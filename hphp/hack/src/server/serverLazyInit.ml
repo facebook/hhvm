@@ -289,20 +289,21 @@ let naming_from_saved_state
            * it could be a new file that was added. *)
           ()
         | Some v ->
+          let backend = Provider_context.get_backend ctx in
           Naming_provider.remove_type_batch
-            ctx
+            backend
             (v.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
-            ctx
+            backend
             (v.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
-            ctx
+            backend
             (v.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
-            ctx
+            backend
             (v.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch
-            ctx
+            backend
             (v.FileInfo.consts |> List.map ~f:snd |> SSet.of_list));
     Unix.gettimeofday ()
   | None ->

@@ -238,16 +238,17 @@ let update_naming_table
       case anyways, since we just did one and know for a fact where the symbol
       is. *)
       let open FileInfo in
+      let backend = Provider_context.get_backend ctx in
       List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
-          Naming_provider.add_fun ctx fun_name pos);
+          Naming_provider.add_fun backend fun_name pos);
       List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
-          Naming_provider.add_class ctx class_name pos);
+          Naming_provider.add_class backend class_name pos);
       List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
-          Naming_provider.add_record_def ctx record_def_name pos);
+          Naming_provider.add_record_def backend record_def_name pos);
       List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
-          Naming_provider.add_typedef ctx typedef_name pos);
+          Naming_provider.add_typedef backend typedef_name pos);
       List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
-          Naming_provider.add_const ctx const_name pos);
+          Naming_provider.add_const backend const_name pos);
 
       (* Update and return the forward naming table *)
       Naming_table.update naming_table path new_file_info

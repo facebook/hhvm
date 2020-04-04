@@ -20,11 +20,11 @@ val get_const_pos : Provider_context.t -> string -> FileInfo.pos option
 
 (** Record that a global constant with the given name was declared at the
 given position. *)
-val add_const : Provider_context.t -> string -> FileInfo.pos -> unit
+val add_const : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Remove all global constants with the given names from the reverse naming
 table. *)
-val remove_const_batch : Provider_context.t -> SSet.t -> unit
+val remove_const_batch : Provider_backend.t -> SSet.t -> unit
 
 (** Determine whether a global function with the given name is declared in
 the reverse naming table. *)
@@ -43,24 +43,24 @@ val get_fun_canon_name : Provider_context.t -> string -> string option
 
 (** Record that a global function with the given name was declared at the
 given position. *)
-val add_fun : Provider_context.t -> string -> FileInfo.pos -> unit
+val add_fun : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Remove all global functions with the given names from the reverse naming
 table. *)
-val remove_fun_batch : Provider_context.t -> SSet.t -> unit
+val remove_fun_batch : Provider_backend.t -> SSet.t -> unit
 
 (** Record that a type (one of [Naming_types.kind_of_type] was declared at
 the given position. These types all live in the same namespace, unlike
 functions and constants. *)
 val add_type :
-  Provider_context.t ->
+  Provider_backend.t ->
   string ->
   FileInfo.pos ->
   Naming_types.kind_of_type ->
   unit
 
 (** Remove all types with the given names from the reverse naming table. *)
-val remove_type_batch : Provider_context.t -> SSet.t -> unit
+val remove_type_batch : Provider_backend.t -> SSet.t -> unit
 
 (** Look up the position at which the given type was declared in the reverse
 naming table. *)
@@ -100,7 +100,7 @@ val get_class_path : Provider_context.t -> string -> Relative_path.t option
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TClass].
 *)
-val add_class : Provider_context.t -> string -> FileInfo.pos -> unit
+val add_class : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result
@@ -110,7 +110,7 @@ val get_record_def_path : Provider_context.t -> string -> Relative_path.t option
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TRecordDef].
 *)
-val add_record_def : Provider_context.t -> string -> FileInfo.pos -> unit
+val add_record_def : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 (** Look up the file path declaring the given class in the reverse naming
 table. Same as calling [get_type_pos] and extracting the path if the result
@@ -120,7 +120,7 @@ val get_typedef_path : Provider_context.t -> string -> Relative_path.t option
 (** Record that a class with the given name was declared at the given
 position. Same as calling [add_type] with [Naming_types.TTypedef].
 *)
-val add_typedef : Provider_context.t -> string -> FileInfo.pos -> unit
+val add_typedef : Provider_backend.t -> string -> FileInfo.pos -> unit
 
 val local_changes_push_sharedmem_stack : unit -> unit
 

@@ -156,7 +156,8 @@ module Env = struct
     match Naming_provider.get_fun_canon_name ctx name_key with
     | Some _ -> ()
     | None ->
-      Naming_provider.add_fun ctx name (FileInfo.File (FileInfo.Fun, fn))
+      let backend = Provider_context.get_backend ctx in
+      Naming_provider.add_fun backend name (FileInfo.File (FileInfo.Fun, fn))
 
   let new_cid_fast ctx fn name cid_kind =
     let name_key = canon_key name in
@@ -169,9 +170,10 @@ module Env = struct
     match Naming_provider.get_type_canon_name ctx name_key with
     | Some _ -> ()
     | None ->
+      let backend = Provider_context.get_backend ctx in
       (* We store redundant info in this case, but if the position is a *)
       (* Full position, we don't store the kind, so this is necessary *)
-      Naming_provider.add_type ctx name (FileInfo.File (mode, fn)) cid_kind
+      Naming_provider.add_type backend name (FileInfo.File (mode, fn)) cid_kind
 
   let new_class_fast ctx fn name = new_cid_fast ctx fn name Naming_types.TClass
 
@@ -181,8 +183,8 @@ module Env = struct
   let new_typedef_fast ctx fn name =
     new_cid_fast ctx fn name Naming_types.TTypedef
 
-  let new_global_const_fast ctx fn name =
-    Naming_provider.add_const ctx name (FileInfo.File (FileInfo.Const, fn))
+  let new_global_const_fast backend fn name =
+    Naming_provider.add_const backend name (FileInfo.File (FileInfo.Const, fn))
 
   let new_fun ctx (p, name) =
     let name_key = canon_key name in
@@ -193,7 +195,9 @@ module Env = struct
         let (p, name) = GEnv.get_full_pos ctx (p, name) in
         let (p', canonical) = GEnv.get_full_pos ctx (p', canonical) in
         Errors.error_name_already_bound name canonical p p'
-    | None -> Naming_provider.add_fun ctx name p
+    | None ->
+      let backend = Provider_context.get_backend ctx in
+      Naming_provider.add_fun backend name p
 
   let (attr_prefix, attr_prefix_len) =
     let a = "\\__attribute__" in
@@ -243,7 +247,8 @@ module Env = struct
             validate alt_canonical Errors.error_class_attribute_already_bound
           | None -> ()
         end;
-        Naming_provider.add_type ctx name p cid_kind
+        let backend = Provider_context.get_backend ctx in
+        Naming_provider.add_type backend name p cid_kind
 
   let new_class ctx = new_cid ctx Naming_types.TClass
 
@@ -258,18 +263,21 @@ module Env = struct
         let (p, x) = GEnv.get_full_pos ctx (p, x) in
         let (p', x) = GEnv.get_full_pos ctx (p', x) in
         Errors.error_name_already_bound x x p p'
-    | None -> Naming_provider.add_const ctx x p
+    | None ->
+      let backend = Provider_context.get_backend ctx in
+      Naming_provider.add_const backend x p
 end
 
 (*****************************************************************************)
 (* Updating the environment *)
 (*****************************************************************************)
 let remove_decls ~ctx ~funs ~classes ~record_defs ~typedefs ~consts =
+  let backend = Provider_context.get_backend ctx in
   let types = SSet.union classes typedefs in
   let types = SSet.union types record_defs in
-  Naming_provider.remove_type_batch ctx types;
-  Naming_provider.remove_fun_batch ctx funs;
-  Naming_provider.remove_const_batch ctx consts
+  Naming_provider.remove_type_batch backend types;
+  Naming_provider.remove_fun_batch backend funs;
+  Naming_provider.remove_const_batch backend consts
 
 (*****************************************************************************)
 (* The entry point to build the naming environment *)
@@ -287,7 +295,9 @@ let make_env_from_fast ctx fn ~funs ~classes ~record_defs ~typedefs ~consts =
   SSet.iter (Env.new_class_fast ctx fn) classes;
   SSet.iter (Env.new_record_decl_fast ctx fn) record_defs;
   SSet.iter (Env.new_typedef_fast ctx fn) typedefs;
-  SSet.iter (Env.new_global_const_fast ctx fn) consts
+  SSet.iter
+    (Env.new_global_const_fast (Provider_context.get_backend ctx) fn)
+    consts
 
 (*****************************************************************************)
 (* Declaring the names in a list of files *)

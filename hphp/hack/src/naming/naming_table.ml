@@ -405,40 +405,41 @@ let saved_to_fast saved = Relative_path.Map.map saved FileInfo.saved_to_names
 let create a = Unbacked a
 
 let update_reverse_entries ctx file_deltas =
+  let backend = Provider_context.get_backend ctx in
   Relative_path.Map.iter file_deltas ~f:(fun path delta ->
       begin
         match Naming_sqlite.get_file_info path with
         | Some fi ->
           Naming_provider.remove_type_batch
-            ctx
+            backend
             (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
           Naming_provider.remove_type_batch
-            ctx
+            backend
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
-            ctx
+            backend
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_const_batch
-            ctx
+            backend
             (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
         | None -> ()
       end;
       match delta with
       | Naming_sqlite.Modified fi ->
         List.iter
-          (fun (pos, name) -> Naming_provider.add_class ctx name pos)
+          (fun (pos, name) -> Naming_provider.add_class backend name pos)
           fi.FileInfo.classes;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_record_def ctx name pos)
+          (fun (pos, name) -> Naming_provider.add_record_def backend name pos)
           fi.FileInfo.record_defs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_typedef ctx name pos)
+          (fun (pos, name) -> Naming_provider.add_typedef backend name pos)
           fi.FileInfo.typedefs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_fun ctx name pos)
+          (fun (pos, name) -> Naming_provider.add_fun backend name pos)
           fi.FileInfo.funs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_const ctx name pos)
+          (fun (pos, name) -> Naming_provider.add_const backend name pos)
           fi.FileInfo.consts
       | Naming_sqlite.Deleted -> ())
 

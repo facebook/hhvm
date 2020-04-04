@@ -691,12 +691,6 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     Errors.abstract_concrete_override pos parent_pos `typeconst;
     env
   | _ ->
-    (* Check that the child's constraint is compatible with the parent. If the
-     * parent has a constraint then the child must also have a constraint if it
-     * is abstract
-     *)
-    let child_is_abstract = Option.is_none child_typeconst.ttc_type in
-
     (* If the class element is defined in the class that we're checking, then
      * don't wrap with the extra
      * "Class ... does not correctly implement all required members" message *)
@@ -707,14 +701,18 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
         on_error
     in
 
+    (* Check that the child's constraint is compatible with the parent. If the
+     * parent has a constraint then the child must also have a constraint if it
+     * is abstract
+     *)
     let default =
       MakeType.generic (Reason.Rtconst_no_cstr child_typeconst.ttc_name) name
     in
     let child_cstr =
-      if child_is_abstract then
+      match child_typeconst.ttc_abstract with
+      | TCAbstract _ ->
         Some (Option.value child_typeconst.ttc_constraint ~default)
-      else
-        child_typeconst.ttc_constraint
+      | _ -> child_typeconst.ttc_constraint
     in
     let env =
       Option.value ~default:env

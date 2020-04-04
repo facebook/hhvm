@@ -46,6 +46,20 @@ let invalidate_local_decl_caches_for_ctx_entries (ctx : Provider_context.t) :
     failwith
       "Decl_provider.invalidate_context_decls not yet impl. for decl memory provider"
 
+let invalidate_local_decl_caches_for_file
+    ~(ctx : Provider_context.t) (file_info : FileInfo.t) : unit =
+  let open FileInfo in
+  let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
+  iter_names file_info.funs ~f:(Decl_provider.invalidate_fun ctx);
+  iter_names file_info.classes ~f:(Decl_provider.invalidate_class ctx);
+  iter_names
+    file_info.classes
+    ~f:(Shallow_classes_provider.invalidate_class ctx);
+  iter_names file_info.record_defs ~f:(Decl_provider.invalidate_record_def ctx);
+  iter_names file_info.typedefs ~f:(Decl_provider.invalidate_typedef ctx);
+  iter_names file_info.consts ~f:(Decl_provider.invalidate_gconst ctx);
+  ()
+
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
   Provider_context.empty_for_tool

@@ -254,33 +254,6 @@ let update_naming_table
   in
   naming_table
 
-let invalidate_ctx_upon_file_change
-    ~(ctx : Provider_context.t) ~(old_file_info : FileInfo.t option) : unit =
-  (* Invalidate folded and shallow decls *)
-  begin
-    match old_file_info with
-    | None -> ()
-    | Some { FileInfo.funs; classes; record_defs; typedefs; consts; _ } ->
-      funs |> strip_positions |> SSet.iter ~f:(Decl_provider.invalidate_fun ctx);
-      classes
-      |> strip_positions
-      |> SSet.iter ~f:(fun class_name ->
-             Decl_provider.invalidate_class ctx class_name;
-             Shallow_classes_provider.invalidate_class ctx class_name);
-      record_defs
-      |> strip_positions
-      |> SSet.iter ~f:(Decl_provider.invalidate_record_def ctx);
-      typedefs
-      |> strip_positions
-      |> SSet.iter ~f:(Decl_provider.invalidate_typedef ctx);
-      consts
-      |> strip_positions
-      |> SSet.iter ~f:(Decl_provider.invalidate_gconst ctx);
-      ()
-  end;
-  (* TODO(ljw): we should invalidate all linearizations and folded decls here *)
-  ()
-
 let update_symbol_index
     ~(sienv : SearchUtils.si_env)
     ~(path : Relative_path.t)

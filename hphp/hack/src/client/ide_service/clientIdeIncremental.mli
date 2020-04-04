@@ -27,6 +27,3 @@ val update_naming_tables_for_changed_file :
   sienv:SearchUtils.si_env ->
   path:Path.t ->
   changed_file_results Lwt.t
-
-val invalidate_ctx_upon_file_change :
-  ctx:Provider_context.t -> old_file_info:FileInfo.t option -> unit

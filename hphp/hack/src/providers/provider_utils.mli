@@ -23,3 +23,6 @@ val respect_but_quarantine_unsaved_changes :
   ctx:Provider_context.t -> f:(unit -> 'a) -> 'a
 
 val invalidate_tast_cache_for_all_ctx_entries : ctx:Provider_context.t -> unit
+
+val invalidate_local_decl_caches_for_file :
+  ctx:Provider_context.t -> FileInfo.t -> unit

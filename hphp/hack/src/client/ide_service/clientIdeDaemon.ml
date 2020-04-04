@@ -772,7 +772,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               new_file_info = None;
             }
       in
-      ClientIdeIncremental.invalidate_ctx_upon_file_change ~ctx ~old_file_info;
+      Option.iter
+        old_file_info
+        ~f:(Provider_utils.invalidate_local_decl_caches_for_file ~ctx);
       Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then

@@ -744,7 +744,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
         try%lwt
           ClientIdeIncremental.update_naming_tables_for_changed_file
-            ~ctx
+            ~backend:(Provider_context.get_backend ctx)
+            ~popt:(Provider_context.get_popt ctx)
             ~naming_table
             ~sienv
             ~path:next_file

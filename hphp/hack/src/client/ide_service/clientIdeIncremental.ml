@@ -272,7 +272,8 @@ type changed_file_results = {
 }
 
 let update_naming_tables_for_changed_file
-    ~(ctx : Provider_context.t)
+    ~(backend : Provider_backend.t)
+    ~(popt : ParserOptions.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
     ~(path : Path.t) : changed_file_results Lwt.t =
@@ -290,14 +291,12 @@ let update_naming_tables_for_changed_file
     else
       let start_time = Unix.gettimeofday () in
       let old_file_info = Naming_table.get_file_info naming_table path in
-      let%lwt (new_file_info, facts) =
-        compute_fileinfo_for_path (Provider_context.get_popt ctx) path
-      in
+      let%lwt (new_file_info, facts) = compute_fileinfo_for_path popt path in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       let naming_table =
         update_naming_table
           ~naming_table
-          ~backend:(Provider_context.get_backend ctx)
+          ~backend
           ~path
           ~old_file_info
           ~new_file_info

@@ -2616,9 +2616,9 @@ MaybeDataType type_constraint_to_data_type(
       // when we extract data from the constraint we know if type is one of
       // collection types but we don't have direct way to figure out if
       // type used to have type arguments - do it indirectly by checking
-      // if name of user type contains '<'
+      // if name of user type contains '>' character as in "Vector<int>"
       auto const has_type_args =
-        user_type && user_type->slice().str().find('<') != std::string::npos;
+        user_type && user_type->slice().rfind('>') != std::string::npos;
       return get_datatype(
         type->toCppString(),
         has_type_args,

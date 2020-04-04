@@ -45,31 +45,6 @@ let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
       entry.Provider_context.tast <- None;
       entry.Provider_context.tast_errors <- None)
 
-let invalidate_local_decl_caches_for_entries
-    (local_memory : Provider_backend.local_memory)
-    (entries : Provider_context.entry Relative_path.Map.t) : unit =
-  let decl_cache = local_memory.Provider_backend.decl_cache in
-  let shallow_decl_cache = local_memory.Provider_backend.shallow_decl_cache in
-  let invalidate_for_entry _path entry =
-    match entry.Provider_context.parser_return with
-    | None -> () (* hasn't been parsed, hence nothing to invalidate *)
-    | Some { Parser_return.ast; _ } ->
-      let (funs, classes, record_defs, typedefs, gconsts) = Nast.get_defs ast in
-      List.iter funs ~f:(fun (_, fun_name) ->
-          invalidate_fun decl_cache fun_name);
-      List.iter classes ~f:(fun (_, class_name) ->
-          invalidate_class decl_cache class_name);
-      List.iter classes ~f:(fun (_, class_name) ->
-          invalidate_shallow_class shallow_decl_cache class_name);
-      List.iter record_defs ~f:(fun (_, record_name) ->
-          invalidate_record_def decl_cache record_name);
-      List.iter typedefs ~f:(fun (_, typedef_name) ->
-          invalidate_typedef decl_cache typedef_name);
-      List.iter gconsts ~f:(fun (_, gconst_name) ->
-          invalidate_gconst decl_cache gconst_name)
-  in
-  Relative_path.Map.iter entries ~f:invalidate_for_entry
-
 let invalidate_local_decl_caches_for_file
     (local_memory : Provider_backend.local_memory) (file_info : FileInfo.t) :
     unit =
@@ -84,6 +59,29 @@ let invalidate_local_decl_caches_for_file
   iter_names file_info.typedefs ~f:(invalidate_typedef decl_cache);
   iter_names file_info.consts ~f:(invalidate_gconst decl_cache);
   ()
+
+let invalidate_local_decl_caches_for_entries
+    (local_memory : Provider_backend.local_memory)
+    (entries : Provider_context.entry Relative_path.Map.t) : unit =
+  let invalidate_for_entry _path entry =
+    match entry.Provider_context.parser_return with
+    | None -> () (* hasn't been parsed, hence nothing to invalidate *)
+    | Some { Parser_return.ast; _ } ->
+      let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
+      invalidate_local_decl_caches_for_file
+        local_memory
+        {
+          FileInfo.funs;
+          classes;
+          record_defs;
+          typedefs;
+          consts;
+          hash = None;
+          comments = None;
+          file_mode = None;
+        }
+  in
+  Relative_path.Map.iter entries ~f:invalidate_for_entry
 
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)

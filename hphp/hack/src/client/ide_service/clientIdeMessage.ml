@@ -13,6 +13,7 @@ module Initialize_from_saved_state = struct
     naming_table_saved_state_path: Path.t option;
     use_ranked_autocomplete: bool;
     config: (string * string) list;
+    open_files: Path.t list;
   }
 
   type result = { num_changed_files_to_process: int }

@@ -203,7 +203,8 @@ let initialize_from_saved_state
     ~(naming_table_saved_state_path : Path.t option)
     ~(wait_for_initialization : bool)
     ~(use_ranked_autocomplete : bool)
-    ~(config : (string * string) list) :
+    ~(config : (string * string) list)
+    ~(open_files : Path.t list) :
     (int, ClientIdeMessage.error_data) Lwt_result.t =
   set_state t (Uninitialized { wait_for_initialization });
 
@@ -213,6 +214,7 @@ let initialize_from_saved_state
       naming_table_saved_state_path;
       use_ranked_autocomplete;
       config;
+      open_files;
     }
   in
   (* Do not use `do_rpc` here, as that depends on a running event loop in
@@ -460,8 +462,23 @@ let push_message (t : t) (message : message_wrapper) : unit =
     can never be sent. *)
     ()
 
-let notify_file_changed (t : t) ~(tracking_id : string) (path : Path.t) : unit =
+let notify_disk_file_changed (t : t) ~(tracking_id : string) (path : Path.t) :
+    unit =
   let message = ClientIdeMessage.File_changed path in
+  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
+
+let notify_ide_file_opened
+    (t : t) ~(tracking_id : string) ~(path : Path.t) ~(contents : string) : unit
+    =
+  let message =
+    ClientIdeMessage.File_opened
+      { ClientIdeMessage.file_path = path; file_contents = contents }
+  in
+  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
+
+let notify_ide_file_closed (t : t) ~(tracking_id : string) ~(path : Path.t) :
+    unit =
+  let message = ClientIdeMessage.File_closed path in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =

@@ -3115,39 +3115,33 @@ let track_ide_service_open_files
   match event with
   | Client_message (metadata, NotificationMessage (DidOpenNotification params))
     ->
-    let file_path =
+    let path =
       params.DidOpen.textDocument.TextDocumentItem.uri
       |> lsp_uri_to_path
       |> Path.make
     in
-    let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
-    let ref_unblocked_time = ref 0. in
-    (* TODO: log errors *)
-    let%lwt (_ : (unit, Lsp.Error.t) result) =
-      ClientIdeService.rpc
-        ide_service
-        ~tracking_id:metadata.tracking_id
-        ~ref_unblocked_time
-        (ClientIdeMessage.File_opened
-           { ClientIdeMessage.file_path; file_contents })
-    in
+    let contents = params.DidOpen.textDocument.TextDocumentItem.text in
+    (* We can't do ClientIdeService.rpc directly, since that fails if the IDE service
+    hasn't yet initialized. Instead, notify_file_opened will queue up the open until
+    the IDE service is ready. The ClientIdeDaemon only delivers answers for open
+    files, which is why it's vital never to let is miss a DidOpen. *)
+    ClientIdeService.notify_ide_file_opened
+      ide_service
+      ~tracking_id:metadata.tracking_id
+      ~path
+      ~contents;
     Lwt.return_unit
   | Client_message (metadata, NotificationMessage (DidCloseNotification params))
     ->
-    let file_path =
+    let path =
       params.DidClose.textDocument.TextDocumentIdentifier.uri
       |> lsp_uri_to_path
       |> Path.make
     in
-    let ref_unblocked_time = ref 0. in
-    (* TODO: log errors *)
-    let%lwt (_ : (unit, Lsp.Error.t) result) =
-      ClientIdeService.rpc
-        ide_service
-        ~tracking_id:metadata.tracking_id
-        ~ref_unblocked_time
-        (ClientIdeMessage.File_closed file_path)
-    in
+    ClientIdeService.notify_ide_file_closed
+      ide_service
+      ~tracking_id:metadata.tracking_id
+      ~path;
     Lwt.return_unit
   | _ ->
     (* Don't handle other events for now. When we show typechecking errors for
@@ -3288,8 +3282,10 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
-let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
-    =
+let run_ide_service
+    (env : env)
+    (ide_service : ClientIdeService.t)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
   if env.use_serverless_ide then (
     let%lwt root = get_root_wait () in
     let initialize_params = initialize_params_exc () in
@@ -3311,6 +3307,12 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
         initialize_params.initializationOptions.namingTableSavedStatePath)
       |> Option.map ~f:Path.make
     in
+    let open_files =
+      editor_open_files
+      |> Option.value ~default:UriMap.empty
+      |> UriMap.keys
+      |> List.map ~f:(fun uri -> uri |> lsp_uri_to_path |> Path.make)
+    in
     let%lwt result =
       ClientIdeService.initialize_from_saved_state
         ide_service
@@ -3319,6 +3321,7 @@ let run_ide_service (env : env) (ide_service : ClientIdeService.t) : unit Lwt.t
         ~wait_for_initialization:(Option.is_some naming_table_saved_state_path)
         ~use_ranked_autocomplete:env.use_ranked_autocomplete
         ~config:env.config
+        ~open_files
     in
     match result with
     | Ok num_changed_files_to_process ->
@@ -3400,7 +3403,8 @@ let tick_showStatus
           let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
           let new_ide_service = ClientIdeService.make ide_args in
           ide_service := new_ide_service;
-          Lwt.async (fun () -> run_ide_service env new_ide_service);
+          Lwt.async (fun () ->
+              run_ide_service env new_ide_service (get_editor_open_files state));
           let%lwt () =
             stop_ide_service
               old_ide_service
@@ -3572,7 +3576,10 @@ let handle_client_message
       List.iter notification.changes ~f:(fun change ->
           let path = lsp_uri_to_path change.uri in
           let path = Path.make path in
-          ClientIdeService.notify_file_changed ide_service ~tracking_id path);
+          ClientIdeService.notify_disk_file_changed
+            ide_service
+            ~tracking_id
+            path);
       Lwt.return_none
     (* Text document completion: "AutoComplete!" *)
     | (_, RequestMessage (id, CompletionRequest params))
@@ -4399,7 +4406,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  Lwt.async (fun () -> run_ide_service env !ide_service);
+  Lwt.async (fun () -> run_ide_service env !ide_service None);
   let%lwt () =
     Lwt.pick [main_loop (); tick_showStatus env ~state ~ide_service ~init_id]
   in

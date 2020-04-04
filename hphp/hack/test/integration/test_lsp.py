@@ -5737,10 +5737,12 @@ function main(): int {
             .notification(
                 method="textDocument/didOpen",
                 params={
-                    "uri": "${main_file}",
-                    "languageId": "hack",
-                    "version": 1,
-                    "text": "${main_file_contents}",
+                    "textDocument": {
+                        "uri": "${main_file}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${main_file_contents}",
+                    }
                 },
             )
             # .request(

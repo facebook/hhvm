@@ -236,6 +236,7 @@ let initialize
        naming_table_saved_state_path;
        use_ranked_autocomplete;
        config;
+       open_files;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
     (state, ClientIdeMessage.error_data) Lwt_result.t =
@@ -321,6 +322,20 @@ let initialize
   let _ = log_startup_time "saved_state" start_time in
   match load_state_result with
   | Ok (naming_table, changed_files) ->
+    (* We only ever serve requests on files that are open. That's why our caller
+    passes an initial list of open files, the ones already open in the editor
+    at the time we were launched. We don't actually care about their contents
+    at this stage, since updated contents will be delivered upon each request.
+    (and indeed it's pointless to waste time reading existing contents off disk).
+    All we care is that every open file is listed in 'open_files'. *)
+    let open_files =
+      open_files
+      |> List.map ~f:(fun path ->
+             path |> Path.to_string |> Relative_path.create_detect_prefix)
+      |> List.map ~f:(fun path ->
+             (path, Provider_context.make_entry ~path ~contents:""))
+      |> Relative_path.Map.of_list
+    in
     let state =
       Initialized
         {
@@ -331,7 +346,7 @@ let initialize
           popt;
           tcopt;
           local_memory;
-          open_files = Relative_path.Map.empty;
+          open_files;
           changed_files_denominator = List.length changed_files;
         }
     in
@@ -385,62 +400,61 @@ let make_singleton_ctx
   let ctx = Provider_context.add_existing_entry ~ctx entry in
   ctx
 
-let close_file (initialized_state : initialized_state) (path : Relative_path.t)
-    : state =
-  (* See invariant docs on `initialized_state` for an explanation of what
-  has to be invalidated here and why. *)
-  match Relative_path.Map.find_opt initialized_state.open_files path with
-  | Some entry ->
-    let entries = Relative_path.Map.singleton path entry in
-    Provider_utils.invalidate_local_decl_caches_for_entries
-      initialized_state.local_memory
-      entries;
-    Initialized
-      {
-        initialized_state with
-        open_files = Relative_path.Map.remove initialized_state.open_files path;
-      }
-  | _ -> Initialized initialized_state
-
-let open_file_with_contents
+(** Opens a file, in response to DidOpen event, by putting in a new
+entry in open_files, with empty AST and TAST. If the LSP client
+happened to send us two DidOpens for a file, well, we won't complain. *)
+let open_file
     (initialized_state : initialized_state)
     (path : Relative_path.t)
-    (contents : string) : initialized_state * Provider_context.entry =
-  (* See invariant docs on `initialized_state` for an explanation of what
-  has to be invalidated here and why. *)
+    (contents : string) : state =
   let initialized_state = restore_hhi_root_if_necessary initialized_state in
-  let entry =
-    match Relative_path.Map.find_opt initialized_state.open_files path with
-    | Some entry when entry.Provider_context.contents = contents -> entry
-    | _ -> Provider_context.make_entry ~path ~contents
-  in
+  let entry = Provider_context.make_entry ~path ~contents in
   let open_files =
     Relative_path.Map.add initialized_state.open_files path entry
   in
-  ({ initialized_state with open_files }, entry)
+  Initialized { initialized_state with open_files }
 
-(** Adds the entry to initialized_state, or leaves the existing entry
-intact with its cache if contents haven't changed. Returns a singleton
-ctx that contains only this entry. *)
-let open_file
+(** Closes a file, in response to DidClose event, by removing the
+entry in open_files. If the LSP client sents us multile DidCloses,
+or DidClose for an unopen file, we won't complain. *)
+let close_file (initialized_state : initialized_state) (path : Relative_path.t)
+    : state =
+  let open_files = Relative_path.Map.remove initialized_state.open_files path in
+  Initialized { initialized_state with open_files }
+
+(** Updates an existing opened file, with new contents; if the
+contents haven't changed then the existing open file's AST and TAST
+will be left intact; if the file wasn't already open then we
+throw an exception. *)
+let update_file
     (initialized_state : initialized_state)
     (document_location : ClientIdeMessage.document_location) :
     state * Provider_context.t * Provider_context.entry =
-  let contents =
-    match document_location.ClientIdeMessage.file_contents with
-    | Some contents -> contents
-    | None -> Path.cat document_location.ClientIdeMessage.file_path
-  in
   let path =
     document_location.ClientIdeMessage.file_path
     |> Path.to_string
     |> Relative_path.create_detect_prefix
   in
-  let (initialized_state, entry) =
-    open_file_with_contents initialized_state path contents
+  let entry =
+    match
+      ( document_location.ClientIdeMessage.file_contents,
+        Relative_path.Map.find_opt initialized_state.open_files path )
+    with
+    | (_, None) ->
+      failwith
+        ( "Attempted LSP operation on a non-open file"
+        ^ Exception.get_current_callstack_string 99 )
+    | (Some contents, Some entry)
+      when entry.Provider_context.contents = contents ->
+      entry
+    | (None, Some entry) -> entry
+    | (Some contents, _) -> Provider_context.make_entry ~path ~contents
+  in
+  let open_files =
+    Relative_path.Map.add initialized_state.open_files path entry
   in
   let ctx = make_singleton_ctx initialized_state entry in
-  (Initialized initialized_state, ctx, entry)
+  (Initialized { initialized_state with open_files }, ctx, entry)
 
 module Handle_message_result = struct
   type 'a t =
@@ -548,17 +562,15 @@ let handle_message :
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let state = close_file initialized_state path in
-    Lwt.return (state, Handle_message_result.Response ())
+    Lwt.return (state, Handle_message_result.Notification)
   | (Initialized initialized_state, File_opened { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let (initialized_state, _) =
-      open_file_with_contents initialized_state path file_contents
-    in
-    Lwt.return (Initialized initialized_state, Handle_message_result.Response ())
+    let state = open_file initialized_state path file_contents in
+    Lwt.return (state, Handle_message_result.Notification)
   | (Initialized initialized_state, Hover document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHover.go_quarantined
@@ -574,7 +586,7 @@ let handle_message :
         { ClientIdeMessage.Completion.document_location; is_manually_invoked }
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
@@ -598,23 +610,31 @@ let handle_message :
       Lwt.return (state, Handle_message_result.Response result))
   (* Autocomplete docblock resolve *)
   | (Initialized initialized_state, Completion_resolve_location param) ->
-    ClientIdeMessage.Completion_resolve_location.(
-      let (state, ctx, entry) =
-        open_file initialized_state param.document_location
-      in
-      let result =
-        Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
-            ServerDocblockAt.go_docblock_ctx
-              ~ctx
-              ~entry
-              ~line:param.document_location.line
-              ~column:param.document_location.column
-              ~kind:param.kind)
-      in
-      Lwt.return (state, Handle_message_result.Response result))
+    (* We're given a location but it often won't be an opened file.
+    We will only serve autocomplete docblocks as of truth on disk.
+    Hence, we construct temporary entry to reflect the file which
+    contained the target of the resolve. *)
+    let open ClientIdeMessage.Completion_resolve_location in
+    let path =
+      param.document_location.ClientIdeMessage.file_path
+      |> Path.to_string
+      |> Relative_path.create_detect_prefix
+    in
+    let ctx = make_empty_ctx initialized_state in
+    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+    let result =
+      Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
+          ServerDocblockAt.go_docblock_ctx
+            ~ctx
+            ~entry
+            ~line:param.document_location.line
+            ~column:param.document_location.column
+            ~kind:param.kind)
+    in
+    Lwt.return (state, Handle_message_result.Response result)
   (* Document highlighting *)
   | (Initialized initialized_state, Document_highlight document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHighlightRefs.go_quarantined
@@ -626,7 +646,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response results)
   (* Signature help *)
   | (Initialized initialized_state, Signature_help document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined
@@ -638,7 +658,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response results)
   (* Go to definition *)
   | (Initialized initialized_state, Definition document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerGoToDefinition.go_quarantined
@@ -650,7 +670,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response result)
   (* Type Definition *)
   | (Initialized initialized_state, Type_definition document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeDefinition.go_quarantined
@@ -662,7 +682,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response result)
   (* Document Symbol *)
   | (Initialized initialized_state, Document_symbol document_location) ->
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result = FileOutline.outline_ctx ~ctx ~entry in
     Lwt.return (state, Handle_message_result.Response result)
   (* Type Coverage *)
@@ -675,7 +695,7 @@ let handle_message :
         column = 0;
       }
     in
-    let (state, ctx, entry) = open_file initialized_state document_location in
+    let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)

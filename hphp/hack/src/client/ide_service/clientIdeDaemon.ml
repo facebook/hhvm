@@ -75,8 +75,20 @@ file-close) are invisible to it.
 *)
 type initialized_state = {
   hhi_root: Path.t;
-  server_env: ServerEnv.env;
+      (** hhi_root files are written during initialize, deleted at shutdown, and
+  refreshed periodically in case the tmp-cleaner has deleted them. *)
+  naming_table: Naming_table.t;
+      (** the forward-naming-table is constructed during initialize and updated
+  during process_changed_files. It stores an in-memory map of FileInfos that
+  have changed since sqlite. When a file is changed on disk, we need this to
+  know which shallow decls to invalidate. Note: while the forward-naming-table
+  is stored here, the reverse-naming-table is instead stored in ctx. *)
+  sienv: SearchUtils.si_env;
+      (** sienv provides autocomplete and find-symbols. It is constructed during
+  initialization and stores a few in-memory structures such as namespace-list,
+  plus in-memory deltas. It is also updated during process_changed_files. *)
   ctx: Provider_context.t;
+      (** ctx stores popt, tcopt, and the backend with all its caches *)
   changed_files_to_process: Path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily
   whittled down one by one in `serve` as we get around to processing them
@@ -227,34 +239,26 @@ let initialize
   in
 
   Provider_backend.set_local_memory_backend_with_defaults ();
+  let backend = Provider_backend.get () in
 
+  (* Use server_config to modify server_env with the correct symbol index *)
   let genv =
     ServerEnvBuild.make_genv server_args server_config server_local_config []
   in
-  let server_env = ServerEnvBuild.make_env genv.ServerEnv.config in
-  (* We need shallow class declarations so that we can invalidate individual
-  members in a class hierarchy. *)
-  let server_env =
-    {
-      server_env with
-      ServerEnv.tcopt =
-        {
-          server_env.ServerEnv.tcopt with
-          GlobalOptions.tco_shallow_class_decl = true;
-        };
-    }
+  let { ServerEnv.tcopt; popt; gleanopt; _ } =
+    ServerEnvBuild.make_env genv.ServerEnv.config
   in
 
-  (* Use server_config to modify server_env with the correct symbol index *)
+  (* We need shallow class declarations so that we can invalidate individual
+  members in a class hierarchy. *)
+  let tcopt = { tcopt with GlobalOptions.tco_shallow_class_decl = true } in
+
   let start_time = log_startup_time "basic_startup" start_time in
-  let namespace_map =
-    GlobalOptions.po_auto_namespace_map server_env.ServerEnv.tcopt
-  in
   let sienv =
     SymbolIndex.initialize
       ~globalrev:None
-      ~gleanopt:server_env.ServerEnv.gleanopt
-      ~namespace_map
+      ~gleanopt
+      ~namespace_map:(GlobalOptions.po_auto_namespace_map tcopt)
       ~provider_name:
         server_local_config.ServerLocalConfig.symbolindex_search_provider
       ~quiet:server_local_config.ServerLocalConfig.symbolindex_quiet
@@ -270,8 +274,7 @@ let initialize
       SearchUtils.use_ranked_autocomplete;
     }
   in
-  let server_env = { server_env with ServerEnv.local_symbol_table = sienv } in
-  let ctx = Provider_utils.ctx_from_server_env server_env in
+  let ctx = Provider_context.empty_for_tool ~popt ~tcopt ~backend in
   let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
@@ -280,12 +283,12 @@ let initialize
   let _ = log_startup_time "saved_state" start_time in
   match load_state_result with
   | Ok (naming_table, changed_files) ->
-    let server_env = { server_env with ServerEnv.naming_table } in
     let state =
       Initialized
         {
           hhi_root;
-          server_env;
+          naming_table;
+          sienv;
           changed_files_to_process = Path.Set.of_list changed_files;
           ctx;
           changed_files_denominator = List.length changed_files;
@@ -542,12 +545,11 @@ let handle_message :
     let (state, ctx, entry) =
       make_context_from_document_location initialized_state document_location
     in
-    let sienv = initialized_state.server_env.ServerEnv.local_symbol_table in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
         ~entry
-        ~sienv
+        ~sienv:initialized_state.sienv
         ~is_manually_invoked
         ~line:document_location.line
         ~column:document_location.column
@@ -728,7 +730,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     | {
      message_queue;
      state =
-       Initialized ({ server_env; changed_files_to_process; ctx; _ } as state);
+       Initialized
+         ({ naming_table; sienv; changed_files_to_process; ctx; _ } as state);
     }
       when Lwt_message_queue.is_empty message_queue
            && (not (Lwt_unix.readable in_fd))
@@ -743,20 +746,13 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let changed_files_to_process =
         Path.Set.remove changed_files_to_process next_file
       in
-      let%lwt server_env =
+      let%lwt (naming_table, sienv) =
         try%lwt
-          let { ServerEnv.naming_table; local_symbol_table; _ } = server_env in
-          let%lwt (naming_table, local_symbol_table) =
-            ClientIdeIncremental.process_changed_file
-              ~ctx
-              ~naming_table
-              ~sienv:local_symbol_table
-              ~path:next_file
-          in
-          let server_env =
-            { server_env with ServerEnv.naming_table; local_symbol_table }
-          in
-          Lwt.return server_env
+          ClientIdeIncremental.process_changed_file
+            ~ctx
+            ~naming_table
+            ~sienv
+            ~path:next_file
         with exn ->
           let e = Exception.wrap exn in
           HackEventLogger.uncaught_exception exn;
@@ -766,7 +762,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               (Printf.sprintf
                  "Uncaught exception when processing changed file: %s"
                  (Path.to_string next_file));
-          Lwt.return server_env
+          Lwt.return (naming_table, sienv)
       in
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then
@@ -774,13 +770,15 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
             (Initialized
                {
                  state with
-                 server_env;
+                 naming_table;
+                 sienv;
                  changed_files_to_process;
                  changed_files_denominator = 0;
                })
         else
           Lwt.return
-            (Initialized { state with server_env; changed_files_to_process })
+            (Initialized
+               { state with naming_table; sienv; changed_files_to_process })
       in
       let%lwt () = write_status ~out_fd state in
       handle_messages { t with state }

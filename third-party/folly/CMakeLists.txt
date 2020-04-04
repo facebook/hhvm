@@ -39,7 +39,7 @@ auto_sources(hfiles "*.h" "RECURSE" "${FOLLY_DIR}")
 HHVM_REMOVE_MATCHES_FROM_LISTS(files cfiles hfiles
  MATCHES
  "/bench/"
- "/experimental/logging/example/"
+ "/logging/example/"
  "/experimental/pushmi/"
  "/experimental/exception_tracer/"
  "/futures/exercises/"
@@ -157,6 +157,8 @@ int main() {
 # This is so clients of folly can #include <folly/blah>
 target_include_directories(folly PUBLIC ${FOLLY_ROOT})
 
+target_link_libraries(folly fmt)
+
 add_dependencies(folly boostMaybeBuild)
 target_link_libraries(folly boost)
 
@@ -181,8 +183,6 @@ endif()
 if (JEMALLOC_ENABLED)
   target_link_libraries(folly PUBLIC jemalloc)
 endif()
-
-include_directories("${TP_DIR}/fmt/fmt/include")
 
 # For some reason we aren't making a folly-config.h and this is in there.
 # Please fix properly!

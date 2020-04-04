@@ -25,9 +25,6 @@
 [submodule "fizz"]
 	path = third-party/fizz/src
 	url = https://github.com/facebookincubator/fizz
-[submodule "fmt"]
-	path = third-party/fmt/fmt
-	url = https://github.com/fmtlib/fmt
 [submodule "folly"]
 	path = third-party/folly/src
 	url = https://github.com/facebook/folly.git

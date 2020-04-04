@@ -2303,9 +2303,28 @@ fn emit_special_function(
                 .intersperse(instr::popc())
                 .collect::<Vec<_>>(),
         ))),
-        ("class_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
-        ("trait_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
-        ("interface_exists", _) if nargs == 1 || nargs == 2 => unimplemented!(),
+        ("class_exists", &[ref arg1, ..])
+        | ("trait_exists", &[ref arg1, ..])
+        | ("interface_exists", &[ref arg1, ..])
+            if nargs == 1 || nargs == 2 =>
+        {
+            let class_kind = match lower_fq_name {
+                "class_exists" => ClassKind::Class,
+                "interface_exists" => ClassKind::Interface,
+                "trait_exists" => ClassKind::Trait,
+                _ => return Err(unrecoverable("emit_special_function: class_kind")),
+            };
+            Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, arg1)?,
+                instr::cast_string(),
+                if nargs == 1 {
+                    instr::true_()
+                } else {
+                    InstrSeq::gather(vec![emit_expr(e, env, &args[1])?, instr::cast_bool()])
+                },
+                instr::oodeclexists(class_kind),
+            ])))
+        }
         ("exit", _) | ("die", _) if nargs == 0 || nargs == 1 => {
             Ok(Some(emit_exit(e, env, args.first())?))
         }
@@ -2390,11 +2409,53 @@ fn emit_special_function(
                 nargs.to_string()
             ),
         )),
-        ("HH\\global_set", _) => unimplemented!(),
-        ("HH\\global_unset", _) => unimplemented!(),
-        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref _p))]) => unimplemented!(),
-        ("__hhvm_internal_newlikearrayl", &[E(_, E_::Lvar(ref _p)), E(_, E_::Int(ref _n))]) => {
-            unimplemented!()
+        ("HH\\global_set", _) => match args {
+            &[ref gkey, ref gvalue] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, gkey)?,
+                emit_expr(e, env, gvalue)?,
+                emit_pos(pos),
+                instr::setg(),
+                instr::popc(),
+                instr::null(),
+            ]))),
+            _ => Err(emit_fatal::raise_fatal_runtime(
+                pos,
+                format!(
+                    "global_set() expects exactly 2 parameters, {} given",
+                    nargs.to_string()
+                ),
+            )),
+        },
+        ("HH\\global_unset", _) => match args {
+            &[ref gkey] => Ok(Some(InstrSeq::gather(vec![
+                emit_expr(e, env, gkey)?,
+                emit_pos(pos),
+                instr::unsetg(),
+                instr::null(),
+            ]))),
+            _ => Err(emit_fatal::raise_fatal_runtime(
+                pos,
+                format!(
+                    "global_unset() expects exactly 1 parameter, {} given",
+                    nargs.to_string()
+                ),
+            )),
+        },
+        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref param))]) if e.context().systemlib() => {
+            Ok(Some(InstrSeq::gather(vec![
+                instr::cgetl(local::Type::Named(local_id::get_name(&param.1).into())),
+                instr::whresult(),
+            ])))
+        }
+        ("__hhvm_internal_newlikearrayl", &[E(_, E_::Lvar(ref param)), E(_, E_::Int(ref n))])
+            if e.context().systemlib() =>
+        {
+            Ok(Some(instr::newlikearrayl(
+                local::Type::Named(local_id::get_name(&param.1).into()),
+                n.parse::<isize>().map_err(|_| {
+                    unrecoverable(format!("emit_special_function: error parsing {}", n))
+                })?,
+            )))
         }
         _ => Ok(
             match (

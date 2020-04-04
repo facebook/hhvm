@@ -433,13 +433,6 @@ impl Gen {
         labels
     }
 
-    fn collect_valid_target_labels_for_stmt<Ex, Fb, En, Hi>(
-        &self,
-        stmt: &Stmt<Ex, Fb, En, Hi>,
-    ) -> LabelSet {
-        self.collect_valid_target_labels(stmt, Self::collect_valid_target_labels_for_stmt_aux)
-    }
-
     fn collect_valid_target_labels_for_block<Ex, Fb, En, Hi>(
         &self,
         block: &Block<Ex, Fb, En, Hi>,

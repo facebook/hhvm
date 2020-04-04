@@ -385,7 +385,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
         Expr_::Binop(e) => emit_binop(emitter, env, pos, e),
-        Expr_::Pipe(e) => emit_pipe(env, e),
+        Expr_::Pipe(e) => emit_pipe(emitter, env, e),
         Expr_::Is(is_expr) => {
             let (e, h) = &**is_expr;
             Ok(InstrSeq::gather(vec![
@@ -4004,8 +4004,23 @@ fn emit_binop(
     }
 }
 
-fn emit_pipe(env: &Env, (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr)) -> Result {
-    unimplemented!("TODO(hrust)")
+fn emit_pipe(
+    e: &mut Emitter,
+    env: &Env,
+    (_, e1, e2): &(aast_defs::Lid, tast::Expr, tast::Expr),
+) -> Result {
+    let lhs_instrs = emit_expr(e, env, e1)?;
+    scope::with_unnamed_local(e, |e, local| {
+        // TODO(hrust) avoid cloning env
+        let mut pipe_env = env.clone();
+        pipe_env.with_pipe_var(local.clone());
+        let rhs_instrs = emit_expr(e, &pipe_env, e2)?;
+        Ok((
+            InstrSeq::gather(vec![lhs_instrs, instr::popl(local.clone())]),
+            rhs_instrs,
+            instr::unsetl(local),
+        ))
+    })
 }
 
 fn emit_as(
@@ -5445,7 +5460,13 @@ pub fn emit_reified_arg(
 
 pub fn get_local(e: &mut Emitter, env: &Env, pos: &Pos, s: &str) -> Result<local::Type> {
     if s == special_idents::DOLLAR_DOLLAR {
-        unimplemented!()
+        match &env.pipe_var {
+            None => Err(emit_fatal::raise_fatal_runtime(
+                pos,
+                "Pipe variables must occur only in the RHS of pipe expressions",
+            )),
+            Some(var) => Ok(var.clone()),
+        }
     } else if special_idents::is_tmp_var(s) {
         Ok(e.local_gen().get_unnamed_for_tempname(s).clone())
     } else {

@@ -35,8 +35,7 @@ pub struct Env<'a> {
     pub scope: Scope<'a>,
     pub namespace: NamespaceEnv,
     pub call_context: Option<String>,
-    // TODO(hrust)
-    // - pipe_var after porting Local
+    pub pipe_var: Option<local::Type>,
 }
 
 impl<'a> Env<'a> {
@@ -61,6 +60,10 @@ impl<'a> Env<'a> {
         if in_rx_body {
             self.flags = self.flags | Flags::IN_RX_BODY;
         }
+    }
+
+    pub fn with_pipe_var(&mut self, local: local::Type) {
+        self.pipe_var = Some(local);
     }
 
     fn with_scope(mut self, scope: Scope<'a>) -> Env {

@@ -56,14 +56,6 @@ let empty_for_debugging ~popt ~tcopt =
     entries = Relative_path.Map.empty;
   }
 
-let remove_entry_if_present ~(ctx : t) ~(path : Relative_path.t) :
-    t * entry option =
-  match Relative_path.Map.find_opt ctx.entries path with
-  | None -> (ctx, None)
-  | Some entry ->
-    let entries = Relative_path.Map.remove ctx.entries path in
-    ({ ctx with entries }, Some entry)
-
 let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
   {
     path;

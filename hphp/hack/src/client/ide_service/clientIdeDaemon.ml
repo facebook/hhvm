@@ -14,64 +14,89 @@ type message = Message : 'a ClientIdeMessage.tracked_t -> message
 type message_queue = message Lwt_message_queue.t
 
 (** Here are some invariants for initialized_state, concerning these data-structures:
-1. cached ASTs and TASTs stored in ctx.entries
-2. forward-naming-table-delta stored in initialized_state
-3. reverse-naming-table-delta-and-cache stored in ctx.backend
-4. shallow-decl-cache, folded-decl-cache, linearization-cache stored in ctx.backend
+1. forward-naming-table-delta stored in naming_table
+2. reverse-naming-table-delta-and-cache stored in local_memory
+3. entries with source text, stored in open_files
+3. cached ASTs and TASTs, stored in open_files
+4. shallow-decl-cache, folded-decl-cache, linearization-cache stored in local-memory
+
+There are two concepts to understand.
+1. "Singleton context" (ctx). When processing IDE requests for a file, we create
+   a context object in which that entry's source text and AST and TAST
+   are present in the context, and no others are.
+2. "Quarantine with respect to an entry". We enter a quarantine while
+   computing the TAST for a singleton context entry. The invariants within
+   the quarantine are different from those without.
 
 The key algorithms which read from these data-structures are:
-1. Ast_provider.get_ast will look up cached AST for an entry, and otherwise parse off disk
-2. Naming_provider.get_* will get_ast for ctx.entries to see if symbol is there.
+1. Ast_provider.get_ast will fetch the cached AST for an entry in ctx, or if
+   the entry is present but as yet lacks an AST then it will parse and cache,
+   or if it's lookinng for the AST of a file not in ctx then it will parse
+   off disk but decline to cache.
+2. Naming_provider.get_* will get_ast for ctx entry to see if symbol is there.
    If not it will look in reverse-delta-and-cache or read from sqlite
-   and store the answer back in reverse-delta-and-cache
+   and store the answer back in reverse-delta-and-cache. But if the answer
+   to that fallback was a file in ctx, then it will say that the symbol's
+   not defined.
 3. Shallow_classes_provider.get_* will look it up in shallow-decl-cache, and otherwise
    will ask Naming_provider and Ast_provider for the AST, will compute shallow decl,
    and will store it in shallow-decl-cache
 4. Linearization_provider.get_* will look it up in linearization-cache. The
    decl_provider reads and writes linearizations via the linearization_provider.
 5. Decl_provider.get_* will look it up in folded-decl-cache, computing it if
-   not there, and store it back in folded-decl-cache
+   not there using shallow and linearization provider, and store it back in folded-decl-cache
 6. Tast_provider.compute* is only ever called on entries. It returns the cached
-   TAST if present; otherwise, the normal type-checking-and-inference rests
-   upon all the other providers.
+   TAST if present; otherwise, it runs normal type-checking-and-inference, relies
+   upon all the other providers, and writes the answer back in the entry's TAST cache.
 
-Those algorithms imply the invariants. I'll express them in terms of what cached data
-depends upon what other data:
-1. AST cache depends solely according to the text content stored in its ctx.entry
-2. forward-naming-delta depends solely on disk contents and is unaffected by entries
-3. reverse-naming-delta also depends solely on disk contents and is unaffected by entries.
-4. shallow decl cache depends upon the presence or absence of an entry for that file;
-   if absent it depends on the disk file content for that file.
-5. folded-decl-cache, linearization-cache and TAST-caches depend upon the list and contents
-   of all entries, and upon the contents of all disk files.
+The invariants for forward and reverse naming tables:
+1. These tables only ever reflect truth about disk files; they are unaffected
+   by open_file entries.
+2. They are updated asynchronously by update_naming_tables_for_changed_file
+   in response to DidChangeWatchedFile events. Thus, we might be asked to fetch
+   a shallow decl even before the naming-tables have been fully updated.
+   We might for instance read the naming-table and try to fetch a shallow
+   decl from a file that doesn't even exist on disk any more.
 
-The invariants imply how we must react upon changes to entries or disk files:
-1. Altering the entries has no effect on forward or reverse naming tables.
-   It will invalidate shallow-decl-cache and cached AST for affected entries.
-   It will invalidate all folded-decl-cache and linearization-cache and TASTs.
-   The reason it has no effect on the reverse naming table is because we read
-   from reverse-naming-table only in cases where the symbol wasn't defined in an entry,
-   and we write back into it only in the same case.
-   The reason it has no effect on the forward naming table is because the forward
-   naming table is only affected by disk.
-2. If a file is modified on disk, we need to update the reverse naming table:
-   we have to remove any old entries that were in that file, and add new entries.
-   The only means of knowing what were the old entries is thanks to the
-   forward-naming-table -- that's why a forward-naming-table has to exist.
-   We naturally have to update the forward-naming-table upon disk-file-change as well.
-   The file-change will have no effect on any cached ASTs.
-   It will invalidate all cached TASTs, folded-decl-cache and linearization cache.
-   It will also invalidate the shallow-decl-cache - we could jettison the entire
-   shallow-decl-cache, but since we know the old entries, we're able to jettison
-   only those.
+The invariants for AST, TAST, shallow, folded-decl and linearization caches:
+1. AST, if present, reflects the AST of its entry's source text,
+   and is a "full" AST (not decl-only), and has errors.
+2. TAST, if present, reflects the TAST of its entry's source text computed
+   against the on-disk state of all other files
+3. Outside a quarantine, all entries in shallow cache are correct as of disk
+   (at least as far as asynchronous file updates have been processed).
+4. Likewise, all entries in folded+linearization caches are correct as
+   of disk.
+5. We only ever enter quarantine with respect to one single entry.
+   For the duration of the quarantine, an AST for that entry,
+   if present, is correct as of the entry's source text.
+6. Likewise any shallow decls for an entry are correct as of its source text.
+   Moreover, if shallow decls for an entry are present, then the entry's AST
+   is present and contains those symbols.
+7. Any shallow decls not for the entry are correct as of disk.
+8. During quarantine, the shallow-decl of all other files is correct as of disk.
+9. The entry's TAST, along with every single decl and linearization,
+   are correct as of this entry's source text plus every other file off disk.
 
-Actually, we currently defer some of that invalidation work until quarantine-entry.
-That might seem wasteful, but it makes a sneaky kind of sense because the only time
-we enter a quarantine is because we want to compute a TAST, and the chief reason
-for computing a TAST is because an entry changed...
-The place where this quarantine-entry falls down is that it only knows about
-entries, and the shallow-decl-invalidations which depend upon other things (file-change,
-file-close) are invisible to it.
+Here are the algorithms we use that satisfy those invariants.
+1. Upon a disk-file-change, we invalidate all TASTs (satisfying invariant 2).
+   We use the forward-naming-table to find all "old" symbols that were
+   defined in the file prior to the disk change, and invalidate those
+   shallow decls (satisfying invariant 3). We invalidate all
+  folded+linearization caches (satisfying invariant 4). Invariant 1 is N/A.
+2. Upon an editor change to a file, we invalidate the entry's AST and TAST
+   (satisfying invariant 1).
+3. Upon request for a TAST of a file, we create a singleton context for
+   that entry, and enter quarantine as follows. We parse the file and
+   cache its AST and invalidate shallow decls for all symbols inside
+   this new AST (satisfying invariant 6). We invalidate all decls
+   and linearizations (satisfying invariant 9). Subsequent fetches,
+   thanks to the "key algorithms for reading these datastructures" (above)
+   will only cache things in accordance with invariants 6,7,8,9.
+4. We leave quarantine as follows. We invalidate shallow decls for
+   all symbols in the entry's AST; thanks to invariant 5, this will
+   fulfill invariant 3. We invalidate all decls and linearizations
+  (satisfying invariant 4).
 *)
 type initialized_state = {
   hhi_root: Path.t;
@@ -87,8 +112,12 @@ type initialized_state = {
       (** sienv provides autocomplete and find-symbols. It is constructed during
   initialization and stores a few in-memory structures such as namespace-list,
   plus in-memory deltas. It is also updated during process_changed_files. *)
-  ctx: Provider_context.t;
-      (** ctx stores popt, tcopt, and the backend with all its caches *)
+  popt: ParserOptions.t;  (** parser options *)
+  tcopt: TypecheckerOptions.t;  (** typechecker options *)
+  local_memory: Provider_backend.local_memory;
+      (** Local_memory backend; includes decl caches *)
+  open_files: Provider_context.entry Relative_path.Map.t;
+      (** all open files, along with caches of their ASTs and TASTs and errors *)
   changed_files_to_process: Path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily
   whittled down one by one in `serve` as we get around to processing them
@@ -239,7 +268,11 @@ let initialize
   in
 
   Provider_backend.set_local_memory_backend_with_defaults ();
-  let backend = Provider_backend.get () in
+  let local_memory =
+    match Provider_backend.get () with
+    | Provider_backend.Local_memory local_memory -> local_memory
+    | _ -> failwith "expected local memory backend"
+  in
 
   (* Use server_config to modify server_env with the correct symbol index *)
   let genv =
@@ -274,11 +307,16 @@ let initialize
       SearchUtils.use_ranked_autocomplete;
     }
   in
-  let ctx = Provider_context.empty_for_tool ~popt ~tcopt ~backend in
   let start_time = log_startup_time "symbol_index" start_time in
   if use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let%lwt load_state_result =
-    load_saved_state ctx ~root ~naming_table_saved_state_path
+    load_saved_state
+      (Provider_context.empty_for_tool
+         ~popt
+         ~tcopt
+         ~backend:(Provider_backend.Local_memory local_memory))
+      ~root
+      ~naming_table_saved_state_path
   in
   let _ = log_startup_time "saved_state" start_time in
   match load_state_result with
@@ -290,7 +328,10 @@ let initialize
           naming_table;
           sienv;
           changed_files_to_process = Path.Set.of_list changed_files;
-          ctx;
+          popt;
+          tcopt;
+          local_memory;
+          open_files = Relative_path.Map.empty;
           changed_files_denominator = List.length changed_files;
         }
     in
@@ -328,78 +369,78 @@ let restore_hhi_root_if_necessary (state : initialized_state) :
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     { state with hhi_root }
 
-let make_context_from_closed_file
-    (initialized_state : initialized_state) (path : Relative_path.t) : state =
-  let ctx = initialized_state.ctx in
+(** An empty ctx with no entries *)
+let make_empty_ctx (initialized_state : initialized_state) : Provider_context.t
+    =
+  Provider_context.empty_for_tool
+    ~popt:initialized_state.popt
+    ~tcopt:initialized_state.tcopt
+    ~backend:(Provider_backend.Local_memory initialized_state.local_memory)
+
+(** Constructs a temporary ctx with just one entry. *)
+let make_singleton_ctx
+    (initialized_state : initialized_state) (entry : Provider_context.entry) :
+    Provider_context.t =
+  let ctx = make_empty_ctx initialized_state in
+  let ctx = Provider_context.add_existing_entry ~ctx entry in
+  ctx
+
+let close_file (initialized_state : initialized_state) (path : Relative_path.t)
+    : state =
   (* See invariant docs on `initialized_state` for an explanation of what
   has to be invalidated here and why. *)
-  (* Invalidate: shallow decls *)
-  let (ctx, entry_opt) = Provider_context.remove_entry_if_present ~ctx ~path in
-  begin
-    match (entry_opt, Provider_context.get_backend ctx) with
-    | (Some entry, Provider_backend.Local_memory local) ->
-      let entries = Relative_path.Map.singleton path entry in
-      Provider_utils.invalidate_local_decl_caches_for_entries local entries
-    | _ -> ()
-  end;
-  Provider_utils.invalidate_tast_cache_of_entries
-    (Provider_context.get_entries ctx);
-  Initialized { initialized_state with ctx }
+  match Relative_path.Map.find_opt initialized_state.open_files path with
+  | Some entry ->
+    let entries = Relative_path.Map.singleton path entry in
+    Provider_utils.invalidate_local_decl_caches_for_entries
+      initialized_state.local_memory
+      entries;
+    Initialized
+      {
+        initialized_state with
+        open_files = Relative_path.Map.remove initialized_state.open_files path;
+      }
+  | _ -> Initialized initialized_state
 
-let make_context_from_file_input
+let open_file_with_contents
     (initialized_state : initialized_state)
     (path : Relative_path.t)
-    (file_input : ServerCommandTypes.file_input) :
-    state * Provider_context.t * Provider_context.entry =
+    (contents : string) : initialized_state * Provider_context.entry =
   (* See invariant docs on `initialized_state` for an explanation of what
   has to be invalidated here and why. *)
-  (* TODO(ljw): should invalidate cached TASTs *)
-  (* TODO(ljw): consider the common scenario of browsing files. Opening a file
-  without modifying it shouldn't involve invalidating its shallow-decl nor all
-  the TASTs and folded-decls. *)
   let initialized_state = restore_hhi_root_if_necessary initialized_state in
-  let ctx = initialized_state.ctx in
-  match Relative_path.Map.find_opt (Provider_context.get_entries ctx) path with
-  | None ->
-    let (ctx, entry) =
-      Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
-    in
-    (Initialized { initialized_state with ctx }, ctx, entry)
-  | Some entry ->
-    (* Only reparse the file if the contents have actually changed.
-     * If the user simply sends us a file_input variable with "FileName"
-     * we shouldn't count that as a change. *)
-    let any_changes =
-      match file_input with
-      | ServerCommandTypes.FileName _ -> false
-      | ServerCommandTypes.FileContent content ->
-        content <> entry.Provider_context.contents
-    in
-    if any_changes then
-      let (ctx, entry) =
-        Provider_context.add_entry_from_file_input ~ctx ~path ~file_input
-      in
-      (Initialized { initialized_state with ctx }, ctx, entry)
-    else
-      (Initialized initialized_state, ctx, entry)
+  let entry =
+    match Relative_path.Map.find_opt initialized_state.open_files path with
+    | Some entry when entry.Provider_context.contents = contents -> entry
+    | _ -> Provider_context.make_entry ~path ~contents
+  in
+  let open_files =
+    Relative_path.Map.add initialized_state.open_files path entry
+  in
+  ({ initialized_state with open_files }, entry)
 
-let make_context_from_document_location
+(** Adds the entry to initialized_state, or leaves the existing entry
+intact with its cache if contents haven't changed. Returns a singleton
+ctx that contains only this entry. *)
+let open_file
     (initialized_state : initialized_state)
     (document_location : ClientIdeMessage.document_location) :
     state * Provider_context.t * Provider_context.entry =
-  let (file_path, file_input) =
-    match document_location with
-    | { ClientIdeMessage.file_contents = None; file_path; _ } ->
-      let file_input = ServerCommandTypes.FileName (Path.to_string file_path) in
-      (file_path, file_input)
-    | { ClientIdeMessage.file_contents = Some file_contents; file_path; _ } ->
-      let file_input = ServerCommandTypes.FileContent file_contents in
-      (file_path, file_input)
+  let contents =
+    match document_location.ClientIdeMessage.file_contents with
+    | Some contents -> contents
+    | None -> Path.cat document_location.ClientIdeMessage.file_path
   in
   let path =
-    file_path |> Path.to_string |> Relative_path.create_detect_prefix
+    document_location.ClientIdeMessage.file_path
+    |> Path.to_string
+    |> Relative_path.create_detect_prefix
   in
-  make_context_from_file_input initialized_state path file_input
+  let (initialized_state, entry) =
+    open_file_with_contents initialized_state path contents
+  in
+  let ctx = make_singleton_ctx initialized_state entry in
+  (Initialized initialized_state, ctx, entry)
 
 module Handle_message_result = struct
   type 'a t =
@@ -506,23 +547,18 @@ let handle_message :
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = make_context_from_closed_file initialized_state path in
+    let state = close_file initialized_state path in
     Lwt.return (state, Handle_message_result.Response ())
   | (Initialized initialized_state, File_opened { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let (state, _, _) =
-      make_context_from_file_input
-        initialized_state
-        path
-        (ServerCommandTypes.FileContent file_contents)
+    let (initialized_state, _) =
+      open_file_with_contents initialized_state path file_contents
     in
-    Lwt.return (state, Handle_message_result.Response ())
+    Lwt.return (Initialized initialized_state, Handle_message_result.Response ())
   | (Initialized initialized_state, Hover document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHover.go_quarantined
@@ -538,9 +574,7 @@ let handle_message :
         { ClientIdeMessage.Completion.document_location; is_manually_invoked }
     ) ->
     (* Update the state of the world with the document as it exists in the IDE *)
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result =
       ServerAutoComplete.go_ctx
         ~ctx
@@ -553,7 +587,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response result)
   (* Autocomplete docblock resolve *)
   | (Initialized initialized_state, Completion_resolve param) ->
-    let ctx = initialized_state.ctx in
+    let ctx = make_empty_ctx initialized_state in
     ClientIdeMessage.Completion_resolve.(
       let result =
         ServerDocblockAt.go_docblock_for_symbol
@@ -566,9 +600,7 @@ let handle_message :
   | (Initialized initialized_state, Completion_resolve_location param) ->
     ClientIdeMessage.Completion_resolve_location.(
       let (state, ctx, entry) =
-        make_context_from_document_location
-          initialized_state
-          param.document_location
+        open_file initialized_state param.document_location
       in
       let result =
         Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -582,9 +614,7 @@ let handle_message :
       Lwt.return (state, Handle_message_result.Response result))
   (* Document highlighting *)
   | (Initialized initialized_state, Document_highlight document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerHighlightRefs.go_quarantined
@@ -596,9 +626,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response results)
   (* Signature help *)
   | (Initialized initialized_state, Signature_help document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let results =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerSignatureHelp.go_quarantined
@@ -610,9 +638,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response results)
   (* Go to definition *)
   | (Initialized initialized_state, Definition document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerGoToDefinition.go_quarantined
@@ -624,9 +650,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response result)
   (* Type Definition *)
   | (Initialized initialized_state, Type_definition document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerTypeDefinition.go_quarantined
@@ -638,9 +662,7 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response result)
   (* Document Symbol *)
   | (Initialized initialized_state, Document_symbol document_location) ->
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result = FileOutline.outline_ctx ~ctx ~entry in
     Lwt.return (state, Handle_message_result.Response result)
   (* Type Coverage *)
@@ -653,9 +675,7 @@ let handle_message :
         column = 0;
       }
     in
-    let (state, ctx, entry) =
-      make_context_from_document_location initialized_state document_location
-    in
+    let (state, ctx, entry) = open_file initialized_state document_location in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)
@@ -727,7 +747,15 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
      message_queue;
      state =
        Initialized
-         ({ naming_table; sienv; changed_files_to_process; ctx; _ } as state);
+         ( {
+             naming_table;
+             sienv;
+             changed_files_to_process;
+             local_memory;
+             popt;
+             open_files;
+             _;
+           } as state );
     }
       when Lwt_message_queue.is_empty message_queue
            && (not (Lwt_unix.readable in_fd))
@@ -745,8 +773,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
         try%lwt
           ClientIdeIncremental.update_naming_tables_for_changed_file
-            ~backend:(Provider_context.get_backend ctx)
-            ~popt:(Provider_context.get_popt ctx)
+            ~backend:(Provider_backend.Local_memory local_memory)
+            ~popt
             ~naming_table
             ~sienv
             ~path:next_file
@@ -767,17 +795,10 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               new_file_info = None;
             }
       in
-      begin
-        match (old_file_info, Provider_context.get_backend ctx) with
-        | (Some old_file_info, Provider_backend.Local_memory local) ->
-          Provider_utils.invalidate_local_decl_caches_for_file
-            local
-            old_file_info
-        | (None, Provider_backend.Local_memory _) -> ()
-        | _ -> failwith "ClientIdeDaemon must use local memory"
-      end;
-      Provider_utils.invalidate_tast_cache_of_entries
-        (Provider_context.get_entries ctx);
+      Option.iter
+        old_file_info
+        ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory);
+      Provider_utils.invalidate_tast_cache_of_entries open_files;
       let%lwt state =
         if Path.Set.is_empty changed_files_to_process then
           Lwt.return

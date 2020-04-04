@@ -197,7 +197,7 @@ let get_gconst (ctx : Provider_context.t) (gconst_name : string) :
     Decl_service_client.rpc_get_gconst decl gconst_name
     |> Option.map ~f:(fun decl -> (decl, Errors.empty))
 
-let local_changes_push_stack (ctx : Provider_context.t) =
+let local_changes_push_stack () : unit =
   (* For now, decl production still writes into shared memory, even when we're
   not using shared memory as the principal decl store. Until we change decl
   production to write into the `Decl_provider` interface, we'll enable the local
@@ -213,12 +213,9 @@ let local_changes_push_stack (ctx : Provider_context.t) =
   Decl_heap.Classes.LocalChanges.push_stack ();
   Decl_heap.Typedefs.LocalChanges.push_stack ();
   Decl_heap.GConsts.LocalChanges.push_stack ();
-
-  Shallow_classes_provider.push_local_changes ctx;
-  Linearization_provider.push_local_changes ctx;
   ()
 
-let local_changes_pop_stack (ctx : Provider_context.t) =
+let local_changes_pop_stack () : unit =
   (* See comment in [local_changes_push_stack] above. *)
   Decl_heap.Funs.LocalChanges.pop_stack ();
   Decl_heap.RecordDefs.LocalChanges.pop_stack ();
@@ -230,7 +227,4 @@ let local_changes_pop_stack (ctx : Provider_context.t) =
   Decl_heap.Classes.LocalChanges.pop_stack ();
   Decl_heap.Typedefs.LocalChanges.pop_stack ();
   Decl_heap.GConsts.LocalChanges.pop_stack ();
-
-  Shallow_classes_provider.pop_local_changes ctx;
-  Linearization_provider.pop_local_changes ctx;
   ()

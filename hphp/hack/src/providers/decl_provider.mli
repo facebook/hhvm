@@ -48,6 +48,6 @@ val get_typedef : Provider_context.t -> typedef_key -> typedef_decl option
 
 val get_gconst : Provider_context.t -> gconst_key -> gconst_decl option
 
-val local_changes_push_stack : Provider_context.t -> unit
+val local_changes_push_stack : unit -> unit
 
-val local_changes_pop_stack : Provider_context.t -> unit
+val local_changes_pop_stack : unit -> unit

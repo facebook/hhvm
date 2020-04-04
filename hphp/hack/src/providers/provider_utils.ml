@@ -109,7 +109,9 @@ let respect_but_quarantine_unsaved_changes
   let enter_quarantine_exn () =
     Ast_provider.local_changes_push_stack ();
     ast_pushed := true;
-    Decl_provider.local_changes_push_stack ctx;
+    Decl_provider.local_changes_push_stack ();
+    Shallow_classes_provider.push_local_changes ctx;
+    Linearization_provider.push_local_changes ctx;
     begin
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
@@ -141,7 +143,9 @@ let respect_but_quarantine_unsaved_changes
     if !fixme_pushed then Fixme_provider.local_changes_pop_stack ();
     if !file_pushed then File_provider.local_changes_pop_stack ();
     if !decl_pushed then begin
-      Decl_provider.local_changes_pop_stack ctx;
+      Decl_provider.local_changes_pop_stack ();
+      Shallow_classes_provider.pop_local_changes ctx;
+      Linearization_provider.pop_local_changes ctx;
       match Provider_context.get_backend ctx with
       | Provider_backend.Local_memory local ->
         invalidate_local_decl_caches_for_entries

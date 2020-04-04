@@ -35,10 +35,3 @@ val remove_batch : Provider_context.t -> SSet.t -> unit
 val push_local_changes : Provider_context.t -> unit
 
 val pop_local_changes : Provider_context.t -> unit
-
-val invalidate_class : Provider_context.t -> string -> unit
-
-val invalidate_context_decls_for_local_backend :
-  Provider_backend.Shallow_decl_cache.t ->
-  Provider_context.entry Relative_path.Map.t ->
-  unit

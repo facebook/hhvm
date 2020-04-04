@@ -17,6 +17,11 @@ let invalidate_class decl_cache class_name =
     decl_cache
     (Provider_backend.Decl_cache_entry.Class_decl class_name)
 
+let invalidate_shallow_class shallow_decl_cache class_name =
+  Provider_backend.Shallow_decl_cache.remove
+    shallow_decl_cache
+    (Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl class_name)
+
 let invalidate_record_def decl_cache record_name =
   Provider_backend.Decl_cache.remove
     decl_cache
@@ -44,6 +49,7 @@ let invalidate_local_decl_caches_for_entries
     (local_memory : Provider_backend.local_memory)
     (entries : Provider_context.entry Relative_path.Map.t) : unit =
   let decl_cache = local_memory.Provider_backend.decl_cache in
+  let shallow_decl_cache = local_memory.Provider_backend.shallow_decl_cache in
   let invalidate_for_entry _path entry =
     match entry.Provider_context.parser_return with
     | None -> () (* hasn't been parsed, hence nothing to invalidate *)
@@ -53,6 +59,8 @@ let invalidate_local_decl_caches_for_entries
           invalidate_fun decl_cache fun_name);
       List.iter classes ~f:(fun (_, class_name) ->
           invalidate_class decl_cache class_name);
+      List.iter classes ~f:(fun (_, class_name) ->
+          invalidate_shallow_class shallow_decl_cache class_name);
       List.iter record_defs ~f:(fun (_, record_name) ->
           invalidate_record_def decl_cache record_name);
       List.iter typedefs ~f:(fun (_, typedef_name) ->
@@ -66,13 +74,14 @@ let invalidate_local_decl_caches_for_file
     ~(ctx : Provider_context.t) (file_info : FileInfo.t) : unit =
   let open FileInfo in
   match Provider_context.get_backend ctx with
-  | Provider_backend.Local_memory { Provider_backend.decl_cache; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
     let iter_names ids ~f = List.iter ids ~f:(fun (_, name) -> f name) in
     iter_names file_info.funs ~f:(invalidate_fun decl_cache);
     iter_names file_info.classes ~f:(invalidate_class decl_cache);
     iter_names
       file_info.classes
-      ~f:(Shallow_classes_provider.invalidate_class ctx);
+      ~f:(invalidate_shallow_class shallow_decl_cache);
     iter_names file_info.record_defs ~f:(invalidate_record_def decl_cache);
     iter_names file_info.typedefs ~f:(invalidate_typedef decl_cache);
     iter_names file_info.consts ~f:(invalidate_gconst decl_cache);

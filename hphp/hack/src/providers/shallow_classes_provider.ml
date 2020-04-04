@@ -96,19 +96,6 @@ let remove_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   | Provider_backend.Decl_service _ ->
     failwith "remove_batch not implemented for Decl_service"
 
-let invalidate_class (ctx : Provider_context.t) (class_name : string) : unit =
-  match Provider_context.get_backend ctx with
-  | Provider_backend.Shared_memory ->
-    remove_batch ctx (SSet.singleton class_name)
-  | Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ } ->
-    Provider_backend.Shallow_decl_cache.remove
-      shallow_decl_cache
-      ~key:
-        (Provider_backend.Shallow_decl_cache_entry.Shallow_class_decl class_name)
-  | Provider_backend.Decl_service _ ->
-    failwith
-      "Decl_provider.invalidate_class not yet impl. for decl memory provider"
-
 let invalidate_context_decls_for_local_backend
     (shallow_decl_cache : Provider_backend.Shallow_decl_cache.t)
     (entries : Provider_context.entry Relative_path.Map.t) : unit =

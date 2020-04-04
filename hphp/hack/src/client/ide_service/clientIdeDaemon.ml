@@ -334,8 +334,6 @@ let make_context_from_closed_file
   (* See invariant docs on `initialized_state` for an explanation of what
   has to be invalidated here and why. *)
   (* Invalidate: shallow decls *)
-  (* TODO(ljw): would be nicer to move this along with all invalidations to
-  inside Provider_context. *)
   let (ctx, entry_opt) = Provider_context.remove_entry_if_present ~ctx ~path in
   begin
     match (entry_opt, Provider_context.get_backend ctx) with
@@ -344,7 +342,7 @@ let make_context_from_closed_file
       Provider_utils.invalidate_local_decl_caches_for_entries local entries
     | _ -> ()
   end;
-  (* TODO(ljw): should invalidate cached TASTs *)
+  Provider_utils.invalidate_tast_cache_for_all_ctx_entries ctx;
   Initialized { initialized_state with ctx }
 
 let make_context_from_file_input

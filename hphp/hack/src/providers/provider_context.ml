@@ -192,7 +192,8 @@ let get_telemetry (t : t) : Telemetry.t =
 
 let reset_telemetry (t : t) : unit =
   match t.backend with
-  | Provider_backend.Local_memory { decl_cache; shallow_decl_cache; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.decl_cache; shallow_decl_cache; _ } ->
     Provider_backend.Decl_cache.reset_telemetry decl_cache;
     Provider_backend.Shallow_decl_cache.reset_telemetry shallow_decl_cache;
     ()

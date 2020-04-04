@@ -180,34 +180,18 @@ module Reverse_naming_table_delta = struct
       Telemetry.object_ telemetry ~key ~value:sub_telemetry
 end
 
+type local_memory = {
+  decl_cache: Decl_cache.t;
+  shallow_decl_cache: Shallow_decl_cache.t;
+  linearization_cache: Linearization_cache.t;
+  reverse_naming_table_delta: Reverse_naming_table_delta.t;
+  fixmes: Fixmes.t;
+  naming_db_path_ref: Naming_sqlite.db_path option ref;
+}
+
 type t =
   | Shared_memory
-  | Local_memory of {
-      decl_cache: Decl_cache.t;
-      shallow_decl_cache: Shallow_decl_cache.t;
-      linearization_cache: Linearization_cache.t;
-      reverse_naming_table_delta: Reverse_naming_table_delta.t;
-          (** A map from symbol-name to pos. (1) It's used as a slowly updated
-          authoritative place to look for symbols that have changed on disk since
-          the naming-table sqlite. "Slow" means we might be asked to compute
-          TASTs even before reverse_naming_table_delta has been updated
-          to reflect all the change files on disk.
-          It stores 'Deleted' for symbols which have been deleted since the
-          saved-state; once a symbol is in the delta, it never leaves.
-          (2) It's used as a cache of naming-table-sqlite lookups, to speed
-          them up on subsequent queries, since sqlite is slow.
-          (3) If a symbol is defined in two files, the delta will only point
-          to an arbitrary one of those files.
-          (4) It stores "FileInfo.pos" positions. These can be either filename-only
-          or filename-line-col positions. There's no particular invariant enforced
-          about this. We happen to store filename-only for file changes.
-          (5) It stores names, and also canon_key (lowercase) names. For authoritative
-          names, it always stores both. For cached names, it might store one or both.
-          If two symbols have the same canon_key, then the canon_key points to
-          an arbitrary one of them. *)
-      fixmes: Fixmes.t;
-      naming_db_path_ref: Naming_sqlite.db_path option ref;
-    }
+  | Local_memory of local_memory
   | Decl_service of {
       decl: Decl_service_client.t;
       fixmes: Fixmes.t;

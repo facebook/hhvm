@@ -95,7 +95,8 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
       match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
         Naming_heap.Consts.get_pos name >>| attach_name_type FileInfo.Const
-      | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
           ~name
@@ -119,7 +120,8 @@ let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos pos in
     reverse_naming_table_delta.consts <-
@@ -134,7 +136,8 @@ let add_const (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
 let remove_const_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Consts.remove_batch names
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.consts <-
       SSet.fold
@@ -161,7 +164,8 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
       match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
         Naming_heap.Funs.get_pos name >>| attach_name_type FileInfo.Fun
-      | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
           ~name
@@ -217,7 +221,8 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         called in some functions in `Naming_global`, which expects the caller
         to have called `Naming_global.remove_decls` already. *)
       Naming_heap.Funs.get_canon_name ctx name
-    | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    | Provider_backend.Local_memory
+        { Provider_backend.reverse_naming_table_delta; _ } ->
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache
         ~name:canon_name_key
@@ -247,7 +252,8 @@ let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
     unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos pos in
     reverse_naming_table_delta.funs <-
@@ -266,7 +272,8 @@ let add_fun (ctx : Provider_context.t) (name : string) (pos : FileInfo.pos) :
 let remove_fun_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Funs.remove_batch names
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.funs <-
       SSet.fold names ~init:reverse_naming_table_delta.funs ~f:(fun name acc ->
@@ -288,7 +295,8 @@ let add_type
     (kind : Naming_types.kind_of_type) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     let data = Pos (pos, kind) in
     reverse_naming_table_delta.types <-
@@ -305,7 +313,8 @@ let add_type
 let remove_type_batch (ctx : Provider_context.t) (names : SSet.t) : unit =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Naming_heap.Types.remove_batch names
-  | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+  | Provider_backend.Local_memory
+      { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
     reverse_naming_table_delta.types <-
       SSet.fold names ~init:reverse_naming_table_delta.types ~f:(fun name acc ->
@@ -358,7 +367,8 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
       | Provider_backend.Shared_memory ->
         Naming_heap.Types.get_pos name >>| fun (pos, kind) ->
         (pos, kind_to_name_type kind)
-      | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+      | Provider_backend.Local_memory
+          { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
         get_and_cache
           ~name
@@ -451,7 +461,8 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
     called in some functions in `Naming_global`, which expects the caller
     to have called `Naming_global.remove_decls` already. *)
       Naming_heap.Types.get_canon_name ctx name
-    | Provider_backend.Local_memory { reverse_naming_table_delta; _ } ->
+    | Provider_backend.Local_memory
+        { Provider_backend.reverse_naming_table_delta; _ } ->
       let open Option.Monad_infix in
       let open Provider_backend.Reverse_naming_table_delta in
       get_and_cache

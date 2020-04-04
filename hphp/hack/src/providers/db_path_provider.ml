@@ -23,7 +23,7 @@ let get_naming_db_path (ctx : Provider_context.t) : Naming_sqlite.db_path option
     =
   match Provider_context.get_backend ctx with
   | Provider_backend.Shared_memory -> Shared_db_settings.get "database_path"
-  | Provider_backend.Local_memory { naming_db_path_ref; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.naming_db_path_ref; _ } ->
     !naming_db_path_ref
   | Provider_backend.Decl_service _ ->
     failwith "decl provider doesn't expose naming db path"
@@ -35,7 +35,7 @@ let set_naming_db_path
   | Provider_backend.Shared_memory ->
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
     Option.iter naming_db_path ~f:(Shared_db_settings.add "database_path")
-  | Provider_backend.Local_memory { naming_db_path_ref; _ } ->
+  | Provider_backend.Local_memory { Provider_backend.naming_db_path_ref; _ } ->
     naming_db_path_ref := naming_db_path
   | Provider_backend.Decl_service _ ->
     failwith "decl provider doesn't expose naming db path"

@@ -339,7 +339,9 @@ let make_context_from_closed_file
   let (ctx, entry_opt) = Provider_context.remove_entry_if_present ~ctx ~path in
   begin
     match (entry_opt, Provider_context.get_backend ctx) with
-    | (Some entry, Provider_backend.Local_memory { shallow_decl_cache; _ }) ->
+    | ( Some entry,
+        Provider_backend.Local_memory { Provider_backend.shallow_decl_cache; _ }
+      ) ->
       let entries_to_invalidate = Relative_path.Map.singleton path entry in
       Shallow_classes_provider.invalidate_context_decls_for_local_backend
         shallow_decl_cache

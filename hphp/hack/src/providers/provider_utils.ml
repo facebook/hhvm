@@ -15,6 +15,37 @@ let invalidate_tast_cache_for_all_ctx_entries ~(ctx : Provider_context.t) : unit
       entry.Provider_context.tast <- None;
       entry.Provider_context.tast_errors <- None)
 
+let invalidate_local_decl_caches_for_ctx_entries (ctx : Provider_context.t) :
+    unit =
+  match Provider_context.get_backend ctx with
+  | Provider_backend.Local_memory _ ->
+    ctx
+    |> Provider_context.get_entries
+    |> Relative_path.Map.iter ~f:(fun _path entry ->
+           match entry.Provider_context.parser_return with
+           | None -> () (* hasn't been parsed, hence nothing to invalidate *)
+           | Some { Parser_return.ast; _ } ->
+             let (funs, classes, record_defs, typedefs, gconsts) =
+               Nast.get_defs ast
+             in
+             List.iter funs ~f:(fun (_, fun_name) ->
+                 Decl_provider.invalidate_fun ctx fun_name);
+             List.iter classes ~f:(fun (_, class_name) ->
+                 Decl_provider.invalidate_class ctx class_name);
+             List.iter record_defs ~f:(fun (_, record_name) ->
+                 Decl_provider.invalidate_record_def ctx record_name);
+             List.iter typedefs ~f:(fun (_, typedef_name) ->
+                 Decl_provider.invalidate_typedef ctx typedef_name);
+             List.iter gconsts ~f:(fun (_, gconst_name) ->
+                 Decl_provider.invalidate_gconst ctx gconst_name))
+  | Provider_backend.Shared_memory ->
+    (* Don't attempt to invalidate decls with shared memory, as we may not be
+    running in the master process where that's allowed. *)
+    ()
+  | Provider_backend.Decl_service _ ->
+    failwith
+      "Decl_provider.invalidate_context_decls not yet impl. for decl memory provider"
+
 let ctx_from_server_env (env : ServerEnv.env) : Provider_context.t =
   (* TODO: backend should be stored in [env]. *)
   Provider_context.empty_for_tool
@@ -40,6 +71,7 @@ let respect_but_quarantine_unsaved_changes
     Ast_provider.local_changes_push_stack ();
     ast_pushed := true;
     Decl_provider.local_changes_push_stack ctx;
+    invalidate_local_decl_caches_for_ctx_entries ctx;
     decl_pushed := true;
     File_provider.local_changes_push_stack ();
     file_pushed := true;
@@ -62,7 +94,10 @@ let respect_but_quarantine_unsaved_changes
     if !naming_pushed then Naming_provider.pop_local_changes ctx;
     if !fixme_pushed then Fixme_provider.local_changes_pop_stack ();
     if !file_pushed then File_provider.local_changes_pop_stack ();
-    if !decl_pushed then Decl_provider.local_changes_pop_stack ctx;
+    if !decl_pushed then begin
+      Decl_provider.local_changes_pop_stack ctx;
+      invalidate_local_decl_caches_for_ctx_entries ctx
+    end;
     if !ast_pushed then Ast_provider.local_changes_pop_stack ();
     SharedMem.invalidate_caches ();
     ()

@@ -121,6 +121,9 @@ val add_entry_from_file_input :
   file_input:ServerCommandTypes.file_input ->
   t * entry
 
+(** Removes an entry, if it was there. If it wasn't there then no-op. *)
+val remove_entry_if_present : ctx:t -> path:Relative_path.t -> t * entry option
+
 (** Get the [ParserOptions.t] contained within the [t]. *)
 val get_popt : t -> ParserOptions.t
 

@@ -13,6 +13,66 @@ type message = Message : 'a ClientIdeMessage.tracked_t -> message
 
 type message_queue = message Lwt_message_queue.t
 
+(** Here are some invariants for initialized_state, concerning these data-structures:
+1. cached ASTs and TASTs stored in ctx.entries
+2. forward-naming-table-delta stored in initialized_state
+3. reverse-naming-table-delta-and-cache stored in ctx.backend
+4. shallow-decl-cache, folded-decl-cache, linearization-cache stored in ctx.backend
+
+The key algorithms which read from these data-structures are:
+1. Ast_provider.get_ast will look up cached AST for an entry, and otherwise parse off disk
+2. Naming_provider.get_* will get_ast for ctx.entries to see if symbol is there.
+   If not it will look in reverse-delta-and-cache or read from sqlite
+   and store the answer back in reverse-delta-and-cache
+3. Shallow_classes_provider.get_* will look it up in shallow-decl-cache, and otherwise
+   will ask Naming_provider and Ast_provider for the AST, will compute shallow decl,
+   and will store it in shallow-decl-cache
+4. Linearization_provider.get_* will look it up in linearization-cache. The
+   decl_provider reads and writes linearizations via the linearization_provider.
+5. Decl_provider.get_* will look it up in folded-decl-cache, computing it if
+   not there, and store it back in folded-decl-cache
+6. Tast_provider.compute* is only ever called on entries. It returns the cached
+   TAST if present; otherwise, the normal type-checking-and-inference rests
+   upon all the other providers.
+
+Those algorithms imply the invariants. I'll express them in terms of what cached data
+depends upon what other data:
+1. AST cache depends solely according to the text content stored in its ctx.entry
+2. forward-naming-delta depends solely on disk contents and is unaffected by entries
+3. reverse-naming-delta also depends solely on disk contents and is unaffected by entries.
+4. shallow decl cache depends upon the presence or absence of an entry for that file;
+   if absent it depends on the disk file content for that file.
+5. folded-decl-cache, linearization-cache and TAST-caches depend upon the list and contents
+   of all entries, and upon the contents of all disk files.
+
+The invariants imply how we must react upon changes to entries or disk files:
+1. Altering the entries has no effect on forward or reverse naming tables.
+   It will invalidate shallow-decl-cache and cached AST for affected entries.
+   It will invalidate all folded-decl-cache and linearization-cache and TASTs.
+   The reason it has no effect on the reverse naming table is because we read
+   from reverse-naming-table only in cases where the symbol wasn't defined in an entry,
+   and we write back into it only in the same case.
+   The reason it has no effect on the forward naming table is because the forward
+   naming table is only affected by disk.
+2. If a file is modified on disk, we need to update the reverse naming table:
+   we have to remove any old entries that were in that file, and add new entries.
+   The only means of knowing what were the old entries is thanks to the
+   forward-naming-table -- that's why a forward-naming-table has to exist.
+   We naturally have to update the forward-naming-table upon disk-file-change as well.
+   The file-change will have no effect on any cached ASTs.
+   It will invalidate all cached TASTs, folded-decl-cache and linearization cache.
+   It will also invalidate the shallow-decl-cache - we could jettison the entire
+   shallow-decl-cache, but since we know the old entries, we're able to jettison
+   only those.
+
+Actually, we currently defer some of that invalidation work until quarantine-entry.
+That might seem wasteful, but it makes a sneaky kind of sense because the only time
+we enter a quarantine is because we want to compute a TAST, and the chief reason
+for computing a TAST is because an entry changed...
+The place where this quarantine-entry falls down is that it only knows about
+entries, and the shallow-decl-invalidations which depend upon other things (file-change,
+file-close) are invisible to it.
+*)
 type initialized_state = {
   hhi_root: Path.t;
   server_env: ServerEnv.env;
@@ -265,11 +325,39 @@ let restore_hhi_root_if_necessary (state : initialized_state) :
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
     { state with hhi_root }
 
+let make_context_from_closed_file
+    (initialized_state : initialized_state) (path : Relative_path.t) : state =
+  let ctx = initialized_state.ctx in
+  (* See invariant docs on `initialized_state` for an explanation of what
+  has to be invalidated here and why. *)
+  (* Invalidate: shallow decls *)
+  (* TODO(ljw): would be nicer to move this along with all invalidations to
+  inside Provider_context. *)
+  let (ctx, entry_opt) = Provider_context.remove_entry_if_present ~ctx ~path in
+  begin
+    match (entry_opt, Provider_context.get_backend ctx) with
+    | (Some entry, Provider_backend.Local_memory { shallow_decl_cache; _ }) ->
+      let entries_to_invalidate = Relative_path.Map.singleton path entry in
+      Shallow_classes_provider.invalidate_context_decls_for_local_backend
+        shallow_decl_cache
+        entries_to_invalidate;
+      ()
+    | _ -> ()
+  end;
+  (* TODO(ljw): should invalidate cached TASTs *)
+  Initialized { initialized_state with ctx }
+
 let make_context_from_file_input
     (initialized_state : initialized_state)
     (path : Relative_path.t)
     (file_input : ServerCommandTypes.file_input) :
     state * Provider_context.t * Provider_context.entry =
+  (* See invariant docs on `initialized_state` for an explanation of what
+  has to be invalidated here and why. *)
+  (* TODO(ljw): should invalidate cached TASTs *)
+  (* TODO(ljw): consider the common scenario of browsing files. Opening a file
+  without modifying it shouldn't involve invalidating its shallow-decl nor all
+  the TASTs and folded-decls. *)
   let initialized_state = restore_hhi_root_if_necessary initialized_state in
   let ctx = initialized_state.ctx in
   match Relative_path.Map.find_opt (Provider_context.get_entries ctx) path with
@@ -419,6 +507,12 @@ let handle_message :
       }
     in
     Lwt.return (state, Handle_message_result.Error error_data)
+  | (Initialized initialized_state, File_closed file_path) ->
+    let path =
+      file_path |> Path.to_string |> Relative_path.create_detect_prefix
+    in
+    let state = make_context_from_closed_file initialized_state path in
+    Lwt.return (state, Handle_message_result.Response ())
   | (Initialized initialized_state, File_opened { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix

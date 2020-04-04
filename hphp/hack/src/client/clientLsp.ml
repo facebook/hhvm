@@ -3122,6 +3122,7 @@ let track_ide_service_open_files
     in
     let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
     let ref_unblocked_time = ref 0. in
+    (* TODO: log errors *)
     let%lwt (_ : (unit, Lsp.Error.t) result) =
       ClientIdeService.rpc
         ide_service
@@ -3129,6 +3130,23 @@ let track_ide_service_open_files
         ~ref_unblocked_time
         (ClientIdeMessage.File_opened
            { ClientIdeMessage.file_path; file_contents })
+    in
+    Lwt.return_unit
+  | Client_message (metadata, NotificationMessage (DidCloseNotification params))
+    ->
+    let file_path =
+      params.DidClose.textDocument.TextDocumentIdentifier.uri
+      |> lsp_uri_to_path
+      |> Path.make
+    in
+    let ref_unblocked_time = ref 0. in
+    (* TODO: log errors *)
+    let%lwt (_ : (unit, Lsp.Error.t) result) =
+      ClientIdeService.rpc
+        ide_service
+        ~tracking_id:metadata.tracking_id
+        ~ref_unblocked_time
+        (ClientIdeMessage.File_closed file_path)
     in
     Lwt.return_unit
   | _ ->

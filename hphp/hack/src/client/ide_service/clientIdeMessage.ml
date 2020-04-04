@@ -123,6 +123,7 @@ type _ t =
   | Shutdown : unit -> unit t
   | File_changed : Path.t -> unit t
   | File_opened : File_opened.request -> unit t
+  | File_closed : Path.t -> unit t
   | Verbose : bool -> unit t
   | Hover : Hover.request -> Hover.result t
   | Definition : Definition.request -> Definition.result t
@@ -148,6 +149,8 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "File_changed(%s)" (Path.to_string file_path)
   | File_opened { file_path; _ } ->
     Printf.sprintf "File_opened(%s)" (Path.to_string file_path)
+  | File_closed file_path ->
+    Printf.sprintf "File_closed(%s)" (Path.to_string file_path)
   | Verbose verbose -> Printf.sprintf "Verbose(%b)" verbose
   | Hover { file_path; _ } ->
     Printf.sprintf "Hover(%s)" (Path.to_string file_path)

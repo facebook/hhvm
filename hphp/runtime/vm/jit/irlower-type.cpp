@@ -85,7 +85,11 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
   }
 
   if (srcType != InvalidReg) {
-    emitTypeTest(v, env, typeParam, srcType, srcData, v.makeReg(), doJcc);
+    // CheckType<UncountedInit> requires two tests: Uncounted, and not Uninit.
+    // If we already know the value is an InitCell, skip the second.
+    auto const relax = typeParam == TUncountedInit && src->isA(TInitCell);
+    auto const typeToCheck = relax ? TUncounted : typeParam;
+    emitTypeTest(v, env, typeToCheck, srcType, srcData, v.makeReg(), doJcc);
     doMov();
     return;
   }

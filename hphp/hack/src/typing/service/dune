@@ -6,6 +6,7 @@
     typing_service_types
   )
   (libraries
+    artifact_store_stubs
     core_kernel
     errors
     hg

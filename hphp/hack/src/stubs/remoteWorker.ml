@@ -34,6 +34,7 @@ module type RemoteServerApi = sig
 end
 
 type 'naming_table work_env = {
+  artifact_store_config: ArtifactStore.config;
   bin_root: Path.t;
   check_id: string;
   ci_info: Ci_util.info option Future.t option;
@@ -59,9 +60,11 @@ let make_env
     ~(transport_channel : string option)
     ~(root : Path.t)
     ?(timeout = (600 : int))
+    (artifact_store_config : ArtifactStore.config)
     (server : (module RemoteServerApi with type naming_table = 'naming_table)) :
     'naming_table work_env =
   {
+    artifact_store_config;
     bin_root;
     check_id;
     ci_info;

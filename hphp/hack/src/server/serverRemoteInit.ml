@@ -22,6 +22,9 @@ let init
              with type naming_table = Naming_table.t option)) =
     ServerApi.make_remote_server_api ctx workers
   in
+  let artifact_store_config =
+    ArtifactStore.default_config ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+  in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
     RemoteWorker.make_env
       ctx
@@ -33,6 +36,7 @@ let init
       ~key:worker_key
       ~transport_channel
       ~root
+      artifact_store_config
       server
   in
   RemoteWorker.go worker_env

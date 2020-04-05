@@ -205,6 +205,9 @@ let parse_work_args () : command =
   in
   let server = make_remote_server_api () in
   let init_id = Random_id.short_string () in
+  let artifact_store_config =
+    ArtifactStore.default_config ~temp_dir:(Path.make Sys_utils.temp_dir_name)
+  in
   CWork
     (RemoteWorker.make_env
        ctx
@@ -217,6 +220,7 @@ let parse_work_args () : command =
        ~key:!key
        ~root
        ~timeout:!timeout
+       artifact_store_config
        server)
 
 let parse_args () =
@@ -315,10 +319,14 @@ let start_remote_checking_service genv env schedule_env =
         genv.local_config.remote_type_check.worker_min_log_level)
   in
   let root = Relative_path.path_of_prefix Relative_path.Root in
+  let artifact_store_config =
+    ArtifactStore.default_config ~temp_dir:(Path.make Sys_utils.temp_dir_name)
+  in
   let delegate_state =
     Typing_service_delegate.start
       Typing_service_types.
         {
+          artifact_store_config;
           defer_class_declaration_threshold =
             ServerLocalConfig.default.remote_type_check.declaration_threshold;
           init_id = env.init_env.init_id;

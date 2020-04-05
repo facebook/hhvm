@@ -50,6 +50,9 @@ let start_typing_delegate genv env : env =
   } =
     genv.local_config.remote_type_check
   in
+  let artifact_store_config =
+    ArtifactStore.default_config ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+  in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   {
     env with
@@ -60,6 +63,7 @@ let start_typing_delegate genv env : env =
           Typing_service_delegate.start
             Typing_service_types.
               {
+                artifact_store_config;
                 defer_class_declaration_threshold;
                 init_id = env.init_env.init_id;
                 mergebase = env.init_env.mergebase;

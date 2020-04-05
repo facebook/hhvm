@@ -116,6 +116,7 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
+  artifact_store_config: ArtifactStore.config;
   defer_class_declaration_threshold: int;
   init_id: string;
   mergebase: Hg.hg_rev option;

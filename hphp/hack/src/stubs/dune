@@ -68,6 +68,7 @@
   (modules
     remoteWorker)
   (libraries
+    artifact_store_stubs
     ci_util_stubs
     errors
     file_info

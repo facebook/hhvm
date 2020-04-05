@@ -180,10 +180,10 @@ FoldableLoadInfo foldable_load_helper(Env& env, Vreg reg, int size,
       break;
     case Vinstr::loadzbq:
     case Vinstr::loadzbl:
-      if (size != sz::byte) return { nullptr, 0, false };
+      if (size > sz::byte) return { nullptr, 0, false };
       break;
     case Vinstr::loadzlq:
-      if (size != sz::dword) return { nullptr, 0, false };
+      if (size > sz::dword) return { nullptr, 0, false };
       break;
     case Vinstr::copy:
       break;

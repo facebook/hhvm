@@ -178,19 +178,18 @@ Variant default_arg_from_php_code(const Func::ParamInfo& fpi,
 }
 
 Array HHVM_FUNCTION(hphp_get_extension_info, const String& name) {
-  Array ret;
 
   Extension *ext = ExtensionRegistry::get(name);
 
-  ret.set(s_name,      name);
-  ret.set(s_version,   ext ? ext->getVersion() : "");
-  ret.set(s_info,      empty_string_tv());
-  ret.set(s_ini,       Array::Create());
-  ret.set(s_constants, Array::Create());
-  ret.set(s_functions, Array::Create());
-  ret.set(s_classes,   Array::Create());
-
-  return ret;
+  return make_darray(
+    s_name,      name,
+    s_version,   ext ? ext->getVersion() : "",
+    s_info,      empty_string(),
+    s_ini,       empty_darray(),
+    s_constants, empty_darray(),
+    s_functions, empty_darray(),
+    s_classes,   empty_darray()
+  );
 }
 
 int get_modifiers(Attr attrs, bool cls, bool prop) {
@@ -259,6 +258,7 @@ static void set_empty_doc_comment(Array& ret) {
 static void set_doc_comment(Array& ret,
                             const StringData* comment,
                             bool isBuiltin) {
+  assertx(ret.isDictOrDArray());
   if (comment == nullptr || comment->empty()) {
     set_empty_doc_comment(ret);
   } else if (isBuiltin && !HHVM_FUNCTION(hphp_debugger_attached)) {
@@ -272,6 +272,7 @@ static void set_doc_comment(Array& ret,
 static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
                                    TypedValue default_val) {
+  assertx(ret.isDictOrDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, default_val);
@@ -291,6 +292,7 @@ static void set_dyn_prop_info(
     Array &ret,
     TypedValue name,
     const StringData* className) {
+  assertx(ret.isDictOrDArray());
   ret.set(s_name, name);
   set_attrs(ret, get_modifiers(AttrPublic, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(className));
@@ -299,6 +301,7 @@ static void set_dyn_prop_info(
 }
 
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
+  assertx(ret.isDictOrDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, prop->val);
@@ -775,13 +778,13 @@ static Array get_function_param_info(const Func* func) {
       param.set(s_is_variadic, make_tv<KindOfBoolean>(true));
     }
     {
-      Array userAttrs = Array::CreateDArray();
-      for (auto it = fpi.userAttributes.begin();
-           it != fpi.userAttributes.end(); ++it) {
-        userAttrs.set(StrNR(it->first),
-                      Variant::attach(arrprov::tagTvRecursively(it->second)));
+      DArrayInit userAttrs(fpi.userAttributes.size());
+      for (auto const& attr : fpi.userAttributes) {
+        userAttrs.set(
+          StrNR{attr.first},
+          Variant::attach(arrprov::tagTvRecursively(attr.second)));
       }
-      param.set(s_attributes, VarNR(userAttrs).tv());
+      param.set(s_attributes, make_array_like_tv(userAttrs.create()));
     }
     ai.append(VarNR(param).tv());
   }
@@ -819,7 +822,7 @@ static String HHVM_METHOD(ReflectionFunctionAbstract, getReturnTypeHint) {
 }
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
-  Array retTypeInfo = Array::Create();
+  DictInit retTypeInfo{3};
   auto name = HHVM_MN(ReflectionFunctionAbstract, getReturnTypeHint)(this_);
   if (name && !name.empty()) {
     auto const func = ReflectionFuncHandle::GetFuncFor(this_);
@@ -846,7 +849,7 @@ static Array HHVM_METHOD(ReflectionFunctionAbstract, getRetTypeInfo) {
     retTypeInfo.set(s_type_hint_builtin, make_tv<KindOfBoolean>(false));
   }
   retTypeInfo.set(s_type_hint, name);
-  return retTypeInfo;
+  return retTypeInfo.toArray();
 }
 
 static Array HHVM_METHOD(ReflectionFunctionAbstract, getReifiedTypeParamInfo) {
@@ -1442,12 +1445,12 @@ static Array HHVM_STATIC_METHOD(
   assertx(st->size() <= numConsts);
 
   DArrayInit ai(numConsts);
-  for (ArrayIter iter(st.get()); iter; ++iter) {
-    auto constName = iter.first().getStringData();
-    TypedValue value = cls->clsCnsGet(constName);
-    assertx(value.m_type != KindOfUninit);
-    ai.add(constName, tvAsCVarRef(value));
-  }
+  IterateV(st->arrayData(), [&](TypedValue k) {
+    auto constName = val(k).pstr;
+    auto value = cls->clsCnsGet(constName);
+    assertx(type(value) != KindOfUninit);
+    ai.add(constName, value);
+  });
   return ai.toArray();
 }
 
@@ -1506,10 +1509,9 @@ static Array HHVM_METHOD(ReflectionClass, getAttributesNamespaced) {
 
   auto userAttrs = pcls->userAttributes();
   DArrayInit ai(userAttrs.size());
-
-  for (auto it = userAttrs.begin(); it != userAttrs.end(); ++it) {
-    ai.set(StrNR(it->first),
-           Variant::attach(arrprov::tagTvRecursively(it->second)));
+  for (auto const& attr : userAttrs) {
+    ai.set(StrNR(attr.first),
+           Variant::attach(arrprov::tagTvRecursively(attr.second)));
   }
   return ai.toArray();
 }
@@ -1601,7 +1603,7 @@ static Array HHVM_METHOD(ReflectionClass, getDynamicPropertyInfos,
       auto const key = tvCastToString(k);
       obj_data->raiseReadDynamicProp(key.get());
     }
-    Array info = Array::CreateDArray();
+    auto info = Array::CreateDArray();
     set_dyn_prop_info(info, k, cls->name());
     ret.setValidKey(k, VarNR(info).tv());
   });
@@ -2239,6 +2241,7 @@ void set_debugger_source_info(Array &ret, const StringData* file, int line1,
 }
 
 static void set_debugger_return_type_constraint(Array &ret, const StringData* retType) {
+  assertx(ret.isDictOrDArray());
   if (retType && retType->size()) {
     assertx(!retType->isRefCounted());
     ret.set(s_return_type, make_tv<KindOfPersistentString>(retType));
@@ -2249,6 +2252,7 @@ static void set_debugger_return_type_constraint(Array &ret, const StringData* re
 
 static void set_debugger_reflection_method_prototype_info(Array& ret,
                                                           const Func *func) {
+  assertx(ret.isDictOrDArray());
   const Class *prototypeCls = nullptr;
   if (func->baseCls() != nullptr && func->baseCls() != func->implCls()) {
     prototypeCls = func->baseCls();
@@ -2260,7 +2264,7 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
     prototypeCls = get_prototype_class_from_interfaces(func->implCls(), func);
   }
   if (prototypeCls) {
-    Array prototype = Array::Create();
+    Array prototype = Array::CreateDArray();
     prototype.set(s_class,
                   make_tv<KindOfPersistentString>(prototypeCls->name()));
     prototype.set(s_name, make_tv<KindOfPersistentString>(func->name()));
@@ -2270,6 +2274,7 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
 
 static void set_debugger_reflection_function_info(Array& ret,
                                                   const Func* func) {
+  assertx(ret.isDictOrDArray());
   // return type
   if (func->isBuiltin()) {
     ret.set(s_internal, make_tv<KindOfBoolean>(true));
@@ -2292,6 +2297,7 @@ static void set_debugger_reflection_function_info(Array& ret,
 
 static void set_debugger_reflection_method_info(Array& ret, const Func* func,
                                                 const Class* cls) {
+  assertx(ret.isDictOrDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(func->name()));
   set_attrs(ret, get_modifiers(func->attrs(), false, false));
 
@@ -2318,10 +2324,10 @@ static void set_debugger_reflection_method_info(Array& ret, const Func* func,
 }
 
 Array get_function_info(const String& name) {
-  Array ret;
-  if (name.get() == nullptr) return ret;
+  if (name.get() == nullptr) return null_array;
   const Func* func = Unit::loadFunc(name.get());
-  if (!func) return ret;
+  if (!func) return null_array;
+  auto ret = Array::CreateDArray();
   ret.set(s_name,       make_tv<KindOfPersistentString>(func->name()));
 
   // setting parameters and static variables
@@ -2333,36 +2339,37 @@ Array get_function_info(const String& name) {
 
 Array get_class_info(const String& name) {
   auto cls = get_cls(name);
-  if (!cls) return Array();
+  if (!cls) return null_array;
 
-  Array ret;
+  auto ret = Array::CreateDArray();
   ret.set(s_name, make_tv<KindOfPersistentString>(cls->name()));
   ret.set(s_extension, empty_string_tv());
   ret.set(s_parent, make_tv<KindOfPersistentString>(cls->preClass()->parent()));
 
   // interfaces
   {
-    Array arr = Array::Create();
+    auto const& allIfaces = cls->allInterfaces();
+    DArrayInit arr(allIfaces.size());
     for (auto const& interface: cls->declInterfaces()) {
       arr.set(interface->nameStr(), make_tv<KindOfInt64>(1));
     }
-    auto const& allIfaces = cls->allInterfaces();
     if (allIfaces.size() > cls->declInterfaces().size()) {
       for (int i = 0; i < allIfaces.size(); ++i) {
         auto const& interface = allIfaces[i];
         arr.set(interface->nameStr(), make_tv<KindOfInt64>(1));
       }
     }
-    ret.set(s_interfaces, VarNR(arr).tv());
+    ret.set(s_interfaces, make_array_like_tv(arr.create()));
   }
 
   // traits
   {
-    Array arr = Array::Create();
-    for (auto const& traitName : cls->preClass()->usedTraits()) {
+    auto const& traits = cls->preClass()->usedTraits();
+    DArrayInit arr(traits.size());
+    for (auto const& traitName : traits) {
       arr.set(StrNR(traitName), make_tv<KindOfInt64>(1));
     }
-    ret.set(s_traits, VarNR(arr).tv());
+    ret.set(s_traits, make_array_like_tv(arr.create()));
   }
 
   // trait aliases
@@ -2401,7 +2408,7 @@ Array get_class_info(const String& name) {
 
   // methods
   {
-    Array arr = Array::Create();
+    auto arr = Array::CreateDArray();
 
     // Fetch from PreClass as:
     // - the order is important
@@ -2414,7 +2421,7 @@ Array get_class_info(const String& name) {
       if (m->isGenerated()) continue;
 
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
-      Array info = Array::Create();
+      auto info = Array::CreateDArray();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info).tv());
     }
@@ -2424,7 +2431,7 @@ Array get_class_info(const String& name) {
       if (m->isGenerated()) continue;
 
       auto lowerName = HHVM_FN(strtolower)(m->nameStr());
-      Array info = Array::Create();
+      auto info = Array::CreateDArray();
       set_debugger_reflection_method_info(info, m, cls);
       arr.set(lowerName, VarNR(info).tv());
     }
@@ -2433,10 +2440,10 @@ Array get_class_info(const String& name) {
 
   // properties
   {
-    auto arr        = Array::Create();
-    auto arrPriv    = Array::Create();
-    auto arrIdx     = Array::Create();
-    auto arrPrivIdx = Array::Create();
+    auto arr        = Array::CreateDArray();
+    auto arrPriv    = Array::CreateDArray();
+    auto arrIdx     = Array::CreateDArray();
+    auto arrPrivIdx = Array::CreateDArray();
 
     auto const properties = cls->declProperties();
     auto const& propInitVec = cls->declPropInit();
@@ -2446,7 +2453,7 @@ Array get_class_info(const String& name) {
       auto index = cls->propSlotToIndex(slot);
       auto const& prop = properties[slot];
       auto const default_val = propInitVec[index].val.tv();
-      auto info = Array::Create();
+      auto info = Array::CreateDArray();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_instance_prop_info(info, &prop, default_val);
@@ -2461,7 +2468,7 @@ Array get_class_info(const String& name) {
     }
 
     for (auto const& prop : cls->staticProperties()) {
-      auto info = Array::Create();
+      auto info = Array::CreateDArray();
       if ((prop.attrs & AttrPrivate) == AttrPrivate) {
         if (prop.cls == cls) {
           set_static_prop_info(info, &prop);
@@ -2482,22 +2489,20 @@ Array get_class_info(const String& name) {
 
   // constants
   {
-    Array arr = Array::Create();
-
     size_t numConsts = cls->numConstants();
     const Class::Const* consts = cls->constants();
-
+    DArrayInit arr(numConsts);
     for (size_t i = 0; i < numConsts; i++) {
       // Note: hphpc doesn't include inherited constants in
       // get_class_constants(), so mimic that behavior
       if (consts[i].cls == cls) {
         TypedValue value = cls->clsCnsGet(consts[i].name);
         assertx(value.m_type != KindOfUninit);
-        arr.set(StrNR(consts[i].name), tvAsCVarRef(value));
+        arr.set(StrNR(consts[i].name), value);
       }
     }
 
-    ret.set(s_constants, VarNR(arr).tv());
+    ret.set(s_constants, make_array_like_tv(arr.create()));
   }
 
   { // source info
@@ -2509,14 +2514,14 @@ Array get_class_info(const String& name) {
 
   // user attributes
   {
-    Array arr = Array::CreateDArray();
     const PreClass* pcls = cls->preClass();
-    for (auto it = pcls->userAttributes().begin();
-         it != pcls->userAttributes().end(); ++it) {
-      arr.set(StrNR(it->first),
-              Variant::attach(arrprov::tagTvRecursively(it->second)));
+    auto const& attrs = pcls->userAttributes();
+    DArrayInit arr{attrs.size()};
+    for (auto const& attr : attrs) {
+      arr.set(StrNR(attr.first),
+              Variant::attach(arrprov::tagTvRecursively(attr.second)));
     }
-    ret.set(s_attributes, VarNR(arr).tv());
+    ret.set(s_attributes, make_array_like_tv(arr.create()));
   }
 
   return ret;

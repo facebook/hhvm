@@ -9,7 +9,7 @@
  *                 ini settings, constants, functions and classes.
  */
 <<__Native("NoInjection"), __HipHopSpecific, __Rx>>
-function hphp_get_extension_info(string $name): array<string, mixed>;
+function hphp_get_extension_info(string $name): darray<string, mixed>;
 
 /**
  * hphp_invoke() - Used by ReflectionFunction to invoke a function.

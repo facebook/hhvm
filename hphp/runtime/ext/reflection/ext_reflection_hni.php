@@ -220,7 +220,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getDocComment(): mixed;
 
   <<__Native, __Rx, __MaybeMutable>>
-  private function getRetTypeInfo(): array;
+  private function getRetTypeInfo(): dict;
 
   <<__Native, __HipHopSpecific, __Rx, __MaybeMutable>>
   private function getReturnTypeHint(): string;

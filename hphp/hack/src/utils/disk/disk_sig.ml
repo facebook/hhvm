@@ -28,6 +28,13 @@ module type S = sig
 
   val chdir : string -> unit
 
+  (* Changes the permissions on a path, which could be a file or a directory.
+      The integer value is the permissions mode. If `recursive` is true, then
+      applies the permissions mode to the directory and all of its contents,
+      recursively.
+      See the Unix documentation for the related `chmod` command. *)
+  val chmod : recursive:bool -> string -> int -> unit
+
   val mkdir : string -> int -> unit
 
   (* Return the names of all files present in the given directory. *)

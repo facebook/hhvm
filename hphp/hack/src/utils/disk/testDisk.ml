@@ -39,6 +39,8 @@ let getcwd () = !cwd
 
 let chdir s = cwd := s
 
+let chmod ~recursive path mode = ignore (recursive, path, mode)
+
 let rec mkdir_p path root =
   match Filename.dirname path with
   | "." -> mkdir_p (getcwd ()) root

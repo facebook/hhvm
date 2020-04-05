@@ -108,6 +108,24 @@ let rec chmod ~(recursive : bool) (path : string) (mode : int) : unit =
 
 let mkdir = Unix.mkdir
 
+let rec readpath (path : string) : string list =
+  let open Unix in
+  let stats = lstat path in
+  match stats.st_kind with
+  | S_DIR ->
+    let contents = Sys.readdir path in
+    Core_kernel.List.fold
+      ~init:[]
+      ~f:
+        begin
+          fun acc name ->
+          let name = Filename.concat path name in
+          List.rev_append acc (readpath name)
+        end
+      (Array.to_list contents)
+  | S_REG -> [path]
+  | _ -> []
+
 let readdir = Sys.readdir
 
 let rename old target =

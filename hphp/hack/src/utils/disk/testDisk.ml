@@ -151,7 +151,18 @@ let rm_dir_tree path =
       (* File already doesn't exist; ignore. *)
       ()
 
-let readdir x =
+let rec readpath (path : string) : string list =
+  match get_file path root with
+  | Actual_file_with_contents _ -> [path]
+  | Directory directory ->
+    Hashtbl.fold
+      (fun name _v acc ->
+        let name = Filename.concat path name in
+        List.rev_append acc (readpath name))
+      directory
+      []
+
+let readdir (x : string) : string array =
   match get_file x root with
   | Actual_file_with_contents _ -> raise (NotADirectory x)
   | Directory directory ->
@@ -182,7 +193,7 @@ let rename old target =
     | (_, _) -> failwith "Not sure what to do here"
 
 let treesize (path : string) : int =
-  match Hashtbl.find sizes path with
+  match Hashtbl.find_opt sizes path with
   | None -> 0
   | Some size -> size
 

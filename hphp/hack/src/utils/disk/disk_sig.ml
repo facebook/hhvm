@@ -37,6 +37,10 @@ module type S = sig
 
   val mkdir : string -> int -> unit
 
+  (* Return the paths of all the regular files present in the given directory
+      and its subdirectories. *)
+  val readpath : string -> string list
+
   (* Return the names of all files present in the given directory. *)
   val readdir : string -> string array
 

@@ -768,13 +768,13 @@ function openssl_digest(string $data,
  * within the returned array.
  * @return array - An array of available cipher methods.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function openssl_get_cipher_methods(bool $aliases = false): varray<string>;
 
 /**
  * Return array of available elliptic curves or FALSE on failure.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function openssl_get_curve_names(): mixed;
 
 /* Gets a list of available digest methods.
@@ -782,5 +782,5 @@ function openssl_get_curve_names(): mixed;
  * within the returned array.
  * @return array - An array of available digest methods.
  */
-<<__Native>>
+<<__Native, __IsFoldable>>
 function openssl_get_md_methods(bool $aliases = false): varray<string>;

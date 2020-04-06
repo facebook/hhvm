@@ -863,7 +863,7 @@ G |- array<> <: array<t>
 ------------------------------- :: emptyarray_as_maparray
 G |- array<> <: array<t1,t2>
 
-{{ com Arrays over the bottom type $[[nonnull]]$ are inhabited by the empty array only. }}
+{{ com Arrays over the bottom type $[[nothing]]$ are inhabited by the empty array only. }}
 
 ------------------------------- :: vecarray_over_nothing_as_emptyarray
 G |- array<nothing> <: array<>

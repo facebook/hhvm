@@ -185,4 +185,20 @@ and diff_both
   | (JSON_Number val_c, JSON_Number val_p) when val_c = val_p ->
     (key, JSON_Number val_c) :: acc
   | (JSON_Null, JSON_Null) -> (key, JSON_Null) :: acc
+  | (JSON_Number c, JSON_Number p) ->
+    (* JSON_Numbers are strings - maybe ints, maybe floats, maybe we
+    can't parse them or they're outside ocaml maximum range *)
+    begin
+      try
+        let (c, p) = (int_of_string c, int_of_string p) in
+        (key, int_ c) :: (key ^ ":diff", int_ (c - p)) :: acc
+      with _ ->
+        begin
+          try
+            let (c, p) = (float_of_string c, float_of_string p) in
+            (key, float_ c) :: (key ^ ":diff", float_ (c -. p)) :: acc
+          with _ ->
+            (key, JSON_Number c) :: (key ^ ":prev", JSON_Number p) :: acc
+        end
+    end
   | (_, _) -> (key, val_c) :: (key ^ ":prev", val_p) :: acc

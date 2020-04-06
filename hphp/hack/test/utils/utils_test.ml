@@ -163,9 +163,9 @@ let test_telemetry_diff () =
     1
     "diff1 a should be 1";
   Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff1 "a:prev")
-    2
-    "diff1 a:prev should be 2";
+    (Telemetry_test_utils.int_exn diff1 "a:diff")
+    (-1)
+    "diff1 a:diff should be -1";
 
   (* same values *)
   let current2 = Telemetry.create () |> Telemetry.int_ ~key:"b" ~value:1 in
@@ -206,9 +206,9 @@ let test_telemetry_diff () =
     1
     "diff3 o.a should be 1";
   Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff3 "o.a:prev")
-    2
-    "diff3 o.a:prev should be 2";
+    (Telemetry_test_utils.int_exn diff3 "o.a:diff")
+    (-1)
+    "diff3 o.a:diff should be -1";
   Int_asserter.assert_equals
     (Telemetry_test_utils.int_exn diff3 "o.b")
     1

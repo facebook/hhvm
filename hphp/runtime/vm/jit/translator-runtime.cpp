@@ -553,35 +553,34 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
-  return dictIdxS(a, key, def);
+  if (UNLIKELY(!a->isMixedKind())) return arrayIdxSSlow(a, key, def);
+  return getDefaultIfNullTV(MixedArray::NvGetStr(a, key), def);
 }
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
-  return dictIdxScan(a, key, def);
+  return LIKELY(MixedArrayKeys::isMixedWithStaticStrKeys(a))
+    ? doScan(MixedArray::asMixed(a), key, def)
+    : arrayIdxSSlow(a, key, def);
 }
 
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
-  static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
+  assertx(a->isDictKind());
   return getDefaultIfNullTV(MixedArray::NvGetIntDict(a, key), def);
 }
 
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
-  static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
+  assertx(a->isDictKind());
   return getDefaultIfNullTV(MixedArray::NvGetStrDict(a, key), def);
 }
 
-NEVER_INLINE
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->hasVanillaMixedLayout());
-  auto const ad = MixedArray::asMixed(a);
-  if (!ad->keyTypes().mustBeStaticStrs()) return dictIdxS(a, key, def);
-  return doScan(ad, key, def);
+  assertx(a->isDictKind());
+  auto ad = MixedArray::asMixed(a);
+  return LIKELY(ad->keyTypes().mustBeStaticStrs())
+    ? doScan(ad, key, def)
+    : dictIdxS(a, key, def);
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {

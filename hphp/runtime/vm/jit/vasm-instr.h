@@ -77,6 +77,7 @@ struct Vunit;
   O(ldimmw, I(s), Un, D(d))\
   O(ldimml, I(s), Un, D(d))\
   O(ldimmq, I(s), Un, D(d))\
+  O(ldundefq, Inone, Un, D(d))\
   O(movqs, I(s) I(addr), Un, D(d))\
   O(load, Inone, U(s), D(d))\
   O(store, Inone, U(s) UW(d), Dn)\
@@ -95,6 +96,7 @@ struct Vunit;
   O(spillbi, I(s), Un, D(d))\
   O(spillli, I(s), Un, D(d))\
   O(spillqi, I(s), Un, D(d))\
+  O(spillundefq, Inone, Un, D(d))\
   O(reload, Inone, U(s), D(d))\
   O(ssaalias, Inone, U(s), D(d))\
   /* native function abi */\
@@ -526,6 +528,12 @@ struct ldimml { Immed s; Vreg d; };
 struct ldimmq { Immed64 s; Vreg d; };
 
 /*
+ * Load an undefined value. Used for a value component of TNull. Implemented
+ * as a noop.
+ */
+struct ldundefq { Vreg d; };
+
+/*
  * Load a smashable immediate value without mutating status flags.
  */
 struct movqs { Immed64 s; Vreg64 d; Vaddr addr; };
@@ -572,6 +580,7 @@ struct spill { Vreg s, d; };
 struct spillbi { Immed s; Vreg d; };
 struct spillli { Immed s; Vreg d; };
 struct spillqi { Immed s; Vreg d; };
+struct spillundefq { Vreg d; };
 struct reload { Vreg s, d; };
 
 /*

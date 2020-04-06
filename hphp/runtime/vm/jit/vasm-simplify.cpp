@@ -1358,12 +1358,7 @@ bool cmov_fold_impl(Env& env, const Inst& inst, Vlabel b, size_t i) {
     if (t_it == env.unit.regToConst.end()) return false;
     auto const f_it = env.unit.regToConst.find(inst.f);
     if (f_it == env.unit.regToConst.end()) return false;
-
-    auto const t_const = t_it->second;
-    auto const f_const = f_it->second;
-    if (t_const.isUndef || f_const.isUndef) return false;
-    if (t_const.kind != f_const.kind) return false;
-    return t_const.val == f_const.val;
+    return t_it->second == f_it->second;
   }();
   if (!equivalent) return false;
 

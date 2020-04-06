@@ -627,6 +627,7 @@ bool is_spill_inst(const Vinstr& inst) {
     case Vinstr::spillbi:
     case Vinstr::spillli:
     case Vinstr::spillqi:
+    case Vinstr::spillundefq:
       return true;
     default:
       return false;
@@ -636,10 +637,11 @@ bool is_spill_inst(const Vinstr& inst) {
 // Generically obtain the destination Vreg from a spill instruction.
 Vreg spill_inst_dest(const Vinstr& inst) {
   switch (inst.op) {
-    case Vinstr::spill:   return inst.spill_.d;
-    case Vinstr::spillbi: return inst.spillbi_.d;
-    case Vinstr::spillli: return inst.spillli_.d;
-    case Vinstr::spillqi: return inst.spillqi_.d;
+    case Vinstr::spill:       return inst.spill_.d;
+    case Vinstr::spillbi:     return inst.spillbi_.d;
+    case Vinstr::spillli:     return inst.spillli_.d;
+    case Vinstr::spillqi:     return inst.spillqi_.d;
+    case Vinstr::spillundefq: return inst.spillundefq_.d;
     default: always_assert(false);
   }
 }
@@ -1335,20 +1337,26 @@ compute_place_constants_block_info(State& state) {
         auto const it = unit.regToConst.find(inst.copy_.s);
         assertx(it != unit.regToConst.end());
         auto const& vconst = it->second;
-        // TODO (T37584483): Undef constants can be dealt with better here.
         switch (vconst.kind) {
           case Vconst::Quad:
           case Vconst::Double:
-            inst.op = Vinstr::ldimmq;
-            inst.ldimmq_.s = uint64_t(vconst.val);
-            inst.ldimmq_.d = d;
+            if (vconst.isUndef) {
+              inst.op = Vinstr::ldundefq;
+              inst.ldundefq_.d = d;
+            } else {
+              inst.op = Vinstr::ldimmq;
+              inst.ldimmq_.s = uint64_t(vconst.val);
+              inst.ldimmq_.d = d;
+            }
             break;
           case Vconst::Long:
+            assertx(!vconst.isUndef);
             inst.op = Vinstr::ldimml;
             inst.ldimml_.s = int32_t(vconst.val);
             inst.ldimml_.d = d;
             break;
           case Vconst::Byte:
+            assertx(!vconst.isUndef);
             inst.op = Vinstr::ldimmb;
             inst.ldimmb_.s = uint8_t(vconst.val);
             inst.ldimmb_.d = d;
@@ -1865,16 +1873,21 @@ std::pair<VregSet, BlockSet> place_constants(State& state) {
         auto const it = unit.regToConst.find(r);
         assertx(it != unit.regToConst.end());
         auto const& vconst = it->second;
-        // TODO (T37584483): Undef constants can be dealt with better here.
         switch (vconst.kind) {
           case Vconst::Quad:
           case Vconst::Double:
-            v << ldimmq{uint64_t(vconst.val), r};
+            if (vconst.isUndef) {
+              v << ldundefq{r};
+            } else {
+              v << ldimmq{uint64_t(vconst.val), r};
+            }
             break;
           case Vconst::Long:
+            assertx(!vconst.isUndef);
             v << ldimml{int32_t(vconst.val), r};
             break;
           case Vconst::Byte:
+            assertx(!vconst.isUndef);
             v << ldimmb{uint8_t(vconst.val), r};
             break;
         }
@@ -2803,6 +2816,8 @@ RematLookup find_defining_inst_for_remat(State& state,
           return {ldimml{inst.spillli_.s, inst.spillli_.d}, false};
         case Vinstr::spillqi:
           return {ldimmq{inst.spillqi_.s.q(), inst.spillqi_.d}, false};
+        case Vinstr::spillundefq:
+          return {ldundefq{inst.spillundefq_.d}, false};
         default:
           // The rest can only be used if we didn't encounter any
           // incompatible copies.
@@ -3115,6 +3130,9 @@ SpillWithRematResult spill_with_remat(State& state,
         ),
         rematerialized
       };
+    case Vinstr::ldundefq:
+      v << spillundefq{dst};
+      return {1, rematerialized};
     case Vinstr::reload:
       // Not rematerializable. Just emit a spill (if we can, fail
       // otherwise).
@@ -6659,6 +6677,7 @@ void set_spill_reg_classes(State& state,
         case Vinstr::spillbi:
         case Vinstr::spillli:
         case Vinstr::spillqi:
+        case Vinstr::spillundefq:
           // The dest of a spill instruction is a spill.
           spillize(spill_inst_dest(inst));
           break;
@@ -6728,7 +6747,8 @@ void set_spill_reg_classes(State& state,
         }
         case Vinstr::spillbi:
         case Vinstr::spillli:
-        case Vinstr::spillqi: {
+        case Vinstr::spillqi:
+        case Vinstr::spillundefq: {
           // The dest of a spill immediate should be a spill slot.
           auto const d = spill_inst_dest(inst);
           always_assert(!d.isPhys());
@@ -10033,6 +10053,13 @@ bool materialize_spill(const State& state,
         inst.spillqi_.s,
         [&] (Immed i, Vreg r) { return ldimmq{i.q(), r}; }
       );
+    case Vinstr::spillundefq:
+      assertx(skip >= 0);
+      assertx(is_spill(reg_info(state, inst.spillundefq_.d).regClass));
+      inst.nop_ = nop{};
+      inst.op = Vinstr::nop;
+      invalidate_cached_operands(inst);
+      return true;
     default:
       return false;
   }

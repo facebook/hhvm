@@ -267,6 +267,7 @@ struct Vgen {
   void emit(const jmpi& i) { a.branchAuto(i.target); }
   void emit(const landingpad&) {}
   void emit(const ldimmw& i) { a.li(Reg64(i.d), i.s); }
+  void emit(const ldundefq& /*i*/) {}
   void emit(const loadups& i) {
     // A lowering would be handy here, but the Vptr's displacement is only
     // later added at the optimizeCopies optimization

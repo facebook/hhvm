@@ -115,6 +115,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::ldimmw:
     case Vinstr::ldimml:
     case Vinstr::ldimmq:
+    case Vinstr::ldundefq:
     case Vinstr::movqs:
     case Vinstr::load:
     case Vinstr::store:
@@ -130,6 +131,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::spillbi:
     case Vinstr::spillli:
     case Vinstr::spillqi:
+    case Vinstr::spillundefq:
     case Vinstr::reload:
     case Vinstr::ssaalias:
     // native function abi

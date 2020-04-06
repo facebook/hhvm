@@ -116,8 +116,7 @@ struct Vconst {
   explicit Vconst(R (*fn)(Args...)) : Vconst(uintptr_t(fn)) {}
 
   bool operator==(Vconst other) const {
-    return kind == other.kind &&
-      ((isUndef && other.isUndef) || val == other.val);
+    return kind == other.kind && isUndef == other.isUndef && val == other.val;
   }
 
   struct Hash {

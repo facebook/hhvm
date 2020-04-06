@@ -314,7 +314,7 @@ std::string show(Vptr p) {
 }
 
 std::string show(Vconst c) {
-  auto str = folly::to<std::string>(c.val);
+  auto str = c.isUndef ? "undef:" : folly::to<std::string>(c.val);
   switch (c.kind) {
     case Vconst::Quad:
       str += 'q';

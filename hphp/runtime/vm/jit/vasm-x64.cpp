@@ -90,6 +90,7 @@ struct Vgen {
   void emit(const ldimmb& i);
   void emit(const ldimml& i);
   void emit(const ldimmq& i);
+  void emit(const ldundefq& /*i*/) {}
   void emit(const load& i);
   void emit(const store& i);
   void emit(const mcprep& i);

@@ -303,9 +303,11 @@ let rec expand ctx env root =
     let (env, ty) = Typing_subtype_tconst.get_tyvar_type_const env n ctx.id in
     (env, Exact ty)
   (* TODO(T36532263): Pocket Universes *)
-  | Tpu (base, _)
-  | Tpu_type_access (base, _, _, _) ->
+  | Tpu (base, _) ->
     let pos = get_pos base in
+    raise_error (fun _ -> Errors.pu_expansion pos)
+  | Tpu_type_access (member, _) ->
+    let pos = fst member in
     raise_error (fun _ -> Errors.pu_expansion pos)
   | Tobject
   | Tnonnull

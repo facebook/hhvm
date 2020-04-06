@@ -1289,19 +1289,21 @@ and simplify_subtype_i
                @@ TUtils.class_get_pu_member env base_super enum_super atom ->
           valid ()
         | _ -> default_subtype env))
-    | (_, Tpu_type_access (bsuper, esuper, msuper, nsuper)) ->
+    | (_, Tpu_type_access (msuper, nsuper)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType ty_sub ->
         (match get_node ty_sub with
-        | Tpu_type_access (bsub, esub, msub, nsub) ->
+        | Tpu_type_access (msub, nsub) ->
           if
-            String.equal (snd esub) (snd esuper)
-            && String.equal (snd nsub) (snd nsuper)
+            String.equal (snd nsub) (snd nsuper)
             && String.equal (snd msub) (snd msuper)
           then
-            simplify_subtype ~subtype_env ~this_ty bsuper bsub env
+            valid_env env
           else
+            (* It's not 100% clear if we should use invalid_env directly or
+             * not. All my attempts a building an error here is always
+             * caught beforehand *)
             default_subtype env
         | Tunion _
         | Tvar _

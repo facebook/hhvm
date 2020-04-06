@@ -563,11 +563,8 @@ module Full = struct
     | Tobject -> text "object"
     | Tshape (shape_kind, fdm) -> tshape k to_doc shape_kind fdm
     | Tpu (base, (_, enum)) -> pu_concat k base enum
-    | Tpu_type_access (base, (_, enum), (_, member), (_, tyname)) ->
-      k base
-      ^^ text (":@" ^ enum)
-      ^^ text (":@" ^ member)
-      ^^ text (":@" ^ tyname)
+    | Tpu_type_access ((_, member), (_, tyname)) ->
+      text member ^^ text (":@" ^ tyname)
 
   let rec constraint_type_ to_doc st env x =
     let k lty = locl_ty to_doc st env lty in
@@ -787,18 +784,11 @@ module ErrorString = struct
         | _ -> "..."
       in
       "the pocket universe " ^ ty ^ ":@" ^ enum
-    | Tpu_type_access (ty, (_, enum), _, (_, tyname)) ->
-      let ty =
-        match get_node ty with
-        | Tclass ((_, x), _, tyl) -> strip_ns x ^ inst env tyl
-        | _ -> "..."
-      in
-      "the type "
+    | Tpu_type_access ((_, member), (_, tyname)) ->
+      "the projected Pocket Universe dependent type "
       ^ tyname
-      ^ " associated with a member of the pocket universe "
-      ^ ty
-      ^ ":@"
-      ^ enum
+      ^ " associated with the type parameter"
+      ^ member
 
   and inst env tyl =
     if List.is_empty tyl then
@@ -999,12 +989,10 @@ module Json = struct
     | (p, Tarraykind (AKvarray ty)) -> obj @@ kind p "varray" @ args [ty]
     | (p, Tpu (base, enum)) ->
       obj @@ kind p "pocket_universe" @ args [base] @ name (snd enum)
-    | (p, Tpu_type_access (base, enum, member, typ)) ->
+    | (p, Tpu_type_access (member, typ)) ->
       obj
       @@ kind p "pocket_universe_type_access"
-      @ args [base]
       @ name (snd member)
-      @ name (snd enum)
       @ name (snd typ)
 
   type deserialized_result = (locl_ty, deserialization_error) result

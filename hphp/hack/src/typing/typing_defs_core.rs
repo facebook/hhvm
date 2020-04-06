@@ -75,10 +75,10 @@ pub enum Ty_<'a> {
     Tmixed,
     Tlike(Ty<'a>),
     /// Access to a Pocket Universe Expression or Atom, denoted by
-    /// Foo:@Bar or Foo:@Bar:@X.
+    /// Foo:@Bar
     /// It might be unresolved at first (e.g. if Foo is a generic variable).
     /// Will be refined to Tpu once typechecking is successful
-    TpuAccess, // TODO: TpuAccess(Ty, nast::Sid, nast::PuLoc),
+    TpuAccess, // TODO: TpuAccess(Ty, nast::Sid),
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,

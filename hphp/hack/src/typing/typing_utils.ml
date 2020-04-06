@@ -106,7 +106,6 @@ let expand_typeconst x = !expand_typeconst_ref x
 
 type expand_pocket_universes =
   env ->
-  ety_env:expand_env ->
   Reason.t ->
   locl_ty ->
   Pos.t * string ->

@@ -39,10 +39,11 @@ type tyvar_constraints = {
           indexed by "T" in the type_constants of the type variable representing T1.
           This allows to properly check constraints on "T1::T". *)
   pu_accesses:
-    (* base * enum * new_var * typname *)
-    (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t;
+    ( Aast.sid (* id of the pu projection "T", containing its position. *)
+    * locl_ty )
+    SMap.t;
       (** Map associating PU information to each instance of
-          C:@E:@#v:@T
+          #v:@T
           when the type variable #v is not resolved yet. We introduce a new type
           variable to 'postpone' the checking of this expression until the end,
           when #v will be known. *)
@@ -106,8 +107,7 @@ module Log = struct
         ( "type_constants",
           smap_as_value (fun (_, ty) -> locl_type_as_value ty) type_constants );
         ( "pu_acceses",
-          smap_as_value (fun (_, _, ty, _) -> locl_type_as_value ty) pu_accesses
-        );
+          smap_as_value (fun (_, ty) -> locl_type_as_value ty) pu_accesses );
       ]
 
   let solving_info_as_value sinfo =
@@ -687,11 +687,9 @@ let set_tyvar_type_const env var ((_, tyconstid_) as tyconstid) ty =
   in
   set_tyvar_constraints env var { tvinfo with type_constants }
 
-let set_tyvar_pu_access env var base enum new_var name =
+let set_tyvar_pu_access env var name new_var =
   let tvinfo = get_tyvar_constraints_exn env var in
-  let pu_accesses =
-    SMap.add (snd name) (base, enum, new_var, name) tvinfo.pu_accesses
-  in
+  let pu_accesses = SMap.add (snd name) (name, new_var) tvinfo.pu_accesses in
   set_tyvar_constraints env var { tvinfo with pu_accesses }
 
 (** Conjoin a subtype proposition onto the subtype_prop in the environment *)
@@ -921,10 +919,7 @@ module Size = struct
     SMap.fold (fun _ x y -> x + y) m 0
 
   let pu_accesses_size env pu_accesses =
-    SMap.map
-      (fun (ty1, _id, ty2, _id') -> ty_size env ty1 + ty_size env ty2)
-      pu_accesses
-    |> fun m -> SMap.fold (fun _ x y -> x + y) m 0
+    SMap.fold (fun _ (_id, ty) acc -> acc + ty_size env ty) pu_accesses 0
 
   let solving_info_size env solving_info =
     match solving_info with
@@ -988,7 +983,7 @@ let merge_constraints cstr1 cstr2 =
     lower_bounds = lb1;
     upper_bounds = ub1;
     type_constants = tc1;
-    pu_accesses = pu1;
+    pu_accesses = pu_accesses1;
     appears_covariantly = cov1;
     appears_contravariantly = contra1;
   } =
@@ -998,7 +993,7 @@ let merge_constraints cstr1 cstr2 =
     lower_bounds = lb2;
     upper_bounds = ub2;
     type_constants = tc2;
-    pu_accesses = pu2;
+    pu_accesses = pu_accesses2;
     appears_covariantly = cov2;
     appears_contravariantly = contra2;
   } =
@@ -1013,7 +1008,7 @@ let merge_constraints cstr1 cstr2 =
       (* Type constants must already have been made equivalent, so picking any should be fine *)
       (* TODO: that might actually not be true during initial merging, but let's fix that later. *)
       SMap.union tc1 tc2;
-    pu_accesses = SMap.union pu1 pu2;
+    pu_accesses = SMap.union pu_accesses1 pu_accesses2;
   }
 
 let solving_info_as_constraints sinfo =

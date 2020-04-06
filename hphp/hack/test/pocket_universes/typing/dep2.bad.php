@@ -7,7 +7,7 @@ class C {
     :@I(type T = int, value = 42);
   }
 
-  public static function f<TP as this:@E>(TP $atom, this:@E:@TP:@T $x) :void {
+  public static function f<TP as this:@E>(TP $atom, TP:@T $x) :void {
   }
 }
 

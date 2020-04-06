@@ -56,9 +56,7 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Terr) -> MakeType.err p
       (* TODO(T36532263) see if that needs updating *)
       | (p, Tpu (base, enum)) -> mk (p, Tpu (exp_ty base, enum))
-      | (p, Tpu_type_access (base, enum, member, tyname)) ->
-        let base = exp_ty base in
-        mk (p, Tpu_type_access (base, enum, member, tyname))
+      | (_, Tpu_type_access (_, _)) -> ety
     in
     ety
   and exp_tys tyl = List.map ~f:exp_ty tyl

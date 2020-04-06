@@ -249,11 +249,6 @@ and _ ty_ =
    * known arms.
    *)
   | Tshape : shape_kind * 'phase shape_field_type Nast.ShapeMap.t -> 'phase ty_
-  (* Access to a Pocket Universe Expression or Atom, denoted by
-   * Foo:@Bar or Foo:@Bar:@X.
-   * It might be unresolved at first (e.g. if Foo is a generic variable).
-   * Will be refined to Tpu once typechecking is successful
-   *)
   | Tvar : Ident.t -> 'phase ty_
   (* The type of a generic parameter. The constraints on a generic parameter
    * are accessed through the lenv.tpenv component of the environment, which
@@ -315,13 +310,10 @@ and _ ty_ =
        * - first parameter is the enclosing class
        * - second parameter is the name of the Pocket Universe Enumeration
        *)
-  | Tpu_type_access : locl_ty * Nast.sid * Nast.sid * Nast.sid -> locl_phase ty_
+  | Tpu_type_access : Nast.sid * Nast.sid -> locl_phase ty_
       (** Typing of Pocket Universes type projections
-       * - first parameter is the enclosing class
-       * - second parameter is the name of the Pocket Universe Enumeration
-       * - third parameter is the Tgeneric in place of the
-       *   member name
-       * - the fourth parameter is the name of the type to project
+       * - first parameter is the Tgeneric in place of the member name
+       * - second parameter is the name of the type to project
        *)
 
 and constraint_type_ =

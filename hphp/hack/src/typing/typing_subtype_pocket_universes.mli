@@ -4,8 +4,8 @@ open Typing_env_types
 val get_tyvar_pu_access :
   env ->
   Typing_reason.t ->
-  locl_ty ->
-  Aast.sid ->
+  (* locl_ty -> *)
+  (* Aast.sid -> *)
   Ident.t ->
   Aast.sid ->
   env * locl_ty

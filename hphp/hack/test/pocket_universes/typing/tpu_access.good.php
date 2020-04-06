@@ -11,11 +11,7 @@ class PU {
     :@S (type T = string, v = "foo");
   }
 
-  public static function good(): this:@E:@I:@T {
-    return 1664;
-  }
-
-  public static function get<TF as this:@E>(TF $x): this:@E:@TF:@T {
+  public static function get<TF as this:@E>(TF $x): TF:@T {
     return static:@E::v($x);
   }
 

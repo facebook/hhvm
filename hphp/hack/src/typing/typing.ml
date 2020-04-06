@@ -5144,11 +5144,12 @@ and dispatch_call
                 | None -> assert false
               in
               (* Its original upper bound is the PU enum itself *)
+              let upper_bound = mk (reason, Tpu (ty1, enum')) in
               let env =
                 SubType.sub_type
                   env
                   fresh_ty
-                  (mk (reason, Tpu (ty1, enum')))
+                  upper_bound
                   Errors.pocket_universes_typing
               in
               let (env, substs) =
@@ -5156,8 +5157,6 @@ and dispatch_call
                   Typing_subtype_pocket_universes.get_tyvar_pu_access
                     env
                     reason
-                    ty1
-                    enum'
                     fresh_var
                     pu_case_type_name
                 in

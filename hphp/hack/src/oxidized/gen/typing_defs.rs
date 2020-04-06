@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<83d21fdf67ee988f0b4c9f38b05fd37e>>
+// @generated SignedSource<<8c67c38c66d53a66aa918de9d31979ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -32,8 +32,6 @@ pub use typing_defs_core::*;
     Serialize
 )]
 pub struct ClassElt {
-    pub xhp_attr: Option<XhpAttr>,
-    pub dynamicallycallable: bool,
     pub visibility: Visibility,
     pub type_: lazy::Lazy<Ty>,
     /// identifies the class from which this elt originates

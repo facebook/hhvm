@@ -19,7 +19,7 @@ abstract class C {
   // to the env tparams, which resulted in errors when extending C
   public static function set<TE as this:@E>(
     TE $entry,
-    ?this:@E:@TE:@T $data = null): void {
+    ?TE:@T $data = null): void {
     $name = static:@E::name($entry);
     static::$data[$name] = $data;
   }

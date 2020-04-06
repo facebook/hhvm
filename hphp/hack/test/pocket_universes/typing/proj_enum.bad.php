@@ -6,7 +6,7 @@ class C {
     case T data;
   }
 
-  public function g<TP as this:@Param>(TP $in): this:@Param:@TP:@T {
+  public function g<TP as this:@Param>(TP $in): TP:@T {
     return static:@Param2::data($in);
   }
 }

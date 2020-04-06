@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab8ae0f3afbf71280423d42cdbff779d>>
+// @generated SignedSource<<2f3ae5cc8f830d5c5f532f312ce1872d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -465,12 +465,9 @@ pub enum Ty_ {
     /// - second parameter is the name of the Pocket Universe Enumeration
     Tpu(Ty, nast::Sid),
     /// Typing of Pocket Universes type projections
-    /// - first parameter is the enclosing class
-    /// - second parameter is the name of the Pocket Universe Enumeration
-    /// - third parameter is the Tgeneric in place of the
-    ///   member name
-    /// - the fourth parameter is the name of the type to project
-    TpuTypeAccess(Ty, nast::Sid, nast::Sid, nast::Sid),
+    /// - first parameter is the Tgeneric in place of the member name
+    /// - second parameter is the name of the type to project
+    TpuTypeAccess(nast::Sid, nast::Sid),
 }
 
 #[derive(

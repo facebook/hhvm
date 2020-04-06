@@ -618,4 +618,5 @@ BadFunctionPointerConstruction = 4363
 NotARecord = 4364
 TraitReuseInsideClass = 4365
 RedundantGeneric = 4366
+PocketUniversesInvalidUpperBounds = 4367
   |}]

@@ -72,6 +72,11 @@ class type ['env] type_mapper_type =
       locl_phase shape_field_type Nast.ShapeMap.t ->
       'env * locl_ty
 
+    method on_tpu : 'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
+
+    method on_tpu_type_access :
+      'env -> Reason.t -> Aast.sid -> Aast.sid -> 'env * locl_ty
+
     method on_type : 'env -> locl_ty -> 'env * locl_ty
 
     method on_locl_ty_list : 'env -> locl_ty list -> 'env * locl_ty list
@@ -126,6 +131,13 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
     method on_tshape env r shape_kind fdm =
       (env, mk (r, Tshape (shape_kind, fdm)))
 
+    method on_tpu env r cls enum =
+      let (env, cls) = this#on_type env cls in
+      (env, mk (r, Tpu (cls, enum)))
+
+    method on_tpu_type_access env r member tyname =
+      (env, mk (r, Tpu_type_access (member, tyname)))
+
     method on_type env ty =
       let (r, ty) = deref ty in
       match ty with
@@ -151,12 +163,9 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
       | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
-      | Tpu (base, enum) ->
-        let (env, base) = this#on_type env base in
-        (env, mk (r, Tpu (base, enum)))
-      | Tpu_type_access (base, enum, member, tyname) ->
-        let (env, base) = this#on_type env base in
-        (env, mk (r, Tpu_type_access (base, enum, member, tyname)))
+      | Tpu (base, enum) -> this#on_tpu env r base enum
+      | Tpu_type_access (member, tyname) ->
+        this#on_tpu_type_access env r member tyname
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end

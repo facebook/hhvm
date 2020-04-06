@@ -313,26 +313,37 @@ let rec localize ~ety_env env (dty : decl_ty) =
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, mk (r, Tshape (shape_kind, tym)))
   | (r, Tpu_access _) ->
-    (* We explicitly forbid the syntax C:@E:X in here, since it brings
-       more complexity to the type checker and do not allow anything
+    (* We explicitly forbid any syntax other than Foo:@Bar in here, since it
+       brings more complexity to the type checker and do not allow anything
        interesting at the moment. If one need a variable ranging over PU
-       member, one should use "C:@E" instead *)
+       member, one should use "C:@E" instead, and for a type parameter TP
+       bound by a PU, projecting its type T must be TP:@T *)
     let rec build_access dty =
       match get_node dty with
-      | Tpu_access (base, sid, pu_loc) ->
+      | Tpu_access (base, sid, _) ->
         let (base, trailing) = build_access base in
-        (base, (sid, pu_loc) :: trailing)
+        (base, sid :: trailing)
       | _ -> (dty, [])
     in
-    let (base, trailing) = build_access dty in
-    let (env, base) = localize ~ety_env env base in
+    let (dbase, trailing) = build_access dty in
+    let (env, base) = localize ~ety_env env dbase in
     (match trailing with
-    | [(enum, _)] -> (env, mk (r, Tpu (base, enum)))
-    | [(ty, _); member; (enum, _)] ->
-      (* Try to expand the dependent type *)
-      TUtils.expand_pocket_universes env ~ety_env r base enum member ty
+    | [enum_or_tyname] ->
+      (match deref base with
+      | (r, Tgeneric tp) ->
+        let member = (Reason.to_pos r, tp) in
+        (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
+      | (r, Tvar v) ->
+        Typing_subtype_pocket_universes.get_tyvar_pu_access
+          env
+          r
+          v
+          enum_or_tyname
+      | _ -> (env, mk (r, Tpu (base, enum_or_tyname))))
     (* Invalid number of :@, report an error *)
     | _ ->
+      (* TODO(T64285771):
+         change the parser to only access Foo:@Bar and get rid of that *)
       Errors.pu_localize_unknown
         (Reason.to_pos r)
         (Typing_print.full_decl (Typing_env.get_ctx env) dty);

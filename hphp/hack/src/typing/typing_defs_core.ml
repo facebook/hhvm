@@ -302,13 +302,10 @@ and _ ty_ =
        * - first parameter is the enclosing class
        * - second parameter is the name of the Pocket Universe Enumeration
        *)
-  | Tpu_type_access : locl_ty * Nast.sid * Nast.sid * Nast.sid -> locl_phase ty_
+  | Tpu_type_access : Nast.sid * Nast.sid -> locl_phase ty_
       (** Typing of Pocket Universes type projections
-       * - first parameter is the enclosing class
-       * - second parameter is the name of the Pocket Universe Enumeration
-       * - third parameter is the Tgeneric in place of the
-       *   member name
-       * - the fourth parameter is the name of the type to project
+       * - first parameter is the Tgeneric in place of the member name
+       * - second parameter is the name of the type to project
        *)
 
 and constraint_type_ =

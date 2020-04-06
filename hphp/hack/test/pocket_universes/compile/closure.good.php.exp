@@ -3,9 +3,8 @@
 .filepath "closure.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:2:{s:8:\"nullable\";b:1;s:4:\"kind\";i:9;}""";
-.adata A_1 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_2 = """v:0:{}""";
+.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """v:0:{}""";
 
 .main (1,1) {
   .srcloc 4:7,4:7;
@@ -15,43 +14,38 @@
 }
 
 .class C (4,14) {
-  .method [public static] (10,13) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field, <"HH\\mixed" N > $data) {
+  .method [public static] (10,13) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
     .declvars $_;
-    .srcloc 10:17,13:135;
+    .srcloc 10:17,13:122;
     VerifyParamType $field
-    .srcloc 12:12,12:16;
-    CGetL $data
-    SetL _3
-    Array @A_0
-    SetL _4
-    IsTypeStructC Resolve
-    JmpNZ L0
-    PushL _3
-    PushL _4
-    ThrowAsTypeStructException
-  L0:
-    PushL _3
-    UnsetL _4
-    .srcloc 12:7,12:39;
+    .srcloc 12:10,12:41;
+    NullUninit
+    NullUninit
+    NullUninit
+    .srcloc 12:35,12:40;
+    CGetL $field
+    .srcloc 12:10,12:41;
+    FCallClsMethodSD <> 1 1 "0" - "" "" Static "Entry##generator"
+    .srcloc 12:5,12:41;
     SetL $_
-    .srcloc 12:7,12:40;
+    .srcloc 12:5,12:42;
     PopC
-    .srcloc 13:6,13:6;
+    .srcloc 13:4,13:4;
     Null
     RetC
   }
-  .method [public static] (5,5) <"HH\\vec<HH\\string>" "HH\\vec" extended_hint> E##Members() {
+  .method [public static] (5,5) <"HH\\vec<HH\\string>" "HH\\vec" extended_hint> Entry##Members() {
     .declvars $mems;
-    .srcloc 5:8,5:8;
-    Vec @A_2
-    .srcloc 5:8,5:8;
+    .srcloc 5:8,5:12;
+    Vec @A_1
+    .srcloc 5:8,5:12;
     SetL $mems
-    .srcloc 5:8,5:8;
+    .srcloc 5:8,5:12;
     PopC
-    .srcloc 5:8,5:8;
+    .srcloc 5:8,5:12;
     CGetL $mems
-    .srcloc 5:8,5:8;
-    Array @A_1
+    .srcloc 5:8,5:12;
+    Array @A_0
     VerifyRetTypeTS
     RetC
   }

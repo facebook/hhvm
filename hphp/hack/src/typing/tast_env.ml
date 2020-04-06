@@ -281,5 +281,5 @@ let condition_type_matches = Typing_reactivity.condition_type_matches
  * to make sure the code is present.
  *)
 let _ =
-  let _ = Typing_pocket_universes.expand_dep_ty in
+  let _ = Typing_pocket_universes.expand_pocket_universes in
   ()

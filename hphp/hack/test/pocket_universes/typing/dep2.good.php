@@ -6,7 +6,7 @@ class PU {
     :@S (type T = string);
   }
 
-  public static function dump<TF as this:@E>(TF $x, this:@E:@TF:@T $v): void {
+  public static function dump<TF as this:@E>(TF $x, TF:@T $v): void {
     var_dump($v);
   }
 

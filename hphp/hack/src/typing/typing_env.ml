@@ -283,9 +283,9 @@ let get_tyvar_pu_access env var =
 let get_tyvar_pu_accesses env var =
   wrap_inference_env_call_res env (fun env -> Inf.get_tyvar_pu_accesses env var)
 
-let set_tyvar_pu_access env var base enum new_var name =
+let set_tyvar_pu_access env var name new_var =
   wrap_inference_env_call_env env (fun env ->
-      Inf.set_tyvar_pu_access env var base enum new_var name)
+      Inf.set_tyvar_pu_access env var name new_var)
 
 let get_current_tyvars env =
   wrap_inference_env_call_res env Inf.get_current_tyvars
@@ -1354,8 +1354,7 @@ and get_tyvars_i env (ty : internal_type) =
           (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
       end
     | Tpu (base, _) -> get_tyvars env base
-    | Tpu_type_access (base, _, _, _) ->
-      get_tyvars_union (env, ISet.empty, ISet.empty) base)
+    | Tpu_type_access (_, _) -> (env, ISet.empty, ISet.empty))
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Tdestructure { d_required; d_optional; d_variadic; d_kind = _ }) ->

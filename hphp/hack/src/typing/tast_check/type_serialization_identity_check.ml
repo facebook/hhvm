@@ -78,8 +78,7 @@ let rec strip_ty ty =
       let shape_fields = Nast.ShapeMap.map strip_field shape_fields in
       Tshape (shape_kind, shape_fields)
     | Tpu (base, enum) -> Tpu (strip_ty base, enum)
-    | Tpu_type_access (base, enum, member, tyname) ->
-      Tpu_type_access (strip_ty base, enum, member, tyname)
+    | Tpu_type_access (_, _) -> ty
   in
   mk (reason, ty)
 

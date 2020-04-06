@@ -27,6 +27,7 @@ and is_reified = bool
  * that a string is a bound type parameter during typing, we thread this
  * information from parsing/naming to typing using this type.
  *)
+(* TODO: will be removed in the next diff *)
 and pu_loc =
   | Unknown
   | TypeParameter

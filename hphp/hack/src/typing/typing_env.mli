@@ -340,16 +340,13 @@ val get_tyvar_eager_solve_fail : env -> Ident.t -> bool
 
 val get_tyvar_type_const : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 
-val get_tyvar_pu_access :
-  env -> int -> Aast.sid -> (locl_ty * Aast.sid * locl_ty * Aast.sid) option
+val get_tyvar_pu_access : env -> int -> Aast.sid -> (Aast.sid * locl_ty) option
 
-val get_tyvar_pu_accesses :
-  env -> int -> (locl_ty * Aast.sid * locl_ty * Aast.sid) SMap.t
+val get_tyvar_pu_accesses : env -> int -> (Aast.sid * locl_ty) SMap.t
 
 val set_tyvar_type_const : env -> int -> Aast.sid -> locl_ty -> env
 
-val set_tyvar_pu_access :
-  env -> int -> locl_ty -> Aast.sid -> locl_ty -> Aast.sid -> env
+val set_tyvar_pu_access : env -> int -> Aast.sid -> locl_ty -> env
 
 val get_tyvar_type_consts : env -> int -> (Aast.sid * locl_ty) SMap.t
 

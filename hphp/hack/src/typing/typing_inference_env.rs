@@ -28,7 +28,7 @@ pub struct TyvarConstraints<'a> {
     /// This allows to properly check constraints on "T1::T".
     pub type_constants: SMap<'a, (&'a aast::Sid, Ty<'a>)>,
     /// Map associating PU information to each instance of
-    /// C:@E:@#v:@T
+    /// #v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.

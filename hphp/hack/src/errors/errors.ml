@@ -1649,16 +1649,13 @@ let pu_atom_unknown pos name kind loc unk =
        kind
        unk)
 
-let pu_localize pos pu member =
+let pu_localize pos pu dep_ty =
   let pu = strip_ns pu in
-  let member = strip_ns member in
+  let dep_ty = strip_ns dep_ty in
   add
     (Naming.err_code Naming.PocketUniversesLocalization)
     pos
-    (sprintf
-       "In %s, member %s is neither an atom nor a generic type parameter"
-       pu
-       member)
+    (sprintf "In the context of %s, cannot expand %s" pu dep_ty)
 
 let pu_localize_unknown pos msg =
   let msg = strip_ns msg in
@@ -4102,6 +4099,12 @@ let pu_typing_not_supported pos =
     (Typing.err_code Typing.PocketUniversesTyping)
     pos
     "Unsupported Pocket Universes member."
+
+let pu_typing_invalid_upper_bounds pos =
+  let msg =
+    "There isn't enough information to infer what pocket universe this atom is from"
+  in
+  add (Typing.err_code Typing.PocketUniversesInvalidUpperBounds) pos msg
 
 let php_lambda_disallowed pos =
   add

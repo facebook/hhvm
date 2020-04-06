@@ -54,14 +54,6 @@ impl<'a> Env<'a> {
     }
 }
 
-#[macro_export]
-macro_rules! avec {
-    (in $env:expr; $elem:expr; $n:expr) => (bumpalo::vec![in $env.bld().alloc; $elem; $n]);
-    (in $env:expr) => (bumpalo::vec![in $env.bld().alloc]);
-    (in $env:expr; $($x:expr),*) => (bumpalo::vec![in $env.bld().alloc; $($x),*]);
-    (in $env:expr; $($x:expr,)*) => (bumpalo::vec![in $env.bld().alloc; $($x),*]);
-}
-
 pub struct Genv<'a> {
     pub tcopt: typechecker_options::TypecheckerOptions,
     pub return_info: typing_env_return_info::TypingEnvReturnInfo<'a>,

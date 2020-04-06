@@ -342,3 +342,23 @@ impl<'a> TypeBuilder<'a> {
         })
     }
 }
+
+#[macro_export]
+macro_rules! avec {
+    (in $bld:expr; $elem:expr; $n:expr) => (bumpalo::vec![in $bld.alloc; $elem; $n]);
+    (in $bld:expr) => (bumpalo::vec![in $bld.alloc]);
+    (in $bld:expr; $($x:expr),*) => (bumpalo::vec![in $bld.alloc; $($x),*]);
+    (in $bld:expr; $($x:expr,)*) => (bumpalo::vec![in $bld.alloc; $($x),*]);
+}
+
+#[macro_export]
+macro_rules! aset {
+  ( ) => ({ Set::empty() });
+  ( in $bld:expr; $($x:expr),* ) => ({
+      let mut temp_map = Set::empty();
+      $(
+          temp_map = temp_map.add($bld.alloc, $x);
+      )*
+      temp_map
+  });
+}

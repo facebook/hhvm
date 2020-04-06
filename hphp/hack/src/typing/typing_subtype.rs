@@ -11,7 +11,7 @@ use itertools::*;
 use oxidized::ast;
 use oxidized::ident::Ident;
 use typing_collections_rust::SMap;
-use typing_defs_rust::Ty;
+use typing_defs_rust::{avec, Ty};
 
 fn simplify_subtype_i<'a>(
     env: &mut Env<'a>,
@@ -200,7 +200,7 @@ pub fn sub_type_i<'a>(env: &mut Env<'a>, ty_sub: InternalType<'a>, ty_super: Int
 }
 
 fn prop_to_env<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> {
-    let mut props_acc = avec![in env];
+    let mut props_acc = avec![in env.bld()];
     prop_to_env_(env, prop, &mut props_acc);
     // TODO(hrust) proper conjunction
     env.bld().conj(props_acc)

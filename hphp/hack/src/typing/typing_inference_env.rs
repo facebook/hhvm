@@ -8,12 +8,13 @@ use oxidized::aast;
 use oxidized::ident::Ident;
 use oxidized::pos::Pos;
 
-use typing_collections_rust::{IMap, ISet, SMap};
+use typing_collections_rust::*;
 use typing_defs_rust::typing_make_type::TypeBuilder;
-use typing_defs_rust::{ITySet, PReason, Ty, Ty_};
+use typing_defs_rust::*;
 
 #[derive(Clone)]
-pub struct TyvarConstraints<'a> {
+pub struct TyvarConstraints_<'a> {
+    pub bld: &'a TypeBuilder<'a>,
     /// Does this type variable appear covariantly in the type of the expression?
     pub appears_covariantly: bool,
     /// Does this type variable appear contravariantly in the type of the expression?
@@ -35,18 +36,41 @@ pub struct TyvarConstraints<'a> {
     pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
 }
 
-impl<'a> TyvarConstraints<'a> {
-    fn new() -> TyvarConstraints<'a> {
-        TyvarConstraints {
+impl<'a> TyvarConstraints_<'a> {
+    fn new(bld: &'a TypeBuilder<'a>) -> &'a Self {
+        bld.alloc(TyvarConstraints_ {
+            bld,
             appears_covariantly: false,
             appears_contravariantly: false,
             lower_bounds: ITySet::empty(),
             upper_bounds: ITySet::empty(),
             type_constants: SMap::empty(),
             pu_accesses: SMap::empty(),
-        }
+        })
+    }
+
+    fn set_lower_bounds(&'a self, lower_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
+        let mut cstr = self.clone();
+        cstr.lower_bounds = lower_bounds;
+        self.bld.alloc(cstr)
+    }
+
+    fn add_lower_bound(&'a self, ty: InternalType<'a>) -> &'a Self {
+        self.set_lower_bounds(self.lower_bounds.add(self.bld, ty))
+    }
+
+    fn set_upper_bounds(&'a self, upper_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
+        let mut cstr = self.clone();
+        cstr.upper_bounds = upper_bounds;
+        self.bld.alloc(cstr)
+    }
+
+    fn add_upper_bound(&'a self, ty: InternalType<'a>) -> &'a Self {
+        self.set_upper_bounds(self.upper_bounds.add(self.bld, ty))
     }
 }
+
+type TyvarConstraints<'a> = &'a TyvarConstraints_<'a>;
 
 #[derive(Clone)]
 pub enum SolvingInfo<'a> {
@@ -58,6 +82,7 @@ pub enum SolvingInfo<'a> {
 
 #[derive(Clone)]
 pub struct TyvarInfo_<'a> {
+    pub bld: &'a TypeBuilder<'a>,
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
     pub tyvar_pos: Option<&'a Pos>,
@@ -66,11 +91,18 @@ pub struct TyvarInfo_<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
+impl<'a> TyvarInfo_<'a> {
+    fn set_solving_info(&'a self, solving_info: SolvingInfo<'a>) -> &'a Self {
+        let mut tvinfo = self.clone();
+        tvinfo.solving_info = solving_info;
+        self.bld.alloc(tvinfo)
+    }
+}
+
 pub type TyvarInfo<'a> = &'a TyvarInfo_<'a>;
 
 pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
 
-#[derive(Clone)]
 pub struct InferenceEnv<'a> {
     pub bld: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
@@ -108,9 +140,8 @@ impl<'a> InferenceEnv<'a> {
     }
 
     fn expand_var(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
-        let ty = self.get_type(r, v);
+        self.get_type(r, v)
         // TODO(hrust) port eager_solve_fail logic
-        ty
     }
 
     fn get_type(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
@@ -137,18 +168,14 @@ impl<'a> InferenceEnv<'a> {
                                 continue;
                             }
                             _ => {
-                                for alias in aliases.into_iter() {
-                                    self.add(*alias, *ty);
-                                }
+                                aliases.into_iter().for_each(|alias| self.add(*alias, *ty));
                                 return Some(*ty);
                             }
                         }
                     }
                     SolvingInfo::Constraints(_) => {
                         let ty = self.bld.tyvar(r, v);
-                        for alias in aliases.into_iter() {
-                            self.add(*alias, ty);
-                        }
+                        aliases.into_iter().for_each(|alias| self.add(*alias, ty));
                         return Some(ty);
                     }
                 },
@@ -156,20 +183,19 @@ impl<'a> InferenceEnv<'a> {
         }
     }
 
-    fn add(&mut self, v: Ident, ty: Ty<'a>) -> () {
-        self.bind(v, ty);
+    fn add(&mut self, v: Ident, ty: Ty<'a>) {
+        self.bind(v, ty)
         // TODO(hrust) update tyvar occurrences
     }
 
-    fn bind(&mut self, v: Ident, ty: Ty<'a>) -> () {
+    fn bind(&mut self, v: Ident, ty: Ty<'a>) {
         /* TODO(hrust): the following indexing might panic,
         as somehow sometimes we're missing variables in the environment,
         The OCaml error, would create an empty tyvar_info in this case
         to avoid throwing. */
-
         let mut tvinfo = self.tvenv.find(&v).unwrap().clone();
         tvinfo.solving_info = SolvingInfo::Type(ty);
-        self.tvenv = self.tvenv.add(self.bld, v, self.bld.alloc(tvinfo));
+        self.tvenv = self.tvenv.add(self.bld, v, self.bld.alloc(tvinfo))
     }
 
     pub fn fresh_type_reason(&mut self, r: PReason<'a>) -> Ty<'a> {
@@ -178,20 +204,81 @@ impl<'a> InferenceEnv<'a> {
         self.bld.tyvar(r, v)
     }
 
-    fn add_current_tyvar(&mut self, pos: Option<&'a Pos>, v: Ident) -> () {
-        self.fresh_unsolved_tyvar(v, pos);
+    fn add_current_tyvar(&mut self, pos: Option<&'a Pos>, v: Ident) {
+        self.fresh_unsolved_tyvar(v, pos)
         // TODO(hrust) update tyvar stack
     }
 
-    fn fresh_unsolved_tyvar(&mut self, v: Ident, tyvar_pos: Option<&'a Pos>) -> () {
+    fn fresh_unsolved_tyvar(&mut self, v: Ident, tyvar_pos: Option<&'a Pos>) {
         // TODO(hrust) variance
-        let solving_info = SolvingInfo::Constraints(TyvarConstraints::new());
+        let solving_info = SolvingInfo::Constraints(TyvarConstraints_::new(self.bld));
         let tyvar_info = self.bld.alloc(TyvarInfo_ {
+            bld: self.bld,
             tyvar_pos,
             global_reason: None,
             eager_solve_failed: false,
             solving_info,
         });
         self.tvenv = self.tvenv.add(self.bld, v, tyvar_info)
+    }
+
+    pub fn get_upper_bounds(&self, v: Ident) -> Set<'a, InternalType<'a>> {
+        match self.tvenv.find(&v) {
+            None => aset![],
+            Some(tvinfo) => match &tvinfo.solving_info {
+                SolvingInfo::Type(ty) => aset![in self.bld; self.bld.loclty(*ty)],
+                SolvingInfo::Constraints(cstr) => cstr.upper_bounds,
+            },
+        }
+    }
+
+    pub fn get_lower_bounds(&self, v: Ident) -> Set<'a, InternalType<'a>> {
+        match self.tvenv.find(&v) {
+            None => aset![],
+            Some(tvinfo) => match &tvinfo.solving_info {
+                SolvingInfo::Type(ty) => aset![in self.bld; self.bld.loclty(*ty)],
+                SolvingInfo::Constraints(cstr) => cstr.lower_bounds,
+            },
+        }
+    }
+
+    pub fn add_upper_bound(&mut self, v: Ident, ty: InternalType<'a>) {
+        match self.tvenv.find(&v) {
+            None => Self::missing_tyvar(v),
+            Some(tvinfo) => match tvinfo.solving_info {
+                SolvingInfo::Type(_ty) => {
+                    panic!("Can't add bound to already solved type var {}", v)
+                }
+                SolvingInfo::Constraints(cstr) => {
+                    self.tvenv = self.tvenv.add(
+                        self.bld,
+                        v,
+                        tvinfo.set_solving_info(SolvingInfo::Constraints(cstr.add_upper_bound(ty))),
+                    )
+                }
+            },
+        }
+    }
+
+    pub fn add_lower_bound(&mut self, v: Ident, ty: InternalType<'a>) {
+        match self.tvenv.find(&v) {
+            None => Self::missing_tyvar(v),
+            Some(tvinfo) => match tvinfo.solving_info {
+                SolvingInfo::Type(_ty) => {
+                    panic!("Can't add bound to already solved type var {}", v)
+                }
+                SolvingInfo::Constraints(cstr) => {
+                    self.tvenv = self.tvenv.add(
+                        self.bld,
+                        v,
+                        tvinfo.set_solving_info(SolvingInfo::Constraints(cstr.add_lower_bound(ty))),
+                    )
+                }
+            },
+        }
+    }
+
+    fn missing_tyvar(v: Ident) -> ! {
+        panic!("Type var {} is missing from the environment.", v)
     }
 }

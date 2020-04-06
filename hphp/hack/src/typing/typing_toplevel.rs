@@ -18,7 +18,6 @@ mod typing;
 mod typing_env;
 mod typing_env_from_def;
 mod typing_env_return_info;
-#[macro_use]
 mod typing_env_types;
 mod typing_phase;
 pub mod typing_print;

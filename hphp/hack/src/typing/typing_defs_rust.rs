@@ -7,6 +7,7 @@ pub mod tast;
 pub mod typing_defs;
 pub mod typing_defs_core;
 pub mod typing_logic;
+#[macro_use]
 pub mod typing_make_type;
 pub mod typing_reason;
 

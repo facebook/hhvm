@@ -3,7 +3,7 @@
 .filepath "closure.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:1:{s:8:\"nullable\";b:1;}""";
+.adata A_0 = """Y:2:{s:8:\"nullable\";b:1;s:4:\"kind\";i:9;}""";
 .adata A_1 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_2 = """v:0:{}""";
 

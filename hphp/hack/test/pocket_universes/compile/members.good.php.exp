@@ -3,7 +3,7 @@
 .filepath "members.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:0:{}}}""";
+.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:9;}}}""";
 .adata A_1 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
 .adata A_2 = """v:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
 
@@ -14,7 +14,7 @@
   RetC
 }
 
-.function (13,18) <"HH\\void" N > foo(<"HH\\vec<(C:@E)>" "HH\\vec" > $v) {
+.function (13,18) <"HH\\void" N > foo(<"HH\\vec<HH\\mixed>" "HH\\vec" > $v) {
   .numiters 1;
   .declvars $x;
   .srcloc 13:1,18:103;

@@ -233,7 +233,7 @@ let gen_pu_accessors (class_name : string) (extends : bool) (field : T.pu_enum)
 *)
 class ['self] erase_body_visitor =
   object (_self : 'self)
-    inherit [_] endo
+    inherit [_] endo as super
 
     method on_'fb _env fb = fb
 
@@ -249,11 +249,11 @@ class ['self] erase_body_visitor =
       let fun_name = (pos, gen_fun_name field name) in
       Class_const (qual, fun_name)
 
-    method! on_hint_ _ h =
+    method! on_hint env (p, h) =
       match h with
-      | Hpu_access _ -> Hmixed
-      | Hprim (Tatom _) -> Hprim Tstring
-      | _ -> h
+      | Hpu_access _ -> simple_typ p "\\HH\\mixed"
+      | Hprim (Tatom _) -> (p, Hprim Tstring)
+      | _ -> super#on_hint env (p, h)
   end
 
 (* Wrapper around the AST visitor *)

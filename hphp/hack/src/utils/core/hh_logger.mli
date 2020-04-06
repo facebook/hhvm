@@ -52,27 +52,55 @@ module Level : sig
   (** overwrites min level for stderr, but leaves file (if enabled) as is *)
   val set_min_level_stderr : t -> unit
 
+  (** overwrites the set of categories that be checked for log level before
+      being output; when logs are logged with no category, then only the log
+      level is used to decide whether the log entry should be output;
+      if a category is specified when logging, then this list of categories
+      will be checked in addition to the log level *)
+  val set_categories : string list -> unit
+
   (** returns true if t passes either stderr or file min level (regardless whether file is enabled) *)
   val passes_min_level : t -> bool
 
-  val log_duration : t -> string -> float -> float
+  (** logs the message and how long the presumed operation took, assuming that
+      the float argument is the start time and that the end time is now *)
+  val log_duration : t -> ?category:string -> string -> float -> float
 end
 
-val log : ?lvl:Level.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+val log :
+  ?lvl:Level.t ->
+  ?category:string ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a
 
-val log_duration : ?lvl:Level.t -> string -> float -> float
+val log_duration : ?lvl:Level.t -> ?category:string -> string -> float -> float
 
 val fatal :
-  ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+  ?category:string ->
+  ?exn:Exception.t ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a
 
 val error :
-  ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+  ?category:string ->
+  ?exn:Exception.t ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a
 
 val warn :
-  ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+  ?category:string ->
+  ?exn:Exception.t ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a
 
 val info :
-  ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+  ?category:string ->
+  ?exn:Exception.t ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a
 
 val debug :
-  ?exn:Exception.t -> ('a, unit, string, string, string, unit) format6 -> 'a
+  ?category:string ->
+  ?exn:Exception.t ->
+  ('a, unit, string, string, string, unit) format6 ->
+  'a

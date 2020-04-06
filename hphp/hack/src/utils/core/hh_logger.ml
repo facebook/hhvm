@@ -38,12 +38,17 @@ let id_string () =
   | None -> ""
   | Some id -> Printf.sprintf "[%s] " id
 
+let category_string category =
+  match category with
+  | None -> ""
+  | Some category -> Printf.sprintf "[%s] " category
+
 type passes = {
   passes_file: bool;
   passes_stderr: bool;
 }
 
-let print_with_newline_internal ~passes ?exn fmt =
+let print_with_newline_internal ?category ~passes ?exn fmt =
   let print_raw ?exn s =
     let exn_str =
       Option.value_map exn ~default:"" ~f:(fun exn ->
@@ -65,14 +70,22 @@ let print_with_newline_internal ~passes ?exn fmt =
     in
     let time = timestamp_string () in
     let id_str = id_string () in
+    let category_str = category_string category in
     begin
       match (!dupe_log, passes.passes_file) with
       | (Some dupe_log_oc, true) ->
-        Printf.fprintf dupe_log_oc "%s %s%s%s\n%!" time id_str s exn_str
+        Printf.fprintf
+          dupe_log_oc
+          "%s %s%s%s%s\n%!"
+          time
+          id_str
+          category_str
+          s
+          exn_str
       | (_, _) -> ()
     end;
     if passes.passes_stderr then
-      Printf.eprintf "%s %s%s%s\n%!" time id_str s exn_str
+      Printf.eprintf "%s %s%s%s%s\n%!" time id_str category_str s exn_str
   in
   Printf.ksprintf (print_raw ?exn) fmt
 
@@ -119,13 +132,16 @@ module Level : sig
 
   val passes_min_level : t -> bool
 
+  val set_categories : string list -> unit
+
   val log :
     t ->
+    ?category:string ->
     ?exn:Exception.t ->
     ('a, unit, string, string, string, unit) format6 ->
     'a
 
-  val log_duration : t -> string -> float -> float
+  val log_duration : t -> ?category:string -> string -> float -> float
 end = struct
   type t =
     | Off [@value 6]
@@ -157,6 +173,8 @@ end = struct
 
   let min_level_stderr_ref = ref Info
 
+  let categories_ref = ref SSet.empty
+
   let set_min_level_file level = min_level_file_ref := level
 
   let set_min_level_stderr level = min_level_stderr_ref := level
@@ -170,44 +188,55 @@ end = struct
 
   let min_level_stderr () = !min_level_stderr_ref
 
-  let passes level =
-    let ilevel = to_enum level in
-    let passes_file = ilevel >= to_enum !min_level_file_ref in
-    let passes_stderr = ilevel >= to_enum !min_level_stderr_ref in
-    if passes_file || passes_stderr then
-      Some { passes_file; passes_stderr }
-    else
+  let set_categories categories = categories_ref := SSet.of_list categories
+
+  let passes level ~category =
+    let passes_category =
+      match category with
+      | None -> true
+      | Some category -> SSet.mem category !categories_ref
+    in
+    if not passes_category then
       None
+    else
+      let ilevel = to_enum level in
+      let passes_file = ilevel >= to_enum !min_level_file_ref in
+      let passes_stderr = ilevel >= to_enum !min_level_stderr_ref in
+      if passes_file || passes_stderr then
+        Some { passes_file; passes_stderr }
+      else
+        None
 
-  let passes_min_level level = passes level |> Option.is_some
+  let passes_min_level level = passes level ~category:None |> Option.is_some
 
-  let log level ?exn fmt =
-    match passes level with
-    | Some passes -> print_with_newline_internal ~passes ?exn fmt
+  let log level ?category ?exn fmt =
+    match passes level category with
+    | Some passes -> print_with_newline_internal ?category ~passes ?exn fmt
     | None -> Printf.ifprintf () fmt
 
-  let log_duration level name t =
+  let log_duration level ?category name t =
     let t2 = Unix.gettimeofday () in
     begin
-      match passes level with
+      match passes level category with
       | Some passes ->
-        print_with_newline_internal ~passes "%s: %f" name (t2 -. t)
+        print_with_newline_internal ?category ~passes "%s: %f" name (t2 -. t)
       | None -> ()
     end;
     t2
 end
 
 (* Default log instructions to INFO level *)
-let log ?(lvl = Level.Info) fmt = Level.log lvl fmt
+let log ?(lvl = Level.Info) ?category fmt = Level.log lvl ?category fmt
 
-let log_duration ?(lvl = Level.Info) fmt t = Level.log_duration lvl fmt t
+let log_duration ?(lvl = Level.Info) ?category fmt t =
+  Level.log_duration lvl ?category fmt t
 
-let fatal ?exn fmt = Level.log Level.Fatal ?exn fmt
+let fatal ?category ?exn fmt = Level.log Level.Fatal ?category ?exn fmt
 
-let error ?exn fmt = Level.log Level.Error ?exn fmt
+let error ?category ?exn fmt = Level.log Level.Error ?category ?exn fmt
 
-let warn ?exn fmt = Level.log Level.Warn ?exn fmt
+let warn ?category ?exn fmt = Level.log Level.Warn ?category ?exn fmt
 
-let info ?exn fmt = Level.log Level.Info ?exn fmt
+let info ?category ?exn fmt = Level.log Level.Info ?category ?exn fmt
 
-let debug ?exn fmt = Level.log Level.Debug ?exn fmt
+let debug ?category ?exn fmt = Level.log Level.Debug ?category ?exn fmt

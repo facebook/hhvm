@@ -210,6 +210,7 @@ struct Repo : RepoProxy {
                         RepoTxn& txn); // nothrow
   void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
 
+  static bool s_deleteLocalOnFailure;
   // All database table names use the schema ID (sha1 checksum based on the
   // source code) as a suffix.  For example, if the schema ID is
   // "b02c58478ce89719782fea89f3009295faceb00c", the file magic is stored in the
@@ -233,7 +234,7 @@ struct Repo : RepoProxy {
   void initCentral();
   RepoStatus openCentral(const char* repoPath, std::string& errorMsg);
   void initLocal();
-  void attachLocal(const char* repoPath, bool isWritable);
+  bool attachLocal(const char* repoPath, bool isWritable);
   void pragmas(int repoId); // throws(RepoExc)
   void getIntPragma(int repoId, const char* name, int& val); // throws(RepoExc)
   void setIntPragma(int repoId, const char* name, int val); // throws(RepoExc)

@@ -430,6 +430,10 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Option::Load(ini, config);
   RuntimeOption::RepoAuthoritative = false;
   RuntimeOption::EvalJit = false;
+  // If RepoLocalMode gets set to rw, we'll read a cache of previously
+  // parsed units, and attempt to update it with any newly parsed
+  // units. If that repo is invalid, we want to delete it up front.
+  Repo::s_deleteLocalOnFailure = RuntimeOption::RepoLocalMode=="rw";
 
   initialize_repo();
 

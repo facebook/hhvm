@@ -48,6 +48,7 @@ const char* Repo::kMagicProduct =
 const char* Repo::kDbs[RepoIdCount] = { "main",   // Central.
                                         "local"}; // Local.
 Repo::GlobalData Repo::s_globalData;
+bool Repo::s_deleteLocalOnFailure;
 
 void initialize_repo() {
   if (!sqlite3_threadsafe()) {
@@ -1058,7 +1059,13 @@ void Repo::initLocal() {
     }
 
     if (!RuntimeOption::RepoLocalPath.empty()) {
-      attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable);
+      if (!attachLocal(RuntimeOption::RepoLocalPath.c_str(), isWritable) &&
+          s_deleteLocalOnFailure) {
+        unlink(RuntimeOption::RepoLocalPath.c_str());
+        s_deleteLocalOnFailure = false;
+        Logger::Warning("Deleting local repo because it was corrupt");
+        attachLocal(RuntimeOption::RepoLocalPath.c_str(), true);
+      }
     } else if (RuntimeOption::RepoAllowFallbackPath) {
       if (!RuntimeOption::ServerExecutionMode()) {
         std::string cliRepo = s_cliFile;
@@ -1073,7 +1080,7 @@ void Repo::initLocal() {
   }
 }
 
-void Repo::attachLocal(const char* path, bool isWritable) {
+bool Repo::attachLocal(const char* path, bool isWritable) {
   std::string repoPath = path;
   replacePlaceholders(repoPath);
   if (!isWritable) {
@@ -1082,29 +1089,31 @@ void Repo::attachLocal(const char* path, bool isWritable) {
     struct stat buf;
     if (!strchr(repoPath.c_str(), ':') &&
         stat(repoPath.c_str(), &buf) != 0) {
-      return;
+      return false;
     }
   }
   try {
+    m_localWritable = isWritable;
     auto attachQuery = folly::sformat(
       "ATTACH DATABASE '{}' as {};", repoPath, dbName(RepoIdLocal));
     exec(attachQuery);
     pragmas(RepoIdLocal);
   } catch (RepoExc& re) {
     // Failed to run pragmas on local DB - ignored
-    return;
+    m_localWritable = false;
+    return false;
   }
 
   std::string error;
   if (initSchema(RepoIdLocal, isWritable, error) == RepoStatus::error) {
     FTRACE(1, "Local repo {} failed to init schema: {}\n", repoPath, error);
-    return;
+    return false;
   }
   m_localRepo = repoPath;
   m_localReadable = true;
-  m_localWritable = isWritable;
   TRACE(1, "Local repo: '%s' (read%s)\n",
            m_localRepo.c_str(), m_localWritable ? "-write" : "-only");
+  return true;
 }
 
 void Repo::pragmas(int repoId) {

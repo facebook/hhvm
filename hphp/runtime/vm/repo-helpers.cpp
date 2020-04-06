@@ -33,9 +33,11 @@ TRACE_SET_MOD(hhbc);
 // Try to look at a SQL statement and figure out which repoId it's targeting.
 static int debugComputeRepoIdFromSQL(Repo& repo, const std::string& stmt) {
   for (int i = 0; i < RepoIdCount; ++i) {
-    auto name = repo.dbName(i);
-    if (stmt.find(folly::format(" {}.", name).str()) != std::string::npos) {
-      return i;
+    auto const name = std::string{" "} + repo.dbName(i);
+    auto const pos = stmt.find(name);
+    if (pos != std::string::npos) {
+      auto const ch = stmt.c_str()[pos + name.size()];
+      if (ch == '.' || ch == ';') return i;
     }
   }
   return 0;
@@ -44,6 +46,7 @@ static int debugComputeRepoIdFromSQL(Repo& repo, const std::string& stmt) {
 
 static void reportDbCorruption(Repo& repo, int repoId,
                                const std::string& where) {
+  if (repoId == RepoIdLocal && Repo::s_deleteLocalOnFailure) return;
 
   std::string report = folly::sformat("{} returned SQLITE_CORRUPT.\n", where);
 

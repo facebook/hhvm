@@ -619,4 +619,5 @@ NotARecord = 4364
 TraitReuseInsideClass = 4365
 RedundantGeneric = 4366
 PocketUniversesInvalidUpperBounds = 4367
+PocketUniversesRefinement = 4368
   |}]

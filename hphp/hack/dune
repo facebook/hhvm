@@ -15,6 +15,20 @@
     src/hh_server.exe
     src/hh_client.exe))
 
+(alias 
+  (name single)
+  (deps 
+    src/hh_single_type_check.exe
+    src/hh_single_compile.exe
+    ))
+
+(alias 
+  (name debug-single)
+  (deps 
+    src/hh_single_type_check.bc
+    src/hh_single_compile.bc
+    ))
+
 (alias
   (name debug)
   (deps

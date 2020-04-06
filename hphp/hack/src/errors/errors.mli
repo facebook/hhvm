@@ -993,6 +993,8 @@ val pu_typing_not_supported : Pos.t -> unit
 
 val pu_typing_invalid_upper_bounds : Pos.t -> unit
 
+val pu_typing_refinement : Pos.t -> unit
+
 val pu_atom_missing : Pos.t -> string -> string -> string -> string -> unit
 
 val pu_atom_unknown : Pos.t -> string -> string -> string -> string -> unit

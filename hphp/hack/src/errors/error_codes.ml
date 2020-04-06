@@ -627,7 +627,8 @@ module Typing = struct
     | NotARecord
     | TraitReuseInsideClass
     | RedundantGeneric
-    | PocketUniversesInvalidUpperBounds (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | PocketUniversesInvalidUpperBounds
+    | PocketUniversesRefinement (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

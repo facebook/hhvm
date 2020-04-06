@@ -4106,6 +4106,12 @@ let pu_typing_invalid_upper_bounds pos =
   in
   add (Typing.err_code Typing.PocketUniversesInvalidUpperBounds) pos msg
 
+let pu_typing_refinement pos =
+  add
+    (Typing.err_code Typing.PocketUniversesRefinement)
+    pos
+    "Pocket Universes are not allowed on the right-hand side of is/as"
+
 let php_lambda_disallowed pos =
   add
     (NastCheck.err_code NastCheck.PhpLambdaDisallowed)

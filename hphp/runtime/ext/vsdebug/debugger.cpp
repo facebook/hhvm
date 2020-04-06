@@ -1724,13 +1724,12 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
   // Warn the user if the breakpoint is going into a unit that has intercepted
   // functions or a memoized function. We can't be certain this breakpoint is
   // reachable in code anymore.
-  request_id_t requestId = getCurrentThreadId();
   BreakpointManager* bpMgr = m_session->getBreakpointManager();
 
   std::string functionName = "";
   const HPHP::Func* function = nullptr;
   if (m_debuggerOptions.notifyOnBpCalibration &&
-      !bpMgr->warningSentForBp(requestId, bpId)) {
+      !bpMgr->warningSentForBp(bpId)) {
 
     compilationUnit->forEachFunc([&](const Func* func) {
       if (functionName == "" &&
@@ -1756,7 +1755,7 @@ bool Debugger::tryResolveBreakpointInUnit(const DebuggerRequestInfo* /*ri*/, int
         // the first time this routine executes, it might not execute again,
         // even if the code is invoked again. Warn the user because this can
         // cause confusion.
-        bpMgr->sendMemoizeWarning(requestId, bpId);
+        bpMgr->sendMemoizeWarning(bpId);
     }
   }
 

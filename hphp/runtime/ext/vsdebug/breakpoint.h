@@ -144,10 +144,7 @@ struct BreakpointManager {
 
   // Returns true if the user was already sent a warning notification
   // about a breakpoint's calibration / resolve location.
-  bool warningSentForBp(
-    request_id_t requestId,
-    int bpId
-  ) const;
+  bool warningSentForBp(int bpId) const;
 
   void onFuncBreakpointResolved(
     Breakpoint& bp,
@@ -188,7 +185,7 @@ struct BreakpointManager {
 
   void onFuncIntercepted(request_id_t requestId, std::string name);
 
-  void sendMemoizeWarning(request_id_t requestId, int bpId);
+  void sendMemoizeWarning(int bpId);
 
   ResolvedLocation bpResolvedInfoForFile(
     const Breakpoint* bp,
@@ -215,7 +212,6 @@ private:
   );
 
   void sendWarningForBp(
-    request_id_t requestId,
     int bpId,
     std::string& warningMessage
   );
@@ -251,9 +247,7 @@ private:
 
   // Breakpoints per-request for which the user has been notified something
   // is odd.
-  std::unordered_map<
-    request_id_t,
-    std::unordered_set<int>> m_userNotifyBps;
+  std::unordered_set<int> m_userNotifyBps;
 
   // Verified breakpoints. A breakpoint is verified if at least one request
   // has resolved it in a compilation unit since it was set. This is a bit odd

@@ -768,15 +768,21 @@ const VariablesCommand::VariableValue VariablesCommand::getVariableValue(
     case KindOfPersistentVec:
     case KindOfVec:
       return VariableValue{format("vec[{}]", variable.toArray().size()).str()};
-    case KindOfPersistentDArray:
-    case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
-    case KindOfArray: {
-      return VariableValue{format("array[{}]", variable.toArray().size()).str()};
+    case KindOfArray:
+    case KindOfPersistentDArray:
+    case KindOfDArray: {
+      auto arr = variable.toArray();
+      if (arr.get()->isVArray()) {
+        return VariableValue{format("varray[{}]", arr.size()).str()};
+      }
+      if (arr.get()->isDArray()) {
+        return VariableValue{format("darray[{}]", arr.size()).str()};
+      }
+      return VariableValue{format("array[{}]", arr.size()).str()};
     }
-
     case KindOfPersistentDict:
     case KindOfDict: {
       return VariableValue{format("dict[{}]", variable.toArray().size()).str()};

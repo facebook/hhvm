@@ -370,7 +370,7 @@ Variant ini_get(String& p) {
 namespace {
 
 template<typename T>
-void add(ArrayInit& arr, const std::string& key, const T& value) {
+void add(DArrayInit& arr, const std::string& key, const T& value) {
   auto keyStr = String(key);
   int64_t n;
   if (keyStr.get()->isStrictlyInteger(n)) {
@@ -383,7 +383,7 @@ void add(ArrayInit& arr, const std::string& key, const T& value) {
 }
 
 Variant ini_get(std::unordered_map<std::string, int>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
+  DArrayInit ret(p.size());
   for (auto& pair : p) {
     add(ret, pair.first, pair.second);
   }
@@ -391,7 +391,7 @@ Variant ini_get(std::unordered_map<std::string, int>& p) {
 }
 
 Variant ini_get(std::map<std::string, std::string>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
+  DArrayInit ret(p.size());
   for (auto& pair : p) {
     add(ret, pair.first, pair.second);
   }
@@ -399,7 +399,7 @@ Variant ini_get(std::map<std::string, std::string>& p) {
 }
 
 Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
+  DArrayInit ret(p.size());
   for (auto& pair : p) {
     add(ret, pair.first, pair.second);
   }
@@ -407,7 +407,7 @@ Variant ini_get(std::map<std::string, std::string, stdltistr>& p) {
 }
 
 Variant ini_get(hphp_string_imap<std::string>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
+  DArrayInit ret(p.size());
   for (auto& pair : p) {
     add(ret, pair.first, pair.second);
   }
@@ -419,38 +419,34 @@ Variant ini_get(Array& p) {
 }
 
 Variant ini_get(std::set<std::string>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
-  auto idx = 0;
+  VArrayInit ret(p.size());
   for (auto& s : p) {
-    ret.add(idx++, s);
+    ret.append(s);
   }
   return ret.toArray();
 }
 
 Variant ini_get(std::set<std::string, stdltistr>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
-  auto idx = 0;
+  VArrayInit ret(p.size());
   for (auto& s : p) {
-    ret.add(idx++, s);
+    ret.append(s);
   }
   return ret.toArray();
 }
 
 Variant ini_get(boost::container::flat_set<std::string>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
-  auto idx = 0;
+  VArrayInit ret(p.size());
   for (auto& s : p) {
-    ret.add(idx++, s);
+    ret.append(s);
   }
   return ret.toArray();
 }
 
 template<typename T>
 Variant ini_get(std::vector<T>& p) {
-  ArrayInit ret(p.size(), ArrayInit::Map{});
-  auto idx = 0;
+  VArrayInit ret(p.size());
   for (auto& s : p) {
-    ret.add(idx++, s);
+    ret.append(s);
   }
   return ret.toArray();
 }
@@ -518,7 +514,7 @@ const IniSettingMap ini_iterate(const IniSettingMap &ini,
 // IniSettingMap
 
 IniSettingMap::IniSettingMap() {
-  m_map = Variant(Array::Create());
+  m_map = Variant(Array::CreateDict());
 }
 
 IniSettingMap::IniSettingMap(Type /*t*/) : IniSettingMap() {}
@@ -555,7 +551,7 @@ void mergeSettings(tv_lval curval, TypedValue v) {
     for (auto i = ArrayIter(v.m_data.parr); !i.end(); i.next()) {
       auto& cur_inner_ref = asArrRef(curval);
       if (!cur_inner_ref.exists(i.first())) {
-        cur_inner_ref.set(i.first(), empty_array());
+        cur_inner_ref.set(i.first(), Array::CreateDict());
       }
       mergeSettings(cur_inner_ref.lval(i.first()), i.secondVal());
     }
@@ -569,7 +565,7 @@ void IniSettingMap::set(const String& key, const Variant& v) {
   assertx(this->isArray());
   auto& mapref = m_map.asArrRef();
   if (!mapref.exists(key)) {
-    mapref.set(key, empty_array());
+    mapref.set(key, Array::CreateDict());
   }
   auto const curval = mapref.lval(key);
   mergeSettings(curval, *v.asTypedValue());
@@ -577,6 +573,36 @@ void IniSettingMap::set(const String& key, const Variant& v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // callbacks for creating arrays out of ini
+
+Array IniSetting::ParserCallback::emptyArrayForMode() const {
+  switch (mode_) {
+    case ParserCallbackMode::DARRAY:
+      return Array::CreateDArray();
+    case ParserCallbackMode::DICT:
+      return Array::CreateDict();
+  }
+  not_reached();
+}
+
+Array& IniSetting::ParserCallback::forceToArrayForMode(Variant& var) const {
+  switch (mode_) {
+    case ParserCallbackMode::DARRAY:
+      return forceToDArray(var);
+    case ParserCallbackMode::DICT:
+      return forceToDict(var);
+  }
+  not_reached();
+}
+
+Array& IniSetting::ParserCallback::forceToArrayForMode(tv_lval var) const {
+  switch (mode_) {
+    case ParserCallbackMode::DARRAY:
+      return forceToDArray(var);
+    case ParserCallbackMode::DICT:
+      return forceToDict(var);
+  }
+  not_reached();
+}
 
 void IniSetting::ParserCallback::onSection(const std::string& /*name*/,
                                            void* /*arg*/) {
@@ -593,7 +619,7 @@ void IniSetting::ParserCallback::onEntry(
   auto arr = static_cast<Variant*>(arg);
   String skey(key);
   Variant sval(value);
-  forceToArray(*arr).set(skey, sval);
+  forceToArrayForMode(*arr).set(skey, sval);
 }
 
 void IniSetting::ParserCallback::onPopEntry(
@@ -602,15 +628,14 @@ void IniSetting::ParserCallback::onPopEntry(
     const std::string &offset,
     void *arg) {
   auto arr = static_cast<Variant*>(arg);
-  forceToArray(*arr);
 
   String skey(key);
-  auto& arr_ref = arr->asArrRef();
+  auto& arr_ref = forceToArrayForMode(*arr);
   if (!arr_ref.exists(skey)) {
-    arr_ref.set(skey, empty_array());
+    arr_ref.set(skey, emptyArrayForMode());
   }
   auto const hash = arr_ref.lval(skey);
-  forceToArray(hash);
+  forceToArrayForMode(hash);
   if (!offset.empty()) {                 // a[b]
     makeArray(hash, offset, value);
   } else {                               // a[]
@@ -633,17 +658,19 @@ void IniSetting::ParserCallback::makeArray(tv_lval val,
     //   hhvm.a[b][c][d]
     // b will be hash and an array already, but c and d might
     // not exist and will need to be made an array
-    auto& arr = forceToArray(val);
-    const auto key = arr.convertKey<IntishCast::Cast>(index);
+    auto& arr = forceToArrayForMode(val);
+    Variant key = index;
+    if (auto const intish = tryIntishCast<IntishCast::Cast>(index.get())) {
+      key = *intish;
+    }
     if (last) {
-      String s{value};
-      arr.set(key, make_tv<KindOfString>(s.get()));
+      arr.set(key, value);
       break;
     }
     // Similar to the above, in the case of a nested array we need to ensure
     // that we create empty arrays on the way down if they don't already exist.
     if (!arr.exists(key)) {
-      arr.set(key, make_array_like_tv(ArrayData::Create()));
+      arr.set(key, emptyArrayForMode());
     }
     val = arr.lval(key);
     p += index.size() + 1;
@@ -697,7 +724,7 @@ void IniSetting::SectionParserCallback::onSection(
     data->arr.asArrRef().set(data->active_name, data->active_section);
     data->active_section.unset();
   }
-  data->active_section = Array::Create();
+  data->active_section = emptyArrayForMode();
   data->active_name = String(name);
 }
 
@@ -776,8 +803,8 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
   Variant ret = false;
   if (process_sections) {
     CallbackData data;
-    SectionParserCallback cb;
-    data.arr = Array::Create();
+    SectionParserCallback cb(ParserCallbackMode::DARRAY);
+    data.arr = Array::CreateDArray();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &data)) {
       if (!data.active_name.isNull()) {
         data.arr.asArrRef().set(data.active_name, data.active_section);
@@ -785,8 +812,8 @@ Variant IniSetting::FromString(const String& ini, const String& filename,
       ret = data.arr;
     }
   } else {
-    ParserCallback cb;
-    Variant arr = Array::Create();
+    ParserCallback cb(ParserCallbackMode::DARRAY);
+    Variant arr = Array::CreateDArray();
     if (zend_parse_ini_string(ini_cpp, filename_cpp, scanner_mode, cb, &arr)) {
       ret = arr;
     }
@@ -799,7 +826,7 @@ IniSettingMap IniSetting::FromStringAsMap(const std::string& ini,
   Lock lock(s_mutex); // ini parser is not thread-safe
   // We are parsing something new, so reset this flag
   s_config_is_a_constant = false;
-  SystemParserCallback cb;
+  SystemParserCallback cb(ParserCallbackMode::DICT);
   Variant parsed;
   zend_parse_ini_string(ini, filename, NormalScanner, cb, &parsed);
   if (parsed.isNull()) {
@@ -1117,7 +1144,7 @@ bool IniSetting::GetMode(const std::string& name, Mode& mode) {
 }
 
 Array IniSetting::GetAll(const String& ext_name, bool details) {
-  Array r = Array::Create();
+  Array r = Array::CreateDArray();
 
   const Extension* ext = nullptr;
   if (!ext_name.empty()) {
@@ -1147,7 +1174,7 @@ Array IniSetting::GetAll(const String& ext_name, bool details) {
       value = value.toString();
     }
     if (details) {
-      Array item = Array::Create();
+      Array item = Array::CreateDArray();
       item.set(s_global_value, value);
       item.set(s_local_value, value);
       if (iter.second.mode == PHP_INI_ALL) {

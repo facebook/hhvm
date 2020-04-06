@@ -172,7 +172,13 @@ public:
     RawScanner,
   };
 
+  enum struct ParserCallbackMode {
+    DARRAY = 0,
+    DICT = 1,
+  };
+
   struct ParserCallback {
+    explicit ParserCallback(ParserCallbackMode mode) : mode_(mode) {}
     virtual ~ParserCallback() {};
     virtual void onSection(const std::string &name, void *arg);
     virtual void onLabel(const std::string &name, void *arg);
@@ -187,6 +193,11 @@ public:
   protected:
     void makeArray(tv_lval hash, const std::string &offset,
                    const std::string &value);
+
+    Array emptyArrayForMode() const;
+    Array& forceToArrayForMode(Variant& var) const;
+    Array& forceToArrayForMode(tv_lval var) const;
+
   private:
     // Substitution copy or symlink via @ or : markers in the config line
     void makeSettingSub(const String &key, const std::string &offset,
@@ -194,8 +205,12 @@ public:
     void traverseToSet(const String &key, const std::string& offset,
                        tv_lval value, Variant& cur_settings,
                        const std::string& stopChar);
+
+    ParserCallbackMode mode_;
   };
   struct SectionParserCallback : ParserCallback {
+    using ParserCallback::ParserCallback;
+
     void onSection(const std::string& name, void* arg) override;
     void onLabel(const std::string& name, void* arg) override;
     void onEntry(const std::string& key, const std::string& value, void* arg)
@@ -210,6 +225,8 @@ public:
     Variant* activeArray(CallbackData* data);
   };
   struct SystemParserCallback : ParserCallback {
+    using ParserCallback::ParserCallback;
+
     void onEntry(const std::string& key, const std::string& value, void* arg)
         override;
     void onPopEntry(

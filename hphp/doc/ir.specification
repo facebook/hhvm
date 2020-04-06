@@ -1705,7 +1705,7 @@ To string conversions:
 | CallUnpack<spOffset,numParams,callOff,destroyLocals>,
 |   DCall,
 |   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
-|   CRc
+|   CRc|PRc
 
   Invoke function S2 corresponding to the current FPI with numParams arguments,
   the last of which is an array of the remaining args. Used for FCall with
@@ -1722,7 +1722,7 @@ To string conversions:
 | Call<offset,numParams,callOff,destroyLocals>,
 |   DCall,
 |   S(StkPtr) S(FramePtr) S(Func) S(Cls|Obj|Nullptr),
-|   CRc
+|   CRc|PRc
 
   Transfer control to a callee S2, based on the pre-live activation record and
   set of args on the stack pointed to by S0 at `offset'. S1 is the current

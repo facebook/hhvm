@@ -911,21 +911,29 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::Apply(innards) => {
                         let (id, inner_types) = &**innards;
                         match id.1.trim_start_matches("\\") {
-                            "varray_or_darray" => {
-                                match inner_types.as_slice() {
-                                    [tk, tv] => {
-                                        Ty_::TvarrayOrDarray(Some(self.node_to_ty(tk, type_variables)?), self.node_to_ty(tv, type_variables)?)
-                                    }
-                                    [tv] => {
-                                        Ty_::TvarrayOrDarray(None, self.node_to_ty(tv, type_variables)?)
-                                    }
-                                    _ => return Err(format!("Expected one or two type arguments on varray_or_darray, got {}", inner_types.len())),
-                                }
-                            }
+                            "varray_or_darray" => match inner_types.as_slice() {
+                                [tk, tv] => Ty_::TvarrayOrDarray(
+                                    Some(
+                                        self.node_to_ty(tk, type_variables)
+                                            .unwrap_or_else(|_| tany()),
+                                    ),
+                                    self.node_to_ty(tv, type_variables)
+                                        .unwrap_or_else(|_| tany()),
+                                ),
+                                [tv] => Ty_::TvarrayOrDarray(
+                                    None,
+                                    self.node_to_ty(tv, type_variables)
+                                        .unwrap_or_else(|_| tany()),
+                                ),
+                                _ => Ty_::Tany(TanySentinel {}),
+                            },
                             _ => {
                                 let id = Id(
                                     id.0.clone(),
-                                    self.state.namespace_builder.rename_import(Cow::Borrowed(&id.1)).into_owned(),
+                                    self.state
+                                        .namespace_builder
+                                        .rename_import(Cow::Borrowed(&id.1))
+                                        .into_owned(),
                                 );
                                 Ty_::Tapply(
                                     id,
@@ -978,8 +986,10 @@ impl DirectDeclSmartConstructors<'_> {
                     HintValue::Darray(innards) => {
                         let (key_type, value_type) = &**innards;
                         Ty_::Tdarray(
-                            self.node_to_ty(key_type, type_variables)?,
-                            self.node_to_ty(value_type, type_variables)?,
+                            self.node_to_ty(key_type, type_variables)
+                                .unwrap_or_else(|_| tany()),
+                            self.node_to_ty(value_type, type_variables)
+                                .unwrap_or_else(|_| tany()),
                         )
                     }
                     HintValue::Varray(inner) => {
@@ -1067,6 +1077,14 @@ impl DirectDeclSmartConstructors<'_> {
                 Reason::Rhint(pos.clone()),
                 Box::new(Ty_::Tarray(None, None)),
             )),
+            Node_::Varray(pos) => Ok(Ty(
+                Reason::Rhint(pos.clone()),
+                Box::new(Ty_::Tvarray(tany())),
+            )),
+            Node_::Darray(pos) => Ok(Ty(
+                Reason::Rhint(pos.clone()),
+                Box::new(Ty_::Tdarray(tany(), tany())),
+            )),
             Node_::This(pos) => Ok(Ty(Reason::Rhint(pos.clone()), Box::new(Ty_::Tthis))),
             Node_::Expr(expr) => {
                 fn expr_to_ty(expr: &nast::Expr) -> Result<Ty_, ParseError> {
@@ -1132,6 +1150,7 @@ impl DirectDeclSmartConstructors<'_> {
                         "nothing" => Ty_::Tunion(Vec::new()),
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
+                        "varray_or_darray" => Ty_::TvarrayOrDarray(None, tany()),
                         _ => {
                             let name = self
                                 .state
@@ -3023,10 +3042,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        Ok(Node_::Hint(
-            HintValue::Varray(Box::new(tparam?)),
-            Pos::merge(&varray?.get_pos()?, &greater_than?.get_pos()?)?,
-        ))
+        let pos = varray?.get_pos()?;
+        let pos = if let Ok(gt_pos) = greater_than?.get_pos() {
+            Pos::merge(&pos, &gt_pos)?
+        } else {
+            pos
+        };
+        Ok(Node_::Hint(HintValue::Varray(Box::new(tparam?)), pos))
     }
 
     fn make_vector_array_type_specifier(
@@ -3036,9 +3058,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         tparam: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
+        let pos = array?.get_pos()?;
+        let pos = if let Ok(gt_pos) = greater_than?.get_pos() {
+            Pos::merge(&pos, &gt_pos)?
+        } else {
+            pos
+        };
         Ok(Node_::Hint(
             HintValue::Array(Box::new((tparam?, Node_::Ignored))),
-            Pos::merge(&array?.get_pos()?, &greater_than?.get_pos()?)?,
+            pos,
         ))
     }
 
@@ -3052,9 +3080,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg5: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
+        let pos = darray?.get_pos()?;
+        let pos = if let Ok(gt_pos) = greater_than?.get_pos() {
+            Pos::merge(&pos, &gt_pos)?
+        } else {
+            pos
+        };
         Ok(Node_::Hint(
             HintValue::Darray(Box::new((key_type?, value_type?))),
-            Pos::merge(&darray?.get_pos()?, &greater_than?.get_pos()?)?,
+            pos,
         ))
     }
 

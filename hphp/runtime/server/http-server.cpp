@@ -296,14 +296,11 @@ void HttpServer::runOrExitProcess() {
             std::vector<std::string> frameStrings;
             std::vector<folly::StringPiece> frames;
             for (int i = 0; i < bt.size(); i++) {
-              auto f = tvCastToArrayLike(bt.rval(i).tv());
+              auto f = tvCastToArrayLike(bt.lookup(i));
               if (f.exists(s_file)) {
-                auto s = tvCastToString(f.rval(s_file).tv()).toCppString();
+                auto s = tvCastToString(f.lookup(s_file)).toCppString();
                 if (f.exists(s_line)) {
-                  s += folly::sformat(
-                    ":{}",
-                    tvCastToInt64(f.rval(s_line).tv())
-                  );
+                  s += folly::sformat(":{}", tvCastToInt64(f.lookup(s_line)));
                 }
                 frameStrings.emplace_back(std::move(s));
                 frames.push_back(frameStrings.back());

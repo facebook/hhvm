@@ -134,13 +134,13 @@ struct SpecHolder {
       Array fieldSpec = specIt.second().toArray();
       field.spec = fieldSpec.get();
       field.type = (TType)tvCastToInt64(
-        fieldSpec.rval(s_type, AccessFlags::ErrorKey).tv()
+        fieldSpec.lookup(s_type, AccessFlags::ErrorKey)
       );
       field.name = tvCastToStringData(
-        fieldSpec.rval(s_var, AccessFlags::ErrorKey).tv()
+        fieldSpec.lookup(s_var, AccessFlags::ErrorKey)
       );
       field.isUnion = tvCastToBoolean(
-        fieldSpec.rval(s_union, AccessFlags::Key).tv()
+        fieldSpec.lookup(s_union, AccessFlags::Key)
       );
 
       // A union field also writes to a property named __type. If one exists, we

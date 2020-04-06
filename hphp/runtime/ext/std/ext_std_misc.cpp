@@ -130,7 +130,7 @@ String HHVM_FUNCTION(execution_context) {
 TypedValue HHVM_FUNCTION(sequence, const Array& args) {
   if (args.empty()) return make_tv<KindOfNull>();
   int64_t idx = args.size() - 1;
-  auto ret = args.rval(idx).tv();
+  auto const ret = args.lookup(idx);
   tvIncRefGen(ret);
   return ret;
 }

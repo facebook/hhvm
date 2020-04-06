@@ -2238,8 +2238,8 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
           }
         }
       }
-      auto const val = env.rval(StrNR{f->localVarName(id)});
-      if (val && type(val) != KindOfUninit) args.append(val.tv());
+      auto const val = env.lookup(StrNR{f->localVarName(id)});
+      if (val.is_init()) args.append(val);
       else appendUninit();
     }
     args.append(make_tv<KindOfNull>()); // $__debugger_exn$output
@@ -2252,9 +2252,9 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
     assertx(val(arr_tv).parr->size() == f->numParams() + 1);
     Array arr = Array::attach(val(arr_tv).parr);
     for (Id id = 0; id < f->numParams() - 1; id++) {
-      auto const rval = arr.rval(id + 1);
-      if (isObjectType(type(rval)) &&
-          val(rval).pobj->instanceof(uninit_cls)) {
+      auto const tv = arr.lookup(id + 1);
+      if (isObjectType(type(tv)) &&
+          val(tv).pobj->instanceof(uninit_cls)) {
         switch (actions[id]) {
         case StoreFrame:
           tvAsVariant(frame_local(fp, frameIds[id])).unset();
@@ -2273,10 +2273,10 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         tvAsVariant(frame_local(fp, frameIds[id])) = arr[id + 1];
         break;
       case StoreVV:
-        fp->m_varEnv->set(f->localVarName(id), rval);
+        fp->m_varEnv->set(f->localVarName(id), &tv);
         break;
       case StoreEnv:
-        env.set(StrNR{f->localVarName(id)}, rval.tv());
+        env.set(StrNR{f->localVarName(id)}, tv);
         break;
       }
     }

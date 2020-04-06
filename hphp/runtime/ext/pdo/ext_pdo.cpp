@@ -1396,7 +1396,7 @@ static Variant HHVM_METHOD(PDO, query, const String& sql,
         pdo_stmt_set_fetch_mode(
           stmt,
           0,
-          tvCastToInt64(_argv.rval(0).tv()),
+          tvCastToInt64(_argv.lookup(0)),
           Variant::attach(HHVM_FN(array_splice)(argv_variant, 1)).toArray()
         )) {
       /* now execute the statement */

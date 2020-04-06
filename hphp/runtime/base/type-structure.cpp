@@ -952,8 +952,8 @@ bool TypeStructure::isValidResolvedTypeStructureList(const Array& arr,
       }
       auto const parr = [&] {
         if (isShape) {
-          auto const value = arr.rval(s_value);
-          // TODO(T64074168): Should we check for a missing value with is_dummy?
+          auto const value = arr.lookup(s_value);
+          // TODO(T64074168): Should we check for a missing value with is_init?
           if (!isDictOrArrayType(value.type())) {
             valid = false;
           } else {
@@ -975,7 +975,7 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
           ? arr.isDict() : (arr.isPHPArray() && !arr.isNull()))) {
     return false;
   }
-  auto const kindfield = arr.rval(s_kind);
+  auto const kindfield = arr.lookup(s_kind);
   if (!isIntType(kindfield.type()) ||
       kindfield.val().num > TypeStructure::kMaxResolvedKind) {
     return false;
@@ -1007,32 +1007,32 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_nonnull:
       return true;
     case TypeStructure::Kind::T_fun: {
-      auto const rtype = arr.rval(s_return_type);
+      auto const rtype = arr.lookup(s_return_type);
       if (!isDictOrArrayType(rtype.type())) return false;
       if (!TypeStructure::isValidResolvedTypeStructure(
             ArrNR(rtype.val().parr))) {
         return false;
       }
-      auto const vtype = arr.rval(s_variadic_type);
-      // TODO(T64074168): Should we check for a missing value with is_dummy?
+      auto const vtype = arr.lookup(s_variadic_type);
+      // TODO(T64074168): Should we check for a missing value with is_init?
       if (!isDictOrArrayType(vtype.type())) return false;
       auto const varr = ArrNR(rtype.val().parr);
       if (!TypeStructure::isValidResolvedTypeStructure(varr)) return false;
-      auto const ptypes = arr.rval(s_param_types);
+      auto const ptypes = arr.lookup(s_param_types);
       if (!isVecOrArrayType(ptypes.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(ptypes.val().parr));
     }
     case TypeStructure::Kind::T_typevar: {
-      auto const name = arr.rval(s_name);
+      auto const name = arr.lookup(s_name);
       return isStringType(name.type());
     }
     case TypeStructure::Kind::T_shape: {
-      auto const fields = arr.rval(s_fields);
+      auto const fields = arr.lookup(s_fields);
       if (!isVecOrArrayType(fields.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(fields.val().parr), true);
     }
     case TypeStructure::Kind::T_tuple: {
-      auto const elems = arr.rval(s_elem_types);
+      auto const elems = arr.lookup(s_elem_types);
       if (!isVecOrArrayType(elems.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(elems.val().parr));
     }
@@ -1040,10 +1040,10 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum: {
-      auto const clsname = arr.rval(s_classname);
+      auto const clsname = arr.lookup(s_classname);
       if (!isStringType(clsname.type())) return false;
-      auto const generics = arr.rval(s_generic_types);
-      // TODO(T64074168): Should we check for a missing value with is_dummy?
+      auto const generics = arr.lookup(s_generic_types);
+      // TODO(T64074168): Should we check for a missing value with is_init?
       if (!isVecOrArrayType(generics.type())) return false;
       return isValidResolvedTypeStructureList(ArrNR(generics.val().parr));
     }

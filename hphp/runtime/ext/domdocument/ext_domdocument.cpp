@@ -423,16 +423,16 @@ static Variant dom_canonicalization(xmlNodePtr nodep, const String& file,
       raise_warning("'query' missing from xpath array");
       return false;
     }
-    auto const tmp = arr.rval(s_query);
+    auto const tmp = arr.lookup(s_query);
     if (!isStringType(tmp.type())) {
       raise_warning("'query' is not a string");
       return false;
     }
-    xquery = tvCastToString(tmp.tv());
+    xquery = tvCastToString(tmp);
     ctxp = xmlXPathNewContext(docp);
     ctxp->node = nodep;
     if (arr.exists(s_namespaces)) {
-      auto const temp = arr.rval(s_namespaces);
+      auto const temp = arr.lookup(s_namespaces);
       if (isArrayLikeType(temp.type())) {
         auto ad = temp.val().parr;
         for (ArrayIter it = ArrayIter(ad); it; ++it) {

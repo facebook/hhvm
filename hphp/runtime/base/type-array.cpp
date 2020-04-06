@@ -182,7 +182,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
         if (by_value) {
           found = value_cmp_as_string_function(
             VarNR(value),
-            VarNR(array.rval(key, AccessFlags::Key).tv()),
+            VarNR(array.lookup(key, AccessFlags::Key)),
             value_data
           ) == 0;
         } else {
@@ -598,9 +598,9 @@ void Array::setLegacyArray(bool isLegacy) {
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename T> ALWAYS_INLINE
-tv_rval Array::rvalImpl(const T& key, AccessFlags flags) const {
-  return m_arr ? m_arr->get(key, any(flags & AccessFlags::Error))
-               : tv_rval::dummy();
+TypedValue Array::lookupImpl(const T& key, AccessFlags flags) const {
+  return m_arr ? *m_arr->get(key, any(flags & AccessFlags::Error))
+               : make_tv<KindOfUninit>();
 }
 
 template<typename T> ALWAYS_INLINE
@@ -663,8 +663,8 @@ template<> bool not_found<bool>() { return false; }
 template<> const Variant& not_found<const Variant&>() { return uninit_variant; }
 template<> Variant& not_found<Variant&>() { return lvalBlackHole(); }
 
-template<> tv_rval not_found<tv_rval>() {
-  return tv_rval::dummy();
+template<> TypedValue not_found<TypedValue>() {
+  return make_tv<KindOfUninit>();
 }
 template<> tv_lval not_found<tv_lval>() {
   return lvalBlackHole().asTypedValue();
@@ -750,7 +750,7 @@ decltype(auto) elem(const Array& arr, Fn fn, bool is_key,
     return name##Impl(int64_t(k), fl);              \
   }
 
-FOR_EACH_KEY_TYPE(rval, tv_rval, const)
+FOR_EACH_KEY_TYPE(lookup, TypedValue, const)
 FOR_EACH_KEY_TYPE(lval, tv_lval, )
 FOR_EACH_KEY_TYPE(lvalForce, tv_lval, )
 

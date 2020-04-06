@@ -399,7 +399,7 @@ public:
   int compare(const Array& v2, bool flip = false) const;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Element rval/lval.
+  // Element lookup/lval.
 
 #define FOR_EACH_KEY_TYPE(...)    \
   C(TypedValue, __VA_ARGS__)            \
@@ -428,9 +428,10 @@ public:
   ret_t name(key_t, Flags = Flags::None) cns = delete;
 
   /*
-   * Get an rval to the element at `key'.
+   * Get the value of the the element at `key', or an Uninit TypedValue if
+   * this key is not present in the array. Does not inc-ref the element.
    */
-  FOR_EACH_KEY_TYPE(rval, tv_rval, const)
+  FOR_EACH_KEY_TYPE(lookup, TypedValue, const)
 
   /*
    * Get an lval to the element at `key'.
@@ -535,7 +536,7 @@ private:
                  PFUNC_CMP key_cmp_function, const void* key_data,
                  PFUNC_CMP value_cmp_function, const void* value_data) const;
 
-  template<typename T> tv_rval rvalImpl(const T& key, Flags) const;
+  template<typename T> TypedValue lookupImpl(const T& key, Flags) const;
   template<typename T> tv_lval lvalImpl(const T& key, Flags);
   template<typename T> tv_lval lvalForceImpl(const T& key, Flags);
 

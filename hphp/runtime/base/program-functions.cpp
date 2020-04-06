@@ -361,7 +361,7 @@ void register_variable(Array& variables, char *name, const Variant& value,
         String key_str(index, index_len, CopyString);
         auto const key =
           symtable->convertKey<IntishCast::Cast>(key_str.asTypedValue());
-        auto const v = symtable->rval(key);
+        auto const v = symtable->lookup(key);
         if (isNullType(v.type()) || !isArrayLikeType(v.type())) {
           symtable->set(key, make_persistent_array_like_tv(ArrayData::Create()));
         }

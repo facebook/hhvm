@@ -47,9 +47,9 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
     case T_VOID:
       return tc.alwaysPasses(KindOfNull);
     case T_STRUCT: {
-      auto const className = spec.rval(s_class);
+      auto const className = spec.lookup(s_class);
       if (isNullType(className.type())) return false;
-      auto const classNameString = tvCastToString(className.tv());
+      auto const classNameString = tvCastToString(className);
       // Binary deserializing can assign a null to an object, while compact
       // won't (this might be a bug).
       return tc.alwaysPasses(classNameString.get()) &&
@@ -71,9 +71,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
     case T_STRING:
       return tc.alwaysPasses(KindOfString);
     case T_MAP: {
-      auto const format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto const format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         return tc.alwaysPasses(KindOfDict);
       } else if (format.equal(s_collection)) {
@@ -84,9 +82,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
       break;
     }
     case T_LIST: {
-      auto const format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto const format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         return tc.alwaysPasses(KindOfVec);
       } else if (format.equal(s_collection)) {
@@ -97,9 +93,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
       break;
     }
     case T_SET: {
-      auto const format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto const format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         return tc.alwaysPasses(KindOfKeyset);
       } else if (format.equal(s_collection)) {

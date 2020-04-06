@@ -510,7 +510,7 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           auto ctag = parser->data.asArrRef().lval(parser->ctag);
           // check if value exists, if yes append to that
           if (asCArrRef(ctag).exists(s_value)) {
-            myval = tvCastToString(asCArrRef(ctag).rval(s_value).tv());
+            myval = tvCastToString(asCArrRef(ctag).lookup(s_value));
             myval += decoded_value;
             asArrRef(ctag).set(s_value, myval);
           } else {
@@ -532,10 +532,10 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
           };
 
           if (curtag.asArrRef().exists(s_type)) {
-            mytype = tvCastToString(curtag.asArrRef().rval(s_type).tv());
+            mytype = tvCastToString(curtag.asArrRef().lookup(s_type));
             if (!strcmp(mytype.data(), "cdata") &&
                 curtag.asArrRef().exists(s_value)) {
-              myval = tvCastToString(curtag.asArrRef().rval(s_value).tv());
+              myval = tvCastToString(curtag.asArrRef().lookup(s_value));
               myval += decoded_value;
               curtag.asArrRef().set(s_value, myval);
               return;

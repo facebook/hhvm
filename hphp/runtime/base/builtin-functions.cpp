@@ -108,12 +108,12 @@ bool array_is_valid_callback(const Array& arr) {
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }
-  auto const elem0 = arr.rval(0);
+  auto const elem0 = arr.lookup(0);
   if (!isStringType(elem0.type()) && !isObjectType(elem0.type()) &&
       !isClassType(elem0.type())) {
     return false;
   }
-  auto const elem1 = arr.rval(1);
+  auto const elem1 = arr.lookup(1);
   if (!isStringType(elem1.type()) && !isFuncType(elem1.type())) {
     return false;
   }
@@ -167,11 +167,10 @@ bool is_callable(const Variant& v, bool syntax_only, Variant* name) {
       isVecType(tv_func->m_type) ||
       isDictType(tv_func->m_type)) {
     auto const arr = Array(tv_func->m_data.parr);
-    auto const clsname = arr.rval(int64_t(0));
-    auto const mthname = arr.rval(int64_t(1));
+    auto const clsname = arr.lookup(int64_t(0));
+    auto const mthname = arr.lookup(int64_t(1));
 
-    if (arr.size() != 2 ||
-        clsname.is_dummy() ||
+    if (arr.size() != 2 || !clsname.is_init() ||
         (!isStringType(mthname.type()) && !isFuncType(mthname.type()))) {
       if (name) *name = array_string;
       return false;

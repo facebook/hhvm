@@ -127,6 +127,11 @@ struct TypedValue {
 
   std::string pretty() const; // debug formatting. see trace.h
 
+  // Accessors to simplify the migration from tv_rval to TypedValue.
+  bool is_init() const { return m_type != KindOfUninit; }
+  DataType type() const { return m_type; }
+  Value val() const { return m_data; }
+
   TYPE_SCAN_CUSTOM() {
     if (isRefcountedType(m_type)) scanner.scan(m_data.pcnt);
   }

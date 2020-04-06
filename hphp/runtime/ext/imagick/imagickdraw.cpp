@@ -30,12 +30,12 @@ using CUCString = const unsigned char*;
 ALWAYS_INLINE
 static void getAffineMatrixElement(
     const Array& array, const String& key, double& ret) {
-  auto const value = array.rval(key);
+  auto const value = array.lookup(key);
   if (isNullType(value.type())) {
     IMAGICKDRAW_THROW(
       "AffineMatrix must contain keys: sx, rx, ry, sy, tx and ty");
   } else {
-    ret = tvCastToDouble(value.tv());
+    ret = tvCastToDouble(value);
   }
 }
 

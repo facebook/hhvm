@@ -1460,19 +1460,19 @@ void clearBlackHole();
 // breaking circular dependencies
 
 inline Variant Array::operator[](TypedValue key) const {
-  return Variant::wrap(rval(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](int key) const {
-  return Variant::wrap(rval(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](int64_t key) const {
-  return Variant::wrap(rval(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](const String& key) const {
-  return Variant::wrap(rval(key).tv());
+  return Variant::wrap(lookup(key));
 }
 inline Variant Array::operator[](const Variant& key) const {
-  return Variant::wrap(rval(key).tv());
+  return Variant::wrap(lookup(key));
 }
 
 inline void Array::append(const Variant& v) {

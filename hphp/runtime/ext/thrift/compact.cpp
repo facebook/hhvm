@@ -444,17 +444,17 @@ struct CompactWriter {
     void writeMap(
         const Variant& map, const Array& spec, const FieldInfo& fieldInfo) {
       TType keyType = (TType)(char)tvCastToInt64(
-        spec.rval(s_ktype, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_ktype, AccessFlags::ErrorKey)
       );
       TType valueType = (TType)(char)tvCastToInt64(
-        spec.rval(s_vtype, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_vtype, AccessFlags::ErrorKey)
       );
 
       auto keySpec = tvCastToArrayLike(
-        spec.rval(s_key, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_key, AccessFlags::ErrorKey)
       );
       auto valueSpec = tvCastToArrayLike(
-        spec.rval(s_val, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_val, AccessFlags::ErrorKey)
       );
 
       auto elemWriter = [&](TypedValue k, TypedValue v) {
@@ -481,10 +481,10 @@ struct CompactWriter {
         CListType listType,
         const FieldInfo& fieldInfo) {
       TType valueType = (TType)(char)tvCastToInt64(
-        spec.rval(s_etype, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_etype, AccessFlags::ErrorKey)
       );
       auto valueSpec = tvCastToArrayLike(
-        spec.rval(s_elem, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
 
       auto const listWriter = [&](TypedValue v) {
@@ -666,20 +666,18 @@ struct CompactReader {
       while (fieldType != T_STOP) {
         bool readComplete = false;
 
-        auto const fieldSpecVariant = spec.rval(fieldNum);
+        auto const fieldSpecVariant = spec.lookup(fieldNum);
         if (!isNullType(fieldSpecVariant.type())) {
-          auto fieldSpec = tvCastToArrayLike(fieldSpecVariant.tv());
+          auto fieldSpec = tvCastToArrayLike(fieldSpecVariant);
 
-          auto fieldName = tvCastToString(fieldSpec.rval(s_var).tv());
-          auto expectedType = (TType)tvCastToInt64(
-            fieldSpec.rval(s_type).tv()
-          );
+          auto fieldName = tvCastToString(fieldSpec.lookup(s_var));
+          auto expectedType = (TType)tvCastToInt64(fieldSpec.lookup(s_type));
 
           if (typesAreCompatible(fieldType, expectedType)) {
             readComplete = true;
             Variant fieldValue = readField(fieldSpec, fieldType);
             dest->o_set(fieldName, fieldValue, dest->getClassName());
-            bool isUnion = tvCastToBoolean(spec.rval(s_union).tv());
+            bool isUnion = tvCastToBoolean(spec.lookup(s_union));
             if (isUnion) {
               dest->o_set(s__type, Variant(fieldNum), dest->getClassName());
             }
@@ -807,12 +805,12 @@ struct CompactReader {
           return init_null();
 
         case T_STRUCT: {
-            auto const className = spec.rval(s_class);
+            auto const className = spec.lookup(s_class);
             if (isNullType(className.type())) {
               thrift_error("no class type in spec", ERR_INVALID_DATA);
             }
 
-            auto classNameString = tvCastToString(className.tv());
+            auto classNameString = tvCastToString(className);
             Variant newStruct = create_object(classNameString, Array());
             if (newStruct.isNull()) {
               thrift_error("invalid class type in spec", ERR_INVALID_DATA);
@@ -992,14 +990,12 @@ struct CompactReader {
       readMapBegin(keyType, valueType, size);
 
       auto keySpec = tvCastToArrayLike(
-        spec.rval(s_key, AccessFlags::Error).tv()
+        spec.lookup(s_key, AccessFlags::Error)
       );
       auto valueSpec = tvCastToArrayLike(
-        spec.rval(s_val, AccessFlags::Error).tv()
+        spec.lookup(s_val, AccessFlags::Error)
       );
-      auto format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         DictInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -1054,11 +1050,9 @@ struct CompactReader {
       readListBegin(valueType, size);
 
       auto valueSpec = tvCastToArrayLike(
-        spec.rval(s_elem, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
-      auto format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         VecArrayInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
@@ -1095,11 +1089,9 @@ struct CompactReader {
       readListBegin(valueType, size);
 
       auto valueSpec = tvCastToArrayLike(
-        spec.rval(s_elem, AccessFlags::ErrorKey).tv()
+        spec.lookup(s_elem, AccessFlags::ErrorKey)
       );
-      auto format = tvCastToString(
-        spec.rval(s_format, AccessFlags::None).tv()
-      );
+      auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
         KeysetInit arr(size);
         for (uint32_t i = 0; i < size; i++) {

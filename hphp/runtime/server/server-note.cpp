@@ -33,9 +33,8 @@ void ServerNote::Add(const String& name, const String& value) {
 
 String ServerNote::Get(const String& name) {
   Array &arr = s_note->m_notes;
-  return arr.exists(name)
-    ? tvCastToString(arr.rval(name).tv())
-    : String{};
+  auto const tv = arr.lookup(name);
+  return tv.is_init() ? tvCastToString(tv) : String{};
 }
 
 void ServerNote::Delete(const String& name) {

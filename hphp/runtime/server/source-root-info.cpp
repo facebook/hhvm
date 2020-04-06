@@ -72,7 +72,7 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
   }
 
   auto const alias = RO::SandboxHostAlias;
-  auto const name = tvCastToString(matches.toArray().rval(1).tv());
+  auto const name = tvCastToString(matches.toArray().lookup(1));
   if (!alias.empty() && !strcmp(name.data(), alias.data())) {
     m_sandboxCond = SandboxCondition::Off;
     return;
@@ -80,12 +80,12 @@ SourceRootInfo::SourceRootInfo(Transport* transport)
     createFromCommonRoot(name);
   } else {
     Array pair = StringUtil::Explode(name, "-", 2).toArray();
-    m_user = tvCastToString(pair.rval(0).tv());
+    m_user = tvCastToString(pair.lookup(0));
     bool defaultSb = pair.size() == 1;
     if (defaultSb) {
       m_sandbox = s_default;
     } else {
-      m_sandbox = tvCastToString(pair.rval(1).tv());
+      m_sandbox = tvCastToString(pair.lookup(1));
     }
 
     createFromUserConfig();

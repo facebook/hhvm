@@ -84,8 +84,8 @@ struct HashCollection : ObjectData {
 
   void remove(int64_t key);
   void remove(StringData* key);
-  void eraseNoCompact(ssize_t pos);
-  void erase(ssize_t pos) {
+  void eraseNoCompact(MixedArray::RemovePos pos);
+  void erase(MixedArray::RemovePos pos) {
     eraseNoCompact(pos);
     compactOrShrinkIfDensityTooLow();
   }
@@ -423,28 +423,24 @@ struct HashCollection : ObjectData {
     return m_arr->find(s, h);
   }
 
-  ssize_t findForRemove(int64_t k, inthash_t h) {
-    assertx(canMutateBuffer());
-    return m_arr->findForRemove(k, h, false);
+  auto findForRemove(int64_t k, inthash_t h) const {
+    return m_arr->findForRemove(k, h);
   }
 
-  ssize_t findForRemove(const StringData* s, strhash_t h) {
-    assertx(canMutateBuffer());
+  auto findForRemove(const StringData* s, strhash_t h) const {
     return m_arr->findForRemove(s, h);
   }
 
-  MixedArray::Inserter findForInsert(int64_t ki,
-                                                 inthash_t h) const {
+  MixedArray::Inserter findForInsert(int64_t ki, inthash_t h) const {
     return m_arr->findForInsertUpdate(ki, h);
   }
 
-  MixedArray::Inserter findForInsert(const StringData* s,
-                                                 strhash_t h) const {
+  MixedArray::Inserter findForInsert(const StringData* s, strhash_t h) const {
     return m_arr->findForInsertUpdate(s, h);
   }
 
   MixedArray::Inserter findForNewInsert(int32_t* table, size_t mask,
-                                                    hash_t h0) const {
+                                        hash_t h0) const {
     return m_arr->findForNewInsert(table, mask, h0);
   }
 

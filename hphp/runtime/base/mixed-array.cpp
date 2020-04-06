@@ -466,9 +466,12 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const ad = mode == AllocMode::Request
     ? reqAlloc(scale)
     : staticAlloc(scale, arrprov::tagSize(&other));
+  // Copy everything including tombstones. This is a requirement for remove() to
+  // work correctly, which assumes the position is the same in the original and
+  // in the copy of the array, in case copying is needed.
 #ifdef USE_JEMALLOC
-  // Copy everything including tombstones.  We want to copy the elements and
-  // the hash separately, because the array may not be very full.
+  // Copy elements and hashes separately, because the array may not be very
+  // full.
   assertx(reinterpret_cast<uintptr_t>(ad) % 16 == 0);
   assertx(reinterpret_cast<uintptr_t>(&other) % 16 == 0);
   // Adding 24 bytes so that we can copy in 32-byte groups. This might
@@ -862,34 +865,6 @@ MixedArray::InsertPos MixedArray::insert(StringData* k) {
   return InsertPos(false, e->data);
 }
 
-NEVER_INLINE
-int32_t MixedArray::findForRemove(int64_t ki, inthash_t h, bool updateNext) {
-  // all vector methods should work w/out touching the hashtable
-  return findForRemove(ki, h,
-      [this, ki, updateNext] (Elm& e) {
-        assertx(ki == e.ikey);
-        // Conform to PHP5 behavior
-        // Hacky: don't removed the unsigned cast, else g++ can optimize away
-        // the check for == 0x7fff..., since there is no signed int k
-        // for which k-1 == 0x7fff...
-        if (((uint64_t)ki == (uint64_t)m_nextKI-1) &&
-            (ki >= 0) &&
-            (ki == 0x7fffffffffffffffLL || updateNext)) {
-          m_nextKI = ki;
-        }
-      }
-  );
-}
-
-int32_t MixedArray::findForRemove(const StringData* s, strhash_t h) {
-  return findForRemove(s, h,
-      [] (Elm& e) {
-        decRefStr(e.skey);
-        e.setIntKey(0, hash_int64(0));
-      }
-    );
-}
-
 bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
   return asMixed(ad)->findForExists(k, hash_int64(k));
 }
@@ -1199,16 +1174,29 @@ ArrayData* MixedArray::AddStr(ArrayData* ad, StringData* k, TypedValue v, bool c
 //=============================================================================
 // Delete.
 
-void MixedArray::eraseNoCompact(ssize_t pos) {
-  assertx(validPos(pos));
+void MixedArray::updateNextKI(int64_t removedKi, bool updateNext) {
+  // Conform to PHP5 behavior
+  // Hacky: don't removed the unsigned cast, else g++ can optimize away
+  // the check for == 0x7fff..., since there is no signed int k
+  // for which k-1 == 0x7fff...
+  if (((uint64_t)removedKi == (uint64_t)m_nextKI-1) &&
+      (removedKi >= 0) &&
+      (removedKi == 0x7fffffffffffffffLL || updateNext)) {
+    m_nextKI = removedKi;
+  }
+}
+
+void MixedArray::eraseNoCompact(RemovePos pos) {
+  assertx(pos.valid());
+  hashTab()[pos.probeIdx] = Tombstone;
 
   // If the internal pointer points to this element, advance it.
   Elm* elms = data();
-  if (m_pos == pos) {
-    m_pos = nextElm(elms, pos);
+  if (m_pos == pos.elmIdx) {
+    m_pos = nextElm(elms, pos.elmIdx);
   }
 
-  auto& e = elms[pos];
+  auto& e = elms[pos.elmIdx];
   auto const oldTV = e.data;
   if (e.hasStrKey()) {
     decRefStr(e.skey);
@@ -1226,9 +1214,11 @@ void MixedArray::eraseNoCompact(ssize_t pos) {
 
 ArrayData* MixedArray::RemoveIntImpl(ArrayData* ad, int64_t k, bool copy) {
   auto a = asMixed(ad);
+  auto const pos = a->findForRemove(k, hash_int64(k));
+  if (!pos.valid()) return a;
   if (copy) a = a->copyMixed();
-  auto pos = a->findForRemove(k, hash_int64(k), false/*updateNext*/);
-  if (validPos(pos)) a->erase(pos);
+  a->updateNextKI(k, false);
+  a->erase(pos);
   return a;
 }
 
@@ -1239,9 +1229,10 @@ ArrayData* MixedArray::RemoveInt(ArrayData* ad, int64_t k) {
 ArrayData*
 MixedArray::RemoveStrImpl(ArrayData* ad, const StringData* key, bool copy) {
   auto a = asMixed(ad);
+  auto const pos = a->findForRemove(key, key->hash());
+  if (!pos.valid()) return a;
   if (copy) a = a->copyMixed();
-  auto pos = a->findForRemove(key, key->hash());
-  if (validPos(pos)) a->erase(pos);
+  a->erase(pos);
   return a;
 }
 
@@ -1511,8 +1502,11 @@ ArrayData* MixedArray::Pop(ArrayData* ad, Variant& value) {
     assertx(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, e.hash(), true);
-    assertx(pos2 == pos);
+                              : a->findForRemove(e.ikey, e.hash());
+    assertx(pos2.elmIdx == pos);
+    if (!e.hasStrKey()) {
+      a->updateNextKI(e.ikey, true);
+    }
     a->erase(pos2);
   } else {
     value = uninit_null();
@@ -1534,8 +1528,11 @@ ArrayData* MixedArray::Dequeue(ArrayData* adInput, Variant& value) {
     assertx(!isTombstone(e.data.m_type));
     value = tvAsCVarRef(&e.data);
     auto pos2 = e.hasStrKey() ? a->findForRemove(e.skey, e.hash())
-                              : a->findForRemove(e.ikey, e.hash(), false);
-    assertx(pos2 == pos);
+                              : a->findForRemove(e.ikey, e.hash());
+    if (!e.hasStrKey()) {
+      a->updateNextKI(e.ikey, false);
+    }
+    assertx(pos2.elmIdx == pos);
     a->erase(pos2);
   } else {
     value = uninit_null();

@@ -606,8 +606,6 @@ private:
   InsertPos insert(StringData* k);
 
   using HashTable<MixedArray, MixedArrayElm>::findForRemove;
-  int32_t findForRemove(int64_t ki, inthash_t h, bool updateNext);
-  int32_t findForRemove(const StringData* s, strhash_t h);
 
   static ArrayData* RemoveIntImpl(ArrayData*, int64_t, bool);
   static ArrayData* RemoveStrImpl(ArrayData*, const StringData*, bool);
@@ -622,8 +620,9 @@ private:
   // If "move" is false, this method will inc-ref data.
   template <class K, bool move = false> ArrayData* update(K k, TypedValue data);
 
-  void eraseNoCompact(ssize_t pos);
-  void erase(ssize_t pos) {
+  void updateNextKI(int64_t removedKey, bool updateNext);
+  void eraseNoCompact(RemovePos pos);
+  void erase(RemovePos pos) {
     eraseNoCompact(pos);
     if (m_size <= m_used / 2) {
       // Compact in order to keep elms from being overly sparse.

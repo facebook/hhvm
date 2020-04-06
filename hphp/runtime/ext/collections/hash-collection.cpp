@@ -128,24 +128,24 @@ Array HashCollection::toValuesArray() {
 }
 
 void HashCollection::remove(int64_t key) {
-  mutate();
   auto p = findForRemove(key, hash_int64(key));
-  if (validPos(p)) {
+  if (p.valid()) {
+    mutate();
     erase(p);
   }
 }
 
 void HashCollection::remove(StringData* key) {
-  mutate();
   auto p = findForRemove(key, key->hash());
-  if (validPos(p)) {
+  if (p.valid()) {
+    mutate();
     erase(p);
   }
 }
 
-void HashCollection::eraseNoCompact(ssize_t pos) {
+void HashCollection::eraseNoCompact(MixedArray::RemovePos pos) {
   assertx(canMutateBuffer());
-  assertx(validPos(pos) && !isTombstone(pos));
+  assertx(pos.valid() && !isTombstone(pos.elmIdx));
   assertx(m_size > 0);
   arrayData()->eraseNoCompact(pos);
   --m_size;

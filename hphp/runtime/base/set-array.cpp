@@ -336,16 +336,16 @@ void SetArray::insert(StringData* k, strhash_t h) {
 }
 void SetArray::insert(StringData* k) { return insert(k, k->hash()); }
 
-void SetArray::erase(int32_t pos) {
-  assertx(pos < m_used);
-  assertx(0 <= pos);
-  auto const elms = data();
+void SetArray::erase(RemovePos pos) {
+  assertx(pos.valid() && pos.elmIdx < m_used);
+  hashTab()[pos.probeIdx] = Tombstone;
 
-  if (m_pos == pos) {
-    m_pos = nextElm(elms, pos);
+  auto const elms = data();
+  if (m_pos == pos.elmIdx) {
+    m_pos = nextElm(elms, pos.elmIdx);
   }
 
-  auto& elm = elms[pos];
+  auto& elm = elms[pos.elmIdx];
   assertx(!elm.isInvalid());
   tvDecRefGen(&elm.tv);
   elm.setTombstone();
@@ -617,11 +617,10 @@ ArrayData* SetArray::SetStr(ArrayData*, StringData*, TypedValue) {
 template<class K> ArrayData*
 SetArray::RemoveImpl(ArrayData* ad, K k, bool copy, SetArrayElm::hash_t h) {
   auto a = asSet(ad);
+  auto const pos = a->findForRemove(k, h);
+  if (!pos.valid()) return a;
   if (copy) a = a->copySet();
-  auto const loc = a->findForRemove(k, h);
-  if (validPos(loc)) {
-    a->erase(loc);
-  }
+  a->erase(pos);
   return a;
 }
 
@@ -691,10 +690,10 @@ ArrayData* SetArray::Pop(ArrayData* ad, Variant& value) {
     ssize_t pos = a->getIterLast();
     tvDup(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findForRemove(pelm->hash(),
+    auto const loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assertx(loc != Empty);
+    assertx(loc.valid());
     a->erase(loc);
   } else {
     value = uninit_null();
@@ -714,10 +713,10 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
     ssize_t pos = a->getIterBegin();
     tvDup(a->getElm(pos), *value.asTypedValue());
     auto const pelm = &a->data()[pos];
-    auto loc = a->findForRemove(pelm->hash(),
+    auto const loc = a->findForRemove(pelm->hash(),
       [pelm] (const Elm& e) { return &e == pelm; }
     );
-    assertx(loc != Empty);
+    assertx(loc.valid());
     a->erase(loc);
   } else {
     value = uninit_null();

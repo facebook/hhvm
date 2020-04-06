@@ -282,7 +282,7 @@ private:
 
   ssize_t findElm(const Elm& e) const;
 
-  void erase(int32_t);
+  void erase(RemovePos);
 
   /*
    * Append idx at the end of the linked list containing the set

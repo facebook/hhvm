@@ -361,22 +361,21 @@ HashTable<ArrayType, ElmType>::findForNewInsertWarn(int32_t* table,
 // table elements exactly once.
 
 template <typename ArrayType, typename ElmType>
-template <typename HashTableCommon::FindType type,
-         typename Hit,
-         typename RLambda>
+template <typename HashTableCommon::FindType type, typename Hit>
 ALWAYS_INLINE
 typename std::conditional<
-  type == HashTableCommon::FindType::Lookup ||
-  type == HashTableCommon::FindType::Remove,
+  type == HashTableCommon::FindType::Lookup,
   int32_t,
   typename std::conditional<
-    type == HashTableCommon::FindType::Exists,
-    bool,
-    typename HashTableCommon::Inserter
+    type == HashTableCommon::FindType::Remove,
+    typename HashTableCommon::RemovePos,
+    typename std::conditional<
+      type == HashTableCommon::FindType::Exists,
+      bool,
+      typename HashTableCommon::Inserter
+    >::type
   >::type
->::type HashTable<ArrayType, ElmType>::findImpl(hash_t h0,
-                                                Hit hit,
-                                                RLambda remove) const {
+>::type HashTable<ArrayType, ElmType>::findImpl(hash_t h0, Hit hit) const {
   static_assert(
     static_cast<int>(FindType::Lookup) == 0 &&
     static_cast<int>(FindType::Exists) == 1 &&
@@ -397,20 +396,17 @@ typename std::conditional<
       assertx(0 <= pos);
       assertx(pos < capacity());
       if (hit(elms[pos])) {
-        if (type == FindType::Remove) {
-          remove(elms[pos]);
-          *ei = Tombstone;
-        }
         return std::get<static_cast<int>(type)>(
           std::make_tuple(int32_t(pos), true, Inserter(nullptr),
-                          Inserter(ei), int32_t(pos))
+                          Inserter(ei),
+                          RemovePos{uint32_t(probe), int32_t(pos)})
         );
       }
     } else if (pos & 1) {
       assertx(pos == Empty);
       return std::get<static_cast<int>(type)>(
-        std::make_tuple(int32_t(pos), false, Inserter(ei),
-                        Inserter(ei), int32_t(pos))
+        std::make_tuple(int32_t(Empty), false, Inserter(ei),
+                        Inserter(ei), RemovePos{})
       );
     }
 

@@ -112,6 +112,14 @@ struct HashTableCommon {
     int32_t* ei;
   };
 
+  struct RemovePos {
+    bool valid() const {
+      return validPos(elmIdx);
+    }
+    size_t probeIdx{0};
+    int32_t elmIdx{Empty};
+  };
+
   static ALWAYS_INLINE
   bool isValidIns(Inserter e) {
     return e.isValid();
@@ -334,8 +342,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -345,8 +352,7 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -356,8 +362,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -367,8 +372,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -378,8 +382,7 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -389,8 +392,7 @@ public:
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
@@ -400,78 +402,53 @@ public:
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
+        }
       );
   }
 
   ALWAYS_INLINE
-  int32_t findForRemove(int64_t ki, hash_t h0) const {
+  auto findForRemove(int64_t ki, hash_t h0) const {
     return findImpl<FindType::Remove>(
         h0,
         [ki](const Elm& e) {
           return hitIntKey(e, ki);
-        },
-        [](Elm&){}
+        }
       );
   }
 
   ALWAYS_INLINE
-  int32_t findForRemove(const StringData* ks, hash_t h0) const {
+  auto findForRemove(const StringData* ks, hash_t h0) const {
     return findImpl<FindType::Remove>(
         h0,
         [ks, h0](const Elm& e) {
           return hitStrKey(e, ks, h0);
-        },
-        [](Elm&){}
-      );
-  }
-
-  template <typename Remove> ALWAYS_INLINE
-  int32_t findForRemove(int64_t ki, hash_t h0, Remove remove) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        [ki](const Elm& e) {
-          return hitIntKey(e, ki);
-        },
-        remove
-      );
-  }
-
-  template <typename Remove> ALWAYS_INLINE
-  int32_t findForRemove(const StringData* ks, hash_t h0, Remove remove) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        [ks, h0](const Elm& e) {
-          return hitStrKey(e, ks, h0);
-        },
-        remove
-      );
+        }
+    );
   }
 
   template <typename Hit> ALWAYS_INLINE
-  typename std::enable_if<!std::is_integral<Hit>::value
-                          && !std::is_pointer<Hit>::value, int32_t>::type
-  findForRemove(hash_t h0, Hit hit) const {
-    return findImpl<FindType::Remove>(
-        h0,
-        hit,
-        [](Elm&){}
-      );
+  auto findForRemove(
+      typename std::enable_if<!std::is_integral<Hit>::value &&
+                              !std::is_pointer<Hit>::value, hash_t>::type h0,
+      Hit hit) const {
+    return findImpl<FindType::Remove>(h0, hit);
   }
 
 protected:
-  template <FindType type, typename Hit, typename Remove>
+  template <FindType type, typename Hit>
   typename std::conditional<
-    type == HashTableCommon::FindType::Lookup ||
-    type == HashTableCommon::FindType::Remove,
+    type == HashTableCommon::FindType::Lookup,
     int32_t,
     typename std::conditional<
-      type == HashTableCommon::FindType::Exists,
-      bool,
-      typename HashTableCommon::Inserter
+      type == HashTableCommon::FindType::Remove,
+      typename HashTableCommon::RemovePos,
+      typename std::conditional<
+        type == HashTableCommon::FindType::Exists,
+        bool,
+        typename HashTableCommon::Inserter
+      >::type
     >::type
-  >::type findImpl(hash_t h0, Hit hit, Remove remove) const;
+  >::type findImpl(hash_t h0, Hit hit) const;
 
   /////////////////////////////////////////////////////////////////////////////
   // Iteration helpers.

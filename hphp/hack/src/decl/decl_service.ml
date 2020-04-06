@@ -13,6 +13,8 @@
 
 open Hh_prelude
 
+let category = "decl_service"
+
 (*****************************************************************************)
 (* The job that will be run on the workers *)
 (*****************************************************************************)
@@ -20,9 +22,12 @@ open Hh_prelude
 let decl_file ctx errorl fn =
   let (errorl', ()) =
     Errors.do_with_context fn Errors.Decl (fun () ->
-        Hh_logger.debug "Typing decl: %s" (Relative_path.to_absolute fn);
+        Hh_logger.debug
+          ~category
+          "Typing decl: %s"
+          (Relative_path.to_absolute fn);
         Decl.make_env ~sh:SharedMem.Uses ctx fn;
-        Hh_logger.debug "Typing dec OK")
+        Hh_logger.debug ~category "Typing decl OK")
   in
   Errors.merge errorl' errorl
 
@@ -40,7 +45,7 @@ let go
     fast =
   let fast_l = Relative_path.Map.fold fast ~init:[] ~f:(fun x _ y -> x :: y) in
   let neutral = Errors.empty in
-  Hh_logger.debug "Declaring the types";
+  Hh_logger.debug ~category "Declaring the types";
   let result =
     MultiWorker.call
       workers

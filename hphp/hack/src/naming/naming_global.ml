@@ -24,6 +24,8 @@ module SN = Naming_special_names
 
 let canon_key = String.lowercase
 
+let category = "naming_global"
+
 module GEnv = struct
   let get_full_pos ctx (pos, name) =
     try
@@ -334,7 +336,10 @@ let ndecl_file
     } =
   let (errors, ()) =
     Errors.do_with_context fn Errors.Naming (fun () ->
-        Hh_logger.debug "Naming decl: %s" (Relative_path.to_absolute fn);
+        Hh_logger.debug
+          ~category
+          "Naming decl: %s"
+          (Relative_path.to_absolute fn);
         make_env ctx ~funs ~classes ~record_defs ~typedefs ~consts)
   in
   if Errors.is_empty errors then

@@ -48,9 +48,18 @@ fn process_class_enum(pu_members: Vec<Tast::PuMember>) -> AccMap {
     info
 }
 
+fn simple_typ_hint(pos: Pos, name: String) -> aast_defs::Hint_ {
+    let id = ast_defs::Id(pos, name);
+    aast_defs::Hint_::Happly(id, Vec::new())
+}
+
 fn simple_typ(pos: Pos, name: String) -> aast_defs::Hint {
+    aast_defs::Hint(pos.clone(), Box::new(simple_typ_hint(pos, name)))
+}
+
+fn apply_to_typ(pos: Pos, name: String, typ: aast_defs::Hint) -> aast_defs::Hint {
     let id = ast_defs::Id(pos.clone(), name);
-    let happly = aast_defs::Hint_::Happly(id, Vec::new());
+    let happly = aast_defs::Hint_::Happly(id, vec![typ]);
     aast_defs::Hint(pos, Box::new(happly))
 }
 
@@ -216,7 +225,14 @@ fn gen_members(fields: Tast::PuEnum) -> Tast::Method_ {
         body,
         fun_kind: ast_defs::FunKind::FSync,
         user_attributes: vec![],
-        ret: Tast::TypeHint((), Some(simple_typ(pos, "\\HH\\mixed".to_string()))),
+        ret: Tast::TypeHint(
+            (),
+            Some(apply_to_typ(
+                pos.clone(),
+                "\\HH\\vec".to_string(),
+                simple_typ(pos, "\\HH\\string".to_string()),
+            )),
+        ),
         external: false,
         doc_comment: None,
     }
@@ -278,11 +294,16 @@ impl VisitorMut for EraseBodyVisitor {
         }
     }
 
-    fn visit_hint_(&mut self, c: &mut Ctx, h: &mut Tast::Hint_) -> Result<(), ()> {
-        match h {
-            Tast::Hint_::HpuAccess(_, _, _) => Ok(*h = Tast::Hint_::Hmixed),
+    fn visit_hint(&mut self, c: &mut Ctx, h: &mut Tast::Hint) -> Result<(), ()> {
+        let aast_defs::Hint(p, h) = h;
+        match h.as_ref() {
+            Tast::Hint_::HpuAccess(_, _, _) => {
+                Ok(*h = Box::new(simple_typ_hint(p.clone(), "\\HH\\mixed".to_string())))
+            }
             Tast::Hint_::Hprim(prim) => Ok(match prim {
-                aast_defs::Tprim::Tatom(_) => *h = Tast::Hint_::Hprim(aast_defs::Tprim::Tstring),
+                aast_defs::Tprim::Tatom(_) => {
+                    *h = Box::new(Tast::Hint_::Hprim(aast_defs::Tprim::Tstring))
+                }
                 _ => (),
             }),
             _ => h.recurse(c, self.object()),

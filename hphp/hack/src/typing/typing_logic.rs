@@ -6,6 +6,7 @@ use bumpalo::collections::Vec;
 
 use crate::typing_defs_core::{InternalType, Ty};
 
+#[derive(Debug)]
 pub enum SubtypePropEnum<'a> {
     Coerce(Ty<'a>, Ty<'a>),
     IsSubtype(InternalType<'a>, InternalType<'a>),

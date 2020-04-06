@@ -9,6 +9,7 @@ use arena_trait::Arena;
 use bumpalo::collections::Vec;
 use itertools::*;
 use oxidized::ast;
+use oxidized::ident::Ident;
 use typing_collections_rust::SMap;
 use typing_defs_rust::Ty;
 
@@ -29,6 +30,7 @@ fn simplify_subtype_i<'a>(
             let ty_sub = env.inference_env.expand_type(*ty_sub);
             let ty_super = env.inference_env.expand_type(*ty_super);
             match (ty_sub.get_node(), ty_super.get_node()) {
+                (Ty_::Tvar(_), _) | (_, Ty_::Tvar(_)) => default(),
                 (Ty_::Tprim(p1), Ty_::Tprim(p2)) => match (p1, p2) {
                     (PrimKind::Tint, PrimKind::Tnum)
                     | (PrimKind::Tfloat, PrimKind::Tnum)
@@ -193,5 +195,82 @@ fn process_simplify_subtype_result<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) {
 // Merge sub_type_inner and sub_type_i
 pub fn sub_type_i<'a>(env: &mut Env<'a>, ty_sub: InternalType<'a>, ty_super: InternalType<'a>) {
     let prop = simplify_subtype_i(env, ty_sub, ty_super);
+    let prop = prop_to_env(env, prop);
     process_simplify_subtype_result(env, &prop);
+}
+
+fn prop_to_env<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> {
+    let mut props_acc = avec![in env];
+    prop_to_env_(env, prop, &mut props_acc);
+    // TODO(hrust) proper conjunction
+    env.bld().conj(props_acc)
+}
+
+fn prop_to_env_<'a>(
+    env: &Env<'a>,
+    prop: SubtypeProp<'a>,
+    props_acc: &mut Vec<'a, SubtypeProp<'a>>,
+) {
+    use SubtypePropEnum as SP;
+    match prop {
+        SP::IsSubtype(ty_sub, ty_super) => match (ty_sub.get_var(), ty_super.get_var()) {
+            (Some(var_sub), Some(var_super)) => {
+                let prop = env.bld().valid();
+                let prop = add_tyvar_upper_bound_and_close(env, prop, var_sub, ty_super);
+                let prop = add_tyvar_lower_bound_and_close(env, prop, var_super, ty_sub);
+                prop_to_env_(env, prop, props_acc)
+            }
+            (Some(var_sub), None) => {
+                let prop = env.bld().valid();
+                let prop = add_tyvar_upper_bound_and_close(env, prop, var_sub, ty_super);
+                prop_to_env_(env, prop, props_acc)
+            }
+            (None, Some(var_super)) => {
+                let prop = env.bld().valid();
+                let prop = add_tyvar_lower_bound_and_close(env, prop, var_super, ty_sub);
+                prop_to_env_(env, prop, props_acc)
+            }
+            (None, None) => props_acc.push(prop),
+        },
+        SP::Coerce(_, _) => unimplemented!("{:?}", prop),
+        SP::Disj(props) => {
+            if props.is_empty() {
+                props_acc.push(prop)
+            } else {
+                // TODO(hrust) try and find the first prop that works. Requires env backtracking.
+                prop_to_env_(env, props[0], props_acc)
+            }
+        }
+        SP::Conj(props) => props_to_env(env, props, props_acc),
+    }
+}
+
+fn props_to_env<'a>(
+    env: &Env<'a>,
+    props: &Vec<'a, SubtypeProp<'a>>,
+    props_acc: &mut Vec<'a, SubtypeProp<'a>>,
+) {
+    props
+        .iter()
+        .for_each(|prop| prop_to_env_(env, prop, props_acc))
+}
+
+fn add_tyvar_upper_bound_and_close<'a>(
+    env: &Env<'a>,
+    _prop: SubtypeProp<'a>,
+    _v: Ident,
+    _ty: InternalType<'a>,
+) -> SubtypeProp<'a> {
+    // TODO(hrust)
+    env.bld().valid()
+}
+
+fn add_tyvar_lower_bound_and_close<'a>(
+    env: &Env<'a>,
+    _prop: SubtypeProp<'a>,
+    _v: Ident,
+    _ty: InternalType<'a>,
+) -> SubtypeProp<'a> {
+    // TODO(hrust)
+    env.bld().valid()
 }

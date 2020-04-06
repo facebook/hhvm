@@ -676,7 +676,7 @@ let add_enum_defn_fact ctx enm enum_id enumerators progress =
   in
   add_fact EnumDefinition (JSON_Object json_fields) progress
 
-let add_enumerator_fact const_name decl_id progress =
+let add_enumerator_fact decl_id const_name progress =
   let json_fact =
     JSON_Object
       [
@@ -806,15 +806,30 @@ let process_member_xref
   match ServerSymbolDefinition.get_class_by_name ctx con_name with
   | None -> (xrefs, prog)
   | Some cls ->
-    let con_kind = get_container_kind cls in
-    let (con_type, decl_pred) = container_decl_predicate con_kind in
-    let (con_decl_id, prog) = add_container_decl_fact decl_pred con_type prog in
-    process_xref
-      (mem_decl_fun con_type con_decl_id)
-      ref_fun
-      member
-      pos
-      (xrefs, prog)
+    if phys_equal cls.c_kind Cenum then
+      match member.kind with
+      | Const ->
+        let (enum_id, prog) = add_enum_decl_fact con_name prog in
+        process_xref
+          (add_enumerator_fact enum_id)
+          build_enumerator_decl_json_ref
+          member
+          pos
+          (xrefs, prog)
+      (* This includes references to built-in enum methods *)
+      | _ -> (xrefs, prog)
+    else
+      let con_kind = get_container_kind cls in
+      let (con_type, decl_pred) = container_decl_predicate con_kind in
+      let (con_decl_id, prog) =
+        add_container_decl_fact decl_pred con_type prog
+      in
+      process_xref
+        (mem_decl_fun con_type con_decl_id)
+        ref_fun
+        member
+        pos
+        (xrefs, prog)
 
 let process_gconst_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -929,7 +944,7 @@ let process_enum_decl ctx enm progress =
   let (enumerators, prog) =
     List.fold enm.c_consts ~init:([], prog) ~f:(fun (decls, prog) enumerator ->
         let (pos, id) = enumerator.cc_id in
-        let (decl_id, prog) = add_enumerator_fact id enum_id prog in
+        let (decl_id, prog) = add_enumerator_fact enum_id id prog in
         let ref_json = build_enumerator_decl_json_ref decl_id in
         let (_, prog) = add_decl_loc_fact pos ref_json prog in
         (build_id_json decl_id :: decls, prog))

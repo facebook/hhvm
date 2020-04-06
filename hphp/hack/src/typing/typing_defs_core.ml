@@ -213,10 +213,10 @@ and _ ty_ =
        * during the localization phase.
        *)
   | Tlike : decl_ty -> decl_phase ty_
-  | Tpu_access : decl_ty * Nast.sid * Nast.pu_loc -> decl_phase ty_
+  | Tpu_access : decl_ty * Nast.sid -> decl_phase ty_
       (** Access to a Pocket Universe or Pocket Universes dependent type,
-       * denoted by Foo:@Bar, or Foo:@Bar:@Bli:@T.
-       * It might be unresolved at first (e.g. if Bli is a generic variable).
+       * denoted by Foo:@Bar.
+       * It might be unresolved at first (e.g. if Foo is a generic variable).
        * Will be refined to Tpu, or to the actual type associated with an
        * atom, once typechecking is successful.
        *)

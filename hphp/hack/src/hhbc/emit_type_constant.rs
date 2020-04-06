@@ -340,7 +340,7 @@ fn hint_to_type_constant_list(
             hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
-        HpuAccess(_, _, _) => {
+        HpuAccess(_, _) => {
             return Err(Unrecoverable(
                 "TODO(T36532263) hint_to_type_constant_list".into(),
             ))

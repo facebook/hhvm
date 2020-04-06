@@ -109,7 +109,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hunion hl
   | Aast.Hintersection hl ->
     List.iter hl (check_hint env)
-  | Aast.Hpu_access (h, _, _) -> check_hint env h
+  | Aast.Hpu_access (h, _) -> check_hint env h
 
 and check_shape env Aast.{ nsi_allows_unknown_fields = _; nsi_field_map } =
   List.iter ~f:(fun v -> check_hint env v.Aast.sfi_hint) nsi_field_map

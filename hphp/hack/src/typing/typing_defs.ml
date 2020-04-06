@@ -849,7 +849,7 @@ let rec equal_decl_ty_ ty_1 ty_2 =
            Ast_defs.ShapeField.equal k1 k2 && equal_shape_field_type v1 v2)
          (Nast.ShapeMap.elements fields1)
          (Nast.ShapeMap.elements fields2)
-  | (Tpu_access (ty1, id1, _), Tpu_access (ty2, id2, _)) ->
+  | (Tpu_access (ty1, id1), Tpu_access (ty2, id2)) ->
     equal_decl_ty ty1 ty2 && Aast.equal_sid id1 id2
   | (Tvar v1, Tvar v2) -> Ident.equal v1 v2
   | (Tany _, _)

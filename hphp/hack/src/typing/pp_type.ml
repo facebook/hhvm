@@ -210,7 +210,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
   | Tpu (base, enum) ->
     Format.fprintf fmt "(@[<2>Tpu (%a@,,%a)@])" pp_ty base Aast.pp_sid enum;
     Format.fprintf fmt "@])"
-  | Tpu_access (base, sid, _) ->
+  | Tpu_access (base, sid) ->
     Format.fprintf fmt "(@[<2>Tpu_access (@,";
     pp_ty fmt base;
     Format.fprintf fmt ",@ ";

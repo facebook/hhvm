@@ -53,7 +53,7 @@ let reduce_pu_type_access env base enum atom name =
    }
 *)
 let expand_pocket_universes env reason (base : locl_ty) enum member ty =
-  let ((_, member), _) = member in
+  let (_, member) = member in
   let (env, member) =
     let (env, res) = TUtils.class_get_pu_member env base (snd enum) member in
     if Option.is_some res then

@@ -297,7 +297,7 @@ impl VisitorMut for EraseBodyVisitor {
     fn visit_hint(&mut self, c: &mut Ctx, h: &mut Tast::Hint) -> Result<(), ()> {
         let aast_defs::Hint(p, h) = h;
         match h.as_ref() {
-            Tast::Hint_::HpuAccess(_, _, _) => {
+            Tast::Hint_::HpuAccess(_, _) => {
                 Ok(*h = Box::new(simple_typ_hint(p.clone(), "\\HH\\mixed".to_string())))
             }
             Tast::Hint_::Hprim(prim) => Ok(match prim {

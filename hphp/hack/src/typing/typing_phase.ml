@@ -320,7 +320,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
        bound by a PU, projecting its type T must be TP:@T *)
     let rec build_access dty =
       match get_node dty with
-      | Tpu_access (base, sid, _) ->
+      | Tpu_access (base, sid) ->
         let (base, trailing) = build_access base in
         (base, sid :: trailing)
       | _ -> (dty, [])

@@ -5,7 +5,7 @@ module TUtils = Typing_utils
 
 type result =
   | Ignore
-  | Expand of (Reason.t * ((Pos.t * string) * Aast_defs.pu_loc))
+  | Expand of (Reason.t * (Pos.t * string))
 
 (* Make new_ty (a type variable representing a pocket universe dependent type)
  * equal to ty:@name (where ty can be a Tgeneric, or an atom).
@@ -20,7 +20,7 @@ let make_pocket_universes_type_equal
       let result =
         match deref lty with
         | (r, Tprim (Aast_defs.Tatom atom)) ->
-          Expand (r, ((Reason.to_pos r, atom), Aast_defs.Atom))
+          Expand (r, (Reason.to_pos r, atom))
         | _ -> Ignore
       in
       (match result with

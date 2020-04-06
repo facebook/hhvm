@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e8b2f2738ac61f6c9674d25c1a5af35c>>
+// @generated SignedSource<<5f551e3be7a80a601bbbffd8b5192fe8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -993,10 +993,9 @@ impl<P: Params> Node<P> for Hint_ {
             Hint_::Hthis => Ok(()),
             Hint_::Hdynamic => Ok(()),
             Hint_::Hnothing => Ok(()),
-            Hint_::HpuAccess(a0, a1, a2) => {
+            Hint_::HpuAccess(a0, a1) => {
                 a0.accept(c, v)?;
                 a1.accept(c, v)?;
-                a2.accept(c, v)?;
                 Ok(())
             }
             Hint_::Hunion(a0) => {
@@ -1182,18 +1181,6 @@ impl<P: Params> Node<P> for PuEnum<P::Ex, P::Fb, P::En, P::Hi> {
         self.case_values.accept(c, v)?;
         self.members.accept(c, v)?;
         Ok(())
-    }
-}
-impl<P: Params> Node<P> for PuLoc {
-    fn accept(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
-        v.visit_pu_loc(c, self)
-    }
-    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
-        match self {
-            PuLoc::Unknown => Ok(()),
-            PuLoc::TypeParameter => Ok(()),
-            PuLoc::Atom => Ok(()),
-        }
     }
 }
 impl<P: Params> Node<P> for PuMember<P::Ex, P::Fb, P::En, P::Hi> {

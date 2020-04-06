@@ -1025,18 +1025,10 @@ where
                 let pos = Self::p_pos(&c.pu_access_left_type, env);
                 let child = Self::pos_name(&c.pu_access_right_type, env)?;
                 match Self::p_hint_(&c.pu_access_left_type, env)? {
-                    h @ HpuAccess(_, _, _) => Ok(HpuAccess(
-                        ast::Hint::new(pos, h),
-                        child,
-                        ast::PuLoc::Unknown,
-                    )),
+                    h @ HpuAccess(_, _) => Ok(HpuAccess(ast::Hint::new(pos, h), child)),
                     Happly(id, hints) => {
                         if hints.is_empty() {
-                            Ok(HpuAccess(
-                                ast::Hint::new(pos, Happly(id, hints)),
-                                child,
-                                ast::PuLoc::Unknown,
-                            ))
+                            Ok(HpuAccess(ast::Hint::new(pos, Happly(id, hints)), child))
                         } else {
                             Self::missing_syntax("pocket universe access base", node, env)
                         }

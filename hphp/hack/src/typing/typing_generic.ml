@@ -59,7 +59,7 @@ end = struct
         Option.iter ~f:ty t1_opt;
         ty t2
       | Tshape (_, fdm) -> ShapeFieldMap.iter (fun _ v -> ty v) fdm
-      | Tpu_access (base, _, _) -> ty base
+      | Tpu_access (base, _) -> ty base
     in
     try
       ty x;

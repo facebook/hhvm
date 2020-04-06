@@ -22,17 +22,6 @@ and sid = Ast_defs.id
 
 and is_reified = bool
 
-(* Helps keeping track if a pocket universe member is a generic type
- * parameter or an atom. Since there is currently no way to make sure
- * that a string is a bound type parameter during typing, we thread this
- * information from parsing/naming to typing using this type.
- *)
-(* TODO: will be removed in the next diff *)
-and pu_loc =
-  | Unknown
-  | TypeParameter
-  | Atom
-
 and call_type =
   | Cnormal [@visitors.name "call_type_Cnormal"]
       (** when the call looks like f() *)
@@ -128,7 +117,7 @@ and hint_ =
   | Hthis
   | Hdynamic
   | Hnothing
-  | Hpu_access of hint * sid * pu_loc
+  | Hpu_access of hint * sid
   | Hunion of hint list
   | Hintersection of hint list
 

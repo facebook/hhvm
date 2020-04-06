@@ -122,8 +122,7 @@ and fmt_hint ~tparams ?(strip_tparams = false) (pos, h) =
   | Aast.Hthis -> fmt_name_or_prim (pos, SN.Typehints.this)
   | Aast.Hdynamic -> fmt_name_or_prim (pos, SN.Typehints.dynamic)
   | Aast.Hnothing -> fmt_name_or_prim (pos, SN.Typehints.nothing)
-  | Aast.Hpu_access (h, sid, _) ->
-    "(" ^ fmt_hint ~tparams h ^ ":@" ^ snd sid ^ ")"
+  | Aast.Hpu_access (h, sid) -> "(" ^ fmt_hint ~tparams h ^ ":@" ^ snd sid ^ ")"
   | Aast.Hunion _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
   | Aast.Hintersection _ -> fmt_name_or_prim (pos, SN.Typehints.mixed)
 

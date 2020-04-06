@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2f3ae5cc8f830d5c5f532f312ce1872d>>
+// @generated SignedSource<<7017a66c71e1e3ea1b590e605856b7d1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -387,11 +387,11 @@ pub enum Ty_ {
     Tmixed,
     Tlike(Ty),
     /// Access to a Pocket Universe or Pocket Universes dependent type,
-    /// denoted by Foo:@Bar, or Foo:@Bar:@Bli:@T.
-    /// It might be unresolved at first (e.g. if Bli is a generic variable).
+    /// denoted by Foo:@Bar.
+    /// It might be unresolved at first (e.g. if Foo is a generic variable).
     /// Will be refined to Tpu, or to the actual type associated with an
     /// atom, once typechecking is successful.
-    TpuAccess(Ty, nast::Sid, nast::PuLoc),
+    TpuAccess(Ty, nast::Sid),
     Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,

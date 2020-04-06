@@ -155,7 +155,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
-      | Tpu_access (base, _, _) -> this#on_type acc base
+      | Tpu_access (base, _) -> this#on_type acc base
   end
 
 class type ['a] locl_type_visitor_type =

@@ -108,9 +108,9 @@ type expand_pocket_universes =
   env ->
   Reason.t ->
   locl_ty ->
-  Pos.t * string ->
-  (Pos.t * string) * Aast_defs.pu_loc ->
-  Pos.t * string ->
+  Aast.sid ->
+  Aast.sid ->
+  Aast.sid ->
   env * locl_ty
 
 let (expand_pocket_universes_ref : expand_pocket_universes ref) =

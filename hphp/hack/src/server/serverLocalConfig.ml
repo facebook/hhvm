@@ -171,6 +171,7 @@ end
 
 type t = {
   min_log_level: Hh_logger.Level.t;
+  log_categories: string list;
   (* the list of experiments from the experiments config *)
   experiments: string list;
   (* a free-form diagnostic string *)
@@ -298,6 +299,7 @@ type t = {
 let default =
   {
     min_log_level = Hh_logger.Level.Info;
+    log_categories = [];
     experiments = [];
     experiments_config_meta = "";
     use_watchman = false;
@@ -512,6 +514,13 @@ let load_ fn ~silent ~current_version overrides =
       "experiments"
       ~delim:(Str.regexp ",")
       ~default:default.experiments
+      config
+  in
+  let log_categories =
+    string_list
+      "log_categories"
+      ~delim:(Str.regexp ",")
+      ~default:default.log_categories
       config
   in
   let min_log_level =
@@ -824,6 +833,7 @@ let load_ fn ~silent ~current_version overrides =
   in
   {
     min_log_level;
+    log_categories;
     experiments;
     experiments_config_meta;
     use_watchman;

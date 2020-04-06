@@ -1167,6 +1167,8 @@ let setup_server ~informant_managed ~monitor_pid options config local_config =
     let profile_owner = local_config.ServerLocalConfig.profile_owner in
     let profile_desc = local_config.ServerLocalConfig.profile_desc in
     Hh_logger.Level.set_min_level local_config.ServerLocalConfig.min_log_level;
+    Hh_logger.Level.set_categories local_config.ServerLocalConfig.log_categories;
+
     if Sys_utils.is_test_mode () then
       EventLogger.init_fake ()
     else if is_worker then

@@ -157,29 +157,68 @@ let test_telemetry_diff () =
   (* different values *)
   let current1 = Telemetry.create () |> Telemetry.int_ ~key:"a" ~value:1 in
   let prev1 = Telemetry.create () |> Telemetry.int_ ~key:"a" ~value:2 in
-  let diff1 = Telemetry.diff current1 ~prev:prev1 in
+  let diff1 = Telemetry.diff ~all:true current1 ~prev:prev1 in
   Int_asserter.assert_equals
     (Telemetry_test_utils.int_exn diff1 "a")
     1
-    "diff1 a should be 1";
+    "diff1 a should be -1";
   Int_asserter.assert_equals
     (Telemetry_test_utils.int_exn diff1 "a:diff")
     (-1)
     "diff1 a:diff should be -1";
+  assert_throws
+    (Telemetry_test_utils.int_exn diff1)
+    "a:prev"
+    "not found"
+    "diff1 a:prev should throw";
+
+  (* different values, only show changed *)
+  begin
+    let diff1b = Telemetry.diff ~all:false current1 ~prev:prev1 in
+    assert_throws
+      (Telemetry_test_utils.int_exn diff1b)
+      "a"
+      "not found"
+      "diff1b a should throw";
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff1b "a:diff")
+      (-1)
+      "diff1b a:diff should be -1";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff1b)
+      "a:prev"
+      "not found"
+      "diff1b a:prev should throw"
+  end;
 
   (* same values *)
   let current2 = Telemetry.create () |> Telemetry.int_ ~key:"b" ~value:1 in
   let prev2 = Telemetry.create () |> Telemetry.int_ ~key:"b" ~value:1 in
-  let diff2 = Telemetry.diff current2 ~prev:prev2 in
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff2 "b")
-    1
-    "diff2 b should be 1";
-  assert_throws
-    (Telemetry_test_utils.int_exn diff2)
-    "a:prev"
-    "not found"
-    "diff2 a:prev should throw";
+  begin
+    let diff2 = Telemetry.diff ~all:true current2 ~prev:prev2 in
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff2 "b")
+      1
+      "diff2 b should be 1";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff2)
+      "a:prev"
+      "not found"
+      "diff2 a:prev should throw";
+
+    (* same value, only show changed *)
+    let diff2b = Telemetry.diff ~all:false current2 ~prev:prev2 in
+    assert_throws
+      (Telemetry_test_utils.int_exn diff2b)
+      "a"
+      "not found"
+      "diff2b a should throw";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff2b)
+      "a:prev"
+      "not found"
+      "diff2b a:prev should throw"
+  end;
 
   (* nested object *)
   let current3 =
@@ -200,24 +239,50 @@ let test_telemetry_diff () =
            |> Telemetry.int_ ~key:"a" ~value:2
            |> Telemetry.int_ ~key:"b" ~value:1 )
   in
-  let diff3 = Telemetry.diff current3 ~prev:prev3 in
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff3 "o.a")
-    1
-    "diff3 o.a should be 1";
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff3 "o.a:diff")
-    (-1)
-    "diff3 o.a:diff should be -1";
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff3 "o.b")
-    1
-    "diff3 o.b should be 1";
-  assert_throws
-    (Telemetry_test_utils.int_exn diff3)
-    "o.b:prev"
-    "not found"
-    "diff3 o.b:prev should throw";
+  begin
+    let diff3 = Telemetry.diff ~all:true current3 ~prev:prev3 in
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff3 "o.a")
+      1
+      "diff3 o.a should be 1";
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff3 "o.a:diff")
+      (-1)
+      "diff3 o.a:diff should be -1";
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff3 "o.b")
+      1
+      "diff3 o.b should be 1";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff3)
+      "o.b:prev"
+      "not found"
+      "diff3 o.b:prev should throw"
+  end;
+
+  (* nested object, only show different *)
+  begin
+    let diff3b = Telemetry.diff ~all:false current3 ~prev:prev3 in
+    assert_throws
+      (Telemetry_test_utils.int_exn diff3b)
+      "o.a"
+      "not found"
+      "diff3b o.a should throw";
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff3b "o.a:diff")
+      (-1)
+      "diff3 o.a:diff should be -1";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff3b)
+      "o.b"
+      "not found"
+      "diff3b o.b should throw";
+    assert_throws
+      (Telemetry_test_utils.int_exn diff3b)
+      "o.b:diff"
+      "not found"
+      "diff3b o.b:diff should throw"
+  end;
 
   (* prev absent, and current absent *)
   let current4 =
@@ -232,29 +297,30 @@ let test_telemetry_diff () =
          ~key:"p"
          ~value:(Telemetry.create () |> Telemetry.int_ ~key:"d" ~value:4)
   in
-  let diff4 = Telemetry.diff current4 ~prev:prev4 in
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff4 "o.c")
-    3
-    "diff4 o.c should be 3";
-  Bool_asserter.assert_equals
-    (Telemetry_test_utils.value_exn diff4 "o:prev" = Hh_json.JSON_Null)
-    true
-    "diff4 o:prev should be JSON_Null";
-  assert_throws
-    (Telemetry_test_utils.value_exn diff4)
-    "o.c:prev"
-    "not found"
-    "diff4 o.c:prev should throw";
-  Bool_asserter.assert_equals
-    (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
-    true
-    "diff4 p should be JSON_Null";
-  Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff4 "p:prev.d:prev")
-    4
-    "diff4 p:prev.d:prev should be 4";
-
+  begin
+    let diff4 = Telemetry.diff ~all:true current4 ~prev:prev4 in
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff4 "o.c")
+      3
+      "diff4 o.c should be 3";
+    Bool_asserter.assert_equals
+      (Telemetry_test_utils.value_exn diff4 "o:prev" = Hh_json.JSON_Null)
+      true
+      "diff4 o:prev should be JSON_Null";
+    assert_throws
+      (Telemetry_test_utils.value_exn diff4)
+      "o.c:prev"
+      "not found"
+      "diff4 o.c:prev should throw";
+    Bool_asserter.assert_equals
+      (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
+      true
+      "diff4 p should be JSON_Null";
+    Int_asserter.assert_equals
+      (Telemetry_test_utils.int_exn diff4 "p:prev.d:prev")
+      4
+      "diff4 p:prev.d:prev should be 4"
+  end;
   true
 
 let () =

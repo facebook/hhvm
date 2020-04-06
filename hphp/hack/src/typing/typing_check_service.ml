@@ -269,6 +269,35 @@ let should_exit ~(memory_cap : int option) =
     ) else
       false
 
+let get_mem_telemetry () : Telemetry.t option =
+  if SharedMem.hh_log_level () > 0 then
+    Some
+      ( Telemetry.create ()
+      |> Telemetry.object_ ~key:"gc" ~value:(Telemetry.quick_gc_stat ())
+      |> Telemetry.object_ ~key:"shmem" ~value:(SharedMem.get_telemetry ()) )
+  else
+    None
+
+let diff_mem_telemetry
+    (start : Telemetry.t option)
+    (second_start : Telemetry.t option)
+    (end_ : Telemetry.t option) : Telemetry.t =
+  match (start, second_start, end_) with
+  | (Some t1, Some t2, Some t3) ->
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"decl_and_typecheck"
+         ~value:(Telemetry.diff ~all:false t2 ~prev:t1)
+    |> Telemetry.object_
+         ~key:"second_typecheck"
+         ~value:(Telemetry.diff ~all:false t3 ~prev:t2)
+  | (Some t1, None, Some t3) ->
+    Telemetry.create ()
+    |> Telemetry.object_
+         ~key:"decl_and_typecheck"
+         ~value:(Telemetry.diff ~all:false t3 ~prev:t1)
+  | _ -> Telemetry.create ()
+
 let process_files
     (dynamic_view_files : Relative_path.Set.t)
     (ctx : Provider_context.t)
@@ -280,10 +309,17 @@ let process_files
   File_provider.local_changes_push_sharedmem_stack ();
   Ast_provider.local_changes_push_sharedmem_stack ();
 
-  let profile_log start_time second_start_time_opt file result =
+  let profile_log
+      start_time
+      start_telemetry_opt
+      second_start_time_opt
+      second_start_telemetry_opt
+      file
+      result =
     let { computation; counters; _ } = result in
     let end_time = Unix.gettimeofday () in
     let times_checked = file.deferred_count + 1 in
+    let end_telemetry_opt = get_mem_telemetry () in
     let files_to_declare =
       List.count computation ~f:(fun f ->
           match f with
@@ -326,17 +362,26 @@ let process_files
              ~value:time_typecheck_opt
         |> Telemetry.int_opt ~key:"filesize" ~value:filesize_opt
         |> Telemetry.object_ ~key:"deferment" ~value:deferment_telemetry
+        |> Telemetry.object_
+             ~key:"mem"
+             ~value:
+               (diff_mem_telemetry
+                  start_telemetry_opt
+                  second_start_telemetry_opt
+                  end_telemetry_opt)
       in
       HackEventLogger.ProfileTypeCheck.process_file
         ~recheck_id:check_info.recheck_id
         ~path:file.path
         ~telemetry;
-      let _t : float =
-        Hh_logger.log_duration
-          (Printf.sprintf "%s [type-check]" (Relative_path.suffix file.path))
-          start_time
-      in
-      ()
+      Hh_logger.log
+        "%s [type-check] %fs%s"
+        (Relative_path.suffix file.path)
+        (Unix.gettimeofday () -. start_time)
+        ( if SharedMem.hh_log_level () > 0 then
+          "\n" ^ Telemetry.to_string telemetry
+        else
+          "" )
     )
   in
   let rec process_or_exit errors progress =
@@ -346,6 +391,7 @@ let process_files
         match fn with
         | Check file ->
           let start_time = Unix.gettimeofday () in
+          let start_telemetry = get_mem_telemetry () in
           let result =
             process_file
               dynamic_view_files
@@ -354,7 +400,7 @@ let process_files
               errors
               file
           in
-          let second_start_time =
+          let (second_start_time, second_start_telemetry) =
             if check_info.profile_type_check_twice then
               let t = Unix.gettimeofday () in
               (* we're running this routine solely for the side effect *)
@@ -367,12 +413,18 @@ let process_files
                   errors
                   file
               in
-              Some t
+              (Some t, get_mem_telemetry ())
             else
-              None
+              (None, None)
           in
           if check_info.profile_log then
-            profile_log start_time second_start_time file result;
+            profile_log
+              start_time
+              start_telemetry
+              second_start_time
+              second_start_telemetry
+              file
+              result;
           (result.errors, result.computation)
         | Declare path ->
           let errors = Decl_service.decl_file ctx errors path in

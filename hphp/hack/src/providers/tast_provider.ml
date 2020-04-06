@@ -76,13 +76,14 @@ let compute_tast_and_errors_unquarantined_internal
     let ctx_telemetry =
       if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
         Provider_context.get_telemetry ctx
-        |> Telemetry.diff ~prev:prev_ctx_telemetry
+        |> Telemetry.diff ~all:true ~prev:prev_ctx_telemetry
       else
         Provider_context.get_telemetry ctx
     in
     let gc_telemetry =
       if Hh_logger.Level.passes_min_level Hh_logger.Level.Debug then
-        Telemetry.quick_gc_stat () |> Telemetry.diff ~prev:prev_gc_telemetry
+        Telemetry.quick_gc_stat ()
+        |> Telemetry.diff ~all:true ~prev:prev_gc_telemetry
       else
         Telemetry.quick_gc_stat ()
     in

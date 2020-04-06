@@ -35,6 +35,7 @@ type predicate =
   | DeclarationLocation
   | EnumDeclaration
   | EnumDefinition
+  | Enumerator
   | FileLines
   | FileXRefs
   | FunctionDeclaration
@@ -67,6 +68,7 @@ type glean_json = {
   declarationLocation: json list;
   enumDeclaration: json list;
   enumDefinition: json list;
+  enumerator: json list;
   fileLines: json list;
   fileXRefs: json list;
   functionDeclaration: json list;
@@ -102,6 +104,7 @@ let init_progress =
       declarationLocation = [];
       enumDeclaration = [];
       enumDefinition = [];
+      enumerator = [];
       fileLines = [];
       fileXRefs = [];
       functionDeclaration = [];
@@ -185,6 +188,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         enumDefinition = json :: progress.resultJson.enumDefinition;
+      }
+    | Enumerator ->
+      {
+        progress.resultJson with
+        enumerator = json :: progress.resultJson.enumerator;
       }
     | FileLines ->
       {
@@ -343,17 +351,6 @@ let build_type_json_nested type_name =
   let ty = Utils.strip_ns type_name in
   JSON_Object [("key", JSON_String ty)]
 
-let build_enumerator_json_nested const_name decl_ref =
-  JSON_Object
-    [
-      ( "key",
-        JSON_Object
-          [
-            ("name", build_name_json_nested const_name);
-            ("enumeration", decl_ref);
-          ] );
-    ]
-
 let build_signature_json_nested parameters return_type_name =
   let fields =
     let params = [("parameters", JSON_Array parameters)] in
@@ -501,6 +498,9 @@ let build_property_decl_json_ref fact_id =
 
 let build_class_const_decl_json_ref fact_id =
   JSON_Object [("classConst", build_id_json fact_id)]
+
+let build_enumerator_decl_json_ref fact_id =
+  JSON_Object [("enumerator", build_id_json fact_id)]
 
 let build_type_const_decl_json_ref fact_id =
   JSON_Object [("typeConst", build_id_json fact_id)]
@@ -653,17 +653,15 @@ let add_enum_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact EnumDeclaration json_fact progress
 
-let add_enum_defn_fact ctx elem decl_id progress =
-  let decl_ref = build_id_json decl_id in
-  let enumerators =
-    List.map elem.c_consts (fun const ->
-        build_enumerator_json_nested (snd const.cc_id) decl_ref)
-  in
+let add_enum_defn_fact ctx enm enum_id enumerators progress =
   let json_fields =
     let json_fields =
-      [("declaration", decl_ref); ("enumerators", JSON_Array enumerators)]
+      [
+        ("declaration", build_id_json enum_id);
+        ("enumerators", JSON_Array enumerators);
+      ]
     in
-    match elem.c_enum with
+    match enm.c_enum with
     | None -> json_fields
     | Some en ->
       let json_fields =
@@ -677,6 +675,16 @@ let add_enum_defn_fact ctx elem decl_id progress =
         :: json_fields)
   in
   add_fact EnumDefinition (JSON_Object json_fields) progress
+
+let add_enumerator_fact const_name decl_id progress =
+  let json_fact =
+    JSON_Object
+      [
+        ("name", build_name_json_nested const_name);
+        ("enumeration", build_id_json decl_id);
+      ]
+  in
+  add_fact Enumerator json_fact progress
 
 let add_func_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
@@ -913,18 +921,20 @@ let process_container_decl ctx elem progress =
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
   prog
 
-let process_enum_decl ctx elem progress =
-  let (pos, id) = elem.c_name in
-  let (_, prog) =
-    process_decl_loc
-      add_enum_decl_fact
-      (add_enum_defn_fact ctx)
-      build_enum_decl_json_ref
-      pos
-      id
-      elem
-      progress
+let process_enum_decl ctx enm progress =
+  let (pos, id) = enm.c_name in
+  let (enum_id, prog) = add_enum_decl_fact id progress in
+  let enum_decl_ref = build_enum_decl_json_ref enum_id in
+  let (_, prog) = add_decl_loc_fact pos enum_decl_ref prog in
+  let (enumerators, prog) =
+    List.fold enm.c_consts ~init:([], prog) ~f:(fun (decls, prog) enumerator ->
+        let (pos, id) = enumerator.cc_id in
+        let (decl_id, prog) = add_enumerator_fact id enum_id prog in
+        let ref_json = build_enumerator_decl_json_ref decl_id in
+        let (_, prog) = add_decl_loc_fact pos ref_json prog in
+        (build_id_json decl_id :: decls, prog))
   in
+  let (_, prog) = add_enum_defn_fact ctx enm enum_id enumerators prog in
   prog
 
 let process_gconst_decl ctx elem progress =
@@ -1065,6 +1075,7 @@ let build_json ctx symbols files_info =
       ("hack.PropertyDeclaration.1", progress.resultJson.propertyDeclaration);
       ("hack.TypeConstDeclaration.1", progress.resultJson.typeConstDeclaration);
       ("hack.FunctionDeclaration.1", progress.resultJson.functionDeclaration);
+      ("hack.Enumerator.1", progress.resultJson.enumerator);
       ("hack.EnumDeclaration.1", progress.resultJson.enumDeclaration);
       ("hack.ClassDeclaration.1", progress.resultJson.classDeclaration);
       ("hack.TraitDeclaration.1", progress.resultJson.traitDeclaration);

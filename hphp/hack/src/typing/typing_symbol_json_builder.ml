@@ -862,18 +862,20 @@ let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
   (decl_id, prog)
 
-let process_container_decl ctx elem progress =
-  let (pos, id) = elem.c_name in
+let process_container_decl ctx con progress =
+  let (con_pos, con_name) = con.c_name in
   let (con_type, decl_pred) =
-    container_decl_predicate (get_container_kind elem)
+    container_decl_predicate (get_container_kind con)
   in
-  let (decl_id, prog) = add_container_decl_fact decl_pred id progress in
+  let (con_decl_id, prog) =
+    add_container_decl_fact decl_pred con_name progress
+  in
   let (prop_decls, prog) =
-    List.fold elem.c_vars ~init:([], prog) ~f:(fun (decls, prog) prop ->
+    List.fold con.c_vars ~init:([], prog) ~f:(fun (decls, prog) prop ->
         let (pos, id) = prop.cv_id in
         let (decl_id, prog) =
           process_decl_loc
-            (add_property_decl_fact con_type decl_id)
+            (add_property_decl_fact con_type con_decl_id)
             (add_property_defn_fact ctx)
             build_property_decl_json_ref
             pos
@@ -884,11 +886,11 @@ let process_container_decl ctx elem progress =
         (build_property_decl_json_ref decl_id :: decls, prog))
   in
   let (class_const_decls, prog) =
-    List.fold elem.c_consts ~init:([], prog) ~f:(fun (decls, prog) const ->
+    List.fold con.c_consts ~init:([], prog) ~f:(fun (decls, prog) const ->
         let (pos, id) = const.cc_id in
         let (decl_id, prog) =
           process_decl_loc
-            (add_class_const_decl_fact con_type decl_id)
+            (add_class_const_decl_fact con_type con_decl_id)
             (add_class_const_defn_fact ctx)
             build_class_const_decl_json_ref
             pos
@@ -899,11 +901,11 @@ let process_container_decl ctx elem progress =
         (build_class_const_decl_json_ref decl_id :: decls, prog))
   in
   let (type_const_decls, prog) =
-    List.fold elem.c_typeconsts ~init:([], prog) ~f:(fun (decls, prog) tc ->
+    List.fold con.c_typeconsts ~init:([], prog) ~f:(fun (decls, prog) tc ->
         let (pos, id) = tc.c_tconst_name in
         let (decl_id, prog) =
           process_decl_loc
-            (add_type_const_decl_fact con_type decl_id)
+            (add_type_const_decl_fact con_type con_decl_id)
             (add_type_const_defn_fact ctx)
             build_type_const_decl_json_ref
             pos
@@ -914,11 +916,11 @@ let process_container_decl ctx elem progress =
         (build_type_const_decl_json_ref decl_id :: decls, prog))
   in
   let (method_decls, prog) =
-    List.fold elem.c_methods ~init:([], prog) ~f:(fun (decls, prog) meth ->
+    List.fold con.c_methods ~init:([], prog) ~f:(fun (decls, prog) meth ->
         let (pos, id) = meth.m_name in
         let (decl_id, prog) =
           process_decl_loc
-            (add_method_decl_fact con_type decl_id)
+            (add_method_decl_fact con_type con_decl_id)
             (add_method_defn_fact ctx)
             build_method_decl_json_ref
             pos
@@ -931,9 +933,9 @@ let process_container_decl ctx elem progress =
   let members =
     prop_decls @ class_const_decls @ type_const_decls @ method_decls
   in
-  let (_, prog) = add_container_defn_fact elem decl_id members prog in
-  let ref_json = build_container_decl_json_ref con_type decl_id in
-  let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  let (_, prog) = add_container_defn_fact con con_decl_id members prog in
+  let ref_json = build_container_decl_json_ref con_type con_decl_id in
+  let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
   prog
 
 let process_enum_decl ctx enm progress =

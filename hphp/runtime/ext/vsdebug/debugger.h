@@ -195,6 +195,9 @@ struct DebuggerOptions {
 
   // The maximum length of a string to return, for perf
   int maxReturnedStringLength;
+
+  // Don't redirect stdout to the debugger console
+  bool disableStdoutRedirection;
 };
 
 struct ClientInfo {

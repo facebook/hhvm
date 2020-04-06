@@ -62,6 +62,9 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   bool disableDummyPsPs =
     tryGetBool(args, "disableDummyPsPs", false);
 
+  bool disableStdoutRedirection =
+    tryGetBool(args, "disableStdoutRedirection", false);
+
   const auto& logFilePath =
     tryGetString(args, "logFilePath", emptyString);
 
@@ -119,6 +122,7 @@ bool LaunchAttachCommand::executeImpl(DebuggerSession* /*session*/,
   options.disableUniqueVarRef = disableUniqueVarRef;
   options.disableDummyPsPs = disableDummyPsPs;
   options.maxReturnedStringLength = maxReturnedStringLength;
+  options.disableStdoutRedirection = disableStdoutRedirection;
   m_debugger->setDebuggerOptions(options);
 
   // Send the InitializedEvent to indicate to the front-end that we are up

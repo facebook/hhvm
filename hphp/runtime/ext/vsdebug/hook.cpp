@@ -350,17 +350,19 @@ void VSDebugHook::tryEnterDebugger(
       (!RuntimeOption::ServerExecutionMode() &&
        !RuntimeOption::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
-      if (!g_context.isNull()) {
-        g_context->addStdoutHook(debugger->getStdoutHook());
-      }
+      if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {
+        if (!g_context.isNull()) {
+          g_context->addStdoutHook(debugger->getStdoutHook());
+        }
 
-      if (scriptAttachMode || debugger->isDummyRequest()) {
-        // Attach to stderr in server mode only for the dummy thread (to show
-        // any error spew from evals, etc) or in script attach mode.
-        // Attaching to all requests in server mode produces way too much error
-        // spew for the client. Users see stderr output for the webserver via
-        // web server logs.
-        Logger::SetThreadHook(debugger->getStderrHook());
+        if (scriptAttachMode || debugger->isDummyRequest()) {
+          // Attach to stderr in server mode only for the dummy thread (to show
+          // any error spew from evals, etc) or in script attach mode.
+          // Attaching to all requests in server mode produces way too much error
+          // spew for the client. Users see stderr output for the webserver via
+          // web server logs.
+          Logger::SetThreadHook(debugger->getStderrHook());
+        }
       }
     }
   }

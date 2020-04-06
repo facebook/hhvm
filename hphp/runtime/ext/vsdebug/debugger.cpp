@@ -61,6 +61,8 @@ bool Debugger::getDebuggerOption(const HPHP::String& option) {
     return options.disableUniqueVarRef;
   } else if (optionStr == "disabledummypsps") {
     return options.disableDummyPsPs;
+  } else if (optionStr == "disableStdoutRedirection") {
+    return options.disableStdoutRedirection;
   } else {
     raise_error("setDebuggerOption: Unknown option specified");
   }
@@ -85,6 +87,8 @@ void Debugger::setDebuggerOption(const HPHP::String& option, bool value) {
     options.disableUniqueVarRef = value;
   } else if (optionStr == "disabledummypsps") {
     options.disableDummyPsPs = value;
+  } else if (optionStr == "disableStdoutRedirection") {
+    options.disableStdoutRedirection = value;
   } else {
     raise_error("getDebuggerOption: Unknown option specified");
   }
@@ -104,13 +108,15 @@ void Debugger::setDebuggerOptions(DebuggerOptions options) {
       "notifyOnBpCalibration: %s\n"
       "disableUniqueVarRef: %s\n"
       "disableDummyPsPs: %s\n"
-      "maxReturnedStringLength: %d\n",
+      "maxReturnedStringLength: %d\n"
+      "disableStdoutRedirection: %s\n",
     options.showDummyOnAsyncPause ? "YES" : "NO",
     options.warnOnInterceptedFunctions ? "YES" : "NO",
     options.notifyOnBpCalibration ? "YES" : "NO",
     options.disableUniqueVarRef ? "YES" : "NO",
     options.disableDummyPsPs ? "YES" : "NO",
-    options.maxReturnedStringLength
+    options.maxReturnedStringLength,
+    options.disableStdoutRedirection ? "YES" : "NO"
   );
 }
 

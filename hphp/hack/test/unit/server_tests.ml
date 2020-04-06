@@ -235,14 +235,12 @@ let test_process_file_deferring () =
   let errors = Errors.empty in
 
   (* Finally, this is what all the setup was for: process this file *)
-  let { Typing_check_service.computation; counters; _ } =
-    Typing_check_service.process_file
-      dynamic_view_files
-      ctx
-      ~profile_log:true
-      errors
-      file
+  let prev_counter_state = Counters.reset ~enable:true in
+  let { Typing_check_service.computation; _ } =
+    Typing_check_service.process_file dynamic_view_files ctx errors file
   in
+  let counters = Counters.get_counters () in
+  Counters.restore_state prev_counter_state;
   Asserter.Int_asserter.assert_equals
     2
     (List.length computation)

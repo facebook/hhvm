@@ -13,7 +13,8 @@ let error_if_is_this (pos, name) =
   if String.equal (String.lowercase name) "this" then Errors.this_reserved pos
 
 let error_if_does_not_start_with_T (pos, name) =
-  if not (Char.equal name.[0] 'T') then Errors.start_with_T pos
+  if String.is_empty name || not (Char.equal name.[0] 'T') then
+    Errors.start_with_T pos
 
 let check_constraint { Aast.tp_name = tp; _ } =
   error_if_is_this tp;

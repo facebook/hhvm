@@ -53,7 +53,7 @@ struct Vreg {
   /*
    * Constructors.
    */
-  Vreg() {}
+  Vreg() = default;
   explicit Vreg(size_t r) : rn(r) {}
   /* implicit */ Vreg(Reg64 r)  : rn(int(r)) {}
   /* implicit */ Vreg(Reg32 r)  : rn(int(r)) {}

@@ -80,6 +80,13 @@ void visit(const Vunit& unit, VcallArgsId a, F f) {
   for (auto r : args.args) detail::invoke(f, r, width(r));
   for (auto r : args.simdArgs) detail::invoke(f, r, width(r));
   for (auto r : args.stkArgs) detail::invoke(f, r, width(r));
+  for (auto r : args.indRetArgs) detail::invoke(f, r, width(r));
+  for (auto const& p : args.argSpills) {
+    detail::invoke(f, p.second, width(p.second));
+  }
+  for (auto const& p : args.stkSpills) {
+    detail::invoke(f, p.second, width(p.second));
+  }
 }
 
 template <class F>
@@ -265,6 +272,8 @@ struct MutableRegVisitor {
     for (auto& r : args.simdArgs)   use(r);
     for (auto& r : args.stkArgs)    use(r);
     for (auto& r : args.indRetArgs) use(r);
+    for (auto& p : args.argSpills)  use(p.second);
+    for (auto& p : args.stkSpills)  use(p.second);
   }
   template<typename W> void use(Vr<W>& m) { Vreg r = m; use(r); m = r; }
   void use(Vreg& r) { r = u((Vreg)r); }

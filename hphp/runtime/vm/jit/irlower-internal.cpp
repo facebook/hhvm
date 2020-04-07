@@ -44,7 +44,10 @@ namespace {
  * Prepare `arg' for a call by shifting or zero-extending as appropriate, then
  * append its Vreg to `vargs'.
  */
-void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
+void prepareArg(const ArgDesc& arg,
+                Vout& v,
+                VregList& vargs,
+                VcallArgs::Spills* spills) {
   assertx(IMPLIES(arg.aux(), arg.kind() == ArgDesc::Kind::Reg));
 
   switch (arg.kind()) {
@@ -102,6 +105,14 @@ void prepareArg(const ArgDesc& arg, Vout& v, VregList& vargs) {
       vargs.push_back(tmp);
       break;
     }
+
+    case ArgDesc::Kind::SpilledTV: {
+      assertx(spills);
+      assertx(arg.srcReg2().isValid());
+      spills->emplace(vargs.size(), arg.srcReg2());
+      vargs.push_back(arg.srcReg());
+      break;
+    }
   }
 }
 
@@ -143,19 +154,20 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
                   SyncOptions sync, const ArgGroup& args) {
   assertx(call.verifySignature(dstInfo, args.argTypes()));
   auto const inst = args.inst();
-  jit::vector<Vreg> vIndRetArgs, vargs, vSimdArgs, vStkArgs;
+  VregList vIndRetArgs, vargs, vSimdArgs, vStkArgs;
+  VcallArgs::Spills vArgSpills, vStkSpills;
 
   for (size_t i = 0; i < args.numIndRetArgs(); ++i) {
-    prepareArg(args.indRetArg(i), v, vIndRetArgs);
+    prepareArg(args.indRetArg(i), v, vIndRetArgs, nullptr);
   }
   for (size_t i = 0; i < args.numGpArgs(); ++i) {
-    prepareArg(args.gpArg(i), v, vargs);
+    prepareArg(args.gpArg(i), v, vargs, &vArgSpills);
   }
   for (size_t i = 0; i < args.numSimdArgs(); ++i) {
-    prepareArg(args.simdArg(i), v, vSimdArgs);
+    prepareArg(args.simdArg(i), v, vSimdArgs, nullptr);
   }
   for (size_t i = 0; i < args.numStackArgs(); ++i) {
-    prepareArg(args.stkArg(i), v, vStkArgs);
+    prepareArg(args.stkArg(i), v, vStkArgs, &vStkSpills);
   }
 
   auto const syncFixup = [&] {
@@ -211,7 +223,9 @@ void cgCallHelper(Vout& v, IRLS& env, CallSpec call, const CallDest& dstInfo,
     std::move(vargs),
     std::move(vSimdArgs),
     std::move(vStkArgs),
-    std::move(vIndRetArgs)
+    std::move(vIndRetArgs),
+    std::move(vArgSpills),
+    std::move(vStkSpills)
   });
   auto const dstId = v.makeTuple(std::move(dstRegs));
 

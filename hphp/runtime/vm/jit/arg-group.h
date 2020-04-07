@@ -78,12 +78,11 @@ struct ArgDesc {
     Addr,    // Address (register plus 32-bit displacement)
     DataPtr, // Pointer to data section
     IndRet,  // Indirect Return Address (register plus 32-bit displacement)
+    SpilledTV, // Address of TypedValue pushed onto the stack
   };
 
-  PhysReg dstReg() const { return m_dstReg; }
   Vreg srcReg() const { return m_srcReg; }
   Kind kind() const { return m_kind; }
-  void setDstReg(PhysReg reg) { m_dstReg = reg; }
   Immed64 imm() const {
     assertx(m_kind == Kind::Imm || m_kind == Kind::DataPtr);
     return m_imm64;
@@ -97,10 +96,13 @@ struct ArgDesc {
             m_kind == Kind::IndRet);
     return m_disp32;
   }
+  Vreg srcReg2() const {
+    assertx(m_kind == Kind::SpilledTV);
+    return m_srcReg2;
+  }
+
   bool isZeroExtend() const { return m_zeroExtend; }
   folly::Optional<AuxUnion> aux() const { return m_aux; }
-  bool done() const { return m_done; }
-  void markDone() { m_done = true; }
 
 private: // These should be created using ArgGroup.
   friend struct ArgGroup;
@@ -120,6 +122,12 @@ private: // These should be created using ArgGroup.
     : m_kind(kind)
   {}
 
+  explicit ArgDesc(Kind kind, Vreg srcReg1, Vreg srcReg2)
+    : m_kind(kind)
+    , m_srcReg(srcReg1)
+    , m_srcReg2(srcReg2)
+  {}
+
   explicit ArgDesc(SSATmp* tmp,
                    Vloc,
                    bool val = true,
@@ -128,15 +136,14 @@ private: // These should be created using ArgGroup.
 private:
   Kind m_kind;
   Vreg m_srcReg;
-  PhysReg m_dstReg;
   union {
     Immed64 m_imm64; // 64-bit plain immediate
     Immed m_disp32;  // 32-bit displacement
     DataType m_typeImm;
+    Vreg m_srcReg2;
   };
   folly::Optional<AuxUnion> m_aux;
   bool m_zeroExtend{false};
-  bool m_done{false};
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -242,6 +249,16 @@ struct ArgGroup {
     return memberKeyImpl(i, false);
   }
 
+  /*
+   * Push a TypedValue onto the stack and pass its address. This is
+   * needed, for example, if you want to pass a tv_lval to a function
+   * expecting a const Variant&.
+   */
+  ArgGroup& constPtrToTV(Vreg type, Vreg data) {
+    push_arg(ArgDesc(ArgDesc::Kind::SpilledTV, type, data));
+    return *this;
+  }
+
   const IRInstruction* inst() const {
     return m_inst;
   }
@@ -275,7 +292,7 @@ private:
   ArgVec m_gpArgs; // INTEGER class args
   ArgVec m_simdArgs; // SSE class args
   ArgVec m_stkArgs; // Overflow
-  std::vector<Type> m_argTypes;
+  jit::vector<Type> m_argTypes;
 };
 
 ArgGroup toArgGroup(const NativeCalls::CallInfo&,

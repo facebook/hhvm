@@ -184,19 +184,28 @@ struct FormatVisitor {
     print(unit.tuples[t]);
   }
 
-  void print(const VregList& regs) {
+  void print(const VregList& regs, const VcallArgs::Spills* spills = nullptr) {
     str << sep() << '{';
     comma = false;
-    for (auto r : regs) print(r);
+    for (int i = 0; i < regs.size(); ++i) {
+      print(regs[i]);
+      if (!spills) continue;
+      auto const it = spills->find(i);
+      if (it == spills->end()) continue;
+      str << '+';
+      comma = false;
+      print(it->second);
+    }
     comma = true;
     str << '}';
   }
 
   void print(VcallArgsId id) {
     auto& args = unit.vcallArgs[id];
-    print(args.args);
+    print(args.args, &args.argSpills);
     print(args.simdArgs);
-    print(args.stkArgs);
+    print(args.stkArgs, &args.stkSpills);
+    print(args.indRetArgs);
   }
 
   void print(RegSet regs) {

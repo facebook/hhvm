@@ -293,19 +293,55 @@ void cgCallBuiltin(IRLS& env, const IRInstruction* inst) {
   for (uint32_t i = 0; i < callee->numParams(); ++i, ++srcNum) {
     auto const& pi = callee->params()[i];
 
-    // Non-pointer and NativeArg args are passed by value.  String, Array,
-    // Object, and Variant are passed by const&, i.e. a pointer to stack memory
-    // holding the value, so we expect PtrToT types for these.  Pointers to
-    // req::ptr types (String, Array, Object) need adjusting to point to
-    // &ptr->m_data.
-    if (TVOFF(m_data) && !pi.isNativeArg() && isReqPtrRef(pi.builtinType)) {
-      assertx(inst->src(srcNum)->type() <= TPtrToCell);
-      args.addr(srcLoc(env, inst, srcNum).reg(), TVOFF(m_data));
-    } else if (pi.isNativeArg() && !pi.builtinType) {
-      // This condition indicates a MixedTV (i.e., TypedValue-by-value) arg.
-      args.typedValue(srcNum);
+    if (pi.isNativeArg()) {
+      // Native args are always passed by value. The input must be a
+      // Cell. If it expects a specific type, just pass the
+      // value. Otherwise pass it as a TypedValue.
+      assertx(inst->src(srcNum)->isA(TCell));
+      if (pi.builtinType) {
+        args.ssa(srcNum);
+      } else {
+        args.typedValue(srcNum);
+      }
+    } else if (pi.builtinType) {
+      // Otherwise the value is passed by value for some types, and by
+      // ref for others. The function expects a specific type, so we
+      // only need to pass the value. The input could be a Cell, a
+      // pointer, or a lval. It will be a Cell for value types, and a
+      // ptr/lval for ref types.
+      auto const src = inst->src(srcNum);
+      if (src->isA(TCell) || src->isA(TPtrToCell)) {
+        static_assert(TVOFF(m_data) == 0, "");
+        args.ssa(srcNum);
+      } else {
+        assertx(src->isA(TLvalToCell));
+        auto const loc = srcLoc(env, inst, srcNum);
+        args.reg(loc.reg(tv_lval::val_idx));
+      }
     } else {
-      args.ssa(srcNum);
+      // Function takes param by ref, and it doesn't expect a specific
+      // type. These will be const Variant&. The inputs will always be
+      // pointers or lvals. If we have a pointer to a Cell, we can
+      // just pass it directly. If we have a lval, we need to
+      // materialize the TypedValue onto the stack and then pass its
+      // address.
+      auto const src = inst->src(srcNum);
+      if (src->isA(TPtrToCell)) {
+        static_assert(TVOFF(m_data) == 0, "");
+        args.ssa(srcNum);
+      } else {
+        assertx(src->isA(TLvalToCell));
+        if (!wide_tv_val) {
+          args.ssa(srcNum);
+        } else {
+          auto const data = v.makeReg();
+          auto const type = v.makeReg();
+          auto const loc = srcLoc(env, inst, srcNum);
+          v << load{*loc.reg(tv_lval::val_idx), data};
+          v << loadb{*loc.reg(tv_lval::type_idx), type};
+          args.constPtrToTV(type, data);
+        }
+      }
     }
   }
 

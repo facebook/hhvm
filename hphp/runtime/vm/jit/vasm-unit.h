@@ -29,6 +29,8 @@
 #include "hphp/util/data-block.h"
 #include "hphp/util/immed.h"
 
+#include <folly/sorted_vector_types.h>
+
 #include <functional>
 #include <type_traits>
 
@@ -63,10 +65,20 @@ struct VcallArgs {
   VregList stkArgs;
   VregList indRetArgs;
 
+  // If the index of the associated VregList has an entry in the
+  // Spills map, it means that Vreg in the VregList is the type field
+  // of a TypedValue to be spilled. The Vreg in the map is the
+  // matching data field. Since spilled TypedValues are rare, this
+  // lets us avoid making the VregLists bigger.
+  using Spills = folly::sorted_vector_map<size_t, Vreg>;
+  Spills argSpills; // For "args"
+  Spills stkSpills; // For "stkArgs"
+
   bool operator==(const VcallArgs& o) const {
     return
-      std::tie(args, simdArgs, stkArgs, indRetArgs) ==
-      std::tie(o.args, o.simdArgs, o.stkArgs, o.indRetArgs);
+      std::tie(args, simdArgs, stkArgs, indRetArgs, argSpills, stkSpills) ==
+      std::tie(o.args, o.simdArgs, o.stkArgs, o.indRetArgs,
+               o.argSpills, o.stkSpills);
   }
   bool operator!=(const VcallArgs& o) const { return !(*this == o); }
 };

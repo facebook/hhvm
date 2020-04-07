@@ -111,39 +111,92 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
   SCOPE_EXIT { unit.freeScratchBlock(scratch); };
   Vout v(unit, scratch, vinstr.irctx());
 
-  // Push stack arguments, in reverse order. Push in pairs without padding
-  // except for the last argument (pushed first) which should be padded if
-  // there are an odd number of arguments.
+  // Total amount of space (in 64-bit words) we've pushed onto the
+  // stack.
+  int32_t spDelta = 0;
+  // If we're going to spill a TypedValue onto the stack, the map of
+  // indices of the VregList to their offset (from spDelta) on the
+  // stack.
+  using SpillOffsets = folly::sorted_vector_map<size_t, int32_t>;
+  SpillOffsets argSpillOffsets;
+  SpillOffsets stkSpillOffsets;
+
+  // First, if we need to spilled any TypedValues to the stack, do
+  // that first. Record their offset in the stack so we can emit the
+  // appropriate leas later.
+  static_assert(TVOFF(m_data) == 0, "");
+  static_assert(TVOFF(m_type) == 8, "");
+  for (auto const& p : vargs.argSpills) {
+    v << pushp{vargs.args[p.first], p.second};
+    spDelta += 2;
+    argSpillOffsets.emplace(p.first, spDelta);
+  }
+  for (auto const& p : vargs.stkSpills) {
+    v << pushp{vargs.stkArgs[p.first], p.second};
+    spDelta += 2;
+    stkSpillOffsets.emplace(p.first, spDelta);
+  }
+
+  // If this parameter is actually a spilled TypedValue, pass its
+  // address on the stack to the function instead, not its Vreg (we
+  // already pushed its Vregs onto the stack). Otherwise use the Vreg
+  // as usual.
+  auto const spillOverride = [&] (Vreg r,
+                                  size_t idx,
+                                  const SpillOffsets& spills) {
+    auto const it = spills.find(idx);
+    if (it == spills.end()) return r;
+    auto const temp = v.makeReg();
+    v << lea{rsp()[(spDelta - it->second) * sizeof(uintptr_t)], temp};
+    return temp;
+  };
+
+  // Now push stack arguments, in reverse order. Push in pairs without
+  // padding except for the last argument (pushed first) which should
+  // be padded if there are an odd number of arguments.
   auto numArgs = vargs.stkArgs.size();
   int32_t const adjust = (numArgs & 0x1) ? sizeof(uintptr_t) : 0;
   if (adjust) {
     // Using InvalidReg below fails SSA checks and simplify pass, so just
     // push the arg twice. It's on the same cacheline and will actually
     // perform faster than an explicit lea.
-    v << pushp{vargs.stkArgs[numArgs - 1], vargs.stkArgs[numArgs - 1]};
+    auto const r =
+      spillOverride(vargs.stkArgs[numArgs - 1], numArgs - 1, stkSpillOffsets);
+    v << pushp{r, r};
+    spDelta += 2;
     --numArgs;
   }
   for (auto i2 = numArgs; i2 >= 2; i2 -= 2) {
-    v << pushp{vargs.stkArgs[i2 - 1], vargs.stkArgs[i2 - 2]};
+    auto const r1 =
+      spillOverride(vargs.stkArgs[i2 - 1], i2 - 1, stkSpillOffsets);
+    auto const r2 =
+      spillOverride(vargs.stkArgs[i2 - 2], i2 - 2, stkSpillOffsets);
+    v << pushp{r1, r2};
+    spDelta += 2;
   }
 
   // Get the arguments in the proper registers.
   RegSet argRegs;
-  auto doArgs = [&] (const VregList& srcs, PhysReg (*r)(size_t)) {
+  auto doArgs = [&] (const VregList& srcs,
+                     PhysReg (*r)(size_t),
+                     const SpillOffsets* spills) {
+    VregList argSrcs;
     VregList argDests;
     for (size_t i2 = 0, n = srcs.size(); i2 < n; ++i2) {
-      auto const reg = r(i2);
-      argDests.push_back(reg);
-      argRegs |= reg;
+      auto const src = spills ? spillOverride(srcs[i2], i2, *spills) : srcs[i2];
+      auto const dst = r(i2);
+      argSrcs.push_back(src);
+      argDests.push_back(dst);
+      argRegs |= dst;
     }
     if (argDests.size()) {
-      v << copyargs{v.makeTuple(srcs),
+      v << copyargs{v.makeTuple(std::move(argSrcs)),
                     v.makeTuple(std::move(argDests))};
     }
   };
-  doArgs(vargs.indRetArgs, rarg_ind_ret);
-  doArgs(vargs.args, rarg);
-  doArgs(vargs.simdArgs, rarg_simd);
+  doArgs(vargs.indRetArgs, rarg_ind_ret, nullptr);
+  doArgs(vargs.args, rarg, &argSpillOffsets);
+  doArgs(vargs.simdArgs, rarg_simd, nullptr);
 
   // Emit the appropriate call instruction sequence.
   emitCall(v, inst.call, argRegs);
@@ -159,13 +212,15 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
 
     // Insert an lea fixup for any stack args at the beginning of the catch
     // block.
-    if (auto rspOffset = ((vargs.stkArgs.size() + 1) & ~1) *
-                         sizeof(uintptr_t)) {
+    if (spDelta > 0) {
       auto& taken = unit.blocks[targets[1]].code;
       assertx(taken.front().op == Vinstr::landingpad ||
               taken.front().op == Vinstr::jmp);
 
-      Vinstr vi { lea{rsp()[rspOffset], rsp()}, taken.front().irctx() };
+      Vinstr vi {
+        lea{rsp()[spDelta*sizeof(uintptr_t)], rsp()},
+        taken.front().irctx()
+      };
 
       if (taken.front().op == Vinstr::jmp) {
         taken.insert(taken.begin(), vi);
@@ -259,11 +314,8 @@ void lower_vcall(Vunit& unit, Inst& inst, Vlabel b, size_t i) {
       break;
   }
 
-  if (vargs.stkArgs.size() > 0) {
-    auto const delta = safe_cast<int32_t>(
-      vargs.stkArgs.size() * sizeof(uintptr_t) + adjust
-    );
-    v << lea{rsp()[delta], rsp()};
+  if (spDelta > 0) {
+    v << lea{rsp()[spDelta * sizeof(uintptr_t)], rsp()};
   }
 
   // Insert new instructions to the appropriate block.

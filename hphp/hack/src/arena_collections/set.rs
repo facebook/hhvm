@@ -102,6 +102,10 @@ impl<'a, K: Clone + Ord> Set<'a, K> {
     pub fn remove_max_entry<A: Arena>(self, arena: &'a A) -> Self {
         Set(self.0.remove_max_entry(arena))
     }
+
+    pub fn diff<A: Arena>(self, arena: &'a A, other: Self) -> Self {
+        Set(self.0.diff(arena, other.0))
+    }
 }
 
 /// Iterator state for set.

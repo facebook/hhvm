@@ -195,7 +195,7 @@ pub fn sub_type_i<'a>(env: &mut Env<'a>, ty_sub: InternalType<'a>, ty_super: Int
     process_simplify_subtype_result(env, &prop);
 }
 
-fn prop_to_env<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> {
+fn prop_to_env<'a>(env: &mut Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> {
     let mut props_acc = avec![in env.bld()];
     prop_to_env_(env, prop, &mut props_acc);
     // TODO(hrust) proper conjunction
@@ -203,7 +203,7 @@ fn prop_to_env<'a>(env: &Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> {
 }
 
 fn prop_to_env_<'a>(
-    env: &Env<'a>,
+    env: &mut Env<'a>,
     prop: SubtypeProp<'a>,
     props_acc: &mut Vec<'a, SubtypeProp<'a>>,
 ) {
@@ -242,7 +242,7 @@ fn prop_to_env_<'a>(
 }
 
 fn props_to_env<'a>(
-    env: &Env<'a>,
+    env: &mut Env<'a>,
     props: &AVec<'a, SubtypeProp<'a>>,
     props_acc: &mut Vec<'a, SubtypeProp<'a>>,
 ) {
@@ -252,21 +252,45 @@ fn props_to_env<'a>(
 }
 
 fn add_tyvar_upper_bound_and_close<'a>(
-    env: &Env<'a>,
-    _prop: SubtypeProp<'a>,
-    _v: Ident,
-    _ty: InternalType<'a>,
+    env: &mut Env<'a>,
+    prop: SubtypeProp<'a>,
+    v: Ident,
+    ty: InternalType<'a>,
 ) -> SubtypeProp<'a> {
-    // TODO(hrust)
-    env.bld().valid()
+    let upper_bounds_before = env.inference_env.get_upper_bounds(v);
+    // TODO(hrust) add_tyvar_upper_bound_and_update_variances instead
+    env.inference_env.add_upper_bound(v, ty);
+    let upper_bounds_after = env.inference_env.get_upper_bounds(v);
+    let added_upper_bounds = upper_bounds_after.diff(env.bld(), upper_bounds_before);
+    let lower_bounds = env.inference_env.get_lower_bounds(v);
+    added_upper_bounds
+        .into_iter()
+        .fold(prop, |prop, upper_bound| {
+            // TODO(hrust) make all type consts and pu equal
+            lower_bounds.into_iter().fold(prop, |prop, lower_bound| {
+                simplify_subtype_i(env, lower_bound, upper_bound).conj(env.bld().alloc, prop)
+            })
+        })
 }
 
 fn add_tyvar_lower_bound_and_close<'a>(
-    env: &Env<'a>,
-    _prop: SubtypeProp<'a>,
-    _v: Ident,
-    _ty: InternalType<'a>,
+    env: &mut Env<'a>,
+    prop: SubtypeProp<'a>,
+    v: Ident,
+    ty: InternalType<'a>,
 ) -> SubtypeProp<'a> {
-    // TODO(hrust)
-    env.bld().valid()
+    let lower_bounds_before = env.inference_env.get_lower_bounds(v);
+    // TODO(hrust) add_tyvar_lower_bound_and_update_variances instead
+    env.inference_env.add_lower_bound(v, ty);
+    let lower_bounds_after = env.inference_env.get_lower_bounds(v);
+    let added_lower_bounds = lower_bounds_after.diff(env.bld(), lower_bounds_before);
+    let upper_bounds = env.inference_env.get_upper_bounds(v);
+    added_lower_bounds
+        .into_iter()
+        .fold(prop, |prop, lower_bound| {
+            // TODO(hrust) make all type consts and pu equal
+            upper_bounds.into_iter().fold(prop, |prop, upper_bound| {
+                simplify_subtype_i(env, upper_bound, lower_bound).conj(env.bld().alloc, prop)
+            })
+        })
 }

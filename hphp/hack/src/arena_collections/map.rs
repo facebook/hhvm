@@ -209,6 +209,13 @@ impl<'a, K: Clone + Ord, V: Clone> Map<'a, K, V> {
             },
         }
     }
+
+    /// Set difference. O(n*log(n))
+    pub fn diff<A: Arena>(self, arena: &'a A, other: Self) -> Self {
+        other
+            .into_iter()
+            .fold(self, |set, (k, _v)| set.remove(arena, k))
+    }
 }
 
 impl<'a, K: Clone + Ord, V: Copy> Map<'a, K, V> {

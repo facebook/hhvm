@@ -277,7 +277,7 @@ let test_context_changes_consts () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "foo.php")
           ~contents:{|<?hh
@@ -285,7 +285,7 @@ let test_context_changes_consts () =
           |}
       in
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "qux.php")
           ~contents:{|<?hh
@@ -305,7 +305,7 @@ let test_context_changes_funs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "foo.php")
           ~contents:{|<?hh
@@ -313,7 +313,7 @@ let test_context_changes_funs () =
           |}
       in
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "bar.php")
           ~contents:{|<?hh
@@ -347,7 +347,7 @@ let test_context_changes_classes () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "foo.php")
           ~contents:{|<?hh
@@ -381,7 +381,7 @@ let test_context_changes_typedefs () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       let (ctx, _entry) =
-        Provider_context.add_entry_from_file_contents
+        Provider_context.add_or_overwrite_entry_contents
           ~ctx
           ~path:(Relative_path.from_root "baz.php")
           ~contents:{|<?hh

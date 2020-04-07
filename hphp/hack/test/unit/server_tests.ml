@@ -298,7 +298,7 @@ let test_compute_tast_counting () =
   let { ctx; foo_path; foo_contents; _ } = server_setup () in
 
   let (ctx, entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents
@@ -397,7 +397,7 @@ let test_quarantine () =
 
   (* simple case *)
   let (ctx, _foo_entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents
@@ -427,7 +427,7 @@ let test_quarantine () =
 
   (* add a non-existent file; should fail *)
   let (ctx2, _nonexistent_entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:nonexistent_path
       ~contents:""
@@ -487,7 +487,7 @@ let test_unsaved_symbol_change () =
 
   (* Compute tast as-is *)
   let (ctx, entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents
@@ -516,7 +516,7 @@ let test_unsaved_symbol_change () =
     Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
   in
   let (ctx, entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents1
@@ -543,7 +543,7 @@ let test_unsaved_symbol_change () =
 
   (* go back to original unsaved content *)
   let (ctx, entry) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents
@@ -624,7 +624,7 @@ let test_canon_names () =
     ~uncanonical:"\\foo";
 
   let (ctx, _) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents
@@ -639,7 +639,7 @@ let test_canon_names () =
     Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
   in
   let (ctx1, _) =
-    Provider_context.add_entry_from_file_contents
+    Provider_context.add_or_overwrite_entry_contents
       ~ctx
       ~path:foo_path
       ~contents:foo_contents1

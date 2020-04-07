@@ -30,7 +30,7 @@ let single_ctx env path file_input =
     | ServerCommandTypes.FileContent contents -> contents
   in
   let ctx = Provider_utils.ctx_from_server_env env in
-  Provider_context.add_entry_from_file_contents ~ctx ~path ~contents
+  Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
 
 let single_ctx_path env path =
   single_ctx
@@ -143,7 +143,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     in
     (* feature not implemented here; it only works for LSP *)
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents
+      Provider_context.add_or_overwrite_entry_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix "")
         ~contents
@@ -369,7 +369,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
       ServerFileSync.get_file_content (ServerCommandTypes.FileName filename)
     in
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents
+      Provider_context.add_or_overwrite_entry_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents
@@ -395,7 +395,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let char_at_pos = File_content.get_char contents offset in
     let ctx = Provider_utils.ctx_from_server_env env in
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents
+      Provider_context.add_or_overwrite_entry_contents
         ~ctx
         ~path:(Relative_path.create_detect_prefix path)
         ~contents

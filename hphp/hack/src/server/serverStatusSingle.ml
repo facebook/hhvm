@@ -17,7 +17,7 @@ let go file_input ctx =
     | FileContent contents -> (Relative_path.default, contents)
   in
   let (_ctx, entry) =
-    Provider_context.add_entry_from_file_contents ~ctx ~path ~contents
+    Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
   in
   (* TODO(ljw): why did that discard _ctx? perform the following computation in
   a ctx that lacks entry? *)

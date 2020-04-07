@@ -166,7 +166,7 @@ let go ctx action include_defs genv env =
   | GConst cst_name -> search_gconst ctx cst_name include_defs genv env
   | LocalVar { filename; file_content; line; char } ->
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents
+      Provider_context.add_or_overwrite_entry_contents
         ~ctx
         ~path:filename
         ~contents:file_content

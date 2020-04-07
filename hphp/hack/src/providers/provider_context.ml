@@ -74,7 +74,7 @@ let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
 let add_or_overwrite_entry ~(ctx : t) (entry : entry) : t =
   { ctx with entries = Relative_path.Map.add ctx.entries entry.path entry }
 
-let add_entry_from_file_contents
+let add_or_overwrite_entry_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
   let entry = make_entry ~path ~contents in
   (add_or_overwrite_entry ctx entry, entry)

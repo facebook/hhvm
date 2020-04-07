@@ -100,12 +100,12 @@ if the context already had an entry of the same path, and returns a new
 Note: for most callers, [add_entry_if_missing] is more appropriate. *)
 val add_or_overwrite_entry : ctx:t -> entry -> t
 
-(** Similar to [add_entry], but adds a new entry with provided contents. 
+(** Similar to [add_or_overwrite_entry], but makes a new entry with contents. 
 Also returns the new entry for convenience.  It's important that
 callers use the resulting [Provider_context.t]. That way, if a
 subsequent operation tries to access data about the same file, it will get
 the [entry] we just added rather than reading from disk. *)
-val add_entry_from_file_contents :
+val add_or_overwrite_entry_contents :
   ctx:t -> path:Relative_path.t -> contents:string -> t * entry
 
 (** Similar to [add_entry], but (1) returns the existing entry if one

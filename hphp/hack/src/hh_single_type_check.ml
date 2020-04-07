@@ -1247,7 +1247,7 @@ let handle_mode
     let pos = File_content.offset_to_position contents offset in
     let is_manually_invoked = mode = Autocomplete_manually_invoked in
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents ~ctx ~path ~contents
+      Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
     in
     let autocomplete_context =
       ServerAutoComplete.get_autocomplete_context
@@ -1581,7 +1581,7 @@ let handle_mode
     let filename = Relative_path.to_absolute filename in
     let contents = cat filename in
     let (ctx, entry) =
-      Provider_context.add_entry_from_file_contents
+      Provider_context.add_or_overwrite_entry_contents
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path:(Relative_path.create_detect_prefix filename)
         ~contents

@@ -250,6 +250,26 @@ struct ArgGroup {
   }
 
   /*
+   * Pass a tv_lval pointing at the specified local
+   */
+  ArgGroup& tvLvalToLocal(Vreg fp, int id);
+
+  /*
+   * Pass a null tv_lval
+   */
+  ArgGroup& nullTvLval();
+
+  /*
+   * Pass a local_lval pointing at the specific local
+   */
+  ArgGroup& localLval(Vreg fp, int id);
+
+  /*
+   * Pass a null local_lval
+   */
+  ArgGroup& nullLocalLval();
+
+  /*
    * Push a TypedValue onto the stack and pass its address. This is
    * needed, for example, if you want to pass a tv_lval to a function
    * expecting a const Variant&.

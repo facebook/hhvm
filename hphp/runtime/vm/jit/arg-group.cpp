@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/translator-inline.h"
 
 namespace HPHP { namespace jit {
 
@@ -112,7 +113,12 @@ ArgGroup& ArgGroup::ssa(int i, bool allowFP) {
       // goes on the stack instead of being split between a register and the
       // stack.
       if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+
+      // On x86, if we have one free GP register left, we'll use it for the next
+      // int argument, but on ARM, we'll just spill all later int arguments.
+#ifndef __aarch64__
       SCOPE_EXIT { m_override = nullptr; };
+#endif
 
       push_arg(arg, s->type());
       push_arg(ArgDesc{ArgDesc::Kind::Reg, m_locs[s].reg(1), -1});
@@ -137,6 +143,72 @@ ArgGroup& ArgGroup::typedValue(int i, folly::Optional<AuxUnion> aux) {
   static_assert(offsetof(TypedValue, m_data) == 0, "");
   static_assert(offsetof(TypedValue, m_type) == 8, "");
   ssa(i, false).type(i, aux);
+  return *this;
+}
+
+ArgGroup& ArgGroup::tvLvalToLocal(Vreg fp, int id) {
+  if (wide_tv_val) {
+    // If there's exactly one register argument slot left, the whole tv_lval
+    // goes on the stack instead of being split between a register and the
+    // stack.
+    if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+
+    // On x86, if we have one free GP register left, we'll use it for the next
+    // int argument, but on ARM, we'll just spill all later int arguments.
+#ifndef __aarch64__
+    SCOPE_EXIT { m_override = nullptr; };
+#endif
+
+    static_assert(!wide_tv_val || tv_lval::typeOff() == 0, "");
+    static_assert(!wide_tv_val || tv_lval::dataOff() == 8, "");
+    addr(fp, offsetToLocalType(id));
+    addr(fp, offsetToLocalData(id));
+  } else {
+    static_assert(wide_tv_val || tv_lval::dataOff() == 0, "");
+    addr(fp, offsetToLocalData(id));
+  }
+  return *this;
+}
+
+ArgGroup& ArgGroup::nullTvLval() {
+  if (wide_tv_val) {
+    // If there's exactly one register argument slot left, the whole tv_lval
+    // goes on the stack instead of being split between a register and the
+    // stack.
+    if (m_gpArgs.size() == num_arg_regs() - 1) m_override = &m_stkArgs;
+
+    // On x86, if we have one free GP register left, we'll use it for the next
+    // int argument, but on ARM, we'll just spill all later int arguments.
+#ifndef __aarch64__
+    SCOPE_EXIT { m_override = nullptr; };
+#endif
+
+    static_assert(!wide_tv_val || tv_lval::typeOff() == 0, "");
+    static_assert(!wide_tv_val || tv_lval::dataOff() == 8, "");
+    immPtr(nullptr);
+    immPtr(nullptr);
+  } else {
+    static_assert(wide_tv_val || tv_lval::dataOff() == 0, "");
+    immPtr(nullptr);
+  }
+  return *this;
+}
+
+ArgGroup& ArgGroup::localLval(Vreg fp, int id) {
+  static_assert(sizeof(local_lval) == sizeof(uintptr_t), "");
+  static_assert(local_lval::typeOff() == 0, "");
+  auto const typeOffset = offsetToLocalType(id);
+  // Make sure the local_lval type -> data calculation matches our own
+  assertx(local_lval::valOffsetFromTypeOffset(typeOffset) ==
+          offsetToLocalData(id));
+  addr(fp, typeOffset);
+  return *this;
+}
+
+ArgGroup& ArgGroup::nullLocalLval() {
+  static_assert(sizeof(local_lval) == sizeof(uintptr_t), "");
+  static_assert(local_lval::typeOff() == 0, "");
+  immPtr(nullptr);
   return *this;
 }
 

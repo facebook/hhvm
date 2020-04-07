@@ -4787,20 +4787,20 @@ void iopFCallBuiltin(
 
 namespace {
 
-void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
+void implIterInit(PC& pc, const IterArgs& ita, tv_rval base,
                   PC targetpc, IterTypeOp op) {
-  auto const local = base != nullptr;
+  auto const local = (bool)base;
 
   if (!local) base = vmStack().topC();
-  auto val = frame_local(vmfp(), ita.valId);
-  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
+  auto const val = frame_local(vmfp(), ita.valId);
+  auto const key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : tv_lval{};
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  if (isArrayLikeType(type(base))) {
-    auto const arr = base->m_data.parr;
+  if (tvIsArrayLike(base)) {
+    auto const arr = base.val().parr;
     auto const res = key
-      ? new_iter_array_key_helper(op)(it, arr, val, key)
-      : new_iter_array_helper(op)(it, arr, val);
+      ? new_iter_array_key_helper(op)(it, arr, local_lval{val}, local_lval{key})
+      : new_iter_array_helper(op)(it, arr, local_lval{val});
     if (res == 0) pc = targetpc;
     if (!local) vmStack().discard();
     return;
@@ -4817,26 +4817,27 @@ void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
   //
 
   if (it->init(base)) {
-    tvAsVariant(val) = it->val();
-    if (key) tvAsVariant(key) = it->key();
+    variant_ref{val} = it->val();
+    if (key) variant_ref{key} = it->key();
   } else {
     pc = targetpc;
   }
   if (!local) vmStack().popC();
 }
 
-void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
-  auto val = frame_local(vmfp(), ita.valId);
-  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
+void implIterNext(PC& pc, const IterArgs& ita, tv_rval base, PC targetpc) {
+  auto const val = frame_local(vmfp(), ita.valId);
+  auto const key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : tv_lval{};
   auto it = frame_iter(vmfp(), ita.iterId);
 
   auto const more = [&]{
-    if (base != nullptr && isArrayLikeType(base->m_type)) {
-      auto const arr = base->m_data.parr;
-      return key ? liter_next_key_ind(it, val, key, arr)
-                 : liter_next_ind(it, val, arr);
+    if (base && tvIsArrayLike(base)) {
+      auto const arr = base.val().parr;
+      return key ? liter_next_key_ind(it, local_lval{val}, local_lval{key}, arr)
+                 : liter_next_ind(it, local_lval{val}, arr);
     }
-    return key ? iter_next_key_ind(it, val, key) : iter_next_ind(it, val);
+    return key ? iter_next_key_ind(it, local_lval{val}, local_lval{key})
+               : iter_next_ind(it, local_lval{val});
   }();
 
   if (more) {
@@ -4862,7 +4863,7 @@ OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
-  implIterNext(pc, ita, nullptr, targetpc);
+  implIterNext(pc, ita, tv_rval{}, targetpc);
 }
 
 OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,

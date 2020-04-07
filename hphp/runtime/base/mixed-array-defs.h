@@ -89,19 +89,19 @@ TypedValue MixedArray::getElmKey(const Elm& e) {
 
 ALWAYS_INLINE
 void MixedArray::getArrayElm(ssize_t pos,
-                            TypedValue* valOut,
-                            TypedValue* keyOut) const {
+                             tv_lval valOut,
+                             tv_lval keyOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  tvDup(elm.data, *valOut);
-  tvCopy(getElmKey(elm), *keyOut);
+  tvDup(elm.data, valOut);
+  tvCopy(getElmKey(elm), keyOut);
 }
 
 ALWAYS_INLINE
-void MixedArray::getArrayElm(ssize_t pos, TypedValue* valOut) const {
+void MixedArray::getArrayElm(ssize_t pos, tv_lval valOut) const {
   assertx(size_t(pos) < m_used);
   auto& elm = data()[pos];
-  tvDup(elm.data, *valOut);
+  tvDup(elm.data, valOut);
 }
 
 ALWAYS_INLINE

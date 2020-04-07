@@ -891,11 +891,11 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
   not_reached();
 }
 
-void TypeConstraint::verifyParam(TypedValue* tv,
+void TypeConstraint::verifyParam(tv_lval val,
                                  const Func* func,
                                  int paramNum) const {
-  if (UNLIKELY(!check(tv, func->cls()))) {
-    verifyParamFail(func, tv, paramNum);
+  if (UNLIKELY(!check(val, func->cls()))) {
+    verifyParamFail(func, val, paramNum);
   }
 }
 
@@ -1039,29 +1039,34 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
   return folly::none;
 }
 
-void TypeConstraint::verifyParamFail(const Func* func, TypedValue* tv,
+void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
                                      int paramNums) const {
-  verifyFail(func, tv, paramNums);
+  verifyFail(func, val, paramNums);
   assertx(
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
     (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
      (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
-      isArrayType(tv->m_type))) ||
+      isArrayType(val.type()))) ||
     (RuntimeOption::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
-    check(tv, func->cls())
+    check(val, func->cls())
   );
 }
 
 namespace {
-template<class T, class F>
-void castClsMeth(T c, F make) {
-  auto const a =
-    make(val(c).pclsmeth->getClsStr(), val(c).pclsmeth->getFuncStr()).detach();
+
+template <typename F>
+void castClsMeth(tv_lval c, F make) {
+  assertx(type(c) == KindOfClsMeth);
+  auto const a = make(
+    val(c).pclsmeth->getClsStr(),
+    val(c).pclsmeth->getFuncStr()
+  ).detach();
   tvDecRefClsMeth(c);
   val(c).parr = a;
   type(c) = a->toDataType();
 }
+
 }
 
 void TypeConstraint::verifyOutParamFail(const Func* func,
@@ -1228,7 +1233,7 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
   );
 }
 
-void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
+void TypeConstraint::verifyFail(const Func* func, tv_lval c,
                                 int id) const {
   VMRegAnchor _;
   std::string name = displayName(func->cls());
@@ -1238,13 +1243,13 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     if (id == ReturnId) {
       raise_hackarr_compat_type_hint_ret_notice(
         func,
-        c->m_data.parr,
+        val(c).parr,
         name.c_str()
       );
     } else {
       raise_hackarr_compat_type_hint_param_notice(
         func,
-        c->m_data.parr,
+        val(c).parr,
         name.c_str(),
         id
       );
@@ -1252,8 +1257,8 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     return;
   }
 
-  if (UNLIKELY(isThis() && c->m_type == KindOfObject)) {
-    Class* cls = c->m_data.pobj->getVMClass();
+  if (UNLIKELY(isThis() && c.type() == KindOfObject)) {
+    Class* cls = val(c).pobj->getVMClass();
     auto const thisClass = getThis();
     if (cls->preClass()->userAttributes().count(s___MockClass.get()) &&
         cls->parent() == thisClass) {
@@ -1261,24 +1266,24 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
     }
   }
 
-  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
+  if (isFuncType(c.type()) || isClassType(c.type())) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
-        if (isFuncType(c->m_type)) {
+        if (isFuncType(c.type())) {
           raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
         } else {
           raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
         }
       }
-      c->m_data.pstr = isFuncType(c->m_type)
-        ? const_cast<StringData*>(c->m_data.pfunc->name())
-        : const_cast<StringData*>(c->m_data.pclass->name());
-      c->m_type = KindOfPersistentString;
+      val(c).pstr = isFuncType(c.type())
+        ? const_cast<StringData*>(val(c).pfunc->name())
+        : const_cast<StringData*>(val(c).pclass->name());
+      c.type() = KindOfPersistentString;
       return;
     }
   }
 
-  if (isClsMethType(c->m_type)) {
+  if (isClsMethType(c.type())) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       if (isClsMethCompactVec()) {
         if (RuntimeOption::EvalVecHintNotices) {
@@ -1301,13 +1306,13 @@ void TypeConstraint::verifyFail(const Func* func, TypedValue* c,
           if (id == ReturnId) {
             raise_hackarr_compat_type_hint_ret_notice(
               func,
-              c->m_data.parr,
+              val(c).parr,
               name.c_str()
             );
           } else {
             raise_hackarr_compat_type_hint_param_notice(
               func,
-              c->m_data.parr,
+              val(c).parr,
               name.c_str(),
               id
             );

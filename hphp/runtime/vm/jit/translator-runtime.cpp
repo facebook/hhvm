@@ -441,9 +441,9 @@ void VerifyParamTypeFail(int paramNum, const TypeConstraint* tc) {
   if (!tc) {
     tc = &func->params()[paramNum].typeConstraint;
   }
-  TypedValue* tv = frame_local(ar, paramNum);
-  assertx(!tc->check(tv, func->cls()));
-  tc->verifyParamFail(func, tv, paramNum);
+  auto const param = frame_local(ar, paramNum);
+  assertx(!tc->check(param, func->cls()));
+  tc->verifyParamFail(func, param, paramNum);
 }
 
 void VerifyRetTypeSlow(int32_t id,
@@ -481,7 +481,7 @@ void VerifyReifiedLocalTypeImpl(int32_t id, ArrayData* ts) {
   VMRegAnchor _;
   const ActRec* ar = liveFrame();
   const Func* func = ar->m_func;
-  TypedValue* param = frame_local(ar, id);
+  auto const param = frame_local(ar, id);
   bool warn = false;
   if (verifyReifiedLocalType(ts, param, tcCouldBeReified(func, id), warn)) {
     return;

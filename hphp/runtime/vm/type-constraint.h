@@ -414,7 +414,7 @@ struct TypeConstraint {
   }
 
   // NB: Can throw if the check fails.
-  void verifyParam(TypedValue* tv, const Func* func, int paramNum) const;
+  void verifyParam(tv_lval val, const Func* func, int paramNum) const;
   void verifyReturn(TypedValue* tv, const Func* func) const;
   void verifyReturnNonNull(TypedValue* tv, const Func* func) const;
   void verifyOutParam(TypedValue* tv, const Func* func,
@@ -433,8 +433,8 @@ struct TypeConstraint {
                    const StringData* recordName,
                    const StringData* fieldName) const;
 
-  void verifyFail(const Func* func, TypedValue* tv, int id) const;
-  void verifyParamFail(const Func* func, TypedValue* tv, int paramNum) const;
+  void verifyFail(const Func* func, tv_lval val, int id) const;
+  void verifyParamFail(const Func* func, tv_lval val, int paramNum) const;
   void verifyOutParamFail(const Func* func, TypedValue* tv,
                           int paramNum) const;
   void verifyReturnFail(const Func* func, TypedValue* tv) const {

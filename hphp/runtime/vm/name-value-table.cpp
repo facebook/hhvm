@@ -107,9 +107,8 @@ void NameValueTable::attach(ActRec* fp) {
 
   const auto func = fp->m_func;
   const Id numNames = func->numNamedLocals();
-  TypedValue* loc = frame_local(fp, 0);
 
-  for (Id i = 0; i < numNames; ++i, --loc) {
+  for (Id i = 0; i < numNames; ++i) {
     if (!func->localVarName(i)) continue;
     assertx(func->lookupVarId(func->localVarName(i)) == i);
 
@@ -117,7 +116,7 @@ void NameValueTable::attach(ActRec* fp) {
     assertx(elm);
     if (elm->m_tv.m_type != kInvalidDataType) {
       assertx(elm->m_tv.m_type != kNamedLocalDataType);
-      tvCopy(elm->m_tv, *loc);
+      tvCopy(elm->m_tv, frame_local(fp, i));
     }
 
     elm->m_tv.m_type = kNamedLocalDataType;
@@ -131,14 +130,14 @@ void NameValueTable::detach(ActRec* fp) {
 
   const auto func = fp->m_func;
   const Id numNames = func->numNamedLocals();
-  TypedValue* loc = frame_local(fp, 0);
 
-  for (Id i = 0; i < numNames; ++i, --loc) {
+  for (Id i = 0; i < numNames; ++i) {
     if (!func->localVarName(i)) continue;
     assertx(func->lookupVarId(func->localVarName(i)) == i);
 
     auto elm = findElm(func->localVarName(i));
     assertx(elm && elm->m_tv.m_type == kNamedLocalDataType);
+    auto const loc = frame_local(fp, i);
     tvCopy(*loc, elm->m_tv);
     tvDebugTrash(loc);
   }
@@ -152,31 +151,31 @@ void NameValueTable::leak() {
   assertx(leaked());
 }
 
-TypedValue* NameValueTable::set(const StringData* name, tv_rval val) {
-  TypedValue* target = findTypedValue(name);
-  tvSet(*val, *target);
+tv_lval NameValueTable::set(const StringData* name, tv_rval val) {
+  auto const target = findTypedValue(name);
+  tvSet(*val, target);
   return target;
 }
 
 void NameValueTable::unset(const StringData* name) {
   Elm* elm = findElm(name);
   if (!elm) return;
-  tvUnset(*derefNamedLocal(&elm->m_tv));
+  tvUnset(derefNamedLocal(&elm->m_tv));
 }
 
-TypedValue* NameValueTable::lookup(const StringData* name) {
+tv_lval NameValueTable::lookup(const StringData* name) {
   Elm* elm = findElm(name);
   if (!elm) return nullptr;
-  TypedValue* tv = derefNamedLocal(&elm->m_tv);
-  return tv->m_type == KindOfUninit ? nullptr : tv;
+  auto const lval = derefNamedLocal(&elm->m_tv);
+  return type(lval) == KindOfUninit ? tv_lval{} : lval;
 }
 
-TypedValue* NameValueTable::lookupAdd(const StringData* name) {
-  auto tv = findTypedValue(name);
-  if (tv->m_type == KindOfUninit) {
-    tvWriteNull(*tv);
+tv_lval NameValueTable::lookupAdd(const StringData* name) {
+  auto const val = findTypedValue(name);
+  if (type(val) == KindOfUninit) {
+    tvWriteNull(val);
   }
-  return tv;
+  return val;
 }
 
 ssize_t NameValueTable::lookupPos(const StringData* name) {
@@ -216,13 +215,13 @@ void NameValueTable::allocate(const size_t newCapac) {
   }
 }
 
-TypedValue* NameValueTable::derefNamedLocal(TypedValue* tv) const {
+tv_lval NameValueTable::derefNamedLocal(TypedValue* tv) const {
   return tv->m_type == kNamedLocalDataType
     ? frame_local(m_fp, tv->m_data.num)
     : tv;
 }
 
-TypedValue* NameValueTable::findTypedValue(const StringData* name) {
+tv_lval NameValueTable::findTypedValue(const StringData* name) {
   Elm* elm = insert(name);
   if (elm->m_tv.m_type == kInvalidDataType) {
     tvWriteNull(elm->m_tv);
@@ -343,7 +342,7 @@ const StringData* NameValueTable::Iterator::curKey() const {
   return m_tab->m_table[m_idx].m_name;
 }
 
-const TypedValue* NameValueTable::Iterator::curVal() const {
+tv_rval NameValueTable::Iterator::curVal() const {
   assertx(valid());
   return m_tab->derefNamedLocal(&m_tab->m_table[m_idx].m_tv);
 }
@@ -373,8 +372,8 @@ bool NameValueTable::Iterator::atEmpty() const {
   if (!m_tab->m_table[m_idx].m_name) {
     return true;
   }
-  const auto tv = m_tab->derefNamedLocal(&m_tab->m_table[m_idx].m_tv);
-  return tv->m_type == KindOfUninit;
+  auto const val = m_tab->derefNamedLocal(&m_tab->m_table[m_idx].m_tv);
+  return type(val) == KindOfUninit;
 }
 
 //////////////////////////////////////////////////////////////////////

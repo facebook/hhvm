@@ -55,7 +55,7 @@ bool isTSAllWildcards(const ArrayData* ts);
  */
 bool verifyReifiedLocalType(
   const ArrayData* type,
-  const TypedValue* param,
+  tv_rval param,
   bool isTypeVar,
   bool& warn
 );

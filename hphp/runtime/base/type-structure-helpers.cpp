@@ -495,7 +495,7 @@ bool isTSAllWildcards(const ArrayData* ts) {
 // is a primitive reified type parameter
 bool verifyReifiedLocalType(
   const ArrayData* type_,
-  const TypedValue* param,
+  tv_rval param,
   bool isTypeVar,
   bool& warn
 ) {
@@ -506,7 +506,7 @@ bool verifyReifiedLocalType(
   // we do not need to run the check if the object in question does not have
   // reified generics since `VerifyParamType` should have taken care of it
   if (!isTypeVar && isObj) {
-    auto const obj = param->m_data.pobj;
+    auto const obj = val(param).pobj;
     auto const objcls = obj->getVMClass();
     // Since we already checked that the class matches in VerifyParamType using
     // the type annotation

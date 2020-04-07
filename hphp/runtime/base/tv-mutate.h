@@ -252,6 +252,13 @@ ALWAYS_INLINE void tvDebugTrash(TypedValue* tv) {
   if (debug) memset(tv, kTVTrashFill, sizeof *tv);
 }
 
+ALWAYS_INLINE void tvDebugTrash(tv_lval lval) {
+  if (debug) {
+    memset(&type(lval), kTVTrashFill, sizeof(type(lval)));
+    memset(&val(lval), kTVTrashFill, sizeof(val(lval)));
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

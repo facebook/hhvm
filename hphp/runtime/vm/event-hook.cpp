@@ -240,14 +240,11 @@ static Array get_frame_args(const ActRec* ar) {
   int numNonVariadic = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
   auto const variadic = ar->func()->hasVariadicCaptureParam();
-  auto local = reinterpret_cast<TypedValue*>(
-    uintptr_t(ar) - sizeof(TypedValue)
-  );
   if (variadic && numArgs > numNonVariadic) {
-    auto arr = local - numNonVariadic;
-    if (isArrayType(arr->m_type) &&
-        arr->m_data.parr->hasVanillaPackedLayout()) {
-      numArgs = numNonVariadic + arr->m_data.parr->size();
+    auto const arr = frame_local(ar, numNonVariadic);
+    if (tvIsArray(arr) &&
+        val(arr).parr->hasVanillaPackedLayout()) {
+      numArgs = numNonVariadic + val(arr).parr->size();
     } else {
       numArgs = numNonVariadic;
     }
@@ -256,18 +253,16 @@ static Array get_frame_args(const ActRec* ar) {
   VArrayInit retArray(numArgs);
 
   int i = 0;
-  // The function's formal parameters are on the stack
   for (; i < numArgs && i < numNonVariadic; ++i) {
-    retArray.append(tvAsCVarRef(local));
-    --local;
+    retArray.append(tvAsCVarRef(*frame_local(ar, i)));
   }
 
   if (i < numArgs) {
     assertx(ar->func()->hasVariadicCaptureParam());
     // If there are still args that haven't been accounted for, they have
     // been shuffled into a packed array stored in the variadic capture
-    // param on the stack.
-    for (ArrayIter iter(tvAsCVarRef(local)); iter; ++iter) {
+    // param.
+    for (ArrayIter iter(tvAsCVarRef(*frame_local(ar, i))); iter; ++iter) {
       retArray.append(iter.secondVal());
     }
   }
@@ -365,10 +360,9 @@ static Variant call_intercept_handler_callback(
   auto reifiedGenerics = [&] {
     if (!origCallee->hasReifiedGenerics()) return Array();
     // Reified generics is the first non param local
-    auto const tv =
-      reinterpret_cast<TypedValue*>(ar) - origCallee->numParams() - 1;
-    assertx(tvIsVecOrVArray(tv));
-    return Array(tv->m_data.parr);
+    auto const generics = frame_local(ar, origCallee->numParams());
+    assertx(tvIsVecOrVArray(generics));
+    return Array(val(generics).parr);
   }();
   auto ret = Variant::attach(
     g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,

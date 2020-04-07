@@ -561,7 +561,7 @@ private:
     DebuggerSession* session,
     const std::string& name,
     const std::string& value,
-    TypedValue* typedVariable,
+    tv_lval typedVariable,
     request_id_t requestId,
     folly::dynamic* result
   );

@@ -66,7 +66,7 @@ struct NameValueTable {
     ssize_t toInteger() const;
     bool valid() const;
     const StringData* curKey() const;
-    const TypedValue* curVal() const;
+    tv_rval curVal() const;
     void next();
     void prev();
 
@@ -132,7 +132,7 @@ struct NameValueTable {
    * Set the slot for the supplied name to `val', allocating it if
    * necessary.
    */
-  TypedValue* set(const StringData* name, tv_rval val);
+  tv_lval set(const StringData* name, tv_rval val);
 
   /*
    * Remove an element from this table.  All elements added always
@@ -144,14 +144,14 @@ struct NameValueTable {
   /*
    * Lookup a name, returning null if it doesn't exist in this table.
    */
-  TypedValue* lookup(const StringData* name);
+  tv_lval lookup(const StringData* name);
 
   /*
    * Insert a name to value entry with KindOfNull for the value, or
    * return what is already there if the key already exists in the
    * table.
    */
-  TypedValue* lookupAdd(const StringData* name);
+  tv_lval lookupAdd(const StringData* name);
 
   /*
    * Lookup a name, returning it's position, or the canonical invalid position.
@@ -179,8 +179,8 @@ private:
 private:
   void reserve(size_t desiredSize);
   void allocate(const size_t newCapac);
-  TypedValue* derefNamedLocal(TypedValue* tv) const;
-  TypedValue* findTypedValue(const StringData* name);
+  tv_lval derefNamedLocal(TypedValue* tv) const;
+  tv_lval findTypedValue(const StringData* name);
   Elm* insertImpl(const StringData* name);
   Elm* insert(const StringData* name);
   void rehash(Elm* const oldTab, const size_t oldMask);

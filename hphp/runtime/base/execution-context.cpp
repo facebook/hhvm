@@ -2221,7 +2221,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
       if (fp) {
         auto const idx = fp->func()->lookupVarId(f->localVarName(id));
         if (idx != kInvalidId) {
-          auto const var = tvAsVariant(frame_local(fp, idx));
+          Variant var{tvAsCVarRef(*frame_local(fp, idx))};
           if (var.isInitialized()) args.append(var);
           else appendUninit();
           actions[id] = StoreFrame;
@@ -2231,7 +2231,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         if (fp->hasVarEnv()) {
           auto const tv = fp->getVarEnv()->lookup(f->localVarName(id));
           if (tv) {
-            if (type(tv) != KindOfUninit) args.append(tvAsVariant(*tv));
+            if (type(tv) != KindOfUninit) args.append(tvAsCVarRef(*tv));
             else appendUninit();
             actions[id] = StoreVV;
             continue;
@@ -2257,7 +2257,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
           val(tv).pobj->instanceof(uninit_cls)) {
         switch (actions[id]) {
         case StoreFrame:
-          tvAsVariant(frame_local(fp, frameIds[id])).unset();
+          variant_ref{frame_local(fp, frameIds[id])}.unset();
           break;
         case StoreVV:
           fp->m_varEnv->unset(f->localVarName(id));
@@ -2270,7 +2270,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
       }
       switch (actions[id]) {
       case StoreFrame:
-        tvAsVariant(frame_local(fp, frameIds[id])) = arr[id + 1];
+        variant_ref{frame_local(fp, frameIds[id])} = arr[id + 1];
         break;
       case StoreVV:
         fp->m_varEnv->set(f->localVarName(id), &tv);

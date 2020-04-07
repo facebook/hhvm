@@ -151,13 +151,13 @@ arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
 
 arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
   auto a = asGlobals(ad);
-  TypedValue* tv = a->m_tab->lookup(k);
-  if (!tv) {
-    TypedValue nulVal;
-    tvWriteNull(nulVal);
-    tv = a->m_tab->set(k, &nulVal);
+  auto val = a->m_tab->lookup(k);
+  if (!val) {
+    TypedValue nullVal;
+    tvWriteNull(nullVal);
+    val = a->m_tab->set(k, &nullVal);
   }
-  return arr_lval { ad, tv };
+  return arr_lval { ad, val };
 }
 
 ArrayData* GlobalsArray::SetIntMove(ArrayData* ad, int64_t k, TypedValue v) {
@@ -169,12 +169,12 @@ ArrayData* GlobalsArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
 }
 
 ArrayData* GlobalsArray::SetStrMove(ArrayData* ad, StringData* k, TypedValue v) {
-  tvMove(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  tvMove(v, asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
 
 ArrayData* GlobalsArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
-  tvSet(v, *asGlobals(ad)->m_tab->lookupAdd(k));
+  tvSet(v, asGlobals(ad)->m_tab->lookupAdd(k));
   return ad;
 }
 

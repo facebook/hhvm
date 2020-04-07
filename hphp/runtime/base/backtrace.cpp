@@ -474,11 +474,14 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         !fp->localsDecRefd() &&
         fp->func()->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
-      auto const tv = frame_local(fp, fp->func()->numParams());
-      if (tv->m_type != KindOfUninit) {
-        assertx(tv && (RuntimeOption::EvalHackArrDVArrs ? tvIsVec(tv)
-                       : tvIsArray(tv)));
-        auto const reified_generics = tv->m_data.parr;
+      auto const generics = frame_local(fp, fp->func()->numParams());
+      if (type(generics) != KindOfUninit) {
+        assertx(
+          RuntimeOption::EvalHackArrDVArrs
+            ? tvIsVec(generics)
+            : tvIsArray(generics)
+        );
+        auto const reified_generics = val(generics).parr;
         funcname += mangleReifiedGenericsName(reified_generics);
       }
     }
@@ -529,11 +532,11 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         auto func = fp->func();
         for (int i = 0; i < nparams; i++) {
           auto const argname = func->localVarName(i);
-          auto const tv = varEnv->lookup(argname);
+          auto const lval = varEnv->lookup(argname);
 
           auto val = init_null();
-          if (tv != nullptr) { // the variable hasn't been unset
-            val = withValues ? tvAsVariant(tv) : "";
+          if (lval) { // the variable hasn't been unset
+            val = withValues ? Variant{variant_ref{lval}} : "";
           }
 
           if (withNames) {
@@ -544,7 +547,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         }
       } else {
         for (int i = 0; i < nparams; i++) {
-          Variant val = withValues ? tvAsVariant(frame_local(fp, i)) : "";
+          Variant val =
+            withValues ? Variant{variant_ref{frame_local(fp, i)}} : "";
 
           if (withNames) {
             auto const argname = fp->func()->localVarName(i);
@@ -560,16 +564,16 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     if (btArgs.m_withMetadata && !fp->localsDecRefd()) {
       if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
-        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
-        if (tv != nullptr && tv->m_type != KindOfUninit) {
-          frame.set(s_metadata, tvAsVariant(tv));
+        auto const val = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (val && type(val) != KindOfUninit) {
+          frame.set(s_metadata, Variant{variant_ref{val}});
         }
       } else {
         auto local = fp->func()->lookupVarId(s_86metadata.get());
         if (local != kInvalidId) {
-          auto tv = frame_local(fp, local);
-          if (tv->m_type != KindOfUninit) {
-            frame.set(s_metadata, tvAsVariant(tv));
+          auto const val = frame_local(fp, local);
+          if (type(val) != KindOfUninit) {
+            frame.set(s_metadata, Variant{variant_ref{val}});
           }
         }
       }
@@ -647,31 +651,24 @@ int64_t createBacktraceHash(bool consider_metadata) {
     hash ^= funchash + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 
     if (consider_metadata && !fp->localsDecRefd()) {
-      TypedValue* meta_tv = nullptr;
+      tv_rval meta;
       if (
         UNLIKELY(fp->func()->attrs() & AttrMayUseVV) &&
         UNLIKELY(fp->hasVarEnv())
       ) {
-        auto tv = fp->getVarEnv()->lookup(s_86metadata.get());
-        if (
-          tv != nullptr &&
-          !isNullType(tv->m_type)
-        ) {
-          meta_tv = tv;
-        }
+        auto const val = fp->getVarEnv()->lookup(s_86metadata.get());
+        if (val && !isNullType(type(val))) meta = val;
       } else {
         auto local = fp->func()->lookupVarId(s_86metadata.get());
         if (local != kInvalidId) {
-          auto tv = frame_local(fp, local);
-          if (!isNullType(tv->m_type)) {
-            meta_tv = tv;
-          }
+          auto const val = frame_local(fp, local);
+          if (!isNullType(type(val))) meta = val;
         }
       }
 
-      if (meta_tv) {
-        hash ^= meta_tv->m_data.num + 0x9e3779b9 + (hash << 6) + (hash >> 2);
-        hash ^= static_cast<int>(meta_tv->m_type)
+      if (meta) {
+        hash ^= val(meta).num + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        hash ^= static_cast<int>(type(meta))
           + 0x9e3779b9 + (hash << 6) + (hash >> 2);
       }
     }

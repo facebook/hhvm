@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/tv-refcount.h"
+#include "hphp/runtime/base/tv-val.h"
 
 namespace HPHP {
 
@@ -67,10 +68,11 @@ frame_iter(const ActRec* fp, int i) {
           - uintptr_t((i+1) * sizeof(Iter)));
 }
 
-inline TypedValue*
+inline tv_lval
 frame_local(const ActRec* fp, int n) {
-  return (TypedValue*)(uintptr_t(fp) -
-    uintptr_t((n+1) * sizeof(TypedValue)));
+  return tv_lval{
+    (TypedValue*)(uintptr_t(fp) - uintptr_t((n+1) * sizeof(TypedValue)))
+  };
 }
 
 inline Resumable*

@@ -60,8 +60,7 @@ inline void scanFrameSlots(const ActRec* ar, type_scan::Scanner& scanner) {
   // layout: [iters][locals][ActRec]
   //                        ^ar
   auto num_locals = ar->func()->numLocals();
-  auto locals = frame_local(ar, num_locals - 1);
-  scanner.scan(*locals, num_locals * sizeof(TypedValue));
+  for (size_t i = 0; i < num_locals; ++i) scanner.scan(frame_local(ar, i));
   auto num_iters = ar->func()->numIterators();
   auto iters = frame_iter(ar, num_iters - 1);
   scanner.scan(*iters, num_iters * sizeof(Iter));

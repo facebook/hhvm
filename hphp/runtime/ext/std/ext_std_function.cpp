@@ -111,29 +111,25 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   int numParams = ar->func()->numNonVariadicParams();
   int numArgs = ar->numArgs();
   bool variadic = ar->func()->hasVariadicCaptureParam();
-  auto local = reinterpret_cast<TypedValue*>(
-    uintptr_t(ar) - sizeof(TypedValue)
-  );
   if (variadic && numArgs > numParams) {
-    auto arr = local - numParams;
-    if (isArrayType(arr->m_type) &&
-        arr->m_data.parr->hasVanillaPackedLayout()) {
-      numArgs = numParams + arr->m_data.parr->size();
+    auto const arr = frame_local(ar, numParams);
+    if (tvIsArray(arr) &&
+        val(arr).parr->hasVanillaPackedLayout()) {
+      numArgs = numParams + val(arr).parr->size();
     } else {
       numArgs = numParams;
     }
   }
-  local -= offset;
+
   VArrayInit retInit(std::max(numArgs - offset, 0));
   for (int i = offset; i < numArgs; ++i) {
     if (i < numParams) {
-      // This corresponds to one of the function's formal parameters, so it's
-      // on the stack.
-      retInit.append(tvAsCVarRef(local));
-      --local;
+      // This corresponds to one of the function's formal parameters
+      retInit.append(tvAsCVarRef(*frame_local(ar, i)));
     } else {
       assertx(variadic);
-      retInit.append(tvAsCVarRef(local).asCArrRef()[i - numParams]);
+      auto const lval = frame_local(ar, numParams);
+      retInit.append(tvAsCVarRef(*lval).asCArrRef()[i - numParams]);
     }
   }
 

@@ -193,7 +193,7 @@ bool SetVariableCommand::setLocalVariable(
     auto const localNameSd = func->localVarName(id);
     if (!localNameSd) continue;
 
-    TypedValue* frameValue = frame_local(fp, id);
+    auto const frameValue = frame_local(fp, id);
     const std::string localName = localNameSd->toCppString();
     if (localName == name) {
       setVariableValue(
@@ -339,20 +339,20 @@ void SetVariableCommand::setVariableValue(
   DebuggerSession* session,
   const std::string& name,
   const std::string& value,
-  TypedValue* typedVariable,
+  tv_lval typedVariable,
   request_id_t requestId,
   folly::dynamic* result
 ) {
-  switch (typedVariable->m_type) {
+  switch (type(typedVariable)) {
     case KindOfBoolean: {
         bool boolVal = getBooleanValue(value);
-        typedVariable->m_data.num = boolVal ? 1 : 0;
+        val(typedVariable).num = boolVal ? 1 : 0;
       }
       break;
 
     case KindOfInt64:
       try {
-        typedVariable->m_data.num = std::stoi(value, nullptr, 0);
+        val(typedVariable).num = std::stoi(value, nullptr, 0);
       } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
@@ -360,7 +360,7 @@ void SetVariableCommand::setVariableValue(
 
     case KindOfDouble:
       try {
-        typedVariable->m_data.dbl = std::stod(value);
+        val(typedVariable).dbl = std::stod(value);
       } catch (std::exception &e) {
         throw DebuggerCommandException("Invalid value specified.");
       }
@@ -373,14 +373,13 @@ void SetVariableCommand::setVariableValue(
         CopyString
       );
 
-      if (typedVariable->m_type == KindOfString &&
-          typedVariable->m_data.pstr != nullptr) {
-
-        typedVariable->m_data.pstr->decRefCount();
+      if (type(typedVariable) == KindOfString &&
+          val(typedVariable).pstr != nullptr) {
+        val(typedVariable).pstr->decRefCount();
       }
 
-      typedVariable->m_data.pstr = newSd;
-      typedVariable->m_type = KindOfString;
+      val(typedVariable).pstr = newSd;
+      type(typedVariable) = KindOfString;
       break;
     }
 
@@ -420,7 +419,7 @@ void SetVariableCommand::setVariableValue(
       throw DebuggerCommandException("Unexpected variable type");
   }
 
-  Variant variable = tvAsVariant(typedVariable);
+  Variant variable{variant_ref{typedVariable}};
   *result = VariablesCommand::serializeVariable(
               session,
               m_debugger,

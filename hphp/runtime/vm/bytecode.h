@@ -132,8 +132,8 @@ struct VarEnv {
   void exitFP(ActRec* fp);
 
   void set(const StringData* name, tv_rval tv);
-  TypedValue* lookup(const StringData* name);
-  TypedValue* lookupAdd(const StringData* name);
+  tv_lval lookup(const StringData* name);
+  tv_lval lookupAdd(const StringData* name);
   bool unset(const StringData* name);
 
   Array getDefinedVariables() const;

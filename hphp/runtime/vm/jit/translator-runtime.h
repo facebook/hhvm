@@ -142,7 +142,7 @@ TypedValue vecFirstLast(ArrayData* a);
 template <bool isFirst, bool isKey>
 TypedValue arrFirstLast(ArrayData* a);
 
-TypedValue* ldGblAddrDefHelper(StringData* name);
+tv_lval ldGblAddrDefHelper(StringData* name);
 
 TypedValue* getSPropOrNull(const Class* cls,
                            const StringData* name,

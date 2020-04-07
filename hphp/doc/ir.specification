@@ -1304,12 +1304,12 @@ To string conversions:
   Load the address of the object property at physical index `index`. Branch if
   the value at that address is Uninit. T must be a subtype of PtrToPropInitCell.
 
-| LdGblAddr, D(PtrToGblCell), S(Str), B
+| LdGblAddr, D(LvalToGblCell), S(Str), B
 
   Loads a pointer to a global. S0 is the global's name. Branches to B if the
   global is not defined.
 
-| LdGblAddrDef, D(PtrToGblCell), S(Str), NF
+| LdGblAddrDef, D(LvalToGblCell), S(Str), NF
 
   Loads a pointer to a global. S0 is the global's name. Defines the global if
   it is not already defined.

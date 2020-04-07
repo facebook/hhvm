@@ -26,14 +26,13 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 inline void php_global_set(const StaticString& name, Variant var) {
-  auto& lval = tvAsVariant(g_context->m_globalVarEnv->lookupAdd(name.get()));
+  variant_ref lval{g_context->m_globalVarEnv->lookupAdd(name.get())};
   lval = std::move(var);
 }
 
 inline Variant php_global_exchange(const StaticString& name, Variant newV) {
-  Variant ret;
-  auto& lval = tvAsVariant(g_context->m_globalVarEnv->lookupAdd(name.get()));
-  ret = lval;
+  variant_ref lval{g_context->m_globalVarEnv->lookupAdd(name.get())};
+  Variant ret{lval};
   lval = std::move(newV);
   return ret;
 }
@@ -41,7 +40,7 @@ inline Variant php_global_exchange(const StaticString& name, Variant newV) {
 inline Variant php_global(const StaticString& name) {
   auto const tv = g_context->m_globalVarEnv->lookup(name.get());
   // Note: Variant is making unnecessary KindOfUninit checks here.
-  return tv ? tvAsCVarRef(tv) : uninit_null();
+  return tv ? Variant{variant_ref{tv}} : uninit_null();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -647,7 +647,7 @@ TypedValue* getSPropOrRaise(const Class* cls,
   return sprop;
 }
 
-TypedValue* ldGblAddrDefHelper(StringData* name) {
+tv_lval ldGblAddrDefHelper(StringData* name) {
   return g_context->m_globalVarEnv->lookupAdd(name);
 }
 

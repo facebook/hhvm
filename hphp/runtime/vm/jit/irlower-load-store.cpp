@@ -354,19 +354,20 @@ void cgStMIPropState(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-static TypedValue* ldGblAddrHelper(const StringData* name) {
+static tv_lval ldGblAddrHelper(const StringData* name) {
   return g_context->m_globalVarEnv->lookup(name);
 }
 
 void cgLdGblAddr(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0);
   auto& v = vmain(env);
 
-  cgCallHelper(v, env, CallSpec::direct(ldGblAddrHelper), callDest(dst),
+  cgCallHelper(v, env, CallSpec::direct(ldGblAddrHelper),
+               callDest(env, inst),
                SyncOptions::None, argGroup(env, inst).ssa(0));
 
   auto const sf = v.makeReg();
-  v << testq{dst, dst, sf};
+  v << testq{dst.reg(tv_lval::val_idx), dst.reg(tv_lval::val_idx), sf};
   v << jcc{CC_Z, sf, {label(env, inst->next()), label(env, inst->taken())}};
 }
 

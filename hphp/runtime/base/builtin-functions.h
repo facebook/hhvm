@@ -64,7 +64,7 @@ void throw_exception(const Object& e);
 ///////////////////////////////////////////////////////////////////////////////
 // type testing
 
-inline bool is_null(const TypedValue* c) {
+inline bool is_null(tv_rval c) {
   assertx(tvIsPlausible(*c));
   return tvIsNull(c);
 }

@@ -4973,6 +4973,145 @@ function b_hover(): string {
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_serverless_ide_decl_two_unsaved_buffers(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("unsaved1.php"))
+        variables.update({"unsaved2_file_uri": self.repo_file_uri("unsaved2.php")})
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_serverless_ide_decl_two_unsaved_buffers"),
+                use_serverless_ide=True,
+            )
+            .notification(
+                comment="open 'unsaved1.php', since we'll be hovering in it",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .notification(
+                comment="open 'unsaved2.php' with a bool-returning signature, different from disk",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${unsaved2_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": """\
+<?hh  //strict
+function unsaved_bar(): bool { return true; }
+""",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover 'unsaved1.php' is with respect to disk contents of 'unsaved2.php'",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 1, "character": 39},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "function unsaved_bar(): int"},
+                        "Return type: `int`",
+                    ],
+                    "range": {
+                        "start": {"line": 1, "character": 34},
+                        "end": {"line": 1, "character": 45},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .notification(
+                comment="change signature in 'unsaved2.php' to return string",
+                method="textDocument/didChange",
+                params={
+                    "textDocument": {"uri": "${unsaved2_file_uri}", "version": 2},
+                    "contentChanges": [
+                        {
+                            "text": """\
+<?hh  //strict
+function unsaved_bar(): string { return "hello"; }
+"""
+                        }
+                    ],
+                },
+            )
+            .request(
+                line=line(),
+                comment="this is a dummy hover in 'unsaved2.php' just to ensure its decl is cached",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${unsaved2_file_uri}"},
+                    "position": {"line": 0, "character": 0},
+                },
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="hover 'unsaved1.php' is still with respect to disk contents of 'unsaved2.php'",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 1, "character": 39},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "function unsaved_bar(): int"},
+                        "Return type: `int`",
+                    ],
+                    "range": {
+                        "start": {"line": 1, "character": 34},
+                        "end": {"line": 1, "character": 45},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .write_to_disk(
+                comment="save signature in 'unsaved2' to return string",
+                uri=variables["unsaved2_file_uri"],
+                contents="""\
+<?hh // strict
+function unsaved_bar(): string { return "hello"; }
+""",
+                notify=True,
+            )
+            .request(
+                line=line(),
+                comment="hover 'unsaved1.php' gets new disk contents of 'unsaved2.php'",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 1, "character": 39},
+                },
+                result={
+                    "contents": [
+                        {"language": "hack", "value": "function unsaved_bar(): string"},
+                        "Return type: `string`",
+                    ],
+                    "range": {
+                        "start": {"line": 1, "character": 34},
+                        "end": {"line": 1, "character": 45},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def _sanitize_gutter_line_numbers(self, s: str) -> str:
         gutter_line_number_re = re.compile(r"^[ ]*[0-9]+ \|", re.MULTILINE)
         return re.sub(gutter_line_number_re, " XXXX |", s)

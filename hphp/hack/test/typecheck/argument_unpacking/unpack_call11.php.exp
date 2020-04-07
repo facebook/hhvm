@@ -17,7 +17,9 @@ Expected B (variadic argument)
 File "unpack_call11.php", line 15, characters 25-25:
 But got E
 File "unpack_call11.php", line 35, characters 26-27:
-An array cannot be unpacked into the required arguments of a function (Typing[4359])
+Invalid argument (Typing[4359])
+File "unpack_call11.php", line 35, characters 26-27:
+An array cannot be unpacked into the required arguments of a function
 File "unpack_call11.php", line 51, characters 10-19:
 Definition is here
 File "unpack_call11.php", line 36, characters 26-28:

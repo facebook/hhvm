@@ -367,11 +367,14 @@ val unset_nonidx_in_strict : Pos.t -> (Pos.t * string) list -> unit
 
 val unpacking_disallowed_builtin_function : Pos.t -> string -> unit
 
-val invalid_destructure : Pos.t -> Pos.t -> string -> unit
+val invalid_destructure :
+  Pos.t -> Pos.t -> string -> typing_error_callback -> unit
 
-val unpack_array_required_argument : Pos.t -> Pos.t -> unit
+val unpack_array_required_argument :
+  Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val unpack_array_variadic_argument : Pos.t -> Pos.t -> unit
+val unpack_array_variadic_argument :
+  Pos.t -> Pos.t -> typing_error_callback -> unit
 
 val array_get_arity : Pos.t -> string -> Pos.t -> unit
 
@@ -419,9 +422,11 @@ val constructor_no_args : Pos.t -> unit
 
 val visibility : Pos.t -> string -> Pos.t -> string -> unit
 
-val typing_too_many_args : int -> int -> Pos.t -> Pos.t -> unit
+val typing_too_many_args :
+  int -> int -> Pos.t -> Pos.t -> typing_error_callback option -> unit
 
-val typing_too_few_args : int -> int -> Pos.t -> Pos.t -> unit
+val typing_too_few_args :
+  int -> int -> Pos.t -> Pos.t -> typing_error_callback option -> unit
 
 val bad_call : Pos.t -> string -> unit
 

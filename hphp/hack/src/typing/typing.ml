@@ -5952,7 +5952,8 @@ and call_construct p env class_ params el unpacked_element cid =
 
 and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
   let exp_min = Typing_defs.arity_min exp_arity in
-  if arity < exp_min then Errors.typing_too_few_args exp_min arity pos pos_def;
+  if arity < exp_min then
+    Errors.typing_too_few_args exp_min arity pos pos_def None;
   match exp_arity with
   | Fstandard _ ->
     let exp_max = List.length ft.ft_params in
@@ -5963,7 +5964,7 @@ and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
         arity
     in
     if arity > exp_max then
-      Errors.typing_too_many_args exp_max arity pos pos_def
+      Errors.typing_too_many_args exp_max arity pos pos_def None
   | Fvariadic _
   | Fellipsis _ ->
     ()
@@ -5973,9 +5974,14 @@ and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
   match (lambda_arity, expected_arity) with
   | (Fstandard lambda_min, Fstandard _) ->
     if lambda_min < expected_min then
-      Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos;
+      Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos None;
     if lambda_min > expected_min then
-      Errors.typing_too_many_args expected_min lambda_min lambda_pos def_pos
+      Errors.typing_too_many_args
+        expected_min
+        lambda_min
+        lambda_pos
+        def_pos
+        None
   | (_, _) -> ()
 
 (* The variadic capture argument is an array listing the passed
@@ -6321,7 +6327,9 @@ and call
                 let (env, te, ty) = expr env e in
                 (* Populate the type variables from the expression in the splat *)
                 let env =
-                  SubType.sub_type_i
+                  Type.sub_type_i
+                    (fst e)
+                    Reason.URparam
                     env
                     (LoclType ty)
                     destructure_ty
@@ -6452,7 +6460,13 @@ and call_untyped_unpack env f_pos unpacked_element =
     let destructure_ty =
       MakeType.simple_variadic_splat (Reason.Runpack_param (fst e, f_pos, 0)) ty
     in
-    SubType.sub_type_i env (LoclType ety) destructure_ty Errors.unify_error
+    Type.sub_type_i
+      f_pos
+      Reason.URnone
+      env
+      (LoclType ety)
+      destructure_ty
+      Errors.unify_error
 
 and bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 

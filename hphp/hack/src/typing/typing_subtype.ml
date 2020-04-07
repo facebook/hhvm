@@ -651,12 +651,14 @@ and simplify_subtype_i
             invalid_env_with env (fun () ->
                 Errors.unpack_array_required_argument
                   (Reason.to_pos r_super)
-                  fpos)
+                  fpos
+                  subtype_env.on_error)
           | (SplatUnpack, [], None) ->
             invalid_env_with env (fun () ->
                 Errors.unpack_array_variadic_argument
                   (Reason.to_pos r_super)
-                  fpos)
+                  fpos
+                  subtype_env.on_error)
           | (SplatUnpack, [], Some _)
           | (ListDestructure, _, _) ->
             List.fold d_required ~init:(env, TL.valid) ~f:(fun res ty_dest ->
@@ -689,7 +691,12 @@ and simplify_subtype_i
               | _ -> (Reason.to_pos r_super, Reason.to_pos r, 0)
             in
             invalid_env_with env (fun () ->
-                f (prefix + len_required) (prefix + len_ts) epos fpos)
+                f
+                  (prefix + len_required)
+                  (prefix + len_ts)
+                  epos
+                  fpos
+                  (Some subtype_env.on_error))
           in
           if len_ts < len_required then
             arity_error Errors.typing_too_few_args
@@ -775,7 +782,8 @@ and simplify_subtype_i
                          Errors.invalid_destructure
                            (Reason.to_pos r_super)
                            (get_pos ty_sub)
-                           ty_sub_descr)
+                           ty_sub_descr
+                           subtype_env.on_error)
               end)
         end
       | ( r,

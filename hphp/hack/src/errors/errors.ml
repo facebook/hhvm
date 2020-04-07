@@ -971,6 +971,11 @@ let experimental_feature pos msg =
 
 let strip_ns id = id |> Utils.strip_ns |> Hh_autoimport.reverse_type
 
+let on_error_or_add (on_error : typing_error_callback option) code errl =
+  match on_error with
+  | None -> add_list code errl
+  | Some f -> f ~code errl
+
 (*****************************************************************************)
 (* Parsing errors. *)
 (*****************************************************************************)
@@ -2769,18 +2774,18 @@ let unpacking_disallowed_builtin_function pos name =
     pos
     ("Arg unpacking is disallowed for " ^ name)
 
-let invalid_destructure pos1 pos2 ty =
-  add_list
-    (Typing.err_code Typing.InvalidDestructure)
+let invalid_destructure pos1 pos2 ty (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.InvalidDestructure)
     [
       ( pos1,
         "This expression cannot be destructured with a list(...) expression" );
       (pos2, "This is " ^ ty);
     ]
 
-let unpack_array_required_argument p fp =
-  add_list
-    (Typing.err_code Typing.SplatArrayRequired)
+let unpack_array_required_argument p fp (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.SplatArrayRequired)
     [
       ( p,
         "An array cannot be unpacked into the required arguments of a function"
@@ -2788,9 +2793,9 @@ let unpack_array_required_argument p fp =
       (fp, "Definition is here");
     ]
 
-let unpack_array_variadic_argument p fp =
-  add_list
-    (Typing.err_code Typing.SplatArrayRequired)
+let unpack_array_variadic_argument p fp (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.SplatArrayRequired)
     [
       ( p,
         "A function that receives an unpacked array as an argument must have a variadic parameter to accept the elements of the array"
@@ -2939,8 +2944,9 @@ let constructor_no_args pos =
 let visibility p msg1 p_vis msg2 =
   add_list (Typing.err_code Typing.Visibility) [(p, msg1); (p_vis, msg2)]
 
-let typing_too_many_args expected actual pos pos_def =
-  add_list
+let typing_too_many_args expected actual pos pos_def on_error =
+  on_error_or_add
+    on_error
     (Typing.err_code Typing.TypingTooManyArgs)
     [
       ( pos,
@@ -2951,8 +2957,9 @@ let typing_too_many_args expected actual pos pos_def =
       (pos_def, "Definition is here");
     ]
 
-let typing_too_few_args required actual pos pos_def =
-  add_list
+let typing_too_few_args required actual pos pos_def on_error =
+  on_error_or_add
+    on_error
     (Typing.err_code Typing.TypingTooFewArgs)
     [
       ( pos,
@@ -3134,9 +3141,7 @@ let expected_tparam
       (definition_pos, "Definition is here");
     ]
   in
-  match on_error with
-  | None -> add_list (Typing.err_code Typing.ExpectedTparam) errl
-  | Some f -> f ~code:(Typing.err_code Typing.ExpectedTparam) errl
+  on_error_or_add on_error (Typing.err_code Typing.ExpectedTparam) errl
 
 let object_string pos1 pos2 =
   add_list
@@ -4231,10 +4236,7 @@ let invalid_newable_type_param_constraints
 let override_final ~parent ~child ~(on_error : typing_error_callback option) =
   let msg1 = (child, "You cannot override this method") in
   let msg2 = (parent, "It was declared as final") in
-  match on_error with
-  | Some on_error ->
-    on_error ~code:(Typing.err_code Typing.OverrideFinal) [msg1; msg2]
-  | None -> add_list (Typing.err_code Typing.OverrideFinal) [msg1; msg2]
+  on_error_or_add on_error (Typing.err_code Typing.OverrideFinal) [msg1; msg2]
 
 let override_memoizelsb ~parent ~child =
   add_list

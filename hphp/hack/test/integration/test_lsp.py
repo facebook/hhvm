@@ -4939,7 +4939,7 @@ class BaseClassIncremental {
 function a_hover(): int {
   return b_hover();
 }
-# A comment describing b_hover.
+# A comment describing b_hover differently.
 function b_hover(): string {
   return 42;
 }

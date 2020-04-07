@@ -1,4 +1,5 @@
 # pyre-strict
+# flake8: noqa: B950
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 

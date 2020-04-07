@@ -5112,6 +5112,130 @@ function unsaved_bar(): string { return "hello"; }
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
+    def test_hover_without_file_open(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables.update(self.setup_php_file("hover.php"))
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_hover_without_file_open"),
+                use_serverless_ide=True,
+                supports_status=True,
+            )
+            .ignore_requests(
+                method="window/showStatus",
+                params={
+                    "type": 1,
+                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "Hack IDE: initializing. hh_server: stopped.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "Hack IDE: ready. hh_server: stopped.",
+                    "shortMessage": "Hack ✓",
+                    "type": 1,
+                },
+                result=NoResponse(),
+            )
+            .request(
+                line=line(),
+                comment="hover before file_open will fail",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 20},
+                },
+                result=None,
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover after file_open will succeed",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 20},
+                },
+                result={"contents": [{"language": "hack", "value": "string"}]},
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                method="$test/shutdownServerlessIde",
+                params={},
+                result=None,
+                powered_by="serverless_ide",
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [
+                        {"title": "Restart hh_server"},
+                        {"title": "Restart Hack IDE"},
+                    ],
+                    "message": "Hack IDE has failed. "
+                    + "See Output>Hack for details. hh_server: stopped.",
+                    "shortMessage": "Hack: failed",
+                    "type": 1,
+                },
+                result={"title": "Restart Hack IDE"},
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "Hack IDE: ready. hh_server: stopped.",
+                    "shortMessage": "Hack ✓",
+                    "type": 1,
+                },
+                result=None,
+            )
+            .request(
+                line=line(),
+                comment="hover after restart will succeed",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 20},
+                },
+                result={"contents": [{"language": "hack", "value": "string"}]},
+                powered_by="serverless_ide",
+            )
+            .notification(
+                method="textDocument/didClose",
+                params={"textDocument": {"uri": "${php_file_uri}"}},
+            )
+            .request(
+                line=line(),
+                comment="hover after file_close will fail",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 26, "character": 20},
+                },
+                result=None,
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
     def _sanitize_gutter_line_numbers(self, s: str) -> str:
         gutter_line_number_re = re.compile(r"^[ ]*[0-9]+ \|", re.MULTILINE)
         return re.sub(gutter_line_number_re, " XXXX |", s)

@@ -440,10 +440,7 @@ let update_file
       ( document_location.ClientIdeMessage.file_contents,
         Relative_path.Map.find_opt initialized_state.open_files path )
     with
-    | (_, None) ->
-      failwith
-        ( "Attempted LSP operation on a non-open file"
-        ^ Exception.get_current_callstack_string 99 )
+    | (_, None) -> failwith "Attempted LSP operation on a non-open file"
     | (Some contents, Some entry)
       when entry.Provider_context.contents = contents ->
       entry

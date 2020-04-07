@@ -19,6 +19,7 @@ use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
 use instruction_sequence_rust::{instr, Error, Result};
+use ocamlrep::rc::RcOc;
 use options::Options;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
 
@@ -61,7 +62,7 @@ pub fn emit_fatal_program<'p>(
 pub fn emit_program<'p>(
     emitter: &mut Emitter,
     flags: FromAstFlags,
-    namespace: &namespace_env::Env,
+    namespace: RcOc<namespace_env::Env>,
     tast: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let result = emit_program_(emitter, flags, namespace, tast);
@@ -80,7 +81,7 @@ pub fn emit_program<'p>(
 fn emit_program_<'p>(
     emitter: &mut Emitter,
     flags: FromAstFlags,
-    namespace: &namespace_env::Env,
+    namespace: RcOc<namespace_env::Env>,
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
     let hoist_kinds = closure_convert::convert_toplevel_prog(emitter, prog)?;
@@ -88,15 +89,13 @@ fn emit_program_<'p>(
         .context_mut()
         .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
 
-    let main = emit_main(emitter, flags, namespace, prog)?;
+    let main = emit_main(emitter, flags, RcOc::clone(&namespace), prog)?;
     let mut functions = emit_functions_from_program(emitter, &hoist_kinds, prog)?;
     let classes = emit_classes_from_program(emitter, &hoist_kinds, prog)?;
     let record_defs = emit_record_defs_from_program(emitter, prog)?;
     let typedefs = emit_typedefs_from_program(emitter, prog)?;
     let (constants, mut const_inits) = {
-        let mut env = Env::default();
-        // TODO(hrust), why clone is needed here? Try Rc,
-        env.namespace = namespace.clone();
+        let mut env = Env::default(namespace);
         emit_constants_from_program(emitter, &mut env, prog)?
     };
     functions.append(&mut const_inits);
@@ -131,7 +130,7 @@ bitflags! {
 fn emit_main<'a>(
     emitter: &mut Emitter,
     flags: FromAstFlags,
-    namespace: &namespace_env::Env,
+    namespace: RcOc<namespace_env::Env>,
     prog: &'a Tast::Program,
 ) -> Result<HhasBody<'a>> {
     let return_value = if flags.contains(FromAstFlags::IS_EVALED) {

@@ -40,9 +40,3 @@ impl Env {
         )
     }
 }
-
-impl std::default::Default for Env {
-    fn default() -> Self {
-        Self::empty(vec![], false, false)
-    }
-}

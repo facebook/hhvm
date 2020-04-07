@@ -21,6 +21,7 @@ use hhbc_id_rust as hhbc_id;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{unrecoverable, Error, Result};
 use naming_special_names_rust::{fb, pseudo_consts, special_idents, superglobals};
+use ocamlrep::rc::RcOc;
 use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
@@ -250,9 +251,9 @@ struct State {
     /// Hoisted meth_caller functions
     named_hoisted_functions: SMap<Fun_>,
     // The current namespace environment
-    namespace: namespace_env::Env,
+    namespace: RcOc<namespace_env::Env>,
     // Empty namespace as constructed by parser
-    empty_namespace: namespace_env::Env,
+    empty_namespace: RcOc<namespace_env::Env>,
     // information about current function
     current_function_state: PerFunctionState,
     // accumulated information about program
@@ -260,10 +261,10 @@ struct State {
 }
 
 impl State {
-    pub fn initial_state(empty_namespace: namespace_env::Env) -> Self {
+    pub fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
         Self {
             namespace: empty_namespace.clone(),
-            empty_namespace, // TODO(hrust) : pass in Rc?
+            empty_namespace: RcOc::clone(&empty_namespace),
             closure_cnt_per_fun: 0,
             captured_vars: UniqueList::new(),
             captured_this: false,
@@ -536,7 +537,7 @@ fn make_closure(
         attributes: vec![],
         xhp_children: vec![],
         xhp_attrs: vec![],
-        namespace: ocamlrep::rc::RcOc::new(st.empty_namespace.clone()),
+        namespace: RcOc::clone(&st.empty_namespace),
         enum_: None,
         doc_comment: None,
         pu_enums: vec![],
@@ -925,7 +926,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         }],
         file_attributes: vec![],
         external: false,
-        namespace: ocamlrep::rc::RcOc::new(st.state.empty_namespace.clone()),
+        namespace: RcOc::clone(&st.state.empty_namespace),
         doc_comment: None,
         static_: false,
     };
@@ -1370,7 +1371,7 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
     *defs = flatten_ns(defs);
 
     let mut visitor = ClosureConvertVisitor {
-        state: State::initial_state(empty_namespace),
+        state: State::initial_state(RcOc::new(empty_namespace)),
         phantom_lifetime_a: std::marker::PhantomData,
     };
 

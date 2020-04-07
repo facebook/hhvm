@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use env::{emitter::Emitter, SMap, SSet, UniqueIdBuilder};
+use ocamlrep::rc::RcOc;
 use ocamlrep_derive::OcamlRep;
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
 use rx_rust as rx;
@@ -28,7 +29,7 @@ impl Default for ClosureEnclosingClassInfo {
 #[derive(Default, OcamlRep, Debug)]
 pub struct GlobalState {
     pub explicit_use_set: SSet,
-    pub closure_namespaces: SMap<NamespaceEnv>,
+    pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,
     pub closure_enclosing_classes: SMap<ClosureEnclosingClassInfo>,
     pub functions_with_finally: SSet,
     pub function_to_labels_map: SMap<SMap<bool>>,

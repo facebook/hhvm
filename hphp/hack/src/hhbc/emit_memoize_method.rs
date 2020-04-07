@@ -27,6 +27,7 @@ use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust::reified;
 use instruction_sequence_rust::{instr, InstrSeq, Result};
 use naming_special_names_rust::{members, user_attributes as ua};
+use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, namespace_env::Env as NamespaceEnv, pos::Pos};
 use runtime::TypedValue;
@@ -447,8 +448,9 @@ fn make_wrapper<'a>(
     } else {
         vec![]
     };
+    // TODO(hrust): Just clone env
     let env_copy = emit_body::make_env(
-        &NamespaceEnv::empty(vec![], false, false),
+        RcOc::clone(&env.namespace),
         env.flags.contains(env::Flags::NEEDS_LOCAL_THIS),
         env.scope.clone(),
         None,

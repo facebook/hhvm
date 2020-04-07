@@ -12,6 +12,7 @@ path = "../../env.rs"
 ast_scope_rust = { path = "../ast_scope" }
 label_rust = { path = "../label" }
 naming_special_names_rust = { path = "../../../naming" }
+ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }

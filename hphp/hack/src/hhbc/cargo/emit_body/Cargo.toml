@@ -30,6 +30,7 @@ instruction_sequence_rust = { path = "../instruction_sequence" }
 label_rewriter_rust = { path = "../label_rewriter" }
 label_rust = { path = "../label" }
 naming_special_names_rust = { path = "../../../naming" }
+ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }

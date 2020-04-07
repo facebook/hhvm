@@ -17,6 +17,7 @@ use hhbc_id_rust::{class, method, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::{members, special_idents, user_attributes};
+use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
 use oxidized::{ast as T, pos::Pos};
 use rx_rust as rx;
@@ -130,12 +131,13 @@ pub fn from_ast<'a>(
             rx_level: None,
         })))
     };
-    let namespace = emitter
-        .emit_state()
-        .closure_namespaces
-        .get(&class_name)
-        .unwrap_or(&class.namespace)
-        .clone();
+    let namespace = RcOc::clone(
+        emitter
+            .emit_state()
+            .closure_namespaces
+            .get(&class_name)
+            .unwrap_or(&class.namespace),
+    );
     let rx_level = rx::Level::from_ast(&method.user_attributes).unwrap_or_else(|| {
         if is_closure_body {
             emitter
@@ -169,7 +171,7 @@ pub fn from_ast<'a>(
             emit_native_opcode::emit_body(
                 emitter,
                 &scope,
-                &namespace,
+                namespace.as_ref(),
                 &class.user_attributes,
                 &method.name,
                 &method.params,
@@ -191,7 +193,7 @@ pub fn from_ast<'a>(
         flags.set(emit_body::Flags::ASYNC, is_async);
         emit_body::emit_body(
             emitter,
-            &namespace,
+            namespace,
             &vec![T::Def::Stmt(Box::new(T::Stmt(
                 Pos::make_none(),
                 T::Stmt_::mk_block(ast_body_block.to_vec()),

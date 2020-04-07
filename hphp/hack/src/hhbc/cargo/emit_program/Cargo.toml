@@ -26,6 +26,7 @@ hhas_body_rust = { path = "../hhas_body" }
 hhas_program_rust = { path = "../hhas_program" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
+ocamlrep = { path = "../../../ocamlrep" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 bitflags = "1.2"

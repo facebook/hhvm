@@ -11,12 +11,13 @@ pub mod local;
 use ast_scope_rust::{Scope, ScopeItem};
 use emitter::Emitter;
 use label_rust::Label;
+use ocamlrep::rc::RcOc;
 use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
 
 extern crate bitflags;
 use bitflags::bitflags;
 
-use std::borrow::Cow;
+use std::{borrow::Cow, rc::Rc};
 
 bitflags! {
     #[derive(Default)]
@@ -28,17 +29,28 @@ bitflags! {
     }
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 pub struct Env<'a> {
     pub flags: Flags,
     pub jump_targets_gen: jump_targets::Gen,
     pub scope: Scope<'a>,
-    pub namespace: NamespaceEnv,
+    pub namespace: RcOc<NamespaceEnv>,
     pub call_context: Option<String>,
     pub pipe_var: Option<local::Type>,
 }
 
 impl<'a> Env<'a> {
+    pub fn default(namespace: RcOc<NamespaceEnv>) -> Self {
+        Env {
+            flags: Flags::default(),
+            jump_targets_gen: jump_targets::Gen::default(),
+            scope: Scope::default(),
+            namespace,
+            call_context: None,
+            pipe_var: None,
+        }
+    }
+
     pub fn with_allows_array_append<F, R>(&mut self, f: F) -> R
     where
         F: FnOnce(&mut Self) -> R,
@@ -72,10 +84,9 @@ impl<'a> Env<'a> {
     }
 
     pub fn make_class_env(class: &'a tast::Class_) -> Env {
-        Env::default().with_scope(Scope {
+        Env::default(RcOc::clone(&class.namespace)).with_scope(Scope {
             items: vec![ScopeItem::Class(Cow::Borrowed(class))],
         })
-        //TODO(hrust): set namespace
     }
 
     pub fn do_in_loop_body<R, F>(

@@ -100,7 +100,7 @@ where
 
     let (program, codegen_t) = match &mut parse_result {
         Either::Right((ast, is_hh_file)) => {
-            let namespace = NamespaceEnv::empty(
+            let namespace = RcOc::new(NamespaceEnv::empty(
                 emitter.options().hhvm.aliased_namespaces_cloned().collect(),
                 true, /* is_codegen */
                 emitter
@@ -108,13 +108,10 @@ where
                     .hhvm
                     .hack_lang_flags
                     .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-            );
+            ));
             // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
-            elaborate_namespaces_visitor::elaborate_program(
-                ocamlrep::rc::RcOc::new(namespace.clone()),
-                ast,
-            );
-            emit(&mut emitter, &env, &namespace, *is_hh_file, ast)
+            elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
+            emit(&mut emitter, &env, namespace, *is_hh_file, ast)
         }
         Either::Left((pos, msg, is_runtime_error)) => {
             emit_fatal(&mut emitter, &env, *is_runtime_error, pos, msg)
@@ -141,7 +138,7 @@ where
 fn emit<'p>(
     emitter: &mut Emitter,
     env: &Env,
-    namespace: &NamespaceEnv,
+    namespace: RcOc<NamespaceEnv>,
     is_hh: bool,
     ast: &'p mut Tast::Program,
 ) -> (Result<HhasProgram<'p>, Error>, f64) {
@@ -170,7 +167,7 @@ fn emit<'p>(
     let r = profile(
         emitter.options().log_extern_compiler_perf(),
         &mut t,
-        move || emit_program(emitter, flags, &namespace, ast),
+        move || emit_program(emitter, flags, namespace, ast),
     );
     (r, t)
 }

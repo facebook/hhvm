@@ -17,6 +17,7 @@ use hhas_pos_rust::Span;
 use hhbc_id_rust::{self as hhbc_id, Id};
 use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
+use ocamlrep::rc::RcOc;
 use options::HhvmFlags;
 use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
 use rx_rust as rx;
@@ -118,7 +119,7 @@ pub fn emit_function<'a>(
         );
         emit_body::emit_body(
             e,
-            &f.namespace,
+            RcOc::clone(&f.namespace),
             &vec![a::Def::mk_stmt(a::Stmt(
                 Pos::make_none(),
                 // TODO(shiqicao): T62049979 we should avoid cloning

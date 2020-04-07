@@ -186,7 +186,7 @@ impl<'a> Env<'a> {
     ) -> Self {
         // (hrust) Ported from namespace_env.ml
         let empty_ns_env = if use_default_namespace {
-            let mut nsenv = NamespaceEnv::default();
+            let mut nsenv = NamespaceEnv::empty(vec![], false, false);
             nsenv.is_codegen = codegen;
             nsenv.disable_xhp_element_mangling = parser_options.po_disable_xhp_element_mangling;
             nsenv

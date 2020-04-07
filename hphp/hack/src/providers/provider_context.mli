@@ -91,30 +91,28 @@ there may not be a [ServerEnv.env] available. *)
 val empty_for_debugging :
   popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
-(** Creates an entry on its own *)
+(** Creates an entry *)
 val make_entry : path:Relative_path.t -> contents:string -> entry
 
-(** Read the contents at [path] from disk and create a new
-[Provider_context.entry] representing that file. The returned
-[Provider_context.t] contains that new entry.
+(** Adds the entry into the supplied [Provider_context.t], overwriting
+if the context already had an entry of the same path, and returns a new
+[Provider_context.t] which includes that entry. 
+Note: for most callers, [add_entry_if_missing] is more appropriate. *)
+val add_or_overwrite_entry : ctx:t -> entry -> t
 
-If an [entry] is already present for the given [path], then this function
-leaves it and doesn't attempt to read from disk.
-
-If the file can't be read from disk, then raises an exception.
-
-It's important to pass around the resulting [Provider_context.t]. That way, if a
-subsequent operation tries to access data about the same file, it will be
-returned the same [entry]. *)
-val add_entry_if_missing : ctx:t -> path:Relative_path.t -> t * entry
-
-(** Creates a new [Provider_context.entry]. The returned [Provider_context.t]
-contains that new entry. This function will overwrite any entry in ctx
-if one's already there. In this respect it differs from [add_entry_if_missing]. *)
+(** Similar to [add_entry], but adds a new entry with provided contents. 
+Also returns the new entry for convenience.  It's important that
+callers use the resulting [Provider_context.t]. That way, if a
+subsequent operation tries to access data about the same file, it will get
+the [entry] we just added rather than reading from disk. *)
 val add_entry_from_file_contents :
   ctx:t -> path:Relative_path.t -> contents:string -> t * entry
 
-val add_existing_entry : ctx:t -> entry -> t
+(** Similar to [add_entry], but (1) returns the existing entry if one
+was already there, (2) if one wasn't there, then adds a new entry
+by reading the contents of the path from disk; may throw if those
+contents can't be read. *)
+val add_entry_if_missing : ctx:t -> path:Relative_path.t -> t * entry
 
 (** Get the [ParserOptions.t] contained within the [t]. *)
 val get_popt : t -> ParserOptions.t

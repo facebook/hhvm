@@ -397,7 +397,7 @@ let make_singleton_ctx
     (initialized_state : initialized_state) (entry : Provider_context.entry) :
     Provider_context.t =
   let ctx = make_empty_ctx initialized_state in
-  let ctx = Provider_context.add_existing_entry ~ctx entry in
+  let ctx = Provider_context.add_or_overwrite_entry ~ctx entry in
   ctx
 
 (** Opens a file, in response to DidOpen event, by putting in a new

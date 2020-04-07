@@ -565,15 +565,6 @@ void BreakpointManager::onBreakpointResolved(
       msg += std::to_string(startLine);
       msg += ", which is actually where the nearest executable instruction in ";
       msg += "the source map for this file is.";
-    } else {
-      // Multi-line expression.
-      msg += " resolved to a multi-line expression. (Lines ";
-      msg += std::to_string(startLine);
-      msg += "-";
-      msg += std::to_string(endLine);
-      msg += ") The breakpoint will be displayed at the first executable ";
-      msg += "instruction of the expression that would be hit when ";
-      msg += "single-stepping through this function.";
     }
 
     m_debugger->sendUserMessage(

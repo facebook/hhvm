@@ -28,31 +28,6 @@
 namespace HPHP {
 
 namespace tv_val_detail {
-/*
- * These structs are used to add dummy() and is_dummy() functions to tv_rval
- * only.
- */
-struct empty {};
-
-template<typename T>
-struct with_dummy {
-  /*
-   * The canonical non-null "missing" rval. Only valid for tv_rval (is_const ==
-   * true). These are actually defined in tv_val_detail::with_dummy; see above.
-   *
-   * Some users of tv_rval prefer to use a dummy rval-to-Uninit to represent a
-   * missing element, instead of a nullptr rval, so that tv() is always valid.
-   * These functions provide and test for such a value.
-   *
-   * static tv_val dummy();
-   * bool is_dummy() const;
-   */
-  INLINE_FLATTEN static T dummy() { return T { &immutable_uninit_base }; }
-  INLINE_FLATTEN bool is_dummy() const {
-    return static_cast<const T&>(*this) == dummy();
-  }
-};
-
 template<typename T>
 INLINE_FLATTEN T* get_ptr(T* ptr) {
   return ptr;
@@ -83,9 +58,7 @@ INLINE_FLATTEN T* get_ptr(CompactTaggedPtr<T, Tag> ptr) {
  * tag. This has no space overhead, but has a slight penalty at runtime.
  */
 template<bool is_const, typename tag_t = void>
-struct tv_val : std::conditional<is_const,
-                                 tv_val_detail::with_dummy<tv_val<true>>,
-                                 tv_val_detail::empty>::type {
+struct tv_val {
 private:
   template<typename T> using maybe_const_t =
     typename std::conditional<is_const, const T, T>::type;

@@ -313,7 +313,7 @@ Vptr ptrToLocalData(Vreg fp, int id);
 /*
  * Given (valid) pointers to a local's type and value `typeIn' and
  * `dataIn', modify the pointers to point at the next local (by
- * increasing indx) and set `typeOUt' and `dataOut' to the new
+ * increasing index) and set `typeOut' and `dataOut' to the new
  * pointers. It is up to the caller to detect when the pointers have
  * reached the end of the frame.
  */

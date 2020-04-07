@@ -3312,14 +3312,15 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
           lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                  : rds::bindStaticMemoCache(func);
         if (!cache.isInit()) return nullptr;
-        auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-        if (auto getter = memoCacheGetForKeyCount(keys.count)) {
-          return getter(*cache, keysBegin);
+        if (auto getter = memoCacheGetForKeyCountFP(func,
+                                                    keys.count)) {
+          return getter(*cache, vmfp(), keys.first);
         }
-        return memoCacheGetGeneric(
+        return memoCacheGenericGetFP(
           *cache,
           GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-          keysBegin
+          vmfp(),
+          keys.first
         );
       }
 
@@ -3356,26 +3357,28 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
           makeSharedOnlyKey(func->getFuncId())
         );
       }
-      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-      if (auto const getter = sharedMemoCacheGetForKeyCount(keys.count)) {
-        return getter(cache, func->getFuncId(), keysBegin);
+      if (auto const getter = sharedMemoCacheGetForKeyCountFP(func,
+                                                              keys.count)) {
+        return getter(cache, func->getFuncId(), vmfp(), keys.first);
       }
-      return memoCacheGetGeneric(
+      return memoCacheGenericGetFP(
         cache,
         GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-        keysBegin
+        vmfp(),
+        keys.first
       );
     }
 
     assertx(keys.count > 0);
-    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-    if (auto const getter = memoCacheGetForKeyCount(keys.count)) {
-      return getter(cache, keysBegin);
+    if (auto const getter = memoCacheGetForKeyCountFP(func,
+                                                      keys.count)) {
+      return getter(cache, vmfp(), keys.first);
     }
-    return memoCacheGetGeneric(
+    return memoCacheGenericGetFP(
       cache,
       GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-      keysBegin
+      vmfp(),
+      keys.first
     );
   }();
 
@@ -3435,14 +3438,15 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
         lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                : rds::bindStaticMemoCache(func);
       if (!cache.isInit()) cache.initWith(nullptr);
-      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-      if (auto setter = memoCacheSetForKeyCount(keys.count)) {
-        return setter(*cache, keysBegin, val);
+      if (auto setter = memoCacheSetForKeyCountFP(func,
+                                                  keys.count)) {
+        return setter(*cache, vmfp(), keys.first, val);
       }
-      return memoCacheSetGeneric(
+      return memoCacheGenericSetFP(
         *cache,
         GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-        keysBegin,
+        vmfp(),
+        keys.first,
         val
       );
     }
@@ -3488,27 +3492,29 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
         val
       );
     }
-    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-    if (auto const setter = sharedMemoCacheSetForKeyCount(keys.count)) {
-      return setter(cache, func->getFuncId(), keysBegin, val);
+    if (auto const setter = sharedMemoCacheSetForKeyCountFP(func,
+                                                            keys.count)) {
+      return setter(cache, func->getFuncId(), vmfp(), keys.first, val);
     }
-    return memoCacheSetGeneric(
+    return memoCacheGenericSetFP(
       cache,
       GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-      keysBegin,
+      vmfp(),
+      keys.first,
       val
     );
   }
 
   assertx(keys.count > 0);
-  auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
-  if (auto const setter = memoCacheSetForKeyCount(keys.count)) {
-    return setter(cache, keysBegin, val);
+  if (auto const setter = memoCacheSetForKeyCountFP(func,
+                                                    keys.count)) {
+    return setter(cache, vmfp(), keys.first, val);
   }
-  return memoCacheSetGeneric(
+  return memoCacheGenericSetFP(
     cache,
     GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-    keysBegin,
+    vmfp(),
+    keys.first,
     val
   );
 }

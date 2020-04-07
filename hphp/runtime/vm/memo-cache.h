@@ -22,40 +22,53 @@
 /*
  * Memoization cache support
  *
- * Memoization caches are used to support functions marked <<__Memoize>> and can
- * either be in RDS (for static functions) or hung-off ObjectData* (for
- * methods).
+ * Memoization caches are used to support functions marked
+ * <<__Memoize>> and can either be in RDS (for static functions) or
+ * hung-off ObjectData* (for methods).
  *
- * All memo caches map some set of keys (which are only integers or strings) to
- * a particular TypedValue value. Caches can either be non-shared or shared. A
- * non-shared cache is for exactly one function, and the keys (corresponding to
- * the parameters) is all that's necessary to lookup the value. Non-shared
- * caches are used for static functions, and (as an optimization) on methods for
- * classes with few memoized functions. A shared cache can be used by different
- * functions, and therefore stores an additional key value distinguishing that
- * function (the form of this key varies by the cache type).
+ * All memo caches map some set of keys (which are only integers or
+ * strings) to a particular TypedValue value. Caches can either be
+ * non-shared or shared. A non-shared cache is for exactly one
+ * function, and the keys (corresponding to the parameters) is all
+ * that's necessary to lookup the value. Non-shared caches are used
+ * for static functions, and (as an optimization) on methods for
+ * classes with few memoized functions. A shared cache can be used by
+ * different functions, and therefore stores an additional key value
+ * distinguishing that function (the form of this key varies by the
+ * cache type).
  *
- * Memo caches are only manipulated via their associated getter and setter
- * functions. Getter functions receive a pointer to MemoCacheBase, a pointer to
- * an array of Cells (which must be integers or strings) representing the
- * parameters, and, if shared, some additional value distinguishing that
- * function. If the value is found, a pointer to it is returned. If not, or if
- * the pointer to the cache is null, null is returned. No ref-count manipulation
- * is done in the returned value. Setter functions receive a *reference* to a
- * pointer to MemoCacheBase, a pointer to an array of Cells, if shared, an
- * additional value distinguishing that function, and a TypedValue to store in the
- * cache. The TypedValue is stored in the cache, and its ref-count is incremented
- * (with any previous value being dec-reffed and overwritten). If the pointer to
- * the cache was null, a new cache is allocated, and the pointer is updated to
- * point at it.
+ * Memo caches are only manipulated via their associated getter and
+ * setter functions. Getter functions receive a pointer to
+ * MemoCacheBase, a source of values (which must be integers or
+ * strings) representing the parameters, and, if shared, some
+ * additional value distinguishing that function. If the value is
+ * found, a pointer to it is returned. If not, or if the pointer to
+ * the cache is null, null is returned. No ref-count manipulation is
+ * done in the returned value. Setter functions receive a *reference*
+ * to a pointer to MemoCacheBase, a source of values, if shared, an
+ * additional value distinguishing that function, and a TypedValue to
+ * store in the cache. The TypedValue is stored in the cache, and its
+ * ref-count is incremented (with any previous value being dec-reffed
+ * and overwritten). If the pointer to the cache was null, a new cache
+ * is allocated, and the pointer is updated to point at it.
  *
- * For optimization, there's a number of specialized memo-caches. These are
- * specialized on a specific number of keys, and perhaps the types of
- * keys. These specializations are not exposed directly, but instead you call a
- * function to obtain the appropriate getter and setter. For a particular memo
- * cache, the same specialized get/set function must always be used! It is not
- * legal to sometimes use a specialized get/set function it, and a generic one
- * elesewhere.
+ * Memo caches support two sources of values (representing the
+ * keys). These are from locals (provided via a frame pointer and a
+ * start offset), or from the VM stack (provided by a pointer to the
+ * first stack element). All variations of the getter/setter functions
+ * have a frame pointer and a stack pointer flavor. It is fine to mix
+ * the frame pointer and stack pointer variations on the same memo
+ * cache. Note: if you use the stack pointer variant, the stack
+ * pointer should point at the first key, not the last one.
+ *
+ * For optimization, there's a number of specialized
+ * memo-caches. These are specialized on a specific number of keys,
+ * and perhaps the types of keys. These specializations are not
+ * exposed directly, but instead you call a function to obtain the
+ * appropriate getter and setter. For a particular memo cache, the
+ * same specialized get/set function must always be used! It is not
+ * legal to sometimes use a specialized get/set function it, and a
+ * generic one elesewhere.
  */
 
 namespace HPHP {
@@ -95,33 +108,63 @@ struct MemoCacheBase {
  * of zero never has a specialized representation here. It makes no sense for
  * the non-shared case, and the shared case should just use "shared-only"
  * caches.
+ *
+ * There are frame pointer and stack pointer flavors for each type.
  */
 
 // Non-shared getter
-using MemoCacheGetter =
+using MemoCacheGetterFP =
+  const TypedValue* (*)(const MemoCacheBase*, const ActRec*, uint64_t);
+using MemoCacheGetterSP =
   const TypedValue* (*)(const MemoCacheBase*, const TypedValue*);
-MemoCacheGetter memoCacheGetForKeyTypes(const bool* types, size_t count);
-MemoCacheGetter memoCacheGetForKeyCount(size_t count);
+MemoCacheGetterFP memoCacheGetForKeyTypesFP(const bool* types,
+                                            const Func* func,
+                                            size_t count);
+MemoCacheGetterFP memoCacheGetForKeyCountFP(const Func* func,
+                                            size_t count);
+MemoCacheGetterSP memoCacheGetForKeyTypesSP(const bool* types, size_t count);
+MemoCacheGetterSP memoCacheGetForKeyCountSP(size_t count);
 
 // Non-shared setter
-using MemoCacheSetter =
+using MemoCacheSetterFP =
+  void (*)(MemoCacheBase*&, const ActRec*, uint64_t, TypedValue);
+using MemoCacheSetterSP =
   void (*)(MemoCacheBase*&, const TypedValue*, TypedValue);
-MemoCacheSetter memoCacheSetForKeyTypes(const bool* types, size_t count);
-MemoCacheSetter memoCacheSetForKeyCount(size_t count);
+MemoCacheSetterFP memoCacheSetForKeyTypesFP(const bool* types,
+                                            const Func* func,
+                                            size_t count);
+MemoCacheSetterFP memoCacheSetForKeyCountFP(const Func* func,
+                                            size_t count);
+MemoCacheSetterSP memoCacheSetForKeyTypesSP(const bool* types, size_t count);
+MemoCacheSetterSP memoCacheSetForKeyCountSP(size_t count);
 
 // Shared getter
-using SharedMemoCacheGetter =
+using SharedMemoCacheGetterFP =
+  const TypedValue* (*)(const MemoCacheBase*, FuncId, const ActRec*, uint64_t);
+using SharedMemoCacheGetterSP =
   const TypedValue* (*)(const MemoCacheBase*, FuncId, const TypedValue*);
-SharedMemoCacheGetter sharedMemoCacheGetForKeyTypes(const bool* types,
-                                                    size_t count);
-SharedMemoCacheGetter sharedMemoCacheGetForKeyCount(size_t count);
+SharedMemoCacheGetterFP sharedMemoCacheGetForKeyTypesFP(const bool* types,
+                                                        const Func* func,
+                                                        size_t count);
+SharedMemoCacheGetterFP sharedMemoCacheGetForKeyCountFP(const Func* func,
+                                                        size_t count);
+SharedMemoCacheGetterSP sharedMemoCacheGetForKeyTypesSP(const bool* types,
+                                                        size_t count);
+SharedMemoCacheGetterSP sharedMemoCacheGetForKeyCountSP(size_t count);
 
 // Shared setter
-using SharedMemoCacheSetter =
+using SharedMemoCacheSetterFP =
+  void (*)(MemoCacheBase*&, FuncId, const ActRec*, uint64_t, TypedValue);
+using SharedMemoCacheSetterSP =
   void (*)(MemoCacheBase*&, FuncId, const TypedValue*, TypedValue);
-SharedMemoCacheSetter sharedMemoCacheSetForKeyTypes(const bool* types,
-                                                    size_t count);
-SharedMemoCacheSetter sharedMemoCacheSetForKeyCount(size_t count);
+SharedMemoCacheSetterFP sharedMemoCacheSetForKeyTypesFP(const bool* types,
+                                                        const Func* func,
+                                                        size_t count);
+SharedMemoCacheSetterFP sharedMemoCacheSetForKeyCountFP(const Func* func,
+                                                        size_t count);
+SharedMemoCacheSetterSP sharedMemoCacheSetForKeyTypesSP(const bool* types,
+                                                        size_t count);
+SharedMemoCacheSetterSP sharedMemoCacheSetForKeyCountSP(size_t count);
 
 ////////////////////////////////////////////////////////////
 
@@ -163,13 +206,23 @@ private:
   };
 };
 
-const TypedValue* memoCacheGetGeneric(MemoCacheBase* base,
-                                GenericMemoId::Param id,
-                                const TypedValue* keys);
-void memoCacheSetGeneric(MemoCacheBase*& base,
-                         GenericMemoId::Param id,
-                         const TypedValue* keys,
-                         TypedValue val);
+const TypedValue* memoCacheGenericGetFP(const MemoCacheBase* base,
+                                        GenericMemoId::Param id,
+                                        const ActRec* fp,
+                                        uint64_t begin);
+void memoCacheGenericSetFP(MemoCacheBase*& base,
+                           GenericMemoId::Param id,
+                           const ActRec* fp,
+                           uint64_t begin,
+                           TypedValue val);
+
+const TypedValue* memoCacheGenericGetSP(const MemoCacheBase* base,
+                                        GenericMemoId::Param id,
+                                        const TypedValue* keys);
+void memoCacheGenericSetSP(MemoCacheBase*& base,
+                           GenericMemoId::Param id,
+                           const TypedValue* keys,
+                           TypedValue val);
 
 ////////////////////////////////////////////////////////////
 
@@ -193,7 +246,7 @@ inline SharedOnlyKey makeSharedOnlyKey(FuncId funcId) {
 }
 
 const TypedValue* memoCacheGetSharedOnly(const MemoCacheBase* base,
-                                   SharedOnlyKey key);
+                                         SharedOnlyKey key);
 void memoCacheSetSharedOnly(MemoCacheBase*& base,
                             SharedOnlyKey key,
                             TypedValue val);

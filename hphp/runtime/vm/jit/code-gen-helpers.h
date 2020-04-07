@@ -336,6 +336,12 @@ void prevLocal(Vout& v,
                Vreg typeOut,
                Vreg dataOut);
 
+/*
+ * Create a lval to the specified local and store it in the registers
+ * given by `dst'.
+ */
+void lvalToLocal(Vout&, Vreg fp, int id, Vloc dst);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

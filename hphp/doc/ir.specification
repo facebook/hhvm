@@ -1033,7 +1033,7 @@ To string conversions:
   Loads the address of the stack slot given by the pointer in S0 at the given
   stack offset (measured in cells).
 
-| LdLocAddr<localId>, D(PtrToFrameCell), S(FramePtr), NF
+| LdLocAddr<localId>, D(LvalToFrameCell), S(FramePtr), NF
 
   Loads the address of the local slot localId from the frame S0 into D.
 

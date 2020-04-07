@@ -41,14 +41,16 @@ void mandatoryDCE(IRUnit&);
 void fullDCE(IRUnit&);
 
 /*
- * Converts an instruction that operates on frame locals in an inlined function
- * to one that operates on the equivalent stack slots in the caller. Useful for
- * eliding DefInlineFP
+ * Converts an instruction that operates on frame locals in an inlined
+ * function to one that operates on the equivalent stack slots in the
+ * caller. Useful for eliding DefInlineFP. If an additional
+ * instruction needed to be inserted (to deal with LdLocAddr), it is
+ * returned.
  *
  * Precondition: inst is LdLoc, StLoc, LdLocAddr, CheckLoc, AssertLoc, or
  * Precondition: inst->src(0)->inst() is DefInlineFP
  */
-void convertToStackInst(IRUnit& unit, IRInstruction& inst);
+IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst);
 
 /*
  * Converts an InlineReturn instruction to a noop instruction that still models

@@ -892,7 +892,7 @@ To string conversions:
   Sets D to true iff S0 holds a value that is not of type T. T must not be a
   specialized type.
 
-| IsTypeMem<T>, D(Bool), S(PtrToCell), NF
+| IsTypeMem<T>, D(Bool), S(MemToCell), NF
 
   Sets D to true iff the value referenced by S0 is of type T. T must not be a
   specialized type.
@@ -900,7 +900,7 @@ To string conversions:
   The value in S0 must not be a pointer into the evaluation stack or frame
   locals.
 
-| IsNTypeMem<T>, D(Bool), S(PtrToCell), NF
+| IsNTypeMem<T>, D(Bool), S(MemToCell), NF
 
   Sets D to true iff the value referenced by S0 is not of type T. T must not be
   a specialized type.

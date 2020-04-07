@@ -1164,17 +1164,6 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
                 print_fcall_args(w, &fcall_args)?;
                 w.write(r#" "" """#)
             }
-            I::FCallBuiltin(n, un, io, id) => concat_str_by(
-                w,
-                " ",
-                [
-                    "FCallBuiltin",
-                    n.to_string().as_str(),
-                    un.to_string().as_str(),
-                    io.to_string().as_str(),
-                    quote_string(id).as_str(),
-                ],
-            ),
             I::FCallClsMethod(fcall_args, is_log_as_dynamic_call) => {
                 w.write("FCallClsMethod ")?;
                 print_fcall_args(w, fcall_args)?;

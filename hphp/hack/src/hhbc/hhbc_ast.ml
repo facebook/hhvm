@@ -434,7 +434,6 @@ type instruct_call =
   | NewObjRD of class_id
   | NewObjS of SpecialClsRef.t
   | FCall of fcall_args
-  | FCallBuiltin of num_params * num_params * num_params * string
   | FCallClsMethod of fcall_args * is_log_as_dynamic_call_op
   | FCallClsMethodD of fcall_args * class_id * method_id
   | FCallClsMethodS of fcall_args * SpecialClsRef.t

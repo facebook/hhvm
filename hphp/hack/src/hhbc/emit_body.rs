@@ -23,7 +23,8 @@ use global_state::LazyState;
 use hhas_body_rust::HhasBody;
 use hhas_param_rust::HhasParam;
 use hhas_type::Info as HhasTypeInfo;
-use hhbc_ast_rust::{Instruct, IstypeOp, ParamId};
+use hhbc_ast_rust::{FcallArgs, FcallFlags, Instruct, IstypeOp, ParamId};
+use hhbc_id_rust::function;
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
@@ -725,12 +726,18 @@ pub fn emit_deprecation_info(
                 instr::empty()
             } else {
                 InstrSeq::gather(vec![
+                    instr::nulluninit(),
+                    instr::nulluninit(),
+                    instr::nulluninit(),
                     trait_instrs,
                     instr::string(deprecation_string),
                     concat_instruction,
                     instr::int64(sampling_rate),
                     instr::int(error_code),
-                    instr::trigger_sampled_error(),
+                    instr::fcallfuncd(
+                        FcallArgs::new(FcallFlags::default(), 0, vec![], None, 3, None),
+                        function::from_raw_string("trigger_sampled_error"),
+                    ),
                     instr::popc(),
                 ])
             }

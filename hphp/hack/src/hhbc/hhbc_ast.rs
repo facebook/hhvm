@@ -472,7 +472,6 @@ pub enum InstructCall {
     NewObjRD(ClassId),
     NewObjS(SpecialClsRef),
     FCall(FcallArgs),
-    FCallBuiltin(NumParams, NumParams, NumParams, String),
     FCallClsMethod(FcallArgs, IsLogAsDynamicCallOp),
     FCallClsMethodD(FcallArgs, ClassId, MethodId),
     FCallClsMethodS(FcallArgs, SpecialClsRef),

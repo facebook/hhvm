@@ -1084,20 +1084,6 @@ pub mod instr {
         instr(Instruct::IMisc(InstructMisc::CreateCl(param_num, cls_num)))
     }
 
-    pub fn fcallbuiltin(
-        n: NumParams,
-        un: NumParams,
-        io: NumParams,
-        s: impl Into<String>,
-    ) -> InstrSeq {
-        instr(Instruct::ICall(InstructCall::FCallBuiltin(
-            n,
-            un,
-            io,
-            s.into(),
-        )))
-    }
-
     pub fn defcls(n: ClassNum) -> InstrSeq {
         instr(Instruct::IIncludeEvalDefine(
             InstructIncludeEvalDefine::DefCls(n),
@@ -1240,10 +1226,6 @@ pub mod instr {
 
     pub fn contgetreturn() -> InstrSeq {
         instr(Instruct::IGenerator(GenCreationExecution::ContGetReturn))
-    }
-
-    pub fn trigger_sampled_error() -> InstrSeq {
-        fcallbuiltin(3, 3, 0, String::from("trigger_sampled_error"))
     }
 
     pub fn nativeimpl() -> InstrSeq {

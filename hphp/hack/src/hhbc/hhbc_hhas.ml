@@ -494,15 +494,6 @@ let string_of_call instruction =
   | NewObjS r -> sep ["NewObjS"; SpecialClsRef.to_string r]
   | FCall fcall_args ->
     sep ["FCall"; string_of_fcall_args fcall_args; "\"\""; "\"\""]
-  | FCallBuiltin (n1, n2, n3, id) ->
-    sep
-      [
-        "FCallBuiltin";
-        string_of_int n1;
-        string_of_int n2;
-        string_of_int n3;
-        SU.quote_string id;
-      ]
   | FCallClsMethod (fcall_args, is_log_as_dynamic_call) ->
     sep
       [

@@ -274,12 +274,17 @@ let emit_deprecation_warning scope deprecation_info =
     else
       gather
         [
+          instr_nulluninit;
+          instr_nulluninit;
+          instr_nulluninit;
           trait_instrs;
           instr_string deprecation_string;
           concat_instruction;
           instr_int64 sampling_rate;
           instr_int error_code;
-          instr_trigger_sampled_error;
+          instr_fcallfuncd
+            (make_fcall_args 3)
+            (Hhbc_id.Function.from_raw_string "trigger_sampled_error");
           instr_popc;
         ]
 

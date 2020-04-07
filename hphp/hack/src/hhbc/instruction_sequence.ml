@@ -394,8 +394,6 @@ let instr_idx = instr (IMisc Idx)
 
 let instr_array_idx = instr (IMisc ArrayIdx)
 
-let instr_fcallbuiltin n un io s = instr (ICall (FCallBuiltin (n, un, io, s)))
-
 let instr_defcls n = instr (IIncludeEvalDefine (DefCls n))
 
 let instr_defclsnop n = instr (IIncludeEvalDefine (DefClsNop n))
@@ -441,9 +439,6 @@ let instr_contcurrent = instr (IGenerator ContCurrent)
 let instr_contkey = instr (IGenerator ContKey)
 
 let instr_contgetreturn = instr (IGenerator ContGetReturn)
-
-let instr_trigger_sampled_error =
-  instr_fcallbuiltin 3 3 0 "trigger_sampled_error"
 
 let instr_nativeimpl = instr (IMisc NativeImpl)
 

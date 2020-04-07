@@ -164,7 +164,6 @@ let stk_data : instruct -> stack_sig = function
   | ICall FCall ((f, n, r, _, _, _))       ->
     produce "C" (n + (if f.has_unpack then 1 else 0)),
     produce "C" r
-  | ICall FCallBuiltin (n, _, _, _)        -> produce "C" n, ["C"]
   | ILitConst _                            -> [], ["C"]
   | ICall _                                -> ["C"], []
   | _ -> [], []

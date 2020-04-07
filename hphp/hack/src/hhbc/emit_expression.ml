@@ -3700,8 +3700,13 @@ and emit_special_function
     Some
       (gather
          [
+           instr_nulluninit;
+           instr_nulluninit;
+           instr_nulluninit;
            instr_string "zend.assertions";
-           instr_fcallbuiltin 1 1 0 "ini_get";
+           instr_fcallfuncd
+             (make_fcall_args 1)
+             (Hhbc_id.Function.from_raw_string "ini_get");
            instr_int 0;
            instr_gt;
            instr_jmpz l0;

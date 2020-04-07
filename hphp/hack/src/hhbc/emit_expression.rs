@@ -2303,8 +2303,14 @@ fn emit_special_function(
             let l0 = e.label_gen_mut().next_regular();
             let l1 = e.label_gen_mut().next_regular();
             Ok(Some(InstrSeq::gather(vec![
+                instr::nulluninit(),
+                instr::nulluninit(),
+                instr::nulluninit(),
                 instr::string("zend.assertions"),
-                instr::fcallbuiltin(1, 1, 0, "ini_get"),
+                instr::fcallfuncd(
+                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1, None),
+                    function::from_raw_string("ini_get"),
+                ),
                 instr::int(0),
                 instr::gt(),
                 instr::jmpz(l0.clone()),

@@ -6,6 +6,7 @@
 
 use env::{iterator::Id as IterId, local};
 use hhbc_ast_rust::*;
+use itertools::Either;
 use label_rust as label;
 use label_rust::Label;
 use oxidized::pos::Pos;
@@ -105,7 +106,7 @@ where
 pub struct InstrIter<'i> {
     instr_seq: &'i InstrSeq,
     index: usize,
-    concat_cur: Option<Box<InstrIter<'i>>>,
+    concat_stack: Vec<Either<(&'i Vec<Instruct>, usize), (&'i Vec<InstrSeq>, usize)>>,
 }
 
 impl<'i> InstrIter<'i> {
@@ -113,7 +114,7 @@ impl<'i> InstrIter<'i> {
         Self {
             instr_seq,
             index: 0,
-            concat_cur: None,
+            concat_stack: vec![],
         }
     }
 }
@@ -134,23 +135,50 @@ impl<'i> Iterator for InstrIter<'i> {
                 self.index += 1;
                 r
             }
-            InstrSeq::Concat(ii) if self.index >= ii.len() => None,
-            InstrSeq::Concat(ii) => match &mut self.concat_cur {
-                Some(cur) => {
-                    let r = cur.as_mut().next();
-                    if r.is_some() {
-                        r
-                    } else {
+            InstrSeq::Concat(cc) => {
+                if self.concat_stack.is_empty() {
+                    if self.index == 0 {
                         self.index += 1;
-                        std::mem::replace(&mut self.concat_cur, None);
-                        self.next()
+                        self.concat_stack.push(Either::Right((cc, 0)));
+                    } else {
+                        return None;
                     }
                 }
-                None => {
-                    std::mem::replace(&mut self.concat_cur, Some(Box::new(ii[self.index].iter())));
-                    self.next()
+
+                while !self.concat_stack.is_empty() {
+                    let top = self.concat_stack.last_mut().unwrap();
+                    match top {
+                        Either::Left((list, size)) if *size >= list.len() => {
+                            self.concat_stack.pop();
+                        }
+                        Either::Left((list, size)) => {
+                            let r: &Instruct = &(list[*size]);
+                            *size += 1;
+                            return Some(&r);
+                        }
+                        Either::Right((concat, size)) if *size >= concat.len() => {
+                            self.concat_stack.pop();
+                        }
+                        Either::Right((concat, size)) => {
+                            let i: &InstrSeq = &(concat[*size]);
+                            *size += 1;
+                            match i {
+                                InstrSeq::One(ref instr) => {
+                                    return Some(instr);
+                                }
+                                InstrSeq::List(ref list) => {
+                                    self.concat_stack.push(Either::Left((list, 0)));
+                                }
+                                InstrSeq::Concat(ref concat) => {
+                                    self.concat_stack.push(Either::Right((concat, 0)));
+                                }
+                                InstrSeq::Empty => {}
+                            }
+                        }
+                    }
                 }
-            },
+                None
+            }
         }
     }
 }
@@ -1587,6 +1615,7 @@ mod tests {
         let list1 = || instrs(vec![mk_i()]);
         let list2 = || instrs(vec![mk_i(), mk_i()]);
         let concat0 = || InstrSeq::Concat(vec![]);
+        let concat1 = || InstrSeq::Concat(vec![one()]);
 
         assert_eq!(empty().iter().count(), 0);
         assert_eq!(one().iter().count(), 1);
@@ -1612,5 +1641,23 @@ mod tests {
 
         let concat = InstrSeq::Concat(vec![concat0(), list2(), list1()]);
         assert_eq!(concat.iter().count(), 3);
+
+        let concat = InstrSeq::Concat(vec![concat1(), concat1()]);
+        assert_eq!(concat.iter().count(), 2);
+
+        let concat = InstrSeq::Concat(vec![concat0(), concat1()]);
+        assert_eq!(concat.iter().count(), 1);
+
+        let concat = InstrSeq::Concat(vec![list2(), concat1()]);
+        assert_eq!(concat.iter().count(), 3);
+
+        let concat = InstrSeq::Concat(vec![list2(), concat0()]);
+        assert_eq!(concat.iter().count(), 2);
+
+        let concat = InstrSeq::Concat(vec![one(), concat0()]);
+        assert_eq!(concat.iter().count(), 1);
+
+        let concat = InstrSeq::Concat(vec![empty(), concat0()]);
+        assert_eq!(concat.iter().count(), 0);
     }
 }

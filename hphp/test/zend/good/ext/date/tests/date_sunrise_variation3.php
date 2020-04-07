@@ -4,6 +4,18 @@
  * Source code: ext/date/php_date.c
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_sunrise() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -16,18 +28,6 @@ $gmt_offset = -5.5;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,3 +93,4 @@ foreach($inputs as $key =>$value) {
       try { var_dump( date_sunrise($time, SUNFUNCS_RET_TIMESTAMP, $value, $longitude, $zenith, $gmt_offset) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 };
 echo "===DONE===\n";
+}

@@ -5,6 +5,18 @@
  * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_sunset() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -17,18 +29,6 @@ $gmt_offset = 5.5;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -96,3 +96,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

@@ -5,6 +5,18 @@
  * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gmdate() : usage variation ***\n";
 
 
@@ -15,18 +27,6 @@ $format = DATE_ISO8601;
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -92,18 +92,19 @@ $inputs = darray[
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-			if ($value === null) {
-				$without_timestamp = gmdate($format);
-				$with_timestamp = gmdate($format, $value);
-				// These is a risk that the time change right between these calls if so
-				// we do another try.
-				if ($with_timestamp !== $without_timestamp) {
-					$without_timestamp = gmdate($format);
-				}
-				var_dump($with_timestamp === $without_timestamp);
-			} else {
-      	try { var_dump( gmdate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-			}
+            if ($value === null) {
+                $without_timestamp = gmdate($format);
+                $with_timestamp = gmdate($format, $value);
+                // These is a risk that the time change right between these calls if so
+                // we do another try.
+                if ($with_timestamp !== $without_timestamp) {
+                    $without_timestamp = gmdate($format);
+                }
+                var_dump($with_timestamp === $without_timestamp);
+            } else {
+        try { var_dump( gmdate($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+            }
 };
 
 echo "===DONE===\n";
+}

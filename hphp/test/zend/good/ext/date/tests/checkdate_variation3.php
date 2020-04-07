@@ -1,27 +1,27 @@
 <?hh
 /* Prototype  : bool checkdate  ( int $month  , int $day  , int $year  )
- * Description: Checks the validity of the date formed by the arguments. 
- *              A date is considered valid if each parameter is properly defined. 
+ * Description: Checks the validity of the date formed by the arguments.
+ *              A date is considered valid if each parameter is properly defined.
  * Source code: ext/date/php_date.c
  */
-
-echo "*** Testing checkdate() : usage variation -  unexpected values to third argument \$year***\n";
-
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
 
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
 {
 }
+<<__EntryPoint>> function main(): void {
+echo "*** Testing checkdate() : usage variation -  unexpected values to third argument \$year***\n";
+
+//get an unset variable
+$unset_var = 10;
+unset ($unset_var);
 
 // heredoc string
 $heredoc = <<<EOT
@@ -77,8 +77,8 @@ $inputs = darray[
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 ];
 
@@ -94,3 +94,4 @@ foreach($inputs as $variation =>$year) {
 fclose( $file_handle);
 
 echo "===DONE===\n";
+}

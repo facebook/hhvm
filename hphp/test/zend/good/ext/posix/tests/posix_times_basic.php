@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
   echo "Basic test of POSIX times function\n";
 
   $times = posix_times();
@@ -10,6 +11,5 @@
       $errno= posix_get_last_error();
       var_dump(posix_strerror($errno));
   }
-<<__EntryPoint>> function main(): void {
-echo "===DONE====";
+  echo "===DONE====";
 }

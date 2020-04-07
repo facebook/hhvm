@@ -1,10 +1,22 @@
 <?hh
 /* Prototype  : int idate(string format [, int timestamp])
- * Description: Format a local time/date as integer 
+ * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing idate() : usage variation ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -14,18 +26,6 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -92,3 +92,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

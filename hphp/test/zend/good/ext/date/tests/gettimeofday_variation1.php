@@ -1,10 +1,22 @@
 <?hh
 /* Prototype  : array gettimeofday([bool get_as_float])
- * Description: Returns the current time as array 
+ * Description: Returns the current time as array
  * Source code: ext/standard/microtime.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing gettimeofday() : usage variation ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -12,18 +24,6 @@ date_default_timezone_set("Asia/Calcutta");
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -95,3 +95,4 @@ foreach($inputs as $key =>$value) {
 };
 
 echo "===DONE===\n";
+}

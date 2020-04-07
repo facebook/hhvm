@@ -5,6 +5,18 @@
  * Alias to functions:
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing strftime() : usage variation ***\n";
 
 date_default_timezone_set("Asia/Calcutta");
@@ -14,18 +26,6 @@ $format = '%b %d %Y %H:%M:%S';
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -85,18 +85,19 @@ $inputs = darray[
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-			if ($value === null) {
-				$without_timestamp = strftime($format);
-				$with_timestamp = strftime($format, $value);
-				// These is a risk that the time change right between these calls if so
-				// we do another try.
-				if ($with_timestamp !== $without_timestamp) {
-					$without_timestamp = strftime($format);
-				}
-				var_dump($with_timestamp === $without_timestamp);
-			} else {
-      	try { var_dump( strftime($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-			}
+            if ($value === null) {
+                $without_timestamp = strftime($format);
+                $with_timestamp = strftime($format, $value);
+                // These is a risk that the time change right between these calls if so
+                // we do another try.
+                if ($with_timestamp !== $without_timestamp) {
+                    $without_timestamp = strftime($format);
+                }
+                var_dump($with_timestamp === $without_timestamp);
+            } else {
+        try { var_dump( strftime($format, $value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+            }
 };
 
 echo "===DONE===\n";
+}

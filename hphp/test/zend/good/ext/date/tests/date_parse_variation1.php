@@ -4,6 +4,18 @@
  * Source code: ext/date/php_date.c
  */
 
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
 echo "*** Testing date_parse() : usage variation -  unexpected values to first argument \$date***\n";
 
 //Set the default time zone
@@ -12,18 +24,6 @@ date_default_timezone_set("Europe/London");
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,12 +93,12 @@ $inputs = darray[
 
 foreach($inputs as $variation =>$date) {
       echo "\n-- $variation --\n";
-			$result = false;
+            $result = false;
       try { $result = date_parse($date); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
       if (is_array($result)) {
-      	  var_dump($result["errors"]);
+          var_dump($result["errors"]);
       } else {
-      	  var_dump($result);
+          var_dump($result);
       }
 };
 
@@ -106,3 +106,4 @@ foreach($inputs as $variation =>$date) {
 fclose( $file_handle );
 
 echo "===DONE===\n";
+}

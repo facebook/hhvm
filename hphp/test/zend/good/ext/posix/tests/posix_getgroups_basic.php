@@ -1,4 +1,5 @@
 <?hh
+<<__EntryPoint>> function main(): void {
   echo "Basic test of POSIX getgroups\n";
 
   $groups = posix_getgroups();
@@ -8,6 +9,5 @@
   } else {
       echo "TEST PASSED\n";
   }
-<<__EntryPoint>> function main(): void {
-echo "===DONE===\n";
+  echo "===DONE===\n";
 }

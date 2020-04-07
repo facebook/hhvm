@@ -372,7 +372,7 @@ let test_docblock_finder (harness : Test_harness.t) : bool =
     Relative_path.create_detect_prefix
       (Path.to_string (Path.concat harness.repo_dir "/bar_1.php"))
   in
-  let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+  let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
   let docblock =
     ServerDocblockAt.go_docblock_ctx
       ~ctx

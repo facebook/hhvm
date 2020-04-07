@@ -32,6 +32,12 @@ let single_ctx env path file_input =
   let ctx = Provider_utils.ctx_from_server_env env in
   Provider_context.add_entry_from_file_contents ~ctx ~path ~contents
 
+let single_ctx_path env path =
+  single_ctx
+    env
+    (Relative_path.create_detect_prefix path)
+    (ServerCommandTypes.FileName path)
+
 let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
  fun genv env ~is_stale -> function
   | STATUS { max_errors; _ } ->
@@ -95,21 +101,11 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let env = { env with tcopt } in
     (env, ServerInferTypeBatch.go genv.workers positions env)
   | IDE_HOVER (path, line, column) ->
-    let path = Relative_path.create_detect_prefix path in
-    let (ctx, entry) =
-      Provider_context.add_entry
-        ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path
-    in
+    let (ctx, entry) = single_ctx_path env path in
     let result = ServerHover.go_quarantined ~ctx ~entry ~line ~column in
     (env, result)
-  | DOCBLOCK_AT (filename, line, column, _, kind) ->
-    let ctx = Provider_utils.ctx_from_server_env env in
-    let (ctx, entry) =
-      Provider_context.add_entry
-        ~ctx
-        ~path:(Relative_path.create_detect_prefix filename)
-    in
+  | DOCBLOCK_AT (path, line, column, _, kind) ->
+    let (ctx, entry) = single_ctx_path env path in
     let r = ServerDocblockAt.go_docblock_ctx ~ctx ~entry ~line ~column ~kind in
     (env, r)
   | DOCBLOCK_FOR_SYMBOL (symbol, kind) ->
@@ -117,11 +113,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let r = ServerDocblockAt.go_docblock_for_symbol ~ctx ~symbol ~kind in
     (env, r)
   | IDE_SIGNATURE_HELP (path, line, column) ->
-    let (ctx, entry) =
-      Provider_context.add_entry
-        ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path:(Relative_path.create_detect_prefix path)
-    in
+    let (ctx, entry) = single_ctx_path env path in
     (env, ServerSignatureHelp.go_quarantined ~ctx ~entry ~line ~column)
   | COMMANDLINE_AUTOCOMPLETE contents ->
     (* For command line autocomplete, we assume the AUTO332 text has
@@ -511,12 +503,8 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
     let (ctx, entry) = single_ctx env path file_input in
     Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
         (env, ServerGoToDefinition.go_quarantined ~ctx ~entry ~line ~column))
-  | BIGCODE filename ->
-    let (ctx, entry) =
-      Provider_context.add_entry
-        ~ctx:(Provider_utils.ctx_from_server_env env)
-        ~path:(Relative_path.create_detect_prefix filename)
-    in
+  | BIGCODE path ->
+    let (ctx, entry) = single_ctx_path env path in
     let result = ServerBigCode.go_ctx ~ctx ~entry in
     (env, result)
   | VERBOSE verbose ->

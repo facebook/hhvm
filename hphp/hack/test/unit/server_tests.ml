@@ -330,7 +330,9 @@ let test_compute_tast_counting () =
           ~tcopt:TypecheckerOptions.default
           ~backend:(Provider_backend.get ())
       in
-      let (ctx, entry) = Provider_context.add_entry ~ctx ~path:foo_path in
+      let (ctx, entry) =
+        Provider_context.add_entry_if_missing ~ctx ~path:foo_path
+      in
       let { Tast_provider.Compute_tast_and_errors.telemetry; _ } =
         Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
       in

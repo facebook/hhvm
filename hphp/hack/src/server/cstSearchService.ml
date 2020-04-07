@@ -622,7 +622,7 @@ let go
       (Relative_path.t * result) list =
     List.fold inputs ~init:acc ~f:(fun acc (path, pattern) ->
         try
-          let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
           match search ctx entry pattern with
           | Some result -> (path, result) :: acc
           | None -> acc

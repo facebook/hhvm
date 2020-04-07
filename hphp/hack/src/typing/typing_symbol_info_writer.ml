@@ -81,7 +81,7 @@ let recheck_job
     (progress : Relative_path.t list) : unit =
   let info_lsts =
     List.map progress ~f:(fun path ->
-        let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in

@@ -348,7 +348,9 @@ let test () =
              { tcopt with GlobalOptions.tco_dynamic_view = dynamic })
     in
     let (ctx, entry) =
-      Provider_context.add_entry ~ctx ~path:(Relative_path.from_root file)
+      Provider_context.add_entry_if_missing
+        ~ctx
+        ~path:(Relative_path.from_root file)
     in
     let { Tast_provider.Compute_tast.tast; _ } =
       Tast_provider.compute_tast_unquarantined ~ctx ~entry

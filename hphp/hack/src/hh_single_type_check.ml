@@ -1274,7 +1274,7 @@ let handle_mode
     iter_over_files (fun path ->
         try
           let sienv = scan_files_for_symbol_index path sienv ctx in
-          let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+          let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
           (* TODO: Use a magic word/symbol to identify autocomplete location instead *)
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
           let position =
@@ -1325,7 +1325,7 @@ let handle_mode
           print_coverage type_acc)
   | Cst_search ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =
       let open Result.Monad_infix in
       Sys_utils.read_stdin_to_string ()
@@ -1427,7 +1427,7 @@ let handle_mode
         ))
   | Identify_symbol (line, column) ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     (* TODO(ljw): surely this doesn't need quarantine? *)
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
@@ -1444,7 +1444,9 @@ let handle_mode
     end
   | Find_local (line, char) ->
     let filename = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry ~ctx ~path:filename in
+    let (ctx, entry) =
+      Provider_context.add_entry_if_missing ~ctx ~path:filename
+    in
     let result = ServerFindLocals.go ~ctx ~entry ~line ~char in
     let print pos = Printf.printf "%s\n" (Pos.string_no_file pos) in
     List.iter result print
@@ -1543,7 +1545,7 @@ let handle_mode
     in
     let include_defs = true in
     let (ctx, entry) =
-      Provider_context.add_entry
+      Provider_context.add_entry_if_missing
         ~ctx:(Provider_utils.ctx_from_server_env env)
         ~path
     in
@@ -1602,7 +1604,7 @@ let handle_mode
         ClientFindRefs.print_ide_readable results))
   | Highlight_refs (line, column) ->
     let path = expect_single_file () in
-    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let results =
       ServerHighlightRefs.go_quarantined ~ctx ~entry ~line ~column
     in

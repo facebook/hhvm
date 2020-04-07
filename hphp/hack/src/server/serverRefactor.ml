@@ -314,7 +314,7 @@ let get_deprecated_wrapper_patch ~filename ~definition ~ctx new_name =
         let (_, col_start_plus1, _, _) = Pos.destruct_range definition.span in
         let col_start = col_start_plus1 - 1 in
         let (_ctx, entry) =
-          Provider_context.add_entry
+          Provider_context.add_entry_if_missing
             ~ctx
             ~path:(Relative_path.create_detect_prefix filename)
         in
@@ -445,7 +445,7 @@ let go ctx action genv env =
 let go_ide ctx (filename, line, column) new_name genv env =
   let open SymbolDefinition in
   let (ctx, entry) =
-    Provider_context.add_entry
+    Provider_context.add_entry_if_missing
       ~ctx
       ~path:(Relative_path.create_detect_prefix filename)
   in

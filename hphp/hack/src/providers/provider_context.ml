@@ -74,10 +74,13 @@ let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
 let add_existing_entry ~(ctx : t) (entry : entry) : t =
   { ctx with entries = Relative_path.Map.add ctx.entries entry.path entry }
 
-let add_entry ~(ctx : t) ~(path : Relative_path.t) : t * entry =
-  let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-  let entry = make_entry ~path ~contents in
-  (add_existing_entry ctx entry, entry)
+let add_entry_if_missing ~(ctx : t) ~(path : Relative_path.t) : t * entry =
+  match Relative_path.Map.find_opt ctx.entries path with
+  | Some entry -> (ctx, entry)
+  | None ->
+    let contents = Sys_utils.cat (Relative_path.to_absolute path) in
+    let entry = make_entry ~path ~contents in
+    (add_existing_entry ctx entry, entry)
 
 let add_entry_from_file_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =

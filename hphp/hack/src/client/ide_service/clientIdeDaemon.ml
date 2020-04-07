@@ -621,7 +621,7 @@ let handle_message :
       |> Relative_path.create_detect_prefix
     in
     let ctx = make_empty_ctx initialized_state in
-    let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+    let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
     let result =
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerDocblockAt.go_docblock_ctx

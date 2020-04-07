@@ -4959,7 +4959,7 @@ function b_hover(): string {
                 result={
                     "contents": [
                         {"language": "hack", "value": "string"},
-                        "A comment describing b_hover.",
+                        "A comment describing b_hover differently.",
                     ],
                     "range": {
                         "start": {"line": 3, "character": 9},

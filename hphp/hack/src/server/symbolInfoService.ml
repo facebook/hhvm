@@ -30,7 +30,7 @@ let helper ctx acc filetuple_l =
   recheck_naming ctx filename_l;
   let tasts =
     List.map filename_l ~f:(fun path ->
-        let (ctx, entry) = Provider_context.add_entry ~ctx ~path in
+        let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in

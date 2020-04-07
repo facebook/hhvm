@@ -1836,6 +1836,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -2827,6 +2828,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3043,6 +3045,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3128,6 +3131,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3330,6 +3334,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3554,6 +3559,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3747,6 +3753,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3803,6 +3810,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3909,6 +3917,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -3961,6 +3970,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -4011,6 +4021,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -4101,6 +4112,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -4163,6 +4175,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 method="textDocument/publishDiagnostics",
                 params={"uri": "${php_file_uri}", "diagnostics": []},
             )
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4258,6 +4271,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 ],
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4648,6 +4662,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4733,6 +4748,7 @@ class TestLsp(TestCase[LspTestDriver]):
                 result=None,
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4802,6 +4818,7 @@ function __hh_loop_forever_foo(): int {
             )
             .wait_for_response(wait_id="definition request")
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -4881,6 +4898,7 @@ class BaseClassIncremental {
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -4969,6 +4987,7 @@ function b_hover(): string {
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
@@ -5279,6 +5298,7 @@ function unsaved_bar(): string { return "hello"; }
                 powered_by="serverless_ide",
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         try:
             self.run_spec(
@@ -5410,6 +5430,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         try:
             self.run_spec(
@@ -5578,6 +5599,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=False)
 
@@ -5597,6 +5619,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -5631,6 +5654,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
@@ -5692,6 +5716,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=None,
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -5739,6 +5764,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 result=None,
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -5800,6 +5826,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 ],
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=False)
 
@@ -5972,6 +5999,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 },
             )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
@@ -6111,5 +6139,6 @@ function aaa(): string {
             #     powered_by="serverless_ide",
             # )
             .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
         )
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

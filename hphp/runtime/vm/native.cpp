@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/native.h"
 
 #include "hphp/runtime/base/req-ptr.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/vm/func-emitter.h"
 #include "hphp/runtime/vm/native-func-table.h"
@@ -59,10 +60,12 @@ struct Registers {
   int64_t GP_regs[kNumGPRegs];
   int64_t spilled_args[kMaxBuiltinArgs - kNumGPRegs];
   double SIMD_regs[kNumSIMDRegs];
+  TypedValue spilled_rvals[kMaxBuiltinArgs];
 
   int GP_count{0};
   int SIMD_count{0};
   int spilled_count{0};
+  int spilled_rval_count{0};
 };
 
 // Push an int argument, spilling to the stack if necessary.
@@ -73,6 +76,22 @@ void pushInt(Registers& regs, const int64_t value) {
     assertx(regs.spilled_count < kMaxBuiltinArgs - kNumGPRegs);
     regs.spilled_args[regs.spilled_count++] = value;
   }
+}
+
+void pushRval(Registers& regs, tv_rval tv, bool isFCallBuiltin) {
+  if (!wide_tv_val || isFCallBuiltin) {
+    // tv_rval either points at the stack, or we don't have wide
+    // tv_vals. In either case, its actually pointing at a TypedValue
+    // already.
+    static_assert(TVOFF(m_data) == 0, "");
+    assertx((const char*)&val(tv) + TVOFF(m_type) == (const char*)&type(tv));
+    return pushInt(regs, (int64_t)&val(tv));
+  }
+  // Otherwise we need to materialize the TypedValue and push a
+  // pointer to it.
+  assertx(regs.spilled_rval_count < kMaxBuiltinArgs);
+  regs.spilled_rvals[regs.spilled_rval_count++] = *tv;
+  pushInt(regs, (int64_t)&regs.spilled_rvals[regs.spilled_rval_count - 1]);
 }
 
 // Push a double argument, spilling to the stack if necessary. We take the
@@ -128,16 +147,26 @@ void pushNativeArg(Registers& regs, const Func* const func, const int i,
 }
 
 // Push each argument, spilling ones we don't have registers for to the stack.
-void populateArgs(Registers& regs, const Func* const func,
-                  const TypedValue* const args, const int numArgs,
+void populateArgs(Registers& regs,
+                  const ActRec* fp,
+                  const Func* const func,
+                  TypedValue* stk,
+                  const int numArgs,
                   bool isFCallBuiltin) {
-  auto io = const_cast<TypedValue*>(args + 1);
-
   // Regular FCalls will have their out parameter locations below the ActRec on
   // the stack, while FCallBuiltin has no ActRec to skip over.
-  if (!isFCallBuiltin) io += kNumActRecCells;
+  auto io = isFCallBuiltin
+    ? stk + 1
+    : reinterpret_cast<TypedValue*>(const_cast<ActRec*>(fp) + 1);
+
+  auto const get = [&] (int idx) {
+    return isFCallBuiltin
+      ? tv_lval{&stk[-idx]}
+      : frame_local(fp, idx);
+  };
+
   for (auto i = 0; i < numArgs; ++i) {
-    auto const& arg = args[-i];
+    auto const arg = get(i);
     auto const& pi = func->params()[i];
     auto const type = pi.builtinType;
     if (func->isInOut(i)) {
@@ -145,7 +174,7 @@ void populateArgs(Registers& regs, const Func* const func,
         *io = *iv;
         tvDecRefGen(arg);
       } else {
-        *io = arg;
+        *io = *arg;
       }
 
       // Any persistent values may become counted...
@@ -156,15 +185,15 @@ void populateArgs(Registers& regs, const Func* const func,
       }
 
       // Set the input value to null to avoid double freeing it
-      const_cast<TypedValue&>(arg).m_type = KindOfNull;
+      arg.type() = KindOfNull;
 
       pushInt(regs, (int64_t)io++);
     } else if (type == KindOfDouble) {
       pushDouble(regs, val(arg));
     } else if (pi.isNativeArg()) {
-      pushNativeArg(regs, func, i, type, arg);
+      pushNativeArg(regs, func, i, type, *arg);
     } else if (!type) {
-      pushInt(regs, (int64_t)&arg);
+      pushRval(regs, arg, isFCallBuiltin);
     } else if (isBuiltinByRef(type)) {
       pushInt(regs, (int64_t)&val(arg));
     } else {
@@ -177,16 +206,20 @@ void populateArgs(Registers& regs, const Func* const func,
 
 /////////////////////////////////////////////////////////////////////////////
 
-void callFunc(const Func* const func, const void* const ctx,
-              const TypedValue* const args, const int numNonDefault,
-              TypedValue& ret, bool isFCallBuiltin) {
+void callFunc(const Func* const func,
+              const ActRec* fp,
+              const void* const ctx,
+              TypedValue* args,
+              const int numNonDefault,
+              TypedValue& ret,
+              bool isFCallBuiltin) {
   auto const f = func->nativeFuncPtr();
   auto const numArgs = func->numParams();
   auto retType = func->hniReturnType();
   auto regs = Registers{};
 
   if (ctx) pushInt(regs, (int64_t)ctx);
-  populateArgs(regs, func, args, numArgs, isFCallBuiltin);
+  populateArgs(regs, fp, func, args, numArgs, isFCallBuiltin);
 
   // Decide how many int and double arguments we need to call func. Note that
   // spilled arguments come after the GP registers, in line with them. We can
@@ -283,19 +316,24 @@ void callFunc(const Func* const func, const void* const ctx,
 
 //////////////////////////////////////////////////////////////////////////////
 
-void coerceFCallArgs(TypedValue* args,
-                     int32_t numArgs, int32_t numNonDefault,
-                     const Func* func) {
+namespace {
+
+template <typename F>
+void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
+                         const Func* func,
+                         F args) {
   assertx(func->isBuiltin() && "func is not a builtin");
   assertx(numArgs == func->numParams());
 
   for (int32_t i = 0; (i < numNonDefault) && (i < numArgs); i++) {
     const Func::ParamInfo& pi = func->params()[i];
 
+    auto const tv = args(i);
+
     auto tc = pi.typeConstraint;
     auto targetType = pi.builtinType;
     if (tc.isNullable()) {
-      if (isNullType(args[-i].m_type)) {
+      if (tvIsNull(tv)) {
         // No need to coerce when passed a null for a nullable type
         continue;
       }
@@ -308,17 +346,15 @@ void coerceFCallArgs(TypedValue* args,
     }
 
     // Check if we have the right type, or if its a Variant.
-    if (!targetType || equivDataTypes(args[-i].m_type, *targetType)) {
-      auto const c = &args[-i];
-
+    if (!targetType || equivDataTypes(type(tv), *targetType)) {
       if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices) ||
           !tc.isArray() ||
-          !isArrayType(c->m_type)) {
+          !tvIsArray(tv)) {
         continue;
       }
 
       auto const raise = [&] {
-        auto const ad = val(c).parr;
+        auto const ad = val(tv).parr;
         if (tc.isVArray()) {
           return !ad->isVArray();
         } else if (tc.isDArray()) {
@@ -333,7 +369,7 @@ void coerceFCallArgs(TypedValue* args,
       if (raise) {
         raise_hackarr_compat_type_hint_param_notice(
           func,
-          c->m_data.parr,
+          val(tv).parr,
           tc.displayName().c_str(),
           i
         );
@@ -341,27 +377,23 @@ void coerceFCallArgs(TypedValue* args,
       continue;
     }
 
-    if (isFuncType(args[-i].m_type) && isStringType(*targetType)) {
-      args[-i].m_data.pstr = const_cast<StringData*>(
-        args[-i].m_data.pfunc->name()
-      );
-      args[-i].m_type = KindOfPersistentString;
+    if (tvIsFunc(tv) && isStringType(*targetType)) {
+      val(tv).pstr = const_cast<StringData*>(val(tv).pfunc->name());
+      type(tv) = KindOfPersistentString;
       if (RuntimeOption::EvalStringHintNotices) {
         raise_notice(Strings::FUNC_TO_STRING_IMPLICIT);
       }
       continue;
     }
-    if (isClassType(args[-i].m_type) && isStringType(*targetType)) {
-      args[-i].m_data.pstr = const_cast<StringData*>(
-        args[-i].m_data.pclass->name()
-      );
-      args[-i].m_type = KindOfPersistentString;
+    if (tvIsClass(tv) && isStringType(*targetType)) {
+      val(tv).pstr = const_cast<StringData*>(val(tv).pclass->name());
+      type(tv) = KindOfPersistentString;
       if (RuntimeOption::EvalStringHintNotices) {
         raise_notice(Strings::CLASS_TO_STRING_IMPLICIT);
       }
       continue;
     }
-    if (isClsMethType(args[-i].m_type)) {
+    if (tvIsClsMeth(tv)) {
       auto raise = [&] {
         if (RuntimeOption::EvalVecHintNotices) {
           raise_clsmeth_compat_type_hint(
@@ -370,31 +402,50 @@ void coerceFCallArgs(TypedValue* args,
       };
       if (RuntimeOption::EvalHackArrDVArrs) {
         if (isVecType(*targetType)) {
-          tvCastToVecInPlace(&args[-i]);
+          tvCastToVecInPlace(tv);
           raise();
           continue;
         }
       } else {
         if (isArrayType(*targetType)) {
-          tvCastToVArrayInPlace(&args[-i]);
+          tvCastToVArrayInPlace(tv);
           raise();
           continue;
         }
       }
     }
 
-
     auto msg = param_type_error_message(
       func->name()->data(),
       i+1,
       *targetType,
-      args[-i].m_type
+      type(tv)
     );
     if (RuntimeOption::PHP7_EngineExceptions) {
       SystemLib::throwTypeErrorObject(msg);
     }
     SystemLib::throwRuntimeExceptionObject(msg);
   }
+}
+
+}
+
+void coerceFCallArgsFromLocals(const ActRec* fp,
+                               int32_t numArgs, int32_t numNonDefault,
+                               const Func* func) {
+  coerceFCallArgsImpl(
+    numArgs, numNonDefault, func,
+    [&] (int32_t idx) { return frame_local(fp, idx); }
+  );
+}
+
+void coerceFCallArgsFromStack(TypedValue* args,
+                              int32_t numArgs, int32_t numNonDefault,
+                              const Func* func) {
+  coerceFCallArgsImpl(
+    numArgs, numNonDefault, func,
+    [&] (int32_t idx) { return &args[-idx]; }
+  );
 }
 
 #undef CASE
@@ -407,11 +458,11 @@ TypedValue* functionWrapper(ActRec* ar) {
   auto numNonDefault = ar->numArgs();
   TypedValue* args = ((TypedValue*)ar) - 1;
 
-  coerceFCallArgs(args, numArgs, numNonDefault, func);
+  coerceFCallArgsFromLocals(ar, numArgs, numNonDefault, func);
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, nullptr, args, numNonDefault, rv, false);
+  callFunc(func, ar, nullptr, args, numNonDefault, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   frame_free_locals_no_this_inl(ar, func->numLocals(), &rv);
@@ -428,7 +479,7 @@ TypedValue* methodWrapper(ActRec* ar) {
   bool isStatic = func->isStatic();
   TypedValue* args = ((TypedValue*)ar) - 1;
 
-  coerceFCallArgs(args, numArgs, numNonDefault, func);
+  coerceFCallArgsFromLocals(ar, numArgs, numNonDefault, func);
 
   // Prepend a context arg for methods
   // Class when it's being called statically Foo::bar()
@@ -448,7 +499,7 @@ TypedValue* methodWrapper(ActRec* ar) {
 
   TypedValue rv;
   rv.m_type = KindOfUninit;
-  callFunc(func, ctx, args, numNonDefault, rv, false);
+  callFunc(func, ar, ctx, args, numNonDefault, rv, false);
 
   assertx(rv.m_type != KindOfUninit);
   if (isStatic) {

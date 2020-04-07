@@ -220,18 +220,27 @@ enum Attr {
  *
  * Uses typehints in Func and tvCast*InPlace
  */
-void coerceFCallArgs(TypedValue* args,
-                     int32_t numArgs, int32_t numNonDefault,
-                     const Func* func);
+void coerceFCallArgsFromLocals(const ActRec* fp,
+                               int32_t numArgs,
+                               int32_t numNonDefault,
+                               const Func* func);
+void coerceFCallArgsFromStack(TypedValue* args,
+                              int32_t numArgs,
+                              int32_t numNonDefault,
+                              const Func* func);
 
 /**
  * Dispatches a call to the native function bound to <func>
  * If <ctx> is not nullptr, it is prepended to <args> when
  * calling.
  */
-void callFunc(const Func* func, const void* ctx,
-              const TypedValue* args, int32_t numNonDefault,
-              TypedValue& ret, bool isFCallBuiltin);
+void callFunc(const Func* func,
+              const ActRec* fp,
+              const void* ctx,
+              TypedValue* args,
+              int32_t numNonDefault,
+              TypedValue& ret,
+              bool isFCallBuiltin);
 
 #define NATIVE_TYPES                                  \
   /* kind       arg type              return type */  \

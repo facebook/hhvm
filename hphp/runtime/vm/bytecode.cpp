@@ -4768,7 +4768,7 @@ void iopFCallBuiltin(
 
   TypedValue* args = vmStack().indTV(numArgs-1);
   TypedValue ret;
-  Native::coerceFCallArgs(args, numArgs, numNonDefault, func);
+  Native::coerceFCallArgsFromStack(args, numArgs, numNonDefault, func);
 
   if (func->hasVariadicCaptureParam()) {
     assertx(numArgs > 0);
@@ -4778,7 +4778,7 @@ void iopFCallBuiltin(
         : isArrayType(args[1 - safe_cast<int32_t>(numArgs)].m_type)
     );
   }
-  Native::callFunc(func, ctx, args, numNonDefault, ret, true);
+  Native::callFunc(func, vmfp(), ctx, args, numNonDefault, ret, true);
 
   frame_free_args(args, numNonDefault);
   vmStack().ndiscard(numArgs);

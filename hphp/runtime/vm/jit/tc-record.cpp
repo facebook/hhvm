@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/relocation.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
@@ -153,9 +154,13 @@ void reportJitMaturity() {
   auto const before = jitMaturityCounter->getValue();
   if (before == 100) return;
 
-  // Limit jit maturity to 70 before retranslateAll finishes (if enabled).
+  // Limit jit maturity to 70 before retranslateAll finishes (if enabled).  If
+  // the JIT is running in jumpstart seeder mode with profiling of optimized
+  // code enabled, don't consider retranslateAll to ever finish because, even
+  // when it's done, it'll be running instrumented optimizing code.
   constexpr uint64_t kMaxMaturityBeforeRTA = 70;
-  auto const beforeRetranslateAll = mcgen::retranslateAllPending();
+  auto const beforeRetranslateAll = mcgen::retranslateAllPending() ||
+    (isJitSerializing() && serializeOptProfEnabled());
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();

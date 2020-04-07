@@ -119,14 +119,6 @@ that a certain file exists on disk). *)
 val add_entry_from_file_contents :
   ctx:t -> path:Relative_path.t -> contents:string -> t * entry
 
-(** Same as [add_entry], but using the provided [ServerCommandTypes.file_input].
-This is useful in some IDE code paths. *)
-val add_entry_from_file_input :
-  ctx:t ->
-  path:Relative_path.t ->
-  file_input:ServerCommandTypes.file_input ->
-  t * entry
-
 val add_existing_entry : ctx:t -> entry -> t
 
 (** Get the [ParserOptions.t] contained within the [t]. *)

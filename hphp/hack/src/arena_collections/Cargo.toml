@@ -10,8 +10,8 @@ path = "lib.rs"
 
 [dependencies]
 arena_trait = { path = "../arena_trait" }
+bumpalo = { version = "3.1.2", features = ["collections"] }
 
 [dev-dependencies]
-bumpalo = { version = "3.1.2", features = ["collections"] }
 quickcheck = "0.9"
 rand = { version = "0.7", features = ["small_rng"] }

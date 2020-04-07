@@ -10,7 +10,7 @@ use bumpalo::collections::Vec;
 use itertools::*;
 use oxidized::ast;
 use oxidized::ident::Ident;
-use typing_collections_rust::SMap;
+use typing_collections_rust::{SMap, Vec as AVec};
 use typing_defs_rust::{avec, Ty};
 
 fn simplify_subtype_i<'a>(
@@ -243,7 +243,7 @@ fn prop_to_env_<'a>(
 
 fn props_to_env<'a>(
     env: &Env<'a>,
-    props: &Vec<'a, SubtypeProp<'a>>,
+    props: &AVec<'a, SubtypeProp<'a>>,
     props_acc: &mut Vec<'a, SubtypeProp<'a>>,
 ) {
     props

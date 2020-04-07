@@ -106,7 +106,7 @@ pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
 pub struct InferenceEnv<'a> {
     pub bld: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
-    pub tyvars_stack: Vec<(&'a Pos, Vec<Ident>)>,
+    pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, Ident>)>,
     pub allow_solve_globals: bool,
     var_id_counter: Ident,
 }
@@ -116,7 +116,7 @@ impl<'a> InferenceEnv<'a> {
         InferenceEnv {
             bld,
             tvenv: IMap::empty(),
-            tyvars_stack: vec![],
+            tyvars_stack: Vec::new_in(bld.alloc),
             allow_solve_globals: false,
             var_id_counter: 0,
         }

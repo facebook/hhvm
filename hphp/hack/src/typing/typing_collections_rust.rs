@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub use arena_collections::map::Map;
 pub use arena_collections::set::Set;
+pub use arena_collections::{pvec, vec::Vec};
 
 pub type ISet<'a> = Set<'a, isize>;
 

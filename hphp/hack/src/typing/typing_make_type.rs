@@ -16,7 +16,7 @@ use crate::typing_defs::ExpandEnv;
 use crate::typing_defs_core::*;
 use crate::typing_logic::{SubtypeProp, SubtypePropEnum};
 use crate::typing_reason::*;
-use typing_collections_rust::SMap;
+use typing_collections_rust::{SMap, Vec};
 
 // Struct off which we call type builder methods
 // This gives us the option to keep some state here e.g. for hash consing
@@ -274,19 +274,19 @@ impl<'a> TypeBuilder<'a> {
 /// Subtype props
 impl<'a> TypeBuilder<'a> {
     pub fn conj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Conj(v))
+        self.alloc(SubtypePropEnum::Conj(Vec::from(v)))
     }
     pub fn disj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Disj(v))
+        self.alloc(SubtypePropEnum::Disj(Vec::from(v)))
     }
     pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
         self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
     }
     pub fn valid(&'a self) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Conj(BVec::new_in(self.alloc)))
+        self.alloc(SubtypePropEnum::Conj(Vec::new_in(self.alloc)))
     }
     pub fn invalid(&'a self) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Disj(BVec::new_in(self.alloc)))
+        self.alloc(SubtypePropEnum::Disj(Vec::new_in(self.alloc)))
     }
 }
 

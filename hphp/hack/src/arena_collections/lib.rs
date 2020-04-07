@@ -4,3 +4,5 @@
 // LICENSE file in the "hack" directory of this source tree.
 pub mod map;
 pub mod set;
+#[macro_use]
+pub mod vec;

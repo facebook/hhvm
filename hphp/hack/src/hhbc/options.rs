@@ -393,6 +393,8 @@ impl Options {
                 Some(pos) => {
                     let (key, val) = arg.split_at(pos);
                     let val = &val[1..]; // strip '='
+                    let key = key.to_ascii_lowercase();
+                    let key = key.as_ref();
                     let key: &str = options_cli::CANON_BY_ALIAS.get(key).unwrap_or(&key);
                     if let Some(val) = options_cli::to_json(key)(&val) {
                         json.as_object_mut().map(|m| {

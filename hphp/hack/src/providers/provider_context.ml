@@ -79,15 +79,6 @@ let add_entry ~(ctx : t) ~(path : Relative_path.t) : t * entry =
   let entry = make_entry ~path ~contents in
   (add_existing_entry ctx entry, entry)
 
-let try_add_entry_from_disk ~(ctx : t) ~(path : Relative_path.t) :
-    (t * entry) option =
-  let absolute_path = Relative_path.to_absolute path in
-  try
-    let contents = Sys_utils.cat absolute_path in
-    let entry = make_entry ~path ~contents in
-    Some (add_existing_entry ctx entry, entry)
-  with _ -> None
-
 let add_entry_from_file_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
   let entry = make_entry ~path ~contents in

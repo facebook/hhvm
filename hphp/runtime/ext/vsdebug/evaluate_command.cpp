@@ -82,9 +82,14 @@ void EvaluatePHPExecutor::callPHPCode()
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
   } else {
     m_result = g_context->evalPHPDebugger(rawUnit, m_frameDepth);
+    if (!m_result.error.empty()) {
+      m_debugger->sendUserMessage(
+        m_result.error.c_str(),
+        DebugTransport::OutputLevelError
+      );
+    }
   }
 }
-
 
 EvaluateCommand::EvaluateCommand(
   Debugger* debugger,

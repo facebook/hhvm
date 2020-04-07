@@ -4937,6 +4937,11 @@ where
                     namespace: Self::mk_empty_ns_env(env),
                 })])
             }
+            _ if env.file_mode() == file_info::Mode::Mdecl
+                || (env.file_mode() == file_info::Mode::Mphp && !env.codegen) =>
+            {
+                Ok(vec![])
+            }
             _ => Ok(vec![ast::Def::mk_stmt(Self::p_stmt(node, env)?)]),
         }
     }

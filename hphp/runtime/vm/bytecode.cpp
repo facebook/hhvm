@@ -5768,9 +5768,10 @@ OPTBLD_INLINE TCA iopAwaitAll(PC origpc, PC& pc, LocalRange locals) {
     return nullptr;
   }
 
-  auto obj = Object::attach(c_AwaitAllWaitHandle::fromFrameNoCheck(
-    locals.count, cnt, frame_local(vmfp(), locals.first)
-  ));
+  auto obj = Object::attach(
+    c_AwaitAllWaitHandle::fromFrameNoCheck(vmfp(), locals.first,
+                                           locals.first + locals.count, cnt)
+  );
   assertx(obj->isWaitHandle());
   assertx(!static_cast<c_Awaitable*>(obj.get())->isFinished());
 

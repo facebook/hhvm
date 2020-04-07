@@ -359,7 +359,6 @@ void cgCreateSSWH(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
-  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<CreateAAWHData>();
 
   cgCallHelper(
@@ -369,9 +368,10 @@ void cgCreateAAWH(IRLS& env, const IRInstruction* inst) {
     callDest(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
-      .imm(extra->count)
+      .ssa(0)
+      .imm(extra->first)
+      .imm(extra->first + extra->count)
       .ssa(1)
-      .addr(fp, localOffset(extra->first))
   );
 }
 

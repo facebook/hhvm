@@ -28,6 +28,7 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/vm/runtime.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,19 +136,20 @@ Object c_AwaitAllWaitHandle::Create(Iter iter) {
 }
 
 ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
-  uint32_t total, uint32_t cnt, TypedValue* stk
+  const ActRec* fp, uint32_t first, uint32_t last, uint32_t cnt
 ) {
   assertx(cnt);
+  assertx(first < last);
 
   auto result = Alloc(cnt);
   auto ctx_idx = std::numeric_limits<context_idx_t>::max();
   auto next = &result->m_children[cnt];
   uint32_t idx = cnt;
 
-  for (int64_t i = 0; i < total; i++) {
-    auto const local = stk[-i];
+  for (int64_t i = first; i < last; i++) {
+    auto const local = frame_local(fp, i);
     if (tvIsNull(local)) continue;
-    auto const waitHandle = c_Awaitable::fromTVAssert(local);
+    auto const waitHandle = c_Awaitable::fromTVAssert(*local);
     if (waitHandle->isFinished()) continue;
 
     auto const child = static_cast<c_WaitableWaitHandle*>(waitHandle);

@@ -57,8 +57,12 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
     }
   }
 
-  static ObjectData* fromFrameNoCheck(uint32_t total, uint32_t cnt,
-                                      TypedValue* stk);
+  // [frame, last) are the set of locals, and cnt is number of
+  // non-finished wait handles in that range.
+  static ObjectData* fromFrameNoCheck(const ActRec* fp,
+                                      uint32_t first,
+                                      uint32_t last,
+                                      uint32_t cnt);
 
  public:
   struct Node final {

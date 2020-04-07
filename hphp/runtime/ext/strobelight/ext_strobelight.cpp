@@ -93,12 +93,14 @@ bool logToUSDT(const Array& bt) {
       ArrayData* bt_frame = val(tv).parr;
       strobelight::backtrace_frame_t* frame = &bt_slab.frames[i];
 
-      if (auto const line = bt_frame->rval(s_line.get())) {
+      auto const line = bt_frame->get(s_line.get());
+      if (line.is_init()) {
         assertx(isIntType(type(line)));
         frame->line = val(line).num;
       }
 
-      if (auto const file_name = bt_frame->rval(s_file.get())) {
+      auto const file_name = bt_frame->get(s_file.get());
+      if (file_name.is_init()) {
         assertx(isStringType(type(file_name)));
         strncpy(frame->file_name,
                 val(file_name).pstr->data(),
@@ -106,7 +108,8 @@ bool logToUSDT(const Array& bt) {
         frame->file_name[strobelight::kFileNameMax - 1] = '\0';
       }
 
-      if (auto const class_name = bt_frame->rval(s_class.get())) {
+      auto const class_name = bt_frame->get(s_class.get());
+      if (class_name.is_init()) {
         assertx(isStringType(type(class_name)));
         strncpy(frame->class_name,
                 val(class_name).pstr->data(),
@@ -114,7 +117,8 @@ bool logToUSDT(const Array& bt) {
         frame->class_name[strobelight::kClassNameMax - 1] = '\0';
       }
 
-      if (auto const function_name = bt_frame->rval(s_function.get())) {
+      auto const function_name = bt_frame->get(s_function.get());
+      if (function_name.is_init()) {
         assertx(isStringType(type(function_name)));
         strncpy(frame->function,
                 val(function_name).pstr->data(),

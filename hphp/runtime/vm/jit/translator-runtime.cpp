@@ -528,7 +528,7 @@ TypedValue getDefaultIfNullTV(tv_rval rval, const TypedValue& def) {
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  return getDefaultIfNullTV(a->rval(key), def);
+  return getDefaultIfNullTV(a->rvalVanilla(key), def);
 }
 
 ALWAYS_INLINE
@@ -548,7 +548,7 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  return getDefaultIfNullTV(a->rval(key), def);
+  return getDefaultIfNullTV(a->rvalVanilla(key), def);
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
@@ -596,9 +596,9 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
   assertx(a->isVecArrayKind() || a->isPackedKind());
-  int64_t idx = isFirst ? 0 : a->size() - 1;
-  auto rval = a->rval(idx);
-  return UNLIKELY(!rval) ? make_tv<KindOfNull>() : rval.tv();
+  auto const size = a->getSize();
+  if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
+  return *PackedArray::NvGetIntVec(a, isFirst ? 0 : size - 1);
 }
 
 template TypedValue vecFirstLast<true>(ArrayData*);

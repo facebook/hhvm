@@ -2032,9 +2032,9 @@ bool strtr_slow(const Array& arr, StringBuffer& result, String& key,
     key.setSize(len);
     auto const key_tval = make_tv<KindOfString>(key.get());
     auto const arrkey = arr.convertKey<IntishCast::Cast>(key_tval);
-    auto const rval = arr->get(arrkey);
-    if (!rval.is_dummy()) {
-      String replace = tvCastToString(rval.tv());
+    auto const tv = arr->get(arrkey);
+    if (tv.is_init()) {
+      String replace = tvCastToString(tv);
       if (!replace.empty()) {
         result.append(replace);
       }

@@ -83,14 +83,14 @@ std::pair<Type, bool> arrElemType(Type arr, Type idx, const Class* ctx) {
 
   if (arr.hasConstVal()) {
     if (dissected.hasConstVal(TInt)) {
-      auto const rval = arr.arrVal()->rval(dissected.intVal());
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = arr.arrVal()->get(dissected.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
     if (dissected.hasConstVal(TStr)) {
-      auto const rval = arr.arrVal()->rval(dissected.strVal());
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = arr.arrVal()->get(dissected.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 

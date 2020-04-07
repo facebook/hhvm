@@ -32,11 +32,11 @@ namespace {
 TypedValue shapes_idx(const Class* self, ArrayArg arr,
                       TypedValue key, TypedValue def /*= uninit */) {
   if (isIntType(type(key))) {
-    auto const result = arr->rval(val(key).num);
-    if (result) return tvReturn(const_variant_ref{result});
+    auto const result = arr->get(val(key).num);
+    if (result.is_init()) return tvReturn(tvAsCVarRef(result));
   } else if (isStringType(type(key))) {
-    auto const result = arr->rval(val(key).pstr);
-    if (result) return tvReturn(const_variant_ref{result});
+    auto const result = arr->get(val(key).pstr);
+    if (result.is_init()) return tvReturn(tvAsCVarRef(result));
   } else {
     auto const message = folly::sformat(
       "Argument 2 passed to HH\\Shapes::idx() "

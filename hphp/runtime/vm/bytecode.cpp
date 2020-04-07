@@ -2758,16 +2758,16 @@ OPTBLD_INLINE void iopClassGetTS() {
     raise_error("Reified type must be a type structure");
   }
   auto const ts = cell->m_data.parr;
-  auto const classname_field = ts->rval(s_classname.get());
-  if (!classname_field.is_set()) {
+  auto const classname_field = ts->get(s_classname.get());
+  if (!classname_field.is_init()) {
     raise_error("You cannot create a new instance of this type as "
                 "it is not a class");
   }
   assertx(isStringType(classname_field.type()));
   auto const name = classname_field.val().pstr;
-  auto const generics_field = ts->rval(s_generic_types.get());
+  auto const generics_field = ts->get(s_generic_types.get());
   ArrayData* reified_types = nullptr;
-  if (generics_field.is_set()) {
+  if (generics_field.is_init()) {
     reified_types = generics_field.val().parr;
     auto const mangledTypeName =
       makeStaticString(mangleReifiedGenericsName(reified_types));

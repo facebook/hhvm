@@ -2956,9 +2956,9 @@ SSATmp* arrKeyImpl(State& env, const IRInstruction* inst) {
   assertx(arr->hasConstVal(TArr));
   assertx(key->hasConstVal(TInt|TStr));
   assertx(arr->arrVal()->isPHPArrayType());
-  auto const rval = key->isA(TInt) ? arr->arrVal()->rval(key->intVal())
-                                   : arr->arrVal()->rval(key->strVal());
-  return rval ? cns(env, rval.tv()) : nullptr;
+  auto const tv = key->isA(TInt) ? arr->arrVal()->get(key->intVal())
+                                 : arr->arrVal()->get(key->strVal());
+  return tv.is_init() ? cns(env, tv) : nullptr;
 }
 
 SSATmp* simplifyArrayGet(State& env, const IRInstruction* inst) {

@@ -631,7 +631,7 @@ SSATmp* opt_foldable(IRGS& env,
   }
   if (variadicArgs) {
     for (auto i = 0; i < numVariadicArgs; i++) {
-      args.append(variadicArgs->get(i).tv());
+      args.append(variadicArgs->get(i));
     }
   }
 

@@ -1365,7 +1365,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   m_nonScalarConstantCache.bind(rds::Mode::Normal);
   auto& clsCnsData = *m_nonScalarConstantCache;
   if (m_nonScalarConstantCache.isInit()) {
-    if (auto cCns = clsCnsData->rval(clsCnsName)) {
+    auto const cCns = clsCnsData->get(clsCnsName);
+    if (cCns.is_init()) {
       // There's an entry in the cache for this (type) constant. If its the
       // globals array, this (type) constant is recursively defined, so raise
       // an error. Otherwise just return it.
@@ -1380,7 +1381,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
           )
         );
       }
-      return cCns.tv();
+      return cCns;
     }
   } else {
     // Because RDS uses a generation number scheme, when isInit was false we
@@ -1427,8 +1428,8 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
       // We could avoid a little duplicated work during warmup with more
       // complexity but it's not worth it.
       auto& cns_nc = const_cast<Const&>(cns);
-      auto const classname_field = ad->rval(s_classname.get());
-      if (classname_field != nullptr && isStringType(classname_field.type())) {
+      auto const classname_field = ad->get(s_classname.get());
+      if (isStringType(classname_field.type())) {
         cns_nc.setPointedClsName(classname_field.val().pstr);
       }
       cns_nc.val.m_data.parr = taggedData;

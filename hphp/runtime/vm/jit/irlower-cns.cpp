@@ -353,7 +353,8 @@ const StaticString s_classname("classname");
 static StringData* loadClsTypeCnsClsNameHelper(const Class* cls,
                                               const StringData* name) {
   auto const ts = loadClsTypeCnsHelper(cls, name);
-  if (auto const classname_field = ts->rval(s_classname.get())) {
+  auto const classname_field = ts->get(s_classname.get());
+  if (classname_field.is_init()) {
     assertx(isStringType(classname_field.type()));
     return classname_field.val().pstr;
   }

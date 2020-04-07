@@ -829,9 +829,9 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       env.invalidType = true;
       if (!ctx.generics) return arr.toDArray();
       assertx(arr.exists(s_name));
-      auto const name = arr[s_name].asCStrRef();
-      if (!ctx.generics->exists(name)) return arr.toDArray();
-      return Variant::wrap(ctx.generics->rval(name.get()).tv()).toDArray();
+      auto const generic = ctx.generics->get(arr[s_name].asCStrRef().get());
+      if (!generic.is_init()) return arr.toDArray();
+      return Variant::wrap(generic).toDArray();
     }
     case TypeStructure::Kind::T_reifiedtype: {
       assertx(env.tsList != nullptr);

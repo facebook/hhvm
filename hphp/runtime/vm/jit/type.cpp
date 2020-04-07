@@ -644,7 +644,7 @@ static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
       auto const packed = type.tag() == A::Tag::Packed;
       for ( ; k < arr->size(); ++k) {
         auto const elemType = packed ? type.packedElem(k) : type.elemType();
-        if (!tvMatchesRepoAuthType(arr->get(k).tv(), elemType)) {
+        if (!tvMatchesRepoAuthType(arr->get(k), elemType)) {
           return false;
         }
       }

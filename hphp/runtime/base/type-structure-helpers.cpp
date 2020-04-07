@@ -163,16 +163,16 @@ ALWAYS_INLINE
 ArrayData* getShapeFieldElement(const TypedValue& v) {
   assertx(tvIsDictOrDArray(&v));
   auto const result = v.m_data.parr;
-  auto const valueField = result->rval(s_value.get());
-  if (!valueField.is_set()) return result;
+  auto const valueField = result->get(s_value.get());
+  if (!valueField.is_init()) return result;
   assertx(tvIsDictOrDArray(valueField));
   return valueField.val().parr;
 }
 
 ALWAYS_INLINE
 folly::Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
-  auto const generics_field = ts->rval(s_generic_types.get());
-  if (!generics_field.is_set()) return folly::none;
+  auto const generics_field = ts->get(s_generic_types.get());
+  if (!generics_field.is_init()) return folly::none;
   assertx(isArrayType(generics_field.type()));
   return generics_field.val().parr;
 }
@@ -250,8 +250,8 @@ bool typeStructureIsType(
         [&](TypedValue k, TypedValue v1) {
           assertx(tvIsString(k));
           if (k.m_data.pstr->isame(s_alias.get())) return false;
-          auto const v2 = type->rval(k.m_data.pstr);
-          if (v2.is_set() && tvEqual(v1, v2.tv())) return false;
+          auto const v2 = type->get(k.m_data.pstr);
+          if (v2.is_init() && tvEqual(v1, v2)) return false;
           result = false;
           return true; // short circuit
         }
@@ -261,8 +261,8 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
-      auto const classname_field = input->rval(s_classname.get());
-      if (!classname_field.is_set()) return false;
+      auto const classname_field = input->get(s_classname.get());
+      if (!classname_field.is_init()) return false;
       assertx(isStringType(classname_field.type()));
       auto const name = classname_field.val().pstr;
       if (!name->isame(get_ts_classname(type))) return false;
@@ -396,8 +396,8 @@ bool typeStructureIsTypeList(
   bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
     if (found && !tpinfo[i].m_isReified) continue;
-    auto const inputElem = inputL->rval(i);
-    auto const typeElem = typeL->rval(i);
+    auto const inputElem = inputL->get(i);
+    auto const typeElem = typeL->get(i);
     assertx(tvIsDictOrDArray(inputElem) && tvIsDictOrDArray(typeElem));
     if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
                              warn, strict)) {
@@ -444,8 +444,8 @@ bool checkReifiedGenericsMatch(
   // if none of the other ones raise an error
   bool willWarn = false;
   for (size_t i = 0; i < size; ++i) {
-    auto const objrg = obj_generics->rval(i);
-    auto const rg = generics->rval(i);
+    auto const objrg = obj_generics->get(i);
+    auto const rg = generics->get(i);
     assertx(tvIsDictOrDArray(objrg) && tvIsDictOrDArray(rg));
     auto const tsvalue = rg.val().parr;
     if (get_ts_kind(tsvalue) == TypeStructure::Kind::T_typevar &&
@@ -763,7 +763,8 @@ bool checkTypeStructureMatchesTVImpl(
               keys_match = false;
               return true;
             }
-            auto const& ts2 = asCArrRef(ts_arr->rval(k.m_data.num));
+            auto const tv = ts_arr->get(k.m_data.num);
+            auto const& ts2 = asCArrRef(&tv);
             auto thisElemWarns = false;
             if (!checkTypeStructureMatchesTVImpl<gen_error>(
               ts2, v, givenType, expectedType, errorKey, thisElemWarns, isOrAsOp
@@ -1061,8 +1062,8 @@ bool errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields,
     [&](TypedValue v) {
       assertx(isArrayLikeType(v.m_type));
       auto arr = v.m_data.parr;
-      auto const value_field = arr->rval(s_value.get());
-      if (value_field.is_set()) {
+      auto const value_field = arr->get(s_value.get());
+      if (value_field.is_init()) {
         assertx(isArrayType(value_field.type()));
         arr = value_field.val().parr;
       }
@@ -1175,8 +1176,8 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
     case TypeStructure::Kind::T_unresolved: {
       if (get_ts_classname(ts)->isame(s_hh_this.get())) return true;
       bool genericsCouldBeNonStatic = false;
-      auto const generics = ts->rval(s_generic_types.get());
-      if (generics.is_set()) {
+      auto const generics = ts->get(s_generic_types.get());
+      if (generics.is_init()) {
         assertx(isArrayLikeType(generics.type()));
         IterateV(
           generics.val().parr,

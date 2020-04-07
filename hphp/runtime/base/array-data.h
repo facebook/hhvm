@@ -388,12 +388,13 @@ public:
   arr_lval lval(const Variant& k, bool copy);
 
   /*
-   * Get an rval for the element at key `k'.
+   * Get an rval for the element at key `k'. The caller must know that the
+   * array is a "vanilla" array, which restricts callers to JIT helpers.
    *
    * If the array has no element at `k', return a null tv_rval.
    */
-  tv_rval rval(int64_t k) const;
-  tv_rval rval(const StringData* k) const;
+  tv_rval rvalVanilla(int64_t k) const;
+  tv_rval rvalVanilla(const StringData* k) const;
 
   /*
    * Get the value of the element at key `k'.
@@ -435,15 +436,14 @@ public:
   /*
    * Get the value of the element at key `k'.
    *
-   * This method behaves like rval(k), except that if the result is not set:
-   *  - If `error`, we'll throw (with different messages based on array type)
-   *  - Otherwise, we'll return a "dummy" Uninit rval
+   * If `error` is false, get returns an Uninit TypedValue if `k` is missing.
+   * If `error` is true, get throws if `k` is missing.
    */
-  tv_rval get(TypedValue k, bool error = false) const;
-  tv_rval get(int64_t k, bool error = false) const;
-  tv_rval get(const StringData* k, bool error = false) const;
-  tv_rval get(const String& k, bool error = false) const;
-  tv_rval get(const Variant& k, bool error = false) const;
+  TypedValue get(TypedValue k, bool error = false) const;
+  TypedValue get(int64_t k, bool error = false) const;
+  TypedValue get(const StringData* k, bool error = false) const;
+  TypedValue get(const String& k, bool error = false) const;
+  TypedValue get(const Variant& k, bool error = false) const;
 
   /*
    * Set the element at key `k' to `v'. set() methods make a copy first if
@@ -733,13 +733,6 @@ protected:
    */
   [[noreturn]] void getNotFound(int64_t k) const;
   [[noreturn]] void getNotFound(const StringData* k) const;
-
-  /*
-   * Raise a notice that `k' is undefined if `error' is set (and if this is not
-   * the globals array), and return an Uninit.
-   */
-  tv_rval getNotFound(int64_t k, bool error) const;
-  tv_rval getNotFound(const StringData* k, bool error) const;
 
   /*
    * Is `k' of an arraykey type (i.e., int or string)?

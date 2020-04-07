@@ -152,14 +152,14 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     if (i < 10) buf.append(' ');
     buf.append(' ');
     if (frame.exists(s_class)) {
-      buf.append(tvCastToString(frame->get(s_class).tv()));
-      buf.append(tvCastToString(frame->get(s_type).tv()));
+      buf.append(tvCastToString(frame->get(s_class)));
+      buf.append(tvCastToString(frame->get(s_type)));
     }
-    buf.append(tvCastToString(frame->get(s_function).tv()));
+    buf.append(tvCastToString(frame->get(s_function)));
     buf.append("(");
     if (!ignore_args) {
       bool first = true;
-      for (ArrayIter argsIt(tvCastToArrayLike(frame->get(s_args).tv()));
+      for (ArrayIter argsIt(tvCastToArrayLike(frame->get(s_args)));
           !argsIt.end();
           argsIt.next()) {
         if (!first) {
@@ -177,9 +177,9 @@ String debug_string_backtrace(bool skip, bool ignore_args /* = false */,
     buf.append(")");
     if (frame.exists(s_file)) {
       buf.append(" called at [");
-      buf.append(tvCastToString(frame->get(s_file).tv()));
+      buf.append(tvCastToString(frame->get(s_file)));
       buf.append(':');
-      buf.append(tvCastToString(frame->get(s_line).tv()));
+      buf.append(tvCastToString(frame->get(s_line)));
       buf.append(']');
     }
     buf.append('\n');

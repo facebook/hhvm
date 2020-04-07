@@ -207,11 +207,11 @@ inline tv_rval ElemEmptyish() {
 }
 
 inline tv_rval ElemArrayPre(ArrayData* base, int64_t key) {
-  return base->rval(key);
+  return base->rvalVanilla(key);
 }
 
 inline tv_rval ElemArrayPre(ArrayData* base, StringData* key) {
-  return base->rval(key);
+  return base->rvalVanilla(key);
 }
 
 inline tv_rval ElemArrayPre(ArrayData* base, TypedValue key) {

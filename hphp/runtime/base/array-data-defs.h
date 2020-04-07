@@ -117,11 +117,13 @@ inline arr_lval ArrayData::lval(StringData* k, bool copy) {
   return g_array_funcs.lvalStr[kind()](this, k, copy);
 }
 
-inline tv_rval ArrayData::rval(int64_t k) const {
+inline tv_rval ArrayData::rvalVanilla(int64_t k) const {
+  assertx(isVanilla());
   return g_array_funcs.nvGetInt[kind()](this, k);
 }
 
-inline tv_rval ArrayData::rval(const StringData* k) const {
+inline tv_rval ArrayData::rvalVanilla(const StringData* k) const {
+  assertx(isVanilla());
   return g_array_funcs.nvGetStr[kind()](this, k);
 }
 
@@ -315,28 +317,40 @@ inline arr_lval ArrayData::lval(TypedValue k, bool copy) {
                              : lval(detail::getStringKey(k), copy);
 }
 
-inline tv_rval ArrayData::get(int64_t k, bool error) const {
-  auto const r = rval(k);
-  return r ? r : getNotFound(k, error);
+inline TypedValue ArrayData::get(int64_t k, bool error) const {
+  // TODO(kshaunak): Add a new ArrayData interface method that returns a value
+  // so that we don't need to use rvalVanilla here.
+  auto const result = rvalVanilla(k);
+  if (result) return *result;
+  if (error) getNotFound(k);
+  return make_tv<KindOfUninit>();
 }
 
-inline tv_rval ArrayData::get(const StringData* k, bool error) const {
-  auto const r = rval(k);
-  return r ? r : getNotFound(k, error);
+inline TypedValue ArrayData::get(const StringData* k, bool error) const {
+  // TODO(kshaunak): Add a new ArrayData interface method that returns a value
+  // so that we don't need to use rvalVanilla here.
+  auto const result = rvalVanilla(k);
+  if (result) return *result;
+  if (error) getNotFound(k);
+  return make_tv<KindOfUninit>();
 }
 
-inline tv_rval ArrayData::get(TypedValue k, bool error) const {
+inline TypedValue ArrayData::get(TypedValue k, bool error) const {
   assertx(IsValidKey(k));
   return detail::isIntKey(k) ? get(detail::getIntKey(k), error)
                              : get(detail::getStringKey(k), error);
 }
 
 inline TypedValue ArrayData::at(int64_t k) const {
-  return rval(k).tv();
+  auto const result = get(k);
+  assertx(result.is_init());
+  return result;
 }
 
 inline TypedValue ArrayData::at(const StringData* k) const {
-  return rval(k).tv();
+  auto const result = get(k);
+  assertx(result.is_init());
+  return result;
 }
 
 inline TypedValue ArrayData::at(TypedValue k) const {
@@ -380,12 +394,12 @@ inline arr_lval ArrayData::lval(const Variant& k, bool copy) {
   return lval(*k.asTypedValue(), copy);
 }
 
-inline tv_rval ArrayData::get(const String& k, bool error) const {
+inline TypedValue ArrayData::get(const String& k, bool error) const {
   assertx(IsValidKey(k));
   return get(k.get(), error);
 }
 
-inline tv_rval ArrayData::get(const Variant& k, bool error) const {
+inline TypedValue ArrayData::get(const Variant& k, bool error) const {
   return get(*k.asTypedValue(), error);
 }
 

@@ -363,7 +363,6 @@ public:
 private:
   using ArrayData::exists;
   using ArrayData::at;
-  using ArrayData::rval;
   using ArrayData::lval;
   using ArrayData::set;
   using ArrayData::remove;

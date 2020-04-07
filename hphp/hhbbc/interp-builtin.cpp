@@ -371,8 +371,8 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
     return true;
   }
   if (ts) {
-    auto const classname_field = ts->rval(s_classname.get());
-    if (classname_field != nullptr && isStringType(classname_field.type())) {
+    auto const classname_field = ts->get(s_classname.get());
+    if (isStringType(classname_field.type())) {
       reduce(env, bc::PopC {}, bc::PopC {},
              bc::String { classname_field.val().pstr });
       return true;

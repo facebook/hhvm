@@ -599,7 +599,7 @@ void Array::setLegacyArray(bool isLegacy) {
 
 template<typename T> ALWAYS_INLINE
 TypedValue Array::lookupImpl(const T& key, AccessFlags flags) const {
-  return m_arr ? *m_arr->get(key, any(flags & AccessFlags::Error))
+  return m_arr ? m_arr->get(key, any(flags & AccessFlags::Error))
                : make_tv<KindOfUninit>();
 }
 

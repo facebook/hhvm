@@ -1933,7 +1933,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
 
   if (m_evaledArgs.get()) {
     auto const arg = m_evaledArgs.get()->get(key);
-    if (!arg.is_dummy()) return Variant::wrap(arg.tv());
+    if (arg.is_init()) return Variant::wrap(arg);
   }
 
   String code;

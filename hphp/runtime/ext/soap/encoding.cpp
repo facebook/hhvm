@@ -1196,7 +1196,7 @@ TypedValue get_property(const Variant &object, const char* name) {
     auto const lval = obj->getPropIgnoreAccessibility(sname.get());
     return lval ? lval.tv() : make_tv<KindOfUninit>();
   } else if (object.isArray()) {
-    return object.asCArrRef()->get(sname.get()).tv();
+    return object.asCArrRef()->get(sname.get());
   }
   return make_tv<KindOfUninit>();
 }

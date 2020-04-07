@@ -845,7 +845,7 @@ bool visitDifferingProvTagsInSimilarArrays(SArray arr1,
         return true;
       };
       assert(arr2->exists(k));
-      auto tv2 = arr2->get(k).tv();
+      auto tv2 = arr2->get(k);
       assert(type(tv1) == type(tv2));
       if (isArrayLikeType(type(tv1))) {
         if (!visitDifferingProvTagsInSimilarArrays(
@@ -5262,14 +5262,12 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
   assert(aval.m_dataTag == DataTag::ArrLikeVal);
   auto ad = aval.m_data.aval;
   if (key.i) {
-    if (auto const r = ad->rval(*key.i)) {
-      return { from_cell(r.tv()), true };
-    }
+    auto const r = ad->get(*key.i);
+    if (r.is_init()) return { from_cell(r), true };
     return { TBottom, false };
   } else if (key.s) {
-    if (auto const r = ad->rval(*key.s)) {
-      return { from_cell(r.tv()), true };
-    }
+    auto const r = ad->get(*key.s);
+    if (r.is_init()) return { from_cell(r), true };
     return { TBottom, false };
   }
 

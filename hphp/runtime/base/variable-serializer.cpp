@@ -2050,8 +2050,9 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
         }
         if (!attrMask &&
             UNLIKELY(obj->getAttribute(ObjectData::HasDynPropArr))) {
-          if (auto const prop = obj->dynPropArray()->rval(propName.get())) {
-            wanted.set(propName, prop.tv());
+          auto const prop = obj->dynPropArray()->get(propName.get());
+          if (prop.is_init()) {
+            wanted.set(propName, prop);
             continue;
           }
         }

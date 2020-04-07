@@ -767,7 +767,8 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
     IterateKV(
       ad1,
       [&](TypedValue k, TypedValue v) {
-        if (!ad2->exists(k) || !tvEqual(v, ad2->get(k).tv())) {
+        auto const v2 = ad2->get(k);
+        if (!v2.is_init() || !tvEqual(v, v2)) {
           equal = false;
           return true;
         }
@@ -803,11 +804,12 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   IterateKV(
     ad1,
     [&](TypedValue k, TypedValue v) {
-      if (!ad2->exists(k)) {
+      auto const v2 = ad2->get(k);
+      if (!v2.is_init()) {
         result = 1;
         return true;
       }
-      auto const cmp = tvCompare(v, ad2->get(k).tv());
+      auto const cmp = tvCompare(v, v2);
       if (cmp != 0) {
         result = cmp;
         return true;
@@ -1003,16 +1005,6 @@ void ArrayData::getNotFound(const StringData* k) const {
   if (isVecArrayType()) throwInvalidArrayKeyException(k, this);
   if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayKeyException(k, false);
-}
-
-tv_rval ArrayData::getNotFound(int64_t k, bool error) const {
-  if (error) getNotFound(k);
-  return tv_rval::dummy();
-}
-
-tv_rval ArrayData::getNotFound(const StringData* k, bool error) const {
-  if (error) getNotFound(k);
-  return tv_rval::dummy();
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {

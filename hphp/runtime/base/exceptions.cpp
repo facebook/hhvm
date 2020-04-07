@@ -281,20 +281,18 @@ namespace {
       auto const frame_tv = iter.secondVal();
       assertx(isArrayLikeType(type(frame_tv)));
       auto const frame = val(frame_tv).parr;
-      auto const file = frame->rval(s_file.get());
-      auto const line = frame->rval(s_line.get());
-      if (file || line) {
-        if (file) {
-          auto const tv = file.tv();
+      auto const file = frame->get(s_file.get());
+      auto const line = frame->get(s_line.get());
+      if (file.is_init() || line.is_init()) {
+        if (file.is_init()) {
           tvSet(
-            tvAssertPlausible(tv),
+            tvAssertPlausible(file),
             throwable->propLvalAtOffset(s_fileSlot)
           );
         }
-        if (line) {
-          auto const tv = line.tv();
+        if (line.is_init()) {
           tvSet(
-            tvAssertPlausible(tv),
+            tvAssertPlausible(line),
             throwable->propLvalAtOffset(s_lineSlot)
           );
         }

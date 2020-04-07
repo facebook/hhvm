@@ -47,30 +47,30 @@ const StaticString s_hh_this("HH\\this");
 namespace detail {
 
 ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
-  auto const field = ts->rval(s.get());
-  assertx(!field.is_set() || (isBoolType(field.type()) && field.val().num));
-  return field.is_set();
+  auto const field = ts->get(s.get());
+  assertx(!field.is_init() || (isBoolType(field.type()) && field.val().num));
+  return field.is_init();
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_array(const ArrayData* ts,
                                             const String& s) {
-  auto const field = ts->rval(s.get());
-  assertx(field != nullptr && isVecOrArrayType(field.type()));
+  auto const field = ts->get(s.get());
+  assertx(isVecOrArrayType(field.type()));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
                                                  const String& s) {
-  auto const field = ts->rval(s.get());
-  if (!field.is_set()) return nullptr;
+  auto const field = ts->get(s.get());
+  if (!field.is_init()) return nullptr;
   assertx(isDictOrArrayType(field.type()));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const StringData* get_ts_string(const ArrayData* ts,
                                               const String& s) {
-  auto const field = ts->rval(s.get());
-  assertx(field != nullptr && isStringType(field.type()));
+  auto const field = ts->get(s.get());
+  assertx(isStringType(field.type()));
   return field.val().pstr;
 }
 
@@ -143,8 +143,8 @@ ALWAYS_INLINE const StringData* get_ts_root_name(const ArrayData* ts) {
 }
 
 ALWAYS_INLINE const TypeStructure::Kind get_ts_kind(const ArrayData* ts) {
-  auto const kind_field = ts->rval(s_kind.get());
-  assertx(kind_field != nullptr && isIntType(kind_field.type()));
+  auto const kind_field = ts->get(s_kind.get());
+  assertx(isIntType(kind_field.type()));
   return static_cast<TypeStructure::Kind>(kind_field.val().num);
 }
 

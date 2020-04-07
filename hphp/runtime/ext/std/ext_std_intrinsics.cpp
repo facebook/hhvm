@@ -197,10 +197,9 @@ void HHVM_FUNCTION(
     [&] (TypedValue k, TypedValue v) {
       auto const arr = v.m_data.parr;
       if (!tvIsString(k) || !tvIsArrayLike(v) || arr->size() != 3) return;
-      auto const elem0 = arr->rval(int64_t{0});
-      auto const elem1 = arr->rval(int64_t{1});
-      auto const elem2 = arr->rval(int64_t{2});
-      if (!elem0 || !elem1 || !elem2) return;
+      auto const elem0 = arr->get(int64_t{0});
+      auto const elem1 = arr->get(int64_t{1});
+      auto const elem2 = arr->get(int64_t{2});
       if (!tvIsInt(elem0) || !tvIsInt(elem1) || !tvIsDict(elem2)) return;
       rqtrace::EventGuard g_event(
         k.m_data.pstr->data(), from_micros(elem0.val().num));

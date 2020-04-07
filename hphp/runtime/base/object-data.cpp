@@ -896,8 +896,8 @@ bool ObjectData::equal(const ObjectData& other) const {
       return false;
     },
     [&](TypedValue key, TypedValue thisVal) {
-      if (!otherDynProps->exists(key) ||
-          !tvEqual(thisVal, otherDynProps->get(key).tv())) {
+      auto const otherVal = otherDynProps->get(key);
+      if (!otherVal.is_init() || !tvEqual(thisVal, otherVal)) {
         result = false;
         return true;
       }
@@ -989,11 +989,12 @@ int64_t ObjectData::compare(const ObjectData& other) const {
       return false;
     },
     [&](TypedValue key, TypedValue thisVal) {
-      if (!otherDynProps->exists(key)) {
+      auto const otherVal = otherDynProps->get(key);
+      if (!otherVal.is_init()) {
         result = 1;
         return true;
       }
-      auto cmp = tvCompare(thisVal, otherDynProps->get(key).tv());
+      auto cmp = tvCompare(thisVal, otherVal);
       if (cmp != 0) {
         result = cmp;
         return true;

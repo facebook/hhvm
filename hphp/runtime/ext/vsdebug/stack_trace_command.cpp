@@ -91,7 +91,7 @@ bool StackTraceCommand::executeImpl(
 
     auto const parentFrame = backtrace.lookup(depth + 1);
     auto const funcName =
-      tvCastToString(parentFrame.val().parr->get(s_function).tv()).data();
+      tvCastToString(parentFrame.val().parr->get(s_function)).data();
     auto const frame = backtrace.lookup(depth);
     const auto file = frame.val().parr->get(s_file);
     const auto line = frame.val().parr->get(s_line);
@@ -101,7 +101,7 @@ bool StackTraceCommand::executeImpl(
     stackFrame["id"] = session->generateFrameId(requestId, depth);
     stackFrame["name"] = funcName;
 
-    int64_t lineNumber = tvCastToInt64(line.tv());
+    int64_t lineNumber = tvCastToInt64(line);
     if (!prefs.linesStartAt1) {
       lineNumber--;
     }
@@ -109,7 +109,7 @@ bool StackTraceCommand::executeImpl(
     stackFrame["line"] = lineNumber;
     stackFrame["column"] = prefs.columnsStartAt1 ? 1 : 0;
 
-    std::string fileName = tvCastToString(file.tv()).toCppString();
+    std::string fileName = tvCastToString(file).toCppString();
     if (!fileName.empty()) {
       stackFrame["source"] = folly::dynamic::object;
       folly::dynamic& source = stackFrame["source"];

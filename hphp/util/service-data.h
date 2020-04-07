@@ -266,6 +266,8 @@ struct ExportedTimeSeries {
   int64_t getSum();
   int64_t getRateByDuration(std::chrono::seconds duration);
 
+  folly::Optional<int64_t> getCounter(StatsType type, int seconds);
+
   void exportAll(const std::string& prefix,
                  std::map<std::string, int64_t>& statsMap);
 

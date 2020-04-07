@@ -735,7 +735,7 @@ pub fn emit_deprecation_info(
                     instr::int64(sampling_rate),
                     instr::int(error_code),
                     instr::fcallfuncd(
-                        FcallArgs::new(FcallFlags::default(), 0, vec![], None, 3, None),
+                        FcallArgs::new(FcallFlags::default(), 1, vec![], None, 3, None),
                         function::from_raw_string("trigger_sampled_error"),
                     ),
                     instr::popc(),

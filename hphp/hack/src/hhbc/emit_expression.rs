@@ -1237,6 +1237,9 @@ fn is_struct_init(
     let mut has_duplicate_keys = false;
     let mut uniq_keys = std::collections::HashSet::<String>::new();
     for f in fields.iter() {
+        if !are_all_keys_non_numeric_strings && has_duplicate_keys {
+            break;
+        }
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
@@ -1246,11 +1249,10 @@ fn is_struct_init(
                     && !i64::from_str(&s).is_ok()
                     && !(f64::from_str(&s).map_or(false, |f| f.is_finite()));
                 has_duplicate_keys = has_duplicate_keys || !uniq_keys.insert(s);
-            }
-            if !are_all_keys_non_numeric_strings && has_duplicate_keys {
-                break;
+                continue;
             }
         }
+        are_all_keys_non_numeric_strings = false;
     }
     let num_keys = fields.len();
     let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
@@ -2308,7 +2310,7 @@ fn emit_special_function(
                 instr::nulluninit(),
                 instr::string("zend.assertions"),
                 instr::fcallfuncd(
-                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1, None),
+                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
                     function::from_raw_string("ini_get"),
                 ),
                 instr::int(0),

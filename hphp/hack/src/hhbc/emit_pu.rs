@@ -126,7 +126,7 @@ fn gen_pu_accessor(
         )));
         let class_id = Tast::ClassId(
             pos.clone(),
-            Tast::ClassId_::CIexpr(build_id(pos.clone(), "\\Expection".to_string())),
+            Tast::ClassId_::CIexpr(build_id(pos.clone(), "\\Exception".to_string())),
         );
         let new = Tast::Expr_::New(Box::new((
             class_id,
@@ -332,7 +332,7 @@ fn process_pufields(
 
 fn update_class(c: &mut Tast::Class_) {
     let class_name = &c.name.1;
-    let extends = c.extends.is_empty();
+    let extends = !c.extends.is_empty();
     let pu_enums = std::mem::replace(&mut c.pu_enums, vec![]);
     let mut pu_methods = process_pufields(class_name, extends, pu_enums);
     visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, c).unwrap();

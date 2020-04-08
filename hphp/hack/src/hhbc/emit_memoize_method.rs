@@ -29,7 +29,7 @@ use instruction_sequence_rust::{instr, InstrSeq, Result};
 use naming_special_names_rust::{members, user_attributes as ua};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
-use oxidized::{ast as T, namespace_env::Env as NamespaceEnv, pos::Pos};
+use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 use rx_rust as rx;
 

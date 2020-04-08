@@ -1317,99 +1317,56 @@ impl InstrSeq {
         ])
     }
 
-    fn get_or_put_label<'a>(
+    fn get_or_put_label<'i, 'm>(
         label_gen: &mut label::Gen,
-        name_label_map: &'a HashMap<String, Label>,
-        name: String,
-    ) -> (Label, &'a HashMap<String, Label>) {
-        match name_label_map.get(&name) {
-            Some(label) => (label.clone(), name_label_map),
-            None => (label_gen.next_regular(), name_label_map),
+        name_label_map: &'m mut HashMap<String, Label>,
+        name: &'i String,
+    ) -> Label {
+        match name_label_map.get(name.as_str()) {
+            Some(label) => label.clone(),
+            None => {
+                let l = label_gen.next_regular();
+                name_label_map.insert(name.to_string(), l.clone());
+                l
+            }
         }
     }
 
-    fn rewrite_user_labels_instr<'a>(
+    fn rewrite_user_labels_instr<'i, 'm>(
         label_gen: &mut label::Gen,
-        instruction: &Instruct,
-        name_label_map: &'a HashMap<String, Label>,
-    ) -> (Instruct, &'a HashMap<String, Label>) {
+        i: &'i mut Instruct,
+        name_label_map: &'m mut HashMap<String, Label>,
+    ) {
         use Instruct::*;
         let mut get_result = |x| InstrSeq::get_or_put_label(label_gen, name_label_map, x);
-        match instruction {
+        match i {
             IContFlow(InstructControlFlow::Jmp(Label::Named(name))) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (
-                    Instruct::IContFlow(InstructControlFlow::Jmp(label)),
-                    name_label_map,
-                )
+                let label = get_result(name);
+                *i = Instruct::IContFlow(InstructControlFlow::Jmp(label));
             }
             IContFlow(InstructControlFlow::JmpNS(Label::Named(name))) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (
-                    Instruct::IContFlow(InstructControlFlow::JmpNS(label)),
-                    name_label_map,
-                )
+                let label = get_result(name);
+                *i = Instruct::IContFlow(InstructControlFlow::JmpNS(label));
             }
             IContFlow(InstructControlFlow::JmpZ(Label::Named(name))) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (
-                    Instruct::IContFlow(InstructControlFlow::JmpZ(label)),
-                    name_label_map,
-                )
+                let label = get_result(name);
+                *i = Instruct::IContFlow(InstructControlFlow::JmpZ(label));
             }
             IContFlow(InstructControlFlow::JmpNZ(Label::Named(name))) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (
-                    Instruct::IContFlow(InstructControlFlow::JmpNZ(label)),
-                    name_label_map,
-                )
+                let label = get_result(name);
+                *i = Instruct::IContFlow(InstructControlFlow::JmpNZ(label));
             }
             ILabel(Label::Named(name)) => {
-                let (label, name_label_map) = get_result(name.to_string());
-                (ILabel(label), name_label_map)
+                let label = get_result(name);
+                *i = ILabel(label);
             }
-            i => (i.clone(), name_label_map),
-        }
+            _ => {}
+        };
     }
 
     pub fn rewrite_user_labels(&mut self, label_gen: &mut label::Gen) {
-        *self = InstrSeq::rewrite_user_labels_aux(label_gen, self, &HashMap::new()).0
-    }
-
-    fn rewrite_user_labels_aux<'a>(
-        label_gen: &mut label::Gen,
-        instrseq: &Self,
-        name_label_map: &'a HashMap<String, Label>,
-    ) -> (Self, &'a HashMap<String, Label>) {
-        match &instrseq {
-            InstrSeq::Empty => (InstrSeq::Empty, name_label_map),
-            InstrSeq::One(instr) => {
-                let (i, name_label_map) =
-                    InstrSeq::rewrite_user_labels_instr(label_gen, instr, name_label_map);
-                (instr::instr(i), name_label_map)
-            }
-            InstrSeq::Concat(instrseq) => {
-                let folder = |(mut acc, map): (Vec<Self>, &'a HashMap<String, Label>),
-                              seq: &Self| {
-                    let (l, map) = InstrSeq::rewrite_user_labels_aux(label_gen, seq, map);
-                    acc.push(l);
-                    (acc, map)
-                };
-                let (instrseq, name_label_map) =
-                    instrseq.iter().fold((vec![], name_label_map), folder);
-                (InstrSeq::Concat(instrseq), name_label_map)
-            }
-            InstrSeq::List(l) => {
-                let folder = |(mut acc, map): (Vec<Instruct>, &'a HashMap<String, Label>),
-                              instr: &Instruct| {
-                    let (i, map) = InstrSeq::rewrite_user_labels_instr(label_gen, instr, map);
-                    acc.push(i);
-                    (acc, map)
-                };
-                let (instrlst, name_label_map) = l.iter().fold((vec![], name_label_map), folder);
-                (InstrSeq::List(instrlst), name_label_map)
-            }
-        }
+        let name_label_map = &mut HashMap::new();
+        self.map_mut(&mut |i| InstrSeq::rewrite_user_labels_instr(label_gen, i, name_label_map));
     }
 
     fn is_srcloc(instruction: &Instruct) -> bool {
@@ -1547,9 +1504,9 @@ impl InstrSeq {
         }
     }
 
-    pub fn map_mut<F>(&mut self, f: &mut F)
+    pub fn map_mut<'i, F>(&'i mut self, f: &mut F)
     where
-        F: FnMut(&mut Instruct),
+        F: FnMut(&'i mut Instruct),
     {
         match self {
             InstrSeq::Empty => (),

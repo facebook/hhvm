@@ -10,6 +10,7 @@ DIR=$(pwd -P)
 # MacOS portability
 SHA1SUM=(openssl dgst -sha1 -r)
 
+xargs_args=(bash -c "${SHA1SUM[*]} \"\$@\" | perl -ne 'print if s/^(.{40}).*/\$1/s'" --)
 if git rev-parse --show-toplevel >& /dev/null; then
   root=$(git rev-parse --show-toplevel)
   compiler=(git describe --all --long "--abbrev=40" --always)
@@ -21,6 +22,9 @@ elif hg root >& /dev/null; then
   fi
   compiler=(hg --config 'trusted.users=*' log -l1 -r"reverse(::.) & file('$root/**')" -T'{branch}-0-g{sub(r"^$",node,mirrornode("fbcode","git"))}\n')
   find_files=(hg files -I hphp/)
+  if [[ -d "$root/.eden/root" ]]; then
+      xargs_args=(getfattr --only-values -hn user.sha1)
+  fi
 else
   root=$(dirname "$(readlink -e "${BASH_SOURCE[0]}/../..")")
   compiler=(date +%s_%N)
@@ -52,7 +56,7 @@ if [ -z "${HHVM_REPO_SCHEMA}" ] ; then
     # Use Perl as BSD grep (MacOS) does not support negated groups
     HHVM_REPO_SCHEMA=$("${find_files[@]}" |\
         { perl -ne 'chomp; print "$_\n" if !m#^hphp/(bin|facebook(?!/extensions)|hack(?!/src)|neo|public_tld|test|tools|util|vixl|zend)|(/\.|/test/)# && !-l && -f' | \
-        LC_ALL=C sort | xargs -d'\n' cat ; echo "${USE_LOWPTR}" ; } | "${SHA1SUM[@]}" | cut -b-40)
+        LC_ALL=C sort | xargs -d'\n' "${xargs_args[@]}" ; echo "${USE_LOWPTR}" ; } | "${SHA1SUM[@]}" | cut -b-40)
 fi
 
 ################################################################################

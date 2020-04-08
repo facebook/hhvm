@@ -462,7 +462,8 @@ fn make_wrapper<'a>(
         decl_vars,
         true,
         args.flags.contains(Flags::WITH_LSB),
-        vec![],
+        vec![], /* upper_bounds */
+        vec![], /* shadowed_tparams */
         params,
         Some(return_type_info),
         None,

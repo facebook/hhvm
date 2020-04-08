@@ -54,6 +54,7 @@ fn emit_constant_cinit<'a>(
                 false,  /* is_memoize_wrapper */
                 false,  /* is_memoize_wrapper_lsb */
                 vec![], /* upper_bounds */
+                vec![], /* shadowed_params */
                 vec![], /* params */
                 return_type_info,
                 None, /* doc_comment */

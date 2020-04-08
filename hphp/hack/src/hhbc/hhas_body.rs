@@ -15,25 +15,9 @@ pub struct HhasBody<'a> {
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
     pub upper_bounds: Vec<(String, Vec<hhas_type::Info>)>,
+    pub shadowed_tparams: Vec<String>,
     pub params: Vec<HhasParam>,
     pub return_type_info: Option<hhas_type::Info>,
     pub doc_comment: Option<DocComment>,
     pub env: Option<Env<'a>>,
-}
-
-impl HhasBody<'_> {
-    pub fn with_body_instrs(mut self, body_instrs: InstrSeq) -> Self {
-        self.body_instrs = body_instrs;
-        self
-    }
-
-    pub fn with_return_type_info(mut self, return_type_info: hhas_type::Info) -> Self {
-        self.return_type_info = Some(return_type_info);
-        self
-    }
-
-    pub fn with_params(mut self, params: Vec<HhasParam>) -> Self {
-        self.params = params;
-        self
-    }
 }

@@ -311,6 +311,7 @@ fn make_wrapper_body<'a>(
         true,   /* is_memoize_wrapper */
         false,  /* is_memoize_wrapper_lsb */
         vec![], /* upper_bounds */
+        vec![], /* shadowed_tparams */
         params,
         Some(return_type_info),
         None, /* doc comment */

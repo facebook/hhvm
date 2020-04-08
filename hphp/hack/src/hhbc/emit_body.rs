@@ -43,6 +43,7 @@ static THIS: &'static str = "$this";
 /// Optional arguments for emit_body; use Args::default() for defaults
 pub struct Args<'a, 'b> {
     pub immediate_tparams: &'b Vec<tast::Tparam>,
+    pub class_tparam_names: &'b [&'b str],
     pub ast_params: &'b Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
     pub scope: &'b Scope<'a>,
@@ -74,6 +75,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
 ) -> Result<HhasBody<'a>> {
     let args = Args {
         immediate_tparams: &vec![],
+        class_tparam_names: &vec![],
         ast_params: &vec![],
         ret: None,
         scope: &Scope::toplevel(),
@@ -136,8 +138,11 @@ pub fn emit_body<'a, 'b>(
     let upper_bounds = make_upper_bounds(
         emitter,
         args.immediate_tparams,
+        args.class_tparam_names,
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
+    let shadowed_tparams =
+        make_shadowed_tparams(emitter, args.immediate_tparams, args.class_tparam_names);
     let (need_local_this, decl_vars) = make_decl_vars(
         emitter,
         args.scope,
@@ -196,6 +201,7 @@ pub fn emit_body<'a, 'b>(
             false, // is_memoize_wrapper
             false, // is_memoize_wrapper_lsb
             upper_bounds,
+            shadowed_tparams,
             params,
             Some(return_type_info),
             args.doc_comment.to_owned(),
@@ -412,6 +418,7 @@ pub fn make_env<'a>(
 fn make_upper_bounds(
     emitter: &mut Emitter,
     immediate_tparams: &[tast::Tparam],
+    class_tparam_names: &[&str],
     skip_awaitable: bool,
 ) -> Vec<(String, Vec<HhasTypeInfo>)> {
     if emitter
@@ -419,7 +426,23 @@ fn make_upper_bounds(
         .hack_compiler_flags
         .contains(CompilerFlags::EMIT_GENERICS_UB)
     {
-        emit_generics_upper_bounds(immediate_tparams, skip_awaitable)
+        emit_generics_upper_bounds(immediate_tparams, class_tparam_names, skip_awaitable)
+    } else {
+        vec![]
+    }
+}
+
+fn make_shadowed_tparams(
+    emitter: &mut Emitter,
+    immediate_tparams: &[tast::Tparam],
+    class_tparam_names: &[&str],
+) -> Vec<String> {
+    if emitter
+        .options()
+        .hack_compiler_flags
+        .contains(CompilerFlags::EMIT_GENERICS_UB)
+    {
+        emit_shadowed_tparams(immediate_tparams, class_tparam_names)
     } else {
         vec![]
     }
@@ -451,6 +474,7 @@ pub fn make_body<'a>(
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
     upper_bounds: Vec<(String, Vec<HhasTypeInfo>)>,
+    shadowed_tparams: Vec<String>,
     mut params: Vec<HhasParam>,
     return_type_info: Option<HhasTypeInfo>,
     doc_comment: Option<DocComment>,
@@ -477,6 +501,7 @@ pub fn make_body<'a>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         upper_bounds,
+        shadowed_tparams,
         params,
         return_type_info,
         doc_comment,
@@ -820,16 +845,19 @@ fn emit_verify_out(params: &[HhasParam]) -> (usize, InstrSeq) {
 }
 
 pub fn emit_generics_upper_bounds(
-    tparams: &[tast::Tparam],
+    immediate_tparams: &[tast::Tparam],
+    class_tparam_names: &[&str],
     skip_awaitable: bool,
 ) -> Vec<(String, Vec<HhasTypeInfo>)> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, tast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
+            let mut tparam_names = get_tp_names(immediate_tparams);
+            tparam_names.extend_from_slice(class_tparam_names);
             emit_type_hint::hint_to_type_info(
                 &emit_type_hint::Kind::UpperBound,
                 skip_awaitable,
                 false, // nullable
-                get_tp_names(tparams).as_slice(),
+                &tparam_names,
                 &hint,
             )
             .ok() //TODO(hrust) propagate Err result
@@ -848,7 +876,25 @@ pub fn emit_generics_upper_bounds(
             _ => Some((get_tp_name(tparam).to_owned(), ubs)),
         }
     };
-    tparams.iter().filter_map(tparam_filter).collect::<Vec<_>>()
+    immediate_tparams
+        .iter()
+        .filter_map(tparam_filter)
+        .collect::<Vec<_>>()
+}
+
+fn emit_shadowed_tparams(
+    immediate_tparams: &[tast::Tparam],
+    class_tparam_names: &[&str],
+) -> Vec<String> {
+    use itertools::Itertools;
+    let mut shadowed_tparams = get_tp_names(immediate_tparams);
+    shadowed_tparams.extend_from_slice(class_tparam_names);
+    shadowed_tparams
+        .into_iter()
+        .map(|s| s.into())
+        .into_iter()
+        .unique()
+        .collect()
 }
 
 fn move_this(vars: &mut Vec<String>) {

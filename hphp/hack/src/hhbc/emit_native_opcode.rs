@@ -29,13 +29,15 @@ pub fn emit_body<'a>(
     let params = emit_param::from_asts(emitter, &mut tparams, namespace, false, scope, params);
     let return_type_info = emit_body::emit_return_type_info(tparams.as_slice(), false, ret);
 
-    body_instrs.and_then(|bi| {
-        params.and_then(|ps| {
+    body_instrs.and_then(|body_instrs| {
+        params.and_then(|params| {
             return_type_info.and_then(|rti| {
-                Ok(HhasBody::default()
-                    .with_body_instrs(bi)
-                    .with_params(ps)
-                    .with_return_type_info(rti))
+                Ok(HhasBody {
+                    body_instrs,
+                    params,
+                    return_type_info: Some(rti),
+                    ..HhasBody::default()
+                })
             })
         })
     })

@@ -712,6 +712,7 @@ fn print_method_def<W: Write>(
         .hack_compiler_flags
         .contains(options::CompilerFlags::EMIT_GENERICS_UB)
     {
+        print_shadowed_tparams(w, &body.shadowed_tparams)?;
         print_upper_bounds(w, &body.upper_bounds)?;
     }
     print_method_attrs(ctx, w, method_def)?;

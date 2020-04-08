@@ -47,6 +47,7 @@ pub fn emit_fatal_program<'p>(
         false,
         vec![],
         vec![],
+        vec![],
         None,
         None,
         None,

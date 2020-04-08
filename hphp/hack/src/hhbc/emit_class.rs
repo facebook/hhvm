@@ -98,6 +98,7 @@ fn make_86method<'a>(
         method_is_memoize_wrapper,
         method_is_memoize_wrapper_lsb,
         vec![],
+        vec![],
         params,
         method_return_type,
         method_doc_comment,
@@ -756,7 +757,7 @@ pub fn emit_class<'a>(
         .hack_compiler_flags
         .contains(options::CompilerFlags::EMIT_GENERICS_UB)
     {
-        emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, false)
+        emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, &[], false)
     } else {
         vec![]
     };

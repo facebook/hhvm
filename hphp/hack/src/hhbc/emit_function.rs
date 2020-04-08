@@ -137,6 +137,7 @@ pub fn emit_function<'a>(
                 ast_params: &f.params,
                 call_context,
                 immediate_tparams: &f.tparams,
+                class_tparam_names: &vec![],
             },
         )?
     };

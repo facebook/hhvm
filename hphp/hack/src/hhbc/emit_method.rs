@@ -181,6 +181,12 @@ pub fn from_ast<'a>(
             false,
         )
     } else {
+        let class_tparam_names = class
+            .tparams
+            .list
+            .iter()
+            .map(|tp| (tp.name).1.as_str())
+            .collect::<Vec<_>>();
         let mut flags = emit_body::Flags::empty();
         flags.set(
             emit_body::Flags::SKIP_AWAITABLE,
@@ -201,6 +207,7 @@ pub fn from_ast<'a>(
             instr::null(),
             emit_body::Args {
                 immediate_tparams: &method.tparams,
+                class_tparam_names: class_tparam_names.as_slice(),
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),
                 scope: &scope,

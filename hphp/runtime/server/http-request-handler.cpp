@@ -217,6 +217,9 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
   ServerStats::Reset();
   m_sourceRootInfo.reset();
 
+  // requestShutdown() needs to happen before hphp_memory_cleanup(), because it
+  // needs to access memory stats.
+  MemoryManager::requestShutdown();
   if (is_hphp_session_initialized()) {
     hphp_session_exit(transport);
   } else {
@@ -225,7 +228,6 @@ void HttpRequestHandler::teardownRequest(Transport* transport) noexcept {
     hphp_memory_cleanup();
   }
 
-  MemoryManager::requestShutdown();
   HHProf::Request::Teardown();
 }
 

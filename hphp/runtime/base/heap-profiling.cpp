@@ -77,10 +77,13 @@ void AllocSamples::addStack(bool skipTop) {
 void AllocSamples::logSamples() {
   if (empty()) return;
   if (!StructuredLog::enabled()) return;
+  auto const stats = tl_heap->getStats();
   for (auto& sample : *this) {
     StructuredLogEntry entry;
     entry.setInt("size", sample.size);
-    entry.setInt("total_alloc", sample.time);
+    entry.setInt("curr_alloc", sample.curr);
+    entry.setInt("total_alloc", stats.mmAllocated());
+    entry.setInt("peak", stats.peakUsage);
     if (sample.phpStack) {
       std::vector<folly::StringPiece> stack;
       auto const& frames = sample.phpStack->frames();

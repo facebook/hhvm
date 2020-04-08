@@ -27,9 +27,9 @@
 namespace HPHP {
 
 struct HeapAllocSample {
-  HeapAllocSample(size_t t, size_t s) : time(t), size(s) {}
-  size_t time;
-  size_t size;
+  HeapAllocSample(size_t c, size_t s) : curr(c), size(s) {}
+  size_t curr;                          // total alloc so far
+  size_t size;                          // size of current allocation
   CompactTraceData::Ptr phpStack{nullptr};
   StackTrace nativeStack{false};
 };
@@ -43,8 +43,8 @@ struct AllocSamples : public std::vector<HeapAllocSample,
     logSamples();
     clear();
   }
-  void addAllocSample(size_t time, size_t size) {
-    emplace_back(time, size);
+  void addAllocSample(size_t curr, size_t size) {
+    emplace_back(curr, size);
   }
   void addStack(bool skipTop = false);
 

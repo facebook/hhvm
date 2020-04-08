@@ -567,11 +567,8 @@ inline tv_rval Elem(TypedValue& tvRef,
   return ElemSlow<mode, keyType>(tvRef, base, key);
 }
 
-template<MOpMode mode>
-inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
-  auto oldArr = val(base).parr;
-
-  defined = (mode != MOpMode::Warn) || oldArr->exists(key);
+inline tv_lval ElemDArrayPre(tv_lval base, int64_t key) {
+  auto const oldArr = val(base).parr;
   auto const lval = oldArr->lval(key);
 
   if (lval.arr != oldArr) {
@@ -585,15 +582,9 @@ inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   return lval;
 }
 
-template<MOpMode mode>
-inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
-                             bool& defined) {
-  auto oldArr = val(base).parr;
-
-  auto const lval = [&]{
-    defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-    return oldArr->lval(key);
-  }();
+inline tv_lval ElemDArrayPre(tv_lval base, StringData* key) {
+  auto const oldArr = val(base).parr;
+  auto const lval = oldArr->lval(key);
 
   if (lval.arr != oldArr) {
     assertx(lval.arr->isPHPArrayType());
@@ -605,43 +596,26 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   return lval;
 }
 
-template<MOpMode mode>
-inline tv_lval ElemDArrayPre(tv_lval base, TypedValue key,
-                             bool& defined) {
+inline tv_lval ElemDArrayPre(tv_lval base, TypedValue key) {
   auto const dt = key.m_type;
-  if (isIntType(dt)) {
-    return ElemDArrayPre<mode>(
-      base, key.m_data.num, defined
-    );
-  }
-  if (isStringType(dt)) {
-    return ElemDArrayPre<mode>(base, key.m_data.pstr, defined);
-  }
-  auto& arr = asArrRef(base);
-  defined = (mode != MOpMode::Warn) || arr.exists(tvAsCVarRef(&key));
-  return arr.lval(key);
+  if (isIntType(dt)) return ElemDArrayPre(base, key.m_data.num);
+  if (isStringType(dt)) return ElemDArrayPre(base, key.m_data.pstr);
+  return asArrRef(base).lval(key);
 }
 
 /**
  * ElemD when base is an Array
  */
-template<MOpMode mode, KeyType keyType>
+template<KeyType keyType>
 inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
 
-  bool defined;
-  auto lval = ElemDArrayPre<mode>(base, key, defined);
+  auto const lval = ElemDArrayPre(base, key);
 
   assertx(tvIsArray(base));
   assertx(tvIsPlausible(*base));
   assertx(lval.type() != KindOfUninit);
-
-  if (!defined) {
-    auto scratchKey = initScratchKey(key);
-    throwArrayKeyException(tvAsCVarRef(&scratchKey).toString().get(), false);
-  }
-
   return lval;
 }
 
@@ -650,9 +624,9 @@ inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
  */
 template <bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
-  ArrayData* oldArr = base.val().parr;
-
+  auto const oldArr = base.val().parr;
   auto const lval = PackedArray::LvalIntVec(oldArr, key);
+
   if (lval.arr != oldArr) {
     base.type() = KindOfVec;
     base.val().parr = lval.arr;
@@ -695,7 +669,7 @@ inline tv_lval ElemDVec(tv_lval base, key_type<keyType> key) {
  */
 template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
-  ArrayData* oldArr = base.val().parr;
+  auto const oldArr = base.val().parr;
   auto const lval = MixedArray::LvalSilentInt(oldArr, key);
 
   if (UNLIKELY(!lval)) {
@@ -715,7 +689,7 @@ inline tv_lval ElemDDictPre(tv_lval base, int64_t key) {
 
 template <bool copyProv>
 inline tv_lval ElemDDictPre(tv_lval base, StringData* key) {
-  ArrayData* oldArr = base.val().parr;
+  auto const oldArr = base.val().parr;
   auto const lval = MixedArray::LvalSilentStr(oldArr, key);
 
   if (UNLIKELY(!lval)) {
@@ -911,7 +885,7 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemDArray<mode, keyType>(base, key);
+      return ElemDArray<keyType>(base, key);
     case KindOfObject:
       return ElemDObject<mode, keyType>(tvRef, base, key);
     case KindOfClsMeth:
@@ -919,7 +893,7 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base,
       if (RO::EvalHackArrDVArrs) {
         return ElemDVec<keyType, copyProv>(base, key);
       } else {
-        return ElemDArray<mode, keyType>(base, key);
+        return ElemDArray<keyType>(base, key);
       }
     case KindOfRecord:
       return ElemDRecord<keyType>(base, key);
@@ -935,9 +909,10 @@ inline tv_lval ElemUEmptyish() {
 }
 
 inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
-  auto oldArr = val(base).parr;
+  auto const oldArr = val(base).parr;
   if (!oldArr->exists(key)) return ElemUEmptyish();
   auto const lval = oldArr->lval(key);
+
   if (lval.arr != oldArr) {
     assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
@@ -949,16 +924,16 @@ inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
 }
 
 inline tv_lval ElemUArrayImpl(tv_lval base, StringData* key) {
-  auto arr = val(base).parr;
-  if (!arr->exists(key)) return ElemUEmptyish();
+  auto const oldArr = val(base).parr;
+  if (!oldArr->exists(key)) return ElemUEmptyish();
+  auto const lval = oldArr->lval(key);
 
-  auto const lval = arr->lval(key);
-  if (lval.arr != arr) {
+  if (lval.arr != oldArr) {
     assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
     val(base).parr = lval.arr;
     assertx(tvIsPlausible(*base));
-    decRefArr(arr);
+    decRefArr(oldArr);
   }
   return lval;
 }
@@ -1982,8 +1957,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef,
     if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
       throwMissingElementException("Set-op");
     }
-    auto result =
-      ElemDArray<MOpMode::None, KeyType::Any>(base, key);
+    auto result = ElemDArray<KeyType::Any>(base, key);
     setopBody(result, op, rhs);
     return result;
   };
@@ -2221,8 +2195,7 @@ inline TypedValue IncDecElem(
     if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
       throwMissingElementException("Inc/dec");
     }
-    auto result =
-      ElemDArray<MOpMode::None, KeyType::Any>(base, key);
+    auto result = ElemDArray<KeyType::Any>(base, key);
     return IncDecBody(op, result);
   };
 

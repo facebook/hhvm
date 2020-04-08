@@ -444,7 +444,7 @@ ELEMD_HELPER_TABLE(X)
 #define X(nm, keyType)                                          \
 inline tv_lval nm(tv_lval base, key_type<keyType> key) {        \
   assertx(isArrayType(type(base)));                            \
-  return ElemDArray<MOpMode::None, keyType>(base, key); \
+  return ElemDArray<keyType>(base, key); \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X

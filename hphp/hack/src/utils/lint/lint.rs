@@ -27,8 +27,8 @@ pub enum Severity {
 pub struct LintError {
     code: usize,
     severity: Severity,
-    pos: Pos,
-    message: String,
+    pub pos: Pos,
+    pub message: String,
 
     /// Normally, lint warnings and lint advice only get shown by arcanist if the
     /// lines they are raised on overlap with lines changed in a diff. This

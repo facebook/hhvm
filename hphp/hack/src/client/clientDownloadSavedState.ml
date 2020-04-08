@@ -17,7 +17,8 @@ type env = {
 let main (env : env) : Exit_status.t Lwt.t =
   let%lwt result =
     State_loader_lwt.load
-      ~repo:env.root
+      ~watchman_opts:
+        Saved_state_loader.Watchman_options.{ root = env.root; sockname = None }
       ~ignore_hh_version:false
       ~saved_state_type:Saved_state_loader.Naming_table
   in

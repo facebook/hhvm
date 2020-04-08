@@ -180,7 +180,8 @@ let load_saved_state
         | None ->
           let%lwt result =
             State_loader_lwt.load
-              ~repo:root
+              ~watchman_opts:
+                Saved_state_loader.Watchman_options.{ root; sockname = None }
               ~ignore_hh_version:false
               ~saved_state_type:Saved_state_loader.Naming_table
           in

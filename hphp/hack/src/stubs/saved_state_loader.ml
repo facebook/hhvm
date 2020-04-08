@@ -23,6 +23,13 @@ type process_failure = string
 
 type config = string * string SMap.t
 
+module Watchman_options = struct
+  type t = {
+    root: Path.t;
+    sockname: Path.t option;
+  }
+end
+
 module Regular_saved_state_info = struct
   type t = {
     naming_table_path: Path.t;

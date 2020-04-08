@@ -6,5 +6,5 @@
  *
  *)
 
-let load ~repo:_ ~ignore_hh_version:_ ~saved_state_type:_ =
+let load ~watchman_opts:_ ~ignore_hh_version:_ ~saved_state_type:_ =
   failwith "Not implemented"

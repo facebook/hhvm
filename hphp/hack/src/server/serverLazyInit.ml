@@ -96,7 +96,8 @@ let download_and_load_state_exn
         Hh_logger.log "Starting naming table download.";
         Some
           (State_loader_futures.load
-             ~repo:root
+             ~watchman_opts:
+               Saved_state_loader.Watchman_options.{ root; sockname = None }
              ~ignore_hh_version
              ~saved_state_type:Saved_state_loader.Naming_table)
       ) else
@@ -576,7 +577,12 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
   let loader_future =
     State_loader_futures.load
-      ~repo:(Path.make Relative_path.(path_of_prefix Root))
+      ~watchman_opts:
+        Saved_state_loader.Watchman_options.
+          {
+            root = Path.make Relative_path.(path_of_prefix Root);
+            sockname = None;
+          }
       ~ignore_hh_version
       ~saved_state_type:Saved_state_loader.Naming_table
   in

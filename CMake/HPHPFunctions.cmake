@@ -483,3 +483,56 @@ function(object_library_ld_link_libraries target)
     endif()
   endif()
 endfunction()
+
+set(
+  HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX
+  ""
+  CACHE
+  STRING
+  "URL prefix containing cache of third-party dependencies"
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX
+  ""
+  CACHE
+  STRING
+  "URL suffix for third-party dependency cache"
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE
+  OFF
+  CACHE
+  BOOL
+  "Do not download sources that are not in cache; may cause build to fail."
+)
+set(
+  HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT
+  ""
+  CACHE
+  STRING
+  "Path to a text file to put a list of sources that should be in the cache"
+)
+
+macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME URL)
+  set(${VAR_NAME} URL)
+  if ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" STREQUAL "")
+    list(APPEND ${VAR_NAME} "${URL}")
+    if (${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+      message(
+        FATAL_ERROR
+        "HHVM_THIRD_PARTY_ONLY_USE_CACHE is set, but cache is not configured"
+      )
+    endif()
+  else()
+    get_filename_component("${VAR_NAME}_NAME" "${URL}" NAME)
+    list(APPEND ${VAR_NAME} "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${${VAR_NAME}_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}")
+    if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
+      list(APPEND "${VAR_NAME}" "${URL}")
+    endif()
+  endif()
+  if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
+    FILE(APPEND "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" "${URL}\n")
+  endif()
+  # If a suffix is provided, we need to specify the downloaded file name
+  list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${${VAR_NAME}_NAME}")
+endmacro()

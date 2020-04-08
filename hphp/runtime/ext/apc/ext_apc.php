@@ -204,6 +204,21 @@ function apc_cas(string $key,
 function apc_exists(mixed $key): mixed;
 
 /**
+ * Extend the TTL of a key in APC to now + a new ttl (or infinite). If the
+ * effective expiration of the key is longer than this, returns FALSE and
+ * does nothing.
+ *
+ * @param string $key - The key to bump. If the key is not stored in APC, then
+ *   FALSE is returned.
+ *
+ * @param int $new_ttl - The new TTL for the key. 0 means infinite TTL.
+ *
+ * @return bool - TRUE if the TTL was actually extended, FALSE otherwise.
+ */
+ <<__Native, __NonRx('APC')>>
+ function apc_extend_ttl(string $key, int $new_ttl): bool;
+
+/**
  * Find the in-memory size of a key in APC, for debugging purposes.
  *
  * @param string $key - The key to find the size of.

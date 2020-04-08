@@ -248,6 +248,7 @@ void apcExtension::moduleInit() {
   HHVM_FE(apc_cas);
   HHVM_FE(apc_exists);
   HHVM_FE(apc_size);
+  HHVM_FE(apc_extend_ttl);
   HHVM_FE(apc_cache_info);
   loadSystemlib();
 }
@@ -396,6 +397,13 @@ Variant HHVM_FUNCTION(apc_add,
     return false;
   }
   return apc_store().add(strKey, var, ttl);
+}
+
+bool HHVM_FUNCTION(apc_extend_ttl, const String& key, int64_t new_ttl) {
+  if (!apcExtension::Enable) return false;
+
+  if (new_ttl < 0) return false;
+  return apc_store().bumpTTL(key, new_ttl);
 }
 
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {

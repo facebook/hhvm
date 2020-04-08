@@ -99,7 +99,7 @@ bool StoreValue::deferredExpire() const {
     auto expected = Treadmill::kInvalidRequestIdx;
     auto const desired = Treadmill::requestIdx();
     if (expireRequestIdx.compare_exchange_strong(expected, desired)) {
-      expireTime.store(1, std::memory_order_release);;
+      expireTime.store(1, std::memory_order_release);
       return true;
     }
     if (expected == Treadmill::kPurgedRequestIdx) {
@@ -854,6 +854,33 @@ static int64_t adjust_ttl(int64_t ttl, bool overwritePrime) {
   }
   return ttl;
 }
+
+bool ConcurrentTableSharedStore::bumpTTL(const String& key, int64_t new_ttl) {
+  SharedMutex::ReadHolder l(m_lock);
+  Map::accessor acc;
+  if (!m_vars.find(acc, tagStringData(key.get()))) {
+    return false;
+  }
+  auto& sval = acc->second;
+  if (sval.expired()) return false; // This can't resurrect a value
+  if (sval.c_time == 0) return false; // Time has no meaning for primed values
+  auto old_expire = sval.rawExpire();
+  if (!old_expire) return false; // Already infinite TTL
+
+  new_ttl = adjust_ttl(new_ttl, false);
+  // This API can't be used to breach the ttl cap.
+  if (new_ttl == 0) {
+    sval.expireTime.store(0, std::memory_order_release);
+    return true;
+  }
+  auto new_expire = time(nullptr) + new_ttl;
+  if (new_expire > old_expire) {
+    sval.expireTime.store(new_expire, std::memory_order_release);
+    return true;
+  }
+  return false;
+}
+
 
 bool ConcurrentTableSharedStore::add(const String& key,
                                      const Variant& val,

@@ -277,6 +277,14 @@ struct ConcurrentTableSharedStore {
   bool exists(const String& key);
 
   /*
+   * Extend the expiration time to now + new_ttl if that is longer than
+   * the current TTL (or to infinity if new_ttl is zero). Returns true if
+   * it succeeds (the key exists in apc, is unexpired, and the expiration
+   * was actually adjusted), false otherwise.
+   */
+  bool bumpTTL(const String& key, int64_t new_ttl);
+
+  /*
    * Returns the size of an entry if it exists. Sets `found` to true if it
    * exists and false if not.
    */

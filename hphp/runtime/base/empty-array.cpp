@@ -204,19 +204,6 @@ arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool enforce> ALWAYS_INLINE
-arr_lval EmptyArray::LvalIntImpl(ArrayData*, int64_t k) {
-  if (enforce) throwMissingElementException("Lval");
-  return k == 0 ? EmptyArray::MakePacked(make_tv<KindOfNull>())
-                : EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
-}
-
-template<bool enforce> ALWAYS_INLINE
-arr_lval EmptyArray::LvalStrImpl(ArrayData*, StringData* k) {
-  if (enforce) throwMissingElementException("Lval");
-  return EmptyArray::MakeMixed(k, make_tv<KindOfNull>());
-}
-
 ArrayData* EmptyArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
   tvIncRefGen(v);
   return SetIntMove(ad, k, v);
@@ -248,12 +235,12 @@ ArrayData* EmptyArray::RemoveStr(ArrayData* ad, const StringData*) {
   return ad;
 }
 
-arr_lval EmptyArray::LvalInt(ArrayData* ad, int64_t k) {
-  return LvalIntImpl<true>(ad, k);
+arr_lval EmptyArray::LvalInt(ArrayData*, int64_t) {
+  throwMissingElementException("Lval");
 }
 
-arr_lval EmptyArray::LvalStr(ArrayData* ad, StringData* k) {
-  return LvalStrImpl<true>(ad, k);
+arr_lval EmptyArray::LvalStr(ArrayData*, StringData*) {
+  throwMissingElementException("Lval");
 }
 
 ArrayData* EmptyArray::Append(ArrayData*, TypedValue v) {

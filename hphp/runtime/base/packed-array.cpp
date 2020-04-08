@@ -760,12 +760,10 @@ auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
 }
 
 arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k) {
-  return MutableOpInt(adIn, k, adIn->cowCheck(),
-    [&] (ArrayData* ad) { return arr_lval { ad, LvalUncheckedInt(ad, k) }; },
-    []() -> arr_lval { throwMissingElementException("Lval"); },
-    // TODO(#2606310): Make use of our knowledge that the key is missing.
-    [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
-  );
+  assertx(checkInvariants(adIn));
+  if (!ExistsInt(adIn, k)) throwMissingElementException("Lval");
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
+  return { ad, LvalUncheckedInt(ad, k) };
 }
 
 arr_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k) {
@@ -781,11 +779,9 @@ tv_lval PackedArray::LvalUncheckedInt(ArrayData* ad, int64_t k) {
   return &packedData(ad)[k];
 }
 
-arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData* k) {
-  return MutableOpStr(adIn, k, adIn->cowCheck(),
-    // TODO(#2606310): Make use of our knowledge that the key is missing.
-    [&] (MixedArray* mixed) { return mixed->addLvalImpl<true>(k); }
-  );
+arr_lval PackedArray::LvalStr(ArrayData* adIn, StringData*) {
+  assertx(checkInvariants(adIn));
+  throwMissingElementException("Lval");
 }
 
 arr_lval PackedArray::LvalStrVec(ArrayData* adIn, StringData* key) {

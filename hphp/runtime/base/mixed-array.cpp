@@ -1091,20 +1091,30 @@ ArrayData* MixedArray::update(K k, TypedValue data) {
   return this;
 }
 
-arr_lval MixedArray::LvalInt(ArrayData* ad, int64_t k) {
-  return asMixed(ad)->prepareForInsert(ad->cowCheck())->addLvalImpl<true>(k);
+arr_lval MixedArray::LvalInt(ArrayData* adIn, int64_t key) {
+  auto const pos = asMixed(adIn)->find(key, hash_int64(key));
+  if (!validPos(pos)) throwMissingElementException("Lval");
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
+  auto const& elm = asMixed(ad)->data()[pos];
+  assertx(elm.intKey() == key);
+  return { ad, const_cast<TypedValue*>(elm.datatv()) };
 }
 
-arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key) {
-  return asMixed(ad)->prepareForInsert(ad->cowCheck())->addLvalImpl<true>(key);
+arr_lval MixedArray::LvalStr(ArrayData* adIn, StringData* key) {
+  auto const pos = asMixed(adIn)->find(key, key->hash());
+  if (!validPos(pos)) throwMissingElementException("Lval");
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
+  auto const& elm = asMixed(ad)->data()[pos];
+  assertx(elm.strKey()->same(key));
+  return { ad, const_cast<TypedValue*>(elm.datatv()) };
 }
 
 tv_lval MixedArray::LvalInPlace(ArrayData* ad, const Variant& k) {
   auto arr = asMixed(ad);
   assertx(!arr->isFull());
   assertx(!arr->cowCheck());
-  return k.isInteger() ? arr->addLvalImpl<false>(k.asInt64Val())
-                       : arr->addLvalImpl<false>(k.asCStrRef().get());
+  return k.isInteger() ? arr->addLvalImpl(k.asInt64Val())
+                       : arr->addLvalImpl(k.asCStrRef().get());
 }
 
 arr_lval MixedArray::LvalSilentInt(ArrayData* ad, int64_t k) {
@@ -1438,7 +1448,7 @@ ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
       ret->nextInsert(value);
     } else {
       StringData* sd = key.getStringData();
-      auto const lval = ret->addLvalImpl<false>(sd);
+      auto const lval = ret->addLvalImpl(sd);
       assertx(value.m_type != KindOfUninit);
       tvSet(value, lval);
     }
@@ -1465,7 +1475,7 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
       if (srcElem->hasIntKey()) {
         ret->nextInsert(srcElem->data);
       } else {
-        auto const lval = ret->addLvalImpl<false>(srcElem->skey);
+        auto const lval = ret->addLvalImpl(srcElem->skey);
         assertx(srcElem->data.m_type != KindOfUninit);
         tvSet(srcElem->data, lval);
       }

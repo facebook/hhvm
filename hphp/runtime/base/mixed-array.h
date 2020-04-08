@@ -615,7 +615,7 @@ private:
   ArrayData* addVal(StringData* key, TypedValue data);
   ArrayData* addValNoAsserts(StringData* key, TypedValue data);
 
-  template <bool warn, class K> arr_lval addLvalImpl(K k);
+  template <class K> arr_lval addLvalImpl(K k);
   // If "move" is false, this method will inc-ref data.
   template <class K, bool move = false> ArrayData* update(K k, TypedValue data);
 

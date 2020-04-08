@@ -33,6 +33,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 
 #include "hphp/runtime/vm/jit/arg-group.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
@@ -452,6 +453,8 @@ static CallMap s_callMap {
 
     {ProfileProp,        &PropertyProfile::incCount, DNone, SNone,
                            {{SSA, 0}, {SSA, 1}}},
+
+    {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{SSA, 0}}},
 
     /* Global helpers */
     {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,

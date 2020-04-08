@@ -329,6 +329,13 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
     profData()->setProfiling(func->getFuncId());
   }
 
+  // Increment the count for the latest call for optimized translations if we're
+  // going to serialize the profile data.
+  if (env.context.kind == TransKind::OptPrologue && isJitSerializing() &&
+      RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+    gen(env, IncCallCounter, fp(env));
+  }
+
   auto const unpackArgsForTooManyArgs = [&]() -> SSATmp* {
     if (argc <= func->numParams()) return nullptr;
 

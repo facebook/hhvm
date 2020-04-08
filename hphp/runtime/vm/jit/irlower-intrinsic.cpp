@@ -906,6 +906,8 @@ void cgRBTraceMsg(IRLS& env, const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPL_OPCODE_CALL(IncCallCounter);
+
 void cgIncStat(IRLS& env, const IRInstruction *inst) {
   auto const stat = Stats::StatCounter(inst->src(0)->intVal());
   emitIncStat(vmain(env), stat);

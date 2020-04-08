@@ -347,6 +347,10 @@ bool isProfileCodeAddress(TCA addr) {
   return g_code->prof().contains(addr);
 }
 
+bool isHotCodeAddress(TCA addr) {
+  return g_code->hot().contains(addr);
+}
+
 void freeTCStub(TCA stub) {
   // We need to lock the code because s_freeStubs.push() writes to the stub and
   // the metadata to protect s_freeStubs itself.

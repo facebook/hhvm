@@ -37,6 +37,7 @@
 #include "hphp/runtime/vm/jit/cls-cns-profile.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/decref-profile.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
@@ -765,7 +766,6 @@ void write_prof_data(ProfDataSerializer& ser, ProfData* pd) {
   );
   write_raw(ser, kInvalidTransID);
   write_raw<uint64_t>(ser, pd->baseProfCount());
-  write_container(ser, pd->sortedFuncs(), write_raw<FuncId>);
 }
 
 void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
@@ -781,14 +781,6 @@ void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
     *pd->transCounterAddr(transID) = read_raw<int64_t>(ser);
   }
   pd->setBaseProfCount(read_raw<uint64_t>(ser));
-  auto const sz = read_raw<uint32_t>(ser);
-  std::vector<FuncId> order;
-  order.reserve(sz);
-  for (auto i = sz; i > 0; --i) {
-    auto const origId = read_raw<FuncId>(ser);
-    order.push_back(ser.getFid(origId));
-  }
-  pd->setFuncOrder(std::move(order));
 }
 
 template<typename T>
@@ -1592,6 +1584,14 @@ std::string serializeOptProfData(const std::string& filename) {
   try {
     ProfDataSerializer ser(filename, ProfDataSerializer::FileMode::Append);
 
+    // If enabled, recompute the function order using the call graph obtained
+    // via instrumentation of the optimized code, then serialize it.
+    if (RuntimeOption::EvalJitPGOOptCodeCallGraph) {
+      FuncOrder::compute();
+    }
+    FuncOrder::serialize(ser);
+
+    // Serialize the vasm block counters.
     VasmBlockCounters::serialize(ser);
 
     ser.finalize();
@@ -1661,6 +1661,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
 
     if (!ser.done()) {
       // We have profile data for the optimized code, so deserialize it too.
+      FuncOrder::deserialize(ser);
       VasmBlockCounters::deserialize(ser);
     }
 

@@ -128,6 +128,15 @@ void vasm_emit(Vunit& u, Vtext& text, CGMeta& fixups,
 const uint64_t* alloc_literal(Venv& env, uint64_t val);
 
 ///////////////////////////////////////////////////////////////////////////////
+
+/*
+ * When the JIT is serializing profile data, keep track that the `callRetAddr'
+ * corresponds to the outer-most function for which the current translation is
+ * being created.
+ */
+void setCallFuncId(Venv& env, TCA callRetAddr);
+
+///////////////////////////////////////////////////////////////////////////////
 }}
 
 #include "hphp/runtime/vm/jit/vasm-internal-inl.h"

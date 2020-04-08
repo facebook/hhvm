@@ -573,20 +573,13 @@ struct ProfData {
   std::vector<TargetProfileInfo> getTargetProfiles(TransID transID) const;
 
   /*
-   * Access base profile count and function ordering. Set in hfsortFuncs().
+   * Access base profile count.
    */
   uint64_t baseProfCount() const {
     return m_baseProfCount;
   }
   void setBaseProfCount(uint64_t c) {
     m_baseProfCount = c;
-  }
-  const std::vector<FuncId>& sortedFuncs() const {
-    return m_sortedFuncIds;
-  }
-  void setFuncOrder(std::vector<FuncId>&& order) {
-    assertx(m_sortedFuncIds.empty());
-    m_sortedFuncIds = order;
   }
 
  private:
@@ -671,12 +664,6 @@ struct ProfData {
    * Base profile count for inlining.
    */
   uint64_t m_baseProfCount;
-
-  /*
-   * Order of optimized translations in the TC, obtained from hfsort on the
-   * callg graph.
-   */
-  std::vector<FuncId> m_sortedFuncIds;
 
   /*
    * The following static variables need to be alive for the lifetime of the

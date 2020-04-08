@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/vm/jit/mcgen.h"
 
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -330,16 +331,15 @@ void retranslateAll() {
 
   // 1) Obtain function ordering in code.hot.
 
-  if (globalProfData()->sortedFuncs().empty()) {
-    auto result = hfsortFuncs();
+  if (FuncOrder::get().empty()) {
+    auto const avgProfCount = FuncOrder::compute();
     ProfData::Session pds;
-    profData()->setFuncOrder(std::move(result.first));
-    profData()->setBaseProfCount(result.second);
+    profData()->setBaseProfCount(avgProfCount);
   } else {
     assertx(isJitDeserializing());
   }
   setBaseInliningProfCount(globalProfData()->baseProfCount());
-  auto const& sortedFuncs = globalProfData()->sortedFuncs();
+  auto const& sortedFuncs = FuncOrder::get();
   auto const nFuncs = sortedFuncs.size();
 
   // 2) Check if we should dump profile data. We may exit here in
@@ -763,6 +763,8 @@ void checkSerializeOptProf() {
 
   // Create a thread to serialize the profile for the optimized code.
   s_serializeOptProfThread = std::thread([] {
+    rds::local::init();
+    SCOPE_EXIT { rds::local::fini(); };
     auto const serverMode = RuntimeOption::ServerExecutionMode();
     if (serverMode) {
       Logger::FInfo("retranslateAll: serialization of optimized code's "

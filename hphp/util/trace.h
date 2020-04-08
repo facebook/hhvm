@@ -111,6 +111,7 @@ namespace Trace {
       TM(extern_compiler) \
       TM(fixup)         \
       TM(fr)            \
+      TM(funcorder)     \
       TM(gc)            \
       TM(heapgraph)     \
       TM(heapreport)    \

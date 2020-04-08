@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/fixup.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/tread-hash-map.h"
@@ -182,6 +183,13 @@ void CGMeta::setJmpTransID(TCA jmp, TransID transID, TransKind kind) {
   jmpTransIDs.emplace_back(jmp, transID);
 }
 
+void CGMeta::setCallFuncId(TCA callRetAddr, FuncId funcId, TransKind kind) {
+  // This is only used when profiling optimized code via jumpstart.
+  if (kind != TransKind::Optimize || !isJitSerializing()) return;
+
+  callFuncIds.emplace_back(callRetAddr, funcId);
+}
+
 void CGMeta::process(
   GrowableVector<IncomingBranch>* inProgressTailBranches
 ) {
@@ -234,6 +242,10 @@ void CGMeta::process_only(
   }
   jmpTransIDs.clear();
 
+  for (auto const& elm : callFuncIds) {
+    FuncOrder::setCallFuncId(elm.first, elm.second);
+  }
+
   for (auto const& pair : trapReasons) {
     auto addr = tc::addrToOffset(pair.first);
     if (auto r = s_trapReasonMap.find(addr)) {
@@ -264,6 +276,7 @@ void CGMeta::clear() {
   inlineFrames.clear();
   inlineStacks.clear();
   jmpTransIDs.clear();
+  callFuncIds.clear();
   literalsToPool.clear();
   literalAddrs.clear();
   veneers.clear();
@@ -286,6 +299,7 @@ bool CGMeta::empty() const {
     inlineFrames.empty() &&
     inlineStacks.empty() &&
     jmpTransIDs.empty() &&
+    callFuncIds.empty() &&
     literalsToPool.empty() &&
     literalAddrs.empty() &&
     veneers.empty() &&

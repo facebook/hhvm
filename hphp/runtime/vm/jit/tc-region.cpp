@@ -25,6 +25,7 @@
 #include "hphp/runtime/vm/jit/cfg.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/ir-unit.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
@@ -264,6 +265,7 @@ void publishTranslationMeta(TransMetaInfo& info) {
                        loc.coldEnd(), false, false);
 
   transdb::addTranslation(tr);
+  FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(sk.unit(), sk.func(), tr);
   }
@@ -886,6 +888,7 @@ void createSrcRec(SrcKey sk, FPInvOffset spOff) {
                 astart, asize, coldStart, coldSize,
                 frozenStart, frozenSize);
     transdb::addTranslation(tr);
+    FuncOrder::recordTranslation(tr);
     if (RuntimeOption::EvalJitUseVtuneAPI) {
       reportTraceletToVtune(sk.unit(), sk.func(), tr);
     }

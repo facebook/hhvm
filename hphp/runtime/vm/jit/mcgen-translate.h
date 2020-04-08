@@ -30,6 +30,9 @@ struct FPInvOffset;
 struct ProfTransRec;
 struct TransArgs;
 
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+
 namespace tc { struct TransMetaInfo; };
 
 namespace mcgen {
@@ -73,12 +76,6 @@ bool pendingRetranslateAllScheduled();
  * Is retranslateAll() finished.
  */
 bool retranslateAllComplete();
-
-/*
- * Get the ordering of optimized translations using hfsort on the call graph.
- * Also returns the average profile count across all profiled blocks.
- */
-std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs();
 
 /*
  * Undo the effects of bumpTraceFunctions() (so that we don't trace

@@ -952,6 +952,7 @@ struct RuntimeOption {
   F(double,   JitPGOCalledFuncCheckThreshold, 50)                       \
   F(double,   JitPGOCalledFuncExitThreshold,  99.9)                     \
   F(bool,     JitPGODumpCallGraph,     false)                           \
+  F(bool,     JitPGOOptCodeCallGraph,  true)                            \
   F(bool,     JitPGORacyProfiling,     false)                           \
   F(uint32_t, JitLiveThreshold,       ServerExecutionMode() ? 1000 : 0) \
   F(uint32_t, JitProfileThreshold,     ServerExecutionMode() ? 200 : 0) \

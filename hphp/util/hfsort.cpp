@@ -65,6 +65,11 @@ void TargetGraph::setSamples(TargetId id, uint64_t samples) {
   targets[id].samples = samples;
 }
 
+void TargetGraph::addSamples(TargetId id, uint64_t samples) {
+  assertx(id < targets.size());
+  targets[id].samples += samples;
+}
+
 uint64_t TargetGraph::getSamples(TargetId id) {
   assertx(id < targets.size());
   return targets[id].samples;

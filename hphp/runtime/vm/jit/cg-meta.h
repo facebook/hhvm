@@ -51,6 +51,8 @@ struct CGMeta {
 
   void setJmpTransID(TCA jmp, TransID transID, TransKind kind);
 
+  void setCallFuncId(TCA callRetAddr, FuncId funcId, TransKind kind);
+
   /*
    * Code addresses of interest to the code generator.
    *
@@ -67,6 +69,7 @@ struct CGMeta {
   std::vector<std::pair<TCA,Fixup>> fixups;
   std::vector<std::pair<TCA,TCA>> catches;
   std::vector<std::pair<TCA,TransID>> jmpTransIDs;
+  std::vector<std::pair<TCA,FuncId>> callFuncIds;
   std::vector<std::pair<TCA,Reason>> trapReasons;
   std::vector<IFrame> inlineFrames;
   std::vector<std::pair<TCA,IStack>> inlineStacks;

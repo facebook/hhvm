@@ -110,7 +110,10 @@ struct Vgen {
   void emit(const tailcallstubr& i);
 
   // php function abi
-  void emit(const callphpr& i) { a.call(i.target); }
+  void emit(const callphpr& i) {
+    a.call(i.target);
+    setCallFuncId(env, a.frontier());
+  }
   void emit(const phpret& i);
   void emit(const callunpack& i);
   void emit(const contenter& i);

@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/relocation.h"
@@ -232,6 +233,9 @@ void clearTCMaps(TCA start, TCA end) {
         ITRACE(1, "Erasing jmpTransID @ {} to {}\n", start, id);
       }
     }
+
+    FuncOrder::clearCallFuncId(start);
+
     eraseCatchTrace(start);
     eraseInlineStack(start);
     if (isCall) {

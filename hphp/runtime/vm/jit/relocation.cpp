@@ -195,6 +195,12 @@ void adjustMetaDataForRelocation(RelocationInfo& rel,
     }
   }
 
+  for (auto& it : meta.callFuncIds) {
+    if (auto const adjusted = rel.adjustedAddressAfter(it.first)) {
+      it.first = adjusted;
+    }
+  }
+
   for (auto& r : meta.trapReasons) {
     if (auto const adjusted = rel.adjustedAddressAfter(r.first)) {
       r.first = adjusted;

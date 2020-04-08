@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/align.h"
 #include "hphp/runtime/vm/jit/cg-meta.h"
+#include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/func-prologue.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
@@ -191,6 +192,7 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
   TransRec tr{funcBody, transID, kind, loc.mainStart(), loc.mainSize(),
       loc.coldStart(), loc.coldSize(), loc.frozenStart(), loc.frozenSize()};
   transdb::addTranslation(tr);
+  FuncOrder::recordTranslation(tr);
   if (RuntimeOption::EvalJitUseVtuneAPI) {
     reportTraceletToVtune(func->unit(), func, tr);
   }

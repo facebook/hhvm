@@ -732,6 +732,7 @@ bool opcodeMayRaise(Opcode opc) {
   case GtStr:
   case GtStrInt:
   case HasToString:
+  case IncCallCounter:
   case IncProfCounter:
   case IncRef:
   case IncStat:

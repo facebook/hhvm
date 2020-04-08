@@ -186,6 +186,7 @@ bool emit(Venv& env, const callphp& i) {
   if (i.func != nullptr) {
     env.meta.smashableCallData[call] = PrologueID(i.func, i.nargs);
   }
+  setCallFuncId(env, call + smashableCallLen());
   return true;
 }
 
@@ -460,6 +461,15 @@ const uint64_t* alloc_literal(Venv& env, uint64_t val) {
 
   pending.emplace(val, addr);
   return addr;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void setCallFuncId(Venv& env, TCA callRetAddr) {
+  if (!env.unit.context) return;
+
+  env.meta.setCallFuncId(callRetAddr, env.unit.context->initSrcKey.funcID(),
+                         env.unit.context->kind);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

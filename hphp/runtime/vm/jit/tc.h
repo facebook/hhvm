@@ -456,6 +456,11 @@ bool isValidCodeAddress(TCA addr);
  */
 bool isProfileCodeAddress(TCA addr);
 
+/*
+ * Check if `addr' is an address within the hot code block in the TC.
+ */
+bool isHotCodeAddress(TCA addr);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 /*

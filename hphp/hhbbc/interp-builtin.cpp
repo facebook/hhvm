@@ -247,6 +247,27 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
   return true;
 }
 
+bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
+  // Do not handle syntax-only checks and name output.
+  if (op.arg1 != 2 && topC(env) != TFalse) return false;
+  auto const ty = topC(env, op.arg1 - 1);
+  if (ty == TInitCell) return false;
+  auto const res = [&]() -> folly::Optional<bool> {
+    auto constexpr BFuncPtr = BClsMeth | BFunc;
+    if (ty.subtypeOf(BFuncPtr)) return true;
+    if (ty.subtypeOf(BArrLikeE) ||
+        ty.subtypeOf(BKeyset) ||
+        !ty.couldBe(BFuncPtr | BArr | BVec | BDict | BObj | BStr)) {
+      return false;
+    }
+    return {};
+  }();
+  if (!res) return false;
+  reduce(env, bc::PopC {}, bc::PopC {});
+  *res ? reduce(env, bc::True {}) : reduce(env, bc::False {});
+  return true;
+}
+
 bool builtin_is_list_like(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 1) return false;
   auto const ty = topC(env);
@@ -445,6 +466,7 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
   X(array_key_cast, HH\\array_key_cast)                                 \
+  X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \
   X(type_structure, HH\\type_structure)                                 \
   X(type_structure_classname, HH\\type_structure_classname)             \

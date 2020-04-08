@@ -5,8 +5,8 @@ function with_static_property(): void {
   $b = WithStaticProperty::$vector;
 }
 class WithStaticProperty {
-  public static \HH\Map<\SomeEnum, string> $map = Map {};
   public static \HH\Vector<\A> $vector = Vector {};
+  public static \HH\Map<\SomeEnum, string> $map = Map {};
 }
 enum SomeEnum: int {
   FIRST = 0;

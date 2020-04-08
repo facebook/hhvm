@@ -21,16 +21,16 @@ module Dep = struct
   type _ variant =
     | GConst : string -> 'a variant
     | GConstName : string -> 'a variant
-    | Const : (string * string) -> dependency variant
+    | Const : string * string -> dependency variant
     | AllMembers : string -> dependency variant
     | Class : string -> 'a variant
     | RecordDef : string -> 'a variant
     | Fun : string -> 'a variant
     | FunName : string -> 'a variant
-    | Prop : (string * string) -> dependency variant
-    | SProp : (string * string) -> dependency variant
-    | Method : (string * string) -> dependency variant
-    | SMethod : (string * string) -> dependency variant
+    | Prop : string * string -> dependency variant
+    | SProp : string * string -> dependency variant
+    | Method : string * string -> dependency variant
+    | SMethod : string * string -> dependency variant
     | Cstr : string -> dependency variant
     | Extends : string -> dependency variant
 
@@ -42,11 +42,11 @@ module Dep = struct
     | (Class lhs, Class rhs) -> lhs = rhs
     | (RecordDef lhs, RecordDef rhs) -> lhs = rhs
     | (Fun lhs, Fun rhs) -> lhs = rhs
-    | (Const lhs, Const rhs) -> lhs = rhs
-    | (Prop lhs, Prop rhs) -> lhs = rhs
-    | (SProp lhs, SProp rhs) -> lhs = rhs
-    | (Method lhs, Method rhs) -> lhs = rhs
-    | (SMethod lhs, SMethod rhs) -> lhs = rhs
+    | (Const (lhs1, lhs2), Const (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
+    | (Prop (lhs1, lhs2), Prop (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
+    | (SProp (lhs1, lhs2), SProp (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
+    | (Method (lhs1, lhs2), Method (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
+    | (SMethod (lhs1, lhs2), SMethod (rhs1, rhs2)) -> lhs1 = rhs1 && lhs2 = rhs2
     | (GConstName lhs, GConstName rhs) -> lhs = rhs
     | (FunName lhs, FunName rhs) -> lhs = rhs
     | (AllMembers lhs, AllMembers rhs) -> lhs = rhs

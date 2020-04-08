@@ -10,8 +10,8 @@ trait TFrobQuery {
 }
 abstract class BaseQuery<TContext> {}
 interface ICreation {
-  abstract const type TUniverse as \IUniverse;
   const type TContext = this::TUniverse::TContext;
+  abstract const type TUniverse as \IUniverse;
 }
 interface IContext {}
 abstract class Query extends \BaseQuery<this::TContext> {

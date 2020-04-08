@@ -1,7 +1,7 @@
 <?hh
 class WithConst {
-  const type WITH_CONSTRAINT = \A0;
   const type TYPECONST as num = int;
+  const type WITH_CONSTRAINT = \A0;
   public function with_type_constants(
     this::TYPECONST $arg1,
     this::WITH_CONSTRAINT $arg2,

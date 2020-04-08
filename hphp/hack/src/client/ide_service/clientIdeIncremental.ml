@@ -88,116 +88,124 @@ let log_file_info_change
  * This fetches the new names out of the modified file
  * Result: (old * new)
  *)
-let compute_fileinfo_for_path (popt : ParserOptions.t) (path : Relative_path.t)
-    : (FileInfo.t option * Facts.facts option) Lwt.t =
+let compute_fileinfo_for_path
+    (popt : ParserOptions.t) (contents : string option) (path : Relative_path.t)
+    =
+  match contents with
+  | None -> (None, None)
+  (* The file couldn't be read from disk. Assume it's been deleted or is
+    otherwise inaccessible. Our caller will delete the entries from the
+    naming and reverse naming table; there's nothing for us to do here. *)
+  | Some contents ->
+    (* We don't want our symbols to be mangled for export.  Mangling would
+      * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
+    Facts_parser.mangle_xhp_mode := false;
+    let facts =
+      Facts_parser.from_text
+        ~php5_compat_mode:false
+        ~hhvm_compat_mode:true
+        ~disable_nontoplevel_declarations:false
+        ~disable_legacy_soft_typehints:false
+        ~allow_new_attribute_syntax:false
+        ~disable_legacy_attribute_syntax:false
+        ~enable_xhp_class_modifier:
+          (ParserOptions.enable_xhp_class_modifier popt)
+        ~disable_xhp_element_mangling:
+          (ParserOptions.disable_xhp_element_mangling popt)
+        ~filename:path
+        ~text:contents
+    in
+    let (funs, classes, record_defs, typedefs, consts) =
+      match facts with
+      | None ->
+        (* File failed to parse or was not a Hack file. *)
+        ([], [], [], [], [])
+      | Some facts ->
+        let to_ids name_type names =
+          List.map names ~f:(fun name ->
+              let fixed_name = Utils.add_ns name in
+              let pos = FileInfo.File (name_type, path) in
+              (pos, fixed_name))
+        in
+        let funs = facts.Facts.functions |> to_ids FileInfo.Fun in
+        (* Classes and typedefs are both stored under `types`. There's also a
+        `typeAliases` field which only stores typedefs that we could use if we
+        wanted, but we write out the pattern-matches here for
+        exhaustivity-checking. *)
+        let classes =
+          facts.Facts.types
+          |> Facts.InvSMap.filter (fun _k v ->
+                 Facts.(
+                   match v.kind with
+                   | TKClass
+                   | TKInterface
+                   | TKEnum
+                   | TKTrait
+                   | TKUnknown
+                   | TKMixed ->
+                     true
+                   | TKTypeAlias
+                   | TKRecord ->
+                     false))
+          |> Facts.InvSMap.keys
+          |> to_ids FileInfo.Class
+        in
+        let record_defs =
+          facts.Facts.types
+          |> Facts.InvSMap.filter (fun _k v -> Facts.(v.kind = TKRecord))
+          |> Facts.InvSMap.keys
+          |> to_ids FileInfo.RecordDef
+        in
+        let typedefs =
+          facts.Facts.types
+          |> Facts.InvSMap.filter (fun _k v ->
+                 Facts.(
+                   match v.kind with
+                   | TKTypeAlias -> true
+                   | TKClass
+                   | TKInterface
+                   | TKEnum
+                   | TKTrait
+                   | TKUnknown
+                   | TKMixed
+                   | TKRecord ->
+                     false))
+          |> Facts.InvSMap.keys
+          |> to_ids FileInfo.Typedef
+        in
+        let consts = facts.Facts.constants |> to_ids FileInfo.Const in
+        (funs, classes, record_defs, typedefs, consts)
+    in
+    let fi_mode =
+      Full_fidelity_parser.parse_mode
+        (Full_fidelity_source_text.make path contents)
+      |> Option.value (* TODO: is this a reasonable default? *)
+           ~default:FileInfo.Mstrict
+    in
+    ( Some
+        {
+          FileInfo.file_mode = Some fi_mode;
+          funs;
+          classes;
+          record_defs;
+          typedefs;
+          consts;
+          hash = None;
+          comments = None;
+        },
+      facts )
+
+(*
+ * This fetches the new names out of the modified file via lwt
+ * Result: (old * new)
+ *)
+let compute_fileinfo_for_path_lwt
+    (popt : ParserOptions.t) (path : Relative_path.t) :
+    (FileInfo.t option * Facts.facts option) Lwt.t =
   (* Fetch file contents *)
   let%lwt contents = Lwt_utils.read_all (Relative_path.to_absolute path) in
   let contents = Result.ok contents in
-  let (new_file_info, facts) =
-    match contents with
-    | None -> (None, None)
-    (* The file couldn't be read from disk. Assume it's been deleted or is
-      otherwise inaccessible. Our caller will delete the entries from the
-      naming and reverse naming table; there's nothing for us to do here. *)
-    | Some contents ->
-      (* We don't want our symbols to be mangled for export.  Mangling would
-       * convert :xhp:myclass to __xhp_myclass, which would fail name lookup *)
-      Facts_parser.mangle_xhp_mode := false;
-      let facts =
-        Facts_parser.from_text
-          ~php5_compat_mode:false
-          ~hhvm_compat_mode:true
-          ~disable_nontoplevel_declarations:false
-          ~disable_legacy_soft_typehints:false
-          ~allow_new_attribute_syntax:false
-          ~disable_legacy_attribute_syntax:false
-          ~enable_xhp_class_modifier:
-            (ParserOptions.enable_xhp_class_modifier popt)
-          ~disable_xhp_element_mangling:
-            (ParserOptions.disable_xhp_element_mangling popt)
-          ~filename:path
-          ~text:contents
-      in
-      let (funs, classes, record_defs, typedefs, consts) =
-        match facts with
-        | None ->
-          (* File failed to parse or was not a Hack file. *)
-          ([], [], [], [], [])
-        | Some facts ->
-          let to_ids name_type names =
-            List.map names ~f:(fun name ->
-                let fixed_name = Utils.add_ns name in
-                let pos = FileInfo.File (name_type, path) in
-                (pos, fixed_name))
-          in
-          let funs = facts.Facts.functions |> to_ids FileInfo.Fun in
-          (* Classes and typedefs are both stored under `types`. There's also a
-          `typeAliases` field which only stores typedefs that we could use if we
-          wanted, but we write out the pattern-matches here for
-          exhaustivity-checking. *)
-          let classes =
-            facts.Facts.types
-            |> Facts.InvSMap.filter (fun _k v ->
-                   Facts.(
-                     match v.kind with
-                     | TKClass
-                     | TKInterface
-                     | TKEnum
-                     | TKTrait
-                     | TKUnknown
-                     | TKMixed ->
-                       true
-                     | TKTypeAlias
-                     | TKRecord ->
-                       false))
-            |> Facts.InvSMap.keys
-            |> to_ids FileInfo.Class
-          in
-          let record_defs =
-            facts.Facts.types
-            |> Facts.InvSMap.filter (fun _k v -> Facts.(v.kind = TKRecord))
-            |> Facts.InvSMap.keys
-            |> to_ids FileInfo.RecordDef
-          in
-          let typedefs =
-            facts.Facts.types
-            |> Facts.InvSMap.filter (fun _k v ->
-                   Facts.(
-                     match v.kind with
-                     | TKTypeAlias -> true
-                     | TKClass
-                     | TKInterface
-                     | TKEnum
-                     | TKTrait
-                     | TKUnknown
-                     | TKMixed
-                     | TKRecord ->
-                       false))
-            |> Facts.InvSMap.keys
-            |> to_ids FileInfo.Typedef
-          in
-          let consts = facts.Facts.constants |> to_ids FileInfo.Const in
-          (funs, classes, record_defs, typedefs, consts)
-      in
-      let fi_mode =
-        Full_fidelity_parser.parse_mode
-          (Full_fidelity_source_text.make path contents)
-        |> Option.value (* TODO: is this a reasonable default? *)
-             ~default:FileInfo.Mstrict
-      in
-      ( Some
-          {
-            FileInfo.file_mode = Some fi_mode;
-            funs;
-            classes;
-            record_defs;
-            typedefs;
-            consts;
-            hash = None;
-            comments = None;
-          },
-        facts )
-  in
+  let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
   Lwt.return (new_file_info, facts)
 
 let update_naming_table
@@ -271,7 +279,7 @@ type changed_file_results = {
   new_file_info: FileInfo.t option;
 }
 
-let update_naming_tables_for_changed_file
+let update_naming_tables_for_changed_file_lwt
     ~(backend : Provider_backend.t)
     ~(popt : ParserOptions.t)
     ~(naming_table : Naming_table.t)
@@ -291,7 +299,9 @@ let update_naming_tables_for_changed_file
     else
       let start_time = Unix.gettimeofday () in
       let old_file_info = Naming_table.get_file_info naming_table path in
-      let%lwt (new_file_info, facts) = compute_fileinfo_for_path popt path in
+      let%lwt (new_file_info, facts) =
+        compute_fileinfo_for_path_lwt popt path
+      in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       let naming_table =
         update_naming_table
@@ -303,3 +313,37 @@ let update_naming_tables_for_changed_file
       in
       let sienv = update_symbol_index ~sienv ~path ~facts in
       Lwt.return { naming_table; sienv; old_file_info; new_file_info }
+
+let update_naming_tables_for_changed_file
+    ~(backend : Provider_backend.t)
+    ~(popt : ParserOptions.t)
+    ~(naming_table : Naming_table.t)
+    ~(sienv : SearchUtils.si_env)
+    ~(path : Path.t) : changed_file_results =
+  let str_path = Path.to_string path in
+  match Relative_path.strip_root_if_possible str_path with
+  | None ->
+    log "Ignored change to file %s, as it is not within our repo root" str_path;
+    { naming_table; sienv; old_file_info = None; new_file_info = None }
+  | Some path ->
+    let path = Relative_path.from_root path in
+    if not (FindUtils.path_filter path) then
+      { naming_table; sienv; old_file_info = None; new_file_info = None }
+    else
+      let start_time = Unix.gettimeofday () in
+      let old_file_info = Naming_table.get_file_info naming_table path in
+      let contents = Disk.cat (Relative_path.to_absolute path) in
+      let (new_file_info, facts) =
+        compute_fileinfo_for_path popt (Some contents) path
+      in
+      log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
+      let naming_table =
+        update_naming_table
+          ~naming_table
+          ~backend
+          ~path
+          ~old_file_info
+          ~new_file_info
+      in
+      let sienv = update_symbol_index ~sienv ~path ~facts in
+      { naming_table; sienv; old_file_info; new_file_info }

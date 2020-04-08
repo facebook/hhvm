@@ -52,7 +52,7 @@ The key algorithms which read from these data-structures are:
 The invariants for forward and reverse naming tables:
 1. These tables only ever reflect truth about disk files; they are unaffected
    by open_file entries.
-2. They are updated asynchronously by update_naming_tables_for_changed_file
+2. They are updated asynchronously by update_naming_tables_for_changed_file_lwt
    in response to DidChangeWatchedFile events. Thus, we might be asked to fetch
    a shallow decl even before the naming-tables have been fully updated.
    We might for instance read the naming-table and try to fetch a shallow
@@ -789,7 +789,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       in
       let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
         try%lwt
-          ClientIdeIncremental.update_naming_tables_for_changed_file
+          ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
             ~backend:(Provider_backend.Local_memory local_memory)
             ~popt
             ~naming_table

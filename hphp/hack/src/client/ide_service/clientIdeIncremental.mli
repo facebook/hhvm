@@ -21,10 +21,19 @@ symbol-search index in 'sienv'. It does this by by parsing the file at
 the given path and reading their declarations. If the file could not be read,
 it's assumed to be deleted, and so the old forward-naming-table indicates
 which caches will have to be deleted by the caller. *)
-val update_naming_tables_for_changed_file :
+val update_naming_tables_for_changed_file_lwt :
   backend:Provider_backend.t ->
   popt:ParserOptions.t ->
   naming_table:Naming_table.t ->
   sienv:SearchUtils.si_env ->
   path:Path.t ->
   changed_file_results Lwt.t
+
+(* Synchronous version of update_naming_tables_for_changed_file_lwt *)
+val update_naming_tables_for_changed_file :
+  backend:Provider_backend.t ->
+  popt:ParserOptions.t ->
+  naming_table:Naming_table.t ->
+  sienv:SearchUtils.si_env ->
+  path:Path.t ->
+  changed_file_results

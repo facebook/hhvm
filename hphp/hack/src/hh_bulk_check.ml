@@ -14,7 +14,8 @@ open ServerLocalConfig.RemoteTypeCheck
 type schedule_args = {
   bin_root: Path.t;
   root: Path.t;
-  naming_table: string;
+  (* Optional up-to-date naming table for target repo *)
+  naming_table: string option;
   input_file: string;
   (* Number of remote workers *)
   num_remote_workers: int;
@@ -112,7 +113,7 @@ let parse_schedule_args () : command =
         "minimal log level (debug, error, fatal etc...)" );
       ( "--naming-table",
         Arg.String (set_option_arg "naming table file" naming_table),
-        "input naming table SQLlite file path (required)." );
+        "up-to-date input naming table SQLlite file path (optional)." );
       ( "--num-remote-workers",
         Arg.Int (fun x -> num_remote_workers := x),
         "The number of remote workers (default is 1)." );
@@ -144,7 +145,7 @@ let parse_schedule_args () : command =
     {
       bin_root;
       root;
-      naming_table = validate_required_arg naming_table "--naming-table";
+      naming_table = !naming_table;
       input_file = validate_required_arg input_file "--input-file";
       num_remote_workers = !num_remote_workers;
       num_local_workers = !num_local_workers;
@@ -231,10 +232,10 @@ let parse_args () =
   | CKWork -> parse_work_args ()
 
 (*
-  Initialize env/genv from naming_table and create local workers
+  Initialize env/genv and create local workers
   based on num_local_workers.
 *)
-let init_env_and_create_local_workers root naming_table num_local_workers =
+let init_env_and_create_local_workers root num_local_workers =
   Tempfile.with_real_tempdir @@ fun tmp ->
   let t = Unix.gettimeofday () in
   Relative_path.set_path_prefix Relative_path.Root root;
@@ -255,13 +256,6 @@ let init_env_and_create_local_workers root naming_table num_local_workers =
   let sharedmem_config = ServerConfig.sharedmem_config server_config in
   let handle = SharedMem.init sharedmem_config ~num_workers:num_local_workers in
   let server_env = ServerEnvBuild.make_env server_config in
-  let ctx = Provider_utils.ctx_from_server_env server_env in
-  let server_env =
-    {
-      server_env with
-      ServerEnv.naming_table = Naming_table.load_from_sqlite ctx naming_table;
-    }
-  in
   let t = Unix.gettimeofday () in
   let gc_control = ServerConfig.gc_control server_config in
   let workers =
@@ -354,18 +348,89 @@ let start_remote_checking_service genv env schedule_env =
   in
   delegate_state
 
+(* Download naming table from saved state *)
+let download_naming_table_from_saved_state (repo_root : Path.t) :
+    string * Saved_state_loader.changed_files =
+  let naming_table_future =
+    State_loader_futures.load
+      ~repo:repo_root
+      ~ignore_hh_version:true
+      ~saved_state_type:Saved_state_loader.Naming_table
+  in
+  match State_loader_futures.wait_for_finish naming_table_future with
+  | Ok (naming_table_info, changed_files) ->
+    let (_ : float) =
+      Hh_logger.log_duration
+        "Finished downloading naming table."
+        (Future.start_t naming_table_future)
+    in
+    let naming_table_path =
+      naming_table_info
+        .Saved_state_loader.Naming_table_saved_state_info.naming_table_path
+    in
+    (Path.to_string naming_table_path, changed_files)
+  | Error err ->
+    failwith
+      (Printf.sprintf "Failed to download naming table saved state: %s" err)
+
+(* Download naming table from saved state then apply changed files to bring
+ the naming table up to date *)
+let download_up_to_date_naming_table
+    (env : ServerEnv.env) (repo_root : Path.t) (ctx : Provider_context.t) =
+  Hh_logger.log "Downloading naming table from saved state...";
+  let (naming_table_path, changed_files) =
+    download_naming_table_from_saved_state repo_root
+  in
+  let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
+  Hh_logger.log "Applying changed files to naming table...";
+  let (naming_table, sienv) =
+    List.fold_left
+      ~f:(fun (naming_table, sienv) changed_file ->
+        let { ClientIdeIncremental.naming_table; sienv; _ } =
+          ClientIdeIncremental.update_naming_tables_for_changed_file
+            ~backend:(Provider_context.get_backend ctx)
+            ~popt:(Provider_context.get_popt ctx)
+            ~naming_table
+            ~sienv
+            ~path:changed_file
+        in
+        (naming_table, sienv))
+      ~init:(naming_table, env.ServerEnv.local_symbol_table)
+      changed_files
+  in
+  let server_env =
+    { env with ServerEnv.naming_table; local_symbol_table = sienv }
+  in
+  (server_env, ctx)
+
 (*
   Initialize envs, create local workers and create remote checking service delegate.
 *)
 let create_service_delegate (schedule_env : schedule_args) =
-  let (env, genv, _) =
+  let (env, genv, _workers) =
     init_env_and_create_local_workers
       schedule_env.root
-      schedule_env.naming_table
       schedule_env.num_local_workers
   in
-  let delegate_state = start_remote_checking_service genv env schedule_env in
-  (env, genv, delegate_state)
+  let ctx = Provider_utils.ctx_from_server_env env in
+  let (server_env, ctx) =
+    match schedule_env.naming_table with
+    | None -> download_up_to_date_naming_table env schedule_env.root ctx
+    | Some naming_table ->
+      Hh_logger.log "Directly loading from naming table %s" naming_table;
+      let env =
+        {
+          env with
+          ServerEnv.naming_table =
+            Naming_table.load_from_sqlite ctx naming_table;
+        }
+      in
+      (env, ctx)
+  in
+  let delegate_state =
+    start_remote_checking_service genv server_env schedule_env
+  in
+  (env, genv, delegate_state, ctx)
 
 (* Parse input_file which should contain a list of php files relative to root *)
 let read_input_file input_file =
@@ -400,8 +465,8 @@ let save_result_error_list errors output_file_path =
   Pervasives.close_out out_chan;
   Hh_logger.log "Wrote %d errors to %s" (Errors.count errors) output_file_path
 
-(* Process type checking result errors. 
-  The errors list is sorted and serialized to output_path_opt in 
+(* Process type checking result errors.
+  The errors list is sorted and serialized to output_path_opt in
   json format if specified; otherwise, printed to stdout. *)
 let process_result errors output_path_opt =
   match output_path_opt with
@@ -421,7 +486,7 @@ let process_result errors output_path_opt =
       remote type checking will be used.
 *)
 let schedule_type_checking schedule_env =
-  let (env, genv, delegate_state) = create_service_delegate schedule_env in
+  let (env, genv, delegate_state, ctx) = create_service_delegate schedule_env in
   let telemetry = Telemetry.create () in
   let memory_cap =
     genv.ServerEnv.local_config
@@ -436,7 +501,6 @@ let schedule_type_checking schedule_env =
         profile_type_check_duration_threshold = 0.0;
       }
   in
-  let ctx = Provider_utils.ctx_from_server_env env in
   (* Typing checking entry point *)
   let (errors, _delegate_state, _telemetry) =
     Typing_check_service.go

@@ -293,7 +293,7 @@ final class Vector implements \MutableVector {
   /** Returns an array built from the keys from this Vector.
    * @return array
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toKeysArray(): varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
@@ -302,7 +302,7 @@ final class Vector implements \MutableVector {
   /** Returns an array built from the values from this Vector.
    * @return array
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toValuesArray(): varray {
     return $this->toVArray();
   }
@@ -954,7 +954,7 @@ final class ImmVector implements \ConstVector {
   /** Returns an array built from the keys from this ImmVector.
    * @return array
    */
-  <<__Rx>>
+  <<__Rx, __ProvenanceSkipFrame>>
   public function toKeysArray(): varray {
     $count = $this->count();
     return $count ? varray(\range(0, $count - 1)) : varray[];
@@ -963,7 +963,7 @@ final class ImmVector implements \ConstVector {
   /** Returns an array built from the values from this ImmVector.
    * @return array
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Rx, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toValuesArray(): varray {
     return $this->toVArray();
   }

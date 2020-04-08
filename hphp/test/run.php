@@ -211,19 +211,31 @@ function error($message) {
 function check_executable($path, $typechecker) {
   $type = $typechecker ? "HH_SERVER" : "HHVM";
   $rpath = realpath($path);
-  $msg = "Provided ".$type." executable (".$path.") is not a file.\n"
+  $msg = "Provided $type executable ($path) is not an executable file.\n"
        . "If using ".$type."_BIN, make sure that is set correctly.";
-  if (!is_file($rpath)) {
+  if (!is_executable($rpath)) {
     error($msg);
   }
   $output = varray[];
   $return_var = -1;
-  exec($rpath . " --help 2> /dev/null", inout $output, inout $return_var);
-  $str = implode($output);
-  $msg = "Provided file (".$rpath.") is not a/an ".$type." executable.\n"
-       . "If using ".$type."_BIN, make sure that is set correctly.";
-  if (strpos($str, "Usage") !== 0) {
-    error($msg);
+  if ($typechecker) {
+    // hh_server
+    exec($rpath . " --help 2> /dev/null", inout $output, inout $return_var);
+    $str = implode($output);
+    $msg = "Provided file ($rpath) is not an HH_SERVER executable.\n"
+         . "If using HH_SERVER_BIN, make sure that is set correctly.";
+    if (strpos($str, "Usage:") !== 0) {
+      error($msg);
+    }
+  } else {
+    // hhvm
+    exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
+    $str = implode($output);
+    $msg = "Provided file ($rpath) is not an HHVM executable.\n"
+         . "If using HHVM_BIN, make sure that is set correctly.";
+    if (strpos($str, "HipHop ") !== 0) {
+      error($msg);
+    }
   }
 }
 

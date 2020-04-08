@@ -332,8 +332,8 @@ public:
   }
   static bool ExistsInt(const ArrayData*, int64_t k);
   static bool ExistsStr(const ArrayData*, const StringData* k);
-  static arr_lval LvalInt(ArrayData* ad, int64_t k, bool copy);
-  static arr_lval LvalStr(ArrayData* ad, StringData* k, bool copy);
+  static arr_lval LvalInt(ArrayData* ad, int64_t k);
+  static arr_lval LvalStr(ArrayData* ad, StringData* k);
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);

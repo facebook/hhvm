@@ -145,11 +145,11 @@ ssize_t GlobalsArray::NvGetIntPos(const ArrayData* ad, int64_t k) {
   return asGlobals(ad)->m_tab->lookupPos(String(k).get());
 }
 
-arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
-  return LvalStr(ad, String(k).get(), copy);
+arr_lval GlobalsArray::LvalInt(ArrayData* ad, int64_t k) {
+  return LvalStr(ad, String(k).get());
 }
 
-arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
+arr_lval GlobalsArray::LvalStr(ArrayData* ad, StringData* k) {
   auto a = asGlobals(ad);
   auto val = a->m_tab->lookup(k);
   if (!val) {

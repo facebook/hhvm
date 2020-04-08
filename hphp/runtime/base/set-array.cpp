@@ -590,13 +590,13 @@ bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return NvGetStr(ad, k).is_set();
 }
 
-arr_lval SetArray::LvalInt(ArrayData*, int64_t, bool) {
+arr_lval SetArray::LvalInt(ArrayData*, int64_t) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval int)"
   );
 }
 
-arr_lval SetArray::LvalStr(ArrayData*, StringData*, bool) {
+arr_lval SetArray::LvalStr(ArrayData*, StringData*) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (lval string)"
   );

@@ -1091,12 +1091,12 @@ ArrayData* MixedArray::update(K k, TypedValue data) {
   return this;
 }
 
-arr_lval MixedArray::LvalInt(ArrayData* ad, int64_t k, bool copy) {
-  return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(k);
+arr_lval MixedArray::LvalInt(ArrayData* ad, int64_t k) {
+  return asMixed(ad)->prepareForInsert(ad->cowCheck())->addLvalImpl<true>(k);
 }
 
-arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key, bool copy) {
-  return asMixed(ad)->prepareForInsert(copy)->addLvalImpl<true>(key);
+arr_lval MixedArray::LvalStr(ArrayData* ad, StringData* key) {
+  return asMixed(ad)->prepareForInsert(ad->cowCheck())->addLvalImpl<true>(key);
 }
 
 tv_lval MixedArray::LvalInPlace(ArrayData* ad, const Variant& k) {

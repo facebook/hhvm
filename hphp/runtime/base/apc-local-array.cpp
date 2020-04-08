@@ -157,16 +157,18 @@ ArrayData* APCLocalArray::loadElems() const {
   return elems;
 }
 
-arr_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
+arr_lval APCLocalArray::LvalInt(ArrayData* ad, int64_t k) {
+  assertx(!ad->cowCheck());
   EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lval(k, false);
+  auto const lval = helper.escalated->lval(k);
   return arr_lval { helper.release(lval.arr), lval };
 }
 
 arr_lval
-APCLocalArray::LvalStr(ArrayData* ad, StringData* k, bool /*copy*/) {
+APCLocalArray::LvalStr(ArrayData* ad, StringData* k) {
+  assertx(!ad->cowCheck());
   EscalateHelper helper{ad};
-  auto const lval = helper.escalated->lval(k, false);
+  auto const lval = helper.escalated->lval(k);
   return arr_lval { helper.release(lval.arr), lval };
 }
 

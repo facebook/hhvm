@@ -572,7 +572,7 @@ inline tv_lval ElemDArrayPre(tv_lval base, int64_t key, bool& defined) {
   auto oldArr = val(base).parr;
 
   defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-  auto const lval = oldArr->lval(key, oldArr->cowCheck());
+  auto const lval = oldArr->lval(key);
 
   if (lval.arr != oldArr) {
     assertx(lval.arr->isPHPArrayType());
@@ -591,9 +591,8 @@ inline tv_lval ElemDArrayPre(tv_lval base, StringData* key,
   auto oldArr = val(base).parr;
 
   auto const lval = [&]{
-    auto const cow = oldArr->cowCheck();
     defined = (mode != MOpMode::Warn) || oldArr->exists(key);
-    return oldArr->lval(key, cow);
+    return oldArr->lval(key);
   }();
 
   if (lval.arr != oldArr) {
@@ -653,7 +652,7 @@ template <bool copyProv>
 inline tv_lval ElemDVecPre(tv_lval base, int64_t key) {
   ArrayData* oldArr = base.val().parr;
 
-  auto const lval = PackedArray::LvalIntVec(oldArr, key, oldArr->cowCheck());
+  auto const lval = PackedArray::LvalIntVec(oldArr, key);
   if (lval.arr != oldArr) {
     base.type() = KindOfVec;
     base.val().parr = lval.arr;
@@ -938,7 +937,7 @@ inline tv_lval ElemUEmptyish() {
 inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
   auto oldArr = val(base).parr;
   if (!oldArr->exists(key)) return ElemUEmptyish();
-  auto const lval = oldArr->lval(key, oldArr->cowCheck());
+  auto const lval = oldArr->lval(key);
   if (lval.arr != oldArr) {
     assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();
@@ -953,7 +952,7 @@ inline tv_lval ElemUArrayImpl(tv_lval base, StringData* key) {
   auto arr = val(base).parr;
   if (!arr->exists(key)) return ElemUEmptyish();
 
-  auto const lval = arr->lval(key, arr->cowCheck());
+  auto const lval = arr->lval(key);
   if (lval.arr != arr) {
     assertx(lval.arr->isPHPArrayType());
     type(base) = lval.arr->toDataType();

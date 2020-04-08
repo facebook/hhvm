@@ -81,8 +81,8 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static bool ExistsStr(const ArrayData*, const StringData*) {
     return false;
   }
-  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k);
+  static arr_lval LvalStr(ArrayData*, StringData* k);
   static constexpr auto IterBegin = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterLast = &ArrayCommon::ReturnInvalidIndex;
   static constexpr auto IterEnd = &ArrayCommon::ReturnInvalidIndex;
@@ -136,9 +136,9 @@ private:
   static arr_lval MakeMixed(int64_t, TypedValue);
 
   template<bool warn>
-  static arr_lval LvalIntImpl(ArrayData*, int64_t k, bool);
+  static arr_lval LvalIntImpl(ArrayData*, int64_t k);
   template<bool warn>
-  static arr_lval LvalStrImpl(ArrayData*, StringData* k, bool);
+  static arr_lval LvalStrImpl(ArrayData*, StringData* k);
 
 private:
   struct Initializer;

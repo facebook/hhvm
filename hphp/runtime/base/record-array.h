@@ -66,8 +66,8 @@ struct RecordArray : ArrayData,
   static bool IsVectorData(const ArrayData*);
   static bool ExistsInt(const ArrayData*, int64_t key);
   static bool ExistsStr(const ArrayData*, const StringData*);
-  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalStr(ArrayData*, StringData* key, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k);
+  static arr_lval LvalStr(ArrayData*, StringData* key);
   static ArrayData* RemoveInt(ArrayData*, int64_t key);
   static ArrayData* RemoveStr(ArrayData*, const StringData*);
   static ssize_t IterEnd(const ArrayData*);

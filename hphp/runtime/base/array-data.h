@@ -381,11 +381,11 @@ public:
   /*
    * Get an lval for the element at key `k'.
    */
-  arr_lval lval(int64_t k, bool copy);
-  arr_lval lval(StringData* k, bool copy);
-  arr_lval lval(TypedValue k, bool copy);
-  arr_lval lval(const String& k, bool copy);
-  arr_lval lval(const Variant& k, bool copy);
+  arr_lval lval(int64_t k);
+  arr_lval lval(StringData* k);
+  arr_lval lval(TypedValue k);
+  arr_lval lval(const String& k);
+  arr_lval lval(const Variant& k);
 
   /*
    * Get an rval for the element at key `k'. The caller must know that the
@@ -855,8 +855,8 @@ struct ArrayFunctions {
   bool (*isVectorData[NK])(const ArrayData*);
   bool (*existsInt[NK])(const ArrayData*, int64_t k);
   bool (*existsStr[NK])(const ArrayData*, const StringData* k);
-  arr_lval (*lvalInt[NK])(ArrayData*, int64_t k, bool copy);
-  arr_lval (*lvalStr[NK])(ArrayData*, StringData* k, bool copy);
+  arr_lval (*lvalInt[NK])(ArrayData*, int64_t k);
+  arr_lval (*lvalStr[NK])(ArrayData*, StringData* k);
   ArrayData* (*removeInt[NK])(ArrayData*, int64_t k);
   ArrayData* (*removeStr[NK])(ArrayData*, const StringData* k);
   ssize_t (*iterBegin[NK])(const ArrayData*);

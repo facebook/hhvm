@@ -109,12 +109,12 @@ inline bool ArrayData::exists(const StringData* k) const {
   return g_array_funcs.existsStr[kind()](this, k);
 }
 
-inline arr_lval ArrayData::lval(int64_t k, bool copy) {
-  return g_array_funcs.lvalInt[kind()](this, k, copy);
+inline arr_lval ArrayData::lval(int64_t k) {
+  return g_array_funcs.lvalInt[kind()](this, k);
 }
 
-inline arr_lval ArrayData::lval(StringData* k, bool copy) {
-  return g_array_funcs.lvalStr[kind()](this, k, copy);
+inline arr_lval ArrayData::lval(StringData* k) {
+  return g_array_funcs.lvalStr[kind()](this, k);
 }
 
 inline tv_rval ArrayData::rvalVanilla(int64_t k) const {
@@ -311,10 +311,10 @@ inline bool ArrayData::exists(TypedValue k) const {
                              : exists(detail::getStringKey(k));
 }
 
-inline arr_lval ArrayData::lval(TypedValue k, bool copy) {
+inline arr_lval ArrayData::lval(TypedValue k) {
   assertx(IsValidKey(k));
-  return detail::isIntKey(k) ? lval(detail::getIntKey(k), copy)
-                             : lval(detail::getStringKey(k), copy);
+  return detail::isIntKey(k) ? lval(detail::getIntKey(k))
+                             : lval(detail::getStringKey(k));
 }
 
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
@@ -385,13 +385,13 @@ inline bool ArrayData::exists(const Variant& k) const {
   return exists(*k.asTypedValue());
 }
 
-inline arr_lval ArrayData::lval(const String& k, bool copy) {
+inline arr_lval ArrayData::lval(const String& k) {
   assertx(IsValidKey(k));
-  return lval(k.get(), copy);
+  return lval(k.get());
 }
 
-inline arr_lval ArrayData::lval(const Variant& k, bool copy) {
-  return lval(*k.asTypedValue(), copy);
+inline arr_lval ArrayData::lval(const Variant& k) {
+  return lval(*k.asTypedValue());
 }
 
 inline TypedValue ArrayData::get(const String& k, bool error) const {

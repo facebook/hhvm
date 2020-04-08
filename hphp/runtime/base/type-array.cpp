@@ -606,7 +606,7 @@ TypedValue Array::lookupImpl(const T& key, AccessFlags flags) const {
 template<typename T> ALWAYS_INLINE
 tv_lval Array::lvalImpl(const T& key, AccessFlags) {
   if (!m_arr) m_arr = Ptr::attach(ArrayData::Create());
-  auto const lval = m_arr->lval(key, m_arr->cowCheck());
+  auto const lval = m_arr->lval(key);
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   assertx(lval);
   return lval;
@@ -619,7 +619,7 @@ tv_lval Array::lvalForceImpl(const T& key, AccessFlags flags) {
     auto const escalated = m_arr->set(key, make_tv<KindOfNull>());
     if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   }
-  auto const lval = m_arr->lval(key, m_arr->cowCheck());
+  auto const lval = m_arr->lval(key);
   if (lval.arr != m_arr) m_arr = Ptr::attach(lval.arr);
   return lval;
 }

@@ -407,8 +407,8 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(ExistsStr)
 
   /*
-   * arr_lval LvalInt(ArrayData*, int64_t k, bool copy)
-   * arr_lval LvalStr(ArrayData*, StringData* key, bool copy)
+   * arr_lval LvalInt(ArrayData*, int64_t k)
+   * arr_lval LvalStr(ArrayData*, StringData* key)
    *
    *   Look up a value in the array by the supplied key, throwing if it doesn't
    *   exist, and return a reference to it.  This function has copy/grow

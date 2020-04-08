@@ -331,22 +331,22 @@ bool RecordArray::ExistsStr(const ArrayData* ad, const StringData* key) {
   return MixedArray::ExistsStr(ra->extraFieldMap(), key);
 }
 
-arr_lval RecordArray::LvalInt(ArrayData* ad, int64_t k, bool /*copy*/) {
+arr_lval RecordArray::LvalInt(ArrayData* ad, int64_t k) {
   return PromoteForOp(ad,
-    [&] (MixedArray* mixed) { return MixedArray::LvalInt(mixed, k, false); },
+    [&] (MixedArray* mixed) { return MixedArray::LvalInt(mixed, k); },
     "LvalInt"
   );
 }
 
-arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k, bool copy) {
+arr_lval RecordArray::LvalStr(ArrayData* ad, StringData* k) {
   auto ra = asRecordArray(ad);
-  if (copy) ra = ra->copyRecordArray(AllocMode::Request);
+  if (ra->cowCheck()) ra = ra->copyRecordArray(AllocMode::Request);
   auto const rec = ra->record();
   auto const idx = rec->lookupField(k);
   if (idx != kInvalidSlot) return arr_lval {ra, ra->lvalAt(idx)};
   auto& extra = ra->extraFieldMap();
   if (!MixedArray::ExistsStr(extra, k)) ra->m_size++;
-  auto const ret = MixedArray::LvalStr(extra, k, extra->cowCheck());
+  auto const ret = MixedArray::LvalStr(extra, k);
   auto const newExtra = MixedArray::asMixed(ret.arr);
   if (extra != newExtra) {
     decRefArr(extra);

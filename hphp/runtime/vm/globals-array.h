@@ -79,8 +79,8 @@ public:
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);
 
-  static arr_lval LvalInt(ArrayData*, int64_t k, bool copy);
-  static arr_lval LvalStr(ArrayData*, StringData* k, bool copy);
+  static arr_lval LvalInt(ArrayData*, int64_t k);
+  static arr_lval LvalStr(ArrayData*, StringData* k);
 
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);

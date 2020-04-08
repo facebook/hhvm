@@ -1,8 +1,13 @@
 <?hh
-function __autoload($className) {
-  include 'bug28751.inc';
-}
 <<__EntryPoint>> function main(): void {
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'soapserveractions' => 'bug28751.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 $server = new SoapServer(NULL, darray['uri'=>"http://testuri.org"]);
 $server->setClass("SoapServerActions");
 

@@ -8,9 +8,14 @@
 
 echo "*** Testing get_declared_traits() : testing autoloaded traits ***\n";
 
-function __autoload($trait_name) {
-    require_once $trait_name . '.inc';
-}
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'autotrait' => 'AutoTrait.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 
 echo "\n-- before instance is declared --\n";
 var_dump(in_array('AutoTrait', get_declared_traits()));
@@ -24,4 +29,3 @@ class MyClass {
 var_dump(in_array('AutoTrait', get_declared_traits()));
 
 echo "\nDONE\n";
-

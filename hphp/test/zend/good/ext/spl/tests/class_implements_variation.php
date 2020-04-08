@@ -16,9 +16,4 @@ echo "\n--- testing autoload ---\n";
 var_dump(class_implements('non_existent'));
 var_dump(class_implements('non_existent2', false));
 
-
-function __autoload($classname) {
-   echo "attempting to autoload $classname\n";
-}
-
 echo "===DONE===\n";

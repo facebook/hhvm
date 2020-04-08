@@ -1,9 +1,4 @@
 <?hh
-function __autoload($name) {
-    echo("AUTOLOAD '$name'\n");
-    eval("class $name {}");
-}
-
 <<__EntryPoint>> function main(): void {
 try {
 } catch (A $e) {

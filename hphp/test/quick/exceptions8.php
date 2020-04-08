@@ -34,7 +34,4 @@ function main_entry(): void {
   error_reporting(-1);
   set_error_handler(fun('doThrow'));
   main();
-
-  spl_autoload_register('doThrow');
-  main2();
 }

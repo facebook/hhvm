@@ -6,10 +6,6 @@
  * Alias to functions:
  */
 
-function __autoload($traitName) {
-    echo "In __autoload($traitName)\n";
-}
-
 trait MyTrait {
 }
 <<__EntryPoint>> function main(): void {

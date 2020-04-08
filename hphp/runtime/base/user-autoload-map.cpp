@@ -167,17 +167,14 @@ AutoloadMap::Result UserAutoloadMap::handleFailure(
 
   // can throw, otherwise
   //  - true means the map was updated. try again
-  //  - false means we should stop applying autoloaders (only affects classes)
-  //  - anything else means keep going
+  //  - anything else means we failed
   Variant action = vm_call_user_func(
     m_failFunc, make_vec_array(getStringRepr(kind), className, err));
   auto const& actionCell = action.asTypedValue();
-  if (actionCell->m_type == KindOfBoolean) {
-    return actionCell->m_data.num
-      ? AutoloadMap::Result::RetryAutoloading
-      : AutoloadMap::Result::StopAutoloading;
+  if (actionCell->m_type == KindOfBoolean && actionCell->m_data.num) {
+    return AutoloadMap::Result::RetryAutoloading;
   }
-  return AutoloadMap::Result::ContinueAutoloading;
+  return AutoloadMap::Result::StopAutoloading;
 }
 
 folly::Optional<String> UserAutoloadMap::getFileFromMap(

@@ -21,8 +21,4 @@ var_dump(class_implements(new a),
          class_implements("bbb", false)
 );
 
-function __autoload($cname) {
-    var_dump($cname);
-}
-
 echo "===DONE===\n";

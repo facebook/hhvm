@@ -5,9 +5,6 @@
  * Alias to functions:
  */
 
-function __autoload($className) {
-    echo "In __autoload($className)\n";
-}
 <<__EntryPoint>> function main(): void {
 echo "*** Testing class_exists() : basic functionality ***\n";
 

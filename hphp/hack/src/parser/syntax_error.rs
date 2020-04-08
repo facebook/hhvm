@@ -836,8 +836,6 @@ pub fn invalid_is_as_expression_hint(n: &str, hint: &str) -> Error {
     ))
 }
 pub const elvis_operator_space: Error = Cow::Borrowed("An Elvis operator ('?:') is expected here.");
-pub const autoload_takes_one_argument: Error =
-    Cow::Borrowed("__autoload() must take exactly 1 argument");
 pub fn clone_takes_no_arguments(class_name: &str, method_name: &str) -> Error {
     Cow::Owned(format!(
         "Method {}::{} cannot accept any arguments",

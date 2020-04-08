@@ -1,18 +1,21 @@
 <?hh
 
-namespace {
-  function __autoload($a) {
-    \var_dump($a);
-    if ($a == 'A') {
-      include 'autoload.inc';
-    }
-  }
-}
-
 namespace A {
   function main() {
+
+    \HH\autoload_set_paths(
+      dict[
+        'class' => dict[
+          'a' => 'autoload.inc',
+        ],
+      ],
+      __DIR__.'/',
+    );
+
     $a = '\\A';
     new $a;
+
+    echo 'Done';
   }
 
   main();

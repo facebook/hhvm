@@ -1,10 +1,15 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-spl_autoload_register(function($classname) {
-	if (in_array($classname, varray['a','b','c'])) {
-		require_once ($classname . '.php');
-	}
-});
+HH\autoload_set_paths(
+	dict[
+		'class' => dict[
+			'a' => 'a.php',
+			'b' => 'b.php',
+			'c' => 'c.php',
+		],
+	],
+	__DIR__.'/',
+);
 
 set_error_handler(function ($errno, $errstr, $errfile, $errline) {
 }, error_reporting());

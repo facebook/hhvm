@@ -5,9 +5,6 @@
  * Alias to functions:
  */
 
-function __autoload($name) {
-    echo "In __autoload($name)\n";
-}
 <<__EntryPoint>> function main(): void {
 var_dump(method_exists('UndefC', 'func'));
 

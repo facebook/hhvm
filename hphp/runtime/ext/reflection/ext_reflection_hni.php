@@ -2060,7 +2060,7 @@ class ReflectionClass implements Reflector {
   public function implementsInterface($cls): bool {
     if ($cls is ReflectionClass) { $cls = $cls->getName(); }
 
-    // Normalize to avoid calling __autoload twice for undefined classes
+    // Normalize to avoid autoloading twice for undefined classes
     $normalized_cls = $cls[0] == '\\' ? substr($cls, 1) : $cls;
     if (!interface_exists($normalized_cls)) {
       throw new ReflectionException("Interface $normalized_cls does not exist");

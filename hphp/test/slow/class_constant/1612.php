@@ -1,8 +1,5 @@
 <?hh
 
-function __autoload($x) {
- var_dump('AUTOLOAD:'.$x);
- }
 class X {
   public $foo = Y::FOO;
   static function foo() {

@@ -3,6 +3,5 @@ array(1) {
   int(3)
 }
 Done
-looking up NonExistentClass
 
-Fatal error: Class undefined: NonExistentClass in %s on line 34
+Fatal error: Class undefined: NonExistentClass in %s on line 27

@@ -355,13 +355,11 @@ module SpecialFunctions = struct
 
   let assert_ = "assert"
 
-  let autoload = "__autoload"
-
   let hhas_adata = "__hhas_adata"
 
   let is_special_function =
     let all_special_functions =
-      HashSet.of_list [tuple; echo; assert_; autoload; hhas_adata]
+      HashSet.of_list [tuple; echo; assert_; hhas_adata]
     in
     (fun x -> HashSet.mem all_special_functions x)
 end

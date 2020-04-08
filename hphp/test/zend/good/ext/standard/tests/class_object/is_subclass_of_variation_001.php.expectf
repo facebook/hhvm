@@ -1,6 +1,6 @@
 *** Testing is_subclass_of() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(69)
-Error: 8 - Undefined variable: unset_var, %s(72)
+Error: 8 - Undefined variable: undefined_var, %s(66)
+Error: 8 - Undefined variable: unset_var, %s(69)
 
 Arg value 0 
 bool(false)
@@ -74,11 +74,9 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
 bool(false)
 
 Arg value  

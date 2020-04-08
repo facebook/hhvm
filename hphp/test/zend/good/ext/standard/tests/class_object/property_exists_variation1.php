@@ -5,10 +5,16 @@
  * Alias to functions:
  */
 
-function __autoload($class_name) {
-    require_once $class_name . '.inc';
-}
 <<__EntryPoint>> function main(): void {
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'autotest' => 'AutoTest.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
+
 echo "*** Testing property_exists() : class auto loading ***\n";
 
 echo "\ntesting property in autoloaded class\n";

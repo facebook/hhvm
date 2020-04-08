@@ -1,7 +1,5 @@
 bool(false)
 bool(false)
-__autoload(autoload_interface)
-__autoload(Autoload_Implements)
 object(autoload_implements) (0) {
 }
 bool(true)

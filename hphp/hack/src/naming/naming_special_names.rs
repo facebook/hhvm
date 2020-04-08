@@ -405,14 +405,12 @@ pub mod special_functions {
 
     pub const ASSERT_: &str = "assert";
 
-    pub const AUTOLOAD: &str = "__autoload";
-
     pub const HHAS_ADATA: &str = "__hhas_adata";
 
     pub fn is_special_function(x: &str) -> bool {
         lazy_static! {
             static ref ALL_SPECIAL_FUNCTIONS: Vec<&'static str> =
-                vec![TUPLE, ECHO, ASSERT_, AUTOLOAD, HHAS_ADATA,]
+                vec![TUPLE, ECHO, ASSERT_, HHAS_ADATA,]
                     .into_iter()
                     .collect();
         }

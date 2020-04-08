@@ -1,4 +1,3 @@
-in autoload: C
 object(__PHP_Incomplete_Class) (1) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(1) "C"

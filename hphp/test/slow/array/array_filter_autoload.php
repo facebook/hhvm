@@ -1,7 +1,5 @@
 <?hh
-function __autoload($c) {
-  throw new Exception("Ha!");
-}
+
 function test() {
   try {
     array_filter(varray[1], varray['Foo', 'Bar']);
@@ -10,8 +8,14 @@ function test() {
   }
 }
 
-
 <<__EntryPoint>>
 function main_array_filter_autoload() {
+HH\autoload_set_paths(
+  dict[
+    'failure' => (...$_args) ==> { throw new Exception('Ha!'); },
+  ],
+  __DIR__.'/',
+);
+
 test();
 }

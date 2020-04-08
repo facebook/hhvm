@@ -1,8 +1,5 @@
 <?hh
 
-function __autoload($c) {
-  var_dump($c);
-}
 function test() {
   var_dump(is_subclass_of('C', 'D'));
   var_dump(get_class_methods('C'));

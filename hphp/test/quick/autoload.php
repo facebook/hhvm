@@ -1,22 +1,23 @@
 <?hh
-function __autoload($cls) {
-  echo "__autoload $cls\n";
-  if ($cls === 'C') {
-    include 'autoload1.inc';
-  }
-}
-function my_autoload_func($cls) {
-  echo "my_autoload_func $cls\n";
-  if ($cls === 'D') {
-    include 'autoload2.inc';
-  }
-}
 
 var_dump(is_callable(varray['D', 'foo']));
-spl_autoload_register('my_autoload_func');
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'd' => 'autoload2.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 var_dump(is_callable(varray['D', 'foo']));
 
 var_dump(is_callable(varray['C', 'foo']));
-spl_autoload_register('__autoload');
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'c' => 'autoload1.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 var_dump(is_callable(varray['C', 'foo']));
-

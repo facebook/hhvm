@@ -23,13 +23,6 @@ function main() {
 }
 main();
 
-function __autoload($cls) {
-  echo "looking up $cls\n";
-  if ($cls == 'F') {
-    include 'propeties4.inc';
-  }
-}
-
 class G {
   public static $x = NonExistentClass::FOO;
 }
@@ -39,6 +32,15 @@ class H extends G {
 }
 
 function main2() {
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'f' => 'propeties4.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
   $d = new H();
   echo "Done\n";
 }

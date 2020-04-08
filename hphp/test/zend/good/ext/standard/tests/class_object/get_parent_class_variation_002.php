@@ -5,10 +5,6 @@
  * Alias to functions:
  */
 
-function __autoload($className) {
-    echo "In __autoload($className)\n";
-}
-
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
     echo "Error: $err_no - $err_msg, $filename($linenum)\n";
 }

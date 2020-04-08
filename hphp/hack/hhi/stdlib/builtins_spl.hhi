@@ -28,18 +28,6 @@ function iterator_apply($obj, $func, $params = null);
 function iterator_count($obj);
 <<__PHPStdLib>>
 function iterator_to_array($obj, bool $use_keys = true);
-<<__PHPStdLib>>
-function spl_autoload_call(string $class_name);
-<<__PHPStdLib>>
-function spl_autoload_extensions(string $file_extensions = "");
-<<__PHPStdLib>>
-function spl_autoload_functions();
-<<__PHPStdLib>>
-function spl_autoload_register($autoload_function = null, bool $throws = true, bool $prepend = false);
-<<__PHPStdLib>>
-function spl_autoload_unregister($autoload_function);
-<<__PHPStdLib>>
-function spl_autoload(string $class_name, $file_extensions = null);
 
 class SplDoublyLinkedList<T> implements Iterator<T>, ArrayAccess<int, T>, Countable {
   public function bottom(): T;

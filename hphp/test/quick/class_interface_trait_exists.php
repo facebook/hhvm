@@ -1,20 +1,20 @@
 <?hh
 
-function __autoload($n) {
-  var_dump($n);
-  include 'class_interface_trait_exists1.inc';
-}
-
 trait tttt {}
 class cccc {}
 interface iiii {}
 
-if (__hhvm_intrinsics\launder_value(0)) {
-  include 'class_interface_trait_exists2.inc';
-}
-
 <<__EntryPoint>>
 function main() {
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'fooo' => 'class_interface_trait_exists1.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
   var_dump(class_exists('fooo', false));
   var_dump(class_exists('fooo'));
   var_dump(class_exists('tttt'));

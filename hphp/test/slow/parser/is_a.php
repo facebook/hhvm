@@ -1,8 +1,6 @@
 <?hh
-function __autoload($name) {
-  echo("AUTOLOAD '$name'\n");
-  eval("class $name {}");
-}
+
+class X1 {}
 
 class BASE {
 }

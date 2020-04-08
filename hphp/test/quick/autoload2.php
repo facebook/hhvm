@@ -1,10 +1,15 @@
 <?hh
-function __autoload($cls) {
-  echo "__autoload $cls\n";
-  if ($cls === 'C') {
-    include 'autoload1.inc';
-  }
-}
+
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'c' => 'autoload1.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
+
 $arr = varray["C"];
 $obj = new $arr[0];
 
+echo 'Done!';

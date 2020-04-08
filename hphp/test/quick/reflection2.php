@@ -41,11 +41,15 @@ foreach ($rc->getMethods() as $ix => $meth) {
   }
 }
 
-function __autoload($cls) {
-  if ($cls == "MyClass") {
-    include 'reflection2-1.inc';
-  }
-}
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'myclass' => 'reflection2-1.inc',
+    ],
+    'failure' => (...$args) ==> var_dump($args),
+  ],
+  __DIR__.'/',
+);
 
 interface I {
   function f(MyClass $c);

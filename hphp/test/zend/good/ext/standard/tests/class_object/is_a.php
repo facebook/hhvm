@@ -64,16 +64,6 @@ function main_entry(): void {
   $t = new derived_a();
   $t->test();
 
-  eval('
-    function __autoload($name)
-    {
-        echo ">>>> In __autoload: ";
-        var_dump($name);
-    }
-  ');
-
-  echo "NOW WITH AUTOLOAD\n\n";
-
   $t = new base();
   $t->test();
 

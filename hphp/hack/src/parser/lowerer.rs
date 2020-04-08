@@ -3532,18 +3532,8 @@ where
                 let function_type_parameter_list = &c.function_type_parameter_list;
                 let function_parameter_list = &c.function_parameter_list;
                 let function_type = &c.function_type;
-                let is_autoload = Self::text_str(function_name, env)
-                    .eq_ignore_ascii_case(special_functions::AUTOLOAD);
                 if function_name.value.is_missing() {
                     Self::raise_parsing_error(function_name, env, &syntax_error::empty_method_name);
-                }
-                let num_params = Self::syntax_to_list(false, function_parameter_list).len();
-                if is_autoload && num_params > 1 {
-                    Self::raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::autoload_takes_one_argument,
-                    );
                 }
                 let kinds = Self::p_kinds(function_modifiers, env)?;
                 let has_async = kinds.has(modifier::ASYNC);

@@ -5,10 +5,16 @@
  * Alias to functions:
  */
 
-function __autoload($class_name) {
-    require_once $class_name . '.inc';
-}
 <<__EntryPoint>> function main(): void {
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'autointerface' => 'AutoInterface.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
+
 echo "*** Testing interface_exists() : test autoload default value ***\n";
 
 

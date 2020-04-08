@@ -1,8 +1,6 @@
 <?hh
-function __autoload($classname) {
-    echo "__autoload($classname)\n";
-    eval("class $classname {}");
-}
+
+class A {}
 
 class B{
     public function doit(A $a){

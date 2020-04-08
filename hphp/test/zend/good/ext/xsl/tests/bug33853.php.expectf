@@ -1,1 +1,2 @@
-string(4) "TeSt"
+Warning: Unable to call handler TeSt::dateLang() in %s/test/zend/good/ext/xsl/tests/bug33853.php on line 20
+===DONE===

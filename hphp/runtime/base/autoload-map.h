@@ -37,7 +37,6 @@ struct AutoloadMap {
     Failure,
     Success,
     StopAutoloading,
-    ContinueAutoloading,
     RetryAutoloading
   };
 

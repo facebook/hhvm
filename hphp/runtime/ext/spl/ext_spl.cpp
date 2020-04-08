@@ -40,8 +40,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s_spl_autoload("spl_autoload"),
-  s_spl_autoload_call("spl_autoload_call"),
   s_rewind("rewind"),
   s_valid("valid"),
   s_next("next"),
@@ -180,50 +178,6 @@ Variant HHVM_FUNCTION(class_uses, const Variant& obj,
   return ret.toArray();
 }
 
-
-bool HHVM_FUNCTION(spl_autoload_register,
-                   const Variant& autoload_function /* = uninit_variant */,
-                   bool throws /* = true */,
-                   bool prepend /* = false */) {
-  if (same(autoload_function, s_spl_autoload_call)) {
-    if (throws) {
-      throw_spl_exception("Function spl_autoload_call()"
-                      "cannot be registered");
-    }
-    return false;
-  }
-  const Variant& func = autoload_function.isNull() ?
-                 s_spl_autoload : autoload_function;
-  bool res = AutoloadHandler::s_instance->addHandler(func, prepend);
-  if (!res && throws) {
-    throw_spl_exception("Invalid autoload_function specified");
-  }
-  return res;
-}
-
-bool HHVM_FUNCTION(spl_autoload_unregister, const Variant& autoload_function) {
-  if (same(autoload_function, s_spl_autoload_call) &&
-      !AutoloadHandler::s_instance->isRunning()) {
-    AutoloadHandler::s_instance->removeAllHandlers();
-  } else {
-    AutoloadHandler::s_instance->removeHandler(autoload_function);
-  }
-  return true;
-}
-
-Variant HHVM_FUNCTION(spl_autoload_functions) {
-  const Array& handlers = AutoloadHandler::s_instance->getHandlers();
-  if (handlers.isNull()) {
-    return false;
-  } else {
-    return handlers;
-  }
-}
-
-void HHVM_FUNCTION(spl_autoload_call, const String& class_name) {
-  AutoloadHandler::s_instance->autoloadClass(class_name, true);
-}
-
 struct ExtensionList final : RequestEventHandler {
   void requestInit() override {
     extensions = make_vec_array(String(".inc"), String(".php"));
@@ -236,16 +190,6 @@ struct ExtensionList final : RequestEventHandler {
 };
 
 IMPLEMENT_STATIC_REQUEST_LOCAL(ExtensionList, s_extension_list);
-
-String HHVM_FUNCTION(spl_autoload_extensions,
-                     const String& file_extensions /* = null_string */) {
-  if (!file_extensions.empty()) {
-    s_extension_list->extensions = StringUtil::Explode(file_extensions, ",")
-                                   .toVecArray();
-    return file_extensions;
-  }
-  return StringUtil::Implode(s_extension_list->extensions, ",");
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -297,11 +241,6 @@ struct SPLExtension final : Extension {
     HHVM_FE(class_implements);
     HHVM_FE(class_parents);
     HHVM_FE(class_uses);
-    HHVM_FE(spl_autoload_call);
-    HHVM_FE(spl_autoload_extensions);
-    HHVM_FE(spl_autoload_functions);
-    HHVM_FE(spl_autoload_register);
-    HHVM_FE(spl_autoload_unregister);
 
     loadSystemlib();
 

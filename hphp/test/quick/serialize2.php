@@ -1,6 +1,5 @@
 <?hh
 
-function __autoload($s) { echo "[load $s]"; }
 interface I {}
 class A { }
 class B extends A { }

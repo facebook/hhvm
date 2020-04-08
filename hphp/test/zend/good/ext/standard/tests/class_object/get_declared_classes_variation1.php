@@ -5,12 +5,17 @@
  * Alias to functions:
  */
 
-function __autoload($class_name) {
-    require_once $class_name . '.inc';
-}
-
 <<__EntryPoint>> function main(): void {
 echo "*** Testing get_declared_classes() : testing autoloaded classes ***\n";
+
+HH\autoload_set_paths(
+  dict[
+    'class' => dict[
+      'autoloaded' => 'AutoLoaded.inc',
+    ],
+  ],
+  __DIR__.'/',
+);
 
 echo "\n-- before instance is declared --\n";
 var_dump(in_array('AutoLoaded', get_declared_classes()));

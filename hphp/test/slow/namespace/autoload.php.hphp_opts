@@ -1,0 +1,2 @@
+--ffile=test/slow/namespace/autoload.inc
+--ffile=hphp/test/slow/namespace/autoload.inc

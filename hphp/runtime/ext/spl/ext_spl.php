@@ -92,7 +92,7 @@ function hphp_get_this(): mixed;
  * given class and its parents implement.
  * @param mixed $obj - An object (class instance) or a string (class name).
  * @param bool $autoload - Whether to allow this function to load the class
- * automatically through the __autoload magic method.
+ * automatically.
  * @return mixed - An array on success, or FALSE on error.
  */
 <<__Native>>
@@ -103,7 +103,7 @@ function class_implements(mixed $obj,
  * given class.
  * @param mixed $obj - An object (class instance) or a string (class name).
  * @param bool $autoload - Whether to allow this function to load the class
- * automatically through the __autoload magic method.
+ * automatically.
  * @return mixed - An array on success, or FALSE on error.
  */
 <<__Native>>
@@ -114,7 +114,7 @@ function class_parents(mixed $obj,
  * class uses.
  * @param mixed $obj - An object (class instance) or a string (class name).
  * @param bool $autoload - Whether to allow this function to load the class
- * automatically through the __autoload magic method.
+ * automatically.
  * @return mixed - An array on success, or FALSE on error.
  */
 <<__Native>>
@@ -181,65 +181,3 @@ function iterator_to_array(mixed $obj, bool $use_keys = true): array {
   }
   return $ret;
 }
-
-/** This function can be used to manually search for a class or interface using
- * the registered __autoload functions.
- * @param string $class_name - The class name being searched.
- */
-<<__Native>>
-function spl_autoload_call(string $class_name): void;
-
-/** This function can modify and check the file extensions that the built in
- * __autoload() fallback function spl_autoload() will be using.
- * @param string $file_extensions - When calling without an argument, it
- * simply returns the current list of extensions each separated by comma. To
- * modify the list of file extensions, simply invoke the functions with the
- * new list of file extensions to use in a single string with each extensions
- * separated by comma.
- * @return string - A comma delimited list of default file extensions for
- * spl_autoload().
- */
-<<__Native>>
-function spl_autoload_extensions(string $file_extensions = ""): string;
-
-/** Get all registered __autoload() functions.
- * @return mixed - An array of all registered __autoload functions. If the
- * autoload stack is not activated then the return value is FALSE. If no
- * function is registered the return value will be an empty array.
- */
-<<__Native>>
-function spl_autoload_functions(): mixed;
-
-/** Register a function with the spl provided __autoload stack. If the stack is
- * not yet activated it will be activated.  If your code has an existing
- * __autoload function then this function must be explicitly registered on the
- * __autoload stack. This is because spl_autoload_register() will effectively
- * replace the engine cache for the __autoload function by either
- * spl_autoload() or spl_autoload_call().  If there must be multiple autoload
- * functions, spl_autoload_register() allows for this. It effectively creates
- * a queue of autoload functions, and runs through each of them in the order
- * they are defined. By contrast, __autoload() may only be defined once.
- * @param mixed $autoload_function - The autoload function being registered.
- * If no parameter is provided, then the default implementation of
- * spl_autoload() will be registered.
- * @param bool $throws - This parameter specifies whether
- * spl_autoload_register() should throw exceptions on error.
- * @param bool $prepend - If true, spl_autoload_register() will prepend the
- * autoloader on the autoload stack instead of appending it.
- * @return bool - Returns TRUE on success or FALSE on failure.
- */
-<<__Native>>
-function spl_autoload_register(mixed $autoload_function = null,
-                               bool $throws = true,
-                               bool $prepend = false): bool;
-
-/** Unregister a function from the spl provided __autoload stack. If the stack
- * is activated and empty after unregistering the given function then it will
- * be deactivated.  When this function results in the autoload stack being
- * deactivated, any __autoload function that previously existed will not be
- * reactivated.
- * @param mixed $autoload_function - The autoload function being unregistered.
- * @return bool - Returns TRUE on success or FALSE on failure.
- */
-<<__Native>>
-function spl_autoload_unregister(mixed $autoload_function): bool;

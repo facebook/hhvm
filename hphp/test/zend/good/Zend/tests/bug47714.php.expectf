@@ -1,5 +1,0 @@
-Fatal error: Uncaught exception 'Exception' with message 'exception' in %s/bug47714.php:21
-Stack trace:
-#0 (): main()
-#1 {main}
-exception

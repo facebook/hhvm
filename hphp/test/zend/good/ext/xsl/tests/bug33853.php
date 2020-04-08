@@ -1,9 +1,5 @@
 <?hh
 
-function __autoload($className) {
-        var_dump($className);
-        exit();
-}
 <<__EntryPoint>> function main(): void {
 $xsl = new DomDocument();
 $xsl->loadXML('<?xml version="1.0" encoding="iso-8859-1" ?>

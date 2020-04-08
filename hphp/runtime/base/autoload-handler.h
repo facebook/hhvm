@@ -39,62 +39,18 @@ bool is_valid_class_name(folly::StringPiece className);
 struct AutoloadMapFactory;
 
 struct AutoloadHandler final : RequestEventHandler {
-  struct DecodedHandler {
-    DecodedHandler(ObjectData* obj, Class* cls, const Func* func,
-                   StringData* name, bool dynamic) :
-      m_obj(obj), m_cls(cls), m_func(func), m_name(name), m_dynamic(dynamic) {
-      assertx(!m_obj || !m_cls);
-    }
 
-    Object m_obj;
-    Class* m_cls;
-    const Func* m_func;
-    String m_name;
-    bool m_dynamic;
-  };
-
-private:
-
-  struct HandlerBundle {
-    HandlerBundle() = delete;
-    HandlerBundle(const Variant& handler,
-                  req::unique_ptr<DecodedHandler>& decodedHandler) :
-      m_handler(handler) {
-      m_decodedHandler = std::move(decodedHandler);
-    }
-    Variant m_handler; // used to respond to f_spl_autoload_functions
-    req::unique_ptr<DecodedHandler> m_decodedHandler; // used to invoke handlers
-  };
-
-  struct CompareBundles {
-    explicit CompareBundles(DecodedHandler* h) : m_decodedHandler(h) { }
-    bool operator()(const HandlerBundle& hb);
-   private:
-    DecodedHandler* m_decodedHandler;
-  };
-
-public:
   AutoloadHandler() { }
 
-  ~AutoloadHandler() {
-    // m_handlers won't run a destructor so nothing to do here
-    m_loading.detach();
-  }
+  ~AutoloadHandler() { }
 
   void requestInit() override;
   void requestShutdown() override;
 
-  Array getHandlers();
-  bool addHandler(const Variant& handler, bool prepend);
-  void removeHandler(const Variant& handler);
-  void removeAllHandlers();
-  bool isRunning();
-
   template<class T>
   bool autoloadType(const String& name);
 
-  bool autoloadClass(const String& className, bool forceSplStack = false);
-  bool autoloadClassPHP5Impl(const String& className, bool forceSplStack);
+  bool autoloadClass(const String& className);
 
   /**
    * autoloadNamedType() tries to autoload either a class or
@@ -161,15 +117,6 @@ private:
                                       Variant& err);
 
   /**
-   * This method may return ContinueAutoloading, StopAutoloading, or
-   * RetryAutoloading.
-   */
-  AutoloadMap::Result invokeFailureCallback(const_variant_ref func,
-                                            AutoloadMap::KindOf kind,
-                                            const String& name,
-                                            const Variant& err);
-
-  /**
    * loadFromMap() will call the failure callback if the specified name is not
    * present in the specified map, or if there is an entry in the map but there
    * was an error during the include operation. loadFromMap() will also retry
@@ -177,9 +124,8 @@ private:
    * boolean true. Note that calling this method may throw if the failure
    * callback throws an exception or raises a fatal error.
    *
-   * This method may return Success, Failure, ContinueAutoloading, or
-   * StopAutoloading. If the failure callback was called, this method will not
-   * return Failure.
+   * This method may return Success, Failure, or StopAutoloading. If the 
+   * failure callback was called, this method will not return Failure.
    */
   template <class T>
   AutoloadMap::Result loadFromMap(const String& name, AutoloadMap::KindOf kind,
@@ -190,9 +136,9 @@ private:
    * during the include operation, but otherwise it will not call the failure
    * callback.
    *
-   * This method may return Success, Failure, ContinueAutoloading,
-   * StopAutoloading, or RetryAutoloading. If the failure callback was called,
-   * this method will not return Failure.
+   * This method may return Success, Failure, StopAutoloading, or
+   * RetryAutoloading. If the failure callback was called, this method will not
+   * return Failure.
    */
   template <class T>
   AutoloadMap::Result loadFromMapPartial(const String& className,
@@ -207,15 +153,6 @@ private:
   // a statically-scoped native AutoloadMap
   AutoloadMap* m_map = nullptr;
   req::unique_ptr<UserAutoloadMap> m_req_map;
-  bool m_spl_stack_inited{false};
-  union {
-    req::deque<HandlerBundle> m_handlers;
-  };
-  bool m_handlers_valid{false};
-  Array m_loading;
-  TYPE_SCAN_CUSTOM_FIELD(m_handlers) {
-    if (m_handlers_valid) { scanner.scan(m_handlers); }
-  }
 };
 
 //////////////////////////////////////////////////////////////////////

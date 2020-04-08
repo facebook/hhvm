@@ -40,11 +40,16 @@ class K implements J {
 class L implements J {
 }
 
-function __autoload($cls) {
-  include 'class_constants-3.inc';
-}
-
 function main() {
+  HH\autoload_set_paths(
+    dict[
+      'class' => dict[
+        'autoloadedclass' => 'class_constants-3.inc',
+      ],
+    ],
+    __DIR__.'/',
+  );
+
   print "Test begin\n";
 
   var_dump(X::BAZ);

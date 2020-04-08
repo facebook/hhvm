@@ -142,6 +142,18 @@ pub fn elaborate_id(nsenv: &namespace_env::Env, kind: ElaborateKind, Id(p, id): 
     Id(p.clone(), elaborate_raw_id(nsenv, kind, id))
 }
 
+/// First pass of flattening namespaces, run super early in the pipeline, right
+/// after parsing.
+///
+/// Fully-qualifies the things we need for Parsing_service.AddDeps -- the classes
+/// we extend, traits we use, interfaces we implement; along with classes we
+/// define. So that we can also use them to figure out fallback behavior, we also
+/// fully-qualify functions that we define, even though AddDeps doesn't need
+/// them this early.
+///
+/// Note that, since AddDeps doesn't need it, we don't recursively traverse
+/// through Happly in hints -- we rely on the idempotence of elaborate_id to
+/// allow us to fix those up during a second pass during naming.
 pub mod toplevel_elaborator {
     use ocamlrep::rc::RcOc;
     use oxidized::{global_options::GlobalOptions, namespace_env, uast::*};
@@ -156,6 +168,8 @@ pub mod toplevel_elaborator {
         *id = super::elaborate_into_current_ns(nsenv, id.as_str());
     }
 
+    /// Elaborate a defined identifier in a given namespace environment. For example,
+    /// a class might be defined inside a namespace.
     fn elaborate_defined_id(nsenv: &namespace_env::Env, sid: &mut Sid) {
         if nsenv.disable_xhp_element_mangling && !sid.1.is_empty() && sid.1.contains(':') {
             elaborate_xhp_namespace(&mut sid.1);
@@ -306,6 +320,11 @@ pub mod toplevel_elaborator {
         acc
     }
 
+    /// This function processes only top-level declarations and does not dive
+    /// into inline classes/functions - those are disallowed in Hack and doing it will
+    /// incur a perf hit that everybody will have to pay. For codegen purposed
+    /// namespaces are propagated to inline declarations
+    /// during closure conversion process
     pub fn elaborate_toplevel_defs<A: ClonableAnnot>(
         popt: &GlobalOptions,
         defs: Program<A>,

@@ -172,15 +172,6 @@ let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
 let process_lint_errors (_ : env) (errors : Relative_path.t Lint.t list) =
   List.iter ~f:Lint.add_lint errors
 
-let elaborate_top_level_defs env aast =
-  if
-    (not (ParserOptions.rust_top_level_elaborator env.parser_options))
-    && env.elaborate_namespaces
-  then
-    Namespaces.elaborate_toplevel_defs env.parser_options aast
-  else
-    aast
-
 external rust_from_text_ffi :
   Rust_aast_parser_types.env ->
   SourceText.t ->
@@ -259,7 +250,7 @@ let process_lowerer_result
     | Ok aast ->
       {
         fi_mode = r.file_mode;
-        ast = elaborate_top_level_defs env aast;
+        ast = aast;
         content =
           ( if env.codegen then
             ""
@@ -353,13 +344,7 @@ let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
     Rust_aast_parser_types.tast_result =
   let result = from_text_rust env source_text in
   Rust_aast_parser_types.
-    {
-      result with
-      aast =
-        Result.map
-          ~f:(fun x -> aast_to_tast (elaborate_top_level_defs env x))
-          result.aast;
-    }
+    { result with aast = Result.map ~f:aast_to_tast result.aast }
 
 (*****************************************************************************(
  * Backward compatibility matter (should be short-lived)

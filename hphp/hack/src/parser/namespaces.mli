@@ -15,13 +15,3 @@ type elaborate_kind =
 
 val elaborate_id :
   Namespace_env.env -> elaborate_kind -> Ast_defs.id -> Ast_defs.id
-
-(* This function processes only top-level declarations and does not dive
-  into inline classes/functions - those are disallowed in Hack and doing it will
-  incur a perf hit that everybody will have to pay. For codegen purposed
-  namespaces are propagated to inline declarations
-  during closure conversion process *)
-val elaborate_toplevel_defs :
-  ParserOptions.t ->
-  ('a, 'b, 'c, 'd) Aast.program ->
-  ('a, 'b, 'c, 'd) Aast.program

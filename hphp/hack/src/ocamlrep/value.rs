@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::marker::PhantomData;
 
-use crate::block::{Block, Header};
+use crate::block::{self, Block, Header};
 use crate::Allocator;
 
 #[inline(always)]
@@ -66,6 +67,32 @@ impl<'a> Value<'a> {
             std::slice::from_raw_parts(header, size)
         };
         Some(Block(block))
+    }
+
+    #[inline(always)]
+    pub fn as_float(&self) -> Option<f64> {
+        let block = self.as_block()?;
+        if block.tag() != block::DOUBLE_TAG {
+            return None;
+        }
+        Some(f64::from_bits(block[0].0 as u64))
+    }
+
+    #[inline(always)]
+    pub fn as_str(&self) -> Option<Cow<str>> {
+        let block = self.as_block()?;
+        if block.tag() != block::STRING_TAG {
+            return None;
+        }
+        let slice = unsafe {
+            let size = block.size() * std::mem::size_of::<Value>();
+            let ptr = self.0 as *mut u8;
+            let last_byte = ptr.offset(size as isize - 1);
+            let padding = *last_byte;
+            let size = size - padding as usize - 1;
+            std::slice::from_raw_parts(ptr, size)
+        };
+        Some(String::from_utf8_lossy(slice))
     }
 
     /// Given a pointer to the first field of a [`Block`](struct.Block.html),

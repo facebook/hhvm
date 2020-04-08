@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::borrow::Cow;
 use std::collections::HashMap;
 use std::fmt::{self, Debug};
 use std::ops::Index;
@@ -67,26 +66,8 @@ impl<'a> Block<'a> {
         self.header().tag()
     }
 
-    pub fn as_str(&self) -> Option<Cow<str>> {
-        if self.tag() != STRING_TAG {
-            return None;
-        }
-        let slice = unsafe {
-            let size = self.size() * std::mem::size_of::<Value>();
-            let ptr = self.0.as_ptr().offset(1) as *mut u8;
-            let last_byte = ptr.offset(size as isize - 1);
-            let padding = *last_byte;
-            let size = size - padding as usize - 1;
-            std::slice::from_raw_parts(ptr, size)
-        };
-        Some(String::from_utf8_lossy(slice))
-    }
-
-    pub fn as_float(&self) -> Option<f64> {
-        if self.tag() != DOUBLE_TAG {
-            return None;
-        }
-        Some(f64::from_bits(self.0[1].0 as u64))
+    pub fn as_value(&self) -> Value {
+        unsafe { Value::from_ptr(&self.0[1]) }
     }
 
     pub fn as_values(&self) -> Option<&[Value]> {
@@ -147,9 +128,9 @@ impl<'a> Index<usize> for Block<'a> {
 impl Debug for Block<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.tag() == STRING_TAG {
-            write!(f, "{:?}", self.as_str().unwrap())
+            write!(f, "{:?}", self.as_value().as_str().unwrap())
         } else if self.tag() == DOUBLE_TAG {
-            write!(f, "{:?}", self.as_float().unwrap())
+            write!(f, "{:?}", self.as_value().as_float().unwrap())
         } else {
             write!(f, "{:?}", self.as_values().unwrap())
         }

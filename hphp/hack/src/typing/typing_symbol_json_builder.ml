@@ -822,7 +822,7 @@ let process_member_xref
       let con_kind = get_container_kind cls in
       let (con_type, decl_pred) = container_decl_predicate con_kind in
       let (con_decl_id, prog) =
-        add_container_decl_fact decl_pred con_type prog
+        add_container_decl_fact decl_pred con_name prog
       in
       process_xref
         (mem_decl_fun con_type con_decl_id)

@@ -18,7 +18,7 @@ type entry = {
   mutable ast_errors: Errors.t option;
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
-  mutable tast_errors: Errors.t option;
+  mutable naming_and_typing_errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
@@ -67,7 +67,7 @@ let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
     ast_errors = None;
     cst = None;
     tast = None;
-    tast_errors = None;
+    naming_and_typing_errors = None;
     symbols = None;
   }
 

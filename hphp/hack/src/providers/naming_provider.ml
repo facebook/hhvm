@@ -9,6 +9,8 @@
 open Core_kernel
 open Reordered_argument_collections
 
+let writes_enabled = ref true
+
 let not_implemented (backend : Provider_backend.t) =
   failwith
     ("not implemented for backend: " ^ Provider_backend.t_to_string backend)
@@ -118,20 +120,21 @@ let get_const_path (ctx : Provider_context.t) (name : string) :
 
 let add_const
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
-  match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
-  | Provider_backend.Local_memory
-      { Provider_backend.reverse_naming_table_delta; _ } ->
-    let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos pos in
-    reverse_naming_table_delta.consts <-
-      SMap.add reverse_naming_table_delta.consts ~key:name ~data;
-    reverse_naming_table_delta.consts_canon_key <-
-      SMap.add
-        reverse_naming_table_delta.consts_canon_key
-        ~key:(Naming_sqlite.to_canon_name_key name)
-        ~data
-  | Provider_backend.Decl_service _ as backend -> not_implemented backend
+  if !writes_enabled then
+    match backend with
+    | Provider_backend.Shared_memory -> Naming_heap.Consts.add name pos
+    | Provider_backend.Local_memory
+        { Provider_backend.reverse_naming_table_delta; _ } ->
+      let open Provider_backend.Reverse_naming_table_delta in
+      let data = Pos pos in
+      reverse_naming_table_delta.consts <-
+        SMap.add reverse_naming_table_delta.consts ~key:name ~data;
+      reverse_naming_table_delta.consts_canon_key <-
+        SMap.add
+          reverse_naming_table_delta.consts_canon_key
+          ~key:(Naming_sqlite.to_canon_name_key name)
+          ~data
+    | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
@@ -250,24 +253,25 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
-  match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
-  | Provider_backend.Local_memory
-      { Provider_backend.reverse_naming_table_delta; _ } ->
-    let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos pos in
-    reverse_naming_table_delta.funs <-
-      SMap.add reverse_naming_table_delta.funs ~key:name ~data;
-    reverse_naming_table_delta.funs_canon_key <-
-      SMap.add
-        reverse_naming_table_delta.funs_canon_key
-        ~key:(Naming_sqlite.to_canon_name_key name)
-        ~data
-  | Provider_backend.Decl_service _ ->
-    (* Do nothing. All naming table updates are expected to have happened
+  if !writes_enabled then
+    match backend with
+    | Provider_backend.Shared_memory -> Naming_heap.Funs.add name pos
+    | Provider_backend.Local_memory
+        { Provider_backend.reverse_naming_table_delta; _ } ->
+      let open Provider_backend.Reverse_naming_table_delta in
+      let data = Pos pos in
+      reverse_naming_table_delta.funs <-
+        SMap.add reverse_naming_table_delta.funs ~key:name ~data;
+      reverse_naming_table_delta.funs_canon_key <-
+        SMap.add
+          reverse_naming_table_delta.funs_canon_key
+          ~key:(Naming_sqlite.to_canon_name_key name)
+          ~data
+    | Provider_backend.Decl_service _ ->
+      (* Do nothing. All naming table updates are expected to have happened
        already--we should have sent a control request to the decl service asking
        it to update in response to the list of changed files. *)
-    ()
+      ()
 
 let remove_fun_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
@@ -293,22 +297,23 @@ let add_type
     (name : string)
     (pos : FileInfo.pos)
     (kind : Naming_types.kind_of_type) : unit =
-  match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
-  | Provider_backend.Local_memory
-      { Provider_backend.reverse_naming_table_delta; _ } ->
-    let open Provider_backend.Reverse_naming_table_delta in
-    let data = Pos (pos, kind) in
-    reverse_naming_table_delta.types <-
-      SMap.add reverse_naming_table_delta.types ~key:name ~data;
-    reverse_naming_table_delta.types_canon_key <-
-      SMap.add
-        reverse_naming_table_delta.types_canon_key
-        ~key:(Naming_sqlite.to_canon_name_key name)
-        ~data
-  | Provider_backend.Decl_service _ ->
-    (* Do nothing. Naming table updates should be done already. *)
-    ()
+  if !writes_enabled then
+    match backend with
+    | Provider_backend.Shared_memory -> Naming_heap.Types.add name (pos, kind)
+    | Provider_backend.Local_memory
+        { Provider_backend.reverse_naming_table_delta; _ } ->
+      let open Provider_backend.Reverse_naming_table_delta in
+      let data = Pos (pos, kind) in
+      reverse_naming_table_delta.types <-
+        SMap.add reverse_naming_table_delta.types ~key:name ~data;
+      reverse_naming_table_delta.types_canon_key <-
+        SMap.add
+          reverse_naming_table_delta.types_canon_key
+          ~key:(Naming_sqlite.to_canon_name_key name)
+          ~data
+    | Provider_backend.Decl_service _ ->
+      (* Do nothing. Naming table updates should be done already. *)
+      ()
 
 let remove_type_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
@@ -538,3 +543,8 @@ let local_changes_push_sharedmem_stack () : unit =
 
 let local_changes_pop_sharedmem_stack () : unit =
   Naming_heap.pop_local_changes ()
+
+let with_quarantined_writes ~(f : unit -> 'a) : 'a =
+  let old_writes_enabled = !writes_enabled in
+  writes_enabled := false;
+  Utils.try_finally ~f ~finally:(fun () -> writes_enabled := old_writes_enabled)

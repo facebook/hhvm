@@ -125,3 +125,9 @@ val add_typedef : Provider_backend.t -> string -> FileInfo.pos -> unit
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit
+
+(** HACK: Causes the `add_*` functions in this module to do nothing when
+called. Only needed because checking for duplicate names using the functions
+in `Naming_global`s requires updating the reverse naming table. When that is
+no longer the case, this function won't be necessary. *)
+val with_quarantined_writes : f:(unit -> 'a) -> 'a

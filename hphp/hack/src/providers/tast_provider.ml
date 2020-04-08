@@ -31,15 +31,17 @@ let compute_tast_and_errors_unquarantined_internal
     ~(entry : Provider_context.entry)
     ~(mode : a compute_tast_mode) : a =
   match
-    (mode, entry.Provider_context.tast, entry.Provider_context.tast_errors)
+    ( mode,
+      entry.Provider_context.tast,
+      entry.Provider_context.naming_and_typing_errors )
   with
   | (Compute_tast_only, Some tast, _) ->
     { Compute_tast.tast; telemetry = Telemetry.create () }
-  | (Compute_tast_and_errors, Some tast, Some tast_errors) ->
+  | (Compute_tast_and_errors, Some tast, Some naming_and_typing_errors) ->
     let (_parser_return, ast_errors) =
       Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
-    let errors = Errors.merge ast_errors tast_errors in
+    let errors = Errors.merge ast_errors naming_and_typing_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   | (mode, _, _) ->
     (* prepare logging *)
@@ -54,13 +56,34 @@ let compute_tast_and_errors_unquarantined_internal
     let ({ Parser_return.ast; _ }, ast_errors) =
       Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
-    let (nast_errors, nast) =
-      Errors.do_with_context
-        entry.Provider_context.path
-        Errors.Naming
-        (fun () -> Naming.program ctx ast)
+    let (naming_errors, nast) =
+      (* [Naming_global.ndecl_file] actually updates the reverse naming
+      table, so wrap in a call to `Naming_provider.with_quarantined_writes.
+
+      The correctness conditions here are subtle. Duplicate name errors are
+      detected by looking at each name's position in the file, and then
+      comparing to the position of the same name in the reverse naming table.
+      If they don't match, then an error is emitted.
+
+      XXX: Currently, names in entries are returned before names in the
+      reverse naming table by `Naming_provider`. This means that this
+      correctly detects duplicate symbols within the same entry, but will not
+      detect duplicate names if one definition is in an entry and the other
+      definition is in a file not in an entry. This should be fixed.
+      *)
+      Naming_provider.with_quarantined_writes ~f:(fun () ->
+          let path = entry.Provider_context.path in
+          let file_info = Ast_provider.compute_file_info ~ctx ~entry in
+          let (reverse_naming_table_errors, _failed_naming) =
+            Naming_global.ndecl_file ctx path file_info
+          in
+          let (nast_errors, nast) =
+            Errors.do_with_context path Errors.Naming (fun () ->
+                Naming.program ctx ast)
+          in
+          (Errors.merge nast_errors reverse_naming_table_errors, nast))
     in
-    let (tast_errors, tast) =
+    let (typing_errors, tast) =
       let do_tast_checks =
         match mode with
         | Compute_tast_only -> false
@@ -94,8 +117,8 @@ let compute_tast_and_errors_unquarantined_internal
       |> Telemetry.object_ ~key:"ctx" ~value:ctx_telemetry
       |> Telemetry.object_ ~key:"gc" ~value:gc_telemetry
       |> Telemetry.int_ ~key:"errors.ast" ~value:(Errors.count ast_errors)
-      |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count nast_errors)
-      |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count tast_errors)
+      |> Telemetry.int_ ~key:"errors.nast" ~value:(Errors.count naming_errors)
+      |> Telemetry.int_ ~key:"errors.tast" ~value:(Errors.count typing_errors)
       |> Telemetry.float_
            ~key:"duration_decl_and_typecheck"
            ~value:(Unix.gettimeofday () -. t)
@@ -114,10 +137,11 @@ let compute_tast_and_errors_unquarantined_internal
 
     (match mode with
     | Compute_tast_and_errors ->
-      let tast_errors = Errors.merge nast_errors tast_errors in
+      let naming_and_typing_errors = Errors.merge naming_errors typing_errors in
       entry.Provider_context.tast <- Some tast;
-      entry.Provider_context.tast_errors <- Some tast_errors;
-      let errors = Errors.merge ast_errors tast_errors in
+      entry.Provider_context.naming_and_typing_errors <-
+        Some naming_and_typing_errors;
+      let errors = Errors.merge ast_errors naming_and_typing_errors in
       { Compute_tast_and_errors.tast; errors; telemetry }
     | Compute_tast_only ->
       entry.Provider_context.tast <- Some tast;
@@ -143,12 +167,15 @@ let compute_tast_and_errors_quarantined
     ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     Compute_tast_and_errors.t =
   (* If results have already been memoized, don't bother quarantining anything *)
-  match (entry.Provider_context.tast, entry.Provider_context.tast_errors) with
-  | (Some tast, Some tast_errors) ->
+  match
+    ( entry.Provider_context.tast,
+      entry.Provider_context.naming_and_typing_errors )
+  with
+  | (Some tast, Some naming_and_typing_errors) ->
     let (_parser_return, ast_errors) =
       Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
     in
-    let errors = Errors.merge ast_errors tast_errors in
+    let errors = Errors.merge ast_errors naming_and_typing_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
   (* Okay, we don't have memoized results, let's ensure we are quarantined before computing *)
   | _ ->

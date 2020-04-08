@@ -42,7 +42,7 @@ type entry = {
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
-  mutable tast_errors: Errors.t option;
+  mutable naming_and_typing_errors: Errors.t option;
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 

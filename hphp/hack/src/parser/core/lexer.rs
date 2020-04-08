@@ -315,23 +315,6 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         self.skip_while(&Self::not_newline)
     }
 
-    fn skip_to_end_of_line_or_end_tag(&mut self) {
-        let n = self.source.length();
-        let peek_def = |i| if i < n { self.peek(i) } else { INVALID };
-
-        let should_stop = |i| {
-            i >= n || {
-                let ch = self.peek(i);
-                Self::is_newline(ch) || (ch == '?' && peek_def(i + 1) == '>')
-            }
-        };
-        let mut i = self.offset();
-        while !(should_stop(i)) {
-            i += 1
-        }
-        self.with_offset(i)
-    }
-
     fn skip_name_end(&mut self) {
         self.skip_while(&Self::is_name_letter)
     }
@@ -1746,7 +1729,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         self.advance(2);
         self.skip_whitespace();
         let lexer_ws = self.clone();
-        self.skip_to_end_of_line_or_end_tag();
+        self.skip_to_end_of_line();
         let w = self.width();
         let remainder = self.offset - lexer_ws.offset;
         if remainder >= 11 && lexer_ws.peek_string(11) == b"FALLTHROUGH" {

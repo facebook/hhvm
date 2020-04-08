@@ -565,12 +565,11 @@ void BreakpointManager::onBreakpointResolved(
       msg += std::to_string(startLine);
       msg += ", which is actually where the nearest executable instruction in ";
       msg += "the source map for this file is.";
+      m_debugger->sendUserMessage(
+        msg.c_str(),
+        DebugTransport::OutputLevelInfo
+      );
     }
-
-    m_debugger->sendUserMessage(
-      msg.c_str(),
-      DebugTransport::OutputLevelInfo
-    );
   }
 }
 

@@ -217,7 +217,7 @@ let convert_capture (incoming : si_capture) : si_scan_result =
 
       (* Find / add filepath hashes *)
       if not (Caml.Hashtbl.mem result.sisr_filepaths s.sif_filepath) then
-        let path_hash = SharedMem.get_hash s.sif_filepath in
+        let path_hash = SharedMemHash.hash_string s.sif_filepath in
         Caml.Hashtbl.add result.sisr_filepaths s.sif_filepath path_hash);
   result
 

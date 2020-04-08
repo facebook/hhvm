@@ -310,13 +310,6 @@ external dep_used_slots : unit -> int = "hh_dep_used_slots"
 external dep_slots : unit -> int = "hh_dep_slots"
 
 (*****************************************************************************)
-(* Gets the hash of a string *)
-(*****************************************************************************)
-external get_hash : string -> int64 = "get_hash_ocaml"
-
-let get_hash s = get_hash (Digest.string s)
-
-(*****************************************************************************)
 (* Must be called after the initialization of the hack server is over.
  * (cf serverInit.ml). *)
 (*****************************************************************************)

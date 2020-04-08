@@ -26,7 +26,7 @@ let strip_first_char char s =
 let get_tombstone (path : Relative_path.t) : int64 =
   let rel_path_str = Relative_path.suffix path in
   let fixed_path_str = strip_first_char '/' rel_path_str in
-  let path_hash = SharedMem.get_hash fixed_path_str in
+  let path_hash = SharedMemHash.hash_string fixed_path_str in
   path_hash
 
 (* This function is used if fast-facts-parser fails to scan the file *)

@@ -417,8 +417,8 @@ module TypesTable = struct
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
   let insert db ~name ~flags ~file_info_id =
-    let hash = SharedMem.get_hash name in
-    let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
+    let hash = SharedMemHash.hash_string name in
+    let canon_hash = SharedMemHash.hash_string (to_canon_name_key name) in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
@@ -440,7 +440,7 @@ module TypesTable = struct
       else
         name
     in
-    let hash = SharedMem.get_hash name in
+    let hash = SharedMemHash.hash_string name in
     let get_sqlite =
       if case_insensitive then
         get_sqlite_case_insensitive
@@ -510,8 +510,8 @@ module FunsTable = struct
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
   let insert db ~name ~file_info_id =
-    let hash = SharedMem.get_hash name in
-    let canon_hash = SharedMem.get_hash (to_canon_name_key name) in
+    let hash = SharedMemHash.hash_string name in
+    let canon_hash = SharedMemHash.hash_string (to_canon_name_key name) in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
@@ -526,7 +526,7 @@ module FunsTable = struct
       else
         name
     in
-    let hash = SharedMem.get_hash name in
+    let hash = SharedMemHash.hash_string name in
     let get_sqlite =
       if case_insensitive then
         get_sqlite_case_insensitive
@@ -581,7 +581,7 @@ module ConstsTable = struct
       "
 
   let insert db ~name ~file_info_id =
-    let hash = SharedMem.get_hash name in
+    let hash = SharedMemHash.hash_string name in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc db;
@@ -589,7 +589,7 @@ module ConstsTable = struct
     Sqlite3.finalize insert_stmt |> check_rc db
 
   let get db ~name =
-    let hash = SharedMem.get_hash name in
+    let hash = SharedMemHash.hash_string name in
     let get_stmt = Sqlite3.prepare db get_sqlite in
     Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     match Sqlite3.step get_stmt with

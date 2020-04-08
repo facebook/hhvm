@@ -24,6 +24,15 @@
   (preprocess (pps ppx_deriving.std visitors.ppx)))
 
 (library
+  (name heap_shared_mem_hash)
+  (wrapped false)
+  (modules
+    sharedMemHash)
+  (preprocess (pps ppx_deriving.std visitors.ppx))
+  (libraries
+    heap_libc))
+
+(library
   (name heap_shared_mem)
   (wrapped false)
   (modules

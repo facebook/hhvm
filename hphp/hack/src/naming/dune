@@ -54,6 +54,7 @@
   (libraries
     file_info
     heap_shared_mem
+    heap_shared_mem_hash
     naming_types
     sqlite3
     sqlite_utils

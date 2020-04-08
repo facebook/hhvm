@@ -78,7 +78,7 @@ impl<'a> Env<'a> {
         self.pipe_var = Some(local);
     }
 
-    fn with_scope(mut self, scope: Scope<'a>) -> Env {
+    pub fn with_scope(mut self, scope: Scope<'a>) -> Env {
         self.scope = scope;
         self
     }

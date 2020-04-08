@@ -144,11 +144,12 @@ pub fn emit_function<'a>(
     flags.set(hhas_function::Flags::PAIR_GENERATOR, is_pair_gen);
     let memoize_wrapper = if memoized {
         Some(emit_memoize_function::emit_wrapper_function(
+            e,
             original_id,
             &renamed_id,
             &deprecation_info,
             &f,
-        ))
+        )?)
     } else {
         None
     };

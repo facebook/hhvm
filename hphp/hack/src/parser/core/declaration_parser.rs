@@ -539,14 +539,14 @@ where
                 self.require_name_allow_non_reserved()
             }
         };
-        let body = self.parse_namespace_body();
-        S!(
-            make_namespace_declaration,
+        let header = S!(
+            make_namespace_declaration_header,
             self,
             namespace_token,
-            name,
-            body
-        )
+            name
+        );
+        let body = self.parse_namespace_body();
+        S!(make_namespace_declaration, self, header, body)
     }
 
     pub fn parse_classish_declaration(&mut self, attribute_spec: S::R) -> S::R {

@@ -389,16 +389,15 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         }
     }
 
-    fn make_namespace_declaration(
-        &mut self,
-        _keyword: Self::R,
-        name: Self::R,
-        body: Self::R,
-    ) -> Self::R {
+    fn make_namespace_declaration(&mut self, header: Self::R, body: Self::R) -> Self::R {
         match body {
             Node::Ignored => Node::Ignored,
-            _ => Node::NamespaceDecl(Box::new(name), Box::new(body)),
+            _ => Node::NamespaceDecl(Box::new(header), Box::new(body)),
         }
+    }
+
+    fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
+        name
     }
 
     fn make_namespace_body(

@@ -77,6 +77,7 @@ module WithToken(Token: TokenType) = struct
       | PropertyDeclaration               _ -> SyntaxKind.PropertyDeclaration
       | PropertyDeclarator                _ -> SyntaxKind.PropertyDeclarator
       | NamespaceDeclaration              _ -> SyntaxKind.NamespaceDeclaration
+      | NamespaceDeclarationHeader        _ -> SyntaxKind.NamespaceDeclarationHeader
       | NamespaceBody                     _ -> SyntaxKind.NamespaceBody
       | NamespaceEmptyBody                _ -> SyntaxKind.NamespaceEmptyBody
       | NamespaceUseDeclaration           _ -> SyntaxKind.NamespaceUseDeclaration
@@ -265,6 +266,7 @@ module WithToken(Token: TokenType) = struct
     let is_property_declaration                 = has_kind SyntaxKind.PropertyDeclaration
     let is_property_declarator                  = has_kind SyntaxKind.PropertyDeclarator
     let is_namespace_declaration                = has_kind SyntaxKind.NamespaceDeclaration
+    let is_namespace_declaration_header         = has_kind SyntaxKind.NamespaceDeclarationHeader
     let is_namespace_body                       = has_kind SyntaxKind.NamespaceBody
     let is_namespace_empty_body                 = has_kind SyntaxKind.NamespaceEmptyBody
     let is_namespace_use_declaration            = has_kind SyntaxKind.NamespaceUseDeclaration
@@ -659,13 +661,18 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc property_initializer in
          acc
       | NamespaceDeclaration {
+        namespace_header;
+        namespace_body;
+      } ->
+         let acc = f acc namespace_header in
+         let acc = f acc namespace_body in
+         acc
+      | NamespaceDeclarationHeader {
         namespace_keyword;
         namespace_name;
-        namespace_body;
       } ->
          let acc = f acc namespace_keyword in
          let acc = f acc namespace_name in
-         let acc = f acc namespace_body in
          acc
       | NamespaceBody {
         namespace_left_brace;
@@ -2512,13 +2519,18 @@ module WithToken(Token: TokenType) = struct
         property_initializer;
       ]
       | NamespaceDeclaration {
+        namespace_header;
+        namespace_body;
+      } -> [
+        namespace_header;
+        namespace_body;
+      ]
+      | NamespaceDeclarationHeader {
         namespace_keyword;
         namespace_name;
-        namespace_body;
       } -> [
         namespace_keyword;
         namespace_name;
-        namespace_body;
       ]
       | NamespaceBody {
         namespace_left_brace;
@@ -4366,13 +4378,18 @@ module WithToken(Token: TokenType) = struct
         "property_initializer";
       ]
       | NamespaceDeclaration {
+        namespace_header;
+        namespace_body;
+      } -> [
+        "namespace_header";
+        "namespace_body";
+      ]
+      | NamespaceDeclarationHeader {
         namespace_keyword;
         namespace_name;
-        namespace_body;
       } -> [
         "namespace_keyword";
         "namespace_name";
-        "namespace_body";
       ]
       | NamespaceBody {
         namespace_left_brace;
@@ -6291,14 +6308,20 @@ module WithToken(Token: TokenType) = struct
           property_initializer;
         }
       | (SyntaxKind.NamespaceDeclaration, [
-          namespace_keyword;
-          namespace_name;
+          namespace_header;
           namespace_body;
         ]) ->
         NamespaceDeclaration {
+          namespace_header;
+          namespace_body;
+        }
+      | (SyntaxKind.NamespaceDeclarationHeader, [
           namespace_keyword;
           namespace_name;
-          namespace_body;
+        ]) ->
+        NamespaceDeclarationHeader {
+          namespace_keyword;
+          namespace_name;
         }
       | (SyntaxKind.NamespaceBody, [
           namespace_left_brace;
@@ -8406,14 +8429,23 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_namespace_declaration
-        namespace_keyword
-        namespace_name
+        namespace_header
         namespace_body
       =
         let syntax = NamespaceDeclaration {
+          namespace_header;
+          namespace_body;
+        } in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_namespace_declaration_header
+        namespace_keyword
+        namespace_name
+      =
+        let syntax = NamespaceDeclarationHeader {
           namespace_keyword;
           namespace_name;
-          namespace_body;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

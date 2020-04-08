@@ -119,9 +119,12 @@ module type Syntax_S = sig
     ; property_initializer                               : t
     }
   | NamespaceDeclaration              of
+    { namespace_header                                   : t
+    ; namespace_body                                     : t
+    }
+  | NamespaceDeclarationHeader        of
     { namespace_keyword                                  : t
     ; namespace_name                                     : t
-    ; namespace_body                                     : t
     }
   | NamespaceBody                     of
     { namespace_left_brace                               : t
@@ -1100,7 +1103,8 @@ module type Syntax_S = sig
   val make_alias_declaration : t -> t -> t -> t -> t -> t -> t -> t -> t
   val make_property_declaration : t -> t -> t -> t -> t -> t
   val make_property_declarator : t -> t -> t
-  val make_namespace_declaration : t -> t -> t -> t
+  val make_namespace_declaration : t -> t -> t
+  val make_namespace_declaration_header : t -> t -> t
   val make_namespace_body : t -> t -> t -> t
   val make_namespace_empty_body : t -> t
   val make_namespace_use_declaration : t -> t -> t -> t -> t
@@ -1281,6 +1285,7 @@ module type Syntax_S = sig
   val is_property_declaration : t -> bool
   val is_property_declarator : t -> bool
   val is_namespace_declaration : t -> bool
+  val is_namespace_declaration_header : t -> bool
   val is_namespace_body : t -> bool
   val is_namespace_empty_body : t -> bool
   val is_namespace_use_declaration : t -> bool

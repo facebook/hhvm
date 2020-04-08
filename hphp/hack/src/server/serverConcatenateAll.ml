@@ -64,8 +64,7 @@ let normalize_namespace_body node =
                       in
                       let ns =
                         Syntax.make_namespace_declaration
-                          ns.namespace_keyword
-                          ns.namespace_name
+                          ns.namespace_header
                           body
                       in
                       let pre = List.take declarations i in
@@ -89,9 +88,10 @@ let normalize_namespace_body node =
             in
             let ns =
               Syntax.make_namespace_declaration
-                (Syntax.make_token
-                   (Token.create TokenKind.Namespace "namespace" [] []))
-                (Syntax.make_missing SourceText.empty 0)
+                (Syntax.make_namespace_declaration_header
+                   (Syntax.make_token
+                      (Token.create TokenKind.Namespace "namespace" [] []))
+                   (Syntax.make_missing SourceText.empty 0))
                 (Syntax.make_namespace_body
                    open_brace
                    (Syntax.make_list SourceText.empty 0 declarations)

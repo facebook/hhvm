@@ -44,7 +44,8 @@
            (missing 0 ())))))
        (() ";" 1 ((end_of_line 1)))))
      (namespace_declaration 77
-      ((() namespace 9 ((whitespace 1))) (() name 1 ((whitespace 1)))
+      ((namespace_declaration_header 11
+        ((() namespace 9 ((whitespace 1))) (() name 1 ((whitespace 1)))))
        (namespace_body 65
         ((() { 1 ((end_of_line 1)))
          (list 59

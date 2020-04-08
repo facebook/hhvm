@@ -36,7 +36,8 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_alias_declaration(ctx: &C, alias_attribute_spec: Self, alias_keyword: Self, alias_name: Self, alias_generic_parameter: Self, alias_constraint: Self, alias_equal: Self, alias_type: Self, alias_semicolon: Self) -> Self;
     fn make_property_declaration(ctx: &C, property_attribute_spec: Self, property_modifiers: Self, property_type: Self, property_declarators: Self, property_semicolon: Self) -> Self;
     fn make_property_declarator(ctx: &C, property_name: Self, property_initializer: Self) -> Self;
-    fn make_namespace_declaration(ctx: &C, namespace_keyword: Self, namespace_name: Self, namespace_body: Self) -> Self;
+    fn make_namespace_declaration(ctx: &C, namespace_header: Self, namespace_body: Self) -> Self;
+    fn make_namespace_declaration_header(ctx: &C, namespace_keyword: Self, namespace_name: Self) -> Self;
     fn make_namespace_body(ctx: &C, namespace_left_brace: Self, namespace_declarations: Self, namespace_right_brace: Self) -> Self;
     fn make_namespace_empty_body(ctx: &C, namespace_semicolon: Self) -> Self;
     fn make_namespace_use_declaration(ctx: &C, namespace_use_keyword: Self, namespace_use_kind: Self, namespace_use_clauses: Self, namespace_use_semicolon: Self) -> Self;

@@ -139,7 +139,8 @@ namespace HH\ExperimentalParserUtils {
     foreach ($elements as $e) {
       if ($e["kind"] === "namespace_declaration") {
         $old_namespace = $namespace;
-        $namespace = extract_name_from_node($e["namespace_name"]);
+        $header = $e["namespace_header"];
+        $namespace = extract_name_from_node($header["namespace_name"]);
 
         // the `namespace A;` body kind is "namespace_empty_body"
         if ($e["namespace_body"]["kind"] === "namespace_body") {

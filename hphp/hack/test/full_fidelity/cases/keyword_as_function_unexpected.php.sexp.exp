@@ -749,7 +749,7 @@
          (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())))
        (() ";" 1 ((end_of_line 1)))))
      (namespace_declaration 9
-      ((() namespace 9 ()) (missing 0 ())
+      ((namespace_declaration_header 9 ((() namespace 9 ()) (missing 0 ())))
        (namespace_body 0 ((missing 0 ()) (missing 0 ()) (missing 0 ())))))
      (expression_statement 3
       ((parenthesized_expression 2

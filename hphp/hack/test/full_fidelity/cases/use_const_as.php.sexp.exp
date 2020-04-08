@@ -4,8 +4,9 @@
       ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (namespace_declaration 37
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 6 ((whitespace 1)))
+      ((namespace_declaration_header 16
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 6 ((whitespace 1)))))
        (namespace_body 20
         ((() { 1 ((end_of_line 1)))
          (list 14

@@ -5079,9 +5079,11 @@ where
     fn get_namespace_name(&self) -> String {
         if let Some(node) = self.nested_namespaces.last() {
             if let NamespaceDeclaration(x) = &node.syntax {
-                let ns = &x.namespace_name;
-                if !ns.is_missing() {
-                    return combine_names(&self.namespace_name, self.text(ns));
+                if let NamespaceDeclarationHeader(x) = &x.namespace_header.syntax {
+                    let ns = &x.namespace_name;
+                    if !ns.is_missing() {
+                        return combine_names(&self.namespace_name, self.text(ns));
+                    }
                 }
             }
         }
@@ -5289,10 +5291,12 @@ where
                 named_function_context(self, node, &x.methodish_attribute, &mut prev_context)
             }
             NamespaceDeclaration(x) => {
-                let namespace_name = &x.namespace_name;
-                if !namespace_name.is_missing() && !self.text(namespace_name).is_empty() {
-                    pushed_nested_namespace = true;
-                    self.nested_namespaces.push(node)
+                if let NamespaceDeclarationHeader(x) = &x.namespace_header.syntax {
+                    let namespace_name = &x.namespace_name;
+                    if !namespace_name.is_missing() && !self.text(namespace_name).is_empty() {
+                        pushed_nested_namespace = true;
+                        self.nested_namespaces.push(node)
+                    }
                 }
             }
             AnonymousFunction(x) => {

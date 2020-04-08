@@ -258,10 +258,18 @@ let schema : schema_node list =
       aggregates = [TopLevelDeclaration];
       fields =
         [
-          ("keyword", Token);
-          ("name", ZeroOrOne (Aggregate Name));
+          ("header", Just "NamespaceDeclarationHeader");
           ("body", Aggregate NamespaceInternals);
         ];
+    };
+    {
+      kind_name = "NamespaceDeclarationHeader";
+      type_name = "namespace_declaration_header";
+      func_name = "namespace_declaration_header";
+      description = "namespace_declaration_header";
+      prefix = "namespace";
+      aggregates = [TopLevelDeclaration];
+      fields = [("keyword", Token); ("name", ZeroOrOne (Aggregate Name))];
     };
     {
       kind_name = "NamespaceBody";

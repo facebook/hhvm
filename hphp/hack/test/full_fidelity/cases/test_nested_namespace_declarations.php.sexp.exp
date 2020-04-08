@@ -6,19 +6,23 @@
         ((() <? 2 ())
          (() name 2 ((whitespace 1) (single_line_comment 8) (end_of_line 1)))))))
      (namespace_declaration 53
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 3 ((whitespace 1)))))
        (namespace_body 39
         ((() { 1 ((whitespace 1)))
          (list 35
           ((namespace_declaration 35
-            ((() namespace 9 ((whitespace 1))) (() name 3 ((whitespace 1)))
+            ((namespace_declaration_header 13
+              ((() namespace 9 ((whitespace 1)))
+               (() name 3 ((whitespace 1)))))
              (namespace_body 21
               ((() { 1 ((whitespace 1)))
                (list 17
                 ((namespace_declaration 17
-                  ((() namespace 9 ((whitespace 1)))
-                   (() name 3 ((whitespace 1)))
+                  ((namespace_declaration_header 13
+                    ((() namespace 9 ((whitespace 1)))
+                     (() name 3 ((whitespace 1)))))
                    (namespace_body 3
                     ((() { 1 ((whitespace 1))) (missing 0 ())
                      (() } 1 ((whitespace 1)))))))))

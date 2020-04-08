@@ -366,9 +366,11 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             handle_attribute_spec env attr ~always_split:false,
             Concat [Space; Split; declaration] )
     | Syntax.NamespaceDeclaration
-        { namespace_keyword = kw; namespace_name = name; namespace_body = body }
-      ->
-      Concat [t env kw; Space; t env name; t env body; Newline]
+        { namespace_header = header; namespace_body = body } ->
+      Concat [t env header; t env body; Newline]
+    | Syntax.NamespaceDeclarationHeader
+        { namespace_keyword = kw; namespace_name = name } ->
+      Concat [t env kw; Space; t env name]
     | Syntax.NamespaceBody
         {
           namespace_left_brace = left_b;

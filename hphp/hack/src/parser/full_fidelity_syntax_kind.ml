@@ -38,6 +38,7 @@ type t =
   | PropertyDeclaration
   | PropertyDeclarator
   | NamespaceDeclaration
+  | NamespaceDeclarationHeader
   | NamespaceBody
   | NamespaceEmptyBody
   | NamespaceUseDeclaration
@@ -220,6 +221,7 @@ let to_string kind =
   | PropertyDeclaration               -> "property_declaration"
   | PropertyDeclarator                -> "property_declarator"
   | NamespaceDeclaration              -> "namespace_declaration"
+  | NamespaceDeclarationHeader        -> "namespace_declaration_header"
   | NamespaceBody                     -> "namespace_body"
   | NamespaceEmptyBody                -> "namespace_empty_body"
   | NamespaceUseDeclaration           -> "namespace_use_declaration"

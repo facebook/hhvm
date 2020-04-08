@@ -192,11 +192,19 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_namespace_declaration(_: &C, namespace_keyword: Self, namespace_name: Self, namespace_body: Self) -> Self {
+    fn make_namespace_declaration(_: &C, namespace_header: Self, namespace_body: Self) -> Self {
         let syntax = SyntaxVariant::NamespaceDeclaration(Box::new(NamespaceDeclarationChildren {
+            namespace_header,
+            namespace_body,
+        }));
+        let value = V::from_syntax(&syntax);
+        Self::make(syntax, value)
+    }
+
+    fn make_namespace_declaration_header(_: &C, namespace_keyword: Self, namespace_name: Self) -> Self {
+        let syntax = SyntaxVariant::NamespaceDeclarationHeader(Box::new(NamespaceDeclarationHeaderChildren {
             namespace_keyword,
             namespace_name,
-            namespace_body,
         }));
         let value = V::from_syntax(&syntax);
         Self::make(syntax, value)
@@ -2045,10 +2053,15 @@ where
                 acc
             },
             SyntaxVariant::NamespaceDeclaration(x) => {
-                let NamespaceDeclarationChildren { namespace_keyword, namespace_name, namespace_body } = *x;
+                let NamespaceDeclarationChildren { namespace_header, namespace_body } = *x;
+                let acc = f(namespace_header, acc);
+                let acc = f(namespace_body, acc);
+                acc
+            },
+            SyntaxVariant::NamespaceDeclarationHeader(x) => {
+                let NamespaceDeclarationHeaderChildren { namespace_keyword, namespace_name } = *x;
                 let acc = f(namespace_keyword, acc);
                 let acc = f(namespace_name, acc);
-                let acc = f(namespace_body, acc);
                 acc
             },
             SyntaxVariant::NamespaceBody(x) => {
@@ -3308,6 +3321,7 @@ where
             SyntaxVariant::PropertyDeclaration {..} => SyntaxKind::PropertyDeclaration,
             SyntaxVariant::PropertyDeclarator {..} => SyntaxKind::PropertyDeclarator,
             SyntaxVariant::NamespaceDeclaration {..} => SyntaxKind::NamespaceDeclaration,
+            SyntaxVariant::NamespaceDeclarationHeader {..} => SyntaxKind::NamespaceDeclarationHeader,
             SyntaxVariant::NamespaceBody {..} => SyntaxKind::NamespaceBody,
             SyntaxVariant::NamespaceEmptyBody {..} => SyntaxKind::NamespaceEmptyBody,
             SyntaxVariant::NamespaceUseDeclaration {..} => SyntaxKind::NamespaceUseDeclaration,
@@ -3575,8 +3589,12 @@ where
                  property_name: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::NamespaceDeclaration, 3) => SyntaxVariant::NamespaceDeclaration(Box::new(NamespaceDeclarationChildren {
+             (SyntaxKind::NamespaceDeclaration, 2) => SyntaxVariant::NamespaceDeclaration(Box::new(NamespaceDeclarationChildren {
                  namespace_body: ts.pop().unwrap(),
+                 namespace_header: ts.pop().unwrap(),
+                 
+             })),
+             (SyntaxKind::NamespaceDeclarationHeader, 2) => SyntaxVariant::NamespaceDeclarationHeader(Box::new(NamespaceDeclarationHeaderChildren {
                  namespace_name: ts.pop().unwrap(),
                  namespace_keyword: ts.pop().unwrap(),
                  
@@ -4781,9 +4799,14 @@ pub struct PropertyDeclaratorChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct NamespaceDeclarationChildren<T, V> {
+    pub namespace_header: Syntax<T, V>,
+    pub namespace_body: Syntax<T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct NamespaceDeclarationHeaderChildren<T, V> {
     pub namespace_keyword: Syntax<T, V>,
     pub namespace_name: Syntax<T, V>,
-    pub namespace_body: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
@@ -6040,6 +6063,7 @@ pub enum SyntaxVariant<T, V> {
     PropertyDeclaration(Box<PropertyDeclarationChildren<T, V>>),
     PropertyDeclarator(Box<PropertyDeclaratorChildren<T, V>>),
     NamespaceDeclaration(Box<NamespaceDeclarationChildren<T, V>>),
+    NamespaceDeclarationHeader(Box<NamespaceDeclarationHeaderChildren<T, V>>),
     NamespaceBody(Box<NamespaceBodyChildren<T, V>>),
     NamespaceEmptyBody(Box<NamespaceEmptyBodyChildren<T, V>>),
     NamespaceUseDeclaration(Box<NamespaceUseDeclarationChildren<T, V>>),
@@ -6371,10 +6395,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             NamespaceDeclaration(x) => {
-                get_index(3).and_then(|index| { match index {
+                get_index(2).and_then(|index| { match index {
+                        0 => Some(&x.namespace_header),
+                    1 => Some(&x.namespace_body),
+                        _ => None,
+                    }
+                })
+            },
+            NamespaceDeclarationHeader(x) => {
+                get_index(2).and_then(|index| { match index {
                         0 => Some(&x.namespace_keyword),
                     1 => Some(&x.namespace_name),
-                    2 => Some(&x.namespace_body),
                         _ => None,
                     }
                 })

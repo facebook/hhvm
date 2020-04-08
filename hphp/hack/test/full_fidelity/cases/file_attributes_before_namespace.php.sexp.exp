@@ -15,8 +15,9 @@
            (missing 0 ())))))
        (() >> 2 ((end_of_line 1)))))
      (namespace_declaration 17
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 3 ((whitespace 1)))))
        (namespace_body 3
         ((() { 1 ((whitespace 1))) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

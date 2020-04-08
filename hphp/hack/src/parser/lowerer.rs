@@ -4873,7 +4873,11 @@ where
                 ))])
             }
             NamespaceDeclaration(c) => {
-                let name = &c.namespace_name;
+                let name = if let NamespaceDeclarationHeader(h) = &c.namespace_header.syntax {
+                    &h.namespace_name
+                } else {
+                    return Self::missing_syntax("namespace_declaration_header", node, env);
+                };
                 let defs = match &c.namespace_body.syntax {
                     NamespaceBody(c) => {
                         let mut env1 = Env::clone_and_unset_toplevel_if_toplevel(env);

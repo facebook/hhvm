@@ -2320,12 +2320,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         })
     }
 
-    fn make_namespace_declaration(
-        &mut self,
-        _keyword: Self::R,
-        _name: Self::R,
-        _body: Self::R,
-    ) -> Self::R {
+    fn make_namespace_declaration(&mut self, _header: Self::R, _body: Self::R) -> Self::R {
         Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
         Ok(Node_::Ignored)
     }

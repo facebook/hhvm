@@ -116,6 +116,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | Syntax.RecordDeclaration _ -> tag validate_record_declaration (fun x -> TLDRecord x) x
     | Syntax.AliasDeclaration _ -> tag validate_alias_declaration (fun x -> TLDAlias x) x
     | Syntax.NamespaceDeclaration _ -> tag validate_namespace_declaration (fun x -> TLDNamespace x) x
+    | Syntax.NamespaceDeclarationHeader _ -> tag validate_namespace_declaration_header (fun x -> TLDNamespaceDeclarationHeader x) x
     | Syntax.NamespaceUseDeclaration _ -> tag validate_namespace_use_declaration (fun x -> TLDNamespaceUse x) x
     | Syntax.NamespaceGroupUseDeclaration _ -> tag validate_namespace_group_use_declaration (fun x -> TLDNamespaceGroupUse x) x
     | Syntax.FunctionDeclaration _ -> tag validate_function_declaration (fun x -> TLDFunction x) x
@@ -152,6 +153,7 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     | TLDRecord                       thing -> invalidate_record_declaration             (value, thing)
     | TLDAlias                        thing -> invalidate_alias_declaration              (value, thing)
     | TLDNamespace                    thing -> invalidate_namespace_declaration          (value, thing)
+    | TLDNamespaceDeclarationHeader   thing -> invalidate_namespace_declaration_header   (value, thing)
     | TLDNamespaceUse                 thing -> invalidate_namespace_use_declaration      (value, thing)
     | TLDNamespaceGroupUse            thing -> invalidate_namespace_group_use_declaration (value, thing)
     | TLDFunction                     thing -> invalidate_function_declaration           (value, thing)
@@ -976,16 +978,28 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   and validate_namespace_declaration : namespace_declaration validator = function
   | { Syntax.syntax = Syntax.NamespaceDeclaration x; value = v } -> v,
     { namespace_body = validate_namespace_internals x.namespace_body
-    ; namespace_name = validate_option_with (validate_name_aggregate) x.namespace_name
-    ; namespace_keyword = validate_token x.namespace_keyword
+    ; namespace_header = validate_namespace_declaration_header x.namespace_header
     }
   | s -> validation_fail (Some SyntaxKind.NamespaceDeclaration) s
   and invalidate_namespace_declaration : namespace_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.NamespaceDeclaration
+      { namespace_header = invalidate_namespace_declaration_header x.namespace_header
+      ; namespace_body = invalidate_namespace_internals x.namespace_body
+      }
+    ; Syntax.value = v
+    }
+  and validate_namespace_declaration_header : namespace_declaration_header validator = function
+  | { Syntax.syntax = Syntax.NamespaceDeclarationHeader x; value = v } -> v,
+    { namespace_name = validate_option_with (validate_name_aggregate) x.namespace_name
+    ; namespace_keyword = validate_token x.namespace_keyword
+    }
+  | s -> validation_fail (Some SyntaxKind.NamespaceDeclarationHeader) s
+  and invalidate_namespace_declaration_header : namespace_declaration_header invalidator = fun (v, x) ->
+    { Syntax.syntax =
+      Syntax.NamespaceDeclarationHeader
       { namespace_keyword = invalidate_token x.namespace_keyword
       ; namespace_name = invalidate_option_with (invalidate_name_aggregate) x.namespace_name
-      ; namespace_body = invalidate_namespace_internals x.namespace_body
       }
     ; Syntax.value = v
     }

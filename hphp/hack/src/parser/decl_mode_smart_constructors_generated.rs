@@ -127,8 +127,12 @@ where
         <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_property_declarator(self, arg0, arg1)
     }
 
-    fn make_namespace_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_namespace_declaration(self, arg0, arg1, arg2)
+    fn make_namespace_declaration(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_namespace_declaration(self, arg0, arg1)
+    }
+
+    fn make_namespace_declaration_header(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::make_namespace_declaration_header(self, arg0, arg1)
     }
 
     fn make_namespace_body(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {

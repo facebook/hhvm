@@ -232,9 +232,12 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; property_initializer                               : t
     }
   | NamespaceDeclaration              of
+    { namespace_header                                   : t
+    ; namespace_body                                     : t
+    }
+  | NamespaceDeclarationHeader        of
     { namespace_keyword                                  : t
     ; namespace_name                                     : t
-    ; namespace_body                                     : t
     }
   | NamespaceBody                     of
     { namespace_left_brace                               : t
@@ -1173,6 +1176,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
   | TLDRecord                       of record_declaration
   | TLDAlias                        of alias_declaration
   | TLDNamespace                    of namespace_declaration
+  | TLDNamespaceDeclarationHeader   of namespace_declaration_header
   | TLDNamespaceUse                 of namespace_use_declaration
   | TLDNamespaceGroupUse            of namespace_group_use_declaration
   | TLDFunction                     of function_declaration
@@ -1527,9 +1531,12 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; property_initializer: simple_initializer option value
     }
   and namespace_declaration =
+    { namespace_header: namespace_declaration_header value
+    ; namespace_body: namespace_internals value
+    }
+  and namespace_declaration_header =
     { namespace_keyword: Token.t value
     ; namespace_name: name_aggregate option value
-    ; namespace_body: namespace_internals value
     }
   and namespace_body =
     { namespace_left_brace: Token.t value

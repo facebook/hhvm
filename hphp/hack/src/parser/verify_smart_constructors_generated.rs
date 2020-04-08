@@ -202,9 +202,17 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_namespace_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_namespace_declaration(self, arg0, arg1, arg2);
+    fn make_namespace_declaration(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_namespace_declaration(self, arg0, arg1);
+        self.state_mut().verify(&args);
+        self.state_mut().push(r.kind());
+        r
+    }
+
+    fn make_namespace_declaration_header(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_namespace_declaration_header(self, arg0, arg1);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

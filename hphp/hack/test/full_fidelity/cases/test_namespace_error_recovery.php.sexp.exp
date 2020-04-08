@@ -4,8 +4,10 @@
       ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (namespace_declaration 13
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1) (single_line_comment 46) (end_of_line 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 3
+          ((whitespace 1) (single_line_comment 46) (end_of_line 1)))))
        (namespace_body 0 ((missing 0 ()) (missing 0 ()) (missing 0 ())))))
      (classish_declaration 12
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -29,7 +31,8 @@
        (classish_body 3
         ((() { 1 ((whitespace 1))) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 14
-      ((((end_of_line 1)) namespace 9 ((whitespace 1))) (() name 3 ())
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1))) (() name 3 ())))
        (namespace_empty_body 1
         ((() ";" 1 ((whitespace 1) (single_line_comment 61) (end_of_line 1)))))))
      (classish_declaration 12
@@ -54,8 +57,9 @@
        (classish_body 3
         ((() { 1 ((whitespace 1))) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 78
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 3 ((whitespace 1)))))
        (namespace_body 64
         ((() { 1 ((whitespace 1) (single_line_comment 11) (end_of_line 1)))
          (list 46
@@ -85,14 +89,16 @@
                (() } 1 ((end_of_line 1)))))))))
          (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 13
-      ((((end_of_line 1) (single_line_comment 73) (end_of_line 1)
-         (single_line_comment 79) (end_of_line 1) (single_line_comment 72)
-         (end_of_line 1) (single_line_comment 75) (end_of_line 1)
-         (single_line_comment 30) (end_of_line 1) (single_line_comment 79)
-         (end_of_line 1) (single_line_comment 79) (end_of_line 1)
-         (single_line_comment 77) (end_of_line 1))
-        namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1) (single_line_comment 46) (end_of_line 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1) (single_line_comment 73) (end_of_line 1)
+           (single_line_comment 79) (end_of_line 1) (single_line_comment 72)
+           (end_of_line 1) (single_line_comment 75) (end_of_line 1)
+           (single_line_comment 30) (end_of_line 1) (single_line_comment 79)
+           (end_of_line 1) (single_line_comment 79) (end_of_line 1)
+           (single_line_comment 77) (end_of_line 1))
+          namespace 9 ((whitespace 1)))
+         (() name 3
+          ((whitespace 1) (single_line_comment 46) (end_of_line 1)))))
        (namespace_body 0 ((missing 0 ()) (missing 0 ()) (missing 0 ())))))
      (classish_declaration 11
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
@@ -119,8 +125,9 @@
       ((() } 1 ((whitespace 1) (single_line_comment 32) (end_of_line 1)))
        (missing 0 ())))
      (namespace_declaration 64
-      ((((end_of_line 1)) namespace 9 ((whitespace 1)))
-       (() name 3 ((whitespace 1)))
+      ((namespace_declaration_header 13
+        ((((end_of_line 1)) namespace 9 ((whitespace 1)))
+         (() name 3 ((whitespace 1)))))
        (namespace_body 50
         ((() { 1 ((end_of_line 1)))
          (list 46

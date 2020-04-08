@@ -4,18 +4,22 @@
       ((() markup 0 ())
        (markup_suffix 4 ((() <? 2 ()) (() name 2 ((end_of_line 1)))))))
      (namespace_declaration 12
-      ((() namespace 9 ((whitespace 1))) (missing 0 ())
+      ((namespace_declaration_header 9
+        ((() namespace 9 ((whitespace 1))) (missing 0 ())))
        (namespace_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 28
-      ((() namespace 9 ((whitespace 1))) (() name 15 ((whitespace 1)))
+      ((namespace_declaration_header 25
+        ((() namespace 9 ((whitespace 1))) (() name 15 ((whitespace 1)))))
        (namespace_body 2
         ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 26
-      ((() namespace 9 ((whitespace 1))) (() name 15 ())
+      ((namespace_declaration_header 25
+        ((() namespace 9 ((whitespace 1))) (() name 15 ())))
        (namespace_empty_body 1 ((() ";" 1 ((end_of_line 1)))))))
      (namespace_declaration 61
-      ((() namespace 9 ((whitespace 1))) (() name 15 ((whitespace 1)))
+      ((namespace_declaration_header 25
+        ((() namespace 9 ((whitespace 1))) (() name 15 ((whitespace 1)))))
        (namespace_body 35
         ((() { 1 ((end_of_line 1)))
          (list 29
@@ -37,7 +41,8 @@
               ((() { 1 ()) (missing 0 ()) (() } 1 ((end_of_line 1)))))))))
          (() } 1 ((end_of_line 1)))))))
      (namespace_declaration 45
-      ((() namespace 9 ((whitespace 1))) (missing 0 ())
+      ((namespace_declaration_header 9
+        ((() namespace 9 ((whitespace 1))) (missing 0 ())))
        (namespace_body 35
         ((() { 1 ((end_of_line 1)))
          (list 29

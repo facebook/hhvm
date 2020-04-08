@@ -49,7 +49,8 @@ pub trait SmartConstructors<'src, State>: Clone {
     fn make_alias_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R, arg5 : Self::R, arg6 : Self::R, arg7 : Self::R) -> Self::R;
     fn make_property_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R;
     fn make_property_declarator(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
-    fn make_namespace_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
+    fn make_namespace_declaration(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
+    fn make_namespace_declaration_header(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_namespace_body(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_namespace_empty_body(&mut self, arg0 : Self::R) -> Self::R;
     fn make_namespace_use_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R;

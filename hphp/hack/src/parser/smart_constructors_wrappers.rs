@@ -114,8 +114,11 @@ where S: SmartConstructors<'src, State> {
     fn make_property_declarator(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::PropertyDeclarator, self.s.make_property_declarator(arg0.1, arg1.1))
     }
-    fn make_namespace_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::NamespaceDeclaration, self.s.make_namespace_declaration(arg0.1, arg1.1, arg2.1))
+    fn make_namespace_declaration(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::NamespaceDeclaration, self.s.make_namespace_declaration(arg0.1, arg1.1))
+    }
+    fn make_namespace_declaration_header(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
+        compose(SyntaxKind::NamespaceDeclarationHeader, self.s.make_namespace_declaration_header(arg0.1, arg1.1))
     }
     fn make_namespace_body(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
         compose(SyntaxKind::NamespaceBody, self.s.make_namespace_body(arg0.1, arg1.1, arg2.1))

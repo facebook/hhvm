@@ -133,6 +133,8 @@ struct Func final {
       InOut,      // Is this an `inout' parameter?
       Variadic,   // Is this a `...' parameter?
       NativeArg,  // Does this use a NativeArg?
+      AsVariant,  // Native function takes as const Variant&
+      AsTypedValue // Native function takes as TypedValue
     };
 
     ParamInfo();
@@ -142,6 +144,8 @@ struct Func final {
     bool isInOut() const;
     bool isVariadic() const;
     bool isNativeArg() const;
+    bool isTakenAsVariant() const;
+    bool isTakenAsTypedValue() const;
     void setFlag(Flags flag);
 
     template<class SerDe> void serde(SerDe& sd);

@@ -1332,7 +1332,9 @@ prepare_params(IRGS& /*env*/, const Func* callee, SSATmp* ctx,
     // We do actually mean exact type equality here.  We're only capable of
     // passing the following primitives through registers; everything else goes
     // by address unless its flagged "NativeArg".
-    if (ty == TBool || ty == TInt || ty == TDbl || pi.isNativeArg()) {
+    if (!pi.isTakenAsVariant() &&
+        (ty == TBool || ty == TInt || ty == TDbl ||
+         pi.isNativeArg() || pi.isTakenAsTypedValue())) {
       continue;
     }
     if (cur.isInOut) continue;
@@ -1684,10 +1686,12 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         },
         [&] {
           if (!param.passByAddr) {
+            assertx(!callee->params()[paramIdx].isTakenAsVariant());
             assertx(targetTy == TBool ||
                     targetTy == TInt ||
                     targetTy == TDbl ||
                     callee->params()[paramIdx].isNativeArg() ||
+                    callee->params()[paramIdx].isTakenAsTypedValue() ||
                     callee->isInOut(paramIdx));
             return gen(env, LdMem,
                        targetTy == TBottom ? TCell : targetTy,
@@ -1737,8 +1741,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
            * of execution) should DecRef param.value (ie the post-coercion
            * value).
            */
-          auto v = param.value;
-          return v;
+          return param.value;
         });
       continue;
     }

@@ -188,12 +188,14 @@ void populateArgs(Registers& regs,
       arg.type() = KindOfNull;
 
       pushInt(regs, (int64_t)io++);
-    } else if (type == KindOfDouble) {
-      pushDouble(regs, val(arg));
+    } else if (pi.isTakenAsTypedValue()) {
+      pushTypedValue(regs, *arg);
     } else if (pi.isNativeArg()) {
       pushNativeArg(regs, func, i, type, *arg);
-    } else if (!type) {
+    } else if (pi.isTakenAsVariant() || !type) {
       pushRval(regs, arg, isFCallBuiltin);
+    } else if (type == KindOfDouble) {
+      pushDouble(regs, val(arg));
     } else if (isBuiltinByRef(type)) {
       pushInt(regs, (int64_t)&val(arg));
     } else {

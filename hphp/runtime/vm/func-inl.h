@@ -84,6 +84,14 @@ inline bool Func::ParamInfo::isNativeArg() const {
   return flags & (1 << static_cast<int32_t>(Flags::NativeArg));
 }
 
+inline bool Func::ParamInfo::isTakenAsVariant() const {
+  return flags & (1 << static_cast<int32_t>(Flags::AsVariant));
+}
+
+inline bool Func::ParamInfo::isTakenAsTypedValue() const {
+  return flags & (1 << static_cast<int32_t>(Flags::AsTypedValue));
+}
+
 inline void Func::ParamInfo::setFlag(Func::ParamInfo::Flags flag) {
   flags |= 1 << static_cast<int32_t>(flag);
 }

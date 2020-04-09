@@ -51,17 +51,9 @@ enum class SessionKind {
 };
 
 /*
- * An invalid request index.
- */
-constexpr int64_t kInvalidRequestIdx = -1;
-/*
- * Another invalid request index, used to indicate that an apc entry
- * has been purged.
- */
-constexpr int64_t kPurgedRequestIdx = -2;
-/*
  * Return the current thread's index.
  */
+constexpr int64_t kInvalidRequestIdx = -1;
 int64_t requestIdx();
 
 /*

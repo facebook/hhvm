@@ -37,7 +37,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/treadmill.h"
 
 namespace HPHP {
 
@@ -56,7 +55,7 @@ struct StoreValue {
   StoreValue() = default;
   StoreValue(const StoreValue& o)
     : tagged_data{o.data()}
-    , expireTime{o.expireTime.load(std::memory_order_relaxed)}
+    , expire{o.expire}
     , dataSize{o.dataSize}
     , kind(o.kind)
     , readOnly(o.readOnly)
@@ -88,10 +87,6 @@ struct StoreValue {
   }
   void set(APCHandle* v, int64_t ttl);
   bool expired() const;
-  bool deferredExpire() const;
-  uint32_t rawExpire() const {
-    return expireTime.load(std::memory_order_acquire);
-  }
 
   int32_t getSerializedSize() const {
     assertx(data().right() != nullptr);
@@ -128,14 +123,13 @@ struct StoreValue {
    * HHVM might get confused after 2106 :)
    */
   mutable std::atomic<HandleOrSerial> tagged_data{HandleOrSerial()};
-  union { mutable std::atomic<uint32_t> expireTime; mutable SmallLock lock; };
+  union { uint32_t expire; mutable SmallLock lock; };
   int32_t dataSize{0};  // For file storage, negative means serialized object
   // Reference to any HotCache entry to be cleared if the value is treadmilled.
   mutable std::atomic<HotCacheIdx> hotIndex{kHotCacheUnknown};
   APCKind kind;  // Only valid if data is an APCHandle*.
   bool readOnly{false}; // Set for primed entries that will never change.
-  char padding[2];  // Make APCMap nodes cache-line sized (it static_asserts).
-  mutable std::atomic<int64_t> expireRequestIdx{Treadmill::kInvalidRequestIdx};
+  char padding[10];  // Make APCMap nodes cache-line sized (it static_asserts).
   uint32_t c_time{0}; // Creation time; 0 for primed values
   uint32_t mtime{0}; // Modification time
 };

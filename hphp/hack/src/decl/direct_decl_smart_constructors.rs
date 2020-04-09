@@ -458,7 +458,7 @@ pub struct PropertyDecl {
     modifiers: Node_,
     hint: Node_,
     id: Id,
-    expr: Option<Box<nast::Expr>>,
+    needs_init: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -544,6 +544,7 @@ pub enum OperatorType {
     Xor,
     Cmp,
     QuestionQuestion,
+    Assignment,
 }
 
 #[derive(Clone, Debug)]
@@ -570,7 +571,7 @@ pub enum Node_ {
     Attribute(Box<Attribute>),
     FunctionHeader(Box<FunctionHeader>),
     Function(Box<FunctionDecl>),
-    Property(Box<PropertyDecl>),
+    Property(Vec<PropertyDecl>),
     TraitUse(Box<Node_>),
     TypeConstant(Box<TypeConstant>),
     RequireClause(Box<RequireClause>),
@@ -1324,7 +1325,7 @@ impl DirectDeclSmartConstructors<'_> {
                                 modifiers: visibility.clone(),
                                 hint: hint.clone(),
                                 id: id.clone(),
-                                expr: None,
+                                needs_init: true,
                             }),
                             Err(_) => (),
                         };
@@ -1676,6 +1677,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::QuestionQuestion => {
                 Node_::Operator(token_pos(self), OperatorType::QuestionQuestion)
             }
+            TokenKind::Equal => Node_::Operator(token_pos(self), OperatorType::Assignment),
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
@@ -1763,8 +1765,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         arg0
     }
 
-    fn make_simple_initializer(&mut self, _arg0: Self::R, expr: Self::R) -> Self::R {
-        expr
+    fn make_simple_initializer(&mut self, equals: Self::R, expr: Self::R) -> Self::R {
+        // If the expr is Ignored, bubble up the assignment operator so that we
+        // can tell that *some* initializer was here. Useful for class
+        // properties, where we need to enforce that properties without default
+        // values are initialized in the constructor.
+        match expr? {
+            Node_::Ignored => equals,
+            expr => Ok(expr),
+        }
     }
 
     fn make_array_intrinsic_expression(
@@ -2548,7 +2557,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 lateinit: attributes.late_init,
                 lsb: attributes.lsb,
                 name: Id(pos, name),
-                needs_init: decl.expr.is_none(),
+                needs_init: decl.needs_init,
                 type_: Some(ty),
                 abstract_: modifiers.is_abstract,
                 visibility: modifiers.visibility,
@@ -2613,8 +2622,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 type_: decl.ty,
                             })
                         }
-                        Node_::Property(decl) => {
-                            handle_property(self, &mut cls, *decl, &type_variables)?
+                        Node_::Property(decls) => {
+                            for decl in decls {
+                                handle_property(self, &mut cls, decl, &type_variables)?
+                            }
                         }
                         Node_::Function(decl) => {
                             let modifiers = read_member_modifiers(decl.header.modifiers.iter());
@@ -2715,44 +2726,42 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         attrs: Self::R,
         modifiers: Self::R,
         hint: Self::R,
-        declarator: Self::R,
+        declarators: Self::R,
         _arg4: Self::R,
     ) -> Self::R {
         // Sometimes the declarator is a single element list.
-        let declarator = match declarator? {
-            Node_::List(nodes) => nodes
-                .first()
-                .ok_or("Expected a declarator, but was given an empty list.".to_owned())?
-                .clone(),
-            declarator => declarator,
+        let declarators = match declarators? {
+            Node_::List(nodes) => nodes,
+            node => return Err(format!("Expected a List, but got {:?}", node)),
         };
-        match declarator {
-            Node_::ListItem(innards) => {
-                let (name, initializer) = *innards;
-                let name = match name {
-                    Node_::List(nodes) => nodes
-                        .first()
-                        .ok_or("Expected a name, but was given an empty list.".to_owned())?
-                        .clone(),
-                    name => name,
-                };
-                Ok(Node_::Property(Box::new(PropertyDecl {
-                    attrs: attrs?,
-                    modifiers: modifiers?,
-                    hint: match hint? {
-                        Node_::Ignored => initializer.clone(),
-                        hint => hint,
-                    },
-                    id: get_name("", &name)?,
-                    expr: match initializer {
-                        Node_::Expr(e) => Some(Box::new(*e)),
-                        Node_::Ignored => None,
-                        n => n.as_expr().ok().map(Box::new),
-                    },
-                })))
-            }
-            n => Err(format!("Expected a ListItem, but was {:?}", n)),
-        }
+        let attrs = attrs?;
+        let modifiers = modifiers?;
+        let hint = hint?;
+        Ok(Node_::Property(
+            declarators
+                .into_iter()
+                .map(|declarator| match declarator {
+                    Node_::ListItem(innards) => {
+                        let (name, initializer) = *innards;
+                        let needs_init = match initializer {
+                            Node_::Ignored => true,
+                            _ => false,
+                        };
+                        Ok(PropertyDecl {
+                            attrs: attrs.clone(),
+                            modifiers: modifiers.clone(),
+                            hint: match &hint {
+                                Node_::Ignored => initializer,
+                                hint => hint.clone(),
+                            },
+                            id: get_name("", &name)?,
+                            needs_init,
+                        })
+                    }
+                    n => Err(format!("Expected a ListItem, but was {:?}", n)),
+                })
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
     }
 
     fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {

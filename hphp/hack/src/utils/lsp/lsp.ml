@@ -792,6 +792,12 @@ module Completion = struct
     | TriggerForIncompleteCompletions [@value 3]
   [@@deriving enum]
 
+  let is_invoked = function
+    | Invoked -> true
+    | TriggerCharacter
+    | TriggerForIncompleteCompletions ->
+      false
+
   type params = completionParams
 
   and completionParams = {

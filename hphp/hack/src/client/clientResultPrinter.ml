@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Hh_json
 
 module type Result_printer = sig

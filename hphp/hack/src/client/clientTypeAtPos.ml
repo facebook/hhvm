@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 let go result output_json =
   if output_json then
     let response =

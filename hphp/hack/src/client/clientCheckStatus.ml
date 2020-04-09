@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Ocaml_overrides
 open ServerCommandTypes
 open String_utils
@@ -106,7 +106,8 @@ let go status output_json from error_format max_errors =
     status
   in
   let stale_msg = is_stale_msg liveness in
-  ( if output_json || from <> "" || error_list = [] then
+  ( if output_json || (not (String.equal from "")) || List.is_empty error_list
+  then
     (* this should really go to stdout but we need to adapt the various
      * IDE plugins first *)
     let oc =
@@ -137,7 +138,13 @@ let go status output_json from error_format max_errors =
 
   (* don't indicate errors in exit code for warnings; warnings shouldn't break
    * CI *)
-  if List.exists ~f:(fun e -> Errors.get_severity e = Errors.Error) error_list
+  if
+    List.exists
+      ~f:(fun e ->
+        match Errors.get_severity e with
+        | Errors.Error -> true
+        | _ -> false)
+      error_list
   then
     Exit_status.Type_error
   else

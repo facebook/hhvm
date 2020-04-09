@@ -7,12 +7,12 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SS = SymbolIndex
 module SUtils = SearchUtils
 
 let print_results (results : SearchUtils.result) : unit =
-  List.iter results (fun res ->
+  List.iter results ~f:(fun res ->
       let pos_string = Pos.string res.SUtils.pos in
       let desc_string = SearchUtils.kind_to_string res.SUtils.result_type in
       print_endline

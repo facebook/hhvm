@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let print_result (name, pos) =
   let pos_str = Pos.string pos in

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 
 let log s = Hh_logger.log ("[ide-incremental] " ^^ s)
@@ -152,7 +152,7 @@ let compute_fileinfo_for_path
         in
         let record_defs =
           facts.Facts.types
-          |> Facts.InvSMap.filter (fun _k v -> Facts.(v.kind = TKRecord))
+          |> Facts.InvSMap.filter (fun _k v -> Facts.(is_tk_record v.kind))
           |> Facts.InvSMap.keys
           |> to_ids FileInfo.RecordDef
         in

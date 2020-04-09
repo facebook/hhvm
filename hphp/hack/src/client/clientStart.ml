@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 module SMUtils = ServerMonitorUtils
 
 let get_hhserver () =
@@ -51,7 +52,7 @@ let start_server env =
   let ic = Unix.in_channel_of_descr in_fd in
   let serialize_config_overrides config =
     config
-    |> List.map (fun (key, value) ->
+    |> List.map ~f:(fun (key, value) ->
            [| "--config"; Printf.sprintf "%s=%s" key value |])
     |> Array.concat
   in
@@ -65,7 +66,7 @@ let start_server env =
     Array.concat
       [
         [| hh_server; "-d"; Path.to_string env.root |];
-        ( if env.from = "" then
+        ( if String.equal env.from "" then
           [||]
         else
           [| "--from"; env.from |] );
@@ -105,15 +106,13 @@ let start_server env =
           [| "--dynamic-view" |]
         else
           [||] );
-        ( if env.prechecked = Some true then
-          [| "--prechecked" |]
-        else
-          [||] );
-        ( if env.prechecked = Some false then
-          [| "--no-prechecked" |]
-        else
-          [||] );
-        ( if env.config <> [] then
+        (match env.prechecked with
+        | Some true -> [| "--prechecked" |]
+        | _ -> [||]);
+        (match env.prechecked with
+        | Some false -> [| "--no-prechecked" |]
+        | _ -> [||]);
+        ( if not (List.is_empty env.config) then
           serialize_config_overrides env.config
         else
           [||] );
@@ -131,8 +130,8 @@ let start_server env =
     Printf.eprintf
       "Server launched with the following command:\n\t%s\n%!"
       (String.concat
-         " "
-         (Array.to_list (Array.map Filename.quote hh_server_args)));
+         ~sep:" "
+         (Array.to_list (Array.map ~f:Filename.quote hh_server_args)));
 
   let (stdin, stdout, stderr) =
     if env.silent then
@@ -149,8 +148,8 @@ let start_server env =
 
     match Sys_utils.waitpid_non_intr [] server_pid with
     | (_, Unix.WEXITED 0) ->
-      assert (input_line ic = ServerMonitorUtils.ready);
-      close_in ic
+      assert (String.equal (Stdlib.input_line ic) ServerMonitorUtils.ready);
+      Stdlib.close_in ic
     | (_, Unix.WEXITED i) ->
       if not env.silent then
         Printf.eprintf

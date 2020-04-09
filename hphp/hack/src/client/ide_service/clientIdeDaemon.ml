@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type message = Message : 'a ClientIdeMessage.tracked_t -> message
 
@@ -443,7 +443,7 @@ let update_file
     with
     | (_, None) -> failwith "Attempted LSP operation on a non-open file"
     | (Some contents, Some entry)
-      when entry.Provider_context.contents = contents ->
+      when String.equal entry.Provider_context.contents contents ->
       entry
     | (None, Some entry) -> entry
     | (Some contents, _) -> Provider_context.make_entry ~path ~contents

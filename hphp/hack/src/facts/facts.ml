@@ -29,6 +29,50 @@ type type_kind =
   | TKUnknown
   | TKMixed
 
+let is_tk_record = function
+  | TKRecord -> true
+  | TKClass
+  | TKInterface
+  | TKEnum
+  | TKTrait
+  | TKTypeAlias
+  | TKUnknown
+  | TKMixed ->
+    false
+
+let is_tk_unknown = function
+  | TKUnknown -> true
+  | TKRecord
+  | TKClass
+  | TKInterface
+  | TKEnum
+  | TKTrait
+  | TKTypeAlias
+  | TKMixed ->
+    false
+
+let is_tk_interface = function
+  | TKInterface -> true
+  | TKRecord
+  | TKClass
+  | TKEnum
+  | TKTrait
+  | TKTypeAlias
+  | TKUnknown
+  | TKMixed ->
+    false
+
+let is_tk_trait = function
+  | TKTrait -> true
+  | TKRecord
+  | TKClass
+  | TKInterface
+  | TKEnum
+  | TKTypeAlias
+  | TKUnknown
+  | TKMixed ->
+    false
+
 let type_kind_to_string = function
   | TKClass -> "class"
   | TKRecord -> "record"

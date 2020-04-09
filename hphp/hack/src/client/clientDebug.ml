@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type env = {
   root: Path.t;
   from: string;

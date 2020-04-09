@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ClientEnv
 open Utils
 open ClientRefactor
@@ -508,10 +508,9 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_STATUS ->
       let ignore_ide = ClientMessages.ignore_ide_from args.from in
       let%lwt () =
-        if args.prechecked = Some false then
-          rpc args Rpc.NO_PRECHECKED_FILES
-        else
-          Lwt.return_unit
+        match args.prechecked with
+        | Some false -> rpc args Rpc.NO_PRECHECKED_FILES
+        | _ -> Lwt.return_unit
       in
       let%lwt status =
         rpc

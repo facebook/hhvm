@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 let print_json res =
   Nuclide_rpc_message_printer.(outline_response_to_json res |> print_json)
 

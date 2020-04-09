@@ -6,6 +6,8 @@
  *
  *)
 
+open Hh_prelude
+
 type saved_state_type = Naming_table
 
 type env = {

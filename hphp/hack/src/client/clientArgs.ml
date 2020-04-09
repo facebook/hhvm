@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ClientCommand
 open ClientEnv
 
@@ -72,7 +72,7 @@ let parse_without_command options usage command =
   let args = ref [] in
   Arg.parse (Arg.align options) (fun x -> args := x :: !args) usage;
   match List.rev !args with
-  | x :: rest when String.lowercase x = String.lowercase command -> rest
+  | x :: rest when String.(lowercase x = lowercase command) -> rest
   | args -> args
 
 (* *** *** NB *** *** ***
@@ -117,7 +117,7 @@ let parse_check_args cmd =
   (* custom behaviors *)
   let set_from x () = from := x in
   let set_mode x () =
-    if !mode <> None then
+    if Option.is_some !mode then
       raise (Arg.Bad "only a single mode should be specified")
     else
       mode := Some x
@@ -695,7 +695,7 @@ let parse_check_args cmd =
   );
 
   let () =
-    if !from = "emacs" then
+    if String.equal !from "emacs" then
       Printf.fprintf stdout "-*- mode: compilation -*-\n%!"
   in
   CCheck

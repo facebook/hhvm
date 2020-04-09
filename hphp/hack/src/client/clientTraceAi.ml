@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Hh_json
 
 let print_json res = print_endline (Hh_json.json_to_string (JSON_String res))

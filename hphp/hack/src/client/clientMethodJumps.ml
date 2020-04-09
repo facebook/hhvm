@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module MethodJumps = ServerCommandTypes.Method_jumps
 
 let pos_to_json pos =

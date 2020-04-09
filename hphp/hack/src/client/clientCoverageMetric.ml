@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Coverage_level
 open Coverage_level_defs
 open Hh_json

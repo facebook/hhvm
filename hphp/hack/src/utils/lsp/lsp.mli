@@ -552,6 +552,8 @@ module Completion : sig
     | TriggerForIncompleteCompletions [@value 3]
   [@@deriving enum]
 
+  val is_invoked : completionTriggerKind -> bool
+
   type params = completionParams
 
   and completionParams = {

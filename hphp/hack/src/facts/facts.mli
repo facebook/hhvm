@@ -23,6 +23,14 @@ type type_kind =
   | TKUnknown
   | TKMixed
 
+val is_tk_record : type_kind -> bool
+
+val is_tk_interface : type_kind -> bool
+
+val is_tk_trait : type_kind -> bool
+
+val is_tk_unknown : type_kind -> bool
+
 type type_facts = {
   base_types: InvSSet.t;
   kind: type_kind;

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let print_json res =
   Nuclide_rpc_message_printer.(

@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 let go (results : ServerLintTypes.result) output_json error_format =
   if output_json then
     ServerLint.output_json stdout results

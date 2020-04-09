@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 let main (env : ClientStart.env) : Exit_status.t Lwt.t =
   HackEventLogger.set_from env.ClientStart.from;
   HackEventLogger.client_restart ();

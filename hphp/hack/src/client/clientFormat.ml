@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Hh_json
 
 let to_json result =

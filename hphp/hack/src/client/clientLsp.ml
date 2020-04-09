@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Lsp
 open Lsp_fmt
 open Hh_json_helpers
@@ -55,6 +55,7 @@ type hh_server_state =
   | Hh_server_typechecking_global_remote_blocking
   | Hh_server_stolen
   | Hh_server_forgot
+[@@deriving eq]
 
 let hh_server_restart_button_text = "Restart hh_server"
 
@@ -151,6 +152,14 @@ type state =
   (* notifies us that we can exit.                                       *)
   | Post_shutdown
 
+let is_post_shutdown = function
+  | Post_shutdown -> true
+  | Pre_init
+  | In_init _
+  | Main_loop _
+  | Lost_server _ ->
+    false
+
 type result_handler = lsp_result -> state -> state Lwt.t
 
 type result_telemetry = {
@@ -216,6 +225,14 @@ type event =
   | Client_ide_notification of ClientIdeMessage.notification
   (* once per second, on idle *)
   | Tick
+
+let is_tick = function
+  | Tick -> true
+  | Server_hello
+  | Server_message _
+  | Client_message _
+  | Client_ide_notification _ ->
+    false
 
 (* Here are some exit points. *)
 let exit_ok () = exit 0
@@ -332,7 +349,7 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
   hh_server_state :=
     match !hh_server_state with
     | (prev_time, prev_hh_server_state) :: rest
-      when prev_hh_server_state = new_hh_server_state ->
+      when equal_hh_server_state prev_hh_server_state new_hh_server_state ->
       (prev_time, prev_hh_server_state) :: retain rest
     | rest -> (new_time, new_hh_server_state) :: retain rest
 
@@ -684,7 +701,7 @@ let request_showStatusFB
     (* That means: if you call request_showStatus but your message is the same as *)
     (* what's already up, then you won't be shown, and your callbacks won't be shown. *)
     let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
-    if msg = !showStatus_outstanding then
+    if String.equal msg !showStatus_outstanding then
       ()
     else (
       showStatus_outstanding := msg;
@@ -693,7 +710,8 @@ let request_showStatusFB
       to_stdout (print_lsp_request id request);
 
       let handler (result : lsp_result) (state : state) : state Lwt.t =
-        if msg = !showStatus_outstanding then showStatus_outstanding := "";
+        if String.equal msg !showStatus_outstanding then
+          showStatus_outstanding := "";
         match result with
         | ShowStatusResultFB result -> on_result result state
         | ErrorResult error -> on_error error state
@@ -810,12 +828,13 @@ let rename_params_to_document_position (params : Lsp.Rename.params) :
       position = params.position;
     }
 
-let hack_pos_to_lsp_range (pos : 'a Pos.pos) : Lsp.range =
+let hack_pos_to_lsp_range ~(equal : 'a -> 'a -> bool) (pos : 'a Pos.pos) :
+    Lsp.range =
   (* .hhconfig errors are Positions with a filename, but dummy start/end
    * positions. Handle that case - and Pos.none - specially, as the LSP
    * specification requires line and character >= 0, and VSCode silently
    * drops diagnostics that violate the spec in this way *)
-  if pos = Pos.make_from (Pos.filename pos) then
+  if Pos.equal_pos equal pos (Pos.make_from (Pos.filename pos)) then
     { start = { line = 0; character = 0 }; end_ = { line = 0; character = 0 } }
   else
     let (line1, col1, line2, col2) = Pos.destruct_range pos in
@@ -829,7 +848,7 @@ let hack_pos_to_lsp_location (pos : Pos.absolute) ~(default_path : string) :
   Lsp.Location.
     {
       uri = path_to_lsp_uri (Pos.filename pos) ~default_path;
-      range = hack_pos_to_lsp_range pos;
+      range = hack_pos_to_lsp_range ~equal:String.equal pos;
     }
 
 let ide_range_to_lsp (range : Ide_api_types.range) : Lsp.range =
@@ -1273,9 +1292,9 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
     infos
     |> List.filter_map ~f:(fun { HoverService.pos; _ } -> pos)
     |> List.hd
-    |> Option.map ~f:hack_pos_to_lsp_range
+    |> Option.map ~f:(hack_pos_to_lsp_range ~equal:Relative_path.equal)
   in
-  if contents = [] then
+  if List.is_empty contents then
     None
   else
     Some { Hover.contents; range }
@@ -1413,7 +1432,7 @@ let make_ide_completion_response
   (* We use snippets to provide parentheses+arguments when autocompleting     *)
   (* method calls e.g. "$c->|" ==> "$c->foo($arg1)". But we'll only do this   *)
   (* there's nothing after the caret: no "$c->|(1)" -> "$c->foo($arg1)(1)"    *)
-  let is_caret_followed_by_lparen = result.char_at_pos = '(' in
+  let is_caret_followed_by_lparen = Char.equal result.char_at_pos '(' in
   let p = initialize_params_exc () in
   let hack_to_itemType (completion : complete_autocomplete_result) :
       string option =
@@ -1452,7 +1471,10 @@ let make_ide_completion_response
     | (Some details, _)
       when Lsp_helpers.supports_snippets p
            && (not is_caret_followed_by_lparen)
-           && completion.res_kind <> SearchUtils.SI_LocalVariable ->
+           && not
+                (SearchUtils.equal_si_kind
+                   completion.res_kind
+                   SearchUtils.SI_LocalVariable) ->
       (* "method(${1:arg1}, ...)" but for args we just use param names. *)
       let f i param =
         let name = Str.global_replace snippet_re "\\\\\\0" param.param_name in
@@ -1481,7 +1503,7 @@ let make_ide_completion_response
       | (`TextEdit edits, format) -> (None, format, edits)
     in
     let pos =
-      if Pos.filename completion.res_pos = "" then
+      if String.equal (Pos.filename completion.res_pos) "" then
         Pos.set_file filename completion.res_pos
       else
         completion.res_pos
@@ -1533,7 +1555,8 @@ let make_ide_completion_response
         string option =
       let label = completion.res_name in
       let should_downrank label =
-        (String.length label > 2 && Str.string_before label 2 = "__")
+        String.length label > 2
+        && String.equal (Str.string_before label 2) "__"
         || Str.string_match (Str.regexp_case_fold ".*do_not_use.*") label 0
       in
       let downranked_result_prefix_character = "~" in
@@ -1546,7 +1569,9 @@ let make_ide_completion_response
       label =
         ( completion.res_name
         ^
-        if completion.res_kind = SearchUtils.SI_Namespace then
+        if
+          SearchUtils.equal_si_kind completion.res_kind SearchUtils.SI_Namespace
+        then
           "\\"
         else
           "" );
@@ -1609,7 +1634,7 @@ let do_completion_legacy
   let is_manually_invoked =
     match params.context with
     | None -> false
-    | Some c -> c.triggerKind = Invoked
+    | Some c -> is_invoked c.triggerKind
   in
   let command =
     ServerCommandTypes.IDE_AUTOCOMPLETE (filename, pos, is_manually_invoked)
@@ -1629,7 +1654,7 @@ let do_completion_local
   let is_manually_invoked =
     match params.context with
     | None -> false
-    | Some c -> c.triggerKind = Invoked
+    | Some c -> is_invoked c.triggerKind
   in
   (* this is what I want to fix *)
   let request =
@@ -1704,7 +1729,7 @@ let do_completionItemResolve
            * need to know the full name INCLUDING all namespaces.  Once
            * we know that, we can look up its file/line/column. *)
           let fullname = Jget.string_exn data "fullname" in
-          if fullname = "" then raise NoLocationFound;
+          if String.equal fullname "" then raise NoLocationFound;
           let fullname = Utils.add_ns fullname in
           let command =
             ServerCommandTypes.DOCBLOCK_FOR_SYMBOL
@@ -2070,11 +2095,11 @@ let do_highlight_local
   | Ok ranges -> Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
   | Error edata -> raise (Server_nonfatal_exception edata)
 
-let format_typeCoverage_result results counts =
+let format_typeCoverage_result ~(equal : 'a -> 'a -> bool) results counts =
   TypeCoverageFB.(
     let coveredPercent = Coverage_level.get_percent counts in
     let hack_coverage_to_lsp (pos, level) =
-      let range = hack_pos_to_lsp_range pos in
+      let range = hack_pos_to_lsp_range ~equal pos in
       match level with
       (* We only show diagnostics for completely untypechecked code. *)
       | Ide_api_types.Checked
@@ -2103,7 +2128,9 @@ let do_typeCoverageFB
     let%lwt (results, counts) : Coverage_level_defs.result =
       rpc conn ref_unblocked_time command
     in
-    let formatted = format_typeCoverage_result results counts in
+    let formatted =
+      format_typeCoverage_result ~equal:String.equal results counts
+    in
     Lwt.return formatted)
 
 let do_typeCoverage_localFB
@@ -2135,7 +2162,9 @@ let do_typeCoverage_localFB
     in
     (match result with
     | Ok (results, counts) ->
-      let formatted = format_typeCoverage_result results counts in
+      let formatted =
+        format_typeCoverage_result ~equal:String.equal results counts
+      in
       Lwt.return formatted
     | Error edata -> raise (Server_nonfatal_exception edata))
 
@@ -2269,10 +2298,15 @@ let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     | Insert insert_patch
     | Replace insert_patch ->
       {
-        TextEdit.range = hack_pos_to_lsp_range insert_patch.pos;
+        TextEdit.range =
+          hack_pos_to_lsp_range ~equal:String.equal insert_patch.pos;
         newText = insert_patch.text;
       }
-    | Remove pos -> { TextEdit.range = hack_pos_to_lsp_range pos; newText = "" }
+    | Remove pos ->
+      {
+        TextEdit.range = hack_pos_to_lsp_range ~equal:String.equal pos;
+        newText = "";
+      }
   in
   let uri =
     match patch with
@@ -2952,14 +2986,16 @@ and reconnect_from_lost_if_necessary
     in
     if should_reconnect then
       let%lwt current_version = read_hhconfig_version () in
-      let needs_to_terminate = !hhconfig_version <> current_version in
+      let needs_to_terminate =
+        not (String.equal !hhconfig_version current_version)
+      in
       if needs_to_terminate then (
         (* In these cases we have to terminate our LSP server, and trust the    *)
         (* client to restart us. Note that we can't do clientStart because that *)
         (* would start our (old) version of hh_server, not the new one!         *)
         let unsaved = get_uris_with_unsaved_changes state |> UriSet.elements in
         let unsaved_str =
-          if unsaved = [] then
+          if List.is_empty unsaved then
             "[None]"
           else
             unsaved |> List.map ~f:string_of_uri |> String.concat ~sep:"\n"
@@ -3036,7 +3072,7 @@ and do_lost_server
 
 let handle_idle_if_necessary (state : state) (event : event) : state =
   match state with
-  | Main_loop menv when event <> Tick ->
+  | Main_loop menv when not (is_tick event) ->
     Main_loop { menv with Main_env.needs_idle = true }
   | _ -> state
 
@@ -3220,7 +3256,16 @@ let hack_log_error
     (unblocked_time : float)
     (env : env) : unit =
   let root = get_root_opt () in
-  let is_expected = source = Error_from_lsp_cancelled in
+  let is_expected =
+    match source with
+    | Error_from_lsp_cancelled -> true
+    | Error_from_server_fatal
+    | Error_from_client_fatal
+    | Error_from_client_recoverable
+    | Error_from_server_recoverable
+    | Error_from_lsp_misc ->
+      false
+  in
   let source =
     match source with
     | Error_from_server_fatal -> "server_fatal"
@@ -3376,7 +3421,7 @@ let tick_showStatus
         let open ShowMessageRequest in
         match (result, state) with
         | (Some { title }, Lost_server _)
-          when title = hh_server_restart_button_text ->
+          when String.equal title hh_server_restart_button_text ->
           let root =
             match get_root_opt () with
             | None -> failwith "we should have root by now"
@@ -3393,7 +3438,8 @@ let tick_showStatus
             reconnect_from_lost_if_necessary ~env state `Force_regain
           in
           Lwt.return state
-        | (Some { title }, _) when title = client_ide_restart_button_text ->
+        | (Some { title }, _)
+          when String.equal title client_ide_restart_button_text ->
           log "Restarting IDE service";
 
           (* It's possible that [destroy] takes a while to finish, so make
@@ -3502,13 +3548,16 @@ let handle_client_message
       Lwt.return_none
     (* exit notification *)
     | (_, NotificationMessage ExitNotification) ->
-      if !state = Post_shutdown then
+      if is_post_shutdown !state then
         exit_ok ()
       else
         exit_fail ()
     (* setTrace notification *)
     | (_, NotificationMessage (SetTraceNotification params)) ->
-      verbose := params = SetTraceNotification.Verbose;
+      (verbose :=
+         match params with
+         | SetTraceNotification.Verbose -> true
+         | SetTraceNotification.Off -> false);
       if !verbose then
         Hh_logger.Level.set_min_level Hh_logger.Level.Debug
       else
@@ -4247,7 +4296,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       Lwt.return_unit
     with
     | Server_fatal_connection_exception { Marshal_tools.stack; message } ->
-      if !state <> Post_shutdown then (
+      if not (is_post_shutdown !state) then (
         (* The server never tells us why it closed the connection - it simply   *)
         (* closes. We don't have privilege to inspect its exit status.          *)
         (* But in some cases of a controlled exit, the server does write to a   *)

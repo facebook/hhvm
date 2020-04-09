@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ClientEnv
 
 let compare_pos pos1 pos2 =
@@ -219,7 +219,7 @@ let go
       let before_method = List.hd_exn (List.tl_exn befores) in
       let after_class = List.hd_exn afters in
       let after_method = List.hd_exn (List.tl_exn afters) in
-      if before_class <> after_class then (
+      if not (String.equal before_class after_class) then (
         Printf.printf "%s %s\n" before_class after_class;
         failwith "Before and After classname must match"
       ) else

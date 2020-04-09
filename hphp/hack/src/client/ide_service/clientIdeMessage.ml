@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 module Initialize_from_saved_state = struct
   type t = {
     root: Path.t;

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SMUtils = ServerMonitorUtils
 
 exception Server_hung_up of ServerCommandTypes.finale_data option
@@ -128,7 +128,7 @@ let rec wait_for_server_message
       [Timeout.descr_of_in_channel ic]
       1.0
   in
-  if readable = [] then (
+  if List.is_empty readable then (
     print_wait_msg progress_callback root;
     wait_for_server_message
       ~expected_message
@@ -143,9 +143,13 @@ let rec wait_for_server_message
       let msg : 'a ServerCommandTypes.message_type =
         Marshal_tools.from_fd_with_preamble fd
       in
-      let is_not_ping = msg <> ServerCommandTypes.Ping in
+      let is_not_ping =
+        match msg with
+        | ServerCommandTypes.Ping -> false
+        | _ -> true
+      in
       let matches_expected =
-        Option.value_map ~default:true ~f:(( = ) msg) expected_message
+        Option.value_map ~default:true ~f:(Poly.( = ) msg) expected_message
       in
       if is_not_ping && matches_expected then (
         progress_callback None;
@@ -192,10 +196,10 @@ let with_server_hung_up (f : unit -> 'a Lwt.t) : 'a Lwt.t =
         "Hack server disconnected suddenly [%s]\n   %s\n"
         (Exit_status.to_string finale_data.exit_status)
         finale_data.msg;
-      if finale_data.exit_status = Exit_status.Failed_to_load_should_abort then
+      (match finale_data.exit_status with
+      | Exit_status.Failed_to_load_should_abort ->
         raise Exit_status.(Exit_with Server_hung_up_should_abort)
-      else
-        raise Exit_status.(Exit_with Server_hung_up_should_retry))
+      | _ -> raise Exit_status.(Exit_with Server_hung_up_should_retry)))
   | Server_hung_up None ->
     Printf.eprintf
       ( "Hack server disconnected suddenly. Most likely a new one"

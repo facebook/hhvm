@@ -7,4 +7,6 @@
  *
  *)
 
+open Hh_prelude
+
 let go result = print_endline result

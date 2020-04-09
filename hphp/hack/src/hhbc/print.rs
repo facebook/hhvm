@@ -15,6 +15,7 @@ use ast_class_expr_rust::ClassExpr;
 use ast_scope_rust as ast_scope;
 use context::Context;
 use core_utils_rust::add_ns;
+use emit_type_hint_rust as emit_type_hint;
 use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::HhasAdata;
@@ -41,7 +42,7 @@ use hhbc_string_utils_rust::{
     float, integer, is_class, is_parent, is_self, is_static, is_xhp, lstrip, mangle, quote_string,
     quote_string_with_escape, strip_global_ns, strip_ns, triple_quote_string, types,
 };
-use instruction_sequence_rust::InstrSeq;
+use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq};
 use label_rust::Label;
 use naming_special_names_rust::classes;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
@@ -2697,7 +2698,7 @@ fn print_expr<W: Write>(
         E_::BracedExpr(e) => wrap_by_braces(w, |w| print_expr(ctx, w, env, e)),
         E_::ParenthesizedExpr(e) => wrap_by_paren(w, |w| print_expr(ctx, w, env, e)),
         E_::Cast(c) => {
-            wrap_by_paren(w, |w| print_hint(w, &c.0))?;
+            wrap_by_paren(w, |w| print_hint(w, false, &c.0))?;
             print_expr(ctx, w, env, &c.1)
         }
         E_::Pipe(p) => {
@@ -2708,12 +2709,12 @@ fn print_expr<W: Write>(
         E_::Is(i) => {
             print_expr(ctx, w, env, &i.0)?;
             w.write(" is ")?;
-            print_hint(w, &i.1)
+            print_hint(w, true, &i.1)
         }
         E_::As(a) => {
             print_expr(ctx, w, env, &a.0)?;
             w.write(if a.2 { " ?as " } else { " as " })?;
-            print_hint(w, &a.1)
+            print_hint(w, true, &a.1)
         }
         E_::Varray(va) => wrap_by_(w, "varray[", "]", |w| {
             concat_by(w, ", ", &va.1, |w, e| print_expr(ctx, w, env, e))
@@ -2800,7 +2801,7 @@ fn print_fparam<W: Write>(
         w.write("...")?;
     }
     option(w, &(param.type_hint).1, |w, h| {
-        print_hint(w, h)?;
+        print_hint(w, true, h)?;
         w.write(" ")
     })?;
     w.write(&param.name)?;
@@ -2846,8 +2847,16 @@ fn print_bop<W: Write>(w: &mut W, bop: &ast_defs::Bop) -> Result<(), W::Error> {
     }
 }
 
-fn print_hint<W: Write>(w: &mut W, hint: &ast::Hint) -> Result<(), W::Error> {
-    not_impl!()
+fn print_hint<W: Write>(w: &mut W, ns: bool, hint: &ast::Hint) -> Result<(), W::Error> {
+    let h = emit_type_hint::fmt_hint(&[], false, hint).map_err(|e| match e {
+        Unrecoverable(s) => Error::fail(s),
+        _ => Error::fail("Error printing hint"),
+    })?;
+    if ns {
+        w.write(escaper::escape(h))
+    } else {
+        w.write(escaper::escape(strip_ns(&h)))
+    }
 }
 
 fn print_import_flavor<W: Write>(w: &mut W, flavor: &ast::ImportFlavor) -> Result<(), W::Error> {

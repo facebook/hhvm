@@ -176,12 +176,18 @@ fn set_afield_to_typed_value_pair(
     afield: &tast::Afield,
 ) -> Result<(TypedValue, TypedValue), Error> {
     match afield {
-        tast::Afield::AFvalue(v) => {
-            let tv = key_expr_to_typed_value(e, ns, v)?;
-            Ok((tv.clone(), tv))
-        }
+        tast::Afield::AFvalue(v) => set_afield_value_to_typed_value_pair(e, ns, v),
         _ => panic!("set_afield_to_typed_value_pair: unexpected key=>value"),
     }
+}
+
+fn set_afield_value_to_typed_value_pair(
+    e: &Emitter,
+    ns: &Namespace,
+    v: &tast::Expr,
+) -> Result<(TypedValue, TypedValue), Error> {
+    let tv = key_expr_to_typed_value(e, ns, v)?;
+    Ok((tv.clone(), tv))
 }
 
 fn afield_to_typed_value_pair(
@@ -191,11 +197,20 @@ fn afield_to_typed_value_pair(
 ) -> Result<(TypedValue, TypedValue), Error> {
     match afield {
         tast::Afield::AFvalue(_) => panic!("afield_to_typed_value_pair: unexpected value"),
-        tast::Afield::AFkvalue(key, value) => Ok((
-            key_expr_to_typed_value(emitter, ns, key)?,
-            expr_to_typed_value(emitter, ns, value)?,
-        )),
+        tast::Afield::AFkvalue(key, value) => kv_to_typed_value_pair(emitter, ns, key, value),
     }
+}
+
+fn kv_to_typed_value_pair(
+    emitter: &Emitter,
+    ns: &Namespace,
+    key: &tast::Expr,
+    value: &tast::Expr,
+) -> Result<(TypedValue, TypedValue), Error> {
+    Ok((
+        key_expr_to_typed_value(emitter, ns, key)?,
+        expr_to_typed_value(emitter, ns, value)?,
+    ))
 }
 
 fn value_afield_to_typed_value(
@@ -245,9 +260,19 @@ fn shape_to_typed_value(
         .iter()
         .map(|(sf, expr)| {
             let key = match sf {
-                ast_defs::ShapeFieldName::SFlitInt(_) => unimplemented!(),
+                ast_defs::ShapeFieldName::SFlitInt((_, s)) => {
+                    let tv = int_expr_to_typed_value(s)?;
+                    match tv {
+                        TypedValue::Int(_) => tv,
+                        _ => panic!(format!("{} is not a valid integer index", s)),
+                    }
+                }
                 ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::String(id.1.clone()),
-                ast_defs::ShapeFieldName::SFclassConst(_, _) => unimplemented!(),
+                ast_defs::ShapeFieldName::SFclassConst(class_id, id) => class_const_to_typed_value(
+                    emitter,
+                    &tast::ClassId(Pos::make_none(), tast::ClassId_::CI(class_id.clone())),
+                    id,
+                )?,
             };
             Ok((key, expr_to_typed_value(emitter, ns, expr)?))
         })
@@ -288,9 +313,7 @@ pub fn expr_to_typed_value_(
     // TODO: ML equivalent has this as an implicit parameter that defaults to false.
     let pos = &expr.0;
     match &expr.1 {
-        Int(s) => Ok(TypedValue::Int(
-            try_type_intlike(&s).unwrap_or(std::i64::MAX),
-        )),
+        Int(s) => int_expr_to_typed_value(s),
         tast::Expr_::True => Ok(TypedValue::Bool(true)),
         False => Ok(TypedValue::Bool(false)),
         Null => Ok(TypedValue::Null),
@@ -307,7 +330,12 @@ pub fn expr_to_typed_value_(
                 .map(|x| x.1 == special_functions::HHAS_ADATA)
                 .unwrap_or(false) =>
         {
-            unimplemented!()
+            match &id.3[..] {
+                &[tast::Expr(_, tast::Expr_::String(ref data))] => {
+                    Ok(TypedValue::HhasAdata(data.into()))
+                }
+                _ => Err(Error::NotLiteral),
+            }
         }
 
         Array(fields) => array_to_typed_value(emitter, ns, &fields),
@@ -357,14 +385,47 @@ pub fn expr_to_typed_value_(
             )))
         }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
-            unimplemented!()
+            Ok(TypedValue::Vec((
+                x.2.iter()
+                    .map(|e| expr_to_typed_value(emitter, ns, e))
+                    .collect::<Result<_, _>>()?,
+                Some(pos.clone()),
+            )))
         }
-        ValCollection(x) if x.0 == tast::VcKind::Keyset => unimplemented!(),
+        ValCollection(x) if x.0 == tast::VcKind::Keyset => Ok(TypedValue::Keyset(
+            x.2.iter()
+                .map(|e| {
+                    expr_to_typed_value(emitter, ns, e).and_then(|tv| match tv {
+                        TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
+                        _ => Err(Error::NotLiteral),
+                    })
+                })
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+                .unique()
+                .collect(),
+        )),
         ValCollection(x) if x.0 == tast::VcKind::Set || x.0 == tast::VcKind::ImmSet => {
-            unimplemented!()
+            let values =
+                x.2.iter()
+                    .map(|e| set_afield_value_to_typed_value_pair(emitter, ns, e))
+                    .collect::<Result<_, _>>()?;
+            Ok(TypedValue::Dict((
+                update_duplicates_in_map(values),
+                Some(pos.clone()),
+            )))
         }
 
-        KeyValCollection(_) => unimplemented!(),
+        KeyValCollection(x) => {
+            let values =
+                x.2.iter()
+                    .map(|e| kv_to_typed_value_pair(emitter, ns, &e.0, &e.1))
+                    .collect::<Result<_, _>>()?;
+            Ok(TypedValue::Dict((
+                update_duplicates_in_map(values),
+                Some(pos.clone()),
+            )))
+        }
 
         Shape(fields) => shape_to_typed_value(emitter, ns, fields, pos),
         ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
@@ -373,6 +434,12 @@ pub fn expr_to_typed_value_(
         As(x) if (x.1).1.is_hlike() => expr_to_typed_value_(emitter, ns, &x.0, allow_maps),
         _ => Err(Error::NotLiteral),
     }
+}
+
+fn int_expr_to_typed_value(s: &str) -> Result<TypedValue, Error> {
+    Ok(TypedValue::Int(
+        try_type_intlike(&s).unwrap_or(std::i64::MAX),
+    ))
 }
 
 fn update_duplicates_in_map(kvs: Vec<(TypedValue, TypedValue)>) -> Vec<(TypedValue, TypedValue)> {
@@ -431,7 +498,7 @@ fn binop_on_values(
     .ok_or(Error::NotLiteral)
 }
 
-fn value_to_expr(v: TypedValue) -> tast::Expr_ {
+fn value_to_expr_(v: TypedValue) -> tast::Expr_ {
     use tast::*;
     use TypedValue::*;
     match v {
@@ -440,8 +507,33 @@ fn value_to_expr(v: TypedValue) -> tast::Expr_ {
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
         String(s) => Expr_::String(s),
-        _ => panic!("TODO"),
+        Null => Expr_::Null,
+        Uninit => panic!("value_to_expr: uninit value"),
+        Vec(_) => panic!("value_to_expr: vec NYI"),
+        Keyset(_) => panic!("value_to_expr: keyset NYI"),
+        HhasAdata(_) => panic!("value_to_expr: HhasAdata NYI"),
+        Array(pairs) => Expr_::Array(
+            pairs
+                .into_iter()
+                .map(|(v1, v2)| Afield::AFkvalue(value_to_expr(v1), value_to_expr(v2)))
+                .collect(),
+        ),
+        VArray((values, _)) => {
+            Expr_::mk_varray(None, values.into_iter().map(value_to_expr).collect())
+        }
+        DArray((pairs, _)) => Expr_::mk_darray(
+            None,
+            pairs
+                .into_iter()
+                .map(|(v1, v2)| (value_to_expr(v1), value_to_expr(v2)))
+                .collect(),
+        ),
+        Dict(_) => panic!("value_to_expr: dict NYI"),
     }
+}
+
+fn value_to_expr(v: TypedValue) -> tast::Expr {
+    tast::Expr(Pos::make_none(), value_to_expr_(v))
 }
 
 struct FolderVisitor<'a> {
@@ -470,16 +562,16 @@ impl VisitorMut for FolderVisitor<'_> {
         let new_p = match p {
             tast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v| cast_value(&(e.0).1, v))
-                .map(value_to_expr)
+                .map(value_to_expr_)
                 .ok(),
             tast::Expr_::Unop(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v| unop_on_value(&e.0, v))
-                .map(value_to_expr)
+                .map(value_to_expr_)
                 .ok(),
             tast::Expr_::Binop(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
                 .and_then(|v1| {
                     expr_to_typed_value(self.emitter, self.empty_namespace, &e.2)
-                        .and_then(|v2| binop_on_values(&e.0, v1, v2).map(value_to_expr))
+                        .and_then(|v2| binop_on_values(&e.0, v1, v2).map(value_to_expr_))
                 })
                 .ok(),
             _ => None,

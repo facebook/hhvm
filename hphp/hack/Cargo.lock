@@ -1422,6 +1422,7 @@ dependencies = [
  "ast_class_expr_rust 0.0.0",
  "ast_scope_rust 0.0.0",
  "core_utils_rust 0.0.0",
+ "emit_type_hint_rust 0.0.0",
  "env 0.0.0",
  "escaper 0.0.0",
  "hhas_adata_rust 0.0.0",

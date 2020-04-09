@@ -42,8 +42,10 @@ Parsed decls:
                           Tthis),
                          [([13:27-28], "T")])))
                     };
-                  fp_kind = FPnormal; fp_accept_disposable = false;
-                  fp_mutable = none }
+                  fp_flags =
+                  (make_fp_flags ~mutability:none ~accept_disposable:false
+                    ~mode:FPnormal);
+                   }
                  ];
                ft_ret =
                { et_enforced = false;
@@ -75,8 +77,10 @@ Parsed decls:
                  (Rhint (root|like_types.php line 4, characters 21-23),
                   (Tprim Tint))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -113,8 +117,10 @@ Parsed decls:
                  (Rhint (root|like_types.php line 6, characters 23-23),
                   (Tgeneric "T"))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;

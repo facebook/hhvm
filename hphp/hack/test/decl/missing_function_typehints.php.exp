@@ -14,8 +14,10 @@ Parsed decls:
                fp_type =
                { et_enforced = false;
                  et_type = (Rnone (| line 0, characters 0-0), Tany) };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;

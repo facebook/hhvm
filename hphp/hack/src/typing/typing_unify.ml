@@ -10,9 +10,9 @@
 open Typing_defs
 
 let unify_param_modes param1 param2 on_error =
-  let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
-  let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
-  match (mode1, mode2) with
+  let { fp_pos = pos1; _ } = param1 in
+  let { fp_pos = pos2; _ } = param2 in
+  match (get_fp_mode param1, get_fp_mode param2) with
   | (FPnormal, FPnormal)
   | (FPinout, FPinout) ->
     ()
@@ -20,9 +20,9 @@ let unify_param_modes param1 param2 on_error =
   | (FPinout, FPnormal) -> Errors.inoutness_mismatch pos1 pos2 on_error
 
 let unify_accept_disposable param1 param2 on_error =
-  let { fp_pos = pos1; fp_accept_disposable = mode1; _ } = param1 in
-  let { fp_pos = pos2; fp_accept_disposable = mode2; _ } = param2 in
-  match (mode1, mode2) with
+  let { fp_pos = pos1; _ } = param1 in
+  let { fp_pos = pos2; _ } = param2 in
+  match (get_fp_accept_disposable param1, get_fp_accept_disposable param2) with
   | (true, false) -> Errors.accept_disposable_invariant pos1 pos2 on_error
   | (false, true) -> Errors.accept_disposable_invariant pos2 pos1 on_error
   | (_, _) -> ()

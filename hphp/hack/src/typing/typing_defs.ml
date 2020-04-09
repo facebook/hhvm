@@ -11,38 +11,6 @@ open Hh_prelude
 open Typing_defs_flags
 include Typing_defs_core
 
-let xhp_attr_to_ce_flags xa =
-  match xa with
-  | None -> 0x0
-  | Some { xa_tag; xa_has_default } ->
-    Int.bit_or
-      ( if xa_has_default then
-        ce_flags_xa_has_default
-      else
-        0x0 )
-    @@
-    (match xa_tag with
-    | None -> ce_flags_xa_tag_none
-    | Some Required -> ce_flags_xa_tag_required
-    | Some Lateinit -> ce_flags_xa_tag_lateinit)
-
-let get_ce_flags_xhp_attr flags =
-  let tag_flags = Int.bit_and ce_flags_xa_tag_mask flags in
-  if Int.equal tag_flags 0 then
-    None
-  else
-    Some
-      {
-        xa_has_default = is_set ce_flags_xa_has_default flags;
-        xa_tag =
-          ( if Int.equal tag_flags ce_flags_xa_tag_none then
-            None
-          else if Int.equal tag_flags ce_flags_xa_tag_required then
-            Some Required
-          else
-            Some Lateinit );
-      }
-
 let get_ft_return_disposable ft = is_set ft.ft_flags ft_flags_return_disposable
 
 let get_ft_returns_void_to_rx ft =
@@ -84,20 +52,27 @@ let get_ft_fun_kind ft =
     | (false, true) -> Ast_defs.FGenerator
     | (true, true) -> Ast_defs.FAsyncGenerator
 
-let get_ft_param_mutable ft =
-  match Int.bit_and ft.ft_flags 0xC0 with
-  | 0x0 -> None
-  | 0x40 -> Some Param_owned_mutable
-  | 0x80 -> Some Param_borrowed_mutable
-  | 0xC0 -> Some Param_maybe_mutable
-  | _ -> failwith "get_ft_param_mutable"
+let from_mutable_flags flags =
+  let masked = Int.bit_and flags mutable_flags_mask in
+  if Int.equal masked mutable_flags_owned then
+    Some Param_owned_mutable
+  else if Int.equal masked mutable_flags_borrowed then
+    Some Param_borrowed_mutable
+  else if Int.equal masked mutable_flags_maybe then
+    Some Param_maybe_mutable
+  else
+    None
 
-let param_mutable_to_flags m =
+let to_mutable_flags m =
   match m with
   | None -> 0x0
-  | Some Param_owned_mutable -> 0x40
-  | Some Param_borrowed_mutable -> 0x80
-  | Some Param_maybe_mutable -> 0xC0
+  | Some Param_owned_mutable -> mutable_flags_owned
+  | Some Param_borrowed_mutable -> mutable_flags_borrowed
+  | Some Param_maybe_mutable -> mutable_flags_maybe
+
+let get_ft_param_mutable ft = from_mutable_flags ft.ft_flags
+
+let get_fp_mutability fp = from_mutable_flags fp.fp_flags
 
 let fun_kind_to_flags kind =
   match kind with
@@ -110,12 +85,31 @@ let fun_kind_to_flags kind =
 let make_ft_flags
     kind param_mutable ~return_disposable ~returns_mutable ~returns_void_to_rx =
   let flags =
-    Int.bit_or (param_mutable_to_flags param_mutable) (fun_kind_to_flags kind)
+    Int.bit_or (to_mutable_flags param_mutable) (fun_kind_to_flags kind)
   in
   let flags = set_bit ft_flags_return_disposable return_disposable flags in
   let flags = set_bit ft_flags_returns_mutable returns_mutable flags in
   let flags = set_bit ft_flags_returns_void_to_rx returns_void_to_rx flags in
   flags
+
+let mode_to_flags mode =
+  match mode with
+  | FPnormal -> 0x0
+  | FPinout -> fp_flags_inout
+
+let make_fp_flags ~mode ~accept_disposable ~mutability =
+  let flags = mode_to_flags mode in
+  let flags = Int.bit_or (to_mutable_flags mutability) flags in
+  let flags = set_bit fp_flags_accept_disposable accept_disposable flags in
+  flags
+
+let get_fp_accept_disposable fp = is_set fp.fp_flags fp_flags_accept_disposable
+
+let get_fp_mode fp =
+  if is_set fp.fp_flags fp_flags_inout then
+    FPinout
+  else
+    FPnormal
 
 type class_elt = {
   ce_visibility: visibility;
@@ -680,10 +674,7 @@ and ft_params_compare ?(normalize_lists = false) params1 params2 =
         param1.fp_type
         param2.fp_type
     with
-    | 0 ->
-      compare
-        (param1.fp_kind, param1.fp_accept_disposable, param1.fp_mutability)
-        (param2.fp_kind, param2.fp_accept_disposable, param2.fp_mutability)
+    | 0 -> Int.compare param1.fp_flags param2.fp_flags
     | n -> n
   in
   ft_params_compare params1 params2
@@ -932,12 +923,7 @@ and equal_decl_possibly_enforced_ty ety1 ety2 =
 
 and equal_decl_fun_param param1 param2 =
   equal_decl_possibly_enforced_ty param1.fp_type param2.fp_type
-  && equal_param_mode param1.fp_kind param2.fp_kind
-  && Bool.equal param1.fp_accept_disposable param2.fp_accept_disposable
-  && Option.equal
-       equal_param_mutability
-       param1.fp_mutability
-       param2.fp_mutability
+  && Int.equal param1.fp_flags param2.fp_flags
 
 and equal_decl_ft_params params1 params2 =
   List.equal ~equal:equal_decl_fun_param params1 params2
@@ -1007,6 +993,38 @@ let get_ce_lateinit ce = is_set ce_flags_lateinit ce.ce_flags
 
 let get_ce_dynamicallycallable ce =
   is_set ce_flags_dynamicallycallable ce.ce_flags
+
+let xhp_attr_to_ce_flags xa =
+  match xa with
+  | None -> 0x0
+  | Some { xa_tag; xa_has_default } ->
+    Int.bit_or
+      ( if xa_has_default then
+        ce_flags_xa_has_default
+      else
+        0x0 )
+    @@
+    (match xa_tag with
+    | None -> ce_flags_xa_tag_none
+    | Some Required -> ce_flags_xa_tag_required
+    | Some Lateinit -> ce_flags_xa_tag_lateinit)
+
+let get_ce_xhp_attr ce =
+  let tag_flags = Int.bit_and ce_flags_xa_tag_mask ce.ce_flags in
+  if Int.equal tag_flags 0 then
+    None
+  else
+    Some
+      {
+        xa_has_default = is_set ce_flags_xa_has_default ce.ce_flags;
+        xa_tag =
+          ( if Int.equal tag_flags ce_flags_xa_tag_none then
+            None
+          else if Int.equal tag_flags ce_flags_xa_tag_required then
+            Some Required
+          else
+            Some Lateinit );
+      }
 
 let make_ce_flags
     ~xhp_attr

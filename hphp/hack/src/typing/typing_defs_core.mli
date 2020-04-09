@@ -441,10 +441,8 @@ and 'ty fun_param = {
   fp_pos: Pos.t;
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
-  fp_kind: param_mode;
-  fp_accept_disposable: bool;
-  fp_mutability: param_mutability option;
   fp_rx_annotation: param_rx_annotation option;
+  fp_flags: int;
 }
 
 and decl_fun_param = decl_ty fun_param

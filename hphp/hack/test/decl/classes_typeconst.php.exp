@@ -113,8 +113,10 @@ Parsed decls:
                           Tthis),
                          [([20:46-56], "TConstType"); ([20:58-59], "T")])))
                     };
-                  fp_kind = FPnormal; fp_accept_disposable = false;
-                  fp_mutable = none }
+                  fp_flags =
+                  (make_fp_flags ~mutability:none ~accept_disposable:false
+                    ~mode:FPnormal);
+                   }
                  ];
                ft_ret =
                { et_enforced = false;

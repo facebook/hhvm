@@ -155,8 +155,10 @@ Parsed decls:
                      (Rhint (root|classes.php line 15, characters 5-10),
                       (Tprim Tstring))
                      };
-                   fp_kind = FPnormal; fp_accept_disposable = false;
-                   fp_mutable = none };
+                   fp_flags =
+                   (make_fp_flags ~mutability:none ~accept_disposable:false
+                     ~mode:FPnormal);
+                    };
                   { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                     fp_type =
                     { et_enforced = false;
@@ -164,8 +166,10 @@ Parsed decls:
                       (Rhint (root|classes.php line 16, characters 5-7),
                        (Tprim Tint))
                       };
-                    fp_kind = FPnormal; fp_accept_disposable = false;
-                    fp_mutable = none }
+                    fp_flags =
+                    (make_fp_flags ~mutability:none ~accept_disposable:false
+                      ~mode:FPnormal);
+                     }
                   ];
                 ft_ret =
                 { et_enforced = false;
@@ -266,8 +270,10 @@ Parsed decls:
                      (Rhint (root|classes.php line 33, characters 19-25),
                       (Tapply (([33:19-26], "\\MyClass"), [])))
                      };
-                   fp_kind = FPnormal; fp_accept_disposable = false;
-                   fp_mutable = mutable };
+                   fp_flags =
+                   (make_fp_flags ~mutability:mutable
+                     ~accept_disposable:false ~mode:FPnormal);
+                    };
                   { fp_pos = [34:32-34]; fp_name = (Some "$b");
                     fp_type =
                     { et_enforced = false;
@@ -275,8 +281,10 @@ Parsed decls:
                       (Rhint (root|classes.php line 34, characters 24-30),
                        (Tapply (([34:24-31], "\\MyClass"), [])))
                       };
-                    fp_kind = FPnormal; fp_accept_disposable = false;
-                    fp_mutable = maybe-mutable };
+                    fp_flags =
+                    (make_fp_flags ~mutability:maybe-mutable
+                      ~accept_disposable:false ~mode:FPnormal);
+                     };
                   { fp_pos = [35:32-34]; fp_name = (Some "$c");
                     fp_type =
                     { et_enforced = false;
@@ -284,8 +292,10 @@ Parsed decls:
                       (Rhint (root|classes.php line 35, characters 24-30),
                        (Tapply (([35:24-31], "\\MyClass"), [])))
                       };
-                    fp_kind = FPnormal; fp_accept_disposable = false;
-                    fp_mutable = owned mutable }
+                    fp_flags =
+                    (make_fp_flags ~mutability:owned mutable
+                      ~accept_disposable:false ~mode:FPnormal);
+                     }
                   ];
                 ft_ret =
                 { et_enforced = false;
@@ -379,8 +389,10 @@ Parsed decls:
                          (Rhint (root|classes.php line 51, characters 13-18),
                           (Tprim Tstring))
                          };
-                       fp_kind = FPnormal; fp_accept_disposable = false;
-                       fp_mutable = none };
+                       fp_flags =
+                       (make_fp_flags ~mutability:none
+                         ~accept_disposable:false ~mode:FPnormal);
+                        };
                       { fp_pos = [52:22-32]; fp_name = (Some "$protected");
                         fp_type =
                         { et_enforced = false;
@@ -388,8 +400,10 @@ Parsed decls:
                           (Rhint (root|classes.php line 52, characters 15-20),
                            (Tprim Tstring))
                           };
-                        fp_kind = FPnormal; fp_accept_disposable = false;
-                        fp_mutable = none };
+                        fp_flags =
+                        (make_fp_flags ~mutability:none
+                          ~accept_disposable:false ~mode:FPnormal);
+                         };
                       { fp_pos = [53:19-26]; fp_name = (Some "$public");
                         fp_type =
                         { et_enforced = false;
@@ -397,8 +411,10 @@ Parsed decls:
                           (Rhint (root|classes.php line 53, characters 12-17),
                            (Tprim Tstring))
                           };
-                        fp_kind = FPnormal; fp_accept_disposable = false;
-                        fp_mutable = none };
+                        fp_flags =
+                        (make_fp_flags ~mutability:none
+                          ~accept_disposable:false ~mode:FPnormal);
+                         };
                       { fp_pos = [54:19-30]; fp_name = (Some "$hasDefault");
                         fp_type =
                         { et_enforced = false;
@@ -406,8 +422,10 @@ Parsed decls:
                           (Rhint (root|classes.php line 54, characters 12-17),
                            (Tprim Tstring))
                           };
-                        fp_kind = FPnormal; fp_accept_disposable = false;
-                        fp_mutable = none }
+                        fp_flags =
+                        (make_fp_flags ~mutability:none
+                          ~accept_disposable:false ~mode:FPnormal);
+                         }
                       ];
                     ft_ret =
                     { et_enforced = false;

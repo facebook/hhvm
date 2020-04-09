@@ -1267,10 +1267,9 @@ and get_tyvars_i env (ty : internal_type) =
     let (env, positive, negative) = get_tyvars env ty in
     (env, ISet.union acc_positive positive, ISet.union acc_negative negative)
   in
-  let get_tyvars_param (env, acc_positive, acc_negative) { fp_type; fp_kind; _ }
-      =
-    let (env, positive, negative) = get_tyvars env fp_type.et_type in
-    match fp_kind with
+  let get_tyvars_param (env, acc_positive, acc_negative) fp =
+    let (env, positive, negative) = get_tyvars env fp.fp_type.et_type in
+    match get_fp_mode fp with
     (* Parameters are treated contravariantly *)
     | FPnormal ->
       (env, ISet.union negative acc_positive, ISet.union positive acc_negative)

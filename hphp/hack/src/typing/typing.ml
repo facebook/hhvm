@@ -5103,9 +5103,11 @@ and dispatch_call
                       fp_pos = cpos;
                       fp_name = None;
                       fp_type = { et_enforced = false; et_type };
-                      fp_kind = FPnormal;
-                      fp_accept_disposable = true;
-                      fp_mutability = None;
+                      fp_flags =
+                        make_fp_flags
+                          ~mode:FPnormal
+                          ~accept_disposable:true
+                          ~mutability:None;
                       fp_rx_annotation = None;
                     });
               ft_ret = { et_enforced = false; et_type = ft_ret };
@@ -5998,8 +6000,8 @@ and variadic_param env ft =
            (mk (Reason.Rvar_param pos, Typing_defs.make_tany ()))) )
   | Fstandard _ -> (env, None)
 
-and param_modes ?(is_variadic = false) { fp_pos; fp_kind; _ } (pos, e) =
-  match (fp_kind, e) with
+and param_modes ?(is_variadic = false) ({ fp_pos; _ } as fp) (pos, e) =
+  match (get_fp_mode fp, e) with
   | (FPnormal, Callconv _) ->
     Errors.inout_annotation_unexpected pos fp_pos is_variadic
   | (FPnormal, _) -> ()
@@ -6202,7 +6204,7 @@ and call
                       param.fp_type
                   in
                   expr
-                    ~accept_using_var:param.fp_accept_disposable
+                    ~accept_using_var:(get_fp_accept_disposable param)
                     ~expected
                     env
                     e

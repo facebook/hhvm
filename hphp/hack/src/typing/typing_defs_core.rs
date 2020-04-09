@@ -599,10 +599,8 @@ impl<'a> FunParam_<'a> {
                 enforced: false,
                 type_: type_.to_oxidized(),
             },
-            kind: ParamMode::FPnormal,
-            accept_disposable: false,
-            mutability: None,
             rx_annotation: None,
+            flags: 0,
         }
     }
 }

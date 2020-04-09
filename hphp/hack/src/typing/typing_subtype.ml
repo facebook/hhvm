@@ -1866,9 +1866,9 @@ and simplify_subtype_params
         ~is_receiver:false
         ~subtype_env
         sub.fp_pos
-        sub.fp_mutability
+        (get_fp_mutability sub)
         super.fp_pos
-        super.fp_mutability
+        (get_fp_mutability super)
     else
       valid )
     &&& fun env ->
@@ -1880,7 +1880,7 @@ and simplify_subtype_params
     &&& simplify_param_accept_disposable ~subtype_env sub super
     &&& begin
           fun env ->
-          match (sub.fp_kind, super.fp_kind) with
+          match (get_fp_mode sub, get_fp_mode super) with
           | (FPinout, FPinout) ->
             (* Inout parameters are invariant wrt subtyping for function types. *)
             env
@@ -2340,9 +2340,9 @@ and simplify_subtype_fun_params_reactivity
       env
 
 and simplify_param_modes ~subtype_env param1 param2 env =
-  let { fp_pos = pos1; fp_kind = mode1; _ } = param1 in
-  let { fp_pos = pos2; fp_kind = mode2; _ } = param2 in
-  match (mode1, mode2) with
+  let { fp_pos = pos1; _ } = param1 in
+  let { fp_pos = pos2; _ } = param2 in
+  match (get_fp_mode param1, get_fp_mode param2) with
   | (FPnormal, FPnormal)
   | (FPinout, FPinout) ->
     valid env
@@ -2356,9 +2356,9 @@ and simplify_param_modes ~subtype_env param1 param2 env =
       env
 
 and simplify_param_accept_disposable ~subtype_env param1 param2 env =
-  let { fp_pos = pos1; fp_accept_disposable = mode1; _ } = param1 in
-  let { fp_pos = pos2; fp_accept_disposable = mode2; _ } = param2 in
-  match (mode1, mode2) with
+  let { fp_pos = pos1; _ } = param1 in
+  let { fp_pos = pos2; _ } = param2 in
+  match (get_fp_accept_disposable param1, get_fp_accept_disposable param2) with
   | (true, false) ->
     invalid
       ~fail:(fun () ->

@@ -22,7 +22,7 @@ module MakeType = Typing_make_type
 
 let member_type env member_ce =
   let (lazy default_result) = member_ce.ce_type in
-  if Option.is_none (get_ce_flags_xhp_attr member_ce.ce_flags) then
+  if Option.is_none (get_ce_xhp_attr member_ce) then
     default_result
   else
     match get_node default_result with

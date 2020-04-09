@@ -540,44 +540,55 @@ and show_param_mode : param_mode -> string =
  (fun x -> Format.asprintf "%a" pp_param_mode x)
 
 and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
- fun fmt x ->
-  Format.fprintf fmt "@[<2>{ ";
+  let pp_fp_flags fmt fp =
+    Format.fprintf fmt "@[<2>(%s@ " "make_fp_flags";
 
-  Format.fprintf fmt "@[%s =@ " "fp_pos";
-  Pos.pp fmt x.fp_pos;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "@[~%s:" "mutability";
+    Format.fprintf fmt "%s" (show_param_mutability_opt (get_fp_mutability fp));
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
 
-  Format.fprintf fmt "@[%s =@ " "fp_name";
-  (match x.fp_name with
-  | None -> Format.pp_print_string fmt "None"
-  | Some x ->
-    Format.pp_print_string fmt "(Some ";
-    Format.fprintf fmt "%S" x;
-    Format.pp_print_string fmt ")");
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "@[~%s:" "accept_disposable";
+    Format.fprintf fmt "%B" (get_fp_accept_disposable fp);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
 
-  Format.fprintf fmt "@[%s =@ " "fp_type";
-  pp_possibly_enforced_ty fmt x.fp_type;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
+    Format.fprintf fmt "@[~%s:" "mode";
+    Format.fprintf fmt "%s" (show_param_mode (get_fp_mode fp));
+    Format.fprintf fmt "@]";
 
-  Format.fprintf fmt "@[%s =@ " "fp_kind";
-  pp_param_mode fmt x.fp_kind;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
+    Format.fprintf fmt ")@]"
+  in
 
-  Format.fprintf fmt "@[%s =@ " "fp_accept_disposable";
-  Format.fprintf fmt "%B" x.fp_accept_disposable;
-  Format.fprintf fmt "@]";
-  Format.fprintf fmt ";@ ";
+  fun fmt x ->
+    Format.fprintf fmt "@[<2>{ ";
 
-  Format.fprintf fmt "@[%s =@ " "fp_mutable";
-  Format.fprintf fmt "%s" (show_param_mutability_opt x.fp_mutability);
-  Format.fprintf fmt "@]";
+    Format.fprintf fmt "@[%s =@ " "fp_pos";
+    Pos.pp fmt x.fp_pos;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
 
-  Format.fprintf fmt "@ }@]"
+    Format.fprintf fmt "@[%s =@ " "fp_name";
+    (match x.fp_name with
+    | None -> Format.pp_print_string fmt "None"
+    | Some x ->
+      Format.pp_print_string fmt "(Some ";
+      Format.fprintf fmt "%S" x;
+      Format.pp_print_string fmt ")");
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "fp_type";
+    pp_possibly_enforced_ty fmt x.fp_type;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@[%s =@ " "fp_flags";
+    pp_fp_flags fmt x;
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt ";@ ";
+
+    Format.fprintf fmt "@ }@]"
 
 and show_fun_param : type a. a ty fun_param -> string =
  (fun x -> Format.asprintf "%a" pp_fun_param x)
@@ -687,6 +698,16 @@ and pp_class_elt : Format.formatter -> class_elt -> unit =
 
     Format.fprintf fmt "@[~%s:" "dynamicallycallable";
     Format.fprintf fmt "%B" (get_ce_dynamicallycallable ce);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "xhp_attr";
+    (match get_ce_xhp_attr ce with
+    | None -> Format.pp_print_string fmt "None"
+    | Some x ->
+      Format.pp_print_string fmt "(Some ";
+      pp_xhp_attr fmt x;
+      Format.pp_print_string fmt ")");
     Format.fprintf fmt "@]";
 
     Format.fprintf fmt ")@]"

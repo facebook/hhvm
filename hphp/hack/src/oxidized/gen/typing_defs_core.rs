@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7017a66c71e1e3ea1b590e605856b7d1>>
+// @generated SignedSource<<56ec957c96090db8e98671b6eb5ee0e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -750,10 +750,8 @@ pub struct FunParam {
     pub pos: pos::Pos,
     pub name: Option<String>,
     pub type_: PossiblyEnforcedTy,
-    pub kind: ParamMode,
-    pub accept_disposable: bool,
-    pub mutability: Option<ParamMutability>,
     pub rx_annotation: Option<ParamRxAnnotation>,
+    pub flags: isize,
 }
 
 pub type FunParams = Vec<FunParam>;

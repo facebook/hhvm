@@ -137,10 +137,10 @@ module Full = struct
         ty to_doc st env et_type;
       ]
 
-  and fun_param ~ty to_doc st env { fp_name; fp_type; fp_kind; _ } =
+  and fun_param ~ty to_doc st env ({ fp_name; fp_type; _ } as fp) =
     Concat
       [
-        (match fp_kind with
+        (match get_fp_mode fp with
         | FPinout -> text "inout" ^^ Space
         | _ -> Nothing);
         (match (fp_name, ty to_doc st env fp_type.et_type) with
@@ -979,7 +979,9 @@ module Json = struct
       let callconv cc =
         [("callConvention", JSON_String (param_mode_to_string cc))]
       in
-      let param fp = obj @@ callconv fp.fp_kind @ typ fp.fp_type.et_type in
+      let param fp =
+        obj @@ callconv (get_fp_mode fp) @ typ fp.fp_type.et_type
+      in
       let params fps = [("params", JSON_Array (List.map fps param))] in
       obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
     | (p, Tarraykind (AKvarray_or_darray (ty1, ty2))) ->
@@ -1340,12 +1342,14 @@ module Json = struct
                 Ok
                   {
                     fp_type = { et_type = param_type; et_enforced = false };
-                    fp_kind = callconv;
+                    fp_flags =
+                      make_fp_flags
+                        ~mode:callconv
+                        ~accept_disposable:false
+                        ~mutability:None;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos.none;
                     fp_name = None;
-                    fp_accept_disposable = false;
-                    fp_mutability = None;
                     fp_rx_annotation = None;
                   })
           in

@@ -94,7 +94,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)
 
 and print_fun_param_exn param =
-  match param.fp_kind with
+  match get_fp_mode param with
   | FPinout -> "inout " ^ print_ty_exn param.fp_type.et_type
   | _ -> print_ty_exn param.fp_type.et_type
 

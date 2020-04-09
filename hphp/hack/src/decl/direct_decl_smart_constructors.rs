@@ -1065,9 +1065,7 @@ impl DirectDeclSmartConstructors<'_> {
                                         enforced: false,
                                         type_: self.node_to_ty(node, type_variables)?,
                                     },
-                                    kind: ParamMode::FPnormal,
-                                    accept_disposable: false,
-                                    mutability: None,
+                                    flags: 0,
                                     rx_annotation: None,
                                 })
                             })
@@ -1358,6 +1356,24 @@ impl DirectDeclSmartConstructors<'_> {
                                 ty
                             })?,
                         };
+                        let mut flags = match attributes.param_mutability {
+                            Some(ParamMutability::ParamBorrowedMutable) => {
+                                typing_defs_flags::MUTABLE_FLAGS_BORROWED
+                            }
+                            Some(ParamMutability::ParamOwnedMutable) => {
+                                typing_defs_flags::MUTABLE_FLAGS_OWNED
+                            }
+                            Some(ParamMutability::ParamMaybeMutable) => {
+                                typing_defs_flags::MUTABLE_FLAGS_MAYBE
+                            }
+                            None => 0,
+                        };
+                        match kind {
+                            ParamMode::FPinout => {
+                                flags |= typing_defs_flags::FP_FLAGS_INOUT;
+                            }
+                            ParamMode::FPnormal => {}
+                        };
                         let param = FunParam {
                             pos: id.0,
                             name: Some(id.1),
@@ -1365,9 +1381,7 @@ impl DirectDeclSmartConstructors<'_> {
                                 enforced: false,
                                 type_,
                             },
-                            kind,
-                            accept_disposable: false,
-                            mutability: attributes.param_mutability,
+                            flags,
                             rx_annotation: None,
                         };
                         let arity = match (arity, initializer, variadic) {

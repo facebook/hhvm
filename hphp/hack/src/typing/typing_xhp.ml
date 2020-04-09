@@ -28,8 +28,7 @@ let raise_xhp_required env pos ureason ty =
  *)
 let xhp_attributes_for_class info : (string * class_elt) list =
   Cls.props info
-  |> List.filter ~f:(fun (_, elt_) ->
-         Option.is_some (get_ce_flags_xhp_attr elt_.ce_flags))
+  |> List.filter ~f:(fun (_, elt_) -> Option.is_some (get_ce_xhp_attr elt_))
 
 (**
  * Walks a type and gathers all the XHP, adding an error when we encounter a

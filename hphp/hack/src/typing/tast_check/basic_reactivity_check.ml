@@ -186,10 +186,10 @@ let check_borrowing
   in
   let check key =
     (* only check mutable expressions *)
-    match (Borrowable_args.find_opt key mut_args, p.fp_mutability) with
+    match (Borrowable_args.find_opt key mut_args, get_fp_mutability p) with
     (* first time we see the parameter - just record it *)
     | (None, _) ->
-      Borrowable_args.add key (get_position e, p.fp_mutability) mut_args
+      Borrowable_args.add key (get_position e, get_fp_mutability p) mut_args
     (* error case 1, expression was already passed as mutable parameter *)
     (* error case 2, expression was passed a maybe mutable parameter before and
        now is passed again as mutable *)
@@ -199,7 +199,7 @@ let check_borrowing
         Some Param_borrowed_mutable ) ->
       Errors.mutable_expression_as_multiple_mutable_arguments
         (get_position e)
-        (mut_to_string p.fp_mutability)
+        (mut_to_string (get_fp_mutability p))
         pos
         (mut_to_string mut);
       mut_args
@@ -241,10 +241,10 @@ let rec check_param_mutability
       not
         (Option.equal
            equal_param_mutability
-           param.fp_mutability
+           (get_fp_mutability param)
            (Some Param_maybe_mutable))
     then
-      match param.fp_mutability with
+      match get_fp_mutability param with
       (* maybe-mutable argument value *)
       | _ when expr_is_maybe_mutable env e ->
         Errors.maybe_mutable_argument_mismatch param.fp_pos (get_position e)
@@ -308,9 +308,17 @@ let check_mutability_fun_params env mut_args call_ty el =
       begin
         match fty.ft_arity with
         (* maybe mutable variadic parameter *)
-        | Fvariadic (_, { fp_mutability = Some Param_maybe_mutable; _ }) -> ()
-        | Fvariadic (_, ({ fp_mutability = req_mut; _ } as param)) ->
-          error_on_first_mismatched_argument ~req_mut param remaining_exprs
+        | Fvariadic (_, param)
+          when Option.equal
+                 equal_param_mutability
+                 (get_fp_mutability param)
+                 (Some Param_maybe_mutable) ->
+          ()
+        | Fvariadic (_, param) ->
+          error_on_first_mismatched_argument
+            ~req_mut:(get_fp_mutability param)
+            param
+            remaining_exprs
         | _ -> ()
       end;
       begin

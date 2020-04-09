@@ -408,10 +408,10 @@ and fun_arity tcopt root variance static env arity =
   | Fvariadic (_, fp) -> fun_param tcopt root variance static env fp
 
 and fun_param
-    tcopt root variance static env { fp_type = { et_type = ty; _ }; fp_kind; _ }
+    tcopt root variance static env ({ fp_type = { et_type = ty; _ }; _ } as fp)
     =
   let pos = get_pos ty in
-  match fp_kind with
+  match get_fp_mode fp with
   | FPnormal ->
     let reason = (pos, Rfun_parameter static, Pcontravariant) in
     let variance = flip reason variance in
@@ -697,7 +697,7 @@ and get_typarams ctx root env (ty : decl_ty) =
     let get_typarams_param acc fp =
       let tp = get_typarams ctx root env fp.fp_type.et_type in
       let tp =
-        match fp.fp_kind with
+        match get_fp_mode fp with
         (* Parameters behave contravariantly *)
         | FPnormal -> flip tp
         (* Inout parameters behave both co- and contra-variantly *)

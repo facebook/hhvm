@@ -194,10 +194,12 @@ let make_param_ty env ~is_lambda param =
     fp_pos = param.param_pos;
     fp_name = Some param.param_name;
     fp_type = { et_type = ty; et_enforced = false };
-    fp_kind = mode;
-    fp_mutability = get_param_mutability param.param_user_attributes;
-    fp_accept_disposable =
-      has_accept_disposable_attribute param.param_user_attributes;
+    fp_flags =
+      make_fp_flags
+        ~mode
+        ~mutability:(get_param_mutability param.param_user_attributes)
+        ~accept_disposable:
+          (has_accept_disposable_attribute param.param_user_attributes);
     fp_rx_annotation = rx_annotation;
   }
 

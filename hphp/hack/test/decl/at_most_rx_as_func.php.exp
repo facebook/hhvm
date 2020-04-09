@@ -27,8 +27,10 @@ Parsed decls:
                             (Rhint (root|at_most_rx_as_func.php line 5, characters 34-34),
                              (Tgeneric "T"))
                             };
-                          fp_kind = FPnormal; fp_accept_disposable = false;
-                          fp_mutable = none }
+                          fp_flags =
+                          (make_fp_flags ~mutability:none
+                            ~accept_disposable:false ~mode:FPnormal);
+                           }
                          ];
                        ft_ret =
                        { et_enforced = false;
@@ -41,8 +43,10 @@ Parsed decls:
                          ~returns_mutable:false ~returns_void_to_rx:false);
                        ft_reactive = RxVar {} }))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                };
               { fp_pos = [6:5-7]; fp_name = (Some "$x");
                 fp_type =
                 { et_enforced = false;
@@ -50,8 +54,10 @@ Parsed decls:
                   (Rhint (root|at_most_rx_as_func.php line 6, characters 3-3),
                    (Tgeneric "T"))
                   };
-                fp_kind = FPnormal; fp_accept_disposable = false;
-                fp_mutable = none }
+                fp_flags =
+                (make_fp_flags ~mutability:none ~accept_disposable:false
+                  ~mode:FPnormal);
+                 }
               ];
             ft_ret =
             { et_enforced = false;

@@ -223,8 +223,8 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
         false
       | (_, _) -> true
     in
-    let parent_attr = get_ce_flags_xhp_attr parent_class_elt.ce_flags in
-    let attr = get_ce_flags_xhp_attr class_elt.ce_flags in
+    let parent_attr = get_ce_xhp_attr parent_class_elt in
+    let attr = get_ce_xhp_attr class_elt in
     match (parent_attr, attr) with
     | (Some { xa_tag = parent_tag; _ }, Some { xa_tag = tag; _ })
       when is_less_strict (tag, parent_tag) ->

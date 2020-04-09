@@ -613,9 +613,8 @@ let default_fun_param ?(pos = Pos.none) ty : 'a fun_param =
     fp_pos = pos;
     fp_name = None;
     fp_type = { et_type = ty; et_enforced = false };
-    fp_kind = FPnormal;
-    fp_accept_disposable = false;
-    fp_mutability = None;
+    fp_flags =
+      make_fp_flags ~mode:FPnormal ~accept_disposable:false ~mutability:None;
     fp_rx_annotation = None;
   }
 

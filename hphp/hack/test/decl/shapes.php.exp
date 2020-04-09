@@ -23,8 +23,10 @@ Parsed decls:
                         (Tgeneric "T"))
                        ]))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -57,8 +59,10 @@ Parsed decls:
                  (Rhint (root|shapes.php line 10, characters 3-12),
                   (Tapply (([10:3-13], "\\Coordinate"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -112,8 +116,10 @@ Parsed decls:
                          } }
                      )))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;

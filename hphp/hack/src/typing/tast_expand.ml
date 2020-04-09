@@ -80,24 +80,13 @@ let expand_ty ?var_hook ?pos env ty =
       ft_ret = exp_possibly_enforced_ty ft_ret;
       ft_params = List.map ~f:exp_fun_param ft_params;
     }
-  and exp_fun_param
-      {
-        fp_pos;
-        fp_name;
-        fp_kind;
-        fp_type;
-        fp_mutability;
-        fp_accept_disposable;
-        fp_rx_annotation;
-      } =
+  and exp_fun_param { fp_pos; fp_name; fp_type; fp_rx_annotation; fp_flags } =
     {
       fp_pos;
       fp_name;
-      fp_kind;
-      fp_accept_disposable;
-      fp_mutability;
       fp_type = exp_possibly_enforced_ty fp_type;
       fp_rx_annotation;
+      fp_flags;
     }
   and exp_possibly_enforced_ty { et_type; et_enforced } =
     { et_type = exp_ty et_type; et_enforced }

@@ -250,7 +250,6 @@ and obj_get_concrete_ty
               ( {
                   ce_visibility = vis;
                   ce_type = (lazy member_);
-                  ce_flags;
                   ce_deprecated;
                   _;
                 } as member_ce ) ->
@@ -320,9 +319,7 @@ and obj_get_concrete_ty
                 in
                 (env, mk (r, Tfun ft), explicit_targs, false)
               | _ ->
-                let is_xhp_attr =
-                  Option.is_some (get_ce_flags_xhp_attr ce_flags)
-                in
+                let is_xhp_attr = Option.is_some (get_ce_xhp_attr member_ce) in
                 let { et_type; et_enforced } =
                   Typing_enforceability.compute_enforced_and_pessimize_ty
                     env

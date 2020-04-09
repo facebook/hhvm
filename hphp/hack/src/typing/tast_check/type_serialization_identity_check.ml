@@ -44,16 +44,18 @@ let rec strip_ty ty =
     | Tintersection tyl -> Tintersection (strip_tyl tyl)
     | Tclass (sid, exact, tyl) -> Tclass (sid, exact, strip_tyl tyl)
     | Tfun { ft_params; ft_ret; _ } ->
-      let strip_param { fp_type; fp_kind; _ } =
+      let strip_param ({ fp_type; _ } as fp) =
         let fp_type = strip_possibly_enforced_ty fp_type in
         {
           fp_type;
-          fp_kind;
+          fp_flags =
+            Typing_defs.make_fp_flags
+              ~mode:(get_fp_mode fp)
+              ~accept_disposable:false
+              ~mutability:None;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos.none;
           fp_name = None;
-          fp_accept_disposable = false;
-          fp_mutability = None;
           fp_rx_annotation = None;
         }
       in

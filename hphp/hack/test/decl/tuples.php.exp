@@ -23,8 +23,10 @@ Parsed decls:
                         (Tgeneric "T"))
                        ]))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -57,8 +59,10 @@ Parsed decls:
                  (Rhint (root|tuples.php line 9, characters 24-33),
                   (Tapply (([9:24-34], "\\Coordinate"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -96,8 +100,10 @@ Parsed decls:
                         (Tprim Tfloat))
                        ]))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;

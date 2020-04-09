@@ -82,7 +82,7 @@ and hint_ p env = function
         hf_is_mutable_return = mut_ret;
       } ->
     let make_param ((p, _) as x) k mut =
-      let fp_mutability =
+      let mutability =
         match mut with
         | Some PMutable -> Some Param_borrowed_mutable
         | Some POwnedMutable -> Some Param_owned_mutable
@@ -93,9 +93,11 @@ and hint_ p env = function
         fp_pos = p;
         fp_name = None;
         fp_type = possibly_enforced_hint env x;
-        fp_kind = get_param_mode k;
-        fp_accept_disposable = false;
-        fp_mutability;
+        fp_flags =
+          make_fp_flags
+            ~mode:(get_param_mode k)
+            ~accept_disposable:false
+            ~mutability;
         fp_rx_annotation = None;
       }
     in

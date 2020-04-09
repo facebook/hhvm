@@ -17,8 +17,10 @@ Parsed decls:
                  (Rhint (root|namespace_elaboration.php line 56, characters 20-31),
                   (Tapply (([56:20-32], "\\MyNamespace\\MyBracedType"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -46,8 +48,10 @@ Parsed decls:
                  (Rhint (root|namespace_elaboration.php line 60, characters 26-43),
                   (Tapply (([60:26-44], "\\MyConcatenatedType"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -75,8 +79,10 @@ Parsed decls:
                  (Rhint (root|namespace_elaboration.php line 48, characters 13-18),
                   (Tapply (([48:13-19], "\\MyNamespace\\MyType"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -106,8 +112,10 @@ Parsed decls:
                      ([43:25-31], "\\MyNamespace\\MyScopedNamespace\\MyType"),
                      [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;
@@ -135,8 +143,10 @@ Parsed decls:
                  (Rhint (root|namespace_elaboration.php line 52, characters 19-29),
                   (Tapply (([52:19-30], "\\MyNamespace\\MyOtherType"), [])))
                  };
-               fp_kind = FPnormal; fp_accept_disposable = false;
-               fp_mutable = none }
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~mode:FPnormal);
+                }
               ];
             ft_ret =
             { et_enforced = false;

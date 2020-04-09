@@ -55,8 +55,10 @@ Parsed decls:
                          (Rhint (root|classes_consistent_construct.php line 8, characters 31-31),
                           (Tapply (([8:31-32], "\\A"), [])))
                          };
-                       fp_kind = FPnormal; fp_accept_disposable = false;
-                       fp_mutable = none }
+                       fp_flags =
+                       (make_fp_flags ~mutability:none
+                         ~accept_disposable:false ~mode:FPnormal);
+                        }
                       ];
                     ft_ret =
                     { et_enforced = false;

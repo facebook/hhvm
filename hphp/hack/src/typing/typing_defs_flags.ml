@@ -32,11 +32,14 @@ let ft_flags_async = 0x10
 
 let ft_flags_generator = 0x20
 
-let ft_flags_param_owned_mutable = 0x40
+(* These flags are usd for return type on FunType and parameter for FunParam *)
+let mutable_flags_owned = 0x40
 
-let ft_flags_param_borrowed_mutable = 0x80
+let mutable_flags_borrowed = 0x80
 
-let ft_flags_param_maybe_mutable = 0xC0
+let mutable_flags_maybe = 0xC0
+
+let mutable_flags_mask = 0xC0
 
 let ft_flags_instantiated_targs = 0x100
 
@@ -76,3 +79,8 @@ let ce_flags_xa_tag_required = 0x800
 let ce_flags_xa_tag_lateinit = 0x1000
 
 let ce_flags_xa_tag_none = 0x1800
+
+(* fun_param flags *)
+let fp_flags_accept_disposable = 0x1
+
+let fp_flags_inout = 0x2

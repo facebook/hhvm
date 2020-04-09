@@ -166,9 +166,9 @@ let compute_enforced_and_pessimize_fun_type env (ft : decl_fun_type) =
   let ft_params =
     List.map
       ~f:(fun fp ->
-        let { fp_type = { et_type; _ }; fp_kind; _ } = fp in
+        let { fp_type = { et_type; _ }; _ } = fp in
         let f =
-          if equal_param_mode fp_kind FPinout then
+          if equal_param_mode (get_fp_mode fp) FPinout then
             compute_enforced_and_pessimize_ty
           else
             compute_enforced_ty

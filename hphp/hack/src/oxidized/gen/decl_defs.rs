@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c7983ed2cbef620692a8312ece86329a>>
+// @generated SignedSource<<bfda8f611f7c86d6e2024f2616c5a25a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -272,20 +272,8 @@ pub struct DeclClassType {
     Serialize
 )]
 pub struct Element {
-    pub final_: bool,
-    pub synthesized: bool,
-    /// Only relevant for methods
-    pub override_: bool,
-    /// Only relevant for methods
-    pub dynamicallycallable: bool,
-    pub memoizelsb: bool,
-    pub abstract_: bool,
+    pub flags: isize,
     pub reactivity: Option<MethodReactivity>,
-    /// Only relevant for properties
-    pub xhp_attr: Option<XhpAttr>,
-    pub const_: bool,
-    pub lateinit: bool,
-    pub lsb: bool,
     pub origin: String,
     pub visibility: Visibility,
     pub fixme_codes: i_set::ISet,

@@ -607,9 +607,8 @@ and class_decl
   let cstr = constructor_decl ~sh parent_cstr c in
   let has_concrete_cstr =
     match fst cstr with
-    | None
-    | Some { elt_abstract = true; _ } ->
-      false
+    | None -> false
+    | Some elt when get_elt_abstract elt -> false
     | _ -> true
   in
   let impl = c.sc_extends @ c.sc_implements @ c.sc_uses in
@@ -787,8 +786,8 @@ and constructor_decl
   let cstr =
     match (class_.sc_constructor, pcstr) with
     | (None, _) -> pcstr
-    | (Some method_, Some { elt_final = true; elt_origin; _ }) ->
-      let fe = Decl_heap.Constructors.find_unsafe elt_origin in
+    | (Some method_, Some elt) when get_elt_final elt ->
+      let fe = Decl_heap.Constructors.find_unsafe elt.elt_origin in
       Errors.override_final
         ~parent:fe.fe_pos
         ~child:(fst method_.sm_name)
@@ -810,16 +809,18 @@ and build_constructor
   let pos = fst method_.sm_name in
   let cstr =
     {
-      elt_final = method_.sm_final;
-      elt_abstract = method_.sm_abstract;
-      elt_xhp_attr = None;
-      elt_const = false;
-      elt_lateinit = false;
-      elt_lsb = false;
-      elt_override = false;
-      elt_memoizelsb = false;
-      elt_dynamicallycallable = false;
-      elt_synthesized = false;
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:None
+          ~final:method_.sm_final
+          ~abstract:method_.sm_abstract
+          ~lateinit:false
+          ~const:false
+          ~lsb:false
+          ~memoizelsb:false
+          ~synthesized:false
+          ~override:false
+          ~dynamicallycallable:false;
       elt_visibility = vis;
       elt_origin = class_name;
       elt_reactivity = None;
@@ -888,16 +889,18 @@ and prop_decl
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
   let elt =
     {
-      elt_final = true;
-      elt_xhp_attr = sp.sp_xhp_attr;
-      elt_const = sp.sp_const;
-      elt_lateinit = sp.sp_lateinit;
-      elt_lsb = false;
-      elt_synthesized = false;
-      elt_override = false;
-      elt_dynamicallycallable = false;
-      elt_memoizelsb = false;
-      elt_abstract = sp.sp_abstract;
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:sp.sp_xhp_attr
+          ~final:true
+          ~lsb:false
+          ~synthesized:false
+          ~override:false
+          ~memoizelsb:false
+          ~const:sp.sp_const
+          ~lateinit:sp.sp_lateinit
+          ~abstract:sp.sp_abstract
+          ~dynamicallycallable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
@@ -923,16 +926,18 @@ and static_prop_decl
   let vis = visibility (snd c.sc_name) sp.sp_visibility in
   let elt =
     {
-      elt_final = true;
-      elt_const = sp.sp_const;
-      elt_lateinit = sp.sp_lateinit;
-      elt_lsb = sp.sp_lsb;
-      elt_xhp_attr = sp.sp_xhp_attr;
-      elt_override = false;
-      elt_dynamicallycallable = false;
-      elt_memoizelsb = false;
-      elt_abstract = sp.sp_abstract;
-      elt_synthesized = false;
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:sp.sp_xhp_attr
+          ~final:true
+          ~const:sp.sp_const
+          ~lateinit:sp.sp_lateinit
+          ~lsb:sp.sp_lsb
+          ~override:false
+          ~memoizelsb:false
+          ~abstract:sp.sp_abstract
+          ~synthesized:false
+          ~dynamicallycallable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
@@ -1054,16 +1059,18 @@ and method_redecl_acc
   in
   let elt =
     {
-      elt_final = m.smr_final;
-      elt_xhp_attr = None;
-      elt_const = false;
-      elt_lateinit = false;
-      elt_lsb = false;
-      elt_abstract = m.smr_abstract;
-      elt_override = false;
-      elt_memoizelsb = false;
-      elt_dynamicallycallable = false;
-      elt_synthesized = false;
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:None
+          ~final:m.smr_final
+          ~abstract:m.smr_abstract
+          ~const:false
+          ~lateinit:false
+          ~lsb:false
+          ~override:false
+          ~memoizelsb:false
+          ~synthesized:false
+          ~dynamicallycallable:false;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = None;
@@ -1093,7 +1100,6 @@ and method_decl_acc
     ((acc, condition_types) : Decl_defs.element SMap.t * SSet.t)
     (m : Shallow_decl_defs.shallow_method) : Decl_defs.element SMap.t * SSet.t =
   let check_override = method_check_override c m acc in
-  let has_memoizelsb = m.sm_memoizelsb in
   let (pos, id) = m.sm_name in
   let get_reactivity t =
     match get_node t with
@@ -1133,16 +1139,18 @@ and method_decl_acc
   in
   let elt =
     {
-      elt_final = m.sm_final;
-      elt_xhp_attr = None;
-      elt_const = false;
-      elt_lateinit = false;
-      elt_lsb = false;
-      elt_abstract = m.sm_abstract;
-      elt_override = check_override;
-      elt_dynamicallycallable = m.sm_dynamicallycallable;
-      elt_memoizelsb = has_memoizelsb;
-      elt_synthesized = false;
+      elt_flags =
+        make_ce_flags
+          ~xhp_attr:None
+          ~final:m.sm_final
+          ~abstract:m.sm_abstract
+          ~override:check_override
+          ~synthesized:false
+          ~lsb:false
+          ~memoizelsb:false
+          ~const:false
+          ~lateinit:false
+          ~dynamicallycallable:m.sm_dynamicallycallable;
       elt_visibility = vis;
       elt_origin = snd c.sc_name;
       elt_reactivity = m.sm_reactivity;

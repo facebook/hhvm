@@ -56,10 +56,10 @@ let empty =
 (*****************************************************************************)
 
 let should_keep_old_sig sig_ old_sig =
-  ((not old_sig.elt_abstract) && sig_.elt_abstract)
-  || Bool.equal old_sig.elt_abstract sig_.elt_abstract
-     && (not old_sig.elt_synthesized)
-     && sig_.elt_synthesized
+  ((not (get_elt_abstract old_sig)) && get_elt_abstract sig_)
+  || Bool.equal (get_elt_abstract old_sig) (get_elt_abstract sig_)
+     && (not (get_elt_synthesized old_sig))
+     && get_elt_synthesized sig_
 
 let add_method name sig_ methods =
   match SMap.find_opt name methods with
@@ -88,7 +88,7 @@ let add_method name sig_ methods =
      * wins!), but not really OK when the naming conflict is trait vs
      * trait (we rely on HHVM to catch the error at runtime) *)
     else
-      SMap.add name { sig_ with elt_override = false } methods
+      SMap.add name (set_elt_override sig_ false) methods
 
 let add_methods methods' acc = SMap.fold add_method methods' acc
 
@@ -278,7 +278,7 @@ let make_substitution class_type class_parameters =
   Inst.make_subst class_type.dc_tparams class_parameters
 
 let mark_as_synthesized inh =
-  let mark_elt elt = { elt with elt_synthesized = true } in
+  let mark_elt elt = set_elt_synthesized elt true in
   {
     inh with
     ih_substs =
@@ -304,7 +304,7 @@ let mark_as_synthesized inh =
 let filter_privates class_type =
   let is_not_private _ elt =
     match elt.elt_visibility with
-    | Vprivate _ when elt.elt_lsb -> true
+    | Vprivate _ when get_elt_lsb elt -> true
     | Vprivate _ -> false
     | Vpublic
     | Vprotected _ ->
@@ -403,7 +403,7 @@ let inherit_hack_xhp_attrs_only class_type =
     SMap.fold
       begin
         fun name prop acc ->
-        if Option.is_some prop.elt_xhp_attr then
+        if Option.is_some (get_elt_xhp_attr prop) then
           SMap.add name prop acc
         else
           acc

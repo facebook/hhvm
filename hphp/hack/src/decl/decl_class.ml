@@ -32,41 +32,14 @@ let rec apply_substs substs class_context (pos, ty) =
 let element_to_class_elt
     (ce_pos, ce_type)
     {
-      elt_final = final;
-      elt_synthesized = synthesized;
-      elt_override = override;
-      elt_lsb = lsb;
-      elt_memoizelsb = memoizelsb;
-      elt_abstract = abstract;
-      elt_dynamicallycallable = dynamicallycallable;
-      elt_xhp_attr = xhp_attr;
-      elt_const = const;
-      elt_lateinit = lateinit;
+      elt_flags = ce_flags;
       elt_origin = ce_origin;
       elt_visibility = ce_visibility;
       elt_reactivity = _;
       elt_fixme_codes = _;
       elt_deprecated = ce_deprecated;
     } =
-  {
-    ce_visibility;
-    ce_origin;
-    ce_type;
-    ce_deprecated;
-    ce_pos;
-    ce_flags =
-      make_ce_flags
-        ~xhp_attr
-        ~abstract
-        ~final
-        ~const
-        ~synthesized
-        ~lateinit
-        ~override
-        ~lsb
-        ~memoizelsb
-        ~dynamicallycallable;
-  }
+  { ce_visibility; ce_origin; ce_type; ce_deprecated; ce_pos; ce_flags }
 
 let to_class_type
     {

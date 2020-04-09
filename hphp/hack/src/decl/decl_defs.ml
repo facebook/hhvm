@@ -188,19 +188,34 @@ type decl_class_type = {
 [@@deriving show]
 
 and element = {
-  elt_final: bool;
-  elt_synthesized: bool;
-  elt_override: bool;  (** Only relevant for methods *)
-  elt_dynamicallycallable: bool;  (** Only relevant for methods *)
-  elt_memoizelsb: bool;
-  elt_abstract: bool;
+  elt_flags: int;
   elt_reactivity: method_reactivity option;
-  elt_xhp_attr: xhp_attr option;  (** Only relevant for properties *)
-  elt_const: bool;
-  elt_lateinit: bool;
-  elt_lsb: bool;
   elt_origin: string;
   elt_visibility: visibility;
   elt_fixme_codes: ISet.t;
   elt_deprecated: string option;
 }
+
+let get_elt_abstract elt =
+  Typing_defs_flags.(is_set ce_flags_abstract elt.elt_flags)
+
+let get_elt_final elt = Typing_defs_flags.(is_set ce_flags_final elt.elt_flags)
+
+let get_elt_lsb elt = Typing_defs_flags.(is_set ce_flags_lsb elt.elt_flags)
+
+let get_elt_synthesized elt =
+  Typing_defs_flags.(is_set ce_flags_synthesized elt.elt_flags)
+
+let get_elt_xhp_attr elt = Typing_defs.flags_to_xhp_attr elt.elt_flags
+
+let set_elt_synthesized elt v =
+  {
+    elt with
+    elt_flags = Typing_defs_flags.(set_bit ce_flags_synthesized v elt.elt_flags);
+  }
+
+let set_elt_override elt v =
+  {
+    elt with
+    elt_flags = Typing_defs_flags.(set_bit ce_flags_override v elt.elt_flags);
+  }

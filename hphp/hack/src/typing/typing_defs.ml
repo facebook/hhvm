@@ -1009,14 +1009,14 @@ let xhp_attr_to_ce_flags xa =
     | Some Required -> ce_flags_xa_tag_required
     | Some Lateinit -> ce_flags_xa_tag_lateinit)
 
-let get_ce_xhp_attr ce =
-  let tag_flags = Int.bit_and ce_flags_xa_tag_mask ce.ce_flags in
+let flags_to_xhp_attr flags =
+  let tag_flags = Int.bit_and ce_flags_xa_tag_mask flags in
   if Int.equal tag_flags 0 then
     None
   else
     Some
       {
-        xa_has_default = is_set ce_flags_xa_has_default ce.ce_flags;
+        xa_has_default = is_set ce_flags_xa_has_default flags;
         xa_tag =
           ( if Int.equal tag_flags ce_flags_xa_tag_none then
             None
@@ -1025,6 +1025,8 @@ let get_ce_xhp_attr ce =
           else
             Some Lateinit );
       }
+
+let get_ce_xhp_attr ce = flags_to_xhp_attr ce.ce_flags
 
 let make_ce_flags
     ~xhp_attr

@@ -135,7 +135,8 @@ let trait_props decl_env c props =
               match fst cstr with
               | None -> SSet.union members acc
               | Some cstr
-                when String.( <> ) cstr.elt_origin trait || cstr.elt_abstract ->
+                when String.( <> ) cstr.elt_origin trait
+                     || get_elt_abstract cstr ->
                 SSet.union members acc
               | _ when Option.is_some c.sc_constructor -> SSet.union members acc
               | _ -> acc

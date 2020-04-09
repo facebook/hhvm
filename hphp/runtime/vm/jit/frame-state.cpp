@@ -381,11 +381,12 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   case CallBuiltin:
     {
       auto const extra = inst->extra<CallBuiltin>();
-      auto const base = extra->retSpOffset;
-      auto const numOut = extra->callee->numInOutParams();
-      for (auto i = uint32_t{0}; i < numOut; ++i) {
-        auto const ty = irgen::callOutType(extra->callee, i);
-        setType(stk(base + i), ty);
+      if (auto const base = extra->retSpOffset) {
+        auto const numOut = extra->callee->numInOutParams();
+        for (auto i = uint32_t{0}; i < numOut; ++i) {
+          auto const ty = irgen::callOutType(extra->callee, i);
+          setType(stk(*base + i), ty);
+        }
       }
     }
     break;

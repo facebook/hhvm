@@ -772,7 +772,7 @@ struct SyncReturnBCData : IRExtraData {
 
 struct CallBuiltinData : IRExtraData {
   explicit CallBuiltinData(IRSPRelOffset spOffset,
-                           IRSPRelOffset retSpOffset,
+                           folly::Optional<IRSPRelOffset> retSpOffset,
                            const Func* callee,
                            int32_t numNonDefault)
     : spOffset(spOffset)
@@ -784,12 +784,14 @@ struct CallBuiltinData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
       spOffset.offset, ',',
-      callee->fullName()->data()
+      retSpOffset ? folly::to<std::string>(retSpOffset->offset) : "*", ',',
+      callee->fullName()->data(), ',',
+      numNonDefault
     );
   }
 
   IRSPRelOffset spOffset; // offset from StkPtr to last passed arg
-  IRSPRelOffset retSpOffset; // offset from StkPtr after a return
+  folly::Optional<IRSPRelOffset> retSpOffset; // offset from StkPtr after a return
   const Func* callee;
   int32_t numNonDefault;
 };

@@ -1896,8 +1896,21 @@ SSATmp* builtinCall(IRGS& env,
     env.irb->exceptionStackBoundary();
   }
 
-  auto const retOff =
-    offsetFromIRSP(env, BCSPRelOffset{safe_cast<int32_t>(params.numByAddr)});
+  // Only record the return stack offset if we're inlining or if we're
+  // processing a FCallBuiltin. Otherwise we're processing a
+  // non-inlined NativeImpl. In that case, there shouldn't be anything
+  // on the stack and any out parameters point to the caller's stack,
+  // so there's nothing for FrameState to do.
+  auto const retOff = [&] () -> folly::Optional<IRSPRelOffset> {
+    if (params.forNativeImpl && !catchMaker.inlining()) {
+      assertx(env.irb->fs().bcSPOff() == env.context.initSpOffset);
+      return folly::none;
+    }
+    return offsetFromIRSP(
+      env,
+      BCSPRelOffset{safe_cast<int32_t>(params.numByAddr)}
+    );
+  }();
 
   // Make the actual call.
   SSATmp** const decayedPtr = &realized[0];

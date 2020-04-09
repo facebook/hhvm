@@ -93,6 +93,18 @@ Parsed decls:
       (Rhint (root|typedefs.php line 27, characters 25-45),
        (Tapply (([27:25-46], "\\MyNamespace\\MyString"), [])))
       };
+    "MyNewtype" ->
+    { td_pos = [29:9-18]; td_vis = Opaque; td_tparams = [];
+      td_constraint =
+      (Some (Rhint (root|typedefs.php line 29, characters 22-24),
+             (Tprim Tnum)));
+      td_type =
+      (Rhint (root|typedefs.php line 29, characters 28-30), (Tprim Tint)) };
+    "MyNewtypeWithoutConstraint" ->
+    { td_pos = [30:9-35]; td_vis = Opaque; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|typedefs.php line 30, characters 38-40), (Tprim Tint)) };
     "MyNonnull" ->
     { td_pos = [23:6-15]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
@@ -102,7 +114,7 @@ Parsed decls:
     { td_pos = [22:6-15]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
-        (Rhint (root|typedefs.php line 22, characters 18-24), (Tunion [])) };
+      (Rhint (root|typedefs.php line 22, characters 18-24), (Tunion [])) };
     "MyNum" ->
     { td_pos = [19:6-11]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;

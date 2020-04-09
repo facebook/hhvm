@@ -614,6 +614,7 @@ pub enum Node_ {
     Implements,
     Inout,
     Interface,
+    Newtype,
     Private,
     Protected,
     Public,
@@ -622,6 +623,7 @@ pub enum Node_ {
     Static,
     Super,
     Trait,
+    Type,
     XHP,
     Yield,
 }
@@ -1702,6 +1704,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Implements => Node_::Implements,
             TokenKind::Inout => Node_::Inout,
             TokenKind::Interface => Node_::Interface,
+            TokenKind::Newtype => Node_::Newtype,
+            TokenKind::Type => Node_::Type,
             TokenKind::XHP => Node_::XHP,
             TokenKind::Yield => Node_::Yield,
             TokenKind::Namespace => {
@@ -2079,10 +2083,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_alias_declaration(
         &mut self,
         _attributes: Self::R,
-        _keyword: Self::R,
+        keyword: Self::R,
         name: Self::R,
         generic_params: Self::R,
-        _constraint: Self::R,
+        constraint: Self::R,
         _equal: Self::R,
         aliased_type: Self::R,
         _semicolon: Self::R,
@@ -2094,26 +2098,33 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let Id(pos, name) =
                     get_name(self.state.namespace_builder.current_namespace(), &name)?;
                 let (tparams, type_variables) = self.into_type_params(generic_params?)?;
-                match self.node_to_ty(&aliased_type, &type_variables) {
-                    Ok(ty) => {
-                        Rc::make_mut(&mut self.state.decls).typedefs.insert(
-                            name,
-                            Rc::new(TypedefType {
-                                pos,
-                                vis: aast::TypedefVisibility::Transparent,
-                                tparams,
-                                constraint: None,
-                                type_: ty,
-                                // NB: We have no intention of populating this
-                                // field. Any errors historically emitted during
-                                // shallow decl should be migrated to a NAST
-                                // check.
-                                decl_errors: Some(Errors::empty()),
-                            }),
-                        );
-                    }
-                    Err(msg) => return Err(msg),
-                }
+                let ty = self.node_to_ty(&aliased_type, &type_variables)?;
+                let typedef = TypedefType {
+                    pos,
+                    vis: match keyword? {
+                        Node_::Type => aast::TypedefVisibility::Transparent,
+                        Node_::Newtype => aast::TypedefVisibility::Opaque,
+                        _ => aast::TypedefVisibility::Transparent,
+                    },
+                    tparams,
+                    constraint: match constraint? {
+                        Node_::TypeConstraint(kind_and_hint) => {
+                            let (_kind, hint) = *kind_and_hint;
+                            Some(self.node_to_ty(&hint, &type_variables)?)
+                        }
+                        _ => None,
+                    },
+                    type_: ty,
+                    // NB: We have no intention of populating this
+                    // field. Any errors historically emitted during
+                    // shallow decl should be migrated to a NAST
+                    // check.
+                    decl_errors: Some(Errors::empty()),
+                };
+
+                Rc::make_mut(&mut self.state.decls)
+                    .typedefs
+                    .insert(name, Rc::new(typedef));
             }
         };
         Ok(Node_::Ignored)

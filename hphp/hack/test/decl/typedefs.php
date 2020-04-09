@@ -25,3 +25,6 @@ type MyDynamic = dynamic;
 type MyArrayKey = arraykey;
 
 type MyNamespacedType = \MyNamespace\MyString;
+
+newtype MyNewtype as num = int;
+newtype MyNewtypeWithoutConstraint = int;

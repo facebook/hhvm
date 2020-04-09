@@ -581,7 +581,7 @@ ArrayData* PackedArray::MakeUninitializedVec(uint32_t size) {
 }
 
 ArrayData* PackedArray::MakeVecFromAPC(const APCArray* apc) {
-  assertx(apc->isVec());
+  assertx(apc->isPacked());
   auto const apcSize = apc->size();
   VecArrayInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {

@@ -88,6 +88,14 @@ struct APCArray {
   void reference() const { m_handle.referenceNonRoot(); }
   void unreference() const { m_handle.unreferenceNonRoot(); }
 
+  ArrayData* toLocalArray() const {
+    // We don't have direct constructors for "plain" PHP arrays, so convert a
+    // Hack array of the appropriate type instead. Since it has refcount 1,
+    // we'll do the conversion in place rather than making a copy.
+    auto const ad = isPacked() ? PackedArray::MakeVecFromAPC(this)
+                               : MixedArray::MakeDictFromAPC(this);
+    return ad->toPHPArray(/*copy=*/false);
+  }
   ArrayData* toLocalVArray() const {
     assertx(!RuntimeOption::EvalHackArrDVArrs);
     return PackedArray::MakeVArrayFromAPC(this);

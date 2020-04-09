@@ -619,7 +619,7 @@ ArrayData* MixedArray::MakeUncounted(ArrayData* array,
 }
 
 ArrayData* MixedArray::MakeDictFromAPC(const APCArray* apc) {
-  assertx(apc->isDict());
+  assertx(apc->isHashed());
   auto const apcSize = apc->size();
   DictInit init{apcSize};
   for (uint32_t i = 0; i < apcSize; ++i) {

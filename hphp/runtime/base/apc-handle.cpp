@@ -226,7 +226,7 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:
       return Variant::attach(
-        APCLocalArray::Make(APCArray::fromHandle(this))->asArrayData()
+        APCArray::fromHandle(this)->toLocalArray()
       );
     case APCKind::SharedVArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);

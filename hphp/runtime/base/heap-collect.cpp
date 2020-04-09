@@ -154,7 +154,6 @@ HeapObject* Collector::find(const void* ptr) {
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   switch (h->kind()) {
-    case HeaderKind::Apc:
     case HeaderKind::Globals:
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
@@ -508,10 +507,6 @@ NEVER_INLINE void Collector::sweep() {
     // if we return true, call reinitFree() before calling find() again,
     // to ensure the heap remains walkable.
     return need_reinit_free = !h || !marked(h);
-  });
-
-  mm.sweepApcArrays([&](APCLocalArray* a) {
-    return !marked(a);
   });
 
   mm.sweepApcStrings([&](StringData* s) {

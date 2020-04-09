@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/base/perf-mem-event.h"
 
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/member-reflection.h"
@@ -314,9 +313,6 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const SetArray*>(hdr), addr, record);
       break;
 
-    case HeaderKind::Apc:
-      try_member(static_cast<const APCLocalArray*>(hdr), addr, record);
-      break;
     case HeaderKind::Globals:
       try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
       break;

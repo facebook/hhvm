@@ -29,10 +29,6 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-struct APCLocalArray;
-
-//////////////////////////////////////////////////////////////////////
-
 struct APCArray {
   static APCHandle::Pair MakeSharedArray(ArrayData* data,
                                          APCHandleLevel level,
@@ -83,10 +79,6 @@ struct APCArray {
     static_assert(offsetof(APCArray, m_handle) == 0, "");
     return reinterpret_cast<const APCArray*>(handle);
   }
-
-  // Used when creating/destroying a local wrapper (see APCLocalArray).
-  void reference() const { m_handle.referenceNonRoot(); }
-  void unreference() const { m_handle.unreferenceNonRoot(); }
 
   ArrayData* toLocalArray() const {
     // We don't have direct constructors for "plain" PHP arrays, so convert a

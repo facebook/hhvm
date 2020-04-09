@@ -16,8 +16,6 @@
 #ifndef HPHP_HEAP_SCAN_H
 #define HPHP_HEAP_SCAN_H
 
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/heap-graph.h"
 #include "hphp/runtime/base/memory-manager.h"
@@ -118,8 +116,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
       return static_cast<const SetArray*>(h)->scan(scanner);
-    case HeaderKind::Apc:
-      return static_cast<const APCLocalArray*>(h)->scan(scanner);
     case HeaderKind::Globals:
       return static_cast<const GlobalsArray*>(h)->scan(scanner);
     case HeaderKind::RecordArray:

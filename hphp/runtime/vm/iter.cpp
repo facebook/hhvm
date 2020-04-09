@@ -23,13 +23,11 @@
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 namespace HPHP {
@@ -428,13 +426,6 @@ NEVER_INLINE int64_t iter_next_free_mixed(Iter* iter, ArrayData* arr) {
   return 0;
 }
 
-NEVER_INLINE int64_t iter_next_free_apc(Iter* iter, APCLocalArray* arr) {
-  assertx(arr->decWillRelease());
-  APCLocalArray::Release(arr->asArrayData());
-  iter->kill();
-  return 0;
-}
-
 /*
  * new_iter_array creates an iterator for the specified array iff the
  * array is not empty.  If new_iter_array creates an iterator, it does
@@ -776,44 +767,6 @@ int64_t liter_next_cold(Iter* iter,
   }
   liter_value_cell_local_impl(iter, valOut, ad);
   if (keyOut) liter_key_cell_local_impl(iter, keyOut, ad);
-  return 1;
-}
-
-// vtable implementation for APC arrays. This method is quite cold, and we
-// might be better off just using the generic implementation instead.
-// The result is false (= 0) if iteration is done, or true (= 1) otherwise.
-template <bool Local>
-NEVER_INLINE
-static int64_t iter_next_apc_array(Iter* iter,
-                                   local_lval valOut,
-                                   local_lval keyOut,
-                                   ArrayData* ad) {
-  assertx(ad->kind() == ArrayData::kApcKind);
-
-  auto const arrIter = unwrap(iter);
-  auto const arr = APCLocalArray::asApcArray(ad);
-  ssize_t const pos = arr->iterAdvanceImpl(arrIter->getPos());
-  if (UNLIKELY(pos == arrIter->getEnd())) {
-    if (!Local) {
-      if (UNLIKELY(arr->decWillRelease())) {
-        return iter_next_free_apc(iter, arr);
-      }
-      arr->decRefCount();
-    }
-    iter->kill();
-    return 0;
-  }
-  arrIter->setPos(pos);
-
-  auto const val = APCLocalArray::GetPosVal(ad, pos);
-  tvSet(val, valOut);
-  if (LIKELY(!keyOut)) return 1;
-
-  auto const key = APCLocalArray::GetPosKey(ad, pos);
-  auto const oldKey = *keyOut;
-  tvDup(key, keyOut);
-  tvDecRefGen(oldKey);
-
   return 1;
 }
 
@@ -1163,35 +1116,21 @@ int64_t literNextKArrayMixed(Iter* it,
 
 int64_t iterNextArray(Iter* it, local_lval valOut) {
   TRACE(2, "iterNextArray: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  if (ad->isApcArrayKind()) {
-    return iter_next_apc_array<false>(it, valOut, local_lval{}, ad);
-  }
   return iter_next_cold(it, valOut, local_lval{});
 }
 
 int64_t literNextArray(Iter* it, local_lval valOut, ArrayData* ad) {
   TRACE(2, "literNextArray: I %p\n", it);
-  if (ad->isApcArrayKind()) {
-    return iter_next_apc_array<true>(it, valOut, local_lval{}, ad);
-  }
   return liter_next_cold(it, ad, valOut, local_lval{});
 }
 
 int64_t iterNextKArray(Iter* it, local_lval valOut, local_lval keyOut) {
   TRACE(2, "iterNextKArray: I %p\n", it);
-  auto const ad = const_cast<ArrayData*>(unwrap(it)->getArrayData());
-  if (ad->isApcArrayKind()) {
-    return iter_next_apc_array<false>(it, valOut, keyOut, ad);
-  }
   return iter_next_cold(it, valOut, keyOut);
 }
 
 int64_t literNextKArray(Iter* it, local_lval valOut, local_lval keyOut, ArrayData* ad) {
   TRACE(2, "literNextKArray: I %p\n", it);
-  if (ad->isApcArrayKind()) {
-    return iter_next_apc_array<true>(it, valOut, keyOut, ad);
-  }
   return liter_next_cold(it, ad, valOut, keyOut);
 }
 

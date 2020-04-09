@@ -18,7 +18,6 @@
 #include "hphp/runtime/ext/array/ext_array.h"
 
 #include "hphp/runtime/base/array-provenance.h"
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"

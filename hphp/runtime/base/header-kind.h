@@ -43,10 +43,8 @@ namespace HPHP {
  * HHVM_REPO_SCHEMA, because kind values are used in HHBC.
  */
 enum class HeaderKind : uint8_t {
-  // ArrayKind aliases
-  Packed, Mixed, Empty, Apc, Globals,
-  // Record array
-  RecordArray,
+  // PHP arrays
+  Packed, Mixed, Empty, Globals, RecordArray,
   // Hack arrays
   Dict, VecArray, Keyset,
   // Other ordinary refcounted heap objects
@@ -138,8 +136,7 @@ enum class GCBits : uint8_t {};
  * padding with ONE_BIT_REFCOUNT.
  *
  * 0       32     40      48        53  56
- * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, VecArray,
- *                                                   APCLocalArray, RecordArray
+ * [ cnt | kind | marks | arrBits | X  | sizeClass ] Packed, Vec, RecordArray
  * [ cnt | kind | marks | arrBits | X  | keyTypes  ] Mixed, Dict
  * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
  * [ cnt | kind | marks | sizeClass:16             ] String

@@ -189,7 +189,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
       });
 
-    case ArrayData::kApcKind:
     case ArrayData::kGlobalsKind:
       // APC can't store WaitHandles, GlobalsArray is used only for
       // $GLOBALS, which contain non-WaitHandles.

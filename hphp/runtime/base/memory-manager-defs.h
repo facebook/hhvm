@@ -17,8 +17,6 @@
 #ifndef incl_HPHP_MEMORY_MANAGER_DEFS_H
 #define incl_HPHP_MEMORY_MANAGER_DEFS_H
 
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-array.h"
@@ -257,7 +255,6 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Packed */
     0, /* Mixed */
     sizeClass<ArrayData>(), /* Empty */
-    0, /* APCLocalArray */
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
     0, /* Dict */
@@ -312,7 +309,6 @@ inline size_t allocSize(const HeapObject* h) {
   static_assert(kind_sizes[(int)HeaderKind::knd] == 0, #knd);
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
-  CHECKSIZE(Apc)
   CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
   CHECKSIZE(VecArray)
@@ -348,7 +344,6 @@ inline size_t allocSize(const HeapObject* h) {
   switch (kind) {
     case HeaderKind::Packed:
     case HeaderKind::VecArray:
-    case HeaderKind::Apc:
     case HeaderKind::RecordArray:
       // size = kSizeIndex2Size[h->aux16>>8]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));
@@ -602,18 +597,6 @@ template<class Fn> void MemoryManager::forEachObject(Fn fn) {
   });
   for (auto ptr : ptrs) {
     fn(ptr);
-  }
-}
-
-template<class Fn> void MemoryManager::sweepApcArrays(Fn fn) {
-  for (size_t i = 0; i < m_apc_arrays.size();) {
-    auto a = m_apc_arrays[i];
-    if (fn(a)) {
-      a->sweep();
-      removeApcArray(a);
-    } else {
-      ++i;
-    }
   }
 }
 

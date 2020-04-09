@@ -19,7 +19,6 @@
 #include <array>
 #include <tbb/concurrent_unordered_set.h>
 
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-common.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
@@ -229,9 +228,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   if (it != s_arrayDataMap.end()) return replace(*it);
 
   ArrayData* ad;
-  if (((arr->isMixedKind() && !arr->isDArray()) ||
-       arr->isApcArrayKind() ||
-       arr->isGlobalsArrayKind()) &&
+  if (((arr->isMixedKind() && !arr->isDArray()) || arr->isGlobalsArrayKind()) &&
       arr->isVectorData()) {
     ad = PackedArray::ConvertStatic(arr);
   } else {
@@ -270,7 +267,6 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
     EmptyArray::entry,                          \
-    APCLocalArray::entry,                       \
     GlobalsArray::entry,                        \
     RecordArray::entry,                         \
     MixedArray::entry##Dict,   /* Dict */       \
@@ -1008,11 +1004,10 @@ void ArrayData::getNotFound(const StringData* k) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,9> names = {{
+  std::array<const char*,8> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
-    "ApcKind",
     "GlobalsKind",
     "RecordKind",
     "DictKind",

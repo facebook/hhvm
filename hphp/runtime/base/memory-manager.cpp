@@ -49,7 +49,6 @@
 
 namespace HPHP {
 
-const unsigned kInvalidSweepIndex = 0xffffffff;
 __thread bool tl_sweeping;
 THREAD_LOCAL_FLAT(MemoryManager, tl_heap);
 __thread size_t tl_heap_id; // thread's current heap instance id
@@ -355,23 +354,6 @@ void MemoryManager::sweep() {
     }
   } while (!m_sweepables.empty());
 
-  DEBUG_ONLY auto napcs = m_apc_arrays.size();
-  FTRACE(1, "heap-id {} sweep: sweepable {} native {} apc array {}\n",
-         tl_heap_id,
-         num_sweepables,
-         num_natives,
-         napcs);
-
-  // decref apc arrays referenced by this request.  This must happen here
-  // (instead of in resetAllocator), because the sweep routine may use
-  // g_context.
-  while (!m_apc_arrays.empty()) {
-    auto a = m_apc_arrays.back();
-    m_apc_arrays.pop_back();
-    a->sweep();
-    if (debug) a->m_sweep_index = kInvalidSweepIndex;
-  }
-
   if (debug) checkHeap("after MM::sweep");
 }
 
@@ -398,7 +380,6 @@ void MemoryManager::resetAllocator() {
 void MemoryManager::flush() {
   always_assert(empty());
   m_heap.flush();
-  m_apc_arrays = std::vector<APCLocalArray*>();
   m_natives = std::vector<NativeNode*>();
   m_root_handles = std::vector<req::root_handle*>{};
 }
@@ -451,7 +432,7 @@ void MemoryManager::flush() {
  */
 
 const std::array<char*,NumHeaderKinds> header_names = {{
-  "PackedArray", "MixedArray", "EmptyArray", "ApcArray", "GlobalsArray",
+  "PackedArray", "MixedArray", "EmptyArray", "GlobalsArray",
   "RecordArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "ClsMeth", "Record", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
@@ -528,12 +509,6 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Free:
         free_blocks.insert(h, alloc_size);
         break;
-      case HeaderKind::Apc:
-        if (static_cast<APCLocalArray*>(h)->m_sweep_index !=
-            kInvalidSweepIndex) {
-          apc_arrays.insert(h, alloc_size);
-        }
-        break;
       case HeaderKind::String:
         if (static_cast<StringData*>(h)->isProxy()) {
           apc_strings.insert(h, alloc_size);
@@ -589,13 +564,6 @@ void MemoryManager::checkHeap(const char* phase) {
     }
   }
   assertx(num_free_blocks == free_blocks.size());
-
-  // check the apc array list
-  assertx(apc_arrays.size() == m_apc_arrays.size());
-  apc_arrays.prepare();
-  for (UNUSED auto a : m_apc_arrays) {
-    assertx(apc_arrays.isStart(a));
-  }
 
   // check the apc string list
   size_t num_apc_strings = 0;
@@ -1036,21 +1004,6 @@ void MemoryManager::removeNativeObject(NativeNode* node) {
   m_natives[index] = last;
   m_natives.pop_back();
   last->sweep_index = index;
-}
-
-void MemoryManager::addApcArray(APCLocalArray* a) {
-  a->m_sweep_index = m_apc_arrays.size();
-  m_apc_arrays.push_back(a);
-}
-
-void MemoryManager::removeApcArray(APCLocalArray* a) {
-  assertx(a->m_sweep_index < m_apc_arrays.size());
-  assertx(m_apc_arrays[a->m_sweep_index] == a);
-  auto index = a->m_sweep_index;
-  auto last = m_apc_arrays.back();
-  m_apc_arrays[index] = last;
-  m_apc_arrays.pop_back();
-  last->m_sweep_index = index;
 }
 
 void MemoryManager::addSweepable(Sweepable* obj) {

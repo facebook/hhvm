@@ -242,17 +242,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
-      case HeaderKind::Apc: {
-        if (edge.offset >= sizeof(APCLocalArray)) {
-          auto elm_offset = edge.offset - sizeof(APCLocalArray);
-          uint32_t index = elm_offset / sizeof(TypedValue);
-          if (index < static_cast<const APCLocalArray*>(from_hdr)->size()) {
-            return {CapturedPtr::Value, index};
-          }
-        }
-        break;
-      }
-
       case HeaderKind::Pair: {
         if (edge.offset >= c_Pair::dataOffset()) {
           auto elm_offset = edge.offset - c_Pair::dataOffset();

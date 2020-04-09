@@ -45,8 +45,6 @@
 
 namespace HPHP {
 
-struct APCLocalArray;
-
 namespace req {
 struct root_handle;
 }
@@ -872,14 +870,11 @@ struct MemoryManager {
 
   /*
    * Methods for maintaining dedicated sweep lists of sweepable NativeData
-   * objects, APCLocalArray instances, and Sweepables.
+   * objects, and Sweepable instances.
    */
   void addNativeObject(NativeNode*);
   void removeNativeObject(NativeNode*);
-  void addApcArray(APCLocalArray*);
-  void removeApcArray(APCLocalArray*);
   void addSweepable(Sweepable*);
-  template<class Fn> void sweepApcArrays(Fn fn);
   template<class Fn> void sweepApcStrings(Fn fn);
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1030,7 +1025,6 @@ private:
   void* m_limit{nullptr};
   FreelistArray m_freelists;
   StringDataNode m_strings; // in-place node is head of circular list
-  std::vector<APCLocalArray*> m_apc_arrays;
   int64_t m_nextGC{kNoNextGC}; // request gc when heap usage reaches this size
   int64_t m_nextSample{kNoNextSample};
   int64_t m_usageLimit; // OOM when m_stats.usage() > m_usageLimit

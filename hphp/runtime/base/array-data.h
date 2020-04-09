@@ -82,16 +82,15 @@ struct ArrayData : MaybeCountable {
    * kNumKinds-1 since we use these values to index into a table.
    */
   enum ArrayKind : uint8_t {
-    kPackedKind = 0,  // PackedArray with keys in range [0..size)
-    kMixedKind = 1,   // MixedArray arbitrary int or string keys, maybe holes
-    kEmptyKind = 2,   // The singleton static empty array
-    kApcKind = 3,     // APCLocalArray
-    kGlobalsKind = 4, // GlobalsArray
-    kRecordKind = 5,  // RecordArray
-    kDictKind = 6,    // Hack dict
-    kVecKind = 7,     // Hack vec
-    kKeysetKind = 8,  // Hack keyset
-    kNumKinds = 9    // insert new values before kNumKinds.
+    kPackedKind,  // PackedArray with keys in range [0..size)
+    kMixedKind,   // MixedArray arbitrary int or string keys, maybe holes
+    kEmptyKind,   // The singleton static empty array
+    kGlobalsKind, // GlobalsArray
+    kRecordKind,  // RecordArray
+    kDictKind,    // Hack dict
+    kVecKind,     // Hack vec
+    kKeysetKind,  // Hack keyset
+    kNumKinds     // insert new values before kNumKinds.
   };
 
   /*
@@ -246,7 +245,6 @@ public:
    */
   bool isPackedKind() const;
   bool isMixedKind() const;
-  bool isApcArrayKind() const;
   bool isGlobalsArrayKind() const;
   bool isEmptyArrayKind() const;
   bool isDictKind() const;
@@ -780,7 +778,6 @@ protected:
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
-static_assert(ArrayData::kApcKind == uint8_t(HeaderKind::Apc), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/types.h"
-#include "hphp/runtime/base/apc-local-array.h"
 #include "hphp/runtime/base/array-util.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"

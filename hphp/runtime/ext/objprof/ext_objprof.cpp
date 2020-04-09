@@ -182,11 +182,7 @@ bool isObjprofRoot(
 
 /**
  * Measures the size of the array and referenced objects without going
- * into ObjectData* references.
- *
- * These are not measured:
- * kApcKind     // APCArray
- * kGlobalsKind // GlobalsArray
+ * into ObjectData* references. GlobalsArray is not measured.
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad,
@@ -200,10 +196,7 @@ std::pair<int, double> sizeOfArray(
   ObjprofFlags flags
 ) {
   auto arrKind = ad->kind();
-  if (
-    arrKind == ArrayData::ArrayKind::kApcKind ||
-    arrKind == ArrayData::ArrayKind::kGlobalsKind
-  ) {
+  if (arrKind == ArrayData::ArrayKind::kGlobalsKind) {
     return std::make_pair(0, 0);
   }
 

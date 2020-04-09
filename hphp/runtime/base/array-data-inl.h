@@ -155,7 +155,6 @@ inline bool ArrayData::noCopyOnWrite() const {
 
 inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
-inline bool ArrayData::isApcArrayKind() const { return kind() == kApcKind; }
 inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
 inline bool ArrayData::isEmptyArrayKind() const { return kind() == kEmptyKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
@@ -280,7 +279,6 @@ inline DataType ArrayData::toDataType() const {
     case kPackedKind:
     case kMixedKind:
     case kEmptyKind:
-    case kApcKind:
     case kGlobalsKind:
     case kRecordKind:
       return KindOfArray;
@@ -307,7 +305,6 @@ inline DataType ArrayData::toPersistentDataType() const {
     case kPackedKind:
     case kMixedKind:
     case kEmptyKind:
-    case kApcKind:
     case kGlobalsKind:
     case kRecordKind:
       return KindOfPersistentArray;

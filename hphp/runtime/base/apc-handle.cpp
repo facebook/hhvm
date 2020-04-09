@@ -23,8 +23,6 @@
 #include "hphp/runtime/base/apc-named-entity.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
-#include "hphp/runtime/base/apc-local-array.h"
-#include "hphp/runtime/base/apc-local-array-defs.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 
 namespace HPHP {

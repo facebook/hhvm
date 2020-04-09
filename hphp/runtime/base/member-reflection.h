@@ -32,7 +32,6 @@ namespace HPHP {
   X(ArrayData)\
   X(MixedArray)\
   X(EmptyArray)\
-  X(APCLocalArray)\
   X(GlobalsArray)\
   /* other php types */\
   X(StringData)\

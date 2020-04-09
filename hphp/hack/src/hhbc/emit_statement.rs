@@ -690,7 +690,10 @@ fn emit_switch(
                     res.push(Ok((
                         (
                             instr::empty(),
-                            emit_pos_then(pos, instr::throw_non_exhaustive_switch()),
+                            InstrSeq::gather(vec![
+                                instr::label(l.clone()),
+                                emit_pos_then(pos, instr::throw_non_exhaustive_switch()),
+                            ]),
                         ),
                         Some(l),
                     )))

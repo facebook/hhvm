@@ -510,6 +510,7 @@ pub struct TypeConstant {
     type_: Node_,
     abstract_: bool,
     reified: Option<Pos>,
+    enforceable: Option<Pos>,
 }
 
 #[derive(Clone, Debug)]
@@ -753,6 +754,7 @@ impl Node_ {
             memoizelsb: false,
             override_: false,
             at_most_rx_as_func: false,
+            enforceable: None,
         };
 
         let mut reactivity_condition_type = None;
@@ -836,6 +838,9 @@ impl Node_ {
                     "__AtMostRxAsFunc" => {
                         attributes.at_most_rx_as_func = true;
                     }
+                    "__Enforceable" => {
+                        attributes.enforceable = Some(attribute.id.0.clone());
+                    }
                     _ => (),
                 }
             } else {
@@ -868,6 +873,7 @@ struct Attributes {
     memoizelsb: bool,
     override_: bool,
     at_most_rx_as_func: bool,
+    enforceable: Option<Pos>,
 }
 
 impl DirectDeclSmartConstructors<'_> {
@@ -2600,7 +2606,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                     Ok(ty) => Some(ty),
                                     Err(_) => None,
                                 },
-                                enforceable: (Pos::make_none(), false),
+                                enforceable: match constant.enforceable {
+                                    Some(pos) => (pos, true),
+                                    None => (Pos::make_none(), false),
+                                },
                                 reifiable: constant.reified,
                             })
                         }
@@ -3226,6 +3235,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             type_: type_?,
             abstract_,
             reified: attributes.reifiable,
+            enforceable: attributes.enforceable,
         })))
     }
 

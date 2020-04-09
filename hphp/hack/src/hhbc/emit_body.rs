@@ -46,7 +46,6 @@ pub struct Args<'a, 'b> {
     pub class_tparam_names: &'b [&'b str],
     pub ast_params: &'b Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
-    pub scope: &'b Scope<'a>,
     pub pos: &'b Pos,
     pub deprecation_info: &'b Option<&'b [TypedValue]>,
     pub doc_comment: Option<DocComment>,
@@ -78,7 +77,6 @@ pub fn emit_body_with_default_args<'a, 'b>(
         class_tparam_names: &vec![],
         ast_params: &vec![],
         ret: None,
-        scope: &Scope::toplevel(),
         pos: &Pos::make_none(),
         deprecation_info: &None,
         doc_comment: None,
@@ -86,7 +84,15 @@ pub fn emit_body_with_default_args<'a, 'b>(
         call_context: None,
         flags: Flags::empty(),
     };
-    emit_body(emitter, namespace, body, return_value, args).map(|r| r.0)
+    emit_body(
+        emitter,
+        namespace,
+        body,
+        return_value,
+        Scope::toplevel(),
+        args,
+    )
+    .map(|r| r.0)
 }
 
 pub fn emit_body<'a, 'b>(
@@ -94,21 +100,17 @@ pub fn emit_body<'a, 'b>(
     namespace: RcOc<namespace_env::Env>,
     body: &'b tast::Program,
     return_value: InstrSeq,
+    scope: Scope<'a>,
     args: Args<'a, '_>,
 ) -> Result<(HhasBody<'a>, bool, bool)> {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)
         && args.ret.map_or(false, |hint| !is_awaitable(&hint))
     {
-        report_error(
-            args.flags.contains(Flags::CLOSURE_BODY),
-            args.scope,
-            args.pos,
-        )?
+        report_error(args.flags.contains(Flags::CLOSURE_BODY), &scope, args.pos)?
     };
 
-    let tparams = args
-        .scope
+    let tparams = scope
         .get_tparams()
         .into_iter()
         .map(|tp| tp.clone())
@@ -131,7 +133,7 @@ pub fn emit_body<'a, 'b>(
         namespace.as_ref(),
         &mut tp_names,
         args.ast_params,
-        args.scope,
+        &scope,
         args.flags,
     )?;
 
@@ -145,7 +147,7 @@ pub fn emit_body<'a, 'b>(
         make_shadowed_tparams(emitter, args.immediate_tparams, args.class_tparam_names);
     let (need_local_this, decl_vars) = make_decl_vars(
         emitter,
-        args.scope,
+        &scope,
         args.immediate_tparams,
         &params,
         &body,
@@ -154,8 +156,7 @@ pub fn emit_body<'a, 'b>(
     let mut env = make_env(
         namespace,
         need_local_this,
-        // TODO(hrust): avoid clone here.
-        args.scope.clone(),
+        scope,
         args.call_context,
         args.flags.contains(Flags::RX_BODY),
     );

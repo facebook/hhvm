@@ -205,12 +205,12 @@ pub fn from_ast<'a>(
                 T::Stmt_::mk_block(ast_body_block.to_vec()),
             )))],
             instr::null(),
+            scope,
             emit_body::Args {
                 immediate_tparams: &method.tparams,
                 class_tparam_names: class_tparam_names.as_slice(),
                 ast_params: &method.params,
                 ret: method.ret.1.as_ref(),
-                scope: &scope,
                 pos: &method.span,
                 deprecation_info: &deprecation_info,
                 doc_comment: method.doc_comment.clone(),

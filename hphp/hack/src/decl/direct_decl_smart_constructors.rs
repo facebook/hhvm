@@ -506,11 +506,18 @@ pub struct NamespaceUseClause {
 #[derive(Clone, Debug)]
 pub struct TypeConstant {
     id: Id,
-    constraints: Vec<Node_>,
+    constraint: Node_,
     type_: Node_,
-    abstract_: bool,
+    abstract_: TypeconstAbstractKind,
     reified: Option<Pos>,
     enforceable: Option<Pos>,
+}
+
+#[derive(Clone, Debug)]
+pub enum TypeconstAbstractKind {
+    TCAbstract(Option<Node_>),
+    TCPartiallyAbstract,
+    TCConcrete,
 }
 
 #[derive(Clone, Debug)]
@@ -2588,19 +2595,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         }
                         Node_::TypeConstant(constant) => {
                             cls.typeconsts.push(shallow_decl_defs::ShallowTypeconst {
-                                abstract_: if constant.abstract_ {
-                                    typing_defs::TypeconstAbstractKind::TCAbstract(None)
-                                } else {
-                                    typing_defs::TypeconstAbstractKind::TCConcrete
-                                },
-                                constraint: constant.constraints.first().and_then(|constraint| {
-                                    match constraint {
-                                        Node_::TypeConstraint(innards) => {
-                                            self.node_to_ty(&innards.1, &type_variables).ok()
-                                        }
-                                        _ => None,
+                                abstract_: match constant.abstract_ {
+                                    TypeconstAbstractKind::TCAbstract(Some(ty)) => {
+                                        typing_defs::TypeconstAbstractKind::TCAbstract(Some(
+                                            self.node_to_ty(&ty, &type_variables)?,
+                                        ))
                                     }
-                                }),
+                                    TypeconstAbstractKind::TCAbstract(None) => {
+                                        typing_defs::TypeconstAbstractKind::TCAbstract(None)
+                                    }
+                                    TypeconstAbstractKind::TCPartiallyAbstract => {
+                                        typing_defs::TypeconstAbstractKind::TCPartiallyAbstract
+                                    }
+                                    TypeconstAbstractKind::TCConcrete => {
+                                        typing_defs::TypeconstAbstractKind::TCConcrete
+                                    }
+                                },
+                                constraint: match constant.constraint {
+                                    Node_::TypeConstraint(innards) => {
+                                        self.node_to_ty(&innards.1, &type_variables).ok()
+                                    }
+                                    _ => None,
+                                },
                                 name: constant.id,
                                 type_: match self.node_to_ty(&constant.type_, &type_variables) {
                                     Ok(ty) => Some(ty),
@@ -3218,21 +3234,49 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         name: Self::R,
         _arg5: Self::R,
-        constraints: Self::R,
+        constraint: Self::R,
         _arg7: Self::R,
         type_: Self::R,
-        _arg9: Self::R,
+        _semicolon: Self::R,
     ) -> Self::R {
         let attributes = attributes?.as_attributes()?;
-        let abstract_ = modifiers?.iter().fold(false, |abstract_, node| match node {
+        let has_abstract_keyword = modifiers?.iter().fold(false, |abstract_, node| match node {
             Node_::Abstract => true,
             _ => abstract_,
         });
+        let constraint = constraint?;
+        let type_ = type_?;
+        let has_constraint = !constraint.is_ignored();
+        let has_type = !type_.is_ignored();
+        let (type_, abstract_) = match (has_abstract_keyword, has_constraint, has_type) {
+            // Has no assigned type. Technically illegal, so if the constraint
+            // is present, proceed as if the constraint was the assigned type.
+            //     const type TFoo;
+            //     const type TFoo as OtherType;
+            (false, _, false) => (constraint.clone(), TypeconstAbstractKind::TCConcrete),
+            // Has no constraint, but does have an assigned type.
+            //     const type TFoo = SomeType;
+            (false, false, true) => (type_, TypeconstAbstractKind::TCConcrete),
+            // Has both a constraint and an assigned type.
+            //     const type TFoo as OtherType = SomeType;
+            (false, true, true) => (type_, TypeconstAbstractKind::TCPartiallyAbstract),
+            // Has no default type.
+            //     abstract const type TFoo;
+            //     abstract const type TFoo as OtherType;
+            (true, _, false) => (type_.clone(), TypeconstAbstractKind::TCAbstract(None)),
+            // Has a default type.
+            //     abstract const Type TFoo = SomeType;
+            //     abstract const Type TFoo as OtherType = SomeType;
+            (true, _, true) => (
+                Node_::Ignored,
+                TypeconstAbstractKind::TCAbstract(Some(type_)),
+            ),
+        };
         let id = get_name("", &name?)?;
         Ok(Node_::TypeConstant(Box::new(TypeConstant {
             id,
-            constraints: constraints?.into_vec(),
-            type_: type_?,
+            constraint,
+            type_,
             abstract_,
             reified: attributes.reifiable,
             enforceable: attributes.enforceable,

@@ -332,9 +332,9 @@ let update_naming_tables_for_changed_file
     else
       let start_time = Unix.gettimeofday () in
       let old_file_info = Naming_table.get_file_info naming_table path in
-      let contents = Disk.cat (Relative_path.to_absolute path) in
+      let contents = File_provider.get_contents path in
       let (new_file_info, facts) =
-        compute_fileinfo_for_path popt (Some contents) path
+        compute_fileinfo_for_path popt contents path
       in
       log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
       let naming_table =

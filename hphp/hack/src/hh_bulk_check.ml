@@ -353,7 +353,9 @@ let download_naming_table_from_saved_state (repo_root : Path.t) :
     string * Saved_state_loader.changed_files =
   let naming_table_future =
     State_loader_futures.load
-      ~repo:repo_root
+      ~watchman_opts:
+        Saved_state_loader.Watchman_options.
+          { root = repo_root; sockname = None }
       ~ignore_hh_version:true
       ~saved_state_type:Saved_state_loader.Naming_table
   in

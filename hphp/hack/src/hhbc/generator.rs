@@ -2,12 +2,13 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use ast_body::AstBody;
 use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast as tast,
 };
 
-pub fn is_function_generator(body: &tast::Program) -> (bool, bool) {
+pub fn is_function_generator(body: &AstBody) -> (bool, bool) {
     struct S((bool, bool));
 
     impl Visitor for S {

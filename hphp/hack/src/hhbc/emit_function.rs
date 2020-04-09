@@ -19,9 +19,10 @@ use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::user_attributes as ua;
 use ocamlrep::rc::RcOc;
 use options::HhvmFlags;
-use oxidized::{aast as a, ast as tast, ast_defs, pos::Pos};
+use oxidized::{ast as tast, ast_defs};
 use rx_rust as rx;
 
+use itertools::Either;
 use std::borrow::Cow;
 
 pub fn emit_function<'a>(
@@ -120,11 +121,7 @@ pub fn emit_function<'a>(
         emit_body::emit_body(
             e,
             RcOc::clone(&f.namespace),
-            &vec![a::Def::mk_stmt(a::Stmt(
-                Pos::make_none(),
-                // TODO(shiqicao): T62049979 we should avoid cloning
-                a::Stmt_::Block(ast_body.clone()),
-            ))],
+            Either::Right(ast_body),
             instr::null(),
             scope,
             EmitBodyArgs {

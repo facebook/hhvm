@@ -1523,7 +1523,7 @@ pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Res
     }
 }
 
-fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Result {
+pub fn emit_final_stmts(e: &mut Emitter, env: &mut Env, block: &[tast::Stmt]) -> Result {
     match block {
         [] => emit_dropthrough_return(e, env),
         [s] => emit_final_stmt(e, env, s),

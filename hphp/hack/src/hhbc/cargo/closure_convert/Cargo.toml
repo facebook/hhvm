@@ -9,6 +9,7 @@ include = ["../../closure_convert.rs"]
 path = "../../closure_convert.rs"
 
 [dependencies]
+ast_body = { path = "../ast_body" }
 ast_constant_folder_rust = { path = "../ast_constant_folder" }
 ast_scope_rust = { path = "../ast_scope" }
 decl_vars_rust = { path = "../decl_vars" }

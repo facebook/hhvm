@@ -19,9 +19,10 @@ use instruction_sequence_rust::{instr, Result};
 use naming_special_names_rust::{members, special_idents, user_attributes};
 use ocamlrep::rc::RcOc;
 use options::{HhvmFlags, Options};
-use oxidized::{ast as T, pos::Pos};
+use oxidized::ast as T;
 use rx_rust as rx;
 
+use itertools::Either;
 use std::borrow::Cow;
 
 pub fn from_asts<'a>(
@@ -200,10 +201,7 @@ pub fn from_ast<'a>(
         emit_body::emit_body(
             emitter,
             namespace,
-            &vec![T::Def::Stmt(Box::new(T::Stmt(
-                Pos::make_none(),
-                T::Stmt_::mk_block(ast_body_block.to_vec()),
-            )))],
+            Either::Right(ast_body_block),
             instr::null(),
             scope,
             emit_body::Args {

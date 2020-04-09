@@ -8,6 +8,7 @@ pub mod iterator;
 pub mod jump_targets;
 pub mod local;
 
+use ast_body::AstBody;
 use ast_scope_rust::{Scope, ScopeItem};
 use emitter::Emitter;
 use label_rust::Label;
@@ -17,7 +18,7 @@ use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
 extern crate bitflags;
 use bitflags::bitflags;
 
-use std::{borrow::Cow, rc::Rc};
+use std::borrow::Cow;
 
 bitflags! {
     #[derive(Default)]
@@ -156,12 +157,12 @@ impl<'a> Env<'a> {
         self.run_and_release_ids(e, block, f)
     }
 
-    pub fn do_function<R, F>(&mut self, e: &mut Emitter, defs: &tast::Program, f: F) -> R
+    pub fn do_function<R, F>(&mut self, e: &mut Emitter, defs: &AstBody, f: F) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter, &[tast::Def]) -> R,
+        F: FnOnce(&mut Self, &mut Emitter, &AstBody) -> R,
     {
         self.jump_targets_gen.with_function(defs);
-        self.run_and_release_ids(e, defs.as_slice(), f)
+        self.run_and_release_ids(e, defs, f)
     }
 
     fn run_and_release_ids<X, R, F>(&mut self, e: &mut Emitter, x: X, f: F) -> R

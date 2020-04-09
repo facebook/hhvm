@@ -6,6 +6,7 @@ mod emit_statement;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
 
+use ast_body::AstBody;
 use ast_scope_rust::{Scope, ScopeItem};
 use decl_vars_rust as decl_vars;
 use emit_adata_rust as emit_adata;
@@ -13,6 +14,7 @@ use emit_expression_rust as emit_expression;
 use emit_fatal_rust::raise_fatal_runtime;
 use emit_param_rust as emit_param;
 use emit_pos_rust::{emit_pos, emit_pos_then};
+use emit_statement::emit_final_stmts;
 use emit_type_hint_rust as emit_type_hint;
 use env::{
     emitter::{Context, Emitter},
@@ -37,6 +39,7 @@ use runtime::TypedValue;
 
 use bitflags::bitflags;
 use indexmap::IndexSet;
+use itertools::Either;
 
 static THIS: &'static str = "$this";
 
@@ -87,7 +90,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
     emit_body(
         emitter,
         namespace,
-        body,
+        Either::Left(body),
         return_value,
         Scope::toplevel(),
         args,
@@ -98,7 +101,7 @@ pub fn emit_body_with_default_args<'a, 'b>(
 pub fn emit_body<'a, 'b>(
     emitter: &mut Emitter,
     namespace: RcOc<namespace_env::Env>,
-    body: &'b tast::Program,
+    body: AstBody<'b>,
     return_value: InstrSeq,
     scope: Scope<'a>,
     args: Args<'a, '_>,
@@ -186,7 +189,7 @@ pub fn emit_body<'a, 'b>(
         &params,
         &tparams,
         &decl_vars,
-        &body,
+        body,
         need_local_this,
         is_generator,
         args.deprecation_info.clone(),
@@ -219,7 +222,7 @@ fn make_body_instrs(
     params: &[HhasParam],
     tparams: &[tast::Tparam],
     decl_vars: &[String],
-    body: &tast::Program,
+    body: AstBody,
     need_local_this: bool,
     is_generator: bool,
     deprecation_info: Option<&[TypedValue]>,
@@ -230,7 +233,7 @@ fn make_body_instrs(
     let stmt_instrs = if flags.contains(Flags::NATIVE) {
         instr::nativeimpl()
     } else {
-        env.do_function(emitter, body, emit_defs)?
+        env.do_function(emitter, &body, emit_ast_body)?
     };
 
     let (begin_label, default_value_setters) = emit_param::emit_param_default_value_setter(
@@ -322,7 +325,7 @@ fn make_decl_vars(
     scope: &Scope,
     immediate_tparams: &[tast::Tparam],
     params: &[HhasParam],
-    body: &tast::Program,
+    body: &AstBody,
     arg_flags: Flags,
 ) -> Result<(bool, Vec<String>)> {
     let mut flags = decl_vars::Flags::empty();
@@ -508,6 +511,13 @@ pub fn make_body<'a>(
         doc_comment,
         env,
     })
+}
+
+fn emit_ast_body(env: &mut Env, e: &mut Emitter, body: &AstBody) -> Result {
+    match body {
+        Either::Left(p) => emit_defs(env, e, p),
+        Either::Right(b) => emit_final_stmts(e, env, b),
+    }
 }
 
 fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result {

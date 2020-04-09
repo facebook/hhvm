@@ -3,12 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use itertools::Either;
-use std::{collections::HashSet, iter::Iterator};
-
-extern crate bitflags;
-use bitflags::bitflags;
-
+use ast_body::AstBody;
 use hhas_param_rust::HhasParam;
 use naming_special_names_rust::{
     emitter_special_functions, pseudo_functions, special_idents, superglobals,
@@ -18,6 +13,9 @@ use oxidized::{
     aast_visitor::{visit, AstParams, Node, Visitor},
     ast::*,
 };
+
+use bitflags::bitflags;
+use std::{collections::HashSet, iter::Iterator};
 use unique_list_rust::UniqueList;
 
 bitflags! {
@@ -28,8 +26,6 @@ bitflags! {
         const IS_IN_STATIC_METHOD = 1 << 4;
     }
 }
-
-pub type ProgramOrStmt<'a> = Either<&'a Program, &'a Block>;
 
 #[derive(PartialEq, Copy, Clone)]
 enum BareThisUsage {
@@ -287,7 +283,7 @@ fn uls_from_ast<P, F1, F2>(
     get_param_name: F1,
     get_param_default_value: F2,
     explicit_use_set_opt: Option<&env::SSet>,
-    b: ProgramOrStmt,
+    b: &AstBody,
     flags: Flags,
 ) -> Result<(bool, impl Iterator<Item = String>), String>
 where
@@ -301,10 +297,7 @@ where
             visitor.visit_expr(&mut (), e)?;
         }
     }
-    match b {
-        Either::Left(b) => visit(&mut visitor, &mut (), b)?,
-        Either::Right(b) => visit(&mut visitor, &mut (), b)?,
-    };
+    visit(&mut visitor, &mut (), b)?;
     let needs_local_this =
         visitor.bare_this == Some(BareThisAsRef) || flags.contains(Flags::IS_IN_STATIC_METHOD);
     for param in params {
@@ -325,7 +318,7 @@ where
 
 pub fn from_ast(
     params: &[HhasParam],
-    body: &Program,
+    body: &AstBody,
     flags: Flags,
     explicit_use_set: &env::SSet,
 ) -> Result<(bool, Vec<String>), String> {
@@ -334,7 +327,7 @@ pub fn from_ast(
         |p| &p.name,
         |p| p.default_value.as_ref().map(|x| &x.1),
         Some(explicit_use_set),
-        Either::Left(body),
+        body,
         flags,
     )?;
     Ok((needs_local_this, decl_vars.collect()))
@@ -342,7 +335,7 @@ pub fn from_ast(
 
 pub fn vars_from_ast(
     params: &[FunParam],
-    b: ProgramOrStmt,
+    b: &AstBody,
     flags: Flags,
 ) -> Result<HashSet<String>, String> {
     let (_, decl_vars) = uls_from_ast(

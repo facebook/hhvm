@@ -394,7 +394,7 @@ fn get_vars(
     scope: &ast_scope::Scope,
     is_closure_body: bool,
     params: &[FunParam],
-    body: decl_vars::ProgramOrStmt,
+    body: ast_body::AstBody,
 ) -> Result<HashSet<String>> {
     use decl_vars::{vars_from_ast, Flags};
     let mut flags = Flags::empty();
@@ -402,7 +402,7 @@ fn get_vars(
     flags.set(Flags::IS_TOPLEVEL, scope.is_toplevel());
     flags.set(Flags::IS_IN_STATIC_METHOD, scope.is_in_static_method());
     flags.set(Flags::IS_CLOSURE_BODY, is_closure_body);
-    let res = vars_from_ast(params, body, flags).map_err(unrecoverable);
+    let res = vars_from_ast(params, &body, flags).map_err(unrecoverable);
     res
 }
 

@@ -9,6 +9,7 @@ include = ["../../decl_vars.rs"]
 path = "../../decl_vars.rs"
 
 [dependencies]
+ast_body = { path = "../ast_body" }
 env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 naming_special_names_rust = { path = "../../../naming" }

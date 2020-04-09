@@ -9,6 +9,7 @@ include = ["../../emit_body.rs", "../../emit_statement.rs", "../../reified_gener
 path = "../../emit_body.rs"
 
 [dependencies]
+ast_body = { path = "../ast_body" }
 ast_scope_rust = { path = "../ast_scope" }
 decl_vars_rust = { path = "../decl_vars" }
 emit_adata_rust = { path = "../emit_adata" }

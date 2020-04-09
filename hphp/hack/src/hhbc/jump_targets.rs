@@ -3,6 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use crate::iterator;
+use ast_body::AstBody;
+use itertools::Either;
 use label_rust::Label;
 use oxidized::aast::*;
 use std::collections::{BTreeMap, HashSet};
@@ -294,8 +296,8 @@ impl Gen {
         self.jump_targets.0.push(Region::Finally(labels));
     }
 
-    pub fn with_function<Ex, Fb, En, Hi>(&mut self, defs: &Program<Ex, Fb, En, Hi>) {
-        let labels = self.collect_valid_target_labels_for_defs(defs);
+    pub fn with_function(&mut self, ast_body: &AstBody) {
+        let labels = self.collect_valid_target_labels_for_ast_body(ast_body);
         self.jump_targets.0.push(Region::Function(labels));
     }
 
@@ -455,6 +457,13 @@ impl Gen {
             cases,
             Self::collect_valid_target_labels_for_switch_cases_aux,
         )
+    }
+
+    fn collect_valid_target_labels_for_ast_body(&self, body: &AstBody) -> LabelSet {
+        match body {
+            Either::Left(p) => self.collect_valid_target_labels_for_defs(*p),
+            Either::Right(b) => self.collect_valid_target_labels_for_block(*b),
+        }
     }
 
     pub fn release_ids(&mut self) {

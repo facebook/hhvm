@@ -6,6 +6,7 @@
 use super::{
     node::Node, node_mut::NodeMut, type_params::Params, visitor::Visitor, visitor_mut::VisitorMut,
 };
+use itertools::Either;
 use ocamlrep::rc::RcOc;
 use std::collections::BTreeMap;
 
@@ -22,6 +23,58 @@ leaf_node!(String);
 leaf_node!(crate::pos::Pos);
 leaf_node!(crate::file_info::Mode);
 leaf_node!(crate::namespace_env::Env);
+
+impl<P: Params, T> Node<P> for &T
+where
+    T: Node<P>,
+{
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
+        (*self).accept(c, v)
+    }
+}
+
+impl<P: Params, T> NodeMut<P> for &mut T
+where
+    T: NodeMut<P>,
+{
+    fn recurse(
+        &mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
+        (*self).accept(c, v)
+    }
+}
+
+impl<P: Params, L, R> Node<P> for Either<L, R>
+where
+    L: Node<P>,
+    R: Node<P>,
+{
+    fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
+        match self {
+            Either::Left(i) => i.accept(c, v),
+            Either::Right(i) => i.accept(c, v),
+        }
+    }
+}
+
+impl<P: Params, L, R> NodeMut<P> for Either<L, R>
+where
+    L: NodeMut<P>,
+    R: NodeMut<P>,
+{
+    fn recurse(
+        &mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<P = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Either::Left(i) => i.accept(c, v),
+            Either::Right(i) => i.accept(c, v),
+        }
+    }
+}
 
 impl<P: Params, T> Node<P> for Vec<T>
 where

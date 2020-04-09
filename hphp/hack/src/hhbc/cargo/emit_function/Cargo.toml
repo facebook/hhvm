@@ -35,3 +35,4 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
 rx_rust = { path = "../rx" }
+itertools = "0.8"

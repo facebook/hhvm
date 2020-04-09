@@ -26,9 +26,12 @@ include Core_kernel
 
     If your module only compares values of a single builtin type (e.g., int or
     string), you can add `open Int.Replace_polymorphic_compare` to the top of
-    the file. *)
-let ( = ) : [ `Do_not_use_polymorphic_compare ] =
-  `Do_not_use_polymorphic_compare
+    the file.
+
+    With ocaml 4.08 and later, Core_kernel is binding (=) to Int.equal, let's
+    do the same.
+*)
+let ( = ) : int -> int -> bool = Int.equal
 
 (** The nonequal function in Pervasives is backed by compiler magic (called
     compare_val), which operates on the memory representation of values to
@@ -49,5 +52,4 @@ let ( = ) : [ `Do_not_use_polymorphic_compare ] =
     If your module only compares values of a single builtin type (e.g., int or
     string), you can add `open Int.Replace_polymorphic_compare` to the top of
     the file. *)
-let ( <> ) : [ `Do_not_use_polymorphic_compare ] =
-  `Do_not_use_polymorphic_compare
+let ( <> ) (x : int) (y : int) = not (Int.equal x y)

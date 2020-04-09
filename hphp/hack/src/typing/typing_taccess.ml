@@ -96,10 +96,11 @@ let make_abstract env id name namel bnd =
    both a constraint type and assigned type. Which one we choose depends if
    the current root is the base (origin) of the expansion, or if it is an
    upper bound of the base. *)
-let create_root_from_type_constant ctx env root (class_pos, class_name) =
+let create_root_from_type_constant
+    ctx env root (class_pos, class_name) opt_class_def =
   let { id = (id_pos, id_name) as id; _ } = ctx in
   let class_ =
-    match Env.get_class env class_name with
+    match opt_class_def with
     | None ->
       raise_error (fun () -> Errors.unbound_name_typing class_pos class_name)
     | Some c -> c
@@ -217,8 +218,9 @@ let rec expand ctx env root =
     let name = Printf.sprintf "<cls#%s>" name in
     (env, update_class_name env ctx.id name res)
   | Tclass (cls, _, _) ->
+    let opt_class_def = Env.get_class env (snd cls) in
     let allow_abstract =
-      match Env.get_class env (snd cls) with
+      match opt_class_def with
       | Some ci
         when Ast_defs.(equal_class_kind (Decl_provider.Class.kind ci) Ctrait) ->
         (* Hack: `self` in a trait is mistakenly replaced by the trait instead
@@ -229,7 +231,7 @@ let rec expand ctx env root =
       | _ -> ctx.allow_abstract
     in
     let ctx = { ctx with allow_abstract } in
-    create_root_from_type_constant ctx env root cls
+    create_root_from_type_constant ctx env root cls opt_class_def
   | Tgeneric s ->
     let ctx =
       let generics_seen = TySet.add root ctx.generics_seen in

@@ -1,2 +1,4 @@
+File "shape12.php", line 12, characters 9-15:
+Cyclic type definition (Typing[4014])
 File "shape12.php", line 12, characters 32-38:
-Cyclic typedef (Typing[4014])
+Cyclic use is here

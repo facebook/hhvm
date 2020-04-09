@@ -3157,8 +3157,10 @@ let object_string_deprecated pos =
     pos
     "You cannot use this object as a string\nImplicit conversions of Stringish objects to string are deprecated."
 
-let cyclic_typedef p =
-  add (Typing.err_code Typing.CyclicTypedef) p "Cyclic typedef"
+let cyclic_typedef def_pos use_pos =
+  add_list
+    (Typing.err_code Typing.CyclicTypedef)
+    [(def_pos, "Cyclic type definition"); (use_pos, "Cyclic use is here")]
 
 let type_arity_mismatch pos1 n1 pos2 n2 (on_error : typing_error_callback) =
   on_error

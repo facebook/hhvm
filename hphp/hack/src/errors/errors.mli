@@ -468,7 +468,7 @@ val object_string : Pos.t -> Pos.t -> unit
 
 val object_string_deprecated : Pos.t -> unit
 
-val cyclic_typedef : Pos.t -> unit
+val cyclic_typedef : Pos.t -> Pos.t -> unit
 
 val type_arity_mismatch :
   Pos.t -> string -> Pos.t -> string -> typing_error_callback -> unit

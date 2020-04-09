@@ -1857,6 +1857,12 @@ where
                         || kind == TokenKind::Coroutine
                 });
 
+                if self.is_inside_interface() {
+                    self.invalid_modifier_errors("Interface methods", node, |kind| {
+                        kind != TokenKind::Final
+                    });
+                };
+
                 if Self::has_modifier_static(node)
                     && (self.attribute_specification_contains(
                         method_attrs,

@@ -187,8 +187,11 @@ fn valid_for_prop(tc: &constraint::Type) -> bool {
 }
 
 fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
+    use ast_defs::Uop::*;
     use tast::Expr_;
     match &expr.1 {
+        Expr_::Unop(e) if e.0 == Uplus || e.0 == Uminus => expr_requires_deep_init(&e.1),
+        Expr_::Binop(e) => expr_requires_deep_init(&e.1) || expr_requires_deep_init(&e.2),
         Expr_::Lvar(_)
         | Expr_::Null
         | Expr_::False
@@ -196,18 +199,13 @@ fn expr_requires_deep_init(expr: &tast::Expr) -> bool {
         | Expr_::Int(_)
         | Expr_::Float(_)
         | Expr_::String(_) => false,
-        Expr_::Unop(e) => match &e.0 {
-            ast_defs::Uop::Uplus | ast_defs::Uop::Uminus => expr_requires_deep_init(&e.1),
-            _ => true,
-        },
-        Expr_::Binop(e) => expr_requires_deep_init(&e.1) || expr_requires_deep_init(&e.2),
         Expr_::Array(afs) => afs.iter().any(af_expr_requires_deep_init),
-        Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init),
-        Expr_::Darray(e) => (e.1).iter().any(expr_pair_requires_deep_init),
         Expr_::Collection(e) if (e.0).1 == "keyset" || (e.0).1 == "dict" || (e.0).1 == "vec" => {
             (e.2).iter().any(af_expr_requires_deep_init)
         }
-        Expr_::Id(e) if e.1 == pseudo_consts::G__LINE__ || e.1 == pseudo_consts::G__DIR__ => false,
+        Expr_::Varray(e) => (e.1).iter().any(expr_requires_deep_init),
+        Expr_::Darray(e) => (e.1).iter().any(expr_pair_requires_deep_init),
+        Expr_::Id(e) if e.1 == pseudo_consts::G__FILE__ || e.1 == pseudo_consts::G__DIR__ => false,
         Expr_::Shape(sfs) => sfs.iter().any(shape_field_requires_deep_init),
         Expr_::ClassConst(e) => match e.0.as_ciexpr() {
             Some(ci_expr) => match (ci_expr.1).as_id() {

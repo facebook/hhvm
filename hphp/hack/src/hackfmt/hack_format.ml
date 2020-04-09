@@ -163,16 +163,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
     | Syntax.NullableTypeSpecifier _
     | Syntax.LikeTypeSpecifier _
     | Syntax.SoftTypeSpecifier _
-    | Syntax.ListItem _
-    | Syntax.PUAccess _
-    | Syntax.PocketAtomExpression _
-    | Syntax.PocketIdentifierExpression _
-    | Syntax.PocketAtomMappingDeclaration _
-    | Syntax.PocketEnumDeclaration _
-    | Syntax.PocketMappingIdDeclaration _
-    | Syntax.PocketMappingTypeDeclaration _
-    | Syntax.PocketFieldTypeExprDeclaration _
-    | Syntax.PocketFieldTypeDeclaration _ ->
+    | Syntax.ListItem _ ->
       transform_simple env node
     | Syntax.ReifiedTypeArgument
         { reified_type_argument_reified; reified_type_argument_type } ->
@@ -2306,6 +2297,106 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             | _ -> Nothing
           end;
           t env expr;
+        ]
+    | Syntax.PUAccess _
+    | Syntax.PocketAtomExpression _
+    | Syntax.PocketIdentifierExpression _
+    | Syntax.PocketMappingIdDeclaration _ ->
+      transform_simple env node
+    | Syntax.PocketEnumDeclaration
+        {
+          pocket_enum_modifiers = modifiers;
+          pocket_enum_enum = enum_keyword;
+          pocket_enum_name = name;
+          pocket_enum_left_brace = left_brace;
+          pocket_enum_fields = fields;
+          pocket_enum_right_brace = right_brace;
+        } ->
+      Concat
+        [
+          handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
+          t env enum_keyword;
+          when_present enum_keyword space;
+          t env name;
+          when_present name space;
+          braced_block_nest
+            env
+            left_brace
+            right_brace
+            [handle_possible_list env ~after_each:(fun _ -> Newline) fields];
+        ]
+    | Syntax.PocketFieldTypeDeclaration
+        {
+          pocket_field_type_case = case_keyword;
+          pocket_field_type_type = type_keyword;
+          pocket_field_type_reified = reify_keyword;
+          pocket_field_type_name = name;
+          pocket_field_type_semicolon = semicolon;
+        } ->
+      Concat
+        [
+          t env case_keyword;
+          when_present case_keyword space;
+          t env type_keyword;
+          when_present type_keyword space;
+          t env reify_keyword;
+          when_present reify_keyword space;
+          t env name;
+          t env semicolon;
+        ]
+    | Syntax.PocketFieldTypeExprDeclaration
+        {
+          pocket_field_type_expr_case = case_keyword;
+          pocket_field_type_expr_type = type_specifier;
+          pocket_field_type_expr_name = name;
+          pocket_field_type_expr_semicolon = semicolon;
+        } ->
+      Concat
+        [
+          t env case_keyword;
+          when_present case_keyword space;
+          t env type_specifier;
+          when_present type_specifier space;
+          t env name;
+          t env semicolon;
+        ]
+    | Syntax.PocketAtomMappingDeclaration
+        {
+          pocket_atom_mapping_glyph = glyph;
+          pocket_atom_mapping_name = name;
+          pocket_atom_mapping_left_paren = left_paren;
+          pocket_atom_mapping_mappings = mappings;
+          pocket_atom_mapping_right_paren = right_paren;
+          pocket_atom_mapping_semicolon = semicolon;
+        } ->
+      Concat
+        [
+          t env glyph;
+          t env name;
+          braced_block_nest
+            env
+            left_paren
+            right_paren
+            [handle_possible_list env ~after_each:(fun _ -> Newline) mappings];
+          t env semicolon;
+        ]
+    | Syntax.PocketMappingTypeDeclaration
+        {
+          pocket_mapping_type_keyword = type_keyword;
+          pocket_mapping_type_name = name;
+          pocket_mapping_type_equal = equal_operator;
+          pocket_mapping_type_type = type_specifier;
+        } ->
+      Concat
+        [
+          t env type_keyword;
+          when_present type_keyword space;
+          t env name;
+          when_present name space;
+          t env equal_operator;
+          when_present equal_operator space;
+          SplitWith Cost.Base;
+          Nest [t env type_specifier];
         ]
     | Syntax.ErrorSyntax _ -> raise Hackfmt_error.InvalidSyntax)
 

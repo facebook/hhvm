@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 open String_utils
 
@@ -23,6 +23,7 @@ type phase =
   | Naming
   | Decl
   | Typing
+[@@deriving eq]
 
 type severity =
   | Warning
@@ -177,7 +178,7 @@ let try_with_result f1 f2 =
      * error position*)
     let l =
       match l with
-      | (_, msg) :: l when msg = badpos_message -> l
+      | (_, msg) :: l when String.equal msg badpos_message -> l
       | _ -> l
     in
     f2 result (code, l)
@@ -301,7 +302,8 @@ let sort err =
       else
         comparison
   in
-  List.sort ~compare err |> List.remove_consecutive_duplicates ~equal:( = )
+  let equal x y = compare x y = 0 in
+  List.sort ~compare err |> List.remove_consecutive_duplicates ~equal
 
 let get_sorted_error_list (err, _) = sort (files_t_to_list err)
 
@@ -537,10 +539,10 @@ let format_messages (msgs : Pos.absolute message list) : string =
       let formatted : string list =
         match prev with
         | Some (prev_filename, prev_line)
-          when prev_filename = filename && prev_line = line ->
+          when String.equal prev_filename filename && prev_line = line ->
           (* Previous message was on this line too, just show the message itself*)
           [pretty_msg]
-        | Some (prev_filename, _) when prev_filename = filename ->
+        | Some (prev_filename, _) when String.equal prev_filename filename ->
           (* Previous message was this file, but an earlier line. *)
           [pretty_ctx; pretty_msg]
         | _ -> [format_filename pos; pretty_ctx; pretty_msg]
@@ -642,8 +644,8 @@ let add_error_impl error =
     let () =
       match !current_context with
       | (path, _)
-        when path = Relative_path.default && not !allow_errors_in_default_path
-        ->
+        when Relative_path.equal path Relative_path.default
+             && not !allow_errors_in_default_path ->
         Hh_logger.log
           "WARNING: adding an error in default path\n%s\n"
           (Caml.Printexc.raw_backtrace_to_string
@@ -653,7 +655,7 @@ let add_error_impl error =
     (* Cheap test to avoid duplicating most recent error *)
     let error_list = get_current_list !error_map in
     match error_list with
-    | old_error :: _ when error = old_error -> ()
+    | old_error :: _ when equal_error error old_error -> ()
     | _ -> set_current_list error_map (error :: error_list)
   else
     (* We have an error, but haven't handled it in any way *)
@@ -663,7 +665,7 @@ let add_error_impl error =
     | None -> Utils.assert_false_log_backtrace (Some msg)
 
 (* Whether we've found at least one error *)
-let currently_has_errors () = get_current_list !error_map <> []
+let currently_has_errors () = not (List.is_empty (get_current_list !error_map))
 
 module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
@@ -771,7 +773,9 @@ let add_ignored_fixme_code_error pos code =
 let check_pos_msg pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let current_file = fst !current_context in
-  if current_file <> Relative_path.default && Pos.filename pos <> current_file
+  if
+    (not (Relative_path.equal current_file Relative_path.default))
+    && not (Relative_path.equal (Pos.filename pos) current_file)
   then
     (Pos.make_from current_file, badpos_message) :: pos_msg_l
   else
@@ -852,7 +856,7 @@ and incremental_update :
   (* Replace old errors with new *)
   let res =
     files_t_merge new_ old ~f:(fun phase path new_ old ->
-        ( if path = Relative_path.default then
+        ( if Relative_path.equal path Relative_path.default then
           let phase =
             match phase with
             | Init -> "Init"
@@ -946,14 +950,13 @@ let fold_errors_in ?phase err ~source ~init ~f =
   Relative_path.Map.find_opt (fst err) source
   |> Option.value ~default:PhaseMap.empty
   |> PhaseMap.fold ~init ~f:(fun p errors acc ->
-         if phase <> None && phase <> Some p then
-           acc
-         else
-           List.fold_right errors ~init:acc ~f)
+         match phase with
+         | Some x when not (equal_phase x p) -> acc
+         | _ -> List.fold_right errors ~init:acc ~f)
 
 let get_failed_files err phase =
   files_t_fold (fst err) ~init:Relative_path.Set.empty ~f:(fun source p _ acc ->
-      if phase <> p then
+      if not (equal_phase phase p) then
         acc
       else
         Relative_path.Set.add acc source)
@@ -1082,9 +1085,9 @@ let error_name_already_bound name name_prev p p_prev =
     ^ "project when first starting with Hack."
   in
   let errs =
-    if Relative_path.prefix (Pos.filename p) = Relative_path.Hhi then
+    if Relative_path.(is_hhi (prefix (Pos.filename p))) then
       errs @ [(p_prev, hhi_msg)]
-    else if Relative_path.prefix (Pos.filename p_prev) = Relative_path.Hhi then
+    else if Relative_path.(is_hhi (prefix (Pos.filename p_prev))) then
       errs @ [(p, hhi_msg)]
     else
       errs
@@ -1757,7 +1760,7 @@ let call_before_init pos cv =
            "The initialization is not over because ";
          ]
        @
-       if cv = "parent::__construct" then
+       if String.equal cv "parent::__construct" then
          ["you forgot to call parent::__construct"]
        else
          ["$this->"; cv; " can still potentially be null"] ))
@@ -2363,7 +2366,7 @@ let explain_constraint ~use_pos ~definition_pos ~param_name msgl =
    * duplicating the instantiation message *)
   let msgl =
     match msgl with
-    | (p, x) :: rest when x = inst_msg && p = use_pos -> rest
+    | (p, x) :: rest when String.equal x inst_msg && Pos.equal p use_pos -> rest
     | _ -> msgl
   in
   let name = strip_ns param_name in
@@ -3752,7 +3755,7 @@ let non_object_member
       ty
   in
   let msg =
-    if ty = "a shape" then
+    if String.equal ty "a shape" then
       msg_start ^ ". Did you mean $foo['" ^ s ^ "'] instead?"
     else
       msg_start
@@ -4137,7 +4140,7 @@ let wrong_extend_kind child_pos child parent_pos parent =
 let unsatisfied_req parent_pos req_name req_pos =
   let s1 = "Failure to satisfy requirement: " ^ strip_ns req_name in
   let s2 = "Required here" in
-  if req_pos = parent_pos then
+  if Pos.equal req_pos parent_pos then
     add (Typing.err_code Typing.UnsatisfiedReq) parent_pos s1
   else
     add_list

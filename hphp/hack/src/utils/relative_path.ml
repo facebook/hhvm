@@ -19,6 +19,13 @@ type prefix =
   | Tmp
 [@@deriving eq, show, enum, ord]
 
+let is_hhi = function
+  | Hhi -> true
+  | Root
+  | Dummy
+  | Tmp ->
+    false
+
 let root = ref None
 
 let hhi = ref None

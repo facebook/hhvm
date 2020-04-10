@@ -90,6 +90,17 @@ pub fn mangle_xhp_id(mut name: String) -> String {
     }
 }
 
+fn unmangle_xhp_id(name: &str) -> String {
+    if name.starts_with("xhp_") {
+        format!(
+            ":{}",
+            lstrip(name, "xhp_").replace("__", ":").replace("_", "-")
+        )
+    } else {
+        name.replace("__", ":").replace("_", "-")
+    }
+}
+
 pub fn mangle(mut name: String) -> String {
     if !ignore_id(&name) {
         if let Some(pos) = name.rfind('\\') {
@@ -101,6 +112,23 @@ pub fn mangle(mut name: String) -> String {
         }
     }
     name
+}
+
+pub fn unmangle(name: String) -> String {
+    if ignore_id(&name) {
+        return name;
+    }
+    let ids = name.split("\\").collect::<Vec<_>>();
+    match ids.split_last() {
+        None => String::new(),
+        Some((last, rest)) => {
+            if rest.is_empty() {
+                unmangle_xhp_id(last)
+            } else {
+                format!("{}\\{}", rest.join("\\"), unmangle_xhp_id(last))
+            }
+        }
+    }
 }
 
 pub fn quote_string(s: &str) -> String {

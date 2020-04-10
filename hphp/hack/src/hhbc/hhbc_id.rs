@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use hhbc_string_utils_rust::{mangle, strip_global_ns};
+use hhbc_string_utils_rust::{mangle, strip_global_ns, unmangle};
 
 use std::convert::From;
 
@@ -21,7 +21,7 @@ pub trait Id<'a>: Sized {
 
     fn to_unmangled_str(&self) -> String {
         if Self::MANGLE {
-            panic!("TOOD(hrust) port unmangle XHP in string_utils")
+            unmangle(self.to_raw_string().into())
         } else {
             self.to_raw_string().into()
         }

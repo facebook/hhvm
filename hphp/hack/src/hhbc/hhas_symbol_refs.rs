@@ -44,7 +44,7 @@ impl IncludePath {
                         IncludePath::Absolute(path_str)
                     };
                 }
-                _ => panic!("missing var in include_roots: {}", var.to_string()),
+                _ => return self, // This should probably never happen
             };
         }
         self

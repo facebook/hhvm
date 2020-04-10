@@ -1473,8 +1473,10 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> 
     match a {
         A::WHResult => w.write("WHResult"),
         A::Await => w.write("Await"),
-        A::AwaitAll(Some((Local::Unnamed(id), count))) => w.write(format!("L:{}+{}", id, count)),
-        A::AwaitAll(None) => w.write("L:0+0"),
+        A::AwaitAll(Some((Local::Unnamed(id), count))) => {
+            w.write(format!("AwaitAll L:{}+{}", id, count))
+        }
+        A::AwaitAll(None) => w.write("AwaitAll L:0+0"),
         _ => Err(Error::fail("AwaitAll needs an unnamed local")),
     }
 }

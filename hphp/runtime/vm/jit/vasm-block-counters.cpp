@@ -129,6 +129,7 @@ std::string checkProfile(const Vunit& unit,
   if (counters.size() == 0) return "no profile for this region";
 
   std::string errorMsg;
+  size_t opcodeMismatches=0;
 
   for (size_t index = 0; index < sortedBlocks.size(); index++) {
     auto b = sortedBlocks[index];
@@ -141,7 +142,7 @@ std::string checkProfile(const Vunit& unit,
         "missing block counter (index = {}, counters.size() = {})\n",
         index, counters.size()
       );
-      break;
+      return errorMsg;
     }
     auto const op_opti = block.code.front().op;
     auto const op_prof = opcodes[index];
@@ -154,9 +155,15 @@ std::string checkProfile(const Vunit& unit,
         "mismatch opcode for block {}: profile was {}, optimized is {}\n",
         index, vinst_names[op_prof], vinst_names[op_opti]
       );
+      opcodeMismatches++;
     }
   }
 
+  // Consider the profile to match even if we have some opcode mismatches.
+  if (opcodeMismatches <=
+      RuntimeOption::EvalJitPGOVasmBlockCountersMaxOpMismatches) {
+    return "";
+  }
   return errorMsg;
 }
 

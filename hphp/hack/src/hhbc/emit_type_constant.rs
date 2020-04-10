@@ -7,7 +7,7 @@
 
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
-use instruction_sequence_rust::{Error::Unrecoverable, Result};
+use instruction_sequence_rust::{unrecoverable, Result};
 use naming_special_names_rust::classes;
 use options::{HhvmFlags, Options};
 use oxidized::{
@@ -172,11 +172,11 @@ fn shape_allows_unknown_fields(si: &NastShapeInfo) -> Option<(TypedValue, TypedV
     }
 }
 
-fn type_constant_access_list(opts: &Options, sl: Vec<aast::Sid>) -> TypedValue {
+fn type_constant_access_list(opts: &Options, sl: &[aast::Sid]) -> TypedValue {
     vec_or_varray(
         opts,
-        sl.into_iter()
-            .map(|ast_defs::Id(_, s)| TypedValue::String(s))
+        sl.iter()
+            .map(|ast_defs::Id(_, s)| TypedValue::string(s))
             .collect(),
     )
 }
@@ -223,11 +223,11 @@ fn get_kind(tparams: &[&str], s: &str) -> Vec<(TypedValue, TypedValue)> {
     )]
 }
 
-fn root_to_string(s: String) -> String {
+fn root_to_string(s: &str) -> String {
     if s == "this" {
-        string_utils::prefix_namespace("HH", s.as_str())
+        string_utils::prefix_namespace("HH", s)
     } else {
-        class::Type::from_ast_name(s.as_str()).into()
+        class::Type::from_ast_name(s).into()
     }
 }
 
@@ -289,15 +289,29 @@ fn hint_to_type_constant_list(
             ));
             r
         }
-        Haccess(_, _) => {
-            return Err(Unrecoverable(
-                "Structure not translated according to ast_to_nast".into(),
-            ))
-        }
+        Haccess(Hint(_, h), ids) => match h.as_happly() {
+            Some((root_id, hs)) if hs.is_empty() => {
+                let mut r = get_kind(tparams, "$$internal$$typeaccess");
+                r.push((
+                    TypedValue::string("root_name"),
+                    TypedValue::string(root_to_string(&root_id.1)),
+                ));
+                r.push((
+                    TypedValue::string("access_list"),
+                    type_constant_access_list(opts, ids),
+                ));
+                r
+            }
+            _ => {
+                return Err(unrecoverable(
+                    "Structure not translated according to ast_to_nast",
+                ))
+            }
+        },
         Hfun(hf) => {
             if hf.is_coroutine {
-                return Err(Unrecoverable(
-                    "Codegen for coroutine functions is not supported".into(),
+                return Err(unrecoverable(
+                    "Codegen for coroutine functions is not supported",
                 ));
             } else {
                 let kind = get_kind(tparams, "$$internal$$fun");
@@ -340,16 +354,8 @@ fn hint_to_type_constant_list(
             hint_to_type_constant_list(opts, tparams, targ_map, h)?,
         ]
         .concat(),
-        HpuAccess(_, _) => {
-            return Err(Unrecoverable(
-                "TODO(T36532263) hint_to_type_constant_list".into(),
-            ))
-        }
-        _ => {
-            return Err(Unrecoverable(
-                "Hints not available on the original AST".into(),
-            ))
-        }
+        HpuAccess(_, _) => return Err(unrecoverable("TODO(T36532263) hint_to_type_constant_list")),
+        _ => return Err(unrecoverable("Hints not available on the original AST")),
     })
 }
 

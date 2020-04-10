@@ -95,8 +95,10 @@ module Main_env = struct
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_diagnostics: UriSet.t;
     uris_with_unsaved_changes: UriSet.t;
-    (* see comment in get_uris_with_unsaved_changes *)
+        (** see comment in get_uris_with_unsaved_changes *)
     hh_server_status: ShowStatusFB.params;
+        (** is updated by [handle_server_message] > [do_server_busy]. Shows status of
+        a connected hh_server, whether it's busy typechecking or ready. *)
   }
 end
 
@@ -3409,98 +3411,94 @@ let run_ide_service
   ) else
     Lwt.return_unit
 
+let on_status_restart_action
+    ~(env : env)
+    ~(init_id : string)
+    ~(ide_service : ClientIdeService.t ref)
+    (result : ShowStatusFB.result)
+    (state : state) : state Lwt.t =
+  let open ShowMessageRequest in
+  match (result, state) with
+  | (Some { title }, Lost_server _) when String.equal title hh_server_restart_button_text
+    ->
+    let root =
+      match get_root_opt () with
+      | None -> failwith "we should have root by now"
+      | Some root -> root
+    in
+    (* Belt-and-braces kill the server. This is in case the server was *)
+    (* stuck in some weird state. It's also what 'hh restart' does. *)
+    if MonitorConnection.server_exists (Path.to_string root) then
+      ClientStop.kill_server root env.from;
+
+    (* After that it's safe to try to reconnect! *)
+    start_server ~env root;
+    let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
+    Lwt.return state
+  | (Some { title }, _) when String.equal title client_ide_restart_button_text ->
+    log "Restarting IDE service";
+
+    (* It's possible that [destroy] takes a while to finish, so make
+    sure to assign the new IDE service to the [ref] before attempting
+    to do an asynchronous operation with the old one. *)
+    let old_ide_service = !ide_service in
+    let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
+    let new_ide_service = ClientIdeService.make ide_args in
+    ide_service := new_ide_service;
+    Lwt.async (fun () ->
+        run_ide_service env new_ide_service (get_editor_open_files state));
+    let%lwt () =
+      stop_ide_service
+        old_ide_service
+        ~tracking_id:"restart"
+        ~reason:ClientIdeService.Stop_reason.Restarting
+    in
+    Lwt.return state
+  | _ -> Lwt.return state
+
 let tick_showStatus
-    (env : env)
+    ~(env : env)
     ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref)
-    ~(init_id : string) : unit Lwt.t =
-  let show_status () : unit Lwt.t =
-    begin
-      let on_result (result : ShowStatusFB.result) (state : state) : state Lwt.t
-          =
-        let open ShowMessageRequest in
-        match (result, state) with
-        | (Some { title }, Lost_server _)
-          when String.equal title hh_server_restart_button_text ->
-          let root =
-            match get_root_opt () with
-            | None -> failwith "we should have root by now"
-            | Some root -> root
-          in
-          (* Belt-and-braces kill the server. This is in case the server was *)
-          (* stuck in some weird state. It's also what 'hh restart' does. *)
-          if MonitorConnection.server_exists (Path.to_string root) then
-            ClientStop.kill_server root env.from;
-
-          (* After that it's safe to try to reconnect! *)
-          start_server ~env root;
-          let%lwt state =
-            reconnect_from_lost_if_necessary ~env state `Force_regain
-          in
-          Lwt.return state
-        | (Some { title }, _)
-          when String.equal title client_ide_restart_button_text ->
-          log "Restarting IDE service";
-
-          (* It's possible that [destroy] takes a while to finish, so make
-          sure to assign the new IDE service to the [ref] before attempting
-          to do an asynchronous operation with the old one. *)
-          let old_ide_service = !ide_service in
-          let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
-          let new_ide_service = ClientIdeService.make ide_args in
-          ide_service := new_ide_service;
-          Lwt.async (fun () ->
-              run_ide_service env new_ide_service (get_editor_open_files state));
-          let%lwt () =
-            stop_ide_service
-              old_ide_service
-              ~tracking_id:"restart"
-              ~reason:ClientIdeService.Stop_reason.Restarting
-          in
-          Lwt.return state
-        | _ -> Lwt.return state
+    ~(init_id : string) : unit =
+  let hh_server_status =
+    match !state with
+    | Main_loop { Main_env.hh_server_status; _ } ->
+      (* This shows whether the connected hh_server is busy or ready.
+      Typical values are "info / <empty> / hh_server is ok" and
+      "warning / checking project / Hack: checking entire project".
+      All we'll do here is an animation for it. *)
+      let shortMessage =
+        match hh_server_status.ShowStatusFB.shortMessage with
+        | Some msg -> Some (msg ^ " " ^ status_tick ())
+        | None -> None
       in
-      match !state with
-      | Main_loop { Main_env.hh_server_status; _ } ->
-        let shortMessage =
-          match hh_server_status.ShowStatusFB.shortMessage with
-          | Some msg -> Some (msg ^ " " ^ status_tick ())
-          | None -> None
-        in
-        let hh_server_status =
-          { hh_server_status with ShowStatusFB.shortMessage }
-        in
-        request_showStatusFB
-          ~on_result
-          (merge_with_client_ide_status env !ide_service hh_server_status)
-      | Lost_server { Lost_env.p; _ } ->
-        let hh_server_status =
-          {
-            ShowStatusFB.request =
-              ShowMessageRequest.
-                {
-                  type_ = MessageType.ErrorMessage;
-                  message = p.Lost_env.explanation;
-                  actions = [{ title = hh_server_restart_button_text }];
-                };
-            progress = None;
-            total = None;
-            shortMessage = None;
-          }
-        in
-        request_showStatusFB
-          ~on_result
-          (merge_with_client_ide_status env !ide_service hh_server_status)
-      | _ -> ()
-    end;
-    Lwt.return_unit
+      Some { hh_server_status with ShowStatusFB.shortMessage }
+    | Lost_server { Lost_env.p; _ } ->
+      Some
+        {
+          ShowStatusFB.request =
+            ShowMessageRequest.
+              {
+                type_ = MessageType.ErrorMessage;
+                message = p.Lost_env.explanation;
+                actions = [{ title = hh_server_restart_button_text }];
+              };
+          progress = None;
+          total = None;
+          shortMessage = None;
+        }
+    | _ -> None
   in
-  let rec loop () : unit Lwt.t =
-    let%lwt () = show_status () in
-    let%lwt () = Lwt_unix.sleep 1.0 in
-    loop ()
-  in
-  loop ()
+  match hh_server_status with
+  | None -> ()
+  | Some hh_server_status ->
+    let combined_status =
+      merge_with_client_ide_status env !ide_service hh_server_status
+    in
+    request_showStatusFB
+      ~on_result:(on_status_restart_action ~env ~init_id ~ide_service)
+      combined_status
 
 (************************************************************************)
 (* Message handling                                                     *)
@@ -4451,12 +4449,15 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time env;
       Lwt.return_unit
   in
+  Lwt.async (fun () -> run_ide_service env !ide_service None);
   let rec main_loop () : unit Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  Lwt.async (fun () -> run_ide_service env !ide_service None);
-  let%lwt () =
-    Lwt.pick [main_loop (); tick_showStatus env ~state ~ide_service ~init_id]
+  let rec tick_loop () : unit Lwt.t =
+    tick_showStatus ~env ~state ~ide_service ~init_id;
+    let%lwt () = Lwt_unix.sleep 1.0 in
+    tick_loop ()
   in
+  let%lwt () = Lwt.pick [main_loop (); tick_loop ()] in
   Lwt.return Exit_status.No_error

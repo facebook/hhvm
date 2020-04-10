@@ -111,6 +111,7 @@ module In_init_env = struct
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
+    hh_server_status_diagnostic: PublishDiagnostics.params option;
   }
 end
 
@@ -122,6 +123,7 @@ module Lost_env = struct
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
+    hh_server_status_diagnostic: PublishDiagnostics.params option;
   }
 
   and params = {
@@ -799,20 +801,28 @@ let (_ : 'a -> 'b) = request_showMessage
 
 and (_ : 'c -> 'd) = dismiss_showMessageRequest
 
-(** dismiss_ui: dismisses all dialogs, progress- and action-required
-indicators and diagnostics in a state. *)
-let dismiss_ui (state : state) : state =
+(** dismiss_diagnostics: dismisses all diagnostics from a state,
+both the error diagnostics in Main_loop and the hh_server_status
+diagnostics in In_init and Lost_server. *)
+let dismiss_diagnostics (state : state) : state =
+  let dismiss_diagnostic diagnostic =
+    diagnostic
+    |> Option.map ~f:(fun d -> UriSet.singleton d.PublishDiagnostics.uri)
+    |> Option.iter ~f:(Lsp_helpers.dismiss_diagnostics to_stdout)
+  in
   match state with
-  | In_init ienv -> In_init ienv
+  | In_init ienv ->
+    let open In_init_env in
+    dismiss_diagnostic ienv.hh_server_status_diagnostic;
+    In_init { ienv with hh_server_status_diagnostic = None }
   | Main_loop menv ->
-    Main_env.(
-      Main_loop
-        {
-          menv with
-          uris_with_diagnostics =
-            Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
-        })
-  | Lost_server lenv -> Lost_server lenv
+    let open Main_env in
+    Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
+    Main_loop { menv with uris_with_diagnostics = UriSet.empty }
+  | Lost_server lenv ->
+    let open Lost_env in
+    dismiss_diagnostic lenv.hh_server_status_diagnostic;
+    Lost_server { lenv with hh_server_status_diagnostic = None }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
 
@@ -999,7 +1009,7 @@ let do_shutdown
     (tracking_id : string)
     (ref_unblocked_time : float ref) : state Lwt.t =
   log "Received shutdown request";
-  let state = dismiss_ui state in
+  let state = dismiss_diagnostics state in
   let%lwt () =
     match state with
     | Main_loop menv ->
@@ -2463,7 +2473,7 @@ let do_diagnostics
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
   In_init_env.(
-    let _state = dismiss_ui (In_init ienv) in
+    let _state = dismiss_diagnostics (In_init ienv) in
     let menv =
       {
         Main_env.conn = ienv.In_init_env.conn;
@@ -2748,7 +2758,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
         (In_init
            { ienv with In_init_env.conn; most_recent_start_time = Unix.time () })
     | _ ->
-      let state = dismiss_ui state in
+      let state = dismiss_diagnostics state in
       Lwt.return
         (In_init
            {
@@ -2762,6 +2772,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              (* Pre_init will of course be empty; *)
              (* Lost_server will exit rather than reconnect with unsaved changes. *)
              uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
+             hh_server_status_diagnostic = None;
            })
   with e ->
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
@@ -2883,7 +2894,7 @@ and do_lost_server
   Lost_env.(
     set_hh_server_state p.new_hh_server_state;
 
-    let state = dismiss_ui state in
+    let state = dismiss_diagnostics state in
     let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
     let most_recent_file = get_most_recent_file state in
     let editor_open_files =
@@ -2904,6 +2915,7 @@ and do_lost_server
             editor_open_files;
             uris_with_unsaved_changes;
             lock_file;
+            hh_server_status_diagnostic = None;
           }
       in
       Lsp_helpers.telemetry_log
@@ -2922,6 +2934,7 @@ and do_lost_server
              editor_open_files;
              uris_with_unsaved_changes;
              lock_file;
+             hh_server_status_diagnostic = None;
            }))
 
 let handle_idle_if_necessary (state : state) (event : event) : state =

@@ -103,7 +103,7 @@ public:
   static ArrayData* CopyStatic(const ArrayData*);
   static constexpr auto Pop = &ArrayCommon::Pop;
   static constexpr auto Dequeue = &ArrayCommon::Dequeue;
-  static void Renumber(ArrayData*);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData*, SortFunction sf);

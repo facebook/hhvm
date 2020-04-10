@@ -358,7 +358,7 @@ public:
   static constexpr auto ToVArray = &ArrayCommon::ToVArray;
   static ArrayData* ToDArray(ArrayData*, bool);
 
-  static void Renumber(ArrayData*);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
   // Recursively register {allocation, rootAPCHandle} with APCGCManager

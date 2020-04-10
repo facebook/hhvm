@@ -758,7 +758,7 @@ ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
   return a;
 }
 
-void SetArray::Renumber(ArrayData*) {
+ArrayData* SetArray::Renumber(ArrayData*) {
   SystemLib::throwInvalidOperationExceptionObject(
     "Invalid keyset operation (renumbering)"
   );

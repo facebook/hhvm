@@ -1751,8 +1751,10 @@ ArrayData* MixedArray::ToDictDict(ArrayData* ad, bool) {
   return ad;
 }
 
-void MixedArray::Renumber(ArrayData* ad) {
+ArrayData* MixedArray::Renumber(ArrayData* adIn) {
+  auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   asMixed(ad)->compact(true);
+  return ad;
 }
 
 void MixedArray::OnSetEvalScalar(ArrayData* ad) {

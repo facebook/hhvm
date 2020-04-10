@@ -90,7 +90,7 @@ struct RecordArray : ArrayData,
   static ArrayData* Pop(ArrayData*, Variant& value);
   static ArrayData* Dequeue(ArrayData*, Variant& value);
   static ArrayData* Prepend(ArrayData*, TypedValue v);
-  static void Renumber(ArrayData*);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static ArrayData* ToPHPArray(ArrayData*, bool);
   static constexpr auto ToPHPArrayIntishCast = &ToPHPArray;

@@ -48,10 +48,11 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
   if (!a->empty()) {
     auto const pos = a->iter_begin();
     value = a->getValue(pos);
-    auto const ret = a->remove(a->getKey(pos));
+    auto const result = a->remove(a->getKey(pos));
     // In PHP, array_shift() will cause all numerically key-ed values re-keyed
-    ret->renumber();
-    return ret;
+    auto const escalated = result->renumber();
+    if (escalated != result) decRefArr(result);
+    return escalated;
   }
   value = uninit_null();
   return a;

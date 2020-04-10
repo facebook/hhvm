@@ -492,7 +492,7 @@ ArrayData* RecordArray::Prepend(ArrayData* ad, TypedValue v) {
   );
 }
 
-void RecordArray::Renumber(ArrayData*) {
+ArrayData* RecordArray::Renumber(ArrayData*) {
   throw_not_supported("Renumber", "Record-array");
 }
 

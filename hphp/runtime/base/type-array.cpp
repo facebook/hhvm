@@ -318,12 +318,8 @@ Array& Array::mergeImpl(ArrayData *data) {
   if (m_arr == nullptr || data == nullptr) {
     throw_bad_array_merge();
   }
-  if (!data->empty()) {
-    auto const escalated = m_arr->merge(data);
-    if (escalated != m_arr) m_arr = Ptr::attach(escalated);
-  } else {
-    m_arr->renumber();
-  }
+  auto const escalated = data->empty() ? m_arr->renumber() : m_arr->merge(data);
+  if (escalated != m_arr) m_arr = Ptr::attach(escalated);
   return *this;
 }
 

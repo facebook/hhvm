@@ -112,7 +112,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* ToDArray(ArrayData*, bool);
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
-  static void Renumber(ArrayData*) {}
+  static ArrayData* Renumber(ArrayData* ad) { return ad; }
   static void OnSetEvalScalar(ArrayData*);
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;

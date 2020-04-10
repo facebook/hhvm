@@ -277,7 +277,7 @@ inline void ArrayData::onSetEvalScalar() {
   return g_array_funcs.onSetEvalScalar[kind()](this);
 }
 
-inline void ArrayData::renumber() {
+inline ArrayData* ArrayData::renumber() {
   return g_array_funcs.renumber[kind()](this);
 }
 

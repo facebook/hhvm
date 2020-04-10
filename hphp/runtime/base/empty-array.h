@@ -126,7 +126,7 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static ArrayData* ToDict(ArrayData*, bool);
   static ArrayData* ToVec(ArrayData*, bool);
   static ArrayData* ToKeyset(ArrayData*, bool);
-  static void Renumber(ArrayData*) {}
+  static ArrayData* Renumber(ArrayData* ad) { return ad; }
   static void OnSetEvalScalar(ArrayData*);
 
 private:

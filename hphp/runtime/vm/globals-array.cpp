@@ -268,7 +268,9 @@ ArrayData* GlobalsArray::CopyStatic(const ArrayData*) {
     "not implemented.");
 }
 
-void GlobalsArray::Renumber(ArrayData*) {}
+ArrayData* GlobalsArray::Renumber(ArrayData* ad) {
+  return ad;
+}
 
 void GlobalsArray::OnSetEvalScalar(ArrayData*) {
   not_reached();

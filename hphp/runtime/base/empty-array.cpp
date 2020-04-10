@@ -267,15 +267,18 @@ ArrayData* EmptyArray::Merge(ArrayData*, const ArrayData* elems) {
     if (elems->isMixedKind()) {
       auto const copy = MixedArray::Copy(elems);
       assertx(copy != elems);
-      MixedArray::Renumber(copy);
+      assertx(copy->hasExactlyOneRef());
+      DEBUG_ONLY auto const escalated = MixedArray::Renumber(copy);
+      assertx(escalated == copy);
       return copy;
     }
   }
-  auto copy = const_cast<ArrayData*>(elems)->toPHPArray(true);
-  copy = copy == elems ? elems->copy() : copy;
+  auto const copy = const_cast<ArrayData*>(elems)->toPHPArray(true);
   assertx(copy != elems);
-  copy->renumber();
-  return copy;
+  assertx(copy->hasExactlyOneRef());
+  auto const escalated = copy->renumber();
+  if (escalated != copy) copy->release();
+  return escalated;
 }
 
 ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {

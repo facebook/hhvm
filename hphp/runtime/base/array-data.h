@@ -672,9 +672,10 @@ public:
   bool convertKey(const StringData* key, int64_t& i) const;
 
   /*
-   * Re-index all numeric keys to start from 0.
+   * Re-index all numeric keys to start from 0. This operation may require
+   * escalation on the array, so it returns the new result.
    */
-  void renumber();
+  ArrayData* renumber();
 
   /*
    * Get the string name for the array kind `kind'.
@@ -876,7 +877,7 @@ struct ArrayFunctions {
   ArrayData* (*pop[NK])(ArrayData*, Variant& value);
   ArrayData* (*dequeue[NK])(ArrayData*, Variant& value);
   ArrayData* (*prepend[NK])(ArrayData*, TypedValue v);
-  void (*renumber[NK])(ArrayData*);
+  ArrayData* (*renumber[NK])(ArrayData*);
   void (*onSetEvalScalar[NK])(ArrayData*);
   ArrayData* (*toPHPArray[NK])(ArrayData*, bool);
   ArrayData* (*toPHPArrayIntishCast[NK])(ArrayData*, bool);

@@ -417,7 +417,7 @@ public:
   static ArrayData* Pop(ArrayData*, Variant&);
   static ArrayData* Dequeue(ArrayData*, Variant&);
   static ArrayData* Prepend(ArrayData*, TypedValue);
-  static void Renumber(ArrayData*);
+  static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static constexpr auto ToDict = &ArrayCommon::ToDict;
   static constexpr auto ToVec = &ArrayCommon::ToVec;

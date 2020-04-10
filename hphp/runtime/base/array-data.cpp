@@ -608,9 +608,10 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Prepend)
 
   /*
-   * void Renumber(ArrayData*)
+   * ArrayData* Renumber(ArrayData*)
    *
-   *   Renumber integer keys on the array in place.
+   *   Renumber integer keys on the array. This method will operate in place
+   *   if possible, but it returns a new array if we need copy / escalation.
    */
   DISPATCH(Renumber)
 

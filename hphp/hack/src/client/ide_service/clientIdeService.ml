@@ -483,21 +483,21 @@ let push_message (t : t) (message : message_wrapper) : unit =
 
 let notify_disk_file_changed (t : t) ~(tracking_id : string) (path : Path.t) :
     unit =
-  let message = ClientIdeMessage.File_changed path in
+  let message = ClientIdeMessage.Disk_file_changed path in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 let notify_ide_file_opened
     (t : t) ~(tracking_id : string) ~(path : Path.t) ~(contents : string) : unit
     =
   let message =
-    ClientIdeMessage.File_opened
+    ClientIdeMessage.Ide_file_opened
       { ClientIdeMessage.file_path = path; file_contents = contents }
   in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 let notify_ide_file_closed (t : t) ~(tracking_id : string) ~(path : Path.t) :
     unit =
-  let message = ClientIdeMessage.File_closed path in
+  let message = ClientIdeMessage.Ide_file_closed path in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =

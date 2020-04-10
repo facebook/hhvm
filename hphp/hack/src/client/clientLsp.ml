@@ -3048,14 +3048,11 @@ let track_edits_if_necessary (state : state) (event : event) : state =
 
 let track_ide_service_open_files
     (ide_service : ClientIdeService.t) (event : event) : unit Lwt.t =
+  let uri_to_path uri = uri |> lsp_uri_to_path |> Path.make in
   match event with
   | Client_message (metadata, NotificationMessage (DidOpenNotification params))
     ->
-    let path =
-      params.DidOpen.textDocument.TextDocumentItem.uri
-      |> lsp_uri_to_path
-      |> Path.make
-    in
+    let path = uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri in
     let contents = params.DidOpen.textDocument.TextDocumentItem.text in
     (* We can't do ClientIdeService.rpc directly, since that fails if the IDE service
     hasn't yet initialized. Instead, notify_file_opened will queue up the open until
@@ -3070,9 +3067,7 @@ let track_ide_service_open_files
   | Client_message (metadata, NotificationMessage (DidCloseNotification params))
     ->
     let path =
-      params.DidClose.textDocument.TextDocumentIdentifier.uri
-      |> lsp_uri_to_path
-      |> Path.make
+      uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
     in
     ClientIdeService.notify_ide_file_closed
       ide_service

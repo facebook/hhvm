@@ -479,7 +479,7 @@ let handle_message :
     else
       Hh_logger.Level.set_min_level Hh_logger.Level.Info;
     Lwt.return (state, Handle_message_result.Notification)
-  | ((Failed_to_initialize _ | Initializing), File_changed _) ->
+  | ((Failed_to_initialize _ | Initializing), Disk_file_changed _) ->
     (* Should not happen. *)
     let user_message =
       "IDE services could not process file change because "
@@ -490,7 +490,7 @@ let handle_message :
     let stack = Exception.get_current_callstack_string 99 in
     let error_data = ClientIdeMessage.make_error_data user_message ~stack in
     Lwt.return (state, Handle_message_result.Error error_data)
-  | (Initialized initialized_state, File_changed path) ->
+  | (Initialized initialized_state, Disk_file_changed path) ->
     (* Only invalidate when a hack file changes *)
     if FindUtils.file_filter (Path.to_string path) then
       let changed_files_to_process =
@@ -555,13 +555,14 @@ let handle_message :
       }
     in
     Lwt.return (state, Handle_message_result.Error error_data)
-  | (Initialized initialized_state, File_closed file_path) ->
+  | (Initialized initialized_state, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let state = close_file initialized_state path in
     Lwt.return (state, Handle_message_result.Notification)
-  | (Initialized initialized_state, File_opened { file_path; file_contents }) ->
+  | (Initialized initialized_state, Ide_file_opened { file_path; file_contents })
+    ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in

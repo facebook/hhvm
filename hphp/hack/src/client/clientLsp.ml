@@ -61,6 +61,8 @@ let hh_server_restart_button_text = "Restart hh_server"
 
 let client_ide_restart_button_text = "Restart Hack IDE"
 
+let see_output_hack = " See Output\xE2\x80\xBAHack for details." (* chevron *)
+
 type incoming_metadata = {
   timestamp: float;  (** time this message arrived at stdin *)
   tracking_id: string;
@@ -98,7 +100,10 @@ module Main_env = struct
         (** see comment in get_uris_with_unsaved_changes *)
     hh_server_status: ShowStatusFB.params;
         (** is updated by [handle_server_message] > [do_server_busy]. Shows status of
-        a connected hh_server, whether it's busy typechecking or ready. *)
+        a connected hh_server, whether it's busy typechecking or ready:
+        (1) type_=InfoMessage when done typechecking, or WarningMessage during.
+        (2) shortMessage="Hack" if IDE is available, or "Hack: busy" if not
+        (3) message is a descriptive status about what it's doing. *)
   }
 end
 
@@ -696,13 +701,6 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
   | Some (Client_message (_, RequestMessage (id, _request))) ->
     respond_jsonrpc ~powered_by:Language_server id result
   | _ -> Lsp_helpers.telemetry_error to_stdout (Lsp_fmt.error_to_log_string e)
-
-let status_tick () : string =
-  (* OCaml has pretty poor Unicode support.
-   # @lint-ignore TXT5 The # sign is needed for the ignore to be respected. *)
-  let statusFrames = [| "□"; "■" |] in
-  let time = Unix.time () in
-  statusFrames.(int_of_float time mod 2)
 
 (** request_showStatusFB: pops up a dialog *)
 let request_showStatusFB
@@ -2382,6 +2380,9 @@ let do_documentRename
   in
   Lwt.return (patches_to_workspace_edit patches)
 
+(** This updates Main_env.hh_server_status according to the status message
+we just received from hh_server. See comments on hh_server_status for
+the invariants on its fields. *)
 let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
     state =
   let open Main_env in
@@ -2389,44 +2390,38 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
   let (type_, shortMessage, message) =
     match status with
     | Needs_local_typecheck ->
-      (MessageType.InfoMessage, None, "Hack: preparing to check edits")
+      (MessageType.InfoMessage, "Hack", "hh_server is preparing to check edits")
     | Doing_local_typecheck ->
-      (MessageType.InfoMessage, None, "Hack: checking edits")
+      (MessageType.WarningMessage, "Hack", "hh_server is checking edits")
     | Done_local_typecheck ->
       ( MessageType.InfoMessage,
-        None,
+        "Hack",
         "hh_server is initialized and running correctly." )
     | Doing_global_typecheck Blocking ->
       ( MessageType.WarningMessage,
-        Some "checking project",
-        "Hack: checking entire project (blocking)" )
+        "Hack: busy",
+        "hh_server is typechecking the entire project (blocking)" )
     | Doing_global_typecheck Interruptible ->
-      ( MessageType.InfoMessage,
-        None,
-        "Hack: checking entire project (interruptible)" )
+      ( MessageType.WarningMessage,
+        "Hack",
+        "hh_server is typechecking entire project" )
     | Doing_global_typecheck (Remote_blocking message) ->
       ( MessageType.WarningMessage,
-        Some (Printf.sprintf "checking project: %s" message),
-        Printf.sprintf
-          "Hack: checking entire project (remote, blocking) - %s"
-          message )
+        "Hack: remote",
+        "hh_server is remote-typechecking the entire project - " ^ message )
     | Done_global_typecheck _ ->
       ( MessageType.InfoMessage,
-        None,
+        "Hack",
         "hh_server is initialized and running correctly." )
   in
   match state with
-  | Main_loop ({ hh_server_status; _ } as menv) ->
+  | Main_loop menv ->
     let hh_server_status =
       {
-        hh_server_status with
-        ShowStatusFB.request =
-          {
-            hh_server_status.ShowStatusFB.request with
-            ShowMessageRequest.type_;
-            message;
-          };
-        shortMessage;
+        ShowStatusFB.shortMessage = Some shortMessage;
+        request = { ShowMessageRequest.type_; message; actions = [] };
+        total = None;
+        progress = None;
       }
     in
     Main_loop { menv with hh_server_status }
@@ -3289,7 +3284,8 @@ let run_ide_service
       if is_actionable then
         Lsp_helpers.showMessage_error
           to_stdout
-          (medium_user_message ^ " See Output>Hack for details.");
+          (medium_user_message ^ see_output_hack);
+      (* chevron *)
       Lwt.return_unit
   ) else
     Lwt.return_unit
@@ -3996,64 +3992,42 @@ let handle_client_ide_notification
 
 let get_client_ide_status (env : env) (ide_service : ClientIdeService.t) :
     ShowStatusFB.params option =
-  match (env.use_serverless_ide, ClientIdeService.get_status ide_service) with
-  | (false, _) -> None
-  | (true, ClientIdeService.Status.Not_started) ->
+  if not env.use_serverless_ide then
+    None
+  else
+    let (type_, shortMessage, message, actions) =
+      match ClientIdeService.get_status ide_service with
+      | ClientIdeService.Status.Not_started ->
+        ( MessageType.ErrorMessage,
+          "Hack: not started",
+          "Hack IDE: not started.",
+          [{ ShowMessageRequest.title = client_ide_restart_button_text }] )
+      | ClientIdeService.Status.Initializing ->
+        ( MessageType.WarningMessage,
+          "Hack: initializing",
+          "Hack IDE: initializing.",
+          [] )
+      | ClientIdeService.Status.Processing_files p ->
+        let open ClientIdeMessage.Processing_files in
+        ( MessageType.WarningMessage,
+          "Hack",
+          Printf.sprintf "Hack IDE: processing %d/%d files." p.processed p.total,
+          [] )
+      | ClientIdeService.Status.Ready ->
+        (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
+      | ClientIdeService.Status.Stopped s ->
+        let open ClientIdeMessage in
+        ( MessageType.ErrorMessage,
+          "Hack: " ^ s.short_user_message,
+          s.medium_user_message ^ see_output_hack,
+          [{ ShowMessageRequest.title = client_ide_restart_button_text }] )
+    in
     Some
       {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = "Hack IDE: not started.";
-              actions = [{ title = client_ide_restart_button_text }];
-            };
+        ShowStatusFB.shortMessage = Some shortMessage;
+        request = { ShowMessageRequest.type_; message; actions };
         progress = None;
         total = None;
-        shortMessage = Some "Hack: not started";
-      }
-  | (true, ClientIdeService.Status.Initializing) ->
-    Some
-      {
-        ShowStatusFB.request =
-          {
-            ShowMessageRequest.type_ = MessageType.WarningMessage;
-            message = "Hack IDE: initializing.";
-            actions = [];
-          };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack: initializing";
-      }
-  | (true, ClientIdeService.Status.Processing_files _)
-  | (true, ClientIdeService.Status.Ready) ->
-    Some
-      {
-        ShowStatusFB.request =
-          {
-            ShowMessageRequest.type_ = MessageType.InfoMessage;
-            message = "Hack IDE: ready.";
-            actions = [];
-          };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack \xE2\x9C\x93" (* check mark *);
-      }
-  | ( true,
-      ClientIdeService.Status.Stopped
-        { ClientIdeMessage.short_user_message; medium_user_message; _ } ) ->
-    Some
-      {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = medium_user_message ^ " See Output>Hack for details.";
-              actions = [{ title = client_ide_restart_button_text }];
-            };
-        progress = None;
-        total = None;
-        shortMessage = Some ("Hack: " ^ short_user_message);
       }
 
 (** This function blocks while it attempts to connect to the monitor to read status.
@@ -4075,52 +4049,51 @@ let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
       | Error _ -> (None, None)
       | Ok (progress, warning) -> (progress, warning)
     in
+    (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
+    it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
+    or None if there's no relevant progress to show.
+    [warning] comes from the same place, and if pressent is a human-readable string
+    that warns about saved-state-init failure. *)
     let progress =
       Option.value progress ~default:ClientConnect.default_progress_message
     in
-    let message =
+    let warning =
       if Option.is_some warning then
-        Printf.sprintf
-          "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-          progress
-          delay_in_secs
+        " (saved-state not found - will take a while)"
       else
-        Printf.sprintf
-          "hh_server initializing: %s [%i seconds]"
-          progress
-          delay_in_secs
+        ""
+    in
+    let message =
+      Printf.sprintf
+        "hh_server initializing%s: %s [%i seconds]"
+        warning
+        progress
+        delay_in_secs
     in
     Some
       {
         request = { type_ = MessageType.WarningMessage; message; actions = [] };
         progress = None;
         total = None;
-        shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
+        shortMessage = Some "Hack: initializing";
       }
   | Main_loop { Main_env.hh_server_status; _ } ->
     (* This shows whether the connected hh_server is busy or ready.
-      Typical values are "info / <empty> / hh_server is ok" and
-      "warning / checking project / Hack: checking entire project".
-      All we'll do here is an animation for it. *)
-    let shortMessage =
-      match hh_server_status.ShowStatusFB.shortMessage with
-      | Some msg -> Some (msg ^ " " ^ status_tick ())
-      | None -> None
-    in
-    Some { hh_server_status with ShowStatusFB.shortMessage }
+    It's produced in clientLsp.do_server_busy upon receipt of a status
+    enum from the server. See comments on hh_server_status for invariants. *)
+    Some hh_server_status
   | Lost_server { Lost_env.p; _ } ->
     Some
       {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = p.Lost_env.explanation;
-              actions = [{ title = hh_server_restart_button_text }];
-            };
+        shortMessage = Some "Hack: stopped";
+        request =
+          {
+            type_ = MessageType.ErrorMessage;
+            message = p.Lost_env.explanation;
+            actions = [{ title = hh_server_restart_button_text }];
+          };
         progress = None;
         total = None;
-        shortMessage = None;
       }
 
 let hh_server_status_to_diagnostic
@@ -4245,56 +4218,62 @@ let publish_hh_server_status_diagnostic
     publish_and_update_diagnostic state desired
   | (None, Some desired, _) -> publish_and_update_diagnostic state desired
 
+(** Here are the rules for merging status. They embody the principle that the spinner
+shows if initializing/typechecking is in progress, the error icon shows if error,
+and the status bar word is "Hack" if IDE services are available or "Hack: xyz" if not.
+Note that if Hack IDE is up but hh_server is down, then the hh_server failure message
+is conveyed via a publishDiagnostic; it's not conveyed via status.
+  [ok] Hack -- if ide_service is up and hh_server is ready
+  [spin] Hack -- if ide_service is processing-files or hh_server is initializing/typechecking
+  [spin] Hack: initializing -- if ide_service is initializing
+  [err] Hack: failure -- if ide_service is down
+If client_ide_service isn't enabled, then we show thing differently:
+  [ok] Hack  -- if hh_server is ready (Main_loop)
+  [spin] Hack -- if hh_server is doing local or global typechecks (Main_loop)
+  [spin] Hack: busy -- if hh_server is doing non-interruptible typechecks (Main_loop)
+  [spin] Hack: initializing -- if hh_server is initializing (In_init)
+  [err] hh_server: stopped -- hh_server is down (Lost_server)
+As for the tooltip and actions, they are combined from both ide_service and hh_server. *)
 let merge_statuses
-    ~(hh_server_status : ShowStatusFB.params option)
-    ~(client_ide_status : ShowStatusFB.params option) :
+    ~(client_ide_status : ShowStatusFB.params option)
+    ~(hh_server_status : ShowStatusFB.params option) :
     ShowStatusFB.params option =
-  let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
-  let combine_types hh_server_type client_ide_type =
-    (* Use the worse of the two status to indicate that something's not
-    working in the maximum number of applicable cases. *)
-    if MessageType.to_enum hh_server_type < MessageType.to_enum client_ide_type
-    then
-      hh_server_type
-    else
-      client_ide_type
-  in
-  let combine_short_messages lhs rhs =
-    Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
-  in
-  let combine_messages lhs rhs = lhs ^ " " ^ rhs in
-  match (hh_server_status, client_ide_status) with
+  (* The correctness of the following match is a bit subtle. This is how to think of it.
+  From the spec in the docblock, (1) if there's no client_ide_service, then the result
+  of this function is simply the same as hh_server_status, since that's how it was constructed
+  by get_hh_server_status (for In_init and Lost_server) and do_server_busy; (2) if there
+  is a client_ide_service then the result is almost always simply the same as ide_service
+  since that's how it was constructed by get_client_ide_status; (3) the only exception to
+  rule 2 is that, if client_ide_status would have shown "[ok] Hack" and hh_server_status
+  would have been a spinner, then we change to "[spin] Hack". *)
+  match (client_ide_status, hh_server_status) with
   | (None, None) -> None
-  | (None, Some status)
-  | (Some status, None) ->
-    Some status
-  | (Some hh_server_status, Some client_ide_status) ->
-    Some
-      ShowStatusFB.
-        {
-          request =
-            ShowMessageRequest.
-              {
-                type_ =
-                  combine_types
-                    hh_server_status.request.type_
-                    client_ide_status.request.type_;
-                (* Put IDE status first, since it's generally more important. *)
-                message =
-                  combine_messages
-                    client_ide_status.request.message
-                    hh_server_status.request.message;
-                actions =
-                  hh_server_status.request.actions
-                  @ client_ide_status.request.actions;
-              };
-          progress = add hh_server_status.progress client_ide_status.progress;
-          total = add hh_server_status.total client_ide_status.total;
-          shortMessage =
-            combine_short_messages
-              hh_server_status.shortMessage
-              client_ide_status.shortMessage;
-        }
+  | (None, Some _) -> hh_server_status
+  | (Some _, None) -> client_ide_status
+  | (Some client_ide_status, Some hh_server_status) ->
+    let open Lsp.ShowStatusFB in
+    let open Lsp.ShowMessageRequest in
+    let request =
+      {
+        client_ide_status.request with
+        message =
+          client_ide_status.request.message
+          ^ "\n"
+          ^ hh_server_status.request.message;
+        actions =
+          client_ide_status.request.actions @ hh_server_status.request.actions;
+      }
+    in
+    if
+      MessageType.equal client_ide_status.request.type_ MessageType.InfoMessage
+      && MessageType.equal
+           hh_server_status.request.type_
+           MessageType.WarningMessage
+    then
+      let request = { request with type_ = MessageType.WarningMessage } in
+      Some { client_ide_status with request; shortMessage = Some "Hack" }
+    else
+      Some { client_ide_status with request }
 
 let handle_tick
     ~(env : env)

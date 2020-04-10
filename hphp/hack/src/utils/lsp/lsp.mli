@@ -168,7 +168,7 @@ module MessageType : sig
     | WarningMessage [@value 2]
     | InfoMessage [@value 3]
     | LogMessage [@value 4]
-  [@@deriving enum]
+  [@@deriving eq, enum]
 end
 
 module CancelRequest : sig

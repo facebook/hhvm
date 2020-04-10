@@ -318,10 +318,19 @@ pub fn expr_to_typed_value_(
         False => Ok(TypedValue::Bool(false)),
         Null => Ok(TypedValue::Null),
         String(s) => Ok(TypedValue::String(s.to_owned())),
-        Float(s) => s
-            .parse()
-            .map(|x| TypedValue::float(x))
-            .map_err(|_| Error::NotLiteral),
+        Float(s) => {
+            if s == math::INF {
+                Ok(TypedValue::float(std::f64::INFINITY))
+            } else if s == math::NEG_INF {
+                Ok(TypedValue::float(std::f64::NEG_INFINITY))
+            } else if s == math::NAN {
+                Ok(TypedValue::float(std::f64::NAN))
+            } else {
+                s.parse()
+                    .map(|x| TypedValue::float(x))
+                    .map_err(|_| Error::NotLiteral)
+            }
+        }
 
         Call(id)
             if id

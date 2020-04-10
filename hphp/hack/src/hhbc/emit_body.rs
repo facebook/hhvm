@@ -720,13 +720,13 @@ pub fn emit_deprecation_info(
                     ),
                 };
 
-            let fn_name = match scope.items.get(0) {
+            let fn_name = match scope.items.last() {
                 Some(ScopeItem::Function(f)) => strip_id(&f.name),
                 Some(ScopeItem::Method(m)) => strip_id(&m.name),
                 _ => {
                     return Err(Error::Unrecoverable(
                         "deprecated functions must have names".into(),
-                    ))
+                    ));
                 }
             };
             let deprecation_string = class_name
@@ -969,7 +969,7 @@ fn report_error(is_closure_body: bool, scope: &Scope, pos: &Pos) -> Result<()> {
     let msg: String = if is_closure_body {
         "Return type hint for async closure must be awaitable".into()
     } else {
-        let mut scope = scope.items.iter();
+        let mut scope = scope.iter();
         let s1 = scope.next();
         let s2 = scope.next();
         use ScopeItem as S;

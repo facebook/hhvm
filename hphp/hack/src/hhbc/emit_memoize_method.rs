@@ -147,8 +147,8 @@ fn make_memoize_wrapper_method<'a>(
     let name = method::Type::from_ast_name(&method.name.1);
     let scope = &Scope {
         items: vec![
-            ScopeItem::Method(Cow::Borrowed(method)),
             ScopeItem::Class(Cow::Borrowed(class)),
+            ScopeItem::Method(Cow::Borrowed(method)),
         ],
     };
     let mut attributes =

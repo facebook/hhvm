@@ -877,6 +877,7 @@ pub mod emitter_special_functions {
 pub mod math {
     pub const NAN: &str = "NAN";
     pub const INF: &str = "INF";
+    pub const NEG_INF: &str = "-INF";
 }
 
 pub mod pocket_universes {

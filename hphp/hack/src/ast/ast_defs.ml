@@ -135,6 +135,22 @@ and uop =
 (* Helpers *)
 (*****************************************************************************)
 
+let is_c_interface = function
+  | Cinterface -> true
+  | Cabstract
+  | Cnormal
+  | Ctrait
+  | Cenum ->
+    false
+
+let is_c_trait = function
+  | Ctrait -> true
+  | Cinterface
+  | Cabstract
+  | Cnormal
+  | Cenum ->
+    false
+
 let string_of_class_kind = function
   | Cabstract -> "an abstract class"
   | Cnormal -> "a class"

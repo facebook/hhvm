@@ -14,7 +14,7 @@
  * 2- transform all the local names into a unique identifier
  *)
 
-open Core_kernel
+open Hh_prelude
 open Utils
 module SN = Naming_special_names
 
@@ -135,7 +135,8 @@ module GEnv = struct
       | ((File _ as p'), Full q') ->
         let p' = fst (get_full_pos ctx (p', name)) in
         Pos.compare p' q' = 0
-      | (File (x, fn1), File (y, fn2)) -> fn1 = fn2 && x = y)
+      | (File (x, fn1), File (y, fn2)) ->
+        Relative_path.equal fn1 fn2 && equal_name_type x y)
 end
 
 (* The primitives to manipulate the naming environment *)

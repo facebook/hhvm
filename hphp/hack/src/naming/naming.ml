@@ -14,7 +14,7 @@
  * 2- transform all the local names into a unique identifier
  *)
 
-open Core_kernel
+open Hh_prelude
 open Common
 open Utils
 open String_utils
@@ -190,8 +190,8 @@ end = struct
 
   let make_class_env ctx tparams c =
     let is_ppl =
-      List.exists c.Aast.c_user_attributes (fun { Aast.ua_name; _ } ->
-          snd ua_name = SN.UserAttributes.uaProbabilisticModel)
+      List.exists c.Aast.c_user_attributes ~f:(fun { Aast.ua_name; _ } ->
+          String.equal (snd ua_name) SN.UserAttributes.uaProbabilisticModel)
     in
     let genv =
       make_class_genv
@@ -325,7 +325,7 @@ end = struct
       (match genv.in_mode with
       | FileInfo.Mpartial
       | FileInfo.Mdecl
-        when name = SN.Classes.cUnknown ->
+        when String.equal name SN.Classes.cUnknown ->
         ()
       | FileInfo.Mphp -> ()
       | FileInfo.Mstrict -> unbound_name_error genv p name kind
@@ -378,8 +378,8 @@ end = struct
   let lvar (genv, env) (p, x) =
     let (p, ident) =
       if
-        (SN.Superglobals.globals = x || SN.Superglobals.is_superglobal x)
-        && genv.in_mode = FileInfo.Mpartial
+        String.(SN.Superglobals.globals = x || SN.Superglobals.is_superglobal x)
+        && FileInfo.equal_mode genv.in_mode FileInfo.Mpartial
       then
         (p, Local_id.make_unscoped x)
       else
@@ -425,7 +425,7 @@ end = struct
         (* Don't let people use strictly internal classes
          * (except when they are being declared in .hhi files) *)
         if
-          name = SN.Classes.cHH_BuiltinEnum
+          String.equal name SN.Classes.cHH_BuiltinEnum
           && not
                (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
         then
@@ -507,7 +507,7 @@ let elaborate_namespaces =
 let check_repetition s param =
   let name = param.Aast.param_name in
   if SSet.mem name s then Errors.already_bound param.Aast.param_pos name;
-  if name <> SN.SpecialIdents.placeholder then
+  if not (String.equal name SN.SpecialIdents.placeholder) then
     SSet.add name s
   else
     s
@@ -517,7 +517,7 @@ let convert_shape_name env = function
   | Ast_defs.SFlit_str (pos, s) -> Ast_defs.SFlit_str (pos, s)
   | Ast_defs.SFclass_const (x, (pos, y)) ->
     let class_name =
-      if snd x = SN.Classes.cSelf then (
+      if String.equal (snd x) SN.Classes.cSelf then (
         match (fst env).current_cls with
         | Some (cid, _, _) -> cid
         | None ->
@@ -576,11 +576,11 @@ let rec hint
 
 and unwrap_mutability p =
   match p with
-  | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hMutable ->
+  | (_, Aast.Happly ((_, hn), [t])) when String.equal hn SN.Rx.hMutable ->
     (Some N.PMutable, t)
-  | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hMaybeMutable ->
+  | (_, Aast.Happly ((_, hn), [t])) when String.equal hn SN.Rx.hMaybeMutable ->
     (Some N.PMaybeMutable, t)
-  | (_, Aast.Happly ((_, hn), [t])) when hn = SN.Rx.hOwnedMutable ->
+  | (_, Aast.Happly ((_, hn), [t])) when String.equal hn SN.Rx.hOwnedMutable ->
     (Some N.POwnedMutable, t)
   | t -> (None, t)
 
@@ -590,7 +590,7 @@ and hfun env reactivity is_coroutine hl kl variadic_hint h =
     List.map
       ~f:(fun h ->
         let (mut, h1) = unwrap_mutability h in
-        if Option.is_some mut && reactivity = N.FNonreactive then
+        if Option.is_some mut && N.is_f_non_reactive reactivity then
           Errors.mutability_hint_in_non_rx_function (fst h);
         (mut, hint env h1))
       hl
@@ -687,7 +687,7 @@ and hint_
                   hf_is_mutable_return = _;
                 } );
         ] )
-    when hname = SN.Rx.hRx ->
+    when String.equal hname SN.Rx.hRx ->
     hfun env N.FReactive hf_is_coroutine hl kl variadic_hint h
   (* Special case for RxShallow<function> *)
   | Aast.Happly
@@ -707,7 +707,7 @@ and hint_
                   hf_is_mutable_return = _;
                 } );
         ] )
-    when hname = SN.Rx.hRxShallow ->
+    when String.equal hname SN.Rx.hRxShallow ->
     hfun env N.FShallow hf_is_coroutine hl kl variadic_hint h
   (* Special case for RxLocal<function> *)
   | Aast.Happly
@@ -727,7 +727,7 @@ and hint_
                   hf_is_mutable_return = _;
                 } );
         ] )
-    when hname = SN.Rx.hRxLocal ->
+    when String.equal hname SN.Rx.hRxLocal ->
     hfun env N.FLocal hf_is_coroutine hl kl variadic_hint h
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
@@ -748,13 +748,13 @@ and hint_
     | N.Hnonnull
     | N.Hdynamic
     | N.Hnothing ->
-      if hl <> [] then Errors.unexpected_type_arguments p
+      if not (List.is_empty hl) then Errors.unexpected_type_arguments p
     | _ -> ());
     hint_id
   | Aast.Haccess ((pos, root_id), ids) ->
     let root_ty =
       match root_id with
-      | Aast.Happly ((pos, x), _) when x = SN.Classes.cSelf ->
+      | Aast.Happly ((pos, x), _) when String.equal x SN.Classes.cSelf ->
         begin
           match (fst env).current_cls with
           | None ->
@@ -763,7 +763,8 @@ and hint_
           | Some (cid, _, _) -> N.Happly (cid, [])
         end
       | Aast.Happly ((pos, x), _)
-        when x = SN.Classes.cStatic || x = SN.Classes.cParent ->
+        when String.equal x SN.Classes.cStatic
+             || String.equal x SN.Classes.cParent ->
         Errors.invalid_type_access_root (pos, x);
         N.Herr
       | Aast.Happly (root, _) ->
@@ -842,15 +843,16 @@ and hint_id
     hl =
   let params = (fst env).type_params in
   (* some common Xhp screw ups *)
-  if x = "Xhp" || x = ":Xhp" || x = "XHP" then Errors.disallowed_xhp_type p x;
+  if String.equal x "Xhp" || String.equal x ":Xhp" || String.equal x "XHP" then
+    Errors.disallowed_xhp_type p x;
   match try_castable_hint ~forbid_this ~allow_wildcard ~tp_depth env p x hl with
   | Some h -> h
   | None ->
     begin
       match x with
-      | x when x = SN.Typehints.wildcard ->
+      | x when String.equal x SN.Typehints.wildcard ->
         if allow_wildcard && tp_depth >= 1 (* prevents 3 as _ *) then
-          if hl <> [] then (
+          if not (List.is_empty hl) then (
             Errors.tparam_with_tparam p x;
             N.Herr
           ) else
@@ -860,58 +862,60 @@ and hint_id
           N.Herr
         )
       | x
-        when x = "\\" ^ SN.Typehints.void
-             || x = "\\" ^ SN.Typehints.null
-             || x = "\\" ^ SN.Typehints.noreturn
-             || x = "\\" ^ SN.Typehints.int
-             || x = "\\" ^ SN.Typehints.bool
-             || x = "\\" ^ SN.Typehints.float
-             || x = "\\" ^ SN.Typehints.num
-             || x = "\\" ^ SN.Typehints.string
-             || x = "\\" ^ SN.Typehints.resource
-             || x = "\\" ^ SN.Typehints.mixed
-             || x = "\\" ^ SN.Typehints.nonnull
-             || x = "\\" ^ SN.Typehints.array
-             || x = "\\" ^ SN.Typehints.arraykey ->
+        when String.equal x ("\\" ^ SN.Typehints.void)
+             || String.equal x ("\\" ^ SN.Typehints.null)
+             || String.equal x ("\\" ^ SN.Typehints.noreturn)
+             || String.equal x ("\\" ^ SN.Typehints.int)
+             || String.equal x ("\\" ^ SN.Typehints.bool)
+             || String.equal x ("\\" ^ SN.Typehints.float)
+             || String.equal x ("\\" ^ SN.Typehints.num)
+             || String.equal x ("\\" ^ SN.Typehints.string)
+             || String.equal x ("\\" ^ SN.Typehints.resource)
+             || String.equal x ("\\" ^ SN.Typehints.mixed)
+             || String.equal x ("\\" ^ SN.Typehints.nonnull)
+             || String.equal x ("\\" ^ SN.Typehints.array)
+             || String.equal x ("\\" ^ SN.Typehints.arraykey) ->
         Errors.primitive_toplevel p;
         N.Herr
-      | x when x = "\\" ^ SN.Typehints.nothing ->
+      | x when String.equal x ("\\" ^ SN.Typehints.nothing) ->
         Errors.primitive_toplevel p;
         N.Herr
-      | x when x = SN.Typehints.void && allow_retonly -> N.Hprim N.Tvoid
-      | x when x = SN.Typehints.void ->
+      | x when String.equal x SN.Typehints.void && allow_retonly ->
+        N.Hprim N.Tvoid
+      | x when String.equal x SN.Typehints.void ->
         Errors.return_only_typehint p `void;
         N.Herr
-      | x when x = SN.Typehints.noreturn && allow_retonly -> N.Hprim N.Tnoreturn
-      | x when x = SN.Typehints.noreturn ->
+      | x when String.equal x SN.Typehints.noreturn && allow_retonly ->
+        N.Hprim N.Tnoreturn
+      | x when String.equal x SN.Typehints.noreturn ->
         Errors.return_only_typehint p `noreturn;
         N.Herr
-      | x when x = SN.Typehints.null -> N.Hprim N.Tnull
-      | x when x = SN.Typehints.num -> N.Hprim N.Tnum
-      | x when x = SN.Typehints.resource -> N.Hprim N.Tresource
-      | x when x = SN.Typehints.arraykey -> N.Hprim N.Tarraykey
-      | x when x = SN.Typehints.mixed -> N.Hmixed
-      | x when x = SN.Typehints.nonnull -> N.Hnonnull
-      | x when x = SN.Typehints.dynamic -> N.Hdynamic
-      | x when x = SN.Typehints.nothing -> N.Hnothing
-      | x when x = SN.Typehints.this && not forbid_this ->
+      | x when String.equal x SN.Typehints.null -> N.Hprim N.Tnull
+      | x when String.equal x SN.Typehints.num -> N.Hprim N.Tnum
+      | x when String.equal x SN.Typehints.resource -> N.Hprim N.Tresource
+      | x when String.equal x SN.Typehints.arraykey -> N.Hprim N.Tarraykey
+      | x when String.equal x SN.Typehints.mixed -> N.Hmixed
+      | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
+      | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
+      | x when String.equal x SN.Typehints.nothing -> N.Hnothing
+      | x when String.equal x SN.Typehints.this && not forbid_this ->
         if not (phys_equal hl []) then Errors.this_no_argument p;
         N.Hthis
-      | x when x = SN.Typehints.this ->
+      | x when String.equal x SN.Typehints.this ->
         Errors.this_type_forbidden p;
         N.Herr
       (* TODO: Duplicate of a Typing[4101] error if namespaced correctly
        * T56198838 *)
       | x
-        when (x = SN.Classes.cClassname || x = "classname")
+        when (String.equal x SN.Classes.cClassname || String.equal x "classname")
              && List.length hl <> 1 ->
         Errors.classname_param p;
         N.Hprim N.Tstring
-      | _ when String.lowercase x = SN.Typehints.this ->
+      | _ when String.(lowercase x = SN.Typehints.this) ->
         Errors.lowercase_this p x;
         N.Herr
       | _ when SMap.mem x params ->
-        if hl <> [] then Errors.tparam_with_tparam p x;
+        if not (List.is_empty hl) then Errors.tparam_with_tparam p x;
         N.Habstr x
       | _ ->
         let name =
@@ -948,11 +952,11 @@ and try_castable_hint
   let canon = String.lowercase x in
   let opt_hint =
     match canon with
-    | nm when nm = SN.Typehints.int -> Some (N.Hprim N.Tint)
-    | nm when nm = SN.Typehints.bool -> Some (N.Hprim N.Tbool)
-    | nm when nm = SN.Typehints.float -> Some (N.Hprim N.Tfloat)
-    | nm when nm = SN.Typehints.string -> Some (N.Hprim N.Tstring)
-    | nm when nm = SN.Typehints.array ->
+    | nm when String.equal nm SN.Typehints.int -> Some (N.Hprim N.Tint)
+    | nm when String.equal nm SN.Typehints.bool -> Some (N.Hprim N.Tbool)
+    | nm when String.equal nm SN.Typehints.float -> Some (N.Hprim N.Tfloat)
+    | nm when String.equal nm SN.Typehints.string -> Some (N.Hprim N.Tstring)
+    | nm when String.equal nm SN.Typehints.array ->
       let tcopt = Provider_context.get_tcopt (fst env).ctx in
       let array_typehints_disallowed =
         TypecheckerOptions.disallow_array_typehint tcopt
@@ -966,7 +970,7 @@ and try_castable_hint
         | _ ->
           Errors.too_many_type_arguments p;
           N.Herr)
-    | nm when nm = SN.Typehints.darray ->
+    | nm when String.equal nm SN.Typehints.darray ->
       Some
         (match hl with
         | [] ->
@@ -980,7 +984,7 @@ and try_castable_hint
         | _ ->
           Errors.too_many_type_arguments p;
           N.Hany)
-    | nm when nm = SN.Typehints.varray ->
+    | nm when String.equal nm SN.Typehints.varray ->
       Some
         (match hl with
         | [] ->
@@ -991,7 +995,7 @@ and try_castable_hint
         | _ ->
           Errors.too_many_type_arguments p;
           N.Hany)
-    | nm when nm = SN.Typehints.varray_or_darray ->
+    | nm when String.equal nm SN.Typehints.varray_or_darray ->
       Some
         (match hl with
         | [] ->
@@ -1011,7 +1015,8 @@ and try_castable_hint
   in
   let () =
     match opt_hint with
-    | Some _ when canon <> x -> Errors.primitive_invalid_alias p x canon
+    | Some _ when not (String.equal canon x) ->
+      Errors.primitive_invalid_alias p x canon
     | _ -> ()
   in
   opt_hint
@@ -1056,7 +1061,7 @@ let add_abstract m = { m with N.m_abstract = true }
 let add_abstractl methods = List.map methods add_abstract
 
 let interface c constructor methods smethods =
-  if c.Aast.c_kind <> Ast_defs.Cinterface then
+  if not (Ast_defs.is_c_interface c.Aast.c_kind) then
     (constructor, methods, smethods)
   else
     let constructor = Option.map constructor add_abstract in
@@ -1140,7 +1145,10 @@ let rec class_ ctx c =
     List.map ~f:(hint ~allow_typedef:false env) c.Aast.c_xhp_attr_uses
   in
   let (c_req_extends, c_req_implements) = Aast.split_reqs c in
-  if c_req_implements <> [] && c.Aast.c_kind <> Ast_defs.Ctrait then
+  if
+    (not (List.is_empty c_req_implements))
+    && not (Ast_defs.is_c_trait c.Aast.c_kind)
+  then
     Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
   let req_implements =
     List.map
@@ -1149,9 +1157,9 @@ let rec class_ ctx c =
   in
   let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
   if
-    c_req_extends <> []
-    && c.Aast.c_kind <> Ast_defs.Ctrait
-    && c.Aast.c_kind <> Ast_defs.Cinterface
+    (not (List.is_empty c_req_extends))
+    && (not (Ast_defs.is_c_trait c.Aast.c_kind))
+    && not (Ast_defs.is_c_interface c.Aast.c_kind)
   then
     Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
   let req_extends =
@@ -1403,13 +1411,16 @@ and type_where_constraints env locl_cstrl =
 and class_prop_expr_is_xhp env cv =
   let expr = Option.map cv.Aast.cv_expr (expr env) in
   let expr =
-    if (fst env).in_mode = FileInfo.Mdecl && expr = None then
+    if
+      FileInfo.equal_mode (fst env).in_mode FileInfo.Mdecl
+      && Option.is_none expr
+    then
       Some (fst cv.Aast.cv_id, N.Any)
     else
       expr
   in
   let is_xhp =
-    try String.sub (snd cv.Aast.cv_id) 0 1 = ":"
+    try String.(sub (snd cv.Aast.cv_id) 0 1 = ":")
     with Invalid_argument _ -> false
   in
   (expr, is_xhp)
@@ -1511,12 +1522,12 @@ and check_constant_expr env (pos, e) =
     (* Only check the values because shape field names are always legal *)
     List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
   | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.AutoimportedFunctions.fun_
-         || cn = SN.AutoimportedFunctions.class_meth
-         || cn = SN.StdlibFunctions.mark_legacy_hack_array
-         || cn = SN.StdlibFunctions.array_mark_legacy
+    when String.equal cn SN.AutoimportedFunctions.fun_
+         || String.equal cn SN.AutoimportedFunctions.class_meth
+         || String.equal cn SN.StdlibFunctions.mark_legacy_hack_array
+         || String.equal cn SN.StdlibFunctions.array_mark_legacy
          (* Tuples are not really function calls, they are just parsed that way*)
-         || cn = SN.SpecialFunctions.tuple ->
+         || String.equal cn SN.SpecialFunctions.tuple ->
     arg_unpack_unexpected unpacked_element;
     List.for_all el ~f:(check_constant_expr env)
   | Aast.FunctionPointer (((_, Aast.Id _) | (_, Aast.Class_const _)), _) -> true
@@ -1524,9 +1535,9 @@ and check_constant_expr env (pos, e) =
     let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
     (* Only vec/keyset/dict are allowed because they are value types *)
     if
-      cn = SN.Collections.cVec
-      || cn = SN.Collections.cKeyset
-      || cn = SN.Collections.cDict
+      String.equal cn SN.Collections.cVec
+      || String.equal cn SN.Collections.cKeyset
+      || String.equal cn SN.Collections.cDict
     then
       List.for_all l ~f:(check_afield_constant_expr env)
     else (
@@ -1536,7 +1547,7 @@ and check_constant_expr env (pos, e) =
   | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
   | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
     let (p, cn) = NS.elaborate_id (fst env).namespace NS.ElaborateClass id in
-    if cn = SN.FB.cIncorrectType then
+    if String.equal cn SN.FB.cIncorrectType then
       check_constant_expr env e
     else (
       Errors.illegal_constant p;
@@ -1848,7 +1859,7 @@ and stmt env (pos, st) =
     | Aast.Try (b, cl, fb) -> try_stmt env b cl fb
     | Aast.Expr
         (cp, Aast.Call (_, (p, Aast.Id (fp, fn)), hl, el, unpacked_element))
-      when fn = SN.AutoimportedFunctions.invariant ->
+      when String.equal fn SN.AutoimportedFunctions.invariant ->
       (* invariant is subject to a source-code transform in the HHVM
        * runtime: the arguments to invariant are lazily evaluated only in
        * the case in which the invariant condition does not hold. So:
@@ -1877,15 +1888,16 @@ and stmt env (pos, st) =
                   el,
                   unpacked_element ) )
           in
-          if cond <> Aast.False then
+          (match cond with
+          | Aast.False ->
+            (* a false <condition> means unconditional invariant_violation *)
+            N.Expr (expr env violation)
+          | _ ->
             let (b1, b2) =
               ([(cp, Aast.Expr violation)], [(Pos.none, Aast.Noop)])
             in
             let cond = (cond_p, Aast.Unop (Ast_defs.Unot, (cond_p, cond))) in
-            if_stmt env cond b1 b2
-          else
-            (* a false <condition> means unconditional invariant_violation *)
-            N.Expr (expr env violation)
+            if_stmt env cond b1 b2)
       end
     | Aast.Expr e -> N.Expr (expr env e)
   in
@@ -2112,7 +2124,7 @@ and expr_ env p (e : Nast.expr_) =
         in
         N.KeyValCollection
           (Nast.get_kvc_kind cn, ta, List.map l (afield_kvalue env cn))
-      | x when x = SN.Collections.cPair ->
+      | x when String.equal x SN.Collections.cPair ->
         begin
           match l with
           | [] ->
@@ -2139,11 +2151,14 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.String2 idl -> N.String2 (string2 env idl)
   | Aast.PrefixedString (n, e) -> N.PrefixedString (n, expr env e)
   | Aast.Id x -> N.Id (Env.global_const env x)
-  | Aast.Lvar (_, x) when Local_id.to_string x = SN.SpecialIdents.this -> N.This
-  | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.dollardollar
-    ->
+  | Aast.Lvar (_, x)
+    when String.equal (Local_id.to_string x) SN.SpecialIdents.this ->
+    N.This
+  | Aast.Lvar (p, x)
+    when String.equal (Local_id.to_string x) SN.SpecialIdents.dollardollar ->
     N.Dollardollar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar)
-  | Aast.Lvar (p, x) when Local_id.to_string x = SN.SpecialIdents.placeholder ->
+  | Aast.Lvar (p, x)
+    when String.equal (Local_id.to_string x) SN.SpecialIdents.placeholder ->
     N.Lplaceholder p
   | Aast.Lvar x ->
     let x = (fst x, Local_id.to_string @@ snd x) in
@@ -2178,7 +2193,7 @@ and expr_ env p (e : Nast.expr_) =
     let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
     begin
       match Naming_provider.get_type_kind genv.ctx name with
-      | Some Naming_types.TTypedef when snd x2 = "class" ->
+      | Some Naming_types.TTypedef when String.equal (snd x2) "class" ->
         N.Typename
           (Env.type_name
              ~context:Errors.ClassContext
@@ -2194,7 +2209,7 @@ and expr_ env p (e : Nast.expr_) =
     let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
     begin
       match Naming_provider.get_type_kind genv.ctx name with
-      | Some Naming_types.TTypedef when snd x2 = "class" ->
+      | Some Naming_types.TTypedef when String.equal (snd x2) "class" ->
         N.Typename
           (Env.type_name
              ~context:Errors.ClassContext
@@ -2213,7 +2228,7 @@ and expr_ env p (e : Nast.expr_) =
       | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
     end
   | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
-    when pseudo_func = SN.SpecialFunctions.echo ->
+    when String.equal pseudo_func SN.SpecialFunctions.echo ->
     arg_unpack_unexpected unpacked_element;
     N.Call
       ( N.Cnormal,
@@ -2222,7 +2237,7 @@ and expr_ env p (e : Nast.expr_) =
         exprl env el,
         None )
   | Aast.Call (_, (p, Aast.Id (_, cn)), tal, el, unpacked_element)
-    when cn = SN.StdlibFunctions.call_user_func ->
+    when String.equal cn SN.StdlibFunctions.call_user_func ->
     arg_unpack_unexpected unpacked_element;
     begin
       match el with
@@ -2233,7 +2248,7 @@ and expr_ env p (e : Nast.expr_) =
         N.Call (N.Cuser_func, expr env f, targl env p tal, exprl env el, None)
     end
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.AutoimportedFunctions.fun_ ->
+    when String.equal cn SN.AutoimportedFunctions.fun_ ->
     arg_unpack_unexpected unpacked_element;
     let (genv, _) = env in
     begin
@@ -2254,7 +2269,7 @@ and expr_ env p (e : Nast.expr_) =
         N.Any
     end
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.AutoimportedFunctions.inst_meth ->
+    when String.equal cn SN.AutoimportedFunctions.inst_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
       match el with
@@ -2272,7 +2287,7 @@ and expr_ env p (e : Nast.expr_) =
         N.Any
     end
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.AutoimportedFunctions.meth_caller ->
+    when String.equal cn SN.AutoimportedFunctions.meth_caller ->
     arg_unpack_unexpected unpacked_element;
     begin
       match el with
@@ -2293,7 +2308,7 @@ and expr_ env p (e : Nast.expr_) =
                   ~allow_generics:false,
                 (pm, meth) )
           | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
-            when mem = SN.Members.mClass ->
+            when String.equal mem SN.Members.mClass ->
             N.Method_caller
               ( Env.type_name
                   ~context:Errors.ClassContext
@@ -2311,7 +2326,7 @@ and expr_ env p (e : Nast.expr_) =
         N.Any
     end
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.AutoimportedFunctions.class_meth ->
+    when String.equal cn SN.AutoimportedFunctions.class_meth ->
     arg_unpack_unexpected unpacked_element;
     begin
       match el with
@@ -2332,7 +2347,7 @@ and expr_ env p (e : Nast.expr_) =
                   ~allow_generics:false,
                 (pm, meth) )
           | ((_, N.Id (_, const)), (pm, N.String meth))
-            when const = SN.PseudoConsts.g__CLASS__ ->
+            when String.equal const SN.PseudoConsts.g__CLASS__ ->
             (* All of these that use current_cls aren't quite correct
              * inside a trait, as the class should be the using class.
              * It's sufficient for typechecking purposes (we require
@@ -2345,7 +2360,7 @@ and expr_ env p (e : Nast.expr_) =
               Errors.illegal_class_meth p;
               N.Any)
           | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
-            when mem = SN.Members.mClass ->
+            when String.equal mem SN.Members.mClass ->
             N.Smethod_id
               ( Env.type_name
                   ~context:Errors.ClassContext
@@ -2355,7 +2370,7 @@ and expr_ env p (e : Nast.expr_) =
                   ~allow_generics:false,
                 (pm, meth) )
           | ((p, N.Class_const ((_, N.CIself), (_, mem))), (pm, N.String meth))
-            when mem = SN.Members.mClass ->
+            when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
             | Some (cid, _, true) -> N.Smethod_id (cid, (pm, meth))
             | Some (cid, _, false) ->
@@ -2365,7 +2380,7 @@ and expr_ env p (e : Nast.expr_) =
               Errors.illegal_class_meth p;
               N.Any)
           | ((p, N.Class_const ((_, N.CIstatic), (_, mem))), (pm, N.String meth))
-            when mem = SN.Members.mClass ->
+            when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
             | Some (cid, _, _) -> N.Smethod_id (cid, (pm, meth))
             | None ->
@@ -2380,14 +2395,14 @@ and expr_ env p (e : Nast.expr_) =
         N.Any
     end
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.SpecialFunctions.assert_ ->
+    when String.equal cn SN.SpecialFunctions.assert_ ->
     arg_unpack_unexpected unpacked_element;
     if List.length el <> 1 then Errors.assert_arity p;
     N.Assert
       (N.AE_assert
          (Option.value_map (List.hd el) ~default:(p, N.Any) ~f:(expr env)))
   | Aast.Call (_, (p, Aast.Id (_, cn)), _, el, unpacked_element)
-    when cn = SN.SpecialFunctions.tuple ->
+    when String.equal cn SN.SpecialFunctions.tuple ->
     arg_unpack_unexpected unpacked_element;
     (match el with
     | [] ->
@@ -2532,7 +2547,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Efun (f, idl) ->
     let idl =
       List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->
-          if Local_id.to_string x = SN.SpecialIdents.this then (
+          if String.equal (Local_id.to_string x) SN.SpecialIdents.this then (
             Errors.this_as_lexical_variable p;
             acc
           ) else
@@ -2639,26 +2654,26 @@ and f_body env f_body =
 and make_class_id env ((p, x) as cid) =
   ( p,
     match x with
-    | x when x = SN.Classes.cParent ->
-      if (fst env).current_cls = None then
+    | x when String.equal x SN.Classes.cParent ->
+      if Option.is_none (fst env).current_cls then
         let () = Errors.parent_outside_class p in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIparent
-    | x when x = SN.Classes.cSelf ->
-      if (fst env).current_cls = None then
+    | x when String.equal x SN.Classes.cSelf ->
+      if Option.is_none (fst env).current_cls then
         let () = Errors.self_outside_class p in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIself
-    | x when x = SN.Classes.cStatic ->
-      if (fst env).current_cls = None then
+    | x when String.equal x SN.Classes.cStatic ->
+      if Option.is_none (fst env).current_cls then
         let () = Errors.static_outside_class p in
         N.CI (p, SN.Classes.cUnknown)
       else
         N.CIstatic
-    | x when x = SN.SpecialIdents.this -> N.CIexpr (p, N.This)
-    | x when x = SN.SpecialIdents.dollardollar ->
+    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr (p, N.This)
+    | x when String.equal x SN.SpecialIdents.dollardollar ->
       (* We won't reach here for "new $$" because the parser creates a
        * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
        * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
@@ -2667,7 +2682,7 @@ and make_class_id env ((p, x) as cid) =
        * like "$$::someMethod()". *)
       N.CIexpr
         (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
-    | x when x.[0] = '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
+    | x when Char.equal x.[0] '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
     | _ ->
       N.CI
         (Env.type_name

@@ -222,6 +222,13 @@ and where_constraint = hint * Ast_defs.constraint_kind * hint
         ancestors = ["endo_defs_base"];
       }]
 
+let is_f_non_reactive = function
+  | FNonreactive -> true
+  | FReactive
+  | FLocal
+  | FShallow ->
+    false
+
 let string_of_visibility vis =
   match vis with
   | Private -> "private"

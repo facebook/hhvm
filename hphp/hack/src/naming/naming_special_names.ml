@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (** Module consisting of the special names known to the typechecker *)
 
@@ -32,7 +32,8 @@ module Classes = struct
 
   let cHHFormatString = "\\HH\\FormatString"
 
-  let is_format_string x = x = cFormatString || x = cHHFormatString
+  let is_format_string x =
+    String.equal x cFormatString || String.equal x cHHFormatString
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 
@@ -392,7 +393,7 @@ module SpecialIdents = struct
   let tmp_var_prefix = "__tmp$"
 
   let is_tmp_var name =
-    String.length name > 6 && String.sub name 0 6 = tmp_var_prefix
+    String.length name > 6 && String.(sub name 0 6 = tmp_var_prefix)
 
   let assert_tmp_var name = assert (is_tmp_var name)
 end
@@ -540,26 +541,29 @@ module Typehints = struct
     (fun x -> HashSet.mem reserved_typehints x)
 
   let is_reserved_global_name x =
-    x = array || x = callable || x = Classes.cSelf || x = Classes.cParent
+    String.equal x array
+    || String.equal x callable
+    || String.equal x Classes.cSelf
+    || String.equal x Classes.cParent
 
   let is_reserved_hh_name x =
-    x = void
-    || x = noreturn
-    || x = int
-    || x = bool
-    || x = float
-    || x = num
-    || x = string
-    || x = resource
-    || x = mixed
-    || x = array
-    || x = arraykey
-    || x = dynamic
-    || x = wildcard
-    || x = null
-    || x = nonnull
-    || x = nothing
-    || x = this
+    String.equal x void
+    || String.equal x noreturn
+    || String.equal x int
+    || String.equal x bool
+    || String.equal x float
+    || String.equal x num
+    || String.equal x string
+    || String.equal x resource
+    || String.equal x mixed
+    || String.equal x array
+    || String.equal x arraykey
+    || String.equal x dynamic
+    || String.equal x wildcard
+    || String.equal x null
+    || String.equal x nonnull
+    || String.equal x nothing
+    || String.equal x this
 
   let is_namespace_with_reserved_hh_name x =
     let unqualify qualified_name =
@@ -571,7 +575,7 @@ module Typehints = struct
     in
     let is_HH qualifier =
       match qualifier with
-      | [qual] -> qual = "HH"
+      | [qual] -> String.equal qual "HH"
       | _ -> false
     in
     let (qualifier, name) = unqualify x in
@@ -680,7 +684,8 @@ module Rx = struct
     let reactive_typehints =
       [hPure; hRx; hRxShallow; hRxLocal; hMutable; hMaybeMutable; hOwnedMutable]
     in
-    (fun name -> List.exists reactive_typehints ~f:(fun th -> th = name))
+    fun name ->
+      List.exists reactive_typehints ~f:(fun th -> String.equal th name)
 end
 
 module Shapes = struct
@@ -762,7 +767,8 @@ module XHP = struct
 
   let empty = "empty"
 
-  let is_reserved name = name = pcdata || name = any || name = empty
+  let is_reserved name =
+    String.equal name pcdata || String.equal name any || String.equal name empty
 
   let is_xhp_category name = String_utils.string_starts_with name "%"
 end

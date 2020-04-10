@@ -24,7 +24,7 @@
 
 open Aast
 open Ast_defs
-open Core_kernel
+open Hh_prelude
 module NS = Namespaces
 module SN = Naming_special_names
 
@@ -54,7 +54,8 @@ let is_special_identifier =
       SN.Typehints.wildcard;
     ]
   in
-  (fun name -> List.exists ~f:(fun ident -> ident = name) special_identifiers)
+  fun name ->
+    List.exists ~f:(fun ident -> String.equal ident name) special_identifiers
 
 let is_reserved_type_hint name =
   let base_name = Utils.strip_ns name in
@@ -65,7 +66,7 @@ let elaborate_type_name env ((_, name) as id) =
   if
     SSet.mem name env.type_params
     || is_special_identifier name
-    || (String.length name <> 0 && name.[0] = '$')
+    || (String.length name <> 0 && Char.equal name.[0] '$')
   then
     id
   else
@@ -86,7 +87,7 @@ let extend_tparams env tparaml =
 let handle_special_calls env call =
   match call with
   | Call (ct, ((_, Id (_, cn)) as id), targs, [(p, String fn)], uargs)
-    when cn = SN.AutoimportedFunctions.fun_ ->
+    when String.equal cn SN.AutoimportedFunctions.fun_ ->
     (* Functions referenced by fun() are always fully-qualified *)
     let fn = Utils.add_ns fn in
     Call (ct, id, targs, [(p, String fn)], uargs)
@@ -96,8 +97,8 @@ let handle_special_calls env call =
         targs,
         [(p1, String cl); meth],
         unpacked_element )
-    when ( cn = SN.AutoimportedFunctions.meth_caller
-         || cn = SN.AutoimportedFunctions.class_meth )
+    when ( String.equal cn SN.AutoimportedFunctions.meth_caller
+         || String.equal cn SN.AutoimportedFunctions.class_meth )
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
     Call (ct, id, targs, [(p1, String cl); meth], unpacked_element)
@@ -263,7 +264,9 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       | Obj_get (e1, (p, Id x), null_safe) ->
         Obj_get (self#on_expr env e1, (p, Id x), null_safe)
       | Id ((_, name) as sid) ->
-        if (name = "NAN" || name = "INF") && in_codegen env then
+        if
+          (String.equal name "NAN" || String.equal name "INF") && in_codegen env
+        then
           expr
         else
           Id (NS.elaborate_id env.namespace NS.ElaborateConst sid)
@@ -310,9 +313,15 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_hint_ env h =
       let is_rx name =
-        name = SN.Rx.hRx || name = SN.Rx.hRxLocal || name = SN.Rx.hRxShallow
+        String.equal name SN.Rx.hRx
+        || String.equal name SN.Rx.hRxLocal
+        || String.equal name SN.Rx.hRxShallow
       in
-      let is_xhp_screwup name = name = "Xhp" || name = ":Xhp" || name = "XHP" in
+      let is_xhp_screwup name =
+        String.equal name "Xhp"
+        || String.equal name ":Xhp"
+        || String.equal name "XHP"
+      in
       match h with
       | Happly ((_, name), _) when is_xhp_screwup name -> super#on_hint_ env h
       | Happly ((_, name), [(_, Hfun _)]) when is_rx name ->

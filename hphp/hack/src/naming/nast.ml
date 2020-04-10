@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 module SN = Naming_special_names
 
@@ -119,15 +119,15 @@ let class_id_to_str = function
   | CI (_, x) -> x
 
 let is_kvc_kind name =
-  name = SN.Collections.cMap
-  || name = SN.Collections.cImmMap
-  || name = SN.Collections.cDict
+  String.equal name SN.Collections.cMap
+  || String.equal name SN.Collections.cImmMap
+  || String.equal name SN.Collections.cDict
 
 let get_kvc_kind name =
   match name with
-  | x when x = SN.Collections.cMap -> Map
-  | x when x = SN.Collections.cImmMap -> ImmMap
-  | x when x = SN.Collections.cDict -> Dict
+  | x when String.equal x SN.Collections.cMap -> Map
+  | x when String.equal x SN.Collections.cImmMap -> ImmMap
+  | x when String.equal x SN.Collections.cDict -> Dict
   | _ ->
     Errors.internal_error Pos.none ("Invalid KeyValueCollection name: " ^ name);
     Map
@@ -139,21 +139,21 @@ let kvc_kind_to_name kind =
   | Dict -> SN.Collections.cDict
 
 let is_vc_kind name =
-  name = SN.Collections.cVector
-  || name = SN.Collections.cImmVector
-  || name = SN.Collections.cSet
-  || name = SN.Collections.cImmSet
-  || name = SN.Collections.cKeyset
-  || name = SN.Collections.cVec
+  String.equal name SN.Collections.cVector
+  || String.equal name SN.Collections.cImmVector
+  || String.equal name SN.Collections.cSet
+  || String.equal name SN.Collections.cImmSet
+  || String.equal name SN.Collections.cKeyset
+  || String.equal name SN.Collections.cVec
 
 let get_vc_kind name =
   match name with
-  | x when x = SN.Collections.cVector -> Vector
-  | x when x = SN.Collections.cImmVector -> ImmVector
-  | x when x = SN.Collections.cVec -> Vec
-  | x when x = SN.Collections.cSet -> Set
-  | x when x = SN.Collections.cImmSet -> ImmSet
-  | x when x = SN.Collections.cKeyset -> Keyset
+  | x when String.equal x SN.Collections.cVector -> Vector
+  | x when String.equal x SN.Collections.cImmVector -> ImmVector
+  | x when String.equal x SN.Collections.cVec -> Vec
+  | x when String.equal x SN.Collections.cSet -> Set
+  | x when String.equal x SN.Collections.cImmSet -> ImmSet
+  | x when String.equal x SN.Collections.cKeyset -> Keyset
   | _ ->
     Errors.internal_error Pos.none ("Invalid ValueCollection name: " ^ name);
     Set
@@ -234,7 +234,7 @@ let ast_deregister_attributes_mapper =
 
     method ignored_attr env l =
       List.exists l (fun attr ->
-          List.mem env.ignored_attributes (snd attr.ua_name) ~equal:( = ))
+          List.mem env.ignored_attributes (snd attr.ua_name) ~equal:String.equal)
 
     (* Filter all functions and classes with the user attributes banned *)
     method! on_program env toplevels =

@@ -17,8 +17,6 @@ module type S = sig
 
   val file_exists : string -> bool
 
-  val mkdir_p : string -> unit
-
   (* Delete the given path - if it is a directory, delete recurisvely. *)
   val rm_dir_tree : string -> unit
 
@@ -36,6 +34,10 @@ module type S = sig
   val chmod : recursive:bool -> string -> int -> unit
 
   val mkdir : string -> int -> unit
+
+  (* Equivalent to `mkdir -p` - creates subdirectories recursively if they
+    don't exist. *)
+  val mkdir_p : string -> unit
 
   (* Return the paths of all the regular files present in the given directory
       and its subdirectories. *)

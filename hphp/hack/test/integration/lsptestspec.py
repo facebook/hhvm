@@ -103,8 +103,14 @@ class LspTestSpec:
     def ignore_status_diagnostics(self, value: bool) -> "LspTestSpec":
         return self._update(ignore_status_diagnostics=value)
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    def ignore_requests(self, *, method: str, params: Json) -> "LspTestSpec":
+    def ignore_requests(
+        self,
+        *,
+        method: str,
+        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        params: Json,
+        comment: Optional[str] = None,
+    ) -> "LspTestSpec":
         ignored_requests = list(self._ignored_requests)
         ignored_requests.append((method, params))
         return self._update(ignored_requests=ignored_requests)

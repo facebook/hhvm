@@ -160,9 +160,19 @@ type state =
           any more requests from the client and will close as soon as it
           notifies us that we can exit. *)
 
-let is_post_shutdown = function
+let is_post_shutdown (state : state) : bool =
+  match state with
   | Post_shutdown -> true
   | Pre_init
+  | In_init _
+  | Main_loop _
+  | Lost_server _ ->
+    false
+
+let is_pre_init (state : state) : bool =
+  match state with
+  | Pre_init -> true
+  | Post_shutdown
   | In_init _
   | Main_loop _
   | Lost_server _ ->
@@ -3990,11 +4000,13 @@ let handle_client_ide_notification
   in
   Lwt.return_none
 
-let get_client_ide_status (env : env) (ide_service : ClientIdeService.t) :
+let get_client_ide_status
+    (env : env) (state : state) (ide_service : ClientIdeService.t) :
     ShowStatusFB.params option =
-  if not env.use_serverless_ide then
-    None
-  else
+  match (env.use_serverless_ide, state) with
+  | (false, _) -> None
+  | (_, (Pre_init | Post_shutdown)) -> None
+  | _ ->
     let (type_, shortMessage, message, actions) =
       match ClientIdeService.get_status ide_service with
       | ClientIdeService.Status.Not_started ->
@@ -4011,7 +4023,7 @@ let get_client_ide_status (env : env) (ide_service : ClientIdeService.t) :
         let open ClientIdeMessage.Processing_files in
         ( MessageType.WarningMessage,
           "Hack",
-          Printf.sprintf "Hack IDE: processing %d/%d files." p.processed p.total,
+          Printf.sprintf "Hack IDE: processing %d files." p.total,
           [] )
       | ClientIdeService.Status.Ready ->
         (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
@@ -4042,7 +4054,13 @@ let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
   | In_init ienv ->
     let open In_init_env in
     let time = Unix.time () in
-    let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
+    let delay_in_secs =
+      if Sys_utils.is_test_mode () then
+        (* we avoid raciness in our tests by not showing a real time *)
+        "<test>"
+      else
+        int_of_float (time -. ienv.first_start_time) |> string_of_int
+    in
     (* TODO: better to report time that hh_server has spent initializing *)
     let (progress, warning) =
       match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
@@ -4065,7 +4083,7 @@ let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
     in
     let message =
       Printf.sprintf
-        "hh_server initializing%s: %s [%i seconds]"
+        "hh_server initializing%s: %s [%s seconds]"
         warning
         progress
         delay_in_secs
@@ -4275,22 +4293,30 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let handle_tick
+let refresh_status
     ~(env : env)
     ~(state : state ref)
     ~(ide_service : ClientIdeService.t ref)
-    ~(init_id : string)
-    ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
-  let%lwt () =
+    ~(init_id : string) : unit =
+  if is_pre_init !state then
+    (* not allowed to send anything until we've received initialize event *)
+    ()
+  else
     let hh_server_status = get_hh_server_status state in
     state := publish_hh_server_status_diagnostic !state hh_server_status;
-    let client_ide_status = get_client_ide_status env !ide_service in
+    let client_ide_status = get_client_ide_status env !state !ide_service in
     let status = merge_statuses ~hh_server_status ~client_ide_status in
     Option.iter
       status
       ~f:
         (request_showStatusFB
            ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
+    ()
+
+let handle_tick
+    ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :
+    result_telemetry option Lwt.t =
+  let%lwt () =
     match !state with
     (* idle tick while waiting for server to complete initialization *)
     | In_init ienv ->
@@ -4390,6 +4416,10 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         else
           Lwt.return_unit
       in
+
+      (* update status immediately if warranted *)
+      refresh_status ~env ~state ~ide_service ~init_id;
+
       (* this is the main handler for each message*)
       let%lwt result_telemetry_opt =
         match event with
@@ -4406,8 +4436,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
           handle_client_ide_notification ~notification
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
-        | Tick ->
-          handle_tick ~env ~state ~ide_service ~init_id ~ref_unblocked_time
+        | Tick -> handle_tick ~env ~state ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
       INVARIANT: every LSP request gets either a response logged here,

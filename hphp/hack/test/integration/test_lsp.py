@@ -5146,6 +5146,7 @@ function unsaved_bar(): string { return "hello"; }
             )
             .ignore_notifications(method="textDocument/publishDiagnostics")
             .ignore_requests(
+                comment="Ignore 'initializing...' messages since they're racy",
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -5224,7 +5225,7 @@ function unsaved_bar(): string { return "hello"; }
                     "shortMessage": "Hack",
                     "type": 3,
                 },
-                result=None,
+                result=NoResponse(),
             )
             .request(
                 line=line(),
@@ -5616,6 +5617,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 use_serverless_ide=False,
                 supports_status=True,
             )
+            .ignore_requests(
+                comment="Ignore initializing... requests since they're racy",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "shortMessage": "Hack: initializing",
+                    "message": "hh_server initializing: processing [<test> seconds]",
+                    "actions": [],
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={"actions": [], "message": "hh_server: ready.", "type": 3},
@@ -5638,6 +5649,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 supports_status=True,
             )
             .ignore_requests(
+                comment="ignore initializing... messages since they're kind of racy",
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -5672,6 +5684,17 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 supports_status=True,
             )
             .ignore_requests(
+                comment="Ignore initializing messages since they're racy",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="Another form of initializing to ignore",
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -5715,7 +5738,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "shortMessage": "Hack",
                     "type": 3,
                 },
-                result=None,
+                result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
@@ -5735,6 +5758,17 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 supports_status=True,
             )
             .ignore_requests(
+                comment="Ignore initializing since they're kind of racy",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.\nhh_server initializing: processing [<test> seconds]",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="Ignore another form of initializing",
                 method="window/showStatus",
                 params={
                     "type": 2,
@@ -5761,7 +5795,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "shortMessage": "Hack: failed",
                     "type": 1,
                 },
-                result=None,
+                result=NoResponse(),
             )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})

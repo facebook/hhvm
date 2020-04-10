@@ -91,6 +91,7 @@ module Main_env = struct
   type t = {
     conn: server_conn;
     needs_idle: bool;
+    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_diagnostics: UriSet.t;
     uris_with_unsaved_changes: UriSet.t;
@@ -106,6 +107,7 @@ module In_init_env = struct
     conn: server_conn;
     first_start_time: float;  (** our first attempt to connect *)
     most_recent_start_time: float;  (** for subsequent retries *)
+    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
@@ -115,6 +117,7 @@ end
 module Lost_env = struct
   type t = {
     p: params;
+    most_recent_file: documentUri option;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
         (** see comment in get_uris_with_unsaved_changes *)
@@ -210,10 +213,23 @@ let to_stdout (json : Hh_json.json) : unit =
 let get_editor_open_files (state : state) :
     Lsp.TextDocumentItem.t UriMap.t option =
   match state with
-  | Main_loop menv -> Main_env.(Some menv.editor_open_files)
-  | In_init ienv -> In_init_env.(Some ienv.editor_open_files)
-  | Lost_server lenv -> Lost_env.(Some lenv.editor_open_files)
-  | _ -> None
+  | Pre_init
+  | Post_shutdown ->
+    None
+  | Main_loop menv -> Some menv.Main_env.editor_open_files
+  | In_init ienv -> Some ienv.In_init_env.editor_open_files
+  | Lost_server lenv -> Some lenv.Lost_env.editor_open_files
+
+(** This is the most recent file that was subject of an LSP request
+from the client. There's no guarantee that the file is still open. *)
+let get_most_recent_file (state : state) : documentUri option =
+  match state with
+  | Pre_init
+  | Post_shutdown ->
+    None
+  | Main_loop menv -> menv.Main_env.most_recent_file
+  | In_init ienv -> ienv.In_init_env.most_recent_file
+  | Lost_server lenv -> lenv.Lost_env.most_recent_file
 
 type event =
   | Server_hello
@@ -2452,6 +2468,7 @@ let report_connect_end (ienv : In_init_env.t) : state =
       {
         Main_env.conn = ienv.In_init_env.conn;
         needs_idle = true;
+        most_recent_file = ienv.most_recent_file;
         editor_open_files = ienv.editor_open_files;
         uris_with_diagnostics = UriSet.empty;
         uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
@@ -2738,6 +2755,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              In_init_env.conn;
              first_start_time = Unix.time ();
              most_recent_start_time = Unix.time ();
+             most_recent_file = get_most_recent_file state;
              editor_open_files =
                Option.value (get_editor_open_files state) ~default:UriMap.empty;
              (* uris_with_unsaved_changes should always be empty here: *)
@@ -2867,6 +2885,7 @@ and do_lost_server
 
     let state = dismiss_ui state in
     let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+    let most_recent_file = get_most_recent_file state in
     let editor_open_files =
       Option.value (get_editor_open_files state) ~default:UriMap.empty
     in
@@ -2881,6 +2900,7 @@ and do_lost_server
         Lost_server
           {
             Lost_env.p;
+            most_recent_file;
             editor_open_files;
             uris_with_unsaved_changes;
             lock_file;
@@ -2898,6 +2918,7 @@ and do_lost_server
         (Lost_server
            {
              Lost_env.p;
+             most_recent_file;
              editor_open_files;
              uris_with_unsaved_changes;
              lock_file;
@@ -2909,7 +2930,7 @@ let handle_idle_if_necessary (state : state) (event : event) : state =
     Main_loop { menv with Main_env.needs_idle = true }
   | _ -> state
 
-let track_open_files (state : state) (event : event) : state =
+let track_open_and_recent_files (state : state) (event : event) : state =
   (* We'll keep track of which files are opened by the editor. *)
   let prev_opened_files =
     Option.value (get_editor_open_files state) ~default:UriMap.empty
@@ -2947,10 +2968,24 @@ let track_open_files (state : state) (event : event) : state =
       UriMap.remove uri prev_opened_files
     | _ -> prev_opened_files
   in
+  (* We'll track which was the most recent file to have an event *)
+  let most_recent_file =
+    match event with
+    | Client_message (_metadata, message) ->
+      let uri = Lsp_helpers.get_uri_opt message in
+      if Option.is_some uri then
+        uri
+      else
+        get_most_recent_file state
+    | _ -> get_most_recent_file state
+  in
   match state with
-  | Main_loop menv -> Main_loop { menv with Main_env.editor_open_files }
-  | In_init ienv -> In_init { ienv with In_init_env.editor_open_files }
-  | Lost_server lenv -> Lost_server { lenv with Lost_env.editor_open_files }
+  | Main_loop menv ->
+    Main_loop { menv with Main_env.editor_open_files; most_recent_file }
+  | In_init ienv ->
+    In_init { ienv with In_init_env.editor_open_files; most_recent_file }
+  | Lost_server lenv ->
+    Lost_server { lenv with Lost_env.editor_open_files; most_recent_file }
   | _ -> state
 
 let track_edits_if_necessary (state : state) (event : event) : state =
@@ -3250,8 +3285,8 @@ let on_status_restart_action
     (state : state) : state Lwt.t =
   let open ShowMessageRequest in
   match (result, state) with
-  | (Some { title }, Lost_server _) when String.equal title hh_server_restart_button_text
-    ->
+  | (Some { title }, Lost_server _)
+    when String.equal title hh_server_restart_button_text ->
     let root = get_root_exn () in
     (* Belt-and-braces kill the server. This is in case the server was *)
     (* stuck in some weird state. It's also what 'hh restart' does. *)
@@ -3262,7 +3297,8 @@ let on_status_restart_action
     start_server ~env root;
     let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
     Lwt.return state
-  | (Some { title }, _) when String.equal title client_ide_restart_button_text ->
+  | (Some { title }, _) when String.equal title client_ide_restart_button_text
+    ->
     log "Restarting IDE service";
 
     (* It's possible that [destroy] takes a while to finish, so make
@@ -4219,7 +4255,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       state := new_state;
 
       (* we keep track of all open files and their contents *)
-      state := track_open_files !state event;
+      state := track_open_and_recent_files !state event;
 
       (* we keep track of all files that have unsaved changes in them *)
       state := track_edits_if_necessary !state event;

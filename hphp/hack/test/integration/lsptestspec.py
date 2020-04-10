@@ -273,7 +273,7 @@ class LspTestSpec:
                     _WaitForNotificationSpec(
                         comment=(
                             f"Waiting for change to URI {uri} to be processed... "
-                            + "(set wait=False on the corresponding `write_to_disk` call "
+                            + "(set wait=False on the corresponding `write_to_disk` call "  # noqa: B950
                             + "if this is undesirable)"
                         ),
                         method="telemetry/event",
@@ -427,7 +427,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     and previous_message.wait_id == message.wait_id
                 ]
                 assert len(lsp_ids) == 1, (
-                    f"Should have had exactly one previous message with wait ID {message.wait_id!r}, "
+                    f"Should have had exactly one previous message with wait ID {message.wait_id!r}, "  # noqa: B950
                     + "but got {len(lsp_ids)}"
                 )
                 [lsp_id] = lsp_ids

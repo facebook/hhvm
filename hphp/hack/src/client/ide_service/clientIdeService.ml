@@ -454,8 +454,27 @@ let push_message (t : t) (message : message_wrapper) : unit =
   match t.state with
   | Uninitialized _
   | Initialized _ ->
-    let _success : bool = Lwt_message_queue.push t.messages_to_send message in
-    ()
+    let success = Lwt_message_queue.push t.messages_to_send message in
+    if not success then (
+      let (Message_wrapper message) = message in
+      let message =
+        Printf.sprintf
+          "failed to push message\n%s\n%s\nmessages_to_send=%d, response_emitter=%d, notification_emitter=%d"
+          (ClientIdeMessage.tracked_t_to_string message)
+          (state_to_string t.state)
+          (Lwt_message_queue.length t.messages_to_send)
+          (Lwt_message_queue.length t.response_emitter)
+          (Lwt_message_queue.length t.notification_emitter)
+      in
+      HackEventLogger.client_lsp_exception
+        ~root:None
+        ~message
+        ~source:"ide_recoverable"
+        ~data_opt:
+          (Lsp_fmt.error_data_of_stack
+             (Exception.get_current_callstack_string 99));
+      ()
+    )
   | Failed_to_initialize _
   | Stopped _ ->
     (* This is a terminal state. Don't waste memory queueing up messages that

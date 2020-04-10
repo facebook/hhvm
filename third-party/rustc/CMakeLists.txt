@@ -8,23 +8,26 @@
 #
 # This also avoids the need to depend on gpg in the installation.
 
-if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-unknown-linux-gnu.tar.gz")
-  set(RUST_SHA256 "b10a73e5ba90034fe51f0f02cb78f297ed3880deb7d3738aa09dc5a4d9704a25")
-elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-  set(RUST_URL "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-apple-darwin.tar.gz")
-  set(RUST_SHA256 "3736d49c5e9592844e1a5d5452883aeaf8f1e25d671c1bc8f01e81c1766603b5")
-else()
-  message(FATAL_ERROR "HHVM does not support this operating system")
-endif()
+include(HPHPFunctions)
+
+SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+  RUST_DOWNLOAD_ARGS
+  Linux_URL
+  "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-unknown-linux-gnu.tar.gz"
+  Darwin_URL
+  "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-apple-darwin.tar.gz"
+  Linux_HASH
+  "SHA256=b10a73e5ba90034fe51f0f02cb78f297ed3880deb7d3738aa09dc5a4d9704a25"
+  Darwin_HASH
+  "SHA256=3736d49c5e9592844e1a5d5452883aeaf8f1e25d671c1bc8f01e81c1766603b5"
+)
 
 set(RUST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/rust-prefix")
 
 include(ExternalProject)
 ExternalProject_Add(
   rustInstall
-  URL "${RUST_URL}"
-  URL_HASH "SHA256=${RUST_SHA256}"
+  ${RUST_DOWNLOAD_ARGS}
   PREFIX "${RUST_PREFIX}"
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""

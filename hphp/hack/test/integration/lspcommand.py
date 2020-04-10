@@ -3,13 +3,13 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import contextlib
+import json
 import os
 import pprint
 import subprocess
 import urllib
 import uuid
 from typing import (
-    BinaryIO,
     Callable,
     Iterator,
     Mapping,
@@ -248,7 +248,6 @@ class LspCommandProcessor:
         ):
             timeout_seconds = 30.0
             message = self._try_read_logged(timeout_seconds=timeout_seconds)
-            params_pretty = pprint.pformat(params)
             comment = comment or "<none>"
             assert (
                 message is not None
@@ -257,11 +256,11 @@ Timed out after {timeout_seconds} seconds while waiting for a {method!r} message
 to be sent from the server (comment: {comment}), which must not have an ID in
 {processed_transcript_ids!r}. The message was expected to have params:
 
-{params_pretty}
+{json.dumps(params, indent=2)}
 
 Transcript of all the messages we saw:
 
-{transcript}"""
+{json.dumps(transcript, indent=2)}"""
             transcript = self._scribe(transcript, sent=None, received=message)
 
         [(transcript_id, message)] = [

@@ -239,6 +239,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
         },
         a::Stmt_::Return(r_opt) => match r_opt.as_ref() {
             Some(r) => {
+                let ret = emit_return(e, env)?;
                 let expr_instr = if let Some(e_) = r.1.as_await() {
                     emit_await(e, env, &r.0, e_)?
                 } else if let Some(_) = r.1.as_yield_from() {
@@ -246,11 +247,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 } else {
                     emit_expr(e, env, &r)?
                 };
-                Ok(InstrSeq::gather(vec![
-                    expr_instr,
-                    emit_pos(pos),
-                    emit_return(e, env)?,
-                ]))
+                Ok(InstrSeq::gather(vec![expr_instr, emit_pos(pos), ret]))
             }
             None => Ok(InstrSeq::gather(vec![
                 instr::null(),
@@ -1654,9 +1651,10 @@ fn emit_if(
 ) -> Result {
     if alternative.is_empty() || (alternative.len() == 1 && alternative[0].1.is_noop()) {
         let done_label = e.label_gen_mut().next_regular();
+        let consequence_instr = emit_stmts(e, env, consequence)?;
         Ok(InstrSeq::gather(vec![
             emit_expr::emit_jmpz(e, env, condition, &done_label)?.instrs,
-            emit_stmts(e, env, consequence)?,
+            consequence_instr,
             instr::label(done_label),
         ]))
     } else {

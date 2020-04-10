@@ -4161,9 +4161,11 @@ let handle_client_ide_notification
 let handle_tick
     ~(env : env)
     ~(state : state ref)
-    ~(ide_service : ClientIdeService.t)
+    ~(ide_service : ClientIdeService.t ref)
+    ~(init_id : string)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let%lwt () =
+    tick_showStatus ~env ~state ~ide_service ~init_id;
     match !state with
     (* idle tick while waiting for server to complete initialization *)
     | In_init ienv ->
@@ -4172,7 +4174,7 @@ let handle_tick
       let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
       let%lwt () =
         if delay_in_secs <= 10 then (
-          report_connect_progress env ienv ide_service;
+          report_connect_progress env ienv !ide_service;
           Lwt.return_unit
         ) else
           (* terminate + retry the connection *)
@@ -4281,7 +4283,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
         | Server_message message -> handle_server_message ~env ~state ~message
         | Server_hello -> handle_server_hello ~state
         | Tick ->
-          handle_tick ~env ~state ~ide_service:!ide_service ~ref_unblocked_time
+          handle_tick ~env ~state ~ide_service ~init_id ~ref_unblocked_time
       in
       (* for LSP requests and notifications, we keep a log of what+when we responded.
       INVARIANT: every LSP request gets either a response logged here,
@@ -4454,10 +4456,5 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()
   in
-  let rec tick_loop () : unit Lwt.t =
-    tick_showStatus ~env ~state ~ide_service ~init_id;
-    let%lwt () = Lwt_unix.sleep 1.0 in
-    tick_loop ()
-  in
-  let%lwt () = Lwt.pick [main_loop (); tick_loop ()] in
+  let%lwt () = main_loop () in
   Lwt.return Exit_status.No_error

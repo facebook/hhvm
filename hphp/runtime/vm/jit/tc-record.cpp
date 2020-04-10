@@ -400,6 +400,12 @@ std::string warmupStatusString() {
   std::string status_str;
 
   if (!s_warmedUp.load(std::memory_order_relaxed)) {
+    // 0. Are we running in jumpstart seeder mode with profiling of optimized
+    //    code enabled?
+    if (isJitSerializing() && serializeOptProfEnabled()) {
+      status_str += "Running in jumpstart seeder mode to collect profile of "
+                    "optimized code.\n";
+    }
     // 1. Are we still profiling new functions?
     if (shouldProfileNewFuncs()) {
       status_str += "New functions are still being profiled.\n";

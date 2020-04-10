@@ -637,18 +637,62 @@ let override_from_cli config_list init =
       | [name; value] -> set_option options name value
       | _ -> options)
 
+type hhbc_options = t
+
+module Result = struct
+  type t = hhbc_options
+
+  let compare (a : t) b = compare a b
+
+  let equal (a : t) b = a = b
+
+  let hash (a : t) = Hashtbl.hash a
+
+  let weight _ = 1
+end
+
+module Key = struct
+  type t = string list * string list
+
+  let compare (a : t) b = compare a b
+
+  let equal (a : t) b = a = b
+
+  let hash (a : t) = Hashtbl.hash a
+
+  let weight _ = 1
+end
+
+module M = Lru.M.Make (Key) (Result)
+
+(** Cache of 100 Last Recently Used results of {apply_config_overrides_statelessly} *)
+let lru = lazy (M.create 100)
+
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.
  *)
 let apply_config_overrides_statelessly config_list config_jsons =
-  List.fold_right
-    ~init:default
-    ~f:(fun config_json init ->
-      extract_config_options_from_json
-        ~init
-        (Some (J.json_of_string config_json)))
-    config_jsons
-  |> override_from_cli config_list
+  let f () =
+    List.fold_right
+      ~init:default
+      ~f:(fun config_json init ->
+        extract_config_options_from_json
+          ~init
+          (Some (J.json_of_string config_json)))
+      config_jsons
+    |> override_from_cli config_list
+  in
+  let key = (config_list, config_jsons) in
+  let lru = Lazy.force lru in
+  match M.find key lru with
+  | Some cached_result ->
+    M.promote key lru;
+    cached_result
+  | None ->
+    let result = f () in
+    M.trim lru;
+    M.add key result lru;
+    result
 
 let compiler_options = ref default
 

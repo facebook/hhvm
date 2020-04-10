@@ -7,6 +7,7 @@
     ast
     core_kernel
     full_fidelity
+    lru
     mutable_accumulator
     pocket_universes
     tast

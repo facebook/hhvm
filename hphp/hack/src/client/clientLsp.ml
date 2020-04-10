@@ -2561,45 +2561,71 @@ let merge_with_client_ide_status
 
 (** This function blocks while it attempts to connect to the monitor to read status.
 It normally it gets status quickly, but has a 3s timeout just in case. *)
-let fetch_hh_server_status_during_init (ienv : In_init_env.t) :
-    ShowStatusFB.params =
-  let open In_init_env in
+let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
   let open ShowStatusFB in
   let open ShowMessageRequest in
-  let time = Unix.time () in
-  let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
-  (* TODO: better to report time that hh_server has spent initializing *)
-  let root =
-    match get_root_opt () with
-    | Some root -> root
-    | None -> failwith "we should have root by now"
-  in
-  let (progress, warning) =
-    match ServerUtils.server_progress ~timeout:3 root with
-    | Error _ -> (None, None)
-    | Ok (progress, warning) -> (progress, warning)
-  in
-  let progress =
-    Option.value progress ~default:ClientConnect.default_progress_message
-  in
-  let message =
-    if Option.is_some warning then
-      Printf.sprintf
-        "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-        progress
-        delay_in_secs
-    else
-      Printf.sprintf
-        "hh_server initializing: %s [%i seconds]"
-        progress
-        delay_in_secs
-  in
-  {
-    request = { type_ = MessageType.WarningMessage; message; actions = [] };
-    progress = None;
-    total = None;
-    shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
-  }
+  match !state with
+  | Pre_init
+  | Post_shutdown ->
+    None
+  | In_init ienv ->
+    let open In_init_env in
+    let time = Unix.time () in
+    let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
+    (* TODO: better to report time that hh_server has spent initializing *)
+    let root = Option.value_exn (get_root_opt ()) in
+    let (progress, warning) =
+      match ServerUtils.server_progress ~timeout:3 root with
+      | Error _ -> (None, None)
+      | Ok (progress, warning) -> (progress, warning)
+    in
+    let progress =
+      Option.value progress ~default:ClientConnect.default_progress_message
+    in
+    let message =
+      if Option.is_some warning then
+        Printf.sprintf
+          "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
+          progress
+          delay_in_secs
+      else
+        Printf.sprintf
+          "hh_server initializing: %s [%i seconds]"
+          progress
+          delay_in_secs
+    in
+    Some
+      {
+        request = { type_ = MessageType.WarningMessage; message; actions = [] };
+        progress = None;
+        total = None;
+        shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
+      }
+  | Main_loop { Main_env.hh_server_status; _ } ->
+    (* This shows whether the connected hh_server is busy or ready.
+      Typical values are "info / <empty> / hh_server is ok" and
+      "warning / checking project / Hack: checking entire project".
+      All we'll do here is an animation for it. *)
+    let shortMessage =
+      match hh_server_status.ShowStatusFB.shortMessage with
+      | Some msg -> Some (msg ^ " " ^ status_tick ())
+      | None -> None
+    in
+    Some { hh_server_status with ShowStatusFB.shortMessage }
+  | Lost_server { Lost_env.p; _ } ->
+    Some
+      {
+        ShowStatusFB.request =
+          ShowMessageRequest.
+            {
+              type_ = MessageType.ErrorMessage;
+              message = p.Lost_env.explanation;
+              actions = [{ title = hh_server_restart_button_text }];
+            };
+        progress = None;
+        total = None;
+        shortMessage = None;
+      }
 
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
@@ -3453,36 +3479,6 @@ let on_status_restart_action
     Lwt.return state
   | _ -> Lwt.return state
 
-let get_hh_server_status_during_main_and_lost ~(state : state ref) :
-    ShowStatusFB.params option =
-  match !state with
-  | Main_loop { Main_env.hh_server_status; _ } ->
-    (* This shows whether the connected hh_server is busy or ready.
-      Typical values are "info / <empty> / hh_server is ok" and
-      "warning / checking project / Hack: checking entire project".
-      All we'll do here is an animation for it. *)
-    let shortMessage =
-      match hh_server_status.ShowStatusFB.shortMessage with
-      | Some msg -> Some (msg ^ " " ^ status_tick ())
-      | None -> None
-    in
-    Some { hh_server_status with ShowStatusFB.shortMessage }
-  | Lost_server { Lost_env.p; _ } ->
-    Some
-      {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = p.Lost_env.explanation;
-              actions = [{ title = hh_server_restart_button_text }];
-            };
-        progress = None;
-        total = None;
-        shortMessage = None;
-      }
-  | _ -> None
-
 (************************************************************************)
 (* Message handling                                                     *)
 (************************************************************************)
@@ -4148,7 +4144,7 @@ let handle_tick
     ~(init_id : string)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let%lwt () =
-    let hh_server_status = get_hh_server_status_during_main_and_lost ~state in
+    let hh_server_status = get_hh_server_status state in
     begin
       match hh_server_status with
       | None -> ()
@@ -4167,12 +4163,9 @@ let handle_tick
       let time = Unix.time () in
       let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
       let%lwt () =
-        if delay_in_secs <= 10 then (
-          let hh_server_status = fetch_hh_server_status_during_init ienv in
-          request_showStatusFB
-            (merge_with_client_ide_status env !ide_service hh_server_status);
+        if delay_in_secs <= 10 then
           Lwt.return_unit
-        ) else
+        else
           (* terminate + retry the connection *)
             let%lwt new_state = connect ~env !state in
             state := new_state;

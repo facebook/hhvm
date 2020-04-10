@@ -143,8 +143,8 @@ std::string checkProfile(const Vunit& unit,
       );
       break;
     }
-    auto const op_prof = block.code.front().op;
-    auto const op_opti = opcodes[index];
+    auto const op_opti = block.code.front().op;
+    auto const op_prof = opcodes[index];
     if (op_prof != op_opti) {
       FTRACE(1, "VasmBlockCounters::checkProfile: mismatch opcode for block {}: "
              "profile was {} optimized is {}\n",

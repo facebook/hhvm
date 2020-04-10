@@ -968,6 +968,7 @@ let hack_errors_to_lsp_diagnostic
   (* is also empty - and throw, logging appropriate telemetry.                *)
   {
     Lsp.PublishDiagnostics.uri = path_to_lsp_uri filename ~default_path:"";
+    isStatusFB = false;
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 

@@ -384,6 +384,8 @@ module PublishDiagnostics : sig
   and publishDiagnosticsParams = {
     uri: documentUri;
     diagnostics: diagnostic list;
+    isStatusFB: bool;
+        (** FB-specific extension, for diagnostics used only to show status *)
   }
 
   and diagnostic = {

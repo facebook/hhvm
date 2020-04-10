@@ -3417,6 +3417,8 @@ class TestLsp(TestCase[LspTestDriver]):
                 },
                 result=None,
             )
+        if not supports_status:
+            spec = spec.ignore_status_diagnostics(True)
         return spec
 
     def test_serverless_ide_type_definition(self) -> None:

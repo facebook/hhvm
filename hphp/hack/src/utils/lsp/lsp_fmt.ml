@@ -444,10 +444,15 @@ let print_diagnostic_list (ds : PublishDiagnostics.diagnostic list) : json =
 
 let print_diagnostics (r : PublishDiagnostics.params) : json =
   PublishDiagnostics.(
-    JSON_Object
+    Jprint.object_opt
       [
-        ("uri", JSON_String (string_of_uri r.uri));
-        ("diagnostics", print_diagnostic_list r.diagnostics);
+        ("uri", Some (JSON_String (string_of_uri r.uri)));
+        ("diagnostics", Some (print_diagnostic_list r.diagnostics));
+        ( "isStatusFB",
+          if r.isStatusFB then
+            Some (JSON_Bool true)
+          else
+            None );
       ])
 
 let parse_diagnostic (j : json option) : PublishDiagnostics.diagnostic =

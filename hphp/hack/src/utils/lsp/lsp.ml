@@ -577,6 +577,7 @@ module PublishDiagnostics = struct
   and publishDiagnosticsParams = {
     uri: documentUri;
     diagnostics: diagnostic list;
+    isStatusFB: bool;
   }
 
   and diagnostic = {

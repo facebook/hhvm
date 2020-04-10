@@ -366,6 +366,8 @@ let get_root_opt () : Path.t option =
     let path = Some (Lsp_helpers.get_root initialize_params) in
     Some (Wwwroot.get path)
 
+let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
+
 let get_root_wait () : Path.t Lwt.t =
   let%lwt initialize_params = initialize_params_promise in
   let path = Lsp_helpers.get_root initialize_params in
@@ -2410,11 +2412,7 @@ let do_diagnostics
   (* figure out which file to report. In this case we'll report on the root.  *)
   (* Nuclide and VSCode both display this fine, though they obviously don't   *)
   (* let you click-to-go-to-file on it.                                       *)
-  let default_path =
-    match get_root_opt () with
-    | None -> failwith "expected root"
-    | Some root -> Path.to_string root
-  in
+  let default_path = get_root_exn () |> Path.to_string in
   let file_reports =
     match SMap.find_opt "" file_reports with
     | None -> file_reports
@@ -2710,11 +2708,6 @@ let start_server ~(env : env) (root : Path.t) : unit =
 (* Lost_server states, obviously. But you can also call it from In_init state *)
 (* if you want to give up on the prior attempt at connection and try again.   *)
 let rec connect ~(env : env) (state : state) : state Lwt.t =
-  let root =
-    match get_root_opt () with
-    | Some root -> root
-    | None -> assert false
-  in
   begin
     match state with
     | In_init { In_init_env.conn; _ } ->
@@ -2730,7 +2723,7 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     | _ -> failwith "connect only in Pre_init, In_init or Lost_server state"
   end;
   try%lwt
-    let%lwt conn = connect_client ~env root ~autostart:false in
+    let%lwt conn = connect_client ~env (get_root_exn ()) ~autostart:false in
     set_hh_server_state Hh_server_initializing;
     match state with
     | In_init ienv ->
@@ -2877,11 +2870,7 @@ and do_lost_server
     let editor_open_files =
       Option.value (get_editor_open_files state) ~default:UriMap.empty
     in
-    let lock_file =
-      match get_root_opt () with
-      | None -> assert false
-      | Some root -> ServerFiles.lock_file root
-    in
+    let lock_file = ServerFiles.lock_file (get_root_exn ()) in
     let reconnect_immediately =
       allow_immediate_reconnect
       && p.trigger_on_lock_file
@@ -3263,11 +3252,7 @@ let on_status_restart_action
   match (result, state) with
   | (Some { title }, Lost_server _) when String.equal title hh_server_restart_button_text
     ->
-    let root =
-      match get_root_opt () with
-      | None -> failwith "we should have root by now"
-      | Some root -> root
-    in
+    let root = get_root_exn () in
     (* Belt-and-braces kill the server. This is in case the server was *)
     (* stuck in some weird state. It's also what 'hh restart' does. *)
     if MonitorConnection.server_exists (Path.to_string root) then
@@ -4032,9 +4017,8 @@ let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
     let time = Unix.time () in
     let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
     (* TODO: better to report time that hh_server has spent initializing *)
-    let root = Option.value_exn (get_root_opt ()) in
     let (progress, warning) =
-      match ServerUtils.server_progress ~timeout:3 root with
+      match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
       | Error _ -> (None, None)
       | Ok (progress, warning) -> (progress, warning)
     in

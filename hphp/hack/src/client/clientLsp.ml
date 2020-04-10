@@ -3701,10 +3701,12 @@ let handle_client_message
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     (* any request/notification that we already handled in [track_open_files] *)
-    | (In_init _, NotificationMessage (DidOpenNotification _))
-    | (In_init _, NotificationMessage (DidChangeNotification _))
-    | (In_init _, NotificationMessage (DidCloseNotification _))
-    | (In_init _, NotificationMessage (DidSaveNotification _)) ->
+    | ((In_init _ | Lost_server _), NotificationMessage (DidOpenNotification _))
+    | ( (In_init _ | Lost_server _),
+        NotificationMessage (DidChangeNotification _) )
+    | ((In_init _ | Lost_server _), NotificationMessage (DidCloseNotification _))
+    | ((In_init _ | Lost_server _), NotificationMessage (DidSaveNotification _))
+      ->
       Lwt.return_none
     (* any request/notification that we can't handle yet *)
     | (In_init _, message) ->

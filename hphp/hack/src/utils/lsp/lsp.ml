@@ -1230,7 +1230,8 @@ type lsp_notification =
   | DidChangeNotification of DidChange.params
   | DidChangeWatchedFilesNotification of DidChangeWatchedFiles.params
   | LogMessageNotification of LogMessage.params
-  | TelemetryNotification of LogMessage.params (* LSP allows 'any' but we only send these *)
+  | TelemetryNotification of LogMessage.params * (string * Hh_json.json) list
+      (** For telemetry, LSP allows 'any', but we're going to send params+list *)
   | ShowMessageNotification of ShowMessage.params
   | ConnectionStatusNotificationFB of ConnectionStatusFB.params
   | InitializedNotification

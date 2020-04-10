@@ -4,7 +4,8 @@
     "id": 1,
     "error": {
       "code": -32002,
-      "message": "Server not yet initialized"
+      "message": "Server not yet initialized",
+      "data": {}
     }
   },
   {

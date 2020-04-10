@@ -72,7 +72,7 @@ let record_backtrace = Printexc.record_backtrace
 
 let stack_re =
   Str.regexp
-    {|^\(Called\|Raised\) .* file "\([^"]*\)", line \([0-9]+\), character.*$|}
+    {|^\(Called\|Raised\|Re-raised\) .* file "\([^"]*\)", line \([0-9]+\), character.*$|}
 
 let filename_re = Str.regexp {|^.*hack/\(.*\)$|}
 

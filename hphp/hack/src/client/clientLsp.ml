@@ -710,7 +710,17 @@ let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
   match event with
   | Some (Client_message (_, RequestMessage (id, _request))) ->
     respond_jsonrpc ~powered_by:Language_server id result
-  | _ -> Lsp_helpers.telemetry_error to_stdout (Lsp_fmt.error_to_log_string e)
+  | _ ->
+    (* We want to report LSP error 'e' over jsonrpc. But jsonrpc only allows
+    errors to be reported in response to requests. So we'll stick the information
+    in a telemetry/event. The format of this event isn't defined. We're going to
+    roll our own, using ad-hoc json fields to emit all the data out of 'e' *)
+    let open Lsp.Error in
+    let extras =
+      ("code", e.code |> Error.show_code |> Hh_json.string_)
+      :: Option.value_map e.data ~default:[] ~f:(fun data -> [("data", data)])
+    in
+    Lsp_helpers.telemetry_error to_stdout e.message ~extras
 
 (** request_showStatusFB: pops up a dialog *)
 let request_showStatusFB
@@ -2994,7 +3004,7 @@ let track_open_and_recent_files (state : state) (event : event) : state =
   let most_recent_file =
     match event with
     | Client_message (_metadata, message) ->
-      let uri = Lsp_helpers.get_uri_opt message in
+      let uri = Lsp_fmt.get_uri_opt message in
       if Option.is_some uri then
         uri
       else
@@ -3076,7 +3086,7 @@ let track_ide_service_open_files
 
 let get_filename_in_message_for_logging (message : lsp_message) :
     Relative_path.t option =
-  let uri_opt = Lsp_helpers.get_uri_opt message in
+  let uri_opt = Lsp_fmt.get_uri_opt message in
   match uri_opt with
   | None -> None
   | Some uri ->
@@ -3695,7 +3705,7 @@ let handle_client_message
     | (In_init _, NotificationMessage (DidSaveNotification _)) ->
       Lwt.return_none
     (* any request/notification that we can't handle yet *)
-    | (In_init _, _) ->
+    | (In_init _, message) ->
       (* we respond with Operation_cancelled so that clients don't produce *)
       (* user-visible logs/warnings. *)
       raise
@@ -3703,7 +3713,15 @@ let handle_client_message
            {
              Error.code = Error.RequestCancelled;
              message = Hh_server_initializing |> hh_server_state_to_string;
-             data = None;
+             data =
+               Some
+                 (Hh_json.JSON_Object
+                    [
+                      ("state", !state |> state_to_string |> Hh_json.string_);
+                      ( "message",
+                        Hh_json.string_
+                          (Lsp_fmt.denorm_message_to_string message) );
+                    ]);
            })
     | (Main_loop _menv, NotificationMessage InitializedNotification) ->
       Lwt.return_none
@@ -3883,7 +3901,15 @@ let handle_client_message
            {
              Error.code = Error.RequestCancelled;
              message = lenv.p.new_hh_server_state |> hh_server_state_to_string;
-             data = None;
+             data =
+               Some
+                 (Hh_json.JSON_Object
+                    [
+                      ("state", !state |> state_to_string |> Hh_json.string_);
+                      ( "message",
+                        Hh_json.string_
+                          (Lsp_fmt.denorm_message_to_string message) );
+                    ]);
            })
   in
   Lwt.return result_telemetry_opt
@@ -4585,24 +4611,27 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       Lsp_helpers.telemetry_error to_stdout (message ^ ", from_client\n" ^ stack);
       Lwt.return_unit
     | (Server_nonfatal_exception e | Error.LspException e) as exn ->
+      let exn = Exception.wrap exn in
       let error_source =
-        match (e.Error.code, exn) with
+        match (e.Error.code, Exception.unwrap exn) with
         | (Error.RequestCancelled, _) -> Error_from_lsp_cancelled
         | (_, Server_nonfatal_exception _) -> Error_from_server_recoverable
         | (_, _) -> Error_from_lsp_misc
       in
+      let e = Lsp_fmt.add_stack_if_absent e exn in
       respond_to_error !ref_event e;
       hack_log_error !ref_event e error_source !ref_unblocked_time env;
       Lwt.return_unit
-    | e ->
-      let e = Exception.wrap e in
+    | exn ->
+      let exn = Exception.wrap exn in
       let e =
         {
           Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message = Exception.get_ctor_string e;
-          data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
+          message = Exception.get_ctor_string exn;
+          data = None;
         }
       in
+      let e = Lsp_fmt.add_stack_if_absent e exn in
       respond_to_error !ref_event e;
       hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time env;
       Lwt.return_unit

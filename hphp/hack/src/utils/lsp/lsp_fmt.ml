@@ -558,13 +558,21 @@ let print_codeActionResult (c : CodeAction.result) : json =
 (************************************************************************)
 
 let print_logMessage (type_ : MessageType.t) (message : string) : json =
-  LogMessage.(
-    let r = { type_; message } in
-    JSON_Object
-      [
-        ("type", int_ (MessageType.to_enum r.type_));
-        ("message", JSON_String r.message);
-      ])
+  JSON_Object
+    [
+      ("type", int_ (MessageType.to_enum type_));
+      ("message", JSON_String message);
+    ]
+
+(************************************************************************)
+
+let print_telemetryNotification
+    (r : LogMessage.params) (extras : (string * Hh_json.json) list) : json =
+  (* LSP allows "any" for the format of telemetry notifications. It's up to us! *)
+  JSON_Object
+    ( ("type", int_ (MessageType.to_enum r.LogMessage.type_))
+    :: ("message", JSON_String r.LogMessage.message)
+    :: extras )
 
 (************************************************************************)
 
@@ -1140,6 +1148,25 @@ let error_data_of_string ~(key : string) (value : string) : Hh_json.json option
 let error_data_of_stack (stack : string) : Hh_json.json option =
   stack |> Exception.clean_stack |> error_data_of_string ~key:"stack"
 
+let add_stack_if_absent (e : Lsp.Error.t) (exn : Exception.t) : Lsp.Error.t =
+  let open Hh_json in
+  let stack =
+    ( "stack",
+      exn |> Exception.get_backtrace_string |> Exception.clean_stack |> string_
+    )
+  in
+  let elems =
+    match e.Error.data with
+    | None -> [stack]
+    | Some (JSON_Object elems) ->
+      if List.Assoc.mem ~equal:String.equal elems "stack" then
+        elems
+      else
+        stack :: elems
+    | Some data -> [("data", data); stack]
+  in
+  { e with Error.data = Some (JSON_Object elems) }
+
 let print_error (e : Error.t) : json =
   let open Hh_json in
   let data =
@@ -1178,6 +1205,83 @@ let parse_error (error : json) : Error.t =
 (************************************************************************)
 (* universal parser+printer                                             *)
 (************************************************************************)
+
+let get_uri_opt (m : lsp_message) : Lsp.documentUri option =
+  let open TextDocumentIdentifier in
+  match m with
+  | RequestMessage (_, DocumentCodeLensRequest p) ->
+    Some p.DocumentCodeLens.textDocument.uri
+  | RequestMessage (_, HoverRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DefinitionRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, TypeDefinitionRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, CodeActionRequest p) ->
+    Some p.CodeActionRequest.textDocument.uri
+  | RequestMessage (_, CompletionRequest p) ->
+    Some p.Completion.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DocumentSymbolRequest p) ->
+    Some p.DocumentSymbol.textDocument.uri
+  | RequestMessage (_, FindReferencesRequest p) ->
+    Some p.FindReferences.loc.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, ImplementationRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, DocumentHighlightRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | RequestMessage (_, TypeCoverageRequestFB p) ->
+    Some p.TypeCoverageFB.textDocument.uri
+  | RequestMessage (_, DocumentFormattingRequest p) ->
+    Some p.DocumentFormatting.textDocument.uri
+  | RequestMessage (_, DocumentRangeFormattingRequest p) ->
+    Some p.DocumentRangeFormatting.textDocument.uri
+  | RequestMessage (_, DocumentOnTypeFormattingRequest p) ->
+    Some p.DocumentOnTypeFormatting.textDocument.uri
+  | RequestMessage (_, RenameRequest p) -> Some p.Rename.textDocument.uri
+  | RequestMessage (_, SignatureHelpRequest p) ->
+    Some p.TextDocumentPositionParams.textDocument.uri
+  | NotificationMessage (PublishDiagnosticsNotification p) ->
+    Some p.PublishDiagnostics.uri
+  | NotificationMessage (DidOpenNotification p) ->
+    Some p.DidOpen.textDocument.TextDocumentItem.uri
+  | NotificationMessage (DidCloseNotification p) ->
+    Some p.DidClose.textDocument.uri
+  | NotificationMessage (DidSaveNotification p) ->
+    Some p.DidSave.textDocument.uri
+  | NotificationMessage (DidChangeNotification p) ->
+    Some p.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+  | NotificationMessage (DidChangeWatchedFilesNotification p) ->
+    begin
+      match p.DidChangeWatchedFiles.changes with
+      | [] -> None
+      | { DidChangeWatchedFiles.uri; _ } :: _ -> Some uri
+    end
+  | RequestMessage (_, HackTestStartServerRequestFB)
+  | RequestMessage (_, HackTestStopServerRequestFB)
+  | RequestMessage (_, HackTestShutdownServerlessRequestFB)
+  | RequestMessage (_, UnknownRequest _)
+  | RequestMessage (_, InitializeRequest _)
+  | RequestMessage (_, RegisterCapabilityRequest _)
+  | RequestMessage (_, ShutdownRequest)
+  | RequestMessage (_, CodeLensResolveRequest _)
+  | RequestMessage (_, CompletionItemResolveRequest _)
+  | RequestMessage (_, WorkspaceSymbolRequest _)
+  | RequestMessage (_, ShowMessageRequestRequest _)
+  | RequestMessage (_, ShowStatusRequestFB _)
+  | RequestMessage (_, RageRequestFB)
+  | NotificationMessage ExitNotification
+  | NotificationMessage (CancelRequestNotification _)
+  | NotificationMessage (LogMessageNotification _)
+  | NotificationMessage (TelemetryNotification _)
+  | NotificationMessage (ShowMessageNotification _)
+  | NotificationMessage (ConnectionStatusNotificationFB _)
+  | NotificationMessage InitializedNotification
+  | NotificationMessage (SetTraceNotification _)
+  | NotificationMessage LogTraceNotification
+  | NotificationMessage (ToggleTypeCoverageNotificationFB _)
+  | NotificationMessage (UnknownNotification _)
+  | ResponseMessage _ ->
+    None
 
 let request_name_to_string (request : lsp_request) : string =
   match request with
@@ -1270,15 +1374,28 @@ let message_name_to_string (message : lsp_message) : string =
   | ResponseMessage (_, r) -> result_name_to_string r
 
 let denorm_message_to_string (message : lsp_message) : string =
+  let uri =
+    match get_uri_opt message with
+    | Some (DocumentUri uri) -> "(" ^ uri ^ ")"
+    | None -> ""
+  in
   match message with
   | RequestMessage (id, r) ->
-    Printf.sprintf "request %s %s" (id_to_string id) (request_name_to_string r)
+    Printf.sprintf
+      "request %s %s%s"
+      (id_to_string id)
+      (request_name_to_string r)
+      uri
   | NotificationMessage n ->
-    Printf.sprintf "notification %s" (notification_name_to_string n)
+    Printf.sprintf "notification %s%s" (notification_name_to_string n) uri
   | ResponseMessage (id, ErrorResult e) ->
-    Printf.sprintf "error %s %s" (id_to_string id) e.Error.message
+    Printf.sprintf "error %s %s %s" (id_to_string id) e.Error.message uri
   | ResponseMessage (id, r) ->
-    Printf.sprintf "result %s %s" (id_to_string id) (result_name_to_string r)
+    Printf.sprintf
+      "result %s %s%s"
+      (id_to_string id)
+      (result_name_to_string r)
+      uri
 
 let parse_lsp_request (method_ : string) (params : json option) : lsp_request =
   match method_ with
@@ -1516,8 +1633,7 @@ let print_lsp_notification (notification : lsp_notification) : json =
     | CancelRequestNotification r -> print_cancelRequest r
     | SetTraceNotification r -> print_setTraceNotification r
     | PublishDiagnosticsNotification r -> print_diagnostics r
-    | TelemetryNotification r ->
-      print_logMessage r.LogMessage.type_ r.LogMessage.message
+    | TelemetryNotification (r, extras) -> print_telemetryNotification r extras
     | LogMessageNotification r ->
       print_logMessage r.LogMessage.type_ r.LogMessage.message
     | ShowMessageNotification r ->

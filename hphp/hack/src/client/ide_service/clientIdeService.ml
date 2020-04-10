@@ -495,6 +495,14 @@ let notify_ide_file_opened
   in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
+let notify_ide_file_changed (t : t) ~(tracking_id : string) ~(path : Path.t) :
+    unit =
+  let message =
+    ClientIdeMessage.Ide_file_changed
+      { ClientIdeMessage.Ide_file_changed.file_path = path }
+  in
+  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
+
 let notify_ide_file_closed (t : t) ~(tracking_id : string) ~(path : Path.t) :
     unit =
   let message = ClientIdeMessage.Ide_file_closed path in

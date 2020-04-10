@@ -82,6 +82,9 @@ therefore queue the notification until the IDE service can handle it. *)
 val notify_ide_file_opened :
   t -> tracking_id:string -> path:Path.t -> contents:string -> unit
 
+(** For DidChange notifications. *)
+val notify_ide_file_changed : t -> tracking_id:string -> path:Path.t -> unit
+
 (** For DidClose notifications. It's important that the IDE service never miss a
 DidClose, since it caches data for open files. This function will therefore
 queue up the notificiation until the IDE service can handle it. *)

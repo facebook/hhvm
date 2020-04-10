@@ -3064,6 +3064,17 @@ let track_ide_service_open_files
       ~path
       ~contents;
     Lwt.return_unit
+  | Client_message (metadata, NotificationMessage (DidChangeNotification params))
+    ->
+    let path =
+      uri_to_path
+        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+    in
+    ClientIdeService.notify_ide_file_changed
+      ide_service
+      ~tracking_id:metadata.tracking_id
+      ~path;
+    Lwt.return_unit
   | Client_message (metadata, NotificationMessage (DidCloseNotification params))
     ->
     let path =

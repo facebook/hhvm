@@ -3405,6 +3405,36 @@ let handle_client_message
       if env.use_serverless_ide then
         ClientIdeService.notify_verbose ide_service ~tracking_id !verbose;
       Lwt.return_none
+    (* test entrypoint: shutdowwn client_ide_service *)
+    | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB))
+      when env.use_serverless_ide ->
+      let%lwt () =
+        stop_ide_service
+          ide_service
+          ~tracking_id
+          ~reason:ClientIdeService.Stop_reason.Testing
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        HackTestShutdownServerlessResultFB;
+      Lwt.return_none
+    (* test entrypoint: stop hh_server *)
+    | (_, RequestMessage (id, HackTestStopServerRequestFB)) ->
+      let root_folder =
+        Path.make (Relative_path.path_of_prefix Relative_path.Root)
+      in
+      ClientStop.kill_server root_folder env.from;
+      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
+      Lwt.return_none
+    (* test entrypoint: start hh_server *)
+    | (_, RequestMessage (id, HackTestStartServerRequestFB)) ->
+      let root_folder =
+        Path.make (Relative_path.path_of_prefix Relative_path.Root)
+      in
+      start_server ~env root_folder;
+      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
+      Lwt.return_none
     (* initialize request *)
     | (Pre_init, RequestMessage (id, InitializeRequest initialize_params)) ->
       Lwt.wakeup_later initialize_params_resolver initialize_params;
@@ -3828,33 +3858,6 @@ let handle_client_message
         | Some result -> List.length result.SignatureHelp.signatures
       in
       Lwt.return_some { result_count; result_extra_telemetry = None }
-    | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB))
-      when env.use_serverless_ide ->
-      let%lwt () =
-        stop_ide_service
-          ide_service
-          ~tracking_id
-          ~reason:ClientIdeService.Stop_reason.Testing
-      in
-      respond_jsonrpc
-        ~powered_by:Serverless_ide
-        id
-        HackTestShutdownServerlessResultFB;
-      Lwt.return_none
-    | (_, RequestMessage (id, HackTestStopServerRequestFB)) ->
-      let root_folder =
-        Path.make (Relative_path.path_of_prefix Relative_path.Root)
-      in
-      ClientStop.kill_server root_folder env.from;
-      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
-      Lwt.return_none
-    | (_, RequestMessage (id, HackTestStartServerRequestFB)) ->
-      let root_folder =
-        Path.make (Relative_path.path_of_prefix Relative_path.Root)
-      in
-      start_server ~env root_folder;
-      respond_jsonrpc ~powered_by:Serverless_ide id HackTestStartServerResultFB;
-      Lwt.return_none
     (* catch-all for client reqs/notifications we haven't yet implemented *)
     | (Main_loop _menv, message) ->
       let method_ = Lsp_fmt.message_name_to_string message in

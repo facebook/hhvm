@@ -2559,9 +2559,10 @@ let merge_with_client_ide_status
   else
     status
 
-let report_connect_progress
-    (env : env) (ienv : In_init_env.t) (ide_service : ClientIdeService.t) : unit
-    =
+(** This function blocks while it attempts to connect to the monitor to read status.
+It normally it gets status quickly, but has a 3s timeout just in case. *)
+let fetch_hh_server_status_during_init (ienv : In_init_env.t) :
+    ShowStatusFB.params =
   let open In_init_env in
   let open ShowStatusFB in
   let open ShowMessageRequest in
@@ -2593,16 +2594,12 @@ let report_connect_progress
         progress
         delay_in_secs
   in
-  let hh_server_status =
-    {
-      request = { type_ = MessageType.WarningMessage; message; actions = [] };
-      progress = None;
-      total = None;
-      shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
-    }
-  in
-  request_showStatusFB
-    (merge_with_client_ide_status env ide_service hh_server_status)
+  {
+    request = { type_ = MessageType.WarningMessage; message; actions = [] };
+    progress = None;
+    total = None;
+    shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
+  }
 
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
@@ -3456,49 +3453,35 @@ let on_status_restart_action
     Lwt.return state
   | _ -> Lwt.return state
 
-let tick_showStatus
-    ~(env : env)
-    ~(state : state ref)
-    ~(ide_service : ClientIdeService.t ref)
-    ~(init_id : string) : unit =
-  let hh_server_status =
-    match !state with
-    | Main_loop { Main_env.hh_server_status; _ } ->
-      (* This shows whether the connected hh_server is busy or ready.
+let get_hh_server_status_during_main_and_lost ~(state : state ref) :
+    ShowStatusFB.params option =
+  match !state with
+  | Main_loop { Main_env.hh_server_status; _ } ->
+    (* This shows whether the connected hh_server is busy or ready.
       Typical values are "info / <empty> / hh_server is ok" and
       "warning / checking project / Hack: checking entire project".
       All we'll do here is an animation for it. *)
-      let shortMessage =
-        match hh_server_status.ShowStatusFB.shortMessage with
-        | Some msg -> Some (msg ^ " " ^ status_tick ())
-        | None -> None
-      in
-      Some { hh_server_status with ShowStatusFB.shortMessage }
-    | Lost_server { Lost_env.p; _ } ->
-      Some
-        {
-          ShowStatusFB.request =
-            ShowMessageRequest.
-              {
-                type_ = MessageType.ErrorMessage;
-                message = p.Lost_env.explanation;
-                actions = [{ title = hh_server_restart_button_text }];
-              };
-          progress = None;
-          total = None;
-          shortMessage = None;
-        }
-    | _ -> None
-  in
-  match hh_server_status with
-  | None -> ()
-  | Some hh_server_status ->
-    let combined_status =
-      merge_with_client_ide_status env !ide_service hh_server_status
+    let shortMessage =
+      match hh_server_status.ShowStatusFB.shortMessage with
+      | Some msg -> Some (msg ^ " " ^ status_tick ())
+      | None -> None
     in
-    request_showStatusFB
-      ~on_result:(on_status_restart_action ~env ~init_id ~ide_service)
-      combined_status
+    Some { hh_server_status with ShowStatusFB.shortMessage }
+  | Lost_server { Lost_env.p; _ } ->
+    Some
+      {
+        ShowStatusFB.request =
+          ShowMessageRequest.
+            {
+              type_ = MessageType.ErrorMessage;
+              message = p.Lost_env.explanation;
+              actions = [{ title = hh_server_restart_button_text }];
+            };
+        progress = None;
+        total = None;
+        shortMessage = None;
+      }
+  | _ -> None
 
 (************************************************************************)
 (* Message handling                                                     *)
@@ -4165,7 +4148,18 @@ let handle_tick
     ~(init_id : string)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let%lwt () =
-    tick_showStatus ~env ~state ~ide_service ~init_id;
+    let hh_server_status = get_hh_server_status_during_main_and_lost ~state in
+    begin
+      match hh_server_status with
+      | None -> ()
+      | Some hh_server_status ->
+        let combined_status =
+          merge_with_client_ide_status env !ide_service hh_server_status
+        in
+        request_showStatusFB
+          ~on_result:(on_status_restart_action ~env ~init_id ~ide_service)
+          combined_status
+    end;
     match !state with
     (* idle tick while waiting for server to complete initialization *)
     | In_init ienv ->
@@ -4174,7 +4168,9 @@ let handle_tick
       let delay_in_secs = int_of_float (time -. ienv.most_recent_start_time) in
       let%lwt () =
         if delay_in_secs <= 10 then (
-          report_connect_progress env ienv !ide_service;
+          let hh_server_status = fetch_hh_server_status_during_init ienv in
+          request_showStatusFB
+            (merge_with_client_ide_status env !ide_service hh_server_status);
           Lwt.return_unit
         ) else
           (* terminate + retry the connection *)

@@ -23,7 +23,7 @@ type env = {
   verbose: bool;
 }
 
-(* We cache the state of the typecoverageToggle button, so that when Hack restarts,
+(** We cache the state of the typecoverageToggle button, so that when Hack restarts,
   dynamic view stays in sync with the button in Nuclide *)
 let cached_toggle_state = ref false
 
@@ -62,10 +62,9 @@ let hh_server_restart_button_text = "Restart hh_server"
 let client_ide_restart_button_text = "Restart Hack IDE"
 
 type incoming_metadata = {
-  (* time this message arrived at stdin *)
-  timestamp: float;
-  (* a unique random string of our own creation, which we can use for logging *)
+  timestamp: float;  (** time this message arrived at stdin *)
   tracking_id: string;
+      (** a unique random string of our own creation, which we can use for logging *)
 }
 
 (** A push message from the server might come while we're waiting for a server-rpc
@@ -85,7 +84,7 @@ type server_conn = {
   oc: Out_channel.t;
   server_finale_file: string;
   pending_messages: server_message Queue.t;
-      (* ones that arrived during current rpc *)
+      (** ones that arrived during current rpc *)
 }
 
 module Main_env = struct
@@ -105,13 +104,11 @@ end
 module In_init_env = struct
   type t = {
     conn: server_conn;
-    first_start_time: float;
-    (* our first attempt to connect *)
-    most_recent_start_time: float;
-    (* for subsequent retries *)
+    first_start_time: float;  (** our first attempt to connect *)
+    most_recent_start_time: float;  (** for subsequent retries *)
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
-        (* see comment in get_uris_with_unsaved_changes *)
+        (** see comment in get_uris_with_unsaved_changes *)
   }
 end
 
@@ -120,7 +117,7 @@ module Lost_env = struct
     p: params;
     editor_open_files: Lsp.TextDocumentItem.t UriMap.t;
     uris_with_unsaved_changes: UriSet.t;
-    (* see comment in get_uris_with_unsaved_changes *)
+        (** see comment in get_uris_with_unsaved_changes *)
     lock_file: string;
   }
 
@@ -128,31 +125,30 @@ module Lost_env = struct
     explanation: string;
     new_hh_server_state: hh_server_state;
     start_on_click: bool;
-    (* if user clicks Restart, do we ClientStart before reconnecting? *)
+        (** if user clicks Restart, do we ClientStart before reconnecting? *)
     trigger_on_lsp: bool;
-    (* reconnect if we receive any LSP request/notification *)
-    trigger_on_lock_file: bool; (* reconnect if lockfile is created *)
+        (** reconnect if we receive any LSP request/notification *)
+    trigger_on_lock_file: bool;  (** reconnect if lockfile is created *)
   }
 end
 
 type state =
-  (* Pre_init: we haven't yet received the initialize request.           *)
-  | Pre_init
-  (* In_init: we did respond to the initialize request, and now we're    *)
-  (* waiting for a "Hello" from the server. When that comes we'll        *)
-  (* request a permanent connection from the server, and process the     *)
-  (* file_changes backlog, and switch to Main_loop.                      *)
+  | Pre_init  (** Pre_init: we haven't yet received the initialize request. *)
   | In_init of In_init_env.t
-  (* Main_loop: we have a working connection to both server and client.  *)
+      (** In_init: we did respond to the initialize request, and now we're
+          waiting for a "Hello" from the server. When that comes we'll
+          request a permanent connection from the server, and process the     
+          file_changes backlog, and switch to Main_loop. *)
   | Main_loop of Main_env.t
-  (* Lost_server: someone stole the persistent connection from us.       *)
-  (* We might choose to grab it back if prompted...                      *)
+      (** Main_loop: we have a working connection to both server and client. *)
   | Lost_server of Lost_env.t
-  (* Post_shutdown: we received a shutdown request from the client, and  *)
-  (* therefore shut down our connection to the server. We can't handle   *)
-  (* any more requests from the client and will close as soon as it      *)
-  (* notifies us that we can exit.                                       *)
+      (** Lost_server: someone stole the persistent connection from us.
+          We might choose to grab it back if prompted... *)
   | Post_shutdown
+      (** Post_shutdown: we received a shutdown request from the client, and
+          therefore shut down our connection to the server. We can't handle
+          any more requests from the client and will close as soon as it
+          notifies us that we can exit. *)
 
 let is_post_shutdown = function
   | Post_shutdown -> true
@@ -222,11 +218,10 @@ let get_editor_open_files (state : state) :
 type event =
   | Server_hello
   | Server_message of server_message
-  (* Client_message stores raw json, and the parsed form of it *)
   | Client_message of incoming_metadata * lsp_message
+      (** Client_message stores raw json, and the parsed form of it *)
   | Client_ide_notification of ClientIdeMessage.notification
-  (* once per second, on idle *)
-  | Tick
+  | Tick  (** once per second, on idle *)
 
 let is_tick = function
   | Tick -> true
@@ -241,13 +236,14 @@ let exit_ok () = exit 0
 
 let exit_fail () = exit 1
 
-(* The following connection exceptions inform the main LSP event loop how to  *)
-(* respond to an exception: was the exception a connection-related exception  *)
-(* (one of these) or did it arise during other logic (not one of these)? Can  *)
-(* we report the exception to the LSP client? Can we continue handling        *)
-(* further LSP messages or must we quit? If we quit, can we do so immediately *)
-(* or must we delay?  --  Separately, they also help us marshal callstacks    *)
-(* across daemon- and process-boundaries.                                     *)
+(* The following connection exceptions inform the main LSP event loop how to
+respond to an exception: was the exception a connection-related exception
+(one of these) or did it arise during other logic (not one of these)? Can
+we report the exception to the LSP client? Can we continue handling
+further LSP messages or must we quit? If we quit, can we do so immediately
+or must we delay?  --  Separately, they also help us marshal callstacks
+across daemon- and process-boundaries. *)
+
 exception
   Client_fatal_connection_exception of Marshal_tools.remote_exception_data
 
@@ -284,7 +280,7 @@ let hh_server_state_to_string (hh_server_state : hh_server_state) : string =
   | Hh_server_unknown -> "hh_server unknown state"
   | Hh_server_forgot -> "hh_server forgotten state"
 
-(* This conversion is imprecise.  Comments indicate potential gaps *)
+(** This conversion is imprecise.  Comments indicate potential gaps *)
 let completion_kind_to_si_kind
     (completion_kind : Completion.completionItemKind option) :
     SearchUtils.si_kind =
@@ -392,16 +388,16 @@ let read_hhconfig_version () : string Lwt.t =
       Lwt.return version
     | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message))
 
-(* get_uris_with_unsaved_changes is the set of files for which we've          *)
-(* received didChange but haven't yet received didSave/didOpen. It is purely  *)
-(* a description of what we've heard of the editor, and is independent of     *)
-(* whether or not they've yet been synced with hh_server.                     *)
-(* As it happens: in Main_loop state all these files will already have been   *)
-(* sent to hh_server; in In_init state all these files will have been queued  *)
-(* up inside editor_open_files ready to be sent when we receive the hello; in *)
-(* Lost_server state they're not even queued up, and if ever we see hh_server *)
-(* ready then we'll terminate the LSP server and trust the client to relaunch *)
-(* us and resend a load of didOpen/didChange events.                          *)
+(** get_uris_with_unsaved_changes is the set of files for which we've
+received didChange but haven't yet received didSave/didOpen. It is purely
+a description of what we've heard of the editor, and is independent of
+whether or not they've yet been synced with hh_server.
+As it happens: in Main_loop state all these files will already have been
+sent to hh_server; in In_init state all these files will have been queued
+up inside editor_open_files ready to be sent when we receive the hello; in
+Lost_server state they're not even queued up, and if ever we see hh_server
+ready then we'll terminate the LSP server and trust the client to relaunch
+us and resend a load of didOpen/didChange events. *)
 let get_uris_with_unsaved_changes (state : state) : UriSet.t =
   match state with
   | Main_loop menv -> menv.Main_env.uris_with_unsaved_changes
@@ -495,8 +491,8 @@ let rpc_with_retry server_conn ref_unblocked_time command =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       rpc server_conn ref_unblocked_time command)
 
-(* Determine whether to read a message from the client (the editor) or the
-   server (hh_server), or whether neither is ready within 1s. *)
+(** Determine whether to read a message from the client (the editor) or the
+server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source (server : server_conn) (client : Jsonrpc.queue) :
     [ `From_server | `From_client | `From_ide_service of event | `No_source ]
     Lwt.t =
@@ -534,7 +530,7 @@ let get_message_source (server : server_conn) (client : Jsonrpc.queue) :
     in
     Lwt.return message_source
 
-(* A simplified version of get_message_source which only looks at client *)
+(** A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
     (client : Jsonrpc.queue) (ide_service : ClientIdeService.t) :
     [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
@@ -566,7 +562,7 @@ let get_client_message_source
     in
     Lwt.return message_source
 
-(*  Read a message unmarshaled from the server's out_channel. *)
+(**  Read a message unmarshaled from the server's out_channel. *)
 let read_message_from_server (server : server_conn) : event Lwt.t =
   let open ServerCommandTypes in
   try%lwt
@@ -587,11 +583,11 @@ let read_message_from_server (server : server_conn) : event Lwt.t =
     let stack = Printexc.get_backtrace () in
     raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
 
-(* get_next_event: picks up the next available message from either client or
-   server. The way it's implemented, at the first character of a message
-   from either client or server, we block until that message is completely
-   received. Note: if server is None (meaning we haven't yet established
-   connection with server) then we'll just block waiting for client. *)
+(** get_next_event: picks up the next available message from either client or
+server. The way it's implemented, at the first character of a message
+from either client or server, we block until that message is completely
+received. Note: if server is None (meaning we haven't yet established
+connection with server) then we'll just block waiting for client. *)
 let get_next_event
     (state : state) (client : Jsonrpc.queue) (ide_service : ClientIdeService.t)
     : event Lwt.t =
@@ -672,8 +668,8 @@ let notify_jsonrpc ~(powered_by : powered_by) (notification : lsp_notification)
     : unit =
   print_lsp_notification notification |> add_powered_by ~powered_by |> to_stdout
 
-(* respond_to_error: if we threw an exception during the handling of a request,
-   report the exception to the client as the response to their request. *)
+(** respond_to_error: if we threw an exception during the handling of a request,
+report the exception to the client as the response to their request. *)
 let respond_to_error (event : event option) (e : Lsp.Error.t) : unit =
   let result = ErrorResult e in
   match event with
@@ -688,7 +684,7 @@ let status_tick () : string =
   let time = Unix.time () in
   statusFrames.(int_of_float time mod 2)
 
-(* request_showStatus: pops up a dialog *)
+(** request_showStatusFB: pops up a dialog *)
 let request_showStatusFB
     ?(on_result : ShowStatusFB.result -> state -> state Lwt.t =
       (fun _ state -> Lwt.return state))
@@ -699,9 +695,9 @@ let request_showStatusFB
   if not (Lsp_helpers.supports_status initialize_params) then
     ()
   else
-    (* We try not to send duplicate statuses. *)
-    (* That means: if you call request_showStatus but your message is the same as *)
-    (* what's already up, then you won't be shown, and your callbacks won't be shown. *)
+    (* We try not to send duplicate statuses.
+    That means: if you call request_showStatus but your message is the same as
+    what's already up, then you won't be shown, and your callbacks won't be shown. *)
     let msg = params.ShowStatusFB.request.ShowMessageRequest.message in
     if String.equal msg !showStatus_outstanding then
       ()
@@ -731,7 +727,7 @@ let request_showStatusFB
         IdMap.add id (request, handler) !requests_outstanding
     )
 
-(* request_showMessage: pops up a dialog *)
+(** request_showMessage: pops up a dialog *)
 let request_showMessage
     (on_result : ShowMessageRequest.result -> state -> state Lwt.t)
     (on_error : Error.t -> state -> state Lwt.t)
@@ -767,7 +763,7 @@ let request_showMessage
   (* return a token *)
   ShowMessageRequest.Present { id }
 
-(* dismiss_showMessageRequest: sends a cancellation-request for the dialog *)
+(** dismiss_showMessageRequest: sends a cancellation-request for the dialog *)
 let dismiss_showMessageRequest (dialog : ShowMessageRequest.t) :
     ShowMessageRequest.t =
   begin
@@ -785,8 +781,8 @@ let (_ : 'a -> 'b) = request_showMessage
 
 and (_ : 'c -> 'd) = dismiss_showMessageRequest
 
-(* dismiss_ui: dismisses all dialogs, progress- and action-required           *)
-(* indicators and diagnostics in a state.                                     *)
+(** dismiss_ui: dismisses all dialogs, progress- and action-required
+indicators and diagnostics in a state. *)
 let dismiss_ui (state : state) : state =
   match state with
   | In_init ienv -> In_init ienv

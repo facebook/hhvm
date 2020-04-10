@@ -3493,6 +3493,8 @@ let handle_client_message
              message = "already received shutdown request";
              data = None;
            })
+    (* initialized notification *)
+    | (_, NotificationMessage InitializedNotification) -> Lwt.return_none
     (* rage request *)
     | (_, RequestMessage (id, RageRequestFB)) ->
       let%lwt result = do_rageFB !state ref_unblocked_time in
@@ -3723,8 +3725,6 @@ let handle_client_message
                           (Lsp_fmt.denorm_message_to_string message) );
                     ]);
            })
-    | (Main_loop _menv, NotificationMessage InitializedNotification) ->
-      Lwt.return_none
     (* textDocument/hover request *)
     | (Main_loop menv, RequestMessage (id, HoverRequest params)) ->
       let%lwt () = cancel_if_stale client timestamp short_timeout in

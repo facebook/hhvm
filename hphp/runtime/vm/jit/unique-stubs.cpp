@@ -190,7 +190,7 @@ bool fcallHelper(CallFlags callFlags, Func* func, int32_t numArgs, void* ctx,
   assertx(tl_regState == VMRegState::DIRTY);
   auto& unsafeRegs = vmRegsUnsafe();
   auto const calleeFP = unsafeRegs.stack.top();
-  for (auto i = kNumActRecCells + func->numInOutParams(); i--;) {
+  for (auto i = kNumActRecCells + func->numInOutParamsForArgs(numArgs); i--;) {
     tvWriteUninit(calleeFP[i]);
   }
 

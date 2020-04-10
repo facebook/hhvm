@@ -1,0 +1,4 @@
+string(75) "__hhvm_intrinsics\dummy_lots_inout() expects exactly 12 parameters, 0 given"
+int(123)
+int(456)
+int(789)

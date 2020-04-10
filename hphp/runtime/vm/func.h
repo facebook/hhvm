@@ -545,6 +545,12 @@ struct Func final {
    */
   uint32_t numInOutParams() const;
 
+  /*
+   * Returns the number of inout parameters for the given number of
+   * arguments.
+   */
+  uint32_t numInOutParamsForArgs(int32_t numArgs) const;
+
   bool hasParamsWithMultiUBs() const;
 
   const ParamUBMap& paramUBs() const;

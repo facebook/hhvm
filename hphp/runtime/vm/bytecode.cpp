@@ -3985,12 +3985,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
     assertx(vmfp() == ar || vmfp() == ar->m_sfp);
 
     auto const func = ar->func();
-    auto const numInOutParams = [&] () -> uint32_t {
-      if (!func->takesInOutParams()) return 0;
-      uint32_t i = 0;
-      for (int p = 0; p < numArgs; ++p) i += func->isInOut(p);
-      return i;
-    }();
+    auto const numInOutParams = func->numInOutParamsForArgs(numArgs);
 
     if (ar->m_sfp == vmfp()) {
       // Unwind pre-live frame.

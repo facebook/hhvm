@@ -68,6 +68,11 @@ function create_class_pointer(string $name): mixed;
 <<__Native, __HipHopSpecific>>
 function create_clsmeth_pointer(string $cls, string $meth): mixed;
 
+<<__Native, __HipHopSpecific>>
+function dummy_lots_inout(inout $p1, inout $p2, inout $p3, inout $p4,
+                          inout $p1, inout $p2, inout $p3, inout $p4,
+                          inout $p1, inout $p2, inout $p3, inout $p4): mixed;
+
 function apc_fetch_no_check(mixed $key) {
   $ignored = false;
   return \apc_fetch($key, inout $ignored);

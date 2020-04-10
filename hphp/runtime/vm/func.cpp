@@ -506,6 +506,13 @@ uint32_t Func::numInOutParams() const {
   return count;
 }
 
+uint32_t Func::numInOutParamsForArgs(int32_t numArgs) const {
+  if (!takesInOutParams()) return 0;
+  uint32_t i = 0;
+  for (int p = 0; p < numArgs; ++p) i += isInOut(p);
+  return i;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Locals, iterators, and stack.
 

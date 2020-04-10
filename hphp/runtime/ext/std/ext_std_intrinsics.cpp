@@ -121,6 +121,12 @@ Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {
   return Array::CreateDict();
 }
 
+void HHVM_FUNCTION(dummy_lots_inout,
+                   Variant& p1, Variant& p2, Variant& p3, Variant& p4,
+                   Variant& p5, Variant& p6, Variant& p7, Variant& p8,
+                   Variant& p9, Variant& p10, Variant& p11, Variant& p12) {
+}
+
 String HHVM_FUNCTION(serialize_with_format, const Variant& thing,
                      int64_t format) {
   if (format > static_cast<int64_t>(VariableSerializer::Type::Last)) {

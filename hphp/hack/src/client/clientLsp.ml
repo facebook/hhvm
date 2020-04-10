@@ -2450,187 +2450,6 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
 
-let get_client_ide_status (env : env) (ide_service : ClientIdeService.t) :
-    ShowStatusFB.params option =
-  match (env.use_serverless_ide, ClientIdeService.get_status ide_service) with
-  | (false, _) -> None
-  | (true, ClientIdeService.Status.Not_started) ->
-    Some
-      {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = "Hack IDE: not started.";
-              actions = [{ title = client_ide_restart_button_text }];
-            };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack: not started";
-      }
-  | (true, ClientIdeService.Status.Initializing) ->
-    Some
-      {
-        ShowStatusFB.request =
-          {
-            ShowMessageRequest.type_ = MessageType.WarningMessage;
-            message = "Hack IDE: initializing.";
-            actions = [];
-          };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack: initializing";
-      }
-  | (true, ClientIdeService.Status.Processing_files _)
-  | (true, ClientIdeService.Status.Ready) ->
-    Some
-      {
-        ShowStatusFB.request =
-          {
-            ShowMessageRequest.type_ = MessageType.InfoMessage;
-            message = "Hack IDE: ready.";
-            actions = [];
-          };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack \xE2\x9C\x93" (* check mark *);
-      }
-  | ( true,
-      ClientIdeService.Status.Stopped
-        { ClientIdeMessage.short_user_message; medium_user_message; _ } ) ->
-    Some
-      {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = medium_user_message ^ " See Output>Hack for details.";
-              actions = [{ title = client_ide_restart_button_text }];
-            };
-        progress = None;
-        total = None;
-        shortMessage = Some ("Hack: " ^ short_user_message);
-      }
-
-let merge_statuses
-    ~(hh_server_status : ShowStatusFB.params option)
-    ~(client_ide_status : ShowStatusFB.params option) :
-    ShowStatusFB.params option =
-  let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
-  let combine_types hh_server_type client_ide_type =
-    (* Use the worse of the two status to indicate that something's not
-    working in the maximum number of applicable cases. *)
-    if MessageType.to_enum hh_server_type < MessageType.to_enum client_ide_type
-    then
-      hh_server_type
-    else
-      client_ide_type
-  in
-  let combine_short_messages lhs rhs =
-    Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
-  in
-  let combine_messages lhs rhs = lhs ^ " " ^ rhs in
-  match (hh_server_status, client_ide_status) with
-  | (None, None) -> None
-  | (None, Some status)
-  | (Some status, None) ->
-    Some status
-  | (Some hh_server_status, Some client_ide_status) ->
-    Some
-      ShowStatusFB.
-        {
-          request =
-            ShowMessageRequest.
-              {
-                type_ =
-                  combine_types
-                    hh_server_status.request.type_
-                    client_ide_status.request.type_;
-                (* Put IDE status first, since it's generally more important. *)
-                message =
-                  combine_messages
-                    client_ide_status.request.message
-                    hh_server_status.request.message;
-                actions =
-                  hh_server_status.request.actions
-                  @ client_ide_status.request.actions;
-              };
-          progress = add hh_server_status.progress client_ide_status.progress;
-          total = add hh_server_status.total client_ide_status.total;
-          shortMessage =
-            combine_short_messages
-              hh_server_status.shortMessage
-              client_ide_status.shortMessage;
-        }
-
-(** This function blocks while it attempts to connect to the monitor to read status.
-It normally it gets status quickly, but has a 3s timeout just in case. *)
-let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
-  let open ShowStatusFB in
-  let open ShowMessageRequest in
-  match !state with
-  | Pre_init
-  | Post_shutdown ->
-    None
-  | In_init ienv ->
-    let open In_init_env in
-    let time = Unix.time () in
-    let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
-    (* TODO: better to report time that hh_server has spent initializing *)
-    let root = Option.value_exn (get_root_opt ()) in
-    let (progress, warning) =
-      match ServerUtils.server_progress ~timeout:3 root with
-      | Error _ -> (None, None)
-      | Ok (progress, warning) -> (progress, warning)
-    in
-    let progress =
-      Option.value progress ~default:ClientConnect.default_progress_message
-    in
-    let message =
-      if Option.is_some warning then
-        Printf.sprintf
-          "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
-          progress
-          delay_in_secs
-      else
-        Printf.sprintf
-          "hh_server initializing: %s [%i seconds]"
-          progress
-          delay_in_secs
-    in
-    Some
-      {
-        request = { type_ = MessageType.WarningMessage; message; actions = [] };
-        progress = None;
-        total = None;
-        shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
-      }
-  | Main_loop { Main_env.hh_server_status; _ } ->
-    (* This shows whether the connected hh_server is busy or ready.
-      Typical values are "info / <empty> / hh_server is ok" and
-      "warning / checking project / Hack: checking entire project".
-      All we'll do here is an animation for it. *)
-    let shortMessage =
-      match hh_server_status.ShowStatusFB.shortMessage with
-      | Some msg -> Some (msg ^ " " ^ status_tick ())
-      | None -> None
-    in
-    Some { hh_server_status with ShowStatusFB.shortMessage }
-  | Lost_server { Lost_env.p; _ } ->
-    Some
-      {
-        ShowStatusFB.request =
-          ShowMessageRequest.
-            {
-              type_ = MessageType.ErrorMessage;
-              message = p.Lost_env.explanation;
-              actions = [{ title = hh_server_restart_button_text }];
-            };
-        progress = None;
-        total = None;
-        shortMessage = None;
-      }
-
 let report_connect_end (ienv : In_init_env.t) : state =
   log "report_connect_end";
   In_init_env.(
@@ -4140,6 +3959,187 @@ let handle_client_ide_notification
       Lwt.return_unit
   in
   Lwt.return_none
+
+let get_client_ide_status (env : env) (ide_service : ClientIdeService.t) :
+    ShowStatusFB.params option =
+  match (env.use_serverless_ide, ClientIdeService.get_status ide_service) with
+  | (false, _) -> None
+  | (true, ClientIdeService.Status.Not_started) ->
+    Some
+      {
+        ShowStatusFB.request =
+          ShowMessageRequest.
+            {
+              type_ = MessageType.ErrorMessage;
+              message = "Hack IDE: not started.";
+              actions = [{ title = client_ide_restart_button_text }];
+            };
+        progress = None;
+        total = None;
+        shortMessage = Some "Hack: not started";
+      }
+  | (true, ClientIdeService.Status.Initializing) ->
+    Some
+      {
+        ShowStatusFB.request =
+          {
+            ShowMessageRequest.type_ = MessageType.WarningMessage;
+            message = "Hack IDE: initializing.";
+            actions = [];
+          };
+        progress = None;
+        total = None;
+        shortMessage = Some "Hack: initializing";
+      }
+  | (true, ClientIdeService.Status.Processing_files _)
+  | (true, ClientIdeService.Status.Ready) ->
+    Some
+      {
+        ShowStatusFB.request =
+          {
+            ShowMessageRequest.type_ = MessageType.InfoMessage;
+            message = "Hack IDE: ready.";
+            actions = [];
+          };
+        progress = None;
+        total = None;
+        shortMessage = Some "Hack \xE2\x9C\x93" (* check mark *);
+      }
+  | ( true,
+      ClientIdeService.Status.Stopped
+        { ClientIdeMessage.short_user_message; medium_user_message; _ } ) ->
+    Some
+      {
+        ShowStatusFB.request =
+          ShowMessageRequest.
+            {
+              type_ = MessageType.ErrorMessage;
+              message = medium_user_message ^ " See Output>Hack for details.";
+              actions = [{ title = client_ide_restart_button_text }];
+            };
+        progress = None;
+        total = None;
+        shortMessage = Some ("Hack: " ^ short_user_message);
+      }
+
+(** This function blocks while it attempts to connect to the monitor to read status.
+It normally it gets status quickly, but has a 3s timeout just in case. *)
+let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
+  let open ShowStatusFB in
+  let open ShowMessageRequest in
+  match !state with
+  | Pre_init
+  | Post_shutdown ->
+    None
+  | In_init ienv ->
+    let open In_init_env in
+    let time = Unix.time () in
+    let delay_in_secs = int_of_float (time -. ienv.first_start_time) in
+    (* TODO: better to report time that hh_server has spent initializing *)
+    let root = Option.value_exn (get_root_opt ()) in
+    let (progress, warning) =
+      match ServerUtils.server_progress ~timeout:3 root with
+      | Error _ -> (None, None)
+      | Ok (progress, warning) -> (progress, warning)
+    in
+    let progress =
+      Option.value progress ~default:ClientConnect.default_progress_message
+    in
+    let message =
+      if Option.is_some warning then
+        Printf.sprintf
+          "hh_server initializing (load-state not found - will take a while): %s [%i seconds]"
+          progress
+          delay_in_secs
+      else
+        Printf.sprintf
+          "hh_server initializing: %s [%i seconds]"
+          progress
+          delay_in_secs
+    in
+    Some
+      {
+        request = { type_ = MessageType.WarningMessage; message; actions = [] };
+        progress = None;
+        total = None;
+        shortMessage = Some (Printf.sprintf "[%s] %s" progress (status_tick ()));
+      }
+  | Main_loop { Main_env.hh_server_status; _ } ->
+    (* This shows whether the connected hh_server is busy or ready.
+      Typical values are "info / <empty> / hh_server is ok" and
+      "warning / checking project / Hack: checking entire project".
+      All we'll do here is an animation for it. *)
+    let shortMessage =
+      match hh_server_status.ShowStatusFB.shortMessage with
+      | Some msg -> Some (msg ^ " " ^ status_tick ())
+      | None -> None
+    in
+    Some { hh_server_status with ShowStatusFB.shortMessage }
+  | Lost_server { Lost_env.p; _ } ->
+    Some
+      {
+        ShowStatusFB.request =
+          ShowMessageRequest.
+            {
+              type_ = MessageType.ErrorMessage;
+              message = p.Lost_env.explanation;
+              actions = [{ title = hh_server_restart_button_text }];
+            };
+        progress = None;
+        total = None;
+        shortMessage = None;
+      }
+
+let merge_statuses
+    ~(hh_server_status : ShowStatusFB.params option)
+    ~(client_ide_status : ShowStatusFB.params option) :
+    ShowStatusFB.params option =
+  let add lhs rhs = Option.merge ~f:( + ) lhs rhs in
+  let combine_types hh_server_type client_ide_type =
+    (* Use the worse of the two status to indicate that something's not
+    working in the maximum number of applicable cases. *)
+    if MessageType.to_enum hh_server_type < MessageType.to_enum client_ide_type
+    then
+      hh_server_type
+    else
+      client_ide_type
+  in
+  let combine_short_messages lhs rhs =
+    Option.merge ~f:(fun x y -> x ^ ", " ^ y) lhs rhs
+  in
+  let combine_messages lhs rhs = lhs ^ " " ^ rhs in
+  match (hh_server_status, client_ide_status) with
+  | (None, None) -> None
+  | (None, Some status)
+  | (Some status, None) ->
+    Some status
+  | (Some hh_server_status, Some client_ide_status) ->
+    Some
+      ShowStatusFB.
+        {
+          request =
+            ShowMessageRequest.
+              {
+                type_ =
+                  combine_types
+                    hh_server_status.request.type_
+                    client_ide_status.request.type_;
+                (* Put IDE status first, since it's generally more important. *)
+                message =
+                  combine_messages
+                    client_ide_status.request.message
+                    hh_server_status.request.message;
+                actions =
+                  hh_server_status.request.actions
+                  @ client_ide_status.request.actions;
+              };
+          progress = add hh_server_status.progress client_ide_status.progress;
+          total = add hh_server_status.total client_ide_status.total;
+          shortMessage =
+            combine_short_messages
+              hh_server_status.shortMessage
+              client_ide_status.shortMessage;
+        }
 
 let handle_tick
     ~(env : env)

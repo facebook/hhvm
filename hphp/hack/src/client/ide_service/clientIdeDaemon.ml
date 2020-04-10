@@ -254,7 +254,7 @@ let initialize
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
   let server_args = ServerArgs.set_config server_args config in
   let (server_config, server_local_config) =
-    ServerConfig.load ServerConfig.filename server_args
+    ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
   let hhconfig_version =
     server_config |> ServerConfig.version |> Config_file.version_to_string_opt

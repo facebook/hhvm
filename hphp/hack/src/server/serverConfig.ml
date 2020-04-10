@@ -243,7 +243,7 @@ let prepare_error_codes_treated_strictly config =
 let prepare_disallowed_decl_fixmes config =
   prepare_iset config "disallowed_decl_fixmes" (ISet.of_list [])
 
-let load config_filename options =
+let load ~silent config_filename options =
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
   let (config_hash, config) =
     Config_file.parse_hhconfig
@@ -256,10 +256,7 @@ let load config_filename options =
   process_untrusted_mode config;
   let version = Config_file.parse_version (SMap.find_opt config "version") in
   let local_config =
-    ServerLocalConfig.load
-      ~silent:false
-      ~current_version:version
-      config_overrides
+    ServerLocalConfig.load ~silent ~current_version:version config_overrides
   in
   let local_config =
     if ServerArgs.ai_mode options <> None then

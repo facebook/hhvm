@@ -122,7 +122,9 @@ module Program = struct
       Relative_path.Set.mem updates ServerConfig.filename
     in
     ( if config_in_updates then
-      let (new_config, _) = ServerConfig.(load filename genv.options) in
+      let (new_config, _) =
+        ServerConfig.(load ~silent:false filename genv.options)
+      in
       if not (ServerConfig.is_compatible genv.config new_config) then (
         Hh_logger.log
           "%s changed in an incompatible way; please restart %s.\n"
@@ -1308,7 +1310,9 @@ let run_once options config local_config =
  *)
 let daemon_main_exn ~informant_managed options monitor_pid in_fds =
   Printexc.record_backtrace true;
-  let (config, local_config) = ServerConfig.(load filename options) in
+  let (config, local_config) =
+    ServerConfig.(load ~silent:false filename options)
+  in
   let (genv, env) =
     setup_server
       options

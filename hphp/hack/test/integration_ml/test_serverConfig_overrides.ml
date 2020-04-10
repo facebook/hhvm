@@ -22,7 +22,9 @@ let test () =
       options
       [("timeout", "747"); ("informant_min_distance_restart", "711")]
   in
-  let (config, local_config) = ServerConfig.load hhconfig_path options in
+  let (config, local_config) =
+    ServerConfig.load ~silent:false hhconfig_path options
+  in
   let timeout =
     TypecheckerOptions.timeout (ServerConfig.typechecker_options config)
   in

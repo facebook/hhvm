@@ -2636,7 +2636,7 @@ let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
   let server_args = ServerArgs.set_config server_args env.config in
   let server_local_config =
-    snd @@ ServerConfig.load ServerConfig.filename server_args
+    snd @@ ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
   Initialize.
     {

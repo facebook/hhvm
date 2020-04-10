@@ -21,7 +21,11 @@ val set_symbol_write_options : t -> SymbolWriteOptions.t -> t
 
 val filename : Relative_path.t
 
-val load : Relative_path.t -> ServerArgs.options -> t * ServerLocalConfig.t
+val load :
+  silent:bool ->
+  Relative_path.t ->
+  ServerArgs.options ->
+  t * ServerLocalConfig.t
 
 val is_compatible : t -> t -> bool
 

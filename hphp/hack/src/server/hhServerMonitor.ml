@@ -38,7 +38,9 @@ let monitor_daemon_main
   Relative_path.set_path_prefix Relative_path.Root www_root;
   let () = ServerLoadFlag.set_no_load (ServerArgs.no_load options) in
   let init_id = Random_id.short_string () in
-  let (config, local_config) = ServerConfig.(load filename options) in
+  let (config, local_config) =
+    ServerConfig.(load ~silent:false filename options)
+  in
   ( if Sys_utils.is_test_mode () then
     EventLogger.init_fake ()
   else

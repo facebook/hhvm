@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type t = key_value_pair list
 
@@ -191,11 +191,11 @@ and diff_both
   | (JSON_Array _, _)
   | (_, JSON_Array _) ->
     acc_if all (key, val_c) acc
-  | (JSON_Bool val_c, JSON_Bool val_p) when val_c = val_p ->
+  | (JSON_Bool val_c, JSON_Bool val_p) when Bool.equal val_c val_p ->
     acc_if all (key, JSON_Bool val_c) acc
-  | (JSON_String val_c, JSON_String val_p) when val_c = val_p ->
+  | (JSON_String val_c, JSON_String val_p) when String.equal val_c val_p ->
     acc_if all (key, JSON_String val_c) acc
-  | (JSON_Number val_c, JSON_Number val_p) when val_c = val_p ->
+  | (JSON_Number val_c, JSON_Number val_p) when String.equal val_c val_p ->
     acc_if all (key, JSON_Number val_c) acc
   | (JSON_Null, JSON_Null) -> acc_if all (key, JSON_Null) acc
   | (JSON_Number c, JSON_Number p) ->

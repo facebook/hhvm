@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Sys_utils
 
 type t = string SMap.t
@@ -45,7 +45,9 @@ let parse_contents (contents : string) : string SMap.t =
     ~f:
       begin
         fun acc line ->
-        if String.strip line = "" || (String.length line > 0 && line.[0] = '#')
+        if
+          String.(strip line = "")
+          || (String.length line > 0 && Char.equal line.[0] '#')
         then
           acc
         else
@@ -162,12 +164,12 @@ module Getters = struct
       List.exists
         ~f:(fun s ->
           let s =
-            if s = "master" then
+            if String.equal s "master" then
               ""
             else
               s
           in
-          s = Build_id.build_revision)
+          String.equal s Build_id.build_revision)
         x
 
   let bool_if_min_version key ?(prefix = None) ~default ~current_version config

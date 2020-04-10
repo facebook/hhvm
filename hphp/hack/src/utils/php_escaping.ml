@@ -10,11 +10,13 @@
 (* Implementation of string escaping stuff. Ugggggggh.
  * See http://php.net/manual/en/language.types.string.php *)
 
-open Core_kernel
+open Hh_prelude
 
 let is_printable c = c >= ' ' && c <= '~'
 
-let is_lit_printable c = is_printable c && c <> '\\' && c <> '\"'
+let is_lit_printable c =
+  let open Char in
+  is_printable c && c <> '\\' && c <> '\"'
 
 let escape_char = function
   | '\n' -> "\\n"

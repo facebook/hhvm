@@ -14,7 +14,7 @@
  * A promise is a strongly-typed wrapper around Process
  *)
 
-open Core_kernel
+open Hh_prelude
 include Future_sig.Types
 
 type 'a delayed = {

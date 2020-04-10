@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Hh_core
 open Reordered_argument_collections
 open Utils
@@ -82,7 +83,7 @@ let default = (Dummy, "")
  * better on space usage. *)
 let storage_to_string (p, rest) = string_of_prefix p ^ "|" ^ rest
 
-let index_opt str ch = (try Some (String.index str ch) with Not_found -> None)
+let index_opt str ch = String.index str ch
 
 let storage_of_string str =
   match index_opt str '|' with
@@ -118,7 +119,7 @@ let to_tmp (_, rest) = (Tmp, rest)
 let to_root (_, rest) = (Root, rest)
 
 module Set = struct
-  include Reordered_argument_set (Set.Make (S))
+  include Reordered_argument_set (Caml.Set.Make (S))
 
   let pp fmt x =
     Format.fprintf fmt "@[<2>{";

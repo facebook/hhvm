@@ -6,7 +6,7 @@
  * when choosing a different Pos module, you must also choose its
  * compatible Pos_source module. *)
 
-open Core_kernel
+open Hh_prelude
 open Lexing
 
 type b = Pos_source.t
@@ -44,7 +44,7 @@ let none =
     }
 
 let pp fmt pos =
-  if pos = none then
+  if equal pos none then
     Format.pp_print_string fmt "[Pos.none]"
   else (
     Format.pp_print_string fmt "[";
@@ -223,12 +223,16 @@ let exactly_matches_range p ~start_line ~start_col ~end_line ~end_col =
 let contains pos_container pos =
   let (cstart, cend) = info_raw pos_container in
   let (pstart, pend) = info_raw pos in
-  filename pos_container = filename pos && pstart >= cstart && pend <= cend
+  Relative_path.equal (filename pos_container) (filename pos)
+  && pstart >= cstart
+  && pend <= cend
 
 let overlaps pos1 pos2 =
   let (start1, end1) = info_raw pos1 in
   let (start2, end2) = info_raw pos2 in
-  filename pos1 = filename pos2 && end1 > start2 && start1 < end2
+  Relative_path.equal (filename pos1) (filename pos2)
+  && end1 > start2
+  && start1 < end2
 
 let make_from_lexing_pos pos_file pos_start pos_end =
   match
@@ -292,7 +296,8 @@ let to_absolute p = set_file (Relative_path.to_absolute (filename p)) p
 let to_relative p = set_file (Relative_path.create_detect_prefix (filename p)) p
 
 let btw x1 x2 =
-  if filename x1 <> filename x2 then failwith "Position in separate files";
+  if not (Relative_path.equal (filename x1) (filename x2)) then
+    failwith "Position in separate files";
   if end_cnum x1 > end_cnum x2 then
     failwith
       (Printf.sprintf
@@ -352,7 +357,7 @@ let rec merge x1 x2 =
   | (_, _) -> merge (as_large_pos x1) (as_large_pos x2)
 
 let last_char p =
-  if p = none then
+  if equal p none then
     none
   else
     match p with
@@ -362,7 +367,7 @@ let last_char p =
       Pos_large { pos_start = pos_end; pos_end; pos_file }
 
 let first_char_of_line p =
-  if p = none then
+  if equal p none then
     none
   else
     match p with
@@ -532,7 +537,7 @@ let pessimize_enabled pos pessimize_coefficient =
     let hash = Hashtbl.hash filename in
     let r = hash % range in
     Float.of_int r /. Float.of_int range <= pessimize_coefficient
-  | _ -> pessimize_coefficient = 1.0
+  | _ -> Float.equal pessimize_coefficient 1.0
 
 (* hack for test cases *)
 

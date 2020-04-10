@@ -1,4 +1,13 @@
-open Core_kernel
+(*
+ * Copyright (c) 2018, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
+open Hh_prelude
 
 let select
     (read_fds : Unix.file_descr list)
@@ -24,7 +33,7 @@ let select
       this list, so we could in theory just return any list (or not return any
       exceptional file descriptors at all). *)
       let exceptional_fds =
-        List.filter exn_fds ~f:(fun fd -> List.mem ~equal:( = ) fds fd)
+        List.filter exn_fds ~f:(fun fd -> List.mem ~equal:Poly.( = ) fds fd)
       in
       Lwt.return (Error exceptional_fds)
   in

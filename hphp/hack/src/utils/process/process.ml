@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Ocaml_overrides
 open Stack_utils
 
@@ -189,7 +189,7 @@ let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
     | Lifecycle_killed_due_to_overflow_stdin -> Error Overflow_stdin
     | Lifecycle_running { pid } ->
       let fds = List.rev_filter_map ~f:( ! ) [stdout_fd; stderr_fd] in
-      if fds = [] then
+      if List.is_empty fds then
         (* EOF reached for all FDs. Blocking wait. *)
         let (_, status) = Unix.waitpid [] pid in
         let () = lifecycle := Lifecycle_exited status in

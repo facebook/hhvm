@@ -79,10 +79,10 @@ val exactly_matches_range :
   end_col:int ->
   bool
 
-val contains : 'a pos -> 'a pos -> bool
+val contains : t -> t -> bool
 
 (* Does first position strictly overlap the second position? *)
-val overlaps : 'a pos -> 'a pos -> bool
+val overlaps : t -> t -> bool
 
 val make : 'a -> b -> 'a pos
 

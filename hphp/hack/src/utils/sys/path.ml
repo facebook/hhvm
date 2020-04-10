@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Reordered_argument_collections
 include Sys
 
@@ -63,12 +64,12 @@ let parent path =
   else
     make (Filename.dirname path)
 
-let output = output_string
+let output = Stdlib.output_string
 
 let slash_escaped_string_of_path path =
   let buf = Buffer.create (String.length path) in
   String.iter
-    (fun ch ->
+    ~f:(fun ch ->
       match ch with
       | '\\' -> Buffer.add_string buf "zB"
       | ':' -> Buffer.add_string buf "zC"
@@ -87,7 +88,7 @@ let path_of_slash_escaped_string str =
       ()
     else
       let replacement =
-        if i < length - 1 && str.[i] = 'z' then
+        if i < length - 1 && Char.equal str.[i] 'z' then
           match str.[i + 1] with
           | 'B' -> Some '\\'
           | 'C' -> Some ':'
@@ -109,4 +110,4 @@ let path_of_slash_escaped_string str =
   consume 0;
   make (Buffer.contents buf)
 
-module Set = Reordered_argument_set (Set.Make (S))
+module Set = Reordered_argument_set (Caml.Set.Make (S))

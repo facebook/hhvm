@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 type t = int array [@@deriving show]
 
 let last_offset = ref 0
@@ -35,7 +37,7 @@ let make text =
     let result = ref [] in
     for i = 1 to len do
       let prev = text.[i - 1] in
-      if (prev = '\r' && text.[i] != '\n') || prev = '\n' then
+      if Char.((prev = '\r' && not (text.[i] = '\n')) || prev = '\n') then
         result := i :: !result
     done;
     (match !result with
@@ -87,14 +89,18 @@ let position_to_offset ?(existing = false) bolmap (line, column) =
   let len = Array.length bolmap in
   let file_line = line in
   (* Treat all file_line errors the same: Not_found *)
-  let line_start = (try bolmap.(file_line - 1) with _ -> raise Not_found) in
+  (* TODO: check if we can use Not_found_s to have a more informative
+   * exception *)
+  let line_start =
+    (try bolmap.(file_line - 1) with _ -> raise Caml.Not_found)
+  in
   let offset = line_start + column - 1 in
   if
     (not existing) || (offset >= 0 && offset <= bolmap.(min (len - 1) file_line))
   then
     offset
   else
-    raise Not_found
+    raise Caml.Not_found
 
 let offset_to_line_start_offset bolmap offset =
   offset - snd (offset_to_position bolmap offset) + 1
@@ -102,11 +108,11 @@ let offset_to_line_start_offset bolmap offset =
 let offsets_to_line_lengths bolmap =
   let (lengths, _) =
     Array.fold_right
-      (fun offset (acc, mnext) ->
+      ~f:(fun offset (acc, mnext) ->
         match mnext with
         | None -> (acc, Some offset)
         | Some next -> ((next - offset) :: acc, Some offset))
       bolmap
-      ([], None)
+      ~init:([], None)
   in
   lengths

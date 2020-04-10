@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* This allows one to fake having multiple files in one file. This
  * is used only in unit test files.
@@ -33,7 +33,8 @@ let rec make_files = function
  *)
 let file_to_file_list file =
   let join_path p1 p2 =
-    if p1 <> "" && p2 <> "" then
+    let open Char in
+    if String.(p1 <> "" && p2 <> "") then
       if p1.[String.length p1 - 1] = '/' && p2.[0] = '/' then
         p1 ^ Str.string_after p2 1
       else if p1.[String.length p1 - 1] <> '/' && p2.[0] <> '/' then

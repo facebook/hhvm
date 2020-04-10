@@ -44,7 +44,7 @@ type lsp_id =
   | NumberId of int
   | StringId of string
 
-type documentUri = DocumentUri of string
+type documentUri = DocumentUri of string [@@deriving eq]
 
 let uri_of_string (s : string) : documentUri = DocumentUri s
 
@@ -56,6 +56,7 @@ type position = {
   (* line position in a document [zero-based] *)
   character: int; (* character offset on a line in a document [zero-based] *)
 }
+[@@deriving eq]
 
 (* A range is comparable to a selection in an editor *)
 type range = {
@@ -63,6 +64,7 @@ type range = {
   (* the range's start position *)
   end_: position; (* the range's end position [exclusive] *)
 }
+[@@deriving eq]
 
 (* Represents a location inside a resource, such as a line inside a text file *)
 module Location = struct
@@ -70,6 +72,7 @@ module Location = struct
     uri: documentUri;
     range: range;
   }
+  [@@deriving eq]
 end
 
 (* Represents a location inside a resource which also wants to display a
@@ -570,7 +573,7 @@ module PublishDiagnostics = struct
     | Warning [@value 2]
     | Information [@value 3]
     | Hint [@value 4]
-  [@@deriving enum]
+  [@@deriving eq, enum]
 
   type params = publishDiagnosticsParams
 
@@ -594,17 +597,20 @@ module PublishDiagnostics = struct
     relatedInformation: diagnosticRelatedInformation list;
     relatedLocations: relatedLocation list; (* legacy FB extension *)
   }
+  [@@deriving eq]
 
   and diagnosticCode =
     | IntCode of int
     | StringCode of string
     | NoCode
+  [@@deriving eq]
 
   and diagnosticRelatedInformation = {
     relatedLocation: Location.t;
     (* wire: just "location" *)
     relatedMessage: string; (* wire: just "message" *)
   }
+  [@@deriving eq]
 
   (* legacy FB extension *)
   and relatedLocation = diagnosticRelatedInformation

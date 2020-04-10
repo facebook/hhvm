@@ -403,15 +403,3 @@ let showMessage
 
 let showMessage_error (writer : Jsonrpc.writer) =
   showMessage writer MessageType.ErrorMessage
-
-let dismiss_diagnostics (writer : Jsonrpc.writer) (diagnostic_uris : UriSet.t) :
-    unit =
-  let dismiss_one (uri : documentUri) : unit =
-    let params =
-      { Lsp.PublishDiagnostics.uri; diagnostics = []; isStatusFB = false }
-    in
-    let notification = PublishDiagnosticsNotification params in
-    notification |> print_lsp_notification |> writer
-  in
-  UriSet.iter dismiss_one diagnostic_uris;
-  ()

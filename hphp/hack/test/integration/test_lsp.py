@@ -5144,6 +5144,7 @@ function unsaved_bar(): string { return "hello"; }
                 use_serverless_ide=True,
                 supports_status=True,
             )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
             .ignore_requests(
                 method="window/showStatus",
                 params={

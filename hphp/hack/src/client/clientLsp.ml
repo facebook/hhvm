@@ -805,23 +805,26 @@ and (_ : 'c -> 'd) = dismiss_showMessageRequest
 both the error diagnostics in Main_loop and the hh_server_status
 diagnostics in In_init and Lost_server. *)
 let dismiss_diagnostics (state : state) : state =
-  let dismiss_diagnostic diagnostic =
-    diagnostic
-    |> Option.map ~f:(fun d -> UriSet.singleton d.PublishDiagnostics.uri)
-    |> Option.iter ~f:(Lsp_helpers.dismiss_diagnostics to_stdout)
+  let dismiss_one ~isStatusFB uri =
+    let params = { PublishDiagnostics.uri; diagnostics = []; isStatusFB } in
+    let notification = PublishDiagnosticsNotification params in
+    notification |> print_lsp_notification |> to_stdout
+  in
+  let dismiss_status diagnostic =
+    dismiss_one ~isStatusFB:true diagnostic.PublishDiagnostics.uri
   in
   match state with
   | In_init ienv ->
     let open In_init_env in
-    dismiss_diagnostic ienv.hh_server_status_diagnostic;
+    Option.iter ienv.hh_server_status_diagnostic ~f:dismiss_status;
     In_init { ienv with hh_server_status_diagnostic = None }
   | Main_loop menv ->
     let open Main_env in
-    Lsp_helpers.dismiss_diagnostics to_stdout menv.uris_with_diagnostics;
+    UriSet.iter (dismiss_one ~isStatusFB:false) menv.uris_with_diagnostics;
     Main_loop { menv with uris_with_diagnostics = UriSet.empty }
   | Lost_server lenv ->
     let open Lost_env in
-    dismiss_diagnostic lenv.hh_server_status_diagnostic;
+    Option.iter lenv.hh_server_status_diagnostic ~f:dismiss_status;
     Lost_server { lenv with hh_server_status_diagnostic = None }
   | Pre_init -> Pre_init
   | Post_shutdown -> Post_shutdown
@@ -4120,6 +4123,128 @@ let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
         shortMessage = None;
       }
 
+let hh_server_status_to_diagnostic
+    (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
+    PublishDiagnostics.params option =
+  let open ShowStatusFB in
+  let open ShowMessageRequest in
+  let open PublishDiagnostics in
+  let diagnostic =
+    {
+      PublishDiagnostics.range =
+        {
+          start = { line = 0; character = 0 };
+          end_ = { line = 0; character = 1 };
+        };
+      severity = None;
+      code = NoCode;
+      source = Some "hh_server";
+      message = "";
+      relatedInformation = [];
+      relatedLocations = [];
+    }
+  in
+  match (uri, hh_server_status.request.type_) with
+  | (None, _)
+  | (_, (MessageType.InfoMessage | MessageType.LogMessage)) ->
+    None
+  | (Some uri, MessageType.ErrorMessage) ->
+    Some
+      {
+        uri;
+        isStatusFB = true;
+        diagnostics =
+          [
+            {
+              diagnostic with
+              message =
+                "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... "
+                ^ hh_server_status.request.message;
+              severity = Some Error;
+            };
+          ];
+      }
+  | (Some uri, MessageType.WarningMessage) ->
+    Some
+      {
+        uri;
+        isStatusFB = true;
+        diagnostics =
+          [
+            {
+              diagnostic with
+              message =
+                "hh_server isn't yet ready, so there may undetected errors... "
+                ^ hh_server_status.request.message;
+              severity = Some Warning;
+            };
+          ];
+      }
+
+(** Manages the state of which diagnostics have been shown to the user
+about hh_server status: removes the old one if necessary, and adds a new one
+if necessary. Note that we only display hh_server_status diagnostics
+during In_init and Lost_server states, neither of which have diagnostics
+of their own. *)
+let publish_hh_server_status_diagnostic
+    (state : state) (hh_server_status : ShowStatusFB.params option) : state =
+  let uri =
+    match (get_most_recent_file state, get_editor_open_files state) with
+    | (Some uri, Some open_files) when UriMap.mem uri open_files -> Some uri
+    | (_, Some open_files) when not (UriMap.is_empty open_files) ->
+      Some (UriMap.choose open_files |> fst)
+    | (_, _) -> None
+  in
+  let desired_diagnostic =
+    Option.bind hh_server_status ~f:(hh_server_status_to_diagnostic uri)
+  in
+  let get_existing_diagnostic state =
+    match state with
+    | In_init ienv -> ienv.In_init_env.hh_server_status_diagnostic
+    | Lost_server lenv -> lenv.Lost_env.hh_server_status_diagnostic
+    | _ -> None
+  in
+  let publish_and_update_diagnostic state diagnostic =
+    let notification = PublishDiagnosticsNotification diagnostic in
+    notification |> print_lsp_notification |> to_stdout;
+    match state with
+    | In_init ienv ->
+      In_init
+        { ienv with In_init_env.hh_server_status_diagnostic = Some diagnostic }
+    | Lost_server lenv ->
+      Lost_server
+        { lenv with Lost_env.hh_server_status_diagnostic = Some diagnostic }
+    | _ -> state
+  in
+  let open PublishDiagnostics in
+  (* The following match emboodies these rules:
+  (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
+  (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
+  (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
+  (4) to avoid flicker, if the diagnostic has changed but is still in the same file, then
+  we refrain from sending an "erase old" message and it will be implied by sending "new". *)
+  match (get_existing_diagnostic state, desired_diagnostic, state) with
+  | (_, _, Main_loop _)
+  | (_, _, Pre_init)
+  | (_, _, Post_shutdown)
+  | (None, None, _) ->
+    state
+  | (Some _, None, _) -> dismiss_diagnostics state
+  | (Some existing, Some desired, _)
+    when Lsp.equal_documentUri existing.uri desired.uri
+         && Option.equal
+              PublishDiagnostics.equal_diagnostic
+              (List.hd existing.diagnostics)
+              (List.hd desired.diagnostics) ->
+    state
+  | (Some existing, Some desired, _)
+    when Lsp.equal_documentUri existing.uri desired.uri ->
+    publish_and_update_diagnostic state desired
+  | (Some _, Some desired, _) ->
+    let state = dismiss_diagnostics state in
+    publish_and_update_diagnostic state desired
+  | (None, Some desired, _) -> publish_and_update_diagnostic state desired
+
 let merge_statuses
     ~(hh_server_status : ShowStatusFB.params option)
     ~(client_ide_status : ShowStatusFB.params option) :
@@ -4179,6 +4304,7 @@ let handle_tick
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   let%lwt () =
     let hh_server_status = get_hh_server_status state in
+    state := publish_hh_server_status_diagnostic !state hh_server_status;
     let client_ide_status = get_client_ide_status env !ide_service in
     let status = merge_statuses ~hh_server_status ~client_ide_status in
     Option.iter

@@ -25,6 +25,10 @@ class C {
     );
   }
 
+  enum X {
+    :@C;
+  }
+
   public static function get_name(this:@Field $x): string {
     return static:@Field::name($x);
   }

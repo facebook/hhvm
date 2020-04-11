@@ -2375,6 +2375,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env name;
           braced_block_nest
             env
+            ~allow_collapse:true
             left_paren
             right_paren
             [handle_possible_list env ~after_each:(fun _ -> Newline) mappings];
@@ -2417,6 +2418,7 @@ and braced_block_nest env ?(allow_collapse = true) open_b close_b nodes =
     when List.for_all (Token.trailing ob) (fun t ->
              Trivia.kind t <> TriviaKind.EndOfLine) ->
     Concat [t env open_b; t env close_b]
+  | (true, false, Syntax.Missing) -> Concat [t env open_b; t env close_b]
   | _ ->
     (* Remove the closing brace's leading trivia and handle it inside the
      * BlockNest, so that comments will be indented correctly. *)

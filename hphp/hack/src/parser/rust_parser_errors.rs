@@ -1255,13 +1255,18 @@ where
         }
     }
 
+    fn parameter_callconv(param: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
+        (match &param.syntax {
+            ParameterDeclaration(x) => Some(&x.parameter_call_convention),
+            ClosureParameterTypeSpecifier(x) => Some(&x.closure_parameter_call_convention),
+            VariadicParameter(x) => Some(&x.variadic_parameter_call_convention),
+            _ => None,
+        })
+        .filter(|node| !node.is_missing())
+    }
+
     fn is_parameter_with_callconv(param: &'a Syntax<Token, Value>) -> bool {
-        match &param.syntax {
-            ParameterDeclaration(x) => !x.parameter_call_convention.is_missing(),
-            ClosureParameterTypeSpecifier(x) => !x.closure_parameter_call_convention.is_missing(),
-            VariadicParameter(x) => !x.variadic_parameter_call_convention.is_missing(),
-            _ => false,
-        }
+        Self::parameter_callconv(param).is_some()
     }
 
     fn has_inout_params(&self) -> bool {
@@ -2313,17 +2318,17 @@ where
                 self.parameter_rx_errors(node);
                 self.check_type_hint(&p.parameter_type);
 
-                if Self::is_parameter_with_callconv(node) {
+                if let Some(inout_modifier) = Self::parameter_callconv(node) {
                     if self.is_inside_async_method() {
                         self.errors.push(Self::make_error_from_node_with_type(
-                            node,
+                            inout_modifier,
                             errors::inout_param_in_async,
                             ErrorType::RuntimeError,
                         ))
                     }
                     if self.is_in_construct_method() {
                         self.errors.push(Self::make_error_from_node(
-                            node,
+                            inout_modifier,
                             errors::inout_param_in_construct,
                         ))
                     }
@@ -2335,7 +2340,7 @@ where
 
                     if (in_memoize || in_memoize_lsb) && !self.is_immediately_in_lambda() {
                         self.errors.push(Self::make_error_from_node_with_type(
-                            node,
+                            inout_modifier,
                             errors::memoize_with_inout,
                             ErrorType::RuntimeError,
                         ))

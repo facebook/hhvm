@@ -49,7 +49,7 @@ use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
 use runtime::TypedValue;
 use write::*;
 
-use std::{borrow::Cow, convert::TryInto, io::Write as _};
+use std::{borrow::Cow, convert::TryInto, io::Write as _, write};
 
 pub mod context {
     use crate::write::*;
@@ -297,7 +297,7 @@ fn print_fun_def<W: Write>(
         print_upper_bounds(w, &body.upper_bounds)?;
     }
     print_fun_attrs(ctx, w, fun_def)?;
-    w.write(string_of_span(&fun_def.span))?;
+    print_span(w, &fun_def.span)?;
     w.write(" ")?;
     option(w, &body.return_type_info, |w, ti| {
         print_type_info(w, ti)?;
@@ -333,10 +333,10 @@ fn print_requirement<W: Write>(
     w.write("\n  .require ")?;
     match r {
         (name, hhas_class::TraitReqKind::MustExtend) => {
-            w.write(format!("extends <{}>;", name.to_raw_string()))
+            write!(w, "extends <{}>;", name.to_raw_string())
         }
         (name, hhas_class::TraitReqKind::MustImplement) => {
-            w.write(format!("implements <{}>;", name.to_raw_string()))
+            write!(w, "implements <{}>;", name.to_raw_string())
         }
     }
 }
@@ -488,7 +488,7 @@ fn print_doc_comment<W: Write>(
 ) -> Result<(), W::Error> {
     if let Some(cmt) = doc_comment {
         ctx.newline(w)?;
-        w.write(format!(".doc {};", triple_quote_string(&cmt.0)))?;
+        write!(w, ".doc {};", triple_quote_string(&cmt.0))?;
     }
     Ok(())
 }
@@ -549,11 +549,12 @@ fn print_method_trait_resolutions<W: Write>(
     w: &mut W,
     (mtr, kind_as_tring): &(&ast::MethodRedeclaration, class::Type),
 ) -> Result<(), W::Error> {
-    w.write(format!(
+    write!(
+        w,
         "\n    {}::{} as strict ",
         kind_as_tring.to_raw_string(),
         mtr.method.1
-    ))?;
+    )?;
     w.write_if(mtr.fun_kind.is_async(), "async ")?;
     wrap_by_square(w, |w| {
         w.write_if(mtr.final_, "final ")?;
@@ -561,7 +562,7 @@ fn print_method_trait_resolutions<W: Write>(
         w.write_if(mtr.abstract_, " abstract")?;
         w.write_if(mtr.static_, " static")
     })?;
-    w.write(format!(" {};", mtr.name.1))
+    write!(w, " {};", mtr.name.1)
 }
 
 fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
@@ -717,7 +718,7 @@ fn print_method_def<W: Write>(
         print_upper_bounds(w, &body.upper_bounds)?;
     }
     print_method_attrs(ctx, w, method_def)?;
-    w.write(string_of_span(&method_def.span))?;
+    print_span(w, &method_def.span)?;
     w.write(" ")?;
     option(w, &body.return_type_info, |w, t| {
         print_type_info(w, t)?;
@@ -817,7 +818,8 @@ fn print_class_def<W: Write>(
     }
     print_class_special_attributes(ctx, w, class_def)?;
     w.write(class_def.name.to_raw_string())?;
-    w.write(format!(" {}", string_of_span(&class_def.span)))?;
+    w.write(" ")?;
+    print_span(w, &class_def.span)?;
     print_extends(w, class_def.base.as_ref().map(|x| x.to_raw_string()))?;
     print_implements(w, &class_def.implements)?;
     w.write(" {")?;
@@ -889,16 +891,17 @@ fn print_adata_mapped_argument<W: Write, F, V>(
 where
     F: Fn(&mut Context, &mut W, &V) -> Result<(), W::Error>,
 {
-    w.write(format!(
+    write!(
+        w,
         "{}:{}:{{{}",
         col_type,
         values.len(),
         pos_to_prov_tag(ctx, loc)
-    ))?;
+    )?;
     for v in values {
         f(ctx, w, v)?
     }
-    w.write(format!("}}"))
+    write!(w, "}}")
 }
 
 fn print_adata_collection_argument<W: Write>(
@@ -928,9 +931,9 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
     match tv {
         TypedValue::Uninit => w.write("uninit"),
         TypedValue::Null => w.write("N;"),
-        TypedValue::String(s) => w.write(format!("s:{}:{};", s.len(), quote_string_with_escape(s))),
-        TypedValue::Float(f) => w.write(format!("d:{};", float::to_string(*f))),
-        TypedValue::Int(i) => w.write(format!("i:{};", i)),
+        TypedValue::String(s) => write!(w, "s:{}:{};", s.len(), quote_string_with_escape(s)),
+        TypedValue::Float(f) => write!(w, "d:{};", float::to_string(*f)),
+        TypedValue::Int(i) => write!(w, "i:{};", i),
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write("b:0;"),
         TypedValue::Bool(true) => w.write("b:1;"),
@@ -961,12 +964,13 @@ fn print_attribute<W: Write>(
     w: &mut W,
     a: &HhasAttribute,
 ) -> Result<(), W::Error> {
-    w.write(format!(
+    write!(
+        w,
         "\"{}\"(\"\"\"{}:{}:{{",
         a.name,
         VARRAY_PREFIX,
         a.arguments.len()
-    ))?;
+    )?;
     concat(w, &a.arguments, |w, arg| print_adata(ctx, w, arg))?;
     w.write("}\"\"\")")
 }
@@ -1029,7 +1033,7 @@ fn print_body<W: Write>(ctx: &mut Context, w: &mut W, body: &HhasBody) -> Result
     }
     if body.num_iters > 0 {
         ctx.newline(w)?;
-        w.write(format!(".numiters {};", body.num_iters))?;
+        write!(w, ".numiters {};", body.num_iters)?;
     }
     if !body.decl_vars.is_empty() {
         ctx.newline(w)?;
@@ -1286,17 +1290,10 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IFinal(i) => print_final(w, i),
         ITry(itry) => print_try(w, itry),
         IComment(s) => concat_str_by(w, " ", ["#", s.as_str()]),
-        ISrcLoc(p) => concat_str(
+        ISrcLoc(p) => write!(
             w,
-            [
-                ".srcloc ",
-                format!(
-                    "{}:{},{}:{}",
-                    p.line_begin, p.col_begin, p.line_end, p.col_end
-                )
-                .as_str(),
-                ";",
-            ],
+            ".srcloc {}:{},{}:{};",
+            p.line_begin, p.col_begin, p.line_end, p.col_end
         ),
         IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
@@ -1465,7 +1462,7 @@ fn print_iter_args<W: Write>(w: &mut W, iter_args: &IterArgs) -> Result<(), W::E
 }
 
 fn print_iterator_id<W: Write>(w: &mut W, i: &IterId) -> Result<(), W::Error> {
-    w.write(format!("{}", i))
+    write!(w, "{}", i)
 }
 
 fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> {
@@ -1473,9 +1470,7 @@ fn print_async<W: Write>(w: &mut W, a: &AsyncFunctions) -> Result<(), W::Error> 
     match a {
         A::WHResult => w.write("WHResult"),
         A::Await => w.write("Await"),
-        A::AwaitAll(Some((Local::Unnamed(id), count))) => {
-            w.write(format!("AwaitAll L:{}+{}", id, count))
-        }
+        A::AwaitAll(Some((Local::Unnamed(id), count))) => write!(w, "AwaitAll L:{}+{}", id, count),
         A::AwaitAll(None) => w.write("AwaitAll L:0+0"),
         _ => Err(Error::fail("AwaitAll needs an unnamed local")),
     }
@@ -1780,7 +1775,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::MemoGet(label, Some((Local::Unnamed(first), local_count))) => {
             w.write("MemoGet ")?;
             print_label(w, label)?;
-            w.write(format!(" L:{}+{}", first, local_count))
+            write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGet(label, None) => {
             w.write("MemoGet ")?;
@@ -1790,7 +1785,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::MemoGet(_, _) => Err(Error::fail("MemoGet needs an unnamed local")),
 
         M::MemoSet(Some((Local::Unnamed(first), local_count))) => {
-            w.write(format!("MemoSet L:{}+{}", first, local_count))
+            write!(w, "MemoSet L:{}+{}", first, local_count)
         }
         M::MemoSet(None) => w.write("MemoSet L:0+0"),
         M::MemoSet(_) => Err(Error::fail("MemoSet needs an unnamed local")),
@@ -1800,7 +1795,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
             print_label(w, label1)?;
             w.write(" ")?;
             print_label(w, label2)?;
-            w.write(format!(" L:{}+{}", first, local_count))
+            write!(w, " L:{}+{}", first, local_count)
         }
         M::MemoGetEager(label1, label2, None) => {
             w.write("MemoGetEager ")?;
@@ -1812,7 +1807,7 @@ fn print_misc<W: Write>(w: &mut W, misc: &InstructMisc) -> Result<(), W::Error> 
         M::MemoGetEager(_, _, _) => Err(Error::fail("MemoGetEager needs an unnamed local")),
 
         M::MemoSetEager(Some((Local::Unnamed(first), local_count))) => {
-            w.write(format!("MemoSetEager L:{}+{}", first, local_count))
+            write!(w, "MemoSetEager L:{}+{}", first, local_count)
         }
         M::MemoSetEager(None) => w.write("MemoSetEager L:0+0"),
         M::MemoSetEager(_) => Err(Error::fail("MemoSetEager needs an unnamed local")),
@@ -1865,7 +1860,7 @@ fn print_include_eval_define<W: Write>(
         DefClsNop(n) => concat_str_by(w, " ", ["DefClsNop", n.to_string().as_str()]),
         DefRecord(n) => concat_str_by(w, " ", ["DefRecord", n.to_string().as_str()]),
         DefCns(n) => concat_str_by(w, " ", ["DefCns", n.to_string().as_str()]),
-        DefTypeAlias(id) => w.write(format!("DefTypeAlias {}", id)),
+        DefTypeAlias(id) => write!(w, "DefTypeAlias {}", id),
     }
 }
 
@@ -2234,8 +2229,7 @@ fn print_local<W: Write>(w: &mut W, local: &Local) -> Result<(), W::Error> {
 }
 
 fn print_int<W: Write>(w: &mut W, i: &usize) -> Result<(), W::Error> {
-    // TODO(shiqicao): avoid allocating intermediate string
-    w.write(format!("{}", i))
+    write!(w, "{}", i)
 }
 
 fn print_key_value<W: Write>(
@@ -2532,11 +2526,11 @@ fn print_expr<W: Write>(
         E_::Id(id) => print_expr_id(w, env, &id.1),
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
-            w.write(if f.contains('E') || f.contains('e') {
-                format!("{:.1}E", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?)
+            if f.contains('E') || f.contains('e') {
+                write!(w, "{:.1}E", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?)
             } else {
-                f.into()
-            })
+                w.write(f)
+            }
         }
         E_::Int(i) => print_expr_int(w, i),
         E_::String(s) => print_expr_string(w, s),
@@ -2882,8 +2876,8 @@ fn print_param_user_attributes<W: Write>(
     }
 }
 
-fn string_of_span(&Span(line_begin, line_end): &Span) -> String {
-    format!("({},{})", line_begin, line_end)
+fn print_span<W: Write>(w: &mut W, &Span(line_begin, line_end): &Span) -> Result<(), W::Error> {
+    write!(w, "({},{})", line_begin, line_end)
 }
 
 fn print_fun_attrs<W: Write>(

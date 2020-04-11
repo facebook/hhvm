@@ -2324,6 +2324,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
             left_brace
             right_brace
             [handle_possible_list env ~after_each:(fun _ -> Newline) fields];
+          Newline;
         ]
     | Syntax.PocketFieldTypeDeclaration
         {

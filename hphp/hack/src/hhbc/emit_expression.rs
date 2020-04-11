@@ -1232,12 +1232,8 @@ fn is_struct_init(
     allow_numerics: bool,
 ) -> bool {
     let mut are_all_keys_non_numeric_strings = true;
-    let mut has_duplicate_keys = false;
     let mut uniq_keys = std::collections::HashSet::<String>::new();
     for f in fields.iter() {
-        if !are_all_keys_non_numeric_strings && has_duplicate_keys {
-            break;
-        }
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
@@ -1246,7 +1242,7 @@ fn is_struct_init(
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
                     && !i64::from_str(&s).is_ok()
                     && !(f64::from_str(&s).map_or(false, |f| f.is_finite()));
-                has_duplicate_keys = has_duplicate_keys || !uniq_keys.insert(s);
+                uniq_keys.insert(s);
                 continue;
             }
         }
@@ -1255,7 +1251,7 @@ fn is_struct_init(
     let num_keys = fields.len();
     let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
     (allow_numerics || are_all_keys_non_numeric_strings)
-        && !has_duplicate_keys
+        && uniq_keys.len() == num_keys
         && num_keys <= limit
         && num_keys != 0
 }
@@ -5424,6 +5420,7 @@ pub fn fixup_type_arg<'a>(
                         "Erased generics are not allowed in is/as expressions",
                     )))
                 }
+                H_::Haccess(_, _) => return Ok(()),
                 _ => (),
             }
             h.recurse(c, self.object())

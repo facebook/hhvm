@@ -7,8 +7,7 @@ class C {
     case ?(function(): Awaitable<?T>) generator;
   }
 
-  public static function derive<TE as this:@Entry>(
-    TE $field) : void {
+  public static function derive<TE as this:@Entry>(TE $field): void {
     $_ = static:@Entry::generator($field);
   }
 }

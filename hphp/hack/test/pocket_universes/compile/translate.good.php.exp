@@ -13,7 +13,7 @@
   RetC
 }
 
-.class C (3,35) {
+.class C (3,37) {
   .property [private sys_initial_val] <"HH\\int" "HH\\int" extended_hint> x =
     """N;""";
   .method [public] (6,8) <"" N > __construct(<"HH\\int" "HH\\int" > $x) {
@@ -79,7 +79,7 @@
     .srcloc 14:8,14:12;
     RetC
   L1:
-    .srcloc 33:15,33:18;
+    .srcloc 34:15,34:18;
     Int 1664
     .srcloc 14:8,14:12;
     RetC
@@ -126,7 +126,7 @@
     .srcloc 14:8,14:12;
     RetC
   L1:
-    .srcloc 31:14,31:16;
+    .srcloc 32:14,32:16;
     String "B"
     .srcloc 14:8,14:12;
     RetC
@@ -173,7 +173,7 @@
     .srcloc 14:8,14:12;
     RetC
   L1:
-    .srcloc 32:23,32:37;
+    .srcloc 33:23,33:37;
     String "default_value"
     .srcloc 14:8,14:12;
     RetC

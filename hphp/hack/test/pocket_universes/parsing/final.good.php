@@ -1,7 +1,6 @@
 <?hh // strict
 
-class Foo
-{
+class Foo {
   final enum Field {
     case type T;
     case string ident;

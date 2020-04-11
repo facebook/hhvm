@@ -2,8 +2,12 @@
 class PU {
   enum E {
     case type T;
-    :@I (type T = int);
-    :@S (type T = string);
+    :@I(
+      type T = int
+    );
+    :@S(
+      type T = string
+    );
   }
 
   public static function dump<TF as this:@E>(TF $x, TF:@T $v): void {

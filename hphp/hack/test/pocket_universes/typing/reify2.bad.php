@@ -9,7 +9,10 @@ class Foo {
     case type reify S;
     case Param<S> data;
 
-    :@I (type S = int, data = new Param(42));
+    :@I(
+      type S = int,
+      data = new Param(42)
+    );
 
   }
 }

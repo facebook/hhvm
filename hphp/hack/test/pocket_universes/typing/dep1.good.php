@@ -2,7 +2,9 @@
 class PU {
   enum E {
     case string name;
-    :@A (name = "A");
+    :@A(
+      name = "A"
+    );
   }
 
   public static function dname<TF as this:@E>(TF $x): string {

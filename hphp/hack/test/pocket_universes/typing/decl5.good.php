@@ -3,6 +3,8 @@
 class PU4 {
   enum X {
     case type T;
-    :@X (type T = int);
+    :@X(
+      type T = int
+    );
   }
 }

@@ -3,7 +3,9 @@
 class PU {
   enum E {
     case int value;
-    :@X (value = 1);
+    :@X(
+      value = 1
+    );
   }
 
   public static function test(): string {

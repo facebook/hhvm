@@ -7,7 +7,7 @@ class C {
     $this->x = $x;
   }
 
-  public function get() : int {
+  public function get(): int {
     return $this->x;
   }
 
@@ -18,18 +18,20 @@ class C {
     case T0 default_value;
     case T1 stuff;
 
-    :@A (
+    :@A(
       type T0 = int,
       type T1 = string,
       name = "A",
       default_value = 42,
-      stuff = "stuff" );
+      stuff = "stuff"
+    );
 
-    :@B (
+    :@B(
       type T0 = string,
       type T1 = int,
       name = "B",
       default_value = "default_value",
-      stuff = 1664 );
+      stuff = 1664
+    );
   }
 }

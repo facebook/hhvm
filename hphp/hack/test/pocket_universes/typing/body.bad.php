@@ -12,7 +12,7 @@ class PU {
     case T val;
 
     /* Unknown type D */
-    :@X (
+    :@X(
       type T = D,
       v = 1,
       s = "X",
@@ -20,7 +20,7 @@ class PU {
     );
 
     /* Incompatible class (using case type) */
-    :@Y (
+    :@Y(
       type T = CC,
       v = 1,
       s = "X",
@@ -28,7 +28,7 @@ class PU {
     );
 
     /* Incompatible class (without case type) */
-    :@Z (
+    :@Z(
       type T = float,
       v = 3,
       s = 4,

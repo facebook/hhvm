@@ -3,6 +3,8 @@
 class PU5 {
   enum X {
     case type T;
-    :@X (type T = U);
+    :@X(
+      type T = U
+    );
   }
 }

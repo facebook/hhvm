@@ -1,19 +1,19 @@
-((script 792
-  ((list 792
+((script 803
+  ((list 803
     ((markup_section 4
       ((() markup 0 ())
        (markup_suffix 4
         ((() <? 2 ())
          (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))
-     (classish_declaration 466
+     (classish_declaration 459
       ((missing 0 ())
        (list 8 ((((end_of_line 1)) abstract 8 ((whitespace 1)))))
        (missing 0 ()) (() class 5 ((whitespace 1)))
-       (() name 3 ((end_of_line 1))) (missing 0 ()) (missing 0 ())
+       (() name 3 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 447
+       (classish_body 440
         ((() { 1 ((end_of_line 1)))
-         (list 441
+         (list 434
           ((pocket_enum_declaration 82
             ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
@@ -31,7 +31,7 @@
                  (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
                  (() name 13 ()) (() ";" 1 ((end_of_line 1)))))))
              (((whitespace 2)) } 1 ((end_of_line 1)))))
-           (methodish_declaration 105
+           (methodish_declaration 103
             ((missing 0 ())
              (function_declaration_header 52
               ((list 6
@@ -61,10 +61,10 @@
                    (missing 0 ())))))
                (() ")" 1 ()) (() : 1 ((whitespace 1)))
                (pu_access 5
-                ((() name 2 ()) (() :@ 2 ()) (() name 1 ((end_of_line 1)))))
+                ((() name 2 ()) (() :@ 2 ()) (() name 1 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 50
-              ((((whitespace 2)) { 1 ((end_of_line 1)))
+              ((() { 1 ((end_of_line 1)))
                (list 40
                 ((return_statement 40
                   ((((whitespace 4)) return 6 ((whitespace 1)))
@@ -80,7 +80,7 @@
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))
-           (methodish_declaration 100
+           (methodish_declaration 98
             ((missing 0 ())
              (function_declaration_header 55
               ((list 6
@@ -109,10 +109,10 @@
                      (() variable 2 ()) (missing 0 ())))
                    (missing 0 ())))))
                (() ")" 1 ()) (() : 1 ((whitespace 1)))
-               (simple_type_specifier 6 ((() string 6 ((end_of_line 1)))))
+               (simple_type_specifier 6 ((() string 6 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 42
-              ((((whitespace 2)) { 1 ((end_of_line 1)))
+              ((() { 1 ((end_of_line 1)))
                (list 32
                 ((return_statement 32
                   ((((whitespace 4)) return 6 ((whitespace 1)))
@@ -128,20 +128,20 @@
                    (() ";" 1 ((end_of_line 1)))))))
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))
-           (methodish_declaration 141
+           (methodish_declaration 138
             ((missing 0 ())
-             (function_declaration_header 49
+             (function_declaration_header 48
               ((list 13
                 ((((end_of_line 1) (end_of_line 1) (whitespace 2)) public 6
                   ((whitespace 1)))
                  (() static 6 ((whitespace 1)))))
                (() function 8 ((whitespace 1))) (() name 17 ())
-               (missing 0 ()) (() "(" 1 ()) (missing 0 ())
-               (() ")" 1 ((whitespace 1))) (() : 1 ((whitespace 1)))
-               (simple_type_specifier 4 ((() void 4 ((end_of_line 1)))))
+               (missing 0 ()) (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
+               (() : 1 ((whitespace 1)))
+               (simple_type_specifier 4 ((() void 4 ((whitespace 1)))))
                (missing 0 ())))
              (compound_statement 89
-              ((((whitespace 2)) { 1 ((end_of_line 1)))
+              ((() { 1 ((end_of_line 1)))
                (list 79
                 ((foreach_statement 79
                   ((((whitespace 4)) foreach 7 ((whitespace 1)))
@@ -176,25 +176,25 @@
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 200
+     (classish_declaration 198
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
        (() name 3 ((whitespace 1))) (missing 0 ())
        (() extends 7 ((whitespace 1)))
        (list 3
         ((list_item 3
-          ((simple_type_specifier 3 ((() name 3 ((end_of_line 1)))))
+          ((simple_type_specifier 3 ((() name 3 ((whitespace 1)))))
            (missing 0 ())))))
        (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 178
+       (classish_body 176
         ((() { 1 ((end_of_line 1)))
-         (list 172
-          ((pocket_enum_declaration 103
+         (list 170
+          ((pocket_enum_declaration 102
             ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
-             (list 82
-              ((pocket_atom_mapping 82
-                ((((whitespace 4)) :@ 2 ()) (() name 4 ((whitespace 1)))
+             (list 81
+              ((pocket_atom_mapping 81
+                ((((whitespace 4)) :@ 2 ()) (() name 4 ())
                  (() "(" 1 ((end_of_line 1)))
                  (list 60
                   ((list_item 13
@@ -220,13 +220,13 @@
                      (missing 0 ())))))
                  (((whitespace 4)) ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
              (((whitespace 2)) } 1 ((end_of_line 1)))))
-           (methodish_declaration 65
+           (methodish_declaration 64
             ((missing 0 ())
-             (function_declaration_header 28
+             (function_declaration_header 27
               ((list 6
                 ((((end_of_line 1) (whitespace 2)) public 6 ((whitespace 1)))))
                (() function 8 ((whitespace 1))) (() name 4 ()) (missing 0 ())
-               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ((whitespace 1)))
+               (() "(" 1 ()) (missing 0 ()) (() ")" 1 ())
                (() : 1 ((whitespace 1)))
                (simple_type_specifier 3 ((() int 3 ((whitespace 1)))))
                (missing 0 ())))
@@ -249,44 +249,45 @@
                (((whitespace 2)) } 1 ((end_of_line 1)))))
              (missing 0 ())))))
          (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 106
+     (classish_declaration 126
       ((missing 0 ()) (missing 0 ()) (missing 0 ())
        (((end_of_line 1)) class 5 ((whitespace 1)))
-       (() name 9 ((end_of_line 1))) (missing 0 ()) (missing 0 ())
+       (() name 9 ((whitespace 1))) (missing 0 ()) (missing 0 ())
        (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 90
+       (classish_body 110
         ((() { 1 ((end_of_line 1)))
-         (list 84
-          ((pocket_enum_declaration 84
+         (list 104
+          ((pocket_enum_declaration 104
             ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 3 ((whitespace 1))) (() { 1 ((end_of_line 1)))
-             (list 66
+             (list 85
               ((pocket_field_type_declaration 18
-                ((((whitespace 3)) case 4 ((whitespace 1)))
+                ((((whitespace 4)) case 4 ((whitespace 1)))
                  (() type 4 ((whitespace 1))) (() reify 5 ((whitespace 1)))
                  (() name 1 ()) (() ";" 1 ((end_of_line 1)))))
                (pocket_field_type_expr_declaration 12
-                ((((whitespace 3)) case 4 ((whitespace 1)))
+                ((((whitespace 4)) case 4 ((whitespace 1)))
                  (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
                  (() name 4 ()) (() ";" 1 ((end_of_line 1)))))
-               (pocket_atom_mapping 27
-                ((((end_of_line 1) (whitespace 3)) :@ 2 ()) (() name 1 ())
-                 (() "(" 1 ((whitespace 1)))
-                 (list 20
+               (pocket_atom_mapping 44
+                ((((end_of_line 1) (whitespace 4)) :@ 2 ()) (() name 1 ())
+                 (() "(" 1 ((end_of_line 1)))
+                 (list 26
                   ((list_item 13
                     ((pocket_mapping_type_declaration 12
-                      ((() type 4 ((whitespace 1)))
+                      ((((whitespace 6)) type 4 ((whitespace 1)))
                        (() name 1 ((whitespace 1))) (() = 1 ((whitespace 1)))
                        (simple_type_specifier 3 ((() int 3 ())))))
-                     (() , 1 ((whitespace 1)))))
+                     (() , 1 ((end_of_line 1)))))
                    (list_item 6
                     ((pocket_mapping_id_declaration 6
-                      ((() name 1 ((whitespace 1)))
+                      ((((whitespace 6)) name 1 ((whitespace 1)))
                        (simple_initializer 4
                         ((() = 1 ((whitespace 1)))
-                         (literal 2 ((() decimal_literal 2 ())))))))
+                         (literal 2
+                          ((() decimal_literal 2 ((end_of_line 1)))))))))
                      (missing 0 ())))))
-                 (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
+                 (((whitespace 4)) ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
              (((whitespace 2)) } 1 ((end_of_line 1)))))))
          (() } 1 ((end_of_line 1)))))))
      (end_of_file 0 ((() end_of_file 0 ()))))))))

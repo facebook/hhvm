@@ -11,7 +11,9 @@ class A {
     case X x;
     case Y x;
 
-    :@A( type T = int );
+    :@A(
+      type T = int
+    );
 
     :@A(
       type T = int,

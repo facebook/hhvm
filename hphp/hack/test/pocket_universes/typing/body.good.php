@@ -9,13 +9,13 @@ class PU {
     case type T;
     case T val;
 
-    :@X (
+    :@X(
       type T = C,
       v = 1,
       s = "X",
       val = new C()
     );
-    :@Y (
+    :@Y(
       type T = float,
       v = 2,
       s = "Y",

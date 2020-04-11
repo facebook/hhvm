@@ -10,7 +10,10 @@ abstract class C {
     case string name;
     case type T;
 
-    :@I (name = 'I', type T = int);
+    :@I(
+      name = 'I',
+      type T = int
+    );
   }
 
   // the localization of ?this:E:@TE:@T is calling into the option
@@ -19,7 +22,8 @@ abstract class C {
   // to the env tparams, which resulted in errors when extending C
   public static function set<TE as this:@E>(
     TE $entry,
-    ?TE:@T $data = null): void {
+    ?TE:@T $data = null,
+  ): void {
     $name = static:@E::name($entry);
     static::$data[$name] = $data;
   }
@@ -27,6 +31,9 @@ abstract class C {
 
 class D extends C {
   enum E {
-    :@S (name = 'S', type T = string);
+    :@S(
+      name = 'S',
+      type T = string
+    );
   }
 }

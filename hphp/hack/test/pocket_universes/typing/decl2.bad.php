@@ -3,6 +3,8 @@
 class PU9 {
   enum X {
     case int v;
-    :@X (v = 1[1]);
+    :@X(
+      v = 1[1]
+    );
   }
 }

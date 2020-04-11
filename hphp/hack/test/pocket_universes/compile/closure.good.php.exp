@@ -13,24 +13,24 @@
   RetC
 }
 
-.class C (4,14) {
-  .method [public static] (10,13) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
+.class C (4,13) {
+  .method [public static] (10,12) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
     .declvars $_;
-    .srcloc 10:17,13:122;
+    .srcloc 10:17,12:116;
     VerifyParamType $field
-    .srcloc 12:10,12:41;
+    .srcloc 11:10,11:41;
     NullUninit
     NullUninit
     NullUninit
-    .srcloc 12:35,12:40;
+    .srcloc 11:35,11:40;
     CGetL $field
-    .srcloc 12:10,12:41;
+    .srcloc 11:10,11:41;
     FCallClsMethodSD <> 1 1 "0" - "" "" Static "Entry##generator"
-    .srcloc 12:5,12:41;
+    .srcloc 11:5,11:41;
     SetL $_
-    .srcloc 12:5,12:42;
+    .srcloc 11:5,11:42;
     PopC
-    .srcloc 13:4,13:4;
+    .srcloc 12:4,12:4;
     Null
     RetC
   }

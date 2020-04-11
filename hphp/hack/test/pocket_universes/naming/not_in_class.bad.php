@@ -4,8 +4,8 @@ interface Foo {
   enum E {
     case string name;
 
-    :@A (
+    :@A(
       name = "A"
-      );
+    );
   }
 }

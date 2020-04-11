@@ -4,6 +4,8 @@ class PU11 {
   enum X {
     case type T;
     case Vector<T> v;
-    :@X (v = 1);
+    :@X(
+      v = 1
+    );
   }
 }

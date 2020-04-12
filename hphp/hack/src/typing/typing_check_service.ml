@@ -522,26 +522,39 @@ let merge
 
   (* If workers can steal work from each other, then it's possible that
     some of the files that the current worker completed checking have already
-    been removed from the in-progress set. Thus, we should calculate
-    the checked count by subtracting the old in-progress count from the new one
-    after we remove the completed files from the set. This way, we get
-    an accurate count whether there's work stealing going on or not. *)
-  let old_in_progress_count = Hash_set.Poly.length files_in_progress in
-  List.iter ~f:(Hash_set.Poly.remove files_in_progress) results.completed;
+    been removed from the in-progress set. Thus, we should keep track of
+    how many type check computations we actually remove from the in-progress
+    set. Note that we also skip counting Declare and Prefetch computations,
+    since they are not relevant for computing how many files we've type
+    checked. *)
+  let completed_check_count =
+    List.fold
+      ~init:0
+      ~f:(fun acc computation ->
+        match Hash_set.Poly.strict_remove files_in_progress computation with
+        | Ok () ->
+          begin
+            match computation with
+            | Check _ -> acc + 1
+            | _ -> acc
+          end
+        | _ -> acc)
+      results.completed
+  in
 
-  (* Let's re-add the deferred files here! *)
-  List.iter ~f:(Hash_set.Poly.add files_in_progress) results.deferred;
+  (* Deferred type check computations should be subtracted from completed
+    in order to produce an accurate count because they we requeued them, yet
+    they were also included in the completed list.
+    *)
   let is_check file =
     match file with
     | Check _ -> true
     | _ -> false
   in
   let deferred_check_count = List.count ~f:is_check results.deferred in
-  let completed_check_count =
-    old_in_progress_count - Hash_set.Poly.length files_in_progress
-  in
-  files_checked_count :=
-    !files_checked_count + completed_check_count - deferred_check_count;
+  let completed_check_count = completed_check_count - deferred_check_count in
+
+  files_checked_count := !files_checked_count + completed_check_count;
   ServerProgress.send_percentage_progress_to_monitor
     ~operation:"typechecking"
     ~done_count:!files_checked_count

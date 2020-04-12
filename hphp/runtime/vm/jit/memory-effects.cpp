@@ -382,11 +382,6 @@ GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
     (inst.taken() && inst.taken()->isCatch()) ||
     inst.is(ReleaseVVAndSkip,
-            LIterInit,
-            LIterInitK,
-            LIterNext,
-            LIterNextK,
-            IterFree,
             MemoSetStaticCache,
             MemoSetLSBCache,
             MemoSetInstanceCache,
@@ -459,14 +454,17 @@ GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
   auto const iters = allIterFields(fp, inst.extra<IterData>()->args.iterId);
-  return may_reenter(
-    inst,
-    may_load_store_kill(
-      iters | locals | AHeapAny,
-      iters | locals | AHeapAny,
-      AMIStateAny
-    )
+  auto const effects = may_load_store_kill(
+    iters | locals | AHeapAny,
+    iters | locals | AHeapAny,
+    AMIStateAny
   );
+  auto const inst_may_reenter = [&]{
+    if (inst.is(LIterInit, LIterInitK, LIterNext, LIterNextK)) return false;
+    if (inst.is(IterInit, IterInitK)) return inst.src(0)->isA(TObj);
+    return true;
+  }();
+  return inst_may_reenter ? may_reenter(inst, effects) : effects;
 }
 
 /*
@@ -1040,7 +1038,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case IterFree: {
     auto const base = AIterBase { inst.src(0), iterId(inst) };
-    return may_reenter(inst, may_load_store(AHeapAny | base, AHeapAny));
+    return may_load_store(AHeapAny | base, AHeapAny);
   }
 
   case CheckIter: {

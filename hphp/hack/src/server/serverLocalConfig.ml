@@ -252,6 +252,10 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
+  (* If false, only the type check delegate's logic will be used.
+    If the delegate fails to type check, the typing check service as a whole
+    will fail. *)
+  num_local_workers: int option;
   (* If the number of files to type check is fewer than this value, the files
     will be type checked sequentially (in the master process). Otherwise,
     the files will be type checked in parallel (in MultiWorker workers). *)
@@ -354,6 +358,7 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
+    num_local_workers = None;
     parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
     max_times_to_defer_type_checking = None;
@@ -756,6 +761,7 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.parallel_type_checking_threshold
       config
   in
+  let num_local_workers = int_opt "num_local_workers" config in
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
   in
@@ -894,6 +900,7 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
+    num_local_workers;
     parallel_type_checking_threshold;
     defer_class_declaration_threshold;
     max_times_to_defer_type_checking;

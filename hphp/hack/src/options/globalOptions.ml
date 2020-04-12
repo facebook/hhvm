@@ -11,6 +11,7 @@ type t = {
   tco_experimental_features: SSet.t;
   tco_migration_flags: SSet.t;
   tco_dynamic_view: bool;
+  tco_num_local_workers: int option;
   tco_parallel_type_checking_threshold: int;
   tco_defer_class_declaration_threshold: int option;
   tco_max_times_to_defer_type_checking: int option;
@@ -177,6 +178,7 @@ let default =
     tco_experimental_features = tco_experimental_all;
     tco_migration_flags = SSet.empty;
     tco_dynamic_view = false;
+    tco_num_local_workers = None;
     tco_parallel_type_checking_threshold = 10;
     tco_defer_class_declaration_threshold = None;
     tco_max_times_to_defer_type_checking = None;
@@ -276,6 +278,7 @@ let make
     ?(tco_experimental_features = default.tco_experimental_features)
     ?(tco_migration_flags = default.tco_migration_flags)
     ?(tco_dynamic_view = default.tco_dynamic_view)
+    ?tco_num_local_workers
     ?(tco_parallel_type_checking_threshold =
       default.tco_parallel_type_checking_threshold)
     ?tco_defer_class_declaration_threshold
@@ -375,6 +378,7 @@ let make
     tco_experimental_features;
     tco_migration_flags;
     tco_dynamic_view;
+    tco_num_local_workers;
     tco_parallel_type_checking_threshold;
     tco_defer_class_declaration_threshold;
     tco_max_times_to_defer_type_checking;
@@ -468,6 +472,8 @@ let tco_experimental_feature_enabled t s =
 let tco_migration_flag_enabled t s = SSet.mem s t.tco_migration_flags
 
 let tco_dynamic_view t = t.tco_dynamic_view
+
+let tco_num_local_workers t = t.tco_num_local_workers
 
 let tco_parallel_type_checking_threshold t =
   t.tco_parallel_type_checking_threshold

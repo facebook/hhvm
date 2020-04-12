@@ -810,9 +810,10 @@ let go_with_interrupt
     ~(check_info : check_info) :
     (Errors.t, Delegate.state, Telemetry.t, 'a) job_result =
   let fnl = List.map fnl ~f:(fun path -> Check { path; deferred_count = 0 }) in
+  let opts = Provider_context.get_tcopt ctx in
   Mocking.with_test_mocking fnl @@ fun fnl ->
   let result =
-    if should_process_sequentially (Provider_context.get_tcopt ctx) fnl then (
+    if should_process_sequentially opts fnl then begin
       Hh_logger.log "Type checking service will process files sequentially";
       let progress = { completed = []; remaining = fnl; deferred = [] } in
       let (errors, _) =
@@ -825,8 +826,17 @@ let go_with_interrupt
           ~check_info
       in
       (errors, delegate_state, telemetry, interrupt.MultiThreadedCall.env, [])
-    ) else (
+    end else begin
       Hh_logger.log "Type checking service will process files in parallel";
+      let workers =
+        match (workers, TypecheckerOptions.num_local_workers opts) with
+        | (Some workers, Some num_local_workers) ->
+          let (workers, _) = List.split_n workers num_local_workers in
+          Some workers
+        | (None, _)
+        | (_, None) ->
+          workers
+      in
       process_in_parallel
         ctx
         dynamic_view_files
@@ -837,7 +847,7 @@ let go_with_interrupt
         ~interrupt
         ~memory_cap
         ~check_info
-    )
+    end
   in
   let url_opt =
     HackEventLogger.ProfileTypeCheck.get_telemetry_url_opt

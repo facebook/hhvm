@@ -38,8 +38,14 @@ let should_do_remote
       t )
 
 let start_typing_delegate genv env : env =
-  let version_specifier = genv.local_config.remote_version_specifier in
-  let transport_channel = genv.local_config.remote_transport_channel in
+  let {
+    remote_version_specifier = version_specifier;
+    remote_transport_channel = transport_channel;
+    num_local_workers;
+    _;
+  } =
+    genv.local_config
+  in
   let {
     declaration_threshold = defer_class_declaration_threshold;
     num_workers;
@@ -52,6 +58,11 @@ let start_typing_delegate genv env : env =
   in
   let artifact_store_config =
     ArtifactStore.default_config ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+  in
+  let raise_on_failure =
+    match num_local_workers with
+    | Some num when num = 0 -> true
+    | _ -> false
   in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   {
@@ -68,6 +79,7 @@ let start_typing_delegate genv env : env =
                 init_id = env.init_env.init_id;
                 mergebase = env.init_env.mergebase;
                 num_workers;
+                raise_on_failure;
                 recheck_id =
                   Option.value
                     env.init_env.recheck_id

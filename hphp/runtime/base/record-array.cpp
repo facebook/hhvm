@@ -230,7 +230,7 @@ MixedArray* RecordArray::ToMixed(const ArrayData* adIn) {
     ++dstData;
   }
   // If a record-array has non-empty ExtraFieldMap, we conservatively set
-  // MixedArrayKeys to have  on-static keys in ToMixedHeader.
+  // MixedArrayKeys to have non-static keys in ToMixedHeader.
   auto const extra = old->extraFieldMap();
   MixedArray::IterateKV(extra, [&](TypedValue k, TypedValue v) {
     auto const kstr = k.m_data.pstr;

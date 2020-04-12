@@ -688,7 +688,6 @@ Array ObjectData::o_toIterArray(const String& context) {
       auto const strKey = key.m_data.pstr;
       auto const val = dynProps.get()->at(strKey);
       retArray.set(StrNR(strKey), val, true /* isKey */);
-      decRefStr(strKey);
     }
   }
 

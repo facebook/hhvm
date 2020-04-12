@@ -252,6 +252,10 @@ type t = {
   (* Look up class members lazily from shallow declarations instead of eagerly
      computing folded declarations representing the entire class type. *)
   shallow_class_decl: bool;
+  (* If the number of files to type check is fewer than this value, the files
+    will be type checked sequentially (in the master process). Otherwise,
+    the files will be type checked in parallel (in MultiWorker workers). *)
+  parallel_type_checking_threshold: int;
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   defer_class_declaration_threshold: int option;
@@ -350,6 +354,7 @@ let default =
     load_decls_from_saved_state = false;
     idle_gc_slice = 0;
     shallow_class_decl = false;
+    parallel_type_checking_threshold = 10;
     defer_class_declaration_threshold = None;
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
@@ -745,6 +750,12 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.shallow_class_decl
       config
   in
+  let parallel_type_checking_threshold =
+    int_
+      "parallel_type_checking_threshold"
+      ~default:default.parallel_type_checking_threshold
+      config
+  in
   let defer_class_declaration_threshold =
     int_opt "defer_class_declaration_threshold" config
   in
@@ -883,6 +894,7 @@ let load_ fn ~silent ~current_version overrides =
     load_decls_from_saved_state;
     idle_gc_slice;
     shallow_class_decl;
+    parallel_type_checking_threshold;
     defer_class_declaration_threshold;
     max_times_to_defer_type_checking;
     prefetch_deferred_files;

@@ -791,8 +791,11 @@ let should_process_sequentially
   let defer_threshold =
     TypecheckerOptions.defer_class_declaration_threshold opts
   in
+  let parallel_threshold =
+    TypecheckerOptions.parallel_type_checking_threshold opts
+  in
   match (defer_threshold, List.length fnl) with
-  | (None, file_count) when file_count < 10 -> true
+  | (None, file_count) when file_count < parallel_threshold -> true
   | _ -> false
 
 let go_with_interrupt

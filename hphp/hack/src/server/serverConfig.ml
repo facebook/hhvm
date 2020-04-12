@@ -291,6 +291,8 @@ let load ~silent config_filename options =
       ?po_disable_static_closures:(bool_opt "disable_static_closures" config)
       ?tco_disallow_array_typehint:(bool_opt "disallow_array_typehint" config)
       ?tco_disallow_array_literal:(bool_opt "disallow_array_literal" config)
+      ~tco_parallel_type_checking_threshold:
+        local_config.parallel_type_checking_threshold
       ?tco_defer_class_declaration_threshold:
         local_config.defer_class_declaration_threshold
       ?tco_max_times_to_defer_type_checking:

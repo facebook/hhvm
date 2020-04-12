@@ -18,8 +18,12 @@ type t = {
   tco_experimental_features: SSet.t;
   (* Set of opt-in migration behavior flags, in lowercase. *)
   tco_migration_flags: SSet.t;
-  (* Whether to treat Tany as  Tdynamic *)
+  (* Whether to treat Tany as Tdynamic *)
   tco_dynamic_view: bool;
+  (* If the number of files to type check is fewer than this value, the files
+    will be type checked sequentially (in the master process). Otherwise,
+    the files will be type checked in parallel (in MultiWorker workers). *)
+  tco_parallel_type_checking_threshold: int;
   (* If set, defers class declarations after N lazy declarations; if not set,
     always lazily declares classes not already in cache. *)
   tco_defer_class_declaration_threshold: int option;
@@ -253,6 +257,7 @@ val make :
   ?tco_experimental_features:SSet.t ->
   ?tco_migration_flags:SSet.t ->
   ?tco_dynamic_view:bool ->
+  ?tco_parallel_type_checking_threshold:int ->
   ?tco_defer_class_declaration_threshold:int ->
   ?tco_max_times_to_defer_type_checking:int ->
   ?tco_prefetch_deferred_files:bool ->
@@ -337,6 +342,8 @@ val tco_experimental_feature_enabled : t -> SSet.elt -> bool
 val tco_migration_flag_enabled : t -> SSet.elt -> bool
 
 val tco_dynamic_view : t -> bool
+
+val tco_parallel_type_checking_threshold : t -> int
 
 val tco_defer_class_declaration_threshold : t -> int option
 

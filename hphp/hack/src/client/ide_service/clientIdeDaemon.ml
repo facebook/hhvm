@@ -251,7 +251,9 @@ let initialize
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
-  let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
+  let server_args =
+    ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
+  in
   let server_args = ServerArgs.set_config server_args config in
   let (server_config, server_local_config) =
     ServerConfig.load ~silent:true ServerConfig.filename server_args

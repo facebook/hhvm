@@ -195,9 +195,30 @@ let ( (initialize_params_promise : Lsp.Initialize.params Lwt.t),
 
 let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
-(* verbosity is controlled by --verbose flag, and also $/setTraceNotification,
-and is also passed to ClientIdeService upon initialization and change. *)
-let verbose : bool ref = ref false
+(** This flag is used to control how much will be written
+to log-files. It can be turned on initially by --verbose at the command-line or
+setting "trace:Verbose" in initializationParams. Thereafter, it can
+be changed by the user dynamically via $/setTraceNotification.
+Don't alter this reference directly; instead use [set_verbose_to_file]
+so as to pass the message on to ide_service as well.
+Note: control for how much will be written to stderr is solely
+controlled by --verbose at the command-line, stored in env.verbose. *)
+let verbose_to_file : bool ref = ref false
+
+let set_verbose_to_file
+    ~(env : env)
+    ~(ide_service : ClientIdeService.t option)
+    ~(tracking_id : string)
+    (value : bool) : unit =
+  verbose_to_file := value;
+  if !verbose_to_file then
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
+  else
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  match (ide_service, env.use_serverless_ide) with
+  | (Some ide_service, true) ->
+    ClientIdeService.notify_verbose ide_service ~tracking_id !verbose_to_file
+  | _ -> ()
 
 let can_autostart_after_mismatch : bool ref = ref true
 
@@ -3344,9 +3365,17 @@ let on_status_restart_action
     sure to assign the new IDE service to the [ref] before attempting
     to do an asynchronous operation with the old one. *)
     let old_ide_service = !ide_service in
-    let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
+    let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
     let new_ide_service = ClientIdeService.make ide_args in
     ide_service := new_ide_service;
+    set_verbose_to_file
+      ~env
+      ~ide_service:(Some !ide_service)
+      ~tracking_id:"[restart]"
+      !verbose_to_file;
+    (* Note: the env.verbose passed on init controls verbosity for stderr
+    and is only ever controlled by --verbose command line, stored in env.
+    But verbosity-to-file can be altered dynamically by the user. *)
     Lwt.async (fun () ->
         run_ide_service env new_ide_service (get_editor_open_files state));
     let%lwt () =
@@ -3410,16 +3439,16 @@ let handle_client_message
         exit_fail ()
     (* setTrace notification *)
     | (_, NotificationMessage (SetTraceNotification params)) ->
-      (verbose :=
-         match params with
-         | SetTraceNotification.Verbose -> true
-         | SetTraceNotification.Off -> false);
-      if !verbose then
-        Hh_logger.Level.set_min_level Hh_logger.Level.Debug
-      else
-        Hh_logger.Level.set_min_level Hh_logger.Level.Info;
-      if env.use_serverless_ide then
-        ClientIdeService.notify_verbose ide_service ~tracking_id !verbose;
+      let value =
+        match params with
+        | SetTraceNotification.Verbose -> true
+        | SetTraceNotification.Off -> false
+      in
+      set_verbose_to_file
+        ~env
+        ~ide_service:(Some ide_service)
+        ~tracking_id
+        value;
       Lwt.return_none
     (* test entrypoint: shutdowwn client_ide_service *)
     | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB))
@@ -3464,6 +3493,19 @@ let handle_client_message
       let%lwt new_state = connect ~env !state in
       state := new_state;
       Relative_path.set_path_prefix Relative_path.Root root;
+      (* If editor sent 'trace: on' then that will turn on verbose_to_file. But we won't turn off
+      verbose here, since the command-line argument --verbose trumps initialization params. *)
+      begin
+        match initialize_params.Initialize.trace with
+        | Initialize.Off -> ()
+        | Initialize.Messages
+        | Initialize.Verbose ->
+          set_verbose_to_file
+            ~env
+            ~ide_service:(Some ide_service)
+            ~tracking_id
+            true
+      end;
       let result = do_initialize ~env root in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
@@ -4397,14 +4439,25 @@ let handle_tick
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
-  verbose := env.verbose;
-  Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-  if !verbose then Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
   HackEventLogger.set_from env.from;
 
+  if env.verbose then
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug
+  else
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
+  set_verbose_to_file
+    ~env
+    ~ide_service:None
+    ~tracking_id:"[startup]"
+    env.verbose;
+
+  (* The --verbose flag in env.verbose is the only thing that controls verbosity
+  to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
+  Why are they different? because we should write to stderr under a test harness,
+  but we should never write to stderr when invoked by VSCode - it's not even guaranteed
+  to drain the stderr pipe. *)
   let client = Jsonrpc.make_queue () in
-  let ide_args = { ClientIdeMessage.init_id; verbose = !verbose } in
+  let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
   let ide_service = ref (ClientIdeService.make ide_args) in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
   let state = ref Pre_init in

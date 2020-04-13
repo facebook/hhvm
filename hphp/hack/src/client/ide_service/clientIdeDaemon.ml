@@ -509,9 +509,9 @@ let handle_message :
     Lwt.return (state, Handle_message_result.Response ())
   | (_, Verbose verbose) ->
     if verbose then
-      Hh_logger.Level.set_min_level Hh_logger.Level.Debug
+      Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
     else
-      Hh_logger.Level.set_min_level Hh_logger.Level.Info;
+      Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
     Lwt.return (state, Handle_message_result.Notification)
   | ((Failed_to_initialize _ | Initializing), Disk_file_changed _) ->
     (* Should not happen. *)
@@ -955,10 +955,16 @@ let daemon_main
       (Random_id.short_string ())
   in
   HackEventLogger.serverless_ide_init ~init_id:daemon_init_id;
-  Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-  if args.ClientIdeMessage.verbose then
-    Hh_logger.Level.set_min_level Hh_logger.Level.Debug;
+  (* The initialize verbose parameter controls once and for all how much we
+  write to stderr, and is also the initial value for how much we write to
+  logfile. *)
+  if args.ClientIdeMessage.verbose then begin
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug;
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug
+  end else begin
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error
+  end;
   Lwt_main.run (serve ~in_fd ~out_fd)
 
 let daemon_entry_point : (ClientIdeMessage.daemon_args, unit, unit) Daemon.entry

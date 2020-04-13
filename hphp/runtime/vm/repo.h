@@ -277,6 +277,8 @@ private:
  */
 void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>&);
 
+bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>&);
+
 //////////////////////////////////////////////////////////////////////
 
 }

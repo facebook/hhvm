@@ -1294,11 +1294,9 @@ bool Repo::writable(int repoId) {
 
 //////////////////////////////////////////////////////////////////////
 
-void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
   auto& repo = Repo::get();
 
-  // Attempt batch commit.  This can legitimately fail due to multiple input
-  // files having identical contents.
   bool err = false;
   {
     auto txn = RepoTxn{repo.begin()};
@@ -1314,6 +1312,16 @@ void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
       txn.commit();
     }
   }
+
+  return err;
+}
+
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+  auto& repo = Repo::get();
+
+  // Attempt batch commit.  This can legitimately fail due to multiple input
+  // files having identical contents.
+  bool err = batchCommitWithoutRetry(ues);
 
   // Commit units individually if an error occurred during batch commit.
   if (err) {

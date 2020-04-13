@@ -217,7 +217,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       };
 
       auto commitSome = [&] (decltype(ues)& emitters) {
-        batchCommit(emitters);
+        auto const DEBUG_ONLY err = batchCommitWithoutRetry(emitters);
+        always_assert(!err);
         if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
           std::move(emitters.begin(), emitters.end(),
                     std::back_inserter(ues_to_print));

@@ -5,11 +5,11 @@
 
 use env::{emitter::Emitter, SMap, SSet, UniqueIdBuilder};
 use ocamlrep::rc::RcOc;
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{ast_defs::ClassKind, namespace_env::Env as NamespaceEnv};
 use rx_rust as rx;
 
-#[derive(Debug, OcamlRep, Clone)]
+#[derive(Debug, FromOcamlRep, ToOcamlRep, Clone)]
 pub struct ClosureEnclosingClassInfo {
     pub kind: ClassKind,
     pub name: String,
@@ -26,7 +26,7 @@ impl Default for ClosureEnclosingClassInfo {
     }
 }
 
-#[derive(Default, OcamlRep, Debug)]
+#[derive(Default, FromOcamlRep, ToOcamlRep, Debug)]
 pub struct GlobalState {
     pub explicit_use_set: SSet,
     pub closure_namespaces: SMap<RcOc<NamespaceEnv>>,

@@ -7,19 +7,19 @@
 //
 
 use crate::token_kind::TokenKind;
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use std::{borrow::Cow, cmp::Ordering};
 
 // many errors are static strings, but not all of them
 pub type Error = Cow<'static, str>;
 
-#[derive(Debug, Clone, OcamlRep, PartialEq, Eq)]
+#[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq, Eq)]
 pub enum ErrorType {
     ParseError,
     RuntimeError,
 }
 
-#[derive(Debug, Clone, OcamlRep, PartialEq, Eq)]
+#[derive(Debug, Clone, FromOcamlRep, ToOcamlRep, PartialEq, Eq)]
 pub struct SyntaxError {
     pub child: Option<Box<SyntaxError>>,
     pub start_offset: usize,

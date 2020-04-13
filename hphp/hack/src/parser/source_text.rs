@@ -6,7 +6,7 @@
 
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
-use ocamlrep::OcamlRep;
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 use oxidized::relative_path::RelativePath;
 use std::rc::Rc;
 
@@ -95,14 +95,16 @@ impl<'a> SourceText<'a> {
     }
 }
 
-impl<'content> OcamlRep for SourceText<'content> {
+impl<'content> ToOcamlRep for SourceText<'content> {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
         // A SourceText with no associated ocaml_source_text cannot be converted
         // to OCaml yet (we'd need to construct the OffsetMap). We still
         // construct some in test cases, so just panic upon attempts to convert.
         alloc.add(&self.0.ocaml_source_text.unwrap())
     }
+}
 
+impl<'content> FromOcamlRep for SourceText<'content> {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         let block = ocamlrep::from::expect_tuple(value, 4)?;
         let file_path: RcOc<RelativePath> = ocamlrep::from::field(block, 0)?;

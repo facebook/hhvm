@@ -9,9 +9,34 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use synstructure::{decl_derive, BindingInfo, VariantInfo};
 
-decl_derive!([OcamlRep] => derive_ocamlrep);
+decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
+decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
 
-fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+    let (to_body, _) = derive_to_and_from(&mut s);
+    s.gen_impl(quote! {
+        gen impl ::ocamlrep::ToOcamlRep for @Self {
+            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator>(&self, arena: &'a Alloc) -> ::ocamlrep::Value<'a> {
+                use ::ocamlrep::Allocator;
+                match self { #to_body }
+            }
+        }
+    })
+}
+
+fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
+    let (_, from_body) = derive_to_and_from(&mut s);
+    s.gen_impl(quote! {
+        gen impl ::ocamlrep::FromOcamlRep for @Self {
+            fn from_ocamlrep(value: ::ocamlrep::Value<'_>) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
+                use ::ocamlrep::{Allocator, FromOcamlRep};
+                #from_body
+            }
+        }
+    })
+}
+
+fn derive_to_and_from(s: &mut synstructure::Structure) -> (TokenStream, TokenStream) {
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
     // parameter T, but also for every type which appears as a field in X. This
@@ -19,24 +44,11 @@ fn derive_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     // parameters implement our trait.
     s.add_bounds(synstructure::AddBounds::Generics);
 
-    let (to_body, from_body) = match &s.ast().data {
+    match &s.ast().data {
         syn::Data::Struct(struct_data) => struct_impl(&s, struct_data),
         syn::Data::Enum(_) => enum_impl(&s),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
-    };
-
-    s.gen_impl(quote! {
-        use ::ocamlrep::{Allocator, OcamlRep};
-        gen impl ::ocamlrep::OcamlRep for @Self {
-            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator>(&self, arena: &'a Alloc) -> ::ocamlrep::Value<'a> {
-                match self { #to_body }
-            }
-
-            fn from_ocamlrep(value: ::ocamlrep::Value<'_>) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
-                #from_body
-            }
-        }
-    })
+    }
 }
 
 fn struct_impl(

@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<361b9813406147f2a668da046e6ba818>>
+// @generated SignedSource<<7e2ba9f4a71c075a2cd5680566cf1d5c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -21,12 +22,13 @@ use crate::*;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Reason {
     Rnone,
@@ -123,12 +125,13 @@ pub enum Reason {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ArgPosition {
     Aonly,
@@ -141,12 +144,13 @@ pub enum ArgPosition {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
@@ -161,12 +165,13 @@ pub enum ExprDepTypeReason {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Ureason {
     URnone,

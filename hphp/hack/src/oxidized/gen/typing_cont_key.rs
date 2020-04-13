@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<41906dd4aae61a74bae4b5e5e07d9615>>
+// @generated SignedSource<<73033c3112b555ba512cda09323fb303>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -20,12 +21,13 @@ use crate::*;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum TypingContKey {
     Next,

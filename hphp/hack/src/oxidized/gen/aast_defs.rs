@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6196c148e80ddfd5ba750aa931974802>>
+// @generated SignedSource<<7fa27546a9064d58cf08d1f273b031aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -28,12 +29,13 @@ pub use shape_map::ShapeMap;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Lid(pub Pos, pub LocalId);
 
@@ -47,12 +49,13 @@ pub type IsReified = bool;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum CallType {
     /// when the call looks like f()
@@ -69,12 +72,13 @@ pub type IsCoroutine = bool;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FuncReactive {
     FReactive,
@@ -89,12 +93,13 @@ pub enum FuncReactive {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamMutability {
     PMutable,
@@ -108,12 +113,13 @@ pub enum ParamMutability {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ImportFlavor {
     Include,
@@ -127,12 +133,13 @@ pub enum ImportFlavor {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum XhpChild {
     ChildName(Sid),
@@ -147,12 +154,13 @@ pub enum XhpChild {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum XhpChildOp {
     ChildStar,
@@ -165,12 +173,13 @@ pub enum XhpChildOp {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Hint(pub Pos, pub Box<Hint_>);
 
@@ -183,12 +192,13 @@ pub type VariadicHint = Option<Hint>;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct HintFun {
     pub reactive_kind: FuncReactive,
@@ -206,12 +216,13 @@ pub struct HintFun {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Hint_ {
     Hoption(Hint),
@@ -264,12 +275,13 @@ pub enum Hint_ {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Tprim {
     Tnull,
@@ -292,12 +304,13 @@ pub enum Tprim {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShapeFieldInfo {
     pub optional: bool,
@@ -310,12 +323,13 @@ pub struct ShapeFieldInfo {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct NastShapeInfo {
     pub allows_unknown_fields: bool,
@@ -328,12 +342,13 @@ pub struct NastShapeInfo {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum KvcKind {
     Map,
@@ -347,12 +362,13 @@ pub enum KvcKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum VcKind {
     Vector,
@@ -370,12 +386,13 @@ pub enum VcKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Visibility {
     Private,
@@ -389,12 +406,13 @@ pub enum Visibility {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum UseAsVisibility {
     UseAsPublic,
@@ -409,12 +427,13 @@ pub enum UseAsVisibility {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum TypedefVisibility {
     Transparent,
@@ -426,12 +445,13 @@ pub enum TypedefVisibility {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Enum_ {
     pub base: Hint,
@@ -443,11 +463,12 @@ pub struct Enum_ {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct WhereConstraint(pub Hint, pub ast_defs::ConstraintKind, pub Hint);

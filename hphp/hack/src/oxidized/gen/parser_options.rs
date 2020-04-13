@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f82dfee557bc1376c5b8e814a048b71d>>
+// @generated SignedSource<<ed88422ce128ebc4f5122cc2511e331a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -22,12 +23,13 @@ pub type ParserOptions = global_options::GlobalOptions;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct FfiT(
     pub bool,

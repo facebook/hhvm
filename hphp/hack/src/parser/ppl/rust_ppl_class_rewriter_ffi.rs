@@ -5,7 +5,7 @@
 
 use std::rc::Rc;
 
-use ocamlrep::OcamlRep;
+use ocamlrep::FromOcamlRep;
 use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
 use positioned_parser;
 use rust_editable_positioned_syntax::{EditablePositionedSyntax, EditablePositionedSyntaxTrait};

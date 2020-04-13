@@ -318,10 +318,12 @@ pub use value::{OpaqueValue, Value};
 
 /// A data structure that can be converted to an equivalent OCaml value and
 /// reconstructed from an OCaml value of the same (OCaml) type.
-pub trait OcamlRep: Sized {
+pub trait ToOcamlRep {
     /// Allocate an OCaml representation of `self` using the given Allocator.
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a>;
+}
 
+pub trait FromOcamlRep: Sized {
     /// Convert the given ocamlrep Value to a value of type `Self`, if possible.
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError>;
 
@@ -364,7 +366,7 @@ pub trait Allocator: Sized {
     }
 
     #[inline(always)]
-    fn add<T: OcamlRep>(&self, value: &T) -> Value<'_> {
+    fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }

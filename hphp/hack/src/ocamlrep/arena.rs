@@ -7,7 +7,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{block::Header, Allocator, BlockBuilder, OcamlRep, Value};
+use crate::{block::Header, Allocator, BlockBuilder, ToOcamlRep, Value};
 
 struct Chunk {
     data: Box<[Value<'static>]>,
@@ -105,7 +105,7 @@ impl Arena {
     }
 
     #[inline(always)]
-    pub fn add<T: OcamlRep>(&self, value: &T) -> Value<'_> {
+    pub fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }

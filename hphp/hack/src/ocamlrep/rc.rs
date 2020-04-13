@@ -17,7 +17,7 @@ use std::rc::Rc;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::{Allocator, FromError, OcamlRep, Value};
+use crate::{Allocator, FromError, FromOcamlRep, ToOcamlRep, Value};
 
 const UNIT: usize = crate::value::isize_to_ocaml_int(0);
 const INVALID_GENERATION: usize = usize::max_value();
@@ -241,7 +241,7 @@ impl<T> fmt::Pointer for RcOc<T> {
     }
 }
 
-impl<T: OcamlRep> OcamlRep for RcOc<T> {
+impl<T: ToOcamlRep> ToOcamlRep for RcOc<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let generation = alloc.generation();
         match self.get_cached_value_in_generation(generation) {
@@ -253,7 +253,9 @@ impl<T: OcamlRep> OcamlRep for RcOc<T> {
             }
         }
     }
+}
 
+impl<T: FromOcamlRep> FromOcamlRep for RcOc<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         // NB: We don't get any sharing this way.
         Ok(RcOc::new(T::from_ocamlrep(value)?))

@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<02b95bd90b0ff3682730439da2987d63>>
+// @generated SignedSource<<32f6cf86fdcf83faff074ea172d17cec>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -26,12 +27,13 @@ pub use crate::typing_tyvar_occurrences as occ;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TyvarConstraints {
     /// Does this type variable appear covariantly in the type of the expression?
@@ -60,12 +62,13 @@ pub struct TyvarConstraints {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum SolvingInfo {
     /// when the type variable is bound to a type
@@ -79,12 +82,13 @@ pub enum SolvingInfo {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TyvarInfo {
     /// Where was the type variable introduced? (e.g. generic method invocation,
@@ -103,12 +107,13 @@ pub type Tvenv = i_map::IMap<TyvarInfo>;
     Default,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypingInferenceEnv {
     pub tvenv: Tvenv,
@@ -123,12 +128,13 @@ pub struct TypingInferenceEnv {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct GlobalTyvarInfo {
     pub tyvar_reason: reason::Reason,
@@ -144,11 +150,12 @@ pub type TGlobal = GlobalTvenv;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TGlobalWithPos(pub pos::Pos, pub TGlobal);

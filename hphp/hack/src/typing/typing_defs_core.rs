@@ -5,7 +5,7 @@
 use std::cmp::Ordering;
 
 use bumpalo::collections::Vec;
-use ocamlrep::{Allocator, FromError, OcamlRep, Value};
+use ocamlrep::{Allocator, ToOcamlRep, Value};
 use oxidized::pos::Pos;
 pub use oxidized::typing_defs_core::{DestructureKind, Exact, ParamMode};
 use oxidized::{aast_defs, ast_defs, ident, nast, tany_sentinel, typing_defs as oxidized_defs};
@@ -448,13 +448,9 @@ impl<'a> InternalType_<'a> {
     }
 }
 
-impl OcamlRep for InternalType_<'_> {
+impl ToOcamlRep for InternalType_<'_> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         self.to_oxidized().to_ocamlrep(alloc)
-    }
-
-    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
-        unimplemented!()
     }
 }
 
@@ -505,13 +501,9 @@ impl<'a> Ty<'a> {
     }
 }
 
-impl OcamlRep for Ty<'_> {
+impl ToOcamlRep for Ty<'_> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         self.to_oxidized().to_ocamlrep(alloc)
-    }
-
-    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
-        unimplemented!()
     }
 }
 
@@ -521,26 +513,18 @@ impl OcamlRep for Ty<'_> {
 #[derive(Debug)]
 pub struct FuncBodyAnn;
 
-impl OcamlRep for FuncBodyAnn {
+impl ToOcamlRep for FuncBodyAnn {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         oxidized::tast::FuncBodyAnn::default().to_ocamlrep(alloc)
-    }
-
-    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
-        unimplemented!()
     }
 }
 
 #[derive(Debug)]
 pub struct SavedEnv;
 
-impl OcamlRep for SavedEnv {
+impl ToOcamlRep for SavedEnv {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         oxidized::tast::SavedEnv::default().to_ocamlrep(alloc)
-    }
-
-    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
-        unimplemented!()
     }
 }
 

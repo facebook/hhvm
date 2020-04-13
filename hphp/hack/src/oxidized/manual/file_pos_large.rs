@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[derive(
     Copy,
@@ -14,7 +14,8 @@ use ocamlrep_derive::OcamlRep;
     Deserialize,
     Eq,
     Hash,
-    OcamlRep,
+    FromOcamlRep,
+    ToOcamlRep,
     PartialEq,
     Serialize
 )]

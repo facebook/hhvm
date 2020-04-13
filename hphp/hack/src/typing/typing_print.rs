@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::Env;
-use ocamlrep::OcamlRep;
+use ocamlrep::FromOcamlRep;
 use typing_defs_rust::{InternalType, Ty};
 
 extern "C" {

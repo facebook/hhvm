@@ -4,14 +4,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use crate::{
     lexable_token::LexableToken, minimal_trivia::MinimalTrivia, source_text::SourceText,
     token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 
-#[derive(Debug, Clone, PartialEq, OcamlRep)]
+#[derive(Debug, Clone, PartialEq, FromOcamlRep, ToOcamlRep)]
 pub struct MinimalToken {
     pub kind: TokenKind,
     pub width: usize,

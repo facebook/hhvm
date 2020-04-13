@@ -13,7 +13,7 @@ use itertools::{
 use lowerer::{lower, ScourComment};
 use mode_parser::parse_mode;
 use namespaces_rust as namespaces;
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{
     aast::Program, file_info::Mode, pos::Pos, scoured_comments::ScouredComments, uast::AstAnnot,
 };
@@ -35,7 +35,7 @@ type State<'a> = CoroutineState<'a, PositionedSyntax>;
 type PositionedSyntaxTreeWithCoroutineState<'a> = SyntaxTree<'a, PositionedSyntax, State<'a>>;
 type PositionedSyntaxTree<'a> = SyntaxTree<'a, PositionedSyntax, ()>;
 
-#[derive(Debug, OcamlRep)]
+#[derive(Debug, FromOcamlRep, ToOcamlRep)]
 pub enum Error {
     ParserFatal(SyntaxError, Pos),
     Other(String),

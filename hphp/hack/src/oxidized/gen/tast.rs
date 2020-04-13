@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<28602011905a4ea63f86636f48fdd5d9>>
+// @generated SignedSource<<63864a9bdf8b42d93f4eed7310d4e4af>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -32,12 +33,13 @@ pub type TypeParamMutability = typing_defs::ParamMutability;
     Default,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct SavedEnv {
     pub tcopt: typechecker_options::TypecheckerOptions,
@@ -56,12 +58,13 @@ pub struct SavedEnv {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FuncBodyAnn {
     HasUnsafeBlocks,

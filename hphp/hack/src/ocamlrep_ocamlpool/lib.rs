@@ -7,9 +7,9 @@ use std::ffi::CString;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
-use ocamlrep::{Allocator, BlockBuilder, Value};
+use ocamlrep::{Allocator, BlockBuilder, ToOcamlRep, Value};
 
-pub use ocamlrep::OcamlRep;
+pub use ocamlrep::FromOcamlRep;
 
 extern "C" {
     fn ocamlpool_enter();
@@ -36,7 +36,7 @@ impl Pool {
     }
 
     #[inline(always)]
-    pub fn add<T: OcamlRep>(&mut self, value: &T) -> Value<'_> {
+    pub fn add<T: ToOcamlRep + ?Sized>(&mut self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
 }
@@ -79,7 +79,7 @@ impl Allocator for Pool {
 /// it. If any other thread interacts with the OCaml runtime or ocamlpool
 /// library during the execution of `to_ocaml`, undefined behavior will result.
 #[inline(always)]
-pub unsafe fn to_ocaml<T: OcamlRep>(value: &T) -> usize {
+pub unsafe fn to_ocaml<T: ToOcamlRep>(value: &T) -> usize {
     let pool = Pool::new();
     let result = pool.add(value);
     result.to_bits()
@@ -118,7 +118,7 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
 /// library during the execution of this function, undefined behavior will
 /// result.
 #[inline(always)]
-pub unsafe fn add_to_ambient_pool<T: OcamlRep>(value: &T) -> usize {
+pub unsafe fn add_to_ambient_pool<T: ToOcamlRep>(value: &T) -> usize {
     let mut fake_pool = Pool(());
     let result = value.to_ocamlrep(&mut fake_pool).to_bits();
     std::mem::forget(fake_pool);
@@ -131,7 +131,7 @@ macro_rules! ocaml_ffi_no_panic_fn {
         #[no_mangle]
         pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
             fn inner($($param: $ty,)*) -> $ret { $code }
-            use $crate::OcamlRep;
+            use $crate::FromOcamlRep;
             $(let $param = <$ty>::from_ocaml($param).unwrap();)*
             let result = inner($($param,)*);
             $crate::to_ocaml(&result)
@@ -175,7 +175,7 @@ macro_rules! ocaml_ffi_fn {
         pub unsafe extern "C" fn $name ($($param: usize,)*) -> usize {
             $crate::catch_unwind(|| {
                 fn inner($($param: $ty,)*) -> $ret { $code }
-                use $crate::OcamlRep;
+                use $crate::FromOcamlRep;
                 $(let $param = <$ty>::from_ocaml($param).unwrap();)*
                 let result = inner($($param,)*);
                 $crate::to_ocaml(&result)

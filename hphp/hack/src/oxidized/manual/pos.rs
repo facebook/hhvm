@@ -6,15 +6,15 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
 use ocamlrep::rc::RcOc;
-use ocamlrep::{Allocator, FromError, Value};
-use ocamlrep_derive::OcamlRep;
+use ocamlrep::{Allocator, Value};
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::relative_path::{Prefix, RelativePath};
 
-#[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Hash, FromOcamlRep, ToOcamlRep, Serialize)]
 enum PosImpl {
     Small {
         file: RcOc<RelativePath>,
@@ -30,18 +30,14 @@ enum PosImpl {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, Deserialize, Hash, OcamlRep, Serialize)]
+#[derive(Clone, Debug, Deserialize, Hash, FromOcamlRep, ToOcamlRep, Serialize)]
 pub struct Pos(PosImpl);
 
 pub type PosR<'a> = &'a Pos;
 
-impl ocamlrep::OcamlRep for PosR<'_> {
+impl ocamlrep::ToOcamlRep for PosR<'_> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         (**self).to_ocamlrep(alloc)
-    }
-
-    fn from_ocamlrep(_value: Value<'_>) -> Result<Self, FromError> {
-        unimplemented!()
     }
 }
 

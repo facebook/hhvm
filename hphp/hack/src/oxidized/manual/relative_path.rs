@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -17,7 +17,8 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     Eq,
     Hash,
-    OcamlRep,
+    FromOcamlRep,
+    ToOcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
@@ -87,7 +88,17 @@ impl Prefix {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd)]
+#[derive(
+    Clone,
+    Debug,
+    Eq,
+    Hash,
+    FromOcamlRep,
+    ToOcamlRep,
+    Ord,
+    PartialEq,
+    PartialOrd
+)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,

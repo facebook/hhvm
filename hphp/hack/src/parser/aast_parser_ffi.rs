@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserError};
-use ocamlrep::OcamlRep;
+use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
 use stack_limit::{StackLimit, KI, MI};

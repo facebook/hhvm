@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[derive(
     Clone,
@@ -16,7 +16,8 @@ use ocamlrep_derive::OcamlRep;
     Ord,
     PartialEq,
     PartialOrd,
-    OcamlRep,
+    FromOcamlRep,
+    ToOcamlRep,
     Serialize
 )]
 pub struct OpaqueDigest(());

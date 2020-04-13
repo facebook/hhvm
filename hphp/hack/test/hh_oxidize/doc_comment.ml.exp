@@ -1,4 +1,5 @@
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -47,7 +48,19 @@ pub type C = isize;
 pub type D = isize;
 
 /// Records can have comments on the fields.
-#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
+)]
 pub struct Record {
     /// The comments need to trail the field declaration in OCaml (unfortunately).
     pub foo: isize,
@@ -57,7 +70,18 @@ pub struct Record {
 
 /// Variant types can have comments on each variant.
 #[derive(
-    Clone, Copy, Debug, Deserialize, Eq, Hash, OcamlRep, Ord, PartialEq, PartialOrd, Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep,
 )]
 pub enum Variant {
     /// Again, the comments need to trail the variant declaration.

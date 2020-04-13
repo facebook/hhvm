@@ -26,7 +26,8 @@ let default_derives =
     (None, "Ord");
     (None, "PartialEq");
     (None, "PartialOrd");
-    (Some "ocamlrep_derive", "OcamlRep");
+    (Some "ocamlrep_derive", "FromOcamlRep");
+    (Some "ocamlrep_derive", "ToOcamlRep");
     (Some "serde", "Serialize");
     (Some "serde", "Deserialize");
   ]

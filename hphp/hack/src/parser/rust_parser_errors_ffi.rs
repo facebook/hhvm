@@ -8,7 +8,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
+use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
 use ocamlrep_ocamlpool::ocaml_ffi;
 use oxidized::parser_options::ParserOptions;
 use parser_core_types::{

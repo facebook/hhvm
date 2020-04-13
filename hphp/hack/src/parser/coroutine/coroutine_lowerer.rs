@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep::OcamlRep;
+use ocamlrep::FromOcamlRep;
 use parser_core_types::{positioned_syntax::PositionedSyntax, source_text::SourceText};
 use rust_to_ocaml::{SerializationContext, ToOcaml};
 

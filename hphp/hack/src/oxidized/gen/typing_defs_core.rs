@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<56ec957c96090db8e98671b6eb5ee0e9>>
+// @generated SignedSource<<3a4487939bfbeca8bbddd0a7ad430948>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -22,12 +23,13 @@ pub use crate::typing_reason as reason;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Visibility {
     Vpublic,
@@ -41,12 +43,13 @@ pub enum Visibility {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Exact {
     Exact,
@@ -59,12 +62,13 @@ pub enum Exact {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ValKind {
     Lval,
@@ -78,12 +82,13 @@ pub enum ValKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamMutability {
     ParamOwnedMutable,
@@ -97,12 +102,13 @@ pub enum ParamMutability {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FunTparamsKind {
     /// If ft_tparams is empty, the containing fun_type is a concrete function type.
@@ -123,12 +129,13 @@ pub enum FunTparamsKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ShapeKind {
     ClosedShape,
@@ -141,12 +148,13 @@ pub enum ShapeKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamMode {
     FPnormal,
@@ -159,12 +167,13 @@ pub enum ParamMode {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum XhpAttrTag {
     Required,
@@ -176,12 +185,13 @@ pub enum XhpAttrTag {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct XhpAttr {
     pub tag: Option<XhpAttrTag>,
@@ -201,12 +211,13 @@ pub struct XhpAttr {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ConsistentKind {
     Inconsistent,
@@ -219,12 +230,13 @@ pub enum ConsistentKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum DependentType {
     DTthis,
@@ -238,12 +250,13 @@ pub enum DependentType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum DestructureKind {
     ListDestructure,
@@ -255,12 +268,13 @@ pub enum DestructureKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Tparam {
     pub variance: ast_defs::Variance,
@@ -275,12 +289,13 @@ pub struct Tparam {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
 
@@ -289,12 +304,13 @@ pub struct WhereConstraint(pub Ty, pub ast_defs::ConstraintKind, pub Ty);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Ty(pub reason::Reason, pub Box<Ty_>);
 
@@ -312,12 +328,13 @@ pub struct Ty(pub reason::Reason, pub Box<Ty_>);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShapeFieldType {
     pub optional: bool,
@@ -329,12 +346,13 @@ pub struct ShapeFieldType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Ty_ {
     /// The late static bound type of a class
@@ -475,12 +493,13 @@ pub enum Ty_ {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ConstraintType_ {
     ThasMember(HasMember),
@@ -495,12 +514,13 @@ pub enum ConstraintType_ {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct HasMember {
     pub name: nast::Sid,
@@ -516,12 +536,13 @@ pub struct HasMember {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Destructure {
     /// This represents the standard parameters of a function or the fields in a list
@@ -550,12 +571,13 @@ pub struct Destructure {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
 
@@ -564,12 +586,13 @@ pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum InternalType {
     LoclType(Ty),
@@ -581,12 +604,13 @@ pub enum InternalType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ArrayKind {
     /// An array declared as a varray.
@@ -602,12 +626,13 @@ pub enum ArrayKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TaccessType(pub Ty, pub Vec<nast::Sid>);
 
@@ -631,12 +656,13 @@ pub struct TaccessType(pub Ty, pub Vec<nast::Sid>);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Reactivity {
     Nonreactive,
@@ -655,12 +681,13 @@ pub enum Reactivity {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct FunType {
     pub arity: FunArity,
@@ -681,12 +708,13 @@ pub struct FunType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum FunArity {
     /// min; max is List.length ft_params
@@ -704,12 +732,13 @@ pub enum FunArity {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum ParamRxAnnotation {
     ParamRxVar,
@@ -721,12 +750,13 @@ pub enum ParamRxAnnotation {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PossiblyEnforcedTy {
     /// True if consumer of this type enforces it at runtime
@@ -739,12 +769,13 @@ pub struct PossiblyEnforcedTy {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct FunParam {
     pub pos: pos::Pos,

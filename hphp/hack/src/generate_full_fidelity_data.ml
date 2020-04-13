@@ -2560,9 +2560,9 @@ module GenerateFFRustTriviaKind = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-#[derive(Debug, Copy, Clone, OcamlRep, PartialEq)]
+#[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
 pub enum TriviaKind {
 TRIVIA}
 
@@ -2660,11 +2660,11 @@ module GenerateFFRustSyntaxKind = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use crate::token_kind::TokenKind;
 
-#[derive(Debug, Copy, Clone, OcamlRep, PartialEq)]
+#[derive(Debug, Copy, Clone, FromOcamlRep, ToOcamlRep, PartialEq)]
 pub enum SyntaxKind {
     Missing,
     Token(TokenKind),
@@ -2890,10 +2890,10 @@ module GenerateFFRustTokenKind = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[allow(non_camel_case_types)] // allow Include_once and Require_once
-#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, OcamlRep)]
+#[derive(Debug, Copy, Clone, PartialEq, Ord, Eq, PartialOrd, FromOcamlRep, ToOcamlRep)]
 pub enum TokenKind {
     // No text tokens
 KIND_DECLARATIONS_NO_TEXT    // Given text tokens
@@ -2991,9 +2991,9 @@ module GenerateFFOperatorRust = struct
     make_header CStyle ""
     ^ "
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 pub enum Operator {
 OPERATORS}
 "

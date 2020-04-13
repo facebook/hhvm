@@ -6,10 +6,10 @@
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 
-use ocamlrep::OcamlRep;
-use ocamlrep_derive::OcamlRep;
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-fn val<T: OcamlRep>(value: T) -> usize {
+fn val<T: FromOcamlRep + ToOcamlRep>(value: T) -> usize {
     let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
     let value = arena.add(&value);
     // Round-trip back to T to exercise from_ocamlrep.
@@ -118,13 +118,13 @@ pub extern "C" fn get_float_list(_unit: usize) -> usize {
 
 // Struct tests
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct Foo {
     a: isize,
     b: bool,
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct Bar {
     c: Foo,
     d: Option<Vec<Option<isize>>>,
@@ -187,7 +187,7 @@ pub extern "C" fn get_one_two_float(_unit: usize) -> usize {
 
 // Variant tests
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 enum Fruit {
     Apple,
     Orange(isize),

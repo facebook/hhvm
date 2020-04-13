@@ -5,7 +5,7 @@
 
 use std::rc::Rc;
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -14,7 +14,8 @@ use serde::{Deserialize, Serialize};
     Deserialize,
     Eq,
     Hash,
-    OcamlRep,
+    FromOcamlRep,
+    ToOcamlRep,
     Ord,
     PartialEq,
     PartialOrd,

@@ -17,9 +17,9 @@
  *
  */
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 pub enum Operator {
     DollarOperator,
     ScopeResolutionOperator,

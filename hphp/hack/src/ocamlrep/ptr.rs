@@ -9,7 +9,7 @@
 use std::fmt;
 use std::num::NonZeroUsize;
 
-use crate::{Allocator, FromError, OcamlRep, Value};
+use crate::{Allocator, FromError, FromOcamlRep, ToOcamlRep, Value};
 
 /// Unsafe pointer to an OCaml value which is (possibly) managed by the garbage
 /// collector.
@@ -48,11 +48,13 @@ impl fmt::Debug for UnsafeOcamlPtr {
     }
 }
 
-impl OcamlRep for UnsafeOcamlPtr {
+impl ToOcamlRep for UnsafeOcamlPtr {
     fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         unsafe { Value::from_bits(self.0.get()) }
     }
+}
 
+impl FromOcamlRep for UnsafeOcamlPtr {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         if value.is_immediate() {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));
@@ -94,11 +96,13 @@ impl<T> fmt::Debug for NakedPtr<T> {
     }
 }
 
-impl<T> OcamlRep for NakedPtr<T> {
+impl<T> ToOcamlRep for NakedPtr<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, _alloc: &'a A) -> Value<'a> {
         unsafe { Value::from_bits(self.0 as usize) }
     }
+}
 
+impl<T> FromOcamlRep for NakedPtr<T> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         if value.is_immediate() {
             return Err(FromError::ExpectedBlock(value.as_int().unwrap()));

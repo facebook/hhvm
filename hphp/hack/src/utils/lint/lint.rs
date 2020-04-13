@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::pos::Pos;
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, FromOcamlRep, ToOcamlRep, PartialEq)]
 #[repr(usize)]
 pub enum LintCode {
     LowercaseConstant = 5001,
@@ -15,7 +15,7 @@ pub enum LintCode {
     ShapeIdxRequiredField = 5005,
 }
 
-#[derive(Clone, Copy, Debug, Eq, OcamlRep, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, FromOcamlRep, ToOcamlRep, PartialEq)]
 pub enum Severity {
     Error,
     Warning,
@@ -23,7 +23,7 @@ pub enum Severity {
 }
 
 // port from lint_core.t
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 pub struct LintError {
     code: usize,
     severity: Severity,

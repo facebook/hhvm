@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8c67c38c66d53a66aa918de9d31979ef>>
+// @generated SignedSource<<85e44fc3de1837bce7ef3eb4e3a29ba9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -24,12 +25,13 @@ pub use typing_defs_core::*;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassElt {
     pub visibility: Visibility,
@@ -46,12 +48,13 @@ pub struct ClassElt {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct FunElt {
     pub deprecated: Option<String>,
@@ -65,12 +68,13 @@ pub struct FunElt {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassConst {
     pub synthesized: bool,
@@ -100,12 +104,13 @@ pub struct ClassConst {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Requirement(pub pos::Pos, pub Ty);
 
@@ -114,12 +119,13 @@ pub struct Requirement(pub pos::Pos, pub Ty);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ClassType {
     pub need_init: bool,
@@ -168,12 +174,13 @@ pub struct ClassType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum TypeconstAbstractKind {
     TCAbstract(Option<Ty>),
@@ -186,12 +193,13 @@ pub enum TypeconstAbstractKind {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypeconstType {
     pub abstract_: TypeconstAbstractKind,
@@ -208,12 +216,13 @@ pub struct TypeconstType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PuEnumType {
     pub name: nast::Sid,
@@ -228,12 +237,13 @@ pub struct PuEnumType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct PuMemberType {
     pub atom: nast::Sid,
@@ -246,12 +256,13 @@ pub struct PuMemberType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct EnumType {
     pub base: Ty,
@@ -264,12 +275,13 @@ pub struct EnumType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum RecordFieldReq {
     ValueRequired,
@@ -281,12 +293,13 @@ pub enum RecordFieldReq {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct RecordDefType {
     pub name: nast::Sid,
@@ -302,12 +315,13 @@ pub struct RecordDefType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct TypedefType {
     pub pos: pos::Pos,
@@ -323,12 +337,13 @@ pub struct TypedefType {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum DeserializationError {
     /// The type was valid, but some component thereof was a decl_ty when we

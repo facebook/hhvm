@@ -3,10 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 #[cfg(test)]
-use ocamlrep::{Allocator, Arena, FromError::*, OcamlRep, Value};
+use ocamlrep::{Allocator, Arena, FromError::*, FromOcamlRep, Value};
 
 #[test]
 fn expected_block_but_got_int() {
@@ -61,7 +61,7 @@ fn out_of_char_range() {
     assert_eq!(err, ExpectedChar(-1));
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct Foo {
     a: isize,
     b: bool,
@@ -80,7 +80,7 @@ fn bad_struct_field() {
     assert_eq!(err, ErrorInField(1, Box::new(ExpectedBool(42))));
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct Bar {
     c: Foo,
     d: Option<Vec<Option<isize>>>,
@@ -111,7 +111,7 @@ fn bad_nested_struct_field() {
     );
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct UnitStruct;
 
 #[test]
@@ -132,7 +132,7 @@ fn expected_unit_struct_but_got_block() {
     }
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 struct WrapperStruct(bool);
 
 #[test]
@@ -142,7 +142,7 @@ fn bad_value_in_wrapper_struct() {
     assert_eq!(err, ExpectedBool(42))
 }
 
-#[derive(OcamlRep)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 enum Fruit {
     Apple,
     Orange(bool),

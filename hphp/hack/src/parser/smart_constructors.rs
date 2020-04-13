@@ -7,7 +7,7 @@
 pub mod smart_constructors_generated;
 pub mod smart_constructors_wrappers;
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use parser_core_types::syntax_kind::SyntaxKind;
 use parser_core_types::token_kind::TokenKind;
@@ -15,7 +15,7 @@ use parser_core_types::token_kind::TokenKind;
 pub use crate::smart_constructors_generated::*;
 pub use crate::smart_constructors_wrappers::*;
 
-#[derive(Clone, OcamlRep)]
+#[derive(Clone, FromOcamlRep, ToOcamlRep)]
 pub struct NoState; // zero-overhead placeholder when there is no state
 
 pub trait NodeType {

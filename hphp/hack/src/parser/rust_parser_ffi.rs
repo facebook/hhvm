@@ -5,7 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use mode_parser::parse_mode;
-use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, OcamlRep};
+use ocamlrep::{ptr::UnsafeOcamlPtr, Allocator, FromOcamlRep};
 use ocamlrep_ocamlpool::{ocaml_ffi, Pool};
 use operator::{Assoc, Operator};
 use oxidized::file_info::Mode;
@@ -167,7 +167,7 @@ macro_rules! parse {
         #[no_mangle]
         pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
             ocamlrep_ocamlpool::catch_unwind(|| {
-                use ocamlrep::{ptr::UnsafeOcamlPtr, OcamlRep};
+                use ocamlrep::{ptr::UnsafeOcamlPtr, FromOcamlRep};
                 use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
                 use smart_constructors::NodeType;
                 use parser_core_types::source_text::SourceText;

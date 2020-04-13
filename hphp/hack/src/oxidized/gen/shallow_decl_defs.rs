@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<2639fbf38b00e1a46af22e4d3cd3664c>>
+// @generated SignedSource<<0d9a9166ecd8a534377448d569f4f4ed>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -22,12 +23,13 @@ pub use typing_defs::*;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowClassConst {
     pub abstract_: bool,
@@ -41,12 +43,13 @@ pub struct ShallowClassConst {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowTypeconst {
     pub abstract_: TypeconstAbstractKind,
@@ -62,12 +65,13 @@ pub struct ShallowTypeconst {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowPuMember {
     pub atom: aast::Sid,
@@ -80,12 +84,13 @@ pub struct ShallowPuMember {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowPuEnum {
     pub name: aast::Sid,
@@ -100,12 +105,13 @@ pub struct ShallowPuEnum {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowProp {
     pub const_: bool,
@@ -125,12 +131,13 @@ pub struct ShallowProp {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowMethod {
     pub abstract_: bool,
@@ -151,12 +158,13 @@ pub struct ShallowMethod {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowMethodRedeclaration {
     pub abstract_: bool,
@@ -175,12 +183,13 @@ pub struct ShallowMethodRedeclaration {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct ShallowClass {
     pub mode: file_info::Mode,

@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d97ff619d548baa814154c9a73e2556c>>
+// @generated SignedSource<<dc9b3bdcefefe17f51495c4ad2ebb5ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -28,12 +29,13 @@ pub type LocalIdSetT = local_id::set::Set;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct LocalEnv {
     pub per_cont_env: typing_per_cont_env::TypingPerContEnv,
@@ -42,7 +44,16 @@ pub struct LocalEnv {
     pub local_using_vars: LocalIdSetT,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    FromOcamlRep,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Env {
     pub function_pos: pos::Pos,
     pub fresh_typarams: s_set::SSet,
@@ -62,7 +73,16 @@ pub struct Env {
     pub pessimize: bool,
 }
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    FromOcamlRep,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Genv {
     pub tcopt: typechecker_options::TypecheckerOptions,
     pub return_: typing_env_return_info::TypingEnvReturnInfo,

@@ -5,7 +5,7 @@
 
 use std::fmt;
 
-use ocamlrep::OcamlRep;
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
 // Three values packed into one 64-bit integer:
@@ -188,11 +188,13 @@ impl fmt::Debug for FilePosSmall {
     }
 }
 
-impl OcamlRep for FilePosSmall {
+impl ToOcamlRep for FilePosSmall {
     fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
         ocamlrep::Value::int(self.0 as isize)
     }
+}
 
+impl FromOcamlRep for FilePosSmall {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
         Ok(Self(ocamlrep::from::expect_int(value)? as usize))
     }

@@ -4,14 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use naming_special_names_rust::{self as sn, user_attributes::*};
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use oxidized::{aast as a, ast_defs};
 use std::{convert::TryFrom, str::FromStr};
 
 pub type Conditional = bool;
 
 /// The possible Rx levels of a function or method
-#[derive(Debug, Clone, Copy, PartialEq, OcamlRep)]
+#[derive(Debug, Clone, Copy, PartialEq, FromOcamlRep, ToOcamlRep)]
 pub enum Level {
     NonRx,
     RxLocal(Conditional),

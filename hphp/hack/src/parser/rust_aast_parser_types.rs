@@ -3,13 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 
 use lint_rust::LintError;
 use oxidized::{aast, errors::Error as HHError, file_info, parser_options, pos, scoured_comments};
 use parser_core_types::syntax_error::SyntaxError;
 
-#[derive(Clone, Debug, OcamlRep, Default)]
+#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep, Default)]
 pub struct Env {
     pub codegen: bool,
     pub php5_compat_mode: bool,
@@ -23,7 +23,7 @@ pub struct Env {
     pub parser_options: parser_options::ParserOptions,
 }
 
-#[derive(Clone, Debug, OcamlRep)]
+#[derive(Clone, Debug, FromOcamlRep, ToOcamlRep)]
 pub struct Result {
     pub file_mode: file_info::Mode,
     pub scoured_comments: scoured_comments::ScouredComments,

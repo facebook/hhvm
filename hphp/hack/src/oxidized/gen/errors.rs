@@ -3,12 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4b2e9e94fbb0598c1f463498139e6ac3>>
+// @generated SignedSource<<c5313ecc148d9ab525fc6e2ceba16645>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -32,12 +33,13 @@ pub type Message<A> = (A, String);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Phase {
     Init,
@@ -53,12 +55,13 @@ pub enum Phase {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Severity {
     Warning,
@@ -71,12 +74,13 @@ pub enum Severity {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum Format {
     Context,
@@ -89,12 +93,13 @@ pub enum Format {
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub enum NameContext {
     FunctionNamespace,
@@ -112,7 +117,17 @@ pub type FileT<A> = phase_map::PhaseMap<Vec<A>>;
 /// Results of multi-file analysis.
 pub type FilesT<A> = relative_path::map::Map<FileT<A>>;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, OcamlRep, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    PartialEq,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct Error_<A>(pub ErrorCode, pub Vec<Message<A>>);
 
 pub type Error = Error_<pos::Pos>;
@@ -122,12 +137,13 @@ pub type Error = Error_<pos::Pos>;
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct AppliedFixme(pub pos::Pos, pub isize);
 
@@ -136,11 +152,12 @@ pub struct AppliedFixme(pub pos::Pos, pub isize);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
     Hash,
-    OcamlRep,
     Ord,
     PartialEq,
     PartialOrd,
-    Serialize
+    Serialize,
+    ToOcamlRep
 )]
 pub struct Errors(pub FilesT<Error>, pub FilesT<AppliedFixme>);

@@ -3,19 +3,29 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c8591838f68fafd89621061c6bdbdab>>
+// @generated SignedSource<<b6c5891083141c658d75dbe3a6e584aa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
 
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::FromOcamlRep;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(Clone, Debug, Deserialize, OcamlRep, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    FromOcamlRep,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
 pub struct GlobalOptions {
     pub tco_experimental_features: s_set::SSet,
     pub tco_migration_flags: s_set::SSet,

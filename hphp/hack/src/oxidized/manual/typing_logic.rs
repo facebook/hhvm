@@ -1,5 +1,5 @@
 use crate::typing_defs::*;
-use ocamlrep_derive::OcamlRep;
+use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -17,7 +17,8 @@ use serde::Serialize;
     PartialEq,
     PartialOrd,
     Serialize,
-    OcamlRep
+    FromOcamlRep,
+    ToOcamlRep
 )]
 pub enum SubtypeProp {
     Coerce(Ty, Ty),

@@ -23,6 +23,13 @@ external get_int_ref : unit -> int ref = "get_int_ref"
 
 external get_int_option_ref : unit -> int option ref = "get_int_option_ref"
 
+(* unsized type tests *)
+external get_str : unit -> string = "get_str"
+
+external get_byte_slice : unit -> Caml.Bytes.t = "get_byte_slice"
+
+external get_int_opt_slice : unit -> int option list = "get_int_opt_slice"
+
 (* list tests *)
 external get_empty_list : unit -> int list = "get_empty_list"
 
@@ -161,6 +168,22 @@ let test_int_option_ref () =
   let int_opt_ref = get_int_option_ref () in
   match !int_opt_ref with
   | Some 5 -> ()
+  | _ -> assert false
+
+let test_str () =
+  let s = get_str () in
+  assert (s = "static str")
+
+let test_byte_slice () =
+  let b = get_byte_slice () in
+  assert (Caml.Bytes.sub_string b 0 4 = "byte");
+  assert (Caml.Bytes.get b 4 = '\x00');
+  assert (Caml.Bytes.get b 5 = '\xFF');
+  assert (Caml.Bytes.sub_string b 6 5 = "slice")
+
+let test_int_opt_slice () =
+  match get_int_opt_slice () with
+  | [None; Some 2; Some 3] -> ()
   | _ -> assert false
 
 let test_empty_list () =
@@ -663,6 +686,9 @@ let test_cases =
     test_some_some_five;
     test_int_ref;
     test_int_option_ref;
+    test_str;
+    test_byte_slice;
+    test_int_opt_slice;
     test_empty_list;
     test_five_list;
     test_one_two_three_list;

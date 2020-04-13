@@ -261,7 +261,7 @@ impl<T: FromOcamlRep, E: FromOcamlRep> FromOcamlRep for Result<T, E> {
     }
 }
 
-impl<T: ToOcamlRep> ToOcamlRep for Vec<T> {
+impl<T: ToOcamlRep> ToOcamlRep for [T] {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         let mut hd = alloc.add(&());
         for val in self.iter().rev() {
@@ -271,6 +271,12 @@ impl<T: ToOcamlRep> ToOcamlRep for Vec<T> {
             hd = block.build();
         }
         hd
+    }
+}
+
+impl<T: ToOcamlRep> ToOcamlRep for Vec<T> {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.add(self.as_slice())
     }
 }
 
@@ -410,7 +416,7 @@ impl ToOcamlRep for OsString {
     #[cfg(unix)]
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         use std::os::unix::ffi::OsStrExt;
-        bytes_to_ocamlrep(self.as_bytes(), alloc)
+        alloc.add(self.as_bytes())
     }
 }
 
@@ -428,7 +434,7 @@ impl ToOcamlRep for PathBuf {
     #[cfg(unix)]
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         use std::os::unix::ffi::OsStrExt;
-        bytes_to_ocamlrep(self.as_os_str().as_bytes(), alloc)
+        alloc.add(self.as_os_str().as_bytes())
     }
 }
 
@@ -440,7 +446,7 @@ impl FromOcamlRep for PathBuf {
 
 impl ToOcamlRep for String {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        str_to_ocamlrep(self.as_str(), alloc)
+        alloc.add(self.as_str())
     }
 }
 
@@ -452,7 +458,8 @@ impl FromOcamlRep for String {
 
 impl ToOcamlRep for Cow<'_, str> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        str_to_ocamlrep(self.borrow(), alloc)
+        let s: &str = self.borrow();
+        alloc.add(s)
     }
 }
 
@@ -462,10 +469,16 @@ impl FromOcamlRep for Cow<'_, str> {
     }
 }
 
+impl ToOcamlRep for str {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        str_to_ocamlrep(self, alloc)
+    }
+}
+
 /// Allocate an OCaml string using the given allocator and copy the given string
 /// slice into it.
 pub fn str_to_ocamlrep<'a, A: Allocator>(s: &str, alloc: &'a A) -> Value<'a> {
-    bytes_to_ocamlrep(s.as_bytes(), alloc)
+    alloc.add(s.as_bytes())
 }
 
 /// Given an OCaml string, return a string slice pointing to its contents, if
@@ -476,13 +489,19 @@ pub fn str_from_ocamlrep<'a>(value: Value<'a>) -> Result<&'a str, FromError> {
 
 impl ToOcamlRep for Vec<u8> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        bytes_to_ocamlrep(self, alloc)
+        alloc.add(self.as_slice())
     }
 }
 
 impl FromOcamlRep for Vec<u8> {
     fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
         Ok(Vec::from(bytes_from_ocamlrep(value)?))
+    }
+}
+
+impl ToOcamlRep for [u8] {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        bytes_to_ocamlrep(self, alloc)
     }
 }
 

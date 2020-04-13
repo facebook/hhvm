@@ -94,6 +94,28 @@ pub extern "C" fn get_int_option_ref(_unit: usize) -> usize {
     val(RefCell::new(Some(5)))
 }
 
+// Unsized type tests
+
+#[no_mangle]
+pub extern "C" fn get_str(_unit: usize) -> usize {
+    let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
+    arena.add("static str").to_bits()
+}
+
+#[no_mangle]
+pub extern "C" fn get_byte_slice(_unit: usize) -> usize {
+    let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
+    arena.add(&b"byte\x00\xFFslice"[..]).to_bits()
+}
+
+#[no_mangle]
+pub extern "C" fn get_int_opt_slice(_unit: usize) -> usize {
+    let arena = Box::leak(Box::new(ocamlrep::Arena::new()));
+    let vec = vec![None, Some(2), Some(3)];
+    let slice = &vec[..];
+    arena.add(slice).to_bits()
+}
+
 // List Tests
 
 #[no_mangle]

@@ -3068,6 +3068,7 @@ fn emit_obj_get(
         expr,
         mode,
         true,
+        BareThisOp::Notice,
         null_coalesce_assignment,
         prop_stack_size,
         0,
@@ -3257,6 +3258,10 @@ fn emit_array_get_(
                 base_expr,
                 mode,
                 false,
+                match query_op {
+                    QueryOp::Isset => BareThisOp::NoNotice,
+                    _ => BareThisOp::Notice,
+                },
                 null_coalesce_assignment,
                 elem_stack_size,
                 0,
@@ -3295,12 +3300,13 @@ fn emit_array_get_(
                 (ArrayGetBase::Regular(base), Some(local_kind)) => {
                     // base does not need temp locals but index expression does
                     let local = e.local_gen_mut().get_unnamed();
-                    // load base and indexer, value of indexer will be saved in local
                     let load = vec![
+                        // load base and indexer, value of indexer will be saved in local
                         (
                             InstrSeq::gather(vec![base.base_instrs.clone(), elem_instrs]),
                             Some((local.clone(), local_kind)),
                         ),
+                        // finish loading the value
                         (
                             InstrSeq::gather(vec![
                                 base.base_instrs,
@@ -3522,6 +3528,7 @@ fn emit_store_for_simple_base(
         base,
         MemberOpMode::Define,
         false,
+        BareThisOp::Notice,
         false,
         elem_stack_size,
         0,
@@ -4272,6 +4279,7 @@ pub fn emit_set_range_expr(
         base,
         MemberOpMode::Define,
         false, /* is_object */
+        BareThisOp::Notice,
         false, /*null_coalesce_assignment*/
         3,     /* base_offset */
         3,     /* rhs_stack_size */
@@ -4349,6 +4357,7 @@ fn emit_base(
     expr: &tast::Expr,
     mode: MemberOpMode,
     is_object: bool,
+    notice: BareThisOp,
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
@@ -4359,6 +4368,7 @@ fn emit_base(
         expr,
         mode,
         is_object,
+        notice,
         null_coalesce_assignment,
         base_offset,
         rhs_stack_size,
@@ -4422,6 +4432,7 @@ fn emit_base_(
     expr: &tast::Expr,
     mode: MemberOpMode,
     is_object: bool,
+    notice: BareThisOp,
     null_coalesce_assignment: bool,
     base_offset: StackIndex,
     rhs_stack_size: StackIndex,
@@ -4514,6 +4525,17 @@ fn emit_base_(
                 0,
             ))
         }
+        E_::Lvar(lid) => {
+            let local = emit_local(e, env, notice, lid)?;
+            Ok(emit_default(
+                e,
+                local,
+                instr::empty(),
+                instr::basec(base_offset, base_mode),
+                1,
+                0,
+            ))
+        }
         E_::ArrayGet(x) => match (&(x.0).1, x.1.as_ref()) {
             (E_::Lvar(v), Some(expr)) if local_id::get_name(&v.1) == superglobals::GLOBALS => {
                 Ok(match expr.1.as_lvar() {
@@ -4567,6 +4589,7 @@ fn emit_base_(
                     base_expr,
                     mode,
                     false,
+                    notice,
                     null_coalesce_assignment,
                     base_offset + elem_stack_size,
                     rhs_stack_size,
@@ -4720,6 +4743,7 @@ fn emit_base_(
                         base_expr,
                         mode,
                         true,
+                        BareThisOp::Notice,
                         null_coalesce_assignment,
                         base_offset + prop_stack_size,
                         rhs_stack_size,
@@ -5208,6 +5232,7 @@ pub fn emit_lval_op_nonlist_steps(
                         &x.0,
                         mode,
                         false,
+                        BareThisOp::Notice,
                         null_coalesce_assignment,
                         base_offset,
                         rhs_stack_size,
@@ -5264,6 +5289,7 @@ pub fn emit_lval_op_nonlist_steps(
                     e1,
                     mode,
                     true,
+                    BareThisOp::Notice,
                     null_coalesce_assignment,
                     base_offset,
                     rhs_stack_size,

@@ -57,8 +57,11 @@ pub fn to_files<'p, 't>(
         );
         let mut newpath = PathBuf::from(dir);
         newpath.push(file);
-        let content = DIRECTORY.replace(content, &b""[..]);
-        Ok(vec![(Right(newpath), content.into())])
+        let mut content: Vec<u8> = DIRECTORY.replace(content, &b""[..]).into();
+        if let Some(b'\n') = content.last() {
+            content.pop();
+        }
+        Ok(vec![(Right(newpath), content)])
     } else {
         Ok(vec![(Left(path), content.into())])
     }
@@ -148,7 +151,7 @@ a
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("a/b/c/test.php"));
 
-        assert_eq!(&r[0].1, b"a\n");
+        assert_eq!(&r[0].1, b"a");
     }
 
     #[test]
@@ -161,7 +164,7 @@ a
         assert_eq!(r.len(), 1);
         assert_eq!(r[0].0.as_ref(), &PathBuf::from("a/b/c/f.php"));
 
-        assert_eq!(&r[0].1, b"a\n");
+        assert_eq!(&r[0].1, b"a");
     }
 
     #[test]

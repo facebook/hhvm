@@ -141,6 +141,7 @@ pub fn emit_goto(
             // for cases when it is not necessary, i.e. when jump target is in the same
             // scope. HHVM does not do this today, do the same for compatibility reasons
             let jt_gen = &mut env.jump_targets_gen;
+            let label_id = jt_gen.get_id_for_label(Label::Named(label.clone()));
             match jt_gen.jump_targets().find_goto_target(&label) {
                 jt::ResolvedGotoTarget::Label(iters) => {
                     let preamble = if !in_finally_epilogue {
@@ -160,7 +161,6 @@ pub fn emit_goto(
                     let preamble = if in_finally_epilogue {
                         instr::empty()
                     } else {
-                        let label_id = jt_gen.get_id_for_label(Label::Named(label.clone()));
                         emit_save_label_id(local_gen, label_id)
                     };
                     Ok(InstrSeq::gather(vec![

@@ -23,6 +23,9 @@ type env = {
   verbose: bool;
 }
 
+(** This is env.from, but maybe modified in the light of the initialize request *)
+let from = ref "[init]"
+
 (** We cache the state of the typecoverageToggle button, so that when Hack restarts,
   dynamic view stays in sync with the button in Nuclide *)
 let cached_toggle_state = ref false
@@ -2610,7 +2613,7 @@ let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
     let env_connect =
       {
         ClientConnect.root;
-        from = env.from;
+        from = !from;
         autostart;
         force_dormant_start = false;
         watchman_debug_logging = false;
@@ -2749,7 +2752,7 @@ let start_server ~(env : env) (root : Path.t) : unit =
   let env_start =
     {
       ClientStart.root;
-      from = env.from;
+      from = !from;
       no_load = false;
       watchman_debug_logging = false;
       log_inference_constraints = false;
@@ -3351,7 +3354,7 @@ let on_status_restart_action
     (* Belt-and-braces kill the server. This is in case the server was *)
     (* stuck in some weird state. It's also what 'hh restart' does. *)
     if MonitorConnection.server_exists (Path.to_string root) then
-      ClientStop.kill_server root env.from;
+      ClientStop.kill_server root !from;
 
     (* After that it's safe to try to reconnect! *)
     start_server ~env root;
@@ -3469,7 +3472,7 @@ let handle_client_message
       let root_folder =
         Path.make (Relative_path.path_of_prefix Relative_path.Root)
       in
-      ClientStop.kill_server root_folder env.from;
+      ClientStop.kill_server root_folder !from;
       respond_jsonrpc ~powered_by:Serverless_ide id HackTestStopServerResultFB;
       Lwt.return_none
     (* test entrypoint: start hh_server *)
@@ -3494,8 +3497,10 @@ let handle_client_message
            initialize_params.client_capabilities.textDocument.declaration
              .declarationLinkSupport)
         && String.equal env.from "vscode"
-      then
-        HackEventLogger.set_from "vscode_pre314";
+      then begin
+        from := "vscode_pre314";
+        HackEventLogger.set_from !from
+      end;
 
       let%lwt version = read_hhconfig_version () in
       hhconfig_version := version;
@@ -4450,7 +4455,8 @@ let handle_tick
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
-  HackEventLogger.set_from env.from;
+  from := env.from;
+  HackEventLogger.set_from !from;
 
   if env.verbose then
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug

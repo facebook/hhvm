@@ -55,7 +55,6 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
     let params =
       match ft.ft_arity with
       | Fstandard _ -> params
-      | Fellipsis _ -> raise Non_denotable
       | Fvariadic (_, p) -> params @ [print_ty_exn p.fp_type.et_type ^ "..."]
     in
     Printf.sprintf

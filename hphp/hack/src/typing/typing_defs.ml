@@ -427,8 +427,7 @@ let make_tany () = Tany TanySentinel.value
 let arity_min ft_arity : int =
   match ft_arity with
   | Fstandard min
-  | Fvariadic (min, _)
-  | Fellipsis (min, _) ->
+  | Fvariadic (min, _) ->
     min
 
 let get_param_mode callconv =
@@ -784,11 +783,8 @@ let equal_locl_fun_arity ft1 ft2 =
     && Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
   | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
     Int.equal min1 min2 && Int.equal 0 (ft_params_compare [param1] [param2])
-  | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
-    Int.equal min1 min2 && Pos.equal pos1 pos2
-  | (Fstandard _, (Fvariadic _ | Fellipsis _))
-  | (Fvariadic _, (Fstandard _ | Fellipsis _))
-  | (Fellipsis _, (Fstandard _ | Fvariadic _)) ->
+  | (Fstandard _, Fvariadic _)
+  | (Fvariadic _, Fstandard _) ->
     false
 
 let is_type_no_return = equal_locl_ty_ (Tprim Aast.Tnoreturn)
@@ -881,11 +877,8 @@ and equal_decl_fun_arity ft1 ft2 =
     && Int.equal (List.length ft1.ft_params) (List.length ft2.ft_params)
   | (Fvariadic (min1, param1), Fvariadic (min2, param2)) ->
     Int.equal min1 min2 && equal_decl_ft_params [param1] [param2]
-  | (Fellipsis (min1, pos1), Fellipsis (min2, pos2)) ->
-    Int.equal min1 min2 && Pos.equal pos1 pos2
-  | (Fstandard _, (Fvariadic _ | Fellipsis _))
-  | (Fvariadic _, (Fstandard _ | Fellipsis _))
-  | (Fellipsis _, (Fstandard _ | Fvariadic _)) ->
+  | (Fstandard _, Fvariadic _)
+  | (Fvariadic _, Fstandard _) ->
     false
 
 and equal_decl_fun_type fty1 fty2 =

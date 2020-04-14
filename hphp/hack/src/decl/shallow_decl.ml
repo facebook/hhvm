@@ -231,7 +231,7 @@ let method_type env m =
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
       Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fellipsis (arity_min, p)
+    | FVellipsis p -> Fvariadic (arity_min, make_ellipsis_param_ty p)
     | FVnonVariadic -> Fstandard arity_min
   in
   let tparams = List.map m.m_tparams (type_param env) in
@@ -273,7 +273,7 @@ let method_redeclaration_type env m =
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
       Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fellipsis (arity_min, p)
+    | FVellipsis p -> Fvariadic (arity_min, make_ellipsis_param_ty p)
     | FVnonVariadic -> Fstandard arity_min
   in
   let tparams = List.map m.mt_tparams (type_param env) in

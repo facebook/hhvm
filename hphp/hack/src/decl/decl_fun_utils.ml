@@ -203,6 +203,19 @@ let make_param_ty env ~is_lambda param =
     fp_rx_annotation = rx_annotation;
   }
 
+(* Make FunParam for the partial-mode ellipsis parameter (unnamed, and untyped) *)
+let make_ellipsis_param_ty pos =
+  let r = Reason.Rwitness pos in
+  let ty = mk (r, Typing_defs.make_tany ()) in
+  {
+    fp_pos = pos;
+    fp_name = None;
+    fp_type = { et_type = ty; et_enforced = false };
+    fp_flags =
+      make_fp_flags ~mode:FPnormal ~mutability:None ~accept_disposable:false;
+    fp_rx_annotation = None;
+  }
+
 let ret_from_fun_kind ?(is_constructor = false) ~is_lambda env pos kind hint =
   let default = mk (Reason.Rwitness pos, Typing_defs.make_tany ()) in
   let ret_ty () =

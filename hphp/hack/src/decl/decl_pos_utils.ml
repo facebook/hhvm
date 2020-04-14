@@ -191,7 +191,6 @@ struct
 
   and fun_arity = function
     | Fstandard _ as x -> x
-    | Fellipsis (n, p) -> Fellipsis (n, pos p)
     | Fvariadic (n, param) -> Fvariadic (n, fun_param param)
 
   and fun_param param =

@@ -94,7 +94,6 @@ module Full = struct
     let variadic_param =
       match ft.ft_arity with
       | Fstandard _ -> None
-      | Fellipsis _ -> Some (text "...")
       | Fvariadic (_, p) ->
         Some
           (Concat

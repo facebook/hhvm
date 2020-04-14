@@ -415,9 +415,6 @@ and 'ty fun_arity =
   (* PHP5.6-style ...$args finishes the func declaration.
      min ; variadic param type *)
   | Fvariadic of int * 'ty fun_param
-  (* HH-style ... anonymous variadic arg; body presumably uses func_get_args.
-     min ; position of ... *)
-  | Fellipsis of int * Pos.t
 
 and decl_fun_arity = decl_ty fun_arity
 

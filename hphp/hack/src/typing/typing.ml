@@ -1893,7 +1893,6 @@ and expr_
           match fty.ft_arity with
           | Fstandard min -> Fstandard (min + 1)
           | Fvariadic (min, x) -> Fvariadic (min + 1, x)
-          | Fellipsis (min, p) -> Fellipsis (min + 1, p)
         in
         let caller =
           {
@@ -2768,10 +2767,11 @@ and expr_
     in
     List.iter idl (check_escaping_var env);
 
-    (* Ensure lambda arity is not Fellipsis in strict mode *)
+    (* Ensure lambda arity is not ellipsis in strict mode *)
     begin
       match declared_ft.ft_arity with
-      | Fellipsis _ when Partial.should_check_error (Env.get_mode env) 4223 ->
+      | Fvariadic (_, { fp_name = None; _ })
+        when Partial.should_check_error (Env.get_mode env) 4223 ->
         Errors.ellipsis_strict_mode ~require:`Param_name p
       | _ -> ()
     end;
@@ -5967,9 +5967,7 @@ and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
     in
     if arity > exp_max then
       Errors.typing_too_many_args exp_max arity pos pos_def None
-  | Fvariadic _
-  | Fellipsis _ ->
-    ()
+  | Fvariadic _ -> ()
 
 and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
   let expected_min = Typing_defs.arity_min expected_arity in
@@ -5992,12 +5990,6 @@ and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
 and variadic_param env ft =
   match ft.ft_arity with
   | Fvariadic (_, param) -> (env, Some param)
-  | Fellipsis (_, pos) ->
-    ( env,
-      Some
-        (TUtils.default_fun_param
-           ~pos
-           (mk (Reason.Rvar_param pos, Typing_defs.make_tany ()))) )
   | Fstandard _ -> (env, None)
 
 and param_modes ?(is_variadic = false) ({ fp_pos; _ } as fp) (pos, e) =
@@ -6401,8 +6393,7 @@ and split_remaining_params_required_optional ft remaining_params =
   let min_arity =
     match ft.ft_arity with
     | Fstandard min_arity
-    | Fvariadic (min_arity, _)
-    | Fellipsis (min_arity, _) ->
+    | Fvariadic (min_arity, _) ->
       min_arity
   in
   let original_params = ft.ft_params in

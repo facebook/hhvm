@@ -520,12 +520,6 @@ and pp_fun_arity : type a. Format.formatter -> a ty fun_arity -> unit =
     Format.fprintf fmt ",@ ";
     pp_fun_param fmt a1;
     Format.fprintf fmt "@,))@]"
-  | Fellipsis (a0, a1) ->
-    Format.fprintf fmt "(@[<2>Fellipsis (@,";
-    Format.fprintf fmt "%d" a0;
-    Format.fprintf fmt ",@ ";
-    Pos.pp fmt a1;
-    Format.fprintf fmt "@,))@]"
 
 and show_fun_arity : type a. a ty fun_arity -> string =
  (fun x -> Format.asprintf "%a" pp_fun_arity x)

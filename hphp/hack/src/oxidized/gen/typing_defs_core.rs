@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3a4487939bfbeca8bbddd0a7ad430948>>
+// @generated SignedSource<<82cb9f3b0cc049b68398550f9d26c52d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -722,9 +722,6 @@ pub enum FunArity {
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
     Fvariadic(isize, FunParam),
-    /// HH-style ... anonymous variadic arg; body presumably uses func_get_args.
-    /// min ; position of ...
-    Fellipsis(isize, pos::Pos),
 }
 
 #[derive(

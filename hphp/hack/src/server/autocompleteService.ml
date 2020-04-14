@@ -17,7 +17,6 @@ open Tast
 module Nast = Aast
 module Tast = Aast
 module Phase = Typing_phase
-module TUtils = Typing_utils
 module Cls = Decl_provider.Class
 
 let ac_env = ref None
@@ -280,12 +279,6 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
       ( List.map ft.ft_params param_to_record
       @
       match ft.ft_arity with
-      | Fellipsis _ ->
-        let empty =
-          TUtils.default_fun_param
-            (Typing_defs.mk (Reason.none, Tany TanySentinel.value))
-        in
-        [param_to_record ~is_variadic:true empty]
       | Fvariadic (_, p) -> [param_to_record ~is_variadic:true p]
       | Fstandard _ -> [] );
   }

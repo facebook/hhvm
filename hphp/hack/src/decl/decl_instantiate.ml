@@ -98,7 +98,7 @@ and instantiate_ subst x =
       | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
         let var_ty = instantiate_possibly_enforced_ty subst var_ty in
         Fvariadic (min, { param with fp_type = var_ty })
-      | (Fellipsis _ | Fstandard _) as x -> x
+      | Fstandard _ as x -> x
     in
     let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
     let tparams =

@@ -577,7 +577,7 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
           ( min,
             { param with fp_type = { et_type = var_ty; et_enforced = false } }
           ) )
-    | (Fellipsis _ | Fstandard _) as x -> (env, x)
+    | Fstandard _ as x -> (env, x)
   in
   let (env, params) =
     List.map_env env ft.ft_params (fun env param ->

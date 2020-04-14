@@ -2491,7 +2491,8 @@ and simplify_subtype_funs_attributes
          (fun () -> Errors.fun_too_many_args p_sub p_super subtype_env.on_error)
     |> fun res ->
     match (ft_sub.ft_arity, ft_super.ft_arity) with
-    | (Fellipsis _, Fvariadic _) ->
+    | ( Fvariadic (_, { fp_name = None; _ }),
+        Fvariadic (_, { fp_name = Some _; _ }) ) ->
       (* The HHVM runtime ignores "..." entirely, but knows about
        * "...$args"; for contexts for which the runtime enforces method
        * compatibility (currently, inheritance from abstract/interface

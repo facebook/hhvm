@@ -30,13 +30,9 @@ let from_raw_client (client : Decl_ipc_ffi_externs.decl_client) : t =
 (* HACK: The decl service just stores the decl (rather than a decl option),
    so it either responds with a pointer to the decl_ty (when present) or the
    integer 0 (otherwise). Turn that into None/Some here. *)
-let pointer_to_option (ptr : 'a) (caller : string) : 'a option =
-  let ptr_as_int : int = Obj.magic ptr in
-  if Int.equal 0 ptr_as_int then
+let pointer_to_option (ptr : 'a) : 'a option =
+  if Obj.is_int (Obj.repr ptr) then
     None
-  else if Int.equal 1 ptr_as_int then
-    failwith
-      (Printf.sprintf "Decl_service_client.%s: error retrieving decl" caller)
   else
     Some ptr
 
@@ -45,7 +41,7 @@ let rpc_get_fun (t : t) (name : string) : Typing_defs.fun_elt option =
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Fun name in
-    let fun_elt_opt = pointer_to_option ptr "rpc_get_fun" in
+    let fun_elt_opt = pointer_to_option ptr in
     String.Table.add_exn t.fun_cache name fun_elt_opt;
     fun_elt_opt
 
@@ -55,7 +51,7 @@ let rpc_get_class (t : t) (name : string) :
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Class name in
-    let class_decl_opt = pointer_to_option ptr "rpc_get_class" in
+    let class_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.class_cache name class_decl_opt;
     class_decl_opt
 
@@ -64,7 +60,7 @@ let rpc_get_typedef (t : t) (name : string) : Typing_defs.typedef_type option =
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Typedef name in
-    let typedef_decl_opt = pointer_to_option ptr "rpc_get_typedef" in
+    let typedef_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.typedef_cache name typedef_decl_opt;
     typedef_decl_opt
 
@@ -74,7 +70,7 @@ let rpc_get_record_def (t : t) (name : string) :
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.RecordDef name in
-    let record_decl_opt = pointer_to_option ptr "rpc_get_record_def" in
+    let record_decl_opt = pointer_to_option ptr in
     String.Table.add_exn t.record_cache name record_decl_opt;
     record_decl_opt
 
@@ -83,6 +79,6 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
   | Some opt -> opt
   | None ->
     let ptr = Decl_ipc_ffi_externs.get_decl t.client FileInfo.Const name in
-    let gconst_ty_opt = pointer_to_option ptr "rpc_get_gconst" in
+    let gconst_ty_opt = pointer_to_option ptr in
     String.Table.add_exn t.gconst_cache name gconst_ty_opt;
     gconst_ty_opt

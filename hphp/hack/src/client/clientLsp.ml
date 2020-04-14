@@ -147,7 +147,7 @@ type state =
   | In_init of In_init_env.t
       (** In_init: we did respond to the initialize request, and now we're
           waiting for a "Hello" from the server. When that comes we'll
-          request a permanent connection from the server, and process the     
+          request a permanent connection from the server, and process the
           file_changes backlog, and switch to Main_loop. *)
   | Main_loop of Main_env.t
       (** Main_loop: we have a working connection to both server and client. *)
@@ -3482,9 +3482,20 @@ let handle_client_message
       Lwt.return_none
     (* initialize request *)
     | (Pre_init, RequestMessage (id, InitializeRequest initialize_params)) ->
+      let open Initialize in
       Lwt.wakeup_later initialize_params_resolver initialize_params;
       let root = Path.make (Lsp_helpers.get_root initialize_params) in
       set_up_hh_logger_for_client_lsp root;
+      (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
+      unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client
+      v3.14. So by looking at the version, we can at least distinguish that it's old. *)
+      if
+        (not
+           initialize_params.client_capabilities.textDocument.declaration
+             .declarationLinkSupport)
+        && String.equal env.from "vscode"
+      then
+        HackEventLogger.set_from "vscode_pre314";
 
       let%lwt version = read_hhconfig_version () in
       hhconfig_version := version;

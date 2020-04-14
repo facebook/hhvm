@@ -44,13 +44,13 @@ use itertools::Either;
 static THIS: &'static str = "$this";
 
 /// Optional arguments for emit_body; use Args::default() for defaults
-pub struct Args<'a, 'b> {
-    pub immediate_tparams: &'b Vec<tast::Tparam>,
-    pub class_tparam_names: &'b [&'b str],
-    pub ast_params: &'b Vec<tast::FunParam>,
+pub struct Args<'a> {
+    pub immediate_tparams: &'a Vec<tast::Tparam>,
+    pub class_tparam_names: &'a [&'a str],
+    pub ast_params: &'a Vec<tast::FunParam>,
     pub ret: Option<&'a tast::Hint>,
-    pub pos: &'b Pos,
-    pub deprecation_info: &'b Option<&'b [TypedValue]>,
+    pub pos: &'a Pos,
+    pub deprecation_info: &'a Option<&'a [TypedValue]>,
     pub doc_comment: Option<DocComment>,
     pub default_dropthrough: Option<InstrSeq>,
     pub call_context: Option<String>,
@@ -104,7 +104,7 @@ pub fn emit_body<'a, 'b>(
     body: AstBody<'b>,
     return_value: InstrSeq,
     scope: Scope<'a>,
-    args: Args<'a, '_>,
+    args: Args<'_>,
 ) -> Result<(HhasBody<'a>, bool, bool)> {
     if args.flags.contains(Flags::ASYNC)
         && args.flags.contains(Flags::SKIP_AWAITABLE)

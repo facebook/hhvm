@@ -614,14 +614,19 @@ pub fn emit_class<'a>(
     let span = Span::from_pos(&ast_class.span);
     let mut additional_methods: Vec<HhasMethod> = vec![];
     if let Some(cats) = xhp_categories {
-        additional_methods.extend(emit_xhp::from_category_declaration(ast_class, &cats)?)
+        additional_methods.push(emit_xhp::from_category_declaration(
+            emitter, ast_class, &cats,
+        )?)
     }
     if let Some(children) = xhp_children {
-        additional_methods.extend(emit_xhp::from_children_declaration(ast_class, &children)?)
+        additional_methods.push(emit_xhp::from_children_declaration(
+            emitter, ast_class, &children,
+        )?)
     }
     let no_xhp_attributes = xhp_attributes.is_empty() && ast_class.xhp_attr_uses.is_empty();
     if !no_xhp_attributes {
-        additional_methods.extend(emit_xhp::from_attribute_declaration(
+        additional_methods.push(emit_xhp::from_attribute_declaration(
+            emitter,
             ast_class,
             &xhp_attributes,
             &ast_class.xhp_attr_uses,
@@ -764,7 +769,7 @@ pub fn emit_class<'a>(
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(
-            namespace, ast_class, is_const,
+            emitter, namespace, ast_class, is_const,
         )?);
     }
     let info = emit_memoize_method::make_info(ast_class, name.clone(), &ast_class.methods)?;

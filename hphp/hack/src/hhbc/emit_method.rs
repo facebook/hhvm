@@ -39,8 +39,10 @@ pub fn from_asts<'a>(
 pub fn from_ast<'a>(
     emitter: &mut Emitter,
     class: &'a T::Class_,
-    method: &'a T::Method_,
+    method_: impl Into<Cow<'a, T::Method_>>,
 ) -> Result<HhasMethod<'a>> {
+    let method_: Cow<'a, T::Method_> = method_.into();
+    let method = method_.as_ref();
     let is_memoize = method
         .user_attributes
         .iter()
@@ -123,7 +125,10 @@ pub fn from_ast<'a>(
     let mut scope = Scope {
         items: vec![
             ScopeItem::Class(Cow::Borrowed(class)),
-            ScopeItem::Method(Cow::Borrowed(method)),
+            // TODO(shiqicao): MUST FIX!!!
+            //    If method is Cow::Borrowed, then Cow::clone should be cheap,
+            //    if method is Cow::Owned, then Cow::clone clones ast::Method_, this must be avoided!
+            ScopeItem::Method(Cow::clone(&method_)),
         ],
     };
     if is_closure_body {
@@ -219,7 +224,9 @@ pub fn from_ast<'a>(
         )?
     };
     let name = {
-        let mut name = method::Type::from_ast_name(&method.name.1);
+        let mut name: method::Type = string_utils::strip_global_ns(&method.name.1)
+            .to_string()
+            .into();
         if is_memoize {
             name.add_suffix(emit_memoize_helpers::MEMOIZE_SUFFIX);
         };

@@ -17,7 +17,7 @@ pub fn emit_body<'a>(
     namespace: &namespace_env::Env,
     class_attrs: &[tast::UserAttribute],
     name: &tast::Sid,
-    params: &'a [tast::FunParam],
+    params: &[tast::FunParam],
     ret: Option<&aast::Hint>,
 ) -> Result<HhasBody<'a>> {
     let body_instrs = emit_native_opcode_impl(&name.1, params, class_attrs);

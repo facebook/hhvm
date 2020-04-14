@@ -6,7 +6,7 @@
 use crate::aast::*;
 use crate::ast_defs;
 use crate::pos::Pos;
-use std::boxed::Box;
+use std::{borrow::Cow, boxed::Box};
 
 impl<Ex, Fb, En, Hi> Stmt<Ex, Fb, En, Hi> {
     pub fn new(pos: Pos, s: Stmt_<Ex, Fb, En, Hi>) -> Self {
@@ -100,5 +100,30 @@ impl<Ex, Fb, En, Hi> Afield<Ex, Fb, En, Hi> {
             Self::AFvalue(e) => e,
             Self::AFkvalue(_, e) => e,
         }
+    }
+}
+
+// TODO(hrust): consider codegen the following
+impl<'a, Ex, Fb, En, Hi> Into<Cow<'a, Method_<Ex, Fb, En, Hi>>> for Method_<Ex, Fb, En, Hi>
+where
+    Ex: Clone,
+    Fb: Clone,
+    En: Clone,
+    Hi: Clone,
+{
+    fn into(self) -> Cow<'a, Self> {
+        Cow::Owned(self)
+    }
+}
+
+impl<'a, Ex, Fb, En, Hi> Into<Cow<'a, Method_<Ex, Fb, En, Hi>>> for &'a Method_<Ex, Fb, En, Hi>
+where
+    Ex: Clone,
+    Fb: Clone,
+    En: Clone,
+    Hi: Clone,
+{
+    fn into(self) -> Cow<'a, Method_<Ex, Fb, En, Hi>> {
+        Cow::Borrowed(self)
     }
 }

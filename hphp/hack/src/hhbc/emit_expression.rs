@@ -1665,12 +1665,15 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
     let current_fun_tparams = env.scope.get_fun_tparams();
     let current_cls_tparams = env.scope.get_class_tparams();
     let is_in_lambda = env.scope.is_in_lambda();
+    let is_soft =
+        |ual: &Vec<tast::UserAttribute>| ual.iter().any(|ua| user_attributes::is_soft(&ua.name.1));
     let same_as_targs = |tparams: &[tast::Tparam]| {
         tparams.len() == targs.len()
-            && tparams
-                .iter()
-                .zip(targs)
-                .all(|(tp, ta)| ta.1.as_happly().map_or(false, |(id, _)| id.1 == tp.name.1))
+            && tparams.iter().zip(targs).all(|(tp, ta)| {
+                ta.1.as_happly().map_or(false, |(id, hs)| {
+                    id.1 == tp.name.1 && hs.is_empty() && !is_soft(&tp.user_attributes)
+                })
+            })
     };
     Ok(if !is_in_lambda && same_as_targs(&current_fun_tparams) {
         instr::cgetl(local::Type::Named(
@@ -5566,7 +5569,6 @@ pub fn emit_reified_arg(
         .list
         .iter()
         .fold(current_tags, |acc, t| f(acc, &*t));
-
     let mut collector = Collector {
         current_tags: &current_tags,
         acc: IndexSet::new(),

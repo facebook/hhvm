@@ -12,3 +12,12 @@ pub struct HhasXhpAttribute<'a> {
     pub tag: Option<tast::XhpAttrTag>,
     pub maybe_enum: Option<&'a (Pos, bool, Vec<tast::Expr>)>,
 }
+
+impl<'a> HhasXhpAttribute<'a> {
+    pub fn is_required(&self) -> bool {
+        matches!(
+            self.tag,
+            Some(tast::XhpAttrTag::Required) | Some(tast::XhpAttrTag::LateInit)
+        )
+    }
+}

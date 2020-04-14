@@ -3668,13 +3668,13 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_enum_left_brace = validate_token x.pocket_enum_left_brace
     ; pocket_enum_name = validate_token x.pocket_enum_name
     ; pocket_enum_enum = validate_token x.pocket_enum_enum
-    ; pocket_enum_modifiers = validate_option_with (validate_token) x.pocket_enum_modifiers
+    ; pocket_enum_modifiers = validate_list_with (validate_token) x.pocket_enum_modifiers
     }
   | s -> validation_fail (Some SyntaxKind.PocketEnumDeclaration) s
   and invalidate_pocket_enum_declaration : pocket_enum_declaration invalidator = fun (v, x) ->
     { Syntax.syntax =
       Syntax.PocketEnumDeclaration
-      { pocket_enum_modifiers = invalidate_option_with (invalidate_token) x.pocket_enum_modifiers
+      { pocket_enum_modifiers = invalidate_list_with (invalidate_token) x.pocket_enum_modifiers
       ; pocket_enum_enum = invalidate_token x.pocket_enum_enum
       ; pocket_enum_name = invalidate_token x.pocket_enum_name
       ; pocket_enum_left_brace = invalidate_token x.pocket_enum_left_brace

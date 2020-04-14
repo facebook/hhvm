@@ -1144,7 +1144,10 @@ where
     // Having this function prevents constants from having attributes as
     // this cannot be checked in parser_errors as there is no field in constant
     // declaration to store 'attributes'.
-    fn parse_methodish_or_property_or_type_constant(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_methodish_or_property_or_type_constant_or_pu_enum(
+        &mut self,
+        attribute_spec: S::R,
+    ) -> S::R {
         let mut parser1 = self.clone();
         let modifiers = parser1.parse_modifiers();
         let current_token_kind = parser1.peek_token_kind();
@@ -1156,7 +1159,7 @@ where
                 let const_ = self.assert_token(TokenKind::Const);
                 self.parse_type_const_declaration(attribute_spec, modifiers, const_)
             }
-            _ => self.parse_methodish_or_property(attribute_spec),
+            _ => self.parse_methodish_or_property_or_pu_enum(attribute_spec),
         }
     }
 
@@ -1164,7 +1167,7 @@ where
         token.leading().iter().any(|x| x.kind() == kind)
     }
 
-    fn parse_methodish_or_property(&mut self, attribute_spec: S::R) -> S::R {
+    fn parse_methodish_or_property_or_pu_enum(&mut self, attribute_spec: S::R) -> S::R {
         let modifiers = self.parse_modifiers();
         // ERROR RECOVERY: match against two tokens, because if one token is
         // in error but the next isn't, then it's likely that the user is
@@ -1190,6 +1193,8 @@ where
                 self.skip_and_log_unexpected_token(false);
                 self.parse_methodish(attribute_spec, modifiers)
             }
+            // Pocket Universe declaration
+            (TokenKind::Enum, _) => self.parse_class_enum(modifiers),
             // Otherwise, continue parsing as a property (which might be a lambda).
             _ => self.parse_property_declaration(attribute_spec, modifiers),
         }
@@ -1952,7 +1957,7 @@ where
             }
             _ => {
                 let missing = S!(make_missing, self, self.pos());
-                self.parse_methodish_or_property(missing)
+                self.parse_methodish_or_property_or_pu_enum(missing)
             }
         }
     }
@@ -2180,26 +2185,18 @@ where
             | TokenKind::Protected
             | TokenKind::Private
             | TokenKind::Static => self.parse_methodish_or_property_or_const_or_type_const(),
-            TokenKind::Enum => self.parse_class_enum(false),
-            TokenKind::Final => {
-                match self.peek_token_kind_with_lookahead(1) {
-                    TokenKind::Enum => self.parse_class_enum(/* final:*/ true),
-                    _ => {
-                        // Parse class methods, constructors, properties
-                        // or type constants.
-                        let attr = self.parse_attribute_specification_opt();
-                        self.parse_methodish_or_property_or_type_constant(attr)
-                    }
-                }
+            TokenKind::Enum => {
+                let missing = S!(make_missing, self, self.pos());
+                self.parse_class_enum(missing)
             }
-            TokenKind::Async | TokenKind::LessThanLessThan => {
-                // Parse methods, constructors, properties, or type constants.
+            TokenKind::Async | TokenKind::Final | TokenKind::LessThanLessThan => {
+                // Parse methods, constructors, properties, type constants, or Pocket Universe enums
                 let attr = self.parse_attribute_specification_opt();
-                self.parse_methodish_or_property_or_type_constant(attr)
+                self.parse_methodish_or_property_or_type_constant_or_pu_enum(attr)
             }
             TokenKind::At if self.env.allow_new_attribute_syntax => {
                 let attr = self.parse_attribute_specification_opt();
-                self.parse_methodish_or_property_or_type_constant(attr)
+                self.parse_methodish_or_property_or_type_constant_or_pu_enum(attr)
             }
             TokenKind::Require => {
                 // We give an error if these are found where they should not be,
@@ -2533,18 +2530,9 @@ where
         self.parse_terminated_list(|x| x.parse_pocket_field(), TokenKind::RightBrace)
     }
 
-    fn parse_class_enum(&mut self, final_: bool /* = false */) -> S::R {
+    fn parse_class_enum(&mut self, modifiers: S::R) -> S::R {
         // SPEC
         // 'final'? 'enum' identifier '{' pocket-field-list '}'
-        //
-        // from parse_classish_declaration.. probably could do better
-        // read Final
-        let final_tok = if final_ {
-            self.require_token(TokenKind::Final, Errors::pocket_universe_final_expected)
-        } else {
-            S!(make_missing, self, self.pos())
-        };
-        // read Enum
         let enum_tok = self.require_token(TokenKind::Enum, Errors::pocket_universe_enum_expected);
         let name = self.require_name();
         let (left_brace, pocket_fields, right_brace) =
@@ -2552,7 +2540,7 @@ where
         S!(
             make_pocket_enum_declaration,
             self,
-            final_tok,
+            modifiers,
             enum_tok,
             name,
             left_brace,

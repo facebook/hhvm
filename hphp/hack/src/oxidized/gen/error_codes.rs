@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b91b25850287bc54ddee49a6ec205af5>>
+// @generated SignedSource<<44bd7306d063c326f94e9908da6a62da>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -224,7 +224,7 @@ pub enum NastCheck {
     SuspendInFinally,
     BreakContinueNNotSupportedDEPRECATED,
     StaticMemoizedFunction,
-    InoutParamsOutsideOfSync,
+    InoutParamsInCoroutine,
     InoutParamsSpecial,
     InoutParamsMixByrefDEPRECATED,
     InoutParamsMemoize,

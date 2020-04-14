@@ -2397,7 +2397,7 @@ let schema : schema_node list =
       aggregates = [ClassBodyDeclaration];
       fields =
         [
-          ("modifiers", ZeroOrOne Token);
+          ("modifiers", ZeroOrMore Token);
           ("enum", Token);
           ("name", Token);
           ("left_brace", Token);

@@ -2418,7 +2418,7 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_atom_mapping_semicolon: Token.t value
     }
   and pocket_enum_declaration =
-    { pocket_enum_modifiers: Token.t option value
+    { pocket_enum_modifiers: Token.t listesque value
     ; pocket_enum_enum: Token.t value
     ; pocket_enum_name: Token.t value
     ; pocket_enum_left_brace: Token.t value

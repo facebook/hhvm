@@ -1035,7 +1035,7 @@ val must_extend_disposable : Pos.t -> unit
 val accept_disposable_invariant :
   Pos.t -> Pos.t -> typing_error_callback -> unit
 
-val inout_params_outside_of_sync : Pos.t -> unit
+val inout_params_in_coroutine : Pos.t -> unit
 
 val inout_params_special : Pos.t -> unit
 

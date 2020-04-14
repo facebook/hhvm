@@ -1968,12 +1968,11 @@ let illegal_function_name pos mname =
     pos
     ("Illegal function name: " ^ strip_ns mname)
 
-let inout_params_outside_of_sync pos =
+let inout_params_in_coroutine pos =
   add
-    (NastCheck.err_code NastCheck.InoutParamsOutsideOfSync)
+    (NastCheck.err_code NastCheck.InoutParamsInCoroutine)
     pos
-    ( "Inout parameters cannot be defined on async functions, "
-    ^ "generators or coroutines." )
+    "Inout parameters cannot be defined on coroutines."
 
 let mutable_attribute_on_function pos =
   add

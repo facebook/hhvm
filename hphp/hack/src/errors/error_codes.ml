@@ -211,7 +211,7 @@ module NastCheck = struct
     | SuspendInFinally
     | BreakContinueNNotSupportedDEPRECATED
     | StaticMemoizedFunction
-    | InoutParamsOutsideOfSync
+    | InoutParamsInCoroutine
     | InoutParamsSpecial
     | InoutParamsMixByrefDEPRECATED
     | InoutParamsMemoize

@@ -16,8 +16,8 @@ let check_param _env params p user_attributes f_type name =
       match param.param_callconv with
       | Some Ast_defs.Pinout ->
         let pos = param.param_pos in
-        if not Ast_defs.(equal_fun_kind f_type FSync) then
-          Errors.inout_params_outside_of_sync pos;
+        if Ast_defs.(equal_fun_kind f_type FCoroutine) then
+          Errors.inout_params_in_coroutine pos;
         if SSet.mem name SN.Members.as_set then Errors.inout_params_special pos
       | None -> ());
   let inout =

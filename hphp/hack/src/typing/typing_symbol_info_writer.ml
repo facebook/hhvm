@@ -70,7 +70,7 @@ let write_json
     Out_channel.close channel;
     Hh_logger.log "Wrote symbol info to: %s" out_file
   with e ->
-    Printf.eprintf "WARNING: symbol write failure: \n%s" (Exn.to_string e)
+    Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e)
 
 let recheck_job
     (ctx : Provider_context.t)

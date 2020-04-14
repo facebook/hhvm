@@ -801,35 +801,37 @@ let process_container_xref
     symbol_pos
     (xrefs, progress)
 
-let process_member_xref
-    ctx member pos con_name mem_decl_fun ref_fun (xrefs, prog) =
-  match ServerSymbolDefinition.get_class_by_name ctx con_name with
-  | None -> (xrefs, prog)
-  | Some cls ->
-    if phys_equal cls.c_kind Cenum then
-      match member.kind with
-      | Const ->
-        let (enum_id, prog) = add_enum_decl_fact con_name prog in
+let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
+  match Str.split (Str.regexp "::") member.full_name with
+  | [] -> (xrefs, prog)
+  | con_name :: _mem_name ->
+    (match ServerSymbolDefinition.get_class_by_name ctx con_name with
+    | None -> (xrefs, prog)
+    | Some cls ->
+      if phys_equal cls.c_kind Cenum then
+        match member.kind with
+        | Const ->
+          let (enum_id, prog) = add_enum_decl_fact con_name prog in
+          process_xref
+            (add_enumerator_fact enum_id)
+            build_enumerator_decl_json_ref
+            member
+            pos
+            (xrefs, prog)
+        (* This includes references to built-in enum methods *)
+        | _ -> (xrefs, prog)
+      else
+        let con_kind = get_container_kind cls in
+        let (con_type, decl_pred) = container_decl_predicate con_kind in
+        let (con_decl_id, prog) =
+          add_container_decl_fact decl_pred con_name prog
+        in
         process_xref
-          (add_enumerator_fact enum_id)
-          build_enumerator_decl_json_ref
+          (mem_decl_fun con_type con_decl_id)
+          ref_fun
           member
           pos
-          (xrefs, prog)
-      (* This includes references to built-in enum methods *)
-      | _ -> (xrefs, prog)
-    else
-      let con_kind = get_container_kind cls in
-      let (con_type, decl_pred) = container_decl_predicate con_kind in
-      let (con_decl_id, prog) =
-        add_container_decl_fact decl_pred con_name prog
-      in
-      process_xref
-        (mem_decl_fun con_type con_decl_id)
-        ref_fun
-        member
-        pos
-        (xrefs, prog)
+          (xrefs, prog))
 
 let process_gconst_xref symbol_def pos (xrefs, progress) =
   process_xref
@@ -1023,9 +1025,9 @@ let build_json ctx symbols files_info =
               process_container_xref con_kind sym_def occ.pos (xrefs, prog)
             | Const ->
               (match occ.type_ with
-              | ClassConst (cn, _) ->
+              | ClassConst _ ->
                 let ref_fun = build_class_const_decl_json_ref in
-                proc_mem cn add_class_const_decl_fact ref_fun (xrefs, prog)
+                proc_mem add_class_const_decl_fact ref_fun (xrefs, prog)
               | GConst -> process_gconst_xref sym_def occ.pos (xrefs, prog)
               | _ -> (xrefs, prog))
             | Enum -> process_enum_xref sym_def occ.pos (xrefs, prog)
@@ -1034,23 +1036,14 @@ let build_json ctx symbols files_info =
               let con_kind = container_decl_predicate InterfaceContainer in
               process_container_xref con_kind sym_def occ.pos (xrefs, prog)
             | Method ->
-              (match occ.type_ with
-              | Method (cn, _) ->
-                let ref_fun = build_method_decl_json_ref in
-                proc_mem cn add_method_decl_fact ref_fun (xrefs, prog)
-              | _ -> (xrefs, prog))
+              let ref_fun = build_method_decl_json_ref in
+              proc_mem add_method_decl_fact ref_fun (xrefs, prog)
             | Property ->
-              (match occ.type_ with
-              | Property (cn, _) ->
-                let ref_fun = build_property_decl_json_ref in
-                proc_mem cn add_property_decl_fact ref_fun (xrefs, prog)
-              | _ -> (xrefs, prog))
+              let ref_fun = build_property_decl_json_ref in
+              proc_mem add_property_decl_fact ref_fun (xrefs, prog)
             | Typeconst ->
-              (match occ.type_ with
-              | Typeconst (cn, _) ->
-                let ref_fun = build_type_const_decl_json_ref in
-                proc_mem cn add_type_const_decl_fact ref_fun (xrefs, prog)
-              | _ -> (xrefs, prog))
+              let ref_fun = build_type_const_decl_json_ref in
+              proc_mem add_type_const_decl_fact ref_fun (xrefs, prog)
             | Trait ->
               let con_kind = container_decl_predicate TraitContainer in
               process_container_xref con_kind sym_def occ.pos (xrefs, prog)

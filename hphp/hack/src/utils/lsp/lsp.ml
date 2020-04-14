@@ -404,9 +404,12 @@ module Initialize = struct
 
   and textDocumentClientCapabilities = {
     synchronization: synchronization;
-    completion: completion;
-    (* textDocument/completion *)
-    codeAction: codeAction; (* omitted: dynamic-registration fields *)
+    completion: completion;  (** textDocument/completion *)
+    codeAction: codeAction;
+    definition: definition;
+    typeDefinition: typeDefinition;
+    declaration: declaration;
+    implementation: implementation;
   }
 
   (* synchronization capabilities say what messages the client is capable
@@ -434,6 +437,14 @@ module Initialize = struct
      * response of the `textDocument/codeAction` request. *)
     codeActionLiteralSupport: codeActionliteralSupport option;
   }
+
+  and definition = { definitionLinkSupport: bool }
+
+  and typeDefinition = { typeDefinitionLinkSupport: bool }
+
+  and declaration = { declarationLinkSupport: bool }
+
+  and implementation = { implementationLinkSupport: bool }
 
   and codeActionliteralSupport = {
     (* The code action kind values the client supports. When this

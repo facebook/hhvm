@@ -937,6 +937,12 @@ let parse_initialize (params : json option) : Initialize.params =
           Jget.obj_opt json "synchronization" |> parse_synchronization;
         completion = Jget.obj_opt json "completion" |> parse_completion;
         codeAction = Jget.obj_opt json "codeAction" |> parse_codeAction;
+        definition = Jget.obj_opt json "definition" |> parse_definition;
+        typeDefinition =
+          Jget.obj_opt json "typeDefinition" |> parse_typeDefinition;
+        implementation =
+          Jget.obj_opt json "implementation" |> parse_implementation;
+        declaration = Jget.obj_opt json "declaration" |> parse_declaration;
       }
     and parse_synchronization json =
       {
@@ -964,6 +970,20 @@ let parse_initialize (params : json option) : Initialize.params =
       Option.(
         Jget.array_opt json "valueSet" >>= fun ls ->
         Some { codeAction_valueSet = parse_kinds ls })
+    and parse_definition json =
+      { definitionLinkSupport = Jget.bool_d json "linkSupport" ~default:false }
+    and parse_typeDefinition json =
+      {
+        typeDefinitionLinkSupport =
+          Jget.bool_d json "linkSupport" ~default:false;
+      }
+    and parse_implementation json =
+      {
+        implementationLinkSupport =
+          Jget.bool_d json "linkSupport" ~default:false;
+      }
+    and parse_declaration json =
+      { declarationLinkSupport = Jget.bool_d json "linkSupport" ~default:false }
     and parse_window json =
       { status = Jget.obj_opt json "status" |> Option.is_some }
     and parse_telemetry json =

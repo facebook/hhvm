@@ -256,6 +256,10 @@ module Initialize : sig
     synchronization: synchronization;
     completion: completion;
     codeAction: codeAction;
+    definition: definition;
+    typeDefinition: typeDefinition;
+    declaration: declaration;
+    implementation: implementation;
   }
 
   and synchronization = {
@@ -274,6 +278,14 @@ module Initialize : sig
   }
 
   and codeActionliteralSupport = { codeAction_valueSet: CodeActionKind.t list }
+
+  and definition = { definitionLinkSupport: bool }
+
+  and typeDefinition = { typeDefinitionLinkSupport: bool }
+
+  and declaration = { declarationLinkSupport: bool }
+
+  and implementation = { implementationLinkSupport: bool }
 
   and windowClientCapabilities = { status: bool }
 

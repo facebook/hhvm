@@ -13,6 +13,35 @@ use oxidized::ident::Ident;
 use typing_collections_rust::{SMap, Vec as AVec};
 use typing_defs_rust::{avec, Ty};
 
+pub fn is_sub_type_for_union<'a>(env: &mut Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) -> bool {
+    match is_sub_type(env, ty_sub, ty_super) {
+        Some(b) => b,
+        None => false,
+    }
+}
+
+fn is_sub_type<'a>(env: &mut Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) -> Option<bool> {
+    let bld = env.bld();
+    let ty_sub = bld.loclty(ty_sub);
+    let ty_super = bld.loclty(ty_super);
+    is_sub_type_i(env, ty_sub, ty_super)
+}
+
+fn is_sub_type_i<'a>(
+    env: &mut Env<'a>,
+    ty_sub: InternalType<'a>,
+    ty_super: InternalType<'a>,
+) -> Option<bool> {
+    let prop = simplify_subtype_i(env, ty_sub, ty_super);
+    if prop.is_valid() {
+        Some(true)
+    } else if prop.is_unsat() {
+        Some(false)
+    } else {
+        None
+    }
+}
+
 fn simplify_subtype_i<'a>(
     env: &mut Env<'a>,
     ty_sub: InternalType<'a>,

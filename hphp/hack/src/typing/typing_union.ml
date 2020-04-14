@@ -552,7 +552,7 @@ let normalize_union env ?on_tyvar tyl =
 
 let union_list_2_by_2 env r tyl =
   let (env, tyl) =
-    List.fold tyl ~init:(env, []) ~f:(fun (env, tyl) ty ->
+    List.fold tyl ~init:(env, []) ~f:(fun (env, res_tyl) ty ->
         let rec union_ty_w_tyl env ty tyl tyl_acc =
           match tyl with
           | [] -> (env, ty :: tyl_acc)
@@ -562,7 +562,7 @@ let union_list_2_by_2 env r tyl =
             | None -> union_ty_w_tyl env ty tyl (ty' :: tyl_acc)
             | Some union -> (env, tyl @ (union :: tyl_acc)))
         in
-        union_ty_w_tyl env ty tyl [])
+        union_ty_w_tyl env ty res_tyl [])
   in
   (env, tyl)
 

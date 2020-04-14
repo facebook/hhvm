@@ -3,7 +3,7 @@
 name = "typing_rust"
 edition = "2018"
 version = "0.0.0"
-include = ["../../typing.rs", "../../typing_env.rs", "../../typing_env_from_def.rs", "../../typing_env_return_info.rs", "../../typing_env_types.rs", "../../typing_phase.rs", "../../typing_print.rs", "../../typing_solver.rs", "../../typing_subtype.rs", "../../typing_toplevel.rs", "../../typing_union.rs"]
+include = ["../../typing.rs", "../../typing_env.rs", "../../typing_env_from_def.rs", "../../typing_env_return_info.rs", "../../typing_env_types.rs", "../../typing_naming.rs", "../../typing_phase.rs", "../../typing_print.rs", "../../typing_solver.rs", "../../typing_subtype.rs", "../../typing_toplevel.rs", "../../typing_union.rs"]
 
 [lib]
 path = "../../typing_toplevel.rs"

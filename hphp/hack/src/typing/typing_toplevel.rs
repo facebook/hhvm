@@ -19,6 +19,7 @@ mod typing_env;
 mod typing_env_from_def;
 mod typing_env_return_info;
 mod typing_env_types;
+mod typing_naming;
 mod typing_phase;
 pub mod typing_print;
 mod typing_solver;
@@ -47,8 +48,15 @@ fn def<'a>(
     match def {
         ast::Def::Fun(f) => fun_def(builder, provider, f),
         ast::Def::Stmt(x) => {
-            let mut env = stmt_env(builder, provider, x);
-            Some(tast::Def::mk_stmt(typing::stmt(&mut env, x)))
+            match (*x).1 {
+                // Currently this is done in naming.ml
+                ast::Stmt_::Noop => None,
+                ast::Stmt_::Markup(_) => None,
+                _ => {
+                    let mut env = stmt_env(builder, provider, x);
+                    Some(tast::Def::mk_stmt(typing::stmt(&mut env, x)))
+                }
+            }
         }
         ast::Def::Class(_) => None,
         _ => unimplemented!(),

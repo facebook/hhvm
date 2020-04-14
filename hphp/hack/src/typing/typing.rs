@@ -9,7 +9,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typing_phase::{self, MethodInstantiation};
-use crate::typing_subtype;
+use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use oxidized::typing_defs_core::Ty_ as DTy_;
@@ -24,14 +24,21 @@ pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
     assert!(f.user_attributes.is_empty());
     assert!(f.file_attributes.is_empty());
 
-    let ret = tast::TypeHint(env.builder().null(env.builder().mk_rnone()), None);
+    let named_ret = match &f.ret.1 {
+        None => None,
+        Some(ty) => {
+            let ty = typing_naming::name_hint(env, ty);
+            Some(ty.clone())
+        }
+    };
+    let ret = tast::TypeHint(env.genv.return_info.type_.type_, named_ret);
 
     tast::Fun_ {
         span: f.span.clone(),
         annotation: SavedEnv,
         mode: f.mode,
         ret,
-        name: f.name.clone(),
+        name: typing_naming::canonicalize(&f.name),
         tparams: vec![],
         where_constraints: f.where_constraints.clone(),
         body: tast::FuncBody {
@@ -166,7 +173,10 @@ fn dispatch_call<'a>(
             let (fty, targs) = fun_type_of_id(env, x, explicit_targs, el);
             let (tel, rty) = call(env, pos, fty, el, unpacked_element);
             // TODO(hrust) reactivity stuff
-            let fte = tast::Expr((fpos, fty), tast::Expr_::Id(x.clone()));
+            let fte = tast::Expr(
+                (fpos, fty),
+                tast::Expr_::Id(Box::new(typing_naming::canonicalize(x))),
+            );
             (
                 rty,
                 tast::Expr_::mk_call(tast::CallType::Cnormal, fte, targs, tel, None),

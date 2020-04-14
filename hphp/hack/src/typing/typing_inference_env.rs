@@ -80,6 +80,22 @@ pub enum SolvingInfo<'a> {
     Constraints(TyvarConstraints<'a>),
 }
 
+impl<'a> SolvingInfo<'a> {
+    fn get_appears_covariantly(&self) -> bool {
+        match self {
+            SolvingInfo::Type(_) => false,
+            SolvingInfo::Constraints(cstr) => cstr.appears_covariantly,
+        }
+    }
+
+    fn get_appears_contravariantly(&self) -> bool {
+        match self {
+            SolvingInfo::Type(_) => false,
+            SolvingInfo::Constraints(cstr) => cstr.appears_contravariantly,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct TyvarInfo_<'a> {
     pub bld: &'a TypeBuilder<'a>,
@@ -126,6 +142,17 @@ impl<'a> InferenceEnv<'a> {
         let id = self.var_id_counter;
         self.var_id_counter += 1;
         id
+    }
+
+    pub fn expand_internal_type(&mut self, ty: InternalType<'a>) -> InternalType<'a> {
+        match ty {
+            InternalType_::LoclType(ty) => {
+                let ty = self.expand_type(*ty);
+                let ty = InternalType_::LoclType(ty);
+                self.bld.alloc(ty)
+            }
+            InternalType_::ConstraintType(_) => ty,
+        }
     }
 
     pub fn expand_type(&mut self, ty: Ty<'a>) -> Ty<'a> {
@@ -183,7 +210,7 @@ impl<'a> InferenceEnv<'a> {
         }
     }
 
-    fn add(&mut self, v: Ident, ty: Ty<'a>) {
+    pub fn add(&mut self, v: Ident, ty: Ty<'a>) {
         self.bind(v, ty)
         // TODO(hrust) update tyvar occurrences
     }
@@ -220,6 +247,20 @@ impl<'a> InferenceEnv<'a> {
             solving_info,
         });
         self.tvenv = self.tvenv.add(self.bld, v, tyvar_info)
+    }
+
+    pub fn get_appears_covariantly(&self, v: Ident) -> bool {
+        match self.tvenv.find(&v) {
+            None => false,
+            Some(tvinfo) => tvinfo.solving_info.get_appears_covariantly(),
+        }
+    }
+
+    pub fn get_appears_contravariantly(&self, v: Ident) -> bool {
+        match self.tvenv.find(&v) {
+            None => false,
+            Some(tvinfo) => tvinfo.solving_info.get_appears_contravariantly(),
+        }
     }
 
     pub fn get_upper_bounds(&self, v: Ident) -> Set<'a, InternalType<'a>> {
@@ -280,5 +321,19 @@ impl<'a> InferenceEnv<'a> {
 
     fn missing_tyvar(v: Ident) -> ! {
         panic!("Type var {} is missing from the environment.", v)
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &'a Ident> {
+        self.tvenv.keys()
+    }
+
+    pub fn tyvar_is_solved(&self, v: Ident) -> bool {
+        match self.tvenv.find(&v) {
+            None => false,
+            Some(tvinfo) => match tvinfo.solving_info {
+                SolvingInfo::Constraints(_) => false,
+                SolvingInfo::Type(_) => true,
+            },
+        }
     }
 }

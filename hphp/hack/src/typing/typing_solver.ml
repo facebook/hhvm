@@ -222,13 +222,13 @@ let bind_to_lower_bound ~freshen env r var lower_bounds on_error =
         (env, ty)
     in
     (* If any of the components of the union are type variables, then remove
-  * var from their upper bounds. Why? Because if we construct
-  *   v1 , ... , vn , t <: var
-  * for type variables v1, ..., vn and non-type variable t
-  * then necessarily we must have var as an upper bound on each of vi
-  * so after binding var we end up with redundant bounds
-  *   vi <: v1 | ... | vn | t
-  *)
+     * var from their upper bounds. Why? Because if we construct
+     *   v1 , ... , vn , t <: var
+     * for type variables v1, ..., vn and non-type variable t
+     * then necessarily we must have var as an upper bound on each of vi
+     * so after binding var we end up with redundant bounds
+     *   vi <: v1 | ... | vn | t
+     *)
     let env =
       TySet.fold
         (fun ty env ->

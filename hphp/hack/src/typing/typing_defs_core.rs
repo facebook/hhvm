@@ -446,6 +446,13 @@ impl<'a> InternalType_<'a> {
             I::ConstraintType(ct) => O::ConstraintType(ct.to_oxidized()),
         }
     }
+
+    pub fn get_locl_type_opt(&self) -> Option<Ty<'a>> {
+        match self {
+            InternalType_::LoclType(ty) => Some(*ty),
+            InternalType_::ConstraintType(_) => None,
+        }
+    }
 }
 
 impl ToOcamlRep for InternalType_<'_> {

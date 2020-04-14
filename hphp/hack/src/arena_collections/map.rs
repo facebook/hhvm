@@ -60,6 +60,26 @@ macro_rules! map {
   });
 }
 
+impl<'a, K, V> Map<'a, K, V> {
+    pub fn keys(&self) -> impl Iterator<Item = &'a K> {
+        self.iter().map(|(k, _v)| k)
+    }
+}
+
+impl<'a, K: Ord, V> Map<'a, K, V> {
+    /// Check whether a key is present in the map.
+    pub fn mem(self, x: &K) -> bool {
+        match self {
+            Map(None) => false,
+            Map(Some(Node(l, v, _d, r, _h))) => match x.cmp(v) {
+                Ordering::Equal => true,
+                Ordering::Less => l.mem(x),
+                Ordering::Greater => r.mem(x),
+            },
+        }
+    }
+}
+
 impl<'a, K: Clone + Ord, V: Clone> Map<'a, K, V> {
     /// Create a new empty map.
     ///
@@ -105,18 +125,6 @@ impl<'a, K: Clone + Ord, V: Clone> Map<'a, K, V> {
         match self {
             Map(None) => 0,
             Map(Some(Node(l, _, _, r, _))) => l.count() + 1 + r.count(),
-        }
-    }
-
-    /// Check whether a key is present in the map.
-    pub fn mem(self, x: &K) -> bool {
-        match self {
-            Map(None) => false,
-            Map(Some(Node(l, v, _d, r, _h))) => match x.cmp(v) {
-                Ordering::Equal => true,
-                Ordering::Less => l.mem(x),
-                Ordering::Greater => r.mem(x),
-            },
         }
     }
 
@@ -345,11 +353,8 @@ struct NodeIter<'a, K, V> {
     node: &'a Node<'a, K, V>,
 }
 
-impl<'a, K, V> IntoIterator for Map<'a, K, V> {
-    type Item = (&'a K, &'a V);
-    type IntoIter = MapIter<'a, K, V>;
-
-    fn into_iter(self) -> Self::IntoIter {
+impl<'a, K, V> Map<'a, K, V> {
+    pub fn iter(&self) -> MapIter<'a, K, V> {
         let stack = match self {
             Map(None) => Vec::new(),
             Map(Some(root)) => vec![NodeIter {
@@ -358,6 +363,15 @@ impl<'a, K, V> IntoIterator for Map<'a, K, V> {
             }],
         };
         MapIter { stack }
+    }
+}
+
+impl<'a, K, V> IntoIterator for Map<'a, K, V> {
+    type Item = (&'a K, &'a V);
+    type IntoIter = MapIter<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
 

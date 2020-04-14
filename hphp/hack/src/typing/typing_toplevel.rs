@@ -9,7 +9,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::{fun_env, stmt_env};
-use decl_provider_rust as decl_provider;
+use decl_provider_rust::DeclProvider;
 use oxidized::ast;
 use typing_defs_rust::tast;
 use typing_defs_rust::typing_make_type::TypeBuilder;
@@ -21,7 +21,9 @@ mod typing_env_return_info;
 mod typing_env_types;
 mod typing_phase;
 pub mod typing_print;
+mod typing_solver;
 mod typing_subtype;
+mod typing_union;
 
 pub use typing_env::*;
 pub use typing_env_from_def::*;
@@ -29,7 +31,7 @@ pub use typing_env_types::*;
 
 pub fn program<'a>(
     builder: &'a TypeBuilder<'a>,
-    provider: &'a dyn decl_provider::DeclProvider,
+    provider: &'a dyn DeclProvider,
     ast: &'a ast::Program,
 ) -> tast::Program<'a> {
     ast.iter()
@@ -39,14 +41,11 @@ pub fn program<'a>(
 
 fn def<'a>(
     builder: &'a TypeBuilder<'a>,
-    provider: &'a dyn decl_provider::DeclProvider,
+    provider: &'a dyn DeclProvider,
     def: &'a ast::Def,
 ) -> Option<tast::Def<'a>> {
     match def {
-        ast::Def::Fun(x) => {
-            let mut env = fun_env(builder, provider, x);
-            Some(tast::Def::mk_fun(typing::fun(&mut env, x)))
-        }
+        ast::Def::Fun(f) => fun_def(builder, provider, f),
         ast::Def::Stmt(x) => {
             let mut env = stmt_env(builder, provider, x);
             Some(tast::Def::mk_stmt(typing::stmt(&mut env, x)))
@@ -54,4 +53,15 @@ fn def<'a>(
         ast::Def::Class(_) => None,
         _ => unimplemented!(),
     }
+}
+
+fn fun_def<'a>(
+    builder: &'a TypeBuilder<'a>,
+    provider: &'a dyn DeclProvider,
+    f: &'a ast::Fun_,
+) -> Option<tast::Def<'a>> {
+    let mut env = fun_env(builder, provider, f);
+    let f = typing::fun(&mut env, f);
+    typing_solver::solve_all_unsolved_tyvars(&mut env);
+    Some(tast::Def::mk_fun(f))
 }

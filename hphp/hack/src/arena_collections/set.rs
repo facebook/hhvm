@@ -42,6 +42,19 @@ macro_rules! set {
   });
 }
 
+impl<'a, K: Ord> Set<'a, K> {
+    pub fn mem(self, x: &K) -> bool {
+        self.0.mem(x)
+    }
+
+    pub fn intersection(self, other: Self) -> Intersection<'a, K> {
+        Intersection {
+            iter: self.iter(),
+            other,
+        }
+    }
+}
+
 impl<'a, K: Clone + Ord> Set<'a, K> {
     pub fn empty() -> Self {
         Set(Map::empty())
@@ -70,10 +83,6 @@ impl<'a, K: Clone + Ord> Set<'a, K> {
 
     pub fn count(self) -> isize {
         self.0.count()
-    }
-
-    pub fn mem(self, x: &K) -> bool {
-        self.0.mem(x)
     }
 
     pub fn add<A: Arena>(self, arena: &'a A, x: K) -> Self {
@@ -108,6 +117,14 @@ impl<'a, K: Clone + Ord> Set<'a, K> {
     }
 }
 
+impl<'a, T> Set<'a, T> {
+    pub fn iter(&self) -> SetIter<'a, T> {
+        SetIter {
+            iter: self.0.iter(),
+        }
+    }
+}
+
 /// Iterator state for set.
 pub struct SetIter<'a, K> {
     iter: MapIter<'a, K, ()>,
@@ -132,6 +149,24 @@ impl<'a, K> Iterator for SetIter<'a, K> {
             None => None,
             Some((k, _)) => Some(k),
         }
+    }
+}
+
+pub struct Intersection<'a, T> {
+    iter: SetIter<'a, T>,
+    other: Set<'a, T>,
+}
+
+impl<'a, T: Ord> Iterator for Intersection<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(x) = self.iter.next() {
+            if self.other.mem(x) {
+                return Some(x);
+            }
+        }
+        None
     }
 }
 

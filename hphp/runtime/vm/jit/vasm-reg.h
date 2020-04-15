@@ -112,6 +112,10 @@ struct Vreg {
   Vptr operator+(int32_t) const;
   Vptr operator+(intptr_t) const;
 
+  Vptr operator-(size_t) const = delete;
+  Vptr operator-(int32_t) const;
+  Vptr operator-(intptr_t) const;
+
 private:
   unsigned rn{kInvalidReg};
 };

@@ -93,6 +93,13 @@ inline Vptr Vreg::operator+(intptr_t d) const {
   return Vptr(*this, safe_cast<int32_t>(d));
 }
 
+inline Vptr Vreg::operator-(int32_t d) const {
+  return Vptr(*this, safe_cast<int32_t>(-static_cast<int64_t>(d)));
+}
+inline Vptr Vreg::operator-(intptr_t d) const {
+  return Vptr(*this, safe_cast<int32_t>(-d));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vr casting.
 

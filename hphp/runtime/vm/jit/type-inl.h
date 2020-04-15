@@ -572,8 +572,9 @@ inline ArraySpec Type::arrSpec() const {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
     if (!m_arrVal->isVanilla()) return ArraySpec::Top();
     auto const array = (m_bits & kArr) != kBottom;
-    return array ? ArraySpec(m_arrVal->kind())
-                 : ArraySpec(ArraySpec::LayoutTag::Vanilla);
+    if (!array) return ArraySpec{ArraySpec::LayoutTag::Vanilla};
+    auto const spec = ArraySpec{m_arrVal->kind()};
+    return m_arrVal->isDVArray() ? spec.narrowToDVArray() : spec;
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

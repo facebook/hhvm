@@ -12,3 +12,5 @@ type remote_mode =
   | Remote
   (* Pseudo remote on the same machine as client *)
   | PseudoRemote
+
+let get _ = failwith "not implemented"

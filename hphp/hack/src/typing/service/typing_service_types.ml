@@ -119,6 +119,8 @@ type delegate_env = {
   artifact_store_config: ArtifactStore.config;
   defer_class_declaration_threshold: int;
   init_id: string;
+  (* The job runner module to use *)
+  job_runner: (module JobRunner_sig.S);
   mergebase: Hg.hg_rev option;
   num_workers: int;
   raise_on_failure: bool;
@@ -136,8 +138,6 @@ type delegate_env = {
   version_specifier: string option;
   (* The minimum log level workers should be logging at *)
   worker_min_log_level: Hh_logger.Level.t;
-  (* The mode to be used by remote job runner *)
-  remote_mode: JobRunner.remote_mode;
   (* Optional transport channel used by remote type checking. None means default. *)
   transport_channel: string option;
 }

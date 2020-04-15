@@ -46,6 +46,7 @@
     test_gconst_file
     test_get_dependent_classes
     test_getfundeps
+    test_ignore_fixme_hhi
     test_infer_type
     test_interrupt
     test_interrupt2
@@ -72,6 +73,11 @@
   (name server_config_overrides)
   (deps test_all.exe)
   (action (run ./test_all.exe server_config_overrides)))
+
+(alias
+  (name ignore_fixme_hhi)
+  (deps test_all.exe)
+  (action (run ./test_all.exe ignore_fixme_hhi)))
 
 (alias
   (name coverage_counts)
@@ -322,5 +328,6 @@
     (alias function_arg_rx_if_implements1)
     (alias function_arg_rx_if_implements2)
     (alias lazy_decl_idempotence)
+    (alias ignore_fixme_hhi)
     (alias interrupt)
     (alias interrupt2)))

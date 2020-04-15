@@ -190,7 +190,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_pocket_atom_expression(ctx: &C, pocket_atom_glyph: Self, pocket_atom_expression: Self) -> Self;
     fn make_pocket_identifier_expression(ctx: &C, pocket_identifier_qualifier: Self, pocket_identifier_pu_operator: Self, pocket_identifier_field: Self, pocket_identifier_operator: Self, pocket_identifier_name: Self) -> Self;
     fn make_pocket_atom_mapping_declaration(ctx: &C, pocket_atom_mapping_glyph: Self, pocket_atom_mapping_name: Self, pocket_atom_mapping_left_paren: Self, pocket_atom_mapping_mappings: Self, pocket_atom_mapping_right_paren: Self, pocket_atom_mapping_semicolon: Self) -> Self;
-    fn make_pocket_enum_declaration(ctx: &C, pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self;
+    fn make_pocket_enum_declaration(ctx: &C, pocket_enum_attributes: Self, pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self;
     fn make_pocket_field_type_expr_declaration(ctx: &C, pocket_field_type_expr_case: Self, pocket_field_type_expr_type: Self, pocket_field_type_expr_name: Self, pocket_field_type_expr_semicolon: Self) -> Self;
     fn make_pocket_field_type_declaration(ctx: &C, pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_reified: Self, pocket_field_type_name: Self, pocket_field_type_semicolon: Self) -> Self;
     fn make_pocket_mapping_id_declaration(ctx: &C, pocket_mapping_id_name: Self, pocket_mapping_id_initializer: Self) -> Self;

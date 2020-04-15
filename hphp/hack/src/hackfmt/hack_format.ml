@@ -2329,6 +2329,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       transform_simple env node
     | Syntax.PocketEnumDeclaration
         {
+          pocket_enum_attributes = attr;
           pocket_enum_modifiers = modifiers;
           pocket_enum_enum = enum_keyword;
           pocket_enum_name = name;
@@ -2338,6 +2339,8 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         } ->
       Concat
         [
+          t env attr;
+          when_present attr newline;
           handle_possible_list env ~after_each:(fun _ -> Space) modifiers;
           t env enum_keyword;
           when_present enum_keyword space;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f551e3be7a80a601bbbffd8b5192fe8>>
+// @generated SignedSource<<1a6d217fab0fb96c39ad547fa5a940d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1176,6 +1176,7 @@ impl<P: Params> Node<P> for PuEnum<P::Ex, P::Fb, P::En, P::Hi> {
     fn recurse(&self, c: &mut P::Context, v: &mut dyn Visitor<P = P>) -> Result<(), P::Error> {
         v.visit_en(c, &self.annotation)?;
         self.name.accept(c, v)?;
+        self.user_attributes.accept(c, v)?;
         self.is_final.accept(c, v)?;
         self.case_types.accept(c, v)?;
         self.case_values.accept(c, v)?;

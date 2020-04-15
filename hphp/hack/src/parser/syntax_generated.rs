@@ -1856,8 +1856,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_pocket_enum_declaration(_: &C, pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self {
+    fn make_pocket_enum_declaration(_: &C, pocket_enum_attributes: Self, pocket_enum_modifiers: Self, pocket_enum_enum: Self, pocket_enum_name: Self, pocket_enum_left_brace: Self, pocket_enum_fields: Self, pocket_enum_right_brace: Self) -> Self {
         let syntax = SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
+            pocket_enum_attributes,
             pocket_enum_modifiers,
             pocket_enum_enum,
             pocket_enum_name,
@@ -3255,7 +3256,8 @@ where
                 acc
             },
             SyntaxVariant::PocketEnumDeclaration(x) => {
-                let PocketEnumDeclarationChildren { pocket_enum_modifiers, pocket_enum_enum, pocket_enum_name, pocket_enum_left_brace, pocket_enum_fields, pocket_enum_right_brace } = *x;
+                let PocketEnumDeclarationChildren { pocket_enum_attributes, pocket_enum_modifiers, pocket_enum_enum, pocket_enum_name, pocket_enum_left_brace, pocket_enum_fields, pocket_enum_right_brace } = *x;
+                let acc = f(pocket_enum_attributes, acc);
                 let acc = f(pocket_enum_modifiers, acc);
                 let acc = f(pocket_enum_enum, acc);
                 let acc = f(pocket_enum_name, acc);
@@ -4637,13 +4639,14 @@ where
                  pocket_atom_mapping_glyph: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::PocketEnumDeclaration, 6) => SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
+             (SyntaxKind::PocketEnumDeclaration, 7) => SyntaxVariant::PocketEnumDeclaration(Box::new(PocketEnumDeclarationChildren {
                  pocket_enum_right_brace: ts.pop().unwrap(),
                  pocket_enum_fields: ts.pop().unwrap(),
                  pocket_enum_left_brace: ts.pop().unwrap(),
                  pocket_enum_name: ts.pop().unwrap(),
                  pocket_enum_enum: ts.pop().unwrap(),
                  pocket_enum_modifiers: ts.pop().unwrap(),
+                 pocket_enum_attributes: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::PocketFieldTypeExprDeclaration, 4) => SyntaxVariant::PocketFieldTypeExprDeclaration(Box::new(PocketFieldTypeExprDeclarationChildren {
@@ -6001,6 +6004,7 @@ pub struct PocketAtomMappingDeclarationChildren<T, V> {
 
 #[derive(Debug, Clone)]
 pub struct PocketEnumDeclarationChildren<T, V> {
+    pub pocket_enum_attributes: Syntax<T, V>,
     pub pocket_enum_modifiers: Syntax<T, V>,
     pub pocket_enum_enum: Syntax<T, V>,
     pub pocket_enum_name: Syntax<T, V>,
@@ -7905,13 +7909,14 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             PocketEnumDeclaration(x) => {
-                get_index(6).and_then(|index| { match index {
-                        0 => Some(&x.pocket_enum_modifiers),
-                    1 => Some(&x.pocket_enum_enum),
-                    2 => Some(&x.pocket_enum_name),
-                    3 => Some(&x.pocket_enum_left_brace),
-                    4 => Some(&x.pocket_enum_fields),
-                    5 => Some(&x.pocket_enum_right_brace),
+                get_index(7).and_then(|index| { match index {
+                        0 => Some(&x.pocket_enum_attributes),
+                    1 => Some(&x.pocket_enum_modifiers),
+                    2 => Some(&x.pocket_enum_enum),
+                    3 => Some(&x.pocket_enum_name),
+                    4 => Some(&x.pocket_enum_left_brace),
+                    5 => Some(&x.pocket_enum_fields),
+                    6 => Some(&x.pocket_enum_right_brace),
                         _ => None,
                     }
                 })

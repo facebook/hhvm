@@ -575,6 +575,7 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
 and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_annotation: 'en;
   pu_name: sid;
+  pu_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   pu_is_final: bool;
   pu_case_types: (sid * reify_kind) list;
   pu_case_values: (sid * hint) list;

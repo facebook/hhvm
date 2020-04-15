@@ -1434,9 +1434,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_pocket_enum_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_pocket_enum_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5);
+    fn make_pocket_enum_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R, arg5: Self::R, arg6: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_pocket_enum_declaration(self, arg0, arg1, arg2, arg3, arg4, arg5, arg6);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

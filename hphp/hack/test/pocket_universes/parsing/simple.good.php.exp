@@ -15,7 +15,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 434
           ((pocket_enum_declaration 82
-            ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
              (list 61
               ((pocket_field_type_declaration 12
@@ -190,7 +191,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 170
           ((pocket_enum_declaration 102
-            ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 5 ((whitespace 1))) (() { 1 ((end_of_line 1)))
              (list 81
               ((pocket_atom_mapping 81
@@ -258,7 +260,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 104
           ((pocket_enum_declaration 104
-            ((missing 0 ()) (((whitespace 2)) enum 4 ((whitespace 1)))
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) enum 4 ((whitespace 1)))
              (() name 3 ((whitespace 1))) (() { 1 ((end_of_line 1)))
              (list 85
               ((pocket_field_type_declaration 18

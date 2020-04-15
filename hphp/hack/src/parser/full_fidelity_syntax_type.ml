@@ -1126,7 +1126,8 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_atom_mapping_semicolon                      : t
     }
   | PocketEnumDeclaration             of
-    { pocket_enum_modifiers                              : t
+    { pocket_enum_attributes                             : t
+    ; pocket_enum_modifiers                              : t
     ; pocket_enum_enum                                   : t
     ; pocket_enum_name                                   : t
     ; pocket_enum_left_brace                             : t
@@ -2418,7 +2419,8 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     ; pocket_atom_mapping_semicolon: Token.t value
     }
   and pocket_enum_declaration =
-    { pocket_enum_modifiers: Token.t listesque value
+    { pocket_enum_attributes: attribute_specification option value
+    ; pocket_enum_modifiers: Token.t listesque value
     ; pocket_enum_enum: Token.t value
     ; pocket_enum_name: Token.t value
     ; pocket_enum_left_brace: Token.t value

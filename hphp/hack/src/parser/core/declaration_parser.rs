@@ -1194,7 +1194,7 @@ where
                 self.parse_methodish(attribute_spec, modifiers)
             }
             // Pocket Universe declaration
-            (TokenKind::Enum, _) => self.parse_class_enum(modifiers),
+            (TokenKind::Enum, _) => self.parse_class_enum(attribute_spec, modifiers),
             // Otherwise, continue parsing as a property (which might be a lambda).
             _ => self.parse_property_declaration(attribute_spec, modifiers),
         }
@@ -2186,8 +2186,9 @@ where
             | TokenKind::Private
             | TokenKind::Static => self.parse_methodish_or_property_or_const_or_type_const(),
             TokenKind::Enum => {
-                let missing = S!(make_missing, self, self.pos());
-                self.parse_class_enum(missing)
+                let missing1 = S!(make_missing, self, self.pos());
+                let missing2 = S!(make_missing, self, self.pos());
+                self.parse_class_enum(missing1, missing2)
             }
             TokenKind::Async | TokenKind::Final | TokenKind::LessThanLessThan => {
                 // Parse methods, constructors, properties, type constants, or Pocket Universe enums
@@ -2530,7 +2531,7 @@ where
         self.parse_terminated_list(|x| x.parse_pocket_field(), TokenKind::RightBrace)
     }
 
-    fn parse_class_enum(&mut self, modifiers: S::R) -> S::R {
+    fn parse_class_enum(&mut self, attribute_spec: S::R, modifiers: S::R) -> S::R {
         // SPEC
         // 'final'? 'enum' identifier '{' pocket-field-list '}'
         let enum_tok = self.require_token(TokenKind::Enum, Errors::pocket_universe_enum_expected);
@@ -2540,6 +2541,7 @@ where
         S!(
             make_pocket_enum_declaration,
             self,
+            attribute_spec,
             modifiers,
             enum_tok,
             name,

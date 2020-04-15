@@ -1128,7 +1128,15 @@ and typeconst_def
 and pu_enum_def
     env
     c_name
-    { pu_name; pu_is_final; pu_case_types; pu_case_values; pu_members; _ } =
+    {
+      pu_name;
+      pu_user_attributes;
+      pu_is_final;
+      pu_case_types;
+      pu_case_values;
+      pu_members;
+      _;
+    } =
   (* What is a well-formed pocket universe?
     - pu_name is unique
     - pu_case_types are well-formed if all names are unique
@@ -1171,6 +1179,9 @@ and pu_enum_def
       tp_reified = Aast.Erased;
       tp_user_attributes = [];
     }
+  in
+  let (env, pu_user_attributes) =
+    List.map_env env pu_user_attributes Typing.user_attribute
   in
   let (env, constraints) =
     let (env, constraints) =
@@ -1262,6 +1273,7 @@ and pu_enum_def
   {
     Aast.pu_annotation = Env.save local_tpenv env;
     Aast.pu_name;
+    Aast.pu_user_attributes;
     Aast.pu_is_final;
     Aast.pu_case_types;
     Aast.pu_case_values;

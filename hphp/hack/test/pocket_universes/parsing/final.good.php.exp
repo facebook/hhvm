@@ -14,7 +14,8 @@
         ((() { 1 ((end_of_line 1)))
          (list 88
           ((pocket_enum_declaration 88
-            ((list 5 ((((whitespace 2)) final 5 ((whitespace 1)))))
+            ((missing 0 ())
+             (list 5 ((((whitespace 2)) final 5 ((whitespace 1)))))
              (() enum 4 ((whitespace 1))) (() name 5 ((whitespace 1)))
              (() { 1 ((end_of_line 1)))
              (list 61

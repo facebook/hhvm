@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-04-14-0001",
+  "version" : "2020-04-14-0002",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -2104,6 +2104,7 @@
       "description" : "pocket_enum_declaration",
       "prefix" : "pocket_enum",
       "fields" : [
+        { "field_name" : "attributes" },
         { "field_name" : "modifiers" },
         { "field_name" : "enum" },
         { "field_name" : "name" },

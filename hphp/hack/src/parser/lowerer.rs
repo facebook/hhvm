@@ -4399,6 +4399,7 @@ where
             }
             PocketEnumDeclaration(c) => {
                 let is_final = Self::p_kinds(&c.pocket_enum_modifiers, env)?.has(modifier::FINAL);
+                let user_attributes = Self::p_user_attributes(&c.pocket_enum_attributes, env)?;
                 let id = Self::pos_name(&c.pocket_enum_name, env)?;
                 let flds = Self::as_list(&c.pocket_enum_fields);
                 let mut case_types = vec![];
@@ -4459,6 +4460,7 @@ where
                 Ok(class.pu_enums.push(ast::PuEnum {
                     annotation: (),
                     name: id,
+                    user_attributes,
                     is_final,
                     case_types,
                     case_values,

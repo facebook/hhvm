@@ -1013,7 +1013,8 @@ module type Syntax_S = sig
     ; pocket_atom_mapping_semicolon                      : t
     }
   | PocketEnumDeclaration             of
-    { pocket_enum_modifiers                              : t
+    { pocket_enum_attributes                             : t
+    ; pocket_enum_modifiers                              : t
     ; pocket_enum_enum                                   : t
     ; pocket_enum_name                                   : t
     ; pocket_enum_left_brace                             : t
@@ -1257,7 +1258,7 @@ module type Syntax_S = sig
   val make_pocket_atom_expression : t -> t -> t
   val make_pocket_identifier_expression : t -> t -> t -> t -> t -> t
   val make_pocket_atom_mapping_declaration : t -> t -> t -> t -> t -> t -> t
-  val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t
+  val make_pocket_enum_declaration : t -> t -> t -> t -> t -> t -> t -> t
   val make_pocket_field_type_expr_declaration : t -> t -> t -> t -> t
   val make_pocket_field_type_declaration : t -> t -> t -> t -> t -> t
   val make_pocket_mapping_id_declaration : t -> t -> t

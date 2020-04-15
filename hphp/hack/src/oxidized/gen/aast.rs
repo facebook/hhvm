@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<843870007720cad0be72e9abe6289605>>
+// @generated SignedSource<<c471c1aa47445c81226c36589f7effd6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1183,6 +1183,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
 pub struct PuEnum<Ex, Fb, En, Hi> {
     pub annotation: En,
     pub name: Sid,
+    pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub is_final: bool,
     pub case_types: Vec<(Sid, ReifyKind)>,
     pub case_values: Vec<(Sid, Hint)>,

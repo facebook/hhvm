@@ -2295,6 +2295,7 @@ module WithToken(Token: TokenType) = struct
          let acc = f acc pocket_atom_mapping_semicolon in
          acc
       | PocketEnumDeclaration {
+        pocket_enum_attributes;
         pocket_enum_modifiers;
         pocket_enum_enum;
         pocket_enum_name;
@@ -2302,6 +2303,7 @@ module WithToken(Token: TokenType) = struct
         pocket_enum_fields;
         pocket_enum_right_brace;
       } ->
+         let acc = f acc pocket_enum_attributes in
          let acc = f acc pocket_enum_modifiers in
          let acc = f acc pocket_enum_enum in
          let acc = f acc pocket_enum_name in
@@ -4153,6 +4155,7 @@ module WithToken(Token: TokenType) = struct
         pocket_atom_mapping_semicolon;
       ]
       | PocketEnumDeclaration {
+        pocket_enum_attributes;
         pocket_enum_modifiers;
         pocket_enum_enum;
         pocket_enum_name;
@@ -4160,6 +4163,7 @@ module WithToken(Token: TokenType) = struct
         pocket_enum_fields;
         pocket_enum_right_brace;
       } -> [
+        pocket_enum_attributes;
         pocket_enum_modifiers;
         pocket_enum_enum;
         pocket_enum_name;
@@ -6012,6 +6016,7 @@ module WithToken(Token: TokenType) = struct
         "pocket_atom_mapping_semicolon";
       ]
       | PocketEnumDeclaration {
+        pocket_enum_attributes;
         pocket_enum_modifiers;
         pocket_enum_enum;
         pocket_enum_name;
@@ -6019,6 +6024,7 @@ module WithToken(Token: TokenType) = struct
         pocket_enum_fields;
         pocket_enum_right_brace;
       } -> [
+        "pocket_enum_attributes";
         "pocket_enum_modifiers";
         "pocket_enum_enum";
         "pocket_enum_name";
@@ -8096,6 +8102,7 @@ module WithToken(Token: TokenType) = struct
           pocket_atom_mapping_semicolon;
         }
       | (SyntaxKind.PocketEnumDeclaration, [
+          pocket_enum_attributes;
           pocket_enum_modifiers;
           pocket_enum_enum;
           pocket_enum_name;
@@ -8104,6 +8111,7 @@ module WithToken(Token: TokenType) = struct
           pocket_enum_right_brace;
         ]) ->
         PocketEnumDeclaration {
+          pocket_enum_attributes;
           pocket_enum_modifiers;
           pocket_enum_enum;
           pocket_enum_name;
@@ -10679,6 +10687,7 @@ module WithToken(Token: TokenType) = struct
         make syntax value
 
       let make_pocket_enum_declaration
+        pocket_enum_attributes
         pocket_enum_modifiers
         pocket_enum_enum
         pocket_enum_name
@@ -10687,6 +10696,7 @@ module WithToken(Token: TokenType) = struct
         pocket_enum_right_brace
       =
         let syntax = PocketEnumDeclaration {
+          pocket_enum_attributes;
           pocket_enum_modifiers;
           pocket_enum_enum;
           pocket_enum_name;

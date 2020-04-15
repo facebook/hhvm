@@ -33,3 +33,5 @@ primarily lives in [heap-collect.cpp](../../runtime/base/heap-collect.cpp) and
 [heap-scan.h](../../runtime/base/heap-scan.h), with [scanning
 code](https://github.com/facebook/hhvm/search?q=TYPE_SCAN_CUSTOM&unscoped_q=TYPE_SCAN_CUSTOM)
 spread throughout various other files, situated with the types being scanned.
+
+For information on annotations, see [type-scan.h](../../util/type-scan.h).

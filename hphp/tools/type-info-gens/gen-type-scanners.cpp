@@ -2917,7 +2917,9 @@ void Generator::checkForLayoutErrors() const {
       for (const auto& context : errors.context) {
         oss << "\t- " << context << "\n";
       }
-      oss << "\t- from type '" << *indexed.type << "'\n\n";
+      oss << "\t- from type '" << *indexed.type << "'\n"
+             "\t- if annotations are needed, see definitions in "
+             "hphp/util/type-scan.h.\n\n";
     }
     // Error if an indexed type had internal linkage.
     for (const auto& address : indexed.addresses) {

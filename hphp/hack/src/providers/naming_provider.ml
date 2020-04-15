@@ -180,10 +180,8 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
             Naming_sqlite.get_fun_pos ~case_insensitive:false name)
         >>| attach_name_type FileInfo.Fun
       | Provider_backend.Decl_service { decl; _ } ->
-        Decl_service_client.rpc_get_fun decl name
-        |> Option.map ~f:(fun fun_elt ->
-               FileInfo.Full fun_elt.Typing_defs.fe_pos
-               |> attach_name_type FileInfo.Fun))
+        Decl_service_client.rpc_get_fun_path decl name
+        |> Option.map ~f:(fun path -> FileInfo.(File (Fun, path), Fun)))
   >>| remove_name_type
 
 let fun_exists (ctx : Provider_context.t) (name : string) : bool =
@@ -388,19 +386,14 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
             Naming_sqlite.get_type_pos ~case_insensitive:false name)
         >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
       | Provider_backend.Decl_service { decl; _ } ->
-        (* TODO: We probably want to provide a decl service API for this. *)
-        (match Decl_service_client.rpc_get_class decl name with
-        | Some sc ->
-          Some (FileInfo.Full (fst sc.Shallow_decl_defs.sc_name), FileInfo.Class)
-        | None ->
-          (match Decl_service_client.rpc_get_typedef decl name with
-          | Some td ->
-            Some (FileInfo.Full td.Typing_defs.td_pos, FileInfo.Typedef)
-          | None ->
-            (match Decl_service_client.rpc_get_record_def decl name with
-            | Some rdt ->
-              Some (FileInfo.Full rdt.Typing_defs.rdt_pos, FileInfo.RecordDef)
-            | None -> None))))
+        Decl_service_client.rpc_get_type_path_and_kind decl name
+        |> Option.map ~f:(fun (path, name_type) ->
+               match name_type with
+               | Naming_types.TClass -> FileInfo.(File (Class, path), Class)
+               | Naming_types.TTypedef ->
+                 FileInfo.(File (Typedef, path), Typedef)
+               | Naming_types.TRecordDef ->
+                 FileInfo.(File (RecordDef, path), RecordDef)))
   >>| fun (pos, name_type) -> (pos, name_type_to_kind name_type)
 
 let get_type_pos (ctx : Provider_context.t) (name : string) :

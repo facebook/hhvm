@@ -44,6 +44,8 @@
     core_kernel
     decl_ipc_ffi_externs
     marshal_tools
+    naming_types
+    relative_path
     typing_defs
     utils_core
     shallow_decl_defs

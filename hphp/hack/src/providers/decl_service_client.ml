@@ -82,3 +82,13 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
     let gconst_ty_opt = pointer_to_option ptr in
     String.Table.add_exn t.gconst_cache name gconst_ty_opt;
     gconst_ty_opt
+
+let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
+  Decl_ipc_ffi_externs.get_const_path t.client name
+
+let rpc_get_fun_path (t : t) (name : string) : Relative_path.t option =
+  Decl_ipc_ffi_externs.get_fun_path t.client name
+
+let rpc_get_type_path_and_kind (t : t) (name : string) :
+    (Relative_path.t * Naming_types.kind_of_type) option =
+  Decl_ipc_ffi_externs.get_type_path_and_kind t.client name

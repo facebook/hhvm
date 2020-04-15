@@ -13,8 +13,8 @@ type state = unit [@@deriving show]
 let create ?(max_batch_size = 0) ?(min_batch_size = 0) () =
   ignore (max_batch_size, min_batch_size)
 
-let start delegate_env state ~recheck_id =
-  ignore (delegate_env, recheck_id);
+let start delegate_env state =
+  ignore delegate_env;
   state
 
 let stop state = state

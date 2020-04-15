@@ -8,7 +8,7 @@
  *)
 
 module Env = Format_env
-open Core_kernel
+open Hh_prelude
 
 type t = {
   chunk_group: Chunk_group.t;
@@ -240,7 +240,7 @@ let add_breaks_from_source rbm source_text chunk_group =
         let (chunk_start, chunk_end) = Chunk.get_range chunk in
         let rbm =
           let rec aux i =
-            i < chunk_start && (source_text.[i] = '\n' || aux (i + 1))
+            i < chunk_start && (Char.equal source_text.[i] '\n' || aux (i + 1))
           in
           if aux prev_chunk_end then
             IMap.add chunk.Chunk.rule true rbm
@@ -298,7 +298,11 @@ let is_overlapping s1 s2 =
   let s2_rules = get_rules_on_partially_bound_lines s2 in
   ISet.cardinal s1_rules = ISet.cardinal s2_rules
   && ISet.for_all
-       (fun s1_key -> IMap.find_opt s1_key s1.rbm = IMap.find_opt s1_key s2.rbm)
+       (fun s1_key ->
+         Option.equal
+           Bool.equal
+           (IMap.find_opt s1_key s1.rbm)
+           (IMap.find_opt s1_key s2.rbm))
        s1_rules
 
 let compare_rule_sets s1 s2 =

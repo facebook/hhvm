@@ -11,7 +11,7 @@ module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
 module DebugPos = Debug.WithSyntax (Syntax)
-open Core_kernel
+open Hh_prelude
 
 type debug_config = {
   print_ast: bool;

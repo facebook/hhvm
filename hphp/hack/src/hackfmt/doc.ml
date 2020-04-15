@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type t =
   (* Null case *)
@@ -109,6 +109,10 @@ type t =
   (* Add a comma only if the next split is broken on. The bool indicates whether
    * a trailing comma was present in the original source. *)
   | TrailingComma of bool
+
+let is_nothing = function
+  | Nothing -> true
+  | _ -> false
 
 let space () = Space
 
@@ -242,7 +246,7 @@ let dump ?(ignored = false) node =
     and print s = eprintf "%s%s\n" (String.make !indent ' ') s
     and dump_list name nodes =
       print
-        ( if name = "" then
+        ( if String.equal name "" then
           "["
         else
           name ^ " [" );
@@ -253,7 +257,7 @@ let dump ?(ignored = false) node =
       List.iter nodes aux;
       indent := !indent - 2
     in
-    if node = Nothing then
+    if is_nothing node then
       print "Nothing"
     else
       aux node;

@@ -12,6 +12,7 @@ type t =
   | Base
   | Moderate
   | High
+[@@deriving eq]
 
 let get_cost t =
   match t with

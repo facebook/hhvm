@@ -8,7 +8,7 @@
  *)
 
 module Env = Format_env
-open Core_kernel
+open Hh_prelude
 open Common
 
 let expand_state env state =

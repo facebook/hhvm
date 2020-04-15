@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type open_span = { open_span_start: int }
 
@@ -24,6 +24,15 @@ type string_type =
   | ConcatOp
   | LineComment
   | Other
+[@@deriving eq]
+
+let is_doc_string_close = function
+  | DocStringClose -> true
+  | Number
+  | ConcatOp
+  | LineComment
+  | Other ->
+    false
 
 let builder =
   object (this)
@@ -93,7 +102,8 @@ let builder =
 
     method private add_string ?(is_trivia = false) ?(multiline = false) s width
         =
-      if last_string_type = DocStringClose && (is_trivia || s <> ";") then
+      if is_doc_string_close last_string_type && (is_trivia || String.(s <> ";"))
+      then
         this#hard_split ();
 
       chunks <-
@@ -142,7 +152,7 @@ let builder =
         done;
         num_pending_spans <- 0;
 
-        if last_string_type = DocStringClose && s = ";" then (
+        if is_doc_string_close last_string_type && String.equal s ";" then (
           (* Normally, we'd have already counted the newline in the semicolon's
            * trailing trivia before splitting. Since here we're splitting before
            * getting the chance to handle that trailing trivia, we temporarily
@@ -159,7 +169,7 @@ let builder =
       after_next_string <- None
 
     method private set_pending_comma present_in_original_source =
-      if last_string_type <> DocStringClose then
+      if not (is_doc_string_close last_string_type) then
         let range =
           if not present_in_original_source then
             None
@@ -283,7 +293,7 @@ let builder =
       (* Override next_split_rule unless it's an Always rule *)
       next_split_rule <-
         (match next_split_rule with
-        | RuleKind kind when kind <> Rule.Always -> NoRule
+        | RuleKind kind when not (Rule.is_always kind) -> NoRule
         | _ -> next_split_rule);
       let rule = this#create_rule rule_kind in
       this#start_rule_id rule
@@ -308,7 +318,7 @@ let builder =
     (*TODO: error *)
     method private has_rule_kind kind =
       List.exists rules ~f:(fun id ->
-          Rule_allocator.get_rule_kind rule_alloc id = kind)
+          Rule.equal_kind (Rule_allocator.get_rule_kind rule_alloc id) kind)
 
     method private start_span () = num_pending_spans <- num_pending_spans + 1
 
@@ -406,11 +416,11 @@ let builder =
           this#consume_doc node;
           last_string_type <- DocStringClose
         | NumericLiteral node ->
-          if last_string_type = ConcatOp then this#add_space ();
+          if equal_string_type last_string_type ConcatOp then this#add_space ();
           this#consume_doc node;
           last_string_type <- Number
         | ConcatOperator node ->
-          if last_string_type = Number then this#add_space ();
+          if equal_string_type last_string_type Number then this#add_space ();
           this#consume_doc node;
           last_string_type <- ConcatOp
         | Split -> this#split ()
@@ -469,7 +479,7 @@ let builder =
           this#end_rule ();
           if override_independent_split then this#end_rule ()
         | TrailingComma present_in_original_source ->
-          if last_string_type <> LineComment then
+          if not (equal_string_type last_string_type LineComment) then
             this#set_pending_comma present_in_original_source
           else (
             this#add_string "," 1;

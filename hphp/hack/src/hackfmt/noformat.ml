@@ -13,7 +13,7 @@ module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 module Token = Full_fidelity_positioned_token
 module Trivia = Full_fidelity_positioned_trivia
-open Core_kernel
+open Hh_prelude
 open Boundaries
 open Format_env
 
@@ -37,7 +37,7 @@ let is_begin_manual_section_tag text =
     true
   with Caml.Not_found -> false
 
-let is_end_manual_section_tag text = text = end_manual_section_tag
+let is_end_manual_section_tag text = String.equal text end_manual_section_tag
 
 let add_fixme_ranges fixmes trivia =
   let trivium_range trivium =

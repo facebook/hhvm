@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Env = Format_env
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_editable_syntax
@@ -18,6 +18,30 @@ module Trivia = Full_fidelity_editable_trivia
 module TriviaKind = Full_fidelity_trivia_kind
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 open Doc
+
+let is_trivia_kind_fallthrough = function
+  | TriviaKind.FallThrough -> true
+  | _ -> false
+
+let is_trivia_kind_end_of_line = function
+  | TriviaKind.EndOfLine -> true
+  | _ -> false
+
+let is_trivia_kind_white_space = function
+  | TriviaKind.WhiteSpace -> true
+  | _ -> false
+
+let is_syntax_kind_parenthesized_exprression = function
+  | SyntaxKind.ParenthesizedExpression -> true
+  | _ -> false
+
+let is_token_kind_xhp_body = function
+  | TokenKind.XHPBody -> true
+  | _ -> false
+
+let is_token_kind_in_out = function
+  | TokenKind.Inout -> true
+  | _ -> false
 
 let make_list = Syntax.make_list SourceText.empty 0
 
@@ -121,7 +145,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         match Syntax.syntax suffix with
         | Syntax.MarkupSuffix
             { markup_suffix_name = Syntax.{ syntax = Token t; _ }; _ } ->
-          Token.text t = "hh"
+          String.equal (Token.text t) "hh"
         | _ -> false
       in
       let rec all_whitespaces s i =
@@ -1181,7 +1205,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       let (labels_leading, labels) = remove_leading_trivia labels in
       let (after_fallthrough, upto_fallthrough) =
         List.split_while (List.rev labels_leading) ~f:(fun t ->
-            Trivia.kind t <> TriviaKind.FallThrough)
+            not (is_trivia_kind_fallthrough (Trivia.kind t)))
       in
       let upto_fallthrough = List.rev upto_fallthrough in
       let after_fallthrough = List.rev after_fallthrough in
@@ -1264,7 +1288,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       (match Syntax.syntax expr_list with
       | Syntax.SyntaxList
           [Syntax.{ syntax = ListItem { list_item = expr; _ }; _ }]
-        when Syntax.kind expr = SyntaxKind.ParenthesizedExpression ->
+        when is_syntax_kind_parenthesized_exprression (Syntax.kind expr) ->
         Concat [t env kw; t env expr; t env semi; Newline]
       | _ -> transform_keyword_expr_list_statement env kw expr_list semi)
     | Syntax.ConcurrentStatement
@@ -1912,7 +1936,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
               (List.map xs ~f:(fun node ->
                    let node_is_xhpbody =
                      match Syntax.syntax node with
-                     | Syntax.Token t -> Token.kind t = TokenKind.XHPBody
+                     | Syntax.Token t -> is_token_kind_xhp_body (Token.kind t)
                      | _ -> false
                    in
 
@@ -2293,7 +2317,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env op;
           begin
             match Syntax.syntax op with
-            | Syntax.Token t when Token.kind t = TokenKind.Inout -> Space
+            | Syntax.Token t when is_token_kind_in_out (Token.kind t) -> Space
             | _ -> Nothing
           end;
           t env expr;
@@ -2417,7 +2441,7 @@ and braced_block_nest env ?(allow_collapse = true) open_b close_b nodes =
   match (allow_collapse, has_printable_content nodes, Syntax.syntax open_b) with
   | (true, false, Syntax.Token ob)
     when List.for_all (Token.trailing ob) (fun t ->
-             Trivia.kind t <> TriviaKind.EndOfLine) ->
+             not (is_trivia_kind_end_of_line (Trivia.kind t))) ->
     Concat [t env open_b; t env close_b]
   | (true, false, Syntax.Missing) -> Concat [t env open_b; t env close_b]
   | _ ->
@@ -2608,7 +2632,7 @@ and handle_xhp_open_right_angle_token env attrs node =
   | Syntax.Token token ->
     Concat
       [
-        ( if Token.text token = "/>" then
+        ( if String.equal (Token.text token) "/>" then
           Concat [Space; when_present attrs split]
         else
           Nothing );
@@ -3184,15 +3208,21 @@ and get_operator_type op =
   | _ -> failwith "Operator should always be a token"
 
 and is_concat op =
-  get_operator_type op = Full_fidelity_operator.ConcatenationOperator
+  match get_operator_type op with
+  | Full_fidelity_operator.ConcatenationOperator -> true
+  | _ -> false
 
 and transform_binary_expression env ~is_nested (left, operator, right) =
   let operator_has_surrounding_spaces op = not (is_concat op) in
   let operator_is_leading op =
-    get_operator_type op = Full_fidelity_operator.PipeOperator
+    match get_operator_type op with
+    | Full_fidelity_operator.PipeOperator -> true
+    | _ -> false
   in
   let operator_preserves_newlines op =
-    get_operator_type op = Full_fidelity_operator.PipeOperator
+    match get_operator_type op with
+    | Full_fidelity_operator.PipeOperator -> true
+    | _ -> false
   in
   let operator_t = get_operator_type operator in
   if Full_fidelity_operator.is_comparison operator_t then
@@ -3384,12 +3414,12 @@ and leading_ignore_comment trivia_list =
  * Note that WhiteSpace includes spaces and tabs, but not newlines. *)
 and has_whitespace trivia_list =
   List.exists trivia_list ~f:(fun trivia ->
-      Trivia.kind trivia = TriviaKind.WhiteSpace)
+      is_trivia_kind_white_space (Trivia.kind trivia))
 
 (* True if the trivia list contains EndOfLine trivia. *)
 and has_newline trivia_list =
   List.exists trivia_list ~f:(fun trivia ->
-      Trivia.kind trivia = TriviaKind.EndOfLine)
+      is_trivia_kind_end_of_line (Trivia.kind trivia))
 
 and is_invisible trivia =
   match Trivia.kind trivia with
@@ -3455,7 +3485,7 @@ and transform_trivia ~is_leading trivia =
           let prefix_space_count str =
             let len = String.length str in
             let rec aux i =
-              if i = len || (str.[i] <> ' ' && str.[i] <> '\t') then
+              if i = len || Char.(str.[i] <> ' ' && str.[i] <> '\t') then
                 0
               else
                 1 + aux (i + 1)
@@ -3577,7 +3607,7 @@ and transform_xhp_leading_trivia triv =
         if seen then
           (upto, t :: after, true)
         else
-          (t :: upto, after, Trivia.kind t = TriviaKind.EndOfLine))
+          (t :: upto, after, is_trivia_kind_end_of_line (Trivia.kind t)))
   in
   Concat
     [
@@ -3587,7 +3617,7 @@ and transform_xhp_leading_trivia triv =
 
 and node_has_trailing_newline node =
   let trivia = Syntax.trailing_trivia node in
-  List.exists trivia ~f:(fun x -> Trivia.kind x = TriviaKind.EndOfLine)
+  List.exists trivia ~f:(fun x -> is_trivia_kind_end_of_line (Trivia.kind x))
 
 and transform_consequence
     t (env : Env.t) (node_body : Syntax.t) (node_newline : Syntax.t) =

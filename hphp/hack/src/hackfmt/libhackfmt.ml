@@ -12,7 +12,7 @@ module SyntaxTree =
 module EditableSyntax = Full_fidelity_editable_syntax
 module SourceText = Full_fidelity_source_text
 module Env = Format_env
-open Core_kernel
+open Hh_prelude
 open Noformat
 open Boundaries
 
@@ -183,7 +183,9 @@ let format_intervals ?config intervals tree =
   (* Dirty hack: Since we don't print the whitespace surrounding formatted
      ranges, we don't print the trailing newline at the end of the file if the
      last line in the file was modified. Add it here manually. *)
-  if Buffer.length buf > 0 && Buffer.nth buf (Buffer.length buf - 1) <> '\n'
+  if
+    Buffer.length buf > 0
+    && Char.(Buffer.nth buf (Buffer.length buf - 1) <> '\n')
   then
     Buffer.add_char buf '\n';
   Buffer.contents buf
@@ -213,12 +215,20 @@ let format_at_offset ?config (tree : SyntaxTree.t) offset =
    * direct parent is a CompoundStatement, skip it and get the grandparent
    * (so we format entire IfStatements or MethodishDeclarations when formatting
    * at the closing brace). *)
+  let is_sk_compound_statement = function
+    | Full_fidelity_syntax_kind.CompoundStatement -> true
+    | _ -> false
+  in
+  let is_sk_syntax_list = function
+    | Full_fidelity_syntax_kind.SyntaxList -> true
+    | _ -> false
+  in
   let (token, node) =
     let module SK = Full_fidelity_syntax_kind in
     match PS.parentage (SyntaxTree.root tree) offset with
     | token :: parent :: grandparent :: _
-      when PS.kind parent = SK.CompoundStatement
-           && PS.kind grandparent <> SK.SyntaxList ->
+      when is_sk_compound_statement (PS.kind parent)
+           && not (is_sk_syntax_list (PS.kind grandparent)) ->
       (token, grandparent)
     | token :: parent :: _ -> (token, parent)
     | _ -> invalid_arg "Invalid offset"

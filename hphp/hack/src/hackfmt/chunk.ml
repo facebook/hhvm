@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* An atom is a substring of the original source which will be exactly
  * represented in the formatted output and is considered indivisible by hackfmt.
@@ -84,7 +84,7 @@ let finalize chunk rule ra space comma end_char =
   let end_char = max chunk.start_char end_char in
   let rule =
     if
-      Rule_allocator.get_rule_kind ra rule = Rule.Always
+      Rule.is_always (Rule_allocator.get_rule_kind ra rule)
       || chunk.rule = Rule.null_rule_id
     then
       rule
@@ -128,7 +128,7 @@ let get_comma_range chunk =
 let is_empty chunk =
   match chunk.atoms with
   | [] -> true
-  | [atom] when atom.text = "" -> true
+  | [atom] when String.equal atom.text "" -> true
   | _ -> false
 
 let text chunk =

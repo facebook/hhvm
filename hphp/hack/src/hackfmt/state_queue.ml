@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 module SolveStateKey = struct
   type t = Solve_state.t
 

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type t = {
   chunks: Chunk.t list;
@@ -47,7 +47,7 @@ let propagate_breakage t initial_bindings =
          |> List.fold ~init:acc ~f:(fun acc id -> IMap.add id true acc))
 
 let get_always_rules t =
-  t.rule_map |> IMap.filter (fun _ v -> v.Rule.kind = Rule.Always) |> IMap.keys
+  t.rule_map |> IMap.filter (fun _ v -> Rule.is_always v.Rule.kind) |> IMap.keys
 
 let get_always_rule_bindings t =
   get_always_rules t

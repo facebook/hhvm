@@ -7,10 +7,19 @@
  *
  *)
 
+open Hh_prelude
+
 type kind =
   | Simple of Cost.t
   | Always
   | Parental
+[@@deriving eq]
+
+let is_always = function
+  | Always -> true
+  | Parental
+  | Simple _ ->
+    false
 
 type t = {
   id: int;

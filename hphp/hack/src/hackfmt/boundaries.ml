@@ -8,7 +8,7 @@
  *)
 
 module SourceText = Full_fidelity_source_text
-open Core_kernel
+open Hh_prelude
 open Printf
 
 let get_line_boundaries text =

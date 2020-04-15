@@ -242,8 +242,8 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 let ret = emit_return(e, env)?;
                 let expr_instr = if let Some(e_) = r.1.as_await() {
                     emit_await(e, env, &r.0, e_)?
-                } else if let Some(_) = r.1.as_yield_from() {
-                    emit_yield_from_delegates(e, env, pos, &r)?
+                } else if let Some(yf) = r.1.as_yield_from() {
+                    emit_yield_from_delegates(e, env, pos, yf)?
                 } else {
                     emit_expr(e, env, &r)?
                 };
@@ -777,9 +777,12 @@ fn emit_try_finally_(
     // jump directly to the finally.
     let finally_start = e.label_gen_mut().next_regular();
     let finally_end = e.label_gen_mut().next_regular();
-    let mut try_env = env.clone();
-    try_env.flags.set(env::Flags::IN_TRY, true);
-    let try_body = try_env.do_in_try_body(e, finally_start.clone(), try_block, emit_block)?;
+
+    let in_try = env.flags.contains(env::Flags::IN_TRY);
+    env.flags.set(env::Flags::IN_TRY, true);
+    let try_body = env.do_in_try_body(e, finally_start.clone(), try_block, emit_block)?;
+    env.flags.set(env::Flags::IN_TRY, in_try);
+
     let jump_instrs = tfr::JumpInstructions::collect(&try_body, &mut env.jump_targets_gen);
     let jump_instrs_is_empty = jump_instrs.is_empty();
 
@@ -883,15 +886,18 @@ fn emit_try_catch_(
         return Ok(instr::empty());
     };
     let end_label = e.label_gen_mut().next_regular();
-    let mut try_env = env.clone();
-    try_env.flags.set(env::Flags::IN_TRY, true);
+
+    let in_try = env.flags.contains(env::Flags::IN_TRY);
+    env.flags.set(env::Flags::IN_TRY, true);
     let catch_instrs = InstrSeq::gather(
         catch_list
             .iter()
             .map(|catch| emit_catch(e, env, pos, &end_label, catch))
             .collect::<Result<Vec<_>>>()?,
     );
-    let try_instrs = InstrSeq::gather(vec![emit_stmts(e, &mut try_env, try_block)?, emit_pos(pos)]);
+    let try_instrs = InstrSeq::gather(vec![emit_stmts(e, env, try_block)?, emit_pos(pos)]);
+    env.flags.set(env::Flags::IN_TRY, in_try);
+
     Ok(InstrSeq::create_try_catch(
         e.label_gen_mut(),
         Some(end_label.clone()),

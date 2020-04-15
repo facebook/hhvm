@@ -2337,6 +2337,17 @@ where
     })
 }
 
+fn print_expr_varray<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    varray: &[ast::Expr],
+) -> Result<(), W::Error> {
+    wrap_by_(w, "varray[", "]", |w| {
+        concat_by(w, ", ", varray, |w, e| print_expr(ctx, w, env, e))
+    })
+}
+
 fn print_shape_field_name<W: Write>(
     _ctx: &mut Context,
     w: &mut W,
@@ -2712,9 +2723,7 @@ fn print_expr<W: Write>(
             w.write(if a.2 { " ?as " } else { " as " })?;
             print_hint(w, true, &a.1)
         }
-        E_::Varray(va) => wrap_by_(w, "varray[", "]", |w| {
-            concat_by(w, ", ", &va.1, |w, e| print_expr(ctx, w, env, e))
-        }),
+        E_::Varray(va) => print_expr_varray(ctx, w, env, &va.1),
         E_::Darray(da) => print_expr_darray(ctx, w, env, print_expr, &da.1),
         E_::List(l) => wrap_by_(w, "list(", ")", |w| {
             concat_by(w, ", ", l, |w, i| print_expr(ctx, w, env, i))
@@ -2737,7 +2746,7 @@ fn print_expr<W: Write>(
             w.write(" ")?;
             print_expr(ctx, w, env, &i.1)
         }
-        E_::Xml(_) => not_impl!(),
+        E_::Xml(x) => print_xml(ctx, w, env, &(x.0).1, &x.1, &x.2),
         E_::Efun(f) => print_efun(ctx, w, env, &f.0, &f.1),
         E_::Omitted => Ok(()),
         E_::Lfun(_) => Err(Error::fail(
@@ -2750,6 +2759,51 @@ fn print_expr<W: Write>(
             "TODO Unimplemented: We are missing a lot of cases in the case match. Delete this catchall"
         ))
     }
+}
+
+fn print_xml<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    id: &str,
+    attrs: &[ast::XhpAttribute],
+    children: &[ast::Expr],
+) -> Result<(), W::Error> {
+    fn print_xhp_attrs<W: Write>(
+        ctx: &mut Context,
+        w: &mut W,
+        env: &ExprEnv,
+        attrs: &[ast::XhpAttribute],
+        spread_id: usize,
+    ) -> Result<(), W::Error> {
+        let key_printer = |_: &mut Context, w: &mut W, _: &ExprEnv, k| print_expr_string(w, k);
+        match &attrs {
+            [] => Ok(()),
+            [hd @ .., ast::XhpAttribute::XhpSimple((_, s), e)] => {
+                print_key_value_(ctx, w, env, s, key_printer, e)?;
+                w.write_if(!hd.is_empty(), ", ")?;
+                print_xhp_attrs(ctx, w, env, hd, spread_id)
+            }
+            [hd @ .., ast::XhpAttribute::XhpSpread(e)] => {
+                print_key_value_(ctx, w, env, &format!("...${}", spread_id), key_printer, e)?;
+                w.write_if(!hd.is_empty(), ", ")?;
+                print_xhp_attrs(ctx, w, env, hd, spread_id + 1)
+            }
+        }
+    }
+    let env = ExprEnv {
+        codegen_env: env.codegen_env,
+        is_xhp: true,
+    };
+    write!(w, "new {}", mangle(id.into()))?;
+    wrap_by_paren(w, |w| {
+        wrap_by_(w, "darray[", "]", |w| {
+            print_xhp_attrs(ctx, w, &env, attrs, 0)
+        })?;
+        w.write(", ")?;
+        print_expr_varray(ctx, w, &env, children)?;
+        w.write(", __FILE__, __LINE__")
+    })
 }
 
 fn print_efun<W: Write>(

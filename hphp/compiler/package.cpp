@@ -303,7 +303,7 @@ bool Package::parse(bool check, std::thread& unit_emitter_thread) {
         folly::Optional<Timer> timer;
 
         auto commitSome = [&] {
-          batchCommit(batched_ues);
+          batchCommit(batched_ues, false);
           if (!useHHBBC) {
             for (auto& ue : batched_ues) {
               m_ar->addHhasFile(std::move(ue));

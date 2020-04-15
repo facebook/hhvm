@@ -742,15 +742,16 @@ void Repo::commit() {
 }
 
 RepoStatus Repo::insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
-                            RepoTxn& txn) {
+                            RepoTxn& txn, bool usePreAllocatedUnitSn) {
   if (insertSha1(unitOrigin, ue, txn) == RepoStatus::error ||
-      ue->insert(unitOrigin, txn) == RepoStatus::error) {
+      ue->insert(unitOrigin, txn, usePreAllocatedUnitSn) == RepoStatus::error) {
     return RepoStatus::error;
   }
   return RepoStatus::success;
 }
 
-void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
+void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
+                      bool usePreAllocatedUnitSn) {
   if (!RuntimeOption::RepoCommit || ue->m_ICE) return;
 
   tracing::Block _{
@@ -760,7 +761,7 @@ void Repo::commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin) {
 
   try {
     commitSha1(unitOrigin, ue);
-    ue->commit(unitOrigin);
+    ue->commit(unitOrigin, usePreAllocatedUnitSn);
   } catch (const std::exception& e) {
     TRACE(0, "unexpected exception in commitUnit: %s\n",
           e.what());
@@ -1294,7 +1295,8 @@ bool Repo::writable(int repoId) {
 
 //////////////////////////////////////////////////////////////////////
 
-bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
+                             bool usePreAllocatedUnitSn) {
   auto& repo = Repo::get();
 
   bool err = false;
@@ -1302,7 +1304,8 @@ bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>& ue
     auto txn = RepoTxn{repo.begin()};
 
     for (auto& ue : ues) {
-      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn) ==
+      assertx(!usePreAllocatedUnitSn || ue->m_sn != -1);
+      if (repo.insertUnit(ue.get(), UnitOrigin::File, txn, usePreAllocatedUnitSn) ==
           RepoStatus::error) {
         err = true;
         break;
@@ -1316,17 +1319,18 @@ bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>& ue
   return err;
 }
 
-void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues) {
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
+                 bool usePreAllocatedUnitSn) {
   auto& repo = Repo::get();
 
   // Attempt batch commit.  This can legitimately fail due to multiple input
   // files having identical contents.
-  bool err = batchCommitWithoutRetry(ues);
+  bool err = batchCommitWithoutRetry(ues, usePreAllocatedUnitSn);
 
   // Commit units individually if an error occurred during batch commit.
   if (err) {
     for (auto& ue : ues) {
-      repo.commitUnit(ue.get(), UnitOrigin::File);
+      repo.commitUnit(ue.get(), UnitOrigin::File, usePreAllocatedUnitSn);
     }
   }
 }

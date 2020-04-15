@@ -95,12 +95,13 @@ struct UnitEmitter {
   /*
    * Commit this unit to a repo.
    */
-  void commit(UnitOrigin unitOrigin);
+  void commit(UnitOrigin unitOrigin, bool usePreAllocatedUnitSn);
 
   /*
    * Insert this unit in a repo as part of transaction `txn'.
    */
-  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn);
+  RepoStatus insert(UnitOrigin unitOrigin, RepoTxn& txn,
+                    bool usePreAllocatedUnitSn);
 
   /*
    * Instatiate a runtime Unit*.
@@ -578,7 +579,8 @@ struct UnitRepoProxy : public RepoProxy {
                 int64_t& unitSn,
                 const SHA1& sha1,
                 const unsigned char* bc,
-                size_t bclen); // throws(RepoExc)
+                size_t bclen,
+                bool usePreAllocatedUnitSn); // throws(RepoExc)
   };
   struct GetUnitStmt : public RepoProxy::Stmt {
     GetUnitStmt(Repo& repo, int repoId) : Stmt(repo, repoId) {}

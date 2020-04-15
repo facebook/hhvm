@@ -1523,6 +1523,7 @@ std::unique_ptr<UnitEmitter> emit_unit(const Index& index,
                                           Native::s_noNativeFuncs,
                                           true);
   FTRACE(1, "  unit {}\n", unit.filename->data());
+  ue->m_sn = unit.sn;
   ue->m_filepath = unit.filename;
   ue->m_isHHFile = unit.isHHFile;
   ue->m_metaData = unit.metaData;

@@ -207,8 +207,9 @@ struct Repo : RepoProxy {
   void commit(); // throws(RepoExc)
  public:
   RepoStatus insertUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
-                        RepoTxn& txn); // nothrow
-  void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin); // nothrow
+                        RepoTxn& txn, bool usePreAllocatedUnitSn); // nothrow
+  void commitUnit(UnitEmitter* ue, UnitOrigin unitOrigin,
+                  bool usePreAllocatedUnitSn); // nothrow
 
   static bool s_deleteLocalOnFailure;
   // All database table names use the schema ID (sha1 checksum based on the
@@ -275,9 +276,11 @@ private:
  * Try to commit a vector of unit emitters to the current repo.  Note that
  * errors are ignored!
  */
-void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>&);
+void batchCommit(const std::vector<std::unique_ptr<UnitEmitter>>&,
+                 bool usePreAllocatedUnitSn);
 
-bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>&);
+bool batchCommitWithoutRetry(const std::vector<std::unique_ptr<UnitEmitter>>&,
+                             bool usePreAllocatedUnitSn);
 
 //////////////////////////////////////////////////////////////////////
 

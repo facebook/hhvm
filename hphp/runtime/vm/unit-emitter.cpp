@@ -426,11 +426,11 @@ void UnitEmitter::insertMergeableRecord(int ix, const Id id) {
 ///////////////////////////////////////////////////////////////////////////////
 // Initialization and execution.
 
-void UnitEmitter::commit(UnitOrigin unitOrigin) {
+void UnitEmitter::commit(UnitOrigin unitOrigin, bool usePreAllocatedUnitSn) {
   Repo& repo = Repo::get();
   try {
     auto txn = RepoTxn{repo.begin()};
-    RepoStatus err = insert(unitOrigin, txn);
+    RepoStatus err = insert(unitOrigin, txn, usePreAllocatedUnitSn);
     if (err == RepoStatus::success) {
       txn.commit();
     }
@@ -445,7 +445,8 @@ void UnitEmitter::commit(UnitOrigin unitOrigin) {
   }
 }
 
-RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
+RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn,
+                               bool usePreAllocatedUnitSn) {
   Repo& repo = Repo::get();
   UnitRepoProxy& urp = repo.urp();
   int repoId = Repo::get().repoIdForNewUnit(unitOrigin);
@@ -460,7 +461,7 @@ RepoStatus UnitEmitter::insert(UnitOrigin unitOrigin, RepoTxn& txn) {
         m_lineTable = createLineTable(m_sourceLocTab, m_bclen);
       }
       urp.insertUnit[repoId].insert(*this, txn, m_sn, m_sha1, m_bc,
-                                    m_bclen);
+                                    m_bclen, usePreAllocatedUnitSn);
     }
     int64_t usn = m_sn;
     urp.insertUnitLineTable[repoId].insert(txn, usn, m_lineTable);
@@ -975,12 +976,13 @@ UnitRepoProxy::load(const folly::StringPiece name, const SHA1& sha1,
 void UnitRepoProxy::InsertUnitStmt
                   ::insert(const UnitEmitter& ue,
                            RepoTxn& txn, int64_t& unitSn, const SHA1& sha1,
-                           const unsigned char* bc, size_t bclen) {
+                           const unsigned char* bc, size_t bclen,
+                           bool usePreAllocatedUnitSn) {
   BlobEncoder dataBlob{ue.useGlobalIds()};
 
   if (!prepared()) {
     auto insertQuery = folly::sformat(
-      "INSERT INTO {} VALUES(NULL, @sha1, @globalids, @bc, @data);",
+      "INSERT INTO {} VALUES(@unitSn, @sha1, @globalids, @bc, @data);",
       m_repo.table(m_repoId, "Unit"));
     txn.prepare(*this, insertQuery);
   }
@@ -990,8 +992,16 @@ void UnitRepoProxy::InsertUnitStmt
   query.bindBlob("@bc", (const void*)bc, bclen);
   const_cast<UnitEmitter&>(ue).serdeMetaData(dataBlob);
   query.bindBlob("@data", dataBlob, /* static */ true);
+  if (!usePreAllocatedUnitSn) {
+    query.bindNull("@unitSn");
+  } else {
+    always_assert(unitSn != -1);
+    query.bindInt64("@unitSn", unitSn);
+  }
   query.exec();
-  unitSn = query.getInsertedRowid();
+  if (!usePreAllocatedUnitSn) {
+    unitSn = query.getInsertedRowid();
+  }
 }
 
 RepoStatus UnitRepoProxy::GetUnitStmt::get(UnitEmitter& ue, const SHA1& sha1) {

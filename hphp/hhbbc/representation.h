@@ -605,6 +605,7 @@ struct Record {
  * Representation of a php file (normal compilation unit).
  */
 struct Unit {
+  int64_t sn{-1};
   SHA1 sha1;
   LSString filename;
   bool isHHFile{false};

@@ -1131,7 +1131,9 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   for (auto const item : puState.constPassFuncs) {
     prog.constInits.push_back(item);
   }
-  ret->sha1 = SHA1 { prog.units.size() };
+  auto unitSn = prog.units.size();
+  ret->sn = unitSn;
+  ret->sha1 = SHA1 { unitSn };
   prog.units.push_back(std::move(ret));
 }
 

@@ -217,7 +217,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       };
 
       auto commitSome = [&] (decltype(ues)& emitters) {
-        auto const DEBUG_ONLY err = batchCommitWithoutRetry(emitters);
+        auto const DEBUG_ONLY err = batchCommitWithoutRetry(emitters, true);
         always_assert(!err);
         if (Option::GenerateTextHHBC || Option::GenerateHhasHHBC) {
           std::move(emitters.begin(), emitters.end(),
@@ -232,7 +232,9 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         uint32_t id = 0;
         for (auto& ue : ues) {
           ue->m_symbol_refs.clear();
-          ue->setSha1(SHA1 { id++ });
+          ue->m_sn = id;
+          ue->setSha1(SHA1 { id });
+          id++;
         }
         commitSome(ues);
       }
@@ -382,7 +384,7 @@ Unit* hphp_compiler_parse(const char* code, int codeLen, const SHA1& sha1,
     }
 
     // NOTE: Repo errors are ignored!
-    Repo::get().commitUnit(ue.get(), unitOrigin);
+    Repo::get().commitUnit(ue.get(), unitOrigin, false);
     unit = ue->create();
     if (BuiltinSymbols::s_systemAr) {
       assertx(ue->m_filepath->data()[0] == '/' &&

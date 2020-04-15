@@ -356,13 +356,13 @@ void write_units(UnitEmitterQueue& ueq) {
     if (!timer) timer.emplace("writing output repo");
     ues.push_back(std::move(ue));
     if (ues.size() == 8) {
-      auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues);
+      auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues, true);
       always_assert(!err);
       ues.clear();
     }
   }
 
-  auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues);
+  auto const DEBUG_ONLY err = batchCommitWithoutRetry(ues, true);
   always_assert(!err);
   ues.clear();
 }

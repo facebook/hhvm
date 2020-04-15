@@ -2193,6 +2193,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         if (orig_f->userAttributes().count(s_DebuggerMainAttr.get())) {
           auto const f = ctx ? orig_f->clone(ctx) : orig_f;
           if (ctx) {
+            f->setNewFuncId();
             f->setBaseCls(ctx);
             if (fp && fp->hasThis()) {
               f->setAttrs(Attr(f->attrs() & ~AttrStatic));

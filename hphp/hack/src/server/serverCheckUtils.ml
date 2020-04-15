@@ -48,6 +48,7 @@ let start_typing_delegate genv env : env =
   in
   let {
     declaration_threshold = defer_class_declaration_threshold;
+    heartbeat_period;
     max_batch_size;
     min_batch_size;
     num_workers;
@@ -78,6 +79,7 @@ let start_typing_delegate genv env : env =
               {
                 artifact_store_config;
                 defer_class_declaration_threshold;
+                heartbeat_period;
                 init_id;
                 job_runner = JobRunner.get JobRunner.Remote;
                 mergebase;

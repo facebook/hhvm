@@ -16,6 +16,8 @@ module RemoteTypeCheck = struct
     declaration_threshold: int;
     (* Enables remote type check *)
     enabled: bool;
+    (* Indicates how long to wait between heartbeats (in seconds) *)
+    heartbeat_period: int;
     load_naming_table_on_full_init: bool;
     max_batch_size: int;
     min_batch_size: int;
@@ -38,6 +40,9 @@ module RemoteTypeCheck = struct
         ~prefix
         ~default:default.declaration_threshold
         config
+    in
+    let heartbeat_period =
+      int_ "heartbeat_period" ~prefix ~default:default.heartbeat_period config
     in
     let num_workers =
       int_ "num_workers" ~prefix ~default:default.num_workers config
@@ -89,6 +94,7 @@ module RemoteTypeCheck = struct
     {
       declaration_threshold;
       enabled;
+      heartbeat_period;
       load_naming_table_on_full_init;
       max_batch_size;
       min_batch_size;
@@ -388,6 +394,8 @@ let default =
         {
           enabled = false;
           declaration_threshold = 2;
+          (* Indicates how long to wait between heartbeats (in seconds) *)
+          heartbeat_period = 15;
           load_naming_table_on_full_init = false;
           max_batch_size = 8_000;
           min_batch_size = 5_000;

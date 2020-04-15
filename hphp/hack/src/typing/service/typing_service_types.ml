@@ -118,6 +118,8 @@ end
 type delegate_env = {
   artifact_store_config: ArtifactStore.config;
   defer_class_declaration_threshold: int;
+  (* The amount of time to wait between heartbeat checks, in seconds *)
+  heartbeat_period: int;
   init_id: string;
   (* The job runner module to use *)
   job_runner: (module JobRunner_sig.S);

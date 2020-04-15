@@ -334,7 +334,7 @@ and emit_awaitall env pos el b =
   match el with
   | [] -> empty
   | [(lvar, e)] -> emit_awaitall_single env pos lvar e b
-  | _ -> emit_awaitall_multi env el b
+  | _ -> emit_awaitall_multi env pos el b
 
 and emit_awaitall_single env pos lval e b =
   Scope.with_unnamed_locals @@ fun () ->
@@ -351,7 +351,7 @@ and emit_awaitall_single env pos lval e b =
                             emit_stmts env b, (* after *)
                                               unset)
 
-and emit_awaitall_multi env el b =
+and emit_awaitall_multi env pos el b =
   Scope.with_unnamed_locals @@ fun () ->
   let load_args =
     gather @@ List.map el ~f:(fun (_, arg) -> emit_expr env arg)
@@ -385,7 +385,7 @@ and emit_awaitall_multi env el b =
   (* before *)
   ( gather [load_args; init_locals],
     (* inner *)
-    gather [await_all; unpack; block],
+    gather [emit_pos pos; await_all; unpack; block],
     (* after *)
     unset_locals )
 

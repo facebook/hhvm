@@ -1,0 +1,37 @@
+backtrace:
+  eager
+    called from line 38
+  main
+backtrace:
+  eager
+    called from line 40
+  main
+backtrace:
+  eager
+    called from line 42
+  main
+backtrace:
+  suspends
+    called from line 34
+  main
+backtrace:
+  suspends
+    called from line 34
+  main
+backtrace:
+  suspends
+    called from line 34
+  main
+int(1)
+int(2)
+int(1)
+int(2)
+backtrace:
+  eager
+    called from line 54
+  main
+backtrace:
+  suspends
+    called from line 58
+  main
+int(3)

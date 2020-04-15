@@ -2677,7 +2677,7 @@ where
         }
     }
 
-    fn with_new_nonconcurrent_scrope<F, R>(f: F, env: &mut Env) -> R
+    fn with_new_nonconcurrent_scope<F, R>(f: F, env: &mut Env) -> R
     where
         F: FnOnce(&mut Env) -> R,
     {
@@ -2687,7 +2687,7 @@ where
         result
     }
 
-    fn with_new_concurrent_scrope<F, R>(f: F, env: &mut Env) -> Result<(LiftedAwaitExprs, R)>
+    fn with_new_concurrent_scope<F, R>(f: F, env: &mut Env) -> Result<(LiftedAwaitExprs, R)>
     where
         F: FnOnce(&mut Env) -> Result<R>,
     {
@@ -3119,7 +3119,8 @@ where
             BreakStatement(_) => Ok(S::new(pos, S_::Break)),
             ContinueStatement(_) => Ok(S::new(pos, S_::Continue)),
             ConcurrentStatement(c) => {
-                let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scrope(
+                let keyword_pos = Self::p_pos(&c.concurrent_keyword, env);
+                let (lifted_awaits, S(stmt_pos, stmt)) = Self::with_new_concurrent_scope(
                     |e: &mut Env| Self::p_stmt(&c.concurrent_statement, e),
                     env,
                 )?;
@@ -3187,7 +3188,10 @@ where
                     }
                     _ => Self::failwith("Unexpected concurrent stmt structure")?,
                 };
-                Ok(S::new(pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
+                Ok(S::new(
+                    keyword_pos,
+                    S_::mk_awaitall(lifted_awaits, vec![stmt]),
+                ))
             }
             MarkupSection(_) => Self::p_markup(node, env),
             _ => Self::missing_syntax_(
@@ -3655,7 +3659,7 @@ where
                 }
             }
         };
-        Self::with_new_nonconcurrent_scrope(f, env)
+        Self::with_new_nonconcurrent_scope(f, env)
     }
 
     fn mk_suspension_kind(

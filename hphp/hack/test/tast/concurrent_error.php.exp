@@ -35,7 +35,7 @@ Errors:
        f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
        f_body =
        { fb_ast =
-         [([8:3-11:4],
+         [([8:3-13],
            (Awaitall (
               [((Some ([9:17-26], __tmp$1)),
                 (([9:17-26], Awaitable<int>),

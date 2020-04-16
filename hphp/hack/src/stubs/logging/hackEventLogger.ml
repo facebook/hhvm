@@ -156,7 +156,7 @@ let serverless_ide_local_files ~local_file_count:_ = ()
 
 let serverless_ide_destroy_ok _ = ()
 
-let serverless_ide_destroy_error _ _ = ()
+let serverless_ide_destroy_error _ _ _ = ()
 
 let client_bad_exit ~command:_ _ = ()
 

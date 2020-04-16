@@ -161,7 +161,10 @@ let rec wait_for_initialization (t : t) : unit Lwt.t =
 
 (** rpc_internal pushes a message onto the daemon's queue, and awaits until
 it can pop the response back. It updates ref_unnblocked_time, the time
-at which the daemon started handling the message. *)
+at which the daemon started handling the message.
+Note: it's not safe to cancel this, since we might end up
+with no one reading the answer to the message we just pushed,
+leading to desync. *)
 let rpc_internal
     (t : t)
     ~(tracked_message : 'a ClientIdeMessage.tracked_t)
@@ -213,6 +216,18 @@ let rpc_internal
         data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
       }
 
+(** This function will always fail if we're in a terminal state.
+If invoked with [needs_init:false] then we'll happily pass
+the message on to the daemon regardless of its state.
+But if invoked with [needs_init:true] and we haven't yet sent
+an initialize request to the daemon, or haven't yet heard a response,
+then we'll fail. This last behavior can be tweaked by the wait_for_initialize
+flag passed to initialize_from_saved_state, used for tests; it means that instead
+of failing in this case we'll await until the daemon's initialize
+response.
+Note: it's not safe to cancel this method: we might get an item on
+the outgoing queue and no one to consume it, leading to desync.
+*)
 let rpc
     (t : t)
     ~(tracking_id : string)
@@ -364,15 +379,6 @@ let process_status_notification
       set_state t (Initialized { status = Status.Ready }))
 
 let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
-  let {
-    daemon_handle;
-    messages_to_send;
-    response_emitter;
-    notification_emitter;
-    _;
-  } =
-    t
-  in
   let%lwt () =
     match t.state with
     | Uninitialized _
@@ -380,45 +386,46 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
     | Stopped _ ->
       Lwt.return_unit
     | Initialized _ ->
+      let open Lsp.Error in
       let start_time = Unix.gettimeofday () in
-      (try%lwt
-         let ref_unblocked_time = ref 0. in
-         let%lwt () =
-           Lwt.pick
-             [
-               (let%lwt (_result : (unit, Lsp.Error.t) result) =
-                  rpc
-                    t
-                    ~tracking_id
-                    ~ref_unblocked_time
-                    ~needs_init:true
-                    (ClientIdeMessage.Shutdown ())
-                in
-                Daemon.kill daemon_handle;
-                HackEventLogger.serverless_ide_destroy_ok start_time;
-                Lwt.return_unit);
-               (let%lwt () = Lwt_unix.sleep 5.0 in
-                Daemon.kill daemon_handle;
-                let stack = Exception.get_current_callstack_string 100 in
-                HackEventLogger.serverless_ide_destroy_error
-                  start_time
-                  ("Timeout\n" ^ stack);
-                log "ClientIdeService.destroy timeout";
-                Lwt.return_unit);
-             ]
-         in
-         Lwt.return_unit
-       with e ->
-         let e = Exception.wrap e in
-         HackEventLogger.serverless_ide_destroy_error
-           start_time
-           (Exception.to_string e);
-         log "ClientIdeService.destroy error\n%s" (Exception.to_string e);
-         Lwt.return_unit)
+      let ref_unblocked_time = ref 0. in
+      let%lwt result =
+        try%lwt
+          Lwt.pick
+            [
+              rpc
+                t
+                ~tracking_id
+                ~ref_unblocked_time
+                ~needs_init:true
+                (ClientIdeMessage.Shutdown ());
+              (let%lwt () = Lwt_unix.sleep 5.0 in
+               Lwt.return_error
+                 { code = InternalError; message = "timeout"; data = None });
+            ]
+        with e ->
+          let e = Exception.wrap e in
+          Lwt.return_error
+            {
+              code = InternalError;
+              message = Exception.get_ctor_string e;
+              data =
+                Lsp_fmt.error_data_of_stack (Exception.get_backtrace_string e);
+            }
+      in
+      let () =
+        match result with
+        | Ok () -> HackEventLogger.serverless_ide_destroy_ok start_time
+        | Error { message; data; _ } ->
+          HackEventLogger.serverless_ide_destroy_error start_time message data;
+          log "ClientIdeService.destroy %s" message
+      in
+      Daemon.kill t.daemon_handle;
+      Lwt.return_unit
   in
-  Lwt_message_queue.close messages_to_send;
-  Lwt_message_queue.close notification_emitter;
-  Lwt_message_queue.close response_emitter;
+  Lwt_message_queue.close t.messages_to_send;
+  Lwt_message_queue.close t.notification_emitter;
+  Lwt_message_queue.close t.response_emitter;
   Lwt.return_unit
 
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t

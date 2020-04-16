@@ -325,6 +325,24 @@ let rec localize ~ety_env env (dty : decl_ty) =
         (base, sid :: trailing)
       | _ -> (dty, [])
     in
+    (* Env.get_upper_bounds might not be populated every time localization
+     * is called, but so far it is when it really matters, so we'll stick
+     * with this approximation: if no upper bounds info is available,
+     * localization will return a Tpu
+     *)
+    let guess_if_pu env tp =
+      let upper_bounds = Env.get_upper_bounds env tp in
+      let res =
+        Typing_set.fold
+          (fun bound res ->
+            match get_node bound with
+            | Tpu (_, _) -> true
+            | _ -> res)
+          upper_bounds
+          false
+      in
+      res
+    in
     let (dbase, trailing) = build_access dty in
     let (env, base) = localize ~ety_env env dbase in
     (match trailing with
@@ -332,7 +350,10 @@ let rec localize ~ety_env env (dty : decl_ty) =
       (match deref base with
       | (r, Tgeneric tp) ->
         let member = (Reason.to_pos r, tp) in
-        (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
+        if guess_if_pu env tp then
+          (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
+        else
+          (env, mk (r, Tpu (base, enum_or_tyname)))
       | (r, Tvar v) ->
         Typing_subtype_pocket_universes.get_tyvar_pu_access
           env

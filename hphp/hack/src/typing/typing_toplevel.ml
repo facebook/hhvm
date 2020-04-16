@@ -291,6 +291,50 @@ let map_funcbody_annotation an =
   | Nast.Named -> Tast.NoUnsafeBlocks
   | Nast.Unnamed _ -> failwith "Should not map over unnamed body"
 
+(* Given a locl_ty type of params, check, in case it is a Tpu or a
+ * Tpu_type_access, if the invocation is correct:
+ * - Tpu(base, enum): enum must be a valid PU in base or its upper bounds
+ * - Tpu_type_acces(tp, name): name must be a valid PU type name in tp's
+ *   upper bounds
+ *)
+let check_pu_in_locl_ty env lty =
+  let check env tp candidate =
+    let upper_bounds = Env.get_upper_bounds env tp in
+    Typing_set.fold
+      (fun bound (env, is_pu, is_pu_type_access) ->
+        match get_node bound with
+        | Tpu (lty, (_, enum)) ->
+          let (env, puaccess) =
+            Typing_utils.class_get_pu_type env lty enum candidate
+          in
+          let res = Option.is_some puaccess in
+          (env, is_pu, res || is_pu_type_access)
+        | _ ->
+          let (env, pu) = TUtils.class_get_pu env bound candidate in
+          let res = Option.is_some pu in
+          (env, res || is_pu, is_pu_type_access))
+      upper_bounds
+      (env, false, false)
+  in
+  match deref lty with
+  | (r, Tpu (base, (_, enum))) ->
+    let (env, res) = Typing_utils.class_get_pu env base enum in
+    if Option.is_none res then
+      Errors.pu_localize_unknown (Reason.to_pos r) (Typing_print.full env lty);
+    env
+  | (r, Tpu_type_access ((_, tp), (_, name))) ->
+    let (env, is_pu, is_pu_type_access) = check env tp name in
+    if is_pu && is_pu_type_access then
+      Errors.pu_localize_unknown
+        (Reason.to_pos r)
+        (sprintf ": %s is ambiguous" (Typing_print.full env lty))
+    else if not (is_pu || is_pu_type_access) then
+      Errors.pu_localize_unknown
+        (Reason.to_pos r)
+        (sprintf ": %s is unknown" (Typing_print.full env lty));
+    env
+  | _ -> env
+
 let rec fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
   let env = EnvFromDef.fun_env ctx f in
@@ -346,6 +390,7 @@ let rec fun_def ctx f :
           let localize env ty = Phase.localize_with_self env ty in
           Typing_return.make_return_type localize env ty
       in
+      let env = check_pu_in_locl_ty env return_ty in
       let return =
         Typing_return.make_info
           f.f_fun_kind
@@ -365,7 +410,15 @@ let rec fun_def ctx f :
       List.iter2_exn ~f:check_has_hint f.f_params param_tys;
       Typing_memoize.check_function env f;
       let (env, typed_params) =
-        List.map_env env (List.zip_exn param_tys f.f_params) Typing.bind_param
+        let bind_param_and_check env param =
+          let (env, fun_param) = Typing.bind_param env param in
+          let env = check_pu_in_locl_ty env (fst fun_param.param_type_hint) in
+          (env, fun_param)
+        in
+        List.map_env
+          env
+          (List.zip_exn param_tys f.f_params)
+          bind_param_and_check
       in
       let (env, t_variadic) =
         get_callable_variadicity
@@ -526,6 +579,7 @@ and method_def env cls m =
           in
           Typing_return.make_return_type (Phase.localize ~ety_env) env ret
       in
+      let env = check_pu_in_locl_ty env locl_ty in
       let return =
         Typing_return.make_info
           m.m_fun_kind
@@ -545,7 +599,15 @@ and method_def env cls m =
       List.iter2_exn ~f:param_fn m.m_params param_tys;
       Typing_memoize.check_method env m;
       let (env, typed_params) =
-        List.map_env env (List.zip_exn param_tys m.m_params) Typing.bind_param
+        let bind_param_and_check env param =
+          let (env, fun_param) = Typing.bind_param env param in
+          let env = check_pu_in_locl_ty env (fst fun_param.param_type_hint) in
+          (env, fun_param)
+        in
+        List.map_env
+          env
+          (List.zip_exn param_tys m.m_params)
+          bind_param_and_check
       in
       let (env, t_variadic) =
         get_callable_variadicity

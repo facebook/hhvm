@@ -673,9 +673,21 @@ let rec class_get_pu_ env cty name =
   | Tdynamic
   | Tunion _ ->
     (env, None)
-  | Tgeneric _ ->
-    (* TODO(T36532263) check for PU in upper bounds (see D18395326) *)
-    (env, None)
+  | Tgeneric tp ->
+    let upper_bounds = Env.get_upper_bounds env tp in
+    let (env, pus) =
+      Typing_set.fold
+        (fun bound (env, pus) ->
+          let (env, opt) = class_get_pu_ env bound name in
+          match opt with
+          | None -> (env, pus)
+          | Some res -> (env, res :: pus))
+        upper_bounds
+        (env, [])
+    in
+    (match pus with
+    | [pu] -> (env, Some pu)
+    | _ -> (env, None))
   | Tvar _
   | Tnonnull
   | Tarraykind _
@@ -729,6 +741,13 @@ let class_get_pu_member ?from_class env ty enum name =
     enum >>= fun (ety_env, pu) ->
     SMap.find_opt name pu.tpu_members >>= fun member -> Some (ety_env, member)
   )
+
+let class_get_pu_type ?from_class env ty enum name =
+  let open Option in
+  let (env, pu) = class_get_pu ?from_class env ty enum in
+  ( env,
+    pu >>= fun (ety_env, pu) ->
+    SMap.find_opt name pu.tpu_case_types >>= fun dty -> Some (ety_env, dty) )
 
 let class_get_pu_member_type ?from_class env ty enum member name =
   let open Option in

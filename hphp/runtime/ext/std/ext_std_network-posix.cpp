@@ -196,6 +196,10 @@ static unsigned char *php_parserr(unsigned char *cp, unsigned char* end,
   GETLONG(ttl, cp);
   GETSHORT(dlen, cp);
   CHECKCP(dlen);
+  if (dlen == 0) {
+    /* No data in the response - nothing to do */
+    return nullptr;
+  }
   if (type_to_fetch != T_ANY && type != type_to_fetch) {
     cp += dlen;
     return cp;

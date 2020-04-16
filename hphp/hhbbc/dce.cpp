@@ -292,18 +292,18 @@ struct DceAction {
   using MaskOrCountType = uint32_t;
   static constexpr size_t kMaskSize = 32;
   MaskOrCountType maskOrCount{0};
+  CompactVector<Bytecode> bcs{};
 
   DceAction() = default;
   /* implicit */ DceAction(Action a) : action{a} {}
   DceAction(Action a, MaskOrCountType m) : action{a}, maskOrCount{m} {}
+  DceAction(Action a, CompactVector<Bytecode> bcs)
+    : action{a}
+    , bcs{std::move(bcs)}
+  {}
 };
 
-bool operator==(const DceAction& a, const DceAction& b) {
-  return a.action == b.action && a.maskOrCount == b.maskOrCount;
-}
-
 using DceActionMap = std::map<InstrId, DceAction>;
-using DceReplaceMap = std::map<InstrId, CompactVector<Bytecode>>;
 
 struct UseInfo {
   explicit UseInfo(Use u) : usage(u) {}
@@ -372,12 +372,6 @@ struct DceState {
    * and producers balanced.
    */
   DceActionMap actionMap;
-
-  /*
-   * Actions of type Replace in the actionMap have an entry here with
-   * the replacement bytecodes.
-   */
-  DceReplaceMap replaceMap;
 
   /*
    * Dead across Call, Yield or Await.
@@ -746,73 +740,80 @@ void use(LocationIdSet& forcedLive,
   }
 }
 
-void combineActions(DceActionMap& dst, const DceActionMap& src) {
-  for (auto& i : src) {
-    auto ret = dst.insert(i);
-    if (!ret.second) {
-      if (i.second.action == DceAction::UnsetLocalsBefore ||
-          i.second.action == DceAction::UnsetLocalsAfter) {
-        continue;
-      }
+void combineActions(DceActionMap& dstMap, DceActionMap srcMap) {
+  if (srcMap.empty())  return;
+  if (dstMap.empty()) {
+    dstMap = std::move(srcMap);
+    return;
+  }
 
-      if (ret.first->second.action == DceAction::UnsetLocalsBefore ||
-          ret.first->second.action == DceAction::UnsetLocalsAfter) {
-        if (i.second.action == DceAction::Replace ||
-            i.second.action == DceAction::PopAndReplace) {
-          // The UnsetLocals replace map will take precedence, so leave the
-          // action as UnsetLocals.
-          continue;
-        }
-        ret.first->second = i.second;
-        continue;
-      }
-
-      if (i.second.action == DceAction::MinstrStackFixup ||
-          i.second.action == DceAction::MinstrStackFinal) {
-        assertx(i.second.action == ret.first->second.action);
-        ret.first->second.maskOrCount |= i.second.maskOrCount;
-        continue;
-      }
-
-      if (i.second.action == DceAction::AdjustPop &&
-          ret.first->second.action == DceAction::AdjustPop) {
-        assertx(ret.first->second.maskOrCount > 0);
-        assertx(i.second.maskOrCount > 0);
-        ret.first->second.maskOrCount += i.second.maskOrCount;
-        continue;
-      }
-
-      if (i.second.action == ret.first->second.action) {
-        continue;
-      }
-
-      assertx(i.second.action == DceAction::Kill ||
-              ret.first->second.action == DceAction::Kill);
-
-      if (i.second.action == DceAction::PopAndReplace ||
-          ret.first->second.action == DceAction::PopAndReplace) {
-        ret.first->second.action = DceAction::Replace;
-        continue;
-      }
-      if (i.second.action == DceAction::Replace ||
-          ret.first->second.action == DceAction::Replace) {
-        ret.first->second.action = DceAction::Replace;
-        continue;
-      }
-      if (ret.first->second.action == DceAction::PopInputs ||
-          i.second.action == DceAction::PopInputs) {
-        ret.first->second.action = DceAction::Kill;
-        continue;
-      }
-      if (ret.first->second.action == DceAction::AdjustPop ||
-          i.second.action == DceAction::AdjustPop) {
-        ret.first->second.action = DceAction::Kill;
-        ret.first->second.maskOrCount = 0;
-        continue;
-      }
-
-      always_assert(false);
+  for (auto& srcElm : srcMap) {
+    // Ideally we could use the try_emplace operation once we can rely on c++17.
+    auto dstIt = dstMap.find(srcElm.first);
+    if (dstIt == dstMap.end()) {
+      dstMap.emplace(std::move(srcElm));
+      continue;
     }
+
+    auto& src = srcElm.second;
+    auto& dst = dstIt->second;
+
+    if (src.action == DceAction::UnsetLocalsBefore ||
+        src.action == DceAction::UnsetLocalsAfter) {
+      continue;
+    }
+
+    if (dst.action == DceAction::UnsetLocalsBefore ||
+        dst.action == DceAction::UnsetLocalsAfter) {
+      dst = std::move(src);
+      continue;
+    }
+
+    if (src.action == DceAction::MinstrStackFixup ||
+        src.action == DceAction::MinstrStackFinal) {
+      assertx(src.action == dst.action);
+      dst.maskOrCount |= src.maskOrCount;
+      continue;
+    }
+
+    if (src.action == DceAction::AdjustPop &&
+        dst.action == DceAction::AdjustPop) {
+      assertx(dst.maskOrCount > 0);
+      assertx(src.maskOrCount > 0);
+      dst.maskOrCount += src.maskOrCount;
+      continue;
+    }
+
+    if (src.action == dst.action) {
+      continue;
+    }
+
+    assertx(src.action == DceAction::Kill ||
+            dst.action == DceAction::Kill);
+
+    if (src.action == DceAction::PopAndReplace ||
+        dst.action == DceAction::PopAndReplace) {
+      dst.action = DceAction::Replace;
+      continue;
+    }
+    if (src.action == DceAction::Replace ||
+        dst.action == DceAction::Replace) {
+      dst.action = DceAction::Replace;
+      continue;
+    }
+    if (dst.action == DceAction::PopInputs ||
+        src.action == DceAction::PopInputs) {
+      dst.action = DceAction::Kill;
+      continue;
+    }
+    if (dst.action == DceAction::AdjustPop ||
+        src.action == DceAction::AdjustPop) {
+      dst.action = DceAction::Kill;
+      dst.maskOrCount = 0;
+      continue;
+    }
+
+    always_assert(false);
   }
 }
 
@@ -1186,8 +1187,10 @@ void cgetImpl(Env& env, LocalId loc, bool quiet) {
           !isLocVolatile(env, loc)) {
         // note: PushL does not deal with Uninit, so we need the
         // readCouldHaveSideEffects here, regardless of quiet.
-        env.dceState.replaceMap.insert({ env.id, { bc::PushL { loc } } });
-        env.dceState.actionMap.emplace(env.id, DceAction::Replace);
+        env.dceState.actionMap.emplace(env.id, DceAction(
+          DceAction::Replace,
+          { bc::PushL { loc } }
+        ));
       }
       return PushFlags::MarkLive;
     });
@@ -1211,9 +1214,10 @@ void dce(Env& env, const bc::PushL& op) {
       scheduleGenLoc(env, op.loc1);
       if (allUnused(ui)) {
         if (isLocLive(env, op.loc1)) {
-          env.dceState.replaceMap.insert(
-            { env.id, { bc::UnsetL { op.loc1 } } });
-          ui.actions.emplace(env.id, DceAction::Replace);
+          ui.actions.emplace(env.id, DceAction(
+            DceAction::Replace,
+            { bc::UnsetL { op.loc1 } }
+          ));
         }
         return PushFlags::MarkUnused;
       }
@@ -1286,8 +1290,7 @@ void dce(Env& env, const bc::Array& op) {
       IterateV(op.arr1, [&] (TypedValue v) {
         bcs.push_back(gen_constant(v));
       });
-      env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-      ui.actions[env.id] = DceAction::Replace;
+      ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
       env.dceState.didAddOpts  = true;
       return PushFlags::MarkUnused;
     });
@@ -1367,8 +1370,8 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
           assert(arrPost.subtypeOf(BDictN));
           bcs.emplace_back(bc::Dict { v->m_data.parr });
         }
-        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-        ui.actions[env.id] = DceAction::PopAndReplace;
+        ui.actions[env.id] = DceAction(DceAction::PopAndReplace,
+                                       std::move(bcs));
         return PushFlags::MarkUnused;
       }
 
@@ -1401,8 +1404,7 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
         } else {
           return PushFlags::MarkLive;
         }
-        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-        ui.actions[env.id] = DceAction::Replace;
+        ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
         return PushFlags::AddElemC;
       }
 
@@ -1411,8 +1413,7 @@ void dce(Env& env, const bc::AddElemC& /*op*/) {
           *postSize <= ArrayData::MaxElemsOnStack) {
         CompactVector<Bytecode> bcs;
         bcs.emplace_back(bc::NewStructDict { get_string_keys(arrPost) });
-        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-        ui.actions[env.id] = DceAction::Replace;
+        ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
         return PushFlags::AddElemC;
       }
 
@@ -1473,8 +1474,7 @@ void dce(Env& env, const bc::SetL& op) {
     // If the stack result of the SetL is unused, we can replace it
     // with a PopL.
     CompactVector<Bytecode> bcs { bc::PopL { op.loc1 } };
-    env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-    ui.actions[env.id] = DceAction::Replace;
+    ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
     return PushFlags::MarkDead;
   });
   if (isLocVolatile(env, op.loc1)) {
@@ -1936,8 +1936,7 @@ void dce(Env& env, const bc::QueryM& op) {
       } else if (auto const val = tv(env.stateAfter.stack.back().type)) {
         addLocGenSet(env, env.flags.mayReadLocalSet);
         CompactVector<Bytecode> bcs { gen_constant(*val) };
-        env.dceState.replaceMap.emplace(env.id, std::move(bcs));
-        ui.actions[env.id] = DceAction::Replace;
+        ui.actions[env.id] = DceAction(DceAction::Replace, std::move(bcs));
         ui.location.id = env.id.idx;
         env.dceState.minstrUI.emplace(std::move(ui));
       }
@@ -2163,8 +2162,10 @@ dce_visit(const Index& index,
                   dceState.stack, dceState.stack.size() - 1 - i);
               bcs.push_back(bc::PopC {});
             }
-            dceState.replaceMap.emplace(visit_env.id, std::move(bcs));
-            dceState.minstrUI->actions[visit_env.id] = DceAction::Replace;
+            dceState.minstrUI->actions[visit_env.id] = DceAction(
+              DceAction::Replace,
+              std::move(bcs)
+            );
           } else {
             dceState.minstrUI->actions[visit_env.id] = DceAction::Kill;
           }
@@ -2200,8 +2201,10 @@ dce_visit(const Index& index,
         return visit_env.stateAfter.locals[i];
       });
       if (!bcs.empty()) {
-        dceState.replaceMap.emplace(visit_env.id, std::move(bcs));
-        dceState.actionMap.emplace(visit_env.id, DceAction::UnsetLocalsAfter);
+        dceState.actionMap.emplace(visit_env.id, DceAction(
+          DceAction::UnsetLocalsAfter,
+          std::move(bcs)
+        ));
 
         // We flag that we shoud rerun DCE since this Unset might be redudant if
         // a CGetL gets replaced with a PushL.
@@ -2327,9 +2330,7 @@ void adjust_ndiscard(Bytecode& bc, int64_t adj) {
 /*
  * Do the actual updates to the bytecodes.
  */
-void dce_perform(php::Func& func,
-                 const DceActionMap& actionMap,
-                 const DceReplaceMap& replaceMap) {
+void dce_perform(php::Func& func, const DceActionMap& actionMap) {
 
   using It = BytecodeVec::iterator;
   auto setloc = [] (int32_t srcLoc, It start, int n) {
@@ -2340,9 +2341,10 @@ void dce_perform(php::Func& func,
 
   for (auto const& elm : actionMap) {
     auto const& id = elm.first;
+    auto const& dceAction = elm.second;
     auto const b = func.blocks[id.blk].mutate();
     FTRACE(1, "{} {}\n", show(elm), show(func, b->hhbcs[id.idx]));
-    switch (elm.second.action) {
+    switch (dceAction.action) {
       case DceAction::PopInputs:
         // we want to replace the bytecode with pops of its inputs
         if (auto const numToPop = numPop(b->hhbcs[id.idx])) {
@@ -2378,36 +2380,36 @@ void dce_perform(php::Func& func,
       }
       case DceAction::Replace:
       {
-        auto it = replaceMap.find(id);
-        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const& bcs = dceAction.bcs;
+        always_assert(!bcs.empty());
         auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
-                        begin(it->second), end(it->second));
-        setloc(srcLoc, b->hhbcs.begin() + id.idx, it->second.size());
+                        begin(bcs), end(bcs));
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, bcs.size());
         break;
       }
       case DceAction::PopAndReplace:
       {
-        auto it = replaceMap.find(id);
-        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const& bcs = dceAction.bcs;
+        always_assert(!bcs.empty());
         auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         auto const numToPop = numPop(b->hhbcs[id.idx]);
         b->hhbcs.erase(b->hhbcs.begin() + id.idx);
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
-                        begin(it->second), end(it->second));
+                        begin(bcs), end(bcs));
         if (numToPop) {
           b->hhbcs.insert(b->hhbcs.begin() + id.idx,
                           numToPop,
                           bc::PopC {});
         }
-        setloc(srcLoc, b->hhbcs.begin() + id.idx, numToPop + it->second.size());
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, numToPop + bcs.size());
         break;
       }
       case DceAction::MinstrStackFinal:
       case DceAction::MinstrStackFixup:
       {
-        adjustMinstr(b->hhbcs[id.idx], elm.second.maskOrCount);
+        adjustMinstr(b->hhbcs[id.idx], dceAction.maskOrCount);
         break;
       }
       case DceAction::MinstrPushBase:
@@ -2438,14 +2440,14 @@ void dce_perform(php::Func& func,
         auto const op = b->hhbcs[id.idx].op;
         always_assert(op == Op::PopU2 || op == Op::PopFrame);
         if (op == Op::PopU2) {
-          assertx(elm.second.maskOrCount == 1);
+          assertx(dceAction.maskOrCount == 1);
           b->hhbcs[id.idx].PopU = bc::PopU {};
           b->hhbcs[id.idx].op = Op::PopU;
         } else {
-          assertx(elm.second.maskOrCount > 0);
+          assertx(dceAction.maskOrCount > 0);
           auto& popFrame = b->hhbcs[id.idx].PopFrame;
-          assertx(elm.second.maskOrCount <= popFrame.arg1);
-          popFrame.arg1 -= elm.second.maskOrCount;
+          assertx(dceAction.maskOrCount <= popFrame.arg1);
+          popFrame.arg1 -= dceAction.maskOrCount;
           if (popFrame.arg1 <= 1) {
             auto const remaining = popFrame.arg1;
             auto const srcLoc = b->hhbcs[id.idx].srcLoc;
@@ -2464,18 +2466,18 @@ void dce_perform(php::Func& func,
       }
       case DceAction::UnsetLocalsBefore: {
         assertx(id.idx == 0);
-        auto it = replaceMap.find(id);
-        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const& bcs = dceAction.bcs;
+        always_assert(!bcs.empty());
         auto const srcLoc = b->hhbcs[id.idx].srcLoc;
         b->hhbcs.insert(b->hhbcs.begin() + id.idx,
-                        begin(it->second), end(it->second));
-        setloc(srcLoc, b->hhbcs.begin() + id.idx, it->second.size());
+                        begin(bcs), end(bcs));
+        setloc(srcLoc, b->hhbcs.begin() + id.idx, bcs.size());
         break;
       }
       case DceAction::UnsetLocalsAfter:
       {
-        auto it = replaceMap.find(id);
-        always_assert(it != end(replaceMap) && !it->second.empty());
+        auto const& bcs = dceAction.bcs;
+        always_assert(!bcs.empty());
         // If this is in the middle of a member op sequence, we walk to the
         // end, and place the UnsetLs there.
         auto idx = id.idx;
@@ -2494,8 +2496,8 @@ void dce_perform(php::Func& func,
         assertx(idx == id.idx || isMemberFinalOp(b->hhbcs[idx].op));
         auto const srcLoc = b->hhbcs[idx].srcLoc;
         b->hhbcs.insert(b->hhbcs.begin() + idx + 1,
-                        begin(it->second), end(it->second));
-        setloc(srcLoc, b->hhbcs.begin() + idx + 1, it->second.size());
+                        begin(bcs), end(bcs));
+        setloc(srcLoc, b->hhbcs.begin() + idx + 1, bcs.size());
         break;
       }
     }
@@ -2505,7 +2507,6 @@ void dce_perform(php::Func& func,
 struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocalNames;
   DceActionMap actionMap;
-  DceReplaceMap replaceMap;
   std::bitset<kMaxTrackedLocals> deadAcrossLocals;
   bool didAddOpts{false};
 };
@@ -2526,7 +2527,6 @@ optimize_dce(const Index& index,
   return {
     std::move(dceState->usedLocalNames),
     std::move(dceState->actionMap),
-    std::move(dceState->replaceMap),
     std::move(dceState->deadAcrossLocals),
     dceState->didAddOpts
   };
@@ -2800,7 +2800,7 @@ void local_dce(const Index& index,
   auto const ret = optimize_dce(index, ainfo, collect, bid, stateIn,
                                 DceOutState{DceOutState::Local{}});
 
-  dce_perform(*ainfo.ctx.func, ret.actionMap, ret.replaceMap);
+  dce_perform(*ainfo.ctx.func, ret.actionMap);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -3193,7 +3193,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   FTRACE(1, "|---- global DCE optimize ({})\n", show(ai.ctx));
   std::bitset<kMaxTrackedLocals> usedLocalNames;
   DceActionMap actionMap;
-  DceReplaceMap replaceMap;
   bool didAddOpts = false;
   for (auto const bid : ai.rpoBlocks) {
     FTRACE(2, "block #{}\n", bid);
@@ -3212,8 +3211,10 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
         return ai.bdata[bid].stateIn.locals[i];
       });
       if (!bcs.empty()) {
-        ret.replaceMap.emplace(InstrId { bid, 0 }, std::move(bcs));
-        ret.actionMap.emplace(InstrId { bid, 0 }, DceAction::UnsetLocalsBefore);
+        ret.actionMap.emplace(InstrId { bid, 0 }, DceAction(
+          DceAction::UnsetLocalsBefore,
+          std::move(bcs)
+        ));
 
         // We flag that we shoud rerun DCE since this Unset might be redudant if
         // a CGetL gets replaced with a PushL.
@@ -3223,25 +3224,10 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
 
     didAddOpts = didAddOpts || ret.didAddOpts;
     usedLocalNames |= ret.usedLocalNames;
-    if (ret.actionMap.size()) {
-      if (!actionMap.size()) {
-        actionMap = std::move(ret.actionMap);
-      } else {
-        combineActions(actionMap, ret.actionMap);
-      }
-    }
-    if (ret.replaceMap.size()) {
-      if (!replaceMap.size()) {
-        replaceMap = std::move(ret.replaceMap);
-      } else {
-        for (auto& elm : ret.replaceMap) {
-          replaceMap.insert(std::move(elm));
-        }
-      }
-    }
+    combineActions(actionMap, std::move(ret.actionMap));
   }
 
-  dce_perform(*ai.ctx.func, actionMap, replaceMap);
+  dce_perform(*ai.ctx.func, actionMap);
 
   remove_unused_local_names(ai, usedLocalNames);
   remap_locals(ai, std::move(localRemappingIndex));

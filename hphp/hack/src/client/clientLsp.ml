@@ -1397,6 +1397,7 @@ let do_hover_local
       ide_service
       ~tracking_id
       ~ref_unblocked_time
+      ~needs_init:true
       (ClientIdeMessage.Hover document_location)
   in
   match infos with
@@ -1432,6 +1433,7 @@ let do_typeDefinition_local
       ide_service
       ~tracking_id
       ~ref_unblocked_time
+      ~needs_init:true
       (ClientIdeMessage.Type_definition document_location)
   in
   match results with
@@ -1485,6 +1487,7 @@ let do_definition_local
       ide_service
       ~tracking_id
       ~ref_unblocked_time
+      ~needs_init:true
       (ClientIdeMessage.Definition document_location)
   in
   match results with
@@ -1739,7 +1742,12 @@ let do_completion_local
       { ClientIdeMessage.Completion.document_location; is_manually_invoked }
   in
   let%lwt result =
-    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+    ClientIdeService.rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      ~needs_init:true
+      request
   in
   match result with
   | Ok infos ->
@@ -1897,6 +1905,7 @@ let do_resolve_local
             ide_service
             ~tracking_id
             ~ref_unblocked_time
+            ~needs_init:true
             request
         in
         (match location_result with
@@ -1933,6 +1942,7 @@ let do_resolve_local
           ide_service
           ~tracking_id
           ~ref_unblocked_time
+          ~needs_init:true
           request
       in
       (match resolve_result with
@@ -2079,7 +2089,12 @@ let do_documentSymbol_local
   in
   let request = ClientIdeMessage.Document_symbol document_location in
   let%lwt results =
-    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+    ClientIdeService.rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      ~needs_init:true
+      request
   in
   match results with
   | Ok outline ->
@@ -2166,6 +2181,7 @@ let do_highlight_local
       ide_service
       ~tracking_id
       ~ref_unblocked_time
+      ~needs_init:true
       (ClientIdeMessage.Document_highlight document_location)
   in
   match result with
@@ -2235,7 +2251,12 @@ let do_typeCoverage_localFB
         { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
     in
     let%lwt result =
-      ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time request
+      ClientIdeService.rpc
+        ide_service
+        ~tracking_id
+        ~ref_unblocked_time
+        ~needs_init:true
+        request
     in
     (match result with
     | Ok (results, counts) ->
@@ -2360,6 +2381,7 @@ let do_signatureHelp_local
       ide_service
       ~tracking_id
       ~ref_unblocked_time
+      ~needs_init:true
       (ClientIdeMessage.Signature_help document_location)
   in
   match result with

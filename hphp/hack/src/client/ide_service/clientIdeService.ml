@@ -47,9 +47,18 @@ end
 
 type state =
   | Uninitialized of { wait_for_initialization: bool }
+      (** The ide_service is created. We may or may not have yet sent an initialize
+      message to the daemon, but we certainly haven't heard back yet. *)
   | Failed_to_initialize of ClientIdeMessage.error_data
+      (** The response to our initialize message was a failure. This is
+      a terminal state. *)
   | Initialized of { status: Status.t }
+      (** We have received an initialize response from the daemon and all
+      is well. The only thing that can take us out of this state is if
+      someone invokes [stop], or if the daemon connection gets EOF. *)
   | Stopped of Stop_reason.t * ClientIdeMessage.error_data
+      (** Someone called [stop] or the daemon connection got EOF.
+      This is a terminal state. *)
 
 let state_to_string (state : state) : string =
   match state with
@@ -512,33 +521,40 @@ let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =
   let message = ClientIdeMessage.Verbose verbose in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
-(* Simplified function for handling initialization cases *)
 let rpc
     (t : t)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
+    ~(needs_init : bool)
     (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
+  let needs_init =
+    if needs_init then
+      `Needs_init
+    else
+      `Fine_without_init
+  in
   let { messages_to_send; response_emitter; _ } = t in
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
-  match t.state with
-  | Uninitialized { wait_for_initialization = false } ->
+  let open ClientIdeMessage in
+  match (t.state, needs_init) with
+  | (Uninitialized { wait_for_initialization = false }, `Needs_init) ->
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
         message = "IDE service has not yet been initialized";
         data = None;
       }
-  | Failed_to_initialize
-      { ClientIdeMessage.short_user_message; debug_details; _ } ->
+  | (Failed_to_initialize info, _) ->
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service failed to initialize: " ^ short_user_message;
+        message = "IDE service failed to initialize: " ^ info.short_user_message;
         data =
-          Lsp_fmt.error_data_of_string ~key:"not_running_reason" debug_details;
+          Lsp_fmt.error_data_of_string
+            ~key:"not_running_reason"
+            info.debug_details;
       }
-  | Stopped (reason, { ClientIdeMessage.short_user_message; debug_details; _ })
-    ->
+  | (Stopped (reason, info), _) ->
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.RequestCancelled;
@@ -546,11 +562,13 @@ let rpc
           Printf.sprintf
             "IDE service is stopped: %s. %s"
             (Stop_reason.to_string reason)
-            short_user_message;
+            info.short_user_message;
         data =
-          Lsp_fmt.error_data_of_string ~key:"not_running_reason" debug_details;
+          Lsp_fmt.error_data_of_string
+            ~key:"not_running_reason"
+            info.debug_details;
       }
-  | Uninitialized { wait_for_initialization = true } ->
+  | (Uninitialized { wait_for_initialization = true }, `Needs_init) ->
     let%lwt () = wait_for_initialization t in
     let%lwt result =
       do_rpc
@@ -560,7 +578,8 @@ let rpc
         ~response_emitter
     in
     Lwt.return result
-  | Initialized _ ->
+  | (Initialized _, (`Needs_init | `Fine_without_init))
+  | (Uninitialized _, `Fine_without_init) ->
     let%lwt result =
       do_rpc
         ~tracked_message

@@ -98,6 +98,7 @@ val rpc :
   t ->
   tracking_id:string ->
   ref_unblocked_time:float ref ->
+  needs_init:bool ->
   'response ClientIdeMessage.t ->
   ('response, Lsp.Error.t) Lwt_result.t
 

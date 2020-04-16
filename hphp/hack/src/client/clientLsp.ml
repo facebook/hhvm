@@ -424,11 +424,6 @@ let get_root_opt () : Path.t option =
 
 let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
 
-let get_root_wait () : Path.t Lwt.t =
-  let%lwt initialize_params = initialize_params_promise in
-  let path = Lsp_helpers.get_root initialize_params in
-  Lwt.return (Wwwroot.get (Some path))
-
 let read_hhconfig_version () : string Lwt.t =
   match get_root_opt () with
   | None -> Lwt.return "[NoRoot]"
@@ -3240,12 +3235,22 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
+(** Like all async methods, this method has a synchronous preamble up
+to its first await point, at which point it returns a promise to its
+caller; the rest of the method will be scheduled asynchronously.
+The synchrpnous preamble sends an "initialize" request to the ide_service.
+The asynchronous continuation is triggered when the response comes back;
+it then pumps messages to and from the ide service.
+Note: the fact that the request is sent in the synchronous preamble, is
+important for correctness - the rest of the codebase can send other requests
+to the ide_service at any time, safe in the knowledge that such requests will
+necessarily be delivered after the initialize request. *)
 let run_ide_service
     (env : env)
     (ide_service : ClientIdeService.t)
+    (initialize_params : Lsp.Initialize.params)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
-  let%lwt root = get_root_wait () in
-  let initialize_params = initialize_params_exc () in
+  let root = Some (Lsp_helpers.get_root initialize_params) |> Wwwroot.get in
   if
     Lsp.Initialize.(
       initialize_params.client_capabilities.workspace.didChangeWatchedFiles
@@ -3358,7 +3363,13 @@ let on_status_restart_action
     and is only ever controlled by --verbose command line, stored in env.
     But verbosity-to-file can be altered dynamically by the user. *)
     Lwt.async (fun () ->
-        run_ide_service env new_ide_service (get_editor_open_files state));
+        run_ide_service
+          env
+          new_ide_service
+          (initialize_params_exc ())
+          (get_editor_open_files state));
+    (* Invariant: at all times after InitializeRequest, ide_service has
+    already been sent an "initialize" message. *)
     let%lwt () =
       stop_ide_service
         old_ide_service
@@ -3592,15 +3603,22 @@ let handle_client_message
       let result = do_initialize ~env root in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
-      if Option.is_some ide_service then (
-        let id = NumberId (Jsonrpc.get_next_request_id ()) in
-        let request = do_didChangeWatchedFiles_registerCapability () in
-        to_stdout (print_lsp_request id request);
-        (* TODO: our handler should really handle an error response properly *)
-        let handler _response state = Lwt.return state in
-        requests_outstanding :=
-          IdMap.add id (request, handler) !requests_outstanding
-      );
+      begin
+        match ide_service with
+        | None -> ()
+        | Some ide_service ->
+          Lwt.async (fun () ->
+              run_ide_service env ide_service initialize_params None);
+          (* Invariant: at all times after InitializeRequest, ide_service has
+          already been sent an "initialize" message. *)
+          let id = NumberId (Jsonrpc.get_next_request_id ()) in
+          let request = do_didChangeWatchedFiles_registerCapability () in
+          to_stdout (print_lsp_request id request);
+          (* TODO: our handler should really handle an error response properly *)
+          let handler _response state = Lwt.return state in
+          requests_outstanding :=
+            IdMap.add id (request, handler) !requests_outstanding
+      end;
 
       if not @@ Sys_utils.is_test_mode () then
         Lsp_helpers.telemetry_log
@@ -4769,12 +4787,6 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time env;
       Lwt.return_unit
   in
-  begin
-    match !ide_service with
-    | None -> ()
-    | Some ide_service ->
-      Lwt.async (fun () -> run_ide_service env ide_service None)
-  end;
   let rec main_loop () : unit Lwt.t =
     let%lwt () = process_next_event () in
     main_loop ()

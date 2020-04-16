@@ -190,11 +190,21 @@ type result_telemetry = {
   result_extra_telemetry: Telemetry.t option;
 }
 
-(* Note: we assume that we won't ever initialize more than once, since this
-promise can only be resolved once. *)
-let ( (initialize_params_promise : Lsp.Initialize.params Lwt.t),
-      (initialize_params_resolver : Lsp.Initialize.params Lwt.u) ) =
-  Lwt.task ()
+let initialize_params_ref : Lsp.Initialize.params option ref = ref None
+
+let initialize_params_exc () : Lsp.Initialize.params =
+  match !initialize_params_ref with
+  | None -> failwith "initialize_params not yet received"
+  | Some initialize_params -> initialize_params
+
+let get_root_opt () : Path.t option =
+  match !initialize_params_ref with
+  | None -> None
+  | Some initialize_params ->
+    let path = Some (Lsp_helpers.get_root initialize_params) in
+    Some (Wwwroot.get path)
+
+let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
 
 let hhconfig_version : string ref = ref "[NotYetInitialized]"
 
@@ -240,11 +250,6 @@ let showStatus_outstanding : string ref = ref ""
 let log s = Hh_logger.log ("[client-lsp] " ^^ s)
 
 let log_debug s = Hh_logger.debug ("[client-lsp] " ^^ s)
-
-let initialize_params_exc () : Lsp.Initialize.params =
-  match Lwt.poll initialize_params_promise with
-  | None -> failwith "initialize_params not yet received"
-  | Some initialize_params -> initialize_params
 
 let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
@@ -414,15 +419,6 @@ let get_older_hh_server_state (requested_time : float) : hh_server_state =
   with
   | None -> Hh_server_forgot
   | Some (_, hh_server_state) -> hh_server_state
-
-let get_root_opt () : Path.t option =
-  match Lwt.poll initialize_params_promise with
-  | None -> None (* haven't yet received initialize so we don't know *)
-  | Some initialize_params ->
-    let path = Some (Lsp_helpers.get_root initialize_params) in
-    Some (Wwwroot.get path)
-
-let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
 
 let read_hhconfig_version () : string Lwt.t =
   match get_root_opt () with
@@ -3568,8 +3564,9 @@ let handle_client_message
     (* initialize request *)
     | (Pre_init, _, RequestMessage (id, InitializeRequest initialize_params)) ->
       let open Initialize in
-      Lwt.wakeup_later initialize_params_resolver initialize_params;
-      let root = Path.make (Lsp_helpers.get_root initialize_params) in
+      initialize_params_ref := Some initialize_params;
+      let root = get_root_exn () in
+      (* calculated from initialize_params_ref *)
       set_up_hh_logger_for_client_lsp root;
       (* Following is a hack. Atom incorrectly passes '--from vscode', rendering us
       unable to distinguish Atom from VSCode. But Atom is now frozen at vscode client

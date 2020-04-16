@@ -9,5 +9,3 @@ $_ = "don't want to see this"
 p $_
 = bad syntax
 = printSomething()
-
-

@@ -3075,50 +3075,6 @@ let track_edits_if_necessary (state : state) (event : event) : state =
     Lost_server { lenv with Lost_env.uris_with_unsaved_changes }
   | _ -> state
 
-let track_ide_service_open_files
-    (ide_service : ClientIdeService.t) (event : event) : unit Lwt.t =
-  let uri_to_path uri = uri |> lsp_uri_to_path |> Path.make in
-  match event with
-  | Client_message (metadata, NotificationMessage (DidOpenNotification params))
-    ->
-    let path = uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri in
-    let contents = params.DidOpen.textDocument.TextDocumentItem.text in
-    (* We can't do ClientIdeService.rpc directly, since that fails if the IDE service
-    hasn't yet initialized. Instead, notify_file_opened will queue up the open until
-    the IDE service is ready. The ClientIdeDaemon only delivers answers for open
-    files, which is why it's vital never to let is miss a DidOpen. *)
-    ClientIdeService.notify_ide_file_opened
-      ide_service
-      ~tracking_id:metadata.tracking_id
-      ~path
-      ~contents;
-    Lwt.return_unit
-  | Client_message (metadata, NotificationMessage (DidChangeNotification params))
-    ->
-    let path =
-      uri_to_path
-        params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
-    in
-    ClientIdeService.notify_ide_file_changed
-      ide_service
-      ~tracking_id:metadata.tracking_id
-      ~path;
-    Lwt.return_unit
-  | Client_message (metadata, NotificationMessage (DidCloseNotification params))
-    ->
-    let path =
-      uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
-    in
-    ClientIdeService.notify_ide_file_closed
-      ide_service
-      ~tracking_id:metadata.tracking_id
-      ~path;
-    Lwt.return_unit
-  | _ ->
-    (* Don't handle other events for now. When we show typechecking errors for
-    the open file, we'll start handling them. *)
-    Lwt.return_unit
-
 let get_filename_in_message_for_logging (message : lsp_message) :
     Relative_path.t option =
   let uri_opt = Lsp_fmt.get_uri_opt message in
@@ -3393,6 +3349,102 @@ let on_status_restart_action
 (************************************************************************)
 (* Message handling                                                     *)
 (************************************************************************)
+
+(** send DidOpen/Close/Change/Save to hh_server and ide_service as needed *)
+let handle_editor_buffer_message
+    ~(state : state)
+    ~(ide_service : ClientIdeService.t option)
+    ~(metadata : incoming_metadata)
+    ~(ref_unblocked_time : float ref)
+    ~(message : lsp_message) : unit Lwt.t =
+  let uri_to_path uri = uri |> lsp_uri_to_path |> Path.make in
+
+  (* send to hh_server as necessary *)
+  let (hh_server_promise : unit Lwt.t) =
+    let open Main_env in
+    match (state, message) with
+    (* textDocument/didOpen notification *)
+    | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
+      let%lwt () = do_didOpen menv.conn ref_unblocked_time params in
+      Lwt.return_unit
+    (* textDocument/didClose notification *)
+    | (Main_loop menv, NotificationMessage (DidCloseNotification params)) ->
+      let%lwt () = do_didClose menv.conn ref_unblocked_time params in
+      Lwt.return_unit
+    (* textDocument/didChange notification *)
+    | (Main_loop menv, NotificationMessage (DidChangeNotification params)) ->
+      let%lwt () = do_didChange menv.conn ref_unblocked_time params in
+      Lwt.return_unit
+    (* textDocument/didSave notification *)
+    | (Main_loop _menv, NotificationMessage (DidSaveNotification _params)) ->
+      Lwt.return_unit
+    | (_, _) -> Lwt.return_unit
+  in
+
+  (* send to ide_service as necessary *)
+  (* For now 'ide_service_promise' is immediately fulfilled, but in future it will
+  be fulfilled only when the ide_service has finished processing the message. *)
+  let (ide_service_promise : unit Lwt.t) =
+    match (ide_service, message) with
+    | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
+      let path = uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri in
+      let contents = params.DidOpen.textDocument.TextDocumentItem.text in
+      (* We can't do ClientIdeService.rpc directly, since that fails if the IDE service
+    hasn't yet initialized. Instead, notify_file_opened will queue up the open until
+    the IDE service is ready. The ClientIdeDaemon only delivers answers for open
+    files, which is why it's vital never to let is miss a DidOpen. *)
+      ClientIdeService.notify_ide_file_opened
+        ide_service
+        ~tracking_id:metadata.tracking_id
+        ~path
+        ~contents;
+      Lwt.return_unit
+    | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
+      let path =
+        uri_to_path
+          params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
+      in
+      ClientIdeService.notify_ide_file_changed
+        ide_service
+        ~tracking_id:metadata.tracking_id
+        ~path;
+      Lwt.return_unit
+    | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
+      let path =
+        uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
+      in
+      ClientIdeService.notify_ide_file_closed
+        ide_service
+        ~tracking_id:metadata.tracking_id
+        ~path;
+      Lwt.return_unit
+    | _ ->
+      (* Don't handle other events for now. When we show typechecking errors for
+    the open file, we'll start handling them. *)
+      Lwt.return_unit
+  in
+
+  (* Our asynchrony deal is (1) we want to kick off notifications to
+  hh_server and ide_service at the same time, (2) we want to wait until
+  both are done, (3) an exception in one shouldn't jeapordize the other,
+  (4) our failure model only allows us to record at most one exception
+  so we'll pick one arbitrarily. *)
+  let%lwt (hh_server_e : Exception.t option) =
+    try%lwt
+      let%lwt () = hh_server_promise in
+      Lwt.return_none
+    with e -> Lwt.return_some (Exception.wrap e)
+  and (ide_service_e : Exception.t option) =
+    try%lwt
+      let%lwt () = ide_service_promise in
+      Lwt.return_none
+    with e -> Lwt.return_some (Exception.wrap e)
+  in
+  match (hh_server_e, ide_service_e) with
+  | (_, Some e)
+  | (Some e, _) ->
+    Exception.reraise e
+  | _ -> Lwt.return_unit
 
 (* handle_event: Process and respond to a message, and update the LSP state
    machine accordingly. In case the message was a request, it returns the
@@ -3756,19 +3808,20 @@ let handle_client_message
         (DocumentOnTypeFormattingResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
-    (* any request/notification that we already handled in [track_open_files] *)
-    | ( (In_init _ | Lost_server _),
+    (* editor buffer events *)
+    | ( _,
         _,
-        NotificationMessage (DidOpenNotification _) )
-    | ( (In_init _ | Lost_server _),
-        _,
-        NotificationMessage (DidChangeNotification _) )
-    | ( (In_init _ | Lost_server _),
-        _,
-        NotificationMessage (DidCloseNotification _) )
-    | ( (In_init _ | Lost_server _),
-        _,
-        NotificationMessage (DidSaveNotification _) ) ->
+        NotificationMessage
+          ( DidOpenNotification _ | DidChangeNotification _
+          | DidCloseNotification _ | DidSaveNotification _ ) ) ->
+      let%lwt () =
+        handle_editor_buffer_message
+          ~state:!state
+          ~ide_service
+          ~metadata
+          ~ref_unblocked_time
+          ~message
+      in
       Lwt.return_none
     (* any request/notification that we can't handle yet *)
     | (In_init _, _, message) ->
@@ -3917,21 +3970,6 @@ let handle_client_message
       let%lwt () =
         do_toggleTypeCoverageFB menv.conn ref_unblocked_time params
       in
-      Lwt.return_none
-    (* textDocument/didOpen notification *)
-    | (Main_loop menv, _, NotificationMessage (DidOpenNotification params)) ->
-      let%lwt () = do_didOpen menv.conn ref_unblocked_time params in
-      Lwt.return_none
-    (* textDocument/didClose notification *)
-    | (Main_loop menv, _, NotificationMessage (DidCloseNotification params)) ->
-      let%lwt () = do_didClose menv.conn ref_unblocked_time params in
-      Lwt.return_none
-    (* textDocument/didChange notification *)
-    | (Main_loop menv, _, NotificationMessage (DidChangeNotification params)) ->
-      let%lwt () = do_didChange menv.conn ref_unblocked_time params in
-      Lwt.return_none
-    (* textDocument/didSave notification *)
-    | (Main_loop _menv, _, NotificationMessage (DidSaveNotification _params)) ->
       Lwt.return_none
     (* textDocument/signatureHelp notification *)
     | (Main_loop menv, _, RequestMessage (id, SignatureHelpRequest params)) ->
@@ -4517,15 +4555,6 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
 
       (* if a message comes from the server, maybe update our record of server state *)
       update_hh_server_state_if_necessary event;
-
-      let%lwt () =
-        match !ide_service with
-        | Some ide_service ->
-          (* update the IDE service with the new file contents, if any *)
-          let%lwt () = track_ide_service_open_files ide_service event in
-          Lwt.return_unit
-        | None -> Lwt.return_unit
-      in
 
       (* update status immediately if warranted *)
       refresh_status ~env ~state ~ide_service ~init_id;

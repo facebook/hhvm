@@ -834,6 +834,7 @@ std::string RuntimeOption::ExtensionDir = "";
 std::vector<std::string> RuntimeOption::Extensions;
 std::vector<std::string> RuntimeOption::DynamicExtensions;
 std::string RuntimeOption::DynamicExtensionPath = ".";
+int RuntimeOption::CheckCLIClientCommands = 0;
 
 int RuntimeOption::CheckIntOverflow = 0;
 HackStrictOption
@@ -1916,6 +1917,8 @@ void RuntimeOption::Load(
                  "Eval.EnableArgsInBacktraces", !RepoAuthoritative);
     Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
                  false);
+
+    Config::Bind(CheckCLIClientCommands, ini, config, "Eval.CheckCLIClientCommands", 1);
     if (RepoAuthoritative) {
       EvalAuthoritativeMode = true;
     }

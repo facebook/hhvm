@@ -1417,18 +1417,14 @@ let do_hover_local
     (params : Hover.params) : Hover.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt infos =
-    ClientIdeService.rpc
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       (ClientIdeMessage.Hover document_location)
   in
-  match infos with
-  | Ok infos ->
-    let infos = do_hover_common infos in
-    Lwt.return infos
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  Lwt.return (do_hover_common infos)
 
 let do_typeDefinition
     (conn : server_conn)
@@ -1453,24 +1449,21 @@ let do_typeDefinition_local
     (params : Definition.params) : TypeDefinition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt results =
-    ClientIdeService.rpc
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       (ClientIdeMessage.Type_definition document_location)
   in
-  match results with
-  | Ok results ->
-    let file = Path.to_string document_location.ClientIdeMessage.file_path in
-    let results =
-      List.map results ~f:(fun nast_sid ->
-          hack_pos_definition_to_lsp_identifier_location
-            nast_sid
-            ~default_path:file)
-    in
-    Lwt.return results
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  let file = Path.to_string document_location.ClientIdeMessage.file_path in
+  let results =
+    List.map results ~f:(fun nast_sid ->
+        hack_pos_definition_to_lsp_identifier_location
+          nast_sid
+          ~default_path:file)
+  in
+  Lwt.return results
 
 let do_definition
     (conn : server_conn)
@@ -1507,24 +1500,21 @@ let do_definition_local
     (params : Definition.params) : Definition.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
   let%lwt results =
-    ClientIdeService.rpc
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       (ClientIdeMessage.Definition document_location)
   in
-  match results with
-  | Ok results ->
-    let results =
-      List.map results ~f:(fun (_occurrence, definition) ->
-          hack_symbol_definition_to_lsp_identifier_location
-            definition
-            ~default_path:
-              (document_location.ClientIdeMessage.file_path |> Path.to_string))
-    in
-    Lwt.return results
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  let results =
+    List.map results ~f:(fun (_occurrence, definition) ->
+        hack_symbol_definition_to_lsp_identifier_location
+          definition
+          ~default_path:
+            (document_location.ClientIdeMessage.file_path |> Path.to_string))
+  in
+  Lwt.return results
 
 let snippet_re = Str.regexp {|[\$}]|} (* snippets must backslash-escape "$\}" *)
 
@@ -1765,22 +1755,19 @@ let do_completion_local
     ClientIdeMessage.Completion
       { ClientIdeMessage.Completion.document_location; is_manually_invoked }
   in
-  let%lwt result =
-    ClientIdeService.rpc
+  let%lwt infos =
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       request
   in
-  match result with
-  | Ok infos ->
-    let filename =
-      document_location.ClientIdeMessage.file_path |> Path.to_string
-    in
-    let%lwt response = make_ide_completion_response infos filename in
-    Lwt.return response
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  let filename =
+    document_location.ClientIdeMessage.file_path |> Path.to_string
+  in
+  let%lwt response = make_ide_completion_response infos filename in
+  Lwt.return response
 
 exception NoLocationFound
 
@@ -1924,22 +1911,19 @@ let do_resolve_local
               kind = resolve_ranking_source kind ranking_source;
             }
         in
-        let%lwt location_result =
-          ClientIdeService.rpc
+        let%lwt raw_docblock =
+          ide_rpc
             ide_service
             ~tracking_id
             ~ref_unblocked_time
             ~needs_init:true
             request
         in
-        (match location_result with
-        | Ok raw_docblock ->
-          let documentation =
-            docblock_with_ranking_detail raw_docblock ranking_detail
-            |> docblock_to_markdown
-          in
-          Lwt.return { params with Completion.documentation }
-        | Error edata -> raise (Server_nonfatal_exception edata))
+        let documentation =
+          docblock_with_ranking_detail raw_docblock ranking_detail
+          |> docblock_to_markdown
+        in
+        Lwt.return { params with Completion.documentation }
       (* If that fails, next try using symbol *)
     with _ ->
       (* The "fullname" value includes the fully qualified namespace, so
@@ -1961,19 +1945,16 @@ let do_resolve_local
             kind = resolve_ranking_source kind ranking_source;
           }
       in
-      let%lwt resolve_result =
-        ClientIdeService.rpc
+      let%lwt raw_docblock =
+        ide_rpc
           ide_service
           ~tracking_id
           ~ref_unblocked_time
           ~needs_init:true
           request
       in
-      (match resolve_result with
-      | Ok raw_docblock ->
-        let documentation = docblock_to_markdown raw_docblock in
-        Lwt.return { params with Completion.documentation }
-      | Error edata -> raise (Server_nonfatal_exception edata))
+      let documentation = docblock_to_markdown raw_docblock in
+      Lwt.return { params with Completion.documentation }
   in
   Lwt.return result
 
@@ -2112,21 +2093,18 @@ let do_documentSymbol_local
     }
   in
   let request = ClientIdeMessage.Document_symbol document_location in
-  let%lwt results =
-    ClientIdeService.rpc
+  let%lwt outline =
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       request
   in
-  match results with
-  | Ok outline ->
-    let converted =
-      hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
-    in
-    Lwt.return converted
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  let converted =
+    hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
+  in
+  Lwt.return converted
 
 let do_findReferences
     (conn : server_conn)
@@ -2200,17 +2178,15 @@ let do_highlight_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : DocumentHighlight.params) : DocumentHighlight.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
-  let%lwt result =
-    ClientIdeService.rpc
+  let%lwt ranges =
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       (ClientIdeMessage.Document_highlight document_location)
   in
-  match result with
-  | Ok ranges -> Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  Lwt.return (List.map ranges ~f:hack_range_to_lsp_highlight)
 
 let format_typeCoverage_result ~(equal : 'a -> 'a -> bool) results counts =
   TypeCoverageFB.(
@@ -2275,20 +2251,18 @@ let do_typeCoverage_localFB
         { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
     in
     let%lwt result =
-      ClientIdeService.rpc
+      ide_rpc
         ide_service
         ~tracking_id
         ~ref_unblocked_time
         ~needs_init:true
         request
     in
-    (match result with
-    | Ok (results, counts) ->
-      let formatted =
-        format_typeCoverage_result ~equal:String.equal results counts
-      in
-      Lwt.return formatted
-    | Error edata -> raise (Server_nonfatal_exception edata))
+    let (results, counts) = result in
+    let formatted =
+      format_typeCoverage_result ~equal:String.equal results counts
+    in
+    Lwt.return formatted
 
 let do_formatting_common
     (uri : Lsp.documentUri)
@@ -2400,17 +2374,15 @@ let do_signatureHelp_local
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
     (params : SignatureHelp.params) : SignatureHelp.result Lwt.t =
   let document_location = get_document_location editor_open_files params in
-  let%lwt result =
-    ClientIdeService.rpc
+  let%lwt signatures =
+    ide_rpc
       ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~needs_init:true
       (ClientIdeMessage.Signature_help document_location)
   in
-  match result with
-  | Ok signatures -> Lwt.return signatures
-  | Error edata -> raise (Server_nonfatal_exception edata)
+  Lwt.return signatures
 
 let patch_to_workspace_edit_change (patch : ServerRefactorTypes.patch) :
     string * TextEdit.t =

@@ -179,9 +179,10 @@ bool CmdMachine::AttachSandbox(DebuggerClient &client,
       "Failed to attach to the sandbox. Maybe another client is debugging, \n"
       "or a client failed to detach cleanly.\n"
       "You can attach to another sandbox, or exit the other attached client, \n"
-      "or force this client to take over the sandbox with: \n"
+      "or force this client to take over the sandbox by typing this\n"
+      "command inside hphpd:\n"
       "\n"
-      "\t[m]achine [a]ttach [f]orce %s %s"
+      "\tlocalhost> machine attach force %s %s"
       "\n",
       sandbox->m_user.c_str(), sandbox->m_name.c_str());
   }

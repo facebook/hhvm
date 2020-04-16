@@ -74,24 +74,6 @@ val stop : t -> tracking_id:string -> reason:Stop_reason.t -> unit Lwt.t
 (** The caller is expected to call this function to notify the IDE service
 whenever a Hack file changes on disk, so that it can update its indexes
 appropriately. Will queue the notification until IDE service can handle it. *)
-val notify_disk_file_changed : t -> tracking_id:string -> Path.t -> unit
-
-(** For DidOpen notifications. It's important that the IDE service never miss a
-DidOpen, since it will only answer queries on open files. This function will
-therefore queue the notification until the IDE service can handle it. *)
-val notify_ide_file_opened :
-  t -> tracking_id:string -> path:Path.t -> contents:string -> unit
-
-(** For DidChange notifications. *)
-val notify_ide_file_changed : t -> tracking_id:string -> path:Path.t -> unit
-
-(** For DidClose notifications. It's important that the IDE service never miss a
-DidClose, since it caches data for open files. This function will therefore
-queue up the notificiation until the IDE service can handle it. *)
-val notify_ide_file_closed : t -> tracking_id:string -> path:Path.t -> unit
-
-(** The caller uses this to switch on or off verbose logging. *)
-val notify_verbose : t -> tracking_id:string -> bool -> unit
 
 (** Make an RPC call to the IDE service. *)
 val rpc :

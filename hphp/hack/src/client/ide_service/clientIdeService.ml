@@ -227,7 +227,11 @@ of failing in this case we'll await until the daemon's initialize
 response.
 Note: it's not safe to cancel this method: we might get an item on
 the outgoing queue and no one to consume it, leading to desync.
-*)
+Note: it's safe to call this even while another rpc is outstanding.
+The responses will come back in the right order. That's because the
+queue is built on top of [Lwt_condition.wait] and [Lwt_condition.signal]:
+the Lwt_condition is an Lwt_sequence.t, and 'wait' sticks an item onto
+the end of the sequence, and 'signal' waks up the first item. *)
 let rpc
     (t : t)
     ~(tracking_id : string)
@@ -528,68 +532,6 @@ let rec serve (t : t) : unit Lwt.t =
     (* cleanup function below will log the exception *)
     let%lwt () = cleanup_upon_shutdown_or_exn t ~e:(Some e) in
     Lwt.return_unit
-
-let push_message (t : t) (message : message_wrapper) : unit =
-  match t.state with
-  | Uninitialized _
-  | Initialized _ ->
-    let success = Lwt_message_queue.push t.messages_to_send message in
-    if not success then (
-      let (Message_wrapper message) = message in
-      let message =
-        Printf.sprintf
-          "failed to push message\n%s\n%s\nmessages_to_send=%d, response_emitter=%d, notification_emitter=%d"
-          (ClientIdeMessage.tracked_t_to_string message)
-          (state_to_string t.state)
-          (Lwt_message_queue.length t.messages_to_send)
-          (Lwt_message_queue.length t.response_emitter)
-          (Lwt_message_queue.length t.notification_emitter)
-      in
-      HackEventLogger.client_lsp_exception
-        ~root:None
-        ~message
-        ~source:"ide_recoverable"
-        ~data_opt:
-          (Lsp_fmt.error_data_of_stack
-             (Exception.get_current_callstack_string 99));
-      ()
-    )
-  | Failed_to_initialize _
-  | Stopped _ ->
-    (* This is a terminal state. Don't waste memory queueing up messages that
-    can never be sent. *)
-    ()
-
-let notify_disk_file_changed (t : t) ~(tracking_id : string) (path : Path.t) :
-    unit =
-  let message = ClientIdeMessage.Disk_file_changed path in
-  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
-
-let notify_ide_file_opened
-    (t : t) ~(tracking_id : string) ~(path : Path.t) ~(contents : string) : unit
-    =
-  let message =
-    ClientIdeMessage.Ide_file_opened
-      { ClientIdeMessage.file_path = path; file_contents = contents }
-  in
-  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
-
-let notify_ide_file_changed (t : t) ~(tracking_id : string) ~(path : Path.t) :
-    unit =
-  let message =
-    ClientIdeMessage.Ide_file_changed
-      { ClientIdeMessage.Ide_file_changed.file_path = path }
-  in
-  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
-
-let notify_ide_file_closed (t : t) ~(tracking_id : string) ~(path : Path.t) :
-    unit =
-  let message = ClientIdeMessage.Ide_file_closed path in
-  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
-
-let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =
-  let message = ClientIdeMessage.Verbose verbose in
-  push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
 
 let get_notifications (t : t) : notification_emitter = t.notification_emitter
 

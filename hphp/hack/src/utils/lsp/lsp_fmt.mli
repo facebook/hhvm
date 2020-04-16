@@ -172,7 +172,7 @@ val error_data_of_stack : string -> Hh_json.json option
 
 val error_data_of_string : key:string -> string -> Hh_json.json option
 
-val add_stack_if_absent : Lsp.Error.t -> Exception.t -> Lsp.Error.t
+val add_stack_if_absent : Lsp.Error.t -> exn:Exception.t -> Lsp.Error.t
 
 val print_error : Lsp.Error.t -> Hh_json.json
 

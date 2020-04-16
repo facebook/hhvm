@@ -1168,7 +1168,7 @@ let error_data_of_string ~(key : string) (value : string) : Hh_json.json option
 let error_data_of_stack (stack : string) : Hh_json.json option =
   stack |> Exception.clean_stack |> error_data_of_string ~key:"stack"
 
-let add_stack_if_absent (e : Lsp.Error.t) (exn : Exception.t) : Lsp.Error.t =
+let add_stack_if_absent (e : Lsp.Error.t) ~(exn : Exception.t) : Lsp.Error.t =
   let open Hh_json in
   let stack =
     ( "stack",

@@ -497,13 +497,6 @@ let update_file
   let ctx = make_singleton_ctx initialized_state entry in
   (Initialized { initialized_state with open_files }, ctx, entry)
 
-module Handle_message_result = struct
-  type 'a t =
-    | Notification
-    | Response of 'a
-    | Error of ClientIdeMessage.error_data
-end
-
 (** handle_message invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
 anything other than [Initialize_from_saved_state] as its first message. Upon
@@ -515,7 +508,7 @@ let handle_message :
     state ->
     string ->
     a ClientIdeMessage.t ->
-    (state * a Handle_message_result.t) Lwt.t =
+    (state * (a, ClientIdeMessage.error_data) result) Lwt.t =
  fun state _tracking_id message ->
   let open ClientIdeMessage in
   match (state, message) with
@@ -525,10 +518,10 @@ let handle_message :
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
     else
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-    Lwt.return (state, Handle_message_result.Notification)
+    Lwt.return (state, Ok ())
   | (_, Shutdown ()) ->
     let%lwt () = shutdown state in
-    Lwt.return (state, Handle_message_result.Response ())
+    Lwt.return (state, Ok ())
   (************************* INITIALIZATION ******************)
   | (Initializing, Initialize_from_saved_state param) ->
     let%lwt result = initialize param in
@@ -542,12 +535,9 @@ let handle_message :
               Path.Set.cardinal initialized_state.changed_files_to_process;
           }
         in
-        Lwt.return
-          (Initialized initialized_state, Handle_message_result.Response results)
+        Lwt.return (Initialized initialized_state, Ok results)
       | Error error_data ->
-        Lwt.return
-          ( Failed_to_initialize error_data,
-            Handle_message_result.Error error_data )
+        Lwt.return (Failed_to_initialize error_data, Error error_data)
     end
   | (Initialized _, Initialize_from_saved_state _) ->
     let error_data =
@@ -555,7 +545,7 @@ let handle_message :
         "Tried to initialize when already initialized"
         ~stack:(Exception.get_current_callstack_string 100)
     in
-    Lwt.return (state, Handle_message_result.Error error_data)
+    Lwt.return (state, Error error_data)
   (************************* UNABLE TO HANDLE ****************)
   | (Initializing, _) ->
     let debug_details =
@@ -566,7 +556,7 @@ let handle_message :
     in
     let stack = Exception.get_current_callstack_string 99 in
     let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
-    Lwt.return (state, Handle_message_result.Error error_data)
+    Lwt.return (state, Error error_data)
   | (Failed_to_initialize error_data, _) ->
     let error_data =
       {
@@ -574,48 +564,52 @@ let handle_message :
         debug_details = "Failed to initialize: " ^ error_data.debug_details;
       }
     in
-    Lwt.return (state, Handle_message_result.Error error_data)
+    Lwt.return (state, Error error_data)
   (************************* NORMAL HANDLING ****************)
-  | (Initialized initialized_state, Disk_file_changed path) ->
+  | (Initialized initialized_state, Disk_files_changed paths) ->
     (* Only invalidate when a hack file changes *)
-    if FindUtils.file_filter (Path.to_string path) then
-      let changed_files_to_process =
-        Path.Set.add initialized_state.changed_files_to_process path
-      in
-      let changed_files_denominator =
-        initialized_state.changed_files_denominator + 1
-      in
-      let state =
-        Initialized
-          {
-            initialized_state with
-            changed_files_to_process;
-            changed_files_denominator;
-          }
-      in
-      Lwt.return (state, Handle_message_result.Notification)
-    else
-      Lwt.return (state, Handle_message_result.Notification)
+    let paths =
+      List.filter paths ~f:(fun path ->
+          path |> Path.to_string |> FindUtils.file_filter)
+    in
+    let changed_files_to_process =
+      List.fold
+        paths
+        ~init:initialized_state.changed_files_to_process
+        ~f:(fun acc path -> Path.Set.add acc path)
+    in
+    let changed_files_denominator =
+      initialized_state.changed_files_denominator + List.length paths
+    in
+    let state =
+      Initialized
+        {
+          initialized_state with
+          changed_files_to_process;
+          changed_files_denominator;
+        }
+    in
+    Lwt.return (state, Ok ())
   | (Initialized initialized_state, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let state = close_file initialized_state path in
-    Lwt.return (state, Handle_message_result.Notification)
+    Lwt.return (state, Ok ())
   | (Initialized initialized_state, Ide_file_opened { file_path; file_contents })
     ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let state = open_file initialized_state path file_contents in
-    Lwt.return (state, Handle_message_result.Notification)
+    Lwt.return (state, Ok ())
   | ( Initialized initialized_state,
       Ide_file_changed { Ide_file_changed.file_path; _ } ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
     let state = change_file initialized_state path in
-    Lwt.return (state, Handle_message_result.Notification)
+    Lwt.return (state, Ok ())
   | (Initialized initialized_state, Hover document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
     let result =
@@ -626,7 +620,7 @@ let handle_message :
             ~line:document_location.ClientIdeMessage.line
             ~column:document_location.ClientIdeMessage.column)
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Autocomplete *)
   | ( Initialized initialized_state,
       Completion
@@ -643,7 +637,7 @@ let handle_message :
         ~line:document_location.line
         ~column:document_location.column
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Autocomplete docblock resolve *)
   | (Initialized initialized_state, Completion_resolve param) ->
     let ctx = make_empty_ctx initialized_state in
@@ -654,7 +648,7 @@ let handle_message :
           ~symbol:param.symbol
           ~kind:param.kind
       in
-      Lwt.return (state, Handle_message_result.Response result))
+      Lwt.return (state, Ok result))
   (* Autocomplete docblock resolve *)
   | (Initialized initialized_state, Completion_resolve_location param) ->
     (* We're given a location but it often won't be an opened file.
@@ -678,7 +672,7 @@ let handle_message :
             ~column:param.document_location.column
             ~kind:param.kind)
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Document highlighting *)
   | (Initialized initialized_state, Document_highlight document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
@@ -690,7 +684,7 @@ let handle_message :
             ~line:document_location.line
             ~column:document_location.column)
     in
-    Lwt.return (state, Handle_message_result.Response results)
+    Lwt.return (state, Ok results)
   (* Signature help *)
   | (Initialized initialized_state, Signature_help document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
@@ -702,7 +696,7 @@ let handle_message :
             ~line:document_location.line
             ~column:document_location.column)
     in
-    Lwt.return (state, Handle_message_result.Response results)
+    Lwt.return (state, Ok results)
   (* Go to definition *)
   | (Initialized initialized_state, Definition document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
@@ -714,7 +708,7 @@ let handle_message :
             ~line:document_location.ClientIdeMessage.line
             ~column:document_location.ClientIdeMessage.column)
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Type Definition *)
   | (Initialized initialized_state, Type_definition document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
@@ -726,12 +720,12 @@ let handle_message :
             ~line:document_location.ClientIdeMessage.line
             ~column:document_location.ClientIdeMessage.column)
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Document Symbol *)
   | (Initialized initialized_state, Document_symbol document_location) ->
     let (state, ctx, entry) = update_file initialized_state document_location in
     let result = FileOutline.outline_ctx ~ctx ~entry in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
   (* Type Coverage *)
   | (Initialized initialized_state, Type_coverage document_identifier) ->
     let document_location =
@@ -747,7 +741,7 @@ let handle_message :
       Provider_utils.respect_but_quarantine_unsaved_changes ~ctx ~f:(fun () ->
           ServerColorFile.go_quarantined ~ctx ~entry)
     in
-    Lwt.return (state, Handle_message_result.Response result)
+    Lwt.return (state, Ok result)
 
 let write_message
     ~(out_fd : Lwt_unix.file_descr)
@@ -887,52 +881,29 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     | t ->
       let%lwt message = Lwt_message_queue.pop t.message_queue in
       (match message with
-      | None -> Lwt.return_unit
+      | None -> Lwt.return_unit (* exit loop if message_queue has been closed *)
       | Some (Message { ClientIdeMessage.tracking_id; message }) ->
         let unblocked_time = Unix.gettimeofday () in
-        let%lwt state =
+        let%lwt (state, response) =
           try%lwt
-            let%lwt (state, response) =
-              handle_message t.state tracking_id message
-            in
-            match response with
-            | Handle_message_result.Notification ->
-              (* No response needed for notifications. *)
-              Lwt.return state
-            | Handle_message_result.Response response ->
-              let message =
-                ClientIdeMessage.Response
-                  { ClientIdeMessage.response = Ok response; unblocked_time }
-              in
-              let%lwt () = write_message ~out_fd ~message in
-              Lwt.return state
-            | Handle_message_result.Error error_data ->
-              let message =
-                ClientIdeMessage.Response
-                  {
-                    ClientIdeMessage.response = Error error_data;
-                    unblocked_time;
-                  }
-              in
-              let%lwt () = write_message ~out_fd ~message in
-              Lwt.return state
+            let%lwt (s, r) = handle_message t.state tracking_id message in
+            Lwt.return (s, r)
           with e ->
-            let stack = e |> Exception.wrap |> Exception.get_backtrace_string in
-            let prefix = "Exception while handling message" in
-            Hh_logger.exc e ~prefix ~stack;
-            let debug_details = prefix ^ ": " ^ Exn.to_string e in
+            let e = Exception.wrap e in
+            let debug_details =
+              "Exception while handling message: " ^ Exception.get_ctor_string e
+            in
+            let stack = Exception.get_backtrace_string e in
             let error_data =
               ClientIdeMessage.make_error_data debug_details ~stack
             in
-
-            (* If we were responding to a message, but threw an exception, write
-            that exception as a response. *)
-            let message =
-              ClientIdeMessage.Response
-                { ClientIdeMessage.response = Error error_data; unblocked_time }
-            in
-            let%lwt () = write_message ~out_fd ~message in
-            Lwt.return t.state
+            log "%s\n%s" debug_details stack;
+            Lwt.return (t.state, Error error_data)
+        in
+        let%lwt () =
+          write_message
+            ~out_fd
+            ~message:ClientIdeMessage.(Response { response; unblocked_time })
         in
         handle_messages { t with state })
   in

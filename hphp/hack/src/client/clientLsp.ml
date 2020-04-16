@@ -218,20 +218,6 @@ Note: control for how much will be written to stderr is solely
 controlled by --verbose at the command-line, stored in env.verbose. *)
 let verbose_to_file : bool ref = ref false
 
-let set_verbose_to_file
-    ~(ide_service : ClientIdeService.t option)
-    ~(tracking_id : string)
-    (value : bool) : unit =
-  verbose_to_file := value;
-  if !verbose_to_file then
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
-  else
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-  match ide_service with
-  | Some ide_service ->
-    ClientIdeService.notify_verbose ide_service ~tracking_id !verbose_to_file
-  | None -> ()
-
 let can_autostart_after_mismatch : bool ref = ref true
 
 let requests_outstanding : (lsp_request * result_handler) IdMap.t ref =
@@ -539,6 +525,53 @@ let rpc
 let rpc_with_retry server_conn ref_unblocked_time command =
   ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
       rpc server_conn ref_unblocked_time command)
+
+(** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
+let ide_rpc
+    (ide_service : ClientIdeService.t)
+    ~(tracking_id : string)
+    ~(ref_unblocked_time : float ref)
+    ~(needs_init : bool)
+    (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
+  let%lwt result =
+    ClientIdeService.rpc
+      ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      ~needs_init
+      message
+  in
+  match result with
+  | Ok result -> Lwt.return result
+  | Error edata -> raise (Server_nonfatal_exception edata)
+
+let set_verbose_to_file
+    ~(ide_service : ClientIdeService.t option)
+    ~(tracking_id : string)
+    (value : bool) : unit =
+  verbose_to_file := value;
+  if !verbose_to_file then
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
+  else
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  match ide_service with
+  | Some ide_service ->
+    let ref_unblocked_time = ref 0. in
+    Lwt.async (fun () ->
+        try%lwt
+          let%lwt () =
+            ide_rpc
+              ide_service
+              ~tracking_id
+              ~ref_unblocked_time
+              ~needs_init:false
+              (ClientIdeMessage.Verbose !verbose_to_file)
+          in
+          Lwt.return_unit
+        with _exn -> Lwt.return_unit
+        (* TODO: log this *));
+    ()
+  | None -> ()
 
 (** Determine whether to read a message from the client (the editor) or the
 server (hh_server), or whether neither is ready within 1s. *)
@@ -3387,6 +3420,8 @@ let handle_editor_buffer_message
     ~(ref_unblocked_time : float ref)
     ~(message : lsp_message) : unit Lwt.t =
   let uri_to_path uri = uri |> lsp_uri_to_path |> Path.make in
+  let ref_hh_unblocked_time = ref 0. in
+  let ref_ide_unblocked_time = ref 0. in
 
   (* send to hh_server as necessary *)
   let (hh_server_promise : unit Lwt.t) =
@@ -3394,15 +3429,15 @@ let handle_editor_buffer_message
     match (state, message) with
     (* textDocument/didOpen notification *)
     | (Main_loop menv, NotificationMessage (DidOpenNotification params)) ->
-      let%lwt () = do_didOpen menv.conn ref_unblocked_time params in
+      let%lwt () = do_didOpen menv.conn ref_hh_unblocked_time params in
       Lwt.return_unit
     (* textDocument/didClose notification *)
     | (Main_loop menv, NotificationMessage (DidCloseNotification params)) ->
-      let%lwt () = do_didClose menv.conn ref_unblocked_time params in
+      let%lwt () = do_didClose menv.conn ref_hh_unblocked_time params in
       Lwt.return_unit
     (* textDocument/didChange notification *)
     | (Main_loop menv, NotificationMessage (DidChangeNotification params)) ->
-      let%lwt () = do_didChange menv.conn ref_unblocked_time params in
+      let%lwt () = do_didChange menv.conn ref_hh_unblocked_time params in
       Lwt.return_unit
     (* textDocument/didSave notification *)
     | (Main_loop _menv, NotificationMessage (DidSaveNotification _params)) ->
@@ -3416,36 +3451,47 @@ let handle_editor_buffer_message
   let (ide_service_promise : unit Lwt.t) =
     match (ide_service, message) with
     | (Some ide_service, NotificationMessage (DidOpenNotification params)) ->
-      let path = uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri in
-      let contents = params.DidOpen.textDocument.TextDocumentItem.text in
-      (* We can't do ClientIdeService.rpc directly, since that fails if the IDE service
-    hasn't yet initialized. Instead, notify_file_opened will queue up the open until
-    the IDE service is ready. The ClientIdeDaemon only delivers answers for open
-    files, which is why it's vital never to let is miss a DidOpen. *)
-      ClientIdeService.notify_ide_file_opened
-        ide_service
-        ~tracking_id:metadata.tracking_id
-        ~path
-        ~contents;
+      let file_path =
+        uri_to_path params.DidOpen.textDocument.TextDocumentItem.uri
+      in
+      let file_contents = params.DidOpen.textDocument.TextDocumentItem.text in
+      (* The ClientIdeDaemon only delivers answers for open files, which is why it's vital
+      never to let is miss a DidOpen. *)
+      let%lwt () =
+        ide_rpc
+          ide_service
+          ~tracking_id:metadata.tracking_id
+          ~ref_unblocked_time:ref_ide_unblocked_time
+          ~needs_init:false
+          ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
+      in
       Lwt.return_unit
     | (Some ide_service, NotificationMessage (DidChangeNotification params)) ->
-      let path =
+      let file_path =
         uri_to_path
           params.DidChange.textDocument.VersionedTextDocumentIdentifier.uri
       in
-      ClientIdeService.notify_ide_file_changed
-        ide_service
-        ~tracking_id:metadata.tracking_id
-        ~path;
+      let%lwt () =
+        ide_rpc
+          ide_service
+          ~tracking_id:metadata.tracking_id
+          ~ref_unblocked_time:ref_ide_unblocked_time
+          ~needs_init:false
+          ClientIdeMessage.(Ide_file_changed { Ide_file_changed.file_path })
+      in
       Lwt.return_unit
     | (Some ide_service, NotificationMessage (DidCloseNotification params)) ->
-      let path =
+      let file_path =
         uri_to_path params.DidClose.textDocument.TextDocumentIdentifier.uri
       in
-      ClientIdeService.notify_ide_file_closed
-        ide_service
-        ~tracking_id:metadata.tracking_id
-        ~path;
+      let%lwt () =
+        ide_rpc
+          ide_service
+          ~tracking_id:metadata.tracking_id
+          ~ref_unblocked_time:ref_ide_unblocked_time
+          ~needs_init:false
+          ClientIdeMessage.(Ide_file_closed file_path)
+      in
       Lwt.return_unit
     | _ ->
       (* Don't handle other events for now. When we show typechecking errors for
@@ -3469,6 +3515,7 @@ let handle_editor_buffer_message
       Lwt.return_none
     with e -> Lwt.return_some (Exception.wrap e)
   in
+  ref_unblocked_time := max !ref_hh_unblocked_time !ref_ide_unblocked_time;
   match (hh_server_e, ide_service_e) with
   | (_, Some e)
   | (Some e, _) ->
@@ -3652,13 +3699,18 @@ let handle_client_message
         NotificationMessage (DidChangeWatchedFilesNotification notification) )
       ->
       let open DidChangeWatchedFiles in
-      List.iter notification.changes ~f:(fun change ->
-          let path = lsp_uri_to_path change.uri in
-          let path = Path.make path in
-          ClientIdeService.notify_disk_file_changed
-            ide_service
-            ~tracking_id
-            path);
+      let changes =
+        List.map notification.changes ~f:(fun change ->
+            change.uri |> lsp_uri_to_path |> Path.make)
+      in
+      let%lwt () =
+        ide_rpc
+          ide_service
+          ~tracking_id
+          ~ref_unblocked_time
+          ~needs_init:false
+          ClientIdeMessage.(Disk_files_changed changes)
+      in
       Lwt.return_none
     (* Text document completion: "AutoComplete!" *)
     | (_, Some ide_service, RequestMessage (id, CompletionRequest params)) ->

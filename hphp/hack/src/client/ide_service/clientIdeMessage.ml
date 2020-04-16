@@ -128,7 +128,7 @@ type _ t =
       Initialize_from_saved_state.t
       -> Initialize_from_saved_state.result t
   | Shutdown : unit -> unit t
-  | Disk_file_changed : Path.t -> unit t
+  | Disk_files_changed : Path.t list -> unit t
   | Ide_file_opened : Ide_file_opened.request -> unit t
   | Ide_file_changed : Ide_file_changed.request -> unit t
   | Ide_file_closed : Path.t -> unit t
@@ -153,8 +153,16 @@ type _ t =
 let t_to_string : type a. a t -> string = function
   | Initialize_from_saved_state _ -> "Initialize_from_saved_state"
   | Shutdown () -> "Shutdown"
-  | Disk_file_changed file_path ->
-    Printf.sprintf "Disk_file_changed(%s)" (Path.to_string file_path)
+  | Disk_files_changed files ->
+    let files = List.map files ~f:Path.to_string in
+    let (files, remainder) = List.split_n files 10 in
+    let remainder =
+      if List.is_empty remainder then
+        ""
+      else
+        ",..."
+    in
+    Printf.sprintf "Disk_file_changed(%s%s)" (String.concat files) remainder
   | Ide_file_opened { file_path; _ } ->
     Printf.sprintf "Ide_file_opened(%s)" (Path.to_string file_path)
   | Ide_file_changed { Ide_file_changed.file_path; _ } ->

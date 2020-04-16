@@ -483,6 +483,11 @@ bool Package::parseImpl(const std::string* fileName) {
     }
   }
 
+  auto const mode =
+    RO::EvalAbortBuildOnCompilerError ? CompileAbortMode::AllErrors :
+    RO::EvalAbortBuildOnVerifyError   ? CompileAbortMode::VerifyErrors :
+                                        CompileAbortMode::OnlyICE;
+
   // Invoke external compiler. If it fails to compile the file we log an
   // error and and skip it.
   auto uc = UnitCompiler::create(
@@ -490,7 +495,7 @@ bool Package::parseImpl(const std::string* fileName) {
     Native::s_noNativeFuncs, false, options);
   assertx(uc);
   try {
-    auto ue = uc->compile(true);
+    auto ue = uc->compile(true, mode);
     if (ue && !ue->m_ICE) {
       addUnitEmitter(std::move(ue));
       report(0);

@@ -80,6 +80,19 @@ FfpResult ffp_parse_file(std::string file,
 
 std::string hackc_version();
 
+/*
+ * Controls handling for errors detected during compilation. By default errors
+ * are converted to Fatal units.
+ *
+ * Never - all errors generate fatal units
+ * OnlyICE - internal errors (IPC and serializer) raise abort signals
+ * VerifyErrors - internal errors and assembler verification errors raise aborts
+ * AllErrors - internal, verification, and hackc errors raise aborts
+ */
+enum class CompileAbortMode {
+  Never, OnlyICE, VerifyErrors, AllErrors
+};
+
 struct UnitCompiler {
   UnitCompiler(const char* code,
                int codeLen,
@@ -108,7 +121,8 @@ struct UnitCompiler {
     const RepoOptions& options);
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    bool wantsSymbolRefs = false) const = 0;
+    bool wantsSymbolRefs = false,
+    CompileAbortMode = CompileAbortMode::Never) const = 0;
 
   virtual const char* getName() const = 0;
 
@@ -126,7 +140,8 @@ struct HackcUnitCompiler : public UnitCompiler {
   using UnitCompiler::UnitCompiler;
 
   virtual std::unique_ptr<UnitEmitter> compile(
-    bool wantsSymbolRefs = false) const override;
+    bool wantsSymbolRefs = false,
+    CompileAbortMode = CompileAbortMode::Never) const override;
 
   virtual const char* getName() const override { return "HackC"; }
 };

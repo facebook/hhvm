@@ -142,7 +142,7 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  if (ad->isPHPArrayType()) return Type::StaticArray(ad->kind());
+  if (ad->isPHPArrayType()) return TStaticArr;
   if (ad->isVecArrayType()) return TStaticVec;
   if (ad->isDictType()) return TStaticDict;
   if (ad->isKeysetType()) return TStaticKeyset;

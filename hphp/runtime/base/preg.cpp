@@ -800,6 +800,7 @@ pcre_get_compiled_regex_cache(PCRECache::Accessor& accessor,
 
     case ' ':
     case '\n':
+    case '\r':
       break;
 
     default:

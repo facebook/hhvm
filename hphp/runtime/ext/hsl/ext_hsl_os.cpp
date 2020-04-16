@@ -285,6 +285,14 @@ struct HSLFileDescriptor {
   };
 
   static Object newInstance(int fd) {
+    // Callers should check for an invalid FD before trying to construct a
+    // FileDescriptor object, but don't trust them.
+    if (fd < 0) {
+      SystemLib::throwErrorObject(
+        "Asked to create a negative FileDescriptor instance; this indicates "
+        "a bug in HHVM or a misbehaving CLI client."
+      );
+    }
     assertx(s_FileDescriptorClass);
     Object obj { s_FileDescriptorClass };
 
@@ -348,6 +356,8 @@ T hsl_cli_unwrap(CLISrvResult<T, int> res) {
   throw_errno_exception(res.error());
 }
 
+#define HSL_CLI_INVOKE(...) hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(__VA_ARGS__))
+
 CLISrvResult<ReturnedFdData, int>
 CLI_CLIENT_HANDLER(HSL_os_open, std::string path, int64_t flags, int64_t mode) {
   auto const fd = [&] {
@@ -363,13 +373,12 @@ CLI_CLIENT_HANDLER(HSL_os_open, std::string path, int64_t flags, int64_t mode) {
 }
 
 Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mode) {
-  int fd = hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+  int fd = HSL_CLI_INVOKE(
     HSL_os_open,
     path.toCppString(),
     flags,
     mode
-  )).fd;
-  assertx(fd >= 0);
+  ).fd;
   return HSLFileDescriptor::newInstance(fd);
 }
 
@@ -455,13 +464,12 @@ Object HHVM_FUNCTION(HSL_os_socket, int64_t domain, int64_t type, int64_t protoc
   // - some operations are/used to be privileged (e.g. raw sockets)
   // - linux allows setting some socket options via type, which may be privileged
   // ... so do the syscall on the client
-  int fd = hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+  int fd = HSL_CLI_INVOKE(
     HSL_os_socket,
     domain,
     type,
     protocol
-  )).fd;
-  assertx(fd >= 0);
+  ).fd;
   return HSLFileDescriptor::newInstance(fd);
 }
 
@@ -499,12 +507,12 @@ void HHVM_FUNCTION(HSL_os_ ## fun, const Object& fd, const Object& hsl_sockaddr)
   socklen_t ss_len; \
   native_sockaddr_from_hsl(hsl_sockaddr, ss, ss_len); \
 \
-  hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT( \
+  HSL_CLI_INVOKE( \
     HSL_os_ ## fun, \
     LoanedFdData { HSLFileDescriptor::fd(fd) }, \
     ss, \
     static_cast<int64_t>(ss_len) \
-  )); \
+  ); \
 }
 
 IMPL(connect);
@@ -523,11 +531,11 @@ CLISrvResult<int, int> CLI_CLIENT_HANDLER(HSL_os_listen,
 }
 
 void HHVM_FUNCTION(HSL_os_listen, const Object& fd, int64_t backlog) {
-  hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+  HSL_CLI_INVOKE(
     HSL_os_listen,
     LoanedFdData { HSLFileDescriptor::fd(fd) },
     backlog
-  ));
+  );
 }
 
 
@@ -587,12 +595,12 @@ Variant HHVM_FUNCTION(HSL_os_fcntl,
           "Argument for specific fcntl operation must be an int"
         );
       }
-      return hsl_cli_unwrap(INVOKE_ON_CLI_CLIENT(
+      return HSL_CLI_INVOKE(
         HSL_os_fcntl_intarg,
         LoanedFdData { fd },
         cmd,
         arg.toInt64()
-      ));
+      );
     default:
       throw_errno_exception(
         ENOTSUP,
@@ -666,6 +674,8 @@ Object HHVM_FUNCTION(HSL_os_poll_async,
     throw;
   }
 }
+
+#undef HSL_CLI_INVOKE
 
 struct OSExtension final : Extension {
 

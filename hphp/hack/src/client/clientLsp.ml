@@ -237,6 +237,8 @@ let log s = Hh_logger.log ("[client-lsp] " ^^ s)
 
 let log_debug s = Hh_logger.debug ("[client-lsp] " ^^ s)
 
+let log_error s = Hh_logger.error ("[client-lsp] " ^^ s)
+
 let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
   Http_lite.write_message stdout s
@@ -301,6 +303,52 @@ exception
   Server_fatal_connection_exception of Marshal_tools.remote_exception_data
 
 exception Server_nonfatal_exception of Lsp.Error.t
+
+(** Use ignore_promise_but_handle_failure when you want don't care about awaiting
+results of an async piece of work, but still want any exceptions to be logged.
+This is similar to Lwt.async except (1) it logs to our HackEventLogger and
+Hh_logger rather than stderr, (2) it you can decide on a case-by-case basis what
+should happen to exceptions rather than having them all share the same
+Lwt.async_exception_hook, (3) while Lwt.async takes a lambda for creating the
+promise and so catches exceptions during promise creation, this function takes
+an already-existing promise and so the caller has to handle such exceptions
+themselves - I resent using lambdas as a control-flow primitive.
+
+You can think of this function as similar to [ignore], but enhanced because
+it's poor practice to ignore a promise. *)
+let ignore_promise_but_handle_failure
+    ~(desc : string) ~(terminate_on_failure : bool) (promise : unit Lwt.t) :
+    unit =
+  Lwt.async (fun () ->
+      try%lwt
+        let%lwt () = promise in
+        Lwt.return_unit
+      with exn ->
+        let open Hh_json in
+        let exn = Exception.wrap exn in
+        let message = "Unhandled exception: " ^ Exception.get_ctor_string exn in
+        let stack =
+          Exception.get_backtrace_string exn |> Exception.clean_stack
+        in
+        let data =
+          JSON_Object
+            [
+              ("description", string_ desc);
+              ("message", string_ message);
+              ("stack", string_ stack);
+            ]
+        in
+        HackEventLogger.client_lsp_exception
+          ~root:(get_root_opt ())
+          ~message:"Unhandled exception"
+          ~data_opt:(Some data)
+          ~source:"lsp_misc";
+        log_error "%s\n%s\n%s" message desc stack;
+        if terminate_on_failure then
+          (* exit 2 is the same as used by Lwt.async *)
+          exit 2;
+
+        Lwt.return_unit)
 
 let state_to_string (state : state) : string =
   match state with
@@ -557,20 +605,18 @@ let set_verbose_to_file
   match ide_service with
   | Some ide_service ->
     let ref_unblocked_time = ref 0. in
-    Lwt.async (fun () ->
-        try%lwt
-          let%lwt () =
-            ide_rpc
-              ide_service
-              ~tracking_id
-              ~ref_unblocked_time
-              ~needs_init:false
-              (ClientIdeMessage.Verbose !verbose_to_file)
-          in
-          Lwt.return_unit
-        with _exn -> Lwt.return_unit
-        (* TODO: log this *));
-    ()
+    let (promise : unit Lwt.t) =
+      ide_rpc
+        ide_service
+        ~tracking_id
+        ~ref_unblocked_time
+        ~needs_init:false
+        (ClientIdeMessage.Verbose !verbose_to_file)
+    in
+    ignore_promise_but_handle_failure
+      promise
+      ~desc:"verbose-ide-rpc"
+      ~terminate_on_failure:false
   | None -> ()
 
 (** Determine whether to read a message from the client (the editor) or the
@@ -3363,12 +3409,17 @@ let on_status_restart_action
     (* Note: the env.verbose passed on init controls verbosity for stderr
     and is only ever controlled by --verbose command line, stored in env.
     But verbosity-to-file can be altered dynamically by the user. *)
-    Lwt.async (fun () ->
-        run_ide_service
-          env
-          new_ide_service
-          (initialize_params_exc ())
-          (get_editor_open_files state));
+    let (promise : unit Lwt.t) =
+      run_ide_service
+        env
+        new_ide_service
+        (initialize_params_exc ())
+        (get_editor_open_files state)
+    in
+    ignore_promise_but_handle_failure
+      promise
+      ~desc:"run-ide-after-restart"
+      ~terminate_on_failure:true;
     (* Invariant: at all times after InitializeRequest, ide_service has
     already been sent an "initialize" message. *)
     let%lwt () =
@@ -3623,8 +3674,13 @@ let handle_client_message
         match ide_service with
         | None -> ()
         | Some ide_service ->
-          Lwt.async (fun () ->
-              run_ide_service env ide_service initialize_params None);
+          let (promise : unit Lwt.t) =
+            run_ide_service env ide_service initialize_params None
+          in
+          ignore_promise_but_handle_failure
+            promise
+            ~desc:"run-ide-after-init"
+            ~terminate_on_failure:true;
           (* Invariant: at all times after InitializeRequest, ide_service has
           already been sent an "initialize" message. *)
           let id = NumberId (Jsonrpc.get_next_request_id ()) in
@@ -4544,13 +4600,15 @@ let handle_tick
         end else
           Lwt.return_unit
       in
-      Lwt.async EventLoggerLwt.flush;
       Lwt.return_unit
     (* idle tick. No-op. *)
-    | _ ->
-      Lwt.async EventLoggerLwt.flush;
-      Lwt.return_unit
+    | _ -> Lwt.return_unit
   in
+  let (promise : unit Lwt.t) = EventLoggerLwt.flush () in
+  ignore_promise_but_handle_failure
+    promise
+    ~desc:"tick-event-flush"
+    ~terminate_on_failure:false;
   Lwt.return_none
 
 let main (init_id : string) (env : env) : Exit_status.t Lwt.t =

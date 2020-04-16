@@ -150,6 +150,8 @@ let state_to_log_string (state : state) : string =
 
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
+let log_error s = Hh_logger.error ("[ide-daemon] " ^^ s)
+
 let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
   `stderr`; this is in addition to that. *)
@@ -916,7 +918,12 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     Lwt.return_unit
   with e ->
     let e = Exception.wrap e in
-    log "Exception occurred while handling RPC call: %s" (Exception.to_string e);
+    let message =
+      "Fatal clientIdeDaemon crash: " ^ Exception.get_ctor_string e
+    in
+    let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
+    HackEventLogger.serverless_ide_crash ~message ~stack;
+    log_error "%s\n%s" message stack;
     Lwt.return_unit
 
 let daemon_main

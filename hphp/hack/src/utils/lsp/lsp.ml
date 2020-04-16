@@ -364,18 +364,15 @@ module Initialize = struct
     | Messages
     | Verbose
 
-  (* Following initialization options are unfortunately a mix of Hack
-   * and Flow. We should find a way to separate them.
-   * Anyway, they're all optional in the source json, but we pick
-   * a default if necessary while parsing. *)
+  (* These hack-specific options they're all optional in initialize request,
+    and we pick a default if necessary while parsing. *)
   and initializationOptions = {
     useTextEditAutocomplete: bool;
-    (* only supported for Hack so far *)
     liveSyntaxErrors: bool;
-    (* implicitly true for Hack; supported in Flow *)
     namingTableSavedStatePath: string option;
-    (* only supported for Hack *)
-    sendServerStatusEvents: bool; (* only supported for Hack *)
+    sendServerStatusEvents: bool;
+        (** do we send telemetry whenever hh_server status changes, e.g. doing-local-typecheck,
+        done-typecheck. Used by HackAst. *)
   }
 
   and client_capabilities = {

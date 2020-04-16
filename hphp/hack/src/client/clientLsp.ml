@@ -4049,11 +4049,12 @@ let handle_server_message
     match (!state, message) with
     (* server busy status *)
     | (_, { push = ServerCommandTypes.BUSY_STATUS status; _ }) ->
+      (* if we're connected to hh_server, that can only be because
+      we know its root, which can only be because we received initializeParams.
+      So the following call won't fail! *)
+      let p = initialize_params_exc () in
       let should_send_status =
-        match Lwt.poll initialize_params_promise with
-        | None -> false
-        | Some p ->
-          Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
+        Lsp.Initialize.(p.initializationOptions.sendServerStatusEvents)
       in
       ( if should_send_status then
         let status_message =

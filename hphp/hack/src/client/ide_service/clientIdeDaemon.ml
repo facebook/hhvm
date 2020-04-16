@@ -139,6 +139,15 @@ type t = {
   state: state;
 }
 
+let state_to_log_string (state : state) : string =
+  match state with
+  | Initializing -> "Initializing"
+  | Failed_to_initialize e ->
+    Printf.sprintf
+      "Failed_to_initialize(%s)"
+      e.ClientIdeMessage.short_user_message
+  | Initialized _ -> Printf.sprintf "Initialized"
+
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
 let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
@@ -240,7 +249,7 @@ let initialize
        open_files;
      } :
       ClientIdeMessage.Initialize_from_saved_state.t) :
-    (state, ClientIdeMessage.error_data) Lwt_result.t =
+    (initialized_state, ClientIdeMessage.error_data) Lwt_result.t =
   let start_time = Unix.gettimeofday () in
   HackEventLogger.serverless_ide_set_root root;
   set_up_hh_logger_for_client_ide_service ~root;
@@ -339,22 +348,20 @@ let initialize
              (path, Provider_context.make_entry ~path ~contents:""))
       |> Relative_path.Map.of_list
     in
-    let state =
-      Initialized
-        {
-          hhi_root;
-          naming_table;
-          sienv;
-          changed_files_to_process = Path.Set.of_list changed_files;
-          popt;
-          tcopt;
-          local_memory;
-          open_files;
-          changed_files_denominator = List.length changed_files;
-        }
+    let initialized_state =
+      {
+        hhi_root;
+        naming_table;
+        sienv;
+        changed_files_to_process = Path.Set.of_list changed_files;
+        popt;
+        tcopt;
+        local_memory;
+        open_files;
+        changed_files_denominator = List.length changed_files;
+      }
     in
-    log "Serverless IDE has completed initialization";
-    Lwt.return_ok state
+    Lwt.return_ok initialized_state
   | Error error_data ->
     log "Serverless IDE failed to initialize";
     Lwt.return_error error_data
@@ -497,6 +504,12 @@ module Handle_message_result = struct
     | Error of ClientIdeMessage.error_data
 end
 
+(** handle_message invariants: Messages are only ever handled serially; we never
+handle one message while another is being handled. It is a bug if the client sends
+anything other than [Initialize_from_saved_state] as its first message. Upon
+receipt+processing of this we transition from [Initializing] to either [Initialized]
+or [Failed_to_initialize], and never thereafter transition state. Processing might
+take time, but we never attempt to handle any other messages during processing. *)
 let handle_message :
     type a.
     state ->
@@ -506,26 +519,63 @@ let handle_message :
  fun state _tracking_id message ->
   let open ClientIdeMessage in
   match (state, message) with
-  | (state, Shutdown ()) ->
-    let%lwt () = shutdown state in
-    Lwt.return (state, Handle_message_result.Response ())
+  (************************* HANDLED IN ANY STATE ************)
   | (_, Verbose verbose) ->
     if verbose then
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
     else
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
     Lwt.return (state, Handle_message_result.Notification)
-  | ((Failed_to_initialize _ | Initializing), Disk_file_changed _) ->
-    (* Should not happen. *)
-    let user_message =
-      "IDE services could not process file change because "
-      ^ "it failed to initialize or was still initializing. The caller "
-      ^ "should have waited for the IDE services to become ready before "
-      ^ "sending file-change notifications."
+  | (_, Shutdown ()) ->
+    let%lwt () = shutdown state in
+    Lwt.return (state, Handle_message_result.Response ())
+  (************************* INITIALIZATION ******************)
+  | (Initializing, Initialize_from_saved_state param) ->
+    let%lwt result = initialize param in
+    begin
+      match result with
+      | Ok initialized_state ->
+        let results =
+          {
+            ClientIdeMessage.Initialize_from_saved_state
+            .num_changed_files_to_process =
+              Path.Set.cardinal initialized_state.changed_files_to_process;
+          }
+        in
+        Lwt.return
+          (Initialized initialized_state, Handle_message_result.Response results)
+      | Error error_data ->
+        Lwt.return
+          ( Failed_to_initialize error_data,
+            Handle_message_result.Error error_data )
+    end
+  | (Initialized _, Initialize_from_saved_state _) ->
+    let error_data =
+      ClientIdeMessage.make_error_data
+        "Tried to initialize when already initialized"
+        ~stack:(Exception.get_current_callstack_string 100)
+    in
+    Lwt.return (state, Handle_message_result.Error error_data)
+  (************************* UNABLE TO HANDLE ****************)
+  | (Initializing, _) ->
+    let debug_details =
+      Printf.sprintf
+        "Unexpected message. state=%s message=%s"
+        (state_to_log_string state)
+        (ClientIdeMessage.t_to_string message)
     in
     let stack = Exception.get_current_callstack_string 99 in
-    let error_data = ClientIdeMessage.make_error_data user_message ~stack in
+    let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
     Lwt.return (state, Handle_message_result.Error error_data)
+  | (Failed_to_initialize error_data, _) ->
+    let error_data =
+      {
+        error_data with
+        debug_details = "Failed to initialize: " ^ error_data.debug_details;
+      }
+    in
+    Lwt.return (state, Handle_message_result.Error error_data)
+  (************************* NORMAL HANDLING ****************)
   | (Initialized initialized_state, Disk_file_changed path) ->
     (* Only invalidate when a hack file changes *)
     if FindUtils.file_filter (Path.to_string path) then
@@ -546,51 +596,6 @@ let handle_message :
       Lwt.return (state, Handle_message_result.Notification)
     else
       Lwt.return (state, Handle_message_result.Notification)
-  | (Initializing, Initialize_from_saved_state param) ->
-    let%lwt result = initialize param in
-    begin
-      match result with
-      | Ok state ->
-        let num_changed_files_to_process =
-          match state with
-          | Initialized { changed_files_to_process; _ } ->
-            Path.Set.cardinal changed_files_to_process
-          | _ -> 0
-        in
-        let results =
-          {
-            ClientIdeMessage.Initialize_from_saved_state
-            .num_changed_files_to_process;
-          }
-        in
-        Lwt.return (state, Handle_message_result.Response results)
-      | Error error_data ->
-        Lwt.return
-          ( Failed_to_initialize error_data,
-            Handle_message_result.Error error_data )
-    end
-  | (Initialized _, Initialize_from_saved_state _) ->
-    let error_data =
-      ClientIdeMessage.make_error_data
-        "Tried to initialize when already initialized"
-        ~stack:(Exception.get_current_callstack_string 100)
-    in
-    Lwt.return (state, Handle_message_result.Error error_data)
-  | (Initializing, _) ->
-    let error_data =
-      ClientIdeMessage.make_error_data
-        "IDE services have not yet been initialized"
-        ~stack:(Exception.get_current_callstack_string 100)
-    in
-    Lwt.return (state, Handle_message_result.Error error_data)
-  | (Failed_to_initialize error_data, _) ->
-    let error_data =
-      {
-        error_data with
-        debug_details = "Failed to initialize: " ^ error_data.debug_details;
-      }
-    in
-    Lwt.return (state, Handle_message_result.Error error_data)
   | (Initialized initialized_state, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix

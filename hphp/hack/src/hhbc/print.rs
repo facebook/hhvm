@@ -2831,11 +2831,96 @@ fn print_efun<W: Write>(
             })
         })?;
     }
-    print_block(w, env, &f.body.ast)
+    print_block_(ctx, w, env, &f.body.ast)
 }
 
-fn print_block<W: Write>(w: &mut W, env: &ExprEnv, block: &ast::Block) -> Result<(), W::Error> {
-    not_impl!()
+fn print_block<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    block: &ast::Block,
+) -> Result<(), W::Error> {
+    match &block[..] {
+        [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
+        [ast::Stmt(_, ast::Stmt_::Block(b))] if matches!(&b[..], [_]) => {
+            print_block_(ctx, w, env, b)
+        }
+        [_, _, ..] => print_block_(ctx, w, env, block),
+        [stmt] => print_statement(ctx, w, env, stmt, None),
+    }
+}
+
+fn print_block_<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    block: &ast::Block,
+) -> Result<(), W::Error> {
+    wrap_by_(w, "{\\n", "}\\n", |w| {
+        concat(w, block, |w, stmt| {
+            print_statement(ctx, w, env, stmt, Some("  "))
+        })
+    })
+}
+
+fn print_statement<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    env: &ExprEnv,
+    stmt: &ast::Stmt,
+    ident: Option<&str>,
+) -> Result<(), W::Error> {
+    use ast::Stmt_ as S_;
+    match &stmt.1 {
+        S_::Return(expr) => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            wrap_by_(w, "return", ";\\n", |w| {
+                option(w, &**expr, |w, e| {
+                    w.write(" ")?;
+                    print_expr(ctx, w, env, e)
+                })
+            })
+        }
+        S_::Expr(expr) => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            print_expr(ctx, w, env, &**expr)?;
+            w.write(";\\n")
+        }
+        S_::Throw(expr) => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            wrap_by_(w, "throw ", ";\\n", |w| print_expr(ctx, w, env, &**expr))
+        }
+        S_::Break => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            w.write("break;\\n")
+        }
+        S_::Continue => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            w.write("continue;\\n")
+        }
+        S_::While(x) => {
+            let (cond, block) = &**x;
+            wrap_by_(w, "while (", ")", |w| print_expr(ctx, w, env, cond))?;
+            print_block(ctx, w, env, block)
+        }
+        S_::If(x) => {
+            let (cond, if_block, else_block) = &**x;
+            wrap_by_(w, "if (", ")", |w| print_expr(ctx, w, env, cond))?;
+            print_block(ctx, w, env, if_block)?;
+            let mut buf = String::new();
+            print_block(ctx, &mut buf, env, else_block).map_err(|e| match e {
+                Error::NotImpl(m) => Error::NotImpl(m),
+                _ => Error::Fail(format!("Failed: {}", e)),
+            })?;
+            w.write_if(!buf.is_empty(), " else ")?;
+            w.write_if(!buf.is_empty(), buf)
+        }
+        S_::Block(block) => print_block_(ctx, w, env, block),
+        S_::Noop => Ok(()),
+        _ => Err(Error::Fail(
+            "TODO(T29869930) Unimplemented NYI: Default value printing".into(),
+        )),
+    }
 }
 
 fn print_fparam<W: Write>(

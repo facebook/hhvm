@@ -251,6 +251,14 @@ void verifyTypeImpl(IRGS& env,
       assertx(valType <= TArr);
       auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
       env.irb->constrainValue(val, gc);
+      auto const type = [&]{
+        if (result == AnnotAction::VArrayCheck) return TVArr;
+        if (result == AnnotAction::DArrayCheck) return TDArr;
+        return TBottom;
+      }();
+      if (val->type().maybe(type)) {
+        val = gen(env, CheckType, type, makeExit(env), val);
+      }
       return dvArr(val);
     }
     case AnnotAction::WarnFunc:

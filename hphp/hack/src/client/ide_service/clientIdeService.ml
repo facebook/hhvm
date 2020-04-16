@@ -125,19 +125,60 @@ let set_state (t : t) (new_state : state) : unit =
   t.state <- new_state;
   Lwt_condition.broadcast t.state_changed_cv ()
 
-let do_rpc
+let make (args : ClientIdeMessage.daemon_args) : t =
+  let daemon_handle =
+    Daemon.spawn
+      ~channel_mode:`pipe
+      (Unix.stdin, Unix.stdout, Unix.stderr)
+      ClientIdeDaemon.daemon_entry_point
+      args
+  in
+  let (ic, oc) = daemon_handle.Daemon.channels in
+  let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
+  let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
+  {
+    state = Uninitialized { wait_for_initialization = false };
+    state_changed_cv = Lwt_condition.create ();
+    daemon_handle;
+    in_fd;
+    out_fd;
+    messages_to_send = Lwt_message_queue.create ();
+    response_emitter = Lwt_message_queue.create ();
+    notification_emitter = Lwt_message_queue.create ();
+  }
+
+let rec wait_for_initialization (t : t) : unit Lwt.t =
+  match t.state with
+  | Uninitialized _
+  | Failed_to_initialize _ ->
+    let%lwt () = Lwt_condition.wait t.state_changed_cv in
+    wait_for_initialization t
+  | Initialized _ -> Lwt.return_unit
+  | Stopped _ ->
+    failwith
+      ( "Should not be waiting for the initialization of a stopped IDE service, "
+      ^ "as this is a terminal state" )
+
+(** rpc_internal pushes a message onto the daemon's queue, and awaits until
+it can pop the response back. It updates ref_unnblocked_time, the time
+at which the daemon started handling the message. *)
+let rpc_internal
+    (t : t)
     ~(tracked_message : 'a ClientIdeMessage.tracked_t)
-    ~(ref_unblocked_time : float ref)
-    ~(messages_to_send : message_queue)
-    ~(response_emitter : response_emitter) : ('a, Lsp.Error.t) Lwt_result.t =
+    ~(ref_unblocked_time : float ref) : ('a, Lsp.Error.t) Lwt_result.t =
   try%lwt
     let success =
-      Lwt_message_queue.push messages_to_send (Message_wrapper tracked_message)
+      Lwt_message_queue.push
+        t.messages_to_send
+        (Message_wrapper tracked_message)
     in
     if not success then failwith "Could not send message (queue was closed)";
 
+    (* Lwt_message_queue.pop is built upon Lwt_condition.wait, which has
+    the guarantee that pops will be fulfilled in the order in which they
+    were called. *)
     let%lwt (response : response_wrapper option) =
-      Lwt_message_queue.pop response_emitter
+      Lwt_message_queue.pop t.response_emitter
     in
     match response with
     | None -> failwith "Could not read response: queue was closed"
@@ -172,39 +213,60 @@ let do_rpc
         data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
       }
 
-let make (args : ClientIdeMessage.daemon_args) : t =
-  let daemon_handle =
-    Daemon.spawn
-      ~channel_mode:`pipe
-      (Unix.stdin, Unix.stdout, Unix.stderr)
-      ClientIdeDaemon.daemon_entry_point
-      args
+let rpc
+    (t : t)
+    ~(tracking_id : string)
+    ~(ref_unblocked_time : float ref)
+    ~(needs_init : bool)
+    (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
+  let needs_init =
+    if needs_init then
+      `Needs_init
+    else
+      `Fine_without_init
   in
-  let (ic, oc) = daemon_handle.Daemon.channels in
-  let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
-  let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
-  {
-    state = Uninitialized { wait_for_initialization = false };
-    state_changed_cv = Lwt_condition.create ();
-    daemon_handle;
-    in_fd;
-    out_fd;
-    messages_to_send = Lwt_message_queue.create ();
-    response_emitter = Lwt_message_queue.create ();
-    notification_emitter = Lwt_message_queue.create ();
-  }
-
-let rec wait_for_initialization (t : t) : unit Lwt.t =
-  match t.state with
-  | Uninitialized _
-  | Failed_to_initialize _ ->
-    let%lwt () = Lwt_condition.wait t.state_changed_cv in
-    wait_for_initialization t
-  | Initialized _ -> Lwt.return_unit
-  | Stopped _ ->
-    failwith
-      ( "Should not be waiting for the initialization of a stopped IDE service, "
-      ^ "as this is a terminal state" )
+  let tracked_message = { ClientIdeMessage.tracking_id; message } in
+  let open ClientIdeMessage in
+  match (t.state, needs_init) with
+  | (Uninitialized { wait_for_initialization = false }, `Needs_init) ->
+    Lwt.return_error
+      {
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service has not yet been initialized";
+        data = None;
+      }
+  | (Failed_to_initialize info, _) ->
+    Lwt.return_error
+      {
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service failed to initialize: " ^ info.short_user_message;
+        data =
+          Lsp_fmt.error_data_of_string
+            ~key:"not_running_reason"
+            info.debug_details;
+      }
+  | (Stopped (reason, info), _) ->
+    Lwt.return_error
+      {
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message =
+          Printf.sprintf
+            "IDE service is stopped: %s. %s"
+            (Stop_reason.to_string reason)
+            info.short_user_message;
+        data =
+          Lsp_fmt.error_data_of_string
+            ~key:"not_running_reason"
+            info.debug_details;
+      }
+  | (Uninitialized { wait_for_initialization = true }, `Needs_init) ->
+    let%lwt () = wait_for_initialization t in
+    let%lwt result = rpc_internal t ~tracked_message ~ref_unblocked_time in
+    Lwt.return result
+  | (Initialized _, (`Needs_init | `Fine_without_init))
+  | (Uninitialized _, `Fine_without_init) ->
+    let%lwt result = rpc_internal t ~tracked_message ~ref_unblocked_time in
+    Lwt.return result
 
 let initialize_from_saved_state
     (t : t)
@@ -318,29 +380,28 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
     | Stopped _ ->
       Lwt.return_unit
     | Initialized _ ->
-      let t = Unix.gettimeofday () in
+      let start_time = Unix.gettimeofday () in
       (try%lwt
-         let message = ClientIdeMessage.Shutdown () in
-         let tracked_message = { ClientIdeMessage.tracking_id; message } in
          let ref_unblocked_time = ref 0. in
          let%lwt () =
            Lwt.pick
              [
                (let%lwt (_result : (unit, Lsp.Error.t) result) =
-                  do_rpc
-                    ~tracked_message
+                  rpc
+                    t
+                    ~tracking_id
                     ~ref_unblocked_time
-                    ~messages_to_send
-                    ~response_emitter
+                    ~needs_init:true
+                    (ClientIdeMessage.Shutdown ())
                 in
                 Daemon.kill daemon_handle;
-                HackEventLogger.serverless_ide_destroy_ok t;
+                HackEventLogger.serverless_ide_destroy_ok start_time;
                 Lwt.return_unit);
                (let%lwt () = Lwt_unix.sleep 5.0 in
                 Daemon.kill daemon_handle;
                 let stack = Exception.get_current_callstack_string 100 in
                 HackEventLogger.serverless_ide_destroy_error
-                  t
+                  start_time
                   ("Timeout\n" ^ stack);
                 log "ClientIdeService.destroy timeout";
                 Lwt.return_unit);
@@ -349,7 +410,9 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
          Lwt.return_unit
        with e ->
          let e = Exception.wrap e in
-         HackEventLogger.serverless_ide_destroy_error t (Exception.to_string e);
+         HackEventLogger.serverless_ide_destroy_error
+           start_time
+           (Exception.to_string e);
          log "ClientIdeService.destroy error\n%s" (Exception.to_string e);
          Lwt.return_unit)
   in
@@ -520,74 +583,6 @@ let notify_ide_file_closed (t : t) ~(tracking_id : string) ~(path : Path.t) :
 let notify_verbose (t : t) ~(tracking_id : string) (verbose : bool) : unit =
   let message = ClientIdeMessage.Verbose verbose in
   push_message t (Message_wrapper { ClientIdeMessage.tracking_id; message })
-
-let rpc
-    (t : t)
-    ~(tracking_id : string)
-    ~(ref_unblocked_time : float ref)
-    ~(needs_init : bool)
-    (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
-  let needs_init =
-    if needs_init then
-      `Needs_init
-    else
-      `Fine_without_init
-  in
-  let { messages_to_send; response_emitter; _ } = t in
-  let tracked_message = { ClientIdeMessage.tracking_id; message } in
-  let open ClientIdeMessage in
-  match (t.state, needs_init) with
-  | (Uninitialized { wait_for_initialization = false }, `Needs_init) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service has not yet been initialized";
-        data = None;
-      }
-  | (Failed_to_initialize info, _) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service failed to initialize: " ^ info.short_user_message;
-        data =
-          Lsp_fmt.error_data_of_string
-            ~key:"not_running_reason"
-            info.debug_details;
-      }
-  | (Stopped (reason, info), _) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message =
-          Printf.sprintf
-            "IDE service is stopped: %s. %s"
-            (Stop_reason.to_string reason)
-            info.short_user_message;
-        data =
-          Lsp_fmt.error_data_of_string
-            ~key:"not_running_reason"
-            info.debug_details;
-      }
-  | (Uninitialized { wait_for_initialization = true }, `Needs_init) ->
-    let%lwt () = wait_for_initialization t in
-    let%lwt result =
-      do_rpc
-        ~tracked_message
-        ~ref_unblocked_time
-        ~messages_to_send
-        ~response_emitter
-    in
-    Lwt.return result
-  | (Initialized _, (`Needs_init | `Fine_without_init))
-  | (Uninitialized _, `Fine_without_init) ->
-    let%lwt result =
-      do_rpc
-        ~tracked_message
-        ~ref_unblocked_time
-        ~messages_to_send
-        ~response_emitter
-    in
-    Lwt.return result
 
 let get_notifications (t : t) : notification_emitter = t.notification_emitter
 

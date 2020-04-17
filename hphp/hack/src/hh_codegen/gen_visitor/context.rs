@@ -3,8 +3,9 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use super::syn_helper::*;
+use super::{gen_helper, syn_helper::*};
 use crate::common::Result;
+use proc_macro2::TokenStream;
 use quote::format_ident;
 use std::{
     collections::{HashMap, HashSet, VecDeque},
@@ -29,6 +30,8 @@ pub struct Context<'a> {
     pub context: String,
     /// the type param name for `Error`, which is used in `Result<(), Error>`
     pub error_ty_param: String,
+
+    pub node_lifetime: String,
 }
 impl<'a> Context<'a> {
     pub fn new(files: &'a [(syn::File, &'a Path)], root: &'a str) -> Result<Self> {
@@ -59,6 +62,7 @@ impl<'a> Context<'a> {
             types,
             context: "Context".into(),
             error_ty_param: "Error".into(),
+            node_lifetime: "node".into(),
         })
     }
 
@@ -68,6 +72,15 @@ impl<'a> Context<'a> {
 
     pub fn error_ident(&self) -> Ident {
         format_ident!("{}", self.error_ty_param)
+    }
+
+    pub fn node_lifetime_ident(&self) -> Ident {
+        format_ident!("{}", self.node_lifetime)
+    }
+
+    pub fn node_lifetime_ident_with_quote(&self) -> TokenStream {
+        let l = self.node_lifetime_ident();
+        gen_helper::make_lifetime(&l)
     }
 
     pub fn is_root_ty_param(&self, ty_param: &str) -> bool {

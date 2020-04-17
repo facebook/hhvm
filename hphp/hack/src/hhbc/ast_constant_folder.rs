@@ -559,10 +559,10 @@ impl<'a> FolderVisitor<'a> {
     }
 }
 
-impl VisitorMut for FolderVisitor<'_> {
+impl<'ast> VisitorMut<'ast> for FolderVisitor<'_> {
     type P = AstParams<(), ()>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 

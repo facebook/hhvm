@@ -272,10 +272,10 @@ fn gen_pu_accessors(class_name: &str, extends: bool, field: Tast::PuEnum) -> Vec
 struct EraseBodyVisitor {}
 struct Ctx {}
 
-impl VisitorMut for EraseBodyVisitor {
+impl<'ast> VisitorMut<'ast> for EraseBodyVisitor {
     type P = AstParams<Ctx, ()>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 

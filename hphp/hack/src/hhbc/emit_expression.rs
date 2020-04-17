@@ -207,19 +207,24 @@ mod inout_locals {
     }
 
     pub struct Ctx<'a> {
+        // TODO(shiqicao): Change AliasInfoMap to AliasInfoMap<'ast>
         state: &'a mut AliasInfoMap,
         env: &'a Env<'a>,
         i: usize,
     }
 
-    impl<'a> aast_visitor::Visitor for Visitor<'a> {
+    impl<'ast, 'a> aast_visitor::Visitor<'ast> for Visitor<'a> {
         type P = aast_visitor::AstParams<Ctx<'a>, ()>;
 
-        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<P = Self::P> {
+        fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
             self
         }
 
-        fn visit_expr_(&mut self, c: &mut Ctx<'a>, p: &tast::Expr_) -> std::result::Result<(), ()> {
+        fn visit_expr_(
+            &mut self,
+            c: &mut Ctx<'a>,
+            p: &'ast tast::Expr_,
+        ) -> std::result::Result<(), ()> {
             p.recurse(c, self.object())?;
             Ok(match p {
                 tast::Expr_::Binop(expr) => {
@@ -271,13 +276,13 @@ mod inout_locals {
 pub fn get_type_structure_for_hint(
     e: &mut Emitter,
     tparams: &[&str],
-    targ_map: &IndexSet<String>,
+    targ_map: &IndexSet<&str>,
     hint: &aast::Hint,
 ) -> Result<InstrSeq> {
     let targ_map: BTreeMap<&str, i64> = targ_map
         .iter()
         .enumerate()
-        .map(|(i, n)| (n.as_str(), i as i64))
+        .map(|(i, n)| (*n, i as i64))
         .collect();
     let tv = emit_type_constant::hint_to_type_constant(
         e.options(),
@@ -5422,10 +5427,10 @@ pub fn fixup_type_arg<'a>(
         erased_tparams: &'s [&'s str],
         isas: bool,
     };
-    impl<'s> Visitor for Checker<'s> {
+    impl<'ast, 's> Visitor<'ast> for Checker<'s> {
         type P = AstParams<(), Option<Error>>;
 
-        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
             self
         }
 
@@ -5467,10 +5472,10 @@ pub fn fixup_type_arg<'a>(
     struct Updater<'s> {
         erased_tparams: &'s [&'s str],
     }
-    impl<'s> VisitorMut for Updater<'s> {
+    impl<'ast, 's> VisitorMut<'ast> for Updater<'s> {
         type P = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+        fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
             self
         }
 
@@ -5514,31 +5519,27 @@ pub fn emit_reified_arg(
     isas: bool,
     hint: &tast::Hint,
 ) -> Result<(InstrSeq, bool)> {
-    struct Collector<'a> {
+    struct Collector<'ast, 'a> {
         current_tags: &'a HashSet<&'a str>,
-        // TODO(hrust): acc should be typed to (usize, HashMap<'str, usize>)
-        // which avoids allocation. This currently isn't possible since visitor need to expose
-        // lifttime of nodes, for example,
-        // `fn visit_hint_(..., h_: &'a tast::Hint_) -> ... {}`
-        acc: IndexSet<String>,
+        acc: IndexSet<&'ast str>,
     }
 
-    impl<'a> Collector<'a> {
-        fn add_name(&mut self, name: &str) {
+    impl<'ast, 'a> Collector<'ast, 'a> {
+        fn add_name(&mut self, name: &'ast str) {
             if self.current_tags.contains(name) && !self.acc.contains(name) {
-                self.acc.insert(name.into());
+                self.acc.insert(name);
             }
         }
     }
 
-    impl<'a> Visitor for Collector<'a> {
+    impl<'ast, 'a> Visitor<'ast> for Collector<'ast, 'a> {
         type P = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
             self
         }
 
-        fn visit_hint_(&mut self, c: &mut (), h_: &tast::Hint_) -> StdResult<(), ()> {
+        fn visit_hint_(&mut self, c: &mut (), h_: &'ast tast::Hint_) -> StdResult<(), ()> {
             use tast::{Hint_ as H_, Id};
             match h_ {
                 H_::Haccess(_, sids) => Ok(sids.iter().for_each(|Id(_, name)| self.add_name(name))),

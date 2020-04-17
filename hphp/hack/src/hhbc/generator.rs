@@ -11,10 +11,10 @@ use oxidized::{
 pub fn is_function_generator(body: &AstBody) -> (bool, bool) {
     struct S((bool, bool));
 
-    impl Visitor for S {
+    impl<'ast> Visitor<'ast> for S {
         type P = AstParams<(), ()>;
 
-        fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+        fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
             self
         }
 

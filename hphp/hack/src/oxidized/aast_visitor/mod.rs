@@ -49,9 +49,9 @@ mod tests {
 
     #[test]
     fn simple() {
-        impl Visitor for usize {
+        impl<'ast> Visitor<'ast> for usize {
             type P = type_params_defaults::P<(), (), (), (), (), ()>;
-            fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
                 self
             }
 
@@ -73,9 +73,9 @@ mod tests {
 
     #[test]
     fn simple_mut() {
-        impl VisitorMut for () {
+        impl<'ast> VisitorMut<'ast> for () {
             type P = type_params_defaults::P<(), (), (), (), (), ()>;
-            fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+            fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
                 self
             }
 

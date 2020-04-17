@@ -679,10 +679,10 @@ where
 
     fn check_valid_reified_hint(env: &mut Env, node: &Syntax<T, V>, hint: &ast::Hint) {
         struct Checker<F: FnMut(&String)>(F);
-        impl<F: FnMut(&String)> Visitor for Checker<F> {
+        impl<'ast, F: FnMut(&String)> Visitor<'ast> for Checker<F> {
             type P = AstParams<(), ()>;
 
-            fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+            fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
                 self
             }
 

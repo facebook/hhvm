@@ -4,21 +4,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use super::{context::Context, generator::Generator};
+use super::{context::Context, gen_helper, generator::Generator};
 use crate::{common::*, impl_generator};
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
 trait NodeTrait {
     fn filename() -> String;
     fn trait_name() -> syn::Ident;
-    fn receiver() -> TokenStream;
+    fn receiver(lifttime: &Ident) -> TokenStream;
     fn visitor() -> syn::Ident;
     fn use_visitor() -> TokenStream;
 
     fn gen(ctx: &Context) -> Result<TokenStream> {
         let trait_name = Self::trait_name();
-        let receiver = Self::receiver();
+        let node_lifetime = ctx.node_lifetime_ident();
+        let receiver = Self::receiver(&node_lifetime);
+        let node_lifetime = gen_helper::make_lifetime(&node_lifetime);
         let visitor = Self::visitor();
         let use_visitor = Self::use_visitor();
         let context = ctx.context_ident();
@@ -29,18 +31,18 @@ trait NodeTrait {
             use super::type_params::Params;
 
             pub trait #trait_name<P: Params> {
-                fn accept(
+                fn accept<#node_lifetime>(
                     #receiver,
                     ctx: &mut P::#context,
-                    v: &mut dyn #visitor<P = P>,
+                    v: &mut dyn #visitor<#node_lifetime, P = P>,
                 ) -> Result<(), P::#error> {
                     self.recurse(ctx, v)
                 }
 
-                fn recurse(
+                fn recurse<#node_lifetime>(
                     #receiver,
                     ctx: &mut P::#context,
-                    v: &mut dyn #visitor<P = P>,
+                    v: &mut dyn #visitor<#node_lifetime, P = P>,
                 ) -> Result<(), P::#error> {
                     Ok(())
                 }
@@ -59,8 +61,9 @@ impl NodeTrait for RefNodeTrait {
         format_ident!("Node")
     }
 
-    fn receiver() -> TokenStream {
-        quote! {&self}
+    fn receiver(lifetime: &Ident) -> TokenStream {
+        let l = gen_helper::make_lifetime(lifetime);
+        quote! {&#l self}
     }
 
     fn visitor() -> syn::Ident {
@@ -83,8 +86,9 @@ impl NodeTrait for MutNodeTrait {
         format_ident!("NodeMut")
     }
 
-    fn receiver() -> TokenStream {
-        quote! {&mut self}
+    fn receiver(lifetime: &Ident) -> TokenStream {
+        let l = gen_helper::make_lifetime(lifetime);
+        quote! {&#l mut self}
     }
 
     fn visitor() -> syn::Ident {

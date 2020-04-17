@@ -992,10 +992,10 @@ struct ClosureConvertVisitor<'a> {
     phantom_lifetime_a: std::marker::PhantomData<&'a ()>,
 }
 
-impl<'a> VisitorMut for ClosureConvertVisitor<'a> {
+impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
     type P = AstParams<Env<'a>, Error>;
 
-    fn object(&mut self) -> &mut dyn VisitorMut<P = Self::P> {
+    fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 

@@ -12,7 +12,7 @@ use quote::{format_ident, quote};
 pub trait VisitorTrait {
     fn filename() -> String;
     fn trait_name() -> syn::Ident;
-    fn node_ref_kind() -> TokenStream;
+    fn node_ref_kind(lifetime: &TokenStream) -> TokenStream;
     fn use_node() -> TokenStream;
     fn node_trait_name() -> syn::Ident;
 
@@ -24,6 +24,9 @@ pub trait VisitorTrait {
         let visit_ty_params = Self::gen_visit_ty_params(ctx)?;
         let uses = gen_module_uses(ctx.modules());
 
+        let lifetime = ctx.node_lifetime_ident();
+        let lifetime = make_lifetime(&lifetime);
+
         Ok(quote! {
             #![allow(unused_variables)]
 
@@ -33,10 +36,10 @@ pub trait VisitorTrait {
 
             #node_dispatcher_function
 
-            pub trait #trait_name {
+            pub trait #trait_name<#lifetime> {
                 type P: Params;
 
-                fn object(&mut self) -> &mut dyn #trait_name<P = Self::P>;
+                fn object(&mut self) -> &mut dyn #trait_name<#lifetime, P = Self::P>;
 
                 #(#visit_ty_params)*
 
@@ -46,7 +49,9 @@ pub trait VisitorTrait {
     }
 
     fn gen_visit_ty_params(ctx: &Context) -> Result<Vec<TokenStream>> {
-        let ref_kind = Self::node_ref_kind();
+        let lifetime = ctx.node_lifetime_ident();
+        let lifetime = make_lifetime(&lifetime);
+        let ref_kind = Self::node_ref_kind(&lifetime);
         let context = ctx.context_ident();
         let error = ctx.error_ident();
         Ok(ctx
@@ -63,7 +68,8 @@ pub trait VisitorTrait {
     }
 
     fn gen_visit_functions(ctx: &Context) -> Result<Vec<TokenStream>> {
-        let ref_kind = Self::node_ref_kind();
+        let lifetime = ctx.node_lifetime_ident_with_quote();
+        let ref_kind = Self::node_ref_kind(&lifetime);
         let context = ctx.context_ident();
         let error = ctx.error_ident();
         let mut visit_fn = vec![];
@@ -90,12 +96,12 @@ pub trait VisitorTrait {
         let visitor_trait_name = Self::trait_name();
         let context = ctx.context_ident();
         let error = ctx.error_ident();
-        let node_ref_kind = Self::node_ref_kind();
+        let lifetime = ctx.node_lifetime_ident_with_quote();
+        let node_ref_kind = Self::node_ref_kind(&lifetime);
         let node_trait_name = Self::node_trait_name();
-
         Ok(quote! {
-            pub fn visit<P: Params>(
-                v: &mut impl #visitor_trait_name<P = P>,
+            pub fn visit<#lifetime, P: Params>(
+                v: &mut impl #visitor_trait_name<#lifetime, P = P>,
                 c: &mut P::#context,
                 p: #node_ref_kind impl #node_trait_name<P>,
             ) -> Result<(), P::#error> {
@@ -119,8 +125,8 @@ impl VisitorTrait for RefVisitorTrait {
         format_ident!("Visitor")
     }
 
-    fn node_ref_kind() -> TokenStream {
-        quote! { & }
+    fn node_ref_kind(lifetime: &TokenStream) -> TokenStream {
+        quote! { &#lifetime }
     }
 
     fn use_node() -> TokenStream {
@@ -143,8 +149,8 @@ impl VisitorTrait for MutVisitorTrait {
         format_ident!("VisitorMut")
     }
 
-    fn node_ref_kind() -> TokenStream {
-        quote! { &mut }
+    fn node_ref_kind(lifetime: &TokenStream) -> TokenStream {
+        quote! { &#lifetime mut }
     }
 
     fn use_node() -> TokenStream {

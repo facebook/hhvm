@@ -43,10 +43,10 @@ impl Checker {
     }
 }
 
-impl Visitor for Checker {
+impl<'ast> Visitor<'ast> for Checker {
     type P = AstParams<Context, ()>;
 
-    fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
         self
     }
 

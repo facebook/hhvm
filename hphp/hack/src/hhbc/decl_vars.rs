@@ -123,10 +123,10 @@ impl<'a> DeclvarVisitor<'a> {
     }
 }
 
-impl<'a> Visitor for DeclvarVisitor<'a> {
+impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     type P = AstParams<(), String>;
 
-    fn object(&mut self) -> &mut dyn Visitor<P = Self::P> {
+    fn object(&mut self) -> &mut dyn Visitor<'ast, P = Self::P> {
         self
     }
 

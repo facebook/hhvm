@@ -217,10 +217,10 @@ struct Ctx<'a> {
     scope: &'a Scope<'a>,
 }
 
-impl<'a> aast_visitor::Visitor for ResolverVisitor<'a> {
+impl<'ast, 'a> aast_visitor::Visitor<'ast> for ResolverVisitor<'a> {
     type P = AstParams<Ctx<'a>, ()>;
 
-    fn object(&mut self) -> &mut dyn aast_visitor::Visitor<P = Self::P> {
+    fn object(&mut self) -> &mut dyn aast_visitor::Visitor<'ast, P = Self::P> {
         self
     }
 

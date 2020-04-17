@@ -8,13 +8,13 @@ use super::{
     context::Context, gen_helper::*, generator::Generator, syn_helper::*, visitor_trait_generator,
 };
 use crate::{common::*, impl_generator};
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
 pub trait NodeImpl {
     fn filename() -> String;
     fn node_trait_name() -> syn::Ident;
-    fn self_ref_kind() -> TokenStream;
+    fn self_ref_kind(lifetime: Option<&Ident>) -> TokenStream;
     fn visitor_trait_name() -> syn::Ident;
     fn use_node() -> TokenStream;
     fn use_visitor() -> TokenStream;
@@ -52,24 +52,27 @@ pub trait NodeImpl {
         let ty_name = format_ident!("{}", ty_name);
         let ty_params = gen_ty_params(get_ty_param_idents(ty_def)?);
         let node_trait_name = Self::node_trait_name();
-        let self_ref_kind = Self::self_ref_kind();
+        let node_lifetime = ctx.node_lifetime_ident();
+        let self_ref_kind = Self::self_ref_kind(Some(&node_lifetime));
+        let node_lifetime = make_lifetime(&node_lifetime);
         let visitor_trait_name = Self::visitor_trait_name();
         let context = ctx.context_ident();
         let error = ctx.error_ident();
+
         Ok(quote! {
             impl<P: Params> #node_trait_name<P> for #ty_name#ty_params {
-                fn accept(
+                fn accept<#node_lifetime>(
                     #self_ref_kind self,
                     c: &mut P::#context,
-                    v: &mut dyn #visitor_trait_name<P = P>
+                    v: &mut dyn #visitor_trait_name<#node_lifetime, P = P>
                 ) -> Result<(), P::#error> {
                     v.#visit_fn(c, self)
                 }
 
-                fn recurse(
+                fn recurse<#node_lifetime>(
                     #self_ref_kind self,
                     c: &mut P::#context,
-                    v: &mut dyn #visitor_trait_name<P = P>
+                    v: &mut dyn #visitor_trait_name<#node_lifetime, P = P>
                 ) -> Result<(), P::#error> {
                     #recurse_body
                 }
@@ -86,7 +89,7 @@ pub trait NodeImpl {
         ty: &syn::Type,
         accessor: TokenStream,
     ) -> Option<TokenStream> {
-        let ref_kind = Self::self_ref_kind();
+        let ref_kind = Self::self_ref_kind(None);
         try_simple_type(ty)
             .filter(|t| ctx.is_root_ty_param(t))
             .map(|ty| {
@@ -207,8 +210,14 @@ impl NodeImpl for RefNodeImpl {
     fn node_trait_name() -> syn::Ident {
         format_ident!("Node")
     }
-    fn self_ref_kind() -> TokenStream {
-        quote! {&}
+    fn self_ref_kind(lifetime: Option<&Ident>) -> TokenStream {
+        match lifetime {
+            Some(l) => {
+                let l = make_lifetime(l);
+                quote! {&#l}
+            }
+            None => quote! {&},
+        }
     }
     fn visitor_trait_name() -> syn::Ident {
         format_ident!("Visitor")
@@ -230,8 +239,14 @@ impl NodeImpl for MutNodeImpl {
     fn node_trait_name() -> syn::Ident {
         format_ident!("NodeMut")
     }
-    fn self_ref_kind() -> TokenStream {
-        quote! {&mut}
+    fn self_ref_kind(lifetime: Option<&Ident>) -> TokenStream {
+        match lifetime {
+            Some(l) => {
+                let l = make_lifetime(l);
+                quote! {&#l mut}
+            }
+            None => quote! {&mut},
+        }
     }
     fn visitor_trait_name() -> syn::Ident {
         format_ident!("VisitorMut")

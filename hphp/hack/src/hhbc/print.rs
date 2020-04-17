@@ -2538,7 +2538,8 @@ fn print_expr<W: Write>(
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
-                write!(w, "{:.1}E", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?)
+                let s = format!("{:.1E}", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?);
+                w.write(s.replace('E', "E+"))
             } else {
                 w.write(f)
             }

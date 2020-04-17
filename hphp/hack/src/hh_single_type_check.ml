@@ -189,7 +189,6 @@ let parse_options () =
   let unsafe_rx = ref (Some false) in
   let log_inference_constraints = ref None in
   let timeout = ref None in
-  let disallow_invalid_arraykey = ref None in
   let disallow_byref_dynamic_calls = ref (Some false) in
   let disallow_byref_calls = ref (Some false) in
   let set_bool x () = x := Some true in
@@ -397,10 +396,6 @@ let parse_options () =
       ( "--batch-files",
         Arg.Set batch_mode,
         " Typecheck each file passed in independently" );
-      ( "--disallow-invalid-arraykey",
-        Arg.Unit (set_bool disallow_invalid_arraykey),
-        " Disallow using values that get casted to arraykey at runtime as array keys"
-      );
       ( "--disallow-invalid-arraykey-constraint",
         Arg.Unit (set_bool disallow_invalid_arraykey_constraint),
         " Disallow using non-string, non-int types as array key constraints" );
@@ -547,7 +542,6 @@ let parse_options () =
       ?tco_dynamic_view:!dynamic_view
       ?tco_log_inference_constraints:!log_inference_constraints
       ?tco_timeout:!timeout
-      ?tco_disallow_invalid_arraykey:!disallow_invalid_arraykey
       ?po_auto_namespace_map:!auto_namespace_map
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls

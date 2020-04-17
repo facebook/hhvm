@@ -131,30 +131,34 @@ std::string checkProfile(const Vunit& unit,
   std::string errorMsg;
   size_t opcodeMismatches=0;
 
+  auto reportRegion = [&] {
+    if (!errorMsg.empty()) return;
+    errorMsg = show(unit.context->region->entry()->start()) + "\n";
+    FTRACE(1, "VasmBlockCounters::checkProfile: SrcKey={}", errorMsg);
+  };
+
   for (size_t index = 0; index < sortedBlocks.size(); index++) {
     auto b = sortedBlocks[index];
     auto& block = unit.blocks[b];
     if (index >= counters.size()) {
-      FTRACE(1, "VasmBlockCounters::checkProfile: missing block counter "
-             "(index = {})\n", index);
-      folly::format(
-        &errorMsg,
-        "missing block counter (index = {}, counters.size() = {})\n",
-        index, counters.size()
-      );
+      reportRegion();
+      auto const msg = folly::sformat(
+        "missing block counter for B{} (index = {}, counters.size() = {})\n",
+        size_t{b}, index, counters.size());
+      FTRACE(1, "VasmBlockCounters::checkProfile: {}", msg);
+      errorMsg += msg;
       return errorMsg;
     }
     auto const op_opti = block.code.front().op;
     auto const op_prof = opcodes[index];
     if (op_prof != op_opti) {
-      FTRACE(1, "VasmBlockCounters::checkProfile: mismatch opcode for block {}: "
-             "profile was {} optimized is {}\n",
-             index, vinst_names[op_prof], vinst_names[op_opti]);
-      folly::format(
-        &errorMsg,
-        "mismatch opcode for block {}: profile was {}, optimized is {}\n",
-        index, vinst_names[op_prof], vinst_names[op_opti]
-      );
+      reportRegion();
+      auto const msg = folly::sformat(
+        "mismatch opcode for B{} (index = {}): "
+        "profile was {} optimized is {}\n",
+        size_t{b}, index, vinst_names[op_prof], vinst_names[op_opti]);
+      FTRACE(1, "VasmBlockCounters::checkProfile: {}", msg);
+      errorMsg += msg;
       opcodeMismatches++;
     }
   }
@@ -190,6 +194,7 @@ void setWeights(Vunit& unit) {
 
   std::string errorMsg = checkProfile(unit, sortedBlocks, counters, opcodes);
 
+  auto DEBUG_ONLY prefix = "";
   if (errorMsg == "") {
     // Update the block weights.
     for (size_t index = 0; index < sortedBlocks.size(); index++) {
@@ -203,13 +208,16 @@ void setWeights(Vunit& unit) {
       // hot/cold/frozen later.
       block.area_idx = AreaIndex::Main;
     }
+  } else {
+    prefix = "un";
   }
 
   if (RuntimeOption::EvalDumpVBC) {
     unit.annotations.emplace_back("VasmBlockCounters",
                                   errorMsg != "" ? errorMsg : "matches");
   }
-  FTRACE(1, "VasmBlockCounters::setWeights: modified unit\n{}", show(unit));
+  FTRACE(1, "VasmBlockCounters::setWeights: {}modified unit\n{}",
+         prefix, show(unit));
 }
 
 }

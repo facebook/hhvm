@@ -29,16 +29,13 @@ pub enum ScopeItem<'a> {
     Class(Cow<'a, ast::Class_>),
     Function(Cow<'a, ast::Fun_>),
     Method(Cow<'a, ast::Method_>),
-    LongLambda(Cow<'a, LongLambda>),
-    Lambda(Cow<'a, Lambda>),
+    LongLambda(LongLambda),
+    Lambda(Lambda),
 }
 
 impl ScopeItem<'_> {
     pub fn is_in_lambda(&self) -> bool {
-        match self {
-            ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => true,
-            _ => false,
-        }
+        matches!(self, ScopeItem::Lambda(_) | ScopeItem::LongLambda(_))
     }
 }
 
@@ -193,7 +190,7 @@ impl<'a> Scope<'a> {
                     return md.static_;
                 }
                 ScopeItem::LongLambda(ll) => {
-                    if ll.as_ref().is_static {
+                    if ll.is_static {
                         return false;
                     }
                 }
@@ -222,22 +219,14 @@ impl<'a> Scope<'a> {
                 }
                 ScopeItem::Method(m) => return from_uas(&m.as_ref().user_attributes),
                 ScopeItem::Function(f) => return from_uas(&f.as_ref().user_attributes),
-                ScopeItem::Lambda(Cow::Borrowed(Lambda {
+                ScopeItem::Lambda(Lambda {
                     rx_level: Some(ref rl),
                     ..
-                }))
-                | ScopeItem::Lambda(Cow::Owned(Lambda {
+                })
+                | ScopeItem::LongLambda(LongLambda {
                     rx_level: Some(ref rl),
                     ..
-                }))
-                | ScopeItem::LongLambda(Cow::Borrowed(LongLambda {
-                    rx_level: Some(ref rl),
-                    ..
-                }))
-                | ScopeItem::LongLambda(Cow::Owned(LongLambda {
-                    rx_level: Some(ref rl),
-                    ..
-                })) => {
+                }) => {
                     return *rl;
                 }
                 _ => (),

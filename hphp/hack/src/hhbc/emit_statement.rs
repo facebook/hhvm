@@ -368,7 +368,7 @@ fn emit_awaitall(
     match el {
         [] => Ok(instr::empty()),
         [(lvar, expr)] => emit_awaitall_single(e, env, pos, lvar, expr, block),
-        _ => emit_awaitall_multi(e, env, el, block),
+        _ => emit_awaitall_multi(e, env, pos, el, block),
     }
 }
 
@@ -402,6 +402,7 @@ fn emit_awaitall_single(
 fn emit_awaitall_multi(
     e: &mut Emitter,
     env: &mut Env,
+    pos: &Pos,
     el: &[(Option<tast::Lid>, tast::Expr)],
     block: &tast::Block,
 ) -> Result {
@@ -450,8 +451,11 @@ fn emit_awaitall_multi(
         let await_all = InstrSeq::gather(vec![instr::awaitall_list(locals), instr::popc()]);
         let block_instrs = emit_stmts(e, env, block)?;
         Ok((
+            // before
             InstrSeq::gather(vec![load_args, init_locals]),
-            InstrSeq::gather(vec![await_all, unpack, block_instrs]),
+            // inner
+            InstrSeq::gather(vec![emit_pos(pos), await_all, unpack, block_instrs]),
+            // after
             unset_locals,
         ))
     })

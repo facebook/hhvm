@@ -163,7 +163,7 @@ impl<'a> Env<'a> {
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
         let lambda = ast_scope::Lambda { is_async, rx_level };
-        self.with_function_like(ast_scope::ScopeItem::Lambda(Cow::Owned(lambda)), true, fd)
+        self.with_function_like(ast_scope::ScopeItem::Lambda(lambda), true, fd)
     }
 
     fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) -> Result<()> {
@@ -175,11 +175,7 @@ impl<'a> Env<'a> {
             is_async,
             rx_level,
         };
-        self.with_function_like(
-            ast_scope::ScopeItem::LongLambda(Cow::Owned(long_lambda.clone())),
-            true,
-            fd,
-        )
+        self.with_function_like(ast_scope::ScopeItem::LongLambda(long_lambda), true, fd)
     }
 
     fn with_class(&mut self, cd: &Class_) {

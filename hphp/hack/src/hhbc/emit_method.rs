@@ -132,10 +132,10 @@ pub fn from_ast<'a>(
         ],
     };
     if is_closure_body {
-        scope.items.push(ScopeItem::Lambda(Cow::Owned(Lambda {
+        scope.items.push(ScopeItem::Lambda(Lambda {
             is_async,
             rx_level: None,
-        })))
+        }))
     };
     let namespace = RcOc::clone(
         emitter

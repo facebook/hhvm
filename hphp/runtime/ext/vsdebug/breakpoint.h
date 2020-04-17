@@ -118,7 +118,7 @@ private:
 
 struct ExceptionBreakpointSettings {
   ExceptionBreakMode m_breakMode {ExceptionBreakMode::BreakNone};
-  const std::vector<std::string> m_filters;
+  const std::vector<std::string> m_filters{};
 };
 
 struct BreakpointManager {

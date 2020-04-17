@@ -50,9 +50,9 @@ let create_mixed_type_hint pos =
   ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
     Some (simple_typ pos "\\HH\\mixed") )
 
-let create_vec_string_type_hint pos =
+let create_key_string_type_hint pos =
   ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
-    Some (apply_to_typ pos "\\HH\\vec" (simple_typ pos "\\HH\\string")) )
+    Some (apply_to_typ pos "\\HH\\keyset" (simple_typ pos "\\HH\\string")) )
 
 (* Error formatter *)
 let error_msg cls field name =
@@ -161,10 +161,10 @@ let gen_pu_accessor
     m_abstract = false;
   }
 
-(* Generate a helper/debug function called Members which is an immutable
-   vector of all the atoms declared in a ClassEnum. Will be removed / boxed in
-   the future
+(* Generate a helper/debug function called Members which is a keyset
+   of all the atoms declared in a ClassEnum.
 *)
+(* generate the Members function for a "base" PU *)
 let gen_Members field pos (fields : T.pu_enum) =
   let { pu_members; _ } = fields in
   let annot = annotation pos in
@@ -174,17 +174,7 @@ let gen_Members field pos (fields : T.pu_enum) =
   let body =
     {
       fb_ast =
-        [
-          ( pos,
-            Expr
-              ( annot,
-                Binop
-                  ( Ast_defs.Eq None,
-                    (annot, Lvar (pos, Local_id.make_unscoped "$mems")),
-                    (annot, Collection ((pos, "vec"), None, mems)) ) ) );
-          ( pos,
-            Return (Some (annot, Lvar (pos, Local_id.make_unscoped "$mems"))) );
-        ];
+        [(pos, Return (Some (annot, Collection ((pos, "keyset"), None, mems))))];
       fb_annotation = T.NoUnsafeBlocks;
     }
   in
@@ -197,8 +187,86 @@ let gen_Members field pos (fields : T.pu_enum) =
     m_params = [];
     m_body = body;
     m_user_attributes = [];
-    (* TODO: Memoize ? *)
-    m_ret = create_vec_string_type_hint pos;
+    (* TODO: Can't memoize if the class is not final, add support for that *)
+    m_ret = create_key_string_type_hint pos;
+    m_fun_kind = Ast_defs.FSync;
+    m_span = pos;
+    m_doc_comment = None;
+    m_external = false;
+    m_where_constraints = [];
+    m_variadic = FVnonVariadic;
+    m_annotation = T.dummy_saved_env;
+    m_abstract = false;
+  }
+
+(* generate the Members function for an "extended" PU that needs to call its
+ * parent
+ *)
+let gen_extended_Members field pos (fields : T.pu_enum) =
+  let { pu_members; _ } = fields in
+  let annot = annotation pos in
+  let mems =
+    List.map ~f:(fun x -> AFvalue (annot, String (snd x.pum_atom))) pu_members
+  in
+  let lvar name = (annot, Lvar (pos, Local_id.make_unscoped name)) in
+  let parent_name = (pos, gen_fun_name field "Members") in
+  let body =
+    {
+      fb_ast =
+        [
+          ( pos,
+            Expr
+              ( annot,
+                Binop
+                  ( Ast_defs.Eq None,
+                    lvar "$result",
+                    (annot, Collection ((pos, "keyset"), None, mems)) ) ) );
+          ( pos,
+            Expr
+              ( annot,
+                Binop
+                  ( Ast_defs.Eq None,
+                    lvar "$parent",
+                    ( annot,
+                      Call
+                        ( Cnormal,
+                          ( annot,
+                            Class_const
+                              ( (annot, CIexpr (annot, Id (pos, "parent"))),
+                                parent_name ) ),
+                          [],
+                          [],
+                          None ) ) ) ) );
+          ( pos,
+            Foreach
+              ( lvar "$parent",
+                As_v (lvar "$p"),
+                [
+                  ( pos,
+                    Expr
+                      ( annot,
+                        Binop
+                          ( Ast_defs.Eq None,
+                            (annot, Array_get (lvar "$result", None)),
+                            lvar "$p" ) ) );
+                ] ) );
+          (pos, Return (Some (lvar "$result")));
+        ];
+      fb_annotation = T.NoUnsafeBlocks;
+    }
+  in
+  let override = { ua_name = (pos, "__Override"); ua_params = [] } in
+  {
+    m_visibility = Public;
+    m_final = fields.pu_is_final;
+    m_static = true;
+    m_tparams = [];
+    m_name = (pos, gen_fun_name field "Members");
+    m_params = [];
+    m_body = body;
+    m_user_attributes = [override];
+    (* TODO: Can't memoize if the class is not final, add support for that *)
+    m_ret = create_key_string_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
@@ -212,7 +280,12 @@ let gen_Members field pos (fields : T.pu_enum) =
 let gen_pu_accessors (class_name : string) (extends : bool) (field : T.pu_enum)
     : T.method_ list =
   let (pos, field_name) = field.pu_name in
-  let fun_members = gen_Members field_name pos field in
+  let fun_members =
+    if extends then
+      gen_extended_Members field_name pos field
+    else
+      gen_Members field_name pos field
+  in
   let info = process_class_enum field in
   fun_members
   :: SMap.fold

@@ -3,8 +3,8 @@
 .filepath "closure.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_1 = """v:0:{}""";
+.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """k:0:{}""";
 
 .main (1,1) {
   .srcloc 4:7,4:7;
@@ -34,16 +34,9 @@
     Null
     RetC
   }
-  .method [public static] (5,5) <"HH\\vec<HH\\string>" "HH\\vec" extended_hint> Entry##Members() {
-    .declvars $mems;
+  .method [public static] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> Entry##Members() {
     .srcloc 5:8,5:12;
-    Vec @A_1
-    .srcloc 5:8,5:12;
-    SetL $mems
-    .srcloc 5:8,5:12;
-    PopC
-    .srcloc 5:8,5:12;
-    CGetL $mems
+    Keyset @A_1
     .srcloc 5:8,5:12;
     Array @A_0
     VerifyRetTypeTS

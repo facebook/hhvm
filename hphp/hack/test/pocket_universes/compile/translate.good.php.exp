@@ -3,8 +3,7 @@
 .filepath "translate.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_1 = """k:2:{s:1:\"A\";s:1:\"B\";}""";
+.adata A_0 = """k:2:{s:1:\"A\";s:1:\"B\";}""";
 
 .main (1,1) {
   .srcloc 3:7,3:7;
@@ -42,15 +41,13 @@
     VerifyRetTypeC
     RetC
   }
-  .method [public static] (14,14) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> Field##Members() {
+  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\void" N > pu$Field$Members$memoize_impl() {
     .srcloc 14:8,14:12;
-    Keyset @A_1
+    Keyset @A_0
     .srcloc 14:8,14:12;
-    Array @A_0
-    VerifyRetTypeTS
     RetC
   }
-  .method [public static] (14,14) <"HH\\mixed" N > Field##stuff(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > pu$Field$stuff(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:12;
     VerifyParamType $atom
     .srcloc 14:8,14:12;
@@ -83,7 +80,7 @@
     NullUninit
     NullUninit
     .srcloc 14:8,14:12;
-    String "\\C::Field::stuff unknown atom access: "
+    String "\\C:@Field::stuff unknown atom access: "
     .srcloc 14:8,14:12;
     CGetL $atom
     Concat
@@ -97,7 +94,7 @@
     Null
     RetC
   }
-  .method [public static] (14,14) <"HH\\mixed" N > Field##name(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > pu$Field$name(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:12;
     VerifyParamType $atom
     .srcloc 14:8,14:12;
@@ -130,7 +127,7 @@
     NullUninit
     NullUninit
     .srcloc 14:8,14:12;
-    String "\\C::Field::name unknown atom access: "
+    String "\\C:@Field::name unknown atom access: "
     .srcloc 14:8,14:12;
     CGetL $atom
     Concat
@@ -144,7 +141,7 @@
     Null
     RetC
   }
-  .method [public static] (14,14) <"HH\\mixed" N > Field##default_value(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (14,14) <"HH\\mixed" N > pu$Field$default_value(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:12;
     VerifyParamType $atom
     .srcloc 14:8,14:12;
@@ -177,7 +174,7 @@
     NullUninit
     NullUninit
     .srcloc 14:8,14:12;
-    String "\\C::Field::default_value unknown atom access: "
+    String "\\C:@Field::default_value unknown atom access: "
     .srcloc 14:8,14:12;
     CGetL $atom
     Concat
@@ -189,6 +186,19 @@
     Throw
     .srcloc 14:13,14:13;
     Null
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\void" N > pu$Field$Members() {
+    .ismemoizewrapper;
+    .srcloc 14:8,14:12;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$Field$Members$memoize_impl"
+    MemoSet L:0+0
     RetC
   }
 }

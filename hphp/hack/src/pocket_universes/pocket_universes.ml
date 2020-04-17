@@ -9,12 +9,16 @@
 
 open Core_kernel
 open Aast
-module T = Tast
 
-let annotation pos =
-  (pos, Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ()))
+let tany = Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ())
 
-let gen_fun_name field name = field ^ "##" ^ name
+module T = struct
+  include Tast
+
+  let tany pos = (pos, tany)
+end
+
+let pu_name_mangle instance_name name = "pu$" ^ instance_name ^ "$" ^ name
 
 (* Gather information from a `ClassEnum` entry
    into a "expr_name -> (atom_name, expr_value) list" map
@@ -31,8 +35,7 @@ let process_pumapping atom_name acc pu_member =
   in
   List.fold_left ~f ~init:acc pum_exprs
 
-let process_class_enum fields =
-  let { pu_members; _ } = fields in
+let process_class_enum pu_members =
   let f acc member =
     let { pum_atom; _ } = member in
     process_pumapping (snd pum_atom) acc member
@@ -41,22 +44,63 @@ let process_class_enum fields =
   (* keep lists in the same order as their appear in the file *)
   SMap.map List.rev info
 
-(* Creates a simple type hint from a string *)
-let simple_typ pos name = (pos, Happly ((pos, name), []))
+(* Helper functions to generate Hint nodes *)
+let simple_hint pos name : T.hint = (pos, Happly ((pos, name), []))
 
-let apply_to_typ pos name typ = (pos, Happly ((pos, name), [typ]))
+let apply_to_hint pos name typ : T.hint = (pos, Happly ((pos, name), [typ]))
 
-let create_mixed_type_hint pos =
-  ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
-    Some (simple_typ pos "\\HH\\mixed") )
+let type_hint pos name : T.type_hint = (tany, Some (simple_hint pos name))
 
-let create_key_string_type_hint pos =
-  ( Typing_make_type.mixed (Typing_defs.Reason.Rhint pos),
-    Some (apply_to_typ pos "\\HH\\keyset" (simple_typ pos "\\HH\\string")) )
+let create_mixed_type_hint pos : T.type_hint = type_hint pos "\\HH\\mixed"
+
+let create_void_type_hint pos : T.type_hint = type_hint pos "\\HH\\void"
+
+let create_key_set_string_type_hint pos : T.type_hint =
+  let hstring = simple_hint pos "\\HH\\string" in
+  let keyset_string = apply_to_hint pos "\\HH\\keyset" hstring in
+  (tany, Some keyset_string)
+
+(* Helper functions to generate Ast nodes *)
+let id pos name : T.expr = (T.tany pos, Id (pos, name))
+
+let class_id pos name : T.class_id = (T.tany pos, CIexpr (id pos name))
+
+let class_const pos cls name : T.expr =
+  (T.tany pos, Class_const (class_id pos cls, (pos, name)))
+
+let call pos (caller : T.expr) (args : T.expr list) : T.expr =
+  let tany = T.tany pos in
+  (tany, Call (Aast.Cnormal, caller, [], args, None))
+
+let lvar pos name : T.expr =
+  (T.tany pos, Lvar (pos, Local_id.make_unscoped name))
+
+let str pos name : T.expr = (T.tany pos, String name)
+
+(* Get property from class *)
+let class_get pos cls name : T.expr =
+  (T.tany pos, Class_get (class_id pos cls, CGstring (pos, "$" ^ name)))
+
+let new_ pos cls args : T.expr =
+  let tany = T.tany pos in
+  (tany, New (class_id pos cls, [], args, None, tany))
+
+(* Get method from class *)
+let obj_get pos var_name method_name : T.expr =
+  (T.tany pos, Obj_get (lvar pos var_name, id pos method_name, OG_nullthrows))
+
+let return pos expr : T.stmt = (pos, Return (Some expr))
+
+let user_attribute pos name params : T.user_attribute =
+  { ua_name = (pos, name); ua_params = params }
+
+let memoize pos = user_attribute pos "__Memoize" []
+
+let override pos = user_attribute pos "__Override" []
 
 (* Error formatter *)
-let error_msg cls field name =
-  Printf.sprintf "%s::%s::%s unknown atom access: " cls field name
+let error_msg cls instance_name name =
+  Printf.sprintf "%s:@%s::%s unknown atom access: " cls instance_name name
 
 (* Generate a static accessor function from the pumapping information,
    something like
@@ -84,12 +128,8 @@ let gen_pu_accessor
     (info : (string * T.expr) list)
     (error : string) : T.method_ =
   let var_name = "$atom" in
-  let var_atom =
-    (annotation pos, Lvar (pos, Local_id.make_unscoped var_name))
-  in
-  let str pos name = (annotation pos, String name) in
-  let id pos name = (annotation pos, Id (pos, name)) in
-  let do_case entry init = Case (str pos entry, [(pos, Return (Some init))]) in
+  let var_atom = lvar pos var_name in
+  let do_case entry init = Case (str pos entry, [return pos init]) in
   let cases =
     List.fold_right
       ~f:(fun (atom_name, value) acc -> do_case atom_name value :: acc)
@@ -98,32 +138,19 @@ let gen_pu_accessor
   in
   let default =
     if extends then
-      let class_id = (annotation pos, CIexpr (id pos "parent")) in
-      let parent_call = Class_const (class_id, (pos, fun_name)) in
-      let call =
-        Call (Aast.Cnormal, (annotation pos, parent_call), [], [var_atom], None)
-      in
-      Default (pos, [(pos, Return (Some (annotation pos, call)))])
+      let parent_call = class_const pos "parent" fun_name in
+      let call = call pos parent_call [var_atom] in
+      Default (pos, [return pos call])
     else
       let open Ast_defs in
-      let msg = Binop (Dot, str pos error, var_atom) in
-      let class_id = (annotation pos, CIexpr (id pos "\\Exception")) in
-      Default
-        ( pos,
-          [
-            ( pos,
-              Throw
-                ( annotation pos,
-                  New
-                    (class_id, [], [(annotation pos, msg)], None, annotation pos)
-                ) );
-          ] )
+      let msg = (T.tany pos, Binop (Dot, str pos error, var_atom)) in
+      Default (pos, [(pos, Throw (new_ pos "\\Exception" [msg]))])
   in
   let cases = cases @ [default] in
   let body =
     {
       fb_ast = [(pos, Switch (var_atom, cases))];
-      fb_annotation = T.NoUnsafeBlocks;
+      fb_annotation = T.HasUnsafeBlocks;
     }
   in
   {
@@ -132,9 +159,9 @@ let gen_pu_accessor
     m_params =
       [
         {
-          param_annotation = annotation pos;
+          param_annotation = T.tany pos;
           param_type_hint =
-            (snd (annotation pos), Some (simple_typ pos "\\HH\\string"));
+            (snd (T.tany pos), Some (simple_hint pos "\\HH\\string"));
           param_is_variadic = false;
           param_pos = pos;
           param_name = "$atom";
@@ -163,110 +190,112 @@ let gen_pu_accessor
 
 (* Generate a helper/debug function called Members which is a keyset
    of all the atoms declared in a ClassEnum.
-*)
-(* generate the Members function for a "base" PU *)
-let gen_Members field pos (fields : T.pu_enum) =
-  let { pu_members; _ } = fields in
-  let annot = annotation pos in
-  let mems =
-    List.map ~f:(fun x -> AFvalue (annot, String (snd x.pum_atom))) pu_members
-  in
-  let body =
-    {
-      fb_ast =
-        [(pos, Return (Some (annot, Collection ((pos, "keyset"), None, mems))))];
-      fb_annotation = T.NoUnsafeBlocks;
-    }
-  in
-  {
-    m_visibility = Public;
-    m_final = fields.pu_is_final;
-    m_static = true;
-    m_tparams = [];
-    m_name = (pos, gen_fun_name field "Members");
-    m_params = [];
-    m_body = body;
-    m_user_attributes = [];
-    (* TODO: Can't memoize if the class is not final, add support for that *)
-    m_ret = create_key_string_type_hint pos;
-    m_fun_kind = Ast_defs.FSync;
-    m_span = pos;
-    m_doc_comment = None;
-    m_external = false;
-    m_where_constraints = [];
-    m_variadic = FVnonVariadic;
-    m_annotation = T.dummy_saved_env;
-    m_abstract = false;
-  }
 
-(* generate the Members function for an "extended" PU that needs to call its
- * parent
- *)
-let gen_extended_Members field pos (fields : T.pu_enum) =
-  let { pu_members; _ } = fields in
-  let annot = annotation pos in
+   All PU classes get a new private static method called `Members` which
+   returns a keyset<string> of all the instance names of a universe.
+
+   If a class doesn't extend any other, the method directly
+   returns the list of the instance names, available locally.
+
+   If a class extends another one, we might need to look into it, so
+   Members will do the recursive call, to correctly get them all.
+   Since this can be expensive, we Memoize the function so it is done only
+   once.
+*)
+
+(* If the class is extending another one, we'll need to call into its
+   parent class to check if there are some instances defined there.
+   Using reflection for the moment because we don't have access to the
+   content of other files (for the time being !). Since reflection can
+   be slow, only call it on the first real access to $members:
+
+  <<__Memoize, __Override>>
+  public static function pu$E$Members() : keyset<string> {
+    $result = keyset[ .. strings based on local PU instances ...];
+    $class = new ReflectionClass(parent::class);
+    try {
+      // might throw if the method is not in the parent class
+      $method = $class->getMethod('pu$E$Members');
+      // method is here, call it
+      $parent_members = $method->invoke(null);
+      foreach ($parent_members as $p) {
+        $result[] = $p;
+      }
+    } catch (ReflectionException $_) {
+      // not the right method: just use local info
+    }
+   return $result;
+  }
+*)
+let gen_Members_extends instance_name pos (pu_members : T.pu_member list) =
+  let tany = T.tany pos in
+  let m_Members = pu_name_mangle instance_name "Members" in
   let mems =
-    List.map ~f:(fun x -> AFvalue (annot, String (snd x.pum_atom))) pu_members
+    List.map ~f:(fun x -> AFvalue (str pos (snd x.pum_atom))) pu_members
   in
-  let lvar name = (annot, Lvar (pos, Local_id.make_unscoped name)) in
-  let parent_name = (pos, gen_fun_name field "Members") in
+  let assign target expr =
+    (pos, Expr (tany, Binop (Ast_defs.Eq None, target, expr)))
+  in
+  let assign_lvar target expr = assign (lvar pos target) expr in
   let body =
     {
       fb_ast =
         [
+          (* $result = keyset[ ... names of local instances ... ] *)
+          assign_lvar "$result" (tany, Collection ((pos, "keyset"), None, mems));
+          (* $class = new ReflectionClass(parent::class) *)
+          assign_lvar
+            "$class"
+            (new_ pos "ReflectionClass" [class_const pos "parent" "class"]);
           ( pos,
-            Expr
-              ( annot,
-                Binop
-                  ( Ast_defs.Eq None,
-                    lvar "$result",
-                    (annot, Collection ((pos, "keyset"), None, mems)) ) ) );
-          ( pos,
-            Expr
-              ( annot,
-                Binop
-                  ( Ast_defs.Eq None,
-                    lvar "$parent",
-                    ( annot,
-                      Call
-                        ( Cnormal,
-                          ( annot,
-                            Class_const
-                              ( (annot, CIexpr (annot, Id (pos, "parent"))),
-                                parent_name ) ),
-                          [],
-                          [],
-                          None ) ) ) ) );
-          ( pos,
-            Foreach
-              ( lvar "$parent",
-                As_v (lvar "$p"),
-                [
+            (* try { *)
+            Try
+              ( [
+                  (* $method = $class->getMethod('pu$E$Members'); *)
+                  assign_lvar
+                    "$method"
+                    (call
+                       pos
+                       (obj_get pos "$class" "getMethod")
+                       [str pos m_Members]);
+                  (* $parent_members = $method->invoke(null); *)
+                  assign_lvar
+                    "$parent_members"
+                    (call pos (obj_get pos "$method" "invoke") [(tany, Null)]);
+                  (* foreach ($parent_members as $p) { $result[] = $p; } *)
                   ( pos,
-                    Expr
-                      ( annot,
-                        Binop
-                          ( Ast_defs.Eq None,
-                            (annot, Array_get (lvar "$result", None)),
-                            lvar "$p" ) ) );
-                ] ) );
-          (pos, Return (Some (lvar "$result")));
+                    Foreach
+                      ( lvar pos "$parent_members",
+                        As_v (lvar pos "$p"),
+                        [
+                          assign
+                            (tany, Array_get (lvar pos "$result", None))
+                            (lvar pos "$p");
+                        ] ) );
+                ],
+                (* } catch (ReflectionException $_) { } *)
+                [
+                  ( (pos, "ReflectionException"),
+                    (pos, Local_id.make_unscoped "$_"),
+                    [] );
+                ],
+                [] ) );
+          (* return $result; *)
+          return pos (lvar pos "$result");
         ];
-      fb_annotation = T.NoUnsafeBlocks;
+      fb_annotation = T.HasUnsafeBlocks;
     }
   in
-  let override = { ua_name = (pos, "__Override"); ua_params = [] } in
   {
     m_visibility = Public;
-    m_final = fields.pu_is_final;
+    m_final = false;
     m_static = true;
     m_tparams = [];
-    m_name = (pos, gen_fun_name field "Members");
+    m_name = (pos, m_Members);
     m_params = [];
     m_body = body;
-    m_user_attributes = [override];
-    (* TODO: Can't memoize if the class is not final, add support for that *)
-    m_ret = create_key_string_type_hint pos;
+    m_user_attributes = [memoize pos; override pos];
+    m_ret = create_void_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
@@ -277,27 +306,76 @@ let gen_extended_Members field pos (fields : T.pu_enum) =
     m_abstract = false;
   }
 
-let gen_pu_accessors (class_name : string) (extends : bool) (field : T.pu_enum)
-    : T.method_ list =
-  let (pos, field_name) = field.pu_name in
-  let fun_members =
-    if extends then
-      gen_extended_Members field_name pos field
-    else
-      gen_Members field_name pos field
+(*
+ If the class doesn't extends another one, everything is available locally
+  <<__Memoize>>
+  public static function pu$E$Members() : keyset<string> {
+    return keyset[ .. strings based on local PU instances ...];
+   }
+ *)
+let gen_Members_no_extends instance_name pos (pu_members : T.pu_member list) =
+  let tany = T.tany pos in
+  let m_Members = pu_name_mangle instance_name "Members" in
+  let mems =
+    List.map ~f:(fun x -> AFvalue (str pos (snd x.pum_atom))) pu_members
   in
-  let info = process_class_enum field in
-  fun_members
-  :: SMap.fold
-       (fun expr_name info acc ->
-         let fun_name = gen_fun_name field_name expr_name in
-         let error = error_msg class_name field_name expr_name in
-         let hd =
-           gen_pu_accessor fun_name pos field.pu_is_final extends info error
-         in
-         hd :: acc)
-       info
-       []
+  let body =
+    {
+      fb_ast = [return pos (tany, Collection ((pos, "keyset"), None, mems))];
+      fb_annotation = T.HasUnsafeBlocks;
+    }
+  in
+  {
+    m_visibility = Public;
+    m_final = false;
+    m_static = true;
+    m_tparams = [];
+    m_name = (pos, m_Members);
+    m_params = [];
+    m_body = body;
+    m_user_attributes = [memoize pos];
+    m_ret = create_void_type_hint pos;
+    m_fun_kind = Ast_defs.FSync;
+    m_span = pos;
+    m_doc_comment = None;
+    m_external = false;
+    m_where_constraints = [];
+    m_variadic = FVnonVariadic;
+    m_annotation = T.dummy_saved_env;
+    m_abstract = false;
+  }
+
+(* Returns the generated methods (accessors + initialization),
+ * the static $members property
+ *
+ * Note for @fzn: the extends+gen_pu_accessor is wrong, but will be replaced
+ *                by your code
+ *)
+let gen_pu_enum (class_name : string) (extends : bool) (instance : T.pu_enum) :
+    T.method_ list =
+  let pu_members = instance.pu_members in
+  let (pos, instance_name) = instance.pu_name in
+  let m_Members =
+    if extends then
+      gen_Members_extends instance_name pos pu_members
+    else
+      gen_Members_no_extends instance_name pos pu_members
+  in
+  let info = process_class_enum pu_members in
+  let accessors =
+    SMap.fold
+      (fun expr_name info acc ->
+        let fun_name = pu_name_mangle instance_name expr_name in
+        let error = error_msg class_name instance_name expr_name in
+        let hd =
+          gen_pu_accessor fun_name pos instance.pu_is_final extends info error
+        in
+        hd :: acc)
+      info
+      []
+  in
+  let methods = m_Members :: accessors in
+  methods
 
 (* Instance of an AST visitor which:
    - updates PU_atom and PU_identifier
@@ -318,13 +396,13 @@ class ['self] erase_body_visitor =
 
     method! on_PU_atom _ _ s = String s
 
-    method! on_PU_identifier _ _ qual (pos, field) (_, name) =
-      let fun_name = (pos, gen_fun_name field name) in
+    method! on_PU_identifier _ _ qual (pos, enum) (_, name) =
+      let fun_name = (pos, pu_name_mangle enum name) in
       Class_const (qual, fun_name)
 
     method! on_hint env (p, h) =
       match h with
-      | Hpu_access _ -> simple_typ p "\\HH\\mixed"
+      | Hpu_access _ -> simple_hint p "\\HH\\mixed"
       | Hprim (Tatom _) -> (p, Hprim Tstring)
       | _ -> super#on_hint env (p, h)
   end
@@ -337,21 +415,23 @@ let erase_stmt stmt = visitor#on_stmt () stmt
 let erase_fun f = visitor#on_fun_ () f
 
 let process_pufields class_name extends (pu_enums : T.pu_enum list) =
-  List.concat_map ~f:(gen_pu_accessors class_name extends) pu_enums
+  List.concat_map ~f:(gen_pu_enum class_name extends) pu_enums
 
 let update_class c =
-  let pu_methods =
+  let methods =
     process_pufields
       (snd c.c_name)
       (not (List.is_empty c.c_extends))
       c.c_pu_enums
   in
   let c = visitor#on_class_ () c in
-  { c with c_pu_enums = []; c_methods = c.c_methods @ pu_methods }
+  { c with c_pu_enums = []; c_methods = c.c_methods @ methods }
 
 let update_def d =
   match d with
-  | Class c -> Class (update_class c)
+  | Class c ->
+    let c = update_class c in
+    Class c
   | Stmt s -> Stmt (erase_stmt s)
   | Fun f -> Fun (erase_fun f)
   | RecordDef _

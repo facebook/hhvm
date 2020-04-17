@@ -4,8 +4,7 @@
 
 .hh_file 1;
 .adata A_0 = """Y:2:{s:4:\"kind\";i:20;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:9;}}}""";
-.adata A_1 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_2 = """k:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
+.adata A_1 = """k:4:{s:2:\"A0\";s:2:\"A1\";s:2:\"A2\";s:2:\"A3\";}""";
 
 .main (1,1) {
   .srcloc 3:7,3:7;
@@ -33,7 +32,7 @@
     .srcloc 23:20,23:21;
     CGetL $x
     .srcloc 23:10,23:22;
-    FCallClsMethodD <> 1 1 "0" - "" "" "C" "E##val"
+    FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$val"
     .srcloc 23:5,23:23;
     Print
     .srcloc 23:5,23:23;
@@ -64,7 +63,7 @@ L0:
   NullUninit
   NullUninit
   .srcloc 30:8,30:22;
-  FCallClsMethodD <> 0 1 "" - "" "" "C" "E##Members"
+  FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members"
   .srcloc 30:3,30:22;
   SetL $v
   .srcloc 30:3,30:23;
@@ -85,15 +84,13 @@ L0:
 }
 
 .class C (3,19) {
-  .method [public static] (4,4) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> E##Members() {
+  .method [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\void" N > pu$E$Members$memoize_impl() {
     .srcloc 4:8,4:8;
-    Keyset @A_2
+    Keyset @A_1
     .srcloc 4:8,4:8;
-    Array @A_1
-    VerifyRetTypeTS
     RetC
   }
-  .method [public static] (4,4) <"HH\\mixed" N > E##val(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static] (4,4) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 4:8,4:8;
     VerifyParamType $atom
     .srcloc 4:8,4:8;
@@ -148,7 +145,7 @@ L0:
     NullUninit
     NullUninit
     .srcloc 4:8,4:8;
-    String "\\C::E::val unknown atom access: "
+    String "\\C:@E::val unknown atom access: "
     .srcloc 4:8,4:8;
     CGetL $atom
     Concat
@@ -160,6 +157,19 @@ L0:
     Throw
     .srcloc 4:9,4:9;
     Null
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\void" N > pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 4:8,4:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
     RetC
   }
 }

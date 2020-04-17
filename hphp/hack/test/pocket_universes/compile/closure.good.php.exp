@@ -3,8 +3,7 @@
 .filepath "closure.good.php";
 
 .hh_file 1;
-.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
-.adata A_1 = """k:0:{}""";
+.adata A_0 = """k:0:{}""";
 
 .main (1,1) {
   .srcloc 4:7,4:7;
@@ -25,7 +24,7 @@
     .srcloc 11:35,11:40;
     CGetL $field
     .srcloc 11:10,11:41;
-    FCallClsMethodSD <> 1 1 "0" - "" "" Static "Entry##generator"
+    FCallClsMethodSD <> 1 1 "0" - "" "" Static "pu$Entry$generator"
     .srcloc 11:5,11:41;
     SetL $_
     .srcloc 11:5,11:42;
@@ -34,12 +33,23 @@
     Null
     RetC
   }
-  .method [public static] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> Entry##Members() {
+  .method [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\void" N > pu$Entry$Members$memoize_impl() {
     .srcloc 5:8,5:12;
-    Keyset @A_1
+    Keyset @A_0
     .srcloc 5:8,5:12;
-    Array @A_0
-    VerifyRetTypeTS
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\void" N > pu$Entry$Members() {
+    .ismemoizewrapper;
+    .srcloc 5:8,5:12;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$Entry$Members$memoize_impl"
+    MemoSet L:0+0
     RetC
   }
 }

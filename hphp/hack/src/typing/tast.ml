@@ -136,6 +136,8 @@ type gconst = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.gconst
 
 type pu_enum = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_enum
 
+type pu_member = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_member
+
 let empty_saved_env tcopt : saved_env =
   {
     tcopt;

@@ -2913,16 +2913,18 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
     auto& out = outBase[i];
     auto& in = inBase[i];
     if (out.usage == Use::Used) {
-      if (in.usage != Use::Used && nonThrowPreds[blk].size() > 1) {
+      if (in.usage != Use::Used) {
         // This is to deal with the case where blk has multiple preds,
         // and one of those has multiple succs, one of which does use
         // this stack value.
         while (true) {
           auto& ui = inBase[i];
-          auto linked = isLinked(ui);
           if (ui.usage != Use::Used) {
-            forcedLiveTemp.insert({blk, i, isSlot});
+            auto location = ui.location;
+            if (location.blk == NoBlockId) location = { blk, i, isSlot };
+            forcedLiveTemp.insert(location);
           }
+          auto linked = isLinked(ui);
           if (!linked) break;
           assert(i);
           i--;

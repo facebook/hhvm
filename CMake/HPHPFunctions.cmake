@@ -513,10 +513,60 @@ set(
   "Path to a text file to put a list of sources that should be in the cache"
 )
 
-macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME URL)
-  set(${VAR_NAME} URL)
+# Usage:
+#  SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+#    MY_VAR_NAME
+#    SOURCE_URL https://example.com/
+#    SOURCE_HASH SHA256=deadbeef
+#  )
+#  ... or ...
+#  SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
+#    MY_VAR_NAME
+#    Linux_URL https://example.com/linux.tar.bz2
+#    Linux_HASH SHA256=deadbeef
+#    Darwin_URL https://example.com/macos.tar.bz2
+#    Darwin_HASH SHA256=deadbeef
+#  )
+#
+macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME)
+  cmake_parse_arguments(
+    # Prefix (FOO becomes _arg_FOO - trailing _ implied)
+    _arg
+    # No-arg parameter (none):
+    ""
+    # Single-argument parameters
+    "SOURCE_URL;SOURCE_HASH;Linux_URL;Linux_HASH;Darwin_URL;Darwin_HASH"
+    # Multi-argument parameters (none)
+    ""
+    ${ARGN}
+  )
+
+  # Try source, but fall back to platform-specific
+  if (NOT "${_arg_SOURCE_URL}" STREQUAL "")
+    set(_URL "${_arg_SOURCE_URL}")
+    set("${VAR_NAME}" URL_HASH "${_arg_SOURCE_HASH}")
+    if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
+      FILE(
+        APPEND
+        "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}"
+        "${_arg_SOURCE_URL}\n"
+      )
+    endif()
+  else()
+    set(_URL "${_arg_${CMAKE_HOST_SYSTEM_NAME}_URL}")
+    set("${VAR_NAME}" URL_HASH "${_arg_${CMAKE_HOST_SYSTEM_NAME}_HASH}")
+    if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
+      FILE(
+        APPEND
+        "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}"
+        "${_arg_Linux_URL}\n"
+        "${_arg_Darwin_URL}\n"
+      )
+    endif()
+  endif()
+
   if ("${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}" STREQUAL "")
-    list(APPEND ${VAR_NAME} "${URL}")
+    list(APPEND ${VAR_NAME} URL "${_URL}")
     if (${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
       message(
         FATAL_ERROR
@@ -524,15 +574,16 @@ macro(SET_HHVM_THIRD_PARTY_SOURCE_ARGS VAR_NAME URL)
       )
     endif()
   else()
-    get_filename_component("${VAR_NAME}_NAME" "${URL}" NAME)
-    list(APPEND ${VAR_NAME} "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${${VAR_NAME}_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}")
+
+    get_filename_component("_URL_NAME" "${_URL}" NAME)
+    list(
+      APPEND "${VAR_NAME}"
+      URL
+      "${HHVM_THIRD_PARTY_SOURCE_CACHE_PREFIX}${_URL_NAME}${HHVM_THIRD_PARTY_SOURCE_CACHE_SUFFIX}"
+    )
     if (NOT ${HHVM_THIRD_PARTY_SOURCE_ONLY_USE_CACHE})
-      list(APPEND "${VAR_NAME}" "${URL}")
+      list(APPEND "${VAR_NAME}" "${_URL}")
     endif()
+    list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${_URL_NAME}")
   endif()
-  if (NOT "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" STREQUAL "")
-    FILE(APPEND "${HHVM_THIRD_PARTY_SOURCE_URL_LIST_OUTPUT}" "${URL}\n")
-  endif()
-  # If a suffix is provided, we need to specify the downloaded file name
-  list(APPEND "${VAR_NAME}" DOWNLOAD_NAME "${${VAR_NAME}_NAME}")
 endmacro()

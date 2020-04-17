@@ -160,11 +160,7 @@ struct TransFlags {
   bool operator==(TransFlags o) const { return packed == o.packed; }
   bool operator!=(TransFlags o) const { return packed != o.packed; }
 
-  union {
-    struct {
-    };
-    uint64_t packed;
-  };
+  uint64_t packed;
 };
 
 static_assert(sizeof(TransFlags) <= sizeof(uint64_t), "Too many TransFlags!");

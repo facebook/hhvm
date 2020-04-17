@@ -190,12 +190,6 @@ let parse_file ~hhbc_options env text :
 
 let emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast =
   with_compilation_times ~hhbc_options env (fun _ ->
-      let tast =
-        if Hhbc_options.enable_pocket_universes hhbc_options then
-          Pocket_universes.translate tast
-        else
-          tast
-      in
       Emit_program.emit_program
         ~is_evaled:env.is_evaled
         ~for_debugger_eval:env.for_debugger_eval
@@ -228,6 +222,12 @@ let from_text (source_text : string) (env : env) : result =
         | Either.First (tast, is_hh_file) ->
           let empty_namespace = Namespace_env.empty_from_popt popt in
           let tast = elaborate_namespaces popt tast in
+          let tast =
+            if Hhbc_options.enable_pocket_universes hhbc_options then
+              Pocket_universes.translate tast
+            else
+              tast
+          in
           emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
         | Either.Second (pos, msg, is_runtime_error) ->
           emit_fatal ~env ~is_runtime_error ~hhbc_options pos (Some msg)

@@ -227,7 +227,7 @@ const StaticString
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString s_force_darrays{"force_darrays"};
-const StaticString s_legacy_hack_arrays{"legacy_hack_arrays"};
+const StaticString s_mark_legacy_arrays{"mark_legacy_arrays"};
 
 VariableUnserializer::VariableUnserializer(
   const char* str,
@@ -243,7 +243,7 @@ VariableUnserializer::VariableUnserializer(
     , m_options(options)
     , m_begin(str)
     , m_forceDArrays{m_options[s_force_darrays].toBoolean()}
-    , m_legacyHackArrays{m_options[s_legacy_hack_arrays].toBoolean()}
+    , m_markLegacyArrays{m_options[s_mark_legacy_arrays].toBoolean()}
 {}
 
 VariableUnserializer::Type VariableUnserializer::type() const {
@@ -837,7 +837,7 @@ void VariableUnserializer::unserializeVariant(
       auto a = (type == 'a') ?
         unserializeArray() :
         unserializeDict();
-      if (UNLIKELY(m_legacyHackArrays && type == 'D') || (type == 'x')) {
+      if (UNLIKELY(m_markLegacyArrays && type == 'a')) {
         a.setLegacyArray(true);
       }
       tvMove(make_array_like_tv(a.detach()), self);
@@ -857,6 +857,9 @@ void VariableUnserializer::unserializeVariant(
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeDArray();
+      if (UNLIKELY(m_markLegacyArrays)) {
+        a.setLegacyArray(true);
+      }
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
@@ -865,17 +868,17 @@ void VariableUnserializer::unserializeVariant(
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVArray();
+      if (UNLIKELY(m_markLegacyArrays)) {
+        a.setLegacyArray(true);
+      }
       tvMove(make_array_like_tv(a.detach()), self);
     }
     return; // array has '}' terminating
-  case 'v':
+  case 'v': // Vec
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();
       auto a = unserializeVec();
-      if (UNLIKELY(m_legacyHackArrays)) {
-        a.setLegacyArray(true);
-      }
       tvMove(make_tv<KindOfVec>(a.detach()), self);
     }
     return; // array has '}' terminating
@@ -888,7 +891,7 @@ void VariableUnserializer::unserializeVariant(
     tvMove(make_tv<KindOfVec>(a.detach()), self);
   }
   return; // array has '}' terminating
-  case 'k':
+  case 'k': // Keyset
     {
       // Check stack depth to avoid overflow.
       check_recursion_throw();

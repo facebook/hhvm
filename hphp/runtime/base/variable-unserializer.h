@@ -171,7 +171,7 @@ private:
   req::vector<Object> m_sleepingObjects;
   const char* const m_begin;
   bool m_forceDArrays;
-  bool m_legacyHackArrays;
+  bool m_markLegacyArrays;
   /* unitFilename should be set when we are deserializing
    * an adata from the repo--it is needed to *re*construct the
    * correct provenance tag */

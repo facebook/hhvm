@@ -1,0 +1,26 @@
+=== a:0:{} ===
+true
+dict(0) {
+}
+=== y:0:{} ===
+true
+vec(0) {
+}
+=== Y:0:{} ===
+true
+dict(0) {
+}
+=== v:0:{} ===
+false
+vec(0) {
+}
+=== D:0:{} ===
+false
+dict(0) {
+}
+=== k:0:{} ===
+
+Warning: is_array_marked_legacy expects a dict or vec in %s on line 10
+false
+keyset(0) {
+}

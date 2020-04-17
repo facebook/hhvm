@@ -34,6 +34,7 @@ pub fn from_text<'a>(
     stack_limit: &StackLimit,
     filepath: &RelativePath,
     text: &[u8],
+    dump_tast: bool,
 ) -> anyhow::Result<Profile> {
     let mut ret = Profile {
         parsing_t: 0.0,
@@ -48,7 +49,9 @@ pub fn from_text<'a>(
     let _program = match &mut parse_result {
         Either::Right((ast, _is_hh_file)) => {
             let tast = typing::program(builder, provider, ast);
-            typing_ast_print::print(&tast);
+            if dump_tast {
+                typing_ast_print::print(&tast);
+            }
             ()
         }
         Either::Left((_pos, _msg, _is_runtime_error)) => (),

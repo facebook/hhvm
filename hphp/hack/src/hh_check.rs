@@ -31,6 +31,10 @@ struct Opts {
     #[structopt(long = "verbose", parse(from_occurrences))]
     verbosity: isize,
 
+    /// Dump TAST
+    #[structopt(long = "tast")]
+    dump_tast: bool,
+
     /// The path to an input Hack file
     #[structopt(name = "FILENAME")]
     filename: PathBuf,
@@ -88,7 +92,14 @@ fn process_single_file_impl(
     let arena = Bump::new();
     let builder = typing_make_type::TypeBuilder::new(&arena);
     let provider = TestDeclProvider::new(&rel_path, content);
-    let profile = from_text(&builder, &provider, stack_limit, &rel_path, content)?;
+    let profile = from_text(
+        &builder,
+        &provider,
+        stack_limit,
+        &rel_path,
+        content,
+        opts.dump_tast,
+    )?;
     Ok(profile)
 }
 
@@ -157,6 +168,10 @@ fn main() -> anyhow::Result<()> {
     let r = process_single_file(&opts, filename, content);
     if let Err(e) = r {
         eprintln!("Error in file: {}", e);
+    } else {
+        if !opts.dump_tast {
+            println!("No errors");
+        }
     }
     Ok(())
 }

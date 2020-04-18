@@ -1720,7 +1720,7 @@ X(BeginInlining,                BeginInliningData);
 X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturn,                 FPRelOffsetData);
 X(InlineSuspend,                FPRelOffsetData);
-X(InlineReturnNoFrame,          FPRelOffsetData);
+X(InlineReturnNoFrame,          IRSPRelOffsetData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);

@@ -262,11 +262,6 @@ AliasClass stack_below(SSATmp* base, Off offset) {
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Helper functions for alias classes representing an ActRec on the stack
- * (whether pre-live or live).
- */
-
 // Return an AliasClass representing an entire ActRec at base + offset.
 AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
   return AStack {
@@ -278,6 +273,10 @@ AliasClass actrec(SSATmp* base, IRSPRelOffset offset) {
   };
 }
 
+/*
+ * Returning from an inlined function kills the stack below the
+ * function's ActRec and all locals in the inlined frame.
+ */
 InlineExitEffects inline_exit_effects(SSATmp* fp) {
   fp = canonical(fp);
   auto fpInst = fp->inst();
@@ -288,8 +287,40 @@ InlineExitEffects inline_exit_effects(SSATmp* fp) {
     if (!func->numLocals()) return AEmpty;
     return AFrame {fp, AliasIdSet::IdRange(0, func->numLocals())};
   }();
-  auto const stack = stack_below(fp, FPRelOffset{2});
+  auto const stack = stack_below(fp, FPRelOffset{kNumActRecCells - 1});
   return InlineExitEffects{ stack, frame, AMIStateAny };
+}
+
+/*
+ * Returning from an inlined function where we've elided the frame
+ * have the same effects as the non-elided case, but we must calculate
+ * the offsets a different way (since we have no frame pointer).
+ */
+InlineExitEffects inline_exit_effects_no_frame(const IRInstruction& inst) {
+  assertx(inst.is(InlineReturnNoFrame));
+
+  // We don't have a frame pointer for this frame, but
+  // InlineReturnNoFrame has the SP relative offset of where the frame
+  // would be. Use this to calculate the FPRelOffset from the
+  // outermost frame pointer, which is what AFrame and AStack would
+  // canonicalize to if given a frame pointer anyways.
+  auto const spInst = inst.src(0)->inst();
+  assertx(spInst->is(DefFrameRelSP, DefRegSP));
+  auto const spOffset = spInst->extra<FPInvOffsetData>()->offset;
+  auto const frameOffset =
+    inst.extra<InlineReturnNoFrame>()->offset.to<FPRelOffset>(spOffset);
+
+  auto const stack = AStack {
+    frameOffset + int32_t{kNumActRecCells} - 1,
+    std::numeric_limits<int32_t>::max()
+  };
+  auto const frame = [&] () -> AliasClass {
+    auto const func = inst.marker().func();
+    if (!func->numLocals()) return AEmpty;
+    return AFrame { frameOffset, AliasIdSet::IdRange(0, func->numLocals()) };
+  }();
+
+  return InlineExitEffects { stack, frame, AMIStateAny };
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -742,13 +773,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return inline_exit_effects(inst.src(0));
   }
 
-  case InlineReturnNoFrame: {
-    auto const callee = AliasClass(AStack {
-      inst.extra<InlineReturnNoFrame>()->offset,
-      std::numeric_limits<int32_t>::max()
-    }) | AMIStateAny;
-    return may_load_store_kill(AEmpty, AEmpty, callee);
-  }
+  case InlineReturnNoFrame:
+    return inline_exit_effects_no_frame(inst);
 
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;

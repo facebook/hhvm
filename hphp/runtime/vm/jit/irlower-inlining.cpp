@@ -174,9 +174,10 @@ void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     if (env.unit.context().initSrcKey.resumeMode() == ResumeMode::None) {
       auto const extra = inst->extra<InlineReturnNoFrame>();
-      auto const offset = cellsToBytes(extra->offset.offset);
+      auto const offset = extra->offset.offset;
+      auto const sp = srcLoc(env, inst, 0).reg();
       for (auto i = 0; i < kNumActRecCells; ++i) {
-        trashFullTV(v, rvmfp()[offset - cellsToBytes(i)], kTVTrashJITFrame);
+        trashFullTV(v, sp[cellsToBytes(offset + i)], kTVTrashJITFrame);
       }
     }
   }

@@ -1467,17 +1467,14 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
 void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(InlineReturn));
   auto const frameInst = inst.src(0)->inst();
-  auto const spInst = frameInst->src(0)->inst();
-  assertx(spInst->is(DefFrameRelSP, DefRegSP));
-
+  assertx(frameInst->is(DefInlineFP));
   auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
-  auto const spOff = spInst->extra<FPInvOffsetData>()->offset;
-
-  auto const data = FPRelOffsetData {
-    // Offset of the callee's return value relative to the frame pointer.
-    calleeAROff.to<FPRelOffset>(spOff) + (kArRetOff / sizeof(TypedValue))
-  };
-  unit.replace(&inst, InlineReturnNoFrame, data);
+  unit.replace(
+    &inst,
+    InlineReturnNoFrame,
+    IRSPRelOffsetData { calleeAROff },
+    frameInst->src(0)
+  );
 }
 
 void mandatoryDCE(IRUnit& unit) {

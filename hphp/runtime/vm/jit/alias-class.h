@@ -101,6 +101,8 @@ FPRelOffset frame_base_offset(SSATmp* fp);
 #define FRAME_RELATIVE(Name, T2, name2)                                       \
   struct Name {                                                               \
     Name(SSATmp* fp, T2 v) : base{detail::frame_base_offset(fp)}, name2{v} {} \
+    Name(SSATmp* fp, T2 v, FPInvOffset off)                                   \
+      : base{detail::frame_base_offset(fp) - off.offset}, name2{v} {}      \
     Name(FPRelOffset off, T2 v) : base{off}, name2{v} {}                      \
     FPRelOffset base;                                                         \
     T2 name2;                                                                 \

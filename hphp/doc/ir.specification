@@ -1681,12 +1681,12 @@ To string conversions:
   every DefInlineFP (while still allowing InlineSuspend in the case of a side
   exit).
 
-| InlineReturnNoFrame<InlineFrameStart>, ND, NA, NF
+| InlineReturnNoFrame<InlineFrameStart>, ND, S(StkPtr), NF
 
   Mark the end of an inlined function for which no DefInlineFP was required. The
   primary purpose of this instruction is to hint the optimization passes that
   after return everything below InlineFrameStart is dead. InlineFrameStart is
-  the caller FP-relative offset of the start of the callee frame.
+  the SP-relative offset of the start of the callee frame.
 
 | DefFuncEntryFP<func>,
 |   D(FramePtr),

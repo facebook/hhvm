@@ -210,7 +210,7 @@ void logArrayIterProfile(IRGS& env, const IterArgs& data,
                          folly::Optional<IterSpecialization> iter_type) {
   // We generate code for thousands of loops each time we call retranslateAll.
   // We don't want production webservers to log when they do so.
-  if (!StructuredLog::coinflip(RuntimeOption::EvalArrayIterLogRate)) return;
+  if (!RO::EvalLogArrayIterProfile) return;
 
   auto const marker  = makeMarker(env, bcOff(env));
   auto const profile = TargetProfile<ArrayIterProfile>(

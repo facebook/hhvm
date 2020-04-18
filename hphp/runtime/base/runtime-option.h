@@ -867,10 +867,12 @@ struct RuntimeOption {
   F(int, JitRetargetJumps,             1)                               \
   /* Sync VM reg state for all native calls. */                         \
   F(bool, JitForceVMRegSync,           false)                           \
+  /* Log the profile used to target iterator specialization. */         \
+  F(bool, LogArrayIterProfile,        false)                            \
   /* We use PGO to target specialization for "foreach" iterator loops.  \
    * We specialize if the chosen specialization covers this fraction    \
    * of profiled loops. If the value is > 1.0, we won't specialize. */  \
-  F(double,   ArrayIterSpecializationRate,  0.99)                       \
+  F(double, ArrayIterSpecializationRate, 0.99)                          \
   F(bool, HHIRSimplification,          true)                            \
   F(bool, HHIRGenOpts,                 true)                            \
   F(bool, HHIRRefcountOpts,            true)                            \
@@ -1023,8 +1025,6 @@ struct RuntimeOption {
   F(bool, AbortBuildOnCompilerError,   true)                            \
   F(uint32_t, StaticContentsLogRate,   100)                             \
   F(uint32_t, LogUnitLoadRate,         0)                               \
-  /* The rate at which we log profiling info about loop behavior. */    \
-  F(uint32_t, ArrayIterLogRate,        0)                               \
   F(uint32_t, MaxDeferredErrors,       50)                              \
   F(bool, JitAlignMacroFusionPairs, alignMacroFusionPairs())            \
   F(bool, JitAlignUniqueStubs,         true)                            \

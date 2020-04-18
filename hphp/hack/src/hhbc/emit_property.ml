@@ -42,7 +42,6 @@ let rec expr_requires_deep_init (_, expr_) =
   | T.Class_const ((_, T.CIexpr (_, T.Id (_, s))), (_, p)) ->
     class_const_requires_deep_init s p
   | T.Shape fields -> List.exists fields shape_field_requires_deep_init
-  | T.Typename _
   | T.Assert _
   | T.Pair _
   | T.Smethod_id _

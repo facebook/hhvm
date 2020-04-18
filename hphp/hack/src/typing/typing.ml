@@ -2306,7 +2306,8 @@ and expr_
     let env = might_throw env in
     Typing_arithmetic.unop p env uop te ty
   | Eif (c, e1, e2) -> eif env ~expected p c e1 e2
-  | Typename sid ->
+  | Class_const ((p, CI sid), pstr)
+    when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
     begin
       match Env.get_typedef env (snd sid) with
       | Some { td_tparams = tparaml; _ } ->
@@ -2320,7 +2321,7 @@ and expr_
               end
             tparaml
         in
-        let tdef = mk (Reason.Rwitness (fst sid), Tapply (sid, params)) in
+        let tdef = mk (Reason.Rwitness p, Tapply (sid, params)) in
         let typename =
           mk (Reason.Rwitness p, Tapply ((p, SN.Classes.cTypename), [tdef]))
         in
@@ -2338,11 +2339,9 @@ and expr_
           Phase.check_tparams_constraints ~use_pos:p ~ety_env env tparaml
         in
         let (env, ty) = Phase.localize ~ety_env env typename in
-        make_result env p (Aast.Typename sid) ty
+        make_result env p (Class_const (((p, ty), CI sid), pstr)) ty
       | None ->
-        (* Should never hit this case since we only construct this AST node
-         * if in the expression Foo::class, Foo is a type def.
-         *)
+        (* Should not expect None as we've checked whether the sid is a typedef *)
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)

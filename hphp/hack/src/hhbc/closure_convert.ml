@@ -1038,7 +1038,6 @@ let rec convert_expr env st ((p, expr_) as expr) =
     | Smethod_id (_, _) ->
       failwith "TODO Unimplemented closure_convert Smethod_id"
     | Assert _ -> failwith "TODO Unimplemented closure_convert Assert"
-    | Typename id -> (st, (p, Typename id))
     | PU_atom _
     | PU_identifier _ ->
       failwith "TODO(T35357243): Pocket Universes syntax must be erased by now")

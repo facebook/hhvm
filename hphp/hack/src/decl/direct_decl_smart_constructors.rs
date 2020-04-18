@@ -1123,9 +1123,10 @@ impl DirectDeclSmartConstructors<'_> {
                         | Id(_) | Import(_) | Is(_) | KeyValCollection(_) | Lfun(_) | List(_)
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | PUAtom(_) | PUIdentifier(_)
-                        | Record(_) | Shape(_) | SmethodId(_) | Suspend(_) | Typename(_)
-                        | ValCollection(_) | Varray(_) | Xml(_) | Yield(_) | YieldBreak
-                        | YieldFrom(_) => Err(format!("Cannot convert expr to type: {:?}", expr)),
+                        | Record(_) | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_)
+                        | Varray(_) | Xml(_) | Yield(_) | YieldBreak | YieldFrom(_) => {
+                            Err(format!("Cannot convert expr to type: {:?}", expr))
+                        }
                     }
                 }
 

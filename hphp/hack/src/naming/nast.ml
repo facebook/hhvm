@@ -521,8 +521,6 @@ module Visitor_DEPRECATED = struct
 
       method on_eif : 'a -> expr -> expr option -> expr -> 'a
 
-      method on_typename : 'a -> sid -> 'a
-
       method on_is : 'a -> expr -> hint -> 'a
 
       method on_as : 'a -> expr -> hint -> bool -> 'a
@@ -799,7 +797,6 @@ module Visitor_DEPRECATED = struct
         | Eif (e1, e2, e3) -> this#on_eif acc e1 e2 e3
         | Is (e, h) -> this#on_is acc e h
         | As (e, h, b) -> this#on_as acc e h b
-        | Typename n -> this#on_typename acc n
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
         | Efun (f, idl) -> this#on_efun acc f idl
@@ -895,8 +892,6 @@ module Visitor_DEPRECATED = struct
       method on_smethod_id acc _ _ = acc
 
       method on_method_caller acc _ _ = acc
-
-      method on_typename acc _ = acc
 
       method on_obj_get acc e1 e2 =
         let acc = this#on_expr acc e1 in

@@ -1701,7 +1701,6 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Lplaceholder _
   | A.Dollardollar _ ->
     failwith "TODO Codegen after naming pass on AAST"
-  | A.Typename _ -> failwith "Typename should not occur in expressions"
   | A.PU_atom _
   | A.PU_identifier _ ->
     failwith "TODO(T35357243): Pocket Universes syntax must be erased by now"
@@ -4194,7 +4193,6 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | Smethod_id (_, _)
     | Pair (_, _)
     | Assert _
-    | Typename _
     | Binop _
     | Shape _
     | Null

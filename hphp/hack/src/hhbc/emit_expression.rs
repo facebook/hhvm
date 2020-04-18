@@ -508,7 +508,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             "list() can only be used as an lvar. Did you mean to use tuple()?",
         )),
         Expr_::Any => Err(unrecoverable("Cannot codegen from an Any node")),
-        Expr_::Typename(_) => Err(unrecoverable("Typename should not occur in expressions")),
         Expr_::This | Expr_::Lplaceholder(_) | Expr_::Dollardollar(_) => {
             unimplemented!("TODO(hrust) Codegen after naming pass on AAST")
         }

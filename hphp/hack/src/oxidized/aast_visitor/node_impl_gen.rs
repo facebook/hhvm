@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6a599c57c1d27cbced9de19370bc8e46>>
+// @generated SignedSource<<496cab72b7eb197413984a38f27d32d3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -955,10 +955,6 @@ impl<P: Params> Node<P> for Expr_<P::Ex, P::Fb, P::En, P::Hi> {
                 Ok(())
             }
             Expr_::Assert(a0) => {
-                a0.accept(c, v)?;
-                Ok(())
-            }
-            Expr_::Typename(a0) => {
                 a0.accept(c, v)?;
                 Ok(())
             }

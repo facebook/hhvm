@@ -213,7 +213,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Smethod_id of sid * pstring
   | Pair of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
-  | Typename of sid
   | PU_atom of string
   | PU_identifier of ('ex, 'fb, 'en, 'hi) class_id * pstring * pstring
   | Any

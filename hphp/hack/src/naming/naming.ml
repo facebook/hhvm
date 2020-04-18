@@ -2175,11 +2175,11 @@ and expr_ env p (e : Nast.expr_) =
     N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
   | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
-    N.Class_get (make_class_id env x1, N.CGstring x2)
+    N.Class_get (make_class_id ~allow_typedef:false env x1, N.CGstring x2)
   | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2)
     ->
     let x1 = (p, Local_id.to_string lid) in
-    N.Class_get (make_class_id env x1, N.CGstring x2)
+    N.Class_get (make_class_id ~allow_typedef:false env x1, N.CGstring x2)
   | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
     ensure_name_not_dynamic env x1;
     N.Any
@@ -2188,43 +2188,20 @@ and expr_ env p (e : Nast.expr_) =
     ensure_name_not_dynamic env x2;
     N.Any
   | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
+  | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), ((_, str) as x2))
+    when String.equal str "class" ->
+    N.Class_const (make_class_id ~allow_typedef:true env x1, x2)
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2) ->
-    let (genv, _) = env in
-    let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
-    begin
-      match Naming_provider.get_type_kind genv.ctx name with
-      | Some Naming_types.TTypedef when String.equal (snd x2) "class" ->
-        N.Typename
-          (Env.type_name
-             ~context:Errors.ClassContext
-             env
-             x1
-             ~allow_typedef:true
-             ~allow_generics:false)
-      | _ -> N.Class_const (make_class_id env x1, x2)
-    end
+    N.Class_const (make_class_id ~allow_typedef:false env x1, x2)
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
     let x1 = (p, Local_id.to_string lid) in
-    let (genv, _) = env in
-    let (_, name) = NS.elaborate_id genv.namespace NS.ElaborateClass x1 in
-    begin
-      match Naming_provider.get_type_kind genv.ctx name with
-      | Some Naming_types.TTypedef when String.equal (snd x2) "class" ->
-        N.Typename
-          (Env.type_name
-             ~context:Errors.ClassContext
-             env
-             x1
-             ~allow_typedef:true
-             ~allow_generics:false)
-      | _ -> N.Class_const (make_class_id env x1, x2)
-    end
+    N.Class_const (make_class_id ~allow_typedef:false env x1, x2)
   | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
   | Aast.PU_identifier ((_, c), s1, s2) ->
     begin
       match c with
       | Aast.CIexpr (_, Aast.Id x1) ->
-        N.PU_identifier (make_class_id env x1, s1, s2)
+        N.PU_identifier (make_class_id ~allow_typedef:false env x1, s1, s2)
       | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
     end
   | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
@@ -2509,7 +2486,7 @@ and expr_ env p (e : Nast.expr_) =
     N.As (expr env e, hint ~allow_wildcard:true ~allow_like:true env h, b)
   | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, unpacked_element, _) ->
     N.New
-      ( make_class_id env x,
+      ( make_class_id ~allow_typedef:false env x,
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
@@ -2518,7 +2495,7 @@ and expr_ env p (e : Nast.expr_) =
       ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, unpacked_element, p)
     ->
     N.New
-      ( make_class_id env (pos, Local_id.to_string x),
+      ( make_class_id ~allow_typedef:false env (pos, Local_id.to_string x),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
@@ -2527,7 +2504,7 @@ and expr_ env p (e : Nast.expr_) =
     if Partial.should_check_error (fst env).in_mode 2060 then
       Errors.dynamic_new_in_strict_mode p;
     N.New
-      ( make_class_id env (p, SN.Classes.cUnknown),
+      ( make_class_id ~allow_typedef:false env (p, SN.Classes.cUnknown),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
@@ -2606,7 +2583,6 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Smethod_id _
   | Aast.Pair _
   | Aast.Assert _
-  | Aast.Typename _
   | Aast.Any ->
     Errors.internal_error
       p
@@ -2651,7 +2627,7 @@ and f_body env f_body =
   else
     failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
 
-and make_class_id env ((p, x) as cid) =
+and make_class_id ~allow_typedef env ((p, x) as cid) =
   ( p,
     match x with
     | x when String.equal x SN.Classes.cParent ->
@@ -2689,7 +2665,7 @@ and make_class_id env ((p, x) as cid) =
            ~context:Errors.ClassContext
            env
            cid
-           ~allow_typedef:false
+           ~allow_typedef
            ~allow_generics:true) )
 
 and casel env l = List.map l (case env)

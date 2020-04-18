@@ -15,4 +15,4 @@ type kind_of_type =
   | TClass
   | TTypedef
   | TRecordDef
-[@@deriving eq, enum]
+[@@deriving show, eq, enum]

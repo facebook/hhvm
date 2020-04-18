@@ -335,11 +335,12 @@ let save naming_table db_name =
       Naming_sqlite.save_file_infos db_name naming_table ~base_content_version
     in
     let (_ : float) =
+      let open Naming_sqlite in
       Hh_logger.log_duration
         (Printf.sprintf
-           "Inserted %d files and %d symbols"
-           save_result.Naming_sqlite.files_added
-           save_result.Naming_sqlite.symbols_added)
+           "Inserted %d symbols from %d files"
+           save_result.symbols_added
+           save_result.files_added)
         t
     in
     save_result
@@ -416,6 +417,9 @@ let update_reverse_entries ctx file_deltas =
           Naming_provider.remove_type_batch
             backend
             (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
+          Naming_provider.remove_type_batch
+            backend
+            (fi.FileInfo.record_defs |> List.map snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             backend
             (fi.FileInfo.funs |> List.map snd |> SSet.of_list);

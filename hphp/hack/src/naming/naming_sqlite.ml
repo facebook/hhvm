@@ -10,12 +10,31 @@ open Sqlite_utils
 
 type db_path = Db_path of string [@@deriving show]
 
+type insertion_error = {
+  canon_hash: Int64.t option;
+  hash: Int64.t;
+  kind_of_type: Naming_types.kind_of_type option;
+  name: string;
+  origin_exception: Exception.t;
+      [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
+}
+[@@deriving show]
+
 type save_result = {
   files_added: int;
   symbols_added: int;
+  errors: insertion_error list;
 }
+[@@deriving show]
 
-let empty_save_result = { files_added = 0; symbols_added = 0 }
+let empty_save_result = { files_added = 0; symbols_added = 0; errors = [] }
+
+let insert_safe ~name ~kind_of_type ~hash ~canon_hash f :
+    (unit, insertion_error) result =
+  try Ok (f ())
+  with e ->
+    let origin_exception = Exception.wrap e in
+    Error { canon_hash; hash; kind_of_type; name; origin_exception }
 
 type 'a forward_naming_table_delta =
   | Modified of 'a
@@ -367,6 +386,9 @@ module TypesTable = struct
   let typedef_flag =
     Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TTypedef)
 
+  let record_def_flag =
+    Int64.of_int (Naming_types.kind_of_type_to_enum Naming_types.TRecordDef)
+
   let create_table_sqlite =
     Printf.sprintf
       "
@@ -416,7 +438,7 @@ module TypesTable = struct
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
-  let insert db ~name ~flags ~file_info_id =
+  let insert db ~name ~flags ~file_info_id : (unit, insertion_error) result =
     let hash = SharedMemHash.hash_string name in
     let canon_hash = SharedMemHash.hash_string (to_canon_name_key name) in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
@@ -424,14 +446,21 @@ module TypesTable = struct
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    let kind_of_type = Naming_types.kind_of_type_of_enum (Int64.to_int flags) in
+    insert_safe ~name ~kind_of_type ~hash ~canon_hash:(Some canon_hash)
+    @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db;
     Sqlite3.finalize insert_stmt |> check_rc db
 
-  let insert_class db ~name ~file_info_id =
+  let insert_class db ~name ~file_info_id : (unit, insertion_error) result =
     insert db ~name ~flags:class_flag ~file_info_id
 
-  let insert_typedef db ~name ~file_info_id =
+  let insert_typedef db ~name ~file_info_id : (unit, insertion_error) result =
     insert db ~name ~flags:typedef_flag ~file_info_id
+
+  let insert_record_def db ~name ~file_info_id : (unit, insertion_error) result
+      =
+    insert db ~name ~flags:record_def_flag ~file_info_id
 
   let get db ~name ~case_insensitive =
     let name =
@@ -509,13 +538,15 @@ module FunsTable = struct
     ( Str.global_replace (Str.regexp "{hash}") "HASH" base,
       Str.global_replace (Str.regexp "{hash}") "CANON_HASH" base )
 
-  let insert db ~name ~file_info_id =
+  let insert db ~name ~file_info_id : (unit, insertion_error) result =
     let hash = SharedMemHash.hash_string name in
     let canon_hash = SharedMemHash.hash_string (to_canon_name_key name) in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:(Some canon_hash)
+    @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db;
     Sqlite3.finalize insert_stmt |> check_rc db
 
@@ -580,11 +611,12 @@ module ConstsTable = struct
         WHERE {table_name}.HASH = ?
       "
 
-  let insert db ~name ~file_info_id =
+  let insert db ~name ~file_info_id : (unit, insertion_error) result =
     let hash = SharedMemHash.hash_string name in
     let insert_stmt = Sqlite3.prepare db insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc db;
+    insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db;
     Sqlite3.finalize insert_stmt |> check_rc db
 
@@ -650,7 +682,7 @@ end = struct
   let is_connected () = get_db () <> None
 end
 
-let save_file_info db relative_path file_info =
+let save_file_info db relative_path file_info : int * insertion_error list =
   Core_kernel.(
     FileInfoTable.insert
       db
@@ -678,40 +710,43 @@ let save_file_info db relative_path file_info =
       | Some id -> id
       | None -> failwith "Could not get last inserted row ID"
     in
-    let symbols_inserted = 0 in
-    let symbols_inserted =
+    let insert insert_fun (symbols_inserted, errors) (_, name) =
+      match insert_fun db ~name ~file_info_id with
+      | Ok () -> (symbols_inserted + 1, errors)
+      | Error error -> (symbols_inserted, error :: errors)
+    in
+    let results = (0, []) in
+    let results =
       List.fold
-        ~init:symbols_inserted
-        ~f:(fun acc (_, name) ->
-          FunsTable.insert db ~name ~file_info_id;
-          acc + 1)
+        ~init:results
+        ~f:(insert FunsTable.insert)
         file_info.FileInfo.funs
     in
-    let symbols_inserted =
+    let results =
       List.fold
-        ~init:symbols_inserted
-        ~f:(fun acc (_, name) ->
-          TypesTable.insert_class db ~name ~file_info_id;
-          acc + 1)
+        ~init:results
+        ~f:(insert TypesTable.insert_class)
         file_info.FileInfo.classes
     in
-    let symbols_inserted =
+    let results =
       List.fold
-        ~init:symbols_inserted
-        ~f:(fun acc (_, name) ->
-          TypesTable.insert_typedef db ~name ~file_info_id;
-          acc + 1)
+        ~init:results
+        ~f:(insert TypesTable.insert_typedef)
         file_info.FileInfo.typedefs
     in
-    let symbols_inserted =
+    let results =
       List.fold
-        ~init:symbols_inserted
-        ~f:(fun acc (_, name) ->
-          ConstsTable.insert db ~name ~file_info_id;
-          acc + 1)
+        ~init:results
+        ~f:(insert TypesTable.insert_record_def)
+        file_info.FileInfo.record_defs
+    in
+    let results =
+      List.fold
+        ~init:results
+        ~f:(insert ConstsTable.insert)
         file_info.FileInfo.consts
     in
-    symbols_inserted)
+    results)
 
 let get_db_path = Database_handle.get_db_path
 
@@ -737,9 +772,11 @@ let save_file_infos db_name file_info_map ~base_content_version =
         file_info_map
         ~init:empty_save_result
         ~f:(fun path fi acc ->
+          let (symbols_added, errors) = save_file_info db path fi in
           {
             files_added = acc.files_added + 1;
-            symbols_added = acc.symbols_added + save_file_info db path fi;
+            symbols_added = acc.symbols_added + symbols_added;
+            errors = List.rev_append acc.errors errors;
           })
     in
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;

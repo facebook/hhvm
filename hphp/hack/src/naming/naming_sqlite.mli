@@ -8,10 +8,22 @@
 
 type db_path = Db_path of string [@@deriving show]
 
+type insertion_error = {
+  canon_hash: Int64.t option;
+  hash: Int64.t;
+  kind_of_type: Naming_types.kind_of_type option;
+  name: string;
+  origin_exception: Exception.t;
+      [@printer (fun fmt e -> fprintf fmt "%s" (Exception.get_ctor_string e))]
+}
+[@@deriving show]
+
 type save_result = {
   files_added: int;
   symbols_added: int;
+  errors: insertion_error list;
 }
+[@@deriving show]
 
 val empty_save_result : save_result
 

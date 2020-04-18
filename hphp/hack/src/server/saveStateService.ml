@@ -257,10 +257,18 @@ let go_naming (naming_table : Naming_table.t) (output_filename : string) :
     (save_naming_result, string) result =
   Utils.try_with_stack (fun () ->
       let save_result = Naming_table.save naming_table output_filename in
-      {
-        nt_files_added = save_result.Naming_sqlite.files_added;
-        nt_symbols_added = save_result.Naming_sqlite.symbols_added;
-      })
+      Hh_logger.log
+        "Inserted symbols into the naming table:\n%s"
+        (Naming_sqlite.show_save_result save_result);
+
+      if List.length save_result.Naming_sqlite.errors > 0 then begin
+        Sys_utils.rm_dir_tree output_filename;
+        failwith "Naming table state had errors - deleting output file!"
+      end else
+        {
+          nt_files_added = save_result.Naming_sqlite.files_added;
+          nt_symbols_added = save_result.Naming_sqlite.symbols_added;
+        })
   |> Result.map_error ~f:(fun (exn, _stack) -> Exn.to_string exn)
 
 (* If successful, returns the # of edges from the dependency table that were written. *)

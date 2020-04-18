@@ -1298,7 +1298,17 @@ let run_once options config local_config =
   let _naming_table_rows_changed =
     match ServerArgs.save_naming_filename genv.options with
     | None -> None
-    | Some filename -> Some (Naming_table.save env.naming_table filename)
+    | Some filename ->
+      Disk.mkdir_p (Filename.dirname filename);
+      let save_result = Naming_table.save env.naming_table filename in
+      Hh_logger.log
+        "Inserted symbols into the naming table:\n%s"
+        (Naming_sqlite.show_save_result save_result);
+      if List.length save_result.Naming_sqlite.errors > 0 then begin
+        Sys_utils.rm_dir_tree filename;
+        failwith "Naming table state had errors - deleting output file!"
+      end else
+        Some save_result
   in
   (* Finish up by generating the output and the exit code *)
   Hh_logger.log "Running in check mode";

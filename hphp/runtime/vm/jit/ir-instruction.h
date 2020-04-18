@@ -126,11 +126,26 @@ struct IRInstruction {
   bool hasDst() const;
   bool naryDst() const;
   bool consumesReferences() const;
-  bool mayRaiseError() const;
   bool isTerminal() const;
   bool hasEdges() const;
   bool isPassthrough() const;
   bool isLayoutAgnostic() const;
+
+  /*
+   * Returns false if this instruction cannot raise an error under any
+   * circumstances (and thus does not require a catch block). True
+   * otherwise. This only consults the HHIR op of the instruction, so
+   * will not change.
+   */
+  bool mayRaiseError() const;
+
+  /*
+   * Returns false if this instruction cannot raise an error, taking
+   * into account its current sources. True otherwise. Since this can
+   * consult the types of the current sources, the result can change
+   * as types are reflowed.
+   */
+  bool mayRaiseErrorWithSources() const;
 
   /*
    * consumesReference covers two similar conditions. Either it decRefs

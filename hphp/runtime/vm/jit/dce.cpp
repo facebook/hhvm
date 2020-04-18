@@ -1000,13 +1000,6 @@ IRSPRelOffset locToStkOff(LocalId locId, const SSATmp* fp) {
  * finally marked it dead.  The instructions in between that were weak uses may
  * need modifications now that their frame is going away.
  *
- * Also, if we eliminated some frames, DecRef instructions (which can re-enter
- * the VM without requiring a materialized frame) need to have stack depths in
- * their markers adjusted so they can't stomp on parts of the outer function.
- * We handle this conservatively by just pushing all DecRef markers where the
- * DecRef is from a function other than the outer function down to a safe
- * re-entry depth.
- *
  * Finally, any removed frame pointers in BCMarkers must be rewritten to point
  * to the outer frame of that frame.
  */
@@ -1014,14 +1007,6 @@ void performActRecFixups(const BlockList& blocks,
                          DceState& state,
                          IRUnit& unit,
                          const UseCounts& uses) {
-  // We limit the total stack depth during inlining, so this is the deepest
-  // we'll ever have to worry about.
-  auto const outerFunc = blocks.front()->front().marker().func();
-  auto const safeDepth = outerFunc->maxStackCells() + kStackCheckLeafPadding;
-  ITRACE(3, "safeDepth: {}, outerFunc depth: {}\n",
-         safeDepth,
-         outerFunc->maxStackCells());
-
   bool needsReflow = false;
 
   for (auto block : blocks) {
@@ -1031,14 +1016,12 @@ void performActRecFixups(const BlockList& blocks,
     for (auto& inst : *block) {
       ITRACE(5, "{}\n", inst.toString());
 
-      bool adjustedMarkerFp = false;
       if (auto const fp = inst.marker().fp()) {
         if (state[fp->inst()].isDead()) {
           always_assert(fp->inst()->is(DefInlineFP));
           auto const prev = fp->inst()->src(1);
           inst.marker() = inst.marker().adjustFP(prev);
           assertx(!state[prev->inst()].isDead());
-          adjustedMarkerFp = true;
         }
       }
 
@@ -1066,42 +1049,15 @@ void performActRecFixups(const BlockList& blocks,
         }
         break;
 
-      /*
-       * These are special: they're the only instructions that can reenter
-       * but not throw. This means it's safe to elide their inlined frame, as
-       * long as we adjust their markers to a depth that is guaranteed to not
-       * stomp on the caller's frame if it reenters.
-       */
-      case DecRef:
-      case MemoSetStaticValue:
-      case MemoSetLSBValue:
-      case MemoSetInstanceValue:
-        if (adjustedMarkerFp) {
-          ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-          inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});
-        }
-        break;
-
       case MemoGetStaticCache:
       case MemoGetLSBCache:
       case MemoGetInstanceCache:
-        if (inst.src(0)->isA(TFramePtr) &&
-            state[inst.src(0)->inst()].isDead()) {
-          convertToStackInst(unit, inst);
-        }
-        break;
       case MemoSetStaticCache:
       case MemoSetLSBCache:
       case MemoSetInstanceCache:
         if (inst.src(0)->isA(TFramePtr) &&
             state[inst.src(0)->inst()].isDead()) {
-          // For the same reason as above, we need to adjust the markers for
-          // re-entracy.
           convertToStackInst(unit, inst);
-          if (adjustedMarkerFp) {
-            ITRACE(3, "pushing stack depth of {} to {}\n", safeDepth, inst);
-            inst.marker() = inst.marker().adjustSP(FPInvOffset{safeDepth});
-          }
         }
         break;
 
@@ -1426,6 +1382,7 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
                   MemoGetStaticCache, MemoSetStaticCache,
                   MemoGetLSBCache, MemoSetLSBCache,
                   MemoGetInstanceCache, MemoSetInstanceCache));
+  assertx(!inst.mayRaiseErrorWithSources());
   assertx(inst.src(0)->inst()->is(DefInlineFP));
 
   auto const mainSP = unit.mainSP();

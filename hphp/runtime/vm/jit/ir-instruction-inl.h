@@ -61,6 +61,12 @@ inline bool IRInstruction::mayRaiseError() const {
   return opcodeMayRaise(op());
 }
 
+inline bool IRInstruction::mayRaiseErrorWithSources() const {
+  if (!mayRaiseError()) return false;
+  if (is(IterInit, IterInitK) && !src(0)->type().maybe(TObj)) return false;
+  return true;
+}
+
 inline bool IRInstruction::isTerminal() const {
   return opcodeHasFlags(op(), Terminal);
 }

@@ -367,27 +367,12 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
  * not report that it can re-enter if it actually can't.  The reason this can
  * go wrong is that if the instruction was in an inlined function, if we've
  * removed the DefInlineFP its spOff will not be meaningful.  In this case
- * the `kills' set will refer to the wrong stack locations.  In general this
- * means instructions that can re-enter must have catch traces---but a few
- * other instructions are exceptions, either since they are not allowed in
- * inlined functions or because they take the (possibly-inlined) FramePtr as a
- * source.
- *
- * DecRefs are no longer allowed to report that they may reenter
- * because they get moved around by delay_decrefs (for example). So if
- * a DecRef is moved past a StStk to a lower address, the DecRef's
- * kill set would make the StStk redundant.
+ * the `kills' set will refer to the wrong stack locations.  This
+ * means instructions that can re-enter must have catch traces.
  */
 GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
-    (inst.taken() && inst.taken()->isCatch()) ||
-    inst.is(ReleaseVVAndSkip,
-            MemoSetStaticCache,
-            MemoSetLSBCache,
-            MemoSetInstanceCache,
-            MemoSetStaticValue,
-            MemoSetLSBValue,
-            MemoSetInstanceValue);
+    inst.taken() && inst.taken()->isCatch();
   always_assert_flog(
     may_reenter_is_ok,
     "instruction {} claimed may_reenter, but it isn't allowed to say that",
@@ -454,17 +439,11 @@ GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
   auto const iters = allIterFields(fp, inst.extra<IterData>()->args.iterId);
-  auto const effects = may_load_store_kill(
+  return may_load_store_kill(
     iters | locals | AHeapAny,
     iters | locals | AHeapAny,
     AMIStateAny
   );
-  auto const inst_may_reenter = [&]{
-    if (inst.is(LIterInit, LIterInitK, LIterNext, LIterNextK)) return false;
-    if (inst.is(IterInit, IterInitK)) return inst.src(0)->isA(TObj);
-    return true;
-  }();
-  return inst_may_reenter ? may_reenter(inst, effects) : effects;
 }
 
 /*
@@ -617,8 +596,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * ReturnHook as src(1), and the ReturnHook may not access the stack).
    */
   case ReturnHook:
-    // Note, this instruction can re-enter, but doesn't need the may_reenter()
-    // treatmeant because of the special kill semantics for locals and stack.
     return may_load_store_kill(
       AHeapAny, AHeapAny,
       *AStackAny.precise_union(AFrameAny)->precise_union(AMIStateAny)
@@ -632,8 +609,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookCreateCont:
   case SuspendHookYield:
     // TODO: may-load here probably doesn't need to include AFrameAny normally.
-    return may_reenter(inst,
-                       may_load_store_kill(AUnknown, AHeapAny, AMIStateAny));
+    return may_load_store_kill(AUnknown, AHeapAny, AMIStateAny);
 
   /*
    * If we're returning from a function, it's ReturnEffects.  The RetCtrl
@@ -982,7 +958,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
         }
       };
-      return may_reenter(inst, may_load_store(frame, AHeapAny));
+      return may_load_store(frame, AHeapAny);
     }
 
   case CountWHNotDone:
@@ -999,7 +975,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   // This re-enters to call extension-defined instance constructors.
   case ConstructInstance:
-    return may_reenter(inst, may_load_store(AHeapAny, AHeapAny));
+    return may_load_store(AHeapAny, AHeapAny);
 
   // Closures don't ever throw or reenter on construction
   case ConstructClosure:
@@ -1277,17 +1253,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MemoSetStaticValue:
   case MemoSetLSBValue:
   case MemoSetInstanceValue:
-    // Writes to the memo value (which isn't modeled), but can re-enter to run
-    // a destructor.
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    // Writes to the memo value (which isn't modeled)
+    return may_load_store(AEmpty, AEmpty);
 
   case MemoGetStaticCache:
   case MemoGetLSBCache:
   case MemoSetStaticCache:
   case MemoSetLSBCache: {
     // Reads some (non-zero) set of locals for keys, and reads/writes from the
-    // memo cache (which isn't modeled). The set can re-enter to run a
-    // destructor.
+    // memo cache (which isn't modeled).
     auto const extra = inst.extra<MemoCacheStaticData>();
     auto const loc = [&] () -> AliasClass {
       if (inst.src(0)->isA(TFramePtr)) {
@@ -1310,17 +1284,13 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       };
     }();
 
-    auto effects = may_load_store(loc, AEmpty);
-    if (inst.op() == MemoSetStaticCache || inst.op() == MemoSetLSBCache) {
-      effects = may_reenter(inst, effects);
-    }
-    return effects;
+    return may_load_store(loc, AEmpty);
   }
 
   case MemoGetInstanceCache:
   case MemoSetInstanceCache: {
     // Reads some set of locals for keys, and reads/writes from the memo cache
-    // (which isn't modeled). The set can re-enter to run a destructor.
+    // (which isn't modeled).
     auto const extra = inst.extra<MemoCacheInstanceData>();
     auto const loc = [&]() -> AliasClass {
       // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
@@ -1345,9 +1315,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
         static_cast<int32_t>(extra->keys.count)
       };
     }();
-    auto effects = may_load_store(loc, AEmpty);
-    if (inst.op() == MemoSetInstanceCache) effects = may_reenter(inst, effects);
-    return effects;
+    return may_load_store(loc, AEmpty);
   }
 
   case MixedArrayGetK:
@@ -1543,7 +1511,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case MapGet:
   case MapSet:
   case VectorSet:
-    return may_reenter(inst, may_load_store(AHeapAny, AEmpty /* Note */));
+    return may_load_store(AHeapAny, AEmpty /* Note */);
 
   case LdInitPropAddr:
     return may_load_store(
@@ -1591,10 +1559,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AllocObj:
     // AllocObj re-enters to call constructors, but if it weren't for that we
     // could ignore its loads and stores since it's a new object.
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    return may_load_store(AEmpty, AEmpty);
   case AllocObjReified:
     // Similar to AllocObj but also stores the reification
-    return may_reenter(inst, may_load_store(AEmpty, AHeapAny));
+    return may_load_store(AEmpty, AHeapAny);
 
   //////////////////////////////////////////////////////////////////////
   // Instructions that explicitly manipulate the stack.
@@ -2123,9 +2091,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvVecToDArr:
     return may_load_store(AElemAny, AEmpty);
 
-  case ReleaseVVAndSkip:  // can decref VarEnv and Locals
-    return may_reenter(inst,
-                       may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny));
+  case ReleaseVVAndSkip:
+    return may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny);
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
@@ -2137,7 +2104,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // can happen (e.g. a surprise flag check could cause a php signal handler to
   // run arbitrary code).
   case AFWHPrepareChild:
-    return may_reenter(inst, may_load_store(AEmpty, AEmpty));
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // The following instructions are used for debugging memory optimizations.
@@ -2207,7 +2174,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
       // Locations may-moved always should also count as may-loads.
       always_assert(x.moves <= x.loads);
 
-      if (inst.mayRaiseError()) {
+      if (inst.mayRaiseErrorWithSources()) {
         // Any instruction that can raise an error can run a user error handler
         // and have arbitrary effects on the heap.
         always_assert(AHeapAny <= x.loads);
@@ -2255,19 +2222,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
 MemEffects memory_effects(const IRInstruction& inst) {
   auto const inner = memory_effects_impl(inst);
   auto const ret = [&] () -> MemEffects {
-    // These instructions have special handling because they occur as functions
-    // suspend or return. Their ability to reenter is handled in
-    // memory_effects_impl, and comments in that function explain why.
-    auto const is_special = inst.is(
-      ReturnHook,
-      SuspendHookAwaitEF,
-      SuspendHookAwaitEG,
-      SuspendHookAwaitR,
-      SuspendHookCreateCont,
-      SuspendHookYield
-    );
-
-    if (is_special || !inst.mayRaiseError()) return inner;
+    if (!inst.mayRaiseErrorWithSources()) return inner;
 
     auto fail = [&] {
       always_assert_flog(

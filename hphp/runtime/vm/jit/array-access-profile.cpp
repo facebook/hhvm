@@ -62,7 +62,8 @@ std::string ArrayAccessProfile::toString() const {
   for (auto const& line : m_hits) {
     out << folly::format("{}:{},", line.pos, line.count);
   }
-  out << folly::format("untracked:{},small:{}", m_untracked, m_small);
+  out << folly::format("untracked:{},small:{},empty:{}",
+                       m_untracked, m_small, m_empty);
   return out.str();
 }
 
@@ -80,6 +81,7 @@ folly::dynamic ArrayAccessProfile::toDynamic() const {
   return dynamic::object("hits", hits)
                         ("untracked", m_untracked)
                         ("small", m_small)
+                        ("empty", m_empty)
                         ("total", total)
                         ("profileType", "ArrayAccessProfile");
 }
@@ -100,12 +102,14 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
 
   auto const idx_threshold  = RuntimeOption::EvalHHIRMixedArrayProfileThreshold;
   auto const size_threshold = RuntimeOption::EvalHHIRSmallArrayProfileThreshold;
-  if (hottest.count >= total * idx_threshold) {
-    return Result{safe_cast<uint32_t>(hottest.pos), {}};
-  } else if (m_small >= total * size_threshold) {
-    return Result{{}, SizeHintData(SizeHintData::SmallStatic)};
-  }
-  return Result{};
+  auto const empty_threshold =
+    RuntimeOption::EvalHHIREmptyArrayProfileThreshold;
+  auto const offset = hottest.count >= total * idx_threshold
+    ? folly::Optional<uint32_t>(safe_cast<uint32_t>(hottest.pos)) : folly::none;
+  auto const size_hint = m_small >= total * size_threshold
+                          ? SizeHintData::SmallStatic : SizeHintData::Default;
+  auto const empty = m_empty >= total * empty_threshold;
+  return Result{offset, SizeHintData(size_hint), empty};
 }
 
 bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
@@ -144,6 +148,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, int64_t i, bool cowCheck) {
     -1;
   update(pos, 1);
   if (isSmallStaticArray(ad)) m_small++;
+  if (ad->size() == 0) m_empty++;
 }
 
 void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
@@ -158,6 +163,7 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
     -1;
   update(pos, 1);
   if (isSmallStaticArray(ad)) m_small++;
+  if (ad->size() == 0) m_empty++;
 }
 
 void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
@@ -179,6 +185,7 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
   }
   l.m_untracked += r.m_untracked;
   l.m_small += r.m_small;
+  l.m_empty += r.m_empty;
 
   if (n == 0) return;
   assertx(n <= kNumTrackedSamples);

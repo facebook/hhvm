@@ -96,10 +96,16 @@ void emitClassGetTS(IRGS& env) {
         IndexData { pos }, base, key
       );
     },
+    [&] (SSATmp* key) {
+      gen(env, ThrowArrayKeyException, ArrayGetExceptionData { false }, key);
+      return cns(env, TBottom);
+    },
     [&] (SSATmp* key, SizeHintData) {
       if (RuntimeOption::EvalHackArrDVArrs) return gen(env, DictGet, ts, key);
       return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
-    }
+    },
+    false, // is unset
+    false  // is define
   );
 
   SSATmp* name;

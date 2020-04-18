@@ -915,6 +915,7 @@ struct RuntimeOption {
   F(uint32_t, HHIRMaxInlineInitMixedElements,  4)                       \
   F(double, HHIRMixedArrayProfileThreshold, 0.8554)                     \
   F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
+  F(double, HHIREmptyArrayProfileThreshold, 1.2) /* disabled */         \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

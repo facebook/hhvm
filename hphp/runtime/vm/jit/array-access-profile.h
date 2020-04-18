@@ -43,6 +43,9 @@ namespace jit {
  *
  *  - Size profiling: If the array used at a certain source location tends to
  *    be small, we might want to do the lookup by scanning instead of hashing.
+ *
+ *  - Empty profiling: If the array is empty, any lookup will fail. In this
+ *    case, we first check the size of the array.
  */
 struct ArrayAccessProfile {
   /*
@@ -51,6 +54,7 @@ struct ArrayAccessProfile {
   struct Result {
     folly::Optional<uint32_t> offset;
     SizeHintData size_hint;
+    bool empty;
   };
 
   /*
@@ -102,6 +106,7 @@ private:
   Line m_hits[kNumTrackedSamples];
   uint32_t m_untracked{0};
   uint32_t m_small{0};
+  uint32_t m_empty{0};
   bool m_init{false};
 };
 

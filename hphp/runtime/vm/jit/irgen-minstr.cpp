@@ -743,6 +743,11 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
     },
+    [&] (SSATmp* key) {
+      if (quiet) return cns(env, TInitNull);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    },
     [&] (SSATmp* key, SizeHintData data) {
       return gen(
         env,
@@ -752,7 +757,9 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
         base,
         key
       );
-    }
+    },
+    false, // is unset
+    false  // is define
   );
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
   return finishMe(pelem);
@@ -765,9 +772,23 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
+    [&] (SSATmp* key) {
+      if (mode == MOpMode::None) return cns(env, TInitNull);
+      assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
+      auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
+      if (key->isA(TInt)) {
+        gen(env, ThrowArrayIndexException, data, key);
+      } else {
+        assertx(key->isA(TStr));
+        gen(env, ThrowArrayKeyException, data, key);
+      }
+      return cns(env, TBottom);
+    },
     [&] (SSATmp* key, SizeHintData data) {
       return gen(env, ArrayGet, MOpModeData { mode }, base, key);
-    }
+    },
+    false, // is unset
+    false  // is define
   );
   auto finishMe = [&](SSATmp* element) {
     gen(env, IncRef, element);
@@ -1379,7 +1400,13 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* dict, SSATmp* key, uint32_t pos) {
       return gen(env, ElemDictK, IndexData { pos }, dict, key);
     },
-    [&] (SSATmp* key, SizeHintData data) {
+    [&] (SSATmp* key) {
+      if (unset || mode == MOpMode::None) return ptrToInitNull(env);
+      assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    },
+    [&] (SSATmp* key, SizeHintData) {
       if (define || unset) {
         return gen(env, unset ? ElemDictU : ElemDictD,
                    baseType, ldMBase(env), key);
@@ -1391,7 +1418,8 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       );
       return gen(env, ElemDictX, MOpModeData { mode }, base, key);
     },
-    define || unset // cow check
+    unset, // is unset
+    define // is define
   );
 }
 
@@ -1408,7 +1436,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     return cns(env, TBottom);
   }
 
-  if (define) {
+  if (define || unset) {
     gen(
       env,
       ThrowInvalidOperation,
@@ -1422,8 +1450,13 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
     [&] (SSATmp* keyset, SSATmp* key, uint32_t pos) {
       return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
     },
-    [&] (SSATmp* key, SizeHintData data) {
-      if (unset) return gen(env, ElemKeysetU, baseType, ldMBase(env), key);
+    [&] (SSATmp* key) {
+      if (mode == MOpMode::None) return ptrToInitNull(env);
+      assertx(mode == MOpMode::Warn || mode == MOpMode::InOut);
+      gen(env, ThrowOutOfBounds, base, key);
+      return cns(env, TBottom);
+    },
+    [&] (SSATmp* key, SizeHintData) {
       assertx(
         mode == MOpMode::Warn ||
         mode == MOpMode::None ||
@@ -1431,7 +1464,8 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
       );
       return gen(env, ElemKeysetX, MOpModeData { mode }, base, key);
     },
-    unset // cow check
+    false, // is unset
+    false  // is define
   );
 }
 
@@ -1458,7 +1492,19 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
       [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
         return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
       },
-      [&] (SSATmp* key, SizeHintData data) {
+      [&] (SSATmp* key) {
+        if (unset || mode == MOpMode::None) return ptrToInitNull(env);
+        assertx(mode == MOpMode::InOut || mode == MOpMode::Warn);
+        auto const data = ArrayGetExceptionData { mode == MOpMode::InOut };
+        if (key->isA(TInt)) {
+          gen(env, ThrowArrayIndexException, data, key);
+        } else {
+          assertx(key->isA(TStr));
+          gen(env, ThrowArrayKeyException, data, key);
+        }
+        return cns(env, TBottom);
+      },
+      [&] (SSATmp* key, SizeHintData) {
         if (define || unset) {
           return gen(env, unset ? ElemArrayU : ElemArrayD,
                      base->type(), ldMBase(env), key);
@@ -1470,7 +1516,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
         );
         return gen(env, ElemArrayX, MOpModeData { mode }, base, key);
       },
-      define || unset // cow check
+      unset, // is unset
+      define // is define
     );
   }
 

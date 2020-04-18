@@ -3268,7 +3268,7 @@ fields of that struct for holding intermediate values.
   Throws an out of bounds exception if S0 is an undefined index for an array.
   The isInOut option indicates that the access was for an inout parameter.
 
-| ThrowArrayKeyException<isInOut>, ND, S(StaticStr), T
+| ThrowArrayKeyException<isInOut>, ND, S(Str), T
 
   Throws an out of bounds exception if S0 is an undefined key for an array.
   The isInOut option indicates that the access was for an inout parameter.

@@ -4,10 +4,10 @@ const varray<string> MAP_INDEX = varray[];
 const (int, ?(string, float)) OPTION = tuple(0, null);
 const varray_or_darray<int> CVARRAY_OR_DARRAY = varray[];
 class WithConst {
-  const string CSTRING = "";
-  const CWITHOUT_HINT = "";
   const float CFLOAT = 0.0;
   const \SomeEnum CENUM = \SomeEnum::FIRST;
+  const string CSTRING = "";
+  const CWITHOUT_HINT = "";
 }
 const \TypedefForString TYPEDEF = "";
 const \HH\keyset<string> KEYSET = keyset[];

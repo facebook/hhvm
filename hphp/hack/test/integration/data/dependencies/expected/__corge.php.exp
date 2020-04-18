@@ -1,7 +1,7 @@
 <?hh
 interface ICorge {
-  public function get(): this::Tthis;
   abstract const type Tthis as this;
+  public function get(): this::Tthis;
 }
 final class Corge implements \ICorge {
   const type Tthis = \Corge;

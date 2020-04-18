@@ -1,11 +1,11 @@
 <?hh
 class WithReactiveMethods {
-  <<__Rx>>
-  public function reactive(): void {
-    throw new \Exception();
-  }
   <<__RxShallow>>
   public function shallow_reactive(): void {
+    throw new \Exception();
+  }
+  <<__Rx>>
+  public function reactive(): void {
     throw new \Exception();
   }
   <<__Rx>>

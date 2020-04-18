@@ -18,21 +18,24 @@ module Dep = struct
 
   type dependency
 
+  (** NOTE: keep in sync with `typing_deps.rs`. *)
   type _ variant =
     | GConst : string -> 'a variant
-    | GConstName : string -> 'a variant
-    | Const : string * string -> dependency variant
-    | AllMembers : string -> dependency variant
-    | Class : string -> 'a variant
-    | RecordDef : string -> 'a variant
     | Fun : string -> 'a variant
-    | FunName : string -> 'a variant
+    | Class : string -> 'a variant
+    | Extends : string -> dependency variant
+    | RecordDef : string -> 'a variant
+    | Const : string * string -> dependency variant
+    | Cstr : string -> dependency variant
     | Prop : string * string -> dependency variant
     | SProp : string * string -> dependency variant
     | Method : string * string -> dependency variant
     | SMethod : string * string -> dependency variant
-    | Cstr : string -> dependency variant
-    | Extends : string -> dependency variant
+    | AllMembers : string -> dependency variant
+    | FunName : string -> 'a variant
+    | GConstName : string -> 'a variant
+
+  external hash_variant : 'a variant -> int = "hash_variant" [@@noalloc]
 
   (** Explicit [equals] function since [=] doesn't work on the [variant] GADT. *)
   let variant_equals : type a b. a variant -> b variant -> bool =
@@ -68,23 +71,7 @@ module Dep = struct
 
   type t = int
 
-  (* 30 bits for the hash and 1 bit to determine if something is a class *)
-  let mask = (1 lsl 30) - 1
-
-  let make : type a. a variant -> t = function
-    | Class class_name ->
-      let h = Hashtbl.hash class_name land mask in
-      let h = h lsl 1 in
-      let h = h lor 1 in
-      h
-    | Extends class_name ->
-      let h = Hashtbl.hash class_name land mask in
-      let h = h lsl 1 in
-      h
-    | variant ->
-      let h = Hashtbl.hash variant land mask in
-      let h = h lsl 1 in
-      h
+  let make = hash_variant
 
   let is_class x = x land 1 = 1
 
@@ -138,6 +125,89 @@ module DepSet = struct
   include Reordered_argument_set (Set.Make (Dep))
 
   let pp = make_pp (fun fmt -> Format.fprintf fmt "%d")
+end
+
+module NamingHash = struct
+  type t = int64
+
+  (* In [Dep.make], we produce a 31-bit hash. In the naming table
+  saved-state, we want to use a hash to identify entries, but to avoid
+  collisions, we want to preserve as many bits as possible of the hash. This
+  can be done by combining it with a larger hash to set the other bits.
+
+  When it comes time to query the naming table, we can get an conservative
+  overestimate of the symbols corresponding to dependency hashes by arranging
+  the bits so that we can do a range query (which can make use of the SQLite
+  index).
+
+  Given a dependency hash with bits in the form DDDD and the additional
+  naming table hash bits in the form NNNN, we want to produce a large hash of
+  the form
+
+    DDDDNNNN
+
+  Then later we can query the naming table SQLite database for all rows in
+  the range DDDD0000 to DDDD1111. *)
+  let combine_hashes ~(dep_hash : int64) ~(naming_hash : int64) : int64 =
+    (* We use a 64-bit integer with OCaml/SQLite, but for clarity with
+    debugging, we limit the hash size to 63 bits, so that we can convert it
+    to an OCaml integer. Then we set the top bit to 0 to ensure that it's
+    positive, leaving 62 bits. The dependency hash is 31 bits, so we can add
+    an additional 31 bits from the naming hash. *)
+    let upper_31_bits = Int64.shift_left dep_hash 31 in
+    let lower_31_bits =
+      Int64.logand naming_hash 0b01111111_11111111_11111111_11111111L
+    in
+    Int64.logor upper_31_bits lower_31_bits
+
+  let unsupported (variant : 'a Dep.variant) =
+    failwith
+      ( "Unsupported dependency variant type for naming table hash: "
+      ^ Dep.variant_to_string variant )
+
+  let get_dep_variant_name : type a. a Dep.variant -> string =
+    let open Dep in
+    function
+    | Class name -> name
+    | RecordDef name -> name
+    | Fun name -> name
+    | GConst name -> name
+    | GConstName _ as variant -> unsupported variant
+    | Const _ as variant -> unsupported variant
+    | AllMembers _ as variant -> unsupported variant
+    | FunName _ as variant -> unsupported variant
+    | Prop _ as variant -> unsupported variant
+    | SProp _ as variant -> unsupported variant
+    | Method _ as variant -> unsupported variant
+    | SMethod _ as variant -> unsupported variant
+    | Cstr _ as variant -> unsupported variant
+    | Extends _ as variant -> unsupported variant
+
+  let make (variant : 'a Dep.variant) : t =
+    let dep_hash = variant |> Dep.make |> Int64.of_int in
+    let naming_hash =
+      variant |> get_dep_variant_name |> SharedMemHash.hash_string
+    in
+    combine_hashes ~dep_hash ~naming_hash
+
+  let naming_table_hash_lower_bound_mask =
+    let lower_31_bits_set_to_1 = (1 lsl 31) - 1 in
+    let upper_31_bits_set_to_1 = ~-lower_31_bits_set_to_1 in
+    Int64.of_int upper_31_bits_set_to_1
+
+  let make_lower_bound (hash : Dep.t) : t =
+    let hash = hash lsl 31 |> Int64.of_int in
+    Int64.logand hash naming_table_hash_lower_bound_mask
+
+  let naming_table_hash_upper_bound_mask =
+    let lower_31_bits_set_to_1 = (1 lsl 31) - 1 in
+    Int64.of_int lower_31_bits_set_to_1
+
+  let make_upper_bound (hash : Dep.t) : t =
+    let upper_31_bits = hash lsl 31 |> Int64.of_int in
+    Int64.logor upper_31_bits naming_table_hash_upper_bound_mask
+
+  let to_int64 (t : t) : int64 = t
 end
 
 (****************************************************************************)
@@ -335,3 +405,9 @@ let add_typing_deps deps =
       DepSet.union (get_ideps_from_hash dep) acc)
 
 let add_all_deps x = x |> add_extend_deps |> add_typing_deps
+
+module ForTest = struct
+  let compute_dep_hash = Dep.make
+
+  let combine_hashes = NamingHash.combine_hashes
+end

@@ -1,9 +1,9 @@
 <?hh
 class SimpleClass {
-  public function simple_method(): void {
+  public function __construct(string $s, int $i) {
     throw new \Exception();
   }
-  public function __construct(string $s, int $i) {
+  public function simple_method(): void {
     throw new \Exception();
   }
 }

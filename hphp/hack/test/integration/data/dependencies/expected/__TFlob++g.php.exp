@@ -8,9 +8,9 @@ abstract class FlobBase {
   }
 }
 interface IFlob {
-  public static function f2(): this::T;
-  public function f1(): void;
   abstract const type T;
+  public function f1(): void;
+  public static function f2(): this::T;
 }
 final class Flob extends \FlobBase implements \IFlob, \IToto {
   use \TFlob;

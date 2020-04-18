@@ -13,6 +13,6 @@ class IntQuuxWrapper implements \IHasQuux {
 }
 interface IHasBaz {
   public function takeQuux(this::TQuux $_): void;
-  const type TQuux = this::TBaz::TQuux;
   abstract const type TBaz as \IHasQuux;
+  const type TQuux = this::TBaz::TQuux;
 }

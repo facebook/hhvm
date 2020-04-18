@@ -4,10 +4,10 @@ abstract class BB {
 }
 final class CC extends \BB implements \II {
   const type T = int;
-  public function f(): void {
+  public function g(): int {
     throw new \Exception();
   }
-  public function g(): int {
+  public function f(): void {
     throw new \Exception();
   }
 }

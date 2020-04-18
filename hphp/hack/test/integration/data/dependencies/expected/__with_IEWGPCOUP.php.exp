@@ -12,8 +12,8 @@ interface IEMBUIDCOUB extends \IEMBUIDMB {}
 interface IEPCOUB extends \IEMBUIDCOUB {}
 interface IEWGP extends \IEP {}
 interface IEMBUIDMB {
-  abstract const type T as \IEMBUID;
   public function f(): this::T;
+  abstract const type T as \IEMBUID;
 }
 function with_IEWGPCOUP(IEWGPCOUB $x): IEWGP {
   return $x->f();

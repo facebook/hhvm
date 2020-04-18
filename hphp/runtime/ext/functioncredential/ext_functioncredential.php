@@ -51,8 +51,20 @@ final class FunctionCredential {
     );
   }
 
-  /** @return array
-   */
   <<__Native>>
-  public final function __debugInfo(): darray;
+  public final function getClassName(): ?string;
+
+  <<__Native>>
+  public final function getFunctionName(): string;
+
+  <<__Native>>
+  public final function getFileName(): string;
+
+  public final function __debugInfo(): darray {
+    return darray[
+      'class_name' => $this->getClassName(),
+      'function_name' => $this->getFunctionName(),
+      'file_name' => $this->getFileName(),
+    ];
+  }
 }

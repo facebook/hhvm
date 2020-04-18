@@ -30,6 +30,7 @@ struct FunctionCredential {
   static Class* classof();
 
   const Func* func() const {
+    assertx(func_);
     return func_;
   }
 

@@ -1,70 +1,167 @@
 <?hh
 
-function print_cred_info($cred) {
-  $info = $cred->__debugInfo();
-  $class_name = idx($info, 'class_name');
-  $function_name = idx($info, 'function_name');
-  $file_name = idx($info, 'file_name');
-  echo "class=".$class_name.PHP_EOL;
-  echo "function=".$function_name.PHP_EOL;
-  $e = explode('/', $file_name); echo "file=".end(inout $e).PHP_EOL;
+type FunctionCrededentialExpectations = shape(
+  'class_name' => ?string,
+  'function_name' => string,
+);
+
+function run_test(
+  string $test_name,
+  FunctionCredential $cred,
+  FunctionCrededentialExpectations $expectations,
+): void {
+  $errors = vec[];
+
+  $class_name = $cred->getClassName();
+  $function_name = $cred->getFunctionName();
+  $file_name_pieces = $cred->getFileName()
+    |> explode('/', $$);
+  $file_name_stripped = end(inout $file_name_pieces);
+
+  if ($class_name !== $expectations['class_name']) {
+    $errors[] = "Expected Class Name ".
+      $expectations['class_name'].
+      " does not match actual Class Name ".
+      $class_name.
+      " from ".
+      $meth;
+  }
+
+  if ($function_name !== $expectations['function_name']) {
+    $errors[] = "Expected Function Name ".
+      $expectations['function_name'].
+      " does not match actual Function Name ".
+      $function_name.
+      " from ".
+      $meth;
+  }
+
+  if ($file_name_stripped !== 'non_errors.php') {
+      $errors[] = "Expected File Name non_errors.php ".
+      "does not match actual File Name ".
+      $file_name_stripped.
+      " from ".
+      $meth;
+  }
+
+  if ($errors) {
+    echo "Errors in `".$test_name."`:".PHP_EOL;
+    foreach ($errors as $error) {
+      echo $error.PHP_EOL;
+    }
+  }
 }
 
-function test_function() {
-  echo "--test_function--".PHP_EOL;
-  print_cred_info(__FUNCTION_CREDENTIAL__);
-  echo PHP_EOL;
+function test_function(): void {
+  run_test(
+    'test_function',
+    __FUNCTION_CREDENTIAL__,
+    shape('class_name' => null, 'function_name' => 'test_function'),
+  );
 }
 
 trait TestTrait {
-  public function test_trait_method() {
-    echo "--test_trait_method--".PHP_EOL;
-    print_cred_info(__FUNCTION_CREDENTIAL__);
-    echo PHP_EOL;
+  public function test_trait_method(): void {
+    run_test(
+      'test_trait_method',
+      __FUNCTION_CREDENTIAL__, shape(
+      'class_name' => 'TestClass',
+      'function_name' => 'test_trait_method',
+    ));
+  }
+
+  public static function test_static_trait_method(): void {
+    run_test(
+      'test_static_trait_method',
+      __FUNCTION_CREDENTIAL__, shape(
+      'class_name' => 'TestClass',
+      'function_name' => 'test_static_trait_method',
+    ));
   }
 }
 
-class TestClass {
+abstract class BaseClass {
+  public function test_inherited_method(): void {
+    run_test('test_inherited_method', __FUNCTION_CREDENTIAL__, shape(
+      'class_name' => 'BaseClass',
+      'function_name' => 'test_inherited_method',
+    ));
+  }
+
+  public static function test_static_inherited_method(): void {
+    run_test('test_static_inherited_method', __FUNCTION_CREDENTIAL__, shape(
+      'class_name' => 'BaseClass',
+      'function_name' => 'test_static_inherited_method',
+    ));
+  }
+}
+
+class TestClass extends BaseClass {
   use TestTrait;
 
-  public static function test_static_method() {
-    echo "--test_static_method--".PHP_EOL;
-    print_cred_info(__FUNCTION_CREDENTIAL__);
-    echo PHP_EOL;
+  public function __construct() {
+    run_test(
+      'test_constructor',
+        __FUNCTION_CREDENTIAL__,
+        shape('class_name' => 'TestClass', 'function_name' => '__construct'),
+    );
   }
 
-  public function test_method() {
-    echo "--test_method--".PHP_EOL;
-    print_cred_info(__FUNCTION_CREDENTIAL__);
-    echo PHP_EOL;
+  public static function test_static_method(): void {
+    run_test('test_static_method', __FUNCTION_CREDENTIAL__, shape(
+      'class_name' => 'TestClass',
+      'function_name' => 'test_static_method',
+    ));
   }
 
-  public static function test_class_lambda() {
+  public function test_method(): void {
+    run_test(
+      'test_method',
+      __FUNCTION_CREDENTIAL__,
+      shape('class_name' => 'TestClass', 'function_name' => 'test_method'),
+    );
+  }
+
+  public static function test_class_lambda(): (function(): void) {
     return () ==> {
-      echo "--test_class_lambda--".PHP_EOL;
-      print_cred_info(__FUNCTION_CREDENTIAL__);
-      echo PHP_EOL;
+      run_test(
+        'test_class_lambda',
+        __FUNCTION_CREDENTIAL__,
+        shape('class_name' => 'TestClass', 'function_name' => '__invoke'),
+      );
     };
   }
 }
-<<__EntryPoint>> function main(): void {
-$test_lambda = () ==> {
-  echo "--test_lambda--".PHP_EOL;
-  print_cred_info(__FUNCTION_CREDENTIAL__);
-  echo PHP_EOL;
-};
 
-$test_long_lambda = function() {
-  echo "--test_long_lambda--".PHP_EOL;
-  print_cred_info(__FUNCTION_CREDENTIAL__);
-  echo PHP_EOL;
-};
+<<__EntryPoint>>
+function main(): void {
+  $test_lambda = () ==> {
+    run_test(
+      'test_lambda',
+      __FUNCTION_CREDENTIAL__,
+      shape('class_name' => null, 'function_name' => '__invoke'),
+    );
+  };
 
-test_function();
-TestClass::test_static_method();
-new TestClass()->test_method();
-new TestClass()->test_trait_method();
-$test_lambda();
-TestClass::test_class_lambda()();
-$test_long_lambda();
+  $test_long_lambda = function(): void {
+    run_test(
+      'test_long_lambda',
+      __FUNCTION_CREDENTIAL__,
+      shape('class_name' => null, 'function_name' => '__invoke'),
+    );
+  };
+
+  test_function();
+  TestClass::test_static_method();
+  TestClass::test_static_trait_method();
+  TestClass::test_static_inherited_method();
+  $inst = new TestClass();
+  $inst->test_method();
+  $inst->test_trait_method();
+  $inst->test_inherited_method();
+  $test_lambda();
+  TestClass::test_class_lambda()();
+  $test_long_lambda();
+
+  echo 'Test Complete.'.PHP_EOL;
 }

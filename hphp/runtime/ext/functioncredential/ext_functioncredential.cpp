@@ -20,6 +20,7 @@
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native-data.h"
 
@@ -27,15 +28,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-const StaticString
-   s_FunctionCredential("FunctionCredential"),
-   s_className("class_name"),
-   s_functionName("function_name"),
-   s_fileName("file_name");
+const StaticString s_FunctionCredential("FunctionCredential");
 }
 
 // static
 ObjectData* FunctionCredential::newInstance(const Func* func) {
+  assertx(func);
   auto objData = ObjectData::newInstance(classof());
   auto data = Native::data<FunctionCredential>(objData);
   data->func_ = func;
@@ -44,44 +42,35 @@ ObjectData* FunctionCredential::newInstance(const Func* func) {
 
 // static
 const FunctionCredential* FunctionCredential::fromObject(
-  const ObjectData* obj) {
+    const ObjectData* obj) {
   return Native::data<FunctionCredential>(obj);
 }
 
 // static
 Class* FunctionCredential::classof() {
   static Class* cls_FunctionCredential =
-    Unit::lookupClass(s_FunctionCredential.get());
+      Unit::lookupClass(s_FunctionCredential.get());
   assertx(cls_FunctionCredential);
   return cls_FunctionCredential;
 }
 
-static Array HHVM_METHOD(FunctionCredential, __debugInfo) {
-    auto data = FunctionCredential::fromObject(this_);
+static TypedValue HHVM_METHOD(FunctionCredential, getClassName) {
+  auto data = FunctionCredential::fromObject(this_);
+  auto func = data->func();
 
-    String className;
-    String functionName;
-    String fileName;
+  auto cls = func->cls();
+  return cls ? make_tv<KindOfPersistentString>(cls->name())
+             : make_tv<KindOfNull>();
+}
 
-    auto func = data->func();
+static String HHVM_METHOD(FunctionCredential, getFunctionName) {
+  auto data = FunctionCredential::fromObject(this_);
+  return String{makeStaticString(data->func()->name())};
+}
 
-    if (func) {
-      functionName = makeStaticString(func->name());
-      fileName = makeStaticString(func->filename());
-
-      auto cls = func->cls();
-      if (cls) {
-         className = makeStaticString(cls->name());
-      }
-    }
-
-    return make_darray(
-      s_className,
-      std::move(className),
-      s_functionName,
-      std::move(functionName),
-      s_fileName,
-      std::move(fileName));
+static String HHVM_METHOD(FunctionCredential, getFileName) {
+  auto data = FunctionCredential::fromObject(this_);
+  return String{makeStaticString(data->func()->filename())};
 }
 
 namespace {
@@ -89,13 +78,15 @@ struct FunctionCredentialExtension final : Extension {
   FunctionCredentialExtension() : Extension("functioncredential", "1.0") {}
 
   void moduleInit() override {
-    HHVM_ME(FunctionCredential, __debugInfo);
+    HHVM_ME(FunctionCredential, getClassName);
+    HHVM_ME(FunctionCredential, getFunctionName);
+    HHVM_ME(FunctionCredential, getFileName);
 
     Native::registerNativeDataInfo<FunctionCredential>(
-      s_FunctionCredential.get());
+        s_FunctionCredential.get());
 
     loadSystemlib();
   }
 } s_functioncredential_extension;
-}
-}
+} // namespace
+} // namespace HPHP

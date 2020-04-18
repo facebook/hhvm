@@ -13,6 +13,13 @@
   * but you almost certainly should NOT be attempting to construct this object
   */
 final class FunctionCredential {
-  private function __construct() {}
-  public function __debugInfo(): darray;
+  private final function __construct() {}
+
+  public final function getClassName(): ?string;
+
+  public final function getFunctionName(): string;
+
+  public final function getFileName(): string;
+
+  public final function __getDebugInfo(): darray;
 }

@@ -1037,14 +1037,7 @@ void performActRecFixups(const BlockList& blocks,
       case AssertLoc:
       case CheckLoc:
         if (state[inst.src(0)->inst()].isDead()) {
-          if (auto const added = convertToStackInst(unit, inst)) {
-            // If we created a new instruction as part of the
-            // conversion, we need to set up its liveness state, or it
-            // will be deleted by the pass.
-            state[&inst].isDead()
-              ? state[added].setDead()
-              : state[added].setLive();
-          }
+          convertToStackInst(unit, inst);
           needsReflow = true;
         }
         break;
@@ -1377,7 +1370,7 @@ IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
   return fpInst;
 }
 
-IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
+void convertToStackInst(IRUnit& unit, IRInstruction& inst) {
   assertx(inst.is(CheckLoc, AssertLoc, LdLoc, StLoc, LdLocAddr,
                   MemoGetStaticCache, MemoSetStaticCache,
                   MemoGetLSBCache, MemoSetLSBCache,
@@ -1396,7 +1389,7 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
         mainSP,
         inst.src(1)
       );
-      return nullptr;
+      return;
     case LdLoc:
       unit.replace(
         &inst,
@@ -1405,22 +1398,16 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
         inst.typeParam(),
         mainSP
       );
-      return nullptr;
-    case LdLocAddr: {
-      // LdLocAddr returns a Lval, but LdStkAddr returns a Ptr, so we
-      // need to convert.
-      auto const addr = unit.gen(
+      return;
+    case LdLocAddr:
+      unit.replace(
+        &inst,
         LdStkAddr,
-        inst.bcctx(),
         IRSPRelOffsetData { locToStkOff(*inst.extra<LocalId>(), inst.src(0)) },
         mainSP
       );
-      auto const block = inst.block();
-      block->insert(block->iteratorTo(&inst), addr);
-      unit.replace(&inst, ConvPtrToLval, addr->dst());
       retypeDests(&inst, &unit);
-      return addr;
-    }
+      return;
     case AssertLoc:
       unit.replace(
         &inst,
@@ -1429,7 +1416,7 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
         inst.typeParam(),
         mainSP
       );
-      return nullptr;
+      return;
     case CheckLoc: {
       auto next = inst.next();
       unit.replace(
@@ -1441,7 +1428,7 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
         mainSP
       );
       inst.setNext(next);
-      return nullptr;
+      return;
     }
     case MemoGetStaticCache:
     case MemoSetStaticCache:
@@ -1450,14 +1437,14 @@ IRInstruction* convertToStackInst(IRUnit& unit, IRInstruction& inst) {
       auto& extra = *inst.extra<MemoCacheStaticData>();
       extra.stackOffset = locToStkOff(LocalId{extra.keys.first}, inst.src(0));
       inst.setSrc(0, mainSP);
-      return nullptr;
+      return;
     }
     case MemoGetInstanceCache:
     case MemoSetInstanceCache: {
       auto& extra = *inst.extra<MemoCacheInstanceData>();
       extra.stackOffset = locToStkOff(LocalId{extra.keys.first}, inst.src(0));
       inst.setSrc(0, mainSP);
-      return nullptr;
+      return;
     }
     default: break;
   }

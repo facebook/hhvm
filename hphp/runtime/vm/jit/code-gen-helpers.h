@@ -313,7 +313,7 @@ Vptr ptrToLocalData(Vreg fp, int id);
 /*
  * Given (valid) pointers to a local's type and value `typeIn' and
  * `dataIn', modify the pointers to point at the next local (by
- * increasing index) and set `typeOut' and `dataOut' to the new
+ * increasing indx) and set `typeOUt' and `dataOut' to the new
  * pointers. It is up to the caller to detect when the pointers have
  * reached the end of the frame.
  */
@@ -335,12 +335,6 @@ void prevLocal(Vout& v,
                Vreg dataIn,
                Vreg typeOut,
                Vreg dataOut);
-
-/*
- * Create a lval to the specified local and store it in the registers
- * given by `dst'.
- */
-void lvalToLocal(Vout&, Vreg fp, int id, Vloc dst);
 
 ///////////////////////////////////////////////////////////////////////////////
 

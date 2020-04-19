@@ -642,17 +642,6 @@ void prevLocal(Vout& v,
   v << addqi{(int32_t)sizeof(TypedValue), dataIn, dataOut, v.makeReg()};
 }
 
-void lvalToLocal(Vout& v, Vreg fp, int id, Vloc dst) {
-  if (wide_tv_val) {
-    assertx(dst.hasReg(tv_lval::type_idx));
-    assertx(dst.hasReg(tv_lval::val_idx));
-    v << lea{ptrToLocalType(fp, id), dst.reg(tv_lval::type_idx)};
-    v << lea{ptrToLocalData(fp, id), dst.reg(tv_lval::val_idx)};
-  } else {
-    v << lea{ptrToLocalData(fp, id), dst.reg()};
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 uint64_t auxToMask(AuxUnion aux) {

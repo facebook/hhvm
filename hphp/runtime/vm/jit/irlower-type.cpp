@@ -150,11 +150,11 @@ void cgCheckTypeMem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
-  auto const loc = inst->extra<CheckLoc>()->locId;
-  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);
+  auto const base = srcLoc(env, inst, 0).reg()[baseOff];
+
   emitTypeCheck(vmain(env), env, inst->typeParam(),
-                ptrToLocalType(fp, loc), ptrToLocalData(fp, loc),
-                inst->taken());
+                base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
 }
 
 void cgCheckStk(IRLS& env, const IRInstruction* inst) {

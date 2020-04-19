@@ -143,8 +143,6 @@ constexpr size_t alignTypedValue(size_t sz) {
   return (sz + kTypedValueAlignMask) & ~kTypedValueAlignMask;
 }
 
-#define TVOFF(nm) int(offsetof(TypedValue, nm))
-
 /*
  * sizeof(TypedValue) should be a power of 2 no greater than 16 bytes.
  */

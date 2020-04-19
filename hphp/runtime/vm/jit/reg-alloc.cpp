@@ -64,10 +64,8 @@ bool loadsCell(const IRInstruction& inst) {
     static_assert(PackedArray::stores_typed_values, "");
     return arch_allows;
 
-  case LdLoc:
-    return arch_allows && !wide_tv_val;
-
   case LdStk:
+  case LdLoc:
   case LdContField:
   case InitClsCns:
   case CGetProp:
@@ -115,7 +113,7 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
   // MixedArray elements, and Map elements.
   switch (inst.op()) {
   case StLoc:
-    return !wide_tv_val;
+    return srcIdx == 1;
   case StStk:
     return srcIdx == 1;
   case StClsInitElem:

@@ -59,6 +59,10 @@ inline int cellsToBytes(int nCells) {
   return safe_cast<int32_t>(nCells * ssize_t(sizeof(TypedValue)));
 }
 
+inline int localOffset(int locId) {
+  return -cellsToBytes(locId + 1);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}

@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-refcount.h"
-#include "hphp/runtime/vm/runtime.h"
 
 #include <bitset>
 #include <type_traits>
@@ -367,37 +366,15 @@ using UnboundKey = Key<UnboundStorage>;
 
 ////////////////////////////////////////////////////////////
 
-// KeySource is an abstraction for obtaining TypedValues from either
-// locals or the stack.
-
-struct FrameKeySource {
-  const ActRec* fp;
-  uint64_t begin;
-  TypedValue operator[](size_t idx) const {
-    assertx(begin + idx < fp->func()->numLocals());
-    return *frame_local(fp, begin + idx);
-  }
-};
-struct StackKeySource {
-  const TypedValue* keys;
-  // NB: We index backwards here to keep the same order as indexing
-  // into locals.
-  TypedValue operator[](size_t idx) const { return keys[-idx]; }
-};
-
-////////////////////////////////////////////////////////////
-
 /*
- * KeyProxy is a wrapper around the pointer to the TypedValue array
- * passed into the get/set function. It allows us to do lookups in the
- * memo cache without having to move or transform those Cells. It
- * comes in two flavors: KeyProxy, where the key types are not known
- * and must be checked at runtme, and KeyProxyWithTypes, where the key
- * types are known statically.
+ * KeyProxy is a wrapper around the pointer to the TypedValue array passed into the
+ * get/set function. It allows us to do lookups in the memo cache without having
+ * to move or transform those Cells. It comes in two flavors: KeyProxy, where
+ * the key types are not known and must be checked at runtme, and
+ * KeyProxyWithTypes, where the key types are known statically.
  */
-template <typename KeySource>
 struct KeyProxy {
-  KeySource keys;
+  const TypedValue* keys;
 
   template <typename H>
   size_t hash(H header) const {
@@ -421,10 +398,9 @@ struct KeyProxy {
   template <typename S>
   bool equals(const S& storage) const {
     for (size_t i = 0; i < storage.size(); ++i) {
-      auto const tv = keys[i];
-      assertx(tvIsPlausible(tv));
-      assertx(isIntType(tv.m_type) || isStringType(tv.m_type));
-      if (UNLIKELY(!storage.elem(i).equals(tv, storage.isString(i)))) {
+      assertx(tvIsPlausible(keys[i]));
+      assertx(isIntType(keys[i].m_type) || isStringType(keys[i].m_type));
+      if (UNLIKELY(!storage.elem(i).equals(keys[i], storage.isString(i)))) {
         return false;
       }
     }
@@ -436,29 +412,28 @@ struct KeyProxy {
     // Given a storage, initialize it with values from this KeyProxy. Used when
     // we're storing a Key and need to turn a KeyProxy into a Key.
     for (size_t i = 0; i < storage.size(); ++i) {
-      auto const tv = keys[i];
-      assertx(tvIsPlausible(tv));
-      assertx(isIntType(tv.m_type) || isStringType(tv.m_type));
-      if (isStringType(tv.m_type)) {
-        tv.m_data.pstr->incRefCount();
+      assertx(tvIsPlausible(keys[i]));
+      assertx(isIntType(keys[i].m_type) || isStringType(keys[i].m_type));
+      if (isStringType(keys[i].m_type)) {
+        keys[i].m_data.pstr->incRefCount();
         storage.initIsString(i);
       } else {
         storage.initIsInt(i);
       }
-      storage.elem(i).i = tv.m_data.num;
+      storage.elem(i).i = keys[i].m_data.num;
     }
   }
 };
 
 // Key types and count are known statically, so we can use compile-time
 // recursion to implement most operations.
-template <typename KeySource, bool IsStr, bool... Rest>
+template <bool IsStr, bool... Rest>
 struct KeyProxyWithTypes {
   static constexpr auto Size = sizeof...(Rest)+1;
 
-  using Next = KeyProxyWithTypes<KeySource, Rest...>;
+  using Next = KeyProxyWithTypes<Rest...>;
 
-  KeySource keys;
+  const TypedValue* keys;
 
   template <typename H>
   size_t hash(H header) const {
@@ -489,19 +464,18 @@ struct KeyProxyWithTypes {
 
   template <int N, typename S>
   bool equalsRec(const S& storage) const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
     if (!S::HasStringTags && UNLIKELY(storage.isString(N) != IsStr)) {
       return false;
     }
     assertx(!S::HasStringTags || storage.isString(N) == IsStr);
     if (IsStr) {
-      auto const s = tv.m_data.pstr;
+      auto const s = keys[N].m_data.pstr;
       auto const s2 = storage.elem(N).s;
       if (UNLIKELY(s != s2 && !s->same(s2))) return false;
-    } else if (UNLIKELY(storage.elem(N).i != tv.m_data.num)) {
+    } else if (UNLIKELY(storage.elem(N).i != keys[N].m_data.num)) {
       return false;
     }
     return Next{keys}.template equalsRec<N+1>(storage);
@@ -509,26 +483,24 @@ struct KeyProxyWithTypes {
 
   template <int N, typename S>
   void initStorageRec(S& storage) const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
     if (IsStr) {
       if (!S::HasStringTags) storage.initIsString(N);
-      tv.m_data.pstr->incRefCount();
+      keys[N].m_data.pstr->incRefCount();
     } else if (!S::HasStringTags) {
       storage.initIsInt(N);
     }
-    storage.elem(N).i = tv.m_data.num;
+    storage.elem(N).i = keys[N].m_data.num;
     Next{keys}.template initStorageRec<N+1>(storage);
   }
 
   template <int N> size_t hashAt() const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
-    return IsStr ? tv.m_data.pstr->hash() : tv.m_data.num;
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
+    return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
   };
 
   static constexpr std::bitset<Size> makeBitset() {
@@ -545,9 +517,8 @@ struct KeyProxyWithTypes {
 };
 
 // Base case for recursion. KeyProxy with one element.
-template <typename KeySource, bool IsStr>
-struct KeyProxyWithTypes<KeySource, IsStr> {
-  KeySource keys;
+template <bool IsStr> struct KeyProxyWithTypes<IsStr> {
+  const TypedValue* keys;
 
   template <typename H>
   size_t hash(H header) const {
@@ -578,16 +549,15 @@ struct KeyProxyWithTypes<KeySource, IsStr> {
 
   template <int N, typename S>
   bool equalsRec(const S& storage) const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
     if (!S::HasStringTags && UNLIKELY(storage.isString(N) != IsStr)) {
       return false;
     }
     assertx(!S::HasStringTags || storage.isString(N) == IsStr);
     if (IsStr) {
-      auto const s = tv.m_data.pstr;
+      auto const s = keys[N].m_data.pstr;
       auto const s2 = storage.elem(N).s;
       return s == s2 || s->same(s2);
     }
@@ -596,25 +566,23 @@ struct KeyProxyWithTypes<KeySource, IsStr> {
 
   template <int N, typename S>
   void initStorageRec(S& storage) const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
     if (IsStr) {
       if (!S::HasStringTags) storage.initIsString(N);
-      tv.m_data.pstr->incRefCount();
+      keys[N].m_data.pstr->incRefCount();
     } else if (!S::HasStringTags) {
       storage.initIsInt(N);
     }
-    storage.elem(N).i = tv.m_data.num;
+    storage.elem(N).i = keys[N].m_data.num;
   }
 
   template <int N> size_t hashAt() const {
-    auto const tv = keys[N];
-    assertx(tvIsPlausible(tv));
-    assertx(!IsStr || isStringType(tv.m_type));
-    assertx(IsStr || isIntType(tv.m_type));
-    return IsStr ? tv.m_data.pstr->hash() : tv.m_data.num;
+    assertx(tvIsPlausible(keys[N]));
+    assertx(!IsStr || isStringType(keys[N].m_type));
+    assertx(IsStr || isIntType(keys[N].m_type));
+    return IsStr ? keys[N].m_data.pstr->hash() : keys[N].m_data.num;
   };
 
   static constexpr std::bitset<1> makeBitset() {
@@ -795,8 +763,8 @@ auto& getCache(MemoCacheBase* base) {
 template <typename K, typename P>
 ALWAYS_INLINE
 const TypedValue* getImpl(const MemoCacheBase* base,
-                          typename K::Header header,
-                          P keys) {
+                    typename K::Header header,
+                    P keys) {
   auto const& cache = getCache<MemoCache<K>>(base);
   auto const it = cache.find(std::make_tuple(header, keys));
   if (it == cache.end()) return nullptr;
@@ -826,107 +794,128 @@ void setImpl(MemoCacheBase*& base,
 // getter/setter helpers, instantiated on the appropriate key and key-proxy
 // type.
 
-#define KEY_PROXY_WITH_TYPES(Source) KeyProxyWithTypes<Source, IsStr...>
-#define KEY_PROXY_NO_TYPES(Source) KeyProxy<Source>
-
-#define FIXED_KEY_TYPES FixedKey<sizeof...(IsStr)>
-#define FIXED_KEY_TYPES_HEADER typename FixedKey<sizeof...(IsStr)>::Header
-#define FIXED_KEY_TYPES_TEMPL template<bool... IsStr>
-
-#define FIXED_KEY_NO_TYPES FixedKey<N>
-#define FIXED_KEY_NO_TYPES_HEADER typename FixedKey<N>::Header
-#define FIXED_KEY_NO_TYPES_TEMPL template <int N>
-
-#define FIXED_KEY_TYPES_FUNC FixedFuncIdKey<sizeof...(IsStr)>
-#define FIXED_KEY_TYPES_FUNC_HEADER \
-  typename FixedFuncIdKey<sizeof...(IsStr)>::Header
-#define FIXED_KEY_TYPES_FUNC_TEMPL template<bool... IsStr>
-
-#define FIXED_KEY_NO_TYPES_FUNC FixedFuncIdKey<N>
-#define FIXED_KEY_NO_TYPES_FUNC_HEADER typename FixedFuncIdKey<N>::Header
-#define FIXED_KEY_NO_TYPES_FUNC_TEMPL template <int N>
-
-#define UNBOUND_KEY UnboundKey
-#define UNBOUND_KEY_HEADER UnboundKey::Header
-#define UNBOUND_KEY_TEMPL
-
-#define FP_PARAMS const ActRec* fp, uint64_t begin
-#define FP_TYPE FrameKeySource
-#define FP_PROXY_PARAMS FrameKeySource{fp, begin}
-
-#define SP_PARAMS const TypedValue* keys
-#define SP_TYPE StackKeySource
-#define SP_PROXY_PARAMS StackKeySource{keys}
-
-#define NO_EXTRA_PARAMS
-#define NO_EXTRA_HEADER_PARAMS
-
-#define EXTRA_FUNC_ID_PARAMS FuncId funcId,
-#define EXTRA_FUNC_ID_HEADER_PARAMS funcId
-
-#define EXTRA_MEMO_ID_PARAMS GenericMemoId::Param id,
-#define EXTRA_MEMO_ID_HEADER_PARAMS id
-
-#define STATIC static
-#define NO_STATIC
-
-#define O(Name, Source, SourceName, Extra, KeyType, Proxy, Static)      \
-KeyType##_TEMPL                                                         \
-Static const TypedValue* Name##Get##SourceName(const MemoCacheBase* base, \
-                                               Extra##_PARAMS           \
-                                               Source##_PARAMS) {       \
-  return getImpl<KeyType>(                                              \
-    base,                                                               \
-    KeyType##_HEADER{Extra##_HEADER_PARAMS},                            \
-    Proxy(Source##_TYPE){Source##_PROXY_PARAMS}                         \
-  );                                                                    \
-}                                                                       \
-KeyType##_TEMPL                                                         \
-Static void Name##Set##SourceName(MemoCacheBase*& base,                 \
-                                  Extra##_PARAMS                        \
-                                  Source##_PARAMS,                      \
-                                  TypedValue val) {                     \
-  setImpl<KeyType>(                                                     \
-    base,                                                               \
-    KeyType##_HEADER{Extra##_HEADER_PARAMS},                            \
-    Proxy(Source##_TYPE){Source##_PROXY_PARAMS},                        \
-    val                                                                 \
-  );                                                                    \
+template <bool... IsStr>
+static const TypedValue* memoCacheGet(const MemoCacheBase* base,
+                                const TypedValue* keys) {
+  return getImpl<FixedKey<sizeof...(IsStr)>>(
+    base,
+    typename FixedKey<sizeof...(IsStr)>::Header{},
+    KeyProxyWithTypes<IsStr...>{keys}
+  );
 }
 
-O(memoCache, FP, FP, NO_EXTRA, FIXED_KEY_TYPES, KEY_PROXY_WITH_TYPES, STATIC);
-O(memoCache, SP, SP, NO_EXTRA, FIXED_KEY_TYPES, KEY_PROXY_WITH_TYPES, STATIC);
+template <int N>
+static const TypedValue* memoCacheGetGenericKeys(const MemoCacheBase* base,
+                                           const TypedValue* keys) {
+  return getImpl<FixedKey<N>>(
+    base,
+    typename FixedKey<N>::Header{},
+    KeyProxy{keys}
+  );
+}
 
-O(memoCacheShared, FP, FP, EXTRA_FUNC_ID, FIXED_KEY_TYPES_FUNC,
-  KEY_PROXY_WITH_TYPES, STATIC);
-O(memoCacheShared, SP, SP, EXTRA_FUNC_ID, FIXED_KEY_TYPES_FUNC,
-  KEY_PROXY_WITH_TYPES, STATIC);
+template <bool... IsStr>
+static const TypedValue* memoCacheGetShared(const MemoCacheBase* base,
+                                      FuncId funcId,
+                                      const TypedValue* keys) {
+  return getImpl<FixedFuncIdKey<sizeof...(IsStr)>>(
+    base,
+    typename FixedFuncIdKey<sizeof...(IsStr)>::Header{funcId},
+    KeyProxyWithTypes<IsStr...>{keys}
+  );
+}
 
-O(memoCacheGenericKeys, FP, FP, NO_EXTRA, FIXED_KEY_NO_TYPES,
-  KEY_PROXY_NO_TYPES, STATIC);
-O(memoCacheGenericKeys, SP, SP, NO_EXTRA, FIXED_KEY_NO_TYPES,
-  KEY_PROXY_NO_TYPES, STATIC);
+template <int N>
+static const TypedValue* memoCacheGetSharedGenericKeys(const MemoCacheBase* base,
+                                                 FuncId funcId,
+                                                 const TypedValue* keys) {
+  return getImpl<FixedFuncIdKey<N>>(
+    base,
+    typename FixedFuncIdKey<N>::Header{funcId},
+    KeyProxy{keys}
+  );
+}
 
-O(memoCacheSharedGenericKeys, FP, FP, EXTRA_FUNC_ID, FIXED_KEY_NO_TYPES_FUNC,
-  KEY_PROXY_NO_TYPES, STATIC);
-O(memoCacheSharedGenericKeys, SP, SP, EXTRA_FUNC_ID, FIXED_KEY_NO_TYPES_FUNC,
-  KEY_PROXY_NO_TYPES, STATIC);
-
-O(memoCacheGeneric, FP, FP, EXTRA_MEMO_ID, UNBOUND_KEY,
-  KEY_PROXY_NO_TYPES, NO_STATIC);
-O(memoCacheGeneric, SP, SP, EXTRA_MEMO_ID, UNBOUND_KEY,
-  KEY_PROXY_NO_TYPES, NO_STATIC);
-
-#undef O
+const TypedValue* memoCacheGetGeneric(MemoCacheBase* base,
+                                GenericMemoId::Param id,
+                                const TypedValue* keys) {
+  return getImpl<UnboundKey>(
+    base,
+    UnboundKey::Header{id},
+    KeyProxy{keys}
+  );
+}
 
 const TypedValue* memoCacheGetSharedOnly(const MemoCacheBase* base,
-                                         SharedOnlyKey key) {
+                                   SharedOnlyKey key) {
   auto const& cache = getCache<SharedOnlyMemoCache>(base);
   auto const it = cache.find(key);
   if (it == cache.end()) return nullptr;
   assertx(tvIsPlausible(it->second.value));
   assertx(it->second.value.m_type != KindOfUninit);
   return &it->second.value;
+}
+
+template <bool... IsStr>
+static void memoCacheSet(MemoCacheBase*& base,
+                         const TypedValue* keys,
+                         TypedValue val) {
+  setImpl<FixedKey<sizeof...(IsStr)>>(
+    base,
+    typename FixedKey<sizeof...(IsStr)>::Header{},
+    KeyProxyWithTypes<IsStr...>{keys},
+    val
+  );
+}
+
+template <int N>
+static void memoCacheSetGenericKeys(MemoCacheBase*& base,
+                                    const TypedValue* keys,
+                                    TypedValue val) {
+  setImpl<FixedKey<N>>(
+    base,
+    typename FixedKey<N>::Header{},
+    KeyProxy{keys},
+    val
+  );
+}
+
+template <bool... IsStr>
+static void memoCacheSetShared(MemoCacheBase*& base,
+                               FuncId funcId,
+                               const TypedValue* keys,
+                               TypedValue val) {
+  setImpl<FixedFuncIdKey<sizeof...(IsStr)>>(
+    base,
+    typename FixedFuncIdKey<sizeof...(IsStr)>::Header{funcId},
+    KeyProxyWithTypes<IsStr...>{keys},
+    val
+  );
+}
+
+template <int N>
+static void memoCacheSetSharedGenericKeys(MemoCacheBase*& base,
+                                          FuncId funcId,
+                                          const TypedValue* keys,
+                                          TypedValue val) {
+  setImpl<FixedFuncIdKey<N>>(
+    base,
+    typename FixedFuncIdKey<N>::Header{funcId},
+    KeyProxy{keys},
+    val
+  );
+}
+
+void memoCacheSetGeneric(MemoCacheBase*& base,
+                         GenericMemoId::Param id,
+                         const TypedValue* keys,
+                         TypedValue val) {
+  setImpl<UnboundKey>(
+    base,
+    UnboundKey::Header{id},
+    KeyProxy{keys},
+    val
+  );
 }
 
 void memoCacheSetSharedOnly(MemoCacheBase*& base,
@@ -955,7 +944,7 @@ static_assert(
 // Use a macro to generate a "builder" class, which is responsible for taking
 // key types and key counts, and returning the appropriate getter or setter.
 
-#define O(Type, Name, Func1, Func2)                                     \
+#define O(Type, Name, Func)                                             \
 template <int, typename = void> struct Name##Builder;                   \
 template <int M>                                                        \
 struct Name##Builder<M,                                                 \
@@ -975,7 +964,7 @@ struct Name##Builder<M,                                                 \
   template <bool... IsStr>                                              \
   struct FromTypes<0, IsStr...> {                                       \
     static Type get(const bool*, size_t) {                              \
-      return Func1<IsStr...>;                                           \
+      return Func<IsStr...>;                                            \
     }                                                                   \
   };                                                                    \
                                                                         \
@@ -984,7 +973,7 @@ struct Name##Builder<M,                                                 \
     return Name##Builder<M-1>::get(types, count);                       \
   }                                                                     \
   static Type get(size_t count) {                                       \
-    if (count == M) return Func2<M>;                                    \
+    if (count == M) return Func##GenericKeys<M>;                        \
     return Name##Builder<M-1>::get(count);                              \
   }                                                                     \
 };                                                                      \
@@ -993,11 +982,11 @@ struct Name##Builder<M,                                                 \
                      std::enable_if_t<                                  \
                        (M > kMemoCacheMaxSpecializedKeyTypes)>> {       \
   static Type get(const bool* types, size_t count) {                    \
-    if (count == M) return Func2<M>;                                    \
+    if (count == M) return Func##GenericKeys<M>;                        \
     return Name##Builder<M-1>::get(types, count);                       \
   }                                                                     \
   static Type get(size_t count) {                                       \
-    if (count == M) return Func2<M>;                                    \
+    if (count == M) return Func##GenericKeys<M>;                        \
     return Name##Builder<M-1>::get(count);                              \
   }                                                                     \
 };                                                                      \
@@ -1006,52 +995,47 @@ template <> struct Name##Builder<0> {                                   \
   static Type get(size_t) { return nullptr; }                           \
 };
 
-#define O2(TypeG, TypeGS, TypeS, TypeSS, Suffix)                     \
-O(TypeG, MemoCacheGet##Suffix,                                       \
-  memoCacheGet##Suffix, memoCacheGenericKeysGet##Suffix)             \
-O(TypeGS, MemoCacheGetShared##Suffix,                                \
-  memoCacheSharedGet##Suffix, memoCacheSharedGenericKeysGet##Suffix) \
-O(TypeS, MemoCacheSet##Suffix,                                       \
-  memoCacheSet##Suffix, memoCacheGenericKeysSet##Suffix)             \
-O(TypeSS, MemoCacheSetShared##Suffix,                                \
-  memoCacheSharedSet##Suffix, memoCacheSharedGenericKeysSet##Suffix)
+// Actually create the builders
+O(MemoCacheGetter, MemoCacheGet, memoCacheGet);
+O(MemoCacheSetter, MemoCacheSet, memoCacheSet);
+O(SharedMemoCacheGetter, MemoCacheGetShared, memoCacheGetShared);
+O(SharedMemoCacheSetter, MemoCacheSetShared, memoCacheSetShared);
 
-O2(MemoCacheGetterFP, SharedMemoCacheGetterFP, MemoCacheSetterFP,
-   SharedMemoCacheSetterFP, FP);
-O2(MemoCacheGetterSP, SharedMemoCacheGetterSP, MemoCacheSetterSP,
-   SharedMemoCacheSetterSP, SP);
-
-#undef O2
 #undef O
 
 }
 
-#define O(Ret, Type, Builder)                                           \
-Ret Type##ForKeyTypesFP(const bool* types,                              \
-                        const Func* func,                               \
-                        size_t count) {                                 \
-  return Builder##FPBuilder<kMemoCacheMaxSpecializedKeys>::get(types, count); \
-}                                                                       \
-Ret Type##ForKeyCountFP(const Func* func, size_t count) { \
-  return Builder##FPBuilder<kMemoCacheMaxSpecializedKeys>::get(count); \
+MemoCacheGetter memoCacheGetForKeyTypes(const bool* types, size_t count) {
+  return MemoCacheGetBuilder<kMemoCacheMaxSpecializedKeys>::get(types, count);
 }
-O(MemoCacheGetterFP, memoCacheGet, MemoCacheGet);
-O(MemoCacheSetterFP, memoCacheSet, MemoCacheSet);
-O(SharedMemoCacheGetterFP, sharedMemoCacheGet, MemoCacheGetShared);
-O(SharedMemoCacheSetterFP, sharedMemoCacheSet, MemoCacheSetShared);
-#undef O
+MemoCacheGetter memoCacheGetForKeyCount(size_t count) {
+  return MemoCacheGetBuilder<kMemoCacheMaxSpecializedKeys>::get(count);
+}
 
-#define O(Ret, Type, Builder)                                           \
-Ret Type##ForKeyTypesSP(const bool* types, size_t count) {              \
-  return Builder##SPBuilder<kMemoCacheMaxSpecializedKeys>::get(types, count); \
-}                                                                       \
-Ret Type##ForKeyCountSP(size_t count) {                                 \
-  return Builder##SPBuilder<kMemoCacheMaxSpecializedKeys>::get(count);  \
+MemoCacheSetter memoCacheSetForKeyTypes(const bool* types, size_t count) {
+  return MemoCacheSetBuilder<kMemoCacheMaxSpecializedKeys>::get(types, count);
 }
-O(MemoCacheGetterSP, memoCacheGet, MemoCacheGet);
-O(MemoCacheSetterSP, memoCacheSet, MemoCacheSet);
-O(SharedMemoCacheGetterSP, sharedMemoCacheGet, MemoCacheGetShared);
-O(SharedMemoCacheSetterSP, sharedMemoCacheSet, MemoCacheSetShared);
-#undef O
+MemoCacheSetter memoCacheSetForKeyCount(size_t count) {
+  return MemoCacheSetBuilder<kMemoCacheMaxSpecializedKeys>::get(count);
+}
+
+SharedMemoCacheGetter sharedMemoCacheGetForKeyTypes(const bool* types,
+                                                    size_t count) {
+  return MemoCacheGetSharedBuilder<kMemoCacheMaxSpecializedKeys>::get(
+    types, count
+  );
+}
+SharedMemoCacheGetter sharedMemoCacheGetForKeyCount(size_t count) {
+  return MemoCacheGetSharedBuilder<kMemoCacheMaxSpecializedKeys>::get(count);
+}
+SharedMemoCacheSetter sharedMemoCacheSetForKeyTypes(const bool* types,
+                                                    size_t count) {
+  return MemoCacheSetSharedBuilder<kMemoCacheMaxSpecializedKeys>::get(
+    types, count
+  );
+}
+SharedMemoCacheSetter sharedMemoCacheSetForKeyCount(size_t count) {
+  return MemoCacheSetSharedBuilder<kMemoCacheMaxSpecializedKeys>::get(count);
+}
 
 }

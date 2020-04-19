@@ -266,191 +266,6 @@ Vptr getHandleAddr(Vreg handle) {
   return handle[rvmtl()];
 }
 
-template <typename F1, typename F2, typename Extra>
-folly::Optional<CallSpec> selectMemoFunc(F1 fp,
-                                         F2 sp,
-                                         const Extra* extra) {
-  if (extra->stackOffset) {
-    auto const f = sp(extra->types, extra->keys.count);
-    if (!f) return folly::none;
-    return CallSpec::direct(f);
-  }
-  auto const f = fp(
-    extra->types,
-    extra->func,
-    extra->keys.count
-  );
-  if (!f) return folly::none;
-  return CallSpec::direct(f);
-}
-
-template <typename Extra>
-void setKeyArg(ArgGroup& args, Vreg fpOrSp, const Extra* extra) {
-  if (!extra->stackOffset) {
-    args.reg(fpOrSp);
-    args.imm(extra->keys.first);
-    return;
-  }
-  auto const off = cellsToBytes(extra->stackOffset->offset);
-  args.addr(fpOrSp, off);
-}
-
-template <typename Extra>
-Vreg emitGetCall(IRLS& env,
-                 const IRInstruction* inst,
-                 Vout& v,
-                 Vreg fpOrSp,
-                 Vreg cachePtr,
-                 const Extra* extra) {
-  // Lookup the proper getter function and call it with the pointer to the
-  // cache. The pointer to the cache may be null, but the getter function can
-  // handle that.
-  auto const valPtr = v.makeReg();
-
-  auto const emit = [&] (const CallSpec& target, ArgGroup& args) {
-    setKeyArg(args, fpOrSp, extra);
-    cgCallHelper(v, env, target, callDest(valPtr), SyncOptions::None, args);
-  };
-
-  if (auto const getter = selectMemoFunc(memoCacheGetForKeyTypesFP,
-                                         memoCacheGetForKeyTypesSP,
-                                         extra)) {
-    emit(*getter, argGroup(env, inst).reg(cachePtr));
-  } else {
-    emit(
-      extra->stackOffset
-        ? CallSpec::direct(memoCacheGenericGetSP)
-        : CallSpec::direct(memoCacheGenericGetFP),
-      argGroup(env, inst)
-        .reg(cachePtr)
-        .imm(GenericMemoId{extra->func->getFuncId(),
-                           extra->keys.count}.asParam())
-    );
-  }
-  return valPtr;
-}
-
-template <typename Extra>
-Vreg emitSharedGetCall(IRLS& env,
-                       const IRInstruction* inst,
-                       Vout& v,
-                       Vreg fpOrSp,
-                       Vreg cachePtr,
-                       const Extra* extra) {
-  auto const valPtr = v.makeReg();
-  auto const funcId = extra->func->getFuncId();
-
-  auto const emit = [&] (const CallSpec& target, ArgGroup& args) {
-    if (extra->keys.count > 0) setKeyArg(args, fpOrSp, extra);
-    cgCallHelper(v, env, target, callDest(valPtr), SyncOptions::None, args);
-  };
-
-  if (extra->keys.count == 0) {
-    emit(
-      CallSpec::direct(memoCacheGetSharedOnly),
-      argGroup(env, inst).reg(cachePtr).imm(makeSharedOnlyKey(funcId))
-    );
-  } else if (auto const getter = selectMemoFunc(sharedMemoCacheGetForKeyTypesFP,
-                                                sharedMemoCacheGetForKeyTypesSP,
-                                                extra)) {
-    emit(*getter, argGroup(env, inst).reg(cachePtr).imm(funcId));
-  } else {
-    emit(
-      extra->stackOffset
-        ? CallSpec::direct(memoCacheGenericGetSP)
-        : CallSpec::direct(memoCacheGenericGetFP),
-      argGroup(env, inst)
-        .reg(cachePtr)
-        .imm(GenericMemoId{funcId, extra->keys.count}.asParam())
-    );
-  }
-  return valPtr;
-}
-
-template <typename Extra>
-void emitSetCall(IRLS& env,
-                 const IRInstruction* inst,
-                 Vout& v,
-                 Vreg fpOrSp,
-                 Vreg handleAddr,
-                 uint32_t valIndex,
-                 const Extra* extra) {
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!extra->asyncEager) return folly::none;
-    return *extra->asyncEager
-      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
-      : AuxUnion{0};
-  }();
-
-  auto const emit = [&] (const CallSpec& target, ArgGroup& args) {
-    setKeyArg(args, fpOrSp, extra);
-    args.typedValue(valIndex, aux);
-    cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
-  };
-
-  // Lookup the setter and call it with the address of the cache pointer. The
-  // setter will create the cache as needed and update the pointer.
-  if (auto const setter = selectMemoFunc(memoCacheSetForKeyTypesFP,
-                                         memoCacheSetForKeyTypesSP,
-                                         extra)) {
-    emit(*setter, argGroup(env, inst).reg(handleAddr));
-  } else {
-    emit(
-      extra->stackOffset
-        ? CallSpec::direct(memoCacheGenericSetSP)
-        : CallSpec::direct(memoCacheGenericSetFP),
-      argGroup(env, inst)
-        .reg(handleAddr)
-        .imm(GenericMemoId{extra->func->getFuncId(),
-                           extra->keys.count}.asParam())
-    );
-  }
-}
-
-template <typename Extra>
-void emitSharedSetCall(IRLS& env,
-                       const IRInstruction* inst,
-                       Vout& v,
-                       Vreg fpOrSp,
-                       Vreg handleAddr,
-                       uint32_t valIndex,
-                       const Extra* extra) {
-  auto const aux = [&] () -> folly::Optional<AuxUnion> {
-    if (!extra->asyncEager) return folly::none;
-    return *extra->asyncEager
-      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
-      : AuxUnion{0};
-  }();
-
-  auto const funcId = extra->func->getFuncId();
-
-  auto const emit = [&] (const CallSpec& target, ArgGroup& args) {
-    if (extra->keys.count > 0) setKeyArg(args, fpOrSp, extra);
-    args.typedValue(valIndex, aux);
-    cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
-  };
-
-  if (extra->keys.count == 0) {
-    emit(
-      CallSpec::direct(memoCacheSetSharedOnly),
-      argGroup(env, inst).reg(handleAddr).imm(makeSharedOnlyKey(funcId))
-    );
-  } else if (auto const setter = selectMemoFunc(sharedMemoCacheSetForKeyTypesFP,
-                                                sharedMemoCacheSetForKeyTypesSP,
-                                                extra)) {
-    emit(*setter, argGroup(env, inst).reg(handleAddr).imm(funcId));
-  } else {
-    emit(
-      extra->stackOffset
-        ? CallSpec::direct(memoCacheGenericSetSP)
-        : CallSpec::direct(memoCacheGenericSetFP),
-      argGroup(env, inst)
-        .reg(handleAddr)
-        .imm(GenericMemoId{funcId, extra->keys.count}.asParam())
-    );
-  }
-}
-
 /* HandleT may be either rds::Handle or VReg */
 template<typename HandleT>
 void doMemoGetValue(
@@ -544,14 +359,51 @@ void doMemoGetCache(
   auto const cachePtr = v.makeReg();
   v << load{getHandleAddr(handle), cachePtr};
 
-  auto const valPtr = emitGetCall(
-    env,
-    inst,
-    v,
-    fpOrSp,
-    cachePtr,
-    extra
-  );
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
+  // Lookup the proper getter function and call it with the pointer to the
+  // cache. The pointer to the cache may be null, but the getter function can
+  // handle that.
+  auto const valPtr = v.makeReg();
+  if (auto const getter =
+      memoCacheGetForKeyTypes(extra->types, extra->keys.count)) {
+
+    auto args = argGroup(env, inst).reg(cachePtr);
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(getter),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  } else {
+    auto args = argGroup(env, inst)
+      .reg(cachePtr)
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(memoCacheGetGeneric),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  }
 
   // If the returned pointer isn't null, load the value out of it.
   auto const sf2 = v.makeReg();
@@ -587,15 +439,57 @@ void doMemoSetCache(
   auto const handleAddr = v.makeReg();
   v << lea{getHandleAddr(handle), handleAddr};
 
-  emitSetCall(
-    env,
-    inst,
-    v,
-    fpOrSp,
-    handleAddr,
-    valIndex,
-    extra
-  );
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!extra->asyncEager) return folly::none;
+    return *extra->asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
+  // Lookup the setter and call it with the address of the cache pointer. The
+  // setter will create the cache as needed and update the pointer.
+  if (auto const setter =
+      memoCacheSetForKeyTypes(extra->types, extra->keys.count)) {
+    auto args = argGroup(env, inst).reg(handleAddr);
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(setter),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
+    );
+  } else {
+    auto args = argGroup(env, inst)
+      .reg(handleAddr)
+      .imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    addKeysAddr(args);
+    args.typedValue(valIndex, aux);
+
+    cgCallHelper(
+      v,
+      env,
+      CallSpec::direct(memoCacheSetGeneric),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
+    );
+  }
 }
 
 } // end anonymous namespace
@@ -788,31 +682,82 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   v << testq{cache, cache, sf};
   fwdJcc(v, env, CC_Z, sf, inst->taken());
 
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
+
   // Lookup the right getter function and call it with the pointer to the cache.
-  auto const valPtr = [&] {
-    if (extra->shared) {
-      return emitSharedGetCall(
-        env,
-        inst,
+  auto const valPtr = v.makeReg();
+  if (extra->shared) {
+    if (extra->keys.count == 0) {
+      auto const args = argGroup(env, inst)
+        .reg(cache)
+        .imm(makeSharedOnlyKey(extra->func->getFuncId()));
+      cgCallHelper(
         v,
-        fpOrSp,
-        cache,
-        extra
+        env,
+        CallSpec::direct(memoCacheGetSharedOnly),
+        callDest(valPtr),
+        SyncOptions::None,
+        args
       );
     } else {
-      // A non-shared cache should always have non-zero keys (it would be a memo
-      // value otherwise).
-      assertx(extra->keys.count > 0);
-      return emitGetCall(
-        env,
-        inst,
+      auto const getter =
+        sharedMemoCacheGetForKeyTypes(extra->types, extra->keys.count);
+      auto const funcId = extra->func->getFuncId();
+      auto args = argGroup(env, inst)
+        .reg(cache)
+        .imm(
+          getter
+            ? funcId
+            : GenericMemoId{funcId, extra->keys.count}.asParam()
+        );
+      addKeysAddr(args);
+
+      cgCallHelper(
         v,
-        fpOrSp,
-        cache,
-        extra
+        env,
+        getter
+          ? CallSpec::direct(getter)
+          : CallSpec::direct(memoCacheGetGeneric),
+        callDest(valPtr),
+        SyncOptions::None,
+        args
       );
     }
-  }();
+  } else {
+    // A non-shared cache should always have non-zero keys (it would be a memo
+    // value otherwise).
+    assertx(extra->keys.count > 0);
+
+    auto const getter =
+      memoCacheGetForKeyTypes(extra->types, extra->keys.count);
+
+    auto args = argGroup(env, inst).reg(cache);
+    if (!getter) {
+      args.imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    }
+    addKeysAddr(args);
+
+    cgCallHelper(
+      v,
+      env,
+      getter
+        ? CallSpec::direct(getter)
+        : CallSpec::direct(memoCacheGetGeneric),
+      callDest(valPtr),
+      SyncOptions::None,
+      args
+    );
+  }
 
   // Check the return pointer, and if it isn't null, load the value out of it.
   auto const sf2 = v.makeReg();
@@ -848,32 +793,89 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
     obj[slotOff + TVOFF(m_type)]
   };
 
-  auto const cachePtr = v.makeReg();
-  v << lea{obj[slotOff + TVOFF(m_data)], cachePtr};
+  auto const aux = [&] () -> folly::Optional<AuxUnion> {
+    if (!extra->asyncEager) return folly::none;
+    return *extra->asyncEager
+      ? AuxUnion{std::numeric_limits<uint32_t>::max()}
+      : AuxUnion{0};
+  }();
+
+  auto const addKeysAddr = [&] (ArgGroup& args) {
+    if (extra->stackOffset) {
+      auto const off =
+        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
+      args.addr(fpOrSp, off);
+      return;
+    }
+    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+  };
 
   // Lookup the right setter and call it with the address of the pointer to the
   // cache. If the pointer is null, the setter will allocate a new cache and
   // update the pointer.
   if (extra->shared) {
-    emitSharedSetCall(
-      env,
-      inst,
-      v,
-      fpOrSp,
-      cachePtr,
-      2,
-      extra
-    );
+    if (extra->keys.count == 0) {
+      auto const args = argGroup(env, inst)
+        .addr(obj, slotOff + TVOFF(m_data))
+        .imm(makeSharedOnlyKey(extra->func->getFuncId()))
+        .typedValue(2, aux);
+      cgCallHelper(
+        v,
+        env,
+        CallSpec::direct(memoCacheSetSharedOnly),
+        kVoidDest,
+        SyncOptions::Sync,
+        args
+      );
+    } else {
+      auto const setter =
+        sharedMemoCacheSetForKeyTypes(extra->types, extra->keys.count);
+      auto const funcId = extra->func->getFuncId();
+      auto args = argGroup(env, inst)
+        .addr(obj, slotOff + TVOFF(m_data))
+        .imm(
+          setter
+            ? funcId
+            : GenericMemoId{funcId, extra->keys.count}.asParam()
+        );
+      addKeysAddr(args);
+      args.typedValue(2, aux);
+
+      cgCallHelper(
+        v,
+        env,
+        setter
+          ? CallSpec::direct(setter)
+          : CallSpec::direct(memoCacheSetGeneric),
+        kVoidDest,
+        SyncOptions::Sync,
+        args
+      );
+    }
   } else {
     assertx(extra->keys.count > 0);
-    emitSetCall(
-      env,
-      inst,
+
+    auto const setter =
+      memoCacheSetForKeyTypes(extra->types, extra->keys.count);
+
+    auto args = argGroup(env, inst).addr(obj, slotOff + TVOFF(m_data));
+    if (!setter) {
+      args.imm(
+        GenericMemoId{extra->func->getFuncId(), extra->keys.count}.asParam()
+      );
+    }
+    addKeysAddr(args);
+    args.typedValue(2, aux);
+
+    cgCallHelper(
       v,
-      fpOrSp,
-      cachePtr,
-      2,
-      extra
+      env,
+      setter
+        ? CallSpec::direct(setter)
+        : CallSpec::direct(memoCacheSetGeneric),
+      kVoidDest,
+      SyncOptions::Sync,
+      args
     );
   }
 }

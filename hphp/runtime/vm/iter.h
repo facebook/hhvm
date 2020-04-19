@@ -293,13 +293,14 @@ struct IterImpl {
 
 private:
   template<IterTypeOp Type>
-  friend int64_t new_iter_array(Iter*, ArrayData*, local_lval);
+  friend int64_t new_iter_array(Iter*, ArrayData*, TypedValue*);
   template<IterTypeOp Type>
-  friend int64_t new_iter_array_key(Iter*, ArrayData*, local_lval, local_lval);
+  friend int64_t new_iter_array_key(Iter*, ArrayData*, TypedValue*,
+                                    TypedValue*);
   template<bool Local>
-  friend int64_t iter_next_packed_pointer(Iter*, local_lval, ArrayData*);
+  friend int64_t iter_next_packed_pointer(Iter*, TypedValue*, ArrayData*);
   template<bool HasKey, bool Local>
-  friend int64_t iter_next_mixed_pointer(Iter*, local_lval, local_lval, ArrayData*);
+  friend int64_t iter_next_mixed_pointer(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
   template <bool incRef = true>
   void arrInit(const ArrayData* arr);
@@ -419,7 +420,7 @@ struct alignas(16) Iter {
 
   // Returns true if the base is non-empty. Only used for non-local iterators.
   // For local iterators, use new_iter_array / new_iter_array_key below.
-  bool init(tv_rval base);
+  bool init(TypedValue* base);
 
   // Returns true if there are more elems. Only used for non-local iterators.
   // For local iterators, use liter_next_ind / liter_next_key_ind below.
@@ -465,14 +466,14 @@ private:
 // to call, then call it. This indirection lets us burn the appropriate helper
 // into the JIT (where we know IterTypeOp statically). For objects, we don't
 // need it because the type is always NonLocal.
-using IterInitArr    = int64_t(*)(Iter*, ArrayData*, local_lval);
-using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, local_lval, local_lval);
+using IterInitArr    = int64_t(*)(Iter*, ArrayData*, TypedValue*);
+using IterInitArrKey = int64_t(*)(Iter*, ArrayData*, TypedValue*, TypedValue*);
 
 IterInitArr    new_iter_array_helper(IterTypeOp type);
 IterInitArrKey new_iter_array_key_helper(IterTypeOp type);
 
 int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
-                        local_lval val, local_lval key);
+                        TypedValue* val, TypedValue* key);
 
 
 // Native helpers for the interpreter + JIT used to implement *IterInit* ops.
@@ -483,11 +484,10 @@ int64_t new_iter_object(Iter* dest, ObjectData* obj, Class* ctx,
 // from the next key-value pair of the base.
 //
 // For non-local iters, if these helpers return 0, they also dec-ref the base.
-NEVER_INLINE int64_t iter_next_ind(Iter* iter, local_lval valOut);
-NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, local_lval valOut,
-                                       local_lval keyOut);
-NEVER_INLINE int64_t liter_next_ind(Iter*, local_lval, ArrayData*);
-NEVER_INLINE int64_t liter_next_key_ind(Iter*, local_lval, local_lval, ArrayData*);
+NEVER_INLINE int64_t iter_next_ind(Iter* iter, TypedValue* valOut);
+NEVER_INLINE int64_t iter_next_key_ind(Iter* iter, TypedValue* valOut, TypedValue* keyOut);
+NEVER_INLINE int64_t liter_next_ind(Iter*, TypedValue*, ArrayData*);
+NEVER_INLINE int64_t liter_next_key_ind(Iter*, TypedValue*, TypedValue*, ArrayData*);
 
 //////////////////////////////////////////////////////////////////////
 

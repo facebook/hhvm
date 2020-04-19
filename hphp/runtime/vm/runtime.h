@@ -68,11 +68,9 @@ frame_iter(const ActRec* fp, int i) {
           - uintptr_t((i+1) * sizeof(Iter)));
 }
 
-inline tv_lval
+inline TypedValue*
 frame_local(const ActRec* fp, int n) {
-  return tv_lval{
-    (TypedValue*)(uintptr_t(fp) - uintptr_t((n+1) * sizeof(TypedValue)))
-  };
+  return (TypedValue*)(uintptr_t(fp) - uintptr_t((n+1) * sizeof(TypedValue)));
 }
 
 inline Resumable*

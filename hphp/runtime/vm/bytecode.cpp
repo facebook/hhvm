@@ -250,7 +250,7 @@ template<class T> struct imm_array {
 
 }
 
-ALWAYS_INLINE tv_lval decode_local(PC& pc) {
+ALWAYS_INLINE TypedValue* decode_local(PC& pc) {
   auto la = decode_iva(pc);
   assertx(la < vmfp()->m_func->numLocals());
   return frame_local(vmfp(), la);
@@ -3308,15 +3308,14 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
           lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                  : rds::bindStaticMemoCache(func);
         if (!cache.isInit()) return nullptr;
-        if (auto getter = memoCacheGetForKeyCountFP(func,
-                                                    keys.count)) {
-          return getter(*cache, vmfp(), keys.first);
+        auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+        if (auto getter = memoCacheGetForKeyCount(keys.count)) {
+          return getter(*cache, keysBegin);
         }
-        return memoCacheGenericGetFP(
+        return memoCacheGetGeneric(
           *cache,
           GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-          vmfp(),
-          keys.first
+          keysBegin
         );
       }
 
@@ -3353,28 +3352,26 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
           makeSharedOnlyKey(func->getFuncId())
         );
       }
-      if (auto const getter = sharedMemoCacheGetForKeyCountFP(func,
-                                                              keys.count)) {
-        return getter(cache, func->getFuncId(), vmfp(), keys.first);
+      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      if (auto const getter = sharedMemoCacheGetForKeyCount(keys.count)) {
+        return getter(cache, func->getFuncId(), keysBegin);
       }
-      return memoCacheGenericGetFP(
+      return memoCacheGetGeneric(
         cache,
         GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-        vmfp(),
-        keys.first
+        keysBegin
       );
     }
 
     assertx(keys.count > 0);
-    if (auto const getter = memoCacheGetForKeyCountFP(func,
-                                                      keys.count)) {
-      return getter(cache, vmfp(), keys.first);
+    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    if (auto const getter = memoCacheGetForKeyCount(keys.count)) {
+      return getter(cache, keysBegin);
     }
-    return memoCacheGenericGetFP(
+    return memoCacheGetGeneric(
       cache,
       GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-      vmfp(),
-      keys.first
+      keysBegin
     );
   }();
 
@@ -3434,15 +3431,14 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
         lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                : rds::bindStaticMemoCache(func);
       if (!cache.isInit()) cache.initWith(nullptr);
-      if (auto setter = memoCacheSetForKeyCountFP(func,
-                                                  keys.count)) {
-        return setter(*cache, vmfp(), keys.first, val);
+      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      if (auto setter = memoCacheSetForKeyCount(keys.count)) {
+        return setter(*cache, keysBegin, val);
       }
-      return memoCacheGenericSetFP(
+      return memoCacheSetGeneric(
         *cache,
         GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-        vmfp(),
-        keys.first,
+        keysBegin,
         val
       );
     }
@@ -3488,29 +3484,27 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
         val
       );
     }
-    if (auto const setter = sharedMemoCacheSetForKeyCountFP(func,
-                                                            keys.count)) {
-      return setter(cache, func->getFuncId(), vmfp(), keys.first, val);
+    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    if (auto const setter = sharedMemoCacheSetForKeyCount(keys.count)) {
+      return setter(cache, func->getFuncId(), keysBegin, val);
     }
-    return memoCacheGenericSetFP(
+    return memoCacheSetGeneric(
       cache,
       GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-      vmfp(),
-      keys.first,
+      keysBegin,
       val
     );
   }
 
   assertx(keys.count > 0);
-  if (auto const setter = memoCacheSetForKeyCountFP(func,
-                                                    keys.count)) {
-    return setter(cache, vmfp(), keys.first, val);
+  auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+  if (auto const setter = memoCacheSetForKeyCount(keys.count)) {
+    return setter(cache, keysBegin, val);
   }
-  return memoCacheGenericSetFP(
+  return memoCacheSetGeneric(
     cache,
     GenericMemoId{func->getFuncId(), keys.count}.asParam(),
-    vmfp(),
-    keys.first,
+    keysBegin,
     val
   );
 }
@@ -4768,20 +4762,20 @@ void iopFCallBuiltin(
 
 namespace {
 
-void implIterInit(PC& pc, const IterArgs& ita, tv_rval base,
+void implIterInit(PC& pc, const IterArgs& ita, TypedValue* base,
                   PC targetpc, IterTypeOp op) {
-  auto const local = (bool)base;
+  auto const local = base != nullptr;
 
   if (!local) base = vmStack().topC();
-  auto const val = frame_local(vmfp(), ita.valId);
-  auto const key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : tv_lval{};
+  auto val = frame_local(vmfp(), ita.valId);
+  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
-  if (tvIsArrayLike(base)) {
-    auto const arr = base.val().parr;
+  if (isArrayLikeType(type(base))) {
+    auto const arr = base->m_data.parr;
     auto const res = key
-      ? new_iter_array_key_helper(op)(it, arr, local_lval{val}, local_lval{key})
-      : new_iter_array_helper(op)(it, arr, local_lval{val});
+      ? new_iter_array_key_helper(op)(it, arr, val, key)
+      : new_iter_array_helper(op)(it, arr, val);
     if (res == 0) pc = targetpc;
     if (!local) vmStack().discard();
     return;
@@ -4798,27 +4792,26 @@ void implIterInit(PC& pc, const IterArgs& ita, tv_rval base,
   //
 
   if (it->init(base)) {
-    variant_ref{val} = it->val();
-    if (key) variant_ref{key} = it->key();
+    tvAsVariant(val) = it->val();
+    if (key) tvAsVariant(key) = it->key();
   } else {
     pc = targetpc;
   }
   if (!local) vmStack().popC();
 }
 
-void implIterNext(PC& pc, const IterArgs& ita, tv_rval base, PC targetpc) {
-  auto const val = frame_local(vmfp(), ita.valId);
-  auto const key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : tv_lval{};
+void implIterNext(PC& pc, const IterArgs& ita, TypedValue* base, PC targetpc) {
+  auto val = frame_local(vmfp(), ita.valId);
+  auto key = ita.hasKey() ? frame_local(vmfp(), ita.keyId) : nullptr;
   auto it = frame_iter(vmfp(), ita.iterId);
 
   auto const more = [&]{
-    if (base && tvIsArrayLike(base)) {
-      auto const arr = base.val().parr;
-      return key ? liter_next_key_ind(it, local_lval{val}, local_lval{key}, arr)
-                 : liter_next_ind(it, local_lval{val}, arr);
+    if (base != nullptr && isArrayLikeType(base->m_type)) {
+      auto const arr = base->m_data.parr;
+      return key ? liter_next_key_ind(it, val, key, arr)
+                 : liter_next_ind(it, val, arr);
     }
-    return key ? iter_next_key_ind(it, local_lval{val}, local_lval{key})
-               : iter_next_ind(it, local_lval{val});
+    return key ? iter_next_key_ind(it, val, key) : iter_next_ind(it, val);
   }();
 
   if (more) {
@@ -4836,7 +4829,7 @@ OPTBLD_INLINE void iopIterInit(PC& pc, const IterArgs& ita, PC targetpc) {
 }
 
 OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
-                                tv_lval base, PC targetpc) {
+                                TypedValue* base, PC targetpc) {
   auto const op = ita.flags & IterArgs::Flags::BaseConst
     ? IterTypeOp::LocalBaseConst
     : IterTypeOp::LocalBaseMutable;
@@ -4844,11 +4837,11 @@ OPTBLD_INLINE void iopLIterInit(PC& pc, const IterArgs& ita,
 }
 
 OPTBLD_INLINE void iopIterNext(PC& pc, const IterArgs& ita, PC targetpc) {
-  implIterNext(pc, ita, tv_rval{}, targetpc);
+  implIterNext(pc, ita, nullptr, targetpc);
 }
 
 OPTBLD_INLINE void iopLIterNext(PC& pc, const IterArgs& ita,
-                                tv_lval base, PC targetpc) {
+                                TypedValue* base, PC targetpc) {
   implIterNext(pc, ita, base, targetpc);
 }
 

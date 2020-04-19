@@ -88,6 +88,7 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   auto const fp = srcLoc(env, inst, 1).reg();
   auto const iterOff = iterOffset(inst->marker(), extra->iterId);
+  auto const valOff = localOffset(extra->valId);
   profileIterInit(env, inst, isInitK);
 
   auto& v = vmain(env);
@@ -97,9 +98,9 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
     .ssa(0 /* src */);
 
   if (src->isA(TArrLike)) {
-    args.localLval(fp, extra->valId);
+    args.addr(fp, valOff);
     if (isInitK) {
-      args.localLval(fp, extra->keyId);
+      args.addr(fp, localOffset(extra->keyId));
     }
 
     auto const op = [&]{
@@ -118,11 +119,11 @@ void implIterInit(IRLS& env, const IRInstruction* inst) {
   always_assert(!isLInit);
 
   args.immPtr(inst->marker().func()->cls())
-      .localLval(fp, extra->valId);
+      .addr(fp, valOff);
   if (isInitK) {
-    args.localLval(fp, extra->keyId);
+    args.addr(fp, localOffset(extra->keyId));
   } else {
-    args.nullLocalLval();
+    args.imm(0);
   }
 
   auto const target = CallSpec::direct(new_iter_object);
@@ -138,8 +139,8 @@ void implIterNext(IRLS& env, const IRInstruction* inst) {
 
     auto ret = argGroup(env, inst)
       .addr(fp, iterOffset(inst->marker(), extra->iterId))
-      .localLval(fp, extra->valId);
-    if (isNextK) ret.localLval(fp, extra->keyId);
+      .addr(fp, localOffset(extra->valId));
+    if (isNextK) ret.addr(fp, localOffset(extra->keyId));
 
     return ret;
   }();
@@ -159,8 +160,8 @@ void implLIterNext(IRLS& env, const IRInstruction* inst) {
     auto const fp = srcLoc(env, inst, 1).reg();
     auto ret = argGroup(env, inst)
       .addr(fp, iterOffset(inst->marker(), extra->iterId))
-      .localLval(fp, extra->valId);
-    if (isKey) ret.localLval(fp, extra->keyId);
+      .addr(fp, localOffset(extra->valId));
+    if (isKey) ret.addr(fp, localOffset(extra->keyId));
     ret.ssa(0);
     return ret;
   }();

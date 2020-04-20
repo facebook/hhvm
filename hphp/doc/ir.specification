@@ -3080,7 +3080,7 @@ fields of that struct for holding intermediate values.
   is not present, branch. The returned value is not inc-reffed. This op can
   only be used inside a memoize wrapper.
 
-| MemoGetStaticCache<func,keys,T>, DParam(InitCell), S(FramePtr,StkPtr), B
+| MemoGetStaticCache<func,keys,T>, DParam(InitCell), S(FramePtr), B
 
   Perform a lookup on the memo cache associated with the static function
   "func". The keys for the lookup are read from the locals on the frame pointed
@@ -3094,7 +3094,7 @@ fields of that struct for holding intermediate values.
   bound class S0. If the value is not present, branch. The returned value is not
   inc-reffed. This op can only be used inside a memoize wrapper.
 
-| MemoGetLSBCache<func,keys,T>, DParam(InitCell), S(FramePtr,StkPtr) S(Cls), B
+| MemoGetLSBCache<func,keys,T>, DParam(InitCell), S(FramePtr) S(Cls), B
 
   Perform a lookup on the memo cache associated with the static function
   "func" and late static bound class S1. The keys for the lookup are read from
@@ -3108,7 +3108,7 @@ fields of that struct for holding intermediate values.
   present, branch. The returned value is not inc-reffed. This op can only be
   used inside a memoize wrapper.
 
-| MemoGetInstanceCache<func,keys,T>, DParam(InitCell), S(FramePtr,StkPtr) S(Obj), B
+| MemoGetInstanceCache<func,keys,T>, DParam(InitCell), S(FramePtr) S(Obj), B
 
   Perform a lookup on the memo cache at the specified memo slot on S1. The keys
   for the lookup are read from the locals on the frame pointed to by S0 (which
@@ -3121,7 +3121,7 @@ fields of that struct for holding intermediate values.
   the value, overwriting any previous value, with appropriate ref-count
   manipulations. This op can only be used inside a memoize wrapper.
 
-| MemoSetStaticCache<func,keys>, ND, S(FramePtr,StkPtr) S(InitCell), NF
+| MemoSetStaticCache<func,keys>, ND, S(FramePtr) S(InitCell), NF
 
   Store S1 in the memo cache associated with the static function "func". The
   keys for the lookup are read from the locals on the frame pointed to be S0
@@ -3136,7 +3136,7 @@ fields of that struct for holding intermediate values.
   value, with appropriate ref-count manipulations. This op can only be used
   inside a memoize wrapper.
 
-| MemoSetLSBCache<func,keys>, ND, S(FramePtr,StkPtr) S(Cls) S(InitCell), NF
+| MemoSetLSBCache<func,keys>, ND, S(FramePtr) S(Cls) S(InitCell), NF
 
   Store S2 in the memo cache associated with the static function "func" and
   late static bound class S1. The keys for the lookup are read from the
@@ -3150,7 +3150,7 @@ fields of that struct for holding intermediate values.
   overwriting any previous value, with appropriate ref-count
   manipulations. This op can only be used inside a memoize wrapper.
 
-| MemoSetInstanceCache<slot,func,keys>, ND, S(FramePtr,StkPtr) S(Obj) S(InitCell), NF
+| MemoSetInstanceCache<slot,func,keys>, ND, S(FramePtr) S(Obj) S(InitCell), NF
 
   Store S2 in the memo cache at the specified memo slot on S1. Store the value,
   overwriting any previous value, with appropriate ref-count

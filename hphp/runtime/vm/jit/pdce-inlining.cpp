@@ -595,20 +595,24 @@ bool replaceFP(Block* block, SSATmp* oldSrc, SSATmp* newSrc, FPUseMap& map) {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
- * Memory instructions which can be made stack relative if DefInlineFP is pushed
- * past them.
+ * Instructions which only require a FramePtr as a base to calculate
+ * some other memory location. These can use a parent FramePtr, along
+ * with a static offset from that FramePtr to where the old FramePtr
+ * would have begun.
  */
-bool canConvertToStack(IRInstruction& inst) {
-  if (inst.is(MemoGetStaticCache, MemoSetStaticCache,
-              MemoGetLSBCache, MemoSetLSBCache,
-              MemoGetInstanceCache, MemoSetInstanceCache)) {
-    return inst.src(0)->isA(TFramePtr);
-  }
+bool canUseParentFrameWithOffset(IRInstruction& inst) {
   if (inst.is(StLoc)) {
     auto const id = inst.marker().func()->lookupVarId(s_86metadata.get());
-    return inst.extra<StLoc>()->locId != id;
+    if (inst.extra<StLoc>()->locId == id) return false;
+  } else if (!inst.is(LdLoc, CheckLoc, AssertLoc, LdLocAddr,
+                      MemoGetStaticCache, MemoSetStaticCache,
+                      MemoGetLSBCache, MemoSetLSBCache,
+                      MemoGetInstanceCache, MemoSetInstanceCache)) {
+    return false;
   }
-  return inst.is(LdLoc, CheckLoc, AssertLoc, LdLocAddr);
+  // If the parent frame is inside a resumable, there's no static
+  // offset from it to a child frame.
+  return !parentFpIsResumed(inst.src(0));
 }
 
 /*
@@ -915,13 +919,13 @@ bool process(OptimizeContext& ctx, const IdomVector& idoms, Block* block) {
 
 void transformUses(InlineAnalysis& ia,
                    OptimizeContext& ctx,
-                   InstructionSet& uses,
-                   bool& reflow) {
+                   InstructionSet& uses) {
   if (!uses.size()) return;
 
   auto fp = ctx.deadFp;
   auto def = fp->inst();
-  auto parentFp = ctx.deadFp->inst()->src(1);
+  assertx(def->is(DefInlineFP));
+  auto parentFp = def->src(1);
 
   jit::vector<IRInstruction*> vuses(uses.begin(), uses.end());
   std::sort(vuses.begin(), vuses.end(),
@@ -947,13 +951,11 @@ void transformUses(InlineAnalysis& ia,
       ITRACE(3, "Updating child DefInlineFP (fp = {}): {}\n", *newFp, *inst);
       inst->setSrc(1, newFp);
       recordNewUse(ia, ctx, newDef, parentFp);
-    } else if (canConvertToStack(*inst)) {
+    } else if (canUseParentFrameWithOffset(*inst)) {
+      ITRACE(3, "Using parent frame with offset for instruction: {}\n", *inst);
       assertx(ctx.mainBlocks.count(block) != 0);
-      ITRACE(3, "Converting to stack relative instruction: {}\n", *inst);
-      convertToStackInst(*ctx.unit, *inst);
-
-      // We may have change the types of some pointers
-      reflow = true;
+      convertToUseParentFrameWithOffset(*ctx.unit, *inst, parentFp);
+      recordNewUse(ia, ctx, inst, parentFp);
     } else if (canAdjustFrame(*inst)) {
       assertx(ctx.mainBlocks.count(block) != 0);
       ITRACE(3, "Using parent frame for instruction: {}\n", *inst);
@@ -1139,7 +1141,7 @@ void syncCatchTraces(OptimizeContext& ctx, OrderedBlockSet& exitBlocks) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
+bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn) {
   ITRACE(2, "optimize(): InlineReturn = {}\n", *inlineReturn);
   Trace::Indent _i;
 
@@ -1163,7 +1165,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
   auto& uses = env.fpUses[fp];
   auto const hasMainUse = [&](IRInstruction* inst) {
     return ctx.mainBlocks.count(inst->block()) &&
-           !canConvertToStack(*inst) &&
+           !canUseParentFrameWithOffset(*inst) &&
            !canAdjustFrame(*inst);
   };
   auto numMainUses = std::count_if(uses.begin(), uses.end(), hasMainUse);
@@ -1215,7 +1217,7 @@ bool optimize(InlineAnalysis& env, IRInstruction* inlineReturn, bool& reflow) {
 
   // Remaining references to the FP must be from nested DefInlineFP instructions
   // that were already moved off the main execution path
-  transformUses(env, ctx, uses, reflow);
+  transformUses(env, ctx, uses);
 
   // Update BC markers on the main trace to use the parentFP, parentFP relative
   // offsets, and the call SrcKey
@@ -1254,11 +1256,10 @@ void optimizeInlineReturns(IRUnit& unit) {
   ITRACE(2, "splitting critical edges\n");
   splitCriticalEdges(unit);
 
-  bool reflow = false;
   auto ia = analyze(unit);
   for (auto iret : ia.inlineReturns) {
     auto def = iret->src(0)->inst();
-    if (!optimize(ia, iret, reflow)) continue;
+    if (!optimize(ia, iret)) continue;
     assertx(def->is(DefInlineFP));
 
     /*
@@ -1291,8 +1292,6 @@ void optimizeInlineReturns(IRUnit& unit) {
     ITRACE(2, "Removing dead DefInlineFP: {}\n", *def);
     def->block()->erase(def);
   }
-
-  if (reflow) reflowTypes(unit);
 }
 
 }}

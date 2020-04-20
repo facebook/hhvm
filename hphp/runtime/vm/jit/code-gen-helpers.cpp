@@ -617,11 +617,11 @@ int offsetToLocalData(int id) {
   return TVOFF(m_data) - cellsToBytes(id + 1);
 }
 
-Vptr ptrToLocalType(Vreg fp, int id) {
-  return fp[offsetToLocalType(id)];
+Vptr ptrToLocalType(Vreg fp, int id, FPInvOffset fpOffset) {
+  return fp[offsetToLocalType(id) - cellsToBytes(fpOffset.offset)];
 }
-Vptr ptrToLocalData(Vreg fp, int id) {
-  return fp[offsetToLocalData(id)];
+Vptr ptrToLocalData(Vreg fp, int id, FPInvOffset fpOffset) {
+  return fp[offsetToLocalData(id) - cellsToBytes(fpOffset.offset)];
 }
 
 void nextLocal(Vout& v,

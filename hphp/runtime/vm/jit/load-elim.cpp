@@ -588,7 +588,11 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
     switch (inst.op()) {
     case AssertLoc:
       return AliasClass {
-        AFrame { inst.src(0), inst.extra<AssertLoc>()->locId }
+        AFrame {
+          inst.src(0),
+          inst.extra<AssertLoc>()->locId,
+          inst.extra<AssertLoc>()->fpOffset
+        }
       };
     case AssertStk:
       return AliasClass {

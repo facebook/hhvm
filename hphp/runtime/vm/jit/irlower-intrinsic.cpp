@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -343,7 +344,7 @@ void doMemoGetCache(
   IRLS& env,
   const IRInstruction* inst,
   const MemoCacheStaticData *extra,
-  Vreg fpOrSp,
+  Vreg fp,
   HandleT handle
 ) {
   auto& v = vmain(env);
@@ -360,13 +361,10 @@ void doMemoGetCache(
   v << load{getHandleAddr(handle), cachePtr};
 
   auto const addKeysAddr = [&] (ArgGroup& args) {
-    if (extra->stackOffset) {
-      auto const off =
-        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
-      args.addr(fpOrSp, off);
-      return;
-    }
-    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+    );
   };
 
   // Lookup the proper getter function and call it with the pointer to the
@@ -417,7 +415,7 @@ void doMemoSetCache(
   IRLS& env,
   const IRInstruction* inst,
   const MemoCacheStaticData *extra,
-  Vreg fpOrSp,
+  Vreg fp,
   HandleT handle,
   uint32_t valIndex
 ) {
@@ -447,13 +445,10 @@ void doMemoSetCache(
   }();
 
   auto const addKeysAddr = [&] (ArgGroup& args) {
-    if (extra->stackOffset) {
-      auto const off =
-        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
-      args.addr(fpOrSp, off);
-      return;
-    }
-    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+    );
   };
 
   // Lookup the setter and call it with the address of the cache pointer. The
@@ -531,43 +526,43 @@ void cgMemoSetLSBValue(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->asyncEager);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
-  doMemoGetCache(env, inst, extra, fpOrSp, cache.handle());
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  doMemoGetCache(env, inst, extra, fp, cache.handle());
 }
 
 void cgMemoGetLSBCache(IRLS& env, const IRInstruction* inst) {
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetLSBCache>();
   auto const lsbCls = srcLoc(env, inst, 1).reg();
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->asyncEager);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
-  doMemoGetCache(env, inst, extra, fpOrSp, handle);
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  doMemoGetCache(env, inst, extra, fp, handle);
 }
 
 void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->loadAux);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
-  doMemoSetCache(env, inst, extra, fpOrSp, cache.handle(), 1);
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  doMemoSetCache(env, inst, extra, fp, cache.handle(), 1);
 }
 
 void cgMemoSetLSBCache(IRLS& env, const IRInstruction* inst) {
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetLSBCache>();
   auto const lsbCls = srcLoc(env, inst, 1).reg();
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->loadAux);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
-  doMemoSetCache(env, inst, extra, fpOrSp, handle, 2);
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  doMemoSetCache(env, inst, extra, fp, handle, 2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -663,10 +658,10 @@ void cgMemoSetInstanceValue(IRLS& env, const IRInstruction* inst) {
 
 void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetInstanceCache>();
   assertx(!extra->asyncEager);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
 
   // Unlike for the static case, we can have zero keys here (because of shared
   // caches).
@@ -683,13 +678,10 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   fwdJcc(v, env, CC_Z, sf, inst->taken());
 
   auto const addKeysAddr = [&] (ArgGroup& args) {
-    if (extra->stackOffset) {
-      auto const off =
-        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
-      args.addr(fpOrSp, off);
-      return;
-    }
-    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+    );
   };
 
   // Lookup the right getter function and call it with the pointer to the cache.
@@ -768,10 +760,10 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
 
 void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
-  auto const fpOrSp = srcLoc(env, inst, 0).reg();
+  auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetInstanceCache>();
   assertx(!extra->loadAux);
-  assertx(inst->src(0)->isA(TStkPtr) == extra->stackOffset.has_value());
+  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
 
   // Unlike the static case, we can have zero keys here (because of shared
   // caches).
@@ -801,13 +793,10 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   }();
 
   auto const addKeysAddr = [&] (ArgGroup& args) {
-    if (extra->stackOffset) {
-      auto const off =
-        cellsToBytes(extra->stackOffset->offset - extra->keys.count + 1);
-      args.addr(fpOrSp, off);
-      return;
-    }
-    args.addr(fpOrSp, localOffset(extra->keys.first + extra->keys.count - 1));
+    args.addr(
+      fp,
+      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+    );
   };
 
   // Lookup the right setter and call it with the address of the pointer to the

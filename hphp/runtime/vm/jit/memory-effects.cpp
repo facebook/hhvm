@@ -92,7 +92,11 @@ AliasClass pointee(
     if (type <= TMemToFrameCell) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
-          AFrame { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
+          AFrame {
+            sinst->src(0),
+            sinst->extra<LdLocAddr>()->locId,
+            sinst->extra<LdLocAddr>()->fpOffset
+          }
         };
       }
       return AFrameAny;
@@ -1073,7 +1077,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StLoc:
     return PureStore {
-      AFrame { inst.src(0), inst.extra<StLoc>()->locId },
+      AFrame {
+        inst.src(0),
+        inst.extra<StLoc>()->locId,
+        inst.extra<StLoc>()->fpOffset
+      },
       inst.src(1),
       nullptr
     };
@@ -1090,14 +1098,24 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case LdLoc:
-    return PureLoad { AFrame { inst.src(0), inst.extra<LocalId>()->locId } };
+    return PureLoad {
+      AFrame {
+        inst.src(0),
+        inst.extra<LocalId>()->locId,
+        inst.extra<LocalId>()->fpOffset
+      }
+    };
 
   case CheckLoc:
   case LdLocPseudoMain:
     // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
     // PureLoad.
     return may_load_store(
-      AFrame { inst.src(0), inst.extra<LocalId>()->locId },
+      AFrame {
+        inst.src(0),
+        inst.extra<LocalId>()->locId,
+        inst.extra<LocalId>()->fpOffset
+      },
       AEmpty
     );
 
@@ -1281,28 +1299,18 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Reads some (non-zero) set of locals for keys, and reads/writes from the
     // memo cache (which isn't modeled).
     auto const extra = inst.extra<MemoCacheStaticData>();
-    auto const loc = [&] () -> AliasClass {
-      if (inst.src(0)->isA(TFramePtr)) {
-        return AFrame {
-          inst.src(0),
-          AliasIdSet{
-            AliasIdSet::IdRange{
-              extra->keys.first,
-              extra->keys.first + extra->keys.count
-            }
-          }
-        };
-      }
-      assertx(inst.src(0)->isA(TStkPtr));
-      assertx(extra->stackOffset);
-      return AStack {
-        inst.src(0),
-        *extra->stackOffset,
-        static_cast<int32_t>(extra->keys.count)
-      };
-    }();
+    auto const frame = AFrame {
+      inst.src(0),
+      AliasIdSet{
+        AliasIdSet::IdRange{
+          extra->keys.first,
+          extra->keys.first + extra->keys.count
+        }
+      },
+      extra->fpOffset
+    };
 
-    return may_load_store(loc, AEmpty);
+    return may_load_store(frame, AEmpty);
   }
 
   case MemoGetInstanceCache:
@@ -1310,30 +1318,22 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Reads some set of locals for keys, and reads/writes from the memo cache
     // (which isn't modeled).
     auto const extra = inst.extra<MemoCacheInstanceData>();
-    auto const loc = [&]() -> AliasClass {
+    auto const frame = [&]() -> AliasClass {
       // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
       if (extra->keys.count == 0) return AEmpty;
 
-      if (inst.src(0)->isA(TFramePtr)) {
-        return AFrame {
-          inst.src(0),
-          AliasIdSet{
-            AliasIdSet::IdRange{
-              extra->keys.first,
-              extra->keys.first + extra->keys.count
-            }
-          }
-        };
-      }
-      assertx(inst.src(0)->isA(TStkPtr));
-      assertx(extra->stackOffset);
-      return AStack {
+      return AFrame {
         inst.src(0),
-        *extra->stackOffset,
-        static_cast<int32_t>(extra->keys.count)
+        AliasIdSet{
+          AliasIdSet::IdRange{
+            extra->keys.first,
+            extra->keys.first + extra->keys.count
+          }
+        },
+        extra->fpOffset
       };
     }();
-    return may_load_store(loc, AEmpty);
+    return may_load_store(frame, AEmpty);
   }
 
   case MixedArrayGetK:

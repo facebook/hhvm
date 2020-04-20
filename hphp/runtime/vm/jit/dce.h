@@ -41,14 +41,16 @@ void mandatoryDCE(IRUnit&);
 void fullDCE(IRUnit&);
 
 /*
- * Converts an instruction that operates on frame locals in an inlined function
- * to one that operates on the equivalent stack slots in the caller. Useful for
- * eliding DefInlineFP
- *
- * Precondition: inst is LdLoc, StLoc, LdLocAddr, CheckLoc, AssertLoc, or
- * Precondition: inst->src(0)->inst() is DefInlineFP
+ * Converts an instruction that operates on a FramePtr in an inlined
+ * function to one that operates on a parent FramePtr along with a
+ * static offset. This is only allowed for instructions which only
+ * need the FramePtr as a base for some other address calculation (and
+ * does not actually access the ActRec). The parent FramePtr must not
+ * be a resumed frame, and the instruction cannot raise an
+ * error. Useful for eliding DefInlineFP.
  */
-void convertToStackInst(IRUnit& unit, IRInstruction& inst);
+void convertToUseParentFrameWithOffset(IRUnit& unit, IRInstruction& inst,
+                                       SSATmp* parentFp);
 
 /*
  * Converts an InlineReturn instruction to a noop instruction that still models
@@ -69,6 +71,21 @@ void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst);
  * Precondition: fp->inst()->is(DefLabel) && fp->is(TFramePtr)
  */
 IRInstruction* resolveFpDefLabel(const SSATmp* fp);
+
+/*
+ * Checks if the given FramePtr points to a resumed frame, looking
+ * through chains of DefLabels if necessary.
+ */
+bool fpIsResumed(const SSATmp* fp);
+
+/*
+ * Checks if the immediate parent of the given FramePtr points to a
+ * resumed frame, looking through chains of DefLabels if
+ * necessary. Note: if the given FramePtr has no parent (because its
+ * not an inlined frame), this returns false, even if the given
+ * FramePtr itself is a resumed frame.
+ */
+bool parentFpIsResumed(const SSATmp* fp);
 
 //////////////////////////////////////////////////////////////////////
 

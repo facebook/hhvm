@@ -532,7 +532,14 @@ void visit(Local& env, IRInstruction& inst) {
     [&] (IrrelevantEffects) {
       switch (inst.op()) {
       case AssertLoc:
-        load(env, AFrame { inst.src(0), inst.extra<AssertLoc>()->locId });
+        load(
+          env,
+          AFrame {
+            inst.src(0),
+            inst.extra<AssertLoc>()->locId,
+            inst.extra<AssertLoc>()->fpOffset
+          }
+        );
         return;
       case AssertStk:
         load(env, AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 });

@@ -22,6 +22,7 @@
 
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/phys-reg.h"
+#include "hphp/runtime/vm/jit/stack-offsets.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-reg.h"
 
@@ -307,8 +308,8 @@ int offsetToLocalData(int id);
  * Obtain a pointer to a local's type or value. Since the local's
  * index is statically known, this will never emit any code.
  */
-Vptr ptrToLocalType(Vreg fp, int id);
-Vptr ptrToLocalData(Vreg fp, int id);
+Vptr ptrToLocalType(Vreg fp, int id, FPInvOffset fpOffset = FPInvOffset{0});
+Vptr ptrToLocalData(Vreg fp, int id, FPInvOffset fpOffset = FPInvOffset{0});
 
 /*
  * Given (valid) pointers to a local's type and value `typeIn' and

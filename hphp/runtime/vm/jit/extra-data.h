@@ -366,12 +366,23 @@ struct FuncArgTypeData : IRExtraData {
 struct LocalId : IRExtraData {
   explicit LocalId(uint32_t id) : locId(id) {}
 
-  std::string show() const { return folly::to<std::string>(locId); }
+  std::string show() const {
+    if (fpOffset.offset == 0) return folly::to<std::string>(locId);
+    return folly::sformat("{}, FPInvOff {}", locId, fpOffset.offset);
+  }
 
-  bool equals(LocalId o) const { return locId == o.locId; }
-  size_t hash() const { return std::hash<uint32_t>()(locId); }
+  bool equals(LocalId o) const {
+    return locId == o.locId && fpOffset == o.fpOffset;
+  }
+  size_t hash() const {
+    return folly::hash::hash_combine(
+      std::hash<uint32_t>()(locId),
+      std::hash<int32_t>()(fpOffset.offset)
+    );
+  }
 
   uint32_t locId;
+  FPInvOffset fpOffset{0};
 };
 
 /*
@@ -1264,20 +1275,16 @@ struct MemoCacheStaticData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
-    p->stackOffset = stackOffset;
+    p->fpOffset = fpOffset;
     return p;
   }
 
   std::string show() const {
     std::string ret;
-    if (stackOffset) {
-      ret += folly::sformat(
-        "{},IRSPOff {}", func->fullName(), stackOffset->offset
-      );
-    } else {
-      ret += folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
+    ret += folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
+    if (fpOffset.offset != 0) {
+      ret += folly::sformat(",FPInvOffset {}", fpOffset.offset);
     }
-
     if (keys.count > 0) {
       ret += ",<";
       for (auto i = 0; i < keys.count; ++i) {
@@ -1294,8 +1301,7 @@ struct MemoCacheStaticData : IRExtraData {
   const bool* types;
   folly::Optional<bool> asyncEager;
   bool loadAux;
-  // Should only be present if the frame is given by a StkPtr
-  folly::Optional<IRSPRelOffset> stackOffset;
+  FPInvOffset fpOffset{0};
 };
 
 struct MemoCacheInstanceData : IRExtraData {
@@ -1321,18 +1327,19 @@ struct MemoCacheInstanceData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
-    p->stackOffset = stackOffset;
+    p->fpOffset = fpOffset;
     return p;
   }
 
   std::string show() const {
     return folly::sformat(
-      "{},{},{},<{}>,{}",
+      "{},{},{},{}<{}>,{}",
       slot,
       func->fullName(),
-      stackOffset
-        ? folly::sformat("IRSPOff {}", stackOffset->offset)
-        : HPHP::show(keys),
+      HPHP::show(keys),
+      fpOffset.offset != 0
+        ? folly::sformat("FPInvOffset {},", fpOffset.offset)
+        : "",
       [&]{
         using namespace folly::gen;
         return range<uint32_t>(0, keys.count)
@@ -1350,8 +1357,7 @@ struct MemoCacheInstanceData : IRExtraData {
   bool shared;
   folly::Optional<bool> asyncEager;
   bool loadAux;
-  // Should only be present if the frame is given by a StkPtr
-  folly::Optional<IRSPRelOffset> stackOffset;
+  FPInvOffset fpOffset{0};
 };
 
 struct MOpModeData : IRExtraData {

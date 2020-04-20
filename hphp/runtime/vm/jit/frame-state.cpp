@@ -470,6 +470,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case AssertLoc:
   case CheckLoc: {
+    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     auto const id = inst->extra<LocalId>()->locId;
     if (inst->marker().func()->isPseudoMain()) {
       setLocalPredictedType(id, inst->typeParam());
@@ -492,11 +493,13 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StLoc:
+    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     setValue(loc(inst->extra<LocalId>()->locId), inst->src(1));
     break;
 
   case LdLoc:
     {
+      assertx(inst->extra<LdLoc>()->fpOffset.offset == 0);
       auto const id = inst->extra<LdLoc>()->locId;
       refinePredictedTmpType(inst->dst(), cur().locals[id].predictedType);
       setValue(loc(id), inst->dst());
@@ -504,6 +507,7 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StLocPseudoMain:
+    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     setLocalPredictedType(inst->extra<LocalId>()->locId,
                           inst->src(1)->type());
     break;

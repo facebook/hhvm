@@ -183,6 +183,7 @@ SSATmp* IRBuilder::preOptimizeCheckLocation(IRInstruction* inst, Location l) {
 }
 
 SSATmp* IRBuilder::preOptimizeCheckLoc(IRInstruction* inst) {
+  assertx(inst->extra<CheckLoc>()->fpOffset.offset == 0);
   return preOptimizeCheckLocation(inst, loc(inst->extra<CheckLoc>()->locId));
 }
 
@@ -259,6 +260,7 @@ SSATmp* IRBuilder::preOptimizeAssertType(IRInstruction* inst) {
 }
 
 SSATmp* IRBuilder::preOptimizeAssertLoc(IRInstruction* inst) {
+  assertx(inst->extra<AssertLoc>()->fpOffset.offset == 0);
   return preOptimizeAssertLocation(inst, loc(inst->extra<AssertLoc>()->locId));
 }
 
@@ -290,6 +292,7 @@ SSATmp* IRBuilder::preOptimizeLdLocation(IRInstruction* inst, Location l) {
 }
 
 SSATmp* IRBuilder::preOptimizeLdLoc(IRInstruction* inst) {
+  assertx(inst->extra<LdLoc>()->fpOffset.offset == 0);
   return preOptimizeLdLocation(inst, loc(inst->extra<LdLoc>()->locId));
 }
 

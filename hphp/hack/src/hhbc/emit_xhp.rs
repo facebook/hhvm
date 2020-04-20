@@ -96,7 +96,7 @@ pub fn from_attribute_declaration<'a>(
     for xua in xual.iter() {
         match xua.1.as_happly() {
             Some((ast_defs::Id(_, s), hints)) if hints.is_empty() => {
-                let s = string_utils::mangle(string_utils::strip_ns(s).into());
+                let s = string_utils::mangle(string_utils::strip_global_ns(s).into());
                 let arg = mk_expr(Expr_::mk_call(
                     CallType::Cnormal,
                     mk_expr(Expr_::mk_class_const(

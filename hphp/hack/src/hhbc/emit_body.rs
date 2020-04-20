@@ -974,10 +974,13 @@ fn report_error(is_closure_body: bool, scope: &Scope, pos: &Pos) -> Result<()> {
         let s2 = scope.next();
         use ScopeItem as S;
         let (kind, name) = match (s1, s2) {
-            (Some(S::Function(f)), _) => ("function", string_utils::strip_ns(&f.name.1).to_owned()),
+            (Some(S::Function(f)), _) => (
+                "function",
+                string_utils::strip_global_ns(&f.name.1).to_owned(),
+            ),
             (Some(S::Method(m)), Some(S::Class(c))) => (
                 "method",
-                string_utils::strip_ns(&c.name.1).to_owned() + "::" + m.name.1.as_str(),
+                string_utils::strip_global_ns(&c.name.1).to_owned() + "::" + m.name.1.as_str(),
             ),
             _ => return Err(Error::Unrecoverable("Unexpected".into())),
         };

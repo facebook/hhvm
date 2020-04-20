@@ -48,7 +48,7 @@ fn emit_field<'a>(
     if valid_tc_for_record_field(&ti.type_constraint) {
         Ok(RecordField(name.as_str(), ti, otv))
     } else {
-        let name = string_utils::strip_ns(name);
+        let name = string_utils::strip_global_ns(name);
         Err(emit_fatal::raise_fatal_parse(
             &pos,
             format!("Invalid record field type hint for '{}'", name),

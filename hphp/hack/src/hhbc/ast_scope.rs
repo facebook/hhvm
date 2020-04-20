@@ -58,7 +58,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem]> {
-        (1..self.items.len()).rev().map(move |i| &self.items[..i])
+        (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
     pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b>]) -> Option<&'b ast::Class_> {

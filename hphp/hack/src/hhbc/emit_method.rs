@@ -47,7 +47,7 @@ pub fn from_ast<'a>(
         .user_attributes
         .iter()
         .any(|ua| user_attributes::is_memoized(&ua.name.1));
-    let class_name = string_utils::mangle(string_utils::strip_ns(&class.name.1).into());
+    let class_name = string_utils::mangle(string_utils::strip_global_ns(&class.name.1).into());
     let is_closure_body = &method.name.1 == "__invoke" && (class.name.1).starts_with("Closure$");
     let mut attributes =
         emit_attribute::from_asts(emitter, &class.namespace, &method.user_attributes)?;

@@ -663,15 +663,15 @@ fn print_class_special_attributes<W: Write>(
         return Ok(());
     }
 
-    w.write("[")?;
     special_attributes.reverse();
-    concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
-    if !special_attributes.is_empty() && !user_attrs.is_empty() {
-        w.write(" ")?;
-    }
-    print_attributes(ctx, w, &user_attrs)?;
-    w.write("] ")?;
-    Ok(())
+    wrap_by_(w, "[", "] ", |w| {
+        concat_by(w, " ", &special_attributes, |w, a| w.write(a))?;
+        w.write_if(
+            !special_attributes.is_empty() && !user_attrs.is_empty(),
+            " ",
+        )?;
+        print_attributes(ctx, w, &user_attrs)
+    })
 }
 
 fn print_implements<W: Write>(
@@ -2432,7 +2432,7 @@ fn print_expr<W: Write>(
         w.write(adjust_id(env, s))
     }
     fn fmt_class_name<'a>(is_class_constant: bool, id: Cow<'a, str>) -> Cow<'a, str> {
-        let cn: Cow<'a, str> = if is_xhp(&strip_ns(&id)) {
+        let cn: Cow<'a, str> = if is_xhp(strip_global_ns(&id)) {
             escaper::escape(strip_global_ns(&mangle(id.into())))
                 .to_string()
                 .into()

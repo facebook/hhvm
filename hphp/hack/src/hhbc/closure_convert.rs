@@ -305,6 +305,10 @@ impl State {
         self.captured_this = false;
         self.captured_generics = UniqueList::new();
     }
+
+    pub fn set_namespace(&mut self, namespace: RcOc<namespace_env::Env>) {
+        self.namespace = namespace;
+    }
 }
 
 fn total_class_count(env: &Env, st: &State) -> usize {
@@ -414,16 +418,21 @@ fn make_class_name(cd: &Class_) -> String {
     string_utils::mangle_xhp_id(strip_id(&cd.name).to_string())
 }
 
-fn make_scope_name(scope: &ast_scope::Scope) -> String {
+fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> String {
     let mut parts: Vec<String> = vec![];
-
     for sub_scope in scope.iter_subscopes() {
-        match sub_scope.last().unwrap() {
-            ast_scope::ScopeItem::Class(x) => {
+        match sub_scope.last() {
+            None => {
+                return match &ns.name {
+                    None => String::new(),
+                    Some(n) => format!("{}\\", n),
+                };
+            }
+            Some(ast_scope::ScopeItem::Class(x)) => {
                 parts.push(make_class_name(&x));
                 break;
             }
-            ast_scope::ScopeItem::Function(x) => {
+            Some(ast_scope::ScopeItem::Function(x)) => {
                 let fname = strip_id(&x.name);
                 parts.push(
                     ast_scope::Scope::get_subscope_class(sub_scope)
@@ -433,7 +442,7 @@ fn make_scope_name(scope: &ast_scope::Scope) -> String {
                 );
                 break;
             }
-            ast_scope::ScopeItem::Method(x) => {
+            Some(ast_scope::ScopeItem::Method(x)) => {
                 parts.push(strip_id(&x.name).to_string());
                 if !parts.last().map(|x| x.ends_with("::")).unwrap_or(false) {
                     parts.push("::".into())
@@ -448,7 +457,7 @@ fn make_scope_name(scope: &ast_scope::Scope) -> String {
 
 fn make_closure_name(env: &Env, st: &State) -> String {
     let per_fun_idx = st.closure_cnt_per_fun;
-    string_utils::closures::mangle_closure(&make_scope_name(&env.scope), per_fun_idx)
+    string_utils::closures::mangle_closure(&make_scope_name(&st.namespace, &env.scope), per_fun_idx)
 }
 
 fn make_closure(
@@ -1401,7 +1410,10 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
                 new_defs.push(Def::Constant(x));
             }
             Def::Namespace(x) => new_defs.extend_from_slice((*x).1.as_slice()),
-            Def::SetNamespaceEnv(_) => panic!("TODO, can't test yet without porting namespaces.ml"),
+            Def::SetNamespaceEnv(x) => {
+                visitor.state.set_namespace(RcOc::clone(&*x));
+                new_defs.push(Def::SetNamespaceEnv(x))
+            }
             def => new_defs.push(def),
         }
     }

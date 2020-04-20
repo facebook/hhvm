@@ -52,7 +52,7 @@ pub fn from_ast<'a>(
     if !args.is_static && class.final_ && class.kind.is_cabstract() {
         return Err(emit_fatal::raise_fatal_parse(&pos, format!(
             "Class {} contains non-static property declaration and therefore cannot be declared 'abstract final'",
-            string_utils::strip_ns(&class.name.1)
+            string_utils::strip_global_ns(&class.name.1),
         )));
     };
 
@@ -71,7 +71,7 @@ pub fn from_ast<'a>(
             &pos,
             format!(
                 "Invalid property type hint for '{}::${}'",
-                string_utils::strip_ns(&class.name.1),
+                string_utils::strip_global_ns(&class.name.1),
                 prop::Type::to_raw_string(&pid)
             ),
         ));
@@ -92,7 +92,7 @@ pub fn from_ast<'a>(
                 &pos,
                 format!(
                     "<<__LateInit>> property '{}::${}' cannot have an initial value",
-                    string_utils::strip_ns(&class.name.1),
+                    string_utils::strip_global_ns(&class.name.1),
                     prop::Type::to_raw_string(&pid)
                 ),
             ));

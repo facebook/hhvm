@@ -48,6 +48,7 @@ bitflags! {
         const IS_EVALED = 1 << 1;
         const FOR_DEBUGGER_EVAL = 1 << 2;
         const DUMP_SYMBOL_REFS = 1 << 3;
+        const DISABLE_TOPLEVEL_ELABORATION = 1 << 4;
     }
 }
 
@@ -93,7 +94,13 @@ where
     };
 
     let mut parse_result = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
-        parse_file(&opts, stack_limit, &env.filepath, text)
+        parse_file(
+            &opts,
+            stack_limit,
+            &env.filepath,
+            text,
+            !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
+        )
     });
 
     let mut emitter = Emitter::new(opts);
@@ -236,6 +243,7 @@ fn parse_file(
     stack_limit: &StackLimit,
     filepath: &RelativePath,
     text: &[u8],
+    elaborate_namespaces: bool,
 ) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
     let mut aast_env = AastEnv::default();
     aast_env.codegen = true;
@@ -246,6 +254,7 @@ fn parse_file(
     //   (not (Hhbc_options.enable_uniform_variable_syntax hhbc_options))
     aast_env.php5_compat_mode = !opts.php7_flags.contains(Php7Flags::UVS);
     aast_env.keep_errors = false;
+    aast_env.elaborate_namespaces = elaborate_namespaces;
     aast_env.parser_options = create_parser_options(opts);
 
     let source_text = SourceText::make(RcOc::new(filepath.clone()), text);

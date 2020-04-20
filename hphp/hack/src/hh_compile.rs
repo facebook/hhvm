@@ -61,6 +61,10 @@ struct Opts {
     /// The path to an input Hack file (omit if --daemon or --input-file-list)
     #[structopt(name = "FILENAME", required_unless_one = &["daemon", "input-file-list"])]
     filename: Option<PathBuf>,
+
+    /// Disable toplevel definition elaboration
+    #[structopt(long)]
+    disable_toplevel_elaboration: bool,
 }
 
 fn read_file(filepath: &Path) -> anyhow::Result<Vec<u8>> {
@@ -83,11 +87,16 @@ fn process_single_file_impl(
     }
 
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
+    let mut flags = EnvFlags::empty();
+    flags.set(
+        EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
+        opts.disable_toplevel_elaboration,
+    );
     let env = Env {
         filepath: rel_path,
         config_jsons: vec![],
         config_list: vec![],
-        flags: EnvFlags::empty(),
+        flags,
     };
     let mut writer = output_kind.make_writer()?;
     let profile = compile::from_text(env, stack_limit, &mut writer, content)?;

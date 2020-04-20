@@ -282,9 +282,9 @@ fn validate_class_name(ns: &namespace_env::Env, tast::Id(p, class_name): &tast::
             format!(
                 "Cannot use '{}' as class name as it is reserved",
                 if is_reserved_global_name {
-                    name
+                    &name
                 } else {
-                    string_utils::strip_ns(class_name)
+                    string_utils::strip_global_ns(class_name)
                 }
             ),
         ))

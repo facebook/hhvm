@@ -78,14 +78,6 @@ struct MySQL {
                int client_flags,
                int connect_timeout);
 
-#ifdef FACEBOOK
-  bool async_connect(const String& host, int port,
-                     const String& socket,
-                     const String& username,
-                     const String& password,
-                     const String& database);
-#endif
-
   bool reconnect(const String& host, int port,
                  const String& socket,
                  const String& username,
@@ -429,7 +421,6 @@ Variant php_mysql_do_connect_on_link(
     String database,
     int client_flags,
     bool persistent,
-    bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
     const Array* conn_attrs = nullptr
@@ -446,7 +437,6 @@ Variant php_mysql_do_connect(
     const String& database,
     int client_flags,
     bool persistent,
-    bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
     const Array* conn_attrs = nullptr);
@@ -465,14 +455,12 @@ Variant php_mysql_do_connect_with_ssl(
 enum MySQLQueryReturn { FAIL = 0, OK = 1, OK_FETCH_RESULT = 2 };
 MySQLQueryReturn php_mysql_do_query(
     const String& query,
-    const Variant& link_id,
-    bool async_mode);
+    const Variant& link_id);
 Variant php_mysql_get_result(const Variant& link_id, bool use_store);
 Variant php_mysql_do_query_and_get_result(
     const String& query,
     const Variant& link_id,
-    bool use_store,
-    bool async_mode);
+    bool use_store);
 
 #define PHP_MYSQL_ASSOC  1 << 0
 #define PHP_MYSQL_NUM    1 << 1
@@ -483,14 +471,6 @@ Variant php_mysql_fetch_hash(const Resource& result, int result_type);
 Variant mysql_makevalue(const String& data, MYSQL_FIELD *mysql_field);
 Variant mysql_makevalue(const String& data, enum_field_types field_type);
 const char *php_mysql_get_field_name(int field_type);
-
-///////////////////////////////////////////////////////////////////////////////
-
-extern const int64_t k_ASYNC_OP_INVALID;
-extern const int64_t k_ASYNC_OP_UNSET;
-extern const int64_t k_ASYNC_OP_CONNECT;
-extern const int64_t k_ASYNC_OP_QUERY;
-extern const int64_t k_ASYNC_OP_FETCH_ROW;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -10,7 +10,6 @@ HHVM_DEFINE_EXTENSION("mysql"
     mysql_stats.h
   SYSTEMLIB
     ext_mysql.php
-    ext_mysql-async.php
   DEPENDS
     libFolly
     libMySQL

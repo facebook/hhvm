@@ -73,13 +73,6 @@ struct mysqlExtension final : Extension {
 
 extern mysqlExtension s_mysql_extension;
 
-///////////////////////////////////////////////////////////////////////////////
-extern const int64_t k_ASYNC_OP_INVALID;
-extern const int64_t k_ASYNC_OP_UNSET;
-extern const int64_t k_ASYNC_OP_CONNECT;
-extern const int64_t k_ASYNC_OP_QUERY;
-extern const int64_t k_ASYNC_OP_FETCH_ROW;
-
 }
 
 #endif // incl_HPHP_EXT_MYSQL_H_

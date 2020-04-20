@@ -586,7 +586,6 @@ Variant php_mysql_do_connect(
     const String& database,
     int client_flags,
     bool persistent,
-    bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
     const Array* conn_attrs) {
@@ -598,7 +597,6 @@ Variant php_mysql_do_connect(
       database,
       client_flags,
       persistent,
-      async,
       connect_timeout_ms,
       query_timeout_ms,
       conn_attrs);
@@ -630,7 +628,6 @@ Variant php_mysql_do_connect_with_ssl(
       password,
       database,
       client_flags,
-      false,
       false,
       connect_timeout_ms,
       query_timeout_ms,
@@ -712,7 +709,6 @@ Variant php_mysql_do_connect_on_link(
     String database,
     int client_flags,
     bool persistent,
-    bool async,
     int connect_timeout_ms,
     int query_timeout_ms,
     const Array *conn_attrs
@@ -789,24 +785,11 @@ Variant php_mysql_do_connect_on_link(
 #endif
 
   if (mySQL->getState() == MySQLState::INITED) {
-    if (async) {
-#ifdef FACEBOOK
-      if (!mySQL->async_connect(host, port, socket, username, password,
-                                database)) {
-        MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
-        mySQL->setLastError("mysql_real_connect_nonblocking_init");
-        return false;
-      }
-#else
-      throw_not_implemented("mysql_async_connect_start");
-#endif
-    } else {
-      if (!mySQL->connect(host, port, socket, username, password,
-                          database, client_flags, connect_timeout_ms)) {
-        MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
-        mySQL->setLastError("mysql_connect");
-        return false;
-      }
+    if (!mySQL->connect(host, port, socket, username, password,
+                        database, client_flags, connect_timeout_ms)) {
+      MySQL::SetDefaultConn(mySQL); // so we can report errno by mysql_errno()
+      mySQL->setLastError("mysql_connect");
+      return false;
     }
   } else {
     if (!MySQL::IsAllowReconnect()) {
@@ -1219,8 +1202,7 @@ Variant mysql_makevalue(const String& data, enum_field_types field_type) {
   return data;
 }
 
-MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
-                                    bool async_mode) {
+MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id) {
   SYNC_VM_REGS_SCOPED();
   if (mysqlExtension::ReadOnly &&
       same(preg_match("/^((\\/\\*.*?\\*\\/)|\\(|\\s)*select/i", query),
@@ -1315,15 +1297,6 @@ MySQLQueryReturn php_mysql_do_query(const String& query, const Variant& link_id,
     mySQL->m_multi_query = false;
   }
 
-  if (async_mode) {
-#ifdef FACEBOOK
-    mySQL->m_async_query = query.toCppString();
-    return MySQLQueryReturn::OK;
-#else
-    throw_not_implemented("mysql_async_query_start");
-#endif
-  }
-
   if (mysql_real_query(conn, query.data(), query.size())) {
 #ifdef HHVM_MYSQL_TRACE_MODE
     raise_notice("runtime/ext_mysql: failed executing [%s] [%s]",
@@ -1404,8 +1377,8 @@ Variant php_mysql_get_result(const Variant& link_id, bool use_store) {
 }
 
 Variant php_mysql_do_query_and_get_result(const String& query, const Variant& link_id,
-                                          bool use_store, bool async_mode) {
-  MySQLQueryReturn result = php_mysql_do_query(query, link_id, async_mode);
+                                          bool use_store) {
+  MySQLQueryReturn result = php_mysql_do_query(query, link_id);
 
   switch (result) {
     case MySQLQueryReturn::OK_FETCH_RESULT:
@@ -1481,51 +1454,5 @@ Variant php_mysql_fetch_hash(const Resource& result, int result_type) {
   }
   return ret;
 }
-
-/* The mysql_*_nonblocking calls are Facebook extensions to
-   libmysqlclient; for now, protect with an ifdef.  Once open sourced,
-   the client will be detectable via its own ifdef. */
-#ifdef FACEBOOK
-
-const int64_t k_ASYNC_OP_INVALID = 0;
-const int64_t k_ASYNC_OP_UNSET = ASYNC_OP_UNSET;
-const int64_t k_ASYNC_OP_CONNECT = ASYNC_OP_CONNECT;
-const int64_t k_ASYNC_OP_QUERY = ASYNC_OP_QUERY;
-
-bool MySQL::async_connect(const String& host, int port, const String& socket,
-                          const String& username, const String& password,
-                          const String& database) {
-  if (m_conn == nullptr) {
-    m_conn = create_new_conn();
-  }
-  if (RuntimeOption::EnableStats && RuntimeOption::EnableSQLStats) {
-    ServerStats::Log("sql.conn", 1);
-  }
-  IOStatusHelper io("mysql::async_connect", host.data(), port);
-  m_xaction_count = 0;
-  m_host = static_cast<std::string>(host);
-  m_username = static_cast<std::string>(username);
-  m_password = static_cast<std::string>(password);
-  m_socket = static_cast<std::string>(socket);
-  m_database = static_cast<std::string>(database);
-  bool ret = mysql_real_connect_nonblocking_init(
-               m_conn, m_host.c_str(), m_username.c_str(), m_password.c_str(),
-               (m_database.empty() ? nullptr : m_database.c_str()), port,
-               m_socket.empty() ? nullptr : m_socket.c_str(),
-               CLIENT_INTERACTIVE);
-
-  m_state = (ret) ? MySQLState::CONNECTED : MySQLState::CLOSED;
-  return ret;
-}
-
-#else  // FACEBOOK
-
-// Bogus values for non-facebook libmysqlclients.
-const int64_t k_ASYNC_OP_INVALID = 0;
-const int64_t k_ASYNC_OP_UNSET = -1;
-const int64_t k_ASYNC_OP_CONNECT = -2;
-const int64_t k_ASYNC_OP_QUERY = -3;
-
-#endif
 
 }

@@ -51,23 +51,6 @@ const int ASYNC_OP_UNSET = 0;
 const int ASYNC_OP_CONNECT = 0;
 const int ASYNC_OP_QUERY = 0;
 
-<<__PHPStdLib>>
-function mysql_async_connect_start(string $server = "", string $username = "", string $password = "", string $database = "");
-<<__PHPStdLib>>
-function mysql_async_connect_completed($link_identifier);
-<<__PHPStdLib>>
-function mysql_async_query_start(string $query, $link_identifier);
-<<__PHPStdLib>>
-function mysql_async_query_result($link_identifier);
-<<__PHPStdLib>>
-function mysql_async_query_completed(resource $result);
-<<__PHPStdLib>>
-function mysql_async_fetch_array(resource $result, int $result_type = 1);
-<<__PHPStdLib>>
-function mysql_async_wait_actionable($items, float $timeout);
-<<__PHPStdLib>>
-function mysql_async_status($link_identifier);
-
 class AsyncMysqlClient {
   public function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }

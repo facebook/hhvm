@@ -6104,7 +6104,6 @@ static int exif_process_undefined(char **result, char *value,
 
 /* Copy a string in Exif header to a character string returns length of
    allocated buffer if any. */
-#if !EXIF_USE_MBSTRING
 static int exif_process_string_raw(char **result, char *value,
                                    size_t byte_count) {
   /* we cannot use strlcpy - here the problem is that we have to copy NUL
@@ -6121,7 +6120,6 @@ static int exif_process_string_raw(char **result, char *value,
   }
   return 0;
 }
-#endif
 
 /*
  * Copy a string in Exif header to a character string and return length of
@@ -6148,12 +6146,6 @@ static int
 exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
                           char** pszEncoding, char* szValuePtr, int ByteCount) {
   int   a;
-
-#if EXIF_USE_MBSTRING
-  char  *decode;
-  size_t len;
-#endif
-
   *pszEncoding = nullptr;
   /* Copy the comment */
   if (ByteCount>=8) {
@@ -6161,30 +6153,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;
-#if EXIF_USE_MBSTRING
-      /* First try to detect BOM: ZERO WIDTH NOBREAK SPACE (FEFF 16)
-       * since we have no encoding support for the BOM yet we skip that.
-       */
-      if (!memcmp(szValuePtr, "\xFE\xFF", 2)) {
-        decode = "UCS-2BE";
-        szValuePtr = szValuePtr+2;
-        ByteCount -= 2;
-      } else if (!memcmp(szValuePtr, "\xFF\xFE", 2)) {
-        decode = "UCS-2LE";
-        szValuePtr = szValuePtr+2;
-        ByteCount -= 2;
-      } else if (ImageInfo->motorola_intel) {
-        decode = ImageInfo->decode_unicode_be;
-      } else {
-        decode = ImageInfo->decode_unicode_le;
-      }
-      *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                            ImageInfo->encode_unicode,
-                                            decode, &len);
-      return len;
-#else
       return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
     } else
     if (!memcmp(szValuePtr, "ASCII\0\0\0", 8)) {
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
@@ -6196,20 +6165,7 @@ exif_process_user_comment(image_info_type* /*ImageInfo*/, char** pszInfoPtr,
       PHP_STRDUP(*pszEncoding, (const char*)szValuePtr);
       szValuePtr = szValuePtr+8;
       ByteCount -= 8;
-#if EXIF_USE_MBSTRING
-      if (ImageInfo->motorola_intel) {
-        *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                              ImageInfo->encode_jis,
-                                              ImageInfo->decode_jis_be, &len);
-      } else {
-        *pszInfoPtr = php_mb_convert_encoding(szValuePtr, ByteCount,
-                                              ImageInfo->encode_jis,
-                                              ImageInfo->decode_jis_le, &len);
-      }
-      return len;
-#else
       return exif_process_string_raw(pszInfoPtr, szValuePtr, ByteCount);
-#endif
     } else
     if (!memcmp(szValuePtr, "\0\0\0\0\0\0\0\0", 8)) {
       /* 8 NULL means undefined and should be ASCII... */
@@ -6239,16 +6195,9 @@ exif_process_unicode(image_info_type* /*ImageInfo*/, xp_field_type* xp_field,
   xp_field->value = nullptr;
 
   /* Copy the comment */
-#if EXIF_USE_MBSTRING
-  xp_field->value =
-    php_mb_convert_encoding(szValuePtr, ByteCount, ImageInfo->encode_unicode,
-                            ImageInfo->decode_unicode_le, &xp_field->size);
-  return xp_field->size;
-#else
   xp_field->size =
     exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
   return xp_field->size;
-#endif
 }
 
 /* Process nested IFDs directories in Maker Note. */
@@ -8113,8 +8062,6 @@ struct ExifExtension final : Extension {
     HHVM_FE(exif_read_data);
     HHVM_FE(exif_tagname);
     HHVM_FE(exif_thumbnail);
-
-    HHVM_RC_INT(EXIF_USE_MBSTRING, 0);
 
     loadSystemlib();
   }

@@ -15,6 +15,11 @@ function mark_legacy_hack_array<Tk as arraykey,
                                 Tv,
                                 T as KeyedContainer<Tk,Tv>>(T $in): T;
 function is_marked_legacy_hack_array(mixed $in): bool;
+
+<<__Rx>>
+function array_mark_legacy<T>(T $in, bool $recursive = false): T;
+<<__Rx>>
+function is_array_marked_legacy(mixed $in): bool;
 }
 namespace {
 const INF = 0.0;

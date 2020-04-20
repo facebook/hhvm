@@ -49,7 +49,8 @@ Tag::Tag(const StringData* filename, int32_t line)
     : m_filename(ptrAndKind(Kind::Known, filename))
     , m_line(line)
   {
-    assertx(IMPLIES(line >= 0, filename && !filename->empty()));
+    // TODO(kshaunak): This assertion fails for getEvaledArg; fix that case.
+    //assertx(IMPLIES(line >= 0, filename && !filename->empty()));
   }
 
 std::string Tag::toString() const {

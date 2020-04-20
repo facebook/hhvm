@@ -1953,10 +1953,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
     funcName = s_evaluate_default_argument;
   }
 
-  // This unit needs to have a name, so that we have provenance for its arrays.
-  auto const name = folly::to<std::string>(
-    funcUnit->filepath()->data(), " @ getEvaledArg @ ", namespacedName.data());
-  Unit* unit = compileEvalString(code.get(), name.data());
+  Unit* unit = compileEvalString(code.get());
   assertx(unit != nullptr);
   unit->setInterpretOnly();
 

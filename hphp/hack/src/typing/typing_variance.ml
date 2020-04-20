@@ -501,8 +501,8 @@ and type_ ctx root variance env ty =
     type_ ctx root variance env (mk (reason, Tarray (Some ty1, Some ty2)))
   | Tvarray ty ->
     type_ ctx root variance env (mk (reason, Tarray (Some ty, None)))
-  | Tvarray_or_darray (ty1_opt, ty2) ->
-    type_ ctx root variance env (mk (reason, Tarray (ty1_opt, Some ty2)))
+  | Tvarray_or_darray (ty1, ty2) ->
+    type_ ctx root variance env (mk (reason, Tarray (Some ty1, Some ty2)))
   | Tthis ->
     (* Check that 'this' isn't being improperly referenced in a contravariant
      * position.
@@ -778,8 +778,8 @@ and get_typarams ctx root env (ty : decl_ty) =
   | Tdarray (ty1, ty2) ->
     union (get_typarams ctx root env ty1) (get_typarams ctx root env ty2)
   | Tvarray ty -> get_typarams ctx root env ty
-  | Tvarray_or_darray (ty1_opt, ty2) ->
-    union (get_typarams_opt ty1_opt) (get_typarams ctx root env ty2)
+  | Tvarray_or_darray (ty1, ty2) ->
+    union (get_typarams ctx root env ty1) (get_typarams ctx root env ty2)
   | Tpu_access _ ->
     let rec split ty =
       match get_node ty with

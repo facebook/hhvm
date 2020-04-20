@@ -750,8 +750,7 @@ and simplify_subtype_i
                    || String.equal x SN.Collections.cVec
                    || String.equal x SN.Collections.cConstVector ->
               env |> destructure_array elt_type
-            | (_, Tarraykind (AKvarray elt_type)) ->
-              env |> destructure_array elt_type
+            | (_, Tvarray elt_type) -> env |> destructure_array elt_type
             | (_, Tdynamic) -> env |> destructure_array ty_sub
             (* TODO: should remove these any cases *)
             | (r, Tany _) ->
@@ -1078,7 +1077,8 @@ and simplify_subtype_i
            *)
           | ( ( _,
                 ( Tdynamic | Tprim _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
-                | Tobject | Tclass _ | Tarraykind _ | Tany _ | Terr | Tpu _
+                | Tobject | Tclass _ | Tvarray _ | Tdarray _
+                | Tvarray_or_darray _ | Tany _ | Terr | Tpu _
                 | Tpu_type_access _ ) ),
               _ ) ->
             simplify_subtype ~subtype_env ~this_ty lty_sub arg_ty_super env)
@@ -1225,7 +1225,8 @@ and simplify_subtype_i
                   ( Tint | Tbool | Tfloat | Tstring | Tresource | Tnum
                   | Tarraykey | Tnoreturn | Tatom _ ))
             | Tnonnull | Tfun _ | Ttuple _ | Tshape _ | Tobject | Tclass _
-            | Tarraykind _ | Tpu _ | Tpu_type_access _ ) ) ->
+            | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tpu _
+            | Tpu_type_access _ ) ) ->
           valid ()
         | _ -> default_subtype env))
     | (_, Tdynamic) ->
@@ -1436,33 +1437,31 @@ and simplify_subtype_i
             (ShapeSet.of_list (ShapeMap.keys fdm_sub @ ShapeMap.keys fdm_super))
             (env, TL.valid)
         | _ -> default_subtype env))
-    | (_, Tarraykind ak_super) ->
+    | (_, (Tvarray _ | Tdarray _ | Tvarray_or_darray _)) ->
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
-        (match deref lty with
-        | (r_sub, Tarraykind ak_sub) ->
-          begin
-            match (ak_sub, ak_super) with
-            | (AKvarray ty_sub, AKvarray ty_super) ->
-              simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
-            | ( AKvarray_or_darray (tk_sub, tv_sub),
-                AKvarray_or_darray (tk_super, tv_super) )
-            | (AKdarray (tk_sub, tv_sub), AKdarray (tk_super, tv_super))
-            | ( AKdarray (tk_sub, tv_sub),
-                AKvarray_or_darray (tk_super, tv_super) ) ->
-              env
-              |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-              &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-            | (AKvarray tv_sub, AKvarray_or_darray (tk_super, tv_super)) ->
-              let pos = Reason.to_pos r_sub in
-              let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
-              env
-              |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
-              &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
-            (* any other array subtyping is unsatisfiable *)
-            | _ -> invalid ()
-          end
+        (match (get_node lty, get_node ty_super) with
+        | (Tvarray ty_sub, Tvarray ty_super) ->
+          simplify_subtype ~subtype_env ~this_ty ty_sub ty_super env
+        | ( Tvarray_or_darray (tk_sub, tv_sub),
+            Tvarray_or_darray (tk_super, tv_super) )
+        | (Tdarray (tk_sub, tv_sub), Tdarray (tk_super, tv_super))
+        | (Tdarray (tk_sub, tv_sub), Tvarray_or_darray (tk_super, tv_super)) ->
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | (Tvarray tv_sub, Tvarray_or_darray (tk_super, tv_super)) ->
+          let pos = get_pos lty in
+          let tk_sub = MakeType.int (Reason.Ridx_vector pos) in
+          env
+          |> simplify_subtype ~subtype_env ~this_ty tk_sub tk_super
+          &&& simplify_subtype ~subtype_env ~this_ty tv_sub tv_super
+        | (Tvarray _, Tdarray _)
+        | (Tdarray _, Tvarray _)
+        | (Tvarray_or_darray _, Tdarray _)
+        | (Tvarray_or_darray _, Tvarray _) ->
+          invalid ()
         | _ -> default_subtype env))
     | (_, Tnewtype (name_super, tyl_super, _)) ->
       (match ety_sub with
@@ -1521,7 +1520,7 @@ and simplify_subtype_i
                || String.equal class_name SN.Classes.cXHPChild ->
           valid ()
         | ( _,
-            ( Tarraykind _
+            ( Tvarray _ | Tdarray _ | Tvarray_or_darray _
             | Tprim Nast.(Tstring | Tarraykey | Tint | Tfloat | Tnum) ) )
           when String.equal class_name SN.Classes.cXHPChild
                && equal_exact exact_super Nonexact ->
@@ -1691,29 +1690,25 @@ and simplify_subtype_i
                       env
                   else
                     invalid ()))
-        | (r_sub, Tarraykind akind) ->
+        | (r_sub, (Tvarray tv | Tdarray (_, tv) | Tvarray_or_darray (_, tv))) ->
           (match (exact_super, tyl_super) with
           | (Nonexact, [tv_super])
             when String.equal class_name SN.Collections.cTraversable
                  || String.equal class_name SN.Rx.cTraversable
                  || String.equal class_name SN.Collections.cContainer ->
-            (match akind with
             (* vec<tv> <: Traversable<tv_super>
              * iff tv <: tv_super
              * Likewise for vec<tv> <: Container<tv_super>
              *          and map<_,tv> <: Traversable<tv_super>
              *          and map<_,tv> <: Container<tv_super>
              *)
-            | AKvarray tv
-            | AKdarray (_, tv)
-            | AKvarray_or_darray (_, tv) ->
-              simplify_subtype ~subtype_env ~this_ty tv tv_super env)
+            simplify_subtype ~subtype_env ~this_ty tv tv_super env
           | (Nonexact, [tk_super; tv_super])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Rx.cKeyedTraversable
                  || String.equal class_name SN.Collections.cKeyedContainer ->
-            (match akind with
-            | AKvarray tv ->
+            (match get_node ty_sub with
+            | Tvarray _ ->
               env
               |> simplify_subtype
                    ~subtype_env
@@ -1721,11 +1716,12 @@ and simplify_subtype_i
                    (MakeType.int r_sub)
                    tk_super
               &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
-            | AKvarray_or_darray (tk, tv)
-            | AKdarray (tk, tv) ->
+            | Tvarray_or_darray (tk, _)
+            | Tdarray (tk, _) ->
               env
               |> simplify_subtype ~subtype_env ~this_ty tk tk_super
-              &&& simplify_subtype ~subtype_env ~this_ty tv tv_super)
+              &&& simplify_subtype ~subtype_env ~this_ty tv tv_super
+            | _ -> default_subtype env)
           | (Nonexact, [])
             when String.equal class_name SN.Collections.cKeyedTraversable
                  || String.equal class_name SN.Rx.cKeyedTraversable

@@ -155,7 +155,8 @@ Parsed decls:
             { et_enforced = false;
               et_type =
               (Rhint (root|array_typehints.php line 31, characters 17-32),
-               (Tvarray_or_darray None,
+               (Tvarray_or_darray
+                  (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
                   (Rnone (| line 0, characters 0-0), Tany)))
               };
             ft_flags =
@@ -174,7 +175,8 @@ Parsed decls:
             { et_enforced = false;
               et_type =
               (Rhint (root|array_typehints.php line 35, characters 17-37),
-               (Tvarray_or_darray None,
+               (Tvarray_or_darray
+                  (Rnone (| line 0, characters 0-0), (Tprim Tarraykey)),
                   (Rhint (root|array_typehints.php line 35, characters 34-36),
                    (Tprim Tint))))
               };
@@ -195,8 +197,8 @@ Parsed decls:
               et_type =
               (Rhint (root|array_typehints.php line 39, characters 17-45),
                (Tvarray_or_darray
-                  (Some (Rhint (root|array_typehints.php line 39, characters 34-36),
-                         (Tprim Tint))),
+                  (Rhint (root|array_typehints.php line 39, characters 34-36),
+                   (Tprim Tint)),
                   (Rhint (root|array_typehints.php line 39, characters 39-44),
                    (Tprim Tstring))))
               };

@@ -157,6 +157,10 @@ fn tany() -> Ty {
     Ty(Reason::Rnone, Box::new(Ty_::Tany(TanySentinel)))
 }
 
+fn tarraykey() -> Ty {
+    Ty(Reason::Rnone, Box::new(Ty_::Tprim(aast::Tprim::Tarraykey)))
+}
+
 #[derive(Clone, Debug)]
 struct NamespaceInfo {
     name: String,
@@ -929,15 +933,13 @@ impl DirectDeclSmartConstructors<'_> {
                         match id.1.trim_start_matches("\\") {
                             "varray_or_darray" => match inner_types.as_slice() {
                                 [tk, tv] => Ty_::TvarrayOrDarray(
-                                    Some(
-                                        self.node_to_ty(tk, type_variables)
-                                            .unwrap_or_else(|_| tany()),
-                                    ),
+                                    self.node_to_ty(tk, type_variables)
+                                        .unwrap_or_else(|_| tany()),
                                     self.node_to_ty(tv, type_variables)
                                         .unwrap_or_else(|_| tany()),
                                 ),
                                 [tv] => Ty_::TvarrayOrDarray(
-                                    None,
+                                    tarraykey(),
                                     self.node_to_ty(tv, type_variables)
                                         .unwrap_or_else(|_| tany()),
                                 ),
@@ -1165,7 +1167,7 @@ impl DirectDeclSmartConstructors<'_> {
                         "nothing" => Ty_::Tunion(Vec::new()),
                         "nonnull" => Ty_::Tnonnull,
                         "dynamic" => Ty_::Tdynamic,
-                        "varray_or_darray" => Ty_::TvarrayOrDarray(None, tany()),
+                        "varray_or_darray" => Ty_::TvarrayOrDarray(tarraykey(), tany()),
                         _ => {
                             let name = self
                                 .state

@@ -49,7 +49,9 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
       (env, MakeType.dynamic r)
     | Terr
     | Tany _
-    | Tarraykind _
+    | Tvarray _
+    | Tdarray _
+    | Tvarray_or_darray _
     | Tnonnull
     | Tprim _
     | Tvar _
@@ -71,7 +73,9 @@ let overload_extract_from_awaitable env ~p opt_ty_maybe =
         | Terr -> MakeType.err r
         | Tdynamic -> MakeType.dynamic r
         | Tnonnull
-        | Tarraykind _
+        | Tvarray _
+        | Tdarray _
+        | Tvarray_or_darray _
         | Tprim _
         | Tvar _
         | Tfun _

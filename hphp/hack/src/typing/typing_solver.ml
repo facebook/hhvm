@@ -131,21 +131,17 @@ let rec freshen_inside_ty env ty =
         let (env, tyl) = freshen_tparams env variancel tyl in
         (env, mk (r, Tclass ((p, cid), e, tyl)))
     end
-  | Tarraykind ak ->
-    begin
-      match ak with
-      | AKvarray ty ->
-        let (env, ty) = freshen_ty env ty in
-        (env, mk (r, Tarraykind (AKvarray ty)))
-      | AKvarray_or_darray (ty1, ty2) ->
-        let (env, ty1) = freshen_ty env ty1 in
-        let (env, ty2) = freshen_ty env ty2 in
-        (env, mk (r, Tarraykind (AKvarray_or_darray (ty1, ty2))))
-      | AKdarray (ty1, ty2) ->
-        let (env, ty1) = freshen_ty env ty1 in
-        let (env, ty2) = freshen_ty env ty2 in
-        (env, mk (r, Tarraykind (AKdarray (ty1, ty2))))
-    end
+  | Tvarray ty ->
+    let (env, ty) = freshen_ty env ty in
+    (env, mk (r, Tvarray ty))
+  | Tvarray_or_darray (ty1, ty2) ->
+    let (env, ty1) = freshen_ty env ty1 in
+    let (env, ty2) = freshen_ty env ty2 in
+    (env, mk (r, Tvarray_or_darray (ty1, ty2)))
+  | Tdarray (ty1, ty2) ->
+    let (env, ty1) = freshen_ty env ty1 in
+    let (env, ty2) = freshen_ty env ty2 in
+    (env, mk (r, Tdarray (ty1, ty2)))
   | Tvar _ -> default ()
   | Tpu _
   | Tpu_type_access _ ->
@@ -295,9 +291,9 @@ let ty_equal_shallow env ty1 ty2 =
   | (Tdynamic, Tdynamic)
   | (Tobject, Tobject)
   | (Ttuple _, Ttuple _)
-  | (Tarraykind (AKvarray _), Tarraykind (AKvarray _))
-  | (Tarraykind (AKvarray_or_darray _), Tarraykind (AKvarray_or_darray _))
-  | (Tarraykind (AKdarray _), Tarraykind (AKdarray _)) ->
+  | (Tvarray _, Tvarray _)
+  | (Tvarray_or_darray _, Tvarray_or_darray _)
+  | (Tdarray _, Tdarray _) ->
     true
   | (Tprim p1, Tprim p2) -> Aast_defs.equal_tprim p1 p2
   | (Tclass (x_sub, exact_sub, _), Tclass (x_super, exact_super, _)) ->
@@ -548,8 +544,9 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
       List.fold tyl ~init:(env, tyvars) ~f:find_tyvars
     | ( _,
         ( Terr | Tany _ | Tdynamic | Tnonnull | Tprim _ | Tclass _ | Tobject
-        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Ttuple _
-        | Tshape _ | Tfun _ | Tpu _ | Tpu_type_access _ ) ) ->
+        | Tgeneric _ | Tnewtype _ | Tdependent _ | Tvarray _ | Tdarray _
+        | Tvarray_or_darray _ | Ttuple _ | Tshape _ | Tfun _ | Tpu _
+        | Tpu_type_access _ ) ) ->
       (env, tyvars)
   in
   find_tyvars (env, []) ty

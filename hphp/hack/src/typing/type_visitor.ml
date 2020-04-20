@@ -27,8 +27,11 @@ class type ['a] decl_type_visitor_type =
 
     method on_tarray : 'a -> Reason.t -> decl_ty option -> decl_ty option -> 'a
 
-    method on_tvarray_or_darray :
-      'a -> Reason.t -> decl_ty option -> decl_ty -> 'a
+    method on_tvarray_or_darray : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
+
+    method on_tvarray : 'a -> Reason.t -> decl_ty -> 'a
+
+    method on_tdarray : 'a -> Reason.t -> decl_ty -> decl_ty -> 'a
 
     method on_tgeneric : 'a -> Reason.t -> string -> 'a
 
@@ -81,8 +84,14 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let acc = Option.fold ~f:this#on_type ~init:acc ty2_opt in
       acc
 
-    method on_tvarray_or_darray acc _ ty1_opt ty2 =
-      let acc = Option.fold ~f:this#on_type ~init:acc ty1_opt in
+    method on_tvarray_or_darray acc _ ty1 ty2 =
+      let acc = this#on_type acc ty1 in
+      this#on_type acc ty2
+
+    method on_tvarray acc _ ty = this#on_type acc ty
+
+    method on_tdarray acc _ ty1 ty2 =
+      let acc = this#on_type acc ty1 in
       this#on_type acc ty2
 
     method on_tgeneric acc _ _ = acc
@@ -141,8 +150,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tdarray (ty1, ty2) ->
         this#on_type acc (mk (r, Tarray (Some ty1, Some ty2)))
       | Tvarray ty -> this#on_type acc (mk (r, Tarray (Some ty, None)))
-      | Tvarray_or_darray (ty1_opt, ty2) ->
-        this#on_tvarray_or_darray acc r ty1_opt ty2
+      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
       | Tgeneric s -> this#on_tgeneric acc r s
       | Toption ty -> this#on_toption acc r ty
       | Tlike ty -> this#on_tlike acc r ty
@@ -197,6 +205,16 @@ class type ['a] locl_type_visitor_type =
 
     method on_tobject : 'a -> Reason.t -> 'a
 
+    method on_tpu : 'a -> Reason.t -> locl_ty -> Aast.sid -> 'a
+
+    method on_tpu_type_access : 'a -> Reason.t -> Aast.sid -> Aast.sid -> 'a
+
+    method on_tvarray_or_darray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
+
+    method on_tvarray : 'a -> Reason.t -> locl_ty -> 'a
+
+    method on_tdarray : 'a -> Reason.t -> locl_ty -> locl_ty -> 'a
+
     method on_tshape :
       'a ->
       Reason.t ->
@@ -205,12 +223,6 @@ class type ['a] locl_type_visitor_type =
       'a
 
     method on_tclass : 'a -> Reason.t -> Aast.sid -> exact -> locl_ty list -> 'a
-
-    method on_tarraykind : 'a -> Reason.t -> array_kind -> 'a
-
-    method on_tpu : 'a -> Reason.t -> locl_ty -> Aast.sid -> 'a
-
-    method on_tpu_type_access : 'a -> Reason.t -> Aast.sid -> Aast.sid -> 'a
 
     method on_tlist : 'a -> Reason.t -> locl_ty list -> 'a
   end
@@ -276,15 +288,17 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
     method on_tclass acc _ _ _ tyl =
       List.fold_left tyl ~f:this#on_type ~init:acc
 
-    method on_tarraykind acc _ array_kind =
-      match array_kind with
-      | AKvarray ty -> this#on_type acc ty
-      | AKdarray (tk, tv)
-      | AKvarray_or_darray (tk, tv) ->
-        let acc = this#on_type acc tk in
-        this#on_type acc tv
-
     method on_tlist acc _ tyl = List.fold_left tyl ~f:this#on_type ~init:acc
+
+    method on_tvarray_or_darray acc _ ty1 ty2 =
+      let acc = this#on_type acc ty1 in
+      this#on_type acc ty2
+
+    method on_tvarray acc _ ty = this#on_type acc ty
+
+    method on_tdarray acc _ ty1 ty2 =
+      let acc = this#on_type acc ty1 in
+      this#on_type acc ty2
 
     method on_tpu acc _ base _ = this#on_type acc base
 
@@ -310,7 +324,9 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Tobject -> this#on_tobject acc r
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
       | Tclass (cls, exact, tyl) -> this#on_tclass acc r cls exact tyl
-      | Tarraykind akind -> this#on_tarraykind acc r akind
+      | Tvarray ty -> this#on_tvarray acc r ty
+      | Tdarray (ty1, ty2) -> this#on_tdarray acc r ty1 ty2
+      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray acc r ty1 ty2
       | Tpu (base, enum) -> this#on_tpu acc r base enum
       | Tpu_type_access (member, tyname) ->
         this#on_tpu_type_access acc r member tyname

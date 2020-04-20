@@ -97,7 +97,9 @@ let rec check_exhaustiveness_ env pos ty caselist enum_coming_from_unresolved =
   | Terr
   | Tany _
   | Tnonnull
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Tclass _
   | Toption _
   | Tprim _

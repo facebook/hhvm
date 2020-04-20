@@ -583,20 +583,11 @@ module HasTany : sig
 
   val check_why : locl_ty -> Reason.t option
 end = struct
-  let merge x y = Option.merge x y (fun x _ -> x)
-
   let visitor =
-    object (this)
+    object (_this)
       inherit [Reason.t option] Type_visitor.locl_type_visitor
 
       method! on_tany _ r = Some r
-
-      method! on_tarraykind acc _r akind =
-        match akind with
-        | AKvarray ty -> this#on_type acc ty
-        | AKdarray (tk, tv)
-        | AKvarray_or_darray (tk, tv) ->
-          merge (this#on_type acc tk) (this#on_type acc tv)
     end
 
   let check_why ty = visitor#on_type None ty
@@ -690,7 +681,9 @@ let rec class_get_pu_ env cty name =
     | _ -> (env, None))
   | Tvar _
   | Tnonnull
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Toption _
   | Tprim _
   | Tfun _

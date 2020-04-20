@@ -133,9 +133,9 @@ let validator =
       else
         this#invalid acc r "an array type"
 
-    method! on_tvarray_or_darray acc r tk_opt tv =
+    method! on_tvarray_or_darray acc r tk tv =
       if acc.like_context then
-        let acc = Option.fold ~f:this#on_type ~init:acc tk_opt in
+        let acc = this#on_type acc tk in
         this#on_type acc tv
       else
         this#invalid acc r "an array type"

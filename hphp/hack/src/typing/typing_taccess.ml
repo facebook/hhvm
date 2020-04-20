@@ -316,7 +316,9 @@ let rec expand ctx env root =
   | Tprim _
   | Tshape _
   | Ttuple _
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Tfun _
   | Tdynamic
   | Toption _ ->

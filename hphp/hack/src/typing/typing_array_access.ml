@@ -77,7 +77,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
     let ty = MakeType.keyed_container r index_ty element_ty in
     (env, Some ty)
   (* The same is true of PHP arrays *)
-  | (r, Tarraykind _) ->
+  | (r, (Tvarray _ | Tdarray _ | Tvarray_or_darray _)) ->
     let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
     let (env, index_ty) = Env.fresh_invariant_type_var env expr_pos in
     let ty = MakeType.keyed_container r index_ty element_ty in
@@ -243,7 +243,7 @@ let rec array_get
               Errors.index_type_mismatch
       in
       match ety1_ with
-      | Tarraykind (AKvarray ty) ->
+      | Tvarray ty ->
         let ty1 = MakeType.int (Reason.Ridx (fst e2, r)) in
         let env = type_index env expr_pos ty2 ty1 Reason.index_array in
         (env, ty)
@@ -336,7 +336,8 @@ let rec array_get
              && ( String.equal cn SN.Collections.cConstVector
                 || String.equal cn SN.Collections.cImmVector ) ->
         error_const_mutation env expr_pos ty1
-      | Tarraykind (AKdarray (_k, v) | AKvarray_or_darray (_k, v)) ->
+      | Tdarray (_k, v)
+      | Tvarray_or_darray (_k, v) ->
         let env = check_arraykey_index env expr_pos ty1 ty2 in
         (env, v)
       | Terr -> (env, err_witness env expr_pos)
@@ -508,9 +509,9 @@ let widen_for_assign_array_append ~expr_pos env ty =
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
-  | (r, Tarraykind (AKvarray _)) ->
+  | (r, Tvarray _) ->
     let (env, element_ty) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (mk (r, Tarraykind (AKvarray element_ty))))
+    (env, Some (mk (r, Tvarray element_ty)))
   | _ -> (env, None)
 
 let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
@@ -545,9 +546,9 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
              || String.equal n SN.Collections.cKeyset ->
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tclass (id, e, [tv'])))
-      | (r, Tarraykind (AKvarray tv)) ->
+      | (r, Tvarray tv) ->
         let (env, tv') = Typing_union.union env tv ty2 in
-        (env, mk (r, Tarraykind (AKvarray tv')))
+        (env, mk (r, Tvarray tv'))
       | (_, Tdynamic) -> (env, ty1)
       | (_, Tobject) ->
         if Partial.should_check_error (Env.get_mode env) 4006 then
@@ -555,10 +556,10 @@ let assign_array_append ~array_pos ~expr_pos ur env ty1 ty2 =
         else
           (env, ty1)
       | ( _,
-          ( Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tvar _ | Tfun _
-          | Tclass _ | Ttuple _ | Tshape _ | Tunion _ | Tintersection _
-          | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _ | Tpu_type_access _
-            ) ) ->
+          ( Tnonnull | Tdarray _ | Tvarray_or_darray _ | Toption _ | Tprim _
+          | Tvar _ | Tfun _ | Tclass _ | Ttuple _ | Tshape _ | Tunion _
+          | Tintersection _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tpu _
+          | Tpu_type_access _ ) ) ->
         error_assign_array_append env expr_pos ty1)
 
 let widen_for_assign_array_get ~expr_pos index_expr env ty =
@@ -583,17 +584,17 @@ let widen_for_assign_array_get ~expr_pos index_expr env ty =
     in
     let ty = mk (r, Tclass (id, Nonexact, params)) in
     (env, Some ty)
-  | (r, Tarraykind (AKvarray _)) ->
+  | (r, Tvarray _) ->
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (mk (r, Tarraykind (AKvarray tv))))
-  | (r, Tarraykind (AKvarray_or_darray _)) ->
+    (env, Some (mk (r, Tvarray tv)))
+  | (r, Tvarray_or_darray _) ->
     let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (mk (r, Tarraykind (AKvarray_or_darray (tk, tv)))))
-  | (r, Tarraykind (AKdarray _)) ->
+    (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
+  | (r, Tdarray _) ->
     let (env, tk) = Env.fresh_invariant_type_var env expr_pos in
     let (env, tv) = Env.fresh_invariant_type_var env expr_pos in
-    (env, Some (mk (r, Tarraykind (AKdarray (tk, tv)))))
+    (env, Some (mk (r, Tdarray (tk, tv))))
   | (r, Ttuple tyl) ->
     (* requires integer literal *)
     begin
@@ -655,11 +656,11 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       in
       let error = (env, ety1) in
       match ety1_ with
-      | Tarraykind (AKvarray tv) ->
+      | Tvarray tv ->
         let tk = MakeType.int (Reason.Ridx (fst key, r)) in
         let env = type_index env expr_pos tkey tk Reason.index_array in
         let (env, tv') = Typing_union.union env tv ty2 in
-        (env, mk (r, Tarraykind (AKvarray tv')))
+        (env, mk (r, Tvarray tv'))
       | Tclass (((_, cn) as id), _, argl)
         when String.equal cn SN.Collections.cVector ->
         let tv =
@@ -732,16 +733,16 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           (Reason.to_pos r)
           (Typing_print.error env ety1);
         error
-      | Tarraykind (AKdarray (tk, tv)) ->
+      | Tdarray (tk, tv) ->
         let env = check_arraykey_index env expr_pos ety1 tkey in
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
-        (env, mk (r, Tarraykind (AKdarray (tk', tv'))))
-      | Tarraykind (AKvarray_or_darray (tk, tv)) ->
+        (env, mk (r, Tdarray (tk', tv')))
+      | Tvarray_or_darray (tk, tv) ->
         let env = check_arraykey_index env expr_pos ety1 tkey in
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
-        (env, mk (r, Tarraykind (AKvarray_or_darray (tk', tv'))))
+        (env, mk (r, Tvarray_or_darray (tk', tv')))
       | Terr -> error
       | Tdynamic -> (env, ety1)
       | Tany _ -> (env, ety1)

@@ -80,7 +80,9 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
       | _ -> (env, [], [cty])
     end
   | Tnonnull
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Toption _
   | Tprim _
   | Tvar _

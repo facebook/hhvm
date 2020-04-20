@@ -153,33 +153,28 @@ let rec localize ~ety_env env (dty : decl_ty) =
           else
             (env, mk (r, TUtils.tany env))
         in
-        (env, Tarraykind (AKvarray_or_darray (tk, tv)))
+        (env, Tvarray_or_darray (tk, tv))
       | (Some tv, None) ->
         let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-        (env, Tarraykind (AKvarray tv))
+        (env, Tvarray tv)
       | (Some tk, Some tv) ->
         let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
         let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-        (env, Tarraykind (AKdarray (tk, tv)))
+        (env, Tdarray (tk, tv))
       | (None, Some _) -> failwith "Invalid array declaration type"
     in
     (env, mk (r, ty))
   | (r, Tdarray (tk, tv)) ->
     let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
-    let ty = Tarraykind (AKdarray (tk, tv)) in
+    let ty = Tdarray (tk, tv) in
     (env, mk (r, ty))
   | (r, Tvarray tv) ->
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:0 in
-    let ty = Tarraykind (AKvarray tv) in
+    let ty = Tvarray tv in
     (env, mk (r, ty))
   | (r, Tvarray_or_darray (tk, tv)) ->
-    let (env, tk) =
-      match tk with
-      | Some tk -> tvar_or_localize ~ety_env env r tk ~i:0
-      | None ->
-        (env, MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)))
-    in
+    let (env, tk) = tvar_or_localize ~ety_env env r tk ~i:0 in
     let (env, tv) = tvar_or_localize ~ety_env env r tv ~i:1 in
     (env, MakeType.varray_or_darray r tk tv)
   | (r, Tgeneric x) ->

@@ -110,12 +110,7 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
     Format.fprintf fmt "@])"
   | Tvarray_or_darray (a0, a1) ->
     Format.fprintf fmt "(@[<2>Tvarray_or_darray@ ";
-    (match a0 with
-    | None -> Format.pp_print_string fmt "None"
-    | Some x ->
-      Format.pp_print_string fmt "(Some ";
-      pp_ty fmt x;
-      Format.pp_print_string fmt ")");
+    pp_ty fmt a0;
     Format.fprintf fmt ",@ ";
     pp_ty fmt a1;
     Format.fprintf fmt "@])"
@@ -203,10 +198,6 @@ and pp_ty_ : type a. Format.formatter -> a ty_ -> unit =
          a1);
     Format.fprintf fmt "@,]@]";
     Format.fprintf fmt "@,))@]"
-  | Tarraykind a0 ->
-    Format.fprintf fmt "(@[<2>Tarraykind@ ";
-    pp_array_kind fmt a0;
-    Format.fprintf fmt "@])"
   | Tpu (base, enum) ->
     Format.fprintf fmt "(@[<2>Tpu (%a@,,%a)@])" pp_ty base Aast.pp_sid enum;
     Format.fprintf fmt "@])"
@@ -241,29 +232,6 @@ and pp_ty_list : type a. Format.formatter -> a ty list -> unit =
   Format.fprintf fmt "@])"
 
 and show_ty_ : type a. a ty_ -> string = (fun x -> Format.asprintf "%a" pp_ty_ x)
-
-and pp_array_kind : Format.formatter -> array_kind -> unit =
- fun fmt ak ->
-  match ak with
-  | AKvarray a0 ->
-    Format.fprintf fmt "(@[<2>AKvarray@ ";
-    pp_ty fmt a0;
-    Format.fprintf fmt "@])"
-  | AKdarray (a0, a1) ->
-    Format.fprintf fmt "(@[<2>AKdarray (@,";
-    pp_ty fmt a0;
-    Format.fprintf fmt ",@ ";
-    pp_ty fmt a1;
-    Format.fprintf fmt "@,))@]"
-  | AKvarray_or_darray (a0, a1) ->
-    Format.fprintf fmt "(@[<2>AKvarray_or_darray (@,";
-    pp_ty fmt a0;
-    Format.fprintf fmt ",@ ";
-    pp_ty fmt a1;
-    Format.fprintf fmt "@,))@]"
-
-and show_array_kind : array_kind -> string =
- (fun x -> Format.asprintf "%a" pp_array_kind x)
 
 and pp_dependent_type : Format.formatter -> dependent_type -> unit =
  fun fmt a0 ->

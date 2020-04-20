@@ -241,9 +241,17 @@ and simplify_union_ env ty1 ty2 r =
     | ((_, Tgeneric name1), (_, Tgeneric name2)) when String.equal name1 name2
       ->
       (env, Some (mk (r, Tgeneric name1)))
-    | ((_, Tarraykind ak1), (_, Tarraykind ak2)) ->
-      let (env, ak) = union_arraykind env ak1 ak2 in
-      (env, Some (mk (r, Tarraykind ak)))
+    | ((_, Tvarray ty1), (_, Tvarray ty2)) ->
+      let (env, ty) = union env ty1 ty2 in
+      (env, Some (mk (r, Tvarray ty)))
+    | ((_, Tdarray (tk1, tv1)), (_, Tdarray (tk2, tv2))) ->
+      let (env, tk) = union env tk1 tk2 in
+      let (env, tv) = union env tv1 tv2 in
+      (env, Some (mk (r, Tdarray (tk, tv))))
+    | ((_, Tvarray_or_darray (tk1, tv1)), (_, Tvarray_or_darray (tk2, tv2))) ->
+      let (env, tk) = union env tk1 tk2 in
+      let (env, tv) = union env tv1 tv2 in
+      (env, Some (mk (r, Tvarray_or_darray (tk, tv))))
     | ((_, Tdependent (dep1, tcstr1)), (_, Tdependent (dep2, tcstr2)))
       when equal_dependent_type dep1 dep2 ->
       let (env, tcstr) = union env tcstr1 tcstr2 in
@@ -276,10 +284,10 @@ and simplify_union_ env ty1 ty2 r =
       (env, Some (mk (r, Tfun ft)))
     (* TODO with Tclass, union type arguments if covariant *)
     | ( ( _,
-          ( ( Tarraykind _ | Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _
-            | Tdependent _ | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _
-            | Terr
-            | Tvar _
+          ( ( Tprim _ | Tdynamic | Tgeneric _ | Tnewtype _ | Tdependent _
+            | Tclass _ | Ttuple _ | Tfun _ | Tobject | Tshape _ | Terr | Tvar _
+            | Tvarray _ | Tdarray _
+            | Tvarray_or_darray _
             (* If T cannot be null, `union T nonnull = nonnull`. However, it's hard
              * to say whether a given T can be null - e.g. opaque newtypes, dependent
              * types, etc. - so for now we leave it here.
@@ -381,21 +389,6 @@ and union_lists env tyl1 tyl2 r =
   let r_null = Option.first_some r_null1 r_null2 in
   let r_dyn = Option.first_some r_dyn1 r_dyn2 in
   make_union env r tyl r_null r_dyn
-
-and union_arraykind env ak1 ak2 =
-  match (ak1, ak2) with
-  | (AKvarray ty1, AKvarray ty2) ->
-    let (env, ty) = union env ty1 ty2 in
-    (env, AKvarray ty)
-  | (AKdarray (tk1, tv1), AKdarray (tk2, tv2)) ->
-    let (env, tk) = union env tk1 tk2 in
-    let (env, tv) = union env tv1 tv2 in
-    (env, AKdarray (tk, tv))
-  | (AKvarray_or_darray (tk1, tv1), AKvarray_or_darray (tk2, tv2)) ->
-    let (env, tk) = union env tk1 tk2 in
-    let (env, tv) = union env tv1 tv2 in
-    (env, AKvarray_or_darray (tk, tv))
-  | _ -> raise Dont_simplify
 
 and union_funs env fty1 fty2 =
   (* TODO: If we later add fields to ft, they will be forgotten here. *)

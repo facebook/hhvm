@@ -168,7 +168,7 @@ let get_key_value_collection_inst p ty =
 let get_varray_inst ty =
   match get_node ty with
   (* It's varray<vty> *)
-  | Tarraykind (AKvarray vty) -> Some vty
+  | Tvarray vty -> Some vty
   | _ -> get_value_collection_inst ty
 
 (* Is this type one of the value collection types with element type vty? *)
@@ -182,13 +182,13 @@ let get_vc_inst vc_kind ty =
 (* Is this type array<vty> or a supertype for some vty? *)
 let get_akvarray_inst ty =
   match get_node ty with
-  | Tarraykind (AKvarray vty) -> Some vty
+  | Tvarray vty -> Some vty
   | _ -> get_value_collection_inst ty
 
 (* Is this type array<kty,vty> or a supertype for some kty and vty? *)
 let get_akdarray_inst p ty =
   match get_node ty with
-  | Tarraykind (AKdarray (kty, vty)) -> Some (kty, vty)
+  | Tdarray (kty, vty) -> Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 
 (* Is this type one of the three key-value collection types
@@ -204,7 +204,7 @@ let get_kvc_inst p kvc_kind ty =
 let get_darray_inst p ty =
   match get_node ty with
   (* It's darray<kty, vty> *)
-  | Tarraykind (AKdarray (kty, vty)) -> Some (kty, vty)
+  | Tdarray (kty, vty) -> Some (kty, vty)
   | _ -> get_key_value_collection_inst p ty
 
 (* Check whether this is a function type that (a) either returns a disposable
@@ -1418,7 +1418,7 @@ and expr_
    *)
   | Array [] ->
     let (env, tv) = Env.fresh_type env p in
-    let ty = mk (Reason.Rwitness p, Tarraykind (AKvarray tv)) in
+    let ty = MakeType.varray (Reason.Rwitness p) tv in
     make_result env p (Aast.Array []) ty
   | Array (x :: rl as l) ->
     (* True if all fields are values, or all fields are key => value *)
@@ -1450,13 +1450,13 @@ and expr_
             l
             array_field_value
         in
-        (env, tel, AKvarray value_ty)
+        (env, tel, Tvarray value_ty)
       in
       make_result
         env
         p
         (Aast.Array (List.map tel (fun e -> Aast.AFvalue e)))
-        (mk (Reason.Rwitness p, Tarraykind arraykind))
+        (mk (Reason.Rwitness p, arraykind))
     else if (* TODO TAST: produce a typed expression here *)
             is_vec then
       (* Use expected type to determine expected element type *)
@@ -1479,11 +1479,7 @@ and expr_
           l
           array_field_value
       in
-      make_result
-        env
-        p
-        Aast.Any
-        (mk (Reason.Rwitness p, Tarraykind (AKvarray value_ty)))
+      make_result env p Aast.Any (MakeType.varray (Reason.Rwitness p) value_ty)
     else
       (* Use expected type to determine expected element type *)
       let (env, kexpected, vexpected) =
@@ -1523,7 +1519,7 @@ and expr_
         (Aast.Array
            (List.map (List.zip_exn key_exprs value_exprs) (fun (tek, tev) ->
                 Aast.AFkvalue (tek, tev))))
-        (mk (Reason.Rwitness p, Tarraykind (AKdarray (key_ty, value_ty))))
+        (MakeType.darray (Reason.Rwitness p) key_ty value_ty)
   | Varray (th, el)
   | ValCollection (_, th, el) ->
     let (get_expected_kind, name, subtype_val, make_expr, make_ty) =
@@ -1553,8 +1549,7 @@ and expr_
           "varray",
           array_value,
           (fun th elements -> Aast.Varray (th, elements)),
-          fun value_ty ->
-            mk (Reason.Rwitness p, Tarraykind (AKvarray value_ty)) )
+          (fun value_ty -> MakeType.varray (Reason.Rwitness p) value_ty) )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -1603,7 +1598,7 @@ and expr_
         ( get_darray_inst p,
           "darray",
           (fun th pairs -> Aast.Darray (th, pairs)),
-          (fun k v -> mk (Reason.Rwitness p, Tarraykind (AKdarray (k, v)))) )
+          (fun k v -> MakeType.darray (Reason.Rwitness p) k v) )
       | _ ->
         (* The parent match makes this case impossible *)
         failwith "impossible match case"
@@ -3262,7 +3257,7 @@ and anon_bind_variadic env vparam variadic_ty =
   in
   let r = Reason.Rvar_param pos in
   let arr_values = mk (r, get_node ty) in
-  let ty = mk (r, Tarraykind (AKvarray arr_values)) in
+  let ty = MakeType.varray r arr_values in
   let (env, t_variadic) = bind_param env (ty, vparam) in
   (env, t_variadic)
 
@@ -4226,7 +4221,9 @@ and call_parent_construct pos env el unpacked_element =
     | Terr
     | Tany _
     | Tnonnull
-    | Tarraykind _
+    | Tvarray _
+    | Tdarray _
+    | Tvarray_or_darray _
     | Toption _
     | Tprim _
     | Tfun _
@@ -4412,7 +4409,7 @@ and dispatch_call
                   MakeType.dynamic r;
                   MakeType.dict r tmixed tmixed;
                   MakeType.keyset r tmixed;
-                  mk (r, Tarraykind (AKdarray (tmixed, tmixed)));
+                  MakeType.darray r tmixed tmixed;
                 ] )
         in
         SubType.sub_type_or_fail env ty super (fun () ->
@@ -4461,9 +4458,9 @@ and dispatch_call
     let rec get_array_filter_return_type env ty =
       let (env, ety) = Env.expand_type env ty in
       match deref ety with
-      | (r, Tarraykind (AKvarray tv)) ->
+      | (r, Tvarray tv) ->
         let (env, tv) = get_value_type env tv in
-        (env, mk (r, Tarraykind (AKvarray tv)))
+        (env, MakeType.varray r tv)
       | (r, Tunion tyl) ->
         let (env, tyl) = List.map_env env tyl get_array_filter_return_type in
         Typing_union.union_list env r tyl
@@ -4484,7 +4481,7 @@ and dispatch_call
               SubType.sub_type env ety keyed_container_type Errors.unify_error
             in
             let (env, tv) = get_value_type env tv in
-            (env, mk (r, Tarraykind (AKdarray (explain_array_filter tk, tv)))))
+            (env, MakeType.darray r (explain_array_filter tk) tv))
           (fun _ ->
             Errors.try_
               (fun () ->
@@ -4494,12 +4491,10 @@ and dispatch_call
                 in
                 let (env, tv) = get_value_type env tv in
                 ( env,
-                  mk
-                    ( r,
-                      Tarraykind
-                        (AKdarray
-                           (explain_array_filter (MakeType.arraykey r), tv)) )
-                ))
+                  MakeType.darray
+                    r
+                    (explain_array_filter (MakeType.arraykey r))
+                    tv ))
               (fun _ -> (env, res)))
     in
     let (env, rty) = get_array_filter_return_type env ty in
@@ -4567,8 +4562,7 @@ and dispatch_call
         env * (env -> locl_ty -> env * locl_ty) =
       let (env, x) = Env.expand_type env x in
       match deref x with
-      | (r, Tarraykind (AKvarray _)) ->
-        (env, (fun env tr -> (env, mk (r, Tarraykind (AKvarray tr)))))
+      | (r, Tvarray _) -> (env, (fun env tr -> (env, MakeType.varray r tr)))
       | (r, Tany _) -> (env, (fun env _ -> (env, mk (r, Typing_utils.tany env))))
       | (r, Terr) -> (env, (fun env _ -> (env, TUtils.terr env r)))
       | (r, Tunion tyl) ->
@@ -4593,21 +4587,20 @@ and dispatch_call
         let try_vector env =
           let vector_type = MakeType.const_vector r_fty tv in
           let env = SubType.sub_type env x vector_type Errors.unify_error in
-          (env, (fun env tr -> (env, mk (r, Tarraykind (AKvarray tr)))))
+          (env, (fun env tr -> (env, MakeType.varray r tr)))
         in
         let try_keyed_container env =
           let keyed_container_type = MakeType.keyed_container r_fty tk tv in
           let env =
             SubType.sub_type env x keyed_container_type Errors.unify_error
           in
-          (env, (fun env tr -> (env, mk (r, Tarraykind (AKdarray (tk, tr))))))
+          (env, (fun env tr -> (env, MakeType.darray r tk tr)))
         in
         let try_container env =
           let container_type = MakeType.container r_fty tv in
           let env = SubType.sub_type env x container_type Errors.unify_error in
           ( env,
-            fun env tr ->
-              (env, mk (r, Tarraykind (AKdarray (MakeType.arraykey r, tr)))) )
+            (fun env tr -> (env, MakeType.darray r (MakeType.arraykey r) tr)) )
         in
         let (env, tr) =
           Errors.try_
@@ -5596,8 +5589,9 @@ and class_get_
           in
           (env, (member_ty, tal))))
   | ( _,
-      ( Tvar _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-      | Ttuple _ | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
+      ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+      | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Tpu _
+      | Tpu_type_access _ ) ) ->
     (* should never happen; static_class_id takes care of these *)
     (env, (Typing_utils.mk_tany env p, []))
 
@@ -5639,7 +5633,9 @@ and class_id_for_new ~exact p env cid explicit_targs =
         | Tany _
         | Terr
         | Tnonnull
-        | Tarraykind _
+        | Tvarray _
+        | Tdarray _
+        | Tvarray_or_darray _
         | Toption _
         | Tprim _
         | Tvar _
@@ -5765,7 +5761,9 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
     | Terr
     | Tany _
     | Tnonnull
-    | Tarraykind _
+    | Tvarray _
+    | Tdarray _
+    | Tvarray_or_darray _
     | Toption _
     | Tprim _
     | Tfun _
@@ -5872,9 +5870,9 @@ and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
         Errors.unknown_type "an object" p (Reason.to_string "It is unknown" r);
         (env, err_witness env p)
       | ( _,
-          ( Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tprim _ | Tfun _
-          | Ttuple _ | Tnewtype _ | Tdependent _ | Tobject | Tshape _ | Tpu _
-          | Tpu_type_access _ ) ) ->
+          ( Tany _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
+          | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tnewtype _ | Tdependent _
+          | Tobject | Tshape _ | Tpu _ | Tpu_type_access _ ) ) ->
         Errors.expected_class
           ~suffix:(", but got " ^ Typing_print.error env base_ty)
           p;
@@ -6567,12 +6565,7 @@ and condition
     let (env, ety) = Env.expand_type env ty in
     (match deref ety with
     | (_, Tprim Tbool) -> env
-    | ( _,
-        ( Terr | Tany _ | Tnonnull | Tarraykind _ | Toption _ | Tdynamic
-        | Tprim _ | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
-        | Tclass _ | Ttuple _ | Tunion _ | Tintersection _ | Tobject | Tshape _
-        | Tpu _ | Tpu_type_access _ ) ) ->
-      condition_nullity ~nonnull:tparamet env te)
+    | _ -> condition_nullity ~nonnull:tparamet env te)
   | Aast.Binop (((Ast_defs.Diff | Ast_defs.Diff2) as op), e1, e2) ->
     let op =
       if Ast_defs.(equal_bop op Diff) then
@@ -6695,12 +6688,7 @@ and class_for_refinement env p reason ivar_pos ivar_ty hint_ty =
           class_for_refinement env p reason ivar_pos ivar_ty hint_ty)
     in
     (env, MakeType.tuple reason tyl)
-  | ( _,
-      ( Tany _ | Tprim _ | Toption _ | Ttuple _ | Tnonnull | Tshape _ | Tvar _
-      | Tgeneric _ | Tnewtype _ | Tdependent _ | Tarraykind _ | Tunion _
-      | Tintersection _ | Tobject | Terr | Tfun _ | Tdynamic | Tpu _
-      | Tpu_type_access _ ) ) ->
-    (env, hint_ty)
+  | _ -> (env, hint_ty)
 
 (** If we are dealing with a refinement like
       $x is MyClass<A, B>
@@ -6910,7 +6898,7 @@ and is_array env ty p pred_name arg_expr =
             else
               mk (r, TUtils.tany env)
           in
-          mk (r, Tarraykind (AKvarray_or_darray (tk, tv)))
+          MakeType.varray_or_darray r tk tv
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
@@ -7129,7 +7117,9 @@ and class_get_pu_ env cty name =
     (env, None)
   | Tvar _
   | Tnonnull
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Toption _
   | Tprim _
   | Tfun _

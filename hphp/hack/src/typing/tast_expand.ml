@@ -42,7 +42,10 @@ let expand_ty ?var_hook ?pos env ty =
       | (p, Tdependent (n, ty)) -> mk (p, Tdependent (n, exp_ty ty))
       | (p, Tshape (shape_kind, fields)) ->
         mk (p, Tshape (shape_kind, Nast.ShapeMap.map exp_sft fields))
-      | (p, Tarraykind ak) -> mk (p, Tarraykind (exp_array_kind ak))
+      | (p, Tvarray ty) -> mk (p, Tvarray (exp_ty ty))
+      | (p, Tdarray (ty1, ty2)) -> mk (p, Tdarray (exp_ty ty1, exp_ty ty2))
+      | (p, Tvarray_or_darray (ty1, ty2)) ->
+        mk (p, Tvarray_or_darray (exp_ty ty1, exp_ty ty2))
       | (p, Tvar v) ->
         (match pos with
         | None -> mk (p, Tvar v)
@@ -92,12 +95,6 @@ let expand_ty ?var_hook ?pos env ty =
     { et_type = exp_ty et_type; et_enforced }
   and exp_sft { sft_optional; sft_ty } =
     { sft_optional; sft_ty = exp_ty sft_ty }
-  and exp_array_kind ak =
-    match ak with
-    | AKvarray ty -> AKvarray (exp_ty ty)
-    | AKdarray (ty1, ty2) -> AKdarray (exp_ty ty1, exp_ty ty2)
-    | AKvarray_or_darray (ty1, ty2) ->
-      AKvarray_or_darray (exp_ty ty1, exp_ty ty2)
   and exp_tparam t =
     {
       t with

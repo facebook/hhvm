@@ -214,15 +214,7 @@ module Full = struct
 
   let tvarray k x = list "varray<" k [x] ">"
 
-  let tvarray_or_darray k x y =
-    let targs =
-      match x with
-      | Some x -> [x; y]
-      | None -> [y]
-    in
-    list "varray_or_darray<" k targs ">"
-
-  let akvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
+  let tvarray_or_darray k x y = list "varray_or_darray<" k [x; y] ">"
 
   let tarray k x y =
     match (x, y) with
@@ -367,9 +359,9 @@ module Full = struct
     | Terr -> terr ()
     | Tdynamic -> text "dynamic"
     | Tnonnull -> text "nonnull"
-    | Tarraykind (AKvarray_or_darray (x, y)) -> akvarray_or_darray k x y
-    | Tarraykind (AKvarray x) -> tvarray k x
-    | Tarraykind (AKdarray (x, y)) -> tdarray k x y
+    | Tvarray_or_darray (x, y) -> tvarray_or_darray k x y
+    | Tvarray x -> tvarray k x
+    | Tdarray (x, y) -> tdarray k x y
     | Tclass ((_, s), Exact, []) when !debug_mode ->
       Concat [text "exact"; Space; to_doc s]
     | Tclass ((_, s), _, []) -> to_doc s
@@ -747,9 +739,9 @@ module ErrorString = struct
     | Tunion l -> union env l
     | Tintersection [] -> "a mixed value"
     | Tintersection l -> intersection env l
-    | Tarraykind (AKvarray_or_darray _) -> varray_or_darray
-    | Tarraykind (AKvarray _) -> varray
-    | Tarraykind (AKdarray (_, _)) -> darray
+    | Tvarray_or_darray _ -> varray_or_darray
+    | Tvarray _ -> varray
+    | Tdarray (_, _) -> darray
     | Ttuple l -> "a tuple of size " ^ string_of_int (List.length l)
     | Tnonnull -> "a nonnull value"
     | Toption x ->
@@ -983,11 +975,10 @@ module Json = struct
       in
       let params fps = [("params", JSON_Array (List.map fps param))] in
       obj @@ fun_kind p @ params ft.ft_params @ result ft.ft_ret.et_type
-    | (p, Tarraykind (AKvarray_or_darray (ty1, ty2))) ->
+    | (p, Tvarray_or_darray (ty1, ty2)) ->
       obj @@ kind p "varray_or_darray" @ args [ty1; ty2]
-    | (p, Tarraykind (AKdarray (ty1, ty2))) ->
-      obj @@ kind p "darray" @ args [ty1; ty2]
-    | (p, Tarraykind (AKvarray ty)) -> obj @@ kind p "varray" @ args [ty]
+    | (p, Tdarray (ty1, ty2)) -> obj @@ kind p "darray" @ args [ty1; ty2]
+    | (p, Tvarray ty) -> obj @@ kind p "varray" @ args [ty]
     | (p, Tpu (base, enum)) ->
       obj @@ kind p "pocket_universe" @ args [base] @ name (snd enum)
     | (p, Tpu_type_access (member, typ)) ->
@@ -1120,7 +1111,7 @@ module Json = struct
             | [ty1; ty2] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
               aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tarraykind (AKdarray (ty1, ty2)))
+              ty (Tdarray (ty1, ty2))
             | _ ->
               deserialization_error
                 ~message:
@@ -1135,7 +1126,7 @@ module Json = struct
             match args with
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              ty (Tarraykind (AKvarray ty1))
+              ty (Tvarray ty1)
             | _ ->
               deserialization_error
                 ~message:
@@ -1151,7 +1142,7 @@ module Json = struct
             | [ty1; ty2] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
               aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tarraykind (AKvarray_or_darray (ty1, ty2)))
+              ty (Tvarray_or_darray (ty1, ty2))
             | _ ->
               deserialization_error
                 ~message:
@@ -1166,14 +1157,14 @@ module Json = struct
             match args with
             | [] ->
               let tany = mk (Reason.Rnone, Typing_defs.make_tany ()) in
-              ty (Tarraykind (AKvarray_or_darray (tany, tany)))
+              ty (Tvarray_or_darray (tany, tany))
             | [ty1] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
-              ty (Tarraykind (AKvarray ty1))
+              ty (Tvarray ty1)
             | [ty1; ty2] ->
               aux ty1 ~keytrace:("0" :: keytrace) >>= fun ty1 ->
               aux ty2 ~keytrace:("1" :: keytrace) >>= fun ty2 ->
-              ty (Tarraykind (AKdarray (ty1, ty2)))
+              ty (Tdarray (ty1, ty2))
             | _ ->
               deserialization_error
                 ~message:

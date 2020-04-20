@@ -135,7 +135,7 @@ let hint_to_type_opt ~is_lambda env reason hint =
             when String.equal (cut_namespace id) "PHPism_FIXME_Array" ->
             if must_reinfer_type tcopt (get_node ty) then
               let tvar = mk (r, Tvar 0) in
-              mk (r, Tvarray_or_darray (Some tvar, tvar))
+              mk (r, Tvarray_or_darray (tvar, tvar))
             else
               ty
           | (_r, ty_) ->

@@ -33,15 +33,6 @@ class type ['env] type_mapper_type =
 
     method on_tprim : 'env -> Reason.t -> Aast.tprim -> 'env * locl_ty
 
-    method on_tarraykind_akvarray :
-      'env -> Reason.t -> locl_ty -> 'env * locl_ty
-
-    method on_tarraykind_akdarray :
-      'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
-
-    method on_tvarray_or_darray :
-      'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
-
     method on_ttuple : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
 
     method on_tunion : 'env -> Reason.t -> locl_ty list -> 'env * locl_ty
@@ -65,6 +56,11 @@ class type ['env] type_mapper_type =
 
     method on_tobject : 'env -> Reason.t -> 'env * locl_ty
 
+    method on_tpu : 'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
+
+    method on_tpu_type_access :
+      'env -> Reason.t -> Aast.sid -> Aast.sid -> 'env * locl_ty
+
     method on_tshape :
       'env ->
       Reason.t ->
@@ -72,10 +68,12 @@ class type ['env] type_mapper_type =
       locl_phase shape_field_type Nast.ShapeMap.t ->
       'env * locl_ty
 
-    method on_tpu : 'env -> Reason.t -> locl_ty -> Aast.sid -> 'env * locl_ty
+    method on_tvarray : 'env -> Reason.t -> locl_ty -> 'env * locl_ty
 
-    method on_tpu_type_access :
-      'env -> Reason.t -> Aast.sid -> Aast.sid -> 'env * locl_ty
+    method on_tdarray : 'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
+
+    method on_tvarray_or_darray :
+      'env -> Reason.t -> locl_ty -> locl_ty -> 'env * locl_ty
 
     method on_type : 'env -> locl_ty -> 'env * locl_ty
 
@@ -98,15 +96,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tprim env r p = (env, mk (r, Tprim p))
 
-    method on_tarraykind_akvarray env r tv =
-      (env, mk (r, Tarraykind (AKvarray tv)))
-
-    method on_tarraykind_akdarray env r tk tv =
-      (env, mk (r, Tarraykind (AKdarray (tk, tv))))
-
-    method on_tvarray_or_darray env r tk tv =
-      (env, mk (r, Tarraykind (AKvarray_or_darray (tk, tv))))
-
     method on_ttuple env r tyl = (env, mk (r, Ttuple tyl))
 
     method on_tunion env r tyl = (env, mk (r, Tunion tyl))
@@ -128,15 +117,22 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
 
     method on_tobject env r = (env, mk (r, Tobject))
 
-    method on_tshape env r shape_kind fdm =
-      (env, mk (r, Tshape (shape_kind, fdm)))
-
     method on_tpu env r cls enum =
       let (env, cls) = this#on_type env cls in
       (env, mk (r, Tpu (cls, enum)))
 
     method on_tpu_type_access env r member tyname =
       (env, mk (r, Tpu_type_access (member, tyname)))
+
+    method on_tshape env r shape_kind fdm =
+      (env, mk (r, Tshape (shape_kind, fdm)))
+
+    method on_tvarray env r ty = (env, mk (r, Tvarray ty))
+
+    method on_tdarray env r ty1 ty2 = (env, mk (r, Tdarray (ty1, ty2)))
+
+    method on_tvarray_or_darray env r ty1 ty2 =
+      (env, mk (r, Tvarray_or_darray (ty1, ty2)))
 
     method on_type env ty =
       let (r, ty) = deref ty in
@@ -146,11 +142,6 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tany _ -> this#on_tany env r
       | Terr -> this#on_terr env r
       | Tprim p -> this#on_tprim env r p
-      | Tarraykind (AKvarray tv) -> this#on_tarraykind_akvarray env r tv
-      | Tarraykind (AKdarray (tk, tv)) ->
-        this#on_tarraykind_akdarray env r tk tv
-      | Tarraykind (AKvarray_or_darray (tk, tv)) ->
-        this#on_tvarray_or_darray env r tk tv
       | Ttuple tyl -> this#on_ttuple env r tyl
       | Tunion tyl -> this#on_tunion env r tyl
       | Tintersection tyl -> this#on_tintersection env r tyl
@@ -162,10 +153,13 @@ class ['env] shallow_type_mapper : ['env] type_mapper_type =
       | Tclass (x, e, tyl) -> this#on_tclass env r x e tyl
       | Tdynamic -> this#on_tdynamic env r
       | Tobject -> this#on_tobject env r
-      | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
       | Tpu (base, enum) -> this#on_tpu env r base enum
       | Tpu_type_access (member, tyname) ->
         this#on_tpu_type_access env r member tyname
+      | Tshape (shape_kind, fdm) -> this#on_tshape env r shape_kind fdm
+      | Tvarray ty -> this#on_tvarray env r ty
+      | Tdarray (ty1, ty2) -> this#on_tdarray env r ty1 ty2
+      | Tvarray_or_darray (ty1, ty2) -> this#on_tvarray_or_darray env r ty1 ty2
 
     method on_locl_ty_list env tyl = List.map_env env tyl ~f:this#on_type
   end
@@ -247,20 +241,6 @@ class ['env] deep_type_mapper =
     inherit! ['env] tunion_type_mapper
 
     inherit! ['env] tinter_type_mapper
-
-    method! on_tarraykind_akvarray env r tv =
-      let (env, tv) = this#on_type env tv in
-      (env, mk (r, Tarraykind (AKvarray tv)))
-
-    method! on_tarraykind_akdarray env r tk tv =
-      let (env, tk) = this#on_type env tk in
-      let (env, tv) = this#on_type env tv in
-      (env, mk (r, Tarraykind (AKdarray (tk, tv))))
-
-    method! on_tvarray_or_darray env r tk tv =
-      let (env, tk) = this#on_type env tk in
-      let (env, tv) = this#on_type env tv in
-      (env, mk (r, Tarraykind (AKvarray_or_darray (tk, tv))))
 
     method! on_ttuple env r tyl =
       let (env, tyl) = this#on_locl_ty_list env tyl in

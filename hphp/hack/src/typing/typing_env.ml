@@ -1340,16 +1340,15 @@ and get_tyvars_i env (ty : internal_type) =
           get_tyvars_variance_list (env, ISet.empty, ISet.empty) variancel tyl
         | None -> (env, ISet.empty, ISet.empty)
       end
-    | Tarraykind ak ->
-      begin
-        match ak with
-        | AKvarray ty -> get_tyvars env ty
-        | AKdarray (ty1, ty2)
-        | AKvarray_or_darray (ty1, ty2) ->
-          let (env, positive1, negative1) = get_tyvars env ty1 in
-          let (env, positive2, negative2) = get_tyvars env ty2 in
-          (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
-      end
+    | Tvarray ty -> get_tyvars env ty
+    | Tdarray (ty1, ty2) ->
+      let (env, positive1, negative1) = get_tyvars env ty1 in
+      let (env, positive2, negative2) = get_tyvars env ty2 in
+      (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
+    | Tvarray_or_darray (ty1, ty2) ->
+      let (env, positive1, negative1) = get_tyvars env ty1 in
+      let (env, positive2, negative2) = get_tyvars env ty2 in
+      (env, ISet.union positive1 positive2, ISet.union negative1 negative2)
     | Tpu (base, _) -> get_tyvars env base
     | Tpu_type_access (_, _) -> (env, ISet.empty, ISet.empty))
   | ConstraintType ty ->

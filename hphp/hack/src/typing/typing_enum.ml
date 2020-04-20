@@ -79,7 +79,9 @@ let check_valid_array_key_type f_fail ~allow_any env p t =
     | Terr
     | Tany _
     | Tnonnull
-    | Tarraykind _
+    | Tvarray _
+    | Tdarray _
+    | Tvarray_or_darray _
     | Tprim _
     | Toption _
     | Tdynamic

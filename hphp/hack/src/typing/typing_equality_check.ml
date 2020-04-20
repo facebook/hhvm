@@ -90,17 +90,18 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2
     | ((_, Tprim _), (_, Toption ty2)) -> assert_nontrivial p bop env ty1 ty2
     | ( ( _,
-          ( Terr | Tany _ | Tnonnull | Tarraykind _ | Tprim _ | Toption _
-          | Tdynamic | Tvar _ | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _
-          | Tclass _ | Ttuple _ | Tunion _ | Tintersection _ | Tobject
-          | Tshape _ | Tpu _ | Tpu_type_access _ ) ),
+          ( Terr | Tany _ | Tnonnull | Tvarray _ | Tdarray _
+          | Tvarray_or_darray _ | Tprim _ | Toption _ | Tdynamic | Tvar _
+          | Tfun _ | Tgeneric _ | Tnewtype _ | Tdependent _ | Tclass _
+          | Ttuple _ | Tunion _ | Tintersection _ | Tobject | Tshape _ | Tpu _
+          | Tpu_type_access _ ) ),
         _ ) ->
       ())
 
 let assert_nullable p bop env ty =
   let (_, ty) = Env.expand_type env ty in
   match deref ty with
-  | (r, Tarraykind _) ->
+  | (r, (Tvarray _ | Tdarray _ | Tvarray_or_darray _)) ->
     let trivial_result = trivial_result_str bop in
     let ty_str = Typing_print.error env ty in
     let msgl =

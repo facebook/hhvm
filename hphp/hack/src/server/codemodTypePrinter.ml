@@ -78,13 +78,13 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tclass ((_, name), _, []) -> strip_ns name
   | Tclass ((_, name), _, tyl) ->
     Utils.strip_ns name ^ "<" ^ print_tyl_exn tyl ^ ">"
-  | Tarraykind (AKvarray ty) -> Printf.sprintf "varray<%s>" (print_ty_exn ty)
-  | Tarraykind (AKvarray_or_darray (ty1, ty2)) ->
+  | Tvarray ty -> Printf.sprintf "varray<%s>" (print_ty_exn ty)
+  | Tvarray_or_darray (ty1, ty2) ->
     Printf.sprintf
       "varray_or_darray<%s, %s>"
       (print_ty_exn ty1)
       (print_ty_exn ty2)
-  | Tarraykind (AKdarray (ty1, ty2)) ->
+  | Tdarray (ty1, ty2) ->
     Printf.sprintf "darray<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Tpu (ty, id) -> Printf.sprintf "(%s:@%s)" (print_ty_exn ty) (snd id)
   | Tpu_type_access (member, tyname) ->

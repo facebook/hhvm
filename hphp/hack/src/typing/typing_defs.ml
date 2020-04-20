@@ -400,7 +400,9 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tdependent _
   | Tgeneric _
   | Tclass _
-  | Tarraykind _ ->
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _ ->
     false
 
 module InternalType = struct
@@ -517,9 +519,11 @@ let ty_con_ordinal ty_ =
   | Tintersection _ -> 14
   | Tobject -> 15
   | Tclass _ -> 16
-  | Tarraykind _ -> 17
   | Tpu _ -> 18
   | Tpu_type_access _ -> 19
+  | Tvarray _ -> 20
+  | Tdarray _ -> 21
+  | Tvarray_or_darray _ -> 22
 
 (* Ordinal value for type constructor, for decl types *)
 let decl_ty_con_ordinal ty_ =
@@ -549,12 +553,6 @@ let decl_ty_con_ordinal ty_ =
   | Tunion _ -> 20
   | Tintersection _ -> 21
 
-let array_kind_con_ordinal ak =
-  match ak with
-  | AKvarray _ -> 1
-  | AKdarray _ -> 3
-  | AKvarray_or_darray _ -> 4
-
 (* Compare two types syntactically, ignoring reason information and other
  * small differences that do not affect type inference behaviour. This
  * comparison function can be used to construct tree-based sets of types,
@@ -570,7 +568,16 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
   let rec ty__compare ty_1 ty_2 =
     match (ty_1, ty_2) with
     | (Tprim ty1, Tprim ty2) -> compare ty1 ty2
-    | (Toption ty, Toption ty2) -> ty_compare ty ty2
+    | (Toption ty, Toption ty2)
+    | (Tvarray ty, Tvarray ty2) ->
+      ty_compare ty ty2
+    | (Tdarray (tk, tv), Tdarray (tk2, tv2))
+    | (Tvarray_or_darray (tk, tv), Tvarray_or_darray (tk2, tv2)) ->
+      begin
+        match ty_compare tk tk2 with
+        | 0 -> ty_compare tv tv2
+        | n -> n
+      end
     | (Tfun fty, Tfun fty2) -> tfun_compare fty fty2
     | (Tunion tyl1, Tunion tyl2)
     | (Tintersection tyl1, Tintersection tyl2)
@@ -604,7 +611,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
           end
         | n -> n
       end
-    | (Tarraykind ak1, Tarraykind ak2) -> array_kind_compare ak1 ak2
     | (Tshape (shape_kind1, fields1), Tshape (shape_kind2, fields2)) ->
       begin
         match compare_shape_kind shape_kind1 shape_kind2 with
@@ -636,13 +642,6 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | n -> n
-  and array_kind_compare ak1 ak2 =
-    match (ak1, ak2) with
-    | (AKdarray (ty1, ty2), AKdarray (ty3, ty4))
-    | (AKvarray_or_darray (ty1, ty2), AKvarray_or_darray (ty3, ty4)) ->
-      tyl_compare ~sort:false [ty1; ty2] [ty3; ty4]
-    | (AKvarray ty1, AKvarray ty2) -> ty_compare ty1 ty2
-    | _ -> array_kind_con_ordinal ak1 - array_kind_con_ordinal ak2
   and ty_compare ty1 ty2 = ty__compare (get_node ty1) (get_node ty2) in
   ty__compare ty_1 ty_2
 
@@ -820,7 +819,7 @@ let rec equal_decl_ty_ ty_1 ty_2 =
     equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
   | (Tvarray ty1, Tvarray ty2) -> equal_decl_ty ty1 ty2
   | (Tvarray_or_darray (tk1, tv1), Tvarray_or_darray (tk2, tv2)) ->
-    Option.equal equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
+    equal_decl_ty tk1 tk2 && equal_decl_ty tv1 tv2
   | (Tlike ty1, Tlike ty2) -> equal_decl_ty ty1 ty2
   | (Tprim ty1, Tprim ty2) -> Aast.equal_tprim ty1 ty2
   | (Toption ty, Toption ty2) -> equal_decl_ty ty ty2

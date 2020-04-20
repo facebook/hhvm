@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<82cb9f3b0cc049b68398550f9d26c52d>>
+// @generated SignedSource<<c8863f45762d160d775312ca26c88038>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -370,12 +370,6 @@ pub enum Ty_ {
     /// Tarray (None, Some ty)      => [invalid]
     /// ```
     Tarray(Option<Ty>, Option<Ty>),
-    /// Tdarray (ty1, ty2) => "darray<ty1, ty2>"
-    Tdarray(Ty, Ty),
-    /// Tvarray (ty) => "varray<ty>"
-    Tvarray(Ty),
-    /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
-    TvarrayOrDarray(Option<Ty>, Ty),
     /// "Any" is the type of a variable with a missing annotation, and "mixed" is
     /// the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
     /// Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -450,6 +444,12 @@ pub enum Ty_ {
     ///   Tunion [null;t] is the same as Toption t
     Tunion(Vec<Ty>),
     Tintersection(Vec<Ty>),
+    /// Tdarray (ty1, ty2) => "darray<ty1, ty2>"
+    Tdarray(Ty, Ty),
+    /// Tvarray (ty) => "varray<ty>"
+    Tvarray(Ty),
+    /// Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>"
+    TvarrayOrDarray(Ty, Ty),
     /// The type of an opaque type (e.g. a "newtype" outside of the file where it
     /// was defined) or enum. They are "opaque", which means that they only unify with
     /// themselves. However, it is possible to have a constraint that allows us to
@@ -476,8 +476,6 @@ pub enum Ty_ {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     Tclass(nast::Sid, Exact, Vec<Ty>),
-    /// Localized version of Tarray
-    Tarraykind(ArrayKind),
     /// Typing of Pocket Universe Expressions
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
@@ -597,28 +595,6 @@ pub struct ConstraintType(pub reason::Reason, pub Box<ConstraintType_>);
 pub enum InternalType {
     LoclType(Ty),
     ConstraintType(ConstraintType),
-}
-
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    FromOcamlRep,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
-pub enum ArrayKind {
-    /// An array declared as a varray.
-    AKvarray(Ty),
-    /// An array declared as a darray.
-    AKdarray(Ty, Ty),
-    /// An array annotated as a varray_or_darray.
-    AKvarrayOrDarray(Ty, Ty),
 }
 
 #[derive(

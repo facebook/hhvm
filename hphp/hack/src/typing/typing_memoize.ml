@@ -53,8 +53,9 @@ let check_param : env -> Nast.fun_param -> unit =
     | Tunion tyl
     | Tintersection tyl ->
       List.iter tyl (check_memoizable env)
-    | Tarraykind (AKvarray ty | AKdarray (_, ty) | AKvarray_or_darray (_, ty))
-      ->
+    | Tvarray ty
+    | Tdarray (_, ty)
+    | Tvarray_or_darray (_, ty) ->
       check_memoizable env ty
     | Tshape (_, fdm) ->
       ShapeMap.iter

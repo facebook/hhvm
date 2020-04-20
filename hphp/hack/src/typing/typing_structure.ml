@@ -131,13 +131,11 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
              *)
             | (SFlit_str (_, "generic_types"), _, _) when is_generic ->
               (env, acc_field_with_type sft_ty)
-            | (SFlit_str (_, "generic_types"), _, (r, Tarraykind (AKvarray ty)))
+            | (SFlit_str (_, "generic_types"), _, (r, Tvarray ty))
               when not is_generic ->
               let (env, ty) = make_ts env ty in
               (env, acc_field_with_type (mk (r, Ttuple [ty])))
-            | ( SFlit_str (_, "generic_types"),
-                _,
-                (r, Tarraykind (AKdarray (ty1, ty2))) )
+            | (SFlit_str (_, "generic_types"), _, (r, Tdarray (ty1, ty2)))
               when not is_generic ->
               let tyl = [ty1; ty2] in
               let (env, tyl) = List.map_env env tyl make_ts in

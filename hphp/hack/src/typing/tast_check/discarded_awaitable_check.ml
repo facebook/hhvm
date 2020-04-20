@@ -42,7 +42,9 @@ let rec enforce_not_awaitable env p ty =
   | Terr
   | Tany _
   | Tnonnull
-  | Tarraykind _
+  | Tvarray _
+  | Tdarray _
+  | Tvarray_or_darray _
   | Tprim _
   | Tvar _
   | Tfun _

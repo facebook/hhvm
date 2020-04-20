@@ -145,8 +145,6 @@ pub enum Ty_<'a> {
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
     Tclass(&'a nast::Sid, Exact, Vec<'a, Ty<'a>>),
-    /// Localized version of Tarray
-    Tarraykind(ArrayKind<'a>),
     /// Typing of Pocket Universe Expressions
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
@@ -269,21 +267,6 @@ impl<'a> Ty<'a> {
 /// We need this because it wraps Tys
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct TaccessType<'a>(pub Ty<'a>, pub Vec<'a, &'a nast::Sid>);
-
-/// This is a direct translation of oxidized::gen::typing_defs_core::ArrayKind.
-///
-/// We need this, because it wraps Tys.
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub enum ArrayKind<'a> {
-    /// An array declared as a varray.
-    AKvarray(Ty<'a>),
-    /// An array declared as a darray.
-    AKdarray(Ty<'a>, Ty<'a>),
-    /// An array annotated as a varray_or_darray.
-    AKvarrayOrDarray(Ty<'a>, Ty<'a>),
-    /// This is a type created when we see array() literal
-    AKempty,
-}
 
 /// This is a direct translation of aast_defs::Tprim.
 ///

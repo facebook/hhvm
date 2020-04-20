@@ -145,8 +145,8 @@ Parsed decls:
       td_type =
       (Rhint (root|typedefs.php line 15, characters 33-56),
        (Tvarray_or_darray
-          (Some (Rhint (root|typedefs.php line 15, characters 50-51),
-                 (Tgeneric "TK"))),
+          (Rhint (root|typedefs.php line 15, characters 50-51),
+           (Tgeneric "TK")),
           (Rhint (root|typedefs.php line 15, characters 54-55),
            (Tgeneric "TV"))))
       } };

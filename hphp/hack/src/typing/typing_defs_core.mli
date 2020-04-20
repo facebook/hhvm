@@ -176,12 +176,6 @@ and _ ty_ =
    * Tarray (None, Some ty)      => [invalid]
    *)
   | Tarray : decl_ty option * decl_ty option -> decl_phase ty_
-  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
-  | Tdarray : decl_ty * decl_ty -> decl_phase ty_
-  (* Tvarray (ty) => "varray<ty>" *)
-  | Tvarray : decl_ty -> decl_phase ty_
-  (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
-  | Tvarray_or_darray : decl_ty option * decl_ty -> decl_phase ty_
   (* "Any" is the type of a variable with a missing annotation, and "mixed" is
    * the type of a variable annotated as "mixed". THESE TWO ARE VERY DIFFERENT!
    * Any unifies with anything, i.e., it is both a supertype and subtype of any
@@ -261,6 +255,12 @@ and _ ty_ =
    *)
   | Tunion : 'phase ty list -> 'phase ty_
   | Tintersection : 'phase ty list -> 'phase ty_
+  (* Tdarray (ty1, ty2) => "darray<ty1, ty2>" *)
+  | Tdarray : 'phase ty * 'phase ty -> 'phase ty_
+  (* Tvarray (ty) => "varray<ty>" *)
+  | Tvarray : 'phase ty -> 'phase ty_
+  (* Tvarray_or_darray (ty1, ty2) => "varray_or_darray<ty1, ty2>" *)
+  | Tvarray_or_darray : 'phase ty * 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
 
   (* The type of an opaque type (e.g. a "newtype" outside of the file where it
@@ -292,8 +292,6 @@ and _ ty_ =
    * If exact=Nonexact, this also includes subclasses
    *)
   | Tclass : Nast.sid * exact * locl_ty list -> locl_phase ty_
-  (* Localized version of Tarray *)
-  | Tarraykind : array_kind -> locl_phase ty_
   (* Typing of Pocket Universe Expressions
    * - first parameter is the enclosing class
    * - second parameter is the name of the Pocket Universe Enumeration
@@ -357,14 +355,6 @@ and constraint_type
 and internal_type =
   | LoclType of locl_ty
   | ConstraintType of constraint_type
-
-and array_kind =
-  (* An array declared as a varray. *)
-  | AKvarray of locl_ty
-  (* An array declared as a darray. *)
-  | AKdarray of locl_ty * locl_ty
-  (* An array annotated as a varray_or_darray. *)
-  | AKvarray_or_darray of locl_ty * locl_ty
 
 and taccess_type = decl_ty * Nast.sid list
 

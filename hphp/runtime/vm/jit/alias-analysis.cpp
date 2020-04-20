@@ -239,6 +239,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
 
   ret |= may_alias_component(*this, acls, acls.frame(), loc_expand_map,
                              AFrameAny, all_frame);
+  ret |= may_alias_component(*this, acls, acls.iter(), iter_expand_map,
+                             AIterAny, all_iter);
 
   ret |= may_alias_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
@@ -263,12 +265,6 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
   ret |= may_alias_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= may_alias_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= may_alias_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
-  ret |= may_alias_part(*this, acls, acls.iterBase(),
-                        AIterBaseAny, all_iterBase);
-  ret |= may_alias_part(*this, acls, acls.iterType(),
-                        AIterTypeAny, all_iterType);
-  ret |= may_alias_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
-  ret |= may_alias_part(*this, acls, acls.iterEnd(), AIterEndAny, all_iterEnd);
 
   return ret;
 }
@@ -294,6 +290,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
 
   ret |= expand_component(*this, acls, acls.frame(), loc_expand_map,
                           AFrameAny, all_frame);
+  ret |= expand_component(*this, acls, acls.iter(), iter_expand_map,
+                          AIterAny, all_iter);
 
   ret |= expand_part(*this, acls, acls.rds(), ARdsAny, all_rds);
 
@@ -317,10 +315,6 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
   ret |= expand_part(*this, acls, acls.prop(), APropAny, all_props);
   ret |= expand_part(*this, acls, acls.elemI(), AElemIAny, all_elemIs);
   ret |= expand_part(*this, acls, acls.elemS(), AElemSAny, all_elemSs);
-  ret |= expand_part(*this, acls, acls.iterBase(), AIterBaseAny, all_iterBase);
-  ret |= expand_part(*this, acls, acls.iterType(), AIterTypeAny, all_iterType);
-  ret |= expand_part(*this, acls, acls.iterPos(), AIterPosAny, all_iterPos);
-  ret |= expand_part(*this, acls, acls.iterEnd(), AIterEndAny, all_iterEnd);
 
   return ret;
 }
@@ -376,12 +370,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_iterBase() || acls.is_iterType() ||
-        acls.is_iterPos() || acls.is_iterEnd()) {
-      add_class(ret, acls);
-      return;
-    }
-
+    if (collect_component(ret, acls.iter(), ret.iter_expand_map)) return;
     if (collect_component(ret, acls.frame(), ret.loc_expand_map)) return;
 
     /*
@@ -483,23 +472,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (acls.is_iterBase()) {
-      ret.all_iterBase.set(meta.index);
-      return;
-    }
-
-    if (acls.is_iterType()) {
-      ret.all_iterType.set(meta.index);
-      return;
-    }
-
-    if (acls.is_iterPos()) {
-      ret.all_iterPos.set(meta.index);
-      return;
-    }
-
-    if (acls.is_iterEnd()) {
-      ret.all_iterEnd.set(meta.index);
+    if (acls.is_iter()) {
+      ret.all_iter.set(meta.index);
       return;
     }
 
@@ -543,6 +517,16 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       }
     } else if (kv.first.is_frame()) {
       for (auto& ent : ret.loc_expand_map) {
+        if (kv.first <= ent.first) {
+          FTRACE(2, "  ({}) {} <= {}\n",
+            kv.second.index,
+            show(kv.first),
+            show(ent.first));
+          ent.second.set(kv.second.index);
+        }
+      }
+    } else if (kv.first.is_iter()) {
+      for (auto& ent : ret.iter_expand_map) {
         if (kv.first <= ent.first) {
           FTRACE(2, "  ({}) {} <= {}\n",
             kv.second.index,
@@ -597,24 +581,26 @@ std::string show(const AliasAnalysis& ainfo) {
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
       " {: <20}       : {}\n"
-      " {: <20}       : {}\n"
-      " {: <20}       : {}\n"
-      " {: <20}       : {}\n"
-      " {: <20}       : {}\n"
       " {: <20}       : {}\n",
 
       "all props",          show(ainfo.all_props),
       "all elemIs",         show(ainfo.all_elemIs),
       "all elemSs",         show(ainfo.all_elemSs),
-      "all iterBase",       show(ainfo.all_iterBase),
-      "all iterType",       show(ainfo.all_iterType),
-      "all iterPos",        show(ainfo.all_iterPos),
-      "all iterEnd",        show(ainfo.all_iterEnd),
-      "all frame",          show(ainfo.all_frame),
-      "all rds",            show(ainfo.all_rds)
+      "all rds",            show(ainfo.all_rds),
+      "all frame",          show(ainfo.all_frame)
   );
   std::vector<std::string> tmp;
   for (auto& kv : ainfo.loc_expand_map) {
+    tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
+                                 show(kv.first),
+                                 show(kv.second)));
+  }
+  std::sort(tmp.begin(), tmp.end());
+  for (auto& s : tmp) ret += s;
+  tmp.clear();
+  folly::format(&ret, " {: <20}       : {}\n",
+     "all iter",  show(ainfo.all_iter));
+  for (auto& kv : ainfo.iter_expand_map) {
     tmp.push_back(folly::sformat(" ex {: <17}       : {}\n",
                                  show(kv.first),
                                  show(kv.second)));

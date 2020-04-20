@@ -36,15 +36,6 @@ uint32_t iterId(const IRInstruction& inst) {
   return inst.extra<IterId>()->iterId;
 }
 
-AliasClass allIterFields(SSATmp* fp, uint32_t iterId) {
-  assertx(fp->isA(TFramePtr));
-  AliasClass const iterBase = AIterBase { fp, iterId };
-  AliasClass const iterType = AIterType { fp, iterId };
-  AliasClass const iterPos  = AIterPos  { fp, iterId };
-  AliasClass const iterEnd  = AIterEnd  { fp, iterId };
-  return iterBase | iterType | iterPos | iterEnd;
-}
-
 AliasClass pointee(
   const SSATmp* ptr,
   jit::flat_set<const IRInstruction*>* visited_labels
@@ -469,7 +460,8 @@ GeneralEffects may_load_store_move(AliasClass loads,
 GeneralEffects iter_effects(const IRInstruction& inst,
                             SSATmp* fp,
                             AliasClass locals) {
-  auto const iters = allIterFields(fp, inst.extra<IterData>()->args.iterId);
+  auto const iters =
+    AliasClass { aiter_all(fp, inst.extra<IterData>()->args.iterId) };
   return may_load_store_kill(
     iters | locals | AHeapAny,
     iters | locals | AHeapAny,
@@ -1039,40 +1031,40 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   case IterFree: {
-    auto const base = AIterBase { inst.src(0), iterId(inst) };
+    auto const base = aiter_base(inst.src(0), iterId(inst));
     return may_load_store(AHeapAny | base, AHeapAny);
   }
 
   case CheckIter: {
     auto const iter = inst.extra<CheckIter>()->iterId;
-    return may_load_store(AIterType { inst.src(0), iter }, AEmpty);
+    return may_load_store(aiter_type(inst.src(0), iter), AEmpty);
   }
 
   case LdIterBase:
-    return PureLoad { AIterBase { inst.src(0), iterId(inst) } };
+    return PureLoad { aiter_base(inst.src(0), iterId(inst)) };
 
   case LdIterPos:
-    return PureLoad { AIterPos { inst.src(0), iterId(inst) } };
+    return PureLoad { aiter_pos(inst.src(0), iterId(inst)) };
 
   case LdIterEnd:
-    return PureLoad { AIterEnd { inst.src(0), iterId(inst) } };
+    return PureLoad { aiter_end(inst.src(0), iterId(inst)) };
 
   case StIterBase:
-    return PureStore { AIterBase { inst.src(0), iterId(inst) }, inst.src(1) };
+    return PureStore { aiter_base(inst.src(0), iterId(inst)), inst.src(1) };
 
   case StIterType: {
     auto const iter = inst.extra<StIterType>()->iterId;
-    return PureStore { AIterType { inst.src(0), iter }, nullptr };
+    return PureStore { aiter_type(inst.src(0), iter), nullptr };
   }
 
   case StIterPos:
-    return PureStore { AIterPos { inst.src(0), iterId(inst) }, inst.src(1) };
+    return PureStore { aiter_pos(inst.src(0), iterId(inst)), inst.src(1) };
 
   case StIterEnd:
-    return PureStore { AIterEnd { inst.src(0), iterId(inst) }, inst.src(1) };
+    return PureStore { aiter_end(inst.src(0), iterId(inst)), inst.src(1) };
 
   case KillIter: {
-    auto const iters = allIterFields(inst.src(0), iterId(inst));
+    auto const iters = aiter_all(inst.src(0), iterId(inst));
     return may_load_store_kill(AEmpty, AEmpty, iters);
   }
 

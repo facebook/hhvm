@@ -40,6 +40,7 @@ std::vector<AliasClass> generic_classes() {
     AElemIAny,
     AElemSAny,
     AElemAny,
+    AIterAny
   };
 }
 
@@ -385,19 +386,19 @@ TEST(AliasClass, IterUnion) {
   auto const FP = unit.gen(DefFP, bcctx)->dst();
 
   {
-    AliasClass const iterP0 = AIterPos { FP, 0 };
-    AliasClass const iterP1 = AIterPos { FP, 1 };
+    AliasClass const iterP0 = aiter_pos(FP, 0);
+    AliasClass const iterP1 = aiter_pos(FP, 1);
     auto const u1 = iterP0 | iterP1;
-    EXPECT_EQ(u1, AIterPosAny);
-    EXPECT_TRUE(iterP0 <= AIterPosAny);
-    EXPECT_FALSE(iterP0 <= AIterBaseAny);
+    EXPECT_TRUE(u1 <= AIterAny);
+    EXPECT_TRUE(iterP0 <= u1);
+    EXPECT_TRUE(iterP1 <= u1);
   }
 
   {
-    AliasClass const iterB0 = AIterBase { FP, 0 };
-    AliasClass const iterP0 = AIterPos { FP, 0 };
-    AliasClass const iterE0 = AIterEnd { FP, 0 };
-    AliasClass const iterP1 = AIterPos { FP, 1 };
+    AliasClass const iterB0 = aiter_base(FP, 0);
+    AliasClass const iterP0 = aiter_pos(FP, 0);
+    AliasClass const iterE0 = aiter_end(FP, 0);
+    AliasClass const iterP1 = aiter_pos(FP, 1);
 
     // All the alias classes should be distinct to start.
     auto const classes = std::vector{iterB0, iterP0, iterE0, iterP1};
@@ -408,60 +409,44 @@ TEST(AliasClass, IterUnion) {
       }
     }
 
-    // If we union a base and a pos of the same iterator, we'll get the
-    // class of all fields of that iterator, which we can still distinguish
-    // from fields of other iterators.
     auto const u1 = iterB0 | iterP0;
     EXPECT_TRUE(iterB0 <= u1);
     EXPECT_TRUE(iterP0 <= u1);
-    EXPECT_TRUE(iterE0 <= u1);
+    EXPECT_FALSE(iterE0 <= u1);
     EXPECT_FALSE(iterP1 <= u1);
-    EXPECT_FALSE(u1 <= AIterPosAny);
-    EXPECT_FALSE(u1 <= AIterBaseAny);
-    EXPECT_FALSE(u1 <= (AIterBaseAny | AIterPosAny));
     EXPECT_TRUE(u1 <= AIterAny);
 
-    EXPECT_TRUE(!!u1.iterPos());
-    EXPECT_TRUE(!!u1.iterBase());
-    EXPECT_TRUE(!u1.is_iterPos());
-    EXPECT_TRUE(!u1.is_iterBase());
+    EXPECT_TRUE(u1.iter());
+    EXPECT_TRUE(u1.is_iter());
 
-    // If we union a base and a pos of different iterators, we'll get the
-    // class of all iter bases and positions, which we can still distinguish
-    // from other iterator fields like iterator ends.
     auto const u2 = iterB0 | iterP1;
-    EXPECT_TRUE(iterP0 <= u2);
+    EXPECT_FALSE(iterP0 <= u2);
     EXPECT_TRUE(iterB0 <= u2);
     EXPECT_TRUE(iterP1 <= u2);
     EXPECT_FALSE(iterE0 <= u2);
-    EXPECT_FALSE(u2 <= AIterPosAny);
-    EXPECT_FALSE(u2 <= AIterBaseAny);
-    EXPECT_TRUE(u2 <= (AIterBaseAny | AIterPosAny));
     EXPECT_TRUE(u2 <= AIterAny);
 
-    EXPECT_TRUE(!u2.iterPos());
-    EXPECT_TRUE(!!u2.iterBase());
-    EXPECT_TRUE(!u2.is_iterPos());
-    EXPECT_TRUE(!u2.is_iterBase());
+    EXPECT_TRUE(u1.iter());
+    EXPECT_TRUE(u1.is_iter());
   }
 
   {
     AliasClass const local = AFrame { FP, 0 };
-    AliasClass const iter  = AIterPos { FP, 0 };
+    AliasClass const iter  = aiter_pos(FP, 0);
     auto const u1 = local | iter;
     EXPECT_TRUE(local <= u1);
     EXPECT_TRUE(iter <= u1);
-    EXPECT_FALSE(!!u1.is_iterPos());
+    EXPECT_FALSE(!!u1.is_iter());
     EXPECT_FALSE(!!u1.is_frame());
     EXPECT_TRUE(!!u1.frame());  // locals are preferred in unions to iters
-    EXPECT_FALSE(!!u1.iterPos());
+    EXPECT_FALSE(!!u1.iter());
   }
 
   {
-    AliasClass const iterP0 = AIterPos { FP, 0 };
-    AliasClass const iterB0 = AIterBase { FP, 0 };
-    AliasClass const iterP1 = AIterPos { FP, 1 };
-    AliasClass const iterB1 = AIterBase { FP, 1 };
+    AliasClass const iterP0 = aiter_pos(FP, 0);
+    AliasClass const iterB0 = aiter_base(FP, 0);
+    AliasClass const iterP1 = aiter_pos(FP, 1);
+    AliasClass const iterB1 = aiter_base(FP, 1);
 
     EXPECT_FALSE(iterP0.maybe(iterP1));
     EXPECT_FALSE(iterB0.maybe(iterB1));
@@ -479,8 +464,7 @@ TEST(AliasClass, IterUnion) {
     EXPECT_FALSE(iterB0 <= u2);
 
     auto const u3 = u1 | iterP1;
-    EXPECT_FALSE(!!u3.iterPos());
-    EXPECT_FALSE(!!u3.iterBase());
+    EXPECT_TRUE(u3.iter());
     EXPECT_TRUE(iterP1 <= u3);
     EXPECT_TRUE(iterP0 <= u3);
     EXPECT_TRUE(iterB0 <= u3);

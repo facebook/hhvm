@@ -752,8 +752,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
     if (!base.maybe(stores)) return;
 
 #define UNTRACKED_ALIAS_CLASSES \
-    X(IterPos)  \
-    X(IterBase) \
+    X(Iter)     \
     X(Prop)     \
     X(ElemI)    \
     X(ElemS)    \

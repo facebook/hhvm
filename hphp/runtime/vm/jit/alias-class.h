@@ -54,9 +54,9 @@ struct SSATmp;
  *                            |
  *                    +-------+-------+
  *                    |               |
- *                 UnknownTV       UIterAll
- *                    |               |
- *                    |             Iter*
+ *                 UnknownTV         Iter
+ *                    |
+ *                    |
  *                    |
  *      +---------+---+---------------+-------------------------+----+
  *      |         |                   |                         |    |
@@ -94,37 +94,71 @@ struct AliasClass;
 
 //////////////////////////////////////////////////////////////////////
 
+struct AFrame;
+struct AIter;
+
 namespace detail {
 FPRelOffset frame_base_offset(SSATmp* fp);
+
+static constexpr uint32_t kSlotsPerAIter = 4;
+static constexpr uint32_t kAIterBaseOffset = 0;
+static constexpr uint32_t kAIterTypeOffset = 1;
+static constexpr uint32_t kAIterPosOffset = 2;
+static constexpr uint32_t kAIterEndOffset = 3;
+
 }
 
-#define FRAME_RELATIVE(Name, T2, name2)                                       \
+#define FRAME_RELATIVE(Name)                                                  \
   struct Name {                                                               \
-    Name(SSATmp* fp, T2 v) : base{detail::frame_base_offset(fp)}, name2{v} {} \
-    Name(SSATmp* fp, T2 v, FPInvOffset off)                                   \
-      : base{detail::frame_base_offset(fp) - off.offset}, name2{v} {}      \
-    Name(FPRelOffset off, T2 v) : base{off}, name2{v} {}                      \
+    Name(SSATmp* fp, AliasIdSet ids, FPInvOffset off = FPInvOffset{0})        \
+      : base{detail::frame_base_offset(fp) - off.offset}, ids{ids} {}         \
+    Name(FPRelOffset off, AliasIdSet ids) : base{off}, ids{ids} {}            \
     FPRelOffset base;                                                         \
-    T2 name2;                                                                 \
+    AliasIdSet ids;                                                           \
   }
 
 
 /*
  * Special data for locations known to be a set of locals on the frame `fp'.
  */
-FRAME_RELATIVE(AFrame, AliasIdSet, ids);
+FRAME_RELATIVE(AFrame);
 
 /*
- * Iterator state. We track changes to each field of the iterator separately.
- * Doing so isn't particularly useful right now, because IterInit / IterNext
- * are monolithic ops that touch all iter fields, but it would be useful if
- * specialize iterators based on base type. (Specialized code would write to
- * each field directly, and load- and store- elim could kick in.)
+ * Iterator state. We model the different fields of the iterator as 4
+ * adjacent slots (with each iterator starting at a multiple of 4).
  */
-FRAME_RELATIVE(AIterBase, uint32_t, id);
-FRAME_RELATIVE(AIterType, uint32_t, id);
-FRAME_RELATIVE(AIterPos, uint32_t, id);
-FRAME_RELATIVE(AIterEnd, uint32_t, id);
+FRAME_RELATIVE(AIter);
+
+inline AIter aiter_base(SSATmp* fp, uint32_t id,
+                        FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterBaseOffset, off };
+}
+inline AIter aiter_type(SSATmp* fp, uint32_t id,
+                        FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterTypeOffset, off };
+}
+inline AIter aiter_pos(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterPosOffset, off };
+}
+inline AIter aiter_end(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter { fp, id * kSlotsPerAIter + kAIterEndOffset, off };
+}
+
+inline AIter aiter_all(SSATmp* fp, uint32_t id,
+                       FPInvOffset off = FPInvOffset{0}) {
+  using namespace detail;
+  return AIter {
+    fp,
+    AliasIdSet::IdRange(id * kSlotsPerAIter, (id + 1) * kSlotsPerAIter),
+    off
+  };
+}
 
 /*
  * A location inside of an object property, with base `obj' at physical index
@@ -212,29 +246,24 @@ struct AliasClass {
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
     BFrame          = 1U << 0,
-    BIterBase       = 1U << 1,
-    BIterType       = 1U << 2,
-    BIterPos        = 1U << 3,
-    BIterEnd        = 1U << 4,
-    BProp           = 1U << 5,
-    BElemI          = 1U << 6,
-    BElemS          = 1U << 7,
-    BStack          = 1U << 8,
-    BRds            = 1U << 9,
+    BIter           = 1U << 1,
+    BProp           = 1U << 2,
+    BElemI          = 1U << 3,
+    BElemS          = 1U << 4,
+    BStack          = 1U << 5,
+    BRds            = 1U << 6,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 11,
-    BMITvRef    = 1U << 12,
-    BMITvRef2   = 1U << 13,
-    BMIBase     = 1U << 14,
-    BMIPropS    = 1U << 15,
+    BMITempBase = 1U << 7,
+    BMITvRef    = 1U << 8,
+    BMITvRef2   = 1U << 9,
+    BMIBase     = 1U << 10,
+    BMIPropS    = 1U << 11,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp,
     BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
     BMIState   = BMIStateTV | BMIBase | BMIPropS,
-
-    BIter      = BIterBase | BIterType | BIterPos | BIterEnd,
 
     BUnknownTV = ~(BIter | BMIBase | BMIPropS),
 
@@ -257,10 +286,7 @@ struct AliasClass {
    * where it is.
    */
   /* implicit */ AliasClass(AFrame);
-  /* implicit */ AliasClass(AIterBase);
-  /* implicit */ AliasClass(AIterType);
-  /* implicit */ AliasClass(AIterPos);
-  /* implicit */ AliasClass(AIterEnd);
+  /* implicit */ AliasClass(AIter);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
   /* implicit */ AliasClass(AElemS);
@@ -318,10 +344,7 @@ struct AliasClass {
    * Returns folly::none if this alias class has no specialization in that way.
    */
   folly::Optional<AFrame>          frame() const;
-  folly::Optional<AIterBase>       iterBase() const;
-  folly::Optional<AIterType>       iterType() const;
-  folly::Optional<AIterPos>        iterPos() const;
-  folly::Optional<AIterEnd>        iterEnd() const;
+  folly::Optional<AIter>           iter() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
   folly::Optional<AElemS>          elemS() const;
@@ -337,10 +360,7 @@ struct AliasClass {
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
   folly::Optional<AFrame>          is_frame() const;
-  folly::Optional<AIterBase>       is_iterBase() const;
-  folly::Optional<AIterType>       is_iterType() const;
-  folly::Optional<AIterPos>        is_iterPos() const;
-  folly::Optional<AIterEnd>        is_iterEnd() const;
+  folly::Optional<AIter>           is_iter() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
   folly::Optional<AElemS>          is_elemS() const;
@@ -358,31 +378,27 @@ private:
   enum class STag {
     None,
     Frame,
-    IterBase,
-    IterType,
-    IterPos,
-    IterEnd,
+    Iter,
     Prop,
     ElemI,
     ElemS,
     Stack,
     Rds,
-
-    IterAll,  // The union of all fields for a given iterator.
   };
-  struct UIterAll { FPRelOffset base; uint32_t id; };
 private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
 
+  void framelike_union_set(AFrame);
+  void framelike_union_set(AIter);
+
+  template <typename T>
+  static AliasClass framelike_union(rep, T, T);
+
   bool checkInvariants() const;
   bool equivData(AliasClass) const;
   bool subclassData(AliasClass) const;
-  bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
   bool maybeData(AliasClass) const;
-  bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
-  folly::Optional<UIterAll> asUIter() const;
-  bool refersToSameIterHelper(AliasClass) const;
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
   static rep stagBits(STag tag);
 
@@ -391,17 +407,12 @@ private:
   STag m_stag{STag::None};
   union {
     AFrame          m_frame;
-    AIterBase       m_iterBase;
-    AIterType       m_iterType;
-    AIterPos        m_iterPos;
-    AIterEnd        m_iterEnd;
+    AIter           m_iter;
     AProp           m_prop;
     AElemI          m_elemI;
     AElemS          m_elemS;
     AStack          m_stack;
     ARds            m_rds;
-
-    UIterAll        m_iterAll;
   };
 };
 
@@ -410,10 +421,6 @@ private:
 /* General alias classes. */
 auto const AEmpty             = AliasClass{AliasClass::BEmpty};
 auto const AFrameAny          = AliasClass{AliasClass::BFrame};
-auto const AIterBaseAny       = AliasClass{AliasClass::BIterBase};
-auto const AIterTypeAny       = AliasClass{AliasClass::BIterType};
-auto const AIterPosAny        = AliasClass{AliasClass::BIterPos};
-auto const AIterEndAny        = AliasClass{AliasClass::BIterEnd};
 auto const AIterAny           = AliasClass{AliasClass::BIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};

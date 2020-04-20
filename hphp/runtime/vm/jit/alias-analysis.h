@@ -91,6 +91,8 @@ struct AliasAnalysis {
    */
   LocationMap loc_expand_map;
 
+  LocationMap iter_expand_map;
+
   /*
    * Short-hand to find an alias class in the locations map, or get folly::none
    * if the alias class wasn't assigned an ALocMeta structure.
@@ -107,10 +109,7 @@ struct AliasAnalysis {
   ALocBits all_frame;
   ALocBits all_stack;
   ALocBits all_rds;
-  ALocBits all_iterBase;
-  ALocBits all_iterType;
-  ALocBits all_iterPos;
-  ALocBits all_iterEnd;
+  ALocBits all_iter;
 
   /*
    * Return the number of distinct locations we're tracking by id

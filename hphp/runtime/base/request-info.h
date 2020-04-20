@@ -108,6 +108,13 @@ struct RequestInfo {
 
   static bool valid(RequestInfo*);
 
+  static size_t OOMKillThreshold() {
+    return s_OOMKillThreshold.load(std::memory_order_acquire);
+  }
+  static void setOOMKillThreshold(size_t t) {
+    s_OOMKillThreshold.store(t, std::memory_order_release);
+  }
+
   RequestInfo();
   ~RequestInfo();
 
@@ -130,6 +137,7 @@ struct RequestInfo {
 
 private:
   std::atomic<GlobalGCStatus> m_globalGCStatus{Idle};
+  static std::atomic_size_t s_OOMKillThreshold;
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -54,6 +54,10 @@ std::atomic<int> s_pendingOOMs{0};
 ///////////////////////////////////////////////////////////////////////////////
 }
 
+// Threshold for aborting when host is low on memory.
+std::atomic_size_t
+RequestInfo::s_OOMKillThreshold{std::numeric_limits<int64_t>::max()};
+
 RDS_LOCAL_NO_CHECK(RequestInfo, RequestInfo::s_requestInfo);
 
 RequestInfo::RequestInfo() {
@@ -311,8 +315,7 @@ size_t handle_request_surprise(c_WaitableWaitHandle* wh, size_t mask) {
       // the lifetime of the request.
       // TODO(#T25950158): add flags to indicate whether a request is safe to
       // retry, etc. to help the OOM killer to make better decisions.
-      if (currUsage > RuntimeOption::RequestMemoryOOMKillBytes &&
-          !p.shouldOOMAbort() &&
+      if (currUsage > RequestInfo::OOMKillThreshold() && !p.shouldOOMAbort() &&
           s_pendingOOMs.fetch_sub(1, std::memory_order_relaxed) > 0) {
         p.setRequestOOMAbort();
       }

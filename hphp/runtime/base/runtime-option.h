@@ -290,8 +290,6 @@ struct RuntimeOption {
   static int PspCpuTimeoutSeconds;
   static int64_t MaxRequestAgeFactor;
   static int64_t RequestMemoryMaxBytes;
-  // Threshold for aborting when host is low on memory.
-  static int64_t RequestMemoryOOMKillBytes;
   // Approximate upper bound for thread heap that is backed by huge pages.  This
   // doesn't include the first slab colocated with thread stack, if any.
   static int64_t RequestHugeMaxBytes;

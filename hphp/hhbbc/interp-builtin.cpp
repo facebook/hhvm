@@ -248,8 +248,8 @@ bool builtin_array_key_cast(ISS& env, const bc::FCallBuiltin& op) {
 }
 
 bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
-  // Do not handle syntax-only checks and name output.
-  if (op.arg1 != 2 || topC(env) != TFalse) return false;
+  // Do not handle syntax-only checks or name output.
+  if (op.arg1 != 1 && (op.arg1 != 2 || topC(env) != TFalse)) return false;
   auto const ty = topC(env, 1);
   if (ty == TInitCell) return false;
   auto const res = [&]() -> folly::Optional<bool> {
@@ -263,7 +263,8 @@ bool builtin_is_callable(ISS& env, const bc::FCallBuiltin& op) {
     return {};
   }();
   if (!res) return false;
-  reduce(env, bc::PopC {}, bc::PopC {});
+  if (op.arg1 == 2) reduce(env, bc::PopC {});
+  reduce(env, bc::PopC {});
   *res ? reduce(env, bc::True {}) : reduce(env, bc::False {});
   return true;
 }

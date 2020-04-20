@@ -10,6 +10,14 @@
 open Core_kernel
 open Aast
 
+(* Remark: the compilation of PU generates code that uses Memoization on
+   non-final static methods.  Although in the general case this is unsafe,
+   in our case either the receiver of the parent:: call is well-defined,
+   or the call is dead-code because it is prevented by the PU type-checker,
+   or the call is encapsulated by reflection.  To the best of our knowledge
+   our use of Memoization is thus safe.
+*)
+
 let tany = Typing_defs.mk (Typing_reason.Rnone, Typing_defs.make_tany ())
 
 module T = struct
@@ -102,9 +110,9 @@ let override pos = user_attribute pos "__Override" []
 let error_msg cls instance_name name =
   Printf.sprintf "%s:@%s::%s unknown atom access: " cls instance_name name
 
-(* Generate a static accessor function from the pumapping information,
-   something like
+(* Generate a static accessor function from the pumapping information, eg:
 
+   <<__Memoize>>
    static function Field_name##Expr_name(string $atom) : mixed {
      switch ($atom) {
        case "A":
@@ -117,8 +125,14 @@ let error_msg cls instance_name name =
      }
     }
 
-   If the class is extending another, the raise statement is replaced with
-   a call to parent::Field_name##Expr_name
+   If the class extends a superclass, the raise statement is replaced with
+   a call to parent::Field_name##Expr_name.
+
+   Remark: at compile time we cannot reliably detect if, whenever a class D
+   extends a class C, a PU defined in the subclass D extends a PU defined in C
+   or is self-contained.  In this case the accessor functions include the
+   default call to parent.  Type checking ensures that the default case is
+   not reachable if the PU was not inherited from the super-class.
 *)
 let gen_pu_accessor
     (fun_name : string)
@@ -172,8 +186,7 @@ let gen_pu_accessor
         };
       ];
     m_body = body;
-    m_user_attributes = [];
-    (* TODO: Memoize ? *)
+    m_user_attributes = [memoize pos];
     m_ret = create_mixed_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
@@ -203,11 +216,14 @@ let gen_pu_accessor
    once.
 *)
 
-(* If the class is extending another one, we'll need to call into its
-   parent class to check if there are some instances defined there.
-   Using reflection for the moment because we don't have access to the
-   content of other files (for the time being !). Since reflection can
-   be slow, only call it on the first real access to $members:
+(* As for accessors, we do not have a reliable way to detect, whenever a
+   PU is defined in a subclass, if the PU is inherited from the superclass.
+   We thus systematically perform a call to Members() in the parent class to
+   check if there are instances of the PU defined in the superclass.
+   As the Members method might not exist in the superclass, we encapsulate
+   the call using reflection and catch the eventual exception.
+   Reflection can be slow, but Memoization ensures that the class hierarchy
+   is explored only once.
 
   <<__Memoize, __Override>>
   public static function pu$E$Members() : keyset<string> {
@@ -347,9 +363,6 @@ let gen_Members_no_extends instance_name pos (pu_members : T.pu_member list) =
 
 (* Returns the generated methods (accessors + initialization),
  * the static $members property
- *
- * Note for @fzn: the extends+gen_pu_accessor is wrong, but will be replaced
- *                by your code
  *)
 let gen_pu_enum (class_name : string) (extends : bool) (instance : T.pu_enum) :
     T.method_ list =
@@ -380,7 +393,7 @@ let gen_pu_enum (class_name : string) (extends : bool) (instance : T.pu_enum) :
 (* Instance of an AST visitor which:
    - updates PU_atom and PU_identifier
 
-  This only do erasure. The generated code is done in a second path
+  This only performs erasure; generation of code is done in a second pass
 *)
 class ['self] erase_body_visitor =
   object (_self : 'self)

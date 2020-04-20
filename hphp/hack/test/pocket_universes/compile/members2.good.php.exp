@@ -242,7 +242,7 @@ L8:
     .srcloc 4:8,4:8;
     RetC
   }
-  .method [public static] (4,4) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 4:8,4:8;
     VerifyParamType $atom
     .srcloc 4:8,4:8;
@@ -289,6 +289,24 @@ L8:
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 4:8,4:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$E$val$memoize_impl"
+    MemoSet L:1+1
     RetC
   }
 }
@@ -384,7 +402,7 @@ L8:
     .srcloc 11:8,11:8;
     RetC
   }
-  .method [public static] (11,11) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (11,11) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 11:8,11:8;
     VerifyParamType $atom
     .srcloc 11:8,11:8;
@@ -504,7 +522,7 @@ L8:
     .srcloc 14:8,14:8;
     RetC
   }
-  .method [public static] (14,14) <"HH\\mixed" N > pu$F$fal(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$F$fal$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:8;
     VerifyParamType $atom
     .srcloc 14:8,14:8;
@@ -547,6 +565,24 @@ L8:
     MemoSet L:0+0
     RetC
   }
+  .method [public static "__Memoize"("""y:0:{}""")] (11,11) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 11:8,11:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "D" "pu$E$val$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
   .method [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (14,14) <"HH\\void" N > pu$F$Members() {
     .ismemoizewrapper;
     .srcloc 14:8,14:8;
@@ -558,6 +594,24 @@ L8:
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$F$Members$memoize_impl"
     MemoSet L:0+0
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$F$fal(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 14:8,14:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "D" "pu$F$fal$memoize_impl"
+    MemoSet L:1+1
     RetC
   }
 }
@@ -653,7 +707,7 @@ L8:
     .srcloc 21:8,21:8;
     RetC
   }
-  .method [public static] (21,21) <"HH\\mixed" N > pu$E$x(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (21,21) <"HH\\mixed" N > pu$E$x$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 21:8,21:8;
     VerifyParamType $atom
     .srcloc 21:8,21:8;
@@ -694,7 +748,7 @@ L8:
     Null
     RetC
   }
-  .method [public static] (21,21) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (21,21) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 21:8,21:8;
     VerifyParamType $atom
     .srcloc 21:8,21:8;
@@ -735,6 +789,42 @@ L8:
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "E" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (21,21) <"HH\\mixed" N > pu$E$x(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 21:8,21:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "E" "pu$E$x$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (21,21) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 21:8,21:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "E" "pu$E$val$memoize_impl"
+    MemoSet L:1+1
     RetC
   }
 }
@@ -833,7 +923,7 @@ L8:
     .srcloc 31:8,31:8;
     RetC
   }
-  .method [public static] (31,31) <"HH\\mixed" N > pu$E$foo(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (31,31) <"HH\\mixed" N > pu$E$foo$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 31:8,31:8;
     VerifyParamType $atom
     .srcloc 31:8,31:8;
@@ -874,6 +964,24 @@ L8:
     NullUninit
     FCallClsMethodD <> 0 1 "" - "" "" "Foo" "pu$E$Members$memoize_impl"
     MemoSet L:0+0
+    RetC
+  }
+  .method [public static "__Memoize"("""y:0:{}""")] (31,31) <"HH\\mixed" N > pu$E$foo(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 31:8,31:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "Foo" "pu$E$foo$memoize_impl"
+    MemoSet L:1+1
     RetC
   }
 }

@@ -31,6 +31,8 @@ function apc_cas(string $key, int $old_cas, int $new_cas) { }
 <<__PHPStdLib, __NonRx('APC')>>
 function apc_exists($key) { }
 <<__PHPStdLib, __NonRx('APC')>>
+function apc_extend_ttl(string $key, int $ttl): bool;
+<<__PHPStdLib, __NonRx('APC')>>
 function apc_size(string $key): ?int;
 
 // The following are php std lib functions not supported by HHVM:

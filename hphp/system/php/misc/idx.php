@@ -63,7 +63,7 @@ namespace HH {
  * ```
  *
  * This code is misleading, since the default value of `idx` (null) will never be used.
- * This confuses both the reader and leads to annoying nullchecks in the code using `$y`.
+ * This confuses the reader and leads to annoying nullchecks in the code using `$y`.
  * Since we know that 'key' should / must be present, it is best to stick to
  * indexing with the subscript operator like so.
  *

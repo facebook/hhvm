@@ -14,6 +14,10 @@
 #   +----------------------------------------------------------------------+
 #
 
+# oniguruma/ is special: it is set up from HPHPFindLibs as it must be included
+# *first* to take precedence over libc regexp functions
+add_subdirectory(oniguruma)
+
 ##### --- header --- #####
 set(EXTRA_INCLUDE_PATHS)
 set(THIRD_PARTY_MODULES)

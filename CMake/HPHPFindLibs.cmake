@@ -258,13 +258,6 @@ SET(CMAKE_REQUIRED_LIBRARIES)
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
-# oniguruma
-find_package(ONIGURUMA REQUIRED)
-include_directories(${ONIGURUMA_INCLUDE_DIRS})
-if (ONIGURUMA_STATIC)
-  add_definitions("-DONIG_EXTERN=extern")
-endif()
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -385,7 +378,7 @@ macro(hphp_link target)
   # the PHP split() function.
   #
   # So make sure to link onig first, so its implementations are picked.
-  target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
+  target_link_libraries(${target} onig)
 
   if (LIBDL_LIBRARIES)
     target_link_libraries(${target} ${LIBDL_LIBRARIES})

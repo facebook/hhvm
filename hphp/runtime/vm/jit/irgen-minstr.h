@@ -47,21 +47,27 @@ bool propertyMayBeCountable(const Class::Prop& prop);
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
+                           MOpMode mode, const ArrayAccessProfile& profile);
+
 /*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
- * the array access represented by `generic' as `direct'.
+ * the array access represented by `generic' using `direct' or `missing`.
  *
- * For profiling translations, this generates the profiling instructions, then
- * falls back to `generic'.  If we can perform the likely-offset optimization,
- * this branches on a CheckMixedArrayOffset/CheckDictOffset/CheckKeysetOffset
- * to either `direct' or `generic'; otherwise, we fall back to `generic'.
+ * For profiling translations, we generate code that updates the profile, then
+ * falls back to `generic'. In optimized translations:
+ *
+ *  - If the key is likely to be at a particular offset in the array-like, we
+ *    generate a Check(MixedArray|Dict|Keyset)Offset. If it passes, we use
+ *    `direct`, else we fall back to `generic`.
+ *
+ *  - If the key is likely to be missing in some way that we can quickly check,
+ *    we do so and then call `missing`, else we fall back to `generic`.
+ *
+ *  - If no optimized access is possible, we just use `generic`.
  *
  * When we call `generic`, if we're optimizing, we'll pass it SizeHintData
  * that can be used to optimize generic lookups.
- *
- * During optimized translations, if we have some information that there is
- * high likelyhood of the array being empty, then we'll check whether it is
- * empty and then call the fail function.
  *
  * The callback function signatures should be:
  *
@@ -69,16 +75,15 @@ bool propertyMayBeCountable(const Class::Prop& prop);
  *    SSATmp* missing(SSATmp* key);
  *    SSATmp* generic(SSATmp* key, SizeHintData data);
  */
-template<class DirectFn, class GenericFn, class MissingFn>
-SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
-                            DirectFn direct, MissingFn fail, GenericFn generic,
-                            bool is_unset, bool is_define) {
+template<class Direct, class Missing, class Generic>
+SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
+                            Direct direct, Missing missing, Generic generic) {
   // These locals should be const, but we need to work around a bug in older
   // versions of GCC that cause the hhvm-cmake build to fail. See the issue:
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
   bool is_dict = arr->isA(TDict);
   bool is_keyset = arr->isA(TKeyset);
-  bool cow_check = is_unset || is_define;
+  bool cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || is_keyset || arr->isA(TArr));
 
   // If the access is statically known, don't bother profiling as we'll probably
@@ -99,21 +104,20 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
   };
 
   if (profile.profiling()) {
-    gen(
-      env,
-      is_dict ? ProfileDictAccess :
-        is_keyset ? ProfileKeysetAccess :
-        ProfileMixedArrayAccess,
-      ArrayAccessProfileData { profile.handle(), cow_check },
-      arr,
-      key
-    );
+    auto const op = is_dict ? ProfileDictAccess
+                            : is_keyset ? ProfileKeysetAccess
+                                        : ProfileMixedArrayAccess;
+    auto const data = ArrayAccessProfileData { profile.handle(), cow_check };
+    gen(env, op, data, arr, key);
     return generic(key, SizeHintData{});
   }
 
   if (profile.optimizing()) {
-    auto const result = profile.data().choose();
-    if (!is_define && result.empty) {
+    auto const data = profile.data();
+    auto const result = data.choose();
+    logArrayAccessProfile(env, arr, key, mode, data);
+
+    if (result.empty && mode != MOpMode::Define) {
       return cond(env,
         [&] (Block* taken) {
           auto const count = [&] {
@@ -122,9 +126,8 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
             return gen(env, CountArrayFast, arr);
           }();
           gen(env, JmpNZero, taken, count);
-          if (cow_check && !is_unset) gen(env, CheckArrayCOW, taken, arr);
         },
-        [&] { return fail(key); },
+        [&] { return missing(key); },
         [&] { return generic(key, result.size_hint); }
       );
     }
@@ -135,24 +138,13 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key,
       [&] (Block* taken) {
         auto const marr = [&](){
           if (is_dict || is_keyset) return arr;
-          env.irb->constrainValue(
-            arr,
-            GuardConstraint(DataTypeSpecialized).setWantArrayKind()
-          );
           return gen(env, CheckType, TMixedArr, taken, arr);
         }();
 
-        gen(
-          env,
-          is_dict ? CheckDictOffset :
-            is_keyset ? CheckKeysetOffset :
-            CheckMixedArrayOffset,
-          IndexData { *result.offset },
-          taken,
-          marr,
-          key
-        );
-
+        auto const op = is_dict ? CheckDictOffset
+                                : is_keyset ? CheckKeysetOffset
+                                            : CheckMixedArrayOffset;
+        gen(env, op, IndexData { *result.offset }, taken, marr, key);
         if (cow_check) gen(env, CheckArrayCOW, taken, marr);
         return marr;
       },

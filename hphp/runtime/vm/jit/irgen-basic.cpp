@@ -86,7 +86,7 @@ void emitClassGetTS(IRGS& env) {
   gen(env, JmpNZero, makeExitSlow(env), val);
 
   auto const clsName = profiledArrayAccess(
-    env, ts, cns(env, s_classname.get()),
+    env, ts, cns(env, s_classname.get()), MOpMode::Warn,
     [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
       return gen(
         env,
@@ -103,9 +103,7 @@ void emitClassGetTS(IRGS& env) {
     [&] (SSATmp* key, SizeHintData) {
       if (RuntimeOption::EvalHackArrDVArrs) return gen(env, DictGet, ts, key);
       return gen(env, ArrayGet, MOpModeData { MOpMode::Warn }, ts, key);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
 
   SSATmp* name;

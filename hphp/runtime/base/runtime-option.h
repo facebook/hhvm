@@ -865,6 +865,8 @@ struct RuntimeOption {
   F(int, JitRetargetJumps,             1)                               \
   /* Sync VM reg state for all native calls. */                         \
   F(bool, JitForceVMRegSync,           false)                           \
+  /* Log the profile used to optimize array-like gets and sets. */      \
+  F(bool, LogArrayAccessProfile,      false)                            \
   /* Log the profile used to target iterator specialization. */         \
   F(bool, LogArrayIterProfile,        false)                            \
   /* We use PGO to target specialization for "foreach" iterator loops.  \

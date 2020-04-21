@@ -996,7 +996,8 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
 
   // Do the array access, using array offset profiling to optimize it.
   auto const key = params[1].value;
-  auto const elm = profiledArrayAccess(env, arr, key,
+  auto const elm = profiledArrayAccess(
+    env, arr, key, MOpMode::None,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       auto const op = is_dict ? DictGetK : MixedArrayGetK;
       return gen(env, op, IndexData { pos }, arr, key);
@@ -1005,9 +1006,7 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
     [&] (SSATmp* key, SizeHintData data) {
       auto const op = is_dict ? DictIdx : ArrayIdx;
       return gen(env, op, data, arr, key, def);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
 
   auto const finish = [&](SSATmp* val){
@@ -2283,16 +2282,15 @@ void implArrayIdx(IRGS& env) {
   auto const key = popC(env);
   auto const base = popC(env);
 
-  auto const elem = profiledArrayAccess(env, base, key,
+  auto const elem = profiledArrayAccess(
+    env, base, key, MOpMode::None,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
     [&] (SSATmp*) { return def; },
     [&] (SSATmp* key, SizeHintData data) {
       return gen(env, ArrayIdx, data, base, key, def);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
 
   auto finish = [&](SSATmp* tmp) {
@@ -2380,7 +2378,8 @@ void implDictKeysetIdx(IRGS& env,
     : stack_base;
   assertx(use_base->isA(is_dict ? TDict : TKeyset));
 
-  auto const elem = profiledArrayAccess(env, use_base, key,
+  auto const elem = profiledArrayAccess(
+    env, use_base, key, MOpMode::None,
     [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
@@ -2389,9 +2388,7 @@ void implDictKeysetIdx(IRGS& env,
     [&] (SSATmp* key, SizeHintData data) {
       return is_dict ? gen(env, DictIdx, data, use_base, key, def)
                      : gen(env, KeysetIdx, use_base, key, def);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
 
   auto const pelem = profiledType(env, elem, [&] { finish(elem); });

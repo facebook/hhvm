@@ -44,6 +44,7 @@
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
 
 #include "hphp/util/safe-cast.h"
+#include "hphp/util/struct-log.h"
 
 #include <folly/Optional.h>
 
@@ -737,8 +738,9 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
     return elem;
   };
 
+  auto const mode = quiet ? MOpMode::None : MOpMode::Warn;
   auto const elem = profiledArrayAccess(
-    env, base, key,
+    env, base, key, mode,
     [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
       return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
                  base, key);
@@ -757,9 +759,7 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
         base,
         key
       );
-    },
-    false, // is unset
-    false  // is define
+    }
   );
   auto const pelem = profiledType(env, elem, [&] { finish(finishMe(elem)); });
   return finishMe(pelem);
@@ -768,7 +768,8 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
 template<class Finish>
 SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
                      Finish finish) {
-  auto const elem = profiledArrayAccess(env, base, key,
+  auto const elem = profiledArrayAccess(
+    env, base, key, mode,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
       return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
     },
@@ -786,9 +787,7 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
     },
     [&] (SSATmp* key, SizeHintData data) {
       return gen(env, ArrayGet, MOpModeData { mode }, base, key);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
   auto finishMe = [&](SSATmp* element) {
     gen(env, IncRef, element);
@@ -1396,7 +1395,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   }
 
   return profiledArrayAccess(
-    env, base, key,
+    env, base, key, mode,
     [&] (SSATmp* dict, SSATmp* key, uint32_t pos) {
       return gen(env, ElemDictK, IndexData { pos }, dict, key);
     },
@@ -1417,9 +1416,7 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         mode == MOpMode::InOut
       );
       return gen(env, ElemDictX, MOpModeData { mode }, base, key);
-    },
-    unset, // is unset
-    define // is define
+    }
   );
 }
 
@@ -1446,7 +1443,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
   }
 
   return profiledArrayAccess(
-    env, base, key,
+    env, base, key, mode,
     [&] (SSATmp* keyset, SSATmp* key, uint32_t pos) {
       return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
     },
@@ -1463,9 +1460,7 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         mode == MOpMode::InOut
       );
       return gen(env, ElemKeysetX, MOpModeData { mode }, base, key);
-    },
-    false, // is unset
-    false  // is define
+    }
   );
 }
 
@@ -1488,7 +1483,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   if (baseType <= TArr && key->type().subtypeOfAny(TInt, TStr)) {
     auto const base = extractBase(env);
 
-    return profiledArrayAccess(env, base, key,
+    return profiledArrayAccess(
+      env, base, key, mode,
       [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
         return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
       },
@@ -1515,9 +1511,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
           mode == MOpMode::InOut
         );
         return gen(env, ElemArrayX, MOpModeData { mode }, base, key);
-      },
-      unset, // is unset
-      define // is define
+      }
     );
   }
 
@@ -2369,6 +2363,44 @@ void emitUnsetM(IRGS& env, uint32_t nDiscard, MemberKey mk) {
   }
 
   mFinalImpl(env, nDiscard, nullptr);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
+                           MOpMode mode, const ArrayAccessProfile& profile) {
+  // We generate code for many accesses each time we call retranslateAll.
+  // We don't want production webservers to log when they do so.
+  if (!RO::EvalLogArrayAccessProfile) return;
+  if (env.inlineState.conjure) return;
+
+  auto const marker  = makeMarker(env, bcOff(env));
+  assertx(marker.hasFunc());
+  auto const func = marker.func();
+  auto const unit = func->unit();
+
+  std::vector<std::string> inline_state_string;
+  std::vector<folly::StringPiece> inline_state;
+  for (auto const& state : env.inlineState.bcStateStack) {
+    inline_state_string.push_back(show(state));
+    inline_state.push_back(inline_state_string.back());
+  }
+
+  StructuredLogEntry entry;
+  entry.setStr("marker", marker.show());
+  entry.setStr("profile", profile.toString());
+  entry.setStr("source_func", func->fullName()->data());
+  entry.setStr("source_file", func->filename()->data());
+  entry.setInt("source_line", unit->getLineNumber(marker.bcOff()));
+  entry.setInt("prof_count", curProfCount(env));
+  entry.setInt("inline_depth", env.inlineState.depth);
+  entry.setVec("inline_state", inline_state);
+  entry.setStr("arr_type", arr->type().toString());
+  entry.setStr("key_type", key->type().toString());
+  entry.setStr("hhbc", instrToString(marker.sk().pc(), unit));
+  entry.setStr("mode", subopToName(mode));
+
+  StructuredLog::log("hhvm_array_accesses", entry);
 }
 
 //////////////////////////////////////////////////////////////////////

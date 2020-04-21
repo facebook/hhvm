@@ -59,7 +59,7 @@ impl Display for Prefix {
     }
 }
 
-struct PrefixPathMap {
+pub struct PrefixPathMap {
     root: PathBuf,
     hhi: PathBuf,
     tmp: PathBuf,
@@ -78,7 +78,7 @@ impl Default for PrefixPathMap {
 }
 
 impl Prefix {
-    fn to_path(self, map: &PrefixPathMap) -> &Path {
+    pub fn to_path(self, map: &PrefixPathMap) -> &Path {
         match self {
             Self::Root => &map.root,
             Self::Hhi => &map.hhi,

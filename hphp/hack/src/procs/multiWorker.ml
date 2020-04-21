@@ -8,7 +8,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 
 (* Hide the worker type from our users *)
 type worker = WorkerController.worker
@@ -23,7 +23,7 @@ let single_threaded_call_with_worker_id job merge neutral next =
    * mode.
    *)
   let _ = Marshal.to_string job [Marshal.Closures] in
-  while !x <> Hh_bucket.Done do
+  while not (Hh_bucket.is_done !x) do
     match !x with
     | Hh_bucket.Wait ->
       (* this state should never be reached in single threaded mode, since

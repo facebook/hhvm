@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Worker
 
 (*****************************************************************************
@@ -185,7 +185,7 @@ let spawn w =
   | Some handle -> handle
 
 (* If the worker isn't prespawned, close the worker *)
-let close w h = if w.prespawned = None then Daemon.close h
+let close w h = if Option.is_none w.prespawned then Daemon.close h
 
 (* If there is a call_wrapper, apply it and create the Request *)
 let wrap_request w f x =
@@ -482,13 +482,13 @@ let select ds additional_fds =
   let processing = get_processing ds in
   let fds = List.map ~f:(fun { infd; _ } -> infd) processing in
   let (ready_fds, _, _) =
-    if fds = [] || List.length processing <> List.length ds then
+    if List.is_empty fds || List.length processing <> List.length ds then
       ([], [], [])
     else
       Sys_utils.select_non_intr (fds @ additional_fds) [] [] (-1.)
   in
   let additional_ready_fds =
-    List.filter ~f:(List.mem ~equal:( = ) ready_fds) additional_fds
+    List.filter ~f:(List.mem ~equal:Poly.( = ) ready_fds) additional_fds
   in
   List.fold_right
     ~f:(fun d acc ->
@@ -497,7 +497,7 @@ let select ds additional_fds =
       | Canceled
       | Failed _ ->
         { acc with readys = d :: acc.readys }
-      | Processing s when List.mem ~equal:( = ) ready_fds s.infd ->
+      | Processing s when List.mem ~equal:Poly.( = ) ready_fds s.infd ->
         { acc with readys = d :: acc.readys }
       | Processing _ -> { acc with waiters = d :: acc.waiters })
     ~init:{ readys = []; waiters = []; ready_fds = additional_ready_fds }

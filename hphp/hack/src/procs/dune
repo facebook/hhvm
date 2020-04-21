@@ -5,7 +5,8 @@
     bucket)
   (libraries
     core_kernel
-    imported_core))
+    imported_core
+    utils_core))
 
 (library
   (name procs_procs)

@@ -8,7 +8,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 
 exception Coalesced_failures of WorkerController.worker_failure list
 
@@ -28,6 +28,10 @@ let () =
 type interrupt_result =
   | Cancel
   | Continue
+
+let is_cancel = function
+  | Cancel -> true
+  | _ -> false
 
 type 'env interrupt_handler = 'env -> 'env * interrupt_result
 
@@ -103,7 +107,9 @@ let multi_threaded_call
         handlers
         ~init:(env, Continue, handlers)
         ~f:(fun (env, decision, handlers) (fd, handler) ->
-          if decision = Cancel || (not @@ List.mem ~equal:( = ) ready_fds fd)
+          if
+            is_cancel decision
+            || (not @@ List.mem ~equal:Poly.( = ) ready_fds fd)
           then
             (env, decision, handlers)
           else
@@ -117,7 +123,7 @@ let multi_threaded_call
             (env, decision, handlers))
     in
     let res = (acc, env, handlers) in
-    if decision = Cancel then (
+    if is_cancel decision then (
       WorkerController.cancel handles;
       let unfinished =
         match on_cancelled with
@@ -193,7 +199,7 @@ let multi_threaded_call
         ~init:(acc, [])
         readys
     in
-    if failures <> [] then
+    if not (List.is_empty failures) then
       (* If any single worker failed, we stop fanning out more jobs. *)
       raise (Coalesced_failures failures)
     else
@@ -218,7 +224,7 @@ let call_with_worker_id workers job merge neutral next =
   let ((res, ()), unfinished) =
     multi_threaded_call workers job merge neutral next (no_interrupt ())
   in
-  assert (unfinished = []);
+  assert (List.is_empty unfinished);
   res
 
 let call workers job merge neutral next =
@@ -227,7 +233,7 @@ let call workers job merge neutral next =
   let ((res, ()), unfinished) =
     multi_threaded_call workers job merge neutral next (no_interrupt ())
   in
-  assert (unfinished = []);
+  assert (List.is_empty unfinished);
   res
 
 let call_with_interrupt workers job merge neutral next ?on_cancelled interrupt =

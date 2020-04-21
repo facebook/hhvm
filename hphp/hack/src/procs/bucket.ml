@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (****************************************************************************)
 (* Moduling Making buckets.
@@ -23,6 +23,12 @@ type 'a bucket =
   | Job of 'a
   | Wait
   | Done
+
+let is_done = function
+  | Done -> true
+  | Wait
+  | Job _ ->
+    false
 
 type 'a next = unit -> 'a bucket
 

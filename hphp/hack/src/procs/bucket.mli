@@ -15,6 +15,8 @@ type 'a bucket =
   | Wait
   | Done
 
+val is_done : 'a bucket -> bool
+
 type 'a next = unit -> 'a bucket
 
 val set_max_bucket_size : int -> unit

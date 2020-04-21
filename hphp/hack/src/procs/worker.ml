@@ -7,6 +7,10 @@
  *
  *)
 
+module CamlGc = Gc
+open Hh_prelude
+module Gc = CamlGc
+
 (*****************************************************************************
  * The job executed by the worker.
  *
@@ -116,7 +120,8 @@ let slave_main ic oc =
         len;
       Printf.eprintf
         "%s"
-        (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100))
+        (Caml.Printexc.raw_backtrace_to_string
+           (Caml.Printexc.get_callstack 100))
     );
 
     Measure.sample "worker_response_len" (float len);
@@ -164,8 +169,8 @@ let slave_main ic oc =
     in
     Exit_status.exit exit_code
   | e ->
-    let e_backtrace = Printexc.get_backtrace () in
-    let e_str = Printexc.to_string e in
+    let e_backtrace = Caml.Printexc.get_backtrace () in
+    let e_str = Caml.Printexc.to_string e in
     let pid = Unix.getpid () in
     Printf.printf "Worker slave %d exception: %s\n%!" pid e_str;
     EventLogger.log_if_initialized (fun () ->
@@ -245,7 +250,7 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
       (* Wait for an incoming job : is there something to read?
          But we don't read it yet. It will be read by the forked slave. *)
       let (readyl, _, _) = Unix.select [in_fd] [] [] (-1.0) in
-      if readyl = [] then exit 0;
+      if List.is_empty readyl then exit 0;
 
       (* We fork a slave for every incoming request.
          And let it die after one request. This is the quickest GC. *)
@@ -260,7 +265,7 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
         | Unix.WEXITED 1 -> raise End_of_file
         | Unix.WEXITED code ->
           Printf.printf "Worker exited (code: %d)\n" code;
-          flush stdout;
+          Stdlib.flush stdout;
           Stdlib.exit code
         | Unix.WSIGNALED x ->
           let sig_str = PrintSignal.string_of_signal x in

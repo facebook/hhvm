@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Class = Typing_classes_heap.Api
 
 type fun_key = string
@@ -117,7 +117,8 @@ let get_static_method
 
 let get_type_id_filename ctx x expected_kind =
   match Naming_provider.get_type_path_and_kind ctx x with
-  | Some (pos, kind) when kind = expected_kind -> Some pos
+  | Some (pos, kind) when Naming_types.equal_kind_of_type kind expected_kind ->
+    Some pos
   | _ -> None
 
 let get_typedef (ctx : Provider_context.t) (typedef_name : string) :

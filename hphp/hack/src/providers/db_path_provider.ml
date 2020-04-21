@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (** This sharedmem is used only for the Shared_memory backend *)
 module Shared_db_settings =

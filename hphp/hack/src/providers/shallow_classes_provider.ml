@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Shallow_decl_defs
 
 (** Fetches the shallow decl, optionally keeping it in cache.

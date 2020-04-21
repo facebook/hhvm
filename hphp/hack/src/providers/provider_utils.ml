@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 
 let invalidate_tast_cache_of_entries (entries : Provider_context.entries) : unit
     =

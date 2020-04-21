@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module PositionedSyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 

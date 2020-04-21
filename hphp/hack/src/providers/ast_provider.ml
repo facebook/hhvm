@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (*****************************************************************************)
 (* Table containing all the Abstract Syntax Trees (cf ast.ml) for each file.*)
@@ -67,7 +67,7 @@ let parse
   let ast = result.Parser_return.ast in
   let ast =
     if
-      Relative_path.prefix path = Relative_path.Hhi
+      Relative_path.(is_hhi (prefix path))
       && ParserOptions.deregister_php_stdlib popt
     then
       Nast.deregister_ignored_attributes ast
@@ -110,7 +110,7 @@ let get_from_local_cache ~full ctx file_name =
     in
     let ast =
       if
-        Relative_path.prefix file_name = Relative_path.Hhi
+        Relative_path.(is_hhi (prefix file_name))
         && ParserOptions.deregister_php_stdlib popt
       then
         Nast.deregister_ignored_attributes ast
@@ -219,7 +219,7 @@ let get_class ?(case_insensitive = false) defs class_name =
             else
               def_name
           in
-          if def_name = class_name then
+          if String.equal def_name class_name then
             Some c
           else
             acc
@@ -246,7 +246,7 @@ let get_record_def ?(case_insensitive = false) defs record_name =
             else
               def_name
           in
-          if def_name = record_name then
+          if String.equal def_name record_name then
             Some rd
           else
             acc
@@ -273,7 +273,7 @@ let get_fun ?(case_insensitive = false) defs fun_name =
             else
               def_name
           in
-          if def_name = fun_name then
+          if String.equal def_name fun_name then
             Some f
           else
             acc
@@ -300,7 +300,7 @@ let get_typedef ?(case_insensitive = false) defs name =
             else
               def_name
           in
-          if def_name = name then
+          if String.equal def_name name then
             Some typedef
           else
             acc
@@ -313,7 +313,8 @@ let get_gconst defs name =
   let rec get acc defs =
     List.fold_left defs ~init:acc ~f:(fun acc def ->
         match def with
-        | Aast.Constant cst when snd cst.Aast.cst_name = name -> Some cst
+        | Aast.Constant cst when String.equal (snd cst.Aast.cst_name) name ->
+          Some cst
         | Aast.Namespace (_, defs) -> get acc defs
         | _ -> acc)
   in

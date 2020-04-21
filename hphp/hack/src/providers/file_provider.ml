@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (*
     Shared memory heap containing the contents of files.

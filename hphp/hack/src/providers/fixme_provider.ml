@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Fixme_store = Provider_backend.Fixme_store
 open Provider_backend.Fixmes
 

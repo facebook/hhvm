@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 module Decl_cache_entry = struct
   (* NOTE: we can't simply use a string as a key. In the case of a name
   conflict, we may put e.g. a function named 'foo' into the cache whose value is

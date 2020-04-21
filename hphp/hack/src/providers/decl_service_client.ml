@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type t = {
   client: Decl_ipc_ffi_externs.decl_client;

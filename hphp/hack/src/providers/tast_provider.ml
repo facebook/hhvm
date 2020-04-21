@@ -6,6 +6,8 @@
  *
  *)
 
+open Hh_prelude
+
 module Compute_tast = struct
   type t = {
     tast: Tast.program;

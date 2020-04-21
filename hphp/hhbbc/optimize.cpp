@@ -438,25 +438,9 @@ bool propagate_constants(const Bytecode& bc, State& state,
 
 //////////////////////////////////////////////////////////////////////
 
-/*
- * Create a block similar to another block (but with no bytecode in it yet).
- */
-BlockId make_block(php::Func* func,
-                   const php::Block* srcBlk) {
-  FTRACE(1, " ++ new block {}\n", func->blocks.size());
-
-  auto newBlk           = copy_ptr<php::Block>{php::Block{}};
-  auto const blk        = newBlk.mutate();
-  blk->exnNodeId        = srcBlk->exnNodeId;
-  blk->throwExit        = srcBlk->throwExit;
-  auto const bid        = func->blocks.size();
-  func->blocks.push_back(std::move(newBlk));
-
-  return bid;
-}
-
 BlockId make_fatal_block(php::Func* func,
                          const php::Block* srcBlk) {
+  FTRACE(1, " ++ new block {}\n", func->blocks.size());
   auto bid = make_block(func, srcBlk);
   auto const blk = func->blocks[bid].mutate();
   auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
@@ -479,17 +463,6 @@ void sync_ainfo(BlockId bid, FuncAnalysis& ainfo, const State& state) {
     static_cast<uint32_t>(ainfo.rpoBlocks.size() - 1),
     state
   });
-}
-
-/*
- * Create a block similar to another block (but with no bytecode in it yet).
- */
-BlockId make_block(FuncAnalysis& ainfo,
-                   const php::Block* srcBlk,
-                   const State& state) {
-  auto const bid = make_block(ainfo.ctx.func, srcBlk);
-  sync_ainfo(bid, ainfo, state);
-  return bid;
 }
 
 BlockId make_fatal_block(FuncAnalysis& ainfo,
@@ -860,6 +833,7 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
       visit_blocks("local DCE", index, ainfo, *collect, local_dce);
     }
     if (options.GlobalDCE) {
+      split_critical_edges(index, ainfo);
       if (global_dce(index, ainfo)) again = true;
       if (control_flow_opts(ainfo)) again = true;
       assert(check(*ainfo.ctx.func));

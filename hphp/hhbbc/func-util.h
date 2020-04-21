@@ -21,7 +21,7 @@
 #include "hphp/hhbbc/misc.h"
 
 namespace HPHP { namespace HHBBC {
-namespace php { struct Func; struct Local; }
+namespace php { struct Func; struct Local; struct Block; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -62,6 +62,13 @@ bool check_nargs_in_range(const php::Func* func, uint32_t nArgs);
  * branch to src instead.
  */
 bool append_func(php::Func* dst, const php::Func& src);
+
+/*
+ * Create a block similar to another block (but with no bytecode in it yet).
+ *
+ * It will have the same exnNodeId, and throw exit block.
+ */
+BlockId make_block(php::Func* func, const php::Block* srcBlk);
 
 /*
  * Based on runtime options returns action that should be taken on dynamic

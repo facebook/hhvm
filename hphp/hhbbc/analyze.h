@@ -234,6 +234,17 @@ locally_propagated_states(const Index&,
                           BlockId bid,
                           State stateIn);
 
+/*
+ * Propagate a block input State to find the output state for a particular
+ * target of the block.  This is used to update the in state for a block added
+ * to the CFG in betwee analysis rounds.
+ */
+State locally_propagated_bid_state(const Index& index,
+                                   const FuncAnalysis& fa,
+                                   CollectedInfo& collect,
+                                   BlockId bid,
+                                   State state,
+                                   BlockId targetBid);
 //////////////////////////////////////////////////////////////////////
 
 }}

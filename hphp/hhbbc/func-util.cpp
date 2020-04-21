@@ -139,6 +139,17 @@ bool append_func(php::Func* dst, const php::Func& src) {
   return true;
 }
 
+BlockId make_block(php::Func* func, const php::Block* srcBlk) {
+  auto newBlk           = copy_ptr<php::Block>{php::Block{}};
+  auto const blk        = newBlk.mutate();
+  blk->exnNodeId        = srcBlk->exnNodeId;
+  blk->throwExit        = srcBlk->throwExit;
+  auto const bid        = func->blocks.size();
+  func->blocks.push_back(std::move(newBlk));
+
+  return bid;
+}
+
 php::FuncBase::FuncBase(const FuncBase& other) {
   copy_into(this, other);
 

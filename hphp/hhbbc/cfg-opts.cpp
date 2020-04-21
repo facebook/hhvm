@@ -22,6 +22,7 @@
 #include "hphp/hhbbc/bc.h"
 #include "hphp/hhbbc/cfg.h"
 #include "hphp/hhbbc/dce.h"
+#include "hphp/hhbbc/func-util.h"
 #include "hphp/hhbbc/options.h"
 #include "hphp/hhbbc/unit-util.h"
 
@@ -134,6 +135,8 @@ struct MergeBlockInfo {
   uint8_t multiplePreds    : 1;
   // Block has more than one successor
   uint8_t multipleSuccs    : 1;
+  // Block has simple Nop successor.
+  uint8_t followSucc       : 1;
 
   // Block contains a sequence that could be part of a switch
   uint8_t couldBeSwitch    : 1;
@@ -463,29 +466,15 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
         bsi.hasPred = true;
       }
     };
-    auto followSucc = false;
     forEachNormalSuccessor(
       *cblk,
       [&] (BlockId succId) {
         auto const realSucc = next_real_block(func, succId);
-        if (succId != realSucc) followSucc = true;
+        if (succId != realSucc) bbi.followSucc = true;
         handleSucc(realSucc);
         numSucc++;
       }
     );
-    if (followSucc) {
-      anyChanges = true;
-      auto const blk = cblk.mutate();
-      forEachNormalSuccessor(
-        *blk,
-        [&] (BlockId& succId) {
-          auto skip = next_real_block(func, succId);
-          if (skip != succId) {
-            succId = skip;
-          }
-        }
-      );
-    }
     if (cblk->throwExit != NoBlockId) handleSucc(cblk->throwExit);
     if (numSucc > 1) bbi.multipleSuccs = true;
   }
@@ -495,7 +484,23 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
       blockInfo[blkId].multiplePreds = true;
     }
   }
-
+  for (auto bid : func.blockRange()) {
+    if (blockInfo[bid].followSucc) {
+      auto const blk = func.blocks[bid].mutate();
+      forEachNormalSuccessor(
+        *blk,
+        [&] (BlockId& succId) {
+          auto skip = next_real_block(func, succId);
+          auto const criticalEdge = blockInfo[bid].multipleSuccs
+                                    && blockInfo[skip].multiplePreds;
+          if (skip != succId) {
+            if (!criticalEdge) anyChanges = true;
+            succId = skip;
+          }
+        }
+      );
+    }
+  }
   for (auto bid : func.blockRange()) {
     auto& cblk = func.blocks[bid];
     if (is_dead(cblk.get())) continue;
@@ -538,6 +543,103 @@ bool control_flow_opts(const FuncAnalysis& ainfo) {
   }
 
   return anyChanges;
+}
+
+void split_critical_edges(const Index& index, FuncAnalysis& ainfo) {
+  // Changed tracks if we need to recompute RPO.
+  bool changed = false;
+
+  auto const func = ainfo.ctx.func;
+
+  assertx(func->blocks.size() == ainfo.bdata.size());
+
+  // Makes an empty block and inserts it between src and dst.  Since we can't
+  // have empty blocks it actually stores a Nop in it to keep everyone happy.
+  // The block will have the same exception node id, and throw exit block as
+  // the src block.
+  //
+  // ainfo is not updated with the correct rpo info by this helper, but is
+  // updated with the correct state info.
+  auto const split_edge = [&](BlockId srcBid, php::Block* srcBlk,
+                              BlockId dstBid) {
+    auto const srcLoc = srcBlk->hhbcs.back().srcLoc;
+    auto const newBid = make_block(func, srcBlk);
+    auto const newBlk = func->blocks[newBid].mutate();
+    newBlk->hhbcs = {
+      bc_with_loc(srcLoc, bc::Nop{})
+    };
+    newBlk->fallthrough = dstBid;
+
+    UNUSED bool replacedDstTarget = false;
+    forEachNormalSuccessor(*srcBlk, [&] (BlockId& bid) {
+      if (bid == dstBid) {
+        bid = newBid;
+        replacedDstTarget = true;
+      }
+    });
+    assertx(replacedDstTarget);
+
+    auto collect = CollectedInfo {
+      index, ainfo.ctx, nullptr,
+      CollectionOpts{}, &ainfo
+    };
+    ainfo.bdata.push_back({
+      0, // We renumber the blocks at the end of the function.
+      locally_propagated_bid_state(index, ainfo, collect, srcBid,
+                                   ainfo.bdata[srcBid].stateIn,
+                                   newBid)
+    });
+    assertx(func->blocks.size() == ainfo.bdata.size());
+
+    changed = true;
+  };
+
+  boost::dynamic_bitset<> haveSeenPred(func->blocks.size());
+  boost::dynamic_bitset<> hasMultiplePreds(func->blocks.size());
+  boost::dynamic_bitset<> hasMultipleSuccs(func->blocks.size());
+  // Switches can have the same successor for multiple cases, and we only want
+  // to split the edge once.
+  boost::dynamic_bitset<> seenSuccs(func->blocks.size());
+  for (auto bid : func->blockRange()) {
+    auto& blk = func->blocks[bid];
+
+    int succCount = 0;
+    seenSuccs.reset();
+    forEachNormalSuccessor(*blk, [&] (BlockId succBid) {
+      if (seenSuccs[succBid]) return;
+      seenSuccs[succBid] = true;
+      if (haveSeenPred[succBid]) {
+        hasMultiplePreds[succBid] = true;
+      } else {
+        haveSeenPred[succBid] = true;
+      }
+      succCount++;
+    });
+
+    hasMultipleSuccs[bid] = succCount > 1;
+  }
+
+  for (auto bid : func->blockRange()) {
+    if (!hasMultipleSuccs[bid]) continue;
+    auto blk = func->blocks[bid];
+    seenSuccs.reset();
+    forEachNormalSuccessor(*blk, [&] (BlockId succBid) {
+      if (hasMultiplePreds[succBid] && !seenSuccs[succBid]) {
+        seenSuccs[succBid] = true;
+        split_edge(bid, func->blocks[bid].mutate(), succBid);
+      }
+    });
+  }
+
+  if (changed) {
+    // Recompute the rpo ids.
+    assertx(func->blocks.size() == ainfo.bdata.size());
+    ainfo.rpoBlocks = rpoSortAddDVs(*func);
+    assertx(ainfo.rpoBlocks.size() <= ainfo.bdata.size());
+    for (size_t rpoId = 0; rpoId < ainfo.rpoBlocks.size(); ++rpoId) {
+      ainfo.bdata[ainfo.rpoBlocks[rpoId]].rpoId = rpoId;
+    }
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

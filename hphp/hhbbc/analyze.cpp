@@ -914,6 +914,32 @@ locally_propagated_states(const Index& index,
   return ret;
 }
 
+
+State locally_propagated_bid_state(const Index& index,
+                                   const FuncAnalysis& fa,
+                                   CollectedInfo& collect,
+                                   BlockId bid,
+                                   State state,
+                                   BlockId targetBid) {
+  Trace::Bump bumper{Trace::hhbbc, 10};
+  if (!state.initialized) return {};
+
+  auto const blk = fa.ctx.func->blocks[bid].get();
+  auto stateOut = state;
+  Interp interp {
+    index, fa.ctx, collect, bid, blk, stateOut
+  };
+
+  State ret{};
+  auto const propagate = [&] (BlockId target, const State* st) {
+    if (target == targetBid) merge_into(ret, *st);
+  };
+  run(interp, state, propagate);
+
+  ret.stack.compact();
+  return ret;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }}

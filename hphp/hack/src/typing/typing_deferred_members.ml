@@ -47,21 +47,15 @@ let parent env c acc =
 let is_lateinit cv =
   Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
-let prop_needs_init sp =
+(* Filter out properties which do not need initialization using information
+ * that is shallowly available i.e. if there's a static initializer *)
+let prop_may_need_init sp =
   if Option.is_some sp.sp_xhp_attr then
     false
   else if sp.sp_lateinit then
     false
   else
-    match sp.sp_type with
-    | None -> false
-    | Some ty ->
-      (match get_node ty with
-      | Tprim Tnull
-      | Toption _
-      | Tmixed ->
-        false
-      | _ -> sp.sp_needs_init)
+    sp.sp_needs_init
 
 let own_props c props =
   List.fold_left
@@ -69,23 +63,23 @@ let own_props c props =
     ~f:
       begin
         fun acc sp ->
-        if prop_needs_init sp then
+        if prop_may_need_init sp then
           SSet.add (snd sp.sp_name) acc
         else
           acc
       end
     ~init:props
 
-let initialized_props c props =
+let init_not_required_props c props =
   List.fold_left
     c.sc_props
     ~f:
       begin
         fun acc sp ->
-        if (not (prop_needs_init sp)) && not sp.sp_lateinit then
-          SSet.add (snd sp.sp_name) acc
-        else
+        if prop_may_need_init sp then
           acc
+        else
+          SSet.add (snd sp.sp_name) acc
       end
     ~init:props
 
@@ -101,7 +95,7 @@ let rec parent_props env c props =
             match Shallow_classes_provider.get (Env.get_ctx env) parent with
             | None -> acc
             | Some sc ->
-              let members = class_ env sc in
+              let (_, members) = class_ env sc in
               SSet.union members acc
           end
         | _ -> acc
@@ -123,7 +117,7 @@ and trait_props env c props =
           (match (cls, shallow_class) with
           | (Some cls, Some sc) ->
             let cstr = Cls.construct cls in
-            let members = class_ env sc in
+            let (_, members) = class_ env sc in
             (* If our current class defines its own constructor, completely ignore
              * the fact that the trait may have had one defined and merge in all of
              * its members.
@@ -155,7 +149,7 @@ and get_deferred_init_props env c =
       ~f:(fun (priv_props, props) sp ->
         let name = snd sp.sp_name in
         let visibility = sp.sp_visibility in
-        if not (prop_needs_init sp) then
+        if not (prop_may_need_init sp) then
           (priv_props, props)
         else if Aast_defs.equal_visibility visibility Private then
           (SSet.add name priv_props, SSet.add name props)
@@ -170,17 +164,11 @@ and get_deferred_init_props env c =
 
 and class_ env c =
   match Decl_provider.get_class (Typing_env.get_ctx env) (snd c.sc_name) with
-  | None -> SSet.empty
+  | None -> (SSet.empty, SSet.empty)
   | Some cls ->
     let has_concrete_cstr = Cls.need_init cls in
     let has_own_cstr = has_concrete_cstr && Option.is_some c.sc_constructor in
     (match c.sc_kind with
-    | Ast_defs.Cabstract when not has_own_cstr ->
-      let (priv_props, props) = get_deferred_init_props env c in
-      if not (SSet.is_empty priv_props) then
-        (* XXX: should priv_props be checked for a trait?
-         * see chown_privates in typing_inherit *)
-        Errors.constructor_required c.sc_name priv_props;
-      props
-    | Ast_defs.Ctrait -> snd (get_deferred_init_props env c)
-    | _ -> SSet.empty)
+    | Ast_defs.Cabstract when not has_own_cstr -> get_deferred_init_props env c
+    | Ast_defs.Ctrait -> get_deferred_init_props env c
+    | _ -> (SSet.empty, SSet.empty))

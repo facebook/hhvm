@@ -49,21 +49,13 @@ let parent decl_env c acc =
 let is_lateinit cv =
   Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
 
-let prop_needs_init sp =
+let prop_may_need_init sp =
   if Option.is_some sp.sp_xhp_attr then
     false
   else if sp.sp_lateinit then
     false
   else
-    match sp.sp_type with
-    | None -> false
-    | Some ty ->
-      (match get_node ty with
-      | Tprim Tnull
-      | Toption _
-      | Tmixed ->
-        false
-      | _ -> sp.sp_needs_init)
+    sp.sp_needs_init
 
 let own_props c props =
   List.fold_left
@@ -71,23 +63,23 @@ let own_props c props =
     ~f:
       begin
         fun acc sp ->
-        if prop_needs_init sp then
+        if prop_may_need_init sp then
           SSet.add (snd sp.sp_name) acc
         else
           acc
       end
     ~init:props
 
-let initialized_props c props =
+let init_not_required_props c props =
   List.fold_left
     c.sc_props
     ~f:
       begin
         fun acc sp ->
-        if (not (prop_needs_init sp)) && not sp.sp_lateinit then
-          SSet.add (snd sp.sp_name) acc
-        else
+        if prop_may_need_init sp then
           acc
+        else
+          SSet.add (snd sp.sp_name) acc
       end
     ~init:props
 
@@ -153,7 +145,7 @@ let get_deferred_init_props decl_env c =
       ~f:(fun (priv_props, props) sp ->
         let name = snd sp.sp_name in
         let visibility = sp.sp_visibility in
-        if not (prop_needs_init sp) then
+        if not (prop_may_need_init sp) then
           (priv_props, props)
         else if Aast.(equal_visibility visibility Private) then
           (SSet.add name priv_props, SSet.add name props)
@@ -169,11 +161,6 @@ let get_deferred_init_props decl_env c =
 let class_ ~has_own_cstr decl_env c =
   match c.sc_kind with
   | Ast_defs.Cabstract when not has_own_cstr ->
-    let (priv_props, props) = get_deferred_init_props decl_env c in
-    if not (SSet.is_empty priv_props) then
-      (* XXX: should priv_props be checked for a trait?
-       * see chown_privates in typing_inherit *)
-      Errors.constructor_required c.sc_name priv_props;
-    props
-  | Ast_defs.Ctrait -> snd (get_deferred_init_props decl_env c)
-  | _ -> SSet.empty
+    get_deferred_init_props decl_env c
+  | Ast_defs.Ctrait -> get_deferred_init_props decl_env c
+  | _ -> (SSet.empty, SSet.empty)

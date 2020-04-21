@@ -1604,7 +1604,7 @@ module PrintClass = struct
       @@
       if shallow_decl_enabled ctx then
         match Shallow_classes_provider.get ctx (Cls.name c) with
-        | Some cls -> Typing_deferred_members.class_ tenv cls
+        | Some cls -> snd (Typing_deferred_members.class_ tenv cls)
         | None -> SSet.empty
       else
         Cls.deferred_init_members c

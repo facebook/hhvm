@@ -620,7 +620,7 @@ val invalid_memoized_param : Pos.t -> (Pos.t * string) list -> unit
 
 val no_construct_parent : Pos.t -> unit
 
-val constructor_required : Pos.t * string -> SSet.t -> unit
+val constructor_required : Pos.t * string -> string list -> unit
 
 val not_initialized : Pos.t * string -> string list -> unit
 

@@ -54,6 +54,39 @@ module SSetWTop = struct
   let empty = Set SSet.empty
 end
 
+let parent_init_prop = "parent::" ^ SN.Members.__construct
+
+let lookup_props env class_name props =
+  SSet.fold
+    begin
+      fun name map ->
+      let ty_opt =
+        if String.equal name parent_init_prop then
+          Some (Typing_make_type.nonnull Typing_reason.Rnone)
+        else
+          Typing_env.get_class env class_name
+          |> Option.bind ~f:(fun cls ->
+                 Typing_env.get_member false env cls name)
+          |> Option.bind ~f:(fun ce -> Some (Lazy.force ce.Typing_defs.ce_type))
+      in
+      SMap.add name ty_opt map
+    end
+    props
+    SMap.empty
+
+(* If a type is missing, nullable, or dynamic, initialization is not required *)
+let type_does_not_require_init env ty_opt =
+  match ty_opt with
+  | None -> true
+  | Some ty ->
+    let (env, ty) = Typing_phase.localize_with_self env ty in
+    let null = Typing_make_type.null Typing_reason.Rnone in
+    Typing_subtype.is_sub_type env null ty
+    ||
+    let dynamic = Typing_make_type.dynamic Typing_reason.Rnone in
+    Typing_subtype.is_sub_type env dynamic ty
+    && Typing_subtype.is_sub_type env ty dynamic
+
 module S = SSetWTop
 
 (* Exception raised when we hit a return statement and the initialization
@@ -96,9 +129,9 @@ module Env = struct
 
   type t = {
     methods: method_status ref SMap.t;
-    props: SSet.t;
+    props: Typing_defs.decl_ty option SMap.t;
     tenv: Typing_env_types.env;
-    class_init_props: SSet.t;
+    init_not_required_props: SSet.t;
   }
 
   let rec make tenv c =
@@ -106,25 +139,52 @@ module Env = struct
     let (_, _, methods) = split_methods c in
     let methods = List.fold_left ~f:method_ ~init:SMap.empty methods in
     let sc = Shallow_decl.class_ ctx c in
-    ( if shallow_decl_enabled ctx then
-      (* Run DeferredMembers.class_ for its error-emitting side effects.
-         When shallow_class_decl is disabled, these are emitted by Decl. *)
-      let (_ : SSet.t) = DeferredMembers.class_ tenv sc in
-      () );
-    let (add_initialized_props, add_trait_props, add_parent_props, add_parent) =
+
+    (* Error when an abstract class has private properties but lacks a constructor *)
+    (let open Shallow_decl_defs in
+    let has_own_cstr =
+      match sc.sc_constructor with
+      | Some s -> not s.sm_abstract
+      | None -> false
+    in
+    let (private_props, _) =
       if shallow_decl_enabled ctx then
-        ( DeferredMembers.initialized_props,
+        DeferredMembers.class_ tenv sc
+      else
+        DICheck.class_ ~has_own_cstr tenv.Typing_env_types.decl_env sc
+    in
+    let private_props = lookup_props tenv (snd c.c_name) private_props in
+    if
+      Ast_defs.equal_class_kind sc.sc_kind Ast_defs.Cabstract
+      && not has_own_cstr
+    then
+      let uninit =
+        SMap.filter
+          (fun _ ty_opt -> not (type_does_not_require_init tenv ty_opt))
+          private_props
+      in
+      if not @@ SMap.is_empty uninit then
+        SMap.bindings uninit
+        |> List.map ~f:fst
+        |> Errors.constructor_required sc.sc_name);
+
+    let ( add_init_not_required_props,
+          add_trait_props,
+          add_parent_props,
+          add_parent ) =
+      if shallow_decl_enabled ctx then
+        ( DeferredMembers.init_not_required_props,
           DeferredMembers.trait_props tenv,
           DeferredMembers.parent_props tenv,
           DeferredMembers.parent tenv )
       else
         let decl_env = tenv.Typing_env_types.decl_env in
-        ( DICheck.initialized_props,
+        ( DICheck.init_not_required_props,
           DICheck.trait_props decl_env,
           DICheck.parent_props decl_env,
           DICheck.parent decl_env )
     in
-    let class_init_props = add_initialized_props sc SSet.empty in
+    let init_not_required_props = add_init_not_required_props sc SSet.empty in
     let props =
       SSet.empty
       |> DeferredMembers.own_props sc
@@ -134,8 +194,11 @@ module Env = struct
       |> add_trait_props sc
       |> add_parent_props sc
       |> add_parent sc
+      |> lookup_props tenv (snd c.c_name)
+      |> SMap.filter (fun _ ty_opt ->
+             not (type_does_not_require_init tenv ty_opt))
     in
-    { methods; props; tenv; class_init_props }
+    { methods; props; tenv; init_not_required_props }
 
   and method_ acc m =
     if not (Aast.equal_visibility m.m_visibility Private) then
@@ -178,20 +241,22 @@ let rec class_ tenv c =
       let env = Env.make tenv c in
       let inits = constructor env c_constructor in
       let check_inits inits =
-        let uninit_props = SSet.diff env.props inits in
-        if not (SSet.is_empty uninit_props) then
-          if SSet.mem DeferredMembers.parent_init_prop uninit_props then
+        let uninit_props =
+          SMap.filter (fun k _ -> not (SSet.mem k inits)) env.props
+        in
+        if not (SMap.is_empty uninit_props) then
+          if SMap.mem DeferredMembers.parent_init_prop uninit_props then
             Errors.no_construct_parent p
           else
             let class_uninit_props =
-              SSet.filter
-                (fun v -> not (SSet.mem v env.class_init_props))
+              SMap.filter
+                (fun prop _ -> not (SSet.mem prop env.init_not_required_props))
                 uninit_props
             in
-            if not (SSet.is_empty class_uninit_props) then
+            if not (SMap.is_empty class_uninit_props) then
               Errors.not_initialized
                 (p, snd c.c_name)
-                (SSet.elements class_uninit_props)
+                (SMap.bindings class_uninit_props |> List.map ~f:fst)
       in
       let check_throws_or_init_all inits =
         match inits with
@@ -351,12 +416,12 @@ and block env acc l =
     raise (InitReturn acc_before_block)
 
 and are_all_init env set =
-  SSet.fold (fun cv acc -> acc && S.mem cv set) env.props true
+  SMap.fold (fun cv _ acc -> acc && S.mem cv set) env.props true
 
 and check_all_init p env acc =
-  SSet.iter
+  SMap.iter
     begin
-      fun cv ->
+      fun cv _ ->
       if not (S.mem cv acc) then Errors.call_before_init p cv
     end
     env.props
@@ -393,7 +458,7 @@ and expr_ env acc p e =
   | Dollardollar _ ->
     acc
   | Obj_get ((_, This), (_, Id ((_, vx) as v)), _) ->
-    if SSet.mem vx env.props && not (S.mem vx acc) then (
+    if SMap.mem vx env.props && not (S.mem vx acc) then (
       Errors.read_before_write v;
       acc
     ) else

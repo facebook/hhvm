@@ -678,7 +678,7 @@ and class_decl
     if shallow_decl_enabled ctx then
       SSet.empty
     else
-      Decl_init_check.class_ ~has_own_cstr env c
+      snd (Decl_init_check.class_ ~has_own_cstr env c)
   in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =

@@ -54,6 +54,8 @@
     test_lazy_decl_idempotence
     test_modify_file
     test_new_file
+    test_property_initializer
+    test_property_initializer2
     test_rx_if_implements
     test_server_hover
     test_serverConfig_overrides
@@ -88,6 +90,16 @@
   (name new_file)
   (deps test_all.exe)
   (action (run ./test_all.exe new_file)))
+
+(alias
+  (name property_initializer)
+  (deps test_all.exe)
+  (action (run ./test_all.exe property_initializer)))
+
+(alias
+  (name property_initializer2)
+  (deps test_all.exe)
+  (action (run ./test_all.exe property_initializer2)))
 
 (alias
   (name capitalization)
@@ -324,6 +336,8 @@
     (alias gconst_file)
     (alias unbound_name)
     (alias decl_decl)
+    (alias property_initializer)
+    (alias property_initializer2)
     (alias rx_if_implements)
     (alias function_arg_rx_if_implements1)
     (alias function_arg_rx_if_implements2)

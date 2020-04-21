@@ -1708,9 +1708,7 @@ let nonstatic_method_in_abstract_final_class pos =
 
 let constructor_required (pos, name) prop_names =
   let name = strip_ns name in
-  let props_str =
-    SSet.fold ~f:(fun x acc -> x ^ " " ^ acc) prop_names ~init:""
-  in
+  let props_str = String.concat prop_names ~sep:" " in
   add
     (NastCheck.err_code NastCheck.ConstructorRequired)
     pos

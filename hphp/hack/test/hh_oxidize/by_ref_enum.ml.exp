@@ -1,0 +1,14 @@
+use serde::Serialize;
+
+#[allow(unused_imports)]
+use crate::*;
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum X<'a> {
+    A(Option<isize>),
+    B(bool),
+    C(f64),
+    D(std::cell::RefCell<isize>),
+    E(&'a str),
+    F(&'a str, &'a str),
+}

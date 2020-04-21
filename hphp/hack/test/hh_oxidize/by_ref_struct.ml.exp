@@ -1,0 +1,13 @@
+use serde::Serialize;
+
+#[allow(unused_imports)]
+use crate::*;
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct X<'a> {
+    pub a: Option<isize>,
+    pub b: bool,
+    pub c: f64,
+    pub d: std::cell::RefCell<isize>,
+    pub e: &'a str,
+}

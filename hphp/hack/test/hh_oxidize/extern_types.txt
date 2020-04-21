@@ -1,0 +1,6 @@
+# Import these types from foo
+foo::bar::Bar
+foo::baz::BazList  # list of Baz
+
+# And this type from qux_crate
+qux_crate::qux::QuxList

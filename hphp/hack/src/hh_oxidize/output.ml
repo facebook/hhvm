@@ -37,3 +37,5 @@ let add_ty_reexport ty =
 
 let add_decl name decl =
   output := { !output with decls = (name, decl) :: !output.decls }
+
+let glob_uses () = SSet.elements !output.glob_uses

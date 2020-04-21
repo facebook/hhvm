@@ -20,3 +20,5 @@ val add_include : string -> unit
 val add_ty_reexport : string -> unit
 
 val add_decl : string -> string -> unit
+
+val glob_uses : unit -> string list

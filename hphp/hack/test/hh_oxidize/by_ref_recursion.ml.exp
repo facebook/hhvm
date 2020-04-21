@@ -1,0 +1,16 @@
+use serde::Serialize;
+
+#[allow(unused_imports)]
+use crate::*;
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum IntList<'a> {
+    Nil,
+    Cons(isize, &'a IntList<'a>),
+}
+
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum NAryTree<'a, A> {
+    Leaf(A),
+    Children(&'a [NAryTree<'a, A>]),
+}

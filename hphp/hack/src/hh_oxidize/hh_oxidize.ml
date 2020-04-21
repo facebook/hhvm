@@ -100,6 +100,37 @@ let convert_single_file env filename =
   write_format_and_sign env out_filename src;
   printf "%s" (read out_filename)
 
+let parse_extern_types_file filename =
+  let lines = ref [] in
+  let ic = Caml.open_in filename in
+  (try
+     while true do
+       lines := Caml.input_line ic :: !lines
+     done;
+     Caml.close_in ic
+   with End_of_file -> Caml.close_in ic);
+  List.fold !lines ~init:SMap.empty ~f:(fun map name ->
+      (* Ignore comments beginning with '#' *)
+      let name =
+        match String.index name '#' with
+        | Some idx -> String.sub name ~pos:0 ~len:idx
+        | None -> name
+      in
+      (* Strip whitespace *)
+      let name = String.strip name in
+      try
+        (* Map the name with the crate prefix stripped (since we do not expect to see
+           the crate name in our OCaml source) to the fully-qualified name. *)
+        let coloncolon_idx = String.substr_index_exn name ~pattern:"::" in
+        let after_coloncolon_idx = coloncolon_idx + 2 in
+        assert (name.[after_coloncolon_idx] <> ':');
+        let name_without_crate = String.subo name ~pos:after_coloncolon_idx in
+        SMap.add map name_without_crate name
+      with _ ->
+        if name <> "" then
+          log "Failed to parse line in extern types file: %S" name;
+        map)
+
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
        buck run hphp/hack/src/hh_oxidize -- [target_file]"
@@ -122,6 +153,8 @@ let parse_args () =
   let regen_command = ref None in
   let rustfmt_path = ref None in
   let files = ref [] in
+  let by_ref = ref Configuration.(default.by_ref) in
+  let extern_types_file = ref None in
   let options =
     [
       ( "--out-dir",
@@ -133,9 +166,22 @@ let parse_args () =
       ( "--rustfmt-path",
         Arg.String (fun s -> rustfmt_path := Some s),
         " Path to rustfmt binary used to format output" );
+      ( "--by-ref",
+        Arg.Set by_ref,
+        " Use references instead of Box, slices instead of Vec and String" );
+      ( "--extern-types-file",
+        Arg.String (fun s -> extern_types_file := Some s),
+        " Use the types listed in this file rather than assuming all types"
+        ^ " are defined within the set of files being oxidized" );
     ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
+  let extern_types =
+    match !extern_types_file with
+    | None -> Configuration.(default.extern_types)
+    | Some filename -> parse_extern_types_file filename
+  in
+  Configuration.set { Configuration.by_ref = !by_ref; extern_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   match !files with
   | [] ->

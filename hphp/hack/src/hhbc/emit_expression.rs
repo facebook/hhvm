@@ -1472,8 +1472,7 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
                 .collect::<Result<_>>()?,
         ))
     };
-    let (x1, fields) = fields.split_at(std::cmp::min(fields.len(), limit));
-    let (x2, _) = fields.split_at(std::cmp::min(fields.len(), limit));
+    let (x1, x2) = fields.split_at(std::cmp::min(fields.len(), limit));
     Ok(match (x1, x2) {
         ([], []) => instr::empty(),
         (_, []) => inline(e, x1)?,

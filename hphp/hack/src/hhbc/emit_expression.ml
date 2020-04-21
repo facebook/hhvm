@@ -1765,10 +1765,10 @@ and emit_value_only_collection env pos es constructor =
            | A.AFvalue e
            -> gather [emit_expr env e; instr_add_new_elemc])
   in
-  match List.groupi ~break:(fun i _ _ -> i = limit) es with
-  | [] -> empty
-  | [x1] -> inline x1
-  | x1 :: x2 :: _ -> gather [inline x1; outofline x2]
+  match List.split_n es limit with
+  | ([], []) -> empty
+  | (x1, []) -> inline x1
+  | (x1, x2) -> gather [inline x1; outofline x2]
 
 and emit_keyvalue_collection ctype env pos es constructor =
   let (transform_instr, add_elem_instr) =

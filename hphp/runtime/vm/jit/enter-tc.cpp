@@ -35,11 +35,6 @@ namespace HPHP { namespace jit {
 namespace {
 
 ALWAYS_INLINE void preEnter(TCA start) {
-  if (debug) {
-    fflush(stdout);
-    fflush(stderr);
-  }
-
   assertx(tc::isValidCodeAddress(start));
   assertx(((uintptr_t)vmsp() & (sizeof(TypedValue) - 1)) == 0);
   assertx(((uintptr_t)vmfp() & (sizeof(TypedValue) - 1)) == 0);

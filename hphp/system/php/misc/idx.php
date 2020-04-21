@@ -4,7 +4,7 @@ namespace HH {
 
 /**
  * Returns the value at a key of a KeyedContainer, if this key is present.
- * This function simplifies the common pattern of checking for an key in
+ * This function simplifies the common pattern of checking for a key in
  * a KeyedContainer and using a default value if the key is not present.
  * You should NOT use `idx` as a replacement for accessing elements
  * of KeyedContainers, since this makes the code harder to reason about.

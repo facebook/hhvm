@@ -172,8 +172,8 @@ bool Repo::hasGlobalData() {
   return false;
 }
 
-void Repo::loadGlobalData(bool readArrayTable /* = true */) {
-  if (readArrayTable) m_lsrp.load(RuntimeOption::RepoLitstrLazyLoad);
+void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
+  if (readGlobalTables) m_lsrp.load(RuntimeOption::RepoLitstrLazyLoad);
 
   if (!RuntimeOption::RepoAuthoritative) return;
 
@@ -212,7 +212,7 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
         FTRACE(1, "{}", show(s_globalData));
       }
 
-      if (readArrayTable) {
+      if (readGlobalTables) {
         {
           RepoTxnQuery query(txn, stmt);
           auto key = std::string("arraytable");
@@ -228,19 +228,19 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
           decoder(s_globalData.ConstantFunctions);
           decoder.assertDone();
         }
-      }
 
-      if (RuntimeOption::EvalUseRepoAutoloadMap) {
-        {
-          RepoTxnQuery query(txn, stmt);
-          auto key = std::string("autoloadmap");
-          query.bindStdString("@key", key);
-          query.step();
-          if (!query.row()) {
-            throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
+        if (RuntimeOption::EvalUseRepoAutoloadMap) {
+          {
+            RepoTxnQuery query(txn, stmt);
+            auto key = std::string("autoloadmap");
+            query.bindStdString("@key", key);
+            query.step();
+            if (!query.row()) {
+              throw RepoExc("Can't find key = 'autoloadmap' in %s", tbl.c_str());
+            }
+            BlobDecoder decoder = query.getBlob(0, true);
+            s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
           }
-          BlobDecoder decoder = query.getBlob(0, true);
-          s_globalData.AutoloadMap = RepoAutoloadMapBuilder::serde(decoder);
         }
       }
 
@@ -312,7 +312,8 @@ void Repo::loadGlobalData(bool readArrayTable /* = true */) {
   exit(1);
 }
 
-void Repo::saveGlobalData(GlobalData&& newData) {
+void Repo::saveGlobalData(GlobalData&& newData,
+                          const RepoAutoloadMapBuilder& autoloadMapBuilder) {
   s_globalData = std::move(newData);
 
   auto const repoId = repoIdForNewUnit(UnitOrigin::File);
@@ -350,7 +351,7 @@ void Repo::saveGlobalData(GlobalData&& newData) {
     auto key = std::string("autoloadmap");
     query.bindStdString("@key", key);
     BlobEncoder encoder{true};
-    RepoAutoloadMapBuilder::get().serde(encoder);
+    autoloadMapBuilder.serde(encoder);
     query.bindBlob("@data", encoder, /* static */ true);
     query.exec();
   }

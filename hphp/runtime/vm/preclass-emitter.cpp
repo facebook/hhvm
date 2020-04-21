@@ -432,8 +432,6 @@ void PreClassRepoProxy::InsertPreClassStmt
   const_cast<PreClassEmitter&>(pce).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
-
-  RepoAutoloadMapBuilder::get().addClass(pce, unitSn);
 }
 
 void PreClassRepoProxy::GetPreClassesStmt

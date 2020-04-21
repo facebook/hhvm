@@ -125,7 +125,8 @@ void genText(const std::vector<std::unique_ptr<UnitEmitter>>& ues,
   }
 }
 
-void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
+void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
+                      const RepoAutoloadMapBuilder& autoloadMapBuilder) {
   auto const now = std::chrono::high_resolution_clock::now();
   auto const nanos =
     std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -185,7 +186,7 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable) {
     gd.ConstantFunctions.push_back(elm);
   }
   if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
-  Repo::get().saveGlobalData(std::move(gd));
+  Repo::get().saveGlobalData(std::move(gd), autoloadMapBuilder);
 }
 
 }
@@ -223,6 +224,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         emitters.clear();
       };
 
+      RepoAutoloadMapBuilder autoloadMapBuilder;
+
       auto program = std::move(ar->program());
       if (ues.size()) {
         assertx(!program.get());
@@ -231,12 +234,26 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           ue->m_symbol_refs.clear();
           ue->m_sn = id;
           ue->setSha1(SHA1 { id });
+          autoloadMapBuilder.addUnit(*ue);
           id++;
         }
         commitSome(ues);
       }
 
       HHBBC::UnitEmitterQueue ueq;
+
+      ar->finish();
+      ar.reset();
+
+      if (!program.get()) {
+        if (Option::GenerateBinaryHHBC) {
+          {
+            commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{},
+                             autoloadMapBuilder);
+          }
+        }
+        return;
+      }
 
       auto commitLoop = [&] {
         folly::Optional<Timer> commitTime;
@@ -252,6 +269,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
           if (!commitTime) {
             commitTime.emplace(Timer::WallTime, "committing units to repo");
           }
+          autoloadMapBuilder.addUnit(*ue);
           ues.push_back(std::move(ue));
           if (ues.size() == kBatchSize) {
             commitSome(ues);
@@ -259,19 +277,6 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         }
         if (ues.size()) commitSome(ues);
       };
-
-      ar->finish();
-      ar.reset();
-
-      if (!program.get()) {
-        if (Option::GenerateBinaryHHBC) {
-          {
-            auto guard = RepoAutoloadMapBuilder::collect();
-            commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{});
-          }
-        }
-        return;
-      }
 
       RuntimeOption::EvalJit = false; // For HHBBC to invoke builtins.
       std::unique_ptr<ArrayTypeTable::Builder> arrTable;
@@ -285,9 +290,8 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         });
 
       {
-        auto guard = RepoAutoloadMapBuilder::collect();
         commitLoop();
-        commitGlobalData(std::move(arrTable));
+        commitGlobalData(std::move(arrTable), autoloadMapBuilder);
       }
     }
     wp_thread.join();

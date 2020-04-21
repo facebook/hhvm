@@ -1326,8 +1326,6 @@ void UnitRepoProxy::InsertUnitTypeAliasStmt
   dataBlob(typeAlias);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
-
-  RepoAutoloadMapBuilder::get().addTypeAlias(typeAlias, unitSn);
 }
 
 void UnitRepoProxy::GetUnitTypeAliasesStmt::get(UnitEmitter& ue) {
@@ -1379,8 +1377,6 @@ void UnitRepoProxy::InsertUnitConstantStmt
   dataBlob(constant);
   query.bindBlob("@data", dataBlob, /* static */ true);
   query.exec();
-
-  RepoAutoloadMapBuilder::get().addConstant(constant, unitSn);
 }
 
 void UnitRepoProxy::GetUnitConstantsStmt::get(UnitEmitter& ue) {

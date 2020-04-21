@@ -43,6 +43,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+struct RepoAutoloadMapBuilder;
+
 namespace Native {
 struct FuncTable;
 }
@@ -136,7 +138,7 @@ struct Repo : RepoProxy {
    * Load the repo-global metadata table, including the global litstr
    * table.  Normally called during process initialization.
    */
-  void loadGlobalData(bool readArrayTable = true);
+  void loadGlobalData(bool readGlobalTables = true);
 
   /*
    * Access to global data.
@@ -157,7 +159,8 @@ struct Repo : RepoProxy {
    * No other threads may be reading or writing the repo GlobalData
    * when this is called.
    */
-  void saveGlobalData(GlobalData&& newData);
+  void saveGlobalData(GlobalData&& newData,
+                      const RepoAutoloadMapBuilder& autoloadMapBuilder);
 
  private:
   /*

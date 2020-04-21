@@ -27,49 +27,30 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-static RepoAutoloadMapBuilder::BuilderNoop s_builder;
-static RepoAutoloadMapBuilder::BuilderCollect* s_builderOverride = nullptr;
-
-void RepoAutoloadMapBuilder::init() {
-  assertx(!s_builderOverride);
-  s_builderOverride = new (vm_malloc(sizeof(RepoAutoloadMapBuilder::BuilderCollect)))
-    RepoAutoloadMapBuilder::BuilderCollect();
-}
-
-void RepoAutoloadMapBuilder::fini() {
-  assertx(s_builderOverride);
-  vm_free(s_builderOverride);
-  s_builderOverride = nullptr;
-}
-
-RepoAutoloadMapBuilder::BuilderBase& RepoAutoloadMapBuilder::get() {
-  if (s_builderOverride) {
-      return *s_builderOverride;
+void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
+  auto unitSn = ue.m_sn;
+  assertx(unitSn != -1 && "unitSn is invalid");
+  for (size_t n = 0; n < ue.numPreClasses(); ++n) {
+    auto pce = ue.pce(n);
+    if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
+      m_classes.insert(std::make_pair(pce->name(), unitSn));
+    }
   }
-  return s_builder;
-}
+  for (auto& fe : ue.fevec()) {
+    if (fe->top && !boost::ends_with(fe->name->slice(), "$memoize_impl")) {
+      m_funcs.insert(std::make_pair(fe->name, unitSn));
+    }
+  }
+  for (auto& ta : ue.typeAliases()) {
+    m_typeAliases.insert(std::make_pair(ta.name, unitSn));
+  }
 
-void RepoAutoloadMapBuilder::BuilderCollect::addClass(const PreClassEmitter& pre, int unitSn) {
-  if (!boost::starts_with(pre.name()->slice(), "Closure$")) {
-    m_classes.insert(std::make_pair(pre.name(), unitSn));
+  for (auto& c : ue.constants()) {
+    m_constants.insert(std::make_pair(c.name, unitSn));
   }
 }
 
-void RepoAutoloadMapBuilder::BuilderCollect::addFunc(const FuncEmitter& fe, int unitSn) {
-  if (fe.top && !boost::ends_with(fe.name->slice(), "$memoize_impl")) {
-    m_funcs.insert(std::make_pair(fe.name, unitSn));
-  }
-}
-
-void RepoAutoloadMapBuilder::BuilderCollect::addTypeAlias(const TypeAlias& ta, int unitSn) {
-  m_typeAliases.insert(std::make_pair(ta.name, unitSn));
-}
-
-void RepoAutoloadMapBuilder::BuilderCollect::addConstant(const Constant& c, int unitSn) {
-  m_constants.insert(std::make_pair(c.name, unitSn));
-}
-
-void RepoAutoloadMapBuilder::BuilderCollect::serde(BlobEncoder& sd) {
+void RepoAutoloadMapBuilder::serde(BlobEncoder& sd) const {
   serdeMap(sd, m_classes);
   serdeMap(sd, m_funcs);
   serdeMap(sd, m_typeAliases);

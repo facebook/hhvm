@@ -28,22 +28,13 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
+struct UnitEmitter;
 struct PreClassEmitter;
 struct FuncEmitter;
 struct TypeAlias;
 struct Constant;
 
 struct RepoAutoloadMapBuilder {
-
-  struct Guard {
-    Guard() {
-      RepoAutoloadMapBuilder::init();
-    }
-
-    ~Guard() {
-      RepoAutoloadMapBuilder::fini();
-    }
-  };
 
   template <typename Compare>
   using Map = tbb::concurrent_hash_map<
@@ -55,44 +46,14 @@ struct RepoAutoloadMapBuilder {
   using CaseInsensitiveMap = Map<StringDataHashICompare>;
   using CaseSensitiveMap = Map<StringDataHashCompare>;
 
-  struct BuilderBase {
-    virtual void addClass(const PreClassEmitter& ce, int unitSn) = 0;
-    virtual void addFunc(const FuncEmitter& fe, int unitSn) = 0;
-    virtual void addTypeAlias(const TypeAlias& fe, int unitSn) = 0;
-    virtual void addConstant(const Constant& fe, int unitSn) = 0;
-    virtual void serde(BlobEncoder& sd) = 0;
-  };
-
   friend struct FuncEmitter;
 
-  struct BuilderNoop : public BuilderBase {
-    void addClass(const PreClassEmitter& ce, int unitSn) {};
-    void addFunc(const FuncEmitter& fe, int unitSn) {};
-    void addTypeAlias(const TypeAlias& fe, int unitSn) {};
-    void addConstant(const Constant& fe, int unitSn) {};
-    void serde(BlobEncoder& sd) {
-      assertx(false && "Can not call serde on BuilderNoop");
-    }
-  };
-
-  struct BuilderCollect : public BuilderBase {
-    void addClass(const PreClassEmitter& ce, int unitSn);
-    void addFunc(const FuncEmitter& fe, int unitSn);
-    void addTypeAlias(const TypeAlias& fe, int unitSn);
-    void addConstant(const Constant& fe, int unitSn);
-    void serde(BlobEncoder& sd);
-
-  private:
-    CaseInsensitiveMap m_classes;
-    CaseInsensitiveMap m_funcs;
-    CaseInsensitiveMap m_typeAliases;
-    CaseSensitiveMap m_constants;
-  };
-
   static std::unique_ptr<RepoAutoloadMap> serde(BlobDecoder& sd);
+  void serde(BlobEncoder& sd) const;
 
-  static RepoAutoloadMapBuilder::BuilderBase& get();
+  void addUnit(const UnitEmitter& ue);
 
+private:
   template<class Compare>
   static void serdeMap(BlobEncoder& sd, Map<Compare> map) {
     sd(map.size());
@@ -119,13 +80,10 @@ struct RepoAutoloadMapBuilder {
     return map;
   }
 
-  static Guard collect() {
-    return Guard();
-  }
-
-private:
-  static void init();
-  static void fini();
+  CaseInsensitiveMap m_classes;
+  CaseInsensitiveMap m_funcs;
+  CaseInsensitiveMap m_typeAliases;
+  CaseSensitiveMap m_constants;
 };
 
 //////////////////////////////////////////////////////////////////////

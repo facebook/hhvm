@@ -597,8 +597,6 @@ void FuncRepoProxy::InsertFuncStmt
   const_cast<FuncEmitter&>(fe).serdeMetaData(extraBlob);
   query.bindBlob("@extraData", extraBlob, /* static */ true);
   query.exec();
-
-  RepoAutoloadMapBuilder::get().addFunc(fe, unitSn);
 }
 
 void FuncRepoProxy::GetFuncsStmt

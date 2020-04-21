@@ -45,7 +45,7 @@ interface PlainSprintf {
  <<__Rx>>
   public function format_d(mixed $s) : string;
  <<__Rx>>
-  public function format_s(mixed $s) : string;
+  public function format_s(?arraykey $s) : string;
  <<__Rx>>
   public function format_u(?int $s) : string;
  <<__Rx>>

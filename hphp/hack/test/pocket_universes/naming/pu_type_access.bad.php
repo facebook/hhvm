@@ -29,4 +29,8 @@ final class C<TBase as Base> {
   public function foo<TP as TBase:@Param>(TP $param): TP:@X {
     while (true) {}
   }
+
+  public function bar<TP as TBase:@Param>(TP $param): vec<TP:@X> {
+    return vec[];
+  }
 }

@@ -374,16 +374,23 @@ struct DceState {
   DceActionMap actionMap;
 
   /*
-   * Dead across Call, Yield or Await.
+   * Locals that are unset at the next possible offset.
    *
-   * At a given instruction during the DCE analysis a local is dead across if
-   * it is dead after the current instruction, and remains dead through the
-   * next Call, Yield or Await opcode along some possible control flow path.
-   * This information is useful in deciding if an UnsetL may be advantageous
-   * vs. when it should be DCEd.  We take this a step further and use this
-   * information to insert UnsetL where we believe they are advantageous.
+   * At a given instruction during the DCE analysis a local "will be unset" if
+   * the local is currently dead, and is unset before any control flow or
+   * opcode other than member base, member dim and unset ops.
    */
-  std::bitset<kMaxTrackedLocals> deadAcrossLocals;
+  std::bitset<kMaxTrackedLocals> willBeUnsetLocals;
+
+  /*
+   * Locals that may need to be unset in successor blocks are accumlated into
+   * this bitset.
+   *
+   * A successor may need to unset a local for us if we are unable to because
+   * the UnsetL would be placed in an illegal position (after control flow ops).
+   */
+  std::bitset<kMaxTrackedLocals> mayNeedUnsetting;
+  std::bitset<kMaxTrackedLocals> mayNeedUnsettingExn;
 
   /*
    * The set of local names thate were ever referenced in this block.  This set
@@ -674,14 +681,6 @@ bool isLocLive(Env& env, uint32_t id) {
     return true;
   }
   return env.dceState.liveLocals[id];
-}
-
-bool isDeadAcross(Env& env, uint32_t id) {
-  if (id >= kMaxTrackedLocals) {
-    // Conservatively assume it is not dead across.
-    return false;
-  }
-  return env.dceState.deadAcrossLocals[id];
 }
 
 Type locRaw(Env& env, LocalId loc) {
@@ -1488,17 +1487,9 @@ void dce(Env& env, const bc::UnsetL& op) {
   auto const oldTy = locRaw(env, op.loc1);
   if (oldTy.subtypeOf(BUninit)) return markDead(env);
 
-  // During local dce we assume all unsets that could free heap objects are
-  // beneficial.  This prevents local dce from removing UnsetLs that global
-  // dce inserted using global knowledge.  This is unnecessary right now,
-  // because local dce assumes that all locals are live at the end of the
-  // block, but this future proofs the UnsetL insertion logic in the event this
-  // changes.
   auto const couldFreeHeapObj = !oldTy.subtypeOf(TUnc);
-  auto const beneficial = couldFreeHeapObj &&
-                          (env.dceState.isLocal || isDeadAcross(env, op.loc1));
   auto const effects = isLocVolatile(env, op.loc1);
-  if (!isLocLive(env, op.loc1) && !effects && !beneficial) {
+  if (!isLocLive(env, op.loc1) && !effects && !couldFreeHeapObj) {
     return markDead(env);
   }
   if (effects) {
@@ -2055,12 +2046,6 @@ struct DceOutState {
   std::bitset<kMaxTrackedLocals>             locLiveExn;
 
   /*
-   * The union of the deadAcrossIn states of each normal successor for
-   * locals.
-   */
-  std::bitset<kMaxTrackedLocals>             locDeadAcross;
-
-  /*
    * The union of the dceStacks from the start of the normal successors.
    */
   folly::Optional<std::vector<UseInfo>>      dceStack;
@@ -2097,9 +2082,11 @@ dce_visit(const Index& index,
 
   auto dceState = DceState{ index, fa };
   dceState.liveLocals = dceOutState.locLive;
-  dceState.deadAcrossLocals = dceOutState.locDeadAcross;
   dceState.isLocal    = dceOutState.isLocal;
   dceState.remappingIndex = localRemappingIndex;
+  // Any locals live out of the block may be desirable to unset in successors
+  // if they are not live there.
+  dceState.mayNeedUnsetting = dceState.liveLocals;
 
   auto const blk = fa.ctx.func->blocks[bid].get();
   auto const dceStkSz = [&] {
@@ -2141,6 +2128,7 @@ dce_visit(const Index& index,
       states[idx+1].first,
       {},
     };
+    auto const liveAfter = dceState.liveLocals;
     auto const handled = [&] {
       if (dceState.minstrUI) {
         if (visit_env.flags.wasPEI) {
@@ -2191,12 +2179,31 @@ dce_visit(const Index& index,
       addInterference(visit_env, dceState.liveLocals | visit_env.liveInside);
     }
 
-    // Any local that is live before this op, dead after this op, and remains
-    // dead through a Call, Await or Yield may be worth unsetting.  We also
-    // check that we won't be inserting these UnsetLs as the last op in a
-    // block to prevent a control flow ops from becoming non terminal.
-    auto const unsetable = dceState.deadAcrossLocals & dceState.liveLocals;
-    if (unsetable.any() && idx != blk->hhbcs.size() - 1) {
+    // Any local that is live before this op, dead after this op may be worth
+    // unsetting.  We check that we won't be inserting these UnsetLs as the
+    // last op in a block to prevent a control flow ops from becoming non
+    // terminal.
+    auto const unsetable = (~liveAfter) & dceState.liveLocals &
+                           (~dceState.willBeUnsetLocals);
+
+    // If we have a PEI instruction, we should try to unset the unsetable
+    // locals at the start of the exception block.
+    if (states[idx].second.wasPEI && blk->throwExit != NoBlockId) {
+      dceState.mayNeedUnsettingExn |= unsetable | liveAfter;
+    }
+    auto const opIsCntrlFlow = [&] {
+      if (idx != blk->hhbcs.size() - 1) return false;
+      if (isRet(op.op)) return true;
+      bool b = false;
+      op.forEachTarget([&b] (BlockId) { b = true; });
+      return b;
+    };
+    if (opIsCntrlFlow()) {
+      // We can't put Unsets in the last position in a block (control flow ops
+      // must be last).  So when the last op in a block needs something unset
+      // we flag it as maybe needing to be unset in all successors.
+      dceState.mayNeedUnsetting |= unsetable;
+    } else if (unsetable.any() && !visit_env.stateAfter.unreachable) {
       auto bcs = eager_unsets(unsetable, fa.ctx.func, [&](uint32_t i) {
         return visit_env.stateAfter.locals[i];
       });
@@ -2212,21 +2219,16 @@ dce_visit(const Index& index,
       }
     }
 
-    // Clear out anything live.
-    dceState.deadAcrossLocals &= ~(dceState.liveLocals | visit_env.liveInside);
-    switch (op.op) {
-      case Op::Await: case Op::AwaitAll: case Op::Yield:
-      case Op::YieldK: case Op::YieldFromDelegate:
-      case Op::FCallBuiltin: case Op::FCallClsMethod:
-      case Op::FCallClsMethodD: case Op::FCallClsMethodS:
-      case Op::FCallClsMethodSD: case Op::FCallCtor:
-      case Op::FCallFunc: case Op::FCallFuncD:
-      case Op::FCallObjMethod: case Op::FCallObjMethodD:
-        dceState.deadAcrossLocals |= ~dceState.liveLocals;
-        break;
-      default:
-        break;
-    };
+    // Update the locals that will be unset.
+    if (op.op == Op::UnsetL) {
+      if (op.UnsetL.loc1 < kMaxTrackedLocals) {
+        dceState.willBeUnsetLocals[op.UnsetL.loc1] = true;
+      }
+    } else if (visit_env.stateAfter.unreachable) {
+      dceState.willBeUnsetLocals.set();
+    } else if (!(isMemberFinalOp(op.op) || isMemberDimOp(op.op))) {
+      dceState.willBeUnsetLocals.reset();
+    }
 
     FTRACE(4, "    dce frame: {}\n",
            loc_bits_string(fa.ctx.func, dceState.liveLocals));
@@ -2261,9 +2263,10 @@ dce_visit(const Index& index,
 
 struct DceAnalysis {
   std::bitset<kMaxTrackedLocals>      locLiveIn;
-  std::bitset<kMaxTrackedLocals>      locDeadAcrossIn;
   std::vector<UseInfo>                stack;
   LocationIdSet                       forcedLiveLocations;
+  std::bitset<kMaxTrackedLocals>      locMayNeedUnsetting;
+  std::bitset<kMaxTrackedLocals>      locMayNeedUnsettingExn;
 };
 
 DceAnalysis analyze_dce(const Index& index,
@@ -2278,9 +2281,10 @@ DceAnalysis analyze_dce(const Index& index,
                                 localRemappingIndex)) {
     return DceAnalysis {
       dceState->liveLocals,
-      dceState->deadAcrossLocals,
       dceState->stack,
-      dceState->forcedLiveLocations
+      dceState->forcedLiveLocations,
+      dceState->mayNeedUnsetting,
+      dceState->mayNeedUnsettingExn
     };
   }
   return DceAnalysis {};
@@ -2506,8 +2510,9 @@ void dce_perform(php::Func& func, const DceActionMap& actionMap) {
 
 struct DceOptResult {
   std::bitset<kMaxTrackedLocals> usedLocalNames;
+  std::bitset<kMaxTrackedLocals> locLiveIn;
+  std::bitset<kMaxTrackedLocals> willBeUnsetLocals;
   DceActionMap actionMap;
-  std::bitset<kMaxTrackedLocals> deadAcrossLocals;
   bool didAddOpts{false};
 };
 
@@ -2526,8 +2531,9 @@ optimize_dce(const Index& index,
 
   return {
     std::move(dceState->usedLocalNames),
+    std::move(dceState->liveLocals),
+    std::move(dceState->willBeUnsetLocals),
     std::move(dceState->actionMap),
-    std::move(dceState->deadAcrossLocals),
     dceState->didAddOpts
   };
 }
@@ -3027,6 +3033,14 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
   }
 
   /*
+   * The set of locals that may need to be unset by a succesor block.
+   */
+  std::vector<std::bitset<kMaxTrackedLocals>>
+    locMayNeedUnsetting(ai.ctx.func->blocks.size());
+  std::vector<std::bitset<kMaxTrackedLocals>>
+    locMayNeedUnsettingExn(ai.ctx.func->blocks.size());
+
+  /*
    * Iterate on live out states until we reach a fixed point.
    *
    * This algorithm treats the exceptional live-out states differently
@@ -3061,6 +3075,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
               loc_bits_string(ai.ctx.func, result.locLiveIn));
 
     processForcedLive(result.forcedLiveLocations);
+    locMayNeedUnsetting[bid] = result.locMayNeedUnsetting;
+    locMayNeedUnsettingExn[bid] = result.locMayNeedUnsettingExn;
 
     // If blk ends with an iterator block, and succId is the loop body for
     // this iterator, this method returns the iterator's arguments so that
@@ -3126,7 +3142,6 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       FTRACE(2, "  -> {}\n", pid);
       auto& pbs = blockStates[pid];
       auto const oldPredLocLive = pbs.locLive;
-      auto const oldPredLocDeadAcross = pbs.locDeadAcross;
       auto const pred = ai.ctx.func->blocks[pid].get();
       if (auto const ita = killIterOutputs(pred, bid)) {
         auto const key = ita->hasKey();
@@ -3140,10 +3155,8 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       } else {
         pbs.locLive |= result.locLiveIn;
       }
-      pbs.locDeadAcross |= result.locDeadAcrossIn;
-      pbs.locDeadAcross &= ~pbs.locLive;
-      auto changed = pbs.locLive != oldPredLocLive ||
-                     pbs.locDeadAcross != oldPredLocDeadAcross;
+
+      auto changed = pbs.locLive != oldPredLocLive;
 
       changed |= [&] {
         if (isCFPushTaken(pred, bid)) {
@@ -3179,13 +3192,15 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
     }
   }
 
-  auto const predLiveLocals = [&] (BlockId bid){
-    std::bitset<kMaxTrackedLocals> live;
+  auto const predMayNeedUnsetting = [&] (BlockId bid){
+    std::bitset<kMaxTrackedLocals> needUnsetting;
     for (auto const pid : nonThrowPreds[bid]) {
-      auto const& pbs = blockStates[pid];
-      live |= pbs.locLive;
+      needUnsetting |= locMayNeedUnsetting[pid];
     }
-    return live;
+    for (auto const pid : throwPreds[bid]) {
+      needUnsetting |= locMayNeedUnsettingExn[pid];
+    }
+    return needUnsetting;
   };
 
   /*
@@ -3207,8 +3222,10 @@ bool global_dce(const Index& index, const FuncAnalysis& ai) {
       blockStates[bid]
     );
 
-    auto const unsetable = ret.deadAcrossLocals & predLiveLocals(bid);
-    if (unsetable.any()) {
+    auto const unsetable = (~ret.locLiveIn) & predMayNeedUnsetting(bid) &
+                           (~ret.willBeUnsetLocals);
+    if (unsetable.any() && ai.bdata[bid].stateIn.initialized &&
+        !ai.bdata[bid].stateIn.unreachable) {
       auto bcs = eager_unsets(unsetable, ai.ctx.func, [&](uint32_t i) {
         return ai.bdata[bid].stateIn.locals[i];
       });

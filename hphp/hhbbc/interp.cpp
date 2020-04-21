@@ -6002,7 +6002,7 @@ StepFlags step(Interp& interp, const Bytecode& op) {
   auto noop    = [] (BlockId, const State*) {};
   ISS env { interp, noop };
   env.analyzeDepth++;
-  dispatch(env, op);
+  default_dispatch(env, op);
   if (env.state.unreachable) {
     env.collect.mInstrState.clear();
   }

@@ -17,6 +17,8 @@ CAMLprim value hh_shared_init(
 value hh_check_heap_overflow(void);
 /* Must be called by every worker before any operation is performed. */
 value hh_connect(value connector, value worker_id_val);
+/* Can only be called after init or after earlier connect. */
+value hh_get_handle(void);
 
 /*****************************************************************************/
 /* Heap diagnostics. */
@@ -61,6 +63,18 @@ CAMLprim value hh_collect(void);
 /* Returns the value associated to a given key, and deserialize it. */
 /* The key MUST be present. */
 CAMLprim value hh_get_and_deserialize(value key);
+
+/*****************************************************************************/
+/* Raw access for network proxying.
+   hh_get_raw key |> hh_deserialize_raw = hh_get key
+   hh_serialize_raw data |> hh_add_raw key = hh_add key data
+ */
+/*****************************************************************************/
+/* The key MUST be present. */
+CAMLprim value hh_get_raw(value key);
+CAMLprim value hh_add_raw(value key, value heap_entry);
+CAMLprim value hh_serialize_raw(value data);
+CAMLprim value hh_deserialize_raw(value heap_entry);
 
 /*****************************************************************************/
 /* Dependency table operations. */

@@ -230,7 +230,10 @@ static int win32_getpagesize(void) {
 /* Convention: .*_b = Size in bytes. */
 
 static size_t global_size_b;
+static size_t global_size;
 static size_t heap_size;
+static size_t dep_table_pow;
+static size_t hash_table_pow;
 
 /* Used for the dependency hashtable */
 static uint64_t dep_size;
@@ -991,8 +994,11 @@ static void set_sizes(
 
   size_t page_size = getpagesize();
 
+  global_size = config_global_size;
   global_size_b = sizeof(global_storage[0]) + config_global_size;
   heap_size = config_heap_size;
+  dep_table_pow = config_dep_table_pow;
+  hash_table_pow = config_hash_table_pow;
 
   dep_size        = 1ul << config_dep_table_pow;
   dep_size_b      = dep_size * sizeof(deptbl[0]);
@@ -1113,6 +1119,23 @@ value hh_connect(value connector, value worker_id_val) {
   define_globals(shared_mem_init);
 
   CAMLreturn(Val_unit);
+}
+
+/* Can only be called after init or after earlier connect. */
+value hh_get_handle(void) {
+  CAMLparam0();
+  CAMLlocal1(
+      connector
+  );
+  connector = caml_alloc_tuple(6);
+  Store_field(connector, 0, Val_handle(memfd));
+  Store_field(connector, 1, Val_long(global_size));
+  Store_field(connector, 2, Val_long(heap_size));
+  Store_field(connector, 3, Val_long(dep_table_pow));
+  Store_field(connector, 4, Val_long(hash_table_pow));
+  Store_field(connector, 5, Val_long(num_workers));
+
+  CAMLreturn(connector);
 }
 
 /*****************************************************************************/
@@ -1696,6 +1719,78 @@ static heap_entry_t* hh_alloc(hh_header_t header) {
 }
 
 /*****************************************************************************/
+/* Serializes an ocaml value into an Ocaml raw heap_entry (bytes) */
+/*****************************************************************************/
+value hh_serialize_raw(value data) {
+  CAMLparam1(data);
+  CAMLlocal1(result);
+  char* data_value = NULL;
+  size_t size = 0;
+  size_t uncompressed_size = 0;
+  storage_kind kind = 0;
+
+  // If the data is an Ocaml string it is more efficient to copy its contents
+  // directly instead of serializing it.
+  if (Is_block(data) && Tag_val(data) == String_tag) {
+    data_value = String_val(data);
+    size = caml_string_length(data);
+    kind = KIND_STRING;
+  } else {
+    intnat serialized_size;
+    // We are responsible for freeing the memory allocated by this function
+    // After copying data_value we need to make sure to free data_value
+    caml_output_value_to_malloc(
+      data, Val_int(0)/*flags*/, &data_value, &serialized_size);
+
+    assert(serialized_size >= 0);
+    size = (size_t) serialized_size;
+    kind = KIND_SERIALIZED;
+  }
+
+  // We limit the size of elements we will allocate to our heap to ~2GB
+  assert(size < 0x80000000);
+
+  size_t max_compression_size = LZ4_compressBound(size);
+  char* compressed_data = malloc(max_compression_size);
+  size_t compressed_size = LZ4_compress_default(
+    data_value,
+    compressed_data,
+    size,
+    max_compression_size);
+
+  if (compressed_size != 0 && compressed_size < size) {
+    uncompressed_size = size;
+    size = compressed_size;
+  }
+
+  // Both size and uncompressed_size will certainly fit in 31 bits, as the
+  // original size fits per the assert above and we check that the compressed
+  // size is less than the original size.
+  hh_header_t header
+    = size << 33
+    | (uint64_t)kind << 32
+    | uncompressed_size << 1
+    | 1;
+
+  size_t ocaml_size = Heap_entry_total_size(header);
+  result = caml_alloc_string(ocaml_size);
+  heap_entry_t *addr = (heap_entry_t *)Bytes_val(result);
+  addr->header = header;
+  memcpy(&addr->data,
+         uncompressed_size ? compressed_data : data_value,
+         size);
+
+  free(compressed_data);
+  // We temporarily allocate memory using malloc to serialize the Ocaml object.
+  // When we have finished copying the serialized data we need to free the
+  // memory we allocated to avoid a leak.
+  if (kind == KIND_SERIALIZED) {
+    free(data_value);
+  }
+  CAMLreturn(result);
+}
+
+/*****************************************************************************/
 /* Allocates an ocaml value in the shared heap.
  * Any ocaml value is valid, except closures. It returns the address of
  * the allocated chunk.
@@ -1889,6 +1984,109 @@ value hh_add(value key, value data) {
 }
 
 /*****************************************************************************/
+/* Stores a raw bytes representation of an heap_entry in the shared heap.  It
+ * returns the address of the allocated chunk.
+ */
+/*****************************************************************************/
+static heap_entry_t* hh_store_raw_entry(
+  value data
+) {
+  size_t size = caml_string_length(data) - sizeof(heap_entry_t);
+  heap_entry_t* entry = (heap_entry_t*)Bytes_val(data);
+
+  hh_header_t header = entry->header;
+  heap_entry_t* addr = hh_alloc(header);
+  memcpy(&addr->data,
+         entry->data,
+         size);
+  return addr;
+}
+
+/*****************************************************************************/
+/* Writes the raw serialized data in one of the slots of the hashtable. There
+ * might be concurrent writers, when that happens, the first writer wins.
+ *
+ */
+/*****************************************************************************/
+static value write_raw_at(unsigned int slot, value data) {
+  CAMLparam1(data);
+  // Try to write in a value to indicate that the data is being written.
+  if(
+     __sync_bool_compare_and_swap(
+       &(hashtbl[slot].addr),
+       NULL,
+       HASHTBL_WRITE_IN_PROGRESS
+     )
+  ) {
+    assert_allow_hashtable_writes_by_current_process();
+    hashtbl[slot].addr = hh_store_raw_entry(data);
+    __sync_fetch_and_add(hcounter_filled, 1);
+  }
+  CAMLreturn(Val_unit);
+}
+
+/*****************************************************************************/
+/* Adds a key and raw heap_entry (represented as bytes) to the hashtable. Used
+ * for over the network proxying.
+ *
+ * Returns unit.
+ */
+/*****************************************************************************/
+CAMLprim value hh_add_raw(value key, value data) {
+  CAMLparam2(key, data);
+  check_should_exit();
+  uint64_t hash = get_hash(key);
+  unsigned int slot = hash & (hashtbl_size - 1);
+  unsigned int init_slot = slot;
+  while(1) {
+    uint64_t slot_hash = hashtbl[slot].hash;
+
+    if(slot_hash == hash) {
+      CAMLreturn(write_raw_at(slot, data));
+    }
+
+    if (*hcounter >= hashtbl_size) {
+      // We're never going to find a spot
+      raise_hash_table_full();
+    }
+
+    if(slot_hash == 0) {
+      // We think we might have a free slot, try to atomically grab it.
+      if(__sync_bool_compare_and_swap(&(hashtbl[slot].hash), 0, hash)) {
+        uint64_t size = __sync_fetch_and_add(hcounter, 1);
+        // Sanity check
+        assert(size < hashtbl_size);
+        CAMLreturn(write_raw_at(slot, data));
+      }
+
+      // Grabbing it failed -- why? If someone else is trying to insert
+      // the data we were about to, try to insert it ourselves too.
+      // Otherwise, keep going.
+      // Note that this read relies on the __sync call above preventing the
+      // compiler from caching the value read out of memory. (And of course
+      // isn't safe on any arch that requires memory barriers.)
+      if(hashtbl[slot].hash == hash) {
+        // Some other thread already grabbed this slot to write this
+        // key, but they might not have written the address (or even
+        // the sigil value) yet. We can't return from hh_add until we
+        // know that hh_mem would succeed, which is to say that addr is
+        // no longer null. To make sure hh_mem will work, we try
+        // writing the value ourselves; either we insert it ourselves or
+        // we know the address is now non-NULL.
+        CAMLreturn(write_raw_at(slot, data));
+      }
+    }
+
+    slot = (slot + 1) & (hashtbl_size - 1);
+    if (slot == init_slot) {
+      // We're never going to find a spot
+      raise_hash_table_full();
+    }
+  }
+  CAMLreturn(Val_unit);
+}
+
+/*****************************************************************************/
 /* Finds the slot corresponding to the key in a hash table. The returned slot
  * is either free or points to the key.
  */
@@ -2029,6 +2227,40 @@ CAMLprim value hh_get_and_deserialize(value key) {
   unsigned int slot = find_slot(key);
   assert(hashtbl[slot].hash == get_hash(key));
   result = hh_deserialize(hashtbl[slot].addr);
+  CAMLreturn(result);
+}
+
+/*****************************************************************************/
+/* Returns Ocaml bytes representing the raw heap_entry. Key must exist. */
+/* The key MUST be present. */
+/*****************************************************************************/
+CAMLprim value hh_get_raw(value key) {
+  CAMLparam1(key);
+  check_should_exit();
+  CAMLlocal1(result);
+
+  unsigned int slot = find_slot(key);
+  assert(hashtbl[slot].hash == get_hash(key));
+
+  heap_entry_t *elt = hashtbl[slot].addr;
+  size_t size = Heap_entry_total_size(elt->header);
+  char *data = (char *)elt;
+  result = caml_alloc_string(size);
+  memcpy(Bytes_val(result), data, size);
+  CAMLreturn(result);
+}
+
+/*****************************************************************************/
+/* Returns result of deserializing and possibly uncompressing a raw heap_entry
+ * passed in as Ocaml bytes. */
+/*****************************************************************************/
+CAMLprim value hh_deserialize_raw(value heap_entry) {
+  CAMLparam1(heap_entry);
+  check_should_exit();
+  CAMLlocal1(result);
+
+  heap_entry_t* entry = (heap_entry_t*)Bytes_val(heap_entry);
+  result = hh_deserialize(entry);
   CAMLreturn(result);
 }
 

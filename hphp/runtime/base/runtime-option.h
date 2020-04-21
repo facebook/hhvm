@@ -1107,7 +1107,6 @@ struct RuntimeOption {
   F(bool, HackArrCompatTypeHintNotices, false)                          \
   F(bool, HackArrCompatTypeHintPolymorphism, false)                     \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
-  F(bool, HackArrCompatHackArrCmpNotices, false)                        \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
   F(bool, HackArrCompatCompactSerializeNotices, false)                  \
@@ -1115,9 +1114,6 @@ struct RuntimeOption {
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
   F(bool, HackArrDVArrs, false)                                         \
-  /* Changes Hack arrays so they == true when not empty and == false    \
-   * when empty, instead of always being != any boolean or null. */     \
-  F(bool, HackArrEmptyBasedBoolEqCmp, false)                            \
   /* Raise a notice for `$dict is shape` and `$vec is tuple`. */        \
   F(bool, HackArrIsShapeTupleNotices, false)                            \
   /* Enable instrumentation and information in the repo for tracking    \

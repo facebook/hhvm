@@ -235,7 +235,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   BIND_HAC_OPTION_SELF(IsArrayNotices)
   BIND_HAC_OPTION_SELF(TypeHintNotices)
   BIND_HAC_OPTION_SELF(DVCmpNotices)
-  BIND_HAC_OPTION_SELF(HackArrCmpNotices)
   BIND_HAC_OPTION_SELF(SerializeNotices)
   BIND_HAC_OPTION_SELF(CompactSerializeNotices)
 
@@ -245,9 +244,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalHackArrDVArrs,
                ini, config, "HackArrDVArrs",
                RuntimeOption::EvalHackArrDVArrs);
-  Config::Bind(RuntimeOption::EvalHackArrEmptyBasedBoolEqCmp,
-               ini, config, "HackArrEmptyBasedBoolEqCmp",
-               RuntimeOption::EvalHackArrEmptyBasedBoolEqCmp);
 
   Config::Bind(RuntimeOption::EvalForbidDynamicCallsToFunc,
                ini, config, "ForbidDynamicCallsToFunc",

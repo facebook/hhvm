@@ -108,19 +108,12 @@ struct Repo::GlobalData {
   bool HackArrCompatIsVecDictNotices = false;
   bool HackArrCompatTypeHintNotices = false;
   bool HackArrCompatDVCmpNotices = false;
-  bool HackArrCompatHackArrCmpNotices = false;
   bool HackArrCompatSerializeNotices = false;
 
   /*
    * Are d/varrays dicts and vecs?
    */
   bool HackArrDVArrs = false;
-
-  /*
-   * Are ==/!= comparisons between Hack arrays and bool/null based on the
-   * array's emptiness?
-   */
-  bool HackArrEmptyBasedBoolEqCmp = false;
 
   /*
    * Should the extension containing HHVM intrinsics be enabled?
@@ -206,10 +199,8 @@ struct Repo::GlobalData {
       (HackArrCompatIsVecDictNotices)
       (HackArrCompatTypeHintNotices)
       (HackArrCompatDVCmpNotices)
-      (HackArrCompatHackArrCmpNotices)
       (HackArrCompatSerializeNotices)
       (HackArrDVArrs)
-      (HackArrEmptyBasedBoolEqCmp)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)
       (ForbidDynamicCallsToClsMeth)

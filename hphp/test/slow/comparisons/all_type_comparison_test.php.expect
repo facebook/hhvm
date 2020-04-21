@@ -97,7 +97,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 null cmp array arr26:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp vec vec1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 null cmp vec vec2:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp vec vec3:
@@ -119,7 +119,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 null cmp vec vec11:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp dict dict1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 null cmp dict dict2:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp dict dict3:
@@ -141,7 +141,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 null cmp dict dict11:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp keyset ks1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 null cmp keyset ks2:
 F       T       Err     Err     F       T       Err     Err     Err
 null cmp keyset ks3:
@@ -345,7 +345,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 false cmp array arr26:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp vec vec1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 false cmp vec vec2:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp vec vec3:
@@ -367,7 +367,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 false cmp vec vec11:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp dict dict1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 false cmp dict dict2:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp dict dict3:
@@ -389,7 +389,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 false cmp dict dict11:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp keyset ks1:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 false cmp keyset ks2:
 F       T       Err     Err     F       T       Err     Err     Err
 false cmp keyset ks3:
@@ -595,73 +595,73 @@ F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec1:
 F       T       Err     Err     F       T       Err     Err     Err
 true cmp vec vec2:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec3:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec4:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec5:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec6:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec7:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec8:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec9:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec10:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp vec vec11:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict1:
 F       T       Err     Err     F       T       Err     Err     Err
 true cmp dict dict2:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict3:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict4:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict5:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict6:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict7:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict8:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict9:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict10:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp dict dict11:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks1:
 F       T       Err     Err     F       T       Err     Err     Err
 true cmp keyset ks2:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks3:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks4:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks5:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks6:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks7:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks8:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks9:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks10:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks11:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks12:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp keyset ks13:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 true cmp object a1:
 F       T       F       T       T       F       T       F       0
 true cmp object a2:
@@ -11905,9 +11905,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr26 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp null:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec1 cmp false:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec1 cmp true:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec1 cmp int 0:
@@ -12157,7 +12157,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec2 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec2 cmp int 99:
@@ -12405,7 +12405,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec3 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec3 cmp int 99:
@@ -12653,7 +12653,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec4 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec4 cmp int 99:
@@ -12901,7 +12901,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec5 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec5 cmp int 99:
@@ -13149,7 +13149,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec6 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec6 cmp int 99:
@@ -13397,7 +13397,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec7 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec7 cmp int 99:
@@ -13645,7 +13645,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec8 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec8 cmp int 99:
@@ -13893,7 +13893,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec9 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec9 cmp int 99:
@@ -14141,7 +14141,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec10 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec10 cmp int 99:
@@ -14389,7 +14389,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 vec vec11 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp int 99:
@@ -14633,9 +14633,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 vec vec11 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp null:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict1 cmp false:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict1 cmp true:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict1 cmp int 0:
@@ -14885,7 +14885,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict2 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict2 cmp int 99:
@@ -15133,7 +15133,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict3 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict3 cmp int 99:
@@ -15381,7 +15381,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict4 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict4 cmp int 99:
@@ -15629,7 +15629,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict5 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict5 cmp int 99:
@@ -15877,7 +15877,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict6 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict6 cmp int 99:
@@ -16125,7 +16125,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict7 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict7 cmp int 99:
@@ -16373,7 +16373,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict8 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict8 cmp int 99:
@@ -16621,7 +16621,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict9 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict9 cmp int 99:
@@ -16869,7 +16869,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict10 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict10 cmp int 99:
@@ -17117,7 +17117,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 dict dict11 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp int 99:
@@ -17361,9 +17361,9 @@ F       T       Err     Err     F       T       Err     Err     Err
 dict dict11 cmp resource f3:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp null:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks1 cmp false:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks1 cmp true:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks1 cmp int 0:
@@ -17613,7 +17613,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks2 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks2 cmp int 99:
@@ -17861,7 +17861,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks3 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks3 cmp int 99:
@@ -18109,7 +18109,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks4 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks4 cmp int 99:
@@ -18357,7 +18357,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks5 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks5 cmp int 99:
@@ -18605,7 +18605,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks6 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks6 cmp int 99:
@@ -18853,7 +18853,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks7 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks7 cmp int 99:
@@ -19101,7 +19101,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks8 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks8 cmp int 99:
@@ -19349,7 +19349,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks9 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks9 cmp int 99:
@@ -19597,7 +19597,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks10 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks10 cmp int 99:
@@ -19845,7 +19845,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks11 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks11 cmp int 99:
@@ -20093,7 +20093,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks12 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks12 cmp int 99:
@@ -20341,7 +20341,7 @@ F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp false:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp true:
-F       T       Err     Err     F       T       Err     Err     Err
+F       T       Err     Err     T       F       Err     Err     Err
 keyset ks13 cmp int 0:
 F       T       Err     Err     F       T       Err     Err     Err
 keyset ks13 cmp int 99:

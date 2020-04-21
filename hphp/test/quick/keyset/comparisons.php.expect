@@ -238,8 +238,8 @@ NULL
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	==  : bool(false)
-	!=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -251,8 +251,8 @@ keyset(0) {
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	==  : bool(false)
-	!=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -264,8 +264,8 @@ bool(false)
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	==  : bool(false)
-	!=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
@@ -277,8 +277,8 @@ keyset(0) {
 	<=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>   : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
 	>=  : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets
-	==  : bool(false)
-	!=  : bool(true)
+	==  : bool(true)
+	!=  : bool(false)
 	=== : bool(false)
 	!== : bool(true)
 	<=> : Error: Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare keysets

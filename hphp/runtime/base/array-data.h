@@ -915,7 +915,6 @@ void raiseHackArrCompatAdd();
 
 void raiseHackArrCompatArrHackArrCmp();
 void raiseHackArrCompatDVArrCmp(const ArrayData*, const ArrayData*, bool);
-void raiseHackArrCompatHackArrBoolCmp();
 
 std::string makeHackArrCompatImplicitArrayKeyMsg(const TypedValue* key);
 void raiseHackArrCompatImplicitArrayKey(const TypedValue* key);

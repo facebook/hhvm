@@ -307,12 +307,9 @@ std::vector<SString> load_input(F&& fun) {
     gd.HackArrCompatTypeHintNotices;
   RO::EvalHackArrCompatDVCmpNotices =
     gd.HackArrCompatDVCmpNotices;
-  RO::EvalHackArrCompatHackArrCmpNotices =
-    gd.HackArrCompatHackArrCmpNotices;
   RO::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
   RO::EvalHackArrDVArrs = gd.HackArrDVArrs;
-  RO::EvalHackArrEmptyBasedBoolEqCmp = gd.HackArrEmptyBasedBoolEqCmp;
   RO::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RO::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
   RO::EvalEmitClsMethPointers = gd.EmitClsMethPointers;
@@ -411,12 +408,9 @@ void write_global_data(
     RuntimeOption::EvalHackArrCompatTypeHintNotices;
   gd.HackArrCompatDVCmpNotices =
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
-  gd.HackArrCompatHackArrCmpNotices =
-    RuntimeOption::EvalHackArrCompatHackArrCmpNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
-  gd.HackArrEmptyBasedBoolEqCmp = RuntimeOption::EvalHackArrEmptyBasedBoolEqCmp;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =

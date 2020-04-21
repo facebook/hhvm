@@ -846,7 +846,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatTypeHintNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatDVCmpNotices ? '1' : '0')
-    + (RuntimeOption::EvalHackArrCompatHackArrCmpNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatSerializeNotices ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerUseEmbedded ? '1' : '0')
     + (RuntimeOption::EvalHackCompilerVerboseErrors ? '1' : '0')
@@ -860,7 +859,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalLogKnownMethodsAsDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls ? '1' : '0')
     + (RuntimeOption::EvalHackArrDVArrs ? '1' : '0')
-    + (RuntimeOption::EvalHackArrEmptyBasedBoolEqCmp ? '1' : '0')
     + (RuntimeOption::EvalAssemblerFoldDefaultValues ? '1' : '0')
     + RuntimeOption::EvalHackCompilerCommand + '\0'
     + RuntimeOption::EvalHackCompilerArgs + '\0'

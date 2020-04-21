@@ -6,6 +6,8 @@
  *
  *)
 
+open Hh_prelude
+
 type blocked_entry = Blocked
 
 (** Gets an entry from shared memory, or falls back to SQLite if necessary. If data is returned by
@@ -60,13 +62,14 @@ let get_and_cache
     )
 
 let check_valid key pos =
-  if FileInfo.get_pos_filename pos = Relative_path.default then (
+  if Relative_path.equal (FileInfo.get_pos_filename pos) Relative_path.default
+  then (
     Hh_logger.log
       "WARNING: setting canonical position of %s to be in dummy file. If this happens in incremental mode, things will likely break later."
       key;
     Hh_logger.log
       "%s"
-      (Printexc.raw_backtrace_to_string (Printexc.get_callstack 100))
+      (Caml.Printexc.raw_backtrace_to_string (Caml.Printexc.get_callstack 100))
   )
 
 let canonize_set = SSet.map Naming_sqlite.to_canon_name_key
@@ -175,7 +178,7 @@ module Types = struct
     | None -> None
     | Some (pos, _) -> Some (FileInfo.get_pos_filename pos)
 
-  let is_defined id = get_pos id <> None
+  let is_defined id = Option.is_some (get_pos id)
 
   let get_canon_name ctx id =
     Core_kernel.(
@@ -298,7 +301,7 @@ module Funs = struct
   let get_filename id =
     get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
 
-  let is_defined id = get_pos id <> None
+  let is_defined id = Option.is_some (get_pos id)
 
   let get_canon_name ctx name =
     Core_kernel.(
@@ -378,7 +381,7 @@ module Consts = struct
   let get_filename id =
     get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
 
-  let is_defined id = get_pos id <> None
+  let is_defined id = Option.is_some (get_pos id)
 
   let remove_batch consts =
     ConstPosHeap.remove_batch consts;

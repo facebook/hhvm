@@ -7,6 +7,7 @@
  *
  *)
 
+open Hh_prelude
 open Aast
 
 (* this should never be exposed / thrown outside of this module; translate
@@ -21,5 +22,5 @@ let rec static_string_exn = function
   | (_, String s) -> s
   | (p, _) -> raise (Not_static_exn p)
 
-let static_string expr =
+let static_string (expr : Nast.expr) =
   (try Ok (static_string_exn expr) with Not_static_exn p -> Error p)

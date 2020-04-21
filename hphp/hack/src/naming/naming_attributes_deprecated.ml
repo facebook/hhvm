@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SN = Naming_special_names
 
 (* TODO: generalize the arity check / argument check here to handle attributes

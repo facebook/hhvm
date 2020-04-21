@@ -7,4 +7,6 @@
  *
  *)
 
+open Hh_prelude
+
 val static_string : Nast.expr -> (string, Pos.t) result

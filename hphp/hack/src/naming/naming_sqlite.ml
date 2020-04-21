@@ -6,6 +6,7 @@
  *
  *)
 
+open Hh_prelude
 open Sqlite_utils
 
 type db_path = Db_path of string [@@deriving show]
@@ -60,15 +61,15 @@ let _ = show_local_changes
 
 let make_relative_path ~prefix_int ~suffix =
   let prefix =
-    Core_kernel.Option.value_exn
-      (Relative_path.prefix_of_enum (Int64.to_int prefix_int))
+    let open Option in
+    value_exn (Int64.to_int prefix_int >>= Relative_path.prefix_of_enum)
   in
   let full_suffix =
     Filename.concat (Relative_path.path_of_prefix prefix) suffix
   in
   Relative_path.create prefix full_suffix
 
-let to_canon_name_key = String.lowercase_ascii
+let to_canon_name_key = Caml.String.lowercase_ascii
 
 let fold_sqlite stmt ~f ~init =
   let rec helper acc =
@@ -298,7 +299,8 @@ module FileInfoTable = struct
 
   let read_row ~stmt ~path ~base_index =
     let file_mode =
-      FileInfo.mode_of_enum (Int64.to_int (column_int64 stmt base_index))
+      let open Option in
+      Int64.to_int (column_int64 stmt base_index) >>= FileInfo.mode_of_enum
     in
     let hash =
       OpaqueDigest.from_raw_contents (column_blob stmt (base_index + 1))
@@ -446,7 +448,9 @@ module TypesTable = struct
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc db;
     Sqlite3.bind insert_stmt 4 (Sqlite3.Data.INT file_info_id) |> check_rc db;
-    let kind_of_type = Naming_types.kind_of_type_of_enum (Int64.to_int flags) in
+    let kind_of_type =
+      Naming_types.kind_of_type_of_enum (Option.value_exn (Int64.to_int flags))
+    in
     insert_safe ~name ~kind_of_type ~hash ~canon_hash:(Some canon_hash)
     @@ fun () ->
     Sqlite3.step insert_stmt |> check_rc db;
@@ -465,7 +469,7 @@ module TypesTable = struct
   let get db ~name ~case_insensitive =
     let name =
       if case_insensitive then
-        String.lowercase_ascii name
+        Caml.String.lowercase_ascii name
       else
         name
     in
@@ -481,11 +485,12 @@ module TypesTable = struct
     match Sqlite3.step get_stmt with
     | Sqlite3.Rc.DONE -> None
     | Sqlite3.Rc.ROW ->
+      let open Option in
       let prefix_type = column_int64 get_stmt 0 in
       let suffix = column_str get_stmt 1 in
       let flags = Int64.to_int (column_int64 get_stmt 2) in
       let class_type =
-        Core_kernel.Option.value_exn (Naming_types.kind_of_type_of_enum flags)
+        value_exn (flags >>= Naming_types.kind_of_type_of_enum)
       in
       Some (make_relative_path prefix_type suffix, class_type)
     | rc ->
@@ -553,7 +558,7 @@ module FunsTable = struct
   let get db ~name ~case_insensitive =
     let name =
       if case_insensitive then
-        String.lowercase_ascii name
+        Caml.String.lowercase_ascii name
       else
         name
     in
@@ -679,7 +684,7 @@ end = struct
 
   let get_db () = Lazy.force !db
 
-  let is_connected () = get_db () <> None
+  let is_connected () = Option.is_some (get_db ())
 end
 
 let save_file_info db relative_path file_info : int * insertion_error list =
@@ -832,14 +837,14 @@ let fold ~init ~f ~file_deltas =
    * properly (again, given our input sorting restraints). *)
   let rec consume_sorted_changes path fi (sorted_changes, acc) =
     match sorted_changes with
-    | hd :: tl when fst hd < path ->
+    | hd :: tl when Relative_path.compare (fst hd) path < 0 ->
       begin
         match snd hd with
         | Modified local_fi ->
           consume_sorted_changes path fi (tl, f (fst hd) local_fi acc)
         | Deleted -> consume_sorted_changes path fi (tl, acc)
       end
-    | hd :: tl when fst hd = path ->
+    | hd :: tl when Relative_path.equal (fst hd) path ->
       begin
         match snd hd with
         | Modified fi -> (tl, f path fi acc)
@@ -856,13 +861,14 @@ let fold ~init ~f ~file_deltas =
     FileInfoTable.fold db ~init:(sorted_changes, init) ~f:consume_sorted_changes
   in
   List.fold_left
-    begin
-      fun acc (path, delta) ->
-      match delta with
-      | Modified fi -> f path fi acc
-      | Deleted -> (* This probably shouldn't happen? *) acc
-    end
-    acc
+    ~f:
+      begin
+        fun acc (path, delta) ->
+        match delta with
+        | Modified fi -> f path fi acc
+        | Deleted -> (* This probably shouldn't happen? *) acc
+      end
+    ~init:acc
     remaining_changes
 
 let get_file_info path =

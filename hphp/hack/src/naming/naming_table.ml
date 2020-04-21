@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (**
     +---------------------------------+
     | Let's talk about naming tables! |
@@ -413,37 +415,38 @@ let update_reverse_entries ctx file_deltas =
         | Some fi ->
           Naming_provider.remove_type_batch
             backend
-            (fi.FileInfo.classes |> List.map snd |> SSet.of_list);
+            (fi.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
             backend
-            (fi.FileInfo.typedefs |> List.map snd |> SSet.of_list);
+            (fi.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_type_batch
             backend
-            (fi.FileInfo.record_defs |> List.map snd |> SSet.of_list);
+            (fi.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_fun_batch
             backend
-            (fi.FileInfo.funs |> List.map snd |> SSet.of_list);
+            (fi.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
           Naming_provider.remove_const_batch
             backend
-            (fi.FileInfo.consts |> List.map snd |> SSet.of_list)
+            (fi.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
         | None -> ()
       end;
       match delta with
       | Naming_sqlite.Modified fi ->
         List.iter
-          (fun (pos, name) -> Naming_provider.add_class backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_class backend name pos)
           fi.FileInfo.classes;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_record_def backend name pos)
+          ~f:(fun (pos, name) ->
+            Naming_provider.add_record_def backend name pos)
           fi.FileInfo.record_defs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_typedef backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_typedef backend name pos)
           fi.FileInfo.typedefs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_fun backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_fun backend name pos)
           fi.FileInfo.funs;
         List.iter
-          (fun (pos, name) -> Naming_provider.add_const backend name pos)
+          ~f:(fun (pos, name) -> Naming_provider.add_const backend name pos)
           fi.FileInfo.consts
       | Naming_sqlite.Deleted -> ())
 
@@ -452,8 +455,9 @@ let choose_local_changes ~local_changes ~custom_local_changes =
   | None -> local_changes
   | Some custom_local_changes ->
     if
-      custom_local_changes.Naming_sqlite.base_content_version
-      = local_changes.Naming_sqlite.base_content_version
+      String.equal
+        custom_local_changes.Naming_sqlite.base_content_version
+        local_changes.Naming_sqlite.base_content_version
     then
       custom_local_changes
     else

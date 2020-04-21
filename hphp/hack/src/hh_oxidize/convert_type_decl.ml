@@ -117,30 +117,6 @@ let should_add_rcoc ty =
   (not (Configuration.by_ref ()))
   && List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
 
-let override_field_type () =
-  let doc_comment_type =
-    if Configuration.by_ref () then
-      ("doc_comment", "Option<doc_comment::DocComment<'a>>")
-    else
-      ("doc_comment", "Option<doc_comment::DocComment>")
-  in
-  let overrides = SMap.of_list [doc_comment_type] in
-  SMap.of_list
-    [
-      ("Fun_", overrides);
-      ("Method_", overrides);
-      ("Class_", overrides);
-      ("ClassConst", overrides);
-      ("ClassTypeconst", overrides);
-      ("ClassVar", overrides);
-      ("RecordDef", overrides);
-    ]
-
-let get_overrides name =
-  match SMap.find_opt name (override_field_type ()) with
-  | None -> SMap.empty
-  | Some x -> x
-
 let blacklisted ty_name =
   let ty = (curr_module_name (), ty_name) in
   List.mem blacklisted_types ty ~equal:( = )
@@ -225,7 +201,7 @@ let type_params params =
     else
       sprintf "<%s>" params
 
-let record_label_declaration ?(pub = false) ?(prefix = "") overrides ld =
+let record_label_declaration ?(pub = false) ?(prefix = "") ld =
   let doc = doc_comment_of_attribute_list ld.pld_attributes in
   let pub =
     if pub then
@@ -236,14 +212,10 @@ let record_label_declaration ?(pub = false) ?(prefix = "") overrides ld =
   let name =
     ld.pld_name.txt |> String.chop_prefix_exn ~prefix |> convert_field_name
   in
-  let ty =
-    match SMap.find_opt name overrides with
-    | None -> core_type ld.pld_type
-    | Some x -> x
-  in
+  let ty = core_type ld.pld_type in
   sprintf "%s%s%s: %s,\n" doc pub name ty
 
-let record_declaration ?(pub = false) overrides labels =
+let record_declaration ?(pub = false) labels =
   let prefix =
     labels |> List.map ~f:(fun ld -> ld.pld_name.txt) |> common_prefix_of_list
   in
@@ -257,7 +229,7 @@ let record_declaration ?(pub = false) overrides labels =
     String.sub prefix 0 !idx
   in
   labels
-  |> map_and_concat ~f:(record_label_declaration ~pub ~prefix overrides)
+  |> map_and_concat ~f:(record_label_declaration ~pub ~prefix)
   |> sprintf "{\n%s}"
 
 let constructor_arguments ?(box_fields = false) = function
@@ -286,7 +258,7 @@ let constructor_arguments ?(box_fields = false) = function
         else
           sprintf "(Box<%s>)" (tuple types)
     )
-  | Pcstr_record labels -> record_declaration SMap.empty labels
+  | Pcstr_record labels -> record_declaration labels
 
 let variant_constructor_declaration ?(box_fields = false) cd =
   let doc = doc_comment_of_attribute_list cd.pcd_attributes in
@@ -441,7 +413,7 @@ let type_declaration name td =
     sprintf "%s enum %s%s {\n%s}" (attrs_and_vis derives) name tparams ctors
   (* Record types. *)
   | (Ptype_record labels, None) ->
-    let labels = record_declaration (get_overrides name) labels ~pub:true in
+    let labels = record_declaration labels ~pub:true in
     sprintf "%s struct %s%s %s" (attrs_and_vis []) name tparams labels
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)

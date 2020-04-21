@@ -3,7 +3,8 @@
   (modules
     aast
     aast_defs
-    aast_defs_visitors_ancestors)
+    aast_defs_visitors_ancestors
+    doc_comment)
   (wrapped false)
   (libraries
     ast

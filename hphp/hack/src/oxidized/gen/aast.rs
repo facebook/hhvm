@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0d88878e4a186b9223baf608c54a206>>
+// @generated SignedSource<<183e6d2105474d65a9721f69fd86255a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -17,6 +17,7 @@ use serde::Serialize;
 use crate::*;
 
 pub use aast_defs::*;
+pub use doc_comment::DocComment;
 
 /// Aast.program represents the top-level definitions in a Hack program.
 /// ex: Expression annotation type (when typechecking, the inferred dtype)
@@ -538,7 +539,7 @@ pub struct Fun_<Ex, Fb, En, Hi> {
     /// external function declaration (e.g. from an HHI file)
     pub external: bool,
     pub namespace: Nsenv,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
     pub static_: bool,
 }
 
@@ -785,7 +786,7 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub file_attributes: Vec<FileAttribute<Ex, Fb, En, Hi>>,
     pub enum_: Option<Enum_>,
     pub pu_enums: Vec<PuEnum<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
 }
 
@@ -902,7 +903,7 @@ pub struct ClassConst<Ex, Fb, En, Hi> {
     pub id: Sid,
     /// expr = None indicates an abstract const
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(
@@ -949,7 +950,7 @@ pub struct ClassTypeconst<Ex, Fb, En, Hi> {
     pub type_: Option<Hint>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub span: Pos,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(
@@ -991,7 +992,7 @@ pub struct ClassVar<Ex, Fb, En, Hi> {
     pub id: Sid,
     pub expr: Option<Expr<Ex, Fb, En, Hi>>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
     pub span: Pos,
@@ -1029,7 +1030,7 @@ pub struct Method_<Ex, Fb, En, Hi> {
     /// true if this declaration has no body because it is an external method
     /// declaration (e.g. from an HHI file)
     pub external: bool,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
 }
 
 #[derive(
@@ -1136,7 +1137,7 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub namespace: Nsenv,
     pub span: Pos,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
 }
 

@@ -286,7 +286,7 @@ and ('ex, 'fb, 'en, 'hi) fun_ = {
       (** true if this declaration has no body because it is an
                          external function declaration (e.g. from an HHI file)*)
   f_namespace: nsenv;
-  f_doc_comment: string option;
+  f_doc_comment: doc_comment option;
   f_static: bool;
 }
 
@@ -391,7 +391,7 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_file_attributes: ('ex, 'fb, 'en, 'hi) file_attribute list;
   c_enum: enum_ option;
   c_pu_enums: ('ex, 'fb, 'en, 'hi) pu_enum list;
-  c_doc_comment: string option;
+  c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
 }
 
@@ -425,7 +425,7 @@ and ('ex, 'fb, 'en, 'hi) class_const = {
   cc_id: sid;
   cc_expr: ('ex, 'fb, 'en, 'hi) expr option;
       (** expr = None indicates an abstract const *)
-  cc_doc_comment: string option;
+  cc_doc_comment: doc_comment option;
 }
 
 and typeconst_abstract_kind =
@@ -446,7 +446,7 @@ and ('ex, 'fb, 'en, 'hi) class_typeconst = {
   c_tconst_type: hint option;
   c_tconst_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   c_tconst_span: pos;
-  c_tconst_doc_comment: string option;
+  c_tconst_doc_comment: doc_comment option;
 }
 
 and xhp_attr_info = { xai_tag: xhp_attr_tag option }
@@ -460,7 +460,7 @@ and ('ex, 'fb, 'en, 'hi) class_var = {
   cv_id: sid;
   cv_expr: ('ex, 'fb, 'en, 'hi) expr option;
   cv_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
-  cv_doc_comment: string option;
+  cv_doc_comment: doc_comment option;
   cv_is_promoted_variadic: bool;
   cv_is_static: bool;
   cv_span: pos;
@@ -485,7 +485,7 @@ and ('ex, 'fb, 'en, 'hi) method_ = {
   m_external: bool;
       (** true if this declaration has no body because it is an external method
           declaration (e.g. from an HHI file) *)
-  m_doc_comment: string option;
+  m_doc_comment: doc_comment option;
 }
 
 and ('ex, 'fb, 'en, 'hi) method_redeclaration = {
@@ -540,7 +540,7 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   rd_namespace: nsenv;
   rd_span: pos;
-  rd_doc_comment: string option;
+  rd_doc_comment: doc_comment option;
   rd_emit_id: emit_id option;
 }
 
@@ -612,6 +612,8 @@ and reify_kind =
   | Erased
   | SoftReified
   | Reified
+
+and doc_comment = (Doc_comment.t[@visitors.opaque])
 
 (* Splits the methods on a class into the constructor, statics, dynamics *)
 

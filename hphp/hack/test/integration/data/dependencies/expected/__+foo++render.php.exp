@@ -1,9 +1,9 @@
 <?hh
 class :xhp implements \XHPChild {}
 class :foo extends :xhp {
-  attribute int bar @required;
-  attribute num baz @lateinit;
   attribute string quux = "";
+  attribute num baz @lateinit;
+  attribute int bar @required;
   public function render(): :xhp {
     return
       <xhp>

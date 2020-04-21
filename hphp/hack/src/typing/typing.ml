@@ -846,7 +846,7 @@ and stmt_ env pos st =
   | Throw e ->
     let p = fst e in
     let (env, te, ty) = expr env e in
-    let env = exception_ty p env ty in
+    let env = coerce_to_throwable p env ty in
     let env = move_and_merge_next_in_catch env in
     (env, Aast.Throw te)
   | Continue ->
@@ -1026,7 +1026,7 @@ and case_list parent_locals ty env switch_pos cl =
   in
   (env, tcl)
 
-and catch catchctx env (sid, exn, b) =
+and catch catchctx env (sid, exn_lvar, b) =
   let env = LEnv.replace_cont env C.Next catchctx in
   let cid = CI sid in
   let ety_p = fst sid in
@@ -1034,10 +1034,10 @@ and catch catchctx env (sid, exn, b) =
   let (env, _tal, _te, ety) =
     static_class_id ~check_constraints:false ety_p env [] cid
   in
-  let env = exception_ty ety_p env ety in
-  let env = set_local env exn ety in
+  let env = coerce_to_throwable ety_p env ety in
+  let env = set_local env exn_lvar ety in
   let (env, tb) = block env b in
-  (env, (env.lenv, (sid, exn, tb)))
+  (env, (env.lenv, (sid, exn_lvar, tb)))
 
 and as_expr env ty1 pe e =
   let env = Env.open_tyvars env pe in
@@ -3546,7 +3546,7 @@ and expand_expected_and_get_node env (expected : ExpectedTy.t option) =
     | Toption ty -> (env, Some (p, ur, ty, get_node ty))
     | _ -> (env, Some (p, ur, ty, get_node ty)))
 
-(* Do a subtype check of inferred type against expected type *)
+(** Do a subtype check of inferred type against expected type *)
 and check_expected_ty message env inferred_ty (expected : ExpectedTy.t option) =
   match expected with
   | None -> env
@@ -3581,7 +3581,11 @@ and new_object
     el
     unpacked_element =
   (* Obtain class info from the cid expression. We get multiple
-   * results with a CIexpr that has a union type *)
+   * results with a CIexpr that has a union type, e.g. in
+
+      $classname = (mycond()? classname<A>: classname<B>);
+      new $classname();
+   *)
   let (env, tal, tcid, classes) =
     instantiable_cid ~exact:Exact p env cid explicit_targs
   in
@@ -3590,172 +3594,154 @@ and new_object
     | ((_, ty), Aast.CI (_, tn)) -> is_generic_equal_to tn ty
     | _ -> false
   in
-  let finish env tcid tel typed_unpack_element ty ctor_fty =
+  let gather (env, _tel, _typed_unpack_element) (cname, class_info, c_ty) =
+    if
+      check_not_abstract
+      && Cls.abstract class_info
+      && (not (requires_consistent_construct cid))
+      && not allow_abstract_bound_generic
+    then
+      uninstantiable_error
+        env
+        p
+        cid
+        (Cls.pos class_info)
+        (Cls.name class_info)
+        p
+        c_ty;
+    let (env, obj_ty_, params) =
+      let (env, c_ty) = Env.expand_type env c_ty in
+      match (cid, tal, get_node c_ty) with
+      (* Explicit type arguments *)
+      | (CI _, _ :: _, Tclass (_, _, tyl)) -> (env, get_node c_ty, tyl)
+      | _ ->
+        let (env, params) =
+          List.map_env env (Cls.tparams class_info) (fun env tparam ->
+              let (env, tvar) =
+                Env.fresh_type_reason
+                  env
+                  (Reason.Rtype_variable_generics
+                     (p, snd tparam.tp_name, strip_ns (snd cname)))
+              in
+              Typing_log.log_new_tvar_for_new_object env p tvar cname tparam;
+              (env, tvar))
+        in
+        begin
+          match get_node c_ty with
+          | Tclass (_, Exact, _) -> (env, Tclass (cname, Exact, params), params)
+          | _ -> (env, Tclass (cname, Nonexact, params), params)
+        end
+    in
+    if
+      (not check_parent)
+      && (not is_using_clause)
+      && Cls.is_disposable class_info
+    then
+      Errors.invalid_new_disposable p;
+    let r_witness = Reason.Rwitness p in
+    let obj_ty = mk (r_witness, obj_ty_) in
+    let c_ty =
+      match cid with
+      | CIstatic -> mk (r_witness, TUtils.this_of obj_ty)
+      | CIexpr _ -> mk (r_witness, get_node c_ty)
+      | _ -> obj_ty
+    in
     let (env, new_ty) =
       let ((_, cid_ty), _) = tcid in
       let (env, cid_ty) = Env.expand_type env cid_ty in
       if is_generic cid_ty then
         (env, cid_ty)
       else if check_parent then
-        (env, ty)
+        (env, c_ty)
       else
-        ExprDepTy.make env cid ty
+        ExprDepTy.make env cid c_ty
     in
-    (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
+    (* Set variance according to type of `new` expression now. Lambda arguments
+     * to the constructor might depend on it, and `call_construct` only uses
+     * `ctor_fty` to set the variance which has void return type *)
+    let env = Env.set_tyvar_variance env new_ty in
+    let (env, tel, typed_unpack_element, ctor_fty) =
+      let env = check_expected_ty "New" env new_ty expected in
+      call_construct p env class_info params el unpacked_element cid
+    in
+    ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent then
+      match cid with
+      | CIstatic -> Errors.new_inconsistent_construct p cname `static
+      | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
+      | _ -> () );
+    match cid with
+    | CIparent ->
+      let (env, ctor_fty) =
+        match fst (Cls.construct class_info) with
+        | Some ({ ce_type = (lazy ty); _ } as ce) ->
+          let ety_env =
+            {
+              type_expansions = [];
+              substs = Subst.make_locl (Cls.tparams class_info) params;
+              this_ty = obj_ty;
+              from_class = None;
+              quiet = false;
+              on_error = Errors.unify_error_at p;
+            }
+          in
+          if get_ce_abstract ce then
+            Errors.parent_abstract_call
+              SN.Members.__construct
+              p
+              (get_pos ctor_fty);
+          let (env, ctor_fty) = Phase.localize ~ety_env env ty in
+          (env, ctor_fty)
+        | None -> (env, ctor_fty)
+      in
+      ((env, tel, typed_unpack_element), (obj_ty, ctor_fty))
+    | CIstatic
+    | CI _
+    | CIself ->
+      ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
+    | CIexpr _ ->
+      (* When constructing from a (classname) variable, the variable
+       * dictates what the constructed object is going to be. This allows
+       * for generic and dependent types to be correctly carried
+       * through the 'new $foo()' iff the constructed obj_ty is a
+       * supertype of the variable-dictated c_ty *)
+      let env =
+        Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
+      in
+      ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
   in
-  let rec gather env tel typed_unpack_element res classes =
-    match classes with
+  let ((env, tel, typed_unpack_element), res) =
+    List.fold_map classes ~init:(env, [], None) ~f:gather
+  in
+  let (env, tel, typed_unpack_element, ty, ctor_fty) =
+    match res with
     | [] ->
-      begin
-        match res with
-        | [] ->
-          let (env, tel, _) = exprs env el in
-          let (env, typed_unpack_element, _) =
-            match unpacked_element with
-            | None -> (env, None, MakeType.nothing Reason.Rnone)
-            | Some unpacked_element ->
-              let (env, e, ty) = expr env unpacked_element in
-              (env, Some e, ty)
-          in
-          let r = Reason.Runknown_class p in
-          finish
-            env
-            tcid
-            tel
-            typed_unpack_element
-            (mk (r, Tobject))
-            (TUtils.terr env r)
-        | [(ty, ctor_fty)] ->
-          finish env tcid tel typed_unpack_element ty ctor_fty
-        | l ->
-          let (tyl, ctyl) = List.unzip l in
-          let r = Reason.Rwitness p in
-          finish
-            env
-            tcid
-            tel
-            typed_unpack_element
-            (mk (r, Tunion tyl))
-            (mk (r, Tunion ctyl))
-      end
-    | (cname, class_info, c_ty) :: classes ->
-      if
-        check_not_abstract
-        && Cls.abstract class_info
-        && (not (requires_consistent_construct cid))
-        && not allow_abstract_bound_generic
-      then
-        uninstantiable_error
-          env
-          p
-          cid
-          (Cls.pos class_info)
-          (Cls.name class_info)
-          p
-          c_ty;
-      let (env, obj_ty_, params) =
-        let (env, c_ty) = Env.expand_type env c_ty in
-        match (cid, tal, get_node c_ty) with
-        (* Explicit type arguments *)
-        | (CI _, _ :: _, Tclass (_, _, tyl)) -> (env, get_node c_ty, tyl)
-        | _ ->
-          let (env, params) =
-            List.map_env env (Cls.tparams class_info) (fun env tparam ->
-                let (env, tvar) =
-                  Env.fresh_type_reason
-                    env
-                    (Reason.Rtype_variable_generics
-                       (p, snd tparam.tp_name, strip_ns (snd cname)))
-                in
-                Typing_log.log_new_tvar_for_new_object env p tvar cname tparam;
-                (env, tvar))
-          in
-          begin
-            match get_node c_ty with
-            | Tclass (_, Exact, _) ->
-              (env, Tclass (cname, Exact, params), params)
-            | _ -> (env, Tclass (cname, Nonexact, params), params)
-          end
+      let (env, tel, _) = exprs env el in
+      let (env, typed_unpack_element, _) =
+        match unpacked_element with
+        | None -> (env, None, MakeType.nothing Reason.Rnone)
+        | Some unpacked_element ->
+          let (env, e, ty) = expr env unpacked_element in
+          (env, Some e, ty)
       in
-      if
-        (not check_parent)
-        && (not is_using_clause)
-        && Cls.is_disposable class_info
-      then
-        Errors.invalid_new_disposable p;
-      let r_witness = Reason.Rwitness p in
-      let obj_ty = mk (r_witness, obj_ty_) in
-      let c_ty =
-        match cid with
-        | CIstatic -> mk (r_witness, TUtils.this_of obj_ty)
-        | CIexpr _ -> mk (r_witness, get_node c_ty)
-        | _ -> obj_ty
-      in
-      let (env, new_ty) =
-        let ((_, cid_ty), _) = tcid in
-        let (env, cid_ty) = Env.expand_type env cid_ty in
-        if is_generic cid_ty then
-          (env, cid_ty)
-        else if check_parent then
-          (env, c_ty)
-        else
-          ExprDepTy.make env cid c_ty
-      in
-      (* Set variance according to type of `new` expression now. Lambda arguments
-       * to the constructor might depend on it, and `call_construct` only uses
-       * `ctor_fty` to set the variance which has void return type *)
-      let env = Env.set_tyvar_variance env new_ty in
-      let (env, _tcid, tel, typed_unpack_element, ctor_fty) =
-        let env = check_expected_ty "New" env new_ty expected in
-        call_construct p env class_info params el unpacked_element cid
-      in
-      ( if equal_consistent_kind (snd (Cls.construct class_info)) Inconsistent
-      then
-        match cid with
-        | CIstatic -> Errors.new_inconsistent_construct p cname `static
-        | CIexpr _ -> Errors.new_inconsistent_construct p cname `classname
-        | _ -> () );
-      (match cid with
-      | CIparent ->
-        let (env, ctor_fty) =
-          match fst (Cls.construct class_info) with
-          | Some ({ ce_type = (lazy ty); _ } as ce) ->
-            let ety_env =
-              {
-                type_expansions = [];
-                substs = Subst.make_locl (Cls.tparams class_info) params;
-                this_ty = obj_ty;
-                from_class = None;
-                quiet = false;
-                on_error = Errors.unify_error_at p;
-              }
-            in
-            if get_ce_abstract ce then
-              Errors.parent_abstract_call
-                SN.Members.__construct
-                p
-                (get_pos ctor_fty);
-            let (env, ctor_fty) = Phase.localize ~ety_env env ty in
-            (env, ctor_fty)
-          | None -> (env, ctor_fty)
-        in
-        gather env tel typed_unpack_element ((obj_ty, ctor_fty) :: res) classes
-      | CIstatic
-      | CI _
-      | CIself ->
-        gather env tel typed_unpack_element ((c_ty, ctor_fty) :: res) classes
-      | CIexpr _ ->
-        (* When constructing from a (classname) variable, the variable
-         * dictates what the constructed object is going to be. This allows
-         * for generic and dependent types to be correctly carried
-         * through the 'new $foo()' iff the constructed obj_ty is a
-         * supertype of the variable-dictated c_ty *)
-        let env =
-          Typing_ops.sub_type p Reason.URnone env c_ty obj_ty Errors.unify_error
-        in
-        gather env tel typed_unpack_element ((c_ty, ctor_fty) :: res) classes)
+      let r = Reason.Runknown_class p in
+      (env, tel, typed_unpack_element, mk (r, Tobject), TUtils.terr env r)
+    | [(ty, ctor_fty)] -> (env, tel, typed_unpack_element, ty, ctor_fty)
+    | l ->
+      let (tyl, ctyl) = List.unzip l in
+      let r = Reason.Rwitness p in
+      (env, tel, typed_unpack_element, mk (r, Tunion tyl), mk (r, Tunion ctyl))
   in
-  gather env [] None [] classes
+  let (env, new_ty) =
+    let ((_, cid_ty), _) = tcid in
+    let (env, cid_ty) = Env.expand_type env cid_ty in
+    if is_generic cid_ty then
+      (env, cid_ty)
+    else if check_parent then
+      (env, ty)
+    else
+      ExprDepTy.make env cid ty
+  in
+  (env, tcid, tal, tel, typed_unpack_element, new_ty, ctor_fty)
 
 and attributes_check_def env kind attrs =
   Typing_attributes.check_def env new_object kind attrs
@@ -3805,14 +3791,14 @@ and uninstantiable_error env reason_pos cid c_tc_pos c_name c_usage_pos c_ty =
   in
   Errors.uninstantiable_class c_usage_pos c_tc_pos c_name reason_msgl
 
-and exception_ty pos env ty =
-  let exn_ty = MakeType.throwable (Reason.Rthrow pos) in
+and coerce_to_throwable pos env exn_ty =
+  let throwable_ty = MakeType.throwable (Reason.Rthrow pos) in
   Typing_coercion.coerce_type
     pos
     Reason.URthrow
     env
-    ty
-    { et_type = exn_ty; et_enforced = false }
+    exn_ty
+    { et_type = throwable_ty; et_enforced = false }
     Errors.unify_error
 
 and shape_field_pos = function
@@ -5595,7 +5581,9 @@ and class_get_
     (* should never happen; static_class_id takes care of these *)
     (env, (Typing_utils.mk_tany env p, []))
 
-and class_id_for_new ~exact p env cid explicit_targs =
+and class_id_for_new
+    ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :
+    env * Tast.targ list * Tast.class_id * (sid * Cls.t * locl_ty) list =
   let (env, tal, te, cid_ty) =
     static_class_id ~exact ~check_constraints:false p env explicit_targs cid
   in
@@ -5723,7 +5711,15 @@ and this_for_method env cid default_ty =
     ExprDepTy.make env CIstatic ty
   | _ -> (env, default_ty)
 
-and static_class_id ?(exact = Nonexact) ~check_constraints p env tal =
+(** Resolve class expressions like `parent`, `self`, `static`, classnames
+    and others. *)
+and static_class_id
+    ?(exact = Nonexact)
+    ~(check_constraints : bool)
+    (p : pos)
+    (env : env)
+    (tal : Nast.targ list) :
+    Nast.class_id_ -> env * Tast.targ list * Tast.class_id * locl_ty =
   let make_result env tal te ty = (env, tal, ((p, ty), te), ty) in
   function
   | CIparent ->
@@ -5888,7 +5884,7 @@ and call_construct p env class_ params el unpacked_element cid =
     else
       cid
   in
-  let (env, _tal, tcid, cid_ty) =
+  let (env, _tal, _tcid, cid_ty) =
     static_class_id ~check_constraints:false p env [] cid
   in
   let ety_env =
@@ -5914,7 +5910,7 @@ and call_construct p env class_ params el unpacked_element cid =
       (Cls.where_constraints class_)
   in
   if Cls.is_xhp class_ then
-    (env, tcid, [], None, TUtils.mk_tany env p)
+    (env, [], None, TUtils.mk_tany env p)
   else
     let cstr = Env.get_construct env class_ in
     let mode = Env.get_mode env in
@@ -5927,7 +5923,7 @@ and call_construct p env class_ params el unpacked_element cid =
       then
         Errors.constructor_no_args p;
       let (env, tel, _tyl) = exprs env el in
-      (env, tcid, tel, None, TUtils.terr env Reason.Rnone)
+      (env, tel, None, TUtils.terr env Reason.Rnone)
     | Some { ce_visibility = vis; ce_type = (lazy m); ce_deprecated; _ } ->
       let def_pos = get_pos m in
       TVis.check_obj_access ~use_pos:p ~def_pos env vis;
@@ -5947,7 +5943,7 @@ and call_construct p env class_ params el unpacked_element cid =
       let (env, (tel, typed_unpack_element, _ty)) =
         call ~expected:None p env m el unpacked_element
       in
-      (env, tcid, tel, typed_unpack_element, m)
+      (env, tel, typed_unpack_element, m)
 
 and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
   let exp_min = Typing_defs.arity_min exp_arity in

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/vm/native-data.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
@@ -567,99 +568,50 @@ void HHVM_METHOD(DateInterval, __construct,
   }
 }
 
-const StaticString
-  s_y("y"),
-  s_m("m"),
-  s_d("d"),
-  s_h("h"),
-  s_i("i"),
-  s_s("s"),
-  s_invert("invert"),
-  s_days("days");
-
-Variant HHVM_METHOD(DateInterval, __get,
-                    const Variant& member) {
-  auto const data = getDateIntervalData(this_);
-  if (member.isString()) {
-    if (same(member, s_y)) {
-      return data->m_di->getYears();
-    }
-    if (same(member, s_m)) {
-      return data->m_di->getMonths();
-    }
-    if (same(member, s_d)) {
-      return data->m_di->getDays();
-    }
-    if (same(member, s_h)) {
-      return data->m_di->getHours();
-    }
-    if (same(member, s_i)) {
-      return data->m_di->getMinutes();
-    }
-    if (same(member, s_s)) {
-      return data->m_di->getSeconds();
-    }
-    if (same(member, s_invert)) {
-      return data->m_di->isInverted() ? 1 : 0;
-    }
-    if (same(member, s_days)) {
-      if (data->m_di->haveTotalDays()) {
-        return data->m_di->getTotalDays();
-      } else {
-        return false;
-      }
-    }
-  }
-  std::string msg = "Undefined property '";
-  msg += member.toString().data();
-  msg += ") on DateInterval object";
-  SystemLib::throwExceptionObject(msg);
+template <int64_t (DateInterval::*get)() const>
+static Variant get_prop(const Object& this_) {
+  return (getDateIntervalData(this_.get())->m_di.get()->*get)();
+}
+static Variant is_inverted(const Object& this_) {
+  return (int)getDateIntervalData(this_.get())->m_di->isInverted();
+}
+static Variant get_total_days(const Object& this_) {
+  auto di = getDateIntervalData(this_.get())->m_di;
+  if (!di->haveTotalDays()) return false;
+  return di->getTotalDays();
 }
 
-Variant HHVM_METHOD(DateInterval, __set,
-                    const Variant& member,
-                    const Variant& value) {
-  auto const data = getDateIntervalData(this_);
-  if (member.isString()) {
-    if (same(member, s_y)) {
-      data->m_di->setYears(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_m)) {
-      data->m_di->setMonths(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_d)) {
-      data->m_di->setDays(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_h)) {
-      data->m_di->setHours(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_i)) {
-      data->m_di->setMinutes(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_s)) {
-      data->m_di->setSeconds(value.toInt64());
-      return init_null();
-    }
-    if (same(member, s_invert)) {
-      data->m_di->setInverted(value.toBoolean());
-      return init_null();
-    }
-    if (same(member, s_days)) {
-      data->m_di->setTotalDays(value.toInt64());
-      return init_null();
-    }
-  }
-
-  std::string msg = "Undefined property '";
-  msg += member.toString().data();
-  msg += ") on DateInterval object";
-  SystemLib::throwExceptionObject(msg);
+template <typename T> using setter_t = void (DateInterval::*)(T);
+template <typename T> using cast_t = T (Variant::*)() const;
+template <typename T> static void set_prop_impl(
+  const Object& this_, const Variant& value, setter_t<T> set, cast_t<T> cast) {
+  (getDateIntervalData(this_.get())->m_di.get()->*set)((value.*cast)());
 }
+template <setter_t<bool> set>
+static void set_prop(const Object& this_, const Variant& value) {
+  set_prop_impl(this_, value, set, &Variant::toBoolean);
+}
+template <setter_t<int64_t> set>
+static void set_prop(const Object& this_, const Variant& value) {
+  set_prop_impl(this_, value, set, &Variant::toInt64);
+}
+
+static Native::PropAccessor date_interval_properties[] = {
+  { "y", get_prop<&DateInterval::getYears>, set_prop<&DateInterval::setYears> },
+  { "m", get_prop<&DateInterval::getMonths>, set_prop<&DateInterval::setMonths> },
+  { "d", get_prop<&DateInterval::getDays>, set_prop<&DateInterval::setDays> },
+  { "h", get_prop<&DateInterval::getHours>, set_prop<&DateInterval::setHours> },
+  { "i", get_prop<&DateInterval::getMinutes>, set_prop<&DateInterval::setMinutes> },
+  { "s", get_prop<&DateInterval::getSeconds>, set_prop<&DateInterval::setSeconds> },
+  { "invert", is_inverted, set_prop<&DateInterval::setInverted> },
+  { "days", get_total_days, set_prop<&DateInterval::setTotalDays> },
+  { nullptr }
+};
+
+Native::PropAccessorMap date_interval_properties_map{date_interval_properties};
+struct DateIntervalPropHandler : Native::MapPropHandler<DateIntervalPropHandler> {
+  static constexpr Native::PropAccessorMap& map = date_interval_properties_map;
+};
 
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time) {
@@ -1060,10 +1012,9 @@ static struct DateTimeExtension final : Extension {
       DateTimeZoneData::s_className.get(), Native::NDIFlags::NO_SWEEP);
 
     HHVM_ME(DateInterval, __construct);
-    HHVM_ME(DateInterval, __get);
-    HHVM_ME(DateInterval, __set);
     HHVM_ME(DateInterval, format);
     HHVM_STATIC_ME(DateInterval, createFromDateString);
+    Native::registerNativePropHandler<DateIntervalPropHandler>(s_DateInterval);
 
     Native::registerNativeDataInfo<DateIntervalData>(
       DateIntervalData::s_className.get(), Native::NDIFlags::NO_SWEEP);

@@ -303,34 +303,6 @@ class DateInterval {
   public function __construct(string $interval_spec): void;
 
   /**
-   * Retreives interval partials (y, m, d, etc...)
-   *
-   * @param mixed $member - One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or
-   *   'days'.  All other vales will return null and throw undefined property
-   *   notice.
-   *
-   * @return mixed - Number of years, months, days, hours, minutes, seconds,
-   *   or total days for DateInterval, or true/false for date inversion.
-   *
-   */
-  <<__Native>>
-  public function __get(mixed $member): mixed;
-
-  /**
-   * Sets interval partials (y, m, d, etc...)
-   *
-   * @param mixed $member - One of 'y', 'm', 'd', 'h', 'i', 's', 'invert', or
-   *   'days'.  All other vales will throw undefined property notice and ignore
-   *   value.
-   * @param mixed $value - Either a boolean for 'invert', or a number.
-   *
-   * @return mixed - Always returns NULL.
-   *
-   */
-  <<__Native>>
-  public function __set(mixed $member, mixed $value): mixed;
-
-  /**
    * Sets up a DateInterval from the relative parts of the string
    *
    * @param string $time - A date with relative parts. Specifically, the

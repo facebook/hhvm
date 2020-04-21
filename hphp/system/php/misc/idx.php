@@ -78,7 +78,7 @@ namespace HH {
  * `idx` is for default selection, not a blanket replacement for array access.
  *
  * If you are tasked with fixing a bug that is caused by an OutOfBoundsException
- * it is often tempting to use `idx` an set a default in place.
+ * it is often tempting to use `idx` and set a default in place.
  * This is hiding the underlying problem.
  * Chances are that the programmer before you actually expected the key to always be present.
  * Try to figure out why this might be the case.

@@ -7943,18 +7943,9 @@ struct FreeRegs {
         if (avail1 != avail2) return avail1 > avail2;
 
         // If they both have the same weight and the same
-        // availability, then break the tie using a pseudo-random
-        // function. Hash the physical register and the Vreg we're
-        // selecting for. This is preferred to just using the lesser
-        // register, for example, because it helps provide a wider
-        // dispersion of register uses (which potentially prevents
-        // conflicts later).
-        auto const perturb1 = hash_int64_pair(seed, Vreg{r1});
-        auto const perturb2 = hash_int64_pair(seed, Vreg{r2});
-        if (perturb1 != perturb2) return perturb1 < perturb2;
-
-        // In the extremely rare case everything is identical, prefer
-        // the lesser register.
+        // availability, select the lesser register.  On x86_64,
+        // this gives preference to the original x86 registers over
+        // the extended ones (x8-x15), which require a REX prefix.
         return Vreg{r1} < Vreg{r2};
       };
 

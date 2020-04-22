@@ -695,6 +695,9 @@ val bad_decl_override :
 val bad_method_override :
   Pos.t -> string -> (Pos.t * string) list -> typing_error_callback -> unit
 
+val bad_prop_override :
+  Pos.t -> string -> (Pos.t * string) list -> typing_error_callback -> unit
+
 val bad_enum_decl : Pos.t -> (Pos.t * string) list -> unit
 
 val missing_constructor : Pos.t -> typing_error_callback -> unit

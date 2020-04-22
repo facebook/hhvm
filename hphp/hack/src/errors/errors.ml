@@ -2175,6 +2175,13 @@ let bad_method_override pos member_name msgl (on_error : typing_error_callback)
   (* This is a cascading error message *)
   on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
 
+let bad_prop_override pos member_name msgl (on_error : typing_error_callback) =
+  let msg =
+    (pos, "The property " ^ strip_ns member_name ^ " has the wrong type")
+  in
+  (* This is a cascading error message *)
+  on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
+
 let bad_enum_decl pos msgl =
   let msg =
     (pos, "This enum declaration is invalid.\nRead the following to see why:")

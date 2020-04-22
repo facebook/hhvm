@@ -155,9 +155,9 @@ pub fn strip_global_ns(s: &str) -> &str {
     s.trim_start_matches("\\")
 }
 
-// TODO(hrust): improve perf: don't use regex and reutrn &str
-pub fn strip_ns(s: &str) -> Cow<str> {
-    NS_RE.replace(&s, "")
+// Strip zero or more chars followed by a backslash
+pub fn strip_ns(s: &str) -> &str {
+    s.rfind('\\').map_or(s, |i| &s[i + 1..])
 }
 
 // Remove \HH\ or HH\ preceding a string
@@ -174,13 +174,12 @@ pub fn strip_type_list(s: &str) -> Cow<str> {
 }
 
 pub fn cmp(s1: &str, s2: &str, case_sensitive: bool, ignore_ns: bool) -> bool {
-    fn canon(s: &str, ignore_ns: bool) -> Cow<str> {
-        let mut cow = Cow::Borrowed(s);
+    fn canon(s: &str, ignore_ns: bool) -> &str {
         if ignore_ns {
-            *cow.to_mut() = strip_ns(&cow).into_owned();
+            strip_ns(s)
+        } else {
+            s
         }
-
-        cow
     }
 
     let s1 = canon(s1, ignore_ns);

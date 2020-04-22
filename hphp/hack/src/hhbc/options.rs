@@ -500,7 +500,10 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
             let from_str = |v: &str| match v {
                 "true" => Ok(true),
                 "false" => Ok(false),
-                num => num.parse::<i32>().map(|v| v > 0).map_err(de::Error::custom),
+                num => num
+                    .parse::<i32>()
+                    .map(|v| v == 1)
+                    .map_err(de::Error::custom),
             };
             while let Some((ref k, ref v)) = map.next_entry::<String, Arg<GlobalValue>>()? {
                 let mut found = None;
@@ -519,7 +522,7 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
                             }
                         }
                         GlobalValue::Bool(b) => *b,
-                        GlobalValue::Int(n) => *n != 0,
+                        GlobalValue::Int(n) => *n == 1,
                         _ => continue, // types such as VecStr aren't parsable as flags
                     };
                     if truish {
@@ -711,8 +714,8 @@ mod tests {
         let j = serde_json::from_str(
             r#"{
             "hhvm.aliased_namespaces": { "global_value": {"foo": "bar"} },
-            "hhvm.emit_func_pointers": { "global_value": "1337" },
-            "hhvm.jit_enable_rename_function": { "global_value": 2 },
+            "hhvm.emit_func_pointers": { "global_value": "true" },
+            "hhvm.jit_enable_rename_function": { "global_value": 1 },
             "hhvm.log_extern_compiler_perf": { "global_value": false },
             "hhvm.array_provenance": { "global_value": "1" }
             }"#,

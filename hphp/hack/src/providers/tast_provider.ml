@@ -126,7 +126,10 @@ let compute_tast_and_errors_unquarantined_internal
            ~value:(Unix.gettimeofday () -. t)
       |> Telemetry.int_
            ~key:"filesize"
-           ~value:(String.length entry.Provider_context.contents)
+           ~value:
+             (String.length
+                ( Provider_context.get_file_contents_if_present entry
+                |> Option.value ~default:"" ))
     in
 
     Hh_logger.debug

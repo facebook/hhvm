@@ -125,10 +125,9 @@ let compute_source_text ~(entry : Provider_context.entry) :
   match entry with
   | { Provider_context.source_text = Some source_text; _ } -> source_text
   | _ ->
+    let contents = Provider_context.read_file_contents_exn entry in
     let source_text =
-      Full_fidelity_source_text.make
-        entry.Provider_context.path
-        entry.Provider_context.contents
+      Full_fidelity_source_text.make entry.Provider_context.path contents
     in
     entry.Provider_context.source_text <- Some source_text;
     source_text

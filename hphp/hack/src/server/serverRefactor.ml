@@ -449,7 +449,7 @@ let go_ide ctx (filename, line, column) new_name genv env =
       ~ctx
       ~path:(Relative_path.create_detect_prefix filename)
   in
-  let file_content = entry.Provider_context.contents in
+  let file_content = Provider_context.read_file_contents_exn entry in
   let definitions =
     ServerIdentifyFunction.go_quarantined_absolute ~ctx ~entry ~line ~column
   in

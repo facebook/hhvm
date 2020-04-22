@@ -347,7 +347,10 @@ let initialize
       |> List.map ~f:(fun path ->
              path |> Path.to_string |> Relative_path.create_detect_prefix)
       |> List.map ~f:(fun path ->
-             (path, Provider_context.make_entry ~path ~contents:""))
+             ( path,
+               Provider_context.make_entry
+                 ~path
+                 ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
       |> Relative_path.Map.of_list
     in
     let initialized_state =
@@ -434,7 +437,11 @@ let open_file
     (path : Relative_path.t)
     (contents : string) : state =
   let initialized_state = restore_hhi_root_if_necessary initialized_state in
-  let entry = Provider_context.make_entry ~path ~contents in
+  let entry =
+    Provider_context.make_entry
+      ~path
+      ~contents:(Provider_context.Provided_contents contents)
+  in
   let open_files =
     Relative_path.Map.add initialized_state.open_files path entry
   in
@@ -483,15 +490,23 @@ let update_file
     | (Some contents, None) ->
       log_missing_open_file_BUG path;
       (* TODO(ljw): failwith "Attempted LSP operation on a non-open file" *)
-      Provider_context.make_entry ~path ~contents
+      Provider_context.make_entry
+        ~path
+        ~contents:(Provider_context.Provided_contents contents)
     | (None, None) ->
       log_missing_open_file_BUG path;
       failwith "Attempted LSP operation on a non-open file"
     | (Some contents, Some entry)
-      when String.equal entry.Provider_context.contents contents ->
+      when Option.equal
+             String.equal
+             (Some contents)
+             (Provider_context.get_file_contents_if_present entry) ->
       entry
     | (None, Some entry) -> entry
-    | (Some contents, _) -> Provider_context.make_entry ~path ~contents
+    | (Some contents, _) ->
+      Provider_context.make_entry
+        ~path
+        ~contents:(Provider_context.Provided_contents contents)
   in
   let open_files =
     Relative_path.Map.add initialized_state.open_files path entry

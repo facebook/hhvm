@@ -60,8 +60,10 @@ let handle_empty_autocomplete (pos : File_content.position) file_content =
 let auto_complete_all_completion_types
     ~(old_ctx : Provider_context.t)
     ~(old_entry : Provider_context.entry)
+    ~(old_contents : string)
     ~(new_ctx : Provider_context.t)
     ~(new_entry : Provider_context.entry)
+    ~(new_contents : string)
     ~(pos : File_content.position)
     ~(filter_by_token : bool)
     ~(sienv : SearchUtils.si_env) : result =
@@ -98,9 +100,7 @@ let auto_complete_all_completion_types
   (* If we are running a test, filter the keywords and local variables based on
   the token we are completing. *)
   let stub =
-    if
-      old_entry.Provider_context.contents <> new_entry.Provider_context.contents
-    then
+    if old_contents <> new_contents then
       String_utils.rstrip stub empty_autocomplete_token
     else
       stub
@@ -150,7 +150,7 @@ let auto_complete
     ~(sienv : SearchUtils.si_env) : result =
   (* Some code paths require the empty autocomplete token to be present, and
   some require that it isn't, so make a separate entry for each scenario. *)
-  let old_file_content = entry.Provider_context.contents in
+  let old_file_content = Provider_context.read_file_contents_exn entry in
   let (old_ctx, old_entry) =
     Provider_context.add_or_overwrite_entry_contents
       ~ctx
@@ -168,8 +168,10 @@ let auto_complete
   auto_complete_all_completion_types
     ~old_ctx
     ~old_entry
+    ~old_contents:old_file_content
     ~new_ctx
     ~new_entry
+    ~new_contents:new_file_content
     ~pos
     ~filter_by_token
     ~sienv

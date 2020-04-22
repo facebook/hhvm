@@ -11,6 +11,28 @@ module PositionedSyntaxTree : sig
       Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 end
 
+(** Represents the file contents for a given entry. We may lazily load the
+file contents from disk, depending on how the entry is constructed. *)
+type entry_contents =
+  | Not_yet_read_from_disk
+      (** We've been provided a file path, but have not yet requested the
+      contents to be read from disk. They will be read from disk the next
+      time it is requested. *)
+  | Contents_from_disk of string
+      (** Terminal state. We transitioned from [Not_yet_read_from_disk] into
+      this state after reading the file from disk. Do not construct directly;
+      use [Provided_contents] instead. *)
+  | Provided_contents of string
+      (** Terminal state. The file contents were provided explicitly when
+      this entry was constructed. We will not read from disk. *)
+  | Read_contents_from_disk_failed of Exception.t
+      (** Terminal state. We transitioned from [Not_yet_read_from_disk] into
+      this state after attempting to read the file from disk, but
+      encountering an exception. *)
+  | Raise_exn_on_attempt_to_read
+      (** Terminal state. Raise an exception on an attempt to read the file
+      contents from this file. *)
+
 (** Various information associated with a given file.
 
 It's important to create an [entry] when processing data about a single file for
@@ -30,19 +52,27 @@ There should generally be no more than one or two entries inside the
 single file's data in memory at once. Once you're done processing a file (e.g.
 you have the TAST and don't need to access further data), then you should
 discard the [entry] and the [Provider_context.t] that it came from.
+
+All of these fields are monotonic, unless otherwise noted. They only
+transition forward through states, never backwards (e.g. from None -> Some),
+and don't lose information in doing so. Monotonic fields don't need to be
+invalidated.
 *)
 type entry = {
   path: Relative_path.t;
-  contents: string;
+  mutable contents: entry_contents;
+      (** Derived from file contents of [path], which was possibly read from disk. *)
   mutable source_text: Full_fidelity_source_text.t option;
-      (** this source text, if present, came from the entry's path+contents *)
+      (** Derived from [contents]; contains additional preprocessing. *)
   mutable parser_return: Parser_return.t option;
       (** this parser_return, if present, came from source_text via Ast_provider.parse
     under ~full:true ~keep_errors:true *)
   mutable ast_errors: Errors.t option;  (** same invariant as parser_return *)
   mutable cst: PositionedSyntaxTree.t option;
   mutable tast: Tast.program option;
+      (** NOT monotonic: depends on the decls of other files. *)
   mutable naming_and_typing_errors: Errors.t option;
+      (** NOT monotonic for the same reason as [tast]. *)
   mutable symbols: Relative_path.t SymbolOccurrence.t list option;
 }
 
@@ -91,16 +121,16 @@ there may not be a [ServerEnv.env] available. *)
 val empty_for_debugging :
   popt:ParserOptions.t -> tcopt:TypecheckerOptions.t -> t
 
-(** Creates an entry *)
-val make_entry : path:Relative_path.t -> contents:string -> entry
+(** Creates an entry. *)
+val make_entry : path:Relative_path.t -> contents:entry_contents -> entry
 
 (** Adds the entry into the supplied [Provider_context.t], overwriting
 if the context already had an entry of the same path, and returns a new
-[Provider_context.t] which includes that entry. 
+[Provider_context.t] which includes that entry.
 Note: for most callers, [add_entry_if_missing] is more appropriate. *)
 val add_or_overwrite_entry : ctx:t -> entry -> t
 
-(** Similar to [add_or_overwrite_entry], but makes a new entry with contents. 
+(** Similar to [add_or_overwrite_entry], but makes a new entry with contents.
 Also returns the new entry for convenience.  It's important that
 callers use the resulting [Provider_context.t]. That way, if a
 subsequent operation tries to access data about the same file, it will get
@@ -128,6 +158,25 @@ val get_backend : t -> Provider_backend.t
 
 (** Get the entries currently contained in this [t]. *)
 val get_entries : t -> entries
+
+(** Return the contents for the file backing this entry. This may involve a
+disk read if the [entry_contents] are backed by disk. Consequently, this
+function may fail and return [None].
+
+Idempotent: future calls to this function will return the same value. *)
+val read_file_contents : entry -> string option
+
+(** Same as [read_file_contents], but raises an exception if the file contents
+could not be read.
+
+Idempotent: future calls to this function will return the same value or raise
+the same exception. *)
+val read_file_contents_exn : entry -> string
+
+(** Get the file contents from this entry if they've already been computed,
+otherwise return [None]. This is mostly useful for telemetry, which doesn't
+want to trigger a file-read event. *)
+val get_file_contents_if_present : entry -> string option
 
 (** Are we within [Provider_utils.respect_but_quarantine_unsaved_changes] ? *)
 val is_quarantined : unit -> bool

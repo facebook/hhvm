@@ -341,9 +341,9 @@ let test_compute_tast_counting () =
         (Telemetry_test_utils.int_exn telemetry "decl_accessors.count")
         "There should be this many decl_accessor_count for local_memory provider";
       Asserter.Int_asserter.assert_equals
-        0
+        1
         (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-        "There should be 0 disk_cat_count for local_memory_provider");
+        "There should be 1 disk_cat_count for local_memory_provider");
 
   true
 

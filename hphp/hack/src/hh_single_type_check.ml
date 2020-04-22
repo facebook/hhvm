@@ -1273,7 +1273,7 @@ let handle_mode
           let args_regex = Str.regexp "AUTOCOMPLETE [1-9][0-9]* [1-9][0-9]*" in
           let position =
             try
-              let file_text = entry.Provider_context.contents in
+              let file_text = Provider_context.read_file_contents_exn entry in
               let _ = Str.search_forward args_regex file_text 0 in
               let raw_flags = Str.matched_string file_text in
               match split ' ' raw_flags with

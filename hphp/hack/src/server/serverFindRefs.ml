@@ -150,7 +150,7 @@ let search_localvar ~ctx ~entry ~line ~char =
   let results = ServerFindLocals.go ~ctx ~entry ~line ~char in
   match results with
   | first_pos :: _ ->
-    let content = entry.Provider_context.contents in
+    let content = Provider_context.read_file_contents_exn entry in
     let var_text = Pos.get_text_from_pos ~content first_pos in
     List.map results (fun x -> (var_text, x))
   | [] -> []

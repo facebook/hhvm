@@ -10,9 +10,16 @@ open Hh_prelude
 module PositionedSyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
+type entry_contents =
+  | Not_yet_read_from_disk
+  | Contents_from_disk of string
+  | Provided_contents of string
+  | Read_contents_from_disk_failed of Exception.t
+  | Raise_exn_on_attempt_to_read
+
 type entry = {
   path: Relative_path.t;
-  contents: string;
+  mutable contents: entry_contents;
   mutable source_text: Full_fidelity_source_text.t option;
   mutable parser_return: Parser_return.t option;
   mutable ast_errors: Errors.t option;
@@ -58,7 +65,7 @@ let empty_for_debugging ~popt ~tcopt =
     entries = Relative_path.Map.empty;
   }
 
-let make_entry ~(path : Relative_path.t) ~(contents : string) : entry =
+let make_entry ~(path : Relative_path.t) ~(contents : entry_contents) : entry =
   {
     path;
     contents;
@@ -76,15 +83,14 @@ let add_or_overwrite_entry ~(ctx : t) (entry : entry) : t =
 
 let add_or_overwrite_entry_contents
     ~(ctx : t) ~(path : Relative_path.t) ~(contents : string) : t * entry =
-  let entry = make_entry ~path ~contents in
+  let entry = make_entry ~path ~contents:(Provided_contents contents) in
   (add_or_overwrite_entry ctx entry, entry)
 
 let add_entry_if_missing ~(ctx : t) ~(path : Relative_path.t) : t * entry =
   match Relative_path.Map.find_opt ctx.entries path with
   | Some entry -> (ctx, entry)
   | None ->
-    let contents = Sys_utils.cat (Relative_path.to_absolute path) in
-    let entry = make_entry ~path ~contents in
+    let entry = make_entry ~path ~contents:Not_yet_read_from_disk in
     (add_or_overwrite_entry ctx entry, entry)
 
 let get_popt (t : t) : ParserOptions.t = t.popt
@@ -97,6 +103,50 @@ let map_tcopt (t : t) ~(f : TypecheckerOptions.t -> TypecheckerOptions.t) : t =
 let get_backend (t : t) : Provider_backend.t = t.backend
 
 let get_entries (t : t) : entries = t.entries
+
+let read_file_contents_exn (entry : entry) : string =
+  match entry.contents with
+  | Provided_contents contents
+  | Contents_from_disk contents ->
+    contents
+  | Not_yet_read_from_disk ->
+    (try
+       let contents = Sys_utils.cat (Relative_path.to_absolute entry.path) in
+       entry.contents <- Contents_from_disk contents;
+       contents
+     with e ->
+       (* Be sure to capture the exception and mark the entry contents as
+       [Read_contents_from_disk_failed]. Otherwise, reading the contents may
+       not be idempotent:
+
+        1) We attempt to read the file from disk, but it doesn't exist, so we
+        raise an exception.
+        2) The file is created on disk.
+        3) We attempt to read the file from disk again. Now it exists, and we
+        return a different value.
+       *)
+       let e = Exception.wrap e in
+       entry.contents <- Read_contents_from_disk_failed e;
+       Exception.reraise e)
+  | Raise_exn_on_attempt_to_read ->
+    failwith
+      (Printf.sprintf
+         "Entry %s was marked as Raise_exn_on_attempt_to_read, but an attempt was made to read its contents"
+         (Relative_path.to_absolute entry.path))
+  | Read_contents_from_disk_failed e -> Exception.reraise e
+
+let read_file_contents (entry : entry) : string option =
+  (try Some (read_file_contents_exn entry) with _ -> None)
+
+let get_file_contents_if_present (entry : entry) : string option =
+  match entry.contents with
+  | Provided_contents contents
+  | Contents_from_disk contents ->
+    Some contents
+  | Not_yet_read_from_disk
+  | Raise_exn_on_attempt_to_read
+  | Read_contents_from_disk_failed _ ->
+    None
 
 (** ref_is_quarantined stores the stack at which it was last changed,
 so we can give better failwith error messages where appropriate. *)
@@ -140,7 +190,11 @@ let get_telemetry (t : t) : Telemetry.t =
                      t.entries
                      ~init:0
                      ~f:(fun _path entry acc ->
-                       acc + String.length entry.contents)) )
+                       let contents =
+                         get_file_contents_if_present entry
+                         |> Option.value ~default:""
+                       in
+                       acc + String.length contents)) )
     |> Telemetry.string_
          ~key:"backend"
          ~value:(t.backend |> Provider_backend.t_to_string)

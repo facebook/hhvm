@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/libxml/ext_libxml.h"
 #include "hphp/system/systemlib.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -1661,27 +1662,38 @@ static String HHVM_METHOD(SimpleXMLElement, __toString) {
   return SimpleXMLElement_objectCast(this_, KindOfString).toString();
 }
 
-static Variant HHVM_METHOD(SimpleXMLElement, __get, const Variant& name) {
-  auto data = Native::data<SimpleXMLElement>(this_);
-  return sxe_prop_dim_read(data, name, true, false);
-}
+struct SimpleXMLElementPropHandler: Native::BasePropHandler {
+  static Variant getProp(const Object& this_, const String& name) {
+    auto data = Native::data<SimpleXMLElement>(this_.get());
+    return sxe_prop_dim_read(data, name, true, false);
+  }
 
-static Variant HHVM_METHOD(SimpleXMLElement, __unset, const Variant& name) {
-  auto data = Native::data<SimpleXMLElement>(this_);
-  sxe_prop_dim_delete(data, name, true, false);
-  return init_null();
-}
+  static Variant setProp(const Object& this_,
+                         const String& name,
+                         const Variant& value) {
+    auto data = Native::data<SimpleXMLElement>(this_.get());
+    return sxe_prop_dim_write(data, name, value, true, false, nullptr);
+    return true;
+  }
 
-static bool HHVM_METHOD(SimpleXMLElement, __isset, const Variant& name) {
-  auto data = Native::data<SimpleXMLElement>(this_);
-  return sxe_prop_dim_exists(data, name, false, true, false);
-}
+  static Variant issetProp(const Object& this_, const String& name) {
+    auto data = Native::data<SimpleXMLElement>(this_.get());
+    return sxe_prop_dim_exists(data, name, false, true, false);
+  }
 
-static Variant HHVM_METHOD(SimpleXMLElement, __set,
-                           const Variant& name, const Variant& value) {
-  auto data = Native::data<SimpleXMLElement>(this_);
-  return sxe_prop_dim_write(data, name, value, true, false, nullptr);
-}
+  static Variant unsetProp(const Object& this_, const String& name) {
+    auto data = Native::data<SimpleXMLElement>(this_.get());
+    sxe_prop_dim_delete(data, name, true, false);
+    return true;
+  }
+
+  static bool isPropSupported(const String&, const String&) {
+    // TODO: we really ought to pull out checking of whether a prop is supported
+    // to here, but it's currently very entagled in the normal functionality
+    // so defer that tech debt to later :p
+    return true;
+  }
+};
 
 static int64_t HHVM_METHOD(SimpleXMLElement, count) {
   auto data = Native::data<SimpleXMLElement>(this_);
@@ -1839,10 +1851,6 @@ static struct SimpleXMLExtension : Extension {
     HHVM_ME(SimpleXMLElement, addChild);
     HHVM_ME(SimpleXMLElement, addAttribute);
     HHVM_ME(SimpleXMLElement, __toString);
-    HHVM_ME(SimpleXMLElement, __get);
-    HHVM_ME(SimpleXMLElement, __unset);
-    HHVM_ME(SimpleXMLElement, __isset);
-    HHVM_ME(SimpleXMLElement, __set);
     HHVM_ME(SimpleXMLElement, count);
     HHVM_ME(SimpleXMLElement, offsetExists);
     HHVM_ME(SimpleXMLElement, offsetGet);
@@ -1852,6 +1860,7 @@ static struct SimpleXMLExtension : Extension {
     Native::registerNativeDataInfo<SimpleXMLElement>(
       s_SimpleXMLElement.get(), 0, Class::CallToImpl
     );
+    Native::registerNativePropHandler<SimpleXMLElementPropHandler>(s_SimpleXMLElement);
 
     /* SimpleXMLElementIterator */
     HHVM_ME(SimpleXMLElementIterator, __construct);

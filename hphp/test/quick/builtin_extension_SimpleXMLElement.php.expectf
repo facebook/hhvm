@@ -5,7 +5,7 @@ object(SimpleXMLElement) (0) {
 Warning: Attempted to serialize unserializable builtin class SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(23) {
+array(19) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -44,14 +44,6 @@ array(23) {
   string(12) "addAttribute"
   [18]=>
   string(10) "__toString"
-  [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
-  string(7) "__unset"
 }
 ================
 A_SimpleXMLElement
@@ -61,7 +53,7 @@ object(A_SimpleXMLElement) (0) {
 Warning: Attempted to serialize unserializable builtin class A_SimpleXMLElement in %s/test/quick/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(23) {
+array(19) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -100,14 +92,6 @@ array(23) {
   string(12) "addAttribute"
   [18]=>
   string(10) "__toString"
-  [19]=>
-  string(5) "__get"
-  [20]=>
-  string(5) "__set"
-  [21]=>
-  string(7) "__isset"
-  [22]=>
-  string(7) "__unset"
 }
 Of basic XML structure the 1th nodes contents is: 
 Of basic XML structure the 2th nodes contents is: b

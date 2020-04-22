@@ -144,31 +144,6 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
   <<__Native>>
   public function __toString(): string;
 
-  /** @param mixed $name
-   * @return mixed
-   */
-  <<__Native>>
-  public function __get(mixed $name): mixed;
-
-  /** @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  <<__Native>>
-  public function __set(mixed $name,
-                        mixed $value): mixed;
-
-  /** @param mixed $name
-   * @return bool
-   */
-  <<__Native>>
-  public function __isset(mixed $name): bool;
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  <<__Native>>
-  public function __unset(mixed $name): mixed;
 }
 
 <<__NativeData("SimpleXMLElementIterator")>>

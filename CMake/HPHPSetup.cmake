@@ -9,7 +9,31 @@ set(HHVM_WHOLE_ARCHIVE_LIBRARIES
 
 set(HHVM_WRAP_SYMS)
 
+# Oniguruma ('onig') must be first:
+#
+# oniguruma has some of its own implementations of POSIX regex functions,
+# like regcomp() and regexec(). We use onig everywhere, for both its own
+# special functions and for the POSIX replacements. This means that the
+# linker needs to pick the implementions of the POSIX regex functions from
+# onig, not libc.
+#
+# On Linux, that works out fine, since the linker sees onig on the link
+# line before (implicitly) libc. However, on OS X, despite the manpage for
+# ld claiming otherwise about indirect dylib dependencies, as soon as we
+# include one of the libs here that pull in libSystem.B, the linker will
+# pick the implementations of those functions from libc, not from onig.
+# And since we've included the onig headers, which have very slightly
+# different definintions for some of the key data structures, things go
+# quite awry -- this manifests as infinite loops or crashes when calling
+# the PHP split() function.
+#
+# So make sure to link onig first, so its implementations are picked.
+#
+# Using the generator expression to explicitly pull the path in early, otherwise
+# it gets resolved later and put later in the build arguments, and makes
+# hphp/test/slow/ext_preg segfault.
 set(HHVM_LINK_LIBRARIES
+  $<TARGET_PROPERTY:onig,INTERFACE_LINK_LIBRARIES>
   ${HHVM_WRAP_SYMS}
   hphp_analysis
   hphp_system

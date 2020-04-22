@@ -82,8 +82,6 @@ if (ENABLE_COTIRE)
       "${ARCH_INCLUDE_PATH}"
       "${CCLIENT_INCLUDE_PATH}"
       "${JEMALLOC_INCLUDE_DIR}/jemalloc"
-      "${ONIGURUMA_INCLUDE_DIR}/onigposix.h"
-      "${ONIGURUMA_INCLUDE_DIR}/oniguruma.h"
       "${LIBPNG_INCLUDE_DIRS}/png.h"
       "${LDAP_INCLUDE_DIR}/ldap.h"
       "${LIBSQLITE3_INCLUDE_DIR}/sqlite3ext.h"

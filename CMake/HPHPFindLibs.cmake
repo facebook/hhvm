@@ -275,13 +275,6 @@ SET(CMAKE_REQUIRED_LIBRARIES)
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
-# oniguruma
-find_package(ONIGURUMA REQUIRED)
-include_directories(${ONIGURUMA_INCLUDE_DIRS})
-if (ONIGURUMA_STATIC)
-  add_definitions("-DONIG_EXTERN=extern")
-endif()
-
 # libpthreads
 find_package(PThread REQUIRED)
 include_directories(${LIBPTHREAD_INCLUDE_DIRS})
@@ -379,30 +372,19 @@ endif()
 include_directories(${HPHP_HOME}/hphp)
 
 macro(hphp_link target)
-  # oniguruma must remain first for OS X to work -- see below for a somewhat
-  # dogscience explanation. If you deeply understand this, feel free to fix
-  # properly; in particular, two-level namespaces on OS X should allow us to
-  # say *which* copy of the disputed functions we want, but I don' t know
-  # how to get that to work.
+  # oniguruma must be linked first for MacOS's linker to do the right thing -
+  # that's handled in HPHPSetup.cmake
   #
-  # oniguruma has some of its own implementations of POSIX regex functions,
-  # like regcomp() an regexec(). We use onig everywhere, for both its own
-  # sepcial functions and for the POSIX replacements. This means that the
-  # linker needs to pick the implementions of the POSIX regex functions from
-  # onig, not libc.
-  #
-  # On Linux, that works out fine, since the linker sees onig on the link
-  # line before (implicitly) libc. However, on OS X, despide the manpage for
-  # ld claiming otherwise about indirect dylib dependencies, as soon as we
-  # include one of the libs here that pull in libSystem.B, the linker will
-  # pick the implementations of those functions from libc, not from onig.
-  # And since we've included the onig headers, which have very slightly
-  # different definintions for some of the key data structures, things go
-  # quite awry -- this manifests as infinite loops or crashes when calling
-  # the PHP split() function.
-  #
-  # So make sure to link onig first, so its implementations are picked.
-  target_link_libraries(${target} ${ONIGURUMA_LIBRARIES})
+  # That only handles linking - we still need to make sure that:
+  # - oniguruma is built first, if needed (so we have the header files)
+  # - we build with the header files in the include path
+  if(APPLE)
+    add_dependencies(${target} onig)
+    target_include_directories(${target} PRIVATE $<TARGET_PROPERTY:onig,INTERFACE_INCLUDE_DIRECTORIES>)
+  else()
+    # Otherwise, the linker does the right thing, which sometimes means putting it after things that use it
+    target_link_libraries(${target} onig)
+  endif()
 
   if (LIBDL_LIBRARIES)
     target_link_libraries(${target} ${LIBDL_LIBRARIES})

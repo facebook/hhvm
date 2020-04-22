@@ -90,6 +90,44 @@ PGORegionMode pgoRegionMode(const Func& /*func*/) {
 
 //////////////////////////////////////////////////////////////////////
 
+PostConditions& PostConditions::operator|=(const PostConditions& other) {
+  using TypedLocation = RegionDesc::TypedLocation;
+  struct State {
+    Type type;
+    bool changed;
+  };
+  jit::fast_map<Location,State,Location::Hash> locState;
+
+  auto add = [&] (const TypedLocation& tl, bool isChanged) {
+    State state{tl.type, isChanged};
+    auto ins = locState.insert(std::pair<Location,State>(tl.location, state));
+    if (ins.second) return;
+    auto& it = ins.first;
+    it->second.type    |= tl.type;
+    it->second.changed |= isChanged;
+  };
+
+  for (auto& c : changed) add(c, true);
+  for (auto& r : refined) add(r, false);
+  for (auto& c : other.changed) add(c, true);
+  for (auto& r : other.refined) add(r, false);
+
+  changed.clear();
+  refined.clear();
+  for (auto& l : locState) {
+    auto const& loc      = l.first;
+    auto const type      = l.second.type;
+    auto const isChanged = l.second.changed;
+    TypedLocation typedLoc{loc, type};
+    if (isChanged) changed.push_back(typedLoc);
+    else           refined.push_back(typedLoc);
+  }
+
+  return *this;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool RegionDesc::empty() const {
   return m_blocks.empty();
 }

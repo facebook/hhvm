@@ -1004,7 +1004,17 @@ const PostConditions& FrameStateMgr::postConds(Block* exitBlock) const {
   assertx(exitBlock->isExitNoThrow());
   auto it = m_exitPostConds.find(exitBlock);
   assertx(it != m_exitPostConds.end());
-  return it->second;
+  auto& pconds = it->second;
+  if (debug) {
+    for (DEBUG_ONLY auto& c : pconds.changed) {
+      for (DEBUG_ONLY auto& r : pconds.refined) {
+        assert_flog(c.location != r.location,
+                    "Location {} in both changed and refined sets",
+                    show(c.location));
+      }
+    }
+  }
+  return pconds;
 }
 
 /*

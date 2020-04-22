@@ -263,6 +263,7 @@ using GuardedLocations = jit::vector<RegionDesc::GuardedLocation>;
 struct PostConditions {
   TypedLocations changed;
   TypedLocations refined;
+  PostConditions& operator|=(const PostConditions& other);
 };
 
 /*

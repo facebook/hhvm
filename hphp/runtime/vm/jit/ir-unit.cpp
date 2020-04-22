@@ -175,42 +175,38 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
   }
 }
 
-Block* findMainExitBlock(const IRUnit& unit, SrcKey lastSk) {
+jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk) {
   bool unreachable = false;
-  Block* mainExit = nullptr;
+  jit::vector<Block*> mainExits;
 
-  FTRACE(5, "findMainExitBlock: looking for exit at {} in unit:\n{}\n",
+  FTRACE(5, "findMainExitBlocks: looking for exit at {} in unit:\n{}\n",
          showShort(lastSk), show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
     if (block->back().is(Unreachable)) unreachable = true;
 
-    if (endsUnitAtSrcKey(block, lastSk)) {
-      if (mainExit == nullptr) {
-        mainExit = block;
-        continue;
-      }
-
-      always_assert_flog(
-        mainExit->hint() == Block::Hint::Unlikely ||
-        block->hint() == Block::Hint::Unlikely,
-        "findMainExit: 2 likely exits found: B{} and B{}\nlastSk = {}",
-        mainExit->id(), block->id(), showShort(lastSk)
-      );
-
-      if (mainExit->hint() == Block::Hint::Unlikely) mainExit = block;
+    if (block->hint() != Block::Hint::Unused &&
+        endsUnitAtSrcKey(block, lastSk)) {
+      mainExits.push_back(block);
     }
   }
 
   always_assert_flog(
-    mainExit || unreachable,
-    "findMainExit: no exit found for lastSk = {}",
+    mainExits.size() > 0 || unreachable,
+    "findMainExits: no exit found for lastSk = {}",
     showShort(lastSk)
   );
 
-  FTRACE(5, "findMainExitBlock: mainExit = B{}\n", mainExit->id());
+  FTRACE(5, "findMainExitBlocks: mainExits = {}\n",
+         [&]{
+           std::string ret;
+           for (auto& me : mainExits) {
+             folly::format(&ret, "B{}, ", me->id());
+           }
+           return ret;
+         }());
 
-  return mainExit;
+  return mainExits;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

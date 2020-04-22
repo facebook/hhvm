@@ -626,10 +626,24 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
     if (context.kind == TransKind::Profile &&
         RuntimeOption::EvalJitPGOUsePostConditions) {
       auto const lastSrcKey = region.lastSrcKey();
-      if (auto const mainExit = findMainExitBlock(irgs.unit, lastSrcKey)) {
-        FTRACE(2, "translateRegion: mainExit: B{}\nUnit: {}\n",
-               mainExit->id(), show(irgs.unit));
-        pConds = irgs.irb->fs().postConds(mainExit);
+      auto const mainExits = findMainExitBlocks(irgs.unit, lastSrcKey);
+      if (mainExits.size() > 0) {
+
+        FTRACE(2, "translateRegion: mainExits: {}\nUnit: {}\n",
+               [&]{
+                 std::string ret;
+                 for (auto& me : mainExits) {
+                   folly::format(&ret, "B{}, ", me->id());
+                 }
+                 return ret;
+               }(),
+               show(irgs.unit));
+
+        // Union the post-conditions of all the main-exit blocks.
+        for (auto& me : mainExits) {
+          FTRACE(2, "  - processing exit B{}\n", me->id());
+          pConds |= irgs.irb->fs().postConds(me);
+        }
       } else {
         FTRACE(2, "translateRegion: no main exit\n");
       }

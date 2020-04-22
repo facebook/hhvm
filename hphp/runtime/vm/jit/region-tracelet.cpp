@@ -518,15 +518,18 @@ RegionDescPtr form_region(Env& env) {
       // because that updates the region but not the IR unit.
       if (env.region->blocks().back()->empty()) return true;
       auto lastSk = env.region->lastSrcKey();
-      auto const mainExit = findMainExitBlock(env.irgs.irb->unit(), lastSk);
-      always_assert_flog(mainExit, "No main exits found!");
+      auto const mainExits = findMainExitBlocks(env.irgs.irb->unit(), lastSk);
+      always_assert_flog(mainExits.size() > 0, "No main exits found!");
       /*
        * If the last instruction is an Unreachable, its probably due to
        * unreachable code. We don't want to truncate the tracelet in that case,
        * because we could lose the assertion (eg if the Unreachable is due to a
        * failed AssertRAT).
        */
-      return !mainExit->back().is(Unreachable);
+      for (auto& me : mainExits) {
+        if (me->back().is(Unreachable)) return false;
+      }
+      return true;
     }();
 
     if (truncate) {

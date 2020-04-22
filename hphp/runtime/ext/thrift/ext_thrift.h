@@ -19,6 +19,7 @@
 #define incl_HPHP_EXT_THRIFT_H_
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/vm/native-data.h"
 
 namespace HPHP { namespace thrift {
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +60,52 @@ Variant HHVM_FUNCTION(thrift_protocol_read_compact,
 Object HHVM_FUNCTION(thrift_protocol_read_compact_struct,
                      const Object& transportobj,
                      const String& obj_typename);
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s_RpcOptions("RpcOptions");
+
+struct RpcOptions {
+  RpcOptions() {}
+  RpcOptions& operator=(const RpcOptions& that_) {
+    return *this;
+  }
+
+  void sweep() { close(true); }
+
+  void close(bool /*sweeping*/ = false) {}
+
+  static Class* PhpClass() {
+    if (!c_RpcOptions) {
+      c_RpcOptions = Unit::lookupClass(s_RpcOptions.get());
+      assert(c_RpcOptions);
+    }
+    return c_RpcOptions;
+  }
+
+  static Object newInstance() { return Object{PhpClass()}; }
+
+  static RpcOptions* GetDataOrThrowException(ObjectData* object_) {
+    if (object_ == nullptr) {
+      throw_null_pointer_exception();
+      not_reached();
+    }
+    if (!object_->getVMClass()->classofNonIFace(PhpClass())) {
+      raise_error("RpcOptions expected");
+      not_reached();
+    }
+    return Native::data<RpcOptions>(object_);
+  }
+
+  int32_t chunkBufferSize{100};
+
+  std::string routingKey;
+  std::string shardId;
+
+  std::map<std::string, std::string> writeHeaders;
+ private:
+  static Class* c_RpcOptions;
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

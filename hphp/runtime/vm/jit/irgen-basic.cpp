@@ -144,7 +144,7 @@ void emitCGetQuietL(IRGS& env, int32_t id) {
         env,
         id,
         ldPMExit,
-        DataTypeCountnessInit
+        DataTypeCountness
       );
 
       if (loc->type() <= TUninit) {

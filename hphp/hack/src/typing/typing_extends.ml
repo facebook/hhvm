@@ -302,9 +302,7 @@ let check_override
     Errors.abstract_concrete_override
       pos
       parent_pos
-      ( if
-        phys_equal mem_source `FromMethod || phys_equal mem_source `FromSMethod
-      then
+      ( if is_method then
         `method_
       else
         `property );

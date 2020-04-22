@@ -1041,18 +1041,14 @@ void Class::initSPropHandles() const {
                       "StaticPropData must be a simple wrapper "
                       "around TypedValue");
         propHandle.bind(
-          [&] {
-            auto const handle =
-              rds::alloc<StaticPropData, rds::Mode::Persistent>().handle();
-            rds::recordRds(handle, sizeof(StaticPropData),
-                           rds::SPropCache{this, slot});
-            return handle;
-          },
-          *reinterpret_cast<const StaticPropData*>(&sProp.val)
+          rds::Mode::Persistent,
+          rds::Symbol{rds::SPropCache{this, slot}},
+          reinterpret_cast<const StaticPropData*>(&sProp.val)
         );
       } else {
-        propHandle = rds::bind<StaticPropData, rds::Mode::Local>(
-          rds::SPropCache{this, slot}
+        propHandle.bind(
+          rds::Mode::Local,
+          rds::Symbol{rds::SPropCache{this, slot}}
         );
       }
     } else {

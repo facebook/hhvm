@@ -16,10 +16,13 @@
 #ifndef incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 #define incl_HPHP_RUNTIME_BASE_RDS_INL_H_
 
-#include <atomic>
-#include <tbb/concurrent_vector.h>
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/safe-cast.h"
+
+#include <folly/Optional.h>
+#include <tbb/concurrent_vector.h>
+
+#include <atomic>
 
 namespace HPHP { namespace rds {
 
@@ -34,13 +37,11 @@ Handle allocUnlocked(Mode mode, size_t numBytes, size_t align,
 Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
                 size_t align, type_scan::Index tyIndex);
 Handle attachImpl(Symbol key);
-void bindOnLinkImpl(std::atomic<Handle>& handle, Mode mode,
-                    size_t sizeBytes, size_t align,
-                    type_scan::Index tyIndex);
+
 void bindOnLinkImpl(std::atomic<Handle>& handle,
-                    std::function<Handle()> fun,
-                    const void* init, size_t size,
-                    type_scan::Index tyIndex);
+                    folly::Optional<Symbol> key,
+                    Mode mode, size_t size, size_t align,
+                    type_scan::Index tsi, const void* init_val);
 
 extern size_t s_normal_frontier;
 extern size_t s_local_base;
@@ -268,24 +269,18 @@ bool Link<T,M>::isPersistent() const {
 
 template<class T, Mode M>
 template<size_t Align>
-void Link<T,M>::bind(Mode mode) {
+void Link<T,M>::bind(Mode mode,
+                     folly::Optional<Symbol> sym,
+                     const T* init_val) {
   assertx(maybe<M>(mode));
   if (LIKELY(bound())) return;
-  detail::bindOnLinkImpl(
-    m_handle, mode, sizeof(T),
-    Align, type_scan::getIndexForScan<T>()
-  );
-  recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
-}
 
-template<class T, Mode M>
-template<typename F>
-void Link<T,M>::bind(F fun, const T& init) {
-  if (LIKELY(bound())) return;
   detail::bindOnLinkImpl(
-      m_handle, std::move(fun), &init, sizeof init,
-      type_scan::getIndexForScan<T>()
+    m_handle, sym, mode, sizeof(T), Align,
+    type_scan::getIndexForScan<T>(), init_val
   );
+  if (!sym) recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
+
   checkSanity();
 }
 

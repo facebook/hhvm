@@ -187,6 +187,12 @@ extern __thread void* tl_base;
  */
 
 /*
+ * Symbols for rds::Link's.
+ */
+struct LinkID { const char* type; uint64_t id; };
+struct LinkName { const char* type; LowStringPtr name; };
+
+/*
  * Class constant values are TypedValue's stored in RDS.
  */
 struct ClsConstant { LowStringPtr clsName;
@@ -274,16 +280,19 @@ struct LSBMemoCache {
 };
 
 
-using Symbol = boost::variant< ClsConstant
-                             , StaticMethod
-                             , StaticMethodF
-                             , Profile
-                             , SPropCache
-                             , StaticMemoValue
-                             , StaticMemoCache
-                             , LSBMemoValue
-                             , LSBMemoCache
-                             >;
+using Symbol = boost::variant<
+  LinkName,
+  LinkID,
+  ClsConstant,
+  StaticMethod,
+  StaticMethodF,
+  Profile,
+  SPropCache,
+  StaticMemoValue,
+  StaticMemoCache,
+  LSBMemoValue,
+  LSBMemoCache
+>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -376,37 +385,26 @@ struct Link {
   operator=(const Link<T,OM>&);
 
   /*
-   * Ensure this Link is bound to an RDS allocation.  If it is not, allocate it
-   * using this Link itself as the symbol.
-   *
-   * This function internally synchronizes to avoid double-allocating.  It is
-   * legal to call it repeatedly with a link that may already be bound.  The
-   * `mode' parameter and `Align' parameters are ignored if the link is already
-   * bound, and only affects the call that allocates RDS memory.
-   *
-   * Post: bound()
-   */
-  template<size_t Align = alignof(T)> void bind(Mode mode);
-
-  /*
    * Ensure this Link is bound to an RDS allocation.
-   *  - if its already bound, do nothing;
-   *  - if another thread is already calling fun to bind it, wait until its
-   *    bound;
-   *  - otherwise call fun to obtain a handle.
-   *  - for persistent handles, value is used to initialize the corresponding
-   *    rds data; for normal handles its ignored.
    *
-   * The intent is to ensure that only one thread allocates the
-   * handle, and that in the case of persistent handles, fun has a
-   * chance to fill in the value before the Link is published (so that
-   * other threads only ever see an unbound handle, or a bound handle
-   * with a valid value.
+   * Allocation is atomic and idempotent.  This ensures that only one thread
+   * allocates the handle, and (in the cast of persistent handles) that the
+   * value is initialized as part of the operation.  The effect is that other
+   * threads only ever see an unbound handle or a bound handle with a valid
+   * value.
+   *
+   * rds::Link's are "keyed" by context---generally meaning that they're owned
+   * by an object with an independent means of enforcing uniqueness.  The `sym`
+   * argument should also be unique, but is used only for optimizations.
+   *
+   * If the Link is already bound, both `mode` and `Align` are ignored.  If the
+   * mode is not persistent, `init_val` is ignored.
    *
    * Post: bound()
    */
-  template<typename F>
-  void bind(F fun, const T& value);
+  template<size_t Align = alignof(T)>
+  void bind(Mode mode, folly::Optional<Symbol> sym = folly::none,
+            const T* init_val = nullptr);
 
   /*
    * Dereference a Link and access its RDS memory for the current thread.

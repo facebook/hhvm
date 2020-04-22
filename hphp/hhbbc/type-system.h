@@ -693,6 +693,15 @@ struct Type {
   }
   bool subtypeOfAny() const { return false; }
 
+  /*
+   * Strict subtype of any of the list of types.
+   */
+  template<class... Types>
+  bool strictSubtypeOfAny(const Type& t, Types... ts) const {
+    return strictSubtypeOf(t) || strictSubtypeOfAny(ts...);
+  }
+  bool strictSubtypeOfAny() const { return false; }
+
   template<bool contextSensitive>
   bool equivImpl(const Type& o) const;
   template<bool contextSensitive>

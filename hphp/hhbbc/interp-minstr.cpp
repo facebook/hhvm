@@ -1307,8 +1307,11 @@ void miFinalUnsetElem(ISS& env, int32_t nDiscard, const Type&) {
   // We don't handle inner-array types with unset yet.
   always_assert(env.collect.mInstrState.arrayChain.empty());
   auto const& ty = env.collect.mInstrState.base.type;
-  always_assert(!ty.strictSubtypeOf(TArr) && !ty.strictSubtypeOf(TVec) &&
-                !ty.strictSubtypeOf(TDict) && !ty.strictSubtypeOf(TKeyset));
+  always_assert(!ty.strictSubtypeOfAny(TVec, TDict, TKeyset));
+  if (ty.strictSubtypeOf(TArr)) {
+    always_assert(RO::EvalHackArrCompatSpecialization);
+    always_assert(!ty.strictSubtypeOfAny(TPArr, TDArr, TVArr));
+  }
   endBase(env);
   discard(env, nDiscard);
 }

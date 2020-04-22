@@ -1149,6 +1149,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
   if (!tc.isCheckable() || tc.isSoft()) return TCell;
 
   using A = AnnotType;
+  auto const dvarrays = RO::EvalHackArrCompatSpecialization;
   auto const atToType = [&](AnnotType at) {
     switch (at) {
       case A::Null:       return TNull;
@@ -1171,9 +1172,9 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Nonnull:    return TInitCell - TInitNull;
       case A::Number:     return TInt | TDbl;
       case A::ArrayKey:   return TInt | TStr;
-      case A::VArray:
-      case A::DArray:
-      case A::VArrOrDArr: return TArr;
+      case A::VArray:     return dvarrays ? TVArr : TArr;
+      case A::DArray:     return dvarrays ? TDArr : TArr;
+      case A::VArrOrDArr: return dvarrays ? (TVArr | TDArr) : TArr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::This:

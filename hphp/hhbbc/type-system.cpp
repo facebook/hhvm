@@ -4769,6 +4769,10 @@ Type loosen_staticness(Type t) {
 }
 
 Type loosen_dvarrayness(Type t) {
+  // If this flag is on, the runtime will treat darrays and varrays as their
+  // own types (that are also distinct from array), enforcing typehints.
+  if (RO::EvalHackArrCompatSpecialization) return t;
+
   auto const check = [&] (trep a) {
     if (t.m_bits & a) t.m_bits |= a;
   };

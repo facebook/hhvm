@@ -30,7 +30,7 @@ ExternalProject_add(
 add_library(onig INTERFACE)
 
 find_package(ONIGURUMA)
-set(CMAKE_CXX_REQUIRED_INCLUDES ${ONIGURUMA_INCLUDE_DIRS})
+set(CMAKE_REQUIRED_INCLUDES ${ONIGURUMA_INCLUDE_DIRS})
 CHECK_CXX_SOURCE_COMPILES(
 "#include <onigposix.h>
 int main() {
@@ -38,7 +38,7 @@ int main() {
 }"
   HAVE_ONIGPOSIX_H
 )
-set(CMAKE_CXX_REQUIRED_INCLUDES)
+set(CMAKE_REQUIRED_INCLUDES)
 
 if(HAVE_ONIGPOSIX_H)
   message(STATUS "Using system oniguruma")

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ast_scope_rust::{Lambda, Scope, ScopeItem};
+use ast_scope_rust::{self as ast_scope, Lambda, Scope, ScopeItem};
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
 use emit_fatal_rust::{emit_fatal_runtimeomitframe, raise_fatal_parse};
@@ -124,11 +124,11 @@ pub fn from_ast<'a>(
     };
     let mut scope = Scope {
         items: vec![
-            ScopeItem::Class(Cow::Borrowed(class)),
-            // TODO(shiqicao): MUST FIX!!!
-            //    If method is Cow::Borrowed, then Cow::clone should be cheap,
-            //    if method is Cow::Owned, then Cow::clone clones ast::Method_, this must be avoided!
-            ScopeItem::Method(Cow::clone(&method_)),
+            ScopeItem::Class(ast_scope::Class::new_ref(class)),
+            ScopeItem::Method(match &method_ {
+                Cow::Borrowed(m) => ast_scope::Method::new_ref(&m),
+                Cow::Owned(m) => ast_scope::Method::new_rc(&m),
+            }),
         ],
     };
     if is_closure_body {

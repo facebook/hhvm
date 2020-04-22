@@ -2,6 +2,10 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
+mod ast_scope_item;
+pub use ast_scope_item::*;
+
 use oxidized::{
     ast,
     ast_defs::{FunKind, Id},
@@ -10,34 +14,6 @@ use oxidized::{
 };
 use rx_rust as rx;
 use std::borrow::Cow;
-
-#[derive(Clone, Debug)]
-pub struct LongLambda {
-    pub is_static: bool,
-    pub is_async: bool,
-    pub rx_level: Option<rx::Level>,
-}
-
-#[derive(Clone, Debug)]
-pub struct Lambda {
-    pub is_async: bool,
-    pub rx_level: Option<rx::Level>,
-}
-
-#[derive(Clone, Debug)]
-pub enum ScopeItem<'a> {
-    Class(Cow<'a, ast::Class_>),
-    Function(Cow<'a, ast::Fun_>),
-    Method(Cow<'a, ast::Method_>),
-    LongLambda(LongLambda),
-    Lambda(Lambda),
-}
-
-impl ScopeItem<'_> {
-    pub fn is_in_lambda(&self) -> bool {
-        matches!(self, ScopeItem::Lambda(_) | ScopeItem::LongLambda(_))
-    }
-}
 
 #[derive(Clone, Default, Debug)]
 pub struct Scope<'a> {
@@ -53,38 +29,38 @@ impl<'a> Scope<'a> {
         self.items.push(s)
     }
 
-    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem> {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = &ScopeItem<'a>> {
         self.items.iter().rev()
     }
 
-    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem]> {
+    pub fn iter_subscopes(&self) -> impl Iterator<Item = &[ScopeItem<'a>]> {
         (0..self.items.len()).rev().map(move |i| &self.items[..i])
     }
 
-    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b>]) -> Option<&'b ast::Class_> {
+    pub fn get_subscope_class<'b>(sub_scope: &'b [ScopeItem<'b>]) -> Option<&'b Class> {
         for scope_item in sub_scope.iter().rev() {
             if let ScopeItem::Class(cd) = scope_item {
-                return Some(cd.as_ref());
+                return Some(cd);
             }
         }
         None
     }
 
-    pub fn get_class(&self) -> Option<&ast::Class_> {
+    pub fn get_class(&self) -> Option<&Class> {
         Self::get_subscope_class(&self.items[..])
     }
 
     pub fn get_span(&self) -> Pos {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(cd) => {
-                    return cd.span.clone();
+                    return cd.get_span().clone();
                 }
                 ScopeItem::Function(fd) => {
-                    return fd.span.clone();
+                    return fd.get_span().clone();
                 }
                 ScopeItem::Method(md) => {
-                    return md.span.clone();
+                    return md.get_span().clone();
                 }
                 _ => (),
             }
@@ -99,16 +75,16 @@ impl<'a> Scope<'a> {
                 tparams.push(tparam);
             }
         };
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(cd) => {
-                    extend_shallowly(cd.tparams.list.as_slice());
+                    extend_shallowly(&cd.get_tparams().list[..]);
                 }
                 ScopeItem::Function(fd) => {
-                    extend_shallowly(fd.tparams.as_slice());
+                    extend_shallowly(fd.get_tparams());
                 }
                 ScopeItem::Method(md) => {
-                    extend_shallowly(md.tparams.as_slice());
+                    extend_shallowly(md.get_tparams());
                 }
                 _ => (),
             }
@@ -117,16 +93,16 @@ impl<'a> Scope<'a> {
     }
 
     pub fn get_fun_tparams(&self) -> &[ast::Tparam] {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
                     return &[];
                 }
                 ScopeItem::Function(fd) => {
-                    return &fd.tparams[..];
+                    return fd.get_tparams();
                 }
                 ScopeItem::Method(md) => {
-                    return &md.tparams[..];
+                    return md.get_tparams();
                 }
                 _ => (),
             }
@@ -135,9 +111,9 @@ impl<'a> Scope<'a> {
     }
 
     pub fn get_class_tparams(&self) -> Cow<ast::ClassTparams> {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             if let ScopeItem::Class(cd) = scope_item {
-                return Cow::Borrowed(&cd.tparams);
+                return Cow::Borrowed(&cd.get_tparams());
             }
         }
         Cow::Owned(ast::ClassTparams {
@@ -147,7 +123,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn has_this(&self) -> bool {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) | ScopeItem::Function(_) => {
                     return false;
@@ -162,16 +138,18 @@ impl<'a> Scope<'a> {
     }
 
     pub fn is_in_async(&self) -> bool {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
                     return false;
                 }
-                ScopeItem::Method(Cow::Borrowed(ast::Method_ { fun_kind, .. }))
-                | ScopeItem::Method(Cow::Owned(ast::Method_ { fun_kind, .. }))
-                | ScopeItem::Function(Cow::Borrowed(ast::Fun_ { fun_kind, .. }))
-                | ScopeItem::Function(Cow::Owned(ast::Fun_ { fun_kind, .. })) => {
-                    return *fun_kind == FunKind::FAsync || *fun_kind == FunKind::FAsyncGenerator;
+                ScopeItem::Method(m) => {
+                    let fun_kind = m.get_fun_kind();
+                    return fun_kind == FunKind::FAsync || fun_kind == FunKind::FAsyncGenerator;
+                }
+                ScopeItem::Function(f) => {
+                    let fun_kind = f.get_fun_kind();
+                    return fun_kind == FunKind::FAsync || fun_kind == FunKind::FAsyncGenerator;
                 }
                 _ => (),
             }
@@ -184,10 +162,10 @@ impl<'a> Scope<'a> {
     }
 
     pub fn is_in_static_method(&self) -> bool {
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Method(md) => {
-                    return md.static_;
+                    return md.is_static();
                 }
                 ScopeItem::LongLambda(ll) => {
                     if ll.is_static {
@@ -202,23 +180,20 @@ impl<'a> Scope<'a> {
     }
 
     pub fn is_in_lambda(&self) -> bool {
-        self.items
-            .last()
-            .map(&ScopeItem::is_in_lambda)
-            .unwrap_or(false)
+        self.items.last().map_or(false, &ScopeItem::is_in_lambda)
     }
 
     pub fn rx_of_scope(&self) -> rx::Level {
-        fn from_uas(user_attrs: &Vec<ast::UserAttribute>) -> rx::Level {
+        fn from_uas(user_attrs: &[ast::UserAttribute]) -> rx::Level {
             rx::Level::from_ast(user_attrs).unwrap_or(rx::Level::NonRx)
         }
-        for scope_item in self.items.iter().rev() {
+        for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) => {
                     return rx::Level::NonRx;
                 }
-                ScopeItem::Method(m) => return from_uas(&m.as_ref().user_attributes),
-                ScopeItem::Function(f) => return from_uas(&f.as_ref().user_attributes),
+                ScopeItem::Method(m) => return from_uas(m.get_user_attributes()),
+                ScopeItem::Function(f) => return from_uas(f.get_user_attributes()),
                 ScopeItem::Lambda(Lambda {
                     rx_level: Some(ref rl),
                     ..
@@ -236,23 +211,14 @@ impl<'a> Scope<'a> {
     }
 
     pub fn has_function_attribute(&self, attr_name: impl AsRef<str>) -> bool {
-        for scope_item in self.items.iter().rev() {
+        let has = |ua: &[ast::UserAttribute]| ua.iter().any(|a| a.name.1 == attr_name.as_ref());
+        for scope_item in self.iter() {
             match scope_item {
-                ScopeItem::Method(Cow::Borrowed(ast::Method_ {
-                    user_attributes, ..
-                }))
-                | ScopeItem::Method(Cow::Owned(ast::Method_ {
-                    user_attributes, ..
-                }))
-                | ScopeItem::Function(Cow::Borrowed(ast::Fun_ {
-                    user_attributes, ..
-                }))
-                | ScopeItem::Function(Cow::Owned(ast::Fun_ {
-                    user_attributes, ..
-                })) => {
-                    return user_attributes
-                        .iter()
-                        .any(|attr| attr.name.1 == attr_name.as_ref());
+                ScopeItem::Method(m) => {
+                    return has(m.get_user_attributes());
+                }
+                ScopeItem::Function(f) => {
+                    return has(f.get_user_attributes());
                 }
                 _ => (),
             }
@@ -261,7 +227,7 @@ impl<'a> Scope<'a> {
     }
 
     pub fn is_static(&self) -> bool {
-        for x in self.items.iter().rev() {
+        for x in self.iter() {
             match x {
                 ScopeItem::LongLambda(x) => {
                     if x.is_static {
@@ -269,7 +235,7 @@ impl<'a> Scope<'a> {
                     }
                 }
                 ScopeItem::Function(_) => return true,
-                ScopeItem::Method(md) => return md.static_,
+                ScopeItem::Method(md) => return md.is_static(),
                 ScopeItem::Lambda(_) => continue,
                 _ => return true,
             }
@@ -282,7 +248,7 @@ impl<'a> Scope<'a> {
         // closure scope: lambda -> method -> class
         match &self.items[..] {
             [.., ScopeItem::Class(ast_cls), _, _] => ast_cls
-                .vars
+                .get_vars()
                 .iter()
                 .map(|var| {
                     let Id(_, id) = &var.id;

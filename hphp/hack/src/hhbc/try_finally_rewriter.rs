@@ -111,9 +111,9 @@ fn get_pos_for_error<'a>(env: &'a Env<'a>) -> Cow<'a, Pos> {
     for item in env.scope.iter() {
         use ast_scope::ScopeItem;
         match item {
-            ScopeItem::Function(fd) => return Pos::first_char_of_line(&fd.span),
+            ScopeItem::Function(fd) => return Pos::first_char_of_line(fd.get_span()),
             // For methods, it points to class not the method.. weird
-            ScopeItem::Class(cd) => return Pos::first_char_of_line(&cd.span),
+            ScopeItem::Class(cd) => return Pos::first_char_of_line(cd.get_span()),
             ScopeItem::Method(_) | ScopeItem::Lambda(_) | ScopeItem::LongLambda(_) => (),
         }
     }

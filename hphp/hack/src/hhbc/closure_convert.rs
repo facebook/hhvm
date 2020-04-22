@@ -5,13 +5,14 @@
 
 use itertools::{Either, EitherOrBoth::*, Itertools};
 use std::{
-    borrow::Cow,
     collections::{BTreeMap, HashSet},
     mem,
 };
 
 use ast_constant_folder_rust as ast_constant_folder;
-use ast_scope_rust as ast_scope;
+use ast_scope_rust::{
+    self as ast_scope, Lambda, LongLambda, Scope as AstScope, ScopeItem as AstScopeItem,
+};
 use decl_vars_rust as decl_vars;
 use emit_fatal_rust as emit_fatal;
 use env::emitter::Emitter;
@@ -34,6 +35,9 @@ use oxidized::{
 };
 use rx_rust as rx;
 use unique_list_rust::UniqueList;
+
+type Scope<'a> = AstScope<'a>;
+type ScopeItem<'a> = AstScopeItem<'a>;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum HoistKind {
@@ -61,7 +65,7 @@ struct Env<'a> {
     /// Span of function/method body
     pos: Pos, // TODO(hrust) change to &'a Pos after dependent Visitor/Node lifetime is fixed.
     /// What is the current context?
-    scope: ast_scope::Scope<'a>,
+    scope: Scope<'a>,
     variable_scopes: Vec<Variables>,
     /// How many existing classes are there?
     defined_class_count: usize,
@@ -90,7 +94,7 @@ impl<'a> Env<'a> {
         defs: &Program,
         options: &'a Options,
     ) -> Result<Self> {
-        let scope = ast_scope::Scope::toplevel();
+        let scope = Scope::toplevel();
         let all_vars = get_vars(&scope, false, &vec![], Either::Left(&defs))?;
 
         Ok(Self {
@@ -110,7 +114,7 @@ impl<'a> Env<'a> {
 
     fn with_function_like_(
         &mut self,
-        e: ast_scope::ScopeItem<'a>,
+        e: ScopeItem<'a>,
         is_closure_body: bool,
         params: &[FunParam],
         pos: Pos,
@@ -127,7 +131,7 @@ impl<'a> Env<'a> {
 
     fn with_function_like(
         &mut self,
-        e: ast_scope::ScopeItem<'a>,
+        e: ScopeItem<'a>,
         is_closure_body: bool,
         fd: &Fun_,
     ) -> Result<()> {
@@ -141,16 +145,12 @@ impl<'a> Env<'a> {
     }
 
     fn with_function(&mut self, fd: &Fun_) -> Result<()> {
-        self.with_function_like(
-            ast_scope::ScopeItem::Function(Cow::Owned(fd.clone())),
-            false,
-            fd,
-        )
+        self.with_function_like(ScopeItem::Function(ast_scope::Fun::new_rc(fd)), false, fd)
     }
 
     fn with_method(&mut self, md: &Method_) -> Result<()> {
         self.with_function_like_(
-            ast_scope::ScopeItem::Method(Cow::Owned(md.clone())),
+            ScopeItem::Method(ast_scope::Method::new_rc(md)),
             false,
             &md.params,
             md.span.clone(),
@@ -162,26 +162,26 @@ impl<'a> Env<'a> {
         let is_async = fd.fun_kind.is_async();
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
-        let lambda = ast_scope::Lambda { is_async, rx_level };
-        self.with_function_like(ast_scope::ScopeItem::Lambda(lambda), true, fd)
+        let lambda = Lambda { is_async, rx_level };
+        self.with_function_like(ScopeItem::Lambda(lambda), true, fd)
     }
 
     fn with_longlambda(&mut self, is_static: bool, fd: &Fun_) -> Result<()> {
         let is_async = fd.fun_kind.is_async();
         let rx_level = rx::Level::from_ast(&fd.user_attributes);
 
-        let long_lambda = ast_scope::LongLambda {
+        let long_lambda = LongLambda {
             is_static,
             is_async,
             rx_level,
         };
-        self.with_function_like(ast_scope::ScopeItem::LongLambda(long_lambda), true, fd)
+        self.with_function_like(ScopeItem::LongLambda(long_lambda), true, fd)
     }
 
     fn with_class(&mut self, cd: &Class_) {
-        self.scope = ast_scope::Scope::toplevel();
+        self.scope = Scope::toplevel();
         self.scope
-            .push_item(ast_scope::ScopeItem::Class(Cow::Owned(cd.clone())));
+            .push_item(ScopeItem::Class(ast_scope::Class::new_rc(cd)))
     }
 
     fn with_in_using<F, R>(&mut self, in_using: bool, mut f: F) -> R
@@ -220,7 +220,7 @@ impl<'a> Env<'a> {
             }
         };
         let head = self.scope.iter().next();
-        use ast_scope::ScopeItem as S;
+        use ScopeItem as S;
         match head {
             None => Err(emit_fatal::raise_fatal_parse(
                 &self.pos,
@@ -229,8 +229,8 @@ impl<'a> Env<'a> {
             Some(S::Lambda(l)) => check_lambda(l.is_async),
             Some(S::LongLambda(l)) => check_lambda(l.is_async),
             Some(S::Class(_)) => Ok(()), /* Syntax error, wont get here */
-            Some(S::Function(fd)) => check_valid_fun_kind(&fd.name.1, fd.fun_kind),
-            Some(S::Method(md)) => check_valid_fun_kind(&md.name.1, md.fun_kind),
+            Some(S::Function(fd)) => check_valid_fun_kind(&fd.get_name().1, fd.get_fun_kind()),
+            Some(S::Method(md)) => check_valid_fun_kind(&md.get_name().1, md.get_fun_kind()),
         }
     }
 }
@@ -391,7 +391,7 @@ fn add_generic(env: &mut Env, st: &mut State, var: &str) {
 }
 
 fn get_vars(
-    scope: &ast_scope::Scope,
+    scope: &Scope,
     is_closure_body: bool,
     params: &[FunParam],
     body: ast_body::AstBody,
@@ -414,8 +414,8 @@ fn strip_id(id: &Id) -> &str {
     string_utils::strip_global_ns(&id.1)
 }
 
-fn make_class_name(cd: &Class_) -> String {
-    string_utils::mangle_xhp_id(strip_id(&cd.name).to_string())
+fn make_class_name(cd: &ast_scope::Class) -> String {
+    string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string())
 }
 
 fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> String {
@@ -433,9 +433,9 @@ fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> S
                 break;
             }
             Some(ast_scope::ScopeItem::Function(x)) => {
-                let fname = strip_id(&x.name);
+                let fname = strip_id(x.get_name());
                 parts.push(
-                    ast_scope::Scope::get_subscope_class(sub_scope)
+                    Scope::get_subscope_class(sub_scope)
                         .map(|cd| make_class_name(cd) + "::")
                         .unwrap_or_default()
                         + &fname,
@@ -443,7 +443,7 @@ fn make_scope_name(ns: &RcOc<namespace_env::Env>, scope: &ast_scope::Scope) -> S
                 break;
             }
             Some(ast_scope::ScopeItem::Method(x)) => {
-                parts.push(strip_id(&x.name).to_string());
+                parts.push(strip_id(x.get_name()).to_string());
                 if !parts.last().map(|x| x.ends_with("::")).unwrap_or(false) {
                     parts.push("::".into())
                 };
@@ -559,18 +559,20 @@ fn make_closure(
 // literal strings. It's necessary to do this before closure conversion
 // because the enclosing class will be changed.
 fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
-    use ast_scope::*;
     let ret = |newstr| Expr_::mk_string(newstr);
-    let name =
-        |c: &Class_| Expr_::mk_string(string_utils::mangle_xhp_id(strip_id(&c.name).to_string()));
+    let name = |c: &ast_scope::Class| {
+        Expr_::mk_string(string_utils::mangle_xhp_id(
+            strip_id(c.get_name()).to_string(),
+        ))
+    };
 
     match s {
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__TRAIT__) => match env.scope.get_class() {
-            Some(c) if c.kind == ClassKind::Ctrait => name(c),
+            Some(c) if c.get_kind() == ClassKind::Ctrait => name(c),
             _ => ret("".into()),
         },
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__CLASS__) => match env.scope.get_class() {
-            Some(c) if c.kind != ClassKind::Ctrait => name(c),
+            Some(c) if c.get_kind() != ClassKind::Ctrait => name(c),
             Some(_) => Expr_::mk_id(Id(p, s)),
             None => ret("".into()),
         },
@@ -578,8 +580,8 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
             let (prefix, is_trait) = match env.scope.get_class() {
                 None => ("".into(), false),
                 Some(cd) => (
-                    string_utils::mangle_xhp_id(strip_id(&cd.name).to_string()) + "::",
-                    cd.kind == ClassKind::Ctrait,
+                    string_utils::mangle_xhp_id(strip_id(cd.get_name()).to_string()) + "::",
+                    cd.get_kind() == ClassKind::Ctrait,
                 ),
             };
             // for lambdas nested in trait methods HHVM replaces __METHOD__
@@ -591,19 +593,19 @@ fn convert_id(env: &Env, Id(p, s): Id) -> Expr_ {
                 .next();
 
             match scope {
-                Some(ScopeItem::Function(fd)) => ret(prefix + strip_id(&fd.name)),
-                Some(ScopeItem::Method(md)) => ret(prefix + strip_id(&md.name)),
+                Some(ScopeItem::Function(fd)) => ret(prefix + strip_id(fd.get_name())),
+                Some(ScopeItem::Method(md)) => ret(prefix + strip_id(md.get_name())),
                 Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => {
                     ret(prefix + "{closure}")
                 }
                 // PHP weirdness: __METHOD__ inside a class outside a method returns class name
-                Some(ScopeItem::Class(cd)) => ret(strip_id(&cd.name).to_string()),
+                Some(ScopeItem::Class(cd)) => ret(strip_id(cd.get_name()).to_string()),
                 _ => ret("".into()),
             }
         }
         _ if s.eq_ignore_ascii_case(pseudo_consts::G__FUNCTION__) => match env.scope.items.last() {
-            Some(ScopeItem::Function(fd)) => ret(strip_id(&fd.name).to_string()),
-            Some(ScopeItem::Method(md)) => ret(strip_id(&md.name).to_string()),
+            Some(ScopeItem::Function(fd)) => ret(strip_id(fd.get_name()).to_string()),
+            Some(ScopeItem::Method(md)) => ret(strip_id(md.get_name()).to_string()),
             Some(ScopeItem::Lambda(_)) | Some(ScopeItem::LongLambda(_)) => ret("{closure}".into()),
             _ => ret("".into()),
         },
@@ -626,11 +628,11 @@ fn visit_class_id<'a>(
     })
 }
 
-fn make_info(c: &Class_) -> ClosureEnclosingClassInfo {
+fn make_info(c: &ast_scope::Class) -> ClosureEnclosingClassInfo {
     ClosureEnclosingClassInfo {
-        kind: c.kind,
-        name: c.name.1.clone(),
-        parent_class_name: match &c.extends.as_slice() {
+        kind: c.get_kind(),
+        name: c.get_name().1.clone(),
+        parent_class_name: match c.get_extends() {
             [x] => x.as_happly().map(|(id, _args)| id.1.clone()),
             _ => None,
         },
@@ -786,7 +788,7 @@ fn convert_lambda<'a>(
         .closure_namespaces
         .insert(closure_class_name.clone(), st.namespace.clone());
     st.record_function_state(
-        env::get_unique_id_for_method(&cd, &cd.methods.first().unwrap()),
+        env::get_unique_id_for_method(&cd.name.1, &cd.methods.first().unwrap().name.1),
         function_state,
         rx_of_scope,
     );
@@ -813,12 +815,12 @@ fn convert_meth_caller_to_func_ptr<'a>(
     pf: &Pos,
     fname: &String,
 ) -> Expr_ {
-    fn get_scope_fmode(scope: &ast_scope::Scope) -> Mode {
+    fn get_scope_fmode(scope: &Scope) -> Mode {
         scope
             .iter()
             .find_map(|item| match item {
-                ast_scope::ScopeItem::Class(cd) => Some(cd.mode),
-                ast_scope::ScopeItem::Function(fd) => Some(fd.mode),
+                ScopeItem::Class(cd) => Some(cd.get_mode()),
+                ScopeItem::Function(fd) => Some(fd.get_mode()),
                 _ => None,
             })
             .unwrap_or(Mode::Mstrict)
@@ -841,7 +843,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         }
     };
     let cname = match env.scope.get_class() {
-        Some(cd) => &cd.name.1,
+        Some(cd) => &cd.get_name().1,
         None => "",
     };
     let mangle_name = string_utils::mangle_meth_caller(cls, fname);
@@ -1014,7 +1016,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
         self.state.reset_function_counts();
         let function_state = convert_function_like_body(self, &mut env, &mut md.body)?;
         self.state.record_function_state(
-            env::get_unique_id_for_method(cls, &md),
+            env::get_unique_id_for_method(cls.get_name_str(), &md.name.1),
             function_state,
             rx::Level::NonRx,
         );
@@ -1042,7 +1044,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 self.state.reset_function_counts();
                 let function_state = convert_function_like_body(self, &mut env, &mut x.body)?;
                 self.state.record_function_state(
-                    env::get_unique_id_for_function(&x),
+                    env::get_unique_id_for_function(&x.name.1),
                     function_state,
                     rx::Level::NonRx,
                 );

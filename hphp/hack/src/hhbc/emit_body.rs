@@ -708,21 +708,21 @@ pub fn emit_deprecation_info(
             let (class_name, trait_instrs, concat_instruction): (String, _, _) =
                 match scope.get_class() {
                     None => ("".into(), instr::empty(), instr::empty()),
-                    Some(c) if c.kind == tast::ClassKind::Ctrait => (
+                    Some(c) if c.get_kind() == tast::ClassKind::Ctrait => (
                         "::".into(),
                         InstrSeq::gather(vec![instr::self_(), instr::classname()]),
                         instr::concat(),
                     ),
                     Some(c) => (
-                        strip_id(&c.name).to_string() + "::",
+                        strip_id(c.get_name()).to_string() + "::",
                         instr::empty(),
                         instr::empty(),
                     ),
                 };
 
             let fn_name = match scope.items.last() {
-                Some(ScopeItem::Function(f)) => strip_id(&f.name),
-                Some(ScopeItem::Method(m)) => strip_id(&m.name),
+                Some(ScopeItem::Function(f)) => strip_id(f.get_name()),
+                Some(ScopeItem::Method(m)) => strip_id(m.get_name()),
                 _ => {
                     return Err(Error::Unrecoverable(
                         "deprecated functions must have names".into(),
@@ -933,9 +933,9 @@ fn set_function_jmp_targets(emitter: &mut Emitter, env: &mut Env) -> bool {
     let function_state_key = match env.scope.items.as_slice() {
         [] => env::get_unique_id_for_main(),
         [.., Class(cls), Method(md)] | [.., Class(cls), Method(md), Lambda(_)] => {
-            env::get_unique_id_for_method(cls, md)
+            env::get_unique_id_for_method(cls.get_name_str(), md.get_name_str())
         }
-        [.., Function(fun)] => env::get_unique_id_for_function(fun),
+        [.., Function(fun)] => env::get_unique_id_for_function(fun.get_name_str()),
         _ => panic!("unexpected scope shape"),
     };
     let global_state = emitter.emit_state();
@@ -976,11 +976,13 @@ fn report_error(is_closure_body: bool, scope: &Scope, pos: &Pos) -> Result<()> {
         let (kind, name) = match (s1, s2) {
             (Some(S::Function(f)), _) => (
                 "function",
-                string_utils::strip_global_ns(&f.name.1).to_owned(),
+                string_utils::strip_global_ns(f.get_name_str()).to_owned(),
             ),
             (Some(S::Method(m)), Some(S::Class(c))) => (
                 "method",
-                string_utils::strip_global_ns(&c.name.1).to_owned() + "::" + m.name.1.as_str(),
+                string_utils::strip_global_ns(c.get_name_str()).to_owned()
+                    + "::"
+                    + m.get_name_str(),
             ),
             _ => return Err(Error::Unrecoverable("Unexpected".into())),
         };

@@ -70,8 +70,9 @@ impl FromStr for Level {
 
 impl Level {
     pub fn from_ast<Ex, Fb, En, Hi>(
-        ast_attrs: &Vec<a::UserAttribute<Ex, Fb, En, Hi>>,
+        ast_attrs: impl AsRef<[a::UserAttribute<Ex, Fb, En, Hi>]>,
     ) -> Option<Self> {
+        let ast_attrs = ast_attrs.as_ref();
         let attrs_contain = |name| ast_attrs.iter().any(|attr| attr.name.1 == name);
         let pure = attrs_contain(PURE);
         let rx = attrs_contain(REACTIVE);

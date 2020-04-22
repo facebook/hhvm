@@ -9,16 +9,14 @@ pub mod jump_targets;
 pub mod local;
 
 use ast_body::AstBody;
-use ast_scope_rust::{Scope, ScopeItem};
+use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
 use emitter::Emitter;
 use label_rust::Label;
 use ocamlrep::rc::RcOc;
-use oxidized::{ast as tast, ast_defs::Id, namespace_env::Env as NamespaceEnv};
+use oxidized::{ast as tast, namespace_env::Env as NamespaceEnv};
 
 extern crate bitflags;
 use bitflags::bitflags;
-
-use std::borrow::Cow;
 
 bitflags! {
     #[derive(Default)]
@@ -86,7 +84,7 @@ impl<'a> Env<'a> {
 
     pub fn make_class_env(class: &'a tast::Class_) -> Env {
         Env::default(RcOc::clone(&class.namespace)).with_scope(Scope {
-            items: vec![ScopeItem::Class(Cow::Borrowed(class))],
+            items: vec![ScopeItem::Class(ast_scope::Class::new_ref(class))],
         })
     }
 
@@ -212,13 +210,10 @@ pub fn get_unique_id_for_main() -> String {
     String::from("|")
 }
 
-pub fn get_unique_id_for_method(cls: &tast::Class_, md: &tast::Method_) -> String {
-    let Id(_, cls_name) = &cls.name;
-    let Id(_, md_name) = &md.name;
+pub fn get_unique_id_for_method(cls_name: &str, md_name: &str) -> String {
     format!("{}|{}", cls_name, md_name)
 }
 
-pub fn get_unique_id_for_function(fun: &tast::Fun_) -> String {
-    let Id(_, fn_name) = &fun.name;
-    format!("|{}", fn_name)
+pub fn get_unique_id_for_function(fun_name: &str) -> String {
+    format!("|{}", fun_name)
 }

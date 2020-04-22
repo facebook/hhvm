@@ -5,7 +5,7 @@
 
 mod emit_memoize_function;
 
-use ast_scope_rust::{Scope, ScopeItem};
+use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
 use closure_convert_rust::HoistKind;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust::{self as emit_body};
@@ -23,7 +23,6 @@ use oxidized::{ast as tast, ast_defs};
 use rx_rust as rx;
 
 use itertools::Either;
-use std::borrow::Cow;
 
 pub fn emit_function<'a>(
     e: &mut Emitter,
@@ -80,7 +79,7 @@ pub fn emit_function<'a>(
         None
     };
     let mut scope = Scope::toplevel();
-    scope.push_item(ScopeItem::Function(Cow::Borrowed(&f)));
+    scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
 
     let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
     let (ast_body, rx_body) = {

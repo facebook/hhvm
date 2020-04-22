@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ast_scope_rust::Scope;
+use ast_scope_rust::{self as ast_scope, Scope};
 use env::emitter::Emitter;
 use global_state::LazyState;
 use hhbc_ast_rust::SpecialClsRef;
@@ -28,8 +28,9 @@ impl ClassExpr {
         scope: &Scope,
     ) -> Option<String> {
         if let Some(cd) = scope.get_class() {
-            if (cd.kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
-                let class_name = &cd.name.1;
+            let kind = cd.get_kind();
+            if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
+                let class_name = cd.get_name_str();
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Some(class_name.to_string());
                 } else if let Some(c) = emitter.emit_state().get_closure_enclosing_class(class_name)
@@ -43,8 +44,8 @@ impl ClassExpr {
         None
     }
 
-    fn get_parent_class_name(class: &ast::Class_) -> Option<String> {
-        if let [Hint(_, hint)] = &class.extends[..] {
+    fn get_parent_class_name(class: &ast_scope::Class) -> Option<String> {
+        if let [Hint(_, hint)] = class.get_extends() {
             if let Hint_::Happly(ast_defs::Id(_, parent_cid), _) = &**hint {
                 return Some(parent_cid.to_string());
             }
@@ -59,11 +60,12 @@ impl ClassExpr {
         scope: &Scope,
     ) -> Option<String> {
         if let Some(cd) = scope.get_class() {
-            if cd.kind == ast_defs::ClassKind::Cinterface {
+            let kind = cd.get_kind();
+            if kind == ast_defs::ClassKind::Cinterface {
                 return Some(classes::PARENT.to_string());
             };
-            if (cd.kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
-                let class_name = &cd.name.1;
+            if (kind != ast_defs::ClassKind::Ctrait || check_traits) && resolve_self {
+                let class_name = cd.get_name_str();
                 if string_utils::closures::unmangle_closure(class_name).is_none() {
                     return Self::get_parent_class_name(cd);
                 } else if let Some(c) = emitter.emit_state().get_closure_enclosing_class(class_name)

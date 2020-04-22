@@ -5,7 +5,7 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-use ast_scope_rust::{Scope, ScopeItem};
+use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
 use emit_fatal_rust as emit_fatal;
@@ -33,7 +33,6 @@ use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 use rx_rust as rx;
 
-use std::borrow::Cow;
 use std::convert::TryInto;
 
 extern crate bitflags;
@@ -124,7 +123,8 @@ pub fn emit_wrapper_methods<'a>(
     let mut hhas_methods = vec![];
     for m in methods.iter() {
         if is_memoize(m) {
-            env.scope.push_item(ScopeItem::Method(Cow::Borrowed(m)));
+            env.scope
+                .push_item(ScopeItem::Method(ast_scope::Method::new_ref(m)));
             hhas_methods.push(make_memoize_wrapper_method(emitter, env, info, class, m)?);
         };
     }
@@ -147,8 +147,8 @@ fn make_memoize_wrapper_method<'a>(
     let name = method::Type::from_ast_name(&method.name.1);
     let scope = &Scope {
         items: vec![
-            ScopeItem::Class(Cow::Borrowed(class)),
-            ScopeItem::Method(Cow::Borrowed(method)),
+            ScopeItem::Class(ast_scope::Class::new_ref(class)),
+            ScopeItem::Method(ast_scope::Method::new_ref(method)),
         ],
     };
     let mut attributes =

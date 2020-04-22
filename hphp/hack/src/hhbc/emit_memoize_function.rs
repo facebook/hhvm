@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use ast_scope_rust::{Scope, ScopeItem};
+use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
 use closure_convert_rust::HoistKind;
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
@@ -24,8 +24,6 @@ use options::{HhvmFlags, Options, RepoFlags};
 use oxidized::{ast as T, pos::Pos};
 use runtime::TypedValue;
 use rx_rust as rx;
-
-use std::borrow::Cow;
 
 pub(crate) fn is_interceptable(fun_id: FunId, opts: &Options) -> bool {
     let difs = opts.hhvm.dynamic_invoke_functions.get();
@@ -49,7 +47,7 @@ pub(crate) fn emit_wrapper_function<'a>(
 ) -> Result<HhasFunction<'a>> {
     emit_memoize_helpers::check_memoize_possible(&(f.name).0, &f.params, false)?;
     let scope = Scope {
-        items: vec![ScopeItem::Function(Cow::Borrowed(f))],
+        items: vec![ScopeItem::Function(ast_scope::Fun::new_ref(f))],
     };
     let mut tparams = scope
         .get_tparams()

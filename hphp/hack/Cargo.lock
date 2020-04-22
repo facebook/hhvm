@@ -119,6 +119,7 @@ dependencies = [
 name = "ast_scope_rust"
 version = "0.0.0"
 dependencies = [
+ "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "oxidized 0.0.0",
  "rx_rust 0.0.0",
 ]

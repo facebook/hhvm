@@ -7,7 +7,6 @@
 
 use ast_class_expr_rust::ClassExpr;
 use ast_constant_folder_rust as ast_constant_folder;
-use ast_scope_rust::Scope;
 use emit_adata_rust as emit_adata;
 use emit_fatal_rust as emit_fatal;
 use emit_pos_rust::{emit_pos, emit_pos_then};
@@ -78,8 +77,8 @@ impl LValOp {
 
 pub fn is_local_this(env: &Env, lid: &local_id::LocalId) -> bool {
     local_id::get_name(lid) == special_idents::THIS
-        && Scope::has_this(&env.scope)
-        && !Scope::is_toplevel(&env.scope)
+        && env.scope.has_this()
+        && !env.scope.is_toplevel()
 }
 
 mod inout_locals {
@@ -2935,7 +2934,7 @@ fn emit_new(
             Some(ast_defs::Id(_, n)) if string_utils::is_parent(n) => {
                 env.scope
                     .get_class()
-                    .map_or(true, |cls| match &cls.extends[..] {
+                    .map_or(true, |cls| match cls.get_extends() {
                         [h, ..] => {
                             h.1.as_happly()
                                 .map_or(true, |(_, l)| !has_non_tparam_generics(env, l))
@@ -3500,7 +3499,7 @@ fn get_elem_member_key(
             {
                 let cname =
                     match (&(x.0).1, env.scope.get_class()) {
-                        (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(&(cd.name).1),
+                        (CI_::CIself, Some(cd)) => string_utils::strip_global_ns(cd.get_name_str()),
                         (CI_::CIexpr(E(_, E_::Id(id))), _) => string_utils::strip_global_ns(&id.1),
                         (CI_::CI(id), _) => string_utils::strip_global_ns(&id.1),
                         _ => return Err(Unrecoverable(

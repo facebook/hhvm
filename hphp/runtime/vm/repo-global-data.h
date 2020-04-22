@@ -111,6 +111,11 @@ struct Repo::GlobalData {
   bool HackArrCompatSerializeNotices = false;
 
   /*
+   * Are d/varrays their own types, distinct from arrays and from each other?
+   */
+  bool HackArrCompatSpecialization = false;
+
+  /*
    * Are d/varrays dicts and vecs?
    */
   bool HackArrDVArrs = false;
@@ -200,6 +205,7 @@ struct Repo::GlobalData {
       (HackArrCompatTypeHintNotices)
       (HackArrCompatDVCmpNotices)
       (HackArrCompatSerializeNotices)
+      (HackArrCompatSpecialization)
       (HackArrDVArrs)
       (EnableIntrinsicsExtension)
       (ForbidDynamicCallsToFunc)

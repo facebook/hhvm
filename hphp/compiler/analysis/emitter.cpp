@@ -172,6 +172,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
     RuntimeOption::EvalHackArrCompatDVCmpNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
+  gd.HackArrCompatSpecialization =
+    RuntimeOption::EvalHackArrCompatSpecialization;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;

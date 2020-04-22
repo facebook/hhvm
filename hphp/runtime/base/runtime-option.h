@@ -1115,6 +1115,11 @@ struct RuntimeOption {
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
+  /* This is the flag for "specialization", meaning that darray and     \
+   * varray are their own types, distinct from array and each other. */ \
+  F(bool, HackArrCompatSpecialization, false)                           \
+  /* This is the flag for "unification", meaning that darrays are       \
+   * replaced by dicts and varrays by vecs. */                          \
   F(bool, HackArrDVArrs, false)                                         \
   /* Raise a notice for `$dict is shape` and `$vec is tuple`. */        \
   F(bool, HackArrIsShapeTupleNotices, false)                            \

@@ -241,16 +241,10 @@ void handleCallReturn(IRGS& env, const Func* callee, const FCallArgs& fca,
     return;
   }
 
-  // Prevent using the callee information for asserting the return type if
-  // either:
-  //   a) we're forming a region, to avoid using information that may be
-  //      dropped once types are relaxed (see callReturn() in
-  //      ir-instruction.cpp); or
-  //   b) we're in a profiling translation, because the returned type is
-  //      different in the 2 exit paths and thus the profiled post-conditions
-  //      collected from the main region exit will be incorrect.
-  if (env.formingRegion || isProfiling(env.context.kind)) {
-    // See callReturn() in ir-instruction.cpp.
+  // Prevent using the callee information for asserting the return type if we're
+  // forming a region, to avoid using information that may be dropped once types
+  // are relaxed (see callReturn() in ir-instruction.cpp).
+  if (env.formingRegion) {
     callee = nullptr;
   }
 

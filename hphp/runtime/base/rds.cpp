@@ -78,9 +78,7 @@ struct SymbolKind : boost::static_visitor<std::string> {
 
 struct SymbolRep : boost::static_visitor<std::string> {
   std::string operator()(LinkName k) const { return k.name->data(); }
-  std::string operator()(LinkID k) const {
-    return folly::to<std::string>(k.id);
-  }
+  std::string operator()(LinkID k) const { return ""; }
 
   std::string operator()(ClsConstant k) const {
     return k.clsName->data() + std::string("::") + k.cnsName->data();
@@ -134,7 +132,7 @@ struct SymbolEq : boost::static_visitor<bool> {
     return strcmp(k1.type, k2.type) == 0 && k1.name->isame(k2.name);
   }
   bool operator()(LinkID k1, LinkID k2) const {
-    return strcmp(k1.type, k2.type) == 0 && k1.id == k2.id;
+    return strcmp(k1.type, k2.type) == 0;
   }
 
   bool operator()(ClsConstant k1, ClsConstant k2) const {
@@ -189,7 +187,7 @@ struct SymbolHash : boost::static_visitor<size_t> {
       std::string{k.type}, k.name->hash());
   }
   size_t operator()(LinkID k) const {
-    return folly::hash::hash_combine(std::string{k.type}, k.id);
+    return folly::hash::hash_combine(std::string{k.type});
   }
 
   size_t operator()(ClsConstant k) const {
@@ -541,6 +539,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
   if (type_scan::hasScanner(tyIndex)) {
     s_handleTable.insert(std::make_pair(handle, key));
   }
+
   return handle;
 }
 
@@ -552,8 +551,7 @@ Handle attachImpl(Symbol key) {
 
 NEVER_INLINE
 void bindOnLinkImpl(std::atomic<Handle>& handle,
-                    folly::Optional<Symbol> sym,
-                    Mode mode, size_t size, size_t align,
+                    Symbol sym, Mode mode, size_t size, size_t align,
                     type_scan::Index tsi, const void* init_val) {
   Handle c = kUninitHandle;
   if (handle.compare_exchange_strong(c, kBeingBound,
@@ -561,7 +559,7 @@ void bindOnLinkImpl(std::atomic<Handle>& handle,
                                      std::memory_order_relaxed)) {
     // we flipped it from kUninitHandle, so we get to fill in the value.
     auto const h = allocUnlocked(mode, size, align, tsi);
-    if (sym) recordRds(h, size, *sym);
+    recordRds(h, size, sym);
 
     if (init_val != nullptr && isPersistentHandle(h)) {
       memcpy(handleToPtr<void, Mode::Persistent>(h), init_val, size);
@@ -638,7 +636,7 @@ void processInit() {
 #endif
   addNewPersistentChunk(allocSize),
 
-  s_persistentTrue.bind(Mode::Persistent);
+  s_persistentTrue.bind(Mode::Persistent, LinkID{"RDSTrue"});
   *s_persistentTrue = true;
 
   local::RDSInit();
@@ -891,7 +889,7 @@ std::vector<void*> allTLBases() {
 }
 
 folly::Optional<Symbol> reverseLink(Handle handle) {
-  RevLinkTable::const_accessor acc;
+  decltype(s_handleTable)::const_accessor acc;
   if (s_handleTable.find(acc, handle)) {
     return acc->second;
   }

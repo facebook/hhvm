@@ -35,8 +35,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-rds::Handle NamedEntity::getFuncHandle() const {
-  m_cachedFunc.bind(rds::Mode::Normal);
+rds::Handle NamedEntity::getFuncHandle(const StringData* name) const {
+  m_cachedFunc.bind(rds::Mode::Normal, rds::LinkName{"NEFunc", name});
   return m_cachedFunc.handle();
 }
 
@@ -47,13 +47,13 @@ void NamedEntity::setCachedFunc(Func* f) {
   }
 }
 
-rds::Handle NamedEntity::getClassHandle() const {
-  m_cachedClass.bind(rds::Mode::Normal);
+rds::Handle NamedEntity::getClassHandle(const StringData* name) const {
+  m_cachedClass.bind(rds::Mode::Normal, rds::LinkName{"NEClass", name});
   return m_cachedClass.handle();
 }
 
-rds::Handle NamedEntity::getRecordDescHandle() const {
-  m_cachedRecordDesc.bind(rds::Mode::Normal);
+rds::Handle NamedEntity::getRecordDescHandle(const StringData* name) const {
+  m_cachedRecordDesc.bind(rds::Mode::Normal, rds::LinkName{"NERecord", name});
   return m_cachedRecordDesc.handle();
 }
 

@@ -98,7 +98,7 @@ struct NamedEntity {
    * Get the rds::Handle that caches this Func*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  rds::Handle getFuncHandle() const;
+  rds::Handle getFuncHandle(const StringData* name) const;
 
   /*
    * Set and get the cached Func*.
@@ -114,7 +114,7 @@ struct NamedEntity {
    * Get the rds::Handle that caches this Class*, creating a (non-persistent)
    * one if it doesn't exist yet.
    */
-  rds::Handle getClassHandle() const;
+  rds::Handle getClassHandle(const StringData* name) const;
 
   /*
    * Set and get the cached Class*.
@@ -130,7 +130,7 @@ struct NamedEntity {
    * Get the rds::Handle that caches this RecordDesc*,
    * creating a (non-persistent) one if it doesn't exist yet.
    */
-  rds::Handle getRecordDescHandle() const;
+  rds::Handle getRecordDescHandle(const StringData* name) const;
 
   /*
    * Set and get the cached RecordDesc*.

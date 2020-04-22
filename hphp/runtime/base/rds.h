@@ -189,7 +189,7 @@ extern __thread void* tl_base;
 /*
  * Symbols for rds::Link's.
  */
-struct LinkID { const char* type; uint64_t id; };
+struct LinkID { const char* type; };
 struct LinkName { const char* type; LowStringPtr name; };
 
 /*
@@ -403,8 +403,7 @@ struct Link {
    * Post: bound()
    */
   template<size_t Align = alignof(T)>
-  void bind(Mode mode, folly::Optional<Symbol> sym = folly::none,
-            const T* init_val = nullptr);
+  void bind(Mode mode, Symbol sym, const T* init_val = nullptr);
 
   /*
    * Dereference a Link and access its RDS memory for the current thread.

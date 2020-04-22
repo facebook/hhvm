@@ -262,7 +262,10 @@ Vout vheader(Vunit& unit, Vlabel s, AreaIndex area_cap = AreaIndex::Main) {
  * Decrement the branch sampling counter, and return the resultant SF register.
  */
 Vreg check_counter(Vout& v) {
-  s_counter.bind(rds::Mode::Local);
+  s_counter.bind(
+    rds::Mode::Local,
+    rds::LinkID{"VasmProfBranchCounter"}
+  );
 
   auto const handle = s_counter.handle();
   auto const sf = v.makeReg();

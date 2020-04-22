@@ -923,7 +923,10 @@ void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
     auto const arrTy = inst->src(0)->type();
 
     if (arrTy.maybe(TPackedArr)) {
-      s_counter.bind(rds::Mode::Local);
+      s_counter.bind(
+        rds::Mode::Local,
+        rds::LinkID{"PackedArraySampleCounter"}
+      );
 
       auto const profile = [&] (Vout& v) {
         auto const handle = s_counter.handle();

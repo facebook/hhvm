@@ -170,26 +170,32 @@ const Func* lookupUnknownFunc(const StringData* name) {
 
 namespace {
 
-template<class T> rds::Handle handleFrom(const NamedEntity* ne);
+template<class T> rds::Handle handleFrom(
+  const NamedEntity* ne,
+  const StringData* name
+);
 
 template<>
-rds::Handle handleFrom<Func>(const NamedEntity* ne) {
-  return ne->getFuncHandle();
+rds::Handle handleFrom<Func>(const NamedEntity* ne,
+                             const StringData* name) {
+  return ne->getFuncHandle(name);
 }
 template<>
-rds::Handle handleFrom<Class>(const NamedEntity* ne) {
-  return ne->getClassHandle();
+rds::Handle handleFrom<Class>(const NamedEntity* ne,
+                              const StringData* name) {
+  return ne->getClassHandle(name);
 }
 template<>
-rds::Handle handleFrom<RecordDesc>(const NamedEntity* ne) {
-  return ne->getRecordDescHandle();
+rds::Handle handleFrom<RecordDesc>(const NamedEntity* ne,
+                                   const StringData* name) {
+  return ne->getRecordDescHandle(name);
 }
 
 template<class T, class SlowPath>
 void implLdCached(IRLS& env, const IRInstruction* inst,
                   const StringData* name, SlowPath fill_cache) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const ch = handleFrom<T>(NamedEntity::get(name));
+  auto const ch = handleFrom<T>(NamedEntity::get(name), name);
   auto& v = vmain(env);
 
   if (rds::isNormalHandle(ch)) {
@@ -220,7 +226,7 @@ template<class T>
 void implLdCachedSafe(IRLS& env, const IRInstruction* inst,
                       const StringData* name) {
   auto const dst = dstLoc(env, inst, 0).reg();
-  auto const ch = handleFrom<T>(NamedEntity::get(name));
+  auto const ch = handleFrom<T>(NamedEntity::get(name), name);
   auto& v = vmain(env);
 
   if (rds::isNormalHandle(ch)) {

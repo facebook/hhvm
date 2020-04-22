@@ -36,7 +36,12 @@ rds::Handle guardProfileHandle(Type t) {
     t.unspecialize().toString() + (t.isSpecialized() ? "<specialized>" : "")
   );
   auto const pair = s_map.emplace(name);
-  if (pair.second) pair.first->second.bind(rds::Mode::Normal);
+  if (pair.second) {
+    pair.first->second.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"ProfileGuardType", pair.first->first}
+    );
+  }
   return pair.first->second.handle();
 }
 }
@@ -56,7 +61,10 @@ void logGuardProfileData() {
     auto& link = pair.second;
     // It's possible to see the Link after insertion but before it's bound, so
     // make sure it's bound before trying to read from it.
-    link.bind(rds::Mode::Normal);
+    link.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"ProfileGuardType", pair.first}
+    );
     if (!link.isInit() || *link == 0) continue;
 
     StructuredLogEntry log;

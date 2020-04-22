@@ -292,7 +292,7 @@ bool bindPersistentCns(const StringData* cnsName, const TypedValue& value) {
   assertx(it != s_stringDataMap->end());
   it->second.bind<kTVSimdAlign>(
     rds::Mode::Persistent,
-    rds::Symbol{rds::LinkName{"Cns", cnsName}},
+    rds::LinkName{"Cns", cnsName},
     &value
   );
   return it->second.isPersistent();
@@ -314,10 +314,10 @@ rds::Handle makeCnsHandle(const StringData* cnsName) {
   auto const it = s_stringDataMap->find(cnsName);
   assertx(it != s_stringDataMap->end());
   if (!it->second.bound()) {
-    it->second.bind<kTVSimdAlign>(rds::Mode::Normal);
-
-    rds::recordRds(it->second.handle(), sizeof(TypedValue),
-                   "Cns", cnsName->slice());
+    it->second.bind<kTVSimdAlign>(
+      rds::Mode::Normal,
+      rds::LinkName{"Cns", cnsName}
+    );
   }
   return it->second.handle();
 }

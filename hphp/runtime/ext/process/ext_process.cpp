@@ -478,7 +478,7 @@ bool HHVM_FUNCTION(pcntl_signal,
   }
 
   if (!g_signal_handlers.bound()) {
-    g_signal_handlers.bind(rds::Mode::Normal);
+    g_signal_handlers.bind(rds::Mode::Normal, rds::LinkID{"SignalHandlers"});
   }
   if (!g_signal_handlers.isInit()) {
     g_signal_handlers.initWith(empty_array());

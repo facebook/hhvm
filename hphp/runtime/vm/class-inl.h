@@ -465,13 +465,19 @@ inline const VMFixedVector<const Func*>& Class::pinitVec() const {
 
 inline rds::Handle Class::checkedPropTypeRedefinesHandle() const {
   assertx(m_maybeRedefsPropTy);
-  m_extra->m_checkedPropTypeRedefs.bind(rds::Mode::Normal);
+  m_extra->m_checkedPropTypeRedefs.bind(
+    rds::Mode::Normal,
+    rds::LinkName{"PropTypeRedefs", name()}
+  );
   return m_extra->m_checkedPropTypeRedefs.handle();
 }
 
 inline rds::Handle Class::checkedPropInitialValuesHandle() const {
   assertx(m_needsPropInitialCheck);
-  m_extra->m_checkedPropInitialValues.bind(rds::Mode::Normal);
+  m_extra->m_checkedPropInitialValues.bind(
+    rds::Mode::Normal,
+    rds::LinkName{"PropInitialValues", name()}
+  );
   return m_extra->m_checkedPropInitialValues.handle();
 }
 
@@ -479,7 +485,10 @@ inline rds::Handle Class::checkedPropInitialValuesHandle() const {
 // Property storage.
 
 inline void Class::initPropHandle() const {
-  m_propDataCache.bind(rds::Mode::Normal);
+  m_propDataCache.bind(
+    rds::Mode::Normal,
+    rds::LinkName{"PropDataCache", name()}
+  );
 }
 
 inline rds::Handle Class::propHandle() const {

@@ -590,7 +590,7 @@ Class* read_class_internal(ProfDataDeserializer& ser) {
       enumBaseReq->type = dt == KindOfInt64 ?
         AnnotType::Int : AnnotType::String;
       enumBaseReq->name = preClass->enumBaseTy().typeName();
-      ne->m_cachedTypeAlias.bind(rds::Mode::Normal);
+      ne->m_cachedTypeAlias.bind(rds::Mode::Normal, rds::LinkID{"NETypeAlias"});
       ne->m_cachedTypeAlias.initWith(*enumBaseReq);
     }
   }

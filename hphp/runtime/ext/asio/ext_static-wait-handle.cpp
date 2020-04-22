@@ -73,9 +73,12 @@ c_StaticWaitHandle* c_StaticWaitHandle::CreateFailed(ObjectData* exception) {
 }
 
 void AsioExtension::initStaticWaitHandle() {
-  c_StaticWaitHandle::NullHandle.bind(rds::Mode::Normal);
-  c_StaticWaitHandle::TrueHandle.bind(rds::Mode::Normal);
-  c_StaticWaitHandle::FalseHandle.bind(rds::Mode::Normal);
+  c_StaticWaitHandle::NullHandle.bind(
+    rds::Mode::Normal, rds::LinkID{"StaticNullWH"});
+  c_StaticWaitHandle::TrueHandle.bind(
+    rds::Mode::Normal, rds::LinkID{"StaticTrueWH"});
+  c_StaticWaitHandle::FalseHandle.bind(
+    rds::Mode::Normal, rds::LinkID{"StaticFalseWH"});
 }
 
 void AsioExtension::requestInitSingletons() {

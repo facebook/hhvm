@@ -39,8 +39,7 @@ Handle bindImpl(Symbol key, Mode mode, size_t sizeBytes,
 Handle attachImpl(Symbol key);
 
 void bindOnLinkImpl(std::atomic<Handle>& handle,
-                    folly::Optional<Symbol> key,
-                    Mode mode, size_t size, size_t align,
+                    Symbol key, Mode mode, size_t size, size_t align,
                     type_scan::Index tsi, const void* init_val);
 
 extern size_t s_normal_frontier;
@@ -269,9 +268,7 @@ bool Link<T,M>::isPersistent() const {
 
 template<class T, Mode M>
 template<size_t Align>
-void Link<T,M>::bind(Mode mode,
-                     folly::Optional<Symbol> sym,
-                     const T* init_val) {
+void Link<T,M>::bind(Mode mode, Symbol sym, const T* init_val) {
   assertx(maybe<M>(mode));
   if (LIKELY(bound())) return;
 
@@ -279,8 +276,6 @@ void Link<T,M>::bind(Mode mode,
     m_handle, sym, mode, sizeof(T), Align,
     type_scan::getIndexForScan<T>(), init_val
   );
-  if (!sym) recordRds(m_handle, sizeof(T), "Unknown", __PRETTY_FUNCTION__);
-
   checkSanity();
 }
 

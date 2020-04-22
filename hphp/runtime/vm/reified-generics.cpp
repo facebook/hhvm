@@ -37,7 +37,10 @@ ArrayData* addToReifiedGenericsTable(
     // We have created a new entry on the named entity table
     // TODO(T31677864): If the type structures only contain persistent data,
     // mark it as persistent
-    ne->m_cachedReifiedGenerics.bind(rds::Mode::Normal);
+    ne->m_cachedReifiedGenerics.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"ReifiedGenerics", name}
+    );
     ArrayData::GetScalarArray(&tsList);
     ne->setCachedReifiedGenerics(tsList);
     return tsList;

@@ -641,7 +641,10 @@ bool Unit::isCoverageEnabled() const {
 void Unit::enableCoverage() {
   if (!m_coverage.bound()) {
     assertx(!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage);
-    m_coverage.bind(rds::Mode::Normal);
+    m_coverage.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"UnitCoverage", filepath()}
+    );
   }
   if (m_coverage.isInit()) return;
   new (m_coverage.get()) req::dynamic_bitset{};
@@ -816,7 +819,7 @@ void Unit::bindFunc(Func *func) {
 
   ne->m_cachedFunc.bind(
     persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::Symbol{rds::LinkName{"Func", func->name()}},
+    rds::LinkName{"Func", func->name()},
     &init_val
   );
   if (func->isUnique() && func == ne->getCachedFunc()) {
@@ -920,7 +923,9 @@ void setupRecord(RecordDesc* newRecord, NamedEntity* nameList) {
     (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
     newRecord->verifyPersistent();
   nameList->m_cachedRecordDesc.bind(
-      isPersistent? rds::Mode::Persistent : rds::Mode::Normal);
+    isPersistent? rds::Mode::Persistent : rds::Mode::Normal,
+    rds::LinkName{"NERecord", newRecord->name()}
+  );
   newRecord->setRecordDescHandle(nameList->m_cachedRecordDesc);
   newRecord->incAtomicCount();
   nameList->pushRecordDesc(newRecord);
@@ -931,7 +936,9 @@ void setupClass(Class* newClass, NamedEntity* nameList) {
     (!SystemLib::s_inited || RuntimeOption::RepoAuthoritative) &&
     newClass->verifyPersistent();
   nameList->m_cachedClass.bind(
-    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal);
+    isPersistent ? rds::Mode::Persistent : rds::Mode::Normal,
+    rds::LinkName{"NEClass", newClass->name()}
+  );
 
   if (newClass->isBuiltin()) {
     assertx(newClass->isUnique());
@@ -1536,7 +1543,7 @@ bool Unit::defTypeAlias(Id id) {
 
   nameList->m_cachedTypeAlias.bind(
     persistent ? rds::Mode::Persistent : rds::Mode::Normal,
-    rds::Symbol{rds::LinkName{"TypeAlias", thisType->value}},
+    rds::LinkName{"TypeAlias", thisType->value},
     &resolved
   );
   if (nameList->m_cachedTypeAlias.isPersistent()) return true;
@@ -1700,7 +1707,10 @@ void Unit::initialMerge() {
   }
 
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
-    m_coverage.bind(rds::Mode::Normal);
+    m_coverage.bind(
+      rds::Mode::Normal,
+      rds::LinkName{"UnitCoverage", filepath()}
+    );
   }
   m_mergeState.store(MergeState::Merged | state, std::memory_order_relaxed);
 }

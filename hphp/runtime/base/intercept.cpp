@@ -236,9 +236,14 @@ void rename_function(const String& old_name, const String& new_name) {
     raise_error("Function already defined: %s", n3w->data());
   }
 
-  always_assert(!rds::isPersistentHandle(oldNe->getFuncHandle()));
+  always_assert(
+    !rds::isPersistentHandle(oldNe->getFuncHandle(func->fullName()))
+  );
   oldNe->setCachedFunc(nullptr);
-  newNe->m_cachedFunc.bind(rds::Mode::Normal);
+  newNe->m_cachedFunc.bind(
+    rds::Mode::Normal,
+    rds::LinkName{"NEFunc", fnew ? fnew->fullName() : makeStaticString(n3w)}
+  );
   newNe->setCachedFunc(func);
 
   if (RuntimeOption::EvalJit) {

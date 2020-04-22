@@ -176,19 +176,18 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
 
 Variant HHVM_FUNCTION(inet_pton, const String& address) {
   int af = AF_INET;
-  const char *saddress = address.data();
-  if (strchr(saddress, ':')) {
+  if (address.find(':') != String::npos) {
     af = AF_INET6;
-  } else if (!strchr(saddress, '.')) {
-    raise_warning("Unrecognized address %s", saddress);
+  } else if (address.find('.') == String::npos) {
+    raise_warning("Unrecognized address %s", address.c_str());
     return false;
   }
 
   char buffer[17];
   memset(buffer, 0, sizeof(buffer));
-  int ret = inet_pton(af, saddress, buffer);
+  int ret = ::inet_pton(af, address.c_str(), buffer);
   if (ret <= 0) {
-    raise_warning("Unrecognized address %s", saddress);
+    raise_warning("Unrecognized address %s", address.c_str());
     return false;
   }
 

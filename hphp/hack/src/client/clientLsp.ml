@@ -574,13 +574,13 @@ let update_hh_server_state_if_necessary (event : event) : unit =
 
 (** This cancellable async function will block indefinitely until a notification is
 available from ide_service. *)
-let pop_from_ide_service (ide_service : ClientIdeService.t option) : event Lwt.t
-    =
+let pop_from_ide_service (ide_service : ClientIdeService.t ref option) :
+    event Lwt.t =
   match ide_service with
   | None -> Lwt.wait () |> fst (* a never-fulfilled promise *)
   | Some ide_service ->
     let%lwt notification_opt =
-      Lwt_message_queue.pop (ClientIdeService.get_notifications ide_service)
+      Lwt_message_queue.pop (ClientIdeService.get_notifications !ide_service)
     in
     (match notification_opt with
     | None -> Lwt.wait () |> fst (* a never-fulfilled promise *)
@@ -591,7 +591,7 @@ server (hh_server), or whether neither is ready within 1s. *)
 let get_message_source
     (server : server_conn)
     (client : Jsonrpc.queue)
-    (ide_service : ClientIdeService.t option) :
+    (ide_service : ClientIdeService.t ref option) :
     [ `From_server | `From_client | `From_ide_service of event | `No_source ]
     Lwt.t =
   (* Take action on server messages in preference to client messages, because
@@ -628,7 +628,7 @@ let get_message_source
 
 (** A simplified version of get_message_source which only looks at client *)
 let get_client_message_source
-    (client : Jsonrpc.queue) (ide_service : ClientIdeService.t option) :
+    (client : Jsonrpc.queue) (ide_service : ClientIdeService.t ref option) :
     [ `From_client | `From_ide_service of event | `No_source ] Lwt.t =
   if Jsonrpc.has_message client then
     Lwt.return `From_client
@@ -678,7 +678,7 @@ connection with server) then we'll just block waiting for client. *)
 let get_next_event
     (state : state)
     (client : Jsonrpc.queue)
-    (ide_service : ClientIdeService.t option) : event Lwt.t =
+    (ide_service : ClientIdeService.t ref option) : event Lwt.t =
   let from_server (server : server_conn) : event Lwt.t =
     if Queue.is_empty server.pending_messages then
       read_message_from_server server
@@ -1496,11 +1496,11 @@ let stop_ide_service
 
 let on_status_restart_action
     ~(env : env)
-    ~(ide_service : ClientIdeService.t option ref)
+    ~(ide_service : ClientIdeService.t ref option)
     (result : ShowStatusFB.result)
     (state : state) : state Lwt.t =
   let open ShowMessageRequest in
-  match (result, state, !ide_service) with
+  match (result, state, ide_service) with
   | (Some { title }, Lost_server _, _)
     when String.equal title hh_server_restart_button_text ->
     let root = get_root_exn () in
@@ -1513,7 +1513,7 @@ let on_status_restart_action
     start_server ~env root;
     let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
     Lwt.return state
-  | (Some { title }, _, Some old_ide_service)
+  | (Some { title }, _, Some ide_service)
     when String.equal title client_ide_restart_button_text ->
     log "Restarting IDE service";
 
@@ -1528,7 +1528,8 @@ let on_status_restart_action
       }
     in
     let new_ide_service = ClientIdeService.make ide_args in
-    ide_service := Some new_ide_service;
+    let old_ide_service = !ide_service in
+    ide_service := new_ide_service;
     (* Note: the env.verbose passed on init controls verbosity for stderr
     and is only ever controlled by --verbose command line, stored in env.
     But verbosity-to-file can be altered dynamically by the user. *)
@@ -1837,12 +1838,12 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t option ref) :
+let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t ref option) :
     unit =
   let client_ide_status =
-    match !ide_service with
+    match ide_service with
     | None -> None
-    | Some ide_service -> get_client_ide_status ide_service
+    | Some ide_service -> get_client_ide_status !ide_service
   in
   let status =
     merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
@@ -1916,14 +1917,14 @@ let rpc_with_retry server_conn ref_unblocked_time command =
 
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
 let ide_rpc
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     ~(env : env)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
   let _ = env in
   let%lwt result =
-    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time message
+    ClientIdeService.rpc !ide_service ~tracking_id ~ref_unblocked_time message
   in
   match result with
   | Ok result -> Lwt.return result
@@ -1935,7 +1936,7 @@ let ide_rpc
 
 let do_shutdown
     (state : state)
-    (ide_service : ClientIdeService.t option)
+    (ide_service : ClientIdeService.t ref option)
     (tracking_id : string)
     (ref_unblocked_time : float ref) : state Lwt.t =
   log "Received shutdown request";
@@ -1968,7 +1969,7 @@ let do_shutdown
     | None -> Lwt.return_unit
     | Some ide_service ->
       stop_ide_service
-        ide_service
+        !ide_service
         ~tracking_id
         ~reason:ClientIdeService.Stop_reason.Editor_exited
   in
@@ -2268,7 +2269,7 @@ let do_hover
   Lwt.return (do_hover_common infos)
 
 let do_hover_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2301,7 +2302,7 @@ let do_typeDefinition
            ~default_path:file))
 
 let do_typeDefinition_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2353,7 +2354,7 @@ let do_definition
            ~default_path:filename))
 
 let do_definition_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2598,7 +2599,7 @@ let do_completion_legacy
   make_ide_completion_response result filename
 
 let do_completion_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2731,7 +2732,7 @@ let do_completionItemResolve
  * hh_server.
  *)
 let do_resolve_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2857,7 +2858,7 @@ let do_workspaceSymbol
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
 let do_workspaceSymbol_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2936,7 +2937,7 @@ let do_documentSymbol
 
 (* for serverless ide *)
 let do_documentSymbol_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -3029,7 +3030,7 @@ let do_documentHighlight
 
 (* Serverless IDE implementation of highlight *)
 let do_highlight_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -3085,7 +3086,7 @@ let do_typeCoverageFB
     Lwt.return formatted)
 
 let do_typeCoverage_localFB
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -3222,7 +3223,7 @@ let do_signatureHelp
 
 (* Serverless IDE version of signature help *)
 let do_signatureHelp_local
-    (ide_service : ClientIdeService.t)
+    (ide_service : ClientIdeService.t ref)
     (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -3703,7 +3704,7 @@ let cancel_if_stale
 (** send DidOpen/Close/Change/Save to hh_server and ide_service as needed *)
 let handle_editor_buffer_message
     ~(state : state)
-    ~(ide_service : ClientIdeService.t option)
+    ~(ide_service : ClientIdeService.t ref option)
     ~(env : env)
     ~(metadata : incoming_metadata)
     ~(ref_unblocked_time : float ref)
@@ -3812,7 +3813,7 @@ let handle_editor_buffer_message
   | _ -> Lwt.return_unit
 
 let set_verbose_to_file
-    ~(ide_service : ClientIdeService.t option)
+    ~(ide_service : ClientIdeService.t ref option)
     ~(env : env)
     ~(tracking_id : string)
     (value : bool) : unit =
@@ -3845,7 +3846,7 @@ let handle_client_message
     ~(env : env)
     ~(state : state ref)
     ~(client : Jsonrpc.queue)
-    ~(ide_service : ClientIdeService.t option)
+    ~(ide_service : ClientIdeService.t ref option)
     ~(metadata : incoming_metadata)
     ~(message : lsp_message)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
@@ -3899,7 +3900,7 @@ let handle_client_message
         RequestMessage (id, HackTestShutdownServerlessRequestFB) ) ->
       let%lwt () =
         stop_ide_service
-          ide_service
+          !ide_service
           ~tracking_id
           ~reason:ClientIdeService.Stop_reason.Testing
       in
@@ -3968,7 +3969,7 @@ let handle_client_message
         | None -> ()
         | Some ide_service ->
           let (promise : unit Lwt.t) =
-            run_ide_service env ide_service initialize_params None
+            run_ide_service env !ide_service initialize_params None
           in
           ignore_promise_but_handle_failure
             promise
@@ -4710,16 +4711,16 @@ let main (env : env) : Exit_status.t Lwt.t =
   let ide_service =
     if env.use_serverless_ide then
       Some
-        (ClientIdeService.make
-           {
-             ClientIdeMessage.init_id = env.init_id;
-             verbose_to_stderr = env.verbose;
-             verbose_to_file = env.verbose;
-           })
+        (ref
+           (ClientIdeService.make
+              {
+                ClientIdeMessage.init_id = env.init_id;
+                verbose_to_stderr = env.verbose;
+                verbose_to_file = env.verbose;
+              }))
     else
       None
   in
-  let ide_service = ref ide_service in
 
   let client = Jsonrpc.make_queue () in
   let deferred_action : (unit -> unit Lwt.t) option ref = ref None in
@@ -4739,7 +4740,7 @@ let main (env : env) : Exit_status.t Lwt.t =
         | None -> Lwt.return_unit
       in
       deferred_action := None;
-      let%lwt event = get_next_event !state client !ide_service in
+      let%lwt event = get_next_event !state client ide_service in
       log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
@@ -4777,7 +4778,7 @@ let main (env : env) : Exit_status.t Lwt.t =
             ~env
             ~state
             ~client
-            ~ide_service:!ide_service
+            ~ide_service
             ~metadata
             ~message
             ~ref_unblocked_time

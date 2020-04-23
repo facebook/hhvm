@@ -118,6 +118,10 @@ type istate = {
   tcopt: TypecheckerOptions.t;  (** typechecker options *)
   local_memory: Provider_backend.local_memory;
       (** Local_memory backend; includes decl caches *)
+  ifiles: open_files_state;
+}
+
+and open_files_state = {
   open_files: Provider_context.entries;
       (** all open files, along with caches of their ASTs and TASTs and errors *)
   changed_files_to_process: Path.Set.t;
@@ -355,18 +359,15 @@ let initialize
                  ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
       |> Relative_path.Map.of_list
     in
-    let istate =
+    let ifiles =
       {
-        hhi_root;
-        naming_table;
-        sienv;
-        changed_files_to_process = Path.Set.of_list changed_files;
-        popt;
-        tcopt;
-        local_memory;
         open_files;
+        changed_files_to_process = Path.Set.of_list changed_files;
         changed_files_denominator = List.length changed_files;
       }
+    in
+    let istate =
+      { hhi_root; naming_table; sienv; popt; tcopt; local_memory; ifiles }
     in
     Lwt.return_ok istate
   | Error error_data ->
@@ -431,35 +432,38 @@ let log_missing_open_file_BUG (path : Relative_path.t) : unit =
 (** Opens a file, in response to DidOpen event, by putting in a new
 entry in open_files, with empty AST and TAST. If the LSP client
 happened to send us two DidOpens for a file, well, we won't complain. *)
-let open_file (istate : istate) (path : Relative_path.t) (contents : string) :
-    state =
+let open_file
+    (files : open_files_state) (path : Relative_path.t) (contents : string) :
+    open_files_state =
   let entry =
     Provider_context.make_entry
       ~path
       ~contents:(Provider_context.Provided_contents contents)
   in
-  let open_files = Relative_path.Map.add istate.open_files path entry in
-  Initialized { istate with open_files }
+  let open_files = Relative_path.Map.add files.open_files path entry in
+  { files with open_files }
 
 (** Changes a file, in response to DidChange event. For future we
 might switch ClientIdeDaemon to incremental change events. But for
 now, this is basically a no-op just with some error checking. *)
-let change_file (istate : istate) (path : Relative_path.t) : state =
-  if Relative_path.Map.mem istate.open_files path then
-    Initialized istate
+let change_file (files : open_files_state) (path : Relative_path.t) :
+    open_files_state =
+  if Relative_path.Map.mem files.open_files path then
+    files
   else
     (* We'll now mark the file as opened. We'll provide empty contents for now;
     this doesn't matter since every actual future request for the file will provide
     actual contents. *)
     let () = log_missing_open_file_BUG path in
-    open_file istate path ""
+    open_file files path ""
 
 (** Closes a file, in response to DidClose event, by removing the
 entry in open_files. If the LSP client sents us multile DidCloses,
 or DidClose for an unopen file, we won't complain. *)
-let close_file (istate : istate) (path : Relative_path.t) : state =
-  let open_files = Relative_path.Map.remove istate.open_files path in
-  Initialized { istate with open_files }
+let close_file (files : open_files_state) (path : Relative_path.t) :
+    open_files_state =
+  let open_files = Relative_path.Map.remove files.open_files path in
+  { files with open_files }
 
 (** Updates an existing opened file, with new contents; if the
 contents haven't changed then the existing open file's AST and TAST
@@ -477,7 +481,7 @@ let update_file
   let entry =
     match
       ( document_location.ClientIdeMessage.file_contents,
-        Relative_path.Map.find_opt istate.open_files path )
+        Relative_path.Map.find_opt istate.ifiles.open_files path )
     with
     | (Some contents, None) ->
       log_missing_open_file_BUG path;
@@ -500,9 +504,10 @@ let update_file
         ~path
         ~contents:(Provider_context.Provided_contents contents)
   in
-  let open_files = Relative_path.Map.add istate.open_files path entry in
+  let open_files = Relative_path.Map.add istate.ifiles.open_files path entry in
+  let ifiles = { istate.ifiles with open_files } in
   let ctx = make_singleton_ctx istate entry in
-  (Initialized { istate with open_files }, ctx, entry)
+  (Initialized { istate with ifiles }, ctx, entry)
 
 (** handle_message invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
@@ -539,7 +544,7 @@ let handle_message :
           {
             ClientIdeMessage.Initialize_from_saved_state
             .num_changed_files_to_process =
-              Path.Set.cardinal istate.changed_files_to_process;
+              Path.Set.cardinal istate.ifiles.changed_files_to_process;
           }
         in
         Lwt.return (Initialized istate, Ok results)
@@ -579,36 +584,39 @@ let handle_message :
       List.filter paths ~f:(fun path ->
           path |> Path.to_string |> FindUtils.file_filter)
     in
-    let changed_files_to_process =
-      List.fold paths ~init:istate.changed_files_to_process ~f:(fun acc path ->
-          Path.Set.add acc path)
+    let files = istate.ifiles in
+    let files =
+      {
+        files with
+        changed_files_to_process =
+          List.fold
+            paths
+            ~init:files.changed_files_to_process
+            ~f:(fun acc path -> Path.Set.add acc path);
+        changed_files_denominator =
+          files.changed_files_denominator + List.length paths;
+      }
     in
-    let changed_files_denominator =
-      istate.changed_files_denominator + List.length paths
-    in
-    let state =
-      Initialized
-        { istate with changed_files_to_process; changed_files_denominator }
-    in
+    let state = Initialized { istate with ifiles = files } in
     Lwt.return (state, Ok ())
   | (Initialized istate, Ide_file_closed file_path) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = close_file istate path in
-    Lwt.return (state, Ok ())
+    let ifiles = close_file istate.ifiles path in
+    Lwt.return (Initialized { istate with ifiles }, Ok ())
   | (Initialized istate, Ide_file_opened { file_path; file_contents }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = open_file istate path file_contents in
-    Lwt.return (state, Ok ())
+    let ifiles = open_file istate.ifiles path file_contents in
+    Lwt.return (Initialized { istate with ifiles }, Ok ())
   | (Initialized istate, Ide_file_changed { Ide_file_changed.file_path; _ }) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let state = change_file istate path in
-    Lwt.return (state, Ok ())
+    let ifiles = change_file istate.ifiles path in
+    Lwt.return (Initialized { istate with ifiles }, Ok ())
   | (Initialized istate, Hover document_location) ->
     let (state, ctx, entry) = update_file istate document_location in
     let result =
@@ -753,8 +761,8 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   | Pre_init
   | Failed_to_initialize _ ->
     Lwt.return_unit
-  | Initialized { changed_files_to_process; changed_files_denominator; _ } ->
-    if Path.Set.is_empty changed_files_to_process then
+  | Initialized { ifiles; _ } ->
+    if Path.Set.is_empty ifiles.changed_files_to_process then
       let%lwt () =
         write_message
           ~out_fd
@@ -763,8 +771,10 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
       in
       Lwt.return_unit
     else
-      let total = changed_files_denominator in
-      let processed = total - Path.Set.cardinal changed_files_to_process in
+      let total = ifiles.changed_files_denominator in
+      let processed =
+        total - Path.Set.cardinal ifiles.changed_files_to_process
+      in
       let%lwt () =
         write_message
           ~out_fd
@@ -807,28 +817,20 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
      message_queue;
      state =
        Initialized
-         ( {
-             naming_table;
-             sienv;
-             changed_files_to_process;
-             local_memory;
-             popt;
-             open_files;
-             _;
-           } as state );
+         ({ naming_table; sienv; ifiles; local_memory; popt; _ } as state);
     }
       when Lwt_message_queue.is_empty message_queue
            && (not (Lwt_unix.readable in_fd))
-           && not (Path.Set.is_empty changed_files_to_process) ->
+           && not (Path.Set.is_empty ifiles.changed_files_to_process) ->
       (* Process the next file change, but only if we have no new events to
       handle. To ensure correctness, we would have to actually process all file
       change events *before* we processed any other IDE queries. However, we're
       trying to maximize availability, even if occasionally we give stale
       results. We can revisit this trade-off later if we decide that the stale
       results are baffling users. *)
-      let next_file = Path.Set.choose changed_files_to_process in
+      let next_file = Path.Set.choose ifiles.changed_files_to_process in
       let changed_files_to_process =
-        Path.Set.remove changed_files_to_process next_file
+        Path.Set.remove ifiles.changed_files_to_process next_file
       in
       let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
         try%lwt
@@ -858,23 +860,17 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       Option.iter
         old_file_info
         ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory);
-      Provider_utils.invalidate_tast_cache_of_entries open_files;
-      let%lwt state =
+      Provider_utils.invalidate_tast_cache_of_entries ifiles.open_files;
+      let changed_files_denominator =
         if Path.Set.is_empty changed_files_to_process then
-          Lwt.return
-            (Initialized
-               {
-                 state with
-                 naming_table;
-                 sienv;
-                 changed_files_to_process;
-                 changed_files_denominator = 0;
-               })
+          0
         else
-          Lwt.return
-            (Initialized
-               { state with naming_table; sienv; changed_files_to_process })
+          ifiles.changed_files_denominator
       in
+      let ifiles =
+        { ifiles with changed_files_to_process; changed_files_denominator }
+      in
+      let state = Initialized { state with naming_table; sienv; ifiles } in
       let%lwt () = write_status ~out_fd state in
       handle_messages { t with state }
     | t ->

@@ -167,7 +167,7 @@ let prop env cv =
     sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
 
-and static_prop env c cv =
+and static_prop env cv =
   let (cv_pos, cv_name) = cv.cv_id in
   let ty =
     hint_to_type_opt
@@ -178,22 +178,8 @@ and static_prop env c cv =
   in
   let id = "$" ^ cv_name in
   let lateinit = Attrs.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes in
-  let abstract = cv.cv_abstract in
   let lsb = Attrs.mem SN.UserAttributes.uaLSB cv.cv_user_attributes in
   let const = Attrs.mem SN.UserAttributes.uaConst cv.cv_user_attributes in
-  ( if
-    Option.is_none cv.cv_expr
-    && FileInfo.(is_strict c.c_mode || equal_mode c.c_mode Mpartial)
-  then
-    match hint_of_type_hint cv.cv_type with
-    | None
-    | Some (_, Hmixed)
-    | Some (_, Hoption _) ->
-      ()
-    | _ when (not lateinit) && not abstract -> Errors.missing_assign cv_pos
-    | _ -> () );
-  if lateinit && Option.is_some cv.cv_expr then
-    Errors.lateinit_with_default cv_pos;
   {
     sp_const = const;
     sp_xhp_attr = make_xhp_attr cv;
@@ -202,7 +188,7 @@ and static_prop env c cv =
     sp_name = (cv_pos, id);
     sp_needs_init = Option.is_none cv.cv_expr;
     sp_type = ty;
-    sp_abstract = abstract;
+    sp_abstract = cv.cv_abstract;
     sp_visibility = cv.cv_visibility;
     sp_fixme_codes = Fixme_provider.get_fixme_codes_for_pos cv_pos;
   }
@@ -421,7 +407,7 @@ let class_ env c =
     sc_typeconsts = List.filter_map c.c_typeconsts (typeconst env c);
     sc_pu_enums = List.map c.c_pu_enums (pu_enum env);
     sc_props = List.map ~f:(prop env) vars;
-    sc_sprops = List.map ~f:(static_prop env c) static_vars;
+    sc_sprops = List.map ~f:(static_prop env) static_vars;
     sc_constructor = Option.map ~f:(method_ env c) constructor;
     sc_static_methods = List.map ~f:(method_ env c) statics;
     sc_methods = List.map ~f:(method_ env c) rest;

@@ -223,10 +223,34 @@ let is_whitelisted = function
   | x when String.equal x SN.StdlibFunctions.get_class -> true
   | _ -> false
 
+let is_lateinit cv =
+  Naming_attributes.mem SN.UserAttributes.uaLateInit cv.cv_user_attributes
+
 let rec class_ tenv c =
   if FileInfo.(equal_mode c.c_mode Mdecl) then
     ()
   else
+    let () =
+      List.iter c.c_vars ~f:(fun cv ->
+          if cv.cv_is_static then
+            match cv.cv_expr with
+            | Some _ ->
+              if is_lateinit cv then Errors.lateinit_with_default (fst cv.cv_id)
+            | None ->
+              let ty_opt =
+                Option.map
+                  ~f:(Decl_hint.hint tenv.Typing_env_types.decl_env)
+                  (hint_of_type_hint cv.cv_type)
+              in
+              if
+                is_lateinit cv
+                || cv.cv_abstract
+                || type_does_not_require_init tenv ty_opt
+              then
+                ()
+              else
+                Errors.missing_assign (fst cv.cv_id))
+    in
     let (c_constructor, _, _) = split_methods c in
     match c_constructor with
     | _ when Ast_defs.(equal_class_kind c.c_kind Cinterface) -> ()

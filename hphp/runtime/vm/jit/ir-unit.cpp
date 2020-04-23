@@ -113,8 +113,8 @@ SSATmp* IRUnit::cns(Type type) {
 ///////////////////////////////////////////////////////////////////////////////
 
 /*
- * Returns true iff `block' ends the IR unit after finishing execution
- * of the bytecode instruction at `sk'.
+ * Returns true iff `block' ends the IR unit after successfully finishing
+ * execution of the bytecode instruction at `sk', without throwing an exception.
  */
 static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
   if (!block->isExitNoThrow()) return false;
@@ -128,24 +128,6 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
     case InterpOneCF:
     case JmpSSwitchDest:
     case JmpSwitchDest:
-    case RaiseError:
-    case ThrowAsTypeStructException:
-    case ThrowArrayIndexException:
-    case ThrowArrayKeyException:
-    case ThrowCallReifiedFunctionWithoutGenerics:
-    case ThrowDivisionByZeroException:
-    case ThrowInvalidArrayKey:
-    case ThrowInvalidOperation:
-    case ThrowHasThisNeedStatic:
-    case ThrowLateInitPropError:
-    case ThrowMissingThis:
-    case ThrowOutOfBounds:
-    case ThrowParameterWrongType:
-    case ThrowParamInOutMismatch:
-    case ThrowParamInOutMismatchRange:
-    case VerifyParamFailHard:
-    case VerifyRetFailHard:
-    case VerifyPropFailHard:
     case Unreachable:
     case EndBlock:
       return instSk == sk;
@@ -176,26 +158,17 @@ static bool endsUnitAtSrcKey(const Block* block, SrcKey sk) {
 }
 
 jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk) {
-  bool unreachable = false;
   jit::vector<Block*> mainExits;
 
   FTRACE(5, "findMainExitBlocks: looking for exit at {} in unit:\n{}\n",
          showShort(lastSk), show(unit));
 
   for (auto block : rpoSortCfg(unit)) {
-    if (block->back().is(Unreachable)) unreachable = true;
-
     if (block->hint() != Block::Hint::Unused &&
         endsUnitAtSrcKey(block, lastSk)) {
       mainExits.push_back(block);
     }
   }
-
-  always_assert_flog(
-    mainExits.size() > 0 || unreachable,
-    "findMainExits: no exit found for lastSk = {}",
-    showShort(lastSk)
-  );
 
   FTRACE(5, "findMainExitBlocks: mainExits = {}\n",
          [&]{

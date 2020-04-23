@@ -304,8 +304,8 @@ std::string show(const IRUnit&);
 /*
  * Find and return a vector of blocks that end the unit at lastSk.
  *
- * The return may be an empty vector, which indicates that the regions ended
- * early, typically due to type contradictions.
+ * The return may be an empty vector, which indicates that the region ended
+ * early, typically due to type contradictions or always throwing an error.
  */
 jit::vector<Block*> findMainExitBlocks(const IRUnit& unit, SrcKey lastSk);
 

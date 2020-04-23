@@ -1313,7 +1313,7 @@ impl InstrSeq {
                 instr::instr(Instruct::IContFlow(InstructControlFlow::Throw))
             },
             instr::instr(Instruct::ITry(InstructTry::TryCatchEnd)),
-            instr::label(done_label.clone()),
+            instr::label(done_label),
         ])
     }
 
@@ -1403,31 +1403,6 @@ impl InstrSeq {
         }
     }
 
-    pub fn flat_map<F>(&self, f: &mut F) -> Self
-    where
-        F: FnMut(&Instruct) -> Vec<Instruct>,
-    {
-        match self {
-            InstrSeq::Empty => InstrSeq::Empty,
-            InstrSeq::One(instr) => match &f(&instr)[..] {
-                [] => InstrSeq::Empty,
-                [x] => instr::instr(x.clone()),
-                xs => InstrSeq::List(xs.to_vec()),
-            },
-            InstrSeq::List(instr_lst) => {
-                let newlst = instr_lst.iter().flat_map(|x| f(x)).collect::<Vec<_>>();
-                InstrSeq::List(newlst)
-            }
-            InstrSeq::Concat(instrseq_lst) => {
-                let newlst = instrseq_lst
-                    .iter()
-                    .map(|x| x.flat_map(f))
-                    .collect::<Vec<_>>();
-                InstrSeq::Concat(newlst)
-            }
-        }
-    }
-
     pub fn flat_map_seq<F>(&self, f: &mut F) -> Self
     where
         F: FnMut(&Instruct) -> Self,
@@ -1485,18 +1460,23 @@ impl InstrSeq {
 
     pub fn filter_map_mut<F>(&mut self, f: &mut F)
     where
-        F: FnMut(&mut Instruct) -> Option<Instruct>,
+        F: FnMut(&mut Instruct) -> bool,
     {
         match self {
             InstrSeq::Empty => (),
             InstrSeq::One(x) => {
-                *self = match f(x) {
-                    Some(x) => instr::instr(x),
-                    None => InstrSeq::Empty,
+                if !f(x) {
+                    *self = InstrSeq::Empty
                 }
             }
-            InstrSeq::List(instr_lst) => {
-                *instr_lst = instr_lst.iter_mut().filter_map(f).collect::<Vec<_>>()
+            InstrSeq::List(ref mut instr_lst) => {
+                let mut new_list = Vec::with_capacity(instr_lst.len());
+                for mut i in instr_lst.drain(..).into_iter() {
+                    if f(&mut i) {
+                        new_list.push(i)
+                    }
+                }
+                *instr_lst = new_list;
             }
             InstrSeq::Concat(instrseq_lst) => {
                 instrseq_lst.iter_mut().for_each(|x| x.filter_map_mut(f))
@@ -1529,13 +1509,6 @@ impl InstrSeq {
                 .map(|x| x.map_result_mut(f))
                 .collect::<Result<()>>(),
         }
-    }
-
-    pub fn map<F>(&self, f: &mut F) -> Self
-    where
-        F: FnMut(Instruct) -> Instruct,
-    {
-        self.filter_map(&mut |x| Some(f(x.clone())))
     }
 }
 

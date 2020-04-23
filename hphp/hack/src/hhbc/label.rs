@@ -14,10 +14,10 @@ pub enum Label {
     Named(String),
 }
 impl Label {
-    pub fn id(&self) -> Result<Id, Error> {
+    pub fn id(&self) -> Result<&Id, Error> {
         match self {
-            Label::Regular(id) => Ok(*id),
-            Label::DefaultArg(id) => Ok(*id),
+            Label::Regular(id) => Ok(id),
+            Label::DefaultArg(id) => Ok(id),
             Label::Named(_) => Err(Error::Id),
         }
     }

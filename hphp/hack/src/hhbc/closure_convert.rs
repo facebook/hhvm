@@ -259,8 +259,8 @@ struct State {
 impl State {
     pub fn initial_state(empty_namespace: RcOc<namespace_env::Env>) -> Self {
         Self {
-            namespace: empty_namespace.clone(),
-            empty_namespace: RcOc::clone(&empty_namespace),
+            namespace: RcOc::clone(&empty_namespace),
+            empty_namespace,
             closure_cnt_per_fun: 0,
             captured_vars: UniqueList::new(),
             captured_this: false,
@@ -890,6 +890,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
     );
     // AST for: return $o-><func>(...$args);
     let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args".into())));
+    let variadic_param = make_fn_param(&args_var.1, true);
     let meth_caller_handle = Expr(
         pos(),
         Expr_::mk_call(
@@ -897,18 +898,17 @@ fn convert_meth_caller_to_func_ptr<'a>(
             Expr(
                 pos(),
                 Expr_::ObjGet(Box::new((
-                    obj_lvar.clone(),
+                    obj_lvar,
                     Expr(pos(), Expr_::mk_id(Id(pf.clone(), fname.clone()))),
                     OgNullFlavor::OGNullthrows,
                 ))),
             ),
             vec![],
             vec![],
-            Some(Expr(pos(), Expr_::Lvar(args_var.clone()))),
+            Some(Expr(pos(), Expr_::Lvar(args_var))),
         ),
     );
 
-    let variadic_param = make_fn_param(&args_var.1, true);
     let fd = Fun_ {
         span: pos(),
         annotation: dummy_saved_env,
@@ -918,7 +918,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         tparams: vec![],
         where_constraints: vec![],
         variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
-        params: vec![make_fn_param(&obj_var.1, false), variadic_param.clone()],
+        params: vec![make_fn_param(&obj_var.1, false), variadic_param],
         body: FuncBody {
             ast: vec![
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),

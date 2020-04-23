@@ -388,7 +388,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
         Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
-        Expr_::Binop(e) => emit_binop(emitter, env, pos, e),
+        Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
         Expr_::Pipe(e) => emit_pipe(emitter, env, e),
         Expr_::Is(is_expr) => {
             let (e, h) = &**is_expr;
@@ -1217,12 +1217,11 @@ fn emit_keyvalue_collection(
     Ok(InstrSeq::gather(vec![
         emitted_pos.clone(),
         instr::lit_const(constructor),
-        InstrSeq::gather(
-            fields
-                .iter()
-                .map(|f| expr_and_new(e, env, pos, add_elem_instr.clone(), instr::add_elemc(), f))
-                .collect::<Result<_>>()?,
-        ),
+        fields
+            .iter()
+            .map(|f| expr_and_new(e, env, pos, add_elem_instr.clone(), instr::add_elemc(), f))
+            .collect::<Result<_>>()
+            .map(InstrSeq::gather)?,
         emitted_pos,
         transform_instr,
     ]))
@@ -2886,8 +2885,9 @@ fn emit_reified_type_opt(
 
 fn emit_known_class_id(e: &mut Emitter, id: &ast_defs::Id) -> InstrSeq {
     let cid = class::Type::from_ast_name(&id.1);
-    emit_symbol_refs::State::add_class(e, cid.clone());
-    InstrSeq::gather(vec![instr::string(cid.to_raw_string()), instr::classgetc()])
+    let cid_string = instr::string(cid.to_raw_string());
+    emit_symbol_refs::State::add_class(e, cid);
+    InstrSeq::gather(vec![cid_string, instr::classgetc()])
 }
 
 fn emit_load_class_ref(e: &mut Emitter, env: &Env, pos: &Pos, cexpr: ClassExpr) -> Result {
@@ -4030,7 +4030,7 @@ fn emit_null_coalesce_assignment(
         instr::jmpnz(do_set_label.clone()),
         instr::popl(l_nonnull.clone()),
         emit_popc_n(querym_n_unpopped),
-        instr::pushl(l_nonnull.clone()),
+        instr::pushl(l_nonnull),
         instr::jmp(end_label.clone()),
         instr::label(do_set_label),
         instr::popc(),
@@ -4068,22 +4068,11 @@ fn emit_short_circuit_op(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Exp
     })
 }
 
-fn emit_binop(
-    e: &mut Emitter,
-    env: &Env,
-    pos: &Pos,
-    (op, e1, e2): &(ast_defs::Bop, tast::Expr, tast::Expr),
-) -> Result {
+fn emit_binop(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
+    let (op, e1, e2) = expr.1.as_binop().unwrap();
     use ast_defs::Bop as B;
     match op {
-        B::Ampamp | B::Barbar => {
-            // TODO(hrust): avoid clone
-            let expr = tast::Expr(
-                Pos::make_none(),
-                tast::Expr_::mk_binop(op.clone(), e1.clone(), e2.clone()),
-            );
-            emit_short_circuit_op(e, env, pos, &expr)
-        }
+        B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, &expr),
         B::Eq(None) => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
@@ -4804,11 +4793,10 @@ fn emit_base_(
 // TODO(hrust): change pos from &Pos to Option<&Pos>, since Pos::make_none() still allocate mem.
 pub fn emit_ignored_expr(emitter: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Result {
     if let Some(es) = expr.1.as_expr_list() {
-        Ok(InstrSeq::gather(
-            es.iter()
-                .map(|e| emit_ignored_expr(emitter, env, pos, e))
-                .collect::<Result<Vec<_>>>()?,
-        ))
+        es.iter()
+            .map(|e| emit_ignored_expr(emitter, env, pos, e))
+            .collect::<Result<Vec<_>>>()
+            .map(InstrSeq::gather)
     } else {
         Ok(InstrSeq::gather(vec![
             emit_expr(emitter, env, expr)?,

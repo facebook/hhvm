@@ -18,7 +18,7 @@ fn create_label_to_offset_map(instrseq: &InstrSeq) -> HashMap<Id, usize> {
     let mut folder = |(i, mut map): (usize, HashMap<Id, usize>), instr: &Instruct| match instr {
         Instruct::ILabel(l) => {
             if let Ok(id) = Label::id(l) {
-                map.insert(id, i);
+                map.insert(*id, i);
                 (i, map)
             } else {
                 panic!("Label should've been rewritten by this point")
@@ -29,14 +29,14 @@ fn create_label_to_offset_map(instrseq: &InstrSeq) -> HashMap<Id, usize> {
     instrseq.fold_left(&mut folder, (0, HashMap::new())).1
 }
 
-fn lookup_def(l: &Id, defs: &HashMap<Id, usize>) -> usize {
+fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
     match defs.get(l) {
-        Some(ix) => *ix,
+        Some(ix) => ix,
         None => panic!("lookup_def: label missing"),
     }
 }
 
-fn get_regular_labels(instr: &Instruct) -> Vec<Label> {
+fn get_regular_labels(instr: &Instruct) -> Vec<&Label> {
     use GenDelegation::*;
     use Instruct::*;
     use InstructCall::*;
@@ -60,10 +60,10 @@ fn get_regular_labels(instr: &Instruct) -> Vec<Label> {
         | ICall(FCallFunc(FcallArgs(_, _, _, _, Some(l), _)))
         | ICall(FCallFuncD(FcallArgs(_, _, _, _, Some(l), _), _))
         | ICall(FCallObjMethod(FcallArgs(_, _, _, _, Some(l), _), _))
-        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _)) => vec![l.clone()],
-        IContFlow(Switch(_, _, ls)) => ls.to_vec(),
-        IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| x.1.clone()).collect::<Vec<_>>(),
-        IMisc(MemoGetEager(l1, l2, _)) => vec![l1.clone(), l2.clone()],
+        | ICall(FCallObjMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _)) => vec![l],
+        IContFlow(Switch(_, _, ls)) => ls.iter().map(|x| x).collect::<Vec<_>>(),
+        IContFlow(SSwitch(pairs)) => pairs.iter().map(|x| &x.1).collect::<Vec<_>>(),
+        IMisc(MemoGetEager(l1, l2, _)) => vec![l1, l2],
         _ => vec![],
     }
 }
@@ -76,10 +76,10 @@ fn create_label_ref_map(
     let process_ref =
         |(mut n, (mut used, mut refs)): (usize, (HashSet<Id>, HashMap<Id, usize>)), l: &Label| {
             if let Ok(id) = Label::id(l) {
-                let ix = lookup_def(&id, defs);
-                if !refs.contains_key(&ix) {
-                    used.insert(id);
-                    refs.insert(ix, n);
+                let ix = lookup_def(id, defs);
+                if !refs.contains_key(ix) {
+                    used.insert(*id);
+                    refs.insert(*ix, n);
                     n += 1;
                 }
                 (n, (used, refs))
@@ -87,19 +87,15 @@ fn create_label_ref_map(
                 panic!("Label should've been rewritten by this point")
             }
         };
-    let gather_using = |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)),
-                        instrseq: &InstrSeq,
-                        get_labels: fn(&Instruct) -> Vec<Label>| {
+    let gather_using = |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instrseq: &InstrSeq| {
         let mut folder = |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), instr: &Instruct| {
-            (get_labels(instr)).iter().fold(acc, process_ref)
+            (get_regular_labels(instr))
+                .into_iter()
+                .fold(acc, process_ref)
         };
         instrseq.fold_left(&mut folder, acc)
     };
-    let init = gather_using(
-        (0, (HashSet::new(), HashMap::new())),
-        body,
-        get_regular_labels,
-    );
+    let init = gather_using((0, (HashSet::new(), HashMap::new())), body);
     let (_, map) = params.iter().fold(
         init,
         |acc: (usize, (HashSet<Id>, HashMap<Id, usize>)), param: &HhasParam| match &param
@@ -160,25 +156,28 @@ fn rewrite_params_and_body(
 ) {
     let relabel_id = |id: &mut Id| {
         *id = *refs
-            .get(&lookup_def(&id, defs))
+            .get(lookup_def(&id, defs))
             .expect("relabel_instrseq: offset not in refs")
     };
     let relabel_define_label_id = |id: Id| {
         if used.contains(&id) {
-            refs.get(&lookup_def(&id, defs)).map(|x| *x)
+            refs.get(lookup_def(&id, defs)).map(|x| *x)
         } else {
             None
         }
     };
-    let mut rewrite_instr = |instr: &mut Instruct| {
-        if let Instruct::ILabel(l) = instr {
+    let mut rewrite_instr = |instr: &mut Instruct| -> bool {
+        if let Instruct::ILabel(ref mut l) = instr {
             match l.option_map(relabel_define_label_id) {
-                Ok(Some(l)) => Some(Instruct::ILabel(l)),
-                _ => None,
+                Ok(Some(new_l)) => {
+                    *l = new_l;
+                    true
+                }
+                _ => false,
             }
         } else {
             relabel_instr(instr, &mut |l| l.map_mut(relabel_id));
-            Some(instr.to_owned())
+            true
         }
     };
     let rewrite_param = |param: &mut HhasParam| {
@@ -215,13 +214,15 @@ pub fn clone_with_fresh_regular_labels(emitter: &mut Emitter, block: &mut InstrS
 
     if !regular_labels.is_empty() || !named_labels.is_empty() {
         let relabel = |l: &mut Label| {
-            let lopt = match l {
+            let new_label = match l {
                 Label::Regular(id) => regular_labels.get(id),
                 Label::Named(name) => named_labels.get(name),
                 _ => None,
             };
-            lopt.unwrap_or(l).to_owned()
+            if let Some(nl) = new_label {
+                *l = nl.clone();
+            }
         };
-        block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| *l = relabel(l)))
+        block.map_mut(&mut |instr| relabel_instr(instr, &mut |l| relabel(l)))
     }
 }

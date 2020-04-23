@@ -67,6 +67,34 @@ const char* carbonResultToString(const carbon::Result result) {
 #endif
 } // namespace compatibility
 
+namespace detail {
+// Flags helpers
+// TODO: Once OSS McRouter version is staged, this code can be
+// removed and the methods in mcrouter/lib/network/MessageHelpers.h
+// used instead.
+template <typename Message>
+uint64_t getFlagsImpl(std::true_type, Message& message) {
+  return message.flags();
+}
+template <typename Message>
+uint64_t getFlagsImpl(std::false_type, Message&) {
+  return 0;
+}
+template <typename Message, typename = std::enable_if_t<true>>
+class HasFlagsTrait : public std::false_type {};
+template <typename Message>
+class HasFlagsTrait<
+    Message,
+    std::enable_if_t<std::is_same<
+        decltype(std::declval<std::remove_const_t<Message>&>().flags()),
+        std::uint64_t&>{}>> : public std::true_type {};
+// Return flags if it exists in Message and 0 otherwise.
+template <class Message>
+uint64_t getFlagsIfExist(Message& message) {
+  return detail::getFlagsImpl(HasFlagsTrait<Message>{}, message);
+}
+}
+
 [[noreturn]]
 static void mcr_throwException(const std::string& message,
                                mc_op_t op = mc_op_unknown,
@@ -304,7 +332,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
           m_cas = getCasToken(reply);
           /* fallthrough */
         case mc_op_get:
-          m_flags = reply.flags();
+          m_flags = detail::getFlagsIfExist(reply);
           if (mc::isMissResult(reply.result())) {
             setResultException(request, reply);
             break;

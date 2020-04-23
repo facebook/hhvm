@@ -67,6 +67,13 @@ let start_typing_delegate genv env : env =
     | Some num when num = 0 -> true
     | _ -> false
   in
+  let delegate_state =
+    Typing_service_delegate.create
+      ~job_runner:(JobRunner.get JobRunner.Remote)
+      ~max_batch_size
+      ~min_batch_size
+      ~raise_on_failure
+  in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   {
     env with
@@ -81,10 +88,8 @@ let start_typing_delegate genv env : env =
                 defer_class_declaration_threshold;
                 heartbeat_period;
                 init_id;
-                job_runner = JobRunner.get JobRunner.Remote;
                 mergebase;
                 num_workers;
-                raise_on_failure;
                 recheck_id;
                 root;
                 server =
@@ -98,8 +103,8 @@ let start_typing_delegate genv env : env =
                 transport_channel;
               }
             (* TODO: use env.typing_service.delegate_state when cancellation
-                    implementation is finished *)
-            (Typing_service_delegate.create ~max_batch_size ~min_batch_size ());
+                implementation is finished *)
+            delegate_state;
       };
   }
 

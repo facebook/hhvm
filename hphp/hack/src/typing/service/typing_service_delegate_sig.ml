@@ -12,7 +12,14 @@ open Typing_service_types
 module type Delegate_sig = sig
   type state [@@deriving show]
 
-  val create : ?max_batch_size:int -> ?min_batch_size:int -> unit -> state
+  val default : state
+
+  val create :
+    job_runner:(module JobRunner_sig.S) ->
+    max_batch_size:int ->
+    min_batch_size:int ->
+    raise_on_failure:bool ->
+    state
 
   val start : delegate_env -> state -> state
 

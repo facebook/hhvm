@@ -210,7 +210,7 @@ let make_remote_server_api
           go
             ctx
             workers
-            (Typing_check_service.Delegate.create ())
+            Typing_check_service.Delegate.default
             (Telemetry.create ())
             Relative_path.Set.empty
             files_to_check

@@ -10,8 +10,10 @@ open Core_kernel
 
 type state = unit [@@deriving show]
 
-let create ?(max_batch_size = 0) ?(min_batch_size = 0) () =
-  ignore (max_batch_size, min_batch_size)
+let default = ()
+
+let create ~job_runner ~max_batch_size ~min_batch_size ~raise_on_failure =
+  ignore (job_runner, max_batch_size, min_batch_size, raise_on_failure)
 
 let start delegate_env state =
   ignore delegate_env;

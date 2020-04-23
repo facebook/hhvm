@@ -67,7 +67,7 @@ let test () =
     Typing_check_service.go_with_interrupt
       ctx
       workers
-      (Typing_service_delegate.create ())
+      Typing_service_delegate.default
       (Telemetry.create ())
       Relative_path.Set.empty
       fnl

@@ -65,7 +65,7 @@ let test () =
       profile_type_check_duration_threshold = 0.;
     }
   in
-  let delegate_state = Typing_service_delegate.create () in
+  let delegate_state = Typing_service_delegate.default in
   let (errors, delegate_state, telemetry) =
     Typing_check_service.go
       ctx

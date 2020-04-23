@@ -106,7 +106,6 @@ let run_test f =
           ~tcopt:TypecheckerOptions.default
       in
 
-      (* let (_ : Naming_table.t) = write_and_parse_test_files () in *)
       let unbacked_naming_table = write_and_parse_test_files () in
       let db_name = Path.to_string (Path.concat path "naming_table.sqlite") in
       let save_results = Naming_table.save unbacked_naming_table db_name in
@@ -124,7 +123,7 @@ let test_dep_graph_blob () =
   run_test (fun () ->
       Tempfile.with_tempdir @@ fun dir ->
       let workers = None in
-      let delegate_state = Typing_service_delegate.create () in
+      let delegate_state = Typing_service_delegate.default in
       let opts = TypecheckerOptions.default in
       let dynamic_view_files = Relative_path.Set.empty in
       let memory_cap = None in

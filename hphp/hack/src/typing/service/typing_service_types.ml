@@ -121,11 +121,8 @@ type delegate_env = {
   (* The amount of time to wait between heartbeat checks, in seconds *)
   heartbeat_period: int;
   init_id: string;
-  (* The job runner module to use *)
-  job_runner: (module JobRunner_sig.S);
   mergebase: Hg.hg_rev option;
   num_workers: int;
-  raise_on_failure: bool;
   recheck_id: string;
   root: string;
   (* This module exposes to the controller the limited set of operations that

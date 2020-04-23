@@ -111,6 +111,12 @@ type istate = {
       is stored here, the reverse-naming-table is instead stored in ctx. *)
 }
 
+and dstate = {
+  start_time: float;
+  dcommon: common_state;
+  dfiles: open_files_state;
+}
+
 and common_state = {
   hhi_root: Path.t;
       (** hhi_root files are written during initialize, deleted at shutdown, and
@@ -140,9 +146,10 @@ and open_files_state = {
 }
 
 type state =
-  | Pre_init
-  | Failed_to_initialize of ClientIdeMessage.error_data
-  | Initialized of istate
+  | Pending_init  (** We haven't yet received init request *)
+  | During_init of dstate  (** We're working on the init request *)
+  | Initialized of istate  (** Finished work on init request *)
+  | Failed_init of ClientIdeMessage.error_data  (** Failed request *)
 
 type t = {
   message_queue: message_queue;
@@ -150,13 +157,20 @@ type t = {
 }
 
 let state_to_log_string (state : state) : string =
-  match state with
-  | Pre_init -> "Pre_init"
-  | Failed_to_initialize e ->
+  let files_to_log_string (files : open_files_state) : string =
     Printf.sprintf
-      "Failed_to_initialize(%s)"
-      e.ClientIdeMessage.short_user_message
-  | Initialized _ -> Printf.sprintf "Initialized"
+      "%d open_files; %d changed_files_to_process"
+      (Relative_path.Map.cardinal files.open_files)
+      (Path.Set.cardinal files.changed_files_to_process)
+  in
+  match state with
+  | Pending_init -> "Pending_init"
+  | During_init { dfiles; _ } ->
+    Printf.sprintf "During_init(%s)" (files_to_log_string dfiles)
+  | Initialized { ifiles; _ } ->
+    Printf.sprintf "Initialized(%s)" (files_to_log_string ifiles)
+  | Failed_init e ->
+    Printf.sprintf "Failed_init(%s)" e.ClientIdeMessage.short_user_message
 
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
@@ -380,17 +394,16 @@ let initialize
     log "Serverless IDE failed to initialize";
     Lwt.return_error error_data
 
-let shutdown (state : state) : unit Lwt.t =
+let remove_hhi (state : state) : unit =
   match state with
-  | Pre_init
-  | Failed_to_initialize _ ->
-    log "No cleanup to be done";
-    Lwt.return_unit
+  | Pending_init
+  | Failed_init _ ->
+    ()
+  | During_init { dcommon = { hhi_root; _ }; _ }
   | Initialized { icommon = { hhi_root; _ }; _ } ->
     let hhi_root = Path.to_string hhi_root in
     log "Removing hhi directory %s..." hhi_root;
-    Sys_utils.rm_dir_tree hhi_root;
-    Lwt.return_unit
+    Sys_utils.rm_dir_tree hhi_root
 
 let restore_hhi_root_if_necessary (istate : istate) : istate =
   if Sys.file_exists (Path.to_string istate.icommon.hhi_root) then
@@ -538,10 +551,10 @@ let handle_request :
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
     Lwt.return (state, Ok ())
   | (_, Shutdown ()) ->
-    let%lwt () = shutdown state in
+    remove_hhi state;
     Lwt.return (state, Ok ())
   (************************* INITIALIZATION ******************)
-  | (Pre_init, Initialize_from_saved_state param) ->
+  | (Pending_init, Initialize_from_saved_state param) ->
     let%lwt result = initialize param in
     begin
       match result with
@@ -553,9 +566,16 @@ let handle_request :
               Path.Set.cardinal istate.ifiles.changed_files_to_process;
           }
         in
+        let _TODO_dummy_to_silence_unused_warning =
+          During_init
+            {
+              dcommon = istate.icommon;
+              start_time = 0.;
+              dfiles = istate.ifiles;
+            }
+        in
         Lwt.return (Initialized istate, Ok results)
-      | Error error_data ->
-        Lwt.return (Failed_to_initialize error_data, Error error_data)
+      | Error error_data -> Lwt.return (Failed_init error_data, Error error_data)
     end
   | (Initialized _, Initialize_from_saved_state _) ->
     let error_data =
@@ -565,7 +585,7 @@ let handle_request :
     in
     Lwt.return (state, Error error_data)
   (************************* UNABLE TO HANDLE ****************)
-  | (Pre_init, _) ->
+  | ((Pending_init | During_init _), _) ->
     let debug_details =
       Printf.sprintf
         "Unexpected message. state=%s message=%s"
@@ -575,7 +595,7 @@ let handle_request :
     let stack = Exception.get_current_callstack_string 99 in
     let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
     Lwt.return (state, Error error_data)
-  | (Failed_to_initialize error_data, _) ->
+  | (Failed_init error_data, _) ->
     let error_data =
       {
         error_data with
@@ -764,8 +784,9 @@ let write_message
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   match state with
-  | Pre_init
-  | Failed_to_initialize _ ->
+  | Pending_init
+  | During_init _
+  | Failed_init _ ->
     Lwt.return_unit
   | Initialized { ifiles; _ } ->
     if Path.Set.is_empty ifiles.changed_files_to_process then
@@ -946,7 +967,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
   try%lwt
     let message_queue = Lwt_message_queue.create () in
     let flusher_promise = flush_event_logger () in
-    let%lwt () = handle_messages { message_queue; state = Pre_init }
+    let%lwt () = handle_messages { message_queue; state = Pending_init }
     and () = pump_stdin message_queue in
     Lwt.cancel flusher_promise;
     Lwt.return_unit

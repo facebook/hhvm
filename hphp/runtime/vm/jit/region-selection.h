@@ -267,8 +267,7 @@ struct PostConditions {
 };
 
 /*
- * A basic block in the region, with type predictions for conditions
- * at various execution points, including at entry to the block.
+ * A basic block in the region.
  */
 struct RegionDesc::Block {
 
@@ -311,12 +310,6 @@ struct RegionDesc::Block {
   void truncateAfter(SrcKey sk);
 
   /*
-   * Add a predicted type to this block.  Multiple calls to this method should
-   * be made in sorted order of the TypeLocation parameter.
-   */
-  void addPredicted(TypedLocation);
-
-  /*
    * Add a precondition type to this block. Preconditions have no effects on
    * correctness, but entering a block with a known type that violates a
    * precondition is likely to result in a side exit after little to no
@@ -340,9 +333,6 @@ struct RegionDesc::Block {
    * iterate over the information is using a MapWalker, since they're all
    * backed by a sorted map.
    */
-  const TypedLocations& typePredictions() const {
-    return m_typePredictions;
-  }
   const GuardedLocations& typePreConditions() const {
     return m_typePreConditions;
   }
@@ -364,7 +354,6 @@ private:
   int              m_length;
   FPInvOffset      m_initialSpOffset;
   TransID          m_profTransID;
-  TypedLocations   m_typePredictions;
   GuardedLocations m_typePreConditions;
   PostConditions   m_postConds;
 };
@@ -523,7 +512,7 @@ RegionDescPtr selectHotTrace(HotTransContext& ctx);
 RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated = nullptr);
 
 /*
- * Checks whether the type predictions at the beginning of block
+ * Checks whether the type pre-conditions at the beginning of block
  * satisfy the post-conditions in prevPostConds.
  */
 bool preCondsAreSatisfied(const RegionDesc::BlockPtr& block,

@@ -306,7 +306,6 @@ void write_region_block(ProfDataSerializer& ser,
   write_raw(ser, block->length());
   write_raw(ser, block->initialSpOffset());
   write_raw(ser, block->profTransID());
-  write_container(ser, block->typePredictions(), write_typed_location);
   write_container(ser, block->typePreConditions(), write_guarded_location);
   write_container(ser, block->postConds().changed, write_typed_location);
   write_container(ser, block->postConds().refined, write_typed_location);
@@ -326,11 +325,6 @@ RegionDesc::BlockPtr read_region_block(ProfDataDeserializer& ser) {
                                                          initialSpOffset);
 
   block->setProfTransID(read_raw<TransID>(ser));
-
-  read_container(ser,
-                 [&] {
-                   block->addPredicted(read_typed_location(ser));
-                 });
 
   read_container(ser,
                  [&] {

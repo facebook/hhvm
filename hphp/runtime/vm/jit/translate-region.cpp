@@ -209,28 +209,18 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
 }
 
 /*
- * Emit type prediction guards.
+ * Emit type guards.
  */
-void emitPredictionsAndPreConditions(irgen::IRGS& irgs,
-                                     const RegionDesc& /*region*/,
-                                     const RegionDesc::Block& block,
-                                     bool isEntry) {
+void emitGuards(irgen::IRGS& irgs,
+                const RegionDesc::Block& block,
+                bool isEntry) {
   auto const sk = block.start();
   auto const bcOff = sk.offset();
-  auto& typePredictions = block.typePredictions();
   auto& typePreConditions = block.typePreConditions();
 
   if (isEntry) {
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletGuards, sk);
     emitEntryAssertions(irgs, block.func(), sk);
-  }
-
-  // Emit type predictions.
-  for (auto const& pred : typePredictions) {
-    auto type = pred.type;
-    auto loc  = pred.location;
-    assertx(type <= TCell);
-    irgen::predictType(irgs, loc, type);
   }
 
   // Emit type guards/preconditions.
@@ -464,7 +454,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // `EndGuards` after the checks, and generate profiling code in profiling
     // translations.
     auto const isEntry = &block == region.entry().get() && !inlining;
-    emitPredictionsAndPreConditions(irgs, region, block, isEntry);
+    emitGuards(irgs, block, isEntry);
     irb.resetGuardFailBlock();
 
     if (irb.inUnreachableState()) {

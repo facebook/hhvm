@@ -695,16 +695,6 @@ void RegionDesc::Block::truncateAfter(SrcKey final) {
   checkMetadata();
 }
 
-void RegionDesc::Block::addPredicted(TypedLocation locType) {
-  FTRACE(2, "Block::addPredicted({})\n", show(locType));
-  assertx(locType.type != TBottom);
-  assertx(locType.type <= TCell);
-  // type predictions should be added in order of location
-  assertx(m_typePredictions.size() == 0 ||
-          (m_typePredictions.back().location < locType.location));
-  m_typePredictions.push_back(locType);
-}
-
 void RegionDesc::Block::addPreCondition(const GuardedLocation& locGuard) {
   FTRACE(2, "Block::addPreCondition({})\n", show(locGuard));
   assertx(locGuard.type != TBottom);
@@ -759,12 +749,11 @@ void RegionDesc::Block::checkInstruction(Op op) const {
 /*
  * Check invariants about the metadata for this Block.
  *
- * 1. Each SrcKey in m_typePredictions and m_preConditions is within
- *    the bounds of the block.
+ * 1. Each SrcKey in m_preConditions is within the bounds of the block.
  *
- * 2. Each local id referred to in the type prediction list is valid.
+ * 2. Each local id referred to in the type pre-conditions list is valid.
  *
- * 3. (Unchecked) each stack offset in the type prediction list is valid.
+ * 3. (Unchecked) each stack offset in the type pre-conditions list is valid.
 */
 void RegionDesc::Block::checkMetadata() const {
   auto checkTypedLocations = [&](const char* /*msg*/,
@@ -799,7 +788,8 @@ void RegionDesc::Block::checkMetadata() const {
     }
   };
 
-  checkTypedLocations("type prediction", m_typePredictions);
+  checkTypedLocations("changed post-conditions", m_postConds.changed);
+  checkTypedLocations("refined post-conditions", m_postConds.refined);
   checkGuardedLocations("type precondition", m_typePreConditions);
 }
 
@@ -1219,13 +1209,9 @@ std::string show(const RegionDesc::Block& b) {
                   &ret
                  );
 
-  auto& predictions   = b.typePredictions();
   auto& preconditions = b.typePreConditions();
   auto  skIter        = b.start();
 
-  for (auto const& p : predictions) {
-    folly::toAppend("  predict: ", show(p), "\n", &ret);
-  }
   for (auto const& p : preconditions) {
     folly::toAppend("  precondition: ", show(p), "\n", &ret);
   }

@@ -362,6 +362,43 @@ exception
 
 exception Server_nonfatal_exception of Lsp.Error.t
 
+(** Helper function to construct an Lsp.Error. Its goal is to gather
+useful information in the optional freeform 'data' field. It assembles
+that data out of any data already provided, the provided stack, and the
+current stack. A typical scenario is that we got an error marshalled
+from a remote server with its remote stack where the error was generated,
+and we also want to record the stack where we received it. *)
+let make_lsp_error
+    ?(data : Hh_json.json option = None)
+    ?(stack : string option)
+    ?(current_stack : bool = true)
+    ?(code : Lsp.Error.code = Lsp.Error.UnknownErrorCode)
+    (message : string) : Lsp.Error.t =
+  let elems =
+    match data with
+    | None -> []
+    | Some (Hh_json.JSON_Object elems) -> elems
+    | Some json -> [("data", json)]
+  in
+  let elems =
+    match stack with
+    | Some stack when not (List.Assoc.mem ~equal:String.equal elems "stack") ->
+      ("stack", stack |> Exception.clean_stack |> Hh_json.string_) :: elems
+    | _ -> elems
+  in
+  let elems =
+    match current_stack with
+    | true when not (List.Assoc.mem ~equal:String.equal elems "current_stack")
+      ->
+      ( "current_stack",
+        Exception.get_current_callstack_string 99
+        |> Exception.clean_stack
+        |> Hh_json.string_ )
+      :: elems
+    | _ -> elems
+  in
+  { Lsp.Error.code; message; data = Some (Hh_json.JSON_Object elems) }
+
 (** Use ignore_promise_but_handle_failure when you want don't care about awaiting
 results of an async piece of work, but still want any exceptions to be logged.
 This is similar to Lwt.async except (1) it logs to our HackEventLogger and
@@ -1201,7 +1238,8 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
              uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
              hh_server_status_diagnostic = None;
            })
-  with e ->
+  with exn ->
+    let exn = Exception.wrap exn in
     (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
     (*   couldn't complete the handshake up to handoff within 3 attempts over *)
     (*   3 seconds. Maybe the informant is stopping anything from happening   *)
@@ -1214,51 +1252,53 @@ let rec connect ~(env : env) (state : state) : state Lwt.t =
     (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
     (*   present but connection-attempt to the monitor times out - maybe it's *)
     (*   under DDOS, or maybe it's declining to answer new connections.       *)
-    let stack = Printexc.get_backtrace () |> Exception.clean_stack in
-    let { Lsp.Error.code; message; _ } = Lsp_fmt.error_of_exn e in
+    let message =
+      match Exception.unwrap exn with
+      | Exit_status.Exit_with code -> Exit_status.to_string code
+      | _ -> Exception.get_ctor_string exn
+    in
     let longMessage =
       Printf.sprintf
-        "connect failed: %s [%s]\n%s"
+        "connect failed: %s\n%s"
         message
-        (Lsp.Error.show_code code)
-        stack
+        (Exception.get_backtrace_string exn |> Exception.clean_stack)
     in
     let () = Lsp_helpers.telemetry_error to_stdout longMessage in
-    Exit_status.(
-      let new_hh_server_state =
-        match e with
-        | Exit_with Build_id_mismatch
-        | Exit_with No_server_running_should_retry
-        | Exit_with Server_hung_up_should_retry
-        | Exit_with Server_hung_up_should_abort ->
-          Hh_server_stopped
-        | Exit_with Out_of_retries
-        | Exit_with Out_of_time ->
-          Hh_server_denying_connection
-        | _ -> Hh_server_unknown
-      in
-      let explanation =
-        match e with
-        | Exit_with Out_of_retries
-        | Exit_with Out_of_time ->
-          "hh_server is waiting for things to settle"
-        | Exit_with No_server_running_should_retry -> "hh_server: stopped."
-        | _ -> "hh_server: " ^ message
-      in
-      let%lwt state =
-        do_lost_server
-          state
-          ~allow_immediate_reconnect:false
-          ~env
-          {
-            Lost_env.explanation;
-            new_hh_server_state;
-            start_on_click = true;
-            trigger_on_lock_file = true;
-            trigger_on_lsp = false;
-          }
-      in
-      Lwt.return state)
+    let open Exit_status in
+    let new_hh_server_state =
+      match Exception.unwrap exn with
+      | Exit_with Build_id_mismatch
+      | Exit_with No_server_running_should_retry
+      | Exit_with Server_hung_up_should_retry
+      | Exit_with Server_hung_up_should_abort ->
+        Hh_server_stopped
+      | Exit_with Out_of_retries
+      | Exit_with Out_of_time ->
+        Hh_server_denying_connection
+      | _ -> Hh_server_unknown
+    in
+    let explanation =
+      match Exception.unwrap exn with
+      | Exit_with Out_of_retries
+      | Exit_with Out_of_time ->
+        "hh_server is waiting for things to settle"
+      | Exit_with No_server_running_should_retry -> "hh_server: stopped."
+      | _ -> "hh_server: " ^ message
+    in
+    let%lwt state =
+      do_lost_server
+        state
+        ~allow_immediate_reconnect:false
+        ~env
+        {
+          Lost_env.explanation;
+          new_hh_server_state;
+          start_on_click = true;
+          trigger_on_lock_file = true;
+          trigger_on_lsp = false;
+        }
+    in
+    Lwt.return state
 
 and reconnect_from_lost_if_necessary
     ~(env : env) (state : state) (reason : [> `Event of event | `Force_regain ])
@@ -1900,14 +1940,7 @@ let rpc
               Utils.Callstack _,
               ServerCommandLwt.Remote_nonfatal_exception
                 { Marshal_tools.message; stack } ) ->
-          let lsp_error =
-            {
-              Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-              message;
-              data = Lsp_fmt.error_data_of_stack stack;
-            }
-          in
-          raise (Server_nonfatal_exception lsp_error)
+          raise (Server_nonfatal_exception (make_lsp_error message ~stack))
         | Error ((), Utils.Callstack stack, e) ->
           let message = Exn.to_string e in
           raise
@@ -4536,14 +4569,7 @@ let handle_server_message
               { Marshal_tools.message; stack };
           _;
         } ) ->
-      let lsp_error =
-        {
-          Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message;
-          data = Lsp_fmt.error_data_of_stack stack;
-        }
-      in
-      raise (Server_nonfatal_exception lsp_error)
+      raise (Server_nonfatal_exception (make_lsp_error message ~stack))
   in
   Lwt.return_none
 
@@ -4829,23 +4855,16 @@ let main (env : env) : Exit_status.t Lwt.t =
         in
         let server_finale_stack =
           match server_finale_data with
-          | Some { ServerCommandTypes.stack = Utils.Callstack s; _ } -> s
+          | Some { ServerCommandTypes.stack = Utils.Callstack s; _ } ->
+            s |> Exception.clean_stack
           | _ -> ""
         in
-        let stack =
-          Printf.sprintf
-            "%s\n---\n%s\n---\n%s"
-            stack
-            (Printexc.get_backtrace ())
-            server_finale_stack
+        let data =
+          Some
+            (Hh_json.JSON_Object
+               [("server_finale_stack", Hh_json.string_ server_finale_stack)])
         in
-        let e =
-          {
-            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-            message;
-            data = Lsp_fmt.error_data_of_stack stack;
-          }
-        in
+        let e = make_lsp_error ~stack ~data message in
         (* Log all the things! *)
         hack_log_error
           !ref_event
@@ -4912,14 +4931,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       );
       Lwt.return_unit
     | Client_fatal_connection_exception { Marshal_tools.stack; message } ->
-      let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
-      let e =
-        {
-          Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message;
-          data = Lsp_fmt.error_data_of_stack stack;
-        }
-      in
+      let e = make_lsp_error ~stack message in
       hack_log_error
         !ref_event
         e
@@ -4931,14 +4943,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       Lwt.return_unit
     | Client_recoverable_connection_exception { Marshal_tools.stack; message }
       ->
-      let stack = stack ^ "---\n" ^ Printexc.get_backtrace () in
-      let e =
-        {
-          Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message;
-          data = Lsp_fmt.error_data_of_stack stack;
-        }
-      in
+      let e = make_lsp_error ~stack message in
       hack_log_error
         !ref_event
         e
@@ -4955,20 +4960,20 @@ let main (env : env) : Exit_status.t Lwt.t =
         | (_, Server_nonfatal_exception _) -> Error_from_server_recoverable
         | (_, _) -> Error_from_lsp_misc
       in
-      let e = Lsp_fmt.add_stack_if_absent e exn in
+      let e =
+        make_lsp_error ~data:e.Error.data ~code:e.Error.code e.Error.message
+      in
       respond_to_error !ref_event e;
       hack_log_error !ref_event e error_source !ref_unblocked_time env;
       Lwt.return_unit
     | exn ->
       let exn = Exception.wrap exn in
       let e =
-        {
-          Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-          message = Exception.get_ctor_string exn;
-          data = None;
-        }
+        make_lsp_error
+          ~stack:(Exception.get_backtrace_string exn)
+          ~current_stack:false
+          (Exception.get_ctor_string exn)
       in
-      let e = Lsp_fmt.add_stack_if_absent e exn in
       respond_to_error !ref_event e;
       hack_log_error !ref_event e Error_from_lsp_misc !ref_unblocked_time env;
       Lwt.return_unit

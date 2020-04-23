@@ -151,6 +151,10 @@ class TestLsp(TestCase[LspTestDriver]):
                 if "data" in response["error"]:
                     if "stack" in response["error"]["data"]:
                         del response["error"]["data"]["stack"]
+                    if "current_stack" in response["error"]["data"]:
+                        del response["error"]["data"]["current_stack"]
+                    if "server_finale_stack" in response["error"]["data"]:
+                        del response["error"]["data"]["server_finale_stack"]
         return sanitized
 
     # dumps an LSP response into a standard json format that can be used for

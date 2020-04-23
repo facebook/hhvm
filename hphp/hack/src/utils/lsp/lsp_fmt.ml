@@ -1150,45 +1150,6 @@ let parse_didChangeWatchedFiles (json : Hh_json.json option) :
 
 (************************************************************************)
 
-let error_of_exn (e : exn) : Lsp.Error.t =
-  let open Lsp.Error in
-  match e with
-  | LspException e -> e
-  | Exit_status.Exit_with code ->
-    {
-      code = UnknownErrorCode;
-      message = Exit_status.to_string code;
-      data = None;
-    }
-  | _ ->
-    { code = UnknownErrorCode; message = Printexc.to_string e; data = None }
-
-let error_data_of_string ~(key : string) (value : string) : Hh_json.json option
-    =
-  Some (Hh_json.JSON_Object [(key, Hh_json.JSON_String value)])
-
-let error_data_of_stack (stack : string) : Hh_json.json option =
-  stack |> Exception.clean_stack |> error_data_of_string ~key:"stack"
-
-let add_stack_if_absent (e : Lsp.Error.t) ~(exn : Exception.t) : Lsp.Error.t =
-  let open Hh_json in
-  let stack =
-    ( "stack",
-      exn |> Exception.get_backtrace_string |> Exception.clean_stack |> string_
-    )
-  in
-  let elems =
-    match e.Error.data with
-    | None -> [stack]
-    | Some (JSON_Object elems) ->
-      if List.Assoc.mem ~equal:String.equal elems "stack" then
-        elems
-      else
-        stack :: elems
-    | Some data -> [("data", data); stack]
-  in
-  { e with Error.data = Some (JSON_Object elems) }
-
 let print_error (e : Error.t) : json =
   let open Hh_json in
   let data =

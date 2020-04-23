@@ -806,29 +806,12 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     Path.Set.remove istate.ifiles.changed_files_to_process next_file
   in
   let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
-    try%lwt
-      ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
-        ~backend:(Provider_backend.Local_memory istate.local_memory)
-        ~popt:istate.popt
-        ~naming_table:istate.naming_table
-        ~sienv:istate.sienv
-        ~path:next_file
-    with exn ->
-      let e = Exception.wrap exn in
-      HackEventLogger.uncaught_exception exn;
-      Hh_logger.exception_
-        e
-        ~prefix:
-          (Printf.sprintf
-             "Uncaught exception when processing changed file: %s"
-             (Path.to_string next_file));
-      Lwt.return
-        {
-          ClientIdeIncremental.naming_table = istate.naming_table;
-          sienv = istate.sienv;
-          old_file_info = None;
-          new_file_info = None;
-        }
+    ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
+      ~backend:(Provider_backend.Local_memory istate.local_memory)
+      ~popt:istate.popt
+      ~naming_table:istate.naming_table
+      ~sienv:istate.sienv
+      ~path:next_file
   in
   Option.iter
     old_file_info
@@ -847,6 +830,58 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   let istate = { istate with naming_table; sienv; ifiles } in
   let%lwt () = write_status ~out_fd (Initialized istate) in
   Lwt.return istate
+
+(** This function will either process one change that's pending,
+or will await as necessary to handle one message. *)
+let handle_one_message_exn
+    ~(in_fd : Lwt_unix.file_descr)
+    ~(out_fd : Lwt_unix.file_descr)
+    ~(message_queue : message_queue)
+    ~(state : state) : state option Lwt.t =
+  (* The precise order of operations is to help us be responsive
+  to requests, to never to await if there are pending changes to process,
+  but also to await for the next thing to do:
+  (1) If there's a message in [message_queue] then handle it;
+  (2) Otherwise if there's a message in [in_fd] then await until it
+  gets pumped into [message_queue] and then handle it;
+  (3) Otherwise if there are pending file-changes then process them;
+  (4) otherwise await until the next client request arrives in [in_fd]
+  and gets pumped into [message_queue] and then handle it. *)
+  match state with
+  | Initialized istate
+    when should_process_file_change in_fd message_queue istate ->
+    let%lwt istate = process_one_file_change out_fd istate in
+    Lwt.return_some (Initialized istate)
+  | _ ->
+    let%lwt message = Lwt_message_queue.pop message_queue in
+    (match message with
+    | None -> Lwt.return_none (* exit loop if message_queue has been closed *)
+    | Some (ClientRequest { ClientIdeMessage.tracking_id; message }) ->
+      let unblocked_time = Unix.gettimeofday () in
+      let%lwt (state, response) =
+        try%lwt
+          let%lwt (s, r) = handle_request state tracking_id message in
+          Lwt.return (s, r)
+        with e ->
+          (* Our caller has an exception handler which logs the exception.
+          But we instead must fulfil our contract of responding to the client,
+          even if we have an exception. Hence we need our own handler here. *)
+          let open ClientIdeMessage in
+          let e = Exception.wrap e in
+          let debug_details = "handle_request " ^ Exception.get_ctor_string e in
+          let stack = Exception.get_backtrace_string e in
+          let error_data = make_error_data debug_details ~stack in
+          log "%s\n%s" debug_details stack;
+          Lwt.return (state, Error error_data)
+      in
+      let%lwt () =
+        write_message
+          ~out_fd
+          ~message:
+            ClientIdeMessage.(
+              Response { response; tracking_id; unblocked_time })
+      in
+      Lwt.return_some state)
 
 let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
@@ -875,41 +910,23 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       Exception.reraise e
   in
   let rec handle_messages ({ message_queue; state } : t) : unit Lwt.t =
-    match state with
-    | Initialized istate
-      when should_process_file_change in_fd message_queue istate ->
-      let%lwt istate = process_one_file_change out_fd istate in
-      handle_messages { message_queue; state = Initialized istate }
-    | _ ->
-      let%lwt message = Lwt_message_queue.pop message_queue in
-      (match message with
-      | None -> Lwt.return_unit (* exit loop if message_queue has been closed *)
-      | Some (ClientRequest { ClientIdeMessage.tracking_id; message }) ->
-        let unblocked_time = Unix.gettimeofday () in
-        let%lwt (state, response) =
-          try%lwt
-            let%lwt (s, r) = handle_request state tracking_id message in
-            Lwt.return (s, r)
-          with e ->
-            let e = Exception.wrap e in
-            let debug_details =
-              "Exception while handling message: " ^ Exception.get_ctor_string e
-            in
-            let stack = Exception.get_backtrace_string e in
-            let error_data =
-              ClientIdeMessage.make_error_data debug_details ~stack
-            in
-            log "%s\n%s" debug_details stack;
-            Lwt.return (state, Error error_data)
+    let%lwt next_state_opt =
+      try%lwt
+        let%lwt state =
+          handle_one_message_exn ~in_fd ~out_fd ~message_queue ~state
         in
-        let%lwt () =
-          write_message
-            ~out_fd
-            ~message:
-              ClientIdeMessage.(
-                Response { response; tracking_id; unblocked_time })
-        in
-        handle_messages { message_queue; state })
+        Lwt.return state
+      with e ->
+        let e = Exception.wrap e in
+        let message = "recoverable: " ^ Exception.get_ctor_string e in
+        let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
+        HackEventLogger.serverless_ide_crash ~message ~stack;
+        log_error "%s\n%s" message stack;
+        Lwt.return_some state
+    in
+    match next_state_opt with
+    | None -> Lwt.return_unit (* exit loop *)
+    | Some state -> handle_messages { message_queue; state }
   in
   try%lwt
     let message_queue = Lwt_message_queue.create () in

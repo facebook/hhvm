@@ -648,7 +648,7 @@ let set_verbose_to_file
         ide_service
         ~tracking_id
         ~ref_unblocked_time
-        (ClientIdeMessage.Verbose !verbose_to_file)
+        (ClientIdeMessage.Verbose_to_file !verbose_to_file)
     in
     ignore_promise_but_handle_failure
       promise
@@ -3424,13 +3424,15 @@ let on_status_restart_action
     (* It's possible that [destroy] takes a while to finish, so make
     sure to assign the new IDE service to the [ref] before attempting
     to do an asynchronous operation with the old one. *)
-    let ide_args = { ClientIdeMessage.init_id; verbose = env.verbose } in
+    let ide_args =
+      {
+        ClientIdeMessage.init_id;
+        verbose_to_stderr = env.verbose;
+        verbose_to_file = !verbose_to_file;
+      }
+    in
     let new_ide_service = ClientIdeService.make ide_args in
     ide_service := Some new_ide_service;
-    set_verbose_to_file
-      ~ide_service:(Some new_ide_service)
-      ~tracking_id:"[restart]"
-      !verbose_to_file;
     (* Note: the env.verbose passed on init controls verbosity for stderr
     and is only ever controlled by --verbose command line, stored in env.
     But verbosity-to-file can be altered dynamically by the user. *)
@@ -4655,11 +4657,13 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
   from := env.from;
   HackEventLogger.set_from !from;
 
-  if env.verbose then
-    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug
-  else
+  if env.verbose then begin
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Debug;
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
+  end else begin
     Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-  set_verbose_to_file ~ide_service:None ~tracking_id:"[startup]" env.verbose;
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info
+  end;
   (* The --verbose flag in env.verbose is the only thing that controls verbosity
   to stderr. Meanwhile, verbosity-to-file can be altered dynamically by the user.
   Why are they different? because we should write to stderr under a test harness,
@@ -4669,7 +4673,11 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
     if env.use_serverless_ide then
       Some
         (ClientIdeService.make
-           { ClientIdeMessage.init_id; verbose = env.verbose })
+           {
+             ClientIdeMessage.init_id;
+             verbose_to_stderr = env.verbose;
+             verbose_to_file = env.verbose;
+           })
     else
       None
   in

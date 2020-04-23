@@ -136,7 +136,7 @@ type _ t =
   | Ide_file_opened : Ide_file_opened.request -> unit t
   | Ide_file_changed : Ide_file_changed.request -> unit t
   | Ide_file_closed : Path.t -> unit t
-  | Verbose : bool -> unit t
+  | Verbose_to_file : bool -> unit t
   | Hover : Hover.request -> Hover.result t
   | Definition : Definition.request -> Definition.result t
   | Completion : Completion.request -> Completion.result t
@@ -174,7 +174,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Ide_file_changed(%s)" (Path.to_string file_path)
   | Ide_file_closed file_path ->
     Printf.sprintf "Ide_file_closed(%s)" (Path.to_string file_path)
-  | Verbose verbose -> Printf.sprintf "Verbose(%b)" verbose
+  | Verbose_to_file verbose -> Printf.sprintf "Verbose_to_file(%b)" verbose
   | Hover { file_path; _ } ->
     Printf.sprintf "Hover(%s)" (Path.to_string file_path)
   | Definition { file_path; _ } ->
@@ -278,5 +278,6 @@ let message_from_daemon_to_string (m : message_from_daemon) : string =
 
 type daemon_args = {
   init_id: string;
-  verbose: bool;
+  verbose_to_stderr: bool;
+  verbose_to_file: bool;
 }

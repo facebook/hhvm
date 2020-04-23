@@ -9,7 +9,7 @@
 
 open Hh_prelude
 
-type message = Message : 'a ClientIdeMessage.tracked_t -> message
+type message = ClientRequest : 'a ClientIdeMessage.tracked_t -> message
 
 type message_queue = message Lwt_message_queue.t
 
@@ -515,7 +515,7 @@ anything other than [Initialize_from_saved_state] as its first message. Upon
 receipt+processing of this we transition from [Initializing] to either [Initialized]
 or [Failed_to_initialize], and never thereafter transition state. Processing might
 take time, but we never attempt to handle any other messages during processing. *)
-let handle_message :
+let handle_request :
     type a.
     state ->
     string ->
@@ -785,6 +785,69 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
       in
       Lwt.return_unit
 
+(** Allow to process the next file change only if we have no new events to
+handle. To ensure correctness, we would have to actually process all file
+change events *before* we processed any other IDE queries. However, we're
+trying to maximize availability, even if occasionally we give stale
+results. We can revisit this trade-off later if we decide that the stale
+results are baffling users. *)
+let should_process_file_change
+    (in_fd : Lwt_unix.file_descr)
+    (message_queue : message_queue)
+    (istate : istate) : bool =
+  Lwt_message_queue.is_empty message_queue
+  && (not (Lwt_unix.readable in_fd))
+  && not (Path.Set.is_empty istate.ifiles.changed_files_to_process)
+
+let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
+    istate Lwt.t =
+  let next_file = Path.Set.choose istate.ifiles.changed_files_to_process in
+  let changed_files_to_process =
+    Path.Set.remove istate.ifiles.changed_files_to_process next_file
+  in
+  let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
+    try%lwt
+      ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
+        ~backend:(Provider_backend.Local_memory istate.local_memory)
+        ~popt:istate.popt
+        ~naming_table:istate.naming_table
+        ~sienv:istate.sienv
+        ~path:next_file
+    with exn ->
+      let e = Exception.wrap exn in
+      HackEventLogger.uncaught_exception exn;
+      Hh_logger.exception_
+        e
+        ~prefix:
+          (Printf.sprintf
+             "Uncaught exception when processing changed file: %s"
+             (Path.to_string next_file));
+      Lwt.return
+        {
+          ClientIdeIncremental.naming_table = istate.naming_table;
+          sienv = istate.sienv;
+          old_file_info = None;
+          new_file_info = None;
+        }
+  in
+  Option.iter
+    old_file_info
+    ~f:
+      (Provider_utils.invalidate_local_decl_caches_for_file istate.local_memory);
+  Provider_utils.invalidate_tast_cache_of_entries istate.ifiles.open_files;
+  let changed_files_denominator =
+    if Path.Set.is_empty changed_files_to_process then
+      0
+    else
+      istate.ifiles.changed_files_denominator
+  in
+  let ifiles =
+    { istate.ifiles with changed_files_to_process; changed_files_denominator }
+  in
+  let istate = { istate with naming_table; sienv; ifiles } in
+  let%lwt () = write_status ~out_fd (Initialized istate) in
+  Lwt.return istate
+
 let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     unit Lwt.t =
   let rec flush_event_logger () : unit Lwt.t =
@@ -792,7 +855,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     Lwt.async EventLoggerLwt.flush;
     flush_event_logger ()
   in
-  let rec pump_message_queue (message_queue : message_queue) : unit Lwt.t =
+  let rec pump_stdin (message_queue : message_queue) : unit Lwt.t =
     try%lwt
       let%lwt { ClientIdeMessage.tracking_id; message } =
         Marshal_tools_lwt.from_fd_with_preamble in_fd
@@ -800,88 +863,32 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       let is_queue_open =
         Lwt_message_queue.push
           message_queue
-          (Message { ClientIdeMessage.tracking_id; message })
+          (ClientRequest { ClientIdeMessage.tracking_id; message })
       in
       match message with
       | ClientIdeMessage.Shutdown () -> Lwt.return_unit
       | _ when not is_queue_open -> Lwt.return_unit
-      | _ -> pump_message_queue message_queue
+      | _ -> pump_stdin message_queue
     with e ->
       let e = Exception.wrap e in
       Lwt_message_queue.close message_queue;
       Exception.reraise e
   in
-  let rec handle_messages (t : t) : unit Lwt.t =
-    match t with
-    | {
-     message_queue;
-     state =
-       Initialized
-         ({ naming_table; sienv; ifiles; local_memory; popt; _ } as state);
-    }
-      when Lwt_message_queue.is_empty message_queue
-           && (not (Lwt_unix.readable in_fd))
-           && not (Path.Set.is_empty ifiles.changed_files_to_process) ->
-      (* Process the next file change, but only if we have no new events to
-      handle. To ensure correctness, we would have to actually process all file
-      change events *before* we processed any other IDE queries. However, we're
-      trying to maximize availability, even if occasionally we give stale
-      results. We can revisit this trade-off later if we decide that the stale
-      results are baffling users. *)
-      let next_file = Path.Set.choose ifiles.changed_files_to_process in
-      let changed_files_to_process =
-        Path.Set.remove ifiles.changed_files_to_process next_file
-      in
-      let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
-        try%lwt
-          ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
-            ~backend:(Provider_backend.Local_memory local_memory)
-            ~popt
-            ~naming_table
-            ~sienv
-            ~path:next_file
-        with exn ->
-          let e = Exception.wrap exn in
-          HackEventLogger.uncaught_exception exn;
-          Hh_logger.exception_
-            e
-            ~prefix:
-              (Printf.sprintf
-                 "Uncaught exception when processing changed file: %s"
-                 (Path.to_string next_file));
-          Lwt.return
-            {
-              ClientIdeIncremental.naming_table;
-              sienv;
-              old_file_info = None;
-              new_file_info = None;
-            }
-      in
-      Option.iter
-        old_file_info
-        ~f:(Provider_utils.invalidate_local_decl_caches_for_file local_memory);
-      Provider_utils.invalidate_tast_cache_of_entries ifiles.open_files;
-      let changed_files_denominator =
-        if Path.Set.is_empty changed_files_to_process then
-          0
-        else
-          ifiles.changed_files_denominator
-      in
-      let ifiles =
-        { ifiles with changed_files_to_process; changed_files_denominator }
-      in
-      let state = Initialized { state with naming_table; sienv; ifiles } in
-      let%lwt () = write_status ~out_fd state in
-      handle_messages { t with state }
-    | t ->
-      let%lwt message = Lwt_message_queue.pop t.message_queue in
+  let rec handle_messages ({ message_queue; state } : t) : unit Lwt.t =
+    match state with
+    | Initialized istate
+      when should_process_file_change in_fd message_queue istate ->
+      let%lwt istate = process_one_file_change out_fd istate in
+      handle_messages { message_queue; state = Initialized istate }
+    | _ ->
+      let%lwt message = Lwt_message_queue.pop message_queue in
       (match message with
       | None -> Lwt.return_unit (* exit loop if message_queue has been closed *)
-      | Some (Message { ClientIdeMessage.tracking_id; message }) ->
+      | Some (ClientRequest { ClientIdeMessage.tracking_id; message }) ->
         let unblocked_time = Unix.gettimeofday () in
         let%lwt (state, response) =
           try%lwt
-            let%lwt (s, r) = handle_message t.state tracking_id message in
+            let%lwt (s, r) = handle_request state tracking_id message in
             Lwt.return (s, r)
           with e ->
             let e = Exception.wrap e in
@@ -893,7 +900,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               ClientIdeMessage.make_error_data debug_details ~stack
             in
             log "%s\n%s" debug_details stack;
-            Lwt.return (t.state, Error error_data)
+            Lwt.return (state, Error error_data)
         in
         let%lwt () =
           write_message
@@ -902,13 +909,13 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
               ClientIdeMessage.(
                 Response { response; tracking_id; unblocked_time })
         in
-        handle_messages { t with state })
+        handle_messages { message_queue; state })
   in
   try%lwt
     let message_queue = Lwt_message_queue.create () in
     let flusher_promise = flush_event_logger () in
     let%lwt () = handle_messages { message_queue; state = Pre_init }
-    and () = pump_message_queue message_queue in
+    and () = pump_stdin message_queue in
     Lwt.cancel flusher_promise;
     Lwt.return_unit
   with e ->

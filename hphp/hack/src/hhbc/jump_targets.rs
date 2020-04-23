@@ -29,6 +29,35 @@ pub enum Region {
     Using(Label, LabelSet),
 }
 
+#[derive(Debug)]
+pub struct ResolvedTryFinally {
+    pub target_label: Label,
+    pub finally_label: Label,
+    pub adjusted_level: usize,
+    pub iterators_to_release: Vec<iterator::Id>,
+}
+
+#[derive(Debug)]
+pub enum ResolvedJumpTarget {
+    NotFound,
+    ResolvedTryFinally(ResolvedTryFinally),
+    ResolvedRegular(Label, Vec<iterator::Id>),
+}
+
+#[derive(Debug)]
+pub struct ResolvedGotoFinally {
+    pub rgf_finally_start_label: Label,
+    pub rgf_iterators_to_release: Vec<iterator::Id>,
+}
+
+#[derive(Debug)]
+pub enum ResolvedGotoTarget {
+    Label(Vec<iterator::Id>),
+    Finally(ResolvedGotoFinally),
+    GotoFromFinally,
+    GotoInvalidLabel,
+}
+
 #[derive(Clone, Debug, Default)]
 pub struct JumpTargets(Vec<Region>);
 impl JumpTargets {
@@ -280,6 +309,20 @@ impl Gen {
         self.jump_targets.0.push(Region::Switch(end_label, labels));
     }
 
+    pub fn with_try_catch<Ex, Fb, En, Hi>(
+        &mut self,
+        finally_label: Label,
+        try_block: &Block<Ex, Fb, En, Hi>,
+        cactch_block: &[Catch<Ex, Fb, En, Hi>],
+    ) {
+        let labels = self.collect_valid_target_labels(|acc| {
+            Self::collect_valid_target_labels_for_try_catch(acc, try_block, cactch_block)
+        });
+        self.jump_targets
+            .0
+            .push(Region::TryFinally(finally_label, labels));
+    }
+
     pub fn with_try<Ex, Fb, En, Hi>(
         &mut self,
         finally_label: Label,
@@ -315,34 +358,18 @@ impl Gen {
     pub fn revert(&mut self) {
         self.jump_targets.0.pop();
     }
-}
 
-pub struct ResolvedTryFinally {
-    pub target_label: Label,
-    pub finally_label: Label,
-    pub adjusted_level: usize,
-    pub iterators_to_release: Vec<iterator::Id>,
-}
+    fn collect_valid_target_labels_for_try_catch<Ex, Fb, En, Hi>(
+        acc: &mut LabelSet,
+        try_block: &Block<Ex, Fb, En, Hi>,
+        catch_blocks: &[Catch<Ex, Fb, En, Hi>],
+    ) {
+        Self::collect_valid_target_labels_for_block_aux(acc, try_block);
+        for Catch(_, _, block) in catch_blocks.iter() {
+            Self::collect_valid_target_labels_for_block_aux(acc, block);
+        }
+    }
 
-pub enum ResolvedJumpTarget {
-    NotFound,
-    ResolvedTryFinally(ResolvedTryFinally),
-    ResolvedRegular(Label, Vec<iterator::Id>),
-}
-
-pub struct ResolvedGotoFinally {
-    pub rgf_finally_start_label: Label,
-    pub rgf_iterators_to_release: Vec<iterator::Id>,
-}
-
-pub enum ResolvedGotoTarget {
-    Label(Vec<iterator::Id>),
-    Finally(ResolvedGotoFinally),
-    GotoFromFinally,
-    GotoInvalidLabel,
-}
-
-impl Gen {
     fn collect_valid_target_labels_for_stmt_aux<Ex, Fb, En, Hi>(
         acc: &mut LabelSet,
         s: &Stmt<Ex, Fb, En, Hi>,
@@ -352,10 +379,7 @@ impl Gen {
             Block(block) => Self::collect_valid_target_labels_for_block_aux(acc, block),
             Try(x) => {
                 let (try_block, catch_blocks, _) = &**x;
-                Self::collect_valid_target_labels_for_block_aux(acc, &try_block);
-                for Catch(_, _, block) in catch_blocks.iter() {
-                    Self::collect_valid_target_labels_for_block_aux(acc, block);
-                }
+                Self::collect_valid_target_labels_for_try_catch(acc, try_block, catch_blocks);
             }
             GotoLabel(x) => {
                 let (_, s) = &**x;
@@ -424,13 +448,13 @@ impl Gen {
             .for_each(|def| Self::collect_valid_target_labels_for_def_aux(acc, def));
     }
 
-    fn collect_valid_target_labels<X, F>(&self, x: &X, f: F) -> LabelSet
+    fn collect_valid_target_labels<F>(&self, f: F) -> LabelSet
     where
-        F: FnOnce(&mut LabelSet, &X),
+        F: FnOnce(&mut LabelSet),
     {
         let mut labels = HashSet::new();
         if self.function_has_goto {
-            f(&mut labels, x);
+            f(&mut labels);
         };
         labels
     }
@@ -439,24 +463,27 @@ impl Gen {
         &self,
         block: &Block<Ex, Fb, En, Hi>,
     ) -> LabelSet {
-        self.collect_valid_target_labels(block, Self::collect_valid_target_labels_for_block_aux)
+        self.collect_valid_target_labels(|acc| {
+            Self::collect_valid_target_labels_for_block_aux(acc, block)
+        })
     }
 
     fn collect_valid_target_labels_for_defs<Ex, Fb, En, Hi>(
         &self,
         defs: &Program<Ex, Fb, En, Hi>,
     ) -> LabelSet {
-        self.collect_valid_target_labels(defs, Self::collect_valid_target_labels_for_defs_aux)
+        self.collect_valid_target_labels(|acc| {
+            Self::collect_valid_target_labels_for_defs_aux(acc, defs)
+        })
     }
 
     fn collect_valid_target_labels_for_switch_cases<Ex, Fb, En, Hi>(
         &self,
         cases: &Vec<Case<Ex, Fb, En, Hi>>,
     ) -> LabelSet {
-        self.collect_valid_target_labels(
-            cases,
-            Self::collect_valid_target_labels_for_switch_cases_aux,
-        )
+        self.collect_valid_target_labels(|acc| {
+            Self::collect_valid_target_labels_for_switch_cases_aux(acc, cases)
+        })
     }
 
     fn collect_valid_target_labels_for_ast_body(&self, body: &AstBody) -> LabelSet {

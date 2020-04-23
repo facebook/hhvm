@@ -102,7 +102,7 @@ impl<'a> Env<'a> {
     {
         self.jump_targets_gen
             .with_loop(label_break, label_continue, iterator, b);
-        self.run_and_release_ids(e, b, f)
+        self.run_and_release_ids(e, |env, e| f(env, e, b))
     }
 
     pub fn do_in_switch_body<R, F>(
@@ -116,7 +116,23 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &[tast::Case]) -> R,
     {
         self.jump_targets_gen.with_switch(end_label, cases);
-        self.run_and_release_ids(e, cases.as_slice(), f)
+        self.run_and_release_ids(e, |env, e| f(env, e, cases.as_slice()))
+    }
+
+    pub fn do_in_try_catch_body<R, F>(
+        &mut self,
+        e: &mut Emitter,
+        finally_label: Label,
+        try_block: &tast::Block,
+        catch_block: &[tast::Catch],
+        f: F,
+    ) -> R
+    where
+        F: FnOnce(&mut Self, &mut Emitter, &tast::Block, &[tast::Catch]) -> R,
+    {
+        self.jump_targets_gen
+            .with_try_catch(finally_label, try_block, catch_block);
+        self.run_and_release_ids(e, |env, e| f(env, e, try_block, catch_block))
     }
 
     pub fn do_in_try_body<R, F>(
@@ -130,7 +146,7 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
     {
         self.jump_targets_gen.with_try(finally_label, block);
-        self.run_and_release_ids(e, block, f)
+        self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
     pub fn do_in_finally_body<R, F>(&mut self, e: &mut Emitter, block: &tast::Block, f: F) -> R
@@ -138,7 +154,7 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
     {
         self.jump_targets_gen.with_finally(block);
-        self.run_and_release_ids(e, block, f)
+        self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
     pub fn do_in_using_body<R, F>(
@@ -152,7 +168,7 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &tast::Block) -> R,
     {
         self.jump_targets_gen.with_using(finally_label, block);
-        self.run_and_release_ids(e, block, f)
+        self.run_and_release_ids(e, |env, e| f(env, e, block))
     }
 
     pub fn do_function<R, F>(&mut self, e: &mut Emitter, defs: &AstBody, f: F) -> R
@@ -160,14 +176,14 @@ impl<'a> Env<'a> {
         F: FnOnce(&mut Self, &mut Emitter, &AstBody) -> R,
     {
         self.jump_targets_gen.with_function(defs);
-        self.run_and_release_ids(e, defs, f)
+        self.run_and_release_ids(e, |env, e| f(env, e, defs))
     }
 
-    fn run_and_release_ids<X, R, F>(&mut self, e: &mut Emitter, x: X, f: F) -> R
+    fn run_and_release_ids<R, F>(&mut self, e: &mut Emitter, f: F) -> R
     where
-        F: FnOnce(&mut Self, &mut Emitter, X) -> R,
+        F: FnOnce(&mut Self, &mut Emitter) -> R,
     {
-        let res = f(self, e, x);
+        let res = f(self, e);
         self.jump_targets_gen.release_ids();
         self.jump_targets_gen.revert();
         res

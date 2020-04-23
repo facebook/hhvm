@@ -280,19 +280,7 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             } else if finally_block.is_empty() {
                 emit_try_catch(e, env, pos, &try_block, &catch_list[..])
             } else {
-                //TODO(hrust): avoid cloning block
-                let try_catch_finally = tast::Stmt(
-                    pos.clone(),
-                    tast::Stmt_::mk_try(
-                        vec![tast::Stmt(
-                            pos.clone(),
-                            tast::Stmt_::mk_try(try_block.clone(), catch_list.clone(), vec![]),
-                        )],
-                        vec![],
-                        finally_block.clone(),
-                    ),
-                );
-                emit_stmt(e, env, &try_catch_finally)
+                emit_try_catch_finally(e, env, pos, &try_block, &catch_list[..], &finally_block)
             }
         }
         a::Stmt_::Switch(x) => emit_switch(e, env, pos, &x.0, &x.1),
@@ -707,7 +695,7 @@ fn emit_switch(
                     .as_slice()
                 {
                     [] => break_label.clone(),
-                    [l] => l.to_owned().clone(),
+                    [l] => (*l).clone(),
                     _ => {
                         return Err(emit_fatal::raise_fatal_runtime(
                             pos,
@@ -740,6 +728,23 @@ fn is_empty_block(b: &tast::Block) -> bool {
     b.iter().all(|s| s.1.is_noop())
 }
 
+fn emit_try_catch_finally(
+    e: &mut Emitter,
+    env: &mut Env,
+    pos: &Pos,
+    r#try: &tast::Block,
+    catch: &[tast::Catch],
+    finally: &tast::Block,
+) -> Result {
+    let is_try_block_empty = false;
+    let emit_try_block = |env: &mut Env, e: &mut Emitter, finally_start: &Label| {
+        env.do_in_try_catch_body(e, finally_start.clone(), r#try, catch, |env, e, t, c| {
+            emit_try_catch(e, env, pos, t, c)
+        })
+    };
+    e.local_scope(|e| emit_try_finally_(e, env, pos, emit_try_block, finally, is_try_block_empty))
+}
+
 fn emit_try_finally(
     e: &mut Emitter,
     env: &mut Env,
@@ -747,17 +752,31 @@ fn emit_try_finally(
     try_block: &tast::Block,
     finally_block: &tast::Block,
 ) -> Result {
-    e.local_scope(|e| emit_try_finally_(e, env, pos, try_block, finally_block))
+    let is_try_block_empty = is_empty_block(try_block);
+    let emit_try_block = |env: &mut Env, e: &mut Emitter, finally_start: &Label| {
+        env.do_in_try_body(e, finally_start.clone(), try_block, emit_block)
+    };
+    e.local_scope(|e| {
+        emit_try_finally_(
+            e,
+            env,
+            pos,
+            emit_try_block,
+            finally_block,
+            is_try_block_empty,
+        )
+    })
 }
 
-fn emit_try_finally_(
+fn emit_try_finally_<E: Fn(&mut Env, &mut Emitter, &Label) -> Result>(
     e: &mut Emitter,
     env: &mut Env,
     pos: &Pos,
-    try_block: &tast::Block,
+    emit_try_block: E,
     finally_block: &tast::Block,
+    is_try_block_empty: bool,
 ) -> Result {
-    if is_empty_block(try_block) {
+    if is_try_block_empty {
         return env.do_in_finally_body(e, finally_block, emit_block);
     };
     // We need to generate four things:
@@ -784,7 +803,7 @@ fn emit_try_finally_(
 
     let in_try = env.flags.contains(env::Flags::IN_TRY);
     env.flags.set(env::Flags::IN_TRY, true);
-    let try_body = env.do_in_try_body(e, finally_start.clone(), try_block, emit_block)?;
+    let try_body = emit_try_block(env, e, &finally_start)?;
     env.flags.set(env::Flags::IN_TRY, in_try);
 
     let jump_instrs = tfr::JumpInstructions::collect(&try_body, &mut env.jump_targets_gen);

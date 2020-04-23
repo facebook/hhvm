@@ -97,6 +97,7 @@ impl Default for GlobalOptions {
             po_enable_first_class_function_pointers: false,
             po_disable_modes: false,
             po_disable_array: false,
+            tco_enable_systemlib_annotations: false,
         }
     }
 }

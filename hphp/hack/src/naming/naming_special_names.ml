@@ -299,6 +299,10 @@ module UserAttributes = struct
 
   let uaHasTopLevelCode = "__HasTopLevelCode"
 
+  let uaNative = "__Native"
+
+  let uaAlwaysInline = "__ALWAYS_INLINE"
+
   let as_map =
     AttributeKinds.(
       SMap.of_list
@@ -344,6 +348,11 @@ module UserAttributes = struct
           (uaNeverInline, [fn; mthd]);
           (uaDisableTypecheckerInternal, [fn; mthd]);
         ])
+
+  (* These are names which are allowed in the systemlib but not in normal programs *)
+  let systemlib_map =
+    AttributeKinds.(
+      SMap.of_list [(uaNative, [fn; mthd]); (uaAlwaysInline, [fn; mthd])])
 
   let is_reserved name = String.is_prefix name ~prefix:"__"
 end

@@ -143,3 +143,6 @@ let error_php_lambdas = GlobalOptions.tco_error_php_lambdas
 
 let disallow_discarded_nullable_awaitables =
   GlobalOptions.tco_disallow_discarded_nullable_awaitables
+
+let enable_systemlib_annotations =
+  GlobalOptions.tco_enable_systemlib_annotations

@@ -97,6 +97,7 @@ type t = {
   po_enable_first_class_function_pointers: bool;
   po_disable_modes: bool;
   po_disable_array: bool;
+  tco_enable_systemlib_annotations: bool;
 }
 [@@deriving show]
 
@@ -264,6 +265,7 @@ let default =
     po_enable_first_class_function_pointers = false;
     po_disable_modes = false;
     po_disable_array = false;
+    tco_enable_systemlib_annotations = false;
   }
 
 let make
@@ -373,6 +375,8 @@ let make
       default.po_enable_first_class_function_pointers)
     ?(po_disable_modes = default.po_disable_modes)
     ?(po_disable_array = default.po_disable_array)
+    ?(tco_enable_systemlib_annotations =
+      default.tco_enable_systemlib_annotations)
     () =
   {
     tco_experimental_features;
@@ -464,6 +468,7 @@ let make
     po_enable_first_class_function_pointers;
     po_disable_modes;
     po_disable_array;
+    tco_enable_systemlib_annotations;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -662,3 +667,5 @@ let po_enable_first_class_function_pointers t =
 let po_disable_modes t = t.po_disable_modes
 
 let po_disable_array t = t.po_disable_array
+
+let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations

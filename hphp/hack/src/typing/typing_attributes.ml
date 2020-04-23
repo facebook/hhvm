@@ -24,10 +24,13 @@ let check_implements
     | None -> "this expression"
     (* this case should never execute *)
   in
+  let enable_systemlib_annotations =
+    TypecheckerOptions.enable_systemlib_annotations (Typing_env.get_tcopt env)
+  in
   if String_utils.string_starts_with attr_name "__" then
     (* Check against builtins *)
-    let () =
-      match SMap.find_opt attr_name SN.UserAttributes.as_map with
+    let check_attr map =
+      match SMap.find_opt attr_name map with
       | Some intfs ->
         let check_locations =
           TypecheckerOptions.check_attribute_locations
@@ -36,12 +39,25 @@ let check_implements
         if
           check_locations
           && (not @@ List.mem intfs attr_interface ~equal:String.equal)
-        then
+        then (
           Errors.wrong_expression_kind_builtin_attribute
             expr_kind
             attr_pos
-            attr_name
-      | None -> Errors.unbound_attribute_name attr_pos attr_name
+            attr_name;
+          false
+        ) else
+          true
+      | None -> false
+    in
+    let () =
+      if
+        check_attr SN.UserAttributes.as_map
+        || enable_systemlib_annotations
+           && check_attr SN.UserAttributes.systemlib_map
+      then
+        ()
+      else
+        Errors.unbound_attribute_name attr_pos attr_name
     in
     env
   else

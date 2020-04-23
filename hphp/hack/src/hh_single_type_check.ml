@@ -236,6 +236,7 @@ let parse_options () =
   let verbosity = ref 0 in
   let enable_first_class_function_pointers = ref false in
   let disable_modes = ref false in
+  let enable_systemlib_annotations = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -524,6 +525,9 @@ let parse_options () =
         Arg.Set enable_first_class_function_pointers,
         "Enable first class funciton pointers using <> syntax" );
       ("--disable-modes", Arg.Set disable_modes, "Treat partial as strict");
+      ( "--enable-systemlib-annotations",
+        Arg.Set enable_systemlib_annotations,
+        "Enable systemlib annotations" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -590,6 +594,7 @@ let parse_options () =
       ~po_enable_first_class_function_pointers:
         !enable_first_class_function_pointers
       ~po_disable_modes:!disable_modes
+      ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
       ()
   in
   let tcopt =

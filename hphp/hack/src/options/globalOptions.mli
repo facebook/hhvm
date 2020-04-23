@@ -247,6 +247,8 @@ type t = {
   po_disable_modes: bool;
   (* Disable array(...) *)
   po_disable_array: bool;
+  (* Enable features used to typecheck systemlib *)
+  tco_enable_systemlib_annotations: bool;
 }
 [@@deriving show]
 
@@ -339,6 +341,7 @@ val make :
   ?po_enable_first_class_function_pointers:bool ->
   ?po_disable_modes:bool ->
   ?po_disable_array:bool ->
+  ?tco_enable_systemlib_annotations:bool ->
   unit ->
   t
 
@@ -549,3 +552,5 @@ val po_enable_first_class_function_pointers : t -> bool
 val po_disable_modes : t -> bool
 
 val po_disable_array : t -> bool
+
+val tco_enable_systemlib_annotations : t -> bool

@@ -21,6 +21,7 @@ type env = {
   use_ranked_autocomplete: bool;
   use_serverless_ide: bool;
   verbose: bool;
+  init_id: string;
 }
 
 (** This is env.from, but maybe modified in the light of the initialize request *)
@@ -1495,7 +1496,6 @@ let stop_ide_service
 
 let on_status_restart_action
     ~(env : env)
-    ~(init_id : string)
     ~(ide_service : ClientIdeService.t option ref)
     (result : ShowStatusFB.result)
     (state : state) : state Lwt.t =
@@ -1522,7 +1522,7 @@ let on_status_restart_action
     to do an asynchronous operation with the old one. *)
     let ide_args =
       {
-        ClientIdeMessage.init_id;
+        ClientIdeMessage.init_id = env.init_id;
         verbose_to_stderr = env.verbose;
         verbose_to_file = !verbose_to_file;
       }
@@ -1837,10 +1837,8 @@ let merge_statuses
     else
       Some { client_ide_status with request }
 
-let refresh_status
-    ~(env : env)
-    ~(ide_service : ClientIdeService.t option ref)
-    ~(init_id : string) : unit =
+let refresh_status ~(env : env) ~(ide_service : ClientIdeService.t option ref) :
+    unit =
   let client_ide_status =
     match !ide_service with
     | None -> None
@@ -1853,7 +1851,7 @@ let refresh_status
     status
     ~f:
       (request_showStatusFB
-         ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
+         ~on_result:(on_status_restart_action ~env ~ide_service));
   ()
 
 let rpc_lock = Lwt_mutex.create ()
@@ -4657,7 +4655,7 @@ let handle_tick
     ~terminate_on_failure:false;
   Lwt.return_none
 
-let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
+let main (env : env) : Exit_status.t Lwt.t =
   Printexc.record_backtrace true;
   from := env.from;
   HackEventLogger.set_from !from;
@@ -4679,7 +4677,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       Some
         (ClientIdeService.make
            {
-             ClientIdeMessage.init_id;
+             ClientIdeMessage.init_id = env.init_id;
              verbose_to_stderr = env.verbose;
              verbose_to_file = env.verbose;
            })
@@ -4733,7 +4731,7 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       if not (is_pre_init !state || is_post_shutdown !state) then begin
         state :=
           publish_hh_server_status_diagnostic !state !latest_hh_server_status;
-        refresh_status ~env ~ide_service ~init_id
+        refresh_status ~env ~ide_service
       end;
 
       (* this is the main handler for each message*)

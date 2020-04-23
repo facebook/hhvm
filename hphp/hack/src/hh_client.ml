@@ -50,9 +50,9 @@ let () =
   Sys_utils.set_signal
     Sys.sigint
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
-  let command = ClientArgs.parse_args () in
-  let root = ClientArgs.root command in
   let init_id = Random_id.short_string () in
+  let command = ClientArgs.parse_args ~init_id in
+  let root = ClientArgs.root command in
   HackEventLogger.client_init ~init_id root;
   let command_name = function
     | ClientCommand.CCheck _ -> "Check"
@@ -71,7 +71,7 @@ let () =
       | ClientCommand.CStart env -> Lwt_main.run (ClientStart.main env)
       | ClientCommand.CStop env -> Lwt_main.run (ClientStop.main env)
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
-      | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main init_id env)
+      | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
       | ClientCommand.CDebug env -> Lwt_main.run (ClientDebug.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)

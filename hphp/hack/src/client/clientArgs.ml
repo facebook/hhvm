@@ -838,7 +838,7 @@ let parse_stop_args () =
   in
   CStop { ClientStop.root; from = !from }
 
-let parse_lsp_args () =
+let parse_lsp_args ~(init_id : string) =
   let usage =
     Printf.sprintf
       "Usage: %s lsp [OPTION]...\nRuns a persistent language service\n"
@@ -883,6 +883,7 @@ let parse_lsp_args () =
         use_ranked_autocomplete = !use_ranked_autocomplete;
         use_serverless_ide = !use_serverless_ide;
         verbose = !verbose;
+        init_id;
       }
   | _ ->
     Printf.printf "%s\n" usage;
@@ -959,14 +960,14 @@ invocations of `hh` faster.|}
   in
   CDownloadSavedState { ClientDownloadSavedState.root; from; saved_state_type }
 
-let parse_args () =
+let parse_args ~(init_id : string) =
   match parse_command () with
   | (CKNone | CKCheck) as cmd -> parse_check_args cmd
   | CKStart -> parse_start_args ()
   | CKStop -> parse_stop_args ()
   | CKRestart -> parse_restart_args ()
   | CKDebug -> parse_debug_args ()
-  | CKLsp -> parse_lsp_args ()
+  | CKLsp -> parse_lsp_args ~init_id
   | CKDownloadSavedState -> parse_download_saved_state_args ()
 
 let root = function

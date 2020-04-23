@@ -32,6 +32,7 @@ type predicate =
   | ClassConstDefinition
   | ClassDeclaration
   | ClassDefinition
+  | DeclarationComment
   | DeclarationLocation
   | EnumDeclaration
   | EnumDefinition
@@ -65,6 +66,7 @@ type glean_json = {
   classConstDefinition: json list;
   classDeclaration: json list;
   classDefinition: json list;
+  declarationComment: json list;
   declarationLocation: json list;
   enumDeclaration: json list;
   enumDefinition: json list;
@@ -101,6 +103,7 @@ let init_progress =
       classConstDefinition = [];
       classDeclaration = [];
       classDefinition = [];
+      declarationComment = [];
       declarationLocation = [];
       enumDeclaration = [];
       enumDefinition = [];
@@ -173,6 +176,11 @@ let update_json_data predicate json progress =
       {
         progress.resultJson with
         classDefinition = json :: progress.resultJson.classDefinition;
+      }
+    | DeclarationComment ->
+      {
+        progress.resultJson with
+        declarationComment = json :: progress.resultJson.declarationComment;
       }
     | DeclarationLocation ->
       {
@@ -350,6 +358,9 @@ let build_type_json_nested type_name =
   (* Remove namespace slash from type, if present *)
   let ty = Utils.strip_ns type_name in
   JSON_Object [("key", JSON_String ty)]
+
+let build_comment_json_nested comment =
+  JSON_Object [("key", JSON_String comment)]
 
 let build_signature_json_nested parameters return_type_name =
   let fields =
@@ -744,6 +755,18 @@ let add_decl_loc_fact pos decl_json progress =
   in
   add_fact DeclarationLocation json_fact progress
 
+let add_decl_comment_fact doc pos decl_json progress =
+  let filepath = Relative_path.to_absolute (Pos.filename pos) in
+  let json_fact =
+    JSON_Object
+      [
+        ("declaration", decl_json);
+        ("file", build_file_json filepath);
+        ("comment", build_comment_json_nested doc);
+      ]
+  in
+  add_fact DeclarationComment json_fact progress
+
 let add_file_lines_fact file_info progress =
   let json_fact = build_file_lines_json file_info in
   add_fact FileLines json_fact progress
@@ -857,11 +880,22 @@ let process_function_xref symbol_def pos (xrefs, progress) =
     pos
     (xrefs, progress)
 
-let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem progress =
+let process_doc_comment comment decl_pos decl_ref_json prog =
+  match comment with
+  | None -> prog
+  | Some doc ->
+    if phys_equal (String.length doc) 0 then
+      prog
+    else
+      let (_, prog) = add_decl_comment_fact doc decl_pos decl_ref_json prog in
+      prog
+
+let process_decl_loc decl_fun defn_fun decl_ref_fun pos id elem doc progress =
   let (decl_id, prog) = decl_fun id progress in
   let (_, prog) = defn_fun elem decl_id prog in
   let ref_json = decl_ref_fun decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
+  let prog = process_doc_comment doc pos ref_json prog in
   (decl_id, prog)
 
 let process_container_decl ctx con progress =
@@ -883,6 +917,7 @@ let process_container_decl ctx con progress =
             pos
             id
             prop
+            prop.cv_doc_comment
             prog
         in
         (build_property_decl_json_ref decl_id :: decls, prog))
@@ -898,6 +933,7 @@ let process_container_decl ctx con progress =
             pos
             id
             const
+            const.cc_doc_comment
             prog
         in
         (build_class_const_decl_json_ref decl_id :: decls, prog))
@@ -913,6 +949,7 @@ let process_container_decl ctx con progress =
             pos
             id
             tc
+            tc.c_tconst_doc_comment
             prog
         in
         (build_type_const_decl_json_ref decl_id :: decls, prog))
@@ -928,6 +965,7 @@ let process_container_decl ctx con progress =
             pos
             id
             meth
+            meth.m_doc_comment
             prog
         in
         (build_method_decl_json_ref decl_id :: decls, prog))
@@ -938,7 +976,7 @@ let process_container_decl ctx con progress =
   let (_, prog) = add_container_defn_fact con con_decl_id members prog in
   let ref_json = build_container_decl_json_ref con_type con_decl_id in
   let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
-  prog
+  process_doc_comment con.c_doc_comment con_pos ref_json prog
 
 let process_enum_decl ctx enm progress =
   let (pos, id) = enm.c_name in
@@ -951,10 +989,13 @@ let process_enum_decl ctx enm progress =
         let (decl_id, prog) = add_enumerator_fact enum_id id prog in
         let ref_json = build_enumerator_decl_json_ref decl_id in
         let (_, prog) = add_decl_loc_fact pos ref_json prog in
+        let prog =
+          process_doc_comment enumerator.cc_doc_comment pos ref_json prog
+        in
         (build_id_json decl_id :: decls, prog))
   in
   let (_, prog) = add_enum_defn_fact ctx enm enum_id enumerators prog in
-  prog
+  process_doc_comment enm.c_doc_comment pos enum_decl_ref prog
 
 let process_gconst_decl ctx elem progress =
   let (pos, id) = elem.cst_name in
@@ -966,6 +1007,7 @@ let process_gconst_decl ctx elem progress =
       pos
       id
       elem
+      None
       progress
   in
   prog
@@ -980,6 +1022,7 @@ let process_func_decl ctx elem progress =
       pos
       id
       elem
+      elem.f_doc_comment
       progress
   in
   prog
@@ -1079,6 +1122,7 @@ let build_json ctx symbols files_info =
       ("hack.TraitDefinition.1", progress.resultJson.traitDefinition);
       ("hack.InterfaceDefinition.1", progress.resultJson.interfaceDefinition);
       ("hack.GlobalConstDefinition.1", progress.resultJson.globalConstDefinition);
+      ("hack.DeclarationComment.1", progress.resultJson.declarationComment);
       ("hack.DeclarationLocation.1", progress.resultJson.declarationLocation);
       ("hack.MethodDeclaration.1", progress.resultJson.methodDeclaration);
       ("hack.ClassConstDeclaration.1", progress.resultJson.classConstDeclaration);

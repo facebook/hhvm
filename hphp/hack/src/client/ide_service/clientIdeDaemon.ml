@@ -920,7 +920,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
         let%lwt () =
           write_message
             ~out_fd
-            ~message:ClientIdeMessage.(Response { response; unblocked_time })
+            ~message:
+              ClientIdeMessage.(
+                Response { response; tracking_id; unblocked_time })
         in
         handle_messages { t with state })
   in

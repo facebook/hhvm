@@ -185,17 +185,27 @@ let rpc_internal
     in
     match response with
     | None -> failwith "Could not read response: queue was closed"
-    | Some (Response_wrapper { ClientIdeMessage.response; unblocked_time }) ->
-      (* We don't carry around the tag at runtime that tells us what type of
-      message the response was for. We're relying here on the invariant that
-      responses are provided in the order that requests are sent, and that we're
-      not sending any requests in parallel. This looks unsafe, but it's not
-      adding additional un-safety. The `Response` message here came from
-      `Marshal_tools_lwt.from_fd_with_preamble`, which is inherently unsafe
-      (returns `'a`), and we've just happened to pass around that `'a` rather
-      than coercing its type immediately. *)
-      ref_unblocked_time := unblocked_time;
-      let response = Result.map ~f:Obj.magic response in
+    | Some (Response_wrapper timed_response) ->
+      if
+        not
+          (String.equal
+             tracked_message.ClientIdeMessage.tracking_id
+             timed_response.ClientIdeMessage.tracking_id)
+      then
+        failwith "ClientIdeService desync";
+      (* ClientIdeDaemon invariant that it will send a response for ever message it
+      received, in the order in which it was received. Our invariant that immediately
+      after pushing a message to ClientIdeDaemon then we await a pop of it.
+      Lwt_message_queue invariant that pops are fulfilled in the order in which they
+      were received. These three invariants ensure that the response we pop will
+      always have the same tracking ID as the request we pushed, and hence the
+      above exception will never be raised. *)
+      ref_unblocked_time := timed_response.ClientIdeMessage.unblocked_time;
+      let response =
+        Result.map ~f:Obj.magic timed_response.ClientIdeMessage.response
+      in
+      (* ClientIdeDaemon invariant that if we pushed an 'a request, then we'll
+      get back an 'a. That's why the Obj.magic cast is safe. *)
       (match response with
       | Ok r -> Lwt.return_ok r
       | Error { ClientIdeMessage.medium_user_message; debug_details; _ } ->

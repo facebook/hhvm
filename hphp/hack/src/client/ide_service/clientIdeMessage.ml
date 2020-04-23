@@ -249,6 +249,7 @@ let make_error_data (debug_details : string) ~(stack : string) : error_data =
 
 type 'a timed_response = {
   unblocked_time: float;
+  tracking_id: string;
   response: ('a, error_data) result;
 }
 

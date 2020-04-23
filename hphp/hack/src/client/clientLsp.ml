@@ -1570,6 +1570,8 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
         "Hack",
         Printf.sprintf "Hack IDE: processing %d files." p.total,
         [] )
+    | ClientIdeService.Status.Rpc ->
+      (MessageType.WarningMessage, "Hack", "Hack IDE: working...", [])
     | ClientIdeService.Status.Ready ->
       (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
     | ClientIdeService.Status.Stopped s ->
@@ -1922,9 +1924,14 @@ let ide_rpc
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
-  let _ = env in
+  let progress () = refresh_status ~env ~ide_service:(Some ide_service) in
   let%lwt result =
-    ClientIdeService.rpc !ide_service ~tracking_id ~ref_unblocked_time message
+    ClientIdeService.rpc
+      !ide_service
+      ~tracking_id
+      ~ref_unblocked_time
+      ~progress
+      message
   in
   match result with
   | Ok result -> Lwt.return result
@@ -4617,7 +4624,13 @@ let handle_server_hello ~(state : state ref) : result_telemetry option Lwt.t =
 let handle_client_ide_notification
     ~(notification : ClientIdeMessage.notification) :
     result_telemetry option Lwt.t =
-  (* A goal of these telemetry_log is so test-harness can easily know the state. *)
+  (* In response to ide_service notifications we have three goals:
+  (1) in case of Done_init, we might have to announce the failure to the user
+  (2) in a few other cases, we send telemetry events so that test harnesses
+  get insight into the internal state of the ide_service
+  (3) after every single event, includinng client_ide_notification events,
+  our caller queries the ide_service for what status it wants to display to
+  the user, so these notifications have the goal of triggering that refresh. *)
   match notification with
   | ClientIdeMessage.Done_init (Ok p) ->
     Lsp_helpers.telemetry_log to_stdout "[client-ide] Finished init: ok";
@@ -4633,7 +4646,8 @@ let handle_client_ide_notification
     let%lwt () = announce_ide_failure error_data in
     Lwt.return_none
   | ClientIdeMessage.Processing_files _ ->
-    (* Do nothing; this is handled by `ClientIdeService`. *)
+    (* used solely for triggering a refresh of status by our caller; nothing
+    for us to do here. *)
     Lwt.return_none
   | ClientIdeMessage.Done_processing ->
     Lsp_helpers.telemetry_log

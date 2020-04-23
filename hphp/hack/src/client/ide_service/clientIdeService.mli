@@ -25,6 +25,9 @@ module Status : sig
     | Processing_files of ClientIdeMessage.Processing_files.t
         (** The IDE services are available, but are also in the middle of
         processing files. *)
+    | Rpc
+        (** The IDE services will be available once they're done handling
+        an existing request *)
     | Ready  (** The IDE services are available. *)
     | Stopped of ClientIdeMessage.stopped_reason
         (** The IDE services are not available. *)
@@ -78,6 +81,7 @@ val rpc :
   t ->
   tracking_id:string ->
   ref_unblocked_time:float ref ->
+  progress:(unit -> unit) ->
   'response ClientIdeMessage.t ->
   ('response, Lsp.Error.t) Lwt_result.t
 

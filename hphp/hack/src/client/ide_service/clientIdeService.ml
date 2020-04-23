@@ -13,8 +13,14 @@ module Status = struct
   type t =
     | Initializing
     | Processing_files of ClientIdeMessage.Processing_files.t
+    | Rpc
     | Ready
     | Stopped of ClientIdeMessage.stopped_reason
+
+  let is_ready (t : t) : bool =
+    match t with
+    | Ready -> true
+    | _ -> false
 
   let to_string (t : t) : string =
     match t with
@@ -23,6 +29,7 @@ module Status = struct
       Printf.sprintf
         "Processing_files(%s)"
         (ClientIdeMessage.Processing_files.to_string p)
+    | Rpc -> "Rpc"
     | Ready -> "Ready"
     | Stopped { ClientIdeMessage.short_user_message; _ } ->
       Printf.sprintf "Stopped(%s)" short_user_message
@@ -88,6 +95,7 @@ type notification_emitter = ClientIdeMessage.notification Lwt_message_queue.t
 
 type t = {
   mutable state: state;
+  mutable active_rpc_count: int;
   state_changed_cv: unit Lwt_condition.t;
       (** Used to notify tasks when the state changes, so that they can wait for the
     IDE service to be initialized. *)
@@ -138,6 +146,7 @@ let make (args : ClientIdeMessage.daemon_args) : t =
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   {
     state = Uninitialized;
+    active_rpc_count = 0;
     state_changed_cv = Lwt_condition.create ();
     daemon_handle;
     in_fd;
@@ -152,6 +161,11 @@ onto the daemon's stdin queue, then awaits until [serve] has stuck
 the stdout response from the daemon response onto our [response_emitter].
 The daemon updates [ref_unblocked_time], the time at which the
 daemon starting handling the rpc.
+
+The progress callback will be invoked during this call to rpc, at times
+when the result of [get_status t] might have changed. It's designed
+so the caller of rpc can, in their callback, invoke get_status and display
+some kind of progress message.
 
 Note: it is safe to call this method even while an existing rpc
 is outstanding - we guarantee that results will be delivered in order.
@@ -169,6 +183,7 @@ let rpc
     (t : t)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
+    ~(progress : unit -> unit)
     (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
   let open ClientIdeMessage in
@@ -200,10 +215,27 @@ let rpc
         (* queue closure is normal part of shutdown *)
         failwith "Could not send message (queue was closed)";
 
+      (* If any rpc takes too long, we'll ask clientLsp to refresh status
+      a short time in, and then again when it's done. *)
+      t.active_rpc_count <- t.active_rpc_count + 1;
+      let (pingPromise : unit Lwt.t) =
+        let%lwt () = Lwt_unix.sleep 0.2 in
+        progress ();
+        Lwt.return_unit
+      in
       let%lwt (response : response_wrapper option) =
         Lwt_message_queue.pop t.response_emitter
       in
-      (* Discussion about why this is safe, even if multiple people call rpc:
+      t.active_rpc_count <- t.active_rpc_count - 1;
+      Lwt.cancel pingPromise;
+      if t.active_rpc_count = 0 then progress ();
+
+      (* when might t.active_rpc_count <> 0? well, if the caller did
+      Lwt.pick [rpc t message1, rpc t message2], then active_rpc_count will
+      reach a peak of 2, then when the first rpc has finished it will go dowwn
+      to 1, then when the second rpc has finished it will go down to 0. *)
+
+      (* Discussion about why the following is safe, even if multiple people call rpc:
       Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
       We will therefore push X onto the [messages_to_send] queue, then
       await [Lwt_message_queue.pop] on [response_emitter] for a response to X,
@@ -377,6 +409,7 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
                 t
                 ~tracking_id
                 ~ref_unblocked_time
+                ~progress:(fun () -> ())
                 (ClientIdeMessage.Shutdown ());
               (let%lwt () = Lwt_unix.sleep 5.0 in
                Lwt.return_error
@@ -523,4 +556,8 @@ let get_status (t : t) : Status.t =
     in
     let error_data = { error_data with ClientIdeMessage.debug_details } in
     Status.Stopped error_data
-  | Initialized { status } -> status
+  | Initialized { status } ->
+    if Status.is_ready status && t.active_rpc_count > 0 then
+      Status.Rpc
+    else
+      status

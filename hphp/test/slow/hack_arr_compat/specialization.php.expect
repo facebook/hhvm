@@ -1,0 +1,28 @@
+
+=====================================
+Implicit append:
+Out of bounds array access: invalid index 0
+
+=====================================
+Test 0:
+[2,3]
+[2,3]
+[2,3,"appended"]
+Out of bounds array access: invalid index 3
+Invalid varray key: expected a key of type int, string given
+
+=====================================
+Test 1:
+[2,3,5]
+[2,3]
+[2,3,"appended"]
+Out of bounds array access: invalid index 3
+Invalid varray key: expected a key of type int, string given
+
+=====================================
+Test 2:
+[2,3,5,7]
+varrays do not support unsetting non-end elements
+varrays do not support unsetting non-end elements
+[2,3,5,"oh no"]
+Invalid varray key: expected a key of type int, string given

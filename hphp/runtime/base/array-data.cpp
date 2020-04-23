@@ -46,6 +46,7 @@ namespace HPHP {
 
 const StaticString
   s_InvalidKeysetOperationMsg{"Invalid operation on keyset"},
+  s_VarrayUnsetMsg{"varrays do not support unsetting non-end elements"},
   s_VecUnsetMsg{"Vecs do not support unsetting non-end elements"};
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1106,6 +1107,10 @@ void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
     if (ad->isDictType()) return std::make_pair("dict", "int or string");
     if (ad->isKeysetType()) return std::make_pair("keyset", "int or string");
     assertx(ad->isPHPArrayType());
+    if (RO::EvalHackArrCompatSpecialization) {
+      if (ad->isVArray()) return std::make_pair("varray", "int");
+      if (ad->isDArray()) return std::make_pair("darray", "int or string");
+    }
     return std::make_pair("array", "int or string");
   }();
   SystemLib::throwInvalidArgumentExceptionObject(
@@ -1175,6 +1180,10 @@ void throwInvalidAdditionException(const ArrayData* ad) {
   SystemLib::throwInvalidOperationExceptionObject(
     folly::sformat("{} do not support the + operator", type)
   );
+}
+
+void throwVarrayUnsetException() {
+  SystemLib::throwInvalidOperationExceptionObject(s_VarrayUnsetMsg);
 }
 
 void throwVecUnsetException() {

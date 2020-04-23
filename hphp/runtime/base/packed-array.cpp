@@ -707,6 +707,10 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
     return found(ad);
   }
 
+  if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+    throwOOBArrayKeyException(k, adIn);
+  }
+
   if (size_t(k) == adIn->getSize()) {
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend) &&
         adIn->isVArray()) {
@@ -728,10 +732,14 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
 }
 
 template <typename PromotedFn>
-auto MutableOpStr(ArrayData* adIn, StringData* /*k*/, bool copy,
+auto MutableOpStr(ArrayData* adIn, StringData* k, bool copy,
                   PromotedFn promoted) {
   assertx(PackedArray::checkInvariants(adIn));
   assertx(adIn->isPackedKind());
+
+  if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+    throwInvalidArrayKeyException(k, adIn);
+  }
 
   if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
       adIn->isVArray()) {
@@ -874,14 +882,27 @@ ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPackedKind());
   if (size_t(k) < adIn->m_size) {
+    // After specializing darray and varrays, we can modify varray behavior
+    // to avoid the surprising PHP unset/append semantics described below.
+    if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+      if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
+        auto const ad = copy ? Copy(adIn) : adIn;
+        auto const size = ad->m_size - 1;
+        ad->m_sizeAndPos = size; // pos = 0
+        tvDecRefGen(LvalUncheckedInt(ad, size));
+        return ad;
+      }
+      throwVarrayUnsetException();
+    }
+
     // Escalate to mixed for correctness; unset preserves m_nextKI.
     if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
         adIn->isVArray()) {
       raise_hackarr_compat_notice("varray promoting to darray: removing key");
     }
-    //
-    // TODO(#2606310): if we're removing the /last/ element, we
-    // probably could stay packed, but this needs to be verified.
+    // TODO(#2606310): If you unset the last element of a vector-like PHP array
+    // and then append to it, PHP skips over the unset index! Since PackedArray
+    // doesn't track m_nextKI, we escalate to mixed to match this behavior.
     auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
     return MixedArray::RemoveInt(mixed, k);
   }

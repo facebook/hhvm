@@ -2813,11 +2813,14 @@ void RuntimeOption::Load(
   // Hack Array Compats
 
   // Ensure that implicit varray append and varray promotion flags cannot be
-  // set if HackArrCompatNotices is not set
+  // set if HackArrCompatNotices is not set. Enabling SPecialization disables
+  // these two flags, because it turns these cases into errors.
   RuntimeOption::EvalHackArrCompatCheckVarrayPromote =
+    !RuntimeOption::EvalHackArrCompatSpecialization &&
     RuntimeOption::EvalHackArrCompatCheckVarrayPromote &&
     RuntimeOption::EvalHackArrCompatNotices;
   RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend =
+    !RuntimeOption::EvalHackArrCompatSpecialization &&
     RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
     RuntimeOption::EvalHackArrCompatNotices;
 

@@ -909,6 +909,7 @@ extern const ArrayFunctions g_array_funcs;
 [[noreturn]] void throwMissingElementException(const char* op);
 [[noreturn]] void throwInvalidKeysetOperation();
 [[noreturn]] void throwInvalidAdditionException(const ArrayData* ad);
+[[noreturn]] void throwVarrayUnsetException();
 [[noreturn]] void throwVecUnsetException();
 
 void raiseHackArrCompatAdd();

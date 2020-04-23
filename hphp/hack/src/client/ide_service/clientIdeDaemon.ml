@@ -101,24 +101,28 @@ Here are the algorithms we use that satisfy those invariants.
   (satisfying invariant 4).
 *)
 type istate = {
-  hhi_root: Path.t;
-      (** hhi_root files are written during initialize, deleted at shutdown, and
-  refreshed periodically in case the tmp-cleaner has deleted them. *)
+  icommon: common_state;
+  ifiles: open_files_state;
   naming_table: Naming_table.t;
       (** the forward-naming-table is constructed during initialize and updated
-  during process_changed_files. It stores an in-memory map of FileInfos that
-  have changed since sqlite. When a file is changed on disk, we need this to
-  know which shallow decls to invalidate. Note: while the forward-naming-table
-  is stored here, the reverse-naming-table is instead stored in ctx. *)
+      during process_changed_files. It stores an in-memory map of FileInfos that
+      have changed since sqlite. When a file is changed on disk, we need this to
+      know which shallow decls to invalidate. Note: while the forward-naming-table
+      is stored here, the reverse-naming-table is instead stored in ctx. *)
+}
+
+and common_state = {
+  hhi_root: Path.t;
+      (** hhi_root files are written during initialize, deleted at shutdown, and
+      refreshed periodically in case the tmp-cleaner has deleted them. *)
   sienv: SearchUtils.si_env;
       (** sienv provides autocomplete and find-symbols. It is constructed during
-  initialization and stores a few in-memory structures such as namespace-list,
-  plus in-memory deltas. It is also updated during process_changed_files. *)
+      initialization and stores a few in-memory structures such as namespace-list,
+      plus in-memory deltas. It is also updated during process_changed_files. *)
   popt: ParserOptions.t;  (** parser options *)
   tcopt: TypecheckerOptions.t;  (** typechecker options *)
   local_memory: Provider_backend.local_memory;
       (** Local_memory backend; includes decl caches *)
-  ifiles: open_files_state;
 }
 
 and open_files_state = {
@@ -359,15 +363,17 @@ let initialize
                  ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
       |> Relative_path.Map.of_list
     in
-    let ifiles =
-      {
-        open_files;
-        changed_files_to_process = Path.Set.of_list changed_files;
-        changed_files_denominator = List.length changed_files;
-      }
-    in
     let istate =
-      { hhi_root; naming_table; sienv; popt; tcopt; local_memory; ifiles }
+      {
+        icommon = { hhi_root; sienv; popt; tcopt; local_memory };
+        ifiles =
+          {
+            open_files;
+            changed_files_to_process = Path.Set.of_list changed_files;
+            changed_files_denominator = List.length changed_files;
+          };
+        naming_table;
+      }
     in
     Lwt.return_ok istate
   | Error error_data ->
@@ -380,14 +386,14 @@ let shutdown (state : state) : unit Lwt.t =
   | Failed_to_initialize _ ->
     log "No cleanup to be done";
     Lwt.return_unit
-  | Initialized { hhi_root; _ } ->
+  | Initialized { icommon = { hhi_root; _ }; _ } ->
     let hhi_root = Path.to_string hhi_root in
     log "Removing hhi directory %s..." hhi_root;
     Sys_utils.rm_dir_tree hhi_root;
     Lwt.return_unit
 
 let restore_hhi_root_if_necessary (istate : istate) : istate =
-  if Sys.file_exists (Path.to_string istate.hhi_root) then
+  if Sys.file_exists (Path.to_string istate.icommon.hhi_root) then
     istate
   else
     (* Some processes may clean up the temporary HHI directory we're using.
@@ -396,17 +402,17 @@ let restore_hhi_root_if_necessary (istate : istate) : istate =
     let hhi_root = Hhi.get_hhi_root ~force_write:true () in
     log
       "Old hhi root %s no longer exists. Creating a new hhi root at %s"
-      (Path.to_string istate.hhi_root)
+      (Path.to_string istate.icommon.hhi_root)
       (Path.to_string hhi_root);
     Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
-    { istate with hhi_root }
+    { istate with icommon = { istate.icommon with hhi_root } }
 
 (** An empty ctx with no entries *)
 let make_empty_ctx (istate : istate) : Provider_context.t =
   Provider_context.empty_for_tool
-    ~popt:istate.popt
-    ~tcopt:istate.tcopt
-    ~backend:(Provider_backend.Local_memory istate.local_memory)
+    ~popt:istate.icommon.popt
+    ~tcopt:istate.icommon.tcopt
+    ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
 
 (** Constructs a temporary ctx with just one entry. *)
 let make_singleton_ctx (istate : istate) (entry : Provider_context.entry) :
@@ -639,7 +645,7 @@ let handle_request :
       ServerAutoComplete.go_ctx
         ~ctx
         ~entry
-        ~sienv:istate.sienv
+        ~sienv:istate.icommon.sienv
         ~is_manually_invoked
         ~line:document_location.line
         ~column:document_location.column
@@ -807,16 +813,17 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   in
   let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
     ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
-      ~backend:(Provider_backend.Local_memory istate.local_memory)
-      ~popt:istate.popt
+      ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
+      ~popt:istate.icommon.popt
       ~naming_table:istate.naming_table
-      ~sienv:istate.sienv
+      ~sienv:istate.icommon.sienv
       ~path:next_file
   in
   Option.iter
     old_file_info
     ~f:
-      (Provider_utils.invalidate_local_decl_caches_for_file istate.local_memory);
+      (Provider_utils.invalidate_local_decl_caches_for_file
+         istate.icommon.local_memory);
   Provider_utils.invalidate_tast_cache_of_entries istate.ifiles.open_files;
   let changed_files_denominator =
     if Path.Set.is_empty changed_files_to_process then
@@ -824,10 +831,18 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     else
       istate.ifiles.changed_files_denominator
   in
-  let ifiles =
-    { istate.ifiles with changed_files_to_process; changed_files_denominator }
+  let istate =
+    {
+      naming_table;
+      icommon = { istate.icommon with sienv };
+      ifiles =
+        {
+          istate.ifiles with
+          changed_files_to_process;
+          changed_files_denominator;
+        };
+    }
   in
-  let istate = { istate with naming_table; sienv; ifiles } in
   let%lwt () = write_status ~out_fd (Initialized istate) in
   Lwt.return istate
 

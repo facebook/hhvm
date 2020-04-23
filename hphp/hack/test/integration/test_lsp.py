@@ -5174,6 +5174,16 @@ function unsaved_bar(): string { return "hello"; }
                     "shortMessage": "Hack: initializing",
                 },
             )
+            .ignore_requests(
+                comment="another racy initializing, before hh_server has even responded",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
@@ -5822,6 +5832,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "shortMessage": "Hack: initializing",
                 },
             )
+            .ignore_requests(
+                comment="another racy initialization to ignore, before hh_server has even reported its status",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
@@ -5864,6 +5884,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "type": 2,
                     "actions": [],
                     "message": "Hack IDE: initializing.\nhh_server: ready.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="Another form of initializing to ignore before we've even heard the first peep from hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -5939,6 +5969,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "type": 2,
                     "actions": [],
                     "message": "Hack IDE: initializing.\nhh_server: ready.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="Ignore another form of initializing, from before we've even heard the first peep out of hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.",
                     "shortMessage": "Hack: initializing",
                 },
             )
@@ -6360,6 +6400,26 @@ function aaa(): string {
                     "actions": [{"title": "Restart hh_server"}],
                     "message": "Hack IDE: initializing.\nhh_server: stopped.",
                     "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="another racy initialization, before we've yet heard from hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [],
+                    "message": "Hack IDE: initializing.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="another racy initialization, if HackIDE is done before hh_server has yet sent status",
+                method="window/showStatus",
+                params={
+                    "type": 3,
+                    "actions": [],
+                    "message": "Hack IDE: ready.",
+                    "shortMessage": "Hack",
                 },
             )
             .write_to_disk(

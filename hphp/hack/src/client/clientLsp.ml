@@ -228,9 +228,37 @@ let get_outstanding_request_exn (id : lsp_id) : lsp_request =
   | Some (request, _) -> request
   | None -> failwith "response id doesn't correspond to an outstanding request"
 
-(* head is newest *)
-let hh_server_state : (float * hh_server_state) list ref = ref []
+(** hh_server pushes BUSY_STATUS messages over the persistent connection
+to mark key milestones like "begin typechecking". We handle them in two
+ways. First, update_hh_server_state_if_necessary updates a historical
+record of state transitions over the past two minutes, called both from
+the main message loop and also during rpc progress callbacks. It's
+stored in a global variable because we don't want rpc callbacks to have
+to be part of the state monad. It's kept as an ordered list of states
+over the past two minutes (head is newest) so that if we were busy at
+the time a jsonrpc request arrived on stdin, we can still know what was
+the server state at the time. The second way we handle them is inside
+handle_server_message, called as part of the main message loop, whose
+job is to update the Main_env representation of current hh_server status. *)
+let hh_server_state_log : (float * hh_server_state) list ref = ref []
 
+(** hh_server pushes a different form of its state to the monitor e.g.
+"busy typechecking 1/50 files" or "init is slow due to lack of saved state".
+It does this for the sake of clients who don't have a persistent connection;
+they can ask the monitor what was the latest that hh_server pushed. We use
+this during In_init when we don't have a persistent connection; other
+command-line clients of hh_client do this when they're waiting their turn.
+On idle, i.e. during [Tick] events, we update the following global
+variable which synthesizes our best knowledge about the current hh_server
+state; during Main_loop it's obtained from the latest Main_env representation
+of the current hh_server state, and during In_init it's obtained by
+asking the monitor. We store this in a global value so we can access
+it during rpc callbacks, without requiring them to have the state monad. *)
+let latest_hh_server_status : ShowStatusFB.params option ref = ref None
+
+(** Have we already sent a status message over LSP? If so, and our new
+status will be just the same as the previous one, we won't need to send it
+again. This stores the most recent status that the LSP client has. *)
 let showStatus_outstanding : string ref = ref ""
 
 let log s = Hh_logger.log ("[client-lsp] " ^^ s)
@@ -455,8 +483,8 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
     | (time, state) :: _rest -> [(time, state)]
     (* retain only the first that's older *)
   in
-  hh_server_state :=
-    match !hh_server_state with
+  hh_server_state_log :=
+    match !hh_server_state_log with
     | (prev_time, prev_hh_server_state) :: rest
       when equal_hh_server_state prev_hh_server_state new_hh_server_state ->
       (prev_time, prev_hh_server_state) :: retain rest
@@ -465,7 +493,7 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
 let get_older_hh_server_state (requested_time : float) : hh_server_state =
   (* find the first item which is older than the specified time. *)
   match
-    List.find !hh_server_state ~f:(fun (time, _) -> time <= requested_time)
+    List.find !hh_server_state_log ~f:(fun (time, _) -> time <= requested_time)
   with
   | None -> Hh_server_forgot
   | Some (_, hh_server_state) -> hh_server_state
@@ -1327,7 +1355,7 @@ let do_rageFB (state : state) (ref_unblocked_time : float ref) :
         state
     in
     let server_state_strings =
-      List.map ~f:server_state_to_string !hh_server_state
+      List.map ~f:server_state_to_string !hh_server_state_log
     in
     add_data
       (String.concat
@@ -4304,10 +4332,10 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
 
 (** This function blocks while it attempts to connect to the monitor to read status.
 It normally it gets status quickly, but has a 3s timeout just in case. *)
-let get_hh_server_status (state : state ref) : ShowStatusFB.params option =
+let get_hh_server_status (state : state) : ShowStatusFB.params option =
   let open ShowStatusFB in
   let open ShowMessageRequest in
-  match !state with
+  match state with
   | Pre_init
   | Post_shutdown ->
     None
@@ -4555,31 +4583,29 @@ let merge_statuses
 
 let refresh_status
     ~(env : env)
-    ~(state : state ref)
     ~(ide_service : ClientIdeService.t option ref)
     ~(init_id : string) : unit =
-  if is_pre_init !state || is_post_shutdown !state then
-    (* not allowed to send anything until we've received initialize event *)
-    ()
-  else
-    let hh_server_status = get_hh_server_status state in
-    let client_ide_status =
-      match !ide_service with
-      | None -> None
-      | Some ide_service -> get_client_ide_status ide_service
-    in
-    state := publish_hh_server_status_diagnostic !state hh_server_status;
-    let status = merge_statuses ~hh_server_status ~client_ide_status in
-    Option.iter
-      status
-      ~f:
-        (request_showStatusFB
-           ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
-    ()
+  let client_ide_status =
+    match !ide_service with
+    | None -> None
+    | Some ide_service -> get_client_ide_status ide_service
+  in
+  let status =
+    merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
+  in
+  Option.iter
+    status
+    ~f:
+      (request_showStatusFB
+         ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
+  ()
 
 let handle_tick
     ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :
     result_telemetry option Lwt.t =
+  (* Update the hh_server_status global variable, either by asking the monitor
+  during In_init, or reading it from Main_env: *)
+  latest_hh_server_status := get_hh_server_status !state;
   let%lwt () =
     match !state with
     (* idle tick while waiting for server to complete initialization *)
@@ -4691,7 +4717,11 @@ let main (init_id : string) (env : env) : Exit_status.t Lwt.t =
       update_hh_server_state_if_necessary event;
 
       (* update status immediately if warranted *)
-      refresh_status ~env ~state ~ide_service ~init_id;
+      if not (is_pre_init !state || is_post_shutdown !state) then begin
+        state :=
+          publish_hh_server_status_diagnostic !state !latest_hh_server_status;
+        refresh_status ~env ~ide_service ~init_id
+      end;
 
       (* this is the main handler for each message*)
       let%lwt result_telemetry_opt =

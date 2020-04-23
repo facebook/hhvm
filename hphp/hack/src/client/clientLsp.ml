@@ -1917,9 +1917,11 @@ let rpc_with_retry server_conn ref_unblocked_time command =
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
 let ide_rpc
     (ide_service : ClientIdeService.t)
+    ~(env : env)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
+  let _ = env in
   let%lwt result =
     ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time message
   in
@@ -2267,6 +2269,7 @@ let do_hover
 
 let do_hover_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2275,6 +2278,7 @@ let do_hover_local
   let%lwt infos =
     ide_rpc
       ide_service
+      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Hover document_location)
@@ -2298,6 +2302,7 @@ let do_typeDefinition
 
 let do_typeDefinition_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2306,6 +2311,7 @@ let do_typeDefinition_local
   let%lwt results =
     ide_rpc
       ide_service
+      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Type_definition document_location)
@@ -2348,6 +2354,7 @@ let do_definition
 
 let do_definition_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2356,6 +2363,7 @@ let do_definition_local
   let%lwt results =
     ide_rpc
       ide_service
+      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Definition document_location)
@@ -2591,6 +2599,7 @@ let do_completion_legacy
 
 let do_completion_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2609,7 +2618,7 @@ let do_completion_local
       { ClientIdeMessage.Completion.document_location; is_manually_invoked }
   in
   let%lwt infos =
-    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
   let filename =
     document_location.ClientIdeMessage.file_path |> Path.to_string
@@ -2723,6 +2732,7 @@ let do_completionItemResolve
  *)
 let do_resolve_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2760,7 +2770,7 @@ let do_resolve_local
             }
         in
         let%lwt raw_docblock =
-          ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+          ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
         in
         let documentation =
           docblock_with_ranking_detail raw_docblock ranking_detail
@@ -2789,7 +2799,7 @@ let do_resolve_local
           }
       in
       let%lwt raw_docblock =
-        ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+        ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
       in
       let documentation = docblock_to_markdown raw_docblock in
       Lwt.return { params with Completion.documentation }
@@ -2848,13 +2858,14 @@ let do_workspaceSymbol
 
 let do_workspaceSymbol_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
   let query = params.WorkspaceSymbol.query in
   let request = ClientIdeMessage.Workspace_symbol query in
   let%lwt results =
-    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
@@ -2926,6 +2937,7 @@ let do_documentSymbol
 (* for serverless ide *)
 let do_documentSymbol_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2944,7 +2956,7 @@ let do_documentSymbol_local
   in
   let request = ClientIdeMessage.Document_symbol document_location in
   let%lwt outline =
-    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+    ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
   in
   let converted =
     hack_symbol_tree_to_lsp ~filename ~accu:[] ~container_name:None outline
@@ -3018,6 +3030,7 @@ let do_documentHighlight
 (* Serverless IDE implementation of highlight *)
 let do_highlight_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3026,6 +3039,7 @@ let do_highlight_local
   let%lwt ranges =
     ide_rpc
       ide_service
+      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Document_highlight document_location)
@@ -3072,6 +3086,7 @@ let do_typeCoverageFB
 
 let do_typeCoverage_localFB
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3095,7 +3110,7 @@ let do_typeCoverage_localFB
         { ClientIdeMessage.file_path; ClientIdeMessage.file_contents }
     in
     let%lwt result =
-      ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
+      ide_rpc ide_service ~env ~tracking_id ~ref_unblocked_time request
     in
     let (results, counts) = result in
     let formatted =
@@ -3208,6 +3223,7 @@ let do_signatureHelp
 (* Serverless IDE version of signature help *)
 let do_signatureHelp_local
     (ide_service : ClientIdeService.t)
+    (env : env)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3216,6 +3232,7 @@ let do_signatureHelp_local
   let%lwt signatures =
     ide_rpc
       ide_service
+      ~env
       ~tracking_id
       ~ref_unblocked_time
       (ClientIdeMessage.Signature_help document_location)
@@ -3687,6 +3704,7 @@ let cancel_if_stale
 let handle_editor_buffer_message
     ~(state : state)
     ~(ide_service : ClientIdeService.t option)
+    ~(env : env)
     ~(metadata : incoming_metadata)
     ~(ref_unblocked_time : float ref)
     ~(message : lsp_message) : unit Lwt.t =
@@ -3731,6 +3749,7 @@ let handle_editor_buffer_message
       let%lwt () =
         ide_rpc
           ide_service
+          ~env
           ~tracking_id:metadata.tracking_id
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_opened { file_path; file_contents })
@@ -3744,6 +3763,7 @@ let handle_editor_buffer_message
       let%lwt () =
         ide_rpc
           ide_service
+          ~env
           ~tracking_id:metadata.tracking_id
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_changed { Ide_file_changed.file_path })
@@ -3756,6 +3776,7 @@ let handle_editor_buffer_message
       let%lwt () =
         ide_rpc
           ide_service
+          ~env
           ~tracking_id:metadata.tracking_id
           ~ref_unblocked_time:ref_ide_unblocked_time
           ClientIdeMessage.(Ide_file_closed file_path)
@@ -3792,6 +3813,7 @@ let handle_editor_buffer_message
 
 let set_verbose_to_file
     ~(ide_service : ClientIdeService.t option)
+    ~(env : env)
     ~(tracking_id : string)
     (value : bool) : unit =
   verbose_to_file := value;
@@ -3805,6 +3827,7 @@ let set_verbose_to_file
     let (promise : unit Lwt.t) =
       ide_rpc
         ide_service
+        ~env
         ~tracking_id
         ~ref_unblocked_time
         (ClientIdeMessage.Verbose_to_file !verbose_to_file)
@@ -3868,7 +3891,7 @@ let handle_client_message
         | SetTraceNotification.Verbose -> true
         | SetTraceNotification.Off -> false
       in
-      set_verbose_to_file ~ide_service ~tracking_id value;
+      set_verbose_to_file ~ide_service ~env ~tracking_id value;
       Lwt.return_none
     (* test entrypoint: shutdown client_ide_service *)
     | ( _,
@@ -3935,7 +3958,7 @@ let handle_client_message
         | Initialize.Off -> ()
         | Initialize.Messages
         | Initialize.Verbose ->
-          set_verbose_to_file ~ide_service ~tracking_id true
+          set_verbose_to_file ~ide_service ~env ~tracking_id true
       end;
       let result = do_initialize ~env root in
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
@@ -4004,6 +4027,7 @@ let handle_client_message
       let%lwt () =
         ide_rpc
           ide_service
+          ~env
           ~tracking_id
           ~ref_unblocked_time
           ClientIdeMessage.(Disk_files_changed changes)
@@ -4015,6 +4039,7 @@ let handle_client_message
       let%lwt result =
         do_completion_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4034,6 +4059,7 @@ let handle_client_message
       let%lwt result =
         do_resolve_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4051,6 +4077,7 @@ let handle_client_message
       let%lwt result =
         do_highlight_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4069,6 +4096,7 @@ let handle_client_message
       let%lwt result =
         do_typeCoverage_localFB
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4089,6 +4117,7 @@ let handle_client_message
       let%lwt result =
         do_hover_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4107,6 +4136,7 @@ let handle_client_message
       let%lwt result =
         do_documentSymbol_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4123,6 +4153,7 @@ let handle_client_message
       let%lwt result =
         do_workspaceSymbol_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           params
@@ -4138,6 +4169,7 @@ let handle_client_message
       let%lwt result =
         do_definition_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4152,6 +4184,7 @@ let handle_client_message
       let%lwt result =
         do_typeDefinition_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4169,6 +4202,7 @@ let handle_client_message
       let%lwt result =
         do_signatureHelp_local
           ide_service
+          env
           tracking_id
           ref_unblocked_time
           editor_open_files
@@ -4219,6 +4253,7 @@ let handle_client_message
         handle_editor_buffer_message
           ~state:!state
           ~ide_service
+          ~env
           ~metadata
           ~ref_unblocked_time
           ~message

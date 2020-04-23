@@ -1999,16 +1999,12 @@ let do_resolve_local
   in
   Lwt.return result
 
-let do_workspaceSymbol
-    (conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
-  let open WorkspaceSymbol in
+let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
   let open SearchUtils in
-  let query = params.query in
-  let query_type = "" in
-  let command = ServerCommandTypes.SEARCH (query, query_type) in
-  let%lwt results = rpc conn ref_unblocked_time command in
+  (* Hack sometimes gives us back items with an empty path, by which it
+  intends "whichever path you asked me about". That would be meaningless
+  here. If it does, then it'll pick up our default path (also empty),
+  which will throw and go into our telemetry. That's the best we can do. *)
   let hack_to_lsp_kind = function
     | SearchUtils.SI_Class -> SymbolInformation.Class
     | SearchUtils.SI_Interface -> SymbolInformation.Interface
@@ -2035,17 +2031,33 @@ let do_workspaceSymbol
     | SearchUtils.SI_Unknown ->
       failwith "Unknown symbol kind"
   in
-  (* Hack sometimes gives us back items with an empty path, by which it       *)
-  (* intends "whichever path you asked me about". That would be meaningless   *)
-  (* here. If it does, then it'll pick up our default path (also empty),      *)
-  (* which will throw and go into our telemetry. That's the best we can do.   *)
-  let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
-    {
-      SymbolInformation.name = Utils.strip_ns symbol.name;
-      kind = hack_to_lsp_kind symbol.result_type;
-      location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
-      containerName = None;
-    }
+  {
+    SymbolInformation.name = Utils.strip_ns symbol.name;
+    kind = hack_to_lsp_kind symbol.result_type;
+    location = hack_pos_to_lsp_location symbol.pos ~default_path:"";
+    containerName = None;
+  }
+
+let do_workspaceSymbol
+    (conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
+  let query_type = "" in
+  let command =
+    ServerCommandTypes.SEARCH (params.WorkspaceSymbol.query, query_type)
+  in
+  let%lwt results = rpc conn ref_unblocked_time command in
+  Lwt.return (List.map results ~f:hack_symbol_to_lsp)
+
+let do_workspaceSymbol_local
+    (ide_service : ClientIdeService.t)
+    (tracking_id : string)
+    (ref_unblocked_time : float ref)
+    (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
+  let query = params.WorkspaceSymbol.query in
+  let request = ClientIdeMessage.Workspace_symbol query in
+  let%lwt results =
+    ide_rpc ide_service ~tracking_id ~ref_unblocked_time request
   in
   Lwt.return (List.map results ~f:hack_symbol_to_lsp)
 
@@ -3828,6 +3840,21 @@ let handle_client_message
         ~powered_by:Serverless_ide
         id
         (DocumentSymbolResult result);
+      Lwt.return_some
+        { result_count = List.length result; result_extra_telemetry = None }
+    | (_, Some ide_service, RequestMessage (id, WorkspaceSymbolRequest params))
+      ->
+      let%lwt result =
+        do_workspaceSymbol_local
+          ide_service
+          tracking_id
+          ref_unblocked_time
+          params
+      in
+      respond_jsonrpc
+        ~powered_by:Serverless_ide
+        id
+        (WorkspaceSymbolResult result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }
     | (_, Some ide_service, RequestMessage (id, DefinitionRequest params)) ->

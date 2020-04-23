@@ -924,6 +924,18 @@ let handle_request :
           ServerColorFile.go_quarantined ~ctx ~entry)
     in
     Lwt.return (state, Ok result)
+  (* Workspace Symbol *)
+  | (Initialized istate, Workspace_symbol query) ->
+    (* Note: needs reverse-naming-table, hence only works in initialized
+    state: for top-level queries it needs reverse-naming-table to look
+    up positions; for member queries "Foo::bar" it needs it to fetch the
+    decl for Foo. *)
+    (* Note: we intentionally don't give results from unsaved files *)
+    let ctx = make_empty_ctx istate in
+    let result =
+      ServerSearch.go ctx query ~kind_filter:"" istate.icommon.sienv
+    in
+    Lwt.return (state, Ok result)
 
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   match state with

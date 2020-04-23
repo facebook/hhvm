@@ -150,6 +150,7 @@ type _ t =
       Document_highlight.request
       -> Document_highlight.result t
   | Document_symbol : Document_symbol.request -> Document_symbol.result t
+  | Workspace_symbol : string -> SearchUtils.result t
   | Type_definition : Type_definition.request -> Type_definition.result t
   | Type_coverage : Type_coverage.request -> Type_coverage.result t
   | Signature_help : Signature_help.request -> Signature_help.result t
@@ -189,6 +190,7 @@ let t_to_string : type a. a t -> string = function
     Printf.sprintf "Document_highlight(%s)" (Path.to_string file_path)
   | Document_symbol { file_path; _ } ->
     Printf.sprintf "Document_symbol(%s)" (Path.to_string file_path)
+  | Workspace_symbol query -> Printf.sprintf "Workspace_symbol(%s)" query
   | Type_definition { file_path; _ } ->
     Printf.sprintf "Type_definition(%s)" (Path.to_string file_path)
   | Type_coverage { file_path; _ } ->

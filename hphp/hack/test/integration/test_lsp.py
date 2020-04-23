@@ -6447,3 +6447,57 @@ function aaa(): string {
         )
 
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_workspace_symbol(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables["root_path"] = self.test_driver.repo_dir
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_workspace_symbol"), use_serverless_ide=True
+            )
+            .request(
+                line=line(),
+                comment="workspace symbol call, global, powered by sqlite (generated during serverless-ide-init)",
+                method="workspace/symbol",
+                params={"query": "TakesString"},
+                result=[
+                    {
+                        "name": "TakesString",
+                        "kind": 5,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 36, "character": 6},
+                                "end": {"line": 36, "character": 17},
+                            },
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(
+                line=line(),
+                comment="workspace symbol call, member (derived from naming-table)",
+                method="workspace/symbol",
+                params={"query": "TakesString::"},
+                result=[
+                    {
+                        "name": "__construct",
+                        "kind": 6,
+                        "location": {
+                            "uri": "file://${root_path}/definition.php",
+                            "range": {
+                                "start": {"line": 37, "character": 18},
+                                "end": {"line": 37, "character": 29},
+                            },
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

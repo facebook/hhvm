@@ -30,10 +30,11 @@ let result_to_json res =
 
 let re_colon_colon = Str.regexp "::"
 
-let go ctx query_text type_ (sienv : SearchUtils.si_env) : SearchUtils.result =
+let go ctx query_text ~(kind_filter : string) (sienv : SearchUtils.si_env) :
+    SearchUtils.result =
   let max_results = 100 in
   let start_time = Unix.gettimeofday () in
-  let kind_filter = SearchUtils.string_to_kind type_ in
+  let kind_filter = SearchUtils.string_to_kind kind_filter in
   let context = Some SearchUtils.Ac_workspace_symbol in
   let results =
     (* If query contains "::", search class methods instead of top level definitions *)

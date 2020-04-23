@@ -1045,7 +1045,7 @@ void ExternCompiler::stop() {
     Logger::FWarning(
       "ExternCompiler: terminated by signal {}{}",
       code,
-      WCOREDUMP(status) ? " (code dumped)" : ""
+      WCOREDUMP(status) ? " (core dumped)" : ""
     );
   }
 }

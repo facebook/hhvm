@@ -9,7 +9,21 @@
 
 open Hh_prelude
 
-type message = ClientRequest : 'a ClientIdeMessage.tracked_t -> message
+(** This is the result type from attempting to load saved-state. *)
+type load_saved_state_result =
+  ( Naming_table.t * Saved_state_loader.changed_files,
+    ClientIdeMessage.stopped_reason )
+  result
+
+(** These are messages on ClientIdeDaemon's internal message-queue *)
+type message =
+  | ClientRequest : 'a ClientIdeMessage.tracked_t -> message
+      (** ClientRequest came from ClientIdeService over stdin;
+      it expects a response. *)
+  | LoadedState : load_saved_state_result -> message
+      (** LoadedState is posted from within ClientIdeDaemon itself once
+      our attempt at loading saved-state has finished; it's picked
+      up by handle_messages. *)
 
 type message_queue = message Lwt_message_queue.t
 
@@ -111,8 +125,13 @@ type istate = {
       is stored here, the reverse-naming-table is instead stored in ctx. *)
 }
 
+(** dstate, "during_init state", is the state the daemon after it has received an
+init message (and has parsed config files to get popt/tcopt, has initialized
+glean, as written out hhi files) but before it has loaded saved-state or processed
+file updates. *)
 and dstate = {
   start_time: float;
+      (** When did we kick off the attempt to load saved-state? *)
   dcommon: common_state;
   dfiles: open_files_state;
 }
@@ -149,7 +168,7 @@ type state =
   | Pending_init  (** We haven't yet received init request *)
   | During_init of dstate  (** We're working on the init request *)
   | Initialized of istate  (** Finished work on init request *)
-  | Failed_init of ClientIdeMessage.error_data  (** Failed request *)
+  | Failed_init of ClientIdeMessage.stopped_reason  (** Failed request *)
 
 type t = {
   message_queue: message_queue;
@@ -174,9 +193,11 @@ let state_to_log_string (state : state) : string =
 
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
+let log_debug s = Hh_logger.debug ("[ide-daemon] " ^^ s)
+
 let log_error s = Hh_logger.error ("[ide-daemon] " ^^ s)
 
-let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
+let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
   `stderr`; this is in addition to that. *)
   let client_ide_log_fn = ServerFiles.client_ide_log root in
@@ -189,27 +210,41 @@ let set_up_hh_logger_for_client_ide_service ~(root : Path.t) : unit =
     (Out_channel.create client_ide_log_fn ~append:true);
   log "Starting client IDE service at %s" client_ide_log_fn
 
+let write_message
+    ~(out_fd : Lwt_unix.file_descr)
+    ~(message : ClientIdeMessage.message_from_daemon) : unit Lwt.t =
+  let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
+  Lwt.return_unit
+
 let load_saved_state
     (ctx : Provider_context.t)
     ~(root : Path.t)
-    ~(naming_table_saved_state_path : Path.t option) :
-    ( Naming_table.t * Saved_state_loader.changed_files,
-      ClientIdeMessage.error_data )
-    Lwt_result.t =
+    ~(naming_table_load_info :
+       ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
+       option) : load_saved_state_result Lwt.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
       let%lwt result =
-        match naming_table_saved_state_path with
-        | Some naming_table_saved_state_path ->
+        match naming_table_load_info with
+        | Some naming_table_load_info ->
+          let open ClientIdeMessage.Initialize_from_saved_state in
+          (* tests may wish to pretend there's a delay *)
+          let%lwt () =
+            if naming_table_load_info.test_delay > 0.0 then
+              Lwt_unix.sleep naming_table_load_info.test_delay
+            else
+              Lwt.return_unit
+          in
           (* Assume that there are no changed files on disk if we're getting
           passed the path to the saved-state directly, and that the saved-state
           corresponds to the current state of the world. *)
           let changed_files = [] in
+          (* Test hook, for tests that want to get messages in before init *)
           Lwt.return_ok
             ( {
                 Saved_state_loader.Naming_table_saved_state_info
-                .naming_table_path = naming_table_saved_state_path;
+                .naming_table_path = naming_table_load_info.path;
               },
               changed_files )
         | None ->
@@ -252,12 +287,12 @@ let load_saved_state
                 Saved_state_loader.debug_details_of_error load_error;
               is_actionable = Saved_state_loader.is_error_actionable load_error;
             }
-    with e ->
-      let stack = e |> Exception.wrap |> Exception.get_backtrace_string in
-      let prefix = "Uncaught exception in client IDE services" in
-      Hh_logger.exc e ~prefix ~stack;
-      let debug_details = prefix ^ ": " ^ Exn.to_string e in
-      Lwt.return_error (ClientIdeMessage.make_error_data debug_details ~stack)
+    with exn ->
+      let exn = Exception.wrap exn in
+      let stack = Exception.get_backtrace_string exn |> Exception.clean_stack in
+      let debug_details = "uncaught: " ^ Exception.get_ctor_string exn in
+      log_error "%s\n%s" debug_details stack;
+      Lwt.return_error (ClientIdeMessage.stopped_for_bug ~debug_details ~stack)
   in
   Lwt.return result
 
@@ -266,30 +301,63 @@ let log_startup_time (component : string) (start_time : float) : float =
   HackEventLogger.serverless_ide_startup ~component ~start_time;
   now
 
-let initialize
-    ({
-       ClientIdeMessage.Initialize_from_saved_state.root;
-       naming_table_saved_state_path;
-       use_ranked_autocomplete;
-       config;
-       open_files;
-     } :
-      ClientIdeMessage.Initialize_from_saved_state.t) :
-    (istate, ClientIdeMessage.error_data) Lwt_result.t =
-  let start_time = Unix.gettimeofday () in
-  HackEventLogger.serverless_ide_set_root root;
-  set_up_hh_logger_for_client_ide_service ~root;
+let restore_hhi_root_if_necessary (istate : istate) : istate =
+  if Sys.file_exists (Path.to_string istate.icommon.hhi_root) then
+    istate
+  else
+    (* Some processes may clean up the temporary HHI directory we're using.
+    Assume that such a process has deleted the directory, and re-write the HHI
+    files to disk. *)
+    let hhi_root = Hhi.get_hhi_root ~force_write:true () in
+    log
+      "Old hhi root %s no longer exists. Creating a new hhi root at %s"
+      (Path.to_string istate.icommon.hhi_root)
+      (Path.to_string hhi_root);
+    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
+    { istate with icommon = { istate.icommon with hhi_root } }
 
-  Relative_path.set_path_prefix Relative_path.Root root;
+(** Deletes the hhi files we've created. *)
+let remove_hhi (state : state) : unit =
+  match state with
+  | Pending_init
+  | Failed_init _ ->
+    ()
+  | During_init { dcommon = { hhi_root; _ }; _ }
+  | Initialized { icommon = { hhi_root; _ }; _ } ->
+    let hhi_root = Path.to_string hhi_root in
+    log "Removing hhi directory %s..." hhi_root;
+    (try Sys_utils.rm_dir_tree hhi_root
+     with e ->
+       let e = Exception.wrap e in
+       let message = "remove_hhi: " ^ Exception.get_ctor_string e in
+       let stack = Exception.get_backtrace_string e in
+       HackEventLogger.serverless_ide_crash ~message ~stack;
+       ())
+
+(** initialize1 is called by handle_request upon receipt of an "init"
+message from the client. It is synchronous. It sets up global variables and
+glean. The remainder of init work will happen after we return... our caller
+handle_request will kick off async work to load saved-state, and once done
+it will stick a LoadedState message into the queue, and handle_one_message
+will subsequently pick up that message and call [initialize2]. *)
+let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
+    dstate =
+  log_debug "initialize1";
+  let open ClientIdeMessage.Initialize_from_saved_state in
+  let start_time = Unix.gettimeofday () in
+  HackEventLogger.serverless_ide_set_root param.root;
+  set_up_hh_logger_for_client_ide_service param.root;
+
+  Relative_path.set_path_prefix Relative_path.Root param.root;
   let hhi_root = Hhi.get_hhi_root () in
   log "Extracted hhi files to directory %s" (Path.to_string hhi_root);
   Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
   Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
 
   let server_args =
-    ServerArgs.default_options_with_check_mode ~root:(Path.to_string root)
+    ServerArgs.default_options_with_check_mode ~root:(Path.to_string param.root)
   in
-  let server_args = ServerArgs.set_config server_args config in
+  let server_args = ServerArgs.set_config server_args param.config in
   let (server_config, server_local_config) =
     ServerConfig.load ~silent:true ServerConfig.filename server_args
   in
@@ -343,82 +411,92 @@ let initialize
     {
       sienv with
       SearchUtils.sie_log_timings = true;
-      SearchUtils.use_ranked_autocomplete;
+      SearchUtils.use_ranked_autocomplete = param.use_ranked_autocomplete;
     }
   in
+  if param.use_ranked_autocomplete then AutocompleteRankService.initialize ();
   let start_time = log_startup_time "symbol_index" start_time in
-  if use_ranked_autocomplete then AutocompleteRankService.initialize ();
-  let%lwt load_state_result =
-    load_saved_state
-      (Provider_context.empty_for_tool
-         ~popt
-         ~tcopt
-         ~backend:(Provider_backend.Local_memory local_memory))
-      ~root
-      ~naming_table_saved_state_path
+  (* We only ever serve requests on files that are open. That's why our caller
+  passes an initial list of open files, the ones already open in the editor
+  at the time we were launched. We don't actually care about their contents
+  at this stage, since updated contents will be delivered upon each request.
+  (and indeed it's pointless to waste time reading existing contents off disk).
+  All we care is that every open file is listed in 'open_files'. *)
+  let open_files =
+    param.open_files
+    |> List.map ~f:(fun path ->
+           path |> Path.to_string |> Relative_path.create_detect_prefix)
+    |> List.map ~f:(fun path ->
+           ( path,
+             Provider_context.make_entry
+               ~path
+               ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
+    |> Relative_path.Map.of_list
   in
-  let _ = log_startup_time "saved_state" start_time in
+  log_debug "initialize1.done";
+  {
+    start_time;
+    dcommon = { hhi_root; sienv; popt; tcopt; local_memory };
+    dfiles =
+      {
+        open_files;
+        changed_files_to_process = Path.Set.empty;
+        changed_files_denominator = 0;
+      };
+  }
+
+(** initialize2 is called by handle_one_message upon receipt of a
+[LoadedState] message. It sends the appropriate message on to the
+client, and transitions into either [Initialized] or [Failed_init]
+state. *)
+let initialize2
+    (out_fd : Lwt_unix.file_descr)
+    (dstate : dstate)
+    (load_state_result : load_saved_state_result) : state Lwt.t =
+  let (_ : float) = log_startup_time "saved_state" dstate.start_time in
+  log_debug "initialize2";
   match load_state_result with
   | Ok (naming_table, changed_files) ->
-    (* We only ever serve requests on files that are open. That's why our caller
-    passes an initial list of open files, the ones already open in the editor
-    at the time we were launched. We don't actually care about their contents
-    at this stage, since updated contents will be delivered upon each request.
-    (and indeed it's pointless to waste time reading existing contents off disk).
-    All we care is that every open file is listed in 'open_files'. *)
-    let open_files =
-      open_files
-      |> List.map ~f:(fun path ->
-             path |> Path.to_string |> Relative_path.create_detect_prefix)
-      |> List.map ~f:(fun path ->
-             ( path,
-               Provider_context.make_entry
-                 ~path
-                 ~contents:Provider_context.Raise_exn_on_attempt_to_read ))
-      |> Relative_path.Map.of_list
+    let changed_files_to_process =
+      Path.Set.union
+        dstate.dfiles.changed_files_to_process
+        (Path.Set.of_list changed_files)
+    in
+    let changed_files_denominator =
+      Path.Set.cardinal changed_files_to_process
+    in
+    let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
+    let%lwt () =
+      write_message
+        ~out_fd
+        ~message:
+          (ClientIdeMessage.Notification (ClientIdeMessage.Done_init (Ok p)))
     in
     let istate =
       {
-        icommon = { hhi_root; sienv; popt; tcopt; local_memory };
+        naming_table;
+        icommon = dstate.dcommon;
         ifiles =
           {
-            open_files;
-            changed_files_to_process = Path.Set.of_list changed_files;
-            changed_files_denominator = List.length changed_files;
+            open_files = dstate.dfiles.open_files;
+            changed_files_to_process;
+            changed_files_denominator;
           };
-        naming_table;
       }
     in
-    Lwt.return_ok istate
-  | Error error_data ->
-    log "Serverless IDE failed to initialize";
-    Lwt.return_error error_data
-
-let remove_hhi (state : state) : unit =
-  match state with
-  | Pending_init
-  | Failed_init _ ->
-    ()
-  | During_init { dcommon = { hhi_root; _ }; _ }
-  | Initialized { icommon = { hhi_root; _ }; _ } ->
-    let hhi_root = Path.to_string hhi_root in
-    log "Removing hhi directory %s..." hhi_root;
-    Sys_utils.rm_dir_tree hhi_root
-
-let restore_hhi_root_if_necessary (istate : istate) : istate =
-  if Sys.file_exists (Path.to_string istate.icommon.hhi_root) then
-    istate
-  else
-    (* Some processes may clean up the temporary HHI directory we're using.
-    Assume that such a process has deleted the directory, and re-write the HHI
-    files to disk. *)
-    let hhi_root = Hhi.get_hhi_root ~force_write:true () in
-    log
-      "Old hhi root %s no longer exists. Creating a new hhi root at %s"
-      (Path.to_string istate.icommon.hhi_root)
-      (Path.to_string hhi_root);
-    Relative_path.set_path_prefix Relative_path.Hhi hhi_root;
-    { istate with icommon = { istate.icommon with hhi_root } }
+    log_debug "initialize2.done";
+    Lwt.return (Initialized istate)
+  | Error edata ->
+    log_debug "initialize2.error";
+    let%lwt () =
+      write_message
+        ~out_fd
+        ~message:
+          (ClientIdeMessage.Notification
+             (ClientIdeMessage.Done_init (Error edata)))
+    in
+    remove_hhi (During_init dstate);
+    Lwt.return (Failed_init edata)
 
 (** An empty ctx with no entries *)
 let make_empty_ctx (istate : istate) : Provider_context.t =
@@ -528,22 +606,37 @@ let update_file
   let ctx = make_singleton_ctx istate entry in
   (Initialized { istate with ifiles }, ctx, entry)
 
-(** handle_message invariants: Messages are only ever handled serially; we never
+(** Simple helper. It updates the [ifiles] or [dfiles] member of Initialized
+or During_init states, respectively. Will throw if you call it on any other
+state. *)
+let update_state_files (state : state) (files : open_files_state) : state =
+  match state with
+  | During_init dstate -> During_init { dstate with dfiles = files }
+  | Initialized istate -> Initialized { istate with ifiles = files }
+  | _ -> failwith ("Update_state_files: unexpected " ^ state_to_log_string state)
+
+(** handle_request invariants: Messages are only ever handled serially; we never
 handle one message while another is being handled. It is a bug if the client sends
 anything other than [Initialize_from_saved_state] as its first message. Upon
-receipt+processing of this we transition from [Initializing] to either [Initialized]
-or [Failed_to_initialize], and never thereafter transition state. Processing might
-take time, but we never attempt to handle any other messages during processing. *)
+receipt+processing of this we transition from [Pre_init] to [During_init]
+and kick off some async work to load saved state. During this async work, i.e.
+during [During_init], we are able to handle a few requests but will reject
+others. Our caller [handle_one_message] is actually the one that transitions
+us from [During_init] to either [Failed_init] or [Initialized]. Once in one
+of those states, we never thereafter transition state. *)
 let handle_request :
     type a.
+    message_queue ->
     state ->
     string ->
     a ClientIdeMessage.t ->
-    (state * (a, ClientIdeMessage.error_data) result) Lwt.t =
- fun state _tracking_id message ->
+    (state * (a, Lsp.Error.t) result) Lwt.t =
+ fun message_queue state _tracking_id message ->
   let open ClientIdeMessage in
   match (state, message) with
+  (***********************************************************)
   (************************* HANDLED IN ANY STATE ************)
+  (***********************************************************)
   | (_, Verbose verbose) ->
     if verbose then
       Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
@@ -553,64 +646,72 @@ let handle_request :
   | (_, Shutdown ()) ->
     remove_hhi state;
     Lwt.return (state, Ok ())
+  (***********************************************************)
   (************************* INITIALIZATION ******************)
+  (***********************************************************)
   | (Pending_init, Initialize_from_saved_state param) ->
-    let%lwt result = initialize param in
+    (* Invariant: no message will be sent to us prior to this request,
+    and we must send no message until we've sent this response. *)
+    let open Initialize_from_saved_state in
     begin
-      match result with
-      | Ok istate ->
-        let results =
+      try
+        let dstate = initialize1 param in
+        (* We're going to kick off the asynchronous part of initializing now.
+        Once it's done, it will appear as a LoadedState message on the queue. *)
+        Lwt.async (fun () ->
+            (* following method never throws *)
+            let%lwt result =
+              load_saved_state
+                (Provider_context.empty_for_tool
+                   ~popt:dstate.dcommon.popt
+                   ~tcopt:dstate.dcommon.tcopt
+                   ~backend:
+                     (Provider_backend.Local_memory dstate.dcommon.local_memory))
+                ~root:param.root
+                ~naming_table_load_info:param.naming_table_load_info
+            in
+            (* if the following push fails, that must be because the queues
+            have been shut down, in which case there's nothing to do. *)
+            let (_succeeded : bool) =
+              Lwt_message_queue.push message_queue (LoadedState result)
+            in
+            Lwt.return_unit);
+        Lwt.return (During_init dstate, Ok ())
+      with exn ->
+        let exn = Exception.wrap exn in
+        let debug_details =
+          "initialize1 failed: " ^ Exception.get_ctor_string exn
+        in
+        let stack =
+          Exception.get_backtrace_string exn |> Exception.clean_stack
+        in
+        let e =
           {
-            ClientIdeMessage.Initialize_from_saved_state
-            .num_changed_files_to_process =
-              Path.Set.cardinal istate.ifiles.changed_files_to_process;
+            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+            message = debug_details;
+            data = Some (Hh_json.JSON_Object [("stack", Hh_json.string_ stack)]);
           }
         in
-        let _TODO_dummy_to_silence_unused_warning =
-          During_init
-            {
-              dcommon = istate.icommon;
-              start_time = 0.;
-              dfiles = istate.ifiles;
-            }
+        let stopped_reason =
+          ClientIdeMessage.stopped_for_bug ~debug_details ~stack
         in
-        Lwt.return (Initialized istate, Ok results)
-      | Error error_data -> Lwt.return (Failed_init error_data, Error error_data)
+        (* Our caller has an exception handler. But we must handle this ourselves
+        to change state to Failed_init; our caller's handler doesn't change state. *)
+        (* TODO: remove_hhi *)
+        Lwt.return (Failed_init stopped_reason, Error e)
     end
-  | (Initialized _, Initialize_from_saved_state _) ->
-    let error_data =
-      ClientIdeMessage.make_error_data
-        "Tried to initialize when already initialized"
-        ~stack:(Exception.get_current_callstack_string 100)
-    in
-    Lwt.return (state, Error error_data)
-  (************************* UNABLE TO HANDLE ****************)
-  | ((Pending_init | During_init _), _) ->
-    let debug_details =
-      Printf.sprintf
-        "Unexpected message. state=%s message=%s"
-        (state_to_log_string state)
-        (ClientIdeMessage.t_to_string message)
-    in
-    let stack = Exception.get_current_callstack_string 99 in
-    let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
-    Lwt.return (state, Error error_data)
-  | (Failed_init error_data, _) ->
-    let error_data =
-      {
-        error_data with
-        debug_details = "Failed to initialize: " ^ error_data.debug_details;
-      }
-    in
-    Lwt.return (state, Error error_data)
-  (************************* NORMAL HANDLING ****************)
-  | (Initialized istate, Disk_files_changed paths) ->
-    (* Only invalidate when a hack file changes *)
+  | (_, Initialize_from_saved_state _) ->
+    failwith ("Unexpected init in " ^ state_to_log_string state)
+  (***********************************************************)
+  (************************* CAN HANDLE DURING INIT **********)
+  (***********************************************************)
+  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
+      Disk_files_changed paths ) ->
     let paths =
       List.filter paths ~f:(fun path ->
           path |> Path.to_string |> FindUtils.file_filter)
     in
-    let files = istate.ifiles in
+    (* That filtered-out non-hack files *)
     let files =
       {
         files with
@@ -623,26 +724,61 @@ let handle_request :
           files.changed_files_denominator + List.length paths;
       }
     in
-    let state = Initialized { istate with ifiles = files } in
-    Lwt.return (state, Ok ())
-  | (Initialized istate, Ide_file_closed file_path) ->
+    Lwt.return (update_state_files state files, Ok ())
+  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
+      Ide_file_closed file_path ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let ifiles = close_file istate.ifiles path in
-    Lwt.return (Initialized { istate with ifiles }, Ok ())
-  | (Initialized istate, Ide_file_opened { file_path; file_contents }) ->
+    let files = close_file files path in
+    Lwt.return (update_state_files state files, Ok ())
+  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
+      Ide_file_opened { file_path; file_contents } ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let ifiles = open_file istate.ifiles path file_contents in
-    Lwt.return (Initialized { istate with ifiles }, Ok ())
-  | (Initialized istate, Ide_file_changed { Ide_file_changed.file_path; _ }) ->
+    let files = open_file files path file_contents in
+    Lwt.return (update_state_files state files, Ok ())
+  | ( (During_init { dfiles = files; _ } | Initialized { ifiles = files; _ }),
+      Ide_file_changed { Ide_file_changed.file_path; _ } ) ->
     let path =
       file_path |> Path.to_string |> Relative_path.create_detect_prefix
     in
-    let ifiles = change_file istate.ifiles path in
-    Lwt.return (Initialized { istate with ifiles }, Ok ())
+    let files = change_file files path in
+    Lwt.return (update_state_files state files, Ok ())
+  (***********************************************************)
+  (************************* UNABLE TO HANDLE ****************)
+  (***********************************************************)
+  | (During_init _, _) ->
+    let e =
+      {
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service has not yet completed init";
+        data = None;
+      }
+    in
+    Lwt.return (state, Error e)
+  | (Failed_init reason, _) ->
+    let e =
+      {
+        Lsp.Error.code = Lsp.Error.RequestCancelled;
+        message = "IDE service failed to init: " ^ reason.medium_user_message;
+        data =
+          Some
+            (Hh_json.JSON_Object
+               [("debug_details", Hh_json.string_ reason.debug_details)]);
+      }
+    in
+    Lwt.return (state, Error e)
+  | (Pending_init, _) ->
+    failwith
+      (Printf.sprintf
+         "unexpected message '%s' in state '%s'"
+         (ClientIdeMessage.t_to_string message)
+         (state_to_log_string state))
+  (***********************************************************)
+  (************************* NORMAL HANDLING AFTER INIT ******)
+  (***********************************************************)
   | (Initialized istate, Hover document_location) ->
     let (state, ctx, entry) = update_file istate document_location in
     let result =
@@ -776,12 +912,6 @@ let handle_request :
     in
     Lwt.return (state, Ok result)
 
-let write_message
-    ~(out_fd : Lwt_unix.file_descr)
-    ~(message : ClientIdeMessage.message_from_daemon) : unit Lwt.t =
-  let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
-  Lwt.return_unit
-
 let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   match state with
   | Pending_init
@@ -890,25 +1020,39 @@ let handle_one_message_exn
     Lwt.return_some (Initialized istate)
   | _ ->
     let%lwt message = Lwt_message_queue.pop message_queue in
-    (match message with
-    | None -> Lwt.return_none (* exit loop if message_queue has been closed *)
-    | Some (ClientRequest { ClientIdeMessage.tracking_id; message }) ->
+    (match (state, message) with
+    | (_, None) ->
+      Lwt.return_none (* exit loop if message_queue has been closed *)
+    | (During_init dstate, Some (LoadedState load_state_result)) ->
+      let%lwt state = initialize2 out_fd dstate load_state_result in
+      Lwt.return_some state
+    | (_, Some (LoadedState _)) ->
+      failwith ("Unexpected LoadedState in " ^ state_to_log_string state)
+    | (_, Some (ClientRequest { ClientIdeMessage.tracking_id; message })) ->
       let unblocked_time = Unix.gettimeofday () in
       let%lwt (state, response) =
         try%lwt
-          let%lwt (s, r) = handle_request state tracking_id message in
+          let%lwt (s, r) =
+            handle_request message_queue state tracking_id message
+          in
           Lwt.return (s, r)
-        with e ->
+        with exn ->
           (* Our caller has an exception handler which logs the exception.
           But we instead must fulfil our contract of responding to the client,
           even if we have an exception. Hence we need our own handler here. *)
-          let open ClientIdeMessage in
-          let e = Exception.wrap e in
-          let debug_details = "handle_request " ^ Exception.get_ctor_string e in
-          let stack = Exception.get_backtrace_string e in
-          let error_data = make_error_data debug_details ~stack in
-          log "%s\n%s" debug_details stack;
-          Lwt.return (state, Error error_data)
+          let exn = Exception.wrap exn in
+          let stack =
+            Exception.get_backtrace_string exn |> Exception.clean_stack
+          in
+          let e =
+            {
+              Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+              message = "handle_request " ^ Exception.get_ctor_string exn;
+              data =
+                Some (Hh_json.JSON_Object [("stack", Hh_json.string_ stack)]);
+            }
+          in
+          Lwt.return (state, Error e)
       in
       let%lwt () =
         write_message

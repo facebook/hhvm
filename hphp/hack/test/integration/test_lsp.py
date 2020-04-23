@@ -3339,12 +3339,23 @@ class TestLsp(TestCase[LspTestDriver]):
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
 
     def initialize_spec(
-        self, spec: LspTestSpec, use_serverless_ide: bool, supports_status: bool = False
+        self,
+        spec: LspTestSpec,
+        use_serverless_ide: bool,
+        supports_status: bool = False,  # does the caller wish to see all status messages?
+        supports_init: bool = False,  # do we wish to interact with init, rather than waiting for init ok?
     ) -> LspTestSpec:
         if use_serverless_ide:
             initialization_options = {
-                "namingTableSavedStatePath": "${naming_table_saved_state_path}"
+                "namingTableSavedStatePath": "${naming_table_saved_state_path}",
+                "namingTableSavedStateTestDelay": 0.0,
             }
+            if supports_init:
+                # A small delay, since otherwise init completes immediately
+                # This isn't very racy. All we need is a tiny delay so that
+                # other things which are in the queue get processed, rather
+                # than continuing synchronously
+                initialization_options["namingTableSavedStateTestDelay"] = 0.5
         else:
             initialization_options = {}
 
@@ -3419,6 +3430,14 @@ class TestLsp(TestCase[LspTestDriver]):
             )
         if not supports_status:
             spec = spec.ignore_status_diagnostics(True)
+
+        if use_serverless_ide and not supports_init:
+            spec = spec.wait_for_notification(
+                comment="wait for sIDE to finish init",
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+
         return spec
 
     def test_serverless_ide_type_definition(self) -> None:
@@ -5410,7 +5429,10 @@ function unsaved_bar(): string { return "hello"; }
         self.test_driver.stop_hh_server()
 
         spec = (
-            self.initialize_spec(LspTestSpec("bad_hover"), use_serverless_ide=True)
+            self.initialize_spec(
+                LspTestSpec("test_lsptestspec_incorrect_request_result"),
+                use_serverless_ide=True,
+            )
             .notification(
                 method="textDocument/didOpen",
                 params={
@@ -5457,10 +5479,10 @@ function unsaved_bar(): string { return "hello"; }
             self.assertEqual(
                 self._sanitize_gutter_line_numbers(str(e)),
                 """\
-Test case bad_hover failed with 1 errors:
+Test case test_lsptestspec_incorrect_request_result failed with 1 errors:
 
 Error 1/1:
-Description: Request with ID 4 (comment: 'hover over function invocation') \
+Description: Request with ID 5 (comment: 'hover over function invocation') \
 got an incorrect result:
 
 (+ is expected lines, - is actual lines)
@@ -5898,6 +5920,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 LspTestSpec("serverless_ide_status_failed_to_load_saved_state"),
                 use_serverless_ide=True,
                 supports_status=True,
+                supports_init=True,
             )
             .ignore_requests(
                 comment="Ignore initializing since they're kind of racy",
@@ -5923,10 +5946,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 method="window/logMessage",
                 params={
                     "type": 1,
-                    "message": "Hack IDE has failed.\n"
-                    + "This is unexpected.\n"
-                    + "Please file a bug within your IDE.\n"
-                    + "More details: http://dummy",
+                    "message": "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.\nMore details: http://dummy",
                 },
             )
             .wait_for_server_request(
@@ -6317,4 +6337,93 @@ function aaa(): string {
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_requests_before_init(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        variables["root_path"] = self.test_driver.repo_dir
+        self.test_driver.stop_hh_server()
+
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("test_serverless_ide_requests_before_init"),
+                use_serverless_ide=True,
+                supports_status=True,
+                supports_init=True,
+            )
+            .ignore_notifications(method="textDocument/publishDiagnostics")
+            .ignore_requests(
+                comment="Ignore 'initializing...' messages since they're racy",
+                method="window/showStatus",
+                params={
+                    "type": 2,
+                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "Hack IDE: initializing.\nhh_server: stopped.",
+                    "shortMessage": "Hack: initializing",
+                },
+            )
+            .write_to_disk(
+                notify=True,
+                wait=False,
+                uri="file://${root_path}/beforeInit1.php",
+                contents="<?hh // strict\nfunction beforeInit1(): int {\n  return 42;\n}\n",
+            )
+            .notification(
+                comment="open a file before init has finished",
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "file://${root_path}/beforeInit2.php",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "<?hh // strict\nfunction beforeInit2(): void {\n  $foo = beforeInit1();\n}\n",
+                    }
+                },
+            )
+            .request(
+                line=line(),
+                comment="hover before init will fail",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "file://${root_path}/beforeInit2.php"},
+                    "position": {"line": 2, "character": 4},
+                },
+                result=None,
+            )
+            .wait_for_notification(
+                comment="wait for sIDE to init",
+                method="telemetry/event",
+                params={"type": 4, "message": "[client-ide] Finished init: ok"},
+            )
+            .wait_for_server_request(
+                method="window/showStatus",
+                params={
+                    "actions": [{"title": "Restart hh_server"}],
+                    "message": "Hack IDE: ready.\nhh_server: stopped.",
+                    "shortMessage": "Hack",
+                    "type": 3,
+                },
+                result=NoResponse(),
+            )
+            .request(
+                line=line(),
+                comment="hover after init will succeed",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "file://${root_path}/beforeInit2.php"},
+                    "position": {"line": 2, "character": 4},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "int"}],
+                    "range": {
+                        "start": {"line": 2, "character": 2},
+                        "end": {"line": 2, "character": 6},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+
         self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)

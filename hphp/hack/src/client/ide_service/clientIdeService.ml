@@ -11,15 +11,13 @@ open Hh_prelude
 
 module Status = struct
   type t =
-    | Not_started
     | Initializing
     | Processing_files of ClientIdeMessage.Processing_files.t
     | Ready
-    | Stopped of ClientIdeMessage.error_data
+    | Stopped of ClientIdeMessage.stopped_reason
 
   let to_string (t : t) : string =
     match t with
-    | Not_started -> "Not_started"
     | Initializing -> "Initializing"
     | Processing_files p ->
       Printf.sprintf
@@ -46,25 +44,25 @@ module Stop_reason = struct
 end
 
 type state =
-  | Uninitialized of { wait_for_initialization: bool }
+  | Uninitialized
       (** The ide_service is created. We may or may not have yet sent an initialize
       message to the daemon, but we certainly haven't heard back yet. *)
-  | Failed_to_initialize of ClientIdeMessage.error_data
+  | Failed_to_initialize of ClientIdeMessage.stopped_reason
       (** The response to our initialize message was a failure. This is
       a terminal state. *)
   | Initialized of { status: Status.t }
       (** We have received an initialize response from the daemon and all
       is well. The only thing that can take us out of this state is if
       someone invokes [stop], or if the daemon connection gets EOF. *)
-  | Stopped of Stop_reason.t * ClientIdeMessage.error_data
+  | Stopped of Stop_reason.t * ClientIdeMessage.stopped_reason
       (** Someone called [stop] or the daemon connection got EOF.
-      This is a terminal state. *)
+      This is a terminal state. This is the only state that arose
+      from actions on our side; all the other states arose from
+      responses from clientIdeDaemon. *)
 
 let state_to_string (state : state) : string =
   match state with
-  | Uninitialized { wait_for_initialization = true } ->
-    "Uninitialized(will_wait_for_init)"
-  | Uninitialized _ -> "Uninitialized"
+  | Uninitialized -> "Uninitialized"
   | Failed_to_initialize { ClientIdeMessage.short_user_message; _ } ->
     Printf.sprintf "Failed_to_initialize(%s)" short_user_message
   | Initialized env ->
@@ -117,6 +115,8 @@ let log s = Hh_logger.log ("[ide-service] " ^^ s)
 
 let log_debug s = Hh_logger.debug ("[ide-service] " ^^ s)
 
+let log_error s = Hh_logger.error ("[ide-service] " ^^ s)
+
 let set_state (t : t) (new_state : state) : unit =
   log
     "ClientIdeService.set_state %s -> %s"
@@ -137,7 +137,7 @@ let make (args : ClientIdeMessage.daemon_args) : t =
   let in_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_in_channel ic) in
   let out_fd = Lwt_unix.of_unix_file_descr (Daemon.descr_of_out_channel oc) in
   {
-    state = Uninitialized { wait_for_initialization = false };
+    state = Uninitialized;
     state_changed_cv = Lwt_condition.create ();
     daemon_handle;
     in_fd;
@@ -147,255 +147,221 @@ let make (args : ClientIdeMessage.daemon_args) : t =
     notification_emitter = Lwt_message_queue.create ();
   }
 
-let rec wait_for_initialization (t : t) : unit Lwt.t =
-  match t.state with
-  | Uninitialized _
-  | Failed_to_initialize _ ->
-    let%lwt () = Lwt_condition.wait t.state_changed_cv in
-    wait_for_initialization t
-  | Initialized _ -> Lwt.return_unit
-  | Stopped _ ->
-    failwith
-      ( "Should not be waiting for the initialization of a stopped IDE service, "
-      ^ "as this is a terminal state" )
+(** This function does an rpc to the daemon: it pushes a message
+onto the daemon's stdin queue, then awaits until [serve] has stuck
+the stdout response from the daemon response onto our [response_emitter].
+The daemon updates [ref_unblocked_time], the time at which the
+daemon starting handling the rpc.
 
-(** rpc_internal pushes a message onto the daemon's queue, and awaits until
-it can pop the response back. It updates ref_unnblocked_time, the time
-at which the daemon started handling the message.
-Note: it's not safe to cancel this, since we might end up
-with no one reading the answer to the message we just pushed,
-leading to desync. *)
-let rpc_internal
+Note: it is safe to call this method even while an existing rpc
+is outstanding - we guarantee that results will be delivered in order.
+
+Note: it is not safe to cancel this method, since we might end up
+with no one reading the response to the message we just pushed, leading
+to desync.
+
+Note: If we're in Stopped state (due to someone calling [stop]) then
+we'll refrain from sending the rpc. Stopped is the only state we enter
+due to our own volition; all other states are just a reflection
+of what state the daemon is in, and so it's fine for the daemon
+to respond as it see fits while in the other states. *)
+let rpc
     (t : t)
-    ~(tracked_message : 'a ClientIdeMessage.tracked_t)
-    ~(ref_unblocked_time : float ref) : ('a, Lsp.Error.t) Lwt_result.t =
+    ~(tracking_id : string)
+    ~(ref_unblocked_time : float ref)
+    (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
+  let tracked_message = { ClientIdeMessage.tracking_id; message } in
+  let open ClientIdeMessage in
   try%lwt
-    let success =
-      Lwt_message_queue.push
-        t.messages_to_send
-        (Message_wrapper tracked_message)
-    in
-    if not success then failwith "Could not send message (queue was closed)";
-
-    (* Lwt_message_queue.pop is built upon Lwt_condition.wait, which has
-    the guarantee that pops will be fulfilled in the order in which they
-    were called. *)
-    let%lwt (response : response_wrapper option) =
-      Lwt_message_queue.pop t.response_emitter
-    in
-    match response with
-    | None -> failwith "Could not read response: queue was closed"
-    | Some (Response_wrapper timed_response) ->
-      if
-        not
-          (String.equal
-             tracked_message.ClientIdeMessage.tracking_id
-             timed_response.ClientIdeMessage.tracking_id)
-      then
-        failwith "ClientIdeService desync";
-      (* ClientIdeDaemon invariant that it will send a response for ever message it
-      received, in the order in which it was received. Our invariant that immediately
-      after pushing a message to ClientIdeDaemon then we await a pop of it.
-      Lwt_message_queue invariant that pops are fulfilled in the order in which they
-      were received. These three invariants ensure that the response we pop will
-      always have the same tracking ID as the request we pushed, and hence the
-      above exception will never be raised. *)
-      ref_unblocked_time := timed_response.ClientIdeMessage.unblocked_time;
-      let response =
-        Result.map ~f:Obj.magic timed_response.ClientIdeMessage.response
+    match t.state with
+    | Stopped (reason, info) ->
+      Lwt.return_error
+        {
+          Lsp.Error.code = Lsp.Error.RequestCancelled;
+          message =
+            Printf.sprintf
+              "IDE service is stopped: %s. %s"
+              (Stop_reason.to_string reason)
+              info.short_user_message;
+          data =
+            Lsp_fmt.error_data_of_string
+              ~key:"not_running_reason"
+              info.debug_details;
+        }
+    | Uninitialized
+    | Initialized _
+    | Failed_to_initialize _ ->
+      let success =
+        Lwt_message_queue.push
+          t.messages_to_send
+          (Message_wrapper tracked_message)
       in
-      (* ClientIdeDaemon invariant that if we pushed an 'a request, then we'll
-      get back an 'a. That's why the Obj.magic cast is safe. *)
+      if not success then
+        (* queue closure is normal part of shutdown *)
+        failwith "Could not send message (queue was closed)";
+
+      let%lwt (response : response_wrapper option) =
+        Lwt_message_queue.pop t.response_emitter
+      in
+      (* Discussion about why this is safe, even if multiple people call rpc:
+      Imagine `let%lwt x = rpc(X) and y = rpc(Y)`.
+      We will therefore push X onto the [messages_to_send] queue, then
+      await [Lwt_message_queue.pop] on [response_emitter] for a response to X,
+      then we'll push Y onto the queue, then await pop for a response to Y.
+      The [messages_to_send] queue will necessarily send them in order X,Y.
+      The daemon will receive X,Y in order.
+      The daemon will handle X first (the daemon only handles a single message
+      at a time) and send it response, then handle Y next and send its response.
+      Our [serve] will read the responses to X,Y in order and put them onto
+      [response_emitter].
+      Why will "pop x" wake up and pick an element before "pop y" even though
+      they're both waiting? The crucial fact is that "pop x" was called
+      before "pop y". And [Lwt_message_queue.pop] is built upon
+      [Lwt_condition.wait], which in turn is built upon [Lwt_sequence.t]:
+      It maintains an ordered queue of callers who are awaiting on pop,
+      and when a new item arrives then it wakes up the first one. *)
       (match response with
-      | Ok r -> Lwt.return_ok r
-      | Error { ClientIdeMessage.medium_user_message; debug_details; _ } ->
-        Lwt.return_error
-          {
-            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-            message = medium_user_message;
-            data = Lsp_fmt.error_data_of_string ~key:"log_string" debug_details;
-          })
+      | Some (Response_wrapper timed_response)
+        when String.equal
+               tracked_message.ClientIdeMessage.tracking_id
+               timed_response.ClientIdeMessage.tracking_id ->
+        ref_unblocked_time := timed_response.ClientIdeMessage.unblocked_time;
+        let (response : ('a, Lsp.Error.t) result) =
+          Result.map ~f:Obj.magic timed_response.ClientIdeMessage.response
+        in
+        (* Obj.magic cast is safe because if we pushed an 'a request
+        then the daemon guarantees to return an 'a. *)
+        Lwt.return response
+      | Some _ ->
+        (* as discussed above, this case will never be hit. *)
+        failwith "ClientIdeService desync"
+      | None ->
+        (* queue closure is part of normal shutdown *)
+        failwith "Could not read response: queue was closed")
   with e ->
     let e = Exception.wrap e in
     Lwt.return_error
       {
         Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-        message =
-          "Internal error during RPC call to IDE services: "
-          ^ Exception.get_ctor_string e;
+        message = "ClientIdeService.rpc " ^ Exception.get_ctor_string e;
         data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
       }
-
-(** This function will always fail if we're in a terminal state.
-If invoked with [needs_init:false] then we'll happily pass
-the message on to the daemon regardless of its state.
-But if invoked with [needs_init:true] and we haven't yet sent
-an initialize request to the daemon, or haven't yet heard a response,
-then we'll fail. This last behavior can be tweaked by the wait_for_initialize
-flag passed to initialize_from_saved_state, used for tests; it means that instead
-of failing in this case we'll await until the daemon's initialize
-response.
-Note: it's not safe to cancel this method: we might get an item on
-the outgoing queue and no one to consume it, leading to desync.
-Note: it's safe to call this even while another rpc is outstanding.
-The responses will come back in the right order. That's because the
-queue is built on top of [Lwt_condition.wait] and [Lwt_condition.signal]:
-the Lwt_condition is an Lwt_sequence.t, and 'wait' sticks an item onto
-the end of the sequence, and 'signal' waks up the first item. *)
-let rpc
-    (t : t)
-    ~(tracking_id : string)
-    ~(ref_unblocked_time : float ref)
-    ~(needs_init : bool)
-    (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
-  let needs_init =
-    if needs_init then
-      `Needs_init
-    else
-      `Fine_without_init
-  in
-  let tracked_message = { ClientIdeMessage.tracking_id; message } in
-  let open ClientIdeMessage in
-  match (t.state, needs_init) with
-  | (Uninitialized { wait_for_initialization = false }, `Needs_init) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service has not yet been initialized";
-        data = None;
-      }
-  | (Failed_to_initialize info, _) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service failed to initialize: " ^ info.short_user_message;
-        data =
-          Lsp_fmt.error_data_of_string
-            ~key:"not_running_reason"
-            info.debug_details;
-      }
-  | (Stopped (reason, info), _) ->
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message =
-          Printf.sprintf
-            "IDE service is stopped: %s. %s"
-            (Stop_reason.to_string reason)
-            info.short_user_message;
-        data =
-          Lsp_fmt.error_data_of_string
-            ~key:"not_running_reason"
-            info.debug_details;
-      }
-  | (Uninitialized { wait_for_initialization = true }, `Needs_init) ->
-    let%lwt () = wait_for_initialization t in
-    let%lwt result = rpc_internal t ~tracked_message ~ref_unblocked_time in
-    Lwt.return result
-  | (Initialized _, (`Needs_init | `Fine_without_init))
-  | (Uninitialized _, `Fine_without_init) ->
-    let%lwt result = rpc_internal t ~tracked_message ~ref_unblocked_time in
-    Lwt.return result
 
 let initialize_from_saved_state
     (t : t)
     ~(root : Path.t)
-    ~(naming_table_saved_state_path : Path.t option)
-    ~(wait_for_initialization : bool)
+    ~(naming_table_load_info :
+       ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
+       option)
     ~(use_ranked_autocomplete : bool)
     ~(config : (string * string) list)
     ~(open_files : Path.t list) :
-    (int, ClientIdeMessage.error_data) Lwt_result.t =
-  set_state t (Uninitialized { wait_for_initialization });
+    (unit, ClientIdeMessage.stopped_reason) Lwt_result.t =
+  let open ClientIdeMessage in
+  set_state t Uninitialized;
 
-  let param =
-    {
-      ClientIdeMessage.Initialize_from_saved_state.root;
-      naming_table_saved_state_path;
-      use_ranked_autocomplete;
-      config;
-      open_files;
-    }
-  in
-  (* Do not use `do_rpc` here, as that depends on a running event loop in
-  `serve`. But `serve` should only be called once the IDE service is
-  initialized, after this function has completed. *)
-  let message = ClientIdeMessage.Initialize_from_saved_state param in
-  let tracked_message = { ClientIdeMessage.tracking_id = "init"; message } in
-  log_debug
-    "-> %s [initialize_from_saved_state]"
-    (ClientIdeMessage.tracked_t_to_string tracked_message);
-  let%lwt (_ : int) =
-    Marshal_tools_lwt.to_fd_with_preamble t.out_fd tracked_message
-  in
-  let%lwt (response : ClientIdeMessage.message_from_daemon) =
-    Marshal_tools_lwt.from_fd_with_preamble t.in_fd
-  in
-  log_debug
-    "<- %s [initialize_from_saved_state]"
-    (ClientIdeMessage.message_from_daemon_to_string response);
-  match response with
-  | ClientIdeMessage.Response { ClientIdeMessage.response = Ok r; _ } ->
-    (* See comment on other use of Obj.magic in this file for why it's valid *)
-    let (r : ClientIdeMessage.Initialize_from_saved_state.result) =
-      Obj.magic r
+  try%lwt
+    (* We must be the first function called after [make].
+    This satisfies the invariant that Initialize_from_saved_state
+    is the first message sent to the daemon. *)
+    begin
+      match t.state with
+      | Uninitialized -> ()
+      | _ -> failwith "not in uninitialized state"
+    end;
+
+    let message =
+      {
+        tracking_id = "init";
+        message =
+          Initialize_from_saved_state
+            {
+              Initialize_from_saved_state.root;
+              naming_table_load_info;
+              use_ranked_autocomplete;
+              config;
+              open_files;
+            };
+      }
     in
-    let total =
-      r
-        .ClientIdeMessage.Initialize_from_saved_state
-         .num_changed_files_to_process
+
+    (* Can't use [rpc] here, since that depends on the [serve] event loop,
+    which is called only after we return. We rely on the invariant
+    that daemon will send us no messages until after it has responded
+    to this first message. *)
+    log_debug "-> %s [init]" (tracked_t_to_string message);
+    let%lwt (_ : int) =
+      Marshal_tools_lwt.to_fd_with_preamble t.out_fd message
     in
-    log
-      "Initialized IDE service process (log file at %s) (%d changed files)"
-      (ServerFiles.client_ide_log root)
-      total;
-    let status =
-      if total = 0 then
-        Status.Ready
-      else
-        Status.Processing_files
-          { ClientIdeMessage.Processing_files.processed = 0; total }
+    let%lwt (response : message_from_daemon) =
+      Marshal_tools_lwt.from_fd_with_preamble t.in_fd
     in
-    set_state t (Initialized { status });
-    Lwt.return_ok total
-  | ClientIdeMessage.Notification _ ->
-    let stack = Exception.get_current_callstack_string 100 in
-    let debug_details =
-      "Failed to initialize IDE service process "
-      ^ "because we received a notification before the initialization response"
-    in
-    log "%s\n%s" debug_details stack;
-    let error_data = ClientIdeMessage.make_error_data debug_details ~stack in
-    set_state t (Failed_to_initialize error_data);
-    Lwt.return_error error_data
-  | ClientIdeMessage.Response
-      { ClientIdeMessage.response = Error error_data; _ } ->
-    log "Failed to initialize IDE service process";
+    log_debug "<- %s [init]" (message_from_daemon_to_string response);
+    match response with
+    | Response { response = Ok _; tracking_id = "init"; _ } -> Lwt.return_ok ()
+    | Response { response = Error e; tracking_id = "init"; _ } ->
+      (* that error has structure, which we wish to preserve in our error_data. *)
+      let debug_details =
+        Printf.sprintf
+          "%s\n%s"
+          e.Lsp.Error.message
+          ( e.Lsp.Error.data
+          |> Option.value ~default:Hh_json.JSON_Null
+          |> Hh_json.json_to_string )
+      in
+      let stack =
+        Exception.get_current_callstack_string 99 |> Exception.clean_stack
+      in
+      let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
+      Lwt.return_error error_data
+    | _ ->
+      (* What we got back wasn't the 'init' response we expected:
+      the clientIdeDaemon has violated its contract. *)
+      failwith ("desync: " ^ message_from_daemon_to_string response)
+  with e ->
+    let e = Exception.wrap e in
+    let stack = Exception.get_backtrace_string e in
+    let debug_details = "Init failed: " ^ Exception.get_ctor_string e in
+    let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
     set_state t (Failed_to_initialize error_data);
     Lwt.return_error error_data
 
 let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
-  match t.state with
-  | Uninitialized _
-  | Failed_to_initialize _
-  | Stopped _ ->
+  let open ClientIdeMessage in
+  let open ClientIdeMessage.Processing_files in
+  match (t.state, notification) with
+  | (Failed_to_initialize _, _)
+  | (Stopped _, _) ->
+    (* terminal states, which don't change with notifications *)
     ()
-  | Initialized _state ->
-    (match notification with
-    | ClientIdeMessage.Initializing ->
-      set_state t (Initialized { status = Status.Initializing })
-    | ClientIdeMessage.Processing_files processed_files ->
-      set_state
-        t
-        (Initialized { status = Status.Processing_files processed_files })
-    | ClientIdeMessage.Done_processing ->
-      set_state t (Initialized { status = Status.Ready }))
+  | (Uninitialized, Done_init (Ok { total = 0; _ })) ->
+    set_state t (Initialized { status = Status.Ready })
+  | (Uninitialized, Done_init (Ok p)) ->
+    set_state t (Initialized { status = Status.Processing_files p })
+  | (Uninitialized, Done_init (Error edata)) ->
+    set_state t (Failed_to_initialize edata)
+  | (Initialized _, Processing_files p) ->
+    set_state t (Initialized { status = Status.Processing_files p })
+  | (Initialized _, Done_processing) ->
+    set_state t (Initialized { status = Status.Ready })
+  | (_, _) ->
+    let message =
+      Printf.sprintf
+        "Unexpected notification '%s' in state '%s'"
+        (ClientIdeMessage.notification_to_string notification)
+        (state_to_string t.state)
+    in
+    HackEventLogger.serverless_ide_crash
+      ~message
+      ~stack:(Exception.get_current_callstack_string 99 |> Exception.clean_stack);
+    log_error "%s" message;
+    ()
 
 let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
   let%lwt () =
     match t.state with
-    | Uninitialized _
+    | Uninitialized
     | Failed_to_initialize _
     | Stopped _ ->
       Lwt.return_unit
@@ -411,7 +377,6 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
                 t
                 ~tracking_id
                 ~ref_unblocked_time
-                ~needs_init:true
                 (ClientIdeMessage.Shutdown ());
               (let%lwt () = Lwt_unix.sleep 5.0 in
                Lwt.return_error
@@ -445,7 +410,8 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
 let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
     =
   let stack = Exception.get_current_callstack_string 100 in
-  let error_data = ClientIdeMessage.make_error_data "stopped" ~stack in
+  let debug_details = "stopped" in
+  let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
   'destroy', we do let%lwt on an rpc call to shutdown the daemon.
@@ -547,7 +513,7 @@ let get_notifications (t : t) : notification_emitter = t.notification_emitter
 
 let get_status (t : t) : Status.t =
   match t.state with
-  | Uninitialized _ -> Status.Initializing
+  | Uninitialized -> Status.Initializing
   | Failed_to_initialize error_data -> Status.Stopped error_data
   | Stopped (reason, error_data) ->
     let debug_details =

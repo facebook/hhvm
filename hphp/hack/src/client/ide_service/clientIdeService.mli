@@ -19,8 +19,6 @@ type t
 
 module Status : sig
   type t =
-    | Not_started
-        (** The IDE services haven't been requested to initialize yet. *)
     | Initializing
         (** The IDE services are still initializing (e.g. loading saved-state or
         building indexes.) *)
@@ -28,7 +26,7 @@ module Status : sig
         (** The IDE services are available, but are also in the middle of
         processing files. *)
     | Ready  (** The IDE services are available. *)
-    | Stopped of ClientIdeMessage.error_data
+    | Stopped of ClientIdeMessage.stopped_reason
         (** The IDE services are not available. *)
 
   val to_string : t -> string
@@ -55,12 +53,12 @@ will block until the initializing is complete. *)
 val initialize_from_saved_state :
   t ->
   root:Path.t ->
-  naming_table_saved_state_path:Path.t option ->
-  wait_for_initialization:bool ->
+  naming_table_load_info:
+    ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info option ->
   use_ranked_autocomplete:bool ->
   config:(string * string) list ->
   open_files:Path.t list ->
-  (int, ClientIdeMessage.error_data) Lwt_result.t
+  (unit, ClientIdeMessage.stopped_reason) Lwt_result.t
 
 (** Pump the message loop for the IDE service. Exits once the IDE service has
 been [destroy]ed. *)
@@ -80,7 +78,6 @@ val rpc :
   t ->
   tracking_id:string ->
   ref_unblocked_time:float ref ->
-  needs_init:bool ->
   'response ClientIdeMessage.t ->
   ('response, Lsp.Error.t) Lwt_result.t
 

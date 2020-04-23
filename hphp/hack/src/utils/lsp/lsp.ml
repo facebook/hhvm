@@ -370,6 +370,8 @@ module Initialize = struct
     useTextEditAutocomplete: bool;
     liveSyntaxErrors: bool;
     namingTableSavedStatePath: string option;
+    namingTableSavedStateTestDelay: float;
+        (** synthetic delay for test purposes *)
     sendServerStatusEvents: bool;
         (** do we send telemetry whenever hh_server status changes, e.g. doing-local-typecheck,
         done-typecheck. Used by HackAst. *)

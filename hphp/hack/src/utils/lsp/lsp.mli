@@ -232,6 +232,7 @@ module Initialize : sig
     useTextEditAutocomplete: bool;
     liveSyntaxErrors: bool;
     namingTableSavedStatePath: string option;
+    namingTableSavedStateTestDelay: float;
     sendServerStatusEvents: bool;
   }
 

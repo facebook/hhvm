@@ -223,7 +223,7 @@ let test () =
   let h = ServerFunDepsBatch.handlers in
   let do_test ((file, line, col), expected) =
     let ctx = Provider_utils.ctx_from_server_env env in
-    let pos_list = [(Relative_path.from_root file, line, col)] in
+    let pos_list = [(Relative_path.from_root ~suffix:file, line, col)] in
     let result = ServerRxApiShared.helper h ctx [] pos_list in
     if result <> [expected] then
       let msg =

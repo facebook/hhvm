@@ -41,7 +41,7 @@ type t = {
 }
 
 let filename =
-  Relative_path.from_root Config_file.file_path_relative_to_repo_root
+  Relative_path.from_root ~suffix:Config_file.file_path_relative_to_repo_root
 
 let is_compatible c1 c2 =
   (* This comparison can eventually be made more complex; we may not always

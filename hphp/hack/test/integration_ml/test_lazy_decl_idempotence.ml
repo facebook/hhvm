@@ -41,8 +41,8 @@ let test () =
   in
   let ctx = Provider_utils.ctx_from_server_env env in
   let classes = [foo_name; bar_name] in
-  let foo_path = Relative_path.from_root foo_file_name in
-  let bar_path = Relative_path.from_root bar_file_name in
+  let foo_path = Relative_path.from_root ~suffix:foo_file_name in
+  let bar_path = Relative_path.from_root ~suffix:bar_file_name in
   (* Remove things from shared memory (that were put there by Test.setup_disk)
    * to simulate lazy saved state init. *)
   let defs =

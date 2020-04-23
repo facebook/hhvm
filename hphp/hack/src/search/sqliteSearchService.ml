@@ -88,7 +88,7 @@ let find_or_build_sqlite_file
     (match find_saved_symbolindex ~ignore_hh_version with
     | Ok filename -> filename
     | Error errmsg ->
-      let repo_path = Relative_path.to_absolute (Relative_path.from_root "") in
+      let repo_path = Relative_path.path_of_prefix Relative_path.Root in
       if not silent then
         Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
       let tempfilename = Filename.temp_file "symbolindex" ".db" in

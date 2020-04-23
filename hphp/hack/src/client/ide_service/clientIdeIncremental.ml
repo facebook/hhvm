@@ -292,7 +292,7 @@ let update_naming_tables_for_changed_file_lwt
     Lwt.return
       { naming_table; sienv; old_file_info = None; new_file_info = None }
   | Some path ->
-    let path = Relative_path.from_root path in
+    let path = Relative_path.from_root ~suffix:path in
     if not (FindUtils.path_filter path) then
       Lwt.return
         { naming_table; sienv; old_file_info = None; new_file_info = None }
@@ -326,7 +326,7 @@ let update_naming_tables_for_changed_file
     log "Ignored change to file %s, as it is not within our repo root" str_path;
     { naming_table; sienv; old_file_info = None; new_file_info = None }
   | Some path ->
-    let path = Relative_path.from_root path in
+    let path = Relative_path.from_root ~suffix:path in
     if not (FindUtils.path_filter path) then
       { naming_table; sienv; old_file_info = None; new_file_info = None }
     else

@@ -54,7 +54,7 @@ let files =
 let write_and_parse_test_files () =
   let files =
     List.map files ~f:(fun (fn, contents) ->
-        (Relative_path.from_root fn, contents))
+        (Relative_path.from_root ~suffix:fn, contents))
   in
   List.iter files ~f:(fun (fn, contents) ->
       let fn = Path.make (Relative_path.to_absolute fn) in
@@ -146,23 +146,28 @@ let test_get_pos () =
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
       Types_pos_asserter.assert_option_equals
         (Some
-           ( FileInfo.File (FileInfo.Class, Relative_path.from_root "foo.php"),
+           ( FileInfo.File
+               (FileInfo.Class, Relative_path.from_root ~suffix:"foo.php"),
              Naming_types.TClass ))
         (Naming_provider.get_type_pos_and_kind ctx "\\Foo")
         "Check for class type";
       Pos_asserter.assert_option_equals
-        (Some (FileInfo.File (FileInfo.Fun, Relative_path.from_root "bar.php")))
+        (Some
+           (FileInfo.File
+              (FileInfo.Fun, Relative_path.from_root ~suffix:"bar.php")))
         (Naming_provider.get_fun_pos ctx "\\bar")
         "Check for function";
       Types_pos_asserter.assert_option_equals
         (Some
-           ( FileInfo.File (FileInfo.Typedef, Relative_path.from_root "baz.php"),
+           ( FileInfo.File
+               (FileInfo.Typedef, Relative_path.from_root ~suffix:"baz.php"),
              Naming_types.TTypedef ))
         (Naming_provider.get_type_pos_and_kind ctx "\\Baz")
         "Check for typedef type";
       Pos_asserter.assert_option_equals
         (Some
-           (FileInfo.File (FileInfo.Const, Relative_path.from_root "qux.php")))
+           (FileInfo.File
+              (FileInfo.Const, Relative_path.from_root ~suffix:"qux.php")))
         (Naming_provider.get_const_pos ctx "\\Qux")
         "Check for const")
 
@@ -192,7 +197,7 @@ let test_get_canon_name () =
 let test_remove () =
   run_naming_table_test
     (fun ~ctx:_ ~unbacked_naming_table ~backed_naming_table ~db_name:_ ->
-      let foo_path = Relative_path.from_root "foo.php" in
+      let foo_path = Relative_path.from_root ~suffix:"foo.php" in
       assert (
         Naming_table.get_file_info unbacked_naming_table foo_path
         |> Option.is_some );
@@ -231,7 +236,7 @@ let test_local_changes () =
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
       let a_name = "CONST_IN_A" in
 
-      let a_file = Relative_path.from_root "a.php" in
+      let a_file = Relative_path.from_root ~suffix:"a.php" in
       let a_pos = FileInfo.File (FileInfo.Const, a_file) in
       let a_file_info =
         FileInfo.{ FileInfo.empty_t with consts = [(a_pos, a_name)] }
@@ -279,7 +284,7 @@ let test_context_changes_consts () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "foo.php")
+          ~path:(Relative_path.from_root ~suffix:"foo.php")
           ~contents:{|<?hh
           class New_qux {}
           |}
@@ -287,13 +292,13 @@ let test_context_changes_consts () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "qux.php")
+          ~path:(Relative_path.from_root ~suffix:"qux.php")
           ~contents:{|<?hh
           const int New_qux = 5;
           |}
       in
       Asserter.Relative_path_asserter.assert_option_equals
-        (Some (Relative_path.from_root "qux.php"))
+        (Some (Relative_path.from_root ~suffix:"qux.php"))
         (Naming_provider.get_const_path ctx "\\New_qux")
         "New const in context should be visible";
       Asserter.Relative_path_asserter.assert_option_equals
@@ -307,7 +312,7 @@ let test_context_changes_funs () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "foo.php")
+          ~path:(Relative_path.from_root ~suffix:"foo.php")
           ~contents:{|<?hh
           class bar {}
           |}
@@ -315,13 +320,13 @@ let test_context_changes_funs () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "bar.php")
+          ~path:(Relative_path.from_root ~suffix:"bar.php")
           ~contents:{|<?hh
           function new_bar(): void {}
           |}
       in
       Asserter.Relative_path_asserter.assert_option_equals
-        (Some (Relative_path.from_root "bar.php"))
+        (Some (Relative_path.from_root ~suffix:"bar.php"))
         (Naming_provider.get_fun_path ctx "\\new_bar")
         "New function in context should be visible";
       Asserter.Relative_path_asserter.assert_option_equals
@@ -349,13 +354,13 @@ let test_context_changes_classes () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "foo.php")
+          ~path:(Relative_path.from_root ~suffix:"foo.php")
           ~contents:{|<?hh
           class NewFoo {}
           |}
       in
       Asserter.Relative_path_asserter.assert_option_equals
-        (Some (Relative_path.from_root "foo.php"))
+        (Some (Relative_path.from_root ~suffix:"foo.php"))
         (Naming_provider.get_class_path ctx "\\NewFoo")
         "New class in context should be visible";
       Asserter.Relative_path_asserter.assert_option_equals
@@ -383,13 +388,13 @@ let test_context_changes_typedefs () =
       let (ctx, _entry) =
         Provider_context.add_or_overwrite_entry_contents
           ~ctx
-          ~path:(Relative_path.from_root "baz.php")
+          ~path:(Relative_path.from_root ~suffix:"baz.php")
           ~contents:{|<?hh
           type NewBaz = Foo;
           |}
       in
       Asserter.Relative_path_asserter.assert_option_equals
-        (Some (Relative_path.from_root "baz.php"))
+        (Some (Relative_path.from_root ~suffix:"baz.php"))
         (Naming_provider.get_typedef_path ctx "\\NewBaz")
         "New typedef in context should be visible";
       Asserter.Relative_path_asserter.assert_option_equals

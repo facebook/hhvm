@@ -164,9 +164,9 @@ let server_setup () : server_setup =
     will be used for look up of symbols in type checking. *)
   Disk.write_file ~file:(in_fake_dir "root/Foo.php") ~contents:foo_contents;
   Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
-  let foo_path = Relative_path.from_root "Foo.php" in
-  let bar_path = Relative_path.from_root "Bar.php" in
-  let nonexistent_path = Relative_path.from_root "Nonexistent.php" in
+  let foo_path = Relative_path.from_root ~suffix:"Foo.php" in
+  let bar_path = Relative_path.from_root ~suffix:"Bar.php" in
+  let nonexistent_path = Relative_path.from_root ~suffix:"Nonexistent.php" in
   (* Parsing produces the file infos that the naming table module can use
     to construct the forward naming table (files-to-symbols) *)
   let popt = ParserOptions.default in

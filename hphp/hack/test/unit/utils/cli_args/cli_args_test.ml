@@ -81,19 +81,19 @@ let verify_parsed_spec parsed_spec =
     "There should be 7 file specs";
 
   let (from_path : Relative_path.t option) =
-    Some (Relative_path.from_root "/from/path/prefix1")
+    Some (Relative_path.from_root ~suffix:"/from/path/prefix1")
   in
   let (to_path : Relative_path.t option) =
-    Some (Relative_path.from_root "/to/path/prefix1")
+    Some (Relative_path.from_root ~suffix:"/to/path/prefix1")
   in
   let (range1 : files_to_check_range) =
     { from_prefix_incl = from_path; to_prefix_excl = to_path }
   in
   let (from_path : Relative_path.t option) =
-    Some (Relative_path.from_root "/from/path/prefix2")
+    Some (Relative_path.from_root ~suffix:"/from/path/prefix2")
   in
   let (to_path : Relative_path.t option) =
-    Some (Relative_path.from_root "/to/path/prefix2")
+    Some (Relative_path.from_root ~suffix:"/to/path/prefix2")
   in
   let (range2 : files_to_check_range) =
     { from_prefix_incl = from_path; to_prefix_excl = to_path }
@@ -103,22 +103,23 @@ let verify_parsed_spec parsed_spec =
   in
   let (range4 : files_to_check_range) =
     {
-      from_prefix_incl = Some (Relative_path.from_root "/from/path/only");
+      from_prefix_incl =
+        Some (Relative_path.from_root ~suffix:"/from/path/only");
       to_prefix_excl = None;
     }
   in
   let (range5 : files_to_check_range) =
     {
       from_prefix_incl = None;
-      to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
+      to_prefix_excl = Some (Relative_path.from_root ~suffix:"/to/path/only");
     }
   in
   let expected =
     [
-      Prefix (Relative_path.from_root "/some/path/prefix1");
+      Prefix (Relative_path.from_root ~suffix:"/some/path/prefix1");
       Range range1;
       Range range2;
-      Prefix (Relative_path.from_root "/some/path/prefix2");
+      Prefix (Relative_path.from_root ~suffix:"/some/path/prefix2");
       Range range3;
       Range range4;
       Range range5;
@@ -143,31 +144,32 @@ let test_save_state_spec_json () : bool =
       {
         files_to_check =
           [
-            Prefix (Relative_path.from_root "/some/path/prefix1");
+            Prefix (Relative_path.from_root ~suffix:"/some/path/prefix1");
             Range
               {
                 from_prefix_incl =
-                  Some (Relative_path.from_root "/from/path/prefix1");
+                  Some (Relative_path.from_root ~suffix:"/from/path/prefix1");
                 to_prefix_excl =
-                  Some (Relative_path.from_root "/to/path/prefix1");
+                  Some (Relative_path.from_root ~suffix:"/to/path/prefix1");
               };
             Range
               {
                 from_prefix_incl =
-                  Some (Relative_path.from_root "/from/path/prefix2");
+                  Some (Relative_path.from_root ~suffix:"/from/path/prefix2");
                 to_prefix_excl =
-                  Some (Relative_path.from_root "/to/path/prefix2");
+                  Some (Relative_path.from_root ~suffix:"/to/path/prefix2");
               };
             Range
               {
                 from_prefix_incl =
-                  Some (Relative_path.from_root "/from/path/only");
+                  Some (Relative_path.from_root ~suffix:"/from/path/only");
                 to_prefix_excl = None;
               };
             Range
               {
                 from_prefix_incl = None;
-                to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
+                to_prefix_excl =
+                  Some (Relative_path.from_root ~suffix:"/to/path/only");
               };
           ];
         filename = "/some/dir/some_filename";

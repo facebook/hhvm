@@ -40,8 +40,11 @@ val create : prefix -> string -> t
 (* Creates a new path, inferring the prefix. Will default to Dummy. *)
 val create_detect_prefix : string -> t
 
-(* Creates a Relative_path.t relative to the root *)
-val from_root : string -> t
+(* Creates a Relative_path.t relative to the root. The argument must be
+    a *relative* path (the path suffix). If you wish to construct
+    a Relative_path.t from an absolute path, use
+    `create_detect_prefix` instead. *)
+val from_root : suffix:string -> t
 
 val prefix : t -> prefix
 

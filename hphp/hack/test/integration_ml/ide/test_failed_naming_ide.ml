@@ -76,8 +76,12 @@ let test () =
     Errors.get_failed_files env.ServerEnv.errorl Errors.Naming
   in
   let found =
-    Relative_path.Set.mem failed_naming (Relative_path.from_root foo1_name)
-    || Relative_path.Set.mem failed_naming (Relative_path.from_root foo2_name)
+    Relative_path.Set.mem
+      failed_naming
+      (Relative_path.from_root ~suffix:foo1_name)
+    || Relative_path.Set.mem
+         failed_naming
+         (Relative_path.from_root ~suffix:foo2_name)
   in
   if not found then Test.fail "File missing from failed_naming";
 

@@ -32,11 +32,13 @@ let get_lambda_parameter_rewrite_patches ctx files =
   List.concat_map files (fun file ->
       ServerRewriteLambdaParameters.get_patches
         ctx
-        (Relative_path.from_root file))
+        (Relative_path.from_root ~suffix:file))
 
 let get_type_params_type_rewrite_patches ctx files =
   List.concat_map files (fun file ->
-      ServerRewriteTypeParamsType.get_patches ctx (Relative_path.from_root file))
+      ServerRewriteTypeParamsType.get_patches
+        ctx
+        (Relative_path.from_root ~suffix:file))
 
 let find_def_filename current_filename definition =
   SymbolDefinition.(

@@ -172,7 +172,7 @@ let strip_root_if_possible s =
   else
     Some (String.sub s prefix_len (String.length s - prefix_len))
 
-let from_root (s : string) : t = (Root, s)
+let from_root ~(suffix : string) : t = (Root, suffix)
 
 let relativize_set prefix m =
   SSet.fold m ~init:Set.empty ~f:(fun k a -> Set.add a (create prefix k))

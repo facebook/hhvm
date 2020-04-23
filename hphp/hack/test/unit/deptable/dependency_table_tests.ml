@@ -54,7 +54,7 @@ let files =
 let write_and_parse_test_files () =
   let files =
     List.map files ~f:(fun (fn, contents) ->
-        (Relative_path.from_root fn, contents))
+        (Relative_path.from_root ~suffix:fn, contents))
   in
   List.iter files ~f:(fun (fn, contents) ->
       let fn = Path.make (Relative_path.to_absolute fn) in
@@ -150,7 +150,7 @@ let test_dep_graph_blob () =
             delegate_state
             (Telemetry.create ())
             dynamic_view_files
-            [Relative_path.from_root "baz.php"]
+            [Relative_path.from_root ~suffix:"baz.php"]
             memory_cap
             check_info
         in

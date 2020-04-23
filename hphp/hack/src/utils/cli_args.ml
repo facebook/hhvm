@@ -55,28 +55,32 @@ let save_state_spec_json_example =
   {
     files_to_check =
       [
-        Prefix (Relative_path.from_root "/some/path/prefix1");
+        Prefix (Relative_path.from_root ~suffix:"/some/path/prefix1");
         Range
           {
             from_prefix_incl =
-              Some (Relative_path.from_root "/from/path/prefix1");
-            to_prefix_excl = Some (Relative_path.from_root "/to/path/prefix1");
+              Some (Relative_path.from_root ~suffix:"/from/path/prefix1");
+            to_prefix_excl =
+              Some (Relative_path.from_root ~suffix:"/to/path/prefix1");
           };
         Range
           {
             from_prefix_incl =
-              Some (Relative_path.from_root "/from/path/prefix2");
-            to_prefix_excl = Some (Relative_path.from_root "/to/path/prefix2");
+              Some (Relative_path.from_root ~suffix:"/from/path/prefix2");
+            to_prefix_excl =
+              Some (Relative_path.from_root ~suffix:"/to/path/prefix2");
           };
         Range
           {
-            from_prefix_incl = Some (Relative_path.from_root "/from/path/only");
+            from_prefix_incl =
+              Some (Relative_path.from_root ~suffix:"/from/path/only");
             to_prefix_excl = None;
           };
         Range
           {
             from_prefix_incl = None;
-            to_prefix_excl = Some (Relative_path.from_root "/to/path/only");
+            to_prefix_excl =
+              Some (Relative_path.from_root ~suffix:"/to/path/only");
           };
       ];
     filename = "/some/dir/some_filename";
@@ -132,11 +136,13 @@ Alternatively, you can pass this JSON as the argument, with the saved state JSON
 let get_path (key : string) json_obj : Relative_path.t option =
   let value = Hh_json.Access.get_string key json_obj in
   match value with
-  | Ok ((value : string), _keytrace) -> Some (Relative_path.from_root value)
+  | Ok ((value : string), _keytrace) ->
+    Some (Relative_path.from_root ~suffix:value)
   | Error _ -> None
 
 let get_spec (spec_json : Hh_json.json) : files_to_check_spec =
-  try Prefix (Hh_json.get_string_exn spec_json |> Relative_path.from_root)
+  try
+    Prefix (Relative_path.from_root ~suffix:(Hh_json.get_string_exn spec_json))
   with _ ->
     let from_prefix_incl = get_path "from_prefix_incl" (spec_json, []) in
     let to_prefix_excl = get_path "to_prefix_excl" (spec_json, []) in
@@ -181,7 +187,7 @@ let get_save_state_spec (v : string option) :
 let parse_saved_state_json (json, _keytrace) =
   let array_to_path_list =
     List.map ~f:(fun file ->
-        Hh_json.get_string_exn file |> Relative_path.from_root)
+        Relative_path.from_root ~suffix:(Hh_json.get_string_exn file))
   in
   let prechecked_changes =
     Hh_json.(get_field_opt (Access.get_array "prechecked_changes")) json

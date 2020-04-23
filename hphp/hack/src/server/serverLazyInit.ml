@@ -174,7 +174,8 @@ let download_and_load_state_exn
       | Ok (dirty_master_files, dirty_local_files) ->
         let () = HackEventLogger.state_loader_dirty_files t in
         let list_to_set x =
-          List.map x Relative_path.from_root |> Relative_path.set_of_list
+          List.map x (fun suffix -> Relative_path.from_root ~suffix)
+          |> Relative_path.set_of_list
         in
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
         let dirty_master_files = list_to_set dirty_master_files in

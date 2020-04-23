@@ -134,8 +134,8 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
   Hh_logger.log "First pass complete";
 
   (* Now, let's remove a few files and try again - assertions should change *)
-  let bar1path = Relative_path.from_root "/bar_1.php" in
-  let foo3path = Relative_path.from_root "/foo_3.php" in
+  let bar1path = Relative_path.from_root ~suffix:"/bar_1.php" in
+  let foo3path = Relative_path.from_root ~suffix:"/foo_3.php" in
   let s = Relative_path.Set.empty in
   let s = Relative_path.Set.add s bar1path in
   let s = Relative_path.Set.add s foo3path in

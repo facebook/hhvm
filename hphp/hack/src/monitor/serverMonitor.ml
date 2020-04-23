@@ -200,7 +200,8 @@ struct
    * version specified in there matches our currently running version. *)
   let is_config_version_matching env =
     let filename =
-      Relative_path.from_root Config_file.file_path_relative_to_repo_root
+      Relative_path.from_root
+        ~suffix:Config_file.file_path_relative_to_repo_root
     in
     let (_hash, config) =
       Config_file.parse_hhconfig

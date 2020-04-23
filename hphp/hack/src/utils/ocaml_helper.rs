@@ -4,6 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::borrow::Cow;
+
 // Port from https://github.com/ocaml/ocaml/blob/6efe8fea5b6c3f1db22e50e8b164d6ffec85578d/runtime/ints.c
 fn parse_sign_and_base(p: &[u8]) -> (i8, u8, &[u8]) {
     let mut sign = 1i8;
@@ -69,6 +71,66 @@ pub fn int_of_string_opt(p: &[u8]) -> Option<i64> {
 
 pub fn int_of_str_opt(s: impl AsRef<str>) -> Option<i64> {
     int_of_string_opt(s.as_ref().as_bytes())
+}
+
+/// ported from supercaml/share/dotopam/default/lib/ocaml/bytes.ml
+/// github link: https://github.com/ocaml/ocaml/blob/4.09.1/stdlib/bytes.ml#L170-L208
+pub fn escaped(s: &str) -> Cow<str> {
+    let mut n: usize = 0;
+    for i in s.as_bytes() {
+        n += match i {
+            b'"' | b'\\' | b'\n' | b'\t' | b'\r' | 8 => 2,
+            b' '..=b'~' => 1,
+            _ => 4,
+        };
+    }
+    if n == s.len() {
+        s.into()
+    } else {
+        let mut es: Vec<u8> = Vec::with_capacity(n);
+        n = 0;
+        for i in s.as_bytes() {
+            match i {
+                b'"' | b'\\' => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(*i);
+                }
+                b'\n' => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(b'n');
+                }
+                b'\t' => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(b't');
+                }
+                b'\r' => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(b'r');
+                }
+                8 => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(b'b');
+                }
+                x @ b' '..=b'~' => es.push(*x),
+                _ => {
+                    es.push(b'\\');
+                    n += 1;
+                    es.push(48 + i / 100);
+                    n += 1;
+                    es.push(48 + (i / 10) % 10);
+                    n += 1;
+                    es.push(48 + i % 10);
+                }
+            }
+            n += 1;
+        }
+        unsafe { String::from_utf8_unchecked(es) }.into()
+    }
 }
 
 #[cfg(test)]
@@ -157,5 +219,24 @@ mod tests {
         assert_eq!(f(b"-0"), Some(0));
         assert_eq!(f(b"-0_"), Some(0));
         assert_eq!(f(b"+0"), Some(0));
+    }
+
+    #[test]
+    fn test_escaped() {
+        use escaped as e;
+        assert_eq!(e(""), "");
+        assert_eq!(e("a"), "a");
+        assert_eq!(e("\n"), "\\n");
+        assert_eq!(e("\t"), "\\t");
+        assert_eq!(e("\r"), "\\r");
+        assert_eq!(e("'"), "'");
+        assert_eq!(e("\""), "\\\"");
+        assert_eq!(e("\\"), "\\\\");
+        assert_eq!(e(String::from_utf8(vec![127]).unwrap().as_str()), "\\127");
+        assert_eq!(e(String::from_utf8(vec![8]).unwrap().as_str()), "\\b");
+        assert_eq!(
+            e(unsafe { String::from_utf8_unchecked(vec![255]) }.as_str()),
+            "\\255"
+        );
     }
 }

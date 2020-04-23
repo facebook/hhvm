@@ -45,6 +45,7 @@ use hhbc_string_utils_rust::{
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq};
 use label_rust::Label;
 use naming_special_names_rust::classes;
+use ocaml_helper::escaped;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
 use runtime::TypedValue;
 use write::*;
@@ -955,7 +956,7 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         TypedValue::VArray((values, loc)) => {
             print_adata_collection_argument(ctx, w, VARRAY_PREFIX, loc, values)
         }
-        TypedValue::HhasAdata(s) => not_impl!(),
+        TypedValue::HhasAdata(s) => w.write(escaped(s)),
     }
 }
 
@@ -1059,7 +1060,7 @@ fn print_instructions<W: Write>(
     use InstructTry::*;
     for instr in instr_seq.compact_iter() {
         match instr {
-            ISpecialFlow(_) => return not_impl!(),
+            ISpecialFlow(_) => return Err(Error::fail("Cannot break/continue 1 level")),
             IComment(_) => {
                 // indetation = 0
                 newline(w)?;
@@ -2017,7 +2018,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             print_collection_type(w, ct)
         }
         LC::NullUninit => w.write("NullUninit"),
-        LC::TypedValue(tv) => not_impl!(),
+        LC::TypedValue(_) => Err(Error::fail("print_lit_const: TypedValue")),
     }
 }
 

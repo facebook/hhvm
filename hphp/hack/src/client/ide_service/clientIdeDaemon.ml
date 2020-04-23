@@ -755,6 +755,13 @@ let handle_request :
     in
     let files = change_file files path in
     Lwt.return (update_state_files state files, Ok ())
+  (* Document Symbol *)
+  | ( ( During_init { dfiles = files; dcommon = common; _ }
+      | Initialized { ifiles = files; icommon = common; _ } ),
+      Document_symbol document_location ) ->
+    let (files, entry) = update_file files document_location in
+    let result = FileOutline.outline_entry ~popt:common.popt ~entry in
+    Lwt.return (update_state_files state files, Ok result)
   (***********************************************************)
   (************************* UNABLE TO HANDLE ****************)
   (***********************************************************)
@@ -897,13 +904,6 @@ let handle_request :
             ~entry
             ~line:document_location.ClientIdeMessage.line
             ~column:document_location.ClientIdeMessage.column)
-    in
-    Lwt.return (state, Ok result)
-  (* Document Symbol *)
-  | (Initialized istate, Document_symbol document_location) ->
-    let (state, ctx, entry) = update_file_ctx istate document_location in
-    let result =
-      FileOutline.outline_entry ~popt:(Provider_context.get_popt ctx) ~entry
     in
     Lwt.return (state, Ok result)
   (* Type Coverage *)

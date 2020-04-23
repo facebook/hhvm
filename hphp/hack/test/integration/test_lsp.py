@@ -6392,10 +6392,23 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="documentSymbol before init will fail",
+                comment="documentSymbol before init will succeed",
                 method="textDocument/documentSymbol",
                 params={"textDocument": {"uri": "file://${root_path}/beforeInit2.php"}},
-                result=None,
+                result=[
+                    {
+                        "name": "beforeInit2",
+                        "kind": 12,
+                        "location": {
+                            "uri": "file://${root_path}/beforeInit2.php",
+                            "range": {
+                                "start": {"line": 1, "character": 0},
+                                "end": {"line": 3, "character": 1},
+                            },
+                        },
+                    }
+                ],
+                powered_by="serverless_ide",
             )
             .wait_for_notification(
                 comment="wait for sIDE to init",

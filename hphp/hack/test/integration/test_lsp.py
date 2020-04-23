@@ -6390,6 +6390,13 @@ function aaa(): string {
                 },
                 result=None,
             )
+            .request(
+                line=line(),
+                comment="documentSymbol before init will fail",
+                method="textDocument/documentSymbol",
+                params={"textDocument": {"uri": "file://${root_path}/beforeInit2.php"}},
+                result=None,
+            )
             .wait_for_notification(
                 comment="wait for sIDE to init",
                 method="telemetry/event",

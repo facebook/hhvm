@@ -436,7 +436,6 @@ let open_file
     (initialized_state : initialized_state)
     (path : Relative_path.t)
     (contents : string) : state =
-  let initialized_state = restore_hhi_root_if_necessary initialized_state in
   let entry =
     Provider_context.make_entry
       ~path
@@ -477,6 +476,7 @@ let update_file
     (initialized_state : initialized_state)
     (document_location : ClientIdeMessage.document_location) :
     state * Provider_context.t * Provider_context.entry =
+  let initialized_state = restore_hhi_root_if_necessary initialized_state in
   let path =
     document_location.ClientIdeMessage.file_path
     |> Path.to_string

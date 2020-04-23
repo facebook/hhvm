@@ -2171,7 +2171,9 @@ let bad_decl_override parent_pos parent_name pos name msgl =
 
 let bad_method_override pos member_name msgl (on_error : typing_error_callback)
     =
-  let msg = (pos, "Member " ^ strip_ns member_name ^ " has the wrong type") in
+  let msg =
+    (pos, "The method " ^ strip_ns member_name ^ " has the wrong type")
+  in
   (* This is a cascading error message *)
   on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
 

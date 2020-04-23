@@ -4,7 +4,7 @@ File "ambiguous_constructor.php", line 10, characters 7-8:
 Some members are incompatible with those declared in type T1
 Read the following to see why:
 File "ambiguous_constructor.php", line 6, characters 19-29:
-Member __construct has the wrong type
+The method __construct has the wrong type
 File "ambiguous_constructor.php", line 6, characters 19-29:
 T2 and T1 both declare ambiguous implementations of __construct.
 File "ambiguous_constructor.php", line 6, characters 19-29:

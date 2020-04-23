@@ -1,5 +1,5 @@
 File "constraint_override_bad2.php", line 20, characters 19-21:
-Member foo has the wrong type (Typing[4341])
+The method foo has the wrong type (Typing[4341])
 File "constraint_override_bad2.php", line 20, characters 28-28:
 Some type constraint(s) are violated here
 File "constraint_override_bad2.php", line 20, characters 23-23:

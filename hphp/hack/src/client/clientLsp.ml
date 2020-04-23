@@ -1487,11 +1487,13 @@ let run_ide_service
 let stop_ide_service
     (ide_service : ClientIdeService.t)
     ~(tracking_id : string)
-    ~(reason : ClientIdeService.Stop_reason.t) : unit Lwt.t =
+    ~(stop_reason : ClientIdeService.Stop_reason.t) : unit Lwt.t =
   log
     "Stopping IDE service process: %s"
-    (ClientIdeService.Stop_reason.to_string reason);
-  let%lwt () = ClientIdeService.stop ide_service ~tracking_id ~reason in
+    (ClientIdeService.Stop_reason.to_string stop_reason);
+  let%lwt () =
+    ClientIdeService.stop ide_service ~tracking_id ~stop_reason ~exn:None
+  in
   Lwt.return_unit
 
 let on_status_restart_action
@@ -1550,7 +1552,7 @@ let on_status_restart_action
       stop_ide_service
         old_ide_service
         ~tracking_id:"restart"
-        ~reason:ClientIdeService.Stop_reason.Restarting
+        ~stop_reason:ClientIdeService.Stop_reason.Restarting
     in
     Lwt.return state
   | _ -> Lwt.return state
@@ -1978,7 +1980,7 @@ let do_shutdown
       stop_ide_service
         !ide_service
         ~tracking_id
-        ~reason:ClientIdeService.Stop_reason.Editor_exited
+        ~stop_reason:ClientIdeService.Stop_reason.Editor_exited
   in
   Lwt.return Post_shutdown
 
@@ -3909,7 +3911,7 @@ let handle_client_message
         stop_ide_service
           !ide_service
           ~tracking_id
-          ~reason:ClientIdeService.Stop_reason.Testing
+          ~stop_reason:ClientIdeService.Stop_reason.Testing
       in
       respond_jsonrpc
         ~powered_by:Serverless_ide

@@ -38,6 +38,7 @@ end
 module Stop_reason = struct
   type t =
     | Crashed
+    | Closed
     | Editor_exited
     | Restarting
     | Testing
@@ -45,6 +46,7 @@ module Stop_reason = struct
   let to_string (t : t) : string =
     match t with
     | Crashed -> "crashed"
+    | Closed -> "closed"
     | Editor_exited -> "editor exited"
     | Restarting -> "restarting"
     | Testing -> "testing-only, you should not see this"
@@ -61,7 +63,7 @@ type state =
       (** We have received an initialize response from the daemon and all
       is well. The only thing that can take us out of this state is if
       someone invokes [stop], or if the daemon connection gets EOF. *)
-  | Stopped of Stop_reason.t * ClientIdeMessage.stopped_reason
+  | Stopped of ClientIdeMessage.stopped_reason * Lsp.Error.t
       (** Someone called [stop] or the daemon connection got EOF.
       This is a terminal state. This is the only state that arose
       from actions on our side; all the other states arose from
@@ -75,7 +77,7 @@ let state_to_string (state : state) : string =
   | Initialized env ->
     Printf.sprintf "Initialized(%s)" (Status.to_string env.status)
   | Stopped (reason, _) ->
-    Printf.sprintf "Stopped(%s)" (Stop_reason.to_string reason)
+    Printf.sprintf "Stopped(%s)" reason.ClientIdeMessage.medium_user_message
 
 type message_wrapper =
   | Message_wrapper : 'a ClientIdeMessage.tracked_t -> message_wrapper
@@ -122,8 +124,6 @@ type t = {
 let log s = Hh_logger.log ("[ide-service] " ^^ s)
 
 let log_debug s = Hh_logger.debug ("[ide-service] " ^^ s)
-
-let log_error s = Hh_logger.error ("[ide-service] " ^^ s)
 
 let set_state (t : t) (new_state : state) : unit =
   log
@@ -186,23 +186,9 @@ let rpc
     ~(progress : unit -> unit)
     (message : 'a ClientIdeMessage.t) : ('a, Lsp.Error.t) Lwt_result.t =
   let tracked_message = { ClientIdeMessage.tracking_id; message } in
-  let open ClientIdeMessage in
   try%lwt
     match t.state with
-    | Stopped (reason, info) ->
-      Lwt.return_error
-        {
-          Lsp.Error.code = Lsp.Error.RequestCancelled;
-          message =
-            Printf.sprintf
-              "IDE service is stopped: %s. %s"
-              (Stop_reason.to_string reason)
-              info.short_user_message;
-          data =
-            Lsp_fmt.error_data_of_string
-              ~key:"not_running_reason"
-              info.debug_details;
-        }
+    | Stopped (_, e) -> Lwt.return_error e
     | Uninitialized
     | Initialized _
     | Failed_to_initialize _ ->
@@ -270,14 +256,9 @@ let rpc
       | None ->
         (* queue closure is part of normal shutdown *)
         failwith "Could not read response: queue was closed")
-  with e ->
-    let e = Exception.wrap e in
-    Lwt.return_error
-      {
-        Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-        message = "ClientIdeService.rpc " ^ Exception.get_ctor_string e;
-        data = Lsp_fmt.error_data_of_stack (Exception.to_string e);
-      }
+  with exn ->
+    let exn = Exception.wrap exn in
+    Lwt.return_error (ClientIdeUtils.make_bug_error "rpc" ~exn)
 
 let initialize_from_saved_state
     (t : t)
@@ -333,30 +314,19 @@ let initialize_from_saved_state
     | Response { response = Ok _; tracking_id = "init"; _ } -> Lwt.return_ok ()
     | Response { response = Error e; tracking_id = "init"; _ } ->
       (* that error has structure, which we wish to preserve in our error_data. *)
-      let debug_details =
-        Printf.sprintf
-          "%s\n%s"
-          e.Lsp.Error.message
-          ( e.Lsp.Error.data
-          |> Option.value ~default:Hh_json.JSON_Null
-          |> Hh_json.json_to_string )
-      in
-      let stack =
-        Exception.get_current_callstack_string 99 |> Exception.clean_stack
-      in
-      let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
-      Lwt.return_error error_data
+      Lwt.return_error
+        (ClientIdeUtils.make_bug_reason
+           e.Lsp.Error.message
+           ~data:e.Lsp.Error.data)
     | _ ->
       (* What we got back wasn't the 'init' response we expected:
       the clientIdeDaemon has violated its contract. *)
       failwith ("desync: " ^ message_from_daemon_to_string response)
-  with e ->
-    let e = Exception.wrap e in
-    let stack = Exception.get_backtrace_string e in
-    let debug_details = "Init failed: " ^ Exception.get_ctor_string e in
-    let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
-    set_state t (Failed_to_initialize error_data);
-    Lwt.return_error error_data
+  with exn ->
+    let exn = Exception.wrap exn in
+    let reason = ClientIdeUtils.make_bug_reason "init_failed" ~exn in
+    set_state t (Failed_to_initialize reason);
+    Lwt.return_error reason
 
 let process_status_notification
     (t : t) (notification : ClientIdeMessage.notification) : unit =
@@ -384,10 +354,7 @@ let process_status_notification
         (ClientIdeMessage.notification_to_string notification)
         (state_to_string t.state)
     in
-    HackEventLogger.serverless_ide_crash
-      ~message
-      ~stack:(Exception.get_current_callstack_string 99 |> Exception.clean_stack);
-    log_error "%s" message;
+    ClientIdeUtils.log_bug message ~telemetry:true;
     ()
 
 let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
@@ -415,15 +382,9 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
                Lwt.return_error
                  { code = InternalError; message = "timeout"; data = None });
             ]
-        with e ->
-          let e = Exception.wrap e in
-          Lwt.return_error
-            {
-              code = InternalError;
-              message = Exception.get_ctor_string e;
-              data =
-                Lsp_fmt.error_data_of_stack (Exception.get_backtrace_string e);
-            }
+        with exn ->
+          let exn = Exception.wrap exn in
+          Lwt.return_error (ClientIdeUtils.make_bug_error "destroy" ~exn)
       in
       let () =
         match result with
@@ -440,11 +401,29 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
   Lwt_message_queue.close t.response_emitter;
   Lwt.return_unit
 
-let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
-    =
-  let stack = Exception.get_current_callstack_string 100 in
-  let debug_details = "stopped" in
-  let error_data = ClientIdeMessage.stopped_for_bug ~debug_details ~stack in
+let stop
+    (t : t)
+    ~(tracking_id : string)
+    ~(stop_reason : Stop_reason.t)
+    ~(exn : Exception.t option) : unit Lwt.t =
+  (* we store both a user-facing reason here, and a programmatic error
+  for use in subsequent telemetry *)
+  let reason = ClientIdeUtils.make_bug_reason "stop" in
+  let e = ClientIdeUtils.make_bug_error "stop" ?exn in
+  (* We'll stick the stop_reason into that programmatic error, so that subsequent
+  telemetry can pick it up. (It never affects the user-facing message.) *)
+  let items =
+    match e.Lsp.Error.data with
+    | None -> []
+    | Some (Hh_json.JSON_Object items) -> items
+    | Some json -> [("data", json)]
+  in
+  let items =
+    ("stop_reason", stop_reason |> Stop_reason.to_string |> Hh_json.string_)
+    :: items
+  in
+  let e = { e with Lsp.Error.data = Some (Hh_json.JSON_Object items) } in
+
   let%lwt () = destroy t ~tracking_id in
   (* Correctness here is very subtle... During the course of that call to
   'destroy', we do let%lwt on an rpc call to shutdown the daemon.
@@ -463,27 +442,29 @@ let stop (t : t) ~(tracking_id : string) ~(reason : Stop_reason.t) : unit Lwt.t
   weirdly because of the lack of hhi.
   Luckily we're saved from that because clientLsp never makes rpc requests
   to us after it has called 'stop'. *)
-  set_state t (Stopped (reason, error_data));
+  set_state t (Stopped (reason, e));
   Lwt.return_unit
 
-let cleanup_upon_shutdown_or_exn (t : t) ~(e : Exception.t option) : unit Lwt.t
-    =
+let cleanup_upon_shutdown_or_exn (t : t) ~(exn : Exception.t option) :
+    unit Lwt.t =
   (* We are invoked with e=None when one of the message-queues has said that
   it's closed. This indicates an orderly shutdown has been performed by 'stop'.
   We are invoked with e=Some when we had an exception in our main serve loop. *)
-  let (message, stack) =
-    match e with
-    | None -> ("message-queue closed", "")
-    | Some e -> (Exception.get_ctor_string e, Exception.get_backtrace_string e)
+  let stop_reason =
+    match exn with
+    | None ->
+      log "Normal shutdown due to message-queue closure";
+      Stop_reason.Closed
+    | Some exn ->
+      ClientIdeUtils.log_bug "shutdown" ~exn ~telemetry:true;
+      Stop_reason.Crashed
   in
-  HackEventLogger.serverless_ide_crash ~message ~stack;
-  log "Shutdown triggered by %s\n%s" message stack;
   (* We might as well call 'stop' in both cases; there'll be no harm. *)
   match t.state with
   | Stopped _ -> Lwt.return_unit
   | _ ->
     log "Shutting down...";
-    let%lwt () = stop t ~tracking_id:"exception" ~reason:Stop_reason.Crashed in
+    let%lwt () = stop t ~tracking_id:"cleanup_or_shutdown" ~stop_reason ~exn in
     Lwt.return_unit
 
 let rec serve (t : t) : unit Lwt.t =
@@ -510,7 +491,7 @@ let rec serve (t : t) : unit Lwt.t =
     in
     match next_action with
     | `Close ->
-      let%lwt () = cleanup_upon_shutdown_or_exn t ~e:None in
+      let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:None in
       Lwt.return_unit
     | `Outgoing (Message_wrapper next_message) ->
       log_debug "-> %s" (ClientIdeMessage.tracked_t_to_string next_message);
@@ -534,12 +515,12 @@ let rec serve (t : t) : unit Lwt.t =
       if queue_is_open then
         serve t
       else
-        let%lwt () = cleanup_upon_shutdown_or_exn t ~e:None in
+        let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:None in
         Lwt.return_unit
-  with e ->
-    let e = Exception.wrap e in
+  with exn ->
+    let exn = Exception.wrap exn in
     (* cleanup function below will log the exception *)
-    let%lwt () = cleanup_upon_shutdown_or_exn t ~e:(Some e) in
+    let%lwt () = cleanup_upon_shutdown_or_exn t ~exn:(Some exn) in
     Lwt.return_unit
 
 let get_notifications (t : t) : notification_emitter = t.notification_emitter
@@ -548,14 +529,7 @@ let get_status (t : t) : Status.t =
   match t.state with
   | Uninitialized -> Status.Initializing
   | Failed_to_initialize error_data -> Status.Stopped error_data
-  | Stopped (reason, error_data) ->
-    let debug_details =
-      Stop_reason.to_string reason
-      ^ "\n"
-      ^ error_data.ClientIdeMessage.debug_details
-    in
-    let error_data = { error_data with ClientIdeMessage.debug_details } in
-    Status.Stopped error_data
+  | Stopped (reason, _) -> Status.Stopped reason
   | Initialized { status } ->
     if Status.is_ready status && t.active_rpc_count > 0 then
       Status.Rpc

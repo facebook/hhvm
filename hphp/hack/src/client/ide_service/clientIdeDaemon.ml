@@ -9,10 +9,12 @@
 
 open Hh_prelude
 
-(** This is the result type from attempting to load saved-state. *)
+(** This is the result type from attempting to load saved-state.
+In the error case, [stopped_reason] is a human-facing response,
+and [Lsp.Error.t] contains structured telemetry data. *)
 type load_saved_state_result =
   ( Naming_table.t * Saved_state_loader.changed_files,
-    ClientIdeMessage.stopped_reason )
+    ClientIdeMessage.stopped_reason * Lsp.Error.t )
   result
 
 (** These are messages on ClientIdeDaemon's internal message-queue *)
@@ -168,7 +170,7 @@ type state =
   | Pending_init  (** We haven't yet received init request *)
   | During_init of dstate  (** We're working on the init request *)
   | Initialized of istate  (** Finished work on init request *)
-  | Failed_init of ClientIdeMessage.stopped_reason  (** Failed request *)
+  | Failed_init of Lsp.Error.t  (** Failed request, with root cause *)
 
 type t = {
   message_queue: message_queue;
@@ -188,14 +190,11 @@ let state_to_log_string (state : state) : string =
     Printf.sprintf "During_init(%s)" (files_to_log_string dfiles)
   | Initialized { ifiles; _ } ->
     Printf.sprintf "Initialized(%s)" (files_to_log_string ifiles)
-  | Failed_init e ->
-    Printf.sprintf "Failed_init(%s)" e.ClientIdeMessage.short_user_message
+  | Failed_init e -> Printf.sprintf "Failed_init(%s)" e.Lsp.Error.message
 
 let log s = Hh_logger.log ("[ide-daemon] " ^^ s)
 
 let log_debug s = Hh_logger.debug ("[ide-daemon] " ^^ s)
-
-let log_error s = Hh_logger.error ("[ide-daemon] " ^^ s)
 
 let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
   (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
@@ -274,7 +273,9 @@ let load_saved_state
 
         Lwt.return_ok (naming_table, changed_files)
       | Error load_error ->
-        Lwt.return_error
+        (* We'll turn that load_error into a user-facing [reason], and a
+        programmatic error [e] for future telemetry *)
+        let reason =
           ClientIdeMessage.
             {
               short_user_message =
@@ -287,12 +288,28 @@ let load_saved_state
                 Saved_state_loader.debug_details_of_error load_error;
               is_actionable = Saved_state_loader.is_error_actionable load_error;
             }
+        in
+        let e =
+          {
+            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+            message = reason.ClientIdeMessage.medium_user_message;
+            data =
+              Some
+                (Hh_json.JSON_Object
+                   [
+                     ( "debug_details",
+                       Hh_json.string_ reason.ClientIdeMessage.debug_details );
+                   ]);
+          }
+        in
+        Lwt.return_error (reason, e)
     with exn ->
       let exn = Exception.wrap exn in
-      let stack = Exception.get_backtrace_string exn |> Exception.clean_stack in
-      let debug_details = "uncaught: " ^ Exception.get_ctor_string exn in
-      log_error "%s\n%s" debug_details stack;
-      Lwt.return_error (ClientIdeMessage.stopped_for_bug ~debug_details ~stack)
+      ClientIdeUtils.log_bug "load_exn" ~exn ~telemetry:false;
+      (* We need both a user-facing "reason" and an internal error "e" *)
+      let reason = ClientIdeUtils.make_bug_reason "load_exn" ~exn in
+      let e = ClientIdeUtils.make_bug_error "load_exn" ~exn in
+      Lwt.return_error (reason, e)
   in
   Lwt.return result
 
@@ -327,12 +344,9 @@ let remove_hhi (state : state) : unit =
     let hhi_root = Path.to_string hhi_root in
     log "Removing hhi directory %s..." hhi_root;
     (try Sys_utils.rm_dir_tree hhi_root
-     with e ->
-       let e = Exception.wrap e in
-       let message = "remove_hhi: " ^ Exception.get_ctor_string e in
-       let stack = Exception.get_backtrace_string e in
-       HackEventLogger.serverless_ide_crash ~message ~stack;
-       ())
+     with exn ->
+       let exn = Exception.wrap exn in
+       ClientIdeUtils.log_bug "remove_hhi" ~exn ~telemetry:true)
 
 (** initialize1 is called by handle_request upon receipt of an "init"
 message from the client. It is synchronous. It sets up global variables and
@@ -486,17 +500,17 @@ let initialize2
     in
     log_debug "initialize2.done";
     Lwt.return (Initialized istate)
-  | Error edata ->
+  | Error (reason, e) ->
     log_debug "initialize2.error";
     let%lwt () =
       write_message
         ~out_fd
         ~message:
           (ClientIdeMessage.Notification
-             (ClientIdeMessage.Done_init (Error edata)))
+             (ClientIdeMessage.Done_init (Error reason)))
     in
     remove_hhi (During_init dstate);
-    Lwt.return (Failed_init edata)
+    Lwt.return (Failed_init e)
 
 (** An empty ctx with no entries *)
 let make_empty_ctx (istate : istate) : Provider_context.t =
@@ -521,10 +535,7 @@ function to log the event and we'll assume that we just missed a DidOpen. *)
 let log_missing_open_file_BUG (path : Relative_path.t) : unit =
   let path = Relative_path.to_absolute path in
   let message = Printf.sprintf "Error: action on non-open file %s" path in
-  log "%s" message;
-  HackEventLogger.serverless_ide_crash
-    ~message
-    ~stack:(Exception.get_current_callstack_string 99)
+  ClientIdeUtils.log_bug message ~telemetry:true
 
 (** Opens a file, in response to DidOpen event, by putting in a new
 entry in open_files, with empty AST and TAST. If the LSP client
@@ -688,26 +699,11 @@ let handle_request :
         Lwt.return (During_init dstate, Ok ())
       with exn ->
         let exn = Exception.wrap exn in
-        let debug_details =
-          "initialize1 failed: " ^ Exception.get_ctor_string exn
-        in
-        let stack =
-          Exception.get_backtrace_string exn |> Exception.clean_stack
-        in
-        let e =
-          {
-            Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-            message = debug_details;
-            data = Some (Hh_json.JSON_Object [("stack", Hh_json.string_ stack)]);
-          }
-        in
-        let stopped_reason =
-          ClientIdeMessage.stopped_for_bug ~debug_details ~stack
-        in
+        let e = ClientIdeUtils.make_bug_error "initialize1" ~exn in
         (* Our caller has an exception handler. But we must handle this ourselves
         to change state to Failed_init; our caller's handler doesn't change state. *)
         (* TODO: remove_hhi *)
-        Lwt.return (Failed_init stopped_reason, Error e)
+        Lwt.return (Failed_init e, Error e)
     end
   | (_, Initialize_from_saved_state _) ->
     failwith ("Unexpected init in " ^ state_to_log_string state)
@@ -776,18 +772,7 @@ let handle_request :
       }
     in
     Lwt.return (state, Error e)
-  | (Failed_init reason, _) ->
-    let e =
-      {
-        Lsp.Error.code = Lsp.Error.RequestCancelled;
-        message = "IDE service failed to init: " ^ reason.medium_user_message;
-        data =
-          Some
-            (Hh_json.JSON_Object
-               [("debug_details", Hh_json.string_ reason.debug_details)]);
-      }
-    in
-    Lwt.return (state, Error e)
+  | (Failed_init e, _) -> Lwt.return (state, Error e)
   | (Pending_init, _) ->
     failwith
       (Printf.sprintf
@@ -1066,17 +1051,7 @@ let handle_one_message_exn
           But we instead must fulfil our contract of responding to the client,
           even if we have an exception. Hence we need our own handler here. *)
           let exn = Exception.wrap exn in
-          let stack =
-            Exception.get_backtrace_string exn |> Exception.clean_stack
-          in
-          let e =
-            {
-              Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-              message = "handle_request " ^ Exception.get_ctor_string exn;
-              data =
-                Some (Hh_json.JSON_Object [("stack", Hh_json.string_ stack)]);
-            }
-          in
+          let e = ClientIdeUtils.make_bug_error "handle_request" ~exn in
           Lwt.return (state, Error e)
       in
       let%lwt () =
@@ -1121,12 +1096,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
           handle_one_message_exn ~in_fd ~out_fd ~message_queue ~state
         in
         Lwt.return state
-      with e ->
-        let e = Exception.wrap e in
-        let message = "recoverable: " ^ Exception.get_ctor_string e in
-        let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
-        HackEventLogger.serverless_ide_crash ~message ~stack;
-        log_error "%s\n%s" message stack;
+      with exn ->
+        let exn = Exception.wrap exn in
+        ClientIdeUtils.log_bug "handle_one_message" ~exn ~telemetry:true;
         Lwt.return_some state
     in
     match next_state_opt with
@@ -1140,14 +1112,9 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
     and () = pump_stdin message_queue in
     Lwt.cancel flusher_promise;
     Lwt.return_unit
-  with e ->
-    let e = Exception.wrap e in
-    let message =
-      "Fatal clientIdeDaemon crash: " ^ Exception.get_ctor_string e
-    in
-    let stack = Exception.get_backtrace_string e |> Exception.clean_stack in
-    HackEventLogger.serverless_ide_crash ~message ~stack;
-    log_error "%s\n%s" message stack;
+  with exn ->
+    let exn = Exception.wrap exn in
+    ClientIdeUtils.log_bug "fatal clientIdeDaemon" ~exn ~telemetry:true;
     Lwt.return_unit
 
 let daemon_main

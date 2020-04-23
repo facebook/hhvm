@@ -37,10 +37,14 @@ end
 
 module Stop_reason : sig
   type t =
-    | Crashed
-    | Editor_exited
+    | Crashed  (** clientIdeService encountered an unexpected bug *)
+    | Closed
+        (** clientIdeService shut down normally, although we've failed to record why *)
+    | Editor_exited  (** clientLsp decided to close in response to shutdown*)
     | Restarting
+        (** clientLsp decided to close this clientIdeService and start a new one *)
     | Testing
+        (** test harnesses can tell clientLsp to shut down clientIdeService *)
 
   val to_string : t -> string
 end
@@ -70,11 +74,12 @@ val serve : t -> unit Lwt.t
 (** Clean up any resources held by the IDE service (such as the message loop
 and background processes). Mark the service's status as "shut down" for the
 given [reason]. *)
-val stop : t -> tracking_id:string -> reason:Stop_reason.t -> unit Lwt.t
-
-(** The caller is expected to call this function to notify the IDE service
-whenever a Hack file changes on disk, so that it can update its indexes
-appropriately. Will queue the notification until IDE service can handle it. *)
+val stop :
+  t ->
+  tracking_id:string ->
+  stop_reason:Stop_reason.t ->
+  exn:Exception.t option ->
+  unit Lwt.t
 
 (** Make an RPC call to the IDE service. *)
 val rpc :

@@ -230,19 +230,6 @@ type stopped_reason = {
   debug_details: string;
 }
 
-(** this is for when things stopped due to internal bugs, invariant
-violations, unexpected exceptions, ... *)
-let stopped_for_bug ~(debug_details : string) ~(stack : string) : stopped_reason
-    =
-  {
-    short_user_message = "failed";
-    medium_user_message = "Hack IDE has failed.";
-    long_user_message =
-      "Hack IDE has failed.\nThis is unexpected.\nPlease file a bug within your IDE.";
-    debug_details = debug_details ^ "\nSTACK:\n" ^ stack;
-    is_actionable = false;
-  }
-
 type notification =
   | Done_init of (Processing_files.t, stopped_reason) result
   | Processing_files of Processing_files.t

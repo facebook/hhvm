@@ -13,7 +13,7 @@ use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use oxidized::typing_defs_core::Ty_ as DTy_;
-use oxidized::{ast, pos::Pos};
+use oxidized::{aast_defs, ast, ast_defs, local_id, pos::Pos};
 use typing_defs_rust::typing_reason::PReason_;
 use typing_defs_rust::{tast, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 
@@ -128,6 +128,43 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
                 unpacked_element,
                 in_suspend,
             )
+        }
+        ast::Expr_::Binop(op) => match op.as_ref() {
+            (ast_defs::Bop::Eq(None), e1, e2) => {
+                let te2 = expr(env, e2);
+                let tast::Expr((_pos2, ty2), _) = te2;
+
+                let te1 = assign(env, e1, ty2);
+                let tast::Expr((_pos1, ty), _) = te1;
+
+                // TODO(hrust): reactivity
+
+                // If we are assigning a local variable to another local
+                // variable then the expression ID associated with e2 is
+                // transferred to e1
+                match (e1, e2) {
+                    (ast::Expr(_, ast::Expr_::Lvar(id1)), ast::Expr(_, ast::Expr_::Lvar(id2))) => {
+                        let ast::Lid(_, x1) = id1.as_ref();
+                        let ast::Lid(_, x2) = id2.as_ref();
+                        if let Some(eid2) = env.get_local_expr_id(x2.into()) {
+                            env.set_local_expr_id(x1.into(), eid2);
+                        }
+                    }
+                    _ => (),
+                };
+                (
+                    ty,
+                    tast::Expr_::Binop(Box::new((ast_defs::Bop::Eq(None), te1, te2))),
+                )
+            }
+            op => unimplemented!("{:#?}", op),
+        },
+        ast::Expr_::Lvar(id) => {
+            // TODO(hrust): using var
+            // TODO(hrust): implement check_defined=false
+            let ast::Lid(pos, x) = id.as_ref();
+            let ty = env.get_local_check_defined(pos, x.into());
+            (ty, tast::Expr_::Lvar(id.clone()))
         }
         x => unimplemented!("{:#?}", x),
     };
@@ -285,4 +322,34 @@ fn bind_param<'a>(env: &mut Env<'a>, ty1: Ty<'a>, param: &'a ast::FunParam) -> t
     // TODO(hrust): has_accept_disposable_attribute
     // TODO(hrust): mutability
     tparam
+}
+
+/// Deal with assignment of a value of type ty2 to lvalue e1.
+fn assign<'a>(
+    env: &mut Env<'a>,
+    ast::Expr(pos1, e1): &'a ast::Expr,
+    ty2: Ty<'a>,
+) -> tast::Expr<'a> {
+    match e1 {
+        ast::Expr_::Lvar(id) => {
+            let aast_defs::Lid(_, x) = id.as_ref();
+            set_valid_rvalue(env, pos1, x, ty2);
+            // TODO(hrust): set_tyvar_variance
+            tast::Expr((pos1, ty2), tast::Expr_::Lvar(id.clone()))
+        }
+        e1 => unimplemented!("{:?}", e1),
+    }
+}
+
+fn set_valid_rvalue<'a>(env: &mut Env<'a>, p: &'a Pos, x: &'a local_id::LocalId, ty: Ty<'a>) {
+    set_local(env, p, x, ty);
+    // We are assigning a new value to the local variable, so we need to
+    // generate a new expression id
+    let id = env.ident();
+    env.set_local_expr_id(x.into(), id);
+}
+
+fn set_local<'a>(env: &mut Env<'a>, _p: &'a Pos, x: &'a local_id::LocalId, ty: Ty<'a>) {
+    // TODO(hrust): is_using_var
+    env.set_local(x.into(), ty)
 }

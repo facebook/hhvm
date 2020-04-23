@@ -596,7 +596,7 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
     let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
     let fnl =
       List.map fnl ~f:(fun path ->
-          Relative_path.from_root (Path.to_string path))
+          Relative_path.create_detect_prefix (Path.to_string path))
     in
     let (env, t) =
       initialize_naming_table

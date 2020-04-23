@@ -47,7 +47,7 @@ pub enum HoistKind {
     Hoisted,
 }
 
-#[derive(Debug, Clone)] // TODO(hrust): Clone is used when bactracking now, can we somehow avoid it?
+#[derive(Debug, Clone)] // TODO(hrust): Clone is used when backtracking now, can we somehow avoid it?
 struct Variables {
     /// all variables declared/used in the scope
     all_vars: HashSet<String>,
@@ -966,7 +966,7 @@ fn add_reified_property(tparams: &ClassTparams, vars: &mut Vec<ClassVar>) {
     if !tparams.list.iter().all(|t| t.reified == ReifyKind::Erased) {
         let p = Pos::make_none();
         // varray/vec that holds a list of type structures
-        // this prop will be initilized during runtime
+        // this prop will be initialized during runtime
         let hint = Hint(
             p.clone(),
             Box::new(Hint_::Happly(Id(p.clone(), "\\HH\\varray".into()), vec![])),

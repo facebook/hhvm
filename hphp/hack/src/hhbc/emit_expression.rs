@@ -1886,7 +1886,7 @@ fn emit_call_lhs_and_fcall(
                     cexpr = reified_var_cexpr;
                 }
             }
-            // TODO(hrust) enabel `let method_id = method::Type::from_ast_name(&id);`,
+            // TODO(hrust) enable `let method_id = method::Type::from_ast_name(&id);`,
             // `from_ast_name` should be able to accpet Cow<str>
             let method_id: method::Type = string_utils::strip_global_ns(&id).to_string().into();
             Ok(match cexpr {
@@ -3759,7 +3759,7 @@ fn emit_class_const(
                 emit_pos_then(&pos, instr::string(cname))
             } else {
                 emit_symbol_refs::State::add_class(e, cid.clone());
-                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // TODO(hrust) enable `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =
                     string_utils::strip_global_ns(&id.1).to_string().into();
@@ -3770,7 +3770,7 @@ fn emit_class_const(
             let load_const = if string_utils::is_class(&id.1) {
                 instr::classname()
             } else {
-                // TODO(hrust) enabel `let const_id = r#const::Type::from_ast_name(&id.1);`,
+                // TODO(hrust) enable `let const_id = r#const::Type::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
                 let const_id: r#const::Type =
                     string_utils::strip_global_ns(&id.1).to_string().into();

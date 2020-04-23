@@ -95,7 +95,7 @@ impl StackLimit {
     }
 }
 
-/// Initializes the global state, more precisely modifes panic hook such that:
+/// Initializes the global state, more precisely modifies panic hook such that:
 /// - panics raised from StackLimit::panic_if_exceeded() are silenced;
 /// - other panics are passed through the original panic hook.
 pub fn init() {

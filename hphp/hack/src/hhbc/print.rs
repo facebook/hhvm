@@ -142,7 +142,7 @@ pub mod context {
             r
         }
 
-        /// Printing instruction list requies manually control indentation,
+        /// Printing instruction list requires manually control indentation,
         /// where indent_inc/indent_dec are called
         pub fn indent_inc(&mut self) {
             self.indent.inc();
@@ -2695,7 +2695,7 @@ fn print_expr<W: Write>(
                     })
                 }
                 _ => Err(Error::fail(format!(
-                    "Default value for an unknow collection - {}",
+                    "Default value for an unknown collection - {}",
                     name
                 ))),
             }

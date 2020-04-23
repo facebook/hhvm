@@ -487,8 +487,8 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
         attributes
     }
 
-    fn make_attribute(&mut self, _at: Self::R, attibute: Self::R) -> Self::R {
-        attibute
+    fn make_attribute(&mut self, _at: Self::R, attribute: Self::R) -> Self::R {
+        attribute
     }
 
     fn make_constructor_call(

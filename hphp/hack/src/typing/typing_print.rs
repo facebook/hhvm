@@ -9,7 +9,7 @@ use typing_defs_rust::{InternalType, Ty};
 
 pub fn debug<'a>(_env: &Env<'a>, ty: Ty<'a>) -> String {
     unsafe {
-        // TODO(hrust): The OCaml printing funtion uses the environment
+        // TODO(hrust): The OCaml printing function uses the environment
         // to expand type variables and to configure the printer.
         //
         // For now a dummy environment is passed on to the
@@ -25,7 +25,7 @@ pub fn debug<'a>(_env: &Env<'a>, ty: Ty<'a>) -> String {
 
 pub fn debug_i<'a>(_env: &Env<'a>, ity: InternalType<'a>) -> String {
     unsafe {
-        // TODO(hrust): The OCaml printing funtion uses the environment
+        // TODO(hrust): The OCaml printing function uses the environment
         // to expand type variables and to configure the printer.
         //
         // For now a dummy environment is passed on to the

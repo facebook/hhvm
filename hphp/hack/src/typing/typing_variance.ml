@@ -757,7 +757,98 @@ and get_typarams ctx root env (ty : decl_ty) =
         ~init:empty
         ~f:get_typarams_where_constraint
     in
-    union bounds (union constrs (union ret params))
+
+    (* Result so far: bounds, constraints, return, parameters *)
+    let result = union bounds (union constrs (union ret params)) in
+
+    (* Get the lower bounds of a type parameter, including where constraints
+     * of the form `where t as T` or `where T super t`
+     *)
+    let get_lower_bounds tp =
+      let name = snd tp.tp_name in
+      List.filter_map
+        ~f:(fun (ck, ty) ->
+          match ck with
+          | Ast_defs.Constraint_super
+          | Ast_defs.Constraint_eq ->
+            Some ty
+          | _ -> None)
+        tp.tp_constraints
+      @ List.filter_map
+          ~f:(fun (ty1, ck, ty2) ->
+            match ck with
+            | Ast_defs.Constraint_as
+            | Ast_defs.Constraint_eq
+              when is_generic_equal_to name ty2 ->
+              Some ty1
+            | Ast_defs.Constraint_super
+            | Ast_defs.Constraint_eq
+              when is_generic_equal_to name ty1 ->
+              Some ty2
+            | _ -> None)
+          ft.ft_where_constraints
+    in
+
+    (* Get the upper bounds of a type parameter, including where constraints
+     * of the form `where T as t` or `where t super T`
+     *)
+    let get_upper_bounds tp =
+      let name = snd tp.tp_name in
+      List.filter_map
+        ~f:(fun (ck, ty) ->
+          match ck with
+          | Ast_defs.Constraint_as
+          | Ast_defs.Constraint_eq ->
+            Some ty
+          | _ -> None)
+        tp.tp_constraints
+      @ List.filter_map
+          ~f:(fun (ty1, ck, ty2) ->
+            match ck with
+            | Ast_defs.Constraint_as
+            | Ast_defs.Constraint_eq
+              when is_generic_equal_to name ty1 ->
+              Some ty2
+            | Ast_defs.Constraint_super
+            | Ast_defs.Constraint_eq
+              when is_generic_equal_to name ty2 ->
+              Some ty1
+            | _ -> None)
+          ft.ft_where_constraints
+    in
+
+    (* If a type parameter appears covariantly, then treat its lower bounds as covariant *)
+    let propagate_covariant_to_lower_bounds tp =
+      let tyl = get_lower_bounds tp in
+      List.fold_left tyl ~init:empty ~f:get_typarams_union
+    in
+
+    (* If a type parameter appears contravariantly, then treat its upper bounds as contravariant *)
+    let propagate_contravariant_to_upper_bounds tp =
+      let tyl = get_upper_bounds tp in
+      flip (List.fold_left tyl ~init:empty ~f:get_typarams_union)
+    in
+
+    (* Given a type parameter, propagate its variance (co and/or contra) to lower and upper bounds
+     * as appropriate. See Typing_env.set_tyvar_appears_covariantly_and_propagate etc for an
+     * analagous calculation for type variables.
+     *)
+    let propagate_typarams_tparam acc tp =
+      let acc =
+        if SMap.mem (snd tp.tp_name) (fst result) then
+          union acc (propagate_covariant_to_lower_bounds tp)
+        else
+          acc
+      in
+      let acc =
+        if SMap.mem (snd tp.tp_name) (snd result) then
+          union acc (propagate_contravariant_to_upper_bounds tp)
+        else
+          acc
+      in
+      acc
+    in
+    List.fold_left ft.ft_tparams ~init:result ~f:propagate_typarams_tparam
   | Tapply (pos_name, tyl) ->
     let rec get_typarams_variance_list acc variancel tyl =
       match (variancel, tyl) with

@@ -62,9 +62,6 @@ class XMLReader {
   public function isValid(): bool;
 
   <<__Native>>
-  public function __get(mixed $name): mixed;
-
-  <<__Native>>
   public function getParserProperty(int $property): bool;
 
   <<__Native>>

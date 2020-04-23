@@ -5,7 +5,7 @@ object(XMLReader) (0) {
 Warning: Attempted to serialize unserializable builtin class XMLReader in %s/builtin_extensions.inc on line 8
 string(2) "N;"
 NULL
-array(27) {
+array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -45,20 +45,18 @@ array(27) {
   [18]=>
   string(7) "isValid"
   [19]=>
-  string(5) "__get"
-  [20]=>
   string(17) "getParserProperty"
-  [21]=>
+  [20]=>
   string(15) "lookupNamespace"
-  [22]=>
+  [21]=>
   string(9) "setSchema"
-  [23]=>
+  [22]=>
   string(17) "setParserProperty"
-  [24]=>
+  [23]=>
   string(16) "setRelaxNGSchema"
-  [25]=>
+  [24]=>
   string(22) "setRelaxNGSchemaSource"
-  [26]=>
+  [25]=>
   string(6) "expand"
 }
 ================
@@ -71,7 +69,7 @@ object(A_XMLReader) (1) {
 Warning: Attempted to serialize unserializable builtin class A_XMLReader in %s/builtin_extensions.inc on line 26
 string(2) "N;"
 NULL
-array(27) {
+array(26) {
   [0]=>
   string(11) "__construct"
   [1]=>
@@ -111,19 +109,17 @@ array(27) {
   [18]=>
   string(7) "isValid"
   [19]=>
-  string(5) "__get"
-  [20]=>
   string(17) "getParserProperty"
-  [21]=>
+  [20]=>
   string(15) "lookupNamespace"
-  [22]=>
+  [21]=>
   string(9) "setSchema"
-  [23]=>
+  [22]=>
   string(17) "setParserProperty"
-  [24]=>
+  [23]=>
   string(16) "setRelaxNGSchema"
-  [25]=>
+  [24]=>
   string(22) "setRelaxNGSchemaSource"
-  [26]=>
+  [25]=>
   string(6) "expand"
 }

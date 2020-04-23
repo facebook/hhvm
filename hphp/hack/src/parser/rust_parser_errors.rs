@@ -5541,8 +5541,9 @@ where
         self.errors
     }
 
-    pub fn parse_errors(
+    fn parse_errors(
         tree: &'a SyntaxTree<'a, Syntax<Token, Value>, State>,
+        text: IndexedSourceText<'a>,
         parser_options: ParserOptions,
         hhvm_compat_mode: bool,
         hhi_mode: bool,
@@ -5551,8 +5552,7 @@ where
         let env = Env {
             parser_options,
             syntax_tree: tree,
-            // TODO(kasper): do not repeat work if we have the indexed text already available somwhere)
-            text: IndexedSourceText::new(tree.text().clone()),
+            text,
             context: Context {
                 active_classish: None,
                 active_methodish: None,
@@ -5597,5 +5597,30 @@ pub fn parse_errors<'a>(
     hhi_mode: bool,
     codegen: bool,
 ) -> Vec<SyntaxError> {
-    ParserErrors::parse_errors(tree, parser_options, hhvm_compat_mode, hhi_mode, codegen)
+    ParserErrors::parse_errors(
+        tree,
+        IndexedSourceText::new(tree.text().clone()),
+        parser_options,
+        hhvm_compat_mode,
+        hhi_mode,
+        codegen,
+    )
+}
+
+pub fn parse_errors_with_text<'a>(
+    tree: &'a SyntaxTree<'a, PositionedSyntax, ()>,
+    text: IndexedSourceText<'a>,
+    parser_options: ParserOptions,
+    hhvm_compat_mode: bool,
+    hhi_mode: bool,
+    codegen: bool,
+) -> Vec<SyntaxError> {
+    ParserErrors::parse_errors(
+        tree,
+        text,
+        parser_options,
+        hhvm_compat_mode,
+        hhi_mode,
+        codegen,
+    )
 }

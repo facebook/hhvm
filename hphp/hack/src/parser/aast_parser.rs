@@ -27,7 +27,7 @@ use parser_core_types::{
 };
 use regex::bytes::Regex;
 use rust_aast_parser_types::{Env, Result as ParserResult};
-use rust_parser_errors::parse_errors;
+use rust_parser_errors::parse_errors_with_text;
 use stack_limit::StackLimit;
 use std::borrow::Borrow;
 
@@ -153,8 +153,9 @@ impl<'a> AastParser {
     ) -> Vec<SyntaxError> {
         let find_errors = |hhi_mode: bool| -> Vec<SyntaxError> {
             let mut errors = tree.errors().into_iter().cloned().collect::<Vec<_>>();
-            errors.extend(parse_errors(
+            errors.extend(parse_errors_with_text(
                 &tree,
+                indexed_source_text.clone(),
                 // TODO(hrust) change to parser_otions to ref in ParserErrors
                 env.parser_options.clone(),
                 true, /* hhvm_compat_mode */

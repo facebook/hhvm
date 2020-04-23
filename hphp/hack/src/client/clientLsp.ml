@@ -267,6 +267,19 @@ let log_debug s = Hh_logger.debug ("[client-lsp] " ^^ s)
 
 let log_error s = Hh_logger.error ("[client-lsp] " ^^ s)
 
+let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
+  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
+  `stderr`; this is in addition to that. *)
+  let client_lsp_log_fn = ServerFiles.client_lsp_log root in
+  begin
+    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
+    with _e -> ()
+  end;
+  Hh_logger.set_log
+    client_lsp_log_fn
+    (Out_channel.create client_lsp_log_fn ~append:true);
+  log "Starting clientLsp at %s" client_lsp_log_fn
+
 let to_stdout (json : Hh_json.json) : unit =
   let s = Hh_json.json_to_string json ^ "\r\n\r\n" in
   Http_lite.write_message stdout s
@@ -557,104 +570,6 @@ let update_hh_server_state_if_necessary (event : event) : unit =
   match event with
   | Server_message { push; has_updated_server_state = false } -> helper push
   | _ -> ()
-
-let rpc_lock = Lwt_mutex.create ()
-
-let rpc
-    (server_conn : server_conn)
-    (ref_unblocked_time : float ref)
-    (command : 'a ServerCommandTypes.t) : 'a Lwt.t =
-  let%lwt result =
-    Lwt_mutex.with_lock rpc_lock (fun () ->
-        let callback () push =
-          update_hh_server_state_if_necessary
-            (Server_message { push; has_updated_server_state = false });
-          Queue.enqueue
-            server_conn.pending_messages
-            { push; has_updated_server_state = true }
-        in
-        let start_time = Unix.gettimeofday () in
-        let%lwt result =
-          ServerCommandLwt.rpc_persistent
-            (server_conn.ic, server_conn.oc)
-            ()
-            callback
-            command
-        in
-        let end_time = Unix.gettimeofday () in
-        let duration = end_time -. start_time in
-        let msg = ServerCommandTypesUtils.debug_describe_t command in
-        log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
-        match result with
-        | Ok ((), res, start_server_handle_time) ->
-          ref_unblocked_time := start_server_handle_time;
-          Lwt.return res
-        | Error
-            ( (),
-              Utils.Callstack _,
-              ServerCommandLwt.Remote_fatal_exception remote_e_data ) ->
-          raise (Server_fatal_connection_exception remote_e_data)
-        | Error
-            ( (),
-              Utils.Callstack _,
-              ServerCommandLwt.Remote_nonfatal_exception
-                { Marshal_tools.message; stack } ) ->
-          let lsp_error =
-            {
-              Lsp.Error.code = Lsp.Error.UnknownErrorCode;
-              message;
-              data = Lsp_fmt.error_data_of_stack stack;
-            }
-          in
-          raise (Server_nonfatal_exception lsp_error)
-        | Error ((), Utils.Callstack stack, e) ->
-          let message = Exn.to_string e in
-          raise
-            (Server_fatal_connection_exception { Marshal_tools.message; stack }))
-  in
-  Lwt.return result
-
-let rpc_with_retry server_conn ref_unblocked_time command =
-  ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
-      rpc server_conn ref_unblocked_time command)
-
-(** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
-let ide_rpc
-    (ide_service : ClientIdeService.t)
-    ~(tracking_id : string)
-    ~(ref_unblocked_time : float ref)
-    (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
-  let%lwt result =
-    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time message
-  in
-  match result with
-  | Ok result -> Lwt.return result
-  | Error error_data -> raise (Server_nonfatal_exception error_data)
-
-let set_verbose_to_file
-    ~(ide_service : ClientIdeService.t option)
-    ~(tracking_id : string)
-    (value : bool) : unit =
-  verbose_to_file := value;
-  if !verbose_to_file then
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
-  else
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-  match ide_service with
-  | Some ide_service ->
-    let ref_unblocked_time = ref 0. in
-    let (promise : unit Lwt.t) =
-      ide_rpc
-        ide_service
-        ~tracking_id
-        ~ref_unblocked_time
-        (ClientIdeMessage.Verbose_to_file !verbose_to_file)
-    in
-    ignore_promise_but_handle_failure
-      promise
-      ~desc:"verbose-ide-rpc"
-      ~terminate_on_failure:false
-  | None -> ()
 
 (** This cancellable async function will block indefinitely until a notification is
 available from ide_service. *)
@@ -1130,9 +1045,6 @@ let hack_errors_to_lsp_diagnostic
     diagnostics = List.map errors ~f:hack_error_to_lsp_diagnostic;
   }
 
-(************************************************************************)
-(* Protocol                                                             *)
-(************************************************************************)
 let get_document_contents
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t) (uri : documentUri) :
     string option =
@@ -1152,6 +1064,425 @@ let get_document_location
   let file_contents = get_document_contents editor_open_files uri in
   { ClientIdeMessage.file_path; file_contents; line; column }
 
+(************************************************************************)
+(* Connection and rpc                                                   *)
+(************************************************************************)
+
+let start_server ~(env : env) (root : Path.t) : unit =
+  (* This basically does "hh_client start": a single attempt to open the     *)
+  (* socket, send+read version and compare for mismatch, send handoff and    *)
+  (* read response. It will print information to stderr. If the server is in *)
+  (* an unresponsive or invalid state then it will kill the server. Next if  *)
+  (* necessary it tries to spawn the server and wait until the monitor is    *)
+  (* responsive enough to print "ready". It will do a hard program exit if   *)
+  (* there were spawn problems.                                              *)
+  let env_start =
+    {
+      ClientStart.root;
+      from = !from;
+      no_load = false;
+      watchman_debug_logging = false;
+      log_inference_constraints = false;
+      profile_log = false;
+      ai_mode = None;
+      silent = true;
+      exit_on_failure = false;
+      debug_port = None;
+      ignore_hh_version = false;
+      saved_state_ignore_hhconfig = false;
+      dynamic_view = !cached_toggle_state;
+      prechecked = None;
+      config = env.config;
+      allow_non_opt_build = false;
+    }
+  in
+  let _exit_status = ClientStart.main env_start in
+  ()
+
+let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
+    server_conn Lwt.t =
+  log "connect_client";
+  Exit_status.(
+    (* This basically does the same connection attempt as "hh_client check":  *)
+    (* it makes repeated attempts to connect; it prints useful messages to    *)
+    (* stderr; in case of failure it will raise an exception. Below we're     *)
+    (* catching the main exceptions so we can give a good user-facing error   *)
+    (* text. For other exceptions, they'll end up showing to the user just    *)
+    (* "internal error" with the error code.                                  *)
+    let env_connect =
+      {
+        ClientConnect.root;
+        from = !from;
+        autostart;
+        force_dormant_start = false;
+        watchman_debug_logging = false;
+        (* If you want this, start the server manually in terminal. *)
+        deadline = Some (Unix.time () +. 3.);
+        (* limit to 3 seconds *)
+        no_load = false;
+        (* only relevant when autostart=true *)
+        log_inference_constraints = false;
+        (* irrelevant *)
+        profile_log = false;
+        (* irrelevant *)
+        remote = false;
+        (* irrelevant *)
+        ai_mode = None;
+        (* only relevant when autostart=true *)
+        progress_callback = ClientConnect.null_progress_reporter;
+        (* we're fast! *)
+        do_post_handoff_handshake = false;
+        ignore_hh_version = false;
+        saved_state_ignore_hhconfig = false;
+        (* priority_pipe delivers good experience for hh_server, but has a bug,
+        and doesn't provide benefits in serverless-ide. *)
+        use_priority_pipe = not env.use_serverless_ide;
+        prechecked = None;
+        config = env.config;
+        allow_non_opt_build = false;
+      }
+    in
+    try%lwt
+      let%lwt ClientConnect.{ channels = (ic, oc); server_finale_file; _ } =
+        ClientConnect.connect env_connect
+      in
+      can_autostart_after_mismatch := false;
+      let pending_messages = Queue.create () in
+      Lwt.return { ic; oc; pending_messages; server_finale_file }
+    with Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
+      (* Raised when the server was running an old version. We'll retry once.   *)
+      log "connect_client: build_id_mismatch";
+      can_autostart_after_mismatch := false;
+      connect_client ~env root ~autostart:true)
+
+(* connect: this method either connects to the monitor and leaves in an       *)
+(* In_init state waiting for the server hello, or it fails to connect and     *)
+(* leaves in a Lost_server state. You might call this from Pre_init or        *)
+(* Lost_server states, obviously. But you can also call it from In_init state *)
+(* if you want to give up on the prior attempt at connection and try again.   *)
+let rec connect ~(env : env) (state : state) : state Lwt.t =
+  begin
+    match state with
+    | In_init { In_init_env.conn; _ } ->
+      begin
+        try
+          Timeout.shutdown_connection conn.ic;
+          Timeout.close_in_noerr conn.ic
+        with _ -> ()
+      end
+    | Pre_init
+    | Lost_server _ ->
+      ()
+    | _ -> failwith "connect only in Pre_init, In_init or Lost_server state"
+  end;
+  try%lwt
+    let%lwt conn = connect_client ~env (get_root_exn ()) ~autostart:false in
+    set_hh_server_state Hh_server_initializing;
+    match state with
+    | In_init ienv ->
+      Lwt.return
+        (In_init
+           { ienv with In_init_env.conn; most_recent_start_time = Unix.time () })
+    | _ ->
+      let state = dismiss_diagnostics state in
+      Lwt.return
+        (In_init
+           {
+             In_init_env.conn;
+             first_start_time = Unix.time ();
+             most_recent_start_time = Unix.time ();
+             most_recent_file = get_most_recent_file state;
+             editor_open_files =
+               Option.value (get_editor_open_files state) ~default:UriMap.empty;
+             (* uris_with_unsaved_changes should always be empty here: *)
+             (* Pre_init will of course be empty; *)
+             (* Lost_server will exit rather than reconnect with unsaved changes. *)
+             uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
+             hh_server_status_diagnostic = None;
+           })
+  with e ->
+    (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
+    (*   couldn't complete the handshake up to handoff within 3 attempts over *)
+    (*   3 seconds. Maybe the informant is stopping anything from happening   *)
+    (*   until a rebase has settled?                                          *)
+    (* Exit_with No_server_running: raised when (1) the server's simply not   *)
+    (*   running, or there's some other reason why the connection was refused *)
+    (*   or timed-out and no lockfile is present; (2) the server was dormant  *)
+    (*   and had already received too many pending connection requests;       *)
+    (*   (3) server failed to load saved-state but was required to do so.     *)
+    (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
+    (*   present but connection-attempt to the monitor times out - maybe it's *)
+    (*   under DDOS, or maybe it's declining to answer new connections.       *)
+    let stack = Printexc.get_backtrace () |> Exception.clean_stack in
+    let { Lsp.Error.code; message; _ } = Lsp_fmt.error_of_exn e in
+    let longMessage =
+      Printf.sprintf
+        "connect failed: %s [%s]\n%s"
+        message
+        (Lsp.Error.show_code code)
+        stack
+    in
+    let () = Lsp_helpers.telemetry_error to_stdout longMessage in
+    Exit_status.(
+      let new_hh_server_state =
+        match e with
+        | Exit_with Build_id_mismatch
+        | Exit_with No_server_running_should_retry
+        | Exit_with Server_hung_up_should_retry
+        | Exit_with Server_hung_up_should_abort ->
+          Hh_server_stopped
+        | Exit_with Out_of_retries
+        | Exit_with Out_of_time ->
+          Hh_server_denying_connection
+        | _ -> Hh_server_unknown
+      in
+      let explanation =
+        match e with
+        | Exit_with Out_of_retries
+        | Exit_with Out_of_time ->
+          "hh_server is waiting for things to settle"
+        | Exit_with No_server_running_should_retry -> "hh_server: stopped."
+        | _ -> "hh_server: " ^ message
+      in
+      let%lwt state =
+        do_lost_server
+          state
+          ~allow_immediate_reconnect:false
+          ~env
+          {
+            Lost_env.explanation;
+            new_hh_server_state;
+            start_on_click = true;
+            trigger_on_lock_file = true;
+            trigger_on_lsp = false;
+          }
+      in
+      Lwt.return state)
+
+and reconnect_from_lost_if_necessary
+    ~(env : env) (state : state) (reason : [> `Event of event | `Force_regain ])
+    : state Lwt.t =
+  Lost_env.(
+    let should_reconnect =
+      match (state, reason) with
+      | (Lost_server _, `Force_regain) -> true
+      | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
+          `Event
+            (Client_message (_, (RequestMessage _ | NotificationMessage _))) )
+        ->
+        true
+      | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
+          `Event Tick ) ->
+        MonitorConnection.server_exists lock_file
+      | (_, _) -> false
+    in
+    if should_reconnect then
+      let%lwt current_version = read_hhconfig_version () in
+      let needs_to_terminate =
+        not (String.equal !hhconfig_version current_version)
+      in
+      if needs_to_terminate then (
+        (* In these cases we have to terminate our LSP server, and trust the    *)
+        (* client to restart us. Note that we can't do clientStart because that *)
+        (* would start our (old) version of hh_server, not the new one!         *)
+        let unsaved = get_uris_with_unsaved_changes state |> UriSet.elements in
+        let unsaved_str =
+          if List.is_empty unsaved then
+            "[None]"
+          else
+            unsaved |> List.map ~f:string_of_uri |> String.concat ~sep:"\n"
+        in
+        let message =
+          "Unsaved files:\n"
+          ^ unsaved_str
+          ^ "\nVersion in hhconfig that spawned the current hh_client: "
+          ^ !hhconfig_version
+          ^ "\nVersion in hhconfig currently: "
+          ^ current_version
+          ^ "\n"
+        in
+        Lsp_helpers.telemetry_log to_stdout message;
+        exit_fail ()
+      ) else
+        let%lwt state = connect ~env state in
+        Lwt.return state
+    else
+      Lwt.return state)
+
+(* do_lost_server: handles the various ways we might lose hh_server. We keep  *)
+(* the LSP server alive, and will (elsewhere) listen for the various triggers *)
+(* of getting the server back.                                                *)
+and do_lost_server
+    (state : state)
+    ~(env : env)
+    ?(allow_immediate_reconnect = true)
+    (p : Lost_env.params) : state Lwt.t =
+  Lost_env.(
+    set_hh_server_state p.new_hh_server_state;
+
+    let state = dismiss_diagnostics state in
+    let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
+    let most_recent_file = get_most_recent_file state in
+    let editor_open_files =
+      Option.value (get_editor_open_files state) ~default:UriMap.empty
+    in
+    let lock_file = ServerFiles.lock_file (get_root_exn ()) in
+    let reconnect_immediately =
+      allow_immediate_reconnect
+      && p.trigger_on_lock_file
+      && MonitorConnection.server_exists lock_file
+    in
+    if reconnect_immediately then (
+      let lost_state =
+        Lost_server
+          {
+            Lost_env.p;
+            most_recent_file;
+            editor_open_files;
+            uris_with_unsaved_changes;
+            lock_file;
+            hh_server_status_diagnostic = None;
+          }
+      in
+      Lsp_helpers.telemetry_log
+        to_stdout
+        "Reconnecting immediately to hh_server";
+      let%lwt new_state =
+        reconnect_from_lost_if_necessary ~env lost_state `Force_regain
+      in
+      Lwt.return new_state
+    ) else
+      Lwt.return
+        (Lost_server
+           {
+             Lost_env.p;
+             most_recent_file;
+             editor_open_files;
+             uris_with_unsaved_changes;
+             lock_file;
+             hh_server_status_diagnostic = None;
+           }))
+
+let report_connect_end (ienv : In_init_env.t) : state =
+  log "report_connect_end";
+  In_init_env.(
+    let _state = dismiss_diagnostics (In_init ienv) in
+    let menv =
+      {
+        Main_env.conn = ienv.In_init_env.conn;
+        needs_idle = true;
+        most_recent_file = ienv.most_recent_file;
+        editor_open_files = ienv.editor_open_files;
+        uris_with_diagnostics = UriSet.empty;
+        uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
+        hh_server_status =
+          {
+            ShowStatusFB.request =
+              {
+                ShowMessageRequest.type_ = MessageType.InfoMessage;
+                message = "hh_server: ready.";
+                actions = [];
+              };
+            progress = None;
+            total = None;
+            shortMessage = None;
+          };
+      }
+    in
+    Main_loop menv)
+
+let announce_ide_failure (error_data : ClientIdeMessage.stopped_reason) :
+    unit Lwt.t =
+  let open ClientIdeMessage in
+  log
+    "IDE services could not be initialized.\n%s\n%s"
+    error_data.long_user_message
+    error_data.debug_details;
+
+  let input =
+    Printf.sprintf
+      "%s\n\n%s"
+      error_data.long_user_message
+      error_data.debug_details
+  in
+  let%lwt upload_result = Clowder_paste.clowder_paste ~timeout:10. input in
+  let append_to_log =
+    match upload_result with
+    | Ok url -> Printf.sprintf "\nMore details: %s" url
+    | Error message ->
+      Printf.sprintf
+        "\n\nMore details:\n%s\n\nTried to upload those details but it didn't work...\n%s"
+        error_data.debug_details
+        message
+  in
+  Lsp_helpers.log_error to_stdout (error_data.long_user_message ^ append_to_log);
+  if error_data.is_actionable then
+    Lsp_helpers.showMessage_error
+      to_stdout
+      (error_data.medium_user_message ^ see_output_hack);
+  Lwt.return_unit
+
+(** Like all async methods, this method has a synchronous preamble up
+to its first await point, at which point it returns a promise to its
+caller; the rest of the method will be scheduled asynchronously.
+The synchronous preamble sends an "initialize" request to the ide_service.
+The asynchronous continuation is triggered when the response comes back;
+it then pumps messages to and from the ide service.
+Note: the fact that the request is sent in the synchronous preamble, is
+important for correctness - the rest of the codebase can send other requests
+to the ide_service at any time, safe in the knowledge that such requests will
+necessarily be delivered after the initialize request. *)
+let run_ide_service
+    (env : env)
+    (ide_service : ClientIdeService.t)
+    (initialize_params : Lsp.Initialize.params)
+    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
+  let open Lsp.Initialize in
+  let root = Some (Lsp_helpers.get_root initialize_params) |> Wwwroot.get in
+  if
+    not
+      initialize_params.client_capabilities.workspace.didChangeWatchedFiles
+        .dynamicRegistration
+  then
+    log_error "client doesn't support file-watching";
+
+  let naming_table_load_info =
+    match initialize_params.initializationOptions.namingTableSavedStatePath with
+    | None -> None
+    | Some path ->
+      Some
+        {
+          ClientIdeMessage.Initialize_from_saved_state.path = Path.make path;
+          test_delay =
+            initialize_params.initializationOptions
+              .namingTableSavedStateTestDelay;
+        }
+  in
+  let open_files =
+    editor_open_files
+    |> Option.value ~default:UriMap.empty
+    |> UriMap.keys
+    |> List.map ~f:(fun uri -> uri |> lsp_uri_to_path |> Path.make)
+  in
+  log_debug "initialize_from_saved_state";
+  let%lwt result =
+    ClientIdeService.initialize_from_saved_state
+      ide_service
+      ~root
+      ~naming_table_load_info
+      ~use_ranked_autocomplete:env.use_ranked_autocomplete
+      ~config:env.config
+      ~open_files
+  in
+  log_debug "initialize_from_saved_state.done";
+  match result with
+  | Ok () ->
+    let%lwt () = ClientIdeService.serve ide_service in
+    Lwt.return_unit
+  | Error error_data ->
+    let%lwt () = announce_ide_failure error_data in
+    Lwt.return_unit
+
 let stop_ide_service
     (ide_service : ClientIdeService.t)
     ~(tracking_id : string)
@@ -1161,6 +1492,446 @@ let stop_ide_service
     (ClientIdeService.Stop_reason.to_string reason);
   let%lwt () = ClientIdeService.stop ide_service ~tracking_id ~reason in
   Lwt.return_unit
+
+let on_status_restart_action
+    ~(env : env)
+    ~(init_id : string)
+    ~(ide_service : ClientIdeService.t option ref)
+    (result : ShowStatusFB.result)
+    (state : state) : state Lwt.t =
+  let open ShowMessageRequest in
+  match (result, state, !ide_service) with
+  | (Some { title }, Lost_server _, _)
+    when String.equal title hh_server_restart_button_text ->
+    let root = get_root_exn () in
+    (* Belt-and-braces kill the server. This is in case the server was *)
+    (* stuck in some weird state. It's also what 'hh restart' does. *)
+    if MonitorConnection.server_exists (Path.to_string root) then
+      ClientStop.kill_server root !from;
+
+    (* After that it's safe to try to reconnect! *)
+    start_server ~env root;
+    let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
+    Lwt.return state
+  | (Some { title }, _, Some old_ide_service)
+    when String.equal title client_ide_restart_button_text ->
+    log "Restarting IDE service";
+
+    (* It's possible that [destroy] takes a while to finish, so make
+    sure to assign the new IDE service to the [ref] before attempting
+    to do an asynchronous operation with the old one. *)
+    let ide_args =
+      {
+        ClientIdeMessage.init_id;
+        verbose_to_stderr = env.verbose;
+        verbose_to_file = !verbose_to_file;
+      }
+    in
+    let new_ide_service = ClientIdeService.make ide_args in
+    ide_service := Some new_ide_service;
+    (* Note: the env.verbose passed on init controls verbosity for stderr
+    and is only ever controlled by --verbose command line, stored in env.
+    But verbosity-to-file can be altered dynamically by the user. *)
+    let (promise : unit Lwt.t) =
+      run_ide_service
+        env
+        new_ide_service
+        (initialize_params_exc ())
+        (get_editor_open_files state)
+    in
+    ignore_promise_but_handle_failure
+      promise
+      ~desc:"run-ide-after-restart"
+      ~terminate_on_failure:true;
+    (* Invariant: at all times after InitializeRequest, ide_service has
+    already been sent an "initialize" message. *)
+    let%lwt () =
+      stop_ide_service
+        old_ide_service
+        ~tracking_id:"restart"
+        ~reason:ClientIdeService.Stop_reason.Restarting
+    in
+    Lwt.return state
+  | _ -> Lwt.return state
+
+let get_client_ide_status (ide_service : ClientIdeService.t) :
+    ShowStatusFB.params option =
+  let (type_, shortMessage, message, actions) =
+    match ClientIdeService.get_status ide_service with
+    | ClientIdeService.Status.Initializing ->
+      ( MessageType.WarningMessage,
+        "Hack: initializing",
+        "Hack IDE: initializing.",
+        [] )
+    | ClientIdeService.Status.Processing_files p ->
+      let open ClientIdeMessage.Processing_files in
+      ( MessageType.WarningMessage,
+        "Hack",
+        Printf.sprintf "Hack IDE: processing %d files." p.total,
+        [] )
+    | ClientIdeService.Status.Ready ->
+      (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
+    | ClientIdeService.Status.Stopped s ->
+      let open ClientIdeMessage in
+      ( MessageType.ErrorMessage,
+        "Hack: " ^ s.short_user_message,
+        s.medium_user_message ^ see_output_hack,
+        [{ ShowMessageRequest.title = client_ide_restart_button_text }] )
+  in
+  Some
+    {
+      ShowStatusFB.shortMessage = Some shortMessage;
+      request = { ShowMessageRequest.type_; message; actions };
+      progress = None;
+      total = None;
+    }
+
+(** This function blocks while it attempts to connect to the monitor to read status.
+It normally it gets status quickly, but has a 3s timeout just in case. *)
+let get_hh_server_status (state : state) : ShowStatusFB.params option =
+  let open ShowStatusFB in
+  let open ShowMessageRequest in
+  match state with
+  | Pre_init
+  | Post_shutdown ->
+    None
+  | In_init ienv ->
+    let open In_init_env in
+    let time = Unix.time () in
+    let delay_in_secs =
+      if Sys_utils.is_test_mode () then
+        (* we avoid raciness in our tests by not showing a real time *)
+        "<test>"
+      else
+        int_of_float (time -. ienv.first_start_time) |> string_of_int
+    in
+    (* TODO: better to report time that hh_server has spent initializing *)
+    let (progress, warning) =
+      match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
+      | Error _ -> (None, None)
+      | Ok (progress, warning) -> (progress, warning)
+    in
+    (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
+    it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
+    or None if there's no relevant progress to show.
+    [warning] comes from the same place, and if pressent is a human-readable string
+    that warns about saved-state-init failure. *)
+    let progress =
+      Option.value progress ~default:ClientConnect.default_progress_message
+    in
+    let warning =
+      if Option.is_some warning then
+        " (saved-state not found - will take a while)"
+      else
+        ""
+    in
+    let message =
+      Printf.sprintf
+        "hh_server initializing%s: %s [%s seconds]"
+        warning
+        progress
+        delay_in_secs
+    in
+    Some
+      {
+        request = { type_ = MessageType.WarningMessage; message; actions = [] };
+        progress = None;
+        total = None;
+        shortMessage = Some "Hack: initializing";
+      }
+  | Main_loop { Main_env.hh_server_status; _ } ->
+    (* This shows whether the connected hh_server is busy or ready.
+    It's produced in clientLsp.do_server_busy upon receipt of a status
+    enum from the server. See comments on hh_server_status for invariants. *)
+    Some hh_server_status
+  | Lost_server { Lost_env.p; _ } ->
+    Some
+      {
+        shortMessage = Some "Hack: stopped";
+        request =
+          {
+            type_ = MessageType.ErrorMessage;
+            message = p.Lost_env.explanation;
+            actions = [{ title = hh_server_restart_button_text }];
+          };
+        progress = None;
+        total = None;
+      }
+
+let hh_server_status_to_diagnostic
+    (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
+    PublishDiagnostics.params option =
+  let open ShowStatusFB in
+  let open ShowMessageRequest in
+  let open PublishDiagnostics in
+  let diagnostic =
+    {
+      PublishDiagnostics.range =
+        {
+          start = { line = 0; character = 0 };
+          end_ = { line = 0; character = 1 };
+        };
+      severity = None;
+      code = NoCode;
+      source = Some "hh_server";
+      message = "";
+      relatedInformation = [];
+      relatedLocations = [];
+    }
+  in
+  match (uri, hh_server_status.request.type_) with
+  | (None, _)
+  | (_, (MessageType.InfoMessage | MessageType.LogMessage)) ->
+    None
+  | (Some uri, MessageType.ErrorMessage) ->
+    Some
+      {
+        uri;
+        isStatusFB = true;
+        diagnostics =
+          [
+            {
+              diagnostic with
+              message =
+                "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... "
+                ^ hh_server_status.request.message;
+              severity = Some Error;
+            };
+          ];
+      }
+  | (Some uri, MessageType.WarningMessage) ->
+    Some
+      {
+        uri;
+        isStatusFB = true;
+        diagnostics =
+          [
+            {
+              diagnostic with
+              message =
+                "hh_server isn't yet ready, so there may undetected errors... "
+                ^ hh_server_status.request.message;
+              severity = Some Warning;
+            };
+          ];
+      }
+
+(** Manages the state of which diagnostics have been shown to the user
+about hh_server status: removes the old one if necessary, and adds a new one
+if necessary. Note that we only display hh_server_status diagnostics
+during In_init and Lost_server states, neither of which have diagnostics
+of their own. *)
+let publish_hh_server_status_diagnostic
+    (state : state) (hh_server_status : ShowStatusFB.params option) : state =
+  let uri =
+    match (get_most_recent_file state, get_editor_open_files state) with
+    | (Some uri, Some open_files) when UriMap.mem uri open_files -> Some uri
+    | (_, Some open_files) when not (UriMap.is_empty open_files) ->
+      Some (UriMap.choose open_files |> fst)
+    | (_, _) -> None
+  in
+  let desired_diagnostic =
+    Option.bind hh_server_status ~f:(hh_server_status_to_diagnostic uri)
+  in
+  let get_existing_diagnostic state =
+    match state with
+    | In_init ienv -> ienv.In_init_env.hh_server_status_diagnostic
+    | Lost_server lenv -> lenv.Lost_env.hh_server_status_diagnostic
+    | _ -> None
+  in
+  let publish_and_update_diagnostic state diagnostic =
+    let notification = PublishDiagnosticsNotification diagnostic in
+    notification |> print_lsp_notification |> to_stdout;
+    match state with
+    | In_init ienv ->
+      In_init
+        { ienv with In_init_env.hh_server_status_diagnostic = Some diagnostic }
+    | Lost_server lenv ->
+      Lost_server
+        { lenv with Lost_env.hh_server_status_diagnostic = Some diagnostic }
+    | _ -> state
+  in
+  let open PublishDiagnostics in
+  (* The following match emboodies these rules:
+  (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
+  (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
+  (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
+  (4) to avoid flicker, if the diagnostic has changed but is still in the same file, then
+  we refrain from sending an "erase old" message and it will be implied by sending "new". *)
+  match (get_existing_diagnostic state, desired_diagnostic, state) with
+  | (_, _, Main_loop _)
+  | (_, _, Pre_init)
+  | (_, _, Post_shutdown)
+  | (None, None, _) ->
+    state
+  | (Some _, None, _) -> dismiss_diagnostics state
+  | (Some existing, Some desired, _)
+    when Lsp.equal_documentUri existing.uri desired.uri
+         && Option.equal
+              PublishDiagnostics.equal_diagnostic
+              (List.hd existing.diagnostics)
+              (List.hd desired.diagnostics) ->
+    state
+  | (Some existing, Some desired, _)
+    when Lsp.equal_documentUri existing.uri desired.uri ->
+    publish_and_update_diagnostic state desired
+  | (Some _, Some desired, _) ->
+    let state = dismiss_diagnostics state in
+    publish_and_update_diagnostic state desired
+  | (None, Some desired, _) -> publish_and_update_diagnostic state desired
+
+(** Here are the rules for merging status. They embody the principle that the spinner
+shows if initializing/typechecking is in progress, the error icon shows if error,
+and the status bar word is "Hack" if IDE services are available or "Hack: xyz" if not.
+Note that if Hack IDE is up but hh_server is down, then the hh_server failure message
+is conveyed via a publishDiagnostic; it's not conveyed via status.
+  [ok] Hack -- if ide_service is up and hh_server is ready
+  [spin] Hack -- if ide_service is processing-files or hh_server is initializing/typechecking
+  [spin] Hack: initializing -- if ide_service is initializing
+  [err] Hack: failure -- if ide_service is down
+If client_ide_service isn't enabled, then we show thing differently:
+  [ok] Hack  -- if hh_server is ready (Main_loop)
+  [spin] Hack -- if hh_server is doing local or global typechecks (Main_loop)
+  [spin] Hack: busy -- if hh_server is doing non-interruptible typechecks (Main_loop)
+  [spin] Hack: initializing -- if hh_server is initializing (In_init)
+  [err] hh_server: stopped -- hh_server is down (Lost_server)
+As for the tooltip and actions, they are combined from both ide_service and hh_server. *)
+let merge_statuses
+    ~(client_ide_status : ShowStatusFB.params option)
+    ~(hh_server_status : ShowStatusFB.params option) :
+    ShowStatusFB.params option =
+  (* The correctness of the following match is a bit subtle. This is how to think of it.
+  From the spec in the docblock, (1) if there's no client_ide_service, then the result
+  of this function is simply the same as hh_server_status, since that's how it was constructed
+  by get_hh_server_status (for In_init and Lost_server) and do_server_busy; (2) if there
+  is a client_ide_service then the result is almost always simply the same as ide_service
+  since that's how it was constructed by get_client_ide_status; (3) the only exception to
+  rule 2 is that, if client_ide_status would have shown "[ok] Hack" and hh_server_status
+  would have been a spinner, then we change to "[spin] Hack". *)
+  match (client_ide_status, hh_server_status) with
+  | (None, None) -> None
+  | (None, Some _) -> hh_server_status
+  | (Some _, None) -> client_ide_status
+  | (Some client_ide_status, Some hh_server_status) ->
+    let open Lsp.ShowStatusFB in
+    let open Lsp.ShowMessageRequest in
+    let request =
+      {
+        client_ide_status.request with
+        message =
+          client_ide_status.request.message
+          ^ "\n"
+          ^ hh_server_status.request.message;
+        actions =
+          client_ide_status.request.actions @ hh_server_status.request.actions;
+      }
+    in
+    if
+      MessageType.equal client_ide_status.request.type_ MessageType.InfoMessage
+      && MessageType.equal
+           hh_server_status.request.type_
+           MessageType.WarningMessage
+    then
+      let request = { request with type_ = MessageType.WarningMessage } in
+      Some { client_ide_status with request; shortMessage = Some "Hack" }
+    else
+      Some { client_ide_status with request }
+
+let refresh_status
+    ~(env : env)
+    ~(ide_service : ClientIdeService.t option ref)
+    ~(init_id : string) : unit =
+  let client_ide_status =
+    match !ide_service with
+    | None -> None
+    | Some ide_service -> get_client_ide_status ide_service
+  in
+  let status =
+    merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
+  in
+  Option.iter
+    status
+    ~f:
+      (request_showStatusFB
+         ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
+  ()
+
+let rpc_lock = Lwt_mutex.create ()
+
+let rpc
+    (server_conn : server_conn)
+    (ref_unblocked_time : float ref)
+    (command : 'a ServerCommandTypes.t) : 'a Lwt.t =
+  let%lwt result =
+    Lwt_mutex.with_lock rpc_lock (fun () ->
+        let callback () push =
+          update_hh_server_state_if_necessary
+            (Server_message { push; has_updated_server_state = false });
+          Queue.enqueue
+            server_conn.pending_messages
+            { push; has_updated_server_state = true }
+        in
+        let start_time = Unix.gettimeofday () in
+        let%lwt result =
+          ServerCommandLwt.rpc_persistent
+            (server_conn.ic, server_conn.oc)
+            ()
+            callback
+            command
+        in
+        let end_time = Unix.gettimeofday () in
+        let duration = end_time -. start_time in
+        let msg = ServerCommandTypesUtils.debug_describe_t command in
+        log_debug "hh_server rpc: [%s] [%0.3f]" msg duration;
+        match result with
+        | Ok ((), res, start_server_handle_time) ->
+          ref_unblocked_time := start_server_handle_time;
+          Lwt.return res
+        | Error
+            ( (),
+              Utils.Callstack _,
+              ServerCommandLwt.Remote_fatal_exception remote_e_data ) ->
+          raise (Server_fatal_connection_exception remote_e_data)
+        | Error
+            ( (),
+              Utils.Callstack _,
+              ServerCommandLwt.Remote_nonfatal_exception
+                { Marshal_tools.message; stack } ) ->
+          let lsp_error =
+            {
+              Lsp.Error.code = Lsp.Error.UnknownErrorCode;
+              message;
+              data = Lsp_fmt.error_data_of_stack stack;
+            }
+          in
+          raise (Server_nonfatal_exception lsp_error)
+        | Error ((), Utils.Callstack stack, e) ->
+          let message = Exn.to_string e in
+          raise
+            (Server_fatal_connection_exception { Marshal_tools.message; stack }))
+  in
+  Lwt.return result
+
+let rpc_with_retry server_conn ref_unblocked_time command =
+  ServerCommandTypes.Done_or_retry.call ~f:(fun () ->
+      rpc server_conn ref_unblocked_time command)
+
+(** A thin wrapper around ClientIdeMessage which turns errors into exceptions *)
+let ide_rpc
+    (ide_service : ClientIdeService.t)
+    ~(tracking_id : string)
+    ~(ref_unblocked_time : float ref)
+    (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
+  let%lwt result =
+    ClientIdeService.rpc ide_service ~tracking_id ~ref_unblocked_time message
+  in
+  match result with
+  | Ok result -> Lwt.return result
+  | Error error_data -> raise (Server_nonfatal_exception error_data)
+
+(************************************************************************)
+(* Protocol                                                             *)
+(************************************************************************)
 
 let do_shutdown
     (state : state)
@@ -2605,149 +3376,6 @@ let do_diagnostics
   (* this is "(uris_with_diagnostics \ uris_without) U uris_with" *)
   UriSet.union (UriSet.diff uris_with_diagnostics uris_without) uris_with
 
-let report_connect_end (ienv : In_init_env.t) : state =
-  log "report_connect_end";
-  In_init_env.(
-    let _state = dismiss_diagnostics (In_init ienv) in
-    let menv =
-      {
-        Main_env.conn = ienv.In_init_env.conn;
-        needs_idle = true;
-        most_recent_file = ienv.most_recent_file;
-        editor_open_files = ienv.editor_open_files;
-        uris_with_diagnostics = UriSet.empty;
-        uris_with_unsaved_changes = ienv.In_init_env.uris_with_unsaved_changes;
-        hh_server_status =
-          {
-            ShowStatusFB.request =
-              {
-                ShowMessageRequest.type_ = MessageType.InfoMessage;
-                message = "hh_server: ready.";
-                actions = [];
-              };
-            progress = None;
-            total = None;
-            shortMessage = None;
-          };
-      }
-    in
-    Main_loop menv)
-
-(* After the server has sent 'hello', it means the persistent connection is   *)
-(* ready, so we can send our backlog of file-edits to the server.             *)
-let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
-    =
-  log "connect_after_hello";
-  let ignore = ref 0.0 in
-  let%lwt () =
-    try%lwt
-      (* tell server we want persistent connection *)
-      let oc = server_conn.oc in
-      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Persistent;
-      let fd = oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr in
-      let%lwt (response : 'a ServerCommandTypes.message_type) =
-        Marshal_tools_lwt.from_fd_with_preamble fd
-      in
-      begin
-        match response with
-        | ServerCommandTypes.Response (ServerCommandTypes.Connected, _) ->
-          set_hh_server_state Hh_server_handling_or_ready
-        | _ -> failwith "Didn't get server Connected response"
-      end;
-
-      (* tell server we want diagnostics *)
-      log "Diag_subscribe: clientLsp subscribing diagnostic 0";
-      let%lwt () =
-        rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
-      in
-      (* Extract the list of file changes we're tracking *)
-      let editor_open_files =
-        UriMap.elements
-          (match state with
-          | Main_loop menv -> Main_env.(menv.editor_open_files)
-          | In_init ienv -> In_init_env.(ienv.editor_open_files)
-          | Lost_server lenv -> Lost_env.(lenv.editor_open_files)
-          | _ -> UriMap.empty)
-      in
-      (* send open files and unsaved buffers to server *)
-      let float_unblocked_time = ref 0.0 in
-      (* Note: do serially since these involve RPC calls. *)
-      let%lwt () =
-        Lwt_list.iter_s
-          (fun (uri, textDocument) ->
-            let filename = lsp_uri_to_path uri in
-            let command =
-              ServerCommandTypes.OPEN_FILE
-                (filename, textDocument.TextDocumentItem.text)
-            in
-            rpc server_conn float_unblocked_time command)
-          editor_open_files
-      in
-      Lwt.return_unit
-    with e ->
-      let message = Exn.to_string e in
-      let stack = Printexc.get_backtrace () in
-      log "connect_after_hello exception %s\n%s" message stack;
-      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
-  in
-  Lwt.return_unit
-
-let rec connect_client ~(env : env) (root : Path.t) ~(autostart : bool) :
-    server_conn Lwt.t =
-  log "connect_client";
-  Exit_status.(
-    (* This basically does the same connection attempt as "hh_client check":  *)
-    (* it makes repeated attempts to connect; it prints useful messages to    *)
-    (* stderr; in case of failure it will raise an exception. Below we're     *)
-    (* catching the main exceptions so we can give a good user-facing error   *)
-    (* text. For other exceptions, they'll end up showing to the user just    *)
-    (* "internal error" with the error code.                                  *)
-    let env_connect =
-      {
-        ClientConnect.root;
-        from = !from;
-        autostart;
-        force_dormant_start = false;
-        watchman_debug_logging = false;
-        (* If you want this, start the server manually in terminal. *)
-        deadline = Some (Unix.time () +. 3.);
-        (* limit to 3 seconds *)
-        no_load = false;
-        (* only relevant when autostart=true *)
-        log_inference_constraints = false;
-        (* irrelevant *)
-        profile_log = false;
-        (* irrelevant *)
-        remote = false;
-        (* irrelevant *)
-        ai_mode = None;
-        (* only relevant when autostart=true *)
-        progress_callback = ClientConnect.null_progress_reporter;
-        (* we're fast! *)
-        do_post_handoff_handshake = false;
-        ignore_hh_version = false;
-        saved_state_ignore_hhconfig = false;
-        (* priority_pipe delivers good experience for hh_server, but has a bug,
-        and doesn't provide benefits in serverless-ide. *)
-        use_priority_pipe = not env.use_serverless_ide;
-        prechecked = None;
-        config = env.config;
-        allow_non_opt_build = false;
-      }
-    in
-    try%lwt
-      let%lwt ClientConnect.{ channels = (ic, oc); server_finale_file; _ } =
-        ClientConnect.connect env_connect
-      in
-      can_autostart_after_mismatch := false;
-      let pending_messages = Queue.create () in
-      Lwt.return { ic; oc; pending_messages; server_finale_file }
-    with Exit_with Build_id_mismatch when !can_autostart_after_mismatch ->
-      (* Raised when the server was running an old version. We'll retry once.   *)
-      log "connect_client: build_id_mismatch";
-      can_autostart_after_mismatch := false;
-      connect_client ~env root ~autostart:true)
-
 let do_initialize ~(env : env) (root : Path.t) : Initialize.result =
   let server_args = ServerArgs.default_options ~root:(Path.to_string root) in
   let server_args = ServerArgs.set_config server_args env.config in
@@ -2819,258 +3447,6 @@ let do_didChangeWatchedFiles_registerCapability () : Lsp.lsp_request =
   in
   Lsp.RegisterCapabilityRequest
     { RegisterCapability.registrations = [registration] }
-
-let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
-  (* Log to a file on disk. Note that calls to `Hh_logger` will always write to
-  `stderr`; this is in addition to that. *)
-  let client_lsp_log_fn = ServerFiles.client_lsp_log root in
-  begin
-    try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
-    with _e -> ()
-  end;
-  Hh_logger.set_log
-    client_lsp_log_fn
-    (Out_channel.create client_lsp_log_fn ~append:true);
-  log "Starting clientLsp at %s" client_lsp_log_fn
-
-let start_server ~(env : env) (root : Path.t) : unit =
-  (* This basically does "hh_client start": a single attempt to open the     *)
-  (* socket, send+read version and compare for mismatch, send handoff and    *)
-  (* read response. It will print information to stderr. If the server is in *)
-  (* an unresponsive or invalid state then it will kill the server. Next if  *)
-  (* necessary it tries to spawn the server and wait until the monitor is    *)
-  (* responsive enough to print "ready". It will do a hard program exit if   *)
-  (* there were spawn problems.                                              *)
-  let env_start =
-    {
-      ClientStart.root;
-      from = !from;
-      no_load = false;
-      watchman_debug_logging = false;
-      log_inference_constraints = false;
-      profile_log = false;
-      ai_mode = None;
-      silent = true;
-      exit_on_failure = false;
-      debug_port = None;
-      ignore_hh_version = false;
-      saved_state_ignore_hhconfig = false;
-      dynamic_view = !cached_toggle_state;
-      prechecked = None;
-      config = env.config;
-      allow_non_opt_build = false;
-    }
-  in
-  let _exit_status = ClientStart.main env_start in
-  ()
-
-(* connect: this method either connects to the monitor and leaves in an       *)
-(* In_init state waiting for the server hello, or it fails to connect and     *)
-(* leaves in a Lost_server state. You might call this from Pre_init or        *)
-(* Lost_server states, obviously. But you can also call it from In_init state *)
-(* if you want to give up on the prior attempt at connection and try again.   *)
-let rec connect ~(env : env) (state : state) : state Lwt.t =
-  begin
-    match state with
-    | In_init { In_init_env.conn; _ } ->
-      begin
-        try
-          Timeout.shutdown_connection conn.ic;
-          Timeout.close_in_noerr conn.ic
-        with _ -> ()
-      end
-    | Pre_init
-    | Lost_server _ ->
-      ()
-    | _ -> failwith "connect only in Pre_init, In_init or Lost_server state"
-  end;
-  try%lwt
-    let%lwt conn = connect_client ~env (get_root_exn ()) ~autostart:false in
-    set_hh_server_state Hh_server_initializing;
-    match state with
-    | In_init ienv ->
-      Lwt.return
-        (In_init
-           { ienv with In_init_env.conn; most_recent_start_time = Unix.time () })
-    | _ ->
-      let state = dismiss_diagnostics state in
-      Lwt.return
-        (In_init
-           {
-             In_init_env.conn;
-             first_start_time = Unix.time ();
-             most_recent_start_time = Unix.time ();
-             most_recent_file = get_most_recent_file state;
-             editor_open_files =
-               Option.value (get_editor_open_files state) ~default:UriMap.empty;
-             (* uris_with_unsaved_changes should always be empty here: *)
-             (* Pre_init will of course be empty; *)
-             (* Lost_server will exit rather than reconnect with unsaved changes. *)
-             uris_with_unsaved_changes = get_uris_with_unsaved_changes state;
-             hh_server_status_diagnostic = None;
-           })
-  with e ->
-    (* Exit_with Out_of_retries, Exit_with Out_of_time: raised when we        *)
-    (*   couldn't complete the handshake up to handoff within 3 attempts over *)
-    (*   3 seconds. Maybe the informant is stopping anything from happening   *)
-    (*   until a rebase has settled?                                          *)
-    (* Exit_with No_server_running: raised when (1) the server's simply not   *)
-    (*   running, or there's some other reason why the connection was refused *)
-    (*   or timed-out and no lockfile is present; (2) the server was dormant  *)
-    (*   and had already received too many pending connection requests;       *)
-    (*   (3) server failed to load saved-state but was required to do so.     *)
-    (* Exit_with Monitor_connection_failure: raised when the lockfile is      *)
-    (*   present but connection-attempt to the monitor times out - maybe it's *)
-    (*   under DDOS, or maybe it's declining to answer new connections.       *)
-    let stack = Printexc.get_backtrace () |> Exception.clean_stack in
-    let { Lsp.Error.code; message; _ } = Lsp_fmt.error_of_exn e in
-    let longMessage =
-      Printf.sprintf
-        "connect failed: %s [%s]\n%s"
-        message
-        (Lsp.Error.show_code code)
-        stack
-    in
-    let () = Lsp_helpers.telemetry_error to_stdout longMessage in
-    Exit_status.(
-      let new_hh_server_state =
-        match e with
-        | Exit_with Build_id_mismatch
-        | Exit_with No_server_running_should_retry
-        | Exit_with Server_hung_up_should_retry
-        | Exit_with Server_hung_up_should_abort ->
-          Hh_server_stopped
-        | Exit_with Out_of_retries
-        | Exit_with Out_of_time ->
-          Hh_server_denying_connection
-        | _ -> Hh_server_unknown
-      in
-      let explanation =
-        match e with
-        | Exit_with Out_of_retries
-        | Exit_with Out_of_time ->
-          "hh_server is waiting for things to settle"
-        | Exit_with No_server_running_should_retry -> "hh_server: stopped."
-        | _ -> "hh_server: " ^ message
-      in
-      let%lwt state =
-        do_lost_server
-          state
-          ~allow_immediate_reconnect:false
-          ~env
-          {
-            Lost_env.explanation;
-            new_hh_server_state;
-            start_on_click = true;
-            trigger_on_lock_file = true;
-            trigger_on_lsp = false;
-          }
-      in
-      Lwt.return state)
-
-and reconnect_from_lost_if_necessary
-    ~(env : env) (state : state) (reason : [> `Event of event | `Force_regain ])
-    : state Lwt.t =
-  Lost_env.(
-    let should_reconnect =
-      match (state, reason) with
-      | (Lost_server _, `Force_regain) -> true
-      | ( Lost_server { p = { trigger_on_lsp = true; _ }; _ },
-          `Event
-            (Client_message (_, (RequestMessage _ | NotificationMessage _))) )
-        ->
-        true
-      | ( Lost_server { p = { trigger_on_lock_file = true; _ }; lock_file; _ },
-          `Event Tick ) ->
-        MonitorConnection.server_exists lock_file
-      | (_, _) -> false
-    in
-    if should_reconnect then
-      let%lwt current_version = read_hhconfig_version () in
-      let needs_to_terminate =
-        not (String.equal !hhconfig_version current_version)
-      in
-      if needs_to_terminate then (
-        (* In these cases we have to terminate our LSP server, and trust the    *)
-        (* client to restart us. Note that we can't do clientStart because that *)
-        (* would start our (old) version of hh_server, not the new one!         *)
-        let unsaved = get_uris_with_unsaved_changes state |> UriSet.elements in
-        let unsaved_str =
-          if List.is_empty unsaved then
-            "[None]"
-          else
-            unsaved |> List.map ~f:string_of_uri |> String.concat ~sep:"\n"
-        in
-        let message =
-          "Unsaved files:\n"
-          ^ unsaved_str
-          ^ "\nVersion in hhconfig that spawned the current hh_client: "
-          ^ !hhconfig_version
-          ^ "\nVersion in hhconfig currently: "
-          ^ current_version
-          ^ "\n"
-        in
-        Lsp_helpers.telemetry_log to_stdout message;
-        exit_fail ()
-      ) else
-        let%lwt state = connect ~env state in
-        Lwt.return state
-    else
-      Lwt.return state)
-
-(* do_lost_server: handles the various ways we might lose hh_server. We keep  *)
-(* the LSP server alive, and will (elsewhere) listen for the various triggers *)
-(* of getting the server back.                                                *)
-and do_lost_server
-    (state : state)
-    ~(env : env)
-    ?(allow_immediate_reconnect = true)
-    (p : Lost_env.params) : state Lwt.t =
-  Lost_env.(
-    set_hh_server_state p.new_hh_server_state;
-
-    let state = dismiss_diagnostics state in
-    let uris_with_unsaved_changes = get_uris_with_unsaved_changes state in
-    let most_recent_file = get_most_recent_file state in
-    let editor_open_files =
-      Option.value (get_editor_open_files state) ~default:UriMap.empty
-    in
-    let lock_file = ServerFiles.lock_file (get_root_exn ()) in
-    let reconnect_immediately =
-      allow_immediate_reconnect
-      && p.trigger_on_lock_file
-      && MonitorConnection.server_exists lock_file
-    in
-    if reconnect_immediately then (
-      let lost_state =
-        Lost_server
-          {
-            Lost_env.p;
-            most_recent_file;
-            editor_open_files;
-            uris_with_unsaved_changes;
-            lock_file;
-            hh_server_status_diagnostic = None;
-          }
-      in
-      Lsp_helpers.telemetry_log
-        to_stdout
-        "Reconnecting immediately to hh_server";
-      let%lwt new_state =
-        reconnect_from_lost_if_necessary ~env lost_state `Force_regain
-      in
-      Lwt.return new_state
-    ) else
-      Lwt.return
-        (Lost_server
-           {
-             Lost_env.p;
-             most_recent_file;
-             editor_open_files;
-             uris_with_unsaved_changes;
-             lock_file;
-             hh_server_status_diagnostic = None;
-           }))
 
 let handle_idle_if_necessary (state : state) (event : event) : state =
   match state with
@@ -3305,159 +3681,6 @@ let cancel_if_stale
   else
     Lwt.return_unit
 
-let announce_ide_failure (error_data : ClientIdeMessage.stopped_reason) :
-    unit Lwt.t =
-  let open ClientIdeMessage in
-  log
-    "IDE services could not be initialized.\n%s\n%s"
-    error_data.long_user_message
-    error_data.debug_details;
-
-  let input =
-    Printf.sprintf
-      "%s\n\n%s"
-      error_data.long_user_message
-      error_data.debug_details
-  in
-  let%lwt upload_result = Clowder_paste.clowder_paste ~timeout:10. input in
-  let append_to_log =
-    match upload_result with
-    | Ok url -> Printf.sprintf "\nMore details: %s" url
-    | Error message ->
-      Printf.sprintf
-        "\n\nMore details:\n%s\n\nTried to upload those details but it didn't work...\n%s"
-        error_data.debug_details
-        message
-  in
-  Lsp_helpers.log_error to_stdout (error_data.long_user_message ^ append_to_log);
-  if error_data.is_actionable then
-    Lsp_helpers.showMessage_error
-      to_stdout
-      (error_data.medium_user_message ^ see_output_hack);
-  Lwt.return_unit
-
-(** Like all async methods, this method has a synchronous preamble up
-to its first await point, at which point it returns a promise to its
-caller; the rest of the method will be scheduled asynchronously.
-The synchronous preamble sends an "initialize" request to the ide_service.
-The asynchronous continuation is triggered when the response comes back;
-it then pumps messages to and from the ide service.
-Note: the fact that the request is sent in the synchronous preamble, is
-important for correctness - the rest of the codebase can send other requests
-to the ide_service at any time, safe in the knowledge that such requests will
-necessarily be delivered after the initialize request. *)
-let run_ide_service
-    (env : env)
-    (ide_service : ClientIdeService.t)
-    (initialize_params : Lsp.Initialize.params)
-    (editor_open_files : Lsp.TextDocumentItem.t UriMap.t option) : unit Lwt.t =
-  let open Lsp.Initialize in
-  let root = Some (Lsp_helpers.get_root initialize_params) |> Wwwroot.get in
-  if
-    not
-      initialize_params.client_capabilities.workspace.didChangeWatchedFiles
-        .dynamicRegistration
-  then
-    log_error "client doesn't support file-watching";
-
-  let naming_table_load_info =
-    match initialize_params.initializationOptions.namingTableSavedStatePath with
-    | None -> None
-    | Some path ->
-      Some
-        {
-          ClientIdeMessage.Initialize_from_saved_state.path = Path.make path;
-          test_delay =
-            initialize_params.initializationOptions
-              .namingTableSavedStateTestDelay;
-        }
-  in
-  let open_files =
-    editor_open_files
-    |> Option.value ~default:UriMap.empty
-    |> UriMap.keys
-    |> List.map ~f:(fun uri -> uri |> lsp_uri_to_path |> Path.make)
-  in
-  log_debug "initialize_from_saved_state";
-  let%lwt result =
-    ClientIdeService.initialize_from_saved_state
-      ide_service
-      ~root
-      ~naming_table_load_info
-      ~use_ranked_autocomplete:env.use_ranked_autocomplete
-      ~config:env.config
-      ~open_files
-  in
-  log_debug "initialize_from_saved_state.done";
-  match result with
-  | Ok () ->
-    let%lwt () = ClientIdeService.serve ide_service in
-    Lwt.return_unit
-  | Error error_data ->
-    let%lwt () = announce_ide_failure error_data in
-    Lwt.return_unit
-
-let on_status_restart_action
-    ~(env : env)
-    ~(init_id : string)
-    ~(ide_service : ClientIdeService.t option ref)
-    (result : ShowStatusFB.result)
-    (state : state) : state Lwt.t =
-  let open ShowMessageRequest in
-  match (result, state, !ide_service) with
-  | (Some { title }, Lost_server _, _)
-    when String.equal title hh_server_restart_button_text ->
-    let root = get_root_exn () in
-    (* Belt-and-braces kill the server. This is in case the server was *)
-    (* stuck in some weird state. It's also what 'hh restart' does. *)
-    if MonitorConnection.server_exists (Path.to_string root) then
-      ClientStop.kill_server root !from;
-
-    (* After that it's safe to try to reconnect! *)
-    start_server ~env root;
-    let%lwt state = reconnect_from_lost_if_necessary ~env state `Force_regain in
-    Lwt.return state
-  | (Some { title }, _, Some old_ide_service)
-    when String.equal title client_ide_restart_button_text ->
-    log "Restarting IDE service";
-
-    (* It's possible that [destroy] takes a while to finish, so make
-    sure to assign the new IDE service to the [ref] before attempting
-    to do an asynchronous operation with the old one. *)
-    let ide_args =
-      {
-        ClientIdeMessage.init_id;
-        verbose_to_stderr = env.verbose;
-        verbose_to_file = !verbose_to_file;
-      }
-    in
-    let new_ide_service = ClientIdeService.make ide_args in
-    ide_service := Some new_ide_service;
-    (* Note: the env.verbose passed on init controls verbosity for stderr
-    and is only ever controlled by --verbose command line, stored in env.
-    But verbosity-to-file can be altered dynamically by the user. *)
-    let (promise : unit Lwt.t) =
-      run_ide_service
-        env
-        new_ide_service
-        (initialize_params_exc ())
-        (get_editor_open_files state)
-    in
-    ignore_promise_but_handle_failure
-      promise
-      ~desc:"run-ide-after-restart"
-      ~terminate_on_failure:true;
-    (* Invariant: at all times after InitializeRequest, ide_service has
-    already been sent an "initialize" message. *)
-    let%lwt () =
-      stop_ide_service
-        old_ide_service
-        ~tracking_id:"restart"
-        ~reason:ClientIdeService.Stop_reason.Restarting
-    in
-    Lwt.return state
-  | _ -> Lwt.return state
-
 (************************************************************************)
 (* Message handling                                                     *)
 (************************************************************************)
@@ -3568,6 +3791,31 @@ let handle_editor_buffer_message
   | (Some e, _) ->
     Exception.reraise e
   | _ -> Lwt.return_unit
+
+let set_verbose_to_file
+    ~(ide_service : ClientIdeService.t option)
+    ~(tracking_id : string)
+    (value : bool) : unit =
+  verbose_to_file := value;
+  if !verbose_to_file then
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
+  else
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  match ide_service with
+  | Some ide_service ->
+    let ref_unblocked_time = ref 0. in
+    let (promise : unit Lwt.t) =
+      ide_rpc
+        ide_service
+        ~tracking_id
+        ~ref_unblocked_time
+        (ClientIdeMessage.Verbose_to_file !verbose_to_file)
+    in
+    ignore_promise_but_handle_failure
+      promise
+      ~desc:"verbose-ide-rpc"
+      ~terminate_on_failure:false
+  | None -> ()
 
 (* handle_event: Process and respond to a message, and update the LSP state
    machine accordingly. In case the message was a request, it returns the
@@ -4256,6 +4504,65 @@ let handle_server_message
   in
   Lwt.return_none
 
+(* After the server has sent 'hello', it means the persistent connection is   *)
+(* ready, so we can send our backlog of file-edits to the server.             *)
+let connect_after_hello (server_conn : server_conn) (state : state) : unit Lwt.t
+    =
+  log "connect_after_hello";
+  let ignore = ref 0.0 in
+  let%lwt () =
+    try%lwt
+      (* tell server we want persistent connection *)
+      let oc = server_conn.oc in
+      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Persistent;
+      let fd = oc |> Unix.descr_of_out_channel |> Lwt_unix.of_unix_file_descr in
+      let%lwt (response : 'a ServerCommandTypes.message_type) =
+        Marshal_tools_lwt.from_fd_with_preamble fd
+      in
+      begin
+        match response with
+        | ServerCommandTypes.Response (ServerCommandTypes.Connected, _) ->
+          set_hh_server_state Hh_server_handling_or_ready
+        | _ -> failwith "Didn't get server Connected response"
+      end;
+
+      (* tell server we want diagnostics *)
+      log "Diag_subscribe: clientLsp subscribing diagnostic 0";
+      let%lwt () =
+        rpc server_conn ignore (ServerCommandTypes.SUBSCRIBE_DIAGNOSTIC 0)
+      in
+      (* Extract the list of file changes we're tracking *)
+      let editor_open_files =
+        UriMap.elements
+          (match state with
+          | Main_loop menv -> Main_env.(menv.editor_open_files)
+          | In_init ienv -> In_init_env.(ienv.editor_open_files)
+          | Lost_server lenv -> Lost_env.(lenv.editor_open_files)
+          | _ -> UriMap.empty)
+      in
+      (* send open files and unsaved buffers to server *)
+      let float_unblocked_time = ref 0.0 in
+      (* Note: do serially since these involve RPC calls. *)
+      let%lwt () =
+        Lwt_list.iter_s
+          (fun (uri, textDocument) ->
+            let filename = lsp_uri_to_path uri in
+            let command =
+              ServerCommandTypes.OPEN_FILE
+                (filename, textDocument.TextDocumentItem.text)
+            in
+            rpc server_conn float_unblocked_time command)
+          editor_open_files
+      in
+      Lwt.return_unit
+    with e ->
+      let message = Exn.to_string e in
+      let stack = Printexc.get_backtrace () in
+      log "connect_after_hello exception %s\n%s" message stack;
+      raise (Server_fatal_connection_exception { Marshal_tools.message; stack })
+  in
+  Lwt.return_unit
+
 let handle_server_hello ~(state : state ref) : result_telemetry option Lwt.t =
   let%lwt () =
     match !state with
@@ -4299,308 +4606,6 @@ let handle_client_ide_notification
       to_stdout
       "[client-ide] Done processing file changes";
     Lwt.return_none
-
-let get_client_ide_status (ide_service : ClientIdeService.t) :
-    ShowStatusFB.params option =
-  let (type_, shortMessage, message, actions) =
-    match ClientIdeService.get_status ide_service with
-    | ClientIdeService.Status.Initializing ->
-      ( MessageType.WarningMessage,
-        "Hack: initializing",
-        "Hack IDE: initializing.",
-        [] )
-    | ClientIdeService.Status.Processing_files p ->
-      let open ClientIdeMessage.Processing_files in
-      ( MessageType.WarningMessage,
-        "Hack",
-        Printf.sprintf "Hack IDE: processing %d files." p.total,
-        [] )
-    | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
-    | ClientIdeService.Status.Stopped s ->
-      let open ClientIdeMessage in
-      ( MessageType.ErrorMessage,
-        "Hack: " ^ s.short_user_message,
-        s.medium_user_message ^ see_output_hack,
-        [{ ShowMessageRequest.title = client_ide_restart_button_text }] )
-  in
-  Some
-    {
-      ShowStatusFB.shortMessage = Some shortMessage;
-      request = { ShowMessageRequest.type_; message; actions };
-      progress = None;
-      total = None;
-    }
-
-(** This function blocks while it attempts to connect to the monitor to read status.
-It normally it gets status quickly, but has a 3s timeout just in case. *)
-let get_hh_server_status (state : state) : ShowStatusFB.params option =
-  let open ShowStatusFB in
-  let open ShowMessageRequest in
-  match state with
-  | Pre_init
-  | Post_shutdown ->
-    None
-  | In_init ienv ->
-    let open In_init_env in
-    let time = Unix.time () in
-    let delay_in_secs =
-      if Sys_utils.is_test_mode () then
-        (* we avoid raciness in our tests by not showing a real time *)
-        "<test>"
-      else
-        int_of_float (time -. ienv.first_start_time) |> string_of_int
-    in
-    (* TODO: better to report time that hh_server has spent initializing *)
-    let (progress, warning) =
-      match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
-      | Error _ -> (None, None)
-      | Ok (progress, warning) -> (progress, warning)
-    in
-    (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
-    it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
-    or None if there's no relevant progress to show.
-    [warning] comes from the same place, and if pressent is a human-readable string
-    that warns about saved-state-init failure. *)
-    let progress =
-      Option.value progress ~default:ClientConnect.default_progress_message
-    in
-    let warning =
-      if Option.is_some warning then
-        " (saved-state not found - will take a while)"
-      else
-        ""
-    in
-    let message =
-      Printf.sprintf
-        "hh_server initializing%s: %s [%s seconds]"
-        warning
-        progress
-        delay_in_secs
-    in
-    Some
-      {
-        request = { type_ = MessageType.WarningMessage; message; actions = [] };
-        progress = None;
-        total = None;
-        shortMessage = Some "Hack: initializing";
-      }
-  | Main_loop { Main_env.hh_server_status; _ } ->
-    (* This shows whether the connected hh_server is busy or ready.
-    It's produced in clientLsp.do_server_busy upon receipt of a status
-    enum from the server. See comments on hh_server_status for invariants. *)
-    Some hh_server_status
-  | Lost_server { Lost_env.p; _ } ->
-    Some
-      {
-        shortMessage = Some "Hack: stopped";
-        request =
-          {
-            type_ = MessageType.ErrorMessage;
-            message = p.Lost_env.explanation;
-            actions = [{ title = hh_server_restart_button_text }];
-          };
-        progress = None;
-        total = None;
-      }
-
-let hh_server_status_to_diagnostic
-    (uri : documentUri option) (hh_server_status : ShowStatusFB.params) :
-    PublishDiagnostics.params option =
-  let open ShowStatusFB in
-  let open ShowMessageRequest in
-  let open PublishDiagnostics in
-  let diagnostic =
-    {
-      PublishDiagnostics.range =
-        {
-          start = { line = 0; character = 0 };
-          end_ = { line = 0; character = 1 };
-        };
-      severity = None;
-      code = NoCode;
-      source = Some "hh_server";
-      message = "";
-      relatedInformation = [];
-      relatedLocations = [];
-    }
-  in
-  match (uri, hh_server_status.request.type_) with
-  | (None, _)
-  | (_, (MessageType.InfoMessage | MessageType.LogMessage)) ->
-    None
-  | (Some uri, MessageType.ErrorMessage) ->
-    Some
-      {
-        uri;
-        isStatusFB = true;
-        diagnostics =
-          [
-            {
-              diagnostic with
-              message =
-                "hh_server isn't running, so there may be undetected errors. Try `hh` at the command line... "
-                ^ hh_server_status.request.message;
-              severity = Some Error;
-            };
-          ];
-      }
-  | (Some uri, MessageType.WarningMessage) ->
-    Some
-      {
-        uri;
-        isStatusFB = true;
-        diagnostics =
-          [
-            {
-              diagnostic with
-              message =
-                "hh_server isn't yet ready, so there may undetected errors... "
-                ^ hh_server_status.request.message;
-              severity = Some Warning;
-            };
-          ];
-      }
-
-(** Manages the state of which diagnostics have been shown to the user
-about hh_server status: removes the old one if necessary, and adds a new one
-if necessary. Note that we only display hh_server_status diagnostics
-during In_init and Lost_server states, neither of which have diagnostics
-of their own. *)
-let publish_hh_server_status_diagnostic
-    (state : state) (hh_server_status : ShowStatusFB.params option) : state =
-  let uri =
-    match (get_most_recent_file state, get_editor_open_files state) with
-    | (Some uri, Some open_files) when UriMap.mem uri open_files -> Some uri
-    | (_, Some open_files) when not (UriMap.is_empty open_files) ->
-      Some (UriMap.choose open_files |> fst)
-    | (_, _) -> None
-  in
-  let desired_diagnostic =
-    Option.bind hh_server_status ~f:(hh_server_status_to_diagnostic uri)
-  in
-  let get_existing_diagnostic state =
-    match state with
-    | In_init ienv -> ienv.In_init_env.hh_server_status_diagnostic
-    | Lost_server lenv -> lenv.Lost_env.hh_server_status_diagnostic
-    | _ -> None
-  in
-  let publish_and_update_diagnostic state diagnostic =
-    let notification = PublishDiagnosticsNotification diagnostic in
-    notification |> print_lsp_notification |> to_stdout;
-    match state with
-    | In_init ienv ->
-      In_init
-        { ienv with In_init_env.hh_server_status_diagnostic = Some diagnostic }
-    | Lost_server lenv ->
-      Lost_server
-        { lenv with Lost_env.hh_server_status_diagnostic = Some diagnostic }
-    | _ -> state
-  in
-  let open PublishDiagnostics in
-  (* The following match emboodies these rules:
-  (1) we only publish hh_server_status diagnostics in In_init and Lost_server states,
-  (2) we'll remove the old PublishDiagnostic if necessary and add a new one if necessary
-  (3) to avoid extra LSP messages, if the diagnostic hasn't changed then we won't send anything
-  (4) to avoid flicker, if the diagnostic has changed but is still in the same file, then
-  we refrain from sending an "erase old" message and it will be implied by sending "new". *)
-  match (get_existing_diagnostic state, desired_diagnostic, state) with
-  | (_, _, Main_loop _)
-  | (_, _, Pre_init)
-  | (_, _, Post_shutdown)
-  | (None, None, _) ->
-    state
-  | (Some _, None, _) -> dismiss_diagnostics state
-  | (Some existing, Some desired, _)
-    when Lsp.equal_documentUri existing.uri desired.uri
-         && Option.equal
-              PublishDiagnostics.equal_diagnostic
-              (List.hd existing.diagnostics)
-              (List.hd desired.diagnostics) ->
-    state
-  | (Some existing, Some desired, _)
-    when Lsp.equal_documentUri existing.uri desired.uri ->
-    publish_and_update_diagnostic state desired
-  | (Some _, Some desired, _) ->
-    let state = dismiss_diagnostics state in
-    publish_and_update_diagnostic state desired
-  | (None, Some desired, _) -> publish_and_update_diagnostic state desired
-
-(** Here are the rules for merging status. They embody the principle that the spinner
-shows if initializing/typechecking is in progress, the error icon shows if error,
-and the status bar word is "Hack" if IDE services are available or "Hack: xyz" if not.
-Note that if Hack IDE is up but hh_server is down, then the hh_server failure message
-is conveyed via a publishDiagnostic; it's not conveyed via status.
-  [ok] Hack -- if ide_service is up and hh_server is ready
-  [spin] Hack -- if ide_service is processing-files or hh_server is initializing/typechecking
-  [spin] Hack: initializing -- if ide_service is initializing
-  [err] Hack: failure -- if ide_service is down
-If client_ide_service isn't enabled, then we show thing differently:
-  [ok] Hack  -- if hh_server is ready (Main_loop)
-  [spin] Hack -- if hh_server is doing local or global typechecks (Main_loop)
-  [spin] Hack: busy -- if hh_server is doing non-interruptible typechecks (Main_loop)
-  [spin] Hack: initializing -- if hh_server is initializing (In_init)
-  [err] hh_server: stopped -- hh_server is down (Lost_server)
-As for the tooltip and actions, they are combined from both ide_service and hh_server. *)
-let merge_statuses
-    ~(client_ide_status : ShowStatusFB.params option)
-    ~(hh_server_status : ShowStatusFB.params option) :
-    ShowStatusFB.params option =
-  (* The correctness of the following match is a bit subtle. This is how to think of it.
-  From the spec in the docblock, (1) if there's no client_ide_service, then the result
-  of this function is simply the same as hh_server_status, since that's how it was constructed
-  by get_hh_server_status (for In_init and Lost_server) and do_server_busy; (2) if there
-  is a client_ide_service then the result is almost always simply the same as ide_service
-  since that's how it was constructed by get_client_ide_status; (3) the only exception to
-  rule 2 is that, if client_ide_status would have shown "[ok] Hack" and hh_server_status
-  would have been a spinner, then we change to "[spin] Hack". *)
-  match (client_ide_status, hh_server_status) with
-  | (None, None) -> None
-  | (None, Some _) -> hh_server_status
-  | (Some _, None) -> client_ide_status
-  | (Some client_ide_status, Some hh_server_status) ->
-    let open Lsp.ShowStatusFB in
-    let open Lsp.ShowMessageRequest in
-    let request =
-      {
-        client_ide_status.request with
-        message =
-          client_ide_status.request.message
-          ^ "\n"
-          ^ hh_server_status.request.message;
-        actions =
-          client_ide_status.request.actions @ hh_server_status.request.actions;
-      }
-    in
-    if
-      MessageType.equal client_ide_status.request.type_ MessageType.InfoMessage
-      && MessageType.equal
-           hh_server_status.request.type_
-           MessageType.WarningMessage
-    then
-      let request = { request with type_ = MessageType.WarningMessage } in
-      Some { client_ide_status with request; shortMessage = Some "Hack" }
-    else
-      Some { client_ide_status with request }
-
-let refresh_status
-    ~(env : env)
-    ~(ide_service : ClientIdeService.t option ref)
-    ~(init_id : string) : unit =
-  let client_ide_status =
-    match !ide_service with
-    | None -> None
-    | Some ide_service -> get_client_ide_status ide_service
-  in
-  let status =
-    merge_statuses ~hh_server_status:!latest_hh_server_status ~client_ide_status
-  in
-  Option.iter
-    status
-    ~f:
-      (request_showStatusFB
-         ~on_result:(on_status_restart_action ~env ~init_id ~ide_service));
-  ()
 
 let handle_tick
     ~(env : env) ~(state : state ref) ~(ref_unblocked_time : float ref) :

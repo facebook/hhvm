@@ -522,12 +522,10 @@ let outline popt content =
   let result = outline_ast ast in
   add_docblocks result comments
 
-let outline_entry ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
+let outline_entry_no_comments
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
     string SymbolDefinition.t list =
-  let ast = Ast_provider.compute_ast ~popt ~entry in
-  let comments = Ast_provider.compute_comments ~popt ~entry in
-  let result = outline_ast ast in
-  add_docblocks result comments
+  Ast_provider.compute_ast ~popt ~entry |> outline_ast
 
 let rec print_def ~short_pos indent def =
   let {

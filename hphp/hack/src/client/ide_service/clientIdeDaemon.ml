@@ -760,7 +760,9 @@ let handle_request :
       | Initialized { ifiles = files; icommon = common; _ } ),
       Document_symbol document_location ) ->
     let (files, entry) = update_file files document_location in
-    let result = FileOutline.outline_entry ~popt:common.popt ~entry in
+    let result =
+      FileOutline.outline_entry_no_comments ~popt:common.popt ~entry
+    in
     Lwt.return (update_state_files state files, Ok result)
   (***********************************************************)
   (************************* UNABLE TO HANDLE ****************)

@@ -164,7 +164,9 @@ let go_quarantined
     (match List.hd results with
     | None -> None
     | Some head_result ->
-      let ast = Ast_provider.compute_ast ~ctx ~entry in
+      let ast =
+        Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
+      in
       (match get_occurrence_info ctx ast head_result with
       | None -> None
       | Some (occurrence, fe, def_opt) ->

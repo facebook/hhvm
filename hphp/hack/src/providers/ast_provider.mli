@@ -50,7 +50,7 @@ val get_ast :
   ?full:bool -> Provider_context.t -> Relative_path.t -> Nast.program
 
 val parse :
-  Provider_context.t ->
+  ParserOptions.t ->
   full:bool ->
   keep_errors:bool ->
   source_text:Full_fidelity_source_text.t ->
@@ -58,24 +58,22 @@ val parse :
 
 (** Compute the AST for the given [Provider_context.entry]. *)
 val compute_ast :
-  ctx:Provider_context.t -> entry:Provider_context.entry -> Nast.program
+  popt:ParserOptions.t -> entry:Provider_context.entry -> Nast.program
 
 (** Compute the full [Parser_return.t] object. *)
 val compute_parser_return_and_ast_errors :
-  ctx:Provider_context.t ->
+  popt:ParserOptions.t ->
   entry:Provider_context.entry ->
   Parser_return.t * Errors.t
 
 (** Compute the comments for the given [Provider_context.entry]. *)
 val compute_comments :
-  ctx:Provider_context.t ->
-  entry:Provider_context.entry ->
-  Parser_return.comments
+  popt:ParserOptions.t -> entry:Provider_context.entry -> Parser_return.comments
 
 (** Compute the [FileInfo.t] associated with the given entry, doing a parse
 if necessary. *)
 val compute_file_info :
-  ctx:Provider_context.t -> entry:Provider_context.entry -> FileInfo.t
+  popt:ParserOptions.t -> entry:Provider_context.entry -> FileInfo.t
 
 (** Compute the [Full_fidelity_source_text.t] for this [Provider_context.entry]. *)
 val compute_source_text :

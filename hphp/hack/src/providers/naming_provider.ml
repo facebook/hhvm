@@ -28,7 +28,11 @@ let find_symbol_in_context
     (Relative_path.t * (FileInfo.pos * FileInfo.name_type)) option =
   Provider_context.get_entries ctx
   |> Relative_path.Map.filter_map ~f:(fun entry ->
-         let file_info = Ast_provider.compute_file_info ctx entry in
+         let file_info =
+           Ast_provider.compute_file_info
+             ~popt:(Provider_context.get_popt ctx)
+             ~entry
+         in
          let symbols = get_entry_symbols file_info in
          List.find_map symbols ~f:(fun ((pos, name), kind) ->
              if is_symbol name then

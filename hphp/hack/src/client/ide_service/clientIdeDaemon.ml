@@ -893,7 +893,9 @@ let handle_request :
   (* Document Symbol *)
   | (Initialized istate, Document_symbol document_location) ->
     let (state, ctx, entry) = update_file istate document_location in
-    let result = FileOutline.outline_ctx ~ctx ~entry in
+    let result =
+      FileOutline.outline_entry ~popt:(Provider_context.get_popt ctx) ~entry
+    in
     Lwt.return (state, Ok result)
   (* Type Coverage *)
   | (Initialized istate, Type_coverage document_identifier) ->

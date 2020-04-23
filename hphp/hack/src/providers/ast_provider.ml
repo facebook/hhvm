@@ -48,11 +48,10 @@ module LocalParserCache =
     end)
 
 let parse
-    (ctx : Provider_context.t)
+    (popt : ParserOptions.t)
     ~(full : bool)
     ~(keep_errors : bool)
     ~(source_text : Full_fidelity_source_text.t) : Parser_return.t =
-  let popt = Provider_context.get_popt ctx in
   let path = source_text.Full_fidelity_source_text.file_path in
   let parser_env =
     Full_fidelity_ast.make_env
@@ -136,7 +135,7 @@ let compute_source_text ~(entry : Provider_context.entry) :
 improved with a method similar to the TAST-and-errors generation, where the TAST
 errors are not generated unless necessary. *)
 let compute_parser_return_and_ast_errors
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
     Parser_return.t * Errors.t =
   match entry with
   | {
@@ -146,15 +145,12 @@ let compute_parser_return_and_ast_errors
   } ->
     (parser_return, ast_errors)
   | _ ->
-    (* Not used yet, but we will eventually want to extract the parser options
-  from the [Provider_context.t]. *)
-    let (_ : Provider_context.t) = ctx in
     let source_text = compute_source_text entry in
     let (ast_errors, parser_return) =
       Errors.do_with_context
         entry.Provider_context.path
         Errors.Parsing
-        (fun () -> parse ctx ~full:true ~keep_errors:true ~source_text)
+        (fun () -> parse popt ~full:true ~keep_errors:true ~source_text)
     in
     entry.Provider_context.ast_errors <- Some ast_errors;
     entry.Provider_context.parser_return <- Some parser_return;
@@ -172,24 +168,23 @@ let compute_cst ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
     entry.Provider_context.cst <- Some cst;
     cst
 
-let compute_ast ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
+let compute_ast ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) :
     Nast.program =
   let ({ Parser_return.ast; _ }, _ast_errors) =
-    compute_parser_return_and_ast_errors ~ctx ~entry
+    compute_parser_return_and_ast_errors ~popt ~entry
   in
   ast
 
-let compute_comments
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) :
-    Parser_return.comments =
+let compute_comments ~(popt : ParserOptions.t) ~(entry : Provider_context.entry)
+    : Parser_return.comments =
   let ({ Parser_return.comments; _ }, _ast_errors) =
-    compute_parser_return_and_ast_errors ~ctx ~entry
+    compute_parser_return_and_ast_errors ~popt ~entry
   in
   comments
 
 let compute_file_info
-    ~(ctx : Provider_context.t) ~(entry : Provider_context.entry) : FileInfo.t =
-  let ast = compute_ast ~ctx ~entry in
+    ~(popt : ParserOptions.t) ~(entry : Provider_context.entry) : FileInfo.t =
+  let ast = compute_ast ~popt ~entry in
   let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
   {
     FileInfo.empty_t with
@@ -327,7 +322,7 @@ let get_ast ?(full = false) ctx path =
     Relative_path.Map.find_opt (Provider_context.get_entries ctx) path
   in
   match (entry_opt, Provider_context.get_backend ctx) with
-  | (Some entry, _) -> compute_ast ctx entry
+  | (Some entry, _) -> compute_ast (Provider_context.get_popt ctx) entry
   (* See documentation on `entry` for its invariants.
     The compute_ast function will use the cached (full) AST if present,
     and otherwise will compute a full AST and cache it and return it.
@@ -360,7 +355,11 @@ let get_ast ?(full = false) ctx path =
     let contents = Sys_utils.cat (Relative_path.to_absolute path) in
     let source_text = Full_fidelity_source_text.make path contents in
     let { Parser_return.ast; _ } =
-      parse ctx ~full ~keep_errors:false ~source_text
+      parse
+        (Provider_context.get_popt ctx)
+        ~full
+        ~keep_errors:false
+        ~source_text
     in
     ast
   | (_, Provider_backend.Decl_service _) ->

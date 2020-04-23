@@ -120,7 +120,11 @@ let respect_but_quarantine_unsaved_changes
         Relative_path.Map.iter
           (Provider_context.get_entries ctx)
           ~f:(fun _path entry ->
-            let (_ : Nast.program) = Ast_provider.compute_ast ~ctx ~entry in
+            let (_ : Nast.program) =
+              Ast_provider.compute_ast
+                ~popt:(Provider_context.get_popt ctx)
+                ~entry
+            in
             ());
         invalidate_local_decl_caches_for_entries
           local

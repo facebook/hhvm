@@ -41,7 +41,9 @@ let compute_tast_and_errors_unquarantined_internal
     { Compute_tast.tast; telemetry = Telemetry.create () }
   | (Compute_tast_and_errors, Some tast, Some naming_and_typing_errors) ->
     let (_parser_return, ast_errors) =
-      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors
+        ~popt:(Provider_context.get_popt ctx)
+        ~entry
     in
     let errors = Errors.merge ast_errors naming_and_typing_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }
@@ -56,7 +58,9 @@ let compute_tast_and_errors_unquarantined_internal
 
     (* do the work *)
     let ({ Parser_return.ast; _ }, ast_errors) =
-      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors
+        ~popt:(Provider_context.get_popt ctx)
+        ~entry
     in
     let (naming_errors, nast) =
       (* [Naming_global.ndecl_file] actually updates the reverse naming
@@ -75,7 +79,11 @@ let compute_tast_and_errors_unquarantined_internal
       *)
       Naming_provider.with_quarantined_writes ~f:(fun () ->
           let path = entry.Provider_context.path in
-          let file_info = Ast_provider.compute_file_info ~ctx ~entry in
+          let file_info =
+            Ast_provider.compute_file_info
+              ~popt:(Provider_context.get_popt ctx)
+              ~entry
+          in
           let (reverse_naming_table_errors, _failed_naming) =
             Naming_global.ndecl_file ctx path file_info
           in
@@ -178,7 +186,9 @@ let compute_tast_and_errors_quarantined
   with
   | (Some tast, Some naming_and_typing_errors) ->
     let (_parser_return, ast_errors) =
-      Ast_provider.compute_parser_return_and_ast_errors ~ctx ~entry
+      Ast_provider.compute_parser_return_and_ast_errors
+        ~popt:(Provider_context.get_popt ctx)
+        ~entry
     in
     let errors = Errors.merge ast_errors naming_and_typing_errors in
     { Compute_tast_and_errors.tast; errors; telemetry = Telemetry.create () }

@@ -502,7 +502,9 @@ let go_from_ast ~ast ~line ~char =
   *)
 let go ~ctx ~entry ~line ~char =
   try
-    let ast = Ast_provider.compute_ast ~ctx ~entry in
+    let ast =
+      Ast_provider.compute_ast ~popt:(Provider_context.get_popt ctx) ~entry
+    in
     let results_list = go_from_ast ast line char in
     List.map results_list (fun pos ->
         Pos.set_file entry.Provider_context.path pos)

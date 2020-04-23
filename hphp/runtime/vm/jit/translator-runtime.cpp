@@ -528,7 +528,8 @@ TypedValue getDefaultIfNullTV(tv_rval rval, const TypedValue& def) {
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  return getDefaultIfNullTV(a->rvalVanilla(key), def);
+  auto const result = a->get(key);
+  return result.is_init() ? result : def;
 }
 
 ALWAYS_INLINE
@@ -548,7 +549,8 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  return getDefaultIfNullTV(a->rvalVanilla(key), def);
+  auto const result = a->get(key);
+  return result.is_init() ? result : def;
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {

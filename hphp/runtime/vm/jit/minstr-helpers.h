@@ -488,8 +488,8 @@ void arrayGetNotFound(const StringData* k);
 
 template<KeyType keyType, MOpMode mode>
 TypedValue arrayGetImpl(ArrayData* a, key_type<keyType> key) {
-  auto ret = a->rvalVanilla(key);
-  if (ret) return ret.tv();
+  auto const result = a->get(key);
+  if (result.is_init()) return result;
   if (mode == MOpMode::None) return make_tv<KindOfNull>();
   if (mode == MOpMode::InOut) {
     throw_inout_undefined_index(key);
@@ -795,8 +795,7 @@ SETELEM_HELPER_TABLE(X)
 
 template<KeyType keyType>
 uint64_t arrayIssetImpl(ArrayData* a, key_type<keyType> key) {
-  auto const rval = a->rvalVanilla(key);
-  return rval && !isNullType(rval.type());
+  return !isNullType(type(a->get(key)));
 }
 
 #define ARRAY_ISSET_HELPER_TABLE(m) \

@@ -7,6 +7,7 @@
     clientIdeService)
   (libraries
     client_ide_message
+    client_ide_utils
     lwt
     lsp
     server
@@ -26,5 +27,14 @@
     server_command_types
     server_services
     sys_utils)
+  (preprocess
+    (pps lwt_ppx)))
+
+(library
+  (name client_ide_utils)
+  (wrapped false)
+  (modules clientIdeUtils)
+  (libraries
+    client_ide_message)
   (preprocess
     (pps lwt_ppx)))

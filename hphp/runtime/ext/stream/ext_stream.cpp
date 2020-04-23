@@ -303,36 +303,28 @@ bool HHVM_FUNCTION(stream_context_set_params,
 Variant HHVM_FUNCTION(stream_copy_to_stream,
                       const Resource& source,
                       const Resource& dest,
-                      int maxlength /* = -1 */,
-                      int offset /* = 0 */) {
+                      int64_t maxlength /* = -1 */,
+                      int64_t offset /* = 0 */) {
   if (maxlength == 0) return 0;
   if (maxlength == PHP_STREAM_COPY_ALL) maxlength = 0;
 
   auto srcFile = cast<File>(source);
   auto destFile = cast<File>(dest);
   if (maxlength < 0) {
-    raise_invalid_argument_warning("maxlength: %d", maxlength);
+    raise_invalid_argument_warning("maxlength: %ld", maxlength);
     return false;
   }
   if (offset > 0 && !srcFile->seek(offset, SEEK_SET) ) {
-    raise_warning("Failed to seek to position %d in the stream", offset);
+    raise_warning("Failed to seek to position %ld in the stream", offset);
     return false;
   }
-  int cbytes = 0;
+  int64_t cbytes = 0;
   if (maxlength == 0) maxlength = INT_MAX;
   while (cbytes < maxlength) {
-    int remaining = maxlength - cbytes;
-    //srcFile->getChunkSize currently returns an int64_t, we need int currently
+    int64_t remaining = maxlength - cbytes;
+    //srcFile->getChunkSize currently returns an int64_t
     auto chunkSize = srcFile->getChunkSize();
-    int intChunkSize = 0;
-    if (chunkSize <= INT_MAX) {
-      intChunkSize = static_cast<int>(chunkSize);
-    } else {
-      raise_warning("Invalid chunk size provided, using default: %d",
-                    FileData::DEFAULT_CHUNK_SIZE);
-      intChunkSize = FileData::DEFAULT_CHUNK_SIZE;
-    }
-    String buf = srcFile->read(std::min(remaining, intChunkSize));
+    String buf = srcFile->read(std::min(remaining, chunkSize));
     if (buf.size() == 0) break;
     if (destFile->write(buf) != buf.size()) {
       return false;
@@ -345,10 +337,10 @@ Variant HHVM_FUNCTION(stream_copy_to_stream,
 
 Variant HHVM_FUNCTION(stream_get_contents,
                       const Resource& handle,
-                      int maxlen /* = -1 */,
-                      int offset /* = -1 */) {
+                      int64_t maxlen /* = -1 */,
+                      int64_t offset /* = -1 */) {
   if (maxlen < -1) {
-    raise_invalid_argument_warning("maxlen: %d", maxlen);
+    raise_invalid_argument_warning("maxlen: %ld", maxlen);
     return false;
   }
 
@@ -364,7 +356,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
   }
 
   if (offset >= 0 && !file->seek(offset, SEEK_SET) ) {
-    raise_warning("Failed to seek to position %d in the stream", offset);
+    raise_warning("Failed to seek to position %ld in the stream", offset);
     return false;
   }
 
@@ -382,7 +374,7 @@ Variant HHVM_FUNCTION(stream_get_contents,
 
 Variant HHVM_FUNCTION(stream_get_line,
                       const Resource& handle,
-                      int length /* = 0 */,
+                      int64_t length /* = 0 */,
                       const Variant& ending /* = uninit_variant */) {
   const String& strEnding = ending.isNull() ? null_string : ending.toString();
   return cast<File>(handle)->readRecord(strEnding, length);
@@ -448,7 +440,8 @@ bool HHVM_FUNCTION(stream_set_blocking,
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
-                      int buffer) {
+                      int64_t buffer) {
+  if (buffer < 0) return -1;
   if (isa<File>(stream)) {
     auto plain_file = dyn_cast<PlainFile>(stream);
     if (!plain_file) {
@@ -463,7 +456,7 @@ int64_t HHVM_FUNCTION(stream_set_read_buffer,
       return setvbuf(file, nullptr, _IONBF, 0);
     } else {
       // Use _IOFBF (full buffer) macro
-      return setvbuf(file, nullptr, _IOFBF, buffer);
+      return setvbuf(file, nullptr, _IOFBF, (size_t)buffer);
     }
   } else {
     return -1;
@@ -506,7 +499,8 @@ bool HHVM_FUNCTION(stream_set_timeout,
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
-                      int buffer) {
+                      int64_t buffer) {
+  if (buffer < 0) return -1;
   auto plain_file = dyn_cast<PlainFile>(stream);
   if (!plain_file) {
     return -1;
@@ -520,13 +514,13 @@ int64_t HHVM_FUNCTION(stream_set_write_buffer,
     return setvbuf(file, nullptr, _IONBF, 0);
   } else {
   // Use _IOFBF (full buffer) macro
-    return setvbuf(file, nullptr, _IOFBF, buffer);
+    return setvbuf(file, nullptr, _IOFBF, (size_t)buffer);
   }
 }
 
 int64_t HHVM_FUNCTION(set_file_buffer,
                       const Resource& stream,
-                      int buffer) {
+                      int64_t buffer) {
   return HHVM_FN(stream_set_write_buffer)(stream, buffer);
 }
 
@@ -792,7 +786,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
-                      int length,
+                      int64_t length,
                       int flags,
                       Variant& address) {
   Variant ret, host, port;

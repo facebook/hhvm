@@ -87,33 +87,33 @@ Variant HHVM_FUNCTION(socket_accept,
                       const Resource& socket);
 Variant HHVM_FUNCTION(socket_read,
                       const Resource& socket,
-                      int length,
+                      int64_t length,
                       int type = 0);
 Variant HHVM_FUNCTION(socket_write,
                       const Resource& socket,
                       const String& buffer,
-                      int length = 0);
+                      int64_t length = 0);
 Variant HHVM_FUNCTION(socket_send,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t len,
                       int flags);
 Variant HHVM_FUNCTION(socket_sendto,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t  len,
                       int flags,
                       const String& addr,
                       int port = -1);
 Variant HHVM_FUNCTION(socket_recv,
                       const Resource& socket,
                       Variant& buf,
-                      int len,
+                      int64_t len,
                       int flags);
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
                       Variant& buf,
-                      int len,
+                      int64_t len,
                       int flags,
                       Variant& name,
                       Variant& port);

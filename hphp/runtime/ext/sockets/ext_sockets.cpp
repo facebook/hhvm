@@ -373,7 +373,8 @@ static void sock_array_from_fd_set(Variant &sockets,
   sockets = ret;
 }
 
-static int php_read(req::ptr<Socket> sock, void *buf, int maxlen, int flags) {
+static int php_read(req::ptr<Socket> sock, void *buf, int64_t maxlen,
+                    int flags) {
   int m = fcntl(sock->fd(), F_GETFL);
   if (m < 0) {
     return m;
@@ -1146,7 +1147,7 @@ Variant HHVM_FUNCTION(socket_accept,
 
 Variant HHVM_FUNCTION(socket_read,
                       const Resource& socket,
-                      int length,
+                      int64_t length,
                       int type /* = 0 */) {
   if (length <= 0) {
     return false;
@@ -1158,7 +1159,7 @@ Variant HHVM_FUNCTION(socket_read,
   if (type == PHP_NORMAL_READ) {
     retval = php_read(sock, tmpbuf, length, 0);
   } else {
-    retval = recv(sock->fd(), tmpbuf, length, 0);
+    retval = recv(sock->fd(), tmpbuf, (size_t)length, 0);
   }
 
   if (retval == -1) {
@@ -1181,12 +1182,13 @@ Variant HHVM_FUNCTION(socket_read,
 Variant HHVM_FUNCTION(socket_write,
                       const Resource& socket,
                       const String& buffer,
-                      int length /* = 0 */) {
+                      int64_t length /* = 0 */) {
   auto sock = cast<Socket>(socket);
+  if (length < 0) return false;
   if (length == 0 || length > buffer.size()) {
     length = buffer.size();
   }
-  int retval = write(sock->fd(), buffer.data(), length);
+  int retval = write(sock->fd(), buffer.data(), (size_t)length);
   if (retval < 0) {
     SOCKET_ERROR(sock, "unable to write to socket", errno);
     return false;
@@ -1197,13 +1199,14 @@ Variant HHVM_FUNCTION(socket_write,
 Variant HHVM_FUNCTION(socket_send,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t len,
                       int flags) {
   auto sock = cast<Socket>(socket);
+  if (len < 0) return false;
   if (len > buf.size()) {
     len = buf.size();
   }
-  int retval = send(sock->fd(), buf.data(), len, flags);
+  int retval = send(sock->fd(), buf.data(), (size_t)len, flags);
   if (retval == -1) {
     SOCKET_ERROR(sock, "unable to write to socket", errno);
     return false;
@@ -1214,11 +1217,12 @@ Variant HHVM_FUNCTION(socket_send,
 Variant HHVM_FUNCTION(socket_sendto,
                       const Resource& socket,
                       const String& buf,
-                      int len,
+                      int64_t len,
                       int flags,
                       const String& addr,
                       int port /* = -1 */) {
   auto sock = cast<Socket>(socket);
+  if (len < 0) return false;
   if (len > buf.size()) {
     len = buf.size();
   }
@@ -1236,7 +1240,8 @@ Variant HHVM_FUNCTION(socket_sendto,
         return false;
       }
 
-      retval = sendto(sock->fd(), buf.data(), len, flags, sa_ptr, sa_size);
+      retval = sendto(sock->fd(), buf.data(), (size_t)len, flags, sa_ptr,
+                      sa_size);
 #endif
     }
     break;
@@ -1255,7 +1260,7 @@ Variant HHVM_FUNCTION(socket_sendto,
         return false;
       }
 
-      retval = sendto(sock->fd(), buf.data(), len, flags,
+      retval = sendto(sock->fd(), buf.data(), (size_t)len, flags,
                       (struct sockaddr *)&sin, sizeof(sin));
     }
     break;
@@ -1275,7 +1280,7 @@ Variant HHVM_FUNCTION(socket_sendto,
         return false;
       }
 
-      retval = sendto(sock->fd(), buf.data(), len, flags,
+      retval = sendto(sock->fd(), buf.data(), (size_t)len, flags,
                       (struct sockaddr *)&sin6, sizeof(sin6));
     }
     break;
@@ -1295,7 +1300,7 @@ Variant HHVM_FUNCTION(socket_sendto,
 Variant HHVM_FUNCTION(socket_recv,
                       const Resource& socket,
                       Variant& buf,
-                      int len,
+                      int64_t len,
                       int flags) {
   if (len <= 0) {
     return false;
@@ -1304,7 +1309,7 @@ Variant HHVM_FUNCTION(socket_recv,
 
   char *recv_buf = (char *)malloc(len + 1);
   int retval;
-  if ((retval = recv(sock->fd(), recv_buf, len, flags)) < 1) {
+  if ((retval = recv(sock->fd(), recv_buf, (size_t)len, flags)) < 1) {
     free(recv_buf);
     buf = init_null();
   } else {
@@ -1322,7 +1327,7 @@ Variant HHVM_FUNCTION(socket_recv,
 Variant HHVM_FUNCTION(socket_recvfrom,
                       const Resource& socket,
                       Variant& buf,
-                      int len,
+                      int64_t len,
                       int flags,
                       Variant& name,
                       Variant& port) {
@@ -1346,7 +1351,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       slen = sizeof(s_un);
       memset(&s_un, 0, slen);
       s_un.sun_family = AF_UNIX;
-      retval = recvfrom(sock->fd(), recv_buf, len, flags,
+      retval = recvfrom(sock->fd(), recv_buf, (size_t)len, flags,
                         (struct sockaddr *)&s_un, (socklen_t *)&slen);
       if (retval < 0) {
         free(recv_buf);
@@ -1371,7 +1376,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       memset(&sin, 0, slen);
       sin.sin_family = AF_INET; // recvfrom doesn't fill this in
 
-      retval = recvfrom(sock->fd(), recv_buf, len, flags,
+      retval = recvfrom(sock->fd(), recv_buf, (size_t)len, flags,
                         (struct sockaddr *)&sin, (socklen_t *)&slen);
       if (retval < 0) {
         free(recv_buf);
@@ -1400,7 +1405,7 @@ Variant HHVM_FUNCTION(socket_recvfrom,
       memset(&sin6, 0, slen);
       sin6.sin6_family = AF_INET6; // recvfrom doesn't fill this in
 
-      retval = recvfrom(sock->fd(), recv_buf, len, flags,
+      retval = recvfrom(sock->fd(), recv_buf, (size_t)len, flags,
                         (struct sockaddr *)&sin6, (socklen_t *)&slen);
       if (retval < 0) {
         free(recv_buf);

@@ -158,17 +158,17 @@ bool HHVM_FUNCTION(stream_context_set_params,
 Variant HHVM_FUNCTION(stream_copy_to_stream,
                       const Resource& source,
                       const Resource& dest,
-                      int maxlength = -1,
-                      int offset = 0);
+                      int64_t maxlength = -1,
+                      int64_t offset = 0);
 
 Variant HHVM_FUNCTION(stream_get_contents,
                       const Resource& handle,
-                      int maxlen = -1,
-                      int offset = -1);
+                      int64_t maxlen = -1,
+                      int64_t offset = -1);
 
 Variant HHVM_FUNCTION(stream_get_line,
                       const Resource& handle,
-                      int length = 0,
+                      int64_t length = 0,
                       const Variant& ending = uninit_variant);
 
 Variant HHVM_FUNCTION(stream_get_meta_data,
@@ -202,7 +202,7 @@ bool HHVM_FUNCTION(stream_set_blocking,
 
 int64_t HHVM_FUNCTION(stream_set_read_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 Variant HHVM_FUNCTION(stream_set_chunk_size,
                       const Resource& stream,
@@ -215,11 +215,11 @@ bool HHVM_FUNCTION(stream_set_timeout,
 
 int64_t HHVM_FUNCTION(stream_set_write_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 int64_t HHVM_FUNCTION(set_file_buffer,
                       const Resource& stream,
-                      int buffer);
+                      int64_t buffer);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream sockets: ext_socket has better implementation of socket functions
@@ -261,7 +261,7 @@ Variant HHVM_FUNCTION(stream_socket_pair,
 
 Variant HHVM_FUNCTION(stream_socket_recvfrom,
                       const Resource& socket,
-                      int length,
+                      int64_t length,
                       int flags,
                       Variant& address);
 

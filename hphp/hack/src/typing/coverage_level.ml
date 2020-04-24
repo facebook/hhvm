@@ -213,16 +213,13 @@ class level_getter fixme_map =
   end
 
 let get_levels ctx tast check =
-  let fixmes =
-    match Fixme_provider.get_hh_fixmes check with
-    | Some fixmes -> fixmes
-    | None ->
-      failwith
-        ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute check)
-  in
-  let lg = new level_getter fixmes in
-  let (pmap, cmap) = lg#go ctx tast in
-  (Pos.Map.fold (fun p ty xs -> (Pos.to_absolute p, ty) :: xs) pmap [], cmap)
+  match Fixme_provider.get_hh_fixmes check with
+  | Some fixmes ->
+    let lg = new level_getter fixmes in
+    let (pmap, cmap) = lg#go ctx tast in
+    Ok
+      (Pos.Map.fold (fun p ty xs -> (Pos.to_absolute p, ty) :: xs) pmap [], cmap)
+  | None -> Error ()
 
 let get_percent counts =
   let nchecked = counts.checked in

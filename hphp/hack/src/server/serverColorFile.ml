@@ -9,14 +9,14 @@
 
 let go_quarantined ~(ctx : Provider_context.t) ~(entry : Provider_context.entry)
     =
-  try
-    let { Tast_provider.Compute_tast.tast; _ } =
-      Tast_provider.compute_tast_quarantined ~ctx ~entry
-    in
-    Coverage_level.get_levels ctx tast entry.Provider_context.path
-  with _ ->
-    (* The "Fixme Provider" will throw an exception if the file cannot be found.
-     * Let's convert that exception to a plain result. *)
+  let { Tast_provider.Compute_tast.tast; _ } =
+    Tast_provider.compute_tast_quarantined ~ctx ~entry
+  in
+  match Coverage_level.get_levels ctx tast entry.Provider_context.path with
+  | Ok levels -> levels
+  | Error () ->
+    (* The "Fixme Provider" will return an error if the file cannot be found.
+    Let's convert that error to a plain result. *)
     ( [],
       {
         Coverage_level_defs.checked = 0;

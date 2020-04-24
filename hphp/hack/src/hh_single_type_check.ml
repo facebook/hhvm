@@ -1313,7 +1313,11 @@ let handle_mode
         else
           let (tast, _) = Typing_check_utils.type_file ctx fn fileinfo in
           let result = Coverage_level.get_levels ctx tast fn in
-          print_colored fn result)
+          match result with
+          | Ok result -> print_colored fn result
+          | Error () ->
+            failwith
+              ("HH_FIXMEs not found for path " ^ Relative_path.to_absolute fn))
   | Coverage ->
     Relative_path.Map.iter files_info (fun fn fileinfo ->
         if Relative_path.Map.mem builtins fn then

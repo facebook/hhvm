@@ -5738,16 +5738,10 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
             )
             .request(
                 line=line(),
-                comment="Check type coverage",
+                comment="Check type coverage - BUGGY! this fails to give a result",
                 method="textDocument/typeCoverage",
                 params={"textDocument": {"uri": "${php_file_uri}"}},
-                result={
-                    "coveredPercent": 100,
-                    "uncoveredRanges": [],
-                    "defaultMessage": "Un-type checked code. Consider adding "
-                    "type annotations.",
-                },
-                powered_by="serverless_ide",
+                result=None,
             )
             .request(
                 line=line(),

@@ -1754,7 +1754,7 @@ let hh_server_status_to_diagnostic
             {
               diagnostic with
               message =
-                "hh_server isn't yet ready, so there may undetected errors... "
+                "hh_server isn't yet ready, so there may be undetected errors... "
                 ^ hh_server_status.request.message;
               severity = Some Warning;
             };

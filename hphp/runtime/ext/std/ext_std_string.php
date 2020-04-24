@@ -84,7 +84,7 @@ function wordwrap(string $str, int $width = 75, string $break = "\n",
  *
  * Variables will be co-erced to a suitable type for the specifier:
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function sprintf(mixed $format, ...$args): mixed;
 
 /* Return a formatted string
@@ -94,7 +94,7 @@ function sprintf(mixed $format, ...$args): mixed;
  *
  * @param string $format - See sprintf() for a description of format.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function vsprintf(mixed $format, mixed $args): mixed;
 
 /**

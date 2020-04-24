@@ -153,7 +153,7 @@ function localeconv();
 function nl_langinfo(int $item);
 <<__PHPStdLib>>
 function vprintf($format, $args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function vsprintf($format, $args);
 <<__Rx>>
 function sscanf(string $str, string $format);

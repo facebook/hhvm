@@ -380,14 +380,6 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   in
   HackEventLogger.set_hhconfig_version hhconfig_version;
 
-  (* NOTE: We don't want to depend on shared memory in the long-term, since
-  we're only running one process and don't need to share memory with anyone. To
-  remove the shared memory usage here requires refactoring our heaps to never
-  write to shared memory. *)
-  let (_ : SharedMem.handle) =
-    SharedMem.init ~num_workers:0 (ServerConfig.sharedmem_config server_config)
-  in
-
   Provider_backend.set_local_memory_backend_with_defaults ();
   let local_memory =
     match Provider_backend.get () with

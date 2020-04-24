@@ -651,32 +651,33 @@ module Database_handle = struct
         let description = "NamingTableDatabaseSettings"
       end)
 
+  let db_cache : [ `Not_yet_cached | `Cached of Sqlite3.db option ] ref =
+    ref `Not_yet_cached
+
   let open_db (path : string) : Sqlite3.db =
     let db = Sqlite3.db_open path in
     Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
     Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
     db
 
-  let open_current_db () =
-    match Shared_db_settings.get "database_path" with
-    | None -> None
-    | Some path -> Some (open_db path)
-
-  let db = ref (lazy (open_current_db ()))
+  let get_db () : Sqlite3.db option =
+    match !db_cache with
+    | `Cached db_opt -> db_opt
+    | `Not_yet_cached ->
+      let path_opt = Shared_db_settings.get "database_path" in
+      let db_opt = Option.map path_opt ~f:open_db in
+      db_cache := `Cached db_opt;
+      db_opt
 
   let get_db_path () : string option = Shared_db_settings.get "database_path"
 
-  let set_db_path path =
+  let set_db_path (path : string option) : unit =
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
-
-    (match path with
-    | Some path -> Shared_db_settings.add "database_path" path
-    | None -> ());
-
+    Option.iter path ~f:(Shared_db_settings.add "database_path");
+    db_cache := `Not_yet_cached;
     (* Force this immediately so that we can get validation errors in master. *)
-    db := Lazy.from_val (open_current_db ())
-
-  let get_db () = Lazy.force !db
+    let _ = get_db () in
+    ()
 
   let is_connected () = Option.is_some (get_db ())
 end

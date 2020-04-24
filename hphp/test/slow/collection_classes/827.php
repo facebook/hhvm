@@ -9,7 +9,7 @@ function f() {
   }
   var_dump($mp2);
   foreach ($mp1->items() as $t) {
-    $mp3[] = $t;
+    $mp3->add($t);
   }
   var_dump($mp3);
 }

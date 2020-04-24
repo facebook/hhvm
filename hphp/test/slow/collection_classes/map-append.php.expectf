@@ -1,5 +1,3 @@
-Warning: Appending to Map via Pair in %s/hphp/test/slow/collection_classes/map-append.php on line 6
-
-Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Parameter must be an instance of Pair' in %s/collection_classes/map-append.php:8
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Cannot append to Map' in %s/hphp/test/slow/collection_classes/map-append.php:6
 Stack trace:
 %a {main}

@@ -15,25 +15,6 @@ object(HH\ImmMap) (3) {
   [2]=>
   int(3)
 }
------- ArrayAppend -------
-object(HH\Map) (4) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-  [3]=>
-  int(42)
-}
-object(HH\ImmMap) (3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
-}
 ------ add -------
 object(HH\Map) (4) {
   [0]=>

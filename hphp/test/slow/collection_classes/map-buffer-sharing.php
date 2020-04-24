@@ -84,7 +84,7 @@ function main() {
 
   $x = Map {0 => Map {0 => 1}};
   $y = $x->toImmMap();
-  $x[0][] = Pair {1, 2};
+  $x[0]->add(Pair {1, 2});
   var_dump($y);
   unset($y);
   $x[1] = null;

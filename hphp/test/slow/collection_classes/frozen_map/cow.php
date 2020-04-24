@@ -17,7 +17,6 @@ function main() {
 
 
   $test("ArraySet", function ($m) { $m[0] = 42; });
-  $test("ArrayAppend", function ($m) { $m[] = Pair {3, 42}; });
   $test("add", function ($m) { $m->add(Pair {3, 42}); });
   $test("addAll", function ($m) { $m->addAll(Map {0 => Pair {3, 42}}); });
   $test("clear", function ($m) { $m->clear(); });

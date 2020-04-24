@@ -908,7 +908,7 @@ let parse_initialize (params : json option) : Initialize.params =
         namingTableSavedStatePath =
           Jget.string_opt json "namingTableSavedStatePath";
         namingTableSavedStateTestDelay =
-          Jget.float_d json "namingTableSavedStateTestDelay" ~default:5.0;
+          Jget.float_d json "namingTableSavedStateTestDelay" ~default:0.0;
         sendServerStatusEvents =
           Jget.bool_d json "sendServerStatusEvents" ~default:false;
       }

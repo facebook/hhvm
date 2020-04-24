@@ -819,7 +819,6 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     if not @@ Sqlite3.db_close db then
       failwith @@ Printf.sprintf "Could not close database at %s" db_name;
-    Database_handle.set_db_path None;
     save_result
   with e ->
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;

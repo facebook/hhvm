@@ -336,6 +336,7 @@ let save naming_table db_name =
     let save_result =
       Naming_sqlite.save_file_infos db_name naming_table ~base_content_version
     in
+    Naming_sqlite.set_db_path None;
     let (_ : float) =
       let open Naming_sqlite in
       Hh_logger.log_duration

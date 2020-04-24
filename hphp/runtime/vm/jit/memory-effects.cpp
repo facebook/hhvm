@@ -1965,7 +1965,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseUndefProp:
   case RaiseTooManyArg:
   case RaiseError:
-  case RaiseErrorOnInvalidIsAsExpressionType:
   case RaiseNotice:
   case RaiseWarning:
   case RaiseHackArrCompatNotice:
@@ -2076,6 +2075,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AHeapAny);
 
   case AddNewElemVec:
+  case RaiseErrorOnInvalidIsAsExpressionType:
   case IsTypeStruct:
   case RecordReifiedGenericsAndGetTSList:
     return may_load_store(AElemAny, AEmpty);

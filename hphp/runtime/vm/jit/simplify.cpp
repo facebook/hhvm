@@ -3653,8 +3653,7 @@ SSATmp* simplifyRaiseErrorOnInvalidIsAsExpressionType(
   }
   auto const tsVal = ts->arrLikeVal();
   if (errorOnIsAsExpressionInvalidTypes(ArrNR(tsVal), true)) {
-    gen(env, Unreachable, ASSERT_REASON);
-    return cns(env, TBottom);
+    return nullptr;
   }
   return ts;
 }

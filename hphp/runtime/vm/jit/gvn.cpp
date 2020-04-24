@@ -311,7 +311,11 @@ bool supportsGVN(const IRInstruction* inst) {
   case StrictlyIntegerConv:
   case LookupSPropSlot:
   case ConvPtrToLval:
+  case RaiseErrorOnInvalidIsAsExpressionType:
     return true;
+
+  case IsTypeStruct:
+    return !opcodeMayRaise(IsTypeStruct);
 
   case SameArr:
   case NSameArr:

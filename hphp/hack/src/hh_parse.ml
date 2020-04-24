@@ -65,6 +65,7 @@ module FullFidelityParseArgs = struct
     allow_new_attribute_syntax: bool;
     disable_legacy_attribute_syntax: bool;
     const_default_func_args: bool;
+    const_default_lambda_args: bool;
     const_static_props: bool;
     abstract_static_props: bool;
     disallow_func_ptrs_in_constants: bool;
@@ -103,6 +104,7 @@ module FullFidelityParseArgs = struct
       allow_new_attribute_syntax
       disable_legacy_attribute_syntax
       const_default_func_args
+      const_default_lambda_args
       const_static_props
       abstract_static_props
       disallow_func_ptrs_in_constants
@@ -139,6 +141,7 @@ module FullFidelityParseArgs = struct
       allow_new_attribute_syntax;
       disable_legacy_attribute_syntax;
       const_default_func_args;
+      const_default_lambda_args;
       const_static_props;
       abstract_static_props;
       disallow_func_ptrs_in_constants;
@@ -192,6 +195,7 @@ module FullFidelityParseArgs = struct
     let allow_new_attribute_syntax = ref false in
     let disable_legacy_attribute_syntax = ref false in
     let const_default_func_args = ref false in
+    let const_default_lambda_args = ref false in
     let const_static_props = ref false in
     let abstract_static_props = ref false in
     let disallow_func_ptrs_in_constants = ref false in
@@ -312,6 +316,10 @@ No errors are filtered out."
           Arg.Set const_default_func_args,
           "Statically check default function arguments are constant initializers"
         );
+        ( "--const-default-lambda-args",
+          Arg.Set const_default_lambda_args,
+          " Statically check default lambda args are constant."
+          ^ " Produces a subset of errors of const-default-func-args" );
         ( "--const-static-props",
           Arg.Set const_static_props,
           "Enable static properties to be const" );
@@ -386,6 +394,7 @@ No errors are filtered out."
       !allow_new_attribute_syntax
       !disable_legacy_attribute_syntax
       !const_default_func_args
+      !const_default_lambda_args
       !const_static_props
       !abstract_static_props
       !disallow_func_ptrs_in_constants
@@ -451,6 +460,11 @@ let handle_existing_file args filename =
   in
   let popt =
     ParserOptions.with_const_default_func_args popt args.const_default_func_args
+  in
+  let popt =
+    ParserOptions.with_const_default_lambda_args
+      popt
+      args.const_default_lambda_args
   in
   let popt =
     ParserOptions.with_const_static_props popt args.const_static_props

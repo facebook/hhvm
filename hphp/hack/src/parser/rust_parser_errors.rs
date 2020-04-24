@@ -5136,6 +5136,17 @@ where
 
     fn param_default_decl_errors(&mut self, node: &'a Syntax<Token, Value>) {
         if let ParameterDeclaration(x) = &node.syntax {
+            if self.env.parser_options.po_const_default_lambda_args {
+                match self.env.context.active_callable {
+                    Some(node) => match node.syntax {
+                        AnonymousFunction(_) | LambdaExpression(_) => {
+                            self.check_constant_expression(&x.parameter_default_value);
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
+            }
             if self.env.parser_options.po_const_default_func_args {
                 self.check_constant_expression(&x.parameter_default_value)
             }

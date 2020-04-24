@@ -235,6 +235,7 @@ prefixed_flags!(
     ALLOW_NEW_ATTRIBUTE_SYNTAX,
     CHECK_INT_OVERFLOW,
     CONST_DEFAULT_FUNC_ARGS,
+    CONST_DEFAULT_LAMBDA_ARGS,
     CONST_STATIC_PROPS,
     DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
     DISABLE_LEGACY_SOFT_TYPEHINTS,
@@ -626,6 +627,9 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.const_default_func_args": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.const_default_lambda_args": {
     "global_value": false
   },
   "hhvm.hack.lang.const_static_props": {
@@ -1023,5 +1027,6 @@ bitflags! {
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
         const RUST_TOP_LEVEL_ELABORATOR = 1 << 51;
+        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 52;
     }
 }

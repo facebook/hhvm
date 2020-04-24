@@ -225,6 +225,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_disable_legacy_attribute_syntax =
         hack_lang_flags(LangFlags::DISABLE_LEGACY_ATTRIBUTE_SYNTAX);
     popt.po_const_default_func_args = hack_lang_flags(LangFlags::CONST_DEFAULT_FUNC_ARGS);
+    popt.po_const_default_lambda_args = hack_lang_flags(LangFlags::CONST_DEFAULT_LAMBDA_ARGS);
     popt.tco_const_static_props = hack_lang_flags(LangFlags::CONST_STATIC_PROPS);
     popt.po_abstract_static_props = hack_lang_flags(LangFlags::ABSTRACT_STATIC_PROPS);
     popt.po_disable_unset_class_const = hack_lang_flags(LangFlags::DISABLE_UNSET_CLASS_CONST);

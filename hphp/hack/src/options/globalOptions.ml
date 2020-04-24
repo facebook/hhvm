@@ -77,6 +77,7 @@ type t = {
   po_disable_legacy_attribute_syntax: bool;
   tco_const_attribute: bool;
   po_const_default_func_args: bool;
+  po_const_default_lambda_args: bool;
   po_disallow_silence: bool;
   po_abstract_static_props: bool;
   po_disable_unset_class_const: bool;
@@ -245,6 +246,7 @@ let default =
     po_disable_legacy_attribute_syntax = false;
     tco_const_attribute = false;
     po_const_default_func_args = false;
+    po_const_default_lambda_args = false;
     po_disallow_silence = false;
     po_abstract_static_props = false;
     po_disable_unset_class_const = false;
@@ -351,6 +353,7 @@ let make
       default.po_disable_legacy_attribute_syntax)
     ?(tco_const_attribute = default.tco_const_attribute)
     ?(po_const_default_func_args = default.po_const_default_func_args)
+    ?(po_const_default_lambda_args = default.po_const_default_lambda_args)
     ?(po_disallow_silence = default.po_disallow_silence)
     ?(po_abstract_static_props = default.po_abstract_static_props)
     ?(po_disable_unset_class_const = default.po_disable_unset_class_const)
@@ -448,6 +451,7 @@ let make
     po_disable_legacy_attribute_syntax;
     tco_const_attribute;
     po_const_default_func_args;
+    po_const_default_lambda_args;
     po_disallow_silence;
     po_abstract_static_props;
     po_disable_unset_class_const;
@@ -620,6 +624,8 @@ let po_disable_legacy_attribute_syntax t = t.po_disable_legacy_attribute_syntax
 let tco_const_attribute t = t.tco_const_attribute
 
 let po_const_default_func_args t = t.po_const_default_func_args
+
+let po_const_default_lambda_args t = t.po_const_default_lambda_args
 
 let po_disallow_silence t = t.po_disallow_silence
 

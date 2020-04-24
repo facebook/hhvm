@@ -53,6 +53,7 @@ lazy_static! {
             "hhvm.lang.disallow_func_ptrs_in_constants" => "hhvm.hack.lang.disallow_func_ptrs_in_constants",
             // group 6: combination of group 5 & 1
             "hhvm.lang.constdefaultfuncargs" => "hhvm.hack.lang.const_default_func_args",
+            "hhvm.lang.constdefaultlambdaargs" => "hhvm.hack.lang.const_default_lambda_args",
             "hhvm.lang.abstractstaticprops" => "hhvm.hack.lang.abstract_static_props",
             "hhvm.lang.disableunsetclassconst" => "hhvm.hack.lang.disable_unset_class_const",
         );

@@ -103,6 +103,9 @@ let assert_opts_equal caml rust =
     Hhbc_options.(const_default_func_args caml)
     Hhbc_options.(const_default_func_args rust);
   assert_equal
+    Hhbc_options.(const_default_lambda_args caml)
+    Hhbc_options.(const_default_lambda_args rust);
+  assert_equal
     Hhbc_options.(const_static_props caml)
     Hhbc_options.(const_static_props rust);
   assert_equal
@@ -321,6 +324,9 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.const_default_func_args\": {
     \"global_value\": true
   },
+  \"hhvm.hack.lang.const_default_lambda_args\": {
+    \"global_value\": true
+  },
   \"hhvm.hack.lang.const_static_props\": {
     \"global_value\": true
   },
@@ -452,6 +458,9 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'const_default_func_args =
     "-vhhvm.lang.constdefaultfuncargs=true"
 
+  let hhvm'hack'lang'const_default_lambda_args =
+    "-vhhvm.lang.constdefaultlambdaargs=true"
+
   let hhvm'hack'lang'const_static_props = "-vhvm.lang.conststaticprops=true"
 
   let hhvm'hack'lang'disable_legacy_attribute_syntax =
@@ -566,6 +575,7 @@ let test_all_overrides_cli_only _ =
       hhvm'rx_is_enabled;
       (* hhvm'server'include_search_paths; *)
       hhvm'widen_is_array;
+      hhvm'hack'lang'const_default_lambda_args;
     ]
   in
   let caml_opts = caml_from_configs ~jsons:[] ~args in

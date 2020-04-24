@@ -33,6 +33,11 @@ let const_default_func_args = GlobalOptions.po_const_default_func_args
 let with_const_default_func_args po b =
   { po with GlobalOptions.po_const_default_func_args = b }
 
+let const_default_lambda_args = GlobalOptions.po_const_default_lambda_args
+
+let with_const_default_lambda_args po b =
+  { po with GlobalOptions.po_const_default_lambda_args = b }
+
 let with_codegen po b = { po with GlobalOptions.po_codegen = b }
 
 let with_disable_lval_as_an_expression po b =
@@ -128,6 +133,7 @@ let make
     ~allow_new_attribute_syntax
     ~disable_legacy_attribute_syntax
     ~const_default_func_args
+    ~const_default_lambda_args
     ~disallow_silence
     ~const_static_props
     ~abstract_static_props
@@ -154,6 +160,7 @@ let make
       po_allow_new_attribute_syntax = allow_new_attribute_syntax;
       po_disable_legacy_attribute_syntax = disable_legacy_attribute_syntax;
       po_const_default_func_args = const_default_func_args;
+      po_const_default_lambda_args = const_default_lambda_args;
       po_disallow_silence = disallow_silence;
       tco_const_static_props = const_static_props;
       po_abstract_static_props = abstract_static_props;
@@ -187,6 +194,7 @@ type ffi_t =
   * bool
   * bool
   * bool
+  * bool
 
 let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
   ( hhvm_compat_mode,
@@ -204,4 +212,5 @@ let to_rust_ffi_t po ~hhvm_compat_mode ~hhi_mode ~codegen =
     disable_xhp_children_declarations po,
     enable_first_class_function_pointers po,
     disable_modes po,
-    disable_array po )
+    disable_array po,
+    const_default_lambda_args po )

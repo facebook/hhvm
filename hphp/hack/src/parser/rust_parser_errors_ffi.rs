@@ -42,12 +42,14 @@ unsafe fn parser_options_from_ocaml_only_for_parser_errors(
     let po_enable_first_class_function_pointers = bool::from_ocaml(*ocaml_opts.add(13)).unwrap();
     let po_disable_modes = bool::from_ocaml(*ocaml_opts.add(14)).unwrap();
     let po_disable_array = bool::from_ocaml(*ocaml_opts.add(15)).unwrap();
+    let po_const_default_lambda_args = bool::from_ocaml(*ocaml_opts.add(16)).unwrap();
 
     parser_options.po_disable_lval_as_an_expression = po_disable_lval_as_an_expression;
     parser_options.po_disable_legacy_soft_typehints = po_disable_legacy_soft_typehints;
     parser_options.tco_const_static_props = tco_const_static_props;
     parser_options.po_disable_legacy_attribute_syntax = po_disable_legacy_attribute_syntax;
     parser_options.po_const_default_func_args = po_const_default_func_args;
+    parser_options.po_const_default_lambda_args = po_const_default_lambda_args;
     parser_options.po_abstract_static_props = po_abstract_static_props;
     parser_options.po_disallow_func_ptrs_in_constants = po_disallow_func_ptrs_in_constants;
     parser_options.po_enable_xhp_class_modifier = po_enable_xhp_class_modifier;

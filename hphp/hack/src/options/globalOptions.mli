@@ -200,6 +200,8 @@ type t = {
   tco_const_attribute: bool;
   (* Statically check default function arguments *)
   po_const_default_func_args: bool;
+  (* Statically check default lambda arguments. Subset of default_func_args *)
+  po_const_default_lambda_args: bool;
   (* Flag to disable the error suppression operator *)
   po_disallow_silence: bool;
   (* Static properties can be abstract *)
@@ -321,6 +323,7 @@ val make :
   ?po_disable_legacy_attribute_syntax:bool ->
   ?tco_const_attribute:bool ->
   ?po_const_default_func_args:bool ->
+  ?po_const_default_lambda_args:bool ->
   ?po_disallow_silence:bool ->
   ?po_abstract_static_props:bool ->
   ?po_disable_unset_class_const:bool ->
@@ -508,6 +511,8 @@ val po_disable_legacy_attribute_syntax : t -> bool
 val tco_const_attribute : t -> bool
 
 val po_const_default_func_args : t -> bool
+
+val po_const_default_lambda_args : t -> bool
 
 val po_disallow_silence : t -> bool
 

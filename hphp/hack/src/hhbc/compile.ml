@@ -113,6 +113,7 @@ let parse_file ~hhbc_options env text :
         ~allow_new_attribute_syntax:(allow_new_attribute_syntax co)
         ~disable_legacy_attribute_syntax:(disable_legacy_attribute_syntax co)
         ~const_default_func_args:(const_default_func_args co)
+        ~const_default_lambda_args:(const_default_lambda_args co)
         ~disallow_silence:false
         ~const_static_props:(const_static_props co)
         ~abstract_static_props:(abstract_static_props co)

@@ -376,6 +376,8 @@ let load ~silent config_filename options =
         (bool_opt "disable_legacy_attribute_syntax" config)
       ?tco_const_attribute:(bool_opt "const_attribute" config)
       ?po_const_default_func_args:(bool_opt "const_default_func_args" config)
+      ?po_const_default_lambda_args:
+        (bool_opt "const_default_lambda_args" config)
       ?po_disallow_silence:(bool_opt "disallow_silence" config)
       ?tco_global_inference:(bool_opt "global_inference" config)
       ?tco_gi_reinfer_types:(string_list_opt "reinfer_types" config)

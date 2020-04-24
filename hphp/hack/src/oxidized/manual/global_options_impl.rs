@@ -77,6 +77,7 @@ impl Default for GlobalOptions {
             po_disable_legacy_attribute_syntax: false,
             tco_const_attribute: false,
             po_const_default_func_args: false,
+            po_const_default_lambda_args: false,
             po_disallow_silence: false,
             po_abstract_static_props: false,
             po_disable_unset_class_const: false,

@@ -156,7 +156,7 @@ type changes_since_baseline = Naming_sqlite.local_changes option
 
 type t =
   | Unbacked of FileInfo.t Relative_path.Map.t
-  | Backed of Naming_sqlite.local_changes
+  | Backed of Naming_sqlite.local_changes * Naming_sqlite.db_path
 [@@deriving show]
 
 type fast = FileInfo.names Relative_path.Map.t
@@ -172,32 +172,33 @@ let empty = Unbacked Relative_path.Map.empty
 let filter a ~f =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.filter a f)
-  | Backed local_changes ->
+  | Backed (local_changes, db_path) ->
     let file_deltas = local_changes.Naming_sqlite.file_deltas in
     Backed
-      {
-        local_changes with
-        Naming_sqlite.file_deltas =
-          Naming_sqlite.fold
-            ~init:file_deltas
-            ~f:
-              begin
-                fun path fi acc ->
-                if f path fi then
-                  acc
-                else
-                  Relative_path.Map.add
+      ( {
+          local_changes with
+          Naming_sqlite.file_deltas =
+            Naming_sqlite.fold
+              ~init:file_deltas
+              ~f:
+                begin
+                  fun path fi acc ->
+                  if f path fi then
                     acc
-                    ~key:path
-                    ~data:Naming_sqlite.Deleted
-              end
-            ~file_deltas;
-      }
+                  else
+                    Relative_path.Map.add
+                      acc
+                      ~key:path
+                      ~data:Naming_sqlite.Deleted
+                end
+              ~file_deltas;
+        },
+        db_path )
 
 let fold a ~init ~f =
   match a with
   | Unbacked a -> Relative_path.Map.fold a ~init ~f
-  | Backed local_changes ->
+  | Backed (local_changes, _db_path) ->
     Naming_sqlite.fold
       ~init
       ~f
@@ -206,7 +207,7 @@ let fold a ~init ~f =
 let get_files a =
   match a with
   | Unbacked a -> Relative_path.Map.keys a
-  | Backed local_changes ->
+  | Backed (local_changes, _db_path) ->
     (* Reverse at the end to preserve ascending sort order. *)
     Naming_sqlite.fold
       ~init:[]
@@ -224,7 +225,7 @@ let get_files_changed_since_baseline
 let get_file_info a key =
   match a with
   | Unbacked a -> Relative_path.Map.find_opt a key
-  | Backed local_changes ->
+  | Backed (local_changes, _db_path) ->
     (match
        Relative_path.Map.find_opt local_changes.Naming_sqlite.file_deltas key
      with
@@ -243,7 +244,7 @@ let has_file a key =
 let iter a ~f =
   match a with
   | Unbacked a -> Relative_path.Map.iter a ~f
-  | Backed local_changes ->
+  | Backed (local_changes, _db_path) ->
     Naming_sqlite.fold
       ~init:()
       ~f:(fun path fi () -> f path fi)
@@ -252,48 +253,51 @@ let iter a ~f =
 let remove a key =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.remove a key)
-  | Backed local_changes ->
+  | Backed (local_changes, db_path) ->
     Backed
-      {
-        local_changes with
-        Naming_sqlite.file_deltas =
-          Relative_path.Map.add
-            local_changes.Naming_sqlite.file_deltas
-            ~key
-            ~data:Naming_sqlite.Deleted;
-      }
+      ( {
+          local_changes with
+          Naming_sqlite.file_deltas =
+            Relative_path.Map.add
+              local_changes.Naming_sqlite.file_deltas
+              ~key
+              ~data:Naming_sqlite.Deleted;
+        },
+        db_path )
 
 let update a key data =
   match a with
   | Unbacked a -> Unbacked (Relative_path.Map.add a ~key ~data)
-  | Backed local_changes ->
+  | Backed (local_changes, db_path) ->
     Backed
-      {
-        local_changes with
-        Naming_sqlite.file_deltas =
-          Relative_path.Map.add
-            local_changes.Naming_sqlite.file_deltas
-            ~key
-            ~data:(Naming_sqlite.Modified data);
-      }
+      ( {
+          local_changes with
+          Naming_sqlite.file_deltas =
+            Relative_path.Map.add
+              local_changes.Naming_sqlite.file_deltas
+              ~key
+              ~data:(Naming_sqlite.Modified data);
+        },
+        db_path )
 
 let update_many a updates =
   match a with
   | Unbacked a ->
     (* Reverse the order because union always takes the first value. *)
     Unbacked (Relative_path.Map.union updates a)
-  | Backed local_changes ->
+  | Backed (local_changes, db_path) ->
     let local_updates =
       Relative_path.Map.map updates ~f:(fun data -> Naming_sqlite.Modified data)
     in
     Backed
-      {
-        local_changes with
-        Naming_sqlite.file_deltas =
-          Relative_path.Map.union
-            local_updates
-            local_changes.Naming_sqlite.file_deltas;
-      }
+      ( {
+          local_changes with
+          Naming_sqlite.file_deltas =
+            Relative_path.Map.union
+              local_updates
+              local_changes.Naming_sqlite.file_deltas;
+        },
+        db_path )
 
 let combine a b =
   match b with
@@ -315,7 +319,7 @@ let save_changes_since_baseline naming_table ~destination_path =
   let snapshot =
     match naming_table with
     | Unbacked _ -> None
-    | Backed local_changes -> Some local_changes
+    | Backed (local_changes, _db_path) -> Some local_changes
   in
   let contents = Marshal.to_string snapshot [Marshal.No_sharing] in
   Disk.write_file ~file:destination_path ~contents
@@ -348,7 +352,7 @@ let save naming_table db_name =
         t
     in
     save_result
-  | Backed local_changes ->
+  | Backed (local_changes, _db_path) ->
     let t = Unix.gettimeofday () in
     Naming_sqlite.copy_and_update db_name local_changes;
     let (_ : float) =
@@ -500,7 +504,7 @@ let load_from_sqlite_for_type_checking
     let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
     ()
   end;
-  Backed local_changes
+  Backed (local_changes, Naming_sqlite.Db_path db_path)
 
 let load_from_sqlite_with_changes_since_baseline
     (ctx : Provider_context.t)

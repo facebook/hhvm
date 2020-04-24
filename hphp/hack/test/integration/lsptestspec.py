@@ -76,6 +76,7 @@ def line() -> int:
     assert (
         cf is not None
     ), "Must be able to get current call frame to produce error messages for test"
+    # pyre-fixme[16]: `Optional` has no attribute `f_lineno`.
     return cf.f_back.f_lineno
 
 

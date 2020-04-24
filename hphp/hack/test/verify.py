@@ -570,6 +570,7 @@ def run_tests(
         report_failures(
             num_results,
             failures,
+            # pyre-fixme[18]: Global name `args` is undefined.
             args.out_extension,
             args.expect_extension,
             args.fallback_expect_extension,

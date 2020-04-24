@@ -36,8 +36,6 @@ class SaveStateResult(NamedTuple):
     returned_values: SaveStateCommandResult
 
 
-# pyre-fixme[13]: Attribute `repo_dir` is never initialized.
-# pyre-fixme[13]: Attribute `saved_state_dir` is never initialized.
 class SavedStateTestDriver(common_tests.CommonTestDriver):
 
     repo_dir: str

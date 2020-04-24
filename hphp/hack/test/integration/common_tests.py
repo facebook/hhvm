@@ -31,6 +31,7 @@ class DebugSubscription(object):
 
     # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def read_msg(self) -> Json:
+        # pyre-fixme[16]: `Optional` has no attribute `readline`.
         line = self.proc.stdout.readline()
         return json.loads(line)
 
@@ -45,12 +46,6 @@ class DebugSubscription(object):
         return msgs
 
 
-# pyre-fixme[13]: Attribute `base_tmp_dir` is never initialized.
-# pyre-fixme[13]: Attribute `bin_dir` is never initialized.
-# pyre-fixme[13]: Attribute `hh_tmp_dir` is never initialized.
-# pyre-fixme[13]: Attribute `repo_dir` is never initialized.
-# pyre-fixme[13]: Attribute `template_repo` is never initialized.
-# pyre-fixme[13]: Attribute `test_env` is never initialized.
 class CommonTestDriver(TestDriver):
 
     # This needs to be overridden in child classes. The files in this
@@ -275,6 +270,7 @@ class CommonTestDriver(TestDriver):
         if retcode != 0:
             print("check returned non-zero code: " + str(retcode), file=sys.stderr)
         if expected_output is not None:
+            # pyre-fixme[8]: Attribute has type `int`; used as `None`.
             self.maxDiff = None
             self.assertCountEqual(
                 map(lambda x: x.format(root=root), expected_output), output.splitlines()

@@ -14,7 +14,11 @@ try:
 except ImportError:
     from typing import _ForwardRef as ForwardRef
 
+# pyre-fixme[5]: Global expression must be annotated.
+# pyre-fixme[16]: Module `typing` has no attribute `ForwardRef`.
 JsonObject = Mapping[str, ForwardRef("Json")]
+# pyre-fixme[5]: Global expression must be annotated.
+# pyre-fixme[16]: `Iterable` has no attribute `__getitem__`.
 JsonArray = Iterable[ForwardRef("Json")]
 JsonScalar = Union[str, int, float, bool, None]
 # pyre-fixme[5]: Global expression must be annotated.

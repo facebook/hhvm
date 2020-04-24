@@ -40,12 +40,6 @@ type local_changes = {
 }
 [@@deriving show]
 
-val get_db_path : unit -> string option
-
-val set_db_path : string option -> unit
-
-val is_connected : unit -> bool
-
 val validate_can_open_db : db_path -> unit
 
 val free_db_cache : unit -> unit
@@ -56,26 +50,30 @@ val save_file_infos :
   base_content_version:string ->
   save_result
 
-val copy_and_update : string -> local_changes -> unit
+val copy_and_update :
+  existing_db:db_path -> new_db:db_path -> local_changes -> unit
 
-val get_local_changes : unit -> local_changes
+val get_local_changes : db_path -> local_changes
 
 val fold :
+  db_path:db_path ->
   init:'a ->
   f:(Relative_path.t -> FileInfo.t -> 'a -> 'a) ->
   file_deltas:file_deltas ->
   'a
 
-val get_file_info : Relative_path.t -> FileInfo.t option
+val get_file_info : db_path -> Relative_path.t -> FileInfo.t option
 
 val get_type_pos :
+  db_path ->
   string ->
   case_insensitive:bool ->
   (Relative_path.t * Naming_types.kind_of_type) option
 
-val get_fun_pos : string -> case_insensitive:bool -> Relative_path.t option
+val get_fun_pos :
+  db_path -> string -> case_insensitive:bool -> Relative_path.t option
 
-val get_const_pos : string -> Relative_path.t option
+val get_const_pos : db_path -> string -> Relative_path.t option
 
 (** The canonical name (and assorted *Canon heaps) store the canonical name for a
     symbol, keyed off of the lowercase version of its name. We use the canon

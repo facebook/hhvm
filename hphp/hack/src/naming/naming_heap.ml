@@ -137,7 +137,7 @@ module Types = struct
     TypeCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     TypePosHeap.write_around id type_info
 
-  let get_pos _db_path_opt ?(bypass_cache = false) id =
+  let get_pos db_path_opt ?(bypass_cache = false) id =
     let get_func =
       if bypass_cache then
         TypePosHeap.get_no_cache
@@ -154,10 +154,8 @@ module Types = struct
       Some (FileInfo.File (name_type, path), entry_type)
     in
     let fallback_get_func_opt =
-      if Naming_sqlite.is_connected () then
-        Some (Naming_sqlite.get_type_pos ~case_insensitive:false)
-      else
-        None
+      Option.map db_path_opt ~f:(fun db_path ->
+          Naming_sqlite.get_type_pos db_path ~case_insensitive:false)
     in
     get_and_cache
       ~map_result
@@ -227,11 +225,12 @@ module Types = struct
             None
         end
     in
+    let db_path_opt =
+      Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+    in
     let fallback_get_func_opt =
-      if Naming_sqlite.is_connected () then
-        Some (Naming_sqlite.get_type_pos ~case_insensitive:true)
-      else
-        None
+      Option.map db_path_opt ~f:(fun db_path ->
+          Naming_sqlite.get_type_pos db_path ~case_insensitive:true)
     in
     get_and_cache
       ~map_result
@@ -242,11 +241,13 @@ module Types = struct
       ~measure_name:"Canon naming table (types) cache hit rate"
       ~key:id
 
-  let remove_batch _db_path_opt types =
+  let remove_batch db_path_opt types =
     let canon_key_types = canonize_set types in
     TypeCanonHeap.remove_batch canon_key_types;
     TypePosHeap.remove_batch types;
-    if Naming_sqlite.is_connected () then
+    match db_path_opt with
+    | None -> ()
+    | Some _ ->
       SSet.iter
         (fun id -> BlockedEntries.add id Blocked)
         (SSet.union types canon_key_types)
@@ -293,13 +294,11 @@ module Funs = struct
     FunCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     FunPosHeap.add id pos
 
-  let get_pos _db_path_opt ?bypass_cache:(_ = false) id =
+  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
     let fallback_get_func_opt =
-      if Naming_sqlite.is_connected () then
-        Some (Naming_sqlite.get_fun_pos ~case_insensitive:false)
-      else
-        None
+      Option.map db_path_opt ~f:(fun db_path ->
+          Naming_sqlite.get_fun_pos db_path ~case_insensitive:false)
     in
     get_and_cache
       ~map_result
@@ -330,11 +329,12 @@ module Funs = struct
           path_str;
         None
     in
+    let db_path_opt =
+      Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+    in
     let fallback_get_func_opt =
-      if Naming_sqlite.is_connected () then
-        Some (Naming_sqlite.get_fun_pos ~case_insensitive:true)
-      else
-        None
+      Option.map db_path_opt ~f:(fun db_path ->
+          Naming_sqlite.get_fun_pos db_path ~case_insensitive:true)
     in
     get_and_cache
       ~map_result
@@ -345,11 +345,13 @@ module Funs = struct
       ~measure_name:"Canon naming table (functions) cache hit rate"
       ~key:name
 
-  let remove_batch _db_path_opt funs =
+  let remove_batch db_path_opt funs =
     let canon_key_funs = canonize_set funs in
     FunCanonHeap.remove_batch canon_key_funs;
     FunPosHeap.remove_batch funs;
-    if Naming_sqlite.is_connected () then
+    match db_path_opt with
+    | None -> ()
+    | Some _ ->
       SSet.iter
         (fun id -> BlockedEntries.add id Blocked)
         (SSet.union funs canon_key_funs)
@@ -385,13 +387,11 @@ module Consts = struct
       check_valid id pos;
     ConstPosHeap.add id pos
 
-  let get_pos _db_path_opt ?bypass_cache:(_ = false) id =
+  let get_pos db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
     let fallback_get_func_opt =
-      if Naming_sqlite.is_connected () then
-        Some Naming_sqlite.get_const_pos
-      else
-        None
+      Option.map db_path_opt ~f:(fun db_path ->
+          Naming_sqlite.get_const_pos db_path)
     in
     get_and_cache
       ~map_result
@@ -408,10 +408,11 @@ module Consts = struct
 
   let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
-  let remove_batch _db_path_opt consts =
+  let remove_batch db_path_opt consts =
     ConstPosHeap.remove_batch consts;
-    if Naming_sqlite.is_connected () then
-      SSet.iter (fun id -> BlockedEntries.add id Blocked) consts
+    match db_path_opt with
+    | None -> ()
+    | Some _ -> SSet.iter (fun id -> BlockedEntries.add id Blocked) consts
 
   let heap_string_of_key = ConstPosHeap.string_of_key
 end

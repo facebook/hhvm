@@ -640,60 +640,30 @@ module ConstsTable = struct
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 end
 
-module Database_handle = struct
-  module Shared_db_settings =
-    SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
-      (struct
-        type t = string
+let db_cache :
+    [ `Not_yet_cached | `Cached of (db_path * Sqlite3.db) option ] ref =
+  ref `Not_yet_cached
 
-        let prefix = Prefix.make ()
+let open_db (Db_path path) : Sqlite3.db =
+  let db = Sqlite3.db_open path in
+  Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
+  Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
+  db
 
-        let description = "NamingTableDatabaseSettings"
-      end)
-
-  let db_path_cache :
-      [ `Not_yet_cached_path | `Cached_path of db_path option ] ref =
-    ref `Not_yet_cached_path
-
-  let db_cache :
-      [ `Not_yet_cached | `Cached of (db_path * Sqlite3.db) option ] ref =
-    ref `Not_yet_cached
-
-  let open_db (Db_path path) : Sqlite3.db =
-    let db = Sqlite3.db_open path in
-    Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
-    Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
+let get_db (path : db_path) : Sqlite3.db =
+  match !db_cache with
+  | `Cached (Some (existing_path, db)) when equal_db_path path existing_path ->
+    db
+  | _ ->
+    let db = open_db path in
+    db_cache := `Cached (Some (path, db));
     db
 
-  let get_db_path () : db_path option =
-    match !db_path_cache with
-    | `Cached_path path_opt -> path_opt
-    | `Not_yet_cached_path ->
-      let path_opt =
-        match Shared_db_settings.get "database_path" with
-        | None -> None
-        | Some path -> Some (Db_path path)
-      in
-      db_path_cache := `Cached_path path_opt;
-      path_opt
+let validate_can_open_db (db_path : db_path) : unit =
+  let (_ : Sqlite3.db) = get_db db_path in
+  ()
 
-  let get_db (path : db_path) : Sqlite3.db =
-    match !db_cache with
-    | `Cached (Some (existing_path, db)) when equal_db_path path existing_path
-      ->
-      db
-    | _ ->
-      let db = open_db path in
-      db_cache := `Cached (Some (path, db));
-      db
-
-  let set_db_path (path : db_path option) : unit =
-    Shared_db_settings.remove_batch (SSet.singleton "database_path");
-    Option.iter path ~f:(fun (Db_path path) ->
-        Shared_db_settings.add "database_path" path);
-    db_path_cache := `Cached_path path;
-    ()
-end
+let free_db_cache () : unit = db_cache := `Not_yet_cached
 
 let save_file_info db relative_path file_info : int * insertion_error list =
   Core_kernel.(
@@ -761,28 +731,6 @@ let save_file_info db relative_path file_info : int * insertion_error list =
     in
     results)
 
-let get_db_path () : string option =
-  match Database_handle.get_db_path () with
-  | None -> None
-  | Some (Db_path path) -> Some path
-
-let set_db_path (path_opt : string option) : unit =
-  let path_opt =
-    match path_opt with
-    | None -> None
-    | Some path -> Some (Db_path path)
-  in
-  Database_handle.set_db_path path_opt;
-  ()
-
-let is_connected () : bool = Database_handle.get_db_path () |> Option.is_some
-
-let validate_can_open_db (db_path : db_path) : unit =
-  let (_ : Sqlite3.db) = Database_handle.get_db db_path in
-  ()
-
-let free_db_cache () : unit = Database_handle.db_cache := `Not_yet_cached
-
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in
   Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc db;
@@ -819,22 +767,19 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     raise e
 
-let copy_and_update (new_db_name : string) (local_changes : local_changes) :
-    unit =
-  FileUtil.cp
-    ~force:(FileUtil.Ask (fun _ -> false))
-    [Core_kernel.Option.value_exn (get_db_path ())]
-    new_db_name;
-  let new_db = Database_handle.open_db (Db_path new_db_name) in
+let copy_and_update
+    ~(existing_db : db_path) ~(new_db : db_path) (local_changes : local_changes)
+    : unit =
+  let (Db_path existing_path, Db_path new_path) = (existing_db, new_db) in
+  FileUtil.cp ~force:(FileUtil.Ask (fun _ -> false)) [existing_path] new_path;
+  let new_db = open_db new_db in
   LocalChanges.update new_db local_changes;
   ()
 
-let get_local_changes () =
-  match Database_handle.get_db_path () with
-  | None -> failwith "Attempted to access non-connected database"
-  | Some db_path -> LocalChanges.get (Database_handle.get_db db_path)
+let get_local_changes (db_path : db_path) : local_changes =
+  LocalChanges.get (get_db db_path)
 
-let fold ~init ~f ~file_deltas =
+let fold ~(db_path : db_path) ~init ~f ~file_deltas =
   (* We depend on [Relative_path.Map.bindings] returning results in increasing
    * order here. *)
   let sorted_changes = Relative_path.Map.bindings file_deltas in
@@ -872,15 +817,9 @@ let fold ~init ~f ~file_deltas =
       end
     | _ -> (sorted_changes, f path fi acc)
   in
+  let db = get_db db_path in
   let (remaining_changes, acc) =
-    match Database_handle.get_db_path () with
-    | None -> failwith "Attempted to access non-connected database"
-    | Some db_path ->
-      let db = Database_handle.get_db db_path in
-      FileInfoTable.fold
-        db
-        ~init:(sorted_changes, init)
-        ~f:consume_sorted_changes
+    FileInfoTable.fold db ~init:(sorted_changes, init) ~f:consume_sorted_changes
   in
   List.fold_left
     ~f:
@@ -893,29 +832,14 @@ let fold ~init ~f ~file_deltas =
     ~init:acc
     remaining_changes
 
-let get_file_info path =
-  match Database_handle.get_db_path () with
-  | None -> None
-  | Some db_path ->
-    FileInfoTable.get_file_info (Database_handle.get_db db_path) path
+let get_file_info (db_path : db_path) path =
+  FileInfoTable.get_file_info (get_db db_path) path
 
-let get_type_pos name ~case_insensitive =
-  match Database_handle.get_db_path () with
-  | None -> None
-  | Some db_path ->
-    let db = Database_handle.get_db db_path in
-    TypesTable.get db ~name ~case_insensitive
+let get_type_pos (db_path : db_path) name ~case_insensitive =
+  TypesTable.get (get_db db_path) ~name ~case_insensitive
 
-let get_fun_pos name ~case_insensitive =
-  match Database_handle.get_db_path () with
-  | None -> None
-  | Some db_path ->
-    let db = Database_handle.get_db db_path in
-    FunsTable.get db ~name ~case_insensitive
+let get_fun_pos (db_path : db_path) name ~case_insensitive =
+  FunsTable.get (get_db db_path) ~name ~case_insensitive
 
-let get_const_pos name =
-  match Database_handle.get_db_path () with
-  | None -> None
-  | Some db_path ->
-    let db = Database_handle.get_db db_path in
-    ConstsTable.get db ~name
+let get_const_pos (db_path : db_path) name =
+  ConstsTable.get (get_db db_path) ~name

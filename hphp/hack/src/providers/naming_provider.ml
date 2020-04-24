@@ -83,7 +83,7 @@ let get_and_cache
   match SMap.find_opt delta name with
   | Some Deleted -> None
   | Some (Pos pos) -> Some pos
-  | None when Naming_sqlite.is_connected () ->
+  | None ->
     let db_path_opt = db_path_of_ctx ctx in
     let sqlite_result = Option.bind db_path_opt ~f:get_from_sqlite in
     (match sqlite_result with
@@ -93,7 +93,6 @@ let get_and_cache
       let new_delta = SMap.add delta ~key:name ~data:(Pos pos) in
       set_delta_for_kind new_delta;
       Some pos)
-  | None -> None
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
     FileInfo.pos option =
@@ -118,7 +117,8 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.consts)
           ~set_delta_for_kind:(fun consts ->
             reverse_naming_table_delta.consts <- consts)
-          ~get_from_sqlite:(fun _db_path -> Naming_sqlite.get_const_pos name)
+          ~get_from_sqlite:(fun db_path ->
+            Naming_sqlite.get_const_pos db_path name)
         >>| attach_name_type FileInfo.Const
       | Provider_backend.Decl_service _ as backend -> not_implemented backend)
   >>| remove_name_type
@@ -193,8 +193,8 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.funs)
           ~set_delta_for_kind:(fun funs ->
             reverse_naming_table_delta.funs <- funs)
-          ~get_from_sqlite:(fun _db_path ->
-            Naming_sqlite.get_fun_pos ~case_insensitive:false name)
+          ~get_from_sqlite:(fun db_path ->
+            Naming_sqlite.get_fun_pos db_path ~case_insensitive:false name)
         >>| attach_name_type FileInfo.Fun
       | Provider_backend.Decl_service { decl; _ } ->
         Decl_service_client.rpc_get_fun_path decl name
@@ -250,8 +250,8 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
           reverse_naming_table_delta.funs_canon_key)
         ~set_delta_for_kind:(fun funs_lower ->
           reverse_naming_table_delta.funs_canon_key <- funs_lower)
-        ~get_from_sqlite:(fun _db_path ->
-          Naming_sqlite.get_fun_pos ~case_insensitive:true name)
+        ~get_from_sqlite:(fun db_path ->
+          Naming_sqlite.get_fun_pos db_path ~case_insensitive:true name)
       >>= fun pos ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
       know that it isn't, then it isn't. *)
@@ -407,8 +407,8 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
           ~get_delta_for_kind:(fun () -> reverse_naming_table_delta.types)
           ~set_delta_for_kind:(fun types ->
             reverse_naming_table_delta.types <- types)
-          ~get_from_sqlite:(fun _db_path ->
-            Naming_sqlite.get_type_pos ~case_insensitive:false name)
+          ~get_from_sqlite:(fun db_path ->
+            Naming_sqlite.get_type_pos db_path ~case_insensitive:false name)
         >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
       | Provider_backend.Decl_service { decl; _ } ->
         Decl_service_client.rpc_get_type_path_and_kind decl name
@@ -504,8 +504,8 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
           reverse_naming_table_delta.types_canon_key)
         ~set_delta_for_kind:(fun types ->
           reverse_naming_table_delta.types_canon_key <- types)
-        ~get_from_sqlite:(fun _db_path ->
-          Naming_sqlite.get_type_pos ~case_insensitive:true name)
+        ~get_from_sqlite:(fun db_path ->
+          Naming_sqlite.get_type_pos db_path ~case_insensitive:true name)
       >>= fun (pos, kind) ->
       (* If reverse_naming_table_delta thought the symbol was in ctx, but we definitively
       know that it isn't, then it isn't. *)

@@ -101,10 +101,6 @@ val load_from_sqlite_with_changes_since_baseline :
 (* The path to the table's SQLite database mapping filenames to symbol names, if any *)
 val get_forward_naming_fallback_path : t -> string option
 
-(* The path to the table's SQLite database mapping symbol names to filenames, if any.
-    Analogous to SharedMem.loaded_dep_table_filename *)
-val get_reverse_naming_fallback_path : unit -> string option
-
 (* Converting between different types of forward naming tables. *)
 val from_saved : saved_state_info -> t
 

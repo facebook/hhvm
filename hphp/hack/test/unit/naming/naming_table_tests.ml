@@ -225,11 +225,18 @@ let test_remove () =
 
 let test_get_sqlite_paths () =
   run_naming_table_test
-    (fun ~ctx:_ ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name ->
+      let provider_path =
+        match
+          Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+        with
+        | None -> None
+        | Some (Naming_sqlite.Db_path path) -> Some path
+      in
       Asserter.String_asserter.assert_option_equals
         (Some db_name)
-        (Naming_table.get_reverse_naming_fallback_path ())
-        "get_reverse_naming_fallback_path should return the expected value";
+        provider_path
+        "get_naming_db_path should return the expected value";
 
       Asserter.String_asserter.assert_option_equals
         (Some db_name)

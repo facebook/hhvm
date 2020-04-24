@@ -179,6 +179,7 @@ let filter a ~f =
           local_changes with
           Naming_sqlite.file_deltas =
             Naming_sqlite.fold
+              ~db_path
               ~init:file_deltas
               ~f:
                 begin
@@ -198,8 +199,9 @@ let filter a ~f =
 let fold a ~init ~f =
   match a with
   | Unbacked a -> Relative_path.Map.fold a ~init ~f
-  | Backed (local_changes, _db_path) ->
+  | Backed (local_changes, db_path) ->
     Naming_sqlite.fold
+      ~db_path
       ~init
       ~f
       ~file_deltas:local_changes.Naming_sqlite.file_deltas
@@ -207,9 +209,10 @@ let fold a ~init ~f =
 let get_files a =
   match a with
   | Unbacked a -> Relative_path.Map.keys a
-  | Backed (local_changes, _db_path) ->
+  | Backed (local_changes, db_path) ->
     (* Reverse at the end to preserve ascending sort order. *)
     Naming_sqlite.fold
+      ~db_path
       ~init:[]
       ~f:(fun path _ acc -> path :: acc)
       ~file_deltas:local_changes.Naming_sqlite.file_deltas
@@ -225,13 +228,13 @@ let get_files_changed_since_baseline
 let get_file_info a key =
   match a with
   | Unbacked a -> Relative_path.Map.find_opt a key
-  | Backed (local_changes, _db_path) ->
+  | Backed (local_changes, db_path) ->
     (match
        Relative_path.Map.find_opt local_changes.Naming_sqlite.file_deltas key
      with
     | Some (Naming_sqlite.Modified fi) -> Some fi
     | Some Naming_sqlite.Deleted -> None
-    | None -> Naming_sqlite.get_file_info key)
+    | None -> Naming_sqlite.get_file_info db_path key)
 
 let get_file_info_unsafe a key =
   Core_kernel.Option.value_exn (get_file_info a key)
@@ -244,8 +247,9 @@ let has_file a key =
 let iter a ~f =
   match a with
   | Unbacked a -> Relative_path.Map.iter a ~f
-  | Backed (local_changes, _db_path) ->
+  | Backed (local_changes, db_path) ->
     Naming_sqlite.fold
+      ~db_path
       ~init:()
       ~f:(fun path fi () -> f path fi)
       ~file_deltas:local_changes.Naming_sqlite.file_deltas
@@ -351,9 +355,12 @@ let save naming_table db_name =
         t
     in
     save_result
-  | Backed (local_changes, _db_path) ->
+  | Backed (local_changes, db_path) ->
     let t = Unix.gettimeofday () in
-    Naming_sqlite.copy_and_update db_name local_changes;
+    Naming_sqlite.copy_and_update
+      ~existing_db:db_path
+      ~new_db:(Naming_sqlite.Db_path db_name)
+      local_changes;
     let (_ : float) =
       Hh_logger.log_duration
         (Printf.sprintf
@@ -404,11 +411,16 @@ let saved_to_fast saved = Relative_path.Map.map saved FileInfo.saved_to_names
 
 let create a = Unbacked a
 
-let update_reverse_entries ctx file_deltas =
+let update_reverse_entries ctx file_deltas : unit =
   let backend = Provider_context.get_backend ctx in
+  let db_path_opt = Db_path_provider.get_naming_db_path backend in
   Relative_path.Map.iter file_deltas ~f:(fun path delta ->
+      let fi =
+        Option.bind db_path_opt ~f:(fun db_path ->
+            Naming_sqlite.get_file_info db_path path)
+      in
       begin
-        match Naming_sqlite.get_file_info path with
+        match fi with
         | Some fi ->
           Naming_provider.remove_type_batch
             backend
@@ -486,15 +498,15 @@ let load_from_sqlite_for_type_checking
     (db_path : string) : t =
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
-  Naming_sqlite.validate_can_open_db (Naming_sqlite.Db_path db_path);
+  let db_path = Naming_sqlite.Db_path db_path in
+  Naming_sqlite.validate_can_open_db db_path;
   (* throw in master if anything's wrong *)
-  Naming_sqlite.set_db_path (Some db_path);
   Db_path_provider.set_naming_db_path
     (Provider_context.get_backend ctx)
-    (Some (Naming_sqlite.Db_path db_path));
+    (Some db_path);
   let local_changes =
     choose_local_changes
-      ~local_changes:(Naming_sqlite.get_local_changes ())
+      ~local_changes:(Naming_sqlite.get_local_changes db_path)
       ~custom_local_changes
   in
   let t = Hh_logger.log_duration "Loaded local naming table changes" t in
@@ -503,7 +515,7 @@ let load_from_sqlite_for_type_checking
     let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
     ()
   end;
-  Backed (local_changes, Naming_sqlite.Db_path db_path)
+  Backed (local_changes, db_path)
 
 let load_from_sqlite_with_changes_since_baseline
     (ctx : Provider_context.t)
@@ -530,13 +542,10 @@ let load_from_sqlite (ctx : Provider_context.t) (db_path : string) : t =
     ctx
     db_path
 
-let get_reverse_naming_fallback_path () : string option =
-  Naming_sqlite.get_db_path ()
-
 let get_forward_naming_fallback_path a : string option =
   match a with
   | Unbacked _ -> None
-  | Backed _ -> Naming_sqlite.get_db_path ()
+  | Backed (_, Naming_sqlite.Db_path db_path) -> Some db_path
 
 (*****************************************************************************)
 (* Testing functions *)

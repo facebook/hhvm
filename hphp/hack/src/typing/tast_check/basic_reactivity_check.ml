@@ -310,13 +310,13 @@ let check_mutability_fun_params env mut_args call_ty el =
       begin
         match fty.ft_arity with
         (* maybe mutable variadic parameter *)
-        | Fvariadic (_, param)
+        | Fvariadic param
           when Option.equal
                  equal_param_mutability
                  (get_fp_mutability param)
                  (Some Param_maybe_mutable) ->
           ()
-        | Fvariadic (_, param) ->
+        | Fvariadic param ->
           error_on_first_mismatched_argument
             ~req_mut:(get_fp_mutability param)
             param
@@ -325,7 +325,7 @@ let check_mutability_fun_params env mut_args call_ty el =
       end;
       begin
         match fty.ft_arity with
-        | Fvariadic (_, p) ->
+        | Fvariadic p ->
           List.fold_left
             ~init:mut_args
             ~f:(check_borrowing env p)

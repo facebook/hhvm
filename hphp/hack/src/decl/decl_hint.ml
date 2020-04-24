@@ -102,17 +102,17 @@ and hint_ p env = function
           make_fp_flags
             ~mode:(get_param_mode k)
             ~accept_disposable:false
-            ~mutability;
+            ~mutability
+            ~has_default:false;
         fp_rx_annotation = None;
       }
     in
     let paraml = List.map3_exn hl kl muts ~f:make_param in
     let ret = possibly_enforced_hint env h in
-    let arity_min = List.length paraml in
     let arity =
       match vh with
-      | Some t -> Fvariadic (arity_min, make_param t None None)
-      | None -> Fstandard arity_min
+      | Some t -> Fvariadic (make_param t None None)
+      | None -> Fstandard
     in
     let reactivity =
       match reactivity with

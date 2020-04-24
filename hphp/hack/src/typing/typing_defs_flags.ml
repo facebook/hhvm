@@ -84,3 +84,5 @@ let ce_flags_xa_tag_none = 0x1800
 let fp_flags_accept_disposable = 0x1
 
 let fp_flags_inout = 0x2
+
+let fp_flags_has_default = 0x4

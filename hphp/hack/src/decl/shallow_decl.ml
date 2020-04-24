@@ -200,7 +200,6 @@ let method_type env m =
   let returns_mutable = fun_returns_mutable m.m_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx m.m_user_attributes in
   let return_disposable = has_return_disposable_attribute m.m_user_attributes in
-  let arity_min = minimum_arity m.m_params in
   let params = make_params env ~is_lambda:false m.m_params in
   let ret =
     ret_from_fun_kind
@@ -216,9 +215,9 @@ let method_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
-      Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (arity_min, make_ellipsis_param_ty p)
-    | FVnonVariadic -> Fstandard arity_min
+      Fvariadic (make_param_ty env ~is_lambda:false param)
+    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
+    | FVnonVariadic -> Fstandard
   in
   let tparams = List.map m.m_tparams (type_param env) in
   let where_constraints =
@@ -242,7 +241,6 @@ let method_type env m =
 
 let method_redeclaration_type env m =
   check_params env m.mt_params;
-  let arity_min = minimum_arity m.mt_params in
   let params = make_params env ~is_lambda:false m.mt_params in
   let ret =
     ret_from_fun_kind
@@ -258,9 +256,9 @@ let method_redeclaration_type env m =
     | FVvariadicArg param ->
       assert param.param_is_variadic;
       assert (Option.is_none param.param_expr);
-      Fvariadic (arity_min, make_param_ty env ~is_lambda:false param)
-    | FVellipsis p -> Fvariadic (arity_min, make_ellipsis_param_ty p)
-    | FVnonVariadic -> Fstandard arity_min
+      Fvariadic (make_param_ty env ~is_lambda:false param)
+    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
+    | FVnonVariadic -> Fstandard
   in
   let tparams = List.map m.mt_tparams (type_param env) in
   let where_constraints =

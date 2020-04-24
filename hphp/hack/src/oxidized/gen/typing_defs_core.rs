@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c8863f45762d160d775312ca26c88038>>
+// @generated SignedSource<<5f108d99a7b1f06c4d8a294da30c8e7e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -693,11 +693,10 @@ pub struct FunType {
     ToOcamlRep
 )]
 pub enum FunArity {
-    /// min; max is List.length ft_params
-    Fstandard(isize),
+    Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
-    Fvariadic(isize, FunParam),
+    Fvariadic(FunParam),
 }
 
 #[derive(

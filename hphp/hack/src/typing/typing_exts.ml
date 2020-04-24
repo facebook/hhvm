@@ -235,6 +235,4 @@ let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.expr list) :
   in
   match f env ft.ft_params el with
   | (env, None) -> (env, ft)
-  | (env, Some xs) ->
-    let num_params = List.length xs in
-    (env, { ft with ft_params = xs; ft_arity = Fstandard num_params })
+  | (env, Some xs) -> (env, { ft with ft_params = xs; ft_arity = Fstandard })

@@ -1088,7 +1088,7 @@ and add_dep ctx env ~this ty : unit =
       method! on_tany _ _ = env.depends_on_any := true
 
       method! on_tfun () r ft =
-        if List.length ft.ft_params > arity_min ft.ft_arity then
+        if List.exists ~f:Typing_defs.get_fp_has_default ft.ft_params then
           env.depends_on_make_default := true;
         super#on_tfun () r ft
 

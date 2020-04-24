@@ -45,7 +45,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|classes_consistent_construct.php line 8, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (1)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [8:33-35]; fp_name = (Some "$a");
@@ -57,7 +57,8 @@ Parsed decls:
                          };
                        fp_flags =
                        (make_fp_flags ~mutability:none
-                         ~accept_disposable:false ~mode:FPnormal);
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:FPnormal);
                         }
                       ];
                     ft_ret =

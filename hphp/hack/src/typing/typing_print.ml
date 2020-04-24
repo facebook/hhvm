@@ -93,8 +93,8 @@ module Full = struct
     let params = List.map ft.ft_params (fun_param ~ty to_doc st env) in
     let variadic_param =
       match ft.ft_arity with
-      | Fstandard _ -> None
-      | Fvariadic (_, p) ->
+      | Fstandard -> None
+      | Fvariadic p ->
         Some
           (Concat
              [
@@ -154,6 +154,10 @@ module Full = struct
               Space;
               text param_name;
             ]);
+        ( if get_fp_has_default fp then
+          text "=_"
+        else
+          Nothing );
       ]
 
   and tparam
@@ -284,7 +288,7 @@ module Full = struct
     let { d_required; d_optional; d_variadic; d_kind } = d in
     let e_required = List.map d_required ~f:k in
     let e_optional =
-      List.map d_optional ~f:(fun v -> Concat [text "opt"; k v])
+      List.map d_optional ~f:(fun v -> Concat [text "=_"; k v])
     in
     let e_variadic =
       Option.value_map
@@ -1336,7 +1340,8 @@ module Json = struct
                       make_fp_flags
                         ~mode:callconv
                         ~accept_disposable:false
-                        ~mutability:None;
+                        ~mutability:None
+                        ~has_default:false;
                     (* Dummy values: these aren't currently serialized. *)
                     fp_pos = Pos.none;
                     fp_name = None;
@@ -1352,7 +1357,7 @@ module Json = struct
                  ft_params;
                  ft_ret = { et_type = ft_ret; et_enforced = false };
                  (* Dummy values: these aren't currently serialized. *)
-                 ft_arity = Fstandard 0;
+                 ft_arity = Fstandard;
                  ft_tparams = [];
                  ft_where_constraints = [];
                  ft_flags = 0;

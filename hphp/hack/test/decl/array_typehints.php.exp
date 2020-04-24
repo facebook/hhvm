@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 3, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -25,7 +25,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 7, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -46,7 +46,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 11, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -69,7 +69,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 23, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -88,7 +88,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 27, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -111,7 +111,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 15, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -129,7 +129,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 19, characters 10-11),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -149,7 +149,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 31, characters 10-12),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -169,7 +169,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 35, characters 10-12),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -190,7 +190,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 39, characters 10-12),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -212,7 +212,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|array_typehints.php line 43, characters 10-12),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;

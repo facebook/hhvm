@@ -1303,8 +1303,8 @@ and get_tyvars_i env (ty : internal_type) =
     | Tfun ft ->
       let (env, params_positive, params_negative) =
         match ft.ft_arity with
-        | Fstandard _ -> (env, ISet.empty, ISet.empty)
-        | Fvariadic (_, fp) -> get_tyvars_param (env, ISet.empty, ISet.empty) fp
+        | Fstandard -> (env, ISet.empty, ISet.empty)
+        | Fvariadic fp -> get_tyvars_param (env, ISet.empty, ISet.empty) fp
       in
       let (env, params_positive, params_negative) =
         List.fold_left

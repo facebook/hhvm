@@ -478,14 +478,11 @@ and show_fun_type : type a. a ty fun_type -> string =
 and pp_fun_arity : type a. Format.formatter -> a ty fun_arity -> unit =
  fun fmt fa ->
   match fa with
-  | Fstandard a0 ->
+  | Fstandard ->
     Format.fprintf fmt "(@[<2>Fstandard (@,";
-    Format.fprintf fmt "%d" a0;
     Format.fprintf fmt "@,))@]"
-  | Fvariadic (a0, a1) ->
+  | Fvariadic a1 ->
     Format.fprintf fmt "(@[<2>Fvariadic (@,";
-    Format.fprintf fmt "%d" a0;
-    Format.fprintf fmt ",@ ";
     pp_fun_param fmt a1;
     Format.fprintf fmt "@,))@]"
 
@@ -512,6 +509,11 @@ and pp_fun_param : type a. Format.formatter -> a ty fun_param -> unit =
 
     Format.fprintf fmt "@[~%s:" "accept_disposable";
     Format.fprintf fmt "%B" (get_fp_accept_disposable fp);
+    Format.fprintf fmt "@]";
+    Format.fprintf fmt "@ ";
+
+    Format.fprintf fmt "@[~%s:" "has_default";
+    Format.fprintf fmt "%B" (get_fp_has_default fp);
     Format.fprintf fmt "@]";
     Format.fprintf fmt "@ ";
 

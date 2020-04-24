@@ -539,7 +539,7 @@ impl<'a> FunType_<'a> {
         let FunType_ { return_, params } = self;
 
         FunType {
-            arity: FunArity::Fstandard(0),
+            arity: FunArity::Fstandard,
             tparams: vec![],
             where_constraints: vec![],
             params: params.iter().map(|p| p.to_oxidized()).collect(),

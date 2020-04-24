@@ -585,15 +585,13 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
   in
   let (env, arity) =
     match ft.ft_arity with
-    | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
+    | Fvariadic ({ fp_type = var_ty; _ } as param) ->
       let (env, var_ty) = localize ~ety_env env var_ty.et_type in
       (* HHVM does not enforce types on vararg parameters yet *)
       ( env,
         Fvariadic
-          ( min,
-            { param with fp_type = { et_type = var_ty; et_enforced = false } }
-          ) )
-    | Fstandard _ as x -> (env, x)
+          { param with fp_type = { et_type = var_ty; et_enforced = false } } )
+    | Fstandard as x -> (env, x)
   in
   let (env, params) =
     List.map_env env ft.ft_params (fun env param ->

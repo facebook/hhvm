@@ -61,7 +61,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|classes.php line 9, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (0)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = []; ft_params = [];
                     ft_ret =
                     { et_enforced = false;
@@ -84,7 +84,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes.php line 11, characters 20-32),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -104,7 +104,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 12, characters 19-30),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -124,7 +124,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 13, characters 22-36),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -145,7 +145,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 14, characters 25-39),
            (Tfun
-              { ft_arity = (Fstandard (2)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = [];
                 ft_params =
                 [{ fp_pos = [15:12-17]; fp_name = (Some "$arg1");
@@ -157,7 +157,7 @@ Parsed decls:
                      };
                    fp_flags =
                    (make_fp_flags ~mutability:none ~accept_disposable:false
-                     ~mode:FPnormal);
+                     ~has_default:false ~mode:FPnormal);
                     };
                   { fp_pos = [16:9-14]; fp_name = (Some "$arg2");
                     fp_type =
@@ -168,7 +168,7 @@ Parsed decls:
                       };
                     fp_flags =
                     (make_fp_flags ~mutability:none ~accept_disposable:false
-                      ~mode:FPnormal);
+                      ~has_default:false ~mode:FPnormal);
                      }
                   ];
                 ft_ret =
@@ -197,7 +197,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 23, characters 19-35),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -218,7 +218,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 26, characters 19-43),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -239,7 +239,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 29, characters 19-41),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -260,7 +260,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 32, characters 19-48),
            (Tfun
-              { ft_arity = (Fstandard (3)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = [];
                 ft_params =
                 [{ fp_pos = [33:27-29]; fp_name = (Some "$a");
@@ -272,7 +272,8 @@ Parsed decls:
                      };
                    fp_flags =
                    (make_fp_flags ~mutability:mutable
-                     ~accept_disposable:false ~mode:FPnormal);
+                     ~accept_disposable:false ~has_default:false
+                     ~mode:FPnormal);
                     };
                   { fp_pos = [34:32-34]; fp_name = (Some "$b");
                     fp_type =
@@ -283,7 +284,8 @@ Parsed decls:
                       };
                     fp_flags =
                     (make_fp_flags ~mutability:maybe-mutable
-                      ~accept_disposable:false ~mode:FPnormal);
+                      ~accept_disposable:false ~has_default:false
+                      ~mode:FPnormal);
                      };
                   { fp_pos = [35:32-34]; fp_name = (Some "$c");
                     fp_type =
@@ -294,7 +296,8 @@ Parsed decls:
                       };
                     fp_flags =
                     (make_fp_flags ~mutability:owned mutable
-                      ~accept_disposable:false ~mode:FPnormal);
+                      ~accept_disposable:false ~has_default:false
+                      ~mode:FPnormal);
                      }
                   ];
                 ft_ret =
@@ -315,7 +318,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes.php line 40, characters 19-32),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -379,7 +382,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|classes.php line 50, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (3)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [51:20-28]; fp_name = (Some "$private");
@@ -391,7 +394,8 @@ Parsed decls:
                          };
                        fp_flags =
                        (make_fp_flags ~mutability:none
-                         ~accept_disposable:false ~mode:FPnormal);
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:FPnormal);
                         };
                       { fp_pos = [52:22-32]; fp_name = (Some "$protected");
                         fp_type =
@@ -402,7 +406,8 @@ Parsed decls:
                           };
                         fp_flags =
                         (make_fp_flags ~mutability:none
-                          ~accept_disposable:false ~mode:FPnormal);
+                          ~accept_disposable:false ~has_default:false
+                          ~mode:FPnormal);
                          };
                       { fp_pos = [53:19-26]; fp_name = (Some "$public");
                         fp_type =
@@ -413,7 +418,8 @@ Parsed decls:
                           };
                         fp_flags =
                         (make_fp_flags ~mutability:none
-                          ~accept_disposable:false ~mode:FPnormal);
+                          ~accept_disposable:false ~has_default:false
+                          ~mode:FPnormal);
                          };
                       { fp_pos = [54:19-30]; fp_name = (Some "$hasDefault");
                         fp_type =
@@ -424,7 +430,8 @@ Parsed decls:
                           };
                         fp_flags =
                         (make_fp_flags ~mutability:none
-                          ~accept_disposable:false ~mode:FPnormal);
+                          ~accept_disposable:false ~has_default:true
+                          ~mode:FPnormal);
                          }
                       ];
                     ft_ret =

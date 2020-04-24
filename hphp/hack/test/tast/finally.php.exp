@@ -47,7 +47,7 @@ Errors:
                        (([10:15-24], Exception),
                         (CI ([10:15-24], "\\Exception"))),
                        [], [], None,
-                       ([10:15-24], (function(string $message, int $code, ?Exception $previous): void))
+                       ([10:15-24], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
                        )))))
                 ],
               [(([11:12-21], "\\Exception"), ([11:22-24], $_), [])],
@@ -68,7 +68,7 @@ Errors:
                  (Expr
                     (([14:5-27], null),
                      (Call (Cnormal,
-                        (([14:5-16], (function<T as shape(...)>(shape() $shape, arraykey $index, $default): null)),
+                        (([14:5-16], (function<T as shape(...)>(shape() $shape, arraykey $index, $default=_): null)),
                          (Class_const (
                             (([14:5-11], Shapes),
                              (CI ([14:5-11], "\\HH\\Shapes"))),

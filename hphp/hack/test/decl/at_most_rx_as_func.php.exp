@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|at_most_rx_as_func.php line 4, characters 10-10),
        (Tfun
-          { ft_arity = (Fstandard (2));
+          { ft_arity = (Fstandard ());
             ft_tparams = [(Invariant, ([4:12-13], "T"), [])];
             ft_where_constraints = [];
             ft_params =
@@ -17,7 +17,7 @@ Parsed decls:
                  et_type =
                  (Rhint (root|at_most_rx_as_func.php line 5, characters 24-42),
                   (Tfun
-                     { ft_arity = (Fstandard (1)); ft_tparams = [];
+                     { ft_arity = (Fstandard ()); ft_tparams = [];
                        ft_where_constraints = [];
                        ft_params =
                        [{ fp_pos = [5:34-35]; fp_name = None;
@@ -29,7 +29,8 @@ Parsed decls:
                             };
                           fp_flags =
                           (make_fp_flags ~mutability:none
-                            ~accept_disposable:false ~mode:FPnormal);
+                            ~accept_disposable:false ~has_default:false
+                            ~mode:FPnormal);
                            }
                          ];
                        ft_ret =
@@ -45,7 +46,7 @@ Parsed decls:
                  };
                fp_flags =
                (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~mode:FPnormal);
+                 ~has_default:false ~mode:FPnormal);
                 };
               { fp_pos = [6:5-7]; fp_name = (Some "$x");
                 fp_type =
@@ -56,7 +57,7 @@ Parsed decls:
                   };
                 fp_flags =
                 (make_fp_flags ~mutability:none ~accept_disposable:false
-                  ~mode:FPnormal);
+                  ~has_default:false ~mode:FPnormal);
                  }
               ];
             ft_ret =

@@ -9,13 +9,15 @@
  *
  */
 
-function f((function(int, mixed...): string) $g): string {
-  return $g(5, 23);
+function f((function(int, float...): string) $g): string {
+  return $g(5, 23.3);
 }
 
+<<__EntryPoint>>
 function test(): void {
+  // Should not accept this!
   f(
-    function(int $x, string $y, mixed ...$args): string {
+    function(int $x, string $y, float ...$args): string {
       return $x."<-";
     },
   );

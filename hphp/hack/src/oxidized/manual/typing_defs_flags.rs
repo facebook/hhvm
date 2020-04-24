@@ -24,3 +24,5 @@ pub const MUTABLE_FLAGS_MASK: isize = 0xC0;
 pub const FP_FLAGS_ACCEPT_DISPOSABLE: isize = 0x1;
 
 pub const FP_FLAGS_INOUT: isize = 0x2;
+
+pub const FP_FLAGS_HAS_DEFAULT: isize = 0x4;

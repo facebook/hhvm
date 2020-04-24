@@ -199,7 +199,8 @@ let make_param_ty env ~is_lambda param =
         ~mode
         ~mutability:(get_param_mutability param.param_user_attributes)
         ~accept_disposable:
-          (has_accept_disposable_attribute param.param_user_attributes);
+          (has_accept_disposable_attribute param.param_user_attributes)
+        ~has_default:(Option.is_some param.param_expr);
     fp_rx_annotation = rx_annotation;
   }
 
@@ -212,7 +213,11 @@ let make_ellipsis_param_ty pos =
     fp_name = None;
     fp_type = { et_type = ty; et_enforced = false };
     fp_flags =
-      make_fp_flags ~mode:FPnormal ~mutability:None ~accept_disposable:false;
+      make_fp_flags
+        ~mode:FPnormal
+        ~mutability:None
+        ~accept_disposable:false
+        ~has_default:false;
     fp_rx_annotation = None;
   }
 

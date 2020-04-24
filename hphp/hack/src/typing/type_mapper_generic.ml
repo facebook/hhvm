@@ -259,9 +259,9 @@ class ['env] deep_type_mapper =
       let (env, ret) = this#on_possibly_enforced_ty env ft.ft_ret in
       let (env, arity) =
         match ft.ft_arity with
-        | Fvariadic (min, ({ fp_type = p_ty; _ } as param)) ->
+        | Fvariadic ({ fp_type = p_ty; _ } as param) ->
           let (env, p_ty) = this#on_possibly_enforced_ty env p_ty in
-          (env, Fvariadic (min, { param with fp_type = p_ty }))
+          (env, Fvariadic { param with fp_type = p_ty })
         | x -> (env, x)
       in
       ( env,

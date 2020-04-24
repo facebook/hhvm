@@ -1884,14 +1884,9 @@ and expr_
         let (env, local_obj_ty) = Phase.localize ~ety_env env obj_type in
         let local_obj_fp = TUtils.default_fun_param local_obj_ty in
         let fty = { ftype with ft_params = local_obj_fp :: ftype.ft_params } in
-        let fun_arity =
-          match fty.ft_arity with
-          | Fstandard min -> Fstandard (min + 1)
-          | Fvariadic (min, x) -> Fvariadic (min + 1, x)
-        in
         let caller =
           {
-            ft_arity = fun_arity;
+            ft_arity = fty.ft_arity;
             ft_tparams = fty.ft_tparams;
             ft_where_constraints = fty.ft_where_constraints;
             ft_params = fty.ft_params;
@@ -2764,7 +2759,7 @@ and expr_
     (* Ensure lambda arity is not ellipsis in strict mode *)
     begin
       match declared_ft.ft_arity with
-      | Fvariadic (_, { fp_name = None; _ })
+      | Fvariadic { fp_name = None; _ }
         when Partial.should_check_error (Env.get_mode env) 4223 ->
         Errors.ellipsis_strict_mode ~require:`Param_name p
       | _ -> ()
@@ -2824,12 +2819,7 @@ and expr_
       match eexpected with
       | Some (_pos, _ur, ty, Tfun expected_ft) ->
         (* First check that arities match up *)
-        check_lambda_arity
-          p
-          (get_pos ty)
-          declared_ft.ft_arity
-          expected_ft.ft_arity;
-
+        check_lambda_arity p (get_pos ty) declared_ft expected_ft;
         (* Use declared types for parameters in preference to those determined
          * by the context: they might be more general. *)
         let rec replace_non_declared_types
@@ -2851,10 +2841,17 @@ and expr_
                 { declared_ft_param with fp_type = expected_ft_param.fp_type }
             in
             resolved_ft_param :: rest
+          | (_ :: params, declared_ft_param :: declared_ft_params, []) ->
+            let rest =
+              replace_non_declared_types
+                params
+                declared_ft_params
+                expected_ft_params
+            in
+            declared_ft_param :: rest
           | (_, _, _) ->
             (* This means the expected_ft params list can have more parameters
-             * than declared parameters in the lambda. For variadics, this is OK,
-             * for non-variadics, this will be caught elsewhere in arity checks.
+             * than declared parameters in the lambda. For variadics, this is OK.
              *)
             expected_ft_params
         in
@@ -2864,9 +2861,8 @@ and expr_
           | FVvariadicArg _ ->
             begin
               match (declared_arity, expected_arity) with
-              | (Fvariadic (min_arity, declared), Fvariadic (_, expected)) ->
-                Fvariadic
-                  (min_arity, { declared with fp_type = expected.fp_type })
+              | (Fvariadic declared, Fvariadic expected) ->
+                Fvariadic { declared with fp_type = expected.fp_type }
               | (_, _) -> declared_arity
             end
           | _ -> declared_arity
@@ -3370,9 +3366,9 @@ and anon_make ?el ?ret_ty env lambda_pos f ft idl is_anon =
           in
           let (env, t_variadic) =
             match (f.f_variadic, ft.ft_arity) with
-            | (FVvariadicArg arg, Fvariadic (_, variadic)) ->
+            | (FVvariadicArg arg, Fvariadic variadic) ->
               make_variadic_arg env arg [variadic.fp_type.et_type]
-            | (FVvariadicArg arg, Fstandard _) -> make_variadic_arg env arg []
+            | (FVvariadicArg arg, Fstandard) -> make_variadic_arg env arg []
             | (FVellipsis pos, _) -> (env, Aast.FVellipsis pos)
             | (_, _) -> (env, Aast.FVnonVariadic)
           in
@@ -5073,9 +5069,8 @@ and dispatch_call
       | (env, Some (ety_env, et)) ->
         let (env, fty) =
           let make_fty params ft_ret =
-            let len = List.length params in
             {
-              ft_arity = Fstandard len;
+              ft_arity = Fstandard;
               ft_tparams = [];
               ft_where_constraints = [];
               ft_params =
@@ -5088,7 +5083,8 @@ and dispatch_call
                         make_fp_flags
                           ~mode:FPnormal
                           ~accept_disposable:true
-                          ~mutability:None;
+                          ~mutability:None
+                          ~has_default:false;
                       fp_rx_annotation = None;
                     });
               ft_ret = { et_enforced = false; et_type = ft_ret };
@@ -5951,12 +5947,12 @@ and call_construct p env class_ params el unpacked_element cid =
       in
       (env, tel, typed_unpack_element, m)
 
-and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
-  let exp_min = Typing_defs.arity_min exp_arity in
+and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) =
+  let exp_min = Typing_defs.arity_min ft in
   if arity < exp_min then
     Errors.typing_too_few_args exp_min arity pos pos_def None;
-  match exp_arity with
-  | Fstandard _ ->
+  match ft.ft_arity with
+  | Fstandard ->
     let exp_max = List.length ft.ft_params in
     let arity =
       if did_unpack then
@@ -5968,10 +5964,11 @@ and check_arity ?(did_unpack = false) pos pos_def ft (arity : int) exp_arity =
       Errors.typing_too_many_args exp_max arity pos pos_def None
   | Fvariadic _ -> ()
 
-and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
-  let expected_min = Typing_defs.arity_min expected_arity in
-  match (lambda_arity, expected_arity) with
-  | (Fstandard lambda_min, Fstandard _) ->
+and check_lambda_arity lambda_pos def_pos lambda_ft expected_ft =
+  match (lambda_ft.ft_arity, expected_ft.ft_arity) with
+  | (Fstandard, Fstandard) ->
+    let expected_min = Typing_defs.arity_min expected_ft in
+    let lambda_min = Typing_defs.arity_min lambda_ft in
     if lambda_min < expected_min then
       Errors.typing_too_few_args expected_min lambda_min lambda_pos def_pos None;
     if lambda_min > expected_min then
@@ -5988,8 +5985,8 @@ and check_lambda_arity lambda_pos def_pos lambda_arity expected_arity =
  * should not unify with it *)
 and variadic_param env ft =
   match ft.ft_arity with
-  | Fvariadic (_, param) -> (env, Some param)
-  | Fstandard _ -> (env, None)
+  | Fvariadic param -> (env, Some param)
+  | Fstandard -> (env, None)
 
 and param_modes ?(is_variadic = false) ({ fp_pos; _ } as fp) (pos, e) =
   match (get_fp_mode fp, e) with
@@ -6325,7 +6322,7 @@ and call
            * unpacked array consumes 1 or many parameters, it is nonsensical to say
            * that not enough args were passed in (so we don't do the min check).
            *)
-          let () = check_arity ~did_unpack pos pos_def ft arity ft.ft_arity in
+          let () = check_arity ~did_unpack pos pos_def ft arity in
           (* Variadic params cannot be inout so we can stop early *)
           let env = wfold_left2 inout_write_back env ft.ft_params el in
           let (env, ret_ty) =
@@ -6356,10 +6353,9 @@ and split_remaining_params_required_optional ft remaining_params =
    * of this function is 2, so there is 1 required parameter remaining and 1 optional parameter.
    *)
   let min_arity =
-    match ft.ft_arity with
-    | Fstandard min_arity
-    | Fvariadic (min_arity, _) ->
-      min_arity
+    List.count
+      ~f:(fun fp -> not (Typing_defs.get_fp_has_default fp))
+      ft.ft_params
   in
   let original_params = ft.ft_params in
   let consumed = List.length original_params - List.length remaining_params in

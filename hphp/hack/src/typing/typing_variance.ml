@@ -402,8 +402,8 @@ and class_method tcopt root static env (_method_name, method_) =
 
 and fun_arity tcopt root variance static env arity =
   match arity with
-  | Fstandard _ -> ()
-  | Fvariadic (_, fp) -> fun_param tcopt root variance static env fp
+  | Fstandard -> ()
+  | Fvariadic fp -> fun_param tcopt root variance static env fp
 
 and fun_param
     tcopt root variance static env ({ fp_type = { et_type = ty; _ }; _ } as fp)
@@ -705,8 +705,8 @@ and get_typarams ctx root env (ty : decl_ty) =
     in
     let get_typarams_arity acc arity =
       match arity with
-      | Fstandard _ -> acc
-      | Fvariadic (_, fp) -> get_typarams_param acc fp
+      | Fstandard -> acc
+      | Fvariadic fp -> get_typarams_param acc fp
     in
     let params =
       List.fold_left

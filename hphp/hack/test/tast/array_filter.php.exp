@@ -75,7 +75,7 @@
            (Expr
               (([13:3-31], darray<arraykey, (_ & nonnull)>),
                (Call (Cnormal,
-                  (([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): darray<arraykey, (_ & nonnull)>)),
+                  (([13:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): darray<arraykey, (_ & nonnull)>)),
                    (Id ([13:3-15], "\\array_filter"))),
                   [((_), ([13:3-15], (Happly (([Pos.none], "_"), []))))],
                   [(([13:16-30], varray_or_darray<arraykey, _>),
@@ -85,7 +85,7 @@
            (Expr
               (([14:3-30], varray<string>),
                (Call (Cnormal,
-                  (([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): varray<string>)),
+                  (([14:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): varray<string>)),
                    (Id ([14:3-15], "\\array_filter"))),
                   [((?string), ([14:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -96,7 +96,7 @@
            (Expr
               (([15:3-27], darray<arraykey, string>),
                (Call (Cnormal,
-                  (([15:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<arraykey, string>)),
+                  (([15:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<arraykey, string>)),
                    (Id ([15:3-15], "\\array_filter"))),
                   [((?string), ([15:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -107,7 +107,7 @@
            (Expr
               (([16:3-33], darray<int, string>),
                (Call (Cnormal,
-                  (([16:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<int, string>)),
+                  (([16:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<int, string>)),
                    (Id ([16:3-15], "\\array_filter"))),
                   [((?string), ([16:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -118,7 +118,7 @@
            (Expr
               (([17:3-25], _),
                (Call (Cnormal,
-                  (([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): _)),
+                  (([17:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)),
                    (Id ([17:3-15], "\\array_filter"))),
                   [((_), ([17:3-15], (Happly (([Pos.none], "_"), []))))],
                   [(([17:16-24], _), (Lvar ([17:16-24], $untyped)))], None)))));
@@ -126,7 +126,7 @@
            (Expr
               (([18:3-28], darray<arraykey, string>),
                (Call (Cnormal,
-                  (([18:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<arraykey, string>)),
+                  (([18:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<arraykey, string>)),
                    (Id ([18:3-15], "\\array_filter"))),
                   [((?string), ([18:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -179,7 +179,7 @@
            (Expr
               (([22:3-35], darray<arraykey, _>),
                (Call (Cnormal,
-                  (([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): darray<arraykey, _>)),
+                  (([22:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): darray<arraykey, _>)),
                    (Id ([22:3-15], "\\array_filter"))),
                   [((_), ([22:3-15], (Happly (([Pos.none], "_"), []))))],
                   [(([22:16-30], varray_or_darray<arraykey, _>),
@@ -192,7 +192,7 @@
            (Expr
               (([23:3-34], varray<?string>),
                (Call (Cnormal,
-                  (([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): varray<?string>)),
+                  (([23:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): varray<?string>)),
                    (Id ([23:3-15], "\\array_filter"))),
                   [((?string), ([23:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -206,7 +206,7 @@
            (Expr
               (([24:3-31], darray<arraykey, ?string>),
                (Call (Cnormal,
-                  (([24:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<arraykey, ?string>)),
+                  (([24:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<arraykey, ?string>)),
                    (Id ([24:3-15], "\\array_filter"))),
                   [((?string), ([24:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -220,7 +220,7 @@
            (Expr
               (([25:3-37], darray<int, ?string>),
                (Call (Cnormal,
-                  (([25:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<int, ?string>)),
+                  (([25:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<int, ?string>)),
                    (Id ([25:3-15], "\\array_filter"))),
                   [((?string), ([25:3-15], (Happly (([Pos.none], "_"), []))))
                     ],
@@ -234,7 +234,7 @@
            (Expr
               (([26:3-29], _),
                (Call (Cnormal,
-                  (([26:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback): _)),
+                  (([26:3-15], (function<Tv>(Container<_> $input, ?(function(_): bool) $callback=_): _)),
                    (Id ([26:3-15], "\\array_filter"))),
                   [((_), ([26:3-15], (Happly (([Pos.none], "_"), []))))],
                   [(([26:16-24], _), (Lvar ([26:16-24], $untyped)));
@@ -246,7 +246,7 @@
            (Expr
               (([27:3-32], darray<arraykey, ?string>),
                (Call (Cnormal,
-                  (([27:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback): darray<arraykey, ?string>)),
+                  (([27:3-15], (function<Tv>(Container<?string> $input, ?(function(?string): bool) $callback=_): darray<arraykey, ?string>)),
                    (Id ([27:3-15], "\\array_filter"))),
                   [((?string), ([27:3-15], (Happly (([Pos.none], "_"), []))))
                     ],

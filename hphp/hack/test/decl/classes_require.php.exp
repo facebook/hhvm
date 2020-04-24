@@ -27,7 +27,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_require.php line 26, characters 19-21),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -60,7 +60,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_require.php line 9, characters 19-21),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -93,7 +93,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_require.php line 4, characters 19-27),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -113,7 +113,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes_require.php line 5, characters 19-28),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -152,7 +152,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_require.php line 16, characters 19-25),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

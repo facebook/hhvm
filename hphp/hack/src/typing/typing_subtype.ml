@@ -2483,12 +2483,11 @@ and simplify_subtype_funs_attributes
     else
       (env, prop) )
     |> check_with
-         (arity_min ft_sub.ft_arity <= arity_min ft_super.ft_arity)
+         (arity_min ft_sub <= arity_min ft_super)
          (fun () -> Errors.fun_too_many_args p_sub p_super subtype_env.on_error)
     |> fun res ->
     match (ft_sub.ft_arity, ft_super.ft_arity) with
-    | ( Fvariadic (_, { fp_name = None; _ }),
-        Fvariadic (_, { fp_name = Some _; _ }) ) ->
+    | (Fvariadic { fp_name = None; _ }, Fvariadic { fp_name = Some _; _ }) ->
       (* The HHVM runtime ignores "..." entirely, but knows about
        * "...$args"; for contexts for which the runtime enforces method
        * compatibility (currently, inheritance from abstract/interface
@@ -2498,7 +2497,7 @@ and simplify_subtype_funs_attributes
         (fun () ->
           Errors.fun_variadicity_hh_vs_php56 p_sub p_super subtype_env.on_error)
         res
-    | (Fstandard _, Fstandard _) ->
+    | (Fstandard, Fstandard) ->
       let sub_max = List.length ft_sub.ft_params in
       let super_max = List.length ft_super.ft_params in
       if sub_max < super_max then
@@ -2507,7 +2506,7 @@ and simplify_subtype_funs_attributes
           res
       else
         res
-    | (Fstandard _, _) ->
+    | (Fstandard, _) ->
       with_error
         (fun () ->
           Errors.fun_unexpected_nonvariadic p_sub p_super subtype_env.on_error)
@@ -2534,12 +2533,12 @@ and simplify_subtype_funs
     env : env * TL.subtype_prop =
   let variadic_subtype =
     match ft_sub.ft_arity with
-    | Fvariadic (_, { fp_type = var_sub; _ }) -> Some var_sub
+    | Fvariadic { fp_type = var_sub; _ } -> Some var_sub
     | _ -> None
   in
   let variadic_supertype =
     match ft_super.ft_arity with
-    | Fvariadic (_, { fp_type = var_super; _ }) -> Some var_super
+    | Fvariadic { fp_type = var_super; _ } -> Some var_super
     | _ -> None
   in
   let simplify_subtype_possibly_enforced =

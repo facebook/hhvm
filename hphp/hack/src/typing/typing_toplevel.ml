@@ -273,7 +273,7 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
   in
   let variadicity_decl_ty =
     match (decl_header, variadic) with
-    | ( Some { ft_arity = Fvariadic (_, { fp_type = { et_type; _ }; _ }); _ },
+    | ( Some { ft_arity = Fvariadic { fp_type = { et_type; _ }; _ }; _ },
         FVvariadicArg fp ) ->
       merge_hint_with_decl_hint
         env

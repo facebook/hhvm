@@ -35,7 +35,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 4, characters 19-27),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -71,7 +71,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 10, characters 19-31),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -104,7 +104,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|traits.php line 14, characters 19-34),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

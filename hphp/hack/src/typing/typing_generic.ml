@@ -40,7 +40,7 @@ end = struct
         List.iter (List.map fty.ft_params (fun x -> x.fp_type.et_type)) ty;
         ty fty.ft_ret.et_type;
         (match fty.ft_arity with
-        | Fvariadic (_min, { fp_type = var_ty; _ }) -> ty var_ty.et_type
+        | Fvariadic { fp_type = var_ty; _ } -> ty var_ty.et_type
         | _ -> ())
       | Ttuple tyl
       | Tunion tyl

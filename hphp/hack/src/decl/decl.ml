@@ -279,7 +279,6 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
   let returns_mutable = fun_returns_mutable f.f_user_attributes in
   let returns_void_to_rx = fun_returns_void_to_rx f.f_user_attributes in
   let return_disposable = has_return_disposable_attribute f.f_user_attributes in
-  let arity_min = minimum_arity f.f_params in
   let params = make_params env ~is_lambda f.f_params in
   let ret_ty =
     ret_from_fun_kind
@@ -293,9 +292,9 @@ and fun_decl_in_env (env : Decl_env.env) ~(is_lambda : bool) (f : Nast.fun_) :
     match f.f_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      Fvariadic (arity_min, make_param_ty env ~is_lambda param)
-    | FVellipsis p -> Fvariadic (arity_min, make_ellipsis_param_ty p)
-    | FVnonVariadic -> Fstandard arity_min
+      Fvariadic (make_param_ty env ~is_lambda param)
+    | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
+    | FVnonVariadic -> Fstandard
   in
   let tparams = List.map f.f_tparams (type_param env) in
   let where_constraints =

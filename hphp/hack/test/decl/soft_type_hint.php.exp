@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|soft_type_hint.php line 3, characters 10-10),
        (Tfun
-          { ft_arity = (Fstandard (1)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = [];
             ft_params =
             [{ fp_pos = [3:27-29]; fp_name = (Some "$x");
@@ -19,7 +19,7 @@ Parsed decls:
                  };
                fp_flags =
                (make_fp_flags ~mutability:none ~accept_disposable:false
-                 ~mode:FPnormal);
+                 ~has_default:false ~mode:FPnormal);
                 }
               ];
             ft_ret =

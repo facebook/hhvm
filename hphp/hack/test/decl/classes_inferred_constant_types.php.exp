@@ -43,7 +43,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_inferred_constant_types.php line 8, characters 19-19),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

@@ -32,7 +32,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_typeconst.php line 7, characters 19-19),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -55,7 +55,7 @@ Parsed decls:
           sm_type =
           (Rwitness (root|classes_typeconst.php line 11, characters 19-19),
            (Tfun
-              { ft_arity = (Fstandard (0)); ft_tparams = [];
+              { ft_arity = (Fstandard ()); ft_tparams = [];
                 ft_where_constraints = []; ft_params = [];
                 ft_ret =
                 { et_enforced = false;
@@ -100,7 +100,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|classes_typeconst.php line 20, characters 28-38),
           (Tfun
-             { ft_arity = (Fstandard (1)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = [];
                ft_params =
                [{ fp_pos = [20:60-68]; fp_name = (Some "$request");
@@ -115,7 +115,7 @@ Parsed decls:
                     };
                   fp_flags =
                   (make_fp_flags ~mutability:none ~accept_disposable:false
-                    ~mode:FPnormal);
+                    ~has_default:false ~mode:FPnormal);
                    }
                  ];
                ft_ret =

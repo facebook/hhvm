@@ -51,7 +51,8 @@ let rec strip_ty ty =
             Typing_defs.make_fp_flags
               ~mode:(get_fp_mode fp)
               ~accept_disposable:false
-              ~mutability:None;
+              ~mutability:None
+              ~has_default:false;
           (* Dummy values: these aren't currently serialized. *)
           fp_pos = Pos.none;
           fp_name = None;
@@ -65,7 +66,7 @@ let rec strip_ty ty =
           ft_params;
           ft_ret;
           (* Dummy values: these aren't currently serialized. *)
-          ft_arity = Fstandard 0;
+          ft_arity = Fstandard;
           ft_tparams = [];
           ft_where_constraints = [];
           ft_flags = 0;

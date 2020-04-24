@@ -76,7 +76,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|self_in_type_constant.php line 15, characters 28-28),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

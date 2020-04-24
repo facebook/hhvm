@@ -189,8 +189,8 @@ struct
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)
 
   and fun_arity = function
-    | Fstandard _ as x -> x
-    | Fvariadic (n, param) -> Fvariadic (n, fun_param param)
+    | Fstandard as x -> x
+    | Fvariadic param -> Fvariadic (fun_param param)
 
   and fun_param param =
     {

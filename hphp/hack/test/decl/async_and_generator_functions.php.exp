@@ -7,7 +7,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 5, characters 16-29),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -28,7 +28,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 18, characters 16-30),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -54,7 +54,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 10, characters 10-27),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -80,7 +80,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 14, characters 10-40),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;
@@ -106,7 +106,7 @@ Parsed decls:
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 3, characters 10-22),
        (Tfun
-          { ft_arity = (Fstandard (0)); ft_tparams = [];
+          { ft_arity = (Fstandard ()); ft_tparams = [];
             ft_where_constraints = []; ft_params = [];
             ft_ret =
             { et_enforced = false;

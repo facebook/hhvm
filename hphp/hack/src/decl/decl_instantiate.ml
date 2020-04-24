@@ -95,10 +95,10 @@ and instantiate_ subst x =
     in
     let arity =
       match ft.ft_arity with
-      | Fvariadic (min, ({ fp_type = var_ty; _ } as param)) ->
+      | Fvariadic ({ fp_type = var_ty; _ } as param) ->
         let var_ty = instantiate_possibly_enforced_ty subst var_ty in
-        Fvariadic (min, { param with fp_type = var_ty })
-      | Fstandard _ as x -> x
+        Fvariadic { param with fp_type = var_ty }
+      | Fstandard as x -> x
     in
     let ret = instantiate_possibly_enforced_ty subst ft.ft_ret in
     let tparams =

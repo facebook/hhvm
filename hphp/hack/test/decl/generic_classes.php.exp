@@ -28,7 +28,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|generic_classes.php line 6, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (1)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [6:33-38]; fp_name = (Some "$data");
@@ -40,7 +40,8 @@ Parsed decls:
                          };
                        fp_flags =
                        (make_fp_flags ~mutability:none
-                         ~accept_disposable:false ~mode:FPnormal);
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:FPnormal);
                         }
                       ];
                     ft_ret =
@@ -64,7 +65,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|generic_classes.php line 10, characters 19-21),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;
@@ -107,7 +108,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|generic_classes.php line 18, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (1)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [18:33-38]; fp_name = (Some "$data");
@@ -119,7 +120,8 @@ Parsed decls:
                          };
                        fp_flags =
                        (make_fp_flags ~mutability:none
-                         ~accept_disposable:false ~mode:FPnormal);
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:FPnormal);
                         }
                       ];
                     ft_ret =
@@ -163,7 +165,7 @@ Parsed decls:
               sm_type =
               (Rwitness (root|generic_classes.php line 26, characters 19-29),
                (Tfun
-                  { ft_arity = (Fstandard (1)); ft_tparams = [];
+                  { ft_arity = (Fstandard ()); ft_tparams = [];
                     ft_where_constraints = [];
                     ft_params =
                     [{ fp_pos = [26:33-38]; fp_name = (Some "$data");
@@ -175,7 +177,8 @@ Parsed decls:
                          };
                        fp_flags =
                        (make_fp_flags ~mutability:none
-                         ~accept_disposable:false ~mode:FPnormal);
+                         ~accept_disposable:false ~has_default:false
+                         ~mode:FPnormal);
                         }
                       ];
                     ft_ret =
@@ -199,7 +202,7 @@ Parsed decls:
          sm_type =
          (Rwitness (root|generic_classes.php line 30, characters 19-21),
           (Tfun
-             { ft_arity = (Fstandard (0)); ft_tparams = [];
+             { ft_arity = (Fstandard ()); ft_tparams = [];
                ft_where_constraints = []; ft_params = [];
                ft_ret =
                { et_enforced = false;

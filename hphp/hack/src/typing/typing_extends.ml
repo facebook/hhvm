@@ -591,7 +591,7 @@ let default_constructor_ce class_ =
   (* reason doesn't get used in, e.g. arity checks *)
   let ft =
     {
-      ft_arity = Fstandard 0;
+      ft_arity = Fstandard;
       ft_tparams = [];
       ft_where_constraints = [];
       ft_params = [];

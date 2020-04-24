@@ -1,0 +1,14 @@
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(8) "resource"
+  ["fd"]=>
+  int(%d)
+}
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(8) "resource"
+  ["fd"]=>
+  int(%d)
+}
+Hello STDOUT
+Hello STDERR

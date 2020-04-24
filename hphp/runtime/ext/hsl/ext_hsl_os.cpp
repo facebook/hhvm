@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-await.h"
+#include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -38,6 +39,8 @@ namespace {
 const StaticString
   s_HSLFileDescriptor("HSLFileDescriptor"),
   s_fd("fd"),
+  s_resource("resource"),
+  s_type("type"),
   s_ErrnoException("HH\\Lib\\_Private\\_OS\\ErrnoException"),
   s_FQHSLFileDescriptor("HH\\Lib\\OS\\FileDescriptor"),
   s_HSL_sockaddr("HH\\Lib\\_Private\\_OS\\sockaddr"),
@@ -70,6 +73,7 @@ void throw_errno_exception(int number, const String& message = String()) {
       number
     )
   );
+
 }
 
 template<class T>
@@ -279,13 +283,28 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
 } // namespace
 
 struct HSLFileDescriptor {
+  enum class Type {
+    FD,
+    RESOURCE
+  };
+
   enum class Awaitability {
     UNKNOWN,
     AWAITABLE,
     NOT_AWAITABLE
   };
 
-  static Object newInstance(int fd) {
+  /* Construct an invalid instance.
+   *
+   * NativeData always invokes this; you probably want to call
+   * HSLFileDescriptor::newInstance() instead.
+   */
+  HSLFileDescriptor() = default;
+
+  HSLFileDescriptor(int fd):
+    m_type(Type::FD),
+    m_fd(fd) {
+
     // Callers should check for an invalid FD before trying to construct a
     // FileDescriptor object, but don't trust them.
     if (fd < 0) {
@@ -294,14 +313,36 @@ struct HSLFileDescriptor {
         "a bug in HHVM or a misbehaving CLI client."
       );
     }
+
+    s_fds_to_close->insert(fd);
+  }
+
+  /** For migration where mixing old and new code is *required*; strongly
+   * prefer adding raw FD support instead.
+   *
+   * The primary purpose of this is to support FD-based access to
+   * STDIN/STDOUT/STDERR, without breaking the PHP resources, logging
+   * systems, and exception handlers.
+   */
+  HSLFileDescriptor(req::ptr<PlainFile> resource):
+    m_type(Type::RESOURCE),
+    m_resource(resource) {
+
+    if (rawfd() < 0) {
+      SystemLib::throwErrorObject(
+        "Asked to create a FileDescriptor instance for a FILE* without an fd; "
+        "this indicates a bug in HHVM."
+      );
+    }
+  }
+
+  template<class ...Args>
+  static Object newInstance(Args&&... args) {
     assertx(s_FileDescriptorClass);
     Object obj { s_FileDescriptorClass };
 
     auto* data = Native::data<HSLFileDescriptor>(obj);
-    data->m_fd = fd;
-    data->m_awaitability = Awaitability::UNKNOWN;
-
-    s_fds_to_close->insert(fd);
+    new (data) HSLFileDescriptor(args...);
     return obj;
   }
 
@@ -317,30 +358,72 @@ struct HSLFileDescriptor {
   }
 
   int fd() const {
-    if (m_fd < 0) throw_errno_exception(EBADF);
-    return m_fd;
+    auto fd = rawfd();
+    if (fd < 0) throw_errno_exception(EBADF);
+    return fd;
   }
 
   void close() {
-    int result = ::close(fd());
-    throw_errno_if_minus_one(result);
-    s_fds_to_close->erase(m_fd);
-    m_fd = -1;
+    switch (m_type) {
+      case Type::FD:
+        throw_errno_if_minus_one(::close(fd()));
+        s_fds_to_close->erase(m_fd);
+        m_fd = -1;
+        return;
+      case Type::RESOURCE:
+        if (m_resource == nullptr) {
+          throw_errno_exception(EBADF, "Already closed");
+        }
+        m_resource->close();
+        m_resource = nullptr;
+        return;
+      default:
+        assertx(false);
+    }
   }
 
   Array __debugInfo() const {
+    String type;
+    switch (m_type) {
+      case Type::FD:
+        type = s_fd;
+        break;
+      case Type::RESOURCE:
+        type = s_resource;
+        break;
+      default:
+        assertx(false);
+    }
     return make_darray(
-      s_fd, VarNR{make_tv<KindOfInt64>(m_fd)}
+      s_type, type,
+      s_fd, VarNR{make_tv<KindOfInt64>(rawfd())}
     );
   }
 
-  Awaitability m_awaitability;
-
+  Awaitability m_awaitability = Awaitability::UNKNOWN;
  private:
-   // intentionally not closed by destructor: that would introduce observable
-   // refcounting behavior. Instead, it's closed at end of request from
-   // s_fds_to_close.
-   int m_fd;
+
+  // Which of `m_fd` or `m_resource` is meaningful
+  Type m_type = Type::FD;
+  // intentionally not closed by destructor: that would introduce observable
+  // refcounting behavior. Instead, it's closed at end of request from
+  // s_fds_to_close.
+  int m_fd = -1;
+  // As this is a resource, refcounting and/or GC will deal with it
+  // appropriately, nothing special for HSLFileDescriptor - except that we must
+  // re-extract the FD every time, in case it was closed elsewhere.
+  req::ptr<PlainFile> m_resource = nullptr;
+
+  int rawfd() const {
+    if (m_type == Type::FD) {
+      return m_fd;
+    }
+    assertx(m_type == Type::RESOURCE);
+    if (!(m_resource && !m_resource->isInvalid())) return -1;
+    FILE* stream = m_resource->getStream();
+    if (!stream) return -1;
+    return ::fileno(stream);
+  }
 };
 
 Array HHVM_METHOD(HSLFileDescriptor, __debugInfo) {
@@ -617,6 +700,41 @@ int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t w
   return ret;
 }
 
+Object HHVM_FUNCTION(HSL_os_request_stdio_fd, int64_t client_fd) {
+  if (RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()) {
+    throw_errno_exception(
+      EBADF,
+      "Request STDIO file descriptors are only available in CLI mode"
+    );
+  }
+  Variant stream;
+  switch (client_fd) {
+    case STDIN_FILENO:
+      stream = BuiltinFiles::getSTDIN();
+      break;
+    case STDOUT_FILENO:
+      stream = BuiltinFiles::getSTDOUT();
+      break;
+    case STDERR_FILENO:
+      stream = BuiltinFiles::getSTDERR();
+      break;
+    default:
+      throw_errno_exception(EINVAL, "Only STDIN, STDOUT, and STDERR fds are permitted");
+  }
+  if (!stream.isResource()) {
+    throw_errno_exception(EBADF, "Unable to retrieve request-local resource");
+  }
+  if (stream.toResource()->isInvalid()) {
+    throw_errno_exception(EBADF, "Resource is invalid (maybe already closed?)");
+  }
+  const auto builtin = dyn_cast_or_null<BuiltinFile>(stream.toResource());
+  if (!builtin) {
+    throw_errno_exception(EBADF, "Resource is not a BuiltinFile");
+  }
+
+  return HSLFileDescriptor::newInstance(builtin);
+}
+
 void HHVM_FUNCTION(HSL_os_flock, const Object& obj, int64_t operation) {
   auto fd = HSLFileDescriptor::fd(obj);
   throw_errno_if_minus_one(retry_on_eintr(-1, ::flock, fd, operation));
@@ -797,6 +915,11 @@ struct OSExtension final : Extension {
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\read, HSL_os_read);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\write, HSL_os_write);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\close, HSL_os_close);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\request_stdio_fd, HSL_os_request_stdio_fd);
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\STDIN_FILENO, STDIN_FILENO);
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\STDOUT_FILENO, STDOUT_FILENO);
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\STDERR_FILENO, STDERR_FILENO);
 
 #define SEEK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SEEK_##name, SEEK_##name)
     SEEK_(SET);

@@ -1,10 +1,14 @@
-object(HH\Lib\OS\FileDescriptor) (1) {
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(2) "fd"
   ["fd"]=>
   int(%d)
 }
 string(13) "Hello, world
 "
-object(HH\Lib\OS\FileDescriptor) (1) {
+object(HH\Lib\OS\FileDescriptor) (2) {
+  ["type"]=>
+  string(2) "fd"
   ["fd"]=>
   int(-1)
 }

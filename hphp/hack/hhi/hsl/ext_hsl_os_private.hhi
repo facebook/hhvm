@@ -125,11 +125,17 @@ const int SEEK_END = 0;
 const int SEEK_HOLE = 0;
 const int SEEK_DATA = 0;
 
+const int STDIN_FILENO = 0;
+const int STDOUT_FILENO = 0;
+const int STDERR_FILENO = 0;
+
 final class ErrnoException extends \Exception {}
 
 function poll_async(FileDescriptor $fd, int $events, int $timeout_ns): Awaitable<int>;
 
 function open(string $path, int $flags, int $mode = 0): FileDescriptor;
+
+function request_stdio_fd(int $stdio_fileno): FileDescriptor;
 
 function read(
   FileDescriptor $fd,

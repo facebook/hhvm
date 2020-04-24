@@ -76,13 +76,15 @@ module type ReverseNamingTable = sig
 
   val add : string -> pos -> unit
 
-  val get_pos : ?bypass_cache:bool -> string -> pos option
+  val get_pos :
+    Naming_sqlite.db_path option -> ?bypass_cache:bool -> string -> pos option
 
-  val get_filename : string -> Relative_path.t option
+  val get_filename :
+    Naming_sqlite.db_path option -> string -> Relative_path.t option
 
-  val is_defined : string -> bool
+  val is_defined : Naming_sqlite.db_path option -> string -> bool
 
-  val remove_batch : SSet.t -> unit
+  val remove_batch : Naming_sqlite.db_path option -> SSet.t -> unit
 
   val heap_string_of_key : string -> string
 end
@@ -135,7 +137,7 @@ module Types = struct
     TypeCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     TypePosHeap.write_around id type_info
 
-  let get_pos ?(bypass_cache = false) id =
+  let get_pos _db_path_opt ?(bypass_cache = false) id =
     let get_func =
       if bypass_cache then
         TypePosHeap.get_no_cache
@@ -166,86 +168,81 @@ module Types = struct
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
 
-  let get_kind id =
-    match get_pos id with
+  let get_kind db_path_opt id =
+    match get_pos db_path_opt id with
     | Some (_pos, kind) -> Some kind
     | None -> None
 
-  let get_filename_and_kind id =
-    match get_pos id with
+  let get_filename_and_kind db_path_opt id =
+    match get_pos db_path_opt id with
     | Some (pos, kind) -> Some (FileInfo.get_pos_filename pos, kind)
     | None -> None
 
-  let get_filename id =
-    match get_pos id with
+  let get_filename db_path_opt id =
+    match get_pos db_path_opt id with
     | None -> None
     | Some (pos, _) -> Some (FileInfo.get_pos_filename pos)
 
-  let is_defined id = Option.is_some (get_pos id)
+  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
   let get_canon_name ctx id =
-    Core_kernel.(
-      let map_result (path, entry_type) =
-        let path_str = Relative_path.S.to_string path in
-        match entry_type with
-        | Naming_types.TClass ->
-          begin
-            match
-              Ast_provider.find_class_in_file ~case_insensitive:true ctx path id
-            with
-            | Some cls -> Some (snd cls.Aast.c_name)
-            | None ->
-              Hh_logger.log
-                "Failed to get canonical name for %s in file %s"
-                id
-                path_str;
-              None
-          end
-        | Naming_types.TTypedef ->
-          begin
-            match
-              Ast_provider.find_typedef_in_file
-                ~case_insensitive:true
-                ctx
-                path
-                id
-            with
-            | Some typedef -> Some (snd typedef.Aast.t_name)
-            | None ->
-              Hh_logger.log
-                "Failed to get canonical name for %s in file %s"
-                id
-                path_str;
-              None
-          end
-        | Naming_types.TRecordDef ->
-          begin
-            match Ast_provider.find_record_def_in_file ctx path id with
-            | Some cls -> Some (snd cls.Aast.rd_name)
-            | None ->
-              Hh_logger.log
-                "Failed to get canonical name for %s in file %s"
-                id
-                path_str;
-              None
-          end
-      in
-      let fallback_get_func_opt =
-        if Naming_sqlite.is_connected () then
-          Some (Naming_sqlite.get_type_pos ~case_insensitive:true)
-        else
-          None
-      in
-      get_and_cache
-        ~map_result
-        ~get_func:TypeCanonHeap.get
-        ~check_block_func:BlockedEntries.get
-        ~fallback_get_func_opt
-        ~add_func:TypeCanonHeap.add
-        ~measure_name:"Canon naming table (types) cache hit rate"
-        ~key:id)
+    let map_result (path, entry_type) =
+      let path_str = Relative_path.S.to_string path in
+      match entry_type with
+      | Naming_types.TClass ->
+        begin
+          match
+            Ast_provider.find_class_in_file ~case_insensitive:true ctx path id
+          with
+          | Some cls -> Some (snd cls.Aast.c_name)
+          | None ->
+            Hh_logger.log
+              "Failed to get canonical name for %s in file %s"
+              id
+              path_str;
+            None
+        end
+      | Naming_types.TTypedef ->
+        begin
+          match
+            Ast_provider.find_typedef_in_file ~case_insensitive:true ctx path id
+          with
+          | Some typedef -> Some (snd typedef.Aast.t_name)
+          | None ->
+            Hh_logger.log
+              "Failed to get canonical name for %s in file %s"
+              id
+              path_str;
+            None
+        end
+      | Naming_types.TRecordDef ->
+        begin
+          match Ast_provider.find_record_def_in_file ctx path id with
+          | Some cls -> Some (snd cls.Aast.rd_name)
+          | None ->
+            Hh_logger.log
+              "Failed to get canonical name for %s in file %s"
+              id
+              path_str;
+            None
+        end
+    in
+    let fallback_get_func_opt =
+      if Naming_sqlite.is_connected () then
+        Some (Naming_sqlite.get_type_pos ~case_insensitive:true)
+      else
+        None
+    in
+    get_and_cache
+      ~map_result
+      ~get_func:TypeCanonHeap.get
+      ~check_block_func:BlockedEntries.get
+      ~fallback_get_func_opt
+      ~add_func:TypeCanonHeap.add
+      ~measure_name:"Canon naming table (types) cache hit rate"
+      ~key:id
 
-  let remove_batch types =
+  let remove_batch _db_path_opt types =
     let canon_key_types = canonize_set types in
     TypeCanonHeap.remove_batch canon_key_types;
     TypePosHeap.remove_batch types;
@@ -296,7 +293,7 @@ module Funs = struct
     FunCanonHeap.add (Naming_sqlite.to_canon_name_key id) id;
     FunPosHeap.add id pos
 
-  let get_pos ?bypass_cache:(_ = false) id =
+  let get_pos _db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
     let fallback_get_func_opt =
       if Naming_sqlite.is_connected () then
@@ -313,42 +310,42 @@ module Funs = struct
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:id
 
-  let get_filename id =
-    get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
+  let get_filename db_path_opt id =
+    get_pos db_path_opt id
+    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
 
-  let is_defined id = Option.is_some (get_pos id)
+  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
   let get_canon_name ctx name =
-    Core_kernel.(
-      let map_result path =
-        match
-          Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
-        with
-        | Some f -> Some (snd f.Aast.f_name)
-        | None ->
-          let path_str = Relative_path.S.to_string path in
-          Hh_logger.log
-            "Failed to get canonical name for %s in file %s"
-            name
-            path_str;
-          None
-      in
-      let fallback_get_func_opt =
-        if Naming_sqlite.is_connected () then
-          Some (Naming_sqlite.get_fun_pos ~case_insensitive:true)
-        else
-          None
-      in
-      get_and_cache
-        ~map_result
-        ~get_func:FunCanonHeap.get
-        ~check_block_func:BlockedEntries.get
-        ~fallback_get_func_opt
-        ~add_func:FunCanonHeap.add
-        ~measure_name:"Canon naming table (functions) cache hit rate"
-        ~key:name)
+    let map_result path =
+      match
+        Ast_provider.find_fun_in_file ~case_insensitive:true ctx path name
+      with
+      | Some f -> Some (snd f.Aast.f_name)
+      | None ->
+        let path_str = Relative_path.S.to_string path in
+        Hh_logger.log
+          "Failed to get canonical name for %s in file %s"
+          name
+          path_str;
+        None
+    in
+    let fallback_get_func_opt =
+      if Naming_sqlite.is_connected () then
+        Some (Naming_sqlite.get_fun_pos ~case_insensitive:true)
+      else
+        None
+    in
+    get_and_cache
+      ~map_result
+      ~get_func:FunCanonHeap.get
+      ~check_block_func:BlockedEntries.get
+      ~fallback_get_func_opt
+      ~add_func:FunCanonHeap.add
+      ~measure_name:"Canon naming table (functions) cache hit rate"
+      ~key:name
 
-  let remove_batch funs =
+  let remove_batch _db_path_opt funs =
     let canon_key_funs = canonize_set funs in
     FunCanonHeap.remove_batch canon_key_funs;
     FunPosHeap.remove_batch funs;
@@ -388,7 +385,7 @@ module Consts = struct
       check_valid id pos;
     ConstPosHeap.add id pos
 
-  let get_pos ?bypass_cache:(_ = false) id =
+  let get_pos _db_path_opt ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
     let fallback_get_func_opt =
       if Naming_sqlite.is_connected () then
@@ -405,12 +402,13 @@ module Consts = struct
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:id
 
-  let get_filename id =
-    get_pos id |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
+  let get_filename db_path_opt id =
+    get_pos db_path_opt id
+    |> Core_kernel.Option.map ~f:FileInfo.get_pos_filename
 
-  let is_defined id = Option.is_some (get_pos id)
+  let is_defined db_path_opt id = Option.is_some (get_pos db_path_opt id)
 
-  let remove_batch consts =
+  let remove_batch _db_path_opt consts =
     ConstPosHeap.remove_batch consts;
     if Naming_sqlite.is_connected () then
       SSet.iter (fun id -> BlockedEntries.add id Blocked) consts

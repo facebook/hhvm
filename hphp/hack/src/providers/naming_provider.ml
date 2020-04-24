@@ -106,7 +106,8 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Consts.get_pos name >>| attach_name_type FileInfo.Const
+        Naming_heap.Consts.get_pos (db_path_of_ctx ctx) name
+        >>| attach_name_type FileInfo.Const
       | Provider_backend.Local_memory
           { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
@@ -149,7 +150,10 @@ let add_const
 
 let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Consts.remove_batch names
+  | Provider_backend.Shared_memory ->
+    Naming_heap.Consts.remove_batch
+      (Db_path_provider.get_naming_db_path backend)
+      names
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -177,7 +181,8 @@ let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Funs.get_pos name >>| attach_name_type FileInfo.Fun
+        Naming_heap.Funs.get_pos (db_path_of_ctx ctx) name
+        >>| attach_name_type FileInfo.Fun
       | Provider_backend.Local_memory
           { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in
@@ -286,7 +291,10 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
 
 let remove_fun_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Funs.remove_batch names
+  | Provider_backend.Shared_memory ->
+    Naming_heap.Funs.remove_batch
+      (Db_path_provider.get_naming_db_path backend)
+      names
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -328,7 +336,10 @@ let add_type
 
 let remove_type_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
   match backend with
-  | Provider_backend.Shared_memory -> Naming_heap.Types.remove_batch names
+  | Provider_backend.Shared_memory ->
+    Naming_heap.Types.remove_batch
+      (Db_path_provider.get_naming_db_path backend)
+      names
   | Provider_backend.Local_memory
       { Provider_backend.reverse_naming_table_delta; _ } ->
     let open Provider_backend.Reverse_naming_table_delta in
@@ -381,8 +392,8 @@ let get_type_pos_and_kind (ctx : Provider_context.t) (name : string) :
     ~fallback:(fun () ->
       match Provider_context.get_backend ctx with
       | Provider_backend.Shared_memory ->
-        Naming_heap.Types.get_pos name >>| fun (pos, kind) ->
-        (pos, kind_to_name_type kind)
+        Naming_heap.Types.get_pos (db_path_of_ctx ctx) name
+        >>| fun (pos, kind) -> (pos, kind_to_name_type kind)
       | Provider_backend.Local_memory
           { Provider_backend.reverse_naming_table_delta; _ } ->
         let open Provider_backend.Reverse_naming_table_delta in

@@ -651,29 +651,45 @@ module Database_handle = struct
         let description = "NamingTableDatabaseSettings"
       end)
 
+  let db_path_cache :
+      [ `Not_yet_cached_path | `Cached_path of db_path option ] ref =
+    ref `Not_yet_cached_path
+
   let db_cache : [ `Not_yet_cached | `Cached of Sqlite3.db option ] ref =
     ref `Not_yet_cached
 
-  let open_db (path : string) : Sqlite3.db =
+  let open_db (Db_path path) : Sqlite3.db =
     let db = Sqlite3.db_open path in
     Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
     Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
     db
 
+  let get_db_path () : db_path option =
+    match !db_path_cache with
+    | `Cached_path path_opt -> path_opt
+    | `Not_yet_cached_path ->
+      let path_opt =
+        match Shared_db_settings.get "database_path" with
+        | None -> None
+        | Some path -> Some (Db_path path)
+      in
+      db_path_cache := `Cached_path path_opt;
+      path_opt
+
   let get_db () : Sqlite3.db option =
     match !db_cache with
     | `Cached db_opt -> db_opt
     | `Not_yet_cached ->
-      let path_opt = Shared_db_settings.get "database_path" in
+      let path_opt = get_db_path () in
       let db_opt = Option.map path_opt ~f:open_db in
       db_cache := `Cached db_opt;
       db_opt
 
-  let get_db_path () : string option = Shared_db_settings.get "database_path"
-
-  let set_db_path (path : string option) : unit =
+  let set_db_path (path : db_path option) : unit =
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
-    Option.iter path ~f:(Shared_db_settings.add "database_path");
+    Option.iter path ~f:(fun (Db_path path) ->
+        Shared_db_settings.add "database_path" path);
+    db_path_cache := `Cached_path path;
     db_cache := `Not_yet_cached;
     (* Force this immediately so that we can get validation errors in master. *)
     let _ = get_db () in
@@ -748,9 +764,19 @@ let save_file_info db relative_path file_info : int * insertion_error list =
     in
     results)
 
-let get_db_path = Database_handle.get_db_path
+let get_db_path () : string option =
+  match Database_handle.get_db_path () with
+  | None -> None
+  | Some (Db_path path) -> Some path
 
-let set_db_path = Database_handle.set_db_path
+let set_db_path (path_opt : string option) : unit =
+  let path_opt =
+    match path_opt with
+    | None -> None
+    | Some path -> Some (Db_path path)
+  in
+  Database_handle.set_db_path path_opt;
+  ()
 
 let is_connected = Database_handle.is_connected
 
@@ -797,7 +823,7 @@ let copy_and_update (new_db_name : string) (local_changes : local_changes) :
     ~force:(FileUtil.Ask (fun _ -> false))
     [Core_kernel.Option.value_exn (get_db_path ())]
     new_db_name;
-  let new_db = Database_handle.open_db new_db_name in
+  let new_db = Database_handle.open_db (Db_path new_db_name) in
   LocalChanges.update new_db local_changes;
   ()
 

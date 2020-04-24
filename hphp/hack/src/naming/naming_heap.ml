@@ -28,38 +28,35 @@ let get_and_cache
     ~(map_result : 'fallback_value -> 'value option)
     ~(get_func : 'key -> 'value option)
     ~(check_block_func : 'key -> blocked_entry option)
-    ~(fallback_get_func : 'key -> 'fallback_value option)
+    ~(fallback_get_func_opt : ('key -> 'fallback_value option) option)
     ~(add_func : 'key -> 'value -> unit)
     ~(measure_name : string)
     ~(key : 'key) : 'value option =
-  match get_func key with
-  | Some v ->
+  match (get_func key, fallback_get_func_opt) with
+  | (Some v, _) ->
     Measure.sample measure_name 1.0;
     Some v
-  | None ->
-    if not (Naming_sqlite.is_connected ()) then
+  | (None, None) -> None
+  | (None, Some fallback_get_func) ->
+    (match check_block_func key with
+    | Some Blocked ->
+      (* We sample 1.0 here even though we're returning None because we didn't go to SQLite. *)
+      Measure.sample measure_name 1.0;
       None
-    else (
-      match check_block_func key with
-      | Some Blocked ->
-        (* We sample 1.0 here even though we're returning None because we didn't go to SQLite. *)
-        Measure.sample measure_name 1.0;
-        None
-      | None ->
-        Measure.sample measure_name 0.0;
-        begin
-          match fallback_get_func key with
-          | Some res ->
-            begin
-              match map_result res with
-              | Some pos ->
-                add_func key pos;
-                Some pos
-              | None -> None
-            end
-          | None -> None
-        end
-    )
+    | None ->
+      Measure.sample measure_name 0.0;
+      begin
+        match fallback_get_func key with
+        | Some res ->
+          begin
+            match map_result res with
+            | Some pos ->
+              add_func key pos;
+              Some pos
+            | None -> None
+          end
+        | None -> None
+      end)
 
 let check_valid key pos =
   if Relative_path.equal (FileInfo.get_pos_filename pos) Relative_path.default
@@ -154,11 +151,17 @@ module Types = struct
       in
       Some (FileInfo.File (name_type, path), entry_type)
     in
+    let fallback_get_func_opt =
+      if Naming_sqlite.is_connected () then
+        Some (Naming_sqlite.get_type_pos ~case_insensitive:false)
+      else
+        None
+    in
     get_and_cache
       ~map_result
       ~get_func
       ~check_block_func:BlockedEntries.get
-      ~fallback_get_func:(Naming_sqlite.get_type_pos ~case_insensitive:false)
+      ~fallback_get_func_opt
       ~add_func:add
       ~measure_name:"Reverse naming table (types) cache hit rate"
       ~key:id
@@ -227,11 +230,17 @@ module Types = struct
               None
           end
       in
+      let fallback_get_func_opt =
+        if Naming_sqlite.is_connected () then
+          Some (Naming_sqlite.get_type_pos ~case_insensitive:true)
+        else
+          None
+      in
       get_and_cache
         ~map_result
         ~get_func:TypeCanonHeap.get
         ~check_block_func:BlockedEntries.get
-        ~fallback_get_func:(Naming_sqlite.get_type_pos ~case_insensitive:true)
+        ~fallback_get_func_opt
         ~add_func:TypeCanonHeap.add
         ~measure_name:"Canon naming table (types) cache hit rate"
         ~key:id)
@@ -289,11 +298,17 @@ module Funs = struct
 
   let get_pos ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Fun, path)) in
+    let fallback_get_func_opt =
+      if Naming_sqlite.is_connected () then
+        Some (Naming_sqlite.get_fun_pos ~case_insensitive:false)
+      else
+        None
+    in
     get_and_cache
       ~map_result
       ~get_func:FunPosHeap.get
       ~check_block_func:BlockedEntries.get
-      ~fallback_get_func:(Naming_sqlite.get_fun_pos ~case_insensitive:false)
+      ~fallback_get_func_opt
       ~add_func:add
       ~measure_name:"Reverse naming table (functions) cache hit rate"
       ~key:id
@@ -318,11 +333,17 @@ module Funs = struct
             path_str;
           None
       in
+      let fallback_get_func_opt =
+        if Naming_sqlite.is_connected () then
+          Some (Naming_sqlite.get_fun_pos ~case_insensitive:true)
+        else
+          None
+      in
       get_and_cache
         ~map_result
         ~get_func:FunCanonHeap.get
         ~check_block_func:BlockedEntries.get
-        ~fallback_get_func:(Naming_sqlite.get_fun_pos ~case_insensitive:true)
+        ~fallback_get_func_opt
         ~add_func:FunCanonHeap.add
         ~measure_name:"Canon naming table (functions) cache hit rate"
         ~key:name)
@@ -369,11 +390,17 @@ module Consts = struct
 
   let get_pos ?bypass_cache:(_ = false) id =
     let map_result path = Some (FileInfo.File (FileInfo.Const, path)) in
+    let fallback_get_func_opt =
+      if Naming_sqlite.is_connected () then
+        Some Naming_sqlite.get_const_pos
+      else
+        None
+    in
     get_and_cache
       ~map_result
       ~get_func:ConstPosHeap.get
       ~check_block_func:BlockedEntries.get
-      ~fallback_get_func:Naming_sqlite.get_const_pos
+      ~fallback_get_func_opt
       ~add_func:add
       ~measure_name:"Reverse naming table (consts) cache hit rate"
       ~key:id

@@ -24,27 +24,13 @@
 
 namespace HPHP {
 
-namespace {
-
-// Large enums get the dummy LargeEnum tag (so that we can cache a single
-// static value for these enums). Small enums get a tag based on the caller.
-Array tagEnumWithProvenance(Array input) {
-  assertx(arrprov::getTag(input.get()));
-  if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
-  auto const ad = input->copy();
-  arrprov::setTag<arrprov::Mode::Emplace>(ad, arrprov::tagFromPC());
-  return Array::attach(ad);
-}
-
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // class BuiltinEnum
 static Array HHVM_STATIC_METHOD(BuiltinEnum, getValues) {
   const EnumValues* values = EnumCache::getValuesBuiltin(self_);
   assertx(values->values.isDictOrDArray());
   if (!RO::EvalLogArrayProvenance) return values->values;
-  return tagEnumWithProvenance(values->values);
+  return EnumCache::tagEnumWithProvenance(values->values);
 }
 
 const StaticString
@@ -62,7 +48,7 @@ static Array HHVM_STATIC_METHOD(BuiltinEnum, getNames) {
 
   assertx(values->names.isDictOrDArray());
   if (!RO::EvalLogArrayProvenance) return values->names;
-  return tagEnumWithProvenance(values->names);
+  return EnumCache::tagEnumWithProvenance(values->names);
 }
 
 static bool HHVM_STATIC_METHOD(BuiltinEnum, isValid, const Variant &value) {

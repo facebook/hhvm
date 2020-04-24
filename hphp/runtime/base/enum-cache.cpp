@@ -234,6 +234,15 @@ void EnumCache::deleteEnumValues(intptr_t key) {
   }
 }
 
+Array EnumCache::tagEnumWithProvenance(Array input) {
+  assertx(IMPLIES(arrprov::arrayWantsTag(input.get()),
+                  arrprov::getTag(input.get())));
+  if (input.size() > RO::EvalArrayProvenanceLargeEnumLimit) return input;
+  auto const ad = input->copy();
+  arrprov::setTag<arrprov::Mode::Emplace>(ad, arrprov::tagFromPC());
+  return Array::attach(ad);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }

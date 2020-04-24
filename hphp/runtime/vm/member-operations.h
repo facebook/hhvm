@@ -157,31 +157,6 @@ inline ObjectData* instanceFromTv(tv_rval tv) {
 namespace detail {
 
 ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
-  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-    assertx(pState != nullptr);
-    auto const cls = pState->getClass();
-    if (UNLIKELY(cls != nullptr)) {
-      auto const slot = pState->getSlot();
-      auto tv = make_array_like_tv(staticEmptyArray());
-      if (pState->isStatic()) {
-        assertx(slot < cls->numStaticProperties());
-        auto const& sprop = cls->staticProperties()[slot];
-        auto const& tc = sprop.typeConstraint;
-        if (tc.isCheckable()) {
-          tc.verifyStaticProperty(&tv, cls, sprop.cls, sprop.name);
-        }
-      } else {
-        assertx(slot < cls->numDeclProperties());
-        auto const& prop = cls->declProperties()[slot];
-        auto const& tc = prop.typeConstraint;
-        if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
-      }
-      // No coercion for array types.
-      assertx(isArrayLikeType(tv.m_type) &&
-              tv.m_data.parr == staticEmptyArray());
-    }
-  }
-
   if (tvIsNull(base)) {
     throwFalseyPromoteException("null");
   } else if (tvIsBool(base)) {
@@ -189,6 +164,7 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
   } else if (tvIsString(base)) {
     throwFalseyPromoteException("empty string");
   }
+  always_assert(false);
 }
 
 ALWAYS_INLINE void promoteClsMeth(tv_lval base) {

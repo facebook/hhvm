@@ -38,6 +38,7 @@ void MemoryManager::checkSampling(size_t bytes) {
   auto const allocated = m_stats.mmAllocated();
   if (allocated < m_nextSample) return;
   auto const usage = m_stats.mmUsage();
+  MemoryManager::MaskAlloc mask(*this);
   s_samples->addAllocSample(usage, bytes);
   if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
     // Get native stacktrace here.
@@ -61,6 +62,7 @@ void AllocSamples::addStack(bool skipTop) {
     Logger::Error("sampled allocation already has associated php stack");
     return;
   }
+  MemoryManager::MaskAlloc mask(*tl_heap);
   auto stack = CompactTraceData::Create();
   fillCompactBacktrace(stack.get(), skipTop);
   for (auto iter = rbegin(); iter != rend(); ++iter) {
@@ -97,7 +99,9 @@ void AllocSamples::logSamples() {
       }
       entry.setVec("php_stack", stack);
     }
-    entry.setStackTrace("native_stack", sample.nativeStack);
+    if (RuntimeOption::EvalHeapAllocSampleNativeStack) {
+      entry.setStackTrace("native_stack", sample.nativeStack);
+    }
     entry.setStr("script", script);
     StructuredLog::log("hhvm_xenon_heap_profiler", entry);
   }

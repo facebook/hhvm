@@ -2163,8 +2163,7 @@ let bad_decl_override parent_pos parent_name pos name msgl =
   let msg2 =
     ( parent_pos,
       "Some members are incompatible with those declared in type "
-      ^ strip_ns parent_name
-      ^ "\nRead the following to see why:" )
+      ^ strip_ns parent_name )
   in
   (* This is a cascading error message *)
   add_list (Typing.err_code Typing.BadDeclOverride) (msg1 :: msg2 :: msgl)
@@ -2185,9 +2184,7 @@ let bad_prop_override pos member_name msgl (on_error : typing_error_callback) =
   on_error ~code:(Typing.err_code Typing.BadMethodOverride) (msg :: msgl)
 
 let bad_enum_decl pos msgl =
-  let msg =
-    (pos, "This enum declaration is invalid.\nRead the following to see why:")
-  in
+  let msg = (pos, "This enum declaration is invalid.") in
   (* This is a cascading error message *)
   add_list (Typing.err_code Typing.BadEnumExtends) (msg :: msgl)
 

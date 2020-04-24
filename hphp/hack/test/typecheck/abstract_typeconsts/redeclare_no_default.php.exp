@@ -6,7 +6,6 @@ File "redeclare_no_default.php", line 11, characters 13-13:
 Class C does not correctly implement all required members  (Typing[4340])
 File "redeclare_no_default.php", line 11, characters 23-23:
 Some members are incompatible with those declared in type B
-Read the following to see why:
 File "redeclare_no_default.php", line 4, characters 23-23:
 Unable to satisfy constraint on this type constant
 File "redeclare_no_default.php", line 8, characters 28-33:

@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_VM_REIFIEDGENERICSINFO_H_
 #define incl_HPHP_VM_REIFIEDGENERICSINFO_H_
 
+#include <algorithm>
 #include <stdint.h>
 #include <vector>
 
@@ -45,6 +46,13 @@ struct ReifiedGenericsInfo {
   uint32_t m_bitmap;
   // Information regarding each type parameter
   std::vector<TypeParamInfo> m_typeParamInfo;
+
+  bool allGenericsSoft() const {
+    return !std::any_of(m_typeParamInfo.begin(), m_typeParamInfo.end(),
+                        [](TypeParamInfo t) {
+                          return !t.m_isSoft;
+                        });
+  }
 };
 
 }

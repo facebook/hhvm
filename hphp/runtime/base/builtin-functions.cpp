@@ -607,10 +607,12 @@ vm_decode_function(const_variant_ref function,
         return nullptr;
       }
       assertx(f && f->preClass() == nullptr);
-      if (f->hasReifiedGenerics() && !genericsAlreadyGiven) {
-        raise_invalid_argument_warning("You may not call the reified function '%s' "
-                               "without reified arguments",
-                               f->fullName()->data());
+      if (f->hasReifiedGenerics() && !genericsAlreadyGiven &&
+          !f->getReifiedGenericsInfo().allGenericsSoft()) {
+        raise_invalid_argument_warning(
+          "You may not call the reified function '%s' "
+          "without reified arguments",
+          f->fullName()->data());
         return nullptr;
       }
       return f;

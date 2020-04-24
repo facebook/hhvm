@@ -4265,7 +4265,8 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
     ? String::attach(methName) : String();
   if (res != LookupResult::MagicCallFound) decRefStr(methName);
 
-  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+  if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
+      !func->getReifiedGenericsInfo().allGenericsSoft()) {
     throw_call_reified_func_without_generics(func);
   }
 
@@ -4503,7 +4504,8 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
     ? String::attach(methName) : String();
   if (res != LookupResult::MagicCallFound) decRefStr(methName);
 
-  if (func->hasReifiedGenerics() && !fca.hasGenerics()) {
+  if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
+      !func->getReifiedGenericsInfo().allGenericsSoft()) {
     throw_call_reified_func_without_generics(func);
   }
 

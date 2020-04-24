@@ -236,17 +236,20 @@ let get_fixme_codes_for_pos pos =
   get_fixmes_for_pos pos |> IMap.keys |> ISet.of_list
 
 let is_disallowed pos code =
-  match Provider_backend.get () with
-  | Provider_backend.Shared_memory
-  | Provider_backend.Local_memory _ ->
-    let filename = Pos.filename pos in
-    let (line, _, _) = Pos.info_pos pos in
-    DISALLOWED_FIXMES.get filename
-    |> Option.value ~default:IMap.empty
-    |> IMap.find_opt line
-    |> Option.value ~default:IMap.empty
-    |> IMap.find_opt code
-  | Provider_backend.Decl_service _ -> None
+  let filename = Pos.filename pos in
+  let (line, _, _) = Pos.info_pos pos in
+  let fixme_map_opt =
+    match Provider_backend.get () with
+    | Provider_backend.Shared_memory -> DISALLOWED_FIXMES.get filename
+    | Provider_backend.Local_memory { Provider_backend.fixmes; _ } ->
+      Fixme_store.get fixmes.disallowed_fixmes filename
+    | Provider_backend.Decl_service _ -> None
+  in
+  fixme_map_opt
+  |> Option.value ~default:IMap.empty
+  |> IMap.find_opt line
+  |> Option.value ~default:IMap.empty
+  |> IMap.find_opt code
 
 let () =
   (Errors.get_hh_fixme_pos :=

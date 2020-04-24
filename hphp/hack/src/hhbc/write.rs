@@ -113,53 +113,23 @@ where
     wrap_by_(w, s, s, f)
 }
 
-pub fn wrap_by_braces<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "{", "}", f)
+macro_rules! wrap_by {
+    ($name:ident, $left:expr, $right:expr) => {
+        pub fn $name<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
+        where
+            F: FnOnce(&mut W) -> Result<(), W::Error>,
+        {
+            wrap_by_(w, $left, $right, f)
+        }
+    };
 }
 
-pub fn wrap_by_paren<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "(", ")", f)
-}
-
-pub fn wrap_by_quotes<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "\"", "\"", f)
-}
-
-pub fn wrap_by_triple_quotes<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "\"\"\"", "\"\"\"", f)
-}
-
-pub fn wrap_by_angle<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "<", ">", f)
-}
-
-pub fn wrap_by_square<W: Write, F>(w: &mut W, f: F) -> Result<(), W::Error>
-where
-    F: FnOnce(&mut W) -> Result<(), W::Error>,
-{
-    wrap_by_(w, "[", "]", f)
-}
-
-pub fn write_list<W: Write>(w: &mut W, items: &[impl AsRef<str>]) -> Result<(), W::Error> {
-    Ok(for i in items {
-        w.write(i.as_ref())?;
-    })
-}
+wrap_by!(braces, "{", "}");
+wrap_by!(paren, "(", ")");
+wrap_by!(quotes, "\"", "\"");
+wrap_by!(triple_quotes, "\"\"\"", "\"\"\"");
+wrap_by!(angle, "<", ">");
+wrap_by!(square, "[", "]");
 
 pub fn concat_str<W: Write, I: AsRef<str>>(w: &mut W, ss: impl AsRef<[I]>) -> Result<(), W::Error> {
     concat(w, ss, |w, s| w.write(s))

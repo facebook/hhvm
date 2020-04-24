@@ -46,6 +46,10 @@ val set_db_path : string option -> unit
 
 val is_connected : unit -> bool
 
+val validate_can_open_db : db_path -> unit
+
+val free_db_cache : unit -> unit
+
 val save_file_infos :
   string ->
   FileInfo.t Relative_path.Map.t ->

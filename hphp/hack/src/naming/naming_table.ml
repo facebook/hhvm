@@ -337,6 +337,7 @@ let save naming_table db_name =
       Naming_sqlite.save_file_infos db_name naming_table ~base_content_version
     in
     Naming_sqlite.set_db_path None;
+    Naming_sqlite.free_db_cache ();
     let (_ : float) =
       let open Naming_sqlite in
       Hh_logger.log_duration
@@ -482,6 +483,8 @@ let load_from_sqlite_for_type_checking
     (db_path : string) : t =
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
+  Naming_sqlite.validate_can_open_db (Naming_sqlite.Db_path db_path);
+  (* throw in master if anything's wrong *)
   Naming_sqlite.set_db_path (Some db_path);
   Db_path_provider.set_naming_db_path
     (Provider_context.get_backend ctx)

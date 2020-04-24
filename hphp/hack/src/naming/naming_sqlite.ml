@@ -687,22 +687,11 @@ module Database_handle = struct
       db_cache := `Cached (Some (path, db));
       db
 
-  let revalidate_db_cache (path_opt : db_path option) : unit =
-    match path_opt with
-    | None ->
-      db_cache := `Cached None;
-      ()
-    | Some db_path ->
-      let _ = get_db db_path in
-      ()
-
   let set_db_path (path : db_path option) : unit =
     Shared_db_settings.remove_batch (SSet.singleton "database_path");
     Option.iter path ~f:(fun (Db_path path) ->
         Shared_db_settings.add "database_path" path);
     db_path_cache := `Cached_path path;
-    (* Force this immediately so that we can get validation errors in master. *)
-    revalidate_db_cache path;
     ()
 end
 
@@ -787,6 +776,12 @@ let set_db_path (path_opt : string option) : unit =
   ()
 
 let is_connected () : bool = Database_handle.get_db_path () |> Option.is_some
+
+let validate_can_open_db (db_path : db_path) : unit =
+  let (_ : Sqlite3.db) = Database_handle.get_db db_path in
+  ()
+
+let free_db_cache () : unit = Database_handle.db_cache := `Not_yet_cached
 
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in

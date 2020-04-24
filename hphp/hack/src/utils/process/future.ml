@@ -210,7 +210,12 @@ let rec is_ready : 'a. 'a t -> bool =
   | Delayed { tapped; remaining; value } ->
     promise := Delayed { tapped = tapped + 1; remaining = remaining - 1; value };
     false
-  | Merged (a, b, _) -> is_ready a && is_ready b
+  | Merged (a, b, _) ->
+    (* Prevent the && operator from short-cirtuiting the is-ready check for
+        the second future: *)
+    let is_a_ready = is_ready a in
+    let is_b_ready = is_ready b in
+    is_a_ready && is_b_ready
   | Bound (curr_future, next_producer) ->
     if is_ready curr_future then begin
       let curr_result = get curr_future in

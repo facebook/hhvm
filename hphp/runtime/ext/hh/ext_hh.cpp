@@ -780,7 +780,8 @@ TypedValue dynamicClassMeth(const StringData* cls, const StringData* meth) {
         );
       }
     } else if (func->attrs() & AttrProtected) {
-      if (!ctx || !ctx->classof(func->cls())) {
+      auto const fcls = func->cls();
+      if (!ctx || (!ctx->classof(fcls) && !fcls->classof(ctx))) {
         SystemLib::throwInvalidArgumentExceptionObject(
           folly::sformat("Method {}::{} is marked Protected",
                          cls->data(), meth->data())

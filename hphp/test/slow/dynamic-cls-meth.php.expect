@@ -1,9 +1,19 @@
+In B
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+h
+i
 In C
 EX: Method C::f is not static
 g
 h
 i
 In H
+EX: Method C::f is not static
+EX: Method C::g is marked Private
+h
+i
+In B
 EX: Method C::f is not static
 EX: Method C::g is marked Private
 h

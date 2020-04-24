@@ -22,7 +22,8 @@ trait T {
   }
 }
 
-class B { function go() {} }
+class R { function go() {} }
+class B extends R { use T; }
 
 class C extends B {
   use T;

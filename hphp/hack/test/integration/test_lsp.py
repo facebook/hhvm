@@ -5188,6 +5188,16 @@ function unsaved_bar(): string { return "hello"; }
                     "shortMessage": "Hack: initializing",
                 },
             )
+            .ignore_requests(
+                comment="another racy initialization to ignore, again before hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 3,
+                    "actions": [],
+                    "message": "Hack IDE: ready.",
+                    "shortMessage": "Hack",
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
@@ -5864,6 +5874,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "shortMessage": "Hack: initializing",
                 },
             )
+            .ignore_requests(
+                comment="another racy initialization to ignore, again before hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 3,
+                    "actions": [],
+                    "message": "Hack IDE: ready.",
+                    "shortMessage": "Hack",
+                },
+            )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
@@ -5917,6 +5937,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "actions": [],
                     "message": "Hack IDE: initializing.",
                     "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="another racy initialization to ignore, again before hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 3,
+                    "actions": [],
+                    "message": "Hack IDE: ready.",
+                    "shortMessage": "Hack",
                 },
             )
             .wait_for_server_request(
@@ -6002,6 +6032,16 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "actions": [],
                     "message": "Hack IDE: initializing.",
                     "shortMessage": "Hack: initializing",
+                },
+            )
+            .ignore_requests(
+                comment="Ignore another form of initializing, again before hh_server",
+                method="window/showStatus",
+                params={
+                    "type": 1,
+                    "actions": [{"title": "Restart Hack IDE"}],
+                    "message": "Hack IDE has failed. See Output›Hack for details.",
+                    "shortMessage": "Hack: failed",
                 },
             )
             .wait_for_notification(

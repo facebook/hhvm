@@ -537,7 +537,6 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
       loads |= AMIStatePropS;
     } else {
       assertx(inst.is(PropDX));
-      if (RuntimeOption::EvalPromoteEmptyObject) loads |= AMIStatePropS;
       stores |= AMIStatePropS;
     }
   } else {
@@ -547,28 +546,6 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
   }
 
   return may_load_store_kill(loads, stores, kills);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-MemEffects minstr_final_with_prop_state(const IRInstruction& inst) {
-  auto const propSLoads = [&]{
-    auto const propPtr = inst.srcs().back();
-    assertx(propPtr->isA(TMIPropSPtr | TNullptr));
-    if (RuntimeOption::EvalCheckPropTypeHints <= 0) return AEmpty;
-    if (propPtr->isA(TNullptr)) return AEmpty;
-    if (!RuntimeOption::EvalPromoteEmptyObject &&
-        inst.is(IncDecProp, SetOpProp, SetProp)) {
-      return AEmpty;
-    }
-    return AMIStatePropS;
-  }();
-
-  return may_load_store_kill(
-    AHeapAny | propSLoads | all_pointees(inst),
-    AHeapAny | all_pointees(inst),
-    AMIStatePropS
-  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1468,7 +1445,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
-    return minstr_final_with_prop_state(inst);
+    return may_load_store_kill(
+      AHeapAny | all_pointees(inst),
+      AHeapAny | all_pointees(inst),
+      AMIStatePropS
+    );
 
   /*
    * SetRange behaves like a simpler version of SetElem.

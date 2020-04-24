@@ -14,7 +14,11 @@ function propNoPromo() {
 
 function propPromo() {
   $ret = "";
-  $ret->prop = 'A';
+  try {
+    $ret->prop = 'A';
+  } catch (Exception $e) {
+    print("Error: ".$e->getMessage()."\n");
+  }
   return $ret;
 }
 <<__EntryPoint>> function main(): void {

@@ -124,19 +124,11 @@ E Object
     [postDec] => -1
 )
 --- null ---
-
-Warning: Creating default object from empty value in %s/test/quick/IncDecProp_nopt.php on line %d
-int(1)
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
 NULL
-NULL
-NULL
-stdClass Object
-(
-    [preInc] => 1
-    [preDec] => 
-    [postInc] => 1
-    [postDec] => 
-)
 --- 42 ---
 
 Warning: Attempt to increment/decrement property of non-object in %s/test/quick/IncDecProp_nopt.php on line %d

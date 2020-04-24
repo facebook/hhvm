@@ -167,6 +167,14 @@ ALWAYS_INLINE void checkPromotion(tv_rval base, const MInstrPropState* pState) {
   always_assert(false);
 }
 
+inline void raiseEmptyObject() {
+  if (RuntimeOption::PHP7_EngineExceptions) {
+    SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
+  } else {
+    SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
+  }
+}
+
 ALWAYS_INLINE void promoteClsMeth(tv_lval base) {
   raiseClsMethToVecWarningHelper();
   val(base).parr = clsMethToVecHelper(val(base).pclsmeth).detach();
@@ -2808,102 +2816,13 @@ inline tv_lval propPreNull(TypedValue& tvRef, MInstrPropState* pState) {
   return tv_lval(&tvRef);
 }
 
-template <class F>
-inline void promoteToStdClass(tv_lval base,
-                              F fun,
-                              const MInstrPropState* pState) {
-  if (!RuntimeOption::EvalPromoteEmptyObject) {
-    // note that the whole point here is to guarantee that the property
-    // never auto updates to a stdclass - so we must do this before
-    // calling promote, and we don't want the try catch below around
-    // this call.
-    if (RuntimeOption::PHP7_EngineExceptions) {
-      SystemLib::throwErrorObject(Strings::SET_PROP_NON_OBJECT);
-    } else {
-      SystemLib::throwExceptionObject(Strings::SET_PROP_NON_OBJECT);
-    }
-    not_reached();
-  }
-
-  Object obj { ObjectData::newInstance(SystemLib::s_stdclassClass) };
-
-  if (RuntimeOption::EvalCheckPropTypeHints > 0) {
-    assertx(pState != nullptr);
-    auto const cls = pState->getClass();
-    if (UNLIKELY(cls != nullptr)) {
-      auto const slot = pState->getSlot();
-      auto tv = make_tv<KindOfObject>(obj.get());
-      if (pState->isStatic()) {
-        assertx(slot < cls->numStaticProperties());
-        auto const& sprop = cls->staticProperties()[slot];
-        auto const& tc = sprop.typeConstraint;
-        if (tc.isCheckable()) {
-          tc.verifyStaticProperty(&tv, cls, sprop.cls, sprop.name);
-        }
-      } else {
-        assertx(slot < cls->numDeclProperties());
-        auto const& prop = cls->declProperties()[slot];
-        auto const& tc = prop.typeConstraint;
-        if (tc.isCheckable()) tc.verifyProperty(&tv, cls, prop.cls, prop.name);
-      }
-
-      // No coercion for should occur for object types.
-      assertx(isObjectType(tv.m_type) && tv.m_data.pobj == obj.get());
-    }
-  }
-
-  if (base.type() == KindOfString) {
-    decRefStr(base.val().pstr);
-  } else {
-    assertx(!isRefcountedType(base.type()));
-  }
-  base.type() = KindOfObject;
-  base.val().pobj = obj.get();
-
-  // Behavior here is observable.
-  // In PHP 5.6, raise_warning is called before updating base, so
-  // the error_handler sees the original base; but if an exception
-  // is thrown from the error handler, any catch block will see the
-  // updated base.
-  // In PHP 7+, raise_warning is called after updating base, but before
-  // doing the work of fun, and again, if an exception is thrown, fun
-  // still gets called before reaching the catch block.
-  // We'll match PHP7, because we have no way of ensuring that base survives
-  // across a call to the error_handler: eg $a[0][0][0]->foo = 0; if $a
-  // started out null, and the error handler resets it to null, base is
-  // left dangling.
-  // Note that this means that the error handler can overwrite the object
-  // so there is no guarantee that we have an object on return from
-  // promoteToStdClass.
-  try {
-    raise_warning(Strings::CREATING_DEFAULT_OBJECT);
-  } catch (const Object&) {
-    fun(obj.get());
-    throw;
-  }
-
-  fun(obj.get());
-}
-
 template<MOpMode mode>
 tv_lval propPreStdclass(TypedValue& tvRef,
                         tv_lval base,
                         MInstrPropState* pState) {
-  if (mode != MOpMode::Define) {
-    return propPreNull<mode>(tvRef, pState);
-  }
-
-  promoteToStdClass(base, [] (ObjectData*) {}, pState);
-  if (UNLIKELY(base.type() != KindOfObject)) {
-    // See the comments above. Although promoteToStdClass will have
-    // either thrown an exception, or promoted base to an object, an
-    // installed error handler might have caused it to be overwritten
-    tvWriteNull(tvRef);
-    if (pState) *pState = MInstrPropState{};
-    return tv_lval(&tvRef);
-  }
-
-  return base;
+  if (mode != MOpMode::Define) return propPreNull<mode>(tvRef, pState);
+  detail::raiseEmptyObject();
+  not_reached();
 }
 
 template<MOpMode mode>
@@ -3062,21 +2981,6 @@ inline void SetPropNull(TypedValue* val) {
   }
 }
 
-inline void SetPropStdclass(tv_lval base,
-                            TypedValue key,
-                            TypedValue* val,
-                            const MInstrPropState* pState) {
-  promoteToStdClass(
-    base,
-    [&] (ObjectData* obj) {
-      auto const keySD = prepareKey(key);
-      SCOPE_EXIT { decRefStr(keySD); };
-      obj->setProp(nullptr, keySD, *val);
-    },
-    pState
-  );
-}
-
 template <KeyType keyType>
 inline void SetPropObj(Class* ctx, ObjectData* instance,
                        key_type<keyType> key, TypedValue* val) {
@@ -3090,17 +2994,15 @@ inline void SetPropObj(Class* ctx, ObjectData* instance,
 // $base->$key = $val
 template <bool setResult, KeyType keyType = KeyType::Any>
 inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
-                    TypedValue* val, const MInstrPropState* pState) {
+                    TypedValue* val) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetPropStdclass(base, initScratchKey(key), val, pState);
+      return detail::raiseEmptyObject();
 
     case KindOfBoolean:
-      if (HPHP::val(base).num) {
-        return SetPropNull<setResult>(val);
-      }
-      return SetPropStdclass(base, initScratchKey(key), val, pState);
+      return HPHP::val(base).num ? SetPropNull<setResult>(val)
+                                 : detail::raiseEmptyObject();
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3125,10 +3027,8 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
 
     case KindOfPersistentString:
     case KindOfString:
-      if (HPHP::val(base).pstr->size() != 0) {
-        return SetPropNull<setResult>(val);
-      }
-      return SetPropStdclass(base, initScratchKey(key), val, pState);
+      return HPHP::val(base).pstr->size() ? SetPropNull<setResult>(val)
+                                          : detail::raiseEmptyObject();
 
     case KindOfObject:
       return SetPropObj<keyType>(ctx, HPHP::val(base).pobj, key, val);
@@ -3139,24 +3039,6 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
 inline tv_lval SetOpPropNull(TypedValue& tvRef) {
   raise_warning("Attempt to assign property of non-object");
   tvWriteNull(tvRef);
-  return &tvRef;
-}
-
-inline tv_lval SetOpPropStdclass(TypedValue& tvRef, SetOpOp op,
-                                 tv_lval base, TypedValue key,
-                                 TypedValue* rhs, const MInstrPropState* pState) {
-  promoteToStdClass(
-    base,
-    [&] (ObjectData* obj) {
-      StringData* keySD = prepareKey(key);
-      SCOPE_EXIT { decRefStr(keySD); };
-      tvWriteNull(tvRef);
-      setopBody(tvAssertPlausible(&tvRef), op, rhs);
-      obj->setProp(nullptr, keySD, tvAssertPlausible(tvRef));
-    },
-    pState
-  );
-
   return &tvRef;
 }
 
@@ -3172,17 +3054,17 @@ inline tv_lval SetOpPropObj(TypedValue& tvRef, Class* ctx,
 inline tv_lval SetOpProp(TypedValue& tvRef,
                          Class* ctx, SetOpOp op,
                          tv_lval base, TypedValue key,
-                         TypedValue* rhs, const MInstrPropState* pState) {
+                         TypedValue* rhs) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfBoolean:
-      if (val(base).num) {
-        return SetOpPropNull(tvRef);
-      }
-      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
+      if (val(base).num) return SetOpPropNull(tvRef);
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3207,10 +3089,9 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
 
     case KindOfPersistentString:
     case KindOfString:
-      if (val(base).pstr->size() != 0) {
-        return SetOpPropNull(tvRef);
-      }
-      return SetOpPropStdclass(tvRef, op, base, key, rhs, pState);
+      if (val(base).pstr->size()) return SetOpPropNull(tvRef);
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfObject:
       return SetOpPropObj(tvRef, ctx, op, instanceFromTv(base), key, rhs);
@@ -3221,26 +3102,6 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
 inline TypedValue IncDecPropNull() {
   raise_warning("Attempt to increment/decrement property of non-object");
   return make_tv<KindOfNull>();
-}
-
-inline TypedValue IncDecPropStdclass(IncDecOp op, tv_lval base,
-                               TypedValue key, const MInstrPropState* pState) {
-  TypedValue dest;
-  promoteToStdClass(
-    base,
-    [&] (ObjectData* obj) {
-      StringData* keySD = prepareKey(key);
-      SCOPE_EXIT { decRefStr(keySD); };
-      TypedValue tv;
-      tvWriteNull(tv);
-      dest = IncDecBody(op, &tv);
-      obj->setProp(nullptr, keySD, dest);
-      assertx(!isRefcountedType(tv.m_type));
-    },
-    pState
-  );
-
-  return dest;
 }
 
 inline TypedValue IncDecPropObj(Class* ctx,
@@ -3256,19 +3117,18 @@ inline TypedValue IncDecProp(
   Class* ctx,
   IncDecOp op,
   tv_lval base,
-  TypedValue key,
-  const MInstrPropState* pState
+  TypedValue key
 ) {
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
-      return IncDecPropStdclass(op, base, key, pState);
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfBoolean:
-      if (val(base).num) {
-        return IncDecPropNull();
-      }
-      return IncDecPropStdclass(op, base, key, pState);
+      if (val(base).num) return IncDecPropNull();
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfInt64:
     case KindOfDouble:
@@ -3293,10 +3153,9 @@ inline TypedValue IncDecProp(
 
     case KindOfPersistentString:
     case KindOfString:
-      if (val(base).pstr->size() != 0) {
-        return IncDecPropNull();
-      }
-      return IncDecPropStdclass(op, base, key, pState);
+      if (val(base).pstr->size()) return IncDecPropNull();
+      detail::raiseEmptyObject();
+      not_reached();
 
     case KindOfObject:
       return IncDecPropObj(ctx, op, instanceFromTv(base), key);

@@ -3196,7 +3196,7 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
       }
     } else {
       auto const ctx = arGetContextClass(vmfp());
-      SetProp<true>(ctx, mstate.base, key, topC, &mstate.propState);
+      SetProp<true>(ctx, mstate.base, key, topC);
     }
   }
 
@@ -3228,9 +3228,7 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto& mstate = vmMInstrState();
   TypedValue result;
   if (mcodeIsProp(mk.mcode)) {
-    result = IncDecProp(
-      arGetContextClass(vmfp()), subop, mstate.base, key, &mstate.propState
-    );
+    result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
   } else if (mcodeIsElem(mk.mcode)) {
     result = IncDecElem(
       subop, mstate.base, key, &mstate.propState
@@ -3249,8 +3247,8 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto& mstate = vmMInstrState();
   tv_lval result;
   if (mcodeIsProp(mk.mcode)) {
-    result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()), subop,
-                       mstate.base, key, rhs, &mstate.propState);
+    result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()),
+                       subop, mstate.base, key, rhs);
   } else if (mcodeIsElem(mk.mcode)) {
     result = SetOpElem(
       mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState

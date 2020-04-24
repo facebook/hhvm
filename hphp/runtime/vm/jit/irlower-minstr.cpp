@@ -176,7 +176,6 @@ void cgSetProp(IRLS& env, const IRInstruction* inst) {
       return target;
     } else {
       BUILD_OPTAB(SETPROP_HELPER_TABLE, keyType);
-      args.ssa(3);
       return target;
     }
   }();
@@ -210,7 +209,6 @@ void cgSetOpProp(IRLS& env, const IRInstruction* inst) {
     .typedValue(1)
     .typedValue(2)
     .imm(static_cast<int32_t>(extra->op));
-  if (!base->isA(TObj)) args.ssa(3);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, helper, callDestTV(env, inst), SyncOptions::Sync, args);
@@ -227,7 +225,6 @@ void cgIncDecProp(IRLS& env, const IRInstruction* inst) {
   auto args = propArgs(env, inst)
     .typedValue(1)
     .imm(static_cast<int32_t>(extra->op));
-  if (!base->isA(TObj)) args.ssa(2);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, helper, callDestTV(env, inst),

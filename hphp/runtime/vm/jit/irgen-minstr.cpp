@@ -357,14 +357,6 @@ SSATmp* propStatePtrElem(IRGS& env, const SSATmp* base) {
     : cns(env, TNullptr);
 }
 
-SSATmp* propStatePtrFinalProp(IRGS& env, const SSATmp* base) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return cns(env, TNullptr);
-  if (!RuntimeOption::EvalPromoteEmptyObject) return cns(env, TNullptr);
-  return baseMightPromote(base)
-    ? gen(env, LdMIPropStateAddr)
-    : cns(env, TNullptr);
-}
-
 bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
   if (!propInfo.knownType.maybe(TUninit)) return false;
   auto const cls = propInfo.objClass;
@@ -961,14 +953,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     }
   }
 
-  return gen(
-    env,
-    IncDecProp,
-    IncDecData{op},
-    base,
-    key,
-    propStatePtrFinalProp(env, base)
-  );
+  return gen(env, IncDecProp, IncDecData{op}, base, key);
 }
 
 template<class Finish>
@@ -1673,15 +1658,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
     gen(env, StMem, propPtr, newVal);
     decRef(env, oldVal);
   } else {
-    gen(
-      env,
-      SetProp,
-      makeCatchSet(env, nDiscard),
-      base,
-      key,
-      value,
-      propStatePtrFinalProp(env, base)
-    );
+    gen(env, SetProp, makeCatchSet(env, nDiscard), base, key, value);
   }
 
   return value;
@@ -2311,15 +2288,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     return pNewVal;
   }
 
-  return gen(
-    env,
-    SetOpProp,
-    SetOpData{op},
-    base,
-    key,
-    rhs,
-    propStatePtrFinalProp(env, base)
-  );
+  return gen(env, SetOpProp, SetOpData{op}, base, key, rhs);
 }
 
 void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {

@@ -254,7 +254,6 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     // which control Option or RuntimeOption values -- the others are read out
     // in an inconsistent and ad-hoc manner. But I don't understand their uses
     // and interactions well enough to feel comfortable fixing now.
-    RuntimeOption::EvalPromoteEmptyObject    = s_globalData.PromoteEmptyObject;
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
     RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;

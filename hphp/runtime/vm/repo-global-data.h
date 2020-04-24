@@ -90,11 +90,6 @@ struct Repo::GlobalData {
   bool PHP7_Substr = false;
 
   /*
-   * Should emptyish in lval context be promoted to a stdclass object?
-   */
-  bool PromoteEmptyObject = true;
-
-  /*
    * Should all functions be interceptable?
    */
   bool EnableRenameFunction = false;
@@ -197,7 +192,6 @@ struct Repo::GlobalData {
       (PHP7_NoHexNumerics)
       (PHP7_Substr)
       (PHP7_Builtins)
-      (PromoteEmptyObject)
       (EnableRenameFunction)
       (HackArrCompatNotices)
       (HackArrCompatIsArrayNotices)

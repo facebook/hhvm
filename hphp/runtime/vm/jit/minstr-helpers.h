@@ -206,10 +206,9 @@ inline TypedValue cGetPropSOQ(Class* ctx, ObjectData* base, StringData* key) {
   m(setPropC,    KeyType::Any)           \
   m(setPropCS,   KeyType::Str)           \
 
-#define X(nm, kt)                                                       \
-inline void nm(Class* ctx, tv_lval base, key_type<kt> key,              \
-               TypedValue val, const MInstrPropState* pState) {               \
-  HPHP::SetProp<false, kt>(ctx, base, key, &val, pState);               \
+#define X(nm, kt)                                                            \
+inline void nm(Class* ctx, tv_lval base, key_type<kt> key, TypedValue val) { \
+  HPHP::SetProp<false, kt>(ctx, base, key, &val);                            \
 }
 SETPROP_HELPER_TABLE(X)
 #undef X
@@ -239,10 +238,9 @@ inline void unsetPropCO(Class* ctx, ObjectData* base, TypedValue key) {
 //////////////////////////////////////////////////////////////////////
 
 inline TypedValue setOpPropC(Class* ctx, tv_lval base, TypedValue key,
-                             TypedValue val, SetOpOp op,
-                             const MInstrPropState* pState) {
+                             TypedValue val, SetOpOp op) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpProp(localTvRef, ctx, op, base, key, &val, pState);
+  auto result = HPHP::SetOpProp(localTvRef, ctx, op, base, key, &val);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -256,8 +254,8 @@ inline TypedValue setOpPropCO(Class* ctx, ObjectData* base, TypedValue key,
 //////////////////////////////////////////////////////////////////////
 
 inline TypedValue incDecPropC(Class* ctx, tv_lval base, TypedValue key,
-                              IncDecOp op, const MInstrPropState* pState) {
-  return HPHP::IncDecProp(ctx, op, base, key, pState);
+                              IncDecOp op) {
+  return HPHP::IncDecProp(ctx, op, base, key);
 }
 
 inline TypedValue incDecPropCO(Class* ctx, ObjectData* base, TypedValue key,

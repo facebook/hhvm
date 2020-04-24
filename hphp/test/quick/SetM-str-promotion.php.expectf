@@ -1,17 +1,9 @@
 string(1) "A"
 string(1) "A"
-
-Warning: Creating default object from empty value in %s on line 17
-object(stdClass) (1) {
-  ["prop"]=>
-  string(1) "A"
-}
-
-Warning: Creating default object from empty value in %s on line 17
-object(stdClass) (1) {
-  ["prop"]=>
-  string(1) "A"
-}
+Error: Setting a property on a non-object
+string(0) ""
+Error: Setting a property on a non-object
+string(0) ""
 
 Warning: Cannot access property on non-object in %s on line 11
 string(1) " "

@@ -47,19 +47,15 @@ E Object
 
     [p] => 1
 )
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
+Error: Setting a property on a non-object
 
-Warning: Creating default object from empty value in %s on line 59
-stdClass Object
-(
-    [a] => <a>
-    [b] => <b><b>
-    [p] => 1
-    [q] => 1
-    [r] => hello
-)
+Warning: Attempt to assign property of non-object in %s on line 77
 
-Warning: Attempt to assign property of non-object in %s on line 68
-
-Warning: Attempt to assign property of non-object in %s on line 69
+Warning: Attempt to assign property of non-object in %s on line 78
 42
 Test end

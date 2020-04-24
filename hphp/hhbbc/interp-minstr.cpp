@@ -60,14 +60,6 @@ bool mustBeEmptyish(const Type& ty) {
   return ty.subtypeOf(BNull | BFalse) || ty.subtypeOf(sempty());
 }
 
-bool propCouldPromoteToObj(const Type& ty) {
-  return RuntimeOption::EvalPromoteEmptyObject && couldBeEmptyish(ty);
-}
-
-bool propMustPromoteToObj(const Type& ty)  {
-  return RuntimeOption::EvalPromoteEmptyObject && mustBeEmptyish(ty);
-}
-
 bool keyCouldBeWeird(const Type& key) {
   return key.couldBe(BObj | BArr | BVec | BDict | BKeyset);
 }
@@ -557,22 +549,6 @@ void promoteBaseElemU(ISS& env) {
   env.collect.mInstrState.base.type = loosen_all(env.collect.mInstrState.base.type);
 }
 
-void promoteBasePropD(ISS& env, bool isNullsafe) {
-  auto& ty = env.collect.mInstrState.base.type;
-
-  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
-  if (isNullsafe || ty.subtypeOf(BObj)) return;
-
-  if (propMustPromoteToObj(ty)) {
-    ty = objExact(env.index.builtin_class(s_stdClass.get()));
-    return;
-  }
-  if (propCouldPromoteToObj(ty)) {
-    ty = promote_emptyish(ty, TObj);
-    return;
-  }
-}
-
 void promoteBaseElemD(ISS& env) {
   auto& ty = env.collect.mInstrState.base.type;
 
@@ -614,45 +590,6 @@ void handleInPublicStaticElemD(ISS& env) {
 }
 
 void handleInThisElemD(ISS& env) {}
-
-void handleInPublicStaticPropD(ISS& env, bool isNullsafe) {
-  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
-  if (isNullsafe) return;
-
-  auto const& base = env.collect.mInstrState.base;
-  if (!couldBeInPublicStatic(base)) return;
-
-  auto const name = baseLocNameType(base);
-  auto const ty = env.index.lookup_public_static(env.ctx, base.locTy, name);
-  if (propCouldPromoteToObj(ty)) {
-    env.collect.publicSPropMutations.merge(
-      env.index, env.ctx, base.locTy, name,
-      objExact(env.index.builtin_class(s_stdClass.get()))
-    );
-  }
-}
-
-void handleInThisPropD(ISS& env, bool isNullsafe) {
-  // NullSafe (Q) props do not promote an emptyish base to stdClass instance.
-  if (isNullsafe) return;
-
-  if (!couldBeInProp(env, env.collect.mInstrState.base)) return;
-
-  if (auto const name = env.collect.mInstrState.base.locName) {
-    auto const ty = thisPropAsCell(env, name);
-    if (ty && propCouldPromoteToObj(*ty)) {
-      mergeThisProp(env, name,
-                    objExact(env.index.builtin_class(s_stdClass.get())));
-    }
-    return;
-  }
-
-  if (RuntimeOption::EvalPromoteEmptyObject) {
-    mergeEachThisPropRaw(env, [&] (const Type& t) {
-        return propCouldPromoteToObj(t) ? TObj : TBottom;
-      });
-  }
-}
 
 // Currently NewElem and Elem InFoo effects don't need to do
 // anything different from each other.
@@ -846,12 +783,6 @@ void miProp(ISS& env, bool isNullsafe, MOpMode mode, Type key) {
     }
   }
 
-  if (isDefine) {
-    handleInThisPropD(env, isNullsafe);
-    handleInPublicStaticPropD(env, isNullsafe);
-    promoteBasePropD(env, isNullsafe);
-  }
-
   if (mustBeThisObj(env, env.collect.mInstrState.base)) {
     auto const optThisTy = thisTypeFromContext(env.index, env.ctx);
     auto const thisTy    = optThisTy ? *optThisTy : TObj;
@@ -1034,10 +965,6 @@ void miFinalSetProp(ISS& env, int32_t nDiscard, const Type& key) {
     push(env, std::move(ty));
   };
 
-  handleInThisPropD(env, false);
-  handleInPublicStaticPropD(env, false);
-  promoteBasePropD(env, false);
-
   if (couldBeThisObj(env, env.collect.mInstrState.base)) {
     if (!name) {
       mergeEachThisPropRaw(
@@ -1068,10 +995,6 @@ void miFinalSetOpProp(ISS& env, int32_t nDiscard,
                       SetOpOp subop, const Type& key) {
   auto const name = mStringKey(key);
   auto const rhsTy = popC(env);
-
-  handleInThisPropD(env, false);
-  handleInPublicStaticPropD(env, false);
-  promoteBasePropD(env, false);
 
   auto const lhsTy = [&] {
     if (name) {
@@ -1107,10 +1030,6 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard,
                        IncDecOp subop, const Type& key) {
   auto const name = mStringKey(key);
 
-  handleInThisPropD(env, false);
-  handleInPublicStaticPropD(env, false);
-  promoteBasePropD(env, false);
-
   auto const postPropTy = [&] {
     if (name) {
       if (mustBeThisObj(env, env.collect.mInstrState.base)) {
@@ -1142,20 +1061,8 @@ void miFinalIncDecProp(ISS& env, int32_t nDiscard,
 }
 
 void miFinalUnsetProp(ISS& env, int32_t nDiscard, const Type& key) {
-  auto const name = mStringKey(key);
-
-  /*
-   * Unset does define intermediate dims but with slightly different
-   * rules than sets.  It only applies to object properties.
-   *
-   * Note that this can't affect self props, because static
-   * properties can never be unset.  It also can't change anything
-   * about an inner array type.
-   */
-  handleInThisPropD(env, false);
-
   if (couldBeThisObj(env, env.collect.mInstrState.base)) {
-    if (name) {
+    if (auto const name = mStringKey(key)) {
       unsetThisProp(env, name);
     } else {
       unsetUnknownThisProp(env);

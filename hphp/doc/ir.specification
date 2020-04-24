@@ -2898,7 +2898,7 @@ fields of that struct for holding intermediate values.
 
   A nullsafe version of CGetProp, returns null if the base S0 is null.
 
-| SetProp, ND, S(Obj,LvalToCell) S(Cell) S(Cell) S(MIPropSPtr,Nullptr), MProp
+| SetProp, ND, S(Obj,LvalToCell) S(Cell) S(Cell), MProp
 
   Set property with key S1 in S0 to S2.
 
@@ -2906,15 +2906,11 @@ fields of that struct for holding intermediate values.
 
   Unset an object property.
 
-| SetOpProp<op>, D(Cell),
-|                S(Obj,LvalToCell) S(Cell) S(Cell) S(MIPropSPtr,Nullptr),
-|                MProp|PRc
+| SetOpProp<op>, D(Cell), S(Obj,LvalToCell) S(Cell) S(Cell), MProp|PRc
 
   Set op propery with key S1 in base S0, using S2 as the right hand side.
 
-| IncDecProp<op>, D(Cell),
-|                 S(Obj,LvalToCell) S(Cell) S(MIPropSPtr,Nullptr),
-|                 MProp|PRc
+| IncDecProp<op>, D(Cell), S(Obj,LvalToCell) S(Cell), MProp|PRc
 
   Increment/decrement property with key S1 in base S0.
 

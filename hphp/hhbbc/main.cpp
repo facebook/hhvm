@@ -387,7 +387,6 @@ void write_global_data(
   gd.PHP7_NoHexNumerics          = RuntimeOption::PHP7_NoHexNumerics;
   gd.PHP7_Substr                 = RuntimeOption::PHP7_Substr;
   gd.PHP7_Builtins               = RuntimeOption::PHP7_Builtins;
-  gd.PromoteEmptyObject          = RuntimeOption::EvalPromoteEmptyObject;
   gd.EnableRenameFunction        = RuntimeOption::EvalJitEnableRenameFunction;
   gd.HackArrCompatNotices        = RuntimeOption::EvalHackArrCompatNotices;
   gd.EnableIntrinsicsExtension   = RuntimeOption::EnableIntrinsicsExtension;

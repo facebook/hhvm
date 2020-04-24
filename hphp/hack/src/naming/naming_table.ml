@@ -348,14 +348,7 @@ let save naming_table db_name =
     save_result
   | Backed local_changes ->
     let t = Unix.gettimeofday () in
-    let old_path = Naming_sqlite.get_db_path () in
-    (* Don't overwrite. *)
-    FileUtil.cp
-      ~force:(FileUtil.Ask (fun _ -> false))
-      [Core_kernel.Option.value_exn (Naming_sqlite.get_db_path ())]
-      db_name;
-    Naming_sqlite.set_db_path (Some db_name);
-    Naming_sqlite.update_file_infos db_name local_changes;
+    Naming_sqlite.copy_and_update db_name local_changes;
     let (_ : float) =
       Hh_logger.log_duration
         (Printf.sprintf
@@ -363,7 +356,6 @@ let save naming_table db_name =
            (Relative_path.Map.cardinal local_changes.Naming_sqlite.file_deltas))
         t
     in
-    Naming_sqlite.set_db_path old_path;
     { Naming_sqlite.empty_save_result with Naming_sqlite.files_added = 1 }
 
 (*****************************************************************************)

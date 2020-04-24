@@ -52,7 +52,7 @@ val save_file_infos :
   base_content_version:string ->
   save_result
 
-val update_file_infos : string -> local_changes -> unit
+val copy_and_update : string -> local_changes -> unit
 
 val get_local_changes : unit -> local_changes
 

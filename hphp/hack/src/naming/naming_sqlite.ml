@@ -640,15 +640,7 @@ module ConstsTable = struct
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 end
 
-module Database_handle : sig
-  val get_db_path : unit -> string option
-
-  val set_db_path : string option -> unit
-
-  val is_connected : unit -> bool
-
-  val get_db : unit -> Sqlite3.db option
-end = struct
+module Database_handle = struct
   module Shared_db_settings =
     SharedMem.NoCache (SharedMem.ProfiledImmediate) (StringKey)
       (struct
@@ -659,16 +651,18 @@ end = struct
         let description = "NamingTableDatabaseSettings"
       end)
 
-  let open_db () =
+  let open_db (path : string) : Sqlite3.db =
+    let db = Sqlite3.db_open path in
+    Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
+    Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
+    db
+
+  let open_current_db () =
     match Shared_db_settings.get "database_path" with
     | None -> None
-    | Some path ->
-      let db = Sqlite3.db_open path in
-      Sqlite3.exec db "PRAGMA synchronous = OFF;" |> check_rc db;
-      Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
-      Some db
+    | Some path -> Some (open_db path)
 
-  let db = ref (lazy (open_db ()))
+  let db = ref (lazy (open_current_db ()))
 
   let get_db_path () : string option = Shared_db_settings.get "database_path"
 
@@ -680,7 +674,7 @@ end = struct
     | None -> ());
 
     (* Force this immediately so that we can get validation errors in master. *)
-    db := Lazy.from_val (open_db ())
+    db := Lazy.from_val (open_current_db ())
 
   let get_db () = Lazy.force !db
 
@@ -796,14 +790,15 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
     raise e
 
-let update_file_infos db_name local_changes =
-  Database_handle.set_db_path (Some db_name);
-  let db =
-    match Database_handle.get_db () with
-    | Some db -> db
-    | None -> failwith @@ Printf.sprintf "Could not connect to %s" db_name
-  in
-  LocalChanges.update db local_changes
+let copy_and_update (new_db_name : string) (local_changes : local_changes) :
+    unit =
+  FileUtil.cp
+    ~force:(FileUtil.Ask (fun _ -> false))
+    [Core_kernel.Option.value_exn (get_db_path ())]
+    new_db_name;
+  let new_db = Database_handle.open_db new_db_name in
+  LocalChanges.update new_db local_changes;
+  ()
 
 let get_local_changes () =
   let db =

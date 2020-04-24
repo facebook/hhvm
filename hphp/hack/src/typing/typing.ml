@@ -5105,8 +5105,11 @@ and dispatch_call
                   []
                   (mk
                      ( reason,
-                       Tclass ((fst et.tpu_name, "\\vec"), Nonexact, [pu_type])
-                     )) )
+                       Tclass
+                         ( ( fst et.tpu_name,
+                             Naming_special_names.Collections.cVec ),
+                           Nonexact,
+                           [pu_type] ) )) )
             else
               let case_ty =
                 match SMap.find_opt case et.tpu_case_values with

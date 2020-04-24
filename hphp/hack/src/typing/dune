@@ -162,6 +162,7 @@
     typing_try)
   (libraries
     logging
+    naming_special_names
     pcre
     procs_procs
     tast

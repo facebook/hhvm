@@ -476,7 +476,6 @@ let test_unsaved_symbol_change () =
 
   (* Now, I want a fresh ctx with no reverse-naming entries in it,
   and I want it to be backed by a sqlite naming database. *)
-  let (_ : Naming_table.t) = Naming_table.load_from_sqlite ctx db_name in
   Provider_backend.set_local_memory_backend_with_defaults ();
   let ctx =
     Provider_context.empty_for_tool
@@ -484,6 +483,7 @@ let test_unsaved_symbol_change () =
       ~tcopt:(Provider_context.get_tcopt ctx)
       ~backend:(Provider_backend.get ())
   in
+  let (_ : Naming_table.t) = Naming_table.load_from_sqlite ctx db_name in
 
   (* Compute tast as-is *)
   let (ctx, entry) =

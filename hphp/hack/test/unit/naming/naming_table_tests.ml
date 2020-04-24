@@ -122,6 +122,11 @@ let run_naming_table_test f =
           ~tcopt
           ~backend:(Provider_backend.get ())
       in
+      (* load_from_sqlite will call set_naming_db_path for the ctx it's given, but
+      here is a fresh ctx with a fresh backend so we have to set it again. *)
+      Db_path_provider.set_naming_db_path
+        (Provider_context.get_backend ctx)
+        (Some (Naming_sqlite.Db_path db_name));
       (try f ~ctx ~unbacked_naming_table ~backed_naming_table ~db_name
        with e ->
          Printf.eprintf

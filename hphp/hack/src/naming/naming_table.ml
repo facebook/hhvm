@@ -483,6 +483,9 @@ let load_from_sqlite_for_type_checking
   Hh_logger.log "Loading naming table from SQLite...";
   let t = Unix.gettimeofday () in
   Naming_sqlite.set_db_path (Some db_path);
+  Db_path_provider.set_naming_db_path
+    (Provider_context.get_backend ctx)
+    (Some (Naming_sqlite.Db_path db_path));
   let local_changes =
     choose_local_changes
       ~local_changes:(Naming_sqlite.get_local_changes ())

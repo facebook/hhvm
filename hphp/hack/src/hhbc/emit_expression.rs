@@ -1630,9 +1630,37 @@ fn emit_call(
         env.call_context.clone(),
         false,
     );
-    let FcallArgs(_, _, num_ret, _, _, _) = &fcall_args;
-    let num_uninit = num_ret - 1;
-    let default = scope::with_unnamed_locals(e, |e| {
+    match expr.1.as_id() {
+        None => emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args),
+        Some(ast_defs::Id(_, id)) => {
+            let fq = function::Type::from_ast_name(id);
+            let lower_fq_name = fq.to_raw_string();
+            if lower_fq_name == "assert" {
+                emit_special_function_assert(e, env, pos, expr, targs, args, uarg, fcall_args)
+            } else {
+                emit_special_function(e, env, pos, &expr.0, &id, args, uarg, lower_fq_name)
+                    .transpose()
+                    .unwrap_or_else(|| {
+                        emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)
+                    })
+            }
+        }
+    }
+}
+
+fn emit_call_default(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+    targs: &[tast::Targ],
+    args: &[tast::Expr],
+    uarg: Option<&tast::Expr>,
+    fcall_args: FcallArgs,
+) -> Result {
+    scope::with_unnamed_locals(e, |e| {
+        let FcallArgs(_, _, num_ret, _, _, _) = &fcall_args;
+        let num_uninit = num_ret - 1;
         let (lhs, fcall) = emit_call_lhs_and_fcall(e, env, expr, fcall_args, targs)?;
         let (args, inout_setters) = emit_args_inout_setters(e, env, args)?;
         let uargs = uarg.map_or(Ok(instr::empty()), |uarg| emit_expr(e, env, uarg))?;
@@ -1653,13 +1681,39 @@ fn emit_call(
             ]),
             instr::empty(),
         ))
-    })?;
-    expr.1
-        .as_id()
-        .and_then(|ast_defs::Id(_, id)| {
-            emit_special_function(e, env, pos, &expr.0, &id, args, uarg, &default).transpose()
-        })
-        .unwrap_or(Ok(default))
+    })
+}
+
+fn emit_special_function_assert(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    expr: &tast::Expr,
+    targs: &[tast::Targ],
+    args: &[tast::Expr],
+    uarg: Option<&tast::Expr>,
+    fcall_args: FcallArgs,
+) -> Result {
+    let l0 = e.label_gen_mut().next_regular();
+    let l1 = e.label_gen_mut().next_regular();
+    Ok(InstrSeq::gather(vec![
+        instr::nulluninit(),
+        instr::nulluninit(),
+        instr::nulluninit(),
+        instr::string("zend.assertions"),
+        instr::fcallfuncd(
+            FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
+            function::from_raw_string("ini_get"),
+        ),
+        instr::int(0),
+        instr::gt(),
+        instr::jmpz(l0.clone()),
+        emit_call_default(e, env, pos, expr, targs, args, uarg, fcall_args)?,
+        instr::jmp(l1.clone()),
+        instr::label(l0),
+        instr::true_(),
+        instr::label(l1),
+    ]))
 }
 
 pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast::Hint]) -> Result {
@@ -2247,12 +2301,10 @@ fn emit_special_function(
     id: &str,
     args: &[tast::Expr],
     uarg: Option<&tast::Expr>,
-    default: &InstrSeq,
+    lower_fq_name: &str,
 ) -> Result<Option<InstrSeq>> {
     use tast::{Expr as E, Expr_ as E_};
     let nargs = args.len() + uarg.map_or(0, |_| 1);
-    let fq = function::Type::from_ast_name(id);
-    let lower_fq_name = fq.to_raw_string();
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -2299,28 +2351,10 @@ fn emit_special_function(
                 instr::null(),
             ])))
         }
-        ("assert", _) => {
-            let l0 = e.label_gen_mut().next_regular();
-            let l1 = e.label_gen_mut().next_regular();
-            Ok(Some(InstrSeq::gather(vec![
-                instr::nulluninit(),
-                instr::nulluninit(),
-                instr::nulluninit(),
-                instr::string("zend.assertions"),
-                instr::fcallfuncd(
-                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
-                    function::from_raw_string("ini_get"),
-                ),
-                instr::int(0),
-                instr::gt(),
-                instr::jmpz(l0.clone()),
-                default.clone(),
-                instr::jmp(l1.clone()),
-                instr::label(l0),
-                instr::true_(),
-                instr::label(l1),
-            ])))
-        }
+        ("assert", _) => Err(unrecoverable(concat!(
+            "emit_special_function assert case:",
+            "should've been handled by emit_special_function_assert"
+        ))),
         ("HH\\sequence", &[]) => Ok(Some(instr::null())),
         ("HH\\sequence", args) => Ok(Some(InstrSeq::gather(
             args.iter()

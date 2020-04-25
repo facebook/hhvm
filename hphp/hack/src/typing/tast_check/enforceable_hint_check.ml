@@ -49,7 +49,11 @@ let validator =
         ^ tconst
         ^ " because it is not marked <<__Enforceable>>"
 
-    method! on_tgeneric acc r name = this#check_generic acc r name
+    method! on_tgeneric acc r name =
+      if acc.like_context then
+        acc
+      else
+        this#check_generic acc r name
 
     method! on_newtype acc r _ _ _ _ =
       if acc.like_context then

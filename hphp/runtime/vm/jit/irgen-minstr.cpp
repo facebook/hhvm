@@ -1482,8 +1482,13 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   }
 
   auto const base = ldMBase(env);
-  auto const op = define ? ElemDX : unset ? ElemUX : ElemX;
-  return gen(env, op, MOpModeData { mode }, base, key, tvRefPtr(env));
+  auto const data = MOpModeData { mode };
+  if (define || unset) {
+    auto const op = define ? ElemDX : ElemUX;
+    return gen(env, op, data, base, key, tvRefPtr(env));
+  }
+  auto const value = gen(env, ElemX, data, base, key, tvRefPtr(env));
+  return baseValueToLval(env, value);
 }
 
 /*

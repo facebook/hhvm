@@ -263,26 +263,27 @@ ArgGroup elemArgs(IRLS& env, const IRInstruction* inst) {
 }
 
 void implElem(IRLS& env, const IRInstruction* inst) {
-  auto const mode  = inst->extra<MOpModeData>()->mode;
-  auto const key   = inst->src(1);
-
+  auto const mode = inst->extra<MOpModeData>()->mode;
+  auto const key  = inst->src(1);
+  auto const sync = SyncOptions::Sync;
   auto const args = elemArgs(env, inst).ssa(2);
 
-  auto const target = [&] {
-    if (inst->is(ElemDX)) {
-      assertx(mode == MOpMode::Define);
-      BUILD_OPTAB(ELEMD_HELPER_TABLE,
-                  getKeyType(key),
-                  RuntimeOption::EvalArrayProvenance);
-      return target;
-    } else {
-      BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
-      return target;
-    }
-  }();
+  if (inst->is(ElemDX)) {
+    assertx(mode == MOpMode::Define);
+    BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key), RO::EvalArrayProvenance);
+    cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
+    return;
+  }
 
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+  if (inst->is(ElemUX)) {
+    assertx(mode == MOpMode::Unset);
+    BUILD_OPTAB(ELEMU_HELPER_TABLE, getKeyType(key));
+    cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
+    return;
+  }
+
+  BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
+  cgCallHelper(vmain(env), env, target, callDestTV(env, inst), sync, args);
 }
 
 }

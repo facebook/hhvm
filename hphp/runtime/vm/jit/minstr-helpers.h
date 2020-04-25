@@ -374,37 +374,21 @@ PROFILE_KEYSET_ACCESS_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, MOpMode mode>
-tv_lval elemImpl(tv_lval base, key_type<keyType> key, TypedValue& tvRef) {
-  static_assert(mode != MOpMode::Define, "");
-  if (mode == MOpMode::Unset) {
-    return ElemU<keyType>(tvRef, base, key);
-  }
-  // We won't really modify the TypedValue in the non-D case, so
-  // this lval cast is safe.
-  return Elem<mode, keyType>(tvRef, base, key).as_lval();
-}
-
 #define ELEM_HELPER_TABLE(m)                    \
   /* name      keyType         mode */          \
   m(elemC,     KeyType::Any,   MOpMode::None)   \
-  m(elemCU,    KeyType::Any,   MOpMode::Unset)  \
   m(elemCW,    KeyType::Any,   MOpMode::Warn)   \
   m(elemCIO,   KeyType::Any,   MOpMode::InOut)  \
   m(elemI,     KeyType::Int,   MOpMode::None)   \
-  m(elemIU,    KeyType::Int,   MOpMode::Unset)  \
   m(elemIW,    KeyType::Int,   MOpMode::Warn)   \
   m(elemIIO,   KeyType::Int,   MOpMode::InOut)  \
   m(elemS,     KeyType::Str,   MOpMode::None)   \
-  m(elemSU,    KeyType::Str,   MOpMode::Unset)  \
   m(elemSW,    KeyType::Str,   MOpMode::Warn)   \
   m(elemSIO,   KeyType::Str,   MOpMode::InOut)  \
 
-#define X(nm, keyType, mode)                        \
-inline tv_lval nm(tv_lval base,                     \
-                  key_type<keyType> key,            \
-                  TypedValue& tvRef) {              \
-  return elemImpl<keyType, mode>(base, key, tvRef); \
+#define X(nm, keyType, mode)                                                   \
+inline TypedValue nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
+  return Elem<mode, keyType>(tvRef, base, key).tv();                           \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -425,6 +409,19 @@ inline tv_lval nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
   return ElemD<MOpMode::Define, keyType, copyProv>(tvRef, base, key);       \
 }
 ELEMD_HELPER_TABLE(X)
+#undef X
+
+#define ELEMU_HELPER_TABLE(m) \
+  /* name      keyType */     \
+  m(elemCU,    KeyType::Any)  \
+  m(elemIU,    KeyType::Int)  \
+  m(elemSU,    KeyType::Str)  \
+
+#define X(nm, keyType)                                                      \
+inline tv_lval nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
+  return ElemU<keyType>(tvRef, base, key);                                  \
+}
+ELEMU_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

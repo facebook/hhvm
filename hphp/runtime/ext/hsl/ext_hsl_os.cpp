@@ -700,6 +700,13 @@ int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t w
   return ret;
 }
 
+void HHVM_FUNCTION(HSL_os_ftruncate, const Object& obj, int64_t length) {
+  auto fd = HSLFileDescriptor::fd(obj);
+  // ftruncate() accepts a signed value, and fails with EINVAL if negative. No
+  // need to duplicate check here.
+  throw_errno_if_minus_one(retry_on_eintr(-1, ::ftruncate, fd, length));
+}
+
 Object HHVM_FUNCTION(HSL_os_request_stdio_fd, int64_t client_fd) {
   if (RuntimeOption::ServerExecutionMode() && !is_cli_server_mode()) {
     throw_errno_exception(
@@ -930,6 +937,7 @@ struct OSExtension final : Extension {
 #undef SEEK_
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\lseek, HSL_os_lseek);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\ftruncate, HSL_os_ftruncate);
 
 #define LOCK_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\LOCK_##name, LOCK_##name)
     LOCK_(SH);

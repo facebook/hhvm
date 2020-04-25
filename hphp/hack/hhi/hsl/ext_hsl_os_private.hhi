@@ -239,4 +239,5 @@ function listen(FileDescriptor $socket, int $backlog): void;
 function accept(FileDescriptor $socket): (FileDescriptor, sockaddr);
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 function lseek(FileDescriptor $fd, int $offset, int $whence): int;
+function ftruncate(FileDescriptor $fd, int $length): void;
 function flock(FileDescriptor $fd, int $operation): void;

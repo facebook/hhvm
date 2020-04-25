@@ -304,25 +304,25 @@ void stMBase(IRGS& env, SSATmp* base) {
 }
 
 /*
- * Returns a pointer to a specific value in MInstrState.
+ * Get pointers to specific MInstrState fields. After accessing tvRef / tvRef2,
+ * we must "ratchet" these references, but that's not needed for tvTempBase.
  */
-SSATmp* misLea(IRGS& env, int32_t offset) {
-  env.irb->fs().setNeedRatchet(true);
-  return gen(env, LdMIStateAddr, cns(env, offset));
-}
-
 SSATmp* tvRefPtr(IRGS& env) {
-  return misLea(env, offsetof(MInstrState, tvRef));
+  env.irb->fs().setNeedRatchet(true);
+  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvRef)));
+}
+SSATmp* tvRef2Ptr(IRGS& env) {
+  env.irb->fs().setNeedRatchet(true);
+  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvRef2)));
+}
+SSATmp* tvTempBasePtr(IRGS& env) {
+  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvTempBase)));
 }
 
 SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
   return prop_ignores_tvref(env, base, key)
     ? cns(env, Type::cns(nullptr, TPtrToMISCell))
     : tvRefPtr(env);
-}
-
-SSATmp* tvRef2Ptr(IRGS& env) {
-  return misLea(env, offsetof(MInstrState, tvRef2));
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {
@@ -1165,6 +1165,19 @@ void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode, Location l) {
 }
 
 /*
+ * We'd like to use value-type access rather than ref-type access for "lookup"
+ * member-op sequences (that is, ones with mode Warn, None, or InOut).
+ *
+ * This helper converts value-type bases into the refs used by MInstrState.
+ * store-elim will usually end up moving these ops off of the main trace.
+ */
+SSATmp* baseValueToLval(IRGS& env, SSATmp* base) {
+  auto const temp = tvTempBasePtr(env);
+  gen(env, StMem, temp, base);
+  return gen(env, ConvPtrToLval, temp);
+}
+
+/*
  * Load and fully unpack---i.e., dereference---the member base.
  *
  * Also constrains the base value (and, if applicable, its inner value) to
@@ -1353,7 +1366,8 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         mode == MOpMode::None ||
         mode == MOpMode::InOut
       );
-      return gen(env, ElemDictX, MOpModeData { mode }, base, key);
+      auto const op = mode == MOpMode::None ? DictGetQuiet : DictGet;
+      return baseValueToLval(env, gen(env, op, base, key));
     }
   );
 }
@@ -1397,7 +1411,8 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
         mode == MOpMode::None ||
         mode == MOpMode::InOut
       );
-      return gen(env, ElemKeysetX, MOpModeData { mode }, base, key);
+      auto const op = mode == MOpMode::None ? KeysetGetQuiet : KeysetGet;
+      return baseValueToLval(env, gen(env, op, base, key));
     }
   );
 }
@@ -1448,7 +1463,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
           mode == MOpMode::None ||
           mode == MOpMode::InOut
         );
-        return gen(env, ElemArrayX, MOpModeData { mode }, base, key);
+        auto const value = gen(env, ArrayGet, MOpModeData { mode }, base, key);
+        return baseValueToLval(env, value);
       }
     );
   }
@@ -1932,10 +1948,8 @@ void emitBaseH(IRGS& env) {
   if (!curClass(env)) return interpOne(env);
 
   initTvRefs(env);
-  auto base = ldThis(env);
-  auto scratchPtr = misLea(env, offsetof(MInstrState, tvTempBase));
-  gen(env, StMem, scratchPtr, base);
-  stMBase(env, scratchPtr);
+  auto const base = ldThis(env);
+  stMBase(env, baseValueToLval(env, base));
   env.irb->fs().setMemberBase(base);
 }
 

@@ -344,6 +344,8 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_iterator_not_valid();
 [[noreturn]] void throw_collection_property_exception();
 [[noreturn]] void throw_collection_compare_exception();
+[[noreturn]] void throw_varray_compare_exception();
+[[noreturn]] void throw_darray_compare_exception();
 [[noreturn]] void throw_vec_compare_exception();
 [[noreturn]] void throw_dict_compare_exception();
 [[noreturn]] void throw_keyset_compare_exception();

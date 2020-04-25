@@ -2813,7 +2813,7 @@ void RuntimeOption::Load(
   // Hack Array Compats
 
   // Ensure that implicit varray append and varray promotion flags cannot be
-  // set if HackArrCompatNotices is not set. Enabling SPecialization disables
+  // set if HackArrCompatNotices is not set. Enabling Specialization disables
   // these two flags, because it turns these cases into errors.
   RuntimeOption::EvalHackArrCompatCheckVarrayPromote =
     !RuntimeOption::EvalHackArrCompatSpecialization &&
@@ -2823,6 +2823,12 @@ void RuntimeOption::Load(
     !RuntimeOption::EvalHackArrCompatSpecialization &&
     RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
     RuntimeOption::EvalHackArrCompatNotices;
+
+  // By the same token, enabling Specialization disables notices for comparing
+  // darrays and varrays, since these comparisons now have default behaviors.
+  RuntimeOption::EvalHackArrCompatDVCmpNotices =
+    !RuntimeOption::EvalHackArrCompatSpecialization &&
+    RuntimeOption::EvalHackArrCompatDVCmpNotices;
 
   if (!RuntimeOption::EvalEmitClsMethPointers) {
     RuntimeOption::EvalIsCompatibleClsMethType = false;

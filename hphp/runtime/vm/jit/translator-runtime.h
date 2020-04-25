@@ -203,16 +203,14 @@ ArrayData* recordReifiedGenericsAndGetTSList(ArrayData*);
 [[noreturn]] void invalidArrayKeyHelper(const ArrayData* ad, TypedValue key);
 
 namespace MInstrHelpers {
-void setNewElem(tv_lval base, TypedValue val, const MInstrPropState*);
+void setNewElem(tv_lval base, TypedValue val);
 void setNewElemArray(tv_lval base, TypedValue val);
 void setNewElemVec(tv_lval base, TypedValue val);
-TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op,
-                     const MInstrPropState*);
+TypedValue setOpElem(tv_lval base, TypedValue key, TypedValue val, SetOpOp op);
 StringData* stringGetI(StringData*, uint64_t);
 uint64_t pairIsset(c_Pair*, int64_t);
 uint64_t vectorIsset(c_Vector*, int64_t);
-TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op,
-                      const MInstrPropState*);
+TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op);
 tv_lval elemVecID(tv_lval base, int64_t key);
 tv_lval elemVecIU(tv_lval base, int64_t key);
 }

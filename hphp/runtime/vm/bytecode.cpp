@@ -2918,7 +2918,6 @@ static inline MInstrState& initMState() {
   auto& mstate = vmMInstrState();
   tvWriteUninit(mstate.tvRef);
   tvWriteUninit(mstate.tvRef2);
-  mstate.propState = MInstrPropState{};
   return mstate;
 }
 
@@ -2975,11 +2974,6 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx, uint32_t clsIdx, MOpMode mode) {
       throw_cannot_modify_static_const_prop(class_->name()->data(),
         name->data());
   }
-
-  if (RuntimeOption::EvalCheckPropTypeHints > 0 && mode == MOpMode::Define) {
-    vmMInstrState().propState = MInstrPropState{class_, lookup.slot, true};
-  }
-
   mstate.base = tv_lval(lookup.val);
 }
 
@@ -3009,23 +3003,20 @@ OPTBLD_INLINE void iopBaseH() {
 
 static OPTBLD_INLINE void propDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
-  auto pState = &mstate.propState;
   auto ctx = arGetContextClass(vmfp());
 
   auto const result = [&]{
     switch (mode) {
       case MOpMode::None:
-        return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key, pState);
+        return Prop<MOpMode::None>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::Warn:
-        return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key, pState);
+        return Prop<MOpMode::Warn>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::Define:
         return Prop<MOpMode::Define,KeyType::Any>(
-          mstate.tvRef, ctx, mstate.base, key, pState
+          mstate.tvRef, ctx, mstate.base, key
         );
       case MOpMode::Unset:
-        return Prop<MOpMode::Unset>(
-          mstate.tvRef, ctx, mstate.base, key, pState
-        );
+        return Prop<MOpMode::Unset>(mstate.tvRef, ctx, mstate.base, key);
       case MOpMode::InOut:
         always_assert_flog(false, "MOpMode::InOut can only occur on Elem");
     }
@@ -3062,11 +3053,11 @@ void elemDispatch(MOpMode mode, TypedValue key) {
       case MOpMode::Define:
         if (RuntimeOption::EvalArrayProvenance) {
           return ElemD<MOpMode::Define, KeyType::Any, true>(
-            mstate.tvRef, b, key, &mstate.propState
+            mstate.tvRef, b, key
           );
         } else {
           return ElemD<MOpMode::Define, KeyType::Any, false>(
-            mstate.tvRef, b, key, &mstate.propState
+            mstate.tvRef, b, key
           );
         }
       case MOpMode::Unset:
@@ -3075,7 +3066,6 @@ void elemDispatch(MOpMode mode, TypedValue key) {
     always_assert(false);
   }().as_lval();
 
-  if (mode == MOpMode::Define) mstate.propState = MInstrPropState{};
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
@@ -3114,10 +3104,7 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
 
     auto& mstate = vmMInstrState();
     auto const base = mstate.base;
-    auto const result = [&] {
-      return NewElem(mstate.tvRef, base, &mstate.propState);
-    }();
-    if (mode == MOpMode::Define) mstate.propState = MInstrPropState{};
+    auto const result = NewElem(mstate.tvRef, base);
     mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
   }
 }
@@ -3178,16 +3165,16 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
 
   if (mk.mcode == MW) {
     if (RuntimeOption::EvalArrayProvenance) {
-      SetNewElem<true, true>(mstate.base, topC, &mstate.propState);
+      SetNewElem<true, true>(mstate.base, topC);
     } else {
-      SetNewElem<true, false>(mstate.base, topC, &mstate.propState);
+      SetNewElem<true, false>(mstate.base, topC);
     }
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
       auto const result = RuntimeOption::EvalArrayProvenance
-        ? SetElem<true, true>(mstate.base, key, topC, &mstate.propState)
-        : SetElem<true, false>(mstate.base, key, topC, &mstate.propState);
+        ? SetElem<true, true>(mstate.base, key, topC)
+        : SetElem<true, false>(mstate.base, key, topC);
 
       if (result) {
         tvDecRefGen(topC);
@@ -3230,11 +3217,9 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   if (mcodeIsProp(mk.mcode)) {
     result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = IncDecElem(
-      subop, mstate.base, key, &mstate.propState
-    );
+    result = IncDecElem(subop, mstate.base, key);
   } else {
-    result = IncDecNewElem(mstate.tvRef, subop, mstate.base, &mstate.propState);
+    result = IncDecNewElem(mstate.tvRef, subop, mstate.base);
   }
 
   mFinal(mstate, nDiscard, result);
@@ -3250,12 +3235,9 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
     result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()),
                        subop, mstate.base, key, rhs);
   } else if (mcodeIsElem(mk.mcode)) {
-    result = SetOpElem(
-      mstate.tvRef, subop, mstate.base, key, rhs, &mstate.propState
-    );
+    result = SetOpElem(mstate.tvRef, subop, mstate.base, key, rhs);
   } else {
-    result =
-      SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs, &mstate.propState);
+    result = SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs);
   }
 
   vmStack().popC();

@@ -241,7 +241,6 @@ bool canDCE(IRInstruction* inst) {
   case LdWHResult:
   case LdWHNotDone:
   case LdAFWHActRec:
-  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case StringIsset:
   case ColIsEmpty:
@@ -720,7 +719,6 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParamInOutMismatch:
   case ThrowParamInOutMismatchRange:
   case StMBase:
-  case StMIPropState:
   case FinishMemberOp:
   case InlineReturnNoFrame:
   case BeginInlining:

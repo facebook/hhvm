@@ -70,8 +70,7 @@ namespace detail {
   T(unsigned long long, TInt)    \
   T(unsigned int, U(Int, RDSHandle)) \
   T(tv_lval, TLvalToCell)        \
-  T(tv_rval, TLvalToCell)        \
-  T(MInstrPropState*, U(MIPropSPtr, Nullptr))
+  T(tv_rval, TLvalToCell)
 
 /*
  * jit_cpp_type<> handles all types that are the same for parameters and return

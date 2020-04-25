@@ -1404,7 +1404,7 @@ bool ObjectData::invokeNativeUnsetProp(const StringData* key) {
 template<ObjectData::PropMode mode>
 ALWAYS_INLINE
 tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
-                             const StringData* key, MInstrPropState* pState) {
+                             const StringData* key) {
   auto constexpr write = (mode == PropMode::DimForWrite);
   auto constexpr read = (mode == PropMode::ReadNoWarn) ||
                         (mode == PropMode::ReadWarn);
@@ -1419,9 +1419,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
             throwMutateConstProp(lookup.slot);
           }
         }
-        if (write && pState) {
-          *pState = MInstrPropState{m_cls, lookup.slot, false};
-        }
         return prop;
       };
 
@@ -1432,7 +1429,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       if (m_cls->rtAttribute(Class::UseGet)) {
         if (auto r = invokeGet(key)) {
           tvCopy(r.val, *tvRef);
-          if (write && pState) *pState = MInstrPropState{};
           return tvRef;
         }
       }
@@ -1446,7 +1442,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
     if (m_cls->rtAttribute(Class::UseGet)) {
       if (auto r = invokeGet(key)) {
         tvCopy(r.val, *tvRef);
-        if (write && pState) *pState = MInstrPropState{};
         return tvRef;
       }
     }
@@ -1469,7 +1464,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
       tvCopy(r.val, *tvRef);
-      if (write && pState) *pState = MInstrPropState{};
       return tvRef;
     }
   }
@@ -1478,7 +1472,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   if (m_cls->rtAttribute(Class::UseGet)) {
     if (auto r = invokeGet(key)) {
       tvCopy(r.val, *tvRef);
-      if (write && pState) *pState = MInstrPropState{};
       return tvRef;
     }
   }
@@ -1488,10 +1481,7 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   }
 
   if (mode == PropMode::ReadWarn) raiseUndefProp(key);
-  if (write) {
-    if (pState) *pState = MInstrPropState{};
-    return makeDynProp(key);
-  }
+  if (write) return makeDynProp(key);
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
@@ -1500,7 +1490,7 @@ tv_lval ObjectData::prop(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key, nullptr);
+  return propImpl<PropMode::ReadNoWarn>(tvRef, ctx, key);
 }
 
 tv_lval ObjectData::propW(
@@ -1508,7 +1498,7 @@ tv_lval ObjectData::propW(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<PropMode::ReadWarn>(tvRef, ctx, key, nullptr);
+  return propImpl<PropMode::ReadWarn>(tvRef, ctx, key);
 }
 
 tv_lval ObjectData::propU(
@@ -1516,16 +1506,15 @@ tv_lval ObjectData::propU(
   const Class* ctx,
   const StringData* key
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, nullptr);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key);
 }
 
 tv_lval ObjectData::propD(
   TypedValue* tvRef,
   const Class* ctx,
-  const StringData* key,
-  MInstrPropState* pState
+  const StringData* key
 ) {
-  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key, pState);
+  return propImpl<PropMode::DimForWrite>(tvRef, ctx, key);
 }
 
 bool ObjectData::propIsset(const Class* ctx, const StringData* key) {

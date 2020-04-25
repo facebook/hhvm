@@ -828,7 +828,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdMBase:
   case LdMem:
   case LdMethCallerName:
-  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdPtrIterKey:
   case LdPtrIterVal:
@@ -974,7 +973,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StLocRange:
   case StMBase:
   case StMem:
-  case StMIPropState:
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:

@@ -926,9 +926,9 @@ void setNewElemArray(tv_lval base, TypedValue val) {
 }
 
 TypedValue setOpElem(tv_lval base, TypedValue key,
-                     TypedValue val, SetOpOp op, const MInstrPropState* pState) {
+                     TypedValue val, SetOpOp op) {
   TypedValue localTvRef;
-  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val, pState);
+  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val);
   return cGetRefShuffle(localTvRef, result);
 }
 
@@ -951,9 +951,8 @@ uint64_t vectorIsset(c_Vector* vec, int64_t index) {
   return result ? !tvIsNull(*result) : false;
 }
 
-TypedValue incDecElem(tv_lval base, TypedValue key,
-                      IncDecOp op, const MInstrPropState* pState) {
-  auto const result = HPHP::IncDecElem(op, base, key, pState);
+TypedValue incDecElem(tv_lval base, TypedValue key, IncDecOp op) {
+  auto const result = HPHP::IncDecElem(op, base, key);
   return result;
 }
 

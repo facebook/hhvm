@@ -345,18 +345,6 @@ bool baseMightPromote(const SSATmp* base) {
     ty.maybe(Type::cns(staticEmptyString()));
 }
 
-SSATmp* propStatePtrDimProp(IRGS& env) {
-  return (RuntimeOption::EvalCheckPropTypeHints <= 0)
-    ? cns(env, TNullptr)
-    : gen(env, LdMIPropStateAddr);
-}
-
-SSATmp* propStatePtrElem(IRGS& env, const SSATmp* base) {
-  return RuntimeOption::EvalCheckPropTypeHints > 0 && baseMightPromote(base)
-    ? gen(env, LdMIPropStateAddr)
-    : cns(env, TNullptr);
-}
-
 bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
   if (!propInfo.knownType.maybe(TUninit)) return false;
   auto const cls = propInfo.objClass;
@@ -1160,37 +1148,11 @@ SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
   );
 }
 
-void setEmptyMIPropState(IRGS& env, const SSATmp* newBase, MOpMode mode) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (mode != MOpMode::Define) return;
-  if (!baseMightPromote(newBase)) return;
-  gen(env, StMIPropState, cns(env, TNullptr), cns(env, 0), cns(env, false));
-}
-
-void setObjMIPropState(IRGS& env, const SSATmp* newBase, MOpMode mode,
-                       SSATmp* obj, Slot slot) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (mode != MOpMode::Define) return;
-  if (!baseMightPromote(newBase)) return;
-  auto const cls = gen(env, LdObjClass, obj);
-  gen(env, StMIPropState, cls, cns(env, slot), cns(env, false));
-}
-
-void setClsMIPropState(IRGS& env, const SSATmp* newBase, MOpMode mode,
-                       SSATmp* cls, SSATmp* name) {
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (mode != MOpMode::Define) return;
-  if (!baseMightPromote(newBase)) return;
-  auto const slot = gen(env, LookupSPropSlot, cls, name);
-  gen(env, StMIPropState, cls, slot, cns(env, true));
-}
-
 void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
   auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
   auto gblPtr = gen(env, BaseG, MOpModeData{base_mode}, name);
   stMBase(env, gblPtr);
-  setEmptyMIPropState(env, gblPtr, mode);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1200,8 +1162,6 @@ void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
  */
 void simpleBaseImpl(IRGS& env, SSATmp* base, MOpMode mode, Location l) {
   env.irb->fs().setMemberBase(base);
-
-  setEmptyMIPropState(env, base, mode);
 }
 
 /*
@@ -1256,14 +1216,10 @@ SSATmp* propGenericImpl(IRGS& env, MOpMode mode, SSATmp* base, SSATmp* key,
     return ptrToInitNull(env);
   }
 
-  auto const modeData = MOpModeData{mode};
-
   auto const tvRef = propTvRefPtr(env, base, key);
-  return nullsafe
-    ? gen(env, PropQ, base, key, tvRef)
-    : define
-      ? gen(env, PropDX, modeData, base, key, tvRef, propStatePtrDimProp(env))
-      : gen(env, PropX, modeData, base, key, tvRef);
+  if (nullsafe) return gen(env, PropQ, base, key, tvRef);
+  auto const op = define ? PropDX : PropX;
+  return gen(env, op, MOpModeData { mode }, base, key, tvRef);
 }
 
 SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
@@ -1295,10 +1251,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
     mode,
     *propInfo
   );
-  if (mode == MOpMode::Define) {
-    assertx(obj != nullptr);
-    setObjMIPropState(env, propPtr, mode, obj, propInfo->slot);
-  }
+  assertx(IMPLIES(mode == MOpMode::Define, obj != nullptr));
   return propPtr;
 }
 
@@ -1513,18 +1466,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   }
 
   auto const base = ldMBase(env);
-  if (define) {
-    return gen(
-      env,
-      ElemDX,
-      MOpModeData { mode },
-      base,
-      key,
-      tvRefPtr(env),
-      propStatePtrElem(env, base)
-    );
-  }
-  auto const op = unset ? ElemUX : ElemX;
+  auto const op = define ? ElemDX : unset ? ElemUX : ElemX;
   return gen(env, op, MOpModeData { mode }, base, key, tvRefPtr(env));
 }
 
@@ -1820,14 +1762,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
       gen(env, SetNewElemKeyset, makeCatchSet(env, nDiscard), basePtr, value);
     }
   } else {
-    gen(
-      env,
-      SetNewElem,
-      makeCatchSet(env, nDiscard),
-      basePtr,
-      value,
-      propStatePtrElem(env, basePtr)
-    );
+    gen(env, SetNewElem, makeCatchSet(env, nDiscard), basePtr, value);
   }
   return value;
 }
@@ -1874,8 +1809,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       // mismatched in-states for any catch block edges we emit later on.
       auto const basePtr = ldMBase(env);
       auto const result = gen(env, SetElem, makeCatchSet(env, nDiscard),
-                              basePtr, key, value,
-                              propStatePtrElem(env, basePtr));
+                              basePtr, key, value);
       auto const t = result->type();
       if (!baseType.maybe(TStr) || t == TNullptr) {
         // Base is not a string. Result is always value.
@@ -1961,7 +1895,6 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
     env, cls, name, true, false, disallowConst
   ).propPtr;
   stMBase(env, spropPtr);
-  setClsMIPropState(env, spropPtr, mode, cls, name);
 }
 
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
@@ -2004,8 +1937,6 @@ void emitBaseH(IRGS& env) {
   gen(env, StMem, scratchPtr, base);
   stMBase(env, scratchPtr);
   env.irb->fs().setMemberBase(base);
-  // Never write to MInstrPropState here since a base from BaseH will never
-  // promote
 }
 
 void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
@@ -2013,21 +1944,14 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
   // ends up calling misLea(), this will be set to true.
   env.irb->fs().setNeedRatchet(false);
 
-  auto key = memberKey(env, mk);
-  auto newBase = [&] {
-    if (mcodeIsProp(mk.mcode)) {
-      return propImpl(env, mode, key, mk.mcode == MQT);
-    }
-    if (mcodeIsElem(mk.mcode)) {
-      auto const base = elemImpl(env, mode, key);
-      setEmptyMIPropState(env, base, mode);
-      return base;
-    }
+  auto const key = memberKey(env, mk);
+  auto const base = [&] {
+    if (mcodeIsProp(mk.mcode)) return propImpl(env, mode, key, mk.mcode == MQT);
+    if (mcodeIsElem(mk.mcode)) return elemImpl(env, mode, key);
     PUNT(DimNewElem);
   }();
 
-  newBase = ratchetRefs(env, newBase);
-  stMBase(env, newBase);
+  stMBase(env, ratchetRefs(env, base));
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {
@@ -2136,14 +2060,7 @@ void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
     }
     if (mcodeIsElem(mk.mcode)) {
       auto const base = ldMBase(env);
-      return gen(
-        env,
-        IncDecElem,
-        IncDecData{incDec},
-        base,
-        key,
-        propStatePtrElem(env, base)
-      );
+      return gen(env, IncDecElem, IncDecData{incDec}, base, key);
     }
     PUNT(IncDecNewElem);
   }();
@@ -2305,15 +2222,7 @@ void emitSetOpM(IRGS& env, uint32_t nDiscard, SetOpOp op, MemberKey mk) {
     }
     if (mcodeIsElem(mk.mcode)) {
       auto const base = ldMBase(env);
-      return gen(
-        env,
-        SetOpElem,
-        SetOpData{op},
-        base,
-        key,
-        rhs,
-        propStatePtrElem(env, base)
-      );
+      return gen(env, SetOpElem, SetOpData{op}, base, key, rhs);
     }
     PUNT(SetOpNewElem);
   }();

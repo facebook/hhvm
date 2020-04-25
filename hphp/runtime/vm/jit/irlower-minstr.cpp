@@ -84,9 +84,7 @@ void implProp(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   auto const keyType = getKeyTypeNoInt(key);
 
-  auto args = propArgs(env, inst)
-    .memberKeyS(1)
-    .ssa(2);
+  auto const args = propArgs(env, inst).memberKeyS(1).ssa(2);
 
   auto const target = [&] {
     if (inst->is(PropDX)) {
@@ -94,7 +92,6 @@ void implProp(IRLS& env, const IRInstruction* inst) {
                    PROPD_OBJ_HELPER_TABLE,
                    PROPD_HELPER_TABLE,
                    keyType);
-      args.ssa(3);
       return target;
     } else {
       BUILD_OPTAB2(base->isA(TObj),
@@ -269,7 +266,7 @@ void implElem(IRLS& env, const IRInstruction* inst) {
   auto const mode  = inst->extra<MOpModeData>()->mode;
   auto const key   = inst->src(1);
 
-  auto args = elemArgs(env, inst).ssa(2);
+  auto const args = elemArgs(env, inst).ssa(2);
 
   auto const target = [&] {
     if (inst->is(ElemDX)) {
@@ -277,7 +274,6 @@ void implElem(IRLS& env, const IRInstruction* inst) {
       BUILD_OPTAB(ELEMD_HELPER_TABLE,
                   getKeyType(key),
                   RuntimeOption::EvalArrayProvenance);
-      args.ssa(3);
       return target;
     } else {
       BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
@@ -315,7 +311,7 @@ void cgSetElem(IRLS& env, const IRInstruction* inst) {
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, elemArgs(env, inst).typedValue(2).ssa(3));
+               SyncOptions::Sync, elemArgs(env, inst).typedValue(2));
 }
 
 void cgSetRange(IRLS& env, const IRInstruction* inst) {
@@ -338,10 +334,7 @@ void cgSetNewElem(IRLS& env, const IRInstruction* inst) {
     ? CallSpec::direct(MInstrHelpers::setNewElem<true>)
     : CallSpec::direct(MInstrHelpers::setNewElem<false>);
 
-  auto args = argGroup(env, inst)
-    .ssa(0)
-    .typedValue(1)
-    .ssa(2);
+  auto const args = argGroup(env, inst).ssa(0).typedValue(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -356,8 +349,7 @@ void cgSetOpElem(IRLS& env, const IRInstruction* inst) {
     .ssa(0)
     .typedValue(1)
     .typedValue(2)
-    .imm(uint32_t(inst->extra<SetOpElem>()->op))
-    .ssa(3);
+    .imm(uint32_t(inst->extra<SetOpElem>()->op));
 
   cgCallHelper(v, env, target, callDestTV(env, inst),
                SyncOptions::Sync, args);
@@ -371,8 +363,7 @@ void cgIncDecElem(IRLS& env, const IRInstruction* inst) {
   auto const args = argGroup(env, inst)
     .ssa(0)
     .typedValue(1)
-    .imm(uint32_t(inst->extra<IncDecElem>()->op))
-    .ssa(2);
+    .imm(uint32_t(inst->extra<IncDecElem>()->op));
 
   cgCallHelper(v, env, target, callDestTV(env, inst),
                SyncOptions::Sync, args);

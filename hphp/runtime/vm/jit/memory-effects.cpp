@@ -172,18 +172,8 @@ AliasClass pointee(
       // src. Otherwise they can only return pointers to properties or
       // &immutable_null_base.
       if (sinst->is(PropX, PropDX, PropQ)) {
-        auto const src = [&]{
-          if (sinst->is(PropDX)) {
-            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISCell));
-            assertx(
-              sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
-            );
-            return sinst->src(sinst->numSrcs() - 2);
-          } else {
-            assertx(sinst->srcs().back()->isA(TPtrToMISCell));
-            return sinst->srcs().back();
-          }
-        }();
+        assertx(sinst->srcs().back()->isA(TMemToMISCell));
+        auto const src = sinst->srcs().back();
         return APropAny | pointee(src, visited_labels);
       }
 
@@ -191,18 +181,8 @@ AliasClass pointee(
       // return pointers to collection elements but those don't exist in
       // AliasClass yet.
       if (sinst->is(ElemX, ElemDX, ElemUX)) {
-        auto const src = [&]{
-          if (sinst->is(ElemDX)) {
-            assertx(sinst->src(sinst->numSrcs() - 2)->isA(TMemToMISCell));
-            assertx(
-              sinst->src(sinst->numSrcs() - 1)->isA(TMIPropSPtr | TNullptr)
-            );
-            return sinst->src(sinst->numSrcs() - 2);
-          } else {
-            assertx(sinst->srcs().back()->isA(TPtrToMISCell));
-            return sinst->srcs().back();
-          }
-        }();
+        assertx(sinst->srcs().back()->isA(TMemToMISCell));
+        auto const src = sinst->srcs().back();
         return AElemAny | pointee(src, visited_labels);
       }
 
@@ -526,9 +506,8 @@ MemEffects minstr_with_tvref(const IRInstruction& inst) {
 
   auto const srcs = inst.srcs();
   if (inst.is(ElemDX, PropDX)) {
-    assertx(inst.src(inst.numSrcs() - 2)->isA(TMemToMISCell));
-    assertx(inst.src(inst.numSrcs() - 1)->isA(TMIPropSPtr | TNullptr));
-    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 2));
+    assertx(inst.srcs().back()->isA(TMemToMISCell));
+    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 1));
 
     auto const propPtr = inst.src(inst.numSrcs() - 1);
     if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propPtr->isA(TNullptr)) {
@@ -1124,9 +1103,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMBase:
     return PureStore { AMIStateBase, inst.src(0), nullptr };
 
-  case StMIPropState:
-    return PureStore { AMIStatePropS, nullptr, nullptr };
-
   case FinishMemberOp:
     return may_load_store_kill(AEmpty, AEmpty, AMIStateAny);
 
@@ -1712,7 +1688,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ConvDblToBool:
   case ConvDblToInt:
   case DblAsBits:
-  case LdMIPropStateAddr:
   case LdMIStateAddr:
   case LdClsCns:
   case LdSubClsCns:

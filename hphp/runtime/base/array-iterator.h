@@ -256,8 +256,8 @@ private:
 
 // Overload for the case where we already know we have an array
 template <typename ArrFn, bool IncRef = true>
-bool IterateV(const ArrayData* adata, ArrFn arrFn) {
-  if (adata->empty()) return true;
+void IterateV(const ArrayData* adata, ArrFn arrFn) {
+  if (adata->empty()) return;
   if (adata->hasVanillaPackedLayout()) {
     PackedArray::IterateV<ArrFn, IncRef>(adata, arrFn);
   } else if (adata->hasVanillaMixedLayout()) {
@@ -271,12 +271,11 @@ bool IterateV(const ArrayData* adata, ArrFn arrFn) {
       }
     }
   }
-  return true;
 }
 
 template <typename ArrFn>
-ALWAYS_INLINE bool IterateVNoInc(const ArrayData* adata, ArrFn arrFn) {
-  return IterateV<ArrFn, false>(adata, std::move(arrFn));
+ALWAYS_INLINE void IterateVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  IterateV<ArrFn, false>(adata, std::move(arrFn));
 }
 
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
@@ -293,7 +292,8 @@ bool IterateV(const TypedValue& it,
    do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
-    return IterateV<ArrFn, false>(adata, arrFn);
+    IterateV<ArrFn, false>(adata, arrFn);
+    return true;
   }
   if (isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();
@@ -341,8 +341,8 @@ bool IterateV(const TypedValue& it, ArrFn arrFn) {
 
 // Overload for the case where we already know we have an array
 template <typename ArrFn, bool IncRef = true>
-bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
-  if (adata->empty()) return true;
+void IterateKV(const ArrayData* adata, ArrFn arrFn) {
+  if (adata->empty()) return;
   if (adata->hasVanillaMixedLayout()) {
     MixedArray::IterateKV<ArrFn, IncRef>(MixedArray::asMixed(adata), arrFn);
   } else if (adata->hasVanillaPackedLayout()) {
@@ -357,12 +357,11 @@ bool IterateKV(const ArrayData* adata, ArrFn arrFn) {
       }
     }
   }
-  return true;
 }
 
 template <typename ArrFn>
-ALWAYS_INLINE bool IterateKVNoInc(const ArrayData* adata, ArrFn arrFn) {
-  return IterateKV<ArrFn, false>(adata, std::move(arrFn));
+ALWAYS_INLINE void IterateKVNoInc(const ArrayData* adata, ArrFn arrFn) {
+  IterateKV<ArrFn, false>(adata, std::move(arrFn));
 }
 
 template <typename PreArrFn, typename ArrFn, typename PreCollFn, typename ObjFn>
@@ -379,7 +378,8 @@ bool IterateKV(const TypedValue& it,
    do_array_no_incref:
     SCOPE_EXIT { decRefArr(adata); };
     if (ArrayData::call_helper(preArrFn, adata)) return true;
-    return IterateKV<ArrFn, false>(adata, arrFn);
+    IterateKV<ArrFn, false>(adata, arrFn);
+    return true;
   }
   if (isClsMethType(it.m_type)) {
     raiseClsMethToVecWarningHelper();

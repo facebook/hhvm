@@ -57,6 +57,7 @@ type t = {
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
   option_rust_top_level_elaborator: bool;
+  option_rust_emitter: bool;
   option_enable_first_class_function_pointers: bool;
   option_widen_is_array: bool;
   option_disable_partial: bool;
@@ -113,6 +114,7 @@ let default =
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
     option_rust_top_level_elaborator = true;
+    option_rust_emitter = false;
     option_enable_first_class_function_pointers = false;
     option_widen_is_array = false;
     option_disable_partial = false;
@@ -214,6 +216,8 @@ let check_int_overflow o = o.option_check_int_overflow
 
 let rust_top_level_elaborator o = o.option_rust_top_level_elaborator
 
+let rust_emitter o = o.option_rust_emitter
+
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
 
@@ -310,6 +314,7 @@ let to_string o =
       Printf.sprintf "rust_top_level_elaborator: %B"
       @@ rust_top_level_elaborator o;
       Printf.sprintf "disable_array: %B" @@ disable_array o;
+      Printf.sprintf "rust_emitter: %B" @@ rust_emitter o;
     ]
 
 let as_bool s =
@@ -407,6 +412,8 @@ let set_option options name value =
     { options with option_check_int_overflow = int_of_string value > 0 }
   | "hhvm.hack.lang.rust_top_level_elaborator" ->
     { options with option_rust_top_level_elaborator = as_bool value }
+  | "hhvm.hack.lang.rust_emitter" ->
+    { options with option_rust_emitter = as_bool value }
   | "hhvm.hack.lang.enable_first_class_function_pointers" ->
     {
       options with

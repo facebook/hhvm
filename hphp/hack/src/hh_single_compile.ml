@@ -311,7 +311,7 @@ let do_compile
   if compiler_options.debug_time then print_debug_time_info filename debug_time;
   if compiler_options.log_stats then
     log_success compiler_options filename debug_time;
-  Compile.(ret.bytecode_segments, Some ret.hhbc_options)
+  Compile.(ret.bytecode_segments, ret.hhbc_options)
 
 let extract_facts ~compiler_options ~config_jsons ~filename text =
   let co =
@@ -335,7 +335,7 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
           ~text
         |> Option.value ~default:"");
     ],
-    Some co )
+    co )
 
 let parse_hh_file ~config_jsons ~compiler_options filename body =
   let co =
@@ -364,7 +364,7 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
     in
     let syntax_tree = SyntaxTree.make ~env source_text in
     let json = SyntaxTree.to_json syntax_tree in
-    ([Hh_json.json_to_string json], Some co))
+    ([Hh_json.json_to_string json], co))
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -470,13 +470,7 @@ let decl_and_run_mode compiler_options =
             ]
           in
           let log_extern_compiler_perf =
-            (match hhbc_options with
-            | Some opts -> opts
-            | None ->
-              Hhbc_options.apply_config_overrides_statelessly
-                compiler_options.config_list
-                (get_config_jsons ()))
-            |> Hhbc_options.log_extern_compiler_perf
+            Hhbc_options.log_extern_compiler_perf hhbc_options
           in
           let msg =
             if log_extern_compiler_perf then

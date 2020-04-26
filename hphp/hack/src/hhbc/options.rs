@@ -250,6 +250,7 @@ prefixed_flags!(
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY,
     RUST_TOP_LEVEL_ELABORATOR,
+    RUST_EMITTER,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
@@ -671,6 +672,9 @@ mod tests {
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
+  "hhvm.hack.lang.rust_emitter": {
+    "global_value": false
+  },
   "hhvm.hack.lang.rust_top_level_elaborator": {
     "global_value": true
   },
@@ -1028,5 +1032,6 @@ bitflags! {
         const DISABLE_ARRAY = 1 << 50;
         const RUST_TOP_LEVEL_ELABORATOR = 1 << 51;
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 52;
+        const RUST_EMITTER = 1 << 53;
     }
 }

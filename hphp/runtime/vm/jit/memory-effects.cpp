@@ -160,8 +160,6 @@ AliasClass pointee(
     // The result of ElemArray{,W,U} is either the address of an array element,
     // or &immutable_null_base.
     if (type <= TMemToMembCell) {
-      if (sinst->is(ElemArrayX, ElemDictX, ElemKeysetX)) return elem();
-
       // Takes a PtrToCell as its first operand, so we can't easily grab an
       // array base.
       if (sinst->is(ElemArrayU, ElemVecU, ElemDictU, ElemKeysetU)) {
@@ -1986,9 +1984,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case KeysetGet:
   case VecSet:
   case DictSet:
-  case ElemArrayX:
-  case ElemDictX:
-  case ElemKeysetX:
   case LdClsCtor:
   case ConcatStrStr:
   case PrintStr:

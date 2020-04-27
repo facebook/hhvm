@@ -559,15 +559,6 @@ void implArraySet(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemArrayX(IRLS& env, const IRInstruction* inst) {
-  auto const mode = inst->extra<ElemArrayX>()->mode;
-  BUILD_OPTAB(ELEM_ARRAY_HELPER_TABLE, getKeyType(inst->src(1)), mode);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst),
-               SyncOptions::Sync, argGroup(env, inst).ssa(0).ssa(1));
-}
-
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, getKeyType(inst->src(1)));
 
@@ -1063,17 +1054,6 @@ void implDictSet(IRLS& env, const IRInstruction* inst) {
 
 }
 
-void cgElemDictX(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const mode = inst->extra<ElemDictX>()->mode;
-  BUILD_OPTAB(ELEM_DICT_HELPER_TABLE, getKeyType(key), mode);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 void cgElemDictD(IRLS& env, const IRInstruction* inst) {
   auto const key     = inst->src(1);
   BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE,
@@ -1175,17 +1155,6 @@ void implKeysetGet(IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
 }
 
-}
-
-void cgElemKeysetX(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const mode = inst->extra<ElemKeysetX>()->mode;
-  BUILD_OPTAB(ELEM_KEYSET_HELPER_TABLE, getKeyType(key), mode);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
-
-  auto& v = vmain(env);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {

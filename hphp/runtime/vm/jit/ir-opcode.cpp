@@ -373,13 +373,10 @@ bool opcodeMayRaise(Opcode opc) {
   case DictSet:
   case ElemArrayD:
   case ElemArrayU:
-  case ElemArrayX:
   case ElemDictD:
   case ElemDictU:
-  case ElemDictX:
   case ElemDX:
   case ElemKeysetU:
-  case ElemKeysetX:
   case ElemUX:
   case ElemVecD:
   case ElemVecU:

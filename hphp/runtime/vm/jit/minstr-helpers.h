@@ -452,22 +452,6 @@ inline tv_lval nm(tv_lval base, key_type<keyType> key) {   \
 ELEM_ARRAY_U_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_ARRAY_HELPER_TABLE(m)                    \
-  /* name             keyType       mode */           \
-  m(elemArrayS,       KeyType::Str, MOpMode::None)    \
-  m(elemArrayI,       KeyType::Int, MOpMode::None)    \
-  m(elemArraySW,      KeyType::Str, MOpMode::Warn)    \
-  m(elemArrayIW,      KeyType::Int, MOpMode::Warn)    \
-  m(elemArraySW_IO,   KeyType::Str, MOpMode::InOut)   \
-  m(elemArrayIW_IO,   KeyType::Int, MOpMode::InOut)   \
-
-#define X(nm, keyType, mode)                              \
-inline tv_rval nm(ArrayData* ad, key_type<keyType> key) { \
-  return ElemArray<mode, keyType>(ad, key);               \
-}
-ELEM_ARRAY_HELPER_TABLE(X)
-#undef X
-
 //////////////////////////////////////////////////////////////////////
 
 // Keep these error handlers in sync with ArrayData::getNotFound();
@@ -550,22 +534,6 @@ inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
 ELEM_DICT_U_HELPER_TABLE(X)
 #undef X
 
-#define ELEM_DICT_HELPER_TABLE(m)                      \
-  /* name               keyType        mode */         \
-  m(elemDictS,     KeyType::Str,       MOpMode::None)  \
-  m(elemDictI,     KeyType::Int,       MOpMode::None)  \
-  m(elemDictSW,    KeyType::Str,       MOpMode::Warn)  \
-  m(elemDictIW,    KeyType::Int,       MOpMode::Warn)  \
-  m(elemDictSIO,   KeyType::Str,       MOpMode::InOut) \
-  m(elemDictIIO,   KeyType::Int,       MOpMode::InOut) \
-
-#define X(nm, keyType, mode) \
-inline tv_rval nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemDict<mode, keyType>(ad, key); \
-}
-ELEM_DICT_HELPER_TABLE(X)
-#undef X
-
 //////////////////////////////////////////////////////////////////////
 
 #define ELEM_KEYSET_U_HELPER_TABLE(m)  \
@@ -579,22 +547,6 @@ inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
   return ElemUKeyset<keyType>(base, key);                             \
 }
 ELEM_KEYSET_U_HELPER_TABLE(X)
-#undef X
-
-#define ELEM_KEYSET_HELPER_TABLE(m)                               \
-  /* name            keyType             mode */                  \
-  m(elemKeysetS,     KeyType::Str,       MOpMode::None)          \
-  m(elemKeysetI,     KeyType::Int,       MOpMode::None)          \
-  m(elemKeysetSW,    KeyType::Str,       MOpMode::Warn)          \
-  m(elemKeysetIW,    KeyType::Int,       MOpMode::Warn)          \
-  m(elemKeysetSIO,   KeyType::Str,       MOpMode::InOut)         \
-  m(elemKeysetIIO,   KeyType::Int,       MOpMode::InOut)         \
-
-#define X(nm, keyType, mode) \
-inline tv_rval nm(ArrayData* ad, key_type<keyType> key) { \
-  return HPHP::ElemKeyset<mode, keyType>(ad, key); \
-}
-ELEM_KEYSET_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////

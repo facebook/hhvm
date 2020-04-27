@@ -2957,19 +2957,16 @@ fields of that struct for holding intermediate values.
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
-| ElemArrayX<M>, D(LvalToMembInitCell), S(Arr) S(Int,Str),       NF
+| ElemArrayD, D(LvalToElemInitCell), S(LvalToArr) S(Int,Str), MElem
 
-| ElemArrayD,    D(LvalToElemInitCell), S(LvalToArr) S(Int,Str), MElem
+| ElemArrayU, D(LvalToMembInitCell), S(LvalToArr) S(Int,Str), MElem
 
-| ElemArrayU,    D(LvalToMembInitCell), S(LvalToArr) S(Int,Str), MElem
-
-  Similar to ElemX, but the base S0 is an array and the key S1 is an int/str.
-  ElemArrayD is for Define member instrs, ElemArrayU is for Unset, and
-  ElemArrayX is for InOut, Warn, and None instrs (where the mode is M).
+  Similar to ElemDX and ElemUX, but specialized for when the base S0 is an
+  array and the key S1 is an int/str.
 
 | ElemMixedArrayK<pos>, D(LvalToElemInitCell), S(AK(Mixed)) S(Int,Str), NF
 
-  Like ElemArray, but the element for S1 is at a known position `pos' in S0.
+  Returns an lval to the element of MixedArray S0 at the known position S1.
 
 | ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
 
@@ -2979,31 +2976,25 @@ fields of that struct for holding intermediate values.
   is for Define member instrs and ElemVecU is for Unset. (Other variations can
   be implemented without special IR instructions).
 
-| ElemDictX<M>, D(LvalToMembInitCell), S(Dict) S(Int,Str),       NF
+| ElemDictD, D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
 
-| ElemDictD,    D(LvalToElemInitCell), S(LvalToDict) S(Int,Str), MElem
+| ElemDictU, D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
 
-| ElemDictU,    D(LvalToMembInitCell), S(LvalToDict) S(Int,Str), MElem
-
-  Similar to ElemX, but the base S0 is a dict and the key S1 is an int/str.
-  ElemDictD is for Define member instrs, ElemDictU is for Unset, and
-  ElemDictX is for InOut, Warn, and None instrs (where the mode is M).
+  Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
+  dict and the key S1 is an int/str.
 
 | ElemDictK<pos>, D(LvalToElemInitCell), S(Dict) S(Int,Str), NF
 
-  Like ElemDict, but the element for S1 is at a known position `pos' in S0.
+  Returns an lval to the element of dict S0 at the known position S1.
 
-| ElemKeysetX<M>, D(LvalToMembInitCell), S(Keyset) S(Int,Str),       NF
+| ElemKeysetU, D(LvalToMembInitCell), S(LvalToKeyset) S(Int,Str), MElem
 
-| ElemKeysetU,    D(LvalToMembInitCell), S(LvalToKeyset) S(Int,Str), MElem
-
-  Similar to ElemX, but the base S0 is a keyset and the key S1 is an int/str.
-  ElemKeysetU is for Unset instrs and ElemKeysetX is for InOut, Warn and None
-  instrs (where the mode is M).
+  Similar to ElemUX, but specialized for when the base S0 is a keyset and the
+  key S1 is an int/str. Keysets do not support the define syntax.
 
 | ElemKeysetK<pos>, D(LvalToElemInitCell), S(Keyset) S(Int,Str), NF
 
-  Like ElemKeyset, but the element for S1 is at a known position `pos' in S0.
+  Returns an lval to the element of keyset S0 at the known position S1.
 
 | ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell) S(PtrToMISCell), MElem
 

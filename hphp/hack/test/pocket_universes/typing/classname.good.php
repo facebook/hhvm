@@ -18,7 +18,7 @@ final class C<TBase as Base> {
     private classname<TBase> $classdef,
   ){}
 
-  public final function set<TP as TBase:@Param>(TP $param, TP:@T $value): this {
+  public final function set<TP as TBase:@Param>(TP $param, TP:@T $_): this {
     $cname = $this->classdef;
     $key = $cname::get($param);
     echo $key. "\n";

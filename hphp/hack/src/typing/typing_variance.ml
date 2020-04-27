@@ -872,6 +872,12 @@ and get_typarams ctx root env (ty : decl_ty) =
   | Tvarray_or_darray (ty1, ty2) ->
     union (get_typarams ctx root env ty1) (get_typarams ctx root env ty2)
   | Tpu_access _ ->
+    (* TODO(T64285771):
+     * Parser currently supports multiple :@ when the source code syntax only support one
+     * :@ . Since the syntax is still a moving target, I'll update this code
+     * once we settle with the final syntax and we no longer need to split the
+     * nested Tpu_access
+     *)
     let rec split ty =
       match get_node ty with
       | Tpu_access (base, sid) ->
@@ -879,14 +885,13 @@ and get_typarams ctx root env (ty : decl_ty) =
         (base, sid :: trailing)
       | _ -> (ty, [])
     in
-    let (base, trailing) = split ty in
+    let (base, _) = split ty in
     let param =
-      match trailing with
-      | [_typ; (_, member); _enum] ->
-        if SMap.mem member env then
-          empty
-        else
-          single member (get_reason ty)
+      match get_node base with
+      (* Tgeneric(tp):@T is a valid usage of tp and should not trigger the
+       * linter
+       *)
+      | Tgeneric tp -> single tp (get_reason ty)
       | _ -> empty
     in
-    union param (get_typarams ctx root env base)
+    union param (flip param)

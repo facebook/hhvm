@@ -5,36 +5,6 @@
  */
 class Closure {
 
-  /* @param mixed $name
-   * @return mixed
-   */
-  public final function __get($name) {
-    trigger_error("Closure object cannot have properties", E_RECOVERABLE_ERROR);
-  }
-
-  /* @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  public final function __set($name, $value) {
-    trigger_error("Closure object cannot have properties", E_RECOVERABLE_ERROR);
-  }
-
-  /* @param mixed $name
-   * @return bool
-   */
-  public final function __isset($name) {
-    trigger_error("Closure object cannot have properties", E_RECOVERABLE_ERROR);
-    return false;
-  }
-
-  /* @param mixed $name
-   * @return mixed
-   */
-  public final function __unset($name) {
-    trigger_error("Closure object cannot have properties", E_RECOVERABLE_ERROR);
-  }
-
   /* @return array
    */
   <<__Native>>

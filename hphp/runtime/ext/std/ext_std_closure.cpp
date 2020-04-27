@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
 #include "hphp/runtime/ext/std/ext_std.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,13 @@ static Array HHVM_METHOD(Closure, __debugInfo) {
 
   return ret;
 }
+
+struct ClosurePropHandler: Native::BasePropHandler {
+  static bool isPropSupported(const String&, const String&) {
+    raise_error("Closure object cannot have properties");
+    return false;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -240,6 +248,7 @@ static void closureInstanceDtor(ObjectData* obj, const Class* cls) {
 }
 
 void StandardExtension::loadClosure() {
+  Native::registerNativePropHandler<ClosurePropHandler>(s_Closure);
   HHVM_SYS_ME(Closure, __debugInfo);
 }
 

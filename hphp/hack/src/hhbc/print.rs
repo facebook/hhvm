@@ -2537,7 +2537,11 @@ fn print_expr<W: Write>(
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
-                let s = format!("{:.1E}", f.parse::<f64>().map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?);
+                let s = format!(
+                    "{:.1E}",
+                    f.parse::<f64>()
+                        .map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?
+                );
                 w.write(s.replace('E', "E+"))
             } else {
                 w.write(f)
@@ -2577,9 +2581,7 @@ fn print_expr<W: Write>(
                 ))),
             }
         }
-        E_::Shape(fl) => {
-            print_expr_darray(ctx, w, env, print_shape_field_name, fl)
-        },
+        E_::Shape(fl) => print_expr_darray(ctx, w, env, print_shape_field_name, fl),
         E_::Binop(x) => {
             let (bop, e1, e2) = &**x;
             print_expr(ctx, w, env, e1)?;
@@ -2607,7 +2609,8 @@ fn print_expr<W: Write>(
                         w.write(", ")?;
                         print_expr(ctx, w, env, e)
                     }
-            }})
+                }
+            })
         }
         E_::New(x) => {
             let (cid, _, es, unpacked_element, _) = &**x;
@@ -2615,9 +2618,13 @@ fn print_expr<W: Write>(
                 Some(ci_expr) => {
                     w.write("new ")?;
                     match ci_expr.1.as_id() {
-                        Some(ast_defs::Id(_, cname)) => {
-                            w.write(lstrip(&adjust_id(env, &class::Type::from_ast_name(cname).to_raw_string().into()), "\\\\"))?
-                        }
+                        Some(ast_defs::Id(_, cname)) => w.write(lstrip(
+                            &adjust_id(
+                                env,
+                                &class::Type::from_ast_name(cname).to_raw_string().into(),
+                            ),
+                            "\\\\",
+                        ))?,
                         None => {
                             let buf = print_expr_to_string::<W>(ctx, env, ci_expr)?;
                             w.write(lstrip(&buf, "\\\\"))?
@@ -2634,30 +2641,53 @@ fn print_expr<W: Write>(
                         }
                     })
                 }
-                None => not_impl!()
+                None => not_impl!(),
             }
         }
         E_::Record(r) => {
             w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
             print_key_values(ctx, w, env, &r.2)
         }
+        E_::ClassGet(cg) => {
+            match &(cg.0).1 {
+                ast::ClassId_::CIexpr(e) => match e.as_id() {
+                    Some(id) => w.write(&get_class_name_from_id(
+                        ctx,
+                        env.codegen_env,
+                        true,  /* should_format */
+                        false, /* is_class_constant */
+                        &id.1,
+                    ))?,
+                    _ => print_expr(ctx, w, env, e)?,
+                },
+                _ => return Err(Error::fail("TODO Unimplemented unexpected non-CIexpr")),
+            }
+            w.write("::")?;
+            match &cg.1 {
+                ast::ClassGetExpr::CGstring((_, litstr)) => w.write(escaper::escape(litstr)),
+                ast::ClassGetExpr::CGexpr(e) => print_expr(ctx, w, env, e),
+            }
+        }
         E_::ClassConst(cc) => {
             if let Some(e1) = (cc.0).1.as_ciexpr() {
-                handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(|| {
-                    let s2 = &(cc.1).1;
-                    match e1.1.as_id() {
-                        Some(ast_defs::Id(_, s1)) => {
-                            let s1 = get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
-                            concat_str_by(w, "::", [&s1.into(), s2])
+                handle_possible_colon_colon_class_expr(ctx, w, env, false, expr)?.map_or_else(
+                    || {
+                        let s2 = &(cc.1).1;
+                        match e1.1.as_id() {
+                            Some(ast_defs::Id(_, s1)) => {
+                                let s1 =
+                                    get_class_name_from_id(ctx, env.codegen_env, true, true, s1);
+                                concat_str_by(w, "::", [&s1.into(), s2])
+                            }
+                            _ => {
+                                print_expr(ctx, w, env, e1)?;
+                                w.write("::")?;
+                                w.write(s2)
+                            }
                         }
-                        _ => {
-                            print_expr(ctx, w, env, e1)?;
-                            w.write("::")?;
-                            w.write(s2)
-                        }
-                    }
-                },
-            |x| Ok(x))
+                    },
+                    |x| Ok(x),
+                )
             } else {
                 Err(Error::fail("TODO: Only expected CIexpr in class_const"))
             }
@@ -2688,7 +2718,16 @@ fn print_expr<W: Write>(
             w.write("clone ")?;
             print_expr(ctx, w, env, e)
         }
-        E_::ArrayGet(ag) => not_impl!(),
+        E_::ArrayGet(ag) => {
+            print_expr(ctx, w, env, &ag.0)?;
+            square(w, |w| {
+                option(w, &ag.1, |w, e: &ast::Expr| {
+                    handle_possible_colon_colon_class_expr(ctx, w, env, true, &e.1)
+                        .transpose()
+                        .unwrap_or_else(|| print_expr(ctx, w, env, e))
+                })
+            })
+        }
         E_::String2(ss) => concat_by(w, " . ", ss, |w, s| print_expr(ctx, w, env, s)),
         E_::PrefixedString(s) => {
             w.write(&s.0)?;

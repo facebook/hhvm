@@ -675,7 +675,7 @@ fn convert_lambda<'a>(
     };
     let function_state = convert_function_like_body(self_, lambda_env, &mut fd.body)?;
     for param in &mut fd.params {
-        self_.visit_fun_param(lambda_env, param)?;
+        self_.visit_type_hint(lambda_env, &mut param.type_hint)?;
     }
     self_.visit_type_hint(lambda_env, &mut fd.ret)?;
 

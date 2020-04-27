@@ -471,40 +471,6 @@ final class Map implements \MutableMap {
   <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "Map"; }
 
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __get(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  public function __set(mixed $name,
-                        mixed $value): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @return bool
-   */
-  public function __isset(mixed $name): bool { return false; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __unset(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
   /** Returns a Map built from the key/value Pairs produced by the specified
    * Iterable.
    * @param mixed $iterable
@@ -859,40 +825,6 @@ final class ImmMap implements \ConstMap {
    */
   <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "ImmMap"; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __get(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  public function __set(mixed $name,
-                        mixed $value): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @return bool
-   */
-  public function __isset(mixed $name): bool { return false; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __unset(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
 
   /** Returns a ImmMap built from the key/value Pairs produced by the specified
    * Iterable.

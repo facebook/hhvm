@@ -436,40 +436,6 @@ final class Set implements \MutableSet {
   <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "Set"; }
 
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __get(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  public function __set(mixed $name,
-                        mixed $value): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @return bool
-   */
-  public function __isset(mixed $name): bool { return false; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __unset(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
   /** Returns a Set built from the values produced by the specified Iterable.
    * @param mixed $iterable
    * @return object
@@ -819,40 +785,6 @@ final class ImmSet implements \ConstSet {
    */
   <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "ImmSet"; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __get(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @param mixed $value
-   * @return mixed
-   */
-  public function __set(mixed $name,
-                        mixed $value): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /** @param mixed $name
-   * @return bool
-   */
-  public function __isset(mixed $name): bool { return false; }
-
-  /** @param mixed $name
-   * @return mixed
-   */
-  public function __unset(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
 
   /** Returns a ImmSet built from the values produced by the specified Iterable.
    * @param mixed $iterable

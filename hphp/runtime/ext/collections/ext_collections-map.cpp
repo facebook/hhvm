@@ -781,6 +781,9 @@ void CollectionsExtension::initMap() {
 
   HHVM_NAMED_ME(HH\\Map, toImmMap,      &c_Map::getImmutableCopy);
 
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Map);
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmMap);
+
   loadSystemlib("collections-map");
 
   c_Map::s_cls = Unit::lookupClass(s_HH_Map.get());

@@ -704,6 +704,9 @@ void CollectionsExtension::initVector() {
   HHVM_NAMED_ME(HH\\ImmVector,   toImmSet,    materialize<c_ImmSet>);
   HHVM_NAMED_ME(HH\\ImmVector,   toVector,    materialize<c_Vector>);
 
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Vector);
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmVector);
+
   loadSystemlib("collections-vector");
 
   c_Vector::s_cls = Unit::lookupClass(s_HH_Vector.get());

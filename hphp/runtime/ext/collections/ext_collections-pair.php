@@ -643,39 +643,6 @@ final class Pair implements \ConstVector {
    */
   <<__Rx, __MaybeMutable>>
   public function __toString(): string { return "Pair"; }
-
-  /**
-   * @internal
-   */
-  public function __get(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /**
-   * @internal
-   */
-  public function __set(mixed $name,
-                        mixed $value): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
-
-  /**
-   * @internal
-   */
-  public function __isset(mixed $name): bool { return false; }
-
-  /**
-   * @internal
-   */
-  public function __unset(mixed $name): mixed {
-    throw new \InvalidOperationException(
-      "Cannot access a property on a collection"
-    );
-  }
 }
 
 } // namespace HH

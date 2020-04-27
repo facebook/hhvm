@@ -156,6 +156,8 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, toSet,          materialize<c_Set>);
   HHVM_NAMED_ME(HH\\Pair, toImmSet,       materialize<c_ImmSet>);
 
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Pair);
+
   loadSystemlib("collections-pair");
 
   c_Pair::s_cls = Unit::lookupClass(s_HH_Pair.get());

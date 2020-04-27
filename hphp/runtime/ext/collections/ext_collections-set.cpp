@@ -664,6 +664,9 @@ void CollectionsExtension::initSet() {
   HHVM_NAMED_ME(HH\\Set, reserve,        &c_Set::php_reserve);
   HHVM_NAMED_ME(HH\\Set, toImmSet,       &c_Set::getImmutableCopy);
 
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_Set);
+  Native::registerNativePropHandler<CollectionPropHandler>(s_HH_ImmSet);
+
   loadSystemlib("collections-set");
 
   c_Set::s_cls = Unit::lookupClass(s_HH_Set.get());

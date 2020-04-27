@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 include Cli_args
 
 type saved_state_target =
@@ -254,9 +254,12 @@ let parse_options () =
 
   (* --json, --save, and --write-symbol-info all imply check *)
   let check_mode =
-    !write_symbol_info <> None || !check_mode || !json_mode || !save <> None
+    Option.is_some !write_symbol_info
+    || !check_mode
+    || !json_mode
+    || Option.is_some !save
   in
-  if check_mode && !waiting_client <> None then (
+  if check_mode && Option.is_some !waiting_client then (
     Printf.eprintf "--check is incompatible with wait modes!\n";
     Exit_status.(exit Input_error)
   );

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 open SymbolDefinition
 open Aast
@@ -180,15 +180,15 @@ let get_reactivity_attributes attrs =
     | { ua_name = (_, n); _ } :: tl ->
       let module SNUA = Naming_special_names.UserAttributes in
       let acc =
-        if n = SNUA.uaReactive then
+        if String.equal n SNUA.uaReactive then
           Rx :: acc
-        else if n = SNUA.uaShallowReactive then
+        else if String.equal n SNUA.uaShallowReactive then
           Shallow :: acc
-        else if n = SNUA.uaLocalReactive then
+        else if String.equal n SNUA.uaLocalReactive then
           Local :: acc
-        else if n = SNUA.uaOnlyRxIfImpl then
+        else if String.equal n SNUA.uaOnlyRxIfImpl then
           OnlyRxIfImpl :: acc
-        else if n = SNUA.uaAtMostRxAsArgs then
+        else if String.equal n SNUA.uaAtMostRxAsArgs then
           AtMostRxAsArgs :: acc
         else
           acc
@@ -233,7 +233,7 @@ let params_implicit_fields params =
 let class_implicit_fields class_ =
   List.concat_map class_.c_methods ~f:(fun m ->
       let (_, name) = m.m_name in
-      if name = "__construct" then
+      if String.equal name "__construct" then
         params_implicit_fields m.m_params
       else
         [])

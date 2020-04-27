@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 
 module SearchServiceRunner = struct
@@ -51,7 +51,7 @@ module SearchServiceRunner = struct
 
   let run genv (ctx : Provider_context.t) (sienv : SearchUtils.si_env) :
       SearchUtils.si_env =
-    if ServerArgs.ai_mode genv.options = None then
+    if Option.is_none (ServerArgs.ai_mode genv.options) then
       let size =
         if chunk_size genv = 0 then
           Queue.length queue
@@ -72,7 +72,7 @@ module SearchServiceRunner = struct
    * false if we should run small chunks every few seconds *)
   let should_run_completely
       (genv : ServerEnv.genv) (_ : SearchUtils.search_provider) : bool =
-    chunk_size genv = 0 && ServerArgs.ai_mode genv.options = None
+    chunk_size genv = 0 && Option.is_none (ServerArgs.ai_mode genv.options)
 
   let update_fileinfo_map
       (fast : Naming_table.t) ~(source : SearchUtils.file_source) : unit =

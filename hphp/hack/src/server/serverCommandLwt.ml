@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 open ServerCommandTypes
 
 exception Remote_fatal_exception of Marshal_tools.remote_exception_data

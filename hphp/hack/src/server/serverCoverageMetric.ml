@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Coverage_level
 open Coverage_level_defs
 open Option.Monad_infix
@@ -108,7 +108,7 @@ let relativize root path =
   let root = Path.to_string root in
   (* If we're provided a file instead of a directory as the path to filter, the
      only valid value is the filename itself. *)
-  if FindUtils.is_hack root && root = path then
+  if FindUtils.is_hack root && String.equal root path then
     Some (Filename.basename path)
   else
     (* naive implementation *)

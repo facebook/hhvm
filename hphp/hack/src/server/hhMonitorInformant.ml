@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 include HhMonitorInformant_sig.Types
 module WEWClient = WatchmanEventWatcherClient
 module WEWConfig = WatchmanEventWatcherConfig
@@ -30,7 +30,7 @@ module State_loader_prefetcher_real = struct
         ~config_hash:hhconfig_hash
         ~rev:handle.State_loader.saved_state_for_rev
     in
-    if cached <> None then
+    if Option.is_some cached then
       (* No need to fetch if catched. *)
       ()
     else
@@ -269,7 +269,7 @@ module Revision_map = struct
             not_yet_ready
           | Future.Complete_with_result _ ->
             let result = query_to_result_list query in
-            if result = [] then
+            if List.is_empty result then
               let () =
                 Hh_logger.log
                   "Got no XDB results on merge base change to %d"
@@ -682,25 +682,25 @@ module Revision_tracker = struct
       let () = Hh_logger.log "Changed_merge_base: %s" rev in
       Some (Changed_merge_base (rev, files, clock))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, json))
-      when state = "hg.update" ->
+      when String.equal state "hg.update" ->
       env.is_in_hg_update_state := true;
       Option.(
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
         Hh_logger.log "State_enter: %s" hg_rev;
         Some (State_enter hg_rev))
     | Watchman.Watchman_pushed (Watchman.State_leave (state, json))
-      when state = "hg.update" ->
+      when String.equal state "hg.update" ->
       env.is_in_hg_update_state := false;
       Option.(
         json >>= Watchman_utils.rev_in_state_change >>= fun hg_rev ->
         Hh_logger.log "State_leave: %s" hg_rev;
         Some (State_leave hg_rev))
     | Watchman.Watchman_pushed (Watchman.State_enter (state, _))
-      when state = "hg.transaction" ->
+      when String.equal state "hg.transaction" ->
       env.is_in_hg_transaction_state := true;
       None
     | Watchman.Watchman_pushed (Watchman.State_leave (state, _))
-      when state = "hg.transaction" ->
+      when String.equal state "hg.transaction" ->
       env.is_in_hg_transaction_state := false;
       None
     | Watchman.Watchman_pushed (Watchman.Files_changed _)
@@ -781,7 +781,7 @@ module Revision_tracker = struct
       (* All the cases that `(change <> None)` cover should be also covered by
        * has_more_watchman_messages, but this alternate method of pumping messages
        * is heavily used in tests *)
-      (report, has_more_watchman_messages env || change <> None))
+      (report, has_more_watchman_messages env || Option.is_some change))
 
   let rec process (server_state, env, reports_acc) =
     (* Sometimes Watchman pushes many file changes as many sequential

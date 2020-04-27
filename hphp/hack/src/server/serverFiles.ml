@@ -7,6 +7,9 @@
  *
  *)
 
+module HhBucket = Bucket
+open Hh_prelude
+module Bucket = HhBucket
 open Utils
 open String_utils
 
@@ -50,13 +53,13 @@ let server_finale_file (pid : int) : string =
 let make_next ~(indexer : unit -> string list) ~(extra_roots : Path.t list) :
     Relative_path.t list Bucket.next =
   let next_files_root =
-    compose (List.map Relative_path.(create Root)) indexer
+    compose (List.map ~f:Relative_path.(create Root)) indexer
   in
   let hhi_root = Hhi.get_hhi_root () in
   let hhi_filter = FindUtils.is_hack in
   let next_files_hhi =
     compose
-      (List.map Relative_path.(create Hhi))
+      (List.map ~f:Relative_path.(create Hhi))
       (Find.make_next_files ~name:"hhi" ~filter:hhi_filter hhi_root)
   in
   let rec concat_next_files l () =
@@ -71,9 +74,9 @@ let make_next ~(indexer : unit -> string list) ~(extra_roots : Path.t list) :
   in
   let next_files_extra =
     List.map
-      (fun root ->
+      ~f:(fun root ->
         compose
-          (List.map Relative_path.create_detect_prefix)
+          (List.map ~f:Relative_path.create_detect_prefix)
           (Find.make_next_files ~filter:FindUtils.file_filter root))
       extra_roots
     |> concat_next_files

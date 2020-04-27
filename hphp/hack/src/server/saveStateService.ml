@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open SaveStateServiceTypes
 
 let get_errors_filename (filename : string) : string = filename ^ ".err"
@@ -33,7 +33,7 @@ let partition_error_files_tf
     Relative_path.Set.t * Relative_path.Set.t =
   let (errors_in_phases_t, errors_in_phases_f) =
     List.partition_tf errors_in_phases ~f:(fun (phase, _error_files) ->
-        List.mem ~equal:( = ) phases phase)
+        List.mem ~equal:Errors.equal_phase phases phase)
   in
   (fold_error_files errors_in_phases_t, fold_error_files errors_in_phases_f)
 
@@ -119,7 +119,7 @@ let get_hot_classes (filename : string) : SSet.t =
     Disk.cat filename
     |> Hh_json.json_of_string
     |> Hh_json.get_object_exn
-    |> List.find_exn ~f:(fun (k, _) -> k = "classes")
+    |> List.find_exn ~f:(fun (k, _) -> String.equal k "classes")
     |> snd
     |> Hh_json.get_array_exn
     |> List.map ~f:Hh_json.get_string_exn

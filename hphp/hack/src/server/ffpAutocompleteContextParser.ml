@@ -12,7 +12,7 @@ module PositionedToken = Full_fidelity_positioned_token
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree
 module TokenKind = Full_fidelity_token_kind
-open Core_kernel
+open Hh_prelude
 
 module Container = struct
   (* Set of mutually exclusive contexts. *)
@@ -34,6 +34,139 @@ module Container = struct
     | TraitBody
     | TraitHeader
     | NoContainer
+
+  let is_after_double_colon = function
+    | AfterDoubleColon -> true
+    | _ -> false
+
+  let is_after_right_arrow = function
+    | AfterRightArrow -> true
+    | _ -> false
+
+  let is_assignment_expression = function
+    | AssignmentExpression -> true
+    | _ -> false
+
+  let is_class_body = function
+    | ClassBody -> true
+    | _ -> false
+
+  let is_class_header = function
+    | ClassHeader -> true
+    | _ -> false
+
+  let is_compound_statement = function
+    | CompoundStatement -> true
+    | _ -> false
+
+  let is_constant_declaration = function
+    | ConstantDeclaration -> true
+    | _ -> false
+
+  let is_function_call_argument_list = function
+    | FunctionCallArgumentList -> true
+    | _ -> false
+
+  let is_function_header = function
+    | FunctionHeader -> true
+    | _ -> false
+
+  let is_if_statement = function
+    | IfStatement -> true
+    | _ -> false
+
+  let is_interface_body = function
+    | InterfaceBody -> true
+    | _ -> false
+
+  let is_interface_header = function
+    | InterfaceHeader -> true
+    | _ -> false
+
+  let is_lambda_body_expression = function
+    | LambdaBodyExpression -> true
+    | _ -> false
+
+  let is_top_level = function
+    | TopLevel -> true
+    | _ -> false
+
+  let is_trait_body = function
+    | TraitBody -> true
+    | _ -> false
+
+  let is_trait_header = function
+    | TraitHeader -> true
+    | _ -> false
+
+  let is_no_container = function
+    | NoContainer -> true
+    | _ -> false
+
+  let is_class_trait_body = function
+    | ClassBody
+    | TraitBody ->
+      true
+    | _ -> false
+
+  let is_trait_interface_body = function
+    | TraitBody
+    | InterfaceBody ->
+      true
+    | _ -> false
+
+  let is_class_header_body = function
+    | ClassHeader
+    | ClassBody ->
+      true
+    | _ -> false
+
+  let is_interface_header_body = function
+    | InterfaceHeader
+    | InterfaceBody ->
+      true
+    | _ -> false
+
+  let is_compound_statement_or_assignment_expression = function
+    | CompoundStatement
+    | AssignmentExpression ->
+      true
+    | _ -> false
+
+  let is_interface_or_class_header_or_body = function
+    | InterfaceHeader
+    | InterfaceBody
+    | ClassHeader
+    | ClassBody ->
+      true
+    | _ -> false
+
+  let is_body = function
+    | ClassBody
+    | InterfaceBody
+    | TraitBody ->
+      true
+    | _ -> false
+
+  let is_body_or_function_header = function
+    | ClassBody
+    | InterfaceBody
+    | TraitBody
+    | FunctionHeader ->
+      true
+    | _ -> false
+
+  let is_class_body_or_function_header = function
+    | ClassBody
+    | FunctionHeader ->
+      true
+    | _ -> false
+
+  let is_compound_statement_or_if = function
+    | CompoundStatement
+    | IfStatement ->
+      true
+    | _ -> false
 end
 
 module Predecessor = struct
@@ -79,6 +212,153 @@ module Predecessor = struct
     | TryWithoutFinally
     | VisibilityModifier
     | NoPredecessor
+
+  let is_if_without_else = function
+    | IfWithoutElse -> true
+    | _ -> false
+
+  let is_class_name = function
+    | ClassName -> true
+    | _ -> false
+
+  let is_colon = function
+    | TokenColon -> true
+    | _ -> false
+
+  let is_less_than = function
+    | TokenLessThan -> true
+    | _ -> false
+
+  let is_kwelse = function
+    | KeywordElse -> true
+    | _ -> false
+
+  let is_kwreturn = function
+    | KeywordReturn -> true
+    | _ -> false
+
+  let is_kwnew = function
+    | KeywordNew -> true
+    | _ -> false
+
+  let is_kwextends = function
+    | KeywordExtends -> true
+    | _ -> false
+
+  let is_kwimplements = function
+    | KeywordImplements -> true
+    | _ -> false
+
+  let is_kwuse = function
+    | KeywordUse -> true
+    | _ -> false
+
+  let is_kwrequire = function
+    | KeywordRequire -> true
+    | _ -> false
+
+  let is_kwfinal = function
+    | KeywordFinal -> true
+    | _ -> false
+
+  let is_kwasync = function
+    | KeywordAsync -> true
+    | _ -> false
+
+  let is_equal = function
+    | TokenEqual -> true
+    | _ -> false
+
+  let is_try_without_finally = function
+    | TryWithoutFinally -> true
+    | _ -> false
+
+  let is_visibility_modifier = function
+    | VisibilityModifier -> true
+    | _ -> false
+
+  let is_top_level_declaration = function
+    | TopLevelDeclaration -> true
+    | _ -> false
+
+  let is_colon_or_less_than = function
+    | TokenColon
+    | TokenLessThan ->
+      true
+    | _ -> false
+
+  let is_top_level_declaration_or_kwabstract = function
+    | TopLevelDeclaration
+    | KeywordAbstract ->
+      true
+    | _ -> false
+
+  let is_open_paren_or_without_trailing_trivia = function
+    | TokenOpenParen
+    | TokenWithoutTrailingTrivia ->
+      true
+    | _ -> false
+
+  let is_comma_open_paren_or_without_trailing_trivia = function
+    | TokenComma
+    | TokenOpenParen
+    | TokenWithoutTrailingTrivia ->
+      true
+    | _ -> false
+
+  let is_visibility_mod_kwconst_or_kwstatic = function
+    | VisibilityModifier
+    | KeywordConst
+    | KeywordStatic ->
+      true
+    | _ -> false
+
+  let is_visibility_mod_kwfinal_or_kwstatic = function
+    | VisibilityModifier
+    | KeywordFinal
+    | KeywordStatic ->
+      true
+    | _ -> false
+
+  let is_visibility_mod_kwasync_kwfinal_or_kwstatic = function
+    | VisibilityModifier
+    | KeywordAsync
+    | KeywordFinal
+    | KeywordStatic ->
+      true
+    | _ -> false
+
+  let is_visibility_mod_or_kwstatic = function
+    | VisibilityModifier
+    | KeywordStatic ->
+      true
+    | _ -> false
+
+  let is_left_brace_or_class_body_decl = function
+    | TokenLeftBrace
+    | ClassBodyDeclaration ->
+      true
+    | _ -> false
+
+  let is_stmt_left_brace_if_wo_else_or_try_wo_finally = function
+    | Statement
+    | TokenLeftBrace
+    | IfWithoutElse
+    | TryWithoutFinally ->
+      true
+    | _ -> false
+
+  let is_class_name_or_extends_list = function
+    | ClassName
+    | ExtendsList ->
+      true
+    | _ -> false
+
+  let is_kwabstract_or_kwfinal = function
+    | KeywordAbstract
+    | KeywordFinal ->
+      true
+    | _ -> false
 end
 
 type context = {
@@ -96,66 +376,52 @@ module ContextPredicates = struct
   open Predecessor
 
   let is_inside_function_call context =
-    context.closest_parent_container = FunctionCallArgumentList
-    && ( context.predecessor = TokenComma
-       || context.predecessor = TokenOpenParen
-       || context.predecessor = TokenWithoutTrailingTrivia )
+    is_function_call_argument_list context.closest_parent_container
+    && is_comma_open_paren_or_without_trailing_trivia context.predecessor
 
   let is_type_valid context =
     (* Function return type *)
-    context.closest_parent_container = FunctionHeader
-    && context.predecessor = TokenColon
+    is_function_header context.closest_parent_container
+    && is_colon context.predecessor
     (* Parameter type *)
-    || context.closest_parent_container = FunctionHeader
-       && ( context.predecessor = TokenComma
-          || context.predecessor = TokenOpenParen
-          || context.predecessor = TokenWithoutTrailingTrivia )
+    || is_function_header context.closest_parent_container
+       && is_comma_open_paren_or_without_trailing_trivia context.predecessor
     (* Class property type *)
-    || ( context.closest_parent_container = ClassBody
-       || context.closest_parent_container = TraitBody )
-       && ( context.predecessor = VisibilityModifier
-          || context.predecessor = KeywordConst
-          || context.predecessor = KeywordStatic )
+    || is_class_trait_body context.closest_parent_container
+       && is_visibility_mod_kwconst_or_kwstatic context.predecessor
     || (* Generic type *)
-    context.predecessor = TokenLessThan
+    is_less_than context.predecessor
 
   let is_class_body_declaration_valid context =
-    context.closest_parent_container = ClassBody
-    && ( context.predecessor = TokenLeftBrace
-       || context.predecessor = ClassBodyDeclaration )
+    is_class_body context.closest_parent_container
+    && is_left_brace_or_class_body_decl context.predecessor
 
   let is_trait_body_declaration_valid context =
-    context.closest_parent_container = TraitBody
-    && ( context.predecessor = TokenLeftBrace
-       || context.predecessor = ClassBodyDeclaration )
+    is_trait_body context.closest_parent_container
+    && is_left_brace_or_class_body_decl context.predecessor
 
   let is_interface_body_declaration_valid context =
-    context.closest_parent_container = InterfaceBody
-    && ( context.predecessor = TokenLeftBrace
-       || context.predecessor = ClassBodyDeclaration )
+    is_interface_body context.closest_parent_container
+    && is_left_brace_or_class_body_decl context.predecessor
 
   let is_in_return_statement context =
-    context.predecessor = KeywordReturn
-    && context.closest_parent_container = CompoundStatement
+    is_kwreturn context.predecessor
+    && is_compound_statement context.closest_parent_container
 
   let is_at_beginning_of_new_statement context =
-    context.closest_parent_container = CompoundStatement
-    && ( context.predecessor = Statement
-       || context.predecessor = TokenLeftBrace
-       || context.predecessor = IfWithoutElse
-       || context.predecessor = TryWithoutFinally )
+    is_compound_statement context.closest_parent_container
+    && is_stmt_left_brace_if_wo_else_or_try_wo_finally context.predecessor
     || (* Cases in a switch body *)
-    context.closest_parent_container = CompoundStatement
-    && context.predecessor = TokenColon
+    is_compound_statement context.closest_parent_container
+    && is_colon context.predecessor
 
   let is_rhs_of_assignment_expression context =
-    context.closest_parent_container = AssignmentExpression
-    && context.predecessor = TokenEqual
+    is_assignment_expression context.closest_parent_container
+    && is_equal context.predecessor
 
   let is_in_conditional context =
-    context.closest_parent_container = IfStatement
-    && ( context.predecessor = TokenOpenParen
-       || context.predecessor = TokenWithoutTrailingTrivia )
+    is_if_statement context.closest_parent_container
+    && is_open_paren_or_without_trailing_trivia context.predecessor
 
   let is_expression_valid context =
     is_rhs_of_assignment_expression context
@@ -163,13 +429,13 @@ module ContextPredicates = struct
     || is_at_beginning_of_new_statement context
     || is_in_return_statement context
     || is_inside_function_call context
-    || context.closest_parent_container = LambdaBodyExpression
+    || is_lambda_body_expression context.closest_parent_container
 
   (* TODO: or is parameter, or is inside if/switch/while/etc. clause *)
 
   let is_top_level_statement_valid context =
-    context.closest_parent_container = TopLevel
-    && context.predecessor = TopLevelDeclaration
+    is_top_level context.closest_parent_container
+    && is_top_level_declaration context.predecessor
 end
 
 let initial_context =
@@ -384,12 +650,14 @@ let make_context
               { acc with closest_parent_container = TraitHeader }
             | ClassishDeclaration _ ->
               { acc with closest_parent_container = ClassHeader }
-            | ClassishBody _ when acc.closest_parent_container = InterfaceHeader
-              ->
+            | ClassishBody _
+              when is_interface_header acc.closest_parent_container ->
               { acc with closest_parent_container = InterfaceBody }
-            | ClassishBody _ when acc.closest_parent_container = TraitHeader ->
+            | ClassishBody _ when is_trait_header acc.closest_parent_container
+              ->
               { acc with closest_parent_container = TraitBody }
-            | ClassishBody _ when acc.closest_parent_container = ClassHeader ->
+            | ClassishBody _ when is_class_header acc.closest_parent_container
+              ->
               {
                 acc with
                 closest_parent_container = ClassBody;

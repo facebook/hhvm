@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerCommandTypes.Method_jumps
 open Typing_defs
 module Reason = Typing_reason
@@ -22,7 +22,7 @@ let string_filter_to_method_jump_filter = function
 
 (* Used so the given input doesn't need the `\`. *)
 let add_ns name =
-  if name.[0] = '\\' then
+  if Char.equal name.[0] '\\' then
     name
   else
     "\\" ^ name
@@ -37,12 +37,12 @@ let get_overridden_methods ctx origin_class get_or_method dest_class acc =
       ~init:acc
       ~f:(fun acc (m_name, de_mthd) ->
         (* Filter out inherited methods *)
-        if de_mthd.ce_origin <> Cls.name dest_class then
+        if not (String.equal de_mthd.ce_origin (Cls.name dest_class)) then
           acc
         else
           let or_mthd = get_or_method m_name in
           match or_mthd with
-          | Some or_mthd when or_mthd.ce_origin = origin_class ->
+          | Some or_mthd when String.equal or_mthd.ce_origin origin_class ->
             let get_pos (lazy ty) =
               ty |> Typing_defs.get_pos |> Pos.to_absolute
             in
@@ -134,8 +134,9 @@ let find_extended_classes_in_files_parallel
 
 (* Find child classes *)
 let get_child_classes_and_methods ctx cls ~filter naming_table workers =
-  if filter <> No_filter then
-    failwith "Method jump filters not implemented for finding children";
+  (match filter with
+  | No_filter -> ()
+  | _ -> failwith "Method jump filters not implemented for finding children");
   let files = FindRefsService.get_child_classes_files ctx (Cls.name cls) in
   find_extended_classes_in_files_parallel
     ctx
@@ -147,12 +148,12 @@ let get_child_classes_and_methods ctx cls ~filter naming_table workers =
     files
 
 let class_passes_filter ~filter cls =
-  match (filter, cls) with
+  match (filter, Cls.kind cls) with
   | (No_filter, _) -> true
-  | (Class, cls) when Cls.kind cls = Ast_defs.Cnormal -> true
-  | (Class, cls) when Cls.kind cls = Ast_defs.Cabstract -> true
-  | (Interface, cls) when Cls.kind cls = Ast_defs.Cinterface -> true
-  | (Trait, cls) when Cls.kind cls = Ast_defs.Ctrait -> true
+  | (Class, Ast_defs.Cnormal) -> true
+  | (Class, Ast_defs.Cabstract) -> true
+  | (Interface, Ast_defs.Cinterface) -> true
+  | (Trait, Ast_defs.Ctrait) -> true
   | _ -> false
 
 (* Find ancestor classes *)

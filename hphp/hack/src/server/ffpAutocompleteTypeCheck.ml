@@ -10,20 +10,21 @@
 (* Autocomplete needs type information for functions, local variables, and class members, so we
    must call into the typechecker to do these types of completions. Once the typed AST is available,
    the call to the previous autocomplete should be replaced with examining the typed AST. *)
+open Hh_prelude
 open FfpAutocompleteContextParser
 open ContextPredicates
-open Container
 open String_utils
 
 let local_variable_valid_in_context (context : context) (stub : string) : bool =
-  is_expression_valid context && (stub = "" || string_starts_with stub "$")
+  is_expression_valid context
+  && (String.equal stub "" || string_starts_with stub "$")
 
 let should_complete_function (context : context) : bool =
   is_expression_valid context
 
 let is_complete_class_member context =
-  context.closest_parent_container = AfterDoubleColon
-  || context.closest_parent_container = AfterRightArrow
+  Container.is_after_double_colon context.closest_parent_container
+  || Container.is_after_right_arrow context.closest_parent_container
 
 let run
     ~(context : context)

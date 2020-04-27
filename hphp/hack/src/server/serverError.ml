@@ -10,7 +10,7 @@
 (*****************************************************************************)
 (* Error module                                                              *)
 (*****************************************************************************)
-open Core_kernel
+open Hh_prelude
 
 let get_save_state_result_props_json
     (save_state_result : SaveStateServiceTypes.save_state_result) :
@@ -88,7 +88,7 @@ let print_error_list
     ~(recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
   ( if output_json then
     print_error_list_json oc error_list save_state_result recheck_stats
-  else if error_list = [] then
+  else if List.is_empty error_list then
     Out_channel.output_string oc "No errors!\n"
   else
     let sl = List.map ~f:Errors.to_string error_list in

@@ -17,7 +17,7 @@ open FfpAutocompleteContextParser
 open FfpAutocompleteContextParser.Container
 open FfpAutocompleteContextParser.Predecessor
 open FfpAutocompleteContextParser.ContextPredicates
-open Core_kernel
+open Hh_prelude
 
 (* Each keyword completion object has a list of keywords and a function that
    takes a context and returns whether or not the list of keywords is valid
@@ -48,16 +48,14 @@ let final_keyword =
       begin
         fun context ->
         (* Final class *)
-        ( context.predecessor = TopLevelDeclaration
-        || context.predecessor = KeywordAbstract )
+        is_top_level_declaration_or_kwabstract context.predecessor
         || is_top_level_statement_valid context
         (* Final method *)
         || is_class_body_declaration_valid context
         || is_trait_body_declaration_valid context
         || (* Final after other modifiers *)
-        context.closest_parent_container = ClassBody
-        && ( context.predecessor = KeywordStatic
-           || context.predecessor = VisibilityModifier )
+        is_class_body context.closest_parent_container
+        && is_visibility_mod_or_kwstatic context.predecessor
       end;
   }
 
@@ -68,12 +66,11 @@ let implements_keyword =
       begin
         fun context ->
         (* Class implements interface *)
-        ( context.closest_parent_container = ClassHeader
-        || context.closest_parent_container = ClassBody )
-        && (context.predecessor = ClassName || context.predecessor = ExtendsList)
+        is_class_header_body context.closest_parent_container
+        && is_class_name_or_extends_list context.predecessor
         || (* "require implements" inside a trait *)
-        context.closest_parent_container = TraitBody
-        && context.predecessor = KeywordRequire
+        is_trait_body context.closest_parent_container
+        && is_kwrequire context.predecessor
       end;
   }
 
@@ -83,15 +80,11 @@ let extends_keyword =
     is_valid_in_context =
       begin
         fun context ->
-        ( context.closest_parent_container = InterfaceHeader
-        || context.closest_parent_container = InterfaceBody
-        || context.closest_parent_container = ClassHeader
-        || context.closest_parent_container = ClassBody )
-        && context.predecessor = ClassName
+        is_interface_or_class_header_or_body context.closest_parent_container
+        && is_class_name context.predecessor
         || (* Inside trait/interface body *)
-        ( context.closest_parent_container = TraitBody
-        || context.closest_parent_container = InterfaceBody )
-        && context.predecessor = KeywordRequire
+        is_trait_interface_body context.closest_parent_container
+        && is_kwrequire context.predecessor
       end;
   }
 
@@ -103,8 +96,8 @@ let visibility_modifiers =
         fun context ->
         is_class_body_declaration_valid context
         || is_trait_body_declaration_valid context
-        || context.closest_parent_container = ClassBody
-           && context.predecessor = KeywordFinal
+        || is_class_body context.closest_parent_container
+           && is_kwfinal context.predecessor
       end;
   }
 
@@ -123,10 +116,8 @@ let static_keyword =
         is_class_body_declaration_valid context
         || is_interface_body_declaration_valid context
         || is_trait_body_declaration_valid context
-        || ( context.closest_parent_container = ClassBody
-           || context.closest_parent_container = InterfaceBody
-           || context.closest_parent_container = TraitBody )
-           && context.predecessor = VisibilityModifier
+        || is_body context.closest_parent_container
+           && is_visibility_modifier context.predecessor
       end;
   }
 
@@ -140,11 +131,8 @@ let async_keyword =
         is_class_body_declaration_valid context
         || is_trait_body_declaration_valid context
         (* Async method after modifiers *)
-        || ( context.closest_parent_container = ClassBody
-           || context.closest_parent_container = TraitBody )
-           && ( context.predecessor = VisibilityModifier
-              || context.predecessor = KeywordFinal
-              || context.predecessor = KeywordStatic )
+        || is_class_trait_body context.closest_parent_container
+           && is_visibility_mod_kwfinal_or_kwstatic context.predecessor
         (* Async top level function *)
         || is_top_level_statement_valid context
         || (* Async lambda *)
@@ -190,19 +178,13 @@ let function_keyword =
         || is_interface_body_declaration_valid context
         || is_trait_body_declaration_valid context
         (* Class method, after modifiers *)
-        || ( context.closest_parent_container = ClassBody
-           || context.closest_parent_container = InterfaceBody
-           || context.closest_parent_container = TraitBody
-           || context.closest_parent_container = FunctionHeader )
-           && ( context.predecessor = VisibilityModifier
-              || context.predecessor = KeywordAsync
-              || context.predecessor = KeywordStatic
-              || context.predecessor = KeywordFinal )
+        || is_body_or_function_header context.closest_parent_container
+           && is_visibility_mod_kwasync_kwfinal_or_kwstatic context.predecessor
         (* Top level function *)
         || is_top_level_statement_valid context
         || (* Top level async function *)
-        context.closest_parent_container = TopLevel
-        && context.predecessor = KeywordAsync
+        is_top_level context.closest_parent_container
+        && is_kwasync context.predecessor
       end;
   }
 
@@ -213,9 +195,8 @@ let class_keyword =
       begin
         fun context ->
         is_top_level_statement_valid context
-        || context.closest_parent_container = ClassHeader
-           && ( context.predecessor = KeywordAbstract
-              || context.predecessor = KeywordFinal )
+        || is_class_header context.closest_parent_container
+           && is_kwabstract_or_kwfinal context.predecessor
       end;
   }
 
@@ -236,10 +217,8 @@ let require_constraint_keyword =
       begin
         fun context ->
         (* Require inside trait body or interface body *)
-        ( context.closest_parent_container = TraitBody
-        || context.closest_parent_container = InterfaceBody )
-        && ( context.predecessor = TokenLeftBrace
-           || context.predecessor = ClassBodyDeclaration )
+        is_trait_interface_body context.closest_parent_container
+        && is_left_brace_or_class_body_decl context.predecessor
       end;
   }
 
@@ -270,9 +249,8 @@ let void_keyword =
     is_valid_in_context =
       begin
         fun context ->
-        context.closest_parent_container = FunctionHeader
-        && ( context.predecessor = TokenColon
-           || context.predecessor = TokenLessThan )
+        is_function_header context.closest_parent_container
+        && is_colon_or_less_than context.predecessor
       end;
   }
 
@@ -282,9 +260,8 @@ let noreturn_keyword =
     is_valid_in_context =
       begin
         fun context ->
-        ( context.closest_parent_container = ClassBody
-        || context.closest_parent_container = FunctionHeader )
-        && context.predecessor = TokenColon
+        is_class_body_or_function_header context.closest_parent_container
+        && is_colon context.predecessor
       end;
   }
 
@@ -315,8 +292,8 @@ let this_type_keyword =
     is_valid_in_context =
       begin
         fun context ->
-        context.closest_parent_container = FunctionHeader
-        && context.predecessor = TokenColon
+        is_function_header context.closest_parent_container
+        && is_colon context.predecessor
         && context.inside_class_body
       end;
   }
@@ -348,8 +325,8 @@ let async_func_body_keywords =
       begin
         fun context ->
         context.inside_async_function
-        && ( context.closest_parent_container = CompoundStatement
-           || context.closest_parent_container = AssignmentExpression )
+        && is_compound_statement_or_assignment_expression
+             context.closest_parent_container
       end;
   }
 
@@ -396,9 +373,8 @@ let if_after_else =
     is_valid_in_context =
       begin
         fun context ->
-        context.predecessor = KeywordElse
-        && ( context.closest_parent_container = CompoundStatement
-           || context.closest_parent_container = IfStatement )
+        is_kwelse context.predecessor
+        && is_compound_statement_or_if context.closest_parent_container
       end;
   }
 
@@ -408,8 +384,8 @@ let if_trailing_keywords =
     is_valid_in_context =
       begin
         fun context ->
-        context.predecessor = IfWithoutElse
-        && context.closest_parent_container = CompoundStatement
+        is_if_without_else context.predecessor
+        && is_compound_statement context.closest_parent_container
       end;
   }
 
@@ -419,8 +395,8 @@ let try_trailing_keywords =
     is_valid_in_context =
       begin
         fun context ->
-        context.predecessor = TryWithoutFinally
-        && context.closest_parent_container = CompoundStatement
+        is_try_without_finally context.predecessor
+        && is_compound_statement context.closest_parent_container
       end;
   }
 

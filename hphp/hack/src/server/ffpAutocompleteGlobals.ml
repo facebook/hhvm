@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module PositionedSyntax = Full_fidelity_positioned_syntax
 open FfpAutocompleteContextParser
 open AutocompleteTypes
@@ -18,12 +18,11 @@ let should_complete_class (context : context) : bool =
   let open Predecessor in
   is_expression_valid context
   || is_type_valid context
-  || ( context.closest_parent_container = CompoundStatement
-     || context.closest_parent_container = AssignmentExpression )
-     && context.predecessor = KeywordNew
-  || ( context.closest_parent_container = ClassHeader
-     || context.closest_parent_container = ClassBody )
-     && context.predecessor = KeywordExtends
+  || is_compound_statement_or_assignment_expression
+       context.closest_parent_container
+     && is_kwnew context.predecessor
+  || is_class_header_body context.closest_parent_container
+     && is_kwextends context.predecessor
 
 let should_complete_interface (context : context) : bool =
   let open ContextPredicates in
@@ -31,21 +30,19 @@ let should_complete_interface (context : context) : bool =
   let open Predecessor in
   is_expression_valid context
   || is_type_valid context
-  || ( context.closest_parent_container = InterfaceHeader
-     || context.closest_parent_container = InterfaceBody )
-     && context.predecessor = KeywordExtends
-  || ( context.closest_parent_container = ClassHeader
-     || context.closest_parent_container = ClassBody )
-     && context.predecessor = KeywordImplements
+  || is_interface_header_body context.closest_parent_container
+     && is_kwextends context.predecessor
+  || is_class_header_body context.closest_parent_container
+     && is_kwimplements context.predecessor
 
 let should_complete_trait (context : context) : bool =
   let open ContextPredicates in
   let open Container in
   let open Predecessor in
   is_expression_valid context
-  || context.closest_parent_container = ClassBody
+  || is_class_body context.closest_parent_container
      && context.inside_class_body
-     && context.predecessor = KeywordUse
+     && is_kwuse context.predecessor
 
 (* TODO: Port over the namespace completion code from autocompleteService.ml *)
 let should_get_globals (context : context) : bool =

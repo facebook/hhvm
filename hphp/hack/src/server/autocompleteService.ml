@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 open Utils
 open String_utils
@@ -58,7 +58,7 @@ let matches_auto_complete_suffix x =
       (String.length x - AutocompleteTypes.autocomplete_token_length)
       AutocompleteTypes.autocomplete_token_length
   in
-  suffix = AutocompleteTypes.autocomplete_token
+  String.equal suffix AutocompleteTypes.autocomplete_token
 
 let is_auto_complete x =
   if List.is_empty !autocomplete_results then
@@ -641,7 +641,8 @@ let find_global_results
         in
         (* Only load func details if the flag sie_resolve_signatures is true *)
         let (func_details, res_ty) =
-          if sienv.sie_resolve_signatures && r.si_kind = SI_Function then
+          if sienv.sie_resolve_signatures && equal_si_kind r.si_kind SI_Function
+          then
             let fixed_name = ns ^ r.si_name in
             match Tast_env.get_fun tast_env fixed_name with
             | None -> (None, kind_to_string r.si_kind)

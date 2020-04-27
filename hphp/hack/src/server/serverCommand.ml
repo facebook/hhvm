@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Utils
 open ServerCommandTypes
 
@@ -121,7 +121,7 @@ let commands_needs_writes = function
 
 let full_recheck_if_needed' genv env reason =
   if
-    ServerEnv.(env.full_check = Full_check_done)
+    ServerEnv.(is_full_check_done env.full_check)
     && Relative_path.Set.is_empty env.ServerEnv.ide_needs_parsing
   then
     env
@@ -130,7 +130,7 @@ let full_recheck_if_needed' genv env reason =
     let env = { env with ServerEnv.can_interrupt = false } in
     let (env, _) = ServerTypeCheck.(type_check genv env Full_check) in
     let env = { env with ServerEnv.can_interrupt = true } in
-    assert (ServerEnv.(env.full_check = Full_check_done));
+    assert (ServerEnv.(is_full_check_done env.full_check));
     env
 
 let force_remote = function
@@ -256,7 +256,8 @@ let actually_handle genv client msg full_recheck_needed ~is_stale env =
   with_dependency_table_reads full_recheck_needed @@ fun () ->
   Errors.ignore_ @@ fun () ->
   assert (
-    (not full_recheck_needed) || ServerEnv.(env.full_check = Full_check_done) );
+    (not full_recheck_needed) || ServerEnv.(is_full_check_done env.full_check)
+  );
 
   (* There might be additional rechecking required when there are unsaved IDE
    * changes and we asked for an answer that requires ignoring those.

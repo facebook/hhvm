@@ -1,4 +1,4 @@
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 
 exception Non_denotable

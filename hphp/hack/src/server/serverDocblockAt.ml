@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Cls = Decl_provider.Class
 
 let get_all_ancestors ctx class_name =
@@ -243,7 +243,7 @@ let rec go_docblock_ctx
   with
   | None ->
     (* Special case: Classes with an assumed default constructor *)
-    if kind = SearchUtils.SI_Constructor then
+    if SearchUtils.equal_si_kind kind SearchUtils.SI_Constructor then
       go_docblock_ctx ~ctx ~entry ~line ~column ~kind:SearchUtils.SI_Class
     else
       []
@@ -255,10 +255,10 @@ let go_docblock_for_symbol
     ~(ctx : Provider_context.t) ~(symbol : string) ~(kind : SearchUtils.si_kind)
     : DocblockService.result =
   (* Shortcut for namespaces, since they don't have locations *)
-  if kind = SearchUtils.SI_Namespace then
+  if SearchUtils.equal_si_kind kind SearchUtils.SI_Namespace then
     let namespace_declaration = Printf.sprintf "namespace %s;" symbol in
     [DocblockService.HackSnippet namespace_declaration]
-  else if kind = SearchUtils.SI_Keyword then
+  else if SearchUtils.equal_si_kind kind SearchUtils.SI_Keyword then
     let txt = Printf.sprintf "Hack language keyword: %s;" symbol in
     [DocblockService.HackSnippet txt]
   else

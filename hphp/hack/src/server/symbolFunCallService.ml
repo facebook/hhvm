@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SN = Naming_special_names
 module Tast = Aast
 open ServerCommandTypes.Symbol_info_service
@@ -57,7 +57,7 @@ class visitor =
         self#zero
       else
         let name = Utils.strip_ns name in
-        if name = SN.SpecialFunctions.echo then
+        if String.equal name SN.SpecialFunctions.echo then
           self#zero
         else
           let cur_class =
@@ -78,7 +78,7 @@ class visitor =
 
     method! on_fun_ env f =
       let name = snd f.Tast.f_name in
-      let is_anon = name = ";anonymous" in
+      let is_anon = String.equal name ";anonymous" in
       if not is_anon then cur_caller <- Some (Utils.strip_ns name);
       let acc = super#on_fun_ env f in
       if not is_anon then cur_caller <- None;
@@ -128,7 +128,7 @@ class visitor =
         | Tast.Class_const (((_, ty), _), mid)
         | Tast.Obj_get (((_, ty), _), (_, Tast.Id mid), _) ->
           let target_type =
-            if snd mid = SN.Members.__construct then
+            if String.equal (snd mid) SN.Members.__construct then
               Constructor
             else
               Method

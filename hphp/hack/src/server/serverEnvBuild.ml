@@ -11,7 +11,7 @@
 (* Building the environment *)
 (*****************************************************************************)
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 module SLC = ServerLocalConfig
 module J = Hh_json_helpers.AdhocJsonHelpers
@@ -52,8 +52,8 @@ let make_genv options config local_config workers =
   let check_mode = ServerArgs.check_mode options in
   Typing_deps.trace :=
     (not check_mode)
-    || ServerArgs.save_filename options <> None
-    || ServerArgs.save_with_spec options <> None;
+    || Option.is_some (ServerArgs.save_filename options)
+    || Option.is_some (ServerArgs.save_with_spec options);
 
   (* The number of workers is set both in hh.conf and as an optional server argument.
     if the two numbers given in argument and in hh.conf are different, we always take the minimum

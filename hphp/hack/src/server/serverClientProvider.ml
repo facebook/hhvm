@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerCommandTypes
 
 exception Client_went_away
@@ -87,15 +87,19 @@ let sleep_and_check
   in
   let ready_fd_l = select ~idle_gc_slice l 0.1 in
   (* Prioritize existing persistent client requests over command line ones *)
-  let is_persistent fd = Some (Persistent_client fd) = persistent_client_opt in
+  let is_persistent fd =
+    match persistent_client_opt with
+    | Some (Persistent_client x) -> Poly.equal fd x
+    | _ -> false
+  in
   try
     if List.exists ready_fd_l ~f:is_persistent then
       Select_persistent
-    else if List.mem ~equal:( = ) ready_fd_l priority_in_fd then
+    else if List.mem ~equal:Poly.( = ) ready_fd_l priority_in_fd then
       Select_new (accept_client Priority_high priority_in_fd)
-    else if List.mem ~equal:( = ) ready_fd_l default_in_fd then
+    else if List.mem ~equal:Poly.( = ) ready_fd_l default_in_fd then
       Select_new (accept_client Priority_default default_in_fd)
-    else if List.mem ~equal:( = ) ready_fd_l force_dormant_start_only then
+    else if List.mem ~equal:Poly.( = ) ready_fd_l force_dormant_start_only then
       Select_new (accept_client Priority_dormant force_dormant_start_only)
     else if List.is_empty ready_fd_l then
       Select_nothing
@@ -109,7 +113,7 @@ let sleep_and_check
 let has_persistent_connection_request = function
   | Persistent_client fd ->
     let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
-    ready <> []
+    not (List.is_empty ready)
   | _ -> false
 
 let priority_fd (_, x, _) = Some x
@@ -190,7 +194,7 @@ let client_has_message = function
   | Non_persistent_client _ -> true
   | Persistent_client fd ->
     let (ready, _, _) = Unix.select [fd] [] [] 0.0 in
-    ready <> []
+    not (List.is_empty ready)
 
 let read_client_msg = function
   | Non_persistent_client { ic; _ } -> read_client_msg ic

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module DepSet = Typing_deps.DepSet
 module Dep = Typing_deps.Dep
 

@@ -8,7 +8,7 @@
  *)
 
 module Hh_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 open Common
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -171,7 +171,7 @@ let find_child_with_type (node : Syntax.t) (child_type : child_type) :
     |> List.findi ~f:(fun _i actual_child_type ->
            match child_type with
            | ChildType expected_child_type ->
-             expected_child_type = actual_child_type)
+             String.equal expected_child_type actual_child_type)
     |> Option.map ~f:fst
   in
   match child_index with
@@ -197,7 +197,8 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
       match kind with
       | NodeKind kind -> kind
     in
-    if node |> Syntax.kind |> SyntaxKind.to_string <> kind then
+    if not (String.equal (node |> Syntax.kind |> SyntaxKind.to_string) kind)
+    then
       (env, None)
     else
       let patterns =
@@ -208,10 +209,9 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
       in
       search_and ~env ~patterns
   | MissingNodePattern ->
-    if Syntax.kind node = SyntaxKind.Missing then
-      (env, empty_result)
-    else
-      (env, None)
+    (match Syntax.kind node with
+    | SyntaxKind.Missing -> (env, empty_result)
+    | _ -> (env, None))
   | MatchPattern { match_name } ->
     let result =
       {
@@ -264,7 +264,7 @@ let rec search_node ~(env : env) ~(pattern : pattern) ~(node : Syntax.t) :
           end)
     end
   | RawTextPattern { raw_text } ->
-    if Syntax.text node = raw_text then
+    if String.equal (Syntax.text node) raw_text then
       (env, empty_result)
     else
       (env, None)
@@ -384,7 +384,8 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
     get_string "kind" (json, keytrace) >>= fun (kind, kind_keytrace) ->
     Schema_definition.(
       let kind_info =
-        List.find schema ~f:(fun schema_node -> schema_node.description = kind)
+        List.find schema ~f:(fun schema_node ->
+            String.equal schema_node.description kind)
       in
       match kind_info with
       | None ->
@@ -409,7 +410,7 @@ let compile_pattern (ctx : Provider_context.t) (json : Hh_json.json) :
           in
           let field =
             List.find kind_info.fields ~f:(fun (field_name, _) ->
-                get_prefixed_field_name field_name = child_name)
+                String.equal (get_prefixed_field_name field_name) child_name)
           in
           match field with
           | None ->

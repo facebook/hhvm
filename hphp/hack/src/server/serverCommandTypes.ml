@@ -1,3 +1,4 @@
+open Hh_prelude
 open Ide_api_types
 
 type connection_type =

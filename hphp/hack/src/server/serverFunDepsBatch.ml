@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* In order to run recheck_typing, workers need access to the FileInfo for each
  * file to be typechecked, so a FileInfo is paired with each query.
@@ -121,7 +121,7 @@ let result_to_string result (fn, line, char) =
                         ]
                       in
                       let props =
-                        if def.SD.reactivity_attributes <> [] then
+                        if not (List.is_empty def.SD.reactivity_attributes) then
                           let l =
                             List.map def.SD.reactivity_attributes ~f:(fun s ->
                                 JSON_String
@@ -140,13 +140,13 @@ let result_to_string result (fn, line, char) =
     in
     json_to_string obj)
 
-let remove_duplicates_except_none l =
+let remove_duplicates_except_none ~compare l =
   let rec loop l accum =
     match l with
     | [] -> accum
     | [x] -> x :: accum
     | x1 :: x2 :: tl ->
-      if x1 <> None && x1 = x2 then
+      if Option.is_some x1 && compare x1 x2 = 0 then
         loop (x2 :: tl) accum
       else
         loop (x2 :: tl) (x1 :: accum)
@@ -177,7 +177,7 @@ let handlers =
         Results.elements refs
         |> List.map ~f:(ServerSymbolDefinition.go ctx ast)
         |> List.sort ~compare
-        |> remove_duplicates_except_none
+        |> remove_duplicates_except_none ~compare
       end;
   }
 

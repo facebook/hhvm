@@ -27,7 +27,7 @@
    Type-decl is performed lazily as needed.
 *)
 
-open Core_kernel
+open Hh_prelude
 open SearchServiceRunner
 open ServerEnv
 open ServerInitCommon
@@ -55,7 +55,11 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
     : ServerEnv.env * float =
   (* We don't support a saved state for eager init. *)
   let (get_next, t) = indexing genv in
-  let lazy_parse = lazy_level = Parse in
+  let lazy_parse =
+    match lazy_level with
+    | Parse -> true
+    | _ -> false
+  in
   (* Parsing entire repo, too many files to trace *)
   let trace = false in
   let (env, t) = parsing ~lazy_parse genv env ~get_next t ~trace in
@@ -73,10 +77,9 @@ let init (genv : ServerEnv.genv) (lazy_level : lazy_level) (env : ServerEnv.env)
       ~init:fast
   in
   let (env, t) =
-    if lazy_level <> Off then
-      (env, t)
-    else
-      type_decl genv env fast t
+    match lazy_level with
+    | Off -> type_decl genv env fast t
+    | _ -> (env, t)
   in
   (* Type-checking everything *)
   SharedMem.cleanup_sqlite ();

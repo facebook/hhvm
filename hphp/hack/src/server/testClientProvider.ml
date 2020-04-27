@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerCommandTypes
 
 module type RefsType = sig

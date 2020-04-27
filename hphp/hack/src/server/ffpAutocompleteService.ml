@@ -12,7 +12,7 @@ module SourceText = Full_fidelity_source_text
 module SyntaxKind = Full_fidelity_syntax_kind
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (PositionedSyntax)
 module TokenKind = Full_fidelity_token_kind
-open Core_kernel
+open Hh_prelude
 open AutocompleteTypes
 
 let empty_autocomplete_token = "PLACEHOLDER"
@@ -100,7 +100,7 @@ let auto_complete_all_completion_types
   (* If we are running a test, filter the keywords and local variables based on
   the token we are completing. *)
   let stub =
-    if old_contents <> new_contents then
+    if not (String.equal old_contents new_contents) then
       String_utils.rstrip stub empty_autocomplete_token
     else
       stub
@@ -140,7 +140,7 @@ let auto_complete_all_completion_types
   |> filter_results
   |> List.sort ~compare:(fun a b -> compare a.res_name b.res_name)
   |> List.remove_consecutive_duplicates ~equal:(fun a b ->
-         a.res_name = b.res_name)
+         String.equal a.res_name b.res_name)
 
 let auto_complete
     (ctx : Provider_context.t)

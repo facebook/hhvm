@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Option.Monad_infix
 open ServerEnv
 open Reordered_argument_collections
@@ -31,7 +31,7 @@ let to_json input =
   Hh_json.JSON_Array entries
 
 let add_ns name =
-  if name.[0] = '\\' then
+  if Char.equal name.[0] '\\' then
     name
   else
     "\\" ^ name
@@ -55,11 +55,11 @@ let handle_prechecked_files genv env dep f =
   let dep = Typing_deps.DepSet.singleton dep in
   (* All the callers of this should be listed in ServerCommand.rpc_command_needs_full_check,
    * and server should never call this before completing full check *)
-  assert (env.full_check = Full_check_done);
+  assert (is_full_check_done env.full_check);
   let env = ServerPrecheckedFiles.update_after_local_changes genv env dep in
   (* If we added more things to recheck, we can't handle this command now, and
    * tell the client to retry instead. *)
-  if env.full_check = Full_check_done then
+  if is_full_check_done env.full_check then
     let () = Hh_logger.debug "ServerFindRefs.handle_prechecked_files: Done" in
     let callback_result = f () in
     (env, Done callback_result)

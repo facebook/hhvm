@@ -7,6 +7,8 @@
  *
  *)
 
+open Hh_prelude
+
 (*****************************************************************************)
 (* Code for auto-completion *)
 (*****************************************************************************)
@@ -70,7 +72,8 @@ let get_autocomplete_context
         0
     in
     let is_after_open_square_bracket =
-      String.length leading_text >= 1 && Str.last_chars leading_text 1 = "["
+      String.length leading_text >= 1
+      && String.equal (Str.last_chars leading_text 1) "["
     in
     let is_after_quote = Str.string_match context_after_quote leading_text 0 in
     (* Detect what comes next *)
@@ -78,7 +81,7 @@ let get_autocomplete_context
       try file_content.[offset + AutocompleteTypes.autocomplete_token_length]
       with _ -> ' '
     in
-    let is_before_apostrophe = char_at_pos = '\'' in
+    let is_before_apostrophe = Char.equal char_at_pos '\'' in
     {
       AutocompleteTypes.is_manually_invoked;
       is_xhp_classname;

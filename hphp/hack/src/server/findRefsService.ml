@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Option.Monad_infix
 open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
@@ -43,7 +43,7 @@ let action_internal_to_string (action : action_internal) : string =
       (ServerCommandTypes.Find_refs.member_to_string member)
 
 let process_fun_id target_fun id =
-  if target_fun = snd id then
+  if String.equal target_fun (snd id) then
     Pos.Map.singleton (fst id) (snd id)
   else
     Pos.Map.empty
@@ -60,19 +60,21 @@ let check_if_extends_class ctx target_class_name class_name =
 let is_target_class ctx target_classes class_name =
   match target_classes with
   | Class_set s -> SSet.mem s class_name
-  | Subclasses_of s -> s = class_name || check_if_extends_class ctx s class_name
+  | Subclasses_of s ->
+    String.equal s class_name || check_if_extends_class ctx s class_name
 
 let process_member_id
     ctx target_classes target_member class_name mid ~is_method ~is_const =
   let member_name = snd mid in
   let is_target =
     match target_member with
-    | Method target_name -> is_method && member_name = target_name
+    | Method target_name -> is_method && String.equal member_name target_name
     | Property target_name ->
       (not is_method)
       && (not is_const)
-      && String_utils.lstrip member_name "$" = target_name
-    | Class_const target_name -> is_const && member_name = target_name
+      && String.equal (String_utils.lstrip member_name "$") target_name
+    | Class_const target_name ->
+      is_const && String.equal member_name target_name
     | Typeconst _ -> false
   in
   if is_target && is_target_class ctx target_classes class_name then
@@ -81,7 +83,7 @@ let process_member_id
     Pos.Map.empty
 
 let process_class_id target_class cid mid_option =
-  if target_class = snd cid then
+  if String.equal target_class (snd cid) then
     let class_name =
       match mid_option with
       | None -> snd cid
@@ -95,14 +97,14 @@ let process_taccess
     ctx target_classes target_typeconst (class_name, tconst_name, p) =
   if
     is_target_class ctx target_classes class_name
-    && target_typeconst = tconst_name
+    && String.equal target_typeconst tconst_name
   then
     Pos.Map.singleton p (class_name ^ "::" ^ tconst_name)
   else
     Pos.Map.empty
 
 let process_gconst_id target_gconst id =
-  if target_gconst = snd id then
+  if String.equal target_gconst (snd id) then
     Pos.Map.singleton (fst id) (snd id)
   else
     Pos.Map.empty
@@ -298,7 +300,7 @@ let get_definitions ctx = function
         | Some class_ ->
           let add_meth get acc =
             match get method_name with
-            | Some meth when meth.ce_origin = Cls.name class_ ->
+            | Some meth when String.equal meth.ce_origin (Cls.name class_) ->
               let pos = get_pos @@ Lazy.force meth.ce_type in
               (method_name, pos) :: acc
             | _ -> acc
@@ -313,7 +315,8 @@ let get_definitions ctx = function
         | Some class_ ->
           let add_class_const get acc =
             match get class_const_name with
-            | Some class_const when class_const.cc_origin = Cls.name class_ ->
+            | Some class_const
+              when String.equal class_const.cc_origin (Cls.name class_) ->
               let pos = class_const.cc_pos in
               (class_const_name, pos) :: acc
             | _ -> acc

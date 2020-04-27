@@ -7,7 +7,7 @@
  *)
 
 open Aast
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 open ServerCommandTypes.Extract_standalone
 module SourceText = Full_fidelity_source_text
@@ -252,7 +252,10 @@ let get_dep_mode ctx dep =
     get_gconst_mode ctx name
   | RecordDef _ -> records_not_supported ()
 
-let is_strict_dep ctx dep = get_dep_mode ctx dep = Some FileInfo.Mstrict
+let is_strict_dep ctx dep =
+  match get_dep_mode ctx dep with
+  | Some FileInfo.Mstrict -> true
+  | _ -> false
 
 let is_strict_fun ctx name = is_strict_dep ctx (Typing_deps.Dep.Fun name)
 
@@ -261,17 +264,22 @@ let is_strict_class ctx name = is_strict_dep ctx (Typing_deps.Dep.Class name)
 let is_builtin_dep ctx dep =
   let msg = Typing_deps.Dep.variant_to_string dep in
   let pos = value_or_not_found msg (get_dep_pos ctx dep) in
-  Relative_path.prefix (Pos.filename pos) = Relative_path.Hhi
+  Relative_path.(is_hhi (prefix (Pos.filename pos)))
 
 let is_relevant_dependency
     (target : target) (dep : Typing_deps.Dep.dependent Typing_deps.Dep.variant)
     =
   match target with
-  | Function f -> dep = Typing_deps.Dep.Fun f || dep = Typing_deps.Dep.FunName f
+  | Function f ->
+    (match dep with
+    | Typing_deps.Dep.Fun g
+    | Typing_deps.Dep.FunName g ->
+      String.equal f g
+    | _ -> false)
   (* We have to collect dependencies of the entire class because dependency collection is
      coarse-grained: if cls's member depends on D, we get a dependency edge cls --> D,
      not (cls, member) --> D *)
-  | Method (cls, _) -> get_class_name dep = Some cls
+  | Method (cls, _) -> Option.equal String.equal (get_class_name dep) (Some cls)
 
 let get_filename ctx target =
   let pos =
@@ -631,19 +639,19 @@ let rec get_init_from_hint ctx tparams_stack hint =
   | Happly ((_, name), hints) ->
     (match () with
     | _
-      when name = SN.Collections.cVec
-           || name = SN.Collections.cKeyset
-           || name = SN.Collections.cDict ->
+      when String.equal name SN.Collections.cVec
+           || String.equal name SN.Collections.cKeyset
+           || String.equal name SN.Collections.cDict ->
       Printf.sprintf "%s[]" (strip_ns name)
     | _
-      when name = SN.Collections.cVector
-           || name = SN.Collections.cImmVector
-           || name = SN.Collections.cMap
-           || name = SN.Collections.cImmMap
-           || name = SN.Collections.cSet
-           || name = SN.Collections.cImmSet ->
+      when String.equal name SN.Collections.cVector
+           || String.equal name SN.Collections.cImmVector
+           || String.equal name SN.Collections.cMap
+           || String.equal name SN.Collections.cImmMap
+           || String.equal name SN.Collections.cSet
+           || String.equal name SN.Collections.cImmSet ->
       Printf.sprintf "%s {}" (strip_ns name)
-    | _ when name = SN.Collections.cPair ->
+    | _ when String.equal name SN.Collections.cPair ->
       (match hints with
       | [first; second] ->
         Printf.sprintf
@@ -651,7 +659,7 @@ let rec get_init_from_hint ctx tparams_stack hint =
           (get_init_from_hint ctx tparams_stack first)
           (get_init_from_hint ctx tparams_stack second)
       | _ -> failwith "malformed hint")
-    | _ when name = SN.Classes.cClassname ->
+    | _ when String.equal name SN.Classes.cClassname ->
       (match hints with
       | [(_, Happly ((_, class_name), _))] ->
         Printf.sprintf "%s::class" class_name
@@ -659,15 +667,15 @@ let rec get_init_from_hint ctx tparams_stack hint =
     | _ ->
       (match get_class_nast ctx name with
       | Some class_ ->
-        if class_.c_kind = Ast_defs.Cenum then
+        (match class_.c_kind with
+        | Ast_defs.Cenum ->
           let const_name =
             match class_.c_consts with
             | [] -> failwith "empty enum"
             | const :: _ -> snd const.cc_id
           in
           Printf.sprintf "%s::%s" name const_name
-        else
-          unsupported_hint ()
+        | _ -> unsupported_hint ())
       | None ->
         let typedef = get_typedef_nast_exn ctx name in
         let tparams =
@@ -884,7 +892,7 @@ let get_prop_declaration ctx prop =
       "%s attribute %s %s %s %s;"
       user_attributes
       type_
-      (String.lstrip ~drop:(fun c -> c = ':') name)
+      (String.lstrip ~drop:(fun c -> Char.equal c ':') name)
       init
       (string_of_xhp_attr_info xhp_attr_info)
 
@@ -913,12 +921,13 @@ let get_method_declaration ctx target class_name method_name =
   match target with
   | ServerCommandTypes.Extract_standalone.Method
       (target_class_name, target_method_name)
-    when class_name = target_class_name && method_name = target_method_name ->
+    when String.equal class_name target_class_name
+         && String.equal method_name target_method_name ->
     None
   | _ ->
     let open Option in
     get_class_nast ctx class_name >>= fun class_ ->
-    let from_interface = class_.c_kind = Ast_defs.Cinterface in
+    let from_interface = Ast_defs.is_c_interface class_.c_kind in
     get_method_nast ctx class_name method_name >>= fun method_ ->
     Some (get_method_declaration method_ ~from_interface)
 
@@ -942,7 +951,9 @@ let get_class_elt_declaration
     let prop = get_prop_nast_exn ctx class_name prop_name in
     Some (get_prop_declaration ctx prop)
   | SProp (class_name, sprop_name) ->
-    let sprop_name = String.lstrip ~drop:(fun c -> c = '$') sprop_name in
+    let sprop_name =
+      String.lstrip ~drop:(fun c -> Char.equal c '$') sprop_name
+    in
     let prop = get_prop_nast_exn ctx class_name sprop_name in
     Some (get_prop_declaration ctx prop)
   (* Constructor should've been tackled earlier, and all other dependencies aren't class elements *)
@@ -1007,7 +1018,8 @@ let get_class_body ctx class_ target class_elts =
      here, with stubs of other class elements. *)
   let extracted_method =
     match target with
-    | Method (cls_name, _) when cls_name = name -> [extract_target ctx target]
+    | Method (cls_name, _) when String.equal cls_name name ->
+      [extract_target ctx target]
     | _ -> []
   in
   String.concat
@@ -1071,8 +1083,13 @@ type extraction_env = {
 }
 
 let rec do_add_dep ctx env dep =
+  let is_wildcard =
+    match dep with
+    | Typing_deps.Dep.Class h -> String.equal h SN.Typehints.wildcard
+    | _ -> false
+  in
   if
-    dep <> Typing_deps.Dep.Class SN.Typehints.wildcard
+    (not is_wildcard)
     && (not (HashSet.mem env.dependencies dep))
     && not (is_builtin_dep ctx dep)
   then (
@@ -1216,7 +1233,7 @@ and add_signature_dependencies ctx env obj =
       | Const (_, name) ->
         (match Class.get_typeconst cls name with
         | Some tc ->
-          if cls_name <> tc.ttc_origin then
+          if not (String.equal cls_name tc.ttc_origin) then
             do_add_dep ctx env (Const (tc.ttc_origin, name));
           Option.iter tc.ttc_type ~f:add_dep;
           Option.iter tc.ttc_constraint ~f:add_dep
@@ -1236,7 +1253,7 @@ and add_signature_dependencies ctx env obj =
       | AllMembers _ ->
         (* AllMembers is used for dependencies on enums, so we should depend on all constants *)
         List.iter (Class.consts cls) (fun (name, c) ->
-            if name <> "class" then add_dep c.cc_type)
+            if not (String.equal name "class") then add_dep c.cc_type)
       (* Ignore, we fetch class hierarchy when we call add_signature_dependencies on a class dep *)
       | Extends _ -> ()
       | _ -> raise UnexpectedDependency))
@@ -1314,13 +1331,14 @@ let get_implementation_dependencies ctx env cls_name =
       else
         HashSet.fold env.dependencies ~init:acc ~f:(fun dep acc ->
             match dep with
-            | SMethod (class_name, method_name) when class_name = ancestor_name
-              ->
+            | SMethod (class_name, method_name)
+              when String.equal class_name ancestor_name ->
               add_smethod_impl acc method_name
-            | Method (class_name, method_name) when class_name = ancestor_name
-              ->
+            | Method (class_name, method_name)
+              when String.equal class_name ancestor_name ->
               add_method_impl acc method_name
-            | Const (class_name, name) when class_name = ancestor_name ->
+            | Const (class_name, name)
+              when String.equal class_name ancestor_name ->
               if Option.is_some (Class.get_typeconst ancestor name) then
                 add_typeconst_impl acc name
               else if Option.is_some (Class.get_const ancestor name) then
@@ -1447,7 +1465,7 @@ let group_class_dependencies_by_class ctx dependencies =
            * Therefore, we should ignore dependencies whose origin differs
            * from their class.
            *)
-          if origin = cls then
+          if String.equal origin cls then
             SMap.add cls [obj] acc ~combine:(fun x y -> y @ x)
           else
             acc))
@@ -1462,10 +1480,10 @@ type hack_namespace = {
 
 let subnamespace index name =
   let (nspaces, _) = String.rsplit2_exn ~on:'\\' name in
-  if nspaces = "" then
+  if String.equal nspaces "" then
     None
   else
-    let nspaces = String.strip ~drop:(fun c -> c = '\\') nspaces in
+    let nspaces = String.strip ~drop:(fun c -> Char.equal c '\\') nspaces in
     let nspaces = String.split ~on:'\\' nspaces in
     List.nth nspaces index
 
@@ -1474,7 +1492,7 @@ let sort_by_namespace declarations =
   let rec add_decl nspace decl index =
     match subnamespace index decl with
     | Some name ->
-      ( if Caml.Hashtbl.find_opt nspace.namespaces name = None then
+      ( if Option.is_none (Caml.Hashtbl.find_opt nspace.namespaces name) then
         let nested = Caml.Hashtbl.create 0 in
         let declarations = HashSet.create () in
         Caml.Hashtbl.add

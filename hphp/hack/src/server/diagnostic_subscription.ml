@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open Reordered_argument_collections
 module RP = Relative_path
 
@@ -182,7 +182,7 @@ let pop_errors ds ~global_errors =
                 ~init:acc
                 ~f:(fun e acc ->
                   (* ... filtering out ones irrelevant to tracked files. *)
-                  if error_filename e <> path then
+                  if not (RP.equal (error_filename e) path) then
                     acc
                   else
                     e :: acc))
@@ -193,7 +193,9 @@ let pop_errors ds ~global_errors =
       RP.Map.merge ds.pushed_errors new_pushed_errors ~f:(fun _ old new_ ->
           match (old, new_) with
           | (None, Some new_) -> Some new_
-          | (Some old, Some new_) when old <> new_ -> Some new_
+          | (Some old, Some new_)
+            when not (List.equal ~equal:Errors.equal_error old new_) ->
+            Some new_
           | (Some _, None) -> Some []
           | _ -> None)
     in

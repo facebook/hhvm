@@ -9,7 +9,7 @@
 
 type 'a error_
 
-type error = Pos.t error_
+type error = Pos.t error_ [@@deriving eq]
 
 type applied_fixme = Pos.t * int
 
@@ -34,6 +34,7 @@ type phase =
   | Naming
   | Decl
   | Typing
+[@@deriving eq]
 
 type severity =
   | Warning

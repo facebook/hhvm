@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open SymbolOccurrence
 open Typing_defs
 
@@ -28,7 +28,7 @@ let process_attribute (pos, name) class_name method_ =
   let type_ =
     match (name, class_name, method_) with
     | (name, Some (_, class_name), Some ((_, method_name), is_static))
-      when name = Naming_special_names.UserAttributes.uaOverride ->
+      when String.equal name Naming_special_names.UserAttributes.uaOverride ->
       Attribute (Some { class_name; method_name; is_static })
     | _ -> Attribute None
   in
@@ -297,9 +297,10 @@ let visitor =
         let class_ =
           match class_.c_extends with
           | [(_, Happly ((_, builtin_enum), [(_, Happly (c_name, []))]))]
-            when c_name = class_.c_name
-                 && builtin_enum = Naming_special_names.Classes.cHH_BuiltinEnum
-            ->
+            when String.equal (snd c_name) (snd class_.c_name)
+                 && String.equal
+                      builtin_enum
+                      Naming_special_names.Classes.cHH_BuiltinEnum ->
             { class_ with c_extends = [] }
           | _ -> class_
         in

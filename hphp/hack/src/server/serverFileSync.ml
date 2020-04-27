@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open File_content
 open Option.Monad_infix
 open ServerEnv
@@ -63,7 +63,8 @@ let open_file ~predeclare env path content =
     File_provider.remove_batch (Relative_path.Set.singleton path);
     File_provider.provide_file path (File_provider.Ide content);
     let (ide_needs_parsing, diag_subscribe) =
-      if content = prev_content && env.full_check = Full_check_done then
+      if String.equal content prev_content && is_full_check_done env.full_check
+      then
         (* Try to avoid telling the user that a check is needed when the file
          * was unchanged. But even in this case, we might need to push
          * errors that were previously throttled. They are available only
@@ -115,10 +116,9 @@ let close_relative_path env path =
   File_provider.remove_batch (Relative_path.Set.singleton path);
   let new_contents = File_provider.get_contents path in
   let ide_needs_parsing =
-    if new_contents = Some contents then
-      env.ide_needs_parsing
-    else
-      Relative_path.Set.add env.ide_needs_parsing path
+    match new_contents with
+    | Some c when String.equal c contents -> env.ide_needs_parsing
+    | _ -> Relative_path.Set.add env.ide_needs_parsing path
   in
   let disk_needs_parsing = Relative_path.Set.add env.disk_needs_parsing path in
   let last_command_time = Unix.gettimeofday () in
@@ -194,7 +194,8 @@ let get_unsaved_changes env =
       | Some (File_provider.Ide ide_contents) ->
         begin
           match get_file_content_from_disk path with
-          | Some disk_contents when ide_contents <> disk_contents ->
+          | Some disk_contents
+            when not (String.equal ide_contents disk_contents) ->
             Relative_path.Map.add acc path (ide_contents, disk_contents)
           | Some _ -> acc
           | None ->

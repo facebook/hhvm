@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 module PosSet = Caml.Set.Make (Pos)
 
@@ -78,7 +78,7 @@ module ScopeChain = struct
     | [] -> None
     | h :: t ->
       let result = SMap.find_opt name h in
-      if result = None then
+      if Option.is_none result then
         get name t
       else
         result
@@ -198,7 +198,7 @@ module LocalMap = struct
     && localmap.target_char <= pos_end
 
   let get_target_ident ident pos localmap =
-    if localmap.target_ident = None && overlaps pos localmap then
+    if Option.is_none localmap.target_ident && overlaps pos localmap then
       Some ident
     else
       localmap.target_ident

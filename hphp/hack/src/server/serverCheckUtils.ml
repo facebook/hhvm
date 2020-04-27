@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 open ServerLocalConfig
 open ServerLocalConfig.RemoteTypeCheck

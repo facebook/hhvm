@@ -228,34 +228,35 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       RepoAutoloadMapBuilder autoloadMapBuilder;
 
       auto program = std::move(ar->program());
-      if (ues.size()) {
-        assertx(!program.get());
-        uint32_t id = 0;
-        for (auto& ue : ues) {
-          ue->m_symbol_refs.clear();
-          ue->m_sn = id;
-          ue->setSha1(SHA1 { id });
-          autoloadMapBuilder.addUnit(*ue);
-          id++;
-        }
-        commitSome(ues);
-      }
-
-      HHBBC::UnitEmitterQueue ueq;
-
-      ar->finish();
-      ar.reset();
-
       if (!program.get()) {
-        if (Option::GenerateBinaryHHBC) {
-          {
-            commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{},
-                             autoloadMapBuilder);
+        if (ues.size()) {
+          uint32_t id = 0;
+          for (auto& ue : ues) {
+            ue->m_symbol_refs.clear();
+            ue->m_sn = id;
+            ue->setSha1(SHA1 { id });
+            autoloadMapBuilder.addUnit(*ue);
+            id++;
           }
+          commitSome(ues);
+        }
+
+        ar->finish();
+        ar.reset();
+
+        if (Option::GenerateBinaryHHBC) {
+          commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder>{},
+                           autoloadMapBuilder);
         }
         return;
       }
 
+      assertx(ues.size() == 0);
+
+      ar->finish();
+      ar.reset();
+
+      HHBBC::UnitEmitterQueue ueq;
       auto commitLoop = [&] {
         folly::Optional<Timer> commitTime;
         // kBatchSize needs to strike a balance between reducing

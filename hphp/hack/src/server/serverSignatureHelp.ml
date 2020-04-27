@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Option.Monad_infix
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
@@ -105,7 +105,7 @@ let get_occurrence_info
     | SymbolOccurrence.Method (classname, methodname) ->
       let classname = Utils.add_ns classname in
       let ft =
-        if methodname = "__construct" then
+        if String.equal methodname "__construct" then
           Decl_provider.get_class_constructor ctx classname
         else
           Option.first_some

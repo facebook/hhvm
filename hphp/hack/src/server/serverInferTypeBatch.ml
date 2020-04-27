@@ -7,13 +7,15 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
-type pos = Relative_path.t * int * int * (int * int) option
+type pos = Relative_path.t * int * int * (int * int) option [@@deriving eq]
+
+type spos = string * int * int * (int * int) option [@@deriving eq, ord]
 
 let recheck_typing ctx (pos_list : pos list) =
   let files_to_check =
-    pos_list |> List.remove_consecutive_duplicates ~equal:( = )
+    pos_list |> List.remove_consecutive_duplicates ~equal:equal_pos
   in
   let tasts =
     List.map files_to_check ~f:(fun (path, _, _, _) ->
@@ -97,9 +99,9 @@ let go :
     pos_list
     (* Sort, so that many queries on the same file will (generally) be
      * dispatched to the same worker. *)
-    |> List.sort ~compare
+    |> List.sort ~compare:compare_spos
     (* Dedup identical queries *)
-    |> List.remove_consecutive_duplicates ~equal:( = )
+    |> List.remove_consecutive_duplicates ~equal:equal_spos
     |> List.map ~f:(fun (fn, line, char, range_end) ->
            let fn = Relative_path.create_detect_prefix fn in
            (fn, line, char, range_end))

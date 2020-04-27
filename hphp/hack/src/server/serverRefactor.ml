@@ -7,12 +7,12 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 open ServerRefactorTypes
 
 let maybe_add_dollar s =
-  if s.[0] <> '$' then
+  if not (Char.equal s.[0] '$') then
     "$" ^ s
   else
     s
@@ -42,7 +42,8 @@ let get_type_params_type_rewrite_patches ctx files =
 
 let find_def_filename current_filename definition =
   SymbolDefinition.(
-    if Pos.filename definition.pos = Relative_path.default then
+    if Relative_path.equal (Pos.filename definition.pos) Relative_path.default
+    then
       (* When the definition is in an IDE buffer with local changes, the filename
        in the definition will be empty. *)
       current_filename
@@ -262,19 +263,22 @@ let get_call_signature_for_wrap (func_decl : Full_fidelity_positioned_syntax.t)
                 };
               _;
             } ->
-          text generic_type = "Awaitable" && text type_spec = "void"
+          String.equal (text generic_type) "Awaitable"
+          && String.equal (text type_spec) "void"
         | SimpleTypeSpecifier { simple_type_specifier = type_spec } ->
-          text type_spec = "void"
+          String.equal (text type_spec) "void"
         | _ -> false
       in
       let (is_async, is_static) =
         match syntax modifiers with
         | SyntaxList modifiers ->
           let is_async =
-            List.exists modifiers ~f:(fun modifier -> text modifier = "async")
+            List.exists modifiers ~f:(fun modifier ->
+                String.equal (text modifier) "async")
           in
           let is_static =
-            List.exists modifiers ~f:(fun modifier -> text modifier = "static")
+            List.exists modifiers ~f:(fun modifier ->
+                String.equal (text modifier) "static")
           in
           (is_async, is_static)
         | _ -> (false, false)

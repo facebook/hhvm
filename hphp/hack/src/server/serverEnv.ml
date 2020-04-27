@@ -91,6 +91,14 @@ let is_full_check_done = function
   | Full_check_done -> true
   | _ -> false
 
+let is_full_check_needed = function
+  | Full_check_needed -> true
+  | _ -> false
+
+let is_full_check_started = function
+  | Full_check_started -> true
+  | _ -> false
+
 (* In addition to this environment, many functions are storing and
  * updating ASTs, NASTs, and types in a shared space
  * (see respectively Parser_heap, Naming_table, Typing_env).

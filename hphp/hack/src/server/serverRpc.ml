@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 open ServerCommandTypes
 open Utils
@@ -417,7 +417,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
   | DISCONNECT -> (ServerFileSync.clear_sync_data env, ())
   | SUBSCRIBE_DIAGNOSTIC id ->
     let init =
-      if env.full_check = Full_check_done then
+      if is_full_check_done env.full_check then
         env.errorl
       else
         Errors.empty

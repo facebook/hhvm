@@ -7,9 +7,11 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type pos = Relative_path.t * int * int
+
+type spos = string * int * int [@@deriving eq, ord]
 
 let pos_to_json fn line char =
   Hh_json.(
@@ -24,7 +26,7 @@ let recheck_typing ctx (pos_list : pos list) =
   let files_to_check =
     pos_list
     |> List.map ~f:(fun (path, _, _) -> path)
-    |> List.remove_consecutive_duplicates ~equal:( = )
+    |> List.remove_consecutive_duplicates ~equal:Relative_path.equal
   in
   List.map files_to_check ~f:(fun path ->
       let (_ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
@@ -76,9 +78,9 @@ let prepare_pos_infos pos_list =
   pos_list
   (* Sort, so that many queries on the same file will (generally) be
    * dispatched to the same worker. *)
-  |> List.sort ~compare
+  |> List.sort ~compare:compare_spos
   (* Dedup identical queries *)
-  |> List.remove_consecutive_duplicates ~equal:( = )
+  |> List.remove_consecutive_duplicates ~equal:equal_spos
   |> List.map ~f:(fun (path, line, char) ->
          (Relative_path.create_detect_prefix path, line, char))
 

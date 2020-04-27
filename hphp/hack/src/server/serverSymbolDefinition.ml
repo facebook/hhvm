@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open IdentifySymbolService
 open Option.Monad_infix
 open Typing_defs
@@ -55,14 +55,14 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
   | Constructor
   | Method
   | Static_method ->
-    List.find c.c_methods (fun m -> snd m.m_name = member_name) >>= fun m ->
-    Some (FileOutline.summarize_method member_origin m)
+    List.find c.c_methods (fun m -> String.equal (snd m.m_name) member_name)
+    >>= fun m -> Some (FileOutline.summarize_method member_origin m)
   | Property
   | Static_property ->
     let props = c.c_vars @ List.map c.c_xhp_attrs (fun (_, var, _, _) -> var) in
     let get_prop_name { cv_id; _ } = snd cv_id in
-    List.find props (fun p -> get_prop_name p = member_name) >>= fun p ->
-    Some (FileOutline.summarize_property member_origin p)
+    List.find props (fun p -> String.equal (get_prop_name p) member_name)
+    >>= fun p -> Some (FileOutline.summarize_property member_origin p)
   | Class_const ->
     let (consts, abs_consts) =
       List.partition_map c.c_consts (fun cc ->
@@ -71,7 +71,7 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
           else
             `Snd cc)
     in
-    let name_matches cc = snd cc.cc_id = member_name in
+    let name_matches cc = String.equal (snd cc.cc_id) member_name in
     let res =
       Option.first_some
         (List.find consts name_matches)
@@ -80,8 +80,8 @@ let get_member_def (ctx : Provider_context.t) (x : class_element) =
     Option.map ~f:(FileOutline.summarize_const member_origin) res
   | Typeconst ->
     let tconsts = c.c_typeconsts in
-    List.find tconsts (fun t -> snd t.c_tconst_name = member_name) >>= fun t ->
-    Some (FileOutline.summarize_typeconst member_origin t)
+    List.find tconsts (fun t -> String.equal (snd t.c_tconst_name) member_name)
+    >>= fun t -> Some (FileOutline.summarize_typeconst member_origin t)
 
 let get_local_var_def ast name p =
   let (line, char, _) = Pos.info_pos p in
@@ -130,7 +130,7 @@ let go ctx ast result =
      * folded together, so we will correctly identify them even if method_name
      * is not defined directly in class c_name *)
     Decl_provider.get_class ctx c_name >>= fun class_ ->
-    if method_name = Naming_special_names.Members.__construct then
+    if String.equal method_name Naming_special_names.Members.__construct then
       match fst (Cls.construct class_) with
       | Some m -> get_member_def ctx (Constructor, m.ce_origin, method_name)
       | None ->

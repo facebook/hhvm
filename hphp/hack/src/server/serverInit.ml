@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Result.Export
 open SearchServiceRunner
 open ServerEnv
@@ -159,13 +159,14 @@ let init
         let msg_verbose = Printf.sprintf "%s\n%s" msg stack in
         HackEventLogger.load_state_exn msg_verbose;
         Hh_logger.log "Could not load saved state: %s" msg_verbose;
-        if next_step = Exit_status.No_error then (
+        (match next_step with
+        | Exit_status.No_error ->
           ServerProgress.send_to_monitor
             (MonitorRpc.PROGRESS_WARNING (Some msg));
           ( ServerLazyInit.full_init genv env,
             Load_state_failed msg_verbose,
             false )
-        ) else
+        | _ ->
           let finale_data =
             {
               ServerCommandTypes.exit_status = next_step;
@@ -181,7 +182,7 @@ let init
               Stdlib.close_out oc
             with _ -> ()
           end;
-          Exit_status.exit next_step)
+          Exit_status.exit next_step))
     | (Off, Full_init)
     | (Decl, Full_init)
     | (Parse, Full_init) ->

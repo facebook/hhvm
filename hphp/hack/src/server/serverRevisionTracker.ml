@@ -15,7 +15,7 @@
  * - we only record "new" mergebases as we see them, not detecting transitions
  *   between already visited revisions
  **)
-open Core_kernel
+open Hh_prelude
 
 (* This will be None after init in case of canaries and Precomputed loads *)
 let current_mergebase : Hg.global_rev option ref = ref None
@@ -130,7 +130,7 @@ let check_blocking () =
 
 let rec check_non_blocking env =
   if Queue.is_empty pending_queries then (
-    if ServerEnv.(env.full_check = Full_check_done) && !did_change_mergebase
+    if ServerEnv.(is_full_check_done env.full_check) && !did_change_mergebase
     then (
       Hh_logger.log
         "ServerRevisionTracker: Full check completed despite mergebase changes";

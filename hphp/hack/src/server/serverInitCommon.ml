@@ -7,7 +7,7 @@
  *)
 
 module Hack_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 module Bucket = Hack_bucket
 open Hh_core
 open ServerEnv
@@ -150,16 +150,19 @@ let type_check
     (files_to_check : Relative_path.t list)
     (t : float) : ServerEnv.env * float =
   (* No type checking in AI mode *)
-  if ServerArgs.ai_mode genv.options <> None then
+  if Option.is_some (ServerArgs.ai_mode genv.options) then
     (env, t)
   else if
     ServerArgs.check_mode genv.options
-    || ServerArgs.save_filename genv.options <> None
-    || ServerArgs.save_with_spec genv.options <> None
+    || Option.is_some (ServerArgs.save_filename genv.options)
+    || Option.is_some (ServerArgs.save_with_spec genv.options)
   then (
     (* Prechecked files are not supported in check/saving-state modes, we
      * should always recheck everything necessary up-front. *)
-    assert (env.prechecked_files = Prechecked_files_disabled);
+    assert (
+      match env.prechecked_files with
+      | Prechecked_files_disabled -> true
+      | _ -> false );
 
     let count = List.length files_to_check in
     let logstring = Printf.sprintf "Filter %d files" count in

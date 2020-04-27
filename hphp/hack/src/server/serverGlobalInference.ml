@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Typing_defs
 module Inf = Typing_inference_env
 module Syntax = Full_fidelity_editable_positioned_syntax
@@ -262,28 +262,24 @@ let log_ty log =
   |> Scuba.add_int "end_column" (snd @@ Pos.end_line_column log.pos)
   |> Scuba.add_int
        "is_error"
-       ( if log.status = SError then
-         1
-       else
-         0 )
+       (match log.status with
+       | SError -> 1
+       | _ -> 0)
   |> Scuba.add_int
        "is_nonacceptable"
-       ( if log.status = SNonacceptable then
-         1
-       else
-         0 )
+       (match log.status with
+       | SNonacceptable -> 1
+       | _ -> 0)
   |> Scuba.add_int
        "is_ret"
-       ( if log.syntax_type = RetType then
-         1
-       else
-         0 )
+       (match log.syntax_type with
+       | RetType -> 1
+       | _ -> 0)
   |> Scuba.add_int
        "is_param"
-       ( if log.syntax_type = ParamType then
-         1
-       else
-         0 )
+       (match log.syntax_type with
+       | ParamType -> 1
+       | _ -> 0)
   |> Scuba.add_normal "ty" log.ty
   |> EventLogger.log
 
@@ -297,7 +293,10 @@ let get_first_suggested_type_as_string ~syntax_type errors file type_map node =
         | Typing_defs.LoclTy ty ->
           let (log, type_str_opt) =
             classify_ty
-              ~is_return:(syntax_type = RetType)
+              ~is_return:
+                (match syntax_type with
+                | RetType -> true
+                | _ -> false)
               ~syntax_type
               ~pos
               ~file
@@ -315,7 +314,7 @@ let get_patches
     (type_map : (Tast_env.env * phase_ty) list Pos.AbsolutePosMap.t)
     file =
   let file = Relative_path.create_detect_prefix file in
-  if Relative_path.prefix file = Relative_path.Hhi then
+  if Relative_path.(is_hhi (prefix file)) then
     []
   else
     let source_text =

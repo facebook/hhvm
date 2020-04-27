@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* Order symbols from innermost to outermost *)
 let by_nesting x y =

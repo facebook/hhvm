@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module MC = MonitorConnection
 
 type 'env handle_command_result =

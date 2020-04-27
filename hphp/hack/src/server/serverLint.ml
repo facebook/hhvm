@@ -10,7 +10,7 @@
 open ServerEnv
 open Utils
 module Hack_bucket = Bucket
-open Core_kernel
+open Hh_prelude
 module RP = Relative_path
 
 let output_json oc el =
@@ -28,7 +28,7 @@ let output_json oc el =
 let output_text oc el format =
   (* Essentially the same as type error output, except that we only have one
    * message per error, and no additional 'typing reasons' *)
-  ( if el = [] then
+  ( if List.is_empty el then
     Out_channel.output_string oc "No lint errors!\n"
   else
     let f =
@@ -36,7 +36,7 @@ let output_text oc el format =
       | Errors.Context -> Lint.to_contextual_string
       | Errors.Raw -> Lint.to_string
     in
-    let sl = List.map el f in
+    let sl = List.map el ~f in
     List.iter sl (fun s -> Printf.fprintf oc "%s\n%!" s) );
   Out_channel.flush oc
 

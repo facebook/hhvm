@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 open Reordered_argument_collections
 open String_utils
@@ -94,7 +94,10 @@ module Program = struct
     (* as Warnings shouldn't break CI, don't change the exit status except for Errors *)
     let has_errors =
       List.exists
-        ~f:(fun e -> Errors.get_severity e = Errors.Error)
+        ~f:(fun e ->
+          match Errors.get_severity e with
+          | Errors.Error -> true
+          | _ -> false)
         (Errors.get_error_list env.errorl)
     in
     let is_saving_state_and_ignoring_errors =
@@ -240,7 +243,7 @@ let handle_connection_ genv env client =
         in
         (* If the client connected in the middle of recheck, let them know it's
          * happening. *)
-        if env.full_check = Full_check_started then
+        if is_full_check_started env.full_check then
           ServerBusyStatus.send
             env
             (ServerCommandTypes.Doing_global_typecheck
@@ -332,7 +335,11 @@ let handle_connection genv env client client_kind =
     |> ServerUtils.wrap (handle_connection_try (fun x -> x) client)
 
 let recheck genv old_env check_kind =
-  let can_interrupt = check_kind = ServerTypeCheck.Full_check in
+  let can_interrupt =
+    match check_kind with
+    | ServerTypeCheck.Full_check -> true
+    | _ -> false
+  in
   let old_env = { old_env with can_interrupt } in
   let (new_env, res) = ServerTypeCheck.type_check genv old_env check_kind in
   let new_env = { new_env with can_interrupt = true } in
@@ -421,7 +428,9 @@ let rec recheck_loop acc genv env select_outcome =
   let (env, updates, updates_stale) = query_notifier genv env query_kind t in
   let acc = { acc with updates_stale } in
   let is_idle =
-    select_outcome <> ClientProvider.Select_persistent
+    (match select_outcome with
+    | ClientProvider.Select_persistent -> false
+    | _ -> true)
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
     t -. env.last_command_time > 0.3
@@ -445,7 +454,7 @@ let rec recheck_loop acc genv env select_outcome =
     (* We need to auto-restart the recheck to make progress towards handling
      * this command... *)
     | Some (_command, reason, client)
-      when env.full_check = Full_check_needed
+      when is_full_check_needed env.full_check
            (*... but we don't want to get into a battle with IDE edits stopping
             * rechecks and us restarting them. We're going to heavily favor edits and
             * restart only after a longer period since last edit. Note that we'll still
@@ -469,14 +478,14 @@ let rec recheck_loop acc genv env select_outcome =
   (* Same as above, but for persistent clients *)
   let env =
     match env.persistent_client_pending_command_needs_full_check with
-    | Some (_command, reason) when env.full_check = Full_check_needed ->
+    | Some (_command, reason) when is_full_check_needed env.full_check ->
       Hh_logger.log "Restarting full check due to %s" reason;
       { env with full_check = Full_check_started }
     | _ -> env
   in
   (* We have some new, or previously un-processed updates *)
   let full_check =
-    env.full_check = Full_check_started
+    is_full_check_started env.full_check
     (* Prioritize building search index over full rechecks. *)
     && ( Queue.is_empty SearchServiceRunner.SearchServiceRunner.queue
        (* Unless there is something actively waiting for this *)
@@ -619,7 +628,8 @@ let serve_one_iteration genv env client_provider =
         client_kind
   in
   let env =
-    if select_outcome = ClientProvider.Select_nothing then (
+    match select_outcome with
+    | ClientProvider.Select_nothing ->
       let last_stats = env.recent_recheck_loop_stats in
       (* Ugly hack: We want GC_SHAREDMEM_RAN to record the last rechecked
        * count so that we can figure out if the largest reclamations
@@ -637,8 +647,7 @@ let serve_one_iteration genv env client_provider =
         { env with last_idle_job_time = t }
       else
         env
-    ) else
-      env
+    | _ -> env
   in
   let start_t = Unix.gettimeofday () in
   let stage =
@@ -759,13 +768,13 @@ let serve_one_iteration genv env client_provider =
   in
   let env =
     match env.persistent_client_pending_command_needs_full_check with
-    | Some (f, _reason) when env.full_check = Full_check_done ->
+    | Some (f, _reason) when is_full_check_done env.full_check ->
       { (f env) with persistent_client_pending_command_needs_full_check = None }
     | _ -> env
   in
   let env =
     match env.default_client_pending_command_needs_full_check with
-    | Some (f, _reason, _client) when env.full_check = Full_check_done ->
+    | Some (f, _reason, _client) when is_full_check_done env.full_check ->
       { (f env) with default_client_pending_command_needs_full_check = None }
     | _ -> env
   in
@@ -860,7 +869,7 @@ let priority_client_interrupt_handler genv client_provider env =
       match (env.full_recheck_on_file_changes, env.init_env.recheck_id) with
       | ( Paused { paused_recheck_id = Some paused_recheck_id; _ },
           Some recheck_id )
-        when paused_recheck_id = recheck_id ->
+        when String.equal paused_recheck_id recheck_id ->
         MultiThreadedCall.Cancel
       | _ -> MultiThreadedCall.Continue
     in
@@ -990,17 +999,17 @@ let resolve_init_approach genv : ServerInit.init_approach * string =
          check_id)
   | (None, None) ->
     if
-      ServerArgs.save_naming_filename genv.options <> None
-      && ServerArgs.save_filename genv.options = None
+      Option.is_some (ServerArgs.save_naming_filename genv.options)
+      && Option.is_none (ServerArgs.save_filename genv.options)
     then
       (ServerInit.Parse_only_init, "Server_args_saving_naming")
     else if not genv.local_config.ServerLocalConfig.use_saved_state then
       (ServerInit.Full_init, "Local_config_saved_state_disabled")
     else if ServerArgs.no_load genv.options then
       (ServerInit.Full_init, "Server_args_no_load")
-    else if ServerArgs.save_filename genv.options <> None then
+    else if Option.is_some (ServerArgs.save_filename genv.options) then
       (ServerInit.Full_init, "Server_args_saving_state")
-    else if ServerArgs.write_symbol_info genv.options <> None then
+    else if Option.is_some (ServerArgs.write_symbol_info genv.options) then
       (ServerInit.Write_symbol_info, "Server_args_writing_symbol_info")
     else (
       match

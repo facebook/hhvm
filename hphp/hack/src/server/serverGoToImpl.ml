@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerEnv
 open Reordered_argument_collections
 open ServerCommandTypes.Find_refs
@@ -52,7 +52,7 @@ let parallel_find_positions_of_classes
     ~next:(MultiWorker.next workers child_classes)
 
 let add_if_valid_origin ctx class_elt child_class method_name result =
-  if class_elt.ce_origin = child_class then
+  if String.equal class_elt.ce_origin child_class then
     (method_name, Lazy.force class_elt.ce_pos) :: result
   else
     let origin_decl = Decl_provider.get_class ctx class_elt.ce_origin in

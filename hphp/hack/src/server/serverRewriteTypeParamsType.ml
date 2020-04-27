@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 module PositionedTree =

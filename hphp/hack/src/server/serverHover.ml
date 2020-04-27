@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open HoverService
 
 (** When we get a Class occurrence and a Method occurrence, that means that the
@@ -344,7 +344,7 @@ let make_hover_info ctx env_and_ty entry occurrence def_opt =
         match (occurrence, env_and_ty) with
         | ({ name; _ }, None) -> Utils.strip_ns name
         | ({ type_ = Method (classname, name); _ }, Some (env, ty))
-          when name = Naming_special_names.Members.__construct ->
+          when String.equal name Naming_special_names.Members.__construct ->
           let snippet_opt =
             Option.Monad_infix.(
               Decl_provider.get_class ctx classname >>= fun c ->
@@ -417,4 +417,4 @@ let go_quarantined
              Provider_context.add_entry_if_missing ~ctx ~path
            in
            make_hover_info ctx env_and_ty entry occurrence def_opt)
-    |> List.remove_consecutive_duplicates ~equal:( = )
+    |> List.remove_consecutive_duplicates ~equal:equal_hover_info

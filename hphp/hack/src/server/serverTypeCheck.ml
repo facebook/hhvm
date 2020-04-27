@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerCheckUtils
 open SearchServiceRunner
 open ServerEnv
@@ -68,7 +68,7 @@ let log_if_diag_subscribe_changed
       Caml.Printexc.get_callstack 100 |> Caml.Printexc.raw_backtrace_to_string
     in
     let disposition =
-      if before = None then
+      if Option.is_none before then
         "added"
       else
         "removed"
@@ -564,7 +564,7 @@ module FullCheckKind : CheckKindType = struct
         (old_env.full_check, old_env.remote)
     in
     let needs_full_init =
-      old_env.init_env.needs_full_init && full_check <> Full_check_done
+      old_env.init_env.needs_full_init && not (is_full_check_done full_check)
     in
     let () =
       log_if_diag_subscribe_changed
@@ -1481,7 +1481,7 @@ let type_check_unsafe genv env kind =
       (ServerCommandTypes.Doing_global_typecheck
          (global_typecheck_kind genv env));
     let ((env, _) as res) = FC.type_check_core genv env in
-    ( if env.full_check = Full_check_done then
+    ( if is_full_check_done env.full_check then
       let total = Errors.count env.ServerEnv.errorl in
       let (is_truncated, shown) =
         match env.ServerEnv.diag_subscribe with

@@ -19,6 +19,7 @@ type hover_info = {
   (* Position of this result. *)
   pos: Pos.t option;
 }
+[@@deriving eq]
 
 type result = hover_info list
 

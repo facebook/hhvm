@@ -5,7 +5,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 
 let go_quarantined
     ~(ctx : Provider_context.t)
@@ -32,7 +32,7 @@ let go_quarantined
     List.fold results ~init:`None ~f:(fun class_opt (occ, _) ->
         match (class_opt, SymbolOccurrence.enclosing_class occ) with
         | (`None, Some c) -> `Single c
-        | (`Single c, Some c2) when c = c2 -> `Single c
+        | (`Single c, Some c2) when String.equal c c2 -> `Single c
         | (`Single _, Some _) ->
           (* Symbol occurrences for methods/properties that only exist in a base
          class still have the derived class as their enclosing class, even

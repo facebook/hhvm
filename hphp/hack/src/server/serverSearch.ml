@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hh_core
 module SS = SearchUtils
 module SUtils = SearchUtils

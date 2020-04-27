@@ -93,19 +93,6 @@ void find(const std::string &root, const std::string& path,
     if (p) {
       isPHP = (strcmp(p + 1, "php") == 0) ||
         (strcmp(p + 1, "hack") == 0) || (strcmp(p + 1, "hh") == 0);
-    } else {
-      try {
-        std::string line;
-        std::ifstream fin(fe.c_str());
-        if (std::getline(fin, line)) {
-          if (line[0] == '#' && line[1] == '!' &&
-              line.find("php") != std::string::npos) {
-            isPHP = true;
-          }
-        }
-      } catch (...) {
-        Logger::Error("FileUtil::find(): unable to read %s", fe.c_str());
-      }
     }
 
     if (isPHP == php) {

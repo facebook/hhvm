@@ -8,35 +8,6 @@ class ZipArchive {
   private ?resource $zipDir = null;
   public string $filename;
 
-  public function __get($name) {
-    switch ($name) {
-      case "status":
-        return $this->getProperty(0);
-      case "statusSys":
-        return $this->getProperty(1);
-      case "numFiles":
-        return $this->getProperty(2);
-      case "comment":
-        return $this->getProperty(3);
-    }
-    trigger_error("Undefined property: ZipArchive::\$$name");
-    return;
-  }
-
-  public function __isset($name) {
-    switch ($name) {
-      case "status":
-      case "statusSys":
-      case "numFiles":
-      case "comment":
-        return true;
-    }
-    return false;
-  }
-
-  <<__Native>>
-  private function getProperty(int $property): mixed;
-
   /**
    * Add a new directory
    *

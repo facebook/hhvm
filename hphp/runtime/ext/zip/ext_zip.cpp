@@ -23,6 +23,7 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 namespace HPHP {
 
@@ -348,50 +349,45 @@ static req::ptr<T> getResource(ObjectData* obj, const char* varName) {
 //////////////////////////////////////////////////////////////////////////////
 // class ZipArchive
 
-static Variant HHVM_METHOD(ZipArchive, getProperty, int64_t property) {
-  auto zipDir = getResource<ZipDirectory>(this_, "zipDir");
+#define TRY_GET_ZIP(this_, default)                                    \
+  auto zipDir = getResource<ZipDirectory>(this_.get(), "zipDir");      \
+  if (zipDir == nullptr) return default;                               \
+  auto zip = zipDir->getZip();
 
-  if (zipDir == nullptr) {
-    switch (property) {
-      case 0:
-      case 1:
-      case 2:
-        return 0;
-      case 3:
-        return empty_string_variant();
-      default:
-        return init_null();
-    }
-  }
-
-  switch (property) {
-    case 0:
-    case 1:
-    {
-      int zep, sys;
-      zip_error_get(zipDir->getZip(), &zep, &sys);
-      if (property == 0) {
-        return zep;
-      }
-      return sys;
-    }
-    case 2:
-    {
-      return zip_get_num_files(zipDir->getZip());
-    }
-    case 3:
-    {
-      int len;
-      auto comment = zip_get_archive_comment(zipDir->getZip(), &len, 0);
-      if (comment == nullptr) {
-        return empty_string_variant();
-      }
-      return String(comment, len, CopyString);
-    }
-    default:
-      return init_null();
-  }
+static Variant getStatus(const Object& this_) {
+  TRY_GET_ZIP(this_, 0)
+  return zip_error_code_zip(zip_get_error(zip));
 }
+
+static Variant getStatusSys(const Object& this_) {
+  TRY_GET_ZIP(this_, 0);
+  return zip_error_code_system(zip_get_error(zip));
+}
+
+static Variant getNumFiles(const Object& this_) {
+  TRY_GET_ZIP(this_, 0);
+  return zip_get_num_files(zip);
+}
+
+static Variant getComment(const Object& this_) {
+  TRY_GET_ZIP(this_, empty_string_variant());
+  int len;
+  auto comment = zip_get_archive_comment(zip, &len, 0);
+  if (comment == nullptr) return empty_string_variant();
+  return String(comment, len, CopyString);
+}
+
+static Native::PropAccessor zip_archive_properties[] = {
+  { "status", getStatus },
+  { "statusSys", getStatusSys },
+  { "numFiles", getNumFiles },
+  { "comment", getComment },
+  { nullptr }
+};
+Native::PropAccessorMap zip_archive_properties_map{zip_archive_properties};
+struct ZipArchivePropHandler : Native::MapPropHandler<ZipArchivePropHandler> {
+  static constexpr Native::PropAccessorMap& map = zip_archive_properties_map;
+};
 
 static bool HHVM_METHOD(ZipArchive, addEmptyDir, const String& dirname) {
   if (dirname.empty()) {
@@ -1440,7 +1436,6 @@ static Variant HHVM_FUNCTION(zip_read, const Resource& zip) {
 struct zipExtension final : Extension {
   zipExtension() : Extension("zip", "1.12.4-dev") {}
   void moduleInit() override {
-    HHVM_ME(ZipArchive, getProperty);
     HHVM_ME(ZipArchive, addEmptyDir);
     HHVM_ME(ZipArchive, addFile);
     HHVM_ME(ZipArchive, addFromString);
@@ -1475,6 +1470,8 @@ struct zipExtension final : Extension {
     HHVM_ME(ZipArchive, unchangeArchive);
     HHVM_ME(ZipArchive, unchangeIndex);
     HHVM_ME(ZipArchive, unchangeName);
+
+    Native::registerNativePropHandler<ZipArchivePropHandler>(s_ZipArchive);
 
     HHVM_RCC_INT(ZipArchive, CREATE, ZIP_CREATE);
     HHVM_RCC_INT(ZipArchive, EXCL, ZIP_EXCL);

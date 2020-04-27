@@ -431,7 +431,7 @@ void MemoryManager::flush() {
  * case c and combine the lists eventually.
  */
 
-const std::array<char*,NumHeaderKinds> header_names = {{
+constexpr const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "MixedArray", "EmptyArray", "GlobalsArray",
   "RecordArray", "DictArray", "VecArray", "KeysetArray",
   "String", "Resource", "ClsMeth", "Record", "RFunc",
@@ -441,6 +441,11 @@ const std::array<char*,NumHeaderKinds> header_names = {{
   "SmallMalloc", "BigMalloc",
   "Free", "Hole", "Slab"
 }};
+
+// you already get a compiler error for having too many header_names--
+// this should catch cases where there are too few header_names
+static_assert(header_names[NumHeaderKinds - 1] != nullptr,
+              "If you add a header kind, add an entry for it to header_names");
 
 // initialize a Hole header in the unused memory between m_front and m_limit
 void MemoryManager::initHole(void* ptr, uint32_t size) {

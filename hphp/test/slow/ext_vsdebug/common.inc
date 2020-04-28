@@ -301,7 +301,7 @@ function vsDebugLaunch($scriptPath, $sendDefaultInit = true, $breakpoints = varr
 
     if ($client === false) {
       $tries++;
-      sleep(1);
+      sleep(2);
     }
   }
 

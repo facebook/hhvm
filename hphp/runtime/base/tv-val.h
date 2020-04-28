@@ -109,14 +109,6 @@ public:
   /* implicit */ INLINE_FLATTEN operator tv_val<true>() const;
 
   /*
-   * Explicit cast to tv_lval.
-   *
-   * This is the moral equivalent of:
-   *   const_cast<TypedValue*>(const TypedValue*)
-   */
-  INLINE_FLATTEN tv_val<false> as_lval() const;
-
-  /*
    * References to the value and type.
    *
    * @requires: is_set()

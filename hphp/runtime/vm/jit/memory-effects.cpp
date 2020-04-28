@@ -178,7 +178,7 @@ AliasClass pointee(
       // Like the Prop* instructions, but for array elements. These could also
       // return pointers to collection elements but those don't exist in
       // AliasClass yet.
-      if (sinst->is(ElemX, ElemDX, ElemUX)) {
+      if (sinst->is(ElemDX, ElemUX)) {
         assertx(sinst->srcs().back()->isA(TMemToMISCell));
         auto const src = sinst->srcs().back();
         return AElemAny | pointee(src, visited_labels);
@@ -1460,11 +1460,20 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AHeapAny, AHeapAny);
 
   /*
+   * The Elem intermediate operation doesn't take a tvRef pointer, like the
+   * other intermeidate minstr operations below do.
+   */
+  case ElemX:
+    return may_load_store(
+      AHeapAny | all_pointees(inst),
+      AHeapAny | all_pointees(inst)
+    );
+
+  /*
    * Intermediate minstr operations. In addition to a base pointer like the
    * operations above, these may take a pointer to MInstrState::tvRef, which
    * they may store to (but not read from).
    */
-  case ElemX:
   case ElemDX:
   case ElemUX:
   case PropX:

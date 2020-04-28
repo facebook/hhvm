@@ -117,16 +117,6 @@ inline arr_lval ArrayData::lval(StringData* k) {
   return g_array_funcs.lvalStr[kind()](this, k);
 }
 
-inline tv_rval ArrayData::rvalVanilla(int64_t k) const {
-  assertx(isVanilla());
-  return g_array_funcs.nvGetInt[kind()](this, k);
-}
-
-inline tv_rval ArrayData::rvalVanilla(const StringData* k) const {
-  assertx(isVanilla());
-  return g_array_funcs.nvGetStr[kind()](this, k);
-}
-
 inline ssize_t ArrayData::nvGetIntPos(int64_t k) const {
   return g_array_funcs.nvGetIntPos[kind()](this, k);
 }
@@ -318,18 +308,16 @@ inline arr_lval ArrayData::lval(TypedValue k) {
 }
 
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
-  // TODO(kshaunak): Add a new ArrayData interface method that returns a value
-  // so that we don't need to use rvalVanilla here.
-  auto const result = rvalVanilla(k);
+  // TODO(kshaunak): Have nvGetInt return TypedValue instead of tv_rval.
+  auto const result = g_array_funcs.nvGetInt[kind()](this, k);
   if (result) return *result;
   if (error) getNotFound(k);
   return make_tv<KindOfUninit>();
 }
 
 inline TypedValue ArrayData::get(const StringData* k, bool error) const {
-  // TODO(kshaunak): Add a new ArrayData interface method that returns a value
-  // so that we don't need to use rvalVanilla here.
-  auto const result = rvalVanilla(k);
+  // TODO(kshaunak): Have nvGetStr return TypedValue instead of tv_rval.
+  auto const result = g_array_funcs.nvGetStr[kind()](this, k);
   if (result) return *result;
   if (error) getNotFound(k);
   return make_tv<KindOfUninit>();

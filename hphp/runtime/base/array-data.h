@@ -386,15 +386,6 @@ public:
   arr_lval lval(const Variant& k);
 
   /*
-   * Get an rval for the element at key `k'. The caller must know that the
-   * array is a "vanilla" array, which restricts callers to JIT helpers.
-   *
-   * If the array has no element at `k', return a null tv_rval.
-   */
-  tv_rval rvalVanilla(int64_t k) const;
-  tv_rval rvalVanilla(const StringData* k) const;
-
-  /*
    * Get the value of the element at key `k'.
    *
    * @requires: exists(k)

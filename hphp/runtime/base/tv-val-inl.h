@@ -83,13 +83,6 @@ tv_val<is_const, tag_t>::operator tv_val<true>() const {
 }
 
 template<bool is_const, typename tag_t>
-tv_val<false> tv_val<is_const, tag_t>::as_lval() const {
-  return tv_val<false>{
-    const_cast<DataType*>(m_s.type()), const_cast<Value*>(m_s.val())
-  };
-}
-
-template<bool is_const, typename tag_t>
 auto tv_val<is_const, tag_t>::val() const -> value_t& {
   assertx(is_set());
   return *m_s.val();

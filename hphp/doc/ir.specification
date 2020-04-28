@@ -2910,7 +2910,7 @@ fields of that struct for holding intermediate values.
 
   Returns true iff the property with key S1 in base S0 is set.
 
-| ElemX, D(Cell), S(LvalToCell) S(Cell) S(PtrToMISCell), NF
+| ElemX, D(Cell), S(LvalToCell) S(Cell), NF
 
   Get intermediate element with key S1 from base S0. The base will not be
   modified and the result will not be inc-ref-ed.

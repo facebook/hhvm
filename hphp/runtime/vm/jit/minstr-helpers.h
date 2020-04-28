@@ -386,9 +386,9 @@ PROFILE_KEYSET_ACCESS_HELPER_TABLE(X)
   m(elemSW,    KeyType::Str,   MOpMode::Warn)   \
   m(elemSIO,   KeyType::Str,   MOpMode::InOut)  \
 
-#define X(nm, keyType, mode)                                                   \
-inline TypedValue nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
-  return Elem<mode, keyType>(tvRef, base, key).tv();                           \
+#define X(nm, keyType, mode)                                \
+inline TypedValue nm(tv_lval base, key_type<keyType> key) { \
+  return Elem<mode, keyType>(base, key);                    \
 }
 ELEM_HELPER_TABLE(X)
 #undef X
@@ -538,9 +538,9 @@ ELEM_KEYSET_U_HELPER_TABLE(X)
   m(dictGetSQuiet, KeyType::Str,  MOpMode::None)                \
   m(dictGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, mode) \
+#define X(nm, keyType, mode)                                \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) { \
-  return HPHP::ElemDict<mode, keyType>(a, key).tv(); \
+  return HPHP::ElemDict<mode, keyType>(a, key);             \
 }
 DICTGET_HELPER_TABLE(X)
 #undef X
@@ -554,9 +554,9 @@ DICTGET_HELPER_TABLE(X)
   m(keysetGetSQuiet, KeyType::Str,  MOpMode::None)                \
   m(keysetGetIQuiet, KeyType::Int,  MOpMode::None)                \
 
-#define X(nm, keyType, mode) \
+#define X(nm, keyType, mode)                                 \
 inline TypedValue nm(ArrayData* a, key_type<keyType> key) {  \
-  return HPHP::ElemKeyset<mode, keyType>(a, key).tv(); \
+  return HPHP::ElemKeyset<mode, keyType>(a, key);            \
 }
 KEYSETGET_HELPER_TABLE(X)
 #undef X
@@ -565,9 +565,9 @@ KEYSETGET_HELPER_TABLE(X)
 
 template <KeyType keyType, MOpMode mode>
 TypedValue cGetElemImpl(tv_lval base, key_type<keyType> key) {
-  TypedValue localTvRef;
-  auto result = Elem<mode, keyType>(localTvRef, base, key);
-  return cGetRefShuffle(localTvRef, result);
+  auto const result = Elem<mode, keyType>(base, key);
+  tvIncRefGen(result);
+  return result;
 }
 
 #define CGETELEM_HELPER_TABLE(m)                    \

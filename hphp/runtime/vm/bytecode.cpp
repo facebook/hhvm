@@ -3042,21 +3042,26 @@ void elemDispatch(MOpMode mode, TypedValue key) {
   auto& mstate = vmMInstrState();
   auto const b = mstate.base;
 
-  auto const result = [&]() -> tv_rval {
+  auto const baseValueToLval = [&](TypedValue base) {
+    mstate.tvTempBase = base;
+    return tv_lval { &mstate.tvTempBase };
+  };
+
+  auto const result = [&]{
     switch (mode) {
       case MOpMode::None:
-        return Elem<MOpMode::None>(mstate.tvRef, b, key);
+        return baseValueToLval(Elem<MOpMode::None>(b, key));
       case MOpMode::Warn:
-        return Elem<MOpMode::Warn>(mstate.tvRef, b, key);
+        return baseValueToLval(Elem<MOpMode::Warn>(b, key));
       case MOpMode::InOut:
-        return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
+        return baseValueToLval(Elem<MOpMode::InOut>(b, key));
       case MOpMode::Define:
         return ElemD(mstate.tvRef, b, key);
       case MOpMode::Unset:
         return ElemU(mstate.tvRef, b, key);
     }
     always_assert(false);
-  }().as_lval();
+  }();
 
   mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }

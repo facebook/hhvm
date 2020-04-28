@@ -8,3 +8,6 @@
 
 let load ~watchman_opts:_ ~ignore_hh_version:_ ~saved_state_type:_ =
   failwith "Not implemented"
+
+let load_internal ~watchman_opts:_ ~ignore_hh_version:_ ~saved_state_type:_ =
+  failwith "Not implemented"

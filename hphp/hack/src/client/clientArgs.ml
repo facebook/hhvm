@@ -605,6 +605,9 @@ let parse_check_args cmd =
       ( "--search-typedef",
         Arg.String (fun x -> set_mode (MODE_SEARCH (x, "typedef")) ()),
         " (mode) fuzzy search typedef definitions" );
+      ( "--server-rage",
+        Arg.Unit (set_mode MODE_SERVER_RAGE),
+        " (mode) dumps internal state of hh_server" );
       ( "--single",
         Arg.String (fun x -> set_mode (MODE_STATUS_SINGLE x) ()),
         "<path> Return errors in file with provided name (give '-' for stdin)"

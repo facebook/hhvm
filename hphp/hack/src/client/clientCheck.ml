@@ -572,6 +572,21 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
           ClientLint.go results args.output_json args.error_format;
           Lwt.return Exit_status.No_error
       end
+    | MODE_SERVER_RAGE ->
+      let open ServerRageTypes in
+      let open Hh_json in
+      if not args.output_json then begin
+        Printf.eprintf "Must use --json\n%!";
+        raise Exit_status.(Exit_with Input_error)
+      end;
+      (* Our json output format is read by clientRage.ml *)
+      let make_item { title; data } =
+        JSON_Object
+          [("name", JSON_String title); ("contents", JSON_String data)]
+      in
+      let%lwt items = rpc args Rpc.RAGE in
+      json_to_string (JSON_Array (List.map items ~f:make_item)) |> print_endline;
+      Lwt.return Exit_status.No_error
     | MODE_LINT_STDIN filename ->
       begin
         match Sys_utils.realpath filename with

@@ -56,6 +56,7 @@ type client_mode =
   | MODE_SAVE_STATE of string
   (* TODO figure out why we can't reference FuzzySearchService from here *)
   | MODE_SEARCH of string * string
+  | MODE_SERVER_RAGE
   | MODE_STATS
   | MODE_STATUS
   | MODE_STATUS_SINGLE of string (* filename *)
@@ -143,6 +144,7 @@ let mode_to_string = function
   | MODE_SAVE_NAMING _ -> "MODE_SAVE_NAMING"
   | MODE_SAVE_STATE _ -> "MODE_SAVE_STATE"
   | MODE_SEARCH _ -> "MODE_SEARCH"
+  | MODE_SERVER_RAGE -> "MODE_SERVER_RAGE"
   | MODE_STATS -> "MODE_STATS"
   | MODE_STATUS -> "MODE_STATUS"
   | MODE_STATUS_SINGLE _ -> "MODE_STATUS_SINGLE"

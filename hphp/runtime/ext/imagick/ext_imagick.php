@@ -10,43 +10,8 @@ class Imagick implements Countable, Iterator {
   private bool $nextOutOfBound = false;
   private bool $imagePending = false;
 
-  public function __get($name) {
-    switch ($name) {
-    case 'width':
-      return $this->getImageWidth();
-    case 'height':
-      return $this->getImageHeight();
-    case 'format':
-      try {
-        return $this->getImageFormat();
-      } catch (ImagickException $ex) {
-        if ($ex->getMessage() == '') {
-          return '';
-        } else {
-          throw $ex;
-        }
-      }
-    default:
-      trigger_error("Undefined property: Imagick::\$$name");
-    }
-  }
-
-  public function __isset($name) {
-    switch ($name) {
-    case 'width':
-    case 'height':
-    case 'format':
-      return true;
-    default:
-      return false;
-    }
-  }
-
   <<__Native>>
   public function count(): int;
-
-  // <<__Native>>
-  // function current(): Imagick;
 
   <<__Native>>
   public function key(): int;
@@ -56,10 +21,6 @@ class Imagick implements Countable, Iterator {
 
   <<__Native>>
   public function rewind(): void;
-
-  // <<__Native>>
-  // function valid(): bool;
-
 
   /**
    * Adds adaptive blur filter to image

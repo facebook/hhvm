@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/vm/native-prop-handler.h"
 
 using std::pair;
 using std::string;
@@ -3794,6 +3795,27 @@ static bool HHVM_METHOD(Imagick, valid) {
   return !getImagePending(Object{this_});
 }
 
+template<size_t (*get)(_MagickWand*)>
+static Variant get_size(const Object& this_) {
+  return get(getMagickWandResource(Object{this_})->getWand());
+}
+
+static Variant get_image_format(const Object& this_) {
+  return HHVM_MN(Imagick, getImageFormat)(this_.get());
+}
+
+static Native::PropAccessor imagick_properties[] = {
+  { "width", get_size<MagickGetImageWidth> },
+  { "height", get_size<MagickGetImageHeight> },
+  { "format", get_image_format },
+  { nullptr }
+};
+
+Native::PropAccessorMap imagick_properties_map{imagick_properties};
+struct ImagickPropHandler : Native::MapPropHandler<ImagickPropHandler> {
+  static constexpr Native::PropAccessorMap& map = imagick_properties_map;
+};
+
 #undef IMAGICK_THROW
 
 void ImagickExtension::loadImagickClass() {
@@ -4127,6 +4149,8 @@ void ImagickExtension::loadImagickClass() {
   HHVM_ME(Imagick, next);
   HHVM_ME(Imagick, rewind);
   HHVM_ME(Imagick, valid);
+
+  Native::registerNativePropHandler<ImagickPropHandler>(s_Imagick);
 }
 
 //////////////////////////////////////////////////////////////////////////////

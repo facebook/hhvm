@@ -40,6 +40,7 @@ runTestWith404HealthCheck(
       "some_file.php",
       "this_file_does_not_exist.php",
       "index.php",
+      "directory_that_exists",
     ];
 
     foreach ($nonexistent_requests as $request) {

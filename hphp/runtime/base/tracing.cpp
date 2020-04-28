@@ -55,16 +55,16 @@ std::string canonicalizeURL(const std::string& url) {
 
 // Determine if we should gather aggregate statistics for this
 // request. Return a tuple containing (1) whether we should trace, (2)
-// the total request count corresponding to this request, and (3) the
-// request count for this particular URL. The later two fields will be
-// recorded into the StructuredLogEntry for this request.
-std::tuple<bool, size_t, size_t> shouldRun(folly::StringPiece url) {
+// the total request count corresponding to this request, (3) the
+// request count for this particular URL, (4) the sample rate used for
+// this request. The later three fields will be recorded into the
+// StructuredLogEntry for this request.
+std::tuple<bool, size_t, size_t, size_t> shouldRun(folly::StringPiece url) {
   // We can avoid taking the lock if we know we'll never succeed.
   if (!RuntimeOption::EvalTracingSampleRate &&
       !RuntimeOption::EvalTracingFirstRequestsCount &&
-      !RuntimeOption::EvalTracingPerRequestCount &&
-      !detail::s_factory) {
-    return std::make_tuple(false, 0, 0);
+      !RuntimeOption::EvalTracingPerRequestCount) {
+    return std::make_tuple(false, 0, 0, 0);
   }
 
   // Otherwise look at the global table to get the request counts:
@@ -89,13 +89,14 @@ std::tuple<bool, size_t, size_t> shouldRun(folly::StringPiece url) {
     rate = std::min(rate, RuntimeOption::EvalTracingPerRequestSampleRate);
   }
   if (!rate || rate == std::numeric_limits<uint32_t>::max()) {
-    return std::make_tuple(false, counts.first, counts.second);
+    return std::make_tuple(false, counts.first, counts.second, 0);
   }
 
   return std::make_tuple(
     StructuredLog::coinflip(rate),
     counts.first,
-    counts.second
+    counts.second,
+    rate
   );
 }
 
@@ -137,22 +138,20 @@ RequestState* startRequestImpl(folly::StringPiece name,
                                folly::StringPiece url) {
   // Request should not be active:
   assertx(tl_active.isNull());
-  // If we have a registered backend, check if the backend wants to
-  // trace this request.
-  auto impl = s_factory ? s_factory->start(name) : nullptr;
   auto const counts = shouldRun(url);
-  // If we don't want aggregate statistics, and the backend isn't
-  // active, we won't trace. Note we call shouldRun() even if the
-  // backend is active to ensure our request counts are accurate.
-  if (!std::get<0>(counts) && !impl) return nullptr;
+  // Check if we want to trace this request
+  if (!std::get<0>(counts)) return nullptr;
   // Set up the request state and create the top block
   auto active = tl_active.getCheck();
   assertx(!active->m_impl);
   assertx(active->m_blocks.empty());
-  active->m_impl = std::move(impl);
+  // If we have a registered backend, check if the backend wants to
+  // trace this request.
+  active->m_impl = s_factory ? s_factory->start(name) : nullptr;
   active->m_url = url.toString();
   active->m_requestCount = std::get<1>(counts);
   active->m_perURLRequestCount = std::get<2>(counts);
+  active->m_sampleRate = std::get<3>(counts);
   active->m_blocks.emplace_back();
   auto& block = active->m_blocks.back();
   block.m_name = name.toString();
@@ -271,6 +270,7 @@ void stopRequest() {
     entry.setStr("canonical_url", canonicalized);
     entry.setInt("request_id", requestID);
     entry.setInt("request_count", active.m_requestCount);
+    entry.setInt("sample_rate", active.m_sampleRate);
     entry.setInt("request_count_per_url", active.m_perURLRequestCount);
     entry.setInt("total_request_time_us", toUS(active.m_total));
     // Also log the tracing backend request id if present

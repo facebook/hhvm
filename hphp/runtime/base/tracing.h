@@ -185,6 +185,7 @@ struct RequestState {
   std::string m_url;
   size_t m_requestCount = 0;
   size_t m_perURLRequestCount = 0;
+  size_t m_sampleRate = 0;
   std::vector<BlockState> m_blocks;
   hphp_fast_string_map<Stat> m_stats;
   Clock::duration m_total{};

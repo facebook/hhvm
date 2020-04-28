@@ -13,6 +13,7 @@ open Aast
 open Full_fidelity_source_text
 open Provider_context
 open Typing_symbol_json_builder
+open Unix
 module Bucket = Hack_bucket
 
 let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
@@ -53,22 +54,43 @@ let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
     (tast_lst : Tast.program list)
-    (files_info : Typing_symbol_json_builder.file_lines list) : unit =
+    (files_info : Typing_symbol_json_builder.file_lines list)
+    (start_time : float) : unit =
   try
     let symbol_occurrences = get_decls ctx tast_lst in
     let json_chunks =
       Typing_symbol_json_builder.build_json ctx symbol_occurrences files_info
     in
-    let (out_file, channel) =
+    let (_out_file, channel) =
       Filename.open_temp_file
         ~temp_dir:file_dir
         "glean_symbol_info_chunk_"
         ".json"
     in
-    let json = JSON_Array json_chunks in
-    Out_channel.output_string channel (json_to_string ~pretty:true json);
+    let json_string = json_to_string ~pretty:true (JSON_Array json_chunks) in
+    let json_length = String.length json_string in
+    Out_channel.output_string channel json_string;
     Out_channel.close channel;
-    Hh_logger.log "Wrote symbol info to: %s" out_file
+    let elapsed = Unix.gettimeofday () -. start_time in
+    let time = Unix.gmtime elapsed in
+    Hh_logger.log
+      "Wrote %s of JSON facts on %i files in %dm%ds"
+      (Byte_units.to_string_hum
+         (Byte_units.create `Bytes (float_of_int json_length)))
+      (List.length files_info)
+      time.tm_min
+      time.tm_sec;
+    if elapsed > 600.0 then
+      (* Write out files from batches that take more than 10 minutes *)
+      let file_list =
+        String.concat
+          ~sep:","
+          (List.map files_info (fun info ->
+               Relative_path.to_absolute info.filepath))
+      in
+      Hh_logger.log "Files processed: %s" file_list
+    else
+      ()
   with e ->
     Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e)
 
@@ -79,6 +101,7 @@ let recheck_job
     (hhi_path : string)
     ()
     (progress : Relative_path.t list) : unit =
+  let start_time = Unix.gettimeofday () in
   let info_lsts =
     List.map progress ~f:(fun path ->
         let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
@@ -91,7 +114,7 @@ let recheck_job
   let (tasts, files_info) = List.unzip info_lsts in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);
   Relative_path.set_path_prefix Relative_path.Hhi (Path.make hhi_path);
-  write_json ctx out_dir tasts files_info
+  write_json ctx out_dir tasts files_info start_time
 
 let go
     (workers : MultiWorker.worker list option)

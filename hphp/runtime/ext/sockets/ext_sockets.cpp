@@ -146,7 +146,7 @@ static bool php_string_to_if_index(const char *val, unsigned *out)
   return false;
 #endif
 }
-}
+} // namespace {
 
 static bool php_set_inet6_addr(struct sockaddr_in6 *sin6,
                                const char *address,
@@ -228,8 +228,16 @@ static bool php_set_inet_addr(struct sockaddr_in *sin,
 }
 
 static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
-                         const char *addr, int port,
+                         const String& addr, int port,
                          struct sockaddr *&sa_ptr, size_t &sa_size) {
+  // Always zero it out:
+  // - fields are added over time; zeroing it out is future-proofing; for
+  //   example, sockaddr_in6 did not originally include sin6_scope_id or
+  //   sin6_flowinfo.
+  // - required for all on MacOS for correct behavior
+  // - on Linux, required for sockaddr_un to deal with buggy sun_path readers
+  //   (they should look at the length)
+  memset(&sa_storage, 0, sizeof(struct sockaddr_storage));
   struct sockaddr *sock_type = (struct sockaddr*) &sa_storage;
   switch (sock->getType()) {
   case AF_UNIX:
@@ -238,21 +246,45 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
       return false;
 #else
       struct sockaddr_un *sa = (struct sockaddr_un *)sock_type;
-      memset(sa, 0, sizeof(sa_storage));
       sa->sun_family = AF_UNIX;
-      snprintf(sa->sun_path, 108, "%s", addr);
+      if (addr.length() > sizeof(sa->sun_path)) {
+        raise_warning(
+          "Unix socket path length (%d) is larger than system limit (%lu)",
+          addr.length(),
+          sizeof(sa->sun_path)
+        );
+        return false;
+      }
+      memcpy(sa->sun_path, addr.data(), addr.length());
       sa_ptr = (struct sockaddr *)sa;
-      sa_size = SUN_LEN(sa);
+      sa_size = offsetof(struct sockaddr_un, sun_path) + addr.length();
+#ifdef __linux__
+      if (addr.length() == 0) {
+        // Linux supports 3 kinds of unix sockets; behavior of this struct
+        // is in `man 7 unix`; relevant parts:
+        // - unnamed: 0-length path. As paths are not required to be
+        //   null-terminated, this needs to be undicated by the size.
+        //   These might be created by `socketpair()`, for eaxmple.
+        // - pathname (common): nothing strange. struct size technically
+        //   indicates length, but null terminators are usually set. This
+        //   does matter if addr.length() == size of the char array though
+        // - abstract: these have a meaningful name, but start with `\0`
+        //
+        // Setting sa_size to indicate a 0-length path is required to
+        // distinguish between unnamed and abstract.
+        sa_size = offsetof(struct sockaddr_un, sun_path);
+      }
 #endif
+
+#endif // ifdef _MSC_VER
     }
     break;
   case AF_INET:
     {
       struct sockaddr_in *sa = (struct sockaddr_in *)sock_type;
-      memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
       sa->sin_family = AF_INET;
       sa->sin_port = htons((unsigned short) port);
-      if (!php_set_inet_addr(sa, addr, sock)) {
+      if (!php_set_inet_addr(sa, addr.c_str(), sock)) {
         return false;
       }
       sa_ptr = (struct sockaddr *)sa;
@@ -262,10 +294,9 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
   case AF_INET6:
     {
       struct sockaddr_in6 *sa = (struct sockaddr_in6 *)sock_type;
-      memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
       sa->sin6_family = AF_INET6;
       sa->sin6_port = htons((unsigned short) port);
-      if (!php_set_inet6_addr(sa, addr, sock)) {
+      if (!php_set_inet6_addr(sa, addr.c_str(), sock)) {
         return false;
       }
       sa_ptr = (struct sockaddr *)sa;
@@ -277,6 +308,19 @@ static bool set_sockaddr(sockaddr_storage &sa_storage, req::ptr<Socket> sock,
                     "AF_UNIX, AF_INET, or AF_INET6", sock->getType());
     return false;
   }
+#ifdef __APPLE__
+  // This field is not in the relevant standards, not defined on Linux, but is
+  // technically required on MacOS (and other BSDs) according to the man pages:
+  // - `man 4 netintro` covers the base sa_len
+  // - `man 4 unix` and `man 4 inet6` cover AF_UNIX sun_len and AF_INET6
+  //    sin6_len
+  // - ... At least MacOS Catalina includes the wrong `man 4 inet`. Look at the
+  //   (Net|Free|Open)BSD `man 4 inet` instead.
+  //   The MacOS man page says it starts with `sin_family`, which would conflict
+  //   with the base sockaddr definition. `sin_len` is actually the first field
+  //   in the header file, matching `sa_len`.
+  sa_ptr->sa_len = sa_size;
+#endif
   return true;
 }
 
@@ -494,7 +538,7 @@ static Variant new_socket_connect(const HostURL &hosturl, double timeout,
       fd, domain, hosturl.getHost().c_str(), hosturl.getPort(),
       0, empty_string_ref, false);
 
-    if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+    if (!set_sockaddr(sa_storage, sock, hosturl.getHost(),
                       hosturl.getPort(), sa_ptr, sa_size)) {
       // set_sockaddr raises its own warning on failure
       return false;
@@ -866,11 +910,10 @@ bool HHVM_FUNCTION(socket_connect,
     break;
   }
 
-  const char *addr = address.data();
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, addr, port, sa_ptr, sa_size)) {
+  if (!set_sockaddr(sa_storage, sock, address, port, sa_ptr, sa_size)) {
     return false;
   }
 
@@ -878,7 +921,7 @@ bool HHVM_FUNCTION(socket_connect,
   int retval = connect(sock->fd(), sa_ptr, sa_size);
   if (retval != 0) {
     std::string msg = "unable to connect to ";
-    msg += addr;
+    msg += address.data();
     msg += ":";
     msg += folly::to<std::string>(port);
     SOCKET_ERROR(sock, msg.c_str(), errno);
@@ -894,18 +937,17 @@ bool HHVM_FUNCTION(socket_bind,
                    int port /* = 0 */) {
   auto sock = cast<Socket>(socket);
 
-  const char *addr = address.data();
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, addr, port, sa_ptr, sa_size)) {
+  if (!set_sockaddr(sa_storage, sock, address, port, sa_ptr, sa_size)) {
     return false;
   }
 
   long retval = ::bind(sock->fd(), sa_ptr, sa_size);
   if (retval != 0) {
     std::string msg = "unable to bind address";
-    msg += addr;
+    msg += address.data();
     msg += ":";
     msg += folly::to<std::string>(port);
     SOCKET_ERROR(sock, msg.c_str(), errno);
@@ -1063,7 +1105,7 @@ Variant socket_server_impl(
   sockaddr_storage sa_storage;
   struct sockaddr *sa_ptr;
   size_t sa_size;
-  if (!set_sockaddr(sa_storage, sock, hosturl.getHost().c_str(),
+  if (!set_sockaddr(sa_storage, sock, hosturl.getHost(),
                     hosturl.getPort(), sa_ptr, sa_size)) {
     return false;
   }
@@ -1181,13 +1223,14 @@ Variant HHVM_FUNCTION(socket_sendto,
 #ifdef _MSC_VER
       retval = -1;
 #else
-      struct sockaddr_un  s_un;
-      memset(&s_un, 0, sizeof(s_un));
-      s_un.sun_family = AF_UNIX;
-      snprintf(s_un.sun_path, 108, "%s", addr.data());
+      struct sockaddr_storage s_s;
+      struct sockaddr* sa_ptr;
+      size_t sa_size;
+      if (!set_sockaddr(s_s, sock, addr, 0, sa_ptr, sa_size)) {
+        return false;
+      }
 
-      retval = sendto(sock->fd(), buf.data(), len, flags,
-                      (struct sockaddr *)&s_un, SUN_LEN(&s_un));
+      retval = sendto(sock->fd(), buf.data(), len, flags, sa_ptr, sa_size);
 #endif
     }
     break;

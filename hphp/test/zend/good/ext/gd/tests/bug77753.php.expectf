@@ -1,0 +1,5 @@
+%A
+Warning: Illegal IFD size: 0x006A > 0x0065 in %sbug77753.php on line %d
+%A
+Warning: Invalid TIFF file in %sbug77753.php on line %d
+bool(false)

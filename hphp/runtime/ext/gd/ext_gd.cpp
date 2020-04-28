@@ -6394,7 +6394,10 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
     break;
   }
 
-  if (maker_note->offset >= value_len) return 0;
+  if (value_len < 2 || maker_note->offset >= value_len - 1) {
+    raise_warning("IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);
+    return 0;
+  }
 
   dir_start = value_ptr + maker_note->offset;
   ImageInfo->sections_found |= FOUND_MAKERNOTE;
@@ -6435,6 +6438,12 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
                     NumDirEntries, 2+NumDirEntries*12, value_len);
     return 0;
   }
+  if ((dir_start - value_ptr) > value_len - (2+NumDirEntries*12)) {
+    raise_warning("Illegal IFD size: 0x%04lX > 0x%04X",
+                  (dir_start - value_ptr) + (2+NumDirEntries*12),
+                  value_len);
+    return 0;
+  }
 
   for (de=0;de<NumDirEntries;de++) {
     if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
@@ -6446,6 +6455,13 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo,
   ImageInfo->motorola_intel = old_motorola_intel;
   return 0;
 }
+
+#define REQUIRE_NON_EMPTY() do { \
+  if (byte_count == 0) { \
+    raise_warning("Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname(tag, tagname, -12, tag_table)); \
+    return 0; \
+  } \
+} while (0)
 
 /* Process one of the nested IFDs directories. */
 static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
@@ -6583,6 +6599,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
   ImageInfo->sections_found |= FOUND_ANY_TAG;
   if (section_index==SECTION_THUMBNAIL) {
     if (!ImageInfo->Thumbnail.data) {
+      REQUIRE_NON_EMPTY();
       switch(tag) {
         case TAG_IMAGEWIDTH:
         case TAG_COMP_IMAGE_WIDTH:
@@ -6686,6 +6703,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_FNUMBER:
         /* Simplest way of expressing aperture, so I trust it the most.
            (overwrite previously computed value if there is one) */
+        REQUIRE_NON_EMPTY();
         ImageInfo->ApertureFNumber =
           (float)exif_convert_any_format(value_ptr, format,
                                          ImageInfo->motorola_intel);
@@ -6696,6 +6714,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         /* More relevant info always comes earlier, so only use this
            field if we don't have appropriate aperture information yet. */
         if (ImageInfo->ApertureFNumber == 0) {
+          REQUIRE_NON_EMPTY();
           ImageInfo->ApertureFNumber
             = (float)exp(exif_convert_any_format(value_ptr, format,
                            ImageInfo->motorola_intel)*log(2)*0.5);
@@ -6708,6 +6727,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
            SHUTTERSPEED comes after EXPOSURE TIME
           */
         if (ImageInfo->ExposureTime == 0) {
+          REQUIRE_NON_EMPTY();
           ImageInfo->ExposureTime
             = (float)(1/exp(exif_convert_any_format(value_ptr, format,
                               ImageInfo->motorola_intel)*log(2)));
@@ -6718,12 +6738,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
         break;
 
       case TAG_COMP_IMAGE_WIDTH:
+        REQUIRE_NON_EMPTY();
         ImageInfo->ExifImageWidth =
           exif_convert_any_to_int(value_ptr, format,
                                   ImageInfo->motorola_intel);
         break;
 
       case TAG_FOCALPLANE_X_RES:
+        REQUIRE_NON_EMPTY();
         ImageInfo->FocalplaneXRes =
           exif_convert_any_format(value_ptr, format,
                                   ImageInfo->motorola_intel);
@@ -6732,12 +6754,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_SUBJECT_DISTANCE:
         /* Inidcates the distacne the autofocus camera is focused to.
            Tends to be less accurate as distance increases. */
+        REQUIRE_NON_EMPTY();
         ImageInfo->Distance =
           (float)exif_convert_any_format(value_ptr, format,
                                          ImageInfo->motorola_intel);
         break;
 
       case TAG_FOCALPLANE_RESOLUTION_UNIT:
+        REQUIRE_NON_EMPTY();
         switch((int)exif_convert_any_format(value_ptr, format,
                                             ImageInfo->motorola_intel)) {
           case 1: ImageInfo->FocalplaneUnits = 25.4; break; /* inch */
@@ -6781,6 +6805,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry,
       case TAG_GPS_IFD_POINTER:
       case TAG_INTEROP_IFD_POINTER:
         if (ReadNextIFD) {
+          REQUIRE_NON_EMPTY();
           char *Subdir_start;
           int sub_section_index = 0;
           switch(tag) {
@@ -7750,7 +7775,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
   size_t length=2, pos=0;
   jpeg_sof_info sof_info;
 
-  if (!data) {
+  if (!data || ImageInfo->Thumbnail.size < 4) {
     return 0; /* nothing to do here */
   }
   if (memcmp(data, "\xFF\xD8\xFF", 3)) {
@@ -7779,7 +7804,7 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
       return 0;
     marker = c;
     length = php_jpg_get16(data+pos);
-    if (pos+length>=ImageInfo->Thumbnail.size) {
+    if (length > ImageInfo->Thumbnail.size || pos >= ImageInfo->Thumbnail.size - length) {
       return 0;
     }
     switch (marker) {
@@ -7797,6 +7822,10 @@ static int exif_scan_thumbnail(image_info_type *ImageInfo) {
       case M_SOF14:
       case M_SOF15:
         /* handle SOFn block */
+        if (length < 8 || ImageInfo->Thumbnail.size - 8 < pos) {
+          /* exif_process_SOFn needs 8 bytes */
+          return 0;
+        }
         exif_process_SOFn(data+pos, marker, &sof_info);
         ImageInfo->Thumbnail.height   = sof_info.height;
         ImageInfo->Thumbnail.width    = sof_info.width;
@@ -8191,7 +8220,9 @@ Variant HHVM_FUNCTION(exif_thumbnail, const String& filename,
   }
 
   if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
-    exif_scan_thumbnail(&ImageInfo);
+    if (!exif_scan_thumbnail(&ImageInfo)) {
+      ImageInfo.Thumbnail.width = ImageInfo.Thumbnail.height = 0;
+    }
   }
   width.assignIfRef((int64_t)ImageInfo.Thumbnail.width);
   height.assignIfRef((int64_t)ImageInfo.Thumbnail.height);

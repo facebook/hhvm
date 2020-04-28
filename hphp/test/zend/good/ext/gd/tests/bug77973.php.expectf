@@ -1,0 +1,6 @@
+
+Warning: invalid XBM in %sbug77973.php on line 2
+
+Warning: '%sbug77973.xbm' is not a valid XBM file in %s/bug77973.php on line %d
+bool(false)
+

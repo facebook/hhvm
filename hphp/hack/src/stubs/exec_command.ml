@@ -12,6 +12,9 @@ type t =
   | Gstack
   | Hackfmt of string
   | Hh_server of string
+  | Hh
+  | Ls
+  | Pgrep
   | Pstack
   | Watchman
 
@@ -21,5 +24,8 @@ let to_string = function
   | Gstack -> "gstack"
   | Hackfmt path -> path
   | Hh_server path -> path
+  | Hh -> "hh"
+  | Ls -> "ls"
   | Pstack -> "pstack"
+  | Pgrep -> "pgrep"
   | Watchman -> "watchman"

@@ -62,6 +62,7 @@ let () =
     | ClientCommand.CLsp _ -> "Lsp"
     | ClientCommand.CDebug _ -> "Debug"
     | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
+    | ClientCommand.CRage _ -> "Rage"
   in
   let exit_status =
     try
@@ -73,6 +74,7 @@ let () =
       | ClientCommand.CRestart env -> Lwt_main.run (ClientRestart.main env)
       | ClientCommand.CLsp env -> Lwt_main.run (ClientLsp.main env)
       | ClientCommand.CDebug env -> Lwt_main.run (ClientDebug.main env)
+      | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)
     with Exit_status.Exit_with es ->

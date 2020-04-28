@@ -15,6 +15,7 @@ type command =
   | CLsp of ClientLsp.env
   | CDebug of ClientDebug.env
   | CDownloadSavedState of ClientDownloadSavedState.env
+  | CRage of ClientRage.env
 
 type command_keyword =
   | CKCheck
@@ -25,3 +26,4 @@ type command_keyword =
   | CKLsp
   | CKDebug
   | CKDownloadSavedState
+  | CKRage

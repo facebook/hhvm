@@ -66,6 +66,7 @@ let parse_command () =
     | "lsp" -> CKLsp
     | "debug" -> CKDebug
     | "download-saved-state" -> CKDownloadSavedState
+    | "rage" -> CKRage
     | _ -> CKNone
 
 let parse_without_command options usage command =
@@ -131,7 +132,17 @@ let parse_check_args cmd =
         Sys.argv.(0)
     | CKNone ->
       Printf.sprintf
-        "Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n\tcheck\t\tShows current Hack errors\n\tstart\t\tStarts a Hack server\n\tstop\t\tStops a Hack server\n\trestart\t\tRestarts a Hack server\n\tlsp\t\tRuns a persistent language service\n\tdebug\t\tDebug mode\n\nDefault values if unspecified:\n\tCOMMAND\t\tcheck\n\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n"
+        ( "Usage: %s [COMMAND] [OPTION]... [WWW-ROOT]\n\nValid values for COMMAND:\n"
+        ^^ "\tcheck\t\tShows current Hack errors\n"
+        ^^ "\tstart\t\tStarts a Hack server\n"
+        ^^ "\tstop\t\tStops a Hack server\n"
+        ^^ "\trestart\t\tRestarts a Hack server\n"
+        ^^ "\tlsp\t\tRuns a persistent language service\n"
+        ^^ "\tdebug\t\tDebug mode\n"
+        ^^ "\trage\t\tReport a bug\n"
+        ^^ "\nDefault values if unspecified:\n"
+        ^^ "\tCOMMAND\t\tcheck\n"
+        ^^ "\tWWW-ROOT\tCurrent directory\n\nCheck command options:\n" )
         Sys.argv.(0)
     | _ -> failwith "No other keywords should make it here"
   in
@@ -909,6 +920,109 @@ let parse_debug_args () =
   in
   CDebug { ClientDebug.root; from = !from }
 
+let parse_rage_args () =
+  let usage =
+    Printf.sprintf "Usage: %s rage [OPTION]... [WWW-ROOT]\n" Sys.argv.(0)
+  in
+  let from = ref "" in
+  let desc = ref None in
+  let rageid = ref None in
+  let options =
+    [
+      Common_argspecs.from from;
+      ("--desc", Arg.String (fun s -> desc := Some s), " description of problem");
+      ( "--rageid",
+        Arg.String (fun s -> rageid := Some s),
+        " (optional) use this id, and finish even if parent process dies" );
+    ]
+  in
+  let args = parse_without_command options usage "rage" in
+  let root =
+    match args with
+    | [] -> Wwwroot.get None
+    | [x] -> Wwwroot.get (Some x)
+    | _ ->
+      Printf.printf "%s\n" usage;
+      exit 2
+  in
+  (* hh_client normally handles Ctrl+C by printing an exception-stack.
+  But for us, in an interactive prompt, Ctrl+C is an unexceptional way to quit. *)
+  Sys_utils.set_signal Sys.sigint Sys.Signal_default;
+
+  let desc =
+    match !desc with
+    | Some desc -> desc
+    | None ->
+      Printf.printf
+        ( "Sorry that hh isn't working. What's wrong?\n"
+        ^^ "1. hh_server takes ages to initialize\n"
+        ^^ "2. hh is stuck in an infinite loop\n"
+        ^^ "3. hh gives some error message about the monitor\n"
+        ^^ "4. hack says it has an internal typecheck bug and asked me to report it\n"
+        ^^ "5. hack is reporting errors that are clearly incorrect [please elaborate]\n"
+        ^^ "6. I'm not sure how to write my code to avoid these hack errors\n"
+        ^^ "7. hh says something about unsaved changes from an editor even after I've quit my editor\n"
+        ^^ "8. something's wrong with hack VS Code or other editor\n"
+        ^^ "[other] Please type either one of the above numbers, or a freeform description\n"
+        ^^ "\nrage> %!" );
+      let response = In_channel.input_line_exn In_channel.stdin in
+      let (response, info) =
+        if String.equal response "1" then
+          ("hh_server slow initialize", `Verbose_hh_start)
+        else if String.equal response "2" then
+          ("hh stuck in infinite loop", `Verbose_hh_start)
+        else if String.equal response "3" then
+          ("hh monitor problem", `Verbose_hh_start)
+        else if String.equal response "4" then
+          ("internal typecheck bug", `No_info)
+        else if String.equal response "5" then
+          let () =
+            Printf.printf
+              "Please elaborate on which errors are incorrect...\nrage> %!"
+          in
+          (In_channel.input_line_exn In_channel.stdin, `No_info)
+        else if String.equal response "6" then
+          let () =
+            Printf.printf
+              ( "Please ask in the appropriate support groups for advice on coding in Hack; "
+              ^^ "`hh rage` is solely for reporting bugs in the tooling, not for reporting typechecker or "
+              ^^ "language issues." )
+          in
+          exit 0
+        else if String.equal response "7" then
+          ("unsaved editor changes", `Unsaved)
+        else if String.equal response "8" then
+          let () =
+            Printf.printf
+              ( "Please file the bug from within your editor to capture the right logs. "
+              ^^ "Note: you can do Preferences > Settings > Hack > Verbose, then `pkill hh_client`, "
+              ^^ "then reproduce the error, then file the bug. This way we'll get even richer logs.\n%!"
+              )
+          in
+          exit 0
+        else
+          (response, `Verbose_hh_start)
+      in
+      begin
+        match info with
+        | `No_info -> ()
+        | `Verbose_hh_start ->
+          Printf.printf
+            ( "\nPOWER USERS ONLY: Sometimes the normal logging from hh_server isn't "
+            ^^ "enough to diagnose an issue, and we'll ask you to switch hh_server to "
+            ^^ "write verbose logs, then have you repro the issue, then use `hh rage` to "
+            ^^ "gather up those now-verbose logs. To restart hh_server with verbose logs, "
+            ^^ "do `hh stop && hh start --config min_log_level=debug`. "
+            ^^ "Once done, then you can repro the issue, and then do rage again.\n\n%!"
+            )
+        | `Unsaved ->
+          Printf.printf
+            "\nNote: you can often work around this issue yourself by quitting your editor, then `pkill hh_client`.\n%!"
+      end;
+      response
+  in
+  CRage { ClientRage.root; from = !from; desc; rageid = !rageid }
+
 let parse_download_saved_state_args () =
   let usage =
     Printf.sprintf
@@ -971,6 +1085,7 @@ let parse_args ~(init_id : string) =
   | CKRestart -> parse_restart_args ()
   | CKDebug -> parse_debug_args ()
   | CKLsp -> parse_lsp_args ~init_id
+  | CKRage -> parse_rage_args ()
   | CKDownloadSavedState -> parse_download_saved_state_args ()
 
 let root = function
@@ -979,6 +1094,7 @@ let root = function
   | CRestart { ClientStart.root; _ }
   | CStop { ClientStop.root; _ }
   | CDebug { ClientDebug.root; _ }
+  | CRage { ClientRage.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
     root
   | CLsp _ -> Path.dummy_path

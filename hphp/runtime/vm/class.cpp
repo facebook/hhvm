@@ -1774,12 +1774,6 @@ void checkDeclarationCompat(const PreClass* preClass,
     for (; i < imeth->numNonVariadicParams(); ++i) {
       auto const& p = params[i];
       if (p.isVariadic()) { raiseIncompat(preClass, imeth); }
-      auto const& ip = iparams[i];
-      // If the interface parameter is a type constant we require the
-      // implementer to specify a type
-      if (!p.userType && ip.typeConstraint.isTypeConstant()) {
-        raiseIncompat(preClass, imeth);
-      }
       if (!iparams[i].hasDefaultValue()) {
         // The leftmost of imeth's contiguous trailing optional parameters
         // must start somewhere to the right of this parameter (which may

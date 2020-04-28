@@ -359,6 +359,7 @@ String HHVM_FUNCTION(sodium_crypto_generichash_init,
   }
 
   crypto_generichash_state state_tmp;
+  memset(&state_tmp, 0, sizeof state_tmp);
   auto result = crypto_generichash_init(
     &state_tmp,
     key_data,

@@ -140,3 +140,8 @@
   (name clowder_paste)
   (wrapped false)
   (modules clowder_paste))
+
+(library
+  (name flytrap)
+  (wrapped false)
+  (modules flytrap))

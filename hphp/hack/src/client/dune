@@ -7,6 +7,7 @@
   (libraries
     client_ide_service
     clowder_paste
+    flytrap
     glean_dependency_graph_stubs
     hh_server_monitor
     logging

@@ -3051,15 +3051,7 @@ void elemDispatch(MOpMode mode, TypedValue key) {
       case MOpMode::InOut:
         return Elem<MOpMode::InOut>(mstate.tvRef, b, key);
       case MOpMode::Define:
-        if (RuntimeOption::EvalArrayProvenance) {
-          return ElemD<MOpMode::Define, KeyType::Any, true>(
-            mstate.tvRef, b, key
-          );
-        } else {
-          return ElemD<MOpMode::Define, KeyType::Any, false>(
-            mstate.tvRef, b, key
-          );
-        }
+        return ElemD(mstate.tvRef, b, key);
       case MOpMode::Unset:
         return ElemU(mstate.tvRef, b, key);
     }
@@ -3164,18 +3156,11 @@ OPTBLD_INLINE void iopSetM(uint32_t nDiscard, MemberKey mk) {
   auto const topC = vmStack().topC();
 
   if (mk.mcode == MW) {
-    if (RuntimeOption::EvalArrayProvenance) {
-      SetNewElem<true, true>(mstate.base, topC);
-    } else {
-      SetNewElem<true, false>(mstate.base, topC);
-    }
+    SetNewElem<true>(mstate.base, topC);
   } else {
     auto const key = key_tv(mk);
     if (mcodeIsElem(mk.mcode)) {
-      auto const result = RuntimeOption::EvalArrayProvenance
-        ? SetElem<true, true>(mstate.base, key, topC)
-        : SetElem<true, false>(mstate.base, key, topC);
-
+      auto const result = SetElem<true>(mstate.base, key, topC);
       if (result) {
         tvDecRefGen(topC);
         topC->m_type = KindOfString;

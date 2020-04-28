@@ -270,7 +270,7 @@ void implElem(IRLS& env, const IRInstruction* inst) {
 
   if (inst->is(ElemDX)) {
     assertx(mode == MOpMode::Define);
-    BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key), RO::EvalArrayProvenance);
+    BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key));
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;
   }
@@ -305,10 +305,7 @@ void cgCGetElem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgSetElem(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  BUILD_OPTAB(SETELEM_HELPER_TABLE,
-              getKeyType(key),
-              RuntimeOption::EvalArrayProvenance);
+  BUILD_OPTAB(SETELEM_HELPER_TABLE, getKeyType(inst->src(1)));
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst),
@@ -331,10 +328,7 @@ void cgSetRangeRev(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgSetNewElem(IRLS& env, const IRInstruction* inst) {
-  auto const target = RuntimeOption::EvalArrayProvenance
-    ? CallSpec::direct(MInstrHelpers::setNewElem<true>)
-    : CallSpec::direct(MInstrHelpers::setNewElem<false>);
-
+  auto const target = CallSpec::direct(MInstrHelpers::setNewElem);
   auto const args = argGroup(env, inst).ssa(0).typedValue(1);
 
   auto& v = vmain(env);
@@ -858,12 +852,8 @@ LvalPtrs implPackedLayoutElemAddr(IRLS& env, Vloc arrLoc,
 }
 
 void implVecSet(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(VECSET_HELPER_TABLE, RuntimeOption::EvalArrayProvenance);
-
-  auto args = argGroup(env, inst).
-    ssa(0).
-    ssa(1).
-    typedValue(2);
+  auto const target = CallSpec::direct(PackedArray::SetIntMoveVec);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -960,9 +950,8 @@ void cgLdPackedElem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgElemVecD(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(ELEM_VEC_D_HELPER_TABLE, RuntimeOption::EvalArrayProvenance);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const target = CallSpec::direct(HPHP::ElemDVec<KeyType::Int>);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -973,14 +962,8 @@ IMPL_OPCODE_CALL(ElemVecU)
 void cgVecSet(IRLS& env, const IRInstruction* i)    { implVecSet(env, i); }
 
 void cgSetNewElemVec(IRLS& env, const IRInstruction* inst) {
-  auto const target = RuntimeOption::EvalArrayProvenance
-    ? CallSpec::direct(MInstrHelpers::setNewElemVec<true>)
-    : CallSpec::direct(MInstrHelpers::setNewElemVec<false>);
-
-  auto args = argGroup(env, inst)
-    .ssa(0)
-    .typedValue(1);
-
+  auto const target = CallSpec::direct(MInstrHelpers::setNewElemVec);
+  auto const args = argGroup(env, inst).ssa(0).typedValue(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -1027,26 +1010,17 @@ void cgReservePackedArrayDataNewElem(IRLS& env, const IRInstruction* i) {
 namespace {
 
 void implDictGet(IRLS& env, const IRInstruction* inst) {
-  auto const key = inst->src(1);
-  auto const mode =
-    (inst->op() == DictGetQuiet) ? MOpMode::None : MOpMode::Warn;
-  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(key), mode);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
+  auto const mode = inst->op() == DictGetQuiet ? MOpMode::None : MOpMode::Warn;
+  BUILD_OPTAB(DICTGET_HELPER_TABLE, getKeyType(inst->src(1)), mode);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDestTV(env, inst), SyncOptions::Sync, args);
 }
 
 void implDictSet(IRLS& env, const IRInstruction* inst) {
-  BUILD_OPTAB(DICTSET_HELPER_TABLE,
-              getKeyType(inst->src(1)),
-              RuntimeOption::EvalArrayProvenance);
-
-  auto args = argGroup(env, inst).
-    ssa(0).
-    ssa(1).
-    typedValue(2);
+  BUILD_OPTAB(DICTSET_HELPER_TABLE, getKeyType(inst->src(1)));
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
@@ -1055,22 +1029,16 @@ void implDictSet(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgElemDictD(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE,
-              getKeyType(key),
-              RuntimeOption::EvalArrayProvenance);
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
+  BUILD_OPTAB(ELEM_DICT_D_HELPER_TABLE, getKeyType(inst->src(1)));
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
 }
 
 void cgElemDictU(IRLS& env, const IRInstruction* inst) {
-  auto const key     = inst->src(1);
-  BUILD_OPTAB(ELEM_DICT_U_HELPER_TABLE, getKeyType(key));
-
-  auto args = argGroup(env, inst).ssa(0).ssa(1);
+  BUILD_OPTAB(ELEM_DICT_U_HELPER_TABLE, getKeyType(inst->src(1)));
+  auto const args = argGroup(env, inst).ssa(0).ssa(1);
 
   auto& v = vmain(env);
   cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);

@@ -396,17 +396,14 @@ ELEM_HELPER_TABLE(X)
 //////////////////////////////////////////////////////////////////////
 
 #define ELEMD_HELPER_TABLE(m) \
-  /* name      keyType        copyProv */ \
-  m(elemCDN,    KeyType::Any, false)      \
-  m(elemIDN,    KeyType::Int, false)      \
-  m(elemSDN,    KeyType::Str, false)      \
-  m(elemCDP,    KeyType::Any, true)       \
-  m(elemIDP,    KeyType::Int, true)       \
-  m(elemSDP,    KeyType::Str, true)       \
+  /* name      keyType     */ \
+  m(elemCD,    KeyType::Any)  \
+  m(elemID,    KeyType::Int)  \
+  m(elemSD,    KeyType::Str)  \
 
-#define X(nm, keyType, copyProv)                                            \
+#define X(nm, keyType)                                                      \
 inline tv_lval nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
-  return ElemD<MOpMode::Define, keyType, copyProv>(tvRef, base, key);       \
+  return ElemD<keyType>(tvRef, base, key);                                  \
 }
 ELEMD_HELPER_TABLE(X)
 #undef X
@@ -491,32 +488,15 @@ ARRAYGET_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-#define ELEM_VEC_D_HELPER_TABLE(m) \
-  /* name          copyProv*/ \
-  m(elemVecIDN,    false)     \
-  m(elemVecIDP,    true)      \
-
-#define X(nm, copyProv) \
-inline tv_lval nm(tv_lval base, int64_t key) {                 \
-  assertx(isVecType(type(base)));                             \
-  return ElemDVec<KeyType::Int, copyProv>(base, key);  \
-}
-ELEM_VEC_D_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 #define ELEM_DICT_D_HELPER_TABLE(m) \
-  /* name          keyType       copyProv*/ \
-  m(elemDictSDN,    KeyType::Str, false)    \
-  m(elemDictIDN,    KeyType::Int, false)    \
-  m(elemDictSDP,    KeyType::Str, true)     \
-  m(elemDictIDP,    KeyType::Int, true)     \
+  /* name          keyType       */ \
+  m(elemDictSD,    KeyType::Str)    \
+  m(elemDictID,    KeyType::Int)    \
 
-#define X(nm, keyType, copyProv)                          \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) {  \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
   assertx(isDictType(type(base)));                       \
-  return ElemDDict<keyType, copyProv>(base, key); \
+  return ElemDDict<keyType>(base, key);                  \
 }
 ELEM_DICT_D_HELPER_TABLE(X)
 #undef X
@@ -526,10 +506,10 @@ ELEM_DICT_D_HELPER_TABLE(X)
   m(elemDictSU, KeyType::Str)        \
   m(elemDictIU, KeyType::Int)        \
 
-#define X(nm, keyType)                                                 \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) {               \
-  assertx(isDictType(type(base)));                                    \
-  return ElemUDict<keyType>(base, key);                               \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  assertx(isDictType(type(base)));                       \
+  return ElemUDict<keyType>(base, key);                  \
 }
 ELEM_DICT_U_HELPER_TABLE(X)
 #undef X
@@ -611,27 +591,6 @@ CGETELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template<bool copyProv>
-auto vecSetImpl(ArrayData* a, int64_t key, TypedValue value) {
-  assertx(tvIsPlausible(value));
-  assertx(a->isVecArrayKind());
-  return PackedArray::SetIntMoveVec(a, key, value);
-}
-
-#define VECSET_HELPER_TABLE(m) \
-  /* name     copyProv */      \
-  m(vecSetIN, false)           \
-  m(vecSetIP, true)
-
-#define X(nm, copyProv)                                     \
-inline ArrayData* nm(ArrayData* a, int64_t key, TypedValue val) { \
-  return vecSetImpl<copyProv>(a, key, val); \
-}
-VECSET_HELPER_TABLE(X)
-#undef X
-
-//////////////////////////////////////////////////////////////////////
-
 inline ArrayData* dictSetImplPre(ArrayData* a, int64_t i, TypedValue val) {
   return MixedArray::SetIntMoveDict(a, i, val);
 }
@@ -639,7 +598,7 @@ inline ArrayData* dictSetImplPre(ArrayData* a, StringData* s, TypedValue val) {
   return MixedArray::SetStrMoveDict(a, s, val);
 }
 
-template<KeyType keyType, bool copyProv>
+template<KeyType keyType>
 auto dictSetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
   assertx(tvIsPlausible(value));
   assertx(a->isDictKind());
@@ -647,29 +606,25 @@ auto dictSetImpl(ArrayData* a, key_type<keyType> key, TypedValue value) {
 }
 
 #define DICTSET_HELPER_TABLE(m) \
-  /* name       keyType        copyProv */ \
-  m(dictSetIN,   KeyType::Int, false)      \
-  m(dictSetIP,   KeyType::Int, true)       \
-  m(dictSetSN,   KeyType::Str, false)      \
-  m(dictSetSP,   KeyType::Str, true)
+  /* name       keyType      */ \
+  m(dictSetI,   KeyType::Int)   \
+  m(dictSetS,   KeyType::Str)   \
 
-#define X(nm, keyType, copyProv)                                      \
+#define X(nm, keyType)                                                      \
 inline ArrayData* nm(ArrayData* a, key_type<keyType> key, TypedValue val) { \
-  return dictSetImpl<keyType, copyProv>(a, key, val); \
+  return dictSetImpl<keyType>(a, key, val);                                 \
 }
 DICTSET_HELPER_TABLE(X)
 #undef X
 
 //////////////////////////////////////////////////////////////////////
 
-template <bool copyProv>
-void setNewElem(tv_lval base, TypedValue val) {
-  HPHP::SetNewElem<false, copyProv>(base, &val);
+inline void setNewElem(tv_lval base, TypedValue val) {
+  HPHP::SetNewElem<false>(base, &val);
 }
 
-template <bool copyProv>
-void setNewElemVec(tv_lval base, TypedValue val) {
-  HPHP::SetNewElemVec<copyProv>(base, &val);
+inline void setNewElemVec(tv_lval base, TypedValue val) {
+  HPHP::SetNewElemVec(base, &val);
 }
 
 
@@ -709,23 +664,20 @@ KEYSET_SETNEWELEM_HELPER_TABLE(X)
 
 //////////////////////////////////////////////////////////////////////
 
-template <KeyType keyType, bool copyProv>
+template <KeyType keyType>
 StringData* setElemImpl(tv_lval base, key_type<keyType> key, TypedValue val) {
-  return HPHP::SetElem<false, copyProv, keyType>(base, key, &val);
+  return HPHP::SetElem<false, keyType>(base, key, &val);
 }
 
 #define SETELEM_HELPER_TABLE(m) \
-  /* name       keyType       copyProv*/ \
-  m(setElemCN,  KeyType::Any, false)     \
-  m(setElemIN,  KeyType::Int, false)     \
-  m(setElemSN,  KeyType::Str, false)     \
-  m(setElemCP,  KeyType::Any, true)      \
-  m(setElemIP,  KeyType::Int, true)      \
-  m(setElemSP,  KeyType::Str, true)      \
+  /* name       keyType      */ \
+  m(setElemC,  KeyType::Any)    \
+  m(setElemI,  KeyType::Int)    \
+  m(setElemS,  KeyType::Str)    \
 
-#define X(nm, kt, copyProv)                                             \
+#define X(nm, kt)                                                       \
 inline StringData* nm(tv_lval base, key_type<kt> key, TypedValue val) { \
-  return setElemImpl<kt, copyProv>(base, key, val);                     \
+  return setElemImpl<kt>(base, key, val);                               \
 }
 SETELEM_HELPER_TABLE(X)
 #undef X

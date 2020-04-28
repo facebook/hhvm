@@ -286,9 +286,9 @@ fn check_arg<'a>(env: &mut Env<'a>, e: &'a ast::Expr, param: &FunParam<'a>) -> t
     te
 }
 
-fn call_param<'a>(_env: &mut Env<'a>, _te: &tast::Expr, _param: &FunParam<'a>) -> () {
+fn call_param<'a>(env: &mut Env<'a>, te: &tast::Expr<'a>, param: &FunParam<'a>) -> () {
     // TODO(hrust) param_modes, dep_ty, coercion
-    // TODO(hrust) call into subtyping here
+    typing_subtype::sub_type(env, (te.0).1, param.type_);
 }
 
 #[allow(dead_code)]

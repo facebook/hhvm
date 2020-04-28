@@ -7,11 +7,9 @@
  *
  *)
 
-(* To make the rage output more useful, it's broken into rageItems. Each      *)
-(* can optionally be tagged with a title like "/repo/file.php:modified_hh" in *)
-(* case we'll want to say download that item in isolation.                    *)
+(** To make the rage output more useful, it's broken into rageItems. *)
 type rageItem = {
-  title: string option;
+  title: string;
   data: string;
 }
 

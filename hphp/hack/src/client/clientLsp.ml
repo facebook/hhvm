@@ -2186,7 +2186,10 @@ let do_rageFB (state : state) (ref_unblocked_time : float ref) :
           in
           let add i =
             add
-              { title = i.ServerRageTypes.title; data = i.ServerRageTypes.data }
+              {
+                title = Some i.ServerRageTypes.title;
+                data = i.ServerRageTypes.data;
+              }
           in
           List.iter items ~f:add;
           Lwt.return (Ok ()))

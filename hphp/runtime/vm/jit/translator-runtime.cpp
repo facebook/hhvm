@@ -555,34 +555,38 @@ TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  if (UNLIKELY(!a->isMixedKind())) return arrayIdxSSlow(a, key, def);
-  return getDefaultIfNullTV(MixedArray::NvGetStr(a, key), def);
+  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
+  return dictIdxS(a, key, def);
 }
 
 TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  return LIKELY(MixedArrayKeys::isMixedWithStaticStrKeys(a))
-    ? doScan(MixedArray::asMixed(a), key, def)
-    : arrayIdxSSlow(a, key, def);
+  if (!a->isMixedKind()) return arrayIdxSSlow(a, key, def);
+  return dictIdxScan(a, key, def);
 }
 
+// This helper may also be used when we know we have a MixedArray in the JIT.
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
-  assertx(a->isDictKind());
+  assertx(a->hasVanillaMixedLayout());
+  static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
   return getDefaultIfNullTV(MixedArray::NvGetIntDict(a, key), def);
 }
 
+// This helper is also used for MixedArrays.
 NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isDictKind());
+  assertx(a->hasVanillaMixedLayout());
+  static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
   return getDefaultIfNullTV(MixedArray::NvGetStrDict(a, key), def);
 }
 
+// This helper is also used for MixedArrays.
+NEVER_INLINE
 TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
-  assertx(a->isDictKind());
-  auto ad = MixedArray::asMixed(a);
-  return LIKELY(ad->keyTypes().mustBeStaticStrs())
-    ? doScan(ad, key, def)
-    : dictIdxS(a, key, def);
+  assertx(a->hasVanillaMixedLayout());
+  auto const ad = MixedArray::asMixed(a);
+  if (!ad->keyTypes().mustBeStaticStrs()) return dictIdxS(a, key, def);
+  return doScan(ad, key, def);
 }
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {

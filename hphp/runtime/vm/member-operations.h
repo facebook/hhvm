@@ -287,13 +287,21 @@ inline tv_rval ElemDictPre(ArrayData* base, TypedValue key) {
   throwInvalidArrayKeyException(&key, base);
 }
 
+// This helper may also be used when we know we have a MixedArray in the JIT.
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isDictKind());
+  assertx(base->hasVanillaMixedLayout());
+  static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
+  static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
   auto const result = ElemDictPre(base, key);
   if (UNLIKELY(!result)) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
-    throwOOBArrayKeyException(key, base);
+    assertx(IMPLIES(base->isDictType(), base->isDictKind()));
+    if (base->isDictKind()) {
+      throwOOBArrayKeyException(key, base);
+    } else {
+      throwArrayKeyException(tvCastToStringData(initScratchKey(key)), false);
+    }
   }
   assertx(result.type() != KindOfUninit);
   return *result;

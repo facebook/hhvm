@@ -2018,214 +2018,140 @@ let do_shutdown
   Lwt.return Post_shutdown
 
 let state_to_rage (state : state) : string =
+  let uris_to_string uris =
+    List.map uris ~f:(fun (DocumentUri uri) -> uri) |> String.concat ~sep:","
+  in
   let details =
     match state with
-    | Pre_init -> []
-    | Post_shutdown -> []
+    | Pre_init -> ""
+    | Post_shutdown -> ""
     | Main_loop menv ->
-      Main_env.
-        [
-          "needs_idle";
-          menv.needs_idle |> string_of_bool;
-          "editor_open_files";
-          menv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
-          "uris_with_diagnostics";
-          menv.uris_with_diagnostics |> UriSet.cardinal |> string_of_int;
-          "uris_with_unsaved_changes";
-          menv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
-          "hh_server_status.message";
-          menv.hh_server_status.ShowStatusFB.request.ShowMessageRequest.message;
-          "hh_server_status.shortMessage";
-          Option.value
-            menv.hh_server_status.ShowStatusFB.shortMessage
-            ~default:"";
-        ]
-    | In_init ienv ->
-      In_init_env.
-        [
-          "first_start_time";
-          ienv.first_start_time |> string_of_float;
-          "most_recent_start_time";
-          ienv.most_recent_start_time |> string_of_float;
-          "editor_open_files";
-          ienv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
-          "uris_with_unsaved_changes";
-          ienv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
-        ]
-    | Lost_server lenv ->
-      Lost_env.
-        [
-          "editor_open_files";
-          lenv.editor_open_files |> UriMap.keys |> List.length |> string_of_int;
-          "uris_with_unsaved_changes";
-          lenv.uris_with_unsaved_changes |> UriSet.cardinal |> string_of_int;
-          "lock_file";
-          lenv.lock_file;
-          "explanation";
-          lenv.p.explanation;
-          "new_hh_server_state";
-          lenv.p.new_hh_server_state |> hh_server_state_to_string;
-          "start_on_click";
-          lenv.p.start_on_click |> string_of_bool;
-          "trigger_on_lsp";
-          lenv.p.trigger_on_lsp |> string_of_bool;
-          "trigger_on_lock_file";
-          lenv.p.trigger_on_lock_file |> string_of_bool;
-        ]
-  in
-  state_to_string state ^ "\n" ^ String.concat ~sep:"\n" details ^ "\n"
-
-let do_rageFB (state : state) (ref_unblocked_time : float ref) :
-    RageFB.result Lwt.t =
-  RageFB.(
-    let items : rageItem list ref = ref [] in
-    let add item = items := item :: !items in
-    let add_data data = add { title = None; data } in
-    let add_fn fn =
-      if Sys.file_exists fn then
-        add { title = Some fn; data = Sys_utils.cat fn }
-    in
-    let get_stack (pid, reason) : string Lwt.t =
-      let pid = string_of_int pid in
-      let format_data msg : string Lwt.t =
-        Lwt.return (Printf.sprintf "PSTACK %s (%s) - %s\n\n" pid reason msg)
-      in
-      log "Getting pstack for %s" pid;
-      match%lwt Lwt_utils.exec_checked Exec_command.Pstack [| pid |] with
-      | Ok result ->
-        let stack = result.Lwt_utils.Process_success.stdout in
-        format_data stack
-      | Error _ ->
-        (* pstack is just an alias for gstack, but it's not present on all systems. *)
-        log "Failed to execute pstack for %s. Executing gstack instead" pid;
-        (match%lwt Lwt_utils.exec_checked Exec_command.Gstack [| pid |] with
-        | Ok result ->
-          let stack = result.Lwt_utils.Process_success.stdout in
-          format_data stack
-        | Error e ->
-          let err =
-            "unable to get pstack - " ^ e.Lwt_utils.Process_failure.stderr
-          in
-          format_data err)
-    in
-    (* logfiles. Start them, but don't wait yet because we want this to run concurrently with fetching
-     * the server logs. *)
-    let get_log_files =
-      match get_root_opt () with
-      | Some root ->
-        add_fn (ServerFiles.log_link root);
-        add_fn (ServerFiles.log_link root ^ ".old");
-        add_fn (ServerFiles.monitor_log_link root);
-        add_fn (ServerFiles.monitor_log_link root ^ ".old");
-        add_fn (ServerFiles.client_lsp_log root);
-        add_fn (ServerFiles.client_lsp_log root ^ ".old");
-        add_fn (ServerFiles.client_ide_log root);
-        add_fn (ServerFiles.client_ide_log root ^ ".old");
-        (try%lwt
-           let pids = PidLog.get_pids (ServerFiles.pids_file root) in
-           let is_interesting (_, reason) =
-             not (String_utils.string_starts_with reason "slave")
-           in
-           let%lwt stacks =
-             Lwt.pick
-               [
-                 (let%lwt () = Lwt_unix.sleep 4.50 in
-                  Lwt.return ["Timed out while getting pstacks"]);
-                 pids
-                 |> List.filter ~f:is_interesting
-                 |> Lwt_list.map_p get_stack;
-               ]
-           in
-           List.iter stacks ~f:add_data;
-           Lwt.return_unit
-         with e ->
-           let message = Exn.to_string e in
-           let stack = Printexc.get_backtrace () in
-           Lwt.return
-             (add_data
-                (Printf.sprintf "Failed to get PIDs: %s - %s" message stack)))
-      | None -> Lwt.return_unit
-    in
-    (* client *)
-    add_data ("LSP adapter state: " ^ state_to_rage state ^ "\n");
-
-    (* client: version *)
-    let current_version = read_hhconfig_version () in
-    (* client's log of server state *)
-    let tnow = Unix.gettimeofday () in
-    let server_state_to_string (tstate, state) =
-      let open Unix in
-      let tdiff = tnow -. tstate in
-      let state = hh_server_state_to_string state in
-      let tm = Unix.localtime tstate in
-      let ms = int_of_float (tstate *. 1000.) mod 1000 in
+      let open Main_env in
       Printf.sprintf
-        "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s\n"
-        tm.tm_hour
-        tm.tm_min
-        tm.tm_sec
-        ms
-        tdiff
-        state
-    in
-    let server_state_strings =
-      List.map ~f:server_state_to_string !hh_server_state_log
-    in
-    add_data
-      (String.concat
-         ~sep:""
-         ("LSP belief of hh_server_state:\n" :: server_state_strings));
+        ( "needs_idle: %b\n"
+        ^^ "editor_open_files: %s\n"
+        ^^ "uris_with_diagnostics: %s\n"
+        ^^ "uris_with_unsaved_changes: %s\n"
+        ^^ "hh_server_status.message: %s\n"
+        ^^ "hh_server_status.shortMessage: %s\n" )
+        menv.needs_idle
+        (menv.editor_open_files |> UriMap.keys |> uris_to_string)
+        (menv.uris_with_diagnostics |> UriSet.elements |> uris_to_string)
+        (menv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
+        menv.hh_server_status.ShowStatusFB.request.ShowMessageRequest.message
+        (Option.value
+           menv.hh_server_status.ShowStatusFB.shortMessage
+           ~default:"[absent]")
+    | In_init ienv ->
+      let open In_init_env in
+      Printf.sprintf
+        ( "first_start_time: %f\n"
+        ^^ "most_recent_sstart_time: %f\n"
+        ^^ "editor_open_files: %s\n"
+        ^^ "uris_with_unsaved_changes: %s\n" )
+        ienv.first_start_time
+        ienv.most_recent_start_time
+        (ienv.editor_open_files |> UriMap.keys |> uris_to_string)
+        (ienv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
+    | Lost_server lenv ->
+      let open Lost_env in
+      Printf.sprintf
+        ( "editor_open_files: %s\n"
+        ^^ "uris_with_unsaved_changes: %s\n"
+        ^^ "lock_file: %s\n"
+        ^^ "explanation: %s\n"
+        ^^ "new_hh_server_state: %s\n"
+        ^^ "start_on_click: %b\n"
+        ^^ "trigger_on_lsp: %b\n"
+        ^^ "trigger_on_lock_file: %b\n" )
+        (lenv.editor_open_files |> UriMap.keys |> uris_to_string)
+        (lenv.uris_with_unsaved_changes |> UriSet.elements |> uris_to_string)
+        lenv.lock_file
+        lenv.p.explanation
+        (lenv.p.new_hh_server_state |> hh_server_state_to_string)
+        lenv.p.start_on_click
+        lenv.p.trigger_on_lsp
+        lenv.p.trigger_on_lock_file
+  in
+  Printf.sprintf "clientLsp state: %s\n%s\n" (state_to_string state) details
 
-    (* server *)
-    let server_promise =
-      match state with
-      | Main_loop menv ->
-        Main_env.(
-          let%lwt items =
-            rpc menv.conn ref_unblocked_time ServerCommandTypes.RAGE
-          in
-          let add i =
-            add
-              {
-                title = Some i.ServerRageTypes.title;
-                data = i.ServerRageTypes.data;
-              }
-          in
-          List.iter items ~f:add;
-          Lwt.return (Ok ()))
-      | _ -> Lwt.return (Error "server rage - not in main loop")
-    in
-    let timeout_promise =
-      let%lwt () = Lwt_unix.sleep 30. in
-      (* 30s *)
-      Lwt.return (Error "server rage - timeout 30s")
-    in
-    let%lwt server_rage_result =
-      try%lwt Lwt.pick [server_promise; timeout_promise]
-      with e ->
-        let message = Exn.to_string e in
-        let stack = Printexc.get_backtrace () in
-        Lwt.return (Error (Printf.sprintf "server rage - %s\n%s" message stack))
-    in
-    (* Don't start waiting on these until the end because we want all of our LWT requests to be in
-     * flight simultaneously. *)
-    let%lwt () = get_log_files in
-    let%lwt current_version = current_version in
-    add_data ("Version previously read from .hhconfig: " ^ !hhconfig_version);
-    add_data ("Version in .hhconfig: " ^ current_version);
-    if
-      Str.string_match
-        (Str.regexp "^\\^[0-9]+\\.[0-9]+\\.[0-9]+")
-        current_version
-        0
-    then
-      add_data
-        ( "Version source control: hg update remote/releases/hack/v"
-        ^ String_utils.lstrip current_version "^" );
-    Result.iter_error server_rage_result ~f:add_data;
+let do_rageFB (state : state) : RageFB.result Lwt.t =
+  (* clientLsp status *)
+  let tnow = Unix.gettimeofday () in
+  let server_state_to_string (tstate, state) =
+    let tdiff = tnow -. tstate in
+    let state = hh_server_state_to_string state in
+    let tm = Unix.localtime tstate in
+    let ms = int_of_float (tstate *. 1000.) mod 1000 in
+    Printf.sprintf
+      "[%02d:%02d:%02d.%03d] [%03.3fs ago] %s"
+      tm.Unix.tm_hour
+      tm.Unix.tm_min
+      tm.Unix.tm_sec
+      ms
+      tdiff
+      state
+  in
+  let server_state =
+    List.map ~f:server_state_to_string !hh_server_state_log
+    |> String.concat ~sep:"\n"
+  in
+  let%lwt current_version = read_hhconfig_version () in
 
-    (* that's it! *)
-    Lwt.return !items)
+  (* spawn hh rage --rageid <rageid>, and write <rageid> in our own rage output *)
+  let rageid = Random_id.short_string () in
+  let devnull = Unix.openfile Sys_utils.null_path [Unix.O_RDWR] 0 in
+  let rage =
+    try
+      let (_pid : int) =
+        Unix.create_process
+          (Exec_command.to_string Exec_command.Hh)
+          [|
+            Exec_command.to_string Exec_command.Hh;
+            "rage";
+            "--rageid";
+            rageid;
+            "--from";
+            !from;
+            "--desc";
+            "lsp_rage";
+            get_root_exn () |> Path.to_string;
+          |]
+          devnull
+          devnull
+          devnull
+      in
+      Printf.sprintf
+        ( "Detailed hack information can't be included here for technical reasons.\n"
+        ^^ "Please look it up by rageid. (This will take several minutes to be ready.)\n"
+        ^^ "rageid: %s\nlook up rageid: %s\n" )
+        rageid
+        (HackEventLogger.Rage.get_telemetry_url rageid)
+    with e -> Exception.wrap e |> Exception.to_string
+  in
+
+  (* We kicked off a potentially long-running `hh rage` command. What happens if we ourselves
+  die before it has finished? Will it be allowed to finish?
+  Unix behavior is that the worst that can happen is that the rage process gets reparented onto
+  parent pid 1, and its stdin/out/err get closed, and it gets sent SIGHUP. The behavior of
+  hh rage when it receives the `--rageid` argument is to ignore all these things. Hence it
+  will run to completion. *)
+
+  (* that's it! *)
+  let data =
+    Printf.sprintf
+      ( "%s\n\n"
+      ^^ "%s\n\n"
+      ^^ "version previously read from .hhconfig: %s\n"
+      ^^ "version in .hhconfig: %s\n\n"
+      ^^ "clientLsp belief of hh_server_state:\n%s\n" )
+      rage
+      (state_to_rage state)
+      !hhconfig_version
+      current_version
+      server_state
+  in
+  Lwt.return [{ RageFB.title = None; data }]
 
 let do_toggleTypeCoverageFB
     (conn : server_conn)
@@ -4057,7 +3983,7 @@ let handle_client_message
     | (_, _, NotificationMessage InitializedNotification) -> Lwt.return_none
     (* rage request *)
     | (_, _, RequestMessage (id, RageRequestFB)) ->
-      let%lwt result = do_rageFB !state ref_unblocked_time in
+      let%lwt result = do_rageFB !state in
       respond_jsonrpc ~powered_by:Language_server id (RageResultFB result);
       Lwt.return_some
         { result_count = List.length result; result_extra_telemetry = None }

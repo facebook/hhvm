@@ -984,6 +984,7 @@ fn emit_foreach_(
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
+        let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
         let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
         let iter_args = IterArgs {
             iter_id: iter_id.clone(),
@@ -999,7 +1000,7 @@ fn emit_foreach_(
             emit_block,
         )?;
         let iter_init = InstrSeq::gather(vec![
-            emit_expr::emit_expr(e, env, collection)?,
+            collection_instrs,
             emit_pos(&collection.0),
             instr::iterinit(iter_args.clone(), loop_break_label.clone()),
         ]);

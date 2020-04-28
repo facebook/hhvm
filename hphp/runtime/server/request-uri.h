@@ -76,6 +76,12 @@ private:
   bool rewriteURL(const VirtualHost *vhost, Transport *transport,
                   const std::string &pathTranslation,
                   const std::string &sourceRoot);
+  bool rewriteURLNoDirCheck(const VirtualHost *vhost, Transport *transport,
+                            const std::string &pathTranslation,
+                            const std::string &sourceRoot);
+  bool rewriteURLForDir(const VirtualHost *vhost, Transport *transport,
+                             const std::string &pathTranslation,
+                             const std::string &sourceRoot);
   bool resolveGlobalURL(const VirtualHost *vhost,
                         const std::string &pathTranslation,
                         const std::string &sourceRoot);

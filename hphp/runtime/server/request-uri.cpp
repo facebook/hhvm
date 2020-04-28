@@ -112,7 +112,7 @@ bool RequestURI::process(const VirtualHost *vhost, Transport *transport,
     // GlobalDocument option in use - never resolveURL and 404 if GlobalDocument
     // does not exist. Still check for rewrites.
 
-    if (!rewriteURL(vhost, transport, pathTranslation, sourceRoot)) {
+    if (!rewriteURLNoDirCheck(vhost, transport, pathTranslation, sourceRoot)) {
       // Redirection
       m_done = true;
       return true;
@@ -181,9 +181,22 @@ const StaticString s_https("https://");
  * Postcondition: Output is false and we are redirecting OR
  *  m_rewrittenURL is set and m_queryString is updated if needed
  */
-bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
-                            const std::string &pathTranslation,
-                            const std::string &sourceRoot) {
+bool RequestURI::rewriteURL(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
+  return rewriteURLNoDirCheck(vhost, transport, pathTranslation, sourceRoot) &&
+         rewriteURLForDir(vhost, transport, pathTranslation, sourceRoot);
+}
+
+bool RequestURI::rewriteURLNoDirCheck(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
   bool qsa = false;
   int redirect = 0;
   std::string host = transport->getHeader("host");
@@ -228,7 +241,15 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
     // A un-rewritten URL is always relative, so remove prepending /
     m_rewrittenURL = m_rewrittenURL.substr(1);
   }
+  return true;
+}
 
+bool RequestURI::rewriteURLForDir(
+  const VirtualHost* vhost,
+  Transport* transport,
+  const std::string& pathTranslation,
+  const std::string& sourceRoot
+) {
   // If the URL refers to a folder but does not end
   // with a slash, then we need to redictect
   String url = m_rewrittenURL;
@@ -257,7 +278,6 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
       return false;
     }
   }
-
   return true;
 }
 

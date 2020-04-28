@@ -483,19 +483,18 @@ bool ConcurrentTableSharedStore::eraseImpl(const char* key,
 
 // Should be called outside m_lock
 void ConcurrentTableSharedStore::purgeExpired() {
-  if (m_purgeCounter.fetch_add(1, std::memory_order_relaxed) %
-      apcExtension::PurgeFrequency != 0) {
-    return;
-  }
+  auto last = m_lastPurgeTime.load(std::memory_order_acquire);
   time_t now = time(nullptr);
+  if (now < last + apcExtension::PurgeInterval) return;
+  if (!m_lastPurgeTime.compare_exchange_strong(last, now,
+                                               std::memory_order_acq_rel)) {
+    return;                             // someone beat us
+  }
   int64_t oldestLive = apcExtension::UseUncounted ?
       HPHP::Treadmill::getOldestStartTime() : 0;
   ExpirationPair tmp;
   int i = 0;
-  while (apcExtension::PurgeRate < 0 || i < apcExtension::PurgeRate) {
-    if (!m_expQueue.try_pop(tmp)) {
-      break;
-    }
+  while (m_expQueue.try_pop(tmp)) {
     if (tmp.second > now) {
       m_expQueue.push(tmp);
       break;
@@ -947,7 +946,7 @@ bool ConcurrentTableSharedStore::storeImpl(const String& key,
     }
   }
   }  // m_lock
-  if (apcExtension::ExpireOnSets) {
+  if (!apcExtension::UseUncounted && apcExtension::ExpireOnSets) {
     purgeExpired();
   }
 

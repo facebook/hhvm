@@ -150,9 +150,8 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(EnableApcSerialize, ini, config, "Server.APC.EnableApcSerialize",
                true);
   Config::Bind(ExpireOnSets, ini, config, "Server.APC.ExpireOnSets");
-  Config::Bind(PurgeFrequency, ini, config, "Server.APC.PurgeFrequency", 4096);
-  Config::Bind(PurgeRate, ini, config, "Server.APC.PurgeRate", -1);
-
+  Config::Bind(PurgeInterval, ini, config, "Server.APC.PurgeIntervalSeconds",
+               PurgeInterval);
   Config::Bind(AllowObj, ini, config, "Server.APC.AllowObject");
   Config::Bind(TTLLimit, ini, config, "Server.APC.TTLLimit", -1);
   // Any TTL > TTLMaxFinite will be made infinite. NB: Applied *after* TTLLimit.
@@ -259,6 +258,9 @@ void apcExtension::moduleShutdown() {
   }
 }
 
+void apcExtension::requestShutdown() {
+  apc_store().purgeExpired();
+}
 
 bool apcExtension::Enable = true;
 bool apcExtension::EnableConstLoad = false;
@@ -267,10 +269,9 @@ std::string apcExtension::PrimeLibrary;
 int apcExtension::LoadThread = 15;
 std::set<std::string> apcExtension::CompletionKeys;
 bool apcExtension::EnableApcSerialize = true;
-bool apcExtension::ExpireOnSets = false;
-int apcExtension::PurgeFrequency = 4096;
-int apcExtension::PurgeRate = -1;
 bool apcExtension::AllowObj = false;
+bool apcExtension::ExpireOnSets = false;
+int apcExtension::PurgeInterval = 1;
 int apcExtension::TTLLimit = -1;
 int64_t apcExtension::TTLMaxFinite = std::numeric_limits<int64_t>::max();
 int apcExtension::HotSize = 30000;

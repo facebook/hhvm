@@ -293,6 +293,11 @@ struct ConcurrentTableSharedStore {
   bool eraseKey(const String& key);
 
   /*
+   * Schedule deletion of expired entries.
+   */
+  void purgeExpired();
+
+  /*
    * Clear the entire APC table.
    */
   bool clear();
@@ -409,7 +414,6 @@ private:
 private:
   bool eraseImpl(const char*, bool, int64_t, ExpMap::accessor* expAcc);
   bool storeImpl(const String&, const Variant&, int64_t, bool, bool);
-  void purgeExpired();
   bool handlePromoteObj(const String&, APCHandle*, const Variant&);
   APCHandle* unserialize(const String&, StoreValue*);
   void dumpKeyAndValue(std::ostream&);
@@ -453,8 +457,7 @@ private:
   tbb::concurrent_priority_queue<ExpirationPair,
                                  ExpirationCompare> m_expQueue;
   ExpMap m_expMap;
-  std::atomic<uint64_t> m_purgeCounter{0};
-
+  std::atomic<time_t> m_lastPurgeTime{0};
   std::unique_ptr<SnapshotLoader> m_snapshotLoader;
 };
 

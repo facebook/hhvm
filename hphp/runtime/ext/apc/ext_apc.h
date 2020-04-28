@@ -37,9 +37,8 @@ struct apcExtension final : Extension {
   static std::set<std::string> CompletionKeys;
   static bool EnableApcSerialize;
   static bool ExpireOnSets;
-  static int PurgeFrequency;
-  static int PurgeRate;
   static bool AllowObj;
+  static int PurgeInterval;
   static int TTLLimit;
   static int64_t TTLMaxFinite;
   static std::vector<std::string> HotPrefix;
@@ -63,6 +62,8 @@ struct apcExtension final : Extension {
   void moduleInit() override;
   void moduleShutdown() override;
   bool moduleEnabled() const override { return Enable; }
+
+  void requestShutdown() override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

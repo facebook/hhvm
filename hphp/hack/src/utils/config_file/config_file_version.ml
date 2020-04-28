@@ -16,11 +16,14 @@ type version =
   | Opaque_version of string option
   | Version_components of version_components
 
-let version_to_string_opt (v : version) : string option =
+let version_to_string_opt ?(pad : bool = true) (v : version) : string option =
   match v with
   | Opaque_version s -> s
   | Version_components { major; minor; build } ->
-    Some (Printf.sprintf "%d.%02d.%d" major minor build)
+    if pad then
+      Some (Printf.sprintf "%d.%02d.%d" major minor build)
+    else
+      Some (Printf.sprintf "%d.%d.%d" major minor build)
 
 let version_re_str = {|\^\([0-9]+\)\.\([0-9]+\)\.\([0-9]+\)|}
 

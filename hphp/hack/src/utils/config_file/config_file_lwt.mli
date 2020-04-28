@@ -20,7 +20,7 @@ type version =
 
 val parse_version : string option -> version
 
-val version_to_string_opt : version -> string option
+val version_to_string_opt : ?pad:bool -> version -> string option
 
 val file_path_relative_to_repo_root : string
 

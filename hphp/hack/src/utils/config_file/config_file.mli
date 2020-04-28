@@ -18,7 +18,7 @@ type version =
   | Opaque_version of string option
   | Version_components of version_components
 
-val version_to_string_opt : version -> string option
+val version_to_string_opt : ?pad:bool -> version -> string option
 
 val file_path_relative_to_repo_root : string
 

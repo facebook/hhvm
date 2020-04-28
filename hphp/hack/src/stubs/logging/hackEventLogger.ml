@@ -374,3 +374,20 @@ module ProfileTypeCheck = struct
 
   let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None
 end
+
+module Rage = struct
+  let rage
+      ~rageid:_
+      ~desc:_
+      ~root:_
+      ~from:_
+      ~hhconfig_version:_
+      ~experiments:_
+      ~experiments_config_meta:_
+      ~items:_
+      ~result:_
+      ~start_time:_ =
+    ()
+
+  let get_telemetry_url ~(rageid : string) : string = rageid
+end

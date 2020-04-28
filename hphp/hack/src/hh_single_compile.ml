@@ -641,54 +641,22 @@ let decl_and_run_mode compiler_options =
             in
             (get_lines_in_file input_file_list, handle_output)
           | None ->
-            if
-              Sys.is_directory compiler_options.filename
-              (* Compile every file under directory *)
-            then
-              let files_in_dir =
-                let rec go dirs =
-                  match dirs with
-                  | [] -> []
-                  | dir :: dirs ->
-                    let (ds, fs) =
-                      Sys.readdir dir
-                      |> Array.map ~f:(Filename.concat dir)
-                      |> Array.to_list
-                      |> List.partition_tf ~f:Sys.is_directory
-                    in
-                    fs @ go (ds @ dirs)
-                in
-                go [compiler_options.filename]
-              in
-              let handle_output filename output _hhbc_options _debug_time =
-                let abs_path = Relative_path.to_absolute filename in
-                if Filename.check_suffix abs_path ".php" then
-                  let output_file =
-                    Filename.chop_suffix abs_path ".php" ^ ".hhas"
-                  in
-                  if Sys.file_exists output_file then (
-                    if not compiler_options.quiet_mode then
-                      Caml.Printf.fprintf
-                        Caml.stderr
-                        "Output file %s already exists\n"
-                        output_file
-                  ) else
-                    Sys_utils.write_strings_to_file ~file:output_file output
-              in
-              (files_in_dir, handle_output)
-            (* Compile a single file *)
-            else
-              let handle_output =
-                match compiler_options.output_file with
-                | Some output_file ->
-                  fun _filename output _hhbc_options _debug_time ->
-                    Sys_utils.write_strings_to_file ~file:output_file output
-                | _ -> handle_output
-              in
-              ([compiler_options.filename], handle_output)
+            let handle_output =
+              match compiler_options.output_file with
+              | Some output_file ->
+                fun _filename output _hhbc_options _debug_time ->
+                  Sys_utils.write_strings_to_file ~file:output_file output
+              | _ -> handle_output
+            in
+            ([compiler_options.filename], handle_output)
           (* Actually execute the compilation(s) *)
         in
-        List.iter filenames (process_single_file handle_output)))
+        if Sys.is_directory compiler_options.filename then
+          P.eprintf
+            "%s is a directory, directory is not supported."
+            compiler_options.filename
+        else
+          List.iter filenames (process_single_file handle_output)))
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in

@@ -1541,10 +1541,10 @@ pub fn emit_final_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Res
         a::Stmt_::Throw(_) | a::Stmt_::Return(_) | a::Stmt_::Goto(_) => emit_stmt(e, env, stmt),
         a::Stmt_::Expr(expr) if expr.1.is_yield_break() => emit_stmt(e, env, stmt),
         a::Stmt_::Block(stmts) => emit_final_stmts(e, env, stmts),
-        _ => Ok(InstrSeq::gather(vec![
-            emit_stmt(e, env, stmt)?,
-            emit_dropthrough_return(e, env)?,
-        ])),
+        _ => {
+            let ret = emit_dropthrough_return(e, env)?;
+            Ok(InstrSeq::gather(vec![emit_stmt(e, env, stmt)?, ret]))
+        }
     }
 }
 

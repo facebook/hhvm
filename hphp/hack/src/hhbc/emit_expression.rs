@@ -2342,10 +2342,11 @@ fn emit_special_function(
                     uarg.cloned(),
                 ),
             );
+            let ignored_expr = emit_ignored_expr(e, env, &Pos::make_none(), &call)?;
             Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, &args[0])?,
                 instr::jmpnz(l.clone()),
-                emit_ignored_expr(e, env, &Pos::make_none(), &call)?,
+                ignored_expr,
                 emit_fatal::emit_fatal_runtime(pos, "invariant_violation"),
                 instr::label(l),
                 instr::null(),

@@ -2732,8 +2732,11 @@ function run_test($options, $test) {
     return run_one_config($options, $test, $hhvm, $hhvm_env);
   }
 
-  if (file_exists($test.'.onlyrepo') || file_exists($test.'.onlyjumpstart')) {
-    return 'skip-onlyrepo or skip-onlyjumpstart';
+  if (file_exists($test.'.onlyrepo')) {
+    return 'skip-onlyrepo';
+  }
+  if (file_exists($test.'.onlyjumpstart')) {
+    return 'skip-onlyjumpstart';
   }
 
   if (isset($options['hhas-round-trip'])) {

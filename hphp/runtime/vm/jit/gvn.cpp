@@ -315,7 +315,9 @@ bool supportsGVN(const IRInstruction* inst) {
     return true;
 
   case IsTypeStruct:
-    return !opcodeMayRaise(IsTypeStruct);
+    // Resources can change type without generating a new SSATmp,
+    // so its not safe to GVN
+    return !opcodeMayRaise(IsTypeStruct) && !inst->src(1)->type().maybe(TRes);
 
   case SameArr:
   case NSameArr:

@@ -2502,22 +2502,20 @@ function run_config_post($outputs, $test, $options) {
   }
   if (!isset($wanted)) $wanted = $wanted_re;
   $passed = @preg_match("/^$wanted_re\$/s", $output);
+  if ($passed) return true;
   if ($passed === false && $repeats) {
     // $repeats can cause the regex to become too big, and fail
     // to compile.
     return 'skip-repeats-fail';
   }
-  if (!$passed) {
-    $diff = generate_diff($wanted_re, $wanted_re, $output);
-    if ($passed === false && $diff === "") {
-      // the preg match failed, probably because the regex was too complex,
-      // but since the line by line diff came up empty, we're fine
-      $passed = 1;
-    } else {
-      file_put_contents("$test.diff", $diff);
-    }
+  $diff = generate_diff($wanted_re, $wanted_re, $output);
+  if ($passed === false && $diff === "") {
+    // the preg match failed, probably because the regex was too complex,
+    // but since the line by line diff came up empty, we're fine
+    return true;
   }
-  return $passed;
+  file_put_contents("$test.diff", $diff);
+  return false;
 }
 
 function timeout_prefix() {
@@ -2574,24 +2572,29 @@ function run_and_lock_test($options, $test) {
     if (!flock($lock, LOCK_UN, inout $wouldblock)) {
       if ($failmsg !== '') $failmsg .= "\n";
       $failmsg .= "Failed to release test lock";
+      $status = false;
     }
     if (!fclose($lock)) {
       if ($failmsg !== '') $failmsg .= "\n";
       $failmsg .= "Failed to close lock file";
+      $status = false;
     }
   }
-  if ($failmsg !== "") {
+  if ($status === false) {
+    invariant($failmsg !== '', "test failed with empty failmsg");
     Status::fail($test, $time, $stime, $etime, $failmsg);
-  } else if (is_string($status) && substr($status, 0, 4) === 'skip') {
-    if (strlen($status) > 5 && substr($status, 0, 5) === 'skip-') {
-      Status::skip($test, substr($status, 5), $time, $stime, $etime);
-    } else {
-      Status::fail($test, $time, $stime, $etime, "invalid skip status $status");
-    }
-  } else if ($status) {
+  } else if ($status === true) {
+    invariant($failmsg === '', "test passed with non-empty failmsg $failmsg");
     Status::pass($test, $time, $stime, $etime);
+  } else if ($status is string) {
+    invariant(
+      preg_match('/^skip-[\w-]+$/', $status),
+      "invalid skip status $status"
+    );
+    invariant($failmsg === '', "test skipped with non-empty failmsg $failmsg");
+    Status::skip($test, substr($status, 5), $time, $stime, $etime);
   } else {
-    Status::fail($test, $time, $stime, $etime, "Unknown failure");
+    invariant_violation("invalid status type " . gettype($status));
   }
 }
 

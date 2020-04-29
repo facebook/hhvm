@@ -498,31 +498,11 @@ GeneralEffects interp_one_effects(const IRInstruction& inst) {
  * These instructions never load tvRef, but they might store to it.
  */
 MemEffects minstr_with_tvref(const IRInstruction& inst) {
-  auto loads = AHeapAny;
-  auto stores = AHeapAny | all_pointees(inst);
-  auto kills = AEmpty;
-
   auto const srcs = inst.srcs();
-  if (inst.is(ElemDX, PropDX)) {
-    assertx(inst.srcs().back()->isA(TMemToMISCell));
-    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 1));
-
-    auto const propPtr = inst.src(inst.numSrcs() - 1);
-    if (RuntimeOption::EvalCheckPropTypeHints <= 0 || propPtr->isA(TNullptr)) {
-      kills = AMIStatePropS;
-    } else if (inst.is(ElemDX)) {
-      loads |= AMIStatePropS;
-    } else {
-      assertx(inst.is(PropDX));
-      stores |= AMIStatePropS;
-    }
-  } else {
-    assertx(srcs.back()->isA(TMemToMISCell));
-    loads |= all_pointees(srcs.subpiece(0, srcs.size() - 1));
-    kills = AMIStatePropS;
-  }
-
-  return may_load_store_kill(loads, stores, kills);
+  assertx(srcs.back()->isA(TMemToMISCell));
+  auto const loads = AHeapAny | all_pointees(srcs.subpiece(0, srcs.size() - 1));
+  auto const stores = AHeapAny | all_pointees(inst);
+  return may_load_store(loads, stores);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -633,7 +613,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase | AMIStatePropS
+      stack_kills | AMIStateTempBase | AMIStateBase
     };
   }
 
@@ -644,7 +624,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateTempBase | AMIStateBase | AMIStatePropS
+      stack_kills | AMIStateTempBase | AMIStateBase
     };
   }
 
@@ -1406,10 +1386,19 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CGetProp:
   case CGetPropQ:
   case IssetProp:
-    return may_load_store_kill(
+    return may_load_store(
       AHeapAny | all_pointees(inst),
-      AHeapAny,
-      AMIStatePropS
+      AHeapAny
+    );
+
+  /*
+   * SetRange behaves like a simpler version of SetElem.
+   */
+  case SetRange:
+  case SetRangeRev:
+    return may_load_store(
+      AHeapAny | all_pointees(inst),
+      AHeapAny | pointee(inst.src(0))
     );
 
   case IncDecElem:
@@ -1419,23 +1408,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetOpElem:
   case SetOpProp:
   case SetProp:
-    return may_load_store_kill(
-      AHeapAny | all_pointees(inst),
-      AHeapAny | all_pointees(inst),
-      AMIStatePropS
-    );
-
-  /*
-   * SetRange behaves like a simpler version of SetElem.
-   */
-  case SetRange:
-  case SetRangeRev:
-    return may_load_store_kill(
-      AHeapAny | all_pointees(inst),
-      AHeapAny | pointee(inst.src(0)),
-      AMIStatePropS
-    );
-
   case SetNewElemArray:
   case SetNewElemVec:
   case SetNewElemKeyset:
@@ -1447,27 +1419,17 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemDictD:
   case ElemDictU:
   case ElemKeysetU:
-  case UnsetProp:
-    // Right now we generally can't limit any of these better than general
-    // re-entry rules, since they can raise warnings and re-enter.
-    return may_load_store_kill(
-      AHeapAny | all_pointees(inst),
-      AHeapAny | all_pointees(inst),
-      AMIStatePropS
-    );
-
-  case ReservePackedArrayDataNewElem:
-    return may_load_store(AHeapAny, AHeapAny);
-
-  /*
-   * The Elem intermediate operation doesn't take a tvRef pointer, like the
-   * other intermeidate minstr operations below do.
-   */
   case ElemX:
+  case UnsetProp:
+    // These member ops will load and store from the base lval which they
+    // take as their first argument, which may point anywhere in the heap.
     return may_load_store(
       AHeapAny | all_pointees(inst),
       AHeapAny | all_pointees(inst)
     );
+
+  case ReservePackedArrayDataNewElem:
+    return may_load_store(AHeapAny, AHeapAny);
 
   /*
    * Intermediate minstr operations. In addition to a base pointer like the

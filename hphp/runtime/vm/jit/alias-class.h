@@ -439,7 +439,6 @@ auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 auto const AMIStateTvRef      = AliasClass{AliasClass::BMITvRef};
 auto const AMIStateTvRef2     = AliasClass{AliasClass::BMITvRef2};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
-auto const AMIStatePropS      = AliasClass{AliasClass::BMIPropS};
 
 //////////////////////////////////////////////////////////////////////
 

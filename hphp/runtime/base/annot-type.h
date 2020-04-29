@@ -114,20 +114,12 @@ bool interface_supports_non_objects(const StringData* s);
 bool interface_supports_int(const StringData* s);
 bool interface_supports_double(const StringData* s);
 bool interface_supports_string(const StringData* s);
-bool interface_supports_array(const StringData* s);
-bool interface_supports_shape(const StringData* s);
-bool interface_supports_vec(const StringData* s);
-bool interface_supports_dict(const StringData* s);
-bool interface_supports_keyset(const StringData* s);
+bool interface_supports_arrlike(const StringData* s);
 
 bool interface_supports_int(std::string const&);
 bool interface_supports_double(std::string const&);
 bool interface_supports_string(std::string const&);
-bool interface_supports_array(std::string const&);
-bool interface_supports_shape(std::string const&);
-bool interface_supports_vec(std::string const&);
-bool interface_supports_dict(std::string const&);
-bool interface_supports_keyset(std::string const&);
+bool interface_supports_arrlike(std::string const&);
 
 TypedValue annotDefaultValue(AnnotType at);
 
@@ -334,19 +326,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
-        return interface_supports_array(annotClsName)
-          ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfPersistentVec:
       case KindOfVec:
-        return interface_supports_vec(annotClsName)
-          ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfPersistentDict:
       case KindOfDict:
-        return interface_supports_dict(annotClsName)
-          ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfPersistentKeyset:
       case KindOfKeyset:
-        return interface_supports_keyset(annotClsName)
+        return interface_supports_arrlike(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfFunc:
         if (interface_supports_string(annotClsName)) {
@@ -361,13 +347,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         }
         return AnnotAction::Fail;
       case KindOfClsMeth:
-        if (RuntimeOption::EvalHackArrDVArrs) {
-          return interface_supports_vec(annotClsName) ?
-            AnnotAction::ClsMethCheck : AnnotAction::Fail;
-        } else {
-          return interface_supports_array(annotClsName) ?
-            AnnotAction::ClsMethCheck : AnnotAction::Fail;
-        }
+        return interface_supports_arrlike(annotClsName) ?
+          AnnotAction::ClsMethCheck : AnnotAction::Fail;
       case KindOfUninit:
       case KindOfNull:
       case KindOfBoolean:

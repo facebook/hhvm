@@ -4668,13 +4668,13 @@ Index::ConstraintResolution Index::resolve_named_type(
       }
 
       if (candidate.subtypeOrNull(BArr)) {
-        if (interface_supports_array(rcls.name())) return TArr;
+        if (interface_supports_arrlike(rcls.name())) return TArr;
       } else if (candidate.subtypeOrNull(BVec)) {
-        if (interface_supports_vec(rcls.name())) return TVec;
+        if (interface_supports_arrlike(rcls.name())) return TVec;
       } else if (candidate.subtypeOrNull(BDict)) {
-        if (interface_supports_dict(rcls.name())) return TDict;
+        if (interface_supports_arrlike(rcls.name())) return TDict;
       } else if (candidate.subtypeOrNull(BKeyset)) {
-        if (interface_supports_keyset(rcls.name())) return TKeyset;
+        if (interface_supports_arrlike(rcls.name())) return TKeyset;
       } else if (candidate.subtypeOrNull(BStr)) {
         if (interface_supports_string(rcls.name())) return TStr;
       } else if (candidate.subtypeOrNull(BInt)) {

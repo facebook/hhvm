@@ -290,12 +290,12 @@ struct TypeConstraint {
 
   bool isClsMethCompactVec() const {
     return isVec() || isVecOrDict() || isArrayLike() ||
-           interface_supports_vec(m_typeName);
+           interface_supports_arrlike(m_typeName);
   }
 
   bool isClsMethCompactVArr() const {
     return isVArray() || isVArrayOrDArray() || isArray() || isArrayLike() ||
-           interface_supports_array(m_typeName);
+           interface_supports_arrlike(m_typeName);
   }
 
   AnnotType type()  const { return m_type; }

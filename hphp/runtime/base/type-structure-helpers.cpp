@@ -85,23 +85,11 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     }
 
     case KindOfPersistentVec:
-    case KindOfVec: {
-      auto const cls = lookupClass();
-      return cls && interface_supports_vec(cls->name());
-    }
-
+    case KindOfVec:
     case KindOfPersistentDict:
-    case KindOfDict: {
-      auto const cls = lookupClass();
-      return cls && interface_supports_dict(cls->name());
-    }
-
+    case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset: {
-      auto const cls = lookupClass();
-      return cls && interface_supports_keyset(cls->name());
-    }
-
+    case KindOfKeyset:
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
@@ -109,7 +97,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfPersistentArray:
     case KindOfArray: {
       auto const cls = lookupClass();
-      return cls && interface_supports_array(cls->name());
+      return cls && interface_supports_arrlike(cls->name());
     }
 
     case KindOfObject: {
@@ -119,9 +107,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 
     case KindOfClsMeth: {
       auto const cls = lookupClass();
-      if (cls && (RuntimeOption::EvalHackArrDVArrs ?
-        interface_supports_vec(cls->name()) :
-        interface_supports_array(cls->name()))) {
+      if (cls && interface_supports_arrlike(cls->name())) {
         if (RO::EvalIsVecNotices) {
           raise_notice("Implicit clsmeth to %s conversion",
                        cls->name()->data());

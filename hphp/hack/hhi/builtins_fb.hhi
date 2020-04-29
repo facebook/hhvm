@@ -104,6 +104,4 @@ function int_mul_overflow(int $a, int $b): int;
  * manipulate rounding of the result.
  */
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
-
-type INCORRECT_TYPE<T> = T;
 } // HH namespace

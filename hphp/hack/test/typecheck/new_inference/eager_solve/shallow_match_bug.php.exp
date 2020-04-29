@@ -6,5 +6,5 @@ File "shallow_match_bug.php", line 26, characters 23-24:
 Tk is a constrained type parameter
 File "shallow_match_bug.php", line 26, characters 29-36:
 Expected arraykey
-File "shallow_match_bug.php", line 7, characters 20-46:
+File "shallow_match_bug.php", line 7, characters 20-28:
 But got dynamic

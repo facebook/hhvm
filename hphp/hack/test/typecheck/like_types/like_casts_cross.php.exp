@@ -1,4 +1,0 @@
-File "like_casts_cross.php--file2.php", line 7, characters 24-61:
-Invalid "as" expression hint (Typing[4195])
-File "like_casts_cross.php--file2.php", line 7, characters 42-60:
-The "as" operator cannot be used with a function type

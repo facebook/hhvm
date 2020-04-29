@@ -4,7 +4,7 @@ function test(): void {
   reduce(
     vec<dict<string, mixed>>[],
     ($prev, $_) ==> {
-      $key = '' as HH\INCORRECT_TYPE<arraykey>;
+      $key = '' as ~arraykey;
       if (!contains_key($prev)) {
         $prev[$key] = 0;
       }

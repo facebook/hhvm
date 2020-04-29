@@ -1376,6 +1376,7 @@ folly::Optional<int> cli_process_command_loop(int fd) {
       cli_write(fd, true, "OK");
       cli_write_fd(fd, dir_fd);
       close(dir_fd);
+      continue;
     }
 
     if (cmd == "lstat") {

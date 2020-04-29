@@ -19,16 +19,20 @@ open State
    In the definition of <module>::<ty1>, instances of <ty2> need to be boxed
    (for instances of mutual recursion where we would otherwise define types of
    infinite size). *)
-let add_indirection_between =
-  [
-    ("typing_defs_core", "ConstraintType", "ConstraintType_");
-    ("typing_defs_core", "Ty", "Ty_");
-    ("aast_defs", "Hint", "Hint_");
-  ]
+let add_indirection_between () =
+  ( if Configuration.by_ref () then
+    [("typing_defs_core", "Ty", "reason::Reason")]
+  else
+    [] )
+  @ [
+      ("typing_defs_core", "ConstraintType", "ConstraintType_");
+      ("typing_defs_core", "Ty", "Ty_");
+      ("aast_defs", "Hint", "Hint_");
+    ]
 
 let should_add_indirection ty =
   List.mem
-    add_indirection_between
+    (add_indirection_between ())
     (curr_module_name (), self (), ty)
     ~equal:( = )
 
@@ -37,6 +41,15 @@ let add_rc_between = [("file_info", "Pos", "relative_path::RelativePath")]
 let should_add_rc ty =
   (not (Configuration.by_ref ()))
   && List.mem add_rc_between (curr_module_name (), self (), ty) ~equal:( = )
+
+let should_add_reference ty =
+  let tyl =
+    if Configuration.by_ref () then
+      ["Pos"; "pos::Pos"]
+    else
+      []
+  in
+  List.mem tyl ty ~equal:String.equal
 
 (* These types inherently add an indirection, so we don't need to box instances
    of recursion in their type arguments. *)
@@ -105,7 +118,9 @@ let rec core_type ?(seen_indirection = false) ct =
       && not (is_owned_builtin id)
     in
     let args = type_args ~seen_indirection ~add_lifetime args in
-    if should_add_rc id then
+    if should_add_reference id then
+      sprintf "&'a %s%s" id args
+    else if should_add_rc id then
       sprintf "ocamlrep::rc::RcOc<%s%s>" id args
     (* Direct or indirect recursion *)
     else if (not seen_indirection) && (self () = id || should_add_indirection id)

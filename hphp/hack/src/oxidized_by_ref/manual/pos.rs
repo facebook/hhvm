@@ -14,7 +14,7 @@ use oxidized::file_pos_small::FilePosSmall;
 
 use crate::relative_path::RelativePath;
 
-#[derive(Copy, Clone, Debug, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
 enum PosImpl<'a> {
     Small {
         file: &'a RelativePath<'a>,
@@ -30,7 +30,7 @@ enum PosImpl<'a> {
 
 use PosImpl::*;
 
-#[derive(Copy, Clone, Debug, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct Pos<'a>(PosImpl<'a>);
 
 const NONE: Pos<'_> = Pos(Small {
@@ -44,7 +44,7 @@ impl<'a> Pos<'a> {
         &NONE
     }
 
-    pub fn is_none(self) -> bool {
+    pub fn is_none(&self) -> bool {
         match self {
             Pos(PosImpl::Small { file, start, end }) => {
                 start.is_dummy() && end.is_dummy() && file.is_empty()
@@ -53,7 +53,7 @@ impl<'a> Pos<'a> {
         }
     }
 
-    pub fn filename(self) -> &'a RelativePath<'a> {
+    pub fn filename(&self) -> &'a RelativePath<'a> {
         match self.0 {
             Small { file, .. } => file,
             Large { file, .. } => file,
@@ -61,7 +61,7 @@ impl<'a> Pos<'a> {
     }
 
     /// Returns a closed interval that's incorrect for multi-line spans.
-    pub fn info_pos(self) -> (usize, usize, usize) {
+    pub fn info_pos(&self) -> (usize, usize, usize) {
         fn compute<P: FilePos>(pos_start: P, pos_end: P) -> (usize, usize, usize) {
             let (line, start_minus1, bol) = pos_start.line_column_beg();
             let start = start_minus1 + 1;
@@ -82,7 +82,7 @@ impl<'a> Pos<'a> {
         }
     }
 
-    pub fn info_pos_extended(self) -> (usize, usize, usize, usize) {
+    pub fn info_pos_extended(&self) -> (usize, usize, usize, usize) {
         let (line_begin, start, end) = self.info_pos();
         let line_end = match self.0 {
             Small { end, .. } => end.line_column_beg(),
@@ -92,11 +92,11 @@ impl<'a> Pos<'a> {
         (line_begin, line_end, start, end)
     }
 
-    pub fn info_raw(self) -> (usize, usize) {
+    pub fn info_raw(&self) -> (usize, usize) {
         (self.start_cnum(), self.end_cnum())
     }
 
-    pub fn line(self) -> usize {
+    pub fn line(&self) -> usize {
         match self.0 {
             Small { start, .. } => start.line(),
             Large { start, .. } => start.line(),
@@ -108,13 +108,13 @@ impl<'a> Pos<'a> {
         file: &'a RelativePath<'a>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
-    ) -> Self {
+    ) -> &'a Self {
         let (start_line, start_bol, start_cnum) = start;
         let (end_line, end_bol, end_cnum) = end;
         let start = FilePosSmall::from_lnum_bol_cnum(start_line, start_bol, start_cnum);
         let end = FilePosSmall::from_lnum_bol_cnum(end_line, end_bol, end_cnum);
         match (start, end) {
-            (Some(start), Some(end)) => Pos(Small { file, start, end }),
+            (Some(start), Some(end)) => b.alloc(Pos(Small { file, start, end })),
             _ => {
                 let start = b.alloc(FilePosLarge::from_lnum_bol_cnum(
                     start_line, start_bol, start_cnum,
@@ -122,7 +122,7 @@ impl<'a> Pos<'a> {
                 let end = b.alloc(FilePosLarge::from_lnum_bol_cnum(
                     end_line, end_bol, end_cnum,
                 ));
-                Pos(Large { file, start, end })
+                b.alloc(Pos(Large { file, start, end }))
             }
         }
     }
@@ -134,7 +134,7 @@ impl<'a> Pos<'a> {
         line: usize,
         cols: Range<usize>,
         start_offset: usize,
-    ) -> Self {
+    ) -> &'a Self {
         let start = FilePosSmall::from_line_column_offset(line, cols.start, start_offset);
         let end = FilePosSmall::from_line_column_offset(
             line,
@@ -142,7 +142,7 @@ impl<'a> Pos<'a> {
             start_offset + (cols.end - cols.start),
         );
         match (start, end) {
-            (Some(start), Some(end)) => Pos(Small { file, start, end }),
+            (Some(start), Some(end)) => b.alloc(Pos(Small { file, start, end })),
             _ => {
                 let start = b.alloc(FilePosLarge::from_line_column_offset(
                     line,
@@ -154,7 +154,7 @@ impl<'a> Pos<'a> {
                     cols.end,
                     start_offset + (cols.end - cols.start),
                 ));
-                Pos(Large { file, start, end })
+                b.alloc(Pos(Large { file, start, end }))
             }
         }
     }
@@ -164,25 +164,29 @@ impl<'a> Pos<'a> {
         FilePosLarge::from_lnum_bol_cnum(lnum, bol, bol + col)
     }
 
-    pub fn btw_nocheck(b: &'a Bump, x1: Self, x2: Self) -> Self {
-        let inner = match (x1.0, x2.0) {
-            (Small { file, start, .. }, Small { end, .. }) => Small { file, start, end },
+    pub fn btw_nocheck(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> &'a Self {
+        let inner = match (&x1.0, &x2.0) {
+            (Small { file, start, .. }, Small { end, .. }) => Small {
+                file,
+                start: *start,
+                end: *end,
+            },
             (Large { file, start, .. }, Large { end, .. }) => Large { file, start, end },
             (Small { file, start, .. }, Large { end, .. }) => Large {
                 file,
-                start: b.alloc(Self::small_to_large_file_pos(start)),
+                start: b.alloc(Self::small_to_large_file_pos(*start)),
                 end,
             },
             (Large { file, start, .. }, Small { end, .. }) => Large {
                 file,
                 start,
-                end: b.alloc(Self::small_to_large_file_pos(end)),
+                end: b.alloc(Self::small_to_large_file_pos(*end)),
             },
         };
-        Pos(inner)
+        b.alloc(Pos(inner))
     }
 
-    pub fn btw(b: &'a Bump, x1: Self, x2: Self) -> Result<Self, String> {
+    pub fn btw(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> Result<&'a Self, String> {
         if x1.filename() != x2.filename() {
             // using string concatenation instead of format!,
             // it is not stable see T52404885
@@ -196,11 +200,11 @@ impl<'a> Pos<'a> {
                 + "and"
                 + &x2.end_cnum().to_string())
         } else {
-            Ok(Self::btw_nocheck(b, x1.clone(), x2.clone()))
+            Ok(Self::btw_nocheck(b, x1, x2))
         }
     }
 
-    pub fn merge(b: &'a Bump, x1: Self, x2: Self) -> Result<Self, String> {
+    pub fn merge(b: &'a Bump, x1: &'a Self, x2: &'a Self) -> Result<&'a Self, String> {
         if x1.filename() != x2.filename() {
             // see comment above (T52404885)
             return Err(String::from("Position in separate files ")
@@ -208,7 +212,7 @@ impl<'a> Pos<'a> {
                 + " and "
                 + &x2.filename().to_string());
         }
-        match (x1.0, x2.0) {
+        match (&x1.0, &x2.0) {
             (
                 Small {
                     file,
@@ -239,7 +243,11 @@ impl<'a> Pos<'a> {
                 } else {
                     end1
                 };
-                Ok(Pos(Small { file, start, end }))
+                Ok(b.alloc(Pos(Small {
+                    file,
+                    start: *start,
+                    end: *end,
+                })))
             }
             (
                 Large {
@@ -271,34 +279,34 @@ impl<'a> Pos<'a> {
                 } else {
                     end1
                 };
-                Ok(Pos(Large { file, start, end }))
+                Ok(b.alloc(Pos(Large { file, start, end })))
             }
             (Small { file, start, end }, Large { .. }) => Self::merge(
                 b,
-                Pos(Large {
+                b.alloc(Pos(Large {
                     file,
-                    start: b.alloc(Self::small_to_large_file_pos(start)),
-                    end: b.alloc(Self::small_to_large_file_pos(end)),
-                }),
+                    start: b.alloc(Self::small_to_large_file_pos(*start)),
+                    end: b.alloc(Self::small_to_large_file_pos(*end)),
+                })),
                 x2,
             ),
             (Large { .. }, Small { file, start, end }) => Self::merge(
                 b,
                 x1,
-                Pos(Large {
+                b.alloc(Pos(Large {
                     file,
-                    start: b.alloc(Self::small_to_large_file_pos(start)),
-                    end: b.alloc(Self::small_to_large_file_pos(end)),
-                }),
+                    start: b.alloc(Self::small_to_large_file_pos(*start)),
+                    end: b.alloc(Self::small_to_large_file_pos(*end)),
+                })),
             ),
         }
     }
 
-    pub fn last_char(self) -> Self {
+    pub fn last_char(&'a self, b: &'a Bump) -> &'a Self {
         if self.is_none() {
             self
         } else {
-            Pos(match self.0 {
+            b.alloc(Pos(match self.0 {
                 Small { file, end, .. } => Small {
                     file,
                     start: end,
@@ -309,15 +317,15 @@ impl<'a> Pos<'a> {
                     start: end,
                     end,
                 },
-            })
+            }))
         }
     }
 
-    pub fn first_char_of_line(self, b: &'a Bump) -> Self {
+    pub fn first_char_of_line(&'a self, b: &'a Bump) -> &'a Self {
         if self.is_none() {
             self
         } else {
-            Pos(match self.0 {
+            b.alloc(Pos(match self.0 {
                 Small { file, start, .. } => {
                     let start = start.with_column(0);
                     Small {
@@ -334,7 +342,7 @@ impl<'a> Pos<'a> {
                         end: start,
                     }
                 }
-            })
+            }))
         }
     }
 
@@ -404,14 +412,14 @@ impl Eq for Pos<'_> {}
 impl<'a> Pos<'a> {
     /// Returns a struct implementing Display which produces the same format as
     /// `Pos.string` in OCaml.
-    pub fn string(self) -> PosString<'a> {
+    pub fn string(&self) -> PosString<'_> {
         PosString(self)
     }
 }
 
 /// This struct has an impl of Display which produces the same format as
 /// `Pos.string` in OCaml.
-pub struct PosString<'a>(Pos<'a>);
+pub struct PosString<'a>(&'a Pos<'a>);
 
 impl std::fmt::Display for PosString<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -457,8 +465,8 @@ mod tests {
         name: &'a RelativePath<'a>,
         start: (usize, usize, usize),
         end: (usize, usize, usize),
-    ) -> Pos<'a> {
-        Pos::from_lnum_bol_cnum(b, name, start, end)
+    ) -> &'a Pos<'a> {
+        b.alloc(Pos::from_lnum_bol_cnum(b, name, start, end))
     }
 
     #[test]

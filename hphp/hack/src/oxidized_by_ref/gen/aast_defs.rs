@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ca48dca4162972ad97840e827f063c17>>
+// @generated SignedSource<<d90f317aae45ebc24120abb4a77d5541>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -25,7 +25,7 @@ pub use shape_map::ShapeMap;
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Lid<'a>(pub Pos<'a>, pub LocalId<'a>);
+pub struct Lid<'a>(pub &'a Pos<'a>, pub LocalId<'a>);
 
 pub type Sid<'a> = ast_defs::Id<'a>;
 
@@ -56,7 +56,7 @@ pub use oxidized::aast_defs::XhpChildOp;
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Hint<'a>(pub Pos<'a>, pub &'a Hint_<'a>);
+pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
 
 pub type MutableReturn<'a> = bool;
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<faec6d6ac1812967ea1a8d4d3a4a0421>>
+// @generated SignedSource<<93d4a6bad22d8029ed30928927e19ca5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -27,7 +27,7 @@ pub struct ClassElt<'a> {
     /// identifies the class from which this elt originates
     pub origin: &'a str,
     pub deprecated: Option<&'a str>,
-    pub pos: oxidized::lazy::Lazy<pos::Pos<'a>>,
+    pub pos: oxidized::lazy::Lazy<&'a pos::Pos<'a>>,
     pub flags: isize,
 }
 
@@ -38,7 +38,7 @@ pub struct FunElt<'a> {
     pub deprecated: Option<&'a str>,
     pub type_: Ty<'a>,
     pub decl_errors: Option<errors::Errors<'a>>,
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
 }
 
 #[derive(
@@ -47,7 +47,7 @@ pub struct FunElt<'a> {
 pub struct ClassConst<'a> {
     pub synthesized: bool,
     pub abstract_: bool,
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
     pub type_: Ty<'a>,
     pub expr: Option<nast::Expr<'a>>,
     /// identifies the class from which this const originates
@@ -70,7 +70,7 @@ pub struct ClassConst<'a> {
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Requirement<'a>(pub pos::Pos<'a>, pub Ty<'a>);
+pub struct Requirement<'a>(pub &'a pos::Pos<'a>, pub Ty<'a>);
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -93,7 +93,7 @@ pub struct ClassType<'a> {
     pub has_xhp_keyword: bool,
     pub is_disposable: bool,
     pub name: &'a str,
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
     pub tparams: &'a [Tparam<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub consts: s_map::SMap<'a, ClassConst<'a>>,
@@ -135,8 +135,8 @@ pub struct TypeconstType<'a> {
     pub constraint: Option<Ty<'a>>,
     pub type_: Option<Ty<'a>>,
     pub origin: &'a str,
-    pub enforceable: (pos::Pos<'a>, bool),
-    pub reifiable: Option<pos::Pos<'a>>,
+    pub enforceable: (&'a pos::Pos<'a>, bool),
+    pub reifiable: Option<&'a pos::Pos<'a>>,
 }
 
 #[derive(
@@ -177,7 +177,7 @@ pub struct RecordDefType<'a> {
     pub extends: Option<nast::Sid<'a>>,
     pub fields: &'a [(nast::Sid<'a>, oxidized::typing_defs::RecordFieldReq)],
     pub abstract_: bool,
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
     pub errors: Option<errors::Errors<'a>>,
 }
 
@@ -185,7 +185,7 @@ pub struct RecordDefType<'a> {
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct TypedefType<'a> {
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
     pub vis: oxidized::aast::TypedefVisibility,
     pub tparams: &'a [Tparam<'a>],
     pub constraint: Option<Ty<'a>>,

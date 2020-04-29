@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0cd6dfe8e2a607fc0e726e698eca4eb>>
+// @generated SignedSource<<33872a6d4742686601ecc28c93b4da1b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -66,9 +66,9 @@ pub struct MroElement<'a> {
     /// The position at which this element was directly included in the hierarchy.
     /// If C extends B extends A, the use_pos of A in C's linearization will be the
     /// position of the class name A in the line "class B extends A".
-    pub use_pos: pos::Pos<'a>,
+    pub use_pos: &'a pos::Pos<'a>,
     /// Like mro_use_pos, but includes type arguments (if any).
-    pub ty_pos: pos::Pos<'a>,
+    pub ty_pos: &'a pos::Pos<'a>,
     /// The type arguments with which this ancestor class was instantiated. The
     /// first class in the linearization (the one which was linearized) will have
     /// an empty list here, even when it takes type parameters.
@@ -97,7 +97,7 @@ pub struct MroElement<'a> {
     /// required by some ancestor, this will be [Some], and the position will be
     /// the location where this requirement was most recently included into the
     /// hierarchy.
-    pub required_at: Option<pos::Pos<'a>>,
+    pub required_at: Option<&'a pos::Pos<'a>>,
     /// True if this element is included in the linearization (directly or
     /// indirectly) because of a require extends relationship.
     pub via_req_extends: bool,
@@ -159,7 +159,7 @@ pub struct DeclClassType<'a> {
     pub is_xhp: bool,
     pub has_xhp_keyword: bool,
     pub name: &'a str,
-    pub pos: pos::Pos<'a>,
+    pub pos: &'a pos::Pos<'a>,
     pub tparams: &'a [Tparam<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     /// class name to the subst_context that must be applied to that class

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4dab43aacecff9416124c9cf63c2c61f>>
+// @generated SignedSource<<7e0e8515e9917b7caabfe277ebc2962e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -34,8 +34,8 @@ pub struct ShallowTypeconst<'a> {
     pub constraint: Option<Ty<'a>>,
     pub name: aast::Sid<'a>,
     pub type_: Option<Ty<'a>>,
-    pub enforceable: (pos::Pos<'a>, bool),
-    pub reifiable: Option<pos::Pos<'a>>,
+    pub enforceable: (&'a pos::Pos<'a>, bool),
+    pub reifiable: Option<&'a pos::Pos<'a>>,
 }
 
 #[derive(

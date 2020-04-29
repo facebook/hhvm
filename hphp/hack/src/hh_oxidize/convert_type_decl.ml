@@ -34,14 +34,35 @@ let default_derives () =
       (Some "serde", "Serialize");
     ]
 
-let additional_derives : (string option * string) list SMap.t =
-  [
-    ("typing_tyvar_occurrences::TypingTyvarOccurrences", [(None, "Default")]);
-    ("tast::SavedEnv", [(None, "Default")]);
-    ("type_parameter_env::TypeParameterEnv", [(None, "Default")]);
-    ("typing_inference_env::TypingInferenceEnv", [(None, "Default")]);
-  ]
-  |> List.fold ~init:SMap.empty ~f:(fun map (ty, x) -> SMap.add ty x map)
+let derive_copy ty =
+  (* By default, we will derive Copy only for enums whose variants all have no
+     arguments. But there are some other small types for which implementing Copy is
+     convenient. We whitelist them here. *)
+  if Configuration.by_ref () then
+    match ty with
+    | "aast::Expr"
+    | "aast::Expr_"
+    | "ast_defs::Id"
+    | "nast::FuncBodyAnn"
+    | "typing_defs_core::Ty"
+    | "typing_defs_core::Ty_" ->
+      true
+    | _ -> false
+  else
+    false
+
+let additional_derives ty : (string option * string) list =
+  ( if derive_copy ty then
+    [(None, "Copy")]
+  else
+    [] )
+  @
+  match ty with
+  | "typing_tyvar_occurrences::TypingTyvarOccurrences" -> [(None, "Default")]
+  | "tast::SavedEnv" -> [(None, "Default")]
+  | "type_parameter_env::TypeParameterEnv" -> [(None, "Default")]
+  | "typing_inference_env::TypingInferenceEnv" -> [(None, "Default")]
+  | _ -> []
 
 let derive_blacklists =
   [
@@ -67,8 +88,7 @@ let derived_traits ty =
       List.filter (default_derives ()) ~f:(fun (_, derive) ->
           not (List.mem blacklist derive ~equal:( = )))
   end
-  |> List.append
-       (Option.value (SMap.find_opt ty additional_derives) ~default:[])
+  |> List.append (additional_derives ty)
 
 let blacklisted_types =
   [
@@ -103,10 +123,30 @@ let tuple_aliases = [("ast_defs", "Pstring"); ("errors", "Message")]
 A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields should
 be wrapped by Box to keep ty1 size down.
 *)
-let box_variant = [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
+let box_variant () =
+  ( if Configuration.by_ref () then
+    [("nast", "FuncBodyAnn"); ("typing_defs_core", "Ty_")]
+  else
+    [] )
+  @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 
 let should_box_variant ty =
-  List.mem box_variant (curr_module_name (), ty) ~equal:( = )
+  List.mem (box_variant ()) (curr_module_name (), ty) ~equal:( = )
+
+(* When should_box_variant returns true, we will switch to boxing the fields of
+   each variant by default. Some fields are small enough not to need boxing,
+   though, so we opt out of the boxing behavior for them here to avoid
+   unnecessary indirections. The rule of thumb I'm using here is that the size
+   should be two words or less (the size of a slice). *)
+let unbox_field ty =
+  ty = "String"
+  || String.is_prefix ty ~prefix:"Vec<"
+  || String.is_prefix ty ~prefix:"Block<"
+  || String.is_prefix ty ~prefix:"&'a "
+  || Configuration.by_ref ()
+     && ( ty = "oxidized::tany_sentinel::TanySentinel"
+        || ty = "ident::Ident<'a>"
+        || ty = "Ty<'a>" )
 
 let add_rcoc = [("aast", "Nsenv")]
 
@@ -238,12 +278,7 @@ let constructor_arguments ?(box_fields = false) = function
       | [] -> ""
       | [ty] ->
         let ty = core_type ty in
-        if
-          ty = "String"
-          || String.is_prefix ty ~prefix:"Vec<"
-          || String.is_prefix ty ~prefix:"Block<"
-          || String.is_prefix ty ~prefix:"&'a "
-        then
+        if unbox_field ty then
           sprintf "(%s)" ty
         else if Configuration.by_ref () then
           sprintf "(&'a %s)" ty
@@ -298,7 +333,8 @@ let type_declaration name td =
   let attrs_and_vis additional_derives =
     let derive_attr =
       derived_traits name @ additional_derives
-      |> List.sort ~compare:(fun (_, t1) (_, t2) -> String.compare t1 t2)
+      |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
+             String.compare t1 t2)
       |> List.map ~f:(fun (m, trait) ->
              Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
              trait)

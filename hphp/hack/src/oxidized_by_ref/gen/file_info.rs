@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c506e77e333ab6f76a2ab7d45e637701>>
+// @generated SignedSource<<810f17ca151b5f3c01594bc62c8508b1>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -28,7 +28,7 @@ pub use oxidized::file_info::NameType;
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum Pos<'a> {
-    Full(pos::Pos<'a>),
+    Full(&'a pos::Pos<'a>),
     File(
         oxidized::file_info::NameType,
         relative_path::RelativePath<'a>,
@@ -38,7 +38,7 @@ pub enum Pos<'a> {
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Id<'a>(pub Pos<'a>, pub &'a str);
+pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
 
 /// The hash value of a decl AST.
 /// We use this to see if two versions of a file are "similar", i.e. their
@@ -58,7 +58,7 @@ pub struct FileInfo<'a> {
     pub typedefs: &'a [Id<'a>],
     pub consts: &'a [Id<'a>],
     /// None if loaded from saved state
-    pub comments: Option<&'a [(pos::Pos<'a>, Comment<'a>)]>,
+    pub comments: Option<&'a [(&'a pos::Pos<'a>, Comment<'a>)]>,
 }
 
 pub use oxidized::file_info::Names;

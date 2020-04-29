@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<707c3f2a7d5034a1bbb2639cbd5122b7>>
+// @generated SignedSource<<96bebb13fa78343d6433a988fb6db5bc>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -28,7 +28,7 @@ pub type Program<'a, Ex, Fb, En, Hi> = &'a [Def<'a, Ex, Fb, En, Hi>];
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Stmt<'a, Ex, Fb, En, Hi>(pub Pos<'a>, pub Stmt_<'a, Ex, Fb, En, Hi>);
+pub struct Stmt<'a, Ex, Fb, En, Hi>(pub &'a Pos<'a>, pub Stmt_<'a, Ex, Fb, En, Hi>);
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -102,8 +102,12 @@ pub struct UsingStmt<'a, Ex, Fb, En, Hi> {
 pub enum AsExpr<'a, Ex, Fb, En, Hi> {
     AsV(Expr<'a, Ex, Fb, En, Hi>),
     AsKv(Expr<'a, Ex, Fb, En, Hi>, Expr<'a, Ex, Fb, En, Hi>),
-    AwaitAsV(Pos<'a>, Expr<'a, Ex, Fb, En, Hi>),
-    AwaitAsKv(Pos<'a>, Expr<'a, Ex, Fb, En, Hi>, Expr<'a, Ex, Fb, En, Hi>),
+    AwaitAsV(&'a Pos<'a>, Expr<'a, Ex, Fb, En, Hi>),
+    AwaitAsKv(
+        &'a Pos<'a>,
+        Expr<'a, Ex, Fb, En, Hi>,
+        Expr<'a, Ex, Fb, En, Hi>,
+    ),
 }
 
 pub type Block<'a, Ex, Fb, En, Hi> = &'a [Stmt<'a, Ex, Fb, En, Hi>];
@@ -125,7 +129,7 @@ pub enum ClassId_<'a, Ex, Fb, En, Hi> {
 }
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Expr<'a, Ex, Fb, En, Hi>(pub Ex, pub Expr_<'a, Ex, Fb, En, Hi>);
 
@@ -138,7 +142,7 @@ pub enum CollectionTarg<'a, Hi> {
 }
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum Expr_<'a, Ex, Fb, En, Hi> {
     Array(&'a [Afield<'a, Ex, Fb, En, Hi>]),
@@ -301,7 +305,7 @@ pub enum AssertExpr<'a, Ex, Fb, En, Hi> {
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum Case<'a, Ex, Fb, En, Hi> {
-    Default(Pos<'a>, Block<'a, Ex, Fb, En, Hi>),
+    Default(&'a Pos<'a>, Block<'a, Ex, Fb, En, Hi>),
     Case(Expr<'a, Ex, Fb, En, Hi>, Block<'a, Ex, Fb, En, Hi>),
 }
 
@@ -340,7 +344,7 @@ pub struct FunParam<'a, Ex, Fb, En, Hi> {
     pub annotation: Ex,
     pub type_hint: TypeHint<'a, Hi>,
     pub is_variadic: IsVariadic<'a>,
-    pub pos: Pos<'a>,
+    pub pos: &'a Pos<'a>,
     pub name: &'a str,
     pub expr: Option<Expr<'a, Ex, Fb, En, Hi>>,
     pub callconv: Option<oxidized::ast_defs::ParamKind>,
@@ -356,7 +360,7 @@ pub enum FunVariadicity<'a, Ex, Fb, En, Hi> {
     /// PHP5.6 ...$args finishes the func declaration
     FVvariadicArg(FunParam<'a, Ex, Fb, En, Hi>),
     /// HH ... finishes the declaration; deprecate for ...$args?
-    FVellipsis(Pos<'a>),
+    FVellipsis(&'a Pos<'a>),
     /// standard non variadic function
     FVnonVariadic,
 }
@@ -365,7 +369,7 @@ pub enum FunVariadicity<'a, Ex, Fb, En, Hi> {
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Fun_<'a, Ex, Fb, En, Hi> {
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub annotation: En,
     pub mode: oxidized::file_info::Mode,
     pub ret: TypeHint<'a, Hi>,
@@ -487,7 +491,7 @@ pub use oxidized::aast::EmitId;
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Class_<'a, Ex, Fb, En, Hi> {
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub annotation: En,
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,
@@ -503,7 +507,7 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub insteadof_alias: &'a [InsteadofAlias<'a>],
     pub method_redeclarations: &'a [MethodRedeclaration<'a, Ex, Fb, En, Hi>],
     pub xhp_attr_uses: &'a [Hint<'a>],
-    pub xhp_category: Option<(Pos<'a>, &'a [Pstring<'a>])>,
+    pub xhp_category: Option<(&'a Pos<'a>, &'a [Pstring<'a>])>,
     pub reqs: &'a [(Hint<'a>, IsExtends<'a>)],
     pub implements: &'a [Hint<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
@@ -512,7 +516,7 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub vars: &'a [ClassVar<'a, Ex, Fb, En, Hi>],
     pub methods: &'a [Method_<'a, Ex, Fb, En, Hi>],
     pub attributes: &'a [ClassAttr<'a, Ex, Fb, En, Hi>],
-    pub xhp_children: &'a [(Pos<'a>, XhpChild<'a>)],
+    pub xhp_children: &'a [(&'a Pos<'a>, XhpChild<'a>)],
     pub xhp_attrs: &'a [XhpAttr<'a, Ex, Fb, En, Hi>],
     pub namespace: Nsenv<'a>,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
@@ -532,7 +536,7 @@ pub struct XhpAttr<'a, Ex, Fb, En, Hi>(
     pub TypeHint<'a, Hi>,
     pub ClassVar<'a, Ex, Fb, En, Hi>,
     pub Option<oxidized::aast::XhpAttrTag>,
-    pub Option<(Pos<'a>, bool, &'a [Expr<'a, Ex, Fb, En, Hi>])>,
+    pub Option<(&'a Pos<'a>, bool, &'a [Expr<'a, Ex, Fb, En, Hi>])>,
 );
 
 #[derive(
@@ -595,7 +599,7 @@ pub struct ClassTypeconst<'a, Ex, Fb, En, Hi> {
     pub constraint: Option<Hint<'a>>,
     pub type_: Option<Hint<'a>>,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub doc_comment: Option<DocComment<'a>>,
 }
 
@@ -616,14 +620,14 @@ pub struct ClassVar<'a, Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment<'a>>,
     pub is_promoted_variadic: bool,
     pub is_static: bool,
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
 }
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Method_<'a, Ex, Fb, En, Hi> {
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub annotation: En,
     pub final_: bool,
     pub abstract_: bool,
@@ -692,7 +696,7 @@ pub struct Gconst<'a, Ex, Fb, En, Hi> {
     pub type_: Option<Hint<'a>>,
     pub value: Expr<'a, Ex, Fb, En, Hi>,
     pub namespace: Nsenv<'a>,
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
 
@@ -707,7 +711,7 @@ pub struct RecordDef<'a, Ex, Fb, En, Hi> {
     pub fields: &'a [(Sid<'a>, Hint<'a>, Option<Expr<'a, Ex, Fb, En, Hi>>)],
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
     pub namespace: Nsenv<'a>,
-    pub span: Pos<'a>,
+    pub span: &'a Pos<'a>,
     pub doc_comment: Option<DocComment<'a>>,
     pub emit_id: Option<oxidized::aast::EmitId>,
 }

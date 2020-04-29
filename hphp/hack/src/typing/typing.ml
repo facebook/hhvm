@@ -1762,7 +1762,6 @@ and expr_
           None
           (* This is not a nullsafe method call, just nullsafe method access *)
         ~coerce_from_ty:None (* What's coerce_from_ty actually mean? *)
-        ~pos_params:None (* No idea what this means either *)
         ~explicit_targs:targs
         ~is_nonnull:false (* Hmmm: No idea here. Does this depend on nullsafe *)
         env
@@ -1812,7 +1811,6 @@ and expr_
         ~is_method:true
         ~nullsafe:None
         ~coerce_from_ty:None
-        ~pos_params:None
         ~is_nonnull:false
         env
         ty1
@@ -4841,7 +4839,6 @@ and dispatch_call
           ~nullsafe:None
           ~obj_pos:pos
           ~coerce_from_ty:None
-          ~pos_params:(Some el)
           ~is_nonnull:false
           env
           ty1
@@ -4893,7 +4890,6 @@ and dispatch_call
         ~obj_pos:p
         ~is_method:true
         ~nullsafe
-        ~pos_params:el
         ~coerce_from_ty:None
         ~explicit_targs
         env
@@ -4938,7 +4934,6 @@ and dispatch_call
         ~obj_pos:(fst e1)
         ~is_method
         ~nullsafe
-        ~pos_params:el
         ~coerce_from_ty:None
         ~explicit_targs
         env

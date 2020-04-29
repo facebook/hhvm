@@ -121,7 +121,6 @@ let rec obj_get
     ~nullsafe
     ~coerce_from_ty
     ?(explicit_targs = [])
-    ?pos_params
     env
     ty1
     cid
@@ -132,7 +131,6 @@ let rec obj_get
     ~is_method
     ~nullsafe
     ~obj_pos
-    ~pos_params
     ~explicit_targs
     ~coerce_from_ty
     ~is_nonnull:false
@@ -186,7 +184,6 @@ and obj_get_concrete_ty
         ~is_method
         ~nullsafe:None
         ~obj_pos:(Reason.to_pos r)
-        ~pos_params:None
         ~explicit_targs
         ~coerce_from_ty
         ~is_nonnull:true
@@ -491,7 +488,6 @@ and obj_get_
     ~is_method
     ~nullsafe
     ~obj_pos
-    ~pos_params
     ~coerce_from_ty
     ~is_nonnull
     ?(explicit_targs = [])
@@ -527,7 +523,6 @@ and obj_get_
           ~obj_pos
           ~is_method
           ~nullsafe
-          ~pos_params
           ~explicit_targs
           ~coerce_from_ty
           ~is_nonnull
@@ -579,7 +574,6 @@ and obj_get_
             ~obj_pos
             ~is_method
             ~nullsafe
-            ~pos_params
             ~explicit_targs
             ~coerce_from_ty
             ~is_nonnull
@@ -615,7 +609,6 @@ and obj_get_
             ~obj_pos
             ~is_method
             ~nullsafe
-            ~pos_params
             ~explicit_targs
             ~coerce_from_ty
             ~is_nonnull
@@ -643,7 +636,6 @@ and obj_get_
       ~obj_pos
       ~is_method
       ~nullsafe
-      ~pos_params
       ~explicit_targs
       ~coerce_from_ty
       ~is_nonnull
@@ -659,7 +651,6 @@ and obj_get_
       ~obj_pos
       ~is_method
       ~nullsafe
-      ~pos_params
       ~explicit_targs
       ~coerce_from_ty
       ~is_nonnull
@@ -687,7 +678,6 @@ and obj_get_
             ~obj_pos
             ~is_method
             ~nullsafe
-            ~pos_params
             ~explicit_targs
             ~coerce_from_ty
             ~is_nonnull

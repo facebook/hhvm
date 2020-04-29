@@ -104,7 +104,7 @@ Variant HHVM_FUNCTION(gethostbynamel, const String& hostname) {
     return false;
   }
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   for (int i = 0 ; result.hostbuf.h_addr_list[i] != 0 ; i++) {
     struct in_addr in = *(struct in_addr *)result.hostbuf.h_addr_list[i];
     try {
@@ -166,12 +166,42 @@ Variant HHVM_FUNCTION(inet_ntop, const String& in_addr) {
     return false;
   }
 
-  char buffer[40];
-  if (!inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
+  char buffer[INET6_ADDRSTRLEN];
+  if (!::inet_ntop(af, in_addr.data(), buffer, sizeof(buffer))) {
     raise_warning("An unknown error occurred");
     return false;
   }
   return String(buffer, CopyString);
+}
+
+TypedValue HHVM_FUNCTION(inet_ntop_folly, const String& in_addr) {
+  try {
+    auto const ip = folly::IPAddress::fromBinary(in_addr.slice());
+    return tvReturn(String{std::move(ip.str())});
+  } catch (folly::IPAddressFormatException&) {
+    return make_tv<KindOfNull>();
+  }
+}
+
+TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr) {
+  int af = AF_INET6;
+  size_t buflen = INET6_ADDRSTRLEN;
+  switch (in_addr.size()) {
+    case 16: break;
+    case 4:
+      af = AF_INET;
+      buflen = INET_ADDRSTRLEN;
+      break;
+    default:
+      return make_tv<KindOfNull>();
+  }
+  String ret(buflen, ReserveString);
+  auto buffer = ret.mutableData();
+  if (!::inet_ntop(af, in_addr.data(), buffer, buflen)) {
+    return make_tv<KindOfNull>();
+  }
+  ret.setSize(std::min(strlen(buffer), buflen));
+  return tvReturn(std::move(ret));
 }
 
 Variant HHVM_FUNCTION(inet_pton, const String& address) {
@@ -469,6 +499,8 @@ void StandardExtension::initNetwork() {
   HHVM_FE(getservbyname);
   HHVM_FE(getservbyport);
   HHVM_FE(inet_ntop);
+  HHVM_FE(inet_ntop_nullable);
+  HHVM_FE(inet_ntop_folly);
   HHVM_FE(inet_pton);
   HHVM_FE(ip2long);
   HHVM_FE(long2ip);

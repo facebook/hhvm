@@ -76,6 +76,10 @@ function getservbyport(int $port, string $protocol);
 <<__PHPStdLib, __Rx>>
 function inet_ntop(string $in_addr);
 <<__PHPStdLib, __Rx>>
+function inet_ntop_folly(string $in_addr);
+<<__PHPStdLib, __Rx>>
+function inet_ntop_nullable(string $in_addr);
+<<__PHPStdLib, __Rx>>
 function inet_pton(string $address);
 <<__PHPStdLib, __Rx>>
 function ip2long(string $ip_address);

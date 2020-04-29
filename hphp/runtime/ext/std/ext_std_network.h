@@ -36,6 +36,8 @@ Variant HHVM_FUNCTION(getservbyname, const String& service,
                                      const String& protocol);
 Variant HHVM_FUNCTION(getservbyport, int64_t port, const String& protocol);
 Variant HHVM_FUNCTION(inet_ntop, const String& in_addr);
+TypedValue HHVM_FUNCTION(inet_ntop_nullable, const String& in_addr);
+TypedValue HHVM_FUNCTION(inet_ntop_folly, const String& in_addr);
 Variant HHVM_FUNCTION(inet_pton, const String& address);
 Variant HHVM_FUNCTION(ip2long, const String& ip_address);
 String HHVM_FUNCTION(long2ip, const String& proper_address);

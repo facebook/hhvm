@@ -400,6 +400,23 @@ function http_response_code(int $response_code = 0): mixed;
 function inet_ntop(string $in_addr): mixed;
 
 /**
+ * Converts a packed internet address to a human readable representation
+ *
+ * @param string $in_addr - A 32bit IPv4, or 128bit IPv6 address.
+ * @return null|string - Returns a string representation of the address.
+ */
+<<__IsFoldable, __Rx, __Native>>
+function inet_ntop_nullable(string $in_addr): ?string;
+
+/**
+ * inet_ntop() using the folly library. Used for performance benchmarking.
+ * @param string $in_addr - A 32bit IPv4, or 128bit IPv6 address.
+ * @return null|string - Returns a string representation of the address.
+ */
+<<__IsFoldable, __Rx, __Native>>
+function inet_ntop_folly(string $in_addr): ?string;
+
+/**
  * Converts a human readable IP address to its packed in_addr representation
  *
  * @param string $address - A human readable IPv4 or IPv6 address.

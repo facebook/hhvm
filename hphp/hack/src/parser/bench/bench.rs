@@ -4,129 +4,130 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![feature(test)]
+use std::time::Duration;
+use std::{fs, path::PathBuf};
 
-extern crate test;
+use criterion::Criterion;
+use structopt::StructOpt;
 
-fn main() {
-    println!(
-        r#"\
-Run this bench suite with:
+use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
+use direct_decl_parser;
+use facts_parser;
+use ocamlrep::rc::RcOc;
+use oxidized::relative_path::{Prefix, RelativePath};
+use parser_core_types::{
+    indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
+};
 
-  FILE_TO_PARSE=<file> buck run @mode/opt //hphp/hack/src/parser/bench:bench-unittest -- --bench
+#[derive(Debug, StructOpt)]
+#[structopt(no_version)] // don't consult CARGO_PKG_VERSION (buck doesn't set it)
+struct Options {
+    #[structopt(parse(from_os_str))]
+    files: Vec<PathBuf>,
 
-Running this bench suite without FILE_TO_PARSE set will cause the benchmarks to complete instantly,
-which is useful for not slowing down automated builds at diff or contbuild time.
+    // The total time in seconds to spend measuring each parser.
+    #[structopt(long, default_value = "10")]
+    measurement_time: u64,
 
-If you want to run this test suite under a performance analyzer, use the following commands
-(relative to the hack directory):
-
-  FILE_TO_PARSE=<file> ./src/parser/bench/facebook/run_bench.sh
-
-This will leave a modified .buckconfig in your project root. Make sure to revert it before sending this out for diff!"#
-    );
+    // If true, only benchmark the direct decl parser.
+    #[structopt(long)]
+    direct_decl_only: bool,
 }
 
-#[cfg(test)]
-mod tests {
-    use test::Bencher;
+fn main() {
+    let opts = Options::from_args();
 
-    use aast_parser::rust_aast_parser_types;
-    use direct_decl_parser;
-    use facts_parser;
-    use ocamlrep::rc::RcOc;
-    use oxidized::{
-        global_options,
-        relative_path::{Prefix, RelativePath},
-    };
-    use parser_core_types::{
-        indexed_source_text::IndexedSourceText, parser_env::ParserEnv, source_text::SourceText,
-    };
-    use std::{env, fs, path::PathBuf};
+    let mut criterion = Criterion::default()
+        .warm_up_time(Duration::from_secs(2))
+        .sample_size(50)
+        .measurement_time(Duration::from_secs(opts.measurement_time));
 
-    fn get_file() -> Option<(RelativePath, String)> {
-        match env::var("FILE_TO_PARSE") {
-            Ok(file) => Some((
-                RelativePath::make(Prefix::Dummy, PathBuf::from(&file)),
-                fs::read_to_string(&file).expect(&format!("Could not read file {}", file)),
-            )),
-            Err(_) => None,
-        }
+    let filenames_and_contents = get_contents(&opts.files);
+    let files = filenames_and_contents
+        .iter()
+        .map(|(path, text)| (RcOc::clone(path), text.as_bytes()))
+        .collect::<Vec<_>>();
+
+    if opts.direct_decl_only {
+        bench_direct_decl_parse(&mut criterion, &files);
+    } else {
+        bench_aast_full_parse(&mut criterion, &files);
+        bench_aast_quick_parse(&mut criterion, &files);
+        bench_direct_decl_parse(&mut criterion, &files);
+        bench_facts_parse(&mut criterion, &files);
     }
 
-    #[bench]
-    fn bench_facts_parse(b: &mut Bencher) {
-        get_file().map(|(filename, text)| {
-            let filename = RcOc::new(filename);
-            b.iter(|| {
-                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
+    criterion.final_summary();
+}
+
+fn get_contents(filenames: &[PathBuf]) -> Vec<(RcOc<RelativePath>, String)> {
+    filenames
+        .into_iter()
+        .map(|file| {
+            (
+                RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from(file))),
+                fs::read_to_string(&file)
+                    .expect(&format!("Could not read file {}", file.display())),
+            )
+        })
+        .collect()
+}
+
+fn bench_facts_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    c.bench_function("facts_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
                 facts_parser::parse_script(&text, ParserEnv::default(), None);
-            });
-        });
-    }
+            }
+        })
+    });
+}
 
-    #[bench]
-    fn bench_direct_decl_parse(b: &mut Bencher) {
-        get_file().map(|(filename, text)| {
-            let filename = RcOc::new(filename);
-            b.iter(|| {
-                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
-                direct_decl_parser::parse_script(&text, ParserEnv::default(), None)
-            });
-        });
-    }
+fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    c.bench_function("direct_decl_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
+                let _ = direct_decl_parser::parse_script(&text, ParserEnv::default(), None);
+            }
+        })
+    });
+}
 
-    #[bench]
-    fn bench_aast_full_parse(b: &mut Bencher) {
-        get_file().map(|(filename, text)| {
-            let filename = RcOc::new(filename);
-            b.iter(|| {
-                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
+fn bench_aast_full_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    c.bench_function("aast_full_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
-                    &rust_aast_parser_types::Env {
-                        codegen: false,
-                        php5_compat_mode: false,
-                        elaborate_namespaces: false,
-                        include_line_comments: false,
-                        keep_errors: false,
-                        quick_mode: false,
-                        show_all_errors: false,
-                        lower_coroutines: false,
-                        fail_open: false,
-                        parser_options: global_options::GlobalOptions::default(),
-                    },
+                    &AastParserEnv::default(),
                     &indexed_source_text,
                     None,
                 )
-            })
-        });
-    }
+                .unwrap();
+            }
+        })
+    });
+}
 
-    #[bench]
-    fn bench_aast_quick_parse(b: &mut Bencher) {
-        get_file().map(|(filename, text)| {
-            let filename = RcOc::new(filename);
-            b.iter(|| {
-                let text = SourceText::make(RcOc::clone(&filename), text.as_bytes());
+fn bench_aast_quick_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    c.bench_function("aast_quick_parse", |b| {
+        b.iter(|| {
+            for (filename, text) in files {
+                let text = SourceText::make(RcOc::clone(filename), text);
                 let indexed_source_text = IndexedSourceText::new(text.clone());
                 aast_parser::AastParser::from_text(
-                    &rust_aast_parser_types::Env {
-                        codegen: false,
-                        php5_compat_mode: false,
-                        elaborate_namespaces: false,
-                        include_line_comments: false,
-                        keep_errors: false,
+                    &AastParserEnv {
                         quick_mode: true,
-                        show_all_errors: false,
-                        lower_coroutines: false,
-                        fail_open: false,
-                        parser_options: global_options::GlobalOptions::default(),
+                        ..AastParserEnv::default()
                     },
                     &indexed_source_text,
                     None,
                 )
-            })
-        });
-    }
+                .unwrap();
+            }
+        })
+    });
 }

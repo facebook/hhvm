@@ -10,7 +10,7 @@
 
  /**
   * Object of this type is returned by __FUNCTION_CREDENTIAL__
-  * attempting to constuct an instance directly will throw an Error
+  * attempting to construct an instance directly will throw an Error
   */
 final class FunctionCredential {
   /**

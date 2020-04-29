@@ -5,7 +5,11 @@
 
 use serde::Serialize;
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+use ocamlrep_derive::ToOcamlRep;
+
+#[derive(
+    Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct DocComment<'a>(pub &'a str);
 
 impl<'a> DocComment<'a> {

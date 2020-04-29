@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab6370be5ebda5b7d7099ea15faa693f>>
+// @generated SignedSource<<faec6d6ac1812967ea1a8d4d3a4a0421>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -17,7 +18,9 @@ pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ClassElt<'a> {
     pub visibility: Visibility<'a>,
     pub type_: oxidized::lazy::Lazy<Ty<'a>>,
@@ -28,7 +31,9 @@ pub struct ClassElt<'a> {
     pub flags: isize,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct FunElt<'a> {
     pub deprecated: Option<&'a str>,
     pub type_: Ty<'a>,
@@ -36,7 +41,9 @@ pub struct FunElt<'a> {
     pub pos: pos::Pos<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ClassConst<'a> {
     pub synthesized: bool,
     pub abstract_: bool,
@@ -60,10 +67,14 @@ pub struct ClassConst<'a> {
 /// class Baz extends Foo implements Bar { <- position of the `implements`
 /// }
 /// ```
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct Requirement<'a>(pub pos::Pos<'a>, pub Ty<'a>);
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ClassType<'a> {
     pub need_init: bool,
     /// Whether the typechecker knows of all (non-interface) ancestors
@@ -106,14 +117,18 @@ pub struct ClassType<'a> {
     pub decl_errors: Option<errors::Errors<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum TypeconstAbstractKind<'a> {
     TCAbstract(Option<Ty<'a>>),
     TCPartiallyAbstract,
     TCConcrete,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct TypeconstType<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub name: nast::Sid<'a>,
@@ -124,7 +139,9 @@ pub struct TypeconstType<'a> {
     pub reifiable: Option<pos::Pos<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct PuEnumType<'a> {
     pub name: nast::Sid<'a>,
     pub is_final: bool,
@@ -133,14 +150,18 @@ pub struct PuEnumType<'a> {
     pub members: s_map::SMap<'a, PuMemberType<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct PuMemberType<'a> {
     pub atom: nast::Sid<'a>,
     pub types: s_map::SMap<'a, (nast::Sid<'a>, Ty<'a>)>,
     pub exprs: s_map::SMap<'a, nast::Sid<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct EnumType<'a> {
     pub base: Ty<'a>,
     pub constraint: Option<Ty<'a>>,
@@ -148,7 +169,9 @@ pub struct EnumType<'a> {
 
 pub use oxidized::typing_defs::RecordFieldReq;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct RecordDefType<'a> {
     pub name: nast::Sid<'a>,
     pub extends: Option<nast::Sid<'a>>,
@@ -158,7 +181,9 @@ pub struct RecordDefType<'a> {
     pub errors: Option<errors::Errors<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct TypedefType<'a> {
     pub pos: pos::Pos<'a>,
     pub vis: oxidized::aast::TypedefVisibility,
@@ -168,7 +193,9 @@ pub struct TypedefType<'a> {
     pub decl_errors: Option<errors::Errors<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum DeserializationError<'a> {
     /// The type was valid, but some component thereof was a decl_ty when we
     /// expected a locl_phase ty, or vice versa.

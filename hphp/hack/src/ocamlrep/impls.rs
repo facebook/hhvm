@@ -5,10 +5,10 @@
 
 use std::borrow::{Borrow, Cow};
 use std::cell::RefCell;
-use std::collections::{btree_map, btree_set, BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet};
 use std::convert::TryInto;
-use std::ffi::OsString;
-use std::path::PathBuf;
+use std::ffi::{OsStr, OsString};
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use crate::{block, from};
@@ -179,6 +179,12 @@ impl<T: FromOcamlRep> FromOcamlRep for Box<T> {
     }
 }
 
+impl<T: ToOcamlRep + ?Sized> ToOcamlRep for &'_ T {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        (**self).to_ocamlrep(alloc)
+    }
+}
+
 impl<T: ToOcamlRep> ToOcamlRep for Rc<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         alloc.add(self.as_ref())
@@ -304,7 +310,7 @@ impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for BTreeMap<K, V> {
         }
         let len = self.len();
         let mut iter = self.iter();
-        let (res, _) = btree_map_to_ocamlrep(&mut iter, alloc, len);
+        let (res, _) = sorted_iter_to_ocaml_map(&mut iter, alloc, len);
         res
     }
 }
@@ -317,17 +323,21 @@ impl<K: FromOcamlRep + Ord, V: FromOcamlRep> FromOcamlRep for BTreeMap<K, V> {
     }
 }
 
-fn btree_map_to_ocamlrep<'a, A: Allocator, K: ToOcamlRep, V: ToOcamlRep>(
-    iter: &mut btree_map::Iter<K, V>,
+/// Given an iterator which emits key-value pairs, build an OCaml Map containing
+/// those bindings. The iterator must emit each key only once. The key-value
+/// pairs must be emitted in ascending order, sorted by key. The iterator must
+/// emit exactly `size` pairs.
+pub fn sorted_iter_to_ocaml_map<'a, 'i, A: Allocator, K: ToOcamlRep + 'i, V: ToOcamlRep + 'i>(
+    iter: &mut impl Iterator<Item = (&'i K, &'i V)>,
     alloc: &'a A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
         return (Value::int(0), 0);
     }
-    let (left, left_height) = btree_map_to_ocamlrep(iter, alloc, size / 2);
+    let (left, left_height) = sorted_iter_to_ocaml_map(iter, alloc, size / 2);
     let (key, val) = iter.next().unwrap();
-    let (right, right_height) = btree_map_to_ocamlrep(iter, alloc, size - 1 - size / 2);
+    let (right, right_height) = sorted_iter_to_ocaml_map(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
     let mut block = alloc.block_with_size(5);
     A::set_field(&mut block, 0, left);
@@ -362,7 +372,7 @@ impl<T: ToOcamlRep + Ord> ToOcamlRep for BTreeSet<T> {
         }
         let len = self.len();
         let mut iter = self.iter();
-        let (res, _) = btree_set_to_ocamlrep(&mut iter, alloc, len);
+        let (res, _) = sorted_iter_to_ocaml_set(&mut iter, alloc, len);
         res
     }
 }
@@ -375,17 +385,20 @@ impl<T: FromOcamlRep + Ord> FromOcamlRep for BTreeSet<T> {
     }
 }
 
-fn btree_set_to_ocamlrep<'a, A: Allocator, T: ToOcamlRep>(
-    iter: &mut btree_set::Iter<T>,
+/// Build an OCaml Set containing all items emitted by the given iterator. The
+/// iterator must emit each item only once. The items must be emitted in
+/// ascending order. The iterator must emit exactly `size` items.
+pub fn sorted_iter_to_ocaml_set<'a, 'i, A: Allocator, T: ToOcamlRep + 'i>(
+    iter: &mut impl Iterator<Item = &'i T>,
     alloc: &'a A,
     size: usize,
 ) -> (Value<'a>, usize) {
     if size == 0 {
         return (Value::int(0), 0);
     }
-    let (left, left_height) = btree_set_to_ocamlrep(iter, alloc, size / 2);
+    let (left, left_height) = sorted_iter_to_ocaml_set(iter, alloc, size / 2);
     let val = iter.next().unwrap();
-    let (right, right_height) = btree_set_to_ocamlrep(iter, alloc, size - 1 - size / 2);
+    let (right, right_height) = sorted_iter_to_ocaml_set(iter, alloc, size - 1 - size / 2);
     let height = std::cmp::max(left_height, right_height) + 1;
     let mut block = alloc.block_with_size(4);
     A::set_field(&mut block, 0, left);
@@ -410,13 +423,19 @@ fn btree_set_from_ocamlrep<T: FromOcamlRep + Ord>(
     Ok(())
 }
 
-impl ToOcamlRep for OsString {
+impl ToOcamlRep for OsStr {
     // TODO: A Windows implementation would be nice, but what does the OCaml
     // runtime do? If we need Windows support, we'll have to find out.
     #[cfg(unix)]
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         use std::os::unix::ffi::OsStrExt;
         alloc.add(self.as_bytes())
+    }
+}
+
+impl ToOcamlRep for OsString {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.add(self.as_os_str())
     }
 }
 
@@ -430,11 +449,15 @@ impl FromOcamlRep for OsString {
     }
 }
 
-impl ToOcamlRep for PathBuf {
-    #[cfg(unix)]
+impl ToOcamlRep for Path {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        use std::os::unix::ffi::OsStrExt;
-        alloc.add(self.as_os_str().as_bytes())
+        alloc.add(self.as_os_str())
+    }
+}
+
+impl ToOcamlRep for PathBuf {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.add(self.as_os_str())
     }
 }
 

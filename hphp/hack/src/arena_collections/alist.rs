@@ -26,6 +26,8 @@ use std::convert::From;
 use bumpalo::Bump;
 use serde::Serialize;
 
+use ocamlrep::ToOcamlRep;
+
 /// Perform a linear search for the last entry in the slice with the given key.
 #[inline(always)]
 fn get_last_entry<'a, K, V, Q: ?Sized>(entries: &'a [(K, V)], key: &Q) -> Option<&'a (K, V)>
@@ -907,5 +909,14 @@ impl<'a, K: Ord, V> From<AssocListMut<'a, K, V>> for SortedAssocList<'a, K, V> {
         SortedAssocList {
             entries: alist.entries.into_bump_slice(),
         }
+    }
+}
+
+impl<K: ToOcamlRep + Ord, V: ToOcamlRep> ToOcamlRep for SortedAssocList<'_, K, V> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let len = self.len();
+        let mut iter = self.iter();
+        let (value, _) = ocamlrep::sorted_iter_to_ocaml_map(&mut iter, alloc, len);
+        value
     }
 }

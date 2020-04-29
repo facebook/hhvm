@@ -6,7 +6,6 @@
 use std::{borrow::Cow, cmp::Ordering, ops::Range, path::PathBuf, result::Result::*};
 
 use ocamlrep::rc::RcOc;
-use ocamlrep::{Allocator, Value};
 use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
 use serde::{Deserialize, Serialize};
 
@@ -34,12 +33,6 @@ use PosImpl::*;
 pub struct Pos(PosImpl);
 
 pub type PosR<'a> = &'a Pos;
-
-impl ocamlrep::ToOcamlRep for PosR<'_> {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        (**self).to_ocamlrep(alloc)
-    }
-}
 
 impl Pos {
     pub fn make_none() -> Self {

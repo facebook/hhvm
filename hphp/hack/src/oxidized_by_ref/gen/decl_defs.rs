@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d11dfbbf61ab16e09b168ac014599e8d>>
+// @generated SignedSource<<e0cd6dfe8e2a607fc0e726e698eca4eb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -45,7 +46,9 @@ pub use typing_defs::*;
 /// The `sc_from_req_extends` field is set to true if the context was inherited
 /// via a require extends type. This information is relevant when folding
 /// `dc_substs` during inheritance. See Decl_inherit module.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct SubstContext<'a> {
     pub subst: s_map::SMap<'a, Ty<'a>>,
     pub class_context: &'a str,
@@ -54,7 +57,9 @@ pub struct SubstContext<'a> {
 
 pub use oxidized::decl_defs::SourceType;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct MroElement<'a> {
     /// The class's name
     pub name: &'a str,
@@ -129,14 +134,18 @@ pub use oxidized::decl_defs::LinearizationKind;
 /// If None - method is unconditionally reactive
 pub type ConditionTypeName<'a> = Option<&'a str>;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum MethodReactivity<'a> {
     MethodReactive(ConditionTypeName<'a>),
     MethodShallow(ConditionTypeName<'a>),
     MethodLocal(ConditionTypeName<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct DeclClassType<'a> {
     pub need_init: bool,
     pub members_fully_known: bool,
@@ -176,7 +185,9 @@ pub struct DeclClassType<'a> {
     pub condition_types: s_set::SSet<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct Element<'a> {
     pub flags: isize,
     pub reactivity: Option<MethodReactivity<'a>>,

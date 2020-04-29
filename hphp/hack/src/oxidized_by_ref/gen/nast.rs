@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cf0e451fcd48309bd2f2671fe414c5c4>>
+// @generated SignedSource<<d24ba6116145181fa5c5a5383a3fadb4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -17,7 +18,9 @@ pub use crate::ast_defs::shape_map;
 
 pub use aast::Sid;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum FuncBodyAnn<'a> {
     Named,
     NamedWithUnsafeBlocks,
@@ -79,7 +82,9 @@ pub type MethodRedeclaration<'a> =
 
 pub type Targ<'a> = aast::Targ<'a, ()>;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct IgnoreAttributeEnv<'a> {
     pub ignored_attributes: &'a [&'a str],
 }

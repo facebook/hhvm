@@ -21,11 +21,7 @@ let default_derives () =
   ( if Configuration.by_ref () then
     []
   else
-    [
-      (Some "ocamlrep_derive", "FromOcamlRep");
-      (Some "ocamlrep_derive", "ToOcamlRep");
-      (Some "serde", "Deserialize");
-    ] )
+    [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")] )
   @ [
       (None, "Clone");
       (None, "Debug");
@@ -34,6 +30,7 @@ let default_derives () =
       (None, "Ord");
       (None, "PartialEq");
       (None, "PartialOrd");
+      (Some "ocamlrep_derive", "ToOcamlRep");
       (Some "serde", "Serialize");
     ]
 

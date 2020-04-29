@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a57f04669155ecb9e9e22a168f04db97>>
+// @generated SignedSource<<4dab43aacecff9416124c9cf63c2c61f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -15,7 +16,9 @@ use crate::*;
 
 pub use typing_defs::*;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowClassConst<'a> {
     pub abstract_: bool,
     pub expr: Option<nast::Expr<'a>>,
@@ -23,7 +26,9 @@ pub struct ShallowClassConst<'a> {
     pub type_: Ty<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowTypeconst<'a> {
     pub abstract_: TypeconstAbstractKind<'a>,
     pub constraint: Option<Ty<'a>>,
@@ -33,14 +38,18 @@ pub struct ShallowTypeconst<'a> {
     pub reifiable: Option<pos::Pos<'a>>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowPuMember<'a> {
     pub atom: aast::Sid<'a>,
     pub types: &'a [(aast::Sid<'a>, Ty<'a>)],
     pub exprs: &'a [aast::Sid<'a>],
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowPuEnum<'a> {
     pub name: aast::Sid<'a>,
     pub is_final: bool,
@@ -49,7 +58,9 @@ pub struct ShallowPuEnum<'a> {
     pub members: &'a [ShallowPuMember<'a>],
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowProp<'a> {
     pub const_: bool,
     pub xhp_attr: Option<oxidized::shallow_decl_defs::XhpAttr>,
@@ -63,7 +74,9 @@ pub struct ShallowProp<'a> {
     pub fixme_codes: i_set::ISet<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowMethod<'a> {
     pub abstract_: bool,
     pub final_: bool,
@@ -78,7 +91,9 @@ pub struct ShallowMethod<'a> {
     pub deprecated: Option<&'a str>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowMethodRedeclaration<'a> {
     pub abstract_: bool,
     pub final_: bool,
@@ -91,7 +106,9 @@ pub struct ShallowMethodRedeclaration<'a> {
     pub fixme_codes: i_set::ISet<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShallowClass<'a> {
     pub mode: oxidized::file_info::Mode,
     pub final_: bool,

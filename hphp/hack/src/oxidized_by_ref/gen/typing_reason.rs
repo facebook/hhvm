@@ -3,18 +3,21 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<866c802f4c935c919f32e89987f6138b>>
+// @generated SignedSource<<7fdbc5ec9d98037259fb1d1a7e2297dd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
 
 /// The reason why something is expected to have a certain type
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Reason<'a> {
     Rnone,
     Rwitness(pos::Pos<'a>),
@@ -119,7 +122,9 @@ pub enum Reason<'a> {
 
 pub use oxidized::typing_reason::ArgPosition;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
     ERstatic,
@@ -128,7 +133,9 @@ pub enum ExprDepTypeReason<'a> {
     ERself(&'a str),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Ureason<'a> {
     URnone,
     URassign,

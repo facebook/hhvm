@@ -313,7 +313,10 @@ pub mod slab;
 pub use arena::Arena;
 pub use block::{Block, BlockBuilder};
 pub use error::{FromError, SlabIntegrityError};
-pub use impls::{bytes_from_ocamlrep, bytes_to_ocamlrep, str_from_ocamlrep, str_to_ocamlrep};
+pub use impls::{
+    bytes_from_ocamlrep, bytes_to_ocamlrep, sorted_iter_to_ocaml_map, sorted_iter_to_ocaml_set,
+    str_from_ocamlrep, str_to_ocamlrep,
+};
 pub use value::{OpaqueValue, Value};
 
 /// A data structure that can be converted to an equivalent OCaml value and

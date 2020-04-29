@@ -16,7 +16,10 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     let (to_body, _) = derive_to_and_from(&mut s);
     s.gen_impl(quote! {
         gen impl ::ocamlrep::ToOcamlRep for @Self {
-            fn to_ocamlrep<'a, Alloc: ::ocamlrep::Allocator>(&self, arena: &'a Alloc) -> ::ocamlrep::Value<'a> {
+            fn to_ocamlrep<'__ocamlrep_derive_allocator, Alloc: ::ocamlrep::Allocator>(
+                &self,
+                arena: &'__ocamlrep_derive_allocator Alloc,
+            ) -> ::ocamlrep::Value<'__ocamlrep_derive_allocator> {
                 use ::ocamlrep::Allocator;
                 match self { #to_body }
             }
@@ -255,7 +258,7 @@ fn boxed_tuple_variant_constructor(variant: &VariantInfo, len: usize) -> TokenSt
 }
 
 fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {
-    use syn::{Fields, GenericArgument, PathArguments, Type, TypePath};
+    use syn::{Fields, GenericArgument, PathArguments, Type, TypePath, TypeReference};
 
     match &variant.ast().fields {
         Fields::Unnamed(_) => (),
@@ -265,22 +268,26 @@ fn get_boxed_tuple_len(variant: &VariantInfo) -> Option<usize> {
         [bi] => bi,
         _ => return None,
     };
-    let path = match &bi.ast().ty {
-        Type::Path(TypePath { path, .. }) => path,
+    let tuple = match &bi.ast().ty {
+        Type::Path(TypePath { path, .. }) => {
+            let path_seg = match path.segments.first() {
+                Some(s) if s.ident == "Box" => s,
+                _ => return None,
+            };
+            let args = match &path_seg.arguments {
+                PathArguments::AngleBracketed(args) => args,
+                _ => return None,
+            };
+            match args.args.first() {
+                Some(GenericArgument::Type(Type::Tuple(tuple))) => tuple,
+                _ => return None,
+            }
+        }
+        Type::Reference(TypeReference { elem, .. }) => match &**elem {
+            Type::Tuple(tuple) => tuple,
+            _ => return None,
+        },
         _ => return None,
     };
-    let path_seg = match path.segments.first() {
-        Some(s) if s.ident == "Box" => s,
-        _ => return None,
-    };
-    let args = match &path_seg.arguments {
-        PathArguments::AngleBracketed(args) => args,
-        _ => return None,
-    };
-    let tuple = match args.args.first() {
-        Some(GenericArgument::Type(Type::Tuple(tuple))) => tuple,
-        _ => return None,
-    };
-
     Some(tuple.elems.len())
 }

@@ -6,6 +6,7 @@
 use std::{cmp::Ordering, ops::Range, result::Result::*};
 
 use bumpalo::Bump;
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 use oxidized::file_pos_large::FilePosLarge;
@@ -13,7 +14,7 @@ use oxidized::file_pos_small::FilePosSmall;
 
 use crate::relative_path::RelativePath;
 
-#[derive(Copy, Clone, Debug, Hash, Serialize)]
+#[derive(Copy, Clone, Debug, Hash, Serialize, ToOcamlRep)]
 enum PosImpl<'a> {
     Small {
         file: &'a RelativePath<'a>,
@@ -29,7 +30,7 @@ enum PosImpl<'a> {
 
 use PosImpl::*;
 
-#[derive(Copy, Clone, Debug, Hash, Serialize)]
+#[derive(Copy, Clone, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct Pos<'a>(PosImpl<'a>);
 
 const NONE: Pos<'_> = Pos(Small {

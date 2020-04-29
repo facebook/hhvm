@@ -6,6 +6,7 @@
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
+use ocamlrep::ToOcamlRep;
 use serde::{Deserialize, Serialize};
 
 pub use oxidized::relative_path::{Prefix, PrefixPathMap};
@@ -78,6 +79,12 @@ impl<'a> RelativePath<'a> {
 impl Display for RelativePath<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}|{}", self.prefix, self.path().display())
+    }
+}
+
+impl ToOcamlRep for RelativePath<'_> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        alloc.add(&(self.prefix, self.path()))
     }
 }
 

@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<802b26991597bf10e2d275ddcfda5150>>
+// @generated SignedSource<<33dc82c2432173c710dcd8e88a6f94ab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
 #[allow(unused_imports)]
@@ -15,7 +16,9 @@ use crate::*;
 
 pub use crate::typing_reason as reason;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Visibility<'a> {
     Vpublic,
     Vprivate(&'a str),
@@ -40,7 +43,9 @@ pub use oxidized::typing_defs_core::XhpAttr;
 
 pub use oxidized::typing_defs_core::ConsistentKind;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum DependentType<'a> {
     DTthis,
     DTcls(&'a str),
@@ -49,7 +54,9 @@ pub enum DependentType<'a> {
 
 pub use oxidized::typing_defs_core::DestructureKind;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct Tparam<'a> {
     pub variance: oxidized::ast_defs::Variance,
     pub name: ast_defs::Id<'a>,
@@ -58,14 +65,18 @@ pub struct Tparam<'a> {
     pub user_attributes: &'a [nast::UserAttribute<'a>],
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct WhereConstraint<'a>(
     pub Ty<'a>,
     pub oxidized::ast_defs::ConstraintKind,
     pub Ty<'a>,
 );
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct Ty<'a>(pub reason::Reason<'a>, pub &'a Ty_<'a>);
 
 /// A shape may specify whether or not fields are required. For example, consider
@@ -77,13 +88,17 @@ pub struct Ty<'a>(pub reason::Reason<'a>, pub &'a Ty_<'a>);
 ///
 /// With this definition, the field 'a' may be unprovided in a shape. In this
 /// case, the field 'a' would have sf_optional set to true.
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ShapeFieldType<'a> {
     pub optional: bool,
     pub ty: Ty<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Ty_<'a> {
     /// The late static bound type of a class
     Tthis,
@@ -223,7 +238,9 @@ pub enum Ty_<'a> {
     TpuTypeAccess(nast::Sid<'a>, nast::Sid<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum ConstraintType_<'a> {
     ThasMember(HasMember<'a>),
     /// The type of container destructuring via list() or splat `...`
@@ -232,7 +249,9 @@ pub enum ConstraintType_<'a> {
     TCintersection(Ty<'a>, ConstraintType<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct HasMember<'a> {
     pub name: nast::Sid<'a>,
     pub type_: Ty<'a>,
@@ -242,7 +261,9 @@ pub struct HasMember<'a> {
     pub class_id: nast::ClassId_<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct Destructure<'a> {
     /// This represents the standard parameters of a function or the fields in a list
     /// destructuring assignment. Example:
@@ -265,16 +286,22 @@ pub struct Destructure<'a> {
     pub kind: oxidized::typing_defs_core::DestructureKind,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct ConstraintType<'a>(pub reason::Reason<'a>, pub &'a ConstraintType_<'a>);
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum InternalType<'a> {
     LoclType(Ty<'a>),
     ConstraintType(ConstraintType<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct TaccessType<'a>(pub Ty<'a>, pub &'a [nast::Sid<'a>]);
 
 /// represents reactivity of function
@@ -292,7 +319,9 @@ pub struct TaccessType<'a>(pub Ty<'a>, pub &'a [nast::Sid<'a>]);
 /// ```
 ///
 /// call to function f will be treated as reactive only if $g is reactive
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum Reactivity<'a> {
     Nonreactive,
     Local(Option<Ty<'a>>),
@@ -305,7 +334,9 @@ pub enum Reactivity<'a> {
 
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct FunType<'a> {
     pub arity: FunArity<'a>,
     pub tparams: &'a [Tparam<'a>],
@@ -320,29 +351,36 @@ pub struct FunType<'a> {
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
 /// standard, non-variadic functions or the type of variadic argument taken
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum FunArity<'a> {
-    /// min; max is List.length ft_params
-    Fstandard(isize),
+    Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
-    Fvariadic(isize, FunParam<'a>),
+    Fvariadic(FunParam<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub enum ParamRxAnnotation<'a> {
     ParamRxVar,
     ParamRxIfImpl(Ty<'a>),
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct PossiblyEnforcedTy<'a> {
     /// True if consumer of this type enforces it at runtime
     pub enforced: bool,
     pub type_: Ty<'a>,
 }
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
 pub struct FunParam<'a> {
     pub pos: pos::Pos<'a>,
     pub name: Option<&'a str>,

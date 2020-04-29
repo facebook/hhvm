@@ -222,7 +222,7 @@ abstract class sockaddr_un extends sockaddr {
 }
 
 final class sockaddr_un_pathname extends sockaddr_un {
-  public function __construct(public string $pathname) {
+  public function __construct(public string $sun_path) {
     parent::__construct();
   }
 }

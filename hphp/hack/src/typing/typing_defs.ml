@@ -625,6 +625,14 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
         | n -> n
       end
     | (Tvar v1, Tvar v2) -> compare v1 v2
+    | (Tpu (cls1, enum1), Tpu (cls2, enum2)) ->
+      (match ty_compare cls1 cls2 with
+      | 0 -> String.compare (snd enum1) (snd enum2)
+      | n -> n)
+    | (Tpu_type_access (n1, t1), Tpu_type_access (n2, t2)) ->
+      (match String.compare (snd n1) (snd n2) with
+      | 0 -> String.compare (snd t1) (snd t2)
+      | n -> n)
     | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_field_type_compare sft1 sft2 =
     match ty_compare sft1.sft_ty sft2.sft_ty with

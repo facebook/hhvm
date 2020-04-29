@@ -2028,20 +2028,40 @@ function is_hack_file($options, $test) {
   return false;
 }
 
-function skip_test($options, $test) {
+function skip_test($options, $test): ?string {
   if (isset($options['hack-only']) &&
       substr($test, -5) !== '.hhas' &&
       !is_hack_file($options, $test)) {
     return 'skip-hack-only';
   }
 
-  if (isset($options['cli-server']) && !can_run_server_test($test)) {
+  if ((isset($options['cli-server']) || isset($options['server'])) &&
+      !can_run_server_test($test)) {
     return 'skip-server';
+  }
+
+  if (isset($options['hhas-round-trip']) && substr($test, -5) === ".hhas") {
+    return 'skip-hhas';
+  }
+
+  if (isset($options['hhbbc2']) || isset($options['hhas-round-trip'])) {
+    $no_hhas_tag = '.nodumphhas';
+    if (file_exists($test.$no_hhas_tag) ||
+        file_exists(dirname($test).'/'.$no_hhas_tag)) {
+      return 'skip-nodumphhas';
+    }
+  }
+
+  if (has_multi_request_mode($options) || isset($options['repo']) ||
+      isset($options['server'])) {
+    if (file_exists($test . ".verify")) {
+      return 'skip-verify';
+    }
   }
 
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
-    return false;
+    return null;
   }
 
   // For now, run the .skipif in non-repo since building a repo for it is hard.
@@ -2062,7 +2082,7 @@ function skip_test($options, $test) {
     // This is weird. We can't run HHVM but we probably shouldn't skip the test
     // since on a broken build everything will show up as skipped and give you a
     // SHIPIT.
-    return false;
+    return null;
   }
 
   fclose($pipes[0]);
@@ -2075,10 +2095,10 @@ function skip_test($options, $test) {
   // small blacklist of things that are really bad if they are output so we
   // surface the errors in the tests themselves.
   if (stripos($output, 'segmentation fault') !== false) {
-    return false;
+    return null;
   }
 
-  return strlen($output) === 0 ? false : 'skip-skipif';
+  return strlen($output) === 0 ? null : 'skip-skipif';
 }
 
 function comp_line($l1, $l2, $is_reg) {
@@ -2278,9 +2298,7 @@ function can_run_server_test($test) {
 
 const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
-  if (!can_run_server_test($test)) {
-    return 'skip-server';
-  }
+  invariant(can_run_server_test($test), "skip_test should have skipped this");
 
   $config = find_file_for_dir(dirname($test), 'config.ini');
   $port = $options['servers']['configs'][$config]->server['port'];
@@ -2600,8 +2618,8 @@ function run_and_lock_test($options, $test) {
 
 function run_typechecker_test($options, $test) {
   $skip_reason = skip_test($options, $test);
-  if ($skip_reason !== false) return $skip_reason;
-  if (!file_exists($test . ".hhconfig")) return 'skip-no-hhconfig';
+  if ($skip_reason !== null) return $skip_reason;
+  invariant(file_exists($test . ".hhconfig"), "find_tests filters on this");
   list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
   $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
   // Remove the temporary directory.
@@ -2613,18 +2631,7 @@ function run_typechecker_test($options, $test) {
 
 function run_test($options, $test) {
   $skip_reason = skip_test($options, $test);
-  if ($skip_reason !== false) return $skip_reason;
-
-  // Skip tests that don't make sense in modes where we dump/compare hhas
-  $no_hhas_tag = '.nodumphhas';
-  $no_hhas = file_exists($test.$no_hhas_tag) ||
-             file_exists(dirname($test).'/'.$no_hhas_tag);
-  if ($no_hhas && (
-    isset($options['hhbbc2']) ||
-    isset($options['hhas-round-trip'])
-  )) {
-    return 'skip-nodumphhas';
-  }
+  if ($skip_reason !== null) return $skip_reason;
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
   if (has_multi_request_mode($options)) {
@@ -2638,11 +2645,6 @@ function run_test($options, $test) {
         return 'skip-count';
       }
     }
-  }
-
-  if (file_exists($test . ".verify") && (has_multi_request_mode($options) ||
-                                         isset($options['repo']))) {
-      return 'skip-verify';
   }
 
   if (isset($options['repo'])) {
@@ -2727,7 +2729,7 @@ function run_test($options, $test) {
   }
 
   if (isset($options['hhas-round-trip'])) {
-    if (substr($test, -5) === ".hhas") return 'skip-hhas';
+    invariant(substr($test, -5) !== ".hhas", "skip_test should have skipped");
     $hhas_temp = dump_hhas_to_temp($hhvm, $test);
     if ($hhas_temp === false) {
       $err = "system failed: " .

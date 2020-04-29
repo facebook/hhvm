@@ -134,8 +134,9 @@ template<typename T>
 template<typename F>
 void AtomicVector<T>::foreach(F fun) const {
   AtomicGrowableVector<std::atomic<T>,T>::foreach(
-    [&] (const T& elm) { f(elm.load(std::memory_order_acquire)); }
-  );
+    [&] (const std::atomic<T>& elm) {
+      fun(elm.load(std::memory_order_acquire));
+    });
 }
 
 template<typename T>

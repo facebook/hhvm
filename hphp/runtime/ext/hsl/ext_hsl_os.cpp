@@ -963,6 +963,7 @@ struct OSExtension final : Extension {
     SOCK_(RAW);
 #undef SOCK_
 
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SUN_PATH_LEN, sizeof(sockaddr_un::sun_path));
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getpeername, HSL_os_getpeername);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getsockname, HSL_os_getsockname);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\socketpair, HSL_os_socketpair);

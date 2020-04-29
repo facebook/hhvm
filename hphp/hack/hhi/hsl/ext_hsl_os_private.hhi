@@ -161,6 +161,8 @@ const int PF_INET = 0;
 const int PF_INET6 = 0;
 const int PF_MAX = 0;
 
+const int SUN_PATH_LEN = 0;
+
 const int SOCK_STREAM = 0;
 const int SOCK_DGRAM = 0;
 const int SOCK_RAW = 0;

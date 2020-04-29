@@ -2036,7 +2036,7 @@ function skip_test($options, $test): ?string {
   }
 
   if ((isset($options['cli-server']) || isset($options['server'])) &&
-      !can_run_server_test($test)) {
+      !can_run_server_test($test, $options)) {
     return 'skip-server';
   }
 
@@ -2272,9 +2272,10 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
 }
 
 const HHAS_EXT = '.hhas';
-function can_run_server_test($test) {
+function can_run_server_test($test, $options) {
   return
     !is_file("$test.noserver") &&
+    !(is_file("$test.nowebserver") && isset($options['server'])) &&
     !find_test_ext($test, 'opts') &&
     !is_file("$test.ini") &&
     !is_file("$test.onlyrepo") &&
@@ -2298,7 +2299,7 @@ function can_run_server_test($test) {
 
 const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
-  invariant(can_run_server_test($test), "skip_test should have skipped this");
+  invariant(can_run_server_test($test, $options), "skip_test should have skipped this");
 
   $config = find_file_for_dir(dirname($test), 'config.ini');
   $port = $options['servers']['configs'][$config]->server['port'];
@@ -3291,7 +3292,7 @@ function main($argv) {
     /* We need to start up a separate server process for each config file
      * found. */
     foreach ($tests as $test) {
-      if (!can_run_server_test($test)) continue;
+      if (!can_run_server_test($test, $options)) continue;
       $config = find_file_for_dir(dirname($test), 'config.ini');
       if (!$config) {
         error("Couldn't find config file for $test");

@@ -121,7 +121,7 @@ function convert_to($from) {
   convert_to(new IterableObj);
   convert_to(new ThrowIterableObj);
   convert_to(new stdclass);
-  convert_to(STDIN);
+  convert_to(fopen(__FILE__, 'r'));
   convert_to(Vector{1, 2, 3});
   convert_to(Vector{1, false, 3});
   convert_to(Map{'a' => 100, 200 => 'b'});

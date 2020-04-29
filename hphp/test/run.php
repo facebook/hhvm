@@ -1578,10 +1578,6 @@ class Status {
   const YELLOW = 33;
   const BLUE = 34;
 
-  const PASS_SERVER = 0;
-  const SKIP_SERVER = 1;
-  const PASS_CLI = 2;
-
   public static function createTempDir(): void {
     self::$tempdir = sys_get_temp_dir();
     // Apparently some systems might not put the trailing slash
@@ -1681,15 +1677,13 @@ class Status {
     self::send(self::MSG_SERVER_RESTARTED, null);
   }
 
-  public static function pass($test, $detail, $time, $stime, $etime) {
+  public static function pass($test, $time, $stime, $etime) {
     self::$results[] = darray['name' => $test,
                              'status' => 'passed',
                              'start_time' => $stime,
                              'end_time' => $etime,
                              'time' => $time];
-    $how = $detail === 'pass-server' ? self::PASS_SERVER :
-      ($detail === 'skip-server' ? self::SKIP_SERVER : self::PASS_CLI);
-    self::send(self::MSG_TEST_PASS, varray[$test, $how, $time, $stime, $etime]);
+    self::send(self::MSG_TEST_PASS, varray[$test, $time, $stime, $etime]);
   }
 
   public static function skip($test, $reason, $time, $stime, $etime) {
@@ -1750,16 +1744,11 @@ class Status {
 
       case Status::MSG_TEST_PASS:
         self::$passed++;
-        list($test, $how, $time, $stime, $etime) = $message;
+        list($test, $time, $stime, $etime) = $message;
         switch (Status::getMode()) {
           case Status::MODE_NORMAL:
             if (!Status::hasCursorControl()) {
-              if ($how == Status::SKIP_SERVER) {
-                Status::sayColor(Status::RED, '.');
-              } else {
-                Status::sayColor(Status::GREEN,
-                                 $how == Status::PASS_SERVER ? ',' : '.');
-              }
+              Status::sayColor(Status::GREEN, '.');
             }
             break;
 
@@ -2289,8 +2278,8 @@ function can_run_server_test($test) {
 
 const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
-  if (!isset($options['server']) || !can_run_server_test($test)) {
-    return null;
+  if (!can_run_server_test($test)) {
+    return 'skip-server';
   }
 
   $config = find_file_for_dir(dirname($test), 'config.ini');
@@ -2300,19 +2289,14 @@ function run_config_server($options, $test) {
   curl_setopt($ch, CURLOPT_TIMEOUT, SERVER_TIMEOUT);
   curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
   $output = curl_exec($ch);
-  if ($output === false) {
-    // The server probably crashed so fall back to cli to determine if this was
-    // the test that caused the crash. Our parent process will see that the
-    // server died and restart it.
-    if (getenv('HHVM_TEST_SERVER_LOG')) {
-      printf("Curl failed: %d\n", curl_errno($ch));
-    }
-    return null;
+  if ($output is string) {
+    $output = trim($output);
+  } else {
+    $output = "Error talking to server: " . curl_error($ch);
   }
   curl_close($ch);
-  $output = trim($output);
 
-  return varray[$output, ''];
+  return run_config_post(varray[$output, ''], $test, $options);
 }
 
 function run_config_cli($options, $test, $cmd, $cmd_env) {
@@ -2605,7 +2589,7 @@ function run_and_lock_test($options, $test) {
       Status::fail($test, $time, $stime, $etime, "invalid skip status $status");
     }
   } else if ($status) {
-    Status::pass($test, $status, $time, $stime, $etime);
+    Status::pass($test, $time, $stime, $etime);
   } else {
     Status::fail($test, $time, $stime, $etime, "Unknown failure");
   }
@@ -2752,10 +2736,8 @@ function run_test($options, $test) {
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
   }
 
-  if ($outputs = run_config_server($options, $test)) {
-    return run_config_post($outputs, $test, $options) ? 'pass-server'
-      : (run_one_config($options, $test, $hhvm, $hhvm_env) ? 'skip-server'
-         : false);
+  if (isset($options['server'])) {
+    return run_config_server($options, $test);
   }
   return run_one_config($options, $test, $hhvm, $hhvm_env);
 }

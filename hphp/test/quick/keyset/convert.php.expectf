@@ -391,7 +391,7 @@ object(stdClass) (0) {
 Exception: "Non-iterable object to keyset conversion"
 ====================================================
 ====================================================
-resource(1) of type (stream)
+resource(%d) of type (stream)
 ----------------------------------------------------
 Exception: "Resource to keyset conversion"
 ====================================================

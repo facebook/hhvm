@@ -114,7 +114,11 @@ static bool get_sockaddr(sockaddr *sa, socklen_t salen,
       // struct without sun_path.
       struct sockaddr_un *s_un = (struct sockaddr_un *)sa;
       if (salen > offsetof(sockaddr_un, sun_path)) {
-        address = String(s_un->sun_path, CopyString);
+        // - `sun_path` MAY have trailing nulls
+        // - `sun_len` MAY include that trailing null on Linux.
+        const auto max_path_len = salen - offsetof(struct sockaddr_un, sun_path);
+        const auto actual_path_len = ::strnlen(s_un->sun_path, max_path_len);
+        address = String(s_un->sun_path, actual_path_len, CopyString);
       } else {
         address = empty_string();
       }
@@ -1362,7 +1366,11 @@ Variant HHVM_FUNCTION(socket_recvfrom,
 
       recv_buf[retval] = 0;
       buf.assignIfRef(String(recv_buf, retval, AttachString));
-      name.assignIfRef(String(s_un.sun_path, CopyString));
+      // - `sun_path` MAY have trailing nulls
+      // - `sun_len` MAY include that trailing null on Linux.
+      const auto max_path_len = slen - offsetof(struct sockaddr_un, sun_path);
+      const auto actual_path_len = ::strnlen(s_un.sun_path, max_path_len);
+      name.assignIfRef(String(s_un.sun_path, actual_path_len, CopyString));
 #endif
     }
     break;

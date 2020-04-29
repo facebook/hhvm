@@ -39,6 +39,6 @@ echo "\n";
 D::isT(false);
 E::isT(false);
 echo "\n";
-D::isT(STDIN);
-E::isT(STDIN);
+D::isT(fopen(__FILE__, 'r'));
+E::isT(fopen(__FILE__, 'r'));
 }

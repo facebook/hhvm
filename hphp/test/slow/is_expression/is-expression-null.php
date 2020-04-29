@@ -19,7 +19,7 @@ is_null_(-1);
 is_null_(false);
 is_null_(1.5);
 is_null_('foo');
-is_null_(STDIN);
+is_null_(fopen(__FILE__, 'r'));
 is_null_(new stdClass());
 is_null_(tuple(1, 2, 3));
 is_null_(shape('a' => 1, 'b' => 2));

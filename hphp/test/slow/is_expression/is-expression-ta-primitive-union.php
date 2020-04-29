@@ -26,7 +26,7 @@ is_arraykey(1);
 is_arraykey("one");
 is_arraykey(1.5);
 is_arraykey(true);
-is_arraykey(STDIN);
+is_arraykey(fopen(__FILE__, 'r'));
 is_arraykey(new stdClass());
 
 echo "\n";
@@ -35,6 +35,6 @@ is_num(1);
 is_num("one");
 is_num(1.5);
 is_num(true);
-is_num(STDIN);
+is_num(fopen(__FILE__, 'r'));
 is_num(new stdClass());
 }

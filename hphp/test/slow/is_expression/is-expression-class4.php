@@ -18,7 +18,7 @@ function main(): void {
   is_C(false);
   is_C(1.5);
   is_C('foo');
-  is_C(STDIN);
+  is_C(fopen(__FILE__, 'r'));
   is_C(new stdClass());
   is_C(new C());
   is_C(tuple(1, 2, 3));

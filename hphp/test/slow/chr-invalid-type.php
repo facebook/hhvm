@@ -10,7 +10,7 @@ $inputs = varray[
   new stdClass,
   new SimpleXMLElement("<foo />"),
   new SimpleXMLElement("<foo><bar/></foo>"),
-  STDIN, STDOUT, STDERR,
+  fopen(__FILE__, 'r'),
 ];
 
 foreach ($inputs as $v) {

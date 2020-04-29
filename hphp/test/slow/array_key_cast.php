@@ -46,7 +46,7 @@ function make_tests($func) {
     vec[$func(), 789.123],
     vec[$func(), 'abc'],
     vec[$func(), '456'],
-    vec[$func(), STDIN],
+    vec[$func(), fopen(__FILE__, 'r')],
     vec[$func(), varray[]],
     vec[$func(), vec[]],
     vec[$func(), dict[]],

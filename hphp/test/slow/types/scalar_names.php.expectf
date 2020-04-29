@@ -3,7 +3,7 @@ string(3) "123"
 int(123)
 float(1.23)
 bool(true)
-resource(1) of type (stream)
+resource(%d) of type (stream)
 string(4) "herp"
 int(123)
 int(123)
@@ -12,7 +12,7 @@ string(3) "123"
 int(123)
 float(1.23)
 bool(true)
-resource(1) of type (stream)
+resource(%d) of type (stream)
 string(4) "herp"
 int(123)
 float(1.23)

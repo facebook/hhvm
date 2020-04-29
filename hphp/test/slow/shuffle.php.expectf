@@ -105,7 +105,7 @@ float(3.14)
 
 Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
 bool(false)
-resource(1) of type (stream)
+resource(%d) of type (stream)
 
 Warning: Invalid operand type was used: shuffle expects array(s) in %s/shuffle.php on line 5
 bool(false)

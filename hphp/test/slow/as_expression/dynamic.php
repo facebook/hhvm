@@ -15,7 +15,7 @@ f(1);
 f(false);
 f(1.5);
 f('foo');
-f(STDIN);
+f(fopen(__FILE__, 'r'));
 f(new stdClass());
 f(vec[]);
 f(dict[]);

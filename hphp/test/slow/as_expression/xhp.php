@@ -18,7 +18,7 @@ is_xhp(1);
 is_xhp(1.5);
 is_xhp('foo');
 is_xhp(false);
-is_xhp(STDIN);
+is_xhp(fopen(__FILE__, 'r'));
 is_xhp(new stdClass());
 is_xhp(null);
 is_xhp(vec[]);

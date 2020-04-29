@@ -15,7 +15,7 @@ function main(): void {
   f(1.5);
   f('foo');
   f(false);
-  f(STDIN);
+  f(fopen(__FILE__, 'r'));
   f(new stdClass());
   f(tuple(1, 2, 3));
   f(shape('a' => 1, 'b' => 2));

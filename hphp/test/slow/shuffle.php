@@ -33,7 +33,7 @@ test(false);
 test(123);
 test('abc');
 test(3.14);
-test(STDIN);
+test(fopen(__FILE__, 'r'));
 test(new stdclass);
 test(Vector{1, 2, 3, 4});
 }

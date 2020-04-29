@@ -17,7 +17,7 @@ function main(): void {
     ->setX(1.5)
     ->setX('foo')
     ->setX(false)
-    ->setX(STDIN)
+    ->setX(fopen(__FILE__, 'r'))
     ->setX(new stdClass())
     ->setX(tuple(1, 2, 3))
     ->setX(shape('a' => 1, 'b' => 2));

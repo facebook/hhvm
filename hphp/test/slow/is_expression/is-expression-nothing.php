@@ -16,7 +16,7 @@ is_nothing(-1);
 is_nothing(false);
 is_nothing(1.5);
 is_nothing('foo');
-is_nothing(STDIN);
+is_nothing(fopen(__FILE__, 'r'));
 is_nothing(new stdClass());
 is_nothing(tuple(1, 2, 3));
 is_nothing(shape('a' => 1, 'b' => 2));

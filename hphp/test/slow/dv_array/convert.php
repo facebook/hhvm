@@ -115,7 +115,7 @@ $values = vec[
   dict[1 => 'a', 2 => 'b'],
   keyset[],
   keyset[100, 'abc', 200],
-  STDIN,
+  fopen(__FILE__, 'r'),
   new stdclass,
   new IterableObj,
   new ThrowIterableObj,

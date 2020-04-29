@@ -32,7 +32,7 @@ as_foo(2);
 as_foo(1.5);
 as_foo(true);
 as_foo(null);
-as_foo(STDIN);
+as_foo(fopen(__FILE__, 'r'));
 as_foo(new stdClass());
 
 echo "\n";
@@ -43,6 +43,6 @@ as_bar('2');
 as_bar(1.5);
 as_bar(true);
 as_bar(null);
-as_bar(STDIN);
+as_bar(fopen(__FILE__, 'r'));
 as_bar(new stdClass());
 }

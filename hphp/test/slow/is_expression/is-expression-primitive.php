@@ -21,5 +21,5 @@ main(true);
 main(0);
 main(1.5);
 main("foo");
-main(STDIN);
+main(fopen(__FILE__, 'r'));
 }

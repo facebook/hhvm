@@ -72,7 +72,7 @@ is_string_("foo");
 echo "---\n";
 
 is_resource_(null);
-is_resource_(STDIN);
+is_resource_(fopen(__FILE__, 'r'));
 
 echo "---\n";
 

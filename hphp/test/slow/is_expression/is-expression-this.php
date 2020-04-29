@@ -22,7 +22,7 @@ C::isThis(null);
 C::isThis(true);
 C::isThis(1.5);
 C::isThis(1);
-C::isThis(STDIN);
+C::isThis(fopen(__FILE__, 'r'));
 
 echo "\n";
 
@@ -33,5 +33,5 @@ D::isThis(null);
 D::isThis(true);
 D::isThis(1.5);
 D::isThis(1);
-D::isThis(STDIN);
+D::isThis(fopen(__FILE__, 'r'));
 }

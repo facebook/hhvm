@@ -61,7 +61,9 @@ let type_hint pos name : T.type_hint = (tany, Some (simple_hint pos name))
 
 let create_mixed_type_hint pos : T.type_hint = type_hint pos "\\HH\\mixed"
 
-let create_void_type_hint pos : T.type_hint = type_hint pos "\\HH\\void"
+(* let create_void_type_hint pos : T.type_hint = type_hint pos "\\HH\\void" *)
+
+let create_string_type_hint pos : T.type_hint = type_hint pos "\\HH\\string"
 
 let create_key_set_string_type_hint pos : T.type_hint =
   let hstring = simple_hint pos "\\HH\\string" in
@@ -86,8 +88,8 @@ let lvar pos name : T.expr =
 let str pos name : T.expr = (T.tany pos, String name)
 
 (* Get property from class *)
-let class_get pos cls name : T.expr =
-  (T.tany pos, Class_get (class_id pos cls, CGstring (pos, "$" ^ name)))
+(* let class_get pos cls name : T.expr =
+  (T.tany pos, Class_get (class_id pos cls, CGstring (pos, "$" ^ name))) *)
 
 let new_ pos cls args : T.expr =
   let tany = T.tany pos in
@@ -113,7 +115,7 @@ let error_msg cls instance_name name =
 (* Generate a static accessor function from the pumapping information, eg:
 
    <<__Memoize>>
-   static function Field_name##Expr_name(string $atom) : mixed {
+   static function pu$Field_name$Expr_name(string $atom) : mixed {
      switch ($atom) {
        case "A":
         return valA;
@@ -126,7 +128,7 @@ let error_msg cls instance_name name =
     }
 
    If the class extends a superclass, the raise statement is replaced with
-   a call to parent::Field_name##Expr_name.
+   a call to parent::pu$Field_name$Expr_name.
 
    Remark: at compile time we cannot reliably detect if, whenever a class D
    extends a class C, a PU defined in the subclass D extends a PU defined in C
@@ -174,8 +176,7 @@ let gen_pu_accessor
       [
         {
           param_annotation = T.tany pos;
-          param_type_hint =
-            (snd (T.tany pos), Some (simple_hint pos "\\HH\\string"));
+          param_type_hint = create_string_type_hint pos;
           param_is_variadic = false;
           param_pos = pos;
           param_name = "$atom";
@@ -311,7 +312,7 @@ let gen_Members_extends instance_name pos (pu_members : T.pu_member list) =
     m_params = [];
     m_body = body;
     m_user_attributes = [memoize pos; override pos];
-    m_ret = create_void_type_hint pos;
+    m_ret = create_key_set_string_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
@@ -350,7 +351,7 @@ let gen_Members_no_extends instance_name pos (pu_members : T.pu_member list) =
     m_params = [];
     m_body = body;
     m_user_attributes = [memoize pos];
-    m_ret = create_void_type_hint pos;
+    m_ret = create_key_set_string_type_hint pos;
     m_fun_kind = Ast_defs.FSync;
     m_span = pos;
     m_doc_comment = None;
@@ -361,11 +362,9 @@ let gen_Members_no_extends instance_name pos (pu_members : T.pu_member list) =
     m_abstract = false;
   }
 
-(* Returns the generated methods (accessors + initialization),
- * the static $members property
- *)
-let gen_pu_enum (class_name : string) (extends : bool) (instance : T.pu_enum) :
-    T.method_ list =
+(* Returns the generated methods (accessors + Members) *)
+let gen_pu_methods (class_name : string) (extends : bool) (instance : T.pu_enum)
+    : T.method_ list =
   let pu_members = instance.pu_members in
   let (pos, instance_name) = instance.pu_name in
   let m_Members =
@@ -428,7 +427,7 @@ let erase_stmt stmt = visitor#on_stmt () stmt
 let erase_fun f = visitor#on_fun_ () f
 
 let process_pufields class_name extends (pu_enums : T.pu_enum list) =
-  List.concat_map ~f:(gen_pu_enum class_name extends) pu_enums
+  List.concat_map ~f:(gen_pu_methods class_name extends) pu_enums
 
 let update_class c =
   let methods =

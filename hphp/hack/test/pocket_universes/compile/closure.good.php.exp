@@ -3,7 +3,8 @@
 .filepath "closure.good.php";
 
 .hh_file 1;
-.adata A_0 = """k:0:{}""";
+.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """k:0:{}""";
 
 .main (1,1) {
   .srcloc 4:7,4:7;
@@ -33,13 +34,15 @@
     Null
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\void" N > pu$Entry$Members$memoize_impl() {
+  .method [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members$memoize_impl() {
     .srcloc 5:8,5:12;
-    Keyset @A_0
+    Keyset @A_1
     .srcloc 5:8,5:12;
+    Array @A_0
+    VerifyRetTypeTS
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\void" N > pu$Entry$Members() {
+  .method [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members() {
     .ismemoizewrapper;
     .srcloc 5:8,5:12;
     MemoGet L0 L:0+0

@@ -10,16 +10,31 @@
 
  /**
   * Object of this type is returned by __FUNCTION_CREDENTIAL__
-  * but you almost certainly should NOT be attempting to construct this object
+  * attempting to constuct an instance directly will throw an Error
   */
 final class FunctionCredential {
+  /**
+   * Do NOT invoke the constructor.
+   */
   private final function __construct() {}
 
+  /**
+   * The classname is equivalent to the magic __CLASS__ constant.
+   * The name is not a late bound classname.
+   * It refers to self::class, not static::class.
+   *
+   * If __FUNCTION_CREDENTIAL__ is used when not in the scope of a class,
+   * the classname will be null.
+   */
   public final function getClassName(): ?string;
 
+  /**
+   * The functionname is equivalent to the magic __FUNCTION__ constant.
+   */
   public final function getFunctionName(): string;
 
+  /**
+   * The absolute filename of the file.
+   */
   public final function getFileName(): string;
-
-  public final function __getDebugInfo(): darray;
 }

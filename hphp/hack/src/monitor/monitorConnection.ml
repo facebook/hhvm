@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerMonitorUtils
 
 let server_exists lock_file = not (Lock.check lock_file)

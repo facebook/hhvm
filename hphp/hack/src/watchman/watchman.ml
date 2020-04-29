@@ -7,7 +7,7 @@
  *
  * *)
 
-open Core_kernel
+open Hh_prelude
 open Utils
 
 (*
@@ -172,7 +172,10 @@ end = struct
       Buffered_line_reader.create @@ Timeout.descr_of_in_channel ic
     in
     let output = read_with_timeout timeout reader in
-    assert (Timeout.close_process_in ic = Unix.WEXITED 0);
+    assert (
+      match Timeout.close_process_in ic with
+      | Unix.WEXITED 0 -> true
+      | _ -> false );
     let json = Hh_json.json_of_string output in
     J.get_string_val "sockname" json
 
@@ -225,7 +228,7 @@ end = struct
     if not ready then
       match timeout with
       | No_timeout -> None
-      | Explicit_timeout timeout when timeout = 0. -> None
+      | Explicit_timeout timeout when Float.equal timeout 0. -> None
       | _ -> raise Timeout
     else
       (* Use the timeout mechanism to limit maximum time to read payload (cap
@@ -378,7 +381,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         | Some terms -> terms :: expressions
         | None -> expressions
       in
-      assert (expressions <> []);
+      assert (not (List.is_empty expressions));
       let directives =
         [
           JSON_Object
@@ -557,7 +560,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   let prepend_relative_path_term ~relative_path ~terms =
     match terms with
     | None -> None
-    | Some _ when relative_path = "" ->
+    | Some _ when String.equal relative_path "" ->
       (* If we're watching the watch root directory, then there's no point in specifying a list of
        * files and directories to watch. We're already subscribed to any change in this watch root
        * anyway *)
@@ -726,7 +729,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
               else
                 attempts )
     in
-    Unix.time () >= time +. offset
+    Float.(Unix.time () >= time +. offset)
 
   let maybe_restart_instance instance =
     match instance with
@@ -792,13 +795,13 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           >|= fun (env, result) -> (Watchman_alive env, result))
         ~catch:(fun exn ->
           match Exception.unwrap exn with
-          | Sys_error msg when msg = "Broken pipe" ->
+          | Sys_error msg when String.equal msg "Broken pipe" ->
             Hh_logger.log "Watchman Pipe broken.";
             close_channel_on_instance env
-          | Sys_error msg when msg = "Connection reset by peer" ->
+          | Sys_error msg when String.equal msg "Connection reset by peer" ->
             Hh_logger.log "Watchman connection reset by peer.";
             close_channel_on_instance env
-          | Sys_error msg when msg = "Bad file descriptor" ->
+          | Sys_error msg when String.equal msg "Bad file descriptor" ->
             (* This happens when watchman is tearing itself down after we
              * retrieved a sock address and connected to the sock address. That's
              * because Unix.open_connection (via Timeout.open_connection) doesn't
@@ -912,10 +915,10 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     let timeout =
       Option.map deadline (fun deadline ->
           let timeout = deadline -. Unix.time () in
-          Explicit_timeout (max timeout 0.0))
+          Explicit_timeout Float.(max timeout 0.0))
     in
     let debug_logging = env.settings.debug_logging in
-    if env.settings.subscribe_mode <> None then
+    if Option.is_some env.settings.subscribe_mode then
       Watchman_process.blocking_read ~debug_logging ?timeout ~conn:env.conn
       >|= fun response ->
       let (env, result) =
@@ -972,7 +975,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
                | Error _ -> false
                | Ok (vs, _) ->
                  List.exists vs ~f:(fun str ->
-                     Hh_json.get_string_exn str = env.subscription))
+                     String.equal (Hh_json.get_string_exn str) env.subscription))
           in
           let is_not_needed =
             lazy
@@ -980,13 +983,13 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
                | Error _ -> false
                | Ok (vs, _) ->
                  List.exists vs ~f:(fun str ->
-                     Hh_json.get_string_exn str = env.subscription))
+                     String.equal (Hh_json.get_string_exn str) env.subscription))
           in
           Lazy.force is_synced || Lazy.force is_not_needed)
     in
     let timeout =
       let timeout = deadline -. Unix.time () in
-      if timeout <= 0.0 then
+      if Float.(timeout <= 0.0) then
         raise Timeout
       else
         Explicit_timeout timeout
@@ -1012,7 +1015,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
 
   let get_changes_synchronously ~(timeout : int) instance =
     ( call_on_instance instance "get_changes_synchronously" @@ fun env ->
-      if env.settings.subscribe_mode = None then
+      if Option.is_none env.settings.subscribe_mode then
         let timeout = Explicit_timeout (float timeout) in
         let query = since_query env in
         Watchman_process.request

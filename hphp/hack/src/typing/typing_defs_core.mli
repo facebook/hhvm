@@ -121,7 +121,7 @@ type dependent_type =
    *  The expression $x->foo() would have a different one
    *)
   | DTexpr of Ident.t
-[@@deriving eq]
+[@@deriving eq, ord]
 
 type destructure_kind =
   | ListDestructure

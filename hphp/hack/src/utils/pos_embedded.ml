@@ -530,6 +530,7 @@ let make_from_lnum_bol_cnum ~pos_file ~pos_start ~pos_end =
 
 let pessimize_enabled pos pessimize_coefficient =
   let path = filename pos in
+  let open Float in
   match Relative_path.prefix path with
   | Relative_path.Root when pessimize_coefficient > 0.0 ->
     let range = 2000000 in

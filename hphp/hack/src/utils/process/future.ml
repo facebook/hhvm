@@ -235,7 +235,8 @@ let merge_status stat_a stat_b handler =
   match (stat_a, stat_b) with
   | (Complete_with_result a, Complete_with_result b) ->
     Complete_with_result (handler a b)
-  | (In_progress { age }, In_progress { age = age_b }) when age > age_b ->
+  | (In_progress { age }, In_progress { age = age_b }) when Float.(age > age_b)
+    ->
     In_progress { age }
   | (In_progress { age }, _)
   | (_, In_progress { age }) ->
@@ -244,7 +245,7 @@ let merge_status stat_a stat_b handler =
 let start_t : 'a. 'a t -> float = (fun (_, time) -> time)
 
 let merge a b handler =
-  (ref (Merged (a, b, handler)), min (start_t a) (start_t b))
+  (ref (Merged (a, b, handler)), Float.min (start_t a) (start_t b))
 
 let make_continue (first : 'first t) next_producer : 'next t =
   (ref (Bound (first, next_producer)), start_t first)

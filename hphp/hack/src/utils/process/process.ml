@@ -69,7 +69,7 @@ let rec maybe_consume
     ?(max_time : float = 0.0)
     (fd_ref : Unix.file_descr option ref)
     (acc : string Stack_utils.Stack.t) : unit =
-  if max_time < 0.0 then
+  if Float.(max_time < 0.0) then
     ()
   else
     let start_t = Unix.time () in

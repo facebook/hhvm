@@ -315,7 +315,7 @@ let compare_rule_sets s1 s2 =
   let rec aux = function
     | [] -> 0
     | rule_id :: ids ->
-      let diff = compare (is_split rule_id s1) (is_split rule_id s2) in
+      let diff = Bool.compare (is_split rule_id s1) (is_split rule_id s2) in
       if diff <> 0 then
         diff
       else

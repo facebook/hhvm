@@ -567,7 +567,7 @@ let decl_ty_con_ordinal ty_ =
 let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
   let rec ty__compare ty_1 ty_2 =
     match (ty_1, ty_2) with
-    | (Tprim ty1, Tprim ty2) -> compare ty1 ty2
+    | (Tprim ty1, Tprim ty2) -> Aast_defs.compare_tprim ty1 ty2
     | (Toption ty, Toption ty2)
     | (Tvarray ty, Tvarray ty2) ->
       ty_compare ty ty2
@@ -595,7 +595,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       end
     | (Tdependent (d1, cstr1), Tdependent (d2, cstr2)) ->
       begin
-        match compare d1 d2 with
+        match compare_dependent_type d1 d2 with
         | 0 -> ty_compare cstr1 cstr2
         | n -> n
       end
@@ -628,7 +628,7 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
     | _ -> ty_con_ordinal ty_1 - ty_con_ordinal ty_2
   and shape_field_type_compare sft1 sft2 =
     match ty_compare sft1.sft_ty sft2.sft_ty with
-    | 0 -> compare sft1.sft_optional sft2.sft_optional
+    | 0 -> Bool.compare sft1.sft_optional sft2.sft_optional
     | n -> n
   and tfun_compare fty1 fty2 =
     match possibly_enforced_ty_compare fty1.ft_ret fty2.ft_ret with
@@ -636,7 +636,10 @@ let rec ty__compare ?(normalize_lists = false) ty_1 ty_2 =
       begin
         match ft_params_compare fty1.ft_params fty2.ft_params with
         | 0 ->
-          compare
+          (* Explicit polymorphic equality. Need to write equality on
+           * locl_ty by hand if we want to make a specialized one
+           *)
+          Poly.compare
             (fty1.ft_arity, fty1.ft_reactive, fty1.ft_flags)
             (fty2.ft_arity, fty2.ft_reactive, fty2.ft_flags)
         | n -> n
@@ -651,7 +654,7 @@ and ty_compare ?(normalize_lists = false) ty1 ty2 =
 and tyl_compare ~sort ?(normalize_lists = false) tyl1 tyl2 =
   let (tyl1, tyl2) =
     if sort then
-      (List.sort ty_compare tyl1, List.sort ty_compare tyl2)
+      (List.sort ~compare:ty_compare tyl1, List.sort ~compare:ty_compare tyl2)
     else
       (tyl1, tyl2)
   in
@@ -699,7 +702,7 @@ let has_member_compare ~normalize_lists hm1 hm2 =
   let ty_compare = ty_compare ~normalize_lists in
   let { hm_name = (_, m1); hm_type = ty1; hm_class_id = cid1 } = hm1 in
   let { hm_name = (_, m2); hm_type = ty2; hm_class_id = cid2 } = hm2 in
-  match compare m1 m2 with
+  match String.compare m1 m2 with
   | 0 ->
     (match ty_compare ty1 ty2 with
     | 0 -> class_id_compare cid1 cid2

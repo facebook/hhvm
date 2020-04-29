@@ -20,7 +20,7 @@
    *    its fate to the next client.
  *)
 
-open Core_kernel
+open Hh_prelude
 open ServerProcess
 open ServerMonitorUtils
 
@@ -75,7 +75,7 @@ module Sent_fds_collector = struct
       Fd_scheduler.wait_for_fun
         ~once:true
         ~priority:1
-        (fun time -> time >= trigger)
+        (fun time -> Float.(time >= trigger))
         (fun x ->
           let () = Printf.eprintf "Closing client fd\n" in
           let () = Unix.close fd in
@@ -154,7 +154,7 @@ struct
 
   let sleep_and_check socket =
     let (ready_socket_l, _, _) = Unix.select [socket] [] [] 1.0 in
-    ready_socket_l <> []
+    not (List.is_empty ready_socket_l)
 
   let start_server ?target_saved_state ~informant_managed options exit_status =
     let server_process =
@@ -264,7 +264,7 @@ struct
     let client_build_id : string = Marshal_tools.from_fd_with_preamble fd in
     let newline_byte = Bytes.create 1 in
     let _ = Unix.read fd newline_byte 0 1 in
-    if Bytes.to_string newline_byte <> "\n" then (
+    if not (String.equal (Bytes.to_string newline_byte) "\n") then (
       Hh_logger.log "Did not find newline character after version";
       raise Malformed_build_id
     );
@@ -300,7 +300,7 @@ struct
    * FD. *)
   and hand_off_client_connection_with_retries server_fd retries client_fd =
     let (_, ready_l, _) = Unix.select [] [server_fd] [] 0.5 in
-    if ready_l <> [] then
+    if not (List.is_empty ready_l) then
       try hand_off_client_connection server_fd client_fd
       with e ->
         if retries > 0 then (
@@ -357,7 +357,7 @@ struct
       let server_fd =
         snd
         @@ List.find_exn server.out_fds ~f:(fun x ->
-               fst x = handoff_options.MonitorRpc.pipe_name)
+               String.equal (fst x) handoff_options.MonitorRpc.pipe_name)
       in
       let since_last_request = Unix.time () -. !(server.last_request_handoff) in
       (* TODO: Send this to client so it is visible. *)
@@ -430,7 +430,8 @@ struct
     try
       let client_version = read_version client_fd in
       if
-        (not env.ignore_hh_version) && client_version <> Build_id.build_revision
+        (not env.ignore_hh_version)
+        && not (String.equal client_version Build_id.build_revision)
       then
         client_out_of_date env client_fd ServerMonitorUtils.current_build_info
       else (
@@ -599,18 +600,18 @@ struct
     in
     let max_watchman_retries = 3 in
     let max_sql_retries = 3 in
-    match informant_report with
-    | Informant_sig.Move_along when env.server = Died_config_changed -> env
-    | Informant_sig.Restart_server _ when env.server = Died_config_changed ->
+    match (informant_report, env.server) with
+    | (Informant_sig.Move_along, Died_config_changed) -> env
+    | (Informant_sig.Restart_server _, Died_config_changed) ->
       Hh_logger.log "%s"
       @@ "Ignoring Informant directed restart - waiting for next client "
       ^ "connection to verify server version first";
       env
-    | Informant_sig.Restart_server target_saved_state ->
+    | (Informant_sig.Restart_server target_saved_state, _) ->
       Hh_logger.log "Informant directed server restart. Restarting server.";
       HackEventLogger.informant_induced_restart ();
       kill_and_maybe_restart_server ?target_saved_state env exit_status
-    | Informant_sig.Move_along ->
+    | (Informant_sig.Move_along, _) ->
       if
         (is_watchman_failed || is_watchman_fresh_instance)
         && env.watchman_retries < max_watchman_retries

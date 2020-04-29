@@ -61,7 +61,7 @@ let select
   in
   let tasks = [read_task; write_task] in
   let tasks =
-    if timeout > 0.0 then
+    if Float.(timeout > 0.0) then
       let timeout_task =
         let%lwt () = Lwt_unix.sleep timeout in
         Lwt.return ([], [], [])

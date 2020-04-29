@@ -518,11 +518,11 @@ let format_messages (msgs : Pos.absolute message list) : string =
   let labelled_msgs = label_first msgs true in
   (* Sort messages by line number, so we can display with context. *)
   let cmp (m1, _) (m2, _) =
-    match compare (Pos.filename (fst m1)) (Pos.filename (fst m2)) with
-    | 0 -> compare (Pos.line (fst m1)) (Pos.line (fst m2))
+    match String.compare (Pos.filename (fst m1)) (Pos.filename (fst m2)) with
+    | 0 -> Int.compare (Pos.line (fst m1)) (Pos.line (fst m2))
     | _ -> 0
   in
-  let sorted_msgs = List.stable_sort cmp labelled_msgs in
+  let sorted_msgs = List.stable_sort ~compare:cmp labelled_msgs in
   (* For every message, show it alongside the relevant line. If there
      are multiple messages associated with the line, only show it once. *)
   let col_widths = col_widths msgs in

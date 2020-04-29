@@ -12,7 +12,9 @@
 
 open Hh_prelude
 
-let is_printable c = c >= ' ' && c <= '~'
+let is_printable c =
+  let open Char in
+  c >= ' ' && c <= '~'
 
 let is_lit_printable c =
   let open Char in

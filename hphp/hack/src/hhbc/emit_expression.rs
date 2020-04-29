@@ -4118,6 +4118,7 @@ fn emit_binop(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Resul
         },
         B::QuestionQuestion => {
             let end_label = e.label_gen_mut().next_regular();
+            let rhs = emit_expr(e, env, e2)?;
             Ok(InstrSeq::gather(vec![
                 emit_quiet_expr(e, env, pos, e1, false)?.0,
                 instr::dup(),
@@ -4125,7 +4126,7 @@ fn emit_binop(e: &mut Emitter, env: &Env, pos: &Pos, expr: &tast::Expr) -> Resul
                 instr::not(),
                 instr::jmpnz(end_label.clone()),
                 instr::popc(),
-                emit_expr(e, env, e2)?,
+                rhs,
                 instr::label(end_label),
             ]))
         }

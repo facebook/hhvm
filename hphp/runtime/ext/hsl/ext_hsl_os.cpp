@@ -103,7 +103,7 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
           "sockaddr_un must fit in allocated space"
         );
         const sockaddr_un* const detail = reinterpret_cast<const sockaddr_un*>(&addr);
-#if defined(__linux__)
+#ifdef __linux__
         // Documented way to check for "unnamed" sockets: 0-byte-length sun_path
         const bool is_unnamed = len == sizeof(sa_family_t);
 #else
@@ -116,15 +116,16 @@ Object hsl_sockaddr_from_native(const sockaddr_storage& addr, socklen_t len) {
           return create_object(s_HSL_sockaddr_un_unnamed, Array::CreateVec());
         }
 
-        auto path_len = len - offsetof(struct sockaddr_un, sun_path) - 1;
-#ifdef __linux__
-        assertx(detail->sun_path[0] /* Linux abstract sockets are not supported by the HSL */);
-#elif defined(__APPLE__)
-        assert(path_len == detail->sun_len);
-#endif
+
+        // This is *super* fun:
+        // - `sun_path` MAY have trailing nulls
+        // - `sun_len` MAY include that trailing null on Linux.
+        const auto max_path_len = len - offsetof(struct sockaddr_un, sun_path);
+        const auto actual_path_len = ::strnlen(detail->sun_path, max_path_len);
+
         return create_object(
           s_HSL_sockaddr_un_pathname,
-          make_vec_array(String(detail->sun_path, path_len, CopyString))
+          make_vec_array(String(detail->sun_path, actual_path_len, CopyString))
         );
       }
       break;
@@ -213,7 +214,7 @@ void native_sockaddr_from_hsl(const Object& object, sockaddr_storage& native, so
           address_len = sizeof(sa_family_t);
           return;
 #elif defined(__APPLE__)
-          // Match what MacOS gives us for socketpair()
+          // Match what MacOS gives us for socketpair()- 16 nulls
           address_len = 16;
           return;
 #else

@@ -145,8 +145,8 @@ static ServiceData::CounterCallback s_warmedUpCounter(
 );
 
 /*
- * If the jit maturity counter is enabled, update it with the current amount of
- * emitted code.
+ * Update JIT maturity with the current amount of emitted code and state of the
+ * JIT.
  */
 void reportJitMaturity() {
   auto static jitMaturityCounter = ServiceData::createCounter("jit.maturity");
@@ -187,6 +187,10 @@ void reportJitMaturity() {
   // based on the rate in which JITed code is being produced.
   if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
     maturity = 100;
+  }
+
+  if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+    maturity = std::max(decltype(maturity){99}, maturity);
   }
 
   if (maturity > before) {
@@ -400,36 +404,36 @@ std::string warmupStatusString() {
   std::string status_str;
 
   if (!s_warmedUp.load(std::memory_order_relaxed)) {
-    // 0. Are we running in jumpstart seeder mode with profiling of optimized
-    //    code enabled?
-    if (isJitSerializing() && serializeOptProfEnabled()) {
-      status_str += "Running in jumpstart seeder mode to collect profile of "
-                    "optimized code.\n";
-    }
     // 1. Are we still profiling new functions?
     if (shouldProfileNewFuncs()) {
-      status_str += "New functions are still being profiled.\n";
+      status_str = "New functions are still being profiled.\n";
     }
     // 2. Has retranslateAll happened yet?
-    if (jit::mcgen::retranslateAllPending()) {
-      status_str += "Waiting on retranslateAll().\n";
+    else if (jit::mcgen::retranslateAllPending()) {
+      status_str = "Waiting on retranslateAll().\n";
     }
     // 3. Has code size in both main and hot plateaued?
-    auto checkCodeSize = [&](ServiceData::ExportedTimeSeries* series) {
-      auto const codeSizeRate = series->getRateByDuration(
-        std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
-      if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
-        folly::format(
-          &status_str,
-          "Code.main is still increasing at a rate of {}\n",
-          codeSizeRate
-        );
+    else {
+      auto checkCodeSize = [&](std::string name) {
+        auto series = getCodeSizeCounter(name);
+        auto const codeSizeRate = series->getRateByDuration(
+          std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
+        if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {
+          folly::format(&status_str,
+                        "Code.{} is still increasing at a rate of {}\n",
+                        name, codeSizeRate);
+        }
+      };
+      checkCodeSize("main");
+      checkCodeSize("hot");
+    }
+    if (status_str.empty()) {
+      if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
+        status_str = "JIT running in SerializeAndExit mode";
+      } else {
+        s_warmedUp.store(true, std::memory_order_relaxed);
       }
-    };
-    checkCodeSize(getCodeSizeCounter("main"));
-    checkCodeSize(getCodeSizeCounter("hot"));
-
-    if (status_str.empty()) s_warmedUp.store(true, std::memory_order_relaxed);
+    }
   }
   // Empty string means "warmed up".
   return status_str;

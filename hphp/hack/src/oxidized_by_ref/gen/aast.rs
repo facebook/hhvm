@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<96bebb13fa78343d6433a988fb6db5bc>>
+// @generated SignedSource<<98f89a353efc06b400db7cec433ec11c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -335,7 +335,7 @@ pub enum XhpAttribute<'a, Ex, Fb, En, Hi> {
     XhpSpread(Expr<'a, Ex, Fb, En, Hi>),
 }
 
-pub type IsVariadic<'a> = bool;
+pub use oxidized::aast::IsVariadic;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -343,7 +343,7 @@ pub type IsVariadic<'a> = bool;
 pub struct FunParam<'a, Ex, Fb, En, Hi> {
     pub annotation: Ex,
     pub type_hint: TypeHint<'a, Hi>,
-    pub is_variadic: IsVariadic<'a>,
+    pub is_variadic: oxidized::aast::IsVariadic,
     pub pos: &'a Pos<'a>,
     pub name: &'a str,
     pub expr: Option<Expr<'a, Ex, Fb, En, Hi>>,
@@ -483,7 +483,7 @@ pub struct UseAsAlias<'a>(
 )]
 pub struct InsteadofAlias<'a>(pub Sid<'a>, pub Pstring<'a>, pub &'a [Sid<'a>]);
 
-pub type IsExtends<'a> = bool;
+pub use oxidized::aast::IsExtends;
 
 pub use oxidized::aast::EmitId;
 
@@ -508,7 +508,7 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub method_redeclarations: &'a [MethodRedeclaration<'a, Ex, Fb, En, Hi>],
     pub xhp_attr_uses: &'a [Hint<'a>],
     pub xhp_category: Option<(&'a Pos<'a>, &'a [Pstring<'a>])>,
-    pub reqs: &'a [(Hint<'a>, IsExtends<'a>)],
+    pub reqs: &'a [(Hint<'a>, oxidized::aast::IsExtends)],
     pub implements: &'a [Hint<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub consts: &'a [ClassConst<'a, Ex, Fb, En, Hi>],

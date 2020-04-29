@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d90f317aae45ebc24120abb4a77d5541>>
+// @generated SignedSource<<4c9f23cb5c52634af2cba3b8c463ca7a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -29,11 +29,11 @@ pub struct Lid<'a>(pub &'a Pos<'a>, pub LocalId<'a>);
 
 pub type Sid<'a> = ast_defs::Id<'a>;
 
-pub type IsReified<'a> = bool;
+pub use oxidized::aast_defs::IsReified;
 
 pub use oxidized::aast_defs::CallType;
 
-pub type IsCoroutine<'a> = bool;
+pub use oxidized::aast_defs::IsCoroutine;
 
 pub use oxidized::aast_defs::FuncReactive;
 
@@ -58,7 +58,7 @@ pub use oxidized::aast_defs::XhpChildOp;
 )]
 pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
 
-pub type MutableReturn<'a> = bool;
+pub use oxidized::aast_defs::MutableReturn;
 
 pub type VariadicHint<'a> = Option<Hint<'a>>;
 
@@ -67,13 +67,13 @@ pub type VariadicHint<'a> = Option<Hint<'a>>;
 )]
 pub struct HintFun<'a> {
     pub reactive_kind: oxidized::aast_defs::FuncReactive,
-    pub is_coroutine: IsCoroutine<'a>,
+    pub is_coroutine: oxidized::aast_defs::IsCoroutine,
     pub param_tys: &'a [Hint<'a>],
     pub param_kinds: &'a [Option<oxidized::ast_defs::ParamKind>],
     pub param_mutability: &'a [Option<oxidized::aast_defs::ParamMutability>],
     pub variadic_ty: VariadicHint<'a>,
     pub return_ty: Hint<'a>,
-    pub is_mutable_return: MutableReturn<'a>,
+    pub is_mutable_return: oxidized::aast_defs::MutableReturn,
 }
 
 #[derive(

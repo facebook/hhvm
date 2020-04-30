@@ -75,6 +75,7 @@
   (modules
     hh_single_compile)
   (libraries
+    compile_ffi
     compiler_id
     default_injector_config
     facts

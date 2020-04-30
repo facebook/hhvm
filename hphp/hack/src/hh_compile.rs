@@ -99,7 +99,7 @@ fn process_single_file_impl(
         flags,
     };
     let mut writer = output_kind.make_writer()?;
-    let profile = compile::from_text(env, stack_limit, &mut writer, content)?;
+    let profile = compile::from_text(&env, stack_limit, &mut writer, content)?;
     writer.flush()?;
     Ok(profile)
 }

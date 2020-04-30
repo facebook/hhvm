@@ -20,6 +20,8 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/runtime-option.h"
 
+#include <folly/Range.h>
+
 namespace HPHP {
 
 struct StringData;
@@ -105,21 +107,17 @@ const AnnotType* nameToAnnotType(const std::string& typeName);
 MaybeDataType nameToMaybeDataType(const StringData* typeName);
 MaybeDataType nameToMaybeDataType(const std::string& typeName);
 
-/*
- * Returns true if the interface with the specified name
- * supports any non-object types, false otherwise.
- */
 bool interface_supports_non_objects(const StringData* s);
-
 bool interface_supports_int(const StringData* s);
 bool interface_supports_double(const StringData* s);
 bool interface_supports_string(const StringData* s);
 bool interface_supports_arrlike(const StringData* s);
 
-bool interface_supports_int(std::string const&);
-bool interface_supports_double(std::string const&);
-bool interface_supports_string(std::string const&);
-bool interface_supports_arrlike(std::string const&);
+bool interface_supports_non_objects(folly::StringPiece s);
+bool interface_supports_int(folly::StringPiece s);
+bool interface_supports_double(folly::StringPiece s);
+bool interface_supports_string(folly::StringPiece s);
+bool interface_supports_arrlike(folly::StringPiece s);
 
 TypedValue annotDefaultValue(AnnotType at);
 

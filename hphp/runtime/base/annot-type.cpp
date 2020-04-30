@@ -124,65 +124,60 @@ const AnnotType* nameToAnnotType(const std::string& typeName) {
   return at;
 }
 
+namespace {
+
+bool isame(folly::StringPiece a, folly::StringPiece b) {
+  return a.size() == b.size() && !strcasecmp(a.data(), b.data());
+}
+
+}
+
 bool interface_supports_non_objects(const StringData* s) {
-  return (s->isame(s_HH_Traversable.get()) ||
-          s->isame(s_HH_KeyedTraversable.get()) ||
-          s->isame(s_HH_RX_Traversable.get()) ||
-          s->isame(s_HH_RX_KeyedTraversable.get()) ||
-          s->isame(s_HH_Container.get()) ||
-          s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_XHPChild.get()) ||
-          s->isame(s_Stringish.get()));
+  return interface_supports_non_objects(s->slice());
+}
+
+bool interface_supports_non_objects(folly::StringPiece s) {
+  return interface_supports_arrlike(s) ||
+         isame(s, s_Stringish.slice());
 }
 
 bool interface_supports_arrlike(const StringData* s) {
-  return (s->isame(s_HH_Traversable.get()) ||
-          s->isame(s_HH_KeyedTraversable.get()) ||
-          s->isame(s_HH_RX_Traversable.get()) ||
-          s->isame(s_HH_RX_KeyedTraversable.get()) ||
-          s->isame(s_HH_Container.get()) ||
-          s->isame(s_HH_KeyedContainer.get()) ||
-          s->isame(s_XHPChild.get()));
+  return interface_supports_arrlike(s->slice());
 }
 
-bool interface_supports_arrlike(const std::string& n) {
-  const char* s = n.c_str();
-  return ((n.size() == 14 && !strcasecmp(s, "HH\\Traversable")) ||
-          (n.size() == 19 && !strcasecmp(s, "HH\\KeyedTraversable")) ||
-          (n.size() == 17 && !strcasecmp(s, "HH\\Rx\\Traversable")) ||
-          (n.size() == 22 && !strcasecmp(s, "HH\\Rx\\KeyedTraversable")) ||
-          (n.size() == 12 && !strcasecmp(s, "HH\\Container")) ||
-          (n.size() == 17 && !strcasecmp(s, "HH\\KeyedContainer")) ||
-          (n.size() == 8 && !strcasecmp(s, "XHPChild")));
+bool interface_supports_arrlike(folly::StringPiece s) {
+  return isame(s, s_HH_Traversable.slice()) ||
+         isame(s, s_HH_KeyedTraversable.slice()) ||
+         isame(s, s_HH_RX_Traversable.slice()) ||
+         isame(s, s_HH_RX_KeyedTraversable.slice()) ||
+         isame(s, s_HH_Container.slice()) ||
+         isame(s, s_HH_KeyedContainer.slice()) ||
+         isame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_string(const StringData* s) {
-  return s->isame(s_XHPChild.get())
-    || s->isame(s_Stringish.get());
+  return interface_supports_string(s->slice());
 }
 
-bool interface_supports_string(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"))
-    || (n.size() == 9 && !strcasecmp(s, "Stringish"));
+bool interface_supports_string(folly::StringPiece s) {
+  return isame(s, s_XHPChild.slice()) ||
+         isame(s, s_Stringish.slice());
 }
 
 bool interface_supports_int(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
+  return interface_supports_int(s->slice());
 }
 
-bool interface_supports_int(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+bool interface_supports_int(folly::StringPiece s) {
+  return isame(s, s_XHPChild.slice());
 }
 
 bool interface_supports_double(const StringData* s) {
-  return (s->isame(s_XHPChild.get()));
+  return interface_supports_double(s->slice());
 }
 
-bool interface_supports_double(const std::string& n) {
-  const char *s = n.c_str();
-  return (n.size() == 8 && !strcasecmp(s, "XHPChild"));
+bool interface_supports_double(folly::StringPiece s) {
+  return isame(s, s_XHPChild.slice());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

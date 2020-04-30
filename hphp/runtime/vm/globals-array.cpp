@@ -129,12 +129,14 @@ GlobalsArray::ExistsStr(const ArrayData* ad, const StringData* k) {
   return asGlobals(ad)->m_tab->lookup(k) != nullptr;
 }
 
-tv_rval GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
-  return asGlobals(ad)->m_tab->lookup(k);
+TypedValue GlobalsArray::NvGetStr(const ArrayData* ad, const StringData* k) {
+  auto const result = asGlobals(ad)->m_tab->lookup(k);
+  return result ? *result : make_tv<KindOfUninit>();
 }
 
-tv_rval GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
-  return asGlobals(ad)->m_tab->lookup(String(k).get());
+TypedValue GlobalsArray::NvGetInt(const ArrayData* ad, int64_t k) {
+  auto const result = asGlobals(ad)->m_tab->lookup(String(k).get());
+  return result ? *result : make_tv<KindOfUninit>();
 }
 
 ssize_t GlobalsArray::NvGetStrPos(const ArrayData* ad, const StringData* k) {

@@ -83,24 +83,18 @@ ETCH_LABEL(cmphash\MANGLED_NAME):
         cmp       %rsi, %r11            // Same pointer?
         jne       ETCH_LABEL(cmplength\MANGLED_NAME)
 ETCH_LABEL(found\MANGLED_NAME):
-#ifdef HHVM_WIDE_TV_VAL
-        lea       \ELM_TYPE(%r8), %rax
-        lea       \ELM_DATA(%r8), %rdx
-#else
-        lea       \ELM_DATA(%r8), %rax
-#endif
+        mov       \ELM_DATA(%r8), %rax
+        mov       \ELM_TYPE(%r8), %rdx
         pop       %rbx
         ret
 
 ETCH_LABEL(fail\MANGLED_NAME):
 /*
  * Use the PF to distinguish between EMPTY and TOMBSTONE.
+ * If the element is missing, we only need to clear the type register.
  */
         jnp       ETCH_LABEL(nextprobe\MANGLED_NAME) // Tombstone
-        xor       %eax, %eax
-#ifdef HHVM_WIDE_TV_VAL
         xor       %edx, %edx
-#endif
         pop       %rbx
         ret
 
@@ -138,13 +132,8 @@ ETCH_LABEL(tail\MANGLED_NAME):                       // assert(ecx >= 0)
         pop       %rdx
         pop       %rdi
         jnz       ETCH_LABEL(nextprobe\MANGLED_NAME)
-
-#ifdef HHVM_WIDE_TV_VAL
-        lea       \ELM_TYPE(%r8), %rax
-        lea       \ELM_DATA(%r8), %rdx
-#else
-        lea       \ELM_DATA(%r8), %rax
-#endif
+        mov       \ELM_DATA(%r8), %rax
+        mov       \ELM_TYPE(%r8), %rdx
         pop       %rbx
         ret
 

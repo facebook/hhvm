@@ -237,20 +237,20 @@ inline TypedValue ElemArray(ArrayData* base, key_type<keyType> key) {
  * Elem when base is a Vec
  */
 template<MOpMode mode>
-inline tv_rval ElemVecPre(ArrayData* base, int64_t key) {
+inline TypedValue ElemVecPre(ArrayData* base, int64_t key) {
   return PackedArray::NvGetIntVec(base, key);
 }
 
 template<MOpMode mode>
-inline tv_rval ElemVecPre(ArrayData* base, StringData* key) {
+inline TypedValue ElemVecPre(ArrayData* base, StringData* key) {
   if (mode == MOpMode::Warn || mode == MOpMode::InOut) {
     throwInvalidArrayKeyException(key, base);
   }
-  return tv_rval{};
+  return make_tv<KindOfUninit>();
 }
 
 template<MOpMode mode>
-inline tv_rval ElemVecPre(ArrayData* base, TypedValue key) {
+inline TypedValue ElemVecPre(ArrayData* base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemVecPre<mode>(base, key.m_data.num);
   if (isStringType(dt)) return ElemVecPre<mode>(base, key.m_data.pstr);
@@ -261,26 +261,26 @@ template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemVec(ArrayData* base, key_type<keyType> key) {
   assertx(base->isVecArrayKind());
   auto const result = ElemVecPre<mode>(base, key);
-  if (UNLIKELY(!result)) {
+  if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
     throwOOBArrayKeyException(key, base);
   }
   assertx(result.type() != KindOfUninit);
-  return *result;
+  return result;
 }
 
 /**
  * Elem when base is a Dict
  */
-inline tv_rval ElemDictPre(ArrayData* base, int64_t key) {
+inline TypedValue ElemDictPre(ArrayData* base, int64_t key) {
   return MixedArray::NvGetIntDict(base, key);
 }
 
-inline tv_rval ElemDictPre(ArrayData* base, StringData* key) {
+inline TypedValue ElemDictPre(ArrayData* base, StringData* key) {
   return MixedArray::NvGetStrDict(base, key);
 }
 
-inline tv_rval ElemDictPre(ArrayData* base, TypedValue key) {
+inline TypedValue ElemDictPre(ArrayData* base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemDictPre(base, key.m_data.num);
   if (isStringType(dt)) return ElemDictPre(base, key.m_data.pstr);
@@ -294,7 +294,7 @@ inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
   static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
   static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
   auto const result = ElemDictPre(base, key);
-  if (UNLIKELY(!result)) {
+  if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
     assertx(IMPLIES(base->isDictType(), base->isDictKind()));
     if (base->isDictKind()) {
@@ -304,21 +304,21 @@ inline TypedValue ElemDict(ArrayData* base, key_type<keyType> key) {
     }
   }
   assertx(result.type() != KindOfUninit);
-  return *result;
+  return result;
 }
 
 /**
  * Elem when base is a Keyset
  */
-inline tv_rval ElemKeysetPre(ArrayData* base, int64_t key) {
+inline TypedValue ElemKeysetPre(ArrayData* base, int64_t key) {
   return SetArray::NvGetInt(base, key);
 }
 
-inline tv_rval ElemKeysetPre(ArrayData* base, StringData* key) {
+inline TypedValue ElemKeysetPre(ArrayData* base, StringData* key) {
   return SetArray::NvGetStr(base, key);
 }
 
-inline tv_rval ElemKeysetPre(ArrayData* base, TypedValue key) {
+inline TypedValue ElemKeysetPre(ArrayData* base, TypedValue key) {
   auto const dt = key.m_type;
   if (isIntType(dt))    return ElemKeysetPre(base, key.m_data.num);
   if (isStringType(dt)) return ElemKeysetPre(base, key.m_data.pstr);
@@ -329,12 +329,12 @@ template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemKeyset(ArrayData* base, key_type<keyType> key) {
   assertx(base->isKeysetKind());
   auto result = ElemKeysetPre(base, key);
-  if (UNLIKELY(!result)) {
+  if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
     throwOOBArrayKeyException(key, base);
   }
   assertx(isIntType(result.type()) || isStringType(result.type()));
-  return *result;
+  return result;
 }
 
 /**

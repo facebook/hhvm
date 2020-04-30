@@ -587,7 +587,7 @@ bool SetArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  return NvGetStr(ad, k).is_set();
+  return NvGetStr(ad, k).is_init();
 }
 
 arr_lval SetArray::LvalInt(ArrayData*, int64_t) {
@@ -896,9 +896,9 @@ bool SetArray::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
       auto& elm = elms[i];
       if (UNLIKELY(elm.isTombstone())) continue;
       if (elm.hasIntKey()) {
-        if (!NvGetInt(ad2, elm.intKey())) return false;
+        if (!ExistsInt(ad2, elm.intKey())) return false;
       } else {
-        if (!NvGetStr(ad2, elm.strKey())) return false;
+        if (!ExistsStr(ad2, elm.strKey())) return false;
       }
     }
   }

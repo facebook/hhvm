@@ -49,11 +49,11 @@ struct MixedArray;
 struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static void Release(ArrayData*);
 
-  static tv_rval NvGetInt(const ArrayData*, int64_t) {
-    return nullptr;
+  static TypedValue NvGetInt(const ArrayData*, int64_t) {
+    return make_tv<KindOfUninit>();
   }
-  static tv_rval NvGetStr(const ArrayData*, const StringData*) {
-    return nullptr;
+  static TypedValue NvGetStr(const ArrayData*, const StringData*) {
+    return make_tv<KindOfUninit>();
   }
 
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t) {

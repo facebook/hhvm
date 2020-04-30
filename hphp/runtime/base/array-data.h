@@ -830,8 +830,8 @@ struct ArrayFunctions {
   static auto const NK = size_t{ArrayData::kNumKinds};
 
   void (*release[NK])(ArrayData*);
-  tv_rval (*nvGetInt[NK])(const ArrayData*, int64_t k);
-  tv_rval (*nvGetStr[NK])(const ArrayData*, const StringData* k);
+  TypedValue (*nvGetInt[NK])(const ArrayData*, int64_t k);
+  TypedValue (*nvGetStr[NK])(const ArrayData*, const StringData* k);
   ssize_t (*nvGetIntPos[NK])(const ArrayData*, int64_t k);
   ssize_t (*nvGetStrPos[NK])(const ArrayData*, const StringData* k);
   TypedValue (*getPosKey[NK])(const ArrayData*, ssize_t pos);

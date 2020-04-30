@@ -247,8 +247,8 @@ struct HashTable : HashTableCommon {
   // Non variant interface
   /////////////////////////////////////////////////////////////////////////////
 
-  static tv_rval NvGetInt(const ArrayData* ad, int64_t k);
-  static tv_rval NvGetStr(const ArrayData* ad, const StringData* k);
+  static TypedValue NvGetInt(const ArrayData* ad, int64_t k);
+  static TypedValue NvGetStr(const ArrayData* ad, const StringData* k);
 
   static ssize_t NvGetIntPos(const ArrayData* ad, int64_t k);
   static ssize_t NvGetStrPos(const ArrayData* ad, const StringData* k);

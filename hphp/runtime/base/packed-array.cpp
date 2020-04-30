@@ -109,9 +109,9 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   // packed arrays.
   if (false) {
     for (uint32_t i = 0; i < arr->m_size; ++i) {
-      auto const DEBUG_ONLY rval = NvGetInt(arr, i);
-      assertx(type(rval) != KindOfUninit);
-      assertx(tvIsPlausible(*rval));
+      auto const DEBUG_ONLY tv = NvGetInt(arr, i);
+      assertx(tv.is_init());
+      assertx(tvIsPlausible(tv));
     }
   }
   return true;
@@ -644,15 +644,15 @@ void PackedArray::ReleaseUncounted(ArrayData* ad) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-tv_rval PackedArray::NvGetInt(const ArrayData* ad, int64_t k) {
+TypedValue PackedArray::NvGetInt(const ArrayData* ad, int64_t k) {
   assertx(checkInvariants(ad));
-  return LIKELY(size_t(k) < ad->m_size) ? &packedData(ad)[k] : nullptr;
+  return LIKELY(size_t(k) < ad->m_size) ? packedData(ad)[k]
+                                        : make_tv<KindOfUninit>();
 }
 
-tv_rval
-PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
+TypedValue PackedArray::NvGetStr(const ArrayData* ad, const StringData* /*s*/) {
   assertx(checkInvariants(ad));
-  return nullptr;
+  return make_tv<KindOfUninit>();
 }
 
 ssize_t PackedArray::NvGetIntPos(const ArrayData* ad, int64_t k) {

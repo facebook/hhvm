@@ -308,19 +308,15 @@ inline arr_lval ArrayData::lval(TypedValue k) {
 }
 
 inline TypedValue ArrayData::get(int64_t k, bool error) const {
-  // TODO(kshaunak): Have nvGetInt return TypedValue instead of tv_rval.
   auto const result = g_array_funcs.nvGetInt[kind()](this, k);
-  if (result) return *result;
-  if (error) getNotFound(k);
-  return make_tv<KindOfUninit>();
+  if (error && !result.is_init()) getNotFound(k);
+  return result;
 }
 
 inline TypedValue ArrayData::get(const StringData* k, bool error) const {
-  // TODO(kshaunak): Have nvGetStr return TypedValue instead of tv_rval.
   auto const result = g_array_funcs.nvGetStr[kind()](this, k);
-  if (result) return *result;
-  if (error) getNotFound(k);
-  return make_tv<KindOfUninit>();
+  if (error && !result.is_init()) getNotFound(k);
+  return result;
 }
 
 inline TypedValue ArrayData::get(TypedValue k, bool error) const {

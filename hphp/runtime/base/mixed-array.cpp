@@ -869,7 +869,7 @@ bool MixedArray::ExistsInt(const ArrayData* ad, int64_t k) {
 }
 
 bool MixedArray::ExistsStr(const ArrayData* ad, const StringData* k) {
-  return NvGetStr(ad, k).is_set();
+  return NvGetStr(ad, k).is_init();
 }
 
 //=============================================================================
@@ -1845,7 +1845,7 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
     auto elm = arr1->data();
     for (auto i = arr1->m_used; i--; elm++) {
       if (UNLIKELY(elm->isTombstone())) continue;
-      auto const other_rval = [&] {
+      auto const other_tv = [&] {
         if (elm->hasIntKey()) {
           return NvGetIntDict(ad2, elm->ikey);
         } else {
@@ -1853,9 +1853,9 @@ bool MixedArray::DictEqualHelper(const ArrayData* ad1, const ArrayData* ad2,
           return NvGetStrDict(ad2, elm->skey);
         }
       }();
-      if (!other_rval ||
+      if (!other_tv.is_init() ||
           !tvEqual(tvAssertPlausible(elm->data),
-                     tvAssertPlausible(other_rval.tv()))) {
+                   tvAssertPlausible(other_tv))) {
         return false;
       }
     }

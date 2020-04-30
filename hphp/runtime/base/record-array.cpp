@@ -157,10 +157,10 @@ void RecordArray::updateField(StringData* key, TypedValue val, Slot idx) {
   }
 }
 
-tv_rval RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
+TypedValue RecordArray::NvGetStr(const ArrayData* base, const StringData* key) {
   auto const ra = asRecordArray(base);
   auto const idx = ra->record()->lookupField(key);
-  if (idx != kInvalidSlot) return ra->rvalAt(idx);
+  if (idx != kInvalidSlot) return *ra->rvalAt(idx);
   auto const extra = ra->extraFieldMap();
   return MixedArray::NvGetStr(extra, key);
 }
@@ -246,10 +246,10 @@ MixedArray* RecordArray::ToMixed(const ArrayData* adIn) {
   return ad;
 }
 
-tv_rval RecordArray::NvGetInt(const ArrayData*, int64_t key) {
+TypedValue RecordArray::NvGetInt(const ArrayData*, int64_t key) {
   // RecordArrays may never have int keys.
   // Setting int keys escalate them to mixed arrays
-  return nullptr;
+  return make_tv<KindOfUninit>();
 }
 
 namespace {

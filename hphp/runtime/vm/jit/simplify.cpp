@@ -3076,8 +3076,8 @@ SSATmp* hackArrGetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) {
-      if (rval) return cns(env, rval.tv());
+    [&] (TypedValue tv) {
+      if (tv.is_init()) return cns(env, tv);
       gen(env, ThrowOutOfBounds, inst->taken(), inst->src(0), inst->src(1));
       return cns(env, TBottom);
     }
@@ -3090,8 +3090,8 @@ SSATmp* hackArrGetQuietImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) {
-      return rval ? cns(env, rval.tv()) : cns(env, TInitNull);
+    [&] (TypedValue tv) {
+      return tv.is_init() ? cns(env, tv) : cns(env, TInitNull);
     }
   );
 }
@@ -3102,7 +3102,7 @@ SSATmp* hackArrIssetImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) { return cns(env, rval && !tvIsNull(rval.tv())); }
+    [&] (TypedValue tv) { return cns(env, tvIsNull(tv)); }
   );
 }
 
@@ -3112,7 +3112,7 @@ SSATmp* hackArrIdxImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) { return rval ? cns(env, rval.tv()) : inst->src(2); }
+    [&] (TypedValue tv) { return tv.is_init() ? cns(env, tv) : inst->src(2); }
   );
 }
 
@@ -3122,7 +3122,7 @@ SSATmp* hackArrAKExistsImpl(State& env, const IRInstruction* inst,
   return hackArrQueryImpl(
     env, inst,
     getInt, getStr,
-    [&] (tv_rval rval) { return cns(env, !!rval); }
+    [&] (TypedValue tv) { return cns(env, tv.is_init()); }
   );
 }
 
@@ -3392,12 +3392,9 @@ SSATmp* packedLayoutLoadImpl(State& env,
     auto const arr = src0->arrLikeVal();
     auto const idx = src1->intVal();
     assertx(arr->hasVanillaPackedLayout());
-    if (idx >= 0) {
-      auto const rval = isVec
-        ? PackedArray::NvGetIntVec(arr, idx)
-        : PackedArray::NvGetInt(arr, idx);
-      return rval ? cns(env, rval.tv()) : nullptr;
-    }
+    auto const tv = isVec ? PackedArray::NvGetIntVec(arr, idx)
+                          : PackedArray::NvGetInt(arr, idx);
+    return tv.is_init() ? cns(env, tv) : nullptr;
   }
   return nullptr;
 }

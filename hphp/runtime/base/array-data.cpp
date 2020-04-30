@@ -316,11 +316,11 @@ const ArrayFunctions g_array_funcs = {
   DISPATCH(Release)
 
   /*
-   * tv_rval NvGetInt(const ArrayData*, int64_t key)
-   * tv_rval NvGetStr(const ArrayData*, const StringData*)
+   * TypedValue NvGetInt(const ArrayData*, int64_t key)
+   * TypedValue NvGetStr(const ArrayData*, const StringData*)
    *
-   *   Lookup a value in an array using an int or string key. Returns a null
-   *   tv_rval if the element is not present in the array.
+   *   Lookup a value in an array using an int or string key. Returns Uninit if
+   *   the key is not in the array. This method does not inc-ref the result.
    */
   DISPATCH(NvGetInt)
   DISPATCH(NvGetStr)

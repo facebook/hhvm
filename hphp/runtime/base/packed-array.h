@@ -66,8 +66,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static void RegisterUncountedAllocations(ArrayData* ad,
                                            APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
-  static tv_rval NvGetInt(const ArrayData*, int64_t ki);
-  static tv_rval NvGetStr(const ArrayData*, const StringData*);
+  static TypedValue NvGetInt(const ArrayData*, int64_t ki);
+  static TypedValue NvGetStr(const ArrayData*, const StringData*);
   static ssize_t NvGetIntPos(const ArrayData*, int64_t k);
   static constexpr auto NvGetIntPosVec = &NvGetIntPos;
   static ssize_t NvGetStrPos(const ArrayData*, const StringData* k);

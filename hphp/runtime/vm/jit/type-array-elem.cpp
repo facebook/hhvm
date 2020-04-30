@@ -173,11 +173,8 @@ std::pair<Type, bool> vecElemType(Type arr, Type idx, const Class* ctx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal()) {
-      auto const idxVal = idx.intVal();
-      if (idxVal >= 0 && idxVal < arr.vecVal()->size()) {
-        auto const rval = PackedArray::NvGetIntVec(arr.vecVal(), idxVal);
-        return {Type::cns(rval.tv()), true};
-      }
+      auto const tv = PackedArray::NvGetIntVec(arr.vecVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
@@ -235,16 +232,12 @@ std::pair<Type, bool> dictElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const idxVal = idx.intVal();
-      auto const rval = MixedArray::NvGetIntDict(arr.dictVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = MixedArray::NvGetIntDict(arr.vecVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
-    }
-
-    if (idx.hasConstVal(TStr)) {
-      auto const idxVal = idx.strVal();
-      auto const rval = MixedArray::NvGetStrDict(arr.dictVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+    } else if (idx.hasConstVal(TStr)) {
+      auto const tv = MixedArray::NvGetStrDict(arr.vecVal(), idx.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 
@@ -278,16 +271,12 @@ std::pair<Type, bool> keysetElemType(Type arr, Type idx) {
     // If both the array and idx are known statically, we can resolve it to the
     // precise type.
     if (idx.hasConstVal(TInt)) {
-      auto const idxVal = idx.intVal();
-      auto const rval = SetArray::NvGetInt(arr.keysetVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+      auto const tv = SetArray::NvGetInt(arr.vecVal(), idx.intVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
-    }
-
-    if (idx.hasConstVal(TStr)) {
-      auto const idxVal = idx.strVal();
-      auto const rval = SetArray::NvGetStr(arr.keysetVal(), idxVal);
-      if (rval) return {Type::cns(rval.tv()), true};
+    } else if (idx.hasConstVal(TStr)) {
+      auto const tv = SetArray::NvGetStr(arr.vecVal(), idx.strVal());
+      if (tv.is_init()) return {Type::cns(tv), true};
       return {TBottom, false};
     }
 

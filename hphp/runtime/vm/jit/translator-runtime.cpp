@@ -521,15 +521,14 @@ void VerifyReifiedReturnTypeImpl(TypedValue cell, ArrayData* ts) {
 namespace {
 
 ALWAYS_INLINE
-TypedValue getDefaultIfNullTV(tv_rval rval, const TypedValue& def) {
-  return UNLIKELY(!rval) ? def : rval.tv();
+TypedValue getDefaultIfMissing(TypedValue tv, TypedValue def) {
+  return tv.is_init() ? tv : def;
 }
 
 NEVER_INLINE
 TypedValue arrayIdxSSlow(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  auto const result = a->get(key);
-  return result.is_init() ? result : def;
+  return getDefaultIfMissing(a->get(key), def);
 }
 
 ALWAYS_INLINE
@@ -549,8 +548,7 @@ TypedValue doScan(const MixedArray* arr, StringData* key, TypedValue def) {
 
 TypedValue arrayIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isPHPArrayType());
-  auto const result = a->get(key);
-  return result.is_init() ? result : def;
+  return getDefaultIfMissing(a->get(key), def);
 }
 
 TypedValue arrayIdxS(ArrayData* a, StringData* key, TypedValue def) {
@@ -569,7 +567,7 @@ TypedValue arrayIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 TypedValue dictIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->hasVanillaMixedLayout());
   static_assert(MixedArray::NvGetInt == MixedArray::NvGetIntDict, "");
-  return getDefaultIfNullTV(MixedArray::NvGetIntDict(a, key), def);
+  return getDefaultIfMissing(MixedArray::NvGetIntDict(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
@@ -577,7 +575,7 @@ NEVER_INLINE
 TypedValue dictIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->hasVanillaMixedLayout());
   static_assert(MixedArray::NvGetStr == MixedArray::NvGetStrDict, "");
-  return getDefaultIfNullTV(MixedArray::NvGetStrDict(a, key), def);
+  return getDefaultIfMissing(MixedArray::NvGetStrDict(a, key), def);
 }
 
 // This helper is also used for MixedArrays.
@@ -591,12 +589,12 @@ TypedValue dictIdxScan(ArrayData* a, StringData* key, TypedValue def) {
 
 TypedValue keysetIdxI(ArrayData* a, int64_t key, TypedValue def) {
   assertx(a->isKeysetKind());
-  return getDefaultIfNullTV(SetArray::NvGetInt(a, key), def);
+  return getDefaultIfMissing(SetArray::NvGetInt(a, key), def);
 }
 
 TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
   assertx(a->isKeysetKind());
-  return getDefaultIfNullTV(SetArray::NvGetStr(a, key), def);
+  return getDefaultIfMissing(SetArray::NvGetStr(a, key), def);
 }
 
 template <bool isFirst>
@@ -604,7 +602,7 @@ TypedValue vecFirstLast(ArrayData* a) {
   assertx(a->isVecArrayKind() || a->isPackedKind());
   auto const size = a->getSize();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
-  return *PackedArray::NvGetIntVec(a, isFirst ? 0 : size - 1);
+  return PackedArray::NvGetIntVec(a, isFirst ? 0 : size - 1);
 }
 
 template TypedValue vecFirstLast<true>(ArrayData*);

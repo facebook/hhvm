@@ -364,8 +364,8 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       }();
 
       if (error) {
-        auto const name = tc.displayName().data();
-        raise_hackarr_compat_type_hint_param_notice(func, ad, name, i);
+        auto const name = tc.displayName();
+        raise_hackarr_compat_type_hint_param_notice(func, ad, name.data(), i);
       }
     };
 

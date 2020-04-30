@@ -2055,6 +2055,9 @@ function skip_test($options, $test): ?string {
         file_exists(dirname($test).'/'.$no_hhas_tag)) {
       return 'skip-nodumphhas';
     }
+    if (file_exists($test . ".verify")) {
+      return 'skip-verify';
+    }
   }
 
   if (has_multi_request_mode($options) || isset($options['repo']) ||

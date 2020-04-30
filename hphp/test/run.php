@@ -206,6 +206,11 @@ function error($message) {
   exit(1);
 }
 
+function success($message) {
+  print "$message\n";
+  exit(0);
+}
+
 // If a user-supplied path is provided, let's make sure we have a valid
 // executable.
 function check_executable($path, $typechecker) {
@@ -3208,7 +3213,7 @@ function main($argv) {
     error(help());
   }
   if (isset($options['list-tests'])) {
-    error(list_tests($files, $options));
+    success(list_tests($files, $options));
   }
 
   $tests = find_tests($files, $options);

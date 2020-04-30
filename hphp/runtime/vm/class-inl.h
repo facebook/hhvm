@@ -706,16 +706,6 @@ inline bool classHasPersistentRDS(const Class* cls) {
     rds::isPersistentHandle(cls->classHandle());
 }
 
-inline bool classMayHaveMagicPropMethods(const Class* cls) {
-  auto constexpr no_overrides =
-    AttrNoOverrideMagicGet |
-    AttrNoOverrideMagicSet |
-    AttrNoOverrideMagicIsset |
-    AttrNoOverrideMagicUnset;
-
-  return (cls->attrs() & no_overrides) != no_overrides;
-}
-
 inline const StringData* classToStringHelper(const Class* cls) {
  if (RuntimeOption::EvalRaiseClassConversionWarning) {
    raise_warning(Strings::CLASS_TO_STRING);

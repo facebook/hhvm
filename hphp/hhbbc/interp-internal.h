@@ -923,18 +923,12 @@ void killThisProps(ISS& env) {
 /*
  * This function returns a type that includes all the possible types
  * that could result from reading a property $this->name.
- *
- * Note that this may include types that the property itself cannot
- * actually contain, due to the effects of a possible __get function.
  */
 folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
   auto const elem = thisPropRaw(env, name);
   if (!elem) return folly::none;
-  if (elem->ty.couldBe(BUninit)) {
-    auto const rthis = thisType(env);
-    if (!is_specialized_obj(rthis) || dobj_of(rthis).cls.couldHaveMagicGet()) {
-      return TInitCell;
-    }
+  if (elem->ty.couldBe(BUninit) && !is_specialized_obj(thisType(env))) {
+    return TInitCell;
   }
   return to_cell(elem->ty);
 }

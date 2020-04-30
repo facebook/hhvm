@@ -581,26 +581,17 @@ struct ClassInfo {
   };
   MagicFnInfo
     magicCall,
-    magicGet,
-    magicSet,
-    magicIsset,
-    magicUnset,
     magicBool;
 };
 
 struct MagicMapInfo {
   StaticString name;
   ClassInfo::MagicFnInfo ClassInfo::*pmem;
-  Attr attrBit;
 };
 
 const MagicMapInfo magicMethods[] {
-  { StaticString{"__call"}, &ClassInfo::magicCall, AttrNone },
-  { StaticString{"__toBoolean"}, &ClassInfo::magicBool, AttrNone },
-  { StaticString{"__get"}, &ClassInfo::magicGet, AttrNoOverrideMagicGet },
-  { StaticString{"__set"}, &ClassInfo::magicSet, AttrNoOverrideMagicSet },
-  { StaticString{"__isset"}, &ClassInfo::magicIsset, AttrNoOverrideMagicIsset },
-  { StaticString{"__unset"}, &ClassInfo::magicUnset, AttrNoOverrideMagicUnset }
+  { StaticString{"__call"}, &ClassInfo::magicCall },
+  { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
 //////////////////////////////////////////////////////////////////////
 
@@ -793,15 +784,6 @@ bool Class::couldBeOverriden() const {
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
       return !(cinfo->cls->attrs & AttrNoOverride);
-    }
-  );
-}
-
-bool Class::couldHaveMagicGet() const {
-  return val.match(
-    [] (SString) { return true; },
-    [] (ClassInfo* cinfo) {
-      return cinfo->magicGet.derivedHas;
     }
   );
 }
@@ -2014,11 +1996,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     auto const attrsToRemove =
       AttrUnique |
       AttrPersistent |
-      AttrNoOverride |
-      AttrNoOverrideMagicGet |
-      AttrNoOverrideMagicSet |
-      AttrNoOverrideMagicIsset |
-      AttrNoOverrideMagicUnset;
+      AttrNoOverride;
     attribute_setter(c->attrs, false, attrsToRemove);
 
     // Manually set closure classes to be unique to maintain invariance.
@@ -3310,16 +3288,6 @@ void mark_no_override_classes(IndexData& index) {
     if (!(cinfo->cls->attrs & AttrInterface) &&
         cinfo->subclassList.size() == 1) {
       attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
-    }
-
-    for (const auto& mm : magicMethods) {
-      if (mm.attrBit == AttrNone) continue;
-      if (!(cinfo.get()->*mm.pmem).derivedHas) {
-        FTRACE(2, "Adding no-override of {} to {}\n",
-               mm.name.get()->data(),
-               cinfo->cls->name);
-        attribute_setter(cinfo->cls->attrs, true, mm.attrBit);
-      }
     }
   }
 }

@@ -249,12 +249,6 @@ struct Class {
 
   /*
    * Whether this class (or its subtypes) could possibly have have
-   * certain magic methods.
-   */
-  bool couldHaveMagicGet() const;
-
-  /*
-   * Whether this class (or its subtypes) could possibly have have
    * a magic toBoolean() method.
    */
   bool couldHaveMagicBool() const;

@@ -1643,10 +1643,6 @@ const StaticString
   s_construct("__construct"),
   s_invoke("__invoke"),
   s_sleep("__sleep"),
-  s_get("__get"),
-  s_set("__set"),
-  s_isset("__isset"),
-  s_unset("__unset"),
   s_debugInfo("__debugInfo"),
   s_clone("__clone");
 
@@ -2027,10 +2023,6 @@ void Class::setMethods() {
 void Class::setRTAttributes() {
   m_RTAttrs = 0;
   if (lookupMethod(s_sleep.get())) { m_RTAttrs |= Class::HasSleep; }
-  if (lookupMethod(s_get.get()  )) { m_RTAttrs |= Class::UseGet;   }
-  if (lookupMethod(s_set.get()  )) { m_RTAttrs |= Class::UseSet;   }
-  if (lookupMethod(s_isset.get())) { m_RTAttrs |= Class::UseIsset; }
-  if (lookupMethod(s_unset.get())) { m_RTAttrs |= Class::UseUnset; }
   if (lookupMethod(s_clone.get())) { m_RTAttrs |= Class::HasClone; }
 
   if ((isBuiltin() && Native::getNativePropHandler(name())) ||

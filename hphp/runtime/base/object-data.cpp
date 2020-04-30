@@ -382,7 +382,7 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
   }
 
   // Can't use propImpl here because if the property is not accessible and
-  // there is no magic __get, propImpl will raise_error("Cannot access ...",
+  // there is no native get, propImpl will raise_error("Cannot access ...",
   // but o_get will only (maybe) raise_notice("Undefined property ..." :-(
 
   auto const lookup = getPropImpl<false, true, true>(ctx, propName.get());
@@ -392,12 +392,6 @@ Variant ObjectData::o_get(const String& propName, bool error /* = true */,
     } else if (lookup.prop && (lookup.prop->attrs & AttrLateInit)) {
       if (error) throw_late_init_prop(lookup.prop->cls, propName.get(), false);
       return uninit_null();
-    }
-  }
-
-  if (m_cls->rtAttribute(Class::UseGet)) {
-    if (auto r = invokeGet(propName.get())) {
-      return std::move(tvAsVariant(&r.val));
     }
   }
 
@@ -425,30 +419,22 @@ void ObjectData::o_set(const String& propName, const Variant& v,
   }
 
   // Can't use setProp here because if the property is not accessible and
-  // there is no magic __set, setProp will raise_error("Cannot access ...",
-  // but o_set will skip writing and return normally. Also, if we try to
-  // invoke __set and fail due to recursion, setProp will fall back to writing
-  // the property normally, but o_set will just skip writing and return :-(
+  // there is no native set, setProp will raise_error("Cannot access ...",
+  // but o_set will skip writing and return normally.
 
-  auto const useSet = m_cls->rtAttribute(Class::UseSet);
   auto const lookup = getPropImpl<true, false, true>(ctx, propName.get());
   auto prop = lookup.val;
   if (prop && lookup.accessible) {
-    if (!useSet || type(prop) != KindOfUninit ||
-        (lookup.prop && (lookup.prop->attrs & AttrLateInit))) {
-      if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
-        throwMutateConstProp(lookup.slot);
-      }
-      auto val = tvToInit(*v.asTypedValue());
-      verifyTypeHint(m_cls, lookup.prop, &val);
-      tvSet(val, prop);
-      return;
+    if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
+      throwMutateConstProp(lookup.slot);
     }
+    auto val = tvToInit(*v.asTypedValue());
+    verifyTypeHint(m_cls, lookup.prop, &val);
+    tvSet(val, prop);
+    return;
   }
 
-  if (useSet) {
-    invokeSet(propName.get(), *v.asTypedValue());
-  } else if (!prop) {
+  if (!prop) {
     setDynProp(propName.get(), tvToInit(*v.asTypedValue()));
   }
 }
@@ -1007,10 +993,6 @@ int64_t ObjectData::compare(const ObjectData& other) const {
 ///////////////////////////////////////////////////////////////////////////////
 
 const StaticString
-  s___get("__get"),
-  s___set("__set"),
-  s___isset("__isset"),
-  s___unset("__unset"),
   s___sleep("__sleep"),
   s___toDebugDisplay("__toDebugDisplay"),
   s___wakeup("__wakeup"),
@@ -1214,156 +1196,6 @@ inline InvokeResult::InvokeResult(bool ok, Variant&& v) :
   val.m_aux.u_ok = ok;
 }
 
-struct PropAccessInfo {
-  struct Hash;
-
-  bool operator==(const PropAccessInfo& o) const {
-    return obj == o.obj && rt_attr == o.rt_attr && key->same(o.key);
-  }
-
-  ObjectData* obj;
-  const StringData* key;      // note: not necessarily static
-  Class::RuntimeAttribute rt_attr;
-};
-
-struct PropAccessInfo::Hash {
-  size_t operator()(PropAccessInfo const& info) const {
-    return hash_int64_pair(reinterpret_cast<intptr_t>(info.obj),
-                           info.key->hash() |
-                           (static_cast<int64_t>(info.rt_attr) << 32));
-  }
-};
-
-struct PropRecurInfo {
-  using RecurSet = req::fast_set<PropAccessInfo, PropAccessInfo::Hash>;
-  // activePropInfo optimizes the common non-recursive case, when our activeSet
-  // would only contain one entry. When we add a second entry, we start using
-  // activeSet.
-  const PropAccessInfo* activePropInfo{nullptr};
-  RecurSet activeSet;
-};
-
-namespace {
-
-/*
- * Recursion of magic property accessors is allowed, but if you
- * recurse on the same object, for the same property, for the same
- * kind of magic method, it doesn't actually enter the magic method
- * anymore.  This matches zend behavior.
- *
- * This means we need to track all active property getters and ensure
- * we aren't recursing for the same one.  Since most accesses to magic
- * property getters aren't going to recurse, we optimize for the case
- * where only a single getter is active.  If it recurses again, we
- * promote to a hash set to track all the information needed.
- *
- * The various invokeFoo functions are the entry points here.  They
- * require that the appropriate ObjectData::Attribute has been checked
- * first, and return false if they refused to run the magic method due
- * to a recursion error.
- */
-
-RDS_LOCAL(PropRecurInfo, propRecurInfo);
-
-template <class Invoker>
-InvokeResult
-magic_prop_impl(const StringData* /*key*/, const PropAccessInfo& info,
-                Invoker invoker) {
-  auto recur_info = propRecurInfo.get();
-  if (UNLIKELY(recur_info->activePropInfo != nullptr)) {
-    auto& activeSet = recur_info->activeSet;
-    if (activeSet.empty()) {
-      activeSet.insert(*recur_info->activePropInfo);
-    }
-    if (!activeSet.insert(info).second) {
-      // We're already running a magic method on the same type here.
-      return {false, make_tv<KindOfUninit>()};
-    }
-    SCOPE_EXIT {
-      activeSet.erase(info);
-    };
-
-    return {true, invoker()};
-  }
-
-  recur_info->activePropInfo = &info;
-  SCOPE_EXIT {
-    recur_info->activePropInfo = nullptr;
-    PropRecurInfo::RecurSet{}.swap(recur_info->activeSet);
-  };
-
-  return {true, invoker()};
-}
-
-// Helper for making invokers for the single-argument magic property
-// methods.  __set takes 2 args, so it uses its own function.
-struct MagicInvoker {
-  const StringData* magicFuncName;
-  const PropAccessInfo& info;
-
-  TypedValue operator()() const {
-    auto const meth = info.obj->getVMClass()->lookupMethod(magicFuncName);
-    TypedValue args[1] = {
-      make_tv<KindOfString>(const_cast<StringData*>(info.key))
-    };
-    return g_context->invokeMethod(info.obj, meth, folly::range(args), false);
-  }
-};
-
-}
-
-bool ObjectData::invokeSet(const StringData* key, TypedValue val) {
-  if (RuntimeOption::EvalNoUseMagicMethods) {
-    raise_warning("Setting property %s::%s via magic __set", this->getClassName().data(), key->data());
-  }
-  auto const info = PropAccessInfo { this, key, Class::UseSet };
-  auto r = magic_prop_impl(key, info, [&] {
-    auto const meth = m_cls->lookupMethod(s___set.get());
-    TypedValue args[2] = {
-      make_tv<KindOfString>(const_cast<StringData*>(key)),
-      val
-    };
-    return g_context->invokeMethod(this, meth, folly::range(args), false);
-  });
-  if (r) tvDecRefGen(r.val);
-  return r.ok();
-}
-
-InvokeResult ObjectData::invokeGet(const StringData* key) {
-  if (RuntimeOption::EvalNoUseMagicMethods) {
-    raise_warning("Accessing property %s::%s via magic __get", this->getClassName().data(), key->data());
-  }
-  auto const info = PropAccessInfo { this, key, Class::UseGet };
-  return magic_prop_impl(
-    key,
-    info,
-    MagicInvoker { s___get.get(), info }
-  );
-}
-
-InvokeResult ObjectData::invokeIsset(const StringData* key) {
-  if (RuntimeOption::EvalNoUseMagicMethods) {
-    raise_warning("Checking if property %s::%s is set via magic __isset", this->getClassName().data(), key->data());
-  }
-  auto const info = PropAccessInfo { this, key, Class::UseIsset };
-  return magic_prop_impl(
-    key,
-    info,
-    MagicInvoker { s___isset.get(), info }
-  );
-}
-
-bool ObjectData::invokeUnset(const StringData* key) {
-  if (RuntimeOption::EvalNoUseMagicMethods) {
-    raise_warning("Unsetting property %s::%s via magic __unset", this->getClassName().data(), key->data());
-  }
-  auto const info = PropAccessInfo { this, key, Class::UseUnset };
-  auto r = magic_prop_impl(key, info,
-                           MagicInvoker{s___unset.get(), info});
-  if (r) tvDecRefGen(r.val);
-  return r.ok();
-}
-
 static InvokeResult guardedNativePropResult(Variant result) {
   if (!Native::isPropHandled(result)) {
     return {false, make_tv<KindOfUninit>()};
@@ -1425,25 +1257,9 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
       // Property exists, is accessible, and is not unset.
       if (type(prop) != KindOfUninit) return checkConstProp();
 
-      // Property is unset, try __get.
-      if (m_cls->rtAttribute(Class::UseGet)) {
-        if (auto r = invokeGet(key)) {
-          tvCopy(r.val, *tvRef);
-          return tvRef;
-        }
-      }
-
       if (mode == PropMode::ReadWarn) raiseUndefProp(key);
       if (write) return checkConstProp();
       return const_cast<TypedValue*>(&immutable_null_base);
-    }
-
-    // Property is not accessible, try __get.
-    if (m_cls->rtAttribute(Class::UseGet)) {
-      if (auto r = invokeGet(key)) {
-        tvCopy(r.val, *tvRef);
-        return tvRef;
-      }
     }
 
     // Property exists, but it is either protected or private since accessible
@@ -1463,14 +1279,6 @@ tv_lval ObjectData::propImpl(TypedValue* tvRef, const Class* ctx,
   // First see if native getter is implemented.
   if (m_cls->rtAttribute(Class::HasNativePropHandler)) {
     if (auto r = invokeNativeGetProp(key)) {
-      tvCopy(r.val, *tvRef);
-      return tvRef;
-    }
-  }
-
-  // Next try calling user-level `__get` if it's used.
-  if (m_cls->rtAttribute(Class::UseGet)) {
-    if (auto r = invokeGet(key)) {
       tvCopy(r.val, *tvRef);
       return tvRef;
     }
@@ -1535,11 +1343,7 @@ bool ObjectData::propIsset(const Class* ctx, const StringData* key) {
     }
   }
 
-  if (!m_cls->rtAttribute(Class::UseIsset)) return false;
-  auto r = invokeIsset(key);
-  if (!r) return false;
-  tvCastToBooleanInPlace(&r.val);
-  return r.val.m_data.num;
+  return false;
 }
 
 void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
@@ -1550,19 +1354,14 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
   auto const prop = lookup.val;
 
   if (prop && lookup.accessible) {
-    if (type(prop) != KindOfUninit ||
-        !m_cls->rtAttribute(Class::UseSet) ||
-        (lookup.prop && (lookup.prop->attrs & AttrLateInit)) ||
-        !invokeSet(key, val)) {
-      if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
-        throwMutateConstProp(lookup.slot);
-      }
-      // TODO(T61738946): We can remove the temporary here once we no longer
-      // coerce class_meth types.
-      Variant tmp = tvAsVariant(&val);
-      verifyTypeHint(m_cls, lookup.prop, tmp.asTypedValue());
-      tvMove(tmp.detach(), prop);
+    if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
+      throwMutateConstProp(lookup.slot);
     }
+    // TODO(T61738946): We can remove the temporary here once we no longer
+    // coerce class_meth types.
+    Variant tmp = tvAsVariant(&val);
+    verifyTypeHint(m_cls, lookup.prop, tmp.asTypedValue());
+    tvMove(tmp.detach(), prop);
     return;
   }
 
@@ -1572,22 +1371,12 @@ void ObjectData::setProp(Class* ctx, const StringData* key, TypedValue val) {
     return;
   }
 
-  // Then go to user-level `__set`.
-  if (!m_cls->rtAttribute(Class::UseSet) || !invokeSet(key, val)) {
-    if (prop) {
-      /*
-       * Note: this differs from Zend right now in the case of a
-       * failed recursive __set.  In Zend, the __set is silently
-       * dropped, and the protected property is not modified.
-       */
-      raise_error("Cannot access protected property");
-    }
-    if (UNLIKELY(!*key->data())) {
-      throw_invalid_property_name(StrNR(key));
-    }
-    setDynProp(key, val);
-    return;
+  if (prop) raise_error("Cannot access protected property");
+
+  if (UNLIKELY(!*key->data())) {
+    throw_invalid_property_name(StrNR(key));
   }
+  setDynProp(key, val);
 }
 
 tv_lval ObjectData::setOpProp(TypedValue& tvRef,
@@ -1599,25 +1388,6 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
   auto prop = lookup.val;
 
   if (prop && lookup.accessible) {
-    if (type(prop) == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
-      if (auto r = invokeGet(key)) {
-        SCOPE_EXIT { tvDecRefGen(r.val); };
-        setopBody(&r.val, op, val);
-        if (m_cls->rtAttribute(Class::UseSet)) {
-          tvDup(tvAssertPlausible(r.val), tvRef);
-          if (invokeSet(key, tvAssertPlausible(tvRef))) {
-            return &tvRef;
-          }
-          tvRef.m_type = KindOfUninit;
-        }
-        if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
-          throwMutateConstProp(lookup.slot);
-        }
-        verifyTypeHint(m_cls, lookup.prop, tvAssertPlausible(&r.val));
-        tvDup(tvAssertPlausible(r.val), prop);
-        return prop;
-      }
-    }
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
@@ -1656,39 +1426,9 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
     // XXX else, write tvRef = null?
   }
 
-  auto const useSet = m_cls->rtAttribute(Class::UseSet);
-  auto const useGet = m_cls->rtAttribute(Class::UseGet);
-
-  if (useGet && !useSet) {
-    auto r = invokeGet(key);
-    if (!r) tvWriteNull(r.val);
-    SCOPE_EXIT { tvDecRefGen(r.val); };
-
-    setopBody(&r.val, op, val);
-
-    if (prop) raise_error("Cannot access protected property");
-    prop = makeDynProp(key);
-
-    // Normally this code path is defining a new dynamic property, but
-    // unlike the non-magic case below, we may have already created it
-    // under the recursion into invokeGet above, so we need to do a
-    // tvSet here.
-    tvSet(r.val, prop);
-    return prop;
-  }
-
-  if (useGet && useSet) {
-    if (auto r = invokeGet(key)) {
-      tvCopy(r.val, tvRef);
-      setopBody(&tvRef, op, val);
-      invokeSet(key, tvRef);
-      return &tvRef;
-    }
-  }
-
   if (prop) raise_error("Cannot access protected property");
 
-  // No visible/accessible property, and no applicable magic method:
+  // No visible/accessible property, and no applicable native method:
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   prop = makeDynProp(key);
@@ -1702,23 +1442,6 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
   auto prop = lookup.val;
 
   if (prop && lookup.accessible) {
-    if (type(prop) == KindOfUninit && m_cls->rtAttribute(Class::UseGet)) {
-      if (auto r = invokeGet(key)) {
-        SCOPE_EXIT { tvDecRefGen(r.val); };
-        auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
-        if (m_cls->rtAttribute(Class::UseSet)) {
-          invokeSet(key, tvAssertPlausible(r.val));
-          return dest;
-        }
-        if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
-          throwMutateConstProp(lookup.slot);
-        }
-        verifyTypeHint(m_cls, lookup.prop, tvAssertPlausible(&r.val));
-        tvCopy(tvAssertPlausible(r.val), prop);
-        tvWriteNull(r.val); // suppress decref
-        return dest;
-      }
-    }
     if (UNLIKELY(lookup.isConst) && !isBeingConstructed()) {
       throwMutateConstProp(lookup.slot);
     }
@@ -1771,37 +1494,9 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
     }
   }
 
-  auto const useSet = m_cls->rtAttribute(Class::UseSet);
-  auto const useGet = m_cls->rtAttribute(Class::UseGet);
-
-  if (useGet && !useSet) {
-    auto r = invokeGet(key);
-    if (!r) tvWriteNull(r.val);
-    SCOPE_EXIT { tvDecRefGen(r.val); };
-    auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
-    if (prop) raise_error("Cannot access protected property");
-    prop = makeDynProp(key);
-
-    // Normally this code path is defining a new dynamic property, but
-    // unlike the non-magic case below, we may have already created it
-    // under the recursion into invokeGet above, so we need to do a
-    // tvSet here.
-    tvSet(r.val, prop);
-    return dest;
-  }
-
-  if (useGet && useSet) {
-    if (auto r = invokeGet(key)) {
-      SCOPE_EXIT { tvDecRefGen(r.val); };
-      auto const dest = IncDecBody(op, tvAssertPlausible(&r.val));
-      invokeSet(key, tvAssertPlausible(r.val));
-      return dest;
-    }
-  }
-
   if (prop) raise_error("Cannot access protected property");
 
-  // No visible/accessible property, and no applicable magic method:
+  // No visible/accessible property, and no applicable native method:
   // create a new dynamic property.  (We know this is a new property,
   // or it would've hit the visible && accessible case above.)
   prop = makeDynProp(key);
@@ -1836,18 +1531,13 @@ void ObjectData::unsetProp(Class* ctx, const StringData* key) {
     return;
   }
 
-  auto const tryUnset = m_cls->rtAttribute(Class::UseUnset);
-
-  if (prop && !lookup.accessible && !tryUnset) {
+  if (prop && !lookup.accessible) {
     // Defined property that is not accessible.
     raise_error("Cannot unset inaccessible property");
   }
 
-  if (!tryUnset || !invokeUnset(key)) {
-    if (UNLIKELY(!*key->data())) {
-      throw_invalid_property_name(StrNR(key));
-    }
-    return;
+  if (UNLIKELY(!*key->data())) {
+    throw_invalid_property_name(StrNR(key));
   }
 }
 

@@ -53,12 +53,6 @@ enum Attr {
   AttrProtected            = (1u <<  2), //       |    X     |    X    //
   AttrPrivate              = (1u <<  3), //       |    X     |    X    //
                                          //       |          |         //
-  // No-override bits for magic class methods.  If set, the class does not
-  // define that magic function, and neither does any derived class.  Note that
-  // the bit for __unset is further down due to Attr-sharing across types.
-  AttrNoOverrideMagicGet   = (1u <<  1), //   X   |          |         //
-  AttrNoOverrideMagicSet   = (1u <<  2), //   X   |          |         //
-  AttrNoOverrideMagicIsset = (1u <<  3), //   X   |          |         //
   // N.B.: AttrEnum and AttrStatic overlap! But they can't be set on the
   // same things.
   // Is this class an enum?
@@ -100,8 +94,6 @@ enum Attr {
                                          //       |          |         //
   // Indicates that this function should be ignored in backtraces.     //
   AttrNoInjection          = (1u <<  9), //       |          |    X    //
-  // Indicates a class has no derived classes that have a magic __unset method.
-  AttrNoOverrideMagicUnset = (1u <<  9), //   X   |          |         //
                                          //       |          |         //
   // Indicates this property's initial value satisfies its type-constraint and
   // no runtime check needs to be done.

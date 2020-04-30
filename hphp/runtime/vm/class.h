@@ -159,10 +159,6 @@ struct Class : AtomicCountable {
     HasClone             = 0x04, // defines __clone PHP method; only valid
                                  // when !isCppBuiltin()
     HasNativePropHandler = 0x08, // class has native magic props handler
-    UseSet               = 0x10, // __set()
-    UseGet               = 0x20, // __get()
-    UseIsset             = 0x40, // __isset()
-    UseUnset             = 0x80, // __unset()
   };
 
   /*
@@ -1828,11 +1824,6 @@ bool isNormalClass(const Class* cls);
  * allocate the handle before we loaded the class.
  */
 bool classHasPersistentRDS(const Class* cls);
-
-/*
- * Returns whether cls or any of its children may have magic property methods.
- */
-bool classMayHaveMagicPropMethods(const Class* cls);
 
 /*
  * Convert a class pointer where a string is needed in some context. A warning

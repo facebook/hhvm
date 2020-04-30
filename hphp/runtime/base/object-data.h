@@ -528,10 +528,6 @@ struct ObjectData : Countable, type_scan::MarkCollectable<ObjectData> {
 
   void setDynProp(const StringData* key, TypedValue val);
 
-  bool invokeSet(const StringData* key, TypedValue val);
-  InvokeResult invokeGet(const StringData* key);
-  InvokeResult invokeIsset(const StringData* key);
-  bool invokeUnset(const StringData* key);
   InvokeResult invokeNativeGetProp(const StringData* key);
   bool invokeNativeSetProp(const StringData* key, TypedValue val);
   InvokeResult invokeNativeIssetProp(const StringData* key);

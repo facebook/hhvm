@@ -220,7 +220,6 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
   if (!base->isA(TObj) || !base->type().clsSpec().cls()) return false;
 
   auto cls = base->type().clsSpec().cls();
-  auto propType = TCell;
   auto isDeclared = false;
   auto propClass = cls;
 
@@ -233,13 +232,7 @@ bool prop_ignores_tvref(IRGS& env, SSATmp* base, const SSATmp* key) {
       isDeclared = true;
       auto const& prop = cls->declProperties()[lookup.slot];
       propClass = prop.cls;
-      propType = knownTypeForProp(prop, cls, curClass(env), true);
     }
-  }
-
-  // Magic getters/setters use tvRef if the property is unset.
-  if (classMayHaveMagicPropMethods(cls) && propType.maybe(TUninit)) {
-    return false;
   }
 
   // Native prop handlers never kick in for declared properties, even if
@@ -343,21 +336,6 @@ bool baseMightPromote(const SSATmp* base) {
     ty.maybe(TNull) ||
     ty.maybe(Type::cns(false)) ||
     ty.maybe(Type::cns(staticEmptyString()));
-}
-
-bool mightCallMagicPropMethod(MOpMode mode, PropInfo propInfo) {
-  if (!propInfo.knownType.maybe(TUninit)) return false;
-  auto const cls = propInfo.objClass;
-  if (!cls) return true;
-  // NB: this function can't yet be used for unset or isset contexts.  Just get
-  // and set.
-  auto const relevant_attrs =
-    // Magic getters can be invoked both in define contexts and non-define
-    // contexts.
-    AttrNoOverrideMagicGet |
-    // But magic setters are only possible in define contexts.
-    (mode == MOpMode::Define ? AttrNoOverrideMagicSet : AttrNone);
-  return (cls->attrs() & relevant_attrs) != relevant_attrs;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -920,12 +898,7 @@ SSATmp* emitIncDecProp(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
 
-  if (RuntimeOption::RepoAuthoritative &&
-      propInfo &&
-      !propInfo->isConst &&
-      !mightCallMagicPropMethod(MOpMode::None, *propInfo) &&
-      !mightCallMagicPropMethod(MOpMode::Define, *propInfo)) {
-
+  if (propInfo && !propInfo->isConst) {
     // Special case for when the property is known to be an int.
     if (base->isA(TObj) && propInfo->knownType <= TInt) {
       base = emitPropSpecialized(env, base, key, false,
@@ -1247,10 +1220,7 @@ SSATmp* propImpl(IRGS& env, MOpMode mode, SSATmp* key, bool nullsafe) {
 
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
-  if (!propInfo ||
-      propInfo->isConst ||
-      mode == MOpMode::Unset ||
-      mightCallMagicPropMethod(mode, *propInfo)) {
+  if (!propInfo || propInfo->isConst || mode == MOpMode::Unset) {
     return propGenericImpl(env, mode, base, key, nullsafe);
   }
 
@@ -1509,9 +1479,7 @@ SSATmp* cGetPropImpl(IRGS& env, SSATmp* base, SSATmp* key,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
 
-  if (propInfo &&
-      !mightCallMagicPropMethod(MOpMode::None, *propInfo)) {
-
+  if (propInfo) {
     auto propAddr =
       emitPropSpecialized(env, base, key, nullsafe, mode, *propInfo).first;
     auto const ty = propAddr->type().deref();
@@ -1585,10 +1553,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), true);
 
-  if (propInfo &&
-      !propInfo->isConst &&
-      !mightCallMagicPropMethod(mode, *propInfo)) {
-
+  if (propInfo && !propInfo->isConst) {
     SSATmp* propPtr;
     SSATmp* obj;
     std::tie(propPtr, obj) = emitPropSpecialized(
@@ -2137,10 +2102,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
   auto const propInfo =
     getCurrentPropertyOffset(env, base, key->type(), false);
 
-  if (propInfo &&
-      !propInfo->isConst &&
-      !mightCallMagicPropMethod(MOpMode::Define, *propInfo)) {
-
+  if (propInfo && !propInfo->isConst) {
     SSATmp* propPtr;
     SSATmp* obj;
     std::tie(propPtr, obj) = emitPropSpecialized(

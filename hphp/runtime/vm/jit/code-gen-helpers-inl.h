@@ -113,6 +113,18 @@ inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vreg s1) {
   return sf;
 }
 
+inline Vreg emitCmpRefCount(Vout& v, Immed s0, Vptr m) {
+  auto const sf = v.makeReg();
+
+  if (one_bit_refcount) {
+    v << cmpbim{s0, m + FAST_REFCOUNT_OFFSET, sf};
+  } else {
+    v << cmplim{s0, m + FAST_REFCOUNT_OFFSET, sf};
+  }
+
+  return sf;
+}
+
 inline void emitStoreRefCount(Vout& v, Immed s0, Vreg s1) {
   emitStoreRefCount(v, s0, *s1);
 }

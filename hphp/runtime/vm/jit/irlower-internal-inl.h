@@ -139,6 +139,12 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     always_assert(false && "unexpected guard on specialized Resource");
   }
 
+  if (type <= TStaticStr) {
+    auto const sf = emitCmpRefCount(v, StaticValue, dataSrc);
+    doJcc(CC_E, sf);
+    return;
+  }
+
   if (type < TObj || type < TCls) {
     // Emit the specific class test.
     assertx(type.clsSpec());
@@ -153,33 +159,34 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
       v << cmpq{v.cns(type.clsSpec().cls()), data, sf};
     }
     doJcc(CC_E, sf);
-  } else {
-    auto const arrSpec = type.arrSpec();
-    assertx(!arrSpec.type());
-
-    auto const r = materialize(v, dataSrc);
-    if (arrSpec.dvarray()) {
-      using AK = ArrayData::ArrayKind;
-      auto const kind = arrSpec.kind();
-      assertx(kind && (*kind == AK::kPackedKind || *kind == AK::kMixedKind));
-      auto const mask = *kind == AK::kPackedKind ? ArrayData::kVArray
-                                                 : ArrayData::kDArray;
-      // WARNING(kshaunak): We're using the fact that testing the DV array bit
-      // also gives us the kind here. That logic may not apply to bespokes...
-      v << testbim{mask, r[ArrayData::offsetofDVArray()], sf};
-      return doJcc(CC_NE, sf);
-    }
-
-    if (arrSpec.kind()) {
-      assertx(type < TArr);
-      v << cmpbim{*arrSpec.kind(), r[HeaderKindOffset], sf};
-    } else {
-      assertx(arrSpec.vanilla());
-      assertx(RO::EvalAllowBespokeArrayLikes);
-      v << testbim{ArrayData::kIsBespoke, r[ArrayData::offsetofDVArray()], sf};
-    }
-    doJcc(CC_E, sf);
+    return;
   }
+
+  auto const arrSpec = type.arrSpec();
+  assertx(!arrSpec.type());
+
+  auto const r = materialize(v, dataSrc);
+  if (arrSpec.dvarray()) {
+    using AK = ArrayData::ArrayKind;
+    auto const kind = arrSpec.kind();
+    assertx(kind && (*kind == AK::kPackedKind || *kind == AK::kMixedKind));
+    auto const mask = *kind == AK::kPackedKind ? ArrayData::kVArray
+                                                : ArrayData::kDArray;
+    // WARNING(kshaunak): We're using the fact that testing the DV array bit
+    // also gives us the kind here. That logic may not apply to bespokes...
+    v << testbim{mask, r[ArrayData::offsetofDVArray()], sf};
+    return doJcc(CC_NE, sf);
+  }
+
+  if (arrSpec.kind()) {
+    assertx(type < TArr);
+    v << cmpbim{*arrSpec.kind(), r[HeaderKindOffset], sf};
+  } else {
+    assertx(arrSpec.vanilla());
+    assertx(RO::EvalAllowBespokeArrayLikes);
+    v << testbim{ArrayData::kIsBespoke, r[ArrayData::offsetofDVArray()], sf};
+  }
+  doJcc(CC_E, sf);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,7 +260,7 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
 
   doJcc(cc, sf);
 
-  if (type.isSpecialized()) {
+  if (type.isSpecialized() || type <= TStaticStr) {
     auto const sf2 = v.makeReg();
     detail::emitSpecializedTypeTest(v, env, type, dataSrc, sf2, doJcc);
   }

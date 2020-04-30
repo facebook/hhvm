@@ -113,6 +113,20 @@ void cgCheckType(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
+  // We know that it is a string and we are checking for static str
+  if (!typeParam.isSpecialized() && typeParam <= TStaticStr) {
+    if (!src->isA(TStr)) {
+      // This could be a false negative but that's okay based on CheckType's
+      // contract
+      v << jmp{label(env, inst->taken())};
+      return;
+    }
+    detail::emitSpecializedTypeTest(v, env, typeParam, srcData,
+                                v.makeReg(), doJcc);
+    doMov();
+    return;
+  }
+
   /*
    * Since not all of our unions carry a type register, there are some
    * situations with strings and arrays that are neither constantly-foldable

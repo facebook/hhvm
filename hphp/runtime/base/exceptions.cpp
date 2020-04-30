@@ -335,7 +335,7 @@ void throwable_init(ObjectData* throwable) {
     auto const funcAndOffset = getCurrentFuncAndOffset();
     assertx(funcAndOffset.first != nullptr);
     auto const unit = funcAndOffset.first->unit();
-    auto const file = const_cast<StringData*>(unit->filepath());
+    auto const file = const_cast<StringData*>(funcAndOffset.first->filename());
     auto const line = unit->getLineNumber(funcAndOffset.second);
     tvSet(
       make_tv<KindOfString>(file),

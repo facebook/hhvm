@@ -144,7 +144,7 @@ void initThrowable(IRGS& env, const Class* cls, SSATmp* throwable) {
     auto const line = unit->getLineNumber(bcOff(env));
     assertx(rootCls->declPropTypeConstraint(fileSlot).isString());
     assertx(rootCls->declPropTypeConstraint(lineSlot).isInt());
-    gen(env, StMem, propAddr(fileSlot), cns(env, unit->filepath()));
+    gen(env, StMem, propAddr(fileSlot), cns(env, curFunc(env)->filename()));
     gen(env, StMem, propAddr(lineSlot), cns(env, line));
   }
 }

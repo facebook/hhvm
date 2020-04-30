@@ -31,27 +31,6 @@ class CounterArray
   }
 }
 
-/* For testing magic __get and __set methods */
-
-class MagicGetSet
-{
-  private $data = varray[];
-
-  public function __set($name, $value)
-  {
-    $this->data[$name] = $value;
-  }
-
-  public function __get($name)
-  {
-    if (array_key_exists($name, $this->data)) {
-      return "I am a search bar!";
-    }
-
-    return null;
-  }
-}
-
 /* More setup */
 
 function f0(): ?int { return null; }
@@ -178,18 +157,6 @@ function test_object_get(): void {
   echo("\n");
   n_dump($obj);
   echo("\n");
-
-  /* Play with MagicGetSet */
-
-  $obj = new MagicGetSet;
-  VS($obj->addme ??= "add me", "add me");
-  VS($obj->addme ??= "don't add me", "I am a search bar!");
-  VS($obj->addmetoo ??= "add me too", "add me too");
-
-  // Check that the right lvalues were set to the right things
-  echo('test_object_get() MagicGetSet $obj:');
-  echo("\n");
-  n_dump($obj);
 }
 
 function test_associativity(): void {

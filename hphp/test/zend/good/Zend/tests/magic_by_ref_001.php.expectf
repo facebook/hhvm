@@ -1,2 +1,0 @@
-
-Fatal error: Method test::__set() cannot take inout arguments in %s/magic_by_ref_001.php on line 4

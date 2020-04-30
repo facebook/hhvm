@@ -1,2 +1,0 @@
-File "typing_fail_magic1.php", line 13, characters 3-24:
-Method A::__set() must take exactly 2 arguments (Parsing[1002])

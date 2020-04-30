@@ -110,6 +110,7 @@ pub mod collections {
 pub mod members {
 
     use lazy_static::lazy_static;
+    use std::collections::HashMap;
     use std::collections::HashSet;
 
     pub const M_CLASS: &str = "class";
@@ -177,6 +178,17 @@ pub mod members {
                     set.insert(special_name.to_ascii_lowercase());
                     set
                 })
+        };
+        pub static ref UNSUPPORTED_MAP: HashMap<String, &'static str> = {
+            vec![__CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
+                .iter()
+                .fold(
+                    HashMap::<String, &'static str>::new(),
+                    |mut set, special_name| {
+                        set.insert(special_name.to_ascii_lowercase(), special_name);
+                        set
+                    },
+                )
         };
     }
 
@@ -888,6 +900,7 @@ pub mod pocket_universes {
 mod test {
     use crate::members::is_special_xhp_attribute;
     use crate::members::AS_LOWERCASE_SET;
+    use crate::members::UNSUPPORTED_MAP;
     use crate::special_idents::is_tmp_var;
     use crate::typehints::is_namespace_with_reserved_hh_name;
 
@@ -904,6 +917,12 @@ mod test {
     fn test_members_as_lowercase_set() {
         assert!(AS_LOWERCASE_SET.contains("__tostring"));
         assert!(!AS_LOWERCASE_SET.contains("__toString"));
+    }
+
+    #[test]
+    fn test_members_unsupported_map() {
+        assert_eq!(UNSUPPORTED_MAP.get("__callstatic"), Some(&"__callStatic"));
+        assert!(!UNSUPPORTED_MAP.contains_key("__callStatic"));
     }
 
     #[test]

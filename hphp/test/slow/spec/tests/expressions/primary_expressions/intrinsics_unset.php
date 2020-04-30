@@ -57,30 +57,12 @@ class X1
 {
 }
 
-class X2
-{
-    public function __isset($name)
-    {
-        echo "Inside " . __METHOD__ . " with \$name $name\n";
-    }
-
-    public function __unset($name)
-    {
-        echo "Inside " . __METHOD__ . " with \$name $name\n";
-    }
-}
-
 $x1 = new X1;
 var_dump(isset($x1->m));
 $x1->m = 123;
 var_dump(isset($x1->m));
 unset($x1->m);
 var_dump(isset($x1->m));
-
-$x2 = new X2;
-var_dump(isset($x2->m));
-unset($x2->m);
-var_dump(isset($x2->m));
 
 echo "---------- unsetting inside a function (\$GLOBALS) ------------\n";
 

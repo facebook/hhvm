@@ -9,16 +9,3 @@ object(C) (3) {
   ["baz"]=>
   int(1)
 }
-object(D) (3) {
-  ["array":"D":private]=>
-  array(2) {
-    ["bar"]=>
-    NULL
-    ["baz"]=>
-    NULL
-  }
-  ["bar"]=>
-  int(42)
-  ["baz"]=>
-  int(1)
-}

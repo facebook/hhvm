@@ -6,11 +6,6 @@ class A {
 
   public function __call($a, $b) { echo "A::__call\n"; }
 
-  public function __set($a, $b) { echo "A::__set\n"; }
-  public function __get($a) { echo "A::__get\n"; return 123; }
-  public function __isset($a) { echo "A::__isset\n"; return false; }
-  public function __unset($a) { echo "A::__unset\n"; }
-
   public function __sleep() { echo "A::__sleep\n"; return varray[]; }
   public function __wakeup() { echo "A::__wakeup\n"; }
 
@@ -30,20 +25,6 @@ function test_magic_call() {
   $x->foo();
 
   $x->__call(1, 2);
-}
-
-function test_magic_props() {
-  echo "=============== test_magic_props ===================\n";
-  $x = new A();
-  $x->foo = 123;
-  $x->foo;
-  isset($x->foo);
-  unset($x->foo);
-
-  $x->__set(1, 2);
-  $x->__get(1);
-  $x->__isset(1);
-  $x->__unset(1);
 }
 
 function test_sleep() {
@@ -104,7 +85,6 @@ function test_ctor() {
 }
 <<__EntryPoint>> function main(): void {
 test_magic_call();
-test_magic_props();
 test_sleep();
 test_stringify();
 test_invoke();

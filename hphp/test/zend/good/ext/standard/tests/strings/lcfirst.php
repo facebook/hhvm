@@ -1,30 +1,6 @@
 <?hh
 /* Make a string's first character uppercase */
 
-class Setter {
-
-    protected $vars = darray['partnerName' => false];
-
-    public function __call($m, $v) {
-        if (stristr($m, 'set')) {
-            $action = lcfirst(substr($m, 3));
-            $this->$action = $v[0];
-        }
-    }
-
-    public function __set($key, $value) {
-        if (array_key_exists($key, $this->vars)) {
-            $this->vars[$key] = $value;
-        }
-    }
-
-    public function __get($key) {
-        if (array_key_exists($key, $this->vars)) {
-            return $this->vars[$key];
-        }
-    }
-}
-
 class mystring {
   function __toString() {
     return "Hello world";
@@ -78,12 +54,6 @@ echo "\n#### Testing Miscelleneous inputs ####\n";
 echo "--- Testing arrays ---";
 $str_arr = varray["Hello", "?world", "!$%**()%**[][[[&@#~!", varray[]];
 try { var_dump( lcfirst($str_arr) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-
-echo "\n--- Testing lowercamelcase action call example ---\n";
-
-$class = new Setter();
-$class->setPartnerName('partnerName');
-var_dump($class->partnerName);
 
 echo "\n--- Testing objects ---\n";
 /* we get "Catchable fatal error: saying Object of class could not be converted

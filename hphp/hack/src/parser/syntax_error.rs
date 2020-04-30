@@ -768,7 +768,12 @@ pub fn async_magic_method(name: &str) -> Error {
         name.to_string(),
     ))
 }
-pub const call_static_method: Error = Cow::Borrowed("__callStatic methods are no longer supported");
+pub fn unsupported_magic_method(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Magic {} methods are no longer supported",
+        name.to_string(),
+    ))
+}
 pub fn reserved_keyword_as_class_name(class_name: &str) -> Error {
     Cow::Owned(format!(
         "Cannot use '{}' as class name as it is reserved",

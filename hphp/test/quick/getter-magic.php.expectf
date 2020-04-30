@@ -1,3 +1,0 @@
-string(4) "prop"
-
-Fatal error: Cannot access protected property Heh::$prop in %s/test/quick/getter-magic.php on line 16

@@ -47,20 +47,7 @@ class X1
 {
 }
 
-class X2
-{
-    public function __isset($name)
-    {
-        echo "Inside " . __METHOD__ . " with \$name $name\n";
-        return FALSE;
-//      return TRUE;
-    }
-}
-
 $x1 = new X1;
 var_dump(isset($x1->m));
 $x1->m = 123;
 var_dump(isset($x1->m));
-
-$x2 = new X2;
-var_dump(isset($x2->m));

@@ -2,12 +2,6 @@
 
 class c {
   public $prop = 'old value';
-  public function __get($n) {
-    return "You asked for property $n";
-  }
-  public function __set($n, $v) {
-    echo "Pretending to set $n to $v\n";
-  }
 }
 
 function propget($o, $p) {

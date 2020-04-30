@@ -2,16 +2,6 @@
 A::__construct
 A::__call
 A::__call
-=============== test_magic_props ===================
-A::__construct
-A::__set
-A::__get
-A::__isset
-A::__unset
-A::__set
-A::__get
-A::__isset
-A::__unset
 =============== test_sleep =========================
 A::__construct
 A::__sleep

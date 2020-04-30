@@ -1,4 +1,0 @@
-File "bad_inout_decl_special_get.php", line 4, characters 3-35:
-Method C::__get() cannot take inout arguments (Parsing[1002])
-File "bad_inout_decl_special_get.php", line 4, characters 31-35:
-Methods with special semantics cannot have inout parameters. (NastCheck[3043])

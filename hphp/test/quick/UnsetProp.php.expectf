@@ -15,15 +15,6 @@ Notice: Undefined property: F::$bart in %s on line 10
 NULL
 object(F) (0) {
 }
-object(C) (2) {
-  ["p"]=>
-  string(4) "C::p"
-  ["q"]=>
-  NULL
-}
-In C::__unset("r")
-object(C) (0) {
-}
 ------------------------
 foo
 ------------------------
@@ -31,6 +22,6 @@ foo
 Test end
 string(4) "set1"
 
-Notice: Undefined property: c2::$declprop in %s on line 68
+Notice: Undefined property: c2::$declprop in %s on line 50
 NULL
 string(4) "set2"

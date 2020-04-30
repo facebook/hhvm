@@ -790,6 +790,20 @@ where
         }
     }
 
+    fn unsupported_magic_method_errors(&mut self, node: &'a Syntax<Token, Value>) {
+        if let FunctionDeclarationHeader(x) = &node.syntax {
+            let name = self.text(&x.function_name).to_ascii_lowercase();
+            let unsupported = sn::members::UNSUPPORTED_MAP.get(&name);
+
+            if let Some(unsupported) = unsupported {
+                self.errors.push(Self::make_error_from_node(
+                    node,
+                    errors::unsupported_magic_method(unsupported),
+                ));
+            }
+        }
+    }
+
     fn async_magic_method(&self, node: &'a Syntax<Token, Value>) -> bool {
         match &node.syntax {
             FunctionDeclarationHeader(node) => {
@@ -802,16 +816,6 @@ where
                     _ => false,
                 }
             }
-            _ => false,
-        }
-    }
-
-    fn call_static_method(&self, node: &'a Syntax<Token, Value>) -> bool {
-        match &node.syntax {
-            FunctionDeclarationHeader(node) => self
-                .text(&node.function_name)
-                .eq_ignore_ascii_case(sn::members::__CALL_STATIC),
-
             _ => false,
         }
     }
@@ -1674,10 +1678,6 @@ where
             let s = name;
             let num_args_opt = match s {
                 _ if s == sn::members::__CALL && len != 2 => Some(2),
-                _ if s == sn::members::__GET && len != 1 => Some(1),
-                _ if s == sn::members::__SET && len != 2 => Some(2),
-                _ if s == sn::members::__ISSET && len != 1 => Some(1),
-                _ if s == sn::members::__UNSET && len != 1 => Some(1),
                 _ => None,
             };
 
@@ -1687,12 +1687,7 @@ where
                     errors::invalid_number_of_args(&full_name, n),
                 ))
             }
-            if s == sn::members::__CALL
-                || s == sn::members::__GET
-                || s == sn::members::__SET
-                || s == sn::members::__ISSET
-                || s == sn::members::__UNSET
-            {
+            if s == sn::members::__CALL {
                 // disallow inout parameters on magic methods
                 if params().any(&Self::is_parameter_with_callconv) {
                     self.errors.push(Self::make_error_from_node(
@@ -1827,16 +1822,11 @@ where
                     || errors::error2009(class_name, method_name),
                     modifiers,
                 );
+                self.unsupported_magic_method_errors(header_node);
                 self.produce_error(
                     |self_, x| self_.async_magic_method(x),
                     header_node,
                     || errors::async_magic_method(method_name),
-                    modifiers,
-                );
-                self.produce_error(
-                    |self_, x| self_.call_static_method(x),
-                    header_node,
-                    || errors::call_static_method,
                     modifiers,
                 );
                 self.produce_error(

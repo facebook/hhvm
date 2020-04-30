@@ -23,11 +23,6 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-Inside X2::__isset with $name m
-bool(false)
-Inside X2::__unset with $name m
-Inside X2::__isset with $name m
-bool(false)
 ---------- unsetting inside a function ($GLOBALS) ------------
 bool(true)
 bool(true)

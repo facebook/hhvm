@@ -16,5 +16,3 @@ bool(true)
 ---------- dynamic property ------------
 bool(false)
 bool(true)
-Inside X2::__isset with $name m
-bool(false)

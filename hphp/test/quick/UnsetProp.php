@@ -10,19 +10,6 @@ function t($o, $memb) {
   var_dump($o->$memb);
 }
 
-class C {
-  public $p = "C::p";
-  public $q;
-  function __unset($propName) {
-    print "In C::__unset(\"$propName\")\n";
-  }
-  function cF() {
-    unset($this->p);
-    unset($this->q);
-    unset($this->r);
-  }
-}
-
 function u() {
   echo "------------------------\n";
   $obj = new F;
@@ -49,11 +36,6 @@ function main() {
   t($f, 'foo');
   t($f, 'bart');
   var_dump($f);
-
-  $c = new C();
-  var_dump($c);
-  $c->cF();
-  var_dump($c);
 
   $e = error_reporting(0);
   u();

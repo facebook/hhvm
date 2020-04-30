@@ -78,20 +78,6 @@ object(CounterArray) (5) {
   string(10) "addmethree"
 }
 
-bool(true)
-bool(true)
-bool(true)
-test_object_get() MagicGetSet $obj:
-n_dump from line %d:
-object(MagicGetSet) (1) {
-  ["data":"MagicGetSet":private]=>
-  array(2) {
-    ["addme"]=>
-    string(6) "add me"
-    ["addmetoo"]=>
-    string(10) "add me too"
-  }
-}
 
 test_associativity()
 bool(true)

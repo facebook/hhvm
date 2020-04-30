@@ -147,6 +147,7 @@ void rds::local::RDSLocal<ExecutionContext,
 
 void ExecutionContext::cleanup() {
   manageAPCHandle();
+  auto dead = std::move(m_stdoutHooks);
 }
 
 void ExecutionContext::sweep() {
@@ -2026,10 +2027,8 @@ private:
 void ExecutionContext::manageAPCHandle() {
   assertx(apcExtension::UseUncounted || m_apcHandles.size() == 0);
   if (m_apcHandles.size() > 0) {
-    std::vector<APCHandle*> handles;
-    handles.swap(m_apcHandles);
     Treadmill::enqueue(
-      FreedAPCHandle(std::move(handles), m_apcMemSize)
+      FreedAPCHandle(std::move(m_apcHandles), m_apcMemSize)
     );
     APCStats::getAPCStats().addPendingDelete(m_apcMemSize);
   }

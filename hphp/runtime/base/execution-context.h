@@ -619,7 +619,8 @@ public:
   Variant m_timeThresholdCallback;
   uint64_t m_setprofileFlags;
   bool m_executingSetprofileCallback;
-  hphp_fast_set<std::string> m_setprofileFunctions;
+  req::fast_set<String,
+                hphp_string_hash, hphp_string_isame> m_setprofileFunctions;
 public:
   TypedValue m_headerCallback;
   bool m_headerCallbackDone{false}; // used to prevent infinite loops

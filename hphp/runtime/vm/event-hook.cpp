@@ -136,7 +136,7 @@ bool shouldRunUserProfiler(const Func* func) {
       g_context->m_setprofileCallback.isNull() ||
       (!g_context->m_setprofileFunctions.empty() &&
         g_context->m_setprofileFunctions.count(
-          func->fullName()->toCppString()) == 0)) {
+          StrNR(func->fullName())) == 0)) {
     return false;
   }
   // Don't profile 86ctor, since its an implementation detail,

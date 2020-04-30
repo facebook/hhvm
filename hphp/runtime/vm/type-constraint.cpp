@@ -513,10 +513,7 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         return Assert || val.val().parr->isDArray();
       case AnnotAction::VArrayOrDArrayCheck:
         assertx(tvIsArray(val));
-        return (Assert || (
-          !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
-          !val.val().parr->isNotDVArray()
-        ));
+        return Assert || val.val().parr->isDVArray();
       case AnnotAction::NonVArrayOrDArrayCheck:
         assertx(tvIsArray(val));
         return Assert || val.val().parr->isNotDVArray();
@@ -757,10 +754,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       return isAssert || val.val().parr->isDArray();
     case AnnotAction::VArrayOrDArrayCheck:
       assertx(tvIsArray(val));
-      return (isAssert || (
-        !RuntimeOption::EvalHackArrCompatTypeHintPolymorphism &&
-        !val.val().parr->isNotDVArray()
-      ));
+      return isAssert || val.val().parr->isDVArray();
     case AnnotAction::NonVArrayOrDArrayCheck:
       assertx(tvIsArray(val));
       return isAssert || val.val().parr->isNotDVArray();
@@ -1019,8 +1013,7 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
         assertx(!val.val().parr->isDArray());
         break;
       case AnnotType::VArrOrDArr:
-        assertx(RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
-                val.val().parr->isNotDVArray());
+        assertx(val.val().parr->isNotDVArray());
         break;
       default:
         return folly::none;
@@ -1045,9 +1038,8 @@ bool TypeConstraint::convertClsMethToArrLike() const {
 }
 
 bool TypeConstraint::raiseClsMethHackArrCompatNotice() const {
-  if (!RO::EvalHackArrCompatTypeHintNotices) return false;
-  return m_type == AnnotType::Array || isDArray() ||
-         (isVArrayOrDArray() && RO::EvalHackArrCompatTypeHintPolymorphism);
+  return RO::EvalHackArrCompatTypeHintNotices &&
+         (m_type == AnnotType::Array || isDArray());
 }
 
 void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
@@ -1056,10 +1048,8 @@ void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
   assertx(
     isSoft() ||
     (isThis() && couldSeeMockObject()) ||
-    (RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-     (RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
-      isArrayType(val.type()))) ||
-    (RuntimeOption::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
+    (RO::EvalHackArrCompatTypeHintNotices && isArrayType(val.type())) ||
+    (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
     check(val, func->cls())
   );
 }

@@ -363,9 +363,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
         return ad->isDVArray();
       }();
 
-      auto const notice = RO::EvalHackArrCompatTypeHintPolymorphism &&
-                          tc.isVArrayOrDArray();
-      if (error || notice) {
+      if (error) {
         auto const name = tc.displayName().data();
         raise_hackarr_compat_type_hint_param_notice(func, ad, name, i);
       }

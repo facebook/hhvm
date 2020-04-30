@@ -2586,7 +2586,6 @@ SSATmp* implSimplifyHackArrTypehint(
     State& env, const IRInstruction* inst, SSATmp* arr) {
   auto const extra = inst->extra<RaiseHackArrTypehintNoticeData>();
   auto const type = [&]{
-    if (RO::EvalHackArrCompatTypeHintPolymorphism) return TBottom;
     switch (extra->tc.type()) {
       case AnnotType::VArrOrDArr: return TVArr | TDArr;
       case AnnotType::VArray:     return TVArr;

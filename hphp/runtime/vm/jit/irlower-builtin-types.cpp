@@ -413,32 +413,12 @@ void implRaiseHackArrTypehintNotice(IRLS& env, Vreg src,
     cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
   };
 
-  if (!RuntimeOption::EvalHackArrCompatTypeHintPolymorphism ||
-      at != AnnotType::VArrOrDArr) {
-    auto const dv = annotTypeToDVArrKind(at);
-    auto const sf = v.makeReg();
-    v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
-
-    auto const cc = at == AnnotType::Array ? CC_NZ : CC_Z;
-
-    return unlikelyIfThen(v, vcold(env), cc, sf, do_notice);
-  }
-
-  auto const dv = ArrayData::kDVArrayMask;
+  auto const dv = annotTypeToDVArrKind(at);
   auto const sf = v.makeReg();
   v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
 
-  unlikelyIfThenElse(v, vcold(env), CC_Z, sf, do_notice, [&] (Vout& v) {
-    implodingIFTE(v, v,
-      [&] (Vout& v, Vlabel next, Vlabel taken) {
-        auto const dv = ArrayData::kDArray;
-        auto const sf = v.makeReg();
-        v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
-        v << jcc{CC_Z, sf, {next, taken}};
-      },
-      do_notice, do_notice
-    );
-  });
+  auto const cc = at == AnnotType::Array ? CC_NZ : CC_Z;
+  return unlikelyIfThen(v, vcold(env), cc, sf, do_notice);
 }
 
 }

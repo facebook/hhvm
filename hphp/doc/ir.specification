@@ -2157,8 +2157,8 @@ To string conversions:
   called.
 
   This instruction performs the appropriate check based on `type', and logs
-  either on the failure branch or on both branches depending on the value of
-  RuntimeOption::EvalHackArrCompatTypeHintPolymorphism.
+  either on the failure branch. TODO(kshaunak): Replace this instruction by
+  one that unconditionally notices.
 
 | RaiseHackArrPropNotice<type>, ND, S(Cls) S(Arr) S(Int) C(Bool), LA
 

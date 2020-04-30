@@ -601,8 +601,12 @@ std::unique_ptr<Unit> UnitEmitter::create(bool saveLineTable) const {
           m_filepath->data(), isSystemLib ? "_SYSTEM" : ""
         );
       }
-      if (!RuntimeOption::EvalVerifyOnly &&
-          RuntimeOption::EvalFatalOnVerifyError) {
+      if (RuntimeOption::EvalVerifyOnly) {
+        if (!isSystemLib) {
+          std::fflush(stdout);
+          _Exit(1);
+        }
+      } else if (RuntimeOption::EvalFatalOnVerifyError) {
         return createFatalUnit(
           const_cast<StringData*>(m_filepath),
           m_sha1,

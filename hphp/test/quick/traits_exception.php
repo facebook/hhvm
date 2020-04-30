@@ -1,5 +1,5 @@
 <?hh
-require_once("hphp/test/quick/traits_exception.inc");
+require_once(__DIR__."/traits_exception.inc");
 
 final class XABC {
   use XABCTrait;

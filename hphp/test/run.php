@@ -2050,8 +2050,8 @@ function skip_test($options, $test): ?string {
   }
 
   if (isset($options['hhbbc2']) || isset($options['hhas-round-trip'])) {
-    $no_hhas_tag = '.nodumphhas';
-    if (file_exists($test.$no_hhas_tag) ||
+    $no_hhas_tag = 'nodumphhas';
+    if (file_exists("$test.$no_hhas_tag") ||
         file_exists(dirname($test).'/'.$no_hhas_tag)) {
       return 'skip-nodumphhas';
     }

@@ -874,6 +874,10 @@ void print_unit_metadata(Output& out, const Unit* unit) {
 
   out.fmtln(".filepath {};", escaped(unit->filepath()));
   print_hh_file(out, unit);
+  if (!unit->fileAttributes().empty()) {
+    out.nl();
+    out.fmtln(".file_attributes [{}] ;", user_attrs(&unit->fileAttributes()));
+  }
   auto const metaData = unit->metaData();
   for (auto kv : metaData) {
     if (isStringType(kv.second.m_type)) {

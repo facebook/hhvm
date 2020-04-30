@@ -6580,7 +6580,7 @@ and condition
     when tparamet
          && ( String.equal f SN.StdlibFunctions.is_array
             || String.equal f SN.StdlibFunctions.is_php_array ) ->
-    is_array env `PHPArray p f lv
+    safely_refine_is_array env `PHPArray p f lv
   | Aast.Call
       ( Cnormal,
         (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
@@ -6807,7 +6807,7 @@ and get_instance_var env = function
  * `p` is position of the function name in the source
  * `arg_expr` is the argument to the function
  *)
-and is_array env ty p pred_name arg_expr =
+and safely_refine_is_array env ty p pred_name arg_expr =
   refine_lvalue_type env arg_expr ~refine:(fun env arg_ty ->
       let r = Reason.Rpredicated (p, pred_name) in
       let (env, tarrkey_name) =
@@ -6861,9 +6861,13 @@ and is_array env ty p pred_name arg_expr =
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>
-       * and refined_ty is keyset<T#1> then we know T#1 <: T *)
+       * and refined_ty is keyset<T#1> then we know T#1 <: T.
+       * See analogous code in safely_refine_class_type.
+       *)
+      let (env, supertypes) = TUtils.get_concrete_supertypes env arg_ty in
       let env =
-        SubType.add_constraint p env Ast_defs.Constraint_as refined_ty arg_ty
+        List.fold_left supertypes ~init:env ~f:(fun env ty ->
+            SubType.add_constraint p env Ast_defs.Constraint_as refined_ty ty)
       in
       Inter.intersect ~r env refined_ty arg_ty)
 

@@ -175,13 +175,10 @@ AliasClass pointee(
         return APropAny | pointee(src, visited_labels);
       }
 
-      // Like the Prop* instructions, but for array elements. These could also
-      // return pointers to collection elements but those don't exist in
-      // AliasClass yet.
+      // Like the Prop* instructions, but for array elements. These ops could
+      // pointers to collection elements, which we don't have AliasClasses for.
       if (sinst->is(ElemDX, ElemUX)) {
-        assertx(sinst->srcs().back()->isA(TMemToMISCell));
-        auto const src = sinst->srcs().back();
-        return AElemAny | pointee(src, visited_labels);
+        return AElemAny;
       }
 
       return folly::none;
@@ -1420,6 +1417,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ElemDictU:
   case ElemKeysetU:
   case ElemX:
+  case ElemDX:
+  case ElemUX:
   case UnsetProp:
     // These member ops will load and store from the base lval which they
     // take as their first argument, which may point anywhere in the heap.
@@ -1436,8 +1435,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
    * operations above, these may take a pointer to MInstrState::tvRef, which
    * they may store to (but not read from).
    */
-  case ElemDX:
-  case ElemUX:
   case PropX:
   case PropDX:
   case PropQ:

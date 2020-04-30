@@ -738,18 +738,18 @@ inline tv_lval ElemDEmptyish(tv_lval base) {
 
 /**
  * ElemD when base is an Int64, Double, Resource, Func, or Class.
+ * We can use immutable_null_base here because setters on null will throw.
  */
-inline tv_lval ElemDScalar(TypedValue& tvRef) {
+inline tv_lval ElemDScalar() {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(tvRef);
-  return tv_lval(&tvRef);
+  return const_cast<TypedValue*>(&immutable_null_base);
 }
 
 /**
  * ElemD when base is a Boolean
  */
-inline tv_lval ElemDBoolean(TypedValue& tvRef, tv_lval base) {
-  return base.val().num ? ElemDScalar(tvRef) : ElemDEmptyish(base);
+inline tv_lval ElemDBoolean(tv_lval base) {
+  return base.val().num ? ElemDScalar() : ElemDEmptyish(base);
 }
 
 /**
@@ -785,8 +785,7 @@ inline tv_lval ElemDRecord(tv_lval base, key_type<keyType> key) {
  * ElemD when base is an Object
  */
 template<KeyType keyType>
-inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
-                           key_type<keyType> key) {
+inline tv_lval ElemDObject(tv_lval base, key_type<keyType> key) {
   auto obj = base.val().pobj;
   failOnNonCollectionObjArrayAccess(obj);
   auto scratchKey = initScratchKey(key);
@@ -797,21 +796,25 @@ inline tv_lval ElemDObject(TypedValue& tvRef, tv_lval base,
  * Intermediate elem operation for defining member instructions.
  */
 template<KeyType keyType = KeyType::Any>
-tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
+tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(base.tv()));
+
+  // ElemD helpers hand out lvals to immutable_null_base in cases where we know
+  // it won't be updated. Confirm that we never do an illegal update on it.
+  assertx(type(immutable_null_base) == KindOfNull);
 
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
       return ElemDEmptyish(base);
     case KindOfBoolean:
-      return ElemDBoolean(tvRef, base);
+      return ElemDBoolean(base);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      return ElemDScalar(tvRef);
+      return ElemDScalar();
     case KindOfPersistentString:
     case KindOfString:
       return ElemDString(base);
@@ -832,7 +835,7 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfArray:
       return ElemDArray<keyType>(base, key);
     case KindOfObject:
-      return ElemDObject<keyType>(tvRef, base, key);
+      return ElemDObject<keyType>(base, key);
     case KindOfClsMeth:
       detail::promoteClsMeth(base);
       if (RO::EvalHackArrDVArrs) {
@@ -847,7 +850,8 @@ tv_lval ElemD(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
 }
 
 /**
- * ElemU when base is Null
+ * ElemU when base is Null. We can use immutable_null_base here because
+ * unsets on null will succeed with no further updates.
  */
 inline tv_lval ElemUEmptyish() {
   return const_cast<TypedValue*>(&immutable_null_base);
@@ -1040,8 +1044,7 @@ inline tv_lval ElemUKeyset(tv_lval base, key_type<keyType> key) {
  * ElemU when base is an Object
  */
 template <KeyType keyType>
-inline tv_lval ElemUObject(TypedValue& tvRef, tv_lval base,
-                           key_type<keyType> key) {
+inline tv_lval ElemUObject(tv_lval base, key_type<keyType> key) {
   auto obj = val(base).pobj;
   failOnNonCollectionObjArrayAccess(obj);
   auto const scratchKey = initScratchKey(key);
@@ -1052,8 +1055,12 @@ inline tv_lval ElemUObject(TypedValue& tvRef, tv_lval base,
  * Intermediate Elem operation for an unsetting member instruction.
  */
 template <KeyType keyType = KeyType::Any>
-tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
+tv_lval ElemU(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
+
+  // ElemU helpers hand out lvals to immutable_null_base in cases where we know
+  // it won't be updated. Confirm that we never do an illegal update on it.
+  assertx(type(immutable_null_base) == KindOfNull);
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1099,7 +1106,7 @@ tv_lval ElemU(TypedValue& tvRef, tv_lval base, key_type<keyType> key) {
     case KindOfArray:
       return ElemUArray<keyType>(base, key);
     case KindOfObject:
-      return ElemUObject<keyType>(tvRef, base, key);
+      return ElemUObject<keyType>(base, key);
     case KindOfRecord:
       raise_error(Strings::OP_NOT_SUPPORTED_RECORD);
   }
@@ -1115,27 +1122,26 @@ inline tv_lval NewElemEmptyish(tv_lval base) {
 }
 
 /**
- * NewElem when base is not a valid type (a number, true boolean,
- * non-empty string, etc.)
+ * NewElem when base is an invalid type (number, boolean, string, etc.) and is
+ * not falsey. We can use immutable_null_base here because updates will raise.
  */
-inline tv_lval NewElemInvalid(TypedValue& tvRef) {
+inline tv_lval NewElemInvalid() {
   raise_warning("Cannot use a scalar value as an array");
-  tvWriteNull(tvRef);
-  return tv_lval(&tvRef);
+  return const_cast<TypedValue*>(&immutable_uninit_base);
 }
 
 /**
  * NewElem when base is a Boolean
  */
-inline tv_lval NewElemBoolean(TypedValue& tvRef, tv_lval base) {
-  return val(base).num ? NewElemInvalid(tvRef) : NewElemEmptyish(base);
+inline tv_lval NewElemBoolean(tv_lval base) {
+  return val(base).num ? NewElemInvalid() : NewElemEmptyish(base);
 }
 
 /**
  * NewElem when base is a String
  */
-inline tv_lval NewElemString(TypedValue& tvRef, tv_lval base) {
-  return val(base).pstr->size() ? NewElemInvalid(tvRef) : NewElemEmptyish(base);
+inline tv_lval NewElemString(tv_lval base) {
+  return val(base).pstr->size() ? NewElemInvalid() : NewElemEmptyish(base);
 }
 
 /**
@@ -1151,7 +1157,7 @@ inline tv_lval NewElemArray(tv_lval base) {
 /**
  * NewElem when base is an Object
  */
-inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
+inline tv_lval NewElemObject(tv_lval base) {
   failOnNonCollectionObjArrayAccess(val(base).pobj);
   throw_cannot_use_newelem_for_lval_read_col();
   return nullptr;
@@ -1160,7 +1166,7 @@ inline tv_lval NewElemObject(TypedValue& tvRef, tv_lval base) {
 /**
  * $result = ($base[] = ...);
  */
-inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
+inline tv_lval NewElem(tv_lval base) {
   assertx(tvIsPlausible(base.tv()));
 
   switch (base.type()) {
@@ -1168,16 +1174,16 @@ inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
     case KindOfNull:
       return NewElemEmptyish(base);
     case KindOfBoolean:
-      return NewElemBoolean(tvRef, base);
+      return NewElemBoolean(base);
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      return NewElemInvalid(tvRef);
+      return NewElemInvalid();
     case KindOfPersistentString:
     case KindOfString:
-      return NewElemString(tvRef, base);
+      return NewElemString(base);
     case KindOfPersistentVec:
     case KindOfVec:
       throw_cannot_use_newelem_for_lval_read_vec();
@@ -1195,7 +1201,7 @@ inline tv_lval NewElem(TypedValue& tvRef, tv_lval base) {
     case KindOfArray:
       return NewElemArray(base);
     case KindOfObject:
-      return NewElemObject(tvRef, base);
+      return NewElemObject(base);
     case KindOfClsMeth:
       throw_cannot_use_newelem_for_lval_read_clsmeth();
     case KindOfRecord:
@@ -1819,40 +1825,39 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
 /**
  * SetOpElem when base is Null
  */
-inline tv_lval SetOpElemEmptyish(tv_lval base) {
+inline TypedValue SetOpElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
 }
 
 /**
- * SetOpElem when base is Int64, Double, Resource, Func, or Class
+ * TypedValue when base is Int64, Double, Resource, Func, or Class
  */
-inline tv_lval SetOpElemScalar(TypedValue& tvRef) {
+inline TypedValue SetOpElemScalar() {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(tvRef);
-  return &tvRef;
+  return make_tv<KindOfNull>();
 }
 
 /**
  * $result = ($base[$x] <op>= $y)
  */
-inline tv_lval SetOpElem(TypedValue& tvRef, SetOpOp op, tv_lval base,
-                         TypedValue key, TypedValue* rhs) {
+inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
+                            TypedValue key, TypedValue* rhs) {
   assertx(tvIsPlausible(*base));
 
   auto const handleArray = [&] {
     if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
       throwMissingElementException("Set-op");
     }
-    auto result = ElemDArray<KeyType::Any>(base, key);
+    auto const result = ElemDArray<KeyType::Any>(base, key);
     setopBody(result, op, rhs);
-    return result;
+    return *result;
   };
 
   auto const handleVec = [&] {
     auto const result = ElemDVec<KeyType::Any>(base, key);
     setopBody(tvAssertPlausible(result), op, rhs);
-    return result;
+    return *result;
   };
 
   switch (type(base)) {
@@ -1861,14 +1866,14 @@ inline tv_lval SetOpElem(TypedValue& tvRef, SetOpOp op, tv_lval base,
       return SetOpElemEmptyish(base);
 
     case KindOfBoolean:
-      return val(base).num ? SetOpElemScalar(tvRef) : SetOpElemEmptyish(base);
+      return val(base).num ? SetOpElemScalar() : SetOpElemEmptyish(base);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      return SetOpElemScalar(tvRef);
+      return SetOpElemScalar();
 
     case KindOfPersistentString:
     case KindOfString:
@@ -1886,7 +1891,7 @@ inline tv_lval SetOpElem(TypedValue& tvRef, SetOpOp op, tv_lval base,
     case KindOfDict: {
       auto const result = ElemDDict<KeyType::Any>(base, key);
       setopBody(tvAssertPlausible(result), op, rhs);
-      return result;
+      return *result;
     }
 
     case KindOfPersistentKeyset:
@@ -1904,9 +1909,9 @@ inline tv_lval SetOpElem(TypedValue& tvRef, SetOpOp op, tv_lval base,
     case KindOfObject: {
       auto obj = val(base).pobj;
       failOnNonCollectionObjArrayAccess(obj);
-      auto result = collections::atRw(obj, &key);
+      auto const result = collections::atRw(obj, &key);
       setopBody(result, op, rhs);
-      return result;
+      return *result;
     }
 
     case KindOfClsMeth:
@@ -1918,26 +1923,23 @@ inline tv_lval SetOpElem(TypedValue& tvRef, SetOpOp op, tv_lval base,
       }
 
     case KindOfRecord: {
-      auto result = ElemDRecord<KeyType::Any>(base, key);
-      result = tvAssertPlausible(result);
-      setopBody(result, op, rhs);
-      return result;
+      auto const result = ElemDRecord<KeyType::Any>(base, key);
+      setopBody(tvAssertPlausible(result), op, rhs);
+      return *result;
     }
   }
   unknownBaseType(type(base));
 }
 
-inline tv_lval SetOpNewElemEmptyish(tv_lval base) {
+inline TypedValue SetOpNewElemEmptyish(tv_lval base) {
   detail::raiseFalseyPromotion(base);
   not_reached();
 }
-inline tv_lval SetOpNewElemScalar(TypedValue& tvRef) {
+inline TypedValue SetOpNewElemScalar() {
   raise_warning(Strings::CANNOT_USE_SCALAR_AS_ARRAY);
-  tvWriteNull(tvRef);
-  return &tvRef;
+  return make_tv<KindOfNull>();
 }
-inline tv_lval SetOpNewElem(TypedValue& tvRef, SetOpOp op,
-                            tv_lval base, TypedValue* rhs) {
+inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
   assertx(tvIsPlausible(*base));
 
   switch (type(base)) {
@@ -1946,15 +1948,14 @@ inline tv_lval SetOpNewElem(TypedValue& tvRef, SetOpOp op,
       return SetOpNewElemEmptyish(base);
 
     case KindOfBoolean:
-      return val(base).num ? SetOpNewElemScalar(tvRef)
-                           : SetOpNewElemEmptyish(base);
+      return val(base).num ? SetOpNewElemScalar() : SetOpNewElemEmptyish(base);
 
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
     case KindOfFunc:
     case KindOfClass:
-      return SetOpNewElemScalar(tvRef);
+      return SetOpNewElemScalar();
 
     case KindOfPersistentString:
     case KindOfString:
@@ -2142,7 +2143,7 @@ inline TypedValue IncDecNewElemScalar() {
   return make_tv<KindOfNull>();
 }
 
-inline TypedValue IncDecNewElem(TypedValue& tvRef, IncDecOp op, tv_lval base) {
+inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
   assertx(tvIsPlausible(*base));
 
   switch (type(base)) {

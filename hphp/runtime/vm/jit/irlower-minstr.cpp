@@ -266,11 +266,11 @@ void implElem(IRLS& env, const IRInstruction* inst) {
   auto const mode = inst->extra<MOpModeData>()->mode;
   auto const key  = inst->src(1);
   auto const sync = SyncOptions::Sync;
+  auto const args = elemArgs(env, inst);
 
   if (inst->is(ElemDX)) {
     assertx(mode == MOpMode::Define);
     BUILD_OPTAB(ELEMD_HELPER_TABLE, getKeyType(key));
-    auto const args = elemArgs(env, inst).ssa(2);
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;
   }
@@ -278,13 +278,11 @@ void implElem(IRLS& env, const IRInstruction* inst) {
   if (inst->is(ElemUX)) {
     assertx(mode == MOpMode::Unset);
     BUILD_OPTAB(ELEMU_HELPER_TABLE, getKeyType(key));
-    auto const args = elemArgs(env, inst).ssa(2);
     cgCallHelper(vmain(env), env, target, callDest(env, inst), sync, args);
     return;
   }
 
   BUILD_OPTAB(ELEM_HELPER_TABLE, getKeyType(key), mode);
-  auto const args = elemArgs(env, inst);
   cgCallHelper(vmain(env), env, target, callDestTV(env, inst), sync, args);
 }
 

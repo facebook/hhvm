@@ -1455,7 +1455,7 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
   auto const data = MOpModeData { mode };
   if (define || unset) {
     auto const op = define ? ElemDX : ElemUX;
-    return gen(env, op, data, base, key, tvRefPtr(env));
+    return gen(env, op, data, base, key);
   }
   auto const value = gen(env, ElemX, data, base, key);
   return baseValueToLval(env, value);

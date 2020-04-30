@@ -3047,7 +3047,7 @@ void elemDispatch(MOpMode mode, TypedValue key) {
     return tv_lval { &mstate.tvTempBase };
   };
 
-  auto const result = [&]{
+  mstate.base = [&]{
     switch (mode) {
       case MOpMode::None:
         return baseValueToLval(Elem<MOpMode::None>(b, key));
@@ -3056,14 +3056,12 @@ void elemDispatch(MOpMode mode, TypedValue key) {
       case MOpMode::InOut:
         return baseValueToLval(Elem<MOpMode::InOut>(b, key));
       case MOpMode::Define:
-        return ElemD(mstate.tvRef, b, key);
+        return ElemD(b, key);
       case MOpMode::Unset:
-        return ElemU(mstate.tvRef, b, key);
+        return ElemU(b, key);
     }
     always_assert(false);
   }();
-
-  mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
 }
 
 static inline TypedValue key_tv(MemberKey key) {
@@ -3098,11 +3096,8 @@ static OPTBLD_INLINE void dimDispatch(MOpMode mode, MemberKey mk) {
     elemDispatch(mode, key);
   } else {
     if (mode == MOpMode::Warn) raise_error("Cannot use [] for reading");
-
     auto& mstate = vmMInstrState();
-    auto const base = mstate.base;
-    auto const result = NewElem(mstate.tvRef, base);
-    mstate.base = ratchetRefs(result, mstate.tvRef, mstate.tvRef2);
+    mstate.base = NewElem(mstate.base);
   }
 }
 
@@ -3203,14 +3198,15 @@ OPTBLD_INLINE void iopIncDecM(uint32_t nDiscard, IncDecOp subop, MemberKey mk) {
   auto const key = key_tv(mk);
 
   auto& mstate = vmMInstrState();
-  TypedValue result;
-  if (mcodeIsProp(mk.mcode)) {
-    result = IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
-  } else if (mcodeIsElem(mk.mcode)) {
-    result = IncDecElem(subop, mstate.base, key);
-  } else {
-    result = IncDecNewElem(mstate.tvRef, subop, mstate.base);
-  }
+  auto const result = [&]{
+    if (mcodeIsProp(mk.mcode)) {
+      return IncDecProp(arGetContextClass(vmfp()), subop, mstate.base, key);
+    } else if (mcodeIsElem(mk.mcode)) {
+      return IncDecElem(subop, mstate.base, key);
+    } else {
+      return IncDecNewElem(subop, mstate.base);
+    }
+  }();
 
   mFinal(mstate, nDiscard, result);
 }
@@ -3220,19 +3216,20 @@ OPTBLD_INLINE void iopSetOpM(uint32_t nDiscard, SetOpOp subop, MemberKey mk) {
   auto const rhs = vmStack().topC();
 
   auto& mstate = vmMInstrState();
-  tv_lval result;
-  if (mcodeIsProp(mk.mcode)) {
-    result = SetOpProp(mstate.tvRef, arGetContextClass(vmfp()),
-                       subop, mstate.base, key, rhs);
-  } else if (mcodeIsElem(mk.mcode)) {
-    result = SetOpElem(mstate.tvRef, subop, mstate.base, key, rhs);
-  } else {
-    result = SetOpNewElem(mstate.tvRef, subop, mstate.base, rhs);
-  }
+  auto const result = [&]{
+    if (mcodeIsProp(mk.mcode)) {
+      return *SetOpProp(mstate.tvRef, arGetContextClass(vmfp()),
+                        subop, mstate.base, key, rhs);
+    } else if (mcodeIsElem(mk.mcode)) {
+      return SetOpElem(subop, mstate.base, key, rhs);
+    } else {
+      return SetOpNewElem(subop, mstate.base, rhs);
+    }
+  }();
 
   vmStack().popC();
-  tvIncRefGen(*result);
-  mFinal(mstate, nDiscard, *result);
+  tvIncRefGen(result);
+  mFinal(mstate, nDiscard, result);
 }
 
 OPTBLD_INLINE void iopUnsetM(uint32_t nDiscard, MemberKey mk) {

@@ -929,9 +929,9 @@ void setNewElemArray(tv_lval base, TypedValue val) {
 
 TypedValue setOpElem(tv_lval base, TypedValue key,
                      TypedValue val, SetOpOp op) {
-  TypedValue localTvRef;
-  auto result = HPHP::SetOpElem(localTvRef, op, base, key, &val);
-  return cGetRefShuffle(localTvRef, result);
+  auto const result = HPHP::SetOpElem(op, base, key, &val);
+  tvIncRefGen(result);
+  return result;
 }
 
 StringData* stringGetI(StringData* base, uint64_t x) {

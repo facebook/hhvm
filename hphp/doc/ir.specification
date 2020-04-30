@@ -2996,12 +2996,12 @@ fields of that struct for holding intermediate values.
 
   Returns an lval to the element of keyset S0 at the known position S1.
 
-| ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell) S(PtrToMISCell), MElem
+| ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base.
 
-| ElemUX, D(LvalToMembCell), S(LvalToCell) S(Cell) S(PtrToMISCell), MElem
+| ElemUX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
 
   Like ElemX, but used for intermediate element lookups that may modify the
   base as part of an unset operation.

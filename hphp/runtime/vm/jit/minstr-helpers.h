@@ -401,9 +401,9 @@ ELEM_HELPER_TABLE(X)
   m(elemID,    KeyType::Int)  \
   m(elemSD,    KeyType::Str)  \
 
-#define X(nm, keyType)                                                      \
-inline tv_lval nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
-  return ElemD<keyType>(tvRef, base, key);                                  \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  return ElemD<keyType>(base, key);                      \
 }
 ELEMD_HELPER_TABLE(X)
 #undef X
@@ -414,9 +414,9 @@ ELEMD_HELPER_TABLE(X)
   m(elemIU,    KeyType::Int)  \
   m(elemSU,    KeyType::Str)  \
 
-#define X(nm, keyType)                                                      \
-inline tv_lval nm(tv_lval base, key_type<keyType> key, TypedValue& tvRef) { \
-  return ElemU<keyType>(tvRef, base, key);                                  \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  return ElemU<keyType>(base, key);                      \
 }
 ELEMU_HELPER_TABLE(X)
 #undef X
@@ -428,10 +428,10 @@ ELEMU_HELPER_TABLE(X)
   m(elemArraySD,    KeyType::Str)     \
   m(elemArrayID,    KeyType::Int)     \
 
-#define X(nm, keyType)                                          \
-inline tv_lval nm(tv_lval base, key_type<keyType> key) {        \
-  assertx(isArrayType(type(base)));                            \
-  return ElemDArray<keyType>(base, key); \
+#define X(nm, keyType)                                   \
+inline tv_lval nm(tv_lval base, key_type<keyType> key) { \
+  assertx(isArrayType(type(base)));                      \
+  return ElemDArray<keyType>(base, key);                 \
 }
 ELEM_ARRAY_D_HELPER_TABLE(X)
 #undef X

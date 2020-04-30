@@ -78,6 +78,7 @@ where
         t: &T::Trivia,
         acc: &mut ScouredComments,
     ) {
+        use oxidized::relative_path::Prefix;
         use TriviaKind::*;
         match t.kind() {
             WhiteSpace | EndOfLine | FallThrough | ExtraTokenError => {}
@@ -126,7 +127,11 @@ where
                             Some(code) => {
                                 let code = std::str::from_utf8(code).unwrap();
                                 let code: isize = std::str::FromStr::from_str(code).unwrap();
-                                if !in_block && self.disallowed_decl_fixmes.contains(&code) {
+                                let in_hhi = pos.filename().prefix() == Prefix::Hhi;
+                                if !in_block
+                                    && !in_hhi
+                                    && self.disallowed_decl_fixmes.contains(&code)
+                                {
                                     acc.add_to_misuses(line, code, p);
                                 } else {
                                     acc.add_to_fixmes(line, code, p);

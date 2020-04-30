@@ -31,6 +31,11 @@ let hhi_contents = "<?hh
 const string C = 4;
 "
 
+let hhconfig_contents =
+  "ignored_fixme_codes = 4110
+disallowed_decl_fixmes = 4110
+"
+
 let errors =
   {|
 File "/f.php", line 5, characters 10-10:
@@ -46,12 +51,17 @@ You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error 4110 (Typi
 
 let test () =
   Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename "ignored_fixme_codes = 4110";
+  TestDisk.set hhconfig_filename hhconfig_contents;
   let hhconfig_path =
     Relative_path.create Relative_path.Root hhconfig_filename
   in
   let options = ServerArgs.default_options ~root in
   let (config, _) = ServerConfig.load ~silent:false hhconfig_path options in
-  let env = Test.setup_server ~custom_config:config ~hhi_files:[(hhi_name, hhi_contents)] () in
+  let env =
+    Test.setup_server
+      ~custom_config:config
+      ~hhi_files:[(hhi_name, hhi_contents)]
+      ()
+  in
   let env = Test.setup_disk env [(file_name, file_contents)] in
   Test.assert_env_errors env errors

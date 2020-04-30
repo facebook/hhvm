@@ -831,7 +831,7 @@ void print_cls(Output& out, const PreClass* cls) {
       name = name.substr(0, p);
     }
   }
-  out.fmt(".class{} {}",
+  out.fmt(".class{} {}{}",
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
               cls->hoistability() != PreClass::NotHoistable),
     name,

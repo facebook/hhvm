@@ -104,4 +104,6 @@ function int_mul_overflow(int $a, int $b): int;
  * manipulate rounding of the result.
  */
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
+
+const int PREG_FB__PRIVATE__HSL_IMPL = (1 << 29);
 } // HH namespace

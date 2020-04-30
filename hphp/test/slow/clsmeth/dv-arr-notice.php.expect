@@ -2,18 +2,22 @@ static_ret_varr(): return notice (wanted: HH\varray got: clsmeth)!
 static_ret_darr(): return notice (wanted: HH\darray got: clsmeth)!
 static_ret_darr(): return notice (wanted: HH\darray got: varray)!
 static_ret_arr(): return notice (wanted: array got: clsmeth)!
+static_ret_arr(): return notice (wanted: array got: varray)!
 static_ret_varr(): return notice (wanted: HH\varray got: clsmeth)!
 static_ret_darr(): return notice (wanted: HH\darray got: clsmeth)!
 static_ret_darr(): return notice (wanted: HH\darray got: varray)!
 static_ret_arr(): return notice (wanted: array got: clsmeth)!
+static_ret_arr(): return notice (wanted: array got: varray)!
 dynamic_ret_varr(): return notice (wanted: HH\varray got: clsmeth)!
 dynamic_ret_darr(): return notice (wanted: HH\darray got: clsmeth)!
 dynamic_ret_darr(): return notice (wanted: HH\darray got: varray)!
 dynamic_ret_arr(): return notice (wanted: array got: clsmeth)!
+dynamic_ret_arr(): return notice (wanted: array got: varray)!
 dynamic_ret_varr(): return notice (wanted: HH\varray got: clsmeth)!
 dynamic_ret_darr(): return notice (wanted: HH\darray got: clsmeth)!
 dynamic_ret_darr(): return notice (wanted: HH\darray got: varray)!
 dynamic_ret_arr(): return notice (wanted: array got: clsmeth)!
+dynamic_ret_arr(): return notice (wanted: array got: varray)!
 call_varr(): argument notice (wanted: HH\varray got: clsmeth)!
 array(2) {
   [0]=>
@@ -30,28 +34,7 @@ array(2) {
   string(3) "bar"
 }
 call_arr(): argument notice (wanted: array got: clsmeth)!
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-call_varr(): argument notice (wanted: HH\varray got: clsmeth)!
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-call_darr(): argument notice (wanted: HH\darray got: clsmeth)!
-call_darr(): argument notice (wanted: HH\darray got: varray)!
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-call_arr(): argument notice (wanted: array got: clsmeth)!
+call_arr(): argument notice (wanted: array got: varray)!
 array(2) {
   [0]=>
   string(3) "Foo"
@@ -74,6 +57,7 @@ array(2) {
   string(3) "bar"
 }
 call_arr(): argument notice (wanted: array got: clsmeth)!
+call_arr(): argument notice (wanted: array got: varray)!
 array(2) {
   [0]=>
   string(3) "Foo"
@@ -96,6 +80,30 @@ array(2) {
   string(3) "bar"
 }
 call_arr(): argument notice (wanted: array got: clsmeth)!
+call_arr(): argument notice (wanted: array got: varray)!
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+call_varr(): argument notice (wanted: HH\varray got: clsmeth)!
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+call_darr(): argument notice (wanted: HH\darray got: clsmeth)!
+call_darr(): argument notice (wanted: HH\darray got: varray)!
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+call_arr(): argument notice (wanted: array got: clsmeth)!
+call_arr(): argument notice (wanted: array got: varray)!
 array(2) {
   [0]=>
   string(3) "Foo"

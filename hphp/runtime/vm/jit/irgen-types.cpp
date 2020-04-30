@@ -1303,16 +1303,15 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
         }
-        if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
-          if (getAnnotMetaType(tc.type()) == AnnotMetaType::DArray) {
-            gen(
-              env,
-              RaiseHackArrParamNotice,
-              RaiseHackArrParamNoticeData { tc, id, true },
-              cns(env, staticEmptyVArray()),
-              cns(env, func)
-            );
-          }
+        if (tc.raiseClsMethHackArrCompatNotice()) {
+          ARRPROV_USE_RUNTIME_LOCATION();
+          gen(
+            env,
+            RaiseHackArrParamNotice,
+            RaiseHackArrParamNoticeData { tc, id, true },
+            cns(env, empty_varray().get()),
+            cns(env, func)
+          );
         }
         auto clsMethArr = convertClsMethToVec(env, val);
         discard(env, 1);
@@ -1420,16 +1419,15 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
         }
-        if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
-          if (getAnnotMetaType(tc.type()) == AnnotMetaType::DArray) {
-            gen(
-              env,
-              RaiseHackArrParamNotice,
-              RaiseHackArrParamNoticeData { tc, id, false },
-              cns(env, staticEmptyVArray()),
-              cns(env, func)
-            );
-          }
+        if (tc.raiseClsMethHackArrCompatNotice()) {
+          ARRPROV_USE_RUNTIME_LOCATION();
+          gen(
+            env,
+            RaiseHackArrParamNotice,
+            RaiseHackArrParamNoticeData { tc, id, false },
+            cns(env, empty_varray().get()),
+            cns(env, func)
+          );
         }
         auto clsMethArr = convertClsMethToVec(env, val);
         stLocRaw(env, id, fp(env), clsMethArr);
@@ -1554,19 +1552,17 @@ void verifyPropType(IRGS& env,
           );
         }
       }
-      if (RuntimeOption::EvalHackArrCompatTypeHintNotices) {
-        if (getAnnotMetaType(tc->type()) == AnnotMetaType::DArray) {
-          ARRPROV_USE_RUNTIME_LOCATION();
-          gen(
-            env,
-            RaiseHackArrPropNotice,
-            RaiseHackArrTypehintNoticeData { *tc },
-            cls,
-            cns(env, empty_varray().get()),
-            cns(env, slot),
-            cns(env, isSProp)
-          );
-        }
+      if (tc->raiseClsMethHackArrCompatNotice()) {
+        ARRPROV_USE_RUNTIME_LOCATION();
+        gen(
+          env,
+          RaiseHackArrPropNotice,
+          RaiseHackArrTypehintNoticeData { *tc },
+          cls,
+          cns(env, empty_varray().get()),
+          cns(env, slot),
+          cns(env, isSProp)
+        );
       }
       *coerce = convertClsMethToVec(env, val);
       return true;

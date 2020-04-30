@@ -322,8 +322,7 @@ namespace {
 
 template <typename F>
 void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
-                         const Func* func,
-                         F args) {
+                         const Func* func, F args) {
   assertx(func->isBuiltin() && "func is not a builtin");
   assertx(numArgs == func->numParams());
 
@@ -347,35 +346,34 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       targetType = tc.underlyingDataType();
     }
 
-    // Check if we have the right type, or if its a Variant.
-    if (!targetType || equivDataTypes(type(tv), *targetType)) {
-      if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices) ||
-          !tc.isArray() ||
-          !tvIsArray(tv)) {
-        continue;
+    // Checks if we need to raise an error due to a dvarray typehint mismatch.
+    // Precondition: the DataType of the TypedValue is correct.
+    auto const check_dvarray = [&]{
+      assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
+      if (!RO::EvalHackArrCompatTypeHintNotices ||
+          !tvIsArray(tv) || !tc.isArray()) {
+        return;
       }
 
-      auto const raise = [&] {
-        auto const ad = val(tv).parr;
-        if (tc.isVArray()) {
-          return !ad->isVArray();
-        } else if (tc.isDArray()) {
-          return !ad->isDArray();
-        } else if (tc.isVArrayOrDArray()) {
-          return ad->isNotDVArray() ||
-                 RuntimeOption::EvalHackArrCompatTypeHintPolymorphism;
-        } else {
-          return !ad->isNotDVArray();
-        }
+      auto const ad = val(tv).parr;
+      auto const error = [&] {
+        if (tc.isVArray()) return !ad->isVArray();
+        if (tc.isDArray()) return !ad->isDArray();
+        if (tc.isVArrayOrDArray()) return !ad->isDVArray();
+        return ad->isDVArray();
       }();
-      if (raise) {
-        raise_hackarr_compat_type_hint_param_notice(
-          func,
-          val(tv).parr,
-          tc.displayName().c_str(),
-          i
-        );
+
+      auto const notice = RO::EvalHackArrCompatTypeHintPolymorphism &&
+                          tc.isVArrayOrDArray();
+      if (error || notice) {
+        auto const name = tc.displayName().data();
+        raise_hackarr_compat_type_hint_param_notice(func, ad, name, i);
       }
+    };
+
+    // Check if we have the right type, or if its a Variant.
+    if (!targetType || equivDataTypes(type(tv), *targetType)) {
+      check_dvarray();
       continue;
     }
 
@@ -395,26 +393,17 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       }
       continue;
     }
-    if (tvIsClsMeth(tv)) {
-      auto raise = [&] {
-        if (RuntimeOption::EvalVecHintNotices) {
-          raise_clsmeth_compat_type_hint(
-            func, tc.displayName(func->cls()), i);
-        }
+    if (tvIsClsMeth(tv) && tc.convertClsMethToArrLike()) {
+      if (RuntimeOption::EvalVecHintNotices) {
+        raise_clsmeth_compat_type_hint(func, tc.displayName(func->cls()), i);
       };
-      if (RuntimeOption::EvalHackArrDVArrs) {
-        if (isVecType(*targetType)) {
-          tvCastToVecInPlace(tv);
-          raise();
-          continue;
-        }
+      if (RO::EvalHackArrDVArrs) {
+        tvCastToVecInPlace(tv);
       } else {
-        if (isArrayType(*targetType)) {
-          tvCastToVArrayInPlace(tv);
-          raise();
-          continue;
-        }
+        tvCastToVArrayInPlace(tv);
+        check_dvarray();
       }
+      continue;
     }
 
     auto msg = param_type_error_message(

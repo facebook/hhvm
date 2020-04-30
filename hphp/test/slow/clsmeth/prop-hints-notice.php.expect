@@ -2,6 +2,7 @@
 [CLSMETH NOTICE] Props::priv_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_static (wanted: HH\varray, got: clsmeth)
 array
@@ -12,6 +13,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_static (wanted: ?HH\darray, got: clsmeth)
 [HAM NOTICE] Props::priv_sprop_opt_varray_static (wanted: ?HH\darray, got: varray)
@@ -22,6 +24,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_static (wanted: HH\varray, got: clsmeth)
 array
@@ -32,6 +35,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_static (wanted: ?HH\darray, got: clsmeth)
 [HAM NOTICE] Props::priv_sprop_opt_varray_static (wanted: ?HH\darray, got: varray)
@@ -42,6 +46,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -52,6 +57,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -62,6 +68,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -72,6 +79,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -82,6 +90,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -92,6 +101,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -102,6 +112,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -112,6 +123,7 @@ array
 [CLSMETH NOTICE] Props::priv_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::priv_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -122,6 +134,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_static (wanted: HH\varray, got: clsmeth)
 array
@@ -132,6 +145,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 array
@@ -142,6 +156,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_static (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_static (wanted: HH\varray, got: clsmeth)
 array
@@ -152,6 +167,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_static (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 array
@@ -162,6 +178,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -172,6 +189,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -182,6 +200,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -192,6 +211,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -202,6 +222,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -212,6 +233,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -222,6 +244,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 array
@@ -232,6 +255,7 @@ array
 [CLSMETH NOTICE] Props::pub_sprop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_sprop_opt_array_dynamic (wanted: ?array, got: varray)
 array
 [CLSMETH NOTICE] Props::pub_sprop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 array
@@ -242,6 +266,7 @@ array
 [CLSMETH NOTICE] Props::priv_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_static (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -252,6 +277,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -262,6 +288,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_static (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -272,6 +299,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -282,6 +310,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -292,6 +321,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -302,6 +332,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -312,6 +343,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -322,6 +354,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -332,6 +365,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -342,6 +376,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -352,6 +387,7 @@ clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::priv_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::priv_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -362,6 +398,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_static (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -372,6 +409,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -382,6 +420,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_static (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_static (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -392,6 +431,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_static (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_static (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_static (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_static (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -402,6 +442,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -412,6 +453,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -422,6 +464,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -432,6 +475,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -442,6 +486,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -452,6 +497,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth
@@ -462,6 +508,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_trav_dynamic (wanted: HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_varray_dynamic (wanted: HH\varray, got: clsmeth)
 clsmeth
@@ -472,6 +519,7 @@ clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_trav_dynamic (wanted: ?HH\Traversable, got: clsmeth)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: clsmeth)
+[HAM NOTICE] Props::pub_prop_opt_array_dynamic (wanted: ?array, got: varray)
 clsmeth
 [CLSMETH NOTICE] Props::pub_prop_opt_varray_dynamic (wanted: ?HH\varray, got: clsmeth)
 clsmeth

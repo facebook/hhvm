@@ -1587,13 +1587,15 @@ SSATmp* maybeCoerceValue(
 
   if (target <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
     if (!val->type().maybe(TClsMeth)) return bail();
+    auto const& tc = func->params()[id].typeConstraint;
+    if (!tc.convertClsMethToArrLike()) return bail();
+
     return cond(
       env,
       [&] (Block* f) { return gen(env, CheckType, TClsMeth, f, val); },
       [&] (SSATmp* methVal) {
         if (RuntimeOption::EvalVecHintNotices) {
-          raiseClsmethCompatTypeHint(
-            env, id, func, func->params()[id].typeConstraint);
+          raiseClsmethCompatTypeHint(env, id, func, tc);
         }
         auto const ret = update(convertClsMethToVec(env, methVal));
         decRef(env, methVal);
@@ -1675,6 +1677,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             paramIdx,
             callee,
             [&] (SSATmp* val) {
+              if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
               gen(env, StLoc, LocalId{paramIdx}, fp(env), val);
               return val;
             },
@@ -1723,7 +1726,10 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             ty,
             paramIdx,
             callee,
-            [&] (SSATmp* val) { return val; },
+            [&] (SSATmp* val) {
+              if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
+              return val;
+            },
             [&] {
               gen(env, ThrowParameterWrongType,
                   FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
@@ -1779,6 +1785,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           paramIdx,
           callee,
           [&] (SSATmp* val) {
+            if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
             gen(env, StStk, off, sp(env), val);
             env.irb->exceptionStackBoundary();
             return val;

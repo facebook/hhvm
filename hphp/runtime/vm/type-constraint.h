@@ -288,15 +288,11 @@ struct TypeConstraint {
     return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr;
   }
 
-  bool isClsMethCompactVec() const {
-    return isVec() || isVecOrDict() || isArrayLike() ||
-           interface_supports_arrlike(m_typeName);
-  }
+  // Returns true if we should convert a ClsMeth to a varray for this typehint.
+  bool convertClsMethToArrLike() const;
 
-  bool isClsMethCompactVArr() const {
-    return isVArray() || isVArrayOrDArray() || isArray() || isArrayLike() ||
-           interface_supports_arrlike(m_typeName);
-  }
+  // Returns true if we must notice after converting a ClsMeth to varray.
+  bool raiseClsMethHackArrCompatNotice() const;
 
   AnnotType type()  const { return m_type; }
 

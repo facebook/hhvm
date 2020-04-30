@@ -18,8 +18,7 @@ use hhbc_ast_rust::FatalOp;
 use hhbc_hhas_rust::{context::Context, print_program, Write};
 use instruction_sequence_rust::Error;
 use itertools::{Either, Either::*};
-use ocamlrep::{rc::RcOc, FromError, FromOcamlRep, Value};
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::rc::RcOc;
 use options::{LangFlags, Options, Php7Flags, PhpismFlags};
 use oxidized::{
     ast as Tast, namespace_env::Env as NamespaceEnv, parser_options::ParserOptions, pos::Pos,
@@ -33,7 +32,6 @@ use stack_limit::StackLimit;
 /// Common input needed for compilation.  Extra care is taken
 /// so that everything is easily serializable at the FFI boundary
 /// until the migration from OCaml is fully complete
-#[derive(Debug, FromOcamlRep)]
 pub struct Env {
     pub filepath: RelativePath,
     pub config_jsons: Vec<String>,
@@ -54,19 +52,13 @@ bitflags! {
     }
 }
 
-impl FromOcamlRep for EnvFlags {
-    fn from_ocamlrep(value: Value<'_>) -> Result<Self, FromError> {
-        Ok(EnvFlags::from_bits(value.as_int().unwrap() as u8).unwrap())
-    }
-}
-
 /// Compilation profile. All times are in seconds,
 /// except when they are ignored and should not be reported,
 /// such as in the case hhvm.log_extern_compiler_perf is false
 /// (this avoids the need to read Options from OCaml, as
 /// they can be simply returned as NaNs to signal that
 /// they should _not_ be passed back as JSON to HHVM process)
-#[derive(Debug, ToOcamlRep)]
+#[derive(Debug)]
 pub struct Profile {
     pub parsing_t: f64,
     pub codegen_t: f64,
@@ -82,7 +74,7 @@ pub fn is_ignored_duration(dt: &f64) -> bool {
 }
 
 pub fn from_text<W>(
-    env: &Env,
+    env: Env,
     stack_limit: &StackLimit,
     writer: &mut W,
     text: &[u8],

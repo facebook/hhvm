@@ -38,7 +38,6 @@ type options = {
   log_stats: bool;
   for_debugger_eval: bool;
   disable_toplevel_elaboration: bool;
-  rust_emitter: bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -112,7 +111,6 @@ let parse_options () =
   let log_stats = ref false in
   let for_debugger_eval = ref false in
   let disable_toplevel_elaboration = ref false in
-  let rust_emitter = ref false in
   let usage =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
   in
@@ -165,9 +163,6 @@ let parse_options () =
       ( "--disable-toplevel-elaboration",
         Arg.Unit (fun () -> disable_toplevel_elaboration := true),
         "Disable toplevel definition elaboration" );
-      ( "--rust-emitter",
-        Arg.Unit (fun () -> rust_emitter := true),
-        "Enable rust emitter" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -210,7 +205,6 @@ let parse_options () =
     extract_facts = !extract_facts;
     for_debugger_eval = !for_debugger_eval;
     disable_toplevel_elaboration = !disable_toplevel_elaboration;
-    rust_emitter = !rust_emitter;
   }
 
 let fail_daemon file error =
@@ -288,44 +282,6 @@ let log_fail compiler_options filename exc ~stack =
     ~filename:(Relative_path.to_absolute filename)
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
-
-let do_compile_rust
-    ~is_systemlib
-    ~config_jsons
-    (compiler_options : options)
-    filename
-    source_text =
-  let env =
-    Compile_ffi.
-      {
-        re_filepath = filename;
-        re_config_jsons = config_jsons;
-        re_config_list = compiler_options.config_list;
-        re_flags =
-          ( ( if is_systemlib then
-              1
-            else
-              0 )
-          lor ( if is_file_path_for_evaled_code filename then
-                2
-              else
-                0 )
-          lor ( if compiler_options.for_debugger_eval then
-                4
-              else
-                0 )
-          lor ( if compiler_options.dump_symbol_refs then
-                8
-              else
-                0 )
-          lor
-          if compiler_options.disable_toplevel_elaboration then
-            16
-          else
-            0 );
-      }
-  in
-  Compile_ffi.rust_from_text_ffi env source_text
 
 let do_compile
     ~is_systemlib
@@ -424,20 +380,10 @@ let process_single_source_unit
     source_text =
   try
     let debug_time = new_debug_time () in
-    if compiler_options.extract_facts then
-      let (output, hhbc_options) =
+    let (output, hhbc_options) =
+      if compiler_options.extract_facts then
         extract_facts ~compiler_options ~config_jsons ~filename source_text
-      in
-      handle_output filename output hhbc_options debug_time
-    else if compiler_options.rust_emitter then
-      do_compile_rust
-        ~is_systemlib
-        ~config_jsons
-        compiler_options
-        filename
-        source_text
-    else
-      let (output, hhbc_options) =
+      else
         do_compile
           ~is_systemlib
           ~config_jsons
@@ -445,8 +391,8 @@ let process_single_source_unit
           filename
           source_text
           debug_time
-      in
-      handle_output filename output hhbc_options debug_time
+    in
+    handle_output filename output hhbc_options debug_time
   with exc ->
     let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats then
@@ -705,10 +651,7 @@ let decl_and_run_mode compiler_options =
             ([compiler_options.filename], handle_output)
           (* Actually execute the compilation(s) *)
         in
-        if
-          compiler_options.filename <> ""
-          && Sys.is_directory compiler_options.filename
-        then
+        if Sys.is_directory compiler_options.filename then
           P.eprintf
             "%s is a directory, directory is not supported."
             compiler_options.filename

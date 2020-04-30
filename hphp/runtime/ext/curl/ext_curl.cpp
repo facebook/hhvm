@@ -891,7 +891,16 @@ struct CurlExtension final : Extension {
     HHVM_RC_INT_SAME(CURLE_SSL_CONNECT_ERROR);
     HHVM_RC_INT_SAME(CURLE_SSL_ENGINE_NOTFOUND);
     HHVM_RC_INT_SAME(CURLE_SSL_ENGINE_SETFAILED);
-    HHVM_RC_INT_SAME(CURLE_SSL_PEER_CERTIFICATE);
+    if (CURLE_SSL_PEER_CERTIFICATE == CURLE_SSL_CACERT) {
+      // In older curl libraries, this was 51, but then it became
+      // equal to CURLE_SSL_CACERT, which breaks enums which include
+      // both values. Keep the old value for now. We can consider
+      // killing it later (after removing it from the hack code that
+      // uses it).
+      HHVM_RC_INT(CURLE_SSL_PEER_CERTIFICATE, 51);
+    } else {
+      HHVM_RC_INT_SAME(CURLE_SSL_PEER_CERTIFICATE);
+    }
     HHVM_RC_INT_SAME(CURLE_TELNET_OPTION_SYNTAX);
     HHVM_RC_INT_SAME(CURLE_TOO_MANY_REDIRECTS);
     HHVM_RC_INT_SAME(CURLE_UNKNOWN_TELNET_OPTION);

@@ -83,8 +83,8 @@ pub fn localize_targs<'a>(
     env: &mut Env<'a>,
     use_pos: &'a Pos,
     use_name: &'a str,
-    tparams: &'a Vec<DTparam>,
-    targs: &Vec<ast::Targ>,
+    tparams: &'a [DTparam],
+    targs: &[ast::Targ],
 ) -> Vec<tast::Targ<'a>> {
     if targs.len() != 0 {
         unimplemented!("Explicit type arguments not supported")

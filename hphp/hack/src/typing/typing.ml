@@ -1812,6 +1812,7 @@ and expr_
         ~nullsafe:None
         ~coerce_from_ty:None
         ~is_nonnull:false
+        ~explicit_targs:[]
         env
         ty1
         (CIexpr instance)
@@ -1856,6 +1857,7 @@ and expr_
           ~is_method:true
           ~nullsafe:None
           ~coerce_from_ty:None
+          ~explicit_targs:[]
           env
           local_obj_ty
           (CI (pos, class_name))
@@ -3031,6 +3033,7 @@ and expr_
                   ~is_method:false
                   ~nullsafe:None
                   ~coerce_from_ty:None
+                  ~explicit_targs:[]
                   env
                   obj
                   cid
@@ -3947,6 +3950,7 @@ and assign_ p ur env e1 ty2 =
         ~is_method:false
         ~nullsafe
         ~coerce_from_ty:(Some (p, ur, ty2))
+        ~explicit_targs:[]
         env
         obj_ty
         (CIexpr e1)
@@ -4843,6 +4847,7 @@ and dispatch_call
           ~obj_pos:pos
           ~coerce_from_ty:None
           ~is_nonnull:false
+          ~explicit_targs:[]
           env
           ty1
           e1

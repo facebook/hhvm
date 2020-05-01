@@ -14,6 +14,7 @@ use oxidized::relative_path::RelativePath;
 use oxidized::shallow_decl_defs::{ShallowClass, ShallowMethod};
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
+use typing_heap_rust::Class;
 
 pub fn empty_global_env<'a>(
     builder: &'a TypeBuilder<'a>,
@@ -162,5 +163,19 @@ impl<'a> Env<'a> {
     pub fn get_construct<'b>(&mut self, class: &'b ShallowClass) -> &'b Option<ShallowMethod> {
         // TODO(hrust) add dependencies
         &class.constructor
+    }
+
+    pub fn get_member<'b>(
+        &self,
+        class: &'b ShallowClass,
+        member_id: &str,
+        is_method: bool,
+    ) -> Option<&'b ShallowMethod> {
+        // TODO(hrust) add dependencies
+        if is_method {
+            Class::get_method(class, member_id)
+        } else {
+            unimplemented!()
+        }
     }
 }

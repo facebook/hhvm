@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::shallow_decl_defs::ShallowClass;
+use oxidized::shallow_decl_defs::{ShallowClass, ShallowMethod};
 use oxidized::typing_defs_core::Tparam;
 
 pub struct Class {
@@ -17,5 +17,10 @@ impl Class {
     pub fn tparams(&self) -> &Vec<Tparam> {
         // TODO(hrust) missing logic: count + lazy / eager
         &self.sc.tparams
+    }
+
+    pub fn get_method<'a>(class: &'a ShallowClass, id: &str) -> Option<&'a ShallowMethod> {
+        // TODO(hrust) missing logic: count + lazy / eager
+        class.methods.iter().find(|m| id == m.name.name())
     }
 }

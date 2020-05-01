@@ -8,6 +8,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::typing_object_get;
 use crate::typing_phase::{self, MethodInstantiation};
 use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
@@ -234,26 +235,69 @@ fn check_call<'a>(
 fn dispatch_call<'a>(
     env: &mut Env<'a>,
     pos: &Pos,
-    _call_type: &ast::CallType,
+    call_type: &ast::CallType,
     ast::Expr(fpos, fun_expr): &'a ast::Expr,
     explicit_targs: &Vec<ast::Targ>,
-    el: &'a Vec<ast::Expr>,
+    args: &'a Vec<ast::Expr>,
     unpacked_arg: &Option<ast::Expr>,
     _in_suspend: bool,
 ) -> (Ty<'a>, tast::Expr_<'a>) {
     match fun_expr {
         ast::Expr_::Id(x) => {
-            let (fty, targs) = fun_type_of_id(env, x, explicit_targs, el);
-            let (tel, unpacked_arg, rty) = call(env, pos, fty, el, unpacked_arg);
+            let (function_ty, type_args) = fun_type_of_id(env, x, explicit_targs, args);
+            let (args, unpacked_arg, return_ty) = call(env, pos, function_ty, args, unpacked_arg);
             // TODO(hrust) reactivity stuff
-            let fte = tast::Expr(
-                (fpos, fty),
+            let fun_expr = tast::Expr(
+                (fpos, function_ty),
                 tast::Expr_::Id(Box::new(typing_naming::canonicalize(x))),
             );
             (
-                rty,
-                tast::Expr_::mk_call(tast::CallType::Cnormal, fte, targs, tel, unpacked_arg),
+                return_ty,
+                tast::Expr_::mk_call(call_type.clone(), fun_expr, type_args, args, unpacked_arg),
             )
+        }
+        ast::Expr_::ObjGet(x) => {
+            let (receiver, method_id, nullflavor) = x.as_ref();
+            let ast::Expr(pos_method_id, method_id_) = method_id;
+            match method_id_ {
+                ast::Expr_::Id(method_id_) => {
+                    // TODO(hrust) set is_method below depending on call type
+                    let is_method = true;
+                    let receiver = expr(env, receiver);
+                    // TODO(hrust) use nullflavor here
+                    let nullsafe = None;
+                    let (function_ty, type_args) = typing_object_get::obj_get(
+                        env,
+                        is_method,
+                        nullsafe,
+                        &receiver,
+                        method_id_,
+                        explicit_targs,
+                    );
+                    // TODO(hrust) coroutine check
+                    let (args, unpacked_arg, return_ty) =
+                        call(env, pos, function_ty, args, unpacked_arg);
+                    let method_id = tast::Expr(
+                        (pos_method_id, function_ty),
+                        tast::Expr_::Id(method_id_.clone()),
+                    );
+                    let fun_expr = tast::Expr(
+                        (fpos, function_ty),
+                        tast::Expr_::ObjGet(Box::new((receiver, method_id, nullflavor.clone()))),
+                    );
+                    (
+                        return_ty,
+                        tast::Expr_::mk_call(
+                            call_type.clone(),
+                            fun_expr,
+                            type_args,
+                            args,
+                            unpacked_arg,
+                        ),
+                    )
+                }
+                _ => unimplemented!(),
+            }
         }
         x => unimplemented!("{:#?}", x),
     }

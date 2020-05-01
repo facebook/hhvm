@@ -120,7 +120,7 @@ let rec obj_get
     ~is_method
     ~nullsafe
     ~coerce_from_ty
-    ?(explicit_targs = [])
+    ~explicit_targs
     env
     ty1
     cid
@@ -490,7 +490,7 @@ and obj_get_
     ~obj_pos
     ~coerce_from_ty
     ~is_nonnull
-    ?(explicit_targs = [])
+    ~explicit_targs
     env
     ty1
     cid

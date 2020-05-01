@@ -13,7 +13,7 @@ val obj_get :
   nullsafe:Ast_defs.pos option ->
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
-  ?explicit_targs:Nast.targ list ->
+  explicit_targs:Nast.targ list ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.class_id_ ->
@@ -29,7 +29,7 @@ val obj_get_ :
   coerce_from_ty:
     (Ast_defs.pos * Typing_reason.ureason * Typing_defs.locl_ty) option ->
   is_nonnull:bool ->
-  ?explicit_targs:Nast.targ list ->
+  explicit_targs:Nast.targ list ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.class_id_ ->

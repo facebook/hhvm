@@ -836,6 +836,7 @@ and simplify_subtype_i
                       ~is_method:false
                       ~coerce_from_ty:None
                       ~nullsafe:None
+                      ~explicit_targs:[]
                       env
                       ty_sub
                       class_id

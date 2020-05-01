@@ -705,6 +705,9 @@ int64_t HHVM_METHOD(SQLite3Result, columntype,
                     int64_t column) {
   auto *data = Native::data<SQLite3Result>(this_);
   data->validate();
+  if (!sqlite3_data_count(data->m_stmt->m_raw_stmt)) {
+    return false;
+  }
   return sqlite3_column_type(data->m_stmt->m_raw_stmt, column);
 }
 

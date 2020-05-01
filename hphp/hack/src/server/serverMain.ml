@@ -1044,23 +1044,23 @@ let program_init genv env =
   in
   let (init_approach, approach_name) = resolve_init_approach genv in
   Hh_logger.log "Initing with approach: %s" approach_name;
-  let (env, init_type, init_error, state_distance) =
+  let (env, init_type, init_error, init_error_stack, state_distance) =
     let (env, init_result) = ServerInit.init ~init_approach genv env in
     match init_approach with
-    | ServerInit.Remote_init _ -> (env, "remote", None, None)
+    | ServerInit.Remote_init _ -> (env, "remote", None, None, None)
     | ServerInit.Write_symbol_info
     | ServerInit.Full_init ->
-      (env, "fresh", None, None)
-    | ServerInit.Parse_only_init -> (env, "parse-only", None, None)
+      (env, "fresh", None, None, None)
+    | ServerInit.Parse_only_init -> (env, "parse-only", None, None, None)
     | ServerInit.Saved_state_init _ ->
       begin
         match init_result with
         | ServerInit.Load_state_succeeded distance ->
-          (env, "state_load", None, distance)
-        | ServerInit.Load_state_failed err ->
-          (env, "state_load_failed", Some err, None)
+          (env, "state_load", None, None, distance)
+        | ServerInit.Load_state_failed (err, stack) ->
+          (env, "state_load_failed", Some err, Some stack, None)
         | ServerInit.Load_state_declined reason ->
-          (env, "state_load_declined", Some reason, None)
+          (env, "state_load_declined", Some reason, None, None)
       end
   in
   let env =
@@ -1092,6 +1092,7 @@ let program_init genv env =
     ~state_distance
     ~approach_name
     ~init_error
+    ~init_error_stack
     ~init_type;
   env
 

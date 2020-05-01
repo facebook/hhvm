@@ -90,7 +90,7 @@ let print_wait_msg (progress_callback : string option -> unit) (root : Path.t) :
   let had_warning = Option.is_some !progress_warning in
   check_progress root;
   if not had_warning then
-    Option.iter !progress_warning ~f:(Printf.eprintf "%s\n%!");
+    Option.iter !progress_warning ~f:(Printf.eprintf "\n%s\n%!");
   let progress = Option.value !progress ~default:default_progress_message in
   let final_suffix =
     if Option.is_some !progress_warning then

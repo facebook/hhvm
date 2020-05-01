@@ -671,7 +671,7 @@ let load_state
   | (_env, ServerInit.Load_state_declined s) ->
     Printf.eprintf "> DECLINED %s\n" s;
     assert false
-  | (_env, ServerInit.Load_state_failed s) ->
+  | (_env, ServerInit.Load_state_failed (s, _stack)) ->
     Printf.eprintf "> FAILED %s\n" s;
     assert false
 

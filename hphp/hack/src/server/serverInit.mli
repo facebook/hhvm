@@ -41,7 +41,7 @@ type init_result =
    * distance is unknown, thus None. *)
   | Load_state_succeeded of int option
   (* Loading error *)
-  | Load_state_failed of string
+  | Load_state_failed of string * Utils.callstack
   (* This option means we didn't even try to load a saved state *)
   | Load_state_declined of string
 

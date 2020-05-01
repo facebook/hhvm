@@ -156,15 +156,14 @@ let init
           | (false, _) -> ("fallback", Exit_status.No_error)
         in
         let msg = Printf.sprintf "%s [%s]" msg next_step_descr in
-        let msg_verbose = Printf.sprintf "%s\n%s" msg stack in
-        HackEventLogger.load_state_exn msg_verbose;
-        Hh_logger.log "Could not load saved state: %s" msg_verbose;
+        HackEventLogger.load_state_exn msg stack;
+        Hh_logger.log "Could not load saved state: %s\n%s\n" msg stack;
         (match next_step with
         | Exit_status.No_error ->
           ServerProgress.send_to_monitor
             (MonitorRpc.PROGRESS_WARNING (Some msg));
           ( ServerLazyInit.full_init genv env,
-            Load_state_failed msg_verbose,
+            Load_state_failed (msg, Utils.Callstack stack),
             false )
         | _ ->
           let finale_data =

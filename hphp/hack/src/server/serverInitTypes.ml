@@ -40,7 +40,7 @@ type init_approach =
 (** Docs are in .mli *)
 type init_result =
   | Load_state_succeeded of int option
-  | Load_state_failed of string
+  | Load_state_failed of string * Utils.callstack
   | Load_state_declined of string
 
 (** returns human-readable string, an indication of whether auto-retry is sensible, and stack *)

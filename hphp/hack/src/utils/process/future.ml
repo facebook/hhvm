@@ -96,6 +96,7 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
   let { Process_types.name; args; stack = Utils.Callstack stack } =
     invocation_info
   in
+  let stack = stack |> Exception.clean_stack in
   let cmd_and_args =
     Printf.sprintf "`%s %s`" name (String.concat ~sep:" " args)
   in
@@ -107,29 +108,36 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
       | Unix.WSIGNALED i -> Printf.sprintf "killed with signal %n" i
       | Unix.WSTOPPED i -> Printf.sprintf "stopped with signal %n" i
     in
-    let stderrs = String_utils.split_on_newlines stderr in
-    let first_stderr =
-      match stderrs with
-      | [] -> ""
-      | s :: _ -> " - " ^ s
-    in
-    ( Printf.sprintf "%s %s%s" cmd_and_args status first_stderr,
-      Utils.Callstack (Printf.sprintf "STDERR:\n%s\n\n%s" stderr stack) )
+    ( Printf.sprintf "%s - %s\n%s" cmd_and_args status stderr,
+      Utils.Callstack stack )
   | Timed_out { stdout; stderr } ->
-    ( Printf.sprintf "%s timed out" cmd_and_args,
-      Utils.Callstack
-        (Printf.sprintf "STDOUT:\n%s\n\nSTDERR:\n%s\n%s" stdout stderr stack) )
+    ( Printf.sprintf
+        "%s timed out\nSTDOUT:\n%s\nSTDERR:\n%s\n"
+        cmd_and_args
+        stdout
+        stderr,
+      Utils.Callstack stack )
   | Process_aborted ->
     (Printf.sprintf "%s aborted" cmd_and_args, Utils.Callstack stack)
   | Continuation_raised e ->
+    let stack =
+      (Exception.get_backtrace_string e |> Exception.clean_stack)
+      ^ "-----\n"
+      ^ stack
+    in
     ( Printf.sprintf "Continuation failure - %s" (Exception.get_ctor_string e),
-      Utils.Callstack (Exception.get_backtrace_string e) )
+      Utils.Callstack stack )
   | Transformer_raised e ->
+    let stack =
+      (Exception.get_backtrace_string e |> Exception.clean_stack)
+      ^ "-----\n"
+      ^ stack
+    in
     ( Printf.sprintf
         "%s - unable to process output - %s"
         cmd_and_args
         (Exception.get_ctor_string e),
-      Utils.Callstack (Exception.get_backtrace_string e ^ "\n" ^ stack) )
+      Utils.Callstack stack )
 
 let error_to_exn e = raise (Failure e)
 

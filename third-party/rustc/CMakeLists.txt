@@ -13,13 +13,13 @@ include(HPHPFunctions)
 SET_HHVM_THIRD_PARTY_SOURCE_ARGS(
   RUST_DOWNLOAD_ARGS
   Linux_URL
-  "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-unknown-linux-gnu.tar.gz"
+  "https://static.rust-lang.org/dist/rust-1.43.0-x86_64-unknown-linux-gnu.tar.gz"
   Darwin_URL
-  "https://static.rust-lang.org/dist/rust-1.39.0-x86_64-apple-darwin.tar.gz"
+  "https://static.rust-lang.org/dist/rust-1.43.0-x86_64-apple-darwin.tar.gz"
   Linux_HASH
-  "SHA256=b10a73e5ba90034fe51f0f02cb78f297ed3880deb7d3738aa09dc5a4d9704a25"
+  "SHA512=f2118652dc4f5d4353a693ec277bfcce649c493ffd0cff4a4992ca0bbddeb49de5f1cb99b4f93b6d271edfa0dae40dd052a52a548dda3a32addbed738cdb86cc"
   Darwin_HASH
-  "SHA256=3736d49c5e9592844e1a5d5452883aeaf8f1e25d671c1bc8f01e81c1766603b5"
+  "SHA512=e1b3b1c41131af65f0487c742c0085b589e7c0eb73ce7ca4a38d30c9ce1af4d04686a141dde8cbaa7afc56bcb670e4d6f9b8b2dbad4700b89c5db371829a4ec4"
 )
 
 set(RUST_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/rust-prefix")

@@ -1396,7 +1396,7 @@ void RuntimeOption::Load(
   const std::vector<std::string>& hdfClis /* = std::vector<std::string>() */,
   std::vector<std::string>* messages /* = nullptr */,
   std::string cmd /* = "" */) {
-  ARRPROV_USE_RUNTIME_LOCATION();
+  ARRPROV_USE_RUNTIME_LOCATION_FORCE();
 
   // Intialize the memory manager here because various settings and
   // initializations that we do here need it

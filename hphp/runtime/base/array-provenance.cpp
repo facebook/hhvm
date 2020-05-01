@@ -314,6 +314,15 @@ TagOverride::TagOverride(Tag tag)
   }
 }
 
+TagOverride::TagOverride(Tag tag, TagOverride::ForceTag)
+  : m_valid(true)
+{
+  if (m_valid) {
+    m_saved_tag = *rl_tag_override;
+    *rl_tag_override = tag;
+  }
+}
+
 TagOverride::~TagOverride() {
   if (m_valid) {
     *rl_tag_override = m_saved_tag;

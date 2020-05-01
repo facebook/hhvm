@@ -257,7 +257,10 @@ Tag tagFromSK(SrcKey sk);
  * backtrace
  */
 struct TagOverride {
+  enum class ForceTag {};
+
   explicit TagOverride(Tag tag);
+  TagOverride(Tag tag, ForceTag);
   ~TagOverride();
 
   TagOverride(TagOverride&&) = delete;
@@ -280,6 +283,15 @@ private:
 
 #define ARRPROV_USE_RUNTIME_LOCATION() \
   ::HPHP::arrprov::TagOverride ap_override(ARRPROV_HERE())
+
+// Set tag even if provenanance is currently disabled.
+// This is useful for runtime initialization and config parsing code, where
+// Eval.ArrayProvenance may change as result of config parsing.
+#define ARRPROV_USE_RUNTIME_LOCATION_FORCE()      \
+  ::HPHP::arrprov::TagOverride ap_override(       \
+      ARRPROV_HERE(),                             \
+      ::HPHP::arrprov::TagOverride::ForceTag{}    \
+  )
 
 #define ARRPROV_USE_POISONED_LOCATION()           \
   ::HPHP::arrprov::TagOverride ap_override(       \

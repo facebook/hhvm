@@ -372,10 +372,10 @@ void libxml_add_error(const std::string &msg) {
 void php_libxml_node_free(xmlNodePtr node, bool force) {
   if (node) {
     if (node->_private) {
-      // When running in Eval.LibXMLUseSafeSubtrees, linked nodes should only be
-      // freed out from under their resources when in requestShutdown() or
-      // sweeping. In all other cases release should be deferred.
-      assertx(!RuntimeOption::EvalLibXMLUseSafeSubtrees || force);
+      // Linked nodes should only be freed out from under their resources when
+      // in requestShutdown() or sweeping. In all other cases release should
+      // be deferred.
+      assertx(force);
 
       // XXX: we may be sweeping- so don't create a smart pointer
       reinterpret_cast<XMLNodeData*>(node->_private)->reset();
@@ -505,8 +505,6 @@ struct LibXmlDeferredTrees final {
   }
 
   static bool hasRefs(xmlNodePtr root) {
-    if (!RuntimeOption::EvalLibXMLUseSafeSubtrees) return false;
-
     // If we are cleaning up the request then all roots must be freed, don't
     // bother with additional work. Callers of php_libxml_node_free_resource
     // should force unconditional cleanup.
@@ -559,8 +557,8 @@ static void php_libxml_node_free_resource(xmlNodePtr node, bool force) {
   assertx(!MemoryManager::sweeping() || force);
   if (!isOrphanedRoot(node)) return;
 
-  // If we are running in Eval.LibXMLUseSafeSubtrees mode and a subtree still
-  // holds a reference to the root then don't do anything here.
+  // If we are a subtree still holds a reference to the root then we cannot
+  // free our resources here.
   if (!force && LibXmlDeferredTrees::hasRefs(node)) {
     // We shouldn't have even attempted to free the document until all of its
     // children have been released (it's shared/reference counted).

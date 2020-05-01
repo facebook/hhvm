@@ -789,7 +789,6 @@ struct RuntimeOption {
    * 2 - Throw when incrementing or decrementing non numeric types
    */                                                                   \
   F(uint32_t, WarnOnIncDecInvalidType, 0)                               \
-  F(bool, LibXMLUseSafeSubtrees,       true)                            \
   F(bool, MoreAccurateMemStats,        true)                            \
   F(bool, AllowScopeBinding,           false)                           \
   F(bool, JitNoGdb,                    true)                            \

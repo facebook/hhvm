@@ -1337,37 +1337,6 @@ static Variant php_xpath_eval(DOMXPath* domxpath, const String& expr,
   return ret;
 }
 
-static void node_list_unlink(xmlNodePtr node) {
-  // This recursive walk is designed to protect actively referenced LibXML
-  // elements from having their subtrees freed. When running with the option
-  // Eval.LibXMLUseSafeSubtrees set this can't happen as nodes collectively
-  // share ownership of their subtree. Short-circuit this logic to prevent the
-  // early destruction of XMLNodes from being observed via the linkage of their
-  // respective subtrees.
-  if (RuntimeOption::EvalLibXMLUseSafeSubtrees) return;
-
-  while (node != nullptr) {
-    if (node->_private) {
-      libxml_register_node(node)->unlink(); // release node if unused
-    } else {
-      if (node->type == XML_ENTITY_REF_NODE) break;
-      node_list_unlink(node->children);
-      switch (node->type) {
-      case XML_ATTRIBUTE_DECL:
-      case XML_DTD_NODE:
-      case XML_DOCUMENT_TYPE_NODE:
-      case XML_ENTITY_DECL:
-      case XML_ATTRIBUTE_NODE:
-      case XML_TEXT_NODE:
-        break;
-      default:
-        node_list_unlink((xmlNodePtr)node->properties);
-      }
-    }
-    node = node->next;
-  }
-}
-
 static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id) {
   if (is_id == 1 && attrp->atype != XML_ATTRIBUTE_ID) {
     xmlChar *id_val = xmlNodeListGetString(attrp->doc, attrp->children, 1);
@@ -1792,7 +1761,6 @@ static void domnode_nodevalue_write(const Object& obj, const Variant& value) {
   case XML_ELEMENT_NODE:
   case XML_ATTRIBUTE_NODE:
     if (nodep->children) {
-      node_list_unlink(nodep->children);
       php_libxml_node_free_resource((xmlNodePtr) nodep->children);
       nodep->children = nullptr;
     }
@@ -2030,7 +1998,6 @@ static void domnode_textcontent_write(const Object& obj, const Variant& value) {
 
   if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE) {
     if (nodep->children) {
-      node_list_unlink(nodep->children);
       php_libxml_node_free_resource((xmlNodePtr) nodep->children);
       nodep->children = nullptr;
     }
@@ -2714,9 +2681,6 @@ static Variant domattr_value_read(const Object& obj) {
 
 static void domattr_value_write(const Object& obj, const Variant& value) {
   CHECK_WRITE_ATTR(attrp);
-  if (attrp->children) {
-    node_list_unlink(attrp->children);
-  }
   String svalue = value.toString();
   xmlNodeSetContentLen((xmlNodePtr)attrp, (xmlChar*)svalue.data(),
                        svalue.size() + 1);
@@ -4346,7 +4310,6 @@ bool HHVM_METHOD(DOMElement, removeAttribute,
   }
   switch (attrp->type) {
   case XML_ATTRIBUTE_NODE:
-    node_list_unlink(attrp->children);
     libxml_register_node(attrp)->unlink(); // release attrp if unused
     break;
   case XML_NAMESPACE_DECL:
@@ -4419,7 +4382,6 @@ Variant HHVM_METHOD(DOMElement, removeAttributeNS,
     }
   }
   if (attrp && attrp->type != XML_ATTRIBUTE_DECL) {
-    node_list_unlink(attrp->children);
     // release attrp if unused
     libxml_register_node((xmlNodePtr)attrp)->unlink();
   }
@@ -4455,7 +4417,6 @@ Variant HHVM_METHOD(DOMElement, setAttribute,
   if (attr != nullptr) {
     switch (attr->type) {
     case XML_ATTRIBUTE_NODE:
-      node_list_unlink(attr->children);
       break;
     case XML_NAMESPACE_DECL:
       return false;
@@ -4581,8 +4542,6 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
     return false;
   }
   xmlNsPtr nsptr;
-  xmlNode *nodep;
-  xmlAttr *attr;
   char *localname = nullptr, *prefix = nullptr;
   int errorcode = 0, is_xmlns = 0, name_valid;
   if (name.empty()) {
@@ -4598,11 +4557,6 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
                               namespaceuri.size(), name.size());
   if (errorcode == 0) {
     if (namespaceuri.size() > 0) {
-      nodep = (xmlNodePtr)xmlHasNsProp(elemp, (xmlChar*)localname,
-                                       (xmlChar*)namespaceuri.data());
-      if (nodep != nullptr && nodep->type != XML_ATTRIBUTE_DECL) {
-        node_list_unlink(nodep->children);
-      }
       if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") ||
           (prefix == nullptr &&
           xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) &&
@@ -4660,8 +4614,8 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
       }
 
       if (errorcode == 0 && is_xmlns == 0) {
-        attr = xmlSetNsProp(elemp, nsptr, (xmlChar*)localname,
-                            (xmlChar*)value.data());
+        xmlSetNsProp(elemp, nsptr, (xmlChar*)localname,
+                     (xmlChar*)value.data());
       }
     } else {
       name_valid = xmlValidateName((xmlChar*)localname, 0);
@@ -4669,11 +4623,7 @@ Variant HHVM_METHOD(DOMElement, setAttributeNS,
         errorcode = INVALID_CHARACTER_ERR;
         stricterror = 1;
       } else {
-        attr = xmlHasProp(elemp, (xmlChar*)localname);
-        if (attr != nullptr && attr->type != XML_ATTRIBUTE_DECL) {
-          node_list_unlink(attr->children);
-        }
-        attr = xmlSetProp(elemp, (xmlChar*)localname, (xmlChar*)value.data());
+        xmlSetProp(elemp, (xmlChar*)localname, (xmlChar*)value.data());
       }
     }
   }

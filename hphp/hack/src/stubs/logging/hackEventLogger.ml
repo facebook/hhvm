@@ -242,6 +242,8 @@ let first_redecl_end _ _ = ()
 
 let second_redecl_end _ _ = ()
 
+let primary_position_error ~current_file:_ ~message:_ ~stack:_ = ()
+
 let type_check_end _ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ = ()
 
 let notifier_returned _ _ = ()

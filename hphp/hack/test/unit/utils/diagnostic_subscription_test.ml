@@ -199,5 +199,6 @@ let tests =
   [("test_update", test_update); ("test_error_sources", test_error_sources)]
 
 let () =
+  EventLogger.init_fake ();
   Relative_path.(set_path_prefix Root (Path.make "/"));
   Unit_test.run_all tests

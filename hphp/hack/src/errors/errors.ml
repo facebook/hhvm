@@ -780,12 +780,21 @@ let check_pos_msg pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let current_file = fst !current_context in
   if
-    (not (Relative_path.equal current_file Relative_path.default))
-    && not (Relative_path.equal (Pos.filename pos) current_file)
+    Relative_path.equal current_file Relative_path.default
+    || Relative_path.equal (Pos.filename pos) current_file
   then
-    (Pos.make_from current_file, badpos_message) :: pos_msg_l
-  else
     pos_msg_l
+  else
+    let message =
+      pos_msg_l
+      |> List.map ~f:(fun (pos, msg) ->
+             Pos.print_verbose_relative pos ^ ": " ^ msg)
+    in
+    let stack =
+      Exception.get_current_callstack_string 99 |> Exception.clean_stack
+    in
+    HackEventLogger.primary_position_error ~current_file ~message ~stack;
+    (Pos.make_from current_file, badpos_message) :: pos_msg_l
 
 let rec add_applied_fixme code pos =
   if ServerLoadFlag.get_no_load () then

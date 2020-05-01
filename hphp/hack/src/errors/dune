@@ -5,6 +5,7 @@
   (libraries
     core_kernel
     hh_autoimport
+    logging
     pos
     server_load_flag
     (select coroutine_errors.ml from

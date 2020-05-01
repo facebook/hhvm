@@ -817,9 +817,17 @@ let rec class_def ctx c =
      * of the class. *)
     None
   | Some tc ->
-    let env = Typing_requirements.check_class env tc in
-    if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
-    Some (class_def_ env c tc)
+    (* If there are duplicate definitions of the class then we will end up
+       * checking one AST with respect to the decl corresponding to the other definition.
+       * Naming has already detected duplicates, so let's just avoid cascading unhelpful
+       * typing errors, and also avoid triggering the bad position assert
+       *)
+    if not (Pos.equal (fst c.c_name) (Cls.pos tc)) then
+      None
+    else
+      let env = Typing_requirements.check_class env tc in
+      if shallow_decl_enabled ctx then Typing_inheritance.check_class env tc;
+      Some (class_def_ env c tc)
 
 and class_def_ env c tc =
   let env =
@@ -1691,38 +1699,31 @@ let record_def_def ctx rd =
 let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
     _ * Typing_inference_env.t_global_with_pos list =
   let convert_def = function
+    (* Sometimes typing will just return `None` but that should only be the case
+     * if an error had already been registered e.g. in naming
+     *)
     | Fun f ->
       begin
         match fun_def ctx f with
-        | Some (f, env) -> (Aast.Fun f, [env])
-        | None ->
-          failwith
-          @@ Printf.sprintf
-               "Error when typechecking function: %s"
-               (snd f.f_name)
+        | Some (f, env) -> Some (Aast.Fun f, [env])
+        | None -> None
       end
-    | Constant gc -> (Aast.Constant (gconst_def ctx gc), [])
-    | Typedef td -> (Aast.Typedef (Typing.typedef_def ctx td), [])
+    | Constant gc -> Some (Aast.Constant (gconst_def ctx gc), [])
+    | Typedef td -> Some (Aast.Typedef (Typing.typedef_def ctx td), [])
     | Class c ->
       begin
         match class_def ctx c with
-        | Some (c, envs) -> (Aast.Class c, envs)
-        | None ->
-          failwith
-          @@ Printf.sprintf
-               "Error in declaration of class: %s\n%s"
-               (snd c.c_name)
-               ( Caml.Printexc.get_callstack 99
-               |> Caml.Printexc.raw_backtrace_to_string )
+        | Some (c, envs) -> Some (Aast.Class c, envs)
+        | None -> None
       end
-    | RecordDef rd -> (Aast.RecordDef (record_def_def ctx rd), [])
+    | RecordDef rd -> Some (Aast.RecordDef (record_def_def ctx rd), [])
     (* We don't typecheck top level statements:
      * https://docs.hhvm.com/hack/unsupported/top-level
      * so just create the minimal env for us to construct a Stmt.
      *)
     | Stmt s ->
       let env = Env.empty ctx Relative_path.default None in
-      (Aast.Stmt (snd (Typing.stmt env s)), [])
+      Some (Aast.Stmt (snd (Typing.stmt env s)), [])
     | Namespace _
     | NamespaceUse _
     | SetNamespaceEnv _
@@ -1731,7 +1732,7 @@ let nast_to_tast_gienv ~(do_tast_checks : bool) ctx nast :
         "Invalid nodes in NAST. These nodes should be removed during naming."
   in
   Nast_check.program ctx nast;
-  let (tast, envs) = List.unzip @@ List.map nast convert_def in
+  let (tast, envs) = List.unzip @@ List.filter_map nast convert_def in
   let envs = List.concat envs in
   if do_tast_checks then Tast_check.program ctx tast;
   (tast, envs)

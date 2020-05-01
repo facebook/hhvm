@@ -19,6 +19,7 @@ hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_hhas_rust = { path = "../hhbc_hhas" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
 ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }

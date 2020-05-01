@@ -273,6 +273,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "compile_ffi"
+version = "0.0.0"
+dependencies = [
+ "compile_rust 0.0.0",
+ "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
+ "ocamlrep_ocamlpool 0.0.0",
+ "oxidized 0.0.0",
+ "stack_limit 0.0.0",
+]
+
+[[package]]
 name = "compile_rust"
 version = "0.0.0"
 dependencies = [
@@ -289,6 +301,7 @@ dependencies = [
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",

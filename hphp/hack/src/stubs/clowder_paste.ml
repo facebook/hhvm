@@ -6,6 +6,11 @@
  *
  *)
 
-let clowder_paste ?(timeout : float option) (input : string) =
+let clowder_upload_and_get_url ?(timeout : float option) (input : string) =
+  ignore (timeout, input);
+  failwith "not implemented in this build"
+
+let clowder_upload_and_get_shellscript
+    ?(timeout : float option) (input : string) =
   ignore (timeout, input);
   failwith "not implemented in this build"

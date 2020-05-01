@@ -1446,7 +1446,9 @@ let announce_ide_failure (error_data : ClientIdeMessage.stopped_reason) :
       error_data.long_user_message
       error_data.debug_details
   in
-  let%lwt upload_result = Clowder_paste.clowder_paste ~timeout:10. input in
+  let%lwt upload_result =
+    Clowder_paste.clowder_upload_and_get_url ~timeout:10. input
+  in
   let append_to_log =
     match upload_result with
     | Ok url -> Printf.sprintf "\nMore details: %s" url

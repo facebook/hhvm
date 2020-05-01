@@ -218,16 +218,30 @@ let rage_www (env : env) : ((string * string) option * string) Lwt.t =
         ~timeout:60.0
         [| "diff"; "-r"; mergebase; "--cwd"; Path.to_string env.root |]
     in
-    let (patch_item, patch_instructions) =
+    let%lwt (patch_item, patch_instructions) =
       match www_diff_result with
       | Error failure ->
-        (None, format_failure "Unable to determine diff" failure)
-      | Ok { Lwt_utils.Process_success.stdout; _ } ->
-        if String.is_empty stdout then
-          (None, "")
+        Lwt.return (None, format_failure "Unable to determine diff" failure)
+      | Ok { Lwt_utils.Process_success.stdout = hgdiff; _ } ->
+        if String.is_empty hgdiff then
+          Lwt.return (None, "")
         else
-          ( Some ("www_hgdiff.txt", stdout),
-            "hg patch --no-commit www_hgdiff.txt" )
+          let%lwt clowder_result =
+            Clowder_paste.clowder_upload_and_get_shellscript
+              ~timeout:60.0
+              hgdiff
+          in
+          (match clowder_result with
+          | Error failure ->
+            Lwt.return
+              ( Some ("www_hgdiff.txt", stdout),
+                Printf.sprintf
+                  "hg patch --no-commit www_hgdiff.txt\n\nnote: clowder failed to put:\n%s"
+                  failure )
+          | Ok clowder_script ->
+            Lwt.return
+              ( Some ("www_hgdiff.txt", stdout),
+                clowder_script ^ " | hg patch --no-commit -" ))
     in
     Lwt.return
       ( patch_item,

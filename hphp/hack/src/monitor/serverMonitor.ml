@@ -701,9 +701,11 @@ struct
         with
         | Exit_status.Exit_with _ as e -> raise e
         | e ->
+          let e = Exception.wrap e in
           HackEventLogger.ack_and_handoff_exception e;
           Hh_logger.log
-            "Handling client connection failed. Ignoring connection attempt.";
+            "Handling client connection failed. Ignoring connection attempt.\n%s\n"
+            (Exception.to_string e |> Exception.clean_stack);
           Unix.close fd;
           env
       with

@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![feature(rustc_private)]
+
 use hhas_attribute_rust::HhasAttribute;
 use hhas_type::{constraint, Info};
 use label_rust::Label;

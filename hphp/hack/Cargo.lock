@@ -281,6 +281,7 @@ dependencies = [
  "ocamlrep_derive 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
  "oxidized 0.0.0",
+ "parser_core_types 0.0.0",
  "stack_limit 0.0.0",
 ]
 

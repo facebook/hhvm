@@ -19,5 +19,5 @@ type rust_env = {
   re_flags: int;
 }
 
-external rust_from_text_ffi : rust_env -> string -> unit
+external rust_from_text_ffi : rust_env -> Full_fidelity_source_text.t -> unit
   = "compile_from_text_ffi"

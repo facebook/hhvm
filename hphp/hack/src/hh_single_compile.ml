@@ -435,7 +435,7 @@ let process_single_source_unit
         ~config_jsons
         compiler_options
         filename
-        source_text
+        (Full_fidelity_source_text.make filename source_text)
     else
       let (output, hhbc_options) =
         do_compile

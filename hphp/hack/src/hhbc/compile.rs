@@ -91,6 +91,20 @@ where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
+    let source_text = SourceText::make(RcOc::new(env.filepath.clone()), text);
+    from_text_(env, stack_limit, writer, source_text)
+}
+
+pub fn from_text_<W>(
+    env: &Env,
+    stack_limit: &StackLimit,
+    writer: &mut W,
+    source_text: SourceText,
+) -> anyhow::Result<Profile>
+where
+    W: Write,
+    W::Error: Send + Sync + 'static, // required by anyhow::Error
+{
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
     let log_extern_compiler_perf = opts.log_extern_compiler_perf();
@@ -105,8 +119,7 @@ where
         parse_file(
             &opts,
             stack_limit,
-            &env.filepath,
-            text,
+            source_text,
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
         )
     });
@@ -250,8 +263,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
 fn parse_file(
     opts: &Options,
     stack_limit: &StackLimit,
-    filepath: &RelativePath,
-    text: &[u8],
+    source_text: SourceText,
     elaborate_namespaces: bool,
 ) -> Either<(Pos, String, bool), (Tast::Program, bool)> {
     let mut aast_env = AastEnv::default();
@@ -265,8 +277,11 @@ fn parse_file(
     aast_env.keep_errors = false;
     aast_env.elaborate_namespaces = elaborate_namespaces;
     aast_env.parser_options = create_parser_options(opts);
+    aast_env.lower_coroutines = opts
+        .hhvm
+        .hack_lang_flags
+        .contains(LangFlags::ENABLE_COROUTINES);
 
-    let source_text = SourceText::make(RcOc::new(filepath.clone()), text);
     let indexed_source_text = IndexedSourceText::new(source_text);
     let ast_result = AastParser::from_text(&aast_env, &indexed_source_text, Some(stack_limit));
     match ast_result {

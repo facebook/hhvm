@@ -132,7 +132,7 @@ AliasClass pointee(
         // it.
         return AEmpty;
       }
-      return AMIStateTV;
+      return AMIStateTempBase;
     }
 
     auto elem = [&] () -> AliasClass {
@@ -198,7 +198,7 @@ AliasClass pointee(
   if (type.maybe(TMemToFrameCell))   ret = ret | AFrameAny;
   if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
   if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
-  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTV;
+  if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase;
   if (type.maybe(TMemToClsInitCell)) ret = ret | AHeapAny;
   if (type.maybe(TMemToClsCnsCell))  ret = ret | AHeapAny;
   if (type.maybe(TMemToSPropCell))   ret = ret | ARdsAny;

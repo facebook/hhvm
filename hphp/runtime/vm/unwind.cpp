@@ -79,23 +79,6 @@ void discardStackTemps(const ActRec* const fp, Stack& stack) {
          implicit_cast<void*>(stack.top()));
 }
 
-void discardMemberTVRefs(PC pc) {
-  auto const throwOp = peek_op(pc);
-
-  /*
-   * If the opcode that threw was a member instruction, we have to decref tvRef
-   * and tvRef2. AssertRAT* instructions can appear while these values are live
-   * but they will never throw.
-   */
-  if (UNLIKELY(isMemberDimOp(throwOp) || isMemberFinalOp(throwOp))) {
-    auto& mstate = vmMInstrState();
-    tvDecRefGen(mstate.tvRef);
-    tvWriteUninit(mstate.tvRef);
-    tvDecRefGen(mstate.tvRef2);
-    tvWriteUninit(mstate.tvRef2);
-  }
-}
-
 /**
  * Discard the current frame, assuming that a PHP exception given in
  * phpException argument, or C++ exception (phpException == nullptr)
@@ -393,8 +376,6 @@ UnwinderResult unwindVM(Either<ObjectData*, Exception*> exception,
   SCOPE_EXIT {
     ITRACE(1, "leaving unwinder for exception: {}\n", describeEx(exception));
   };
-
-  discardMemberTVRefs(pc);
 
   while (true) {
     auto const func = fp->func();

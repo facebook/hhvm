@@ -256,8 +256,6 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     };
 
     add_mis(AMIStateTempBase);
-    add_mis(AMIStateTvRef);
-    add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
   }
 
@@ -305,8 +303,6 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     };
 
     add_mis(AMIStateTempBase);
-    add_mis(AMIStateTvRef);
-    add_mis(AMIStateTvRef2);
     add_mis(AMIStateBase);
   }
 

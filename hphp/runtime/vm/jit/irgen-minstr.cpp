@@ -297,17 +297,9 @@ void stMBase(IRGS& env, SSATmp* base) {
 }
 
 /*
- * Get pointers to specific MInstrState fields. After accessing tvRef / tvRef2,
- * we must "ratchet" these references, but that's not needed for tvTempBase.
+ * Get a pointer to the "tvTempBase" field used to materialize values that
+ * are created on the fly during a member operation sequence.
  */
-SSATmp* tvRefPtr(IRGS& env) {
-  env.irb->fs().setNeedRatchet(true);
-  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvRef)));
-}
-SSATmp* tvRef2Ptr(IRGS& env) {
-  env.irb->fs().setNeedRatchet(true);
-  return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvRef2)));
-}
 SSATmp* tvTempBasePtr(IRGS& env) {
   return gen(env, LdMIStateAddr, cns(env, offsetof(MInstrState, tvTempBase)));
 }
@@ -1064,63 +1056,6 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   return SimpleOp::None;
 }
 
-/*
- * Store Uninit to tvRef and tvRef2.
- */
-void initTvRefs(IRGS& env) {
-  gen(env, StMem, tvRefPtr(env), cns(env, TUninit));
-  gen(env, StMem, tvRef2Ptr(env), cns(env, TUninit));
-}
-
-/*
- * DecRef tvRef and tvRef2.
- */
-void cleanTvRefs(IRGS& env) {
-  for (auto ptr : {tvRefPtr(env), tvRef2Ptr(env)}) {
-    decRef(env, gen(env, LdMem, TCell, ptr));
-  }
-}
-
-/*
- * If tvRef is not Uninit, DecRef tvRef2 and move tvRef's value to tvRef2,
- * storing Uninit to tvRef. Returns the adjusted base, which may point to
- * tvRef2.
- */
-SSATmp* ratchetRefs(IRGS& env, SSATmp* base) {
-  if (!env.irb->fs().needRatchet()) {
-    return base;
-  }
-
-  auto tvRef = tvRefPtr(env);
-
-  return cond(
-    env,
-    [&] (Block* taken) {
-      gen(env, CheckTypeMem, taken, TUninit, tvRef);
-    },
-    [&] { // Next: tvRef is Uninit. Do nothing.
-      return base;
-    },
-    [&] { // Taken: tvRef isn't Uninit. Ratchet the refs
-      auto tvRef2 = tvRef2Ptr(env);
-      // Clean up tvRef2 before overwriting it.
-      auto const oldRef2 = gen(env, LdMem, TCell, tvRef2);
-      decRef(env, oldRef2);
-
-      // Copy tvRef to tvRef2.
-      auto const tvRefVal = gen(env, LdMem, TCell, tvRef);
-      gen(env, StMem, tvRef2, tvRefVal);
-      // Reset tvRef.
-      gen(env, StMem, tvRef, cns(env, TUninit));
-
-      // Adjust base pointer.  Don't use 'tvRef2' here so that we don't reuse
-      // the temp.  This will let us elide uses of the register for 'tvRef2',
-      // until the Jmp we're going to emit here.
-      return gen(env, ConvPtrToLval, tvRef2Ptr(env));
-    }
-  );
-}
-
 void baseGImpl(IRGS& env, SSATmp* name, MOpMode mode) {
   if (!name->isA(TStr)) PUNT(BaseG-non-string-name);
   auto base_mode = mode != MOpMode::Unset ? mode : MOpMode::None;
@@ -1462,14 +1397,12 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
 }
 
 /*
- * Pop nDiscard elements from the stack, push the result (if present), DecRef
- * tvRef(2), and mark the member operation as complete.
+ * Pop nDiscard elements from the stack, push the result (if present),
+ * and mark the member operation as complete.
  */
 void mFinalImpl(IRGS& env, int32_t nDiscard, SSATmp* result) {
   for (auto i = 0; i < nDiscard; ++i) popDecRef(env);
-  cleanTvRefs(env);
   if (result) push(env, result);
-
   gen(env, FinishMemberOp);
 }
 
@@ -1532,7 +1465,6 @@ Block* makeCatchSet(IRGS& env, uint32_t nDiscard) {
   for (int i = 0; i < nDiscard; ++i) {
     popDecRef(env, DataTypeGeneric);
   }
-  cleanTvRefs(env);
   auto const val = gen(env, LdUnwinderValue, TCell);
   push(env, val);
 
@@ -1608,7 +1540,6 @@ void handleStrTestResult(IRGS& env, uint32_t nDiscard, SSATmp* strTestResult) {
       for (int i = 0; i < nDiscard; ++i) {
         popDecRef(env);
       }
-      cleanTvRefs(env);
       push(env, str);
       gen(env, FinishMemberOp);
       gen(env, Jmp, makeExit(env, nextBcOff(env)));
@@ -1855,20 +1786,16 @@ bool propertyMayBeCountable(const Class::Prop& prop) {
 //////////////////////////////////////////////////////////////////////
 
 void emitBaseGC(IRGS& env, uint32_t idx, MOpMode mode) {
-  initTvRefs(env);
   auto name = top(env, BCSPRelOffset{safe_cast<int32_t>(idx)});
   baseGImpl(env, name, mode);
 }
 
 void emitBaseGL(IRGS& env, int32_t locId, MOpMode mode) {
-  initTvRefs(env);
   auto name = ldLoc(env, locId, makePseudoMainExit(env), DataTypeSpecific);
   baseGImpl(env, name, mode);
 }
 
 void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
-  initTvRefs(env);
-
   auto const cls = topC(env, BCSPRelOffset{safe_cast<int32_t>(clsIdx)});
   if (!cls->isA(TCls)) PUNT(BaseSC-NotClass);
 
@@ -1884,7 +1811,6 @@ void emitBaseSC(IRGS& env, uint32_t propIdx, uint32_t clsIdx, MOpMode mode) {
 }
 
 void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
-  initTvRefs(env);
   stMBase(env, ldLocAddr(env, loc.id));
 
   auto base = ldLoc(env, loc.id, makePseudoMainExit(env), DataTypeGeneric);
@@ -1904,8 +1830,6 @@ void emitBaseL(IRGS& env, NamedLocal loc, MOpMode mode) {
 }
 
 void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
-  initTvRefs(env);
-
   auto const bcOff = BCSPRelOffset{safe_cast<int32_t>(idx)};
   auto const irOff = offsetFromIRSP(env, bcOff);
   stMBase(env, ldStkAddr(env, bcOff));
@@ -1917,7 +1841,6 @@ void emitBaseC(IRGS& env, uint32_t idx, MOpMode mode) {
 void emitBaseH(IRGS& env) {
   if (!curClass(env)) return interpOne(env);
 
-  initTvRefs(env);
   auto const base = ldThis(env);
   stMBase(env, baseValueToLval(env, base));
   env.irb->fs().setMemberBase(base);
@@ -1935,7 +1858,7 @@ void emitDim(IRGS& env, MOpMode mode, MemberKey mk) {
     PUNT(DimNewElem);
   }();
 
-  stMBase(env, ratchetRefs(env, base));
+  stMBase(env, base);
 }
 
 void emitQueryM(IRGS& env, uint32_t nDiscard, QueryMOp query, MemberKey mk) {

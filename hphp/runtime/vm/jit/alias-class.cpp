@@ -55,7 +55,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BUnknownTV:      return "UnkTV";
   case A::BUnknown:        return "Unk";
   case A::BElem:           return "Elem";
-  case A::BMIStateTV:      return "MisTV";
   case A::BMIState:        return "Mis";
   case A::BFrame:          break;
   case A::BIter:           break;
@@ -64,10 +63,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BElemS:          break;
   case A::BStack:          break;
   case A::BMITempBase:     break;
-  case A::BMITvRef:        break;
-  case A::BMITvRef2:       break;
   case A::BMIBase:         break;
-  case A::BMIPropS:        break;
   case A::BRds:            break;
   }
 
@@ -82,7 +78,6 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BUnknown:
     case A::BUnknownTV:
     case A::BElem:
-    case A::BMIStateTV:
     case A::BMIState:
       always_assert(0);
     case A::BFrame:          ret += "Fr"; break;
@@ -92,10 +87,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BElemS:          ret += "Es"; break;
     case A::BStack:          ret += "St"; break;
     case A::BMITempBase:     ret += "MiTB"; break;
-    case A::BMITvRef:        ret += "MiT1"; break;
-    case A::BMITvRef2:       ret += "MiT2"; break;
     case A::BMIBase:         ret += "MiB"; break;
-    case A::BMIPropS:        ret += "MiP"; break;
     case A::BRds:            ret += "Rds"; break;
     }
   }
@@ -649,12 +641,6 @@ bool AliasClass::isSingleLocation() const {
 AliasClass mis_from_offset(size_t offset) {
   if (offset == offsetof(MInstrState, tvTempBase)) {
     return AliasClass{AliasClass::BMITempBase};
-  }
-  if (offset == offsetof(MInstrState, tvRef)) {
-    return AliasClass{AliasClass::BMITvRef};
-  }
-  if (offset == offsetof(MInstrState, tvRef2)) {
-    return AliasClass{AliasClass::BMITvRef2};
   }
   if (offset == offsetof(MInstrState, base)) {
     return AliasClass{AliasClass::BMIBase};

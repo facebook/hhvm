@@ -307,7 +307,7 @@ TEST(AliasClass, SpecializedUnions) {
   EXPECT_TRUE(stk_and_prop.maybe(rel_stk_and_frame));
   EXPECT_FALSE(rel_stk_and_frame <= stk_and_prop);
 
-  auto const some_mis = AMIStateTvRef;
+  auto const some_mis = AMIStateTempBase;
   {
     auto const some_heap = AElemIAny;
     auto const u1 = some_heap | some_mis;
@@ -482,7 +482,7 @@ TEST(AliasClass, Pointees) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto ptr = unit.gen(LdMBase, bcctx, TLvalToCell)->dst();
   auto const acls = pointee(ptr);
-  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTV | ARdsAny, acls);
+  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTempBase | ARdsAny, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

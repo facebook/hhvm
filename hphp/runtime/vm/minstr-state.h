@@ -48,8 +48,6 @@ struct MInstrState {
   // it allows us to keep rds::Header below 128 bytes.
   TYPE_SCAN_CONSERVATIVE_FIELD(tvBuiltinReturn);
 
-  TypedValue tvRef;
-  TypedValue tvRef2;
   tv_lval base;
 
   // type-scan driven scanner

@@ -58,27 +58,22 @@ struct SSATmp;
  *                    |
  *                    |
  *                    |
- *      +---------+---+---------------+-------------------------+----+
- *      |         |                   |                         |    |
- *      |         |                   |                         |    |
- *      |         |                   |                         | RdsAny
- *      |         |                   |                         |    |
- *      |         |                HeapAny*                     |   ...
- *      |         |                   |                         |
- *      |         |            +------+------+                  |
- *      |         |            |             |                  |
- *   FrameAny  StackAny     ElemAny       PropAny           MIStateAny
- *      |         |          /    \          |                  |
- *     ...       ...   ElemIAny  ElemSAny   ...                 |
- *                        |         |                           |
- *                       ...       ...    +---------+--------+--+------+
- *                                        |         |        |         |
- *                                   MITempBase  MITvRef  MITvRef2     |
- *                                                                     |
- *                                                                     |
- *                                                  +--------+---------+
- *                                                  |        |
- *                                               MIBase**  MIPropS**
+ *      +---------+---+---------------+-------------------+----------+
+ *      |         |                   |                   |          |
+ *      |         |                   |                   |          |
+ *      |         |                   |                   |       RdsAny
+ *      |         |                   |                   |          |
+ *      |         |                HeapAny*               |         ...
+ *      |         |                   |                   |
+ *      |         |            +------+------+            |
+ *      |         |            |             |            |
+ *   FrameAny  StackAny     ElemAny       PropAny     MIStateAny
+ *      |         |          /    \          |            |
+ *     ...       ...   ElemIAny  ElemSAny   ...           |
+ *                        |         |                     |
+ *                       ...       ...             +------+------+
+ *                                                 |             |
+ *                                             MITempBase     MIBase**
  *
  *
  *   (*) AHeapAny contains some things other than ElemAny, and PropAny
@@ -86,9 +81,8 @@ struct SSATmp;
  *       lvalBlackhole, etc.)  It's hard for this to matter to client code for
  *       now because we don't expose an intersection or difference operation.
  *
- *  (**) MIBase is a pointer, and MIPropS is an encoded value, so neither is
- *       UnknownTV, but its hard to find the right spot for them in this
- *       diagram.
+ *  (**) MIBase is a pointer, so it's not UnknownTV, but it's hard to find
+ *       the right spot for it in this diagram.
  */
 struct AliasClass;
 
@@ -245,27 +239,23 @@ struct AliasClass {
     BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame          = 1U << 0,
-    BIter           = 1U << 1,
-    BProp           = 1U << 2,
-    BElemI          = 1U << 3,
-    BElemS          = 1U << 4,
-    BStack          = 1U << 5,
-    BRds            = 1U << 6,
+    BFrame      = 1U << 0,
+    BIter       = 1U << 1,
+    BProp       = 1U << 2,
+    BElemI      = 1U << 3,
+    BElemS      = 1U << 4,
+    BStack      = 1U << 5,
+    BRds        = 1U << 6,
 
     // Have no specialization, put them last.
     BMITempBase = 1U << 7,
-    BMITvRef    = 1U << 8,
-    BMITvRef2   = 1U << 9,
-    BMIBase     = 1U << 10,
-    BMIPropS    = 1U << 11,
+    BMIBase     = 1U << 8,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp,
-    BMIStateTV = BMITempBase | BMITvRef | BMITvRef2,
-    BMIState   = BMIStateTV | BMIBase | BMIPropS,
+    BMIState   = BMITempBase | BMIBase,
 
-    BUnknownTV = ~(BIter | BMIBase | BMIPropS),
+    BUnknownTV = ~(BIter | BMIBase),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -429,15 +419,12 @@ auto const ARdsAny            = AliasClass{AliasClass::BRds};
 auto const AElemIAny          = AliasClass{AliasClass::BElemI};
 auto const AElemSAny          = AliasClass{AliasClass::BElemS};
 auto const AElemAny           = AliasClass{AliasClass::BElem};
-auto const AMIStateTV         = AliasClass{AliasClass::BMIStateTV};
 auto const AMIStateAny        = AliasClass{AliasClass::BMIState};
 auto const AUnknownTV         = AliasClass{AliasClass::BUnknownTV};
 auto const AUnknown           = AliasClass{AliasClass::BUnknown};
 
 /* Alias classes for specific MInstrState fields. */
 auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
-auto const AMIStateTvRef      = AliasClass{AliasClass::BMITvRef};
-auto const AMIStateTvRef2     = AliasClass{AliasClass::BMITvRef2};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
 
 //////////////////////////////////////////////////////////////////////

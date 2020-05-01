@@ -4714,7 +4714,8 @@ let main (env : env) : Exit_status.t Lwt.t =
       in
       deferred_action := None;
       let%lwt event = get_next_event !state client ide_service in
-      log_debug "next event: %s" (event_to_string event);
+      if not (is_tick event) then
+        log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;
       ref_unblocked_time := Unix.gettimeofday ();
 

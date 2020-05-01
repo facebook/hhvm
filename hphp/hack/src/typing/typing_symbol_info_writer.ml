@@ -23,10 +23,10 @@ let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
         List.fold prog ~init:(decl_acc, def_acc) ~f:(fun (decls, defs) def ->
             match def with
             | Class _
-            | Typedef _
-            | Constant _ ->
+            | Constant _
+            | Fun _
+            | Typedef _ ->
               (def :: decls, def :: defs)
-            | Fun _ -> (def :: decls, def :: defs)
             | _ -> (decls, def :: defs)))
   in
   let symbols = IdentifySymbolService.all_symbols ctx all_defs in

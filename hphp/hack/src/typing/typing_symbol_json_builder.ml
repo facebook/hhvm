@@ -11,6 +11,7 @@ open Ast_defs
 open Decl_env
 open Hh_json
 open Hh_prelude
+open Namespace_env
 open SymbolDefinition
 open SymbolOccurrence
 
@@ -362,6 +363,19 @@ let build_type_json_nested type_name =
 let build_comment_json_nested comment =
   JSON_Object [("key", JSON_String comment)]
 
+(* Returns a singleton list containing the JSON field if there
+is a non-empty namespace in the nsenv, or else an empty list *)
+let build_ns_json_nested nsenv =
+  match nsenv.ns_name with
+  | None -> [] (* Global namespace *)
+  | Some "" -> []
+  | Some ns ->
+    [
+      ( "namespace_",
+        JSON_Object [("key", JSON_Object [("name", build_name_json_nested ns)])]
+      );
+    ]
+
 let build_signature_json_nested parameters return_type_name =
   let fields =
     let params = [("parameters", JSON_Array parameters)] in
@@ -528,6 +542,7 @@ let add_container_defn_fact clss decl_id member_decls progress =
       ("declaration", build_id_json decl_id);
       ("members", JSON_Array member_decls);
     ]
+    @ build_ns_json_nested clss.c_namespace
   in
   let (defn_pred, json_fields) =
     match get_container_kind clss with
@@ -671,6 +686,7 @@ let add_enum_defn_fact ctx enm enum_id enumerators progress =
         ("declaration", build_id_json enum_id);
         ("enumerators", JSON_Array enumerators);
       ]
+      @ build_ns_json_nested enm.c_namespace
     in
     match enm.c_enum with
     | None -> json_fields
@@ -702,15 +718,15 @@ let add_func_decl_fact name progress =
   add_fact FunctionDeclaration json_fact progress
 
 let add_func_defn_fact ctx elem decl_id progress =
-  let json_fact =
-    JSON_Object
-      [
-        ("declaration", build_id_json decl_id);
-        ("signature", build_signature_json ctx elem.f_params elem.f_ret);
-        ("isAsync", build_is_async_json elem.f_fun_kind);
-      ]
+  let json_fields =
+    [
+      ("declaration", build_id_json decl_id);
+      ("signature", build_signature_json ctx elem.f_params elem.f_ret);
+      ("isAsync", build_is_async_json elem.f_fun_kind);
+    ]
+    @ build_ns_json_nested elem.f_namespace
   in
-  add_fact FunctionDefinition json_fact progress
+  add_fact FunctionDefinition (JSON_Object json_fields) progress
 
 let add_typedef_decl_fact name elem progress =
   let is_transparent =
@@ -718,27 +734,30 @@ let add_typedef_decl_fact name elem progress =
     | Transparent -> true
     | Opaque -> false
   in
-  let json_fact =
-    JSON_Object
-      [
-        ("name", build_name_json_nested name);
-        ("isTransparent", JSON_Bool is_transparent);
-      ]
+  let json_fields =
+    [
+      ("name", build_name_json_nested name);
+      ("isTransparent", JSON_Bool is_transparent);
+    ]
+    @ build_ns_json_nested elem.t_namespace
   in
-  add_fact TypedefDeclaration json_fact progress
+  add_fact TypedefDeclaration (JSON_Object json_fields) progress
 
 let add_gconst_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact GlobalConstDeclaration json_fact progress
 
 let add_gconst_defn_fact ctx elem decl_id progress =
-  let req_fields = [("declaration", build_id_json decl_id)] in
+  let base_fields =
+    [("declaration", build_id_json decl_id)]
+    @ build_ns_json_nested elem.cst_namespace
+  in
   let json_fields =
     match elem.cst_type with
-    | None -> req_fields
+    | None -> base_fields
     | Some h ->
       let ty = get_type_from_hint ctx h in
-      ("type", build_type_json_nested ty) :: req_fields
+      ("type", build_type_json_nested ty) :: base_fields
   in
   let json_fact = JSON_Object json_fields in
   add_fact GlobalConstDefinition json_fact progress

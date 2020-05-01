@@ -110,7 +110,7 @@ impl<'a> TypeBuilder<'a> {
         self.mk(reason, Ty_::Tprim(kind))
     }
     pub fn class(&'a self, reason: PReason<'a>, name: &'a Sid, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
-        self.mk(reason, Ty_::Tclass(name, Exact::Nonexact, tys))
+        self.mk(reason, Ty_::Tclass(name, Exact::Nonexact, tys.into()))
     }
     pub fn traversable(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(reason, &self.id_traversable, vec![in &self.alloc; ty])
@@ -237,10 +237,10 @@ impl<'a> TypeBuilder<'a> {
         self.mk(reason, Ty_::Tvar(v))
     }
     pub fn union(&'a self, reason: PReason<'a>, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
-        self.mk(reason, Ty_::Tunion(tys))
+        self.mk(reason, Ty_::Tunion(tys.into()))
     }
     pub fn intersection(&'a self, reason: PReason<'a>, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
-        self.mk(reason, Ty_::Tintersection(tys))
+        self.mk(reason, Ty_::Tintersection(tys.into()))
     }
     pub fn nothing(&'a self, reason: PReason<'a>) -> Ty<'a> {
         self.union(reason, BVec::new_in(self.alloc))
@@ -267,17 +267,20 @@ impl<'a> TypeBuilder<'a> {
         self.alloc(FunParam_ { type_ })
     }
     pub fn funtype(&'a self, params: BVec<'a, FunParam<'a>>, return_: Ty<'a>) -> FunType<'a> {
-        self.alloc(FunType_ { return_, params })
+        self.alloc(FunType_ {
+            return_,
+            params: params.into(),
+        })
     }
 }
 
 /// Subtype props
 impl<'a> TypeBuilder<'a> {
     pub fn conj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Conj(Vec::from(v)))
+        self.alloc(SubtypePropEnum::Conj(v.into()))
     }
     pub fn disj(&'a self, v: BVec<'a, SubtypeProp<'a>>) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Disj(Vec::from(v)))
+        self.alloc(SubtypePropEnum::Disj(v.into()))
     }
     pub fn is_subtype(&'a self, ty1: InternalType<'a>, ty2: InternalType<'a>) -> SubtypeProp<'a> {
         self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))

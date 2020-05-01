@@ -6,11 +6,11 @@
 use crate::typing_env_types::*;
 use crate::typing_phase::localize;
 use arena_trait::Arena;
-use bumpalo::collections::Vec;
+use bumpalo::collections::Vec as BVec;
 use itertools::*;
 use oxidized::ast;
 use oxidized::ident::Ident;
-use typing_collections_rust::{SMap, Vec as AVec};
+use typing_collections_rust::{SMap, Vec};
 use typing_defs_rust::{avec, Ty};
 
 pub fn is_sub_type_for_union<'a>(env: &mut Env<'a>, ty_sub: Ty<'a>, ty_super: Ty<'a>) -> bool {
@@ -123,7 +123,7 @@ fn simplify_subtype_i<'a>(
                                         substs = substs.add(bld, &tparam.name.1, ty)
                                     }
                                     let ety_env = bld.alloc(ExpandEnv {
-                                        type_expansions: Vec::new_in(bld.alloc),
+                                        type_expansions: BVec::new_in(bld.alloc),
                                         substs,
                                     });
                                     // Iterate over all immediate supertypes, recursing through
@@ -132,7 +132,7 @@ fn simplify_subtype_i<'a>(
                                     // TODO (hrust): precompute (or cache) the transitive closure of
                                     // the extends/implements relation, so that we can instead
                                     // query if classish C inherits from classish D
-                                    let mut props = Vec::new_in(env.bld().alloc);
+                                    let mut props = BVec::new_in(env.bld().alloc);
                                     for ty in cd.extends.iter().chain(cd.implements.iter()) {
                                         let up_obj = localize(ety_env, env, ty);
                                         let prop = simplify_subtype(env, up_obj, ty_super);
@@ -166,7 +166,7 @@ fn simplify_subtype_variance<'a>(
     super_tyl: &'a Vec<Ty<'a>>,
 ) -> SubtypeProp<'a> {
     // Collect propositions in an arena-allocated vector
-    let mut props = Vec::new_in(env.bld().alloc);
+    let mut props = BVec::new_in(env.bld().alloc);
     for (tparam, &ty_sub, &ty_super) in izip!(tparaml.iter(), children_tyl.iter(), super_tyl.iter())
     {
         // Apply subtyping according to the variance of the type parameter
@@ -234,7 +234,7 @@ fn prop_to_env<'a>(env: &mut Env<'a>, prop: SubtypeProp<'a>) -> SubtypeProp<'a> 
 fn prop_to_env_<'a>(
     env: &mut Env<'a>,
     prop: SubtypeProp<'a>,
-    props_acc: &mut Vec<'a, SubtypeProp<'a>>,
+    props_acc: &mut BVec<'a, SubtypeProp<'a>>,
 ) {
     use SubtypePropEnum as SP;
     match prop {
@@ -272,8 +272,8 @@ fn prop_to_env_<'a>(
 
 fn props_to_env<'a>(
     env: &mut Env<'a>,
-    props: &AVec<'a, SubtypeProp<'a>>,
-    props_acc: &mut Vec<'a, SubtypeProp<'a>>,
+    props: &Vec<'a, SubtypeProp<'a>>,
+    props_acc: &mut BVec<'a, SubtypeProp<'a>>,
 ) {
     props
         .iter()

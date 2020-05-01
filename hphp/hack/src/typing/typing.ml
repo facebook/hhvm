@@ -3706,11 +3706,11 @@ and new_object
       in
       ((env, tel, typed_unpack_element), (c_ty, ctor_fty))
   in
-  let ((env, tel, typed_unpack_element), res) =
+  let ((env, tel, typed_unpack_element), class_types_and_ctor_types) =
     List.fold_map classes ~init:(env, [], None) ~f:gather
   in
   let (env, tel, typed_unpack_element, ty, ctor_fty) =
-    match res with
+    match class_types_and_ctor_types with
     | [] ->
       let (env, tel, _) = exprs env el in
       let (env, typed_unpack_element, _) =
@@ -3743,15 +3743,18 @@ and new_object
 and attributes_check_def env kind attrs =
   Typing_attributes.check_def env new_object kind attrs
 
-(* FIXME: we need to separate our instantiability into two parts. Currently,
- * all this function is doing is checking if a given type is inhabited --
- * that is, whether there are runtime values of type Aast. However,
- * instantiability should be the stricter notion that T has a runtime
- * constructor; that is, `new T()` should be valid. In particular, interfaces
- * are inhabited, but not instantiable.
- * To make this work with classname, we likely need to add something like
- * concrete_classname<T>, where T cannot be an interface.
- * *)
+(** Get class infos for a class expression (e.g. `parent`, `self` or
+    regular classnames) - which might resolve to a union or intersection
+    of classes - and check they are instantiable.
+
+    FIXME: we need to separate our instantiability into two parts. Currently,
+    all this function is doing is checking if a given type is inhabited --
+    that is, whether there are runtime values of type Aast. However,
+    instantiability should be the stricter notion that T has a runtime
+    constructor; that is, `new T()` should be valid. In particular, interfaces
+    are inhabited, but not instantiable.
+    To make this work with classname, we likely need to add something like
+    concrete_classname<T>, where T cannot be an interface. *)
 and instantiable_cid ?(exact = Nonexact) p env cid explicit_targs =
   let (env, tal, te, classes) =
     class_id_for_new ~exact p env cid explicit_targs
@@ -5813,7 +5816,7 @@ and static_class_id
       let tgeneric = MakeType.generic r id in
       make_result env tal (Aast.CI c) tgeneric
     else
-      let class_ = Env.get_class env (snd c) in
+      let class_ = Env.get_class env id in
       (match class_ with
       | None -> make_result env [] (Aast.CI c) (Typing_utils.mk_tany env p)
       | Some class_ ->

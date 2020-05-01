@@ -7,7 +7,7 @@ use bumpalo::Bump;
 use std::ops::Deref;
 use std::slice;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Vec<'a, T: 'a>(BVec<'a, T>);
 
 #[macro_export]

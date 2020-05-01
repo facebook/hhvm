@@ -8,7 +8,10 @@ use crate::typing_local_types::Local;
 use crate::typing_per_cont_env::{PerContEntry, TypingContKey};
 
 use decl_provider_rust as decl_provider;
-use oxidized::{ident::Ident, pos::Pos, relative_path::RelativePath};
+use oxidized::ident::Ident;
+use oxidized::pos::Pos;
+use oxidized::relative_path::RelativePath;
+use oxidized::shallow_decl_defs::{ShallowClass, ShallowMethod};
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 
@@ -154,5 +157,10 @@ impl<'a> Env<'a> {
 
     fn next_cont_opt(&self) -> Option<&'a PerContEntry<'a>> {
         self.lenv.per_cont_env.get_cont_option(TypingContKey::Next)
+    }
+
+    pub fn get_construct<'b>(&mut self, class: &'b ShallowClass) -> &'b Option<ShallowMethod> {
+        // TODO(hrust) add dependencies
+        &class.constructor
     }
 }

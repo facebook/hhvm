@@ -77,8 +77,24 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
 }
 
 impl<Ex, Fb, En, Hi> ClassId<Ex, Fb, En, Hi> {
+    pub fn annot(&self) -> &Ex {
+        &self.0
+    }
+    pub fn get(&self) -> &ClassId_<Ex, Fb, En, Hi> {
+        &self.1
+    }
     pub fn as_ciexpr(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
         self.1.as_ciexpr()
+    }
+}
+
+impl<Hi> Targ<Hi> {
+    pub fn hint(&self) -> &Hint {
+        &self.1
+    }
+
+    pub fn annot(&self) -> &Hi {
+        &self.0
     }
 }
 

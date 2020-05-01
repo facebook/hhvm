@@ -9,15 +9,14 @@ use typing_defs_rust::typing_make_type::TypeBuilder;
 
 pub fn make_locl<'a>(
     bld: &'a TypeBuilder<'a>,
-    tparams: &'a Vec<Tparam>,
-    targs: &Vec<Ty<'a>>,
+    tparams: impl IntoIterator<Item = &'a Tparam>,
+    mut targs: impl Iterator<Item = Ty<'a>>,
 ) -> SMap<'a, Ty<'a>> {
     // TODO(hrust)
     let mut substs = SMap::empty();
-    let mut targs = targs.iter();
     for tparam in tparams {
         let targ_ty: Ty = match targs.next() {
-            Some(ty) => *ty,
+            Some(ty) => ty,
             None => bld.any(bld.mk_rnone()),
         };
         substs = substs.add(bld, &tparam.name.1, targ_ty)

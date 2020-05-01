@@ -337,3 +337,53 @@ impl<'a> InferenceEnv<'a> {
         }
     }
 }
+
+pub trait IntoUnionIntersectionIterator<'a> {
+    fn into_union_inter_iter<'b>(
+        self,
+        env: &'b mut InferenceEnv<'a>,
+    ) -> UnionIntersectionIterator<'a, 'b>;
+}
+
+impl<'a> IntoUnionIntersectionIterator<'a> for Ty<'a> {
+    fn into_union_inter_iter<'b>(
+        self,
+        env: &'b mut InferenceEnv<'a>,
+    ) -> UnionIntersectionIterator<'a, 'b> {
+        UnionIntersectionIterator {
+            stack: bumpalo::vec![in env.bld.alloc; self],
+            env,
+        }
+    }
+}
+
+pub struct UnionIntersectionIterator<'a, 'b> {
+    env: &'b mut InferenceEnv<'a>,
+    stack: bumpalo::collections::Vec<'a, Ty<'a>>,
+}
+
+impl<'a, 'b> Iterator for UnionIntersectionIterator<'a, 'b> {
+    type Item = Ty<'a>;
+
+    fn next(&mut self) -> Option<Ty<'a>> {
+        while let Some(ty) = self.stack.pop() {
+            let (r, ty_) = ty.unpack();
+            match ty_ {
+                Ty_::Tvar(_) => {
+                    let ty = self.env.expand_type(ty);
+                    self.stack.push(ty);
+                }
+                Ty_::Toption(ty) => {
+                    self.stack.push(self.env.bld.null(r));
+                    self.stack.push(*ty);
+                }
+                Ty_::Tunion(tys) | Ty_::Tintersection(tys) => {
+                    // can't append here because tys not mutable
+                    tys.iter().for_each(|ty| self.stack.push(*ty));
+                }
+                _ => return Some(ty),
+            }
+        }
+        None
+    }
+}

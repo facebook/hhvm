@@ -9,7 +9,7 @@ use crate::typing_env_types::Env;
 use decl_rust::decl_subst as subst;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
-use oxidized::aast_defs::Tprim;
+use oxidized::aast_defs::{Sid, Tprim};
 use oxidized::ast;
 use oxidized::ast_defs::Id;
 use oxidized::pos::Pos;
@@ -82,7 +82,7 @@ pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: &'a DTy
 pub fn localize_targs<'a>(
     env: &mut Env<'a>,
     use_pos: &'a Pos,
-    use_name: &'a String,
+    use_name: &'a str,
     tparams: &'a Vec<DTparam>,
     targs: &Vec<ast::Targ>,
 ) -> Vec<tast::Targ<'a>> {
@@ -158,8 +158,8 @@ pub fn localize_ft<'a, 'b>(
             if !explicit_targs.is_empty() && explicit_targs.len() != ft.tparams.len() {
                 unimplemented!("Wrong number of type arguments.")
             }
-            let targ_tys = explicit_targs.iter().map(|targ| targ.0).collect();
-            let substs = subst::make_locl(env.bld(), &ft.tparams, &targ_tys);
+            let targ_tys = explicit_targs.iter().map(|targ| targ.0);
+            let substs = subst::make_locl(env.bld(), ft.tparams.iter(), targ_tys);
             ety_env.substs = substs // TODO(hrust) extend substs instead of replacing
         }
         None => {
@@ -223,4 +223,29 @@ fn localize_tparam<'a>(
 ) -> Ty<'a> {
     // TODO(hrust) wildcard case
     localize(ety_env, env, ty)
+}
+
+pub fn resolve_type_arguments_and_check_constraints<'a>(
+    env: &mut Env<'a>,
+    check_constraints: bool,
+    use_pos: &'a Pos,
+    cid: &'a Sid,
+    _class_id: &ast::ClassId,
+    tparams: &'a Vec<DTparam>,
+    targs: &Vec<ast::Targ>,
+) -> (Ty<'a>, Vec<tast::Targ<'a>>) {
+    // TODO(hrust) strip_ns of cid.name()
+    let targs = localize_targs(env, use_pos, cid.name(), tparams, targs);
+    let targs_tys = BVec::from_iter_in(
+        targs.iter().map(|targ| targ.annot()).copied(),
+        env.bld().alloc,
+    );
+    let this_ty = {
+        let r = env.bld().mk_rwitness(cid.pos());
+        env.bld().class(r, cid, targs_tys)
+    };
+    if check_constraints {
+        // TODO(hrust) check tparam constraints
+    }
+    (this_ty, targs)
 }

@@ -19,6 +19,7 @@ oxidized = { path = "../../../oxidized" }
 typing_ast_rust = { path = "../typing_ast_rust" }
 typing_collections_rust = { path = "../typing_collections_rust" }
 typing_defs_rust = { path = "../typing_defs_rust" }
+typing_heap_rust = { path = "../typing_heap" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 itertools = "0.8"
 ocaml = "0.8"

@@ -29,6 +29,10 @@ impl FunKind {
 }
 
 impl Id {
+    pub fn pos(&self) -> &Pos {
+        &self.0
+    }
+
     pub fn name(&self) -> &str {
         &self.1
     }

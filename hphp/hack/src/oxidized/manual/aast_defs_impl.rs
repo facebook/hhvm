@@ -15,6 +15,14 @@ impl Lid {
     pub fn from_counter(p: Pos, counter: isize, s: &str) -> Self {
         Self(p, (counter, String::from(s)))
     }
+
+    pub fn name(&self) -> &String {
+        crate::local_id::get_name(&self.1)
+    }
+
+    pub fn pos(&self) -> &Pos {
+        &self.0
+    }
 }
 
 impl Hint {
@@ -34,12 +42,6 @@ impl Hint {
 impl AsRef<Hint> for Hint {
     fn as_ref(&self) -> &Self {
         self
-    }
-}
-
-impl Lid {
-    pub fn name(&self) -> &String {
-        crate::local_id::get_name(&self.1)
     }
 }
 

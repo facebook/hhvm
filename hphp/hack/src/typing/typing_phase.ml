@@ -757,10 +757,9 @@ and resolve_type_arguments_and_check_constraints
       tparaml
       hintl
   in
+  let targs_tys = List.map ~f:fst type_argl in
   let this_ty =
-    mk
-      ( Reason.Rwitness (fst class_id),
-        Tclass (class_id, exact, List.map ~f:fst type_argl) )
+    mk (Reason.Rwitness (fst class_id), Tclass (class_id, exact, targs_tys))
   in
   let env =
     if check_constraints then
@@ -768,7 +767,7 @@ and resolve_type_arguments_and_check_constraints
         {
           type_expansions = [];
           this_ty;
-          substs = Subst.make_locl tparaml (List.map ~f:fst type_argl);
+          substs = Subst.make_locl tparaml targs_tys;
           from_class = Some from_class;
           quiet = false;
           on_error = Errors.unify_error_at use_pos;

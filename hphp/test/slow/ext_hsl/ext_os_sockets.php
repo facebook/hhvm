@@ -33,8 +33,8 @@ async function server(OS\FileDescriptor $server): Awaitable<void> {
   printf("Server received: '%s'\n", $data);
 }
 
-async function client(_OS\sockaddr_in $addr): Awaitable<void> {
-  $fd = _OS\socket(_OS\AF_INET, _OS\SOCK_STREAM, 0);
+async function client(_OS\sockaddr $addr): Awaitable<void> {
+  $fd = _OS\socket($addr->sa_family, _OS\SOCK_STREAM, 0);
   _OS\fcntl($fd, _OS\F_SETFL, _OS\O_NONBLOCK);
   try {
     _OS\connect($fd, $addr);
@@ -57,22 +57,40 @@ async function client(_OS\sockaddr_in $addr): Awaitable<void> {
   _OS\write($fd, "world!");
 }
 
-<<__EntryPoint>>
-async function main(): Awaitable<void> {
-  // 127.0.0.1 as a uint32; this test written before _OS\inet_aton() :)
-  $localhost = (127 << 24) + 1;
-  $server = _OS\socket(_OS\AF_INET, _OS\SOCK_STREAM, 0);
-  _OS\bind($server, new _OS\sockaddr_in(0, $localhost));
+async function do_test(_OS\sockaddr $sa): Awaitable<void> {
+  print("Initial server address:\n");
+  \var_dump($sa);
+  $server = _OS\socket($sa->sa_family, _OS\SOCK_STREAM, 0);
+  _OS\bind($server, $sa);
   _OS\listen($server, 128);
 
   // We bound to port 0, so we got a random one. To connect, we need to find
   // the real port number.
   $addr = _OS\getsockname($server);
   print("Server address from getsockname():\n");
-  \var_dump($addr);
+  var_dump($addr);
 
   concurrent {
     await server($server);
     await client($addr);
+  }
+}
+
+<<__EntryPoint>>
+async function main(): Awaitable<void> {
+  print("***** Testing AF_INET server ***\n");
+  // 127.0.0.1 as a uint32; this test written before _OS\inet_aton() :)
+  $localhost = (127 << 24) | 1;
+  $sin = new _OS\sockaddr_in(0, $localhost);
+  await do_test($sin);
+
+  print("\n\n***** Testing AF_UNIX server ***\n");
+  $tmp = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
+  $path = $tmp.'/hsl-os-server-test-'.random_int(0, PHP_INT_MAX).'.sock';
+  $sun = new _OS\sockaddr_un_pathname($path);
+  try {
+    await do_test($sun);
+  } finally {
+    unlink($path);
   }
 }

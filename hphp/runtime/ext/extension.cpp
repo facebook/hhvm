@@ -36,11 +36,6 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// Global systemlib extensions implemented entirely in PHP
-
-IMPLEMENT_DEFAULT_EXTENSION_VERSION(redis, NO_EXTENSION_VERSION_YET);
-
-///////////////////////////////////////////////////////////////////////////////
 
 Extension::Extension(const char* name, const char* version /* = "" */)
     : m_name(name)

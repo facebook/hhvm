@@ -187,6 +187,10 @@ inline VscaledDisp operator+(Vscaled vs, int32_t disp) {
   return {vs, disp};
 }
 
+inline VscaledDisp operator-(Vscaled vs, int32_t disp) {
+  return {vs, -disp};
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Vptr.
 

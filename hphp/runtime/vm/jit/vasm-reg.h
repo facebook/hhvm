@@ -107,6 +107,7 @@ struct Vreg {
 
   Vptr operator*() const;
   Vscaled operator*(int scale) const;
+  friend void operator*(int scale, const Vreg&) = delete;
 
   Vptr operator+(size_t) const;
   Vptr operator+(int32_t) const;

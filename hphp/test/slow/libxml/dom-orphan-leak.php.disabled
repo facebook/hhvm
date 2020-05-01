@@ -1,5 +1,8 @@
 <?hh
 // c.f. https://github.com/facebook/hhvm/issues/4086
+//
+// Disabling this test for now, because in interp mode, we intentionally leak
+// the results of native property handlers. We're deprecating those sometime.
 
 function foo() {
   for ($i = 0; $i < 1000; $i++) {

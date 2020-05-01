@@ -315,7 +315,7 @@ SSATmp* tvTempBasePtr(IRGS& env) {
 SSATmp* propTvRefPtr(IRGS& env, SSATmp* base, const SSATmp* key) {
   return prop_ignores_tvref(env, base, key)
     ? cns(env, Type::cns(nullptr, TPtrToMISCell))
-    : tvRefPtr(env);
+    : tvTempBasePtr(env);
 }
 
 SSATmp* ptrToInitNull(IRGS& env) {

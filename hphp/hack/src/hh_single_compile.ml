@@ -644,16 +644,7 @@ let decl_and_run_mode compiler_options =
         in
         dispatch_loop handlers
       | CLI ->
-        let dumped_options =
-          lazy
-            ( Hhbc_options.apply_config_overrides_statelessly
-                compiler_options.config_list
-                (get_config_jsons ())
-            |> Hhbc_options.to_string )
-        in
         let handle_output _filename output _hhbc_options _debug_time =
-          if compiler_options.dump_config then
-            Printf.printf "===CONFIG===\n%s\n\n%!" (Lazy.force dumped_options);
           if not compiler_options.quiet_mode then print_and_flush_strings output
         in
         let handle_exception filename exc =
@@ -705,6 +696,13 @@ let decl_and_run_mode compiler_options =
             ([compiler_options.filename], handle_output)
           (* Actually execute the compilation(s) *)
         in
+        if compiler_options.dump_config then
+          Printf.printf
+            "===CONFIG===\n%s\n\n%!"
+            ( Hhbc_options.apply_config_overrides_statelessly
+                compiler_options.config_list
+                (get_config_jsons ())
+            |> Hhbc_options.to_string );
         if
           compiler_options.filename <> ""
           && Sys.is_directory compiler_options.filename

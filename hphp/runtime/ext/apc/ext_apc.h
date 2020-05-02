@@ -57,6 +57,7 @@ struct apcExtension final : Extension {
   static bool ShareUncounted;
   static bool Stat;
   static bool EnableCLI;
+  static bool DeferredExpiration;
 
   void moduleLoad(const IniSetting::Map& ini, Hdf config) override;
   void moduleInit() override;
@@ -64,6 +65,7 @@ struct apcExtension final : Extension {
   bool moduleEnabled() const override { return Enable; }
 
   void requestShutdown() override;
+  static void purgeDeferred(req::vector<StringData*>&&);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

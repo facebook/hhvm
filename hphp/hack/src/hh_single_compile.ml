@@ -29,7 +29,6 @@ type options = {
   debug_time: bool;
   output_file: string option;
   config_file: string option;
-  quiet_mode: bool;
   mode: mode;
   input_file_list: string option;
   dump_symbol_refs: bool;
@@ -104,7 +103,6 @@ let parse_options () =
   let mode = ref CLI in
   let output_file = ref None in
   let config_file = ref None in
-  let quiet_mode = ref false in
   let input_file_list = ref None in
   let dump_symbol_refs = ref false in
   let extract_facts = ref false in
@@ -123,10 +121,6 @@ let parse_options () =
       ( "--debug-time",
         Arg.Set debug_time,
         " Enables debugging logging for elapsed time" );
-      ( "--quiet-mode",
-        Arg.Set quiet_mode,
-        " Runs very quietly, and ignore any result if invoked without -o "
-        ^ "(lower priority than the debug-time option)" );
       ("--facts", Arg.Set extract_facts, "Extract facts from the source code.");
       ( "-v",
         Arg.String (fun str -> config_list := str :: !config_list),
@@ -201,7 +195,6 @@ let parse_options () =
     debug_time = !debug_time;
     output_file = !output_file;
     config_file = !config_file;
-    quiet_mode = !quiet_mode;
     mode = !mode;
     input_file_list = !input_file_list;
     dump_symbol_refs = !dump_symbol_refs;
@@ -645,17 +638,15 @@ let decl_and_run_mode compiler_options =
         dispatch_loop handlers
       | CLI ->
         let handle_output _filename output _hhbc_options _debug_time =
-          if not compiler_options.quiet_mode then print_and_flush_strings output
+          print_and_flush_strings output
         in
         let handle_exception filename exc =
-          if not compiler_options.quiet_mode then (
-            let stack = Caml.Printexc.get_backtrace () in
-            prerr_endline stack;
-            P.eprintf
-              "Error in file %s: %s\n"
-              (Relative_path.to_absolute filename)
-              (Caml.Printexc.to_string exc)
-          )
+          let stack = Caml.Printexc.get_backtrace () in
+          prerr_endline stack;
+          P.eprintf
+            "Error in file %s: %s\n"
+            (Relative_path.to_absolute filename)
+            (Caml.Printexc.to_string exc)
         in
         let process_single_file handle_output filename =
           let filename = Relative_path.create Relative_path.Dummy filename in

@@ -1,14 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-class A {
-  public function __call($name, $arguments) {
-    echo "================== A::__call =====================\n";
-    var_dump($arguments);
-    var_dump(is_varray($arguments));
-  }
-}
-
 function variadic($a, ...$b) {
   echo "================== variadic ======================\n";
   var_dump($b);
@@ -20,11 +12,6 @@ function test($x) {
   variadic(1, 2, ...$x);
   if (count($x) > 0) variadic(...$x);
   if (count($x) > 0) call_user_func_array(fun('variadic'), $x);
-
-  $a = new A();
-  if (count($x) > 0) $a->foobaz(...$x);
-  $a->foobaz(1, 2, ...$x);
-  if (count($x) > 0) call_user_func_array(varray[$a, 'foobaz'], $x);
 }
 
 <<__EntryPoint>>

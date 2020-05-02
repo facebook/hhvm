@@ -1,4 +1,0 @@
-From foo::__call:
-string(3) "abc"
-object(foo) (0) {
-}

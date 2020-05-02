@@ -16,11 +16,6 @@ class C {
     var_dump($a, $b, $c);
   }
 
-  public function __call($name, $args) {
-    echo '* ', __METHOD__, ' for ', $name, "\n";
-    var_dump($args);
-  }
-
   public static function stRegular($a, $b, $c) {
     echo '* ', __METHOD__, "\n";
     var_dump($a, $b, $c);
@@ -54,7 +49,6 @@ function test_call_array_equivalent($args) {
   $inst = new C(...$args);
   $inst->regular(...$args);
   $inst->variadic(...$args);
-  $inst->magic(...$args);
   echo "\n";
 }
 
@@ -92,7 +86,6 @@ function test_param_mix($args) {
   $inst = new C($prefix, ...$args);
   $inst->regular($prefix, ...$args);
   $inst->variadic($prefix, ...$args);
-  $inst->magic($prefix, ...$args);
   echo "\n";
 
   $prefix2 = 'also passed regularly';
@@ -107,7 +100,6 @@ function test_param_mix($args) {
   $inst = new C($prefix, $prefix2, ...$args);
   $inst->regular($prefix, $prefix2, ...$args);
   $inst->variadic($prefix, $prefix2, ...$args);
-  $inst->magic($prefix, $prefix2, ...$args);
   echo "\n";
 }
 

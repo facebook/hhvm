@@ -1,18 +1,18 @@
 =============== positive tests =====================
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 171
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 121
 
-Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 172
+Notice: 'async_func' called dynamically but is not __DynamicallyCallable in %s on line 122
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 209
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 156
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 221
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 167
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 232
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 177
 
-Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 243
+Notice: 'func' called dynamically but is not __DynamicallyCallable in %s on line 187
 
-Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 251
+Notice: 'cmp' called dynamically but is not __DynamicallyCallable in %s on line 195
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
 Exception: 'func' called dynamically but is not __DynamicallyCallable

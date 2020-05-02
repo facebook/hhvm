@@ -1,7 +1,3 @@
-=============== test_magic_call ====================
-A::__construct
-A::__call
-A::__call
 =============== test_sleep =========================
 A::__construct
 A::__sleep

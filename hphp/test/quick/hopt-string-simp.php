@@ -88,16 +88,6 @@ function foo14() {
   }
 }
 
-class C { public function __call($meth, $args) { return "C"; } }
-
-function foo15() {
-  $x = new C();
-  try {
-    return strlen($x);
-  } catch (Exception $e) {
-    return $e->getMessage();
-  }
-}
 <<__EntryPoint>> function main(): void {
 var_dump(foo1());
 var_dump(foo2());
@@ -113,5 +103,4 @@ var_dump(foo11());
 var_dump(foo12());
 var_dump(foo13());
 var_dump(foo14());
-var_dump(foo15());
 }

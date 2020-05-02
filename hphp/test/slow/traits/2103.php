@@ -13,9 +13,6 @@ class A {
   public function testDoSomething() {
     return $this->doSomething();
   }
-  public function __call($name, $args) {
-    echo "**calling __call $name**";
-  }
   protected function doSomething() {
     return 'doSomething';
   }

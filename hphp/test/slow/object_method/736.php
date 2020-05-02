@@ -8,10 +8,6 @@ function f4 ($a) {
 class B {
   public $id;
   public $x;
-  function __call($name, $arguments) {
-    // keep f4bogus from fatalling
-    echo "Calling B object method '$name' " . implode(', ', $arguments). "\n";
-  }
 
   function f1($a) {
     return $x=$a+11;
@@ -33,10 +29,6 @@ class B {
 
 class G extends B {
   public $pointless;
-  function __call($name, $arguments) {
-    // keep f4bogus from fatalling
-    echo "Calling G object method '$name' " . implode(', ', $arguments). "\n";
-  }
   function __construct($i) {
     $this->id=$i;
   }
@@ -79,18 +71,6 @@ class G extends B {
     // task 217171
     echo "static parent method B::f4, 16 == ", B::f4(4),"\n";
     // should work
-
-    // call an non-existent method on the one object via dynamic class name
-    //php53 if($fix249639) echo "Calling G object method 'f4bogus' 5 == ", $b::f4bogus(5); __call,
-    // call existing method on the one object via dynamic class name
-    //php53 if($fix249639) echo "Calling G object method 'f4missing' 5 == ", $b::f4missing(5);
-
-    // $b="Bbogus"; $b::f4bogus(6);
-    // report error
-    // !m_validClass, !m_class // DDD need this test yet
-    //echo "missing 3 ", Bbogus::f4bogus(6),"\n";
-    // fatals in PHP
-
   }
 
   function f5($a) {
@@ -111,15 +91,6 @@ class H {
     return $a+12;
   }
   function f7($a) {
-    return "";
-  }
-}
-
-class J {
-  function __call($name, $arguments) {
-    echo "Calling object method '$name' " . implode(', ', $arguments). "\n";
-  }
-  function f6($a) {
     return "";
   }
 }
@@ -226,12 +197,6 @@ $f = 'missing';
 // test methodIndexLookupReverse
 echo "dynamic call \$g->'missing' ".ObjectMethod736::$trace.", Calling G object method 'missing' 2 = ", call_user_func_array(varray[$g,'missing'],varray[2]),"\n";
 echo "dynamic call 'missing(2)' ".ObjectMethod736::$trace.", FAIL =", call_user_func_array('missing',varray[2]),"\n";
-
-// more __call testing
-$j = new J();
-echo "Calling object method 'missing' 3 = ";
-call_user_func_array(varray[$j,'missing'],varray[3]);
-
 
 // test mapping for system function names
 $ourFileName = "testFile.txt";

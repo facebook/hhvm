@@ -8,18 +8,3 @@ array(4) {
   [3]=>
   string(1) "f"
 }
-array(3) {
-  [0]=>
-  string(6) "__call"
-  [1]=>
-  string(3) "bar"
-  [2]=>
-  array(3) {
-    [0]=>
-    string(1) "d"
-    [1]=>
-    string(1) "e"
-    [2]=>
-    string(1) "f"
-  }
-}

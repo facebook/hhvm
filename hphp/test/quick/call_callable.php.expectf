@@ -9,16 +9,12 @@ int(10)
 int(10)
 int(10)
 int(10)
-inst_intval called on instance
-int(10)
 * ()-invoke ********************
 int(10)
 int(10)
 int(10)
 int(10)
 int(10)
-int(10)
-inst_intval called on instance
 int(10)
 
 Fatal error: Invalid callable (array) in %s on line %d

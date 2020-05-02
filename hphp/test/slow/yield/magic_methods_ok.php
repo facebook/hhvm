@@ -7,11 +7,6 @@ class Foo {
       yield $arg;
     }
   }
-  function __call($a, $b) {
-    yield __FUNCTION__;
-    yield $a;
-    yield $b;
-  }
 }
 
 
@@ -19,5 +14,4 @@ class Foo {
 function main_magic_methods_ok() {
 $foo = new Foo();
 var_dump(iterator_to_array($foo('d', 'e', 'f')));
-var_dump(iterator_to_array($foo->bar('d', 'e', 'f')));
 }

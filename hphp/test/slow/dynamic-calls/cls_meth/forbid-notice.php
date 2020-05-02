@@ -10,56 +10,6 @@ function cmp($x, $y) { return $x <=> $y; }
 <<__DynamicallyCallable>> async function async_func2() { return 5; }
 <<__DynamicallyCallable>> function cmp2($x, $y) { return $x <=> $y; }
 
-class D {
-  public function __call($a, $b) {}
-
-}
-
-class C extends D {
-  public function __call($a, $b) {}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-class G  {
-  <<__DynamicallyCallable>> public function __call($a, $b) {}
-
-}
-
-class E extends G {
-  <<__DynamicallyCallable>> public function __call($a, $b) {}
-
-
-
-
-
-
-
-
-}
-
-class CCmp {
-  public function __call($a, $b) { return $b[0] <=> $b[1]; }
-
-}
-
-class CCmp2 {
-  <<__DynamicallyCallable>> public function __call($a, $b) { return $b[0] <=> $b[1]; }
-
-}
-
 class Invokable {
   public function __invoke() {}
 }
@@ -184,7 +134,6 @@ async function positive_tests() {
   try { $x = varray[new A, 'static_func']; $x(); } catch (Exception $e) { wrap($e); }
   try { $x = varray[new A, 'async_func']; await $x(); } catch (Exception $e) { wrap($e); }
   try { $x = varray[new A, 'static_async_func']; await $x(); } catch (Exception $e) { wrap($e); }
-  try { $x = varray[new C, 'foobar']; $x(); } catch (Exception $e) { wrap($e); }
 
   try { $x = 'A'; $x::static_func(); } catch (Exception $e) { wrap($e); }
 
@@ -204,8 +153,6 @@ async function positive_tests() {
 
   try { $obj = new A; $x = 'async_func'; await $obj->$x(); } catch (Exception $e) { wrap($e); }
 
-  try { $obj = new C; $x = 'foobar'; $obj->$x(); } catch (Exception $e) { wrap($e); }
-
   try { array_map('func', varray[true]); } catch (Exception $e) { wrap($e); }
   //try { array_map('A::func', varray[true]); } catch (Exception $e) { wrap($e); } // fatal
   try { array_map('A::static_func', varray[true]); } catch (Exception $e) { wrap($e); }
@@ -215,7 +162,6 @@ async function positive_tests() {
 
   try { array_map(varray[new A, 'func'], varray[true]); } catch (Exception $e) { wrap($e); }
   try { array_map(varray[new A, 'static_func'], varray[true]); } catch (Exception $e) { wrap($e); }
-  try { array_map(varray[new C, 'foobar'], varray[true]); } catch (Exception $e) { wrap($e); }
 
   $x = Vector::fromItems(varray[varray[]]);
   try { $x->map('func'); } catch (Exception $e) { wrap($e); }
@@ -227,7 +173,6 @@ async function positive_tests() {
 
   try { $x->map(varray[new A, 'func']); } catch (Exception $e) { wrap($e); }
   try { $x->map(varray[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { $x->map(varray[new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func('func'); } catch (Exception $e) { wrap($e); }
 
@@ -238,7 +183,6 @@ async function positive_tests() {
 
   try { call_user_func(varray[new A, 'func']); } catch (Exception $e) { wrap($e); }
   try { call_user_func(varray[new A, 'static_func']); } catch (Exception $e) { wrap($e); }
-  try { call_user_func(varray[new C, 'foobar']); } catch (Exception $e) { wrap($e); }
 
   try { call_user_func_array('func', varray[]); } catch (Exception $e) { wrap($e); }
 
@@ -257,7 +201,6 @@ async function positive_tests() {
 
   try { $x = varray[new A, 'cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
   try { $x = varray[new A, 'static_cmp']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
-  try { $x = varray[new CCmp, 'foobar']; $y = varray[2, 1]; usort(inout $y, $x); } catch (Exception $e) { wrap($e); }
 }
 
 async function negative_tests() {
@@ -286,9 +229,6 @@ async function negative_tests() {
 
   await $obj->async_func();
 
-
-  $obj = new C;
-  $obj->foobar();
 
   $obj = new Vector;
   $obj->firstValue();
@@ -360,7 +300,6 @@ async function negative_tests() {
   $x = varray[new A, 'static_func2']; $x();
   $x = varray[new A, 'async_func2']; await $x();
   $x = varray[new A, 'static_async_func2']; await $x();
-  $x = varray[new E, 'foobar']; $x();
 
   $x = 'A'; $x::static_func2();
 
@@ -377,8 +316,6 @@ async function negative_tests() {
 
   $obj = new A; $x = 'async_func2'; await $obj->$x();
 
-  $obj = new E; $x = 'foobar'; $obj->$x();
-
   array_map('func2', varray[true]);
   //array_map('A::func2', varray[true]); // fatal
   array_map('A::static_func2', varray[true]);
@@ -388,7 +325,6 @@ async function negative_tests() {
 
   array_map(varray[new A, 'func2'], varray[true]);
   array_map(varray[new A, 'static_func2'], varray[true]);
-  array_map(varray[new E, 'foobar'], varray[true]);
 
   $x = Vector::fromItems(varray[varray[]]);
   $x->map('func2');
@@ -400,7 +336,6 @@ async function negative_tests() {
 
   $x->map(varray[new A, 'func2']);
   $x->map(varray[new A, 'static_func2']);
-  $x->map(varray[new E, 'foobar']);
 
   call_user_func('func2');
 
@@ -411,7 +346,6 @@ async function negative_tests() {
 
   call_user_func(varray[new A, 'func2']);
   call_user_func(varray[new A, 'static_func2']);
-  call_user_func(varray[new E, 'foobar']);
 
   call_user_func_array('func2', varray[]);
 
@@ -430,7 +364,6 @@ async function negative_tests() {
 
   $x = varray[new A, 'cmp2']; $y = varray[2, 1]; usort(inout $y, $x);
   $x = varray[new A, 'static_cmp2']; $y = varray[2, 1]; usort(inout $y, $x);
-  $x = varray[new CCmp2, 'foobar']; $y = varray[2, 1]; usort(inout $y, $x);
 }
 <<__EntryPoint>>
 function main_entry(): void {

@@ -1,2 +1,0 @@
--vAllDynamic=1 -d hhvm.php7.all=0
--v DynamicMethodPrefix.*=_ -d hhvm.php7.all=0

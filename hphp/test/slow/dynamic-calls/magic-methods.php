@@ -4,8 +4,6 @@
 class A {
   public function __construct() { echo "A::__construct\n"; }
 
-  public function __call($a, $b) { echo "A::__call\n"; }
-
   public function __sleep() { echo "A::__sleep\n"; return varray[]; }
   public function __wakeup() { echo "A::__wakeup\n"; }
 
@@ -17,14 +15,6 @@ class A {
   public function __debugInfo() { echo "A::__debugInfo\n"; return varray[]; }
 
   public function __clone() { echo "A::__clone\n"; }
-}
-
-function test_magic_call() {
-  echo "=============== test_magic_call ====================\n";
-  $x = new A();
-  $x->foo();
-
-  $x->__call(1, 2);
 }
 
 function test_sleep() {
@@ -84,7 +74,6 @@ function test_ctor() {
   $x->__construct();
 }
 <<__EntryPoint>> function main(): void {
-test_magic_call();
 test_sleep();
 test_stringify();
 test_invoke();

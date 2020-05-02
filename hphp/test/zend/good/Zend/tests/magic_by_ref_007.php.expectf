@@ -1,2 +1,0 @@
-
-Fatal error: Method test::__call() cannot take inout arguments in %s/magic_by_ref_007.php on line 4

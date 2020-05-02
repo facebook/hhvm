@@ -27,14 +27,6 @@ class C extends Base {
   }
 }
 
-class CMagic {
-  public function __call($name, $args) {
-    echo $name, ' called on instance', "\n";
-    return intval(reset(inout $args));
-  }
-}
-
-
 class Foo extends Base {
   public function get() { return varray[$this, 'blah']; }
 }
@@ -57,14 +49,12 @@ function test_invocation_syntaxes() {
   $test = '10f';
   $call_functor = new Functor();
   $inst = new C();
-  $inst_magic = new CMagic();
   $call_func_string = 'intval';
   $call_static_arr = varray['C', 'intval'];
   $call_static_string = 'C::intval';
   $call_instance = varray[$inst, 'inst_intval'];
   $call_static_on_instance = varray[$inst, 'intval'];
   $call_closure = function($x) {return C::intval($x);};
-  $call_magic_instance = varray[$inst_magic, 'inst_intval'];
   $call_invalid = varray['C', 'noSuchMethod'];
 
   echo "* call_user_func ********************\n";
@@ -75,7 +65,6 @@ function test_invocation_syntaxes() {
   var_dump(call_user_func($call_static_arr, $test));
   var_dump(call_user_func($call_instance, $test));
   var_dump(call_user_func($call_static_on_instance, $test));
-  var_dump(call_user_func($call_magic_instance, $test));
 
   echo "* ()-invoke ********************\n";
   var_dump($call_func_string($test));
@@ -84,7 +73,6 @@ function test_invocation_syntaxes() {
   var_dump($call_static_arr($test));
   var_dump($call_instance($test));
   var_dump($call_static_on_instance($test));
-  var_dump($call_magic_instance($test));
 
   var_dump($call_invalid($test)); // fatals
   var_dump($call_static_string($test)); // fatals

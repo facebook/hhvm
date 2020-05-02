@@ -1,8 +1,0 @@
-test
-test1
-test2
-test3
-test4
-test5
-
-Fatal error: Call to undefined method C::test6() in %s/bug42937.php on line 21

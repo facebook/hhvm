@@ -12,4 +12,3 @@ bool(true)
 string(54) "strlen() expects parameter 1 to be string, array given"
 string(55) "strlen() expects parameter 1 to be string, object given"
 string(55) "strlen() expects parameter 1 to be string, object given"
-string(55) "strlen() expects parameter 1 to be string, object given"

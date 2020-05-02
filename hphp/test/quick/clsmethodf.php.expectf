@@ -11,5 +11,3 @@ protected aa::blah
 bool(false)
 protected aa::blah
 bool(true)
-magic call to aa->fakemethod with 3 arguments
-magic call to aa->fakemethod with 0 arguments

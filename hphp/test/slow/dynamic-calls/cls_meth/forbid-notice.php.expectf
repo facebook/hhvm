@@ -1,66 +1,66 @@
 =============== positive tests =====================
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 174
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 124
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 176
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 126
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 129
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 131
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 134
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 136
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 138
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 140
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 143
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 145
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 57
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 58
+
+Notice: 'B::static_func' called dynamically but is not __DynamicallyCallable in %s on line 59
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 67
+
+Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 68
+
+Notice: 'B::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 69
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 158
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 161
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 164
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 169
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 172
+
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 175
 
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 179
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 181
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 182
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 184
-
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 186
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 185
 
 Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 189
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 191
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 191
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 194
+Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 193
 
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 196
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 197
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 107
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 200
 
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 108
-
-Notice: 'B::static_func' called dynamically but is not __DynamicallyCallable in %s on line 109
-
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 117
-
-Notice: 'A::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 118
-
-Notice: 'B::static_async_func' called dynamically but is not __DynamicallyCallable in %s on line 119
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 211
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 214
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 217
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 223
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 226
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 229
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 234
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 237
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 240
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 245
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 247
-
-Notice: 'A::static_func' called dynamically but is not __DynamicallyCallable in %s on line 249
-
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 253
-
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 256
-
-Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 259
+Notice: 'A::static_cmp' called dynamically but is not __DynamicallyCallable in %s on line 203
 =============== negative tests =====================
 =============== positive tests (exceptions) ========
 Exception: 'A::static_func' called dynamically but is not __DynamicallyCallable

@@ -13,14 +13,6 @@ function passthrough_handler($name, $obj, inout $args, $data, inout $done) {
   echo "---------------\n";
 }
 
-class MagicCall {
-  public function __call($name, $args) {
-    echo "magic call! ";
-    var_dump($name, $args);
-    echo "\n";
-  }
-}
-
 function frap($arg) {
   echo "frap $arg\n";
 }
@@ -90,7 +82,6 @@ class SubBlark2 extends Blark {}
 
 function test_methods() {
   echo '---------- ', __FUNCTION__, ' ----------', "\n";
-  $mc = new MagicCall();
 
   // Intercept static method
   fb_intercept('SubBlark2::sfrap', 'handler');
@@ -133,12 +124,6 @@ function test_methods() {
   frap('claptrap');
   Blark::sfrap();
   $b->frap();
-
-  // Intercept __call
-  fb_intercept('MagicCall::__call', 'handler');
-  $mc->blark('hi');
-  fb_intercept('MagicCall::__call', 'passthrough_handler');
-  $mc->blark('ho');
 }
 
 <<__EntryPoint>> function main(): void {

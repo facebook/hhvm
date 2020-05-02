@@ -18,8 +18,6 @@ trait Tr {
   public function meth() { echo __METHOD__, "\n"; }
   <<__Deprecated('message')>>
   public static function stMeth() { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public function __call($name, $args) { echo __METHOD__, "\n"; }
 }
 
 class C {
@@ -27,8 +25,6 @@ class C {
   public function meth() { echo __METHOD__, "\n"; }
   <<__Deprecated('message')>>
   public static function stMeth() { echo __METHOD__, "\n"; }
-  <<__Deprecated('message')>>
-  public function __call($name, $args) { echo __METHOD__, "\n"; }
 }
 
 class C_T {
@@ -50,7 +46,6 @@ function basic() {
   C::stMeth();
   $inst = new C();
   $inst->meth();
-  $inst->viaCall();
   f_gen();
   echo "\n";
 }
@@ -68,7 +63,6 @@ function via_trait() {
   C_T::stMeth();
   $inst = new C_T();
   $inst->meth();
-  $inst->viaCall();
   echo "\n";
 }
 

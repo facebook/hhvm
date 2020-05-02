@@ -18,8 +18,8 @@ function test() {
 }
 
 class C {
-  function __call($name, $args) {
-    var_dump(__METHOD__, $name, $args);
+  function snoot() {
+    var_dump(__METHOD__);
   }
 }
 
@@ -37,7 +37,7 @@ function swizzle($name, $obj, inout $args, $data, inout $done) {
     $c->snoot();
     if ($i == 1) {
       fb_intercept('foo', 'bar', false);
-      fb_intercept('C::__call', 'swizzle');
+      fb_intercept('C::snoot', 'swizzle');
     }
   }
 }

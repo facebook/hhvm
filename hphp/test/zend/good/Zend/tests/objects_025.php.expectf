@@ -1,6 +1,0 @@
-non-static - ok
-non-static - ok
-non-static - ok
-non-static - ok
-
-Fatal error: Method name must be a string in %s/objects_025.php on line 22

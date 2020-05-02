@@ -48,15 +48,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-* C::__call for magic
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 
 = test_call_array_equivalent =
 object(HH\Vector) (3) {
@@ -108,15 +99,6 @@ array(2) {
   [1]=>
   string(1) "c"
 }
-* C::__call for magic
-array(3) {
-  [0]=>
-  string(1) "a"
-  [1]=>
-  string(1) "b"
-  [2]=>
-  string(1) "c"
-}
 
 = test_param_mix =
 array(3) {
@@ -172,17 +154,6 @@ array(3) {
   [1]=>
   string(1) "b"
   [2]=>
-  string(1) "c"
-}
-* C::__call for magic
-array(4) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(1) "a"
-  [2]=>
-  string(1) "b"
-  [3]=>
   string(1) "c"
 }
 
@@ -267,19 +238,6 @@ array(4) {
   [2]=>
   string(1) "b"
   [3]=>
-  string(1) "c"
-}
-* C::__call for magic
-array(5) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(21) "also passed regularly"
-  [2]=>
-  string(1) "a"
-  [3]=>
-  string(1) "b"
-  [4]=>
   string(1) "c"
 }
 
@@ -339,17 +297,6 @@ array(3) {
   [2]=>
   string(1) "c"
 }
-* C::__call for magic
-array(4) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(1) "a"
-  [2]=>
-  string(1) "b"
-  [3]=>
-  string(1) "c"
-}
 
 * variadic
 string(16) "passed regularly"
@@ -432,19 +379,6 @@ array(4) {
   [2]=>
   string(1) "b"
   [3]=>
-  string(1) "c"
-}
-* C::__call for magic
-array(5) {
-  [0]=>
-  string(16) "passed regularly"
-  [1]=>
-  string(21) "also passed regularly"
-  [2]=>
-  string(1) "a"
-  [3]=>
-  string(1) "b"
-  [4]=>
   string(1) "c"
 }
 

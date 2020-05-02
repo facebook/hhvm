@@ -1,4 +1,0 @@
-
-Fatal error: Uncaught exception 'InvalidOperationException' with message 'Unable to resolve magic call for inst_meth()' in %s/inst_meth_magic.php:9
-Stack trace:
-%a {main}

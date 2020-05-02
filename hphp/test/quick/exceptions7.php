@@ -15,15 +15,6 @@ function passthrough_handler($name, $obj, inout $args, $data, inout $done) {
   throw new Exception;
 }
 
-class MagicCall {
-  public function __call($name, $args) {
-    echo "magic call! ";
-    var_dump($name, $args);
-    echo "\n";
-    throw new Exception;
-  }
-}
-
 function frap($arg) {
   echo "frap $arg\n";
 }
@@ -65,8 +56,6 @@ function main_entry(): void {
     echo "caught closure 1\n";
   }
 
-  $mc = new MagicCall();
-
   // Intercept static method
   fb_intercept('Blark::sfrap', 'handler');
   try {
@@ -105,19 +94,5 @@ function main_entry(): void {
     call_user_func(fun("frap"), 'claptrap');
   } catch (Exception $e) {
     echo "caught double intercept 1\n";
-  }
-
-  // Intercept __call
-  fb_intercept('MagicCall::__call', 'handler');
-  try {
-    call_user_func(varray[$mc, "blark"], 'hi');
-  } catch (Exception $e) {
-    echo "caught __call 1\n";
-  }
-  fb_intercept('MagicCall::__call', 'passthrough_handler');
-  try {
-    call_user_func(varray[$mc, "blark"], 'ho');
-  } catch (Exception $e) {
-    echo "caught __call 2\n";
   }
 }

@@ -384,35 +384,7 @@ class IntlCalendar {
    *   iif the field is set.
    */
   <<__Native>>
-  public function _isSet(int $field): bool;
-
-  /**
-   * Can't define a method named isSet()
-   */
-  public function __call($fname, $args): mixed {
-    if (ini_get('hhvm.no_use_magic_methods')) {
-      trigger_error(
-        "Invoking IntlCalendar::$fname via magic __call",
-        E_USER_WARNING
-      );
-    }
-    return $this->call__($fname, $args);
-  }
-
-  public function call__($fname, $args): mixed {
-    $cls = get_class($this);
-    $count = count($args);
-    if (!strcasecmp($fname, 'isSet')) {
-      if ($count < 1) {
-        trigger_error("$cls::$fname must be called with at least 1 argument, ".
-                      "$count provided.", E_USER_WARNING);
-        return null;
-      }
-      return $this->_isSet((int)$args[0]);
-    }
-    trigger_error("Call to undefined method $cls::$fname", E_ERROR);
-  }
-
+  public function isSet(int $field): bool;
 
   /**
    * Whether a certain date/time is in the weekend

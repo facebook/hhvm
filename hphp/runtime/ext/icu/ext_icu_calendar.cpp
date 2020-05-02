@@ -367,7 +367,7 @@ static bool HHVM_METHOD(IntlCalendar, isLenient) {
   return data->calendar()->isLenient();
 }
 
-static bool HHVM_METHOD(IntlCalendar, _isSet, int64_t field) {
+static bool HHVM_METHOD(IntlCalendar, isSet, int64_t field) {
   CAL_FETCH(data, this_, false);
   CAL_CHECK_FIELD(field, "intlcal_is_set");
   return data->calendar()->isSet((UCalendarDateFields)field);
@@ -841,7 +841,7 @@ void IntlExtension::initCalendar() {
   HHVM_ME(IntlCalendar, inDaylightTime);
   HHVM_ME(IntlCalendar, isEquivalentTo);
   HHVM_ME(IntlCalendar, isLenient);
-  HHVM_ME(IntlCalendar, _isSet);
+  HHVM_ME(IntlCalendar, isSet);
   HHVM_ME(IntlCalendar, roll);
   HHVM_ME(IntlCalendar, set);
   HHVM_ME(IntlCalendar, setFirstDayOfWeek);

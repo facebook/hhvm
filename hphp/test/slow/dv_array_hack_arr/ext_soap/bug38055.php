@@ -35,7 +35,10 @@ function main_entry(): void {
   var_dump($client->__gettypes());
   $boolA = 1;
   $boolB = '1';
-  $res = $client->Test(darray['boolA'=>$boolA, 'boolB'=>$boolB]);
+  $res = $client->__soapcall(
+    'Test',
+    varray[darray['boolA'=>$boolA, 'boolB'=>$boolB]],
+  );
   var_dump(DvArrayHackArrExtSoapBug38055::$g1);
   var_dump(DvArrayHackArrExtSoapBug38055::$g2);
 }

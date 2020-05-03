@@ -44,7 +44,7 @@ $wsdl  = <<<EOF
 	</binding>
 	<service name="testService">
    <port name="testPort" binding="tns:testBinding">
-     <soap:address location="test://" /> 
+     <soap:address location="test://" />
    </port>
  </service>
 </definitions>
@@ -60,7 +60,7 @@ EOF;
 	$y->addfunction("test");
   unlink($fname);
 
-  $x->test($param);
+  $x->__soapcall('test', varray[$param]);
   $xml = xml_parser_create();
   $req = $x->__getlastrequest();
   if ($style == "rpc") {

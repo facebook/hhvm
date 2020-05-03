@@ -64,7 +64,7 @@ $a = varray[1, 2, 3, 4, 5];
 $it = new LimitIterator(new NumericArrayIterator($a), 1, 3);
 foreach ($it as $v)
 {
-    print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+    print $v . ' is ' . ($it->getInnerIterator()->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 echo "===SEEKABLE===\n";
@@ -72,7 +72,7 @@ $a = varray[1, 2, 3, 4, 5];
 $it = new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3);
 foreach($it as $v)
 {
-    print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+    print $v . ' is ' . ($it->getInnerIterator()->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 echo "===STACKED===\n";
@@ -81,7 +81,7 @@ $a = varray[1, 2, 3, 4, 5];
 $it = new CachingIterator(new LimitIterator(new SeekableNumericArrayIterator($a), 1, 3));
 foreach($it as $v)
 {
-    print $v . ' is ' . ($it->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
+    print $v . ' is ' . ($it->getInnerIterator()->getInnerIterator()->greaterThan(2) ? 'greater than 2' : 'less than or equal 2') . "\n";
 }
 
 echo "===DONE===\n";

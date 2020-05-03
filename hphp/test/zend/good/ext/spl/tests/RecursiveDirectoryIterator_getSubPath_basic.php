@@ -23,7 +23,7 @@ function main_entry(): void {
 
   $list = varray[];
   while($it->valid()) {
-    $list[] = $it->getSubPath();
+    $list[] = $it->getInnerIterator()->getSubPath();
     $it->next();
   }
   asort(inout $list);

@@ -46,7 +46,7 @@ function main_entry(): void {
   	$r->field='maxDateTime';
   	$r->min='2003-04-01';
   	$search->index='all';
-  	$res=$ws->search($search,0,10);
+  	$res=$ws->__soapcall('search', varray[$search,0,10]);
   }
   echo "ok\n";
 }

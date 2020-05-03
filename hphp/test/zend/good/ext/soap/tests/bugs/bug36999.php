@@ -28,7 +28,8 @@ function test($num) {
 
   try {
 	  printf("%s %0.0f\n", gettype($num), $num);
-	  $ret = ZendGoodExtSoapTestsBugsBug36999::$soap->echoLong($num);
+    $ret = ZendGoodExtSoapTestsBugsBug36999::$soap
+      ->__soapcall('echoLong', varray[$num]);
 	  printf("%s %0.0f\n", gettype($ret), $ret);
 	} catch (SoapFault $ex) {
 	  var_dump($ex);

@@ -39,7 +39,7 @@ function main_entry(): void {
   		];
 
   $client = new TestSoapClient(NULL, $options);
-  $ret = $client->dotest2("???");
+  $ret = $client->__soapcall('dotest2', varray["???"]);
   var_dump($ret);
   echo "ok\n";
 }

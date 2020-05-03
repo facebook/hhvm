@@ -42,5 +42,5 @@ $client = new MySoapClient(
 $recipientType = new BodyType();
 $recipientType->_ = '1234567890';
 $recipientType->uid = 4119859;
-$client->test($recipientType);
+$client->__soapcall('test', varray[$recipientType]);
 }

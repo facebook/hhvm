@@ -28,7 +28,7 @@ $book = new book();
 $book->a = "foo";
 $book->b = "bar";
 try {
-    $ret = $client->dotest($book);
+    $ret = $client->__soapcall('dotest', varray[$book]);
 } catch (SoapFault $e) {
     $ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
 }

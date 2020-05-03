@@ -32,5 +32,5 @@ EOF;
 function main_entry(): void {
 
   $client = new LocalSoapClient(NULL, darray['location'=>'test://','uri'=>'test://']);
-  print_r($client->getDIDAreaResponse());
+  print_r($client->__soapcall('getDIDAreaResponse', varray[]));
 }

@@ -5,5 +5,5 @@ var_dump($ai->count());
 
 $ii = new IteratorIterator($ai);
 
-var_dump($ii->count());
+var_dump($ii->getInnerIterator()->count());
 }

@@ -30,7 +30,10 @@ function main_entry(): void {
   $client = new TestSoapClient(dirname(__FILE__).'/bug38004.wsdl');
   $strA = 'test &amp; test';
   $strB = 'test & test';
-  $res = $client->Test(darray['strA'=>$strA, 'strB'=>$strB]);
+  $res = $client->__soapcall(
+    'Test',
+    varray[darray['strA'=>$strA, 'strB'=>$strB]],
+  );
   print_r($res);
   print_r(ZendGoodExtSoapTestsBugsBug38004::$g);
 }

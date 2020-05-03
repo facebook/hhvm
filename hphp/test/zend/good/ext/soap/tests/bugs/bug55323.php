@@ -30,6 +30,6 @@ function main_entry(): void {
 
   $soapClient = new TestSoapClient($wsdl,
           darray['trace' => 1, 'exceptions' => 0]);
-  $result = $soapClient->getObject();
+  $result = $soapClient->__soapcall('getObject', varray[]);
   var_dump($result);
 }

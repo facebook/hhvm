@@ -40,5 +40,5 @@ $client = new LocalSoapClient(
 $b = new B();
 $b->x = 1;
 $b->y = 2;
-print_r($client->f($b));
+print_r($client->__soapcall('f', varray[$b]));
 }

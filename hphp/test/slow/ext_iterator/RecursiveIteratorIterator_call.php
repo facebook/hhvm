@@ -10,7 +10,7 @@ $it = new RecursiveIteratorIterator(
 $files = darray[];
 foreach($it as $file) {
   $files[$file->getFilename()] =
-    $it->getFilename() == $file->getFilename();
+    $it->getInnerIterator()->getFilename() == $file->getFilename();
 }
 ksort(inout $files);
 var_dump($files);

@@ -26,7 +26,7 @@ function main_entry(): void {
 
   $client = new TestSoap(dirname(__FILE__) . "/bug42692.wsdl", darray["trace"=>1]);
   try {
-  	$result = $client->checkAuth(1,"two");
+  	$result = $client->__soapcall('checkAuth', varray[1,"two"]);
   	echo "Auth for 1 is $result\n";
   } catch (Exception $e) {
   	echo $e->getMessage();

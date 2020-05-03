@@ -34,7 +34,7 @@ function main_entry(): void {
 
   $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
   try {
-  	$ret = $client->dotest2("???");
+  	$ret = $client->__soapcall('dotest2', varray["???"]);
   } catch (SoapFault $e) {
   	$ret = "SoapFault = " . $e->faultcode . " - " . $e->faultstring;
   }

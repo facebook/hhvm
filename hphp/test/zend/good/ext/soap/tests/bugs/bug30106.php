@@ -10,7 +10,7 @@ class LocalSoapClient extends SoapClient {
   function __construct($wsdl, $options=varray[]) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
-		$this->server->addFunction("getContinentList"); 
+		$this->server->addFunction("getContinentList");
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
@@ -30,6 +30,9 @@ function main_entry(): void {
   $client = new LocalSoapClient(dirname(__FILE__)."/bug30106.wsdl");
   var_dump($client->__getFunctions());
   var_dump($client->__getTypes());
-  $x = $client->getContinentList(darray["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]);
+  $x = $client->__soapcall(
+    'getContinentList',
+    varray[darray["AFFILIATE_ID"=>1,"PASSWORD"=>"x"]],
+  );
   var_dump($x);
 }

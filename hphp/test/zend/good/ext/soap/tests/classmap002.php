@@ -27,7 +27,7 @@ function main_entry(): void {
   		];
 
   $client = new TestSoapClient(dirname(__FILE__)."/classmap.wsdl",$options);
-  $ret = $client->dotest2("???");
+  $ret = $client->__soapcall('dotest2', varray["???"]);
   var_dump($ret);
   echo "ok\n";
 }

@@ -177,16 +177,6 @@ class AppendIterator extends IteratorIterator implements OuterIterator {
     }
   }
 
-  public function __call($func, $params) {
-    if (ini_get('hhvm.no_use_magic_methods')) {
-      trigger_error(
-        "Invoking AppendIterator::$func via magic __call",
-        E_WARNING
-      );
-    }
-    return $this->call__($func, $params);
-  }
-
   public function call__($func, $params) {
     return call_user_func_array(varray[$this->getInnerIterator(), $func],
                                 $params);

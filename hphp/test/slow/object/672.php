@@ -7,9 +7,12 @@ class FOo {
   public function teST() {
  echo "FOo::teST\n";
  }
-  public function __CaLL($name, $args) {
-    echo "FOo::" . $name . "\n";
-  }
+  public function __FUNcTION__() {
+ echo "FOo::__FUNcTION__\n";
+ }
+  public function __CLAsS__() {
+ echo "FOo::__CLAsS__\n";
+ }
 }
 class TesT {
   public static function ExclAim() {

@@ -62,7 +62,6 @@ pub fn from_ast<'a>(
     let is_abstract = class.kind.is_cinterface() || method.abstract_;
     let is_async = method.fun_kind.is_fasync() || method.fun_kind.is_fasync_generator();
     let is_no_injection = hhas_attribute::is_no_injection(&attributes);
-    let has_variadic_param = method.params.iter().any(|p| p.is_variadic);
 
     if !(method.static_ || is_closure_body) {
         for p in method.params.iter() {
@@ -86,15 +85,6 @@ pub fn from_ast<'a>(
             format!(
                 "Class {} contains non-static method {} and therefore cannot be declared 'abstract final'",
                 class_name, &method.name.1
-            ),
-        ));
-    };
-    if has_variadic_param && &method.name.1 == members::__CALL {
-        return Err(raise_fatal_parse(
-            &method.name.0,
-            format!(
-                "Method {}::__call() cannot take a variadic argument",
-                class_name
             ),
         ));
     };

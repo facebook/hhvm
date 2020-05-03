@@ -1658,47 +1658,6 @@ where
         }
     }
 
-    fn special_method_param_errors(&mut self, node: &'a Syntax<Token, Value>) {
-        if let FunctionDeclarationHeader(x) = &node.syntax {
-            let function_name = &x.function_name;
-            let function_parameter_list = &x.function_parameter_list;
-            let name = self.text(function_name).to_ascii_lowercase();
-
-            if !sn::members::AS_LOWERCASE_SET.contains(&name) {
-                return;
-            }
-            let params = || Self::syntax_to_list_no_separators(function_parameter_list);
-            let len = params().count();
-
-            let full_name = self
-                .first_parent_class_name()
-                .map(|c_name| c_name.to_string() + "::" + &name + "()")
-                .unwrap_or(name.to_string());
-
-            let s = name;
-            let num_args_opt = match s {
-                _ if s == sn::members::__CALL && len != 2 => Some(2),
-                _ => None,
-            };
-
-            if let Some(n) = num_args_opt {
-                self.errors.push(Self::make_error_from_node(
-                    node,
-                    errors::invalid_number_of_args(&full_name, n),
-                ))
-            }
-            if s == sn::members::__CALL {
-                // disallow inout parameters on magic methods
-                if params().any(&Self::is_parameter_with_callconv) {
-                    self.errors.push(Self::make_error_from_node(
-                        node,
-                        errors::invalid_inout_args(&full_name),
-                    ))
-                }
-            }
-        }
-    }
-
     fn is_in_reified_class(&self) -> bool {
         let active_classish = match self.env.context.active_classish {
             Some(x) => x,
@@ -1944,7 +1903,6 @@ where
                         modifiers,
                     );
                 }
-                self.special_method_param_errors(&md.methodish_function_decl_header);
                 self.produce_error(
                     |self_, x| self_.methodish_multiple_reactivity_annotations(x),
                     node,
@@ -2568,7 +2526,6 @@ where
         self.first_parent_function_name().map_or(false, |s| {
             let s = s.to_ascii_lowercase();
             match s {
-                _ if s == sn::members::__CALL => false,
                 _ if s == sn::members::__INVOKE => false,
                 _ => sn::members::AS_LOWERCASE_SET.contains(&s),
             }

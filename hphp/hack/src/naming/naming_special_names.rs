@@ -180,7 +180,7 @@ pub mod members {
                 })
         };
         pub static ref UNSUPPORTED_MAP: HashMap<String, &'static str> = {
-            vec![__CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
+            vec![__CALL, __CALL_STATIC, __GET, __ISSET, __SET, __UNSET]
                 .iter()
                 .fold(
                     HashMap::<String, &'static str>::new(),

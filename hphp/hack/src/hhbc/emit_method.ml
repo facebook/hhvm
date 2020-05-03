@@ -91,15 +91,6 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
       ^ " contains non-static method "
       ^ original_name
       ^ " and therefore cannot be declared 'abstract final'" );
-  let has_variadic_param =
-    List.exists ast_method.T.m_params ~f:(fun p -> p.T.param_is_variadic)
-  in
-  if has_variadic_param && original_name = Naming_special_names.Members.__call
-  then
-    Emit_fatal.raise_fatal_parse pos
-    @@ Printf.sprintf
-         "Method %s::__call() cannot take a variadic argument"
-         class_name;
   let default_dropthrough =
     if ast_method.T.m_abstract then
       Some

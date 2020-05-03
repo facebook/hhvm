@@ -259,7 +259,9 @@ void verifyTypeImpl(IRGS& env,
       if (val->type().maybe(type)) {
         val = gen(env, CheckType, type, makeExit(env), val);
       }
-      return dvArr(val);
+      ifThen(env, [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
+                  [&]{ dvArr(val); });
+      return;
     }
     case AnnotAction::WarnFunc:
       assertx(valType <= TFunc);
@@ -481,12 +483,6 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
 
 // Checks if `arr` is a darray, varray, or varray (based on op). Executes the
 // code in `next` if that is the case.
-//
-// The JIT's type system doesn't track dvarray-ness, and it's not particularly
-// useful in general, but we implement a simple optimization here based on the
-// instruction that created src. This optimization is valuable because it lets
-// us check dvarray-ness for other reasons and then call maybeLogSerialization,
-// which is the canonical safe way to do provenance-based logging.
 template <typename Next>
 void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
   assertx(arr->isA(TArr));
@@ -494,12 +490,7 @@ void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
 
   auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
   env.irb->constrainValue(arr, gc);
-
-  if (arr->inst()->is(CheckDArray, CheckVArray, CheckDVArray)) {
-    next(arr);
-  } else {
-    ifThen(env, [&](Block* taken) { next(gen(env, op, taken, arr)); }, [&]{});
-  }
+  ifThen(env, [&](Block* taken) { next(gen(env, op, taken, arr)); }, [&]{});
 }
 
 // Checks if the `arr` has provenance, implementing the same logic as in the
@@ -1778,6 +1769,20 @@ void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
     BCSPRelOffset{safe_cast<int32_t>(offset)},
     typeFromRAT(rat, curClass(env))
   );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
+                      const TypeConstraint& tc) {
+  assertx(tc.isArray());
+  if (tc.isVArray()) return gen(env, CheckVArray, taken, arr);
+  if (tc.isDArray()) return gen(env, CheckDArray, taken, arr);
+  if (tc.isVArrayOrDArray()) return gen(env, CheckDVArray, taken, arr);
+
+  ifElse(env, [&](Block* okay) { gen(env, CheckDVArray, okay, arr); },
+              [&]{ gen(env, Jmp, taken); });
+  return arr;
 }
 
 //////////////////////////////////////////////////////////////////////

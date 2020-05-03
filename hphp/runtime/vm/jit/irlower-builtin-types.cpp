@@ -403,34 +403,12 @@ ArrayData::DVArray annotTypeToDVArrKind(AnnotType at) {
   not_reached();
 }
 
-void implRaiseHackArrTypehintNotice(IRLS& env, Vreg src,
-                                    const RaiseHackArrTypehintNoticeData* extra,
-                                    CallSpec target, const ArgGroup& args) {
-  auto& v = vmain(env);
-  auto const at = extra->tc.type();
-
-  auto const do_notice = [&] (Vout& v) {
-    cgCallHelper(v, env, target, kVoidDest, SyncOptions::Sync, args);
-  };
-
-  auto const dv = annotTypeToDVArrKind(at);
-  auto const sf = v.makeReg();
-  v << testbim{dv, src + ArrayData::offsetofDVArray(), sf};
-
-  auto const cc = at == AnnotType::Array ? CC_NZ : CC_Z;
-  return unlikelyIfThen(v, vcold(env), cc, sf, do_notice);
-}
-
 }
 
 void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<RaiseHackArrParamNotice>();
-
-  auto args = argGroup(env, inst)
-    .ssa(1)
-    .ssa(0)
-    .imm(makeStaticString(extra->tc.displayName()));
+  auto const name = makeStaticString(extra->tc.displayName());
+  auto args = argGroup(env, inst).ssa(1).ssa(0).imm(name);
 
   auto const target = [&] {
     if (extra->isReturn) {
@@ -445,24 +423,19 @@ void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
     }
   }();
 
-  implRaiseHackArrTypehintNotice(env, src, extra, target, args);
+  cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
 void cgRaiseHackArrPropNotice(IRLS& env, const IRInstruction* inst) {
-  auto const src = srcLoc(env, inst, 1).reg();
   auto const extra = inst->extra<RaiseHackArrPropNotice>();
+  auto const name = makeStaticString(extra->tc.displayName());
 
   auto const target = inst->src(3)->boolVal()
     ? CallSpec::direct(hackArrPropNoticeImpl<true>)
     : CallSpec::direct(hackArrPropNoticeImpl<false>);
 
-  auto args = argGroup(env, inst)
-    .ssa(0)
-    .ssa(1)
-    .ssa(2)
-    .imm(makeStaticString(extra->tc.displayName()));
-
-  implRaiseHackArrTypehintNotice(env, src, extra, target, args);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).ssa(2).imm(name);
+  cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 
 void cgRaiseStrToClassNotice(IRLS& env, const IRInstruction* inst) {

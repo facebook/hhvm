@@ -1636,14 +1636,19 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const dvCheck = [&](uint32_t param, SSATmp* val) {
     assertx(needDVCheck(param, val->type()));
     auto const& tc = callee->params()[param].typeConstraint;
-
-    gen(
+    ifThen(
       env,
-      RaiseHackArrParamNotice,
-      RaiseHackArrParamNoticeData { tc, int32_t(param), false },
-      maker.makeUnusualCatch(),
-      val,
-      cns(env, callee)
+      [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
+      [&]{
+        gen(
+          env,
+          RaiseHackArrParamNotice,
+          RaiseHackArrParamNoticeData { tc, int32_t(param), false },
+          maker.makeUnusualCatch(),
+          val,
+          cns(env, callee)
+        );
+      }
     );
   };
 

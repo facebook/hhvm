@@ -29,6 +29,7 @@ struct Func;
 
 namespace jit {
 
+struct Block;
 struct SSATmp;
 struct Type;
 
@@ -49,6 +50,12 @@ void verifyPropType(IRGS& env,
 
 void raiseClsmethCompatTypeHint(
   IRGS& env, int32_t id, const Func* func, const TypeConstraint& tc);
+
+// Does dvarray checks on `arr` needed to satisfy `tc`, jumping to `taken`
+// if the checks fail. Preconditions: arr->isA(TArr) && tc.isArray()
+SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
+                      const TypeConstraint& tc);
+
 //////////////////////////////////////////////////////////////////////
 
 SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className);

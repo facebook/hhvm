@@ -2152,18 +2152,13 @@ To string conversions:
 
 | RaiseHackArrParamNotice<type,id,isReturn>, ND, S(Arr) S(Func), LA
 
-  Raise a HackArrCompatNotice corresponding to a parameter or return type-hint
-  d/varray check.  S0 is the array being passed in.  S1 is the function being
-  called.
-
-  This instruction performs the appropriate check based on `type', and logs
-  either on the failure branch. TODO(kshaunak): Replace this instruction by
-  one that unconditionally notices.
+  Raise a HackArrCompatNotice corresponding to a param or return typehint
+  dvarray mismatch. S0 is the array being passed to the callee S1.
 
 | RaiseHackArrPropNotice<type>, ND, S(Cls) S(Arr) S(Int) C(Bool), LA
 
-  Raise a HackArrCompatNotice corresponding to a property type-hint d/varray
-  mismatch.  Behaves like RaiseHackArrParamNotice.
+  Raise a HackArrCompatNotice corresponding to a property typehint dvarray
+  mismatch. Behaves like RaiseHackArrParamNotice.
 
 | RaiseArraySerializeNotice, ND, C(Int) S(ArrLike), LA
 

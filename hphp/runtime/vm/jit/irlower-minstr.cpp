@@ -544,25 +544,6 @@ void implArrayGet(IRLS& env, const IRInstruction* inst, MOpMode mode) {
                SyncOptions::Sync, argGroup(env, inst).ssa(0).ssa(1));
 }
 
-void implArraySet(IRLS& env, const IRInstruction* inst) {
-  auto const& arr_type = inst->src(0)->type();
-  auto const& key_type = inst->src(1)->type();
-
-  using SetIntMove = ArrayData* (ArrayData::*)(int64_t, TypedValue);
-  using SetStrMove = ArrayData* (ArrayData::*)(StringData*, TypedValue);
-
-  assertx(key_type.subtypeOfAny(TInt, TStr));
-  auto const target = (key_type <= TInt)
-    ? CallSpec::array(arr_type, &g_array_funcs.setIntMove,
-                      static_cast<SetIntMove>(&ArrayData::setMove))
-    : CallSpec::array(arr_type, &g_array_funcs.setStrMove,
-                      static_cast<SetStrMove>(&ArrayData::setMove));
-
-  auto& v = vmain(env);
-  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
-  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
-}
-
 }
 
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
@@ -706,7 +687,24 @@ void cgMixedArrayGetK(IRLS& env, const IRInstruction* inst) {
   loadTV(v, inst->dst(0), dstLoc(env, inst, 0), arr[off]);
 }
 
-void cgArraySet(IRLS& env, const IRInstruction* i)    { implArraySet(env, i); }
+void cgArraySet(IRLS& env, const IRInstruction* inst) {
+  auto const& arr_type = inst->src(0)->type();
+  auto const& key_type = inst->src(1)->type();
+
+  using SetIntMove = ArrayData* (ArrayData::*)(int64_t, TypedValue);
+  using SetStrMove = ArrayData* (ArrayData::*)(StringData*, TypedValue);
+
+  assertx(key_type.subtypeOfAny(TInt, TStr));
+  auto const target = (key_type <= TInt)
+    ? CallSpec::array(arr_type, &g_array_funcs.setIntMove,
+                      static_cast<SetIntMove>(&ArrayData::setMove))
+    : CallSpec::array(arr_type, &g_array_funcs.setStrMove,
+                      static_cast<SetStrMove>(&ArrayData::setMove));
+
+  auto& v = vmain(env);
+  auto const args = argGroup(env, inst).ssa(0).ssa(1).typedValue(2);
+  cgCallHelper(v, env, target, callDest(env, inst), SyncOptions::Sync, args);
+}
 
 IMPL_OPCODE_CALL(SetNewElemArray);
 IMPL_OPCODE_CALL(AddNewElem);

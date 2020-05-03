@@ -87,29 +87,29 @@ mod inout_locals {
     use std::{collections::HashMap, marker::PhantomData};
 
     pub(super) struct AliasInfo {
-        first_inout: usize,
-        last_write: usize,
+        first_inout: isize,
+        last_write: isize,
         num_uses: usize,
     }
 
     impl Default for AliasInfo {
         fn default() -> Self {
             AliasInfo {
-                first_inout: std::usize::MAX,
-                last_write: std::usize::MIN,
+                first_inout: std::isize::MAX,
+                last_write: std::isize::MIN,
                 num_uses: 0,
             }
         }
     }
 
     impl AliasInfo {
-        pub(super) fn add_inout(&mut self, i: usize) {
+        pub(super) fn add_inout(&mut self, i: isize) {
             if i < self.first_inout {
                 self.first_inout = i;
             }
         }
 
-        pub(super) fn add_write(&mut self, i: usize) {
+        pub(super) fn add_write(&mut self, i: isize) {
             if i > self.last_write {
                 self.last_write = i;
             }
@@ -119,7 +119,7 @@ mod inout_locals {
             self.num_uses += 1
         }
 
-        pub(super) fn in_range(&self, i: usize) -> bool {
+        pub(super) fn in_range(&self, i: isize) -> bool {
             i > self.first_inout || i <= self.last_write
         }
 
@@ -131,11 +131,11 @@ mod inout_locals {
     pub(super) type AliasInfoMap = HashMap<String, AliasInfo>;
 
     fn add_write(name: String, i: usize, map: &mut AliasInfoMap) {
-        map.entry(name).or_default().add_write(i);
+        map.entry(name).or_default().add_write(i as isize);
     }
 
     fn add_inout(name: String, i: usize, map: &mut AliasInfoMap) {
-        map.entry(name).or_default().add_inout(i);
+        map.entry(name).or_default().add_inout(i as isize);
     }
 
     fn add_use(name: String, map: &mut AliasInfoMap) {
@@ -145,7 +145,9 @@ mod inout_locals {
     // determines if value of a local 'name' that appear in parameter 'i'
     // should be saved to local because it might be overwritten later
     pub(super) fn should_save_local_value(name: &str, i: usize, aliases: &AliasInfoMap) -> bool {
-        aliases.get(name).map_or(false, |alias| alias.in_range(i))
+        aliases
+            .get(name)
+            .map_or(false, |alias| alias.in_range(i as isize))
     }
 
     pub(super) fn should_move_local_value(local: &local::Type, aliases: &AliasInfoMap) -> bool {

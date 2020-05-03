@@ -980,12 +980,12 @@ fn emit_foreach_(
     iterator: &tast::AsExpr,
     block: &tast::Block,
 ) -> Result {
+    let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
     scope::with_unnamed_locals_and_iterators(e, |e| {
         let iter_id = e.iterator_mut().get();
         let loop_break_label = e.label_gen_mut().next_regular();
         let loop_continue_label = e.label_gen_mut().next_regular();
         let loop_head_label = e.label_gen_mut().next_regular();
-        let collection_instrs = emit_expr::emit_expr(e, env, collection)?;
         let (key_id, val_id, preamble) = emit_iterator_key_value_storage(e, env, iterator)?;
         let iter_args = IterArgs {
             iter_id: iter_id.clone(),
@@ -1046,6 +1046,14 @@ fn emit_foreach_await(
             instr::label(input_is_async_iterator_label),
             instr::popl(iter_temp_local.clone()),
         ]);
+        let loop_body_instr = env.do_in_loop_body(
+            e,
+            exit_label.clone(),
+            next_label.clone(),
+            None,
+            block,
+            emit_block,
+        )?;
         let iterate = InstrSeq::gather(vec![
             instr::label(next_label.clone()),
             instr::cgetl(iter_temp_local.clone()),
@@ -1069,14 +1077,7 @@ fn emit_foreach_await(
             instr::istypec(IstypeOp::OpNull),
             instr::jmpnz(pop_and_exit_label.clone()),
             emit_foreach_await_key_value_storage(e, env, iterator)?,
-            env.do_in_loop_body(
-                e,
-                exit_label.clone(),
-                next_label.clone(),
-                None,
-                block,
-                emit_block,
-            )?,
+            loop_body_instr,
             emit_pos(pos),
             instr::jmp(next_label),
             instr::label(pop_and_exit_label),
@@ -1348,6 +1349,7 @@ fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Block, cond: &tast::Expr
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
+    let jmpnz_instr = emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs;
     Ok(InstrSeq::gather(vec![
         instr::label(start_label.clone()),
         env.do_in_loop_body(
@@ -1359,7 +1361,7 @@ fn emit_do(e: &mut Emitter, env: &mut Env, body: &tast::Block, cond: &tast::Expr
             emit_block,
         )?,
         instr::label(cont_label),
-        emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
+        jmpnz_instr,
         instr::label(break_label),
     ]))
 }

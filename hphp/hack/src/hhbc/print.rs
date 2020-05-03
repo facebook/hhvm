@@ -44,9 +44,11 @@ use hhbc_string_utils_rust::{
 };
 use instruction_sequence_rust::{Error::Unrecoverable, InstrSeq};
 use label_rust::Label;
+use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use ocaml_helper::escaped;
 use oxidized::{ast, ast_defs, doc_comment::DocComment, local_id, pos::Pos};
+use regex::Regex;
 use runtime::TypedValue;
 use write::*;
 
@@ -2537,12 +2539,22 @@ fn print_expr<W: Write>(
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
-                let s = format!(
+                let mut s = format!(
                     "{:.1E}",
                     f.parse::<f64>()
                         .map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?
                 );
-                w.write(s.replace('E', "E+"))
+                if s.contains("E-") {
+                    lazy_static! {
+                        static ref NEG_SINGLE_DIGIT_EXP: Regex = Regex::new(r".*E-\d$").unwrap();
+                    }
+                    if NEG_SINGLE_DIGIT_EXP.is_match(&s) {
+                        s.insert(s.len() - 1, '0');
+                    }
+                    w.write(s)
+                } else {
+                    w.write(s.replace('E', "E+"))
+                }
             } else {
                 w.write(f)
             }

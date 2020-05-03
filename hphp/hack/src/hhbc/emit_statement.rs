@@ -291,57 +291,49 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     }
 }
 
-fn emit_case(
+fn emit_case<'c>(
+    e: &mut Emitter,
+    env: &mut Env,
+    case: &'c tast::Case,
+) -> Result<(InstrSeq, (Option<(&'c tast::Expr, Label)>, Option<Label>))> {
+    let l = e.label_gen_mut().next_regular();
+    Ok(match case {
+        tast::Case::Case(case_expr, b) => (
+            InstrSeq::gather(vec![instr::label(l.clone()), emit_block(env, e, b)?]),
+            (Some((case_expr, l)), None),
+        ),
+        tast::Case::Default(_, b) => (
+            InstrSeq::gather(vec![instr::label(l.clone()), emit_block(env, e, b)?]),
+            (None, Some(l)),
+        ),
+    })
+}
+
+fn emit_check_case(
     e: &mut Emitter,
     env: &mut Env,
     pos: &Pos,
     scrutinee_expr: &tast::Expr,
-    case: &tast::Case,
-    emit_exhaustiveness: bool,
-) -> Result<((InstrSeq, InstrSeq), Option<Label>)> {
-    Ok(match case {
-        tast::Case::Case(case_expr, b) => {
-            let case_handler_label = e.label_gen_mut().next_regular();
-            let instr_check_case = if scrutinee_expr.1.is_lvar() {
-                InstrSeq::gather(vec![
-                    emit_expr::emit_two_exprs(e, env, &case_expr.0, scrutinee_expr, &case_expr)?,
-                    instr::eq(),
-                    instr::jmpnz(case_handler_label.clone()),
-                ])
-            } else {
-                let next_case_label = e.label_gen_mut().next_regular();
-                InstrSeq::gather(vec![
-                    instr::dup(),
-                    emit_expr::emit_expr(e, env, &case_expr)?,
-                    emit_pos(&case_expr.0),
-                    instr::eq(),
-                    instr::jmpz(next_case_label.clone()),
-                    instr::popc(),
-                    instr::jmp(case_handler_label.clone()),
-                    instr::label(next_case_label),
-                ])
-            };
-            (
-                (
-                    instr_check_case,
-                    InstrSeq::gather(vec![
-                        instr::label(case_handler_label),
-                        emit_block(env, e, b)?,
-                    ]),
-                ),
-                None,
-            )
-        }
-        tast::Case::Default(_, b) => {
-            let l = e.label_gen_mut().next_regular();
-            (
-                (
-                    instr::empty(),
-                    InstrSeq::gather(vec![instr::label(l.clone()), emit_block(env, e, b)?]),
-                ),
-                Some(l),
-            )
-        }
+    (case_expr, case_handler_label): (&tast::Expr, Label),
+) -> Result {
+    Ok(if scrutinee_expr.1.is_lvar() {
+        InstrSeq::gather(vec![
+            emit_expr::emit_two_exprs(e, env, &case_expr.0, scrutinee_expr, &case_expr)?,
+            instr::eq(),
+            instr::jmpnz(case_handler_label),
+        ])
+    } else {
+        let next_case_label = e.label_gen_mut().next_regular();
+        InstrSeq::gather(vec![
+            instr::dup(),
+            emit_expr::emit_expr(e, env, &case_expr)?,
+            emit_pos(&case_expr.0),
+            instr::eq(),
+            instr::jmpz(next_case_label.clone()),
+            instr::popc(),
+            instr::jmp(case_handler_label),
+            instr::label(next_case_label),
+        ])
     })
 }
 
@@ -648,19 +640,25 @@ fn emit_switch(
                 // Emit all the cases except the last one
                 let mut res = rest
                     .iter()
-                    .map(|case| emit_case(e, env, pos, scrutinee_expr, case, !has_default))
+                    .map(|case| emit_case(e, env, case))
                     .collect::<Vec<_>>();
 
                 if has_default {
                     // If there is a default, emit the last case as usual
-                    res.push(emit_case(e, env, pos, scrutinee_expr, last, !has_default))
+                    res.push(emit_case(e, env, last))
                 } else {
                     // Otherwise, emit the last case with an added break
-                    let last = &mut last.clone();
                     match last {
                         tast::Case::Case(expr, block) => {
-                            block.push(tast::Stmt(Pos::make_none(), tast::Stmt_::Break));
-                            res.push(emit_case(e, env, pos, scrutinee_expr, last, !has_default))
+                            let l = e.label_gen_mut().next_regular();
+                            res.push(Ok((
+                                InstrSeq::gather(vec![
+                                    instr::label(l.clone()),
+                                    emit_block(env, e, block)?,
+                                    emit_break(e, env, &Pos::make_none()),
+                                ]),
+                                (Some((expr, l)), None),
+                            )))
                         }
                         tast::Case::Default(_, _) => {
                             return Err(Unrecoverable(
@@ -671,22 +669,24 @@ fn emit_switch(
                     // ...and emit warning/exception for missing default
                     let l = e.label_gen_mut().next_regular();
                     res.push(Ok((
-                        (
-                            instr::empty(),
-                            InstrSeq::gather(vec![
-                                instr::label(l.clone()),
-                                emit_pos_then(pos, instr::throw_non_exhaustive_switch()),
-                            ]),
-                        ),
-                        Some(l),
+                        InstrSeq::gather(vec![
+                            instr::label(l.clone()),
+                            emit_pos_then(pos, instr::throw_non_exhaustive_switch()),
+                        ]),
+                        (None, Some(l)),
                     )))
                 };
-                let (case_instrs, default_labels): (Vec<(InstrSeq, InstrSeq)>, Vec<_>) = res
+                let (case_body_instrs, case_exprs_and_default_labels): (Vec<InstrSeq>, Vec<_>) =
+                    res.into_iter()
+                        .collect::<Result<Vec<_>>>()?
+                        .into_iter()
+                        .unzip();
+                let (case_exprs, default_labels): (Vec<Option<(&tast::Expr, Label)>>, Vec<_>) =
+                    case_exprs_and_default_labels.into_iter().unzip();
+                let case_expr_instrs = case_exprs
                     .into_iter()
-                    .collect::<Result<Vec<_>>>()?
-                    .into_iter()
-                    .unzip();
-                let (case_expr_instrs, case_body_instrs) = case_instrs.into_iter().unzip();
+                    .filter_map(|x| x.map(|x| emit_check_case(e, env, pos, scrutinee_expr, x)))
+                    .collect::<Result<Vec<_>>>()?;
                 let default_label = match default_labels
                     .iter()
                     .filter_map(|lopt| lopt.as_ref())
@@ -802,9 +802,10 @@ fn emit_try_finally_<E: Fn(&mut Env, &mut Emitter, &Label) -> Result>(
 
     let in_try = env.flags.contains(env::Flags::IN_TRY);
     env.flags.set(env::Flags::IN_TRY, true);
-    let try_body = emit_try_block(env, e, &finally_start)?;
+    let try_body_result = emit_try_block(env, e, &finally_start);
     env.flags.set(env::Flags::IN_TRY, in_try);
 
+    let try_body = try_body_result?;
     let jump_instrs = tfr::JumpInstructions::collect(&try_body, &mut env.jump_targets_gen);
     let jump_instrs_is_empty = jump_instrs.is_empty();
 
@@ -909,17 +910,18 @@ fn emit_try_catch_(
     };
     let end_label = e.label_gen_mut().next_regular();
 
-    let in_try = env.flags.contains(env::Flags::IN_TRY);
-    env.flags.set(env::Flags::IN_TRY, true);
     let catch_instrs = InstrSeq::gather(
         catch_list
             .iter()
             .map(|catch| emit_catch(e, env, pos, &end_label, catch))
             .collect::<Result<Vec<_>>>()?,
     );
-    let try_instrs = InstrSeq::gather(vec![emit_stmts(e, env, try_block)?, emit_pos(pos)]);
+    let in_try = env.flags.contains(env::Flags::IN_TRY);
+    env.flags.set(env::Flags::IN_TRY, true);
+    let try_body = emit_stmts(e, env, try_block);
     env.flags.set(env::Flags::IN_TRY, in_try);
 
+    let try_instrs = InstrSeq::gather(vec![try_body?, emit_pos(pos)]);
     Ok(InstrSeq::create_try_catch(
         e.label_gen_mut(),
         Some(end_label.clone()),

@@ -636,11 +636,6 @@ public:
    */
   const Func* getCachedInvoke() const;
 
-  /*
-   * Does this class have a __call method?
-   */
-  bool hasCall() const;
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Builtin classes.                                                   [const]

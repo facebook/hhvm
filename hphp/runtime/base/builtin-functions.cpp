@@ -135,11 +135,7 @@ const StaticString
 
 bool is_callable(const Variant& v) {
   CallCtx ctx;
-  ctx.invName = nullptr;
   vm_decode_function(v, ctx, DecodeFlags::LookupOnly);
-  if (ctx.invName != nullptr) {
-    decRefStr(ctx.invName);
-  }
   return ctx.func != nullptr && !ctx.func->isAbstract();
 }
 
@@ -292,7 +288,6 @@ const Func* vm_decode_func_from_name(
   Class*& cls,
   Class* ctx,
   Class* cc,
-  StringData*& invName,
   DecodeFlags flags) {
   CallType lookupType = this_ ? CallType::ObjMethod : CallType::ClsMethod;
   auto f = lookupMethodCtx(cc, funcName.get(), ctx, lookupType);
@@ -320,28 +315,15 @@ const Func* vm_decode_func_from_name(
       }
     }
     if (!f) {
-      if (this_) {
-        // If this_ is non-null AND we could not find a method, try
-        // looking up __call in cls's method table
-        f = cls->lookupMethod(s___call.get());
-        assertx(!f || !(f->attrs() & AttrStatic));
-      }
-      if (!f && lookupType == CallType::ClsMethod) {
+      if (lookupType == CallType::ClsMethod) {
         this_ = nullptr;
       }
-      if (f && (cc == cls || cc->lookupMethod(f->name()))) {
-        // We found __call!
-        // Stash the original name into invName.
-        invName = funcName.get();
-        invName->incRefCount();
-      } else {
-        // Bail out if we couldn't find the method or __call
-        if (flags == DecodeFlags::Warn) {
-          raise_invalid_argument_warning("function: method '%s' not found",
-                                 funcName.data());
-        }
-        return nullptr;
+      // Bail out if we couldn't find the method
+      if (flags == DecodeFlags::Warn) {
+        raise_invalid_argument_warning("function: method '%s' not found",
+                               funcName.data());
       }
+      return nullptr;
     }
   }
 
@@ -446,12 +428,10 @@ vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
-                   StringData*& invName,
                    bool& dynamic,
                    DecodeFlags flags /* = DecodeFlags::Warn */,
                    bool genericsAlreadyGiven /* = false */) {
   bool forwarding = false;
-  invName = nullptr;
   dynamic = true;
 
   if (function.isFunc()) {
@@ -627,7 +607,7 @@ vm_decode_function(const_variant_ref function,
     }
     assertx(cls);
     return vm_decode_func_from_name(
-      name, ar, forwarding, this_, cls, ctx, cc, invName, flags);
+      name, ar, forwarding, this_, cls, ctx, cc, flags);
   }
   if (function.isObject()) {
     this_ = function.asCObjRef().get();
@@ -662,8 +642,7 @@ Variant vm_call_user_func(const_variant_ref function, const Variant& params,
   }
   auto ret = Variant::attach(
     g_context->invokeFunc(ctx.func, params, ctx.this_, ctx.cls,
-                          ctx.invName, ctx.dynamic, checkRef,
-                          allowDynCallNoPointer)
+                          ctx.dynamic, checkRef, allowDynCallNoPointer)
   );
   return ret;
 }
@@ -674,8 +653,8 @@ invoke(const String& function, const Variant& params,
   Func* func = Unit::loadFunc(function.get());
   if (func && (isContainer(params) || params.isNull())) {
     auto ret = Variant::attach(
-      g_context->invokeFunc(func, params, nullptr, nullptr, nullptr, true,
-                            false, allowDynCallNoPointer)
+      g_context->invokeFunc(func, params, nullptr, nullptr, true, false,
+                            allowDynCallNoPointer)
 
     );
     return ret;

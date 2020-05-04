@@ -179,7 +179,6 @@ struct CallCtx {
   const Func* func;
   ObjectData* this_;
   Class* cls;
-  StringData* invName;
   bool dynamic;
 };
 
@@ -714,7 +713,6 @@ void enterVMAtPseudoMain(ActRec* enterFnAr, VarEnv* varEnv);
 void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
                    bool dynamicCall, bool allowDynCallNoPointer);
 void enterVMAtCurPC();
-void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack);
 uint32_t prepareUnpackArgs(const Func* func, uint32_t numArgs,
                            bool checkInOutAnnot);
 

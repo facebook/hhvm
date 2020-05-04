@@ -4205,7 +4205,7 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     return;
   }
 
-  if (rfunc.exactFunc() && rfunc.cantBeMagicCall() && op.str2->empty()) {
+  if (rfunc.exactFunc() && op.str2->empty()) {
     return reduce(env, updateBC(op.fca, rfunc.exactFunc()->cls->name));
   }
 

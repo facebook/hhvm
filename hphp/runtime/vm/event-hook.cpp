@@ -313,7 +313,7 @@ static Variant call_intercept_handler(
 
   auto ret = Variant::attach(
     g_context->invokeFunc(f, par.toVariant(), callCtx.this_, callCtx.cls,
-                          callCtx.invName, callCtx.dynamic)
+                          callCtx.dynamic)
   );
 
   auto& arr = ret.asCArrRef();
@@ -366,7 +366,7 @@ static Variant call_intercept_handler_callback(
   }();
   auto ret = Variant::attach(
     g_context->invokeFunc(f, args.toArray(), callCtx.this_, callCtx.cls,
-                          callCtx.invName, callCtx.dynamic, false, false,
+                          callCtx.dynamic, false, false,
                           std::move(reifiedGenerics))
   );
   return ret;

@@ -197,15 +197,11 @@ LookupResult lookupObjMethod(const Func*& f,
                              bool raise) {
   f = lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, false);
   if (!f) {
-    f = cls->lookupMethod(s___call.get());
-    if (!f) {
-      if (raise) {
-        // Throw a fatal error
-        lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, true);
-      }
-      return LookupResult::MethodNotFound;
+    if (raise) {
+      // Throw a fatal error
+      lookupMethodCtx(cls, methodName, ctx, CallType::ObjMethod, true);
     }
-    return LookupResult::MagicCallFound;
+    return LookupResult::MethodNotFound;
   }
   if (f->isStaticInPrologue()) {
     return LookupResult::MethodFoundNoThis;
@@ -243,13 +239,7 @@ lookupImmutableObjMethod(const Class* cls, const StringData* name,
   if (func->isAbstract() && exactClass) return notFound;
 
   assertx(res == LookupResult::MethodFoundWithThis ||
-          res == LookupResult::MethodFoundNoThis ||
-          res == LookupResult::MagicCallFound);
-
-  if (res == LookupResult::MagicCallFound) {
-    if (exactClass) return { ImmutableObjMethodLookup::Type::MagicFunc, func };
-    return notFound;
-  }
+          res == LookupResult::MethodFoundNoThis);
 
   if (exactClass || func->attrs() & AttrPrivate || func->isImmutableFrom(cls)) {
     return { ImmutableObjMethodLookup::Type::Func, func };
@@ -264,24 +254,10 @@ LookupResult lookupClsMethod(const Func*& f,
                              ObjectData* obj,
                              const Class* ctx,
                              bool raise) {
-  f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, false);
+  f = lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, raise);
   if (!f) {
-    if (obj && obj->instanceof(cls)) {
-      f = obj->getVMClass()->lookupMethod(s___call.get());
-    }
-    if (!f) {
-      if (raise) {
-        // Throw a fatal error
-        lookupMethodCtx(cls, methodName, ctx, CallType::ClsMethod, true);
-      }
-      return LookupResult::MethodNotFound;
-    }
-    assertx(f);
-    assertx(obj);
-    // __call cannot be static, this should be enforced by semantic
-    // checks defClass time or earlier
-    assertx(!(f->attrs() & AttrStatic));
-    return LookupResult::MagicCallFound;
+    assertx(!raise);
+    return LookupResult::MethodNotFound;
   }
   if (obj && !(f->attrs() & AttrStatic) && obj->instanceof(cls)) {
     return LookupResult::MethodFoundWithThis;

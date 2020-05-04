@@ -63,8 +63,6 @@ namespace HPHP {
 
 TRACE_SET_MOD(hhbc);
 
-const StaticString s___call("__call");
-
 std::atomic<bool> Func::s_treadmill;
 
 /*

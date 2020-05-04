@@ -1305,7 +1305,7 @@ Variant Unit::getCns(const StringData* name) {
     func &&
     "The function should have been autoloaded when we loaded the constant");
   return Variant::attach(
-    g_context->invokeFuncFew(func, nullptr, nullptr, 0, nullptr, false, false)
+    g_context->invokeFuncFew(func, nullptr, 0, nullptr, false, false)
   );
 }
 

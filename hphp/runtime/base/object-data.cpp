@@ -63,9 +63,7 @@ TRACE_SET_MOD(runtime);
 
 namespace {
 
-const StaticString
-  s_call("__call"),
-  s_clone("__clone");
+const StaticString s_clone("__clone");
 
 ALWAYS_INLINE
 void verifyTypeHint(const Class* thisCls,
@@ -684,30 +682,18 @@ static bool decode_invoke(const String& s, ObjectData* obj, bool fatal,
                           CallCtx& ctx) {
   ctx.this_ = obj;
   ctx.cls = obj->getVMClass();
-  ctx.invName = nullptr;
   ctx.dynamic = true;
 
   ctx.func = ctx.cls->lookupMethod(s.get());
-  if (ctx.func) {
-    // Null out this_ for statically called methods
-    if (ctx.func->isStaticInPrologue()) {
-      ctx.this_ = nullptr;
-    }
-  } else {
-    // If this_ is non-null AND we could not find a method, try
-    // looking up __call in cls's method table
-    ctx.func = ctx.cls->lookupMethod(s_call.get());
+  if (!ctx.func) {
+    // Bail if this_ is non-null AND we could not find a method.
+    o_invoke_failed(ctx.cls->name()->data(), s.data(), fatal);
+    return false;
+  }
 
-    if (!ctx.func) {
-      // Bail if we couldn't find the method or __call
-      o_invoke_failed(ctx.cls->name()->data(), s.data(), fatal);
-      return false;
-    }
-    // We found __call! Stash the original name into invName.
-    assertx(!(ctx.func->attrs() & AttrStatic));
-    ctx.invName = s.get();
-    ctx.invName->incRefCount();
-    ctx.dynamic = false;
+  // Null out this_ for statically called methods
+  if (ctx.func->isStaticInPrologue()) {
+    ctx.this_ = nullptr;
   }
   return true;
 }

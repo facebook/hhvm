@@ -432,7 +432,6 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
   CallCtx ctx;
   ctx.cls = providedClass;
   ctx.this_ = objData;
-  ctx.invName = nullptr;
   ctx.func = selectedFunc;
   ctx.dynamic = true;
 

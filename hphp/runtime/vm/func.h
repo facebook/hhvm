@@ -43,8 +43,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-extern const StaticString s___call;
-
 struct ActRec;
 struct Class;
 struct NamedEntity;

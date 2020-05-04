@@ -357,7 +357,6 @@ struct ActiveSubscription {
         context->invokeFuncFew(
           func,
           nullptr, // thisOrCls
-          nullptr, // invName
           5, // argc
           args,
           true, // dynamic

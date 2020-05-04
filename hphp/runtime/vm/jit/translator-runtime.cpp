@@ -774,8 +774,7 @@ const Func* lookupClsMethodHelper(const Class* cls, const StringData* methName,
   const Func* f;
   auto const res = lookupClsMethod(f, cls, methName, obj, ctx, true);
 
-  if (res == LookupResult::MethodFoundWithThis ||
-      res == LookupResult::MagicCallFound) {
+  if (res == LookupResult::MethodFoundWithThis) {
     // Handled by interpreter.
     return nullptr;
   }

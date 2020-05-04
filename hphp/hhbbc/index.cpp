@@ -579,9 +579,7 @@ struct ClassInfo {
     bool thisHas{false};
     bool derivedHas{false};
   };
-  MagicFnInfo
-    magicCall,
-    magicBool;
+  MagicFnInfo magicBool;
 };
 
 struct MagicMapInfo {
@@ -590,7 +588,6 @@ struct MagicMapInfo {
 };
 
 const MagicMapInfo magicMethods[] {
-  { StaticString{"__call"}, &ClassInfo::magicCall },
   { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
 //////////////////////////////////////////////////////////////////////
@@ -925,17 +922,6 @@ const php::Func* Func::exactFunc() const {
     [&](FuncInfo* fi)                { return fi->func; },
     [&](const MethTabEntryPair* mte) { return mte->second.func; },
     [&](FuncFamily* /*fa*/)          { return Ret{}; }
-  );
-}
-
-bool Func::cantBeMagicCall() const {
-  return match<bool>(
-    val,
-    [&](FuncName)                { return true; },
-    [&](MethodName)              { return false; },
-    [&](FuncInfo*)               { return true; },
-    [&](const MethTabEntryPair*) { return true; },
-    [&](FuncFamily*)             { return true; }
   );
 }
 
@@ -3604,17 +3590,16 @@ template<class PossibleFuncRange>
 PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
 
   /*
-   * In sinlge-unit mode, the range is not complete. Without konwing all
-   * possible resolutions, HHBBC cannot deduce anything about by-ref vs by-val.
+   * In single-unit mode, the range is not complete. Without konwing all
+   * possible resolutions, HHBBC cannot deduce anything about by-val vs inout.
    * So the caller should make sure not calling this in single-unit mode.
    */
   assert(RuntimeOption::RepoAuthoritative);
 
   if (begin(range) == end(range)) {
     /*
-     * We can assume it's by value, because either we're calling a function
-     * that doesn't exist (about to fatal), or we're going to an __call (which
-     * never takes parameters by reference).
+     * We can assume it's by value, because we're calling a function that
+     * doesn't exist (about to fatal).
      *
      * Or if we've got AllFuncsInterceptable we need to assume someone could
      * rename a function to the new name.
@@ -3659,9 +3644,8 @@ folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
 
   if (begin(range) == end(range)) {
     /*
-     * We can assume it's by value, because either we're calling a function
-     * that doesn't exist (about to fatal), or we're going to an __call (which
-     * never takes parameters by reference).
+     * We can assume it's by value, because we're calling a function that
+     * doesn't exist (about to fatal).
      *
      * Or if we've got AllFuncsInterceptable we need to assume someone could
      * rename a function to the new name.
@@ -4800,85 +4784,6 @@ res::Func Index::resolve_method(Context ctx,
     }
   }
 
-  /*
-   * Note: this currently isn't exhaustively checking accessibility,
-   * except in cases where we must do a little bit of it for
-   * correctness.
-   *
-   * It is generally ok to resolve a method that won't actually be
-   * called as long, as we only do so in cases where it will fatal at
-   * runtime.
-   *
-   * So, in the presence of magic methods, we must handle the fact
-   * that attempting to call an inaccessible method will instead call
-   * the magic method, if it exists.  Note that if any class derives
-   * from a class and adds magic methods, it can change still change
-   * dispatch to call that method instead of fatalling.
-   */
-
-  // If false, this method is definitely accessible.  If true, it may
-  // or may not be accessible.
-  auto const couldBeInaccessible = [&] {
-    // Public is always accessible.
-    if (methIt->second.attrs & AttrPublic) return false;
-    // An anonymous context won't have access if it wasn't public.
-    if (!ctx.cls) return true;
-    // If the calling context class is the same as the target class,
-    // and the method is defined on this class or is protected, it
-    // must be accessible.
-    if (ctx.cls == cinfo->cls &&
-        (methIt->second.topLevel || methIt->second.attrs & AttrProtected)) {
-      return false;
-    }
-    // If the method is private, the above case is the only case where
-    // we'd know it was accessible.
-    if (methIt->second.attrs & AttrPrivate) return true;
-    /*
-     * For the protected method case: if the context class must be
-     * derived from the class that first defined the protected method
-     * we know it is accessible.  First check against the class of the
-     * method (or cinfo for trait methods).
-     */
-    if (must_be_derived_from(
-          ctx.cls,
-          ftarget->cls->attrs & AttrTrait ? cinfo->cls : ftarget->cls)) {
-      return false;
-    }
-    if (methIt->second.hasAncestor ||
-        (ftarget->cls->attrs & AttrTrait && !methIt->second.topLevel)) {
-      // Now we have find the first class that defined the method, and
-      // check if *that* is an ancestor of the context class.
-      auto parent = cinfo->parent;
-      while (true) {
-        assertx(parent);
-        auto it = parent->methods.find(name);
-        assertx(it != parent->methods.end());
-        if (!it->second.hasAncestor && it->second.topLevel) {
-          if (must_be_derived_from(ctx.cls, parent->cls)) return false;
-          break;
-        }
-        parent = parent->parent;
-      }
-    }
-    /*
-     * On the other hand, if the class that defined the method must be
-     * derived from the context class, it is going to be accessible as
-     * long as the context class does not define a private method with
-     * the same name.  (If it did, we'd be calling that private
-     * method, which currently we don't ever resolve---we've removed
-     * it from the method table in the classInfo.)
-     */
-    if (must_be_derived_from(cinfo->cls, ctx.cls)) {
-      if (!contextMayHavePrivateWithSameName()) {
-        return false;
-      }
-    }
-    // Other cases we're not sure about (maybe some non-unique classes
-    // got in the way).  Conservatively return that it might be
-    // inaccessible.
-    return true;
-  };
-
   auto resolve = [&] {
     create_func_info(*m_data, ftarget);
     return res::Func { this, mteFromIt(methIt) };
@@ -4886,14 +4791,8 @@ res::Func Index::resolve_method(Context ctx,
 
   switch (dcls.type) {
   case DCls::Exact:
-    if (cinfo->magicCall.thisHas) {
-      if (couldBeInaccessible()) return name_only();
-    }
     return resolve();
   case DCls::Sub:
-    if (cinfo->magicCall.derivedHas) {
-      if (couldBeInaccessible()) return name_only();
-    }
     if (methIt->second.attrs & AttrNoOverride) {
       return resolve();
     }
@@ -5557,24 +5456,18 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
       auto const it = m_data->method_inout_params_by_name.find(s.name);
       if (it == end(m_data->method_inout_params_by_name)) {
         // There was no entry, so no method by this name takes a parameter
-        // by reference.
+        // by inout.
         return PrepKind::Val;
       }
-      /*
-       * If we think it's supposed to be PrepKind::InOut, we still can't be sure
-       * unless we go through some effort to guarantee that it can't be going
-       * to an __call function magically (which will never take anything by
-       * ref).
-       */
-      if (paramId < sizeof(it->second) * CHAR_BIT) {
-        return ((it->second >> paramId) & 1) ?
-          PrepKind::Unknown : PrepKind::Val;
+      if (paramId < sizeof(it->second) * CHAR_BIT &&
+          !((it->second >> paramId) & 1)) {
+        // No method of this name takes parameter paramId by inout.
+        return PrepKind::Val;
       }
-      auto const kind = prep_kind_from_set(
+      return prep_kind_from_set(
         find_range(m_data->methods, s.name),
         paramId
       );
-      return kind == PrepKind::InOut ? PrepKind::Unknown : kind;
     },
     [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);

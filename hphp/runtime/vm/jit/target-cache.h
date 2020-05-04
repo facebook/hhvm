@@ -111,8 +111,6 @@ namespace MethodCache {
  *
  * MethodCache entries cache the dispatch target for an object method call.
  * Each line consists of a Class* key and a Func* (stored as a uintptr_t).
- * We also pack a bit into the value -- the low bit is set if the function is
- * a magic call.
  */
 struct Entry {
   const Class* m_key;

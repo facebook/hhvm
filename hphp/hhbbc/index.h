@@ -417,17 +417,6 @@ struct Func {
   const php::Func* exactFunc() const;
 
   /*
-   * Returns whether this resolved function could possibly be going through a
-   * magic call, in the magic way.
-   *
-   * That is, if was resolved as part of a direct call to an __call method,
-   * this will say true.  If it was resolved as part as some normal method
-   * call, and we haven't proven that there's no way an __call dispatch could
-   * be involved, this will say false.
-   */
-  bool cantBeMagicCall() const;
-
-  /*
    * Returns whether this resolved function is definitely safe to constant fold.
    */
   bool isFoldable() const;

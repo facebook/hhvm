@@ -211,16 +211,14 @@ inline TypedValue ExecutionContext::invokeFunc(
   const CallCtx& ctx,
   const Variant& args_
 ) {
-  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, ctx.invName,
-                    ctx.dynamic);
+  return invokeFunc(ctx.func, args_, ctx.this_, ctx.cls, ctx.dynamic);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
   const Func* f,
-  ExecutionContext::ThisOrClass thisOrCls,
-  StringData* invName
+  ExecutionContext::ThisOrClass thisOrCls
 ) {
-  return invokeFuncFew(f, thisOrCls, invName, 0, nullptr);
+  return invokeFuncFew(f, thisOrCls, 0, nullptr);
 }
 
 inline TypedValue ExecutionContext::invokeFuncFew(
@@ -237,7 +235,6 @@ inline TypedValue ExecutionContext::invokeFuncFew(
   return invokeFuncFew(
     ctx.func,
     thisOrCls,
-    ctx.invName,
     numArgs,
     argv,
     ctx.dynamic
@@ -253,7 +250,6 @@ inline TypedValue ExecutionContext::invokeMethod(
   return invokeFuncFew(
     meth,
     obj,
-    nullptr /* invName */,
     args.size(),
     args.start(),
     dynamic,

@@ -472,7 +472,6 @@ public:
                         const Variant& args_ = init_null_variant,
                         ObjectData* this_ = nullptr,
                         Class* class_ = nullptr,
-                        StringData* invName = nullptr,
                         bool dynamic = true,
                         bool checkRefAnnot = false,
                         bool allowDynCallNoPointer = false,
@@ -483,15 +482,13 @@ public:
 
   TypedValue invokeFuncFew(const Func* f,
                            ThisOrClass thisOrCls,
-                           StringData* invName,
                            uint32_t numArgs,
                            const TypedValue* argv,
                            bool dynamic = true,
                            bool allowDynCallNoPointer = false);
 
   TypedValue invokeFuncFew(const Func* f,
-                           ThisOrClass thisOrCls,
-                           StringData* invName = nullptr);
+                           ThisOrClass thisOrCls);
 
   TypedValue invokeFuncFew(const CallCtx& ctx,
                            uint32_t numArgs,

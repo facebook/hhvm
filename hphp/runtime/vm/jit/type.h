@@ -338,7 +338,6 @@ constexpr bool operator>(Mem a, Mem b) {
   IRT(RDSHandle,   bits_t::bit<kRuntime+7>()) /* rds::Handle */         \
   IRT(Nullptr,     bits_t::bit<kRuntime+8>())                           \
   IRT(Smashable,   bits_t::bit<kRuntime+9>()) /* Smashable uint64_t */  \
-                                      /* bit set indicating magic call */
   /* bits above this are unused */
 
 /*

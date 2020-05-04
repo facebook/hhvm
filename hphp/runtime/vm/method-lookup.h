@@ -33,7 +33,6 @@ enum class CallType {
 enum class LookupResult {
   MethodFoundWithThis,
   MethodFoundNoThis,
-  MagicCallFound,
   MethodNotFound,
 };
 
@@ -73,7 +72,6 @@ struct ImmutableObjMethodLookup {
   enum class Type {
     NotFound,   // unable to determine suitable Func*
     Func,       // the called func is returned
-    MagicFunc,  // call redirected to the returned magic func
     Class,      // the called func may override the returned base class func
     Interface,  // the called func implements the returned interface func
   };

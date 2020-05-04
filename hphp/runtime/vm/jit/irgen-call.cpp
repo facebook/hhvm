@@ -533,9 +533,8 @@ void fcallObjMethodUnknown(
   auto const func = [&] {
     auto const cls = gen(env, LdObjClass, obj);
     if (!methodName->hasConstVal()) {
-      auto const func =
-        gen(env, LdObjMethodD, OptClassData { callerCtx }, cls, methodName);
-      return gen(env, CheckNonNull, makeExitSlow(env), func);
+      auto const ocData = OptClassData { callerCtx };
+      return gen(env, LdObjMethodD, ocData, cls, methodName);
     }
 
     auto const tcCache = gen(env, LdSmashable);
@@ -553,8 +552,7 @@ void fcallObjMethodUnknown(
         // slow path: run C++ helper to determine Func*, exit if we can't handle
         // the call in the JIT
         auto const fnData = FuncNameData { methodName->strVal(), callerCtx };
-        auto const func = gen(env, LdObjMethodS, fnData, cls, tcCache);
-        return gen(env, CheckNonNull, makeExitSlow(env), func);
+        return gen(env, LdObjMethodS, fnData, cls, tcCache);
       }
     );
   }();
@@ -735,10 +733,7 @@ void optimizeProfiledCallMethod(IRGS& env,
     }
 
     // Although there were multiple classes, the method was unique
-    // (this comes up eg for a final method in a base class).  But
-    // note that we can't allow a magic call here since it's possible
-    // that an as-yet-unseen derived class defines a method named
-    // methodName.
+    // (this comes up eg for a final method in a base class).
     ifThen(
       env,
       [&] (Block* sideExit) {
@@ -835,42 +830,6 @@ void optimizeProfiledCallMethod(IRGS& env,
   emitFCall();
 }
 
-void fcallObjMethodMagic(IRGS& env, const Func* callee, const FCallArgs& fca,
-                         SSATmp* obj, const StringData* methodName,
-                         bool dynamicCall, uint32_t numExtraInputs) {
-  if (fca.hasUnpack() || fca.numRets != 1) return interpOne(env);
-  if (fca.enforceInOut()) {
-    for (auto i = 0; i < fca.numArgs; ++i) {
-      if (fca.isInOut(i)) {
-        gen(env, ThrowParamInOutMismatch, ParamData { i }, cns(env, callee));
-        return;
-      }
-    }
-  }
-
-  discard(env, numExtraInputs);
-  auto const generics = fca.hasGenerics() ? popC(env) : nullptr;
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    emitNewVecArray(env, fca.numArgs);
-  } else {
-    emitNewVArray(env, fca.numArgs);
-  }
-  auto const arr = popC(env);
-  push(env, cns(env, methodName));
-  push(env, arr);
-  if (generics) push(env, generics);
-
-  // We just wrote to the stack, make sure the function call can proceed.
-  updateMarker(env);
-  env.irb->exceptionStackBoundary();
-
-  assertx(!fca.supportsAsyncEagerReturn());
-  auto const fca2 =
-    FCallArgs(fca.flags, 2, 1, nullptr, kInvalidOffset, false, false,
-              fca.context);
-  prepareAndCallKnown(env, callee, fca2, obj, dynamicCall, false);
-}
-
 void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
                        const StringData* clsHint, SSATmp* methodName,
                        bool dynamicCall, uint32_t numExtraInputs) {
@@ -916,12 +875,6 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
   // If we know which exact or overridden method to call, we don't need PGO.
   switch (lookup.type) {
-    case ImmutableObjMethodLookup::Type::MagicFunc:
-      implIncStat(env, Stats::ObjMethod_known);
-      assertx(!lookup.func->isStaticInPrologue());
-      fcallObjMethodMagic(env, lookup.func, fca, obj, methodName->strVal(),
-                          dynamicCall, numExtraInputs);
-      return;
     case ImmutableObjMethodLookup::Type::Func:
       implIncStat(env, Stats::ObjMethod_known);
       if (lookup.func->isStaticInPrologue()) {
@@ -1419,9 +1372,6 @@ void emitFCallClsMethodD(IRGS& env,
   prepareAndCallProfiled(env, func, fca, ctx, false, false);
 }
 
-const StaticString s_resolveMagicCall(
-  "Unable to resolve magic call for inst_meth()");
-
 void emitResolveObjMethod(IRGS& env) {
   auto const name = topC(env, BCSPRelOffset { 0 });
   auto const obj = topC(env, BCSPRelOffset { 1 });
@@ -1443,9 +1393,6 @@ void emitResolveObjMethod(IRGS& env) {
   switch (lookup.type) {
     case ImmutableObjMethodLookup::Type::NotFound:
       PUNT(ResolveObjMethod-unknownObjMethod);
-    case ImmutableObjMethodLookup::Type::MagicFunc:
-      gen(env, ThrowInvalidOperation, cns(env, s_resolveMagicCall.get()));
-      return;
     case ImmutableObjMethodLookup::Type::Func:
       if (lookup.func->isStaticInPrologue()) {
         gen(env, ThrowHasThisNeedStatic, cns(env, lookup.func));

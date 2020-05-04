@@ -655,9 +655,8 @@ SSATmp* opt_foldable(IRGS& env,
     RID().setJitFolding(true);
     SCOPE_EXIT{ RID().setJitFolding(false); };
 
-    auto retVal = g_context->invokeFunc(func, args.toArray(),
-                                        nullptr, const_cast<Class*>(cls),
-                                        nullptr, false);
+    auto retVal = g_context->invokeFunc(func, args.toArray(), nullptr,
+                                        const_cast<Class*>(cls), false);
     SCOPE_EXIT { tvDecRefGen(retVal); };
     assertx(tvIsPlausible(retVal));
 

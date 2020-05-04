@@ -1871,12 +1871,7 @@ FCallObjMethodD <fca> <class hint> <nullsafe> <litstr id>
   calls that method.
 
   If object x does not have an accessible method named y, this instruction
-  checks if object x has a __call method. If a __call method is found, this
-  instruction packs arguments into a varray z and calls the __call method with
-  two arguments -- string y and varray z.
-
-  If object x does not have an accessible method named y and it does not have a
-  __call method, this instruction throws a fatal error.
+  throws a fatal error.
 
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
@@ -1913,14 +1908,7 @@ FCallClsMethodSD <fca> <class hint> <mode> <litstr id>
   this instruction calls that method.
 
   If class x does not have an accessible method named y, this instruction
-  checks if the current function's $this is non-null, if the class of $this is
-  the same or derived from class x, and if $this has a __call method. If a
-  suitable __call method is found, this instruction packs arguments into
-  a varray z and calls the __call method with two arguments -- string y and
-  varray z.
-
-  If class x does not have an accessible method named y, and if a suitable
-  __call method could not be found, this instruction throws a fatal error.
+  throws a fatal error.
 
   The string in %2 provides a static analysis hint. If it is non-empty, it is
   the class name with the implementation of method y that will be called.
@@ -3328,8 +3316,7 @@ ResolveObjMethod [C C] -> [C]
   Resolve $1 as a method of $2 to a method array, then push the array onto the
   top of stack. When $1 represents a class method of $2, the first element of
   the resulting array is the class pointer of $2, otherwise the first element is
-  always $2. Fatal if the function resolves to a magic __call method. When
-  resolution fails, raise an error.
+  always $2. When resolution fails, raise an error.
 
 ResolveClsMethod  <litstr id>               [C:Class] -> [C]
 ResolveClsMethodD <litstr id> <litstr id>   []        -> [C]

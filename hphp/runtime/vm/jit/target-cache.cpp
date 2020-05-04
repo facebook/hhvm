@@ -51,8 +51,6 @@ TRACE_SET_MOD(targetcache);
 
 namespace {
 
-const StaticString s_call("__call");
-
 inline bool stringMatches(const StringData* rowString, const StringData* sd) {
   return rowString &&
     (rowString == sd ||
@@ -167,20 +165,12 @@ namespace {
 
 NEVER_INLINE
 const Func* lookup(const Class* cls, const StringData* name, const Class* ctx) {
-  auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, false);
-  if (LIKELY(func != nullptr)) {
-    if (UNLIKELY(func->isStaticInPrologue())) {
-      throw_has_this_need_static(func);
-    }
-    return func;
+  auto const func = lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true);
+  assertx(func);
+  if (UNLIKELY(func->isStaticInPrologue())) {
+    throw_has_this_need_static(func);
   }
-
-  // Handle magic calls in the interpreter.
-  auto const magicFunc = cls->lookupMethod(s_call.get());
-  if (LIKELY(magicFunc != nullptr)) return nullptr;
-
-  lookupMethodCtx(cls, name, ctx, CallType::ObjMethod, true /* raise */);
-  not_reached();
+  return func;
 }
 
 void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
@@ -197,8 +187,8 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   //     the request we'll never hit the TC fast path.  But we can't
   //     do it if the Class* or Func* might be freed.
   //
-  //   - The call must not be magic or static.  The code path in
-  //     handleStaticCall currently assumes we've ruled this out.
+  //   - The call must not be static.  The code path in handleStaticCall
+  //     currently assumes we've ruled this out.
   //
   // It's ok to store into the inline cache even if there are low bits
   // set in mce->m_key.  In that case we'll always just miss the in-TC
@@ -208,6 +198,7 @@ void smashImmediate(TCA movAddr, const Class* cls, const Func* func) {
   // If the situation is not cacheable, we just put a value into the
   // immediate that will cause it to always call out to handleStaticCall.
   assertx(cls);
+  assertx(func);
   auto const clsVal = reinterpret_cast<uintptr_t>(cls);
   auto const funcVal = reinterpret_cast<uintptr_t>(func);
   auto const cacheable =
@@ -257,14 +248,11 @@ handleStaticCall(const Class* cls, const StringData* name, const Class* ctx,
     // Otherwise, use TC's mcePrime as a starting point for request local cache.
     mce = Entry { nullptr, reinterpret_cast<const Func*>(mcePrime >> 32) };
     rds::initHandle(mceHandle);
-  } else if (LIKELY(mce.m_key == cls)) {
+  } else {
+    assertx(mce.m_value != nullptr);
+
     // Fast path -- hit in the request local cache.
-    return mce.m_value;
-  } else if (UNLIKELY(mce.m_value == nullptr)) {
-    // Snail path -- the cache missed func is magic, can't use it.
-    auto const func = lookup(cls, name, ctx);
-    mce = Entry { cls, func };
-    return func;
+    if (LIKELY(mce.m_key == cls)) return mce.m_value;
   }
 
   auto const oldFunc = mce.m_value;
@@ -460,13 +448,13 @@ StaticMethodFCache::lookup(rds::Handle handle, const Class* cls,
   if (LIKELY(res == LookupResult::MethodFoundNoThis && !f->isAbstract())) {
     // We called lookupClsMethod with a NULL this and got back a method that
     // may or may not be static. This implies that lookupClsMethod, given the
-    // same class and the same method name, will never return MagicCall*Found
-    // or MethodNotFound. It will always return the same f and if we do give it
-    // a this it will return MethodFoundWithThis iff (this->instanceof(cls) &&
-    // !f->isStatic()). this->instanceof(cls) is always true for
-    // FCallClsMethodS because it is only used for self:: and parent::
-    // calls. So, if we store f and its staticness we can handle calls with and
-    // without this completely in assembly.
+    // same class and the same method name, will never return MethodNotFound.
+    // It will always return the same f and if we do give it a this it will
+    // return MethodFoundWithThis iff (this->instanceof(cls) && !f->isStatic()).
+    // this->instanceof(cls) is always true for FCallClsMethodS because it is
+    // only used for self:: and parent:: calls. So, if we store f and its
+    // staticness we can handle calls with and without this completely in
+    // assembly.
     f->validate();
     thiz->m_func = f;
     thiz->m_static = f->isStatic();

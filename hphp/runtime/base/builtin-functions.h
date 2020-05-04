@@ -294,7 +294,6 @@ vm_decode_function(const_variant_ref function,
                    ActRec* ar,
                    ObjectData*& this_,
                    HPHP::Class*& cls,
-                   StringData*& invName,
                    bool& dynamic,
                    DecodeFlags flags = DecodeFlags::Warn,
                    bool genericsAlreadyGiven = false);
@@ -305,8 +304,7 @@ vm_decode_function(const_variant_ref function,
                    DecodeFlags flags = DecodeFlags::Warn,
                    bool genericsAlreadyGiven = false) {
   ctx.func = vm_decode_function(function, nullptr, ctx.this_, ctx.cls,
-                                ctx.invName, ctx.dynamic, flags,
-                                genericsAlreadyGiven);
+                                ctx.dynamic, flags, genericsAlreadyGiven);
 }
 
 bool checkMethCallerTarget(const Func* meth, const Class* ctx, bool error);

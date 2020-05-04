@@ -728,12 +728,6 @@ const Func* Class::getCachedInvoke() const {
   return m_invoke;
 }
 
-const StaticString s_call("__call");
-
-bool Class::hasCall() const {
-  return this->lookupMethod(s_call.get()) ? true : false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Builtin classes.
 
@@ -804,8 +798,7 @@ void Class::initProps() const {
     // through the inheritance chain.
     for (auto it = m_pinitVec.rbegin(); it != m_pinitVec.rend(); ++it) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
-        *it, init_null_variant, nullptr, const_cast<Class*>(this),
-        nullptr, false
+        *it, init_null_variant, nullptr, const_cast<Class*>(this), false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -892,14 +885,14 @@ void Class::initSProps() const {
     for (unsigned i = 0, n = m_sinitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_sinitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        nullptr, false
+        false
       );
       assertx(retval.m_type == KindOfNull);
     }
     for (unsigned i = 0, n = m_linitVec.size(); i < n; i++) {
       DEBUG_ONLY auto retval = g_context->invokeFunc(
         m_linitVec[i], init_null_variant, nullptr, const_cast<Class*>(this),
-        nullptr, false
+        false
       );
       assertx(retval.m_type == KindOfNull);
     }
@@ -1452,7 +1445,6 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   auto ret = g_context->invokeFuncFew(
     meth86cinit,
     const_cast<Class*>(this),
-    nullptr,
     1,
     args,
     false,

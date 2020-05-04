@@ -2136,7 +2136,7 @@ static bool valid_function(SoapServer *server, Object &soap_obj,
 
   assertx(cls);
   HPHP::Func* f = cls->lookupMethod(fn_name.get());
-  return (f && f->isPublic()) || cls->hasCall();
+  return (f && f->isPublic());
 }
 
 const StaticString

@@ -925,48 +925,6 @@ Array getDefinedVariables(const ActRec* fp) {
   return ret.toArray();
 }
 
-void shuffleMagicArgs(String&& invName, uint32_t numArgs, bool hasUnpack) {
-  assertx(!invName.isNull());
-  auto& stack = vmStack();
-
-  // We need to make an array containing all the arguments passed by
-  // the caller and put it where the second argument is.
-  auto argArray = Array::attach([&] {
-    if (numArgs == 0) {
-      return RuntimeOption::EvalHackArrDVArrs
-        ? ArrayData::CreateVec()
-        : ArrayData::CreateVArray();
-    }
-    auto const args = stack.indC(hasUnpack ? 1 : 0);
-    return RuntimeOption::EvalHackArrDVArrs
-      ? PackedArray::MakeVec(numArgs, args)
-      : PackedArray::MakeVArray(numArgs, args);
-  }());
-
-  // Unpack arguments to the end of the argument array.
-  if (UNLIKELY(hasUnpack)) {
-    auto const args = *stack.topC();
-    if (!isContainer(args)) throwInvalidUnpackArgs();
-    stack.discard();
-    SCOPE_EXIT { tvDecRefGen(args); };
-    IterateV(args, [&](TypedValue v) { argArray.append(v); });
-  }
-
-  // Remove the arguments from the stack; they were moved into the
-  // array so we don't need to decref.
-  stack.ndiscard(numArgs);
-
-  // Move invName to where the first argument belongs.
-  stack.pushStringNoRc(invName.detach());
-
-  // Move argArray to where the second argument belongs.
-  if (RuntimeOption::EvalHackArrDVArrs) {
-    stack.pushVecNoRc(argArray.detach());
-  } else {
-    stack.pushArrayNoRc(argArray.detach());
-  }
-}
-
 // Unpack or repack arguments as needed to match the function signature.
 // The stack contains numArgs arguments plus an extra cell containing
 // arguments to unpack.
@@ -3960,35 +3918,6 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
   pc = vmpc();
 }
 
-template<bool dynamic, typename Ctx>
-void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               Ctx&& ctx, String&& invName, bool logAsDynamicCall = true) {
-  if (LIKELY(invName.isNull())) {
-    fcallImpl<dynamic>(origpc, pc, fca, func, std::forward<Ctx>(ctx),
-                       logAsDynamicCall);
-    return;
-  }
-
-  // Enforce inout-ness before reshuffling.
-  if (fca.enforceInOut()) callerInOutChecks(func, fca);
-
-  // Magic methods don't support reified generics.
-  assertx(!func->hasReifiedGenerics());
-  if (fca.hasGenerics()) vmStack().popC();
-
-  // Magic methods don't support inout args.
-  assertx(fca.numRets == 1);
-
-  shuffleMagicArgs(std::move(invName), fca.numArgs, fca.hasUnpack());
-
-  auto const flags = static_cast<FCallArgs::Flags>(
-    fca.flags & ~(FCallArgs::Flags::HasUnpack | FCallArgs::Flags::HasGenerics));
-  auto const fca2 =
-    FCallArgs(flags, 2, 1, nullptr, kInvalidOffset, false, false, fca.context);
-  fcallImpl<dynamic>(origpc, pc, fca2, func, std::forward<Ctx>(ctx),
-                     logAsDynamicCall);
-}
-
 const StaticString s___invoke("__invoke");
 
 // This covers both closures and functors.
@@ -4030,12 +3959,10 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
 
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
   bool dynamic = false;
 
   auto const func = vm_decode_function(const_variant_ref{arr}, vmfp(), thiz,
-                                       cls, invName, dynamic,
-                                       DecodeFlags::NoWarn);
+                                       cls, dynamic, DecodeFlags::NoWarn);
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
     raise_error("Invalid callable (array)");
@@ -4045,12 +3972,11 @@ OPTBLD_INLINE void fcallFuncArr(PC origpc, PC& pc, const FCallArgs& fca) {
   arr.reset();
 
   if (thisRC) {
-    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC),
-                    String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    fcallImpl<true>(origpc, pc, fca, func, cls, String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, cls);
   } else {
-    fcallImpl<true>(origpc, pc, fca, func, NoCtx{}, String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
   }
 }
 
@@ -4066,12 +3992,10 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
 
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
   bool dynamic = false;
 
   auto const func = vm_decode_function(const_variant_ref{str}, vmfp(), thiz,
-                                       cls, invName, dynamic,
-                                       DecodeFlags::NoWarn);
+                                       cls, dynamic, DecodeFlags::NoWarn);
   assertx(dynamic);
   if (UNLIKELY(func == nullptr)) {
     raise_call_to_undefined(str.get());
@@ -4081,12 +4005,11 @@ OPTBLD_INLINE void fcallFuncStr(PC origpc, PC& pc, const FCallArgs& fca) {
   str.reset();
 
   if (thisRC) {
-    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC),
-                    String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, std::move(thisRC));
   } else if (cls) {
-    fcallImpl<true>(origpc, pc, fca, func, cls, String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, cls);
   } else {
-    fcallImpl<true>(origpc, pc, fca, func, NoCtx{}, String::attach(invName));
+    fcallImpl<true>(origpc, pc, fca, func, NoCtx{});
   }
 }
 
@@ -4171,15 +4094,11 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   // if lookup throws, obj will be decref'd via stack
   res = lookupObjMethod(func, cls, methName, ctx, true);
   assertx(func);
+  decRefStr(methName);
   if (res == LookupResult::MethodFoundNoThis) {
     throw_has_this_need_static(func);
   }
-  assertx(res == LookupResult::MethodFoundWithThis ||
-          res == LookupResult::MagicCallFound);
-
-  auto invName = res == LookupResult::MagicCallFound
-    ? String::attach(methName) : String();
-  if (res != LookupResult::MagicCallFound) decRefStr(methName);
+  assertx(res == LookupResult::MethodFoundWithThis);
 
   if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
       !func->getReifiedGenericsInfo().allGenericsSoft()) {
@@ -4189,8 +4108,7 @@ void fcallObjMethodImpl(PC origpc, PC& pc, const FCallArgs& fca,
   // fcallImpl() will do further checks before spilling the ActRec. If any
   // of these checks fail, make sure it gets decref'd only via ctx.
   tvWriteNull(*vmStack().indC(fca.numInputs() + 2));
-  fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj),
-                     std::move(invName));
+  fcallImpl<dynamic>(origpc, pc, fca, func, Object::attach(obj));
 }
 
 static void raise_resolve_non_object(const char* methodName,
@@ -4275,7 +4193,6 @@ void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
   auto name = c1->m_data.pstr;
   ObjectData* thiz = nullptr;
   HPHP::Class* cls = nullptr;
-  StringData* invName = nullptr;
   bool dynamic = false;
   auto arr = make_varray(tvAsVariant(*c2), tvAsVariant(*c1));
   auto const func = vm_decode_function(
@@ -4283,16 +4200,11 @@ void resolveMethodImpl(TypedValue* c1, TypedValue* c2) {
     vmfp(),
     thiz,
     cls,
-    invName,
     dynamic,
     DecodeFlags::NoWarn
   );
   assertx(dynamic);
   if (!func) raise_error("Failure to resolve method name \'%s\'", name->data());
-  if (invName) {
-    SystemLib::throwInvalidOperationExceptionObject(
-      "Unable to resolve magic call for inst_meth()");
-  }
   if (thiz) {
     assertx(isObjectType(type(c2)));
     assertx(!(func->attrs() & AttrStatic));
@@ -4404,6 +4316,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   const Func* func;
   auto const res = lookupClsMethod(func, cls, methName, obj, ctx, true);
   assertx(func);
+  decRefStr(methName);
 
   if (res == LookupResult::MethodFoundNoThis) {
     if (!func->isStaticInPrologue()) {
@@ -4412,13 +4325,8 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
     obj = nullptr;
   } else {
     assertx(obj);
-    assertx(res == LookupResult::MethodFoundWithThis ||
-            res == LookupResult::MagicCallFound);
+    assertx(res == LookupResult::MethodFoundWithThis);
   }
-
-  auto invName = res == LookupResult::MagicCallFound
-    ? String::attach(methName) : String();
-  if (res != LookupResult::MagicCallFound) decRefStr(methName);
 
   if (func->hasReifiedGenerics() && !fca.hasGenerics() &&
       !func->getReifiedGenericsInfo().allGenericsSoft()) {
@@ -4426,8 +4334,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
   }
 
   if (obj) {
-    fcallImpl<dynamic>(origpc, pc, fca, func, Object(obj), std::move(invName),
-                       logAsDynamicCall);
+    fcallImpl<dynamic>(origpc, pc, fca, func, Object(obj), logAsDynamicCall);
   } else {
     if (forwarding && ctx) {
       /* Propagate the current late bound class if there is one, */
@@ -4438,8 +4345,7 @@ void fcallClsMethodImpl(PC origpc, PC& pc, const FCallArgs& fca, Class* cls,
         cls = vmfp()->getClass();
       }
     }
-    fcallImpl<dynamic>(origpc, pc, fca, func, cls, std::move(invName),
-                       logAsDynamicCall);
+    fcallImpl<dynamic>(origpc, pc, fca, func, cls, logAsDynamicCall);
   }
 }
 

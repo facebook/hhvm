@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-open Core_kernel
+open Hh_prelude
 module CoroutineSyntax = Coroutine_syntax
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSuspendRewriter = Coroutine_suspend_rewriter

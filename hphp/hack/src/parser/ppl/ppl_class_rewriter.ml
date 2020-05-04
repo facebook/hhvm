@@ -19,7 +19,7 @@
  * enabled for Hack PPL.
  *)
 
-open Core_kernel
+open Hh_prelude
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
 
@@ -87,7 +87,7 @@ let should_be_rewritten receiver =
     match syntax e with
     | VariableExpression
         { variable_expression = { syntax = Token token; _ }; _ }
-      when Token.text token = "$this" ->
+      when String.equal (Token.text token) "$this" ->
       true
     | ParenthesizedExpression { parenthesized_expression_expression; _ } ->
       is_this parenthesized_expression_expression
@@ -103,9 +103,9 @@ let should_be_rewritten receiver =
       } ->
     let qualifier = Token.text qualifier in
     let m = Token.text m in
-    (qualifier = "parent" && m <> "__construct")
-    || qualifier = "static"
-    || qualifier = "self"
+    (String.equal qualifier "parent" && not (String.equal m "__construct"))
+    || String.equal qualifier "static"
+    || String.equal qualifier "self"
   | ScopeResolutionExpression { scope_resolution_qualifier = e; _ } -> is_this e
   | _ -> false
 
@@ -193,7 +193,7 @@ let is_ppl_attribute attribute =
           };
         _;
       }
-    when Token.text token = ppl_macro_string ->
+    when String.equal (Token.text token) ppl_macro_string ->
     true
   | _ -> false
 

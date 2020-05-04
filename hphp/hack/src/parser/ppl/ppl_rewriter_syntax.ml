@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* Includes helpful builders *)
 module CoroutineSyntax = Coroutine_syntax
@@ -31,4 +31,4 @@ let reserved_method_names =
 
 (* Determines whether a string is in the list of reserved method names *)
 let is_infer_method method_string =
-  List.mem ~equal:( = ) reserved_method_names method_string
+  List.mem ~equal:String.( = ) reserved_method_names method_string

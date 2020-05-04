@@ -13,7 +13,7 @@ type t = {
   text: string;
   offset_map: Line_break_map.t;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 type pos = t * int
 

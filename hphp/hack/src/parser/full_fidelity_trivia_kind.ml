@@ -27,7 +27,7 @@ type t =
   | FallThrough
   | ExtraTokenError
 
-  [@@deriving show, enum]
+  [@@deriving show, enum, eq]
 
 let to_string kind =
   match kind with

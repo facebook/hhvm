@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *)
 
-open Core_kernel
+open Hh_prelude
 module Syntax = Full_fidelity_editable_positioned_syntax
 module CoroutineSyntax = Coroutine_syntax
 module Rewriter = Full_fidelity_rewriter.WithSyntax (Syntax)
@@ -421,13 +421,13 @@ let rec might_be_spilled node parent ~spill_subscript_expressions =
           _;
         },
       _ )
-    when Token.text token = "$this" ->
+    when String.equal (Token.text token) "$this" ->
     false
   (* Do not spill member selection if is function call *)
   (* $obj->some_function(...) or self::some_function *)
   | ( (MemberSelectionExpression _ | ScopeResolutionExpression _),
       FunctionCallExpression { function_call_receiver; _ } )
-    when function_call_receiver = node ->
+    when Syntax.equal function_call_receiver node ->
     false
   (* do not spill member accesses on $closure variable *)
   | ( MemberSelectionExpression
@@ -449,7 +449,7 @@ let rec might_be_spilled node parent ~spill_subscript_expressions =
           _;
         },
       _ )
-    when Token.text token = closure_variable ->
+    when String.equal (Token.text token) closure_variable ->
     false
   (* do not spill binary expressions where operands don't need spilling *)
   | ( BinaryExpression
@@ -696,7 +696,12 @@ let rewrite_suspends_in_statement node context next_label ~is_argument_to_unset
         | _ -> assert false
       in
       let is_tail_call =
-        context = EnclosedByReturnStatementInTailPosition
+        let is_enclosed_by_return_statement_in_tail_position =
+          match context with
+          | EnclosedByReturnStatementInTailPosition -> true
+          | _ -> false
+        in
+        is_enclosed_by_return_statement_in_tail_position
         && is_in_tail_position node parents
       in
       let { next_label; next_temp; expression = new_node; extra_info } =
@@ -792,7 +797,12 @@ let rewrite_suspends_in_statement node context next_label ~is_argument_to_unset
             in
             (* return test : consequence ? alternative; *)
             let is_top_level_in_return =
-              context <> EnclosedByOtherStatement && List.is_empty parents
+              let is_enclosed_by_other_statement =
+                match context with
+                | EnclosedByOtherStatement -> true
+                | _ -> false
+              in
+              (not is_enclosed_by_other_statement) && List.is_empty parents
             in
             let assign_to_temp_or_return value value_extra_info =
               if is_missing value then

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Common
 module SourceText = Full_fidelity_source_text
 

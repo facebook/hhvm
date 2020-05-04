@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let param_doc_re_str = {|@param[ ]+\([^ ]+\)[ ]+\(.+\)|}
 

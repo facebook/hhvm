@@ -197,7 +197,7 @@ type t =
   | PocketMappingIdDeclaration
   | PocketMappingTypeDeclaration
 
-  [@@deriving show]
+  [@@deriving show, eq]
 
 let to_string kind =
   match kind with

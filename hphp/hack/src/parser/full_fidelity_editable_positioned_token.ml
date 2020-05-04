@@ -34,13 +34,13 @@ module Trivia = Full_fidelity_positioned_trivia
 (**
  * Data about the token with respect to the original source text.
  *)
-type synthetic_token_data = { text: string } [@@deriving show]
+type synthetic_token_data = { text: string } [@@deriving show, eq]
 
 type token_data =
   | Original of SourceData.t
   | SynthesizedFromOriginal of synthetic_token_data * SourceData.t
   | Synthetic of synthetic_token_data
-[@@deriving show]
+[@@deriving show, eq]
 
 (**
  * Data common to all EditablePositionedTokens.
@@ -51,7 +51,7 @@ type t = {
   trailing_text: string;
   token_data: token_data;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let from_positioned_token positioned_token =
   {

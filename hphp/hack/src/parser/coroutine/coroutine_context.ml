@@ -17,7 +17,7 @@ what the return type and parameter types of the coroutine are, and so on,
 is computed elsewhere.
 *)
 
-open Core_kernel
+open Hh_prelude
 module Syntax = Full_fidelity_editable_positioned_syntax
 module SourceText = Full_fidelity_source_text
 

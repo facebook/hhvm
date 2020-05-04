@@ -20,14 +20,14 @@
 
  *)
 
-open Core_kernel
+open Hh_prelude
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
 
   type t = Syntax.t list [@@deriving show]
 
-  type r = Syntax.t [@@deriving show]
+  type r = Syntax.t [@@deriving show, eq]
 
   exception NotEquals of string * Syntax.t list * Syntax.t list * Syntax.t list
 
@@ -38,7 +38,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   let verify ~stack params args cons_name =
     let equals e1 e2 =
       if not (phys_equal e1 e2) then
-        if e1 = e2 then
+        if equal_r e1 e2 then
           raise @@ NotPhysicallyEquals (cons_name, List.rev stack, params, args)
         else
           raise @@ NotEquals (cons_name, List.rev stack, params, args)

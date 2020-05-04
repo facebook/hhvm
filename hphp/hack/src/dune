@@ -130,4 +130,5 @@
     core_kernel
     str
     parser_schema
-    collections))
+    collections
+    utils_core))

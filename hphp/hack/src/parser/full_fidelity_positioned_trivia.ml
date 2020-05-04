@@ -26,7 +26,7 @@ type t = {
   offset: int;
   width: int;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let make_ignore_error source_text offset width =
   { kind = TriviaKind.IgnoreError; source_text; offset; width }

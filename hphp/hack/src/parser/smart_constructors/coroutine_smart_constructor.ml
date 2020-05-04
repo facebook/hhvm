@@ -4,7 +4,7 @@
  * a conversion of the positioned syntax to an editable positioned syntax
  *)
 
-open Core_kernel
+open Hh_prelude
 module ParserEnv = Full_fidelity_parser_env
 module TokenKind = Full_fidelity_token_kind
 
@@ -116,7 +116,7 @@ module WithSyntax (Syntax : Positioned_syntax_sig.PositionedSyntax_S) = struct
             && Option.value_map
                  (Syntax.extract_text constructor_call_type)
                  ~default:false
-                 ~f:(fun text -> text = ppl_macro_string)
+                 ~f:(fun text -> String.equal text ppl_macro_string)
           | _ -> false
       in
       let state =

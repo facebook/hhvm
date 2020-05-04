@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SyntaxTree =
   Full_fidelity_syntax_tree.WithSyntax (Full_fidelity_positioned_syntax)
 
@@ -17,7 +17,15 @@ let enable () =
   Hh_logger.log "Enabling Ide_parser_cache";
   is_active_ref := `Inactive
 
-let is_enabled () = !is_active_ref <> `Disabled
+let is_enabled () =
+  match !is_active_ref with
+  | `Disabled -> false
+  | _ -> true
+
+let is_active () =
+  match !is_active_ref with
+  | `Active -> true
+  | _ -> false
 
 let activate () = if is_enabled () then is_active_ref := `Active
 
@@ -56,7 +64,7 @@ let get_digest path content =
   Md5.(digest_string (string_path ^ content) |> to_binary)
 
 let get_cst source_text =
-  assert (!is_active_ref = `Active);
+  assert (is_active ());
   let digest =
     get_digest
       (Full_fidelity_source_text.file_path source_text)
@@ -71,7 +79,7 @@ let get_cst source_text =
     cst
 
 let get_ast tcopt path content =
-  assert (!is_active_ref = `Active);
+  assert (is_active ());
   let digest = get_digest path content in
   match IdeAstCache.get digest with
   | Some (ast, fixmes, errors) ->
@@ -102,7 +110,7 @@ let get_ast tcopt path content =
     ast
 
 let get_ast_if_active tcopt path content =
-  if !is_active_ref <> `Active then
+  if not (is_active ()) then
     None
   else
     Some (get_ast tcopt path content)

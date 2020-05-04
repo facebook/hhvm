@@ -12,7 +12,7 @@
  * break) allowing binary search from an offset to a line number (the index in
  * the map itself + 1).
  *)
-type t [@@deriving show]
+type t [@@deriving show, eq]
 
 val reset_global_state : unit -> unit
 

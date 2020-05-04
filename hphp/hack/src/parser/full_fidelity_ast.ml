@@ -8,7 +8,7 @@
  *)
 
 module SyntaxError = Full_fidelity_syntax_error
-open Core_kernel
+open Hh_prelude
 open Scoured_comments
 
 (* Context of the file being parsed, as (hopefully some day read-only) state. *)
@@ -353,7 +353,11 @@ let from_text_to_empty_tast (env : env) (source_text : SourceText.t) :
 let legacy (x : aast_result) : Parser_return.t =
   {
     Parser_return.file_mode =
-      Option.some_if (x.fi_mode <> FileInfo.Mphp) x.fi_mode;
+      Option.some_if
+        (match x.fi_mode with
+        | FileInfo.Mphp -> false
+        | _ -> true)
+        x.fi_mode;
     Parser_return.comments = x.comments.sc_comments;
     Parser_return.ast = aast_to_nast x.ast;
     Parser_return.content = x.content;

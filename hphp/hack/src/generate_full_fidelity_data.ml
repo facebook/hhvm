@@ -8,7 +8,7 @@
  *)
 
 module OcamlPrintf = Printf
-open Core_kernel
+open Hh_prelude
 open Printf
 open Full_fidelity_schema
 
@@ -88,7 +88,10 @@ let omit_syntax_record =
 
 module GenerateFFValidatedSyntax = struct
   let to_validate_functions x =
-    if x.kind_name = "ErrorSyntax" || x.kind_name = "ListItem" then
+    if
+      String.equal x.kind_name "ErrorSyntax"
+      || String.equal x.kind_name "ListItem"
+    then
       ""
     else
       let get_type_string t =
@@ -359,7 +362,10 @@ module GenerateFFSyntaxType = struct
      * in validated syntax. Their absence being the point of the validated
      * syntax
      *)
-    if x.kind_name = "ErrorSyntax" || x.kind_name = "ListItem" then
+    if
+      String.equal x.kind_name "ErrorSyntax"
+      || String.equal x.kind_name "ListItem"
+    then
       ""
     else
       Printf.(
@@ -431,14 +437,14 @@ module GenerateFFSyntaxType = struct
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t [@@deriving show]
+  type t [@@deriving show, eq]
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
   val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig
-  type t [@@deriving show]
+  type t [@@deriving show, eq]
   val to_json: t -> Hh_json.json
 end
 
@@ -447,8 +453,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type value = SyntaxValue.t [@@deriving show]
-  type t = { syntax : syntax ; value : value } [@@deriving show]
+  type value = SyntaxValue.t [@@deriving show, eq]
+  type t = { syntax : syntax ; value : value } [@@deriving show, eq]
 PARSE_TREE   and syntax =
   | Token                             of Token.t
   | Missing
@@ -852,8 +858,8 @@ module TokenKind = Full_fidelity_token_kind
 
 module type Syntax_S = sig
   module Token : Lexable_token_sig.LexableToken_S
-  type value [@@deriving show]
-  type t = { syntax : syntax ; value : value } [@@deriving show]
+  type value [@@deriving show, eq]
+  type t = { syntax : syntax ; value : value } [@@deriving show, eq]
   and syntax =
   | Token                             of Token.t
   | Missing
@@ -1378,14 +1384,14 @@ module GenerateFFVerifySmartConstructors = struct
 "
     ^ "
 
-open Core_kernel
+open Hh_prelude
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module Token = Syntax.Token
 
   type t = Syntax.t list [@@deriving show]
 
-  type r = Syntax.t [@@deriving show]
+  type r = Syntax.t [@@deriving show, eq]
 
   exception NotEquals of string * Syntax.t list * Syntax.t list * Syntax.t list
 
@@ -1396,7 +1402,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   let verify ~stack params args cons_name =
     let equals e1 e2 =
       if not (phys_equal e1 e2) then
-        if e1 = e2 then
+        if equal_r e1 e2 then
           raise @@ NotPhysicallyEquals (cons_name, List.rev stack, params, args)
         else
           raise @@ NotEquals (cons_name, List.rev stack, params, args)
@@ -2216,7 +2222,7 @@ module GenerateFFSyntax = struct
  * a rewriting visitor, and so on."
     ^ "
 
-open Core_kernel
+open Hh_prelude
 open Full_fidelity_syntax_type
 
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -2255,13 +2261,17 @@ TO_KIND
       to_kind (syntax node)
 
     let has_kind syntax_kind node =
-      kind node = syntax_kind
+      SyntaxKind.equal (kind node) syntax_kind
 
     let is_missing node =
-      kind node = SyntaxKind.Missing
+      match kind node with
+      | SyntaxKind.Missing -> true
+      | _ -> false
 
     let is_list node =
-      kind node = SyntaxKind.SyntaxList
+      match kind node with
+      | SyntaxKind.SyntaxList -> true
+      | _ -> false
 
 TYPE_TESTS
 
@@ -2281,7 +2291,7 @@ TYPE_TESTS
 
     let is_specific_token kind node =
       match syntax node with
-      | Token t -> Token.kind t = kind
+      | Token t -> TokenKind.equal (Token.kind t) kind
       | _ -> false
 
     let is_namespace_prefix node =
@@ -2299,7 +2309,8 @@ TYPE_TESTS
 
     let has_leading_trivia kind token =
       List.exists (Token.leading token)
-        ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
+        ~f:(fun trivia ->
+            Full_fidelity_trivia_kind.equal (Token.Trivia.kind trivia) kind)
 
     let is_external e =
       is_specific_token TokenKind.Semicolon e || is_missing e
@@ -2403,9 +2414,9 @@ CHILDREN_NAMES
         | [] -> None
         | h :: t ->
           let token = get_token h in
-          if token = None then
+          if Option.is_none token then
             let result = aux (children h) in
-            if result = None then aux t else result
+            if Option.is_none result then aux t else result
           else
             token in
       aux [node]
@@ -2416,9 +2427,9 @@ CHILDREN_NAMES
         | [] -> None
         | h :: t ->
           let token = get_token h in
-          if token = None then
+          if Option.is_none token then
             let result = aux (List.rev (children h)) in
-            if result = None then aux t else result
+            if Option.is_none result then aux t else result
           else
             token in
       aux [node]
@@ -2520,7 +2531,7 @@ module GenerateFFTriviaKind = struct
 
 type t =
 TRIVIA
-  [@@deriving show, enum]
+  [@@deriving show, enum, eq]
 
 let to_string kind =
   match kind with
@@ -2618,7 +2629,7 @@ type t =
   | Missing
   | SyntaxList
 TOKENS
-  [@@deriving show]
+  [@@deriving show, eq]
 
 let to_string kind =
   match kind with
@@ -2717,7 +2728,7 @@ module GenerateFFTokenKind = struct
       cond:bool * string -> ?else_cond:bool * string -> string -> string =
    fun ~cond:(cond, guard) ?else_cond guards ->
     let pad str = String.make (String.length str) ' ' in
-    let is_only_spaces str = str = pad str in
+    let is_only_spaces str = String.equal str (pad str) in
     let make_same_length str1 str2 =
       let blanks n = (try String.make n ' ' with Invalid_argument _ -> "") in
       let (len1, len2) = (String.length str1, String.length str2) in
@@ -2774,7 +2785,7 @@ type t =
 KIND_DECLARATIONS_NO_TEXT  (* Given text tokens *)
 KIND_DECLARATIONS_GIVEN_TEXT  (* Variable text tokens *)
 KIND_DECLARATIONS_VARIABLE_TEXT
-  [@@deriving show]
+  [@@deriving show, eq]
 
 let from_string keyword ~only_reserved =
   match keyword with
@@ -2859,7 +2870,7 @@ module GenerateFFRustTokenKind = struct
         ""
     in
     let guard =
-      if guard = "" then
+      if String.equal guard "" then
         ""
       else
         " if " ^ guard

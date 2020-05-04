@@ -18,6 +18,7 @@
  *
  *)
 
+open Hh_prelude
 module MinimalToken = Full_fidelity_minimal_token
 module MinimalTrivia = Full_fidelity_minimal_trivia
 module Trivia = Full_fidelity_positioned_trivia
@@ -27,6 +28,8 @@ module TriviaKind = Full_fidelity_trivia_kind
 
 module LazyTrivia : sig
   type t [@@deriving show]
+
+  val equal : t -> t -> bool
 
   val has_trivia_kind : t -> TriviaKind.t -> bool
 
@@ -82,6 +85,8 @@ end = struct
       to the leading and trailing trivia. *)
   type t = Obj.t
 
+  let equal : t -> t -> bool = (fun x y -> Poly.equal x y)
+
   (** Internal representation used for printing and pattern matching. *)
   type internal_t =
     | Packed of int
@@ -108,11 +113,11 @@ end = struct
 
   let get_trivia_kinds trivia_lists =
     let get_trivia_kinds trivia_list =
-      let kinds = List.map (fun trivia -> trivia.Trivia.kind) trivia_list in
-      List.fold_left fold_kind 0 kinds
+      let kinds = List.map ~f:(fun trivia -> trivia.Trivia.kind) trivia_list in
+      List.fold_left ~f:fold_kind ~init:0 kinds
     in
-    let trivia_kinds = List.map get_trivia_kinds trivia_lists in
-    List.fold_left ( lor ) 0 trivia_kinds
+    let trivia_kinds = List.map ~f:get_trivia_kinds trivia_lists in
+    List.fold_left ~f:( lor ) ~init:0 trivia_kinds
 
   let is_special = function
     | TriviaKind.ExtraTokenError -> true
@@ -120,7 +125,8 @@ end = struct
 
   let has_special trivia_lists =
     trivia_lists
-    |> List.exists (List.exists (fun trivia -> is_special trivia.Trivia.kind))
+    |> List.exists
+         ~f:(List.exists ~f:(fun trivia -> is_special trivia.Trivia.kind))
 
   let has_trivia_kind trivia kind =
     match to_internal trivia with
@@ -129,7 +135,10 @@ end = struct
       trivia land kind_mask <> 0
     | Expanded (leading, trailing) ->
       [leading; trailing]
-      |> List.exists (List.exists (fun trivia -> trivia.Trivia.kind = kind))
+      |> List.exists
+           ~f:
+             (List.exists ~f:(fun trivia ->
+                  TriviaKind.equal trivia.Trivia.kind kind))
 
   let from (leading, trailing) =
     let internal =
@@ -203,13 +212,13 @@ type t = {
   trailing_width: int;
   trivia: LazyTrivia.t;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let fold_width sum trivia = sum + Trivia.width trivia
 
 let make kind source_text offset width leading trailing =
-  let leading_width = List.fold_left fold_width 0 leading in
-  let trailing_width = List.fold_left fold_width 0 trailing in
+  let leading_width = List.fold_left ~f:fold_width ~init:0 leading in
+  let trailing_width = List.fold_left ~f:fold_width ~init:0 trailing in
   let trivia = LazyTrivia.from (leading, trailing) in
   { kind; source_text; offset; leading_width; width; trailing_width; trivia }
 
@@ -286,7 +295,9 @@ let with_trailing new_trailing token =
   }
 
 let filter_leading_trivia_by_kind token kind =
-  List.filter (fun t -> Trivia.kind t = kind) (leading token)
+  List.filter
+    ~f:(fun t -> TriviaKind.equal (Trivia.kind t) kind)
+    (leading token)
 
 let leading_start_offset token = token.offset
 
@@ -420,7 +431,7 @@ let to_json token =
         ("leading_width", int_ token.leading_width);
         ("width", int_ token.width);
         ("trailing_width", int_ token.trailing_width);
-        ("leading", JSON_Array (List.map Trivia.to_json (leading token)));
-        ("trailing", JSON_Array (List.map Trivia.to_json (trailing token)));
+        ("leading", JSON_Array (List.map ~f:Trivia.to_json (leading token)));
+        ("trailing", JSON_Array (List.map ~f:Trivia.to_json (trailing token)));
         ("line_number", int_ line_number);
       ])

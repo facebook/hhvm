@@ -20,7 +20,7 @@ type t = {
   kind: TriviaKind.t;
   text: string;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let make_ignore_error source_text offset width =
   {

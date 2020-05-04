@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (*****************************************************************************)
 (* Helpers *)
@@ -41,7 +41,7 @@ let process_parse_result
   in
   let ast =
     if
-      Relative_path.prefix fn = Relative_path.Hhi
+      Relative_path.(is_hhi (Relative_path.prefix fn))
       && ParserOptions.deregister_php_stdlib popt
     then
       Nast.deregister_ignored_attributes ast
@@ -54,15 +54,14 @@ let process_parse_result
     else
       File_provider.Disk content
   in
-  if file_mode <> None then (
+  if Option.is_some file_mode then (
     let (funs, classes, record_defs, typedefs, consts) = Nast.get_defs ast in
     (* If this file was parsed from a tmp directory,
       save it to the main directory instead *)
     let fn =
-      if Relative_path.prefix fn = Relative_path.Tmp then
-        Relative_path.to_root fn
-      else
-        fn
+      match Relative_path.prefix fn with
+      | Relative_path.Tmp -> Relative_path.to_root fn
+      | _ -> fn
     in
     (* We only have to write to the disk heap on initialization, and only *)
     (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
@@ -149,7 +148,7 @@ let parse_sequential ~quick ~show_all_errors fn content acc popt =
       * change the parse tree, and is much easier than debugging the parser. *)
           let length = String.length content in
           let content =
-            if length > 0 && content.[length - 1] <> '\n' then
+            if length > 0 && not (Char.equal content.[length - 1] '\n') then
               content ^ "\n"
             else
               content

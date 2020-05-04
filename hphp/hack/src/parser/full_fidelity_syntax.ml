@@ -27,7 +27,7 @@
  * a rewriting visitor, and so on.
  *)
 
-open Core_kernel
+open Hh_prelude
 open Full_fidelity_syntax_type
 
 module SyntaxKind = Full_fidelity_syntax_kind
@@ -241,13 +241,17 @@ module WithToken(Token: TokenType) = struct
       to_kind (syntax node)
 
     let has_kind syntax_kind node =
-      kind node = syntax_kind
+      SyntaxKind.equal (kind node) syntax_kind
 
     let is_missing node =
-      kind node = SyntaxKind.Missing
+      match kind node with
+      | SyntaxKind.Missing -> true
+      | _ -> false
 
     let is_list node =
-      kind node = SyntaxKind.SyntaxList
+      match kind node with
+      | SyntaxKind.SyntaxList -> true
+      | _ -> false
 
     let is_end_of_file                          = has_kind SyntaxKind.EndOfFile
     let is_script                               = has_kind SyntaxKind.Script
@@ -442,7 +446,7 @@ module WithToken(Token: TokenType) = struct
 
     let is_specific_token kind node =
       match syntax node with
-      | Token t -> Token.kind t = kind
+      | Token t -> TokenKind.equal (Token.kind t) kind
       | _ -> false
 
     let is_namespace_prefix node =
@@ -460,7 +464,8 @@ module WithToken(Token: TokenType) = struct
 
     let has_leading_trivia kind token =
       List.exists (Token.leading token)
-        ~f:(fun trivia ->  Token.Trivia.kind trivia = kind)
+        ~f:(fun trivia ->
+            Full_fidelity_trivia_kind.equal (Token.Trivia.kind trivia) kind)
 
     let is_external e =
       is_specific_token TokenKind.Semicolon e || is_missing e
@@ -6117,9 +6122,9 @@ module WithToken(Token: TokenType) = struct
         | [] -> None
         | h :: t ->
           let token = get_token h in
-          if token = None then
+          if Option.is_none token then
             let result = aux (children h) in
-            if result = None then aux t else result
+            if Option.is_none result then aux t else result
           else
             token in
       aux [node]
@@ -6130,9 +6135,9 @@ module WithToken(Token: TokenType) = struct
         | [] -> None
         | h :: t ->
           let token = get_token h in
-          if token = None then
+          if Option.is_none token then
             let result = aux (List.rev (children h)) in
-            if result = None then aux t else result
+            if Option.is_none result then aux t else result
           else
             token in
       aux [node]

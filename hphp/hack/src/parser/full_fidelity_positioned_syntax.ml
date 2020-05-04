@@ -18,7 +18,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SourceText = Full_fidelity_source_text
 module Token = Full_fidelity_positioned_token
 module SyntaxWithPositionedToken = Full_fidelity_syntax.WithToken (Token)
@@ -36,7 +36,7 @@ module PositionedSyntaxValue = struct
         source_text: SourceText.t;
         offset: int;
       }
-  [@@deriving show]
+  [@@deriving show, eq]
 
   let source_text value =
     match value with
@@ -90,10 +90,11 @@ include PositionedWithValue
 
 module PositionedValueBuilder = struct
   let value_from_token token =
-    if
-      Token.kind token = Full_fidelity_token_kind.EndOfFile
-      || Token.full_width token = 0
-    then
+    let is_end_of_file = function
+      | Full_fidelity_token_kind.EndOfFile -> true
+      | _ -> false
+    in
+    if is_end_of_file (Token.kind token) || Token.full_width token = 0 then
       PositionedSyntaxValue.Missing
         {
           source_text = Token.source_text token;

@@ -230,7 +230,7 @@ type t =
   | XHPComment
   | Markup
 
-  [@@deriving show]
+  [@@deriving show, eq]
 
 let from_string keyword ~only_reserved =
   match keyword with

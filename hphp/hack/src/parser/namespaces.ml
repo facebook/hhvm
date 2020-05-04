@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Namespace_env
 module SN = Naming_special_names
 
@@ -30,7 +30,7 @@ let elaborate_into_current_ns nsenv id = elaborate_into_ns nsenv.ns_name id
  * in a way that the rest of elaborate_id_impl expects.
  *)
 let elaborate_xhp_namespace id =
-  let is_xhp s = s <> "" && String.contains s ':' in
+  let is_xhp s = String.(s <> "" && contains s ':') in
 
   if is_xhp id then
     Str.global_replace (Str.regexp ":") "\\\\" id
@@ -56,13 +56,13 @@ let elaborate_xhp_namespace id =
 let elaborate_raw_id nsenv kind id =
   (* in case we've found an xhp id let's do some preparation to get it into the \namespace\xhp format *)
   let id =
-    if kind = ElaborateClass && nsenv.ns_disable_xhp_element_mangling then
+    match kind with
+    | ElaborateClass when nsenv.ns_disable_xhp_element_mangling ->
       elaborate_xhp_namespace id
-    else
-      id
+    | _ -> id
   in
 
-  if id <> "" && id.[0] = '\\' then
+  if (not (String.equal id "")) && Char.equal id.[0] '\\' then
     id
   else
     let fqid = Utils.add_ns id in
@@ -81,7 +81,7 @@ let elaborate_raw_id nsenv kind id =
         | Some i -> (String.sub id 0 i, true)
         | None -> (id, false)
       in
-      if has_bslash && prefix = "namespace" then
+      if has_bslash && String.equal prefix "namespace" then
         elaborate_into_current_ns nsenv (String_utils.lstrip id "namespace\\")
       else
         let uses =

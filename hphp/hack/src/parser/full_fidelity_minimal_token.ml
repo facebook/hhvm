@@ -23,7 +23,7 @@ type t = {
   leading: Trivia.t list;
   trailing: Trivia.t list;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let make kind _source _offset width leading trailing =
   { kind; width; leading; trailing }

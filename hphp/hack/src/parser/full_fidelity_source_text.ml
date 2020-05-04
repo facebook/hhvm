@@ -42,7 +42,7 @@ type t = {
   text: string; [@opaque]
   offset_map: OffsetMap.t;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 type pos = t * int
 

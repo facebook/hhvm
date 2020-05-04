@@ -6,11 +6,9 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 
-type fixmes = Pos.t IMap.t IMap.t [@@deriving show]
-
-let equal_fixmes = IMap.equal (IMap.equal ( = ))
+type fixmes = Pos.t IMap.t IMap.t [@@deriving show, eq]
 
 type t = {
   sc_comments: (Pos.t * Prim_defs.comment) list;

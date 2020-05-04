@@ -30,7 +30,7 @@ type t = {
   leading: Trivia.t list;
   trailing: Trivia.t list;
 }
-[@@deriving show]
+[@@deriving show, eq]
 
 let empty =
   {

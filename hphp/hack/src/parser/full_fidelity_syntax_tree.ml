@@ -16,7 +16,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module SourceText = Full_fidelity_source_text
 module Env = Full_fidelity_parser_env
 module SyntaxError = Full_fidelity_syntax_error
@@ -106,16 +106,25 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
 
     let sc_state tree = tree.state
 
-    let is_hack tree = tree.mode <> Some FileInfo.Mphp
+    let is_hack tree =
+      match tree.mode with
+      | Some FileInfo.Mphp -> false
+      | _ -> true
 
-    let is_php tree = tree.mode = Some FileInfo.Mphp
+    let is_php tree =
+      match tree.mode with
+      | Some FileInfo.Mphp -> true
+      | _ -> false
 
     let is_strict tree =
       match tree.mode with
       | Some mode -> FileInfo.is_strict mode
       | None -> false
 
-    let is_decl tree = tree.mode = Some FileInfo.Mdecl
+    let is_decl tree =
+      match tree.mode with
+      | Some FileInfo.Mdecl -> true
+      | _ -> false
 
     let errors_no_bodies tree =
       let not_in_body error =

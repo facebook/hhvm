@@ -18,7 +18,7 @@ module Token = Full_fidelity_minimal_token
 module SyntaxWithMinimalToken = Full_fidelity_syntax.WithToken (Token)
 
 module MinimalSyntaxValue = struct
-  type t = { full_width: int } [@@deriving show]
+  type t = { full_width: int } [@@deriving show, eq]
 
   let make w = { full_width = w }
 

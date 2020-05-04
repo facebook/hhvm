@@ -59,14 +59,14 @@
 
 module type TokenType = sig
   module Trivia : Lexable_trivia_sig.LexableTrivia_S
-  type t [@@deriving show]
+  type t [@@deriving show, eq]
   val kind: t -> Full_fidelity_token_kind.t
   val to_json: t -> Hh_json.json
   val leading : t -> Trivia.t list
 end
 
 module type SyntaxValueType = sig
-  type t [@@deriving show]
+  type t [@@deriving show, eq]
   val to_json: t -> Hh_json.json
 end
 
@@ -75,8 +75,8 @@ end
  * node.
  *)
 module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type value = SyntaxValue.t [@@deriving show]
-  type t = { syntax : syntax ; value : value } [@@deriving show]
+  type value = SyntaxValue.t [@@deriving show, eq]
+  type t = { syntax : syntax ; value : value } [@@deriving show, eq]
   and function_declaration =
     { function_attribute_spec                            : t
     ; function_declaration_header                        : t

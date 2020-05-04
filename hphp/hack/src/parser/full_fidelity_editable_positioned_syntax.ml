@@ -21,7 +21,7 @@
  *     synthetic.
  *)
 
-open Core_kernel
+open Hh_prelude
 module Token = Full_fidelity_editable_positioned_token
 module PositionedSyntax = Full_fidelity_positioned_syntax
 
@@ -33,7 +33,7 @@ module Value = struct
   type t =
     | Positioned of SourceData.t
     | Synthetic
-  [@@deriving show]
+  [@@deriving show, eq]
 
   let from_positioned_syntax syntax =
     Positioned (SourceData.from_positioned_syntax syntax)

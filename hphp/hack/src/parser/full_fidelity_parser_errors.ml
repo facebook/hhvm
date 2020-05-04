@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   module WithSmartConstructors
@@ -81,7 +81,10 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           rust_tree
           (ParserOptions.to_rust_ffi_t
              env.parser_options
-             ~hhvm_compat_mode:(env.hhvm_compat_mode <> NoCompat)
+             ~hhvm_compat_mode:
+               (match env.hhvm_compat_mode with
+               | NoCompat -> false
+               | HHVMCompat -> true)
              ~hhi_mode:env.hhi_mode
              ~codegen:env.codegen)
       | None ->
@@ -102,10 +105,9 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           | _ -> SyntaxTree.errors env.syntax_tree
         in
         let errors2 =
-          if env.level = Minimum && errors1 <> [] then
-            []
-          else
-            find_syntax_errors env
+          match env.level with
+          | Minimum when not (List.is_empty errors1) -> []
+          | _ -> find_syntax_errors env
         in
         List.sort SyntaxError.compare (List.append errors1 errors2)
       with e ->

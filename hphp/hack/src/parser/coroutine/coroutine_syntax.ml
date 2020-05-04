@@ -10,7 +10,7 @@
  * Contains syntaxes used in coroutine code generation.
  *)
 
-open Core_kernel
+open Hh_prelude
 module Syntax = Full_fidelity_editable_positioned_syntax
 module Token = Syntax.Token
 module TokenKind = Full_fidelity_token_kind
@@ -36,10 +36,9 @@ let newline = "\n"
 
 let make_token_syntax ?text token_kind =
   let trailing_trivia =
-    if token_kind = TokenKind.Semicolon then
-      newline
-    else
-      single_space
+    match token_kind with
+    | TokenKind.Semicolon -> newline
+    | _ -> single_space
   in
   let text = Option.value text ~default:(TokenKind.to_string token_kind) in
   make_syntax
@@ -76,7 +75,7 @@ let make_qualified_name_syntax ?(has_leading = false) parts =
 
 let make_name_syntax name =
   let (name, has_leading) =
-    if name.[0] = '\\' then
+    if Char.equal name.[0] '\\' then
       (String.sub name 1 (String.length name - 1), true)
     else
       (name, false)

@@ -140,16 +140,7 @@ struct TargetProfile {
                     marker.bcOff(),
                     name,
                     extraSize)
-  {
-    if (dumpIREnabled(unit.context().kind)) {
-      auto const profile = rds::Profile(
-        (T*)nullptr,
-        m_key.transId,
-        marker.bcOff(),
-        name);
-      unit.annotationData->profileKeys.push_back(profile);
-    }
-  }
+  {}
 
   /*
    * Calls T::reduce to fold the data from each local RDS slot.

@@ -104,7 +104,6 @@ struct AnnotationData {
     annotations.emplace_back(label, value);
   }
 
-  std::vector<rds::Symbol> profileKeys;
   std::vector<InliningDecision> inliningDecisions;
   Annotations annotations;
 };

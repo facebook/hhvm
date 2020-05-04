@@ -12,7 +12,7 @@ open Hh_json
 open Aast
 open Full_fidelity_source_text
 open Provider_context
-open Typing_symbol_json_builder
+open Symbol_json_builder
 open Unix
 module Bucket = Hack_bucket
 
@@ -42,7 +42,7 @@ let compute_line_lengths (entry : Provider_context.entry) : int list =
   | Some st -> Line_break_map.offsets_to_line_lengths st.offset_map
 
 let compute_file_lines (path : Relative_path.t) (entry : Provider_context.entry)
-    : Typing_symbol_json_builder.file_lines =
+    : Symbol_json_builder.file_lines =
   {
     filepath = path;
     lineLengths = compute_line_lengths entry;
@@ -54,12 +54,12 @@ let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
     (tast_lst : Tast.program list)
-    (files_info : Typing_symbol_json_builder.file_lines list)
+    (files_info : Symbol_json_builder.file_lines list)
     (start_time : float) : unit =
   try
     let symbol_occurrences = get_decls ctx tast_lst in
     let json_chunks =
-      Typing_symbol_json_builder.build_json ctx symbol_occurrences files_info
+      Symbol_json_builder.build_json ctx symbol_occurrences files_info
     in
     let (_out_file, channel) =
       Filename.open_temp_file

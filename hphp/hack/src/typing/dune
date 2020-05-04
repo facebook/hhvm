@@ -269,18 +269,3 @@
     typing
     utils_core)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
-
-(library
-  (name typing_symbol_info)
-  (wrapped false)
-  (modules
-    typing_symbol_info_writer
-    typing_symbol_json_builder)
-  (libraries
-    tast_provider
-    typing
-    typing_ast
-    procs_procs
-    server_services
-    utils_core)
-  (preprocess (pps ppx_deriving.std))) ; See T41851208

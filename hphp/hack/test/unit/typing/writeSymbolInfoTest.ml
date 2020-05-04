@@ -11,7 +11,7 @@ open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
 open OUnit2
-open Typing_symbol_json_builder
+open Symbol_json_builder
 
 let test_add_fact _test_ctxt =
   let progress = init_progress in
@@ -64,7 +64,7 @@ let test_add_decl_fact _test_ctxt =
   | _ -> assert_failure "Could not extract decl name"
 
 let () =
-  "typing_symbol_info_test"
+  "write_symbol_info_test"
   >::: [
          "test_add_fact" >:: test_add_fact;
          "test_add_decl_fact" >:: test_add_decl_fact;

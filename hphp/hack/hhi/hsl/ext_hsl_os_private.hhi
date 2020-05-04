@@ -162,6 +162,10 @@ const int PF_INET6 = 0;
 const int PF_MAX = 0;
 
 const int SUN_PATH_LEN = 0;
+const int INADDR_ANY = 0;
+const int INADDR_LOOPBACK = 0;
+const int INADDR_BROADCAST = 0;
+const int INADDR_NONE = 0;
 
 const int SOCK_STREAM = 0;
 const int SOCK_DGRAM = 0;

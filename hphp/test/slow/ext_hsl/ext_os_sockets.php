@@ -79,9 +79,7 @@ async function do_test(_OS\sockaddr $sa): Awaitable<void> {
 <<__EntryPoint>>
 async function main(): Awaitable<void> {
   print("***** Testing AF_INET server ***\n");
-  // 127.0.0.1 as a uint32; this test written before _OS\inet_aton() :)
-  $localhost = (127 << 24) | 1;
-  $sin = new _OS\sockaddr_in(0, $localhost);
+  $sin = new _OS\sockaddr_in(0, _OS\INADDR_LOOPBACK);
   await do_test($sin);
 
   print("\n\n***** Testing AF_UNIX server ***\n");

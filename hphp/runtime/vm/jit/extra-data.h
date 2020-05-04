@@ -345,7 +345,7 @@ struct FuncArgData : IRExtraData {
  * Func with argument index and expected type.
  */
 struct FuncArgTypeData : IRExtraData {
-  explicit FuncArgTypeData(const Func* f, int64_t arg, DataType t)
+  explicit FuncArgTypeData(const Func* f, int64_t arg, const StringData* t)
     : func(f)
     , argNum(arg)
     , type(t)
@@ -357,7 +357,7 @@ struct FuncArgTypeData : IRExtraData {
 
   const Func* func;
   int64_t argNum;
-  DataType type;
+  const StringData* type;
 };
 
 /*

@@ -721,8 +721,8 @@ void raise_deprecated(const char *fmt, ...) {
 std::string param_type_error_message(
     const char* func_name,
     int param_num,
-    DataType expected_type,
-    DataType actual_type) {
+    const char* expected_type,
+    TypedValue actual_value) {
 
   // slice off fg1_
   if (strncmp(func_name, "fg1_", 4) == 0) {
@@ -731,19 +731,29 @@ std::string param_type_error_message(
     func_name += 4;
   }
   assertx(param_num > 0);
+
+  auto const actual_type = [&]{
+    if (RO::EvalHackArrCompatSpecialization && tvIsArray(actual_value)) {
+      auto const ad = val(actual_value).parr;
+      if (ad->isVArray()) return "varray";
+      if (ad->isDArray()) return "darray";
+    }
+    return getDataTypeString(type(actual_value)).data();
+  }();
+
   return folly::sformat(
     "{}() expects parameter {} to be {}, {} given",
     func_name,
     param_num,
-    getDataTypeString(expected_type).data(),
-    getDataTypeString(actual_type).data());
+    expected_type,
+    actual_type);
 }
 
 void raise_param_type_warning(
     const char* func_name,
     int param_num,
-    DataType expected_type,
-    DataType actual_type) {
+    const char* expected_type,
+    TypedValue actual_value) {
 
   // its ok to do this before munging, because it only looks at the
   // end of the string
@@ -753,7 +763,7 @@ void raise_param_type_warning(
   auto msg = param_type_error_message(func_name,
                                       param_num,
                                       expected_type,
-                                      actual_type);
+                                      actual_value);
 
   if (is_constructor) {
     SystemLib::throwExceptionObject(msg);

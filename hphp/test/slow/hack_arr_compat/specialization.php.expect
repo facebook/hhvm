@@ -1,5 +1,10 @@
 
 =====================================
+Builtins:
+Passing boolean to darray: idx() expects parameter 1 to be darray, boolean given
+Passing darray to boolean: json_decode() expects parameter 2 to be boolean, darray given
+
+=====================================
 Comparisons:
   Comparing array and array:
     === true

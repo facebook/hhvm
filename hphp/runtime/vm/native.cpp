@@ -404,12 +404,17 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       continue;
     }
 
-    auto msg = param_type_error_message(
-      func->name()->data(),
-      i+1,
-      *targetType,
-      type(tv)
-    );
+    auto const expected_type = [&]{
+      if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
+        if (tc.isVArray()) return "varray";
+        if (tc.isDArray()) return "darray";
+        if (tc.isVArrayOrDArray()) return "varray_or_darray";
+        return "array";
+      }
+      return getDataTypeString(*targetType).data();
+    }();
+    auto const msg = param_type_error_message(
+      func->name()->data(), i+1, expected_type, *tv);
     if (RuntimeOption::PHP7_EngineExceptions) {
       SystemLib::throwTypeErrorObject(msg);
     }

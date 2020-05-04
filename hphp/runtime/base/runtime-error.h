@@ -113,13 +113,13 @@ void raise_message(ErrorMode mode, bool skipTop, const std::string& msg);
 std::string param_type_error_message(
     const char* func_name,
     int param_num,
-    DataType expected_type,
-    DataType actual_type);
+    const char* expected_type,
+    TypedValue actual_value);
 void raise_param_type_warning(
     const char* func_name,
     int param_num,
-    DataType expected_type,
-    DataType actual_type);
+    const char* expected_type,
+    TypedValue actual_value);
 void raise_hack_strict(HackStrictOption option, const char *ini_setting,
                        const std::string& msg);
 void raise_hack_strict(HackStrictOption option, const char *ini_setting,

@@ -366,7 +366,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_parameter_wrong_type(TypedValue tv,
                                              const Func* callee,
                                              unsigned int arg_num,
-                                             DataType type);
+                                             const StringData* type);
 
 void check_collection_cast_to_array();
 

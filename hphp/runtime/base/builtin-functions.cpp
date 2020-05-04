@@ -871,11 +871,9 @@ NEVER_INLINE
 void throw_parameter_wrong_type(TypedValue tv,
                                 const Func* callee,
                                 unsigned int arg_num,
-                                DataType expected_type) {
-  auto msg = param_type_error_message(
-    callee->name()->data(), arg_num, expected_type,
-    type(tv));
-
+                                const StringData* expected_type) {
+  auto const msg = param_type_error_message(
+    callee->name()->data(), arg_num, expected_type->data(), tv);
   if (RuntimeOption::PHP7_EngineExceptions) {
     SystemLib::throwTypeErrorObject(msg);
   }

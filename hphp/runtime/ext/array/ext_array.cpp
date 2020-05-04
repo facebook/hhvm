@@ -3353,13 +3353,9 @@ Array HHVM_FUNCTION(merge_xhp_attr_declarations,
   IterateV(
     rest.get(),
     [&](TypedValue arr) {
-      if (!isArrayType(arr.m_type)) {
-        raise_param_type_warning(
-          "__SystemLib\\merge_xhp_attr_declarations",
-          idx+1,
-          RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray,
-          arr.m_type
-        );
+      if (!tvIsArray(arr)) {
+        raise_param_type_warning("__SystemLib\\merge_xhp_attr_declarations",
+                                 idx+1, "array", arr);
         ret = Array{};
         return true;
       }

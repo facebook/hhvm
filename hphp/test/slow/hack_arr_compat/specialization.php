@@ -1,5 +1,6 @@
 <?hh
 
+// Run a function and print either the result or the error thrown.
 function run($fn) {
   try {
     print(json_encode($fn())."\n");
@@ -19,6 +20,14 @@ function display($x) {
     'D'=>'dict',
   ];
   return $lookup[$result];
+}
+
+function test_builtin_error_message() {
+  print("\n=====================================\nBuiltins:\n");
+  print('Passing boolean to darray: ');
+  run(() ==> Shapes::idx(false, 17));
+  print('Passing darray to boolean: ');
+  run(() ==> json_decode('[]', darray[]));
 }
 
 // Test all possible triples of (a1 type, a2 type, comparison operator).
@@ -73,6 +82,7 @@ function test_varray_ops() {
 
 <<__EntryPoint>>
 function main() {
+  test_builtin_error_message();
   test_darray_varray_comparisons();
   test_varray_implicit_append();
   test_varray_ops();

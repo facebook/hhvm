@@ -1610,6 +1610,12 @@ SSATmp* maybeCoerceValue(
   return bail();
 }
 
+StaticString
+  s_varray("varray"),
+  s_darray("darray"),
+  s_varray_or_darray("varray_or_darray"),
+  s_array("array");
+
 /*
  * Prepare the actual arguments to the CallBuiltin instruction, by converting a
  * ParamPrep into a vector of SSATmps to pass to CallBuiltin.  If any of the
@@ -1625,6 +1631,22 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   ret[argIdx++] = fp(env);
   ret[argIdx++] = sp(env);
   if (params.ctx) ret[argIdx++] = params.ctx;
+
+  auto const genFail = [&](uint32_t param, SSATmp* val) {
+    auto const expected_type = [&]{
+      auto const& tc = callee->params()[param].typeConstraint;
+      if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
+        if (tc.isVArray()) return s_varray.get();
+        if (tc.isDArray()) return s_darray.get();
+        if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
+        return s_array.get();
+      }
+      auto const dt = param_target_type(callee, param) - TNull;
+      return getDataTypeString(dt.toDataType()).get();
+    }();
+    auto const data = FuncArgTypeData { callee, param + 1, expected_type };
+    gen(env, ThrowParameterWrongType, data, maker.makeUnusualCatch(), val);
+  };
 
   auto const needDVCheck = [&](uint32_t param, const Type& ty) {
     if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
@@ -1685,11 +1707,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
               gen(env, StLoc, LocalId{paramIdx}, fp(env), val);
               return val;
             },
-            [&] {
-              gen(env, ThrowParameterWrongType,
-                  FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-                  maker.makeUnusualCatch(), val);
-            }
+            [&] { genFail(paramIdx, val); }
           );
           return nullptr;
         },
@@ -1734,11 +1752,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
               if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
               return val;
             },
-            [&] {
-              gen(env, ThrowParameterWrongType,
-                  FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-                  maker.makeUnusualCatch(), oldVal);
-            }
+            [&] { genFail(paramIdx, oldVal); }
           );
         },
         [&] {
@@ -1794,11 +1808,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             env.irb->exceptionStackBoundary();
             return val;
           },
-          [&] {
-            gen(env, ThrowParameterWrongType,
-                FuncArgTypeData { callee, paramIdx + 1, ty.toDataType() },
-                maker.makeUnusualCatch(), tv);
-          }
+          [&] { genFail(paramIdx, tv); }
         );
         return nullptr;
       },

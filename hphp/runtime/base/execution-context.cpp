@@ -1436,8 +1436,6 @@ void ExecutionContext::requestInit() {
 }
 
 void ExecutionContext::requestExit() {
-  apcExtension::purgeDeferred(std::move(m_apcDeferredExpire));
-
   autoTypecheckRequestExit();
   HHProf::Request::FinishProfiling();
 
@@ -1990,12 +1988,6 @@ void ExecutionContext::clearLastError() {
   m_lastErrorNum = 0;
   m_lastErrorPath = staticEmptyString();
   m_lastErrorLine = 0;
-}
-
-void ExecutionContext::enqueueAPCDeferredExpire(const String& key) {
-  auto keyStr = key.get();
-  keyStr->incRefCount();
-  m_apcDeferredExpire.push_back(keyStr);
 }
 
 void ExecutionContext::enqueueAPCHandle(APCHandle* handle, size_t size) {

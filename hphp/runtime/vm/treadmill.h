@@ -51,12 +51,9 @@ enum class SessionKind {
 };
 
 /*
- * An invalid request index.
- */
-constexpr int64_t kInvalidRequestIdx = -1;
-/*
  * Return the current thread's index.
  */
+constexpr int64_t kInvalidRequestIdx = -1;
 int64_t requestIdx();
 
 /*
@@ -81,11 +78,6 @@ int64_t getOldestStartTime();
  * been running, in seconds.
  */
 int64_t getAgeOldestRequest();
-
-/*
- * Returns the unique GenCount identifying this request.
- */
-int64_t getRequestGenCount();
 
 /*
  * Ask for memory to be freed (as in free, not delete) by the next

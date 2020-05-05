@@ -2388,12 +2388,19 @@ and expr_
     let (env, mem_ty) = Env.fresh_type env p in
     let r = Reason.Rwitness (fst e1) in
     let has_member_ty = MakeType.has_member r m mem_ty (CIexpr e1) in
-    let on_error = Errors.unify_error in
     let lty1 = LoclType ty1 in
     let (env, result_ty) =
       match nullsafe with
       | None ->
-        let env = SubType.sub_type_i env lty1 has_member_ty on_error in
+        let env =
+          Type.sub_type_i
+            (fst e1)
+            Reason.URnone
+            env
+            lty1
+            has_member_ty
+            Errors.unify_error
+        in
         (env, mem_ty)
       | Some _ ->
         (* In that case ty1 is a subtype of ?Thas_member(m, #1)
@@ -2403,7 +2410,15 @@ and expr_
         let (env, null_has_mem_ty) =
           Union.union_i env r has_member_ty null_ty
         in
-        let env = SubType.sub_type_i env lty1 null_has_mem_ty on_error in
+        let env =
+          Type.sub_type_i
+            (fst e1)
+            Reason.URnone
+            env
+            lty1
+            null_has_mem_ty
+            Errors.unify_error
+        in
         let (env, null_or_nothing_ty) = Inter.intersect env ~r null_ty ty1 in
         let (env, result_ty) = Union.union env null_or_nothing_ty mem_ty in
         (env, result_ty)

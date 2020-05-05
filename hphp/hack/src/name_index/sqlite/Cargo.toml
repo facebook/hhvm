@@ -12,4 +12,4 @@ path = "lib.rs"
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 md-5 = "0.8"
-rusqlite = "0.21"
+rusqlite = "0.23"

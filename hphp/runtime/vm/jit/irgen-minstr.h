@@ -121,10 +121,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
     FTRACE_MOD(Trace::idx, 1, "{}\nArrayAccessProfile: {}\n",
                env.irb->curMarker().show(), data.toString());
 
-    using MKAction = ArrayAccessProfile::MissingKeyAction;
-
-    auto const missingCond = [&] (MKAction action, auto f) {
-      assertx(action != MKAction::None);
+    using Action = ArrayAccessProfile::Action;
+    auto const missingCond = [&] (Action action, auto f) {
+      assertx(action != Action::None);
       return cond(env,
         f,
         [&] {
@@ -132,14 +131,14 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
         },
         [&] {
           hint(env, Block::Hint::Unlikely);
-          if (action == MKAction::Cold) return generic(key, result.size_hint);
+          if (action == Action::Cold) return generic(key, result.size_hint);
           gen(env, Jmp, makeExitSlow(env));
           return cns(env, TBottom);
         }
       );
     };
 
-    if (!is_define && result.empty != MKAction::None) {
+    if (!is_define && result.empty != Action::None) {
       return missingCond(result.empty, [&] (Block* taken) {
         auto const count = [&] {
           if (is_dict) return gen(env, CountDict, arr);
@@ -149,7 +148,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
         gen(env, JmpNZero, taken, count);
       });
     }
-    if (!is_define && !is_keyset && result.missing != MKAction::None) {
+    if (!is_define && !is_keyset && result.missing != Action::None) {
       return missingCond(result.missing, [&] (Block* taken) {
         // According to the profiling, the key is mostly a TStaticStr.
         // If if the JIT doesn't know that statically, lets check for it.
@@ -161,7 +160,8 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
         gen(env, AssertType, t, arr);
       });
     }
-    if (!result.offset) return generic(key, result.size_hint);
+    auto const offset_action = result.offset.first;
+    if (offset_action == Action::None) return generic(key, result.size_hint);
 
     return cond(
       env,
@@ -174,17 +174,19 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
         auto const op = is_dict ? CheckDictOffset
                                 : is_keyset ? CheckKeysetOffset
                                             : CheckMixedArrayOffset;
-        gen(env, op, IndexData { *result.offset }, taken, marr, key);
+        gen(env, op, IndexData { result.offset.second }, taken, marr, key);
         if (cow_check) gen(env, CheckArrayCOW, taken, marr);
         return marr;
       },
-      [&] (SSATmp* tmp) { return direct(tmp, key, *result.offset); },
+      [&] (SSATmp* tmp) { return direct(tmp, key,result.offset.second); },
       [&] {
+        hint(env, Block::Hint::Unlikely);
         // NOTE: We could pass result.size_hint here, but that's the size hint
         // for the overall distribution, not the conditional distribution when
         // the likely offset profile misses. We pass a default profile instead.
-        hint(env, Block::Hint::Unlikely);
-        return generic(key, SizeHintData{});
+        if (offset_action == Action::Cold) return generic(key, SizeHintData{});
+        gen(env, Jmp, makeExitSlow(env));
+        return cns(env, TBottom);
       }
     );
   }

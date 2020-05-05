@@ -101,22 +101,24 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   }
   total += m_untracked;
 
-  auto const pickAction = [&](uint32_t val) {
-    auto const cold = RO::EvalHHIRMissingColdArrayProfileThreshold;
-    auto const exit = RO::EvalHHIRMissingExitArrayProfileThreshold;
-    if (val >= total * exit) return MissingKeyAction::Exit;
-    if (val >= total * cold) return MissingKeyAction::Cold;
-    return MissingKeyAction::None;
+  auto const pickAction = [&](uint32_t val, double cold) {
+    auto const exit = RO::EvalHHIRExitArrayProfileThreshold;
+    if (val >= total * exit) return Action::Exit;
+    if (val >= total * cold) return Action::Cold;
+    return Action::None;
   };
 
-  auto const idx_threshold  = RO::EvalHHIRMixedArrayProfileThreshold;
+  auto const offset_threshold  = RO::EvalHHIROffsetArrayProfileThreshold;
   auto const size_threshold = RO::EvalHHIRSmallArrayProfileThreshold;
-  auto const offset = hottest.count >= total * idx_threshold
-    ? folly::Optional<uint32_t>(safe_cast<uint32_t>(hottest.pos)) : folly::none;
+  auto const missing_threshold = RO::EvalHHIRMissingArrayProfileThreshold;
+  auto const index_action = pickAction(hottest.count, offset_threshold);
+  auto const offset =
+    std::make_pair(index_action, index_action == Action::None
+                                 ? 0 : safe_cast<uint32_t>(hottest.pos));
   auto const size_hint = m_small >= total * size_threshold
-                          ? SizeHintData::SmallStatic : SizeHintData::Default;
-  auto const empty = pickAction(m_empty);
-  auto const missing = pickAction(m_missing);
+                         ? SizeHintData::SmallStatic : SizeHintData::Default;
+  auto const empty = pickAction(m_empty, missing_threshold);
+  auto const missing = pickAction(m_missing, missing_threshold);
   return Result{offset, SizeHintData(size_hint), empty, missing};
 }
 

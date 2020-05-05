@@ -52,15 +52,15 @@ namespace jit {
  *    whether this key exists in the array by a fast side table lookup.
  */
 struct ArrayAccessProfile {
-  enum class MissingKeyAction { None, Cold, Exit };
+  enum class Action { None, Cold, Exit };
   /*
    * The result of both profiling types. Prefer the offset to the size hint.
    */
   struct Result {
-    folly::Optional<uint32_t> offset;
+    std::pair<Action, uint32_t> offset;
     SizeHintData size_hint;
-    MissingKeyAction empty;
-    MissingKeyAction missing;
+    Action empty;
+    Action missing;
   };
 
   /*

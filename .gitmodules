@@ -1,9 +1,6 @@
 [submodule "__FORKS__"]
 	path = third-party/forks
 	url = https://github.com/hhvm/hhvm-third-party.git
-[submodule "boost"]
-	path = third-party/boost/boost
-	url = https://github.com/boostorg/boost
 [submodule "brotli"]
 	path = third-party/brotli/src
 	url = https://github.com/google/brotli

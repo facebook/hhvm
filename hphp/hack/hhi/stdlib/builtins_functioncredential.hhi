@@ -9,7 +9,7 @@
  */
 
  /**
-  * Object of this type is returned by __FUNCTION_CREDENTIAL__
+  * Object of this type is returned by `__FUNCTION_CREDENTIAL__`
   * attempting to construct an instance directly will throw an Error
   */
 final class FunctionCredential {
@@ -19,17 +19,17 @@ final class FunctionCredential {
   private final function __construct() {}
 
   /**
-   * The classname is equivalent to the magic __CLASS__ constant.
+   * The classname is equivalent to the magic `__CLASS__` constant.
    * The name is not a late bound classname.
-   * It refers to self::class, not static::class.
+   * It refers to `self::class`, not `static::class`.
    *
-   * If __FUNCTION_CREDENTIAL__ is used when not in the scope of a class,
+   * If `__FUNCTION_CREDENTIAL__` is used when not in the scope of a class,
    * the classname will be null.
    */
   public final function getClassName(): ?string;
 
   /**
-   * The functionname is equivalent to the magic __FUNCTION__ constant.
+   * The functionname is equivalent to the magic `__FUNCTION__` constant.
    */
   public final function getFunctionName(): string;
 

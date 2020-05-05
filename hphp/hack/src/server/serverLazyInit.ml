@@ -515,17 +515,36 @@ let type_check_dirty
   let to_recheck = Relative_path.Set.union to_recheck similar_files in
   let fast = extend_fast genv dirty_fast env.naming_table to_recheck in
   let files_to_check = Relative_path.Map.keys fast in
-  let env = { env with changed_files = dirty_files } in
-  let result = type_check genv env files_to_check t in
-  HackEventLogger.type_check_dirty
-    ~start_t
-    ~dirty_count:(Relative_path.Set.cardinal dirty_files)
-    ~recheck_count:(Relative_path.Set.cardinal to_recheck);
-  Hh_logger.log
-    "ServerInit type_check_dirty count: %d. recheck count: %d"
-    (Relative_path.Set.cardinal dirty_files)
-    (Relative_path.Set.cardinal to_recheck);
-  result
+
+  (* HACK: dump the fanout that we calculated and exit. This is for
+  `hh_fanout`'s regression testing vs. `hh_server`. This can be deleted once
+  we no longer worry about `hh_fanout` regressing vs. `hh_server`. Deletion
+  is tracked at T65464119. *)
+  if ServerArgs.dump_fanout genv.options then (
+    Hh_json.json_to_multiline_output
+      stdout
+      (Hh_json.JSON_Object
+         [
+           ( "recheck_files",
+             Hh_json.JSON_Array
+               ( to_recheck
+               |> Relative_path.Set.elements
+               |> List.map ~f:Relative_path.to_absolute
+               |> List.map ~f:Hh_json.string_ ) );
+         ]);
+    exit 0
+  ) else
+    let env = { env with changed_files = dirty_files } in
+    let result = type_check genv env files_to_check t in
+    HackEventLogger.type_check_dirty
+      ~start_t
+      ~dirty_count:(Relative_path.Set.cardinal dirty_files)
+      ~recheck_count:(Relative_path.Set.cardinal to_recheck);
+    Hh_logger.log
+      "ServerInit type_check_dirty count: %d. recheck count: %d"
+      (Relative_path.Set.cardinal dirty_files)
+      (Relative_path.Set.cardinal to_recheck);
+    result
 
 let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
     Relative_path.Set.t =

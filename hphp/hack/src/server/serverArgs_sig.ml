@@ -40,6 +40,8 @@ module type S = sig
 
   val config : options -> (string * string) list
 
+  val dump_fanout : options -> bool
+
   val dynamic_view : options -> bool
 
   val from : options -> string

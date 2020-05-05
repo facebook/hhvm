@@ -22,6 +22,7 @@ type options = {
   ai_mode: Ai_options.t option;
   check_mode: bool;
   config: (string * string) list;
+  dump_fanout: bool;
   dynamic_view: bool;
   from: string;
   gen_saved_ignore_type_errors: bool;
@@ -66,6 +67,8 @@ module Messages = struct
   let config = " override arbitrary value from hh.conf (format: <key>=<value>)"
 
   let daemon = " detach process"
+
+  let dump_fanout = " dump fanout to stdout as JSON, then exit"
 
   let dynamic_view = " start with dynamic view for IDE files on by default."
 
@@ -143,6 +146,7 @@ let parse_options () =
   let ai_mode = ref None in
   let check_mode = ref false in
   let config = ref [] in
+  let dump_fanout = ref false in
   let dynamic_view = ref false in
   let from = ref "" in
   let from_emacs = ref false in
@@ -189,6 +193,7 @@ let parse_options () =
         Arg.String (fun s -> config := String_utils.split2_exn '=' s :: !config),
         Messages.config );
       ("--daemon", Arg.Set should_detach, Messages.daemon);
+      ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--dynamic-view", Arg.Set dynamic_view, Messages.dynamic_view);
       ("--from-emacs", Arg.Set from_emacs, Messages.from_emacs);
       ("--from-hhclient", Arg.Set from_hhclient, Messages.from_hhclient);
@@ -305,6 +310,7 @@ let parse_options () =
     ai_mode = !ai_mode;
     check_mode;
     config = !config;
+    dump_fanout = !dump_fanout;
     dynamic_view = !dynamic_view;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
@@ -337,6 +343,7 @@ let default_options ~root =
     ai_mode = None;
     check_mode = false;
     config = [];
+    dump_fanout = false;
     dynamic_view = false;
     from = "";
     gen_saved_ignore_type_errors = false;
@@ -377,6 +384,8 @@ let ai_mode options = options.ai_mode
 let check_mode options = options.check_mode
 
 let config options = options.config
+
+let dump_fanout options = options.dump_fanout
 
 let dynamic_view options = options.dynamic_view
 
@@ -456,6 +465,7 @@ let to_string
       ai_mode;
       check_mode;
       config;
+      dump_fanout;
       dynamic_view;
       from;
       gen_saved_ignore_type_errors;
@@ -544,6 +554,9 @@ let to_string
     ", ";
     "config: ";
     config_str;
+    "dump_fanout: ";
+    string_of_bool dump_fanout;
+    ", ";
     "dynamic_view: ";
     string_of_bool dynamic_view;
     ", ";

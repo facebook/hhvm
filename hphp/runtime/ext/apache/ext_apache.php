@@ -17,6 +17,16 @@ function apache_note(string $note_name,
                      ?string $note_value = ""): mixed;
 
 /**
+ * Set many apache request notes at once.
+ * All keys must be strings.
+ * All values must be strings.
+ * Nullable values may not be used to remove keys as with apache_note().
+ * This function returns nothing.
+ */
+<<__Native>>
+function apache_notes(dict<string, string> $notes): void;
+
+/**
  * Fetch all HTTP request headers
  *
  * @return array - An associative array of all the HTTP headers in the

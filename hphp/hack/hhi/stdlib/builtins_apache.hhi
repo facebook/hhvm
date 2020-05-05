@@ -11,6 +11,8 @@
 <<__PHPStdLib>>
 function apache_note(string $note_name, $note_value = "") { }
 <<__PHPStdLib>>
+function apache_notes(dict<string, string> $notes): void { }
+<<__PHPStdLib>>
 function apache_request_headers(): darray<string, string> { }
 <<__PHPStdLib>>
 function apache_response_headers(): darray<string, string> { }

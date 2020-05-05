@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/runtime/server/server-note.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/tv-conversions.h"
 #include "hphp/util/rds-local.h"
 
@@ -29,6 +30,17 @@ ServerNote* get_server_note() {
 void ServerNote::Add(const String& name, const String& value) {
   Array &arr = s_note->m_notes;
   arr.set(name, value);
+}
+
+void ServerNote::AddNotes(const Array& notes) {
+  auto& arr = s_note->m_notes;
+  IterateKVNoInc(notes.get(), [&arr](TypedValue key, TypedValue v) {
+    if (!isStringType(type(key)) || !isStringType(type(v))) {
+      SystemLib::throwInvalidArgumentExceptionObject(
+      "server notes: keys and values must be strings");
+    }
+    arr.set(key, v, true);
+  });
 }
 
 String ServerNote::Get(const String& name) {

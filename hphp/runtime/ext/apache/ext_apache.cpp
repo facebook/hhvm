@@ -30,6 +30,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+void HHVM_FUNCTION(apache_notes, const Array& notes) {
+  ServerNote::AddNotes(notes);
+}
+
 Variant HHVM_FUNCTION(apache_note, const String& note_name,
                       const Variant& note_value /* = empty_string */) {
   String prev = ServerNote::Get(note_name);
@@ -122,6 +126,7 @@ ApacheExtension::~ApacheExtension() {}
 
 void ApacheExtension::moduleInit() {
   HHVM_FE(apache_note);
+  HHVM_FE(apache_notes);
   HHVM_FE(apache_request_headers);
   HHVM_FE(apache_response_headers);
   HHVM_FE(apache_setenv);

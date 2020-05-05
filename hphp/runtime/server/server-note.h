@@ -21,8 +21,9 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-struct ServerNote  {
+struct ServerNote final {
   static void Add(const String& name, const String& value);
+  static void AddNotes(const Array& notes);
   static String Get(const String& name);
   static void Delete(const String& name);
   static void Reset();

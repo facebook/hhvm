@@ -698,10 +698,15 @@ fn convert_lambda<'a>(
 
     // Remove duplicates, (not efficient, but unlikely to be large),
     // remove variables that are actually just parameters
-    let use_vars_opt: Option<Vec<Lid>> = use_vars_opt.map(|x| {
-        x.into_iter()
+    let use_vars_opt: Option<Vec<Lid>> = use_vars_opt.map(|use_vars| {
+        use_vars
+            .into_iter()
+            .rev()
             .unique_by(|lid| lid.name().to_string())
             .filter(|x| !fd.params.iter().any(|y| x.name() == &y.name))
+            .collect::<Vec<_>>()
+            .into_iter()
+            .rev()
             .collect()
     });
 

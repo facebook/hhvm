@@ -4640,5 +4640,4 @@ and emit_unop env pos op e =
 and emit_exprs env (exprs : Tast.expr list) =
   match exprs with
   | [] -> empty
-  | expr :: exprs ->
-    gather (emit_expr env expr :: List.map exprs (emit_expr env))
+  | _ :: _ -> gather @@ List.map exprs (emit_expr env)

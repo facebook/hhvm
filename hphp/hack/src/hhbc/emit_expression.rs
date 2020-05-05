@@ -1244,7 +1244,7 @@ fn is_struct_init(
             ast_constant_folder::fold_expr(&mut key, e, &env.namespace);
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
-                    && !i64::from_str(&s).is_ok()
+                    && !i64::from_str(&s.replace("_", "")).is_ok()
                     && !(f64::from_str(&s).map_or(false, |f| f.is_finite()));
                 uniq_keys.insert(s);
                 continue;
@@ -1476,7 +1476,11 @@ fn emit_value_only_collection<F: FnOnce(isize) -> InstructLitConst>(
     Ok(match (x1, x2) {
         ([], []) => instr::empty(),
         (_, []) => inline(e, x1)?,
-        _ => InstrSeq::gather(vec![inline(e, x1)?, outofline(e, x2)?]),
+        _ => {
+            let outofline_instrs = outofline(e, x2)?;
+            let inline_instrs = inline(e, x1)?;
+            InstrSeq::gather(vec![inline_instrs, outofline_instrs])
+        }
     })
 }
 
@@ -3659,12 +3663,14 @@ fn emit_conditional_expr(
         }
         None => {
             let end_label = e.label_gen_mut().next_regular();
+            let efalse_instr = emit_expr(e, env, efalse)?;
+            let etest_instr = emit_expr(e, env, etest)?;
             InstrSeq::gather(vec![
-                emit_expr(e, env, etest)?,
+                etest_instr,
                 instr::dup(),
                 instr::jmpnz(end_label.clone()),
                 instr::popc(),
-                emit_expr(e, env, efalse)?,
+                efalse_instr,
                 instr::label(end_label),
             ])
         }

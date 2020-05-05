@@ -2820,25 +2820,20 @@ fn print_xml<W: Write>(
     attrs: &[ast::XhpAttribute],
     children: &[ast::Expr],
 ) -> Result<(), W::Error> {
-    fn print_xhp_attrs<W: Write>(
+    fn print_xhp_attr<W: Write>(
         ctx: &mut Context,
         w: &mut W,
         env: &ExprEnv,
-        attrs: &[ast::XhpAttribute],
+        attr: &ast::XhpAttribute,
         spread_id: usize,
     ) -> Result<(), W::Error> {
         let key_printer = |_: &mut Context, w: &mut W, _: &ExprEnv, k| print_expr_string(w, k);
-        match &attrs {
-            [] => Ok(()),
-            [hd @ .., ast::XhpAttribute::XhpSimple((_, s), e)] => {
-                print_key_value_(ctx, w, env, s, key_printer, e)?;
-                w.write_if(!hd.is_empty(), ", ")?;
-                print_xhp_attrs(ctx, w, env, hd, spread_id)
+        match attr {
+            ast::XhpAttribute::XhpSimple((_, s), e) => {
+                print_key_value_(ctx, w, env, s, key_printer, e)
             }
-            [hd @ .., ast::XhpAttribute::XhpSpread(e)] => {
-                print_key_value_(ctx, w, env, &format!("...${}", spread_id), key_printer, e)?;
-                w.write_if(!hd.is_empty(), ", ")?;
-                print_xhp_attrs(ctx, w, env, hd, spread_id + 1)
+            ast::XhpAttribute::XhpSpread(e) => {
+                print_key_value_(ctx, w, env, &format!("...${}", spread_id), key_printer, e)
             }
         }
     }
@@ -2849,7 +2844,9 @@ fn print_xml<W: Write>(
     write!(w, "new {}", mangle(id.into()))?;
     paren(w, |w| {
         wrap_by_(w, "darray[", "]", |w| {
-            print_xhp_attrs(ctx, w, &env, attrs, 0)
+            concat_by(w, ", ", attrs, |w, attr| {
+                print_xhp_attr(ctx, w, &env, attr, 0)
+            })
         })?;
         w.write(", ")?;
         print_expr_varray(ctx, w, &env, children)?;
@@ -2882,7 +2879,7 @@ fn print_efun<W: Write>(
             })
         })?;
     }
-    print_block_(ctx, w, env, &f.body.ast)
+    print_block_(ctx, w, env, &f.body.ast, None)
 }
 
 fn print_block<W: Write>(
@@ -2890,13 +2887,14 @@ fn print_block<W: Write>(
     w: &mut W,
     env: &ExprEnv,
     block: &ast::Block,
+    ident: Option<&str>,
 ) -> Result<(), W::Error> {
     match &block[..] {
         [] | [ast::Stmt(_, ast::Stmt_::Noop)] => Ok(()),
         [ast::Stmt(_, ast::Stmt_::Block(b))] if matches!(&b[..], [_]) => {
-            print_block_(ctx, w, env, b)
+            print_block_(ctx, w, env, b, ident)
         }
-        [_, _, ..] => print_block_(ctx, w, env, block),
+        [_, _, ..] => print_block_(ctx, w, env, block, ident),
         [stmt] => print_statement(ctx, w, env, stmt, None),
     }
 }
@@ -2906,11 +2904,14 @@ fn print_block_<W: Write>(
     w: &mut W,
     env: &ExprEnv,
     block: &ast::Block,
+    ident: Option<&str>,
 ) -> Result<(), W::Error> {
     wrap_by_(w, "{\\n", "}\\n", |w| {
         concat(w, block, |w, stmt| {
+            option(w, ident, |w, i: &str| w.write(i))?;
             print_statement(ctx, w, env, stmt, Some("  "))
-        })
+        })?;
+        option(w, ident, |w, i: &str| w.write(i))
     })
 }
 
@@ -2951,22 +2952,27 @@ fn print_statement<W: Write>(
         }
         S_::While(x) => {
             let (cond, block) = &**x;
-            wrap_by_(w, "while (", ")", |w| print_expr(ctx, w, env, cond))?;
-            print_block(ctx, w, env, block)
+            option(w, ident, |w, i: &str| w.write(i))?;
+            wrap_by_(w, "while (", ") ", |w| print_expr(ctx, w, env, cond))?;
+            print_block(ctx, w, env, block, ident)
         }
         S_::If(x) => {
             let (cond, if_block, else_block) = &**x;
-            wrap_by_(w, "if (", ")", |w| print_expr(ctx, w, env, cond))?;
-            print_block(ctx, w, env, if_block)?;
+            option(w, ident, |w, i: &str| w.write(i))?;
+            wrap_by_(w, "if (", ") ", |w| print_expr(ctx, w, env, cond))?;
+            print_block(ctx, w, env, if_block, ident)?;
             let mut buf = String::new();
-            print_block(ctx, &mut buf, env, else_block).map_err(|e| match e {
+            print_block(ctx, &mut buf, env, else_block, ident).map_err(|e| match e {
                 Error::NotImpl(m) => Error::NotImpl(m),
                 _ => Error::Fail(format!("Failed: {}", e)),
             })?;
             w.write_if(!buf.is_empty(), " else ")?;
             w.write_if(!buf.is_empty(), buf)
         }
-        S_::Block(block) => print_block_(ctx, w, env, block),
+        S_::Block(block) => {
+            option(w, ident, |w, i: &str| w.write(i))?;
+            print_block_(ctx, w, env, block, ident)
+        }
         S_::Noop => Ok(()),
         _ => Err(Error::Fail(
             "TODO(T29869930) Unimplemented NYI: Default value printing".into(),

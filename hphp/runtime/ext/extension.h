@@ -86,6 +86,13 @@ public:
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const;
 
+  // override these functions to perform extension-specific jumpstart,
+  // leveraging the JIT profile data serialization mechanisms.
+  virtual std::string serialize() { return {}; }
+  // throws std::runtime_error to abort the whole thing if needed. The extension
+  // can also choose to swallow the error.
+  virtual void deserialize(std::string) {}
+
   using DependencySet = std::set<std::string>;
   using DependencySetMap = std::map<Extension*, DependencySet>;
 

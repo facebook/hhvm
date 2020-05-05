@@ -25,6 +25,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/vm-worker.h"
 
+#include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 
 #include "hphp/runtime/vm/class.h"
@@ -1550,6 +1551,7 @@ std::string serializeProfData(const std::string& filename) {
     };
 
     write_units_preload(ser);
+    ExtensionRegistry::serialize(ser);
     PropertyProfile::serialize(ser);
     InstanceBits::init();
     InstanceBits::serialize(ser);
@@ -1640,6 +1642,7 @@ std::string deserializeProfData(const std::string& filename, int numWorkers) {
     }
 
     read_units_preload(ser);
+    ExtensionRegistry::deserialize(ser);
     PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
     read_global_array_map(ser);

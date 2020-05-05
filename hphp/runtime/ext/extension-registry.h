@@ -6,7 +6,14 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/hdf.h"
 
-namespace HPHP { namespace ExtensionRegistry {
+namespace HPHP {
+
+namespace jit {
+struct ProfDataSerializer;
+struct ProfDataDeserializer;
+}
+
+namespace ExtensionRegistry {
 /////////////////////////////////////////////////////////////////////////////
 
 void registerExtension(Extension* ext);
@@ -36,7 +43,12 @@ void requestShutdown();
 
 bool modulesInitialised();
 
+void serialize(jit::ProfDataSerializer& ser);
+void deserialize(jit::ProfDataDeserializer& des);
+
 /////////////////////////////////////////////////////////////////////////////
-}} // namespace HPHP::ExtensionRegistry
+} // namespace HPHP::ExtensionRegistry
+
+}
 
 #endif // incl_HPHP_EXTENSION_REGISTRY_H

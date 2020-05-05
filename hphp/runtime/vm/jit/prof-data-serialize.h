@@ -150,6 +150,9 @@ struct ProfDataDeserializer {
   friend std::string deserializeProfData(const std::string&, int);
 };
 
+void write_raw(ProfDataSerializer& ser, const void* data, size_t sz);
+void read_raw(ProfDataDeserializer& ser, void* data, size_t sz);
+
 template<class T>
 void write_raw(ProfDataSerializer& ser, const T& t) {
   write_raw(ser, &t, sizeof(t));

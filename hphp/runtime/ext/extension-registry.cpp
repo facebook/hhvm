@@ -5,8 +5,9 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/runtime/version.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
+#include "hphp/runtime/vm/litstr-table.h"
 #include "hphp/system/systemlib.h"
 
 #ifdef HAVE_LIBDL
@@ -282,6 +283,42 @@ void requestShutdown() {
 }
 
 bool modulesInitialised() { return s_initialized; }
+
+void serialize(jit::ProfDataSerializer& ser) {
+  std::vector<std::pair<std::string, std::string>> extData;
+  for (auto& ext : *s_exts) {
+    auto name = ext.first;
+    auto data = ext.second->serialize();
+    if (!data.size()) continue;
+    extData.push_back({std::move(name), std::move(data)});
+  }
+  uint32_t len = extData.size();
+  jit::write_raw<uint32_t>(ser, len);
+  for (const auto& ext : extData) {
+    len = ext.first.size();
+    jit::write_raw<uint32_t>(ser, len);
+    jit::write_raw(ser, ext.first.c_str(), len);
+    len = ext.second.size();
+    jit::write_raw<uint32_t>(ser, len);
+    jit::write_raw(ser, ext.second.c_str(), len);
+  }
+}
+
+void deserialize(jit::ProfDataDeserializer& des) {
+  auto const nExts = jit::read_raw<uint32_t>(des);
+  for (uint32_t i = 0; i < nExts; ++i) {
+    uint32_t len = jit::read_raw<uint32_t>(des);
+    std::string str;
+    str.resize(len);
+    jit::read_raw(des, str.data(), len);
+    auto ext = get(str.data(), false);
+    if (!ext) throw std::runtime_error{str.c_str()};
+    len = jit::read_raw<uint32_t>(des);
+    str.resize(len);
+    jit::read_raw(des, str.data(), len);
+    ext->deserialize(std::move(str));
+  }
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -140,10 +140,10 @@ inline const StringData* decRefProfileKey(const IRInstruction* inst) {
                             inst->extra<DecRefData>()->locId));
 }
 
-inline TargetProfile<DecRefProfile> decRefProfile(const IRUnit& unit,
+inline TargetProfile<DecRefProfile> decRefProfile(const TransContext& context,
                                                   const IRInstruction* inst) {
   auto const profileKey = decRefProfileKey(inst);
-  return TargetProfile<DecRefProfile>(unit, inst->marker(), profileKey);
+  return TargetProfile<DecRefProfile>(context, inst->marker(), profileKey);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

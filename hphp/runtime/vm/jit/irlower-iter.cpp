@@ -61,7 +61,7 @@ static auto const s_ArrayIterProfile = makeStaticString("ArrayIterProfile");
 void profileIterInit(IRLS& env, const IRInstruction* inst, bool isInitK) {
   if (!inst->src(0)->isA(TArrLike)) return;
   auto const profile = TargetProfile<ArrayIterProfile>(
-    env.unit,
+    env.unit.context(),
     inst->marker(),
     s_ArrayIterProfile
   );

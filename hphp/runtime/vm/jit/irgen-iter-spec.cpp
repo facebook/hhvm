@@ -214,7 +214,7 @@ void logArrayIterProfile(IRGS& env, const IterArgs& data,
 
   auto const marker  = makeMarker(env, bcOff(env));
   auto const profile = TargetProfile<ArrayIterProfile>(
-    env.unit,
+    env.context,
     makeMarker(env, bcOff(env)),
     s_ArrayIterProfile
   );
@@ -275,7 +275,7 @@ ArrayIterProfile::Result getProfileResult(IRGS& env, const SSATmp* base) {
   assertx(!generic.top_specialization.specialized);
 
   auto const profile = TargetProfile<ArrayIterProfile>(
-    env.unit,
+    env.context,
     makeMarker(env, bcOff(env)),
     s_ArrayIterProfile
   );

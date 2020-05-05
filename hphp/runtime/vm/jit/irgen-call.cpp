@@ -290,7 +290,7 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   if (!RuntimeOption::RepoAuthoritative) return callUnknown(false);
 
   auto profile = TargetProfile<CallTargetProfile>(
-    env.unit, env.irb->curMarker(), callTargetProfileKey());
+    env.context, env.irb->curMarker(), callTargetProfileKey());
 
   if (profile.profiling()) {
     gen(env, ProfileCall, ProfileCallTargetData { profile.handle() }, callee);
@@ -675,7 +675,7 @@ void optimizeProfiledCallMethod(IRGS& env,
                                 Fn emitFCall) {
   always_assert(objOrCls->type().subtypeOfAny(TObj, TCls));
   auto const isStaticCall = objOrCls->type() <= TCls;
-  auto profile = TargetProfile<MethProfile>(env.unit, env.irb->curMarker(),
+  auto profile = TargetProfile<MethProfile>(env.context, env.irb->curMarker(),
                                             methProfileKey.get());
   if (!profile.optimizing()) {
     emitFCall(&profile);

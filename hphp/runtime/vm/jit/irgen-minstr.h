@@ -97,7 +97,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   static const StaticString s_KeysetAccess{"KeysetAccess"};
   static const StaticString s_MixedArrayAccess{"MixedArrayAccess"};
   auto const profile = TargetProfile<ArrayAccessProfile> {
-    env.unit,
+    env.context,
     env.irb->curMarker(),
     is_dict ? s_DictAccess.get() :
     is_keyset ? s_KeysetAccess.get() :
@@ -212,7 +212,7 @@ SSATmp* profiledType(IRGS& env, SSATmp* tmp, Finish finish) {
   }
 
   static const StaticString s_TypeProfile{"TypeProfile"};
-  TargetProfile<TypeProfile> prof(env.unit, env.irb->curMarker(),
+  TargetProfile<TypeProfile> prof(env.context, env.irb->curMarker(),
                                   s_TypeProfile.get());
 
   if (prof.profiling()) {

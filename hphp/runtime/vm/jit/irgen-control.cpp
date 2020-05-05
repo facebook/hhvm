@@ -163,8 +163,7 @@ void emitSwitch(IRGS& env, SwitchKind kind, int64_t base,
 
   auto const dataSize = SwitchProfile::extraSize(iv.size());
   TargetProfile<SwitchProfile> profile(
-    env.unit, env.irb->curMarker(), s_switchProfile.get(),
-    dataSize
+    env.context, env.irb->curMarker(), s_switchProfile.get(), dataSize
   );
 
   auto checkBounds = [&] {

@@ -179,7 +179,7 @@ void emitClsCns(IRGS& env, const StringData* cnsNameStr) {
 
   if (!clsTy.clsSpec() || !isNormalClass(clsTy.clsSpec().cls())) {
     if (RuntimeOption::RepoAuthoritative) {
-      TargetProfile<ClsCnsProfile> profile(env.unit, env.irb->curMarker(),
+      TargetProfile<ClsCnsProfile> profile(env.context, env.irb->curMarker(),
                                            clsCnsProfileKey.get());
       if (profile.profiling()) {
         auto const data = ProfileSubClsCnsData { cnsNameStr, profile.handle() };

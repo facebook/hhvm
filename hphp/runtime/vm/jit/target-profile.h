@@ -129,14 +129,13 @@ struct TargetProfile {
     , m_key{(T*)nullptr, profTransID, bcOff, name}
   {}
 
-  TargetProfile(const IRUnit& unit,
+  TargetProfile(const TransContext& context,
                 BCMarker marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(unit.context().kind == TransKind::Profile ?
-                      unit.context().transID :
-                      marker.profTransID(),
-                    unit.context().kind,
+    : TargetProfile(context.kind == TransKind::Profile ? context.transID
+                                                       : marker.profTransID(),
+                    context.kind,
                     marker.bcOff(),
                     name,
                     extraSize)

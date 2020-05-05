@@ -1870,6 +1870,7 @@ Type::Type(Type&& o) noexcept
 
 Type& Type::operator=(const Type& o) noexcept {
   SCOPE_EXIT { assert(checkInvariants()); };
+  if (this == &o) return *this;
   destroy(*this);
   construct(*this, o);
   return *this;
@@ -1878,6 +1879,7 @@ Type& Type::operator=(const Type& o) noexcept {
 Type& Type::operator=(Type&& o) noexcept {
   SCOPE_EXIT { assert(checkInvariants());
                assert(o.checkInvariants()); };
+  if (this == &o) return *this;
   destroy(*this);
   construct(*this, std::move(o));
   return *this;

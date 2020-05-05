@@ -466,7 +466,7 @@ void InterpStack::insert_after(int numPop, int numPush, const Type* types,
       elems.resize(elems.size() + numPush);
       for (auto j = elems.size() - numPush; j-- > elemIx; ) {
         auto& e = elems[j + numPush];
-        e = std::move(elems[j]);
+        if (numPush) e = std::move(elems[j]);
         e.index += numPush - numPop;
         if (e.id != StackElem::NoId) e.id += numInst;
       }

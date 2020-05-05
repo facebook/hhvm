@@ -202,6 +202,7 @@ namespace Trace {
       TM(clisrv)        \
       TM(factparse)     \
       TM(bccache)       \
+      TM(idx)           \
       /* Stress categories, to exercise rare paths */ \
       TM(stress_txInterpPct)  \
       TM(stress_txInterpSeed) \

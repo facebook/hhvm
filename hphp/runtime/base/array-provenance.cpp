@@ -138,6 +138,7 @@ Tag& tag_for_nonreq(ArrayData* ad) {
 
   auto const mem = reinterpret_cast<char*>(ad)
     - sizeof(Tag)
+    - (ad->hasStrKeyTable() ? sizeof(StrKeyTable) : 0)
     - (ad->hasApcTv() ? sizeof(APCTypedValue) : 0);
 
   return *reinterpret_cast<Tag*>(mem);

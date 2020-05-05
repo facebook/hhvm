@@ -62,8 +62,8 @@ std::string ArrayAccessProfile::toString() const {
   for (auto const& line : m_hits) {
     out << folly::format("{}:{},", line.pos, line.count);
   }
-  out << folly::format("untracked:{},small:{},empty:{}",
-                       m_untracked, m_small, m_empty);
+  out << folly::format("untracked:{},small:{},empty:{},missing:{}",
+                       m_untracked, m_small, m_empty, m_missing);
   return out.str();
 }
 
@@ -82,6 +82,7 @@ folly::dynamic ArrayAccessProfile::toDynamic() const {
                         ("untracked", m_untracked)
                         ("small", m_small)
                         ("empty", m_empty)
+                        ("missing", m_missing)
                         ("total", total)
                         ("profileType", "ArrayAccessProfile");
 }
@@ -100,16 +101,23 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   }
   total += m_untracked;
 
-  auto const idx_threshold  = RuntimeOption::EvalHHIRMixedArrayProfileThreshold;
-  auto const size_threshold = RuntimeOption::EvalHHIRSmallArrayProfileThreshold;
-  auto const empty_threshold =
-    RuntimeOption::EvalHHIREmptyArrayProfileThreshold;
+  auto const pickAction = [&](uint32_t val) {
+    auto const cold = RO::EvalHHIRMissingColdArrayProfileThreshold;
+    auto const exit = RO::EvalHHIRMissingExitArrayProfileThreshold;
+    if (val >= total * exit) return MissingKeyAction::Exit;
+    if (val >= total * cold) return MissingKeyAction::Cold;
+    return MissingKeyAction::None;
+  };
+
+  auto const idx_threshold  = RO::EvalHHIRMixedArrayProfileThreshold;
+  auto const size_threshold = RO::EvalHHIRSmallArrayProfileThreshold;
   auto const offset = hottest.count >= total * idx_threshold
     ? folly::Optional<uint32_t>(safe_cast<uint32_t>(hottest.pos)) : folly::none;
   auto const size_hint = m_small >= total * size_threshold
                           ? SizeHintData::SmallStatic : SizeHintData::Default;
-  auto const empty = m_empty >= total * empty_threshold;
-  return Result{offset, SizeHintData(size_hint), empty};
+  auto const empty = pickAction(m_empty);
+  auto const missing = pickAction(m_missing);
+  return Result{offset, SizeHintData(size_hint), empty, missing};
 }
 
 bool ArrayAccessProfile::update(int32_t pos, uint32_t count) {
@@ -164,6 +172,9 @@ void ArrayAccessProfile::update(const ArrayData* ad, const StringData* sd,
   update(pos, 1);
   if (isSmallStaticArray(ad)) m_small++;
   if (ad->size() == 0) m_empty++;
+  if (ad->hasStrKeyTable() && !ad->missingKeySideTable().mayContain(sd)) {
+    m_missing++;
+  }
 }
 
 void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
@@ -186,6 +197,7 @@ void ArrayAccessProfile::reduce(ArrayAccessProfile& l,
   l.m_untracked += r.m_untracked;
   l.m_small += r.m_small;
   l.m_empty += r.m_empty;
+  l.m_missing += r.m_missing;
 
   if (n == 0) return;
   assertx(n <= kNumTrackedSamples);

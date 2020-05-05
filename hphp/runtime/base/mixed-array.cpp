@@ -30,6 +30,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/stats.h"
+#include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-comparisons.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
@@ -461,10 +462,16 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     assertx(!other.keyTypes().mayIncludeTombstone());
   }
 
+  auto const shouldCreateStrKeyTable =
+    mode == AllocMode::Static &&
+    other.keyTypes().mustBeStaticStrs() &&
+    other.size() < StrKeyTable::kStrKeyTableSize * 3 / 4;
+  auto const sizeOfStrKeyTable =
+    shouldCreateStrKeyTable ? sizeof(StrKeyTable) : 0;
   auto const scale = other.m_scale;
   auto const ad = mode == AllocMode::Request
     ? reqAlloc(scale)
-    : staticAlloc(scale, arrprov::tagSize(&other));
+    : staticAlloc(scale, arrprov::tagSize(&other) + sizeOfStrKeyTable);
   // Copy everything including tombstones. This is a requirement for remove() to
   // work correctly, which assumes the position is the same in the original and
   // in the copy of the array, in case copying is needed.
@@ -484,7 +491,9 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   auto const aux =
     other.keyTypes().packForAux() |
-    (dvArray | (other.isLegacyArray() ? ArrayData::kLegacyArray : 0));
+    dvArray |
+    (other.isLegacyArray() ? ArrayData::kLegacyArray : 0) |
+    (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
   ad->initHeader_16(dest_hk, count, aux);
 
   // We want SlowCopy to be a tail call in the opt build, but we still want to
@@ -502,12 +511,20 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
     return res;
   };
 
+  MixedArrayElm* elm = ad->data();
+  auto const end = elm + ad->m_used;
+  if (shouldCreateStrKeyTable) {
+    auto table = ad->mutableStrKeyTable();
+    for (; elm < end; ++elm) {
+      assertx(elm->hasStrKey() && elm->strKey()->isStatic());
+      table->add(elm->strKey());
+    }
+  }
+
   CopyHash(ad->hashTab(), other.hashTab(), scale);
   if (mode == AllocMode::Static) return check(ad);
 
   // Bump up refcounts as needed.
-  MixedArrayElm* elm = ad->data();
-  auto const end = elm + ad->m_used;
   if (other.keyTypes().mayIncludeCounted()) {
     return check(SlowCopy(ad, other, elm, end));
   }
@@ -937,7 +954,8 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
   ad->m_sizeAndPos   = old->m_sizeAndPos;
   ad->initHeader_16(old->m_kind, OneReference, old->m_aux16);
   ad->m_scale_used   = newScale | uint64_t{oldUsed} << 32;
-  ad->m_aux16 &= ~ArrayData::kHasProvenanceData;
+  ad->m_aux16 &= ~(ArrayData::kHasProvenanceData |
+                   ArrayData::kHasStrKeyTable);
 
   copyElmsNextUnsafe(ad, old, oldUsed);
 
@@ -954,6 +972,7 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     assertx(res->m_pos == old->m_pos);
     assertx(res->m_used == oldUsed);
     assertx(res->m_scale == newScale);
+    assertx(!res->hasStrKeyTable());
     return asMixed(tagArrProv(res, old));
   };
 
@@ -1282,7 +1301,8 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   auto const oldUsed = src->m_used;
 
   auto const aux = MixedArrayKeys::compactPacked(src->m_aux16) &
-                   ~ArrayData::kHasProvenanceData;
+                   ~(ArrayData::kHasProvenanceData |
+                     ArrayData::kHasStrKeyTable);
 
   ad->m_sizeAndPos      = src->m_sizeAndPos;
   ad->initHeader_16(src->m_kind, OneReference, aux);
@@ -1350,6 +1370,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   assertx(ad->m_scale == scale);
   assertx(ad->m_nextKI == src->m_nextKI);
   assertx(ad->checkInvariants());
+  assertx(!ad->hasStrKeyTable());
   return ad;
 }
 

@@ -571,6 +571,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckMBase:
   case CheckMixedArrayKeys:
   case CheckMixedArrayOffset:
+  case CheckMissingKeyInArrLike:
   case CheckNonNull:
   case CheckNullptr:
   case CheckPackedArrayDataBounds:

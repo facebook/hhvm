@@ -1326,6 +1326,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CheckMixedArrayOffset:
   case CheckDictOffset:
   case CheckKeysetOffset:
+  case CheckMissingKeyInArrLike:
   case ProfileMixedArrayAccess:
   case ProfileDictAccess:
   case ProfileKeysetAccess:

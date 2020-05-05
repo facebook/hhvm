@@ -83,6 +83,7 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80543
   bool is_dict = arr->isA(TDict);
   bool is_keyset = arr->isA(TKeyset);
+  bool is_define = mode == MOpMode::Define;
   bool cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || is_keyset || arr->isA(TArr));
 
@@ -117,19 +118,48 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
     auto const result = data.choose();
     logArrayAccessProfile(env, arr, key, mode, data);
 
-    if (result.empty && mode != MOpMode::Define) {
+    FTRACE_MOD(Trace::idx, 1, "{}\nArrayAccessProfile: {}\n",
+               env.irb->curMarker().show(), data.toString());
+
+    using MKAction = ArrayAccessProfile::MissingKeyAction;
+
+    auto const missingCond = [&] (MKAction action, auto f) {
+      assertx(action != MKAction::None);
       return cond(env,
-        [&] (Block* taken) {
-          auto const count = [&] {
-            if (is_dict) return gen(env, CountDict, arr);
-            if (is_keyset) return gen(env, CountKeyset, arr);
-            return gen(env, CountArrayFast, arr);
-          }();
-          gen(env, JmpNZero, taken, count);
+        f,
+        [&] {
+          return missing(key);
         },
-        [&] { return missing(key); },
-        [&] { return generic(key, result.size_hint); }
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          if (action == MKAction::Cold) return generic(key, result.size_hint);
+          gen(env, Jmp, makeExitSlow(env));
+          return cns(env, TBottom);
+        }
       );
+    };
+
+    if (!is_define && result.empty != MKAction::None) {
+      return missingCond(result.empty, [&] (Block* taken) {
+        auto const count = [&] {
+          if (is_dict) return gen(env, CountDict, arr);
+          if (is_keyset) return gen(env, CountKeyset, arr);
+          return gen(env, CountArrayFast, arr);
+        }();
+        gen(env, JmpNZero, taken, count);
+      });
+    }
+    if (!is_define && !is_keyset && result.missing != MKAction::None) {
+      return missingCond(result.missing, [&] (Block* taken) {
+        // According to the profiling, the key is mostly a TStaticStr.
+        // If if the JIT doesn't know that statically, lets check for it.
+        auto const skey = key->isA(TStaticStr) ? key :
+          gen(env, CheckType, TStaticStr, taken, key);
+        gen(env, CheckMissingKeyInArrLike, taken, arr, skey);
+        auto const t = is_dict ? TStaticDict :
+                       is_keyset ? TStaticKeyset : TStaticArr;
+        gen(env, AssertType, t, arr);
+      });
     }
     if (!result.offset) return generic(key, result.size_hint);
 

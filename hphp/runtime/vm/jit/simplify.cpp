@@ -287,6 +287,7 @@ SSATmp* mergeBranchDests(State& env, const IRInstruction* inst) {
                    CheckPackedArrayDataBounds,
                    CheckMixedArrayKeys,
                    CheckMixedArrayOffset,
+                   CheckMissingKeyInArrLike,
                    CheckDictOffset,
                    CheckKeysetOffset));
   if (inst->next() != nullptr && inst->next() == inst->taken()) {
@@ -3232,6 +3233,21 @@ SSATmp* simplifyCheckMixedArrayKeys(State& env, const IRInstruction* inst) {
   return match ? gen(env, Nop) : gen(env, Jmp, inst->taken());
 }
 
+SSATmp* simplifyCheckMissingKeyInArrLike(State& env,
+                                         const IRInstruction* inst) {
+  auto const arr = inst->src(0);
+  auto const key = inst->src(1);
+  if (!arr->hasConstVal(TArrLike) || !key->hasConstVal(TStaticStr)) {
+    return mergeBranchDests(env, inst);
+  }
+  auto const ad = arr->arrLikeVal();
+  auto const sd = key->strVal();
+  if (ad->hasStrKeyTable() && !ad->missingKeySideTable().mayContain(sd)) {
+    return gen(env, Nop);
+  }
+  return gen(env, Jmp, inst->taken());
+}
+
 SSATmp* simplifyCheckMixedArrayOffset(State& env, const IRInstruction* inst) {
   return checkOffsetImpl(env, inst);
 }
@@ -3895,6 +3911,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckDictOffset)
   X(CheckKeysetOffset)
   X(CheckArrayCOW)
+  X(CheckMissingKeyInArrLike)
   X(ArrayIsset)
   X(DictIsset)
   X(KeysetIsset)

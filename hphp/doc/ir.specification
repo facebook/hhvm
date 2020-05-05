@@ -2950,6 +2950,12 @@ fields of that struct for holding intermediate values.
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
   fail, branch to B.  This check is allowed to have false negatives.
 
+| CheckMissingKeyInArrLike, ND, S(ArrLike) S(StaticStr), B
+
+  Uses the StrKeyTable to check if S1 is guaranteed to be missing in S0.
+  If S1 may be present, branches to block B. If we branch here, the key may or
+  may not be present.
+
 | ElemArrayD, D(LvalToElemInitCell), S(LvalToArr) S(Int,Str), MElem
 
 | ElemArrayU, D(LvalToMembInitCell), S(LvalToArr) S(Int,Str), MElem

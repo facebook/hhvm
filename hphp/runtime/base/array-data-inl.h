@@ -257,6 +257,10 @@ inline void ArrayData::setLegacyArray(bool legacy) {
   m_aux16 = (m_aux16 & ~kLegacyArray) | (legacy ? kLegacyArray : 0);
 }
 
+inline bool ArrayData::hasStrKeyTable() const {
+  return m_aux16 & kHasStrKeyTable;
+}
+
 inline uint8_t ArrayData::auxBits() const {
   return dvArray() | (isLegacyArray() ? kLegacyArray : 0);
 }

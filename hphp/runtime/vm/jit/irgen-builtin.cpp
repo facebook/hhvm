@@ -995,6 +995,8 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
 
   // Do the array access, using array offset profiling to optimize it.
   auto const key = params[1].value;
+  // we might side-exit in profiledArrayAccess
+  env.irb->fs().incBCSPDepth(nparams);
   auto const elm = profiledArrayAccess(
     env, arr, key, MOpMode::None,
     [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
@@ -1007,6 +1009,7 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
       return gen(env, op, data, arr, key, def);
     }
   );
+  env.irb->fs().decBCSPDepth(nparams);
 
   auto const finish = [&](SSATmp* val){
     gen(env, IncRef, val);
@@ -2298,11 +2301,10 @@ void implArrayIdx(IRGS& env) {
     return;
   }
 
-  auto const def = popC(env, DataTypeGeneric); // a helper will decref it but
-                                               // the translated code doesn't
-                                               // care about the type
-  auto const key = popC(env);
-  auto const base = popC(env);
+  // A helper will decref it but the translated code doesn't care about the type
+  auto const def = topC(env, BCSPRelOffset{0}, DataTypeGeneric);
+  auto const key = topC(env, BCSPRelOffset{1});
+  auto const base = topC(env, BCSPRelOffset{2});
 
   auto const elem = profiledArrayAccess(
     env, base, key, MOpMode::None,
@@ -2316,6 +2318,7 @@ void implArrayIdx(IRGS& env) {
   );
 
   auto finish = [&](SSATmp* tmp) {
+    popC(env); popC(env); popC(env);
     pushIncRef(env, tmp);
     decRef(env, base);
     decRef(env, key);
@@ -2371,11 +2374,12 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
 void implDictKeysetIdx(IRGS& env,
                        bool is_dict,
                        SSATmp* loaded_collection_dict) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const stack_base = popC(env);
+  auto const def = topC(env, BCSPRelOffset{0});
+  auto const key = topC(env, BCSPRelOffset{1});
+  auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
+    popC(env); popC(env); popC(env);
     pushIncRef(env, elem);
     decRef(env, def);
     decRef(env, key);

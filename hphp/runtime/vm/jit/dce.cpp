@@ -639,6 +639,7 @@ bool canDCE(IRInstruction* inst) {
   case ElemX:
   case ProfileMixedArrayAccess:
   case CheckMixedArrayOffset:
+  case CheckMissingKeyInArrLike:
   case CheckArrayCOW:
   case ProfileDictAccess:
   case CheckDictOffset:

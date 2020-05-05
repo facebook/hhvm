@@ -46,15 +46,21 @@ namespace jit {
  *
  *  - Empty profiling: If the array is empty, any lookup will fail. In this
  *    case, we first check the size of the array.
+ *
+ *  - Missing element profiling: If the array used at a certain source location
+ *    with the given key tends to not have the given key, we first check
+ *    whether this key exists in the array by a fast side table lookup.
  */
 struct ArrayAccessProfile {
+  enum class MissingKeyAction { None, Cold, Exit };
   /*
    * The result of both profiling types. Prefer the offset to the size hint.
    */
   struct Result {
     folly::Optional<uint32_t> offset;
     SizeHintData size_hint;
-    bool empty;
+    MissingKeyAction empty;
+    MissingKeyAction missing;
   };
 
   /*
@@ -107,6 +113,7 @@ private:
   uint32_t m_untracked{0};
   uint32_t m_small{0};
   uint32_t m_empty{0};
+  uint32_t m_missing{0};
   bool m_init{false};
 };
 

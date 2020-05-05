@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sort-flags.h"
+#include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
 
@@ -130,6 +131,12 @@ struct ArrayData : MaybeCountable {
    * their standard "vanilla" layouts never have this bit set.
    */
   static auto constexpr kIsBespoke = 32;
+
+  /*
+   * Indicates that this array has a side table that contains information about
+   * its keys.
+   */
+  static auto constexpr kHasStrKeyTable = 64;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -307,6 +314,8 @@ public:
    */
   bool isLegacyArray() const;
   void setLegacyArray(bool legacy);
+
+  bool hasStrKeyTable() const;
 
   /* Get the aux bits in the header that must be preserved
    * when we copy or resize the array
@@ -682,6 +691,20 @@ public:
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
   static constexpr size_t offsetofDVArray() {
     return offsetof(ArrayData, m_aux16);
+  }
+
+  const StrKeyTable& missingKeySideTable() const {
+    assertx(this->hasStrKeyTable());
+    auto const pointer = reinterpret_cast<const char*>(this)
+      - sizeof(StrKeyTable);
+    return *reinterpret_cast<const StrKeyTable*>(pointer);
+  }
+
+  StrKeyTable* mutableStrKeyTable() {
+    assertx(this->hasStrKeyTable());
+    auto const pointer = reinterpret_cast<char*>(this)
+      - sizeof(StrKeyTable);
+    return reinterpret_cast<StrKeyTable*>(pointer);
   }
 
   /////////////////////////////////////////////////////////////////////////////

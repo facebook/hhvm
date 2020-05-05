@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/unit.h"
@@ -525,6 +526,85 @@ void cgCheckMixedArrayKeys(IRLS& env, const IRInstruction* inst) {
   auto const sf = v.makeReg();
   v << testbim{int8_t(*mask), src[MixedArray::kKeyTypesOffset], sf};
   v << jcc{CC_NZ, sf, {label(env, inst->next()), label(env, inst->taken())}};
+}
+
+namespace {
+void traceCheckNotInStrKeyTable(ArrayData* ad, StringData* sd) {
+  FTRACE_MOD(Trace::idx, 1,
+             "Key: {}, HashMasked: {}, ad: {}\n",
+             sd->data(),
+             sd->hash() & StrKeyTable::kStrKeyTableMask,
+             ad);
+  FTRACE_MOD(Trace::idx, 1,
+             "HasStrKeyTable: {}\nMay be in table: {}\n",
+             ad->hasStrKeyTable(),
+             ad->missingKeySideTable().mayContain(sd));
+}
+} // namespace
+
+void cgCheckMissingKeyInArrLike(IRLS& env, const IRInstruction* inst) {
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const key = srcLoc(env, inst, 1).reg();
+  auto const branch = label(env, inst->taken());
+  auto& v = vmain(env);
+
+  if (Trace::moduleEnabled(Trace::idx, 1)) {
+    v << copy2{arr, srcLoc(env, inst, 1).reg(), rarg(0), rarg(1)};
+    v << call{TCA(traceCheckNotInStrKeyTable), arg_regs(2)};
+  }
+
+  auto const sf = v.makeReg();
+  // If the array doesn't have the table, jump to branch.
+  v << testbim{
+    ArrayData::kHasStrKeyTable,
+    arr[ArrayData::offsetofDVArray()],
+    sf
+  };
+  ifThen(v, CC_Z, sf, branch);
+  auto const mask = StrKeyTable::kStrKeyTableMask;
+  auto const tableSize = safe_cast<int32_t>(sizeof(StrKeyTable));
+  static_assert(sizeof(StrKeyTable) % 8 == 0,
+                "Size of StrKeyTable to be a multiple of 8 bytes");
+  if (inst->src(1)->hasConstVal(TStaticStr)) {
+    // If the key is constant, so is the hash.
+    // So, emit a direct 1-byte test for the corresponding bit.
+    auto const sfmap = v.makeReg();
+    auto const maskedHash = inst->src(1)->strVal()->hash() & mask;
+    v << testqim{
+      1 << (maskedHash & 7),
+      arr[(maskedHash >> 3) - tableSize],
+      sfmap
+    };
+    ifThen(v, CC_NZ, sfmap, branch);
+    return;
+  }
+  auto const hash = v.makeReg();       // sd->hash
+  auto const maskedHash = v.makeReg(); // hash & mask
+  auto const test = v.makeReg();       // 1 << maskedHash
+  auto const sfmap = v.makeReg();
+  // Mask the hash to get an index into the StrKeyTable.
+  v << load{key[StringData::hashOff()], hash};
+  v << andqi{mask, hash, maskedHash, v.makeReg()};
+  auto const indexBits = [&] {
+    if (tableSize == 8 /* bytes */) return maskedHash;
+    auto const reg = v.makeReg();
+    // Extract the bottom 6 bits to index into the quadword
+    v << andqi{0x3F, maskedHash, reg, v.makeReg()};
+    return reg;
+  }();
+  v << shl{indexBits, v.cns(1), test, v.makeReg()};
+
+  if (tableSize == 8 /* bytes */) {
+    // If the bitset only has 64 bits, we can use a single quadword test.
+    v << testqm{test, arr[-tableSize], sfmap};
+  } else {
+    // Otherwise, find the right quadword and apply the test.
+    auto const offset = v.makeReg(); // maskedHash >> 6
+    v << shrqi{6, maskedHash, offset, v.makeReg()};
+    v << testqm{test, arr[offset * 8 - tableSize], sfmap};
+  }
+  // If the bit is set(i.e. the key may exist in the array), jump to the branch.
+  ifThen(v, CC_NZ, sfmap, branch);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

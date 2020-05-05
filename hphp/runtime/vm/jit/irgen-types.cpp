@@ -259,8 +259,9 @@ void verifyTypeImpl(IRGS& env,
       if (val->type().maybe(type)) {
         val = gen(env, CheckType, type, makeExit(env), val);
       }
-      ifThen(env, [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
-                  [&]{ dvArr(val); });
+      ifThen(env,
+        [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
+        [&]{ RO::EvalHackArrCompatSpecialization ? genFail() : dvArr(val); });
       return;
     }
     case AnnotAction::WarnFunc:

@@ -346,6 +346,24 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       targetType = tc.underlyingDataType();
     }
 
+    auto raise_type_error = [&]{
+      auto const expected_type = [&]{
+        if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
+          if (tc.isVArray()) return "varray";
+          if (tc.isDArray()) return "darray";
+          if (tc.isVArrayOrDArray()) return "varray_or_darray";
+          return "array";
+        }
+        return getDataTypeString(*targetType).data();
+      }();
+      auto const msg = param_type_error_message(
+        func->name()->data(), i+1, expected_type, *tv);
+      if (RuntimeOption::PHP7_EngineExceptions) {
+        SystemLib::throwTypeErrorObject(msg);
+      }
+      SystemLib::throwRuntimeExceptionObject(msg);
+    };
+
     // Checks if we need to raise an error due to a dvarray typehint mismatch.
     // Precondition: the DataType of the TypedValue is correct.
     auto const check_dvarray = [&]{
@@ -364,6 +382,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       }();
 
       if (error) {
+        if (RO::EvalHackArrCompatSpecialization) raise_type_error();
         auto const name = tc.displayName();
         raise_hackarr_compat_type_hint_param_notice(func, ad, name.data(), i);
       }
@@ -404,21 +423,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       continue;
     }
 
-    auto const expected_type = [&]{
-      if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
-        if (tc.isVArray()) return "varray";
-        if (tc.isDArray()) return "darray";
-        if (tc.isVArrayOrDArray()) return "varray_or_darray";
-        return "array";
-      }
-      return getDataTypeString(*targetType).data();
-    }();
-    auto const msg = param_type_error_message(
-      func->name()->data(), i+1, expected_type, *tv);
-    if (RuntimeOption::PHP7_EngineExceptions) {
-      SystemLib::throwTypeErrorObject(msg);
-    }
-    SystemLib::throwRuntimeExceptionObject(msg);
+    raise_type_error();
   }
 }
 

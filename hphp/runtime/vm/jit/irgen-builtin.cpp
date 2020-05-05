@@ -1661,6 +1661,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
       env,
       [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
       [&]{
+        if (RO::EvalHackArrCompatSpecialization) return genFail(param, val);
         gen(
           env,
           RaiseHackArrParamNotice,

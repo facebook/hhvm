@@ -1,1 +1,4 @@
--vEval.HackArrCompatSpecialization=true
+-vRuntime.Eval.CheckPropTypeHints=2
+-vRuntime.Eval.EmitClsMethPointers=1
+-vRuntime.Eval.IsCompatibleClsMethType=1
+-vRuntime.Eval.HackArrCompatSpecialization=true

@@ -189,6 +189,11 @@ inline AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
+  // Returns true if a clsmeth may be coerced to a (plain) PHP array.
+  auto const clsmeth_array_compat = []{
+    return !RO::EvalHackArrDVArrs && !RO::EvalHackArrCompatSpecialization;
+  };
+
   auto const metatype = getAnnotMetaType(at);
   switch (metatype) {
     case AnnotMetaType::Mixed:
@@ -228,8 +233,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         : AnnotAction::Pass;
     case AnnotMetaType::DArray:
       if (isClsMethType(dt)) {
-        return RuntimeOption::EvalHackArrDVArrs ?
-          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+        return clsmeth_array_compat() ? AnnotAction::ClsMethCheck
+                                      : AnnotAction::Fail;
       }
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
@@ -281,15 +286,13 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
   }
   if (isClsMethType(dt)) {
-    if ((at == AnnotType::VArray) || (at == AnnotType::Array) ||
-        (at == AnnotType::ArrayLike)) {
-      return RuntimeOption::EvalHackArrDVArrs ?
-        AnnotAction::Fail : AnnotAction::ClsMethCheck;
-    }
-    if ((at == AnnotType::Vec) || (at == AnnotType::ArrayLike)) {
-      return !RuntimeOption::EvalHackArrDVArrs ?
-        AnnotAction::Fail : AnnotAction::ClsMethCheck ;
-    }
+    auto const resolve = [] (bool okay) {
+      return okay ? AnnotAction::ClsMethCheck : AnnotAction::Fail;
+    };
+    if (at == AnnotType::Vec)       return resolve(RO::EvalHackArrDVArrs);
+    if (at == AnnotType::VArray)    return resolve(!RO::EvalHackArrDVArrs);
+    if (at == AnnotType::Array)     return resolve(clsmeth_array_compat());
+    if (at == AnnotType::ArrayLike) return resolve(true);
   }
 
   if (at == AnnotType::Record) {

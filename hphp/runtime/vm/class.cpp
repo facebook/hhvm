@@ -997,7 +997,8 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     newTCName
   );
 
-  if (result == TypeConstraint::EquivalentResult::DVArray) {
+  if (result == TypeConstraint::EquivalentResult::DVArray &&
+      !RO::EvalHackArrCompatSpecialization) {
     assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
     raise_hackarr_compat_notice(msg);
   } else {

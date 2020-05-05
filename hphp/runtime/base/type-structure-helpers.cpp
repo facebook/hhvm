@@ -773,15 +773,11 @@ bool checkTypeStructureMatchesTVImpl(
         return vals_match;
       }();
 
-      if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-        is_tuple_like &&
-        ad->isPHPArrayType()
-      )) {
-        if (ad->isDArray()) {
-          raise_hackarr_compat_is_operator("darray", "tuple");
-        } else if (!ad->isVArray()) {
-          raise_hackarr_compat_is_operator("array", "tuple");
+      if (is_tuple_like && ad->isPHPArrayType() && !ad->isVArray()) {
+        if (RO::EvalHackArrCompatSpecialization) return false;
+        if (RO::EvalHackArrCompatTypeHintNotices) {
+          auto const name = ad->isDArray() ? "darray" : "array";
+          raise_hackarr_compat_is_operator(name, "tuple");
         }
       }
       return with_prov_check(is_tuple_like);
@@ -960,15 +956,11 @@ bool checkTypeStructureMatchesTVImpl(
         return false;
       }
 
-      if (UNLIKELY(
-        RuntimeOption::EvalHackArrCompatTypeHintNotices &&
-        !warn &&
-        ad->isPHPArrayType()
-      )) {
-        if (ad->isVArray()) {
-          raise_hackarr_compat_is_operator("varray", "shape");
-        } else if (!ad->isDArray()) {
-          raise_hackarr_compat_is_operator("array", "shape");
+      if (!warn && ad->isPHPArrayType() && !ad->isDArray()) {
+        if (RO::EvalHackArrCompatSpecialization) return false;
+        if (RO::EvalHackArrCompatTypeHintNotices) {
+          auto const name = ad->isVArray() ? "varray" : "array";
+          raise_hackarr_compat_is_operator(name, "shape");
         }
       }
       return with_prov_check(!warn);

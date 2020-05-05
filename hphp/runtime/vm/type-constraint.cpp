@@ -979,7 +979,13 @@ std::string describe_actual_type(tv_rval val) {
       return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
         ? "varray" : "array";
     case KindOfPersistentArray:
-    case KindOfArray:         return "array";
+    case KindOfArray: {
+      if (!RO::EvalHackArrCompatSpecialization) return "array";
+      auto const arr = val.val().parr;
+      if (arr->isVArray()) return "varray";
+      if (arr->isDArray()) return "darray";
+      return "array";
+    }
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfFunc:          return "func";
@@ -1001,6 +1007,11 @@ std::string describe_actual_type(tv_rval val) {
 
 ALWAYS_INLINE
 folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
+  // This function returns a truthy result if we should emit a HackArrCompat
+  // *notice* for a mismatch for this TypeConstraint. Post specialization,
+  // we'll always emit an error instead, so short-circuit these notices.
+  if (RO::EvalHackArrCompatSpecialization) return folly::none;
+
   auto const check = [&](AnnotType at) -> folly::Optional<AnnotType> {
     switch (at) {
       case AnnotType::Array:

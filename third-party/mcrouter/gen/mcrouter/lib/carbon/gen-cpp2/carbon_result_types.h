@@ -88,7 +88,9 @@ template <> struct TEnumTraits<::carbon::Result> {
 namespace carbon {
 
 using _Result_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Result>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Result_EnumMapFactory::ValuesToNamesMapType _Result_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _Result_EnumMapFactory::NamesToValuesMapType _Result_NAMES_TO_VALUES;
 
 } // carbon

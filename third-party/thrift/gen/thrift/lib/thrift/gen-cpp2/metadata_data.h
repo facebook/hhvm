@@ -42,6 +42,7 @@ struct _ThriftPrimitiveTypeEnumDataStorage {
 };
 
 }}} // apache::thrift::metadata
+
 namespace apache { namespace thrift {
 
 template <> struct TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveType> {
@@ -49,4 +50,3 @@ template <> struct TEnumDataStorage<::apache::thrift::metadata::ThriftPrimitiveT
 };
 
 }} // apache::thrift
-

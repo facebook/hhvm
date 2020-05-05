@@ -10,4 +10,11 @@
 
 #include "mcrouter/lib/network/gen/gen-cpp2/Common_types.h"
 
+namespace facebook { namespace memcache { namespace thrift {
 
+}}} // facebook::memcache::thrift
+
+namespace apache { namespace thrift {
+
+
+}} // apache::thrift

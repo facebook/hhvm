@@ -140,7 +140,9 @@ template <> struct TEnumTraits<::apache::thrift::reflection::Type> {
 namespace apache { namespace thrift { namespace reflection {
 
 using _Type_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<Type>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _Type_EnumMapFactory::ValuesToNamesMapType _Type_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _Type_EnumMapFactory::NamesToValuesMapType _Type_NAMES_TO_VALUES;
 
 }}} // apache::thrift::reflection
@@ -204,52 +206,64 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
   bool operator==(const StructField& rhs) const;
   bool operator<(const StructField& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const bool&> isRequired_ref() const& {
-    return {isRequired, __isset.isRequired};
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> isRequired_ref() const& {
+    return {this->isRequired, __isset.isRequired};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const bool&&> isRequired_ref() const&& {
-    return {std::move(isRequired), __isset.isRequired};
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> isRequired_ref() const&& {
+    return {std::move(this->isRequired), __isset.isRequired};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<bool&> isRequired_ref() & {
-    return {isRequired, __isset.isRequired};
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> isRequired_ref() & {
+    return {this->isRequired, __isset.isRequired};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<bool&&> isRequired_ref() && {
-    return {std::move(isRequired), __isset.isRequired};
+  template <typename..., typename T = bool>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> isRequired_ref() && {
+    return {std::move(this->isRequired), __isset.isRequired};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int64_t&> type_ref() const& {
-    return {type, __isset.type};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> type_ref() const& {
+    return {this->type, __isset.type};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int64_t&&> type_ref() const&& {
-    return {std::move(type), __isset.type};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> type_ref() const&& {
+    return {std::move(this->type), __isset.type};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int64_t&> type_ref() & {
-    return {type, __isset.type};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> type_ref() & {
+    return {this->type, __isset.type};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int64_t&&> type_ref() && {
-    return {std::move(type), __isset.type};
+  template <typename..., typename T = int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> type_ref() && {
+    return {std::move(this->type), __isset.type};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
-    return {name, __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
+    return {this->name, __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
-    return {std::move(name), __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name_ref() const&& {
+    return {std::move(this->name), __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
-    return {name, __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> name_ref() & {
+    return {this->name, __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
-    return {std::move(name), __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
+    return {std::move(this->name), __isset.name};
   }
 
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<::std::string, ::std::string>&> annotations_ref() const& {
@@ -268,20 +282,24 @@ class StructField final : private apache::thrift::detail::st::ComparisonOperator
     return {std::move(annotations), __isset.annotations};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> order_ref() const& {
-    return {order, __isset.order};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> order_ref() const& {
+    return {this->order, __isset.order};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> order_ref() const&& {
-    return {std::move(order), __isset.order};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> order_ref() const&& {
+    return {std::move(this->order), __isset.order};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> order_ref() & {
-    return {order, __isset.order};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> order_ref() & {
+    return {this->order, __isset.order};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> order_ref() && {
-    return {std::move(order), __isset.order};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> order_ref() && {
+    return {std::move(this->order), __isset.order};
   }
 
   bool get_isRequired() const {
@@ -408,20 +426,24 @@ class DataType final : private apache::thrift::detail::st::ComparisonOperators<D
   bool operator==(const DataType& rhs) const;
   bool operator<(const DataType& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> name_ref() const& {
-    return {name, __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> name_ref() const& {
+    return {this->name, __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> name_ref() const&& {
-    return {std::move(name), __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> name_ref() const&& {
+    return {std::move(this->name), __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> name_ref() & {
-    return {name, __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> name_ref() & {
+    return {this->name, __isset.name};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> name_ref() && {
-    return {std::move(name), __isset.name};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> name_ref() && {
+    return {std::move(this->name), __isset.name};
   }
 
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const std::unordered_map<int16_t,  ::apache::thrift::reflection::StructField>&> fields_ref() const& {
@@ -609,36 +631,44 @@ class Schema final : private apache::thrift::detail::st::ComparisonOperators<Sch
   bool operator==(const Schema& rhs) const;
   bool operator<(const Schema& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&> dataTypes_ref() const& {
-    return {dataTypes, __isset.dataTypes};
+  template <typename..., typename T = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> dataTypes_ref() const& {
+    return {this->dataTypes, __isset.dataTypes};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&&> dataTypes_ref() const&& {
-    return {std::move(dataTypes), __isset.dataTypes};
+  template <typename..., typename T = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> dataTypes_ref() const&& {
+    return {std::move(this->dataTypes), __isset.dataTypes};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&> dataTypes_ref() & {
-    return {dataTypes, __isset.dataTypes};
+  template <typename..., typename T = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> dataTypes_ref() & {
+    return {this->dataTypes, __isset.dataTypes};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>&&> dataTypes_ref() && {
-    return {std::move(dataTypes), __isset.dataTypes};
+  template <typename..., typename T = std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> dataTypes_ref() && {
+    return {std::move(this->dataTypes), __isset.dataTypes};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<::std::string, int64_t>&> names_ref() const& {
-    return {names, __isset.names};
+  template <typename..., typename T = std::unordered_map<::std::string, int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> names_ref() const& {
+    return {this->names, __isset.names};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const std::unordered_map<::std::string, int64_t>&&> names_ref() const&& {
-    return {std::move(names), __isset.names};
+  template <typename..., typename T = std::unordered_map<::std::string, int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> names_ref() const&& {
+    return {std::move(this->names), __isset.names};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<::std::string, int64_t>&> names_ref() & {
-    return {names, __isset.names};
+  template <typename..., typename T = std::unordered_map<::std::string, int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> names_ref() & {
+    return {this->names, __isset.names};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<std::unordered_map<::std::string, int64_t>&&> names_ref() && {
-    return {std::move(names), __isset.names};
+  template <typename..., typename T = std::unordered_map<::std::string, int64_t>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> names_ref() && {
+    return {std::move(this->names), __isset.names};
   }
   const std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType>& get_dataTypes() const&;
   std::unordered_map<int64_t,  ::apache::thrift::reflection::DataType> get_dataTypes() &&;

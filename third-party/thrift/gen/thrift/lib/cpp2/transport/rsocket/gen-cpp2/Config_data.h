@@ -10,4 +10,11 @@
 
 #include "thrift/lib/cpp2/transport/rsocket/gen-cpp2/Config_types.h"
 
+namespace apache { namespace thrift {
 
+}} // apache::thrift
+
+namespace apache { namespace thrift {
+
+
+}} // apache::thrift

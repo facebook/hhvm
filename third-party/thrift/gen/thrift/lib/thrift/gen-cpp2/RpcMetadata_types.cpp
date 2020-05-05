@@ -37,9 +37,11 @@ bool TEnumTraits<::apache::thrift::ProtocolId>::findValue(char const* name, type
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _ProtocolId_EnumMapFactory::ValuesToNamesMapType _ProtocolId_VALUES_TO_NAMES = _ProtocolId_EnumMapFactory::makeValuesToNamesMap();
 const _ProtocolId_EnumMapFactory::NamesToValuesMapType _ProtocolId_NAMES_TO_VALUES = _ProtocolId_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -68,9 +70,11 @@ bool TEnumTraits<::apache::thrift::RpcKind>::findValue(char const* name, type* o
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _RpcKind_EnumMapFactory::ValuesToNamesMapType _RpcKind_VALUES_TO_NAMES = _RpcKind_EnumMapFactory::makeValuesToNamesMap();
 const _RpcKind_EnumMapFactory::NamesToValuesMapType _RpcKind_NAMES_TO_VALUES = _RpcKind_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -99,9 +103,11 @@ bool TEnumTraits<::apache::thrift::RpcPriority>::findValue(char const* name, typ
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _RpcPriority_EnumMapFactory::ValuesToNamesMapType _RpcPriority_VALUES_TO_NAMES = _RpcPriority_EnumMapFactory::makeValuesToNamesMap();
 const _RpcPriority_EnumMapFactory::NamesToValuesMapType _RpcPriority_NAMES_TO_VALUES = _RpcPriority_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -130,9 +136,11 @@ bool TEnumTraits<::apache::thrift::CompressionAlgorithm>::findValue(char const* 
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _CompressionAlgorithm_EnumMapFactory::ValuesToNamesMapType _CompressionAlgorithm_VALUES_TO_NAMES = _CompressionAlgorithm_EnumMapFactory::makeValuesToNamesMap();
 const _CompressionAlgorithm_EnumMapFactory::NamesToValuesMapType _CompressionAlgorithm_NAMES_TO_VALUES = _CompressionAlgorithm_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -161,9 +169,11 @@ bool TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>::findValue(char cons
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _RequestRpcMetadataFlags_EnumMapFactory::ValuesToNamesMapType _RequestRpcMetadataFlags_VALUES_TO_NAMES = _RequestRpcMetadataFlags_EnumMapFactory::makeValuesToNamesMap();
 const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcMetadataFlags_NAMES_TO_VALUES = _RequestRpcMetadataFlags_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -192,9 +202,11 @@ bool TEnumTraits<::apache::thrift::InterfaceKind>::findValue(char const* name, t
 }} // apache::thrift
 
 namespace apache { namespace thrift {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _InterfaceKind_EnumMapFactory::ValuesToNamesMapType _InterfaceKind_VALUES_TO_NAMES = _InterfaceKind_EnumMapFactory::makeValuesToNamesMap();
 const _InterfaceKind_EnumMapFactory::NamesToValuesMapType _InterfaceKind_NAMES_TO_VALUES = _InterfaceKind_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }} // apache::thrift
 
@@ -312,6 +324,10 @@ void TccStructTraits<::apache::thrift::StreamPayloadMetadata>::translateFieldNam
   else if (_fname == "compression") {
     fid = 1;
     _ftype = apache::thrift::protocol::T_I32;
+  }
+  else if (_fname == "otherMetadata") {
+    fid = 2;
+    _ftype = apache::thrift::protocol::T_MAP;
   }
 }
 void TccStructTraits<::apache::thrift::RequestSetupMetadata>::translateFieldName(
@@ -935,14 +951,17 @@ template uint32_t ResponseRpcMetadata::serializedSizeZC<>(apache::thrift::Compac
 }} // apache::thrift
 namespace apache { namespace thrift {
 
-StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg) :
-    compression(std::move(compression__arg)) {
+StreamPayloadMetadata::StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg) :
+    compression(std::move(compression__arg)),
+    otherMetadata(std::move(otherMetadata__arg)) {
   __isset.compression = true;
+  __isset.otherMetadata = true;
 }
 
 void StreamPayloadMetadata::__clear() {
   // clear all fields
   compression =  ::apache::thrift::CompressionAlgorithm::NONE;
+  otherMetadata.clear();
   __isset = {};
 }
 
@@ -955,6 +974,14 @@ bool StreamPayloadMetadata::operator==(const StreamPayloadMetadata& rhs) const {
   }
   if (lhs.__isset.compression) {
     if (!(lhs.compression == rhs.compression)) {
+      return false;
+    }
+  }
+  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+    return false;
+  }
+  if (lhs.__isset.otherMetadata) {
+    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
       return false;
     }
   }
@@ -973,13 +1000,30 @@ bool StreamPayloadMetadata::operator<(const StreamPayloadMetadata& rhs) const {
       return lhs.compression < rhs.compression;
     }
   }
+  if (lhs.__isset.otherMetadata != rhs.__isset.otherMetadata) {
+    return lhs.__isset.otherMetadata < rhs.__isset.otherMetadata;
+  }
+  if (lhs.__isset.otherMetadata) {
+    if (!(lhs.otherMetadata == rhs.otherMetadata)) {
+      return lhs.otherMetadata < rhs.otherMetadata;
+    }
+  }
   return false;
+}
+
+const ::std::map<::std::string, ::std::string>* StreamPayloadMetadata::get_otherMetadata() const& {
+  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
+}
+
+::std::map<::std::string, ::std::string>* StreamPayloadMetadata::get_otherMetadata() & {
+  return __isset.otherMetadata ? std::addressof(otherMetadata) : nullptr;
 }
 
 
 void swap(StreamPayloadMetadata& a, StreamPayloadMetadata& b) {
   using ::std::swap;
   swap(a.compression_ref().value_unchecked(), b.compression_ref().value_unchecked());
+  swap(a.otherMetadata_ref().value_unchecked(), b.otherMetadata_ref().value_unchecked());
   swap(a.__isset, b.__isset);
 }
 

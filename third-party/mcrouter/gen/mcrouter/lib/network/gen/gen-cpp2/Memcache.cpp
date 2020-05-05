@@ -29,7 +29,9 @@ folly::Future<facebook::memcache::McGetReply> MemcacheSvIf::future_mcGet(const f
 
 
 void MemcacheSvIf::async_eb_mcGet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetReply>> callback, const facebook::memcache::McGetRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcGet(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcGet(request);
+  });
 }
 
 
@@ -47,7 +49,9 @@ folly::Future<facebook::memcache::McSetReply> MemcacheSvIf::future_mcSet(const f
 
 
 void MemcacheSvIf::async_eb_mcSet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McSetReply>> callback, const facebook::memcache::McSetRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcSet(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcSet(request);
+  });
 }
 
 
@@ -65,7 +69,9 @@ folly::Future<facebook::memcache::McDeleteReply> MemcacheSvIf::future_mcDelete(c
 
 
 void MemcacheSvIf::async_eb_mcDelete(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDeleteReply>> callback, const facebook::memcache::McDeleteRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcDelete(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcDelete(request);
+  });
 }
 
 
@@ -83,7 +89,9 @@ folly::Future<facebook::memcache::McLeaseGetReply> MemcacheSvIf::future_mcLeaseG
 
 
 void MemcacheSvIf::async_eb_mcLeaseGet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseGetReply>> callback, const facebook::memcache::McLeaseGetRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcLeaseGet(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcLeaseGet(request);
+  });
 }
 
 
@@ -101,7 +109,9 @@ folly::Future<facebook::memcache::McLeaseSetReply> MemcacheSvIf::future_mcLeaseS
 
 
 void MemcacheSvIf::async_eb_mcLeaseSet(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McLeaseSetReply>> callback, const facebook::memcache::McLeaseSetRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcLeaseSet(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcLeaseSet(request);
+  });
 }
 
 
@@ -119,7 +129,9 @@ folly::Future<facebook::memcache::McAddReply> MemcacheSvIf::future_mcAdd(const f
 
 
 void MemcacheSvIf::async_eb_mcAdd(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAddReply>> callback, const facebook::memcache::McAddRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcAdd(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcAdd(request);
+  });
 }
 
 
@@ -137,7 +149,9 @@ folly::Future<facebook::memcache::McReplaceReply> MemcacheSvIf::future_mcReplace
 
 
 void MemcacheSvIf::async_eb_mcReplace(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McReplaceReply>> callback, const facebook::memcache::McReplaceRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcReplace(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcReplace(request);
+  });
 }
 
 
@@ -155,7 +169,9 @@ folly::Future<facebook::memcache::McGetsReply> MemcacheSvIf::future_mcGets(const
 
 
 void MemcacheSvIf::async_eb_mcGets(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGetsReply>> callback, const facebook::memcache::McGetsRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcGets(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcGets(request);
+  });
 }
 
 
@@ -173,7 +189,9 @@ folly::Future<facebook::memcache::McCasReply> MemcacheSvIf::future_mcCas(const f
 
 
 void MemcacheSvIf::async_eb_mcCas(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McCasReply>> callback, const facebook::memcache::McCasRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcCas(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcCas(request);
+  });
 }
 
 
@@ -191,7 +209,9 @@ folly::Future<facebook::memcache::McIncrReply> MemcacheSvIf::future_mcIncr(const
 
 
 void MemcacheSvIf::async_eb_mcIncr(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McIncrReply>> callback, const facebook::memcache::McIncrRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcIncr(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcIncr(request);
+  });
 }
 
 
@@ -209,7 +229,9 @@ folly::Future<facebook::memcache::McDecrReply> MemcacheSvIf::future_mcDecr(const
 
 
 void MemcacheSvIf::async_eb_mcDecr(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McDecrReply>> callback, const facebook::memcache::McDecrRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcDecr(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcDecr(request);
+  });
 }
 
 
@@ -227,7 +249,9 @@ folly::Future<facebook::memcache::McMetagetReply> MemcacheSvIf::future_mcMetaget
 
 
 void MemcacheSvIf::async_eb_mcMetaget(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McMetagetReply>> callback, const facebook::memcache::McMetagetRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcMetaget(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcMetaget(request);
+  });
 }
 
 
@@ -245,7 +269,9 @@ folly::Future<facebook::memcache::McAppendReply> MemcacheSvIf::future_mcAppend(c
 
 
 void MemcacheSvIf::async_eb_mcAppend(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McAppendReply>> callback, const facebook::memcache::McAppendRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcAppend(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcAppend(request);
+  });
 }
 
 
@@ -263,7 +289,9 @@ folly::Future<facebook::memcache::McPrependReply> MemcacheSvIf::future_mcPrepend
 
 
 void MemcacheSvIf::async_eb_mcPrepend(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McPrependReply>> callback, const facebook::memcache::McPrependRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcPrepend(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcPrepend(request);
+  });
 }
 
 
@@ -281,7 +309,9 @@ folly::Future<facebook::memcache::McTouchReply> MemcacheSvIf::future_mcTouch(con
 
 
 void MemcacheSvIf::async_eb_mcTouch(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McTouchReply>> callback, const facebook::memcache::McTouchRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcTouch(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcTouch(request);
+  });
 }
 
 
@@ -299,7 +329,9 @@ folly::Future<facebook::memcache::McFlushReReply> MemcacheSvIf::future_mcFlushRe
 
 
 void MemcacheSvIf::async_eb_mcFlushRe(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushReReply>> callback, const facebook::memcache::McFlushReRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcFlushRe(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcFlushRe(request);
+  });
 }
 
 
@@ -317,7 +349,9 @@ folly::Future<facebook::memcache::McFlushAllReply> MemcacheSvIf::future_mcFlushA
 
 
 void MemcacheSvIf::async_eb_mcFlushAll(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McFlushAllReply>> callback, const facebook::memcache::McFlushAllRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcFlushAll(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcFlushAll(request);
+  });
 }
 
 
@@ -335,7 +369,9 @@ folly::Future<facebook::memcache::McGatReply> MemcacheSvIf::future_mcGat(const f
 
 
 void MemcacheSvIf::async_eb_mcGat(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatReply>> callback, const facebook::memcache::McGatRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcGat(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcGat(request);
+  });
 }
 
 
@@ -353,7 +389,9 @@ folly::Future<facebook::memcache::McGatsReply> MemcacheSvIf::future_mcGats(const
 
 
 void MemcacheSvIf::async_eb_mcGats(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McGatsReply>> callback, const facebook::memcache::McGatsRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcGats(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcGats(request);
+  });
 }
 
 
@@ -371,7 +409,9 @@ folly::Future<facebook::memcache::McVersionReply> MemcacheSvIf::future_mcVersion
 
 
 void MemcacheSvIf::async_eb_mcVersion(std::unique_ptr<apache::thrift::HandlerCallback<facebook::memcache::McVersionReply>> callback, const facebook::memcache::McVersionRequest& request) {
-  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable { return future_mcVersion(request); });
+  apache::thrift::detail::si::async_eb(this, std::move(callback), [this, request = std::move(request)]() mutable {
+    return future_mcVersion(request);
+  });
 }
 
 
@@ -383,19 +423,14 @@ void MemcacheAsyncProcessor::getServiceMetadata(apache::thrift::metadata::Thrift
   ::apache::thrift::detail::md::ServiceMetadata<MemcacheSvIf>::gen(response.metadata, response.context);
 }
 
-void MemcacheAsyncProcessor::process(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
-}
-
-bool MemcacheAsyncProcessor::isOnewayMethod(const folly::IOBuf* buf, const apache::thrift::transport::THeader* header) {
-  return apache::thrift::detail::ap::is_oneway_method(buf, header, onewayMethods_);
+void MemcacheAsyncProcessor::processSerializedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
 }
 
 std::shared_ptr<folly::RequestContext> MemcacheAsyncProcessor::getBaseContextForRequest() {
   return iface_->getBaseContextForRequest();
 }
 
-std::unordered_set<std::string> MemcacheAsyncProcessor::onewayMethods_ {};
 const MemcacheAsyncProcessor::ProcessMap& MemcacheAsyncProcessor::getBinaryProtocolProcessMap() {
   return binaryProcessMap_;
 }

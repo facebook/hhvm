@@ -29,7 +29,9 @@ folly::Future<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadata
 
 
 void ThriftMetadataServiceSvIf::async_tm_getThriftServiceMetadata(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr< ::apache::thrift::metadata::ThriftServiceMetadataResponse>>> callback) {
-  apache::thrift::detail::si::async_tm(this, std::move(callback), [&] { return future_getThriftServiceMetadata(); });
+  apache::thrift::detail::si::async_tm(this, std::move(callback), [&] {
+    return future_getThriftServiceMetadata();
+  });
 }
 
 
@@ -43,19 +45,14 @@ void ThriftMetadataServiceAsyncProcessor::getServiceMetadata(apache::thrift::met
   ::apache::thrift::detail::md::ServiceMetadata<ThriftMetadataServiceSvIf>::gen(response.metadata, response.context);
 }
 
-void ThriftMetadataServiceAsyncProcessor::process(apache::thrift::ResponseChannelRequest::UniquePtr req, std::unique_ptr<folly::IOBuf> buf, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
-  apache::thrift::detail::ap::process(this, std::move(req), std::move(buf), protType, context, eb, tm);
-}
-
-bool ThriftMetadataServiceAsyncProcessor::isOnewayMethod(const folly::IOBuf* buf, const apache::thrift::transport::THeader* header) {
-  return apache::thrift::detail::ap::is_oneway_method(buf, header, onewayMethods_);
+void ThriftMetadataServiceAsyncProcessor::processSerializedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
 }
 
 std::shared_ptr<folly::RequestContext> ThriftMetadataServiceAsyncProcessor::getBaseContextForRequest() {
   return iface_->getBaseContextForRequest();
 }
 
-std::unordered_set<std::string> ThriftMetadataServiceAsyncProcessor::onewayMethods_ {};
 const ThriftMetadataServiceAsyncProcessor::ProcessMap& ThriftMetadataServiceAsyncProcessor::getBinaryProtocolProcessMap() {
   return binaryProcessMap_;
 }

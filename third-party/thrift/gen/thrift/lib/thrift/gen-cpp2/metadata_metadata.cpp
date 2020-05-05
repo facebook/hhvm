@@ -25,8 +25,9 @@ void EnumMetadata<::apache::thrift::metadata::ThriftPrimitiveType>::gen(ThriftMe
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "metadata.ThriftPrimitiveType";
-  for (const auto& p : ::apache::thrift::metadata::_ThriftPrimitiveType_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::metadata::ThriftPrimitiveType>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 

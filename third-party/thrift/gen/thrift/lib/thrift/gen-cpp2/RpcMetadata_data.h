@@ -25,16 +25,6 @@ struct _ProtocolIdEnumDataStorage {
   }};
 };
 
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
-  using storage_type = ::apache::thrift::_ProtocolIdEnumDataStorage;
-};
-
-}} // apache::thrift
-namespace apache { namespace thrift {
-
 struct _RpcKindEnumDataStorage {
   using type = RpcKind;
   static constexpr const std::size_t size = 7;
@@ -58,16 +48,6 @@ struct _RpcKindEnumDataStorage {
   }};
 };
 
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
-  using storage_type = ::apache::thrift::_RpcKindEnumDataStorage;
-};
-
-}} // apache::thrift
-namespace apache { namespace thrift {
-
 struct _RpcPriorityEnumDataStorage {
   using type = RpcPriority;
   static constexpr const std::size_t size = 6;
@@ -89,16 +69,6 @@ struct _RpcPriorityEnumDataStorage {
   }};
 };
 
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
-  using storage_type = ::apache::thrift::_RpcPriorityEnumDataStorage;
-};
-
-}} // apache::thrift
-namespace apache { namespace thrift {
-
 struct _CompressionAlgorithmEnumDataStorage {
   using type = CompressionAlgorithm;
   static constexpr const std::size_t size = 3;
@@ -114,16 +84,6 @@ struct _CompressionAlgorithmEnumDataStorage {
   }};
 };
 
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
-  using storage_type = ::apache::thrift::_CompressionAlgorithmEnumDataStorage;
-};
-
-}} // apache::thrift
-namespace apache { namespace thrift {
-
 struct _RequestRpcMetadataFlagsEnumDataStorage {
   using type = RequestRpcMetadataFlags;
   static constexpr const std::size_t size = 2;
@@ -136,16 +96,6 @@ struct _RequestRpcMetadataFlagsEnumDataStorage {
     "QUERY_SERVER_LOAD",
   }};
 };
-
-}} // apache::thrift
-namespace apache { namespace thrift {
-
-template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
-  using storage_type = ::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage;
-};
-
-}} // apache::thrift
-namespace apache { namespace thrift {
 
 struct _InterfaceKindEnumDataStorage {
   using type = InterfaceKind;
@@ -161,11 +111,26 @@ struct _InterfaceKindEnumDataStorage {
 };
 
 }} // apache::thrift
+
 namespace apache { namespace thrift {
 
+template <> struct TEnumDataStorage<::apache::thrift::ProtocolId> {
+  using storage_type = ::apache::thrift::_ProtocolIdEnumDataStorage;
+};
+template <> struct TEnumDataStorage<::apache::thrift::RpcKind> {
+  using storage_type = ::apache::thrift::_RpcKindEnumDataStorage;
+};
+template <> struct TEnumDataStorage<::apache::thrift::RpcPriority> {
+  using storage_type = ::apache::thrift::_RpcPriorityEnumDataStorage;
+};
+template <> struct TEnumDataStorage<::apache::thrift::CompressionAlgorithm> {
+  using storage_type = ::apache::thrift::_CompressionAlgorithmEnumDataStorage;
+};
+template <> struct TEnumDataStorage<::apache::thrift::RequestRpcMetadataFlags> {
+  using storage_type = ::apache::thrift::_RequestRpcMetadataFlagsEnumDataStorage;
+};
 template <> struct TEnumDataStorage<::apache::thrift::InterfaceKind> {
   using storage_type = ::apache::thrift::_InterfaceKindEnumDataStorage;
 };
 
 }} // apache::thrift
-

@@ -387,7 +387,6 @@ pub enum HintValue<'a> {
     Array(&'a (Node_<'a>, Node_<'a>)),
     Varray(&'a Node_<'a>),
     Darray(&'a (Node_<'a>, Node_<'a>)),
-    Mixed,
     Tuple(&'a [Node_<'a>]),
     Shape(&'a ShapeDecl<'a>),
     Nullable(&'a Node_<'a>),
@@ -978,7 +977,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     HintValue::Varray(&inner) => {
                         Ty_::Tvarray(self.node_to_ty(inner, type_variables)?)
                     }
-                    HintValue::Mixed => Ty_::Tmixed,
                     HintValue::Tuple(items) => {
                         let items_iter = items.iter();
                         let mut items = Vec::new_in(self.state.arena);
@@ -1602,7 +1600,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 HintValue::Apply(&*self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
                 token_pos(self),
             ))),
-            TokenKind::Mixed => Node_::Hint(&*self.alloc((HintValue::Mixed, token_pos(self)))),
+            TokenKind::Mixed => Node_::Ty(Ty(
+                self.alloc(Reason::hint(token_pos(self))),
+                self.alloc(Ty_::Tmixed),
+            )),
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),

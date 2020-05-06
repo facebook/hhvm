@@ -5,8 +5,9 @@
 use arena_trait::Arena;
 
 use decl_provider_rust::DeclProvider;
-use oxidized::pos::Pos;
-use oxidized::{local_id, relative_path, typechecker_options};
+use oxidized::pos::Pos as OwnedPos;
+use oxidized::{relative_path, typechecker_options};
+use oxidized_by_ref::pos::Pos;
 
 use crate::typing_env_return_info;
 use crate::typing_make_type::TypeBuilder;
@@ -18,7 +19,7 @@ pub use typing_defs_rust::{Ty, *};
 
 pub struct Env<'a> {
     pub ident_counter: isize,
-    pub function_pos: &'a Pos,
+    pub function_pos: &'a Pos<'a>,
     pub fresh_typarams: SSet<'a>,
     pub lenv: LocalEnv<'a>,
     pub genv: Genv<'a>,
@@ -28,7 +29,8 @@ pub struct Env<'a> {
 }
 
 impl<'a> Env<'a> {
-    pub fn new(function_pos: &'a Pos, genv: Genv<'a>) -> Self {
+    pub fn new<'b>(function_pos: &'b OwnedPos, genv: Genv<'a>) -> Self {
+        let function_pos = Pos::from_oxidized_in(function_pos, genv.builder.alloc);
         Env {
             ident_counter: 0,
             function_pos,
@@ -52,8 +54,12 @@ impl<'a> Env<'a> {
         self.genv.provider
     }
 
-    pub fn set_function_pos(&mut self, pos: &'a Pos) {
-        self.function_pos = pos;
+    pub fn ast_pos(&self, pos: &OwnedPos) -> &'a Pos<'a> {
+        Pos::from_oxidized_with_file_in(pos, self.function_pos.filename(), self.genv.builder.alloc)
+    }
+
+    pub fn set_function_pos(&mut self, pos: &OwnedPos) {
+        self.function_pos = Pos::from_oxidized_in(pos, self.genv.builder.alloc);
     }
 
     pub fn set_return_type(&mut self, ty: Ty<'a>) {
@@ -86,24 +92,6 @@ impl<'a> LocalEnv<'a> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub struct LocalId<'a>(pub isize, pub &'a str);
-
-impl<'a> LocalId<'a> {
-    pub fn make_unscoped(name: &'a str) -> LocalId<'a> {
-        LocalId(0, name)
-    }
-
-    pub fn name(&self) -> &'a str {
-        self.1
-    }
-}
-
-impl<'a> From<&'a local_id::LocalId> for LocalId<'a> {
-    fn from(x: &'a local_id::LocalId) -> LocalId<'a> {
-        let (a, b) = x;
-        LocalId(*a, b.as_str())
-    }
-}
+pub use oxidized_by_ref::local_id::LocalId;
 
 pub type LocalIdMap<'a, V> = Map<'a, LocalId<'a>, V>;

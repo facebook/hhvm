@@ -2013,6 +2013,7 @@ dependencies = [
  "oxidized 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+ "typing_collections_rust 0.0.0",
 ]
 
 [[package]]
@@ -2675,7 +2676,9 @@ dependencies = [
  "im-rc 14.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
  "oxidized 0.0.0",
+ "oxidized_by_ref 0.0.0",
  "typing_collections_rust 0.0.0",
 ]
 

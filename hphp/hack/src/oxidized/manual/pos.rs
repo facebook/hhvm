@@ -126,6 +126,13 @@ impl Pos {
         }
     }
 
+    pub fn to_start_and_end_lnum_bol_cnum(&self) -> ((usize, usize, usize), (usize, usize, usize)) {
+        match &self.0 {
+            Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+        }
+    }
+
     /// For single-line spans only.
     pub fn from_line_cols_offset(
         file: RcOc<RelativePath>,

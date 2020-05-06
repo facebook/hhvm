@@ -6,8 +6,10 @@
 use std::fmt::{self, Display};
 use std::path::{Path, PathBuf};
 
-use ocamlrep::ToOcamlRep;
+use bumpalo::Bump;
 use serde::{Deserialize, Serialize};
+
+use ocamlrep::ToOcamlRep;
 
 pub use oxidized::relative_path::{Prefix, PrefixPathMap};
 
@@ -73,6 +75,19 @@ impl<'a> RelativePath<'a> {
         let mut r = PathBuf::from(prefix);
         r.push(self.path());
         r
+    }
+
+    pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {
+        oxidized::relative_path::RelativePath::make(self.prefix, self.path().to_owned())
+    }
+
+    pub fn from_oxidized_in(
+        path: &oxidized::relative_path::RelativePath,
+        arena: &'a Bump,
+    ) -> &'a Self {
+        let path_str =
+            bumpalo::collections::String::from_str_in(path.path_str(), arena).into_bump_str();
+        arena.alloc(Self::make(path.prefix(), path_str))
     }
 }
 

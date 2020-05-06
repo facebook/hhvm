@@ -44,6 +44,8 @@ let derive_copy ty =
     | "aast::Expr_"
     | "ast_defs::Id"
     | "nast::FuncBodyAnn"
+    | "typing_defs_core::ConstraintType"
+    | "typing_defs_core::InternalType"
     | "typing_defs_core::Ty"
     | "typing_defs_core::Ty_" ->
       true
@@ -64,30 +66,30 @@ let additional_derives ty : (string option * string) list =
   | "typing_inference_env::TypingInferenceEnv" -> [(None, "Default")]
   | _ -> []
 
-let derive_blacklists =
-  [
-    (* A custom implementation of Ord for Error_ matches the sorting behavior of
+let derive_blacklist ty =
+  match ty with
+  (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
-    ("errors::Error_", ["Ord"; "PartialOrd"]);
-    (* GlobalOptions contains a couple floats, which only implement PartialEq
+  | "errors::Error_" -> ["Ord"; "PartialOrd"]
+  (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
-    ("global_options::GlobalOptions", ["Eq"; "Hash"; "Ord"]);
-    (* And GlobalOptions is used in Genv which is used in Env. We
-     * don't care about comparison or hashing on environments *)
-    ("typing_env_types::Env", ["Eq"; "Hash"; "Ord"]);
-    ("typing_env_types::Genv", ["Eq"; "Hash"; "Ord"]);
-  ]
-  |> List.fold ~init:SMap.empty ~f:(fun map (ty, bl) -> SMap.add ty bl map)
+  | "global_options::GlobalOptions" -> ["Eq"; "Hash"; "Ord"]
+  (* And GlobalOptions is used in Genv which is used in Env. We
+   * don't care about comparison or hashing on environments *)
+  | "typing_env_types::Env" -> ["Eq"; "Hash"; "Ord"]
+  | "typing_env_types::Genv" -> ["Eq"; "Hash"; "Ord"]
+  | "typing_defs_core::Ty" when Configuration.by_ref () ->
+    ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+  | "typing_defs_core::ConstraintType" when Configuration.by_ref () ->
+    ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+  | _ -> []
 
 let derived_traits ty =
   let ty = sprintf "%s::%s" (curr_module_name ()) ty in
-  begin
-    match SMap.find_opt ty derive_blacklists with
-    | None -> default_derives ()
-    | Some blacklist ->
-      List.filter (default_derives ()) ~f:(fun (_, derive) ->
-          not (List.mem blacklist derive ~equal:( = )))
-  end
+  let blacklist = derive_blacklist ty in
+  default_derives ()
+  |> List.filter ~f:(fun (_, derive) ->
+         not (List.mem blacklist derive ~equal:( = )))
   |> List.append (additional_derives ty)
 
 let blacklisted_types =
@@ -145,7 +147,7 @@ let unbox_field ty =
   || String.is_prefix ty ~prefix:"&'a "
   || Configuration.by_ref ()
      && ( ty = "oxidized::tany_sentinel::TanySentinel"
-        || ty = "ident::Ident<'a>"
+        || ty = "ident::Ident"
         || ty = "Ty<'a>" )
 
 let add_rcoc = [("aast", "Nsenv")]

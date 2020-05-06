@@ -17,10 +17,11 @@ pub fn union_list<'a>(env: &mut Env<'a>, tys: impl Iterator<Item = Ty<'a>> + 'a)
 pub fn union_list_2_by_2<'a>(
     env: &mut Env<'a>,
     tys: impl Iterator<Item = Ty<'a>> + 'a,
-) -> BVec<'a, Ty<'a>> {
+) -> &'a [Ty<'a>] {
     tys.fold(bumpalo::vec![in env.bld().alloc], |res_tys, ty| {
         union_ty_w_tyl(env, ty, res_tys)
     })
+    .into_bump_slice()
 }
 
 pub fn union_ty_w_tyl<'a>(
@@ -42,7 +43,7 @@ pub fn union_ty_w_tyl<'a>(
     res_tys
 }
 
-pub fn make_union<'a>(env: &mut Env<'a>, tys: BVec<'a, Ty<'a>>) -> Ty<'a> {
+pub fn make_union<'a>(env: &mut Env<'a>, tys: &'a [Ty<'a>]) -> Ty<'a> {
     let bld = env.bld();
     // TODO(hrust) treat null and nonnull properly, build nullable type if necessary...
     // TODO(hrust) build proper like type if necessary

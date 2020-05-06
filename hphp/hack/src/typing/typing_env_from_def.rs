@@ -12,6 +12,7 @@ use crate::typing_env::{empty_global_env, Env};
 use crate::typing_phase;
 use decl_provider_rust as decl_provider;
 use oxidized::ast;
+use oxidized_by_ref::pos::Pos;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_defs_rust::typing_reason::*;
 use typing_defs_rust::Ty_;
@@ -29,11 +30,11 @@ pub fn fun_env<'a>(
     let ty = match provider.get_fun(&f.name.1) {
         None => unimplemented!(),
         Some(f) => {
-            let fty = &f.type_;
+            let fty = f.type_;
             let ety_env = builder.env_with_self();
             let fty = typing_phase::localize(ety_env, &mut env, fty);
             match fty.get_node() {
-                Ty_::Tfun(x) => x.return_,
+                Ty_::Tfun(x) => x.ret.type_,
                 x => unimplemented!("{:#?}", x),
             }
         }
@@ -48,7 +49,7 @@ pub fn stmt_env<'a>(
     s: &'a ast::Stmt,
 ) -> Env<'a> {
     let r = builder.alloc.alloc(PReason_ {
-        pos: Some(&s.0),
+        pos: Some(Pos::from_oxidized_in(&s.0, builder.alloc)),
         reason: Reason::Rhint,
     });
     let rty = builder.void(r);

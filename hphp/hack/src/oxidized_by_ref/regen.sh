@@ -31,12 +31,10 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
-  hphp/hack/src/heap/ident.ml                                                 \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/typing/typing_defs.ml                                         \
   hphp/hack/src/typing/typing_defs_core.ml                                    \
-  hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
 

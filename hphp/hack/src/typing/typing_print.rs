@@ -7,11 +7,6 @@ use crate::Env;
 use ocamlrep::FromOcamlRep;
 use typing_defs_rust::{InternalType, Ty};
 
-extern "C" {
-    fn ocamlpool_enter();
-    fn ocamlpool_leave();
-}
-
 pub fn debug<'a>(_env: &Env<'a>, ty: Ty<'a>) -> String {
     unsafe {
         // TODO(hrust): The OCaml printing funtion uses the environment
@@ -19,9 +14,7 @@ pub fn debug<'a>(_env: &Env<'a>, ty: Ty<'a>) -> String {
         //
         // For now a dummy environment is passed on to the
         // OCaml printing function.
-        ocamlpool_enter();
-        let ocaml_ty = ocamlrep_ocamlpool::add_to_ambient_pool(&ty);
-        ocamlpool_leave();
+        let ocaml_ty = ocamlrep_ocamlpool::to_ocaml(&ty);
 
         let ocaml_debug = ocaml::named_value("typing_print_ffi_debug")
             .expect("typing_print_ffi_debug not registered");
@@ -37,9 +30,7 @@ pub fn debug_i<'a>(_env: &Env<'a>, ity: InternalType<'a>) -> String {
         //
         // For now a dummy environment is passed on to the
         // OCaml printing function.
-        ocamlpool_enter();
-        let ocaml_ity = ocamlrep_ocamlpool::add_to_ambient_pool(ity);
-        ocamlpool_leave();
+        let ocaml_ity = ocamlrep_ocamlpool::to_ocaml(&ity);
 
         let ocaml_debug_i = ocaml::named_value("typing_print_ffi_debug_i")
             .expect("typing_print_ffi_debug_i not registered");

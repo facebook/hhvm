@@ -6,9 +6,9 @@
 use std::{cmp::Ordering, ops::Range, result::Result::*};
 
 use bumpalo::Bump;
-use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
+use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;
 
@@ -124,6 +124,13 @@ impl<'a> Pos<'a> {
                 ));
                 b.alloc(Pos(Large { file, start, end }))
             }
+        }
+    }
+
+    pub fn to_start_and_end_lnum_bol_cnum(&self) -> ((usize, usize, usize), (usize, usize, usize)) {
+        match &self.0 {
+            Small { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
+            Large { start, end, .. } => (start.line_beg_offset(), end.line_beg_offset()),
         }
     }
 
@@ -358,6 +365,46 @@ impl<'a> Pos<'a> {
             Small { start, .. } => start.offset(),
             Large { start, .. } => start.offset(),
         }
+    }
+
+    pub fn to_oxidized(&self) -> oxidized::pos::Pos {
+        match &self.0 {
+            Small { file, start, end } => {
+                let start = start.line_beg_offset();
+                let end = end.line_beg_offset();
+                oxidized::pos::Pos::from_lnum_bol_cnum(
+                    ocamlrep::rc::RcOc::new(file.to_oxidized()),
+                    start,
+                    end,
+                )
+            }
+            Large { file, start, end } => {
+                let start = start.line_beg_offset();
+                let end = end.line_beg_offset();
+                oxidized::pos::Pos::from_lnum_bol_cnum(
+                    ocamlrep::rc::RcOc::new(file.to_oxidized()),
+                    start,
+                    end,
+                )
+            }
+        }
+    }
+
+    pub fn from_oxidized_in(pos: &oxidized::pos::Pos, arena: &'a Bump) -> &'a Self {
+        let file = RelativePath::from_oxidized_in(pos.filename(), arena);
+        let (start, end) = pos.to_start_and_end_lnum_bol_cnum();
+        Self::from_lnum_bol_cnum(arena, file, start, end)
+    }
+
+    pub fn from_oxidized_with_file_in(
+        pos: &oxidized::pos::Pos,
+        file: &'a RelativePath<'a>,
+        arena: &'a Bump,
+    ) -> &'a Self {
+        debug_assert!(pos.filename().prefix() == file.prefix());
+        debug_assert!(pos.filename().path() == file.path());
+        let (start, end) = pos.to_start_and_end_lnum_bol_cnum();
+        Self::from_lnum_bol_cnum(arena, file, start, end)
     }
 }
 

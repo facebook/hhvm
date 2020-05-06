@@ -4,11 +4,10 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typing_env_types::Env;
-use oxidized::decl_defs::Ty as DTy;
-use oxidized::shallow_decl_defs::ShallowMethod;
+use oxidized_by_ref::decl_defs::Ty;
+use oxidized_by_ref::shallow_decl_defs::ShallowMethod;
 
-pub fn member_type<'a>(_env: &Env, member: &'a ShallowMethod) -> &'a DTy {
-    let member_type = &member.type_;
+pub fn member_type<'a>(_env: &Env, member: &'a ShallowMethod<'a>) -> &'a Ty<'a> {
     // TODO(hrust) xhp case
-    member_type
+    &member.type_
 }

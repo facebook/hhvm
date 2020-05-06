@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<98f89a353efc06b400db7cec433ec11c>>
+// @generated SignedSource<<dd94c98d49bdd5f0f29147e2662d2d85>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -358,7 +358,7 @@ pub struct FunParam<'a, Ex, Fb, En, Hi> {
 )]
 pub enum FunVariadicity<'a, Ex, Fb, En, Hi> {
     /// PHP5.6 ...$args finishes the func declaration
-    FVvariadicArg(FunParam<'a, Ex, Fb, En, Hi>),
+    FVvariadicArg(&'a FunParam<'a, Ex, Fb, En, Hi>),
     /// HH ... finishes the declaration; deprecate for ...$args?
     FVellipsis(&'a Pos<'a>),
     /// standard non variadic function
@@ -377,7 +377,7 @@ pub struct Fun_<'a, Ex, Fb, En, Hi> {
     pub tparams: &'a [Tparam<'a, Ex, Fb, En, Hi>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
-    pub params: &'a [FunParam<'a, Ex, Fb, En, Hi>],
+    pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub body: FuncBody<'a, Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
@@ -637,7 +637,7 @@ pub struct Method_<'a, Ex, Fb, En, Hi> {
     pub tparams: &'a [Tparam<'a, Ex, Fb, En, Hi>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
-    pub params: &'a [FunParam<'a, Ex, Fb, En, Hi>],
+    pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub body: FuncBody<'a, Ex, Fb, En, Hi>,
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
@@ -660,7 +660,7 @@ pub struct MethodRedeclaration<'a, Ex, Fb, En, Hi> {
     pub tparams: &'a [Tparam<'a, Ex, Fb, En, Hi>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub variadic: FunVariadicity<'a, Ex, Fb, En, Hi>,
-    pub params: &'a [FunParam<'a, Ex, Fb, En, Hi>],
+    pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub ret: TypeHint<'a, Hi>,
     pub trait_: Hint<'a>,

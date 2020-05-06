@@ -11,7 +11,10 @@ pub use aast::*;
 pub use aast_defs::*;
 pub use ast_defs::*;
 
-type Ex<'a> = (&'a Pos, crate::typing_defs::Ty<'a>);
+type Ex<'a> = (
+    &'a oxidized_by_ref::pos::Pos<'a>,
+    crate::typing_defs::Ty<'a>,
+);
 
 type Fb = crate::typing_defs::FuncBodyAnn;
 

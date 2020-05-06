@@ -187,7 +187,7 @@ fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
     name.trim_start_matches("$")
 }
 
-const TANY: Ty<'_> = Ty(&Reason::Rnone, &Ty_::Tany(TanySentinel));
+const TANY: Ty<'_> = Ty(Reason::none(), &Ty_::Tany(TanySentinel));
 
 fn tany() -> Ty<'static> {
     TANY
@@ -195,7 +195,7 @@ fn tany() -> Ty<'static> {
 
 fn tarraykey<'a>(arena: &'a Bump) -> Ty<'a> {
     Ty(
-        arena.alloc(Reason::Rnone),
+        Reason::none(),
         arena.alloc(Ty_::Tprim(arena.alloc(aast::Tprim::Tarraykey))),
     )
 }
@@ -769,7 +769,7 @@ impl<'a> Node_<'a> {
                         ))],
                 }) => {
                     reactivity_condition_type = Some(Ty(
-                        arena.alloc(Reason::Rhint(*pos)),
+                        arena.alloc(Reason::hint(*pos)),
                         arena.alloc(Ty_::Tapply(arena.alloc((*class_name, &[][..])))),
                     ));
                 }
@@ -897,7 +897,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     ) -> Result<Ty<'a>, ParseError> {
         match node {
             Node_::Hint((hv, pos)) => {
-                let reason = self.alloc(Reason::Rhint(*pos));
+                let reason = self.alloc(Reason::hint(*pos));
                 let ty_ = match hv {
                     HintValue::Void => Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
                     HintValue::Int => Ty_::Tprim(self.alloc(aast::Tprim::Tint)),
@@ -952,7 +952,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                         } else {
                                             class_name_pos
                                         };
-                                        let reason = self.alloc(Reason::Rhint(self_pos));
+                                        let reason = self.alloc(Reason::hint(self_pos));
                                         let ty_ =
                                             Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
                                         Ty(reason, self.alloc(ty_))
@@ -1044,7 +1044,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     HintValue::Closure(hint) => {
                         let mut params = Vec::new_in(self.state.arena);
                         for node in hint.args.iter().copied() {
-                            params.push(FunParam {
+                            params.push(&*self.alloc(FunParam {
                                 pos: node.get_pos(self.state.arena)?,
                                 name: None,
                                 type_: PossiblyEnforcedTy {
@@ -1053,7 +1053,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 },
                                 flags: 0,
                                 rx_annotation: None,
-                            });
+                            }));
                         }
                         let params = params.into_bump_slice();
                         let ret = self.node_to_ty(hint.ret_hint, type_variables)?;
@@ -1074,18 +1074,18 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 Ok(Ty(reason, self.alloc(ty_)))
             }
             Node_::Array(pos) => Ok(Ty(
-                self.alloc(Reason::Rhint(pos)),
+                self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tarray(self.alloc((None, None)))),
             )),
             Node_::Varray(pos) => Ok(Ty(
-                self.alloc(Reason::Rhint(pos)),
+                self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tvarray(tany())),
             )),
             Node_::Darray(pos) => Ok(Ty(
-                self.alloc(Reason::Rhint(pos)),
+                self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tdarray(self.alloc((tany(), tany())))),
             )),
-            Node_::This(pos) => Ok(Ty(self.alloc(Reason::Rhint(pos)), self.alloc(Ty_::Tthis))),
+            Node_::This(pos) => Ok(Ty(self.alloc(Reason::hint(pos)), self.alloc(Ty_::Tthis))),
             Node_::Expr(&expr) => {
                 fn expr_to_ty<'a>(
                     arena: &'a Bump,
@@ -1120,33 +1120,33 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 }
 
                 Ok(Ty(
-                    self.alloc(Reason::Rwitness(expr.0)),
+                    self.alloc(Reason::witness(expr.0)),
                     self.alloc(expr_to_ty(self.state.arena, expr)?),
                 ))
             }
             Node_::IntLiteral(_, pos) => Ok(Ty(
-                self.alloc(Reason::Rwitness(pos)),
+                self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tint))),
             )),
             Node_::FloatingLiteral(_, pos) => Ok(Ty(
-                self.alloc(Reason::Rwitness(pos)),
+                self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tfloat))),
             )),
             Node_::StringLiteral(_, pos) => Ok(Ty(
-                self.alloc(Reason::Rwitness(pos)),
+                self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tstring))),
             )),
             Node_::BooleanLiteral(_, pos) => Ok(Ty(
-                self.alloc(Reason::Rwitness(pos)),
+                self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tbool))),
             )),
             Node_::Null(pos) => Ok(Ty(
-                self.alloc(Reason::Rhint(pos)),
+                self.alloc(Reason::hint(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tnull))),
             )),
             node => {
                 let Id(pos, name) = self.get_name("", node)?;
-                let reason = self.alloc(Reason::Rhint(pos));
+                let reason = self.alloc(Reason::hint(pos));
                 let ty_ = if type_variables.contains(&name) {
                     Ty_::Tgeneric(name)
                 } else {
@@ -1231,7 +1231,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             self.into_variables_list(header.param_list, type_variables)?;
         let type_ = match header.name {
             Node_::Construct(pos) => Ty(
-                self.alloc(Reason::Rwitness(pos)),
+                self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tvoid))),
             ),
             _ => self
@@ -1293,10 +1293,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             flags,
         });
 
-        let ty = Ty(
-            self.alloc(Reason::Rwitness(id.0)),
-            self.alloc(Ty_::Tfun(ft)),
-        );
+        let ty = Ty(self.alloc(Reason::witness(id.0)), self.alloc(Ty_::Tfun(ft)));
         Ok((id, ty, properties))
     }
 
@@ -1380,7 +1377,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if !initializer.is_ignored() {
                                 flags |= typing_defs_flags::FP_FLAGS_HAS_DEFAULT;
                             }
-                            let param = FunParam {
+                            let param = &*self.alloc(FunParam {
                                 pos: id.0,
                                 name: Some(id.1),
                                 type_: PossiblyEnforcedTy {
@@ -1389,7 +1386,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 },
                                 flags,
                                 rx_annotation: None,
-                            };
+                            });
                             arity = match (arity, initializer, variadic) {
                                 (FunArity::Fstandard, Node_::Ignored, false) => {
                                     variables.push(param);
@@ -2949,7 +2946,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         expr: Some(value.as_expr(self.state.arena)?),
                         name: self.get_name("", *name)?,
                         type_: Ty(
-                            self.alloc(Reason::Rwitness(value.get_pos(self.state.arena)?)),
+                            self.alloc(Reason::witness(value.get_pos(self.state.arena)?)),
                             hint.1,
                         ),
                     })

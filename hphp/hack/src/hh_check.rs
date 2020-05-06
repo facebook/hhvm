@@ -41,39 +41,29 @@ struct Opts {
 }
 
 /// DeclProvider for tests - assumes that all the declarations come from a single file
-struct TestDeclProvider {
-    decls: oxidized::direct_decl_parser::Decls,
+struct TestDeclProvider<'a> {
+    decls: &'a oxidized_by_ref::direct_decl_parser::Decls<'a>,
 }
 
-impl TestDeclProvider {
-    fn new(path: &RelativePath, text: &[u8], arena: &Bump) -> Self {
+impl<'a> TestDeclProvider<'a> {
+    fn new(path: &RelativePath, text: &'a [u8], arena: &'a Bump) -> Self {
         let decls = match decl_rust::direct_decl_parser::parse_decls(path.clone(), text, arena) {
             Err(e) => panic!("{:?}", e),
-            Ok(decls) => decls,
+            Ok(decls) => arena.alloc(decls),
         };
-        // We don't have a means of converting oxidized_by_ref types directly
-        // into oxidized types at the moment. However, we can convert them to
-        // OCaml values, and we can convert the OCaml values to owned oxidized
-        // types, so we can perform the conversion as long as we're willing to
-        // pay the overhead of allocating the intermediate OCaml value (which is
-        // acceptable in hh_check for now).
-        let arena = ocamlrep::Arena::new();
-        let ocaml_decls = arena.add(&decls);
-        use ocamlrep::FromOcamlRep;
-        let decls = oxidized::direct_decl_parser::Decls::from_ocamlrep(ocaml_decls).unwrap();
         Self { decls }
     }
 }
 
-impl decl_provider::DeclProvider for TestDeclProvider {
-    fn get_fun(&self, s: &str) -> Option<&decl_provider::FunDecl> {
+impl decl_provider::DeclProvider for TestDeclProvider<'_> {
+    fn get_fun(&self, s: &str) -> Option<&decl_provider::FunDecl<'_>> {
         // Names in function call expressions don't seem to be fully-qualified
         // in hh_check yet.
         // TODO: fix this
         let s = format!("\\{}", s);
         self.decls.funs.get(&*s)
     }
-    fn get_class(&self, name: &str) -> Option<&decl_provider::ClassDecl> {
+    fn get_class(&self, name: &str) -> Option<&decl_provider::ClassDecl<'_>> {
         // Class names in expressions don't seem to be fully-qualified in
         // hh_check yet.
         // TODO: fix this

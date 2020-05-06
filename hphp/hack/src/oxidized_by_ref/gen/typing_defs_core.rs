@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9c3e92bd903c547c111b74df0f7c0fa4>>
+// @generated SignedSource<<4c40d6336ff5b5dd8dbfa021479cef39>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -49,7 +49,7 @@ pub use oxidized::typing_defs_core::ConsistentKind;
 pub enum DependentType<'a> {
     DTthis,
     DTcls(&'a str),
-    DTexpr(ident::Ident<'a>),
+    DTexpr(ident::Ident),
 }
 
 pub use oxidized::typing_defs_core::DestructureKind;
@@ -74,9 +74,7 @@ pub struct WhereConstraint<'a>(
     pub Ty<'a>,
 );
 
-#[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
+#[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::Reason<'a>, pub &'a Ty_<'a>);
 
 /// A shape may specify whether or not fields are required. For example, consider
@@ -179,7 +177,7 @@ pub enum Ty_<'a> {
             nast::shape_map::ShapeMap<'a, ShapeFieldType<'a>>,
         ),
     ),
-    Tvar(ident::Ident<'a>),
+    Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
@@ -290,13 +288,11 @@ pub struct Destructure<'a> {
     pub kind: oxidized::typing_defs_core::DestructureKind,
 }
 
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
-pub struct ConstraintType<'a>(pub reason::Reason<'a>, pub &'a ConstraintType_<'a>);
+#[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
+pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum InternalType<'a> {
     LoclType(Ty<'a>),
@@ -362,7 +358,7 @@ pub enum FunArity<'a> {
     Fstandard,
     /// PHP5.6-style ...$args finishes the func declaration.
     /// min ; variadic param type
-    Fvariadic(FunParam<'a>),
+    Fvariadic(&'a FunParam<'a>),
 }
 
 #[derive(
@@ -393,4 +389,4 @@ pub struct FunParam<'a> {
     pub flags: isize,
 }
 
-pub type FunParams<'a> = &'a [FunParam<'a>];
+pub type FunParams<'a> = &'a [&'a FunParam<'a>];

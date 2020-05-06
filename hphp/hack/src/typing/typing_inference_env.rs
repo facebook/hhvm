@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 use arena_trait::Arena;
 
-use oxidized::aast;
-use oxidized::ident::Ident;
-use oxidized::pos::Pos;
+use oxidized_by_ref::aast;
+use oxidized_by_ref::ident::Ident;
+use oxidized_by_ref::pos::Pos;
 
 use typing_collections_rust::*;
 use typing_defs_rust::typing_make_type::TypeBuilder;
@@ -27,13 +27,13 @@ pub struct TyvarConstraints_<'a> {
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: SMap<'a, (&'a aast::Sid, Ty<'a>)>,
+    pub type_constants: SMap<'a, (&'a aast::Sid<'a>, Ty<'a>)>,
     /// Map associating PU information to each instance of
     /// #v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.
-    pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid, Ty<'a>, &'a aast::Sid)>,
+    pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid<'a>, Ty<'a>, &'a aast::Sid<'a>)>,
 }
 
 impl<'a> TyvarConstraints_<'a> {
@@ -101,7 +101,7 @@ pub struct TyvarInfo_<'a> {
     pub bld: &'a TypeBuilder<'a>,
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
-    pub tyvar_pos: Option<&'a Pos>,
+    pub tyvar_pos: Option<&'a Pos<'a>>,
     pub global_reason: Option<PReason<'a>>,
     pub eager_solve_failed: bool,
     pub solving_info: SolvingInfo<'a>,
@@ -122,7 +122,7 @@ pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
 pub struct InferenceEnv<'a> {
     pub bld: &'a TypeBuilder<'a>,
     pub tvenv: Tvenv<'a>,
-    pub tyvars_stack: Vec<'a, (&'a Pos, Vec<'a, Ident>)>,
+    pub tyvars_stack: Vec<'a, (&'a Pos<'a>, Vec<'a, Ident>)>,
     pub allow_solve_globals: bool,
     var_id_counter: Ident,
 }
@@ -146,12 +146,12 @@ impl<'a> InferenceEnv<'a> {
 
     pub fn expand_internal_type(&mut self, ty: InternalType<'a>) -> InternalType<'a> {
         match ty {
-            InternalType_::LoclType(ty) => {
-                let ty = self.expand_type(*ty);
-                let ty = InternalType_::LoclType(ty);
-                self.bld.alloc(ty)
+            InternalType::LoclType(ty) => {
+                let ty = self.expand_type(ty);
+                let ty = InternalType::LoclType(ty);
+                ty
             }
-            InternalType_::ConstraintType(_) => ty,
+            InternalType::ConstraintType(_) => ty,
         }
     }
 

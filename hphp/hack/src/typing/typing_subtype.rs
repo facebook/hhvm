@@ -8,8 +8,8 @@ use crate::typing_phase::localize;
 use arena_trait::Arena;
 use bumpalo::collections::Vec as BVec;
 use itertools::*;
-use oxidized::ast;
-use oxidized::ident::Ident;
+use oxidized_by_ref::ast;
+use oxidized_by_ref::ident::Ident;
 use typing_collections_rust::{SMap, Vec};
 use typing_defs_rust::{avec, Ty};
 
@@ -55,9 +55,9 @@ fn simplify_subtype_i<'a>(
     // This doesn't correspond to the pattern match order used in the OCaml
     // TODO(hrust): when we are dealing with more types, refactor this so that it does correspond
     match (ty_sub, ty_super) {
-        (InternalType_::LoclType(ty_sub), InternalType_::LoclType(ty_super)) => {
-            let ty_sub = env.inference_env.expand_type(*ty_sub);
-            let ty_super = env.inference_env.expand_type(*ty_super);
+        (InternalType::LoclType(ty_sub), InternalType::LoclType(ty_super)) => {
+            let ty_sub = env.inference_env.expand_type(ty_sub);
+            let ty_super = env.inference_env.expand_type(ty_super);
             match (ty_sub.get_node(), ty_super.get_node()) {
                 (Ty_::Tvar(_), _) | (_, Ty_::Tvar(_)) => default(),
                 (Ty_::Tprim(p1), Ty_::Tprim(p2)) => match (p1, p2) {
@@ -84,8 +84,8 @@ fn simplify_subtype_i<'a>(
                     }
                 }
                 (
-                    Ty_::Tclass(x_sub, exact_sub, tyl_sub),
-                    Ty_::Tclass(x_super, exact_super, tyl_super),
+                    Ty_::Tclass((x_sub, exact_sub, tyl_sub)),
+                    Ty_::Tclass((x_super, exact_super, tyl_super)),
                 ) => {
                     let exact_match = match (exact_sub, exact_super) {
                         (Exact::Nonexact, Exact::Exact) => false,
@@ -105,7 +105,7 @@ fn simplify_subtype_i<'a>(
                             match class_def_sub {
                                 None => invalid(),
                                 Some(cd) => {
-                                    simplify_subtype_variance(env, &cd.tparams, tyl_sub, tyl_super)
+                                    simplify_subtype_variance(env, cd.tparams, tyl_sub, tyl_super)
                                 }
                             }
                         }
@@ -133,7 +133,7 @@ fn simplify_subtype_i<'a>(
                                     // the extends/implements relation, so that we can instead
                                     // query if classish C inherits from classish D
                                     let mut props = BVec::new_in(env.bld().alloc);
-                                    for ty in cd.extends.iter().chain(cd.implements.iter()) {
+                                    for &ty in cd.extends.iter().chain(cd.implements.iter()) {
                                         let up_obj = localize(ety_env, env, ty);
                                         let prop = simplify_subtype(env, up_obj, ty_super);
                                         if prop.is_valid() {
@@ -147,10 +147,10 @@ fn simplify_subtype_i<'a>(
                         }
                     }
                 }
-                (Ty_::Tclass(_, _, _), Ty_::Tprim(_)) => invalid(),
-                (Ty_::Tprim(_), Ty_::Tclass(_, _, _)) => invalid(),
-                (Ty_::Tclass(_, _, _), Ty_::Tgeneric(_)) => invalid(),
-                (Ty_::Tgeneric(_), Ty_::Tclass(_, _, _)) => invalid(),
+                (Ty_::Tclass(..), Ty_::Tprim(..)) => invalid(),
+                (Ty_::Tprim(..), Ty_::Tclass(..)) => invalid(),
+                (Ty_::Tclass(..), Ty_::Tgeneric(..)) => invalid(),
+                (Ty_::Tgeneric(..), Ty_::Tclass(..)) => invalid(),
 
                 _ => default(),
             }
@@ -161,9 +161,9 @@ fn simplify_subtype_i<'a>(
 
 fn simplify_subtype_variance<'a>(
     env: &mut Env<'a>,
-    tparaml: &std::vec::Vec<oxidized::typing_defs::Tparam>,
-    children_tyl: &'a Vec<Ty<'a>>,
-    super_tyl: &'a Vec<Ty<'a>>,
+    tparaml: &[oxidized_by_ref::typing_defs::Tparam],
+    children_tyl: &'a [Ty<'a>],
+    super_tyl: &'a [Ty<'a>],
 ) -> SubtypeProp<'a> {
     // Collect propositions in an arena-allocated vector
     let mut props = BVec::new_in(env.bld().alloc);
@@ -238,7 +238,7 @@ fn prop_to_env_<'a>(
 ) {
     use SubtypePropEnum as SP;
     match prop {
-        SP::IsSubtype(ty_sub, ty_super) => match (ty_sub.get_var(), ty_super.get_var()) {
+        &SP::IsSubtype(ty_sub, ty_super) => match (ty_sub.get_var(), ty_super.get_var()) {
             (Some(var_sub), Some(var_super)) => {
                 let prop = env.bld().valid();
                 let prop = add_tyvar_upper_bound_and_close(env, prop, var_sub, ty_super);
@@ -294,9 +294,9 @@ fn add_tyvar_upper_bound_and_close<'a>(
     let lower_bounds = env.inference_env.get_lower_bounds(v);
     added_upper_bounds
         .into_iter()
-        .fold(prop, |prop, upper_bound| {
+        .fold(prop, |prop, &upper_bound| {
             // TODO(hrust) make all type consts and pu equal
-            lower_bounds.into_iter().fold(prop, |prop, lower_bound| {
+            lower_bounds.into_iter().fold(prop, |prop, &lower_bound| {
                 simplify_subtype_i(env, lower_bound, upper_bound).conj(env.bld().alloc, prop)
             })
         })
@@ -316,9 +316,9 @@ fn add_tyvar_lower_bound_and_close<'a>(
     let upper_bounds = env.inference_env.get_upper_bounds(v);
     added_lower_bounds
         .into_iter()
-        .fold(prop, |prop, lower_bound| {
+        .fold(prop, |prop, &lower_bound| {
             // TODO(hrust) make all type consts and pu equal
-            upper_bounds.into_iter().fold(prop, |prop, upper_bound| {
+            upper_bounds.into_iter().fold(prop, |prop, &upper_bound| {
                 simplify_subtype_i(env, upper_bound, lower_bound).conj(env.bld().alloc, prop)
             })
         })

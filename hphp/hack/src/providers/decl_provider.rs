@@ -6,12 +6,10 @@
 // In Ocaml, providers return Typing_defs.fun_elt, and Shallow_decl_defs.fun_elt is an alias to it, so
 // this signature is accurate. In case of class declarations, Typing_defs.class_type is a separate type, which
 // folds many shallow class declarations into one. We don't have this type / logic in Rust yet.
-
-// TODO: We should probably use oxidized_by_ref here.
-pub type FunDecl = oxidized::shallow_decl_defs::FunElt;
-pub type ClassDecl = oxidized::shallow_decl_defs::ShallowClass;
+pub type FunDecl<'a> = oxidized_by_ref::shallow_decl_defs::FunElt<'a>;
+pub type ClassDecl<'a> = oxidized_by_ref::shallow_decl_defs::ShallowClass<'a>;
 
 pub trait DeclProvider {
-    fn get_fun(&self, s: &str) -> Option<&FunDecl>;
-    fn get_class(&self, s: &str) -> Option<&ClassDecl>;
+    fn get_fun(&self, s: &str) -> Option<&FunDecl<'_>>;
+    fn get_class(&self, s: &str) -> Option<&ClassDecl<'_>>;
 }

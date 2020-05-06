@@ -2,25 +2,21 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use arena_trait::Arena;
+
 use bumpalo::collections::Vec as BVec;
 
 use crate::typing_env_types::Env;
 use decl_rust::decl_subst as subst;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
-use oxidized::aast_defs::{Sid, Tprim};
 use oxidized::ast;
-use oxidized::ast_defs::Id;
-use oxidized::pos::Pos;
-use oxidized::typing_defs_core::{
-    FunParam as DFunParam, FunParams as DFunParams, FunType as DFunType, Tparam as DTparam,
-    Ty as DTy, Ty_ as DTy_,
-};
+use oxidized::ast_defs::Id as OwnedId;
+use oxidized::pos::Pos as OwnedPos;
+use oxidized_by_ref::ast_defs::Id;
+use oxidized_by_ref::pos::Pos;
 use typing_defs_rust::tast;
 use typing_defs_rust::typing_defs::ExpandEnv;
-use typing_defs_rust::typing_defs_core::{FunParam, FunType, PrimKind, Ty};
-use typing_defs_rust::typing_reason::PReason_;
+use typing_defs_rust::typing_defs_core::{FunParam, FunParams, FunType, Tparam, Ty, Ty_};
 
 /// Transforms a declaration phase type into a localized type. This performs
 /// common operations that are necessary for this operation, specifically:
@@ -32,14 +28,13 @@ use typing_defs_rust::typing_reason::PReason_;
 /// When keep track of additional information while localizing a type such as
 /// what type defs were expanded to detect potentially recursive definitions..
 
-pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: &'a DTy) -> Ty<'a> {
+pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: Ty<'a>) -> Ty<'a> {
     let bld = env.builder();
-    let DTy(r0, dty) = dty;
-    let r = bld.alloc(PReason_::from(r0));
-    match &**dty {
-        DTy_::Tprim(p) => bld.prim(r, localize_prim(env, p)),
+    let Ty(r, dty) = dty;
+    match dty {
+        Ty_::Tprim(p) => bld.prim(r, (*p).clone()),
         // TODO(hrust) missing matches
-        DTy_::Tgeneric(name) => match ety_env.substs.find(&&name[..]) {
+        Ty_::Tgeneric(name) => match ety_env.substs.find(&&name[..]) {
             None => bld.generic(r, &name),
             Some(ty) => {
                 let ty = env.inference_env.expand_type(ty);
@@ -48,20 +43,22 @@ pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: &'a DTy
             }
         },
         // TODO(hrust) missing matches
-        DTy_::Tapply(cls, tys) => {
+        Ty_::Tapply(&(cls, tys)) => {
             let Id(_, cls_name) = cls;
             let tys = match env.genv.provider.get_class(&cls_name) {
-                None => bld.vec_from_iter(tys.iter().map(|ty: &'a DTy| localize(ety_env, env, ty))),
+                None => {
+                    bld.slice_from_iter(tys.iter().copied().map(|ty| localize(ety_env, env, ty)))
+                }
                 Some(class_info) => {
                     // TODO(hrust) global inference logic
                     // TODO(hrust) will the `unwrap` below panic?
                     // Assumption: r is always Rhint or at least always has a pos
-                    localize_tparams(ety_env, env, r.pos.unwrap(), tys, &class_info.tparams)
+                    localize_tparams(ety_env, env, r.pos.unwrap(), tys, class_info.tparams)
                 }
             };
-            bld.class(r, &cls, tys)
+            bld.class(r, cls, tys)
         }
-        DTy_::Tfun(ft) => {
+        Ty_::Tfun(ft) => {
             let instantiation = None;
             let ft = localize_ft(ety_env, env, ft, instantiation);
             bld.fun(r, ft)
@@ -81,9 +78,9 @@ pub fn localize<'a>(ety_env: &mut ExpandEnv<'a>, env: &mut Env<'a>, dty: &'a DTy
 /// (for the use-site) and `use_name` (the name of the constructor or function).
 pub fn localize_targs<'a>(
     env: &mut Env<'a>,
-    use_pos: &'a Pos,
+    use_pos: &'a OwnedPos,
     use_name: &'a str,
-    tparams: &'a [DTparam],
+    tparams: &'a [Tparam<'a>],
     targs: &[ast::Targ],
 ) -> Vec<tast::Targ<'a>> {
     if targs.len() != 0 {
@@ -96,7 +93,7 @@ pub fn localize_targs<'a>(
         let tvar = env
             .inference_env
             .fresh_type_reason(env.bld().mk_rtype_variable_generics(
-                use_pos,
+                Pos::from_oxidized_in(use_pos, env.bld().alloc),
                 tparam.name.name(),
                 use_name,
             ));
@@ -106,7 +103,7 @@ pub fn localize_targs<'a>(
             Hint(
                 use_pos.clone(),
                 Box::new(Hint_::Happly(
-                    Id(Pos::make_none(), typehints::WILDCARD.to_string()),
+                    OwnedId(OwnedPos::make_none(), typehints::WILDCARD.to_string()),
                     vec![],
                 )),
             ),
@@ -116,26 +113,10 @@ pub fn localize_targs<'a>(
     explicit_targs.chain(implicit_targs).collect()
 }
 
-fn localize_prim<'a>(_env: &mut Env<'a>, prim: &Tprim) -> PrimKind<'a> {
-    match prim {
-        Tprim::Tnull => PrimKind::Tnull,
-        Tprim::Tvoid => PrimKind::Tvoid,
-        Tprim::Tint => PrimKind::Tint,
-        Tprim::Tbool => PrimKind::Tbool,
-        Tprim::Tfloat => PrimKind::Tfloat,
-        Tprim::Tstring => PrimKind::Tstring,
-        Tprim::Tresource => PrimKind::Tresource,
-        Tprim::Tnum => PrimKind::Tnum,
-        Tprim::Tarraykey => PrimKind::Tarraykey,
-        Tprim::Tnoreturn => PrimKind::Tnoreturn,
-        Tprim::Tatom(_s) => panic!("Tatom NYI"),
-    }
-}
-
 pub struct MethodInstantiation<'a: 'b, 'b> {
     /// position of the method call
     #[allow(dead_code)]
-    pub use_pos: &'b Pos,
+    pub use_pos: &'b OwnedPos,
     /// name of the method
     #[allow(dead_code)]
     pub use_name: &'b str,
@@ -145,9 +126,9 @@ pub struct MethodInstantiation<'a: 'b, 'b> {
 pub fn localize_ft<'a, 'b>(
     ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
-    ft: &'a DFunType,
+    ft: &'a FunType,
     instantiation: Option<MethodInstantiation<'a, 'b>>,
-) -> FunType<'a> {
+) -> &'a FunType<'a> {
     // TODO(hrust) rx stuff
     match instantiation {
         Some(MethodInstantiation {
@@ -174,25 +155,25 @@ pub fn localize_ft<'a, 'b>(
        - arity
     */
     let params = localize_funparams(ety_env, env, &ft.params);
-    let ret = localize(ety_env, env, &ft.ret.type_);
+    let ret = localize(ety_env, env, ft.ret.type_);
     env.bld().funtype(params, ret)
 }
 
 fn localize_funparams<'a>(
     ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
-    params: &'a DFunParams,
-) -> BVec<'a, FunParam<'a>> {
+    params: &'a FunParams,
+) -> &'a [&'a FunParam<'a>] {
     env.bld()
-        .vec_from_iter(params.iter().map(|ty| localize_funparam(ety_env, env, ty)))
+        .slice_from_iter(params.iter().map(|ty| localize_funparam(ety_env, env, ty)))
 }
 
 fn localize_funparam<'a>(
     ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
-    param: &'a DFunParam,
-) -> FunParam<'a> {
-    let type_ = &param.type_.type_;
+    param: &'a FunParam,
+) -> &'a FunParam<'a> {
+    let type_ = param.type_.type_;
     let type_ = localize(ety_env, env, type_);
     env.bld().funparam(type_)
 }
@@ -201,13 +182,14 @@ fn localize_tparams<'a>(
     ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
     pos: &Pos,
-    tys: &'a Vec<DTy>,
-    tparams: &Vec<DTparam>,
-) -> BVec<'a, Ty<'a>> {
+    tys: &[Ty<'a>],
+    tparams: &[Tparam<'a>],
+) -> &'a [Ty<'a>] {
     let bld = env.builder();
     let length = std::cmp::min(tys.len(), tparams.len());
-    bld.vec_from_iter(
+    bld.slice_from_iter(
         tys.iter()
+            .cloned()
             .take(length)
             .zip(tparams.iter().take(length))
             .map(|(ty, tparam)| localize_tparam(ety_env, env, pos, ty, tparam)),
@@ -218,8 +200,8 @@ fn localize_tparam<'a>(
     ety_env: &mut ExpandEnv<'a>,
     env: &mut Env<'a>,
     _pos: &Pos,
-    ty: &'a DTy,
-    _tparam: &DTparam,
+    ty: Ty<'a>,
+    _tparam: &Tparam,
 ) -> Ty<'a> {
     // TODO(hrust) wildcard case
     localize(ety_env, env, ty)
@@ -228,20 +210,22 @@ fn localize_tparam<'a>(
 pub fn resolve_type_arguments_and_check_constraints<'a>(
     env: &mut Env<'a>,
     check_constraints: bool,
-    use_pos: &'a Pos,
-    cid: &'a Sid,
+    use_pos: &'a OwnedPos,
+    cid: &'a OwnedId,
     _class_id: &ast::ClassId,
-    tparams: &'a Vec<DTparam>,
-    targs: &Vec<ast::Targ>,
+    tparams: &'a [Tparam<'a>],
+    targs: &[ast::Targ],
 ) -> (Ty<'a>, Vec<tast::Targ<'a>>) {
     // TODO(hrust) strip_ns of cid.name()
     let targs = localize_targs(env, use_pos, cid.name(), tparams, targs);
     let targs_tys = BVec::from_iter_in(
         targs.iter().map(|targ| targ.annot()).copied(),
         env.bld().alloc,
-    );
+    )
+    .into_bump_slice();
     let this_ty = {
-        let r = env.bld().mk_rwitness(cid.pos());
+        let r = env.bld().mk_rwitness(env.ast_pos(cid.pos()));
+        let cid = Id(env.ast_pos(cid.pos()), cid.name());
         env.bld().class(r, cid, targs_tys)
     };
     if check_constraints {

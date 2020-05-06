@@ -14,12 +14,11 @@ use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
-use oxidized::aast_defs::Sid;
-use oxidized::shallow_decl_defs::ShallowClass;
-use oxidized::typing_defs_core::Ty_ as DTy_;
-use oxidized::{aast, aast_defs, ast, ast_defs, local_id, pos::Pos};
+use oxidized::{aast, aast_defs, ast, ast_defs};
+use oxidized_by_ref::aast_defs::Sid;
+use oxidized_by_ref::shallow_decl_defs::ShallowClass;
+use oxidized_by_ref::{local_id, pos::Pos};
 use typing_ast_rust::typing_inference_env::IntoUnionIntersectionIterator;
-use typing_defs_rust::typing_reason::PReason_;
 use typing_defs_rust::{tast, ExpandEnv, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 
 pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
@@ -88,6 +87,7 @@ fn markup<'a>(s: &ast::Pstring) -> tast::Stmt_<'a> {
 }
 
 fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'a> {
+    let pos = env.ast_pos(pos);
     let (ty, e) = match e {
         ast::Expr_::True => {
             let ty = env.bld().bool(env.bld().mk_rwitness(pos));
@@ -191,13 +191,13 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
             // TODO(hrust) might_throw
             let (class_id, targs, args, unpacked_arg, ty, ctor_fty) = new_object(
                 env,
-                class_id.annot(),
+                env.ast_pos(class_id.annot()),
                 class_id,
                 explicit_targs,
                 args,
                 unpacked_arg,
             );
-            let ctor_annot = (ctor_pos, ctor_fty);
+            let ctor_annot = (env.ast_pos(ctor_pos), ctor_fty);
             (
                 ty,
                 tast::Expr_::New(Box::new((class_id, targs, args, unpacked_arg, ctor_annot))),
@@ -206,17 +206,17 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
         x => unimplemented!("{:#?}", x),
     };
     // TODO(hrust) set_tyvar_variance
-    ast::Expr((&pos, ty), e)
+    ast::Expr((pos, ty), e)
 }
 
 fn check_call<'a>(
     env: &mut Env<'a>,
-    pos: &Pos,
+    pos: &Pos<'a>,
     call_type: &ast::CallType,
     e: &'a ast::Expr,
-    explicit_targs: &Vec<ast::Targ>,
-    el: &'a Vec<ast::Expr>,
-    unpacked_element: &Option<ast::Expr>,
+    explicit_targs: &'a [ast::Targ],
+    el: &'a [ast::Expr],
+    unpacked_element: &'a Option<ast::Expr>,
     in_suspend: bool,
 ) -> (Ty<'a>, tast::Expr_<'a>) {
     dispatch_call(
@@ -234,12 +234,12 @@ fn check_call<'a>(
 
 fn dispatch_call<'a>(
     env: &mut Env<'a>,
-    pos: &Pos,
+    pos: &Pos<'a>,
     call_type: &ast::CallType,
     ast::Expr(fpos, fun_expr): &'a ast::Expr,
-    explicit_targs: &Vec<ast::Targ>,
-    args: &'a Vec<ast::Expr>,
-    unpacked_arg: &Option<ast::Expr>,
+    explicit_targs: &'a [ast::Targ],
+    args: &'a [ast::Expr],
+    unpacked_arg: &'a Option<ast::Expr>,
     _in_suspend: bool,
 ) -> (Ty<'a>, tast::Expr_<'a>) {
     match fun_expr {
@@ -248,7 +248,7 @@ fn dispatch_call<'a>(
             let (args, unpacked_arg, return_ty) = call(env, pos, function_ty, args, unpacked_arg);
             // TODO(hrust) reactivity stuff
             let fun_expr = tast::Expr(
-                (fpos, function_ty),
+                (env.ast_pos(fpos), function_ty),
                 tast::Expr_::Id(Box::new(typing_naming::canonicalize(x))),
             );
             (
@@ -278,11 +278,11 @@ fn dispatch_call<'a>(
                     let (args, unpacked_arg, return_ty) =
                         call(env, pos, function_ty, args, unpacked_arg);
                     let method_id = tast::Expr(
-                        (pos_method_id, function_ty),
+                        (env.ast_pos(pos_method_id), function_ty),
                         tast::Expr_::Id(method_id_.clone()),
                     );
                     let fun_expr = tast::Expr(
-                        (fpos, function_ty),
+                        (env.ast_pos(fpos), function_ty),
                         tast::Expr_::ObjGet(Box::new((receiver, method_id, nullflavor.clone()))),
                     );
                     (
@@ -306,19 +306,19 @@ fn dispatch_call<'a>(
 fn fun_type_of_id<'a>(
     env: &mut Env<'a>,
     ast::Id(pos, id): &'a ast::Sid,
-    targs: &Vec<ast::Targ>,
-    _el: &'a Vec<ast::Expr>,
+    targs: &'a [ast::Targ],
+    _el: &'a [ast::Expr],
 ) -> (Ty<'a>, Vec<tast::Targ<'a>>) {
     let bld = env.builder();
     match env.provider().get_fun(id) {
         None => unimplemented!(),
         Some(f) => {
             match f.type_.get_node() {
-                DTy_::Tfun(ft) => {
+                Ty_::Tfun(ft) => {
                     // TODO(hrust) transform_special_fun_ty
                     let ety_env = bld.env_with_self();
                     // TODO(hrust) below: strip_ns id
-                    let targs = typing_phase::localize_targs(env, pos, id, &ft.tparams, targs);
+                    let targs = typing_phase::localize_targs(env, pos, id, ft.tparams, targs);
                     // TODO(hrust) pessimize
                     let instantiation = MethodInstantiation {
                         use_pos: pos,
@@ -326,7 +326,7 @@ fn fun_type_of_id<'a>(
                         explicit_targs: &targs,
                     };
                     let ft = typing_phase::localize_ft(ety_env, env, ft, Some(instantiation));
-                    let fty = bld.fun(bld.alloc(PReason_::from(f.type_.get_reason())), ft);
+                    let fty = bld.fun(f.type_.get_reason(), ft);
                     // TODO(hrust) check deprecated
                     (fty, targs)
                 }
@@ -338,9 +338,9 @@ fn fun_type_of_id<'a>(
 
 fn call<'a>(
     env: &mut Env<'a>,
-    _pos: &Pos,
+    _pos: &Pos<'a>,
     fty: Ty<'a>,
-    el: &'a Vec<ast::Expr>,
+    el: &'a [ast::Expr],
     unpacked_arg: &Option<ast::Expr>,
 ) -> (Vec<tast::Expr<'a>>, Option<tast::Expr<'a>>, Ty<'a>) {
     // TODO(hrust) missing bits
@@ -349,7 +349,7 @@ fn call<'a>(
             // TODO(hrust) retype magic fun, variadic param, expected ty, set tyvar variance
             let tel = el
                 .iter()
-                .zip(&ft.params)
+                .zip(ft.params)
                 .map(|(e, param)| check_arg(env, e, param))
                 .collect();
             // TODO(hrust) rx check_call
@@ -358,7 +358,7 @@ fn call<'a>(
                 Some(_) => unimplemented!(),
             };
             // TODO(hrust) arity, inout, rx adjusted return
-            (tel, unpacked_arg, ft.return_)
+            (tel, unpacked_arg, ft.ret.type_)
         }
         x => unimplemented!("{:#?}", x),
     }
@@ -373,7 +373,7 @@ fn check_arg<'a>(env: &mut Env<'a>, e: &'a ast::Expr, param: &FunParam<'a>) -> t
 
 fn call_param<'a>(env: &mut Env<'a>, te: &tast::Expr<'a>, param: &FunParam<'a>) -> () {
     // TODO(hrust) param_modes, dep_ty, coercion
-    typing_subtype::sub_type(env, (te.0).1, param.type_);
+    typing_subtype::sub_type(env, (te.0).1, param.type_.type_);
 }
 
 #[allow(dead_code)]
@@ -390,7 +390,7 @@ fn bind_param<'a>(env: &mut Env<'a>, ty1: Ty<'a>, param: &'a ast::FunParam) -> t
         vec![]
     };
     let tparam = tast::FunParam {
-        annotation: (&param.pos, ty1),
+        annotation: (env.ast_pos(&param.pos), ty1),
         type_hint: ast::TypeHint(ty1, param.type_hint.get_hint().clone()),
         is_variadic: param.is_variadic,
         pos: param.pos.clone(),
@@ -402,7 +402,7 @@ fn bind_param<'a>(env: &mut Env<'a>, ty1: Ty<'a>, param: &'a ast::FunParam) -> t
     };
     // TODO(hrust): add type to locals env
     let mode = ParamMode::from(param.callconv);
-    let id = LocalId::make_unscoped(&param.name);
+    let id = LocalId::new_unscoped_in(&param.name);
     env.set_param(id, (ty1, mode));
     // TODO(hrust): has_accept_disposable_attribute
     // TODO(hrust): mutability
@@ -417,8 +417,9 @@ fn assign<'a>(
 ) -> tast::Expr<'a> {
     match e1 {
         ast::Expr_::Lvar(id) => {
+            let pos1 = env.ast_pos(pos1);
             let aast_defs::Lid(_, x) = id.as_ref();
-            set_valid_rvalue(env, pos1, x, ty2);
+            set_valid_rvalue(env, pos1, x.into(), ty2);
             // TODO(hrust): set_tyvar_variance
             tast::Expr((pos1, ty2), tast::Expr_::Lvar(id.clone()))
         }
@@ -426,17 +427,17 @@ fn assign<'a>(
     }
 }
 
-fn set_valid_rvalue<'a>(env: &mut Env<'a>, p: &'a Pos, x: &'a local_id::LocalId, ty: Ty<'a>) {
+fn set_valid_rvalue<'a>(env: &mut Env<'a>, p: &'a Pos, x: local_id::LocalId<'a>, ty: Ty<'a>) {
     set_local(env, p, x, ty);
     // We are assigning a new value to the local variable, so we need to
     // generate a new expression id
     let id = env.ident();
-    env.set_local_expr_id(x.into(), id);
+    env.set_local_expr_id(x, id);
 }
 
-fn set_local<'a>(env: &mut Env<'a>, _p: &'a Pos, x: &'a local_id::LocalId, ty: Ty<'a>) {
+fn set_local<'a>(env: &mut Env<'a>, _p: &'a Pos, x: local_id::LocalId<'a>, ty: Ty<'a>) {
     // TODO(hrust): is_using_var
-    env.set_local(x.into(), ty)
+    env.set_local(x, ty)
 }
 
 fn new_object<'a>(
@@ -445,7 +446,7 @@ fn new_object<'a>(
     class_id: &'a ast::ClassId,
     targs: &'a Vec<ast::Targ>,
     args: &'a Vec<ast::Expr>,
-    unpacked_arg: &'a Option<ast::Expr>,
+    unpacked_arg: &Option<ast::Expr>,
 ) -> (
     tast::ClassId<'a>,
     Vec<tast::Targ<'a>>,
@@ -495,15 +496,15 @@ fn new_object<'a>(
 fn call_construct<'a>(
     env: &mut Env<'a>,
     p: &'a Pos,
-    class: &'a ShallowClass,
+    class: &'a ShallowClass<'a>,
     targ_tys: impl Iterator<Item = Ty<'a>>,
     args: &'a Vec<ast::Expr>,
-    unpacked_arg: &'a Option<ast::Expr>,
+    unpacked_arg: &Option<ast::Expr>,
     _class_id: &'a ast::ClassId,
 ) -> (Vec<tast::Expr<'a>>, Option<tast::Expr<'a>>, Ty<'a>) {
     // TODO(hrust) turn CIparent into CIstatic. WHY? o_O
     let mut ety_env = ExpandEnv {
-        substs: subst::make_locl(env.bld(), &class.tparams, targ_tys),
+        substs: subst::make_locl(env.bld(), class.tparams.iter(), targ_tys),
         type_expansions: bumpalo::vec![in env.bld().alloc],
     };
     // TODO(hrust) check tparam constraints and where constraints
@@ -513,7 +514,7 @@ fn call_construct<'a>(
         Some(ctor) => {
             // TODO(hrust) check obj access and deprecation
             // TODO(hrust) pessimize
-            let ctor_type = typing_phase::localize(&mut ety_env, env, &ctor.type_);
+            let ctor_type = typing_phase::localize(&mut ety_env, env, ctor.type_);
             // TODO(hrust) actually call the constructor and return its type and typed arguments
             let (args, unpacked_arg, _return_ty) = call(env, p, ctor_type, args, unpacked_arg);
             (args, unpacked_arg, ctor_type)
@@ -529,7 +530,7 @@ fn instantiable_cid<'a>(
 ) -> (
     tast::ClassId<'a>,
     Vec<tast::Targ<'a>>,
-    Vec<(&'a Sid, &'a ShallowClass, Ty<'a>)>,
+    Vec<(Sid<'a>, &'a ShallowClass<'a>, Ty<'a>)>,
 ) {
     class_id_for_new(env, p, class_id, targs)
     // TODO(hrust) check instantiable
@@ -543,7 +544,7 @@ fn class_id_for_new<'a>(
 ) -> (
     tast::ClassId<'a>,
     Vec<tast::Targ<'a>>,
-    Vec<(&'a Sid, &'a ShallowClass, Ty<'a>)>,
+    Vec<(Sid<'a>, &'a ShallowClass<'a>, Ty<'a>)>,
 ) {
     let (targs, class_id) = {
         let check_constraints = false;
@@ -558,12 +559,12 @@ fn class_id_for_new<'a>(
     let tys = tys
         .filter_map(|ty| {
             match ty.get_node() {
-                Ty_::Tclass(sid, _, _) => {
+                Ty_::Tclass(&(sid, _, _)) => {
                     match provider.get_class(sid.name()) {
                         None => None,
                         Some(class_info) => {
                             // TODO check generic, check generic is newable
-                            Some((*sid, class_info, ty))
+                            Some((sid, class_info, ty))
                         }
                     }
                 }

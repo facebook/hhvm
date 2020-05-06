@@ -9,5 +9,5 @@ include = ["../../decl_provider.rs"]
 path = "../../decl_provider.rs"
 
 [dependencies]
-oxidized = { path = "../../../oxidized" }
+oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 typing_heap_rust = { path = "../../../typing/cargo/typing_heap" }

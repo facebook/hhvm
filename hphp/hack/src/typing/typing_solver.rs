@@ -6,7 +6,7 @@ use crate::typing_union;
 use crate::Env;
 use oxidized::ident::Ident;
 use typing_collections_rust::Set;
-use typing_defs_rust::{InternalType_, Ty};
+use typing_defs_rust::{InternalType, Ty};
 
 pub fn solve_all_unsolved_tyvars(env: &mut Env) {
     env.inference_env
@@ -37,25 +37,25 @@ fn try_bind_to_equal_bound(env: &mut Env, v: Ident) {
         let bld = env.bld();
         // TODO(hrust) remove tyvar from bounds
         let lower_bounds = {
-            let bounds = env.inference_env.get_lower_bounds(v).iter();
+            let bounds = env.inference_env.get_lower_bounds(v).iter().copied();
             let bounds = bounds.map(|ty| env.inference_env.expand_internal_type(ty));
             Set::from(bld, bounds)
         };
         let upper_bounds = {
-            let bounds = env.inference_env.get_upper_bounds(v).iter();
+            let bounds = env.inference_env.get_upper_bounds(v).iter().copied();
             let bounds = bounds.map(|ty| env.inference_env.expand_internal_type(ty));
             Set::from(bld, bounds)
         };
-        let mut equal_bounds = lower_bounds.intersection(upper_bounds).cloned();
+        let mut equal_bounds = lower_bounds.intersection(upper_bounds).copied();
         // TODO(hrust) remove Terr and Tany from equal bounds
         match equal_bounds.next() {
             Some(ty) => {
                 match ty {
-                    InternalType_::LoclType(ty) => {
+                    InternalType::LoclType(ty) => {
                         // TODO union with any if any in lower bounds
-                        bind(env, v, *ty)
+                        bind(env, v, ty)
                     }
-                    InternalType_::ConstraintType(_) => {
+                    InternalType::ConstraintType(_) => {
                         // TODO(hrust)
                     }
                 }
@@ -95,8 +95,8 @@ fn bind_to_lower_bound(env: &mut Env, v: Ident) {
         // TODO(hrust) remove type var itself from its lower bounds
         lower_bounds
             .iter()
-            .cloned()
-            .filter_map(InternalType_::get_locl_type_opt)
+            .copied()
+            .filter_map(InternalType::get_locl_type_opt)
     };
     let ty = typing_union::union_list(env, lower_bounds);
     // TODO(hrust) freshen

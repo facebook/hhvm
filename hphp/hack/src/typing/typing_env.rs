@@ -11,7 +11,7 @@ use decl_provider_rust as decl_provider;
 use oxidized::ident::Ident;
 use oxidized::pos::Pos;
 use oxidized::relative_path::RelativePath;
-use oxidized::shallow_decl_defs::{ShallowClass, ShallowMethod};
+use oxidized_by_ref::shallow_decl_defs::{ShallowClass, ShallowMethod};
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_heap_rust::Class;
@@ -160,17 +160,20 @@ impl<'a> Env<'a> {
         self.lenv.per_cont_env.get_cont_option(TypingContKey::Next)
     }
 
-    pub fn get_construct<'b>(&mut self, class: &'b ShallowClass) -> &'b Option<ShallowMethod> {
+    pub fn get_construct<'b>(
+        &mut self,
+        class: &'b ShallowClass<'b>,
+    ) -> &'b Option<ShallowMethod<'b>> {
         // TODO(hrust) add dependencies
         &class.constructor
     }
 
     pub fn get_member<'b>(
         &self,
-        class: &'b ShallowClass,
+        class: &'b ShallowClass<'b>,
         member_id: &str,
         is_method: bool,
-    ) -> Option<&'b ShallowMethod> {
+    ) -> Option<&'b ShallowMethod<'b>> {
         // TODO(hrust) add dependencies
         if is_method {
             Class::get_method(class, member_id)

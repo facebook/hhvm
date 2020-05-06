@@ -13,12 +13,19 @@ use ocamlrep_derive::ToOcamlRep;
 pub struct LocalId<'a>(isize, &'a str);
 
 impl<'a> LocalId<'a> {
-    pub fn new_unscoped(name: &'a str) -> Self {
+    pub fn new_unscoped_in(name: &'a str) -> Self {
         Self(0, name)
     }
 
     pub fn name(self) -> &'a str {
         self.1
+    }
+}
+
+impl<'a> From<&'a oxidized::local_id::LocalId> for LocalId<'a> {
+    fn from(x: &'a oxidized::local_id::LocalId) -> LocalId<'a> {
+        let (a, b) = x;
+        LocalId(*a, b.as_str())
     }
 }
 

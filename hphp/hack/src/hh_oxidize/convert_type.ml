@@ -20,15 +20,11 @@ open State
    (for instances of mutual recursion where we would otherwise define types of
    infinite size). *)
 let add_indirection_between () =
-  ( if Configuration.by_ref () then
-    [("typing_defs_core", "Ty", "reason::Reason")]
-  else
-    [] )
-  @ [
-      ("typing_defs_core", "ConstraintType", "ConstraintType_");
-      ("typing_defs_core", "Ty", "Ty_");
-      ("aast_defs", "Hint", "Hint_");
-    ]
+  [
+    ("typing_defs_core", "ConstraintType", "ConstraintType_");
+    ("typing_defs_core", "Ty", "Ty_");
+    ("aast_defs", "Hint", "Hint_");
+  ]
 
 let should_add_indirection ty =
   List.mem
@@ -45,7 +41,7 @@ let should_add_rc ty =
 let should_add_reference ty =
   let tyl =
     if Configuration.by_ref () then
-      ["Pos"; "pos::Pos"]
+      ["Pos"; "pos::Pos"; "reason::Reason"; "FunParam"; "FunType"]
     else
       []
   in
@@ -60,6 +56,11 @@ let owned_builtins =
   SSet.of_list ["()"; "Option"; "isize"; "bool"; "f64"; "std::cell::RefCell"]
 
 let is_owned_builtin = SSet.mem owned_builtins
+
+let never_add_lifetime_parameter ty =
+  match ty with
+  | "ident::Ident" -> true
+  | _ -> false
 
 let rec core_type ?(seen_indirection = false) ct =
   match ct.ptyp_desc with
@@ -115,7 +116,8 @@ let rec core_type ?(seen_indirection = false) ct =
     let add_lifetime =
       Configuration.by_ref ()
       && Option.is_none extern_type
-      && not (is_owned_builtin id)
+      && (not (is_owned_builtin id))
+      && not (never_add_lifetime_parameter id)
     in
     let args = type_args ~seen_indirection ~add_lifetime args in
     if should_add_reference id then

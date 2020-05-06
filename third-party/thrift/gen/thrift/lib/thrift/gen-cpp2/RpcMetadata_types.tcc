@@ -1104,6 +1104,23 @@ _readField_compression:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           1,
+          2,
+          apache::thrift::protocol::T_MAP))) {
+    goto _loop;
+  }
+_readField_otherMetadata:
+  {
+    _readState.beforeSubobject(iprot);
+    
+    this->otherMetadata = ::std::map<::std::string, ::std::string>();
+    ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::read(*iprot, this->otherMetadata);
+    this->__isset.otherMetadata = true;
+    _readState.afterSubobject(iprot);
+  }
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -1132,6 +1149,14 @@ _loop:
         goto _skip;
       }
     }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_MAP))) {
+        goto _readField_otherMetadata;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -1151,6 +1176,10 @@ uint32_t StreamPayloadMetadata::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
   }
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->serializedFieldSize("otherMetadata", apache::thrift::protocol::T_MAP, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->otherMetadata);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1163,6 +1192,10 @@ uint32_t StreamPayloadMetadata::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("compression", apache::thrift::protocol::T_I32, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::serializedSize<false>(*prot_, this->compression);
   }
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->serializedFieldSize("otherMetadata", apache::thrift::protocol::T_MAP, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::serializedSize<false>(*prot_, this->otherMetadata);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -1174,6 +1207,11 @@ uint32_t StreamPayloadMetadata::write(Protocol_* prot_) const {
   if (this->__isset.compression) {
     xfer += prot_->writeFieldBegin("compression", apache::thrift::protocol::T_I32, 1);
     xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::enumeration,  ::apache::thrift::CompressionAlgorithm>::write(*prot_, this->compression);
+    xfer += prot_->writeFieldEnd();
+  }
+  if (this->__isset.otherMetadata) {
+    xfer += prot_->writeFieldBegin("otherMetadata", apache::thrift::protocol::T_MAP, 2);
+    xfer += ::apache::thrift::detail::pm::protocol_methods< ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::string>, ::std::map<::std::string, ::std::string>>::write(*prot_, this->otherMetadata);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

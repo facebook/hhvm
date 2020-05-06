@@ -58,7 +58,7 @@ void MemcacheAsyncClient::mcGetT(Protocol_* prot, apache::thrift::RpcOptions& rp
   args.get<0>().value = const_cast<facebook::memcache::McGetRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGet", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGet", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -69,7 +69,7 @@ void MemcacheAsyncClient::mcSetT(Protocol_* prot, apache::thrift::RpcOptions& rp
   args.get<0>().value = const_cast<facebook::memcache::McSetRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcSet", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcSet", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -80,7 +80,7 @@ void MemcacheAsyncClient::mcDeleteT(Protocol_* prot, apache::thrift::RpcOptions&
   args.get<0>().value = const_cast<facebook::memcache::McDeleteRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcDelete", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcDelete", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -91,7 +91,7 @@ void MemcacheAsyncClient::mcLeaseGetT(Protocol_* prot, apache::thrift::RpcOption
   args.get<0>().value = const_cast<facebook::memcache::McLeaseGetRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcLeaseGet", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcLeaseGet", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -102,7 +102,7 @@ void MemcacheAsyncClient::mcLeaseSetT(Protocol_* prot, apache::thrift::RpcOption
   args.get<0>().value = const_cast<facebook::memcache::McLeaseSetRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcLeaseSet", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcLeaseSet", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -113,7 +113,7 @@ void MemcacheAsyncClient::mcAddT(Protocol_* prot, apache::thrift::RpcOptions& rp
   args.get<0>().value = const_cast<facebook::memcache::McAddRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcAdd", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcAdd", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -124,7 +124,7 @@ void MemcacheAsyncClient::mcReplaceT(Protocol_* prot, apache::thrift::RpcOptions
   args.get<0>().value = const_cast<facebook::memcache::McReplaceRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcReplace", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcReplace", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -135,7 +135,7 @@ void MemcacheAsyncClient::mcGetsT(Protocol_* prot, apache::thrift::RpcOptions& r
   args.get<0>().value = const_cast<facebook::memcache::McGetsRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGets", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGets", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -146,7 +146,7 @@ void MemcacheAsyncClient::mcCasT(Protocol_* prot, apache::thrift::RpcOptions& rp
   args.get<0>().value = const_cast<facebook::memcache::McCasRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcCas", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcCas", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -157,7 +157,7 @@ void MemcacheAsyncClient::mcIncrT(Protocol_* prot, apache::thrift::RpcOptions& r
   args.get<0>().value = const_cast<facebook::memcache::McIncrRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcIncr", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcIncr", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -168,7 +168,7 @@ void MemcacheAsyncClient::mcDecrT(Protocol_* prot, apache::thrift::RpcOptions& r
   args.get<0>().value = const_cast<facebook::memcache::McDecrRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcDecr", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcDecr", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -179,7 +179,7 @@ void MemcacheAsyncClient::mcMetagetT(Protocol_* prot, apache::thrift::RpcOptions
   args.get<0>().value = const_cast<facebook::memcache::McMetagetRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcMetaget", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcMetaget", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -190,7 +190,7 @@ void MemcacheAsyncClient::mcAppendT(Protocol_* prot, apache::thrift::RpcOptions&
   args.get<0>().value = const_cast<facebook::memcache::McAppendRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcAppend", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcAppend", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -201,7 +201,7 @@ void MemcacheAsyncClient::mcPrependT(Protocol_* prot, apache::thrift::RpcOptions
   args.get<0>().value = const_cast<facebook::memcache::McPrependRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcPrepend", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcPrepend", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -212,7 +212,7 @@ void MemcacheAsyncClient::mcTouchT(Protocol_* prot, apache::thrift::RpcOptions& 
   args.get<0>().value = const_cast<facebook::memcache::McTouchRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcTouch", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcTouch", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -223,7 +223,7 @@ void MemcacheAsyncClient::mcFlushReT(Protocol_* prot, apache::thrift::RpcOptions
   args.get<0>().value = const_cast<facebook::memcache::McFlushReRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcFlushRe", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcFlushRe", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -234,7 +234,7 @@ void MemcacheAsyncClient::mcFlushAllT(Protocol_* prot, apache::thrift::RpcOption
   args.get<0>().value = const_cast<facebook::memcache::McFlushAllRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcFlushAll", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcFlushAll", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -245,7 +245,7 @@ void MemcacheAsyncClient::mcGatT(Protocol_* prot, apache::thrift::RpcOptions& rp
   args.get<0>().value = const_cast<facebook::memcache::McGatRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGat", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGat", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -256,7 +256,7 @@ void MemcacheAsyncClient::mcGatsT(Protocol_* prot, apache::thrift::RpcOptions& r
   args.get<0>().value = const_cast<facebook::memcache::McGatsRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGats", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcGats", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 
@@ -267,7 +267,7 @@ void MemcacheAsyncClient::mcVersionT(Protocol_* prot, apache::thrift::RpcOptions
   args.get<0>().value = const_cast<facebook::memcache::McVersionRequest*>(&request);
   auto sizer = [&](Protocol_* p) { return args.serializedSizeZC(p); };
   auto writer = [&](Protocol_* p) { args.write(p); };
-  apache::thrift::clientSendT<Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcVersion", writer, sizer, apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  apache::thrift::clientSendT<apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE, Protocol_>(prot, rpcOptions, std::move(callback), ctx->ctx, std::move(header), channel_.get(), "mcVersion", writer, sizer);
   ctx->reqContext.setRequestHeader(nullptr);
 }
 

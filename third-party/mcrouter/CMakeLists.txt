@@ -37,7 +37,17 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h"
   COMMENT "Creating RouterRegistry.h symlink"
 )
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/mcrouter"
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrouter/ThriftAcceptor-impl.h"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h"
+  COMMENT "Creating ThriftAcceptor.h symlink"
+)
 list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/RouterRegistry.h")
+list(APPEND CXX_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/mcrouter/ThriftAcceptor.h")
 list(APPEND CXX_SOURCES ${files})
 
 # We need to make sure several files are the same

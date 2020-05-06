@@ -37,9 +37,11 @@ bool TEnumTraits<::apache::thrift::metadata::ThriftPrimitiveType>::findValue(cha
 }} // apache::thrift
 
 namespace apache { namespace thrift { namespace metadata {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _ThriftPrimitiveType_EnumMapFactory::ValuesToNamesMapType _ThriftPrimitiveType_VALUES_TO_NAMES = _ThriftPrimitiveType_EnumMapFactory::makeValuesToNamesMap();
 const _ThriftPrimitiveType_EnumMapFactory::NamesToValuesMapType _ThriftPrimitiveType_NAMES_TO_VALUES = _ThriftPrimitiveType_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }}} // apache::thrift::metadata
 

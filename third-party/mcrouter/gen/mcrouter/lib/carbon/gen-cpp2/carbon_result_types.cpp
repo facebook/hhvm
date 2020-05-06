@@ -37,9 +37,11 @@ bool TEnumTraits<::carbon::Result>::findValue(char const* name, type* out) {
 }} // apache::thrift
 
 namespace carbon {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Result_EnumMapFactory::ValuesToNamesMapType _Result_VALUES_TO_NAMES = _Result_EnumMapFactory::makeValuesToNamesMap();
 const _Result_EnumMapFactory::NamesToValuesMapType _Result_NAMES_TO_VALUES = _Result_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 } // carbon
 

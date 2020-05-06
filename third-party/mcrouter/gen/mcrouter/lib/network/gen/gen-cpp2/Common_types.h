@@ -200,20 +200,24 @@ class McVersionRequest final : private apache::thrift::detail::st::ComparisonOpe
   bool operator==(const McVersionRequest& rhs) const;
   bool operator<(const McVersionRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
+    return {std::move(this->key), __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
+    return {std::move(this->key), __isset.key};
   }
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
@@ -295,68 +299,84 @@ class McVersionReply final : private apache::thrift::detail::st::ComparisonOpera
   bool operator==(const McVersionReply& rhs) const;
   bool operator<(const McVersionReply& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const folly::IOBuf&> value_ref() const& {
-    return {value, __isset.value};
+  template <typename..., typename T = folly::IOBuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> value_ref() const& {
+    return {this->value, __isset.value};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const folly::IOBuf&&> value_ref() const&& {
-    return {std::move(value), __isset.value};
+  template <typename..., typename T = folly::IOBuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> value_ref() const&& {
+    return {std::move(this->value), __isset.value};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<folly::IOBuf&> value_ref() & {
-    return {value, __isset.value};
+  template <typename..., typename T = folly::IOBuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> value_ref() & {
+    return {this->value, __isset.value};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<folly::IOBuf&&> value_ref() && {
-    return {std::move(value), __isset.value};
+  template <typename..., typename T = folly::IOBuf>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> value_ref() && {
+    return {std::move(this->value), __isset.value};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
    ::carbon::Result get_result() const {
@@ -462,20 +482,24 @@ class McStatsRequest final : private apache::thrift::detail::st::ComparisonOpera
   bool operator==(const McStatsRequest& rhs) const;
   bool operator<(const McStatsRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
+    return {std::move(this->key), __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
+    return {std::move(this->key), __isset.key};
   }
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
@@ -557,68 +581,84 @@ class McStatsReply final : private apache::thrift::detail::st::ComparisonOperato
   bool operator==(const McStatsReply& rhs) const;
   bool operator<(const McStatsReply& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector<::std::string>&> stats_ref() const& {
-    return {stats, __isset.stats};
+  template <typename..., typename T = ::std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> stats_ref() const& {
+    return {this->stats, __isset.stats};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::vector<::std::string>&&> stats_ref() const&& {
-    return {std::move(stats), __isset.stats};
+  template <typename..., typename T = ::std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> stats_ref() const&& {
+    return {std::move(this->stats), __isset.stats};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector<::std::string>&> stats_ref() & {
-    return {stats, __isset.stats};
+  template <typename..., typename T = ::std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> stats_ref() & {
+    return {this->stats, __isset.stats};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::vector<::std::string>&&> stats_ref() && {
-    return {std::move(stats), __isset.stats};
+  template <typename..., typename T = ::std::vector<::std::string>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> stats_ref() && {
+    return {std::move(this->stats), __isset.stats};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
    ::carbon::Result get_result() const {
@@ -718,20 +758,24 @@ class McShutdownRequest final : private apache::thrift::detail::st::ComparisonOp
   bool operator==(const McShutdownRequest& rhs) const;
   bool operator<(const McShutdownRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
+    return {std::move(this->key), __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
+    return {std::move(this->key), __isset.key};
   }
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
@@ -810,52 +854,64 @@ class McShutdownReply final : private apache::thrift::detail::st::ComparisonOper
   bool operator==(const McShutdownReply& rhs) const;
   bool operator<(const McShutdownReply& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
    ::carbon::Result get_result() const {
@@ -946,20 +1002,24 @@ class McQuitRequest final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const McQuitRequest& rhs) const;
   bool operator<(const McQuitRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
+    return {std::move(this->key), __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
+    return {std::move(this->key), __isset.key};
   }
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
@@ -1038,52 +1098,64 @@ class McQuitReply final : private apache::thrift::detail::st::ComparisonOperator
   bool operator==(const McQuitReply& rhs) const;
   bool operator<(const McQuitReply& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
    ::carbon::Result get_result() const {
@@ -1174,20 +1246,24 @@ class McExecRequest final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const McExecRequest& rhs) const;
   bool operator<(const McExecRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&> key_ref() const& {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> key_ref() const& {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::thrift::IOBufKey&&> key_ref() const&& {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> key_ref() const&& {
+    return {std::move(this->key), __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&> key_ref() & {
-    return {key, __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> key_ref() & {
+    return {this->key, __isset.key};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::thrift::IOBufKey&&> key_ref() && {
-    return {std::move(key), __isset.key};
+  template <typename..., typename T =  ::carbon::thrift::IOBufKey>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> key_ref() && {
+    return {std::move(this->key), __isset.key};
   }
 
   const  ::carbon::thrift::IOBufKey& get_key() const& {
@@ -1269,68 +1345,84 @@ class McExecReply final : private apache::thrift::detail::st::ComparisonOperator
   bool operator==(const McExecReply& rhs) const;
   bool operator<(const McExecReply& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> response_ref() const& {
-    return {response, __isset.response};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> response_ref() const& {
+    return {this->response, __isset.response};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> response_ref() const&& {
-    return {std::move(response), __isset.response};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> response_ref() const&& {
+    return {std::move(this->response), __isset.response};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> response_ref() & {
-    return {response, __isset.response};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> response_ref() & {
+    return {this->response, __isset.response};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> response_ref() && {
-    return {std::move(response), __isset.response};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> response_ref() && {
+    return {std::move(this->response), __isset.response};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> message_ref() const& {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> message_ref() const& {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> message_ref() const&& {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> message_ref() const&& {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> message_ref() & {
-    return {message, __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> message_ref() & {
+    return {this->message, __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> message_ref() && {
-    return {std::move(message), __isset.message};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> message_ref() && {
+    return {std::move(this->message), __isset.message};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&> appSpecificErrorCode_ref() const& {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> appSpecificErrorCode_ref() const& {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const int16_t&&> appSpecificErrorCode_ref() const&& {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> appSpecificErrorCode_ref() const&& {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&> appSpecificErrorCode_ref() & {
-    return {appSpecificErrorCode, __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> appSpecificErrorCode_ref() & {
+    return {this->appSpecificErrorCode, __isset.appSpecificErrorCode};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<int16_t&&> appSpecificErrorCode_ref() && {
-    return {std::move(appSpecificErrorCode), __isset.appSpecificErrorCode};
+  template <typename..., typename T = int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> appSpecificErrorCode_ref() && {
+    return {std::move(this->appSpecificErrorCode), __isset.appSpecificErrorCode};
   }
 
    ::carbon::Result get_result() const {
@@ -1486,36 +1578,44 @@ class GoAwayRequest final : private apache::thrift::detail::st::ComparisonOperat
   bool operator==(const GoAwayRequest& rhs) const;
   bool operator<(const GoAwayRequest& rhs) const;
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&> result_ref() const& {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> result_ref() const& {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const  ::carbon::Result&&> result_ref() const&& {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> result_ref() const&& {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&> result_ref() & {
-    return {result, __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> result_ref() & {
+    return {this->result, __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref< ::carbon::Result&&> result_ref() && {
-    return {std::move(result), __isset.result};
+  template <typename..., typename T =  ::carbon::Result>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> result_ref() && {
+    return {std::move(this->result), __isset.result};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&> reason_ref() const& {
-    return {reason, __isset.reason};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> reason_ref() const& {
+    return {this->reason, __isset.reason};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<const ::std::string&&> reason_ref() const&& {
-    return {std::move(reason), __isset.reason};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> reason_ref() const&& {
+    return {std::move(this->reason), __isset.reason};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&> reason_ref() & {
-    return {reason, __isset.reason};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> reason_ref() & {
+    return {this->reason, __isset.reason};
   }
 
-  FOLLY_ERASE ::apache::thrift::field_ref<::std::string&&> reason_ref() && {
-    return {std::move(reason), __isset.reason};
+  template <typename..., typename T = ::std::string>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> reason_ref() && {
+    return {std::move(this->reason), __isset.reason};
   }
 
    ::carbon::Result get_result() const {

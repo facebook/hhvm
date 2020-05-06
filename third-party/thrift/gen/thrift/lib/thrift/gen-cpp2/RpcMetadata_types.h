@@ -36,6 +36,7 @@ struct load;
 struct crc32c;
 struct compression;
 struct compression;
+struct otherMetadata;
 struct opaque;
 struct interfaceKind;
 struct otherMetadata;
@@ -129,6 +130,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(compression);
 #ifndef APACHE_THRIFT_ACCESSOR_compression
 #define APACHE_THRIFT_ACCESSOR_compression
 APACHE_THRIFT_DEFINE_ACCESSOR(compression);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_otherMetadata
+#define APACHE_THRIFT_ACCESSOR_otherMetadata
+APACHE_THRIFT_DEFINE_ACCESSOR(otherMetadata);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_opaque
 #define APACHE_THRIFT_ACCESSOR_opaque
@@ -351,27 +356,39 @@ template <> struct TEnumTraits<::apache::thrift::InterfaceKind> {
 namespace apache { namespace thrift {
 
 using _ProtocolId_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<ProtocolId>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _ProtocolId_EnumMapFactory::ValuesToNamesMapType _ProtocolId_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _ProtocolId_EnumMapFactory::NamesToValuesMapType _ProtocolId_NAMES_TO_VALUES;
 
 using _RpcKind_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<RpcKind>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _RpcKind_EnumMapFactory::ValuesToNamesMapType _RpcKind_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _RpcKind_EnumMapFactory::NamesToValuesMapType _RpcKind_NAMES_TO_VALUES;
 
 using _RpcPriority_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<RpcPriority>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _RpcPriority_EnumMapFactory::ValuesToNamesMapType _RpcPriority_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _RpcPriority_EnumMapFactory::NamesToValuesMapType _RpcPriority_NAMES_TO_VALUES;
 
 using _CompressionAlgorithm_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<CompressionAlgorithm>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _CompressionAlgorithm_EnumMapFactory::ValuesToNamesMapType _CompressionAlgorithm_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _CompressionAlgorithm_EnumMapFactory::NamesToValuesMapType _CompressionAlgorithm_NAMES_TO_VALUES;
 
 using _RequestRpcMetadataFlags_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<RequestRpcMetadataFlags>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _RequestRpcMetadataFlags_EnumMapFactory::ValuesToNamesMapType _RequestRpcMetadataFlags_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _RequestRpcMetadataFlags_EnumMapFactory::NamesToValuesMapType _RequestRpcMetadataFlags_NAMES_TO_VALUES;
 
 using _InterfaceKind_EnumMapFactory = apache::thrift::detail::TEnumMapFactory<InterfaceKind>;
+[[deprecated("use apache::thrift::util::enumNameSafe, apache::thrift::util::enumName, or apache::thrift::TEnumTraits")]]
 extern const _InterfaceKind_EnumMapFactory::ValuesToNamesMapType _InterfaceKind_VALUES_TO_NAMES;
+[[deprecated("use apache::thrift::TEnumTraits")]]
 extern const _InterfaceKind_EnumMapFactory::NamesToValuesMapType _InterfaceKind_NAMES_TO_VALUES;
 
 }} // apache::thrift
@@ -1271,7 +1288,7 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
       compression( ::apache::thrift::CompressionAlgorithm::NONE) {}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg);
+  StreamPayloadMetadata(apache::thrift::FragileConstructor,  ::apache::thrift::CompressionAlgorithm compression__arg, ::std::map<::std::string, ::std::string> otherMetadata__arg);
 
   StreamPayloadMetadata(StreamPayloadMetadata&&) = default;
 
@@ -1283,10 +1300,13 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
   void __clear();
  private:
    ::apache::thrift::CompressionAlgorithm compression;
+ private:
+  ::std::map<::std::string, ::std::string> otherMetadata;
 
  public:
   struct __isset {
     bool compression;
+    bool otherMetadata;
   } __isset = {};
   bool operator==(const StreamPayloadMetadata& rhs) const;
   bool operator<(const StreamPayloadMetadata& rhs) const;
@@ -1307,6 +1327,22 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
     return {std::move(compression), __isset.compression};
   }
 
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&> otherMetadata_ref() const& {
+    return {otherMetadata, __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const ::std::map<::std::string, ::std::string>&&> otherMetadata_ref() const&& {
+    return {std::move(otherMetadata), __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&> otherMetadata_ref() & {
+    return {otherMetadata, __isset.otherMetadata};
+  }
+
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<::std::map<::std::string, ::std::string>&&> otherMetadata_ref() && {
+    return {std::move(otherMetadata), __isset.otherMetadata};
+  }
+
   const  ::apache::thrift::CompressionAlgorithm* get_compression() const& {
     return __isset.compression ? std::addressof(compression) : nullptr;
   }
@@ -1320,6 +1356,16 @@ class StreamPayloadMetadata final : private apache::thrift::detail::st::Comparis
     compression = compression_;
     __isset.compression = true;
     return compression;
+  }
+  const ::std::map<::std::string, ::std::string>* get_otherMetadata() const&;
+  ::std::map<::std::string, ::std::string>* get_otherMetadata() &;
+  ::std::map<::std::string, ::std::string>* get_otherMetadata() && = delete;
+
+  template <typename T_StreamPayloadMetadata_otherMetadata_struct_setter = ::std::map<::std::string, ::std::string>>
+  ::std::map<::std::string, ::std::string>& set_otherMetadata(T_StreamPayloadMetadata_otherMetadata_struct_setter&& otherMetadata_) {
+    otherMetadata = std::forward<T_StreamPayloadMetadata_otherMetadata_struct_setter>(otherMetadata_);
+    __isset.otherMetadata = true;
+    return otherMetadata;
   }
 
   template <class Protocol_>

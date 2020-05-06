@@ -37,9 +37,11 @@ bool TEnumTraits<::apache::thrift::reflection::Type>::findValue(char const* name
 }} // apache::thrift
 
 namespace apache { namespace thrift { namespace reflection {
-
+FOLLY_PUSH_WARNING
+FOLLY_GNU_DISABLE_WARNING("-Wdeprecated-declarations")
 const _Type_EnumMapFactory::ValuesToNamesMapType _Type_VALUES_TO_NAMES = _Type_EnumMapFactory::makeValuesToNamesMap();
 const _Type_EnumMapFactory::NamesToValuesMapType _Type_NAMES_TO_VALUES = _Type_EnumMapFactory::makeNamesToValuesMap();
+FOLLY_POP_WARNING
 
 }}} // apache::thrift::reflection
 

@@ -90,6 +90,7 @@ struct _ResultEnumDataStorage {
 };
 
 } // carbon
+
 namespace apache { namespace thrift {
 
 template <> struct TEnumDataStorage<::carbon::Result> {
@@ -97,4 +98,3 @@ template <> struct TEnumDataStorage<::carbon::Result> {
 };
 
 }} // apache::thrift
-

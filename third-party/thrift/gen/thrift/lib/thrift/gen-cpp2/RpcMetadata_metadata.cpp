@@ -25,8 +25,9 @@ void EnumMetadata<::apache::thrift::ProtocolId>::gen(ThriftMetadata& metadata) {
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.ProtocolId";
-  for (const auto& p : ::apache::thrift::_ProtocolId_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::ProtocolId>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::apache::thrift::RpcKind>::gen(ThriftMetadata& metadata) {
@@ -36,8 +37,9 @@ void EnumMetadata<::apache::thrift::RpcKind>::gen(ThriftMetadata& metadata) {
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.RpcKind";
-  for (const auto& p : ::apache::thrift::_RpcKind_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::RpcKind>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::apache::thrift::RpcPriority>::gen(ThriftMetadata& metadata) {
@@ -47,8 +49,9 @@ void EnumMetadata<::apache::thrift::RpcPriority>::gen(ThriftMetadata& metadata) 
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.RpcPriority";
-  for (const auto& p : ::apache::thrift::_RpcPriority_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::RpcPriority>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::apache::thrift::CompressionAlgorithm>::gen(ThriftMetadata& metadata) {
@@ -58,8 +61,9 @@ void EnumMetadata<::apache::thrift::CompressionAlgorithm>::gen(ThriftMetadata& m
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.CompressionAlgorithm";
-  for (const auto& p : ::apache::thrift::_CompressionAlgorithm_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::CompressionAlgorithm>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::apache::thrift::RequestRpcMetadataFlags>::gen(ThriftMetadata& metadata) {
@@ -69,8 +73,9 @@ void EnumMetadata<::apache::thrift::RequestRpcMetadataFlags>::gen(ThriftMetadata
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.RequestRpcMetadataFlags";
-  for (const auto& p : ::apache::thrift::_RequestRpcMetadataFlags_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::RequestRpcMetadataFlags>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 void EnumMetadata<::apache::thrift::InterfaceKind>::gen(ThriftMetadata& metadata) {
@@ -80,8 +85,9 @@ void EnumMetadata<::apache::thrift::InterfaceKind>::gen(ThriftMetadata& metadata
   }
   ::apache::thrift::metadata::ThriftEnum& enum_metadata = res.first->second;
   enum_metadata.name = "RpcMetadata.InterfaceKind";
-  for (const auto& p : ::apache::thrift::_InterfaceKind_VALUES_TO_NAMES) {
-    enum_metadata.elements.emplace(static_cast<int32_t>(p.first), p.second) ;
+  using EnumTraits = TEnumTraits<::apache::thrift::InterfaceKind>;
+  for (std::size_t i = 0; i < EnumTraits::size; ++i) {
+    enum_metadata.elements.emplace(static_cast<int32_t>(EnumTraits::values[i]), EnumTraits::names[i].str());
   }
 }
 
@@ -177,6 +183,7 @@ void StructMetadata<::apache::thrift::StreamPayloadMetadata>::gen(ThriftMetadata
   static const std::tuple<int32_t, const char*, bool, std::unique_ptr<MetadataTypeInterface>>
   RpcMetadata_StreamPayloadMetadata_fields[] = {
     std::make_tuple(1, "compression", true, std::make_unique<Enum< ::apache::thrift::CompressionAlgorithm>>("RpcMetadata.CompressionAlgorithm")),
+    std::make_tuple(2, "otherMetadata", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE))),
   };
   for (const auto& f : RpcMetadata_StreamPayloadMetadata_fields) {
     ::apache::thrift::metadata::ThriftField field;

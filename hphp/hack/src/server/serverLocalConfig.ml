@@ -821,16 +821,18 @@ let load_ fn ~silent ~current_version overrides =
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
   let remote_transport_channel = string_opt "remote_transport_channel" config in
-  let naming_sqlite_path = string_opt "naming_sqlite_path" config in
   let enable_naming_table_fallback =
-    match naming_sqlite_path with
-    | Some _ -> true
-    | None ->
-      bool_if_min_version
-        "enable_naming_table_fallback"
-        ~default:default.enable_naming_table_fallback
-        ~current_version
-        config
+    bool_if_min_version
+      "enable_naming_table_fallback"
+      ~default:default.enable_naming_table_fallback
+      ~current_version
+      config
+  in
+  let naming_sqlite_path =
+    if enable_naming_table_fallback then
+      string_opt "naming_sqlite_path" config
+    else
+      None
   in
   let symbolindex_search_provider =
     string_

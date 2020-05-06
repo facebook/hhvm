@@ -75,7 +75,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
   list so that later errors come later, and then do a stable sort to put the
   lexical and parser errors together. *)
       let errors = List.rev errors in
-      let errors = List.stable_sort SyntaxError.compare errors in
+      let errors = List.stable_sort ~compare:SyntaxError.compare errors in
       remove_duplicates errors SyntaxError.exactly_equal
 
     let create text root rust_tree errors mode state =

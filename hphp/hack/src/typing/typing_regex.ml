@@ -66,7 +66,9 @@ let keys p s ~flags =
   in
   let names_numbers = List.zip_exn names numbers in
   let names_numbers_sorted =
-    List.sort (fun nn1 nn2 -> ~-(Int.compare (snd nn1) (snd nn2))) names_numbers
+    List.sort
+      ~compare:(fun nn1 nn2 -> ~-(Int.compare (snd nn1) (snd nn2)))
+      names_numbers
   in
   keys_aux p count names_numbers_sorted []
 

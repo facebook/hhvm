@@ -109,7 +109,7 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
           | Minimum when not (List.is_empty errors1) -> []
           | _ -> find_syntax_errors env
         in
-        List.sort SyntaxError.compare (List.append errors1 errors2)
+        List.sort ~compare:SyntaxError.compare (List.append errors1 errors2)
       with e ->
         let error_msg = "UNEXPECTED_ERROR: " ^ Exn.to_string e in
         [make_error_from_node (SyntaxTree.root env.syntax_tree) error_msg]

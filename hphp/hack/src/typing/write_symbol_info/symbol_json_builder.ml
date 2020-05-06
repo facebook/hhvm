@@ -465,7 +465,7 @@ let build_xrefs_json xref_map =
   let xrefs =
     IMap.fold
       (fun _id (target_json, pos_list) acc ->
-        let sorted_pos = List.sort Pos.compare pos_list in
+        let sorted_pos = List.sort ~compare:Pos.compare pos_list in
         let (byte_spans, _) =
           List.fold sorted_pos ~init:([], 0) ~f:(fun (spans, last_start) pos ->
               let start = fst (Pos.info_raw pos) in

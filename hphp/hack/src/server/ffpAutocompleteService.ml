@@ -138,7 +138,7 @@ let auto_complete_all_completion_types
   [keyword_completions; type_based_completions; global_completions]
   |> List.concat_no_order
   |> filter_results
-  |> List.sort ~compare:(fun a b -> compare a.res_name b.res_name)
+  |> List.sort ~compare:(fun a b -> String.compare a.res_name b.res_name)
   |> List.remove_consecutive_duplicates ~equal:(fun a b ->
          String.equal a.res_name b.res_name)
 

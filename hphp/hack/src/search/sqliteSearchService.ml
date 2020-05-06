@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open SearchUtils
 open Sqlite_utils
 
@@ -91,7 +91,7 @@ let find_or_build_sqlite_file
       let repo_path = Relative_path.path_of_prefix Relative_path.Root in
       if not silent then
         Hh_logger.log "Unable to fetch sqlite symbol index: %s" errmsg;
-      let tempfilename = Filename.temp_file "symbolindex" ".db" in
+      let tempfilename = Caml.Filename.temp_file "symbolindex" ".db" in
       if not silent then
         Hh_logger.log
           "Generating [%s] from repository [%s]"
@@ -142,10 +142,14 @@ let initialize
   (* Here's the updated environment *)
   { sienv with sql_symbolindex_db = ref (Some db) }
 
+let is_row = function
+  | Sqlite3.Rc.ROW -> true
+  | _ -> false
+
 (* Single function for reading results from an executed statement *)
 let read_si_results (stmt : Sqlite3.stmt) : si_results =
   let results = ref [] in
-  while Sqlite3.step stmt = Sqlite3.Rc.ROW do
+  while is_row (Sqlite3.step stmt) do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     let kindnum = to_int (Sqlite3.column stmt 1) in
     let kind = int_to_kind kindnum in
@@ -286,7 +290,7 @@ let fetch_namespaces ~(sienv : si_env) : string list =
       sql_select_namespaces
   in
   let namespace_list = ref [] in
-  while Sqlite3.step stmt = Sqlite3.Rc.ROW do
+  while is_row (Sqlite3.step stmt) do
     let name = Sqlite3.Data.to_string (Sqlite3.column stmt 0) in
     namespace_list := name :: !namespace_list
   done;

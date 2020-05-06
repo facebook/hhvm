@@ -105,6 +105,6 @@ val resolve_type_arguments_and_check_constraints :
   env ->
   Ast_defs.id ->
   Nast.class_id_ ->
-  decl_tparam sexp_list ->
-  Aast.hint sexp_list ->
-  env * locl_ty * Tast.targ sexp_list
+  decl_tparam list ->
+  Aast.hint list ->
+  env * locl_ty * Tast.targ list

@@ -95,6 +95,14 @@ type si_kind =
   | SI_RecordDef
 [@@deriving eq, show]
 
+let is_si_class = function
+  | SI_Class -> true
+  | _ -> false
+
+let is_si_trait = function
+  | SI_Trait -> true
+  | _ -> false
+
 (* Individual result object as known by the autocomplete system *)
 type symbol = (Pos.absolute, si_kind) term
 

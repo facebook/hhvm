@@ -305,7 +305,7 @@ let summarize_class class_ ~no_children =
       in
       let sort_by_line summaries =
         let cmp x y = Int.compare (Pos.line x.pos) (Pos.line y.pos) in
-        List.sort cmp summaries
+        List.sort ~compare:cmp summaries
       in
       Some (sort_by_line acc)
   in

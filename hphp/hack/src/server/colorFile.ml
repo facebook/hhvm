@@ -102,5 +102,5 @@ let go (str : string) ((pos_level_l, _) : Coverage_level_defs.result) :
   let get_pos_info_raw (pos, level) = (Pos.info_raw pos, level) in
   let pos_level_l = List.map pos_level_l ~f:get_pos_info_raw in
   let cmp x y = Compare.pos (fst x) (fst y) in
-  let pos_level_l = List.sort cmp pos_level_l |> flatten in
+  let pos_level_l = List.sort ~compare:cmp pos_level_l |> flatten in
   walk str pos_level_l

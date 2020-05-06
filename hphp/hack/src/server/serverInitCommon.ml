@@ -109,13 +109,13 @@ let is_path_in_range (path : string) (range : ServerArgs.files_to_check_range) :
     match range.ServerArgs.from_prefix_incl with
     | None -> true
     | Some (from_prefix_incl : Relative_path.t) ->
-      path >= Relative_path.suffix from_prefix_incl
+      String.(path >= Relative_path.suffix from_prefix_incl)
   in
   let is_to_prefix_excl =
     match range.ServerArgs.to_prefix_excl with
     | None -> true
     | Some (to_prefix_excl : Relative_path.t) ->
-      path < Relative_path.suffix to_prefix_excl
+      String.(path < Relative_path.suffix to_prefix_excl)
   in
   is_from_prefix_incl && is_to_prefix_excl
 

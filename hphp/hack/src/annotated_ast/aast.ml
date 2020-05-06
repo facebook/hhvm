@@ -615,6 +615,24 @@ and reify_kind =
 
 and doc_comment = (Doc_comment.t[@visitors.opaque])
 
+let is_erased = function
+  | Erased -> true
+  | SoftReified
+  | Reified ->
+    false
+
+let is_reified = function
+  | Reified -> true
+  | Erased
+  | SoftReified ->
+    false
+
+let is_soft_reified = function
+  | SoftReified -> true
+  | Erased
+  | Reified ->
+    false
+
 (* Splits the methods on a class into the constructor, statics, dynamics *)
 
 (**

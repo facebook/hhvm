@@ -6,7 +6,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Aast
 
 let handler =
@@ -18,7 +18,8 @@ let handler =
       | Fun_id (p, name) when String.contains name ':' ->
         Errors.illegal_meth_fun p
       | Fun_id (p, name)
-        when Naming_provider.get_fun_pos env.Nast_check_env.ctx name = None ->
+        when Option.is_none
+               (Naming_provider.get_fun_pos env.Nast_check_env.ctx name) ->
         Errors.invalid_fun_pointer p name
       | _ -> ()
   end

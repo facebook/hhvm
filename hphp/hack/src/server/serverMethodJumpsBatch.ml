@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 let get_ancestors_single ctx class_ ~filter =
   let class_ = MethodJumps.add_ns class_ in
@@ -41,7 +41,9 @@ let go :
  fun ctx workers classes filter ->
   (* Sort and dedup identical queries *)
   let deduped =
-    List.remove_consecutive_duplicates ~equal:( = ) (List.sort ~compare classes)
+    List.remove_consecutive_duplicates
+      ~equal:String.( = )
+      (List.sort ~compare:String.compare classes)
   in
   let results =
     if List.length deduped < 10 then

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open SearchUtils
 
 (* Set the currently selected search provider *)
@@ -133,7 +133,7 @@ let find_matching_symbols
    * Nuclide often sends this exact request to verify that HH is working.
    * Let's capture it and avoid doing unnecessary work.
    *)
-  if query_text = "this_is_just_to_check_liveness_of_hh_server" then
+  if String.equal query_text "this_is_just_to_check_liveness_of_hh_server" then
     [
       {
         si_name = "Yes_hh_server_is_alive";
@@ -145,10 +145,9 @@ let find_matching_symbols
   else
     (* Potential namespace matches always show up first *)
     let namespace_results =
-      if context <> Some Ac_workspace_symbol then
-        NamespaceSearchService.find_matching_namespaces ~sienv ~query_text
-      else
-        []
+      match context with
+      | Some Ac_workspace_symbol -> []
+      | _ -> NamespaceSearchService.find_matching_namespaces ~sienv ~query_text
     in
     (* The local index captures symbols in files that have been changed on disk.
      * Search it first for matches, then search global and add any elements
@@ -202,7 +201,7 @@ let find_matching_symbols
     (* Strip namespace already typed from the results *)
     let (ns, _) = Utils.split_ns_from_name query_text in
     let clean_results =
-      if ns = "" || ns = "\\" then
+      if String.equal ns "" || String.equal ns "\\" then
         dedup_results
       else
         List.map dedup_results ~f:(fun s ->
@@ -227,10 +226,10 @@ let update_files
   | LocalIndex
   | SqliteIndex ->
     List.fold paths ~init:sienv ~f:(fun sienv (path, info, detector) ->
-        if detector = SearchUtils.TypeChecker then
+        match detector with
+        | SearchUtils.TypeChecker ->
           LocalSearchService.update_file ~ctx ~sienv ~path ~info
-        else
-          sienv)
+        | _ -> sienv)
 
 (* Update from fast facts parser directly *)
 let update_from_facts

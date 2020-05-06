@@ -94,7 +94,7 @@ let write_patches_to_buffer buf original_content patch_list =
 
 let apply_patches_to_string old_content patch_list =
   let buf = Buffer.create (String.length old_content) in
-  let patch_list = List.sort compare_result patch_list in
+  let patch_list = List.sort ~compare:compare_result patch_list in
   write_patches_to_buffer buf old_content patch_list;
   Buffer.contents buf
 

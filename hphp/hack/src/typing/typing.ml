@@ -3883,7 +3883,7 @@ and check_shape_keys_validity env pos keys =
    * more sense if we take the one that appears first as canonical and if
    * they are processed in source order. *)
   let cmp_keys x y = Pos.compare (shape_field_pos x) (shape_field_pos y) in
-  let keys = List.sort cmp_keys keys in
+  let keys = List.sort ~compare:cmp_keys keys in
   match keys with
   | [] -> env
   | witness :: rest_keys ->

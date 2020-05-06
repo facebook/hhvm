@@ -416,7 +416,7 @@ let rec recheck_loop acc genv env select_outcome =
     match select_outcome with
     | ClientProvider.Select_new _ -> `Sync
     | ClientProvider.Select_nothing ->
-      if t -. env.last_notifier_check_time > 0.5 then
+      if Float.(t -. env.last_notifier_check_time > 0.5) then
         `Async
       else
         `Skip
@@ -433,7 +433,7 @@ let rec recheck_loop acc genv env select_outcome =
     | _ -> true)
     && (* "average person types [...] between 190 and 200 characters per minute"
         * 60/200 = 0.3 *)
-    t -. env.last_command_time > 0.3
+    Float.(t -. env.last_command_time > 0.3)
   in
   (* saving any file is our trigger to start full recheck *)
   let env =
@@ -459,7 +459,7 @@ let rec recheck_loop acc genv env select_outcome =
             * rechecks and us restarting them. We're going to heavily favor edits and
             * restart only after a longer period since last edit. Note that we'll still
             * start full recheck immediately after any file save. *)
-           && t -. env.last_command_time > 5.0 ->
+           && Float.(t -. env.last_command_time > 5.0) ->
       let still_there =
         try
           ClientProvider.ping client;
@@ -642,7 +642,7 @@ let serve_one_iteration genv env client_provider =
         last_stats.total_rechecked_count
         (fun () -> SharedMem.collect `aggressive);
       let t = Unix.gettimeofday () in
-      if t -. env.last_idle_job_time > 0.5 then
+      if Float.(t -. env.last_idle_job_time > 0.5) then
         let env = ServerIdle.go env in
         { env with last_idle_job_time = t }
       else

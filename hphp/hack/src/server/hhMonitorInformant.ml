@@ -118,7 +118,7 @@ module Revision_map = struct
   let find_global_rev hg_rev t =
     let future = Caml.Hashtbl.find t.global_rev_queries hg_rev in
     match Future.check_status future with
-    | Future.In_progress { age } when age > 60.0 ->
+    | Future.In_progress { age } when Float.(age > 60.0) ->
       (* Fail if lookup up global rev number takes more than 60 s.
        * Delete the query so we can retry again if we encounter this hg_rev
        * again. Return fake "0" global rev number. *)
@@ -224,7 +224,7 @@ module Revision_map = struct
       | (query, Some prefetcher) ->
         begin
           match Future.check_status prefetcher with
-          | Future.In_progress { age } when age > 90.0 ->
+          | Future.In_progress { age } when Float.(age > 90.0) ->
             (* If prefetcher has taken longer than 90 seconds, we consider
              * this as having no saved states. *)
             let () = Hh_logger.log "Informant prefetcher timed out" in
@@ -257,7 +257,7 @@ module Revision_map = struct
       | (query, None) ->
         begin
           match Future.check_status query with
-          | Future.In_progress { age } when age > 15.0 ->
+          | Future.In_progress { age } when Float.(age > 15.0) ->
             (* If lookup in XDB table has taken more than 15 seconds, we
              * we consider this as having no saved state. *)
             let () =
@@ -507,7 +507,8 @@ module Revision_tracker = struct
      * prefer a server restart. *)
     let result =
       jump_distance > min_distance_restart
-      && (elapsed_t <= 0.0 || float_of_int jump_distance /. elapsed_t > 2.0)
+      && Float.(
+           elapsed_t <= 0.0 || float_of_int jump_distance /. elapsed_t > 2.0)
     in
     result
 

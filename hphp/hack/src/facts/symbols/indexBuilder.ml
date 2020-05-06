@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open IndexBuilderTypes
 open SearchUtils
 open Facts
@@ -250,7 +250,7 @@ let export_to_custom_writer
 (* Run the index builder project *)
 let go (ctxt : index_builder_context) (workers : MultiWorker.worker list option)
     : unit =
-  if ctxt.json_repo_name <> None then
+  if Option.is_some ctxt.json_repo_name then
     (* if json repo is specified, just export to custom writer directly *)
     let json_exported_files =
       match ctxt.json_repo_name with

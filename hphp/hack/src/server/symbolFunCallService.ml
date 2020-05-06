@@ -22,15 +22,15 @@ module Result_set = Caml.Set.Make (struct
     if r <> 0 then
       r
     else
-      let r = compare b.name a.name in
+      let r = String.compare b.name a.name in
       if r <> 0 then
         r
       else
-        let r = compare b.type_ a.type_ in
+        let r = compare_target_type b.type_ a.type_ in
         if r <> 0 then
           r
         else
-          compare b.caller a.caller
+          String.compare b.caller a.caller
 end)
 
 let combine_name cur_class cur_caller =

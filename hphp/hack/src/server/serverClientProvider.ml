@@ -52,7 +52,7 @@ let select ~idle_gc_slice fd_list timeout =
   let deadline = Unix.gettimeofday () +. timeout in
   match ServerIdleGc.select ~slice:idle_gc_slice ~timeout fd_list with
   | [] ->
-    let timeout = max 0.0 (deadline -. Unix.gettimeofday ()) in
+    let timeout = Float.(max 0.0 (deadline -. Unix.gettimeofday ())) in
     let (ready_fds, _, _) = Unix.select fd_list [] [] timeout in
     ready_fds
   | ready_fds -> ready_fds

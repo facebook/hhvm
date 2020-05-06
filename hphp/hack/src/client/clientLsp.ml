@@ -529,7 +529,7 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
   let rec retain rest =
     match rest with
     | [] -> []
-    | (time, state) :: rest when time >= new_time -. 120.0 ->
+    | (time, state) :: rest when Float.(time >= new_time -. 120.0) ->
       (time, state) :: retain rest
     | (time, state) :: _rest -> [(time, state)]
     (* retain only the first that's older *)
@@ -544,7 +544,8 @@ let set_hh_server_state (new_hh_server_state : hh_server_state) : unit =
 let get_older_hh_server_state (requested_time : float) : hh_server_state =
   (* find the first item which is older than the specified time. *)
   match
-    List.find !hh_server_state_log ~f:(fun (time, _) -> time <= requested_time)
+    List.find !hh_server_state_log ~f:(fun (time, _) ->
+        Float.(time <= requested_time))
   with
   | None -> Hh_server_forgot
   | Some (_, hh_server_state) -> hh_server_state
@@ -3656,7 +3657,7 @@ let cancel_if_stale
     (client : Jsonrpc.queue) (timestamp : float) (timeout : float) : unit Lwt.t
     =
   let time_elapsed = Unix.gettimeofday () -. timestamp in
-  if time_elapsed >= timeout then
+  if Float.(time_elapsed >= timeout) then
     if Jsonrpc.has_message client then
       raise
         (Error.LspException
@@ -3778,7 +3779,7 @@ let handle_editor_buffer_message
       Lwt.return_none
     with e -> Lwt.return_some (Exception.wrap e)
   in
-  ref_unblocked_time := max !ref_hh_unblocked_time !ref_ide_unblocked_time;
+  ref_unblocked_time := Float.max !ref_hh_unblocked_time !ref_ide_unblocked_time;
   match (hh_server_e, ide_service_e) with
   | (_, Some e)
   | (Some e, _) ->

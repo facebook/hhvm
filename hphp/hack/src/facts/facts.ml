@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module J = Hh_json
 
 module InvStringKey = struct
@@ -84,21 +84,21 @@ let type_kind_to_string = function
   | TKMixed -> "mixed"
 
 let type_kind_from_string s =
-  if s = "class" then
+  if String.equal s "class" then
     TKClass
-  else if s = "record" then
+  else if String.equal s "record" then
     TKRecord
-  else if s = "interface" then
+  else if String.equal s "interface" then
     TKInterface
-  else if s = "enum" then
+  else if String.equal s "enum" then
     TKEnum
-  else if s = "trait" then
+  else if String.equal s "trait" then
     TKTrait
-  else if s = "typeAlias" then
+  else if String.equal s "typeAlias" then
     TKTypeAlias
-  else if s = "unknown" then
+  else if String.equal s "unknown" then
     TKUnknown
-  else if s = "mixed" then
+  else if String.equal s "mixed" then
     TKMixed
   else
     raise (Failure (Printf.sprintf "No Facts.type_kind matches string: %s" s))
@@ -169,12 +169,12 @@ let add_map_member name values members =
 let type_facts_to_json name tf =
   let members =
     add_set_member
-      ~include_empty:(tf.kind = TKInterface || tf.kind = TKTrait)
+      ~include_empty:(is_tk_interface tf.kind || is_tk_trait tf.kind)
       "requireExtends"
       tf.require_extends
       []
     |> add_set_member
-         ~include_empty:(tf.kind = TKTrait)
+         ~include_empty:(is_tk_trait tf.kind)
          "requireImplements"
          tf.require_implements
     |> add_map_member "attributes" tf.attributes
@@ -233,20 +233,20 @@ let facts_from_json : Hh_json.json -> facts option =
           ~init:empty_type_facts
           ~f:(fun acc (k, v) ->
             match v with
-            | JSON_String name when k = "name" ->
+            | JSON_String name when String.equal k "name" ->
               name_ref := name;
               acc
-            | JSON_String kind when k = "kindOf" ->
+            | JSON_String kind when String.equal k "kindOf" ->
               { acc with kind = type_kind_from_string kind }
-            | JSON_Number flags when k = "flags" ->
+            | JSON_Number flags when String.equal k "flags" ->
               { acc with flags = int_of_string flags }
-            | JSON_Array xs when k = "baseTypes" ->
+            | JSON_Array xs when String.equal k "baseTypes" ->
               { acc with base_types = set_from_jstr_array xs }
-            | JSON_Array xs when k = "requireExtends" ->
+            | JSON_Array xs when String.equal k "requireExtends" ->
               { acc with require_extends = set_from_jstr_array xs }
-            | JSON_Array xs when k = "requireImplements" ->
+            | JSON_Array xs when String.equal k "requireImplements" ->
               { acc with require_implements = set_from_jstr_array xs }
-            | JSON_Object key_values when k = "attributes" ->
+            | JSON_Object key_values when String.equal k "attributes" ->
               {
                 acc with
                 attributes =
@@ -270,13 +270,13 @@ let facts_from_json : Hh_json.json -> facts option =
            ~init:empty
            ~f:(fun acc (k, v) ->
              match v with
-             | JSON_Array xs when k = "constants" ->
+             | JSON_Array xs when String.equal k "constants" ->
                { acc with constants = list_from_jstr_array xs }
-             | JSON_Array xs when k = "functions" ->
+             | JSON_Array xs when String.equal k "functions" ->
                { acc with functions = list_from_jstr_array xs }
-             | JSON_Array xs when k = "typeAliases" ->
+             | JSON_Array xs when String.equal k "typeAliases" ->
                { acc with type_aliases = list_from_jstr_array xs }
-             | JSON_Array types when k = "types" ->
+             | JSON_Array types when String.equal k "types" ->
                {
                  acc with
                  types =

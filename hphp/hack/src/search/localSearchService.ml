@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open SearchUtils
 
 (* How many locally changed files are in this env? *)
@@ -17,7 +17,7 @@ let count_local_fileinfos ~(sienv : si_env) : int =
  * "/path/to/root//subpath/file".  When we extract the suffix
  * from a relative_path.t, clear out any preceding slash. *)
 let strip_first_char char s =
-  if String.length s = 0 || s.[0] <> char then
+  if String.length s = 0 || not (Char.equal s.[0] char) then
     s
   else
     String.sub s 1 (String.length s - 1)
@@ -44,7 +44,7 @@ let convert_fileinfo_to_contents
        * than we can get from FileInfo.t objects.  Since this function is only
        * called when a file has been modified locally, it's safe to call
        * decl_provider - this information has already been cached. *)
-      if kind = SI_Class && sienv.sie_resolve_local_decl then
+      if is_si_class kind && sienv.sie_resolve_local_decl then
         match Decl_provider.get_class ctx name with
         | Some cls ->
           let is_final = Decl_provider.Class.final cls in
@@ -180,8 +180,8 @@ let search_local_symbols
       | (Some Actype, _) -> SearchUtils.valid_for_actype symbol
       | (Some Acnew, _) -> SearchUtils.valid_for_acnew symbol
       | (Some Acid, _) -> SearchUtils.valid_for_acid symbol
-      | (Some Actrait_only, _) -> symbol.sif_kind = SI_Trait
-      | (_, Some kind_match) -> symbol.sif_kind = kind_match
+      | (Some Actrait_only, _) -> is_si_trait symbol.sif_kind
+      | (_, Some kind_match) -> equal_si_kind symbol.sif_kind kind_match
       | _ -> true
     in
     if

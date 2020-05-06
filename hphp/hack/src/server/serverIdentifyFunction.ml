@@ -46,7 +46,7 @@ let go_quarantined
   let symbols =
     IdentifySymbolService.go_quarantined ~ctx ~entry ~line ~column
   in
-  let symbols = take_best_suggestions (List.sort by_nesting symbols) in
+  let symbols = take_best_suggestions (List.sort ~compare:by_nesting symbols) in
   (* TODO(ljw): shouldn't the following be quarantined also? *)
   List.map symbols ~f:(fun symbol ->
       let ast =

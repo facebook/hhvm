@@ -103,7 +103,7 @@ let print_wait_msg (progress_callback : string option -> unit) (root : Path.t) :
 let check_for_deadline deadline_opt =
   let timed_out =
     match deadline_opt with
-    | Some d -> Unix.time () > d
+    | Some d -> Float.(Unix.time () > d)
     | None -> false
   in
   if timed_out then (
@@ -250,7 +250,7 @@ let rec connect
     if
       Sys_utils.is_apple_os ()
       && allow_macos_hack
-      && Unix.gettimeofday () -. start > threshold
+      && Float.(Unix.gettimeofday () -. start > threshold)
     then (
       (*
         HACK: on MacOS, re-establish the connection if it took a long time

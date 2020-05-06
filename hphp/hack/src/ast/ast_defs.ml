@@ -135,6 +135,14 @@ and uop =
 (* Helpers *)
 (*****************************************************************************)
 
+let is_c_enum = function
+  | Cenum -> true
+  | Cabstract
+  | Cnormal
+  | Ctrait
+  | Cinterface ->
+    false
+
 let is_c_interface = function
   | Cinterface -> true
   | Cabstract
@@ -150,6 +158,24 @@ let is_c_trait = function
   | Cnormal
   | Cenum ->
     false
+
+let is_c_abstract = function
+  | Cabstract -> true
+  | Cinterface
+  | Cnormal
+  | Ctrait
+  | Cenum ->
+    false
+
+let is_f_async = function
+  | FAsync -> true
+  | _ -> false
+
+let is_f_async_or_generator = function
+  | FAsync
+  | FAsyncGenerator ->
+    true
+  | _ -> false
 
 let string_of_class_kind = function
   | Cabstract -> "an abstract class"

@@ -340,7 +340,7 @@ let profile_log
     Option.value time_typecheck_opt ~default:time_decl_and_typecheck
   in
   let should_log =
-    deciding_time >= check_info.profile_type_check_duration_threshold
+    Float.(deciding_time >= check_info.profile_type_check_duration_threshold)
     || times_checked > 1
     || files_to_declare > 0
   in

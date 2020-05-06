@@ -631,7 +631,7 @@ let parse_check_args cmd =
         Arg.Unit (set_mode MODE_STATUS),
         " (mode) show a human readable list of errors (default)" );
       ( "--timeout",
-        Arg.Float (fun x -> timeout := Some (max 5. x)),
+        Arg.Float (fun x -> timeout := Some (Float.max 5. x)),
         " set the timeout in seconds (default: no timeout)" );
       ( "--type-at-pos",
         Arg.String (fun x -> set_mode (MODE_TYPE_AT_POS x) ()),

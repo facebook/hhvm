@@ -168,6 +168,7 @@ module Symbol_info_service = struct
     | Function
     | Method
     | Constructor
+  [@@deriving ord]
 
   type symbol_fun_call = {
     name: string;

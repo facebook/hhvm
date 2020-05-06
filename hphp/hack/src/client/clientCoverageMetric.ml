@@ -71,14 +71,14 @@ let print_reasons reasons_stats =
             Pos.Map.fold (fun _ x acc -> acc + x.pos_count) pos_map 0 ))
     in
     let sorted_reasons =
-      List.sort (fun (_, _, x) (_, _, y) -> y - x) reasons_list
+      List.sort ~compare:(fun (_, _, x) (_, _, y) -> y - x) reasons_list
     in
     List.iter sorted_reasons (fun (r, pos_map, count) ->
         Printf.printf "  Reason %s: %d\n" r count;
         Printf.printf "    Reason position:\n";
         let pos_list =
           List.sort
-            (fun (_, p1) (_, p2) -> p2.pos_count - p1.pos_count)
+            ~compare:(fun (_, p1) (_, p2) -> p2.pos_count - p1.pos_count)
             (Pos.Map.elements pos_map)
         in
         let pos_list = List.take pos_list Coverage_level.display_limit in

@@ -62,7 +62,7 @@ let write_json
       Symbol_json_builder.build_json ctx symbol_occurrences files_info
     in
     let (_out_file, channel) =
-      Filename.open_temp_file
+      Caml.Filename.open_temp_file
         ~temp_dir:file_dir
         "glean_symbol_info_chunk_"
         ".json"
@@ -80,7 +80,7 @@ let write_json
       (List.length files_info)
       time.tm_min
       time.tm_sec;
-    if elapsed > 600.0 then
+    if Float.(elapsed > 600.0) then
       (* Write out files from batches that take more than 10 minutes *)
       let file_list =
         String.concat

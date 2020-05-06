@@ -230,7 +230,7 @@ let load_saved_state
           let open ClientIdeMessage.Initialize_from_saved_state in
           (* tests may wish to pretend there's a delay *)
           let%lwt () =
-            if naming_table_load_info.test_delay > 0.0 then
+            if Float.(naming_table_load_info.test_delay > 0.0) then
               Lwt_unix.sleep naming_table_load_info.test_delay
             else
               Lwt.return_unit

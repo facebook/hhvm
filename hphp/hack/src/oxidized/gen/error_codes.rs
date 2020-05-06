@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44bd7306d063c326f94e9908da6a62da>>
+// @generated SignedSource<<aaa6cad5115463c52fec555bc36ba616>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -652,6 +652,7 @@ pub enum Typing {
     RedundantGeneric,
     PocketUniversesInvalidUpperBounds,
     PocketUniversesRefinement,
+    PocketUniversesReservedSyntax,
 }
 
 #[derive(

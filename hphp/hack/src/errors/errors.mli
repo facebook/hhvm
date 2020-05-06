@@ -1014,6 +1014,8 @@ val pu_localize : Pos.t -> string -> string -> unit
 
 val pu_localize_unknown : Pos.t -> string -> unit
 
+val pu_reserved_syntax : Pos.t -> unit
+
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit

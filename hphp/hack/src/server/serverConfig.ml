@@ -410,6 +410,21 @@ let load ~silent config_filename options =
       ?po_enable_xhp_class_modifier:
         (bool_opt "enable_xhp_class_modifier" config)
       ?po_disable_modes:(bool_opt "disable_modes" config)
+      ?tco_pu_enabled_paths:
+        (match
+           string_list
+             ~delim:config_list_regexp
+             ~default:[]
+             "pocket_universe_enabled_paths"
+             config
+         with
+        | [] -> Some (false, [])
+        | ["nowhere"] -> Some (false, [])
+        | ["everywhere"] -> Some (true, [])
+        | l ->
+          Some
+            ( false,
+              List.map ~f:(fun suffix -> Relative_path.from_root ~suffix) l ))
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;

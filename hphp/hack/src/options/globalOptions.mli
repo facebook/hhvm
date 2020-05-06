@@ -251,6 +251,12 @@ type t = {
   po_disable_array: bool;
   (* Enable features used to typecheck systemlib *)
   tco_enable_systemlib_annotations: bool;
+  (* Controls if/where the pocket universe syntax is enabled
+   * if bool is set to true, then the PU syntax is enabled everywhere
+   * if bool is set to false, the PU syntax is enabled only inside the directories specified in the string list
+   * Paths are relative to the path of .hhconfig
+   *)
+  tco_pu_enabled_paths: bool * Relative_path.t list;
 }
 [@@deriving show]
 
@@ -345,6 +351,7 @@ val make :
   ?po_disable_modes:bool ->
   ?po_disable_array:bool ->
   ?tco_enable_systemlib_annotations:bool ->
+  ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   unit ->
   t
 
@@ -559,3 +566,5 @@ val po_disable_modes : t -> bool
 val po_disable_array : t -> bool
 
 val tco_enable_systemlib_annotations : t -> bool
+
+val tco_pu_enabled_paths : t -> bool * Relative_path.t list

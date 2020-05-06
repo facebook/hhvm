@@ -238,6 +238,7 @@ let parse_options () =
   let enable_first_class_function_pointers = ref false in
   let disable_modes = ref false in
   let enable_systemlib_annotations = ref false in
+  let enable_pocket_universes_syntax = ref false in
   let options =
     [
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
@@ -533,6 +534,9 @@ let parse_options () =
       ( "--enable-systemlib-annotations",
         Arg.Set enable_systemlib_annotations,
         "Enable systemlib annotations" );
+      ( "--enable-pocket-universes-syntax",
+        Arg.Set enable_pocket_universes_syntax,
+        "Enable the pocket universes syntax" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -601,6 +605,7 @@ let parse_options () =
         !enable_first_class_function_pointers
       ~po_disable_modes:!disable_modes
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
+      ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
       ()
   in
   let tcopt =

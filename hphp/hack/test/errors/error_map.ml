@@ -620,4 +620,5 @@ TraitReuseInsideClass = 4365
 RedundantGeneric = 4366
 PocketUniversesInvalidUpperBounds = 4367
 PocketUniversesRefinement = 4368
+PocketUniversesReservedSyntax = 4369
   |}]

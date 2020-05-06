@@ -1696,6 +1696,15 @@ let pu_localize_unknown pos msg =
     pos
     (sprintf "Illegal Pocket Universe invocation %s" msg)
 
+let pu_reserved_syntax pos =
+  add
+    (Typing.err_code Typing.PocketUniversesReservedSyntax)
+    pos
+    ( sprintf "This syntax is reserved for the Pocket Universes prototype.\n"
+    ^ "It can only be used in the directories specified by the\n"
+    ^ "  pocket_universe_enabled_path = nowhere|everywhere|dir1,..,dirn\noption in .hhconfig"
+    )
+
 let illegal_use_of_dynamically_callable attr_pos meth_pos visibility =
   add_list
     (Naming.err_code Naming.IllegalUseOfDynamicallyCallable)

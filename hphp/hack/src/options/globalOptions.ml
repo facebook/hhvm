@@ -99,6 +99,7 @@ type t = {
   po_disable_modes: bool;
   po_disable_array: bool;
   tco_enable_systemlib_annotations: bool;
+  tco_pu_enabled_paths: bool * Relative_path.t list;
 }
 [@@deriving show]
 
@@ -268,6 +269,7 @@ let default =
     po_disable_modes = false;
     po_disable_array = false;
     tco_enable_systemlib_annotations = false;
+    tco_pu_enabled_paths = (false, []);
   }
 
 let make
@@ -380,6 +382,7 @@ let make
     ?(po_disable_array = default.po_disable_array)
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
+    ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
     () =
   {
     tco_experimental_features;
@@ -473,6 +476,7 @@ let make
     po_disable_modes;
     po_disable_array;
     tco_enable_systemlib_annotations;
+    tco_pu_enabled_paths;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -675,3 +679,5 @@ let po_disable_modes t = t.po_disable_modes
 let po_disable_array t = t.po_disable_array
 
 let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
+
+let tco_pu_enabled_paths t = t.tco_pu_enabled_paths

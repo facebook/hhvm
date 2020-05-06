@@ -1240,6 +1240,29 @@ void ConcurrentTableSharedStore::dumpRandomKeys(std::ostream& out,
   dumpEntriesInfo(sampleEntriesInfo(count), out);
 }
 
+void ConcurrentTableSharedStore::dumpKeysWithPrefixes(
+  std::ostream& out,
+  const std::vector<std::string>& prefixes) {
+  if (prefixes.empty()) return;
+  SharedMutex::WriteHolder l(m_lock);
+  for (auto const& iter : m_vars) {
+    const StoreValue& value = iter.second;
+    if (value.c_time == 0) continue;
+    if (value.data().left() == nullptr) continue;
+    if (value.expired()) continue;
+    auto const key = iter.first;
+    // We are going to use newline to separate different keys
+    if (strpbrk(key, "\r\n")) continue;
+    bool match = std::any_of(
+      prefixes.begin(), prefixes.end(),
+      [key] (const std::string& prefix) {
+        return !strncmp(key, prefix.c_str(), prefix.size());
+      });
+    if (!match) continue;
+    out << key << "\n";
+  }
+}
+
 std::vector<EntryInfo>
 ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
   SharedMutex::WriteHolder l(m_lock);

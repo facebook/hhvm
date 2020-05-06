@@ -331,7 +331,13 @@ struct ConcurrentTableSharedStore {
    * of what the dump `KeyAndValue` command would do.
    */
   void dumpPrefix(std::ostream& out, const std::string &prefix, uint32_t count);
-
+  /**
+   * Dump all non-primed keys that begin with one of the prefixes. Different
+   * keys are separated by \n in the output stream. Keys containing \r or \n
+   * will not be included.
+   */
+  void dumpKeysWithPrefixes(std::ostream& out,
+                            const std::vector<std::string>& prefixes);
   /*
    * Dump random key and entry size to output stream
    */

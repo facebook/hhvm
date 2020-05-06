@@ -50,6 +50,7 @@
 #include "hphp/runtime/ext/apc/snapshot-builder.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
 #include "hphp/runtime/server/cli-server.h"
+#include "hphp/runtime/server/upload.h"
 
 using HPHP::ScopedMem;
 
@@ -119,8 +120,8 @@ void initialize_apc() {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString
-  s_delete("delete");
+const StaticString s_delete("delete");
+const StaticString s_internal_preload("__apc_internal_preload");
 
 extern void const_load();
 
@@ -158,6 +159,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(TTLMaxFinite, ini, config, "Server.APC.TTLMaxFinite",
                std::numeric_limits<int64_t>::max());
   Config::Bind(HotPrefix, ini, config, "Server.APC.HotPrefix");
+  Config::Bind(SerializePrefix, ini, config, "Server.APC.SerializePrefix");
   Config::Bind(HotSize, ini, config, "Server.APC.HotSize", 30000);
   Config::Bind(HotLoadFactor, ini, config, "Server.APC.HotLoadFactor", 0.5);
   Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
@@ -262,6 +264,19 @@ void apcExtension::requestShutdown() {
   apc_store().purgeExpired();
 }
 
+std::string apcExtension::serialize() {
+  std::ostringstream oss;
+  apc_store().dumpKeysWithPrefixes(oss, SerializePrefix);
+  return oss.str();
+}
+
+void apcExtension::deserialize(std::string data) {
+  auto sd = StringData::MakeUncounted(data);
+  data.clear();
+  apc_store().set(s_internal_preload, Variant{sd}, 0);
+  StringData::ReleaseUncounted(sd);     // a copy was made in APC
+}
+
 bool apcExtension::Enable = true;
 bool apcExtension::EnableConstLoad = false;
 bool apcExtension::ForceConstLoadToAPC = true;
@@ -277,9 +292,10 @@ int64_t apcExtension::TTLMaxFinite = std::numeric_limits<int64_t>::max();
 int apcExtension::HotSize = 30000;
 double apcExtension::HotLoadFactor = 0.5;
 std::vector<std::string> apcExtension::HotPrefix;
+std::vector<std::string> apcExtension::SerializePrefix;
+std::string apcExtension::PrimeLibraryUpgradeDest;
 bool apcExtension::HotKeyAllocLow = false;
 bool apcExtension::HotMapAllocLow = false;
-std::string apcExtension::PrimeLibraryUpgradeDest;
 bool apcExtension::UseFileStorage = false;
 int64_t apcExtension::FileStorageChunkSize = int64_t(1LL << 29);
 std::string apcExtension::FileStoragePrefix = "/tmp/apc_store";

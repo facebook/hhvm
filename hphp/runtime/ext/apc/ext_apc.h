@@ -42,6 +42,7 @@ struct apcExtension final : Extension {
   static int TTLLimit;
   static int64_t TTLMaxFinite;
   static std::vector<std::string> HotPrefix;
+  static std::vector<std::string> SerializePrefix;
   static int HotSize;
   static double HotLoadFactor;
   static bool HotKeyAllocLow;
@@ -64,6 +65,9 @@ struct apcExtension final : Extension {
   bool moduleEnabled() const override { return Enable; }
 
   void requestShutdown() override;
+
+  std::string serialize() override;
+  void deserialize(std::string data) override;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

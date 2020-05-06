@@ -802,7 +802,10 @@ let check_pos_msg pos_msg_l =
     let stack =
       Exception.get_current_callstack_string 99 |> Exception.clean_stack
     in
-    HackEventLogger.primary_position_error ~current_file ~message ~stack;
+    HackEventLogger.type_check_primary_position_bug
+      ~current_file
+      ~message
+      ~stack;
     (Pos.make_from current_file, badpos_message) :: pos_msg_l
 
 let rec add_applied_fixme code pos =

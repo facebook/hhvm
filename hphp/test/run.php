@@ -1097,31 +1097,11 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $cmd .= " -vScribe.Tables.hhvm_jit.include.*=deployment_id";
   }
 
-  // Command line arguments
-  $cli_args = find_test_ext($test, 'cli_args');
-  if ($cli_args !== null) {
-    $cmd .= " -- " . trim(file_get_contents($cli_args));
-  }
-
   $env = $_ENV;
-  $extra_env = varray[];
 
   // Apply the --env option
   if (isset($options['env'])) {
-    $extra_env = array_merge($extra_env,
-      explode(",", $options['env']));
-  }
-
-  // If there's an <test name>.env file then inject the contents of that into
-  // the test environment.
-  $env_file = find_test_ext($test, 'env');
-  if ($env_file !== null) {
-    $extra_env = array_merge($extra_env,
-      explode("\n", trim(file_get_contents($env_file))));
-  }
-
-  if ($extra_env) {
-    foreach ($extra_env as $arg) {
+    foreach (explode(",", $options['env']) as $arg) {
       $i = strpos($arg, '=');
       if ($i) {
         $key = substr($arg, 0, $i);

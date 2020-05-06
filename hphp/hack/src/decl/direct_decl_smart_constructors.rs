@@ -386,8 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Nullable(&'a Node_<'a>),
-    LikeType(&'a Node_<'a>),
     Soft(&'a Node_<'a>),
     Closure(&'a ClosureTypeHint<'a>),
 }
@@ -942,8 +940,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
                     }
-                    HintValue::Nullable(&hint) => Ty_::Toption(self.node_to_ty(hint)?),
-                    HintValue::LikeType(&hint) => Ty_::Tlike(self.node_to_ty(hint)?),
                     HintValue::Soft(&hint) => {
                         // Use the pos from the Soft node (above, when we
                         // construct `reason`) so that we include the position
@@ -3260,14 +3256,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_nullable_type_specifier(&mut self, question_mark: Self::R, hint: Self::R) -> Self::R {
         let hint = hint?;
         let hint_pos = hint.get_pos(self.state.arena)?;
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Nullable(self.alloc(hint)),
+        Ok(self.hint_ty(
             Pos::merge(
                 self.state.arena,
                 question_mark?.get_pos(self.state.arena)?,
                 hint_pos,
             )?,
-        ))))
+            Ty_::Toption(self.node_to_ty(hint)?),
+        ))
     }
 
     fn make_like_type_specifier(&mut self, tilde: Self::R, type_: Self::R) -> Self::R {
@@ -3277,9 +3273,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             tilde.get_pos(self.state.arena)?,
             type_.get_pos(self.state.arena)?,
         )?;
-        Ok(Node_::Hint(
-            self.alloc((HintValue::LikeType(self.alloc(type_)), pos)),
-        ))
+        Ok(self.hint_ty(pos, Ty_::Tlike(self.node_to_ty(type_)?)))
     }
 
     fn make_closure_type_specifier(

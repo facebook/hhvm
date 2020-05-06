@@ -28,23 +28,6 @@ use \MyNamespace\{
   const BRACED_DONT_CARE as BRACED_REALLY_DONT_CARE,
 };
 
-use \MyNamespace{
-  MyConcatenatedType,
-  MyConcatenatedType as MyConcatenatedType2,
-  function concatenated_dont_care,
-  function concatenated_dont_care as concatenated_really_dont_care,
-  const CONCATENATED_DONT_CARE,
-  const CONCATENATED_DONT_CARE as CONCATENATED_REALLY_DONT_CARE,
-};
-
-namespace {
-  use MyNamespace\MyScopedNamespace\MyType;
-
-  function my_scoped_id(MyType $x): MyType2 {
-    return $x;
-  }
-}
-
 function id(MyType $x): MyType2 {
   return $x;
 }
@@ -54,9 +37,5 @@ function other_id(MyOtherType $x): MyOtherType2 {
 }
 
 function braced_id(MyBracedType $x): MyBracedType2 {
-  return $x;
-}
-
-function concatenated_id(MyConcatenatedType $x): MyConcatenatedType2 {
   return $x;
 }

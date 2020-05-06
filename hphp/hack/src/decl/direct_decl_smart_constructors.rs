@@ -382,15 +382,6 @@ impl<'a> State<'a> {
 
 #[derive(Clone, Debug)]
 pub enum HintValue<'a> {
-    Void,
-    Int,
-    Bool,
-    Float,
-    String,
-    Resource,
-    Num,
-    ArrayKey,
-    NoReturn,
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Array(&'a (Node_<'a>, Node_<'a>)),
@@ -563,6 +554,7 @@ pub enum Node_<'a> {
     BooleanLiteral(&'a str, &'a Pos<'a>), // For const expressions.
     Null(&'a Pos<'a>),                   // For const expressions.
     Hint(&'a (HintValue<'a>, &'a Pos<'a>)),
+    Ty(Ty<'a>),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node_<'a>, Node_<'a>)),
     Const(&'a ConstDecl<'a>),
@@ -624,6 +616,7 @@ impl<'a> Node_<'a> {
         match self {
             Node_::Name(_, pos) => Ok(pos),
             Node_::Hint(&(_, pos)) => Ok(pos),
+            Node_::Ty(ty) => Ok(ty.get_pos().unwrap_or(Pos::none())),
             Node_::XhpName(_, pos) => Ok(pos),
             Node_::QualifiedName(_, pos) => Ok(pos),
             Node_::Backslash(pos)
@@ -896,18 +889,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         type_variables: SortedSet<&str>,
     ) -> Result<Ty<'a>, ParseError> {
         match node {
+            Node_::Ty(ty) => Ok(ty),
             Node_::Hint((hv, pos)) => {
                 let reason = self.alloc(Reason::hint(*pos));
                 let ty_ = match hv {
-                    HintValue::Void => Ty_::Tprim(self.alloc(aast::Tprim::Tvoid)),
-                    HintValue::Int => Ty_::Tprim(self.alloc(aast::Tprim::Tint)),
-                    HintValue::Bool => Ty_::Tprim(self.alloc(aast::Tprim::Tbool)),
-                    HintValue::Float => Ty_::Tprim(self.alloc(aast::Tprim::Tfloat)),
-                    HintValue::String => Ty_::Tprim(self.alloc(aast::Tprim::Tstring)),
-                    HintValue::Resource => Ty_::Tprim(self.alloc(aast::Tprim::Tresource)),
-                    HintValue::Num => Ty_::Tprim(self.alloc(aast::Tprim::Tnum)),
-                    HintValue::ArrayKey => Ty_::Tprim(self.alloc(aast::Tprim::Tarraykey)),
-                    HintValue::NoReturn => Ty_::Tprim(self.alloc(aast::Tprim::Tnoreturn)),
                     HintValue::Apply(&(id, inner_types)) => match id.1.trim_start_matches("\\") {
                         "varray_or_darray" => match inner_types {
                             [tk, tv] => Ty_::TvarrayOrDarray(
@@ -1442,6 +1427,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             pos,
         ))))
     }
+
+    fn prim_ty(&self, tprim: aast::Tprim<'a>, pos: &'a Pos<'a>) -> Node_<'a> {
+        Node_::Ty(Ty(
+            self.alloc(Reason::hint(pos)),
+            self.alloc(Ty_::Tprim(self.alloc(tprim))),
+        ))
+    }
 }
 
 enum NodeIterHelper<'a: 'b, 'b> {
@@ -1597,30 +1589,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::FloatingLiteral => Node_::FloatingLiteral(token_text(self), token_pos(self)),
             TokenKind::NullLiteral => Node_::Null(token_pos(self)),
             TokenKind::BooleanLiteral => Node_::BooleanLiteral(token_text(self), token_pos(self)),
-            TokenKind::String => Node_::Hint(&*self.alloc((HintValue::String, token_pos(self)))),
-            TokenKind::Int => Node_::Hint(&*self.alloc((HintValue::Int, token_pos(self)))),
-            TokenKind::Float => Node_::Hint(&*self.alloc((HintValue::Float, token_pos(self)))),
+            TokenKind::String => self.prim_ty(aast::Tprim::Tstring, token_pos(self)),
+            TokenKind::Int => self.prim_ty(aast::Tprim::Tint, token_pos(self)),
+            TokenKind::Float => self.prim_ty(aast::Tprim::Tfloat, token_pos(self)),
             TokenKind::Double => Node_::Hint(&*self.alloc((
                 HintValue::Apply(&*self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
                 token_pos(self),
             ))),
-            TokenKind::Num => Node_::Hint(&*self.alloc((HintValue::Num, token_pos(self)))),
-            TokenKind::Bool => Node_::Hint(&*self.alloc((HintValue::Bool, token_pos(self)))),
+            TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
+            TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Boolean => Node_::Hint(&*self.alloc((
                 HintValue::Apply(&*self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
                 token_pos(self),
             ))),
             TokenKind::Mixed => Node_::Hint(&*self.alloc((HintValue::Mixed, token_pos(self)))),
-            TokenKind::Void => Node_::Hint(&*self.alloc((HintValue::Void, token_pos(self)))),
-            TokenKind::Arraykey => {
-                Node_::Hint(&*self.alloc((HintValue::ArrayKey, token_pos(self))))
-            }
-            TokenKind::Noreturn => {
-                Node_::Hint(&*self.alloc((HintValue::NoReturn, token_pos(self))))
-            }
-            TokenKind::Resource => {
-                Node_::Hint(&*self.alloc((HintValue::Resource, token_pos(self))))
-            }
+            TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
+            TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
+            TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
+            TokenKind::Resource => self.prim_ty(aast::Tprim::Tresource, token_pos(self)),
             TokenKind::Array => Node_::Array(token_pos(self)),
             TokenKind::Darray => Node_::Darray(token_pos(self)),
             TokenKind::Varray => Node_::Varray(token_pos(self)),
@@ -3126,7 +3112,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let (classname, targ, gt) = (classname?, targ?, gt?);
         let id = self.get_name("\\", classname)?;
         match gt {
-            Node_::Ignored => Ok(Node_::Hint(self.alloc((HintValue::String, id.0)))),
+            Node_::Ignored => Ok(self.prim_ty(aast::Tprim::Tstring, id.0)),
             gt => Ok(Node_::Hint(self.alloc((
                 HintValue::Apply(self.alloc((
                     id,

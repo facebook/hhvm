@@ -8,4 +8,7 @@ Cannot convert func to string
 * fb_serialize result:
 Cannot convert func to string
 * json_encode result:
-Cannot convert func to string
+string(6) ""test""
+* json_decode result:
+string(4) "test"
+NULL

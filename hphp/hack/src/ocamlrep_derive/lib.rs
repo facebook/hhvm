@@ -13,7 +13,14 @@ decl_derive!([ToOcamlRep] => derive_to_ocamlrep);
 decl_derive!([FromOcamlRep] => derive_from_ocamlrep);
 
 fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
-    let (to_body, _) = derive_to_and_from(&mut s);
+    // By default, if you are deriving an impl of trait Foo for generic type
+    // X<T>, synstructure will add Foo as a bound not only for the type
+    // parameter T, but also for every type which appears as a field in X. This
+    // is not necessary for our use case--we can just require that the type
+    // parameters implement our trait.
+    s.add_bounds(synstructure::AddBounds::Generics);
+
+    let to_body = to_ocamlrep_body(&s);
     s.gen_impl(quote! {
         gen impl ::ocamlrep::ToOcamlRep for @Self {
             fn to_ocamlrep<'__ocamlrep_derive_allocator, Alloc: ::ocamlrep::Allocator>(
@@ -28,7 +35,9 @@ fn derive_to_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
 }
 
 fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
-    let (_, from_body) = derive_to_and_from(&mut s);
+    s.add_bounds(synstructure::AddBounds::Generics);
+
+    let from_body = from_ocamlrep_body(&s);
     s.gen_impl(quote! {
         gen impl ::ocamlrep::FromOcamlRep for @Self {
             fn from_ocamlrep(value: ::ocamlrep::Value<'_>) -> ::std::result::Result<Self, ::ocamlrep::FromError> {
@@ -39,62 +48,73 @@ fn derive_from_ocamlrep(mut s: synstructure::Structure) -> TokenStream {
     })
 }
 
-fn derive_to_and_from(s: &mut synstructure::Structure) -> (TokenStream, TokenStream) {
-    // By default, if you are deriving an impl of trait Foo for generic type
-    // X<T>, synstructure will add Foo as a bound not only for the type
-    // parameter T, but also for every type which appears as a field in X. This
-    // is not necessary for our use case--we can just require that the type
-    // parameters implement our trait.
-    s.add_bounds(synstructure::AddBounds::Generics);
-
+fn to_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
     match &s.ast().data {
-        syn::Data::Struct(struct_data) => struct_impl(&s, struct_data),
-        syn::Data::Enum(_) => enum_impl(&s),
+        syn::Data::Struct(struct_data) => struct_to_ocamlrep(&s, struct_data),
+        syn::Data::Enum(_) => enum_to_ocamlrep(&s, collect_enum_variants(&s)),
         syn::Data::Union(_) => panic!("untagged unions not supported"),
     }
 }
 
-fn struct_impl(
-    s: &synstructure::Structure,
-    struct_data: &syn::DataStruct,
-) -> (TokenStream, TokenStream) {
-    let variant = &s.variants()[0];
+fn from_ocamlrep_body(s: &synstructure::Structure) -> TokenStream {
+    match &s.ast().data {
+        syn::Data::Struct(struct_data) => struct_from_ocamlrep(&s, struct_data),
+        syn::Data::Enum(_) => enum_from_ocamlrep(collect_enum_variants(&s)),
+        syn::Data::Union(_) => panic!("untagged unions not supported"),
+    }
+}
+
+fn struct_to_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct) -> TokenStream {
     match struct_data.fields {
         syn::Fields::Unit => {
             // Represent unit structs with unit.
-            let to = s.each_variant(|_| quote! { arena.add(&()) });
-            let constructor = variant.construct(|_, _| quote!(unreachable!()));
-            let from = quote! { <()>::from_ocamlrep(value)?; Ok(#constructor) };
-            (to, from)
+            s.each_variant(|_| quote! { arena.add(&()) })
         }
         syn::Fields::Unnamed(ref fields) if fields.unnamed.len() == 1 => {
             // For the newtype pattern (a tuple struct with a single field),
             // don't allocate a block--just use the inner value directly.
-            let to = s.each(|bi| quote! { arena.add(#bi) });
-            let constructor = variant.construct(|field, _| {
-                let ty = &field.ty;
-                quote! { <#ty>::from_ocamlrep(value)? }
-            });
-            let from = quote! { Ok(#constructor) };
-            (to, from)
+            s.each(|bi| quote! { arena.add(#bi) })
         }
         syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
             // Otherwise, we have a record-like struct or a tuple struct. Both
             // are represented with a block.
-            let to = s.each_variant(|v| allocate_block(v, 0));
-            let size = variant.bindings().len();
-            let constructor =
-                variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? });
-            let from = quote! {
-                let mut block = ::ocamlrep::from::expect_tuple(value, #size)?;
-                Ok(#constructor)
-            };
-            (to, from)
+            s.each_variant(|v| allocate_block(v, 0))
         }
     }
 }
 
-fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
+fn struct_from_ocamlrep(s: &synstructure::Structure, struct_data: &syn::DataStruct) -> TokenStream {
+    let variant = &s.variants()[0];
+    match struct_data.fields {
+        syn::Fields::Unit => {
+            let constructor = variant.construct(|_, _| quote!(unreachable!()));
+            quote! { <()>::from_ocamlrep(value)?; Ok(#constructor) }
+        }
+        syn::Fields::Unnamed(ref fields) if fields.unnamed.len() == 1 => {
+            let constructor = variant.construct(|field, _| {
+                let ty = &field.ty;
+                quote! { <#ty>::from_ocamlrep(value)? }
+            });
+            quote! { Ok(#constructor) }
+        }
+        syn::Fields::Named(_) | syn::Fields::Unnamed(_) => {
+            let size = variant.bindings().len();
+            let constructor =
+                variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? });
+            quote! {
+                let mut block = ::ocamlrep::from::expect_tuple(value, #size)?;
+                Ok(#constructor)
+            }
+        }
+    }
+}
+
+struct EnumVariants<'a> {
+    nullary_variants: Vec<(&'a synstructure::VariantInfo<'a>, isize)>,
+    block_variants: Vec<(&'a synstructure::VariantInfo<'a>, isize)>,
+}
+
+fn collect_enum_variants<'a>(s: &'a synstructure::Structure) -> EnumVariants<'a> {
     // For tagging purposes, variant constructors of zero arguments are numbered
     // separately from variant constructors of one or more arguments, so we need
     // to count them separately to learn their tags.
@@ -114,19 +134,19 @@ fn enum_impl(s: &synstructure::Structure) -> (TokenStream, TokenStream) {
         block_variants.len() <= 246,
         "Too many non-constant enum variants -- maximum is 246"
     );
-
-    let mut all_variants = nullary_variants.clone();
-    all_variants.extend(block_variants.iter().cloned());
-
-    let to = enum_to_ocamlrep(s, all_variants);
-    let from = enum_from_ocamlrep(nullary_variants, block_variants);
-    (to, from)
+    EnumVariants {
+        nullary_variants,
+        block_variants,
+    }
 }
 
-fn enum_to_ocamlrep(
-    s: &synstructure::Structure,
-    all_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
-) -> TokenStream {
+fn enum_to_ocamlrep(s: &synstructure::Structure, variants: EnumVariants<'_>) -> TokenStream {
+    let EnumVariants {
+        nullary_variants,
+        mut block_variants,
+    } = variants;
+    let mut all_variants = nullary_variants;
+    all_variants.append(&mut block_variants);
     s.each_variant(|v| {
         let size = v.bindings().len();
         let tag = {
@@ -148,10 +168,11 @@ fn enum_to_ocamlrep(
     })
 }
 
-fn enum_from_ocamlrep(
-    nullary_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
-    block_variants: Vec<(&synstructure::VariantInfo<'_>, isize)>,
-) -> TokenStream {
+fn enum_from_ocamlrep(variants: EnumVariants<'_>) -> TokenStream {
+    let EnumVariants {
+        nullary_variants,
+        block_variants,
+    } = variants;
     let max_nullary_tag = nullary_variants.len().saturating_sub(1);
     let max_block_tag = block_variants.len().saturating_sub(1) as u8;
 

@@ -174,7 +174,9 @@ module Hg_actual = struct
 
   (** hg update --rev r<global_rev> --cwd <repo> *)
   let update_to_rev rev repo =
-    let process = exec_hg ["update"; "--rev"; rev_string rev; "--cwd"; repo] in
+    let process =
+      exec_hg ["update"; "--rev"; rev_string rev; "--cwd"; repo; "--clean"]
+    in
     Future.make process ignore
 
   module Mocking = struct

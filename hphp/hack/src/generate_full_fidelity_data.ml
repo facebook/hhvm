@@ -1708,7 +1708,7 @@ module GenerateRustFlattenSmartConstructors = struct
         if %s {
           Self::zero()
         } else {
-          Self::flatten(vec!(%s))
+          self.flatten(vec!(%s))
         }
     }\n\n"
       x.type_name
@@ -1725,7 +1725,7 @@ pub trait FlattenOp {
     type S;
     fn is_zero(s: &Self::S) -> bool;
     fn zero() -> Self::S;
-    fn flatten(lst: Vec<Self::S>) -> Self::S;
+    fn flatten(&self, lst: Vec<Self::S>) -> Self::S;
 }
 
 pub trait FlattenSmartConstructors<'src, State>
@@ -1847,7 +1847,7 @@ use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
 use parser_core_types::positioned_token::PositionedToken;
 
-use crate::*;
+use crate::{State, Node};
 
 #[derive(Clone)]
 pub struct DirectDeclSmartConstructors<'src> {
@@ -1855,7 +1855,7 @@ pub struct DirectDeclSmartConstructors<'src> {
 }
 impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
     type Token = PositionedToken;
-    type R = Node;
+    type R = Node<'src>;
 
     fn state_mut(&mut self) -> &mut State<'src> {
         &mut self.state

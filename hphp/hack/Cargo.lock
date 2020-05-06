@@ -149,6 +149,7 @@ name = "bench"
 version = "0.0.0"
 dependencies = [
  "aast_parser 0.0.0",
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "criterion 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "decl_mode_parser 0.0.0",
  "decl_rust 0.0.0",
@@ -509,6 +510,7 @@ dependencies = [
 name = "decl_rust"
 version = "0.0.0"
 dependencies = [
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "direct_decl_parser 0.0.0",
  "direct_decl_smart_constructors 0.0.0",
  "flatten_smart_constructors 0.0.0",
@@ -518,6 +520,7 @@ dependencies = [
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
+ "oxidized_by_ref 0.0.0",
  "parser_core_types 0.0.0",
  "typing_collections_rust 0.0.0",
  "typing_defs_rust 0.0.0",
@@ -527,9 +530,12 @@ dependencies = [
 name = "decl_rust_ffi"
 version = "0.0.0"
 dependencies = [
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "decl_rust 0.0.0",
+ "ocamlrep 0.0.0",
  "ocamlrep_ocamlpool 0.0.0",
  "oxidized 0.0.0",
+ "oxidized_by_ref 0.0.0",
 ]
 
 [[package]]
@@ -563,6 +569,7 @@ dependencies = [
 name = "direct_decl_parser"
 version = "0.0.0"
 dependencies = [
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "direct_decl_smart_constructors 0.0.0",
  "parser 0.0.0",
  "parser_core_types 0.0.0",
@@ -573,12 +580,15 @@ dependencies = [
 name = "direct_decl_smart_constructors"
 version = "0.0.0"
 dependencies = [
+ "arena_collections 0.0.0",
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "flatten_smart_constructors 0.0.0",
  "hh_autoimport_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
+ "oxidized_by_ref 0.0.0",
  "parser_core_types 0.0.0",
  "smart_constructors 0.0.0",
 ]
@@ -1987,6 +1997,20 @@ dependencies = [
  "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "ocamlrep_derive 0.0.0",
+ "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "oxidized_by_ref"
+version = "0.0.0"
+dependencies = [
+ "arena_collections 0.0.0",
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hh_autoimport_rust 0.0.0",
+ "ocamlrep 0.0.0",
+ "ocamlrep_derive 0.0.0",
+ "oxidized 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

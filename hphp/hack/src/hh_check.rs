@@ -46,14 +46,21 @@ struct TestDeclProvider {
 }
 
 impl TestDeclProvider {
-    fn new(path: &RelativePath, text: &[u8]) -> Self {
-        let decls = match decl_rust::direct_decl_parser::parse_decls(
-            path.clone(),
-            &String::from_utf8_lossy(text),
-        ) {
+    fn new(path: &RelativePath, text: &[u8], arena: &Bump) -> Self {
+        let decls = match decl_rust::direct_decl_parser::parse_decls(path.clone(), text, arena) {
             Err(e) => panic!("{:?}", e),
             Ok(decls) => decls,
         };
+        // We don't have a means of converting oxidized_by_ref types directly
+        // into oxidized types at the moment. However, we can convert them to
+        // OCaml values, and we can convert the OCaml values to owned oxidized
+        // types, so we can perform the conversion as long as we're willing to
+        // pay the overhead of allocating the intermediate OCaml value (which is
+        // acceptable in hh_check for now).
+        let arena = ocamlrep::Arena::new();
+        let ocaml_decls = arena.add(&decls);
+        use ocamlrep::FromOcamlRep;
+        let decls = oxidized::direct_decl_parser::Decls::from_ocamlrep(ocaml_decls).unwrap();
         Self { decls }
     }
 }
@@ -95,7 +102,7 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let arena = Bump::new();
     let builder = typing_make_type::TypeBuilder::new(&arena);
-    let provider = TestDeclProvider::new(&rel_path, content);
+    let provider = TestDeclProvider::new(&rel_path, content, &arena);
     let profile = from_text(
         &builder,
         &provider,

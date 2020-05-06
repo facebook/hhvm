@@ -132,7 +132,7 @@ impl Debug for Block<'_> {
         } else if self.tag() == DOUBLE_TAG {
             write!(f, "{:?}", self.as_value().as_float().unwrap())
         } else {
-            write!(f, "{:?}", self.as_values().unwrap())
+            write!(f, "{}{:?}", self.tag(), self.as_values().unwrap())
         }
     }
 }

@@ -116,7 +116,7 @@ pub struct TypeAliasDeclChildren {
 impl<'a> FlattenOp for FactsSmartConstructors<'_> {
     type S = Node;
 
-    fn flatten(lst: Vec<Self::S>) -> Self::S {
+    fn flatten(&self, lst: Vec<Self::S>) -> Self::S {
         let mut r = lst
             .into_iter()
             .map(|s| match s {

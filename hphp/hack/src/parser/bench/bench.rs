@@ -7,6 +7,7 @@
 use std::time::Duration;
 use std::{fs, path::PathBuf};
 
+use bumpalo::Bump;
 use criterion::Criterion;
 use structopt::StructOpt;
 
@@ -85,11 +86,13 @@ fn bench_facts_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
 }
 
 fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8])]) {
+    let mut arena = Bump::with_capacity(1024 * 1024); // 1 MB
     c.bench_function("direct_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
                 let text = SourceText::make(RcOc::clone(filename), text);
-                let _ = direct_decl_parser::parse_script(&text, ParserEnv::default(), None);
+                let _ = direct_decl_parser::parse_script(&text, ParserEnv::default(), &arena, None);
+                arena.reset();
             }
         })
     });

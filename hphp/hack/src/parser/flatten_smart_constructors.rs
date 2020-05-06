@@ -22,7 +22,7 @@ pub trait FlattenOp {
     type S;
     fn is_zero(s: &Self::S) -> bool;
     fn zero() -> Self::S;
-    fn flatten(lst: Vec<Self::S>) -> Self::S;
+    fn flatten(&self, lst: Vec<Self::S>) -> Self::S;
 }
 
 pub trait FlattenSmartConstructors<'src, State>
@@ -44,7 +44,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -52,7 +52,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -60,7 +60,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -68,7 +68,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -76,7 +76,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -84,7 +84,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -92,7 +92,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -100,7 +100,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -108,7 +108,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -116,7 +116,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
         }
     }
 
@@ -124,7 +124,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -132,7 +132,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
         }
     }
 
@@ -140,7 +140,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -148,7 +148,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7))
         }
     }
 
@@ -156,7 +156,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -164,7 +164,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -172,7 +172,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -180,7 +180,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -188,7 +188,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -196,7 +196,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -204,7 +204,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -212,7 +212,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -220,7 +220,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -228,7 +228,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -236,7 +236,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) && Self::is_zero(&arg9) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
         }
     }
 
@@ -244,7 +244,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -252,7 +252,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -260,7 +260,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -268,7 +268,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -276,7 +276,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) && Self::is_zero(&arg9) && Self::is_zero(&arg10) && Self::is_zero(&arg11) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
         }
     }
 
@@ -284,7 +284,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -292,7 +292,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -300,7 +300,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -308,7 +308,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -316,7 +316,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -324,7 +324,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -332,7 +332,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -340,7 +340,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -348,7 +348,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) && Self::is_zero(&arg9) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
         }
     }
 
@@ -356,7 +356,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -364,7 +364,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -372,7 +372,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -380,7 +380,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -388,7 +388,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -396,7 +396,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -404,7 +404,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -412,7 +412,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -420,7 +420,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -428,7 +428,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -436,7 +436,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -444,7 +444,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -452,7 +452,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -460,7 +460,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -468,7 +468,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -476,7 +476,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -484,7 +484,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -492,7 +492,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -500,7 +500,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -508,7 +508,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -516,7 +516,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -524,7 +524,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -532,7 +532,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -540,7 +540,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
         }
     }
 
@@ -548,7 +548,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) && Self::is_zero(&arg9) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9))
         }
     }
 
@@ -556,7 +556,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -564,7 +564,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -572,7 +572,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -580,7 +580,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -588,7 +588,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -596,7 +596,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -604,7 +604,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -612,7 +612,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -620,7 +620,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -628,7 +628,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -636,7 +636,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -644,7 +644,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -652,7 +652,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -660,7 +660,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -668,7 +668,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
         }
     }
 
@@ -676,7 +676,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) && Self::is_zero(&arg9) && Self::is_zero(&arg10) && Self::is_zero(&arg11) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11))
         }
     }
 
@@ -684,7 +684,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -692,7 +692,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -700,7 +700,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -708,7 +708,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -716,7 +716,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -724,7 +724,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -732,7 +732,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -740,7 +740,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -748,7 +748,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -756,7 +756,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -764,7 +764,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -772,7 +772,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -780,7 +780,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -788,7 +788,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -796,7 +796,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -804,7 +804,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -812,7 +812,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -820,7 +820,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -828,7 +828,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -836,7 +836,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -844,7 +844,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -852,7 +852,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -860,7 +860,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -868,7 +868,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -876,7 +876,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -884,7 +884,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -892,7 +892,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -900,7 +900,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -908,7 +908,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -916,7 +916,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -924,7 +924,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -932,7 +932,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -940,7 +940,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -948,7 +948,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -956,7 +956,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -964,7 +964,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -972,7 +972,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -980,7 +980,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -988,7 +988,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -996,7 +996,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1004,7 +1004,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1012,7 +1012,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1020,7 +1020,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1028,7 +1028,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1036,7 +1036,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1044,7 +1044,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1052,7 +1052,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1060,7 +1060,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1068,7 +1068,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -1076,7 +1076,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1084,7 +1084,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1092,7 +1092,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1100,7 +1100,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1108,7 +1108,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1116,7 +1116,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1124,7 +1124,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1132,7 +1132,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1140,7 +1140,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1148,7 +1148,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1156,7 +1156,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1164,7 +1164,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1172,7 +1172,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1180,7 +1180,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1188,7 +1188,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -1196,7 +1196,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -1204,7 +1204,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1212,7 +1212,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) && Self::is_zero(&arg7) && Self::is_zero(&arg8) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
         }
     }
 
@@ -1220,7 +1220,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1228,7 +1228,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1236,7 +1236,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1244,7 +1244,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1252,7 +1252,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1260,7 +1260,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1268,7 +1268,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1276,7 +1276,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1284,7 +1284,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1292,7 +1292,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1300,7 +1300,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1308,7 +1308,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1316,7 +1316,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1324,7 +1324,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1332,7 +1332,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1340,7 +1340,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1348,7 +1348,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1356,7 +1356,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2))
+          self.flatten(vec!(arg0, arg1, arg2))
         }
     }
 
@@ -1364,7 +1364,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0))
+          self.flatten(vec!(arg0))
         }
     }
 
@@ -1372,7 +1372,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1380,7 +1380,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1388,7 +1388,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1396,7 +1396,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5))
         }
     }
 
@@ -1404,7 +1404,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) && Self::is_zero(&arg5) && Self::is_zero(&arg6) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4, arg5, arg6))
         }
     }
 
@@ -1412,7 +1412,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 
@@ -1420,7 +1420,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) && Self::is_zero(&arg4) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3, arg4))
+          self.flatten(vec!(arg0, arg1, arg2, arg3, arg4))
         }
     }
 
@@ -1428,7 +1428,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1))
+          self.flatten(vec!(arg0, arg1))
         }
     }
 
@@ -1436,7 +1436,7 @@ pub trait FlattenSmartConstructors<'src, State>
         if Self::is_zero(&arg0) && Self::is_zero(&arg1) && Self::is_zero(&arg2) && Self::is_zero(&arg3) {
           Self::zero()
         } else {
-          Self::flatten(vec!(arg0, arg1, arg2, arg3))
+          self.flatten(vec!(arg0, arg1, arg2, arg3))
         }
     }
 

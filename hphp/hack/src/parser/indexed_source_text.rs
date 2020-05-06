@@ -40,4 +40,8 @@ impl<'a> IndexedSourceText<'a> {
         let pos_end = self.0.offset_map.offset_to_file_pos_triple(end_offset);
         Pos::from_lnum_bol_cnum(self.0.source_text.file_path_rc(), pos_start, pos_end)
     }
+
+    pub fn offset_to_file_pos_triple(&self, offset: usize) -> (usize, usize, usize) {
+        self.0.offset_map.offset_to_file_pos_triple(offset)
+    }
 }

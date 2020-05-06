@@ -14,6 +14,8 @@ include Sys
 module S = struct
   type t = string [@@deriving show]
 
+  let equal = String.equal
+
   let compare = String.compare
 
   let to_string x = x
@@ -24,6 +26,8 @@ type t = S.t [@@deriving show]
 let dummy_path : t = ""
 
 let cat = Sys_utils.cat
+
+let equal = S.equal
 
 let compare = S.compare
 

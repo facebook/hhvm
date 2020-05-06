@@ -3,6 +3,7 @@
   (wrapped false)
   (modules
     process_types)
+  (preprocess (pps ppx_deriving.std))
   (libraries
     core_kernel
     utils_core
@@ -13,6 +14,7 @@
   (wrapped false)
   (modules
     process)
+  (preprocess (pps ppx_deriving.std))
   (libraries
     exec_command
     process_types
@@ -27,6 +29,7 @@
   (modules
     future
     future_sig)
+  (preprocess (pps ppx_deriving.std))
   (libraries
     process
     process_types

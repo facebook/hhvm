@@ -8,7 +8,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 exception Expected_throw_missing
 
@@ -20,7 +20,7 @@ let expect_throws e f x =
     Printf.eprintf "Error. Did not throw expected: %s\n" (Exn.to_string e);
     false
   with err ->
-    if e <> err then
+    if Poly.(e <> err) then
       let () =
         Printf.eprintf
           "Error. Expected exn: %s. But got : %s\n"
@@ -65,7 +65,7 @@ let run_only tests names =
   let f =
     match names with
     | [] -> const true
-    | _ -> (fun (n, _) -> List.mem names n ~equal:( = ))
+    | _ -> (fun (n, _) -> List.mem names n ~equal:String.( = ))
   in
   let tests = List.filter tests ~f in
   run_all tests

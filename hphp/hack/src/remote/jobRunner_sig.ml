@@ -9,7 +9,7 @@
 open Core_kernel
 
 module Types = struct
-  type job_id = int [@@deriving show]
+  type job_id = int [@@deriving show, eq]
 end
 
 module type S = sig

@@ -12,6 +12,8 @@ open Reordered_argument_collections
 module S : sig
   type t = private string [@@deriving show]
 
+  val equal : t -> t -> bool
+
   val compare : t -> t -> int
 
   val to_string : t -> string
@@ -30,6 +32,8 @@ val to_string : t -> string
 val file_exists : t -> bool
 
 val is_directory : t -> bool
+
+val equal : t -> t -> bool
 
 val compare : t -> t -> int
 

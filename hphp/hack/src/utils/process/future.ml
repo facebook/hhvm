@@ -61,6 +61,8 @@ type 'a promise =
 (** float is the time the Future was constructed. *)
 and 'a t = 'a promise ref * float
 
+let equal (_f : 'a -> 'a -> bool) (x : 'a t) (y : 'a t) = Poly.equal x y
+
 (* 30 seconds *)
 let default_timeout = 30
 

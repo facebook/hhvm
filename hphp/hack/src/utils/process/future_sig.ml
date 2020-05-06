@@ -36,7 +36,7 @@ end
 module type S = sig
   include module type of Types
 
-  type 'a t
+  type 'a t [@@deriving eq]
 
   (* Blocking. Returns the value from the underlying process. *)
   val get : ?timeout:int -> 'a t -> ('a, error) result

@@ -316,6 +316,11 @@ class DOMComment extends DOMCharacterData {
   public function __construct(?string $value = null);
 }
 
+class DOMCdataSection extends DOMText {
+  // Methods
+  public function __construct(string $value = '');
+}
+
 <<__PHPStdLib>>
 function dom_import_simplexml(SimpleXMLElement $node): ?DOMElement;
 <<__PHPStdLib>>

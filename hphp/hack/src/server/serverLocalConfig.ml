@@ -14,6 +14,9 @@ module RemoteTypeCheck = struct
   type remote_type_check = {
     (* Controls the `defer_class_declaration_threshold` setting on the remote worker *)
     declaration_threshold: int;
+    (* A list of error phases; if, before type checking, errors in these phases
+        are present, then remote type checking will be disabled *)
+    disabled_on_errors: Errors.phase list;
     (* Enables remote type check *)
     enabled: bool;
     (* Indicates how long to wait between heartbeats (in seconds) *)
@@ -40,6 +43,26 @@ module RemoteTypeCheck = struct
         ~prefix
         ~default:default.declaration_threshold
         config
+    in
+    let enabled_on_errors =
+      string_list
+        "enabled_on_errors"
+        ~delim:(Str.regexp ",")
+        ~prefix
+        ~default:["typing"]
+        config
+      |> List.fold ~init:[] ~f:(fun acc phase ->
+             match Errors.phase_of_string phase with
+             | Some phase -> phase :: acc
+             | None -> acc)
+    in
+    let disabled_on_errors =
+      List.filter
+        [Errors.Typing; Errors.Decl; Errors.Parsing; Errors.Init; Errors.Naming]
+        ~f:(fun phase ->
+          not
+            (List.exists enabled_on_errors ~f:(fun enabled_phase ->
+                 enabled_phase = phase)))
     in
     let heartbeat_period =
       int_ "heartbeat_period" ~prefix ~default:default.heartbeat_period config
@@ -93,6 +116,7 @@ module RemoteTypeCheck = struct
     in
     {
       declaration_threshold;
+      disabled_on_errors;
       enabled;
       heartbeat_period;
       load_naming_table_on_full_init;
@@ -394,6 +418,7 @@ let default =
         {
           enabled = false;
           declaration_threshold = 2;
+          disabled_on_errors = [];
           (* Indicates how long to wait between heartbeats (in seconds) *)
           heartbeat_period = 15;
           load_naming_table_on_full_init = false;

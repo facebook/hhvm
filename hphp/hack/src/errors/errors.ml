@@ -261,6 +261,15 @@ let phase_to_string (phase : phase) : string =
   | Decl -> "Decl"
   | Typing -> "Typing"
 
+let phase_of_string (value : string) : phase option =
+  match Caml.String.lowercase_ascii value with
+  | "init" -> Some Init
+  | "parsing" -> Some Parsing
+  | "naming" -> Some Naming
+  | "decl" -> Some Decl
+  | "typing" -> Some Typing
+  | _ -> None
+
 let get_message (error : error) =
   (* We get the position of the first item in the message error list, which
     represents the location of the error (error claim). Other messages represent

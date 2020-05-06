@@ -12,30 +12,63 @@ open ServerLocalConfig
 open ServerLocalConfig.RemoteTypeCheck
 
 let should_do_remote
-    (opts : TypecheckerOptions.t) (fnl : Relative_path.Set.t) ~(t : float) :
-    bool * float =
+    (genv : ServerEnv.genv)
+    (opts : TypecheckerOptions.t)
+    (fnl : Relative_path.Set.t)
+    (errors : Errors.t) : bool =
   let remote_type_check = TypecheckerOptions.remote_type_check opts in
   let remote_type_check_threshold =
     TypecheckerOptions.remote_type_check_threshold opts
   in
   let file_count = Relative_path.Set.cardinal fnl in
   let do_remote =
-    match (remote_type_check, remote_type_check_threshold) with
-    | (true, Some remote_type_check_threshold)
-      when file_count >= remote_type_check_threshold ->
-      Hh_logger.log
-        "Going to schedule work because file count %d >= threshold %d"
-        file_count
-        remote_type_check_threshold;
-      true
-    | _ -> false
+    if remote_type_check then begin
+      Hh_logger.log "Remote type checking is enabled";
+      match remote_type_check_threshold with
+      | Some remote_type_check_threshold ->
+        Hh_logger.log
+          "Remote type checking threshold is set to %d"
+          remote_type_check_threshold;
+        if file_count >= remote_type_check_threshold then begin
+          Hh_logger.log
+            "The file count threshold is met: %d >= threshold %d"
+            file_count
+            remote_type_check_threshold;
+          true
+        end else begin
+          Hh_logger.log
+            "The file count threshold is not met: %d < threshold %d"
+            file_count
+            remote_type_check_threshold;
+          false
+        end
+      | None ->
+        Hh_logger.log "Remote type checking threshold is not set";
+        false
+    end else begin
+      Hh_logger.log "Remote type checking is disabled";
+      false
+    end
   in
-  ( do_remote,
-    Hh_logger.log_duration
-      (Printf.sprintf
-         "Calculated whether should do remote type checking (%B)"
-         do_remote)
-      t )
+  let do_remote =
+    let open Relative_path.Set in
+    if do_remote then begin
+      let phases = genv.local_config.remote_type_check.disabled_on_errors in
+      let do_remote =
+        List.fold phases ~init:true ~f:(fun acc phase ->
+            acc && not (cardinal (Errors.get_failed_files errors phase) > 0))
+      in
+      if not do_remote then
+        Hh_logger.log
+          "Errors were present in phases that disqualify from remote type checking";
+      do_remote
+    end else
+      false
+  in
+  Hh_logger.log
+    "Calculated whether should do remote type checking (%B)"
+    do_remote;
+  do_remote
 
 let start_typing_delegate genv env : env =
   let {

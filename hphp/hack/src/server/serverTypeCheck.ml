@@ -1305,8 +1305,8 @@ functor
       let (files_to_check, lazy_check_later) =
         CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
       in
-      let (should_start_delegate, t) =
-        ServerCheckUtils.should_do_remote env.tcopt files_to_check ~t
+      let should_start_delegate =
+        ServerCheckUtils.should_do_remote genv env.tcopt files_to_check errors
       in
       let env =
         if should_start_delegate then

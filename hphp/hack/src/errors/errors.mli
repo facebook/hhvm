@@ -99,6 +99,8 @@ val error_code_to_string : int -> string
 
 val phase_to_string : phase -> string
 
+val phase_of_string : string -> phase option
+
 val internal_error : Pos.t -> string -> unit
 
 val unimplemented_feature : Pos.t -> string -> unit

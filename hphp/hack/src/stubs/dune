@@ -5,7 +5,9 @@
     ai
     ai_options)
   (libraries
-    errors))
+    errors)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name artifact_store_stubs)
@@ -13,24 +15,32 @@
   (modules
     artifactStore)
   (libraries
-    errors))
+    errors)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name build)
   (wrapped false)
   (modules
-    buildMain))
+    buildMain)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name rust_ffi_stubs)
   (wrapped false)
-  (modules ))
+  (modules)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name linting_stubs)
   (wrapped false)
   (modules
-    linting_service))
+    linting_service)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name load_script_stubs)
@@ -38,13 +48,17 @@
   (modules
     load_script
     loadScriptConfig
-    loadScriptUtils))
+    loadScriptUtils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name messages_stubs)
   (wrapped false)
   (modules
-    clientMessages))
+    clientMessages)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name vfs_stubs)
@@ -52,7 +66,9 @@
   (modules
     vfs)
   (libraries
-    relative_path))
+    relative_path)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name typing_service_api_stubs)
@@ -60,10 +76,12 @@
   (modules
     typing_service_delegate)
   (libraries
-    typing_service_api))
+    typing_service_api)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
-  (name remote_worker_stubs)
+  (name remote_stubs)
   (wrapped false)
   (modules
     remoteWorker)
@@ -75,7 +93,9 @@
     future
     naming
     relative_path
-    sys_utils))
+    sys_utils)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name job_runner_stubs)
@@ -87,7 +107,9 @@
     (select jobRunner_sig.ml from (-> ../remote/jobRunner_sig.ml))
     core_kernel
     future
-    utils_core))
+    utils_core)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name state_loader_stubs)
@@ -99,20 +121,27 @@
     state_loader_lwt
     xdb)
   (libraries
+    artifact_store_stubs
     hg
-    server_monitor))
+    server_monitor)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name decl_ipc_ffi_externs)
   (wrapped false)
   (modules
-    decl_ipc_ffi_externs))
+    decl_ipc_ffi_externs)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name experiments_config_file_stubs)
   (wrapped false)
   (modules
-    experiments_config_file))
+    experiments_config_file)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name ci_util_stubs)
@@ -120,7 +149,9 @@
   (modules
     ci_util)
   (libraries
-    future))
+    future)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name glean_dependency_graph_stubs)
@@ -129,19 +160,27 @@
     glean_dependency_graph)
   (libraries
     hh_json
-    collections))
+    collections)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name exec_command_stubs)
   (wrapped false)
-  (modules exec_command))
+  (modules exec_command)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name clowder_paste)
   (wrapped false)
-  (modules clowder_paste))
+  (modules clowder_paste)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))
 
 (library
   (name flytrap)
   (wrapped false)
-  (modules flytrap))
+  (modules flytrap)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std)))

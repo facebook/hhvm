@@ -10,7 +10,7 @@
   (libraries
     ai
     build_options
-    ci_util_stubs
+    ci_util
     cli_args
     config_state_loader
     diagnostic_subscription
@@ -26,6 +26,7 @@
     server_client_provider
     server_command_types
     server_monitor
+    state_loader
     typechecker_options
     typing_service_api
     typing_service_api_stubs
@@ -240,7 +241,7 @@
       (-> logging_stubs))
     lsp
     parsing_service
-    remote_worker_stubs
+    remote
     search
     server_env
     server_services
@@ -282,7 +283,7 @@
   (libraries
     bad_files
     build
-    ci_util_stubs
+    ci_util
     load_script
     lwt
     parent

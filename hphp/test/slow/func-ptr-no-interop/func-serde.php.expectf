@@ -1,0 +1,11 @@
+function(test)
+fun('test')
+function(test)
+function(test)
+
+* serialize result:
+Cannot convert func to string
+* fb_serialize result:
+Cannot convert func to string
+* json_encode result:
+Cannot convert func to string

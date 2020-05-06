@@ -73,6 +73,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
         return {value->getHandle(), sizeof(APCNamedEntity)};
       }
       // fallthrough to string serialization
+      if (!func->isMethod()) invalidFuncConversion("string");
     }
     case KindOfClass:
     case KindOfPersistentString:

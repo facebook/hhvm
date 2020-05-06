@@ -1,0 +1,4 @@
+
+int(3)
+
+Fatal error: calling an ill-formed function pointer without resolved class/object pointer in %s/test/slow/func-ptr-no-interop/bad-func2.php on line 15

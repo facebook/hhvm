@@ -283,6 +283,7 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         continue;
 
       case KindOfFunc:
+        invalidFuncConversion("int");
         i = funcToInt64Helper(val(tv).pfunc);
         continue;
 
@@ -451,6 +452,7 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       return;
 
     case KindOfFunc: {
+      invalidFuncConversion("string");
       auto const s = funcToStringHelper(val(tv).pfunc);
       return persistentString(const_cast<StringData*>(s));
     }
@@ -534,6 +536,7 @@ StringData* tvCastToStringData(TypedValue tv) {
       return tv.m_data.pres->data()->o_toString().detach();
 
     case KindOfFunc: {
+      invalidFuncConversion("string");
       auto const s = funcToStringHelper(tv.m_data.pfunc);
       return const_cast<StringData*>(s);
     }

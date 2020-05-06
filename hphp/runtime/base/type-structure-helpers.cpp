@@ -61,7 +61,8 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
 
     case KindOfFunc: {
       auto const cls = lookupClass();
-      if (cls && interface_supports_string(cls->name())) {
+      if (RO::EvalEnableFuncStringInterop &&
+          cls && interface_supports_string(cls->name())) {
         funcToStringHelper(tv->m_data.pfunc); // maybe raise a warning
         return true;
       }
@@ -593,7 +594,7 @@ bool checkTypeStructureMatchesTVImpl(
       return isIntType(type) || isStringType(type);
 
     case TypeStructure::Kind::T_string:
-      if (isFuncType(type)) {
+      if (RO::EvalEnableFuncStringInterop && isFuncType(type)) {
         if (RO::EvalIsStringNotices) {
           raise_notice("Func used in is_string");
         }

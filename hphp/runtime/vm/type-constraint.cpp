@@ -1091,7 +1091,8 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
     return;
   }
 
-  if (isFuncType(c->m_type) || isClassType(c->m_type)) {
+  if ((RO::EvalEnableFuncStringInterop && isFuncType(c->m_type)) ||
+      isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c->m_type)) {
@@ -1254,7 +1255,8 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
     }
   }
 
-  if (isFuncType(c.type()) || isClassType(c.type())) {
+  if ((RO::EvalEnableFuncStringInterop && isFuncType(c.type())) ||
+      isClassType(c.type())) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
       if (RuntimeOption::EvalStringHintNotices) {
         if (isFuncType(c.type())) {

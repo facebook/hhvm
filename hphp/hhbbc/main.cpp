@@ -321,6 +321,7 @@ std::vector<SString> load_input(F&& fun) {
     RO::EvalArrProvDVArrays =
       gd.ArrayProvenance;
   RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
+  RO::EvalEnableFuncStringInterop = gd.EnableFuncStringInterop;
   if (gd.HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
 
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
@@ -425,6 +426,7 @@ void write_global_data(
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
+  gd.EnableFuncStringInterop = RO::EvalEnableFuncStringInterop;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);

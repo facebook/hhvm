@@ -1,0 +1,18 @@
+function(main)
+array(3) {
+  [0]=>
+  int(1)
+  [1]=>
+  function(main)
+  [2]=>
+  string(3) "foo"
+}
+function(array_map)
+array(3) {
+  [0]=>
+  int(10)
+  [1]=>
+  function(apc_fetch)
+  [2]=>
+  string(3) "foo"
+}

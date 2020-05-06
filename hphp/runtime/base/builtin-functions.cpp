@@ -108,6 +108,10 @@ const StaticString s_cmpWithNonArr(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a PHP array with a non-array"
 );
+const StaticString s_cmpWithFunc(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "funcs"
+);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -795,6 +799,10 @@ void throw_clsmeth_compare_exception() {
 
 void throw_arr_non_arr_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithNonArr);
+}
+
+void throw_func_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithFunc);
 }
 
 void throw_param_is_not_container() {

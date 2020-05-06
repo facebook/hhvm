@@ -2268,6 +2268,10 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           return;
 
         case KindOfFunc:
+          if (!RO::EvalEnableFuncStringInterop) {
+            match = SwitchMatch::DEFAULT;
+            return;
+          }
         case KindOfClass:
         case KindOfPersistentString:
         case KindOfString: {

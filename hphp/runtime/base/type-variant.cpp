@@ -438,6 +438,7 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfFunc:
+      invalidFuncConversion("int");
       return funcToInt64Helper(m_data.pfunc);
     case KindOfClass:
       return classToStringHelper(m_data.pclass)->toInt64();
@@ -477,6 +478,7 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfFunc:
+      invalidFuncConversion("array");
       return make_packed_array(Variant{funcToStringHelper(m_data.pfunc),
                                        PersistentStrInit{}});
     case KindOfClass:

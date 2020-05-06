@@ -106,6 +106,7 @@ TypedNum numericConvHelper(TypedValue cell) {
       return make_int(cell.m_data.num);
 
     case KindOfFunc:
+      invalidFuncConversion("int");
       return stringToNumeric(funcToStringHelper(cell.m_data.pfunc));
 
     case KindOfClass:
@@ -506,6 +507,7 @@ void tvIncDecOp(Op op, tv_lval cell) {
 
     case KindOfFunc: {
       raiseIncDecInvalidType(cell);
+      invalidFuncConversion("int");
       auto s = funcToStringHelper(val(cell).pfunc);
       stringIncDecOp(op, cell, const_cast<StringData*>(s));
       return;
@@ -795,8 +797,9 @@ void tvBitNot(TypedValue& cell) {
       cell.m_data.num = ~double_to_int64(cell.m_data.dbl);
       break;
 
-    case KindOfClass:
     case KindOfFunc:
+      invalidFuncConversion("int");
+    case KindOfClass:
       cell.m_data.pstr = isFuncType(cell.m_type)
         ? const_cast<StringData*>(funcToStringHelper(cell.m_data.pfunc))
         : const_cast<StringData*>(classToStringHelper(cell.m_data.pclass));

@@ -37,6 +37,7 @@ extern const StaticString s_cmpWithKeyset;
 extern const StaticString s_cmpWithClsMeth;
 extern const StaticString s_cmpWithRecord;
 extern const StaticString s_cmpWithNonArr;
+extern const StaticString s_cmpWithFunc;
 
 ///////////////////////////////////////////////////////////////////////////////
 // operators
@@ -351,6 +352,7 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();
 [[noreturn]] void throw_arr_non_arr_compare_exception();
+[[noreturn]] void throw_func_compare_exception();
 [[noreturn]] void throw_param_is_not_container();
 [[noreturn]] void throw_invalid_inout_base();
 [[noreturn]] void throw_cannot_modify_immutable_object(const char* className);

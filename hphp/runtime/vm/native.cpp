@@ -394,7 +394,8 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       continue;
     }
 
-    if (tvIsFunc(tv) && isStringType(*targetType)) {
+    if (tvIsFunc(tv) && isStringType(*targetType) &&
+        RO::EvalEnableFuncStringInterop) {
       val(tv).pstr = const_cast<StringData*>(val(tv).pfunc->name());
       type(tv) = KindOfPersistentString;
       if (RuntimeOption::EvalStringHintNotices) {

@@ -80,7 +80,7 @@ bool mayHaveData(trep bits) {
   case BArrN:    case BSArrN:    case BCArrN:
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
-  case BFunc:
+  case BFunc:    case BFuncS:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
   case BOptVec:   case BOptSVec:   case BOptCVec:
@@ -175,6 +175,7 @@ bool mayHaveData(trep bits) {
   case BOptStrLike:
   case BOptUncStrLike:
   case BOptFunc:
+  case BOptFuncS:
   case BOptCls:
   case BClsMeth:
   case BOptClsMeth:
@@ -214,6 +215,7 @@ bool canBeOptional(trep bits) {
   case BObj:
   case BRes:
   case BFunc:
+  case BFuncS:
   case BCls:
   case BClsMeth:
   case BRecord:
@@ -335,6 +337,7 @@ bool canBeOptional(trep bits) {
   case BOptVecLikeSA:
   case BOptVecLike:
   case BOptFunc:
+  case BOptFuncS:
   case BOptCls:
   case BOptClsMeth:
   case BOptRecord:
@@ -3858,7 +3861,8 @@ Type type_of_istype(IsTypeOp op) {
     assertx(!RO::EvalHackArrDVArrs);
     return TDArr;
   case IsTypeOp::ClsMeth: return TClsMeth;
-  case IsTypeOp::Func: return TFunc;
+  case IsTypeOp::Func:
+    return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: always_assert(0);
   }
@@ -3886,7 +3890,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
     return IsTypeOp::DArray;
   }
   if (t.subtypeOf(BClsMeth)) return IsTypeOp::ClsMeth;
-  if (t.subtypeOf(BFunc)) return IsTypeOp::Func;
+  if (t.subtypeOf(BFunc|BFuncS)) return IsTypeOp::Func;
   return folly::none;
 }
 
@@ -4120,7 +4124,7 @@ Type from_DataType(DataType dt) {
   case KindOfArray:    return TArr;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  case KindOfFunc:     return TFunc;
+  case KindOfFunc:     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;
   }
@@ -6672,6 +6676,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(OptObj)
   X(Func)
   X(OptFunc)
+  X(FuncS)
+  X(OptFuncS)
   X(Cls)
   X(OptCls)
   X(ClsMeth)

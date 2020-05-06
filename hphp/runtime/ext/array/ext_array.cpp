@@ -338,6 +338,15 @@ bool HHVM_FUNCTION(array_key_exists,
 
   auto const cell = key.asTypedValue();
 
+  auto const fail = [&] {
+    if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
+    if (checkHACArrayKeyCast()) {
+      raiseHackArrCompatImplicitArrayKey(cell);
+    }
+    raise_warning("Array key should be either a string or an integer");
+    return false;
+  };
+
   switch (cell->m_type) {
     case KindOfUninit:
     case KindOfNull:
@@ -368,14 +377,10 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord:
-      if (!ad->useWeakKeys()) throwInvalidArrayKeyException(cell, ad);
-      if (checkHACArrayKeyCast()) {
-        raiseHackArrCompatImplicitArrayKey(cell);
-      }
-      raise_warning("Array key should be either a string or an integer");
-      return false;
+      return fail();
 
     case KindOfFunc:
+      if (!RO::EvalEnableFuncStringInterop) return fail();
       return ad->exists(StrNR(funcToStringHelper(cell->m_data.pfunc)));
 
     case KindOfClass:
@@ -3270,6 +3275,11 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     }
 
     case KindOfFunc:
+      if (!RO::EvalEnableFuncStringInterop) {
+        SystemLib::throwInvalidArgumentExceptionObject(
+          "Funcs cannot be cast to an array-key"
+        );
+      }
       return tvReturn(StrNR(funcToStringHelper(input.toFuncVal())));
 
     case KindOfClass:

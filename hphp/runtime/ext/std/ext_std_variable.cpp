@@ -447,8 +447,9 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
       sb.append(';');
       return sb.detach();
     }
-    case KindOfClass:
     case KindOfFunc:
+      invalidFuncConversion("string");
+    case KindOfClass:
     case KindOfPersistentString:
     case KindOfString: {
       auto const str =

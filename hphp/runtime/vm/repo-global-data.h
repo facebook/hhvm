@@ -171,6 +171,10 @@ struct Repo::GlobalData {
   /* Avoid optimizations that interfere with array provenance */
   bool ArrayProvenance = false;
 
+  /* When true function pointers will pass string typehints and checks,
+     while optionally raising notices. */
+  bool EnableFuncStringInterop = true;
+
   /*
    * The Hack.Lang.StrictArrayFillKeys option the repo was compiled with.
    */
@@ -217,6 +221,7 @@ struct Repo::GlobalData {
       (IsCompatibleClsMethType)
       (ArrayProvenance)
       (StrictArrayFillKeys)
+      (EnableFuncStringInterop)
       ;
   }
 };

@@ -342,6 +342,7 @@ auto const primitives = folly::lazy([] {
     TCls,
     TClsMeth,
     TFunc,
+    TFuncS,
   };
 });
 
@@ -662,6 +663,7 @@ TEST(Type, Prim) {
     { dval(0.0), TInitPrim },
     { ival(0),   TInitPrim },
     { TFunc,     TInitPrim },
+    { TFuncS,    TInitPrim },
     { TCls,      TInitPrim },
     { TFuncOrCls, TInitPrim },
   };
@@ -701,6 +703,7 @@ TEST(Type, Prim) {
     { TPrim, TOptRecord },
     { TPrim, TOptFalse },
     { TPrim, TFunc },
+    { TPrim, TFuncS },
     { TPrim, TCls },
     { TPrim, TFuncOrCls },
     { TPrim, TStrLike },
@@ -2996,6 +2999,7 @@ TEST(Type, RemoveCounted) {
     { TDbl, TDbl },
     { TSStr, TSStr },
     { TFunc, TFunc },
+    { TFuncS, TFuncS },
     { TSArr, TSArr },
     { TSDict, TSDict },
     { TSVec, TSVec },
@@ -3168,6 +3172,7 @@ TEST(Type, MustBeCounted) {
     { TInt, false },
     { TDbl, false },
     { TFunc, false },
+    { TFuncS, false },
     { TSArr, false },
     { TCls, false },
     { TPrim, false },

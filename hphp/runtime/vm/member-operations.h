@@ -480,6 +480,7 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfResource:
       return ElemScalar();
     case KindOfFunc:
+      if (!RO::EvalEnableFuncStringInterop) return ElemScalar();
       return ElemString<mode, keyType>(
         funcToStringHelper(base.val().pfunc), key
       );
@@ -1418,7 +1419,7 @@ inline ArrayData* SetElemArrayPre(ArrayData* a, TypedValue key, TypedValue* valu
       a, key.m_data.num, value
     );
   }
-  if (isFuncType(key.m_type)) {
+  if (isFuncType(key.m_type) && RO::EvalEnableFuncStringInterop) {
     return SetElemArrayPre<setResult>(
       a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc)), value
     );
@@ -2223,7 +2224,7 @@ inline ArrayData* UnsetElemArrayPre(ArrayData* a, TypedValue key) {
   if (key.m_type == KindOfInt64) {
     return UnsetElemArrayPre(a, key.m_data.num);
   }
-  if (isFuncType(key.m_type)) {
+  if (isFuncType(key.m_type) && RO::EvalEnableFuncStringInterop) {
     return UnsetElemArrayPre(
       a, const_cast<StringData*>(funcToStringHelper(key.m_data.pfunc))
     );
@@ -2583,6 +2584,7 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
       return false;
 
     case KindOfFunc:
+      if (!RO::EvalEnableFuncStringInterop) return false;
       return IssetElemString<keyType>(
         funcToStringHelper(val(base).pfunc), key
       );

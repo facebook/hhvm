@@ -35,6 +35,7 @@ int64_t funcToInt64Helper(const Func* func);
 const StringData* classToStringHelper(const Class* cls);
 Array clsMethToVecHelper(const ClsMethDataRef clsMeth);
 void raiseClsMethConvertWarningHelper(const char* toType);
+void invalidFuncConversion(const char*);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +99,7 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;
     case KindOfFunc:
+      invalidFuncConversion("int");
       return funcToInt64Helper(cell.m_data.pfunc);
     case KindOfClass:
       return classToStringHelper(cell.m_data.pclass)->toInt64();
@@ -128,7 +130,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
       return make_tv<KindOfInt64>(n);
     }
     return cell;
-  } else if (isFuncType(cell.m_type)) {
+  } else if (isFuncType(cell.m_type) && RO::EvalEnableFuncStringInterop) {
     return coerceKey(funcToStringHelper(cell.m_data.pfunc));
   } else if (isClassType(cell.m_type)) {
     return coerceKey(classToStringHelper(cell.m_data.pclass));
@@ -157,6 +159,8 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     case KindOfResource:
       return make_tv<KindOfInt64>(cell.m_data.pres->data()->o_toInt64());
 
+    case KindOfFunc:
+      assertx(!RO::EvalEnableFuncStringInterop);
     case KindOfDArray:
     case KindOfPersistentDArray:
     case KindOfVArray:
@@ -178,7 +182,6 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     case KindOfInt64:
     case KindOfString:
     case KindOfPersistentString:
-    case KindOfFunc:
     case KindOfClass:
       break;
   }

@@ -957,13 +957,18 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::OptRes:         return TRes        | TInitNull;
     case T::OptObj:         return TObj        | TInitNull;
     case T::OptFunc:        return TFunc       | TInitNull;
+    case T::OptFuncS:       return TFunc       | TInitNull;
     case T::OptCls:         return TCls        | TInitNull;
     case T::OptClsMeth:     return TClsMeth    | TInitNull;
     case T::OptRecord:      return TRecord     | TInitNull;
     case T::OptArrKey:      return TInt | TStr | TInitNull;
     case T::OptUncArrKey:   return TInt | TPersistentStr | TInitNull;
-    case T::OptStrLike:     return TFunc | TStr | TInitNull;
-    case T::OptUncStrLike:  return TFunc | TPersistentStr | TInitNull;
+    case T::OptUncStrLike:
+      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
+             TCls | TPersistentStr | TInitNull;
+    case T::OptStrLike:
+      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
+             TCls | TStr | TInitNull;
 
     case T::Uninit:         return TUninit;
     case T::InitNull:       return TInitNull;
@@ -976,6 +981,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::Str:            return TStr;
     case T::Obj:            return TObj;
     case T::Func:           return TFunc;
+    case T::FuncS:          return TFunc;
     case T::Cls:            return TCls;
     case T::ClsMeth:        return TClsMeth;
     case T::Record:         return TRecord;
@@ -983,8 +989,12 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::Cell:           return TCell;
     case T::UncArrKey:      return TInt | TPersistentStr;
     case T::ArrKey:         return TInt | TStr;
-    case T::UncStrLike:     return TFunc | TPersistentStr;
-    case T::StrLike:        return TFunc | TStr;
+    case T::UncStrLike:
+      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
+             TCls | TPersistentStr;
+    case T::StrLike:
+      return (RO::EvalEnableFuncStringInterop ? TFunc : TBottom) |
+             TCls | TStr;
     case T::InitUnc:        return TUncountedInit;
     case T::Unc:            return TUncounted;
     case T::InitCell:       return TInitCell;

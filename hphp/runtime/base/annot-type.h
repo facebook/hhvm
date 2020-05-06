@@ -277,7 +277,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   }
 
   assertx(metatype == AnnotMetaType::Precise);
-  if (at == AnnotType::String && dt == KindOfFunc) {
+  if (at == AnnotType::String && dt == KindOfFunc &&
+      RO::EvalEnableFuncStringInterop) {
     return RuntimeOption::EvalStringHintNotices
       ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
   }
@@ -336,7 +337,8 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return interface_supports_arrlike(annotClsName)
           ? AnnotAction::Pass : AnnotAction::Fail;
       case KindOfFunc:
-        if (interface_supports_string(annotClsName)) {
+        if (interface_supports_string(annotClsName) &&
+            RO::EvalEnableFuncStringInterop) {
           return RuntimeOption::EvalStringHintNotices
             ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
         }

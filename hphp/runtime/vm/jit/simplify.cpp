@@ -2365,6 +2365,7 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)    return gen(env, ConvObjToStr, catchTrace, src);
   if (srcType <= TRes)    return gen(env, ConvResToStr, catchTrace, src);
   if (srcType <= TFunc) {
+    if (!RO::EvalEnableFuncStringInterop) return nullptr;
     auto const ret = gen(env, LdFuncName, src);
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToStr.get()));
@@ -2414,6 +2415,7 @@ SSATmp* simplifyConvTVToInt(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)  return gen(env, ConvObjToInt, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToInt, src);
   if (srcType <= TFunc) {
+    if (!RO::EvalEnableFuncStringInterop) return nullptr;
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToInt.get()));
     }
@@ -2454,6 +2456,7 @@ SSATmp* simplifyConvTVToDbl(State& env, const IRInstruction* inst) {
   if (srcType <= TObj)  return gen(env, ConvObjToDbl, inst->taken(), src);
   if (srcType <= TRes)  return gen(env, ConvResToDbl, src);
   if (srcType <= TFunc) {
+    if (!RO::EvalEnableFuncStringInterop) return nullptr;
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       gen(env, RaiseWarning, catchTrace, cns(env, s_msgFuncToDbl.get()));
     }

@@ -285,6 +285,7 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RuntimeOption::EvalIsCompatibleClsMethType =
       s_globalData.IsCompatibleClsMethType;
     RuntimeOption::EvalEmitClsMethPointers = s_globalData.EmitClsMethPointers;
+    RO::EvalEnableFuncStringInterop = s_globalData.EnableFuncStringInterop;
 
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {

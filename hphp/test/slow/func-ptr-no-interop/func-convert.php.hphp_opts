@@ -1,0 +1,3 @@
+-vCheckPropTypeHints=3
+
+-vRuntime.Eval.EmitFuncPointers=1

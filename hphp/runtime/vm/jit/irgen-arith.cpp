@@ -514,6 +514,27 @@ SSATmp* emitMixedKeysetCmp(IRGS& env, Op op) {
   }
 }
 
+SSATmp* emitMixedFuncCmp(IRGS& env, Op op) {
+  switch (op) {
+    case Op::Gt:
+    case Op::Gte:
+    case Op::Lt:
+    case Op::Lte:
+    case Op::Cmp:
+      gen(
+        env,
+        ThrowInvalidOperation,
+        cns(env, s_cmpWithFunc.get())
+      );
+      return cns(env, false);
+    case Op::Same:
+    case Op::Eq: return cns(env, false);
+    case Op::NSame:
+    case Op::Neq: return cns(env, true);
+    default: always_assert(false);
+  }
+}
+
 SSATmp* emitMixedClsMethCmp(IRGS& env, Op op) {
   switch (op) {
     case Op::Gt:
@@ -625,6 +646,8 @@ void implBoolCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       raiseClsMethCompareWarningHelper(env, op);
       push(env, gen(env, toBoolCmpOpcode(op), left, cns(env, true)));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     // Convert whatever is on the right to a boolean and compare. The conversion
     // may be a no-op if the right operand is already a bool.
@@ -702,6 +725,8 @@ void implIntCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     // For everything else, convert to an int. The conversion may be a no-op if
     // the right operand is already an int.
@@ -761,6 +786,8 @@ void implDblCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       raiseClsMethCompareWarningHelper(env, op);
       push(env, emitConstCmp(env, op, false, true));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     // For everything else, convert to a double. The conversion may be a no-op
     // if the right operand is already a double.
@@ -897,6 +924,8 @@ void implVecCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       }
       push(env, emitMixedVecCmp(env, op));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     push(env, emitMixedVecCmp(env, op));
   }
@@ -922,6 +951,8 @@ void implDictCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
       push(env, cns(env, false));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     push(env, emitMixedDictCmp(env, op));
   }
@@ -947,6 +978,8 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       );
       push(env, cns(env, false));
     }
+  } else if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else {
     push(env, emitMixedKeysetCmp(env, op));
   }
@@ -955,7 +988,7 @@ void implKeysetCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
 void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
   assertx(left->type() <= TStr);
 
-  if (right->isA(TFunc)) {
+  if (right->isA(TFunc) && RO::EvalEnableFuncStringInterop) {
     if (RuntimeOption::EvalRaiseFuncConversionWarning) {
       gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
     }
@@ -1037,6 +1070,8 @@ void implStrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env, emitMixedDictCmp(env, op));
   } else if (rightTy <= TKeyset) {
     push(env, emitMixedKeysetCmp(env, op));
+  } else if (rightTy <= TFunc) {
+    push(env, emitMixedFuncCmp(env, op));
   } else if (rightTy <= TClsMeth) {
     if (RuntimeOption::EvalHackArrDVArrs) {
       push(env, emitMixedClsMethCmp(env, op));
@@ -1117,18 +1152,22 @@ void implObjCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
       )
     );
   } else if (rightTy <= TFunc) {
-    if (RuntimeOption::EvalRaiseFuncConversionWarning) {
-      gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
-    }
-    push(
-      env,
-      emitCollectionCheck(
+    if (!RO::EvalEnableFuncStringInterop) {
+      push(env, emitMixedFuncCmp(env, op));
+    } else {
+      if (RuntimeOption::EvalRaiseFuncConversionWarning) {
+        gen(env, RaiseWarning, cns(env, s_funcToStringWarning.get()));
+      }
+      push(
         env,
-        op,
-        left,
-        [&]{ return emitObjStrCmp(env, op, left, gen(env, LdFuncName, right)); }
-      )
-    );
+        emitCollectionCheck(
+          env,
+          op,
+          left,
+          [&]{return emitObjStrCmp(env, op, left, gen(env, LdFuncName, right));}
+        )
+      );
+    }
   } else if (rightTy <= TCls) {
     if (RuntimeOption::EvalRaiseClassConversionWarning) {
       gen(env, RaiseWarning, cns(env, s_clsToStringWarning.get()));
@@ -1254,6 +1293,22 @@ void implFunCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
         env, gen(env, XorBool, gen(env, EqFunc, left, right), cns(env, true)));
       return;
     }
+    PUNT(Func-cmp);
+  }
+
+  if (!RO::EvalEnableFuncStringInterop) {
+    if (rightTy <= TVec) {
+      push(env, emitMixedVecCmp(env, op));
+    } else if (rightTy <= TDict) {
+      push(env, emitMixedDictCmp(env, op));
+    } else if (rightTy <= TKeyset) {
+      push(env, emitMixedKeysetCmp(env, op));
+    } else if (rightTy <= TClsMeth && RuntimeOption::EvalHackArrDVArrs) {
+      push(env, emitMixedClsMethCmp(env, op));
+    } else {
+      push(env, emitMixedFuncCmp(env, op));
+    }
+    return;
   }
 
   if (rightTy <= TStr) {
@@ -1426,7 +1481,15 @@ void implCmp(IRGS& env, Op op) {
           if (leftTy <= TObj || rightTy <= TObj) {
             emitCollectionCheck(env, op, leftTy <= TObj ? left : right, nonArr);
           } else {
-            nonArr();
+            if (!RO::EvalEnableFuncStringInterop && rightTy <= TFunc) {
+              gen(
+                env,
+                ThrowInvalidOperation,
+                cns(env, s_cmpWithFunc.get())
+              );
+            } else {
+              nonArr();
+            }
           }
         }
       }
@@ -1765,9 +1828,10 @@ void emitBitNot(IRGS& env) {
     return;
   }
 
-  auto const resultType = srcType <= TStr || srcType <= TFunc ? TStr
-                        : srcType.needsReg() ? TCell
-                        : TInt;
+  auto const resultType = srcType <= TStr || srcType <= TCls ||
+                          (srcType <= TFunc && RO::EvalEnableFuncStringInterop)
+                        ? TStr
+                        : (srcType.needsReg() ? TCell : TInt);
   interpOne(env, resultType, 1);
 }
 

@@ -4004,7 +4004,7 @@ void fcallFuncClsMeth(ISS& env, const bc::FCallFunc& op) {
 }
 
 void fcallFuncFunc(ISS& env, const bc::FCallFunc& op) {
-  assertx(topC(env).subtypeOf(BFunc));
+  assertx(topC(env).subtypeOf(BFunc|BFuncS));
 
   // TODO: optimize me
   fcallFuncUnknown(env, op);
@@ -4044,7 +4044,7 @@ void fcallFuncStr(ISS& env, const bc::FCallFunc& op) {
 
 void in(ISS& env, const bc::FCallFunc& op) {
   auto const callable = topC(env);
-  if (callable.subtypeOf(BFunc)) return fcallFuncFunc(env, op);
+  if (callable.subtypeOf(BFunc|BFuncS)) return fcallFuncFunc(env, op);
   if (callable.subtypeOf(BClsMeth)) return fcallFuncClsMeth(env, op);
   if (callable.subtypeOf(BObj)) return fcallFuncObj(env, op);
   if (callable.subtypeOf(BStr)) return fcallFuncStr(env, op);
@@ -4052,12 +4052,14 @@ void in(ISS& env, const bc::FCallFunc& op) {
 }
 
 void in(ISS& env, const bc::ResolveFunc& op) {
-  push(env, TFunc);
+  if (RO::EvalEnableFuncStringInterop) push(env, TFunc);
+  else                                 push(env, TFuncS);
 }
 
 void in(ISS& env, const bc::ResolveMethCaller& op) {
   // TODO (T29639296)
-  push(env, TFunc);
+  if (RO::EvalEnableFuncStringInterop) push(env, TFunc);
+  else                                 push(env, TFuncS);
 }
 
 void in(ISS& env, const bc::ResolveObjMethod& op) {

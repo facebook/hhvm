@@ -300,6 +300,10 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(RuntimeOption::EvalUseHHBBC, ini, config, "UseHHBBC",
                RuntimeOption::EvalUseHHBBC);
 
+  Config::Bind(RuntimeOption::EvalEnableFuncStringInterop, ini, config,
+               "EnableFuncStringInterop",
+               RuntimeOption::EvalEnableFuncStringInterop);
+
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 }

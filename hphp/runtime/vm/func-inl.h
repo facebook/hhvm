@@ -188,6 +188,14 @@ inline int64_t funcToInt64Helper(const Func* func) {
   return func->name()->toInt64();
 }
 
+inline void invalidFuncConversion(const char* type) {
+  if (RO::EvalEnableFuncStringInterop) return;
+
+  SystemLib::throwInvalidOperationExceptionObject(folly::sformat(
+    "Cannot convert func to {}", type
+  ));
+}
+
 inline NamedEntity* Func::getNamedEntity() {
   assertx(!shared()->m_preClass);
   return *reinterpret_cast<LowPtr<NamedEntity>*>(&m_namedEntity);

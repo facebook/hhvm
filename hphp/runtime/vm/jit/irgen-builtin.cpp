@@ -1552,7 +1552,8 @@ SSATmp* maybeCoerceValue(
 ) {
   auto bail = [&] { fail(); return cns(env, TBottom); };
   if (target <= TStr) {
-    if (!val->type().maybe(TFunc|TCls)) return bail();
+    auto const allowedTy = RO::EvalEnableFuncStringInterop ? TFunc|TCls : TCls;
+    if (!val->type().maybe(allowedTy)) return bail();
 
     auto castW = [&] (SSATmp* val, bool isCls){
       if (RuntimeOption::EvalStringHintNotices) {
@@ -1571,21 +1572,27 @@ SSATmp* maybeCoerceValue(
       return update(val);
     };
 
+    auto checkCls = [&] {
+      return cond(
+        env,
+        [&] (Block* f) { return gen(env, CheckType, TCls, f, val); },
+        [&] (SSATmp* cval) { return castW(gen(env, LdClsName, cval), true); },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          return bail();
+        }
+      );
+    };
+
+    if (!RO::EvalEnableFuncStringInterop) return checkCls();
+
     return cond(
       env,
       [&] (Block* f) { return gen(env, CheckType, TFunc, f, val); },
       [&] (SSATmp* fval) { return castW(gen(env, LdFuncName, fval), false); },
       [&] {
         hint(env, Block::Hint::Unlikely);
-        return cond(
-          env,
-          [&] (Block* f) { return gen(env, CheckType, TCls, f, val); },
-          [&] (SSATmp* cval) { return castW(gen(env, LdClsName, cval), true); },
-          [&] {
-            hint(env, Block::Hint::Unlikely);
-            return bail();
-          }
-        );
+        return checkCls();
       }
     );
   }

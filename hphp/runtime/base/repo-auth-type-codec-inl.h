@@ -65,6 +65,8 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::OptObj:
   case T::Func:
   case T::OptFunc:
+  case T::FuncS:
+  case T::OptFuncS:
   case T::ClsMeth:
   case T::OptClsMeth:
   case T::Record:

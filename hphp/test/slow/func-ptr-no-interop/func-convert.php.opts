@@ -1,0 +1,3 @@
+-vEval.CheckPropTypeHints=3
+
+-vEval.EmitFuncPointers=1

@@ -386,7 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Shape(&'a ShapeDecl<'a>),
     Nullable(&'a Node_<'a>),
     LikeType(&'a Node_<'a>),
     Soft(&'a Node_<'a>),
@@ -942,29 +941,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
-                    }
-                    HintValue::Shape(shape_decl) => {
-                        let fields_iter = shape_decl.fields.iter();
-                        let mut fields = AssocListMut::new_in(self.state.arena);
-                        for field_decl in fields_iter {
-                            let name = match field_decl.name {
-                                Node_::StringLiteral(s, pos) => ShapeFieldName::SFlitStr((pos, s)),
-                                n => {
-                                    return Err(format!(
-                                    "Expected a string literal for shape key name, but was {:?}",
-                                    n
-                                ))
-                                }
-                            };
-                            fields.insert(
-                                ShapeField(name),
-                                ShapeFieldType {
-                                    optional: field_decl.is_optional,
-                                    ty: self.node_to_ty(field_decl.type_)?,
-                                },
-                            );
-                        }
-                        Ty_::Tshape(self.alloc((shape_decl.kind, fields.into())))
                     }
                     HintValue::Nullable(&hint) => Ty_::Toption(self.node_to_ty(hint)?),
                     HintValue::LikeType(&hint) => Ty_::Tlike(self.node_to_ty(hint)?),
@@ -2984,14 +2960,32 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::DotDotDot => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Shape(self.alloc(ShapeDecl { kind, fields })),
-            Pos::merge(
-                self.state.arena,
-                shape?.get_pos(self.state.arena)?,
-                rparen?.get_pos(self.state.arena)?,
-            )?,
-        ))))
+        let fields_iter = fields.iter();
+        let mut fields = AssocListMut::new_in(self.state.arena);
+        for field_decl in fields_iter {
+            let name = match field_decl.name {
+                Node_::StringLiteral(s, pos) => ShapeFieldName::SFlitStr((pos, s)),
+                n => {
+                    return Err(format!(
+                        "Expected a string literal for shape key name, but was {:?}",
+                        n
+                    ))
+                }
+            };
+            fields.insert(
+                ShapeField(name),
+                ShapeFieldType {
+                    optional: field_decl.is_optional,
+                    ty: self.node_to_ty(field_decl.type_)?,
+                },
+            );
+        }
+        let pos = Pos::merge(
+            self.state.arena,
+            shape?.get_pos(self.state.arena)?,
+            rparen?.get_pos(self.state.arena)?,
+        )?;
+        Ok(self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into())))))
     }
 
     fn make_shape_expression(

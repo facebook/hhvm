@@ -101,8 +101,11 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   }
   total += m_untracked;
 
-  auto const pickAction = [&](uint32_t val, double cold) {
-    auto const exit = RO::EvalHHIRExitArrayProfileThreshold;
+  auto const pickAction = [&](
+    uint32_t val,
+    double cold,
+    double exit = RO::EvalHHIRExitArrayProfileThreshold
+  ) {
     if (val >= total * exit) return Action::Exit;
     if (val >= total * cold) return Action::Cold;
     return Action::None;
@@ -111,7 +114,9 @@ ArrayAccessProfile::Result ArrayAccessProfile::choose() const {
   auto const offset_threshold  = RO::EvalHHIROffsetArrayProfileThreshold;
   auto const size_threshold = RO::EvalHHIRSmallArrayProfileThreshold;
   auto const missing_threshold = RO::EvalHHIRMissingArrayProfileThreshold;
-  auto const index_action = pickAction(hottest.count, offset_threshold);
+  auto const index_action =
+    pickAction(hottest.count, offset_threshold,
+               RO::EvalHHIROffsetExitArrayProfileThreshold);
   auto const offset =
     std::make_pair(index_action, index_action == Action::None
                                  ? 0 : safe_cast<uint32_t>(hottest.pos));

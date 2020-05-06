@@ -917,6 +917,7 @@ struct RuntimeOption {
   F(double, HHIRSmallArrayProfileThreshold, 0.8)                        \
   F(double, HHIRMissingArrayProfileThreshold, 0.8)                      \
   F(double, HHIRExitArrayProfileThreshold, 0.98)                        \
+  F(double, HHIROffsetExitArrayProfileThreshold, 1.2)  /* disabled */   \
   /* Register allocation flags */                                       \
   F(bool, HHIREnablePreColoring,       true)                            \
   F(bool, HHIREnableCoalescing,        true)                            \

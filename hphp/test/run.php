@@ -2013,7 +2013,7 @@ function is_hack_file($options, $test) {
   return false;
 }
 
-function skip_test($options, $test): ?string {
+function skip_test($options, $test, $run_skipif = true): ?string {
   if (isset($options['hack-only']) &&
       substr($test, -5) !== '.hhas' &&
       !is_hack_file($options, $test)) {
@@ -2045,8 +2045,12 @@ function skip_test($options, $test): ?string {
     if (file_exists($test . ".verify")) {
       return 'skip-verify';
     }
+    if (find_debug_config($test, 'hphpd.ini')) {
+      return 'skip-debugger';
+    }
   }
 
+  if (!$run_skipif) return null;
   $skipif_test = find_test_ext($test, 'skipif');
   if (!$skipif_test) {
     return null;
@@ -2269,7 +2273,6 @@ function can_run_server_test($test, $options) {
     !is_file("$test.onlyrepo") &&
     !is_file("$test.onlyjumpstart") &&
     !is_file("$test.use.for.ini.migration.testing.only.hdf") &&
-    strpos($test, 'quick/debugger') === false &&
     strpos($test, 'quick/xenon') === false &&
     strpos($test, 'slow/streams/') === false &&
     strpos($test, 'slow/ext_mongo/') === false &&
@@ -2277,7 +2280,6 @@ function can_run_server_test($test, $options) {
     strpos($test, 'slow/ext_vsdebug/') === false &&
     strpos($test, 'slow/ext_yaml/') === false &&
     strpos($test, 'slow/ext_xdebug/') === false &&
-    strpos($test, 'slow/debugger/') === false &&
     strpos($test, 'slow/type_profiler/debugger/') === false &&
     strpos($test, 'zend/good/ext/standard/tests/array/') === false &&
     strpos($test, 'zend/good/ext/ftp') === false &&
@@ -2637,7 +2639,7 @@ function run_test($options, $test) {
   }
 
   if (isset($options['repo'])) {
-    if (preg_grep('/-m debug/', (array)$hhvm) || file_exists($test.'.norepo')) {
+    if (file_exists($test.'.norepo')) {
       return 'skip-norepo';
     }
     if (file_exists($test.'.onlyjumpstart') &&
@@ -3275,17 +3277,18 @@ function main($argv) {
     if (isset($options['repo']) || isset($options['typechecker'])) {
       error("Server mode repo tests are not supported");
     }
-    $configs = darray[];
 
     /* We need to start up a separate server process for each config file
      * found. */
+    $configs = keyset[];
     foreach ($tests as $test) {
-      if (!can_run_server_test($test, $options)) continue;
       $config = find_file_for_dir(dirname($test), 'config.ini');
       if (!$config) {
         error("Couldn't find config file for $test");
       }
-      $configs[$config] = $config;
+      if (array_key_exists($config, $configs)) continue;
+      if (skip_test($options, $test, false) !== null) continue;
+      $configs[] = $config;
     }
 
     $max_configs = 30;

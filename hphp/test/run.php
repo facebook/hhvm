@@ -2263,28 +2263,43 @@ function dump_hhas_to_temp($hhvm_cmd, $test) {
   return $ret === 0 ? $temp_file : false;
 }
 
+const SERVER_EXCLUDE_PATHS = vec[
+  'quick/xenon/',
+  'slow/streams/',
+  'slow/ext_mongo/',
+  'slow/ext_oauth/',
+  'slow/ext_vsdebug/',
+  'zend/good/ext/standard/tests/array/',
+];
 const HHAS_EXT = '.hhas';
 function can_run_server_test($test, $options) {
-  return
-    !is_file("$test.noserver") &&
-    !(is_file("$test.nowebserver") && isset($options['server'])) &&
-    !find_test_ext($test, 'opts') &&
-    !is_file("$test.ini") &&
-    !is_file("$test.onlyrepo") &&
-    !is_file("$test.onlyjumpstart") &&
-    !is_file("$test.use.for.ini.migration.testing.only.hdf") &&
-    strpos($test, 'quick/xenon') === false &&
-    strpos($test, 'slow/streams/') === false &&
-    strpos($test, 'slow/ext_mongo/') === false &&
-    strpos($test, 'slow/ext_oauth/') === false &&
-    strpos($test, 'slow/ext_vsdebug/') === false &&
-    strpos($test, 'slow/ext_yaml/') === false &&
-    strpos($test, 'slow/ext_xdebug/') === false &&
-    strpos($test, 'slow/type_profiler/debugger/') === false &&
-    strpos($test, 'zend/good/ext/standard/tests/array/') === false &&
-    strpos($test, 'zend/good/ext/ftp') === false &&
-    strrpos($test, HHAS_EXT) !== (strlen($test) - strlen(HHAS_EXT))
-    ;
+  // explicitly disabled
+  if (is_file("$test.noserver") ||
+      (is_file("$test.nowebserver") && isset($options['server']))) {
+    return false;
+  }
+
+  // has its own config
+  if (find_test_ext($test, 'opts') || is_file("$test.ini") ||
+      is_file("$test.use.for.ini.migration.testing.only.hdf")) {
+    return false;
+  }
+
+  // we can't run repo only tests in server modes
+  if (is_file("$test.onlyrepo") || is_file("$test.onlyjumpstart")) {
+    return false;
+  }
+
+  foreach (SERVER_EXCLUDE_PATHS as $path) {
+    if (strpos($test, $path) !== false) return false;
+  }
+
+  // don't run hhas tests in server modes
+  if (strrpos($test, HHAS_EXT) === (strlen($test) - strlen(HHAS_EXT))) {
+    return false;
+  }
+
+  return true;
 }
 
 const SERVER_TIMEOUT = 45;

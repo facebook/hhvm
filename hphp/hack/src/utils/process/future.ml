@@ -25,6 +25,19 @@ type 'a delayed = {
   value: 'a;
 }
 
+type 'a incomplete = {
+  (* The underlying implementation whose progress we manage *)
+  process: Process_types.t;
+  (* An optional deadline (time value); if set, the future can expire when being
+    checked for readiness. If not set, only the `get` function's timeout will
+    apply (default or explicit). *)
+  deadline: float option;
+  (* The underlying implementation's output is a string. This function transforms
+    the output into a desired value of the type that the Future's successful
+    result is of. *)
+  transformer: string -> 'a;
+}
+
 type 'a promise =
   | Complete : 'a -> 'a promise
   | Complete_but_failed of error
@@ -38,14 +51,49 @@ type 'a promise =
       * 'b t
       * (('a, error) result -> ('b, error) result -> ('c, error) result) )
       -> 'c promise
+  (* The future's success is bound to another future producer; it's a chain
+      of futures that have to execute serially in order, as opposed to
+      the list of Merged futures above that have to execute in parallel. *)
   | Bound : ('a t * (('a, error) result -> 'b t)) -> 'b promise
-  | Incomplete of Process_types.t * (string -> 'a)
+  (* The future is not yet fulfilled. *)
+  | Incomplete of 'a incomplete
 
 (** float is the time the Future was constructed. *)
 and 'a t = 'a promise ref * float
 
-let make process transformer =
-  (ref (Incomplete (process, transformer)), Unix.gettimeofday ())
+(* 30 seconds *)
+let default_timeout = 30
+
+(* Given an optional deadline, constructs a timeout time span, in seconds,
+    relative to the current time (dealine - now). If the current time is past
+    the deadline, the timeout is 0. If the deadline is not specified,
+    the max timeout value is returned. *)
+let timeout_of_deadline deadline ~max_timeout =
+  match deadline with
+  | Some deadline ->
+    let time_left = deadline -. Unix.gettimeofday () in
+    if time_left > 0.0 then
+      min (int_of_float time_left) max_timeout
+    else
+      0
+  | None -> max_timeout
+
+(* Given an optional timeout, constructs the deadline relative to
+    the specified start time. If the timeout is not specified, then
+    the deadline is also not specified *)
+let deadline_of_timeout ~timeout ~start_time =
+  match timeout with
+  | Some timeout -> Some (start_time +. float_of_int timeout)
+  | None -> None
+
+let make
+    (process : Process_types.t)
+    ?(timeout : int option)
+    (transformer : string -> 'result) : 'result t =
+  let deadline =
+    deadline_of_timeout ~timeout ~start_time:(Unix.gettimeofday ())
+  in
+  (ref (Incomplete { process; deadline; transformer }), Unix.gettimeofday ())
 
 let of_value v = (ref @@ Complete v, Unix.gettimeofday ())
 
@@ -142,7 +190,7 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
 let error_to_exn e = raise (Failure e)
 
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
- fun ?(timeout = 30) (promise, _) ->
+ fun ?(timeout = default_timeout) (promise, _) ->
   match !promise with
   | Complete v -> Ok v
   | Complete_but_failed e -> Error e
@@ -184,7 +232,8 @@ let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
         promise := Complete_but_failed (info, Continuation_raised e);
         Error (info, Continuation_raised e)
     end
-  | Incomplete (process, transformer) ->
+  | Incomplete { process; deadline; transformer } ->
+    let timeout = timeout_of_deadline deadline ~max_timeout:timeout in
     let info = process.Process_types.info in
     (match Process.read_and_wait_pid ~timeout process with
     | Ok { Process_types.stdout; _ } ->
@@ -237,7 +286,15 @@ let rec is_ready : 'a. 'a t -> bool =
       is_next_ready
     end else
       false
-  | Incomplete (process, _) -> Process.is_ready process
+  | Incomplete { process; deadline; _ } ->
+    (* Note: if the promise's own deadline is not set, we allow the caller
+        to call is_ready as long as they wish, without timing out *)
+    let timeout = timeout_of_deadline deadline ~max_timeout:Int.max_value in
+    if timeout > 0 then
+      Process.is_ready process
+    else
+      (* E.g., we timed out *)
+      true
 
 let merge_status stat_a stat_b handler =
   match (stat_a, stat_b) with
@@ -274,6 +331,29 @@ let continue_and_map_err (a : 'a t) (f : ('a, error) result -> ('b, 'c) result)
   let f res = of_value (f res) in
   make_continue a f
 
+(* Must explicitly make recursive functions polymorphic. *)
+let rec with_timeout : 'value. 'value t -> timeout:int -> 'value t =
+ fun ((promise, start_time) as future) ~timeout ->
+  match !promise with
+  | Complete _
+  | Complete_but_failed _ ->
+    future
+  | Delayed _ ->
+    (* The delayed state is used for testing, so it doesn't make sense to
+        figure out the semantics of what it means to have a timeout on a
+        delayed future *)
+    failwith "Setting timeout on a delayed future is not supported"
+  | Merged (a_future, b_future, handler) ->
+    merge
+      (with_timeout a_future ~timeout)
+      (with_timeout b_future ~timeout)
+      handler
+  | Bound (curr_future, next_producer) ->
+    make_continue (with_timeout curr_future ~timeout) next_producer
+  | Incomplete { process; transformer; _ } ->
+    let deadline = deadline_of_timeout ~timeout:(Some timeout) ~start_time in
+    (ref (Incomplete { process; deadline; transformer }), start_time)
+
 (* Must explicitly make recursive function polymorphic. *)
 let rec check_status : 'a. 'a t -> 'a status =
  fun (promise, start_t) ->
@@ -293,9 +373,12 @@ let rec check_status : 'a. 'a t -> 'a status =
     else
       let age = Unix.time () -. start_t in
       In_progress { age }
-  | Incomplete (process, _) ->
-    if Process.is_ready process then
-      Complete_with_result (get (promise, start_t))
+  | Incomplete { process; deadline; _ } ->
+    (* Note: if the promise's own deadline is not set, we allow the caller
+        to call check_status as long as they wish, without timing out *)
+    let timeout = timeout_of_deadline deadline ~max_timeout:Int.max_value in
+    if Process.is_ready process || timeout <= 0 then
+      Complete_with_result (get ~timeout (promise, start_t))
     else
       let age = Unix.time () -. start_t in
       In_progress { age }

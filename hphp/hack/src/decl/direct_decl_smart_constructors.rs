@@ -386,7 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Tuple(&'a [Node_<'a>]),
     Shape(&'a ShapeDecl<'a>),
     Nullable(&'a Node_<'a>),
     LikeType(&'a Node_<'a>),
@@ -943,15 +942,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
-                    }
-                    HintValue::Tuple(items) => {
-                        let items_iter = items.iter();
-                        let mut items = Vec::new_in(self.state.arena);
-                        for node in items_iter {
-                            items.push(self.node_to_ty(*node)?);
-                        }
-                        let items = items.into_bump_slice();
-                        Ty_::Ttuple(items)
                     }
                     HintValue::Shape(shape_decl) => {
                         let fields_iter = shape_decl.fields.iter();
@@ -2954,20 +2944,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_tuple_type_specifier(
         &mut self,
         left_paren: Self::R,
-        inner: Self::R,
+        tys: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        // We don't need to include the inner list in this position merging
+        // We don't need to include the tys list in this position merging
         // because by definition it's already contained by the two brackets.
         let pos = Pos::merge(
             self.state.arena,
             left_paren?.get_pos(self.state.arena)?,
             right_paren?.get_pos(self.state.arena)?,
         )?;
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Tuple(inner?.as_slice(self.state.arena)),
-            pos,
-        ))))
+        let tys = tys?;
+        let tys_iter = tys.iter();
+        let mut tys = Vec::new_in(self.state.arena);
+        for node in tys_iter {
+            tys.push(self.node_to_ty(*node)?);
+        }
+        let tys = tys.into_bump_slice();
+        Ok(self.hint_ty(pos, Ty_::Ttuple(tys)))
     }
 
     fn make_shape_type_specifier(

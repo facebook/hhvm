@@ -187,7 +187,7 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
         (Exception.get_ctor_string e),
       Utils.Callstack stack )
 
-let error_to_exn e = raise (Failure e)
+let error_to_exn e = Failure e
 
 let rec get : 'a. ?timeout:int -> 'a t -> ('a, error) result =
  fun ?(timeout = default_timeout) (promise, _) ->

@@ -40,14 +40,14 @@ module State_loader_prefetcher_real = struct
         in
         msg ^ "\n" ^ stack
       in
-      let result =
-        State_loader.fetch_saved_state
-          ~cache_limit
-          ~config:State_loader_config.default_timeouts
-          ~config_hash:hhconfig_hash
-          handle
-      in
-      result
+      State_loader.fetch_saved_state
+        ~cache_limit
+        ~config:State_loader_config.default_timeouts
+        ~config_hash:hhconfig_hash
+        handle
+      |> Future.get ~timeout:Int.max_value
+      |> Result.map_error ~f:(fun error ->
+             failwith (Future.error_to_string error))
       |> Result.map_error ~f:error_to_string
       |> Result.ok_or_failwith
       |> ignore

@@ -104,7 +104,7 @@ let download_and_load_state_exn
         None
     in
     let state_future :
-        (State_loader.native_load_result, State_loader.error) result =
+        (State_loader.native_load_result, State_loader.error) result Future.t =
       State_loader.mk_state_future
         ~config:genv.local_config.SLC.state_loader_timeouts
         ~use_canary
@@ -115,9 +115,14 @@ let download_and_load_state_exn
         ~ignore_hhconfig
         ~use_prechecked_files
     in
-    match state_future with
-    | Error error -> Error (Load_state_loader_failure error)
-    | Ok result ->
+    match Future.get state_future ~timeout:Int.max_value with
+    | Error error ->
+      let e = Exception.wrap_unraised (Future.error_to_exn error) in
+      let exn = Exception.to_exn e in
+      let stack = Utils.Callstack (Exception.get_backtrace_string e) in
+      Error (Load_state_unhandled_exception { exn; stack })
+    | Ok (Error error) -> Error (Load_state_loader_failure error)
+    | Ok (Ok result) ->
       let (downloaded_naming_table_path, dirty_naming_files) =
         match naming_table_saved_state with
         | None -> (None, [])

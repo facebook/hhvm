@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 open Instruction_sequence
 open Ast_class_expr
@@ -42,6 +42,13 @@ module LValOp = struct
     | SetOp of eq_op
     | IncDec of incdec_op
     | Unset
+
+  let is_unset = function
+    | Unset -> true
+    | Set
+    | SetOp _
+    | IncDec _ ->
+      false
 end
 
 let jit_enable_rename_function () =
@@ -50,7 +57,7 @@ let jit_enable_rename_function () =
 let is_local_this env (lid : Aast.local_id) : bool =
   let id = Local_id.get_name lid in
   let scope = Emit_env.get_scope env in
-  id = SN.SpecialIdents.this
+  String.equal id SN.SpecialIdents.this
   && Ast_scope.Scope.has_this scope
   && not (Ast_scope.Scope.is_toplevel scope)
 
@@ -218,10 +225,9 @@ let rebuild_load_store load store =
     | (i, Some (l, kind)) :: xs ->
       let (ld, st) = aux xs in
       let set =
-        if kind = Value_kind_expression then
-          instr_setl l
-        else
-          instr_popl l
+        match kind with
+        | Value_kind_expression -> instr_setl l
+        | _ -> instr_popl l
       in
       let unset = instr_unsetl l in
       (i :: set :: ld, unset :: st)
@@ -488,7 +494,7 @@ let is_reified_tparam ~(is_fun : bool) (env : Emit_env.t) (name : string) =
   in
   let is_soft =
     List.exists ~f:(function { A.ua_name = n; _ } ->
-        snd n = SN.UserAttributes.uaSoft)
+        String.equal (snd n) SN.UserAttributes.uaSoft)
   in
   List.find_mapi
     tparams
@@ -500,10 +506,12 @@ let is_reified_tparam ~(is_fun : bool) (env : Emit_env.t) (name : string) =
               _;
             }
             ->
-      if (reified = A.Reified || reified = A.SoftReified) && id = name then
+      match reified with
+      | A.Reified
+      | A.SoftReified
+        when String.equal id name ->
         Some (i, is_soft ual)
-      else
-        None)
+      | _ -> None)
 
 let extract_shape_field_name_pstring env annot = function
   | Ast_defs.SFlit_int s -> A.Int (snd s)
@@ -551,7 +559,7 @@ let from_ast_null_flavor = function
 let parse_include (e : Tast.expr) =
   let strip_backslash p =
     let len = String.length p in
-    if len > 0 && p.[0] = '/' then
+    if len > 0 && Char.equal p.[0] '/' then
       String.sub p 1 (len - 1)
     else
       p
@@ -559,7 +567,7 @@ let parse_include (e : Tast.expr) =
   let rec split_var_lit = function
     | (_, A.Binop (Ast_defs.Dot, e1, e2)) ->
       let (v, l) = split_var_lit e2 in
-      if v = "" then
+      if String.equal v "" then
         let (var, lit) = split_var_lit e1 in
         (var, lit ^ l)
       else
@@ -569,12 +577,12 @@ let parse_include (e : Tast.expr) =
   in
   let (var, lit) = split_var_lit e in
   let (var, lit) =
-    if var = SN.PseudoConsts.g__DIR__ then
+    if String.equal var SN.PseudoConsts.g__DIR__ then
       ("", strip_backslash lit)
     else
       (var, lit)
   in
-  if var = "" then
+  if String.equal var "" then
     if Filename.is_relative lit then
       Hhas_symbol_refs.SearchPathRelative lit
     else
@@ -582,13 +590,17 @@ let parse_include (e : Tast.expr) =
   else
     Hhas_symbol_refs.IncludeRootRelative (var, strip_backslash lit)
 
+let is_null_safe = function
+  | Ast_defs.OG_nullsafe -> true
+  | _ -> false
+
 let rec expr_and_new env pos instr_to_add_new instr_to_add = function
   | A.AFvalue e -> gather [emit_expr env e; emit_pos pos; instr_to_add_new]
   | A.AFkvalue (k, v) ->
     gather [emit_two_exprs env (fst @@ fst k) k v; instr_to_add]
 
 and get_local env (pos, (str : string)) : Hhbc_ast.local_id =
-  if str = SN.SpecialIdents.dollardollar then
+  if String.equal str SN.SpecialIdents.dollardollar then
     match Emit_env.get_pipe_var env with
     | None ->
       Emit_fatal.raise_fatal_runtime
@@ -603,7 +615,7 @@ and get_local env (pos, (str : string)) : Hhbc_ast.local_id =
 and emit_local ~notice env (lid : Aast.lid) =
   let (pos, id) = lid in
   let str = Local_id.get_name id in
-  if SN.Superglobals.globals = str then
+  if String.equal SN.Superglobals.globals str then
     Emit_fatal.raise_fatal_parse pos "Access $GLOBALS via wrappers"
   else if SN.Superglobals.is_superglobal str then
     gather
@@ -626,7 +638,7 @@ and emit_first_expr env (expr : Tast.expr) =
   | A.Lvar (pos, id)
     when not
            ( (is_local_this env id && not (Emit_env.get_needs_local_this env))
-           || Local_id.get_name id = SN.Superglobals.globals
+           || String.equal (Local_id.get_name id) SN.Superglobals.globals
            || SN.Superglobals.is_superglobal (Local_id.get_name id) ) ->
     (instr_cgetl2 (get_local env (pos, Local_id.get_name id)), true)
   | _ -> (emit_expr env expr, false)
@@ -690,16 +702,19 @@ and emit_binop env annot op (e1 : Tast.expr) (e2 : Tast.expr) =
   | _ ->
     if not (optimize_null_checks ()) then
       default ()
-    else (
-      match op with
-      | Ast_defs.Eqeqeq when snd e2 = A.Null -> emit_is_null env e1
-      | Ast_defs.Eqeqeq when snd e1 = A.Null -> emit_is_null env e2
-      | Ast_defs.Diff2 when snd e2 = A.Null ->
+    else
+      let is_null = function
+        | A.Null -> true
+        | _ -> false
+      in
+      (match op with
+      | Ast_defs.Eqeqeq when is_null (snd e2) -> emit_is_null env e1
+      | Ast_defs.Eqeqeq when is_null (snd e1) -> emit_is_null env e2
+      | Ast_defs.Diff2 when is_null (snd e2) ->
         gather [emit_is_null env e1; instr_not]
-      | Ast_defs.Diff2 when snd e1 = A.Null ->
+      | Ast_defs.Diff2 when is_null (snd e1) ->
         gather [emit_is_null env e2; instr_not]
-      | _ -> default ()
-    )
+      | _ -> default ())
 
 and get_type_structure_for_hint ~targ_map ~tparams (h : Aast.hint) =
   let tv = Emit_type_constant.hint_to_type_constant ~tparams ~targ_map h in
@@ -757,7 +772,8 @@ and emit_is env pos (h : Aast.hint) =
   let (ts_instrs, is_static) = emit_reified_arg env ~isas:true pos h in
   if is_static then
     match snd h with
-    | Aast.Happly ((_, id), []) when SU.strip_hh_ns id = SN.Typehints.this ->
+    | Aast.Happly ((_, id), [])
+      when String.equal (SU.strip_hh_ns id) SN.Typehints.this ->
       instr_islateboundcls
     | _ ->
       gather
@@ -776,11 +792,11 @@ and emit_cast env pos hint expr =
       let id = SU.strip_hh_ns id in
       begin
         match id with
-        | _ when id = SN.Typehints.int -> instr (IOp CastInt)
-        | _ when id = SN.Typehints.bool -> instr (IOp CastBool)
-        | _ when id = SN.Typehints.string -> instr (IOp CastString)
-        | _ when id = SN.Typehints.array -> instr (IOp CastArray)
-        | _ when id = SN.Typehints.float -> instr (IOp CastDouble)
+        | _ when String.equal id SN.Typehints.int -> instr (IOp CastInt)
+        | _ when String.equal id SN.Typehints.bool -> instr (IOp CastBool)
+        | _ when String.equal id SN.Typehints.string -> instr (IOp CastString)
+        | _ when String.equal id SN.Typehints.array -> instr (IOp CastArray)
+        | _ when String.equal id SN.Typehints.float -> instr (IOp CastDouble)
         | _ ->
           Emit_fatal.raise_fatal_parse
             pos
@@ -840,7 +856,7 @@ and get_erased_tparams env =
   Ast_scope.Scope.get_tparams (Emit_env.get_scope env)
   |> List.filter_map ~f:(function
          | { A.tp_name = (_, name); A.tp_reified; _ } ->
-         Option.some_if (tp_reified = A.Erased) name)
+         Option.some_if (A.is_erased tp_reified) name)
 
 and has_non_tparam_generics env (targs : Aast.hint list) =
   let erased_tparams = get_erased_tparams env in
@@ -866,14 +882,14 @@ and emit_reified_targs env pos targs =
   let is_in_lambda = Ast_scope.Scope.is_in_lambda (Emit_env.get_scope env) in
   let is_soft { A.tp_user_attributes = ua; _ } =
     List.exists ua ~f:(function { A.ua_name = n; _ } ->
-        snd n = SN.UserAttributes.uaSoft)
+        String.equal (snd n) SN.UserAttributes.uaSoft)
   in
   let is_same tparam =
     List.length tparam = len
     && List.for_all2_exn tparam targs ~f:(fun tp ta ->
            match (tp, ta) with
            | ({ A.tp_name = (_, name1); _ }, (_, A.Happly ((_, name2), []))) ->
-             name1 = name2 && not (is_soft tp)
+             String.equal name1 name2 && not (is_soft tp)
            | (_, _) -> false)
   in
   if (not is_in_lambda) && is_same current_fun_tparams then
@@ -920,7 +936,7 @@ and emit_new
     match cid with
     | (_, A.CIexpr (_, A.Id (_, n))) when SU.is_self n ->
       (Ast_scope.Scope.get_class_tparams scope).A.c_tparam_list
-      |> List.for_all ~f:(fun t -> t.A.tp_reified = A.Erased)
+      |> List.for_all ~f:(fun t -> A.is_erased t.A.tp_reified)
     | (_, A.CIexpr (_, A.Id (_, n))) when SU.is_parent n ->
       let cls = Ast_scope.Scope.get_class scope in
       Option.value_map cls ~default:true ~f:(fun cls ->
@@ -948,6 +964,10 @@ and emit_new
     | _ -> (cexpr, H.NoGenerics)
   in
   let newobj_instrs =
+    let maybe_generics = function
+      | H.MaybeGenerics -> true
+      | _ -> false
+    in
     match cexpr with
     (* Special case for statically-known class *)
     | Class_id (_, cname) ->
@@ -967,7 +987,7 @@ and emit_new
           failwith "Internal error: This case should have been transformed"
       end
     | Class_special cls_ref -> gather [emit_pos pos; instr_newobjs cls_ref]
-    | Class_reified instrs when has_generics = H.MaybeGenerics ->
+    | Class_reified instrs when maybe_generics has_generics ->
       gather [instrs; instr_classgetts; instr_newobjr]
     | _ -> gather [emit_load_class_ref env pos cexpr; instr_newobj]
   in
@@ -1026,18 +1046,19 @@ and emit_shape
 and emit_call_expr env pos e targs args uarg async_eager_label =
   match (snd e, targs, args, uarg) with
   | (A.Id (_, id), _, [(_, A.String data)], None)
-    when id = SN.SpecialFunctions.hhas_adata ->
+    when String.equal id SN.SpecialFunctions.hhas_adata ->
     let v = Typed_value.HhasAdata data in
     emit_pos_then pos @@ instr (ILitConst (TypedValue v))
-  | (A.Id (_, id), _, _, None) when id = SN.PseudoFunctions.isset ->
+  | (A.Id (_, id), _, _, None) when String.equal id SN.PseudoFunctions.isset ->
     emit_call_isset_exprs env pos args
   | (A.Id (_, id), _, ([_; _] | [_; _; _]), None)
-    when id = SN.FB.idx && not (jit_enable_rename_function ()) ->
+    when String.equal id SN.FB.idx && not (jit_enable_rename_function ()) ->
     emit_idx env pos args
-  | (A.Id (_, id), _, [arg1], None) when id = SN.EmitterSpecialFunctions.eval ->
+  | (A.Id (_, id), _, [arg1], None)
+    when String.equal id SN.EmitterSpecialFunctions.eval ->
     emit_eval env pos arg1
   | (A.Id (_, id), _, [arg1], None)
-    when id = SN.EmitterSpecialFunctions.set_frame_metadata ->
+    when String.equal id SN.EmitterSpecialFunctions.set_frame_metadata ->
     gather
       [
         emit_expr env arg1;
@@ -1046,10 +1067,12 @@ and emit_call_expr env pos e targs args uarg async_eager_label =
         instr_null;
       ]
   | (A.Id (_, s), _, [], None)
-    when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
+    when String.equal s SN.PseudoFunctions.exit
+         || String.equal s SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env None
   | (A.Id (_, s), _, [arg1], None)
-    when s = SN.PseudoFunctions.exit || s = SN.PseudoFunctions.die ->
+    when String.equal s SN.PseudoFunctions.exit
+         || String.equal s SN.PseudoFunctions.die ->
     emit_pos_then pos @@ emit_exit env (Some arg1)
   | (_, _, _, _) ->
     let instrs = emit_call env pos e targs args uarg async_eager_label in
@@ -1102,7 +1125,8 @@ and emit_class_expr
   | Class_expr
       ((_, (A.BracedExpr _ | A.Call _ | A.Binop _ | A.Class_get _)) as e) ->
     aux e
-  | Class_expr ((_, A.Lvar (_, id)) as e) when Local_id.get_name id = "$this" ->
+  | Class_expr ((_, A.Lvar (_, id)) as e)
+    when String.equal (Local_id.get_name id) "$this" ->
     aux e
   | _ ->
     let pos =
@@ -1207,22 +1231,26 @@ and emit_lambda (env : Emit_env.t) (fundef : Tast.fun_) (ids : Aast.lid list) =
 
 and emit_id (env : Emit_env.t) ((p, s) : Aast.sid) =
   match s with
-  | _ when s = SN.PseudoConsts.g__FILE__ -> instr (ILitConst File)
-  | _ when s = SN.PseudoConsts.g__DIR__ -> instr (ILitConst Dir)
-  | _ when s = SN.PseudoConsts.g__CLASS__ ->
+  | _ when String.equal s SN.PseudoConsts.g__FILE__ -> instr (ILitConst File)
+  | _ when String.equal s SN.PseudoConsts.g__DIR__ -> instr (ILitConst Dir)
+  | _ when String.equal s SN.PseudoConsts.g__CLASS__ ->
     gather [instr_self; instr_classname]
-  | _ when s = SN.PseudoConsts.g__METHOD__ -> instr (ILitConst Method)
-  | _ when s = SN.PseudoConsts.g__FUNCTION_CREDENTIAL__ ->
+  | _ when String.equal s SN.PseudoConsts.g__METHOD__ ->
+    instr (ILitConst Method)
+  | _ when String.equal s SN.PseudoConsts.g__FUNCTION_CREDENTIAL__ ->
     instr (ILitConst FuncCred)
-  | _ when s = SN.PseudoConsts.g__LINE__ ->
+  | _ when String.equal s SN.PseudoConsts.g__LINE__ ->
     (* If the expression goes on multi lines, we return the last line *)
     let (_, line, _, _) = Pos.info_pos_extended p in
     instr_int line
-  | _ when s = SN.PseudoConsts.g__NAMESPACE__ ->
+  | _ when String.equal s SN.PseudoConsts.g__NAMESPACE__ ->
     let ns = Emit_env.get_namespace env in
     instr_string (Option.value ~default:"" ns.Namespace_env.ns_name)
-  | _ when s = SN.PseudoConsts.g__COMPILER_FRONTEND__ -> instr_string "hackc"
-  | _ when s = SN.PseudoConsts.exit || s = SN.PseudoConsts.die ->
+  | _ when String.equal s SN.PseudoConsts.g__COMPILER_FRONTEND__ ->
+    instr_string "hackc"
+  | _
+    when String.equal s SN.PseudoConsts.exit
+         || String.equal s SN.PseudoConsts.die ->
     emit_exit env None
   | _ ->
     let cid = Hhbc_id.Const.from_ast_name s in
@@ -1296,7 +1324,7 @@ and emit_call_isset_expr env outer_pos (expr : Tast.expr) =
   let ((pos, _), expr_) = expr in
   match expr_ with
   | A.Array_get ((_, A.Lvar (_, x)), Some e)
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     gather [emit_expr env e; emit_pos outer_pos; instr_issetg]
   | A.Array_get (base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.Isset base_expr opt_elem_expr)
@@ -1305,7 +1333,7 @@ and emit_call_isset_expr env outer_pos (expr : Tast.expr) =
     fst (emit_obj_get env pos QueryOp.Isset expr prop nullflavor)
   | A.Lvar (_, n)
     when SN.Superglobals.is_superglobal (Local_id.get_name n)
-         || Local_id.get_name n = SN.Superglobals.globals ->
+         || String.equal (Local_id.get_name n) SN.Superglobals.globals ->
     gather
       [
         emit_pos outer_pos;
@@ -1419,7 +1447,7 @@ and try_inline_gen_call env (e : Tast.expr) =
   else
     match snd e with
     | A.Call (_, (_, A.Id (_, s)), _, [arg], None)
-      when SU.strip_global_ns s = "gena" ->
+      when String.equal (SU.strip_global_ns s) "gena" ->
       Some (inline_gena_call env arg)
     | _ -> None
 
@@ -1623,7 +1651,7 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     emit_conditional_expression env pos etest etrue efalse
   | A.Expr_list es -> gather @@ List.map es ~f:(emit_expr env)
   | A.Array_get ((_, A.Lvar (_, x)), Some e)
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     gather [emit_expr env e; emit_pos pos; instr (IGet CGetG)]
   | A.Array_get (base_expr, opt_elem_expr) ->
     fst (emit_array_get env pos QueryOp.CGet base_expr opt_elem_expr)
@@ -1897,18 +1925,20 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
         pos
         es
         (NewDictArray count)
-  | A.Collection ((_, name), _, _) when SU.strip_ns name = "Set" ->
+  | A.Collection ((_, name), _, _) when String.equal (SU.strip_ns name) "Set" ->
     emit_collection_helper CollectionType.Set
   | A.ValCollection (A.Set, _, _) -> emit_collection_helper CollectionType.Set
-  | A.Collection ((_, name), _, _) when SU.strip_ns name = "ImmSet" ->
+  | A.Collection ((_, name), _, _) when String.equal (SU.strip_ns name) "ImmSet"
+    ->
     emit_collection_helper CollectionType.ImmSet
   | A.ValCollection (A.ImmSet, _, _) ->
     emit_collection_helper CollectionType.ImmSet
-  | A.Collection ((_, name), _, _) when SU.strip_ns name = "Map" ->
+  | A.Collection ((_, name), _, _) when String.equal (SU.strip_ns name) "Map" ->
     emit_collection_helper CollectionType.Map
   | A.KeyValCollection (A.Map, _, _) ->
     emit_collection_helper CollectionType.Map
-  | A.Collection ((_, name), _, _) when SU.strip_ns name = "ImmMap" ->
+  | A.Collection ((_, name), _, _) when String.equal (SU.strip_ns name) "ImmMap"
+    ->
     emit_collection_helper CollectionType.ImmMap
   | A.KeyValCollection (A.ImmMap, _, _) ->
     emit_collection_helper CollectionType.ImmMap
@@ -1973,14 +2003,14 @@ and emit_named_collection_str env (expr : Tast.expr) pos name fields =
 
 and emit_named_collection env (expr : Tast.expr) pos ctype fields =
   let emit_vector_like collection_type =
-    if fields = [] then
+    if List.is_empty fields then
       emit_pos_then pos @@ instr_newcol collection_type
     else
       gather
         [emit_vec_collection env pos fields; instr_colfromarray collection_type]
   in
   let emit_map_or_set collection_type =
-    if fields = [] then
+    if List.is_empty fields then
       emit_pos_then pos @@ instr_newcol collection_type
     else
       emit_collection ~transform_to_collection:collection_type env expr fields
@@ -2298,7 +2328,7 @@ and emit_quiet_expr
   let (_, expr_) = expr in
   match expr_ with
   | A.Lvar (name_pos, name)
-    when Local_id.get_name name = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name name) SN.Superglobals.globals ->
     ( gather
         [
           emit_pos name_pos;
@@ -2310,7 +2340,7 @@ and emit_quiet_expr
   | A.Lvar (_, name) when not (is_local_this env name) ->
     (instr_cgetquietl (get_local env (pos, Local_id.get_name name)), None)
   | A.Array_get ((_, A.Lvar (_, x)), Some e)
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     (gather [emit_expr env e; emit_pos pos; instr (IGet CGetG)], None)
   | A.Array_get (base_expr, opt_elem_expr) ->
     emit_array_get
@@ -2615,8 +2645,8 @@ and emit_obj_get
   let (annot, expr_) = expr in
   match expr_ with
   | A.Lvar (pos, id)
-    when Local_id.get_name id = SN.SpecialIdents.this
-         && null_flavor = Ast_defs.OG_nullsafe ->
+    when String.equal (Local_id.get_name id) SN.SpecialIdents.this
+         && is_null_safe null_flavor ->
     Emit_fatal.raise_fatal_parse pos "?-> is not allowed with $this"
   | _ ->
     begin
@@ -2798,7 +2828,7 @@ and emit_prop_expr
     | MemberKey.PL _
     | MemberKey.PC _ ->
       let ((pos, _), _) = prop_expr in
-      if null_flavor = Ast_defs.OG_nullsafe then
+      if is_null_safe null_flavor then
         Emit_fatal.raise_fatal_parse
           pos
           "?-> can only be used with scalar property names"
@@ -2884,10 +2914,9 @@ and emit_base_worker
     (expr : Tast.expr) =
   let (((pos, _) as annot), expr_) = expr in
   let base_mode =
-    if mode = MemberOpMode.InOut then
-      MemberOpMode.Warn
-    else
-      mode
+    match mode with
+    | MemberOpMode.InOut -> MemberOpMode.Warn
+    | _ -> mode
   in
   let local_temp_kind =
     get_local_temp_kind ~is_base:true inout_param_info env (Some expr)
@@ -2922,7 +2951,8 @@ and emit_base_worker
         }
   in
   match expr_ with
-  | A.Lvar (_, x) when Local_id.get_name x = SN.Superglobals.globals ->
+  | A.Lvar (_, x)
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     Emit_fatal.raise_fatal_runtime pos "Cannot use [] with $GLOBALS"
   | A.Lvar (name_pos, x)
     when SN.Superglobals.is_superglobal (Local_id.get_name x) ->
@@ -2934,7 +2964,8 @@ and emit_base_worker
       1
       0
   | A.Lvar (thispos, x)
-    when is_object && Local_id.get_name x = SN.SpecialIdents.this ->
+    when is_object && String.equal (Local_id.get_name x) SN.SpecialIdents.this
+    ->
     emit_default
       (emit_pos_then thispos @@ instr (IMisc CheckThis))
       empty
@@ -2956,11 +2987,11 @@ and emit_base_worker
       1
       0
   | A.Array_get ((_, A.Lvar (_, x)), Some (_, A.Lvar (y_pos, y_id)))
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     let v = get_local env (y_pos, Local_id.get_name y_id) in
     emit_default empty empty (instr (IBase (BaseGL (v, base_mode)))) 0 0
   | A.Array_get ((_, A.Lvar (_, x)), Some e)
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     let elem_expr_instrs = emit_expr env e in
     emit_default
       elem_expr_instrs
@@ -3222,7 +3253,7 @@ and emit_reified_arg env ~isas pos (hint : Aast.hint) =
   let scope = Emit_env.get_scope env in
   let f tparam acc =
     match tparam with
-    | { A.tp_name = (_, id); A.tp_reified; _ } when not (tp_reified = A.Erased)
+    | { A.tp_name = (_, id); A.tp_reified; _ } when not (A.is_erased tp_reified)
       ->
       SSet.add id acc
     | _ -> acc
@@ -3659,7 +3690,7 @@ and emit_special_function
   (* Make sure that we do not treat a special function that is aliased as not
    * aliased *)
   match (lower_fq_name, args) with
-  | (id, _) when id = SN.SpecialFunctions.echo ->
+  | (id, _) when String.equal id SN.SpecialFunctions.echo ->
     let instrs =
       gather
       @@ List.mapi args (fun i arg ->
@@ -3803,8 +3834,8 @@ and emit_special_function
       | ((_, A.Class_const (_, (_, id))), (_, A.String _)) when SU.is_class id
         ->
         Some (emit_class_meth env cls meth)
-      | ((_, A.Id (_, s)), (_, A.String _)) when s = SN.PseudoConsts.g__CLASS__
-        ->
+      | ((_, A.Id (_, s)), (_, A.String _))
+        when String.equal s SN.PseudoConsts.g__CLASS__ ->
         Some (emit_class_meth env cls meth)
       | ((_, A.String _), (_, A.String _)) ->
         Some (emit_class_meth env cls meth)
@@ -3880,7 +3911,8 @@ and emit_special_function
         Some (gather [emit_expr env arg_expr; emit_is env pos h])
       | ([(_, A.Lvar ((_, arg_str) as arg_id))], Some i, _)
         when SN.Superglobals.is_superglobal (Local_id.get_name arg_str)
-             || Local_id.get_name arg_str = SN.Superglobals.globals ->
+             || String.equal (Local_id.get_name arg_str) SN.Superglobals.globals
+        ->
         Some
           (gather
              [
@@ -3924,7 +3956,7 @@ and emit_class_meth env cls meth =
     match cls with
     | ((pos, _), A.Class_const (cid, (_, id))) when SU.is_class id ->
       emit_class_meth_native env pos cid method_id
-    | (_, A.Id (_, s)) when s = SN.PseudoConsts.g__CLASS__ ->
+    | (_, A.Id (_, s)) when String.equal s SN.PseudoConsts.g__CLASS__ ->
       instr_resolveclsmethods SpecialClsRef.Self method_id
     | (_, A.String class_name) ->
       instr_resolveclsmethodd
@@ -4053,7 +4085,7 @@ and emit_function_pointer env (annot, e) _targs =
   (* inst_meth *)
   | A.Obj_get
       (obj_expr, (((pos, _) as annot), A.Id (_, method_name)), null_flavor) ->
-    if null_flavor = A.OG_nullsafe then
+    if is_null_safe null_flavor then
       let end_label = Label.next_regular () in
       gather
         [
@@ -4148,7 +4180,8 @@ and emit_array_get_fixed last_usage local indices =
 and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
   Aast.(
     match expr with
-    | Call (_, (_, Id (_, s)), _, _, _) when s = SN.SpecialFunctions.echo ->
+    | Call (_, (_, Id (_, s)), _, _, _)
+      when String.equal s SN.SpecialFunctions.echo ->
       false
     | Lvar _
     | Array_get _
@@ -4241,6 +4274,10 @@ and emit_lval_op_list
     (indices : int list)
     (expr : Tast.expr) =
   let is_ltr = php7_ltr_assign () in
+  let is_ommited = function
+    | A.Omitted -> true
+    | _ -> false
+  in
   match snd expr with
   | A.List exprs ->
     let last_non_omitted =
@@ -4250,7 +4287,7 @@ and emit_lval_op_list
         if is_ltr then
           exprs
           |> List.foldi ~init:None ~f:(fun i acc (_, v) ->
-                 if v = A.Omitted then
+                 if is_ommited v then
                    acc
                  else
                    Some i)
@@ -4258,7 +4295,7 @@ and emit_lval_op_list
            so we need to find first non-omitted expression *)
         else
           exprs
-          |> List.findi ~f:(fun _ (_, v) -> v <> A.Omitted)
+          |> List.findi ~f:(fun _ (_, v) -> not (is_ommited v))
           |> Option.map ~f:fst
       else
         None
@@ -4266,7 +4303,10 @@ and emit_lval_op_list
     let (lhs_instrs, set_instrs) =
       List.mapi exprs (fun i expr ->
           emit_lval_op_list
-            ~last_usage:(Some i = last_non_omitted)
+            ~last_usage:
+              (match last_non_omitted with
+              | Some x -> x = i
+              | None -> false)
             env
             outer_pos
             local
@@ -4413,7 +4453,7 @@ and emit_lval_op_nonlist_steps
   match expr_ with
   | A.Lvar (name_pos, id)
     when SN.Superglobals.is_superglobal (Local_id.get_name id)
-         || Local_id.get_name id = SN.Superglobals.globals ->
+         || String.equal (Local_id.get_name id) SN.Superglobals.globals ->
     ( emit_pos_then name_pos
       @@ instr_string
       @@ SU.Locals.strip_dollar (Local_id.get_name id),
@@ -4421,7 +4461,7 @@ and emit_lval_op_nonlist_steps
       emit_final_global_op outer_pos op )
   | A.Lvar ((_, str) as id) when is_local_this env str && is_incdec op ->
     (emit_local ~notice:Notice env id, rhs_instrs, empty)
-  | A.Lvar (pos, name) when (not (is_local_this env name)) || op = LValOp.Unset
+  | A.Lvar (pos, name) when (not (is_local_this env name)) || LValOp.is_unset op
     ->
     ( empty,
       rhs_instrs,
@@ -4430,7 +4470,7 @@ and emit_lval_op_nonlist_steps
         op
         (get_local env (pos, Local_id.get_name name)) )
   | A.Array_get ((_, A.Lvar (_, x)), Some e)
-    when Local_id.get_name x = SN.Superglobals.globals ->
+    when String.equal (Local_id.get_name x) SN.Superglobals.globals ->
     let final_global_op_instrs = emit_final_global_op pos op in
     if rhs_stack_size = 0 then
       (emit_expr env e, empty, final_global_op_instrs)
@@ -4503,7 +4543,7 @@ and emit_lval_op_nonlist_steps
       rhs_instrs,
       gather [emit_pos pos; base_setup_instrs; final_instr] )
   | A.Obj_get (e1, e2, null_flavor) ->
-    if null_flavor = Ast_defs.OG_nullsafe then
+    if is_null_safe null_flavor then
       Emit_fatal.raise_fatal_parse pos "?-> is not allowed in write context";
     let mode =
       match op with

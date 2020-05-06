@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 (* We introduce a type for Hack/PHP values, mimicking what happens at runtime.
  * Currently this is used for constant folding. By defining a special type, we
@@ -75,8 +75,8 @@ let to_bool v =
   | String "" -> false
   | String "0" -> false
   | String _ -> true
-  | Int i -> i <> Int64.zero
-  | Float f -> f <> 0.0
+  | Int i -> Int64.(i <> Int64.zero)
+  | Float f -> Float.(f <> 0.0)
   (* Empty collections cast to false *)
   | Dict ([], _)
   | Array []
@@ -102,7 +102,7 @@ let string_to_int_opt ~allow_inf s =
   | None ->
     (try
        let s = float_of_string s in
-       if (not allow_inf) && (s = Float.infinity || s = Float.neg_infinity) then
+       if (not allow_inf) && Float.(s = infinity || s = neg_infinity) then
          None
        else
          Some (Int64.of_float s)
@@ -136,15 +136,15 @@ let to_int v =
        *)
       | Float.Class.Nan
       | Float.Class.Infinite ->
-        if f = Float.infinity then
+        if Float.(f = infinity) then
           Some Int64.zero
         else
           Some Caml.Int64.min_int
       | _ ->
         (* mimic double-to-int64.h *)
         let cast v = (try Some (Int64.of_float v) with Failure _ -> None) in
-        if f >= 0.0 then
-          if f < Int64.to_float Caml.Int64.max_int then
+        if Float.(f >= 0.0) then
+          if Float.(f < Int64.to_float Caml.Int64.max_int) then
             cast f
           else
             Some 0L
@@ -221,14 +221,16 @@ let mul v1 v2 =
 (* Arithmetic. For now, only on pure integer or float operands *)
 let div v1 v2 =
   match (v1, v2) with
-  | (Int i1, Int i2) when i2 <> 0L ->
-    if Int64.rem i1 i2 = 0L then
+  | (Int i1, Int i2) when Int64.(i2 <> 0L) ->
+    if Int64.(rem i1 i2 = 0L) then
       Some (Int (Int64.( / ) i1 i2))
     else
       Some (Float (Int64.to_float i1 /. Int64.to_float i2))
-  | (Float f1, Float f2) when f2 <> 0.0 -> Some (Float (f1 /. f2))
-  | (Int i1, Float f2) when f2 <> 0.0 -> Some (Float (Int64.to_float i1 /. f2))
-  | (Float f1, Int i2) when i2 <> 0L -> Some (Float (f1 /. Int64.to_float i2))
+  | (Float f1, Float f2) when Float.(f2 <> 0.0) -> Some (Float (f1 /. f2))
+  | (Int i1, Float f2) when Float.(f2 <> 0.0) ->
+    Some (Float (Int64.to_float i1 /. f2))
+  | (Float f1, Int i2) when Int64.(i2 <> 0L) ->
+    Some (Float (f1 /. Int64.to_float i2))
   | _ -> None
 
 (* Arithmetic. For now, only on pure integer or float operands *)
@@ -242,7 +244,7 @@ let add v1 v2 =
 
 let shift_left v1 v2 =
   match (v1, v2) with
-  | (Int i1, Int i2) when i2 >= 0L ->
+  | (Int i1, Int i2) when Int64.(i2 >= 0L) ->
     begin
       try
         let v = Int64.to_int_exn i2 in

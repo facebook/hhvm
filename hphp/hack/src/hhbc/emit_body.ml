@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 open Instruction_sequence
 module A = Aast
@@ -43,7 +43,7 @@ let emit_generics_upper_bounds tparams class_tparam_names ~skipawaitable =
                    h)
             | _ -> None)
       in
-      if ubs = [] then
+      if List.is_empty ubs then
         None
       else
         Some (snd t.A.tp_name, ubs))
@@ -58,7 +58,7 @@ let emit_method_prolog
   in
   let ast_params =
     List.filter ast_params ~f:(fun p ->
-        not (p.A.param_is_variadic && p.A.param_name = "..."))
+        not (p.A.param_is_variadic && String.equal p.A.param_name "..."))
   in
   let make_param_instr (param, ast_param) =
     if Hhas_param.is_variadic param then
@@ -233,7 +233,7 @@ let emit_deprecation_warning scope deprecation_info =
     let (class_name, trait_instrs, concat_instruction) =
       match Ast_scope.Scope.get_class scope with
       | None -> ("", empty, empty)
-      | Some c when c.A.c_kind = Ast_defs.Ctrait ->
+      | Some c when Ast_defs.is_c_trait c.A.c_kind ->
         ("::", gather [instr_self; instr_classname], instr_concat)
       | Some c -> (strip_id c.A.c_name ^ "::", empty, empty)
     in
@@ -291,7 +291,7 @@ let emit_deprecation_warning scope deprecation_info =
 let rec is_awaitable h =
   match snd h with
   | Aast.Happly ((_, s), ([] | [_]))
-    when s = Naming_special_names.Classes.cAwaitable ->
+    when String.equal s Naming_special_names.Classes.cAwaitable ->
     true
   | Aast.Hsoft h
   | Aast.Hoption h ->
@@ -410,8 +410,12 @@ let emit_body
     Generator.is_function_generator body
   in
   let verify_return =
+    let is_some_empty = function
+      | Some s -> String.equal s ""
+      | _ -> false
+    in
     if
-      return_type_info.Hhas_type_info.type_info_user_type <> Some ""
+      (not (is_some_empty return_type_info.Hhas_type_info.type_info_user_type))
       && Hhas_type_info.has_type_constraint return_type_info
       && not is_generator
     then
@@ -420,7 +424,7 @@ let emit_body
       None
   in
   let default_dropthrough =
-    if default_dropthrough <> None then
+    if Option.is_some default_dropthrough then
       default_dropthrough
     else if is_async && Option.is_some verify_return then
       Some (gather [instr_null; instr_verifyRetTypeC; instr_retc])
@@ -444,9 +448,11 @@ let emit_body
   Emit_statement.set_function_pos pos;
   Jump_targets.reset ();
 
-  let remove_this vars = List.filter vars (fun s -> s <> "$this") in
+  let remove_this vars =
+    List.filter vars (fun s -> not (String.equal s "$this"))
+  in
   let move_this vars =
-    if List.mem ~equal:( = ) vars "$this" then
+    if List.mem ~equal:String.( = ) vars "$this" then
       remove_this vars @ ["$this"]
     else
       vars
@@ -486,7 +492,7 @@ let emit_body
       let captured_vars = filter_vars ast_class.A.c_vars in
       captured_vars
       @ List.filter (move_this decl_vars) ~f:(fun v ->
-            not (List.mem ~equal:( = ) captured_vars v))
+            not (List.mem ~equal:String.( = ) captured_vars v))
     else
       match scope with
       | _ :: Ast_scope.ScopeItem.Class _ :: _ -> move_this decl_vars
@@ -496,7 +502,7 @@ let emit_body
   let decl_vars =
     if
       List.exists
-        ~f:(fun t -> not (t.A.tp_reified = A.Erased))
+        ~f:(fun t -> not (A.is_erased t.A.tp_reified))
         immediate_tparams
       && not is_closure_body
     then
@@ -570,7 +576,8 @@ let emit_body
   let should_emit_init_this =
     (not is_in_static_method)
     && ( needs_local_this
-       || (is_toplevel && List.exists ~f:(fun x -> x = "$this") decl_vars) )
+       || is_toplevel
+          && List.exists ~f:(fun x -> String.equal x "$this") decl_vars )
   in
   let header =
     (* per comment in emitter.cpp there should be no

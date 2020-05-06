@@ -10,7 +10,7 @@
 open Instruction_sequence
 open Hhbc_ast
 open Hhbc_string_utils
-open Core_kernel
+open Hh_prelude
 module A = Ast_defs
 module T = Aast
 module SN = Naming_special_names
@@ -37,7 +37,8 @@ let rec expr_requires_deep_init (_, expr_) =
   | T.Varray (_, fields) -> List.exists fields expr_requires_deep_init
   | T.Darray (_, fields) -> List.exists fields expr_pair_requires_deep_init
   | T.Id (_, name)
-    when name = SN.PseudoConsts.g__FILE__ || name = SN.PseudoConsts.g__DIR__ ->
+    when String.equal name SN.PseudoConsts.g__FILE__
+         || String.equal name SN.PseudoConsts.g__DIR__ ->
     false
   | T.Class_const ((_, T.CIexpr (_, T.Id (_, s))), (_, p)) ->
     class_const_requires_deep_init s p
@@ -83,9 +84,9 @@ let valid_tc_for_prop tc =
   | Some name ->
     (not (is_self name))
     && (not (is_parent name))
-    && (not (String.lowercase name = "callable"))
-    && (not (String.lowercase name = "hh\\nothing"))
-    && not (String.lowercase name = "hh\\noreturn")
+    && (not (String.equal (String.lowercase name) "callable"))
+    && (not (String.equal (String.lowercase name) "hh\\nothing"))
+    && not (String.equal (String.lowercase name) "hh\\noreturn")
 
 let from_ast
     class_
@@ -109,8 +110,15 @@ let from_ast
   let is_lsb = Hhas_attribute.has_lsb attributes in
   let is_late_init = Hhas_attribute.has_late_init attributes in
   let visibility = cv_visibility in
-  let is_private = cv_visibility = Aast.Private in
-  if (not is_static) && class_.T.c_final && class_.T.c_kind = Ast_defs.Cabstract
+  let is_private =
+    match cv_visibility with
+    | Aast.Private -> true
+    | _ -> false
+  in
+  if
+    (not is_static)
+    && class_.T.c_final
+    && Ast_defs.is_c_abstract class_.T.c_kind
   then
     Emit_fatal.raise_fatal_parse
       pos

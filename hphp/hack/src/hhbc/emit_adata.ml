@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Acc = Mutable_accumulator
 module SU = Hhbc_string_utils
 module TV = Typed_value
@@ -109,7 +109,7 @@ let attribute_to_string a =
 let attributes_to_strings al =
   let al =
     List.sort
-      (fun a1 a2 ->
+      ~compare:(fun a1 a2 ->
         String.compare (Hhas_attribute.name a1) (Hhas_attribute.name a2))
       al
   in
@@ -175,16 +175,16 @@ let rewrite_typed_value tv =
       let identifier = get_array_identifier tv in
       begin
         match String.sub d 0 1 with
-        | s when s = adata_array_prefix -> Array identifier
-        | s when s = adata_varray_prefix && hack_arr_dv_arrs () ->
+        | s when String.equal s adata_array_prefix -> Array identifier
+        | s when String.equal s adata_varray_prefix && hack_arr_dv_arrs () ->
           Vec identifier
-        | s when s = adata_varray_prefix -> Array identifier
-        | s when s = adata_darray_prefix && hack_arr_dv_arrs () ->
+        | s when String.equal s adata_varray_prefix -> Array identifier
+        | s when String.equal s adata_darray_prefix && hack_arr_dv_arrs () ->
           Dict identifier
-        | s when s = adata_darray_prefix -> Array identifier
-        | s when s = adata_vec_prefix -> Vec identifier
-        | s when s = adata_keyset_prefix -> Keyset identifier
-        | s when s = adata_dict_prefix -> Dict identifier
+        | s when String.equal s adata_darray_prefix -> Array identifier
+        | s when String.equal s adata_vec_prefix -> Vec identifier
+        | s when String.equal s adata_keyset_prefix -> Keyset identifier
+        | s when String.equal s adata_dict_prefix -> Dict identifier
         | _ -> failwith ("Unknown HhasAdata data: " ^ d)
       end
     | TV.Array _ -> Array (get_array_identifier tv)

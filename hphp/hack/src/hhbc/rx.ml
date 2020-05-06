@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Ast = Aast
 module T = Aast
 
@@ -21,28 +21,47 @@ type t =
   | Rx of conditional
   | Pure of conditional
 
+let is_non_rx = function
+  | NonRx -> true
+  | RxLocal _
+  | RxShallow _
+  | Rx _
+  | Pure _ ->
+    false
+
 let attr_is_pure ast_attr =
-  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaPure
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaPure
 
 let attr_is_rx ast_attr =
-  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaReactive
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaReactive
 
 let attr_is_rx_shallow ast_attr =
-  snd ast_attr.Ast.ua_name
-  = Naming_special_names.UserAttributes.uaShallowReactive
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaShallowReactive
 
 let attr_is_rx_local ast_attr =
-  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaLocalReactive
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaLocalReactive
 
 let attr_is_non_rx ast_attr =
-  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaNonRx
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaNonRx
 
 let attr_is_rx_if_impl ast_attr =
-  snd ast_attr.Ast.ua_name = Naming_special_names.UserAttributes.uaOnlyRxIfImpl
+  String.equal
+    (snd ast_attr.Ast.ua_name)
+    Naming_special_names.UserAttributes.uaOnlyRxIfImpl
 
 let attr_is_rx_as_args ast_attr =
   let name = snd ast_attr.Ast.ua_name in
-  name = Naming_special_names.UserAttributes.uaAtMostRxAsArgs
+  String.equal name Naming_special_names.UserAttributes.uaAtMostRxAsArgs
 
 let rx_level_from_ast ast_attrs =
   let pure = List.exists ast_attrs ~f:attr_is_pure in

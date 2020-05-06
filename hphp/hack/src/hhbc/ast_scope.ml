@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 module T = Aast
 
 module ScopeItem = struct
@@ -94,9 +94,9 @@ module Scope = struct
     | ScopeItem.Class _ :: _ -> false
     | ScopeItem.Function { T.f_fun_kind = kind; _ } :: _
     | ScopeItem.Method { T.m_fun_kind = kind; _ } :: _ ->
-      kind = Ast_defs.FAsync || kind = Ast_defs.FAsyncGenerator
+      Ast_defs.is_f_async_or_generator kind
 
-  let is_toplevel scope = scope = []
+  let is_toplevel scope = List.is_empty scope
 
   let rec is_in_static_method scope =
     match scope with
@@ -109,7 +109,7 @@ module Scope = struct
   let is_in_trait scope =
     match get_class scope with
     | None -> false
-    | Some cd -> cd.T.c_kind = Ast_defs.Ctrait
+    | Some cd -> Ast_defs.is_c_trait cd.T.c_kind
 
   let is_in_lambda = function
     | ScopeItem.Lambda _ :: _
@@ -141,7 +141,8 @@ module Scope = struct
 
   let find_function_attribute scope attr_name =
     let find_attribute ua_list =
-      List.find ua_list (fun attr -> snd attr.T.ua_name = attr_name)
+      List.find ua_list (fun attr ->
+          String.equal (snd attr.T.ua_name) attr_name)
     in
     match find_enclosing_function scope with
     | Some (ScopeItem.Function f) -> find_attribute f.T.f_user_attributes

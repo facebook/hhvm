@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 open Emit_memoize_helpers
 open Hhbc_ast
@@ -37,7 +37,7 @@ let make_info ast_class class_id ast_methods =
         pos
         ~params:ast_method.T.m_params
         ~is_method:true;
-      if ast_class.T.c_kind = Ast_defs.Cinterface then
+      if Ast_defs.is_c_interface ast_class.T.c_kind then
         Emit_fatal.raise_fatal_runtime
           pos
           "<<__Memoize>> cannot be used in interfaces"
@@ -52,7 +52,7 @@ let make_info ast_class class_id ast_methods =
     )
   in
   List.iter ast_methods check_method;
-  let is_trait = ast_class.T.c_kind = Ast_defs.Ctrait in
+  let is_trait = Ast_defs.is_c_trait ast_class.T.c_kind in
   let class_prefix =
     if is_trait then
       "$" ^ String.lowercase (Hhbc_id.Class.to_raw_string class_id)
@@ -551,7 +551,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
   let method_visibility = ast_method.T.m_visibility in
   let (_, original_name) = ast_method.T.m_name in
   let ret =
-    if original_name = Naming_special_names.Members.__construct then
+    if String.equal original_name Naming_special_names.Members.__construct then
       None
     else
       T.hint_of_type_hint ast_method.T.m_ret
@@ -572,7 +572,7 @@ let make_memoize_wrapper_method env info ast_class ast_method =
       method_attributes
       ast_method.T.m_tparams
   in
-  let method_is_async = ast_method.T.m_fun_kind = Ast_defs.FAsync in
+  let method_is_async = Ast_defs.is_f_async ast_method.T.m_fun_kind in
   let deprecation_info = Hhas_attribute.deprecation_info method_attributes in
   (* __Memoize is not allowed on lambdas, so we never need to inherit the rx
      level from the declaring scope when we're in a Memoize wrapper *)
@@ -580,10 +580,11 @@ let make_memoize_wrapper_method env info ast_class ast_method =
     Rx.rx_level_from_ast ast_method.T.m_user_attributes
     |> Option.value ~default:Rx.NonRx
   in
-  let env = Emit_env.with_rx_body (method_rx_level <> Rx.NonRx) env in
+  let env = Emit_env.with_rx_body (not (Rx.is_non_rx method_rx_level)) env in
   let is_reified =
     List.exists
-      ~f:(fun t -> t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
+      ~f:(fun t ->
+        T.is_reified t.T.tp_reified || T.is_soft_reified t.T.tp_reified)
       ast_method.T.m_tparams
   in
   let method_body =

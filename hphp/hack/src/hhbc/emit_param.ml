@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 open Ast_class_expr
 module SU = Hhbc_string_utils
@@ -114,7 +114,11 @@ let default_type_check param_name param_type_info param_expr =
 let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
   let param_name = p.A.param_name in
   let param_is_variadic = p.A.param_is_variadic in
-  let param_is_inout = p.A.param_callconv = Some Ast_defs.Pinout in
+  let param_is_inout =
+    match p.A.param_callconv with
+    | Some Ast_defs.Pinout -> true
+    | _ -> false
+  in
   let param_user_attributes =
     Emit_attribute.from_asts namespace p.A.param_user_attributes
   in
@@ -158,7 +162,7 @@ let from_ast ~tparams ~namespace ~generate_defaults ~scope p =
     else
       None
   in
-  if param_is_variadic && param_name = "..." then
+  if param_is_variadic && String.equal param_name "..." then
     None
   else
     Some
@@ -205,11 +209,16 @@ let emit_param_default_value_setter ?(is_native = false) env pos params =
       | Some { Hhas_type_info.type_info_user_type = Some s; _ } ->
         let is_optional = String_utils.string_starts_with s "?" in
         let s = String_utils.lstrip s "?" in
-        (is_optional, s = "HH\\mixed", s = "callable")
+        (is_optional, String.equal s "HH\\mixed", String.equal s "callable")
       | _ -> (false, false, false)
     in
+    let is_null = function
+      | A.Null -> true
+      | _ -> false
+    in
+
     let nop_requirements e =
-      is_native && snd e = A.Null && (is_mixed || (is_optional && is_callable))
+      is_native && is_null (snd e) && (is_mixed || (is_optional && is_callable))
     in
     let dvo = Hhas_param.default_value param in
     Option.map dvo ~f:(fun (l, e) ->

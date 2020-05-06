@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 module T = Aast
 module ULS = Unique_list_string
 module SN = Naming_special_names
@@ -19,6 +19,7 @@ type bare_this_usage =
   - $this as target of & operator
   - $this as reference in catch clause *)
   | Bare_this_as_ref
+[@@deriving eq]
 
 type decl_vars_state = {
   (* set of locals used inside the functions *)
@@ -36,7 +37,7 @@ let with_this barethis s =
     | (None, Bare_this) -> Some Bare_this
     | (u, _) -> u
   in
-  if s.dvs_bare_this = new_bare_this then
+  if Option.equal equal_bare_this_usage s.dvs_bare_this new_bare_this then
     s
   else
     {
@@ -51,12 +52,12 @@ let dvs_empty = { dvs_locals = ULS.empty; dvs_bare_this = None }
  * "bare" (because bareparam=true), remember for needs_local_this *)
 let add_local ~barethis s (_, name) =
   if
-    name = SN.Superglobals.globals
-    || name = SN.SpecialIdents.dollardollar
+    String.equal name SN.Superglobals.globals
+    || String.equal name SN.SpecialIdents.dollardollar
     || SN.SpecialIdents.is_tmp_var name
   then
     s
-  else if name = SN.SpecialIdents.this then
+  else if String.equal name SN.SpecialIdents.this then
     with_this barethis s
   else
     with_local name s
@@ -107,7 +108,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
       match e with
       | Aast.Obj_get (receiver_e, prop_e, _) ->
         (match snd receiver_e with
-        | Aast.Lvar (_, id) when Local_id.get_name id = "$this" ->
+        | Aast.Lvar (_, id) when String.equal (Local_id.get_name id) "$this" ->
           if is_in_static_method && not is_closure_body then
             ()
           else
@@ -165,21 +166,24 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
       | Aast.Call (_, func_e, _, pos_args, unpacked_arg) ->
         (match func_e with
         | (_, Aast.Id (pos, call_name))
-          when call_name = SN.EmitterSpecialFunctions.set_frame_metadata ->
+          when String.equal
+                 call_name
+                 SN.EmitterSpecialFunctions.set_frame_metadata ->
           state := add_local ~barethis:Bare_this !state (pos, "$86metadata")
         | _ -> ());
         let barethis =
           match func_e with
           | (_, Aast.Id (_, name))
-            when name = SN.PseudoFunctions.isset
-                 || "\\" ^ name = SN.PseudoFunctions.echo ->
+            when String.equal name SN.PseudoFunctions.isset
+                 || String.equal ("\\" ^ name) SN.PseudoFunctions.echo ->
             Bare_this
           | _ -> Bare_this_as_ref
         in
         let on_arg e =
           match e with
           (* Only add $this to locals if it's bare *)
-          | (_, Aast.Lvar (_, id)) when Local_id.get_name id = "$this" ->
+          | (_, Aast.Lvar (_, id))
+            when String.equal (Local_id.get_name id) "$this" ->
             state := with_this barethis !state
           | _ -> self#on_expr () e
         in
@@ -192,7 +196,8 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
       | Aast.New (_, _, exprs1, expr2, _) ->
         let add_bare_expr expr =
           match expr with
-          | (_, Aast.Lvar (_, id)) when Local_id.get_name id = "$this" ->
+          | (_, Aast.Lvar (_, id))
+            when String.equal (Local_id.get_name id) "$this" ->
             state := with_this Bare_this_as_ref !state
           | _ -> self#on_expr () expr
         in
@@ -230,7 +235,11 @@ let uls_from_ast
   visitor#on_program () b;
   let state = visitor#state in
   let needs_local_this =
-    state.dvs_bare_this = Some Bare_this_as_ref || is_in_static_method
+    let is_some_bare_this_as_ref = function
+      | Some Bare_this_as_ref -> true
+      | _ -> false
+    in
+    is_some_bare_this_as_ref state.dvs_bare_this || is_in_static_method
   in
   let param_names =
     List.fold_left params ~init:ULS.empty ~f:(fun l p ->

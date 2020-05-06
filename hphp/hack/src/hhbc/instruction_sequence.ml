@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 
 (* The various from_X functions below take some kind of AST (expression,
@@ -68,7 +68,7 @@ let make_fcall_args
     ?async_eager_label
     ?context
     num_args =
-  if inouts <> [] && List.length inouts <> num_args then
+  if (not (List.is_empty inouts)) && List.length inouts <> num_args then
     failwith "length of inouts must be either zero or num_args";
   (flags, num_args, num_rets, inouts, async_eager_label, context)
 

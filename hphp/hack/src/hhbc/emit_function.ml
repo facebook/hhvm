@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 module A = Ast_defs
 module T = Aast
@@ -20,8 +20,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
   let namespace = ast_fun.T.f_namespace in
   let original_id = Hhbc_id.Function.from_ast_name (snd ast_fun.T.f_name) in
   let function_is_async =
-    ast_fun.T.f_fun_kind = Ast_defs.FAsync
-    || ast_fun.T.f_fun_kind = Ast_defs.FAsyncGenerator
+    Ast_defs.is_f_async_or_generator ast_fun.T.f_fun_kind
   in
   let function_attributes =
     Emit_attribute.from_asts namespace ast_fun.T.f_user_attributes
@@ -47,7 +46,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
     if fun_is_meth_caller then
       match ast_fun.T.f_user_attributes with
       | [{ T.ua_name = (_, "__MethCaller"); T.ua_params = [(_, T.String ctx)] }]
-        when ctx <> "" ->
+        when not (String.equal ctx "") ->
         Some (ctx |> Hhbc_id.Class.from_ast_name |> Hhbc_id.Class.to_raw_string)
       | _ -> None
     else
@@ -69,7 +68,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
     |> Option.value ~default:Rx.NonRx
   in
   let (ast_body, is_rx_body, function_rx_disabled) =
-    if function_rx_level <> Rx.NonRx then
+    if not (Rx.is_non_rx function_rx_level) then
       match Rx.halves_of_is_enabled_body ast_fun.T.f_body with
       | Some (enabled_body, disabled_body) ->
         if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options then
@@ -95,7 +94,7 @@ let emit_function (ast_fun, hoisted) : Hhas_function.t list =
           None
         else
           deprecation_info )
-      ~skipawaitable:(ast_fun.T.f_fun_kind = Ast_defs.FAsync)
+      ~skipawaitable:(Ast_defs.is_f_async ast_fun.T.f_fun_kind)
       ~default_dropthrough:None
       ~return_value:instr_null
       ~namespace

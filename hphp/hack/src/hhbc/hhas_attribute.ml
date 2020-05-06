@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 
 type t = {
   attribute_name: string;
@@ -21,7 +21,7 @@ let name a = a.attribute_name
 
 let arguments a = a.attribute_arguments
 
-let is_ s attr = name attr = s
+let is_ s attr = String.equal (name attr) s
 
 let has_ f attrs = List.exists attrs f
 
@@ -73,7 +73,7 @@ let is_native_arg s attributes =
   let f attr =
     is_native attr
     && List.exists (arguments attr) ~f:(function
-           | Typed_value.String s0 -> s = s0
+           | Typed_value.String s0 -> String.equal s s0
            | _ -> false)
   in
   List.exists attributes f
@@ -84,7 +84,7 @@ let is_no_injection = is_native_arg "NoInjection"
 
 let deprecation_info attributes =
   let f attr =
-    if name attr = "__Deprecated" then
+    if String.equal (name attr) "__Deprecated" then
       Some (arguments attr)
     else
       None

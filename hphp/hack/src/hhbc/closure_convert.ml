@@ -10,7 +10,7 @@
 open Aast
 open Tast
 open Ast_scope
-open Core_kernel
+open Hh_prelude
 open Common
 module ULS = Unique_list_string
 module SN = Naming_special_names
@@ -58,6 +58,7 @@ type per_function_state = {
   has_goto: bool;
   labels: bool SMap.t;
 }
+[@@deriving eq]
 
 let empty_per_function_state =
   { has_finally = false; has_goto = false; labels = SMap.empty }
@@ -198,14 +199,14 @@ let should_capture_var env var =
 (* Add a variable to the captured variables *)
 let add_var env st var =
   (* Don't bother if it's $this, as this is captured implicitly *)
-  if var = Naming_special_names.SpecialIdents.this then
+  if String.equal var Naming_special_names.SpecialIdents.this then
     { st with captured_this = true }
   (* If it's bound as a parameter or definite assignment, don't add it *)
   (* Also don't add the pipe variable and superglobals *)
   else if
     (not (should_capture_var env var))
-    || var = Naming_special_names.SpecialIdents.dollardollar
-    || Naming_special_names.Superglobals.globals = var
+    || String.equal var Naming_special_names.SpecialIdents.dollardollar
+    || String.equal Naming_special_names.Superglobals.globals var
     || Naming_special_names.Superglobals.is_superglobal var
   then
     st
@@ -221,7 +222,7 @@ let add_generic env st var =
         (Ast_scope.Scope.get_class_tparams env.scope).c_tparam_list
     in
     List.find_mapi tparams ~f:(fun i { tp_name = (_, id); tp_reified = b; _ } ->
-        if b <> Erased && id = var then
+        if (not (is_erased b)) && String.equal id var then
           Some i
         else
           None)
@@ -274,11 +275,7 @@ let env_with_function_like env e ~is_closure_body fd =
     fd.f_span
     fd.f_body.fb_ast
 
-let fun_is_async = function
-  | Ast_defs.FAsync
-  | Ast_defs.FAsyncGenerator ->
-    true
-  | _ -> false
+let fun_is_async = Ast_defs.is_f_async_or_generator
 
 let env_with_lambda env fd =
   let is_async = fun_is_async fd.f_fun_kind in
@@ -376,7 +373,7 @@ let record_function_state key { has_finally; has_goto; labels } rx_of_scope st =
     (not has_finally)
     && (not has_goto)
     && SMap.is_empty labels
-    && rx_of_scope = Rx.NonRx
+    && Rx.is_non_rx rx_of_scope
   then
     st
   else
@@ -393,7 +390,7 @@ let record_function_state key { has_finally; has_goto; labels } rx_of_scope st =
         st.function_to_labels_map
     in
     let lambda_rx_of_scope =
-      if rx_of_scope <> Rx.NonRx then
+      if not (Rx.is_non_rx rx_of_scope) then
         SMap.add key rx_of_scope st.lambda_rx_of_scope
       else
         st.lambda_rx_of_scope
@@ -518,26 +515,26 @@ let convert_id (env : env) p ((pid, str) as id) =
   let return newstr = (p, String newstr) in
   let name c = (p, String (SU.Xhp.mangle @@ strip_id c.c_name)) in
   match str with
-  | _ when str = SN.PseudoConsts.g__TRAIT__ ->
+  | _ when String.equal str SN.PseudoConsts.g__TRAIT__ ->
     begin
       match Scope.get_class env.scope with
-      | Some c when c.c_kind = Ast_defs.Ctrait -> name c
+      | Some c when Ast_defs.is_c_trait c.c_kind -> name c
       | _ -> return ""
     end
-  | _ when str = SN.PseudoConsts.g__CLASS__ ->
+  | _ when String.equal str SN.PseudoConsts.g__CLASS__ ->
     begin
       match Scope.get_class env.scope with
-      | Some c when c.c_kind <> Ast_defs.Ctrait -> name c
+      | Some c when not (Ast_defs.is_c_trait c.c_kind) -> name c
       | Some _ -> (p, Id (pid, snd id))
       | None -> return ""
     end
-  | _ when str = SN.PseudoConsts.g__METHOD__ ->
+  | _ when String.equal str SN.PseudoConsts.g__METHOD__ ->
     let (prefix, is_trait) =
       match Scope.get_class env.scope with
       | None -> ("", false)
       | Some cd ->
         ( (SU.Xhp.mangle @@ strip_id cd.c_name) ^ "::",
-          cd.c_kind = Ast_defs.Ctrait )
+          Ast_defs.is_c_trait cd.c_kind )
     in
     let scope =
       if not is_trait then
@@ -562,7 +559,7 @@ let convert_id (env : env) p ((pid, str) as id) =
       | ScopeItem.Class cd :: _ -> return @@ strip_id cd.c_name
       | _ -> return ""
     end
-  | _ when str = SN.PseudoConsts.g__FUNCTION__ ->
+  | _ when String.equal str SN.PseudoConsts.g__FUNCTION__ ->
     begin
       match env.scope with
       | ScopeItem.Function fd :: _ -> return (strip_id fd.f_name)
@@ -570,7 +567,7 @@ let convert_id (env : env) p ((pid, str) as id) =
       | (ScopeItem.Lambda _ | ScopeItem.LongLambda _) :: _ -> return "{closure}"
       | _ -> return ""
     end
-  | _ when str = SN.PseudoConsts.g__LINE__ ->
+  | _ when String.equal str SN.PseudoConsts.g__LINE__ ->
     (* If the expression goes on multi lines, we return the last line *)
     let (_, line, _, _) = Pos.info_pos_extended pid in
     (p, Int (string_of_int line))
@@ -848,7 +845,8 @@ let rec convert_expr env st ((p, expr_) as expr) =
           ([((pc, _), cls); ((pf, _), func)] as el2),
           None )
       when let name = String.lowercase @@ SU.strip_global_ns meth_caller in
-           (name = "hh\\meth_caller" || name = "meth_caller")
+           ( String.equal name "hh\\meth_caller"
+           || String.equal name "meth_caller" )
            && Hhbc_options.emit_meth_caller_func_pointers
                 !Hhbc_options.compiler_options ->
       (match (cls, func) with
@@ -891,7 +889,8 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, el2) = convert_exprs env st el2 in
       let (st, e3) = convert_opt_expr env st e3 in
       (st, (p, Call (ct, e, targs, el2, e3)))
-    | Call (_, (_, Id (_, id)), _, es, _) when String.lowercase id = "tuple" ->
+    | Call (_, (_, Id (_, id)), _, es, _)
+      when String.equal (String.lowercase id) "tuple" ->
       convert_expr env st (p, Varray (None, es))
     | Call (ct, e, targs, el2, e3) ->
       let (st, e) = convert_expr env st e in
@@ -946,8 +945,8 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, e) = convert_expr env st e in
       (st, e)
     | As (e, (_, Happly ((_, id), [_])), _)
-      when id = SN.FB.cIncorrectType
-           || id = SU.strip_global_ns SN.FB.cIncorrectType ->
+      when String.equal id SN.FB.cIncorrectType
+           || String.equal id (SU.strip_global_ns SN.FB.cIncorrectType) ->
       convert_expr env st e
     | As (e, h, b) ->
       let (st, e) = convert_expr env st e in
@@ -1134,7 +1133,7 @@ and convert_lambda env st p fd use_vars_opt =
     use_vars_opt
     ~f:
       (List.iter ~f:(fun (p, id) ->
-           if Local_id.get_name id = SN.SpecialIdents.this then
+           if String.equal (Local_id.get_name id) SN.SpecialIdents.this then
              Emit_fatal.raise_fatal_parse
                p
                "Cannot use $this as lexical variable"));
@@ -1166,7 +1165,7 @@ and convert_lambda env st p fd use_vars_opt =
   let lid_name (lid : Aast.lid) : string = Local_id.get_name (snd lid) in
   (* HHVM lists lambda vars in descending order - do the same *)
   let lambda_vars =
-    List.sort ~compare:(fun a b -> compare b a)
+    List.sort ~compare:(fun a b -> String.compare b a)
     @@ ULS.items st.captured_vars
     @ current_generics
   in
@@ -1182,9 +1181,9 @@ and convert_lambda env st p fd use_vars_opt =
         List.fold_right use_vars ~init:[] ~f:(fun use_var use_vars ->
             if
               List.exists use_vars (fun var' ->
-                  lid_name use_var = lid_name var')
+                  String.equal (lid_name use_var) (lid_name var'))
               || List.exists fd.f_params (fun p ->
-                     lid_name use_var = p.param_name)
+                     String.equal (lid_name use_var) p.param_name)
             then
               use_vars
             else
@@ -1392,7 +1391,11 @@ and convert_function_like_body (env : env) (old_st : state) (body : func_body) :
     state * func_body * 'c =
   (* reset has_finally/goto_state values on the state *)
   let st =
-    if old_st.current_function_state = empty_per_function_state then
+    if
+      equal_per_function_state
+        old_st.current_function_state
+        empty_per_function_state
+    then
       old_st
     else
       { old_st with current_function_state = empty_per_function_state }
@@ -1495,7 +1498,7 @@ and convert_fun env (st : state) (fd : fun_def) =
 and add_reified_property cd c_vars =
   if
     List.for_all cd.c_tparams.c_tparam_list ~f:(function t ->
-        t.tp_reified = Erased)
+        is_erased t.tp_reified)
   then
     c_vars
   else

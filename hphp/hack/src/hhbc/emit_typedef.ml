@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module T = Aast
 
 let kind_to_type_info ~tparams h =
@@ -35,7 +35,11 @@ let emit_typedef ast_typedef : Hhas_typedef.t =
   in
   let tparams = Emit_body.tparams_to_strings ast_typedef.T.t_tparams in
   let typedef_type_info = kind_to_type_info ~tparams ast_typedef.T.t_kind in
-  let is_opaque = ast_typedef.T.t_vis = T.Opaque in
+  let is_opaque =
+    match ast_typedef.T.t_vis with
+    | T.Opaque -> true
+    | _ -> false
+  in
   let typedef_type_structure =
     kind_to_type_structure ~tparams ~is_opaque ast_typedef.T.t_kind
   in

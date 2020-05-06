@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 module A = Aast
 module TV = Typed_value
 module SN = Naming_special_names
@@ -18,7 +18,7 @@ exception NotLiteral
 exception UserDefinedConstant
 
 let radix (s : string) : [ `Oct | `Hex | `Dec | `Bin ] =
-  if String.length s > 1 && s.[0] = '0' then
+  if String.length s > 1 && Char.equal s.[0] '0' then
     match s.[1] with
     (* Binary *)
     | 'b'
@@ -41,7 +41,7 @@ let int64_of_octal_opt (s : string) (truncate : bool) : Int64.t option =
    * then we are in danger of overflowing and should return None *)
   let limit = Int64.( / ) Caml.Int64.max_int (Int64.of_int 8) in
   let to_int64 c = Int64.of_int @@ (int_of_char c - 48) in
-  let is_octal_digit ch = '0' <= ch && ch <= '7' in
+  let is_octal_digit ch = Char.('0' <= ch && ch <= '7') in
   let rec loop (idx : int) (acc : Int64.t) =
     (* Given a new least significant digit [digit] and an orginal value [base]
      * append [digit] to the end of [base]. Example:
@@ -80,9 +80,9 @@ let try_type_intlike (s : string) : TV.t option =
        to the signed integer Int64.min_int + input - Int64.max_int - 1.*)
       match Int64.of_string s with
       | i ->
-        let input_is_negative = s.[0] = '-' in
+        let input_is_negative = Char.equal s.[0] '-' in
         (* treat as overflow if result has changed the sign comparing to input *)
-        if input_is_negative = (i < 0L) then
+        if Bool.equal input_is_negative Int64.(i < 0L) then
           Some (TV.Int i)
         else
           None
@@ -110,14 +110,14 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
   | A.String s -> TV.String s
   | A.Float s -> TV.Float (float_of_string s)
   | A.Call (_, (_, A.Id (_, id)), _, [(_, A.String data)], None)
-    when id = SN.SpecialFunctions.hhas_adata ->
+    when String.equal id SN.SpecialFunctions.hhas_adata ->
     TV.HhasAdata data
   | A.Array fields -> array_to_typed_value ns fields
   | A.Varray (_, fields) -> varray_to_typed_value ns fields pos
   | A.Darray (_, fields) -> darray_to_typed_value ns fields pos
   (* A.Id *)
-  | A.Id (_, id) when id = "NAN" -> TV.Float Float.nan
-  | A.Id (_, id) when id = "INF" -> TV.Float Float.infinity
+  | A.Id (_, id) when String.equal id "NAN" -> TV.Float Float.nan
+  | A.Id (_, id) when String.equal id "INF" -> TV.Float Float.infinity
   | A.Id _ -> raise UserDefinedConstant
   (* A.Coolection *)
   | A.Collection ((_, "vec"), _, fields) -> vec_to_typed_value ns pos fields
@@ -130,7 +130,7 @@ let rec expr_to_typed_value ?(allow_maps = false) ns ((_, expr_) as expr) =
     in
     TV.Keyset (TVL.items l)
   | A.Collection ((_, kind), _, fields)
-    when kind = "dict"
+    when String.equal kind "dict"
          || allow_maps
             && ( SU.cmp ~case_sensitive:false ~ignore_ns:true kind "Map"
                || SU.cmp ~case_sensitive:false ~ignore_ns:true kind "ImmMap" )
@@ -203,7 +203,7 @@ and update_duplicates_in_map kvs =
   List.rev values
 
 and class_const_to_typed_value cid id =
-  if snd id = SN.Members.mClass then
+  if String.equal (snd id) SN.Members.mClass then
     let open Ast_class_expr in
     let cexpr = class_id_to_class_expr ~resolve_self:true [] cid in
     match cexpr with
@@ -398,15 +398,15 @@ let cast_value hint v =
   match hint with
   | A.Happly ((_, id), []) ->
     let id = SU.strip_hh_ns id in
-    if id = SN.Typehints.int then
+    if String.equal id SN.Typehints.int then
       (* temporarily disabled *)
       (* TV.cast_to_int v *)
       None
-    else if id = SN.Typehints.bool then
+    else if String.equal id SN.Typehints.bool then
       TV.cast_to_bool v
-    else if id = SN.Typehints.string then
+    else if String.equal id SN.Typehints.string then
       TV.cast_to_string v
-    else if id = SN.Typehints.float then
+    else if String.equal id SN.Typehints.float then
       TV.cast_to_float v
     else
       None

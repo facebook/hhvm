@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module A = Ast_defs
 module SU = Hhbc_string_utils
 module T = Aast
@@ -96,7 +96,7 @@ let emit_xhp_attribute_array xal =
     let rec extract_from_hint h =
       match h with
       | (_, Aast.Happly ((_, inc), [h]))
-        when inc = Naming_special_names.FB.cIncorrectType ->
+        when String.equal inc Naming_special_names.FB.cIncorrectType ->
         extract_from_hint h
       | (_, Aast.Hlike h)
       | (_, Aast.Hoption h) ->
@@ -106,7 +106,7 @@ let emit_xhp_attribute_array xal =
     in
     let (class_name, hint) =
       match ho with
-      | None when enumo = None ->
+      | None when Option.is_none enumo ->
         (* attribute declared with the var identifier - we treat it as mixed *)
         get_attribute_array_values "\\HH\\mixed" enumo
       | None -> get_attribute_array_values "enum" enumo
@@ -264,11 +264,12 @@ and emit_xhp_child_decl ~unary child =
       (T.Int unary)
       (T.Int "5")
       (emit_xhp_children_decl_expr ~unary:"0" l)
-  | Aast.ChildName (_, name) when String.lowercase name = "any" ->
+  | Aast.ChildName (_, name) when String.equal (String.lowercase name) "any" ->
     get_array3 (T.Int unary) (T.Int "1") T.Null
-  | Aast.ChildName (_, name) when String.lowercase name = "pcdata" ->
+  | Aast.ChildName (_, name) when String.equal (String.lowercase name) "pcdata"
+    ->
     get_array3 (T.Int unary) (T.Int "2") T.Null
-  | Aast.ChildName (_, s) when s.[0] = '%' ->
+  | Aast.ChildName (_, s) when Char.equal s.[0] '%' ->
     get_array3
       (T.Int unary)
       (T.Int "4")

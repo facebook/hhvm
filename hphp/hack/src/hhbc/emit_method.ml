@@ -10,7 +10,7 @@
 module SU = Hhbc_string_utils
 module SN = Naming_special_names
 module T = Aast
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 
 let from_ast_wrapper privatize make_name ast_class ast_method =
@@ -18,7 +18,8 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   let class_name = SU.Xhp.mangle @@ Utils.strip_ns @@ snd ast_class.T.c_name in
   (* TODO: use something that can't be faked in user code *)
   let method_is_closure_body =
-    original_name = "__invoke" && String.is_prefix ~prefix:"Closure$" class_name
+    String.equal original_name "__invoke"
+    && String.is_prefix ~prefix:"Closure$" class_name
   in
   let namespace = ast_class.T.c_namespace in
   let method_attributes =
@@ -38,7 +39,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   in
   let method_is_final = ast_method.T.m_final in
   let method_is_abstract =
-    ast_class.T.c_kind = Ast_defs.Cinterface || ast_method.T.m_abstract
+    Ast_defs.is_c_interface ast_class.T.c_kind || ast_method.T.m_abstract
   in
   let method_is_static = ast_method.T.m_static in
   let method_visibility =
@@ -63,14 +64,13 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   let method_id = make_name ast_method.T.m_name in
   if not (method_is_static || method_is_closure_body) then
     List.iter ast_method.T.m_params ~f:(fun p ->
-        if p.T.param_name = SN.SpecialIdents.this then
+        if String.equal p.T.param_name SN.SpecialIdents.this then
           Emit_fatal.raise_fatal_parse p.T.param_pos "Cannot re-assign $this");
   let method_is_async =
-    ast_method.T.m_fun_kind = Ast_defs.FAsync
-    || ast_method.T.m_fun_kind = Ast_defs.FAsyncGenerator
+    Ast_defs.is_f_async_or_generator ast_method.T.m_fun_kind
   in
   if
-    ast_class.T.c_kind = Ast_defs.Cinterface
+    Ast_defs.is_c_interface ast_class.T.c_kind
     && not (List.is_empty ast_method.T.m_body.T.fb_ast)
   then
     Emit_fatal.raise_fatal_parse
@@ -82,7 +82,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
   if
     (not method_is_static)
     && ast_class.T.c_final
-    && ast_class.T.c_kind = Ast_defs.Cabstract
+    && Ast_defs.is_c_abstract ast_class.T.c_kind
   then
     Emit_fatal.raise_fatal_parse
       pos
@@ -127,7 +127,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
         Rx.NonRx
   in
   let (ast_body_block, is_rx_body, method_rx_disabled) =
-    if method_rx_level <> Rx.NonRx then
+    if not (Rx.is_non_rx method_rx_level) then
       match Rx.halves_of_is_enabled_body ast_method.T.m_body with
       | Some (enabled_body, disabled_body) ->
         if Hhbc_options.rx_is_enabled !Hhbc_options.compiler_options then
@@ -163,7 +163,7 @@ let from_ast_wrapper privatize make_name ast_class ast_method =
         ~is_rx_body
         ~debugger_modify_program:false
         ~deprecation_info
-        ~skipawaitable:(ast_method.T.m_fun_kind = Ast_defs.FAsync)
+        ~skipawaitable:(Ast_defs.is_f_async ast_method.T.m_fun_kind)
         ~default_dropthrough
         ~return_value:instr_null
         ~namespace

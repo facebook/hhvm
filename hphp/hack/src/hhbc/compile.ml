@@ -8,7 +8,7 @@
 
 [@@@warning "-33"]
 
-open Core_kernel (* ensure forward compatible *)
+open Hh_prelude (* ensure forward compatible *)
 
 [@@@warning "+33"]
 
@@ -154,7 +154,12 @@ let parse_file ~hhbc_options env text :
           let runtime_errors =
             List.filter
               errors
-              ~f:SyntaxError.((fun e -> error_type e = RuntimeError))
+              ~f:
+                SyntaxError.(
+                  fun e ->
+                    match error_type e with
+                    | RuntimeError -> true
+                    | _ -> false)
           in
           (match runtime_errors with
           | e :: _ -> Either.Second (pos_of_error e, SyntaxError.message e, true)

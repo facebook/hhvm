@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 open Emit_memoize_helpers
 open Hhbc_ast
@@ -233,7 +233,7 @@ let emit_wrapper_function
   let function_attributes =
     Emit_attribute.add_reified_attribute function_attributes ast_fun.T.f_tparams
   in
-  let function_is_async = ast_fun.T.f_fun_kind = Ast_defs.FAsync in
+  let function_is_async = Ast_defs.is_f_async ast_fun.T.f_fun_kind in
   let scope = [Ast_scope.ScopeItem.Function ast_fun] in
   let return_type_info =
     Emit_body.emit_return_type_info
@@ -243,7 +243,8 @@ let emit_wrapper_function
   in
   let is_reified =
     List.exists
-      ~f:(fun t -> t.T.tp_reified = T.Reified || t.T.tp_reified = T.SoftReified)
+      ~f:(fun t ->
+        T.is_reified t.T.tp_reified || T.is_soft_reified t.T.tp_reified)
       ast_fun.T.f_tparams
   in
   let body_instrs =
@@ -261,7 +262,7 @@ let emit_wrapper_function
     Rx.rx_level_from_ast ast_fun.T.f_user_attributes
     |> Option.value ~default:Rx.NonRx
   in
-  let env = Emit_env.with_rx_body (function_rx_level <> Rx.NonRx) env in
+  let env = Emit_env.with_rx_body (not (Rx.is_non_rx function_rx_level)) env in
   let memoized_body =
     make_wrapper_body env return_type_info params body_instrs is_reified
   in

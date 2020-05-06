@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 module A = Aast
 module SN = Naming_special_names
@@ -24,7 +24,7 @@ let get_original_class_name ~resolve_self ~check_traits scope =
   match Ast_scope.Scope.get_class scope with
   | None -> None
   | Some cd ->
-    if (cd.A.c_kind = Ast_defs.Ctrait && not check_traits) || not resolve_self
+    if (Ast_defs.is_c_trait cd.A.c_kind && not check_traits) || not resolve_self
     then
       None
     else
@@ -37,7 +37,7 @@ let get_original_class_name ~resolve_self ~check_traits scope =
           match
             SMap.find_opt class_name (Emit_env.get_closure_enclosing_classes ())
           with
-          | Some cd when cd.Emit_env.kind <> Ast_defs.Ctrait ->
+          | Some cd when not (Ast_defs.is_c_trait cd.Emit_env.kind) ->
             Some cd.Emit_env.name
           | _ -> None
         end
@@ -54,10 +54,10 @@ let get_original_parent_class_name ~check_traits ~resolve_self scope =
   | Some cd ->
     (* Parent doesn't make sense on an interface, so we treat
       "parent" as the literal class id to grab from *)
-    if cd.A.c_kind = Ast_defs.Cinterface then
+    if Ast_defs.is_c_interface cd.A.c_kind then
       Some SN.Classes.cParent
     else if
-      (cd.A.c_kind = Ast_defs.Ctrait && not check_traits) || not resolve_self
+      (Ast_defs.is_c_trait cd.A.c_kind && not check_traits) || not resolve_self
     then
       None
     else

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 open Instruction_sequence
 open Emit_expression
@@ -111,13 +111,13 @@ let rec set_bytes_kind name =
   in
   if Str.string_match re name 0 then
     let op =
-      if Str.matched_group 1 name = "_rev" then
+      if String.equal (Str.matched_group 1 name) "_rev" then
         Reverse
       else
         Forward
     in
     let size = Str.matched_group 2 name in
-    let is_vec = Str.matched_group 3 name = "_vec" in
+    let is_vec = String.equal (Str.matched_group 3 name) "_vec" in
     match (size, is_vec) with
     | ("string", false) -> Some (op, 1, true)
     | ("bool", _)
@@ -139,7 +139,7 @@ and emit_stmt env (pos, stmt) =
   | A.Expr (_, A.Yield_break) -> gather [instr_null; emit_return env]
   | A.Expr (((pos, _), A.Call (_, (_, A.Id (_, s)), _, exprl, None)) as expr) ->
     let s = Hhbc_id.Function.(from_ast_name s |> to_raw_string) in
-    if String.lowercase s = "unset" then
+    if String.equal (String.lowercase s) "unset" then
       gather (List.map exprl (emit_unset_expr env))
     else (
       match set_bytes_kind s with
@@ -232,13 +232,14 @@ and emit_stmt env (pos, stmt) =
       TFR.fail_if_goto_from_try_to_finally try_block finally_block;
 
     (* TFR.fail_if_goto_from_try_to_finally try_block finally_block;*)
-    if catch_list <> [] && finally_block <> [] then
+    if (not (List.is_empty catch_list)) && not (List.is_empty finally_block)
+    then
       emit_stmt
         env
         ( pos,
           A.Try ([(pos, A.Try (try_block, catch_list, []))], [], finally_block)
         )
-    else if catch_list <> [] then
+    else if not (List.is_empty catch_list) then
       emit_try_catch env pos try_block catch_list
     else
       emit_try_finally env pos try_block finally_block
@@ -698,8 +699,8 @@ and emit_switch (env : Emit_env.t) pos scrutinee_expr cl =
 
 and block_pos b =
   let bpos = List.map b fst in
-  let valid_pos = List.filter bpos (fun e -> e <> Pos.none) in
-  if valid_pos = [] then
+  let valid_pos = List.filter bpos (fun e -> not (Pos.equal e Pos.none)) in
+  if List.is_empty valid_pos then
     Pos.none
   else
     Pos.btw (List.hd_exn valid_pos) (List.last_exn valid_pos)
@@ -876,12 +877,13 @@ and make_finally_catch exn_local finally_body =
 
 and get_id_of_simple_lvar_opt v =
   match v with
-  | A.Lvar (pos, id) when Local_id.get_name id = SN.SpecialIdents.this ->
+  | A.Lvar (pos, id)
+    when String.equal (Local_id.get_name id) SN.SpecialIdents.this ->
     Emit_fatal.raise_fatal_parse pos "Cannot re-assign $this"
   | A.Lvar (_, id)
     when not
            ( SN.Superglobals.is_superglobal (Local_id.get_name id)
-           || Local_id.get_name id = SN.Superglobals.globals ) ->
+           || String.equal (Local_id.get_name id) SN.Superglobals.globals ) ->
     Some (Local_id.get_name id)
   | _ -> None
 

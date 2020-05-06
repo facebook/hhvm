@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module Acc = Mutable_accumulator
 module H = Hhbc_ast
 module A = Aast
@@ -804,7 +804,11 @@ let string_of_typedef_info ti =
   let flags = Hhas_type_constraint.flags type_constraint in
   (* TODO: check if other flags are emitted for type aliases *)
   let flags =
-    List.filter ~f:(fun f -> f = Hhas_type_constraint.Nullable) flags
+    List.filter
+      ~f:(function
+        | Hhas_type_constraint.Nullable -> true
+        | _ -> false)
+      flags
   in
   let flags_text =
     if not (List.is_empty flags) then
@@ -915,10 +919,9 @@ and string_of_fun ~env f use_list =
       None
     | name ->
       let inout =
-        if p.A.param_callconv = Some Ast_defs.Pinout then
-          "inout "
-        else
-          ""
+        match p.A.param_callconv with
+        | Some Ast_defs.Pinout -> "inout "
+        | _ -> ""
       in
       let hint =
         Option.value_map
@@ -958,10 +961,7 @@ and string_of_fun ~env f use_list =
     "static "
   else
     "" )
-  ^ ( if
-      f.A.f_fun_kind = Ast_defs.FAsync
-      || f.A.f_fun_kind = Ast_defs.FAsyncGenerator
-    then
+  ^ ( if Ast_defs.is_f_async_or_generator f.A.f_fun_kind then
       "async "
     else
       "" )
@@ -1081,7 +1081,7 @@ and string_of_expression ~env expr =
       | Some env ->
         let nsenv = Emit_env.get_namespace env in
         if
-          nsenv.Namespace_env.ns_name = None
+          Option.is_none nsenv.Namespace_env.ns_name
           && (not @@ String.contains (SU.strip_global_ns id) '\\')
         then
           SU.strip_global_ns id
@@ -1123,9 +1123,9 @@ and string_of_expression ~env expr =
   in
   let get_class_name_from_id ~env ~should_format ~is_class_constant id =
     if
-      id = SN.Classes.cSelf
-      || id = SN.Classes.cParent
-      || id = SN.Classes.cStatic
+      String.equal id SN.Classes.cSelf
+      || String.equal id SN.Classes.cParent
+      || String.equal id SN.Classes.cStatic
     then
       get_special_class_name ~env ~is_class_constant id
     else
@@ -1194,7 +1194,9 @@ and string_of_expression ~env expr =
    * https://fburl.com/tzom2qoe *)
   | A.Array afl -> "array(" ^ string_of_afield_list ~env afl ^ ")"
   | A.Collection ((_, name), _, afl)
-    when name = "vec" || name = "dict" || name = "keyset" ->
+    when String.equal name "vec"
+         || String.equal name "dict"
+         || String.equal name "keyset" ->
     name ^ "[" ^ string_of_afield_list ~env afl ^ "]"
   | A.Collection ((_, name), _, afl) ->
     let name = SU.Types.fix_casing @@ SU.strip_ns name in
@@ -1461,7 +1463,7 @@ let is_bareword_char c =
   | '$'
   | '\\' ->
     true
-  | c -> (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')
+  | c -> Char.(c >= '0' && c <= '9') || Char.(c >= 'a' && c <= 'z')
 
 let is_bareword_string s =
   let rec aux i =
@@ -1479,7 +1481,7 @@ let add_decl_vars buf indent decl_vars =
           "\"" ^ Php_escaping.escape s ^ "\"")
       decl_vars
   in
-  if decl_vars <> [] then
+  if not (List.is_empty decl_vars) then
     add_indented_line
       buf
       indent
@@ -1571,7 +1573,7 @@ let function_attributes f =
     | None -> attrs
   in
   let text = String.concat ~sep:" " attrs in
-  if text = "" then
+  if String.equal text "" then
     ""
   else
     "[" ^ text ^ "] "
@@ -1607,7 +1609,7 @@ let add_fun_def buf fun_def =
 let attributes_to_string attrs =
   let text = String.concat ~sep:" " attrs in
   let text =
-    if text = "" then
+    if String.equal text "" then
       ""
     else
       "[" ^ text ^ "] "
@@ -1826,7 +1828,7 @@ let class_special_attributes c =
       attrs
   in
   let attrs =
-    if Hhas_class.enum_type c <> None then
+    if Option.is_some (Hhas_class.enum_type c) then
       "enum" :: attrs
     else
       attrs
@@ -1839,7 +1841,7 @@ let class_special_attributes c =
   in
   let text = String.concat ~sep:" " attrs in
   let text =
-    if text = "" then
+    if String.equal text "" then
       ""
     else
       "[" ^ text ^ "] "
@@ -1926,7 +1928,7 @@ let property_attributes p =
   let attrs = Aast.string_of_visibility (P.visibility p) :: attrs in
   let text = String.concat ~sep:" " attrs in
   let text =
-    if text = "" then
+    if String.equal text "" then
       ""
     else
       "[" ^ text ^ "] "
@@ -1943,6 +1945,10 @@ let property_doc_comment p =
   | Some s -> Printf.sprintf "%s " (SU.triple_quote_string s)
 
 let add_property (class_def : Hhas_class.t) buf property =
+  let is_some_uninit = function
+    | Some Typed_value.Uninit -> true
+    | _ -> false
+  in
   Acc.add buf "\n  .property ";
   Acc.add buf (property_attributes property);
   Acc.add buf (property_doc_comment property);
@@ -1950,10 +1956,7 @@ let add_property (class_def : Hhas_class.t) buf property =
   Acc.add buf (Hhbc_id.Prop.to_raw_string (Hhas_property.name property));
   Acc.add buf " =\n    ";
   let initial_value = Hhas_property.initial_value property in
-  if
-    Hhas_class.is_closure_class class_def
-    || initial_value = Some Typed_value.Uninit
-  then
+  if Hhas_class.is_closure_class class_def || is_some_uninit initial_value then
     Acc.add buf "uninit;"
   else (
     Acc.add buf "\"\"\"";
@@ -2041,10 +2044,7 @@ let add_method_trait_resolutions buf (mtr, kind_as_string) =
        "\n    %s::%s as strict "
        kind_as_string
        (snd mtr.A.mt_method);
-  if
-    mtr.A.mt_fun_kind = Ast_defs.FAsync
-    || mtr.A.mt_fun_kind = Ast_defs.FAsyncGenerator
-  then
+  if Ast_defs.is_f_async_or_generator mtr.A.mt_fun_kind then
     Acc.add buf "async ";
   Acc.add buf "[";
   if mtr.A.mt_final then Acc.add buf "final ";
@@ -2063,7 +2063,7 @@ let add_uses buf c =
   let class_method_trait_resolutions =
     Hhas_class.class_method_trait_resolutions c
   in
-  if use_l = [] && class_method_trait_resolutions = [] then
+  if List.is_empty use_l && List.is_empty class_method_trait_resolutions then
     ()
   else
     let unique_ids =
@@ -2075,9 +2075,9 @@ let add_uses buf c =
     let use_l = String.concat ~sep:" " @@ ULS.items unique_ids in
     Acc.add buf @@ Printf.sprintf "\n  .use %s" use_l;
     if
-      use_alias_list = []
-      && use_precedence_list = []
-      && class_method_trait_resolutions = []
+      List.is_empty use_alias_list
+      && List.is_empty use_precedence_list
+      && List.is_empty class_method_trait_resolutions
     then
       Acc.add buf ";"
     else (
@@ -2229,7 +2229,7 @@ let add_include_region
         in
         try_paths (dirname @ Option.value search_paths ~default:[])
     | Hhas_symbol_refs.IncludeRootRelative (v, p) ->
-      if p <> "" then
+      if not (String.equal p "") then
         Option.iter (SMap.find_opt v include_roots) (fun ir ->
             let doc_root = Option.value doc_root ~default:"" in
             let resolved = Filename.concat doc_root (Filename.concat ir p) in

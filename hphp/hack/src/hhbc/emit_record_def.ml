@@ -1,8 +1,9 @@
-open Core_kernel
+open Hh_prelude
 open Aast
 open Hhbc_string_utils
 
 let valid_tc_for_record_field tc =
+  let open String in
   match Hhas_type_constraint.name tc with
   | None -> true
   | Some name ->

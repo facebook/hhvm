@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_ast
 open Instruction_sequence
 module JT = Jump_targets
@@ -98,7 +98,9 @@ let fail_if_goto_from_try_to_finally try_block finally_block =
         inherit [_] Aast.iter
 
         method! on_GotoLabel () (_, label) =
-          let label_opt = List.find ~f:(fun (_, l) -> l = label) goto_labels in
+          let label_opt =
+            List.find ~f:(fun (_, l) -> String.equal l label) goto_labels
+          in
           match label_opt with
           | Some (p, _) ->
             Emit_fatal.raise_fatal_parse

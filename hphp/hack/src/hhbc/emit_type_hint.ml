@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_string_utils
 module A = Ast_defs
 module SN = Naming_special_names
@@ -20,9 +20,50 @@ type type_hint_kind =
   | TypeDef
   | UpperBound
 
+let is_property = function
+  | Property -> true
+  | Return
+  | Param
+  | TypeDef
+  | UpperBound ->
+    false
+
+let is_return = function
+  | Return -> true
+  | Property
+  | Param
+  | TypeDef
+  | UpperBound ->
+    false
+
+let is_param = function
+  | Param -> true
+  | Property
+  | Return
+  | TypeDef
+  | UpperBound ->
+    false
+
+let is_typedef = function
+  | TypeDef -> true
+  | Property
+  | Return
+  | Param
+  | UpperBound ->
+    false
+
+let is_upperbound = function
+  | UpperBound -> true
+  | Property
+  | Return
+  | Param
+  | TypeDef ->
+    false
+
 (* Produce the "userType" bit of the annotation *)
 let rec fmt_name_or_prim ~tparams (_, name) =
-  if List.mem ~equal:( = ) tparams name || is_self name || is_parent name then
+  if List.mem ~equal:String.( = ) tparams name || is_self name || is_parent name
+  then
     name
   else
     let needs_unmangling = Xhp.is_xhp (strip_ns name) in
@@ -166,16 +207,16 @@ let can_be_nullable (_, h) =
 
 let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   let happly_helper (pos, name) =
-    if List.mem ~equal:( = ) tparams name then
+    if List.mem ~equal:String.( = ) tparams name then
       let tc_name =
-        if kind = Param || kind = Return then
+        if is_param kind || is_return kind then
           name
         else
           ""
       in
       let tc_flags = [TC.ExtendedHint; TC.TypeVar] in
       TC.make (Some tc_name) tc_flags
-    else if kind = TypeDef && (is_self name || is_parent name) then
+    else if is_typedef kind && (is_self name || is_parent name) then
       Emit_fatal.raise_fatal_runtime
         pos
         (Printf.sprintf "Cannot access %s when no class scope is active" name)
@@ -188,7 +229,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
       in
       TC.make (Some tc_name) []
   in
-  let is_awaitable s = s = SN.Classes.cAwaitable in
+  let is_awaitable s = String.equal s SN.Classes.cAwaitable in
   match h with
   (* The dynamic and nonnull types are treated by the runtime as mixed *)
   | Aast.Happly ((_, "\\HH\\dynamic"), [])
@@ -200,9 +241,10 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   | Aast.Hintersection _
   | Aast.Hmixed ->
     TC.make None []
-  | Aast.Hprim Aast.Tvoid when kind <> TypeDef -> TC.make None []
+  | Aast.Hprim Aast.Tvoid when not (is_typedef kind) -> TC.make None []
   | Aast.Happly ((_, s), [])
-    when String.lowercase s = "\\hh\\void" && kind <> TypeDef ->
+    when String.equal (String.lowercase s) "\\hh\\void" && not (is_typedef kind)
+    ->
     TC.make None []
   | Aast.Haccess _ ->
     let tc_name = Some "" in
@@ -310,8 +352,9 @@ let param_hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
     | Aast.Hmixed ->
       false
     (* I think Happly where id is in tparams is translated into Habstr *)
-    | Aast.Habstr s when List.mem ~equal:( = ) tparams s -> false
-    | Aast.Happly ((_, id), _) when List.mem ~equal:( = ) tparams id -> false
+    | Aast.Habstr s when List.mem ~equal:String.( = ) tparams s -> false
+    | Aast.Happly ((_, id), _) when List.mem ~equal:String.( = ) tparams id ->
+      false
     | Aast.Herr
     | Aast.Hany ->
       failwith "Expected error on Tany in naming: param_hint_to_type_info"
@@ -343,19 +386,19 @@ let hint_to_type_info ~kind ~skipawaitable ~nullable ~tparams h =
     let tc_name = TC.name tc in
     let tc_flags = TC.flags tc in
     let tc_flags =
-      if (kind = Return || kind = Property) && tc_name <> None then
+      if (is_return kind || is_property kind) && Option.is_some tc_name then
         List.stable_dedup (TC.ExtendedHint :: tc_flags)
       else
         tc_flags
     in
     let tc_flags =
-      if kind = TypeDef then
+      if is_typedef kind then
         add_nullable ~nullable tc_flags
       else
         try_add_nullable ~nullable h tc_flags
     in
     let tc_flags =
-      if kind = UpperBound then
+      if is_upperbound kind then
         List.stable_dedup (TC.UpperBound :: tc_flags)
       else
         tc_flags
@@ -374,7 +417,9 @@ let emit_type_constraint_for_native_function tparams ret ti =
     | (_, None)
     | (None, _) ->
       (Some "HH\\void", [TC.ExtendedHint])
-    | (Some t, _) when t = "HH\\mixed" || t = "callable" -> (None, [])
+    | (Some t, _) when String.equal t "HH\\mixed" || String.equal t "callable"
+      ->
+      (None, [])
     | (Some t, Some ret) ->
       let strip_nullable n = String_utils.lstrip n "?" in
       let strip_soft n = String_utils.lstrip n "@" in
@@ -390,7 +435,8 @@ let emit_type_constraint_for_native_function tparams ret ti =
           TC.Nullable :: TC.DisplayNullable :: get_flags x flags
         | Aast.Hsoft x -> TC.Soft :: get_flags x flags
         | Aast.Haccess _ -> TC.TypeConstant :: flags
-        | Aast.Happly ((_, name), _) when List.mem ~equal:( = ) tparams name ->
+        | Aast.Happly ((_, name), _)
+          when List.mem ~equal:String.( = ) tparams name ->
           TC.TypeVar :: flags
         | _ -> flags
       in

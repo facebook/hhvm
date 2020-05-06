@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Hhbc_string_utils
 module A = Ast_defs
 module TV = Typed_value
@@ -30,7 +30,7 @@ let dict_or_darray kv =
 (* Taken from: hphp/runtime/base/type-structure.h *)
 let get_kind_num ~tparams p =
   let p =
-    if List.mem ~equal:( = ) tparams p then
+    if List.mem ~equal:String.( = ) tparams p then
       "$$internal$$typevar"
     else
       String.lowercase p
@@ -72,7 +72,7 @@ let get_kind_num ~tparams p =
   | "hh\\nothing" -> 29
   | "hh\\dynamic" -> 30
   | "$$internal$$typeaccess" -> 102
-  | _ when String.length p > 4 && String.sub p 0 4 = "xhp_" -> 103
+  | _ when String.length p > 4 && String.equal (String.sub p 0 4) "xhp_" -> 103
   | "$$internal$$reifiedtype" -> 104
   | "unresolved"
   | _ ->
@@ -158,7 +158,9 @@ and type_constant_access_list sl =
   vec_or_varray l
 
 and resolve_classname ~tparams (_, s) =
-  let is_tparam = s = "_" || List.mem ~equal:( = ) tparams s in
+  let is_tparam =
+    String.equal s "_" || List.mem ~equal:String.( = ) tparams s
+  in
   let s =
     if is_tparam then
       s
@@ -185,7 +187,7 @@ and get_generic_types ~tparams ~targ_map hl =
 and get_kind ~tparams s = [(TV.String "kind", TV.Int (get_kind_num ~tparams s))]
 
 and root_to_string s =
-  if s = "this" then
+  if String.equal s "this" then
     prefix_namespace "HH" s
   else
     Hhbc_id.Class.(from_ast_name s |> to_raw_string)
@@ -216,7 +218,9 @@ and hint_to_type_constant_list ~tparams ~targ_map (h : Aast.hint) =
     let n = String.lowercase @@ snd s in
     let generic_types =
       let module SN = Naming_special_names.Classes in
-      if n = String.lowercase SN.cClassname || n = String.lowercase SN.cTypename
+      if
+        String.equal n (String.lowercase SN.cClassname)
+        || String.equal n (String.lowercase SN.cTypename)
       then
         []
       else

@@ -6,7 +6,7 @@
  * LICENSE file in the "hack" directory of this source tree.
  *
  *)
-open Core_kernel
+open Hh_prelude
 module SN = Naming_special_names
 
 let quote_string s = "\"" ^ Php_escaping.escape s ^ "\""
@@ -22,7 +22,7 @@ let triple_quote_string s = "\"\"\"" ^ Php_escaping.escape s ^ "\"\"\""
 let prefix_namespace n s = n ^ "\\" ^ s
 
 let strip_global_ns s =
-  if String.length s > 0 && s.[0] = '\\' then
+  if String.length s > 0 && Char.equal s.[0] '\\' then
     String_utils.lstrip s "\\"
   else
     s
@@ -58,15 +58,15 @@ let cmp ?(case_sensitive = true) ?(ignore_ns = false) s1 s2 =
     else
       (strip_ns s1, strip_ns s2)
   in
-  s1 = s2
+  String.equal s1 s2
 
-let is_self s = String.lowercase s = SN.Classes.cSelf
+let is_self s = String.equal (String.lowercase s) SN.Classes.cSelf
 
-let is_parent s = String.lowercase s = SN.Classes.cParent
+let is_parent s = String.equal (String.lowercase s) SN.Classes.cParent
 
-let is_static s = String.lowercase s = SN.Classes.cStatic
+let is_static s = String.equal (String.lowercase s) SN.Classes.cStatic
 
-let is_class s = String.lowercase s = SN.Members.mClass
+let is_class s = String.equal (String.lowercase s) SN.Members.mClass
 
 let mangle_meth_caller mangled_cls_name f_name =
   "\\MethCaller$" ^ mangled_cls_name ^ "$" ^ f_name
@@ -91,7 +91,7 @@ module Integer = struct
     Int64.to_string
     @@ Int64.of_string
     @@
-    if String.length s > 1 && s.[0] = '0' then
+    if String.length s > 1 && Char.equal s.[0] '0' then
       match s.[1] with
       (* Binary *)
       | 'b'
@@ -184,7 +184,7 @@ end
 
 (* XHP name mangling *)
 module Xhp = struct
-  let is_xhp s = String.length s <> 0 && s.[0] = ':'
+  let is_xhp s = String.length s <> 0 && Char.equal s.[0] ':'
 
   let strip_colon s = String_utils.lstrip s ":"
 

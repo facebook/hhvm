@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module J = Hh_json
 
 (* Compiler configuration options, as set by -v key=value on the command line *)
@@ -63,6 +63,7 @@ type t = {
   option_disable_partial: bool;
   option_disable_array: bool;
 }
+[@@deriving eq, ord]
 
 let default =
   {
@@ -426,7 +427,7 @@ let set_option options name value =
   | _ -> options
 
 let get_value_from_config_ config key =
-  let f k1 (k2, _) = k1 = k2 in
+  let f k1 (k2, _) = String.equal k1 k2 in
   match List.find config ~f:(f key) with
   | None -> None
   | Some (_, json) ->
@@ -656,14 +657,14 @@ let override_from_cli config_list init =
       | [name; value] -> set_option options name value
       | _ -> options)
 
-type hhbc_options = t
+type hhbc_options = t [@@deriving eq, ord]
 
 module Result = struct
   type t = hhbc_options
 
-  let compare (a : t) b = compare a b
+  let compare (a : t) b = compare_hhbc_options a b
 
-  let equal (a : t) b = a = b
+  let equal (a : t) b = equal_hhbc_options a b
 
   let hash (a : t) = Hashtbl.hash a
 
@@ -671,11 +672,11 @@ module Result = struct
 end
 
 module Key = struct
-  type t = string list * string list
+  type t = string list * string list [@@deriving eq, ord]
 
   let compare (a : t) b = compare a b
 
-  let equal (a : t) b = a = b
+  let equal (a : t) b = equal a b
 
   let hash (a : t) = Hashtbl.hash a
 

@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 module TV = Typed_value
 module A = Aast
 
@@ -37,14 +37,22 @@ let from_asts namespace ast_attributes =
   List.map ast_attributes ~f:(from_ast namespace)
 
 let ast_is_memoize ast_attr =
-  snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoize
-  || snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoizeLSB
+  String.equal
+    (snd ast_attr.A.ua_name)
+    Naming_special_names.UserAttributes.uaMemoize
+  || String.equal
+       (snd ast_attr.A.ua_name)
+       Naming_special_names.UserAttributes.uaMemoizeLSB
 
 let ast_is_memoize_lsb ast_attr =
-  snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaMemoizeLSB
+  String.equal
+    (snd ast_attr.A.ua_name)
+    Naming_special_names.UserAttributes.uaMemoizeLSB
 
 let ast_is_deprecated ast_attr =
-  snd ast_attr.A.ua_name = Naming_special_names.UserAttributes.uaDeprecated
+  String.equal
+    (snd ast_attr.A.ua_name)
+    Naming_special_names.UserAttributes.uaDeprecated
 
 let ast_any_is_memoize ast_attrs = List.exists ast_attrs ast_is_memoize
 
@@ -59,14 +67,16 @@ let ast_any_is_deprecated ast_attrs = List.exists ast_attrs ast_is_deprecated
  *)
 let add_reified_attribute attrs (params : Tast.tparam list) =
   let is_soft =
-    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Soft")
+    List.exists ~f:(function { A.ua_name = n; _ } ->
+        String.equal (snd n) "__Soft")
   in
   let is_warn =
-    List.exists ~f:(function { A.ua_name = n; _ } -> snd n = "__Warn")
+    List.exists ~f:(function { A.ua_name = n; _ } ->
+        String.equal (snd n) "__Warn")
   in
   let reified_data =
     List.filter_mapi params ~f:(fun i t ->
-        if t.A.tp_reified = A.Erased then
+        if A.is_erased t.A.tp_reified then
           None
         else
           Some

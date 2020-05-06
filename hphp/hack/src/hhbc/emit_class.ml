@@ -7,7 +7,7 @@
  *
  *)
 
-open Core_kernel
+open Hh_prelude
 open Instruction_sequence
 module H = Hhbc_ast
 module SU = Hhbc_string_utils
@@ -172,7 +172,7 @@ let from_enum_type opt =
 
 let is_hh_namespace ns =
   Option.value_map ns.Namespace_env.ns_name ~default:false ~f:(fun v ->
-      String.lowercase v = "hh")
+      String.equal (String.lowercase v) "hh")
 
 let is_global_namespace ns = Option.is_none ns.Namespace_env.ns_name
 
@@ -252,7 +252,7 @@ let emit_reified_init_body env num_reified class_ =
         ]
   in
   let return = gather [instr_null; instr_retc] in
-  if class_.A.c_extends = [] then
+  if List.is_empty class_.A.c_extends then
     gather [set_prop; return]
   else
     let generic_arr = emit_reified_extends_params env class_ in
@@ -276,7 +276,7 @@ let emit_reified_init_body env num_reified class_ =
 let emit_reified_init_method env ast_class =
   let num_reified =
     List.count ast_class.A.c_tparams.A.c_tparam_list ~f:(fun t ->
-        not (t.A.tp_reified = A.Erased))
+        not (A.is_erased t.A.tp_reified))
   in
   let maybe_has_reified_parents =
     match ast_class.A.c_extends with
@@ -345,8 +345,8 @@ let emit_class (ast_class, hoisted) =
    * it on. *)
   let class_no_dynamic_props = class_is_const in
   let class_id = Hhbc_id.Class.from_ast_name (snd ast_class.A.c_name) in
-  let class_is_trait = ast_class.A.c_kind = Ast_defs.Ctrait in
-  let class_is_interface = ast_class.A.c_kind = Ast_defs.Cinterface in
+  let class_is_trait = Ast_defs.is_c_trait ast_class.A.c_kind in
+  let class_is_interface = Ast_defs.is_c_interface ast_class.A.c_kind in
   let class_uses =
     List.filter_map ast_class.A.c_uses (fun (p, h) ->
         match h with
@@ -405,7 +405,7 @@ let emit_class (ast_class, hoisted) =
         (mtr, string_of_trait mtr.A.mt_trait))
   in
   let class_enum_type =
-    if ast_class.A.c_kind = Ast_defs.Cenum then
+    if Ast_defs.is_c_enum ast_class.A.c_kind then
       from_enum_type ast_class.A.c_enum
     else
       None
@@ -427,9 +427,9 @@ let emit_class (ast_class, hoisted) =
     | Some (p, c) -> Some (p, List.map c ~f:snd)
     | None -> None
   in
-  let class_is_abstract = ast_class.A.c_kind = Ast_defs.Cabstract in
+  let class_is_abstract = Ast_defs.is_c_abstract ast_class.A.c_kind in
   let class_is_final =
-    ast_class.A.c_final || class_is_trait || class_enum_type <> None
+    ast_class.A.c_final || class_is_trait || Option.is_some class_enum_type
   in
   let class_is_sealed = Hhas_attribute.has_sealed class_attributes in
   let tparams =
@@ -440,11 +440,15 @@ let emit_class (ast_class, hoisted) =
       None
     else
       let base =
-        from_extends ~is_enum:(class_enum_type <> None) ast_class.A.c_extends
+        from_extends
+          ~is_enum:(Option.is_some class_enum_type)
+          ast_class.A.c_extends
       in
       match base with
       | Some cls
-        when String.lowercase (Hhbc_id.Class.to_raw_string cls) = "closure"
+        when String.equal
+               (String.lowercase (Hhbc_id.Class.to_raw_string cls))
+               "closure"
              && not is_closure_class ->
         Emit_fatal.raise_fatal_runtime
           (fst ast_class.A.c_name)
@@ -474,7 +478,8 @@ let emit_class (ast_class, hoisted) =
       additional_methods @ Emit_xhp.from_children_declaration ast_class children
   in
   let no_xhp_attributes =
-    class_xhp_attributes = [] && ast_class.A.c_xhp_attr_uses = []
+    List.is_empty class_xhp_attributes
+    && List.is_empty ast_class.A.c_xhp_attr_uses
   in
   let additional_methods =
     if no_xhp_attributes then

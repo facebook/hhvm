@@ -57,65 +57,23 @@ let lock_and_load_deptable
       LoadScriptUtils.delete_corrupted_saved_state fn;
       Caml.Printexc.raise_with_backtrace e stack
 
-(* download_and_load_state_exn does these things:
- * mk_state_future which synchronously downloads ss and kicks of async dirty query
- * lock_and_load_deptable
- * load_saved_state
- * synchronously wait 200s for the async dirty query to finish
- *)
-let download_and_load_state_exn
-    ~(use_canary : bool)
-    ~(target : ServerMonitorUtils.target_saved_state option)
-    ~(genv : ServerEnv.genv)
-    ~(ctx : Provider_context.t)
-    ~(root : Path.t) : (loaded_info, load_state_error) result =
-  ServerMonitorUtils.(
-    let saved_state_handle =
-      match target with
-      | None -> None
-      | Some
-          {
-            saved_state_everstore_handle;
-            target_global_rev;
-            watchman_mergebase;
-          } ->
-        Some
-          {
-            State_loader.saved_state_everstore_handle;
-            saved_state_for_rev = Hg.Global_rev target_global_rev;
-            watchman_mergebase;
-          }
-    in
-    let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
-    let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
-    let use_prechecked_files =
-      ServerPrecheckedFiles.should_use genv.options genv.local_config
-    in
-    let naming_table_saved_state =
-      if genv.local_config.ServerLocalConfig.enable_naming_table_fallback then (
-        Hh_logger.log "Starting naming table download.";
-        Some
-          (State_loader_futures.load
-             ~watchman_opts:
-               Saved_state_loader.Watchman_options.{ root; sockname = None }
-             ~ignore_hh_version
-             ~saved_state_type:Saved_state_loader.Naming_table)
-      ) else
-        None
-    in
-    let state_future :
-        (State_loader.native_load_result, State_loader.error) result Future.t =
-      State_loader.mk_state_future
-        ~config:genv.local_config.SLC.state_loader_timeouts
-        ~use_canary
-        ?saved_state_handle
-        ~config_hash:(ServerConfig.config_hash genv.config)
-        root
-        ~ignore_hh_version
-        ~ignore_hhconfig
-        ~use_prechecked_files
-    in
-    match Future.get state_future ~timeout:Int.max_value with
+let merge_saved_state_futures
+    (genv : genv)
+    (ctx : Provider_context.t)
+    (dependency_table_saved_state_future :
+      (State_loader.native_load_result, State_loader.error) result Future.t)
+    (naming_table_saved_state_future :
+      ( ( Saved_state_loader.Naming_table_saved_state_info.t
+        * Relative_path.t list )
+        option,
+        string )
+      result
+      Future.t) : (loaded_info, load_state_error) result =
+  let t = Unix.gettimeofday () in
+
+  let merge dependency_table_saved_state_result naming_table_saved_state_result
+      =
+    match dependency_table_saved_state_result with
     | Error error ->
       let e = Exception.wrap_unraised (Future.error_to_exn error) in
       let exn = Exception.to_exn e in
@@ -124,29 +82,26 @@ let download_and_load_state_exn
     | Ok (Error error) -> Error (Load_state_loader_failure error)
     | Ok (Ok result) ->
       let (downloaded_naming_table_path, dirty_naming_files) =
-        match naming_table_saved_state with
-        | None -> (None, [])
-        | Some future ->
-          begin
-            match State_loader_futures.wait_for_finish future with
-            | Ok (naming_table_info, changed_files) ->
-              let (_ : float) =
-                Hh_logger.log_duration
-                  "Finished downloading naming table."
-                  (Future.start_t future)
-              in
-              let path =
-                naming_table_info
-                  .Saved_state_loader.Naming_table_saved_state_info
-                   .naming_table_path
-              in
-              (Some (Path.to_string path), changed_files)
-            | Error err ->
-              Hh_logger.warn
-                "Failed to download naming table saved state: %s"
-                err;
-              (None, [])
-          end
+        match naming_table_saved_state_result with
+        | Ok (Ok None) -> (None, [])
+        | Ok (Ok (Some (naming_table_info, changed_files))) ->
+          let (_ : float) =
+            Hh_logger.log_duration "Finished downloading naming table." t
+          in
+          let path =
+            naming_table_info
+              .Saved_state_loader.Naming_table_saved_state_info
+               .naming_table_path
+          in
+          (Some (Path.to_string path), changed_files)
+        | Ok (Error err) ->
+          Hh_logger.warn "Failed to download naming table saved state: %s" err;
+          (None, [])
+        | Error error ->
+          Hh_logger.warn
+            "Failed to download the naming table saved state: %s"
+            (Future.error_to_string error);
+          (None, [])
       in
       let ignore_hh_version =
         ServerArgs.ignore_hh_version genv.ServerEnv.options
@@ -189,7 +144,92 @@ let download_and_load_state_exn
             old_naming_table;
             old_errors;
             state_distance = Some result.State_loader.state_distance;
-          }))
+          })
+  in
+  let merge left right = Ok (merge left right) in
+  let future =
+    Future.merge
+      dependency_table_saved_state_future
+      naming_table_saved_state_future
+      merge
+  in
+  (* We don't call Future.get on the merged future until it's ready because
+      the implementation of Future.get blocks on the first future until it's
+      ready, then moves on to the second future, but the second future, since
+      it's composed of bound continuations, will not be making as much progress
+      on its own in this case. *)
+  let rec wait_until_ready future =
+    if not (Future.is_ready future) then begin
+      Sys_utils.sleep ~seconds:0.04;
+      wait_until_ready future
+    end else
+      match Future.get future ~timeout:Int.max_value with
+      | Ok result -> result
+      | Error error -> failwith (Future.error_to_string error)
+  in
+  wait_until_ready future
+
+let download_and_load_state_exn
+    ~(use_canary : bool)
+    ~(target : ServerMonitorUtils.target_saved_state option)
+    ~(genv : ServerEnv.genv)
+    ~(ctx : Provider_context.t)
+    ~(root : Path.t) : (loaded_info, load_state_error) result =
+  let open ServerMonitorUtils in
+  let saved_state_handle =
+    match target with
+    | None -> None
+    | Some
+        { saved_state_everstore_handle; target_global_rev; watchman_mergebase }
+      ->
+      Some
+        {
+          State_loader.saved_state_everstore_handle;
+          saved_state_for_rev = Hg.Global_rev target_global_rev;
+          watchman_mergebase;
+        }
+  in
+  let ignore_hh_version = ServerArgs.ignore_hh_version genv.options in
+  let ignore_hhconfig = ServerArgs.saved_state_ignore_hhconfig genv.options in
+  let use_prechecked_files =
+    ServerPrecheckedFiles.should_use genv.options genv.local_config
+  in
+  let naming_table_saved_state_future =
+    if genv.local_config.ServerLocalConfig.enable_naming_table_fallback then begin
+      Hh_logger.log "Starting naming table download.";
+      let loader_future =
+        State_loader_futures.load
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.{ root; sockname = None }
+          ~ignore_hh_version
+          ~saved_state_type:Saved_state_loader.Naming_table
+        |> Future.with_timeout ~timeout:60
+      in
+      Future.continue_and_map_err loader_future @@ fun result ->
+      match result with
+      | Ok (Ok load_state) -> Ok (Some load_state)
+      | Ok (Error e) -> Error (Saved_state_loader.long_user_message_of_error e)
+      | Error e -> Error (Future.error_to_string e)
+    end else
+      Future.of_value (Ok None)
+  in
+  let dependency_table_saved_state_future :
+      (State_loader.native_load_result, State_loader.error) result Future.t =
+    State_loader.mk_state_future
+      ~config:genv.local_config.SLC.state_loader_timeouts
+      ~use_canary
+      ?saved_state_handle
+      ~config_hash:(ServerConfig.config_hash genv.config)
+      root
+      ~ignore_hh_version
+      ~ignore_hhconfig
+      ~use_prechecked_files
+  in
+  merge_saved_state_futures
+    genv
+    ctx
+    dependency_table_saved_state_future
+    naming_table_saved_state_future
 
 let use_precomputed_state_exn
     (genv : ServerEnv.genv)

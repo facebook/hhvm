@@ -126,7 +126,7 @@ struct Vunit;
   O(syncvmret, Inone, U(data) U(type), Dn)\
   O(syncvmrettype, Inone, U(type), Dn)\
   O(phplogue, Inone, U(fp), Dn)\
-  O(phpret, Inone, U(fp) U(args), D(d))\
+  O(phpret, Inone, U(fp) U(args), Dn)\
   O(callphp, I(stub), U(args), Dn)\
   O(callphpr, Inone, U(target) U(args), Dn)\
   O(callunpack, I(target), U(args), Dn)\
@@ -837,11 +837,11 @@ struct syncvmrettype { Vreg type; };
 struct phplogue { Vreg fp; };
 
 /*
- * Load fp[m_sfp] into `d' and return to m_savedRip on `fp'.
+ * Load fp[m_sfp] into rvmfp() and return to m_savedRip on `fp'.
  *
- * If `noframe' is set, `d' is not changed.
+ * If `noframe' is set, rvmfp() is not changed.
  */
-struct phpret { Vreg fp; Vreg d; RegSet args; bool noframe; };
+struct phpret { Vreg fp; RegSet args; bool noframe; };
 
 /*
  * Call a PHP function.

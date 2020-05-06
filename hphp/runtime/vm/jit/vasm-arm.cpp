@@ -807,7 +807,7 @@ void Vgen::emit(const callfaststub& i) {
 void Vgen::emit(const phpret& i) {
   // prefer load-pair instruction
   if (!i.noframe) {
-    a->ldp(X(i.d), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
+    a->ldp(X(rvmfp()), X(rlr()), X(i.fp)[AROFF(m_sfp)]);
   } else {
     a->Ldr(X(rlr()), X(i.fp)[AROFF(m_savedRip)]);
   }

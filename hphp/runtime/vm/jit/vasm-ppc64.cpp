@@ -1278,7 +1278,7 @@ void lowerForPPC64(const VLS& /*e*/, Vout& v, phplogue& inst) {
 
 void lowerForPPC64(const VLS& /*e*/, Vout& v, phpret& inst) {
   v << load{inst.fp[AROFF(m_savedRip)], rfuncln()};
-  if (!inst.noframe) v << load{inst.fp[AROFF(m_sfp)], inst.d};
+  if (!inst.noframe) v << load{inst.fp[AROFF(m_sfp)], rvmfp()};
 
   // for balancing the link stack (branch predictor), this should perform blr
   v << mtlr{rfuncln()};

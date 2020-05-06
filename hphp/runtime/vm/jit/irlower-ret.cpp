@@ -160,7 +160,7 @@ void cgRetCtrl(IRLS& env, const IRInstruction* inst) {
 
   prepare_return_regs(v, inst->src(2), srcLoc(env, inst, 2),
                       inst->extra<RetCtrl>()->aux);
-  v << phpret{fp, rvmfp(), php_return_regs()};
+  v << phpret{fp, php_return_regs()};
 }
 
 void cgAsyncFuncRet(IRLS& env, const IRInstruction* inst) {

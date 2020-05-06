@@ -712,7 +712,7 @@ template<class X64Asm>
 void Vgen<X64Asm>::emit(const phpret& i) {
   a.push(i.fp[AROFF(m_savedRip)]);
   if (!i.noframe) {
-    a.loadq(i.fp[AROFF(m_sfp)], i.d);
+    a.loadq(i.fp[AROFF(m_sfp)], rvmfp());
   }
   a.ret();
 }

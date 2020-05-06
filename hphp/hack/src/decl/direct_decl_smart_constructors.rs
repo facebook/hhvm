@@ -35,13 +35,21 @@ use oxidized::{
 use parser_core_types::{
     indexed_source_text::IndexedSourceText, lexable_token::LexableToken,
     lexable_trivia::LexablePositionedTrivia, positioned_token::PositionedToken,
-    token_kind::TokenKind, trivia_kind::TriviaKind,
+    source_text::SourceText, token_kind::TokenKind, trivia_kind::TriviaKind,
 };
 use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::rc::Rc;
 
 pub use crate::direct_decl_smart_constructors_generated::*;
+
+impl<'src> DirectDeclSmartConstructors<'src> {
+    pub fn new(src: &SourceText<'src>) -> Self {
+        Self {
+            state: State::new(IndexedSourceText::new(src.clone())),
+        }
+    }
+}
 
 type ParseError = String;
 

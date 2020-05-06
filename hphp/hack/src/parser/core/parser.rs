@@ -30,9 +30,8 @@ where
     S: SmartConstructors<'a, T>,
     S::R: NodeType,
 {
-    pub fn make(source: &SourceText<'a>, env: ParserEnv) -> Self {
+    pub fn new(source: &SourceText<'a>, env: ParserEnv, sc: S) -> Self {
         let source = source.clone();
-        let sc = S::new(&env, &source);
         Self {
             lexer: Lexer::make(&source),
             errors: vec![],
@@ -48,8 +47,9 @@ where
     pub fn parse_header_only(
         env: ParserEnv,
         text: &'a SourceText<'a>,
+        sc: S,
     ) -> Option<<S::R as NodeType>::R> {
-        let (lexer, errors, env, sc) = Self::make(text, env).into_parts();
+        let (lexer, errors, env, sc) = Self::new(text, env, sc).into_parts();
         let mut decl_parser: DeclarationParser<S, T> =
             DeclarationParser::make(lexer, env, Context::empty(None), errors, sc);
         decl_parser

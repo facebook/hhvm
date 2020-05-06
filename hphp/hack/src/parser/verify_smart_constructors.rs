@@ -24,6 +24,10 @@ pub struct State {
 }
 
 impl State {
+    pub fn new() -> Self {
+        State { stack: vec![] }
+    }
+
     pub fn push(&mut self, kind: SyntaxKind) {
         self.stack.push(kind);
     }
@@ -54,7 +58,7 @@ impl State {
 
 impl<'src> StateType<'src, PositionedSyntax> for State {
     fn initial(_env0: &ParserEnv, _src: &SourceText<'src>) -> Self {
-        State { stack: vec![] }
+        Self::new()
     }
 
     fn next(&mut self, _inputs: &[&PositionedSyntax]) {}
@@ -67,13 +71,15 @@ pub struct VerifySmartConstructors {
     pub state: State,
 }
 
-impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, State> for VerifySmartConstructors {
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
+impl VerifySmartConstructors {
+    pub fn new() -> Self {
         Self {
-            state: <State as StateType<'src, PositionedSyntax>>::initial(env, src),
+            state: State::new(),
         }
     }
 }
+
+impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, State> for VerifySmartConstructors {}
 
 impl ToOcaml for State {
     unsafe fn to_ocaml(&self, context: &SerializationContext) -> Value {

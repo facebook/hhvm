@@ -16,11 +16,7 @@
  **
  *
  */
-use parser_core_types::{
-  syntax::*,
-  source_text::SourceText,
-  parser_env::ParserEnv,
-};
+use parser_core_types::syntax::*;
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
@@ -29,8 +25,6 @@ pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoSt
 where
     State: StateType<'src, S>,
 {
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
-
     fn make_missing(&mut self, offset: usize) -> Self::R {
         let r = Self::R::make_missing(self.state_mut(), offset);
         self.state_mut().next(&[]);

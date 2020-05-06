@@ -19,8 +19,6 @@
 use parser_core_types::{
   minimal_syntax::MinimalSyntax,
   minimal_token::MinimalToken,
-  source_text::SourceText,
-  parser_env::ParserEnv,
 };
 use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
@@ -29,20 +27,20 @@ use syntax_smart_constructors::SyntaxSmartConstructors;
 pub struct MinimalSmartConstructors {
   dummy_state: NoState,
 }
-impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
-    for MinimalSmartConstructors
-{
-    fn new(_env: &ParserEnv, _src: &SourceText<'src>) -> Self {
-        MinimalSmartConstructors { dummy_state: NoState{} }
+
+impl MinimalSmartConstructors {
+    pub fn new() -> Self {
+        MinimalSmartConstructors { dummy_state: NoState }
     }
 }
+
+impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
+    for MinimalSmartConstructors
+{}
+
 impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
     type Token = MinimalToken;
     type R = MinimalSyntax;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut NoState {
         &mut self.dummy_state

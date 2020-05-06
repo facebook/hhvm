@@ -18,15 +18,12 @@
  */
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
-  parser_env::ParserEnv,
 };
 
 pub trait SmartConstructors<'src, State>: Clone {
     type Token: LexableToken<'src>;
     type R;
 
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
     fn state_mut(&mut self) -> &mut State;
     fn into_state(self) -> State;
 

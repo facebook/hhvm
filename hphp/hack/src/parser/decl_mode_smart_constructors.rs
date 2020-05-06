@@ -19,6 +19,17 @@ pub struct State<'src, S> {
     stack: Vec<bool>,
     phantom_s: std::marker::PhantomData<*const S>,
 }
+
+impl<'src, S> State<'src, S> {
+    fn new(source: &SourceText<'src>) -> Self {
+        Self {
+            source: source.clone(),
+            stack: vec![],
+            phantom_s: std::marker::PhantomData,
+        }
+    }
+}
+
 impl<'a, S> Clone for State<'a, S> {
     fn clone(&self) -> Self {
         Self {
@@ -51,11 +62,7 @@ impl<'a, S> State<'a, S> {
 
 impl<'src, S> StateType<'src, S> for State<'src, S> {
     fn initial(_: &ParserEnv, source: &SourceText<'src>) -> Self {
-        Self {
-            source: source.clone(),
-            stack: vec![],
-            phantom_s: std::marker::PhantomData,
-        }
+        Self::new(source)
     }
 
     fn next(&mut self, inputs: &[&S]) {
@@ -76,6 +83,17 @@ pub struct DeclModeSmartConstructors<'src, S, Token, Value> {
     phantom_token: std::marker::PhantomData<*const Token>,
     phantom_value: std::marker::PhantomData<*const Value>,
 }
+
+impl<'a, Token, Value> DeclModeSmartConstructors<'a, Syntax<Token, Value>, Token, Value> {
+    pub fn new(src: &SourceText<'a>) -> Self {
+        Self {
+            state: State::new(src),
+            phantom_token: std::marker::PhantomData,
+            phantom_value: std::marker::PhantomData,
+        }
+    }
+}
+
 impl<'a, S, Token, Value> Clone for DeclModeSmartConstructors<'a, S, Token, Value> {
     fn clone(&self) -> Self {
         Self {
@@ -93,14 +111,6 @@ where
     Token: LexableToken<'a>,
     Value: SyntaxValueType<Token>,
 {
-    fn new(env: &ParserEnv, src: &SourceText<'a>) -> Self {
-        Self {
-            state: State::initial(env, src),
-            phantom_token: std::marker::PhantomData,
-            phantom_value: std::marker::PhantomData,
-        }
-    }
-
     fn make_yield_expression(&mut self, _r1: Self::R, _r2: Self::R) -> Self::R {
         self.state.pop_n(2);
         self.state.push(true);

@@ -16,9 +16,7 @@
  **
  *
  */
-use parser_core_types::source_text::SourceText;
 use crate::*;
-use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
 use smart_constructors::SmartConstructors;
@@ -37,10 +35,6 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
 {
     type Token = PositionedToken;
     type R = PositionedSyntax;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut State {
        &mut self.state

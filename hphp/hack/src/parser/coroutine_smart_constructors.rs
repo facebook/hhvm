@@ -117,6 +117,19 @@ where
         _ => false,
     }
 }
+impl<'a, S, T> CoroutineSmartConstructors<'a, S, T>
+where
+    T: StateType<'a, S> + CoroutineStateType,
+    S: SyntaxType<'a, T>,
+    S::Value: SyntaxValueWithKind,
+{
+    pub fn new(env: &ParserEnv, src: &SourceText<'a>) -> Self {
+        Self {
+            state: T::initial(env, src),
+            phantom_s: PhantomData,
+        }
+    }
+}
 
 impl<'a, S, T> SyntaxSmartConstructors<'a, S, T> for CoroutineSmartConstructors<'a, S, T>
 where
@@ -124,13 +137,6 @@ where
     S: SyntaxType<'a, T>,
     S::Value: SyntaxValueWithKind,
 {
-    fn new(env: &ParserEnv, src: &SourceText<'a>) -> Self {
-        Self {
-            state: T::initial(env, src),
-            phantom_s: PhantomData,
-        }
-    }
-
     fn make_token(&mut self, token: Self::Token) -> Self::R {
         let token = if self.state.is_codegen() {
             token.with_leading(vec![]).with_trailing(vec![])

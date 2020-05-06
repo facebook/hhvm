@@ -18,12 +18,10 @@
  */
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
   syntax::{
     Syntax,
     SyntaxValueType,
   },
-  parser_env::ParserEnv,
 };
 use crate::*;
 use smart_constructors::SmartConstructors;
@@ -38,10 +36,6 @@ where
 {
     type Token = Token;
     type R = Syntax<Token, Value>;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut State<'src, Syntax<Token, Value>> {
         &mut self.state

@@ -1008,15 +1008,12 @@ module GenerateFFRustSmartConstructors = struct
     ^ "
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
-  parser_env::ParserEnv,
 };
 
 pub trait SmartConstructors<'src, State>: Clone {
     type Token: LexableToken<'src>;
     type R;
 
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
     fn state_mut(&mut self) -> &mut State;
     fn into_state(self) -> State;
 
@@ -1058,8 +1055,6 @@ module GenerateFFRustMinimalSmartConstructors = struct
 use parser_core_types::{
   minimal_syntax::MinimalSyntax,
   minimal_token::MinimalToken,
-  source_text::SourceText,
-  parser_env::ParserEnv,
 };
 use smart_constructors::{NoState, SmartConstructors};
 use syntax_smart_constructors::SyntaxSmartConstructors;
@@ -1068,20 +1063,20 @@ use syntax_smart_constructors::SyntaxSmartConstructors;
 pub struct MinimalSmartConstructors {
   dummy_state: NoState,
 }
-impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
-    for MinimalSmartConstructors
-{
-    fn new(_env: &ParserEnv, _src: &SourceText<'src>) -> Self {
-        MinimalSmartConstructors { dummy_state: NoState{} }
+
+impl MinimalSmartConstructors {
+    pub fn new() -> Self {
+        MinimalSmartConstructors { dummy_state: NoState }
     }
 }
+
+impl<'src> SyntaxSmartConstructors<'src, MinimalSyntax, NoState>
+    for MinimalSmartConstructors
+{}
+
 impl<'src> SmartConstructors<'src, NoState> for MinimalSmartConstructors {
     type Token = MinimalToken;
     type R = MinimalSyntax;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, MinimalSyntax, NoState>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut NoState {
         &mut self.dummy_state
@@ -1125,7 +1120,7 @@ module GenerateFFRustPositionedSmartConstructors = struct
     let fwd_args = String.concat ~sep:", " fwd_args in
     sprintf
       "    fn make_%s(&mut self, %s) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_%s(self, %s)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_%s(self, %s)
     }\n\n"
       x.type_name
       args
@@ -1135,55 +1130,47 @@ module GenerateFFRustPositionedSmartConstructors = struct
   let positioned_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_core_types::source_text::SourceText;
-use parser_core_types::parser_env::ParserEnv;
+
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
 use smart_constructors::{NoState, SmartConstructors};
-use syntax_smart_constructors::{SyntaxSmartConstructors, StateType};
+use syntax_smart_constructors::SyntaxSmartConstructors;
 
 #[derive(Clone)]
-pub struct PositionedSmartConstructors<State: Clone = NoState> {
-    pub state: State,
+pub struct PositionedSmartConstructors {
+    pub state: NoState,
 }
 
-impl<'src, State: StateType<'src, PositionedSyntax>>
-SyntaxSmartConstructors<'src, PositionedSyntax, State>
-    for PositionedSmartConstructors<State>
-{
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: <State as StateType<PositionedSyntax>>::initial(env, src) }
+impl PositionedSmartConstructors {
+    pub fn new() -> Self {
+        Self { state: NoState }
     }
 }
 
-impl<'src, State: StateType<'src, PositionedSyntax>> SmartConstructors<'src, State>
-    for PositionedSmartConstructors<State>
-{
+impl<'src> SyntaxSmartConstructors<'src, PositionedSyntax, NoState> for PositionedSmartConstructors {}
+
+impl<'src> SmartConstructors<'src, NoState> for PositionedSmartConstructors {
     type Token = PositionedToken;
     type R = PositionedSyntax;
 
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::new(env, src)
-    }
-
-    fn state_mut(&mut self) -> &mut State {
+    fn state_mut(&mut self) -> &mut NoState {
        &mut self.state
     }
 
-    fn into_state(self) -> State {
+    fn into_state(self) -> NoState {
       self.state
     }
 
     fn make_missing(&mut self, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_missing(self, offset)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_missing(self, offset)
     }
 
     fn make_token(&mut self, offset: Self::Token) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_token(self, offset)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_token(self, offset)
     }
 
     fn make_list(&mut self, lst: Vec<Self::R>, offset: usize) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_list(self, lst, offset)
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_list(self, lst, offset)
     }
 
 CONSTRUCTOR_METHODS}
@@ -1223,9 +1210,7 @@ module GenerateFFRustVerifySmartConstructors = struct
   let verify_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_core_types::source_text::SourceText;
 use crate::*;
-use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_syntax::PositionedSyntax;
 use parser_core_types::positioned_token::PositionedToken;
 use smart_constructors::SmartConstructors;
@@ -1244,10 +1229,6 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
 {
     type Token = PositionedToken;
     type R = PositionedSyntax;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut State {
        &mut self.state
@@ -1316,9 +1297,7 @@ module GenerateFFRustCoroutineSmartConstructors = struct
     ^ "
 use parser_core_types::{
   syntax::*,
-  source_text::SourceText,
   lexable_token::LexableToken,
-  parser_env::ParserEnv,
 };
 use crate::*;
 use smart_constructors::SmartConstructors;
@@ -1334,10 +1313,6 @@ where
 {
     type Token = Token;
     type R = S;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, Self::R, T>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut T {
         &mut self.state
@@ -1535,11 +1510,7 @@ module GenerateFFRustSyntaxSmartConstructors = struct
   let full_fidelity_syntax_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_core_types::{
-  syntax::*,
-  source_text::SourceText,
-  parser_env::ParserEnv,
-};
+use parser_core_types::syntax::*;
 use smart_constructors::{NoState, SmartConstructors};
 use crate::StateType;
 
@@ -1548,8 +1519,6 @@ pub trait SyntaxSmartConstructors<'src, S: SyntaxType<'src, State>, State = NoSt
 where
     State: StateType<'src, S>,
 {
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self;
-
     fn make_missing(&mut self, offset: usize) -> Self::R {
         let r = Self::R::make_missing(self.state_mut(), offset);
         self.state_mut().next(&[]);
@@ -1670,12 +1639,10 @@ module GenerateFFRustDeclModeSmartConstructors = struct
     ^ "
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
   syntax::{
     Syntax,
     SyntaxValueType,
   },
-  parser_env::ParserEnv,
 };
 use crate::*;
 use smart_constructors::SmartConstructors;
@@ -1690,10 +1657,6 @@ where
 {
     type Token = Token;
     type R = Syntax<Token, Value>;
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        <Self as SyntaxSmartConstructors<'src, Self::R, State<Self::R>>>::new(env, src)
-    }
 
     fn state_mut(&mut self) -> &mut State<'src, Syntax<Token, Value>> {
         &mut self.state
@@ -1812,10 +1775,8 @@ module GenerateRustFactsSmartConstructors = struct
   let facts_smart_constructors_template : string =
     make_header CStyle ""
     ^ "
-use parser_core_types::source_text::SourceText;
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_token::PositionedToken;
 
 use crate::*;
@@ -1827,10 +1788,6 @@ pub struct FactsSmartConstructors<'src> {
 impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstructors<'src> {
     type Token = PositionedToken;
     type R = Node;
-
-    fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: (false, src.clone()) }
-    }
 
     fn state_mut(&mut self) -> &mut HasScriptContent<'src> {
         &mut self.state
@@ -1887,10 +1844,7 @@ module GenerateRustDirectDeclSmartConstructors = struct
     make_header CStyle ""
     ^ "
 use flatten_smart_constructors::*;
-use parser_core_types::source_text::SourceText;
-use parser_core_types::indexed_source_text::IndexedSourceText;
 use smart_constructors::SmartConstructors;
-use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_token::PositionedToken;
 
 use crate::*;
@@ -1902,10 +1856,6 @@ pub struct DirectDeclSmartConstructors<'src> {
 impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<'src> {
     type Token = PositionedToken;
     type R = Node;
-
-    fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: State::new(IndexedSourceText::new(src.clone())) }
-    }
 
     fn state_mut(&mut self) -> &mut State<'src> {
         &mut self.state
@@ -2028,9 +1978,7 @@ module GenerateFFRustSmartConstructorsWrappers = struct
 
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
   syntax_kind::SyntaxKind,
-  parser_env::ParserEnv,
 };
 use crate::SmartConstructors;
 
@@ -2038,14 +1986,17 @@ use crate::SmartConstructors;
 pub struct WithKind<S> {
     s: S,
 }
+
+impl<S> WithKind<S> {
+    pub fn new(s: S) -> Self {
+        Self { s }
+    }
+}
+
 impl<'src, S, State> SmartConstructors<'src, State> for WithKind<S>
 where S: SmartConstructors<'src, State> {
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { s: S::new(env, src) }
-    }
 
     fn state_mut(&mut self) -> &mut State {
         self.s.state_mut()

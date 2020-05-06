@@ -16,10 +16,8 @@
  **
  *
  */
-use parser_core_types::source_text::SourceText;
 use flatten_smart_constructors::*;
 use smart_constructors::SmartConstructors;
-use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::positioned_token::PositionedToken;
 
 use crate::*;
@@ -31,10 +29,6 @@ pub struct FactsSmartConstructors<'src> {
 impl<'src> SmartConstructors<'src, HasScriptContent<'src>> for FactsSmartConstructors<'src> {
     type Token = PositionedToken;
     type R = Node;
-
-    fn new(_: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { state: (false, src.clone()) }
-    }
 
     fn state_mut(&mut self) -> &mut HasScriptContent<'src> {
         &mut self.state

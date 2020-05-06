@@ -22,9 +22,7 @@
 
 use parser_core_types::{
   lexable_token::LexableToken,
-  source_text::SourceText,
   syntax_kind::SyntaxKind,
-  parser_env::ParserEnv,
 };
 use crate::SmartConstructors;
 
@@ -32,14 +30,17 @@ use crate::SmartConstructors;
 pub struct WithKind<S> {
     s: S,
 }
+
+impl<S> WithKind<S> {
+    pub fn new(s: S) -> Self {
+        Self { s }
+    }
+}
+
 impl<'src, S, State> SmartConstructors<'src, State> for WithKind<S>
 where S: SmartConstructors<'src, State> {
     type Token = S::Token;
     type R = (SyntaxKind, S::R);
-
-    fn new(env: &ParserEnv, src: &SourceText<'src>) -> Self {
-        Self { s: S::new(env, src) }
-    }
 
     fn state_mut(&mut self) -> &mut State {
         self.s.state_mut()

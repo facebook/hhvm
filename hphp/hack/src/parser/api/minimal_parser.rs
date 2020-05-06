@@ -29,14 +29,14 @@ use stack_limit::StackLimit;
 
 pub type SmartConstructors = WithKind<MinimalSmartConstructors>;
 pub type ScState = NoState;
-type MinimalSyntaxParser<'a> = Parser<'a, SmartConstructors, ScState>;
 
 pub fn parse_script<'a>(
     source: &SourceText<'a>,
     env: ParserEnv,
     stack_limit: Option<&'a StackLimit>,
 ) -> (MinimalSyntax, Vec<SyntaxError>, NoState) {
-    let mut parser = MinimalSyntaxParser::make(&source, env);
+    let sc = WithKind::new(MinimalSmartConstructors::new());
+    let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();
     let sc_state = parser.into_sc_state();
@@ -44,7 +44,8 @@ pub fn parse_script<'a>(
 }
 
 pub fn parse_header_only<'a>(env: ParserEnv, source: &SourceText<'a>) -> Option<MinimalSyntax> {
-    MinimalSyntaxParser::parse_header_only(env, source)
+    let sc = WithKind::new(MinimalSmartConstructors::new());
+    Parser::parse_header_only(env, source, sc)
 }
 
 fn trivia_lexer<'a>(source_text: SourceText<'a>, offset: usize) -> Lexer<'a, MinimalToken> {

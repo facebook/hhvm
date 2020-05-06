@@ -16,38 +16,53 @@ open Symbol_build_json
 open Symbol_builder_types
 open Symbol_json_util
 
-let add_container_defn_fact clss decl_id member_decls progress =
-  let base_fields =
+let add_container_decl_fact decl_pred name progress =
+  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  add_fact decl_pred json_fact progress
+
+let add_container_defn_fact ctx clss decl_id member_decls progress =
+  let common_fields =
     [
       ("declaration", build_id_json decl_id);
       ("members", JSON_Array member_decls);
     ]
     @ build_ns_json_nested clss.c_namespace
   in
-  let (defn_pred, json_fields) =
+  let (defn_pred, json_fields, prog) =
     match get_container_kind clss with
-    | InterfaceContainer -> (InterfaceDefinition, base_fields)
-    | TraitContainer -> (TraitDefinition, base_fields)
+    | InterfaceContainer -> (InterfaceDefinition, common_fields, progress)
+    | TraitContainer -> (TraitDefinition, common_fields, progress)
     | ClassContainer ->
       let is_abstract =
         match clss.c_kind with
         | Cabstract -> true
         | _ -> false
       in
-      let class_fields =
-        base_fields
-        @ [
-            ("isAbstract", JSON_Bool is_abstract);
-            ("isFinal", JSON_Bool clss.c_final);
-          ]
+      let (class_fields, prog) =
+        let req_class_fields =
+          common_fields
+          @ [
+              ("isAbstract", JSON_Bool is_abstract);
+              ("isFinal", JSON_Bool clss.c_final);
+            ]
+        in
+        match clss.c_extends with
+        | [] -> (req_class_fields, progress)
+        | [parent] ->
+          let (decl_id, prog) =
+            let parent_clss = get_type_from_hint ctx parent in
+            add_container_decl_fact ClassDeclaration parent_clss progress
+          in
+          (("extends_", build_id_json decl_id) :: req_class_fields, prog)
+        | _ ->
+          Hh_logger.log
+            "WARNING: skipping extends field for class with multiple parents %s"
+            (snd clss.c_name);
+          (req_class_fields, progress)
       in
-      (ClassDefinition, class_fields)
+      (ClassDefinition, class_fields, prog)
   in
-  add_fact defn_pred (JSON_Object json_fields) progress
-
-let add_container_decl_fact decl_pred name progress =
-  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
-  add_fact decl_pred json_fact progress
+  add_fact defn_pred (JSON_Object json_fields) prog
 
 let add_property_decl_fact con_type decl_id name progress =
   let json_fact =

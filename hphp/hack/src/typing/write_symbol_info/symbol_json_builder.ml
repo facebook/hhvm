@@ -113,7 +113,7 @@ let process_container_decl ctx con progress =
   let members =
     prop_decls @ class_const_decls @ type_const_decls @ method_decls
   in
-  let (_, prog) = add_container_defn_fact con con_decl_id members prog in
+  let (_, prog) = add_container_defn_fact ctx con con_decl_id members prog in
   let ref_json = build_container_decl_json_ref con_type con_decl_id in
   let (_, prog) = add_decl_loc_fact con_pos ref_json prog in
   process_doc_comment con.c_doc_comment con_pos ref_json prog

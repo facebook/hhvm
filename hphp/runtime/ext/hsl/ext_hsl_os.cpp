@@ -466,6 +466,51 @@ Object HHVM_FUNCTION(HSL_os_open, const String& path, int64_t flags, int64_t mod
   return HSLFileDescriptor::newInstance(fd);
 }
 
+CLISrvResult<std::tuple<ReturnedFdData, std::string>, int>
+CLI_CLIENT_HANDLER(HSL_os_mkostemps, std::string path_template, int64_t suffixlen, int64_t flags) {
+  // 0 is reasonable for emulating `mkstemp`
+  if (suffixlen < 0) {
+    return { CLIError {}, EINVAL };
+  }
+
+  char* buf = (char*) malloc(path_template.length() + 1);
+  if (buf == nullptr) {
+    // this will probably fail if malloc fails, but... at least we tried?
+    return { CLIError {} , ENOMEM };
+  }
+  SCOPE_EXIT { free(buf); };
+
+  strncpy(buf, path_template.c_str(), path_template.length());
+  buf[path_template.length()] = 0;
+
+  // only checking for memory safety; glibc will also raise EINVAL if
+  // strlen(buf) < suffixlen + 6
+  if (strlen(buf) < suffixlen) {
+    return { CLIError {}, EINVAL };
+  }
+
+  auto const fd = retry_on_eintr(-1, ::mkostemps, buf, suffixlen, flags);
+  if (fd == -1) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, std::make_tuple(ReturnedFdData { fd }, std::string(buf)) };
+}
+
+Array HHVM_FUNCTION(HSL_os_mkostemps, const String& path_template, int64_t suffixlen, int64_t flags) {
+  ReturnedFdData fd;
+  std::string path;
+  std::tie(fd, path) = HSL_CLI_INVOKE(
+    HSL_os_mkostemps,
+    path_template.toCppString(),
+    suffixlen,
+    flags
+  );
+  return make_varray(
+    HSLFileDescriptor::newInstance(fd.fd),
+    path
+  );
+}
+
 String HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
   if (max <= 0) {
     throw_errno_exception(EINVAL, "Max bytes can not be negative");
@@ -917,6 +962,10 @@ struct OSExtension final : Extension {
 
     CLI_REGISTER_HANDLER(HSL_os_open);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\open, HSL_os_open);
+
+    CLI_REGISTER_HANDLER(HSL_os_mkostemps);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\mkostemps, HSL_os_mkostemps);
+
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\read, HSL_os_read);

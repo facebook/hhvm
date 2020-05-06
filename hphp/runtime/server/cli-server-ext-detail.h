@@ -37,11 +37,13 @@ protected:
 
   int afdt_fd;
 
-  template<typename T>
+  template<class T>
   void read(T& arg) {
     cli_read(afdt_fd, arg);
   }
 
+  // Specialization needed so that the FD is read via cli_read_fd, instead of
+  // just being read as an `int`
   void read(ReturnedFdData& arg) {
     arg.fd = cli_read_fd(afdt_fd);
   }
@@ -51,7 +53,15 @@ protected:
     borrowed_fds.insert(arg.fd);
   }
 
-  template<typename T>
+  // Structs are usually a good alternative to tuples; tuples are required if
+  // the members need special handling, e.g. FdData
+  template<class... Ts>
+  void read(std::tuple<Ts...>& arg) {
+    // use readMulti instead of cli_read so that specializations are used
+    folly::apply([&](Ts&... args) { readMulti(args...); }, arg);
+  }
+
+  template<class T>
   void write(const T& arg) {
     cli_write(afdt_fd,arg);
   }
@@ -64,6 +74,11 @@ protected:
 
   void write(const LoanedFdData& arg) {
     cli_write_fd(afdt_fd, arg.fd);
+  }
+
+  template<class... Ts>
+  void write(const std::tuple<Ts...>& arg) {
+    folly::apply([&](const Ts&... args) { writeMulti(args...); }, arg);
   }
 
   template <class T, class... Ts>

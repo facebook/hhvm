@@ -1,0 +1,45 @@
+vec(7) {
+  string(7) "mkstemp"
+  object(HH\Lib\OS\FileDescriptor) (2) {
+    ["type"]=>
+    string(2) "fd"
+    ["fd"]=>
+    int(%d)
+  }
+  string(%d) "%s/hsl-mkostemps-test%s"
+  bool(true)
+  bool(true)
+  bool(true)
+  string(5) "fobar"
+}
+vec(6) {
+  string(8) "mkstemps"
+  object(HH\Lib\OS\FileDescriptor) (2) {
+    ["type"]=>
+    string(2) "fd"
+    ["fd"]=>
+    int(%d)
+  }
+  string(%s) "%s/hsl-mkostemps-test%s.txt"
+  bool(true)
+  bool(true)
+  bool(true)
+}
+vec(2) {
+  string(8) "mkostemp"
+  string(6) "foobar"
+}
+vec(7) {
+  string(9) "mkostemps"
+  object(HH\Lib\OS\FileDescriptor) (2) {
+    ["type"]=>
+    string(2) "fd"
+    ["fd"]=>
+    int(%d)
+  }
+  string(%d) "%s/hsl-mkostemps-test%s.txt"
+  bool(true)
+  bool(true)
+  bool(true)
+  string(6) "foobar"
+}

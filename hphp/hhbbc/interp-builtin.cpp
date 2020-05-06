@@ -409,25 +409,36 @@ bool builtin_type_structure_classname(ISS& env, const bc::FCallBuiltin& op) {
 bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
   if (op.arg1 != 3) return false;
 
-  auto const def = to_cell(topT(env));
+  auto def = to_cell(topT(env));
   auto const key = topC(env, 1);
   auto const base = topC(env, 2);
+  const auto optDArr = RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptArr;
 
-  if (!base.couldBe(RuntimeOption::EvalHackArrDVArrs ? BDict : BArr) ||
+  if (!base.couldBe(optDArr) ||
       !key.couldBe(BArrKey)) {
     unreachable(env);
     discard(env, 3);
     push(env, TBottom);
     return true;
   }
-  if (!base.subtypeOf(RuntimeOption::EvalHackArrDVArrs ? BOptDict : BOptDArr) ||
-      !key.subtypeOf(BOptArrKey)) {
+  if (!base.subtypeOf(optDArr) || !key.subtypeOf(BOptArrKey)) {
     return false;
+  }
+
+  auto mightThrow = is_opt(key);
+
+  if (base.subtypeOf(BNull)) {
+    if (!mightThrow) {
+      constprop(env);
+      effect_free(env);
+    }
+    discard(env, 3);
+    push(env, std::move(def));
+    return true;
   }
 
   auto const unoptBase = is_opt(base) ? unopt(base) : base;
   auto const unoptKey = is_opt(key) ? unopt(key) : key;
-  auto mightThrow = is_opt(base) || is_opt(key);
 
   auto elem = RuntimeOption::EvalHackArrDVArrs
     ? dict_elem(unoptBase, unoptKey, def)
@@ -448,8 +459,12 @@ bool builtin_shapes_idx(ISS& env, const bc::FCallBuiltin& op) {
     constprop(env);
     effect_free(env);
   }
+
+  auto res = elem.first;
+  if (is_opt(base)) res |= def;
+
   discard(env, 3);
-  push(env, std::move(elem.first));
+  push(env, std::move(res));
   return true;
 }
 

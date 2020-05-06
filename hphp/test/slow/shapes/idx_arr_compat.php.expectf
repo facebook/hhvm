@@ -3,7 +3,7 @@ array(1) {
   int(1)
 }
 
-Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type HH\darray, array given in %s/test/slow/shapes/idx_arr_compat.php on line 14
+Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, array given in %s/test/slow/shapes/idx_arr_compat.php on line 14
 int(1)
 array(1) {
   ["x"]=>
@@ -22,7 +22,7 @@ array(2) {
   bool(false)
 }
 
-Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type HH\darray, varray given in %s/test/slow/shapes/idx_arr_compat.php on line 14
+Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, varray given in %s/test/slow/shapes/idx_arr_compat.php on line 14
 NULL
 object(HH\Map) (1) {
   ["x"]=>

@@ -951,19 +951,6 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   auto const nparams = params.size();
   if (nparams != 2 && nparams != 3) return nullptr;
 
-  // params[0] is a darray, which may be a Dict or an Arr based on options.
-  // If the Hack typehint check flag is on, then we fall back to the native
-  // implementation of this method, which checks the DVArray bit in ArrayData.
-  bool is_dict;
-  auto const arrType = params[0].value->type();
-  if (RuntimeOption::EvalHackArrDVArrs && arrType <= TDict) {
-    is_dict = true;
-  } else if (!RuntimeOption::EvalHackArrDVArrs && arrType <= TArr) {
-    is_dict = false;
-  } else {
-    return nullptr;
-  }
-
   // params[1] is an arraykey. We only optimize if it's narrowed to int or str.
   auto const keyType = params[1].value->type();
   if (!(keyType <= TInt || keyType <= TStr)) return nullptr;
@@ -973,6 +960,22 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   auto const defType = nparams == 3 ? params[2].value->type() : TUninit;
   if (!(defType <= TUninit) && defType.maybe(TUninit)) return nullptr;
   auto const def = defType <= TUninit ? cns(env, TInitNull) : params[2].value;
+
+  // params[0] is an ?darray, which may be a ?Dict or an ?Arr based on options.
+  // If the Hack typehint check flag is on, then we fall back to the native
+  // implementation of this method, which checks the DVArray bit in ArrayData.
+  bool is_dict;
+  auto const arrType = params[0].value->type();
+  if (RuntimeOption::EvalHackArrDVArrs && arrType <= TDict) {
+    is_dict = true;
+  } else if (!RuntimeOption::EvalHackArrDVArrs && arrType <= TArr) {
+    is_dict = false;
+  } else if (arrType <= TNull) {
+    gen(env, IncRef, def);
+    return def;
+  } else {
+    return nullptr;
+  }
 
   // params[0] is the array, for which we may need to do a dvarray check.
   auto const arr = [&]() -> SSATmp* {

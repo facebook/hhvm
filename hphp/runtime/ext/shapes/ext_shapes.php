@@ -5,7 +5,7 @@ namespace HH {
 
     <<__Native, __Rx, __IsFoldable>>
     public static function idx(
-      darray $shape,
+      ?darray $shape,
       arraykey $index,
       mixed $default = null,
     ): mixed;

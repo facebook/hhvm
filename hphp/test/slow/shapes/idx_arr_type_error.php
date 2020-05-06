@@ -2,5 +2,5 @@
 
 <<__EntryPoint>>
 function main() {
-  var_dump(Shapes::idx(null, 'x'));
+  var_dump(Shapes::idx(42, 'x'));
 }

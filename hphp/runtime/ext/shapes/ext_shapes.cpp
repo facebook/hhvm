@@ -29,21 +29,35 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue shapes_idx(const Class* self, ArrayArg arr,
+void raiseExpectedArrayKey(TypedValue key) {
+  raise_error(folly::sformat(
+    "Argument 2 passed to HH\\Shapes::idx() "
+    "must be an instance of arraykey, {} given",
+    getDataTypeString(type(key)).data()
+  ));
+  not_reached();
+}
+
+TypedValue shapes_idx(const Class* self, const Variant& maybe_shape,
                       TypedValue key, TypedValue def /*= uninit */) {
+  if (maybe_shape.isNull()) {
+    // still check second arg type
+    if (!(isIntType(type(key)) || isStringType(type(key)))) {
+      raiseExpectedArrayKey(key);
+      not_reached();
+    }
+    return tvReturn(tvAsCVarRef(&def));
+  }
+
+  const Array& shape = maybe_shape.asCArrRef();
   if (isIntType(type(key))) {
-    auto const result = arr->get(val(key).num);
+    auto const result = shape->get(val(key).num);
     if (result.is_init()) return tvReturn(tvAsCVarRef(result));
   } else if (isStringType(type(key))) {
-    auto const result = arr->get(val(key).pstr);
+    auto const result = shape->get(val(key).pstr);
     if (result.is_init()) return tvReturn(tvAsCVarRef(result));
   } else {
-    auto const message = folly::sformat(
-      "Argument 2 passed to HH\\Shapes::idx() "
-      "must be an instance of arraykey, {} given",
-      getDataTypeString(type(key)).data()
-    );
-    raise_error(message);
+    raiseExpectedArrayKey(key);
     not_reached();
   }
   return tvReturn(tvAsCVarRef(&def));

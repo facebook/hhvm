@@ -10,8 +10,10 @@ open Asserter
 open Hh_json
 open Hh_json.Access
 open Hh_json_helpers
+open Symbol_add_fact
+open Symbol_builder_types
+open Symbol_json_util
 open OUnit2
-open Symbol_json_builder
 
 let test_add_fact _test_ctxt =
   let progress = init_progress in

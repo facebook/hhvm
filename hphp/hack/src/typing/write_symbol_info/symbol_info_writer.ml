@@ -12,9 +12,27 @@ open Hh_json
 open Aast
 open Full_fidelity_source_text
 open Provider_context
-open Symbol_json_builder
+open Symbol_builder_types
 open Unix
 module Bucket = Hack_bucket
+
+let compute_line_lengths (entry : Provider_context.entry) : int list =
+  match entry.source_text with
+  | None ->
+    Hh_logger.log
+      "WARNING: no source text for %s"
+      (Relative_path.to_absolute entry.path);
+    []
+  | Some st -> Line_break_map.offsets_to_line_lengths st.offset_map
+
+let compute_file_lines (path : Relative_path.t) (entry : Provider_context.entry)
+    : Symbol_builder_types.file_lines =
+  {
+    filepath = path;
+    lineLengths = compute_line_lengths entry;
+    endsInNewline = false (* TODO *);
+    hasUnicodeOrTabs = false (* TODO *);
+  }
 
 let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
     symbol_occurrences =
@@ -32,29 +50,11 @@ let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
   let symbols = IdentifySymbolService.all_symbols ctx all_defs in
   { decls = all_decls; occurrences = symbols }
 
-let compute_line_lengths (entry : Provider_context.entry) : int list =
-  match entry.source_text with
-  | None ->
-    Hh_logger.log
-      "WARNING: no source text for %s"
-      (Relative_path.to_absolute entry.path);
-    []
-  | Some st -> Line_break_map.offsets_to_line_lengths st.offset_map
-
-let compute_file_lines (path : Relative_path.t) (entry : Provider_context.entry)
-    : Symbol_json_builder.file_lines =
-  {
-    filepath = path;
-    lineLengths = compute_line_lengths entry;
-    endsInNewline = false (* TODO *);
-    hasUnicodeOrTabs = false (* TODO *);
-  }
-
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
     (tast_lst : Tast.program list)
-    (files_info : Symbol_json_builder.file_lines list)
+    (files_info : Symbol_builder_types.file_lines list)
     (start_time : float) : unit =
   try
     let symbol_occurrences = get_decls ctx tast_lst in

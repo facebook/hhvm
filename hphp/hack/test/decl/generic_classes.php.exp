@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "Bag" ->
+  { "\\Bag" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-10], "\\Bag");
@@ -81,7 +81,7 @@ Parsed decls:
         ];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "ContravariantBag" ->
+    "\\ContravariantBag" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([15:7-23], "\\ContravariantBag");
@@ -138,7 +138,7 @@ Parsed decls:
               sm_deprecated = None });
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
       sc_enum_type = None; sc_decl_errors = <opaque> };
-    "CovariantBag" ->
+    "\\CovariantBag" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([23:7-19], "\\CovariantBag");

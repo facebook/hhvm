@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "DeprecatedClass" ->
+  { "\\DeprecatedClass" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-22], "\\DeprecatedClass"); sc_tparams = [];
@@ -99,7 +99,7 @@ Parsed decls:
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       } };
   funs =
-  { "bar" ->
+  { "\\bar" ->
     { fe_pos = [21:10-13];
       fe_type =
       (Rwitness (root|deprecated.php line 21, characters 10-12),
@@ -117,7 +117,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "baz" ->
+    "\\baz" ->
     { fe_pos = [24:10-13];
       fe_type =
       (Rwitness (root|deprecated.php line 24, characters 10-12),
@@ -135,7 +135,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "foo" ->
+    "\\foo" ->
     { fe_pos = [18:10-13];
       fe_type =
       (Rwitness (root|deprecated.php line 18, characters 10-12),
@@ -154,7 +154,7 @@ Parsed decls:
             ft_reactive = Nonreactive }));
       fe_deprecated =
       (Some "The function foo is deprecated: use bar() instead");  };
-    "foo2" ->
+    "\\foo2" ->
     { fe_pos = [27:10-14];
       fe_type =
       (Rwitness (root|deprecated.php line 27, characters 10-13),

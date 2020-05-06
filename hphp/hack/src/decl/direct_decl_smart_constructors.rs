@@ -68,7 +68,11 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
         parts: &Vec<Node_>,
         pos: &Pos,
     ) -> Result<Id, ParseError> {
-        let mut qualified_name = String::new();
+        let mut qualified_name = String::with_capacity(namespace.len() + parts.len() * 10);
+        match parts.first() {
+            Some(Node_::Backslash(_)) => (), // Already fully-qualified
+            _ => qualified_name.push_str(namespace),
+        }
         for part in parts {
             match part {
                 Node_::Name(name, _pos) => qualified_name.push_str(&name),
@@ -92,32 +96,18 @@ pub fn get_name(namespace: &str, name: &Node_) -> Result<Id, ParseError> {
                 }
             }
         }
-        let name = if namespace.is_empty() {
-            qualified_name // globally qualified name
-        } else {
-            let namespace = namespace.to_owned();
-            let namespace = if namespace.ends_with("\\") {
-                namespace
-            } else {
-                namespace + "\\"
-            };
-            namespace + &qualified_name
-        };
         let pos = pos.clone();
-        Ok(Id(pos, name))
+        Ok(Id(pos, qualified_name))
     }
 
     match name {
         Node_::Name(name, pos) => {
             // always a simple name
-            let name = name.to_string();
-            let name = if namespace.is_empty() {
-                name
-            } else {
-                namespace.to_owned() + "\\" + &name
-            };
+            let mut fully_qualified = String::with_capacity(namespace.len() + name.len());
+            fully_qualified.push_str(namespace);
+            fully_qualified.push_str(name);
             let pos = pos.clone();
-            Ok(Id(pos, name))
+            Ok(Id(pos, fully_qualified))
         }
         Node_::XhpName(name, pos) => {
             // xhp names are always unqualified
@@ -176,7 +166,7 @@ impl NamespaceBuilder {
     fn new() -> NamespaceBuilder {
         NamespaceBuilder {
             stack: vec![NamespaceInfo {
-                name: "".to_string(),
+                name: "\\".to_string(),
                 imports: BTreeMap::new(),
             }],
         }
@@ -184,12 +174,10 @@ impl NamespaceBuilder {
 
     fn push_namespace(&mut self, name: &str) {
         let current = self.current_namespace();
-        let mut fully_qualified = String::with_capacity(current.len() + 1 + name.len());
+        let mut fully_qualified = String::with_capacity(current.len() + name.len() + 1);
         fully_qualified.push_str(current);
-        if current != "" {
-            fully_qualified.push('\\');
-        }
         fully_qualified.push_str(name);
+        fully_qualified.push('\\');
         self.stack.push(NamespaceInfo {
             name: fully_qualified,
             imports: BTreeMap::new(),
@@ -206,7 +194,7 @@ impl NamespaceBuilder {
     }
 
     fn current_namespace(&self) -> &str {
-        self.stack.last().map(|ni| ni.name.as_str()).unwrap_or("")
+        self.stack.last().map(|ni| ni.name.as_str()).unwrap_or("\\")
     }
 
     fn add_import(&mut self, name: String, aliased_name: Option<String>) {
@@ -231,16 +219,11 @@ impl NamespaceBuilder {
     }
 
     fn rename_import<'a>(&'a self, name: Cow<'a, String>) -> Cow<'a, String> {
-        let should_prepend_slash = name.starts_with('\\');
         let trimmed_name = name.trim_start_matches('\\');
         let check_import_map = |import_map: &'a BTreeMap<String, String>| {
-            import_map.get(trimmed_name).map(|renamed| {
-                if should_prepend_slash {
-                    prefix_slash(Cow::Borrowed(renamed))
-                } else {
-                    Cow::Borrowed(renamed)
-                }
-            })
+            import_map
+                .get(trimmed_name)
+                .map(|renamed| prefix_slash(Cow::Borrowed(renamed)))
         };
         for ni in self.stack.iter().rev() {
             if let Some(name) = check_import_map(&ni.imports) {
@@ -1253,12 +1236,12 @@ impl DirectDeclSmartConstructors<'_> {
     fn prefix_ns<'a>(&self, name: Cow<'a, String>) -> Cow<'a, String> {
         if name.starts_with("\\") {
             name
-        } else if self.state.namespace_builder.current_namespace().is_empty() {
-            Cow::Owned("\\".to_owned() + &name)
         } else {
-            Cow::Owned(
-                "\\".to_owned() + self.state.namespace_builder.current_namespace() + "\\" + &name,
-            )
+            let current = self.state.namespace_builder.current_namespace();
+            let mut fully_qualified = String::with_capacity(current.len() + name.len());
+            fully_qualified.push_str(current);
+            fully_qualified.push_str(&name);
+            Cow::Owned(fully_qualified)
         }
     }
 
@@ -1370,7 +1353,6 @@ impl DirectDeclSmartConstructors<'_> {
         closing_delimiter: Option<Node_>,
     ) -> Result<Node_, ParseError> {
         let Id(base_ty_pos, base_ty_name) = get_name("", &base_ty)?;
-        let base_ty_name = prefix_slash(Cow::Owned(base_ty_name)).into_owned();
         let pos = match closing_delimiter {
             Some(closing_delimiter) => Pos::merge(&base_ty_pos, &closing_delimiter.get_pos()?)?,
             None => base_ty_pos.clone(),
@@ -1953,10 +1935,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Err(_) => pos.clone(),
         };
         Ok(Node_::Hint(
-            HintValue::Apply(Box::new((
-                Id(pos, "\\".to_string() + &class_type),
-                argument_list.into_vec(),
-            ))),
+            HintValue::Apply(Box::new((Id(pos, class_type), argument_list.into_vec()))),
             full_pos,
         ))
     }
@@ -2126,9 +2105,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     body,
                     &HashSet::new(),
                 )?;
-                let deprecated = parsed_attributes
-                    .deprecated
-                    .map(|msg| format!("The function {} is deprecated: {}", name, msg));
+                let deprecated = parsed_attributes.deprecated.map(|msg| {
+                    format!(
+                        "The function {} is deprecated: {}",
+                        name.trim_start_matches("\\"),
+                        msg
+                    )
+                });
                 Rc::make_mut(&mut self.state.decls).funs.insert(
                     name,
                     Rc::new(FunElt {
@@ -2202,7 +2185,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::List(nodes) => match nodes.as_slice() {
                 [Node_::List(nodes)] => match nodes.as_slice() {
                     [name, initializer] => {
-                        let id = get_name(self.state.namespace_builder.current_namespace(), name)?;
+                        let id = get_name(
+                            if self
+                                .state
+                                .classish_name_builder
+                                .get_current_classish_name()
+                                .is_some()
+                            {
+                                ""
+                            } else {
+                                self.state.namespace_builder.current_namespace()
+                            },
+                            name,
+                        )?;
                         let modifiers = modifiers?;
                         let ty = self
                             .node_to_ty(&hint, &HashSet::new())
@@ -2372,8 +2367,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         }
 
         let Id(pos, name) = get_name(self.state.namespace_builder.current_namespace(), &name?)?;
-        let key = name.clone();
-        let name = prefix_slash(Cow::Owned(name));
         let (type_params, type_variables) = self.into_type_params(tparams?)?;
         let class_kind = match class_keyword? {
             Node_::Interface => ClassKind::Cinterface,
@@ -2392,7 +2385,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => false,
             },
             kind: class_kind,
-            name: Id(pos, name.into_owned()),
+            name: Id(pos, name.clone()),
             tparams: type_params,
             where_constraints: Vec::new(),
             extends: extends?
@@ -2636,7 +2629,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         Rc::make_mut(&mut self.state.decls)
             .classes
-            .insert(key, Rc::new(cls));
+            .insert(name, Rc::new(cls));
 
         self.state
             .classish_name_builder
@@ -2734,11 +2727,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg8: Self::R,
     ) -> Self::R {
         let name = name?;
-        let id = get_name("", &name)?;
+        let id = get_name(self.state.namespace_builder.current_namespace(), &name)?;
         let hint = self.node_to_ty(&extends?, &HashSet::new())?;
         let extends = self.node_to_ty(
             &self.make_apply(
-                Node_::Name("HH\\BuiltinEnum".to_string(), name.get_pos()?),
+                Node_::Name("\\HH\\BuiltinEnum".to_string(), name.get_pos()?),
                 name,
                 None,
             )?,
@@ -2754,7 +2747,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             is_xhp: false,
             has_xhp_keyword: false,
             kind: ClassKind::Cenum,
-            name: Id(id.0, prefix_slash(Cow::Owned(id.1)).into_owned()),
+            name: id,
             tparams: Vec::new(),
             where_constraints: Vec::new(),
             extends: vec![extends],
@@ -2924,8 +2917,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let (class_name, value) = (class_name?, value?);
         let pos = Pos::merge(&class_name.get_pos()?, &value.get_pos()?)?;
-        let Id(class_name_pos, class_name_str) = get_name("", &class_name)?;
-        let class_name_str = prefix_slash(Cow::Owned(class_name_str)).into_owned();
+        let Id(class_name_pos, class_name_str) = get_name(
+            self.state.namespace_builder.current_namespace(),
+            &class_name,
+        )?;
         let class_id = aast::ClassId(
             class_name_pos.clone(),
             match class_name_str.to_ascii_lowercase().as_ref() {

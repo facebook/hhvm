@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "MyPartialClass" ->
+  { "\\MyPartialClass" ->
     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-21], "\\MyPartialClass"); sc_tparams = [];
@@ -13,7 +13,7 @@ Parsed decls:
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
       sc_decl_errors = <opaque> } };
   funs =
-  { "my_partial_function" ->
+  { "\\my_partial_function" ->
     { fe_pos = [5:10-29];
       fe_type =
       (Rwitness (root|file_mode.php line 5, characters 10-28),
@@ -32,14 +32,14 @@ Parsed decls:
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs =
-  { "MyPartialType" ->
+  { "\\MyPartialType" ->
     { td_pos = [7:6-19]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
       (Rhint (root|file_mode.php line 7, characters 22-27), (Tprim Tstring))
       } };
   consts =
-  { "MY_PARTIAL_CONST" ->
+  { "\\MY_PARTIAL_CONST" ->
     (Rhint (root|file_mode.php line 9, characters 7-19),
      (Tapply (([9:7-20], "\\MyPartialType"), []))) }
   }

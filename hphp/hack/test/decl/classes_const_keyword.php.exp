@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "AbstractConsts" ->
+  { "\\AbstractConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
       sc_name = ([12:16-30], "\\AbstractConsts"); sc_tparams = [];
@@ -20,7 +20,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "ArrayConsts" ->
+    "\\ArrayConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([21:7-18], "\\ArrayConsts"); sc_tparams = [];
@@ -117,7 +117,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "BinopConsts" ->
+    "\\BinopConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([30:7-18], "\\BinopConsts"); sc_tparams = [];
@@ -169,7 +169,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "ClassnameConsts" ->
+    "\\ClassnameConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([46:7-22], "\\ClassnameConsts"); sc_tparams = [];
@@ -208,7 +208,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "DictConsts" ->
+    "\\DictConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([4:7-17], "\\DictConsts"); sc_tparams = [];
@@ -300,7 +300,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "ShapeConsts" ->
+    "\\ShapeConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([37:7-18], "\\ShapeConsts"); sc_tparams = [];
@@ -341,7 +341,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "TupleConsts" ->
+    "\\TupleConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([42:7-18], "\\TupleConsts"); sc_tparams = [];
@@ -375,7 +375,7 @@ Parsed decls:
       sc_constructor = None; sc_static_methods = []; sc_methods = [];
       sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
       };
-    "VecConsts" ->
+    "\\VecConsts" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([16:7-16], "\\VecConsts"); sc_tparams = [];

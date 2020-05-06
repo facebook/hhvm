@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "braced_id" ->
+  { "\\braced_id" ->
     { fe_pos = [39:10-19];
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 39, characters 10-18),
@@ -33,7 +33,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "id" ->
+    "\\id" ->
     { fe_pos = [31:10-12];
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 31, characters 10-11),
@@ -64,7 +64,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "other_id" ->
+    "\\other_id" ->
     { fe_pos = [35:10-18];
       fe_type =
       (Rwitness (root|namespace_elaboration.php line 35, characters 10-17),

@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "a0" ->
+  { "\\a0" ->
     { fe_pos = [3:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 3, characters 10-11),
@@ -20,7 +20,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "a1" ->
+    "\\a1" ->
     { fe_pos = [7:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 7, characters 10-11),
@@ -41,7 +41,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "a2" ->
+    "\\a2" ->
     { fe_pos = [11:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 11, characters 10-11),
@@ -64,7 +64,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "d0" ->
+    "\\d0" ->
     { fe_pos = [23:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 23, characters 10-11),
@@ -83,7 +83,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "d2" ->
+    "\\d2" ->
     { fe_pos = [27:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 27, characters 10-11),
@@ -106,7 +106,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "v0" ->
+    "\\v0" ->
     { fe_pos = [15:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 15, characters 10-11),
@@ -124,7 +124,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "v1" ->
+    "\\v1" ->
     { fe_pos = [19:10-12];
       fe_type =
       (Rwitness (root|array_typehints.php line 19, characters 10-11),
@@ -144,7 +144,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "vd0" ->
+    "\\vd0" ->
     { fe_pos = [31:10-13];
       fe_type =
       (Rwitness (root|array_typehints.php line 31, characters 10-12),
@@ -164,7 +164,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "vd1" ->
+    "\\vd1" ->
     { fe_pos = [35:10-13];
       fe_type =
       (Rwitness (root|array_typehints.php line 35, characters 10-12),
@@ -185,7 +185,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "vd2" ->
+    "\\vd2" ->
     { fe_pos = [39:10-13];
       fe_type =
       (Rwitness (root|array_typehints.php line 39, characters 10-12),
@@ -207,7 +207,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "vd3" ->
+    "\\vd3" ->
     { fe_pos = [43:10-13];
       fe_type =
       (Rwitness (root|array_typehints.php line 43, characters 10-12),

@@ -73,7 +73,7 @@ let compare_decl ctx verbosity fn =
   in
   let passes_symbol_check () =
     let compare name facts_symbols decl_symbols =
-      let facts_symbols = SSet.of_list facts_symbols in
+      let facts_symbols = SSet.of_list (List.map facts_symbols (( ^ ) "\\")) in
       let decl_symbols = SSet.of_list decl_symbols in
       let facts_only = SSet.diff facts_symbols decl_symbols in
       let decl_only = SSet.diff decl_symbols facts_symbols in
@@ -117,7 +117,7 @@ let compare_decl ctx verbosity fn =
       let different_decls =
         SMap.fold
           (fun key parsed_decl acc ->
-            let legacy_decl = get_decl ctx fn ("\\" ^ key) in
+            let legacy_decl = get_decl ctx fn key in
             let legacy_decl_str = show_decl legacy_decl in
             let parsed_decl_str = show_decl parsed_decl in
             if not @@ eq_decl legacy_decl parsed_decl then

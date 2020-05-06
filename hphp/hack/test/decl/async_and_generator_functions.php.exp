@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "async_function" ->
+  { "\\async_function" ->
     { fe_pos = [5:16-30];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 5, characters 16-29),
@@ -23,7 +23,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "async_generator" ->
+    "\\async_generator" ->
     { fe_pos = [18:16-31];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 18, characters 16-30),
@@ -49,7 +49,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "generator_function" ->
+    "\\generator_function" ->
     { fe_pos = [10:10-28];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 10, characters 10-27),
@@ -75,7 +75,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "generator_function_implicit_key" ->
+    "\\generator_function_implicit_key" ->
     { fe_pos = [14:10-41];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 14, characters 10-40),
@@ -101,7 +101,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "sync_function" ->
+    "\\sync_function" ->
     { fe_pos = [3:10-23];
       fe_type =
       (Rwitness (root|async_and_generator_functions.php line 3, characters 10-22),

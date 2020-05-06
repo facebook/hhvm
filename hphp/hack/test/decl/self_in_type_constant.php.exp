@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "C" ->
+  { "\\C" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
@@ -28,7 +28,7 @@ Parsed decls:
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
       sc_enum_type = None; sc_decl_errors = <opaque> };
-    "I" ->
+    "\\I" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
       sc_name = ([8:11-12], "\\I"); sc_tparams = [];
@@ -56,7 +56,7 @@ Parsed decls:
       sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
       sc_enum_type = None; sc_decl_errors = <opaque> };
-    "T" ->
+    "\\T" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Ctrait;
       sc_name = ([13:7-8], "\\T"); sc_tparams = [];

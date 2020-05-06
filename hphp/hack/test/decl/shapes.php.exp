@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "generic_shape" ->
+  { "\\generic_shape" ->
     { fe_pos = [15:10-23];
       fe_type =
       (Rwitness (root|shapes.php line 15, characters 10-22),
@@ -44,7 +44,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "returns_shape" ->
+    "\\returns_shape" ->
     { fe_pos = [9:10-23];
       fe_type =
       (Rwitness (root|shapes.php line 9, characters 10-22),
@@ -88,7 +88,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "takes_shape" ->
+    "\\takes_shape" ->
     { fe_pos = [5:10-21];
       fe_type =
       (Rwitness (root|shapes.php line 5, characters 10-20),
@@ -133,7 +133,7 @@ Parsed decls:
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs =
-  { "Coordinate" ->
+  { "\\Coordinate" ->
     { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =
@@ -153,7 +153,7 @@ Parsed decls:
               } }
           )))
       };
-    "TaggedCoordinate" ->
+    "\\TaggedCoordinate" ->
     { td_pos = [19:6-22]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =

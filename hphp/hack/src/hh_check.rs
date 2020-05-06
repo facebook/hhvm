@@ -60,14 +60,18 @@ impl TestDeclProvider {
 
 impl decl_provider::DeclProvider for TestDeclProvider {
     fn get_fun(&self, s: &str) -> Option<&decl_provider::FunDecl> {
-        self.decls.funs.get(s)
+        // Names in function call expressions don't seem to be fully-qualified
+        // in hh_check yet.
+        // TODO: fix this
+        let s = format!("\\{}", s);
+        self.decls.funs.get(&*s)
     }
     fn get_class(&self, name: &str) -> Option<&decl_provider::ClassDecl> {
-        // Unlike the existing OCaml decl provider, classes in the direct decl parser don't seem to
-        // have namespace qualification
+        // Class names in expressions don't seem to be fully-qualified in
+        // hh_check yet.
         // TODO: fix this
-        let stripped = name.trim_start_matches("\\");
-        self.decls.classes.get(stripped)
+        let name = format!("\\{}", name);
+        self.decls.classes.get(&*name)
     }
 }
 

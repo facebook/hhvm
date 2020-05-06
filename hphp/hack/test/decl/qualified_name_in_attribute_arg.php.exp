@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "f" ->
+  { "\\f" ->
     { fe_pos = [4:10-11];
       fe_type =
       (Rwitness (root|qualified_name_in_attribute_arg.php line 4, characters 10-10),

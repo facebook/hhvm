@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "C" ->
+  { "\\C" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([3:7-8], "\\C");
@@ -13,7 +13,7 @@ Parsed decls:
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
       sc_decl_errors = <opaque> };
-    "X" ->
+    "\\X" ->
     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cabstract;
       sc_name = ([5:16-17], "\\X"); sc_tparams = [];

@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "generic_tuple" ->
+  { "\\generic_tuple" ->
     { fe_pos = [13:10-23];
       fe_type =
       (Rwitness (root|tuples.php line 13, characters 10-22),
@@ -44,7 +44,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "returns_tuple" ->
+    "\\returns_tuple" ->
     { fe_pos = [9:10-23];
       fe_type =
       (Rwitness (root|tuples.php line 9, characters 10-22),
@@ -80,7 +80,7 @@ Parsed decls:
               ~returns_mutable:false ~returns_void_to_rx:false);
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  };
-    "takes_tuple" ->
+    "\\takes_tuple" ->
     { fe_pos = [5:10-21];
       fe_type =
       (Rwitness (root|tuples.php line 5, characters 10-20),
@@ -117,7 +117,7 @@ Parsed decls:
             ft_reactive = Nonreactive }));
       fe_deprecated = None;  } };
   typedefs =
-  { "Coordinate" ->
+  { "\\Coordinate" ->
     { td_pos = [3:6-16]; td_vis = Transparent; td_tparams = [];
       td_constraint = None;
       td_type =

@@ -2,7 +2,7 @@ Parsed decls:
 
 { Direct_decl_parser.classes = {};
   funs =
-  { "f" ->
+  { "\\f" ->
     { fe_pos = [3:10-11];
       fe_type =
       (Rwitness (root|missing_function_typehints.php line 3, characters 10-10),

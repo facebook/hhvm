@@ -1,7 +1,7 @@
 The following class(es) differed between the legacy and parsed versions:
 
 
-[C]
+[\C]
 --- legacy
 +++ parsed
 @@ -1,11 +1,11 @@

@@ -1,7 +1,7 @@
 Parsed decls:
 
 { Direct_decl_parser.classes =
-  { "A" ->
+  { "\\A" ->
     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([11:7-8], "\\A"); sc_tparams = [];
@@ -12,7 +12,7 @@ Parsed decls:
       sc_sprops = []; sc_constructor = None; sc_static_methods = [];
       sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
       sc_decl_errors = <opaque> };
-    "C1" ->
+    "\\C1" ->
     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([4:7-9], "\\C1"); sc_tparams = [];
@@ -25,7 +25,7 @@ Parsed decls:
       sc_user_attributes =
       [{ ua_name = ([3:3-24], "__ConsistentConstruct"); ua_params = [] }];
       sc_enum_type = None; sc_decl_errors = <opaque> };
-    "C2" ->
+    "\\C2" ->
     { Shallow_decl_defs.sc_mode = Mpartial; sc_final = false;
       sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
       sc_name = ([6:7-9], "\\C2"); sc_tparams = [];

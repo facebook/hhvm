@@ -98,6 +98,14 @@ val load_from_sqlite_for_batch_update : Provider_context.t -> string -> t
 val load_from_sqlite_with_changes_since_baseline :
   Provider_context.t -> changes_since_baseline -> string -> t
 
+(** The same as load_from_sqlite_with_changes_since_baseline but accepting
+  a list of changed file infos since naming table base. *)
+val load_from_sqlite_with_changed_file_infos :
+  Provider_context.t ->
+  (Relative_path.t * FileInfo.t option) list ->
+  string ->
+  t
+
 (* The path to the table's SQLite database mapping filenames to symbol names, if any *)
 val get_forward_naming_fallback_path : t -> string option
 

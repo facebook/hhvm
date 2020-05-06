@@ -411,36 +411,44 @@ let saved_to_fast saved = Relative_path.Map.map saved FileInfo.saved_to_names
 
 let create a = Unbacked a
 
-let update_reverse_entries ctx file_deltas : unit =
+(* Helper function to apply new files info to reverse naming table *)
+let update_reverse_entries_helper
+    (ctx : Provider_context.t)
+    (changed_file_infos : (Relative_path.t * FileInfo.t option) list) : unit =
   let backend = Provider_context.get_backend ctx in
   let db_path_opt = Db_path_provider.get_naming_db_path backend in
-  Relative_path.Map.iter file_deltas ~f:(fun path delta ->
-      let fi =
+  (* Remove all old file symbols first *)
+  List.iter
+    ~f:(fun (path, _file_info) ->
+      let fi_opt =
         Option.bind db_path_opt ~f:(fun db_path ->
             Naming_sqlite.get_file_info db_path path)
       in
-      begin
-        match fi with
-        | Some fi ->
-          Naming_provider.remove_type_batch
-            backend
-            (fi.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
-          Naming_provider.remove_type_batch
-            backend
-            (fi.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
-          Naming_provider.remove_type_batch
-            backend
-            (fi.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
-          Naming_provider.remove_fun_batch
-            backend
-            (fi.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
-          Naming_provider.remove_const_batch
-            backend
-            (fi.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
-        | None -> ()
-      end;
-      match delta with
-      | Naming_sqlite.Modified fi ->
+      match fi_opt with
+      | Some fi ->
+        Naming_provider.remove_type_batch
+          backend
+          (fi.FileInfo.classes |> List.map ~f:snd |> SSet.of_list);
+        Naming_provider.remove_type_batch
+          backend
+          (fi.FileInfo.typedefs |> List.map ~f:snd |> SSet.of_list);
+        Naming_provider.remove_type_batch
+          backend
+          (fi.FileInfo.record_defs |> List.map ~f:snd |> SSet.of_list);
+        Naming_provider.remove_fun_batch
+          backend
+          (fi.FileInfo.funs |> List.map ~f:snd |> SSet.of_list);
+        Naming_provider.remove_const_batch
+          backend
+          (fi.FileInfo.consts |> List.map ~f:snd |> SSet.of_list)
+      | None -> ())
+    changed_file_infos;
+
+  (* Add new file symbols after removing old files symbols *)
+  List.iter
+    ~f:(fun (_path, new_file_info) ->
+      match new_file_info with
+      | Some fi ->
         List.iter
           ~f:(fun (pos, name) -> Naming_provider.add_class backend name pos)
           fi.FileInfo.classes;
@@ -457,7 +465,20 @@ let update_reverse_entries ctx file_deltas : unit =
         List.iter
           ~f:(fun (pos, name) -> Naming_provider.add_const backend name pos)
           fi.FileInfo.consts
-      | Naming_sqlite.Deleted -> ())
+      | None -> ())
+    changed_file_infos
+
+let update_reverse_entries ctx file_deltas =
+  let file_delta_list = Relative_path.Map.bindings file_deltas in
+  let changed_files_info =
+    List.map
+      ~f:(fun (path, file_delta) ->
+        match file_delta with
+        | Naming_sqlite.Modified fi -> (path, Some fi)
+        | Naming_sqlite.Deleted -> (path, None))
+      file_delta_list
+  in
+  update_reverse_entries_helper ctx changed_files_info
 
 let choose_local_changes ~local_changes ~custom_local_changes =
   match custom_local_changes with
@@ -515,6 +536,45 @@ let load_from_sqlite_for_type_checking
     let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
     ()
   end;
+  Backed (local_changes, db_path)
+
+let load_from_sqlite_with_changed_file_infos
+    (ctx : Provider_context.t)
+    (changed_file_infos : (Relative_path.t * FileInfo.t option) list)
+    (db_path : string) : t =
+  Hh_logger.log "Loading naming table from SQLite...";
+  let db_path = Naming_sqlite.Db_path db_path in
+  Naming_sqlite.validate_can_open_db db_path;
+  (* throw in master if anything's wrong *)
+  Db_path_provider.set_naming_db_path
+    (Provider_context.get_backend ctx)
+    (Some db_path);
+  let t = Unix.gettimeofday () in
+  (* Get changed files delta from file info *)
+  let changed_file_deltas =
+    List.fold_left
+      ~f:(fun acc_files_delta (path, changed_file_info_opt) ->
+        let file_delta =
+          match changed_file_info_opt with
+          | Some file_info -> Naming_sqlite.Modified file_info
+          | None -> Naming_sqlite.Deleted
+        in
+        Relative_path.Map.add acc_files_delta ~key:path ~data:file_delta)
+      ~init:Relative_path.Map.empty
+      changed_file_infos
+  in
+  let base_local_changes = Naming_sqlite.get_local_changes db_path in
+  let local_changes =
+    Naming_sqlite.
+      {
+        file_deltas = changed_file_deltas;
+        base_content_version =
+          base_local_changes.Naming_sqlite.base_content_version;
+      }
+  in
+  let t = Hh_logger.log_duration "Calculate changed files delta" t in
+  update_reverse_entries_helper ctx changed_file_infos;
+  let _t = Hh_logger.log_duration "Updated reverse naming table entries" t in
   Backed (local_changes, db_path)
 
 let load_from_sqlite_with_changes_since_baseline

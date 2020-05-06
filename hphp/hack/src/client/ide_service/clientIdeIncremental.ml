@@ -284,15 +284,9 @@ let update_naming_tables_for_changed_file_lwt
     ~(popt : ParserOptions.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
-    ~(path : Path.t) : changed_file_results Lwt.t =
-  let str_path = Path.to_string path in
-  match Relative_path.strip_root_if_possible str_path with
-  | None ->
-    log "Ignored change to file %s, as it is not within our repo root" str_path;
-    Lwt.return
-      { naming_table; sienv; old_file_info = None; new_file_info = None }
-  | Some path ->
-    let path = Relative_path.from_root ~suffix:path in
+    ~(path : Relative_path.t) : changed_file_results Lwt.t =
+  match Relative_path.prefix path with
+  | Relative_path.Root ->
     if not (FindUtils.path_filter path) then
       Lwt.return
         { naming_table; sienv; old_file_info = None; new_file_info = None }
@@ -313,20 +307,21 @@ let update_naming_tables_for_changed_file_lwt
       in
       let sienv = update_symbol_index ~sienv ~path ~facts in
       Lwt.return { naming_table; sienv; old_file_info; new_file_info }
+  | _ ->
+    log
+      "Ignored change to file %s, as it is not within our repo root"
+      (Relative_path.to_absolute path);
+    Lwt.return
+      { naming_table; sienv; old_file_info = None; new_file_info = None }
 
 let update_naming_tables_for_changed_file
     ~(backend : Provider_backend.t)
     ~(popt : ParserOptions.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
-    ~(path : Path.t) : changed_file_results =
-  let str_path = Path.to_string path in
-  match Relative_path.strip_root_if_possible str_path with
-  | None ->
-    log "Ignored change to file %s, as it is not within our repo root" str_path;
-    { naming_table; sienv; old_file_info = None; new_file_info = None }
-  | Some path ->
-    let path = Relative_path.from_root ~suffix:path in
+    ~(path : Relative_path.t) : changed_file_results =
+  match Relative_path.prefix path with
+  | Relative_path.Root ->
     if not (FindUtils.path_filter path) then
       { naming_table; sienv; old_file_info = None; new_file_info = None }
     else
@@ -347,3 +342,8 @@ let update_naming_tables_for_changed_file
       in
       let sienv = update_symbol_index ~sienv ~path ~facts in
       { naming_table; sienv; old_file_info; new_file_info }
+  | _ ->
+    log
+      "Ignored change to file %s, as it is not within our repo root"
+      (Relative_path.to_absolute path);
+    { naming_table; sienv; old_file_info = None; new_file_info = None }

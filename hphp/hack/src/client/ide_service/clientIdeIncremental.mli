@@ -26,7 +26,7 @@ val update_naming_tables_for_changed_file_lwt :
   popt:ParserOptions.t ->
   naming_table:Naming_table.t ->
   sienv:SearchUtils.si_env ->
-  path:Path.t ->
+  path:Relative_path.t ->
   changed_file_results Lwt.t
 
 (* Synchronous version of update_naming_tables_for_changed_file_lwt *)
@@ -35,5 +35,5 @@ val update_naming_tables_for_changed_file :
   popt:ParserOptions.t ->
   naming_table:Naming_table.t ->
   sienv:SearchUtils.si_env ->
-  path:Path.t ->
+  path:Relative_path.t ->
   changed_file_results

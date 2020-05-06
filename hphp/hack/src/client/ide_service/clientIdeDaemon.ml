@@ -155,7 +155,7 @@ and common_state = {
 and open_files_state = {
   open_files: Provider_context.entries;
       (** all open files, along with caches of their ASTs and TASTs and errors *)
-  changed_files_to_process: Path.Set.t;
+  changed_files_to_process: Relative_path.Set.t;
       (** changed_files_to_process is grown during File_changed events, and steadily
   whittled down one by one in `serve` as we get around to processing them
   via `process_changed_files`. *)
@@ -182,7 +182,7 @@ let state_to_log_string (state : state) : string =
     Printf.sprintf
       "%d open_files; %d changed_files_to_process"
       (Relative_path.Map.cardinal files.open_files)
-      (Path.Set.cardinal files.changed_files_to_process)
+      (Relative_path.Set.cardinal files.changed_files_to_process)
   in
   match state with
   | Pending_init -> "Pending_init"
@@ -446,7 +446,7 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
     dfiles =
       {
         open_files;
-        changed_files_to_process = Path.Set.empty;
+        changed_files_to_process = Relative_path.Set.empty;
         changed_files_denominator = 0;
       };
   }
@@ -464,12 +464,12 @@ let initialize2
   match load_state_result with
   | Ok (naming_table, changed_files) ->
     let changed_files_to_process =
-      Path.Set.union
+      Relative_path.Set.union
         dstate.dfiles.changed_files_to_process
-        (Path.Set.of_list changed_files)
+        (Relative_path.Set.of_list changed_files)
     in
     let changed_files_denominator =
-      Path.Set.cardinal changed_files_to_process
+      Relative_path.Set.cardinal changed_files_to_process
     in
     let p = { ClientIdeMessage.Processing_files.total = 0; processed = 0 } in
     let%lwt () =
@@ -716,7 +716,10 @@ let handle_request :
           List.fold
             paths
             ~init:files.changed_files_to_process
-            ~f:(fun acc path -> Path.Set.add acc path);
+            ~f:(fun acc path ->
+              Relative_path.Set.add
+                acc
+                (Relative_path.create_detect_prefix (Path.to_string path)));
         changed_files_denominator =
           files.changed_files_denominator + List.length paths;
       }
@@ -921,7 +924,7 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
   | Failed_init _ ->
     Lwt.return_unit
   | Initialized { ifiles; _ } ->
-    if Path.Set.is_empty ifiles.changed_files_to_process then
+    if Relative_path.Set.is_empty ifiles.changed_files_to_process then
       let%lwt () =
         write_message
           ~out_fd
@@ -932,7 +935,7 @@ let write_status ~(out_fd : Lwt_unix.file_descr) (state : state) : unit Lwt.t =
     else
       let total = ifiles.changed_files_denominator in
       let processed =
-        total - Path.Set.cardinal ifiles.changed_files_to_process
+        total - Relative_path.Set.cardinal ifiles.changed_files_to_process
       in
       let%lwt () =
         write_message
@@ -956,13 +959,15 @@ let should_process_file_change
     (istate : istate) : bool =
   Lwt_message_queue.is_empty message_queue
   && (not (Lwt_unix.readable in_fd))
-  && not (Path.Set.is_empty istate.ifiles.changed_files_to_process)
+  && not (Relative_path.Set.is_empty istate.ifiles.changed_files_to_process)
 
 let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
     istate Lwt.t =
-  let next_file = Path.Set.choose istate.ifiles.changed_files_to_process in
+  let next_file =
+    Relative_path.Set.choose istate.ifiles.changed_files_to_process
+  in
   let changed_files_to_process =
-    Path.Set.remove istate.ifiles.changed_files_to_process next_file
+    Relative_path.Set.remove istate.ifiles.changed_files_to_process next_file
   in
   let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
     ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
@@ -979,7 +984,7 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
          istate.icommon.local_memory);
   Provider_utils.invalidate_tast_cache_of_entries istate.ifiles.open_files;
   let changed_files_denominator =
-    if Path.Set.is_empty changed_files_to_process then
+    if Relative_path.Set.is_empty changed_files_to_process then
       0
     else
       istate.ifiles.changed_files_denominator

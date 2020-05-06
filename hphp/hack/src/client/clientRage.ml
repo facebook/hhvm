@@ -307,7 +307,7 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
           ( result,
             Printf.sprintf
               "%s\n\n%s\n"
-              ( List.map changed_files ~f:Path.to_string
+              ( List.map changed_files ~f:Relative_path.suffix
               |> String.concat ~sep:"\n" )
               (Telemetry.to_json telemetry |> Hh_json.json_to_multiline) )
       | Ok (Error (load_error, telemetry)) ->

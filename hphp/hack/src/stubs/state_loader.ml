@@ -6,7 +6,7 @@ type native_load_result = {
   is_cached: bool;
   state_distance: int;
   deptable_fn: string;
-  dirty_files: (string list * string list) Future.t;
+  dirty_files: (Relative_path.t list * Relative_path.t list) Future.t;
 }
 
 type saved_state_handle = {

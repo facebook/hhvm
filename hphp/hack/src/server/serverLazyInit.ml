@@ -135,12 +135,6 @@ let download_and_load_state_exn
                   .Saved_state_loader.Naming_table_saved_state_info
                    .naming_table_path
               in
-              let changed_files =
-                List.map
-                  ~f:(fun path ->
-                    Relative_path.create_detect_prefix (Path.to_string path))
-                  changed_files
-              in
               (Some (Path.to_string path), changed_files)
             | Error err ->
               Hh_logger.warn
@@ -173,13 +167,9 @@ let download_and_load_state_exn
       | Error error -> Error (Load_state_dirty_files_failure error)
       | Ok (dirty_master_files, dirty_local_files) ->
         let () = HackEventLogger.state_loader_dirty_files t in
-        let list_to_set x =
-          List.map x (fun suffix -> Relative_path.from_root ~suffix)
-          |> Relative_path.set_of_list
-        in
         let dirty_naming_files = Relative_path.Set.of_list dirty_naming_files in
-        let dirty_master_files = list_to_set dirty_master_files in
-        let dirty_local_files = list_to_set dirty_local_files in
+        let dirty_master_files = Relative_path.Set.of_list dirty_master_files in
+        let dirty_local_files = Relative_path.Set.of_list dirty_local_files in
         Ok
           {
             saved_state_fn = result.State_loader.saved_state_fn;
@@ -606,7 +596,9 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
       ~ignore_hh_version
       ~saved_state_type:Saved_state_loader.Naming_table
   in
-  match State_loader_futures.wait_for_finish loader_future with
+  match
+    State_loader_futures.wait_for_finish_with_debug_details loader_future
+  with
   | Ok (info, fnl) ->
     let { Saved_state_loader.Naming_table_saved_state_info.naming_table_path } =
       info
@@ -614,10 +606,6 @@ let load_naming_table (genv : ServerEnv.genv) (env : ServerEnv.env) :
     let ctx = Provider_utils.ctx_from_server_env env in
     let naming_table_path = Path.to_string naming_table_path in
     let naming_table = Naming_table.load_from_sqlite ctx naming_table_path in
-    let fnl =
-      List.map fnl ~f:(fun path ->
-          Relative_path.create_detect_prefix (Path.to_string path))
-    in
     let (env, t) =
       initialize_naming_table
         ~fnl:(Some fnl)

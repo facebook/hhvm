@@ -54,7 +54,7 @@ type _ saved_state_type =
 (** List of files changed since the saved-state's commit. This list of files may
 include files other than Hack files, so the caller should filter the given list
 as necessary. *)
-type changed_files = Path.t list
+type changed_files = Relative_path.t list
 
 type load_error
 

@@ -2625,16 +2625,17 @@ function run_test($options, $test) {
   if ($skip_reason !== null) return $skip_reason;
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
-  if (has_multi_request_mode($options)) {
-    if (isset($options['jit-serialize']) || isset($options['cli-server'])) {
-      if (preg_grep('/ --count[ =][0-9]+ /', (array)$hhvm)) {
-        return 'skip-count';
-      }
-    } else {
-      if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+ /',
-                    (array)$hhvm)) {
-        return 'skip-count';
-      }
+
+  if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/',
+                (array)$hhvm)) {
+    // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
+    // this can't work so skip the test
+    return 'skip-count';
+  } else if (isset($options['jit-serialize'])) {
+    // jit-serialize adds the --count option later, so even 1 --count in the
+    // command means we have to skip
+    if (preg_grep('/ --count[ =][0-9]+( |$)/', (array)$hhvm)) {
+      return 'skip-count';
     }
   }
 

@@ -386,8 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Array(&'a (Node_<'a>, Node_<'a>)),
-    Darray(&'a (Node_<'a>, Node_<'a>)),
     Tuple(&'a [Node_<'a>]),
     Shape(&'a ShapeDecl<'a>),
     Nullable(&'a Node_<'a>),
@@ -946,21 +944,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
                     }
-                    HintValue::Array(&(key_type, value_type)) => {
-                        let key_type = match key_type {
-                            Node_::Ignored => None,
-                            n => Some(self.node_to_ty(n)?),
-                        };
-                        let value_type = match value_type {
-                            Node_::Ignored => None,
-                            n => Some(self.node_to_ty(n)?),
-                        };
-                        Ty_::Tarray(self.alloc((key_type, value_type)))
-                    }
-                    HintValue::Darray(&(key_type, value_type)) => Ty_::Tdarray(self.alloc((
-                        self.node_to_ty(key_type).unwrap_or_else(|_| tany()),
-                        self.node_to_ty(value_type).unwrap_or_else(|_| tany()),
-                    ))),
                     HintValue::Tuple(items) => {
                         let items_iter = items.iter();
                         let mut items = Vec::new_in(self.state.arena);
@@ -3183,10 +3166,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             pos
         };
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Array(self.alloc((tparam?, Node_::Ignored))),
-            pos,
-        ))))
+        let key_type = match tparam? {
+            Node_::Ignored => None,
+            n => Some(self.node_to_ty(n)?),
+        };
+        Ok(self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, None)))))
     }
 
     fn make_darray_type_specifier(
@@ -3205,10 +3189,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         } else {
             pos
         };
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Darray(self.alloc((key_type?, value_type?))),
-            pos,
-        ))))
+        let key_type = self.node_to_ty(key_type?).unwrap_or(TANY);
+        let value_type = self.node_to_ty(value_type?).unwrap_or(TANY);
+        Ok(self.hint_ty(pos, Ty_::Tdarray(self.alloc((key_type, value_type)))))
     }
 
     fn make_map_array_type_specifier(
@@ -3220,14 +3203,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         value_type: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Array(self.alloc((key_type?, value_type?))),
-            Pos::merge(
-                self.state.arena,
-                array?.get_pos(self.state.arena)?,
-                greater_than?.get_pos(self.state.arena)?,
-            )?,
-        ))))
+        let pos = Pos::merge(
+            self.state.arena,
+            array?.get_pos(self.state.arena)?,
+            greater_than?.get_pos(self.state.arena)?,
+        )?;
+        let key_type = match key_type? {
+            Node_::Ignored => None,
+            n => Some(self.node_to_ty(n)?),
+        };
+        let value_type = match value_type? {
+            Node_::Ignored => None,
+            n => Some(self.node_to_ty(n)?),
+        };
+        Ok(self.hint_ty(pos, Ty_::Tarray(self.alloc((key_type, value_type)))))
     }
 
     fn make_old_attribute_specification(

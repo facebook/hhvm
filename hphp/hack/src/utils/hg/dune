@@ -9,11 +9,15 @@
     injector_config
     process
     process_types
-    future))
+    future)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208
 
 (executable
   (name hg_runner)
   (modules hg_runner)
   (libraries
     hg
-    default_injector_config))
+    default_injector_config)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

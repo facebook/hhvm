@@ -13,4 +13,6 @@
     sys_utils
     utils_config_file
     utils_scheduler
-    watchman))
+    watchman)
+  (preprocess
+    (pps lwt_ppx ppx_deriving.std))) ; See T41851208

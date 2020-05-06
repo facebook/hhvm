@@ -35,6 +35,7 @@ type watchman_mergebase = {
   (* ...as of this clock *)
   watchman_clock: string;
 }
+[@@deriving show]
 
 (* Informant-induced restart may specify the saved state
  * we should load from. *)

@@ -1,13 +1,14 @@
 module Types = struct
   exception Malformed_result
 
-  type hg_rev = string
+  type hg_rev = string [@@deriving show]
 
-  type global_rev = int
+  type global_rev = int [@@deriving show]
 
   type rev =
     | Hg_rev of hg_rev
     | Global_rev of global_rev
+  [@@deriving show]
 
   module Rev_comparator = struct
     type t = rev

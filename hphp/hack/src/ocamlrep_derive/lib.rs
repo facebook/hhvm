@@ -191,10 +191,12 @@ fn enum_from_ocamlrep(variants: EnumVariants<'_>) -> TokenStream {
     let mut block_arms = TokenStream::new();
     for (variant, tag) in block_variants.iter() {
         let tag = *tag as u8;
-        let size = variant.bindings().len();
-        let constructor = match get_boxed_tuple_len(variant) {
-            None => variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? }),
-            Some(len) => boxed_tuple_variant_constructor(variant, len),
+        let (size, constructor) = match get_boxed_tuple_len(variant) {
+            None => (
+                variant.bindings().len(),
+                variant.construct(|_, i| quote! { ::ocamlrep::from::field(block, #i)? }),
+            ),
+            Some(len) => (len, boxed_tuple_variant_constructor(variant, len)),
         };
         block_arms.extend(quote! { #tag => {
             ::ocamlrep::from::expect_block_size(block, #size)?;

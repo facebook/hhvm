@@ -142,12 +142,13 @@ fn bad_value_in_wrapper_struct() {
     assert_eq!(err, ExpectedBool(42))
 }
 
-#[derive(FromOcamlRep, ToOcamlRep)]
+#[derive(Debug, PartialEq, FromOcamlRep, ToOcamlRep)]
 enum Fruit {
     Apple,
     Orange(bool),
     Pear { is_tasty: bool },
     Kiwi,
+    Peach(Box<(isize, bool)>),
 }
 
 #[test]
@@ -162,7 +163,7 @@ fn block_variant_tag_out_of_range() {
     let arena = Arena::new();
     let value = arena.block_with_size_and_tag(1, 42).build();
     let err = Fruit::from_ocamlrep(value).err().unwrap();
-    assert_eq!(err, BlockTagOutOfRange { max: 1, actual: 42 });
+    assert_eq!(err, BlockTagOutOfRange { max: 2, actual: 42 });
 }
 
 #[test]
@@ -201,4 +202,17 @@ fn bad_struct_variant_value() {
     };
     let err = Fruit::from_ocamlrep(pear).err().unwrap();
     assert_eq!(err, ErrorInField(0, Box::new(ExpectedBool(42))));
+}
+
+#[test]
+fn good_boxed_tuple_variant() {
+    let arena = Arena::new();
+    let peach = {
+        let mut peach = arena.block_with_size_and_tag(2, 2);
+        Arena::set_field(&mut peach, 0, Value::int(42));
+        Arena::set_field(&mut peach, 1, Value::int(1));
+        peach.build()
+    };
+    let peach = Fruit::from_ocamlrep(peach);
+    assert_eq!(peach, Ok(Fruit::Peach(Box::new((42, true)))));
 }

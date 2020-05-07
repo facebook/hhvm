@@ -6,6 +6,7 @@ module TUtils = Typing_utils
 type result =
   | Ignore
   | Expand of (Reason.t * (Pos.t * string))
+  | DepPu of locl_ty
 
 (* Make new_ty (a type variable representing a pocket universe dependent type)
  * equal to ty:@name (where ty can be a Tgeneric, or an atom).
@@ -14,6 +15,7 @@ type result =
  *)
 let make_pocket_universes_type_equal
     env new_ty (ty : internal_type) base enum name ~on_error =
+  let error = Errors.type_constant_mismatch on_error in
   let rec make_equal env ty =
     match ty with
     | LoclType lty ->
@@ -21,6 +23,9 @@ let make_pocket_universes_type_equal
         match deref lty with
         | (r, Tprim (Aast_defs.Tatom atom)) ->
           Expand (r, (Reason.to_pos r, atom))
+        | (r, Tgeneric s) ->
+          let p = Reason.to_pos r in
+          DepPu (mk (r, Tpu_type_access ((p, s), name)))
         | _ -> Ignore
       in
       (match result with
@@ -29,7 +34,10 @@ let make_pocket_universes_type_equal
         let (env, pu_ty) =
           TUtils.expand_pocket_universes env reason base enum member name
         in
-        let error = Errors.type_constant_mismatch on_error in
+        let env = TUtils.sub_type env pu_ty new_ty error in
+        let env = TUtils.sub_type env new_ty pu_ty error in
+        env
+      | DepPu pu_ty ->
         let env = TUtils.sub_type env pu_ty new_ty error in
         let env = TUtils.sub_type env new_ty pu_ty error in
         env)

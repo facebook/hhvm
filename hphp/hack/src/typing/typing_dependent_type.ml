@@ -110,6 +110,7 @@ module ExprDepTy = struct
           (env, ty)
         else
           apply env ty
+      | (_, Tpu _) -> apply env ty
       | (r, Toption ty) ->
         let (env, ty) = make env ty in
         (env, mk (r, Toption ty))
@@ -127,7 +128,7 @@ module ExprDepTy = struct
       | ( _,
           ( Tobject | Tnonnull | Tprim _ | Tshape _ | Ttuple _ | Tdynamic
           | Tvarray _ | Tdarray _ | Tvarray_or_darray _ | Tfun _ | Tany _
-          | Tvar _ | Terr | Tpu _ | Tpu_type_access _ ) ) ->
+          | Tvar _ | Terr | Tpu_type_access _ ) ) ->
         (env, ty)
     in
     make env ty

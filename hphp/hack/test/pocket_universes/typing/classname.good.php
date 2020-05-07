@@ -14,14 +14,12 @@ abstract class Base {
 }
 
 final class C<TBase as Base> {
-  public function __construct(
-    private classname<TBase> $classdef,
-  ){}
+  public function __construct(private classname<TBase> $classdef) {}
 
   public final function set<TP as TBase:@Param>(TP $param, TP:@T $_): this {
     $cname = $this->classdef;
     $key = $cname::get($param);
-    echo $key. "\n";
+    echo $key."\n";
     return $this;
   }
 }

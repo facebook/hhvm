@@ -23,7 +23,6 @@ function bad2<TP as C:@E, TR>(TP $x) : TR where TR = nothing {
   return C:@E::value($x);
 }
 
-/* should not be accepted: Type hole at the moment */
-/* function bad2(C:@E $x) : nothing { */
-/*   return C:@E::value($x); */
-/* } */
+function bad3(C:@E $x): nothing {
+  return C:@E::value($x);
+}

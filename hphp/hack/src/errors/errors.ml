@@ -4131,11 +4131,12 @@ let mutable_return_result_mismatch
           m1 );
     ]
 
-let pu_expansion pos =
+let pu_expansion pos ty name =
+  let ty = strip_ns ty in
   add
     (Typing.err_code Typing.PocketUniversesExpansion)
     pos
-    "[PocketUniverses] Type expansion is not supported."
+    (sprintf "Cannot project type %s from %s." name ty)
 
 let pu_typing pos kind msg =
   add

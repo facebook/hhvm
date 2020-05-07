@@ -52,7 +52,7 @@ let reduce_pu_type_access env base enum atom name =
      expect_int(f(:@I));
    }
 *)
-let expand_pocket_universes env reason (base : locl_ty) enum member ty =
+let expand_atom env reason (base : locl_ty) enum member tyname =
   let (_, member) = member in
   let (env, member) =
     let (env, res) = TUtils.class_get_pu_member env base (snd enum) member in
@@ -65,7 +65,7 @@ let expand_pocket_universes env reason (base : locl_ty) enum member ty =
       Errors.pu_localize
         (Reason.to_pos reason)
         (Printf.sprintf "%s:@%s" (Typing_print.debug env base) (snd enum))
-        (Printf.sprintf "%s:@%s" member (snd ty));
+        (Printf.sprintf "%s:@%s" member (snd tyname));
       (env, TUtils.terr env reason)
     )
   in
@@ -74,8 +74,43 @@ let expand_pocket_universes env reason (base : locl_ty) enum member ty =
    *)
   match deref member with
   | (_, Tprim (Aast_defs.Tatom atom)) ->
-    reduce_pu_type_access env base enum atom ty
+    reduce_pu_type_access env base enum atom tyname
   | _ -> (env, Typing_utils.terr env reason)
+
+(* In the context of the PU base:@enum, we are trying to expand the type
+ * projection ty:@tyname
+ *)
+let expand_pocket_universes env base enum (ty : locl_ty) tyname =
+  let apply env r gen tyname =
+    let p = Reason.to_pos r in
+    (env, Some (mk (r, Tpu_type_access ((p, gen), tyname))))
+  in
+  let error env r =
+    let pos = Reason.to_pos r in
+    Errors.pu_expansion pos (Typing_print.debug env ty) (snd tyname);
+    (env, Some (TUtils.terr env r))
+  in
+  let (env, ty) = Env.expand_type env ty in
+  match deref ty with
+  | (r, Tprim (Aast_defs.Tatom atom)) ->
+    let member = (Reason.to_pos r, atom) in
+    let (env, ty) = expand_atom env r base enum member tyname in
+    (env, Some ty)
+  | (r, Tgeneric s) -> apply env r s tyname
+  | (r, Tdependent (dep_ty, lty)) ->
+    let (env, lty) = Env.expand_type env lty in
+    (match deref lty with
+    | (_, Tpu _) ->
+      let gen = DependentKind.to_string dep_ty in
+      apply env r gen tyname
+    | (_, Tgeneric gen) -> apply env r gen tyname
+    | _ -> error env r)
+  | (_, Tpu _) ->
+    (* Non dependent Tpu can/will happen because it is used as upperbounds
+     * for PU generics. These occurences should be ignored
+     *)
+    (env, None)
+  | (r, _) -> error env r
 
 (*****************************************************************************)
 (* Exporting *)

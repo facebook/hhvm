@@ -105,13 +105,7 @@ let (expand_typeconst_ref : expand_typeconst ref) =
 let expand_typeconst x = !expand_typeconst_ref x
 
 type expand_pocket_universes =
-  env ->
-  Reason.t ->
-  locl_ty ->
-  Aast.sid ->
-  Aast.sid ->
-  Aast.sid ->
-  env * locl_ty
+  env -> locl_ty -> Aast.sid -> locl_ty -> Aast.sid -> env * locl_ty option
 
 let (expand_pocket_universes_ref : expand_pocket_universes ref) =
   ref (not_implemented "expand_pocket_universes")

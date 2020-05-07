@@ -996,7 +996,7 @@ val mutable_methods_must_be_reactive : Pos.t -> string -> unit
 val mutable_return_annotated_decls_must_be_reactive :
   string -> Pos.t -> string -> unit
 
-val pu_expansion : Pos.t -> unit
+val pu_expansion : Pos.t -> string -> string -> unit
 
 val pu_typing : Pos.t -> string -> string -> unit
 

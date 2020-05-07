@@ -136,7 +136,7 @@ final class TypecheckResult implements \JsonSerializable {
   public function __construct(
     private TypecheckStatus $status,
     private ?string $error,
-    private ?array $rawResult = null
+    private ?varray_or_darray $rawResult = null
   ) {}
 
   public function getStatus(): TypecheckStatus {

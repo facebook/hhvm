@@ -122,9 +122,9 @@ Array HHVM_FUNCTION(mailparse_rfc822_parse_addresses,
     php_mailparse_rfc822_tokenize(addresses.data(), 1);
   php_rfc822_addresses_t *addrs = php_rfc822_parse_address_tokens(toks);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int i = 0; i < addrs->naddrs; i++) {
-    Array item = Array::Create();
+    Array item = Array::CreateDArray();
     if (addrs->addrs[i].name) {
       item.set(s_display, String(addrs->addrs[i].name, CopyString));
     }

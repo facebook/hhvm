@@ -28,6 +28,12 @@ let get_type_from_hint ctx h =
   let decl_env = { mode; droot = None; ctx } in
   Typing_print.full_decl ctx (Decl_hint.hint decl_env h)
 
+(* Convert ContainerName<TParam> to ContainerName *)
+let strip_tparams name =
+  match String.index name '<' with
+  | None -> name
+  | Some i -> String.sub name 0 i
+
 let rec find_fid fid_list pred =
   match fid_list with
   | [] -> None

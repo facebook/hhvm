@@ -50,7 +50,7 @@ let add_container_defn_fact ctx clss decl_id member_decls progress =
         | [] -> (req_class_fields, progress)
         | [parent] ->
           let (decl_id, prog) =
-            let parent_clss = get_type_from_hint ctx parent in
+            let parent_clss = strip_tparams (get_type_from_hint ctx parent) in
             add_container_decl_fact ClassDeclaration parent_clss progress
           in
           (("extends_", build_id_json decl_id) :: req_class_fields, prog)

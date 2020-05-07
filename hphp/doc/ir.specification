@@ -2963,9 +2963,9 @@ fields of that struct for holding intermediate values.
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is an
   array and the key S1 is an int/str.
 
-| ElemMixedArrayK<pos>, D(LvalToElemInitCell), S(AK(Mixed)) S(Int,Str), NF
+| ElemMixedArrayK, D(LvalToElemInitCell), S(AK(Mixed)) S(Int,Str) S(Int), NF
 
-  Returns an lval to the element of MixedArray S0 at the known position S1.
+  Returns an lval to the element of MixedArray S0 at the known position S2 in S1.
 
 | ElemVecD, D(LvalToElemInitCell), S(LvalToVec) S(Int), MElem
 
@@ -2982,18 +2982,18 @@ fields of that struct for holding intermediate values.
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is a
   dict and the key S1 is an int/str.
 
-| ElemDictK<pos>, D(LvalToElemInitCell), S(Dict) S(Int,Str), NF
+| ElemDictK, D(LvalToElemInitCell), S(Dict) S(Int,Str) S(Int), NF
 
-  Returns an lval to the element of dict S0 at the known position S1.
+  Returns an lval to the element of dict S0 at the known position S2 in S1.
 
 | ElemKeysetU, D(LvalToMembInitCell), S(LvalToKeyset) S(Int,Str), MElem
 
   Similar to ElemUX, but specialized for when the base S0 is a keyset and the
   key S1 is an int/str. Keysets do not support the define syntax.
 
-| ElemKeysetK<pos>, D(LvalToElemInitCell), S(Keyset) S(Int,Str), NF
+| ElemKeysetK, D(LvalToElemInitCell), S(Keyset) S(Int,Str) S(Int), NF
 
-  Returns an lval to the element of keyset S0 at the known position S1.
+  Returns an lval to the element of keyset S0 at the known position S2 in S1.
 
 | ElemDX, D(LvalToMembCell), S(LvalToCell) S(Cell), MElem
 
@@ -3009,9 +3009,9 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| MixedArrayGetK<pos>, DArrElem, S(AK(Mixed)) S(Int,Str), NF
+| MixedArrayGetK, DArrElem, S(AK(Mixed)) S(Int,Str) S(Int), NF
 
-  Like ArrayGet, but the element for S1 is at a known position `pos' in S0.
+  Like ArrayGet, but the element for S1 is at a known position S2 in S0.
 
 | DictGet, DDictElem, S(Dict) S(Int,Str), NF
 
@@ -3022,9 +3022,9 @@ fields of that struct for holding intermediate values.
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| DictGetK<pos>, DDictElem, S(Dict) S(Int,Str), NF
+| DictGetK, DDictElem, S(Dict) S(Int,Str) S(Int), NF
 
-  Like DictGet, but the element for S1 is at a known position `pos' in S0.
+  Like DictGet, but the element for S1 is at a known position S2 in S0.
 
 | KeysetGet, DKeysetElem, S(Keyset) S(Int,Str), NF
 
@@ -3035,9 +3035,9 @@ fields of that struct for holding intermediate values.
   Get element with key S1 from base S0, returning null if the element is not
   present.
 
-| KeysetGetK<pos>, DKeysetElem, S(Keyset) S(Int,Str), NF
+| KeysetGetK, DKeysetElem, S(Keyset) S(Int,Str) S(Int), NF
 
-  Like KeysetGet, but the element for S1 is at a known position `pos' in S0.
+  Like KeysetGet, but the element for S1 is at a known position S2 in S0.
 
 | StringGet, D(StaticStr), S(Str) S(Int), PRc
 

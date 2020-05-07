@@ -3006,13 +3006,13 @@ namespace {
 
 SSATmp* arrGetKImpl(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
-  auto const& extra = inst->extra<IndexData>();
-
-  assertx(validPos(ssize_t(extra->index)));
+  if (!inst->src(2)->hasConstVal(TInt)) return nullptr;
+  auto const pos = inst->src(2)->intVal();
+  assertx(validPos(ssize_t(pos)));
   if (!arr->hasConstVal()) return nullptr;
 
   auto const mixed = MixedArray::asMixed(arr->arrLikeVal());
-  auto const tv = mixed->getArrayElmPtr(extra->index);
+  auto const tv = mixed->getArrayElmPtr(pos);
 
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.
@@ -3184,13 +3184,14 @@ SSATmp* simplifyDictGetK(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyKeysetGetK(State& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
-  auto const& extra = inst->extra<IndexData>();
+  if (!inst->src(2)->hasConstVal(TInt)) return nullptr;
+  auto const pos = inst->src(2)->intVal();
 
-  assertx(validPos(ssize_t(extra->index)));
+  assertx(validPos(ssize_t(pos)));
   if (!arr->hasConstVal()) return nullptr;
 
   auto const set = SetArray::asSet(arr->keysetVal());
-  auto const tv = set->tvOfPos(extra->index);
+  auto const tv = set->tvOfPos(pos);
 
   // The array doesn't contain a valid element at that offset. Since this
   // instruction should be guarded by a check, this (should be) unreachable.

@@ -478,7 +478,8 @@ void cgCheckKeysetOffset(IRLS& env, const IRInstruction* inst) {
   auto const branch = label(env, inst->taken());
   auto const pos = inst->extra<CheckKeysetOffset>()->index;
   auto& v = vmain(env);
-  auto const tvOff = SetArray::tvOff(pos);
+  auto const tvOff =
+    pos * (int) sizeof(SetArray::Elm) + SetArray::dataOff() + SetArray::tvOff();
 
   { // Fail if our predicted position exceeds bounds.
     auto const sf = v.makeReg();
@@ -624,7 +625,29 @@ void implArrayGet(IRLS& env, const IRInstruction* inst, MOpMode mode) {
                SyncOptions::Sync, argGroup(env, inst).ssa(0).ssa(1));
 }
 
+VscaledDisp getMixedLayoutOffset(IRLS& env, const IRInstruction* inst) {
+  auto const pos = srcLoc(env, inst, 2).reg();
+  auto& v = vmain(env);
+  // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 24
+  // So let's use (3 * pos) * 8 to get sizeof(MixedArray::Elm) * pos
+  auto pos3 = v.makeReg();
+  v << lea{pos[pos * 2], pos3};
+  static_assert(sizeof(MixedArray::Elm) == 24);
+  return pos3 * 8 + MixedArray::dataOff() + MixedArray::Elm::dataOff();
 }
+
+VscaledDisp getSetArrayLayoutOffset(IRLS& env, const IRInstruction* inst) {
+  auto const pos = srcLoc(env, inst, 2).reg();
+  auto& v = vmain(env);
+  // We want to index by MixedArray::Elm but VScaled doesn't let us scale by 16
+  // So let's use (2 * pos) * 8 to get sizeof(SetArray::Elm) * pos
+  auto pos2 = v.makeReg();
+  v << lea{pos[pos], pos2};
+  static_assert(sizeof(SetArray::Elm) == 16);
+  return pos2 * 8 + SetArray::dataOff() + SetArray::tvOff();
+}
+
+} // namespace
 
 void cgElemArrayD(IRLS& env, const IRInstruction* inst) {
   BUILD_OPTAB(ELEM_ARRAY_D_HELPER_TABLE, getKeyType(inst->src(1)));
@@ -645,10 +668,9 @@ void cgElemArrayU(IRLS& env, const IRInstruction* inst) {
 void cgElemMixedArrayK(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
-  auto const pos = inst->extra<ElemMixedArrayK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
 
   auto& v = vmain(env);
+  auto const off = getMixedLayoutOffset(env, inst);
 
   v << lea{arr[off], dst.reg(tv_lval::val_idx)};
   if (wide_tv_val) {
@@ -760,11 +782,8 @@ void cgEqPtrIter(IRLS& env, const IRInstruction* inst) {
 
 void cgMixedArrayGetK(IRLS& env, const IRInstruction* inst) {
   auto const arr = srcLoc(env, inst, 0).reg();
-  auto const pos = inst->extra<MixedArrayGetK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
-
-  auto& v = vmain(env);
-  loadTV(v, inst->dst(0), dstLoc(env, inst, 0), arr[off]);
+  auto const off = getMixedLayoutOffset(env, inst);
+  loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), arr[off]);
 }
 
 void cgArraySet(IRLS& env, const IRInstruction* inst) {
@@ -1136,10 +1155,9 @@ void cgElemDictU(IRLS& env, const IRInstruction* inst) {
 void cgElemDictK(IRLS& env, const IRInstruction* inst) {
   auto const dict = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
-  auto const pos = inst->extra<ElemDictK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
 
   auto& v = vmain(env);
+  auto const off = getMixedLayoutOffset(env, inst);
 
   v << lea{dict[off], dst.reg(tv_lval::val_idx)};
   if (wide_tv_val) {
@@ -1157,11 +1175,8 @@ void cgDictGetQuiet(IRLS& env, const IRInstruction* inst) {
 
 void cgDictGetK(IRLS& env, const IRInstruction* inst) {
   auto const dict = srcLoc(env, inst, 0).reg();
-  auto const pos = inst->extra<DictGetK>()->index;
-  auto const off = MixedArray::elmOff(pos) + MixedArray::Elm::dataOff();
-
-  auto& v = vmain(env);
-  loadTV(v, inst->dst(0), dstLoc(env, inst, 0), dict[off]);
+  auto const off = getMixedLayoutOffset(env, inst);
+  loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), dict[off]);
 }
 
 void cgDictSet(IRLS& env, const IRInstruction* i)    { implDictSet(env, i); }
@@ -1229,10 +1244,9 @@ void cgElemKeysetU(IRLS& env, const IRInstruction* inst) {
 void cgElemKeysetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0);
-  auto const pos = inst->extra<ElemKeysetK>()->index;
-  auto const off = SetArray::tvOff(pos);
 
   auto& v = vmain(env);
+  auto const off = getSetArrayLayoutOffset(env, inst);
   v << lea{keyset[off], dst.reg(tv_lval::val_idx)};
   if (wide_tv_val) {
     static_assert(TVOFF(m_data) == 0, "");
@@ -1249,11 +1263,8 @@ void cgKeysetGetQuiet(IRLS& env, const IRInstruction* inst) {
 
 void cgKeysetGetK(IRLS& env, const IRInstruction* inst) {
   auto const keyset = srcLoc(env, inst, 0).reg();
-  auto const pos = inst->extra<KeysetGetK>()->index;
-  auto const off = SetArray::tvOff(pos);
-
-  auto& v = vmain(env);
-  loadTV(v, inst->dst(0), dstLoc(env, inst, 0), keyset[off]);
+  auto const off = getSetArrayLayoutOffset(env, inst);
+  loadTV(vmain(env), inst->dst(0), dstLoc(env, inst, 0), keyset[off]);
 }
 
 void cgSetNewElemKeyset(IRLS& env, const IRInstruction* inst) {

@@ -71,7 +71,7 @@ void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
  *
  * The callback function signatures should be:
  *
- *    SSATmp* direct (SSATmp* key, uint32_t pos);
+ *    SSATmp* direct (SSATmp* arr, SSATmp* key, SSATmp* pos);
  *    SSATmp* missing(SSATmp* key);
  *    SSATmp* generic(SSATmp* key, SizeHintData data);
  */
@@ -178,7 +178,9 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
         if (cow_check) gen(env, CheckArrayCOW, taken, marr);
         return marr;
       },
-      [&] (SSATmp* tmp) { return direct(tmp, key,result.offset.second); },
+      [&] (SSATmp* tmp) {
+        return direct(tmp, key, cns(env, result.offset.second));
+      },
       [&] {
         hint(env, Block::Hint::Unlikely);
         // NOTE: We could pass result.size_hint here, but that's the size hint

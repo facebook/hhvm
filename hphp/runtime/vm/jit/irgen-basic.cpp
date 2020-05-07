@@ -87,13 +87,11 @@ void emitClassGetTS(IRGS& env) {
 
   auto const clsName = profiledArrayAccess(
     env, ts, cns(env, s_classname.get()), MOpMode::Warn,
-    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
+    [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
       return gen(
         env,
-        RuntimeOption::EvalHackArrDVArrs
-          ? DictGetK
-          : MixedArrayGetK,
-        IndexData { pos }, base, key
+        RO::EvalHackArrDVArrs ? DictGetK : MixedArrayGetK,
+        base, key, pos
       );
     },
     [&] (SSATmp* key) {

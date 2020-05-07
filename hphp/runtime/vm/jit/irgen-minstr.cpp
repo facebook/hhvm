@@ -691,9 +691,8 @@ SSATmp* emitDictKeysetGet(IRGS& env, SSATmp* base, SSATmp* key,
   auto const mode = quiet ? MOpMode::None : MOpMode::Warn;
   auto const elem = profiledArrayAccess(
     env, base, key, mode,
-    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
-      return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
-                 base, key);
+    [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
+      return gen(env, is_dict ? DictGetK : KeysetGetK, base, key, pos);
     },
     [&] (SSATmp* key) {
       if (quiet) return cns(env, TInitNull);
@@ -720,8 +719,8 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
                      Finish finish) {
   auto const elem = profiledArrayAccess(
     env, base, key, mode,
-    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
-      return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
+    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
+      return gen(env, MixedArrayGetK, arr, key, pos);
     },
     [&] (SSATmp* key) {
       if (mode == MOpMode::None) return cns(env, TInitNull);
@@ -1251,8 +1250,8 @@ SSATmp* dictElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   return profiledArrayAccess(
     env, base, key, mode,
-    [&] (SSATmp* dict, SSATmp* key, uint32_t pos) {
-      return gen(env, ElemDictK, IndexData { pos }, dict, key);
+    [&] (SSATmp* dict, SSATmp* key, SSATmp* pos) {
+      return gen(env, ElemDictK, dict, key, pos);
     },
     [&] (SSATmp* key) {
       if (unset || mode == MOpMode::None) return ptrToInitNull(env);
@@ -1300,8 +1299,8 @@ SSATmp* keysetElemImpl(IRGS& env, MOpMode mode, Type baseType, SSATmp* key) {
 
   return profiledArrayAccess(
     env, base, key, mode,
-    [&] (SSATmp* keyset, SSATmp* key, uint32_t pos) {
-      return gen(env, ElemKeysetK, IndexData { pos }, keyset, key);
+    [&] (SSATmp* keyset, SSATmp* key, SSATmp* pos) {
+      return gen(env, ElemKeysetK, keyset, key, pos);
     },
     [&] (SSATmp* key) {
       if (mode == MOpMode::None) return ptrToInitNull(env);
@@ -1342,8 +1341,8 @@ SSATmp* elemImpl(IRGS& env, MOpMode mode, SSATmp* key) {
 
     return profiledArrayAccess(
       env, base, key, mode,
-      [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
-        return gen(env, ElemMixedArrayK, IndexData { pos }, arr, key);
+      [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
+        return gen(env, ElemMixedArrayK, arr, key, pos);
       },
       [&] (SSATmp* key) {
         if (unset || mode == MOpMode::None) return ptrToInitNull(env);

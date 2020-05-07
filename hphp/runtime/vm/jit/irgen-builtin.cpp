@@ -1002,9 +1002,9 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   env.irb->fs().incBCSPDepth(nparams);
   auto const elm = profiledArrayAccess(
     env, arr, key, MOpMode::None,
-    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
+    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
       auto const op = is_dict ? DictGetK : MixedArrayGetK;
-      return gen(env, op, IndexData { pos }, arr, key);
+      return gen(env, op, arr, key, pos);
     },
     [&] (SSATmp*) { return def; },
     [&] (SSATmp* key, SizeHintData data) {
@@ -2318,8 +2318,8 @@ void implArrayIdx(IRGS& env) {
 
   auto const elem = profiledArrayAccess(
     env, base, key, MOpMode::None,
-    [&] (SSATmp* arr, SSATmp* key, uint32_t pos) {
-      return gen(env, MixedArrayGetK, IndexData { pos }, arr, key);
+    [&] (SSATmp* arr, SSATmp* key, SSATmp* pos) {
+      return gen(env, MixedArrayGetK, arr, key, pos);
     },
     [&] (SSATmp*) { return def; },
     [&] (SSATmp* key, SizeHintData data) {
@@ -2416,9 +2416,8 @@ void implDictKeysetIdx(IRGS& env,
 
   auto const elem = profiledArrayAccess(
     env, use_base, key, MOpMode::None,
-    [&] (SSATmp* base, SSATmp* key, uint32_t pos) {
-      return gen(env, is_dict ? DictGetK : KeysetGetK, IndexData { pos },
-                 base, key);
+    [&] (SSATmp* base, SSATmp* key, SSATmp* pos) {
+      return gen(env, is_dict ? DictGetK : KeysetGetK, base, key, pos);
     },
     [&] (SSATmp*) { return def; },
     [&] (SSATmp* key, SizeHintData data) {

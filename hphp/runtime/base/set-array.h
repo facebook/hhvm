@@ -338,8 +338,8 @@ public:
 //////////////////////////////////////////////////////////////////////
 // JIT Supporting Routines
 
-  static constexpr ptrdiff_t tvOff(uint32_t pos) {
-    return dataOff() + pos * sizeof(Elm) + offsetof(Elm, tv);
+  static constexpr ptrdiff_t tvOff() {
+    return offsetof(Elm, tv);
   }
 
 //////////////////////////////////////////////////////////////////////

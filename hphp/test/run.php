@@ -41,6 +41,13 @@ function test_dir(): string {
   return __DIR__;
 }
 
+// In many places in this file, we use a strings for a single command and a
+// varray of strings for multiple commands. Our logic actually depends on
+// this behavior in complicated ways. Coerce such a value to a varray.
+function to_varray($x): varray {
+  return is_array($x) ? $x : varray[$x];
+}
+
 function get_expect_file_and_type($test, $options) {
   // .typechecker files are for typechecker (hh_server --check) test runs.
   $types = null;
@@ -744,7 +751,7 @@ function exec_find(mixed $files, string $extra): mixed {
   return $results;
 }
 
-function find_tests($files, array $options = null) {
+function find_tests($files, darray $options = null) {
   if (!$files) {
     $files = varray['quick'];
   }
@@ -927,7 +934,7 @@ function extra_args($options): string {
 }
 
 function hhvm_cmd_impl($options, $config, $autoload_db_prefix, ...$extra_args) {
-  $modes = (array)mode_cmd($options);
+  $modes = to_varray(mode_cmd($options));
 
   $cmds = varray[];
   foreach ($modes as $mode_num => $mode) {
@@ -2642,14 +2649,14 @@ function run_test($options, $test) {
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
   if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/',
-                (array)$hhvm)) {
+                to_varray($hhvm))) {
     // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
     // this can't work so skip the test
     return 'skip-count';
   } else if (isset($options['jit-serialize'])) {
     // jit-serialize adds the --count option later, so even 1 --count in the
     // command means we have to skip
-    if (preg_grep('/ --count[ =][0-9]+( |$)/', (array)$hhvm)) {
+    if (preg_grep('/ --count[ =][0-9]+( |$)/', to_varray($hhvm))) {
       return 'skip-count';
     }
   }
@@ -2788,7 +2795,7 @@ function print_commands($tests, $options) {
       list($command, $_) = hhvm_cmd($options, $test);
     }
     if (!isset($options['repo'])) {
-      foreach ((array)$command as $c) {
+      foreach (to_varray($command) as $c) {
         print "$c\n";
       }
       continue;
@@ -2801,14 +2808,14 @@ function print_commands($tests, $options) {
       $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if (isset($options['hhbbc2'])) {
-        foreach ((array)$command as $c) {
+        foreach (to_varray($command) as $c) {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
         }
         $hhbbc_cmds .=
           "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
-        foreach ((array)$command as $c) {
+        foreach (to_varray($command) as $c) {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
         }
@@ -2821,7 +2828,7 @@ function print_commands($tests, $options) {
         jit_serialize_option($command, $test, $options, true) . "\n";
       $command = jit_serialize_option($command, $test, $options, false);
     }
-    foreach ((array)$command as $c) {
+    foreach (to_varray($command) as $c) {
       $hhbbc_cmds .= $c."\n";
     }
     print "$hhbbc_cmds\n";

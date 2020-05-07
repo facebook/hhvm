@@ -346,7 +346,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       targetType = tc.underlyingDataType();
     }
 
-    auto raise_type_error = [&]{
+    auto const raise_type_error = [&]{
       auto const expected_type = [&]{
         if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
           if (tc.isVArray()) return "varray";

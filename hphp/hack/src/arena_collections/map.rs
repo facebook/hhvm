@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cmp::{Ord, Ordering};
-
 use arena_trait::Arena;
+use std::cmp::{Ord, Ordering};
 
 /// The maximum height difference (or balance factor) that is allowed
 /// in the implementation of the AVL tree.
@@ -172,6 +171,12 @@ impl<'a, K: Clone + Ord, V: Clone> Map<'a, K, V> {
                 Ordering::Greater => bal(arena, *l, v.clone(), d.clone(), r.remove(arena, x)),
             },
         }
+    }
+
+    pub fn add_all<A: Arena>(self, arena: &'a A, other: Self) -> Self {
+        other
+            .iter()
+            .fold(self, |m, (k, v)| m.add(arena, k.clone(), v.clone()))
     }
 
     /// Find the minimal key-value entry.
@@ -366,7 +371,7 @@ impl<'a, K, V> Map<'a, K, V> {
     }
 }
 
-impl<'a, K, V> IntoIterator for Map<'a, K, V> {
+impl<'a, K, V> IntoIterator for &Map<'a, K, V> {
     type Item = (&'a K, &'a V);
     type IntoIter = MapIter<'a, K, V>;
 

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::map::{Map, MapIter};
-
 use arena_trait::Arena;
 
 /// An arena-allocated map.
@@ -130,7 +129,7 @@ pub struct SetIter<'a, K> {
     iter: MapIter<'a, K, ()>,
 }
 
-impl<'a, K> IntoIterator for Set<'a, K> {
+impl<'a, K> IntoIterator for &Set<'a, K> {
     type Item = &'a K;
     type IntoIter = SetIter<'a, K>;
 

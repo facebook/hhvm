@@ -141,7 +141,7 @@ pub fn localize_ft<'a, 'b>(
             }
             let targ_tys = explicit_targs.iter().map(|targ| targ.0);
             let substs = subst::make_locl(env.bld(), ft.tparams.iter(), targ_tys);
-            ety_env.substs = substs // TODO(hrust) extend substs instead of replacing
+            ety_env.substs = ety_env.substs.add_all(env.bld().alloc, substs);
         }
         None => {
             // TODO(hrust)

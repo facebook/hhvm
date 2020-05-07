@@ -7,6 +7,7 @@ use bumpalo::collections::Vec as BVec;
 use oxidized::pos::Pos;
 use typing_collections_rust::SMap;
 
+#[derive(Debug)]
 pub struct ExpandEnv<'a> {
     /// A list of the type defs and type access we have expanded thus far. Used
     /// to prevent entering into a cycle when expanding these types

@@ -673,8 +673,12 @@ bool simplify(Env& env, const addq& vadd, Vlabel b, size_t i) {
 // first, try to simplify lea (%r1), %r2 into copy %r1,%r2
 bool simplify(Env& env, const lea& vlea, Vlabel b, size_t i) {
   if (vlea.s.disp == 0 && !vlea.s.index.isValid() &&
-    arch() != Arch::ARM) {
+      arch() != Arch::ARM && vlea.s.base.isValid()) {
     env.unit.blocks[b].code[i] = copy{ vlea.s.base, vlea.d };
+    return true;
+  }
+  if (!vlea.s.index.isValid() && !vlea.s.base.isValid()) {
+    env.unit.blocks[b].code[i] = copy{env.unit.makeConst(vlea.s.disp), vlea.d };
     return true;
   }
   auto xinst = env.unit.blocks[b].code[i];

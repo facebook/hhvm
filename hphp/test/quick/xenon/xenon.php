@@ -5,7 +5,7 @@ include "xenonUtil.inc";
 // Test showing async stacks in Xenon.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 
@@ -71,7 +71,7 @@ $required_functions = varray[
 $optional_functions = varray[
   'include',
   'is_callable',
-  AwaitAllWaitHandle::class.'::fromArray',
+  AwaitAllWaitHandle::class.'::fromVec',
   RescheduleWaitHandle::class.'::create',
   Awaitable::class.'::result',
 ];

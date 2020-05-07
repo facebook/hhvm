@@ -313,7 +313,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   return implode("\n", $result);
 }
 
-function requestAll(array $requests, $customArgs = '', $repoArgs = '') {
+function requestAll(varray $requests, $customArgs = '', $repoArgs = '') {
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {

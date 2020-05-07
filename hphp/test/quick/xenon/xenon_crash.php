@@ -3,7 +3,7 @@
 // Testing that we don't crash due to xenon
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 

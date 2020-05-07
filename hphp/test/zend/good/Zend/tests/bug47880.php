@@ -2,7 +2,7 @@
 class bomb {
   static function go($n) {
    $backtrace = debug_backtrace(0);
-   $backtrace[1]['args'][1] = 'bomb';
+   $backtrace[1]['args'][] = 'bomb';
   }
 }
 <<__EntryPoint>> function main(): void {

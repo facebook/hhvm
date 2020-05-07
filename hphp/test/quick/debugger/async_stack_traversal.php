@@ -23,8 +23,8 @@ async function genBar($a) {
 async function genFoo($a) {
   $v1 = "v1-genFoo";
   $a++;
-  await AwaitAllWaitHandle::fromArray(
-    varray[
+  await AwaitAllWaitHandle::fromVec(
+    vec[
       genBar($a),
       gen2($a + 2),
       gen2($a + 3)

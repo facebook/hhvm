@@ -33,6 +33,7 @@ use hhas_pos_rust::Span;
 use hhas_program_rust::HhasProgram;
 use hhas_property_rust::HhasProperty;
 use hhas_record_def_rust::{Field, HhasRecord};
+use hhas_symbol_refs_rust::{HhasSymbolRefs, IncludePath};
 use hhas_type::{constraint, Info as HhasTypeInfo};
 use hhas_type_const::HhasTypeConstant;
 use hhas_typedef_rust::Typedef as HhasTypedef;
@@ -52,7 +53,9 @@ use regex::Regex;
 use runtime::TypedValue;
 use write::*;
 
-use std::{borrow::Cow, convert::TryInto, io::Write as _, write};
+use std::{
+    borrow::Cow, collections::BTreeSet, convert::TryInto, io::Write as _, path::Path, write,
+};
 
 pub mod context {
     use crate::write::*;
@@ -222,9 +225,107 @@ fn print_program_<W: Write>(
     print_file_attributes(ctx, w, &prog.file_attributes)?;
 
     if ctx.dump_symbol_refs() {
-        return not_impl!();
+        print_include_region(ctx, w, &prog.symbol_refs.includes)?;
+        print_symbol_ref_regions(ctx, w, &prog.symbol_refs)?;
     }
     Ok(())
+}
+
+fn print_include_region<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    includes: &BTreeSet<IncludePath>,
+) -> Result<(), W::Error> {
+    fn print_path<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
+        option(w, p.to_str(), |w, p: &str| write!(w, "\n  {}", p))
+    };
+    fn print_if_exists<W: Write>(w: &mut W, p: &Path) -> Result<(), W::Error> {
+        if p.exists() {
+            print_path(w, p)
+        } else {
+            Ok(())
+        }
+    };
+    fn print_include<W: Write>(
+        ctx: &mut Context,
+        w: &mut W,
+        inc: IncludePath,
+    ) -> Result<(), W::Error> {
+        let include_roots = ctx.emitter.options().hhvm.include_roots.get();
+        match inc.into_doc_root_relative(include_roots) {
+            IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p)),
+            IncludePath::SearchPathRelative(p) => {
+                let search_paths = ctx.emitter.options().server.include_search_paths.get();
+                if search_paths.is_empty() {
+                    let dirname = ctx
+                        .path
+                        .and_then(|p| p.path().parent())
+                        .unwrap_or(Path::new(""));
+                    print_if_exists(w, &dirname.join(&p))
+                } else {
+                    for prefix in search_paths.iter() {
+                        let path = Path::new(prefix).join(&p);
+                        if path.exists() {
+                            return print_path(w, &path);
+                        }
+                    }
+                    Ok(())
+                }
+            }
+            IncludePath::IncludeRootRelative(v, p) => {
+                if !p.is_empty() {
+                    include_roots
+                        .get(&v)
+                        .iter()
+                        .map(|ir| {
+                            let doc_root = ctx.emitter.options().doc_root.get();
+                            let resolved = Path::new(doc_root).join(ir).join(&p);
+                            print_if_exists(w, &resolved)
+                        })
+                        .collect::<Result<_, _>>()?
+                }
+                Ok(())
+            }
+            IncludePath::DocRootRelative(p) => {
+                let doc_root = ctx.emitter.options().doc_root.get();
+                let resolved = Path::new(doc_root).join(&p);
+                print_if_exists(w, &resolved)
+            }
+        }
+    };
+    if !includes.is_empty() {
+        w.write("\n.includes {")?;
+        for inc in includes.into_iter() {
+            // TODO(hrust): avoid clone. Rethink onwership of inc in
+            // hhas_symbol_refs_rust::IncludePath::into_doc_root_relative
+            print_include(ctx, w, inc.clone())?;
+        }
+        w.write("\n}\n")
+    } else {
+        Ok(())
+    }
+}
+
+fn print_symbol_ref_regions<W: Write>(
+    ctx: &mut Context,
+    w: &mut W,
+    symbol_refs: &HhasSymbolRefs,
+) -> Result<(), W::Error> {
+    let mut print_region = |name, refs: &BTreeSet<String>| {
+        if !refs.is_empty() {
+            write!(w, "\n.{}", name)?;
+            w.write(" {")?;
+            for s in refs.iter() {
+                write!(w, "\n  {}", s)?;
+            }
+            w.write("\n}\n")
+        } else {
+            Ok(())
+        }
+    };
+    print_region("constant_refs", &symbol_refs.constants)?;
+    print_region("function_refs", &symbol_refs.functions)?;
+    print_region("class_refs", &symbol_refs.classes)
 }
 
 fn print_adata_region<W: Write>(

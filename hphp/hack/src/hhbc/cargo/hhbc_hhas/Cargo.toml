@@ -27,6 +27,7 @@ hhas_pos_rust = { path = "../hhas_pos" }
 hhas_program_rust = { path = "../hhas_program" }
 hhas_property_rust = { path = "../hhas_property" }
 hhas_record_def_rust = { path = "../hhas_record_def" }
+hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
 hhas_type = { path = "../hhas_type" }
 hhas_type_const = { path = "../hhas_type_const" }
 hhas_typedef_rust = { path = "../hhas_typedef" }

@@ -496,7 +496,7 @@ pub fn emit_class<'a>(
                         "Interfaces cannot use traits",
                     )))
                 } else {
-                    Some(Ok(name.into()))
+                    Some(Ok(class::Type::from_ast_name(name)))
                 }
             }
             _ => None,

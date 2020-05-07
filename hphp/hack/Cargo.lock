@@ -1546,6 +1546,7 @@ dependencies = [
  "hhas_program_rust 0.0.0",
  "hhas_property_rust 0.0.0",
  "hhas_record_def_rust 0.0.0",
+ "hhas_symbol_refs_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhas_type_const 0.0.0",
  "hhas_typedef_rust 0.0.0",

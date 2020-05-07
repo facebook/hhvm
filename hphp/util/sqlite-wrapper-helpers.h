@@ -102,7 +102,7 @@ struct SQLiteStmt {
   SQLiteStmt& operator=(const SQLiteStmt&) = delete;
   void* operator new(size_t) = delete;
 
-  SQLiteStmt(SQLite& db, folly::StringPiece sql);  // throws(SQLiteExc)
+  SQLiteStmt(SQLite& db, const folly::StringPiece sql);  // throws(SQLiteExc)
 
   /**
    * Return a query object to run this statement.

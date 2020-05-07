@@ -302,11 +302,11 @@ folly::StringPiece SQLiteStmt::sql() const noexcept {
 #endif
 }
 
-SQLiteStmt::SQLiteStmt(SQLite& db, folly::StringPiece sql) {
+SQLiteStmt::SQLiteStmt(SQLite& db, const folly::StringPiece sql) {
   int rc =
       sqlite3_prepare_v2(db.m_dbc, sql.data(), sql.size(), &m_stmt, nullptr);
   if (rc) {
-    throw SQLiteExc{rc, ""};
+    throw SQLiteExc{rc, sql.str()};
   }
   assertx(m_stmt != nullptr);
 }

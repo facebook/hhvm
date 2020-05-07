@@ -386,7 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Soft(&'a Node_<'a>),
     Closure(&'a ClosureTypeHint<'a>),
 }
 
@@ -939,15 +938,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
-                    }
-                    HintValue::Soft(&hint) => {
-                        // Use the pos from the Soft node (above, when we
-                        // construct `reason`) so that we include the position
-                        // of the attribute list, but throw away the knowledge
-                        // that we had a soft type specifier here (the
-                        // typechecker does not use it)
-                        let Ty(_, &ty_) = self.node_to_ty(hint)?;
-                        ty_
                     }
                     HintValue::Closure(hint) => {
                         let mut params = Vec::new_in(self.state.arena);
@@ -3397,14 +3387,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_soft_type_specifier(&mut self, at_token: Self::R, hint: Self::R) -> Self::R {
         let hint = hint?;
         let hint_pos = hint.get_pos(self.state.arena)?;
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Soft(self.alloc(hint)),
+        // Use the type of the hint as-is (i.e., throw away the knowledge that
+        // we had a soft type specifier here--the typechecker does not use it).
+        // Replace its Reason with one including the position of the `@` token.
+        Ok(self.hint_ty(
             Pos::merge(
                 self.state.arena,
                 at_token?.get_pos(self.state.arena)?,
                 hint_pos,
             )?,
-        ))))
+            *self.node_to_ty(hint)?.1,
+        ))
     }
 
     // A type specifier preceded by an attribute list. At the time of writing,
@@ -3422,10 +3415,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let attributes_pos = Pos::merge(self.state.arena, *ltlt_pos, *gtgt_pos)?;
                 let hint = hint?;
                 let hint_pos = hint.get_pos(self.state.arena)?;
-                return Ok(Node_::Hint(self.alloc((
-                    HintValue::Soft(self.alloc(hint)),
+                // Use the type of the hint as-is (i.e., throw away the
+                // knowledge that we had a soft type specifier here--the
+                // typechecker does not use it). Replace its Reason with one
+                // including the position of the attribute list.
+                return Ok(self.hint_ty(
                     Pos::merge(self.state.arena, attributes_pos, hint_pos)?,
-                ))));
+                    *self.node_to_ty(hint)?.1,
+                ));
             }
             _ => (),
         }

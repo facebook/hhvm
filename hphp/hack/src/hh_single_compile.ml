@@ -36,8 +36,10 @@ type options = {
   extract_facts: bool;
   log_stats: bool;
   for_debugger_eval: bool;
+  (* below are used during Rust porting *)
   disable_toplevel_elaboration: bool;
   rust_emitter: bool;
+  include_header: bool;
 }
 
 type message_handler = Hh_json.json -> string -> unit
@@ -111,6 +113,7 @@ let parse_options () =
   let for_debugger_eval = ref false in
   let disable_toplevel_elaboration = ref false in
   let rust_emitter = ref false in
+  let include_header = ref false in
   let usage =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
   in
@@ -162,6 +165,9 @@ let parse_options () =
       ( "--rust-emitter",
         Arg.Unit (fun () -> rust_emitter := true),
         "Enable rust emitter" );
+      ( "--include-header",
+        Arg.Unit (fun () -> include_header := true),
+        "Include JSON header" );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -204,6 +210,7 @@ let parse_options () =
     for_debugger_eval = !for_debugger_eval;
     disable_toplevel_elaboration = !disable_toplevel_elaboration;
     rust_emitter = !rust_emitter;
+    include_header = !include_header;
   }
 
 let fail_daemon file error =
@@ -282,10 +289,56 @@ let log_fail compiler_options filename exc ~stack =
     ~mode:(mode_to_string compiler_options.mode)
     ~exc:(Caml.Printexc.to_string exc ^ "\n" ^ stack)
 
+let print_output
+    (bytecode : string list)
+    (config : Compile_ffi.rust_output_config)
+    (file : Relative_path.t)
+    (debug_time : debug_time option) =
+  let write =
+    match config.Compile_ffi.output_file with
+    | Some file ->
+      Printf.printf "FILE";
+      Sys_utils.write_strings_to_file ~file
+    | None ->
+      fun c ->
+        List.iter ~f:(P.printf "%s") c;
+        P.printf "%!"
+  in
+  if config.Compile_ffi.include_header then (
+    let bytes =
+      List.fold ~f:(fun len s -> len + String.length s) ~init:0 bytecode
+    in
+    let abs_path = Relative_path.to_absolute file in
+    let msg =
+      Hh_json.
+        [
+          ("bytes", int_ bytes);
+          ("file", JSON_String abs_path);
+          ("type", JSON_String "success");
+        ]
+    in
+    let msg =
+      match debug_time with
+      | Some debug_time ->
+        let json_microsec t =
+          Hh_json.int_ @@ int_of_float @@ (t *. 1000000.0)
+        in
+        ("parsing_time", json_microsec !(debug_time.parsing_t))
+        :: ("codegen_time", json_microsec !(debug_time.codegen_t))
+        :: ("printing_time", json_microsec !(debug_time.printing_t))
+        :: msg
+      | None -> msg
+    in
+    write Hh_json.[json_to_string @@ JSON_Object msg];
+    write ["\n"]
+  );
+  write bytecode
+
 let do_compile_rust
     ~is_systemlib
     ~config_jsons
     (compiler_options : options)
+    rust_output_config
     filename
     source_text =
   let env =
@@ -318,7 +371,7 @@ let do_compile_rust
             0 );
       }
   in
-  Compile_ffi.rust_from_text_ffi env source_text
+  Compile_ffi.rust_from_text_ffi env rust_output_config source_text
 
 let do_compile
     ~is_systemlib
@@ -411,22 +464,23 @@ let process_single_source_unit
     ~is_systemlib
     ~config_jsons
     compiler_options
-    handle_output
+    rust_output_config
     handle_exception
     filename
     source_text =
   try
     let debug_time = new_debug_time () in
     if compiler_options.extract_facts then
-      let (output, hhbc_options) =
+      let (output, _) =
         extract_facts ~compiler_options ~config_jsons ~filename source_text
       in
-      handle_output filename output hhbc_options debug_time
+      print_output output rust_output_config filename None
     else if compiler_options.rust_emitter then
       do_compile_rust
         ~is_systemlib
         ~config_jsons
         compiler_options
+        rust_output_config
         filename
         (Full_fidelity_source_text.make filename source_text)
     else
@@ -439,7 +493,14 @@ let process_single_source_unit
           source_text
           debug_time
       in
-      handle_output filename output hhbc_options debug_time
+      print_output
+        output
+        rust_output_config
+        filename
+        ( if Hhbc_options.log_extern_compiler_perf hhbc_options then
+          Some debug_time
+        else
+          None )
   with exc ->
     let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats then
@@ -449,10 +510,6 @@ let process_single_source_unit
 let decl_and_run_mode compiler_options =
   Hh_json.(
     Access.(
-      let print_and_flush_strings strings =
-        List.iter ~f:(P.printf "%s") strings;
-        P.printf "%!"
-      in
       (* list of pending config JSONs *)
       let config_jsons = ref [] in
       let add_config (config_json : string option) =
@@ -505,32 +562,14 @@ let decl_and_run_mode compiler_options =
             body
         in
         let handle_output filename output hhbc_options debug_time =
-          let abs_path = Relative_path.to_absolute filename in
-          let bytes =
-            List.fold ~f:(fun len s -> len + String.length s) ~init:0 output
-          in
-          let msg =
-            [
-              ("type", JSON_String "success");
-              ("file", JSON_String abs_path);
-              ("bytes", int_ bytes);
-            ]
-          in
-          let log_extern_compiler_perf =
-            Hhbc_options.log_extern_compiler_perf hhbc_options
-          in
-          let msg =
-            if log_extern_compiler_perf then
-              let json_microsec t = int_ @@ int_of_float @@ (t *. 1000000.0) in
-              ("parsing_time", json_microsec !(debug_time.parsing_t))
-              :: ("codegen_time", json_microsec !(debug_time.codegen_t))
-              :: ("printing_time", json_microsec !(debug_time.printing_t))
-              :: msg
+          print_output
+            output
+            Compile_ffi.{ include_header = true; output_file = None }
+            filename
+            ( if Hhbc_options.log_extern_compiler_perf hhbc_options then
+              Some debug_time
             else
-              msg
-          in
-          P.printf "%s\n" (json_to_string @@ JSON_Object msg);
-          print_and_flush_strings output
+              None )
         in
         let handle_exception filename exc =
           let abs_path = Relative_path.to_absolute filename in
@@ -594,7 +633,7 @@ let decl_and_run_mode compiler_options =
                     ~is_systemlib
                     ~config_jsons:(get_config_jsons ())
                     compiler_options
-                    handle_output
+                    Compile_ffi.{ include_header = true; output_file = None }
                     handle_exception
                     path
                     body
@@ -637,9 +676,6 @@ let decl_and_run_mode compiler_options =
         in
         dispatch_loop handlers
       | CLI ->
-        let handle_output _filename output _hhbc_options _debug_time =
-          print_and_flush_strings output
-        in
         let handle_exception filename exc =
           let stack = Caml.Printexc.get_backtrace () in
           prerr_endline stack;
@@ -648,7 +684,7 @@ let decl_and_run_mode compiler_options =
             (Relative_path.to_absolute filename)
             (Caml.Printexc.to_string exc)
         in
-        let process_single_file handle_output filename =
+        let process_single_file output_file filename =
           let filename = Relative_path.create Relative_path.Dummy filename in
           (* let abs_path = Relative_path.to_absolute filename in *)
           let files = Multifile.file_to_file_list filename in
@@ -657,12 +693,16 @@ let decl_and_run_mode compiler_options =
                 ~is_systemlib:false
                 ~config_jsons:(get_config_jsons ())
                 compiler_options
-                handle_output
+                Compile_ffi.
+                  {
+                    include_header = compiler_options.include_header;
+                    output_file;
+                  }
                 handle_exception
                 filename
                 content)
         in
-        let (filenames, handle_output) =
+        let (filenames, output_file) =
           match compiler_options.input_file_list with
           (* List of source files explicitly given *)
           | Some input_file_list ->
@@ -675,16 +715,8 @@ let decl_and_run_mode compiler_options =
               in
               go []
             in
-            (get_lines_in_file input_file_list, handle_output)
-          | None ->
-            let handle_output =
-              match compiler_options.output_file with
-              | Some output_file ->
-                fun _filename output _hhbc_options _debug_time ->
-                  Sys_utils.write_strings_to_file ~file:output_file output
-              | _ -> handle_output
-            in
-            ([compiler_options.filename], handle_output)
+            (get_lines_in_file input_file_list, None)
+          | None -> ([compiler_options.filename], compiler_options.output_file)
           (* Actually execute the compilation(s) *)
         in
         if compiler_options.dump_config then
@@ -702,7 +734,7 @@ let decl_and_run_mode compiler_options =
             "%s is a directory, directory is not supported."
             compiler_options.filename
         else
-          List.iter filenames (process_single_file handle_output)))
+          List.iter filenames (process_single_file output_file)))
 
 let main_hack opts =
   let start_time = Unix.gettimeofday () in

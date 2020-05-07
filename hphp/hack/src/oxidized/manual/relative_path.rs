@@ -129,7 +129,7 @@ impl RelativePath {
         self.prefix
     }
 
-    pub fn to_absoute(&self) -> PathBuf {
+    pub fn to_absolute(&self) -> PathBuf {
         let prefix_map = PrefixPathMap::default();
         let prefix = self.prefix.to_path(&prefix_map);
         let mut r = PathBuf::from(prefix);

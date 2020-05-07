@@ -17,3 +17,5 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
+anyhow = "1.0"
+serde_json = "1.0"

@@ -73,20 +73,12 @@ pub struct Profile {
     pub printing_t: f64,
 }
 
-// TODO(hrust) switch over to Option<Duration> once FFI is no longer needed;
-// however, for FFI it's easier to serialize to floating point in seconds
-// and use NaN for ignored (i.e., when hhvm.log_extern_compiler_perf is false)
-pub const IGNORED_DURATION: f64 = std::f64::NAN;
-pub fn is_ignored_duration(dt: &f64) -> bool {
-    dt.is_nan()
-}
-
 pub fn from_text<W>(
     env: &Env,
     stack_limit: &StackLimit,
     writer: &mut W,
     text: &[u8],
-) -> anyhow::Result<Profile>
+) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
@@ -100,22 +92,15 @@ pub fn from_text_<W>(
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
-) -> anyhow::Result<Profile>
+) -> anyhow::Result<Option<Profile>>
 where
     W: Write,
     W::Error: Send + Sync + 'static, // required by anyhow::Error
 {
     let opts =
         Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
-    let log_extern_compiler_perf = opts.log_extern_compiler_perf();
 
-    let mut ret = Profile {
-        parsing_t: IGNORED_DURATION,
-        codegen_t: IGNORED_DURATION,
-        printing_t: IGNORED_DURATION,
-    };
-
-    let mut parse_result = profile(log_extern_compiler_perf, &mut ret.parsing_t, || {
+    let (parsing_t, mut parse_result) = profile(|| {
         parse_file(
             &opts,
             stack_limit,
@@ -123,10 +108,11 @@ where
             !env.flags.contains(EnvFlags::DISABLE_TOPLEVEL_ELABORATION),
         )
     });
+    let log_extern_compiler_perf = opts.log_extern_compiler_perf();
 
     let mut emitter = Emitter::new(opts);
 
-    let (program, codegen_t) = match &mut parse_result {
+    let (codegen_t, program) = match &mut parse_result {
         Either::Right((ast, is_hh_file)) => {
             let namespace = RcOc::new(NamespaceEnv::empty(
                 emitter.options().hhvm.aliased_namespaces_cloned().collect(),
@@ -147,16 +133,16 @@ where
             {
                 emit_pu_rust::translate(ast);
             }
-            emit(&mut emitter, &env, namespace, *is_hh_file, ast)
+            let e = &mut emitter;
+            profile(move || emit(e, &env, namespace, *is_hh_file, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            emit_fatal(&mut emitter, &env, *is_runtime_error, pos, msg)
+            profile(|| emit_fatal(&mut emitter, &env, *is_runtime_error, pos, msg))
         }
     };
     let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
-    ret.codegen_t = codegen_t;
 
-    profile(log_extern_compiler_perf, &mut ret.printing_t, || {
+    let (printing_t, print_result) = profile(|| {
         print_program(
             &mut Context::new(
                 &mut emitter,
@@ -167,8 +153,18 @@ where
             writer,
             &program,
         )
-    })?;
-    Ok(ret)
+    });
+    print_result?;
+
+    if log_extern_compiler_perf {
+        Ok(Some(Profile {
+            parsing_t,
+            codegen_t,
+            printing_t,
+        }))
+    } else {
+        Ok(None)
+    }
 }
 
 fn emit<'p>(
@@ -177,7 +173,7 @@ fn emit<'p>(
     namespace: RcOc<NamespaceEnv>,
     is_hh: bool,
     ast: &'p mut Tast::Program,
-) -> (Result<HhasProgram<'p>, Error>, f64) {
+) -> Result<HhasProgram<'p>, Error> {
     let mut flags = FromAstFlags::empty();
     if is_hh {
         flags |= FromAstFlags::IS_HH_FILE;
@@ -191,13 +187,7 @@ fn emit<'p>(
     if env.flags.contains(EnvFlags::IS_SYSTEMLIB) {
         flags |= FromAstFlags::IS_SYSTEMLIB;
     }
-    let mut t = 0f64;
-    let r = profile(
-        emitter.options().log_extern_compiler_perf(),
-        &mut t,
-        move || emit_program(emitter, flags, namespace, ast),
-    );
-    (r, t)
+    emit_program(emitter, flags, namespace, ast)
 }
 
 fn emit_fatal<'a>(
@@ -206,23 +196,19 @@ fn emit_fatal<'a>(
     is_runtime_error: bool,
     pos: &Pos,
     msg: impl AsRef<str>,
-) -> (Result<HhasProgram<'a>, Error>, f64) {
+) -> Result<HhasProgram<'a>, Error> {
     let op = if is_runtime_error {
         FatalOp::Runtime
     } else {
         FatalOp::Parse
     };
-    let mut t = 0f64;
-    let r = profile(emitter.options().log_extern_compiler_perf(), &mut t, || {
-        emit_fatal_program(
-            emitter.options(),
-            env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-            op,
-            pos,
-            msg,
-        )
-    });
-    (r, t)
+    emit_fatal_program(
+        emitter.options(),
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        op,
+        pos,
+        msg,
+    )
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {
@@ -335,16 +321,11 @@ fn parse_file(
     }
 }
 
-fn profile<T, F>(log_extern_compiler_perf: bool, dt: &mut f64, f: F) -> T
+fn profile<T, F>(f: F) -> (f64, T)
 where
     F: FnOnce() -> T,
 {
     let t0 = std::time::Instant::now();
     let ret = f();
-    *dt = if log_extern_compiler_perf {
-        t0.elapsed().as_secs_f64()
-    } else {
-        IGNORED_DURATION
-    };
-    ret
+    (t0.elapsed().as_secs_f64(), ret)
 }

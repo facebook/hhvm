@@ -81,7 +81,7 @@ fn process_single_file_impl(
     content: &[u8],
     output_kind: &OutputKind,
     stack_limit: &StackLimit,
-) -> anyhow::Result<Profile> {
+) -> anyhow::Result<Option<Profile>> {
     if opts.verbosity > 1 {
         eprintln!("processing file: {}", filepath.display());
     }
@@ -109,7 +109,7 @@ fn process_single_file_with_retry(
     filepath: PathBuf,
     content: Vec<u8>,
     output_kind: &OutputKind,
-) -> anyhow::Result<Profile> {
+) -> anyhow::Result<Option<Profile>> {
     let ctx = &Arc::new((opts.clone(), filepath, content, output_kind.clone()));
     let job_builder = move || {
         let new_ctx = Arc::clone(ctx);
@@ -155,7 +155,7 @@ fn process_single_file(
     filepath: PathBuf,
     content: Vec<u8>,
     output_kind: &OutputKind,
-) -> anyhow::Result<Profile> {
+) -> anyhow::Result<Option<Profile>> {
     match std::panic::catch_unwind(|| {
         process_single_file_with_retry(opts, filepath, content, output_kind)
     }) {

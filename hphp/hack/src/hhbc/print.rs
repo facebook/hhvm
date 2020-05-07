@@ -169,7 +169,7 @@ pub fn print_program<W: Write>(
 ) -> Result<(), W::Error> {
     match ctx.path {
         Some(p) => {
-            let abs = p.to_absoute();
+            let abs = p.to_absolute();
             let p = escape(abs.to_str().ok_or(Error::InvalidUTF8)?);
 
             concat_str_by(w, " ", ["#", p.as_ref(), "starts here"])?;

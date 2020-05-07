@@ -9,13 +9,13 @@
  *
  */
 
-interface FormatString<T> { }
+
 
 interface Dummy {
   public function format_s(string $s) : string;
 }
 
-function f(FormatString<Dummy> $x, mixed...$args) : void {
+function f(\HH\FormatString<Dummy> $x, mixed...$args) : void {
 }
 
 function _() : void {

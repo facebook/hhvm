@@ -9,13 +9,13 @@
  *
  */
 
-newtype FormatString<T> = string;
+
 
 interface Dummy {
   public function format_s(string $s) : string;
 }
 
-function takesFS(?FormatString<Dummy> $f = null) : void {
+function takesFS(?\HH\FormatString<Dummy> $f = null) : void {
 }
 function _() : void {
   takesFS('%s', 1);

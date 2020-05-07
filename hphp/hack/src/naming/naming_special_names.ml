@@ -28,12 +28,9 @@ module Classes = struct
 
   let cAsyncGenerator = "\\HH\\AsyncGenerator"
 
-  let cFormatString = "\\FormatString"
-
   let cHHFormatString = "\\HH\\FormatString"
 
-  let is_format_string x =
-    String.equal x cFormatString || String.equal x cHHFormatString
+  let is_format_string x = String.equal x cHHFormatString
 
   let cHH_BuiltinEnum = "\\HH\\BuiltinEnum"
 

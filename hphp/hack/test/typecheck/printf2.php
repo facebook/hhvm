@@ -9,10 +9,10 @@
  *
  */
 
-interface FormatString<T> { }
+
 interface X { }
 
-function f(FormatString<X> $fs, mixed...$args) : void {
+function f(\HH\FormatString<X> $fs, mixed...$args) : void {
 }
 
 function _(string $s) {

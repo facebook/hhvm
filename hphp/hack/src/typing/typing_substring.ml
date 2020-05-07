@@ -21,7 +21,7 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
   (* Under constraint-based inference, we implement sub_string as a subtype test.
    * All the cases in the legacy implementation just fall out from subtyping rules.
    * We test against ?(arraykey | bool | float | resource | object | dynamic |
-   * FormatString<T> | HH\FormatString<T>).
+   * HH\FormatString<T>).
    *)
   let r = Reason.Rwitness p in
   let (env, formatter_tyvar) = Env.fresh_invariant_type_var env p in
@@ -32,7 +32,6 @@ let sub_string (p : Pos.Map.key) (env : env) (ty : locl_ty) : env =
       MakeType.float r;
       MakeType.resource r;
       MakeType.dynamic r;
-      MakeType.class_type r SN.Classes.cFormatString [formatter_tyvar];
       MakeType.class_type r SN.Classes.cHHFormatString [formatter_tyvar];
     ]
   in

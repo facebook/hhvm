@@ -9,7 +9,7 @@
  *
  */
 
-interface FormatString<T> { }
+
 
 interface Dummy {
   public function format_0x25() : string;
@@ -18,7 +18,7 @@ interface Dummy {
   public function format_s(string $s) : string;
 }
 
-function f(FormatString<Dummy> $fs, mixed ...$args) : void {
+function f(\HH\FormatString<Dummy> $fs, mixed ...$args) : void {
 }
 
 function _() {

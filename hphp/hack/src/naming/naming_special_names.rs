@@ -27,13 +27,11 @@ pub mod classes {
 
     pub const ASYNC_GENERATOR: &str = "\\HH\\AsyncGenerator";
 
-    pub const FORMAT_STRING: &str = "\\FormatString";
-
     pub const HH_FORMAT_STRING: &str = "\\HH\\FormatString";
 
     pub fn is_format_string(x: &str) -> bool {
         match x {
-            FORMAT_STRING | HH_FORMAT_STRING => true,
+            HH_FORMAT_STRING => true,
             _ => false,
         }
     }

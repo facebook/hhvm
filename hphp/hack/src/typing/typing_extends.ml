@@ -707,14 +707,17 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
     Errors.abstract_concrete_override pos parent_pos `typeconst;
     env
   | _ ->
-    (* If the class element is defined in the class that we're checking, then
-     * don't wrap with the extra
-     * "Class ... does not correctly implement all required members" message *)
+    let inherited = not (String.equal child_typeconst.ttc_origin class_name) in
+    (* If the class element is inherited from a parent class, we must
+     * wrap any error with
+     *   "Class [class_name] does not correctly implement all required members"
+     * and the primary position should be on [class_name]
+     *)
     let on_error =
-      if String.equal child_typeconst.ttc_origin class_name then
-        Errors.unify_error
-      else
+      if inherited then
         on_error
+      else
+        Errors.unify_error
     in
 
     (* Check that the child's constraint is compatible with the parent. If the
@@ -757,7 +760,9 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
                 on_error)
     in
 
-    begin
+    (* Don't recheck inherited type constants for enforceability: an error will
+     * have been emitted already for the parent *)
+    ( if not inherited then
       match
         ( child_typeconst.ttc_abstract,
           child_typeconst.ttc_type,
@@ -774,8 +779,7 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           (fst child_typeconst.ttc_name)
           ty
           emit_error
-      | _ -> ()
-    end;
+      | _ -> () );
 
     begin
       match parent_typeconst.ttc_reifiable with

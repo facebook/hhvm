@@ -150,7 +150,6 @@ module Reverse_naming_table_delta = struct
     consts: pos_or_deleted SMap.t ref;
     funs: pos_or_deleted SMap.t ref;
     types: pos_or_deleted SMap.t ref;
-    consts_canon_key: pos_or_deleted SMap.t ref;
     funs_canon_key: pos_or_deleted SMap.t ref;
     types_canon_key: pos_or_deleted SMap.t ref;
   }
@@ -160,7 +159,6 @@ module Reverse_naming_table_delta = struct
       consts = ref SMap.empty;
       funs = ref SMap.empty;
       types = ref SMap.empty;
-      consts_canon_key = ref SMap.empty;
       funs_canon_key = ref SMap.empty;
       types_canon_key = ref SMap.empty;
     }

@@ -308,15 +308,14 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
     (Some setup.Common_setup.nonexistent_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "unduped: expected f1 to be here";
-
-  (* Asserter.String_asserter.assert_option_equals - fails due to trying to read foo.php
+  Asserter.String_asserter.assert_option_equals
     (Some "\\f1")
     (Naming_provider.get_fun_canon_name ctx "\\F1")
-    "unduped: expected f1 to be canonical spelling"; *)
-  (* Asserter.String_asserter.assert_option_equals - fails due to tryinng to read foo.php
-    None (* bug; should be fOo *)
+    "unduped: expected f1 to be canonical spelling";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\fOo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
-    "unduped: expected this canonical spelling of 'foo'"; *)
+    "unduped: expected this canonical spelling of 'foo'";
   true
 
 let tests =

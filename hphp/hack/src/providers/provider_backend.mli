@@ -127,7 +127,6 @@ module Reverse_naming_table_delta : sig
     consts: pos_or_deleted SMap.t ref;
     funs: pos_or_deleted SMap.t ref;
     types: pos_or_deleted SMap.t ref;
-    consts_canon_key: pos_or_deleted SMap.t ref;
     funs_canon_key: pos_or_deleted SMap.t ref;
     types_canon_key: pos_or_deleted SMap.t ref;
   }

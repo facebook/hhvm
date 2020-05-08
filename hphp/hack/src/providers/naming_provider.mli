@@ -38,7 +38,14 @@ val get_fun_path : Provider_context.t -> string -> Relative_path.t option
 the reverse naming table. *)
 val get_fun_pos : Provider_context.t -> string -> FileInfo.pos option
 
-(** Look up the canonical name for the given global function. *)
+(** Look up the canonical name for the given global function.
+THIS IS A BAD API. The reverse-naming-table should solely be a multimap from
+symbol name (maybe case insensitive) to filename+type. That's what
+the other APIs here do. But this API requires us to read the filename
+and parse it to return the canon name. Moreover, one form of storage
+(SQL) only stores filenames, while another form of storage (sharedmem)
+only stores canonical names, which means we can't easily clean up
+this API. *)
 val get_fun_canon_name : Provider_context.t -> string -> string option
 
 (** Record that a global function with the given name was declared at the
@@ -89,7 +96,15 @@ val get_type_path_and_kind :
   string ->
   (Relative_path.t * Naming_types.kind_of_type) option
 
-(** Look up the canonical name for the given type. *)
+(** Look up the canonical name for the given type.
+THIS IS A BAD API. The reverse-naming-table should solely be a multimap from
+symbol name (maybe case insensitive) to filename+type. That's what
+the other APIs here do. But this API requires us to read the filename
+and parse it to return the canon name. Moreover, one form of storage
+(SQL) only stores filenames, while another form of storage (sharedmem)
+only stores canonical names, which means we can't easily clean up
+this API.
+ *)
 val get_type_canon_name : Provider_context.t -> string -> string option
 
 (** Look up the file path declaring the given class in the reverse naming

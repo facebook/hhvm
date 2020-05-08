@@ -154,12 +154,7 @@ let add_const
       let open Provider_backend.Reverse_naming_table_delta in
       let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
       reverse_naming_table_delta.consts :=
-        SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data;
-      reverse_naming_table_delta.consts_canon_key :=
-        SMap.add
-          !(reverse_naming_table_delta.consts_canon_key)
-          ~key:(Naming_sqlite.to_canon_name_key name)
-          ~data
+        SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data
     | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
@@ -175,13 +170,7 @@ let remove_const_batch (backend : Provider_backend.t) (names : SSet.t) : unit =
       SSet.fold
         names
         ~init:!(reverse_naming_table_delta.consts)
-        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted);
-    reverse_naming_table_delta.consts_canon_key :=
-      SSet.fold
-        names
-        ~init:!(reverse_naming_table_delta.consts_canon_key)
-        ~f:(fun name acc ->
-          SMap.add acc ~key:(Naming_sqlite.to_canon_name_key name) ~data:Deleted)
+        ~f:(fun name acc -> SMap.add acc ~key:name ~data:Deleted)
   | Provider_backend.Decl_service _ as backend -> not_implemented backend
 
 let get_fun_pos (ctx : Provider_context.t) (name : string) : FileInfo.pos option
@@ -543,11 +532,18 @@ We enforce this with exceptions in some cases where it's cheap enough to verify,
 but not in others where enforcing it would involve a sqlite read.
 Invariant: this never transitions an entry from Some to None. *)
 let remove
+    ~(case_insensitive : bool)
     (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
     (path : Relative_path.t)
     (name : string) :
     Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
   let open Provider_backend.Reverse_naming_table_delta in
+  let name =
+    if case_insensitive then
+      Naming_sqlite.to_canon_name_key name
+    else
+      name
+  in
   match SMap.find_opt delta name with
   | None ->
     (* We've never yet read/cached from sqlite. Presumably the caller is removing
@@ -586,12 +582,19 @@ Invariant: if this function causes the delta for this symbol to go from None->So
 then the result will include the name->path mapping that was present in sqlite (if any),
 in addition to the name->path mapping that we wish to add right now. *)
 let add
+    ~(case_insensitive : bool)
     (db_path : Naming_sqlite.db_path option)
     (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
     (pos : Provider_backend.Reverse_naming_table_delta.pos)
     (name : string) :
     Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
   let open Provider_backend.Reverse_naming_table_delta in
+  let name =
+    if case_insensitive then
+      Naming_sqlite.to_canon_name_key name
+    else
+      name
+  in
   match (SMap.find_opt delta name, db_path) with
   | (None, None) -> SMap.add delta ~key:name ~data:(Pos (pos, []))
   | (None, Some db_path) ->
@@ -604,13 +607,13 @@ let add
           ~f:(fun sqlite_path -> (FileInfo.Const, sqlite_path))
       | FileInfo.Fun ->
         Option.map
-          (Naming_sqlite.get_fun_pos db_path name ~case_insensitive:false)
+          (Naming_sqlite.get_fun_pos db_path name ~case_insensitive)
           ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
       | FileInfo.RecordDef
       | FileInfo.Class
       | FileInfo.Typedef ->
         Option.map
-          (Naming_sqlite.get_type_pos db_path name ~case_insensitive:false)
+          (Naming_sqlite.get_type_pos db_path name ~case_insensitive)
           ~f:(fun (sqlite_path, sqlite_kind) ->
             (kind_to_name_type sqlite_kind, sqlite_path))
     in
@@ -667,14 +670,21 @@ let update
       } ->
     let open Provider_backend.Reverse_naming_table_delta in
     (* helper*)
-    let update olds news delta name_type =
+    let update ?(case_insensitive = false) olds news delta name_type =
       let olds = strip_positions olds in
       let news = strip_positions news in
       let removed = SSet.diff olds news in
       let added = SSet.diff news olds in
-      SSet.iter removed ~f:(fun name -> delta := remove !delta path name);
+      SSet.iter removed ~f:(fun name ->
+          delta := remove ~case_insensitive !delta path name);
       SSet.iter added ~f:(fun name ->
-          delta := add !naming_db_path_ref !delta (name_type, path) name);
+          delta :=
+            add
+              !naming_db_path_ref
+              ~case_insensitive
+              !delta
+              (name_type, path)
+              name);
       ()
     in
     (* do the update *)
@@ -685,7 +695,20 @@ let update
     update oldfi.classes newfi.classes deltas.types FileInfo.Class;
     update oldfi.typedefs newfi.typedefs deltas.types FileInfo.Typedef;
     update oldfi.record_defs newfi.record_defs deltas.types FileInfo.RecordDef;
-    (* TODO: canon *)
+    (* update canon names too *)
+    let updatei = update ~case_insensitive:true in
+    updatei oldfi.funs newfi.funs deltas.funs_canon_key FileInfo.Fun;
+    updatei oldfi.classes newfi.classes deltas.types_canon_key FileInfo.Class;
+    updatei
+      oldfi.typedefs
+      newfi.typedefs
+      deltas.types_canon_key
+      FileInfo.Typedef;
+    updatei
+      oldfi.record_defs
+      newfi.record_defs
+      deltas.types_canon_key
+      FileInfo.RecordDef;
     ()
 
 let local_changes_push_sharedmem_stack () : unit =

@@ -10,20 +10,8 @@
 
 open Core_kernel
 
-let errors_to_string (errors : Errors.t) : string list =
-  let error_to_string (error : Errors.error) : string =
-    let error = Errors.to_absolute_for_test error in
-    let code = Errors.get_code error in
-    let message =
-      error |> Errors.to_list |> List.map ~f:snd |> String.concat ~sep:"; "
-    in
-    Printf.sprintf "[%d] %s" code message
-  in
-  errors |> Errors.get_sorted_error_list |> List.map ~f:error_to_string
-
-let fake_dir = Printf.sprintf "%s/fake" (Filename.get_temp_dir_name ())
-
-let in_fake_dir path = Printf.sprintf "%s/%s" fake_dir path
+let tcopt_with_defer =
+  GlobalOptions.{ default with tco_defer_class_declaration_threshold = Some 1 }
 
 let test_process_data =
   ServerProcess.
@@ -119,117 +107,13 @@ let test_deferred_decl_should_defer () =
 
   true
 
-let foo_contents =
-  {|<?hh //strict
-  class Foo {
-    public function foo (Bar $b) : int {
-      return $b->toString();
-    }
-  }
-
-  function f1(Foo $x) : void { }
-  function f2(foo $x) : void { }
-|}
-
-let bar_contents =
-  {|<?hh //strict
-  class Bar {
-    public function toString() : string {
-      return "bar";
-    }
-  }
-|}
-
-type server_setup = {
-  ctx: Provider_context.t;
-  foo_path: Relative_path.t;
-  foo_contents: string;
-  bar_path: Relative_path.t;
-  bar_contents: string;
-  nonexistent_path: Relative_path.t;
-  naming_table: Naming_table.t;
-}
-
-(** This lays down some files on disk. Sets up a forward naming table.
-Sets up the provider's reverse naming table. Returns an empty context, plus
-information about the files on disk. *)
-let server_setup () : server_setup =
-  (* Set up a simple fake repo *)
-  Disk.mkdir_p @@ in_fake_dir "root/";
-  Relative_path.set_path_prefix
-    Relative_path.Root
-    (Path.make @@ in_fake_dir "root/");
-
-  (* We'll need to parse these files in order to create a naming table, which
-    will be used for look up of symbols in type checking. *)
-  Disk.write_file ~file:(in_fake_dir "root/Foo.php") ~contents:foo_contents;
-  Disk.write_file ~file:(in_fake_dir "root/Bar.php") ~contents:bar_contents;
-  let foo_path = Relative_path.from_root ~suffix:"Foo.php" in
-  let bar_path = Relative_path.from_root ~suffix:"Bar.php" in
-  let nonexistent_path = Relative_path.from_root ~suffix:"Nonexistent.php" in
-  (* Parsing produces the file infos that the naming table module can use
-    to construct the forward naming table (files-to-symbols) *)
-  let popt = ParserOptions.default in
-  let (file_infos, _errors, _failed_parsing) =
-    Parsing_service.go
-      None
-      Relative_path.Set.empty
-      ~get_next:(MultiWorker.next None [foo_path; bar_path])
-      popt
-      ~trace:true
-  in
-  let naming_table = Naming_table.create file_infos in
-  (* Construct the reverse naming table (symbols-to-files) *)
-  let fast = Naming_table.to_fast naming_table in
-  let tcopt =
-    GlobalOptions.
-      { default with tco_defer_class_declaration_threshold = Some 1 }
-  in
-  let ctx =
-    Provider_context.empty_for_tool
-      ~popt
-      ~tcopt
-      ~backend:(Provider_backend.get ())
-  in
-  Relative_path.Map.iter fast ~f:(fun name info ->
-      let {
-        FileInfo.n_classes = classes;
-        n_record_defs = record_defs;
-        n_types = typedefs;
-        n_funs = funs;
-        n_consts = consts;
-      } =
-        info
-      in
-      Naming_global.ndecl_file_fast
-        ctx
-        name
-        ~funs
-        ~classes
-        ~record_defs
-        ~typedefs
-        ~consts);
-
-  (* Construct one instance of file type check computation. Class \Foo depends
-    on class \Bar being declared, so processing \Foo once should result in
-    two computations:
-      - a declaration of \Bar
-      - a (deferred) type check of \Foo *)
-  {
-    ctx;
-    foo_path;
-    foo_contents;
-    bar_path;
-    bar_contents;
-    nonexistent_path;
-    naming_table;
-  }
-
 (* In this test, we wish to establish that we enable deferring type checking
   for files that have undeclared dependencies, UNLESS we've already deferred
   those files a certain number of times. *)
 let test_process_file_deferring () =
-  let { ctx; foo_path; _ } = server_setup () in
+  let { Common_setup.ctx; foo_path; _ } =
+    Common_setup.setup ~sqlite:false tcopt_with_defer
+  in
   let file = Typing_check_service.{ path = foo_path; deferred_count = 0 } in
   let dynamic_view_files = Relative_path.Set.empty in
   let errors = Errors.empty in
@@ -295,7 +179,9 @@ let test_process_file_deferring () =
 (* This test verifies that the deferral/counting machinery works for
    ProviderUtils.compute_tast_and_errors_unquarantined. *)
 let test_compute_tast_counting () =
-  let { ctx; foo_path; foo_contents; _ } = server_setup () in
+  let { Common_setup.ctx; foo_path; foo_contents; _ } =
+    Common_setup.setup ~sqlite:false tcopt_with_defer
+  in
 
   let (ctx, entry) =
     Provider_context.add_or_overwrite_entry_contents
@@ -350,7 +236,7 @@ let test_compute_tast_counting () =
 let test_should_enable_deferring () =
   Relative_path.set_path_prefix
     Relative_path.Root
-    (Path.make @@ in_fake_dir "www");
+    (Path.make @@ Common_setup.in_fake_dir "www");
 
   let opts =
     GlobalOptions.{ default with tco_max_times_to_defer_type_checking = Some 2 }
@@ -359,7 +245,8 @@ let test_should_enable_deferring () =
     Typing_check_service.
       {
         path =
-          Relative_path.create Relative_path.Root @@ in_fake_dir "www/Foo.php";
+          Relative_path.create Relative_path.Root
+          @@ Common_setup.in_fake_dir "www/Foo.php";
         deferred_count = 1;
       }
   in
@@ -393,7 +280,9 @@ let test_should_enable_deferring () =
 (* This test verifies quarantine. *)
 let test_quarantine () =
   Provider_backend.set_local_memory_backend_with_defaults ();
-  let { ctx; foo_path; foo_contents; nonexistent_path; _ } = server_setup () in
+  let { Common_setup.ctx; foo_path; foo_contents; nonexistent_path; _ } =
+    Common_setup.setup ~sqlite:false tcopt_with_defer
+  in
 
   (* simple case *)
   let (ctx, _foo_entry) =
@@ -458,217 +347,6 @@ let test_quarantine () =
 
   true
 
-let test_unsaved_symbol_change () =
-  Provider_backend.set_local_memory_backend_with_defaults ();
-
-  (* We'll create a naming-table. This test suite is based on naming-table. *)
-  let { ctx; foo_path; foo_contents; naming_table; _ } = server_setup () in
-  let db_name = Filename.temp_file "server_naminng" ".sqlite" in
-  let save_results = Naming_table.save naming_table db_name in
-  Asserter.Int_asserter.assert_equals
-    2
-    save_results.Naming_sqlite.files_added
-    "unsaved: expected this many files in naming.sqlite";
-  Asserter.Int_asserter.assert_equals
-    4
-    save_results.Naming_sqlite.symbols_added
-    "unsaved: expected this many symbols in naming.sqlite";
-
-  (* Now, I want a fresh ctx with no reverse-naming entries in it,
-  and I want it to be backed by a sqlite naming database. *)
-  Provider_backend.set_local_memory_backend_with_defaults ();
-  let ctx =
-    Provider_context.empty_for_tool
-      ~popt:(Provider_context.get_popt ctx)
-      ~tcopt:(Provider_context.get_tcopt ctx)
-      ~backend:(Provider_backend.get ())
-  in
-  let (_ : Naming_table.t) = Naming_table.load_from_sqlite ctx db_name in
-
-  (* Compute tast as-is *)
-  let (ctx, entry) =
-    Provider_context.add_or_overwrite_entry_contents
-      ~ctx
-      ~path:foo_path
-      ~contents:foo_contents
-  in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
-  in
-  Asserter.Int_asserter.assert_equals
-    11
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
-    "unsaved: compute_tast(class Foo) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    1
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "unsaved: compute_tast(class Foo) should have this many calls to disk_cat";
-  Asserter.String_asserter.assert_list_equals
-    [
-      "[4110] Invalid return type; Expected int; But got string";
-      "[2006] Could not find foo; Did you mean Foo?";
-    ]
-    (errors_to_string errors)
-    "unsaved: compute_tast(class Foo) should have these errors";
-
-  (* Make an unsaved change which affects a symbol definition that's used *)
-  let foo_contents1 =
-    Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
-  in
-  let (ctx, entry) =
-    Provider_context.add_or_overwrite_entry_contents
-      ~ctx
-      ~path:foo_path
-      ~contents:foo_contents1
-  in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
-  in
-  Asserter.Int_asserter.assert_equals
-    4
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
-    "unsaved: compute_tast(class Foo1) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "unsaved: compute_tast(class Foo1) should have this many calls to disk_cat";
-  Asserter.String_asserter.assert_list_equals
-    [
-      "[4110] Invalid return type; Expected int; But got string";
-      "[2049] Unbound name: Foo";
-      "[2049] Unbound name: foo";
-    ]
-    (errors_to_string errors)
-    "unsaved: compute_tast(class Foo1) should have these errors";
-
-  (* go back to original unsaved content *)
-  let (ctx, entry) =
-    Provider_context.add_or_overwrite_entry_contents
-      ~ctx
-      ~path:foo_path
-      ~contents:foo_contents
-  in
-  let { Tast_provider.Compute_tast_and_errors.telemetry; errors; _ } =
-    Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
-  in
-  Asserter.Int_asserter.assert_equals
-    5
-    (Telemetry_test_utils.int_exn telemetry "get_ast.count")
-    "unsaved: compute_tast(class Foo again) should have this many calls to get_ast";
-  Asserter.Int_asserter.assert_equals
-    0
-    (Telemetry_test_utils.int_exn telemetry "disk_cat.count")
-    "unsaved: compute_tast(class Foo again) should have this many calls to disk_cat";
-  Asserter.String_asserter.assert_list_equals
-    [
-      "[4110] Invalid return type; Expected int; But got string";
-      "[2006] Could not find foo; Did you mean Foo?";
-    ]
-    (errors_to_string errors)
-    "unsaved: compute_tast(class Foo again) should have these errors";
-
-  true
-
-let test_canon_names_internal
-    ~(ctx : Provider_context.t)
-    ~(id : string)
-    ~(canonical : string)
-    ~(uncanonical : string) : unit =
-  begin
-    match Naming_provider.get_type_pos_and_kind ctx canonical with
-    | None ->
-      Printf.eprintf "Canon[%s]: expected to find symbol '%s'\n" id canonical;
-      assert false
-    | Some _ -> ()
-  end;
-
-  begin
-    match Naming_provider.get_type_pos_and_kind ctx uncanonical with
-    | None -> ()
-    | Some _ ->
-      Printf.eprintf
-        "Canon[%s]: expected not to find symbol '%s'\n"
-        id
-        uncanonical;
-      assert false
-  end;
-
-  begin
-    match Naming_provider.get_type_canon_name ctx uncanonical with
-    | None ->
-      Printf.eprintf
-        "Canon[%s]: expected %s to have a canonical name"
-        id
-        uncanonical;
-      assert false
-    | Some canon ->
-      Asserter.String_asserter.assert_equals
-        canonical
-        canon
-        (Printf.sprintf
-           "Canon[%s]: expected '%s' to have canonical name '%s'"
-           id
-           uncanonical
-           canonical)
-  end;
-  ()
-
-let test_canon_names () =
-  Provider_backend.set_local_memory_backend_with_defaults ();
-  let { ctx; foo_path; foo_contents; _ } = server_setup () in
-
-  test_canon_names_internal
-    ~ctx
-    ~id:"ctx"
-    ~canonical:"\\Foo"
-    ~uncanonical:"\\foo";
-
-  let (ctx, _) =
-    Provider_context.add_or_overwrite_entry_contents
-      ~ctx
-      ~path:foo_path
-      ~contents:foo_contents
-  in
-  test_canon_names_internal
-    ~ctx
-    ~id:"entry"
-    ~canonical:"\\Foo"
-    ~uncanonical:"\\foo";
-
-  let foo_contents1 =
-    Str.global_replace (Str.regexp "class Foo") "class Foo1" foo_contents
-  in
-  let (ctx1, _) =
-    Provider_context.add_or_overwrite_entry_contents
-      ~ctx
-      ~path:foo_path
-      ~contents:foo_contents1
-  in
-  test_canon_names_internal
-    ~ctx:ctx1
-    ~id:"entry1"
-    ~canonical:"\\Foo1"
-    ~uncanonical:"\\foo1";
-
-  begin
-    match Naming_provider.get_type_pos_and_kind ctx1 "\\Foo" with
-    | None -> ()
-    | Some _ ->
-      Printf.eprintf "Canon[entry1b]: expected not to find symbol '\\Foo'\n";
-      assert false
-  end;
-
-  begin
-    match Naming_provider.get_type_canon_name ctx1 "\\foo" with
-    | None -> ()
-    | Some _ ->
-      Printf.eprintf
-        "Canon[entry1b]: expected not to find canonical for '\\foo'\n";
-      assert false
-  end;
-
-  true
-
 let tests =
   [
     ("test_deferred_decl_add", test_deferred_decl_add);
@@ -678,8 +356,6 @@ let tests =
     ("test_dmesg_parser", test_dmesg_parser);
     ("test_should_enable_deferring", test_should_enable_deferring);
     ("test_quarantine", test_quarantine);
-    ("test_unsaved_symbol_change", test_unsaved_symbol_change);
-    ("test_canon_names", test_canon_names);
   ]
 
 let () =

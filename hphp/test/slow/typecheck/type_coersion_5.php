@@ -31,9 +31,9 @@ check("Double", function ($v) { return number_format($v); },
       function (@float $v) { });
 check("String", function ($v) { return rtrim($v); },
       function (@string $v) { });
-check("Array",
-      function ($v) { return __hhvm_intrinsics\dummy_array_builtin($v); },
-      function (@array $v) { });
+check("varray",
+      function ($v) { return __hhvm_intrinsics\dummy_varray_builtin($v); },
+      function (@varray $v) { });
 check("Object", function ($v) { return get_object_vars($v); },
       function (@object $v) { });
 }

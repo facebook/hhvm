@@ -53,7 +53,7 @@ function round_trip($a) {
 }
 
 function serialize_tests() {
-  serialize_test(__hhvm_intrinsics\dummy_array_builtin(varray[]));
+  serialize_test(__hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]));
   serialize_test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[100 => 200, 200 => 300, 300 => 400]));
   serialize_test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict[0 => 'a', 1 => 'b', 2 => 'c']));
   serialize_test(__hhvm_intrinsics\dummy_cast_to_kindofarray(dict['abc' => 100, 'def' => 200, 'ghi' => 300]));

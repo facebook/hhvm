@@ -769,6 +769,6 @@ PASSED erroneous files test
 PASSED path mangling test
 PASSED multi-threaded test
 PASSED version get test
-string(60) "HH\facts_parse() expects parameter 2 to be array, null given"
+string(%d) "HH\facts_parse() expects parameter 2 to be %rv?%rarray, null given"
 string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"
 string(62) "HH\facts_parse() expects parameter 3 to be boolean, null given"

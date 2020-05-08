@@ -58,7 +58,7 @@ function array_count_values_test_cases(
 function main(): void {
   foreach (array_count_values_test_cases() as $case) {
     list($input, $expected) = $case;
-    $output = array_count_values($input);
+    $output = darray(array_count_values($input));
     invariant($output === $expected, 'Expected output to be equal to expected');
     // We're not changing the output: only asserting that the _input_ can be a
     // Hack Array

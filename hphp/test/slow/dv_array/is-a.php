@@ -72,7 +72,7 @@ function test1() {
     dict['abc' => 100, 200 => 'def'],
     keyset[],
     keyset['a', 100, 'b'],
-    __hhvm_intrinsics\dummy_array_builtin(varray[]),
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]),
     __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1, 2, 3]),
     __hhvm_intrinsics\dummy_cast_to_kindofarray(dict['a' => 100, 'b' => 200, 'c' => 300]),
     varray[],

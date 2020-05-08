@@ -104,24 +104,24 @@ module Fixmes : sig
 end
 
 module Reverse_naming_table_delta : sig
-  type 'pos pos_or_deleted =
-    | Pos of 'pos
+  type pos = FileInfo.name_type * Relative_path.t
+
+  type pos_or_deleted =
+    | Pos of pos
     | Deleted
 
   (** This stores normal symbol tables (consts/funs/types).
-  It also stores lower-case versions of those tables. 
+  It also stores lower-case versions of those tables.
   If more than two symbols with the same name are present,
   it's arbitrary which one is included. Likewise if more than
   two symbols with the same lower-case name. *)
   type t = {
-    mutable consts: FileInfo.pos pos_or_deleted SMap.t;
-    mutable funs: FileInfo.pos pos_or_deleted SMap.t;
-    mutable types:
-      (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
-    mutable consts_canon_key: FileInfo.pos pos_or_deleted SMap.t;
-    mutable funs_canon_key: FileInfo.pos pos_or_deleted SMap.t;
-    mutable types_canon_key:
-      (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
+    consts: pos_or_deleted SMap.t ref;
+    funs: pos_or_deleted SMap.t ref;
+    types: pos_or_deleted SMap.t ref;
+    consts_canon_key: pos_or_deleted SMap.t ref;
+    funs_canon_key: pos_or_deleted SMap.t ref;
+    types_canon_key: pos_or_deleted SMap.t ref;
   }
 
   val get_telemetry : key:string -> t -> Telemetry.t -> Telemetry.t

@@ -140,36 +140,36 @@ let empty_fixmes =
     }
 
 module Reverse_naming_table_delta = struct
-  type 'pos pos_or_deleted =
-    | Pos of 'pos
+  type pos = FileInfo.name_type * Relative_path.t
+
+  type pos_or_deleted =
+    | Pos of pos
     | Deleted
 
   type t = {
-    mutable consts: FileInfo.pos pos_or_deleted SMap.t;
-    mutable funs: FileInfo.pos pos_or_deleted SMap.t;
-    mutable types:
-      (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
-    mutable consts_canon_key: FileInfo.pos pos_or_deleted SMap.t;
-    mutable funs_canon_key: FileInfo.pos pos_or_deleted SMap.t;
-    mutable types_canon_key:
-      (FileInfo.pos * Naming_types.kind_of_type) pos_or_deleted SMap.t;
+    consts: pos_or_deleted SMap.t ref;
+    funs: pos_or_deleted SMap.t ref;
+    types: pos_or_deleted SMap.t ref;
+    consts_canon_key: pos_or_deleted SMap.t ref;
+    funs_canon_key: pos_or_deleted SMap.t ref;
+    types_canon_key: pos_or_deleted SMap.t ref;
   }
 
   let make () : t =
     {
-      consts = SMap.empty;
-      funs = SMap.empty;
-      types = SMap.empty;
-      consts_canon_key = SMap.empty;
-      funs_canon_key = SMap.empty;
-      types_canon_key = SMap.empty;
+      consts = ref SMap.empty;
+      funs = ref SMap.empty;
+      types = ref SMap.empty;
+      consts_canon_key = ref SMap.empty;
+      funs_canon_key = ref SMap.empty;
+      types_canon_key = ref SMap.empty;
     }
 
   let get_telemetry ~(key : string) (t : t) (telemetry : Telemetry.t) :
       Telemetry.t =
-    let consts = SMap.cardinal t.consts in
-    let funs = SMap.cardinal t.funs in
-    let types = SMap.cardinal t.types in
+    let consts = SMap.cardinal !(t.consts) in
+    let funs = SMap.cardinal !(t.funs) in
+    let types = SMap.cardinal !(t.types) in
     if consts + funs + types = 0 then
       telemetry
     else

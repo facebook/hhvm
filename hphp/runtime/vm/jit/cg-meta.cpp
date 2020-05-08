@@ -179,6 +179,8 @@ void addVeneer(CGMeta& meta, TCA source, TCA target) {
 void CGMeta::setJmpTransID(TCA jmp, TransID transID, TransKind kind) {
   if (kind != TransKind::Profile) return;
 
+  assertx(transID != kInvalidTransID);
+
   FTRACE(5, "setJmpTransID: adding {} => {}\n", jmp, transID);
   jmpTransIDs.emplace_back(jmp, transID);
 }

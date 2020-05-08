@@ -195,8 +195,8 @@ TCA getFuncBody(Func* func) {
       TRACE(2, "punting because jitting code was disabled\n");
       return nullptr;
     }
-    auto const kind = tc::profileFunc(func) ? TransKind::Profile
-                                            : TransKind::Live;
+    auto const kind = tc::profileFunc(func) ? TransKind::ProfPrologue
+                                            : TransKind::LivePrologue;
     tca = tc::emitFuncBodyDispatch(func, dvs, kind);
   } else {
     SrcKey sk(func, func->base(), ResumeMode::None);

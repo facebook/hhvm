@@ -1,6 +1,6 @@
 <?hh
 
-function a() { return varray[]; }
+function a() { return darray[]; }
 function main() {
   $x = a();
   $x[12] = 2;

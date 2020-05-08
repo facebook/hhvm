@@ -46,9 +46,9 @@ var_dump($colors);
 
 $ary = darray[];
 $ary[0] = varray["abc"];
-$ary[0][1] = "ij";
+$ary[0][] = "ij";
 $ary[1] = varray["mnop"];
-$ary[1][1] = "xyz";
+$ary[1][] = "xyz";
 
 foreach ($ary as $e1)
 {

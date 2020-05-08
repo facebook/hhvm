@@ -4,3 +4,9 @@ array(2) {
   [2]=>
   string(4) "test"
 }
+array(2) {
+  [0]=>
+  int(10)
+  [2]=>
+  string(4) "test"
+}

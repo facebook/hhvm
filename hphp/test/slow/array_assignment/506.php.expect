@@ -13,7 +13,7 @@ array(4) {
   string(5) "hello"
   [2]=>
   float(3.5)
-  [4]=>
+  [3]=>
   string(5) "world"
 }
 array(3) {

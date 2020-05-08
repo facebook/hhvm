@@ -47,11 +47,11 @@ function main_entry(): void {
 
   $table = darray[];
   $table[0] = varray[34];
-  $table[0][1] = -3;
-  $table[0][2] = 345;
+  $table[0][] = -3;
+  $table[0][] = 345;
   $table[1] = varray[123];
-  $table[1][1] = 9854;
-  $table[1][2] = -765;
+  $table[1][] = 9854;
+  $table[1][] = -765;
 
   findValue($table, 123);
   findValue($table, -23);

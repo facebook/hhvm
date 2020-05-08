@@ -1,7 +1,7 @@
 <?hh
 
 trait Singleton {
-  protected static $instances=varray[];
+  protected static $instances=darray[];
   abstract protected function __construct($config);
   public static function getInstance($config) {
     if (!isset(self::$instances[$serialize = serialize($config)])) {

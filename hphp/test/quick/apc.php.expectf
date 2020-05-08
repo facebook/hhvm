@@ -19,11 +19,8 @@ array(4) {
   int(4)
   [2]=>
   int(1776)
-  ["newKey"]=>
-  array(0) {
-  }
-}
-array(0) {
+  [3]=>
+  string(16) "new varray entry"
 }
 array(2) {
   [0]=>
@@ -40,11 +37,8 @@ array(3) {
   string(3) "sv0"
   [1]=>
   string(3) "sv1"
-  ["newKey"]=>
-  array(0) {
-  }
-}
-array(0) {
+  [2]=>
+  string(16) "new varray entry"
 }
 array(2) {
   ["sk0"]=>

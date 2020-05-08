@@ -59,21 +59,23 @@ function test_casting($a) {
 }
 
 function run_tests() {
+  $arr = $x ==> __hhvm_intrinsics\dummy_cast_to_kindofarray($x);
+
   echo "\n******* ad-hoc tests ********************************\n";
-  test(varray[], '10');
-  test(varray[], 10);
-  test(varray[1, 2, 3, 4], '2');
+  test($arr(varray[]), '10');
+  test($arr(varray[]), 10);
+  test($arr(varray[1, 2, 3, 4]), '2');
   test(varray[1, 2, 3, 4], 2);
   test(darray[10 => 'abc'], '10');
   test(darray[10 => 'abc'], 10);
 
   echo "\n******* constant string tests ***********************\n";
-  test_const_key(varray[]);
-  test_const_key(varray[1, 2, 3, 4]);
+  test_const_key($arr(varray[]));
+  test_const_key($arr(varray[1, 2, 3, 4]));
   test_const_key(darray[2 => 'abc']);
 
   echo "\n******* constant int tests **************************\n";
-  test_const_key_int(varray[]);
+  test_const_key_int($arr(varray[]));
   test_const_key_int(varray[1, 2, 3, 4]);
   test_const_key_int(darray[2 => 'abc']);
 

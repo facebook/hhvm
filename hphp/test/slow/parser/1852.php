@@ -6,7 +6,7 @@ function main_1852() {
 ($a) = 1;
 var_dump($a);
 $b = varray[];
-($b)[0] = 2;
+($b)[] = 2;
 var_dump($b[0]);
 $c = new stdClass;
 ($c)->prop = 3;

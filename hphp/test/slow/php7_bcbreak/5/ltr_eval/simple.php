@@ -26,6 +26,6 @@ list($e[$f++],$e[$f++]) = $g[$f];
 var_dump($e);
 $h = varray[1, 2, 3];
 $i = 0;
-$j = varray[];
+$j = darray[];
 $j[$i++] = $h[$i++];
 var_dump($j);

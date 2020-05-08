@@ -1,6 +1,17 @@
 <?hh
 
-function test($a) {
+function test_varray($a) {
+  var_dump(current($a));
+  while (next(inout $a)) echo '.';
+  $a[] = 2;
+  $a[] = 3;
+  var_dump(current($a));
+  var_dump(next(inout $a));
+  var_dump(next(inout $a));
+  var_dump(current($a));
+}
+
+function test_darray($a) {
   var_dump(current($a));
   while (next(inout $a)) echo '.';
   $a[] = 2;
@@ -17,6 +28,15 @@ function test($a) {
   var_dump(current($a));
   $a[1] = 5;
   var_dump(current($a));
+}
+
+function test($a) {
+  print("\n==================================\nTesting: ");
+  print(json_encode($a)."\n");
+  print("\ntest_varray:\n");
+  test_varray(varray($a));
+  print("\ntest_darray:\n");
+  test_darray(darray($a));
 }
 
 <<__EntryPoint>>

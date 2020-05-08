@@ -3,7 +3,7 @@
 function foo($p) { return $p; }
 
 <<__EntryPoint>> function main(): void {
-$a = varray[1, 2, 3, 4];
+$a = darray(varray[1, 2, 3, 4]);
 $a[123] = 5;
 $a["0000"] = 6;
 var_dump(foo(__LINE__));

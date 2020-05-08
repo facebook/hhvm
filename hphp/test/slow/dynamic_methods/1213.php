@@ -10,7 +10,7 @@ class A {
 function main_1213() {
 $obj = new A();
 $method = 'foo';
-$aa = varray[];
+$aa = darray[];
 $obj->$method(inout $aa);
 var_dump($aa);
 }

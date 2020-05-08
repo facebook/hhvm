@@ -15,6 +15,6 @@ function main() {
   var_dump($b[1]->v);
   $b[1]->f();
   var_dump($b[1]->v);
-  $b[2] = 1;
+  $b[] = 1;
   var_dump($b[1]->v);
 }

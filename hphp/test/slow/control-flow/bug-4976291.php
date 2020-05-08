@@ -16,7 +16,7 @@ class Dlgr {
 }
 
 class X {
-  private static $classCache = varray[];
+  private static $classCache = darray[];
 
   static function getuirc(E $blah) {
     $blah_class = get_class($blah);

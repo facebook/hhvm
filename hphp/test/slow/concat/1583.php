@@ -4,7 +4,7 @@
 <<__EntryPoint>>
 function main_1583() {
 $a = varray[1, varray[1, varray[1]]];
-$a[1][1][1] = 3;
+$a[1][1][] = 3;
 var_dump($a);
 $a[1][1][1] = "1";
 $a[1][1][1] .= "2";

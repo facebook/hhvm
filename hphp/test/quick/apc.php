@@ -42,6 +42,13 @@ function testApc($before) {
     }
   }
 
+  # varrays don't support setStr or general-purpose unset.
+  if (isset($after[0])) {
+    $after[] = 'new varray entry';
+    var_dump($after);
+    return;
+  }
+
   # setM
   $after['newKey'] = varray[];
   var_dump($after);

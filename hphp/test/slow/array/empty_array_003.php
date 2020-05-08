@@ -3,7 +3,7 @@
 function a() { return varray[]; }
 function main() {
   $x = a();
-  $x[0] = 2;
+  $x[] = 2;
   return $x;
 }
 

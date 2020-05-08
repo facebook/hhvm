@@ -1,2 +1,3 @@
 -vEval.HackArrCompatNotices=true
 -vEval.HackArrCompatCheckImplicitVarrayAppend=true
+-vEval.HackArrCompatSpecialization=false

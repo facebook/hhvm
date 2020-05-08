@@ -6,7 +6,7 @@ function foo() {
 }
 function bar() {
   $x = foo();
-  $x['a'] = new C;
+  $x[] = new C;
   return $x[0];
 }
 function main() {

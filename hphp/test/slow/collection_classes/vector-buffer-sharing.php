@@ -23,7 +23,7 @@ function main() {
 
   $x = Vector {null};
   $y = $x->toImmVector();
-  $x[0] = varray[]; $x[0][42] = 73;
+  $x[0] = darray[]; $x[0][42] = 73;
   var_dump($y);
   unset($y);
   unset($x);
@@ -57,7 +57,7 @@ function main() {
   unset($y);
   unset($x);
 
-  $x = Vector {varray[1]};
+  $x = Vector {darray[0 => 1]};
   $y = $x->toImmVector();
   $x[0][1] = 2;
   var_dump($y);

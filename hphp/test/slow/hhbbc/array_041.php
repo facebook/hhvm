@@ -1,7 +1,7 @@
 <?hh
 
 class C { function heh() { echo "heh\n"; } }
-function foo() { return varray[]; }
+function foo() { return darray[]; }
 function some_int() { return mt_rand() ? 1 : 2; }
 function bar() {
   $x = foo();

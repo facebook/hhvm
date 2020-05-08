@@ -4,7 +4,7 @@ class C { function heh() { echo "heh\n"; } }
 function foo() { return varray[new C]; }
 function bar() {
   $x = foo();
-  $x[1] = new C;
+  $x[] = new C;
   return varray[$x[0], $x[1]];
 }
 function main() {

@@ -6419,14 +6419,17 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="Now that we've fixed the error, hover should work. It currently doesn't, and that's a bug, and this test expresses the current failure",
+                comment="Now that we've fixed the error, hover should work.",
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${main_file}"},
                     "position": {"line": 2, "character": 13},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [
+                        {"language": "hack", "value": "function aaa(): string"},
+                        "Return type: `string`",
+                    ],
                     "range": {
                         "start": {"line": 2, "character": 11},
                         "end": {"line": 2, "character": 14},
@@ -6476,14 +6479,20 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="hover should work fine after making copy then deleting copy. But it doesn't, and that's a current bug.",
+                comment="hover should work fine after making copy then deleting copy.",
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 3, "character": 15},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [
+                        {
+                            "language": "hack",
+                            "value": "function naming_error_declaration(): void",
+                        },
+                        "Return type: `void`",
+                    ],
                     "range": {
                         "start": {"line": 3, "character": 2},
                         "end": {"line": 3, "character": 26},
@@ -6533,14 +6542,20 @@ function aaa(): string {
             )
             .request(
                 line=line(),
-                comment="hover should work fine after making copy then deleting original. But it doesn't, and that's a current bug.",
+                comment="hover should work fine after making copy then deleting original.",
                 method="textDocument/hover",
                 params={
                     "textDocument": {"uri": "${php_file_uri}"},
                     "position": {"line": 3, "character": 15},
                 },
                 result={
-                    "contents": [{"language": "hack", "value": "_"}],
+                    "contents": [
+                        {
+                            "language": "hack",
+                            "value": "function naming_error_declaration(): void",
+                        },
+                        "Return type: `void`",
+                    ],
                     "range": {
                         "start": {"line": 3, "character": 2},
                         "end": {"line": 3, "character": 26},

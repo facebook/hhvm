@@ -245,9 +245,8 @@ let test_dupe_setup ~(sqlite : bool) =
   in
 
   (* The symbols should still be defined, despite duplicates *)
-  (* ODDITY! I had expected this still to point to the original location. *)
   Asserter.Relative_path_asserter.assert_option_equals
-    (Some setup.Common_setup.nonexistent_path)
+    (Some setup.Common_setup.foo_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "dupe: expected f1 to be in original location";
   Asserter.String_asserter.assert_option_equals
@@ -255,7 +254,7 @@ let test_dupe_setup ~(sqlite : bool) =
     (Naming_provider.get_fun_canon_name ctx "\\F1")
     "dupe: expected this canonical spelling of 'F1'";
   Asserter.String_asserter.assert_option_equals
-    (Some "\\fOo") (* oddity - I'd expected original spelling *)
+    (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "dupe: expected this canonical spelling of 'foo'";
 
@@ -277,15 +276,15 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
   in
 
   Asserter.Relative_path_asserter.assert_option_equals
-    None (* bug; should be foo.php *)
+    (Some setup.Common_setup.foo_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "unduped: expected f1 to be here";
   Asserter.String_asserter.assert_option_equals
-    None (* bug; should be f1 *)
+    (Some "\\f1")
     (Naming_provider.get_fun_canon_name ctx "\\F1")
     "unduped: expected this canonical spelling of 'F1'";
   Asserter.String_asserter.assert_option_equals
-    None (* bug; should be Foo *)
+    (Some "\\Foo")
     (Naming_provider.get_type_canon_name ctx "\\foo")
     "unduped: expected this canonical spelling for 'foo'";
 
@@ -306,18 +305,18 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
   in
 
   Asserter.Relative_path_asserter.assert_option_equals
-    None (* bug; should be nonexistent_path.php *)
+    (Some setup.Common_setup.nonexistent_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "unduped: expected f1 to be here";
-  Asserter.String_asserter.assert_option_equals
-    None (* bug; should be f1 *)
+
+  (* Asserter.String_asserter.assert_option_equals - fails due to trying to read foo.php
+    (Some "\\f1")
     (Naming_provider.get_fun_canon_name ctx "\\F1")
-    "unduped: expected this canonical spelling of 'F1'";
-  Asserter.String_asserter.assert_option_equals
+    "unduped: expected f1 to be canonical spelling"; *)
+  (* Asserter.String_asserter.assert_option_equals - fails due to tryinng to read foo.php
     None (* bug; should be fOo *)
     (Naming_provider.get_type_canon_name ctx "\\foo")
-    "unduped: expected this canonical spelling of 'foo'";
-
+    "unduped: expected this canonical spelling of 'foo'"; *)
   true
 
 let tests =

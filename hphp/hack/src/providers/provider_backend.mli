@@ -107,14 +107,22 @@ module Reverse_naming_table_delta : sig
   type pos = FileInfo.name_type * Relative_path.t
 
   type pos_or_deleted =
-    | Pos of pos
+    | Pos of pos * pos list
+        (** Pos(first,rest) is a multiset "first::rest" of positions.
+        An arbitrary one of the positions is stored as 'first', and the
+        rest are stored in 'rest'. This structure represents in ocaml's
+        type system that the 'Pos' case has at least one element in its
+        mltiset. Also, the first position is the one returned
+        when a caller asks what is "the" position for a given symbol --
+        many callers aren't even aware that there may be multiple positions,
+        and will happily do something reasonable when given an arbitrary one.
+        Our current implementation happens to leave 'first' unchanged until
+        such time as it's removed, at which point it's arbitrary which of
+        'rest' (if there are any) will be promoted to 'first'. *)
     | Deleted
 
-  (** This stores normal symbol tables (consts/funs/types).
-  It also stores lower-case versions of those tables.
-  If more than two symbols with the same name are present,
-  it's arbitrary which one is included. Likewise if more than
-  two symbols with the same lower-case name. *)
+  (** This stores a multimap from symbol name to the position(s)
+  where it's defined. It also stores a lower-case version of the multimap. *)
   type t = {
     consts: pos_or_deleted SMap.t ref;
     funs: pos_or_deleted SMap.t ref;

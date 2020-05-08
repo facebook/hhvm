@@ -102,12 +102,12 @@ let get_and_cache
   let open Provider_backend.Reverse_naming_table_delta in
   match SMap.find_opt !cache name with
   | Some Deleted -> None
-  | Some (Pos (name_type, path)) -> Some (name_type, path)
+  | Some (Pos ((name_type, path), _rest)) -> Some (name_type, path)
   | None ->
     (match Option.bind (db_path_of_ctx ctx) ~f:fallback with
     | None -> None
     | Some (name_type, path) ->
-      cache := SMap.add !cache ~key:name ~data:(Pos (name_type, path));
+      cache := SMap.add !cache ~key:name ~data:(Pos ((name_type, path), []));
       Some (name_type, path))
 
 let get_const_pos (ctx : Provider_context.t) (name : string) :
@@ -152,7 +152,7 @@ let add_const
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
       let open Provider_backend.Reverse_naming_table_delta in
-      let data = Pos (FileInfo.Const, FileInfo.get_pos_filename pos) in
+      let data = Pos ((FileInfo.Const, FileInfo.get_pos_filename pos), []) in
       reverse_naming_table_delta.consts :=
         SMap.add !(reverse_naming_table_delta.consts) ~key:name ~data;
       reverse_naming_table_delta.consts_canon_key :=
@@ -283,7 +283,7 @@ let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
       let open Provider_backend.Reverse_naming_table_delta in
-      let data = Pos (FileInfo.Fun, FileInfo.get_pos_filename pos) in
+      let data = Pos ((FileInfo.Fun, FileInfo.get_pos_filename pos), []) in
       reverse_naming_table_delta.funs :=
         SMap.add !(reverse_naming_table_delta.funs) ~key:name ~data;
       reverse_naming_table_delta.funs_canon_key :=
@@ -332,7 +332,9 @@ let add_type
     | Provider_backend.Local_memory
         { Provider_backend.reverse_naming_table_delta; _ } ->
       let open Provider_backend.Reverse_naming_table_delta in
-      let data = Pos (kind_to_name_type kind, FileInfo.get_pos_filename pos) in
+      let data =
+        Pos ((kind_to_name_type kind, FileInfo.get_pos_filename pos), [])
+      in
       reverse_naming_table_delta.types :=
         SMap.add !(reverse_naming_table_delta.types) ~key:name ~data;
       reverse_naming_table_delta.types_canon_key :=
@@ -535,44 +537,156 @@ let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type backend name pos Naming_types.TTypedef
 
+(** This removes the name->path mapping from the naming table (i.e. the combination
+of sqlite and delta). It is an error to call this method unless name->path exists.
+We enforce this with exceptions in some cases where it's cheap enough to verify,
+but not in others where enforcing it would involve a sqlite read.
+Invariant: this never transitions an entry from Some to None. *)
+let remove
+    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
+    (path : Relative_path.t)
+    (name : string) :
+    Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
+  let open Provider_backend.Reverse_naming_table_delta in
+  match SMap.find_opt delta name with
+  | None ->
+    (* We've never yet read/cached from sqlite. Presumably the caller is removing
+    the name->path mapping that we assume is present in sqlite. We could read
+    from sqlite right now solely to verify that the user-supplied path matches
+    the one that's in sqlite, but that'd be costly and doesn't seem worth it. *)
+    SMap.add delta ~key:name ~data:Deleted
+  | Some Deleted -> failwith "removing symbol that's already removed"
+  | Some (Pos ((_name_type, old_path), [])) ->
+    if not (Relative_path.equal path old_path) then
+      failwith
+        (Printf.sprintf
+           "Naming_provider invariant failed: symbol %s was in %s, but we're trying to remove %s"
+           name
+           (Relative_path.to_absolute old_path)
+           (Relative_path.to_absolute path));
+    SMap.add delta ~key:name ~data:Deleted
+  | Some (Pos ((_name_type, old_path), rest_hd :: rest_tl)) ->
+    if Relative_path.equal path old_path then
+      SMap.add delta ~key:name ~data:(Pos (rest_hd, rest_tl))
+    else
+      let rest =
+        List.filter (rest_hd :: rest_tl) ~f:(fun (_name_type, rest_path) ->
+            not (Relative_path.equal path rest_path))
+      in
+      if List.length rest <> List.length rest_tl then
+        failwith
+          (Printf.sprintf
+             "Naming_provider invariant failed: symbol %s was in several files, but we're trying to remove %s which isn't one of them"
+             name
+             (Relative_path.to_absolute path));
+      SMap.add delta ~key:name ~data:(Pos ((_name_type, old_path), rest))
+
+(** This adds name->path to the naming table (i.e. the combination of sqlite+delta).
+Invariant: if this function causes the delta for this symbol to go from None->Some,
+then the result will include the name->path mapping that was present in sqlite (if any),
+in addition to the name->path mapping that we wish to add right now. *)
+let add
+    (db_path : Naming_sqlite.db_path option)
+    (delta : Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t)
+    (pos : Provider_backend.Reverse_naming_table_delta.pos)
+    (name : string) :
+    Provider_backend.Reverse_naming_table_delta.pos_or_deleted SMap.t =
+  let open Provider_backend.Reverse_naming_table_delta in
+  match (SMap.find_opt delta name, db_path) with
+  | (None, None) -> SMap.add delta ~key:name ~data:(Pos (pos, []))
+  | (None, Some db_path) ->
+    let (name_type, _) = pos in
+    let sqlite_pos =
+      match name_type with
+      | FileInfo.Const ->
+        Option.map
+          (Naming_sqlite.get_const_pos db_path name)
+          ~f:(fun sqlite_path -> (FileInfo.Const, sqlite_path))
+      | FileInfo.Fun ->
+        Option.map
+          (Naming_sqlite.get_fun_pos db_path name ~case_insensitive:false)
+          ~f:(fun sqlite_path -> (FileInfo.Fun, sqlite_path))
+      | FileInfo.RecordDef
+      | FileInfo.Class
+      | FileInfo.Typedef ->
+        Option.map
+          (Naming_sqlite.get_type_pos db_path name ~case_insensitive:false)
+          ~f:(fun (sqlite_path, sqlite_kind) ->
+            (kind_to_name_type sqlite_kind, sqlite_path))
+    in
+    let data =
+      match sqlite_pos with
+      | None -> Pos (pos, [])
+      | Some sqlite_pos -> Pos (sqlite_pos, [pos])
+    in
+    SMap.add delta ~key:name ~data
+  | (Some Deleted, _) -> SMap.add delta ~key:name ~data:(Pos (pos, []))
+  | (Some (Pos (old_pos, rest)), _) ->
+    SMap.add delta ~key:name ~data:(Pos (old_pos, pos :: rest))
+
 let update
     ~(backend : Provider_backend.t)
     ~(path : Relative_path.t)
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option) : unit =
-  ignore path;
   let open FileInfo in
   let strip_positions symbols =
     List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) -> SSet.add acc x)
   in
-  (* Remove old entries *)
-  Option.iter old_file_info ~f:(fun old_file_info ->
-      remove_type_batch backend (strip_positions old_file_info.classes);
-      remove_type_batch backend (strip_positions old_file_info.typedefs);
-      remove_type_batch backend (strip_positions old_file_info.record_defs);
-      remove_fun_batch backend (strip_positions old_file_info.funs);
-      remove_const_batch backend (strip_positions old_file_info.consts));
-  (* Add new entries.
-  TODO: this doesn't handle name collisions. For instance, if you create
-  duplicate names and then delete one of them, it will fail to think the
-  remaining one is present.
-  NOTE: We don't use [Naming_global.ndecl_file_fast] here because it
-  attempts to look up the symbol by doing a file parse, but the file may not
-  exist on disk anymore. We also don't need to do the file parse in this
-  case anyways, since we just did one and know for a fact where the symbol
-  is. *)
-  Option.iter new_file_info ~f:(fun new_file_info ->
-      List.iter new_file_info.funs ~f:(fun (pos, name) ->
-          add_fun backend name pos);
-      List.iter new_file_info.classes ~f:(fun (pos, name) ->
-          add_class backend name pos);
-      List.iter new_file_info.record_defs ~f:(fun (pos, name) ->
-          add_record_def backend name pos);
-      List.iter new_file_info.typedefs ~f:(fun (pos, name) ->
-          add_typedef backend name pos);
-      List.iter new_file_info.consts ~f:(fun (pos, name) ->
-          add_const backend name pos));
-  ()
+  match backend with
+  | Provider_backend.Decl_service _ -> not_implemented backend
+  | Provider_backend.Shared_memory ->
+    (* Remove old entries *)
+    Option.iter old_file_info ~f:(fun old_file_info ->
+        remove_type_batch backend (strip_positions old_file_info.classes);
+        remove_type_batch backend (strip_positions old_file_info.typedefs);
+        remove_type_batch backend (strip_positions old_file_info.record_defs);
+        remove_fun_batch backend (strip_positions old_file_info.funs);
+        remove_const_batch backend (strip_positions old_file_info.consts));
+    (* Add new entries. Note: the caller is expected to have a solution
+    for duplicate names. Note: can't use [Naming_global.ndecl_file_fast]
+    because it attempts to look up the symbol by doing a file parse, but
+    we have to use the file_info we're given to avoid races. *)
+    Option.iter new_file_info ~f:(fun new_file_info ->
+        List.iter new_file_info.funs ~f:(fun (pos, name) ->
+            add_fun backend name pos);
+        List.iter new_file_info.classes ~f:(fun (pos, name) ->
+            add_class backend name pos);
+        List.iter new_file_info.record_defs ~f:(fun (pos, name) ->
+            add_record_def backend name pos);
+        List.iter new_file_info.typedefs ~f:(fun (pos, name) ->
+            add_typedef backend name pos);
+        List.iter new_file_info.consts ~f:(fun (pos, name) ->
+            add_const backend name pos));
+    ()
+  | Provider_backend.Local_memory
+      {
+        Provider_backend.reverse_naming_table_delta = deltas;
+        naming_db_path_ref;
+        _;
+      } ->
+    let open Provider_backend.Reverse_naming_table_delta in
+    (* helper*)
+    let update olds news delta name_type =
+      let olds = strip_positions olds in
+      let news = strip_positions news in
+      let removed = SSet.diff olds news in
+      let added = SSet.diff news olds in
+      SSet.iter removed ~f:(fun name -> delta := remove !delta path name);
+      SSet.iter added ~f:(fun name ->
+          delta := add !naming_db_path_ref !delta (name_type, path) name);
+      ()
+    in
+    (* do the update *)
+    let oldfi = Option.value old_file_info ~default:FileInfo.empty_t in
+    let newfi = Option.value new_file_info ~default:FileInfo.empty_t in
+    update oldfi.funs newfi.funs deltas.funs FileInfo.Fun;
+    update oldfi.consts newfi.consts deltas.consts FileInfo.Const;
+    update oldfi.classes newfi.classes deltas.types FileInfo.Class;
+    update oldfi.typedefs newfi.typedefs deltas.types FileInfo.Typedef;
+    update oldfi.record_defs newfi.record_defs deltas.types FileInfo.RecordDef;
+    (* TODO: canon *)
+    ()
 
 let local_changes_push_sharedmem_stack () : unit =
   Naming_heap.push_local_changes ()

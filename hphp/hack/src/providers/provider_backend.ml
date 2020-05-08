@@ -143,7 +143,7 @@ module Reverse_naming_table_delta = struct
   type pos = FileInfo.name_type * Relative_path.t
 
   type pos_or_deleted =
-    | Pos of pos
+    | Pos of pos * pos list
     | Deleted
 
   type t = {

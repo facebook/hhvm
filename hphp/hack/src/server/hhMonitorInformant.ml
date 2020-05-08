@@ -31,7 +31,7 @@ module State_loader_prefetcher_real = struct
         ~rev:handle.State_loader.saved_state_for_rev
     in
     if Option.is_some cached then
-      (* No need to fetch if catched. *)
+      (* No need to fetch if cached. *)
       ()
     else
       let error_to_string (error : State_loader.error) : string =
@@ -45,7 +45,7 @@ module State_loader_prefetcher_real = struct
         ~config:State_loader_config.default_timeouts
         ~config_hash:hhconfig_hash
         handle
-      |> Future.get ~timeout:Int.max_value
+      |> Future.get ~timeout:999
       |> Result.map_error ~f:(fun error ->
              failwith (Future.error_to_string error))
       |> Result.map_error ~f:error_to_string

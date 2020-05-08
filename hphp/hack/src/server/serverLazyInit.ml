@@ -163,7 +163,7 @@ let merge_saved_state_futures
       Sys_utils.sleep ~seconds:0.04;
       wait_until_ready future
     end else
-      match Future.get future ~timeout:Int.max_value with
+      match Future.get future ~timeout:0 with
       | Ok result -> result
       | Error error -> failwith (Future.error_to_string error)
   in

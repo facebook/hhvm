@@ -296,7 +296,11 @@ module UserAttributes = struct
 
   let uaHasTopLevelCode = "__HasTopLevelCode"
 
+  let uaIsFoldable = "__IsFoldable"
+
   let uaNative = "__Native"
+
+  let uaOutOnly = "__OutOnly"
 
   let uaAlwaysInline = "__ALWAYS_INLINE"
 
@@ -349,7 +353,13 @@ module UserAttributes = struct
   (* These are names which are allowed in the systemlib but not in normal programs *)
   let systemlib_map =
     AttributeKinds.(
-      SMap.of_list [(uaNative, [fn; mthd]); (uaAlwaysInline, [fn; mthd])])
+      SMap.of_list
+        [
+          (uaAlwaysInline, [fn; mthd]);
+          (uaIsFoldable, [fn; mthd]);
+          (uaNative, [fn; mthd]);
+          (uaOutOnly, [parameter]);
+        ])
 
   let is_reserved name = String.is_prefix name ~prefix:"__"
 end

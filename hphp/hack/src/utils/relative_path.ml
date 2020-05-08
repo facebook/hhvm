@@ -27,6 +27,13 @@ let is_hhi = function
   | Tmp ->
     false
 
+let is_root = function
+  | Root -> true
+  | Hhi
+  | Dummy
+  | Tmp ->
+    false
+
 let root = ref None
 
 let hhi = ref None

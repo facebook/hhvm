@@ -18,6 +18,8 @@ type prefix =
 
 val is_hhi : prefix -> bool
 
+val is_root : prefix -> bool
+
 val set_path_prefix : prefix -> Path.t -> unit
 
 val path_of_prefix : prefix -> string

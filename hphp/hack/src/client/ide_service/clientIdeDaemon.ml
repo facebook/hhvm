@@ -978,8 +978,8 @@ let process_one_file_change (out_fd : Lwt_unix.file_descr) (istate : istate) :
   let changed_files_to_process =
     Relative_path.Set.remove istate.ifiles.changed_files_to_process next_file
   in
-  let%lwt { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
-    ClientIdeIncremental.update_naming_tables_for_changed_file_lwt
+  let { ClientIdeIncremental.naming_table; sienv; old_file_info; _ } =
+    ClientIdeIncremental.update_naming_tables_for_changed_file
       ~backend:(Provider_backend.Local_memory istate.icommon.local_memory)
       ~popt:istate.icommon.popt
       ~naming_table:istate.naming_table

@@ -15,50 +15,50 @@ let log s = Hh_logger.log ("[ide-incremental] " ^^ s)
 let strip_positions symbols =
   List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) -> SSet.add acc x)
 
-(* Print old and new symbols in a file after a change *)
+(** Print old and new symbols in a file after a change *)
 let log_file_info_change
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option)
     ~(start_time : float)
     ~(path : Relative_path.t) : unit =
   let end_time = Unix.gettimeofday () in
-  FileInfo.(
-    let list_symbols_in_file_info file_info =
-      let symbol_list_to_string symbols =
-        let num_symbols = List.length symbols in
-        let max_num_symbols_to_show = 5 in
-        match symbols with
-        | [] -> "<none>"
-        | symbols when num_symbols <= max_num_symbols_to_show ->
-          symbols |> strip_positions |> SSet.elements |> String.concat ~sep:", "
-        | symbols ->
-          let num_remaining_symbols = num_symbols - max_num_symbols_to_show in
-          let symbols = List.take symbols max_num_symbols_to_show in
-          Printf.sprintf
-            "%s (+%d more...)"
-            ( symbols
-            |> strip_positions
-            |> SSet.elements
-            |> String.concat ~sep:", " )
-            num_remaining_symbols
-      in
-      match file_info with
-      | Some file_info ->
+  let open FileInfo in
+  let list_symbols_in_file_info file_info =
+    let symbol_list_to_string symbols =
+      let num_symbols = List.length symbols in
+      let max_num_symbols_to_show = 5 in
+      match symbols with
+      | [] -> "<none>"
+      | symbols when num_symbols <= max_num_symbols_to_show ->
+        symbols |> strip_positions |> SSet.elements |> String.concat ~sep:", "
+      | symbols ->
+        let num_remaining_symbols = num_symbols - max_num_symbols_to_show in
+        let symbols = List.take symbols max_num_symbols_to_show in
         Printf.sprintf
-          "funs: %s, classes: %s, typedefs: %s, consts: %s"
-          (symbol_list_to_string file_info.funs)
-          (symbol_list_to_string file_info.classes)
-          (symbol_list_to_string file_info.typedefs)
-          (symbol_list_to_string file_info.consts)
-      | None -> "<file absent>"
+          "%s (+%d more...)"
+          ( symbols
+          |> strip_positions
+          |> SSet.elements
+          |> String.concat ~sep:", " )
+          num_remaining_symbols
     in
-    let verb =
-      match (old_file_info, new_file_info) with
-      | (Some _, Some _) -> "updated"
-      | (Some _, None) -> "deleted"
-      | (None, Some _) -> "added"
-      | (None, None) ->
-        (* May or may not indicate a bug in either the language client or the
+    match file_info with
+    | Some file_info ->
+      Printf.sprintf
+        "funs: %s, classes: %s, typedefs: %s, consts: %s"
+        (symbol_list_to_string file_info.funs)
+        (symbol_list_to_string file_info.classes)
+        (symbol_list_to_string file_info.typedefs)
+        (symbol_list_to_string file_info.consts)
+    | None -> "<file absent>"
+  in
+  let verb =
+    match (old_file_info, new_file_info) with
+    | (Some _, Some _) -> "updated"
+    | (Some _, None) -> "deleted"
+    | (None, Some _) -> "added"
+    | (None, None) ->
+      (* May or may not indicate a bug in either the language client or the
       language server.
 
       - Could happen if the language client sends spurious notifications.
@@ -74,23 +74,21 @@ let log_file_info_change
         we'll think it was deleted twice. This is the correct way to handle
         the race condition.
       *)
-        "spuriously updated"
-    in
-    log
-      "File changed (%.3fs) %s %s: old: %s vs. new: %s"
-      (end_time -. start_time)
-      (Relative_path.to_absolute path)
-      verb
-      (list_symbols_in_file_info old_file_info)
-      (list_symbols_in_file_info new_file_info))
+      "spuriously updated"
+  in
+  log
+    "File changed (%.3fs) %s %s: old: %s vs. new: %s"
+    (end_time -. start_time)
+    (Relative_path.to_absolute path)
+    verb
+    (list_symbols_in_file_info old_file_info)
+    (list_symbols_in_file_info new_file_info)
 
-(*
- * This fetches the new names out of the modified file
- * Result: (old * new)
- *)
+(** This fetches the new names out of the modified file.
+Returns (new_file_info * new_facts) *)
 let compute_fileinfo_for_path
     (popt : ParserOptions.t) (contents : string option) (path : Relative_path.t)
-    =
+    : FileInfo.t option * Facts.facts option =
   match contents with
   | None -> (None, None)
   (* The file couldn't be read from disk. Assume it's been deleted or is
@@ -195,20 +193,7 @@ let compute_fileinfo_for_path
         },
       facts )
 
-(*
- * This fetches the new names out of the modified file via lwt
- * Result: (old * new)
- *)
-let compute_fileinfo_for_path_lwt
-    (popt : ParserOptions.t) (path : Relative_path.t) :
-    (FileInfo.t option * Facts.facts option) Lwt.t =
-  (* Fetch file contents *)
-  let%lwt contents = Lwt_utils.read_all (Relative_path.to_absolute path) in
-  let contents = Result.ok contents in
-  let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
-  Lwt.return (new_file_info, facts)
-
-let update_naming_table
+let update_naming_tables
     ~(naming_table : Naming_table.t)
     ~(backend : Provider_backend.t)
     ~(path : Relative_path.t)
@@ -262,16 +247,6 @@ let update_naming_table
   in
   naming_table
 
-let update_symbol_index
-    ~(sienv : SearchUtils.si_env)
-    ~(path : Relative_path.t)
-    ~(facts : Facts.facts option) : SearchUtils.si_env =
-  match facts with
-  | None ->
-    let paths = Relative_path.Set.singleton path in
-    SymbolIndex.remove_files ~sienv ~paths
-  | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
-
 type changed_file_results = {
   naming_table: Naming_table.t;
   sienv: SearchUtils.si_env;
@@ -279,71 +254,39 @@ type changed_file_results = {
   new_file_info: FileInfo.t option;
 }
 
-let update_naming_tables_for_changed_file_lwt
-    ~(backend : Provider_backend.t)
-    ~(popt : ParserOptions.t)
-    ~(naming_table : Naming_table.t)
-    ~(sienv : SearchUtils.si_env)
-    ~(path : Relative_path.t) : changed_file_results Lwt.t =
-  match Relative_path.prefix path with
-  | Relative_path.Root ->
-    if not (FindUtils.path_filter path) then
-      Lwt.return
-        { naming_table; sienv; old_file_info = None; new_file_info = None }
-    else
-      let start_time = Unix.gettimeofday () in
-      let old_file_info = Naming_table.get_file_info naming_table path in
-      let%lwt (new_file_info, facts) =
-        compute_fileinfo_for_path_lwt popt path
-      in
-      log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
-      let naming_table =
-        update_naming_table
-          ~naming_table
-          ~backend
-          ~path
-          ~old_file_info
-          ~new_file_info
-      in
-      let sienv = update_symbol_index ~sienv ~path ~facts in
-      Lwt.return { naming_table; sienv; old_file_info; new_file_info }
-  | _ ->
-    log
-      "Ignored change to file %s, as it is not within our repo root"
-      (Relative_path.to_absolute path);
-    Lwt.return
-      { naming_table; sienv; old_file_info = None; new_file_info = None }
-
 let update_naming_tables_for_changed_file
     ~(backend : Provider_backend.t)
     ~(popt : ParserOptions.t)
     ~(naming_table : Naming_table.t)
     ~(sienv : SearchUtils.si_env)
     ~(path : Relative_path.t) : changed_file_results =
-  match Relative_path.prefix path with
-  | Relative_path.Root ->
-    if not (FindUtils.path_filter path) then
-      { naming_table; sienv; old_file_info = None; new_file_info = None }
-    else
-      let start_time = Unix.gettimeofday () in
-      let old_file_info = Naming_table.get_file_info naming_table path in
-      let contents = File_provider.get_contents path in
-      let (new_file_info, facts) =
-        compute_fileinfo_for_path popt contents path
-      in
-      log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
-      let naming_table =
-        update_naming_table
-          ~naming_table
-          ~backend
-          ~path
-          ~old_file_info
-          ~new_file_info
-      in
-      let sienv = update_symbol_index ~sienv ~path ~facts in
-      { naming_table; sienv; old_file_info; new_file_info }
-  | _ ->
-    log
-      "Ignored change to file %s, as it is not within our repo root"
-      (Relative_path.to_absolute path);
+  if
+    Relative_path.is_root (Relative_path.prefix path)
+    && FindUtils.path_filter path
+  then begin
+    let contents = File_provider.get_contents path in
+    let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
+    let start_time = Unix.gettimeofday () in
+    let old_file_info = Naming_table.get_file_info naming_table path in
+    log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
+    let naming_table =
+      update_naming_tables
+        ~naming_table
+        ~backend
+        ~path
+        ~old_file_info
+        ~new_file_info
+    in
+    let sienv =
+      match facts with
+      | None ->
+        SymbolIndex.remove_files
+          ~sienv
+          ~paths:(Relative_path.Set.singleton path)
+      | Some facts -> SymbolIndex.update_from_facts ~sienv ~path ~facts
+    in
+    { naming_table; sienv; old_file_info; new_file_info }
+  end else begin
+    log "Ignored change to file %s" (Relative_path.to_absolute path);
     { naming_table; sienv; old_file_info = None; new_file_info = None }
+  end

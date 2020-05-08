@@ -1,7 +1,7 @@
 <?hh
 abstract class :base {
   protected static function __xhpAttributeDeclaration() {
-    return varray[];
+    return darray[];
   }
   public static function xhpAttributeDeclaration() {
     return static::__xhpAttributeDeclaration();

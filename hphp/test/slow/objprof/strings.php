@@ -3,19 +3,19 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_dups(string $cls, ?array $objs) {
+function get_dups(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "dups", 0);
 }
-function get_refs(string $cls, ?array $objs) {
+function get_refs(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "refs", 0);
 }
-function get_srefs(string $cls, ?array $objs) {
+function get_srefs(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "srefs", 0);
 }
-function get_path(string $cls, ?array $objs) {
+function get_path(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "path", 0);
 }
@@ -86,7 +86,7 @@ $objs = null;
 // TEST: Complex path
 $myClass = Map {};
 $two = getStr(2);
-$myClass["root"] = varray[];
+$myClass["root"] = darray[];
 $myClass["root"][] = "one";
 $myClass["root"][] = "one";
 $myClass["root"][$two] = getStr(2);

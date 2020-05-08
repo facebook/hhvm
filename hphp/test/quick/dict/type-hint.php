@@ -39,10 +39,10 @@ function takes_vec(@vec $v): vec {
 function takes_keyset(@keyset $ks): keyset {
   return $ks;
 }
-function takes_array1(@array $arr): array {
+function takes_array1(@varray $arr): varray {
   return $arr;
 }
-function takes_array2(@?array $arr): ?array {
+function takes_array2(@?varray $arr): ?varray {
   return $arr;
 }
 function takes_bool(@bool $b): bool {
@@ -133,7 +133,7 @@ set_error_handler(
    string $errstr,
    string $errfile,
    int $errline,
-   array $errcontext
+   darray $errcontext
   ) ==> {
     echo "ERROR: "; var_dump($errstr);
     return true;

@@ -9,12 +9,12 @@ $descriptorspec = varray[
   varray["pipe", "a"],
 ];
 $io = null;
-$process = proc_open('cat', $descriptorspec, inout $io);
+$process = proc_open('cat', darray($descriptorspec), inout $io);
 fwrite($io[0], "a\nb\nc\n");
 
 // Just to have another thing in the $r array that has no data
 $io2 = null;
-$process2 = proc_open('cat', $descriptorspec, inout $io2);
+$process2 = proc_open('cat', darray($descriptorspec), inout $io2);
 
 while (!feof($io[1])) {
   $r = varray[$io[1], $io2[1]];

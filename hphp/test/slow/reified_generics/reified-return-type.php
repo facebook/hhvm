@@ -5,7 +5,7 @@ set_error_handler(
   string $errstr,
   string $errfile,
   int $errline,
-  array $errcontext
+  darray $errcontext
   ) ==> {
     echo "ERROR: ".$errstr." on line ".(string)$errline."\n";
     return true;

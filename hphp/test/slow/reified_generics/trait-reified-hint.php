@@ -12,7 +12,7 @@ function main() {
     string $errstr,
     string $errfile,
     int $errline,
-    array $errcontext
+    darray $errcontext
     ) ==> {
       echo $errstr."\n";
       throw new Exception();

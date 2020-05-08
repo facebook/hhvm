@@ -1,13 +1,13 @@
 <?hh
 
 
-function array_extend(inout $dest, array $src): void {
+function array_extend(inout $dest, varray $src): void {
   foreach ($src as $element) {
     $dest[] = $element;
   }
 }
 
-function getImpliedChecks(array $arg): array {
+function getImpliedChecks(varray $arg): varray {
   $implied_checks = varray[];
   foreach ($arg as $key => $val) {
     array_extend(inout $implied_checks, $val);

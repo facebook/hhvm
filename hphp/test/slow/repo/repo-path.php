@@ -31,7 +31,7 @@ function main() {
   ];
 
   $pipes = null;
-  $proc = proc_open($cmd, $descriptorspec, inout $pipes);
+  $proc = proc_open($cmd, darray($descriptorspec), inout $pipes);
   if (!$proc) {
     echo "Failed to open: $cmd\n";
     exit -1;

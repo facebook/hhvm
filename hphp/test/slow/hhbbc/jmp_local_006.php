@@ -1,6 +1,6 @@
 <?hh
 
-function main(array $x = null) {
+function main(varray $x = null) {
   if ($x) {
     echo is_array($x);
     echo "\n";

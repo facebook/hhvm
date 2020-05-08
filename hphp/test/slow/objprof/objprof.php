@@ -3,11 +3,11 @@
 // If anything breaks, it's should be easier to debug by running shell:
 // #export TRACE=objprof:3
 
-function get_instances(string $cls, ?array $objs) {
+function get_instances(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "instances", 0);
 }
-function get_bytes_eq(string $cls, ?array $objs) {
+function get_bytes_eq(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   $bytes = get_bytes($cls, $objs);
   $bytesd = get_bytesd($cls, $objs);
@@ -16,11 +16,11 @@ function get_bytes_eq(string $cls, ?array $objs) {
   }
   return $bytes;
 }
-function get_bytes(string $cls, ?array $objs) {
+function get_bytes(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]), "bytes", 0);
 }
-function get_bytesd(string $cls, ?array $objs) {
+function get_bytesd(string $cls, ?darray $objs) {
   if (!$objs) return 0;
   return hphp_array_idx(hphp_array_idx($objs, $cls, varray[]),
     "bytes_normalized", 0);
@@ -48,8 +48,8 @@ class SimpleProps { // 19+16+16 = 51
 
 // TEST: sizes of arrays
 class SimpleArrays {
-  public array $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
-  public array $arrMixed = darray[ // 32 (ArrayData) + 46 + 32 = 110
+  public varray $arrEmpty = varray[]; // 16 (tv) + 16 (ArrayData) = 32
+  public darray $arrMixed = darray[ // 32 (ArrayData) + 46 + 32 = 110
     "somekey" => "someval", // 2 * (7 chars + 16 bytes object) = 46
     321 => 3, // 16 * 2 = 32
   ];
@@ -72,14 +72,14 @@ class SharedStringClass {
   }
 }
 class SharedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
+  public varray_or_darray $val_ref = null;
+  public function __construct(varray_or_darray $arr) {
     $this->val_ref = $arr;
   }
 }
 class NestedArrayClass {
-  public array $val_ref = null;
-  public function __construct(array $arr) {
+  public varray_or_darray $val_ref = null;
+  public function __construct(varray_or_darray $arr) {
     $this->val_ref = $arr;
   }
 }

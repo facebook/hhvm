@@ -1,2 +1,2 @@
 
-Warning: Argument 1 to foo() must be of type @?xhp_url, array given in %s on line 7
+Warning: Argument 1 to foo() must be of type @?xhp_url, %rv?%rarray given in %s on line 7

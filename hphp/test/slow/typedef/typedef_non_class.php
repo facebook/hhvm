@@ -3,7 +3,7 @@
 type MyInt    = int;
 type MyBool   = bool;
 type MyDouble = float;
-type MyArray  = array;
+type MyArray  = varray;
 type MyString = string;
 
 function fooInt(MyInt $x): void {

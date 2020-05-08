@@ -1,6 +1,6 @@
 <?hh
 
-function f1(array $p1)
+function f1(varray $p1)
 {
     echo "Inside " . __METHOD__ . "\n";
 

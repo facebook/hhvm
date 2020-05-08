@@ -3,7 +3,7 @@
 
 class CatWrapper {
   private resource $proc;
-  private array $pipes;
+  private varray $pipes;
 
   public function __construct() {
     $descriptorspec = darray[
@@ -45,7 +45,7 @@ async function correctFrame(Awaitable<int> $awaitable): Awaitable<void> {
   await $awaitable;
 }
 
-function backtrace_contains(array $bt, string $fn_name): bool {
+function backtrace_contains(varray $bt, string $fn_name): bool {
   foreach ($bt as $frame) {
     if (idx($frame, 'function') === $fn_name) {
       return true;

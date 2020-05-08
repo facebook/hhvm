@@ -3,7 +3,7 @@
 namespace A\B;
 class Foo {
   static $baz = 32;
-  function __construct(array $a) {
+  function __construct(varray $a) {
     \var_dump($a);
   }
   function callUnknownClassMethod($method) {

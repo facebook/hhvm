@@ -22,7 +22,7 @@ function test5(float $v) { return HH\array_key_cast($v); }
 function test6(string $v) { return HH\array_key_cast($v); }
 function test7(string $v) { return HH\array_key_cast($v); }
 function test8(resource $v) { return HH\array_key_cast($v); }
-function test9(array $v) { return HH\array_key_cast($v); }
+function test9(varray $v) { return HH\array_key_cast($v); }
 function test10(vec $v) { return HH\array_key_cast($v); }
 function test11(dict $v) { return HH\array_key_cast($v); }
 function test12(keyset $v) { return HH\array_key_cast($v); }

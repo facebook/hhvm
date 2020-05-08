@@ -7,7 +7,7 @@
 // have a balanced enter/exit for every call.
 
 async function genList(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($wh ==> \HH\Asio\result($wh), $args);
 }
 

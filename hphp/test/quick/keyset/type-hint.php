@@ -42,10 +42,10 @@ function takes_bool(@bool $b): bool {
 function takes_string(@string $s): string {
   return $s;
 }
-function takes_array1(@array $a): array {
+function takes_array1(@varray $a): varray {
   return $a;
 }
-function takes_array2(@?array $a): ?array {
+function takes_array2(@?varray $a): ?varray {
   return $a;
 }
 function takes_xhp_child(@XHPChild $x): XHPChild {
@@ -113,7 +113,7 @@ set_error_handler(
    string $errstr,
    string $errfile,
    int $errline,
-   array $errcontext
+   darray $errcontext
   ) ==> {
     echo "ERROR: "; var_dump($errstr);
     return true;

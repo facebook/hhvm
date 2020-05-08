@@ -1,12 +1,12 @@
 ********** static string **********
-true, false, string(15) "a boring string"
+true, false, string(%d) "a boring string"
 
-true, false, string(15) "a boring string"
+true, false, string(%d) "a boring string"
 
 ********** dynamic string **********
-true, false, string(11) "hello world"
+true, false, string(%d) "hello world"
 
-true, false, string(11) "hello world"
+true, false, string(%d) "hello world"
 
 ********** explicit implements **********
 true, true, object(CExplicit) (0) {
@@ -36,7 +36,7 @@ Handled 2: Argument 1 to f2() must be of type @Stringish, null given
 false, false, NULL
 
 ********** array **********
-Handled 2: Argument 1 to f1() must be of type @?Stringish, array given
+Handled 2: Argument 1 to f1() must be of type @?Stringish, %rv?%rarray given
 false, false, array(3) {
   [0]=>
   int(1)
@@ -46,7 +46,7 @@ false, false, array(3) {
   int(3)
 }
 
-Handled 2: Argument 1 to f2() must be of type @Stringish, array given
+Handled 2: Argument 1 to f2() must be of type @Stringish, %rv?%rarray given
 false, false, array(3) {
   [0]=>
   int(1)
@@ -79,41 +79,41 @@ bool(false)
 bool(true)
 array(2) {
   [0]=>
-  string(9) "Stringish"
+  string(%d) "Stringish"
   [1]=>
-  string(8) "XHPChild"
+  string(%d) "XHPChild"
 }
 bool(true)
 bool(true)
 array(2) {
   [0]=>
-  string(9) "Stringish"
+  string(%d) "Stringish"
   [1]=>
-  string(8) "XHPChild"
+  string(%d) "XHPChild"
 }
 bool(true)
 bool(true)
 array(2) {
   [0]=>
-  string(9) "Stringish"
+  string(%d) "Stringish"
   [1]=>
-  string(8) "XHPChild"
+  string(%d) "XHPChild"
 }
 bool(true)
 bool(true)
 array(2) {
   [0]=>
-  string(9) "Stringish"
+  string(%d) "Stringish"
   [1]=>
-  string(8) "XHPChild"
+  string(%d) "XHPChild"
 }
 bool(false)
 bool(false)
 array(2) {
   [0]=>
-  string(9) "Stringish"
+  string(%d) "Stringish"
   [1]=>
-  string(8) "XHPChild"
+  string(%d) "XHPChild"
 }
 bool(true)
 bool(true)

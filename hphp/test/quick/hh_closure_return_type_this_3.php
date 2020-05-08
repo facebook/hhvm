@@ -30,8 +30,8 @@ function f5() { return function ($p): float { return $p; }; }
 function f5_soft() { return function ($p): @float { return $p; }; }
 function f6() { return function ($p): resource { return $p; }; }
 function f6_soft() { return function ($p): @resource { return $p; }; }
-function f7() { return function ($p): array { return $p; }; }
-function f7_soft() { return function ($p): @array { return $p; }; }
+function f7() { return function ($p): varray { return $p; }; }
+function f7_soft() { return function ($p): @varray { return $p; }; }
 function f8() { return function ($p): callable { return $p; }; }
 function f8_soft() { return function ($p): @callable { return $p; }; }
 function f9() { return function ($p): Figure { return $p; }; }

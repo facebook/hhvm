@@ -9,7 +9,7 @@ class C {
   }
 
   final public function genWithAccessTokens(
-    ?darray<int, mixed> $tokens_data = null,
+    ?varray<mixed> $tokens_data = null,
   ): bool {
     $tokens_data = $tokens_data ?: varray[];
     $z = $this->accessTokens->toMap();

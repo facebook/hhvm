@@ -28,8 +28,8 @@ async function f5($p): Awaitable<float> { return $p; }
 async function f5_soft($p): @Awaitable<float> { return $p; }
 async function f6($p): Awaitable<resource> { return $p; }
 async function f6_soft($p): @Awaitable<resource> { return $p; }
-async function f7($p): Awaitable<array> { return $p; }
-async function f7_soft($p): @Awaitable<array> { return $p; }
+async function f7($p): Awaitable<varray> { return $p; }
+async function f7_soft($p): @Awaitable<varray> { return $p; }
 async function f8($p): Awaitable<callable> { return $p; }
 async function f8_soft($p): @Awaitable<callable> { return $p; }
 async function f9($p): Awaitable<Figure> { return $p; }

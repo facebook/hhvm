@@ -1,6 +1,6 @@
 <?hh
 
-function append_to_self(): array {
+function append_to_self(): varray {
   $a = varray[];
   $a[] = $a;
   $a[] = $a;

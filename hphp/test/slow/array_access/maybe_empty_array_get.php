@@ -15,7 +15,7 @@ class Gronk {
     } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
 
-  private function getStuffAndGronk(?int $count): array {
+  private function getStuffAndGronk(?int $count): varray {
     foreach ($this->gronks as $gronk) {
       if ($GLOBALS['break']) {
         $z = varray[varray[null, null], $gronk];

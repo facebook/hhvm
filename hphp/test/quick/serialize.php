@@ -64,7 +64,7 @@ class G extends DangerousClass {
 function test_serialization($obj, $class_whitelist) {
   $str = serialize($obj);
   var_dump($str);
-  $new_obj = unserialize($str, $class_whitelist);
+  $new_obj = unserialize($str, darray($class_whitelist));
   var_dump($new_obj);
   unset($obj);
   unset($new_obj);

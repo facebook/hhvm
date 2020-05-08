@@ -5,7 +5,7 @@ async function block() {
 }
 
 async function awaitva(...$args) {
-  await AwaitAllWaitHandle::fromArray($args);
+  await AwaitAllWaitHandle::fromVec(vec($args));
   return array_map($x ==> HH\Asio\join($x), $args);
 }
 

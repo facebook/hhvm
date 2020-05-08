@@ -28,8 +28,8 @@ function f5($p): float { return $p; }
 function f5_soft($p): @float { return $p; }
 function f6($p): resource { return $p; }
 function f6_soft($p): @resource { return $p; }
-function f7($p): array { return $p; }
-function f7_soft($p): @array { return $p; }
+function f7($p): varray { return $p; }
+function f7_soft($p): @varray { return $p; }
 function f8($p): callable { return $p; }
 function f8_soft($p): @callable { return $p; }
 function f9($p): Figure { return $p; }

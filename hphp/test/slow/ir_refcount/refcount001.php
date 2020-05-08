@@ -2,7 +2,7 @@
 
 class X {
   private $rc_prop;
-  function __construct(array $x) {
+  function __construct(varray $x) {
     $this->rc_prop = $x;
   }
   function thing() {

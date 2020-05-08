@@ -1,6 +1,6 @@
 <?hh
 
-function instance_of_test(array $x) {
+function instance_of_test(varray $x) {
   echo '==================== ', __FUNCTION__,' ====================', "\n";
   var_dump($x is \HH\Traversable);
   var_dump($x is Traversable); // autoimported

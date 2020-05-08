@@ -11,7 +11,7 @@ try {
   var_dump(HH\Asio\join($handle));
 
   $handle = blockme(2);
-  HH\Asio\join(AwaitAllWaitHandle::fromArray(varray[$handle]));
+  HH\Asio\join(AwaitAllWaitHandle::fromVec(vec[$handle]));
   var_dump(HH\Asio\result($handle));
 
   $handle = blockme(3);

@@ -8,7 +8,7 @@ function testCycleBackTrace() {
   Exception::setTraceOptions(DEBUG_BACKTRACE_IGNORE_ARGS);
 
   $ref = new Ref();
-  $ref->value = AwaitAllWaitHandle::fromArray(varray[
+  $ref->value = AwaitAllWaitHandle::fromVec(vec[
     async {
       // asio checks first unfinished child
       await RescheduleWaitHandle::create(0, 2);

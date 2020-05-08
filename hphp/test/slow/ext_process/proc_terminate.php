@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_proc_terminate() {
 $cmd = 'sleep 3';
-$descriptors = varray[];
+$descriptors = darray[];
 
 // Don't add signals that would cause the process to abort, the output will
 // depend on whether it dumps its core.

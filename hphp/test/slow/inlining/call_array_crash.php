@@ -16,12 +16,12 @@ function foo_maker(bool $b, $x) {
   return $y->why();
 }
 
-function foo_maker_caller(bool $b, array $x) {
+function foo_maker_caller(bool $b, varray $x) {
   $t = foo_maker($b, $x);
   return $t;
 }
 
-function main(bool $b, array $x) {
+function main(bool $b, varray $x) {
   $q = foo_maker_caller($b, $x);
   return count($q);
 }

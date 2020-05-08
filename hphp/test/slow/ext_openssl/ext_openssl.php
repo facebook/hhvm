@@ -56,7 +56,7 @@ function test_openssl_csr_sign() {
 
   $privkey = openssl_pkey_new();
   VERIFY($privkey != null);
-  $csr = openssl_csr_new($dn, inout $privkey);
+  $csr = openssl_csr_new(darray($dn), inout $privkey);
   VERIFY($csr != null);
   $scert = openssl_csr_sign($csr, null, $privkey, $numberofdays);
   $publickey = null;

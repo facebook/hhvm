@@ -14,7 +14,7 @@ newtype Baz = BazCls;
 function baz(Baz $k) {}
 function baz2(Bazcls $k) {}
 
-type A = array;
+type A = varray;
 type B = int;
 type C = int;
 type D = bool;

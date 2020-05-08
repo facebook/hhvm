@@ -1,5 +1,5 @@
 <?hh
-function handler ($errno, $errstr, $errfile, $errline, array $errcontext) {
+function handler ($errno, $errstr, $errfile, $errline, darray $errcontext) {
   echo "handler_called\n";
 }
 <<__EntryPoint>> function main(): void {

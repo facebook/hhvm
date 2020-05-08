@@ -1,6 +1,6 @@
 <?hh
 
-type Foo = array;
+type Foo = varray;
 type Bar = Foo;
 
 function main(Bar $x) {

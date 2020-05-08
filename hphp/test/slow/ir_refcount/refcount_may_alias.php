@@ -4,7 +4,7 @@ class X {
   private $someArrayMember = varray[];
   private $someOtherMember;
 
-  function __construct(array $x) { $this->someArrayMember = $x; }
+  function __construct(varray $x) { $this->someArrayMember = $x; }
 
   final function myfunc() {
     /*

@@ -1,6 +1,6 @@
 <?hh
 
-function main(?array $a) {
+function main(?darray $a) {
   return foo($a[100][200]);
 }
 

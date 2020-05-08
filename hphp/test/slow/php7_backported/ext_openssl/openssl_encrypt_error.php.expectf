@@ -8,11 +8,11 @@ Warning: openssl_encrypt() expects parameter 2 to be string, object given in %s/
 
 Warning: openssl_encrypt() expects parameter 3 to be string, object given in %s/openssl_encrypt_error.php on line 14
 
-Warning: openssl_encrypt() expects parameter 1 to be string, array given in %s/openssl_encrypt_error.php on line 15
+Warning: openssl_encrypt() expects parameter 1 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 15
 
-Warning: openssl_encrypt() expects parameter 2 to be string, array given in %s/openssl_encrypt_error.php on line 16
+Warning: openssl_encrypt() expects parameter 2 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 16
 
-Warning: openssl_encrypt() expects parameter 3 to be string, array given in %s/openssl_encrypt_error.php on line 17
+Warning: openssl_encrypt() expects parameter 3 to be string, %rv?%rarray given in %s/openssl_encrypt_error.php on line 17
 
 Warning: The authenticated tag cannot be provided for cipher that does not support AEAD in %s/openssl_encrypt_error.php on line 20
-string(44) "iPR4HulskuaP5Z6me5uImk6BqVyJG73+63tkPauVZYk="
+string(%d) "iPR4HulskuaP5Z6me5uImk6BqVyJG73+63tkPauVZYk="

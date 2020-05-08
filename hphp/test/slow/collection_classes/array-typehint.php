@@ -32,14 +32,14 @@ function helper_ref(inout $x) {
   }
 }
 
-function f1(array $x) { helper($x); }
-function f2(?array $x) { helper($x); }
-function f3(@array $x) { helper($x); }
-function f4(@?array $x) { helper($x); }
-function f5(inout array $x) { helper_ref(inout $x); }
-function f6(inout ?array $x) { helper_ref(inout $x); }
-function f7(inout @array $x) { helper_ref(inout $x); }
-function f8(inout @?array $x) { helper_ref(inout $x); }
+function f1(varray $x) { helper($x); }
+function f2(?varray $x) { helper($x); }
+function f3(@varray $x) { helper($x); }
+function f4(@?varray $x) { helper($x); }
+function f5(inout varray $x) { helper_ref(inout $x); }
+function f6(inout ?varray $x) { helper_ref(inout $x); }
+function f7(inout @varray $x) { helper_ref(inout $x); }
+function f8(inout @?varray $x) { helper_ref(inout $x); }
 
 function main() {
   $containers = Map {

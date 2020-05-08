@@ -22,10 +22,10 @@ class Stringy {
   }
 }
 
-function getFooValues(): array<string, Foo> {
+function getFooValues(): darray<string, Foo> {
   return Foo::getValues();
 }
-function getFooValues2(): array<string, int> {
+function getFooValues2(): darray<string, int> {
   return Foo::getValues();
 }
 <<__EntryPoint>> function main(): void {

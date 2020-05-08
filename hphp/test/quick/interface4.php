@@ -7,16 +7,16 @@ interface J {
   function foo($x, $y);
 }
 interface K {
-  function foo($x, $y=0, array $z);
+  function foo($x, $y=0, varray $z);
 }
 interface L {
-  function foo($x, $y, array $z=null);
+  function foo($x, $y, varray $z=null);
 }
 interface M {
-  function foo($x, $y=0, array $z=varray[]);
+  function foo($x, $y=0, varray $z=varray[]);
 }
 class C implements I, J, K, L, M {
-  public function foo($x, $y=0, array $z=null, array $a=null) {
+  public function foo($x, $y=0, varray $z=null, array $a=null) {
     echo "$x $y $z\n";
   }
 }

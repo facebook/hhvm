@@ -2,7 +2,7 @@
 
 // with type hints
 class C8 {
-  public function __invoke(array $a0) {
+  public function __invoke(varray $a0) {
     var_dump($a0);
   }
 }

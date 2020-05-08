@@ -20,7 +20,7 @@ $im->newImage($width, $height, 'gray');
 
 /* Import the pixels into image.
    width * height * strlen("RGB") must match count($pixels) */
-$im->importImagePixels(0, 0, $width, $height, "RGB", Imagick::PIXEL_CHAR, $pixels);
+$im->importImagePixels(0, 0, $width, $height, "RGB", Imagick::PIXEL_CHAR, varray($pixels));
 
 var_dump($width, $height);
 var_dump($im->getImageGeometry());

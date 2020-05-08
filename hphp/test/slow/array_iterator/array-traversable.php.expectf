@@ -16,4 +16,4 @@ KeyedContainer Array
 array(0) {
 }
 
-Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, array given in %s/test/slow/array_iterator/array-traversable.php on line 36
+Catchable fatal error: Argument 1 passed to ifoo() must implement interface IFoo, %rv?%rarray given in %s/test/slow/array_iterator/array-traversable.php on line 36

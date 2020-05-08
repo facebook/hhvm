@@ -11,7 +11,7 @@ set_error_handler(
   string $errstr,
   string $errfile,
   int $errline,
-  array $errcontext
+  darray $errcontext
   ) ==> {
     echo "ERROR: "; var_dump($errstr);
     throw new Exception();

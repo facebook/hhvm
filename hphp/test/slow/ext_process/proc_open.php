@@ -3,7 +3,7 @@
 function test_me($desc) {
   $pipes = null;
   $child_status = null;
-  $process = proc_open(__DIR__."/test_proc_open.sh", $desc, inout $pipes);
+  $process = proc_open(__DIR__."/test_proc_open.sh", darray($desc), inout $pipes);
   $status = proc_get_status($process);
   pcntl_waitpid($status["pid"], inout $child_status);
 }

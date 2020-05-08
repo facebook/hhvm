@@ -122,6 +122,14 @@ position. Same as calling [add_type] with [Naming_types.TTypedef].
 *)
 val add_typedef : Provider_backend.t -> string -> FileInfo.pos -> unit
 
+(** Updates the reverse naming table based on old+new names in this file *)
+val update :
+  backend:Provider_backend.t ->
+  path:Relative_path.t ->
+  old_file_info:FileInfo.t option ->
+  new_file_info:FileInfo.t option ->
+  unit
+
 val local_changes_push_sharedmem_stack : unit -> unit
 
 val local_changes_pop_sharedmem_stack : unit -> unit

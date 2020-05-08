@@ -557,6 +557,47 @@ let add_typedef
     (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos) : unit =
   add_type backend name pos Naming_types.TTypedef
 
+let update
+    ~(backend : Provider_backend.t)
+    ~(path : Relative_path.t)
+    ~(old_file_info : FileInfo.t option)
+    ~(new_file_info : FileInfo.t option) : unit =
+  ignore path;
+  let open FileInfo in
+  let strip_positions symbols =
+    List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) -> SSet.add acc x)
+  in
+  (* Remove old entries *)
+  Option.iter old_file_info ~f:(fun old_file_info ->
+      remove_type_batch
+        backend
+        ( strip_positions old_file_info.classes
+        |> SSet.union (strip_positions old_file_info.typedefs)
+        |> SSet.union (strip_positions old_file_info.record_defs) );
+      remove_fun_batch backend (strip_positions old_file_info.funs);
+      remove_const_batch backend (strip_positions old_file_info.consts));
+  (* Add new entries.
+  TODO: this doesn't handle name collisions. For instance, if you create
+  duplicate names and then delete one of them, it will fail to think the
+  remaining one is present.
+  NOTE: We don't use [Naming_global.ndecl_file_fast] here because it
+  attempts to look up the symbol by doing a file parse, but the file may not
+  exist on disk anymore. We also don't need to do the file parse in this
+  case anyways, since we just did one and know for a fact where the symbol
+  is. *)
+  Option.iter new_file_info ~f:(fun new_file_info ->
+      List.iter new_file_info.funs ~f:(fun (pos, name) ->
+          add_fun backend name pos);
+      List.iter new_file_info.classes ~f:(fun (pos, name) ->
+          add_class backend name pos);
+      List.iter new_file_info.record_defs ~f:(fun (pos, name) ->
+          add_record_def backend name pos);
+      List.iter new_file_info.typedefs ~f:(fun (pos, name) ->
+          add_typedef backend name pos);
+      List.iter new_file_info.consts ~f:(fun (pos, name) ->
+          add_const backend name pos));
+  ()
+
 let local_changes_push_sharedmem_stack () : unit =
   Naming_heap.push_local_changes ()
 

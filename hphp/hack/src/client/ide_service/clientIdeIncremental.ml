@@ -8,50 +8,16 @@
  *)
 
 open Hh_prelude
-open Reordered_argument_collections
 
 let log s = Hh_logger.log ("[ide-incremental] " ^^ s)
 
-let strip_positions symbols =
-  List.fold symbols ~init:SSet.empty ~f:(fun acc (_, x) -> SSet.add acc x)
+let log_debug s = Hh_logger.debug ("[ide-incremental] " ^^ s)
 
-(** Print old and new symbols in a file after a change *)
+(** Print file change *)
 let log_file_info_change
     ~(old_file_info : FileInfo.t option)
     ~(new_file_info : FileInfo.t option)
-    ~(start_time : float)
     ~(path : Relative_path.t) : unit =
-  let end_time = Unix.gettimeofday () in
-  let open FileInfo in
-  let list_symbols_in_file_info file_info =
-    let symbol_list_to_string symbols =
-      let num_symbols = List.length symbols in
-      let max_num_symbols_to_show = 5 in
-      match symbols with
-      | [] -> "<none>"
-      | symbols when num_symbols <= max_num_symbols_to_show ->
-        symbols |> strip_positions |> SSet.elements |> String.concat ~sep:", "
-      | symbols ->
-        let num_remaining_symbols = num_symbols - max_num_symbols_to_show in
-        let symbols = List.take symbols max_num_symbols_to_show in
-        Printf.sprintf
-          "%s (+%d more...)"
-          ( symbols
-          |> strip_positions
-          |> SSet.elements
-          |> String.concat ~sep:", " )
-          num_remaining_symbols
-    in
-    match file_info with
-    | Some file_info ->
-      Printf.sprintf
-        "funs: %s, classes: %s, typedefs: %s, consts: %s"
-        (symbol_list_to_string file_info.funs)
-        (symbol_list_to_string file_info.classes)
-        (symbol_list_to_string file_info.typedefs)
-        (symbol_list_to_string file_info.consts)
-    | None -> "<file absent>"
-  in
   let verb =
     match (old_file_info, new_file_info) with
     | (Some _, Some _) -> "updated"
@@ -76,13 +42,7 @@ let log_file_info_change
       *)
       "spuriously updated"
   in
-  log
-    "File changed (%.3fs) %s %s: old: %s vs. new: %s"
-    (end_time -. start_time)
-    (Relative_path.to_absolute path)
-    verb
-    (list_symbols_in_file_info old_file_info)
-    (list_symbols_in_file_info new_file_info)
+  log_debug "File changed: %s %s" (Relative_path.to_absolute path) verb
 
 (** This fetches the new names out of the modified file.
 Returns (new_file_info * new_facts) *)
@@ -193,60 +153,6 @@ let compute_fileinfo_for_path
         },
       facts )
 
-let update_naming_tables
-    ~(naming_table : Naming_table.t)
-    ~(backend : Provider_backend.t)
-    ~(path : Relative_path.t)
-    ~(old_file_info : FileInfo.t option)
-    ~(new_file_info : FileInfo.t option) : Naming_table.t =
-  (* Remove the old entries from the forward and reverse naming tables. *)
-  let naming_table =
-    match old_file_info with
-    | None -> naming_table
-    | Some old_file_info ->
-      (* Update reverse naming table, which is stored in ctx *)
-      let open FileInfo in
-      Naming_global.remove_decls
-        ~backend
-        ~funs:(strip_positions old_file_info.funs)
-        ~classes:(strip_positions old_file_info.classes)
-        ~record_defs:(strip_positions old_file_info.record_defs)
-        ~typedefs:(strip_positions old_file_info.typedefs)
-        ~consts:(strip_positions old_file_info.consts);
-
-      (* Update and return the forward naming table *)
-      Naming_table.remove naming_table path
-  in
-  (* Update forward naming table and reverse naming table with the new
-  declarations. *)
-  let naming_table =
-    match new_file_info with
-    | None -> naming_table
-    | Some new_file_info ->
-      (* Update reverse naming table, which is stored in ctx.
-      TODO: this doesn't handle name collisions in erroneous programs.
-      NOTE: We don't use [Naming_global.ndecl_file_fast] here because it
-      attempts to look up the symbol by doing a file parse, but the file may not
-      exist on disk anymore. We also don't need to do the file parse in this
-      case anyways, since we just did one and know for a fact where the symbol
-      is. *)
-      let open FileInfo in
-      List.iter new_file_info.funs ~f:(fun (pos, fun_name) ->
-          Naming_provider.add_fun backend fun_name pos);
-      List.iter new_file_info.classes ~f:(fun (pos, class_name) ->
-          Naming_provider.add_class backend class_name pos);
-      List.iter new_file_info.record_defs ~f:(fun (pos, record_def_name) ->
-          Naming_provider.add_record_def backend record_def_name pos);
-      List.iter new_file_info.typedefs ~f:(fun (pos, typedef_name) ->
-          Naming_provider.add_typedef backend typedef_name pos);
-      List.iter new_file_info.consts ~f:(fun (pos, const_name) ->
-          Naming_provider.add_const backend const_name pos);
-
-      (* Update and return the forward naming table *)
-      Naming_table.update naming_table path new_file_info
-  in
-  naming_table
-
 type changed_file_results = {
   naming_table: Naming_table.t;
   sienv: SearchUtils.si_env;
@@ -266,17 +172,23 @@ let update_naming_tables_for_changed_file
   then begin
     let contents = File_provider.get_contents path in
     let (new_file_info, facts) = compute_fileinfo_for_path popt contents path in
-    let start_time = Unix.gettimeofday () in
     let old_file_info = Naming_table.get_file_info naming_table path in
-    log_file_info_change ~old_file_info ~new_file_info ~start_time ~path;
+    log_file_info_change ~old_file_info ~new_file_info ~path;
+    (* update the reverse-naming-table, which is mutable storage owned by backend *)
+    Naming_provider.update ~backend ~path ~old_file_info ~new_file_info;
+    (* remove old FileInfo from forward-naming-table, then add new FileInfo *)
     let naming_table =
-      update_naming_tables
-        ~naming_table
-        ~backend
-        ~path
-        ~old_file_info
-        ~new_file_info
+      match old_file_info with
+      | None -> naming_table
+      | Some _ -> Naming_table.remove naming_table path
     in
+    let naming_table =
+      match new_file_info with
+      | None -> naming_table
+      | Some new_file_info ->
+        Naming_table.update naming_table path new_file_info
+    in
+    (* update search index *)
     let sienv =
       match facts with
       | None ->

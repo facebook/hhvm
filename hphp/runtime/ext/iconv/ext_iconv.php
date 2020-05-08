@@ -110,7 +110,7 @@ function iconv_mime_decode(string $encoded_header,
 <<__Native>>
 function iconv_mime_encode(string $field_name,
                            string $field_value,
-                           ?array $preferences = null): mixed;
+                           ?darray $preferences = null): mixed;
 
 /**
  * Set current setting for character encoding conversion

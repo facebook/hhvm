@@ -164,7 +164,7 @@ function iterator_count(mixed $obj): mixed {
  * @param bool $use_keys - Whether to use the iterator element keys as index.
  * @return mixed - An array containing the elements of the iterator.
  */
-function iterator_to_array(mixed $obj, bool $use_keys = true): array {
+function iterator_to_array(mixed $obj, bool $use_keys = true): darray {
   if (!is_object($obj) || !($obj is \HH\Traversable)) {
     trigger_error("Argument must implement interface Traversable", E_RECOVERABLE_ERROR);
     return 0;

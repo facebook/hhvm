@@ -449,7 +449,7 @@ static Array HHVM_STATIC_METHOD(Locale, getAllVariants, const String& locale) {
   if (strval.empty()) {
     return Array();
   }
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   const char *s = strval.c_str(), *e = s + strval.size(), *p;
   for (p = s; p < e; ++p) {
     if (!isIDSeparator(*p)) continue;
@@ -516,7 +516,7 @@ static Array HHVM_STATIC_METHOD(Locale, getKeywords, const String& locale) {
   UEnumeration *e = uloc_openKeywords(locname.c_str(), &error);
   if (!e) return Array();
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   const char *key;
   int key_len;
   String val(128, ReserveString);
@@ -687,7 +687,7 @@ static void add_array_entry(Array& ret,
 static Array HHVM_STATIC_METHOD(Locale, parseLocale, const String& locale) {
   CHECK_LOCALELEN_OR_RETURN(locale, Array());
   String locname = localeOrDefault(locale);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   if (std::find(g_grandfathered.begin(),
                 g_grandfathered.end(), locale.data()) !=
                 g_grandfathered.end()) {

@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/ipc/ext_ipc.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/posix/ext_posix.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/base/builtin-functions.h"
@@ -215,18 +216,18 @@ Array HHVM_FUNCTION(msg_stat_queue,
 
   struct msqid_ds stat;
   if (msgctl(q->id, IPC_STAT, &stat) == 0) {
-    Array data;
-    data.set(s_msg_perm_uid,  (int64_t)stat.msg_perm.uid);
-    data.set(s_msg_perm_gid,  (int64_t)stat.msg_perm.gid);
-    data.set(s_msg_perm_mode, (int32_t)stat.msg_perm.mode);
-    data.set(s_msg_stime,     (int64_t)stat.msg_stime);
-    data.set(s_msg_rtime,     (int64_t)stat.msg_rtime);
-    data.set(s_msg_ctime,     (int64_t)stat.msg_ctime);
-    data.set(s_msg_qnum,      (int64_t)stat.msg_qnum);
-    data.set(s_msg_qbytes,    (int64_t)stat.msg_qbytes);
-    data.set(s_msg_lspid,     stat.msg_lspid);
-    data.set(s_msg_lrpid,     stat.msg_lrpid);
-    return data;
+    return make_darray(
+      s_msg_perm_uid,  (int64_t)stat.msg_perm.uid,
+      s_msg_perm_gid,  (int64_t)stat.msg_perm.gid,
+      s_msg_perm_mode, (int32_t)stat.msg_perm.mode,
+      s_msg_stime,     (int64_t)stat.msg_stime,
+      s_msg_rtime,     (int64_t)stat.msg_rtime,
+      s_msg_ctime,     (int64_t)stat.msg_ctime,
+      s_msg_qnum,      (int64_t)stat.msg_qnum,
+      s_msg_qbytes,    (int64_t)stat.msg_qbytes,
+      s_msg_lspid,     stat.msg_lspid,
+      s_msg_lrpid,     stat.msg_lrpid
+    );
   }
 
   return Array();

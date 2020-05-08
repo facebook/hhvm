@@ -35,14 +35,14 @@ class UConverter implements IDisposable {
    * Default "from" callback function
    *
    * @param int $reason -
-   * @param string $source -
+   * @param mixed $source -
    * @param string $codePoint -
    * @param int $error -
    *
    * @return mixed -
    */
   public function fromUCallback(int $reason,
-                                array $source,
+                                mixed $source,
                                 int $codePoint,
                                 inout int $error): mixed {
     switch ($reason) {
@@ -71,7 +71,7 @@ class UConverter implements IDisposable {
    * @return array -
    */
   <<__Native>>
-  public static function getAvailable(): array;
+  public static function getAvailable(): varray;
 
   /**
    * Get the destination encoding
@@ -273,7 +273,7 @@ class UConverter implements IDisposable {
   public static function transcode(string $str,
                                    string $toEncoding,
                                    string $fromEncoding,
-                                   array $options = null): ?string {
+                                   darray $options = null): ?string {
     $cnv = new UConverter($toEncoding, $fromEncoding);
     if ((isset($options['from_subst']) &&
          !$cnv->setSourceSubstChars($options['from_subst'])) ||

@@ -171,7 +171,7 @@ function msg_remove_queue(resource $queue): bool;
  *
  */
 <<__Native>>
-function msg_set_queue(resource $queue, array $data): bool;
+function msg_set_queue(resource $queue, darray $data): bool;
 
 /**
  * msg_stat_queue() returns the message queue meta data for the message queue
@@ -195,4 +195,4 @@ function msg_set_queue(resource $queue, array $data): bool;
  *
  */
 <<__Native>>
-function msg_stat_queue(resource $queue): array;
+function msg_stat_queue(resource $queue): darray;

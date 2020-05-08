@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/icu/ext_icu_uconverter.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 
@@ -429,13 +430,13 @@ static Variant HHVM_STATIC_METHOD(UConverter, reasonText, int64_t reason) {
 
 static Array HHVM_STATIC_METHOD(UConverter, getAvailable) {
   int32_t i, count = ucnv_countAvailable();
-  Array ret = Array::Create();
+  VArrayInit ret(count);
 
   for(i = 0; i < count; ++i) {
     ret.append(ucnv_getAvailableName(i));
   }
 
-  return ret;
+  return ret.toArray();
 }
 
 static Variant HHVM_STATIC_METHOD(UConverter, getAliases,

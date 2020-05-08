@@ -1,4 +1,6 @@
 <?hh
+<<__EntryPoint>>
+function main(): void {
 file_put_contents('csv_control_data.csv',
 <<<CDATA
 'groene appelen'|10
@@ -15,3 +17,4 @@ foreach ($s as $row) {
 }
 error_reporting(0);
 unlink('csv_control_data.csv');
+}

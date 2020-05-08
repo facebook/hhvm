@@ -2,19 +2,31 @@
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class
  * Source code: ext/spl/php_spl.c
- * Alias to functions: 
+ * Alias to functions:
  */
-
-echo "*** Testing class_uses() : variation ***\n";
-
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	if (error_reporting() != 0) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() != 0) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
+
+// define some classes
+class classWithToString
+{
+    public function __toString() {
+        return "Class A object";
+    }
+}
+
+class classWithoutToString
+{
+}
+<<__EntryPoint>> function main(): void {
+echo "*** Testing class_uses() : variation ***\n";
+
 set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
@@ -26,18 +38,6 @@ $res = fopen(__FILE__,'r');
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
-
-// define some classes
-class classWithToString
-{
-	public function __toString() {
-		return "Class A object";
-	}
-}
-
-class classWithoutToString
-{
-}
 
 // heredoc string
 $heredoc = <<<EOT
@@ -93,7 +93,7 @@ $inputs = darray[
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       //resource
       'resource' => $res,
 ];
@@ -108,3 +108,4 @@ foreach($inputs as $key =>$value) {
 fclose($res);
 
 echo "===DONE===\n";
+}

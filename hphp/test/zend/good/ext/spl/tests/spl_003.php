@@ -3,6 +3,10 @@ class a{}
 class b extends a{}
 class c extends b{}
 class d{}
+interface iface1{}
+interface iface2{}
+class f implements iface1, iface2{}
+<<__EntryPoint>> function main(): void {
 var_dump(class_parents(new c),
          class_parents("c"),
          class_parents(new b),
@@ -11,10 +15,6 @@ var_dump(class_parents(new c),
          class_parents("foo", false),
          class_parents("foo", true)
 );
-
-interface iface1{}
-interface iface2{}
-class f implements iface1, iface2{}
 var_dump(class_implements(new a),
          class_implements("a"),
          class_implements("aaa"),
@@ -22,3 +22,4 @@ var_dump(class_implements(new a),
 );
 
 echo "===DONE===\n";
+}

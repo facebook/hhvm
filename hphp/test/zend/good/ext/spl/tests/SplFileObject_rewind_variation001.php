@@ -2,9 +2,8 @@
 //line 2
 //line 3
 //line 4
-//line 5
+<<__EntryPoint>> function main(): void {
 $s = new SplFileObject(__FILE__);
-
 $s->seek(15);
 echo $s->current();
 $s->next();
@@ -13,3 +12,4 @@ var_dump($s->valid());
 $s->rewind();
 var_dump($s->valid());
 echo $s->current();
+}

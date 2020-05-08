@@ -29,6 +29,13 @@ type message =
 
 type message_queue = message Lwt_message_queue.t
 
+exception Outfd_write_error
+
+let is_outfd_write_error (exn : Exception.t) : bool =
+  match Exception.unwrap exn with
+  | Outfd_write_error -> true
+  | _ -> false
+
 (** istate, "initialized state", is the state the daemon after it has
 finished initialization (i.e. finished loading saved state),
 concerning these data-structures:
@@ -212,8 +219,10 @@ let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
 let write_message
     ~(out_fd : Lwt_unix.file_descr)
     ~(message : ClientIdeMessage.message_from_daemon) : unit Lwt.t =
-  let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
-  Lwt.return_unit
+  try%lwt
+    let%lwt (_ : int) = Marshal_tools_lwt.to_fd_with_preamble out_fd message in
+    Lwt.return_unit
+  with Unix.Unix_error (Unix.EPIPE, _, _) -> raise Outfd_write_error
 
 let load_saved_state
     (ctx : Provider_context.t)
@@ -1096,6 +1105,8 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
       with exn ->
         let exn = Exception.wrap exn in
         ClientIdeUtils.log_bug "handle_one_message" ~exn ~telemetry:true;
+        if is_outfd_write_error exn then exit 1;
+        (* if out_fd is down then there's no use continuing. *)
         Lwt.return_some state
     in
     match next_state_opt with

@@ -81,7 +81,6 @@ class TestFreshInit(common_tests.CommonTests):
                 function foo(?string $s): void {
                   /* HH_FIXME[4010] We can delete this one */
                   /* HH_FIXME[4089] We need to keep this one */
-                  /* HH_FIXME[4110] Keep errors discovered by new_inference */
                   /* HH_FIXME[4099] We can delete this one */
                   if (/* HH_FIXME[4011] We can delete this one */   $s) {
                     print "hello";
@@ -108,7 +107,6 @@ class TestFreshInit(common_tests.CommonTests):
                 out,
                 """<?hh // strict
                 function foo(?string $s): void {
-                  /* HH_FIXME[4110] Keep errors discovered by new_inference */
                   if ($s) {
                     print "hello";
                   } else {

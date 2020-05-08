@@ -336,7 +336,6 @@ let load ~silent config_filename options =
       ?po_disable_lval_as_an_expression:
         (bool_opt "disable_lval_as_an_expression" config)
       ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
-      ?ignored_fixme_regex:(string_opt "ignored_fixme_regex" config)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
       ~tco_experimental_features:(config_experimental_tc_features config)
       ~tco_log_inference_constraints:

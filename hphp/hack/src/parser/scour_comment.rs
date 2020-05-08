@@ -28,7 +28,6 @@ pub struct ScourComment<'a, T, V> {
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub collect_fixmes: bool,
     pub include_line_comments: bool,
-    pub ignored_fixme: Option<&'a Regex>,
     pub disallowed_decl_fixmes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
 }
@@ -111,36 +110,27 @@ where
 
                 if self.collect_fixmes {
                     let text = t.text_raw(self.source_text());
-                    let ignore_fixme = match self.ignored_fixme {
-                        None => false,
-                        Some(r) => r.is_match(text),
-                    };
-                    if !ignore_fixme {
-                        let pos = self.p_pos(node);
-                        let line = pos.line() as isize;
-                        let p = self.pos_of_offset(t.start_offset(), t.end_offset());
-                        match IGNORE_ERROR
-                            .captures(text)
-                            .and_then(|c| c.get(1))
-                            .map(|m| m.as_bytes())
-                        {
-                            Some(code) => {
-                                let code = std::str::from_utf8(code).unwrap();
-                                let code: isize = std::str::FromStr::from_str(code).unwrap();
-                                let in_hhi = pos.filename().prefix() == Prefix::Hhi;
-                                if !in_block
-                                    && !in_hhi
-                                    && self.disallowed_decl_fixmes.contains(&code)
-                                {
-                                    acc.add_to_misuses(line, code, p);
-                                } else {
-                                    acc.add_to_fixmes(line, code, p);
-                                }
+                    let pos = self.p_pos(node);
+                    let line = pos.line() as isize;
+                    let p = self.pos_of_offset(t.start_offset(), t.end_offset());
+                    match IGNORE_ERROR
+                        .captures(text)
+                        .and_then(|c| c.get(1))
+                        .map(|m| m.as_bytes())
+                    {
+                        Some(code) => {
+                            let code = std::str::from_utf8(code).unwrap();
+                            let code: isize = std::str::FromStr::from_str(code).unwrap();
+                            let in_hhi = pos.filename().prefix() == Prefix::Hhi;
+                            if !in_block && !in_hhi && self.disallowed_decl_fixmes.contains(&code) {
+                                acc.add_to_misuses(line, code, p);
+                            } else {
+                                acc.add_to_fixmes(line, code, p);
                             }
-                            None => {
-                                // Errors.fixme_format pos;
-                                acc.add_format_error(pos);
-                            }
+                        }
+                        None => {
+                            // Errors.fixme_format pos;
+                            acc.add_format_error(pos);
                         }
                     }
                 }

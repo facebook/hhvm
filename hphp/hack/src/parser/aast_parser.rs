@@ -25,7 +25,6 @@ use parser_core_types::{
     syntax_error::SyntaxError,
     syntax_tree::SyntaxTree,
 };
-use regex::bytes::Regex;
 use rust_aast_parser_types::{Env, Result as ParserResult};
 use rust_parser_errors::parse_errors_with_text;
 use stack_limit::StackLimit;
@@ -244,19 +243,12 @@ impl<'a> AastParser {
         indexed_source_text: &'a IndexedSourceText,
         script: &PositionedSyntax,
     ) -> Result<ScouredComments> {
-        let ignored_fixme_regex = env
-            .parser_options
-            .ignored_fixme_regex
-            .as_ref()
-            .map(|r| Regex::new(&r))
-            .transpose()?;
         let scourer: ScourComment<PositionedToken, PositionedValue> = ScourComment {
             phantom: std::marker::PhantomData,
             indexed_source_text,
             collect_fixmes: env.keep_errors,
             include_line_comments: env.include_line_comments,
             disallowed_decl_fixmes: &env.parser_options.po_disallowed_decl_fixmes,
-            ignored_fixme: ignored_fixme_regex.as_ref(),
         };
         Ok(scourer.scour_comments(script))
     }

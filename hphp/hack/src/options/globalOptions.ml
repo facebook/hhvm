@@ -45,7 +45,6 @@ type t = {
   tco_disallow_byref_dynamic_calls: bool;
   tco_disallow_byref_calls: bool;
   ignored_fixme_codes: ISet.t;
-  ignored_fixme_regex: string option;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
@@ -215,7 +214,6 @@ let default =
     tco_disallow_byref_dynamic_calls = false;
     tco_disallow_byref_calls = false;
     ignored_fixme_codes = Errors.default_ignored_fixme_codes;
-    ignored_fixme_regex = None;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
@@ -314,7 +312,6 @@ let make
       default.tco_disallow_byref_dynamic_calls)
     ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
     ?(ignored_fixme_codes = default.ignored_fixme_codes)
-    ?ignored_fixme_regex
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
@@ -406,7 +403,6 @@ let make
     po_auto_namespace_map;
     po_codegen = false;
     ignored_fixme_codes;
-    ignored_fixme_regex;
     po_deregister_php_stdlib;
     po_disallow_execution_operator;
     po_disallow_toplevel_requires;
@@ -562,8 +558,6 @@ let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
 
 let ignored_fixme_codes t = t.ignored_fixme_codes
-
-let ignored_fixme_regex t = t.ignored_fixme_regex
 
 let log_levels t = t.log_levels
 

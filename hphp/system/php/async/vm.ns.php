@@ -90,7 +90,7 @@ async function v<Tv>(
  * @fbdeprecated Use `genva()` instead.
  */
 async function va(...$awaitables): Awaitable/*<(...)>*/ {
-  await AwaitAllWaitHandle::fromArray($awaitables);
+  await AwaitAllWaitHandle::fromVec(vec($awaitables));
   $ret = varray[];
   foreach ($awaitables as $value) {
     $ret[] = \HH\Asio\result($value);

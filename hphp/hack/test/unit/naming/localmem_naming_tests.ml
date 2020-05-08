@@ -222,10 +222,16 @@ let test_dupe_setup ~(sqlite : bool) =
   let ctx = setup.Common_setup.ctx in
 
   (* In the common_setup, 'foo.php' defines symbols Foo,f1,f2.
-  Let's make another file 'nonexistent.php' define duplicates.
+  Let's make another file 'nonexistent.php' define duplicates,
+  but with different capitalization for Foo.
   It gets written to disk because canon-name-lookups have
   to read from disk to resolve canon names. *)
-  let contents = setup.Common_setup.foo_contents in
+  let contents =
+    Str.global_replace
+      (Str.regexp "class Foo")
+      "class fOo"
+      setup.Common_setup.foo_contents
+  in
   Disk.write_file
     ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
     ~contents;
@@ -244,6 +250,14 @@ let test_dupe_setup ~(sqlite : bool) =
     (Some setup.Common_setup.nonexistent_path)
     (Naming_provider.get_fun_path ctx "\\f1")
     "dupe: expected f1 to be in original location";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\f1")
+    (Naming_provider.get_fun_canon_name ctx "\\F1")
+    "dupe: expected this canonical spelling of 'F1'";
+  Asserter.String_asserter.assert_option_equals
+    (Some "\\fOo") (* oddity - I'd expected original spelling *)
+    (Naming_provider.get_type_canon_name ctx "\\foo")
+    "dupe: expected this canonical spelling of 'foo'";
 
   (setup, ctx, dupe)
 
@@ -266,6 +280,14 @@ let test_dupe_then_delete_dupe ~(sqlite : bool) () =
     None (* bug; should be foo.php *)
     (Naming_provider.get_fun_path ctx "\\f1")
     "unduped: expected f1 to be here";
+  Asserter.String_asserter.assert_option_equals
+    None (* bug; should be f1 *)
+    (Naming_provider.get_fun_canon_name ctx "\\F1")
+    "unduped: expected this canonical spelling of 'F1'";
+  Asserter.String_asserter.assert_option_equals
+    None (* bug; should be Foo *)
+    (Naming_provider.get_type_canon_name ctx "\\foo")
+    "unduped: expected this canonical spelling for 'foo'";
 
   true
 
@@ -287,6 +309,14 @@ let test_dupe_then_delete_original ~(sqlite : bool) () =
     None (* bug; should be nonexistent_path.php *)
     (Naming_provider.get_fun_path ctx "\\f1")
     "unduped: expected f1 to be here";
+  Asserter.String_asserter.assert_option_equals
+    None (* bug; should be f1 *)
+    (Naming_provider.get_fun_canon_name ctx "\\F1")
+    "unduped: expected this canonical spelling of 'F1'";
+  Asserter.String_asserter.assert_option_equals
+    None (* bug; should be fOo *)
+    (Naming_provider.get_type_canon_name ctx "\\foo")
+    "unduped: expected this canonical spelling of 'foo'";
 
   true
 

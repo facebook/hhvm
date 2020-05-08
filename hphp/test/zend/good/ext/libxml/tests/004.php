@@ -7,7 +7,7 @@ $ctxs = varray[
 	new stdclass,
 	varray['a'],
 	stream_context_create(),
-	stream_context_create(varray['file']),
+	stream_context_create(darray[0 => 'file']),
 	stream_context_create(darray['file' => darray['some_opt' => 'aaa']])
 ];
 

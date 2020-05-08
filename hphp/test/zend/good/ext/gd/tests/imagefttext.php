@@ -10,7 +10,7 @@
         $colour_b = imagecolorallocate($im, 0, 0, 0);
 
         imagefilledrectangle($im, 0, 0, $sx - 1, $sy - 1, $colour_b);
-        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", varray[]);
+        imagefttext($im, $sy * 0.75, 0, 0, $sy - 1, $colour_w, $fontfile, "A", darray[]);
 
         $cnt = 0;
         for ($y = 0; $y < $sy; ++$y) {
@@ -34,4 +34,3 @@
     $im = imagecreatetruecolor(256, 256);
     var_dump(testrun($im, $fontfile_8859));
     imagedestroy($im);
-

@@ -2,7 +2,7 @@
 class ItemArray implements Iterator {
 
 
-    public function __construct(private array $arr) {
+    public function __construct(private varray $arr) {
 
     }
 

@@ -54,7 +54,7 @@ $descriptorspec =
 
 putenv("inherit_me=please");
 $pipes = null;
-$process = proc_open('echo $inherit_me', $descriptorspec, inout $pipes);
+$process = proc_open('echo $inherit_me', darray($descriptorspec), inout $pipes);
 VERIFY($process != false);
 
 fpassthru($pipes[1]);
@@ -62,7 +62,7 @@ fpassthru($pipes[1]);
 VS(proc_close($process), 0);
 
 // Ensure that PATH makes it through too
-$process = proc_open('echo $PATH', $descriptorspec, inout $pipes);
+$process = proc_open('echo $PATH', darray($descriptorspec), inout $pipes);
 VERIFY($process != false);
 
 VERIFY(strlen(fgets($pipes[1])) > 2);
@@ -75,7 +75,7 @@ $descriptorspec =
         varray["file", $errout, "a"]];
 $cwd = "/tmp";
 
-$process = proc_open("sh", $descriptorspec, inout $pipes, $cwd);
+$process = proc_open("sh", darray($descriptorspec), inout $pipes, $cwd);
 VERIFY($process != false);
 
 fprintf($pipes[0], "echo Sup");
@@ -87,13 +87,13 @@ $descriptorspec =
   varray[varray["pipe", "r"],
         varray["pipe", "w"],
         varray["file", $errout, "a"]];
-$process = proc_open('cat', $descriptorspec, inout $pipes);
+$process = proc_open('cat', darray($descriptorspec), inout $pipes);
 VERIFY($process != false);
 VERIFY(proc_terminate($process));
 // still need to close it, not to leave a zombie behind
 proc_close($process);
 
-$process = proc_open('cat', $descriptorspec, inout $pipes);
+$process = proc_open('cat', darray($descriptorspec), inout $pipes);
 VERIFY($process != false);
 $ret = proc_get_status($process);
 VS($ret['command'], 'cat');
@@ -119,6 +119,6 @@ $nullbyteout = null;
 VS(exec($nullbyte, inout $nullbyteout, inout $return_var), "");
 VS($nullbyteout, varray[]);
 VS(shell_exec($nullbyte), null);
-$process = proc_open($nullbyte, varray[], inout $pipes);
+$process = proc_open($nullbyte, darray[], inout $pipes);
 VS($process, false);
 }

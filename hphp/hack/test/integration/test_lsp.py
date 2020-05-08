@@ -6301,7 +6301,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         )
         self.run_spec(spec, variables, wait_for_server=True, use_serverless_ide=True)
 
-    def test_serverless_ide_naming_error(self) -> None:
+    def test_serverless_ide_naming_error1(self) -> None:
         variables = dict(self.prepare_serverless_ide_environment())
         variables.update(self.setup_php_file("didchange.php"))
         variables.update(
@@ -6319,7 +6319,7 @@ function main(): int {
         )
         spec = (
             self.initialize_spec(
-                LspTestSpec("serverless_ide_naming_error"), use_serverless_ide=True
+                LspTestSpec("serverless_ide_naming_error1"), use_serverless_ide=True
             )
             .write_to_disk(
                 uri="${main_file}", contents="${main_file_contents}", notify=True
@@ -6414,28 +6414,140 @@ function aaa(): string {
                 },
                 powered_by="serverless_ide",
             )
-            # .write_to_disk(
-            #     comment="delete file A", uri="${file_a}", contents=None, notify=True
-            # )
-            # .request(
-            #     comment="Ensure that hover over `aaa` works now that the naming error is resolved",
-            #     method="textDocument/hover",
-            #     params={
-            #         "textDocument": {"uri": "${main_file}"},
-            #         "position": {"line": 2, "character": 13},
-            #     },
-            #     result={
-            #         "contents": [
-            #             {"language": "hack", "value": "function aaa(): string"},
-            #             "Return type: `string`",
-            #         ],
-            #         "range": {
-            #             "start": {"line": 2, "character": 11},
-            #             "end": {"line": 2, "character": 14},
-            #         },
-            #     },
-            #     powered_by="serverless_ide",
-            # )
+            .write_to_disk(
+                comment="delete file A", uri="${file_a}", contents=None, notify=True
+            )
+            .request(
+                line=line(),
+                comment="Now that we've fixed the error, hover should work. It currently doesn't, and that's a bug, and this test expresses the current failure",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${main_file}"},
+                    "position": {"line": 2, "character": 13},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "_"}],
+                    "range": {
+                        "start": {"line": 2, "character": 11},
+                        "end": {"line": 2, "character": 14},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_naming_error2(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        self.test_driver.stop_hh_server()
+        variables.update(self.setup_php_file("naming_error_caller.php"))
+        variables.update(
+            {
+                "contents": self.read_repo_file("naming_error_declaration.php"),
+                "original": self.repo_file("naming_error_declaration.php"),
+                "copy": self.repo_file("naming_error_copy.php"),
+            }
+        )
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_naming_error2"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .write_to_disk(
+                comment="create copy",
+                uri="${copy}",
+                contents="${contents}",
+                notify=True,
+            )
+            .write_to_disk(
+                comment="delete copy", uri="${copy}", contents=None, notify=True
+            )
+            .request(
+                line=line(),
+                comment="hover should work fine after making copy then deleting copy. But it doesn't, and that's a current bug.",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 15},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "_"}],
+                    "range": {
+                        "start": {"line": 3, "character": 2},
+                        "end": {"line": 3, "character": 26},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
+            .request(line=line(), method="shutdown", params={}, result=None)
+            .notification(method="exit", params={})
+        )
+        self.run_spec(spec, variables, wait_for_server=False, use_serverless_ide=True)
+
+    def test_serverless_ide_naming_error3(self) -> None:
+        variables = dict(self.prepare_serverless_ide_environment())
+        self.test_driver.stop_hh_server()
+        variables.update(self.setup_php_file("naming_error_caller.php"))
+        variables.update(
+            {
+                "contents": self.read_repo_file("naming_error_declaration.php"),
+                "original": self.repo_file("naming_error_declaration.php"),
+                "copy": self.repo_file("naming_error_copy.php"),
+            }
+        )
+        spec = (
+            self.initialize_spec(
+                LspTestSpec("serverless_ide_naming_error3"), use_serverless_ide=True
+            )
+            .notification(
+                method="textDocument/didOpen",
+                params={
+                    "textDocument": {
+                        "uri": "${php_file_uri}",
+                        "languageId": "hack",
+                        "version": 1,
+                        "text": "${php_file}",
+                    }
+                },
+            )
+            .write_to_disk(
+                comment="create copy",
+                uri="${copy}",
+                contents="${contents}",
+                notify=True,
+            )
+            .write_to_disk(
+                comment="delete original", uri="${original}", contents=None, notify=True
+            )
+            .request(
+                line=line(),
+                comment="hover should work fine after making copy then deleting original. But it doesn't, and that's a current bug.",
+                method="textDocument/hover",
+                params={
+                    "textDocument": {"uri": "${php_file_uri}"},
+                    "position": {"line": 3, "character": 15},
+                },
+                result={
+                    "contents": [{"language": "hack", "value": "_"}],
+                    "range": {
+                        "start": {"line": 3, "character": 2},
+                        "end": {"line": 3, "character": 26},
+                    },
+                },
+                powered_by="serverless_ide",
+            )
             .request(line=line(), method="shutdown", params={}, result=None)
             .notification(method="exit", params={})
         )

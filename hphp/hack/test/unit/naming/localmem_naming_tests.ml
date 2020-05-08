@@ -215,12 +215,94 @@ let test_canon_names_in_entries () =
 
   true
 
+let test_dupe_setup ~(sqlite : bool) =
+  Provider_backend.set_local_memory_backend_with_defaults ();
+  let setup = Common_setup.setup ~sqlite tcopt_with_shallow in
+  let sienv = SearchUtils.quiet_si_env in
+  let ctx = setup.Common_setup.ctx in
+
+  (* In the common_setup, 'foo.php' defines symbols Foo,f1,f2.
+  Let's make another file 'nonexistent.php' define duplicates.
+  It gets written to disk because canon-name-lookups have
+  to read from disk to resolve canon names. *)
+  let contents = setup.Common_setup.foo_contents in
+  Disk.write_file
+    ~file:(Relative_path.to_absolute setup.Common_setup.nonexistent_path)
+    ~contents;
+  let dupe =
+    ClientIdeIncremental.update_naming_tables_for_changed_file
+      ~backend:(Provider_context.get_backend ctx)
+      ~popt:(Provider_context.get_popt ctx)
+      ~naming_table:setup.Common_setup.naming_table
+      ~sienv
+      ~path:setup.Common_setup.nonexistent_path
+  in
+
+  (* The symbols should still be defined, despite duplicates *)
+  (* ODDITY! I had expected this still to point to the original location. *)
+  Asserter.Relative_path_asserter.assert_option_equals
+    (Some setup.Common_setup.nonexistent_path)
+    (Naming_provider.get_fun_path ctx "\\f1")
+    "dupe: expected f1 to be in original location";
+
+  (setup, ctx, dupe)
+
+let test_dupe_then_delete_dupe ~(sqlite : bool) () =
+  let (setup, ctx, dupe) = test_dupe_setup ~sqlite in
+
+  (* Now we'll delete 'nonexistent.php'. *)
+  Sys_utils.rm_dir_tree
+    (Relative_path.to_absolute setup.Common_setup.nonexistent_path);
+  let (_unduped : ClientIdeIncremental.changed_file_results) =
+    ClientIdeIncremental.update_naming_tables_for_changed_file
+      ~backend:(Provider_context.get_backend ctx)
+      ~popt:(Provider_context.get_popt ctx)
+      ~naming_table:dupe.ClientIdeIncremental.naming_table
+      ~sienv:dupe.ClientIdeIncremental.sienv
+      ~path:setup.Common_setup.nonexistent_path
+  in
+
+  Asserter.Relative_path_asserter.assert_option_equals
+    None (* bug; should be foo.php *)
+    (Naming_provider.get_fun_path ctx "\\f1")
+    "unduped: expected f1 to be here";
+
+  true
+
+let test_dupe_then_delete_original ~(sqlite : bool) () =
+  let (setup, ctx, dupe) = test_dupe_setup ~sqlite in
+
+  (* Now we'll delete the original 'foo.php'. *)
+  Sys_utils.rm_dir_tree (Relative_path.to_absolute setup.Common_setup.foo_path);
+  let (_unduped : ClientIdeIncremental.changed_file_results) =
+    ClientIdeIncremental.update_naming_tables_for_changed_file
+      ~backend:(Provider_context.get_backend ctx)
+      ~popt:(Provider_context.get_popt ctx)
+      ~naming_table:dupe.ClientIdeIncremental.naming_table
+      ~sienv:dupe.ClientIdeIncremental.sienv
+      ~path:setup.Common_setup.foo_path
+  in
+
+  Asserter.Relative_path_asserter.assert_option_equals
+    None (* bug; should be nonexistent_path.php *)
+    (Naming_provider.get_fun_path ctx "\\f1")
+    "unduped: expected f1 to be here";
+
+  true
+
 let tests =
   [
     ("test_unsaved_symbol_change_mem", test_unsaved_symbol_change ~sqlite:false);
     ( "test_unsaved_symbol_change_sqlite",
       test_unsaved_symbol_change ~sqlite:true );
     ("test_canon_names_in_entries", test_canon_names_in_entries);
+    ("test_dupe_then_delete_dupe_mem", test_dupe_then_delete_dupe ~sqlite:false);
+    ( "test_dupe_then_delete_dupe_sqlite",
+      test_dupe_then_delete_dupe ~sqlite:true );
+    ( "test_dupe_then_delete_original_mem",
+      test_dupe_then_delete_original ~sqlite:false );
+    ( "test_dupe_then_delete_original_sqlite",
+      test_dupe_then_delete_original ~sqlite:true );
   ]
 
 let () =

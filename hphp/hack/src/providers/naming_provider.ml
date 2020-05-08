@@ -569,11 +569,9 @@ let update
   in
   (* Remove old entries *)
   Option.iter old_file_info ~f:(fun old_file_info ->
-      remove_type_batch
-        backend
-        ( strip_positions old_file_info.classes
-        |> SSet.union (strip_positions old_file_info.typedefs)
-        |> SSet.union (strip_positions old_file_info.record_defs) );
+      remove_type_batch backend (strip_positions old_file_info.classes);
+      remove_type_batch backend (strip_positions old_file_info.typedefs);
+      remove_type_batch backend (strip_positions old_file_info.record_defs);
       remove_fun_batch backend (strip_positions old_file_info.funs);
       remove_const_batch backend (strip_positions old_file_info.consts));
   (* Add new entries.

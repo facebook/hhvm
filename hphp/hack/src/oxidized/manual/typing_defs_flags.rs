@@ -1,28 +1,115 @@
-pub const FT_FLAGS_RETURN_DISPOSABLE: isize = 0x1;
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
 
-pub const FT_FLAGS_RETURNS_MUTABLE: isize = 0x2;
+use std::convert::TryInto;
 
-pub const FT_FLAGS_RETURNS_VOID_TO_RX: isize = 0x4;
+use bitflags::bitflags;
 
-pub const FT_FLAGS_IS_COROUTINE: isize = 0x8;
+// NB: Keep the values of these flags in sync with typing_defs_flags.ml.
 
-pub const FT_FLAGS_ASYNC: isize = 0x10;
+bitflags! {
+    pub struct FunTypeFlags: u16 {
+        const RETURN_DISPOSABLE      = 1 << 0;
+        const RETURNS_MUTABLE        = 1 << 1;
+        const RETURNS_VOID_TO_RX     = 1 << 2;
+        const IS_COROUTINE           = 1 << 3;
+        const ASYNC                  = 1 << 4;
+        const GENERATOR              = 1 << 5;
 
-pub const FT_FLAGS_GENERATOR: isize = 0x20;
+        // These flags apply to the self type on methods.
+        const MUTABLE_FLAGS_OWNED    = 1 << 6;
+        const MUTABLE_FLAGS_BORROWED = 1 << 7;
+        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
+        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
 
-pub const FT_FLAGS_INSTANTIATED_TARGS: isize = 0x100;
+        const INSTANTIATED_TARGS     = 1 << 8;
+    }
+}
 
-// These flags are used for return type on FunType and parameter for FunParam
-pub const MUTABLE_FLAGS_OWNED: isize = 0x40;
+bitflags! {
+    pub struct FunParamFlags: u8 {
+        const ACCEPT_DISPOSABLE      = 1 << 0;
+        const INOUT                  = 1 << 1;
+        const HAS_DEFAULT            = 1 << 2;
 
-pub const MUTABLE_FLAGS_BORROWED: isize = 0x80;
+        // These flags apply to the parameter type.
+        const MUTABLE_FLAGS_OWNED    = 1 << 6;
+        const MUTABLE_FLAGS_BORROWED = 1 << 7;
+        const MUTABLE_FLAGS_MAYBE    = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
+        const MUTABLE_FLAGS_MASK     = Self::MUTABLE_FLAGS_OWNED.bits | Self::MUTABLE_FLAGS_BORROWED.bits;
+    }
+}
 
-pub const MUTABLE_FLAGS_MAYBE: isize = 0xC0;
+impl ocamlrep::ToOcamlRep for FunTypeFlags {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
+    }
+}
 
-pub const MUTABLE_FLAGS_MASK: isize = 0xC0;
+impl ocamlrep::FromOcamlRep for FunTypeFlags {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let int_value = ocamlrep::from::expect_int(value)?;
+        Ok(Self::from_bits_truncate(int_value.try_into()?))
+    }
+}
 
-pub const FP_FLAGS_ACCEPT_DISPOSABLE: isize = 0x1;
+impl serde::Serialize for FunTypeFlags {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u16(self.bits())
+    }
+}
 
-pub const FP_FLAGS_INOUT: isize = 0x2;
+impl<'de> serde::Deserialize<'de> for FunTypeFlags {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = FunTypeFlags;
 
-pub const FP_FLAGS_HAS_DEFAULT: isize = 0x4;
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                write!(formatter, "a u16 for FunTypeFlags")
+            }
+            fn visit_u16<E: serde::de::Error>(self, value: u16) -> Result<Self::Value, E> {
+                Ok(Self::Value::from_bits_truncate(value))
+            }
+        }
+        deserializer.deserialize_u16(Visitor)
+    }
+}
+
+impl ocamlrep::ToOcamlRep for FunParamFlags {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        ocamlrep::Value::int(self.bits() as isize)
+    }
+}
+
+impl ocamlrep::FromOcamlRep for FunParamFlags {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let int_value = ocamlrep::from::expect_int(value)?;
+        Ok(Self::from_bits_truncate(int_value.try_into()?))
+    }
+}
+
+impl serde::Serialize for FunParamFlags {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_u8(self.bits())
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for FunParamFlags {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct Visitor;
+        impl<'de> serde::de::Visitor<'de> for Visitor {
+            type Value = FunParamFlags;
+
+            fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                write!(formatter, "a u8 for FunParamFlags")
+            }
+            fn visit_u8<E: serde::de::Error>(self, value: u8) -> Result<Self::Value, E> {
+                Ok(Self::Value::from_bits_truncate(value))
+            }
+        }
+        deserializer.deserialize_u8(Visitor)
+    }
+}

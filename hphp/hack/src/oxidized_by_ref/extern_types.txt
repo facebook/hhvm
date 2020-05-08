@@ -76,6 +76,8 @@ oxidized::typing_defs_core::ShapeKind
 oxidized::typing_defs_core::ValKind
 oxidized::typing_defs_core::XhpAttr
 oxidized::typing_defs_core::XhpAttrTag
+oxidized::typing_defs_flags::FunParamFlags
+oxidized::typing_defs_flags::FunTypeFlags
 oxidized::typing_defs::ConsistentKind
 oxidized::typing_defs::RecordFieldReq
 oxidized::typing_defs::TypedefVisibility

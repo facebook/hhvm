@@ -9,6 +9,10 @@
 
 open Hh_prelude
 
+type fun_type_flags = int
+
+type fun_param_flags = int
+
 (* Is this bit set in the flags? *)
 let is_set bit flags = not (Int.equal 0 (Int.bit_and bit flags))
 
@@ -19,70 +23,74 @@ let set_bit bit value flags =
   else
     Int.bit_and (Int.bit_not bit) flags
 
+[@@@ocamlformat "disable"]
+
+(* NB: Keep the values of these flags in sync with typing_defs_flags.rs. *)
+
 (* Function type flags *)
-let ft_flags_return_disposable = 0x1
+let ft_flags_return_disposable  = 1 lsl 0
 
-let ft_flags_returns_mutable = 0x2
+let ft_flags_returns_mutable    = 1 lsl 1
 
-let ft_flags_returns_void_to_rx = 0x4
+let ft_flags_returns_void_to_rx = 1 lsl 2
 
-let ft_flags_is_coroutine = 0x8
+let ft_flags_is_coroutine       = 1 lsl 3
 
-let ft_flags_async = 0x10
+let ft_flags_async              = 1 lsl 4
 
-let ft_flags_generator = 0x20
+let ft_flags_generator          = 1 lsl 5
 
-(* These flags are usd for return type on FunType and parameter for FunParam *)
-let mutable_flags_owned = 0x40
+(* These flags are used for the self type on FunType and the parameter type on FunParam *)
+let mutable_flags_owned         = 1 lsl 6
 
-let mutable_flags_borrowed = 0x80
+let mutable_flags_borrowed      = 1 lsl 7
 
-let mutable_flags_maybe = 0xC0
+let mutable_flags_maybe         = Int.bit_or mutable_flags_owned mutable_flags_borrowed
 
-let mutable_flags_mask = 0xC0
+let mutable_flags_mask          = Int.bit_or mutable_flags_owned mutable_flags_borrowed
 
-let ft_flags_instantiated_targs = 0x100
+let ft_flags_instantiated_targs = 1 lsl 8
 
 (* Class element flags *)
-let ce_flags_abstract = 0x1
+let ce_flags_abstract            = 1 lsl 0
 
-let ce_flags_final = 0x2
+let ce_flags_final               = 1 lsl 1
 
-let ce_flags_override = 0x4
+let ce_flags_override            = 1 lsl 2
 
-let ce_flags_lsb = 0x8
+let ce_flags_lsb                 = 1 lsl 3
 
-let ce_flags_memoizelsb = 0x10
+let ce_flags_memoizelsb          = 1 lsl 4
 
-let ce_flags_synthesized = 0x20
+let ce_flags_synthesized         = 1 lsl 5
 
-let ce_flags_const = 0x40
+let ce_flags_const               = 1 lsl 6
 
-let ce_flags_lateinit = 0x80
+let ce_flags_lateinit            = 1 lsl 7
 
-let ce_flags_dynamicallycallable = 0x100
+let ce_flags_dynamicallycallable = 1 lsl 8
 
 (* Three bits used to encode optional XHP attr.
- * Set 0x400 if xa_has_default=true
+ * Set 1<<10 (0x400) if xa_has_default=true
  * Then encode xa_tag as follows:
- *   None: 0x1800
- *   Some Required: 0x0800
- *   Some lateinit: 0x1000
+ *   Some Required: 1<<11 (0x0800)
+ *   Some lateinit: 1<<12 (0x1000)
+ *   None:          1<<11 | 1<<12 (0x1800)
  * If attr is not present at all, then masking with 0x1800 will produce zero.
  *)
-let ce_flags_xa_tag_mask = 0x1800
+let ce_flags_xa_has_default      = 1 lsl 10
 
-let ce_flags_xa_has_default = 0x400
+let ce_flags_xa_tag_required     = 1 lsl 11
 
-let ce_flags_xa_tag_required = 0x800
+let ce_flags_xa_tag_lateinit     = 1 lsl 12
 
-let ce_flags_xa_tag_lateinit = 0x1000
+let ce_flags_xa_tag_none         = Int.bit_or ce_flags_xa_tag_required ce_flags_xa_tag_lateinit
 
-let ce_flags_xa_tag_none = 0x1800
+let ce_flags_xa_tag_mask         = Int.bit_or ce_flags_xa_tag_required ce_flags_xa_tag_lateinit
 
 (* fun_param flags *)
-let fp_flags_accept_disposable = 0x1
+let fp_flags_accept_disposable = 1 lsl 0
 
-let fp_flags_inout = 0x2
+let fp_flags_inout             = 1 lsl 1
 
-let fp_flags_has_default = 0x4
+let fp_flags_has_default       = 1 lsl 2

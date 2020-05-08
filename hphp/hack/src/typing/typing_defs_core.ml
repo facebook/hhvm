@@ -388,7 +388,7 @@ and 'ty fun_type = {
   ft_ret: 'ty possibly_enforced_ty;
       (** Carries through the sync/async information from the aast *)
   ft_reactive: reactivity;
-  ft_flags: int;
+  ft_flags: Typing_defs_flags.fun_type_flags;
 }
 
 and decl_fun_type = decl_ty fun_type
@@ -427,7 +427,7 @@ and 'ty fun_param = {
   fp_name: string option;
   fp_type: 'ty possibly_enforced_ty;
   fp_rx_annotation: param_rx_annotation option;
-  fp_flags: int;
+  fp_flags: Typing_defs_flags.fun_param_flags;
 }
 
 and decl_fun_param = decl_ty fun_param

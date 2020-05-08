@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c40d6336ff5b5dd8dbfa021479cef39>>
+// @generated SignedSource<<68b67b8b399d1062350379405a26d403>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -345,7 +345,7 @@ pub struct FunType<'a> {
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy<'a>,
     pub reactive: Reactivity<'a>,
-    pub flags: isize,
+    pub flags: oxidized::typing_defs_flags::FunTypeFlags,
 }
 
 /// Arity information for a fun_type; indicating the minimum number of
@@ -386,7 +386,7 @@ pub struct FunParam<'a> {
     pub name: Option<&'a str>,
     pub type_: PossiblyEnforcedTy<'a>,
     pub rx_annotation: Option<ParamRxAnnotation<'a>>,
-    pub flags: isize,
+    pub flags: oxidized::typing_defs_flags::FunParamFlags,
 }
 
 pub type FunParams<'a> = &'a [&'a FunParam<'a>];

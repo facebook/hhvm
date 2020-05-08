@@ -10,7 +10,12 @@ use arena_trait::Arena;
 use naming_special_names_rust::{classes, collections};
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::tany_sentinel::TanySentinel;
-use oxidized_by_ref::{aast_defs::Sid, ast_defs::Id, ident};
+use oxidized_by_ref::{
+    aast_defs::Sid,
+    ast_defs::Id,
+    ident,
+    typing_defs_flags::{FunParamFlags, FunTypeFlags},
+};
 
 use crate::typing_defs::ExpandEnv;
 use crate::typing_defs_core::*;
@@ -334,7 +339,7 @@ impl<'a> TypeBuilder<'a> {
                 enforced: false,
             },
             // TODO: set the following fields correctly
-            flags: 0,
+            flags: FunParamFlags::empty(),
             name: None,
             pos: Pos::none(),
             rx_annotation: None,
@@ -353,7 +358,7 @@ impl<'a> TypeBuilder<'a> {
             tparams: &[],
             where_constraints: &[],
             reactive: Reactivity::Nonreactive,
-            flags: 0,
+            flags: FunTypeFlags::empty(),
         })
     }
 }

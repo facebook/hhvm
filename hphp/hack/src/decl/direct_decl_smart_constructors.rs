@@ -35,7 +35,7 @@ use oxidized_by_ref::{
         EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
         PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
     },
-    typing_defs_flags,
+    typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
 };
 use parser_core_types::{
@@ -949,7 +949,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                     enforced: false,
                                     type_: self.node_to_ty(node)?,
                                 },
-                                flags: 0,
+                                flags: FunParamFlags::empty(),
                                 rx_annotation: None,
                             }));
                         }
@@ -965,7 +965,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 type_: ret,
                             },
                             reactive: Reactivity::Nonreactive,
-                            flags: 0,
+                            flags: FunTypeFlags::empty(),
                         }))
                     }
                 };
@@ -1166,16 +1166,14 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let attributes = attributes.as_attributes(self.state.arena)?;
         // TODO(hrust) Put this in a helper. Possibly do this for all flags.
         let mut flags = match fun_kind {
-            FunKind::FSync => 0,
-            FunKind::FAsync => typing_defs_flags::FT_FLAGS_ASYNC,
-            FunKind::FGenerator => typing_defs_flags::FT_FLAGS_GENERATOR,
-            FunKind::FAsyncGenerator => {
-                typing_defs_flags::FT_FLAGS_ASYNC | typing_defs_flags::FT_FLAGS_GENERATOR
-            }
-            FunKind::FCoroutine => typing_defs_flags::FT_FLAGS_IS_COROUTINE,
+            FunKind::FSync => FunTypeFlags::empty(),
+            FunKind::FAsync => FunTypeFlags::ASYNC,
+            FunKind::FGenerator => FunTypeFlags::GENERATOR,
+            FunKind::FAsyncGenerator => FunTypeFlags::ASYNC | FunTypeFlags::GENERATOR,
+            FunKind::FCoroutine => FunTypeFlags::IS_COROUTINE,
         };
         if attributes.returns_mutable {
-            flags |= typing_defs_flags::FT_FLAGS_RETURNS_MUTABLE;
+            flags |= FunTypeFlags::RETURNS_MUTABLE;
         }
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params)?;
@@ -1256,24 +1254,24 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             };
                             let mut flags = match attributes.param_mutability {
                                 Some(ParamMutability::ParamBorrowedMutable) => {
-                                    typing_defs_flags::MUTABLE_FLAGS_BORROWED
+                                    FunParamFlags::MUTABLE_FLAGS_BORROWED
                                 }
                                 Some(ParamMutability::ParamOwnedMutable) => {
-                                    typing_defs_flags::MUTABLE_FLAGS_OWNED
+                                    FunParamFlags::MUTABLE_FLAGS_OWNED
                                 }
                                 Some(ParamMutability::ParamMaybeMutable) => {
-                                    typing_defs_flags::MUTABLE_FLAGS_MAYBE
+                                    FunParamFlags::MUTABLE_FLAGS_MAYBE
                                 }
-                                None => 0,
+                                None => FunParamFlags::empty(),
                             };
                             match kind {
                                 ParamMode::FPinout => {
-                                    flags |= typing_defs_flags::FP_FLAGS_INOUT;
+                                    flags |= FunParamFlags::INOUT;
                                 }
                                 ParamMode::FPnormal => {}
                             };
                             if !initializer.is_ignored() {
-                                flags |= typing_defs_flags::FP_FLAGS_HAS_DEFAULT;
+                                flags |= FunParamFlags::HAS_DEFAULT;
                             }
                             let param = &*self.alloc(FunParam {
                                 pos: id.0,

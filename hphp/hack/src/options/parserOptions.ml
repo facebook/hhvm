@@ -46,8 +46,6 @@ let with_disable_lval_as_an_expression po b =
 let disable_lval_as_an_expression =
   GlobalOptions.po_disable_lval_as_an_expression
 
-let rust_top_level_elaborator = GlobalOptions.po_rust_top_level_elaborator
-
 let enable_class_level_where_clauses =
   GlobalOptions.po_enable_class_level_where_clauses
 
@@ -142,7 +140,6 @@ let make
     ~enable_xhp_class_modifier
     ~disable_xhp_element_mangling
     ~disable_xhp_children_declarations
-    ~rust_top_level_elaborator
     ~enable_first_class_function_pointers
     ~disable_modes
     ~disable_array =
@@ -169,7 +166,6 @@ let make
       po_enable_xhp_class_modifier = enable_xhp_class_modifier;
       po_disable_xhp_element_mangling = disable_xhp_element_mangling;
       po_disable_xhp_children_declarations = disable_xhp_children_declarations;
-      po_rust_top_level_elaborator = rust_top_level_elaborator;
       po_enable_first_class_function_pointers =
         enable_first_class_function_pointers;
       po_disable_modes = disable_modes;

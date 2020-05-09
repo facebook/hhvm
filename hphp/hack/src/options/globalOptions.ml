@@ -49,7 +49,6 @@ type t = {
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
   po_rust_parser_errors: bool;
-  po_rust_top_level_elaborator: bool;
   profile_type_check_duration_threshold: float;
   profile_type_check_twice: bool;
   profile_owner: string;
@@ -218,7 +217,6 @@ let default =
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
     po_rust_parser_errors = false;
-    po_rust_top_level_elaborator = true;
     profile_type_check_duration_threshold = 0.05;
     profile_type_check_twice = false;
     profile_owner = "";
@@ -317,7 +315,6 @@ let make
       default.po_disable_lval_as_an_expression)
     ?(tco_shallow_class_decl = default.tco_shallow_class_decl)
     ?(po_rust_parser_errors = default.po_rust_parser_errors)
-    ?(po_rust_top_level_elaborator = default.po_rust_top_level_elaborator)
     ?(profile_type_check_duration_threshold =
       default.profile_type_check_duration_threshold)
     ?(profile_type_check_twice = default.profile_type_check_twice)
@@ -423,7 +420,6 @@ let make
     po_disable_lval_as_an_expression;
     tco_shallow_class_decl;
     po_rust_parser_errors;
-    po_rust_top_level_elaborator;
     profile_type_check_duration_threshold;
     profile_type_check_twice;
     profile_owner;
@@ -566,8 +562,6 @@ let po_disable_lval_as_an_expression t = t.po_disable_lval_as_an_expression
 let tco_shallow_class_decl t = t.tco_shallow_class_decl
 
 let po_rust_parser_errors t = t.po_rust_parser_errors
-
-let po_rust_top_level_elaborator t = t.po_rust_top_level_elaborator
 
 let profile_type_check_duration_threshold t =
   t.profile_type_check_duration_threshold

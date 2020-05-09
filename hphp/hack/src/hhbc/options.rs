@@ -249,12 +249,11 @@ prefixed_flags!(
     ENABLE_POCKET_UNIVERSES,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY,
-    RUST_TOP_LEVEL_ELABORATOR,
     RUST_EMITTER,
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES | LangFlags::RUST_TOP_LEVEL_ELABORATOR
+        LangFlags::ENABLE_COROUTINES
     }
 }
 
@@ -675,9 +674,6 @@ mod tests {
   "hhvm.hack.lang.rust_emitter": {
     "global_value": false
   },
-  "hhvm.hack.lang.rust_top_level_elaborator": {
-    "global_value": true
-  },
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
@@ -1030,8 +1026,7 @@ bitflags! {
         const WIDEN_IS_ARRAY = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
-        const RUST_TOP_LEVEL_ELABORATOR = 1 << 51;
-        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 52;
-        const RUST_EMITTER = 1 << 53;
+        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 51;
+        const RUST_EMITTER = 1 << 52;
     }
 }

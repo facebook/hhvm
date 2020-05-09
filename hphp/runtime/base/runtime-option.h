@@ -88,7 +88,6 @@ struct RepoOptions {
   H(bool,           DisallowFuncPtrsInConstants,    false)            \
   E(bool,           EmitFuncPointers,               true)             \
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
-  H(bool,           RustTopLevelElaborator,         true)             \
   H(bool,           EnableXHPClassModifier,         false)            \
   E(bool,           EmitGenericsUB,                 false)            \
   H(bool,           DisableXHPElementMangling,      false)            \
@@ -558,6 +557,7 @@ struct RuntimeOption {
   // Eval options
   static bool EnableHipHopSyntax;
   static bool EnableShortTags;
+  static bool EnableRustEmitter;
   static bool EnableXHP;
   static bool EnableIntrinsicsExtension;
   static bool CheckSymLink;

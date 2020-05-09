@@ -111,8 +111,7 @@ impl<'a> AastParser {
                 stack_limit,
             );
             let ret = lower(&mut lowerer_env, Self::to_as_ref(tree).as_ref().root());
-            let ret = if env.parser_options.po_rust_top_level_elaborator && env.elaborate_namespaces
-            {
+            let ret = if env.elaborate_namespaces {
                 ret.map(|ast| {
                     namespaces::toplevel_elaborator::elaborate_toplevel_defs::<AstAnnot>(
                         &env.parser_options,

@@ -4,6 +4,8 @@ classMeth{
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_array_as_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 16
+
+Notice: Hack Array Compat: Argument 1 to test_array_as_param() must be of type array, varray given in %s/decl_type_warn.php on line 16
 array(2) {
   [0]=>
   string(1) "A"
@@ -36,6 +38,8 @@ array(2) {
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_array_as_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 21
+
+Notice: Hack Array Compat: Argument 1 to test_soft_type_array_as_param() must be of type @array, varray given in %s/decl_type_warn.php on line 21
 array(2) {
   [0]=>
   string(1) "A"
@@ -60,12 +64,16 @@ classMeth{
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_array_as_io_param() must be of type array, clsmeth given in %s/decl_type_warn.php on line 37
+
+Notice: Hack Array Compat: Argument 1 to test_array_as_io_param() must be of type array, varray given in %s/decl_type_warn.php on line 37
 array(2) {
   [0]=>
   string(1) "A"
   [1]=>
   string(5) "func1"
 }
+
+Notice: Hack Array Compat: Argument 1 returned from test_array_as_io_param() as an inout parameter must be of type array, varray given in %s/decl_type_warn.php on line 37
 
 Notice: class_meth Compat: Argument 1 passed to test_varry_as_io_param() must be of type HH\varray, clsmeth given in %s/decl_type_warn.php on line 38
 array(2) {
@@ -92,12 +100,16 @@ array(2) {
 }
 
 Notice: class_meth Compat: Argument 1 passed to test_soft_type_array_as_io_param() must be of type @array, clsmeth given in %s/decl_type_warn.php on line 42
+
+Notice: Hack Array Compat: Argument 1 to test_soft_type_array_as_io_param() must be of type @array, varray given in %s/decl_type_warn.php on line 42
 array(2) {
   [0]=>
   string(1) "A"
   [1]=>
   string(5) "func1"
 }
+
+Notice: Hack Array Compat: Argument 1 returned from test_soft_type_array_as_io_param() as an inout parameter must be of type @array, varray given in %s/decl_type_warn.php on line 42
 
 Warning: Argument 1 to test_soft_type_vec_as_io_param() must be of type @HH\vec, clsmeth given in %s/decl_type_warn.php on line 43
 classMeth{
@@ -120,6 +132,8 @@ classMeth{
 }
 
 Notice: class_meth Compat: Value returned from function test_return_as_array() must be of type array, clsmeth given in %s/decl_type_warn.php on line 61
+
+Notice: Hack Array Compat: Value returned from test_return_as_array() must be of type array, varray given in %s/decl_type_warn.php on line 61
 array(2) {
   [0]=>
   string(1) "A"

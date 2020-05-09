@@ -2,25 +2,25 @@
 
 class Test
 {
-    static function f1(array $ar)
+    static function f1(varray $ar)
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
-    static function f2(array $ar = NULL)
+    static function f2(varray $ar = NULL)
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
-    static function f3(array $ar = varray[])
+    static function f3(varray $ar = varray[])
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);
     }
 
-    static function f4(array $ar = varray[25])
+    static function f4(varray $ar = varray[25])
     {
         echo __METHOD__ . "()\n";
         var_dump($ar);

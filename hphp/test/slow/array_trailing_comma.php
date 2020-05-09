@@ -1,6 +1,6 @@
 <?hh
 
-function array_trailing_comma(): array<int, > {
+function array_trailing_comma(): varray<int, > {
   return varray[42];
 }
 

@@ -1,4 +1,4 @@
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -33,14 +33,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -116,7 +116,7 @@ array(2) {
   [1]=>
   int(42)
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -151,14 +151,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -234,7 +234,7 @@ array(2) {
   [1]=>
   int(42)
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -269,14 +269,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -352,7 +352,7 @@ array(2) {
   [1]=>
   int(42)
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -387,14 +387,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -470,7 +470,7 @@ array(2) {
   [1]=>
   int(42)
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -505,14 +505,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -588,7 +588,7 @@ array(2) {
   [1]=>
   int(42)
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container
@@ -623,14 +623,14 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-** CAST RET: clsmeth -> array
+** CAST RET: clsmeth -> HH\varray_or_darray
 array(2) {
   [0]=>
   string(3) "Foo"
   [1]=>
   string(3) "bar"
 }
-** CAST ARG(1): clsmeth -> array
+** CAST ARG(1): clsmeth -> HH\varray_or_darray
 ** CAST ARG(2): clsmeth -> HH\varray
 ** CAST ARG(3): clsmeth -> HH\Traversable
 ** CAST ARG(4): clsmeth -> HH\Container

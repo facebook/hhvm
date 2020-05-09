@@ -1,5 +1,5 @@
 <?hh
-function foo(array $a) {
+function foo(varray $a) {
     echo count($a)."\n";
 }
 <<__EntryPoint>> function main(): void {

@@ -1,6 +1,6 @@
 <?hh
 
-function gen(array $array) {
+function gen(varray $array) {
     foreach ($array as $value) {
         yield $value;
     }

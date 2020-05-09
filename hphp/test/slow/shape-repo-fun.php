@@ -5,7 +5,7 @@ class Q { const A = 'f'; const B = 'Q::B'; }
 
 <<__EntryPoint>>
 function main() {
-  $x = varray[42, 1337];
+  $x = darray[0 => 42, 1 => 1337];
   $y = darray['f' => 10];
   $z = darray['Q::B' => 20];
   $t = darray['f' => 10, 'Q::B' => 20];

@@ -1,2 +1,3 @@
 -vEval.HackArrCompatNotices=1
+-vEval.HackArrCompatTypeHintNotices=1
 -vEval.HackArrIsShapeTupleNotices=1

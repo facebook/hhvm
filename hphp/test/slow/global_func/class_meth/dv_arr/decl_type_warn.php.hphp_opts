@@ -5,4 +5,6 @@
 -vCheckPropTypeHints=2
 -vCheckReturnTypeHints=2
 
+-vRuntime.Eval.HackArrCompatTypeHintNotices=1
+
 -vHackArrDVArrs=0

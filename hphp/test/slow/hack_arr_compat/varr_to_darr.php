@@ -58,7 +58,7 @@ function test_misc() {
 function main_varr_to_darr() {
   test(varray[]);
   test(darray[]);
-  test(__hhvm_intrinsics\dummy_array_builtin(varray[]));
+  test(__hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]));
   test(dict[]);
 
   test(varray[1, 2, 3, 4]);

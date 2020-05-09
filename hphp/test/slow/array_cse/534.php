@@ -1,6 +1,6 @@
 <?hh
 
-function f(array $a = null, $e) {
+function f(darray $a = null, $e) {
   if (is_int($e) || is_string($e)) {
     $a[$e] ??= darray[];
     $a[$e]['foo'] = 30;
@@ -32,10 +32,10 @@ function h($x, $y) {
 
 <<__EntryPoint>>
 function main_534() {
-f(varray[], 'e');
+f(darray[], 'e');
 f(darray['e' => darray['baz' => 40]], 'e');
-var_dump(f(darray['y' => varray[]], 'y'));
-var_dump(f(varray[], 'y'));
-h(varray[], 0);
-h(varray[varray[]], 0);
+var_dump(f(darray['y' => darray[]], 'y'));
+var_dump(f(darray[], 'y'));
+h(darray[], 0);
+h(darray[0 => darray[]], 0);
 }

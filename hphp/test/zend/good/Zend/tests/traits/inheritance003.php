@@ -2,11 +2,11 @@
 error_reporting(E_ALL);
 
 abstract class Base {
-   public abstract function sayHello(array $a);
+   public abstract function sayHello(varray $a);
 }
 
 class SubClass extends Base {
-   public function sayHello(array $a) {
+   public function sayHello(varray $a) {
      echo "World!\n";
    }
 }

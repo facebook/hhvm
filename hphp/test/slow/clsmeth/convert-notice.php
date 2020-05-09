@@ -30,7 +30,7 @@ class Foo { static function bar() {} }
 function LV($x) { return __hhvm_intrinsics\launder_value($x); }
 
 function args(
-  array $arr,
+  varray_or_darray $arr,
   varray $varr,
   Traversable $trav,
   Container $cont,
@@ -48,13 +48,13 @@ function args(
 }
 
 function ret_varr(): varray { return class_meth(Foo::class, 'bar'); }
-function ret_arr(): array   { return class_meth(Foo::class, 'bar'); }
+function ret_arr(): varray_or_darray { return class_meth(Foo::class, 'bar'); }
 
 function ret_varr_dyn(): varray { return LV(class_meth(Foo::class, 'bar')); }
-function ret_arr_dyn(): array   { return LV(class_meth(Foo::class, 'bar')); }
+function ret_arr_dyn(): varray_or_darray { return LV(class_meth(Foo::class, 'bar')); }
 
 function inout_args(
-  inout array $arr,
+  inout varray_or_darray $arr,
   inout varray $varr,
   inout Traversable $trav,
   inout Container $cont,

@@ -1,1 +1,2 @@
 -vRuntime.Eval.HackArrCompatSpecialization=false
+-vRuntime.Eval.HackArrCompatTypeHintNotices=false

@@ -1,6 +1,6 @@
 <?hh
 
-function reverse(array $array) {
+function reverse(darray $array) {
     end(inout $array);
     while (null !== $key = key($array)) {
         yield $key => current($array);

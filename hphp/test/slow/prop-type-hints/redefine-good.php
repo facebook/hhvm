@@ -265,10 +265,10 @@ class D extends C {}
 class E extends D {
   public Enum2 $p1;
   public Enum1 $p2;
-  public varray_or_darray $p5;
-  public darray $p15;
-  public varray $p16;
-  public darray $p17;
+  public array $p5;
+  public varray $p15;
+  public darray $p16;
+  public varray_or_darray $p17;
   public Alias3 $p18;
   public Alias4 $p19;
   public Alias5 $p21;
@@ -287,9 +287,9 @@ class E extends D {
   public arraykey $p35;
   public Enum4 $p36;
   public Alias9 $p37;
-  public varray $p38;
-  public varray $p39;
-  public darray $p40;
+  public varray_or_darray $p38;
+  public array $p39;
+  public array $p40;
   public ?mixed $p41;
   public mixed $p42;
   public ?Alias10 $p43;
@@ -416,8 +416,8 @@ class G extends F {
   public Alias1 $p1;
   public Enum3 $p2;
   public array $p5;
-  public varray_or_darray $p15;
-  public varray_or_darray $p16;
+  public varray $p15;
+  public darray $p16;
   public Alias6 $p23;
   public $p29;
   public array $p39;

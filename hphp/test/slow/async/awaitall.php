@@ -92,7 +92,7 @@ function get_wrapped_handles() {
   return tuple(
     $vectors->map($v ==> AwaitAllWaitHandle::fromVector($v)),
     $maps->map($m ==> AwaitAllWaitHandle::fromMap($m)),
-    $arrays->map($a ==> AwaitAllWaitHandle::fromArray($a)),
+    $arrays->map($a ==> AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($a))),
     $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
     $dicts->map($d ==> AwaitAllWaitHandle::fromDict($d))
   );
@@ -114,7 +114,7 @@ foreach ($maps as $m) {
   t($wh, $m);
 }
 foreach ($arrays as $a) {
-  $wh = AwaitAllWaitHandle::fromArray($a);
+  $wh = AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($a));
   t($wh, $a);
 }
 foreach ($vecs as $v) {
@@ -153,7 +153,7 @@ $top = varray[
   AwaitAllWaitHandle::fromVector($vecs),
   AwaitAllWaitHandle::fromVector($dicts)
 ];
-$wh = AwaitAllWaitHandle::fromArray($top);
+$wh = AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($top));
 $finished = () ==> {
   foreach ($handles as $hs) {
     echo count($hs), "\t";

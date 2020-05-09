@@ -1,6 +1,6 @@
 <?hh
 
-function test( array $array )
+function test( varray $array )
 {
     $closure = function() use ( $array ) {
         print_r( $array );
@@ -9,7 +9,7 @@ function test( array $array )
     return $closure();
 }
 
-function test2( array $array )
+function test2( varray $array )
 {
     $closure = function() use ( $array ) {
         print_r( $array );

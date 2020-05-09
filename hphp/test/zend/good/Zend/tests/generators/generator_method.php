@@ -3,7 +3,7 @@
 class Test implements IteratorAggregate {
     protected $data;
 
-    public function __construct(array $data) {
+    public function __construct(varray $data) {
         $this->data = $data;
     }
 

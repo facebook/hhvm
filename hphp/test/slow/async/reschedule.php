@@ -15,7 +15,7 @@ async function re($e) {
     echo "$e\t(2**$e)+$diff\t$priority\n";
   };
   await AwaitAllWaitHandle::fromArray(
-    varray[$r(-1), $r(0), $r(1)],
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[$r(-1), $r(0), $r(1)]),
   );
 }
 

@@ -1,6 +1,6 @@
 <?hh
 
-function f(array $a, $e) {
+function f(darray $a, $e) {
   $a[$e] = darray[$e => 30];
   $x = new stdClass();
   $x = $a[$e];
@@ -14,7 +14,7 @@ function g(string $x) {
 
 <<__EntryPoint>>
 function main_535() {
-f(varray[], 0);
+f(darray[], 0);
 g('bar');
 g('');
 g('b');

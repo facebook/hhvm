@@ -1,7 +1,7 @@
 <?hh
 
 class Foo {
-    public function __construct(array $data) {
+    public function __construct(varray $data) {
         var_dump(array_map(varray[$this, 'callback'], $data));
     }
 
@@ -17,7 +17,7 @@ class Bar extends Foo {
 }
 
 class Foo2 {
-    public function __construct(array $data) {
+    public function __construct(varray $data) {
         var_dump(array_map(varray[$this, 'callBack'], $data));
     }
 

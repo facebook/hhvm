@@ -15,6 +15,8 @@ Notice: Observing vec in is_tuple from %s/array_provenance/type-structure.php:15
 bool(false)
 bool(false)
 
+Notice: Hack Array Compat: is/as operator used with darray and tuple in %s/array_provenance/type-structure.php on line 28
+
 Notice: Observing darray in is_tuple from %s/array_provenance/type-structure.php:19 in %s/array_provenance/type-structure.php on line 28
 bool(true)
 bool(false)

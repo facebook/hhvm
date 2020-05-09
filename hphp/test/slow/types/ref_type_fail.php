@@ -5,7 +5,7 @@ function handler() {
  return true;
  }
 
-function foo(inout @array $a) {
+function foo(inout @varray $a) {
  var_dump($a);
  }
 

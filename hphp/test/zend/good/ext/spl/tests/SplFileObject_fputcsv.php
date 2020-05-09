@@ -26,7 +26,7 @@ $list = darray [
 ];
 
 foreach ($list as $v) {
-    $fo->fputcsv(explode(',', $v));
+    $fo->fputcsv(varray(explode(',', $v)));
 }
 unset($fo);
 

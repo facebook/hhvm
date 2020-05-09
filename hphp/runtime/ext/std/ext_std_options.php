@@ -375,7 +375,7 @@ namespace __SystemLib {
 
     private function is_cli() { return \php_sapi_name() == 'cli'; }
 
-    private function appendChildren(\DOMElement $el, ?array $children) {
+    private function appendChildren(\DOMElement $el, ?varray $children) {
       if ($children) {
         foreach ($children as $v) {
           if ($v === null) {
@@ -390,7 +390,7 @@ namespace __SystemLib {
       }
     }
 
-    private function element(string $tag, ?array $attr = null, ...$children) {
+    private function element(string $tag, ?darray $attr = null, ...$children) {
       $el = $this->xml->createElement($tag);
       if ($attr) {
         foreach ($attr as $k => $v) {
@@ -409,7 +409,7 @@ namespace __SystemLib {
           $this->element('td', darray['class' => 'r'], $d));
     }
 
-    private function table(string $title, array $data) {
+    private function table(string $title, darray $data) {
       if ($this->is_cli()) {
         echo $title . "\n";
         echo "\n";
@@ -483,7 +483,7 @@ namespace __SystemLib {
                             $this->table('Headers', \getallheaders()));
     }
 
-    private function reportMap(string $name, array $map) {
+    private function reportMap(string $name, darray $map) {
       $data = darray[];
       foreach ($map as $k => $v) {
         $data[\sprintf("%s['%s']", $name, $k)] = $v;

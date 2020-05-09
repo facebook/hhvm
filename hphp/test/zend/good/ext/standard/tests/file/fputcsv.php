@@ -28,7 +28,7 @@ $file = dirname(__FILE__) . 'fputcsv.csv';
 
 $fp = fopen($file, "w");
 foreach ($list as $v) {
-	fputcsv($fp, explode(',', $v));
+	fputcsv($fp, varray(explode(',', $v)));
 }
 fclose($fp);
 

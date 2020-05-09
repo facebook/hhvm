@@ -2,9 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(unused_variables)]
-#![allow(dead_code)]
-
 use ast_scope_rust::{self as ast_scope, Scope, ScopeItem};
 use emit_attribute_rust as emit_attribute;
 use emit_body_rust as emit_body;
@@ -40,10 +37,6 @@ use bitflags::bitflags;
 
 /// Precomputed information required for generation of memoized methods
 pub struct MemoizeInfo<'a> {
-    /// Prefix on method and property names
-    class_prefix: String,
-    /// Number of instance methods with <<__Memoize>>
-    instance_method_count: usize,
     /// True if the enclosing class is a trait
     is_trait: bool,
     /// Enclosing class ID
@@ -93,21 +86,7 @@ pub fn make_info<'a>(
     }
 
     let is_trait = class.kind.is_ctrait();
-    let class_prefix = if is_trait {
-        format!("${}", class_id.to_raw_string().to_lowercase())
-    } else {
-        String::new()
-    };
-    let instance_method_count = methods
-        .iter()
-        .filter(|m| is_memoize(m) && !m.static_)
-        .count();
-    Ok(MemoizeInfo {
-        class_prefix,
-        instance_method_count,
-        is_trait,
-        class_id,
-    })
+    Ok(MemoizeInfo { is_trait, class_id })
 }
 
 pub fn emit_wrapper_methods<'a>(

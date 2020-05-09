@@ -2,9 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
-#![allow(dead_code, unused_variables)]
-
 use crate::try_finally_rewriter as tfr;
 
 use emit_expression_rust::{self as emit_expr, emit_await, emit_expr, LValOp, Setrange};
@@ -54,27 +51,6 @@ pub(crate) fn set_state(e: &mut Emitter, state: State) {
 }
 
 pub(crate) type Level = usize;
-
-fn get_level<Ex, Fb, En, Hi>(
-    pos: Pos,
-    op: &str,
-    ex: a::Expr_<Ex, Fb, En, Hi>,
-) -> Result<a::BreakContinueLevel> {
-    if let a::Expr_::Int(ref s) = ex {
-        match s.parse::<isize>() {
-            Ok(level) if level > 0 => return Ok(a::BreakContinueLevel::LevelOk(Some(level))),
-            Ok(level) if level <= 0 => {
-                return Err(emit_fatal::raise_fatal_parse(
-                    &pos,
-                    format!("'{}' operator accepts only positive numbers", op),
-                ))
-            }
-            _ => (),
-        }
-    }
-    let msg = format!("'{}' with non-constant operand is not supported", op);
-    Err(emit_fatal::raise_fatal_parse(&pos, msg))
-}
 
 // Wrapper functions
 
@@ -131,7 +107,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
             ])),
             a::Expr_::Call(c) => {
                 if let (_, a::Expr(_, a::Expr_::Id(sid)), _, exprs, None) = c.as_ref() {
-                    let expr = &c.1;
                     let ft = hhbc_id::function::Type::from_ast_name(&sid.1);
                     let fname = ft.to_raw_string();
                     if fname.eq_ignore_ascii_case("unset") {
@@ -312,7 +287,6 @@ fn emit_case<'c>(
 fn emit_check_case(
     e: &mut Emitter,
     env: &mut Env,
-    pos: &Pos,
     scrutinee_expr: &tast::Expr,
     (case_expr, case_handler_label): (&tast::Expr, Label),
 ) -> Result {
@@ -685,7 +659,7 @@ fn emit_switch(
                     case_exprs_and_default_labels.into_iter().unzip();
                 let case_expr_instrs = case_exprs
                     .into_iter()
-                    .filter_map(|x| x.map(|x| emit_check_case(e, env, pos, scrutinee_expr, x)))
+                    .filter_map(|x| x.map(|x| emit_check_case(e, env, scrutinee_expr, x)))
                     .collect::<Result<Vec<_>>>()?;
                 let default_label = match default_labels
                     .iter()
@@ -1410,7 +1384,6 @@ fn emit_for(
         fn final_(
             emitter: &mut Emitter,
             env: &mut Env,
-            pos: &Pos,
             jmpz: bool,
             label: &Label,
             cond: &tast::Expr,
@@ -1435,7 +1408,6 @@ fn emit_for(
                 None => Ok(vec![final_(
                     emitter,
                     env,
-                    pos,
                     jmpz,
                     label,
                     &tast::Expr(
@@ -1465,7 +1437,7 @@ fn emit_for(
                     InstrSeq::gather(expr_list(emitter, env, pos, jmpz, label, hd, tl)?)
                 }
             }),
-            None => final_(emitter, env, pos, jmpz, label, cond),
+            None => final_(emitter, env, jmpz, label, cond),
         }
     };
     // TODO: this is bizarre codegen for a "for" loop.
@@ -1624,16 +1596,6 @@ fn emit_break(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {
 fn emit_continue(e: &mut Emitter, env: &mut Env, pos: &Pos) -> InstrSeq {
     use tfr::EmitBreakOrContinueFlags as Flags;
     tfr::emit_break_or_continue(e, Flags::empty(), env, pos, 1)
-}
-
-fn emit_temp_break(e: &mut Emitter, env: &mut Env, pos: &Pos, level: Level) -> InstrSeq {
-    use tfr::EmitBreakOrContinueFlags as Flags;
-    tfr::emit_break_or_continue(e, Flags::IS_BREAK, env, pos, level)
-}
-
-fn emit_temp_continue(e: &mut Emitter, env: &mut Env, pos: &Pos, level: Level) -> InstrSeq {
-    use tfr::EmitBreakOrContinueFlags as Flags;
-    tfr::emit_break_or_continue(e, Flags::empty(), env, pos, level)
 }
 
 fn emit_await_assignment(

@@ -2,8 +2,6 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-#![allow(unused_variables)]
-
 mod print_env;
 mod write;
 
@@ -213,7 +211,7 @@ fn print_program_<W: Write>(
     newline(w)?;
     concat_str(w, [".hh_file ", is_hh, ";"])?;
 
-    print_data_region(w, vec![])?;
+    newline(w)?;
     concat(w, &prog.adata, |w, a| print_adata_region(ctx, w, a))?;
     newline(w)?;
     print_main(ctx, w, &prog.main)?;
@@ -313,11 +311,15 @@ fn print_symbol_ref_regions<W: Write>(
 ) -> Result<(), W::Error> {
     let mut print_region = |name, refs: &BTreeSet<String>| {
         if !refs.is_empty() {
-            write!(w, "\n.{}", name)?;
-            w.write(" {")?;
-            for s in refs.iter() {
-                write!(w, "\n  {}", s)?;
-            }
+            ctx.newline(w)?;
+            write!(w, "{}  {{", name)?;
+            ctx.block(w, |c, w| {
+                for s in refs.iter() {
+                    c.newline(w)?;
+                    w.write(s)?;
+                }
+                Ok(())
+            })?;
             w.write("\n}\n")
         } else {
             Ok(())
@@ -361,15 +363,6 @@ fn print_typedef_attributes<W: Write>(
         specials.push("persistent");
     }
     print_special_and_user_attrs(ctx, w, &specials[..], td.attributes.as_slice())
-}
-
-fn print_data_region_element<W: Write>(w: &mut W, fake_elem: usize) -> Result<(), W::Error> {
-    not_impl!()
-}
-
-fn print_data_region<W: Write>(w: &mut W, fake_adata: Vec<usize>) -> Result<(), W::Error> {
-    concat(w, fake_adata, |w, i| print_data_region_element(w, *i))?;
-    newline(w)
 }
 
 fn handle_not_impl<E: std::fmt::Debug, F: FnOnce() -> Result<(), E>>(f: F) -> Result<(), E> {
@@ -434,7 +427,8 @@ fn print_requirement<W: Write>(
     w: &mut W,
     r: &(class::Type<'_>, hhas_class::TraitReqKind),
 ) -> Result<(), W::Error> {
-    w.write("\n  .require ")?;
+    ctx.newline(w)?;
+    w.write(".require ")?;
     match r {
         (name, hhas_class::TraitReqKind::MustExtend) => {
             write!(w, "extends <{}>;", name.to_raw_string())
@@ -459,11 +453,7 @@ fn print_type_constant<W: Write>(
     w.write(";")
 }
 
-fn print_property_doc_comment<W: Write>(
-    ctx: &mut Context,
-    w: &mut W,
-    p: &HhasProperty,
-) -> Result<(), W::Error> {
+fn print_property_doc_comment<W: Write>(w: &mut W, p: &HhasProperty) -> Result<(), W::Error> {
     if let Some(s) = p.doc_comment.as_ref() {
         w.write(triple_quote_string(&s.0))?;
         w.write(" ")?;
@@ -516,11 +506,7 @@ fn print_property_attributes<W: Write>(
     w.write("] ")
 }
 
-fn print_property_type_info<W: Write>(
-    ctx: &mut Context,
-    w: &mut W,
-    p: &HhasProperty,
-) -> Result<(), W::Error> {
+fn print_property_type_info<W: Write>(w: &mut W, p: &HhasProperty) -> Result<(), W::Error> {
     print_type_info(w, &p.type_info)?;
     w.write(" ")
 }
@@ -534,8 +520,8 @@ fn print_property<W: Write>(
     newline(w)?;
     w.write("  .property ")?;
     print_property_attributes(ctx, w, property)?;
-    print_property_doc_comment(ctx, w, property)?;
-    print_property_type_info(ctx, w, property)?;
+    print_property_doc_comment(w, property)?;
+    print_property_type_info(w, property)?;
     w.write(property.name.to_raw_string())?;
     w.write(" =\n    ")?;
     let initial_value = property.initial_value.as_ref();
@@ -571,8 +557,8 @@ fn print_constant<W: Write>(
 
 fn print_enum_ty<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(), W::Error> {
     if let Some(et) = c.enum_type.as_ref() {
-        newline(w)?;
-        w.write("  .enum_ty ")?;
+        ctx.newline(w)?;
+        w.write(".enum_ty ")?;
         print_type_info_(w, true, et)?;
         w.write(";")?;
     }
@@ -647,9 +633,10 @@ fn print_method_trait_resolutions<W: Write>(
     w: &mut W,
     (mtr, kind_as_tring): &(&ast::MethodRedeclaration, class::Type),
 ) -> Result<(), W::Error> {
+    ctx.newline(w)?;
     write!(
         w,
-        "\n    {}::{} as strict ",
+        "{}::{} as strict ",
         kind_as_tring.to_raw_string(),
         mtr.method.1
     )?;
@@ -692,11 +679,11 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
                 for x in &c.use_aliases {
                     print_use_alias(ctx, w, x)?;
                 }
+                for x in &c.method_trait_resolutions {
+                    print_method_trait_resolutions(ctx, w, x)?;
+                }
                 Ok(())
             })?;
-            for x in &c.method_trait_resolutions {
-                print_method_trait_resolutions(ctx, w, x)?;
-            }
             newline(w)?;
             w.write("  }")
         }
@@ -2451,9 +2438,9 @@ fn print_expr_varray<W: Write>(
 }
 
 fn print_shape_field_name<W: Write>(
-    _ctx: &mut Context,
+    _: &mut Context,
     w: &mut W,
-    env: &ExprEnv,
+    _: &ExprEnv,
     field: &ast::ShapeFieldName,
 ) -> Result<(), W::Error> {
     use ast::ShapeFieldName as S;
@@ -2505,7 +2492,7 @@ fn print_expr<W: Write>(
     ctx: &mut Context,
     w: &mut W,
     env: &ExprEnv,
-    ast::Expr(p, expr): &ast::Expr,
+    ast::Expr(_, expr): &ast::Expr,
 ) -> Result<(), W::Error> {
     fn adjust_id<'a>(env: &ExprEnv, id: &'a String) -> Cow<'a, str> {
         let s: Cow<'a, str> = match env.codegen_env {

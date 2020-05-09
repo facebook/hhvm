@@ -759,8 +759,9 @@ pub fn emit_class<'a>(
     let type_constants = from_class_elt_typeconsts(emitter, ast_class)?;
     let upper_bounds = if emitter
         .options()
-        .hack_compiler_flags
-        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
     {
         emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, &[], false)
     } else {

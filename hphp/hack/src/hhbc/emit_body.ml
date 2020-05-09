@@ -24,7 +24,7 @@ let has_type_constraint env ti ast_param =
 let emit_shadowed_tparams immediate_tparam_names class_tparam_names =
   let s1 = SS.of_list immediate_tparam_names in
   let s2 = SS.of_list class_tparam_names in
-  SS.elements (SS.inter s1 s2)
+  SS.elements (SS.inter s1 s2) |> List.sort ~compare:String.compare
 
 let emit_generics_upper_bounds tparams class_tparam_names ~skipawaitable =
   List.filter_map tparams ~f:(fun t ->

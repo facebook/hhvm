@@ -32,7 +32,7 @@ use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use naming_special_names_rust::classes;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
+use options::{CompilerFlags, HhvmFlags};
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use reified_generics_helpers as RGH;
 use runtime::TypedValue;
@@ -40,6 +40,7 @@ use runtime::TypedValue;
 use bitflags::bitflags;
 use indexmap::IndexSet;
 use itertools::Either;
+use std::collections::HashSet;
 
 static THIS: &'static str = "$this";
 
@@ -427,8 +428,9 @@ fn make_upper_bounds(
 ) -> Vec<(String, Vec<HhasTypeInfo>)> {
     if emitter
         .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(HhvmFlags::EMIT_GENERICS_UB)
     {
         emit_generics_upper_bounds(immediate_tparams, class_tparam_names, skip_awaitable)
     } else {
@@ -443,8 +445,9 @@ fn make_shadowed_tparams(
 ) -> Vec<String> {
     if emitter
         .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(HhvmFlags::EMIT_GENERICS_UB)
     {
         emit_shadowed_tparams(immediate_tparams, class_tparam_names)
     } else {
@@ -897,15 +900,15 @@ fn emit_shadowed_tparams(
     immediate_tparams: &[tast::Tparam],
     class_tparam_names: &[&str],
 ) -> Vec<String> {
-    use itertools::Itertools;
-    let mut shadowed_tparams = get_tp_names(immediate_tparams);
-    shadowed_tparams.extend_from_slice(class_tparam_names);
-    shadowed_tparams
-        .into_iter()
-        .map(|s| s.into())
-        .into_iter()
-        .unique()
-        .collect()
+    let s1 = get_tp_names_set(immediate_tparams);
+    let s2: HashSet<&str> = class_tparam_names.into_iter().cloned().collect();
+    // TODO(hrust): remove sort after Rust emitter released
+    let mut r = s1
+        .intersection(&s2)
+        .map(|s| (*s).into())
+        .collect::<Vec<_>>();
+    r.sort();
+    r
 }
 
 fn move_this(vars: &mut Vec<String>) {
@@ -921,6 +924,10 @@ fn get_tp_name(tparam: &tast::Tparam) -> &str {
 }
 
 pub fn get_tp_names(tparams: &[tast::Tparam]) -> Vec<&str> {
+    tparams.iter().map(get_tp_name).collect()
+}
+
+pub fn get_tp_names_set(tparams: &[tast::Tparam]) -> HashSet<&str> {
     tparams.iter().map(get_tp_name).collect()
 }
 

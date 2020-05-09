@@ -388,10 +388,12 @@ fn print_fun_def<W: Write>(
     if ctx
         .emitter
         .options()
-        .hack_compiler_flags
-        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
     {
         print_upper_bounds(w, &body.upper_bounds)?;
+        w.write(" ")?;
     }
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
@@ -796,11 +798,13 @@ fn print_method_def<W: Write>(
     if ctx
         .emitter
         .options()
-        .hack_compiler_flags
-        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
     {
         print_shadowed_tparams(w, &body.shadowed_tparams)?;
         print_upper_bounds(w, &body.upper_bounds)?;
+        w.write(" ")?;
     }
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
@@ -896,10 +900,12 @@ fn print_class_def<W: Write>(
     if ctx
         .emitter
         .options()
-        .hack_compiler_flags
-        .contains(options::CompilerFlags::EMIT_GENERICS_UB)
+        .hhvm
+        .flags
+        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
     {
         print_upper_bounds(w, &class_def.upper_bounds)?;
+        w.write(" ")?;
     }
     print_class_special_attributes(ctx, w, class_def)?;
     w.write(class_def.name.to_raw_string())?;
@@ -3279,7 +3285,7 @@ fn print_type_flags<W: Write>(w: &mut W, flag: constraint::Flags) -> Result<(), 
 
     if flag.contains(F::UPPERBOUND) {
         print_space(w)?;
-        w.write("upperbound")?;
+        w.write("upper_bound")?;
     }
     Ok(())
 }

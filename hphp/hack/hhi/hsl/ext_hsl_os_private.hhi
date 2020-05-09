@@ -195,6 +195,32 @@ const int LOCK_EX = 0;
 const int LOCK_NB = 0;
 const int LOCK_UN = 0;
 
+const int SOL_SOCKET = 0;
+// the constant formerly known as SOL_TCP
+const int IPPROTO_TCP = 0;
+
+const int SO_BROADCAST = 0;
+const int SO_DEBUG = 0;
+const int SO_DONTROUTE = 0;
+const int SO_ERROR = 0;
+const int SO_KEEPALIVE = 0;
+const int SO_LINGER = 0;
+const int SO_OOBINLINE = 0;
+const int SO_RCVBUF = 0;
+const int SO_RCVLOWAT = 0;
+const int SO_REUSEADDR = 0;
+const int SO_REUSEPORT = 0;
+const int SO_SNDBUF = 0;
+const int SO_SNDLOWAT = 0;
+const int SO_TYPE = 0;
+
+const int TCP_FASTOPEN = 0;
+const int TCP_KEEPCNT = 0;
+const int TCP_KEEPINTVL = 0;
+const int TCP_MAXSEG = 0;
+const int TCP_NODELAY = 0;
+const int TCP_NOTSENT_LOWAT = 0;
+
 type uint32_t = int;
 type sa_family_t = int;
 type in_port_t = int;
@@ -248,12 +274,15 @@ function getpeername(FileDescriptor $fd): sockaddr;
 function getsockname(FileDescriptor $fd): sockaddr;
 function socketpair(int $domain, int $type, int $protocol): (FileDescriptor, FileDescriptor);
 
+function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
+function getsockopt_int(FileDescriptor $fd, int $level, int $option): int;
+function setsockopt_int(FileDescriptor $fd, int $level, int $option, int $value): void;
+
 function socket(int $domain, int $type, int $protocol): FileDescriptor;
 function connect(FileDescriptor $socket, sockaddr $addr): void;
 function bind(FileDescriptor $socket, sockaddr $addr): void;
 function listen(FileDescriptor $socket, int $backlog): void;
 function accept(FileDescriptor $socket): (FileDescriptor, sockaddr);
-function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 function lseek(FileDescriptor $fd, int $offset, int $whence): int;
 function ftruncate(FileDescriptor $fd, int $length): void;
 function flock(FileDescriptor $fd, int $operation): void;

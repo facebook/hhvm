@@ -152,6 +152,12 @@ function accept(FileDescriptor $socket): varray<mixed> /* (FileDescriptor, SockA
 function fcntl(FileDescriptor $fd, int $cmd, mixed $arg = null): mixed;
 
 <<__Native>>
+function getsockopt_int(FileDescriptor $fd, int $level, int $option): int;
+
+<<__Native>>
+function setsockopt_int(FileDescriptor $fd, int $level, int $option, int $value): void;
+
+<<__Native>>
 function lseek(FileDescriptor $fd, int $offset, int $whence): int;
 
 <<__Native>>

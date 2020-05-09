@@ -29,8 +29,11 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <sys/file.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 namespace HPHP {
@@ -738,6 +741,40 @@ Variant HHVM_FUNCTION(HSL_os_fcntl,
   }
 }
 
+int64_t HHVM_FUNCTION(HSL_os_getsockopt_int,
+                      const Object& obj,
+                      int64_t level,
+                      int64_t option) {
+  const auto fd = HSLFileDescriptor::fd(obj);
+
+  int value = 0;
+
+  socklen_t value_len = sizeof(value);
+  throw_errno_if_minus_one(retry_on_eintr(-1,
+    ::getsockopt, fd, level, option, &value, &value_len));
+  assertx(value_len <= sizeof(int));
+  return value;
+}
+
+// in the past, SO_BROADCAST was a privileged operation, but not any more - no
+// need for CLI server proxying as long as there are no privileged ops.
+void HHVM_FUNCTION(HSL_os_setsockopt_int,
+                      const Object& obj,
+                      int64_t level,
+                      int64_t option,
+                      int64_t option_value) {
+  static_assert(
+    sizeof(int) < sizeof(void*),
+    "Security and safety of this function depends on it being unusable for "
+    "pointers. (level, option) pairs must be whitelisted if ints and pointers "
+    "interchangeable."
+  );
+  const auto fd = HSLFileDescriptor::fd(obj);
+  const int int_value = option_value;
+  throw_errno_if_minus_one(retry_on_eintr(-1,
+    ::setsockopt, fd, level, option, &int_value, sizeof(int_value)));
+}
+
 int64_t HHVM_FUNCTION(HSL_os_lseek, const Object& obj, int64_t offset, int64_t whence) {
   auto fd = HSLFileDescriptor::fd(obj);
   off_t ret = retry_on_eintr(-1, ::lseek, fd, offset, whence);
@@ -1047,6 +1084,37 @@ struct OSExtension final : Extension {
 
     CLI_REGISTER_HANDLER(HSL_os_fcntl_intarg);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fcntl, HSL_os_fcntl);
+
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SOL_SOCKET, SOL_SOCKET);
+    // The constant formerly known as SOL_TCP
+    HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\IPPROTO_TCP, IPPROTO_TCP);
+#define SO_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\SO_##name, SO_##name)
+    SO_(BROADCAST);
+    SO_(DEBUG);
+    SO_(DONTROUTE);
+    SO_(ERROR);
+    SO_(KEEPALIVE);
+    SO_(LINGER);
+    SO_(OOBINLINE);
+    SO_(RCVBUF);
+    SO_(RCVLOWAT);
+    SO_(REUSEADDR);
+    SO_(REUSEPORT);
+    SO_(SNDBUF);
+    SO_(SNDLOWAT);
+    SO_(TYPE);
+#undef SO_
+#define TCP_(name) HHVM_RC_INT(HH\\Lib\\_Private\\_OS\\TCP_##name, TCP_##name)
+    TCP_(FASTOPEN);
+    TCP_(KEEPCNT);
+    TCP_(KEEPINTVL);
+    TCP_(MAXSEG);
+    TCP_(NODELAY);
+    TCP_(NOTSENT_LOWAT);
+#undef TCP_
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getsockopt_int, HSL_os_getsockopt_int);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\setsockopt_int, HSL_os_setsockopt_int);
 
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());

@@ -371,7 +371,9 @@ let do_compile_rust
             0 );
       }
   in
-  Compile_ffi.rust_from_text_ffi env rust_output_config source_text
+  match Compile_ffi.rust_from_text_ffi env rust_output_config source_text with
+  | Ok () -> ()
+  | Error msg -> raise (Failure msg)
 
 let do_compile
     ~is_systemlib

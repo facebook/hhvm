@@ -30,10 +30,10 @@ _MSG_;
 
 
 $args = varray[
-      varray['female', 0,  'Alice', 'Bob'],
-      varray['male',   1,  'Alice', 'Bob'],
-      varray['none',   2,  'Alice', 'Bob'],
-      varray['female', 27, 'Alice', 'Bob'],
+      darray[0 => 'female', 1 => 0,  2 => 'Alice', 3 => 'Bob'],
+      darray[0 => 'male',   1 => 1,  2 => 'Alice', 3 => 'Bob'],
+      darray[0 => 'none',   1 => 2,  2 => 'Alice', 3 => 'Bob'],
+      darray[0 => 'female', 1 => 27, 2 => 'Alice', 3 => 'Bob'],
 ];
 
 $str_res = '';

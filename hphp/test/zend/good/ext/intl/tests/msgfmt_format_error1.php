@@ -6,5 +6,5 @@ $fmt = <<<EOD
 EOD;
 
 $mf = new MessageFormatter('en_US', $fmt);
-var_dump($mf->format(varray[7]));
+var_dump($mf->format(darray[0 => 7]));
 }

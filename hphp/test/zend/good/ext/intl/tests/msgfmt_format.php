@@ -29,8 +29,8 @@ function ut_main()
 			$str_res .= dump(intl_get_error_message())."\n";
 			continue;
 		}
-        $str_res .= dump( ut_msgfmt_format( $fmt, varray[$m, $t, $m/$t] ) ) . "\n";
-		$str_res .= dump( ut_msgfmt_format_message($locale, $pattern, varray[$m, $t, $m/$t])) . "\n";
+        $str_res .= dump( ut_msgfmt_format( $fmt, darray[0 => $m, 1 => $t, 2 => $m/$t] ) ) . "\n";
+		$str_res .= dump( ut_msgfmt_format_message($locale, $pattern, darray[0 => $m, 1 => $t, 2 => $m/$t])) . "\n";
     }
     return $str_res;
 }

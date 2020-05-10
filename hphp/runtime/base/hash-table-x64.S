@@ -84,7 +84,7 @@ ETCH_LABEL(cmphash\MANGLED_NAME):
         jne       ETCH_LABEL(cmplength\MANGLED_NAME)
 ETCH_LABEL(found\MANGLED_NAME):
         mov       \ELM_DATA(%r8), %rax
-        mov       \ELM_TYPE(%r8), %rdx
+        movzbl    \ELM_TYPE(%r8), %edx
         pop       %rbx
         ret
 
@@ -133,7 +133,7 @@ ETCH_LABEL(tail\MANGLED_NAME):                       // assert(ecx >= 0)
         pop       %rdi
         jnz       ETCH_LABEL(nextprobe\MANGLED_NAME)
         mov       \ELM_DATA(%r8), %rax
-        mov       \ELM_TYPE(%r8), %rdx
+        movzbl    \ELM_TYPE(%r8), %edx
         pop       %rbx
         ret
 

@@ -432,6 +432,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e),
+        Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, &fp.0),
         Expr_::Record(e) => emit_record(emitter, env, pos, e),
         Expr_::Array(es) => Ok(emit_pos_then(
             pos,
@@ -2682,6 +2683,59 @@ fn get_call_builtin_func_info(opts: &Options, id: impl AsRef<str>) -> Option<(us
         "HH\\global_get" => Some((1, IGet(CGetG))),
         "HH\\global_isset" => Some((1, IIsset(IssetG))),
         _ => None,
+    }
+}
+
+// How do we make these work with reified generics?
+fn emit_function_pointer(
+    e: &mut Emitter,
+    env: &Env,
+    tast::Expr(annot, expr_): &tast::Expr,
+) -> Result {
+    use tast::Expr_;
+    match expr_ {
+        // This is a function name. Equivalent to HH\fun('str')
+        Expr_::Id(id) => Ok(emit_hh_fun(e, id.name())),
+        // class_meth
+        Expr_::ClassConst(cc) => {
+            // TODO(hrust) should accept `let method_id = method::Type::from_ast_name(&(cc.1).1);`
+            let method_id: method::Type =
+                string_utils::strip_global_ns(&(cc.1).1).to_string().into();
+            emit_class_meth_native(e, env, annot, &cc.0, method_id)
+        }
+        Expr_::ObjGet(og) => match (og.1).1.as_id() {
+            Some(ast_defs::Id(_, method_name)) => {
+                let substitute_method_name =
+                    tast::Expr((og.1).0.clone(), Expr_::mk_string(method_name.into()));
+                if og.2.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
+                    let end_label = e.label_gen_mut().next_regular();
+                    let meth_instr = emit_expr(e, env, &substitute_method_name)?;
+                    Ok(InstrSeq::gather(vec![
+                        emit_quiet_expr(e, env, &(og.1).0, &og.0, false)?.0,
+                        instr::dup(),
+                        instr::istypec(IstypeOp::OpNull),
+                        instr::jmpnz(end_label.clone()),
+                        meth_instr,
+                        if e.options()
+                            .hhvm
+                            .flags
+                            .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
+                        {
+                            instr::resolve_obj_method()
+                        } else if hack_arr_dv_arrs(e.options()) {
+                            instr::new_vec_array(2)
+                        } else {
+                            instr::new_varray(2)
+                        },
+                        instr::label(end_label),
+                    ]))
+                } else {
+                    emit_inst_meth(e, env, &og.0, &substitute_method_name)
+                }
+            }
+            _ => Err(unrecoverable("What else could go here?")),
+        },
+        _ => Err(unrecoverable("What else could go here?")),
     }
 }
 

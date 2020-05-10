@@ -238,6 +238,8 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
         hack_lang_flags(LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS);
     popt.po_enable_xhp_class_modifier = hack_lang_flags(LangFlags::ENABLE_XHP_CLASS_MODIFIER);
     popt.po_disable_xhp_element_mangling = hack_lang_flags(LangFlags::DISABLE_XHP_ELEMENT_MANGLING);
+    popt.po_enable_first_class_function_pointers =
+        hack_lang_flags(LangFlags::ENABLE_FIRST_CLASS_FUNCTION_POINTERS);
     popt
 }
 

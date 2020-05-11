@@ -174,18 +174,29 @@ module Revision_map = struct
       |> Option.value ~default:[]
     in
     let prefetch_package xdb_result =
-      let handle =
+      let rev = Hg.Global_rev xdb_result.Xdb.global_rev in
+      let config_hash = xdb_result.Xdb.hhconfig_hash in
+      let saved_state_handle =
         {
-          State_loader.saved_state_for_rev =
-            Hg.Global_rev xdb_result.Xdb.global_rev;
+          State_loader.saved_state_for_rev = rev;
           saved_state_everstore_handle = xdb_result.Xdb.everstore_handle;
           watchman_mergebase = None;
         }
       in
-      State_loader_prefetcher.fetch
-        ~hhconfig_hash:xdb_result.Xdb.hhconfig_hash
-        ~cache_limit:t.saved_state_cache_limit
-        handle
+      let cached_state =
+        State_loader.cached_state ~saved_state_handle ~config_hash ~rev
+      in
+      match cached_state with
+      | Some _ ->
+        Hh_logger.log
+          "Informant found cached saved state for %s"
+          (Hg.show_rev rev);
+        Future.of_value ()
+      | None ->
+        State_loader_prefetcher.fetch
+          ~hhconfig_hash:config_hash
+          ~cache_limit:t.saved_state_cache_limit
+          saved_state_handle
     in
     let not_yet_ready =
       (* We use None to represent a not yet ready result. Check again later *)

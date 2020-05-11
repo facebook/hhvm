@@ -58,7 +58,7 @@ let get_path path =
    * use /tmp/ *)
   let dir =
     if String.length dir > max_addr_length - min_name_length then
-      Filename.get_temp_dir_name ()
+      Sys_utils.temp_dir_name
     else
       dir
   in

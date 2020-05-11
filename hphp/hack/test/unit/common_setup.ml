@@ -37,9 +37,9 @@ type setup = {
   naming_table: Naming_table.t;
 }
 
-let fake_dir = Printf.sprintf "%s/fake" (Filename.get_temp_dir_name ())
+let fake_dir = Filename.concat Sys_utils.temp_dir_name "fake"
 
-let in_fake_dir path = Printf.sprintf "%s/%s" fake_dir path
+let in_fake_dir path = Filename.concat fake_dir path
 
 (** This lays down some files on disk. Sets up a forward naming table.
 Sets up the provider's reverse naming table. Returns an empty context, plus

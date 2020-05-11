@@ -278,14 +278,20 @@ let rec is_ready : 'a. 'a t -> bool =
   | Bound (curr_future, next_producer) ->
     if is_ready curr_future then begin
       let curr_result = get curr_future in
-      let next_future = next_producer curr_result in
-      let is_next_ready = is_ready next_future in
-      (* `is_ready` *may* change next_promise's internal state/cache, so
+      try
+        let next_future = next_producer curr_result in
+        let is_next_ready = is_ready next_future in
+        (* `is_ready` *may* change next_promise's internal state/cache, so
         the updating of the promise below should happen AFTER calling `is_ready`
         on it. *)
-      let (next_promise, _t) = next_future in
-      promise := !next_promise;
-      is_next_ready
+        let (next_promise, _t) = next_future in
+        promise := !next_promise;
+        is_next_ready
+      with e ->
+        let e = Exception.wrap e in
+        let info = Process_types.dummy.Process_types.info in
+        promise := Complete_but_failed (info, Continuation_raised e);
+        true
     end else
       false
   | Incomplete { process; deadline; _ } ->

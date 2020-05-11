@@ -37,13 +37,28 @@ let test_exception_in_future_continuation () =
       Future.continue_with (Future.of_value ()) @@ fun _ ->
       failwith "Does it fire?"
   in
+
+  let successful_future = make_future 4 in
+
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Future.is_ready successful_future)
+    "Successful future must be ready";
+
   let () =
-    match Future.get (make_future 4) with
+    match Future.get successful_future with
     | Ok result -> Asserter.Int_asserter.assert_equals 5 result "must be 5"
     | Error error -> failwith (Future.error_to_string error)
   in
+  let failing_future = make_future 3 in
+
+  Asserter.Bool_asserter.assert_equals
+    true
+    (Future.is_ready failing_future)
+    "Failing future must be ready";
+
   let () =
-    match Future.get (make_future 3) with
+    match Future.get failing_future with
     | Ok _result -> failwith "Expected a failure"
     | Error error ->
       Asserter.String_asserter.assert_equals

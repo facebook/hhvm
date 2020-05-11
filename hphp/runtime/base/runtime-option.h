@@ -1106,7 +1106,7 @@ struct RuntimeOption {
    * inserting at n == count(arr)                                       \
    */                                                                   \
   F(bool, HackArrCompatCheckImplicitVarrayAppend, false)                \
-  F(bool, HackArrCompatTypeHintNotices, false)                          \
+  F(bool, HackArrCompatTypeHintNotices, true)                           \
   F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \

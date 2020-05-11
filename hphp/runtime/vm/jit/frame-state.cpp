@@ -280,7 +280,7 @@ Type refinePrediction(Type oldPredicted, Type newPredicted, Type proven) {
 
 }
 
-FrameStateMgr::FrameStateMgr(BCMarker marker) {
+FrameStateMgr::FrameStateMgr(const BCMarker& marker) {
   m_stack.push_back(FrameState{});
   cur().curFunc = marker.func();
   cur().irSPOff = marker.spOff();

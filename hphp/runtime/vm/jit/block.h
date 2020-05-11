@@ -109,7 +109,7 @@ struct Block {
   }
 
   // If its a catch block, the BeginCatch's marker
-  BCMarker catchMarker() const;
+  const BCMarker& catchMarker() const;
 
   // return the fallthrough block.  Should be nullptr if the last instruction
   // is a Terminal.
@@ -377,7 +377,7 @@ inline uint64_t Block::checkedProfCount(uint64_t profCount) {
   return profCount;
 }
 
-inline BCMarker Block::catchMarker() const {
+inline const BCMarker& Block::catchMarker() const {
   assertx(isCatch());
   auto it = skipHeader();
   assertx(it != begin());

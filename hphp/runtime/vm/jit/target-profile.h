@@ -130,7 +130,7 @@ struct TargetProfile {
   {}
 
   TargetProfile(const TransContext& context,
-                BCMarker marker,
+                const BCMarker& marker,
                 const StringData* name,
                 size_t extraSize = 0)
     : TargetProfile(context.kind == TransKind::Profile ? context.transID

@@ -76,7 +76,7 @@ bool isMBaseLoad(const IRInstruction* inst) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-IRBuilder::IRBuilder(IRUnit& unit, BCMarker initMarker)
+IRBuilder::IRBuilder(IRUnit& unit, const BCMarker& initMarker)
   : m_unit(unit)
   , m_initialMarker(initMarker)
   , m_curBCContext{initMarker, 0}
@@ -488,7 +488,7 @@ void IRBuilder::exceptionStackBoundary() {
   m_state.resetStackModified();
 }
 
-void IRBuilder::setCurMarker(BCMarker newMarker) {
+void IRBuilder::setCurMarker(const BCMarker& newMarker) {
   if (newMarker == curMarker()) return;
   FTRACE(2, "IRBuilder::setCurMarker:\n  old: {}\n  new: {}\n",
          curMarker().valid() ? curMarker().show() : "<invalid>",
@@ -851,7 +851,7 @@ void IRBuilder::resetGuardFailBlock() {
   m_guardFailBlock = nullptr;
 }
 
-void IRBuilder::pushBlock(BCMarker marker, Block* b) {
+void IRBuilder::pushBlock(const BCMarker& marker, Block* b) {
   FTRACE(2, "IRBuilder::pushBlock:\n  saved: B{} @ {}\n pushed: B{} @ {}\n",
          m_curBlock->id(), curMarker().show(), b->id(), marker.show());
   assertx(b);

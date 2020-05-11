@@ -237,7 +237,8 @@ struct IRUnit {
   /*
    * Create a DefLabel with `numDst` dests at the start of `block`.
    */
-  IRInstruction* defLabel(unsigned numDst, Block* block, BCContext bcctx);
+  IRInstruction* defLabel(unsigned numDst, Block* block,
+                          const BCContext& bcctx);
 
   /*
    * Add some extra destinations to a defLabel.

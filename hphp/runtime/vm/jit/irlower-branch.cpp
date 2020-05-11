@@ -53,7 +53,7 @@ namespace {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
+void maybe_syncsp(Vout& v, const BCMarker& marker, Vreg sp, IRSPRelOffset off) {
   if (marker.resumeMode() == ResumeMode::None) {
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       v << syncvmsp{v.cns(0x42)};
@@ -65,7 +65,7 @@ void maybe_syncsp(Vout& v, BCMarker marker, Vreg sp, IRSPRelOffset off) {
   v << syncvmsp{sync_sp};
 }
 
-RegSet cross_trace_args(BCMarker marker) {
+RegSet cross_trace_args(const BCMarker& marker) {
   return marker.resumeMode() != ResumeMode::None
     ? cross_trace_regs_resumed() : cross_trace_regs();
 }

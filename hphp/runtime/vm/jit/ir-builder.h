@@ -65,14 +65,14 @@ struct ExnStackState {
  *      copy propagation and strength reduction.  (See simplify.h.)
  */
 struct IRBuilder {
-  IRBuilder(IRUnit&, BCMarker);
+  IRBuilder(IRUnit&, const BCMarker&);
 
   /*
    * Accessors.
    */
   IRUnit& unit() const { return m_unit; }
   FrameStateMgr& fs() { return m_state; }
-  BCMarker curMarker() const { return m_curBCContext.marker; }
+  const BCMarker& curMarker() const { return m_curBCContext.marker; }
 
   /*
    * Get the current BCContext, incrementing its `iroff'.
@@ -84,7 +84,7 @@ struct IRBuilder {
   /*
    * Update the current BCContext.
    */
-  void setCurMarker(BCMarker);
+  void setCurMarker(const BCMarker&);
   void resetCurIROff(uint16_t off = 0) { m_curBCContext.iroff = off; }
 
   /*
@@ -254,7 +254,7 @@ struct IRBuilder {
    * }
    * gen(CodeForMainBlock, ...);
    */
-  void pushBlock(BCMarker marker, Block* b);
+  void pushBlock(const BCMarker& marker, Block* b);
   void popBlock();
 
   /*
@@ -383,7 +383,7 @@ private:
  * for usage.
  */
 struct BlockPusher {
-  BlockPusher(IRBuilder& irb, BCMarker marker, Block* block)
+  BlockPusher(IRBuilder& irb, const BCMarker& marker, Block* block)
     : m_irb(irb)
   {
     irb.pushBlock(marker, block);

@@ -225,7 +225,7 @@ struct FrameState {
  *   - current function and bytecode offset
  */
 struct FrameStateMgr final {
-  explicit FrameStateMgr(BCMarker);
+  explicit FrameStateMgr(const BCMarker&);
 
   FrameStateMgr(const FrameStateMgr&) = delete;
   FrameStateMgr(FrameStateMgr&&) = default;

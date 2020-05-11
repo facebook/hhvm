@@ -48,7 +48,8 @@ void IRUnit::initLogEntry(const Func* func) {
   }
 }
 
-IRInstruction* IRUnit::defLabel(unsigned numDst, Block* b, BCContext bcctx) {
+IRInstruction* IRUnit::defLabel(unsigned numDst, Block* b,
+                                const BCContext& bcctx) {
   IRInstruction inst(DefLabel, bcctx);
   auto const label = clone(&inst);
   if (numDst > 0) {

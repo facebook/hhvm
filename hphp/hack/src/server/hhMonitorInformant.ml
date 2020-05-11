@@ -21,50 +21,27 @@ module type State_loader_prefetcher_sig = sig
 end
 
 module State_loader_prefetcher_real = struct
-  (* Main entry point for a new package fetcher process. Exits with 0 on success. *)
-  let main (hhconfig_hash, handle, cache_limit) =
-    EventLogger.init_fake ();
-    let cached =
-      State_loader.cached_state
-        ~saved_state_handle:handle
-        ~config_hash:hhconfig_hash
-        ~rev:handle.State_loader.saved_state_for_rev
-    in
-    if Option.is_some cached then
-      (* No need to fetch if cached. *)
-      ()
-    else
-      let error_to_string (error : State_loader.error) : string =
-        let (msg, _retry, Utils.Callstack stack) =
-          State_loader.error_string_verbose error
-        in
-        msg ^ "\n" ^ stack
+  let fetch ~hhconfig_hash ~cache_limit handle =
+    let error_to_string (error : State_loader.error) : string =
+      let (msg, _retry, Utils.Callstack stack) =
+        State_loader.error_string_verbose error
       in
+      msg ^ "\n" ^ stack
+    in
+    let future =
       State_loader.fetch_saved_state
         ~cache_limit
         ~config:State_loader_config.default_timeouts
         ~config_hash:hhconfig_hash
         handle
-      |> Future.get ~timeout:999
-      |> Result.map_error ~f:(fun error ->
-             failwith (Future.error_to_string error))
-      |> Result.map_error ~f:error_to_string
-      |> Result.ok_or_failwith
-      |> ignore
-
-  let prefetch_package_entry =
-    Process.register_entry_point "State_loader_prefetcher_entry" main
-
-  let fetch ~hhconfig_hash ~cache_limit handle =
-    Future.make
-      (Process.run_entry
-         prefetch_package_entry
-         (hhconfig_hash, handle, cache_limit))
-      ignore
+    in
+    Future.continue_with future @@ function
+    | Ok result -> ignore result
+    | Error error -> failwith (error_to_string error)
 end
 
 module State_loader_prefetcher_fake = struct
-  let fetch ~hhconfig_hash:_ ~cache_limit:_ _ = Future.of_value ()
+  let fetch ~hhconfig_hash:_ ~cache_limit:_ _handle = Future.of_value ()
 end
 
 module State_loader_prefetcher =
@@ -84,15 +61,16 @@ module Revision_map = struct
    *)
   type t = {
     global_rev_queries: (Hg.hg_rev, Hg.global_rev Future.t) Caml.Hashtbl.t;
-    xdb_queries:
-      ( int,
-        Xdb.sql_result list Future.t * (* Prefetcher *)
-        unit Future.t option ref )
-      Caml.Hashtbl.t;
+    xdb_queries: (Hg.global_rev, query) Caml.Hashtbl.t;
     use_xdb: bool;
     ignore_hh_version: bool;
     ignore_hhconfig: bool;
     saved_state_cache_limit: int;
+  }
+
+  and query = {
+    query: Xdb.sql_result list Future.t;
+    prefetcher: unit Future.t option ref;
   }
 
   let create
@@ -179,7 +157,12 @@ module Revision_map = struct
             ~hhconfig_hash
           |> fst
         in
-        let () = Caml.Hashtbl.add t.xdb_queries global_rev (future, ref None) in
+        let () =
+          Caml.Hashtbl.add
+            t.xdb_queries
+            global_rev
+            { query = future; prefetcher = ref None }
+        in
         None
     in
     let query_to_result_list future =
@@ -219,7 +202,7 @@ module Revision_map = struct
     Option.(
       (* We run the prefetcher after the XDB lookup (because we need the XDB
        * result to run the prefetcher). *)
-      query >>= fun (query, prefetcher) ->
+      query >>= fun { query; prefetcher } ->
       match (query, !prefetcher) with
       | (query, Some prefetcher) ->
         begin
@@ -236,7 +219,7 @@ module Revision_map = struct
           | Future.In_progress _ ->
             (* Prefetcher is still running. "Not yet ready, check later." *)
             not_yet_ready
-          | Future.Complete_with_result (Ok _) ->
+          | Future.Complete_with_result (Ok ()) ->
             (* This is the only case where we produce a positive result
              * (where the prefetcher succeeded). Prefetchr is only run after
              * XDB lookup finishes and produces a non-empty result list,
@@ -247,6 +230,9 @@ module Revision_map = struct
             in
             good_xdb_result (List.hd_exn (query_to_result_list query))
           | Future.Complete_with_result (Error e) ->
+            Hh_logger.log
+              "Informant prefetcher failed with error: %s"
+              (Future.error_to_string e);
             let () =
               HackEventLogger.informant_prefetcher_failed
                 (Future.start_t prefetcher)

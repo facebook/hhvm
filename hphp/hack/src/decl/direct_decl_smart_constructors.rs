@@ -386,7 +386,6 @@ impl<'a> State<'a> {
 pub enum HintValue<'a> {
     Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-    Closure(&'a ClosureTypeHint<'a>),
 }
 
 #[derive(Clone, Debug)]
@@ -938,35 +937,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }
                         let names = names_copy.into_bump_slice();
                         Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
-                    }
-                    HintValue::Closure(hint) => {
-                        let mut params = Vec::new_in(self.state.arena);
-                        for node in hint.args.iter().copied() {
-                            params.push(&*self.alloc(FunParam {
-                                pos: node.get_pos(self.state.arena)?,
-                                name: None,
-                                type_: PossiblyEnforcedTy {
-                                    enforced: false,
-                                    type_: self.node_to_ty(node)?,
-                                },
-                                flags: FunParamFlags::empty(),
-                                rx_annotation: None,
-                            }));
-                        }
-                        let params = params.into_bump_slice();
-                        let ret = self.node_to_ty(hint.ret_hint)?;
-                        Ty_::Tfun(self.alloc(FunType {
-                            arity: FunArity::Fstandard,
-                            tparams: &[],
-                            where_constraints: &[],
-                            params,
-                            ret: PossiblyEnforcedTy {
-                                enforced: false,
-                                type_: ret,
-                            },
-                            reactive: Reactivity::Nonreactive,
-                            flags: FunTypeFlags::empty(),
-                        }))
                     }
                 };
                 Ok(Ty(reason, self.alloc(ty_)))
@@ -3276,17 +3246,41 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ret_hint: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Closure(self.alloc(ClosureTypeHint {
-                args: args?,
-                ret_hint: ret_hint?,
+        let mut params = Vec::new_in(self.state.arena);
+        for node in args?.iter().copied() {
+            params.push(&*self.alloc(FunParam {
+                pos: node.get_pos(self.state.arena)?,
+                name: None,
+                type_: PossiblyEnforcedTy {
+                    enforced: false,
+                    type_: self.node_to_ty(node)?,
+                },
+                flags: FunParamFlags::empty(),
+                rx_annotation: None,
+            }));
+        }
+        let params = params.into_bump_slice();
+        let ret = self.node_to_ty(ret_hint?)?;
+        let pos = Pos::merge(
+            self.state.arena,
+            left_paren?.get_pos(self.state.arena)?,
+            right_paren?.get_pos(self.state.arena)?,
+        )?;
+        Ok(self.hint_ty(
+            pos,
+            Ty_::Tfun(self.alloc(FunType {
+                arity: FunArity::Fstandard,
+                tparams: &[],
+                where_constraints: &[],
+                params,
+                ret: PossiblyEnforcedTy {
+                    enforced: false,
+                    type_: ret,
+                },
+                reactive: Reactivity::Nonreactive,
+                flags: FunTypeFlags::empty(),
             })),
-            Pos::merge(
-                self.state.arena,
-                left_paren?.get_pos(self.state.arena)?,
-                right_paren?.get_pos(self.state.arena)?,
-            )?,
-        ))))
+        ))
     }
 
     fn make_closure_parameter_type_specifier(&mut self, _arg0: Self::R, name: Self::R) -> Self::R {

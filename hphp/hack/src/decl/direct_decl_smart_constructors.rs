@@ -384,7 +384,6 @@ impl<'a> State<'a> {
 
 #[derive(Clone, Debug)]
 pub enum HintValue<'a> {
-    Apply(&'a (Id<'a>, &'a [Node_<'a>])),
     Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
 }
 
@@ -882,29 +881,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node_::Hint((hv, pos)) => {
                 let reason = self.alloc(Reason::hint(*pos));
                 let ty_ = match hv {
-                    HintValue::Apply(&(id, inner_types)) => match id.1.trim_start_matches("\\") {
-                        "varray_or_darray" => match inner_types {
-                            [tk, tv] => Ty_::TvarrayOrDarray(self.alloc((
-                                self.node_to_ty(*tk).unwrap_or_else(|_| tany()),
-                                self.node_to_ty(*tv).unwrap_or_else(|_| tany()),
-                            ))),
-                            [tv] => Ty_::TvarrayOrDarray(self.alloc((
-                                tarraykey(self.state.arena),
-                                self.node_to_ty(*tv).unwrap_or_else(|_| tany()),
-                            ))),
-                            _ => Ty_::Tany(TanySentinel),
-                        },
-                        _ => {
-                            let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
-                            let inner_types_iter = inner_types.iter();
-                            let mut inner_types = Vec::new_in(self.state.arena);
-                            for node in inner_types_iter {
-                                inner_types.push(self.node_to_ty(*node)?);
-                            }
-                            let inner_types = inner_types.into_bump_slice();
-                            Ty_::Tapply(self.alloc((id, inner_types)))
-                        }
-                    },
                     HintValue::Access((ty, names)) => {
                         let ty = match ty {
                             Node_::Name("self", self_pos) => {
@@ -1287,26 +1263,27 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn make_apply(
         &self,
-        base_ty: Node_<'a>,
-        type_variables: Node_<'a>,
-        closing_delimiter: Option<Node_<'a>>,
+        base_ty: Id<'a>,
+        type_arguments: Node_<'a>,
+        pos_to_merge: Option<&'a Pos<'a>>,
     ) -> Node<'a> {
-        let Id(base_ty_pos, base_ty_name) = self.get_name("", base_ty)?;
-        let pos = match closing_delimiter {
-            Some(closing_delimiter) => Pos::merge(
-                self.state.arena,
-                base_ty_pos,
-                closing_delimiter.get_pos(self.state.arena)?,
-            )?,
+        let Id(base_ty_pos, base_ty_name) = base_ty;
+        let id = Id(
+            base_ty_pos,
+            self.state.namespace_builder.rename_import(base_ty_name),
+        );
+        let type_arguments_iter = type_arguments.iter();
+        let mut type_arguments = Vec::new_in(self.state.arena);
+        for node in type_arguments_iter {
+            type_arguments.push(self.node_to_ty(*node)?);
+        }
+        let type_arguments = type_arguments.into_bump_slice();
+        let ty_ = Ty_::Tapply(self.alloc((id, type_arguments)));
+        let pos = match pos_to_merge {
+            Some(p) => Pos::merge(self.state.arena, base_ty_pos, p)?,
             None => base_ty_pos,
         };
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Apply(self.alloc((
-                Id(base_ty_pos, base_ty_name),
-                type_variables.as_slice(self.state.arena),
-            ))),
-            pos,
-        ))))
+        Ok(self.hint_ty(pos, ty_))
     }
 
     fn hint_ty(&self, pos: &'a Pos<'a>, ty_: Ty_<'a>) -> Node_<'a> {
@@ -1474,16 +1451,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::String => self.prim_ty(aast::Tprim::Tstring, token_pos(self)),
             TokenKind::Int => self.prim_ty(aast::Tprim::Tint, token_pos(self)),
             TokenKind::Float => self.prim_ty(aast::Tprim::Tfloat, token_pos(self)),
-            TokenKind::Double => Node_::Hint(&*self.alloc((
-                HintValue::Apply(&*self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
+            // "double" and "boolean" are parse errors--they should be written
+            // "float" and "bool". The decl-parser treats the incorrect names as
+            // type names rather than primitives.
+            TokenKind::Double | TokenKind::Boolean => self.hint_ty(
                 token_pos(self),
-            ))),
+                Ty_::Tapply(self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
+            ),
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
-            TokenKind::Boolean => Node_::Hint(&*self.alloc((
-                HintValue::Apply(&*self.alloc((Id(token_pos(self), token_text(self)), &[][..]))),
-                token_pos(self),
-            ))),
             TokenKind::Mixed => Node_::Ty(Ty(
                 self.alloc(Reason::hint(token_pos(self))),
                 self.alloc(Ty_::Tmixed),
@@ -1946,22 +1922,38 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_generic_type_specifier(
         &mut self,
         class_type: Self::R,
-        argument_list: Self::R,
+        type_arguments: Self::R,
     ) -> Self::R {
-        let (class_type, argument_list) = (class_type?, argument_list?);
-        let Id(pos, class_type) =
-            self.get_name(self.state.namespace_builder.current_namespace(), class_type)?;
-        let full_pos = match argument_list.get_pos(self.state.arena) {
-            Ok(p2) => Pos::merge(self.state.arena, pos, p2)?,
-            Err(_) => pos,
-        };
-        Ok(Node_::Hint(self.alloc((
-            HintValue::Apply(self.alloc((
+        let (class_type, type_arguments) = (class_type?, type_arguments?);
+        let unqualified_id = self.get_name("", class_type)?;
+        if unqualified_id.1.trim_start_matches("\\") == "varray_or_darray" {
+            let pos = Pos::merge(
+                self.state.arena,
+                unqualified_id.0,
+                type_arguments.get_pos(self.state.arena)?,
+            )?;
+            let type_arguments = type_arguments.as_slice(self.state.arena);
+            let ty_ = match type_arguments {
+                [tk, tv] => Ty_::TvarrayOrDarray(self.alloc((
+                    self.node_to_ty(*tk).unwrap_or_else(|_| tany()),
+                    self.node_to_ty(*tv).unwrap_or_else(|_| tany()),
+                ))),
+                [tv] => Ty_::TvarrayOrDarray(self.alloc((
+                    tarraykey(self.state.arena),
+                    self.node_to_ty(*tv).unwrap_or_else(|_| tany()),
+                ))),
+                _ => Ty_::Tany(TanySentinel),
+            };
+            Ok(self.hint_ty(pos, ty_))
+        } else {
+            let Id(pos, class_type) =
+                self.get_name(self.state.namespace_builder.current_namespace(), class_type)?;
+            self.make_apply(
                 Id(pos, class_type),
-                argument_list.as_slice(self.state.arena),
-            ))),
-            full_pos,
-        ))))
+                type_arguments,
+                type_arguments.get_pos(self.state.arena).ok(),
+            )
+        }
     }
 
     fn make_alias_declaration(
@@ -2796,7 +2788,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let id = self.get_name(self.state.namespace_builder.current_namespace(), name)?;
         let hint = self.node_to_ty(extends?)?;
         let extends = self.node_to_ty(self.make_apply(
-            Node_::Name("\\HH\\BuiltinEnum", name.get_pos(self.state.arena)?),
+            Id(name.get_pos(self.state.arena)?, "\\HH\\BuiltinEnum"),
             name,
             None,
         )?)?;
@@ -3014,17 +3006,15 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let id = self.get_name("\\", classname)?;
         match gt {
             Node_::Ignored => Ok(self.prim_ty(aast::Tprim::Tstring, id.0)),
-            gt => Ok(Node_::Hint(self.alloc((
-                HintValue::Apply(self.alloc((
-                    id,
-                    bumpalo::vec![in self.state.arena; targ].into_bump_slice(),
-                ))),
-                Pos::merge(
+            gt => self.make_apply(
+                id,
+                targ,
+                Some(Pos::merge(
                     self.state.arena,
                     classname.get_pos(self.state.arena)?,
                     gt.get_pos(self.state.arena)?,
-                )?,
-            )))),
+                )?),
+            ),
         }
     }
 
@@ -3429,7 +3419,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(vec?, hint?, Some(greater_than?))
+        self.make_apply(
+            self.get_name("", vec?)?,
+            hint?,
+            greater_than?.get_pos(self.state.arena).ok(),
+        )
     }
 
     fn make_dictionary_type_specifier(
@@ -3439,7 +3433,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         hint: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(dict?, hint?, Some(greater_than?))
+        self.make_apply(
+            self.get_name("", dict?)?,
+            hint?,
+            greater_than?.get_pos(self.state.arena).ok(),
+        )
     }
 
     fn make_keyset_type_specifier(
@@ -3450,6 +3448,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(keyset?, hint?, Some(greater_than?))
+        self.make_apply(
+            self.get_name("", keyset?)?,
+            hint?,
+            greater_than?.get_pos(self.state.arena).ok(),
+        )
     }
 }

@@ -20,7 +20,7 @@ let add_container_decl_fact decl_pred name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact decl_pred json_fact progress
 
-let add_container_defn_fact ctx clss decl_id member_decls progress =
+let add_container_defn_fact ctx clss decl_id member_decls prog =
   let common_fields =
     [
       ("declaration", build_id_json decl_id);
@@ -28,10 +28,31 @@ let add_container_defn_fact ctx clss decl_id member_decls progress =
     ]
     @ build_ns_json_nested clss.c_namespace
   in
+  let add_decls decls pred prog =
+    List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
+        let name = strip_tparams (get_type_from_hint ctx decl) in
+        let (decl_id, prog) = add_container_decl_fact pred name prog in
+        let ref = build_id_json decl_id in
+        (ref :: decl_refs, prog))
+  in
   let (defn_pred, json_fields, prog) =
     match get_container_kind clss with
-    | InterfaceContainer -> (InterfaceDefinition, common_fields, progress)
-    | TraitContainer -> (TraitDefinition, common_fields, progress)
+    | InterfaceContainer ->
+      let (extends, prog) =
+        add_decls clss.c_extends InterfaceDeclaration prog
+      in
+      let req_fields = ("extends_", JSON_Array extends) :: common_fields in
+      (InterfaceDefinition, req_fields, prog)
+    | TraitContainer ->
+      let (impls, prog) =
+        add_decls clss.c_implements InterfaceDeclaration prog
+      in
+      let (uses, prog) = add_decls clss.c_uses TraitDeclaration prog in
+      let req_fields =
+        [("implements_", JSON_Array impls); ("uses", JSON_Array uses)]
+        @ common_fields
+      in
+      (TraitDefinition, req_fields, prog)
     | ClassContainer ->
       let is_abstract =
         match clss.c_kind with
@@ -39,26 +60,32 @@ let add_container_defn_fact ctx clss decl_id member_decls progress =
         | _ -> false
       in
       let (class_fields, prog) =
+        let (impls, prog) =
+          add_decls clss.c_implements InterfaceDeclaration prog
+        in
+        let (uses, prog) = add_decls clss.c_uses TraitDeclaration prog in
         let req_class_fields =
           common_fields
           @ [
               ("isAbstract", JSON_Bool is_abstract);
               ("isFinal", JSON_Bool clss.c_final);
+              ("implements_", JSON_Array impls);
+              ("uses", JSON_Array uses);
             ]
         in
         match clss.c_extends with
-        | [] -> (req_class_fields, progress)
+        | [] -> (req_class_fields, prog)
         | [parent] ->
           let (decl_id, prog) =
             let parent_clss = strip_tparams (get_type_from_hint ctx parent) in
-            add_container_decl_fact ClassDeclaration parent_clss progress
+            add_container_decl_fact ClassDeclaration parent_clss prog
           in
           (("extends_", build_id_json decl_id) :: req_class_fields, prog)
         | _ ->
           Hh_logger.log
             "WARNING: skipping extends field for class with multiple parents %s"
             (snd clss.c_name);
-          (req_class_fields, progress)
+          (req_class_fields, prog)
       in
       (ClassDefinition, class_fields, prog)
   in

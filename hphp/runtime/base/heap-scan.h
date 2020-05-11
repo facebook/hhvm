@@ -121,6 +121,11 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return static_cast<const GlobalsArray*>(h)->scan(scanner);
     case HeaderKind::RecordArray:
       return static_cast<const RecordArray*>(h)->scan(scanner);
+    case HeaderKind::BespokeArray:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeKeyset:
+      return static_cast<const BespokeArray*>(h)->scan(scanner);
     case HeaderKind::Closure:
       scanner.scan(*static_cast<const c_Closure*>(h)->hdr());
       return static_cast<const c_Closure*>(h)->scan(scanner);

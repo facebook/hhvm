@@ -17,6 +17,7 @@
 #ifndef incl_HPHP_MEMORY_MANAGER_DEFS_H
 #define incl_HPHP_MEMORY_MANAGER_DEFS_H
 
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/record-array.h"
@@ -260,6 +261,10 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* Dict */
     0, /* VecArray */
     0, /* KeySet */
+    0, /* BespokeArray */
+    0, /* BespokeDict */
+    0, /* BespokeVec */
+    0, /* BespokeKeyset */
     0, /* String */
     0, /* Resource */
     sizeClass<ClsMethData>(),
@@ -313,6 +318,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Dict)
   CHECKSIZE(VecArray)
   CHECKSIZE(Keyset)
+  CHECKSIZE(BespokeArray)
   CHECKSIZE(String)
   CHECKSIZE(Resource)
   CHECKSIZE(Record)
@@ -357,6 +363,12 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::Keyset:
       // size = fn of h->m_scale
       size = static_cast<const SetArray*>(h)->heapSize();
+      break;
+    case HeaderKind::BespokeArray:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeKeyset:
+      size = static_cast<const BespokeArray*>(h)->heapSize();
       break;
     case HeaderKind::String:
       // size = isFlat ? isRefCounted ? table[aux16] : m_size+C : proxy_size;

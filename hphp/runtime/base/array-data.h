@@ -83,15 +83,19 @@ struct ArrayData : MaybeCountable {
    * kNumKinds-1 since we use these values to index into a table.
    */
   enum ArrayKind : uint8_t {
-    kPackedKind,  // PackedArray with keys in range [0..size)
-    kMixedKind,   // MixedArray arbitrary int or string keys, maybe holes
-    kEmptyKind,   // The singleton static empty array
-    kGlobalsKind, // GlobalsArray
-    kRecordKind,  // RecordArray
-    kDictKind,    // Hack dict
-    kVecKind,     // Hack vec
-    kKeysetKind,  // Hack keyset
-    kNumKinds     // insert new values before kNumKinds.
+    kPackedKind,        // PackedArray with keys in range [0..size)
+    kMixedKind,         // MixedArray arbitrary int or string keys, maybe holes
+    kEmptyKind,         // The singleton static empty array
+    kGlobalsKind,       // GlobalsArray
+    kRecordKind,        // RecordArray
+    kDictKind,          // Hack dict
+    kVecKind,           // Hack vec
+    kKeysetKind,        // Hack keyset
+    kBespokeArrayKind,  // Bespoke array
+    kBespokeDictKind,   // Bespoke array
+    kBespokeVecKind,    // Bespoke array
+    kBespokeKeysetKind, // Bespoke array
+    kNumKinds           // insert new values before kNumKinds.
   };
 
   /*
@@ -127,16 +131,10 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kHasProvenanceData = 16;
 
   /*
-   * Indicates that this array has some hidden-class type. Array-likes with
-   * their standard "vanilla" layouts never have this bit set.
-   */
-  static auto constexpr kIsBespoke = 32;
-
-  /*
    * Indicates that this array has a side table that contains information about
    * its keys.
    */
-  static auto constexpr kHasStrKeyTable = 64;
+  static auto constexpr kHasStrKeyTable = 32;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -226,7 +224,7 @@ public:
   /*
    * Fast-path number of elements.
    *
-   * Only valid for arrays that aren't GlobalsArray.
+   * Only valid for arrays that aren't GlobalsArray or BespokeArray.
    */
   size_t getSize() const;
 
@@ -781,6 +779,11 @@ protected:
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
+
+  // note that m_size does not store the array size for GlobalsArray (where it
+  // is -1) or for BespokeArray (where it is ~bespoke_id) and you must call the
+  // size arraydata method to get the size of these arrays (or, future-proofing
+  // here:) or for any array with the sign bit of its m_size set.
   union {
     struct {
       uint32_t m_size;

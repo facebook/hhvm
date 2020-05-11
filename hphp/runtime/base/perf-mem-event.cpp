@@ -324,6 +324,13 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::RFunc: // TODO(T63348446)
       break;
 
+    case HeaderKind::BespokeArray:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeKeyset:
+      // TODO(jgriego)
+      break;
+
     case HeaderKind::Object:
     case HeaderKind::NativeObject:
     case HeaderKind::Closure:

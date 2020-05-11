@@ -139,7 +139,6 @@ inline bool ArrayData::empty() const {
 }
 
 inline bool ArrayData::kindIsValid() const {
-  assertx(isVanilla());
   return isArrayKind(m_kind);
 }
 
@@ -164,20 +163,20 @@ inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
 inline bool ArrayData::isPHPArrayType() const {
-  return ::HPHP::isArrayType(toDataType());
+  return (kind() & (~0x10)) < kDictKind;
 }
 inline bool ArrayData::isHackArrayType() const {
-  return ::HPHP::isHackArrayType(toDataType());
+  return (kind() & (~0x10)) >= kDictKind;
 }
 
 inline bool ArrayData::isDictType() const {
-  return ::HPHP::isDictType(toDataType());
+  return ((kind() - 4) & 0x13) == 0x01;
 }
 inline bool ArrayData::isVecArrayType() const {
-  return ::HPHP::isVecType(toDataType());
+  return ((kind() - 4) & 0x13) == 0x02;
 }
 inline bool ArrayData::isKeysetType() const {
-  return ::HPHP::isKeysetType(toDataType());
+  return ((kind() - 4) & 0x13) == 0x03;
 }
 
 inline bool ArrayData::hasVanillaPackedLayout() const {
@@ -192,11 +191,11 @@ inline bool ArrayData::isPHPArrayKind() const {
 }
 
 inline bool ArrayData::isHackArrayKind() const {
-  return kind() >= kDictKind;
+  return kind() >= kDictKind && kind() < kBespokeArrayKind;
 }
 
 inline bool ArrayData::isVanilla() const {
-  return !(m_aux16 & kIsBespoke);
+  return kind() < kBespokeArrayKind;
 }
 
 inline ArrayData::DVArray ArrayData::dvArray() const {
@@ -269,57 +268,6 @@ inline bool ArrayData::useWeakKeys() const {
   return isPHPArrayType();
 }
 
-inline DataType ArrayData::toDataType() const {
-  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
-    if (isVArray()) {
-      assertx(isPackedKind());
-      return KindOfVArray;
-    } else if (isDArray()) {
-      assertx(isMixedKind());
-      return KindOfDArray;
-    }
-  }
-  switch (kind()) {
-    case kPackedKind:
-    case kMixedKind:
-    case kEmptyKind:
-    case kGlobalsKind:
-    case kRecordKind:
-      return KindOfArray;
-
-    case kDictKind:   return KindOfDict;
-    case kVecKind:    return KindOfVec;
-    case kKeysetKind: return KindOfKeyset;
-    case kNumKinds:   not_reached();
-  }
-  not_reached();
-}
-
-inline DataType ArrayData::toPersistentDataType() const {
-  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
-    if (isVArray()) {
-      assertx(isPackedKind());
-      return KindOfPersistentVArray;
-    } else if (isDArray()) {
-      assertx(isMixedKind());
-      return KindOfPersistentDArray;
-    }
-  }
-  switch (kind()) {
-    case kPackedKind:
-    case kMixedKind:
-    case kEmptyKind:
-    case kGlobalsKind:
-    case kRecordKind:
-      return KindOfPersistentArray;
-
-    case kDictKind:   return KindOfPersistentDict;
-    case kVecKind:    return KindOfPersistentVec;
-    case kKeysetKind: return KindOfPersistentKeyset;
-    case kNumKinds:   not_reached();
-  }
-  not_reached();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Iteration.

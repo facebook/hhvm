@@ -201,12 +201,18 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
     case ArrayData::kVecKind:
     case ArrayData::kDictKind:
     case ArrayData::kKeysetKind:
+    case ArrayData::kBespokeDictKind:
+    case ArrayData::kBespokeVecKind:
+    case ArrayData::kBespokeKeysetKind:
       // Shouldn't get Hack arrays
       not_reached();
 
     case ArrayData::kRecordKind:
       // TODO: T47449944
       not_reached();
+
+    case ArrayData::kBespokeArrayKind:
+      always_assert(false); // TODO(jgriego) bespoke
 
     case ArrayData::kNumKinds:
       not_reached();

@@ -47,6 +47,8 @@ enum class HeaderKind : uint8_t {
   Packed, Mixed, Empty, Globals, RecordArray,
   // Hack arrays
   Dict, VecArray, Keyset,
+  // Bespoke arrays
+  BespokeArray, BespokeDict, BespokeVec, BespokeKeyset,
   // Other ordinary refcounted heap objects
   String, Resource, ClsMeth, Record, RFunc,
 
@@ -271,7 +273,7 @@ inline constexpr bool isObjectKind(HeaderKind k) {
 }
 
 inline constexpr bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::Keyset;
+  return k >= HeaderKind::Packed && k <= HeaderKind::BespokeKeyset;
 }
 
 inline constexpr bool isFreeKind(HeaderKind k) {

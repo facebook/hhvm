@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/empty-array.h"
@@ -273,6 +274,10 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     MixedArray::entry##Dict,   /* Dict */       \
     PackedArray::entry##Vec,   /* Vec */        \
     SetArray::entry,           /* Keyset */     \
+    BespokeArray::entry, /* bespoke array */    \
+    BespokeArray::entry, /* bespoke dict */     \
+    BespokeArray::entry, /* bespoke vec */      \
+    BespokeArray::entry, /* bespoke keyset */   \
   },
 
 /*
@@ -691,6 +696,68 @@ const ArrayFunctions g_array_funcs = {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+__attribute__((__always_inline__))
+DataType ArrayData::toDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfDArray;
+    }
+  }
+  switch (kind()) {
+    case kPackedKind:
+    case kMixedKind:
+    case kEmptyKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfArray;
+
+    case kDictKind:    return KindOfDict;
+    case kVecKind:     return KindOfVec;
+    case kKeysetKind:  return KindOfKeyset;
+    case kBespokeArrayKind: return KindOfArray;
+    case kBespokeDictKind: return KindOfDict;
+    case kBespokeVecKind: return KindOfVec;
+    case kBespokeKeysetKind: return KindOfKeyset;
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
+}
+
+__attribute__((__always_inline__))
+DataType ArrayData::toPersistentDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfPersistentVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfPersistentDArray;
+    }
+  }
+  switch (kind()) {
+    case kPackedKind:
+    case kMixedKind:
+    case kEmptyKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfPersistentArray;
+
+    case kDictKind:   return KindOfPersistentDict;
+    case kVecKind:    return KindOfPersistentVec;
+    case kKeysetKind: return KindOfPersistentKeyset;
+    case kBespokeArrayKind: return KindOfPersistentArray;
+    case kBespokeDictKind: return KindOfPersistentDict;
+    case kBespokeVecKind: return KindOfPersistentVec;
+    case kBespokeKeysetKind: return KindOfPersistentKeyset;
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
+}
+
 namespace {
 
 DEBUG_ONLY void assertForCreate(TypedValue name) {
@@ -1018,7 +1085,7 @@ void ArrayData::getNotFound(const StringData* k) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*,8> names = {{
+  std::array<const char*, 12> names = {{
     "PackedKind",
     "MixedKind",
     "EmptyKind",
@@ -1026,7 +1093,11 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "RecordKind",
     "DictKind",
     "VecKind",
-    "KeysetKind"
+    "KeysetKind",
+    "BespokeArrayKind",
+    "BespokeDictKind",
+    "BespokeVecKind",
+    "BespokeKeysetKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

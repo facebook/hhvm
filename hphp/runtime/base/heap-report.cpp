@@ -51,6 +51,10 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Empty:
     case HeaderKind::VecArray:
     case HeaderKind::Keyset:
+    case HeaderKind::BespokeArray:
+    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeKeyset:
     case HeaderKind::Globals:
     case HeaderKind::RecordArray:
       out << "[" << static_cast<const ArrayData*>(h)->size() << "]";

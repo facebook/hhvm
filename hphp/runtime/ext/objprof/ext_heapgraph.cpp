@@ -242,6 +242,13 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
         break;
       }
 
+      case HeaderKind::BespokeArray:
+      case HeaderKind::BespokeDict:
+      case HeaderKind::BespokeVec:
+      case HeaderKind::BespokeKeyset:
+        always_assert(false); // TODO(jgriego)
+        break;
+
       case HeaderKind::Pair: {
         if (edge.offset >= c_Pair::dataOffset()) {
           auto elm_offset = edge.offset - c_Pair::dataOffset();

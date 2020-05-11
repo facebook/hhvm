@@ -181,4 +181,9 @@ impl<'a> Env<'a> {
             unimplemented!()
         }
     }
+
+    pub fn tany(&self, r: PReason<'a>) -> Ty<'a> {
+        // TODO(hrust) check dynamic view
+        self.bld().any(r)
+    }
 }

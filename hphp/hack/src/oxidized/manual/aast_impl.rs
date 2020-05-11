@@ -48,6 +48,9 @@ impl<Ex, Fb, En, Hi> Expr<Ex, Fb, En, Hi> {
 }
 
 impl<Fb, En, Hi> Expr<Pos, Fb, En, Hi> {
+    pub fn pos(&self) -> &Pos {
+        &self.0
+    }
     pub fn mk_lvar(p: &Pos, n: &str) -> Self {
         Self::new(
             p.clone(),

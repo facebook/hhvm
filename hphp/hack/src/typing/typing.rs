@@ -8,12 +8,14 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use crate::typing_log;
 use crate::typing_object_get;
 use crate::typing_phase::{self, MethodInstantiation};
 use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
+use oxidized::ast_defs::Id;
 use oxidized::{aast, aast_defs, ast, ast_defs};
 use oxidized_by_ref::aast_defs::Sid;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
@@ -121,18 +123,28 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
         }
         ast::Expr_::Call(x) => {
             // TODO(hrust) pseudo functions, might_throw
-            let (call_type, e, explicit_targs, el, unpacked_element) = &**x;
-            let in_suspend = false;
-            check_call(
-                env,
-                pos,
-                call_type,
-                e,
-                explicit_targs,
-                el,
-                unpacked_element,
-                in_suspend,
-            )
+            let (call_type, fun_expr, explicit_targs, args, unpacked_element) = &**x;
+            if let Some(fun_id) = is_pseudo_function(fun_expr) {
+                call_pseudo_function(
+                    env,
+                    pos,
+                    (env.ast_pos(fun_expr.pos()), fun_id),
+                    args,
+                    call_type,
+                )
+            } else {
+                let in_suspend = false;
+                check_call(
+                    env,
+                    pos,
+                    call_type,
+                    fun_expr,
+                    explicit_targs,
+                    args,
+                    unpacked_element,
+                    in_suspend,
+                )
+            }
         }
         ast::Expr_::Binop(op) => match op.as_ref() {
             (ast_defs::Bop::Eq(None), e1, e2) => {
@@ -157,10 +169,7 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
                     }
                     _ => (),
                 };
-                (
-                    ty,
-                    tast::Expr_::Binop(Box::new((ast_defs::Bop::Eq(None), te1, te2))),
-                )
+                (ty, tast::Expr_::mk_binop(ast_defs::Bop::Eq(None), te1, te2))
             }
             op => unimplemented!("{:#?}", op),
         },
@@ -200,13 +209,55 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
             let ctor_annot = (env.ast_pos(ctor_pos), ctor_fty);
             (
                 ty,
-                tast::Expr_::New(Box::new((class_id, targs, args, unpacked_arg, ctor_annot))),
+                tast::Expr_::mk_new(class_id, targs, args, unpacked_arg, ctor_annot),
             )
         }
         x => unimplemented!("{:#?}", x),
     };
     // TODO(hrust) set_tyvar_variance
     ast::Expr((pos, ty), e)
+}
+
+fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&Id> {
+    let ast::Expr(_, fun_expr_) = fun_expr;
+    if let ast::Expr_::Id(fun_id) = fun_expr_ {
+        let Id(_, fun_id_) = fun_id.as_ref();
+        // TODO(hrust) use constants in naming_special_names
+        if fun_id_ == "hh_show_env" {
+            Some(fun_id)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+fn call_pseudo_function<'a>(
+    env: &mut Env<'a>,
+    p_call_expr: &'a Pos,
+    (p_fun_expr, fun_id): (&'a Pos, &Id),
+    args: &'a Vec<ast::Expr>,
+    call_type: &ast::CallType,
+) -> (Ty<'a>, tast::Expr_<'a>) {
+    let bld = env.bld();
+    let args = args.iter().map(|e| expr(env, e)).collect();
+    typing_log::hh_show_env(p_call_expr, env);
+    let return_ty = {
+        let r_call = bld.mk_rwitness(p_call_expr);
+        bld.void(r_call)
+    };
+    // TODO(hrust) call typing_utils::mk_tany instead
+    let fun_expr_ty = {
+        let r_fun = bld.mk_rwitness(p_fun_expr);
+        env.tany(r_fun)
+    };
+    let fun_expr = tast::Expr(
+        (p_fun_expr, fun_expr_ty),
+        tast::Expr_::mk_id(fun_id.clone()),
+    );
+    let call_expr = tast::Expr_::mk_call(call_type.clone(), fun_expr, vec![], args, None);
+    (return_ty, call_expr)
 }
 
 fn check_call<'a>(
@@ -249,7 +300,7 @@ fn dispatch_call<'a>(
             // TODO(hrust) reactivity stuff
             let fun_expr = tast::Expr(
                 (env.ast_pos(fpos), function_ty),
-                tast::Expr_::Id(Box::new(typing_naming::canonicalize(x))),
+                tast::Expr_::mk_id(typing_naming::canonicalize(x)),
             );
             (
                 return_ty,
@@ -283,7 +334,7 @@ fn dispatch_call<'a>(
                     );
                     let fun_expr = tast::Expr(
                         (env.ast_pos(fpos), function_ty),
-                        tast::Expr_::ObjGet(Box::new((receiver, method_id, nullflavor.clone()))),
+                        tast::Expr_::mk_obj_get(receiver, method_id, nullflavor.clone()),
                     );
                     (
                         return_ty,

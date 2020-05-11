@@ -22,6 +22,7 @@ mod typing_env_from_def;
 mod typing_env_return_info;
 mod typing_env_types;
 mod typing_local_types;
+mod typing_log;
 mod typing_naming;
 mod typing_object_get;
 mod typing_per_cont_env;

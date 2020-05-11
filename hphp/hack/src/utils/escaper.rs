@@ -9,6 +9,8 @@
 
 use std::{borrow::Cow, error::Error, fmt, io::Write};
 
+use bumpalo::Bump;
+
 #[derive(Debug)]
 pub struct InvalidString {
     pub msg: String,
@@ -31,6 +33,29 @@ impl<'a> From<&'a str> for InvalidString {
         Self {
             msg: String::from(x),
         }
+    }
+}
+
+trait GrowableBytes {
+    fn push(&mut self, byte: u8);
+    fn extend_from_slice(&mut self, slice: &[u8]);
+}
+
+impl GrowableBytes for Vec<u8> {
+    fn push(&mut self, byte: u8) {
+        self.push(byte)
+    }
+    fn extend_from_slice(&mut self, slice: &[u8]) {
+        self.extend_from_slice(slice)
+    }
+}
+
+impl GrowableBytes for bumpalo::collections::Vec<'_, u8> {
+    fn push(&mut self, byte: u8) {
+        self.push(byte)
+    }
+    fn extend_from_slice(&mut self, slice: &[u8]) {
+        self.extend_from_slice(slice)
     }
 }
 
@@ -126,7 +151,7 @@ fn escape_byte_by<F: Fn(u8) -> Option<Cow<'static, [u8]>>>(cow: Cow<[u8]>, f: F)
     }
 }
 
-fn codepoint_to_utf8(n: u32, output: &mut Vec<u8>) -> Result<(), InvalidString> {
+fn codepoint_to_utf8(n: u32, output: &mut impl GrowableBytes) -> Result<(), InvalidString> {
     if n <= 0x7f {
         output.push(n as u8);
     } else if n <= 0x7ff {
@@ -184,7 +209,13 @@ pub enum LiteralKind {
     LiteralLongString,
 }
 
-fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, InvalidString> {
+/// Copies `s` into `output`, replacing escape sequences with the characters
+/// they represent. The bytes added to `output` will be valid UTF-8.
+fn unescape_literal(
+    literal_kind: LiteralKind,
+    s: &str,
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
     struct Scanner<'a> {
         s: &'a [u8],
         i: usize,
@@ -228,8 +259,6 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
         }
     }
 
-    let mut output: Vec<u8> = Vec::with_capacity(s.len());
-
     let mut s = Scanner::new(s.as_bytes());
     while !s.is_empty() {
         let c = s.next()?;
@@ -272,7 +301,7 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
                     let _ = s.next()?;
                     let unicode = s.take_if(|c| c != b'}', 6);
                     let n = parse_int(unicode, 16)?;
-                    codepoint_to_utf8(n, &mut output)?;
+                    codepoint_to_utf8(n, output)?;
                     let n = s.next()?;
                     if n != b'}' {
                         return Err("Invalid UTF-8 escape sequence".into());
@@ -301,24 +330,66 @@ fn unescape_literal(literal_kind: LiteralKind, s: &str) -> Result<String, Invali
             }
         }
     }
-    return Ok(unsafe { String::from_utf8_unchecked(output) });
+    Ok(())
+}
+
+fn unescape_literal_into_string(
+    literal_kind: LiteralKind,
+    s: &str,
+) -> Result<String, InvalidString> {
+    let mut output = Vec::with_capacity(s.len());
+    unescape_literal(literal_kind, s, &mut output)?;
+    // Safety: s is a valid &str, and unescape_literal copies it into output,
+    // only adding and removing valid UTF-8 codepoints.
+    Ok(unsafe { String::from_utf8_unchecked(output) })
+}
+
+fn unescape_literal_into_arena<'a>(
+    literal_kind: LiteralKind,
+    s: &str,
+    arena: &'a Bump,
+) -> Result<&'a str, InvalidString> {
+    let mut output = bumpalo::collections::Vec::with_capacity_in(s.len(), arena);
+    unescape_literal(literal_kind, s, &mut output)?;
+    // Safety: s is a valid &str, and unescape_literal copies it into output,
+    // only adding and removing valid UTF-8 codepoints.
+    let string = unsafe { bumpalo::collections::String::from_utf8_unchecked(output) };
+    Ok(string.into_bump_str())
 }
 
 pub fn unescape_double(s: &str) -> Result<String, InvalidString> {
-    unescape_literal(LiteralKind::LiteralDoubleQuote, s)
+    unescape_literal_into_string(LiteralKind::LiteralDoubleQuote, s)
 }
 
 pub fn unescape_backtick(s: &str) -> Result<String, InvalidString> {
-    unescape_literal(LiteralKind::LiteralBacktick, s)
+    unescape_literal_into_string(LiteralKind::LiteralBacktick, s)
 }
 
 pub fn unescape_heredoc(s: &str) -> Result<String, InvalidString> {
-    unescape_literal(LiteralKind::LiteralHeredoc, s)
+    unescape_literal_into_string(LiteralKind::LiteralHeredoc, s)
 }
 
-fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &[u8]) -> Result<String, InvalidString> {
+pub fn unescape_double_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_literal_into_arena(LiteralKind::LiteralDoubleQuote, s, arena)
+}
+
+pub fn unescape_backtick_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_literal_into_arena(LiteralKind::LiteralBacktick, s, arena)
+}
+
+pub fn unescape_heredoc_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_literal_into_arena(LiteralKind::LiteralHeredoc, s, arena)
+}
+
+/// Copies `s` into `output`, replacing escape sequences with the characters
+/// they represent. The bytes added to `output` will be valid UTF-8.
+fn unescape_single_or_nowdoc(
+    is_nowdoc: bool,
+    s: &str,
+    output: &mut impl GrowableBytes,
+) -> Result<(), InvalidString> {
+    let s = s.as_bytes();
     let len = s.len();
-    let mut output: Vec<u8> = Vec::with_capacity(len);
     let mut idx = 0;
     while idx < len {
         let c = s[idx];
@@ -341,19 +412,55 @@ fn unescape_single_or_nowdoc(is_nowdoc: bool, s: &[u8]) -> Result<String, Invali
         }
         idx += 1;
     }
-    unsafe { Ok(String::from_utf8_unchecked(output)) }
+    Ok(())
+}
+
+fn unescape_single_or_nowdoc_into_string(
+    is_nowdoc: bool,
+    s: &str,
+) -> Result<String, InvalidString> {
+    let mut output = Vec::with_capacity(s.len());
+    unescape_single_or_nowdoc(is_nowdoc, s, &mut output)?;
+    // Safety: s is a valid &str, and unescape_single_or_nowdoc copies it into
+    // output, only adding and removing valid UTF-8 codepoints.
+    Ok(unsafe { String::from_utf8_unchecked(output) })
+}
+
+fn unescape_single_or_nowdoc_into_arena<'a>(
+    is_nowdoc: bool,
+    s: &str,
+    arena: &'a Bump,
+) -> Result<&'a str, InvalidString> {
+    let mut output = bumpalo::collections::Vec::with_capacity_in(s.len(), arena);
+    unescape_single_or_nowdoc(is_nowdoc, s, &mut output)?;
+    // Safety: s is a valid &str, and unescape_single_or_nowdoc copies it into
+    // output, only adding and removing valid UTF-8 codepoints.
+    let string = unsafe { bumpalo::collections::String::from_utf8_unchecked(output) };
+    Ok(string.into_bump_str())
 }
 
 pub fn unescape_single(s: &str) -> Result<String, InvalidString> {
-    unescape_single_or_nowdoc(false, s.as_bytes())
+    unescape_single_or_nowdoc_into_string(false, s)
 }
 
 pub fn unescape_nowdoc(s: &str) -> Result<String, InvalidString> {
-    unescape_single_or_nowdoc(true, s.as_bytes())
+    unescape_single_or_nowdoc_into_string(true, s)
+}
+
+pub fn unescape_single_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_single_or_nowdoc_into_arena(false, s, arena)
+}
+
+pub fn unescape_nowdoc_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_single_or_nowdoc_into_arena(true, s, arena)
 }
 
 pub fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
-    unescape_literal(LiteralKind::LiteralLongString, s)
+    unescape_literal_into_string(LiteralKind::LiteralLongString, s)
+}
+
+pub fn unescape_long_string_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+    unescape_literal_into_arena(LiteralKind::LiteralLongString, s, arena)
 }
 
 pub fn extract_unquoted_string(
@@ -361,8 +468,20 @@ pub fn extract_unquoted_string(
     start: usize,
     len: usize,
 ) -> Result<String, InvalidString> {
-    let r = extract_unquoted_string_(content.as_bytes(), start, len)?;
-    unsafe { Ok(String::from_utf8_unchecked(r)) }
+    let substr = content
+        .get(start..start + len)
+        .ok_or_else(|| InvalidString::from("out of bounds or sliced at non-codepoint-boundary"))?;
+    Ok(unquote_str(substr).into())
+}
+
+/// Remove single quotes, double quotes, backticks, or heredoc/nowdoc delimiters
+/// surrounding a string literal.
+pub fn unquote_str(content: &str) -> &str {
+    let unquoted = unquote_slice(content.as_bytes());
+    // Safety: content is a valid &str. unquote_slice finds ASCII delimiters and
+    // removes the prefix and suffix surrounding them. Because it uses ASCII
+    // delimiters, we know it is slicing at codepoint boundaries.
+    unsafe { std::str::from_utf8_unchecked(unquoted) }
 }
 
 fn find(s: &[u8], needle: u8) -> Option<usize> {
@@ -385,55 +504,36 @@ fn rfind(s: &[u8], needle: u8) -> Option<usize> {
     None
 }
 
-fn extract_unquoted_string_(
-    content: &[u8],
-    start: usize,
-    len: usize,
-) -> Result<Vec<u8>, InvalidString> {
-    if len == 0 {
-        Ok(vec![])
-    } else if content.len() > 3 && content.starts_with(b"<<<") {
+/// Remove single quotes, double quotes, backticks, or heredoc/nowdoc delimiters
+/// surrounding a string literal. If the input slice is valid UTF-8, the output
+/// slice will also be valid UTF-8.
+pub fn unquote_slice(content: &[u8]) -> &[u8] {
+    if content.len() < 2 {
+        content
+    } else if content.starts_with(b"<<<") {
         // The heredoc case
         // These types of strings begin with an opening line containing <<<
         // followed by a string to use as a terminator (which is optionally
-        // quoted) and end with a line containing only the terminator and a
-        // semicolon followed by a blank line. We need to drop the opening line
-        // as well as the blank line and preceding terminator line.
-        match (
-            find(content, b'\n'),
-            rfind(&content[..start + len - 1], b'\n'),
-        ) {
-            (Some(start_), Some(end_)) =>
-            // An empty heredoc, this way, will have start >= end
-            {
-                if start_ >= end_ {
-                    Ok(vec![])
+        // quoted), and end with a line containing only the terminator.
+        // We need to drop the opening line and terminator line.
+        match (find(content, b'\n'), rfind(content, b'\n')) {
+            (Some(start), Some(end)) => {
+                // An empty heredoc, this way, will have start >= end
+                if start >= end {
+                    &[]
                 } else {
-                    Ok(content[start_ + 1..end_].into())
+                    &content[start + 1..end]
                 }
             }
-            _ => Ok(content.into()),
+            _ => content,
         }
     } else {
-        static SINGLE_QUOTE: u8 = b'\'';
-        static DOUBLE_QUOTE: u8 = b'"';
-        static BACK_TICK: u8 = b'`';
-        match (content.get(start), content.get(start + len - 1)) {
-            (Some(&c1), Some(&c2))
-                if (c1 == DOUBLE_QUOTE && c2 == DOUBLE_QUOTE)
-                    || c1 == SINGLE_QUOTE && c2 == SINGLE_QUOTE
-                    || c1 == BACK_TICK && c2 == BACK_TICK =>
-            {
-                Ok(content[start + 1..len - 1].into())
-            }
-            (Some(_), Some(_)) => {
-                if start == 0 && content.len() == len {
-                    Ok(content.into())
-                } else {
-                    Ok(content[start..start + len].into())
-                }
-            }
-            _ => Err("out of bounds".into()),
+        let c1 = content[0];
+        let c2 = content[content.len() - 1];
+        if c1 == c2 && (c1 == b'\'' || c1 == b'"' || c1 == b'`') {
+            &content[1..content.len() - 1]
+        } else {
+            content
         }
     }
 }
@@ -546,20 +646,9 @@ mod tests {
         assert_eq!(extract_unquoted_string("''", 0, 2).unwrap(), "");
         assert_eq!(extract_unquoted_string("'a", 0, 2).unwrap(), "'a");
         assert_eq!(extract_unquoted_string("a", 0, 1).unwrap(), "a");
+        assert_eq!(extract_unquoted_string("<<<EOT\n\nEOT", 0, 11).unwrap(), "");
         assert_eq!(
-            extract_unquoted_string("<<<EOT\n\nEOT;", 0, 12).unwrap(),
-            ""
-        );
-        assert_eq!(
-            extract_unquoted_string("<<<EOT\na\nEOT;", 0, 13).unwrap(),
-            "a"
-        );
-        assert_eq!(
-            extract_unquoted_string("<<<EOT\n\nEOT;\n", 0, 13).unwrap(),
-            ""
-        );
-        assert_eq!(
-            extract_unquoted_string("<<<EOT\na\nEOT;\n", 0, 14).unwrap(),
+            extract_unquoted_string("<<<EOT\na\nEOT", 0, 12).unwrap(),
             "a"
         );
     }
@@ -570,5 +659,36 @@ mod tests {
         assert_eq!(rfind(b"a", b'a'), Some(0));
         assert_eq!(rfind(b"b", b'a'), None);
         assert_eq!(rfind(b"ba", b'a'), Some(1));
+    }
+
+    #[test]
+    fn unquote_str_test() {
+        assert_eq!(unquote_str(""), "");
+        assert_eq!(unquote_str("''"), "");
+        assert_eq!(unquote_str("\"\""), "");
+        assert_eq!(unquote_str("``"), "");
+
+        assert_eq!(unquote_str("'a'"), "a");
+        assert_eq!(unquote_str("\"a\""), "a");
+        assert_eq!(unquote_str("`a`"), "a");
+        assert_eq!(unquote_str(r#"`a\``"#), r#"a\`"#);
+
+        assert_eq!(unquote_str("<<<EOT\nEOT"), "");
+        assert_eq!(unquote_str("<<<EOT\n\nEOT"), "");
+        assert_eq!(unquote_str("<<<EOT\n\n\nEOT"), "\n");
+        assert_eq!(unquote_str("<<<EOT\na\nEOT"), "a");
+        assert_eq!(unquote_str("<<<EOT\n\na\n\nEOT"), "\na\n");
+
+        assert_eq!(unquote_str("'"), "'");
+        assert_eq!(unquote_str("\""), "\"");
+        assert_eq!(unquote_str("`"), "`");
+
+        assert_eq!(unquote_str("a"), "a");
+        assert_eq!(unquote_str("`a"), "`a");
+        assert_eq!(unquote_str(" `a`"), " `a`");
+        assert_eq!(unquote_str("'a\""), "'a\"");
+
+        assert_eq!(unquote_str("<<<"), "<<<");
+        assert_eq!(unquote_str("<<<EOTEOT"), "<<<EOTEOT");
     }
 }

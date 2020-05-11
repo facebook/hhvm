@@ -1127,6 +1127,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
+ "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

@@ -397,6 +397,8 @@ def report_failures(
             print()
     elif failures != []:
         record_results(failures, out_extension)
+        if dump_on_failure:
+            dump_failures(failures)
         fnames = [failure.test_case.file_path for failure in failures]
         print("To review the failures, use the following command: ")
         fallback_expect_ext_var = ""
@@ -421,8 +423,6 @@ def report_failures(
                 " ".join(map(fname_map_var, fnames)),
             )
         )
-        if dump_on_failure:
-            dump_failures(failures)
 
 
 def dump_failures(failures: List[Result]) -> None:

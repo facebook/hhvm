@@ -1344,19 +1344,31 @@ fn emit_while(e: &mut Emitter, env: &mut Env, cond: &tast::Expr, body: &tast::Bl
     let break_label = e.label_gen_mut().next_regular();
     let cont_label = e.label_gen_mut().next_regular();
     let start_label = e.label_gen_mut().next_regular();
+    /* TODO: This is *bizarre* codegen for a while loop.
+             It would be better to generate this as
+             instr_label continue_label;
+             emit_expr e;
+             instr_jmpz break_label;
+             body;
+             instr_jmp continue_label;
+             instr_label break_label;
+    */
+    let i3 = emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs;
+    let i2 = env.do_in_loop_body(
+        e,
+        break_label.clone(),
+        cont_label.clone(),
+        None,
+        body,
+        emit_block,
+    )?;
+    let i1 = emit_expr::emit_jmpz(e, env, cond, &break_label)?.instrs;
     Ok(InstrSeq::gather(vec![
-        emit_expr::emit_jmpz(e, env, cond, &break_label)?.instrs,
+        i1,
         instr::label(start_label.clone()),
-        env.do_in_loop_body(
-            e,
-            break_label.clone(),
-            cont_label.clone(),
-            None,
-            body,
-            emit_block,
-        )?,
+        i2,
         instr::label(cont_label),
-        emit_expr::emit_jmpnz(e, env, cond, &start_label)?.instrs,
+        i3,
         instr::label(break_label),
     ]))
 }
@@ -1451,21 +1463,26 @@ fn emit_for(
     //  emit_ignored_expr increment;
     //  instr_jmp start_label;
     //  instr_label break_label;
+    let i5 = emit_cond(e, env, pos, false, &start_label, e2)?;
+    let i4 = emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e3)?;
+    let i3 = env.do_in_loop_body(
+        e,
+        break_label.clone(),
+        cont_label.clone(),
+        None,
+        body,
+        emit_block,
+    )?;
+    let i2 = emit_cond(e, env, pos, true, &break_label, e2)?;
+    let i1 = emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e1)?;
     Ok(InstrSeq::gather(vec![
-        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e1)?,
-        emit_cond(e, env, pos, true, &break_label, e2)?,
-        instr::label(start_label.clone()),
-        env.do_in_loop_body(
-            e,
-            break_label.clone(),
-            cont_label.clone(),
-            None,
-            body,
-            emit_block,
-        )?,
+        i1,
+        i2,
+        instr::label(start_label),
+        i3,
         instr::label(cont_label),
-        emit_expr::emit_ignored_expr(e, env, &Pos::make_none(), e3)?,
-        emit_cond(e, env, pos, false, &start_label, e2)?,
+        i4,
+        i5,
         instr::label(break_label),
     ]))
 }

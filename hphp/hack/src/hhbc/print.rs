@@ -312,7 +312,7 @@ fn print_symbol_ref_regions<W: Write>(
     let mut print_region = |name, refs: &BTreeSet<String>| {
         if !refs.is_empty() {
             ctx.newline(w)?;
-            write!(w, "{}  {{", name)?;
+            write!(w, ".{} {{", name)?;
             ctx.block(w, |c, w| {
                 for s in refs.iter() {
                     c.newline(w)?;
@@ -714,7 +714,7 @@ fn print_class_special_attributes<W: Write>(
         special_attributes.push("foldable")
     }
     if is_system_lib {
-        special_attributes.extend(&["unique", "builtin", "persistent"])
+        special_attributes.extend(&["persistent", "builtin", "unique"])
     }
     if hhas_attribute::has_dynamically_constructible(user_attrs) {
         special_attributes.push("dyn_constructible");
@@ -940,10 +940,28 @@ fn print_class_def<W: Write>(
     newline(w)
 }
 
-fn pos_to_prov_tag(ctx: &Context, loc: &Option<ast_defs::Pos>) -> String {
+fn print_pos_as_prov_tag<W: Write>(
+    ctx: &Context,
+    w: &mut W,
+    loc: &Option<ast_defs::Pos>,
+) -> Result<(), W::Error> {
     match loc {
-        Some(_) if ctx.emitter.options().array_provenance() => unimplemented!(),
-        _ => "".into(),
+        Some(l) if ctx.emitter.options().array_provenance() => {
+            let (line, ..) = l.info_pos();
+            let filename = l.filename().to_absolute();
+            let filename = match filename.to_str().unwrap() {
+                "" => "(unknown hackc filename)",
+                x => x,
+            };
+            write!(
+                w,
+                "p:i:{};s:{}:{};",
+                line,
+                filename.len(),
+                quote_string_with_escape(filename)
+            )
+        }
+        _ => Ok(()),
     }
 }
 
@@ -986,13 +1004,8 @@ fn print_adata_mapped_argument<W: Write, F, V>(
 where
     F: Fn(&mut Context, &mut W, &V) -> Result<(), W::Error>,
 {
-    write!(
-        w,
-        "{}:{}:{{{}",
-        col_type,
-        values.len(),
-        pos_to_prov_tag(ctx, loc)
-    )?;
+    write!(w, "{}:{}:{{", col_type, values.len(),)?;
+    print_pos_as_prov_tag(ctx, w, loc)?;
     for v in values {
         f(ctx, w, v)?
     }
@@ -3202,6 +3215,11 @@ fn print_fun_attrs<W: Write>(
     }
     if ctx.is_system_lib() || (has_dynamically_callable(user_attrs) && !f.is_memoize_impl()) {
         special_attrs.push("dyn_callable")
+    }
+    if ctx.is_system_lib() {
+        special_attrs.push("unique");
+        special_attrs.push("builtin");
+        special_attrs.push("persistent");
     }
     print_special_and_user_attrs(ctx, w, &special_attrs, user_attrs)
 }

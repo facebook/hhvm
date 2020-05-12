@@ -1162,7 +1162,7 @@ fn emit_static_collection(
                 instr::nulluninit(),
                 instr::typedvalue(tv),
                 instr::fcallfuncd(
-                    FcallArgs::new(FcallFlags::default(), 0, vec![], None, 1, None),
+                    FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
                     function::from_raw_string("HH\\tag_provenance_here"),
                 ),
                 transform_instr,
@@ -4252,17 +4252,19 @@ fn emit_as(
                 },
             ])
         };
+        let i2 = if is_static {
+            main_block(
+                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                TypestructResolveOp::Resolve,
+            )
+        } else {
+            main_block(ts_instrs, TypestructResolveOp::DontResolve)
+        };
+        let i1 = emit_expr(e, env, expr)?;
         Ok(InstrSeq::gather(vec![
-            emit_expr(e, env, expr)?,
+            i1,
             instr::setl(arg_local.clone()),
-            if is_static {
-                main_block(
-                    get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
-                    TypestructResolveOp::Resolve,
-                )
-            } else {
-                main_block(ts_instrs, TypestructResolveOp::DontResolve)
-            },
+            i2,
             instr::label(then_label),
             instr::pushl(arg_local),
             instr::unsetl(type_struct_local),

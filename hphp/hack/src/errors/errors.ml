@@ -4100,13 +4100,13 @@ let overriding_prop_const_mismatch
   on_error
     ~code:(Typing.err_code Typing.OverridingPropConstMismatch)
     [
-      ( parent_pos,
-        if parent_const then
+      ( child_pos,
+        if child_const then
           m1
         else
           m2 );
-      ( child_pos,
-        if child_const then
+      ( parent_pos,
+        if parent_const then
           m1
         else
           m2 );

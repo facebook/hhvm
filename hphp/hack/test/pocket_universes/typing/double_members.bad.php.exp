@@ -1,10 +1,10 @@
-File "double_members.bad.php", line 35, characters 32-60:
+File "double_members.bad.php", line 38, characters 12-13:
 Invalid argument (Typing[4110])
-File "double_members.bad.php", line 33, characters 12-28:
-Expected <expr#1>:@T because a type could not be determined here
-File "double_members.bad.php", line 35, characters 22-29:
-  where '<expr#1>' is a reference to this expression
-File "double_members.bad.php", line 34, characters 14-30:
-But got <expr#2>:@T because a type could not be determined here
-File "double_members.bad.php", line 35, characters 50-57:
+File "double_members.bad.php", line 36, characters 14-27:
+Expected <expr#2>:@T
+File "double_members.bad.php", line 36, characters 29-36:
   where '<expr#2>' is a reference to this expression
+File "double_members.bad.php", line 35, characters 14-30:
+But got <expr#1>:@T
+File "double_members.bad.php", line 35, characters 32-39:
+  where '<expr#1>' is a reference to this expression

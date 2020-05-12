@@ -80,9 +80,8 @@ let expand_atom env reason (base : locl_ty) enum member tyname =
 (* In the context of the PU base:@enum, we are trying to expand the type
  * projection ty:@tyname
  *)
-let expand_pocket_universes env base enum (ty : locl_ty) tyname =
-  let apply env r gen tyname =
-    let p = Reason.to_pos r in
+let expand_pocket_universes env reason base enum (ty : locl_ty) tyname =
+  let apply env r p gen tyname =
     (env, Some (mk (r, Tpu_type_access ((p, gen), tyname))))
   in
   let error env r =
@@ -94,16 +93,33 @@ let expand_pocket_universes env base enum (ty : locl_ty) tyname =
   match deref ty with
   | (r, Tprim (Aast_defs.Tatom atom)) ->
     let member = (Reason.to_pos r, atom) in
-    let (env, ty) = expand_atom env r base enum member tyname in
+    let (env, ty) = expand_atom env reason base enum member tyname in
     (env, Some ty)
-  | (r, Tgeneric s) -> apply env r s tyname
+  | (r, Tgeneric s) -> apply env reason (Reason.to_pos r) s tyname
   | (r, Tdependent (dep_ty, lty)) ->
     let (env, lty) = Env.expand_type env lty in
     (match deref lty with
     | (_, Tpu _) ->
+      let new_r =
+        (* Patch the location for better error reporting *)
+        match r with
+        | Reason.Rexpr_dep_type (_, pos, s) ->
+          let r = Reason.Rwitness (fst tyname) in
+          Reason.Rexpr_dep_type (r, pos, s)
+        | _ -> r
+      in
       let gen = DependentKind.to_string dep_ty in
-      apply env r gen tyname
-    | (_, Tgeneric gen) -> apply env r gen tyname
+      apply env new_r (Reason.to_pos r) gen tyname
+    | (_, Tgeneric gen) ->
+      (* Patch the location for better error reporting *)
+      let rdep =
+        match r with
+        | Reason.Rexpr_dep_type (_, pos, _) ->
+          let r = Reason.Rwitness (fst tyname) in
+          Reason.Rexpr_dep_type (r, pos, Reason.ERpu (gen ^ ":@" ^ snd tyname))
+        | _ -> r
+      in
+      apply env rdep (Reason.to_pos r) gen tyname
     | _ -> error env r)
   | (_, Tpu _) ->
     (* Non dependent Tpu can/will happen because it is used as upperbounds

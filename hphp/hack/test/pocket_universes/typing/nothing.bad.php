@@ -7,19 +7,19 @@ class C {
   }
 }
 
-function good<TP as C:@E>(TP $x) : TP:@T {
+function good<TP as C:@E>(TP $x): TP:@T {
   return C:@E::value($x);
 }
 
-function good2<TP as C:@E, TR>(TP $x) : TR where TR = TP:@T {
+function good2<TP as C:@E, TR>(TP $x): TR where TR = TP:@T {
   return C:@E::value($x);
 }
 
-function bad<TP as C:@E>(TP $x) : nothing {
+function bad<TP as C:@E>(TP $x): nothing {
   return C:@E::value($x);
 }
 
-function bad2<TP as C:@E, TR>(TP $x) : TR where TR = nothing {
+function bad2<TP as C:@E, TR>(TP $x): TR where TR = nothing {
   return C:@E::value($x);
 }
 

@@ -11,11 +11,12 @@ module TUtils = Typing_utils
 let make_pocket_universes_type_equal
     env new_ty (ty : internal_type) base enum name ~on_error =
   let error = Errors.type_constant_mismatch on_error in
+  let reason = get_reason new_ty in
   let rec make_equal env ty =
     match ty with
     | LoclType lty ->
       let (env, opt_pu_ty) =
-        TUtils.expand_pocket_universes env base enum lty name
+        TUtils.expand_pocket_universes env reason base enum lty name
       in
       (match opt_pu_ty with
       | Some pu_ty ->

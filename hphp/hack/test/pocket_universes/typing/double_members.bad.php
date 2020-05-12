@@ -32,7 +32,10 @@ class PU2 {
 function main(): void {
   foreach (PU2:@E::Members() as $member1) {
     foreach (PU2:@E::Members() as $member2) {
-      PU2:@E::logger($member1)(PU2:@E::generator($member2)());
+      $gen = PU2:@E::generator($member2);
+      $log = PU2:@E::logger($member1);
+      $x = $gen();
+      $log($x);
     }
   }
 }

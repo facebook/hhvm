@@ -106,6 +106,7 @@ and expr_dep_type_reason =
   | ERclass of string
   | ERparent of string
   | ERself of string
+  | ERpu of string
 [@@deriving eq]
 
 let arg_pos_str ap =
@@ -566,6 +567,7 @@ and expr_dep_type_reason_string = function
     "where the class '"
     ^ strip_ns c
     ^ "' was referenced here via the keyword 'self'"
+  | ERpu s -> "where '" ^ s ^ "' is a type projected from this expression"
 
 let to_constructor_string r =
   match r with

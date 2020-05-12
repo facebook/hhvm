@@ -81,9 +81,25 @@ type afield = (Pos.t, func_body_ann, unit, unit) Aast.afield
 type method_redeclaration =
   (Pos.t, func_body_ann, unit, unit) Aast.method_redeclaration
 
+type pu_enum = (Pos.t, func_body_ann, unit, unit) Aast.pu_enum
+
+type pu_member = (Pos.t, func_body_ann, unit, unit) Aast.pu_member
+
+type pu_case_value = Aast.pu_case_value
+
 type targ = unit Aast.targ
 
 type sid = Aast.sid
+
+type shape_field_name = Ast_defs.shape_field_name
+
+type class_hint = Aast.class_hint
+
+type trait_hint = Aast.trait_hint
+
+type record_hint = Aast.record_hint
+
+type xhp_attr_hint = Aast.xhp_attr_hint
 
 module ShapeMap = Ast_defs.ShapeMap
 

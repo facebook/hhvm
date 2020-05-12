@@ -369,15 +369,15 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_name: sid;
   c_tparams: ('ex, 'fb, 'en, 'hi) class_tparams;
       (** The type parameters of a class A<T> (T is the parameter) *)
-  c_extends: hint list;
-  c_uses: hint list;
+  c_extends: class_hint list;
+  c_uses: trait_hint list;
   c_use_as_alias: use_as_alias list;
   c_insteadof_alias: insteadof_alias list;
   c_method_redeclarations: ('ex, 'fb, 'en, 'hi) method_redeclaration list;
-  c_xhp_attr_uses: hint list;
+  c_xhp_attr_uses: xhp_attr_hint list;
   c_xhp_category: (pos * pstring list) option;
-  c_reqs: (hint * is_extends) list;
-  c_implements: hint list;
+  c_reqs: (class_hint * is_extends) list;
+  c_implements: class_hint list;
   c_where_constraints: where_constraint list;
   c_consts: ('ex, 'fb, 'en, 'hi) class_const list;
   c_typeconsts: ('ex, 'fb, 'en, 'hi) class_typeconst list;
@@ -394,6 +394,12 @@ and ('ex, 'fb, 'en, 'hi) class_ = {
   c_doc_comment: doc_comment option;
   c_emit_id: emit_id option;
 }
+
+and class_hint = hint
+
+and trait_hint = hint
+
+and xhp_attr_hint = hint
 
 and xhp_attr_tag =
   | Required
@@ -500,7 +506,7 @@ and ('ex, 'fb, 'en, 'hi) method_redeclaration = {
   mt_params: ('ex, 'fb, 'en, 'hi) fun_param list;
   mt_fun_kind: Ast_defs.fun_kind;
   mt_ret: 'hi type_hint;
-  mt_trait: hint;
+  mt_trait: trait_hint;
   mt_method: pstring;
   mt_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
 }
@@ -534,7 +540,7 @@ and ('ex, 'fb, 'en, 'hi) gconst = {
 and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_annotation: 'en;
   rd_name: sid;
-  rd_extends: hint option;
+  rd_extends: record_hint option;
   rd_abstract: bool;
   rd_fields: (sid * hint * ('ex, 'fb, 'en, 'hi) expr option) list;
   rd_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
@@ -543,6 +549,8 @@ and ('ex, 'fb, 'en, 'hi) record_def = {
   rd_doc_comment: doc_comment option;
   rd_emit_id: emit_id option;
 }
+
+and record_hint = hint
 
 (** Pocket Universe Enumeration, e.g.
 
@@ -577,9 +585,11 @@ and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   pu_is_final: bool;
   pu_case_types: (sid * reify_kind) list;
-  pu_case_values: (sid * hint) list;
+  pu_case_values: pu_case_value list;
   pu_members: ('ex, 'fb, 'en, 'hi) pu_member list;
 }
+
+and pu_case_value = sid * hint
 
 and ('ex, 'fb, 'en, 'hi) pu_member = {
   pum_atom: sid;

@@ -11,10 +11,12 @@
 use crate::typing_log;
 use crate::typing_object_get;
 use crate::typing_phase::{self, MethodInstantiation};
+use crate::typing_solver;
 use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
+use lazy_static::lazy_static;
 use oxidized::ast_defs::Id;
 use oxidized::{aast, aast_defs, ast, ast_defs};
 use oxidized_by_ref::aast_defs::Sid;
@@ -218,12 +220,17 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
     ast::Expr((pos, ty), e)
 }
 
+lazy_static! {
+    static ref PSEUDO_FUNCTIONS: std::collections::HashSet<&'static str> =
+        { vec!["hh_force_solve", "hh_show_env"].into_iter().collect() };
+}
+
 fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&Id> {
     let ast::Expr(_, fun_expr_) = fun_expr;
     if let ast::Expr_::Id(fun_id) = fun_expr_ {
         let Id(_, fun_id_) = fun_id.as_ref();
         // TODO(hrust) use constants in naming_special_names
-        if fun_id_ == "hh_show_env" {
+        if PSEUDO_FUNCTIONS.contains(&fun_id_[..]) {
             Some(fun_id)
         } else {
             None
@@ -242,7 +249,11 @@ fn call_pseudo_function<'a>(
 ) -> (Ty<'a>, tast::Expr_<'a>) {
     let bld = env.bld();
     let args = args.iter().map(|e| expr(env, e)).collect();
-    typing_log::hh_show_env(p_call_expr, env);
+    if fun_id.name() == "hh_show_env" {
+        typing_log::hh_show_env(p_call_expr, env);
+    } else if fun_id.name() == "hh_force_solve" {
+        typing_solver::solve_all_unsolved_tyvars(env);
+    }
     let return_ty = {
         let r_call = bld.mk_rwitness(p_call_expr);
         bld.void(r_call)

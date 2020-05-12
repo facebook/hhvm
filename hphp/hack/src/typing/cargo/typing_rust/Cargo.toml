@@ -23,4 +23,5 @@ typing_defs_rust = { path = "../typing_defs_rust" }
 typing_heap_rust = { path = "../typing_heap" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
 itertools = "0.8"
+lazy_static = "1.0"
 ocaml = "0.8"

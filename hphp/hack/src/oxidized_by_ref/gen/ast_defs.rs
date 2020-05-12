@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b90245e04c9efe743a508a34a005146d>>
+// @generated SignedSource<<ed46e4b39dd9c0a8ec79173af2b8b41d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -33,6 +34,7 @@ pub enum ShapeFieldName<'a> {
     SFlitStr(Pstring<'a>),
     SFclassConst(Id<'a>, Pstring<'a>),
 }
+impl<'a> TrivialDrop for ShapeFieldName<'a> {}
 
 pub use oxidized::ast_defs::Variance;
 
@@ -79,5 +81,6 @@ pub enum Bop<'a> {
     QuestionQuestion,
     Eq(Option<&'a Bop<'a>>),
 }
+impl<'a> TrivialDrop for Bop<'a> {}
 
 pub use oxidized::ast_defs::Uop;

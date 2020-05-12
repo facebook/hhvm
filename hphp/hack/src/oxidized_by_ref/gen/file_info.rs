@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<810f17ca151b5f3c01594bc62c8508b1>>
+// @generated SignedSource<<7be0da14eac996ba77fc38258705e90d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -34,11 +35,13 @@ pub enum Pos<'a> {
         relative_path::RelativePath<'a>,
     ),
 }
+impl<'a> TrivialDrop for Pos<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
+impl<'a> TrivialDrop for Id<'a> {}
 
 /// The hash value of a decl AST.
 /// We use this to see if two versions of a file are "similar", i.e. their
@@ -60,6 +63,7 @@ pub struct FileInfo<'a> {
     /// None if loaded from saved state
     pub comments: Option<&'a [(&'a pos::Pos<'a>, Comment<'a>)]>,
 }
+impl<'a> TrivialDrop for FileInfo<'a> {}
 
 pub use oxidized::file_info::Names;
 

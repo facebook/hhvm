@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4c9f23cb5c52634af2cba3b8c463ca7a>>
+// @generated SignedSource<<484e48550d2b64b348a4a295ae401d07>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -26,6 +27,7 @@ pub use shape_map::ShapeMap;
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Lid<'a>(pub &'a Pos<'a>, pub LocalId<'a>);
+impl<'a> TrivialDrop for Lid<'a> {}
 
 pub type Sid<'a> = ast_defs::Id<'a>;
 
@@ -50,6 +52,7 @@ pub enum XhpChild<'a> {
     ChildUnary(&'a XhpChild<'a>, oxidized::aast_defs::XhpChildOp),
     ChildBinary(&'a XhpChild<'a>, &'a XhpChild<'a>),
 }
+impl<'a> TrivialDrop for XhpChild<'a> {}
 
 pub use oxidized::aast_defs::XhpChildOp;
 
@@ -57,6 +60,7 @@ pub use oxidized::aast_defs::XhpChildOp;
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Hint<'a>(pub &'a Pos<'a>, pub &'a Hint_<'a>);
+impl<'a> TrivialDrop for Hint<'a> {}
 
 pub use oxidized::aast_defs::MutableReturn;
 
@@ -75,6 +79,7 @@ pub struct HintFun<'a> {
     pub return_ty: Hint<'a>,
     pub is_mutable_return: oxidized::aast_defs::MutableReturn,
 }
+impl<'a> TrivialDrop for HintFun<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -123,6 +128,7 @@ pub enum Hint_<'a> {
     Hunion(&'a [Hint<'a>]),
     Hintersection(&'a [Hint<'a>]),
 }
+impl<'a> TrivialDrop for Hint_<'a> {}
 
 /// AST types such as Happly("int", []) are resolved to Hprim values
 #[derive(
@@ -143,6 +149,7 @@ pub enum Tprim<'a> {
     /// E.g. `:@MyAtom`
     Tatom(&'a str),
 }
+impl<'a> TrivialDrop for Tprim<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -152,6 +159,7 @@ pub struct ShapeFieldInfo<'a> {
     pub hint: Hint<'a>,
     pub name: ast_defs::ShapeFieldName<'a>,
 }
+impl<'a> TrivialDrop for ShapeFieldInfo<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -160,6 +168,7 @@ pub struct NastShapeInfo<'a> {
     pub allows_unknown_fields: bool,
     pub field_map: &'a [ShapeFieldInfo<'a>],
 }
+impl<'a> TrivialDrop for NastShapeInfo<'a> {}
 
 pub use oxidized::aast_defs::KvcKind;
 
@@ -178,6 +187,7 @@ pub struct Enum_<'a> {
     pub base: Hint<'a>,
     pub constraint: Option<Hint<'a>>,
 }
+impl<'a> TrivialDrop for Enum_<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -187,3 +197,4 @@ pub struct WhereConstraint<'a>(
     pub oxidized::ast_defs::ConstraintKind,
     pub Hint<'a>,
 );
+impl<'a> TrivialDrop for WhereConstraint<'a> {}

@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7e0e8515e9917b7caabfe277ebc2962e>>
+// @generated SignedSource<<398f7b8d67d551a0f791af3548ca119f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -25,6 +26,7 @@ pub struct ShallowClassConst<'a> {
     pub name: aast::Sid<'a>,
     pub type_: Ty<'a>,
 }
+impl<'a> TrivialDrop for ShallowClassConst<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -37,6 +39,7 @@ pub struct ShallowTypeconst<'a> {
     pub enforceable: (&'a pos::Pos<'a>, bool),
     pub reifiable: Option<&'a pos::Pos<'a>>,
 }
+impl<'a> TrivialDrop for ShallowTypeconst<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -46,6 +49,7 @@ pub struct ShallowPuMember<'a> {
     pub types: &'a [(aast::Sid<'a>, Ty<'a>)],
     pub exprs: &'a [aast::Sid<'a>],
 }
+impl<'a> TrivialDrop for ShallowPuMember<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -57,6 +61,7 @@ pub struct ShallowPuEnum<'a> {
     pub case_values: &'a [(aast::Sid<'a>, Ty<'a>)],
     pub members: &'a [ShallowPuMember<'a>],
 }
+impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -73,6 +78,7 @@ pub struct ShallowProp<'a> {
     pub visibility: oxidized::aast::Visibility,
     pub fixme_codes: i_set::ISet<'a>,
 }
+impl<'a> TrivialDrop for ShallowProp<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -90,6 +96,7 @@ pub struct ShallowMethod<'a> {
     pub fixme_codes: i_set::ISet<'a>,
     pub deprecated: Option<&'a str>,
 }
+impl<'a> TrivialDrop for ShallowMethod<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -105,6 +112,7 @@ pub struct ShallowMethodRedeclaration<'a> {
     pub method: aast::Pstring<'a>,
     pub fixme_codes: i_set::ISet<'a>,
 }
+impl<'a> TrivialDrop for ShallowMethodRedeclaration<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -137,3 +145,4 @@ pub struct ShallowClass<'a> {
     pub enum_type: Option<EnumType<'a>>,
     pub decl_errors: errors::Errors<'a>,
 }
+impl<'a> TrivialDrop for ShallowClass<'a> {}

@@ -17,6 +17,14 @@ open State
 open Convert_longident
 open Convert_type
 
+let default_implements () =
+  if Configuration.by_ref () then
+    [(Some "arena_trait", "TrivialDrop")]
+  else
+    []
+
+let implements_traits _name = default_implements ()
+
 let default_derives () =
   ( if Configuration.by_ref () then
     []
@@ -345,6 +353,25 @@ let type_declaration name td =
     in
     doc ^ derive_attr ^ "\npub"
   in
+  let does_derive t =
+    let ts = derived_traits name |> List.map ~f:(fun (_, t) -> t) in
+    List.mem ts t ~equal:String.equal
+  in
+  let implements tparams =
+    implements_traits name
+    |> ( if does_derive "Copy" then
+         List.filter ~f:(fun (_, t) -> not (String.equal t "TrivialDrop"))
+       else
+         ident )
+    |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
+           String.compare t1 t2)
+    |> List.map ~f:(fun (m, trait) ->
+           Option.iter m ~f:(fun m -> add_extern_use (m ^ "::" ^ trait));
+           trait)
+    |> List.map ~f:(fun trait ->
+           sprintf "\nimpl%s %s for %s%s {}" tparams trait name tparams)
+    |> String.concat ~sep:""
+  in
   let tparams =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
@@ -427,7 +454,13 @@ let type_declaration name td =
           | Ptyp_tuple tys -> tuple tys ~pub:true
           | _ -> sprintf "(pub %s)" @@ core_type ty
         in
-        sprintf "%s struct %s%s %s;" (attrs_and_vis []) name tparams ty)
+        sprintf
+          "%s struct %s%s %s;%s"
+          (attrs_and_vis [])
+          name
+          tparams
+          ty
+          (implements tparams))
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let all_nullary =
@@ -445,11 +478,23 @@ let type_declaration name td =
         ctors
         (variant_constructor_declaration ~box_fields:should_box_variant)
     in
-    sprintf "%s enum %s%s {\n%s}" (attrs_and_vis derives) name tparams ctors
+    sprintf
+      "%s enum %s%s {\n%s}%s"
+      (attrs_and_vis derives)
+      name
+      tparams
+      ctors
+      (implements tparams)
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
-    sprintf "%s struct %s%s %s" (attrs_and_vis []) name tparams labels
+    sprintf
+      "%s struct %s%s %s%s"
+      (attrs_and_vis [])
+      name
+      tparams
+      labels
+      (implements tparams)
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<68b67b8b399d1062350379405a26d403>>
+// @generated SignedSource<<b33e7b64b711feee6f8a44cd74bc3f26>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -24,6 +25,7 @@ pub enum Visibility<'a> {
     Vprivate(&'a str),
     Vprotected(&'a str),
 }
+impl<'a> TrivialDrop for Visibility<'a> {}
 
 pub use oxidized::typing_defs_core::Exact;
 
@@ -51,6 +53,7 @@ pub enum DependentType<'a> {
     DTcls(&'a str),
     DTexpr(ident::Ident),
 }
+impl<'a> TrivialDrop for DependentType<'a> {}
 
 pub use oxidized::typing_defs_core::DestructureKind;
 
@@ -64,6 +67,7 @@ pub struct Tparam<'a> {
     pub reified: oxidized::aast::ReifyKind,
     pub user_attributes: &'a [nast::UserAttribute<'a>],
 }
+impl<'a> TrivialDrop for Tparam<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -73,6 +77,7 @@ pub struct WhereConstraint<'a>(
     pub oxidized::ast_defs::ConstraintKind,
     pub Ty<'a>,
 );
+impl<'a> TrivialDrop for WhereConstraint<'a> {}
 
 #[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct Ty<'a>(pub &'a reason::Reason<'a>, pub &'a Ty_<'a>);
@@ -93,6 +98,7 @@ pub struct ShapeFieldType<'a> {
     pub optional: bool,
     pub ty: Ty<'a>,
 }
+impl<'a> TrivialDrop for ShapeFieldType<'a> {}
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -250,6 +256,7 @@ pub enum ConstraintType_<'a> {
     TCunion(Ty<'a>, ConstraintType<'a>),
     TCintersection(Ty<'a>, ConstraintType<'a>),
 }
+impl<'a> TrivialDrop for ConstraintType_<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -262,6 +269,7 @@ pub struct HasMember<'a> {
     /// one from the current class.
     pub class_id: nast::ClassId_<'a>,
 }
+impl<'a> TrivialDrop for HasMember<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -287,6 +295,7 @@ pub struct Destructure<'a> {
     /// might throw i.e. list($a) = vec[];
     pub kind: oxidized::typing_defs_core::DestructureKind,
 }
+impl<'a> TrivialDrop for Destructure<'a> {}
 
 #[derive(Clone, Copy, Debug, Hash, Serialize, ToOcamlRep)]
 pub struct ConstraintType<'a>(pub &'a reason::Reason<'a>, pub &'a ConstraintType_<'a>);
@@ -303,6 +312,7 @@ pub enum InternalType<'a> {
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct TaccessType<'a>(pub Ty<'a>, pub &'a [nast::Sid<'a>]);
+impl<'a> TrivialDrop for TaccessType<'a> {}
 
 /// represents reactivity of function
 /// - None corresponds to non-reactive function
@@ -331,6 +341,7 @@ pub enum Reactivity<'a> {
     MaybeReactive(&'a Reactivity<'a>),
     RxVar(Option<&'a Reactivity<'a>>),
 }
+impl<'a> TrivialDrop for Reactivity<'a> {}
 
 /// The type of a function AND a method.
 /// A function has a min and max arity because of optional arguments
@@ -347,6 +358,7 @@ pub struct FunType<'a> {
     pub reactive: Reactivity<'a>,
     pub flags: oxidized::typing_defs_flags::FunTypeFlags,
 }
+impl<'a> TrivialDrop for FunType<'a> {}
 
 /// Arity information for a fun_type; indicating the minimum number of
 /// args expected by the function and the maximum number of args for
@@ -360,6 +372,7 @@ pub enum FunArity<'a> {
     /// min ; variadic param type
     Fvariadic(&'a FunParam<'a>),
 }
+impl<'a> TrivialDrop for FunArity<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -368,6 +381,7 @@ pub enum ParamRxAnnotation<'a> {
     ParamRxVar,
     ParamRxIfImpl(Ty<'a>),
 }
+impl<'a> TrivialDrop for ParamRxAnnotation<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -377,6 +391,7 @@ pub struct PossiblyEnforcedTy<'a> {
     pub enforced: bool,
     pub type_: Ty<'a>,
 }
+impl<'a> TrivialDrop for PossiblyEnforcedTy<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -388,5 +403,6 @@ pub struct FunParam<'a> {
     pub rx_annotation: Option<ParamRxAnnotation<'a>>,
     pub flags: oxidized::typing_defs_flags::FunParamFlags,
 }
+impl<'a> TrivialDrop for FunParam<'a> {}
 
 pub type FunParams<'a> = &'a [&'a FunParam<'a>];

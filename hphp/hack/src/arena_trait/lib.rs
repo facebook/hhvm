@@ -17,3 +17,17 @@ impl Arena for Bump {
         self.alloc(val)
     }
 }
+
+/// Marker trait for types whose implementation of `Drop` is a no-op.
+///
+/// Used to denote types which can be moved into an arena (which does not drop
+/// its contents) without leaking memory.
+///
+/// Must not be implemented for any type which owns heap memory or otherwise
+/// needs to run cleanup in its `Drop` implementation (e.g., `Box`, `Vec`,
+/// `std::fs::File`, etc.), or any type containing a field with such a
+/// nontrivial `Drop` implementation.
+///
+/// All `Copy` types implement `TrivialDrop` via a blanket implementation.
+pub trait TrivialDrop {}
+impl<T: Copy> TrivialDrop for T {}

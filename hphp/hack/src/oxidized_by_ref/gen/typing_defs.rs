@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<93d4a6bad22d8029ed30928927e19ca5>>
+// @generated SignedSource<<223eed14448f804c316013ba08361d41>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -30,6 +31,7 @@ pub struct ClassElt<'a> {
     pub pos: oxidized::lazy::Lazy<&'a pos::Pos<'a>>,
     pub flags: isize,
 }
+impl<'a> TrivialDrop for ClassElt<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -40,6 +42,7 @@ pub struct FunElt<'a> {
     pub decl_errors: Option<errors::Errors<'a>>,
     pub pos: &'a pos::Pos<'a>,
 }
+impl<'a> TrivialDrop for FunElt<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -53,6 +56,7 @@ pub struct ClassConst<'a> {
     /// identifies the class from which this const originates
     pub origin: &'a str,
 }
+impl<'a> TrivialDrop for ClassConst<'a> {}
 
 /// The position is that of the hint in the `use` / `implements` AST node
 /// that causes a class to have this requirement applied to it. E.g.
@@ -71,6 +75,7 @@ pub struct ClassConst<'a> {
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Requirement<'a>(pub &'a pos::Pos<'a>, pub Ty<'a>);
+impl<'a> TrivialDrop for Requirement<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -116,6 +121,7 @@ pub struct ClassType<'a> {
     pub sealed_whitelist: Option<s_set::SSet<'a>>,
     pub decl_errors: Option<errors::Errors<'a>>,
 }
+impl<'a> TrivialDrop for ClassType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -125,6 +131,7 @@ pub enum TypeconstAbstractKind<'a> {
     TCPartiallyAbstract,
     TCConcrete,
 }
+impl<'a> TrivialDrop for TypeconstAbstractKind<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -138,6 +145,7 @@ pub struct TypeconstType<'a> {
     pub enforceable: (&'a pos::Pos<'a>, bool),
     pub reifiable: Option<&'a pos::Pos<'a>>,
 }
+impl<'a> TrivialDrop for TypeconstType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -149,6 +157,7 @@ pub struct PuEnumType<'a> {
     pub case_values: s_map::SMap<'a, (nast::Sid<'a>, Ty<'a>)>,
     pub members: s_map::SMap<'a, PuMemberType<'a>>,
 }
+impl<'a> TrivialDrop for PuEnumType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -158,6 +167,7 @@ pub struct PuMemberType<'a> {
     pub types: s_map::SMap<'a, (nast::Sid<'a>, Ty<'a>)>,
     pub exprs: s_map::SMap<'a, nast::Sid<'a>>,
 }
+impl<'a> TrivialDrop for PuMemberType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -166,6 +176,7 @@ pub struct EnumType<'a> {
     pub base: Ty<'a>,
     pub constraint: Option<Ty<'a>>,
 }
+impl<'a> TrivialDrop for EnumType<'a> {}
 
 pub use oxidized::typing_defs::RecordFieldReq;
 
@@ -180,6 +191,7 @@ pub struct RecordDefType<'a> {
     pub pos: &'a pos::Pos<'a>,
     pub errors: Option<errors::Errors<'a>>,
 }
+impl<'a> TrivialDrop for RecordDefType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -192,6 +204,7 @@ pub struct TypedefType<'a> {
     pub type_: Ty<'a>,
     pub decl_errors: Option<errors::Errors<'a>>,
 }
+impl<'a> TrivialDrop for TypedefType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -207,3 +220,4 @@ pub enum DeserializationError<'a> {
     /// The input JSON was invalid for some reason.
     DeserializationError(&'a str),
 }
+impl<'a> TrivialDrop for DeserializationError<'a> {}

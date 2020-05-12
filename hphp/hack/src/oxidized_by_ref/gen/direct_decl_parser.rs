@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ab5c46c01c6fef448c260d9611090fd3>>
+// @generated SignedSource<<9cef101d2ab724481e628a61047d499d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -23,3 +24,4 @@ pub struct Decls<'a> {
     pub typedefs: s_map::SMap<'a, typing_defs::TypedefType<'a>>,
     pub consts: s_map::SMap<'a, typing_defs::Ty<'a>>,
 }
+impl<'a> TrivialDrop for Decls<'a> {}

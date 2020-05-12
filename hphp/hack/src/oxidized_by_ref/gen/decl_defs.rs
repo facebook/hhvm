@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<33872a6d4742686601ecc28c93b4da1b>>
+// @generated SignedSource<<d3904c12c54f3f78453fdfa17fc9be92>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -54,6 +55,7 @@ pub struct SubstContext<'a> {
     pub class_context: &'a str,
     pub from_req_extends: bool,
 }
+impl<'a> TrivialDrop for SubstContext<'a> {}
 
 pub use oxidized::decl_defs::SourceType;
 
@@ -127,6 +129,7 @@ pub struct MroElement<'a> {
     /// type constant instead.
     pub passthrough_abstract_typeconst: bool,
 }
+impl<'a> TrivialDrop for MroElement<'a> {}
 
 pub use oxidized::decl_defs::LinearizationKind;
 
@@ -142,6 +145,7 @@ pub enum MethodReactivity<'a> {
     MethodShallow(ConditionTypeName<'a>),
     MethodLocal(ConditionTypeName<'a>),
 }
+impl<'a> TrivialDrop for MethodReactivity<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -184,6 +188,7 @@ pub struct DeclClassType<'a> {
     /// in Decl_redecl_service.is_dependent_class_of_any
     pub condition_types: s_set::SSet<'a>,
 }
+impl<'a> TrivialDrop for DeclClassType<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -196,3 +201,4 @@ pub struct Element<'a> {
     pub fixme_codes: i_set::ISet<'a>,
     pub deprecated: Option<&'a str>,
 }
+impl<'a> TrivialDrop for Element<'a> {}

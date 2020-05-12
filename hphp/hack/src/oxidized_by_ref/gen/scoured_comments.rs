@@ -3,11 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7800982f6ca1f568c36dc46a760a7dab>>
+// @generated SignedSource<<c641676131817cfeb7548f945ba54aaa>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
 
+use arena_trait::TrivialDrop;
 use ocamlrep_derive::ToOcamlRep;
 use serde::Serialize;
 
@@ -25,3 +26,4 @@ pub struct ScouredComments<'a> {
     pub misuses: Fixmes<'a>,
     pub error_pos: &'a [&'a pos::Pos<'a>],
 }
+impl<'a> TrivialDrop for ScouredComments<'a> {}

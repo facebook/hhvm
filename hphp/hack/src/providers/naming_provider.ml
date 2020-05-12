@@ -134,7 +134,9 @@ let get_const_pos (ctx : Provider_context.t) (name : string) :
             Naming_sqlite.get_const_pos db_path name
             |> Option.map ~f:(fun path -> (FileInfo.Const, path)))
         >>| attach_name_type_to_tuple
-      | Provider_backend.Decl_service _ as backend -> not_implemented backend)
+      | Provider_backend.Decl_service { decl; _ } ->
+        Decl_service_client.rpc_get_gconst_path decl name
+        |> Option.map ~f:(fun path -> FileInfo.(File (Const, path), Const)))
   >>| remove_name_type
 
 let const_exists (ctx : Provider_context.t) (name : string) : bool =

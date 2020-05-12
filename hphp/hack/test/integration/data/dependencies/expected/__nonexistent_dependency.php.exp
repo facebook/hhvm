@@ -1,1 +1,2 @@
-Dependency not found: Class BogusType
+<?hh
+function nonexistent_dependency(BogusType $arg): void {}

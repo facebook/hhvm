@@ -52,9 +52,6 @@ type genv = {
   type_params: type_constraint SMap.t;
   (* The current class, None if we are in a function *)
   current_cls: (Ast_defs.id * Ast_defs.class_kind * is_final) option;
-  (* Normally we don't need to add dependencies at this stage, but there
-   * are edge cases when we do. *)
-  droot: Typing_deps.Dep.dependent Typing_deps.Dep.variant;
   (* Namespace environment, e.g., what namespace we're in and what use
    * declarations are in play. *)
   namespace: Namespace_env.env;
@@ -96,18 +93,6 @@ module Env : sig
   val new_lvar : genv * lenv -> Ast_defs.id -> positioned_ident
 
   val lvar : genv * lenv -> Ast_defs.id -> positioned_ident
-
-  val global_const : genv * lenv -> Ast_defs.id -> Ast_defs.id
-
-  val type_name :
-    ?context:Errors.name_context ->
-    genv * lenv ->
-    Ast_defs.id ->
-    allow_typedef:bool ->
-    allow_generics:bool ->
-    Ast_defs.id
-
-  val fun_id : genv * lenv -> Ast_defs.id -> Ast_defs.id
 
   val goto_label : genv * lenv -> string -> Pos.t option
 
@@ -161,32 +146,8 @@ end = struct
       in_ppl = is_ppl;
       type_params = tparams;
       current_cls = Some (cid, ckind, final);
-      droot = Typing_deps.Dep.Class (snd cid);
       namespace;
     }
-
-  let unbound_name_error genv pos name kind =
-    (* Naming pretends to be local and not dependent on other files, so it
-     * doesn't bother with adding dependencies (even though it does look up
-     * things in global state). This is mostly brushed aside because "they
-     * will be added during typing". Unfortunately, there are multiple scenarios
-     * when typechecker will name an expression, but gives up on typechecking
-     * it. We are then left with a unrecorded dependency. This should be fixed
-     * on some more basic level, but so far the only incorrectness that anyone
-     * has observed due to this is that we fail to remove "unbound name" errors
-     * sometimes. I add this dependency here for now to fix the annoyance it
-     * causes developers. *)
-    begin
-      match kind with
-      | Errors.FunctionNamespace -> Typing_deps.Dep.Fun name
-      | Errors.TypeNamespace -> Typing_deps.Dep.Class name
-      | Errors.ConstantNamespace -> Typing_deps.Dep.GConst name
-      | Errors.TraitContext -> Typing_deps.Dep.Class name
-      | Errors.RecordContext -> Typing_deps.Dep.RecordDef name
-      | Errors.ClassContext -> Typing_deps.Dep.Class name
-    end
-    |> Typing_deps.add_idep genv.droot;
-    Errors.unbound_name pos name kind
 
   let make_class_env ctx tparams c =
     let is_ppl =
@@ -206,42 +167,33 @@ end = struct
     let lenv = empty_local None in
     (genv, lenv)
 
-  let make_typedef_genv ctx cstrs tdef_name tdef_namespace =
+  let make_typedef_genv ctx cstrs tdef_namespace =
     {
       in_mode = FileInfo.Mstrict;
       ctx;
       in_ppl = false;
       type_params = cstrs;
       current_cls = None;
-      droot = Typing_deps.Dep.Class tdef_name;
       namespace = tdef_namespace;
     }
 
   let make_typedef_env ctx cstrs tdef =
-    let genv =
-      make_typedef_genv ctx cstrs (snd tdef.Aast.t_name) tdef.Aast.t_namespace
-    in
+    let genv = make_typedef_genv ctx cstrs tdef.Aast.t_namespace in
     let lenv = empty_local None in
     (genv, lenv)
 
-  let make_fun_genv ctx params f_mode f_name f_namespace =
+  let make_fun_genv ctx params f_mode f_namespace =
     {
       in_mode = f_mode;
       ctx;
       in_ppl = false;
       type_params = params;
       current_cls = None;
-      droot = Typing_deps.Dep.Fun f_name;
       namespace = f_namespace;
     }
 
   let make_fun_decl_genv ctx params f =
-    make_fun_genv
-      ctx
-      params
-      f.Aast.f_mode
-      (snd f.Aast.f_name)
-      f.Aast.f_namespace
+    make_fun_genv ctx params f.Aast.f_mode f.Aast.f_namespace
 
   let make_const_genv ctx cst =
     {
@@ -250,7 +202,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      droot = Typing_deps.Dep.GConst (snd cst.Aast.cst_name);
       namespace = cst.Aast.cst_namespace;
     }
 
@@ -261,7 +212,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      droot = Typing_deps.Dep.Fun "";
       namespace = Namespace_env.empty_with_default;
     }
 
@@ -278,7 +228,6 @@ end = struct
       in_ppl = false;
       type_params = SMap.empty;
       current_cls = None;
-      droot = Typing_deps.Dep.Fun "";
       namespace;
     }
 
@@ -299,47 +248,6 @@ end = struct
   let set_ppl (genv, lenv) in_ppl =
     let genv = { genv with in_ppl } in
     (genv, lenv)
-
-  let if_unbound_then_dep_edge_and_report
-      genv (is_defined : Provider_context.t -> string -> bool) (p, x) =
-    if not (is_defined genv.ctx x) then
-      match genv.in_mode with
-      | FileInfo.Mstrict
-      | FileInfo.Mpartial
-      | FileInfo.Mdecl ->
-        unbound_name_error genv p x Errors.ConstantNamespace
-      | FileInfo.Mphp -> ()
-
-  let handle_unbound_name genv get_full_pos get_canon (p, name) kind =
-    match get_canon genv.ctx name with
-    | Some canonical ->
-      canonical
-      |> get_full_pos genv.ctx
-      |> Option.iter ~f:(fun p_canon ->
-             Errors.did_you_mean_naming p name p_canon canonical);
-
-      (* Recovering from the capitalization error means
-       * returning the name in its canonical form *)
-      (p, canonical)
-    | None ->
-      (match genv.in_mode with
-      | FileInfo.Mpartial
-      | FileInfo.Mdecl
-        when String.equal name SN.Classes.cUnknown ->
-        ()
-      | FileInfo.Mphp -> ()
-      | FileInfo.Mstrict -> unbound_name_error genv p name kind
-      | FileInfo.Mpartial
-      | FileInfo.Mdecl ->
-        unbound_name_error genv p name kind);
-      (p, name)
-
-  let canonicalize genv is_defined get_full_pos get_canon (p, name) kind =
-    (* Get the canonical name to check if the name exists in the heap *)
-    if is_defined name then
-      (p, name)
-    else
-      handle_unbound_name genv get_full_pos get_canon (p, name) kind
 
   (* Adds a local variable, without any check *)
   let add_lvar (_, lenv) (_, name) (p, x) =
@@ -389,65 +297,6 @@ end = struct
         | None -> handle_undefined_variable (genv, env) (p, x)
     in
     (p, ident)
-
-  let global_const (genv, _env) x =
-    match Provider_backend.get () with
-    | Provider_backend.Shared_memory
-    | Provider_backend.Local_memory _ ->
-      if_unbound_then_dep_edge_and_report genv Naming_provider.const_exists x;
-      x
-    | Provider_backend.Decl_service _ ->
-      (* TODO: we need to refactor this so naming phase doesn't report *)
-      (* unbound name errors; that should come later, during typchecking, *)
-      (* which is when we look up the decl service. The decl service *)
-      (* is the only one who'll tell us whether a name is unbound. *)
-      x
-
-  let type_name
-      ?(context = Errors.TypeNamespace)
-      (genv, _)
-      ((p, name) as x)
-      ~allow_typedef
-      ~allow_generics =
-    match SMap.find_opt name genv.type_params with
-    | Some (reified, _) ->
-      if not allow_generics then Errors.generics_not_allowed p;
-      begin
-        match reified with
-        | N.Erased -> Errors.generic_at_runtime p "Erased"
-        | N.SoftReified -> Errors.generic_at_runtime p "Soft reified"
-        | N.Reified -> ()
-      end;
-      x
-    | None ->
-      (match Naming_provider.get_type_pos_and_kind genv.ctx name with
-      | Some (_def_pos, Naming_types.TClass) ->
-        (* Don't let people use strictly internal classes
-         * (except when they are being declared in .hhi files) *)
-        if
-          String.equal name SN.Classes.cHH_BuiltinEnum
-          && not
-               (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
-        then
-          Errors.using_internal_class p (strip_ns name);
-        x
-      | Some (def_pos, Naming_types.TTypedef) when not allow_typedef ->
-        let (full_pos, _) = GEnv.get_full_pos genv.ctx (def_pos, name) in
-        Errors.unexpected_typedef p full_pos;
-        x
-      | Some (_def_pos, Naming_types.TTypedef) -> x
-      | Some (_def_pos, Naming_types.TRecordDef) -> x
-      | None ->
-        handle_unbound_name genv GEnv.type_pos GEnv.type_canon_name x context)
-
-  let fun_id (genv, _) x =
-    canonicalize
-      genv
-      (Naming_provider.fun_exists genv.ctx)
-      GEnv.fun_pos
-      GEnv.fun_canon_name
-      x
-      Errors.FunctionNamespace
 
   (**
    * Returns the position of the goto label declaration, if it exists.
@@ -512,6 +361,15 @@ let check_repetition s param =
   else
     s
 
+let check_name (p, name) =
+  (* We perform this check here because currently, naming edits the AST to add
+   * a parent node of this class to enums during the AST transform *)
+  if
+    String.equal name SN.Classes.cHH_BuiltinEnum
+    && not (string_ends_with (Relative_path.suffix (Pos.filename p)) ".hhi")
+  then
+    Errors.using_internal_class p (strip_ns name)
+
 let convert_shape_name env = function
   | Ast_defs.SFlit_int (pos, s) -> Ast_defs.SFlit_int (pos, s)
   | Ast_defs.SFlit_str (pos, s) -> Ast_defs.SFlit_str (pos, s)
@@ -524,12 +382,8 @@ let convert_shape_name env = function
           Errors.self_outside_class pos;
           (pos, SN.Classes.cUnknown)
       ) else
-        Env.type_name
-          env
-          x
-          ~allow_typedef:false
-          ~allow_generics:false
-          ~context:Errors.ClassContext
+        let () = check_name x in
+        x
     in
     Ast_defs.SFclass_const (class_name, (pos, y))
 
@@ -549,10 +403,8 @@ let arg_unpack_unexpected = function
  * Used with with Ast_to_nast to go from Ast_defs.hint -> Nast.hint
  *)
 let rec hint
-    ?(context = Errors.TypeNamespace)
     ?(forbid_this = false)
     ?(allow_retonly = false)
-    ?(allow_typedef = true)
     ?(allow_wildcard = false)
     ?(allow_like = false)
     ?(in_where_clause = false)
@@ -563,10 +415,8 @@ let rec hint
   if Option.is_some mut then Errors.misplaced_mutability_hint p;
   ( p,
     hint_
-      ~context
       ~forbid_this
       ~allow_retonly
-      ~allow_typedef
       ~allow_wildcard
       ~allow_like
       ~in_where_clause
@@ -619,10 +469,8 @@ and hfun env reactivity is_coroutine hl kl variadic_hint h =
       }
 
 and hint_
-    ~context
     ~forbid_this
     ~allow_retonly
-    ~allow_typedef
     ~allow_wildcard
     ~allow_like
     ~in_where_clause
@@ -634,7 +482,7 @@ and hint_
   let union_intersection_type_hints_enabled =
     TypecheckerOptions.union_intersection_type_hints tcopt
   in
-  let hint = hint ~forbid_this ~allow_typedef ~allow_wildcard ~allow_like in
+  let hint = hint ~forbid_this ~allow_wildcard ~allow_like in
   match x with
   | Aast.Hunion hl ->
     if not union_intersection_type_hints_enabled then
@@ -731,16 +579,7 @@ and hint_
     hfun env N.FLocal hf_is_coroutine hl kl variadic_hint h
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
-      hint_id
-        ~context
-        ~forbid_this
-        ~allow_retonly
-        ~allow_typedef
-        ~allow_wildcard
-        ~tp_depth
-        env
-        id
-        hl
+      hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
     in
     (match hint_id with
     | N.Hprim _
@@ -770,10 +609,8 @@ and hint_
       | Aast.Happly (root, _) ->
         let h =
           hint_id
-            ~context
             ~forbid_this
             ~allow_retonly
-            ~allow_typedef
             ~allow_wildcard:false
             ~tp_depth
             env
@@ -832,15 +669,8 @@ and hint_
   | Aast.Hpu_access (h, id) -> N.Hpu_access (hint ~allow_retonly env h, id)
 
 and hint_id
-    ?(context = Errors.TypeNamespace)
-    ~forbid_this
-    ~allow_retonly
-    ~allow_typedef
-    ~allow_wildcard
-    ~tp_depth
-    env
-    ((p, x) as id)
-    hl =
+    ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env ((p, x) as id) hl
+    =
   let params = (fst env).type_params in
   (* some common Xhp screw ups *)
   if String.equal x "Xhp" || String.equal x ":Xhp" || String.equal x "XHP" then
@@ -918,18 +748,12 @@ and hint_id
         if not (List.is_empty hl) then Errors.tparam_with_tparam p x;
         N.Habstr x
       | _ ->
-        let name =
-          Env.type_name ~context env id ~allow_typedef ~allow_generics:false
-        in
-        (* Note that we are intentionally setting allow_typedef to `true` here.
-         * In general, generics arguments can be typedefs -- there is no
-         * runtime restriction. *)
+        let () = check_name id in
         N.Happly
-          ( name,
+          ( id,
             hintl
               ~allow_wildcard
               ~forbid_this
-              ~allow_typedef:true
               ~allow_retonly:true
               ~tp_depth:(tp_depth + 1)
               env
@@ -1021,18 +845,8 @@ and try_castable_hint
   in
   opt_hint
 
-and hintl
-    ~forbid_this ~allow_retonly ~allow_typedef ~allow_wildcard ~tp_depth env l =
-  List.map
-    ~f:
-      (hint
-         ~forbid_this
-         ~allow_retonly
-         ~allow_typedef
-         ~allow_wildcard
-         ~tp_depth
-         env)
-    l
+and hintl ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env l =
+  List.map ~f:(hint ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env) l
 
 let constraint_ ?(forbid_this = false) env (ck, h) =
   (ck, hint ~forbid_this env h)
@@ -1042,7 +856,6 @@ let targ env (p, t) =
     hint
       ~allow_wildcard:true
       ~forbid_this:false
-      ~allow_typedef:true
       ~allow_retonly:true
       ~tp_depth:1
       env
@@ -1088,14 +901,7 @@ let rec class_ ctx c =
   let where_constraints =
     type_where_constraints env c.Aast.c_where_constraints
   in
-  let name =
-    Env.type_name
-      ~context:Errors.ClassContext
-      env
-      c.Aast.c_name
-      ~allow_typedef:false
-      ~allow_generics:false
-  in
+  let name = c.Aast.c_name in
   let (constructor, smethods, methods) = Aast.split_methods c in
   let smethods = List.map ~f:(method_ (fst env)) smethods in
   let (sprops, props) = Aast.split_vars c in
@@ -1106,15 +912,7 @@ let rec class_ ctx c =
   let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
   (* These would be out of order with the old attributes, but that shouldn't matter? *)
   let props = props @ xhp_attrs in
-  let parents =
-    List.map
-      c.Aast.c_extends
-      (hint
-         ~allow_retonly:false
-         ~allow_typedef:false
-         ~context:Errors.ClassContext
-         env)
-  in
+  let parents = List.map c.Aast.c_extends (hint ~allow_retonly:false env) in
   let parents =
     match c.Aast.c_kind with
     (* Make enums implicitly extend the BuiltinEnum class in order to provide
@@ -1132,29 +930,19 @@ let rec class_ ctx c =
     | _ -> parents
   in
   let methods = List.map ~f:(method_ (fst env)) methods in
-  let uses =
-    List.map
-      ~f:(hint ~allow_typedef:false ~context:Errors.TraitContext env)
-      c.Aast.c_uses
-  in
+  let uses = List.map ~f:(hint env) c.Aast.c_uses in
   let pu_enums = List.map ~f:(class_pu_enum env) c.Aast.c_pu_enums in
   let redeclarations =
     List.map ~f:(method_redeclaration env) c.Aast.c_method_redeclarations
   in
-  let xhp_attr_uses =
-    List.map ~f:(hint ~allow_typedef:false env) c.Aast.c_xhp_attr_uses
-  in
+  let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
   let (c_req_extends, c_req_implements) = Aast.split_reqs c in
   if
     (not (List.is_empty c_req_implements))
     && not (Ast_defs.is_c_trait c.Aast.c_kind)
   then
     Errors.invalid_req_implements (fst (List.hd_exn c_req_implements));
-  let req_implements =
-    List.map
-      ~f:(hint ~allow_typedef:false ~context:Errors.ClassContext env)
-      c_req_implements
-  in
+  let req_implements = List.map ~f:(hint env) c_req_implements in
   let req_implements = List.map ~f:(fun h -> (h, false)) req_implements in
   if
     (not (List.is_empty c_req_extends))
@@ -1162,11 +950,7 @@ let rec class_ ctx c =
     && not (Ast_defs.is_c_interface c.Aast.c_kind)
   then
     Errors.invalid_req_extends (fst (List.hd_exn c_req_extends));
-  let req_extends =
-    List.map
-      ~f:(hint ~allow_typedef:false ~context:Errors.ClassContext env)
-      c_req_extends
-  in
+  let req_extends = List.map ~f:(hint env) c_req_extends in
   let req_extends = List.map ~f:(fun h -> (h, true)) req_extends in
   (* Setting a class type parameters constraint to the 'this' type is weird
    * so lets forbid it for now.
@@ -1177,14 +961,7 @@ let rec class_ ctx c =
   let consts = List.map ~f:(class_const env) c.Aast.c_consts in
   let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
   let implements =
-    List.map
-      ~f:
-        (hint
-           ~allow_retonly:false
-           ~context:Errors.ClassContext
-           ~allow_typedef:false
-           env)
-      c.Aast.c_implements
+    List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
   in
   let constructor = Option.map constructor (method_ (fst env)) in
   let (constructor, methods, smethods) =
@@ -1258,18 +1035,7 @@ and user_attributes env attrl =
       true
   in
   let on_attr acc { Aast.ua_name; ua_params } =
-    let name = snd ua_name in
-    let ua_name =
-      if SN.UserAttributes.is_reserved name then
-        ua_name
-      else
-        Env.type_name
-          ~context:Errors.ClassContext
-          env
-          ua_name
-          ~allow_typedef:false
-          ~allow_generics:false
-    in
+    let () = check_name ua_name in
     if not (validate_seen ua_name) then
       acc
     else
@@ -1689,7 +1455,7 @@ and method_redeclaration env mt =
     N.mt_fun_kind = mt.Aast.mt_fun_kind;
     N.mt_ret = ret;
     N.mt_variadic = variadicity;
-    N.mt_trait = hint ~allow_typedef:false env mt.Aast.mt_trait;
+    N.mt_trait = hint env mt.Aast.mt_trait;
     N.mt_method = mt.Aast.mt_method;
     N.mt_user_attributes = [];
   }
@@ -1768,7 +1534,6 @@ and fun_ ctx f =
       (Naming_elaborate_namespaces_endo.make_env (fst env).namespace)
       f
   in
-  let name = Env.fun_id env f.Aast.f_name in
   let where_constraints =
     type_where_constraints env f.Aast.f_where_constraints
   in
@@ -1807,7 +1572,7 @@ and fun_ ctx f =
       f_span = f.Aast.f_span;
       f_mode = f.Aast.f_mode;
       f_ret = h;
-      f_name = name;
+      f_name = f.Aast.f_name;
       f_tparams;
       f_where_constraints = where_constraints;
       f_params = paraml;
@@ -2150,7 +1915,7 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.String s -> N.String s
   | Aast.String2 idl -> N.String2 (string2 env idl)
   | Aast.PrefixedString (n, e) -> N.PrefixedString (n, expr env e)
-  | Aast.Id x -> N.Id (Env.global_const env x)
+  | Aast.Id x -> N.Id x
   | Aast.Lvar (_, x)
     when String.equal (Local_id.to_string x) SN.SpecialIdents.this ->
     N.This
@@ -2175,11 +1940,11 @@ and expr_ env p (e : Nast.expr_) =
     N.Array_get (id, None)
   | Aast.Array_get (e1, e2) -> N.Array_get (expr env e1, oexpr env e2)
   | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Id x1)), Aast.CGstring x2) ->
-    N.Class_get (make_class_id ~allow_typedef:false env x1, N.CGstring x2)
+    N.Class_get (make_class_id env x1, N.CGstring x2)
   | Aast.Class_get ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), Aast.CGstring x2)
     ->
     let x1 = (p, Local_id.to_string lid) in
-    N.Class_get (make_class_id ~allow_typedef:false env x1, N.CGstring x2)
+    N.Class_get (make_class_id env x1, N.CGstring x2)
   | Aast.Class_get ((_, Aast.CIexpr x1), Aast.CGstring _) ->
     ensure_name_not_dynamic env x1;
     N.Any
@@ -2190,18 +1955,18 @@ and expr_ env p (e : Nast.expr_) =
   | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), ((_, str) as x2))
     when String.equal str "class" ->
-    N.Class_const (make_class_id ~allow_typedef:true env x1, x2)
+    N.Class_const (make_class_id env x1, x2)
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Id x1)), x2) ->
-    N.Class_const (make_class_id ~allow_typedef:false env x1, x2)
+    N.Class_const (make_class_id env x1, x2)
   | Aast.Class_const ((_, Aast.CIexpr (_, Aast.Lvar (p, lid))), x2) ->
     let x1 = (p, Local_id.to_string lid) in
-    N.Class_const (make_class_id ~allow_typedef:false env x1, x2)
+    N.Class_const (make_class_id env x1, x2)
   | Aast.Class_const _ -> (* TODO: report error in strict mode *) N.Any
   | Aast.PU_identifier ((_, c), s1, s2) ->
     begin
       match c with
       | Aast.CIexpr (_, Aast.Id x1) ->
-        N.PU_identifier (make_class_id ~allow_typedef:false env x1, s1, s2)
+        N.PU_identifier (make_class_id env x1, s1, s2)
       | _ -> failwith "TODO(T35357243): Error during parsing of PU_identifier"
     end
   | Aast.Call (_, (_, Aast.Id (p, pseudo_func)), tal, el, unpacked_element)
@@ -2276,24 +2041,12 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((pc, N.String cl), (pm, N.String meth)) ->
-            N.Method_caller
-              ( Env.type_name
-                  ~context:Errors.ClassContext
-                  env
-                  (pc, cl)
-                  ~allow_typedef:false
-                  ~allow_generics:false,
-                (pm, meth) )
+            let () = check_name (pc, cl) in
+            N.Method_caller ((pc, cl), (pm, meth))
           | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
-            N.Method_caller
-              ( Env.type_name
-                  ~context:Errors.ClassContext
-                  env
-                  cl
-                  ~allow_typedef:false
-                  ~allow_generics:false,
-                (pm, meth) )
+            let () = check_name cl in
+            N.Method_caller (cl, (pm, meth))
           | ((p, _), _) ->
             Errors.illegal_meth_caller p;
             N.Any
@@ -2315,14 +2068,8 @@ and expr_ env p (e : Nast.expr_) =
         begin
           match (expr env e1, expr env e2) with
           | ((pc, N.String cl), (pm, N.String meth)) ->
-            N.Smethod_id
-              ( Env.type_name
-                  ~context:Errors.ClassContext
-                  env
-                  (pc, cl)
-                  ~allow_typedef:false
-                  ~allow_generics:false,
-                (pm, meth) )
+            let () = check_name (pc, cl) in
+            N.Smethod_id ((pc, cl), (pm, meth))
           | ((_, N.Id (_, const)), (pm, N.String meth))
             when String.equal const SN.PseudoConsts.g__CLASS__ ->
             (* All of these that use current_cls aren't quite correct
@@ -2338,14 +2085,8 @@ and expr_ env p (e : Nast.expr_) =
               N.Any)
           | ((_, N.Class_const ((_, N.CI cl), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
-            N.Smethod_id
-              ( Env.type_name
-                  ~context:Errors.ClassContext
-                  env
-                  cl
-                  ~allow_typedef:false
-                  ~allow_generics:false,
-                (pm, meth) )
+            let () = check_name cl in
+            N.Smethod_id (cl, (pm, meth))
           | ((p, N.Class_const ((_, N.CIself), (_, mem))), (pm, N.String meth))
             when String.equal mem SN.Members.mClass ->
             (match (fst env).current_cls with
@@ -2397,10 +2138,9 @@ and expr_ env p (e : Nast.expr_) =
         exprl env el,
         oexpr env unpacked_element )
   | Aast.Call (_, (p, Aast.Id f), tal, el, unpacked_element) ->
-    let qualified = Env.fun_id env f in
     N.Call
       ( N.Cnormal,
-        (p, N.Id qualified),
+        (p, N.Id f),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element )
@@ -2430,8 +2170,7 @@ and expr_ env p (e : Nast.expr_) =
         exprl env el,
         oexpr env unpacked_element )
   | Aast.FunctionPointer ((p, Aast.Id fid), targs) ->
-    let e = N.Id (Env.fun_id env fid) in
-    N.FunctionPointer ((p, e), targl env p targs)
+    N.FunctionPointer ((p, N.Id fid), targl env p targs)
   | Aast.FunctionPointer (e, targs) ->
     N.FunctionPointer (expr env e, targl env p targs)
   | Aast.Yield_break -> N.Yield_break
@@ -2450,7 +2189,7 @@ and expr_ env p (e : Nast.expr_) =
       match try_castable_hint ~tp_depth:1 env p x hl with
       | Some ty -> (p, ty)
       | None ->
-        let h = hint ~allow_typedef:false env ty in
+        let h = hint env ty in
         Errors.object_cast p;
         h
     in
@@ -2486,7 +2225,7 @@ and expr_ env p (e : Nast.expr_) =
     N.As (expr env e, hint ~allow_wildcard:true ~allow_like:true env h, b)
   | Aast.New ((_, Aast.CIexpr (p, Aast.Id x)), tal, el, unpacked_element, _) ->
     N.New
-      ( make_class_id ~allow_typedef:false env x,
+      ( make_class_id env x,
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
@@ -2495,7 +2234,7 @@ and expr_ env p (e : Nast.expr_) =
       ((_, Aast.CIexpr (_, Aast.Lvar (pos, x))), tal, el, unpacked_element, p)
     ->
     N.New
-      ( make_class_id ~allow_typedef:false env (pos, Local_id.to_string x),
+      ( make_class_id env (pos, Local_id.to_string x),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
@@ -2504,21 +2243,14 @@ and expr_ env p (e : Nast.expr_) =
     if Partial.should_check_error (fst env).in_mode 2060 then
       Errors.dynamic_new_in_strict_mode p;
     N.New
-      ( make_class_id ~allow_typedef:false env (p, SN.Classes.cUnknown),
+      ( make_class_id env (p, SN.Classes.cUnknown),
         targl env p tal,
         exprl env el,
         oexpr env unpacked_element,
         p )
   | Aast.New _ -> failwith "ast_to_nast aast.new"
   | Aast.Record (id, is_array, l) ->
-    let id =
-      Env.type_name
-        ~context:Errors.RecordContext
-        env
-        id
-        ~allow_typedef:false
-        ~allow_generics:false
-    in
+    let () = check_name id in
     let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
     N.Record (id, is_array, l)
   | Aast.Efun (f, idl) ->
@@ -2551,15 +2283,8 @@ and expr_ env p (e : Nast.expr_) =
     let f = expr_lambda env f in
     N.Lfun (f, !to_capture)
   | Aast.Xml (x, al, el) ->
-    N.Xml
-      ( Env.type_name
-          ~context:Errors.ClassContext
-          env
-          x
-          ~allow_typedef:false
-          ~allow_generics:false,
-        attrl env al,
-        exprl env el )
+    let () = check_name x in
+    N.Xml (x, attrl env al, exprl env el)
   | Aast.Shape fdl ->
     let shp =
       List.map fdl ~f:(fun (pname, value) ->
@@ -2627,7 +2352,7 @@ and f_body env f_body =
   else
     failwith "Malformed f_body: unexpected UnnamedBody from ast_to_nast"
 
-and make_class_id ~allow_typedef env ((p, x) as cid) =
+and make_class_id env ((p, x) as cid) =
   ( p,
     match x with
     | x when String.equal x SN.Classes.cParent ->
@@ -2660,13 +2385,8 @@ and make_class_id ~allow_typedef env ((p, x) as cid) =
         (p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
     | x when Char.equal x.[0] '$' -> N.CIexpr (p, N.Lvar (Env.lvar env cid))
     | _ ->
-      N.CI
-        (Env.type_name
-           ~context:Errors.ClassContext
-           env
-           cid
-           ~allow_typedef
-           ~allow_generics:true) )
+      let () = check_name cid in
+      N.CI cid )
 
 and casel env l = List.map l (case env)
 
@@ -2687,14 +2407,8 @@ and catch env ((p1, lid1), (p2, lid2), b) =
       let name2 = Local_id.get_name lid2 in
       let x2 = Env.new_lvar env (p2, name2) in
       let b = branch env b in
-      ( Env.type_name
-          ~context:Errors.ClassContext
-          env
-          (p1, lid1)
-          ~allow_typedef:true
-          ~allow_generics:false,
-        x2,
-        b ))
+      let () = check_name (p1, lid1) in
+      ((p1, lid1), x2, b))
 
 and afield env field =
   match field with
@@ -2862,7 +2576,7 @@ let record_def ctx rd =
   let attrs = user_attributes env rd.Aast.rd_user_attributes in
   let extends =
     match rd.Aast.rd_extends with
-    | Some extends -> Some (hint ~context:Errors.RecordContext env extends)
+    | Some extends -> Some (hint env extends)
     | None -> None
   in
   let fields = List.map rd.Aast.rd_fields ~f:(record_field env) in

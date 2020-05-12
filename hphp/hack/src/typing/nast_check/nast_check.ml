@@ -32,6 +32,15 @@ let visitor =
       Duplicate_xhp_attribute_check.handler;
     ]
 
-let program = visitor#go
+let stateful_visitor ctx =
+  Stateful_aast_visitor.checker (Unbound_name_check.handler ctx)
 
-let def = visitor#go_def
+let program ctx p =
+  let () = visitor#go ctx p in
+  let v = stateful_visitor ctx in
+  v#on_program v#initial_state p
+
+let def ctx d =
+  let () = visitor#go_def ctx d in
+  let v = stateful_visitor ctx in
+  v#on_def v#initial_state d

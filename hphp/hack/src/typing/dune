@@ -51,6 +51,7 @@
     tast_visitor
     nast_visitor
     nast_check_env
+    stateful_aast_visitor
     type_mapper
     type_parameter_env_ops
     type_validator

@@ -145,7 +145,7 @@ let check_final_method member_source parent_class_elt class_elt on_error =
       ~child:pos
       ~on_error:(Some on_error)
 
-let check_memoizelsb_method member_source parent_class_elt class_elt =
+let check_memoizelsb_method member_source parent_class_elt class_elt on_error =
   let is_method = is_method member_source in
   let is_memoizelsb = get_ce_memoizelsb class_elt in
   let is_override =
@@ -155,10 +155,10 @@ let check_memoizelsb_method member_source parent_class_elt class_elt =
     (* we have a __MemoizeLSB method which is overriding something else *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_memoizelsb parent_pos pos
+    Errors.override_memoizelsb parent_pos pos on_error
 
 let check_dynamically_callable
-    member_source member_name parent_class_elt class_elt =
+    member_source member_name parent_class_elt class_elt on_error =
   let is_method = is_method member_source in
   let is_override =
     String.( <> ) parent_class_elt.ce_origin class_elt.ce_origin
@@ -177,9 +177,10 @@ let check_dynamically_callable
         (pos, "This method is not");
       ]
     in
-    Errors.bad_method_override pos member_name errorl Errors.unify_error
+    Errors.bad_method_override pos member_name errorl on_error
 
-let check_lsb_overrides member_source member_name parent_class_elt class_elt =
+let check_lsb_overrides
+    member_source member_name parent_class_elt class_elt on_error =
   let is_sprop =
     match member_source with
     | `FromSProp -> true
@@ -193,7 +194,7 @@ let check_lsb_overrides member_source member_name parent_class_elt class_elt =
     (* __LSB attribute is being overridden *)
     let (lazy parent_pos) = parent_class_elt.ce_pos in
     let (lazy pos) = class_elt.ce_pos in
-    Errors.override_lsb member_name parent_pos pos
+    Errors.override_lsb member_name parent_pos pos on_error
 
 let check_lateinit parent_class_elt class_elt on_error =
   let is_override =
@@ -266,11 +267,16 @@ let check_override
   in
   (* We first verify that we aren't overriding a final method *)
   check_final_method mem_source parent_class_elt class_elt on_error;
-  check_memoizelsb_method mem_source parent_class_elt class_elt;
-  check_dynamically_callable mem_source member_name parent_class_elt class_elt;
+  check_memoizelsb_method mem_source parent_class_elt class_elt on_error;
+  check_dynamically_callable
+    mem_source
+    member_name
+    parent_class_elt
+    class_elt
+    on_error;
 
   (* Verify that we are not overriding an __LSB property *)
-  check_lsb_overrides mem_source member_name parent_class_elt class_elt;
+  check_lsb_overrides mem_source member_name parent_class_elt class_elt on_error;
   check_lateinit parent_class_elt class_elt on_error;
   check_xhp_attr_required env parent_class_elt class_elt on_error;
   let check_params = should_check_params parent_class class_ in

@@ -4283,9 +4283,9 @@ let override_final ~parent ~child ~(on_error : typing_error_callback option) =
   let msg2 = (parent, "It was declared as final") in
   on_error_or_add on_error (Typing.err_code Typing.OverrideFinal) [msg1; msg2]
 
-let override_memoizelsb ~parent ~child =
-  add_list
-    (Typing.err_code Typing.OverrideMemoizeLSB)
+let override_memoizelsb ~parent ~child (on_error : typing_error_callback) =
+  on_error
+    ~code:(Typing.err_code Typing.OverrideMemoizeLSB)
     [
       ( child,
         "__MemoizeLSB method may not be an override (temporary due to HHVM bug)"
@@ -4293,9 +4293,10 @@ let override_memoizelsb ~parent ~child =
       (parent, "This method is being overridden");
     ]
 
-let override_lsb ~member_name ~parent ~child =
-  add_list
-    (Typing.err_code Typing.OverrideLSB)
+let override_lsb ~member_name ~parent ~child (on_error : typing_error_callback)
+    =
+  on_error
+    ~code:(Typing.err_code Typing.OverrideLSB)
     [
       ( child,
         "Member " ^ member_name ^ " may not override __LSB member of parent" );

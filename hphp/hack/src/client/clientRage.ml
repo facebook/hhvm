@@ -82,6 +82,17 @@ let rage_pstacks (env : env) : string Lwt.t =
   let stacks = String.concat stacks ~sep:"\n\n" in
   Lwt.return stacks
 
+let rage_ps () : string Lwt.t =
+  (* Flags to ps:
+  -A means "all processes"
+  -F means "extra full output" i.e. lots of fields of output. *)
+  let%lwt result =
+    Lwt_utils.exec_checked ~timeout:20.0 Exec_command.Ps [| "-AF" |]
+  in
+  match result with
+  | Ok { Lwt_utils.Process_success.stdout; _ } -> Lwt.return stdout
+  | Error failure -> Lwt.return (format_failure "" failure)
+
 let rage_hh_version
     (env : env) (hhconfig_version_raw : Config_file.version option) :
     string Lwt.t =
@@ -436,6 +447,8 @@ let main (env : env) : Exit_status.t Lwt.t =
   eprintf "Fetching pstacks (this takes a minute...)";
   let%lwt pstacks = rage_pstacks env in
   add ("pstacks", pstacks);
+  let%lwt ps = rage_ps () in
+  add ("ps", ps);
 
   (* hhconfig, hh.conf *)
   let hhconfig_file = Filename.concat (Path.to_string env.root) ".hhconfig" in

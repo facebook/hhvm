@@ -15,6 +15,7 @@ type t =
   | Hh
   | Ls
   | Pgrep
+  | Ps
   | Pstack
   | Watchman
 
@@ -26,6 +27,7 @@ let to_string = function
   | Hh_server path -> path
   | Hh -> "hh"
   | Ls -> "ls"
-  | Pstack -> "pstack"
   | Pgrep -> "pgrep"
+  | Ps -> "ps"
+  | Pstack -> "pstack"
   | Watchman -> "watchman"

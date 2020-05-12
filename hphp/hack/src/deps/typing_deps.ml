@@ -194,13 +194,21 @@ let dependency_callbacks = Caml.Hashtbl.create 0
 let add_dependency_callback cb_name cb =
   Caml.Hashtbl.replace dependency_callbacks cb_name cb
 
+let add_idep_directly_to_graph ~(dependent : Dep.t) ~(dependency : Dep.t) : unit
+    =
+  Graph.add dependency dependent
+
 let add_idep
-    (root : Dep.dependent Dep.variant) (obj : Dep.dependency Dep.variant) =
-  if Dep.variant_equals root obj then
+    (dependent : Dep.dependent Dep.variant)
+    (dependency : Dep.dependency Dep.variant) =
+  if Dep.variant_equals dependent dependency then
     ()
   else (
-    Caml.Hashtbl.iter (fun _ f -> f root obj) dependency_callbacks;
-    if !trace then Graph.add (Dep.make obj) (Dep.make root)
+    Caml.Hashtbl.iter (fun _ f -> f dependent dependency) dependency_callbacks;
+    if !trace then
+      add_idep_directly_to_graph
+        ~dependent:(Dep.make dependent)
+        ~dependency:(Dep.make dependency)
   )
 
 (*****************************************************************************)

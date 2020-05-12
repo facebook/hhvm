@@ -107,6 +107,8 @@ val allow_dependency_table_reads : bool -> bool
 
 val add_idep : Dep.dependent Dep.variant -> Dep.dependency Dep.variant -> unit
 
+val add_idep_directly_to_graph : dependent:Dep.t -> dependency:Dep.t -> unit
+
 val get_ideps_from_hash : Dep.t -> DepSet.t
 
 val get_ideps : Dep.dependency Dep.variant -> DepSet.t

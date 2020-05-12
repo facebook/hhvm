@@ -1184,7 +1184,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::ArrayKey:   return TInt | TStr;
       case A::VArray:     return dvarrays ? TVArr : TArr;
       case A::DArray:     return dvarrays ? TDArr : TArr;
-      case A::VArrOrDArr: return dvarrays ? (TVArr | TDArr) : TArr;
+      case A::VArrOrDArr: return dvarrays ? TDVArr : TArr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::This:

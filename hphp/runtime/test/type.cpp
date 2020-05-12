@@ -870,6 +870,9 @@ TEST(Type, DVArray) {
   EXPECT_TRUE(TDArr <= TArr);
   EXPECT_TRUE(TDArr <= TMixedArr);
   EXPECT_FALSE(TDArr <= TPackedArr);
+  EXPECT_FALSE(TArr <= TDArr);
+  EXPECT_FALSE(TMixedArr <= TDArr);
+  EXPECT_FALSE(TPackedArr <= TDArr);
   EXPECT_TRUE(TDArr.arrSpec().kind());
   EXPECT_FALSE(TDArr.arrSpec().type());
   EXPECT_TRUE(TDArr.arrSpec().dvarray());
@@ -880,22 +883,29 @@ TEST(Type, DVArray) {
   EXPECT_TRUE(TVArr <= TArr);
   EXPECT_FALSE(TVArr <= TMixedArr);
   EXPECT_TRUE(TVArr <= TPackedArr);
+  EXPECT_FALSE(TArr <= TVArr);
+  EXPECT_FALSE(TMixedArr <= TVArr);
+  EXPECT_FALSE(TPackedArr <= TVArr);
   EXPECT_TRUE(TVArr.arrSpec().kind());
   EXPECT_FALSE(TVArr.arrSpec().type());
   EXPECT_TRUE(TVArr.arrSpec().dvarray());
   EXPECT_TRUE(TVArr.arrSpec().vanilla());
 
-  auto const dvarr = TDArr | TVArr;
-  EXPECT_TRUE(dvarr <= TArr);
-  EXPECT_FALSE(dvarr <= TDArr);
-  EXPECT_FALSE(dvarr <= TVArr);
-  EXPECT_FALSE(dvarr.arrSpec().kind());
-  EXPECT_FALSE(dvarr.arrSpec().type());
-  EXPECT_TRUE(dvarr.arrSpec().dvarray());
-  EXPECT_TRUE(dvarr.arrSpec().vanilla());
+  EXPECT_EQ(TDVArr, TVArr | TDArr);
+  EXPECT_EQ("Arr=Vanilla:DV", TDVArr.toString());
+  EXPECT_TRUE(TDVArr <= TArr);
+  EXPECT_FALSE(TDVArr <= TDArr);
+  EXPECT_FALSE(TDVArr <= TVArr);
+  EXPECT_FALSE(TArr <= TDVArr);
+  EXPECT_TRUE(TDArr <= TDVArr);
+  EXPECT_TRUE(TVArr <= TDVArr);
+  EXPECT_FALSE(TDVArr.arrSpec().kind());
+  EXPECT_FALSE(TDVArr.arrSpec().type());
+  EXPECT_TRUE(TDVArr.arrSpec().dvarray());
+  EXPECT_TRUE(TDVArr.arrSpec().vanilla());
 
-  EXPECT_EQ(TDArr, dvarr & TMixedArr);
-  EXPECT_EQ(TVArr, dvarr & TPackedArr);
+  EXPECT_EQ(TDArr, TDVArr & TMixedArr);
+  EXPECT_EQ(TVArr, TDVArr & TPackedArr);
 
   auto const hamD = TDArr | TDict;
   EXPECT_FALSE(hamD.arrSpec().dvarray());

@@ -2591,7 +2591,7 @@ SSATmp* implSimplifyHackArrTypehint(
   auto const extra = inst->extra<RaiseHackArrTypehintNoticeData>();
   auto const type = [&]{
     switch (extra->tc.type()) {
-      case AnnotType::VArrOrDArr: return TVArr | TDArr;
+      case AnnotType::VArrOrDArr: return TDVArr;
       case AnnotType::VArray:     return TVArr;
       case AnnotType::DArray:     return TDArr;
       default:                    return TBottom;
@@ -2609,6 +2609,19 @@ SSATmp* simplifyRaiseHackArrParamNotice(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyRaiseHackArrPropNotice(State& env, const IRInstruction* inst) {
   return implSimplifyHackArrTypehint(env, inst, inst->src(1));
+}
+
+SSATmp* simplifyCheckDVArray(State& env, const IRInstruction* inst) {
+  if (!RO::EvalHackArrCompatSpecialization) return nullptr;
+  auto const src = inst->src(0);
+  if (src->type() <= TDVArr) {
+    gen(env, Nop);
+    return src;
+  } else if (!src->type().maybe(TDVArr.widenToBespoke())) {
+    gen(env, Jmp, inst->taken());
+    return cns(env, TBottom);
+  }
+  return nullptr;
 }
 
 SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
@@ -3704,6 +3717,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckTypeMem)
   X(RaiseHackArrParamNotice)
   X(RaiseHackArrPropNotice)
+  X(CheckDVArray)
   X(CheckVArray)
   X(CheckDArray)
   X(AssertType)

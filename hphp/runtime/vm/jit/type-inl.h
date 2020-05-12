@@ -71,16 +71,17 @@ static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
 static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
 static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 
-// DV array types that appear in irgen.
-static auto const TDArr = TMixedArr.narrowToDVArray();
-static auto const TVArr = TPackedArr.narrowToDVArray();
-
 // Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();
 static auto const TVanillaDict    = TDict.narrowToVanilla();
 static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
 static auto const TVanillaArrLike = TArrLike.narrowToVanilla();
+
+// DV array types that appear in irgen. Always vanilla.
+static auto const TDVArr = TVanillaArr.narrowToDVArray();
+static auto const TDArr = TMixedArr.narrowToDVArray();
+static auto const TVArr = TPackedArr.narrowToDVArray();
 
 /*
  * Abbreviated namespace for predefined types.

@@ -6,6 +6,7 @@
 use bumpalo::collections::Vec;
 
 use oxidized::typing_reason::Reason as OxReason;
+use oxidized::ToOxidized;
 
 use crate::pos::Pos;
 use crate::{aast, ast_defs, ast_defs::Id};
@@ -145,8 +146,12 @@ impl<'a> Reason<'a> {
     pub fn witness(pos: &'a Pos<'a>) -> Self {
         Self::with_pos(pos, Reason_::Rwitness)
     }
+}
 
-    pub fn to_oxidized(&self) -> OxReason {
+impl<'a> ToOxidized for Reason<'a> {
+    type Target = OxReason;
+
+    fn to_oxidized(&self) -> Self::Target {
         use OxReason as O;
         use Reason_ as R;
 

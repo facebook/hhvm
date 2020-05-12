@@ -9,6 +9,7 @@ include = ["**/*.rs"]
 path = "lib.rs"
 
 [dependencies]
+arena_collections = { path = "../arena_collections" }
 hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }

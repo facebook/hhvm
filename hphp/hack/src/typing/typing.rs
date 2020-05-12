@@ -18,8 +18,8 @@ use decl_rust::decl_subst as subst;
 use oxidized::ast_defs::Id;
 use oxidized::{aast, aast_defs, ast, ast_defs};
 use oxidized_by_ref::aast_defs::Sid;
+use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
-use oxidized_by_ref::{local_id, pos::Pos};
 use typing_ast_rust::typing_inference_env::IntoUnionIntersectionIterator;
 use typing_defs_rust::{tast, ExpandEnv, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
 
@@ -478,7 +478,12 @@ fn assign<'a>(
     }
 }
 
-fn set_valid_rvalue<'a>(env: &mut Env<'a>, p: &'a Pos, x: local_id::LocalId<'a>, ty: Ty<'a>) {
+fn set_valid_rvalue<'a>(
+    env: &mut Env<'a>,
+    p: &'a Pos,
+    x: oxidized_by_ref::local_id::LocalId<'a>,
+    ty: Ty<'a>,
+) {
     set_local(env, p, x, ty);
     // We are assigning a new value to the local variable, so we need to
     // generate a new expression id
@@ -486,7 +491,12 @@ fn set_valid_rvalue<'a>(env: &mut Env<'a>, p: &'a Pos, x: local_id::LocalId<'a>,
     env.set_local_expr_id(x, id);
 }
 
-fn set_local<'a>(env: &mut Env<'a>, _p: &'a Pos, x: local_id::LocalId<'a>, ty: Ty<'a>) {
+fn set_local<'a>(
+    env: &mut Env<'a>,
+    _p: &'a Pos,
+    x: oxidized_by_ref::local_id::LocalId<'a>,
+    ty: Ty<'a>,
+) {
     // TODO(hrust): is_using_var
     env.set_local(x, ty)
 }

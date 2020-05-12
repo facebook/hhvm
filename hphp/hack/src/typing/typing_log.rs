@@ -6,4 +6,15 @@
 use crate::typing_env_types::Env;
 use oxidized_by_ref::ast_defs::Pos;
 
-pub fn hh_show_env(_pos: &Pos, _env: &mut Env) {}
+pub fn hh_show_env(pos: &Pos, env: &mut Env) {
+    unsafe {
+        let ocaml_env = ocamlrep_ocamlpool::to_ocaml(env);
+        let ocaml_pos = ocamlrep_ocamlpool::to_ocaml(&pos);
+
+        let ocaml_hh_show_env =
+            ocaml::named_value("hh_show_env").expect("hh_show_env not registered");
+        ocaml_hh_show_env
+            .call_n(&[ocaml::Value::new(ocaml_pos), ocaml::Value::new(ocaml_env)])
+            .unwrap();
+    }
+}

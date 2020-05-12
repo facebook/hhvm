@@ -8,9 +8,9 @@
 
 (*
  * This is a top level OCaml binary that immediately delegates to Rust main.
- * The reason to do it is to make OCaml runtime available to Rust, so we can use 
+ * The reason to do it is to make OCaml runtime available to Rust, so we can use
  * OCaml callbacks. This should also be possible by using Rust binary and OCaml
- * library compiled with -output-complete-obj flag, but I could not find a way 
+ * library compiled with -output-complete-obj flag, but I could not find a way
  * to make it work in our build system.
  *)
 external hh_check_main : unit -> unit = "hh_check_main"
@@ -18,7 +18,7 @@ external hh_check_main : unit -> unit = "hh_check_main"
 let () =
   let () =
     Callback.register "print_tast_for_rust" Typing_ast_print.print_tast_for_rust;
-
+    Callback.register "hh_show_env" Typing_log.hh_show_env;
     Typing_print_ffi.register_callbacks ()
   in
   hh_check_main ()

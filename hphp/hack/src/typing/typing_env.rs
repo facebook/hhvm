@@ -12,6 +12,7 @@ use oxidized::ident::Ident;
 use oxidized::pos::Pos;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::shallow_decl_defs::{ShallowClass, ShallowMethod};
+use typing_collections_rust::Map;
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_heap_rust::Class;
@@ -24,7 +25,7 @@ pub fn empty_global_env<'a>(
     Genv {
         file,
         tcopt: oxidized::global_options::GlobalOptions::default(),
-        params: LocalIdMap::empty(),
+        params: Map::empty(),
         return_info: typing_env_return_info::TypingEnvReturnInfo {
             explicit: false,
             mutable: false,
@@ -119,7 +120,7 @@ impl<'a> Env<'a> {
                 Some(Local(bld.nothing(bld.mk_rnone()), 0))
             }
             Some(ctx) => {
-                let lcl = ctx.local_types.find(&x);
+                let lcl = ctx.local_types.find(&x).copied();
                 // TODO(hrust): error if not found
                 lcl
             }

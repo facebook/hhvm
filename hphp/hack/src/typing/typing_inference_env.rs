@@ -4,16 +4,17 @@
 // LICENSE file in the "hack" directory of this source tree.
 use arena_trait::Arena;
 
+use oxidized::ToOxidized;
 use oxidized_by_ref::aast;
 use oxidized_by_ref::ident::Ident;
 use oxidized_by_ref::pos::Pos;
-
+use std::collections::BTreeMap;
 use typing_collections_rust::*;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_defs_rust::*;
 
 #[derive(Clone)]
-pub struct TyvarConstraints_<'a> {
+pub struct TyvarConstraints<'a> {
     pub bld: &'a TypeBuilder<'a>,
     /// Does this type variable appear covariantly in the type of the expression?
     pub appears_covariantly: bool,
@@ -21,63 +22,100 @@ pub struct TyvarConstraints_<'a> {
     /// If it appears in an invariant position then both will be true; if it doesn't
     /// appear at all then both will be false.
     pub appears_contravariantly: bool,
-    pub lower_bounds: ITySet<'a>,
-    pub upper_bounds: ITySet<'a>,
+    pub lower_bounds: Set<'a, InternalType<'a>>,
+    pub upper_bounds: Set<'a, InternalType<'a>>,
     /// Map associating a type to each type constant id of this variable.
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: SMap<'a, (&'a aast::Sid<'a>, Ty<'a>)>,
+    pub type_constants: SMap<'a, &'a (aast::Sid<'a>, Ty<'a>)>,
     /// Map associating PU information to each instance of
     /// #v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.
-    pub pu_accesses: SMap<'a, (Ty<'a>, &'a aast::Sid<'a>, Ty<'a>, &'a aast::Sid<'a>)>,
+    pub pu_accesses: SMap<'a, &'a (aast::Sid<'a>, Ty<'a>)>,
 }
 
-impl<'a> TyvarConstraints_<'a> {
+impl<'a> ToOxidized for TyvarConstraints<'a> {
+    type Target = oxidized::typing_inference_env::TyvarConstraints;
+
+    fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarConstraints {
+        let TyvarConstraints {
+            bld: _,
+            appears_contravariantly,
+            appears_covariantly,
+            lower_bounds,
+            upper_bounds,
+            type_constants,
+            pu_accesses,
+        } = self;
+        oxidized::typing_inference_env::TyvarConstraints {
+            appears_contravariantly: *appears_contravariantly,
+            appears_covariantly: *appears_covariantly,
+            lower_bounds: lower_bounds.to_oxidized(),
+            upper_bounds: upper_bounds.to_oxidized(),
+            type_constants: type_constants.to_oxidized(),
+            pu_accesses: pu_accesses.to_oxidized(),
+        }
+    }
+}
+
+impl<'a> TyvarConstraints<'a> {
     fn new(bld: &'a TypeBuilder<'a>) -> &'a Self {
-        bld.alloc(TyvarConstraints_ {
+        bld.alloc(TyvarConstraints {
             bld,
             appears_covariantly: false,
             appears_contravariantly: false,
-            lower_bounds: ITySet::empty(),
-            upper_bounds: ITySet::empty(),
+            lower_bounds: Set::empty(),
+            upper_bounds: Set::empty(),
             type_constants: SMap::empty(),
             pu_accesses: SMap::empty(),
         })
     }
 
-    fn set_lower_bounds(&'a self, lower_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
+    fn with_lower_bounds(&'a self, lower_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
         let mut cstr = self.clone();
         cstr.lower_bounds = lower_bounds;
         self.bld.alloc(cstr)
     }
 
     fn add_lower_bound(&'a self, ty: InternalType<'a>) -> &'a Self {
-        self.set_lower_bounds(self.lower_bounds.add(self.bld, ty))
+        self.with_lower_bounds(self.lower_bounds.add(self.bld, ty))
     }
 
-    fn set_upper_bounds(&'a self, upper_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
+    fn with_upper_bounds(&'a self, upper_bounds: Set<'a, InternalType<'a>>) -> &'a Self {
         let mut cstr = self.clone();
         cstr.upper_bounds = upper_bounds;
         self.bld.alloc(cstr)
     }
 
     fn add_upper_bound(&'a self, ty: InternalType<'a>) -> &'a Self {
-        self.set_upper_bounds(self.upper_bounds.add(self.bld, ty))
+        self.with_upper_bounds(self.upper_bounds.add(self.bld, ty))
     }
 }
-
-type TyvarConstraints<'a> = &'a TyvarConstraints_<'a>;
 
 #[derive(Clone)]
 pub enum SolvingInfo<'a> {
     /// when the type variable is bound to a type
     Type(Ty<'a>),
     /// when the type variable is still unsolved
-    Constraints(TyvarConstraints<'a>),
+    Constraints(&'a TyvarConstraints<'a>),
+}
+
+impl<'a> ToOxidized for SolvingInfo<'a> {
+    type Target = oxidized::typing_inference_env::SolvingInfo;
+
+    fn to_oxidized(&self) -> oxidized::typing_inference_env::SolvingInfo {
+        match self {
+            SolvingInfo::Type(ty) => {
+                oxidized::typing_inference_env::SolvingInfo::TVIType(ty.to_oxidized())
+            }
+            SolvingInfo::Constraints(cstr) => {
+                oxidized::typing_inference_env::SolvingInfo::TVIConstraints(cstr.to_oxidized())
+            }
+        }
+    }
 }
 
 impl<'a> SolvingInfo<'a> {
@@ -97,7 +135,7 @@ impl<'a> SolvingInfo<'a> {
 }
 
 #[derive(Clone)]
-pub struct TyvarInfo_<'a> {
+pub struct TyvarInfo<'a> {
     pub bld: &'a TypeBuilder<'a>,
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
@@ -107,17 +145,38 @@ pub struct TyvarInfo_<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
-impl<'a> TyvarInfo_<'a> {
-    fn set_solving_info(&'a self, solving_info: SolvingInfo<'a>) -> &'a Self {
+impl<'a> ToOxidized for TyvarInfo<'a> {
+    type Target = oxidized::typing_inference_env::TyvarInfo;
+
+    fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarInfo {
+        let TyvarInfo {
+            bld: _,
+            tyvar_pos,
+            global_reason,
+            eager_solve_failed,
+            solving_info,
+        } = self;
+        oxidized::typing_inference_env::TyvarInfo {
+            tyvar_pos: match tyvar_pos {
+                None => oxidized::pos::Pos::make_none(),
+                Some(pos) => pos.to_oxidized(),
+            },
+            global_reason: global_reason.to_oxidized(),
+            eager_solve_failed: *eager_solve_failed,
+            solving_info: solving_info.to_oxidized(),
+        }
+    }
+}
+
+impl<'a> TyvarInfo<'a> {
+    fn with_solving_info(&'a self, solving_info: SolvingInfo<'a>) -> &'a Self {
         let mut tvinfo = self.clone();
         tvinfo.solving_info = solving_info;
         self.bld.alloc(tvinfo)
     }
 }
 
-pub type TyvarInfo<'a> = &'a TyvarInfo_<'a>;
-
-pub type Tvenv<'a> = IMap<'a, TyvarInfo<'a>>;
+pub type Tvenv<'a> = IMap<'a, &'a TyvarInfo<'a>>;
 
 pub struct InferenceEnv<'a> {
     pub bld: &'a TypeBuilder<'a>,
@@ -125,6 +184,30 @@ pub struct InferenceEnv<'a> {
     pub tyvars_stack: Vec<'a, (&'a Pos<'a>, Vec<'a, Ident>)>,
     pub allow_solve_globals: bool,
     var_id_counter: Ident,
+}
+
+impl<'a> ToOxidized for InferenceEnv<'a> {
+    type Target = oxidized::typing_inference_env::TypingInferenceEnv;
+
+    fn to_oxidized(&self) -> oxidized::typing_inference_env::TypingInferenceEnv {
+        let InferenceEnv {
+            bld: _,
+            tvenv,
+            tyvars_stack: _,
+            allow_solve_globals,
+            var_id_counter: _,
+        } = self;
+        oxidized::typing_inference_env::TypingInferenceEnv {
+            tvenv: tvenv.to_oxidized(),
+            tyvars_stack: vec![], // TODO(hrust)
+            subtype_prop: oxidized::typing_logic::SubtypeProp::Conj(vec![]), // TODO(hrust)
+            tyvar_occurrences: oxidized::typing_tyvar_occurrences::TypingTyvarOccurrences {
+                tyvar_occurrences: BTreeMap::new(),
+                tyvars_in_tyvar: BTreeMap::new(),
+            },
+            allow_solve_globals: *allow_solve_globals,
+        }
+    }
 }
 
 impl<'a> InferenceEnv<'a> {
@@ -238,8 +321,8 @@ impl<'a> InferenceEnv<'a> {
 
     fn fresh_unsolved_tyvar(&mut self, v: Ident, tyvar_pos: Option<&'a Pos>) {
         // TODO(hrust) variance
-        let solving_info = SolvingInfo::Constraints(TyvarConstraints_::new(self.bld));
-        let tyvar_info = self.bld.alloc(TyvarInfo_ {
+        let solving_info = SolvingInfo::Constraints(TyvarConstraints::new(self.bld));
+        let tyvar_info = self.bld.alloc(TyvarInfo {
             bld: self.bld,
             tyvar_pos,
             global_reason: None,
@@ -294,7 +377,8 @@ impl<'a> InferenceEnv<'a> {
                     self.tvenv = self.tvenv.add(
                         self.bld,
                         v,
-                        tvinfo.set_solving_info(SolvingInfo::Constraints(cstr.add_upper_bound(ty))),
+                        tvinfo
+                            .with_solving_info(SolvingInfo::Constraints(cstr.add_upper_bound(ty))),
                     )
                 }
             },
@@ -312,7 +396,8 @@ impl<'a> InferenceEnv<'a> {
                     self.tvenv = self.tvenv.add(
                         self.bld,
                         v,
-                        tvinfo.set_solving_info(SolvingInfo::Constraints(cstr.add_lower_bound(ty))),
+                        tvinfo
+                            .with_solving_info(SolvingInfo::Constraints(cstr.add_lower_bound(ty))),
                     )
                 }
             },

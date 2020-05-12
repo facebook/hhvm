@@ -163,10 +163,11 @@ inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
 inline bool ArrayData::isPHPArrayType() const {
-  return (kind() & (~0x10)) < kDictKind;
+  static_assert(kBespokeArrayKind == 8, "");
+  return (kind() & (~0x08)) < kDictKind;
 }
 inline bool ArrayData::isHackArrayType() const {
-  return (kind() & (~0x10)) >= kDictKind;
+  return (kind() & (~0x08)) >= kDictKind;
 }
 
 inline bool ArrayData::isDictType() const {
@@ -232,6 +233,9 @@ inline bool ArrayData::dvArraySanityCheck() const {
   if (!RuntimeOption::EvalHackArrDVArrs) {
     if (isPackedKind()) return !(dv & kDArray);
     if (isMixedKind())  return !(dv & kVArray);
+    // TODO(jgriego) we should probably have a way of restricting the
+    //               dvarrayness of a bespoke but hack it for now
+    if (!isVanilla()) return true;
   }
   return dv == kNotDVArray;
 }

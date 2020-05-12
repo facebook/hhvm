@@ -75,6 +75,8 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad) {
     always_assert(false);
   }();
   lad->initHeader(hk, OneReference);
+  lad->setDVArray(ad->dvArray());
+
   lad->wrapped = ad;
   lad->setLayout(LoggingLayout::layoutForVanillaArray(ad));
 

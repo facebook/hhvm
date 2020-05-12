@@ -1,0 +1,6 @@
+File "catch.php", line 21, characters 10-26:
+Unbound name: NotFoundException (an object type) (Naming[2049])
+File "catch.php", line 27, characters 10-10:
+Generics are not allowed in this position. (Typing[4306])
+File "catch.php", line 27, characters 10-10:
+Erased generics can only be used in type hints because they do not exist at runtime. (Typing[4124])

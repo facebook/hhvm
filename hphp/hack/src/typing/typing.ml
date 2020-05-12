@@ -1973,6 +1973,7 @@ and expr_
             this_ty = cid_ty;
             from_class = Some cid;
             quiet = true;
+            report_cycle = None;
             on_error = Errors.unify_error_at p;
           }
         in
@@ -3696,6 +3697,7 @@ and new_object
               this_ty = obj_ty;
               from_class = None;
               quiet = false;
+              report_cycle = None;
               on_error = Errors.unify_error_at p;
             }
           in
@@ -5417,6 +5419,7 @@ and class_get_
           substs = Subst.make_locl (Cls.tparams class_) paraml;
           from_class = Some cid;
           quiet = true;
+          report_cycle = None;
           on_error = Errors.unify_error_at p;
         }
       in
@@ -5914,6 +5917,7 @@ and call_construct p env class_ params el unpacked_element cid =
       substs = Subst.make_locl (Cls.tparams class_) params;
       from_class = Some cid;
       quiet = true;
+      report_cycle = None;
       on_error = Errors.unify_error_at p;
     }
   in
@@ -6748,6 +6752,7 @@ and safely_refine_class_type
       (* In case `this` appears in constraints *)
       from_class = None;
       quiet = true;
+      report_cycle = None;
       on_error = Errors.unify_error_at p;
     }
   in
@@ -6969,7 +6974,7 @@ and typedef_def ctx typedef =
   NastCheck.typedef env typedef;
   let {
     t_annotation = ();
-    t_name = (t_pos, _);
+    t_name = (t_pos, t_name);
     t_tparams = _;
     t_constraint = tcstr;
     t_kind = hint;
@@ -6982,7 +6987,10 @@ and typedef_def ctx typedef =
     typedef
   in
   let ty = Decl_hint.hint env.decl_env hint in
-  let (env, ty) = Phase.localize_with_self ~pos:t_pos env ty in
+  (* We want to report cycles through the definition *)
+  let (env, ty) =
+    Phase.localize_with_self env ~pos:t_pos ~report_cycle:(t_pos, t_name) ty
+  in
   let env =
     match tcstr with
     | Some tcstr ->
@@ -7087,6 +7095,7 @@ and class_get_pu ?from_class env ty name =
         substs;
         from_class;
         quiet = false;
+        report_cycle = None;
         on_error = Errors.unify_error;
       }
     in

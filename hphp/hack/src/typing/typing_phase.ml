@@ -83,7 +83,7 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-let env_with_self ?pos ?(quiet = false) env =
+let env_with_self ?pos ?(quiet = false) ?report_cycle env =
   let this_ty = mk (Reason.none, TUtils.this_of (Env.get_self env)) in
   {
     type_expansions = [];
@@ -91,6 +91,7 @@ let env_with_self ?pos ?(quiet = false) env =
     this_ty;
     from_class = None;
     quiet;
+    report_cycle;
     on_error =
       (match pos with
       | None -> Errors.unify_error
@@ -680,8 +681,8 @@ and check_where_constraints
 (* Performs no substitutions of generics and initializes Tthis to
  * Env.get_self env
  *)
-and localize_with_self env ?pos ?(quiet = false) ty =
-  let ety_env = env_with_self env ?pos ~quiet in
+and localize_with_self env ?pos ?(quiet = false) ?report_cycle ty =
+  let ety_env = env_with_self env ?pos ~quiet ?report_cycle in
   localize env ty ~ety_env
 
 and localize_possibly_enforced_with_self env ety =
@@ -718,6 +719,7 @@ and localize_missing_tparams_class env r sid class_ =
       substs = Subst.make_locl (Cls.tparams class_) tyl;
       from_class = Some (Aast.CI sid);
       quiet = false;
+      report_cycle = None;
       on_error = Errors.unify_error_at use_pos;
     }
   in
@@ -770,6 +772,7 @@ and resolve_type_arguments_and_check_constraints
           substs = Subst.make_locl tparaml targs_tys;
           from_class = Some from_class;
           quiet = false;
+          report_cycle = None;
           on_error = Errors.unify_error_at use_pos;
         }
       in

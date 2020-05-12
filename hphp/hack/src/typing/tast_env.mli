@@ -141,7 +141,12 @@ val localize :
     and/or are not appropriate at the time we call localize.
     *)
 val localize_with_self :
-  env -> ?pos:Pos.t -> ?quiet:bool -> Typing_defs.decl_ty -> env * Tast.ty
+  env ->
+  ?pos:Pos.t ->
+  ?quiet:bool ->
+  ?report_cycle:Pos.t * string ->
+  Typing_defs.decl_ty ->
+  env * Tast.ty
 
 (** Get the upper bounds of the type parameter with the given name. *)
 val get_upper_bounds : env -> string -> Type_parameter_env.tparam_bounds

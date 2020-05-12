@@ -28,7 +28,10 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
     unsafe_opt @@ Typing_env.get_typedef env x
   in
   if Typing_defs.has_expanded ety_env x then (
-    Errors.cyclic_typedef td_pos pos;
+    (* Only report a cycle if it's through the specified definition *)
+    (match ety_env.report_cycle with
+    | Some (_, x') when String.equal x x' -> Errors.cyclic_typedef td_pos pos
+    | _ -> ());
     (env, (ety_env, MakeType.err r))
   ) else
     let should_expand =

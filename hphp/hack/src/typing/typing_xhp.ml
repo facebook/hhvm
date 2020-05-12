@@ -124,6 +124,7 @@ and get_spread_attributes env pos onto_xhp cty =
         substs = Subst.make_locl (Cls.tparams xhp_info) tparams;
         from_class = None;
         quiet = false;
+        report_cycle = None;
         on_error = Errors.unify_error;
       }
     in

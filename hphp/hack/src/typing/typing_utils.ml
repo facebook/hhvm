@@ -171,7 +171,12 @@ let (simplify_intersections_ref : simplify_intersections ref) =
 let simplify_intersections x = !simplify_intersections_ref x
 
 type localize_with_self =
-  env -> ?pos:Pos.t -> ?quiet:bool -> decl_ty -> env * locl_ty
+  env ->
+  ?pos:Pos.t ->
+  ?quiet:bool ->
+  ?report_cycle:Pos.t * string ->
+  decl_ty ->
+  env * locl_ty
 
 let (localize_with_self_ref : localize_with_self ref) =
   ref (not_implemented "localize_with_self")
@@ -720,6 +725,7 @@ let class_get_pu ?from_class env ty name =
         substs;
         from_class;
         quiet = false;
+        report_cycle = None;
         on_error = Errors.unify_error;
       }
     in

@@ -289,6 +289,9 @@ type expand_env = {
        * dependent types for type constants.
        *)
   quiet: bool;
+      (** If set to true, do not report errors, just return Terr or equivalent *)
+  report_cycle: (Pos.t * string) option;
+      (** Report a cycle through this type def / type constant definition *)
   on_error: Errors.typing_error_callback;
       (** If what we are localizing or expanding comes from the decl heap for
           example, then some errors must be silenced since they must have already been

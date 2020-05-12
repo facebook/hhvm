@@ -14,7 +14,8 @@ type method_instantiation = {
   explicit_targs: Tast.targ list;
 }
 
-val env_with_self : ?pos:Pos.t -> ?quiet:bool -> env -> expand_env
+val env_with_self :
+  ?pos:Pos.t -> ?quiet:bool -> ?report_cycle:Pos.t * string -> env -> expand_env
 
 (** Transforms a declaration phase type ({!Typing_defs.decl_ty})
     into a localized type ({!Typing_defs.locl_ty} = {!Tast.ty}).
@@ -30,7 +31,12 @@ val env_with_self : ?pos:Pos.t -> ?quiet:bool -> env -> expand_env
     and/or are not appropriate at the time we call localize.
     *)
 val localize_with_self :
-  env -> ?pos:Pos.t -> ?quiet:bool -> decl_ty -> env * locl_ty
+  env ->
+  ?pos:Pos.t ->
+  ?quiet:bool ->
+  ?report_cycle:Pos.t * string ->
+  decl_ty ->
+  env * locl_ty
 
 val localize_possibly_enforced_with_self :
   env -> decl_possibly_enforced_ty -> env * locl_possibly_enforced_ty

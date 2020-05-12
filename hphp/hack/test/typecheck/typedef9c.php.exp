@@ -1,0 +1,4 @@
+File "typedef9c.php--file1.php", line 12, characters 6-6:
+Cyclic type definition (Typing[4014])
+File "typedef9c.php--file1.php", line 12, characters 10-10:
+Cyclic use is here

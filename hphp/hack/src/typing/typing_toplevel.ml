@@ -1001,7 +1001,9 @@ and class_def_ env c tc =
   let (typed_methods, methods_global_inference_envs) =
     List.filter_map methods (method_def env tc) |> List.unzip
   in
-  let (env, typed_typeconsts) = List.map_env env c.c_typeconsts typeconst_def in
+  let (env, typed_typeconsts) =
+    List.map_env env c.c_typeconsts (typeconst_def (snd c.c_name))
+  in
   let (env, consts) = List.map_env env c.c_consts class_const_def in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
@@ -1159,6 +1161,7 @@ and get_decl_prop_ty env cls ~is_static prop_id =
     None
 
 and typeconst_def
+    class_name
     env
     {
       c_tconst_abstract;
@@ -1170,7 +1173,18 @@ and typeconst_def
       c_tconst_doc_comment;
     } =
   let (env, cstr) = opt Phase.localize_hint_with_self env c_tconst_constraint in
-  let (env, ty) = opt Phase.localize_hint_with_self env hint in
+  let (env, ty) =
+    match hint with
+    | None -> (env, None)
+    | Some hint ->
+      let ty = Decl_hint.hint env.decl_env hint in
+      (* We want to report cycles through the definition *)
+      let name = class_name ^ "::" ^ snd id in
+      let (env, ty) =
+        Phase.localize_with_self env ~pos ~report_cycle:(pos, name) ty
+      in
+      (env, Some ty)
+  in
   let check env t c =
     Type.sub_type pos Reason.URtypeconst_cstr env t c Errors.unify_error
   in

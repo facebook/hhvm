@@ -120,12 +120,22 @@ let create_root_from_type_constant
   in
   let name = tp_name class_name id in
   let type_expansions = (id_pos, name) :: ctx.ety_env.type_expansions in
-  ( if
-    List.mem ~equal:String.equal (List.map ctx.ety_env.type_expansions snd) name
-  then
-    let seen = List.rev_map type_expansions snd in
-    raise_error (fun () ->
-        Errors.cyclic_typeconst (fst typeconst.ttc_name) seen) );
+  (match ctx.ety_env.report_cycle with
+  (* This is a cycle through a type constant that we are defining *)
+  | Some (_, name') when String.equal name name' ->
+    let seen = name :: List.rev_map type_expansions snd in
+    Errors.cyclic_typeconst (fst typeconst.ttc_name) seen
+  | _ ->
+    (* This is a cycle through a type constant that we are using *)
+    if
+      List.mem
+        ~equal:String.equal
+        (List.map ctx.ety_env.type_expansions snd)
+        name
+    then
+      raise_error (fun () -> ())
+    else
+      ());
   let drop_exact ty =
     (* Legacy behavior is to preserve exactness only on `this` and not
        through `this::T` *)

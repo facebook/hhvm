@@ -58,8 +58,23 @@ struct LightProcess {
                      const char *cwd = nullptr);
   static int pclose(FILE *f);
 
+  /** Opens a process with the given arguments, environment, working directory,
+   * and file descriptors.
+   *
+   * See Process::ForkAndExecve for details.
+   */
+  static pid_t ForkAndExecve(
+    const std::string& path,
+    const std::vector<std::string>& argv,
+    const std::vector<std::string>& envp,
+    const std::string& cwd,
+    const std::map<int, int>& fds,
+    int flags = Process::FORK_AND_EXECVE_FLAG_NONE,
+    pid_t pgid = 0
+  );
+
   /**
-   * Opens a process with given cwd and environment variables.
+   * Opens a process with given cwd and environment variables, using the shell.
    *
    * The parameters "created" and "desired" describe the pipes that need to
    * be setup for the child process: "created" contains created fd for child,

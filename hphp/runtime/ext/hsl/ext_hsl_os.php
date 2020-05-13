@@ -169,4 +169,13 @@ function flock(FileDescriptor $fd, int $operation): void;
 <<__Native>>
 function request_stdio_fd(int $fd): FileDescriptor;
 
+<<__Native>>
+function fork_and_execve(
+  string $path,
+  vec<string> $argv,
+  vec<string> $envp,
+  dict<int, FileDescriptor> $fds,
+  shape(...) $options,
+): int;
+
 } // namespace _OS

@@ -15,11 +15,11 @@ lseek:
 --- Not an FD ---
 PHP7 engine exceptions (required): 1
 close:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
 lseek:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
 getpeername:
-- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor")
+- Caught exception: 0 (TypeError - "Expected an HSL FileDescriptor, got instance of class 'NotAnFD'")
 --- null ---
 close:
 - Caught exception: 0 (TypeError - "HH\Lib\_Private\_OS\close() expects parameter 1 to be object, null given")

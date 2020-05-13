@@ -63,9 +63,12 @@ void recordBCInstr(uint32_t op, const TCA addr, const TCA end, bool cold);
 void reportJitMaturity();
 
 /*
- * Get a code size counter for the named code block ("main", "cold", etc.)
+ * Update the jit.code.*.used ServiceData counters to reflect the
+ * current usage of the TC. Call this whenever a new translation is
+ * emitted into the TC. The code lock must be already held.
  */
-ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name);
+void updateCodeSizeCounters();
+
 /*
  * Log statistics about a translation to scribe via StructuredLog.
  */

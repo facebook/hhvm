@@ -28,6 +28,7 @@
 #include "hphp/runtime/vm/jit/code-gen-tls.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
 #include "hphp/runtime/vm/jit/srcdb.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -138,6 +139,7 @@ bool addDbgGuard(const Func* func, Offset offset, ResumeMode resumeMode) {
     addDbgGuardImpl(sk, sr, view.main(), view.data(), fixups);
   }
   fixups.process(nullptr);
+  updateCodeSizeCounters();
   return true;
 }
 

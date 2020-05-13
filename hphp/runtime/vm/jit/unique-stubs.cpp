@@ -56,6 +56,7 @@
 #include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+#include "hphp/runtime/vm/jit/tc-record.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unique-stubs-arm.h"
 #include "hphp/runtime/vm/jit/unique-stubs-ppc64.h"
@@ -1276,6 +1277,8 @@ void UniqueStubs::emitAll(CodeCache& code, Debug::DebugInfo& dbg) {
 
   emitAllResumable(code, dbg);
   if (cti_enabled()) compile_cti_stubs();
+
+  tc::updateCodeSizeCounters();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

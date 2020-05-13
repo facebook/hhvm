@@ -131,11 +131,6 @@ static InitFiniNode initCodeSizeCounters([] {
   s_counters = buildCodeSizeCounters();
 }, InitFiniNode::When::PostRuntimeOptions);
 
-ServiceData::ExportedTimeSeries* getCodeSizeCounter(const std::string& name) {
-  assertx(!s_counters.empty());
-  return s_counters.at(name);
-}
-
 static std::atomic<bool> s_warmedUp{false};
 
 static ServiceData::CounterCallback s_warmedUpCounter(
@@ -143,6 +138,20 @@ static ServiceData::CounterCallback s_warmedUpCounter(
     counters["jit.warmed-up"] = warmupStatusString().empty() ? 1 : 0;
   }
 );
+
+void updateCodeSizeCounters() {
+  assertOwnsCodeLock();
+
+  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
+    auto codeUsed = s_counters.at(name);
+    // Add delta
+    codeUsed->addValue(a.used() - codeUsed->getSum());
+  });
+
+  // Manually add code.data.
+  auto codeUsed = s_counters.at("data");
+  codeUsed->addValue(code().data().used() - codeUsed->getSum());
+}
 
 /*
  * Update JIT maturity with the current amount of emitted code and state of the
@@ -196,16 +205,6 @@ void reportJitMaturity() {
   if (maturity > before) {
     jitMaturityCounter->setValue(maturity);
   }
-
-  code().forEachBlock([&] (const char* name, const CodeBlock& a) {
-    auto codeUsed = s_counters.at(name);
-    // Add delta
-    codeUsed->addValue(a.used() - codeUsed->getSum());
-  });
-
-  // Manually add code.data.
-  auto codeUsed = s_counters.at("data");
-  codeUsed->addValue(code().data().used() - codeUsed->getSum());
 }
 
 static void logFrame(const Vunit& unit, const size_t frame) {
@@ -415,7 +414,9 @@ std::string warmupStatusString() {
     // 3. Has code size in both main and hot plateaued?
     else {
       auto checkCodeSize = [&](std::string name) {
-        auto series = getCodeSizeCounter(name);
+        assertx(!s_counters.empty());
+        auto series = s_counters.at(name);
+
         auto const codeSizeRate = series->getRateByDuration(
           std::chrono::seconds(RuntimeOption::EvalJitWarmupRateSeconds));
         if (codeSizeRate > RuntimeOption::EvalJitWarmupMaxCodeGenRate) {

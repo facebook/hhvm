@@ -1009,6 +1009,7 @@ publishTranslation(TransMetaInfo info, OptView optSrcView) {
   if (loc) {
     publishTranslationMeta(info);
     publishTranslationCode(std::move(info));
+    updateCodeSizeCounters();
   }
   return loc;
 }
@@ -1022,6 +1023,8 @@ void publishOptFunc(FuncMetaInfo info) {
   invalidateFuncProfSrcKeys(Func::fromFuncId(info.fid));
   publishOptFuncMeta(info);
   publishOptFuncCode(info);
+
+  updateCodeSizeCounters();
 }
 
 void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
@@ -1077,6 +1080,8 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   if (debug) {
     checkPublishedAddresses(prologueTCAs, srcKeyTrans, publishedSet);
   }
+
+  updateCodeSizeCounters();
 }
 
 }}}

@@ -267,6 +267,8 @@ TCA emitFuncPrologue(Func* func, int argc, TransKind kind) {
   emitFuncPrologueInternal(func, argc, kind, info, nullptr);
   publishFuncPrologueMeta(func, argc, kind, info);
   publishFuncPrologueCode(func, argc, info);
+
+  updateCodeSizeCounters();
   return info.start;
 }
 
@@ -375,6 +377,7 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
 
   auto const loc = emitFuncBodyDispatchInternal(func, dvs, kind, nullptr);
   publishFuncBodyDispatch(func, loc);
+  updateCodeSizeCounters();
   return loc.mainStart();
 }
 

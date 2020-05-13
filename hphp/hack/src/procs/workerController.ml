@@ -363,11 +363,12 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
   let get_result_with_status_check ?(block_on_waitpid = false) () : b =
     with_exit_status_check ~block_on_waitpid slave_pid (fun () ->
         let data : b = Marshal_tools.from_fd_with_preamble infd in
-        let metadata_out : metadata_out =
+        let ({ stats; log_globals } : metadata_out) =
           Marshal_tools.from_fd_with_preamble infd
         in
         close w h;
-        Measure.merge (Measure.deserialize metadata_out.stats);
+        Measure.merge (Measure.deserialize stats);
+        HackEventLogger.deserialize_globals log_globals;
         data)
   in
   let result () : b =
@@ -407,7 +408,7 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
         ())
   in
   let slave = { result; slave_pid; infd; worker = w; wait_for_cancel } in
-  let metadata_in = () in
+  let metadata_in = { log_globals = HackEventLogger.serialize_globals () } in
   let (request : Worker.request) = wrap_request w f x metadata_in in
   (* Send the job to the slave. *)
   let () =

@@ -7,6 +7,12 @@
  *
  *)
 
+type serialized_globals = Serialized_globals
+
+let serialize_globals () = Serialized_globals
+
+let deserialize_globals _ = ()
+
 let set_use_watchman _ = ()
 
 let set_use_full_fidelity_parser _ = ()

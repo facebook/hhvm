@@ -20,6 +20,7 @@
   (libraries
     core_kernel
     heap_shared_mem
+    logging
     marshal_tools
     procs_bucket
     procfs

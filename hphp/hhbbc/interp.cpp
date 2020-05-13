@@ -2950,40 +2950,6 @@ void isTypeArrLike(ISS& env, const Type& ty) {
   push(env, TBool);
 }
 
-namespace {
-bool isCompactTypeClsMeth(ISS& env, IsTypeOp op, const Type& t) {
-  assertx(RuntimeOption::EvalEmitClsMethPointers);
-  if (t.couldBe(BClsMeth)) {
-    if (RuntimeOption::EvalHackArrDVArrs) {
-      if (op == IsTypeOp::Vec || op == IsTypeOp::VArray) {
-        if (t.subtypeOf(
-            op == IsTypeOp::Vec ? BClsMeth | BVec : BClsMeth | BVArr)) {
-          push(env, TTrue);
-        } else if (t.couldBe(op == IsTypeOp::Vec ? BVec : BVArr)) {
-          push(env, TBool);
-        } else {
-          isTypeImpl(env, t, TClsMeth);
-        }
-        return true;
-      }
-    } else {
-      if (op == IsTypeOp::Arr || op == IsTypeOp::VArray) {
-        if (t.subtypeOf(
-            op == IsTypeOp::VArray ? BClsMeth | BVArr : BClsMeth | BArr)) {
-          push(env, TTrue);
-        } else if (t.couldBe(op == IsTypeOp::VArray ? BVArr : BArr)) {
-          push(env, TBool);
-        } else {
-          isTypeImpl(env, t, TClsMeth);
-        }
-        return true;
-      }
-    }
-  }
-  return false;
-}
-}
-
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   auto const loc = locAsCell(env, op.nloc1.id);

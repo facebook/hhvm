@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::typing_env_types::Env;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
 use oxidized::aast_defs::Tprim;
@@ -32,7 +31,7 @@ pub fn canonicalize_str(id: &str) -> String {
 }
 
 // In the OCaml code, this is done in naming.ml, in the hint_ function
-pub fn name_hint<'a>(_env: &mut Env<'a>, h: &'a Hint) -> &'a Hint {
+pub fn name_hint<'a>(h: &Hint) -> Hint {
     let Hint(pos, node) = &*h;
     // TODO(hrust): complete the cases
     let newnode = match &**node {
@@ -54,11 +53,8 @@ pub fn name_hint<'a>(_env: &mut Env<'a>, h: &'a Hint) -> &'a Hint {
 
     match newnode {
         None => {
-            return h;
+            return h.clone();
         }
-        Some(node) => {
-            let h = Hint(pos.clone(), Box::new(node));
-            Box::leak(Box::new(h))
-        }
+        Some(node) => Hint(pos.clone(), Box::new(node)),
     }
 }

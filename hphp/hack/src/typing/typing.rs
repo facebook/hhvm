@@ -34,8 +34,8 @@ pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
     let named_ret = match &f.ret.1 {
         None => None,
         Some(ty) => {
-            let ty = typing_naming::name_hint(env, ty);
-            Some(ty.clone())
+            let ty = typing_naming::name_hint(ty);
+            Some(ty)
         }
     };
     let ret = tast::TypeHint(env.genv.return_info.type_.type_, named_ret);

@@ -849,13 +849,12 @@ let go_with_interrupt
         ~check_info
     end
   in
-  let url_opt =
-    HackEventLogger.ProfileTypeCheck.get_telemetry_url_opt
-      ~profile_log:check_info.profile_log
-      ~init_id:check_info.init_id
-      ~recheck_id:check_info.recheck_id
-  in
-  Option.iter url_opt ~f:(fun s -> Hh_logger.log "%s" s);
+  if check_info.profile_log then
+    Hh_logger.log
+      "Typecheck perf: %s"
+      (HackEventLogger.ProfileTypeCheck.get_telemetry_url
+         ~init_id:check_info.init_id
+         ~recheck_id:check_info.recheck_id);
   result
 
 let go

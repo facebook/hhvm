@@ -383,7 +383,7 @@ module ProfileTypeCheck = struct
 
   let compute_tast ~path:_ ~telemetry:_ = ()
 
-  let get_telemetry_url_opt ~profile_log:_ ~init_id:_ ~recheck_id:_ = None
+  let get_telemetry_url ~init_id:_ ~recheck_id:_ = ""
 end
 
 module Rage = struct

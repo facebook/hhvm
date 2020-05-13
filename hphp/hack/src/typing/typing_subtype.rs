@@ -126,22 +126,16 @@ fn simplify_subtype_i<'a>(
                                         type_expansions: BVec::new_in(bld.alloc),
                                         substs,
                                     });
-                                    // Iterate over all immediate supertypes, recursing through
-                                    // simplify_subtype on each in turn. If any succeed, return
-                                    // early, otherwise build up a disjunction
-                                    // TODO (hrust): precompute (or cache) the transitive closure of
-                                    // the extends/implements relation, so that we can instead
-                                    // query if classish C inherits from classish D
-                                    let mut props = BVec::new_in(env.bld().alloc);
-                                    for &ty in cd.extends.iter().chain(cd.implements.iter()) {
-                                        let up_obj = localize(ety_env, env, ty);
-                                        let prop = simplify_subtype(env, up_obj, ty_super);
-                                        if prop.is_valid() {
-                                            return valid();
+                                    match cd.ancestors.get(cid_super) {
+                                        Some(up_obj) => {
+                                            let up_obj = localize(ety_env, env, *up_obj);
+                                            simplify_subtype(env, up_obj, ty_super)
                                         }
-                                        props.push(prop);
+                                        None => {
+                                            // TODO(hrust): traits and interfaces
+                                            invalid()
+                                        }
                                     }
-                                    bld.disj(props)
                                 }
                             }
                         }

@@ -146,6 +146,10 @@ impl<'a> Reason<'a> {
     pub fn witness(pos: &'a Pos<'a>) -> Self {
         Self::with_pos(pos, Reason_::Rwitness)
     }
+
+    pub fn instantiate(r1: &'a Reason<'a>, x: &'a str, r2: &'a Reason<'a>) -> Self {
+        Self::new(r2.pos, Reason_::Rinstantiate(r1, x, r2))
+    }
 }
 
 impl<'a> ToOxidized for Reason<'a> {

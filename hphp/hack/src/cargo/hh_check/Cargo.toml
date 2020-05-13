@@ -9,8 +9,8 @@ include = ["../../hh_check.rs"]
 path = "../../hh_check.rs"
 
 [dependencies]
+decl_dummy_provider_rust = { path = "../../providers/cargo/decl_dummy_provider_rust" }
 decl_provider_rust = { path = "../../providers/cargo/decl_provider_rust" }
-decl_rust = { path = "../../decl/decl_rust" }
 multifile_rust = { path = "../../utils/multifile" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../../hhbc/cargo/options" }

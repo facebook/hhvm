@@ -374,6 +374,13 @@ impl<T> Clone for SortedSet<'_, T> {
 }
 
 impl<'a, T> SortedSet<'a, T> {
+    /// Returns the empty set
+    pub fn empty() -> Self {
+        SortedSet {
+            list: SortedAssocList::empty(),
+        }
+    }
+
     /// Returns `true` if the set contains a value.
     ///
     /// The value may be any borrowed form of the set's value type,

@@ -46,7 +46,7 @@ pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
         annotation: SavedEnv,
         mode: f.mode,
         ret,
-        name: typing_naming::canonicalize(&f.name),
+        name: typing_naming::canonicalize_sid(&f.name),
         tparams: vec![],
         where_constraints: f.where_constraints.clone(),
         body: tast::FuncBody {
@@ -186,6 +186,7 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
             let (class_id, explicit_targs, args, unpacked_arg, ctor_pos) = &**x;
             // TODO(hrust) the following does not exist in the OCaml version and would be done
             // (properly) in the naming phase
+            // TODO(hrust) fix memory leaks
             let ast::ClassId(p0, class_id_) = class_id;
             let class_id = match class_id_ {
                 ast::ClassId_::CIexpr(e) => {
@@ -199,6 +200,9 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
                 }
                 _ => class_id,
             };
+            let class_id = env
+                .bld()
+                .alloc(typing_naming::canonicalize_class_id(&class_id));
             // TODO(hrust) might_throw
             let (class_id, targs, args, unpacked_arg, ty, ctor_fty) = new_object(
                 env,
@@ -311,7 +315,7 @@ fn dispatch_call<'a>(
             // TODO(hrust) reactivity stuff
             let fun_expr = tast::Expr(
                 (env.ast_pos(fpos), function_ty),
-                tast::Expr_::mk_id(typing_naming::canonicalize(x)),
+                tast::Expr_::mk_id(typing_naming::canonicalize_sid(x)),
             );
             (
                 return_ty,
@@ -628,11 +632,12 @@ fn class_id_for_new<'a>(
         .1
         .into_union_inter_iter(&mut env.inference_env);
     // TODO(hrust) map TUtils.get_base_type
+    // TODO(hrust) get eager class
     let tys = tys
         .filter_map(|ty| {
             match ty.get_node() {
                 Ty_::Tclass(&(sid, _, _)) => {
-                    match provider.get_class(sid.name()) {
+                    match provider.get_shallow_class(sid.name()) {
                         None => None,
                         Some(class_info) => {
                             // TODO check generic, check generic is newable

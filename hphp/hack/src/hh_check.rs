@@ -11,7 +11,7 @@ use typing_check_service_rust::{typing_check_utils::from_text, typing_check_util
 
 use typing_defs_rust::typing_make_type;
 
-use decl_provider_rust as decl_provider;
+use decl_dummy_provider_rust::DummyDeclProvider;
 use oxidized::relative_path::{self, RelativePath};
 use stack_limit::{StackLimit, KI, MI};
 
@@ -40,38 +40,6 @@ struct Opts {
     filename: PathBuf,
 }
 
-/// DeclProvider for tests - assumes that all the declarations come from a single file
-struct TestDeclProvider<'a> {
-    decls: &'a oxidized_by_ref::direct_decl_parser::Decls<'a>,
-}
-
-impl<'a> TestDeclProvider<'a> {
-    fn new(path: &RelativePath, text: &'a [u8], arena: &'a Bump) -> Self {
-        let decls = match decl_rust::direct_decl_parser::parse_decls(path.clone(), text, arena) {
-            Err(e) => panic!("{:?}", e),
-            Ok(decls) => arena.alloc(decls),
-        };
-        Self { decls }
-    }
-}
-
-impl decl_provider::DeclProvider for TestDeclProvider<'_> {
-    fn get_fun(&self, s: &str) -> Option<&decl_provider::FunDecl<'_>> {
-        // Names in function call expressions don't seem to be fully-qualified
-        // in hh_check yet.
-        // TODO: fix this
-        let s = format!("\\{}", s);
-        self.decls.funs.get(&*s)
-    }
-    fn get_class(&self, name: &str) -> Option<&decl_provider::ClassDecl<'_>> {
-        // Class names in expressions don't seem to be fully-qualified in
-        // hh_check yet.
-        // TODO: fix this
-        let name = format!("\\{}", name);
-        self.decls.classes.get(&*name)
-    }
-}
-
 fn read_file(filepath: &Path) -> anyhow::Result<Vec<u8>> {
     let mut text: Vec<u8> = Vec::new();
     File::open(filepath)
@@ -92,7 +60,7 @@ fn process_single_file_impl(
     let rel_path = RelativePath::make(relative_path::Prefix::Dummy, filepath.to_owned());
     let arena = Bump::new();
     let builder = typing_make_type::TypeBuilder::new(&arena);
-    let provider = TestDeclProvider::new(&rel_path, content, &arena);
+    let provider = DummyDeclProvider::new(&rel_path, content, &arena);
     let profile = from_text(
         &builder,
         &provider,

@@ -67,7 +67,8 @@ fn obj_get_concrete_ty<'a>(
     let (_r, receiver_ty_) = receiver_ty.unpack();
     match receiver_ty_ {
         Ty_::Tclass(&(class_id, exact, class_type_args)) => {
-            match env.genv.provider.get_class(class_id.name()) {
+            // TODO(hrust): use eager class
+            match env.genv.provider.get_shallow_class(class_id.name()) {
                 None => unimplemented!(),
                 Some(class_info) => {
                     // TODO(hrust) default if not a method in partial mode and

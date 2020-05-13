@@ -8,15 +8,28 @@ use arena_trait::Arena;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
 use oxidized::aast_defs::Tprim;
-use oxidized::ast;
+use oxidized::{aast, ast};
 use typing_defs_rust::tast;
 
 // In the OCaml code, this is done in naming.ml, and resolves an identifier wrt namespaces
 // For now, just prefix with the top-level namespace
 // TODO(hrust): align Rust and OCaml
-pub fn canonicalize<'a>(id: &'a ast::Sid) -> ast::Sid {
-    let prefix = "\\".to_string();
-    tast::Id(id.0.clone(), prefix + &id.1.clone())
+pub fn canonicalize_sid(id: &ast::Sid) -> ast::Sid {
+    tast::Id(id.0.clone(), canonicalize_str(&id.1))
+}
+
+pub fn canonicalize_class_id(id: &ast::ClassId) -> ast::ClassId {
+    use aast::ClassId_::*;
+    let id_new = match &id.1 {
+        CIparent | CIself | CIstatic => id.1.clone(),
+        CIexpr(..) => unimplemented!(),
+        CI(sid) => CI(canonicalize_sid(&sid)),
+    };
+    ast::ClassId(id.0.clone(), id_new)
+}
+
+pub fn canonicalize_str(id: &str) -> String {
+    "\\".to_string() + &id.to_string()
 }
 
 // In the OCaml code, this is done in naming.ml, in the hint_ function

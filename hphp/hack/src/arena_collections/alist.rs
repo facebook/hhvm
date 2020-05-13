@@ -674,6 +674,11 @@ pub struct SortedAssocList<'a, K: 'a, V: 'a> {
 }
 
 impl<'a, K, V> SortedAssocList<'a, K, V> {
+    /// Returns the empty association list.
+    pub fn empty() -> Self {
+        SortedAssocList { entries: &[] }
+    }
+
     /// Returns a reference to the value corresponding to the key.
     ///
     /// The key may be any borrowed form of the list's key type, but the

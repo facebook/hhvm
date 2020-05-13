@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use bumpalo::collections::String as BString;
 use bumpalo::collections::Vec as BVec;
 use bumpalo::{vec, Bump};
 
@@ -112,6 +113,10 @@ impl<'a> TypeBuilder<'a> {
 
     pub fn slice_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> &'a [T] {
         self.vec_from_iter(iter).into_bump_slice()
+    }
+
+    pub fn str_from_str(&self, s: &str) -> &'a str {
+        BString::from_str_in(s, &self.bumpalo).into_bump_str()
     }
 }
 

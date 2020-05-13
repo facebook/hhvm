@@ -14,11 +14,13 @@ use crate::typing_phase::{self, MethodInstantiation};
 use crate::typing_solver;
 use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
+use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
 use lazy_static::lazy_static;
-use oxidized::ast_defs::Id;
-use oxidized::{aast, aast_defs, ast, ast_defs};
+use oxidized::ToOxidized;
+use oxidized::{aast_defs, ast, ast_defs};
 use oxidized_by_ref::aast_defs::Sid;
+use oxidized_by_ref::ast::{ClassId, ClassId_, Id};
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use typing_ast_rust::typing_inference_env::IntoUnionIntersectionIterator;
@@ -187,25 +189,26 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
             // (properly) in the naming phase
             // TODO(hrust) fix memory leaks
             let ast::ClassId(p0, class_id_) = class_id;
-            let class_id = match class_id_ {
+            let mut class_id_ = match class_id_ {
                 ast::ClassId_::CIexpr(e) => {
                     let ast::Expr(_p1, e) = e;
                     match e {
-                        ast::Expr_::Id(id) => {
-                            let b = aast::ClassId(p0.clone(), aast::ClassId_::CI(*id.clone()));
-                            Box::leak(Box::new(b))
-                        }
-                        _ => class_id,
+                        ast::Expr_::Id(id) => ClassId_::CI(Id(env.ast_pos(&id.0), &id.1)),
+                        _ => unimplemented!("{:?}", e),
                     }
                 }
-                _ => class_id,
+                ast::ClassId_::CI(id) => ClassId_::CI(Id(env.ast_pos(&id.0), &id.1)),
+                ast::ClassId_::CIparent => ClassId_::CIparent,
+                ast::ClassId_::CIself => ClassId_::CIself,
+                ast::ClassId_::CIstatic => ClassId_::CIstatic,
             };
-            let class_id = Box::leak(Box::new(typing_naming::canonicalize_class_id(&class_id)));
+            typing_naming::canonicalize_class_id(env, &mut class_id_);
+            let class_id_arena = env.bld().alloc(ClassId(env.ast_pos(p0), class_id_));
             // TODO(hrust) might_throw
             let (class_id, targs, args, unpacked_arg, ty, ctor_fty) = new_object(
                 env,
                 env.ast_pos(class_id.annot()),
-                class_id,
+                class_id_arena,
                 explicit_targs,
                 args,
                 unpacked_arg,
@@ -227,10 +230,10 @@ lazy_static! {
         { vec!["hh_force_solve", "hh_show_env"].into_iter().collect() };
 }
 
-fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&Id> {
+fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&ast::Id> {
     let ast::Expr(_, fun_expr_) = fun_expr;
     if let ast::Expr_::Id(fun_id) = fun_expr_ {
-        let Id(_, fun_id_) = fun_id.as_ref();
+        let ast::Id(_, fun_id_) = fun_id.as_ref();
         // TODO(hrust) use constants in naming_special_names
         if PSEUDO_FUNCTIONS.contains(&fun_id_[..]) {
             Some(fun_id)
@@ -245,7 +248,7 @@ fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&Id> {
 fn call_pseudo_function<'a>(
     env: &mut Env<'a>,
     p_call_expr: &'a Pos,
-    (p_fun_expr, fun_id): (&'a Pos, &Id),
+    (p_fun_expr, fun_id): (&'a Pos, &ast::Id),
     args: &'a Vec<ast::Expr>,
     call_type: &ast::CallType,
 ) -> (Ty<'a>, tast::Expr_<'a>) {
@@ -382,7 +385,8 @@ fn fun_type_of_id<'a>(
                     // TODO(hrust) transform_special_fun_ty
                     let ety_env = bld.env_with_self();
                     // TODO(hrust) below: strip_ns id
-                    let targs = typing_phase::localize_targs(env, pos, id, ft.tparams, targs);
+                    let targs =
+                        typing_phase::localize_targs(env, env.ast_pos(pos), id, ft.tparams, targs);
                     // TODO(hrust) pessimize
                     let instantiation = MethodInstantiation {
                         use_pos: pos,
@@ -517,7 +521,7 @@ fn set_local<'a>(
 fn new_object<'a>(
     env: &mut Env<'a>,
     p: &'a Pos,
-    class_id: &'a ast::ClassId,
+    class_id: &'a ClassId<'a>,
     targs: &'a Vec<ast::Targ>,
     args: &'a Vec<ast::Expr>,
     unpacked_arg: &Option<ast::Expr>,
@@ -548,8 +552,8 @@ fn new_object<'a>(
             let (args, unpacked_arg, ctor_fty) =
                 call_construct(env, p, *class_info, targs, args, unpacked_arg, class_id);
             // TODO(hrust) new_inconsistent_kind error
-            use ast::ClassId_ as CID;
-            match class_id.get() {
+            use ClassId_ as CID;
+            match &class_id.1 {
                 CID::CIparent | CID::CIexpr(_) => unimplemented!(),
                 CID::CIstatic | CID::CIself | CID::CI(_) => ((cty, ctor_fty), (args, unpacked_arg)),
             }
@@ -574,7 +578,7 @@ fn call_construct<'a>(
     targ_tys: impl Iterator<Item = Ty<'a>>,
     args: &'a Vec<ast::Expr>,
     unpacked_arg: &Option<ast::Expr>,
-    _class_id: &'a ast::ClassId,
+    _class_id: &ClassId<'a>,
 ) -> (Vec<tast::Expr<'a>>, Option<tast::Expr<'a>>, Ty<'a>) {
     // TODO(hrust) turn CIparent into CIstatic. WHY? o_O
     let mut ety_env = ExpandEnv {
@@ -599,7 +603,7 @@ fn call_construct<'a>(
 fn instantiable_cid<'a>(
     env: &mut Env<'a>,
     p: &'a Pos,
-    class_id: &'a ast::ClassId,
+    class_id: &'a ClassId<'a>,
     targs: &'a Vec<ast::Targ>,
 ) -> (
     tast::ClassId<'a>,
@@ -613,7 +617,7 @@ fn instantiable_cid<'a>(
 fn class_id_for_new<'a>(
     env: &mut Env<'a>,
     p: &'a Pos,
-    class_id: &'a ast::ClassId,
+    class_id: &'a ClassId<'a>,
     targs: &'a Vec<ast::Targ>,
 ) -> (
     tast::ClassId<'a>,
@@ -655,10 +659,10 @@ fn static_class_id<'a>(
     check_constraints: bool,
     p: &'a Pos,
     targs: &'a Vec<ast::Targ>,
-    class_id: &'a ast::ClassId,
+    class_id: &'a ClassId<'a>,
 ) -> (Vec<tast::Targ<'a>>, tast::ClassId<'a>) {
-    use ast::ClassId_ as CID;
-    match class_id.get() {
+    use ClassId_ as CID;
+    match &class_id.1 {
         CID::CIparent | CID::CIself | CID::CIstatic | CID::CIexpr(_) => unimplemented!(),
         CID::CI(cid) => {
             // TODO(hrust) check if generic parameter
@@ -676,7 +680,10 @@ fn static_class_id<'a>(
                     );
                     (
                         targs,
-                        tast::ClassId((p, ty), tast::ClassId_::CI(cid.clone())),
+                        tast::ClassId(
+                            (p, ty),
+                            tast::ClassId_::CI(tast::Id(cid.0.to_oxidized(), cid.1.to_string())),
+                        ),
                     )
                 }
             }

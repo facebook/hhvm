@@ -177,10 +177,18 @@ pub fn error1059(terminator: TokenKind) -> Error {
         terminator.to_string().to_string(),
     ))
 }
-pub const error1060: Error = Cow::Borrowed(concat!(
-    "Leading markup and `<?hh` are not permitted in `.hack` ",
-    "files, which are always strict."
-));
+pub fn error1060(extension: &str) -> Error {
+    let kind = if extension == "hack" {
+        "strict"
+    } else {
+        "partial"
+    };
+    Cow::Owned(format!(
+        "Leading markup and `<?hh` are not permitted in `.{}` files, which are always {}.",
+        extension.to_string(),
+        kind.to_string()
+    ))
+}
 pub const error1061: Error = Cow::Borrowed("A Pocket Universes operator (':@') is expected here.");
 pub const error1063: Error = Cow::Borrowed("Expected matching separator here.");
 pub const error1064: Error = Cow::Borrowed("XHP children declarations are no longer supported.");

@@ -3227,9 +3227,14 @@ where
             MarkupSection(c) => {
                 let markup_text = &c.markup_text;
                 let pos = Self::p_pos(node, env);
-                let has_dot_hack_extension = pos.filename().has_extension("hack");
-                if has_dot_hack_extension {
-                    Self::raise_parsing_error(node, env, &syntax_error::error1060);
+                let f = pos.filename();
+                if f.has_extension("hack") || f.has_extension("hackpartial") {
+                    let ext = f.path().extension().unwrap(); // has_extension ensures this is a Some
+                    Self::raise_parsing_error(
+                        node,
+                        env,
+                        &syntax_error::error1060(&ext.to_str().unwrap()),
+                    );
                 } else if markup_text.width() > 0 && !Self::is_hashbang(&markup_text, env) {
                     Self::raise_parsing_error(node, env, &syntax_error::error1001);
                 }

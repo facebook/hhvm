@@ -68,12 +68,17 @@ pub fn parse_mode(text: &SourceText) -> Option<Mode> {
                             }
                         }
                     };
+                } else {
+                    Some(Mode::Mstrict)
                 }
             }
-            _ => (),
+            _ => Some(Mode::Mstrict),
         }
     } else {
-        // no header - assume .hack file
+        if text.file_path().has_extension("hackpartial") {
+            Some(Mode::Mpartial)
+        } else {
+            Some(Mode::Mstrict)
+        }
     }
-    Some(Mode::Mstrict)
 }

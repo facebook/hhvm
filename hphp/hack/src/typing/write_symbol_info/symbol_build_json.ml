@@ -15,7 +15,6 @@ open Ast_defs
 open Hh_json
 open Hh_prelude
 open Namespace_env
-open Symbol_builder_types
 open Symbol_json_util
 
 let build_id_json fact_id =
@@ -23,6 +22,9 @@ let build_id_json fact_id =
 
 let build_comment_json_nested comment =
   JSON_Object [("key", JSON_String comment)]
+
+let build_file_json_nested filepath =
+  JSON_Object [("key", JSON_String filepath)]
 
 let build_name_json_nested name =
   (* Remove leading slash, if present, so names such as
@@ -75,19 +77,16 @@ let build_rel_bytespan_json offset len =
 
 let build_decl_target_json json = JSON_Object [("declaration", json)]
 
-let build_file_json filepath = JSON_Object [("key", JSON_String filepath)]
-
-let build_file_lines_json file_info =
-  let file = build_file_json (Relative_path.to_absolute file_info.filepath) in
+let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
   let lengths =
-    List.map file_info.lineLengths (fun len -> JSON_Number (string_of_int len))
+    List.map lineLengths (fun len -> JSON_Number (string_of_int len))
   in
   JSON_Object
     [
-      ("file", file);
+      ("file", build_file_json_nested filepath);
       ("lengths", JSON_Array lengths);
-      ("endsInNewline", JSON_Bool file_info.endsInNewline);
-      ("hasUnicodeOrTabs", JSON_Bool file_info.hasUnicodeOrTabs);
+      ("endsInNewline", JSON_Bool endsInNewline);
+      ("hasUnicodeOrTabs", JSON_Bool hasUnicodeOrTabs);
     ]
 
 let build_is_async_json fun_kind =

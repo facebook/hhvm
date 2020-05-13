@@ -254,8 +254,23 @@ let process_typedef_decl elem progress =
 (* This function walks over the symbols in each file and gleans
  facts along the way. *)
 let build_json ctx symbols files_info =
+  let (_file_map, progress) =
+    List.fold
+      files_info
+      ~init:(SMap.empty, init_progress)
+      ~f:(fun (fm, prog) (fp, source_text) ->
+        let filepath = Relative_path.to_absolute fp in
+        match source_text with
+        | None ->
+          Hh_logger.log "WARNING: no source text for %s" filepath;
+          (fm, prog)
+        | Some st ->
+          let fm = SMap.add filepath st fm in
+          let (_, prog) = add_file_lines_fact filepath st prog in
+          (fm, prog))
+  in
   let progress =
-    List.fold symbols.decls ~init:init_progress ~f:(fun acc symbol ->
+    List.fold symbols.decls ~init:progress ~f:(fun acc symbol ->
         match symbol with
         | Class en when phys_equal en.c_kind Cenum ->
           process_enum_decl ctx en acc
@@ -316,11 +331,6 @@ let build_json ctx symbols files_info =
         res)
       file_xrefs
       progress
-  in
-  let progress =
-    List.fold files_info ~init:progress ~f:(fun prog file_info ->
-        let (_, prog) = add_file_lines_fact file_info prog in
-        prog)
   in
   let preds_and_records =
     (* The order is the reverse of how these items appear in the JSON,

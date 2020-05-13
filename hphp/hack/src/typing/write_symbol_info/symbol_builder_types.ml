@@ -77,12 +77,7 @@ type result_progress = {
   factIds: (predicate * int) list JMap.t;
 }
 
-type file_lines = {
-  filepath: Relative_path.t;
-  lineLengths: int list;
-  endsInNewline: bool;
-  hasUnicodeOrTabs: bool;
-}
+type file_info = Relative_path.t * Full_fidelity_source_text.t option
 
 (* Containers that can be in inheritance relationships *)
 type container_type =

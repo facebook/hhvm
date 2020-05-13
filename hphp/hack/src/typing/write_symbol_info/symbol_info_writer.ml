@@ -10,29 +10,10 @@ module Hack_bucket = Bucket
 open Hh_prelude
 open Hh_json
 open Aast
-open Full_fidelity_source_text
 open Provider_context
 open Symbol_builder_types
 open Unix
 module Bucket = Hack_bucket
-
-let compute_line_lengths (entry : Provider_context.entry) : int list =
-  match entry.source_text with
-  | None ->
-    Hh_logger.log
-      "WARNING: no source text for %s"
-      (Relative_path.to_absolute entry.path);
-    []
-  | Some st -> Line_break_map.offsets_to_line_lengths st.offset_map
-
-let compute_file_lines (path : Relative_path.t) (entry : Provider_context.entry)
-    : Symbol_builder_types.file_lines =
-  {
-    filepath = path;
-    lineLengths = compute_line_lengths entry;
-    endsInNewline = false (* TODO *);
-    hasUnicodeOrTabs = false (* TODO *);
-  }
 
 let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
     symbol_occurrences =
@@ -54,7 +35,7 @@ let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
     (tast_lst : Tast.program list)
-    (files_info : Symbol_builder_types.file_lines list)
+    (files_info : Symbol_builder_types.file_info list)
     (start_time : float) : unit =
   try
     let symbol_occurrences = get_decls ctx tast_lst in
@@ -85,8 +66,7 @@ let write_json
       let file_list =
         String.concat
           ~sep:","
-          (List.map files_info (fun info ->
-               Relative_path.to_absolute info.filepath))
+          (List.map files_info (fun (fp, _) -> Relative_path.to_absolute fp))
       in
       Hh_logger.log "Files processed: %s" file_list
     else
@@ -108,8 +88,7 @@ let recheck_job
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        let file_info = compute_file_lines path entry in
-        (tast, file_info))
+        (tast, (path, entry.source_text)))
   in
   let (tasts, files_info) = List.unzip info_lsts in
   Relative_path.set_path_prefix Relative_path.Root (Path.make root_path);

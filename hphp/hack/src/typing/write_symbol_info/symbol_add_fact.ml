@@ -10,6 +10,7 @@
 
 open Aast
 open Ast_defs
+open Full_fidelity_source_text
 open Hh_json
 open Hh_prelude
 open Symbol_build_json
@@ -290,7 +291,7 @@ let add_decl_loc_fact pos decl_json progress =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", build_file_json filepath);
+        ("file", build_file_json_nested filepath);
         ("span", build_bytespan_json pos);
       ]
   in
@@ -302,19 +303,29 @@ let add_decl_comment_fact doc pos decl_json progress =
     JSON_Object
       [
         ("declaration", decl_json);
-        ("file", build_file_json filepath);
+        ("file", build_file_json_nested filepath);
         ("comment", build_comment_json_nested doc);
       ]
   in
   add_fact DeclarationComment json_fact progress
 
-let add_file_lines_fact file_info progress =
-  let json_fact = build_file_lines_json file_info in
+let add_file_lines_fact filepath sourceText progress =
+  let lineLengths =
+    Line_break_map.offsets_to_line_lengths sourceText.offset_map
+  in
+  let endsInNewline = false (* TODO *) in
+  let hasUnicodeOrTabs = false (* TODO *) in
+  let json_fact =
+    build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs
+  in
   add_fact FileLines json_fact progress
 
 let add_file_xrefs_fact filepath xref_map progress =
   let json_fact =
     JSON_Object
-      [("file", build_file_json filepath); ("xrefs", build_xrefs_json xref_map)]
+      [
+        ("file", build_file_json_nested filepath);
+        ("xrefs", build_xrefs_json xref_map);
+      ]
   in
   add_fact FileXRefs json_fact progress

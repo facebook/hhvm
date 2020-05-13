@@ -293,6 +293,7 @@ struct Vgen {
   void emit(xorqi i) { binary(i); a.xorq(i.s0, i.d); }
   void emit(const conjure& /*i*/) { always_assert(false); }
   void emit(const conjureuse& /*i*/) { always_assert(false); }
+  void emit(const crc32q& i);
 
   void emit_nop() {
     emit(lea{rax[8], rax});
@@ -1001,6 +1002,12 @@ void Vgen<X64Asm>::emit(xorq i) {
   }
   commuteSF(i);
   a.xorq(i.s0, i.d);
+}
+
+template<class X64Asm>
+void Vgen<X64Asm>::emit(const crc32q& i) {
+  noncommute(i);
+  a.crc32q(i.s0, i.d);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -194,6 +194,8 @@ public:
                                                          m, r, sz::byte); }
   void movsbq(Reg8 src, Reg64 dest)         { xedInstrRR(XED_ICLASS_MOVSX,
                                                          src, dest); }
+  void crc32q(Reg64 src, Reg64 dest)        { xedInstrRR(XED_ICLASS_CRC32,
+                                                         src, dest); }
 
   void lea(MemoryRef p, Reg64 reg)       { xedInstrMR(XED_ICLASS_LEA, p, reg); }
   void lea(RIPRelativeRef p, Reg64 reg)  { xedInstrMR(XED_ICLASS_LEA, p, reg); }

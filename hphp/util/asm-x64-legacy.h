@@ -51,7 +51,7 @@ enum X64InstrFlags {
   IF_66PREFIXED = 0x4000, // instruction requires a manditory 0x66 prefix
   IF_F3PREFIXED = 0x8000, // instruction requires a manditory 0xf3 prefix
   IF_F2PREFIXED = 0x10000, // instruction requires a manditory 0xf2 prefix
-  IF_THREEBYTEOP = 0x20000, // instruction requires a 0x0F 0x3A prefix
+  IF_THREEBYTEOP = 0x20000, // instruction requires a 0x0F 0x3[8A] prefix
   IF_ROUND       = 0x40000, // instruction is round(sp)d
 };
 
@@ -157,6 +157,8 @@ const X64Instr instr_shrd =    { { 0xAD,0xF1,0xAC,0x00,0xF1,0xF1 }, 0x0082  };
 const X64Instr instr_int3 =    { { 0xF1,0xF1,0xF1,0x00,0xF1,0xCC }, 0x0500  };
 const X64Instr instr_roundsd = { { 0xF1,0xF1,0x0b,0x00,0xF1,0xF1 }, 0x64112 };
 const X64Instr instr_cmpsd =   { { 0xF1,0xF1,0xC2,0xF1,0xF1,0xF1 }, 0x10112 };
+const X64Instr instr_crc32 =   { { 0xF1,0xF1,0xF1,0x00,0xF1,0xF1 }, 0x30001 };
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -319,6 +321,7 @@ public:
                                                       m, r); }
   void movsbq(Reg8 src, Reg64 dest)         { emitRR(instr_movsbx,
                                                        rn(src), rn(dest)); }
+  void crc32q(Reg64 src, Reg64 dest)        { instrRR(instr_crc32, src, dest); }
 
   void lea(MemoryRef p, Reg64 reg)        { instrMR(instr_lea, p, reg); }
   void lea(RIPRelativeRef p, Reg64 reg)   { instrMR(instr_lea, p, reg); }
@@ -656,8 +659,9 @@ public:
       byte(0x40 | rex);
       if (highByteReg) byteRegMisuse();
     }
-    // For two byte opcodes
-    if ((op.flags & (IF_TWOBYTEOP | IF_IMUL)) != 0) byte(0x0F);
+    // For two/three byte opcodes
+    if ((op.flags & (IF_TWOBYTEOP | IF_IMUL | IF_THREEBYTEOP)) != 0) byte(0x0F);
+    if ((op.flags & IF_THREEBYTEOP) != 0) byte(0x38);
     byte(op.table[0] | jcond);
     if (reverse) {
       emitModrm(3, r2, r1);

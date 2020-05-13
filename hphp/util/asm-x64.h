@@ -652,6 +652,7 @@ public:
   virtual void movzwl(Reg16 src, Reg32 dest)    = 0;
   virtual void loadsbq(MemoryRef m, Reg64 r)    = 0;
   virtual void movsbq(Reg8 src, Reg64 dest)     = 0;
+  virtual void crc32q(Reg64 src, Reg64 dest)    = 0;
   virtual void lea(MemoryRef p, Reg64 reg)      = 0;
   virtual void lea(RIPRelativeRef p, Reg64 reg) = 0;
 

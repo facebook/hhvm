@@ -137,6 +137,11 @@ void emitCheckSurpriseFlags(Vout& v, Vreg fp, Vlabel handleSurprise);
 void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
                                  Fixup fixup, Vlabel catchBlock);
 
+/*
+ * Emits vasm instructions to get crc32 hash of the given arr
+ */
+Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr);
+
 ///////////////////////////////////////////////////////////////////////////////
 
 #define O(name, ...)  \

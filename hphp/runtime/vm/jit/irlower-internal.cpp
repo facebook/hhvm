@@ -265,6 +265,26 @@ void cgCallNative(Vout& v, IRLS& env, const IRInstruction* inst) {
   cgCallHelper(v, env, info.func.call, dest, info.sync, args);
 }
 
+Vreg emitHashInt64(IRLS& env, const IRInstruction* inst, Vreg arr) {
+  auto& v = vmain(env);
+  auto const hash = v.makeReg();
+  if (arch() == Arch::X64) {
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+    v << crc32q{arr, v.cns(0), hash};
+    return hash;
+#endif
+  }
+  cgCallHelper(
+    v,
+    env,
+    CallSpec::direct(hash_int64),
+    callDest(hash),
+    SyncOptions::Sync,
+    argGroup(env, inst).reg(arr)
+  );
+  return hash;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

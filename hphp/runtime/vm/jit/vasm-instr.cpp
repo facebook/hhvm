@@ -390,6 +390,7 @@ Width width(Vinstr::Opcode op) {
     case Vinstr::mulsd:
     case Vinstr::roundsd:
     case Vinstr::sqrtsd:
+    case Vinstr::crc32q:
       return Width::Quad;
 
     case Vinstr::loadups:

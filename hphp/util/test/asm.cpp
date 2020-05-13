@@ -975,6 +975,24 @@ TEST(Asm, Psllq) {
   EXPECT_EQ(0x73, current[3]);
 }
 
+#if defined(USE_HWCRC) && defined(__SSE4_2__)
+TEST(Asm, Crc32q) {
+  TestDataBlock db(10 << 24);
+  Asm a { db };
+
+  a.   push   (rax);
+  a.   push   (rbx);
+  a.   movq   (0x15, rax);
+  a.   crc32q (rax, rbx);
+  expect_asm(a, R"(
+pushq %rax
+pushq %rbx
+mov $0x15, %rax
+crc32 %rax, %rbx
+)");
+}
+#endif
+
 }}
 
 #endif

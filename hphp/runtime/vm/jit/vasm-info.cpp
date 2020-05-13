@@ -187,6 +187,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::copy2:
     case Vinstr::copy:
     case Vinstr::copyargs:
+    case Vinstr::crc32q:
     case Vinstr::csincb:
     case Vinstr::csincl:
     case Vinstr::csincq:

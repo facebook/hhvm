@@ -340,6 +340,7 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shrq, I(fl), UH(s,d), DH(d,s) D(sf))\
+  O(crc32q, Inone, U(s0) UH(s1,d), DH(d,s1))\
   /* arm instructions */\
   O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
   O(csincw, I(cc), U(sf) U(f) U(t), D(d))\
@@ -1230,6 +1231,7 @@ struct idiv { Vreg64 s; VregSF sf; Vflags fl; };
 struct sarq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct shlq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
 struct shrq { Vreg64 s, d; VregSF sf; Vflags fl; }; // uses rcx
+struct crc32q { Vreg64 s0, s1; Vreg64 d; };
 
 /*
  * arm intrinsics.

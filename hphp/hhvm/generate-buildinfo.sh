@@ -20,7 +20,7 @@ elif hg root >& /dev/null; then
   if [ -f "$root/fbcode/.projectid" ]; then
     root="$root/fbcode"
   fi
-  compiler=(hg --config 'trusted.users=*' log -l1 -r"reverse(::.) & file('$root/**')" -T'{branch}-0-g{sub(r"^$",node,mirrornode("fbcode","git"))}\n')
+  compiler=(hg --config 'trusted.users=*' log -r. -T'{branch}-0-g{sub(r"^$",node,mirrornode("fbcode","git"))}\n')
   find_files=(hg files -I hphp/)
   if [[ -d "$root/.eden/root" ]]; then
       xargs_args=(getfattr --only-values -hn user.sha1)

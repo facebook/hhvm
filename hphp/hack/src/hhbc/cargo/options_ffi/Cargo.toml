@@ -7,6 +7,7 @@ include = ["../../options_ffi.rs"]
 
 [lib]
 path = "../../options_ffi.rs"
+crate-type = ["lib", "staticlib"]
 
 [dependencies]
 hhbc_string_utils_rust = { path = "../string_utils" }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_ocamlpool::ocaml_ffi_no_panic;
+use ocamlrep_ocamlpool::ocaml_ffi;
 use options::Options;
 
 extern crate fnv;
@@ -21,7 +21,7 @@ thread_local! {
   }
 }
 
-ocaml_ffi_no_panic! {
+ocaml_ffi! {
     fn configs_to_json_ffi(
         jsons: Vec<String>,
         cli_args: Vec<String>,

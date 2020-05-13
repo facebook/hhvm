@@ -25,4 +25,4 @@ type env = {
   disable_toplevel_elaboration: bool;
 }
 
-val from_text : string -> env -> result
+val from_text : string -> env -> result * bool

@@ -9,6 +9,7 @@ members = [
     "src/facts/ffi",
     "src/hhbc/cargo/string_utils",
     "src/hhbc/cargo/compile_ffi",
+    "src/hhbc/cargo/options_ffi",
     "src/name_index/sqlite",
     "src/name_index",
     "src/parser/core",

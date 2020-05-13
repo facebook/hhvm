@@ -39,7 +39,7 @@ let add_to_time t0 =
   (t, t -. t0)
 
 let with_global_state env f =
-  let hhbc_options =
+  let (hhbc_options, log_config_json) =
     Hhbc_options.apply_config_overrides_statelessly
       env.config_list
       env.config_jsons
@@ -49,7 +49,7 @@ let with_global_state env f =
   let ret = f hhbc_options in
   (* TODO(hrust) investigate if we can revert it here, or some parts of
   global state carry over across multiple emit requests  *)
-  ret
+  (ret, log_config_json)
 
 let with_compilation_times ~hhbc_options env f =
   let t = Unix.gettimeofday () in
@@ -217,7 +217,7 @@ let emit_fatal ~env ~is_runtime_error ~hhbc_options pos message =
       in
       Emit_program.emit_fatal_program ~ignore_message error_t pos message)
 
-let from_text (source_text : string) (env : env) : result =
+let from_text (source_text : string) (env : env) : result * bool =
   with_global_state env (fun hhbc_options ->
       let t = Unix.gettimeofday () in
       let (fail_or_tast, popt) = parse_file env source_text ~hhbc_options in

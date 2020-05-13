@@ -9,6 +9,7 @@
     full_fidelity
     lru
     mutable_accumulator
+    options_ffi
     pocket_universes
     tast
     utils_php_escape))

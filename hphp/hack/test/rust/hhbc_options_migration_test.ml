@@ -167,20 +167,22 @@ let test_override_2bools_sanity_check _ =
 (* FFI tests *)
 
 let test_override_2bools_configs_to_json_ffi _ =
-  let opts = Options_ffi.from_configs ~jsons:[json_override_2bools] ~args:[] in
+  let opts =
+    Hhbc_options.from_configs_rust ~jsons:[json_override_2bools] ~args:[]
+  in
   assert_equal false Hhbc_options.(enable_coroutines opts);
   assert_equal true Hhbc_options.(disable_xhp_element_mangling opts);
   ()
 
 let test_ffi_defaults_consistent _ =
-  let rust = Options_ffi.get_default () in
+  let rust = Hhbc_options.get_default () in
   let caml = Hhbc_options.default in
   assert_equal caml rust;
   ()
 
 let test_aliased_namespaces_object_configs_to_json_ffi _ =
   let opts =
-    Options_ffi.from_configs
+    Hhbc_options.from_configs_rust
       ~args:[]
       ~jsons:
         [
@@ -195,7 +197,7 @@ let test_aliased_namespaces_object_configs_to_json_ffi _ =
 let test_aliased_namespaces_empty_configs_to_json_ffi _ =
   (* Note: HackC must understand [] as {} for hhvm.aliased_namespaces *)
   let opts =
-    Options_ffi.from_configs
+    Hhbc_options.from_configs_rust
       ~args:[]
       ~jsons:
         [
@@ -208,7 +210,7 @@ let test_aliased_namespaces_empty_configs_to_json_ffi _ =
 
   (* Test forward compatibility; i.e., deserialization from {} (empty map) *)
   let opts =
-    Options_ffi.from_configs
+    Hhbc_options.from_configs_rust
       ~args:[]
       ~jsons:
         [
@@ -243,7 +245,7 @@ let test_json_configs_stackable _ =
       ]
   in
   (* Sanity checks *)
-  let caml_opts = caml_from_configs ~jsons ~args:[] in
+  let (caml_opts, _) = caml_from_configs ~jsons ~args:[] in
   (* set to 0 in the first JSON, so it must stay 0 *)
   assert_equal false Hhbc_options.(enable_coroutines caml_opts);
 
@@ -254,7 +256,7 @@ let test_json_configs_stackable _ =
   assert_equal true Hhbc_options.(rx_is_enabled caml_opts);
 
   (* Verify Rust implementation behind FFI gives the same results *)
-  let rust_opts = Options_ffi.from_configs ~jsons ~args:[] in
+  let rust_opts = Hhbc_options.from_configs_rust ~jsons ~args:[] in
   assert_equal
     Hhbc_options.(enable_coroutines caml_opts)
     Hhbc_options.(enable_coroutines rust_opts);
@@ -267,8 +269,8 @@ let test_json_configs_stackable _ =
   ()
 
 let test_no_overrides _ =
-  let caml_opts = caml_from_configs ~jsons:[] ~args:[] in
-  let rust_opts = Options_ffi.from_configs ~jsons:[] ~args:[] in
+  let (caml_opts, _) = caml_from_configs ~jsons:[] ~args:[] in
+  let rust_opts = Hhbc_options.from_configs_rust ~jsons:[] ~args:[] in
   assert_opts_equal caml_opts rust_opts;
   ()
 
@@ -406,8 +408,8 @@ let test_all_overrides_json_only _ =
 "
   in
   let jsons = [json] in
-  let caml_opts = caml_from_configs ~jsons ~args:[] in
-  let rust_opts = Options_ffi.from_configs ~jsons ~args:[] in
+  let (caml_opts, _) = caml_from_configs ~jsons ~args:[] in
+  let rust_opts = Hhbc_options.from_configs_rust ~jsons ~args:[] in
   assert_opts_equal caml_opts rust_opts
 
 module CliArgOverrides = struct
@@ -578,8 +580,8 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'const_default_lambda_args;
     ]
   in
-  let caml_opts = caml_from_configs ~jsons:[] ~args in
-  let rust_opts = Options_ffi.from_configs ~jsons:[] ~args in
+  let (caml_opts, _) = caml_from_configs ~jsons:[] ~args in
+  let rust_opts = Hhbc_options.from_configs_rust ~jsons:[] ~args in
   assert_opts_equal caml_opts rust_opts
 
 let () =

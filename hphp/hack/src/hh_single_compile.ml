@@ -293,12 +293,13 @@ let print_output
     (bytecode : string list)
     (config : Compile_ffi.rust_output_config)
     (file : Relative_path.t)
-    (debug_time : debug_time option) =
+    (debug_time : debug_time option)
+    (log_config_json : bool)
+    (config_jsons : string list)
+    (config_list : string list) =
   let write =
     match config.Compile_ffi.output_file with
-    | Some file ->
-      Printf.printf "FILE";
-      Sys_utils.write_strings_to_file ~file
+    | Some file -> Sys_utils.write_strings_to_file ~file
     | None ->
       fun c ->
         List.iter ~f:(P.printf "%s") c;
@@ -316,6 +317,22 @@ let print_output
           ("file", JSON_String abs_path);
           ("type", JSON_String "success");
         ]
+    in
+    let msg =
+      if
+        log_config_json
+        || String.is_suffix
+             (Relative_path.to_absolute file)
+             "HACKC_LOG_OPTS.php"
+      then
+        ( "config_jsons",
+          Hh_json.JSON_Array
+            (List.map
+               ~f:(fun x -> Hh_json.JSON_String x)
+               (config_jsons @ config_list)) )
+        :: msg
+      else
+        msg
     in
     let msg =
       match debug_time with
@@ -396,17 +413,17 @@ let do_compile
           compiler_options.disable_toplevel_elaboration;
       }
   in
-  let ret = Compile.from_text source_text env in
+  let (ret, log_config_json) = Compile.from_text source_text env in
   (debug_time.parsing_t := Compile.(ret.parsing_t));
   (debug_time.codegen_t := Compile.(ret.codegen_t));
   (debug_time.printing_t := Compile.(ret.printing_t));
   if compiler_options.debug_time then print_debug_time_info filename debug_time;
   if compiler_options.log_stats then
     log_success compiler_options filename debug_time;
-  Compile.(ret.bytecode_segments, ret.hhbc_options)
+  Compile.(ret.bytecode_segments, ret.hhbc_options, log_config_json)
 
 let extract_facts ~compiler_options ~config_jsons ~filename text =
-  let co =
+  let (co, log_config_json) =
     Hhbc_options.apply_config_overrides_statelessly
       compiler_options.config_list
       config_jsons
@@ -427,10 +444,11 @@ let extract_facts ~compiler_options ~config_jsons ~filename text =
           ~text
         |> Option.value ~default:"");
     ],
-    co )
+    co,
+    log_config_json )
 
 let parse_hh_file ~config_jsons ~compiler_options filename body =
-  let co =
+  let (co, log_config_json) =
     Hhbc_options.apply_config_overrides_statelessly
       compiler_options.config_list
       config_jsons
@@ -456,7 +474,7 @@ let parse_hh_file ~config_jsons ~compiler_options filename body =
     in
     let syntax_tree = SyntaxTree.make ~env source_text in
     let json = SyntaxTree.to_json syntax_tree in
-    ([Hh_json.json_to_string json], co))
+    ([Hh_json.json_to_string json], co, log_config_json))
 
 (*****************************************************************************)
 (* Main entry point *)
@@ -473,10 +491,17 @@ let process_single_source_unit
   try
     let debug_time = new_debug_time () in
     if compiler_options.extract_facts then
-      let (output, _) =
+      let (output, _, log_config_json) =
         extract_facts ~compiler_options ~config_jsons ~filename source_text
       in
-      print_output output rust_output_config filename None
+      print_output
+        output
+        rust_output_config
+        filename
+        None
+        log_config_json
+        config_jsons
+        compiler_options.config_list
     else if compiler_options.rust_emitter then
       do_compile_rust
         ~is_systemlib
@@ -486,7 +511,7 @@ let process_single_source_unit
         filename
         (Full_fidelity_source_text.make filename source_text)
     else
-      let (output, hhbc_options) =
+      let (output, hhbc_options, log_config_json) =
         do_compile
           ~is_systemlib
           ~config_jsons
@@ -503,6 +528,9 @@ let process_single_source_unit
           Some debug_time
         else
           None )
+        log_config_json
+        config_jsons
+        compiler_options.config_list
   with exc ->
     let stack = Caml.Printexc.get_backtrace () in
     if compiler_options.log_stats then
@@ -563,7 +591,13 @@ let decl_and_run_mode compiler_options =
           else
             body
         in
-        let handle_output filename output hhbc_options debug_time =
+        let handle_output
+            filename
+            output
+            hhbc_options
+            log_config_json
+            compiler_options
+            debug_time =
           print_output
             output
             Compile_ffi.{ include_header = true; output_file = None }
@@ -572,6 +606,9 @@ let decl_and_run_mode compiler_options =
               Some debug_time
             else
               None )
+            log_config_json
+            (get_config_jsons ())
+            compiler_options.config_list
         in
         let handle_exception filename exc =
           let abs_path = Relative_path.to_absolute filename in
@@ -647,14 +684,21 @@ let decl_and_run_mode compiler_options =
                 (let (filename, path) = get_filename_and_path header in
                  let body = body_or_file_contents body filename in
                  add_config_overrides header;
-                 let (output, hhbc_options) =
+                 let (output, hhbc_options, log_config_json) =
                    extract_facts
                      ~compiler_options
                      ~config_jsons:(get_config_jsons ())
                      ~filename:path
                      body
                  in
-                 let result = handle_output path output hhbc_options in
+                 let result =
+                   handle_output
+                     path
+                     output
+                     hhbc_options
+                     log_config_json
+                     compiler_options
+                 in
                  pop_config ();
                  result)
                   (new_debug_time ()));
@@ -663,14 +707,21 @@ let decl_and_run_mode compiler_options =
                 (let (filename, path) = get_filename_and_path header in
                  let body = body_or_file_contents body filename in
                  add_config_overrides header;
-                 let (output, hhbc_options) =
+                 let (output, hhbc_options, log_config_json) =
                    parse_hh_file
                      ~config_jsons:(get_config_jsons ())
                      ~compiler_options
                      filename
                      body
                  in
-                 let result = handle_output path output hhbc_options in
+                 let result =
+                   handle_output
+                     path
+                     output
+                     hhbc_options
+                     log_config_json
+                     compiler_options
+                 in
                  pop_config ();
                  result)
                   (new_debug_time ()));
@@ -727,6 +778,7 @@ let decl_and_run_mode compiler_options =
             ( Hhbc_options.apply_config_overrides_statelessly
                 compiler_options.config_list
                 (get_config_jsons ())
+            |> fst
             |> Hhbc_options.to_string );
         if
           compiler_options.filename <> ""

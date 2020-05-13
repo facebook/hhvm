@@ -669,6 +669,17 @@ module M = Lru.M.Make (Key) (Result)
 (** Cache of 100 Last Recently Used results of {apply_config_overrides_statelessly} *)
 let lru = lazy (M.create 100)
 
+external configs_to_json_ffi : string list -> string list -> string
+  = "configs_to_json_ffi"
+
+let from_configs_rust ~(jsons : string list) ~(args : string list) : t =
+  let merged = configs_to_json_ffi jsons args in
+  extract_config_options_from_json
+    ~init:default
+    (Some (Hh_json.json_of_string merged))
+
+let get_default () = from_configs_rust [] []
+
 (* Construct an instance of Hhbc_options.t from the options passed in as well as
  * as specified in `-v str` on the command line.
  *)
@@ -688,12 +699,20 @@ let apply_config_overrides_statelessly config_list config_jsons =
   match M.find key lru with
   | Some cached_result ->
     M.promote key lru;
-    cached_result
+    (cached_result, false)
   | None ->
     let result = f () in
+    let log_config_json =
+      try
+        let rust_result =
+          from_configs_rust ~jsons:config_jsons ~args:config_list
+        in
+        not (equal rust_result result)
+      with _ -> true
+    in
     M.trim lru;
     M.add key result lru;
-    result
+    (result, log_config_json)
 
 let compiler_options = ref default
 

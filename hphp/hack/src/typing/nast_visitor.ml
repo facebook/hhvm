@@ -59,7 +59,7 @@ class virtual iter =
 
     method! on_Binop env op e1 e2 =
       match op with
-      | Ast_defs.Eq _ ->
+      | Ast_defs.Eq None ->
         self#on_expr { env with array_append_allowed = true } e1;
         self#on_expr env e2
       | _ -> super#on_Binop env op e1 e2

@@ -197,6 +197,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

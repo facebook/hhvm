@@ -309,6 +309,7 @@ void callFunc(const Func* const func,
       return;
     }
 
+    case KindOfRFunc:
     case KindOfUninit:
       break;
   }
@@ -605,6 +606,7 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfUninit:
   case KindOfObject:
   case KindOfResource:
+  case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
@@ -660,6 +662,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfUninit:
     case KindOfNull:         return ty == T::Void;
     case KindOfInt64:        return ty == T::Int64    || ty == T::Int32;
+    case KindOfRFunc:        return false; // TODO(T66903859)
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
@@ -696,6 +699,7 @@ static bool tcCheckNativeIO(
       case KindOfUninit:
       case KindOfNull:         return false;
       case KindOfInt64:        return ty == T::IntIO;
+      case KindOfRFunc:        return false; // TODO(T66903859)
       case KindOfFunc:         return ty == T::FuncIO;
       case KindOfClass:        return ty == T::ClassIO;
       case KindOfClsMeth:      return ty == T::ClsMethIO;

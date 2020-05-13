@@ -105,6 +105,9 @@ TypedNum numericConvHelper(TypedValue cell) {
     case KindOfBoolean:
       return make_int(cell.m_data.num);
 
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("num");
+
     case KindOfFunc:
       invalidFuncConversion("int");
       return stringToNumeric(funcToStringHelper(cell.m_data.pfunc));
@@ -542,6 +545,7 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRFunc:
     case KindOfRecord:
       raiseIncDecInvalidType(cell);
       return;
@@ -850,6 +854,7 @@ void tvBitNot(TypedValue& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRFunc:
     case KindOfRecord:
       raise_error("Unsupported operand type for ~");
   }

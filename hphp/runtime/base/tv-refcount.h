@@ -184,6 +184,12 @@ enable_if_lval_t<T, void> tvDecRefClsMeth(T tv) {
   decRefClsMeth(val(tv).pclsmeth);
 }
 
+template<typename T> ALWAYS_INLINE
+enable_if_lval_t<T, void> tvDecRefRFunc(T tv) {
+  assertx(isRFuncType(type(tv)));
+  decRefRFunc(val(tv).prfunc);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

@@ -283,6 +283,8 @@ CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
       return CallSpec::method(&ResourceHdr::release);
     case KindOfRecord:
       return CallSpec::method(&RecordData::release);
+    case KindOfRFunc:
+      return CallSpec::method(&RFuncData::release);
     case KindOfClsMeth:
       if (!use_lowptr) return CallSpec::direct(ClsMethDataRef::Release);
       // fallthrough

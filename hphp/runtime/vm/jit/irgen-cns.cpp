@@ -55,6 +55,7 @@ SSATmp* staticTVCns(IRGS& env, const TypedValue* tv) {
     case KindOfUninit:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     // TODO (T29639296)
     case KindOfFunc:
     case KindOfClass:

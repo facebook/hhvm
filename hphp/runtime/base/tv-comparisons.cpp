@@ -147,6 +147,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
         return op(true, false);
       }
 
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
     case KindOfRecord:
       return op.recordVsNonRecord();
   }
@@ -219,6 +222,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
         }
         return op(true, false);
       }
+
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
 
     case KindOfRecord:
       return op.recordVsNonRecord();
@@ -308,6 +314,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
         return op(true, false);
       }
 
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
     case KindOfRecord:
       return op.recordVsNonRecord();
   }
@@ -377,6 +386,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
         raiseClsMethToVecWarningHelper();
         return op(clsMethToVecHelper(cell.m_data.pclsmeth).get(), ad);
       }
+
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
 
     case KindOfRecord:
       return op.recordVsNonRecord();
@@ -460,6 +472,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
         }
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
       }
+
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
 
     case KindOfRecord:
       return op.recordVsNonRecord();
@@ -545,6 +560,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
         }
         return op(true, false);
       }
+
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
 
     case KindOfRecord:
       return op.recordVsNonRecord();
@@ -723,8 +741,49 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
       }
     }
 
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
     case KindOfRecord:
       return op.recordVsNonRecord();
+  }
+  not_reached();
+}
+
+template<class Op>
+typename Op::RetType tvRelOp(Op op, TypedValue cell, RFuncData* rfunc) {
+  assertx(tvIsPlausible(cell));
+
+  switch (cell.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfFunc:
+    case KindOfClass:
+    case KindOfResource:
+    case KindOfClsMeth:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+    case KindOfPersistentArray:
+    case KindOfArray:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfObject:
+    case KindOfRecord:
+    case KindOfBoolean:
+      return op.rfuncVsNonRFunc();
+
+    case KindOfRFunc:
+      return op(cell.m_data.prfunc, rfunc);
   }
   not_reached();
 }
@@ -817,6 +876,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
         return op(true, false);
       }
 
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
     case KindOfRecord:
       return op.recordVsNonRecord();
   }
@@ -908,6 +970,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
         return op(true, false);
       }
 
+    case KindOfRFunc:
+      return op.rfuncVsNonRFunc();
+
     case KindOfRecord:
       return op.recordVsNonRecord();
   }
@@ -945,6 +1010,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfArray:        return tvRelOp(op, c1, c2.m_data.parr);
   case KindOfObject:       return tvRelOp(op, c1, c2.m_data.pobj);
   case KindOfResource:     return tvRelOp(op, c1, c2.m_data.pres);
+  case KindOfRFunc:        return tvRelOp(op, c1, c2.m_data.prfunc);
   case KindOfFunc:         return tvRelOp(op, c1, c2.m_data.pfunc);
   case KindOfClass:        return tvRelOp(op, c1, c2.m_data.pclass);
   case KindOfClsMeth:      return tvRelOp(op, c1, c2.m_data.pclsmeth);
@@ -1030,6 +1096,7 @@ struct Eq {
   bool dictVsNonDict() const { return false; }
   bool keysetVsNonKeyset() const { return false; }
   bool collectionVsNonObj() const { return false; }
+  bool rfuncVsNonRFunc() const { return false; }
   bool recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
@@ -1047,6 +1114,10 @@ struct Eq {
 
   bool operator()(const RecordData* r1, const RecordData* r2) const {
     return RecordData::equal(r1, r2);
+  }
+
+  bool operator()(const RFuncData* r1, const RFuncData* r2) const {
+    return RFuncData::Same(r1, r2);
   }
 };
 
@@ -1113,6 +1184,9 @@ struct CompareBase {
   RetType collectionVsNonObj() const {
     throw_collection_compare_exception();
   }
+  RetType rfuncVsNonRFunc() const {
+    throw_rfunc_non_rfunc_compare_exception();
+  }
   RetType recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
@@ -1153,6 +1227,10 @@ struct CompareBase {
 
   RetType operator()(const RecordData*, const RecordData*) const {
     throw_record_compare_exception();
+  }
+
+  RetType operator()(const RFuncData*, const RFuncData*) const {
+    throw_rfunc_compare_exception();
   }
 };
 
@@ -1322,6 +1400,10 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       }
       if (!isStringType(c2.m_type)) return false;
       return c1.m_data.pstr->same(c2.m_data.pstr);
+
+    case KindOfRFunc:
+      return isRFuncType(c2.m_type) &&
+        RFuncData::Same(c1.m_data.prfunc, c2.m_data.prfunc);
 
     case KindOfFunc:
       if (RO::EvalEnableFuncStringInterop) {

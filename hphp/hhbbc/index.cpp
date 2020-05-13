@@ -4982,6 +4982,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfObject:
         return resolve_named_type(ctx, name, candidate);
       case KindOfUninit:
+      case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
         always_assert_flog(false, "Unexpected DataType");

@@ -43,6 +43,7 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_object(name + "=KindOfObject")
   , m_resource(name + "=KindOfResource")
   , m_func(name + "=KindOfFunc")
+  , m_rfunc(name + "=KindOfRFunc")
   , m_class(name + "=KindOfClass")
   , m_clsmeth(name + "=KindOfClsMeth")
   , m_record(name + "=KindOfRecord")
@@ -71,6 +72,7 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfArray:         m_array.count(); break;
     case KindOfObject:        m_object.count(); break;
     case KindOfResource:      m_resource.count(); break;
+    case KindOfRFunc:         m_rfunc.count(); break;
     case KindOfFunc:          m_func.count(); break;
     case KindOfClass:         m_class.count(); break;
     case KindOfClsMeth:       m_clsmeth.count(); break;
@@ -103,6 +105,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_object.hits() +
                m_resource.hits() +
                m_func.hits() +
+               m_rfunc.hits() +
                m_class.hits() +
                m_clsmeth.hits() +
                m_record.hits();
@@ -129,6 +132,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfObject=%.1f%% "
                   "KindOfResource=%.1f%% "
                   "KindOfFunc=%.1f%% "
+                  "KindOfRFunc=%.1f%%"
                   "KindOfClass=%.1f%% "
                   "KindOfClsMeth=%.1f%% "
                   "KindOfRecord=%.1f%% ",
@@ -155,6 +159,7 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_object.hits() / total,
           100.0 * m_resource.hits() / total,
           100.0 * m_func.hits() / total,
+          100.0 * m_rfunc.hits() / total,
           100.0 * m_class.hits() / total,
           100.0 * m_clsmeth.hits() / total,
           100.0 * m_record.hits() / total);

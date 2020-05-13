@@ -122,6 +122,7 @@ struct ScalarHash {
           case KindOfKeyset:
           case KindOfObject:
           case KindOfResource:
+          case KindOfRFunc:
           case KindOfFunc:
           case KindOfClass:
           case KindOfClsMeth:
@@ -1139,6 +1140,7 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfRecord:
     return tv->m_data.prec->record()->name()->toCppString();
 
+  case KindOfRFunc:           return "rfunc";
   case KindOfFunc:            return "func";
   case KindOfClass:           return "class";
   case KindOfClsMeth:         return "clsmeth";
@@ -1171,6 +1173,7 @@ std::string describeKeyValue(TypedValue tv) {
   case KindOfArray:
   case KindOfResource:
   case KindOfObject:
+  case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:

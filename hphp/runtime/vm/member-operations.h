@@ -478,6 +478,7 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
       return ElemScalar();
     case KindOfFunc:
       if (!RO::EvalEnableFuncStringInterop) return ElemScalar();
@@ -813,6 +814,7 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return ElemDScalar();
@@ -1076,6 +1078,9 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
     case KindOfClass:
       raise_error(Strings::OP_NOT_SUPPORTED_CLASS);
       return nullptr;
+    case KindOfRFunc:
+      raise_error(Strings::RFUNC_NOT_SUPPORTED);
+      return nullptr;
     case KindOfFunc:
       raise_error(Strings::OP_NOT_SUPPORTED_FUNC);
       return nullptr;
@@ -1179,6 +1184,7 @@ inline tv_lval NewElem(tv_lval base) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return NewElemInvalid();
@@ -1588,6 +1594,7 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       SetElemScalar<setResult>(value);
@@ -1786,6 +1793,7 @@ inline void SetNewElem(tv_lval base, TypedValue* value) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return SetNewElemScalar<setResult>(value);
@@ -1872,6 +1880,7 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return SetOpElemScalar();
@@ -1954,6 +1963,7 @@ inline TypedValue SetOpNewElem(SetOpOp op, tv_lval base, TypedValue* rhs) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return SetOpNewElemScalar();
@@ -2071,6 +2081,7 @@ inline TypedValue IncDecElem(
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return IncDecElemScalar();
@@ -2159,6 +2170,7 @@ inline TypedValue IncDecNewElem(IncDecOp op, tv_lval base) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return IncDecNewElemScalar();
@@ -2380,6 +2392,9 @@ void UnsetElemSlow(tv_lval base, key_type<keyType> key) {
     case KindOfResource:
       return; // Do nothing.
 
+    case KindOfRFunc:
+      raise_error("Cannot unset a reified function");
+      return;
     case KindOfFunc:
       raise_error("Cannot unset a func");
       return;
@@ -2581,6 +2596,7 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
       return false;
 
     case KindOfFunc:
@@ -2681,6 +2697,7 @@ tv_lval propPre(TypedValue& tvRef, tv_lval base) {
     case KindOfInt64:
     case KindOfDouble:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return propPreNull<mode>(tvRef);
@@ -2739,6 +2756,7 @@ inline tv_lval nullSafeProp(TypedValue& tvRef,
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -2850,6 +2868,7 @@ inline void SetProp(Class* ctx, tv_lval base, key_type<keyType> key,
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -2912,6 +2931,7 @@ inline tv_lval SetOpProp(TypedValue& tvRef,
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -2976,6 +2996,7 @@ inline TypedValue IncDecProp(
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

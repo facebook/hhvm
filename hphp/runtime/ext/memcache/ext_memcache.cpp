@@ -171,6 +171,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

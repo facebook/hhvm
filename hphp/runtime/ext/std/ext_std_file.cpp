@@ -719,6 +719,7 @@ Variant HHVM_FUNCTION(file_put_contents,
       }
       break;
     }
+    case KindOfRFunc:
     case KindOfRecord:
       raise_warning("Not a valid stream resource");
       return false;

@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/rfunc-data.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -780,6 +781,7 @@ struct Variant : private TypedValue {
       case KindOfVArray:
       case KindOfPersistentArray:
       case KindOfArray:
+      case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
@@ -1435,6 +1437,9 @@ private:
         return;
       case KindOfRecord:
         assertx(m_data.prec->checkCount());
+        return;
+      case KindOfRFunc:
+        assertx(m_data.prfunc->checkCount());
         return;
     }
     not_reached();

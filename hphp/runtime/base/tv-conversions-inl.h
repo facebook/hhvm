@@ -65,6 +65,7 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfObject:        return cell.m_data.pobj->toBoolean();
     case KindOfResource:      return cell.m_data.pres->data()->o_toBoolean();
     case KindOfRecord:        raise_convert_record_to_type("bool"); break;
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:       return true;
@@ -98,6 +99,7 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfObject:        return cell.m_data.pobj->toInt64();
     case KindOfResource:      return cell.m_data.pres->data()->o_toInt64();
     case KindOfRecord:        raise_convert_record_to_type("int"); break;
+    case KindOfRFunc:         raise_convert_rfunc_to_type("int"); break;
     case KindOfFunc:
       invalidFuncConversion("int");
       return funcToInt64Helper(cell.m_data.pfunc);
@@ -175,6 +177,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:
     case KindOfObject:
+    case KindOfRFunc:
     case KindOfRecord:
       raise_warning("Invalid operand type was used: Invalid type used as key");
       return make_tv<KindOfNull>();

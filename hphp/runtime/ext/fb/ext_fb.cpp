@@ -593,6 +593,11 @@ static int fb_compact_serialize_variant(
         "object/resource/ref/func/class/record"
       );
       break;
+    case KindOfRFunc:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified function pointer"
+      );
+      break;
   }
 
   return 1;

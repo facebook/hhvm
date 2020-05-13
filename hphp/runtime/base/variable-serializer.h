@@ -205,6 +205,7 @@ private:
   void serializeResource(const ResourceData*);
   void serializeResourceImpl(const ResourceData* res);
   void serializeString(const String&);
+  void serializeRFunc(const RFuncData* func);
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
   void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);

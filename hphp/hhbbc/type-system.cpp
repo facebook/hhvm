@@ -4090,6 +4090,7 @@ Type from_cell(TypedValue cell) {
 
   case KindOfObject:
   case KindOfResource:
+  case KindOfRFunc:
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
@@ -4124,6 +4125,7 @@ Type from_DataType(DataType dt) {
   case KindOfArray:    return TArr;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
+  case KindOfRFunc:    // TODO(T63348446)
   case KindOfFunc:     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;

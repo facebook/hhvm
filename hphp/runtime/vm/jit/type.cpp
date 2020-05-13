@@ -538,6 +538,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
 
     case KindOfResource         : return kRes;
     case KindOfObject           : return kObj;
+    case KindOfRFunc            : return kRFunc;
     case KindOfFunc             : return kFunc;
     case KindOfClass            : return kCls;
     case KindOfClsMeth          : return kClsMeth;

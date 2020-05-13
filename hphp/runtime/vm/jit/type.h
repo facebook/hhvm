@@ -284,6 +284,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(ClsMeth,         bits_t::bit<24>())                                 \
   c(Record,          bits_t::bit<25>())                                 \
   c(RecDesc,         bits_t::bit<26>())                                 \
+  c(RFunc,           bits_t::bit<27>())                                 \
 /**/
 
 /*
@@ -298,9 +299,9 @@ constexpr bool operator>(Mem a, Mem b) {
 #endif
 
 #ifdef USE_LOWPTR
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kRFunc
 #else
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kClsMeth
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kClsMeth|kRFunc
 #endif
 
 #define IRT_PHP_UNIONS(c)                                               \
@@ -345,10 +346,10 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #ifdef USE_LOWPTR
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kRFunc
 #else
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kClsMeth
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kClsMeth|kRFunc
 #endif
 
 #define IRT_SPECIAL                                           \
@@ -395,8 +396,8 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 struct Type {
 private:
-  static constexpr size_t kRuntime = 27;
-  static constexpr size_t numRuntime = 10;
+  static constexpr size_t kRuntime = 28;
+  static constexpr size_t numRuntime = 12;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:

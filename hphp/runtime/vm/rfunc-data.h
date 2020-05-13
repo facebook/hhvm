@@ -19,10 +19,11 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/countable.h"
-#include "hphp/runtime/vm/func.h"
 #include "hphp/util/type-scan.h"
 
 namespace HPHP {
+
+struct Func;
 
 struct RFuncData : Countable, type_scan::MarkCollectable<RFuncData> {
   Func* m_func;
@@ -46,9 +47,15 @@ struct RFuncData : Countable, type_scan::MarkCollectable<RFuncData> {
     if (decReleaseCheck()) release();
   }
 
+  static bool Same(const RFuncData* rfunc1, const RFuncData* rfunc2);
+
 private:
   RFuncData(Func* m_func, ArrayData* m_arr);
 };
+
+ALWAYS_INLINE void decRefRFunc(RFuncData* rfunc) {
+  rfunc->decRefAndRelease();
+}
 
 } // namespace HPHP
 

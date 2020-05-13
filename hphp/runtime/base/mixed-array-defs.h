@@ -317,6 +317,7 @@ void ConvertTvToUncounted(
       raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
       not_reached();
   }
 }

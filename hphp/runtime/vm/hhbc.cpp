@@ -684,6 +684,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
     case KindOfClsMeth:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfRecord:

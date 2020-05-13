@@ -56,6 +56,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       auto const value = new APCTypedValue(val(cell).dbl);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
+    case KindOfRFunc: // TODO(T64133790)
+      raise_error(Strings::RFUNC_NOT_SUPPORTED);
     case KindOfFunc: {
       auto const func = val(cell).pfunc;
       auto const serialize_func =

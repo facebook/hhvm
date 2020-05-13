@@ -99,6 +99,8 @@ bool DataWalker::visitTypedValue(TypedValue rval,
     traverseData(rval.m_data.parr, features, visited, seenArrs);
   } else if (rval.m_type == KindOfResource) {
     features.hasObjectOrResource = true;
+  } else if (rval.m_type == KindOfRFunc) {
+    features.hasObjectOrResource = true;
   } else if (serialize_funcs && rval.m_type == KindOfFunc) {
     if (!rval.m_data.pfunc->isPersistent()) features.hasObjectOrResource = true;
   }

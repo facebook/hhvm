@@ -113,8 +113,9 @@ static_assert(typeToDestrIdx(KindOfResource) == 10, "Resource destruct index");
 #ifndef USE_LOWPTR
 static_assert(typeToDestrIdx(KindOfClsMeth)  == 11, "ClsMeth destruct index");
 #endif
+static_assert(typeToDestrIdx(KindOfRFunc)    == 12, "RFunc destruct index");
 
-static_assert(kDestrTableSize == (use_lowptr ? 11 : 12),
+static_assert(kDestrTableSize == 13,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -131,7 +132,10 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ResourceHdr::release), // KindOfResource
 #ifndef USE_LOWPTR
   (RawDestructor)&ClsMethDataRef::Release,            // KindOfClsMeth
+#else
+  nullptr,
 #endif
+  (RawDestructor)getMethodPtr(&RFuncData::release),   // KindOfRFunc
 };
 
 #define IMPLEMENT_SET(argType, setOp)                     \
@@ -265,6 +269,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfObject:
     case KindOfRecord:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -305,6 +310,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfResource:
     case KindOfClsMeth:
     case KindOfRecord:
+    case KindOfRFunc:
       return false;
 
     case KindOfBoolean:
@@ -360,6 +366,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfUninit:
     case KindOfObject:
     case KindOfClass:
+    case KindOfRFunc:
     case KindOfRecord:
       return false;
   }
@@ -404,6 +411,9 @@ bool Variant::toBooleanHelper() const {
     case KindOfArray:         return !m_data.parr->empty();
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("bool");
+      return false;
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:       return true;
@@ -437,6 +447,9 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfArray:         return m_data.parr->empty() ? 0 : 1;
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("int");
+      return 0; // Should we return 0 or 1 or something else?
     case KindOfFunc:
       invalidFuncConversion("int");
       return funcToInt64Helper(m_data.pfunc);
@@ -477,6 +490,9 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfArray:         return Array(m_data.parr);
     case KindOfObject:        return m_data.pobj->toArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("array");
+      return empty_array();
     case KindOfFunc:
       invalidFuncConversion("array");
       return make_packed_array(Variant{funcToStringHelper(m_data.pfunc),
@@ -517,6 +533,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfObject:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
@@ -621,6 +638,9 @@ void Variant::setEvalScalar() {
     case KindOfFunc:
     case KindOfClass:
       break;
+
+    case KindOfRFunc:
+      raise_error(Strings::RFUNC_NOT_SUPPORTED);
 
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);

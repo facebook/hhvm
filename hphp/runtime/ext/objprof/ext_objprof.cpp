@@ -301,6 +301,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfVArray:
         case KindOfArray:
         case KindOfKeyset:
+        case KindOfRFunc:
         case KindOfFunc:
         case KindOfClass:
         case KindOfClsMeth:
@@ -403,6 +404,7 @@ void stringsOfArray(
         case KindOfVArray:
         case KindOfArray:
         case KindOfKeyset:
+        case KindOfRFunc:
         case KindOfFunc:
         case KindOfClass:
         case KindOfClsMeth:
@@ -444,6 +446,42 @@ std::pair<int, double> tvGetSize(
 ) {
   int size = sizeof(tv);
   double sized = size;
+
+  auto add_array_size = [&](ArrayData* arr) {
+    auto size_of_array_pair = sizeOfArray(
+      arr,
+      source,
+      stack,
+      paths,
+      val_stack,
+      exclude_classes,
+      nullptr, /* cls */
+      nullptr, /* histogram */
+      flags
+    );
+    if (arr->isRefCounted()) {
+      auto arr_ref_count = int{tvGetCount(tv)};
+      FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
+        (void*)arr,
+        arr_ref_count
+      );
+      size += sizeof(*arr);
+      size += size_of_array_pair.first;
+      if (one_bit_refcount) {
+        sized += sizeof(*arr);
+        sized += size_of_array_pair.second;
+      } else {
+        assertx(arr_ref_count > 0);
+        sized += sizeof(*arr) / (double)arr_ref_count;
+        sized += size_of_array_pair.second / (double)(arr_ref_count);
+      }
+    } else {
+      // static or uncounted array
+      FTRACE(3, " ArrayData tv: at {} not refcounted\n", (void*)arr);
+      size += sizeof(*arr);
+      size += size_of_array_pair.first;
+    }
+  };
 
   switch (tv.m_type) {
     case KindOfUninit:
@@ -522,41 +560,12 @@ std::pair<int, double> tvGetSize(
     case KindOfPersistentArray:
     case KindOfArray: {
       ArrayData* arr = tv.m_data.parr;
-      auto size_of_array_pair = sizeOfArray(
-        arr,
-        source,
-        stack,
-        paths,
-        val_stack,
-        exclude_classes,
-        nullptr, /* cls */
-        nullptr, /* histogram */
-        flags
-      );
-      if (arr->isRefCounted()) {
-        auto arr_ref_count = int{tvGetCount(tv)};
-        FTRACE(3, " ArrayData tv: at {} with ref count {}\n",
-          (void*)arr,
-          arr_ref_count
-        );
-        size += sizeof(*arr);
-        size += size_of_array_pair.first;
-        if (one_bit_refcount) {
-          sized += sizeof(*arr);
-          sized += size_of_array_pair.second;
-        } else {
-          assertx(arr_ref_count > 0);
-          sized += sizeof(*arr) / (double)arr_ref_count;
-          sized += size_of_array_pair.second / (double)(arr_ref_count);
-        }
-      } else {
-        // static or uncounted array
-        FTRACE(3, " ArrayData tv: at {} not refcounted\n", (void*)arr);
-        size += sizeof(*arr);
-        size += size_of_array_pair.first;
-      }
-
+      add_array_size(arr);
       break;
+    }
+    case KindOfRFunc: {
+      size += sizeof(RFuncData);
+      add_array_size(tv.m_data.prfunc->m_arr);
     }
     case KindOfResource: {
       auto resource = tv.m_data.pres;
@@ -642,6 +651,7 @@ void tvGetStrings(
     case HPHP::KindOfBoolean:
     case HPHP::KindOfInt64:
     case HPHP::KindOfDouble:
+    case HPHP::KindOfRFunc:
     case HPHP::KindOfFunc:
     case HPHP::KindOfClass:
     case HPHP::KindOfClsMeth: {

@@ -2718,6 +2718,7 @@ bool Class::compatibleTraitPropInit(const TypedValue& tv1,
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

@@ -152,6 +152,11 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(cell.m_data.pres->kindIsValid());
         assertx(cell.m_data.pres->checkCountZ());
         return;
+      case KindOfRFunc:
+        assertPtr(cell.m_data.prfunc);
+        assertx(cell.m_data.prfunc->m_func->validate());
+        assertx(tvIsPlausible(make_array_like_tv(cell.m_data.prfunc->m_arr)));
+        return;
       case KindOfFunc:
         assertPtr(cell.m_data.pfunc);
         assertx(cell.m_data.pfunc->validate());

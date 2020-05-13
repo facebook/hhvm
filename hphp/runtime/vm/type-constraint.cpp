@@ -988,6 +988,7 @@ std::string describe_actual_type(tv_rval val) {
     }
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
+    case KindOfRFunc:         return "reified function";
     case KindOfFunc:          return "func";
     case KindOfClass:         return "class";
     case KindOfClsMeth:       return "clsmeth";
@@ -1428,6 +1429,7 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
         case KindOfRecord:
         case KindOfNull:         return MK::None;
         case KindOfUninit:
+        case KindOfRFunc:
         case KindOfFunc:
         case KindOfClass:
           always_assert_flog(false, "Unexpected DataType");

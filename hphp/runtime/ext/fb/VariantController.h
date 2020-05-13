@@ -141,6 +141,10 @@ struct VariantControllerImpl {
       case KindOfRecord: // TODO(T41025646): implement serialization for records
         throw HPHP::serialize::SerializeError(
           "don't know how to serialize HPHP Variant");
+      case KindOfRFunc:
+        throw HPHP::serialize::SerializeError(
+          "Unable to serialize reified function pointer"
+        );
     }
     not_reached();
   }

@@ -79,6 +79,7 @@ namespace HPHP {
   DT(Resource,           5) \
   DT(Int64,              6) \
   DT(Double,             8) \
+  DT(RFunc,              9) \
   DT(Func,              10) \
   DT(Class,             12) \
   DT(ClsMeth,           use_lowptr ? 14 : 7)
@@ -122,8 +123,7 @@ constexpr DataType kExtraInvalidDataType = static_cast<DataType>(-127);
 auto constexpr kMinDataType = dt_t(KindOfPersistentDArray);
 auto constexpr kMaxDataType = dt_t(use_lowptr ? KindOfClsMeth : KindOfClass);
 auto constexpr kMinRefCountedDataType = dt_t(KindOfDArray);
-auto constexpr kMaxRefCountedDataType =
-  dt_t(use_lowptr ? KindOfResource : KindOfClsMeth);
+auto constexpr kMaxRefCountedDataType = dt_t(KindOfRFunc);
 
 /*
  * A DataType is a refcounted type if and only if it has this bit set.
@@ -380,6 +380,7 @@ constexpr bool isDoubleType(DataType t) { return t == KindOfDouble; }
 constexpr bool isObjectType(DataType t) { return t == KindOfObject; }
 constexpr bool isRecordType(DataType t) { return t == KindOfRecord; }
 constexpr bool isResourceType(DataType t) { return t == KindOfResource; }
+constexpr bool isRFuncType(DataType t) { return t == KindOfRFunc; }
 constexpr bool isFuncType(DataType t) { return t == KindOfFunc; }
 constexpr bool isClassType(DataType t) { return t == KindOfClass; }
 constexpr bool isClsMethType(DataType t) { return t == KindOfClsMeth; }

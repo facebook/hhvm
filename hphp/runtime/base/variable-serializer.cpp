@@ -1418,6 +1418,12 @@ void VariableSerializer::decNestedLevel(tv_rval tv) {
   }
 }
 
+void VariableSerializer::serializeRFunc(const RFuncData* rfunc) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Unable to serialize reified function pointer"
+  );
+}
+
 void VariableSerializer::serializeFunc(const Func* func) {
   auto const name = func->fullName();
   switch (getType()) {
@@ -1610,6 +1616,11 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfResource:
       assertx(!isArrayKey);
       serializeResource(val(tv).pres->data());
+      return;
+
+    case KindOfRFunc:
+      assertx(!isArrayKey);
+      serializeRFunc(val(tv).prfunc);
       return;
 
     case KindOfFunc:

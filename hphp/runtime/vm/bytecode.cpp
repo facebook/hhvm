@@ -714,6 +714,14 @@ static std::string toStringElm(TypedValue tv) {
          << tv.m_data.pres->data()->o_getClassName().get()->data()
          << ")";
       continue;
+    case KindOfRFunc: // TODO(T63348446) serialize the reified generics
+      assertx(tv.m_data.prfunc->checkCount());
+      os << tv.m_data.prfunc;
+      print_count();
+      os << ":RFunc("
+         << tv.m_data.prfunc->m_func->fullName()->data()
+         << ")";
+      continue;
     case KindOfFunc:
       os << ":Func("
          << tv.m_data.pfunc->fullName()->data()
@@ -2309,6 +2317,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfArray:
             case KindOfObject:
             case KindOfResource:
+            case KindOfRFunc:
             case KindOfFunc:
             case KindOfClass:
             case KindOfClsMeth:
@@ -2361,6 +2370,9 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           intval = val->m_data.pres->data()->o_toInt64();
           tvDecRefRes(val);
           return;
+
+        case KindOfRFunc: // TODO(T63348446)
+          raise_error(Strings::RFUNC_NOT_SUPPORTED);
 
         case KindOfRecord: // TODO (T41029094)
           raise_error(Strings::RECORD_NOT_SUPPORTED);

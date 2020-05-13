@@ -530,6 +530,7 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfDouble:
     case KindOfObject:
     case KindOfClsMeth:
+    case KindOfRFunc:
     case KindOfRecord:
       break;
   }

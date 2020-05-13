@@ -17,6 +17,8 @@
 #include "hphp/runtime/vm/rfunc-data.h"
 
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/packed-array.h"
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
@@ -35,6 +37,17 @@ RFuncData* RFuncData::newInstance(Func* func, ArrayData* reified_generics) {
 void RFuncData::release() noexcept {
   decRefArr(m_arr);
   tl_heap->objFree(this, sizeof(RFuncData));
+}
+
+bool RFuncData::Same(const RFuncData* rfunc1, const RFuncData* rfunc2) {
+  if (rfunc1->m_func != rfunc2->m_func) {
+    return false;
+  }
+  if (RuntimeOption::EvalHackArrDVArrs) {
+    return PackedArray::VecSame(rfunc1->m_arr, rfunc2->m_arr);
+  } else {
+    return ArrayData::Same(rfunc1->m_arr, rfunc2->m_arr);
+  }
 }
 
 } // namespace HPHP

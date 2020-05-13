@@ -118,6 +118,7 @@ Variant SSATmp::variantVal() const {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfRecord:
       break;
   }

@@ -377,6 +377,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord:
+    case KindOfRFunc:
       return fail();
 
     case KindOfFunc:
@@ -807,6 +808,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
+      case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
@@ -836,6 +838,7 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
       case KindOfRecord:
+      case KindOfRFunc:
         continue;
     }
     not_reached();
@@ -1088,6 +1091,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfArray:
       case KindOfObject:
       case KindOfResource:
+      case KindOfRFunc:
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
@@ -1117,6 +1121,7 @@ DOUBLE:
       case KindOfObject:
       case KindOfResource:
       case KindOfRecord:
+      case KindOfRFunc:
         continue;
     }
     not_reached();
@@ -1302,6 +1307,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfPersistentString:
     case KindOfString:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
       return 1;
@@ -3326,6 +3332,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfObject:
       SystemLib::throwInvalidArgumentExceptionObject(
         "Objects cannot be cast to an array-key"
+      );
+    case KindOfRFunc:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "Reified functions cannot be cast to an array key"
       );
     case KindOfRecord:
       SystemLib::throwInvalidArgumentExceptionObject(

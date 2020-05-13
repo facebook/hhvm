@@ -174,6 +174,10 @@ void raise_convert_record_to_type(const char* typeName) {
   raise_error("Cannot convert record to %s", typeName);
 }
 
+void raise_convert_rfunc_to_type(const char* typeName) {
+  raise_error("Cannot convert reified function to %s", typeName);
+}
+
 void raise_use_of_specialized_array() {
   raise_error(Strings::DATATYPE_SPECIALIZED_DVARR);
 }

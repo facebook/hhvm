@@ -352,6 +352,7 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfObject:
       case KindOfResource:
+      case KindOfRFunc:
       // TODO (T29639296)
       case KindOfFunc:
       case KindOfClass:

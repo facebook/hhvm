@@ -385,6 +385,7 @@ const StaticString
   s_keyset("keyset"),
   s_object("object"),
   s_resource("resource"),
+  s_rfunc("reified function"),
   s_func("function"),
   s_class("class"),
   s_clsmeth("clsmeth"),
@@ -417,6 +418,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfArray:      return s_array;
     case KindOfObject:     return s_object;
     case KindOfResource:   return s_resource;
+    case KindOfRFunc:      return s_rfunc;
     case KindOfFunc:       return s_func;
     case KindOfClass:      return s_class;
     case KindOfClsMeth:    return s_clsmeth;

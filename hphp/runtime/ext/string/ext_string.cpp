@@ -1010,6 +1010,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfArray:
     case KindOfObject:
     case KindOfResource:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

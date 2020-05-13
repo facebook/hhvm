@@ -114,6 +114,14 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
 
       case KindOfClsMeth:
         tvDecRefClsMeth(tv);
+        b = true;
+        continue;
+
+      case KindOfRFunc:
+        tvDecRefRFunc(tv);
+        b = true;
+        continue;
+
       case KindOfFunc:
       case KindOfClass:
         b = true;
@@ -193,6 +201,9 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         d = val(tv).pres->data()->o_toDouble();
         tvDecRefRes(tv);
         continue;
+
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("double");
 
       case KindOfFunc:
         if (RuntimeOption::EvalRaiseFuncConversionWarning) {
@@ -282,6 +293,9 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         tvDecRefRes(tv);
         continue;
 
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("int");
+
       case KindOfFunc:
         invalidFuncConversion("int");
         i = funcToInt64Helper(val(tv).pfunc);
@@ -351,6 +365,9 @@ double tvCastToDouble(TypedValue tv) {
 
     case KindOfResource:
       return tv.m_data.pres->data()->o_toDouble();
+
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("double");
 
     case KindOfFunc:
       if (RuntimeOption::EvalRaiseFuncConversionWarning) {
@@ -451,6 +468,9 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
       );
       return;
 
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("string");
+
     case KindOfFunc: {
       invalidFuncConversion("string");
       auto const s = funcToStringHelper(val(tv).pfunc);
@@ -535,6 +555,9 @@ StringData* tvCastToStringData(TypedValue tv) {
     case KindOfResource:
       return tv.m_data.pres->data()->o_toString().detach();
 
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("string");
+
     case KindOfFunc: {
       invalidFuncConversion("string");
       auto const s = funcToStringHelper(tv.m_data.pfunc);
@@ -610,6 +633,9 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
       assertx(ad->isPHPArrayType());
       return ad.detach();
     }
+
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("array");
 
     case KindOfRecord:
       raise_convert_record_to_type("array");
@@ -791,6 +817,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("array");
+
       case KindOfRecord:
         raise_convert_record_to_type("array");
     }
@@ -887,6 +916,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         // We might have re-entered, so tv may not contain the object anymore.
         tvDecRefGen(tv);
         continue;
+
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("vec");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -1000,6 +1032,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         tvDecRefGen(tv);
         continue;
 
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("dict");
+
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
           "Func to dict conversion"
@@ -1111,6 +1146,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         // We might have re-entered, so tv may not contain the object anymore.
         tvDecRefGen(tv);
         continue;
+
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("keyset");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -1234,6 +1272,9 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         // We might have re-entered, so tv may not contain the object anymore.
         tvDecRefGen(tv);
         continue;
+
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("varray");
 
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
@@ -1361,6 +1402,9 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         tvDecRefGen(tv);
         continue;
 
+      case KindOfRFunc:
+        raise_convert_rfunc_to_type("darray");
+
       case KindOfFunc:
         SystemLib::throwInvalidOperationExceptionObject(
           "Func to darray conversion"
@@ -1445,6 +1489,9 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return ObjectData::FromArray(arr.get()).detach();
     }
 
+    case KindOfRFunc:
+      raise_convert_rfunc_to_type("object");
+
     case KindOfRecord:
       raise_convert_record_to_type("object");
   }
@@ -1459,6 +1506,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
     switch (type(tv)) {
       DT_UNCOUNTED_CASE:
         continue;
+      case KindOfRFunc: // TODO(T63348446)
       case KindOfString:
       case KindOfVec:
       case KindOfDict:

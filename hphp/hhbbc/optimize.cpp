@@ -947,6 +947,7 @@ Bytecode gen_constant(const TypedValue& cell) {
 
     case KindOfResource:
     case KindOfObject:
+    case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:

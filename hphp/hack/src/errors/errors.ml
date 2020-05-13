@@ -2863,15 +2863,19 @@ let undefined_field ~use_pos ~name ~shape_type_pos =
       (shape_type_pos, "Definition is here");
     ]
 
-let array_access pos1 pos2 ty =
+let array_access code pos1 pos2 ty =
   add_list
-    (Typing.err_code Typing.ArrayAccess)
+    (Typing.err_code code)
     ( (pos1, "This is not an object of type KeyedContainer, this is " ^ ty)
     ::
     ( if not (phys_equal pos2 Pos.none) then
       [(pos2, "Definition is here")]
     else
       [] ) )
+
+let array_access_read = array_access Typing.ArrayAccessRead
+
+let array_access_write = array_access Typing.ArrayAccessWrite
 
 let keyset_set pos1 pos2 =
   add_list
@@ -3749,7 +3753,7 @@ let dynamic_redeclared_as_static
     (Typing.err_code Typing.StaticDynamic)
     [(static_position, msg_static); (dyn_position, msg_dynamic)]
 
-let null_member ~is_method s pos r =
+let null_member code ~is_method s pos r =
   let msg =
     Printf.sprintf
       "You are trying to access the %s '%s' but this object can be null."
@@ -3759,10 +3763,14 @@ let null_member ~is_method s pos r =
         "property" )
       s
   in
-  add_list (Typing.err_code Typing.NullMember) ([(pos, msg)] @ r)
+  add_list (Typing.err_code code) ([(pos, msg)] @ r)
+
+let null_member_read = null_member Typing.NullMemberRead
+
+let null_member_write = null_member Typing.NullMemberWrite
 
 (* Trying to access a member on a mixed or nonnull value. *)
-let top_member ~is_method ~is_nullable s pos1 ty pos2 =
+let top_member null_code nonnull_code ~is_method ~is_nullable s pos1 ty pos2 =
   let msg =
     Printf.sprintf
       "You are trying to access the %s '%s' but this is %s. Use a specific class or interface name."
@@ -3776,13 +3784,19 @@ let top_member ~is_method ~is_nullable s pos1 ty pos2 =
   add_list
     (Typing.err_code
        ( if is_nullable then
-         Typing.NullMember
+         null_code
        else
-         Typing.NonObjectMember ))
+         nonnull_code ))
     [(pos1, msg); (pos2, "Definition is here")]
 
+let top_member_read =
+  top_member Typing.NullMemberRead Typing.NonObjectMemberRead
+
+let top_member_write =
+  top_member Typing.NullMemberWrite Typing.NonObjectMemberWrite
+
 let non_object_member
-    ~is_method s pos1 ty pos2 (on_error : typing_error_callback) =
+    code ~is_method s pos1 ty pos2 (on_error : typing_error_callback) =
   let msg_start =
     Printf.sprintf
       "You are trying to access the %s '%s' but this is %s"
@@ -3800,8 +3814,12 @@ let non_object_member
       msg_start
   in
   on_error
-    ~code:(Typing.err_code Typing.NonObjectMember)
+    ~code:(Typing.err_code code)
     [(pos1, msg); (pos2, "Definition is here")]
+
+let non_object_member_read = non_object_member Typing.NonObjectMemberRead
+
+let non_object_member_write = non_object_member Typing.NonObjectMemberRead
 
 let unknown_object_member ~is_method s pos r =
   let msg =
@@ -4899,14 +4917,18 @@ let redundant_rx_condition pos =
     pos
     "Reactivity condition for this method is always true, consider removing it."
 
-let invalid_arraykey pos (cpos, ctype) (kpos, ktype) =
+let invalid_arraykey code pos (cpos, ctype) (kpos, ktype) =
   add_list
-    (Typing.err_code Typing.InvalidArrayKey)
+    (Typing.err_code code)
     [
       (pos, "This value is not a valid key type for this container");
       (cpos, "This container is " ^ ctype);
       (kpos, String.capitalize ktype ^ " cannot be used as a key for " ^ ctype);
     ]
+
+let invalid_arraykey_read = invalid_arraykey Typing.InvalidArrayKeyRead
+
+let invalid_arraykey_write = invalid_arraykey Typing.InvalidArrayKeyWrite
 
 let invalid_sub_string pos ty =
   add (Typing.err_code Typing.InvalidSubString) pos

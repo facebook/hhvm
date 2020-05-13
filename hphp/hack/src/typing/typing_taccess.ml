@@ -270,7 +270,7 @@ let rec expand ctx env root =
     let err () =
       let (pos, tconst) = ctx.id in
       let ty = Typing_print.error env root in
-      Errors.non_object_member
+      Errors.non_object_member_read
         ~is_method:false
         tconst
         (get_pos root)
@@ -330,7 +330,7 @@ let rec expand ctx env root =
     let (pos, tconst) = ctx.id in
     let ty = Typing_print.error env root in
     raise_error (fun () ->
-        Errors.non_object_member
+        Errors.non_object_member_read
           ~is_method:false
           tconst
           pos

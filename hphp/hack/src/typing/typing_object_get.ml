@@ -167,6 +167,7 @@ and obj_get_concrete_ty
       on_error;
     }
   in
+  let read_context = Option.is_none coerce_from_ty in
   let (env, concrete_ty) = Env.expand_type env concrete_ty in
   match deref concrete_ty with
   | (r, Tclass (x, exact, paraml)) ->
@@ -378,7 +379,13 @@ and obj_get_concrete_ty
   | (_, Terr) ->
     default ()
   | (_, Tnonnull) ->
-    Errors.top_member
+    let err =
+      if read_context then
+        Errors.top_member_read
+      else
+        Errors.top_member_write
+    in
+    err
       ~is_method
       ~is_nullable:false
       id_str
@@ -387,7 +394,13 @@ and obj_get_concrete_ty
       (get_pos concrete_ty);
     default ()
   | _ ->
-    Errors.non_object_member
+    let err =
+      if read_context then
+        Errors.non_object_member_read
+      else
+        Errors.non_object_member_write
+    in
+    err
       ~is_method
       id_str
       id_pos
@@ -516,7 +529,7 @@ and obj_get_
         ty1
         Errors.unify_error
   in
-  let nullable_obj_get ty =
+  let nullable_obj_get ~read_context ty =
     match nullsafe with
     | Some p1 ->
       let (env, (method_, tal)) =
@@ -545,7 +558,13 @@ and obj_get_
         begin
           match get_node opt_ty with
           | Tnonnull ->
-            Errors.top_member
+            let err =
+              if read_context then
+                Errors.top_member_read
+              else
+                Errors.top_member_write
+            in
+            err
               ~is_method
               ~is_nullable:true
               id_str
@@ -553,20 +572,27 @@ and obj_get_
               (Typing_print.error env ety1)
               (Reason.to_pos r)
           | _ ->
-            Errors.null_member
-              ~is_method
-              id_str
-              id_pos
-              (Reason.to_string "This can be null" r)
+            let err =
+              if read_context then
+                Errors.null_member_read
+              else
+                Errors.null_member_write
+            in
+            err ~is_method id_str id_pos (Reason.to_string "This can be null" r)
         end
       | (r, _) ->
-        Errors.null_member
-          ~is_method
-          id_str
-          id_pos
-          (Reason.to_string "This can be null" r));
+        let err =
+          if read_context then
+            Errors.null_member_read
+          else
+            Errors.null_member_write
+        in
+        err ~is_method id_str id_pos (Reason.to_string "This can be null" r));
       (env, (TUtils.terr env (get_reason ety1), []))
   in
+  (* coerce_from_ty is used to store the source type for an assignment, so it
+   * is a useful marker for whether we're reading or writing *)
+  let read_context = Option.is_none coerce_from_ty in
   match deref ety1 with
   | (r, Tunion tyl) ->
     let (env, resultl) =
@@ -693,7 +719,13 @@ and obj_get_
     begin
       match resl with
       | [] ->
-        Errors.non_object_member
+        let err =
+          if read_context then
+            Errors.non_object_member_read
+          else
+            Errors.non_object_member_write
+        in
+        err
           ~is_method
           id_str
           id_pos
@@ -713,10 +745,10 @@ and obj_get_
         ) else
           res
     end
-  | (_, Toption ty) -> nullable_obj_get ty
+  | (_, Toption ty) -> nullable_obj_get ~read_context ty
   | (r, Tprim Tnull) ->
     let ty = mk (r, Tunion []) in
-    nullable_obj_get ty
+    nullable_obj_get ~read_context ty
   (* We are trying to access a member through a value of unknown type *)
   | (r, Tvar _) ->
     Errors.unknown_object_member

@@ -386,7 +386,9 @@ val typing_error : Pos.t -> string -> unit
 val undefined_field :
   use_pos:Pos.t -> name:string -> shape_type_pos:Pos.t -> unit
 
-val array_access : Pos.t -> Pos.t -> string -> unit
+val array_access_read : Pos.t -> Pos.t -> string -> unit
+
+val array_access_write : Pos.t -> Pos.t -> string -> unit
 
 val keyset_set : Pos.t -> Pos.t -> unit
 
@@ -535,10 +537,13 @@ val static_redeclared_as_dynamic :
 val dynamic_redeclared_as_static :
   Pos.t -> Pos.t -> string -> elt_type:[ `Method | `Property ] -> unit
 
-val null_member :
+val null_member_read :
   is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit
 
-val top_member :
+val null_member_write :
+  is_method:bool -> string -> Pos.t -> (Pos.t * string) list -> unit
+
+val top_member_read :
   is_method:bool ->
   is_nullable:bool ->
   string ->
@@ -547,7 +552,25 @@ val top_member :
   Pos.t ->
   unit
 
-val non_object_member :
+val top_member_write :
+  is_method:bool ->
+  is_nullable:bool ->
+  string ->
+  Pos.t ->
+  string ->
+  Pos.t ->
+  unit
+
+val non_object_member_read :
+  is_method:bool ->
+  string ->
+  Pos.t ->
+  string ->
+  Pos.t ->
+  typing_error_callback ->
+  unit
+
+val non_object_member_write :
   is_method:bool ->
   string ->
   Pos.t ->
@@ -1170,7 +1193,9 @@ val ambiguous_object_access :
 
 val unserializable_type : Pos.t -> string -> unit
 
-val invalid_arraykey : Pos.t -> Pos.t * string -> Pos.t * string -> unit
+val invalid_arraykey_read : Pos.t -> Pos.t * string -> Pos.t * string -> unit
+
+val invalid_arraykey_write : Pos.t -> Pos.t * string -> Pos.t * string -> unit
 
 val invalid_arraykey_constraint : Pos.t -> string -> unit
 

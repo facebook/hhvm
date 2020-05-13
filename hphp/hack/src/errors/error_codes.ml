@@ -265,7 +265,7 @@ module Typing = struct
     | UninstantiableClass
     | AnonymousRecursiveDEPRECATED
     | AnonymousRecursiveCallDEPRECATED
-    | ArrayAccess
+    | ArrayAccessRead
     | ArrayAppend
     | ArrayCast
     | ArrayGetArity
@@ -322,9 +322,9 @@ module Typing = struct
     | SelfOutsideClass
     | NewStaticInconsistent
     | StaticOutsideClass
-    | NonObjectMember
+    | NonObjectMemberRead
     | NullContainer
-    | NullMember
+    | NullMemberRead
     | NullableParameterDEPRECATED
     | OptionReturnOnlyTypehint
     | ObjectString
@@ -558,7 +558,7 @@ module Typing = struct
     | OptionNull
     | UnknownObjectMember
     | UnknownType
-    | InvalidArrayKey
+    | InvalidArrayKeyRead
     | ReferenceExprNotFunctionArgDEPRECATED
     | RedundantRxCondition
     | RedeclaringMissingMethod
@@ -629,7 +629,11 @@ module Typing = struct
     | RedundantGeneric
     | PocketUniversesInvalidUpperBounds
     | PocketUniversesRefinement
-    | PocketUniversesReservedSyntax (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
+    | PocketUniversesReservedSyntax
+    | ArrayAccessWrite
+    | InvalidArrayKeyWrite
+    | NullMemberWrite
+    | NonObjectMemberWrite (* EXTEND HERE WITH NEW VALUES IF NEEDED *)
   [@@deriving enum, show { with_path = false }]
 
   let err_code = to_enum

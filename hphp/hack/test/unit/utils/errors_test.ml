@@ -129,20 +129,20 @@ let test_get_sorted_error_list () =
   let key_pos2 = Pos.make_from (create_path "K2") in
   let (errors, ()) =
     Errors.do_with_context file_with_errors Errors.Typing (fun () ->
-        Errors.invalid_arraykey
+        Errors.invalid_arraykey_read
           err_pos
           (container_pos2, "C2_Type")
           (key_pos2, "K2_Type");
-        Errors.invalid_arraykey
+        Errors.invalid_arraykey_read
           err_pos
           (container_pos1, "C1_Type")
           (key_pos1, "K1_Type");
         error_in "FileWithErrors.php";
-        Errors.invalid_arraykey
+        Errors.invalid_arraykey_read
           err_pos
           (container_pos2, "C2_Type")
           (key_pos2, "K2_Type");
-        Errors.invalid_arraykey
+        Errors.invalid_arraykey_read
           err_pos
           (container_pos1, "C1_Type")
           (key_pos1, "K1_Type");

@@ -25,7 +25,7 @@ open String.Replace_polymorphic_compare
 let err_witness env p = TUtils.terr env (Reason.Rwitness p)
 
 let error_array env p ty =
-  Errors.array_access p (get_pos ty) (Typing_print.error env ty);
+  Errors.array_access_read p (get_pos ty) (Typing_print.error env ty);
   (env, err_witness env p)
 
 let error_const_mutation env p ty =
@@ -123,7 +123,7 @@ let widen_for_array_get ~lhs_of_null_coalesce ~expr_pos index_expr env ty =
 (* Check that an index to a map-like collection passes the basic test of
  * being a subtype of arraykey
  *)
-let check_arraykey_index env pos container_ty index_ty =
+let check_arraykey_index error env pos container_ty index_ty =
   if TypecheckerOptions.disallow_invalid_arraykey (Env.get_tcopt env) then
     let (env, container_ty) = Env.expand_type env container_ty in
     let reason =
@@ -141,12 +141,15 @@ let check_arraykey_index env pos container_ty index_ty =
       index_ty
       { et_type = ty_arraykey; et_enforced = true }
       (fun ?code:_ _ ->
-        Errors.invalid_arraykey
-          pos
-          (info_of_type container_ty)
-          (info_of_type index_ty))
+        error pos (info_of_type container_ty) (info_of_type index_ty))
   else
     env
+
+let check_arraykey_index_read =
+  check_arraykey_index Errors.invalid_arraykey_read
+
+let check_arraykey_index_write =
+  check_arraykey_index Errors.invalid_arraykey_write
 
 let rec array_get
     ~array_pos
@@ -289,7 +292,7 @@ let rec array_get
               String.equal cn SN.Collections.cDict
               || String.equal cn SN.Collections.cKeyset
             then
-              check_arraykey_index env expr_pos ty1 ty2
+              check_arraykey_index_read env expr_pos ty1 ty2
             else
               type_index env expr_pos ty2 k (Reason.index_class cn)
           in
@@ -315,7 +318,7 @@ let rec array_get
               let any = err_witness env expr_pos in
               (any, any)
           in
-          let env = check_arraykey_index env expr_pos ty1 ty2 in
+          let env = check_arraykey_index_read env expr_pos ty1 ty2 in
           (env, v)
       | Tclass (((_, cn) as id), _, argl)
         when (not is_lvalue)
@@ -338,7 +341,7 @@ let rec array_get
         error_const_mutation env expr_pos ty1
       | Tdarray (_k, v)
       | Tvarray_or_darray (_k, v) ->
-        let env = check_arraykey_index env expr_pos ty1 ty2 in
+        let env = check_arraykey_index_read env expr_pos ty1 ty2 in
         (env, v)
       | Terr -> (env, err_witness env expr_pos)
       | Tdynamic -> (env, ty1)
@@ -690,7 +693,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tclass (id, e, [tv'])))
       | Tclass (((_, cn) as id), _, argl) when cn = SN.Collections.cMap ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
+        let env = check_arraykey_index_write env expr_pos ety1 tkey in
         let (tk, tv) =
           match argl with
           | [tk; tv] -> (tk, tv)
@@ -706,7 +709,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
         (env, ety1)
       | Tclass (((_, cn) as id), e, argl)
         when String.equal cn SN.Collections.cDict ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
+        let env = check_arraykey_index_write env expr_pos ety1 tkey in
         let (tk, tv) =
           match argl with
           | [tk; tv] -> (tk, tv)
@@ -734,12 +737,12 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
           (Typing_print.error env ety1);
         error
       | Tdarray (tk, tv) ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
+        let env = check_arraykey_index_write env expr_pos ety1 tkey in
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tdarray (tk', tv')))
       | Tvarray_or_darray (tk, tv) ->
-        let env = check_arraykey_index env expr_pos ety1 tkey in
+        let env = check_arraykey_index_write env expr_pos ety1 tkey in
         let (env, tk') = Typing_union.union env tk tkey in
         let (env, tv') = Typing_union.union env tv ty2 in
         (env, mk (r, Tvarray_or_darray (tk', tv')))
@@ -782,8 +785,8 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
             (env, mk (r, Tshape (shape_kind, fdm')))
         end
       | Tobject ->
-        if Partial.should_check_error (Env.get_mode env) 4005 then (
-          Errors.array_access
+        if Partial.should_check_error (Env.get_mode env) 4370 then (
+          Errors.array_access_write
             expr_pos
             (Reason.to_pos r)
             (Typing_print.error env ety1);
@@ -803,7 +806,7 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 key tkey ty2 =
       | Tclass _
       | Tpu _
       | Tpu_type_access _ ->
-        Errors.array_access
+        Errors.array_access_write
           expr_pos
           (Reason.to_pos r)
           (Typing_print.error env ety1);

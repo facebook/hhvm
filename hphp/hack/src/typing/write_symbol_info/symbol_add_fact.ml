@@ -21,11 +21,13 @@ let add_container_decl_fact decl_pred name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact decl_pred json_fact progress
 
-let add_container_defn_fact ctx clss decl_id member_decls prog =
+let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
   let common_fields =
     [
       ("declaration", build_id_json decl_id);
       ("members", JSON_Array member_decls);
+      ( "attributes",
+        build_attributes_json_nested source_map clss.c_user_attributes );
     ]
     @ build_ns_json_nested clss.c_namespace
   in
@@ -132,7 +134,7 @@ let add_method_decl_fact con_type decl_id name progress =
   in
   add_fact MethodDeclaration json_fact progress
 
-let add_method_defn_fact ctx meth decl_id progress =
+let add_method_defn_fact ctx source_map meth decl_id progress =
   let json_fact =
     JSON_Object
       [
@@ -143,11 +145,13 @@ let add_method_defn_fact ctx meth decl_id progress =
         ("isAsync", build_is_async_json meth.m_fun_kind);
         ("isFinal", JSON_Bool meth.m_final);
         ("isStatic", JSON_Bool meth.m_static);
+        ( "attributes",
+          build_attributes_json_nested source_map meth.m_user_attributes );
       ]
   in
   add_fact MethodDefinition json_fact progress
 
-let add_property_defn_fact ctx prop decl_id progress =
+let add_property_defn_fact ctx source_map prop decl_id progress =
   let base_fields =
     [
       ("declaration", build_id_json decl_id);
@@ -155,6 +159,8 @@ let add_property_defn_fact ctx prop decl_id progress =
       ("isFinal", JSON_Bool prop.cv_final);
       ("isAbstract", JSON_Bool prop.cv_abstract);
       ("isStatic", JSON_Bool prop.cv_is_static);
+      ( "attributes",
+        build_attributes_json_nested source_map prop.cv_user_attributes );
     ]
   in
   let json_fields =
@@ -182,11 +188,13 @@ let add_class_const_defn_fact ctx const decl_id progress =
   in
   add_fact ClassConstDefinition (JSON_Object json_fields) progress
 
-let add_type_const_defn_fact ctx tc decl_id progress =
+let add_type_const_defn_fact ctx source_map tc decl_id progress =
   let base_fields =
     [
       ("declaration", build_id_json decl_id);
       ("kind", build_type_const_kind_json tc.c_tconst_abstract);
+      ( "attributes",
+        build_attributes_json_nested source_map tc.c_tconst_user_attributes );
     ]
   in
   let json_fields =
@@ -202,12 +210,14 @@ let add_enum_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact EnumDeclaration json_fact progress
 
-let add_enum_defn_fact ctx enm enum_id enumerators progress =
+let add_enum_defn_fact ctx source_map enm enum_id enumerators progress =
   let json_fields =
     let json_fields =
       [
         ("declaration", build_id_json enum_id);
         ("enumerators", JSON_Array enumerators);
+        ( "attributes",
+          build_attributes_json_nested source_map enm.c_user_attributes );
       ]
       @ build_ns_json_nested enm.c_namespace
     in
@@ -240,18 +250,20 @@ let add_func_decl_fact name progress =
   let json_fact = JSON_Object [("name", build_name_json_nested name)] in
   add_fact FunctionDeclaration json_fact progress
 
-let add_func_defn_fact ctx elem decl_id progress =
+let add_func_defn_fact ctx source_map elem decl_id progress =
   let json_fields =
     [
       ("declaration", build_id_json decl_id);
       ("signature", build_signature_json ctx elem.f_params elem.f_ret);
       ("isAsync", build_is_async_json elem.f_fun_kind);
+      ( "attributes",
+        build_attributes_json_nested source_map elem.f_user_attributes );
     ]
     @ build_ns_json_nested elem.f_namespace
   in
   add_fact FunctionDefinition (JSON_Object json_fields) progress
 
-let add_typedef_decl_fact name elem progress =
+let add_typedef_decl_fact source_map name elem progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
@@ -261,6 +273,8 @@ let add_typedef_decl_fact name elem progress =
     [
       ("name", build_name_json_nested name);
       ("isTransparent", JSON_Bool is_transparent);
+      ( "attributes",
+        build_attributes_json_nested source_map elem.t_user_attributes );
     ]
     @ build_ns_json_nested elem.t_namespace
   in

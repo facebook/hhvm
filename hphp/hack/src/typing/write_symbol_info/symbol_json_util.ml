@@ -28,6 +28,11 @@ let get_type_from_hint ctx h =
   let decl_env = { mode; droot = None; ctx } in
   Typing_print.full_decl ctx (Decl_hint.hint decl_env h)
 
+let source_at_span source_text pos =
+  let st = Pos.start_cnum pos in
+  let fi = Pos.end_cnum pos in
+  Full_fidelity_source_text.sub source_text st (fi - st)
+
 (* Convert ContainerName<TParam> to ContainerName *)
 let strip_tparams name =
   match String.index name '<' with

@@ -59,6 +59,27 @@ let build_signature_json_nested parameters return_type_name =
   in
   JSON_Object [("key", JSON_Object fields)]
 
+let build_attributes_json_nested source_map attrs =
+  let attributes =
+    List.map attrs ~f:(fun attr ->
+        let (_, name) = attr.ua_name in
+        let params =
+          List.fold_right attr.ua_params ~init:[] ~f:(fun ((pos, _), _) acc ->
+              let fp = Relative_path.to_absolute (Pos.filename pos) in
+              match SMap.find_opt fp source_map with
+              | Some st -> JSON_String (source_at_span st pos) :: acc
+              | None -> acc)
+        in
+        let fields =
+          [
+            ("name", build_name_json_nested name);
+            ("parameters", JSON_Array params);
+          ]
+        in
+        JSON_Object [("key", JSON_Object fields)])
+  in
+  JSON_Array attributes
+
 let build_bytespan_json pos =
   let start = fst (Pos.info_raw pos) in
   let length = Pos.length pos in

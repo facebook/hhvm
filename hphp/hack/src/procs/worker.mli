@@ -7,9 +7,13 @@
  *
  *)
 
-type request = Request of (serializer -> unit)
+type request = Request of (serializer -> unit) * metadata_in
 
 and serializer = { send: 'a. 'a -> unit }
+
+and metadata_in = unit
+
+type metadata_out = { stats: Measure.record_data }
 
 type slave_job_status = Slave_terminated of Unix.process_status
 

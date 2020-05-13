@@ -188,10 +188,10 @@ let spawn w =
 let close w h = if Option.is_none w.prespawned then Daemon.close h
 
 (* If there is a call_wrapper, apply it and create the Request *)
-let wrap_request w f x =
+let wrap_request w f x metadata_in =
   match w.call_wrapper with
-  | Some { wrap } -> Request (fun { send } -> send (wrap f x))
-  | None -> Request (fun { send } -> send (f x))
+  | Some { wrap } -> Request ((fun { send } -> send (wrap f x)), metadata_in)
+  | None -> Request ((fun { send } -> send (f x)), metadata_in)
 
 type 'a entry_state = 'a * Gc.control * SharedMem.handle * int
 
@@ -363,11 +363,11 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
   let get_result_with_status_check ?(block_on_waitpid = false) () : b =
     with_exit_status_check ~block_on_waitpid slave_pid (fun () ->
         let data : b = Marshal_tools.from_fd_with_preamble infd in
-        let stats : Measure.record_data =
+        let metadata_out : metadata_out =
           Marshal_tools.from_fd_with_preamble infd
         in
         close w h;
-        Measure.merge (Measure.deserialize stats);
+        Measure.merge (Measure.deserialize metadata_out.stats);
         data)
   in
   let result () : b =
@@ -407,7 +407,8 @@ let call ?(call_id = 0) w (type a b) (f : a -> b) (x : a) : (a, b) handle =
         ())
   in
   let slave = { result; slave_pid; infd; worker = w; wait_for_cancel } in
-  let request = wrap_request w f x in
+  let metadata_in = () in
+  let (request : Worker.request) = wrap_request w f x metadata_in in
   (* Send the job to the slave. *)
   let () =
     try

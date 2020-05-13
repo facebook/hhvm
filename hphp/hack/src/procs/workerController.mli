@@ -78,9 +78,6 @@ val spawn : worker -> (void, Worker.request) Daemon.handle
 (* If the worker isn't prespawned, close the worker *)
 val close : worker -> (void, Worker.request) Daemon.handle -> unit
 
-(* If there is a call_wrapper, apply it and create the Request *)
-val wrap_request : worker -> ('x -> 'b) -> 'x -> Worker.request
-
 type call_wrapper = { wrap: 'x 'b. ('x -> 'b) -> 'x -> 'b }
 
 type 'a entry

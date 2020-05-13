@@ -22,9 +22,13 @@ module Gc = CamlGc
  *
  *****************************************************************************)
 
-type request = Request of (serializer -> unit)
+type request = Request of (serializer -> unit) * metadata_in
 
 and serializer = { send: 'a. 'a -> unit }
+
+and metadata_in = unit
+
+type metadata_out = { stats: Measure.record_data }
 
 type slave_job_status = Slave_terminated of Unix.process_status
 
@@ -126,13 +130,13 @@ let slave_main ic oc =
 
     Measure.sample "worker_response_len" (float len);
 
-    let stats = Measure.serialize (Measure.pop_global ()) in
-    let _ = Marshal_tools.to_fd_with_preamble outfd stats in
+    let metadata_out = { stats = Measure.serialize (Measure.pop_global ()) } in
+    let _ = Marshal_tools.to_fd_with_preamble outfd metadata_out in
     ()
   in
   try
     Measure.push_global ();
-    let (Request do_process) =
+    let (Request (do_process, metadata_in)) =
       Measure.time "worker_read_request" (fun () ->
           Marshal_tools.from_fd_with_preamble infd)
     in
@@ -151,6 +155,7 @@ let slave_main ic oc =
     start_wall_time := Unix.gettimeofday ();
     start_proc_fs_status :=
       ProcFS.status_for_pid (Unix.getpid ()) |> Core_kernel.Result.ok;
+    let () = metadata_in in
     Mem_profile.start ();
     do_process { send = send_result };
     exit 0

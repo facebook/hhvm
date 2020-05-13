@@ -14,7 +14,6 @@ use crate::typing_phase::{self, MethodInstantiation};
 use crate::typing_solver;
 use crate::{typing_naming, typing_subtype};
 use crate::{Env, LocalId, ParamMode};
-use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
 use lazy_static::lazy_static;
 use oxidized::ast_defs::Id;
@@ -192,17 +191,16 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
                 ast::ClassId_::CIexpr(e) => {
                     let ast::Expr(_p1, e) = e;
                     match e {
-                        ast::Expr_::Id(id) => env
-                            .bld()
-                            .alloc(aast::ClassId(p0.clone(), aast::ClassId_::CI(*id.clone()))),
+                        ast::Expr_::Id(id) => {
+                            let b = aast::ClassId(p0.clone(), aast::ClassId_::CI(*id.clone()));
+                            Box::leak(Box::new(b))
+                        }
                         _ => class_id,
                     }
                 }
                 _ => class_id,
             };
-            let class_id = env
-                .bld()
-                .alloc(typing_naming::canonicalize_class_id(&class_id));
+            let class_id = Box::leak(Box::new(typing_naming::canonicalize_class_id(&class_id)));
             // TODO(hrust) might_throw
             let (class_id, targs, args, unpacked_arg, ty, ctor_fty) = new_object(
                 env,
@@ -581,7 +579,7 @@ fn call_construct<'a>(
     // TODO(hrust) turn CIparent into CIstatic. WHY? o_O
     let mut ety_env = ExpandEnv {
         substs: subst::make_locl(env.bld(), class.tparams.iter(), targ_tys),
-        type_expansions: bumpalo::vec![in env.bld().alloc],
+        type_expansions: bumpalo::vec![in env.bld().bumpalo()],
     };
     // TODO(hrust) check tparam constraints and where constraints
     // TODO(hrust) return any if xhp

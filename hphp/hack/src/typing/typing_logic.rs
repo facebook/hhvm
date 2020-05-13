@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use arena_trait::TrivialDrop;
 use bumpalo::Bump;
 use typing_collections_rust::{pvec, Vec};
 
@@ -15,6 +16,8 @@ pub enum SubtypePropEnum<'a> {
     Disj(Vec<'a, SubtypeProp<'a>>),
 }
 pub type SubtypeProp<'a> = &'a SubtypePropEnum<'a>;
+
+impl TrivialDrop for SubtypePropEnum<'_> {}
 
 impl<'a> SubtypePropEnum<'a> {
     // Return true if this proposition is always true

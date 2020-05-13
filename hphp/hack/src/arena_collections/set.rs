@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::map::{Map, MapIter};
-use arena_trait::Arena;
+use arena_trait::{Arena, TrivialDrop};
 
 /// An arena-allocated map.
 ///
@@ -54,7 +54,7 @@ impl<'a, K: Ord> Set<'a, K> {
     }
 }
 
-impl<'a, K: Clone + Ord> Set<'a, K> {
+impl<'a, K: TrivialDrop + Clone + Ord> Set<'a, K> {
     pub fn empty() -> Self {
         Set(Map::empty())
     }

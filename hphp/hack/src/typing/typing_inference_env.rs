@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-use arena_trait::Arena;
+use arena_trait::{Arena, TrivialDrop};
 
 use oxidized::ToOxidized;
 use oxidized_by_ref::aast;
@@ -36,6 +36,8 @@ pub struct TyvarConstraints<'a> {
     /// when #v will be known.
     pub pu_accesses: SMap<'a, &'a (aast::Sid<'a>, Ty<'a>)>,
 }
+
+impl TrivialDrop for TyvarConstraints<'_> {}
 
 impl<'a> ToOxidized for TyvarConstraints<'a> {
     type Target = oxidized::typing_inference_env::TyvarConstraints;
@@ -145,6 +147,8 @@ pub struct TyvarInfo<'a> {
     pub solving_info: SolvingInfo<'a>,
 }
 
+impl TrivialDrop for TyvarInfo<'_> {}
+
 impl<'a> ToOxidized for TyvarInfo<'a> {
     type Target = oxidized::typing_inference_env::TyvarInfo;
 
@@ -215,7 +219,7 @@ impl<'a> InferenceEnv<'a> {
         InferenceEnv {
             bld,
             tvenv: IMap::empty(),
-            tyvars_stack: Vec::new_in(bld.alloc),
+            tyvars_stack: Vec::new_in(bld.bumpalo()),
             allow_solve_globals: false,
             var_id_counter: 0,
         }
@@ -436,7 +440,7 @@ impl<'a> IntoUnionIntersectionIterator<'a> for Ty<'a> {
         env: &'b mut InferenceEnv<'a>,
     ) -> UnionIntersectionIterator<'a, 'b> {
         UnionIntersectionIterator {
-            stack: bumpalo::vec![in env.bld.alloc; self],
+            stack: bumpalo::vec![in env.bld.bumpalo(); self],
             env,
         }
     }

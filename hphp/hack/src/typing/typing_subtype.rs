@@ -123,7 +123,7 @@ fn simplify_subtype_i<'a>(
                                         substs = substs.add(bld, &tparam.name.1, ty)
                                     }
                                     let ety_env = bld.alloc(ExpandEnv {
-                                        type_expansions: BVec::new_in(bld.alloc),
+                                        type_expansions: BVec::new_in(bld.bumpalo()),
                                         substs,
                                     });
                                     match cd.ancestors.get(cid_super) {
@@ -160,7 +160,7 @@ fn simplify_subtype_variance<'a>(
     super_tyl: &'a [Ty<'a>],
 ) -> SubtypeProp<'a> {
     // Collect propositions in an arena-allocated vector
-    let mut props = BVec::new_in(env.bld().alloc);
+    let mut props = BVec::new_in(env.bld().bumpalo());
     for (tparam, &ty_sub, &ty_super) in izip!(tparaml.iter(), children_tyl.iter(), super_tyl.iter())
     {
         // Apply subtyping according to the variance of the type parameter
@@ -291,7 +291,7 @@ fn add_tyvar_upper_bound_and_close<'a>(
         .fold(prop, |prop, &upper_bound| {
             // TODO(hrust) make all type consts and pu equal
             lower_bounds.into_iter().fold(prop, |prop, &lower_bound| {
-                simplify_subtype_i(env, lower_bound, upper_bound).conj(env.bld().alloc, prop)
+                simplify_subtype_i(env, lower_bound, upper_bound).conj(env.bld().bumpalo(), prop)
             })
         })
 }
@@ -313,7 +313,7 @@ fn add_tyvar_lower_bound_and_close<'a>(
         .fold(prop, |prop, &lower_bound| {
             // TODO(hrust) make all type consts and pu equal
             upper_bounds.into_iter().fold(prop, |prop, &upper_bound| {
-                simplify_subtype_i(env, upper_bound, lower_bound).conj(env.bld().alloc, prop)
+                simplify_subtype_i(env, upper_bound, lower_bound).conj(env.bld().bumpalo(), prop)
             })
         })
 }

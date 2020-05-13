@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use arena_trait::Arena;
+use arena_trait::{Arena, TrivialDrop};
 use std::cmp::{Ord, Ordering};
 
 /// The maximum height difference (or balance factor) that is allowed
@@ -47,6 +47,8 @@ impl<'a, K: Eq, V: Eq> Eq for Map<'a, K, V> {}
 #[derive(Debug)]
 struct Node<'a, K, V>(Map<'a, K, V>, K, V, Map<'a, K, V>, u8);
 
+impl<'a, K: TrivialDrop, V: TrivialDrop> TrivialDrop for Node<'a, K, V> {}
+
 #[macro_export]
 macro_rules! map {
   ( ) => ({ Map::empty() });
@@ -79,7 +81,7 @@ impl<'a, K: Ord, V> Map<'a, K, V> {
     }
 }
 
-impl<'a, K: Clone + Ord, V: Clone> Map<'a, K, V> {
+impl<'a, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone> Map<'a, K, V> {
     /// Create a new empty map.
     ///
     /// Note that this does not require heap allocation,
@@ -253,7 +255,7 @@ fn height<'a, K, V>(l: Map<'a, K, V>) -> u8 {
     }
 }
 
-fn create<'a, A: Arena, K, V>(
+fn create<'a, A: Arena, K: TrivialDrop, V: TrivialDrop>(
     arena: &'a A,
     l: Map<'a, K, V>,
     x: K,
@@ -267,7 +269,7 @@ fn create<'a, A: Arena, K, V>(
     Map(Some(arena.alloc(node)))
 }
 
-fn bal<'a, A: Arena, K: Clone, V: Clone>(
+fn bal<'a, A: Arena, K: TrivialDrop + Clone, V: TrivialDrop + Clone>(
     arena: &'a A,
     l: Map<'a, K, V>,
     x: K,
@@ -333,7 +335,7 @@ fn bal<'a, A: Arena, K: Clone, V: Clone>(
     }
 }
 
-fn merge<'a, A: Arena, K: Clone + Ord, V: Clone>(
+fn merge<'a, A: Arena, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone>(
     arena: &'a A,
     t1: Map<'a, K, V>,
     t2: Map<'a, K, V>,

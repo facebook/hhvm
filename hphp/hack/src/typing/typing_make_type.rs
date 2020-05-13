@@ -51,13 +51,19 @@ pub struct TypeBuilder<'a> {
     id_const_collection: Id<'a>,
     id_collection: Id<'a>,
 
-    pub alloc: &'a Bump,
+    /// The allocator.
+    ///
+    /// We have made this field private to avoid people calling
+    /// alloc on the underlying allocator directly. Instead, use
+    /// `TypeBuilder::alloc`, which provides safety mechanisms
+    /// against memory leaks.
+    bumpalo: &'a Bump,
 }
 
 impl<'a> Arena for TypeBuilder<'a> {
     #[inline(always)]
     fn alloc<T>(&self, val: T) -> &mut T {
-        return self.alloc.alloc(val);
+        return self.bumpalo.alloc(val);
     }
 }
 
@@ -70,9 +76,9 @@ fn mk_special_id(name: &'static str) -> Id<'static> {
 }
 
 impl<'a> TypeBuilder<'a> {
-    pub fn new(alloc: &'a Bump) -> Self {
+    pub fn new(bumpalo: &'a Bump) -> Self {
         TypeBuilder {
-            alloc,
+            bumpalo,
 
             id_traversable: mk_special_id(collections::TRAVERSABLE),
             id_keyed_traversable: mk_special_id(collections::KEYED_TRAVERSABLE),
@@ -96,8 +102,12 @@ impl<'a> TypeBuilder<'a> {
         }
     }
 
+    pub fn bumpalo(&self) -> &'a Bump {
+        self.bumpalo
+    }
+
     pub fn vec_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> BVec<'a, T> {
-        BVec::from_iter_in(iter, &self.alloc)
+        BVec::from_iter_in(iter, &self.bumpalo)
     }
 
     pub fn slice_from_iter<T, I: IntoIterator<Item = T>>(&self, iter: I) -> &'a [T] {
@@ -128,28 +138,28 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_traversable,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn keyed_traversable(&'a self, reason: PReason<'a>, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_keyed_traversable,
-            vec![in &self.alloc; kty, vty].into_bump_slice(),
+            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn keyed_container(&'a self, reason: PReason<'a>, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_keyed_container,
-            vec![in &self.alloc; kty, vty].into_bump_slice(),
+            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn awaitable(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_awaitable,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn generator(
@@ -162,7 +172,7 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_generator,
-            vec![in &self.alloc; key, value, send].into_bump_slice(),
+            vec![in &self.bumpalo; key, value, send].into_bump_slice(),
         )
     }
     pub fn async_generator(
@@ -175,98 +185,98 @@ impl<'a> TypeBuilder<'a> {
         self.class(
             reason,
             self.id_async_generator,
-            vec![in &self.alloc; key, value, send].into_bump_slice(),
+            vec![in &self.bumpalo; key, value, send].into_bump_slice(),
         )
     }
     pub fn async_iterator(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_async_iterator,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn async_keyed_iterator(&'a self, reason: PReason<'a>, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_async_keyed_iterator,
-            vec![in &self.alloc; kty, vty].into_bump_slice(),
+            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn pair(&'a self, reason: PReason<'a>, ty1: Ty<'a>, ty2: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_pair,
-            vec![in &self.alloc; ty1, ty2].into_bump_slice(),
+            vec![in &self.bumpalo; ty1, ty2].into_bump_slice(),
         )
     }
     pub fn dict(&'a self, reason: PReason<'a>, kty: Ty<'a>, vty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_dict,
-            vec![in &self.alloc; kty, vty].into_bump_slice(),
+            vec![in &self.bumpalo; kty, vty].into_bump_slice(),
         )
     }
     pub fn keyset(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_keyset,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn vec(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_vec,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn container(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_container,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn const_vector(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_const_vector,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn const_collection(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_const_collection,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn collection(&'a self, reason: PReason<'a>, ty: Ty<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_collection,
-            vec![in &self.alloc; ty].into_bump_slice(),
+            vec![in &self.bumpalo; ty].into_bump_slice(),
         )
     }
     pub fn throwable(&'a self, reason: PReason<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_throwable,
-            vec![in &self.alloc; ].into_bump_slice(),
+            vec![in &self.bumpalo; ].into_bump_slice(),
         )
     }
     pub fn datetime(&'a self, reason: PReason<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_datetime,
-            vec![in &self.alloc].into_bump_slice(),
+            vec![in &self.bumpalo].into_bump_slice(),
         )
     }
     pub fn datetime_immutable(&'a self, reason: PReason<'a>) -> Ty<'a> {
         self.class(
             reason,
             self.id_datetime_immutable,
-            vec![in &self.alloc].into_bump_slice(),
+            vec![in &self.bumpalo].into_bump_slice(),
         )
     }
     pub fn int(&'a self, reason: PReason<'a>) -> Ty<'a> {
@@ -375,10 +385,10 @@ impl<'a> TypeBuilder<'a> {
         self.alloc(SubtypePropEnum::IsSubtype(ty1, ty2))
     }
     pub fn valid(&'a self) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Conj(Vec::new_in(self.alloc)))
+        self.alloc(SubtypePropEnum::Conj(Vec::new_in(self.bumpalo)))
     }
     pub fn invalid(&'a self) -> SubtypeProp<'a> {
-        self.alloc(SubtypePropEnum::Disj(Vec::new_in(self.alloc)))
+        self.alloc(SubtypePropEnum::Disj(Vec::new_in(self.bumpalo)))
     }
 }
 
@@ -429,7 +439,7 @@ impl<'a> TypeBuilder<'a> {
     pub fn env_with_self(&self) -> &mut ExpandEnv<'a> {
         // TODO(hrust) this_ty
         self.alloc(ExpandEnv {
-            type_expansions: vec![in &self.alloc],
+            type_expansions: vec![in &self.bumpalo],
             substs: SMap::empty(),
         })
     }
@@ -437,10 +447,10 @@ impl<'a> TypeBuilder<'a> {
 
 #[macro_export]
 macro_rules! avec {
-    (in $bld:expr; $elem:expr; $n:expr) => (bumpalo::vec![in $bld.alloc; $elem; $n]);
-    (in $bld:expr) => (bumpalo::vec![in $bld.alloc]);
-    (in $bld:expr; $($x:expr),*) => (bumpalo::vec![in $bld.alloc; $($x),*]);
-    (in $bld:expr; $($x:expr,)*) => (bumpalo::vec![in $bld.alloc; $($x),*]);
+    (in $bld:expr; $elem:expr; $n:expr) => (bumpalo::vec![in $bld.bumpalo(); $elem; $n]);
+    (in $bld:expr) => (bumpalo::vec![in $bld.bumpalo()]);
+    (in $bld:expr; $($x:expr),*) => (bumpalo::vec![in $bld.bumpalo(); $($x),*]);
+    (in $bld:expr; $($x:expr,)*) => (bumpalo::vec![in $bld.bumpalo(); $($x),*]);
 }
 
 #[macro_export]
@@ -449,7 +459,7 @@ macro_rules! aset {
   ( in $bld:expr; $($x:expr),* ) => ({
       let mut temp_map = Set::empty();
       $(
-          temp_map = temp_map.add($bld.alloc, $x);
+          temp_map = temp_map.add($bld, $x);
       )*
       temp_map
   });

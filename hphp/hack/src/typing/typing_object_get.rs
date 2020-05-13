@@ -139,6 +139,6 @@ fn mk_ety_env<'a>(
             class_info.tparams.iter(),
             type_args.iter().copied(),
         ),
-        type_expansions: bumpalo::vec![in env.bld().alloc],
+        type_expansions: bumpalo::vec![in env.bld().bumpalo()],
     }
 }

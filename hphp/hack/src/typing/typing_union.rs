@@ -18,7 +18,7 @@ pub fn union_list_2_by_2<'a>(
     env: &mut Env<'a>,
     tys: impl Iterator<Item = Ty<'a>> + 'a,
 ) -> &'a [Ty<'a>] {
-    tys.fold(bumpalo::vec![in env.bld().alloc], |res_tys, ty| {
+    tys.fold(bumpalo::vec![in env.bld().bumpalo()], |res_tys, ty| {
         union_ty_w_tyl(env, ty, res_tys)
     })
     .into_bump_slice()
@@ -29,7 +29,7 @@ pub fn union_ty_w_tyl<'a>(
     ty: Ty<'a>,
     mut tys: BVec<'a, Ty<'a>>,
 ) -> BVec<'a, Ty<'a>> {
-    let mut res_tys = bumpalo::vec![in env.bld().alloc];
+    let mut res_tys = bumpalo::vec![in env.bld().bumpalo()];
     let union_ty = tys
         .drain(..)
         .fold(ty, |ty_acc, ty| match simplify_union(env, ty_acc, ty) {

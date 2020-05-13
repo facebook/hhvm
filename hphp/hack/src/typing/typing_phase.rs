@@ -93,7 +93,7 @@ pub fn localize_targs<'a>(
         let tvar = env
             .inference_env
             .fresh_type_reason(env.bld().mk_rtype_variable_generics(
-                Pos::from_oxidized_in(use_pos, env.bld().alloc),
+                Pos::from_oxidized_in(use_pos, env.bld().bumpalo()),
                 tparam.name.name(),
                 use_name,
             ));
@@ -141,7 +141,7 @@ pub fn localize_ft<'a, 'b>(
             }
             let targ_tys = explicit_targs.iter().map(|targ| targ.0);
             let substs = subst::make_locl(env.bld(), ft.tparams.iter(), targ_tys);
-            ety_env.substs = ety_env.substs.add_all(env.bld().alloc, substs);
+            ety_env.substs = ety_env.substs.add_all(env.bld(), substs);
         }
         None => {
             // TODO(hrust)
@@ -220,7 +220,7 @@ pub fn resolve_type_arguments_and_check_constraints<'a>(
     let targs = localize_targs(env, use_pos, cid.name(), tparams, targs);
     let targs_tys = BVec::from_iter_in(
         targs.iter().map(|targ| targ.annot()).copied(),
-        env.bld().alloc,
+        env.bld().bumpalo(),
     )
     .into_bump_slice();
     let this_ty = {

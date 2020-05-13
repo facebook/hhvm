@@ -32,7 +32,7 @@ pub struct Env<'a> {
 
 impl<'a> Env<'a> {
     pub fn new<'b>(function_pos: &'b OwnedPos, genv: Genv<'a>) -> Self {
-        let function_pos = Pos::from_oxidized_in(function_pos, genv.builder.alloc);
+        let function_pos = Pos::from_oxidized_in(function_pos, genv.builder.bumpalo());
         Env {
             ident_counter: 0,
             function_pos,
@@ -57,11 +57,15 @@ impl<'a> Env<'a> {
     }
 
     pub fn ast_pos(&self, pos: &OwnedPos) -> &'a Pos<'a> {
-        Pos::from_oxidized_with_file_in(pos, self.function_pos.filename(), self.genv.builder.alloc)
+        Pos::from_oxidized_with_file_in(
+            pos,
+            self.function_pos.filename(),
+            self.genv.builder.bumpalo(),
+        )
     }
 
     pub fn set_function_pos(&mut self, pos: &OwnedPos) {
-        self.function_pos = Pos::from_oxidized_in(pos, self.genv.builder.alloc);
+        self.function_pos = Pos::from_oxidized_in(pos, self.genv.builder.bumpalo());
     }
 
     pub fn set_return_type(&mut self, ty: Ty<'a>) {

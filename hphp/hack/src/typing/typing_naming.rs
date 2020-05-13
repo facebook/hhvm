@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typing_env_types::Env;
-use arena_trait::Arena;
 use naming_special_names_rust::typehints;
 use oxidized::aast::{Hint, Hint_};
 use oxidized::aast_defs::Tprim;
@@ -33,8 +32,7 @@ pub fn canonicalize_str(id: &str) -> String {
 }
 
 // In the OCaml code, this is done in naming.ml, in the hint_ function
-pub fn name_hint<'a>(env: &mut Env<'a>, h: &'a Hint) -> &'a Hint {
-    let bld = env.builder();
+pub fn name_hint<'a>(_env: &mut Env<'a>, h: &'a Hint) -> &'a Hint {
     let Hint(pos, node) = &*h;
     // TODO(hrust): complete the cases
     let newnode = match &**node {
@@ -59,7 +57,8 @@ pub fn name_hint<'a>(env: &mut Env<'a>, h: &'a Hint) -> &'a Hint {
             return h;
         }
         Some(node) => {
-            return bld.alloc(Hint(pos.clone(), Box::new(node)));
+            let h = Hint(pos.clone(), Box::new(node));
+            Box::leak(Box::new(h))
         }
     }
 }

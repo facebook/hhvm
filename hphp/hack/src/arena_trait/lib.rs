@@ -7,13 +7,14 @@
 use bumpalo::Bump;
 
 pub trait Arena {
-    fn alloc<T>(&self, val: T) -> &mut T;
+    #[allow(clippy::mut_from_ref)]
+    fn alloc<T: TrivialDrop>(&self, val: T) -> &mut T;
 }
 
 impl Arena for Bump {
-    #![deny(clippy::mut_from_ref)]
+    #[allow(clippy::mut_from_ref)]
     #[inline(always)]
-    fn alloc<T>(&self, val: T) -> &mut T {
+    fn alloc<T: TrivialDrop>(&self, val: T) -> &mut T {
         self.alloc(val)
     }
 }

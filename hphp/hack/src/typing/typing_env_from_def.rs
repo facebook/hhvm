@@ -10,6 +10,7 @@
 
 use crate::typing_env::{empty_global_env, Env};
 use crate::typing_phase;
+use arena_trait::Arena;
 use decl_provider_rust as decl_provider;
 use oxidized::ast;
 use oxidized_by_ref::pos::Pos;
@@ -48,8 +49,8 @@ pub fn stmt_env<'a>(
     provider: &'a dyn decl_provider::DeclProvider,
     s: &'a ast::Stmt,
 ) -> Env<'a> {
-    let r = builder.alloc.alloc(PReason_ {
-        pos: Some(Pos::from_oxidized_in(&s.0, builder.alloc)),
+    let r = builder.alloc(PReason_ {
+        pos: Some(Pos::from_oxidized_in(&s.0, builder.bumpalo())),
         reason: Reason::Rhint,
     });
     let rty = builder.void(r);

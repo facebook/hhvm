@@ -2,7 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
-
+use arena_trait::TrivialDrop;
 use bumpalo::collections::Vec;
 
 use oxidized::typing_reason::Reason as OxReason;
@@ -18,6 +18,8 @@ pub struct Reason<'a> {
     pub pos: Option<&'a Pos<'a>>,
     pub reason: Reason_<'a>,
 }
+
+impl TrivialDrop for Reason<'_> {}
 
 #[derive(Clone, Debug, Hash)]
 pub enum Reason_<'a> {
@@ -113,6 +115,8 @@ pub enum Reason_<'a> {
     RglobalFunParam,
     RglobalFunRet,
 }
+
+impl TrivialDrop for Reason_<'_> {}
 
 #[derive(Clone, Debug, Hash)]
 pub enum ExprDepTypeReason<'a> {

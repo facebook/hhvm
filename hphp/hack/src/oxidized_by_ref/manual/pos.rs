@@ -65,14 +65,14 @@ impl<'a> Pos<'a> {
     pub fn info_pos(&self) -> (usize, usize, usize) {
         fn compute<P: FilePos>(pos_start: P, pos_end: P) -> (usize, usize, usize) {
             let (line, start_minus1, bol) = pos_start.line_column_beg();
-            let start = start_minus1 + 1;
+            let start = start_minus1.wrapping_add(1);
             let end_offset = pos_end.offset();
             let mut end = end_offset - bol;
             // To represent the empty interval, pos_start and pos_end are equal because
             // end_offset is exclusive. Here, it's best for error messages to the user if
             // we print characters N to N (highlighting a single character) rather than characters
             // N to (N-1), which is very unintuitive.
-            if start == end + 1 {
+            if start_minus1 == end {
                 end = start
             }
             (line, start, end)
@@ -536,6 +536,22 @@ mod tests {
         assert_eq!(
             Pos::from_lnum_bol_cnum(&b, empty_path, (1, 0, 0), (0, 0, 0)).is_none(),
             false
+        );
+    }
+
+    #[test]
+    fn test_string() {
+        assert_eq!(
+            Pos::none().string().to_string(),
+            r#"File "", line 0, characters 0-0:"#
+        );
+        let b = Bump::new();
+        let path = b.alloc(RelativePath::make(Prefix::Dummy, "a.php"));
+        assert_eq!(
+            Pos::from_lnum_bol_cnum(&b, path, (5, 100, 117), (5, 100, 142))
+                .string()
+                .to_string(),
+            r#"File "a.php", line 5, characters 18-42:"#
         );
     }
 

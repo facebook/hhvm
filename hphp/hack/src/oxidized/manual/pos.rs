@@ -495,6 +495,21 @@ mod tests {
     }
 
     #[test]
+    fn test_string() {
+        assert_eq!(
+            Pos::make_none().string().to_string(),
+            r#"File "", line 0, characters 0-0:"#
+        );
+        let path = RcOc::new(RelativePath::make(Prefix::Dummy, PathBuf::from("a.php")));
+        assert_eq!(
+            Pos::from_lnum_bol_cnum(path, (5, 100, 117), (5, 100, 142))
+                .string()
+                .to_string(),
+            r#"File "a.php", line 5, characters 18-42:"#
+        );
+    }
+
+    #[test]
     fn test_merge() {
         let test = |name, (exp_start, exp_end), ((fst_start, fst_end), (snd_start, snd_end))| {
             assert_eq!(

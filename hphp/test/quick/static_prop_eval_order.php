@@ -1,6 +1,12 @@
 <?hh
-function f() { echo '1 '; }
-function g() { echo '2 '; }
+function f() {
+  echo '1 ';
+  return 0;
+}
+function g() {
+  echo '2 ';
+  return 0;
+}
 
 HH\autoload_set_paths(
   dict[

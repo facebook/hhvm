@@ -278,18 +278,34 @@ let rage_www (env : env) : ((string * string) option * string) Lwt.t =
           (match clowder_result with
           | Error failure ->
             Lwt.return
-              ( Some ("www_hgdiff.txt", stdout),
+              ( Some ("www_hgdiff.txt", hgdiff),
                 Printf.sprintf
                   "hg patch --no-commit www_hgdiff.txt\n\nnote: clowder failed to put:\n%s"
                   failure )
           | Ok clowder_script ->
             Lwt.return
-              ( Some ("www_hgdiff.txt", stdout),
+              ( Some ("www_hgdiff.txt", hgdiff),
                 clowder_script ^ " | hg patch --no-commit -" ))
+    in
+    let%lwt hg_st_result =
+      Lwt_utils.exec_checked
+        ?env:hgplain_env
+        Exec_command.Hg
+        ~timeout:30.0
+        [| "status"; "--cwd"; Path.to_string env.root |]
+    in
+    let hg_st =
+      match hg_st_result with
+      | Error failure -> format_failure "Unable to `hg status`" failure
+      | Ok { Lwt_utils.Process_success.stdout; _ } -> "hg status:\n" ^ stdout
     in
     Lwt.return
       ( patch_item,
-        Printf.sprintf "hg update -C %s\n\n%s\n" mergebase patch_instructions )
+        Printf.sprintf
+          "hg update -C %s\n\n%s\n\n\n%s"
+          mergebase
+          patch_instructions
+          hg_st )
 
 let rage_www_errors (env : env) : string Lwt.t =
   let%lwt www_errors_result =

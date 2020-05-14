@@ -120,10 +120,8 @@ let check_extend_kinds ctx shallow_class =
       | Some parent ->
         check_extend_kind parent_pos parent.sc_kind class_pos class_kind)
 
-let no_trait_reuse_enabled env =
-  TypecheckerOptions.experimental_feature_enabled
-    (Env.get_tcopt env)
-    TypecheckerOptions.experimental_no_trait_reuse
+let disallow_trait_reuse env =
+  TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)
 
 let check_trait_reuse ctx shallow_class =
   let class_name = snd shallow_class.sc_name in
@@ -147,7 +145,7 @@ let check_class env cls =
   check_if_cyclic (Env.get_ctx env) cls;
   let shallow_class = Cls.shallow_decl cls in
   check_extend_kinds (Env.get_ctx env) shallow_class;
-  if no_trait_reuse_enabled env then
+  if disallow_trait_reuse env then
     check_trait_reuse (Env.get_ctx env) shallow_class;
   if not Ast_defs.(equal_class_kind (Cls.kind cls) Ctrait) then (
     check_override_annotations cls ~static:false;

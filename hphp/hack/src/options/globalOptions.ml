@@ -63,6 +63,7 @@ type t = {
   tco_check_xhp_attribute: bool;
   tco_check_redundant_generics: bool;
   tco_disallow_unresolved_type_variables: bool;
+  tco_disallow_trait_reuse: bool;
   tco_disallow_invalid_arraykey_constraint: bool;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
@@ -131,12 +132,6 @@ let tco_experimental_disallow_static_memoized = "disallow_static_memoized"
 let tco_experimental_coroutines = "coroutines"
 
 (**
- * Enforce no duplication of traits in a class hierarchy. There is some clean-up
- * involved, so it's behind a flag.
- *)
-let tco_experimental_no_trait_reuse = "no_trait_reuse"
-
-(**
  * Prevent type param names from shadowing class names
  *)
 let tco_experimental_type_param_shadowing = "type_param_shadowing"
@@ -164,7 +159,6 @@ let tco_experimental_all =
          tco_experimental_forbid_nullable_cast;
          tco_experimental_coroutines;
          tco_experimental_disallow_static_memoized;
-         tco_experimental_no_trait_reuse;
          tco_experimental_trait_method_redeclarations;
          tco_experimental_abstract_type_const_with_default;
        ]
@@ -231,6 +225,7 @@ let default =
     tco_check_xhp_attribute = false;
     tco_check_redundant_generics = false;
     tco_disallow_unresolved_type_variables = false;
+    tco_disallow_trait_reuse = false;
     tco_disallow_invalid_arraykey_constraint = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
@@ -333,6 +328,7 @@ let make
     ?(tco_check_redundant_generics = default.tco_check_redundant_generics)
     ?(tco_disallow_unresolved_type_variables =
       default.tco_disallow_unresolved_type_variables)
+    ?(tco_disallow_trait_reuse = default.tco_disallow_trait_reuse)
     ?(tco_disallow_invalid_arraykey_constraint =
       default.tco_disallow_invalid_arraykey_constraint)
     ?(po_enable_class_level_where_clauses =
@@ -434,6 +430,7 @@ let make
     tco_check_xhp_attribute;
     tco_check_redundant_generics;
     tco_disallow_unresolved_type_variables;
+    tco_disallow_trait_reuse;
     tco_disallow_invalid_arraykey_constraint;
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
@@ -593,6 +590,8 @@ let tco_check_redundant_generics t = t.tco_check_redundant_generics
 
 let tco_disallow_unresolved_type_variables t =
   t.tco_disallow_unresolved_type_variables
+
+let tco_disallow_trait_reuse t = t.tco_disallow_trait_reuse
 
 let po_enable_class_level_where_clauses t =
   t.po_enable_class_level_where_clauses

@@ -115,10 +115,8 @@ let check_extend_kind
  *)
 (*****************************************************************************)
 
-let experimental_no_trait_reuse_enabled (env : Decl_env.env) : bool =
-  TypecheckerOptions.experimental_feature_enabled
-    (Decl_env.tcopt env)
-    TypecheckerOptions.experimental_no_trait_reuse
+let disallow_trait_reuse (env : Decl_env.env) : bool =
+  TypecheckerOptions.disallow_trait_reuse (Decl_env.tcopt env)
 
 let report_reused_trait
     (parent_type : Decl_defs.decl_class_type)
@@ -194,7 +192,7 @@ let get_class_parent_or_trait
     (ty : Typing_defs.decl_phase Typing_defs.ty) : SSet.t * bool * 'a =
   (* See comment on check_no_duplicate_traits for reasoning here *)
   let no_trait_reuse =
-    experimental_no_trait_reuse_enabled env
+    disallow_trait_reuse env
     && (not (phys_equal pass `Xhp_pass))
     && not Ast_defs.(equal_class_kind shallow_class.sc_kind Cinterface)
   in

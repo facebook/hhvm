@@ -70,8 +70,6 @@ let experimental_coroutines = GlobalOptions.tco_experimental_coroutines
 let experimental_disallow_static_memoized =
   GlobalOptions.tco_experimental_disallow_static_memoized
 
-let experimental_no_trait_reuse = GlobalOptions.tco_experimental_no_trait_reuse
-
 let experimental_type_param_shadowing =
   GlobalOptions.tco_experimental_type_param_shadowing
 
@@ -123,6 +121,8 @@ let check_redundant_generics = GlobalOptions.tco_check_redundant_generics
 
 let disallow_unresolved_type_variables =
   GlobalOptions.tco_disallow_unresolved_type_variables
+
+let disallow_trait_reuse = GlobalOptions.tco_disallow_trait_reuse
 
 let disallow_invalid_arraykey_constraint =
   GlobalOptions.tco_disallow_invalid_arraykey_constraint

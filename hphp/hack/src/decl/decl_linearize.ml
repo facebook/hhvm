@@ -112,10 +112,8 @@ let empty_mro_element =
     mro_passthrough_abstract_typeconst = false;
   }
 
-let no_trait_reuse_enabled env =
-  TypecheckerOptions.experimental_feature_enabled
-    (Decl_env.tcopt env.decl_env)
-    TypecheckerOptions.experimental_no_trait_reuse
+let disallow_trait_reuse env =
+  TypecheckerOptions.disallow_trait_reuse (Decl_env.tcopt env.decl_env)
 
 let is_requirement (source : source_type) =
   match source with
@@ -354,11 +352,11 @@ and next_state
               | _ -> false
             in
             if
-              no_trait_reuse_enabled env
+              disallow_trait_reuse env
               && Option.is_none next.mro_trait_reuse
               && is_trait next.mro_name
             then
-              (* When the no_trait_reuse feature is enabled, we want to report
+              (* When the disallow_trait_reuse feature is enabled, we want to report
              an error for reused traits. Instead of skipping trait
              mro_elements when they are already present in the
              linearization, we emit an element with the trait_reuse flag

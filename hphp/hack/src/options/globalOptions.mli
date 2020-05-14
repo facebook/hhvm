@@ -168,6 +168,8 @@ type t = {
    * Flag to produce an error whenever the TAST contains unresolved type variables
    *)
   tco_disallow_unresolved_type_variables: bool;
+  (* Ban use of traits that are already used in parent classes. *)
+  tco_disallow_trait_reuse: bool;
   (* Disallow using non-string, non-int types as array key type constraints. *)
   tco_disallow_invalid_arraykey_constraint: bool;
   (* Enable class-level where clauses, i.e.
@@ -308,6 +310,7 @@ val make :
   ?tco_check_xhp_attribute:bool ->
   ?tco_check_redundant_generics:bool ->
   ?tco_disallow_unresolved_type_variables:bool ->
+  ?tco_disallow_trait_reuse:bool ->
   ?tco_disallow_invalid_arraykey_constraint:bool ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
@@ -432,8 +435,6 @@ val tco_experimental_coroutines : string
 
 val tco_experimental_disallow_static_memoized : string
 
-val tco_experimental_no_trait_reuse : string
-
 val tco_experimental_type_param_shadowing : string
 
 val tco_experimental_trait_method_redeclarations : string
@@ -481,6 +482,8 @@ val tco_check_xhp_attribute : t -> bool
 val tco_check_redundant_generics : t -> bool
 
 val tco_disallow_unresolved_type_variables : t -> bool
+
+val tco_disallow_trait_reuse : t -> bool
 
 val tco_disallow_invalid_arraykey_constraint : t -> bool
 

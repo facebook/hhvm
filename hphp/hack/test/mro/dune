@@ -9,7 +9,8 @@
     --program %{exe:../../src/hh_single_type_check.exe}
     --flags --mro
     --shallow-class-decl
-    --no-builtins)))
+    --no-builtins
+    --disallow-trait-reuse)))
 
 (alias
     (name runtest)

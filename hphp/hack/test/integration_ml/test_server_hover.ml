@@ -971,23 +971,6 @@ function test_duplicate_result_class(bool $x): void {
 }
 "
 
-let duplicate_results_cases =
-  [
-    ( ("duplicate_results.php", 22, 7),
-      [
-        {
-          snippet = "public function foo(): void";
-          addendum =
-            [
-              "Doc block.";
-              "Return type: `void`";
-              "Full name: `DuplicateResultTrait::foo`";
-            ];
-          pos = pos_at (22, 7) (22, 9);
-        };
-      ] );
-  ]
-
 let files =
   [
     ("class_members.php", class_members);
@@ -999,12 +982,10 @@ let files =
     ("bounded_generic_fun.php", bounded_generic_fun);
     ("doc_block_fallback.php", doc_block_fallback);
     ("class_id_positions.php", class_id_positions);
-    ("duplicate_results.php", duplicate_results);
   ]
 
 let cases =
-  duplicate_results_cases
-  @ class_id_positions_cases
+  class_id_positions_cases
   @ doc_block_fallback_cases
   @ special_cases_cases
   @ docblock_cases

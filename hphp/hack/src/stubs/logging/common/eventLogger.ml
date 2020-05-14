@@ -71,3 +71,5 @@ let watchman_connection_reestablishment_failed _ = ()
 let watchman_timeout _ = ()
 
 let dfind_ready _ _ = ()
+
+let recheck_disk_files () = ()

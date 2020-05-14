@@ -1074,6 +1074,7 @@ let serve ~(in_fd : Lwt_unix.file_descr) ~(out_fd : Lwt_unix.file_descr) :
   let rec flush_event_logger () : unit Lwt.t =
     let%lwt () = Lwt_unix.sleep 0.5 in
     Lwt.async EventLoggerLwt.flush;
+    EventLogger.recheck_disk_files ();
     flush_event_logger ()
   in
   let rec pump_stdin (message_queue : message_queue) : unit Lwt.t =

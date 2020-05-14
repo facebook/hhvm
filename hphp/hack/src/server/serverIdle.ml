@@ -22,6 +22,8 @@ type callback =
 module Periodical : sig
   val always : float
 
+  val one_second : float
+
   val one_hour : float
 
   val one_day : float
@@ -39,6 +41,8 @@ module Periodical : sig
   val register_callback : callback -> unit
 end = struct
   let always = 0.0
+
+  let one_second = 1.0
 
   let one_hour = 3600.0
 
@@ -113,6 +117,10 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
       ( Periodical.always,
         fun ~env ->
           let _result : int = Gc.major_slice 0 in
+          env );
+      ( Periodical.one_second,
+        fun ~env ->
+          EventLogger.recheck_disk_files ();
           env );
       ( Periodical.one_hour *. 3.,
         fun ~env ->

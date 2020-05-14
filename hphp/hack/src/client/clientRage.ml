@@ -16,6 +16,17 @@ type env = {
   desc: string;
 }
 
+let format_failure (message : string) (failure : Lwt_utils.Process_failure.t) :
+    string =
+  let open Lwt_utils.Process_failure in
+  Printf.sprintf
+    "%s: %s\n%s\nSTDOUT:\n%s\nSTDERR:\n%s\n"
+    message
+    (Process.status_to_string failure.process_status)
+    failure.command_line
+    failure.stdout
+    failure.stderr
+
 let get_stack (pid, reason) : string Lwt.t =
   let pid = string_of_int pid in
   let format msg = Printf.sprintf "PSTACK %s (%s)\n%s\n" pid reason msg in
@@ -37,35 +48,14 @@ let get_stack (pid, reason) : string Lwt.t =
       let err = "unable to get stack: " ^ e.Lwt_utils.Process_failure.stderr in
       Lwt.return (format err))
 
-let format_failure (message : string) (failure : Lwt_utils.Process_failure.t) :
-    string =
-  let open Lwt_utils.Process_failure in
-  Printf.sprintf
-    "%s: %s\n%s\nSTDOUT:\n%s\nSTDERR:\n%s\n"
-    message
-    (Process.status_to_string failure.process_status)
-    failure.command_line
-    failure.stdout
-    failure.stderr
-
-let rage_pstacks (env : env) : string Lwt.t =
-  let is_interesting (_, reason) =
-    not (String_utils.string_starts_with reason "slave")
+let pgrep pattern =
+  let%lwt result =
+    Lwt_utils.exec_checked ~timeout:20.0 Exec_command.Pgrep [| "-a"; pattern |]
   in
-  let server_pids =
-    PidLog.get_pids (ServerFiles.pids_file env.root)
-    |> List.filter ~f:is_interesting
-  in
-  let%lwt client_pids_result =
-    Lwt_utils.exec_checked
-      ~timeout:20.0
-      Exec_command.Pgrep
-      [| "-a"; "hh_client" |]
-  in
-  let client_pids =
-    match client_pids_result with
-    | Ok { Lwt_utils.Process_success.stdout; _ } ->
-      let re = Str.regexp {|^\([0-9]+\) \(.*\)$|} in
+  match result with
+  | Ok { Lwt_utils.Process_success.stdout; _ } ->
+    let re = Str.regexp {|^\([0-9]+\) \(.*\)$|} in
+    let pids =
       String.split_lines stdout
       |> List.filter_map ~f:(fun s ->
              try
@@ -76,9 +66,52 @@ let rage_pstacks (env : env) : string Lwt.t =
                else
                  None
              with _ -> None)
-    | Error _ -> []
+    in
+    Lwt.return pids
+  | Error _ -> Lwt.return []
+
+let rage_pstacks (env : env) : string Lwt.t =
+  (* We'll look at all relevant pids: all those from the hh_server
+  binary, and the hh_client binary, and all those in the server pids_file.
+  We put them into a map from pid to "reason" so that each relevant
+  pid is only picked once. The "reason" is a useful string description:
+  pgrep shows the cmdline that spawned a given pid so we use that as
+  a reason; the server pids_file also stores reasons. *)
+  let%lwt hh_server_pids = pgrep "hh_server" in
+  let%lwt hh_client_pids = pgrep "hh_client" in
+  let server_pids = PidLog.get_pids (ServerFiles.pids_file env.root) in
+  let pids = IMap.empty in
+  let pids =
+    List.fold hh_server_pids ~init:pids ~f:(fun acc (pid, reason) ->
+        IMap.add pid reason acc)
   in
-  let%lwt stacks = Lwt_list.map_p get_stack (server_pids @ client_pids) in
+  let pids =
+    List.fold hh_client_pids ~init:pids ~f:(fun acc (pid, reason) ->
+        IMap.add pid reason acc)
+  in
+  let pids =
+    List.fold server_pids ~init:pids ~f:(fun acc (pid, reason) ->
+        IMap.add pid reason acc)
+  in
+  let pids = IMap.bindings pids in
+  (* Pstacks take a while to collect. And some are uninteresting.
+  We'll filter out all scuba, and all but one slave. Keep just
+  one slave in case the workers are stuck for some reason. *)
+  let (pids, _) =
+    List.fold pids ~init:([], false) ~f:(fun (acc, has_slave) (pid, reason) ->
+        if String_utils.is_substring "scuba for process" reason then
+          (acc, has_slave)
+        else if String_utils.string_starts_with reason "slave" then
+          if has_slave then
+            (acc, has_slave)
+          else
+            ((pid, reason) :: acc, true)
+        else
+          ((pid, reason) :: acc, has_slave))
+  in
+  (* I don't know why pstacks are slow; I don't know what their
+  bottleneck is. But I observed that doing them in parallel didn't hurt. *)
+  let%lwt stacks = Lwt_list.map_p get_stack pids in
   let stacks = String.concat stacks ~sep:"\n\n" in
   Lwt.return stacks
 

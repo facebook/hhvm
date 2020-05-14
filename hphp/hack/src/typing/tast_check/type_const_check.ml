@@ -71,6 +71,7 @@ let handler =
                       (Errors.invalid_enforceable_type "constant" (pos, name))
                 | _ -> ()
               end;
-              Option.iter tc.ttc_reifiable (check_reifiable env tc)
+              if String.equal tc.ttc_origin (Cls.name cls) then
+                Option.iter tc.ttc_reifiable (check_reifiable env tc)
           end)
   end

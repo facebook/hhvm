@@ -766,9 +766,11 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
                 on_error)
     in
 
-    (* Don't recheck inherited type constants for enforceability: an error will
+    (* Don't recheck inherited type constants: errors will
      * have been emitted already for the parent *)
-    ( if not inherited then
+    ( if inherited then
+      ()
+    else
       match
         ( child_typeconst.ttc_abstract,
           child_typeconst.ttc_type,
@@ -785,15 +787,14 @@ let tconst_subsumption env class_name parent_typeconst child_typeconst on_error
           (fst child_typeconst.ttc_name)
           ty
           emit_error
-      | _ -> () );
+      | _ ->
+        ();
 
-    begin
-      match parent_typeconst.ttc_reifiable with
-      | None -> ()
-      | Some pos ->
-        let tast_env = Tast_env.typing_env_as_tast_env env in
-        Type_const_check.check_reifiable tast_env child_typeconst pos
-    end;
+        (match parent_typeconst.ttc_reifiable with
+        | None -> ()
+        | Some pos ->
+          let tast_env = Tast_env.typing_env_as_tast_env env in
+          Type_const_check.check_reifiable tast_env child_typeconst pos) );
 
     (* If the parent cannot be overridden, we unify the types otherwise we ensure
      * the child's assigned type is compatible with the parent's *)

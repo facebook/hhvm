@@ -15,8 +15,9 @@
 */
 #include "hphp/util/light-process.h"
 
-#include <string>
 #include <memory>
+#include <set>
+#include <string>
 #include <vector>
 
 #include <boost/thread/barrier.hpp>
@@ -61,18 +62,18 @@ Mutex s_mutex;
 using afdt::send_fd;
 using afdt::recv_fd;
 
-char **build_envp(const std::vector<std::string> &env) {
-  char **envp = nullptr;
-  int size = env.size();
+char **build_cstrarr(const std::vector<std::string> &vec) {
+  char **cstrarr = nullptr;
+  int size = vec.size();
   if (size) {
-    envp = (char **)malloc((size + 1) * sizeof(char *));
+    cstrarr = (char **)malloc((size + 1) * sizeof(char *));
     int j = 0;
-    for (unsigned int i = 0; i < env.size(); i++, j++) {
-      *(envp + j) = (char *)env[i].c_str();
+    for (unsigned int i = 0; i < vec.size(); i++, j++) {
+      *(cstrarr + j) = (char *)vec[i].c_str();
     }
-    *(envp + j) = nullptr;
+    *(cstrarr + j) = nullptr;
   }
-  return envp;
+  return cstrarr;
 }
 
 void close_fds(const std::vector<int> &fds) {
@@ -287,6 +288,38 @@ void do_popen(int afdt_fd) {
   hardwareCounterWrapperHelper(do_popen_helper, afdt_fd);
 }
 
+pid_t do_fork_and_execve_helper(int afdt_fd) {
+  std::string path, cwd;
+  std::vector<std::string> argv, envp;
+  int flags, pgid;
+  size_t fd_count;
+
+  lwp_read(afdt_fd, path, cwd, argv, envp, flags, pgid, fd_count);
+  std::map<int, int> fds;
+  for (size_t i = 0; i < fd_count; ++i) {
+    int target_fd;
+    lwp_read(afdt_fd, target_fd);
+    int current_fd = recv_fd(afdt_fd);
+    fds[target_fd] = current_fd;
+  }
+
+  pid_t pid = Process::ForkAndExecve(path, argv, envp, cwd, fds, flags, pgid);
+  if (pid> 0) {
+    lwp_write(afdt_fd, "success", pid);
+  } else {
+    lwp_write(afdt_fd, "error", (int) pid, (int) errno);
+  }
+
+  for (auto [_target, fd] : fds) {
+    close(fd);
+  }
+  return pid;
+}
+
+void do_fork_and_execve(int afdt_fd) {
+  hardwareCounterWrapperHelper(do_fork_and_execve_helper, afdt_fd);
+}
+
 pid_t do_proc_open_helper(int afdt_fd) {
   std::string cmd, cwd;
   std::vector<std::string> env;
@@ -318,12 +351,13 @@ pid_t do_proc_open_helper(int afdt_fd) {
     for (int i = 0; i < pvals.size(); i++) {
       dup2(pkeys[i], pvals[i]);
     }
+
     if (!cwd.empty() && chdir(cwd.c_str())) {
       // non-zero for error
       // chdir failed, the working directory remains unchanged
     }
     if (!env.empty()) {
-      char **envp = build_envp(env);
+      char **envp = build_cstrarr(env);
       execle("/bin/sh", "sh", "-c", cmd.c_str(), nullptr, envp);
       free(envp);
     } else {
@@ -599,6 +633,8 @@ void LightProcess::runShadow(int afdt_fd) {
           do_popen(afdt_fd);
         } else if (buf == "proc_open") {
           do_proc_open(afdt_fd);
+        } else if (buf == "execve") {
+          do_fork_and_execve(afdt_fd);
         } else if (buf == "waitpid") {
           do_waitpid(afdt_fd);
         } else if (buf == "change_user") {
@@ -800,6 +836,40 @@ int LightProcess::pclose(FILE *f) {
   int status;
   if (LightProcess::waitpid(pid, &status, 0, 0) < 0) return -1;
   return status;
+}
+
+pid_t LightProcess::ForkAndExecve(const std::string& path,
+                                  const std::vector<std::string>& argv,
+                                  const std::vector<std::string>& envp,
+                                  const std::string& cwd,
+                                  const std::map<int, int>& fds,
+                                  int options,
+                                  pid_t pgid) {
+  return runLight("execve", [&] (LightProcess* proc) -> pid_t {
+      auto fin = proc->m_afdt_fd;
+      auto fout = proc->m_afdt_fd;
+
+      lwp_write(fout, "execve", path, cwd, argv, envp, options, pgid, (size_t) fds.size());
+      for (const auto& [target_fd, current_fd]: fds) {
+        lwp_write(fout, target_fd);
+        send_fd(fout, current_fd);
+      }
+
+      std::string buf;
+      lwp_read(fin, buf);
+      if (buf == "success") {
+        pid_t pid;
+        lwp_read(fin, pid);
+        return pid;
+      }
+      assert(buf == "error");
+
+      int ret;
+      int saved_errno;
+      lwp_read(fin, ret, saved_errno);
+      errno = saved_errno;
+      return (pid_t) ret;
+  }, static_cast<pid_t>(-1));
 }
 
 pid_t LightProcess::proc_open(const char *cmd, const std::vector<int> &created,

@@ -23,10 +23,12 @@
 #include <Windows.h>
 #include <ShlObj.h>
 #else
+#include <sys/fcntl.h>
 #include <sys/utsname.h>
 #include <sys/wait.h>
 #include <pwd.h>
 #include <folly/portability/Sockets.h>
+#include <folly/portability/SysMman.h>
 #include <folly/portability/Unistd.h>
 #endif
 
@@ -37,6 +39,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <set>
+
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/text-color.h"
 #include "hphp/util/user-info.h"
 
@@ -398,6 +403,225 @@ int Process::Relaunch() {
     return -1;
   }
   return execvp(Argv[0], Argv);
+}
+
+std::map<int, int> Process::RemapFDsPreExec(const std::map<int, int>& fds) {
+  std::map<int, int> unspecified;
+  // 1. copy all to FDs outside of STDIO range
+  std::map<int, int> dups;
+  std::set<int> preserve_set;
+  for (auto& [_target, current] : fds) {
+    if (dups.find(current) != dups.end()) {
+      continue;
+    }
+
+    int next_fd;
+    bool conflict;
+    do {
+      conflict = false;
+      // don't conflict with STDIO
+      next_fd = dup(current);
+      if (next_fd <= STDERR_FILENO) {
+        conflict = true;
+        continue;
+      }
+      // don't conflict with targets
+      conflict = false;
+      for (auto [target, _current] : fds) {
+        if (next_fd == target) {
+          conflict = true;
+          break;
+        }
+      }
+    } while (conflict);
+    dups[current] = next_fd;
+    preserve_set.emplace(next_fd);
+  }
+
+  // 2. clean up libc STDIO
+  //
+  // Don't want to swap the FD underlying these FILE*...
+  //
+  // If they are closed already, these are silent no-ops.
+  fclose(stdin);
+  fclose(stdout);
+  fclose(stderr);
+
+  // 3. close all FDs except our dups
+  //
+  // This includes the STDIO FDs as it's possible that:
+  // - the FILE* were previously closed (so the fclose above were no-ops)
+  // - the FDs were then re-used
+#ifdef __APPLE__
+  const char* fd_dir = "/dev/fd";
+#endif
+#ifdef __linux__
+  const char* fd_dir = "/proc/self/fd";
+#endif
+  // If you close FDs while in this loop, they get removed from /proc/self/fd
+  // and the iterator gets sad ("Bad file descriptor: /proc/self/fd")
+  std::set<int> fds_to_close;
+  for (const auto& entry : boost::filesystem::directory_iterator(fd_dir)) {
+    char* endptr = nullptr;
+    const char* filename = entry.path().filename().c_str();
+    const int fd = strtol(filename, &endptr, 10);
+    assert(endptr != filename); // no matching characters
+    assert(*endptr == '\0'); // entire string
+    if (preserve_set.find(fd) != preserve_set.end()) {
+      continue;
+    }
+    fds_to_close.emplace(fd);
+  }
+  for (const auto& fd: fds_to_close) {
+    close(fd);
+  }
+
+  // 4. Move the dups into place.
+  for (const auto& [target, orig] : fds) {
+    int tmp = dups[orig];
+
+    if (target < 0 /* don't care what the FD is */) {
+      unspecified[target] = tmp;
+    } else {
+      dup2(tmp, target);
+    }
+  }
+
+  // 5. Close the dups; do this separately to above in case
+  // the same orig was used for multiple targets
+  for (const auto& [target, orig] : fds) {
+    if (target < 0) {
+      continue;
+    }
+    close(dups.at(orig));
+  }
+  return unspecified;
+}
+
+namespace {
+  char **build_cstrarr(const std::vector<std::string> &vec) {
+    char **cstrarr = nullptr;
+    int size = vec.size();
+    if (size) {
+      cstrarr = (char **)malloc((size + 1) * sizeof(char *));
+      int j = 0;
+      for (unsigned int i = 0; i < vec.size(); i++, j++) {
+        *(cstrarr + j) = (char *)vec[i].c_str();
+      }
+      *(cstrarr + j) = nullptr;
+    }
+    return cstrarr;
+  }
+} // namespace {
+
+pid_t Process::ForkAndExecve(
+  const std::string& path,
+  const std::vector<std::string>& argv,
+  const std::vector<std::string>& envp,
+  const std::string& cwd,
+  const std::map<int, int>& orig_fds,
+  int flags,
+  pid_t pgid
+) {
+  // Distinguish execve failure: if the write side of the pipe
+  // is closed with no data, it succeeded.
+  int fork_fds[2];
+  pipe(fork_fds);
+  int fork_r = fork_fds[0];
+  int fork_w = fork_fds[1];
+  fcntl(fork_w, F_SETFD, fcntl(fork_w, F_GETFD) | O_CLOEXEC);
+
+  pid_t child = fork();
+
+  if (child == -1) {
+    return -1;
+  }
+
+  if (child == 0) {
+    mprotect_1g_pages(PROT_READ);
+    Process::OOMScoreAdj(1000);
+
+    close(fork_r);
+
+    // Need mutable copy
+    std::map<int, int> fds(orig_fds);
+    fds[-1] = fork_w;
+    const auto remapped = Process::RemapFDsPreExec(fds);
+    fork_w = remapped.at(-1);
+
+    if (!cwd.empty()) {
+      if (cwd != Process::GetCurrentDirectory()) {
+        if (chdir(cwd.c_str()) == -1) {
+          dprintf(fork_w, "%s %d", "chdir", errno);
+          _Exit(1);
+        }
+      }
+    }
+
+    if (flags & Process::FORK_AND_EXECVE_FLAG_SETSID) {
+      if (setsid() == -1) {
+        dprintf(fork_w, "%s\n%d\n", "setsid", errno);
+        _Exit(1);
+      }
+    } else if (flags & Process::FORK_AND_EXECVE_FLAG_SETPGID) {
+      if (setpgid(0, pgid) == -1) {
+        dprintf(fork_w, "%s %d", "setpgid", errno);
+        _Exit(1);
+      }
+    }
+
+    char** argv_arr = build_cstrarr(argv);
+    char** envp_arr = build_cstrarr(envp);
+    SCOPE_EXIT { free(argv_arr); free(envp_arr); };
+
+    execve(path.c_str(), argv_arr, envp_arr);
+    dprintf(fork_w, "%s %d", "execve", errno);
+    _Exit(1);
+  }
+
+  close(fork_w);
+
+  pollfd pfd[1];
+  pfd[0].fd = fork_w;
+  pfd[0].events = POLLIN;
+  int ret;
+  do {
+    ret = poll(pfd, /* number of fds = */ 1, /* timeout = no timeout*/ -1);
+  } while (ret == -1 && errno == EINTR);
+
+  char buf[16];
+  auto len = read(fork_r, &buf, sizeof(buf));
+  close(fork_r);
+
+  // Closed without write, which means close-on-exec
+  if (len < 1) {
+    return child;
+  }
+
+  char failed_call_buf[16];
+  int saved_errno;
+  if (sscanf(buf, "%16s %d", failed_call_buf, &saved_errno) != 2) {
+    return -999;
+  }
+
+  // Doing the call => return value here instead of sending return values over
+  // the pipe so that it's all in one place, and we're less likely to introduce
+  // bugs when/if we add additional features.
+  const std::string failed_call(failed_call_buf);
+  SCOPE_EXIT { errno = saved_errno; };
+  if (failed_call == "chdir") {
+    return -2;
+  }
+  if (failed_call == "setsid") {
+    return -3;
+  }
+  if (failed_call == "setpgid") {
+    return -4;
+  }
+  if (failed_call == "execve") {
+    return -5;
+  }
+  return -9999;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

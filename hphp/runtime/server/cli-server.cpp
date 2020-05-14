@@ -187,7 +187,7 @@ namespace {
  *
  * ===== WARNING ===== WARNING ===== WARNING ===== WARNING ===== WARNING =====
  */
-const uint32_t CLI_SERVER_API_BASE_VERSION = 5;
+const uint32_t CLI_SERVER_API_BASE_VERSION = 6;
 std::atomic<uint64_t> s_cliServerComputedVersion(0);
 
 const StaticString s_hphp_cli_server_api_version("hphp.cli_server_api_version");

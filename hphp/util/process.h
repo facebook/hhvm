@@ -17,8 +17,11 @@
 #ifndef incl_HPHP_PROCESS_H_
 #define incl_HPHP_PROCESS_H_
 
+#include <map>
 #include <string>
+#include <vector>
 
+#include <folly/portability/SysResource.h>
 #include <folly/portability/Unistd.h>
 
 #ifdef _MSC_VER
@@ -230,6 +233,65 @@ struct Process {
    * upon success, and returns -1 when an error occurs (similar to exec()).
    */
   static int Relaunch();
+
+  /** Replace the FDs, ensuring a clean STDIO, and avoiding conflicts.
+   *
+   * `fds` is a map where:
+   * - keys are the target FD in the new process
+   * - values are the FD in the current process
+   *
+   * Any FDs not specified (including STDIO) will be closed.
+   *
+   * If the TARGET is negative, it will be given any FD that does not conflict
+   * with the other input.
+   *
+   * createDelegate() closes stdin/stdout/stderr, so some of our
+   * received handles may be FD 0/1/2 - that doesn't mean they're
+   * stdin/out/err though, but we need to make sure we don't accidentally
+   * close them. Copy everything out of the 'unsafe' space, close everything
+   * else, then move back.
+   *
+   * Returns a map of negative targets (if any) to their new actual FD.
+   */
+  static std::map<int, int> RemapFDsPreExec(const std::map<int, int>& fds);
+
+  static const int FORK_AND_EXECVE_FLAG_NONE    = 0;
+  static const int FORK_AND_EXECVE_FLAG_SETPGID = 1 << 0;
+  static const int FORK_AND_EXECVE_FLAG_SETSID  = 1 << 1;
+
+  /** Opens a process with the given arguments, environment, working directory,
+   * and file descriptors.
+   *
+   * This *does not* use the shell; to use the shell, consider executing
+   * `/bin/sh` with args `['-c', 'command'].
+   *
+   * `pgid` is ignored unless `FORK_AND_EXECVE_FLAG_SETPGID` is in `flags`.
+   *
+   * `FORK_AND_EXECVE_FLAG_SETPGID` and `FORK_AND_EXECVE_FLAG_SETSID` are
+   * mutually exclusive.
+   *
+   * `fds` is a map where:
+   * - keys are the target FD in the new process
+   * - values are the FD in the current process
+   *
+   * Any FDs not specified (including STDIO) will be closed.
+   *
+   * On error, `errno` will be set.
+   * - if fork() fails, -1 will be returned
+   * - if chdir() fails, -2 will be returned
+   * - if setsid() fails, -3 will be returned
+   * - if setpgid() fails, -4 will be returned
+   * - if execve() fails, -5 will be returned
+   */
+  static pid_t ForkAndExecve(
+    const std::string& path,
+    const std::vector<std::string>& argv,
+    const std::vector<std::string>& envp,
+    const std::string& cwd,
+    const std::map<int, int>& fds,
+    int flags = FORK_AND_EXECVE_FLAG_NONE,
+    pid_t pgid = 0
+  );
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/file-await.h"
 #include "hphp/runtime/base/plain-file.h"
@@ -23,6 +24,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/server/cli-server-ext.h"
 #include "hphp/system/systemlib.h"
+#include "hphp/util/light-process.h"
 
 #include <folly/functional/Invoke.h>
 #include <type_traits>
@@ -350,13 +352,34 @@ struct HSLFileDescriptor {
   }
 
   static HSLFileDescriptor* get(const Object& obj) {
-    if (obj.isNull() || !obj->instanceof(s_FQHSLFileDescriptor)) {
-      raise_typehint_error("Expected an HSL FileDescriptor");
+    if (obj.isNull()) {
+      raise_typehint_error("Expected an HSL FileDescriptor, got null");
+    }
+    if (!obj->instanceof(s_FQHSLFileDescriptor)) {
+      raise_typehint_error(
+        folly::sformat(
+          "Expected an HSL FileDescriptor, got instance of class '{}'",
+          obj->getClassName().c_str()
+        )
+      );
     }
     return Native::data<HSLFileDescriptor>(obj);
   }
 
-  static int fd(const Object& obj) {
+  static HSLFileDescriptor* get(const Variant& var) {
+    if (!var.isObject()) {
+      raise_typehint_error(
+        folly::sformat(
+          "Expected an HSL FileDescriptor, got {}",
+          getDataTypeString(var.getType()).c_str()
+        )
+      );
+    }
+    return get(var.asCObjRef());
+  }
+
+  template<class T>
+  static int fd(const T& obj) {
     return get(obj)->fd();
   }
 
@@ -883,6 +906,112 @@ Object HHVM_FUNCTION(HSL_os_poll_async,
   }
 }
 
+// options
+const StaticString
+  s_cwd("cwd"),
+  s_setsid("setsid"),
+  s_setpgid("setpgid");
+
+int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
+                      const String& path,
+                      const Array& argv,
+                      const Array& envp,
+                      const Array& fds,
+                      const Array& options) {
+  std::string cwd("");
+  int flags = Process::FORK_AND_EXECVE_FLAG_NONE;
+  int pgid = 0;
+
+  if (options.exists(s_cwd)) {
+    const auto& val = options[s_cwd];
+    if (!val.isString()) {
+      throw_errno_exception(EINVAL, "'cwd' option must be a string");
+    }
+    cwd = val.asCStrRef().toCppString();
+  }
+
+  if (options.exists(s_setsid)) {
+    const auto& val = options[s_setsid];
+    if (!val.isBoolean()) {
+      throw_errno_exception(EINVAL, "'setsid' option must be a bool");
+    }
+    if (val.asBooleanVal()) {
+      flags |= Process::FORK_AND_EXECVE_FLAG_SETSID;
+    }
+  }
+
+  if(options.exists(s_setpgid)) {
+    const auto& val = options[s_setpgid];
+    if (!val.isInteger()) {
+      throw_errno_exception(EINVAL, "'setpgid' option must be an integer");
+    }
+    pgid = val.asInt64Val();
+    if (pgid <= 0) {
+      throw_errno_exception(
+        ERANGE,
+        "'setpgid' option is <= 0, which is not a valid pid"
+      );
+    }
+    flags |= Process::FORK_AND_EXECVE_FLAG_SETPGID;
+  }
+
+  auto vec_str_to_cpp_arr = ([] (const Array& vec) {
+    std::vector<std::string> arr;
+    for (ArrayIter iter(vec); iter; ++iter) {
+      arr.push_back(iter.second().toString().toCppString());
+    }
+    return arr;
+  });
+  std::map<int, int> fds_map;
+  for (ArrayIter iter(fds); iter; ++iter) {
+    auto target = iter.first();
+    if (!target.isInteger()) {
+      throw_errno_exception(EINVAL, "Target FD must be an int");
+    }
+    fds_map[target.asInt64Val()] = HSLFileDescriptor::fd(iter.second());
+  }
+  pid_t pid = -1;
+  if (LightProcess::Available()) {
+    pid = LightProcess::ForkAndExecve(
+      path.toCppString(),
+      vec_str_to_cpp_arr(argv),
+      vec_str_to_cpp_arr(envp),
+      cwd,
+      fds_map,
+      flags,
+      pgid
+    );
+  } else {
+    if (RuntimeOption::ServerExecutionMode()) {
+      throw_errno_exception(
+        ENOSYS,
+        "Fork and execve requires lightprocesses in server mode"
+      );
+    }
+    pid = Process::ForkAndExecve(
+      path.toCppString(),
+      vec_str_to_cpp_arr(argv),
+      vec_str_to_cpp_arr(envp),
+      cwd,
+      fds_map,
+      flags,
+      pgid
+    );
+  }
+
+  if (pid > 0) {
+    return pid;
+  }
+  switch (pid) {
+    case -1: throw_errno_exception(errno, "fork() failed");
+    case -2: throw_errno_exception(errno, "chdir() failed");
+    case -3: throw_errno_exception(errno, "setsid() failed");
+    case -4: throw_errno_exception(errno, "setpgid() failed");
+    case -5: throw_errno_exception(errno, "execve() failed");
+    default: throw_errno_exception(errno);
+  }
+}
+
 #undef HSL_CLI_INVOKE
 
 struct OSExtension final : Extension {
@@ -1115,6 +1244,8 @@ struct OSExtension final : Extension {
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\getsockopt_int, HSL_os_getsockopt_int);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\setsockopt_int, HSL_os_setsockopt_int);
+
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\fork_and_execve, HSL_os_fork_and_execve);
 
     loadSystemlib();
     s_FileDescriptorClass = Unit::lookupClass(s_FQHSLFileDescriptor.get());

@@ -20,7 +20,9 @@ let extensions =
     ".phpt";
     (* our php template or test files *)
     ".hack";
-    (* open source hack: bikeshed entry *)
+    (* strict-mode files (Hack) *)
+    ".hackpartial";
+    (* partial-mode files (Hack) *)
     ".hck";
     (* open source hack: bikeshed entry *)
     ".hh";

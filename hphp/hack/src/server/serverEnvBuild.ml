@@ -33,6 +33,7 @@ let watchman_expression_terms =
               J.strlist ["suffix"; "php"];
               J.strlist ["suffix"; "phpt"];
               J.strlist ["suffix"; "hack"];
+              J.strlist ["suffix"; "hackpartial"];
               J.strlist ["suffix"; "hck"];
               J.strlist ["suffix"; "hh"];
               J.strlist ["suffix"; "hhi"];

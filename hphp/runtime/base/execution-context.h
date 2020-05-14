@@ -353,6 +353,7 @@ public:
   void enqueueAPCHandle(APCHandle* handle, size_t size);
 
   void manageAPCHandle();
+  void enqueueAPCDeferredExpire(const String&);
   void cleanup();
 
 public:
@@ -584,6 +585,7 @@ public:
 private:
   size_t m_apcMemSize{0};
   std::vector<APCHandle*> m_apcHandles; // gets moved to treadmill
+  req::vector<StringData*> m_apcDeferredExpire;
 public:
   // Although the error handlers may want to access dynamic properties,
   // we cannot *call* the error handlers (or their destructors) while

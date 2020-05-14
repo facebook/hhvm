@@ -64,7 +64,6 @@ struct TreadmillRequestInfo {
 };
 
 pthread_mutex_t s_genLock = PTHREAD_MUTEX_INITIALIZER;
-const GenCount kIdleGenCount = 0; // not processing any requests.
 std::vector<TreadmillRequestInfo> s_inflightRequests;
 GenCount s_latestCount = 0;
 std::atomic<GenCount> s_oldestRequestInFlight(0);
@@ -288,6 +287,12 @@ int64_t getAgeOldestRequest() {
   if (start == 0) return 0; // no request in flight
   int64_t time = getTime() - start;
   return time / ONE_SEC_IN_MICROSEC;
+}
+
+int64_t getRequestGenCount() {
+  auto const requestIdx = Treadmill::requestIdx();
+  assertx(requestIdx != -1);
+  return s_inflightRequests[requestIdx].startTime;
 }
 
 void deferredFree(void* p) {

@@ -102,7 +102,9 @@ let create_root_from_type_constant
   let class_ =
     match opt_class_def with
     | None ->
-      raise_error (fun () -> Errors.unbound_name_typing class_pos class_name)
+      raise_error (fun () ->
+          if not ctx.ety_env.quiet then
+            Errors.unbound_name_typing class_pos class_name)
     | Some c -> c
   in
   let typeconst =
@@ -155,6 +157,9 @@ let create_root_from_type_constant
     (* TODO(T59448452): this treatment of abstract type constants is unsound *)
     make_abstract env id class_name [] bnd
   in
+  (* Quiet: don't report errors in expanded definition or constraint.
+   * These will have been reported at the definition site already. *)
+  let ety_env = { ety_env with quiet = true } in
   match typeconst with
   (* Concrete type constants *)
   | { ttc_type = Some ty; ttc_constraint = None; _ } ->

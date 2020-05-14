@@ -42,11 +42,14 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
         Relative_path.equal (Pos.filename td_pos) (Env.get_file env)
       | Aast.Transparent -> true
     in
+    (* Quiet: don't report errors in expanded definition.
+     * These will have been reported at the definition site already. *)
     let ety_env =
       {
         ety_env with
         type_expansions = (td_pos, x) :: ety_env.type_expansions;
         substs = Subst.make_locl td_tparams argl;
+        quiet = true;
       }
     in
     let (env, expanded_ty) =

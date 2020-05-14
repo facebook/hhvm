@@ -362,7 +362,7 @@ let do_compile_rust
     Compile_ffi.
       {
         re_filepath = filename;
-        re_config_jsons = config_jsons;
+        re_config_jsons = List.rev config_jsons;
         re_config_list = compiler_options.config_list;
         re_flags =
           ( ( if is_systemlib then

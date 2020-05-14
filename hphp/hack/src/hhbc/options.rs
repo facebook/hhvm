@@ -502,7 +502,7 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
                 "false" => Ok(false),
                 num => num
                     .parse::<i32>()
-                    .map(|v| v == 1)
+                    .map(|v| v.is_positive())
                     .map_err(de::Error::custom),
             };
             while let Some((ref k, ref v)) = map.next_entry::<String, Arg<GlobalValue>>()? {

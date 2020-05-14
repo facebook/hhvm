@@ -74,6 +74,22 @@ lazy_static! {
         let mut m = HashMap::new();
         m.insert("hhvm.dynamic_invoke_functions", parse_csv_strs as ParseFn);
         m.insert("hhvm.include_roots", parse_csv_keyval_strs as ParseFn);
+        m.insert(
+            "hhvm.hack.lang.check_int_overflow",
+            parse_numeric_str as ParseFn,
+        );
+        m.insert(
+            "hhvm.hack.lang.enable_first_class_function_pointers",
+            parse_numeric_str as ParseFn,
+        );
+        m.insert("hhvm.emit_func_pointers", parse_numeric_str as ParseFn);
+        m.insert("hhvm.emit_cls_meth_pointers", parse_numeric_str as ParseFn);
+        m.insert("hhvm.emit_inst_meth_pointers", parse_numeric_str as ParseFn);
+        m.insert(
+            "hhvm.emit_meth_caller_func_pointers",
+            parse_numeric_str as ParseFn,
+        );
+        m.insert("hhvm.rx_is_enabled", parse_numeric_str as ParseFn);
         m
     };
 }
@@ -104,4 +120,11 @@ fn parse_csv_keyval_strs(s: &str) -> Option<Json> {
         }
     });
     Some(ret)
+}
+
+fn parse_numeric_str(s: &str) -> Option<Json> {
+    match s.parse::<i32>() {
+        Ok(i) if i.is_positive() => Some(json!("true")),
+        _ => Some(json!(s)),
+    }
 }

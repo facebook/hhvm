@@ -2055,6 +2055,12 @@ let maybe_mutable_methods_must_be_reactive pos name =
     ^ " is annotated with <<__MaybeMutable> attribute, or has this attribute on one of parameters so it must be marked reactive."
     )
 
+let entrypoint_arguments pos =
+  add
+    (NastCheck.err_code NastCheck.EntryPointArguments)
+    pos
+    "__EntryPoint functions cannot take arguments."
+
 let inout_params_special pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsSpecial)

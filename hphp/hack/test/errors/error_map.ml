@@ -250,6 +250,7 @@ SwitchNonTerminalDefault = 3081
 SwitchMultipleDefault = 3082
 RepeatedRecordFieldName = 3083
 PhpLambdaDisallowed = 3084
+EntryPointArguments = 3085
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

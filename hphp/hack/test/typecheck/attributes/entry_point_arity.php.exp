@@ -1,0 +1,2 @@
+File "entry_point_arity.php", line 8, characters 33-34:
+__EntryPoint functions cannot take arguments. (NastCheck[3085])

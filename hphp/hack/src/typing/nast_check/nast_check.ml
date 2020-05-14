@@ -30,6 +30,7 @@ let visitor =
       Record_field_check.handler;
       Php_lambda_check.handler;
       Duplicate_xhp_attribute_check.handler;
+      Attribute_arity_check.handler;
     ]
 
 let stateful_visitor ctx =

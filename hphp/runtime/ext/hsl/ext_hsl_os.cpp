@@ -910,7 +910,8 @@ Object HHVM_FUNCTION(HSL_os_poll_async,
 const StaticString
   s_cwd("cwd"),
   s_setsid("setsid"),
-  s_setpgid("setpgid");
+  s_setpgid("setpgid"),
+  s_execvpe("execvpe");
 
 int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
                       const String& path,
@@ -953,6 +954,16 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
       );
     }
     flags |= Process::FORK_AND_EXECVE_FLAG_SETPGID;
+  }
+
+  if (options.exists(s_execvpe)) {
+    const auto& val = options[s_execvpe];
+    if (!val.isBoolean()) {
+      throw_errno_exception(EINVAL, "'execvpe' option must be a bool");
+    }
+    if (val.asBooleanVal()) {
+      flags |= Process::FORK_AND_EXECVE_FLAG_EXECVPE;
+    }
   }
 
   auto vec_str_to_cpp_arr = ([] (const Array& vec) {

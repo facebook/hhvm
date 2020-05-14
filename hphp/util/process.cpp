@@ -32,6 +32,10 @@
 #include <folly/portability/Unistd.h>
 #endif
 
+#ifdef __APPLE__
+#include <crt_externs.h>
+#endif
+
 #include <folly/Conv.h>
 #include <folly/Format.h>
 #include <folly/ScopeGuard.h>
@@ -574,7 +578,27 @@ pid_t Process::ForkAndExecve(
     char** envp_arr = build_cstrarr(envp);
     SCOPE_EXIT { free(argv_arr); free(envp_arr); };
 
-    execve(path.c_str(), argv_arr, envp_arr);
+    if (flags & Process::FORK_AND_EXECVE_FLAG_EXECVPE) {
+#if defined(__APPLE__)
+      // execvpe() is a glibcism
+      //
+      // We could either:
+      // - use `execve()` and implement our own $PATH behavior
+      // - use `execvp()` and implement our own envp behavior
+      // The latter seems less likely to lead to accidental problems, so let's
+      // do that.
+      char**& environ = *_NSGetEnviron();
+      // We could also use this implementation on Linux (using the standard
+      // `extern char** environ` instead of the Apple-specific call above)...
+      environ = envp_arr;
+      execvp(path.c_str(), argv_arr);
+#else
+      // ... but it feels nasty enough that I'll use the glibcism
+      execvpe(path.c_str(), argv_arr, envp_arr);
+#endif
+    } else {
+      execve(path.c_str(), argv_arr, envp_arr);
+    }
     dprintf(fork_w, "%s %d", "execve", errno);
     _Exit(1);
   }
@@ -620,6 +644,9 @@ pid_t Process::ForkAndExecve(
   }
   if (failed_call == "execve") {
     return -5;
+  }
+  if (failed_call == "putenv") {
+    return -6;
   }
   return -9999;
 }

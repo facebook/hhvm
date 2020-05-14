@@ -258,6 +258,7 @@ struct Process {
   static const int FORK_AND_EXECVE_FLAG_NONE    = 0;
   static const int FORK_AND_EXECVE_FLAG_SETPGID = 1 << 0;
   static const int FORK_AND_EXECVE_FLAG_SETSID  = 1 << 1;
+  static const int FORK_AND_EXECVE_FLAG_EXECVPE = 1 << 2;
 
   /** Opens a process with the given arguments, environment, working directory,
    * and file descriptors.

@@ -15,6 +15,7 @@ use type HH\Lib\OS\FileDescriptor;
 type ForkAndExecveOptions = shape(
   ?'cwd' => string,
   ?'setsid' => bool,
+  ?'execvpe' => bool,
   ?'setpgid' => int,
 );
 

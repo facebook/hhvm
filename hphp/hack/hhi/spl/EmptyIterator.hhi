@@ -8,13 +8,10 @@
  *
  */
 
-final class EmptyIterator<T> implements Iterator<T> {
-
-  /* current() technically returns ?Tv, but most places that use Iterators
-   * check valid() before calling current(), so typing it as non-nullable
-   * is what most callsites would expect.*/
-  public function current(): T;
-  public function key<Tk>(): Tk;
+final class EmptyIterator implements Iterator<nothing> {
+  /* Both current() and key() on an EmptyIterator throw unconditionally */
+  public function current(): nothing;
+  public function key(): nothing;
   public function next(): void;
   public function rewind(): void;
   public function valid(): bool;

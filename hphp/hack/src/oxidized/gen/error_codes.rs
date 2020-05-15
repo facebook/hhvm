@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<359a90072ac2bb07864a1323bf9c4e2b>>
+// @generated SignedSource<<cb67f1801551f71b503ed40d45cd541a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -267,6 +267,8 @@ pub enum NastCheck {
     SwitchMultipleDefault,
     RepeatedRecordFieldName,
     PhpLambdaDisallowed,
+    EntryPointArguments,
+    VariadicMemoize,
 }
 
 #[derive(

@@ -1216,6 +1216,8 @@ val maybe_mutable_methods_must_be_reactive : Pos.t -> string -> unit
 
 val entrypoint_arguments : Pos.t -> unit
 
+val variadic_memoize : Pos.t -> unit
+
 val reassign_maybe_mutable_var : in_collection:bool -> Pos.t -> unit
 
 val immutable_argument_mismatch : Pos.t -> Pos.t -> unit

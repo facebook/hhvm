@@ -15,8 +15,8 @@ let has_attribute (name : string) (attrs : Nast.user_attribute list) : bool =
   in
   List.exists matches_name attrs
 
-let variadic_pos (f : Nast.fun_) : pos option =
-  match f.f_variadic with
+let variadic_pos v : pos option =
+  match v with
   | FVvariadicArg param -> Some param.param_pos
   | FVellipsis p -> Some p
   | FVnonVariadic -> None
@@ -31,8 +31,23 @@ let handler =
         (match f.f_params with
         | [] -> ()
         | param :: _ -> Errors.entrypoint_arguments param.param_pos);
-        match variadic_pos f with
+        match variadic_pos f.f_variadic with
         | Some p -> Errors.entrypoint_arguments p
         | None -> ()
-      end
+      end;
+      (* Ban variadic arguments on memoized functions. *)
+      if has_attribute "__Memoize" f.f_user_attributes then
+        match variadic_pos f.f_variadic with
+        | Some p -> Errors.variadic_memoize p
+        | None -> ()
+
+    method! at_method_ _ m =
+      (* Ban variadic arguments on memoized methods. *)
+      if
+        has_attribute "__Memoize" m.m_user_attributes
+        || has_attribute "__MemoizeLSB" m.m_user_attributes
+      then
+        match variadic_pos m.m_variadic with
+        | Some p -> Errors.variadic_memoize p
+        | None -> ()
   end

@@ -251,6 +251,7 @@ SwitchMultipleDefault = 3082
 RepeatedRecordFieldName = 3083
 PhpLambdaDisallowed = 3084
 EntryPointArguments = 3085
+VariadicMemoize = 3086
 
 Typing Errors:
 AbstractClassFinalDEPRECATED = 4001

@@ -2062,6 +2062,12 @@ let entrypoint_arguments pos =
     pos
     "__EntryPoint functions cannot take arguments."
 
+let variadic_memoize pos =
+  add
+    (NastCheck.err_code NastCheck.VariadicMemoize)
+    pos
+    "Memoized functions cannot be variadic."
+
 let inout_params_special pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsSpecial)

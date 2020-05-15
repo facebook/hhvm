@@ -1,0 +1,2 @@
+File "memoize_lsb_variadic.php", line 5, characters 39-43:
+Memoized functions cannot be variadic. (NastCheck[3086])

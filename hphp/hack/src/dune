@@ -9,6 +9,7 @@
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
     ai
+    ifc
     client
     default_injector_config
     file_content

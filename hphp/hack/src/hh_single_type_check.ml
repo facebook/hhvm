@@ -28,6 +28,7 @@ module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 (*****************************************************************************)
 
 type mode =
+  | Ifc of string
   | Ai of Ai_options.t
   | Autocomplete
   | Autocomplete_manually_invoked
@@ -178,6 +179,7 @@ let parse_options () =
     else
       mode := x
   in
+  let set_ifc x = set_mode (Ifc x) () in
   let set_ai x = set_mode (Ai (Ai_options.prepare ~server:false x)) () in
   let error_format = ref Errors.Context in
   let forbid_nullable_cast = ref false in
@@ -241,6 +243,7 @@ let parse_options () =
   let enable_pocket_universes_syntax = ref false in
   let options =
     [
+      ("--ifc", Arg.String set_ifc, " Run the flow analysis");
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -1222,8 +1225,20 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
+  | Ifc ifc_options ->
+    let print_errors errors = List.iter ~f:(print_error error_format) errors in
+    if not (List.is_empty parse_errors) then
+      print_errors parse_errors
+    else
+      let errors =
+        check_file ~verbosity ctx [] files_info error_format max_errors
+      in
+      if not (List.is_empty errors) then
+        print_errors errors
+      else
+        Ifc.do_ files_info ifc_options ctx
   | Ai ai_options ->
-    if parse_errors <> [] then
+    if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors
     else
       let to_check =
@@ -1238,7 +1253,7 @@ let handle_mode
       let errors =
         check_file ~verbosity ctx [] to_check error_format max_errors
       in
-      if errors <> [] then
+      if not (List.is_empty errors) then
         List.iter ~f:(print_error error_format) errors
       else
         Ai.do_ files_info ai_options ctx

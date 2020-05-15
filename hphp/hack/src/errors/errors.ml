@@ -724,6 +724,7 @@ let default_ignored_fixme_codes =
       Typing.err_code Typing.NewStaticClassReified;
       Typing.err_code Typing.MemoizeReified;
       Typing.err_code Typing.ClassGetReified;
+      Typing.err_code Typing.PocketUniversesReservedSyntax;
     ]
 
 let ignored_fixme_codes = ref default_ignored_fixme_codes

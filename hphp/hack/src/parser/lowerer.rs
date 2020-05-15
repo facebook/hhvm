@@ -4450,7 +4450,7 @@ where
                         PocketFieldTypeExprDeclaration(c) => {
                             let typ = Self::p_hint(&c.pocket_field_type_expr_type, env)?;
                             let id = Self::pos_name(&c.pocket_field_type_expr_name, env)?;
-                            case_values.push((id, typ));
+                            case_values.push(ast::PuCaseValue(id, typ));
                         }
                         PocketFieldTypeDeclaration(c) => {
                             let id = Self::pos_name(&c.pocket_field_type_name, env)?;

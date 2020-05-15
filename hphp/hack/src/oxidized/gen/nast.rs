@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dcfb41bf81590dc62eb704c40723f222>>
+// @generated SignedSource<<f1a3809ae03fe6598601726289fcfd64>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -18,7 +18,13 @@ use crate::*;
 
 pub use crate::ast_defs::shape_map;
 
+pub use aast::ClassHint;
+pub use aast::PuCaseValue;
+pub use aast::RecordHint;
 pub use aast::Sid;
+pub use aast::TraitHint;
+pub use aast::XhpAttrHint;
+pub use ast_defs::ShapeFieldName;
 
 #[derive(
     Clone,
@@ -90,6 +96,10 @@ pub type Field = aast::Field<pos::Pos, FuncBodyAnn, (), ()>;
 pub type Afield = aast::Afield<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type MethodRedeclaration = aast::MethodRedeclaration<pos::Pos, FuncBodyAnn, (), ()>;
+
+pub type PuEnum = aast::PuEnum<pos::Pos, FuncBodyAnn, (), ()>;
+
+pub type PuMember = aast::PuMember<pos::Pos, FuncBodyAnn, (), ()>;
 
 pub type Targ = aast::Targ<()>;
 

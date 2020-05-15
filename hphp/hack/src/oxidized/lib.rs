@@ -54,38 +54,6 @@ pub mod aast_visitor;
 
 mod gen;
 
-pub use gen::aast;
-pub use gen::aast_defs;
-pub use gen::ast_defs;
-pub use gen::decl_defs;
-pub use gen::direct_decl_parser;
-pub use gen::error_codes;
-pub use gen::errors;
-pub use gen::file_info;
-pub use gen::full_fidelity_parser_env;
-pub use gen::global_options;
-pub use gen::ident;
-pub use gen::namespace_env;
-pub use gen::naming_types;
-pub use gen::nast;
-pub use gen::parser_options;
-pub use gen::prim_defs;
-pub use gen::scoured_comments;
-pub use gen::shallow_decl_defs;
-pub use gen::tast;
-pub use gen::type_parameter_env;
-pub use gen::typechecker_options;
-pub use gen::typing_cont_key;
-pub use gen::typing_defs;
-pub use gen::typing_defs_core;
-pub use gen::typing_env_types;
-pub use gen::typing_fake_members;
-pub use gen::typing_inference_env;
-pub use gen::typing_local_types;
-pub use gen::typing_mutability_env;
-pub use gen::typing_per_cont_env;
-pub use gen::typing_reason;
-pub use gen::typing_tyvar_occurrences;
 
 pub trait ToOxidized {
     type Target;
@@ -178,3 +146,35 @@ impl<T: Oxide> ToOxidized for T {
         self.clone()
     }
 }
+pub use gen::aast;
+pub use gen::aast_defs;
+pub use gen::ast_defs;
+pub use gen::decl_defs;
+pub use gen::direct_decl_parser;
+pub use gen::error_codes;
+pub use gen::errors;
+pub use gen::file_info;
+pub use gen::full_fidelity_parser_env;
+pub use gen::global_options;
+pub use gen::ident;
+pub use gen::namespace_env;
+pub use gen::naming_types;
+pub use gen::nast;
+pub use gen::parser_options;
+pub use gen::prim_defs;
+pub use gen::scoured_comments;
+pub use gen::shallow_decl_defs;
+pub use gen::tast;
+pub use gen::type_parameter_env;
+pub use gen::typechecker_options;
+pub use gen::typing_cont_key;
+pub use gen::typing_defs;
+pub use gen::typing_defs_core;
+pub use gen::typing_env_types;
+pub use gen::typing_fake_members;
+pub use gen::typing_inference_env;
+pub use gen::typing_local_types;
+pub use gen::typing_mutability_env;
+pub use gen::typing_per_cont_env;
+pub use gen::typing_reason;
+pub use gen::typing_tyvar_occurrences;

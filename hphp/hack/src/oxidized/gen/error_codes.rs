@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<aaa6cad5115463c52fec555bc36ba616>>
+// @generated SignedSource<<359a90072ac2bb07864a1323bf9c4e2b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -288,7 +288,7 @@ pub enum Typing {
     UninstantiableClass,
     AnonymousRecursiveDEPRECATED,
     AnonymousRecursiveCallDEPRECATED,
-    ArrayAccess,
+    ArrayAccessRead,
     ArrayAppend,
     ArrayCast,
     ArrayGetArity,
@@ -345,9 +345,9 @@ pub enum Typing {
     SelfOutsideClass,
     NewStaticInconsistent,
     StaticOutsideClass,
-    NonObjectMember,
+    NonObjectMemberRead,
     NullContainer,
-    NullMember,
+    NullMemberRead,
     NullableParameterDEPRECATED,
     OptionReturnOnlyTypehint,
     ObjectString,
@@ -581,7 +581,7 @@ pub enum Typing {
     OptionNull,
     UnknownObjectMember,
     UnknownType,
-    InvalidArrayKey,
+    InvalidArrayKeyRead,
     ReferenceExprNotFunctionArgDEPRECATED,
     RedundantRxCondition,
     RedeclaringMissingMethod,
@@ -653,6 +653,10 @@ pub enum Typing {
     PocketUniversesInvalidUpperBounds,
     PocketUniversesRefinement,
     PocketUniversesReservedSyntax,
+    ArrayAccessWrite,
+    InvalidArrayKeyWrite,
+    NullMemberWrite,
+    NonObjectMemberWrite,
 }
 
 #[derive(

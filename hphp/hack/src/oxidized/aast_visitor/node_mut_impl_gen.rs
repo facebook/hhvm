@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<825d850b1b0c4f155e33ba0c0d9a2573>>
+// @generated SignedSource<<4905dcff95c827e08daa8e258f37412f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1571,6 +1571,24 @@ impl<P: Params> NodeMut<P> for ParamMutability {
             ParamMutability::POwnedMutable => Ok(()),
             ParamMutability::PMaybeMutable => Ok(()),
         }
+    }
+}
+impl<P: Params> NodeMut<P> for PuCaseValue {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_pu_case_value(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, P = P>,
+    ) -> Result<(), P::Error> {
+        self.0.accept(c, v)?;
+        self.1.accept(c, v)?;
+        Ok(())
     }
 }
 impl<P: Params> NodeMut<P> for PuEnum<P::Ex, P::Fb, P::En, P::Hi> {

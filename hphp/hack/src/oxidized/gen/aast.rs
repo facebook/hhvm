@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<183e6d2105474d65a9721f69fd86255a>>
+// @generated SignedSource<<42c0219d7393d36a5b34f7ed4cf91f34>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -764,15 +764,15 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub name: Sid,
     /// The type parameters of a class A<T> (T is the parameter)
     pub tparams: ClassTparams<Ex, Fb, En, Hi>,
-    pub extends: Vec<Hint>,
-    pub uses: Vec<Hint>,
+    pub extends: Vec<ClassHint>,
+    pub uses: Vec<TraitHint>,
     pub use_as_alias: Vec<UseAsAlias>,
     pub insteadof_alias: Vec<InsteadofAlias>,
     pub method_redeclarations: Vec<MethodRedeclaration<Ex, Fb, En, Hi>>,
-    pub xhp_attr_uses: Vec<Hint>,
+    pub xhp_attr_uses: Vec<XhpAttrHint>,
     pub xhp_category: Option<(Pos, Vec<Pstring>)>,
-    pub reqs: Vec<(Hint, IsExtends)>,
-    pub implements: Vec<Hint>,
+    pub reqs: Vec<(ClassHint, IsExtends)>,
+    pub implements: Vec<ClassHint>,
     pub where_constraints: Vec<WhereConstraint>,
     pub consts: Vec<ClassConst<Ex, Fb, En, Hi>>,
     pub typeconsts: Vec<ClassTypeconst<Ex, Fb, En, Hi>>,
@@ -789,6 +789,12 @@ pub struct Class_<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
 }
+
+pub type ClassHint = Hint;
+
+pub type TraitHint = Hint;
+
+pub type XhpAttrHint = Hint;
 
 #[derive(
     Clone,
@@ -1058,7 +1064,7 @@ pub struct MethodRedeclaration<Ex, Fb, En, Hi> {
     pub params: Vec<FunParam<Ex, Fb, En, Hi>>,
     pub fun_kind: ast_defs::FunKind,
     pub ret: TypeHint<Hi>,
-    pub trait_: Hint,
+    pub trait_: TraitHint,
     pub method: Pstring,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
 }
@@ -1131,7 +1137,7 @@ pub struct Gconst<Ex, Fb, En, Hi> {
 pub struct RecordDef<Ex, Fb, En, Hi> {
     pub annotation: En,
     pub name: Sid,
-    pub extends: Option<Hint>,
+    pub extends: Option<RecordHint>,
     pub abstract_: bool,
     pub fields: Vec<(Sid, Hint, Option<Expr<Ex, Fb, En, Hi>>)>,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
@@ -1140,6 +1146,8 @@ pub struct RecordDef<Ex, Fb, En, Hi> {
     pub doc_comment: Option<DocComment>,
     pub emit_id: Option<EmitId>,
 }
+
+pub type RecordHint = Hint;
 
 /// Pocket Universe Enumeration, e.g.
 ///
@@ -1186,9 +1194,24 @@ pub struct PuEnum<Ex, Fb, En, Hi> {
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub is_final: bool,
     pub case_types: Vec<(Sid, ReifyKind)>,
-    pub case_values: Vec<(Sid, Hint)>,
+    pub case_values: Vec<PuCaseValue>,
     pub members: Vec<PuMember<Ex, Fb, En, Hi>>,
 }
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+pub struct PuCaseValue(pub Sid, pub Hint);
 
 #[derive(
     Clone,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d92dd336e054ada3d2ef61fbca91faf7>>
+// @generated SignedSource<<902c9effec72f1a251bc4ba90af6fe7c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -539,6 +539,13 @@ pub trait Visitor<'node> {
         &mut self,
         c: &mut <Self::P as Params>::Context,
         p: &'node ParamMutability,
+    ) -> Result<(), <Self::P as Params>::Error> {
+        p.recurse(c, self.object())
+    }
+    fn visit_pu_case_value(
+        &mut self,
+        c: &mut <Self::P as Params>::Context,
+        p: &'node PuCaseValue,
     ) -> Result<(), <Self::P as Params>::Error> {
         p.recurse(c, self.object())
     }

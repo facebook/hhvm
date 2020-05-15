@@ -2941,12 +2941,12 @@ void isTypeObj(ISS& env, const Type& ty) {
 }
 
 void isTypeArrLike(ISS& env, const Type& ty) {
-  if (ty.subtypeOf(BArr | BVec | BDict | BKeyset | BClsMeth))  {
-    return push(env, TTrue);
+  auto arrlike = BArr | BVec | BDict | BKeyset;
+  if (RuntimeOption::EvalIsCompatibleClsMethType) {
+    arrlike |= BClsMeth;
   }
-  if (!ty.couldBe(BArr | BVec | BDict | BKeyset | BClsMeth))  {
-    return push(env, TFalse);
-  }
+  if (ty.subtypeOf(arrlike)) return push(env, TTrue);
+  if (!ty.couldBe(arrlike)) return push(env, TFalse);
   push(env, TBool);
 }
 

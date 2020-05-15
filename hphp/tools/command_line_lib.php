@@ -3,8 +3,6 @@
  * Contains some reusable utilities for command line php scripts.
  */
 
-require_once(__DIR__.'/command_line_lib_UNSAFE.php');
-
 function error(string $message): void {
   error_unsafe($message);
 }
@@ -52,7 +50,10 @@ type OptionInfoMap = Map<string,OptionInfo>;
 type OptionMap     = Map<string,mixed>;
 
 function parse_options(OptionInfoMap $optmap): OptionMap {
-  return parse_options_UNSAFE($optmap);
+  $argv = new Vector($GLOBALS['argv']);
+  $result = parse_options_impl($optmap, $argv);
+  $GLOBALS['argv'] = varray($argv);
+  return $result;
 }
 
 function remove_argument(Vector<string> $argv, $index) {
@@ -253,7 +254,7 @@ function display_help(string $message, OptionInfoMap $optmap): void {
     }
   }
 
-  $longest_col = max($first_cols->values()->map(fun('strlen'))->toArray());
+  $longest_col = max($first_cols->values()->map(fun('strlen')));
 
   foreach ($first_cols as $long => $col) {
     $pad = str_repeat(' ', $longest_col - strlen($col) + 5);

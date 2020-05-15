@@ -1,8 +1,5 @@
 #!/usr/local/bin/php
 <?hh
-// Run with --help for help.
-$FBCODE_ROOT = __DIR__.'/../..';
-require_once $FBCODE_ROOT.'/hphp/tools/command_line_lib.php';
 
 //////////////////////////////////////////////////////////////////////
 
@@ -323,7 +320,9 @@ function ends_with(string $haystack, string $needle): bool {
   return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
+<<__EntryPoint>>
 function main(): void {
+  require_once __DIR__.'/command_line_lib.php';
   $opts = parse_options(my_option_map());
   if ($opts->containsKey('help')) {
     help();
@@ -384,5 +383,3 @@ function help(): void {
 }
 
 //////////////////////////////////////////////////////////////////////
-
-main();

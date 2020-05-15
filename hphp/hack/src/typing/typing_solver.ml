@@ -24,10 +24,8 @@ module TySet = Typing_set
 module MakeType = Typing_make_type
 
 let log_remaining_prop env =
-  let filename = Pos.filename (Pos.to_absolute env.function_pos) in
-  if Str.string_match (Str.regexp {|.*\.hhi|}) filename 0 then
-    ()
-  else
+  let filename = Pos.filename env.function_pos in
+  if not (Relative_path.is_hhi (Relative_path.prefix filename)) then (
     let prop =
       Typing_inference_env.get_nongraph_subtype_prop env.inference_env
     in
@@ -45,6 +43,7 @@ let log_remaining_prop env =
         "There are remaining unsolved constraints!"
         env
         prop
+  )
 
 (* Given a type ty, replace any covariant or contravariant components of the type
  * with fresh type variables. Components replaced include

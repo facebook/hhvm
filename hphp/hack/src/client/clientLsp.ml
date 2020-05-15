@@ -1618,7 +1618,7 @@ let get_client_ide_status (ide_service : ClientIdeService.t) :
     | ClientIdeService.Status.Rpc ->
       (MessageType.WarningMessage, "Hack", "Hack IDE: working...", [])
     | ClientIdeService.Status.Ready ->
-      (MessageType.InfoMessage, "Hack", "Hack IDE: ready.", [])
+      (MessageType.InfoMessage, "Hack: ready", "Hack IDE: ready.", [])
     | ClientIdeService.Status.Stopped s ->
       let open ClientIdeMessage in
       ( MessageType.ErrorMessage,
@@ -3287,12 +3287,14 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
   let (type_, shortMessage, message) =
     match status with
     | Needs_local_typecheck ->
-      (MessageType.InfoMessage, "Hack", "hh_server is preparing to check edits")
+      ( MessageType.InfoMessage,
+        "Hack: ready",
+        "hh_server is preparing to check edits" )
     | Doing_local_typecheck ->
       (MessageType.WarningMessage, "Hack", "hh_server is checking edits")
     | Done_local_typecheck ->
       ( MessageType.InfoMessage,
-        "Hack",
+        "Hack: ready",
         "hh_server is initialized and running correctly." )
     | Doing_global_typecheck Blocking ->
       ( MessageType.WarningMessage,
@@ -3308,7 +3310,7 @@ let do_server_busy (state : state) (status : ServerCommandTypes.busy_status) :
         "hh_server is remote-typechecking the entire project - " ^ message )
     | Done_global_typecheck _ ->
       ( MessageType.InfoMessage,
-        "Hack",
+        "Hack: ready",
         "hh_server is initialized and running correctly." )
   in
   match state with

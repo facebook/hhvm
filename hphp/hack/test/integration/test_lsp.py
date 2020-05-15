@@ -5195,7 +5195,7 @@ function unsaved_bar(): string { return "hello"; }
                     "type": 3,
                     "actions": [],
                     "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
@@ -5203,7 +5203,7 @@ function unsaved_bar(): string { return "hello"; }
                 params={
                     "actions": [{"title": "Restart hh_server"}],
                     "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "type": 3,
                 },
                 result=NoResponse(),
@@ -5265,7 +5265,7 @@ function unsaved_bar(): string { return "hello"; }
                 params={
                     "actions": [{"title": "Restart hh_server"}],
                     "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "type": 3,
                 },
                 result=NoResponse(),
@@ -5881,14 +5881,14 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "type": 3,
                     "actions": [],
                     "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
                 method="window/showStatus",
                 params={
                     "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "actions": [{"title": "Restart hh_server"}],
                     "type": 3,
                 },
@@ -5946,7 +5946,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                     "type": 3,
                     "actions": [],
                     "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                 },
             )
             .wait_for_server_request(
@@ -5954,7 +5954,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 params={
                     "actions": [],
                     "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "type": 3,
                 },
                 result=NoResponse(),
@@ -5981,7 +5981,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
                 params={
                     "actions": [],
                     "message": "Hack IDE: ready.\nhh_server: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "type": 3,
                 },
                 result=NoResponse(),
@@ -6608,7 +6608,7 @@ function aaa(): string {
                     "type": 3,
                     "actions": [],
                     "message": "Hack IDE: ready.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                 },
             )
             .write_to_disk(
@@ -6669,7 +6669,7 @@ function aaa(): string {
                 params={
                     "actions": [{"title": "Restart hh_server"}],
                     "message": "Hack IDE: ready.\nhh_server: stopped.",
-                    "shortMessage": "Hack",
+                    "shortMessage": "Hack: ready",
                     "type": 3,
                 },
                 result=NoResponse(),

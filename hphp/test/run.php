@@ -49,14 +49,13 @@ function to_varray($x): varray {
 }
 
 function get_expect_file_and_type($test, $options) {
-  // .typechecker files are for typechecker (hh_server --check) test runs.
-  $types = null;
-  if (isset($options['typechecker'])) {
-    $types = varray['typechecker.expect', 'typechecker.expectf'];
-  } else {
-    $types = varray['expect', 'hhvm.expect', 'expectf', 'hhvm.expectf',
-                   'expectregex'];
-  }
+  $types = varray[
+    'expect',
+    'expectf',
+    'expectregex',
+    'hhvm.expect',
+    'hhvm.expectf',
+  ];
   if (isset($options['repo'])) {
     if (file_exists($test . '.hhbbc_assert')) {
       return varray[$test . '.hhbbc_assert', 'expectf'];
@@ -189,21 +188,6 @@ Examples:
   # test once more, serialize all profile data, and then restart hhvm, load the
   # serialized state and run retranslate-all before starting the test.
   % {$argv[0]} --jit-serialize  2 -r quick
-
-  # Run the Hack typechecker against quick typechecker.expect[f] files
-  # Could explcitly use quick here too
-  # {$argv[0]} --typechecker
-
-  # Run the Hack typechecker against typechecker.expect[f] files in the slow
-  # directory
-  # {$argv[0]} --typechecker slow
-
-  # Run the Hack typechecker against the typechecker.expect[f] file in this test
-  # {$argv[0]} --typechecker test/slow/test_runner_typechecker_mode/basic.php
-
-  # Use a specific typechecker binary
-  # {$argv[0]} --hhserver-binary-path ~/code/hhvm/hphp/hack/bin/hh_server --typechecker .
-
 EOT;
   return usage().$help;
 }
@@ -219,49 +203,29 @@ function success($message) {
 }
 
 // If a user-supplied path is provided, let's make sure we have a valid
-// executable.
-function check_executable($path, $typechecker) {
-  $type = $typechecker ? "HH_SERVER" : "HHVM";
+// executable. Returns canonicanalized path or exits.
+function check_executable(string $path): string {
   $rpath = realpath($path);
-  $msg = "Provided $type executable ($path) is not an executable file.\n"
-       . "If using ".$type."_BIN, make sure that is set correctly.";
-  if (!is_executable($rpath)) {
-    error($msg);
+  if ($rpath === false || !is_executable($rpath)) {
+    error("Provided HHVM executable ($path) is not an executable file.\n" .
+          "If using HHVM_BIN, make sure that is set correctly.");
   }
+
   $output = varray[];
   $return_var = -1;
-  if ($typechecker) {
-    // hh_server
-    exec($rpath . " --help 2> /dev/null", inout $output, inout $return_var);
-    $str = implode($output);
-    $msg = "Provided file ($rpath) is not an HH_SERVER executable.\n"
-         . "If using HH_SERVER_BIN, make sure that is set correctly.";
-    if (strpos($str, "Usage:") !== 0) {
-      error($msg);
-    }
-  } else {
-    // hhvm
-    exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
-    $str = implode($output);
-    $msg = "Provided file ($rpath) is not an HHVM executable.\n"
-         . "If using HHVM_BIN, make sure that is set correctly.";
-    if (strpos($str, "HipHop ") !== 0) {
-      error($msg);
-    }
+  exec($rpath . " --version 2> /dev/null", inout $output, inout $return_var);
+  if (strpos(implode($output), "HipHop ") !== 0) {
+    error("Provided file ($rpath) is not an HHVM executable.\n" .
+          "If using HHVM_BIN, make sure that is set correctly.");
   }
+
+  return $rpath;
 }
 
 function hhvm_binary_routes() {
   return darray[
     "buck"    => "/buck-out/gen/hphp/hhvm/hhvm",
     "cmake"   => "/hphp/hhvm"
-  ];
-}
-
-function hh_server_binary_routes() {
-  return darray[
-    "buck"    => "/buck-out/gen/hphp/hack/src/hh_server",
-    "cmake"   => "/hphp/hack/bin"
   ];
 }
 
@@ -276,19 +240,16 @@ function hh_codegen_binary_routes() {
 // the same code repo.  If multiple binaries exist, we want the onus to be on
 // the user to specify a particular one because before we chose the buck one
 // by default and that could cause unexpected results.
-function check_for_multiple_default_binaries($typechecker) {
+function check_for_multiple_default_binaries() {
   // Env var we use in testing that'll pick which build system to use.
   if (getenv("FBCODE_BUILD_TOOL") !== false) {
     return;
   }
 
   $home = hphp_home();
-  $routes = $typechecker ? hh_server_binary_routes() : hhvm_binary_routes();
-  $binary = $typechecker ? "hh_server" : "hhvm";
-
   $found = varray[];
-  foreach ($routes as $_ => $path) {
-    $abs_path = $home . $path . "/" . $binary;
+  foreach (hhvm_binary_routes() as $path) {
+    $abs_path = $home . $path . "/hhvm";
     if (file_exists($abs_path)) {
       $found[] = $abs_path;
     }
@@ -298,19 +259,13 @@ function check_for_multiple_default_binaries($typechecker) {
     return;
   }
 
-  $path_option = $typechecker ? "--hhserver-binary-path" : "--hhvm-binary-path";
-
   $msg = "Multiple binaries exist in this repo. \n";
   foreach ($found as $bin) {
     $msg .= " - " . $bin . "\n";
   }
   $msg .= "Are you in fbcode?  If so, remove a binary \n"
-    . "or use the " . $path_option . " option to the test runner. \n"
-    . "e.g., test/run ";
-  if ($typechecker) {
-    $msg .= "--typechecker";
-  }
-  $msg .= " " . $path_option . " /path/to/binary slow\n";
+    . "or use the --hhvm-binary-path option to the test runner. \n"
+    . "e.g. test/run --hhvm-binary-path /path/to/binary slow\n";
   error($msg);
 }
 
@@ -355,42 +310,6 @@ function bin_root() {
   $home = hphp_home();
   $env_tool = getenv("FBCODE_BUILD_TOOL");
   $routes = hhvm_binary_routes();
-
-  if ($env_tool !== false) {
-    return $home . $routes[$env_tool];
-  }
-
-  foreach ($routes as $_ => $path) {
-    $dir = $home . $path;
-    if (is_dir($dir)) {
-      return $dir;
-    }
-  }
-
-  return $home . $routes["cmake"];
-}
-
-function hh_server_path() {
-  $file = "";
-  if (getenv("HH_SERVER_BIN") !== false) {
-    $file = realpath(getenv("HH_SERVER_BIN"));
-  } else {
-    $file = hh_server_bin_root().'/hh_server';
-  }
-  if (!is_file($file)) {
-    error("$file doesn't exist. Did you forget to build first?");
-  }
-  return rel_path($file);
-}
-
-function hh_server_bin_root() {
-  if (getenv("HH_SERVER_BIN") !== false) {
-    return dirname(realpath(getenv("HH_SERVER_BIN")));
-  }
-
-  $home = hphp_home();
-  $env_tool = getenv("FBCODE_BUILD_TOOL");
-  $routes = hh_server_binary_routes();
 
   if ($env_tool !== false) {
     return $home . $routes[$env_tool];
@@ -537,9 +456,7 @@ function get_options($argv) {
     '*retranslate-all:' => '',
     '*jit-serialize:' => '',
     '*hhvm-binary-path:' => 'b:',
-    '*typechecker' => '',
     '*vendor:' => '',
-    '*hhserver-binary-path:' => '',
     'record-failures:' => '',
     '*hackc' => '',
     '*hack-only' => '',
@@ -774,38 +691,17 @@ function find_tests($files, darray $options = null) {
     $file = preg_replace(',^'.getcwd().'/,', '', $file);
     $files[$idx] = $file;
   }
-  if (isset($options['typechecker'])) {
-    $tests = exec_find(
-      $files,
-      "-name '*.php' ".
-      "-o -name '*.php.type-errors' ".
-      "-o -name '*.hack' ".
-      "-o -name '*.hack.type-errors'"
-    );
-    // The above will get all the php files. Now filter out only the ones
-    // that have a .hhconfig associated with it.
-    $tests = array_filter(
-      $tests,
-      function($test) {
-        return (file_exists($test . '.typechecker.expect') ||
-                file_exists($test . '.typechecker.expectf')) &&
-                file_exists($test . '.hhconfig');
-      }
-    );
-  } else {
-    $tests = exec_find(
-      $files,
-      "'(' " .
-      "-name '*.php' " .
-      "-o -name '*.hack' " .
-      "-o -name '*.js' " .
-      "-o -name '*.php.type-errors' " .
-      "-o -name '*.hack.type-errors' " .
-      "-o -name '*.hhas' " .
-      "')' " .
-      "-not -regex '.*round_trip[.]hhas'"
-    );
-  }
+  $tests = exec_find(
+    $files,
+    "'(' " .
+    "-name '*.php' " .
+    "-o -name '*.hack' " .
+    "-o -name '*.hhas' " .
+    "-o -name '*.php.type-errors' " .
+    "-o -name '*.hack.type-errors' " .
+    "')' " .
+    "-not -regex '.*round_trip[.]hhas'"
+  );
   if (!$tests) {
     error("Could not find any tests associated with your options.\n" .
           "Make sure your test path is correct and that you have " .
@@ -1291,54 +1187,6 @@ function repo_mode_compile($options, $test, $program) {
   }
   if ($result === true) return true;
   file_put_contents("$test.diff", $result);
-}
-
-function hh_server_cmd($options, $test) {
-  // In order to run hh_server --check on only one file, we copy all of the
-  // files associated with the test to a temporary directory, rename the
-  // basename($test_file).hhconfig file to just .hhconfig and set the command
-  // appropriately.
-  $temp_dir = '/tmp/hh-test-runner-'.bin2hex(random_bytes(16));
-  mkdir($temp_dir);
-  foreach (glob($test . '*') as $test_file) {
-    copy($test_file, $temp_dir . '/' . basename($test_file));
-    if (strpos($test_file, '.hhconfig') !== false) {
-      rename(
-        $temp_dir . '/' . basename($test) . '.hhconfig',
-        $temp_dir . '/.hhconfig'
-      );
-    } else if (strpos($test_file, '.type-errors') !== false) {
-      // In order to actually run hh_server --check successfully, all files
-      // named *.php.type-errors have to be renamed *.php
-      rename(
-        $temp_dir . '/' . basename($test_file),
-        $temp_dir . '/' . str_replace('.type-errors', '', basename($test_file))
-      );
-    }
-  }
-  // Just copy all the .php.inc files, even if they are not related since
-  // unrelated ones will be ignored anyway. This just makes it easier to
-  // start with instead of doing a search inside the test file for requires
-  // and includes and extracting it.
-  foreach (glob(dirname($test) . "/*.inc.php") as $inc_file) {
-    copy($inc_file, $temp_dir . '/' . basename($inc_file));
-  }
-  $cmd = hh_server_path() .  ' --check ' . $temp_dir;
-
-  $vendor = $options['vendor'] ?? null;
-  if ($vendor !== null) {
-    $f = fopen($temp_dir.'/.hhconfig', 'a+');
-    if (!is_resource($f)) {
-      throw new Exception('failed to open hhconfig for append');
-    }
-    fprintf(
-      $f,
-      "\nextra_paths=%s\n",
-      $vendor
-    );
-    fclose($f);
-  }
-  return varray[$cmd, ' ', $temp_dir];
 }
 
 
@@ -2331,7 +2179,7 @@ function run_config_server($options, $test) {
 }
 
 function run_config_cli($options, $test, $cmd, $cmd_env) {
-  if (isset($options['log']) && !isset($options['typechecker'])) {
+  if (isset($options['log'])) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
   }
@@ -2342,15 +2190,9 @@ function run_config_cli($options, $test, $cmd, $cmd_env) {
     2 => varray["pipe", "w"],
   ];
   $pipes = null;
-  if (isset($options['typechecker'])) {
-    $process = proc_open(
-      "$cmd 2>/dev/null", $descriptorspec, inout $pipes, null, $cmd_env
-    );
-  } else {
-    $process = proc_open(
-      "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
-    );
-  }
+  $process = proc_open(
+    "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
+  );
   if (!is_resource($process)) {
     file_put_contents("$test.diff", "Couldn't invoke $cmd");
     return false;
@@ -2421,16 +2263,13 @@ function run_config_post($outputs, $test, $options) {
     file_put_contents(
       "$test.diff", "No $test.expect, $test.expectf, " .
       "$test.hhvm.expect, $test.hhvm.expectf, " .
-      "$test.typechecker.expect, $test.typechecker.expectf, " .
       "nor $test.expectregex. If $test is meant to be included by other ".
       "tests, use a different file extension.\n"
     );
     return false;
   }
 
-  $is_tc = isset($options['typechecker']);
-  if ((!$is_tc && ($type === 'expect' || $type === 'hhvm.expect')) ||
-      ($is_tc && $type === 'typechecker.expect')) {
+  if ($type === 'expect' || $type === 'hhvm.expect') {
     $wanted = trim(file_get_contents($file));
     if (isset($options['ignore-oids']) || isset($options['repo'])) {
       $output = replace_object_resource_ids($output, 'n');
@@ -2445,8 +2284,7 @@ function run_config_post($outputs, $test, $options) {
       return $passed;
     }
     $wanted_re = preg_quote($wanted, '/');
-  } else if ((!$is_tc && ($type === 'expectf' || $type === 'hhvm.expectf')) ||
-             ($is_tc && $type === 'typechecker.expectf')) {
+  } else if ($type === 'expectf' || $type === 'hhvm.expectf') {
     $wanted = trim(file_get_contents($file));
     if (isset($options['ignore-oids']) || isset($options['repo'])) {
       $wanted = replace_object_resource_ids($wanted, '%d');
@@ -2522,7 +2360,7 @@ function run_config_post($outputs, $test, $options) {
     // Normalize newlines.
     $wanted_re = preg_replace("/(\r\n?|\n)/", "\n", $wanted_re);
     $output    = preg_replace("/(\r\n?|\n)/", "\n", $output);
-  } else if (!$is_tc && $type === 'expectregex') {
+  } else if ($type === 'expectregex') {
     $wanted_re = trim(file_get_contents($file));
   } else {
     throw new Exception("Unsupported expect file type: ".$type);
@@ -2584,11 +2422,7 @@ function run_and_lock_test($options, $test) {
     if ($lock) fclose($lock);
     $lock = null;
   } else {
-    if (isset($options['typechecker'])) {
-      $status = run_typechecker_test($options, $test);
-    } else {
-      $status = run_test($options, $test);
-    }
+    $status = run_test($options, $test);
   }
   $time = microtime(true) - $time;
   $etime = time();
@@ -2627,19 +2461,6 @@ function run_and_lock_test($options, $test) {
   } else {
     invariant_violation("invalid status type " . gettype($status));
   }
-}
-
-function run_typechecker_test($options, $test) {
-  $skip_reason = skip_test($options, $test);
-  if ($skip_reason !== null) return $skip_reason;
-  invariant(file_exists($test . ".hhconfig"), "find_tests filters on this");
-  list($hh_server, $hh_server_env, $temp_dir) = hh_server_cmd($options, $test);
-  $result =  run_one_config($options, $test, $hh_server, $hh_server_env);
-  // Remove the temporary directory.
-  if (!isset($options['no-clean'])) {
-    shell_exec('rm -rf ' . $temp_dir);
-  }
-  return $result;
 }
 
 function run_test($options, $test) {
@@ -2789,11 +2610,7 @@ function print_commands($tests, $options) {
   print make_header("Run these by hand:");
 
   foreach ($tests as $test) {
-    if (isset($options['typechecker'])) {
-      list($command, $_, ) = hh_server_cmd($options, $test);
-    } else {
-      list($command, $_) = hhvm_cmd($options, $test);
-    }
+    list($command, $_) = hhvm_cmd($options, $test);
     if (!isset($options['repo'])) {
       foreach (to_varray($command) as $c) {
         print "$c\n";
@@ -3186,11 +3003,6 @@ function start_servers($options, $configs) {
 }
 
 function get_num_threads($options, $tests) {
-  if ($options['typechecker'] ?? false) {
-    // hh_server spawns a child per CPU; things get flakey with CPU^2 forks
-    return 1;
-  }
-
   if (isset($options['threads'])) {
     $threads = (int)$options['threads'];
     if ((string)$threads !== $options['threads'] || $threads < 1) {
@@ -3229,63 +3041,17 @@ function main($argv) {
     shuffle($tests);
   }
 
-  if (isset($options['repo']) && isset($options['typechecker'])) {
-    error("Repo mode and typechecker mode are not compatible");
-  }
-
-  if (isset($options['hhvm-binary-path']) &&
-      isset($options['typechecker'])) {
-    error("Did you mean to set the hh_server binary path instead?");
-  }
-
-  if (isset($options['hhserver-binary-path']) &&
-      !isset($options['typechecker'])) {
-    error("hh_server binary path set, but not --typechecker");
-  }
-
-  if (isset($options['hhvm-binary-path']) &&
-      isset($options['hhserver-binary-path'])) {
-    error("Need to choose one of the two binaries to run");
-  }
-
-  $binary_path = "";
-  $typechecker = false;
+  // Explicit path given by --hhvm-binary-path takes priority. Then, if an
+  // HHVM_BIN env var exists, and the file it points to exists, that trumps
+  // any default hhvm executable path.
   if (isset($options['hhvm-binary-path'])) {
-    check_executable($options['hhvm-binary-path'], false);
-    $binary_path = realpath($options['hhvm-binary-path']);
+    $binary_path = check_executable($options['hhvm-binary-path']);
     putenv("HHVM_BIN=" . $binary_path);
-  } else if (isset($options['hhserver-binary-path'])) {
-    check_executable($options['hhserver-binary-path'], true);
-    $binary_path = realpath($options['hhserver-binary-path']);
-    $typechecker = true;
-    putenv("HH_SERVER_BIN=" . $binary_path);
-  } else if (isset($options['typechecker'])) {
-    $typechecker = true;
-  }
-
-  // Explicit path given by --hhvm-binary-path or --hhserver-binary-path
-  // takes priority (see above)
-  // Then, if an HHVM_BIN or HH_SERVER env var exists, and the file it
-  // points to exists, that trumps any default hhvm / typechecker executable
-  // path.
-  if ($binary_path === "") {
-    if (!$typechecker) {
-      if (getenv("HHVM_BIN") !== false) {
-        $binary_path = realpath(getenv("HHVM_BIN"));
-        check_executable($binary_path, false);
-      } else {
-        check_for_multiple_default_binaries(false);
-        $binary_path = hhvm_path();
-      }
-    } else {
-      if (getenv("HH_SERVER_BIN") !== false) {
-        $binary_path = realpath(getenv("HH_SERVER_BIN"));
-        check_executable($binary_path, true);
-      } else {
-        check_for_multiple_default_binaries(true);
-        $binary_path = hh_server_path();
-      }
-    }
+  } else if (getenv("HHVM_BIN") !== false) {
+    $binary_path = check_executable(getenv("HHVM_BIN"));
+  } else {
+    check_for_multiple_default_binaries();
+    $binary_path = hhvm_path();
   }
 
   if (isset($options['verbose'])) {
@@ -3297,7 +3063,7 @@ function main($argv) {
     if (isset($options['server']) && isset($options['cli-server'])) {
       error("Server mode and CLI Server mode are mutually exclusive");
     }
-    if (isset($options['repo']) || isset($options['typechecker'])) {
+    if (isset($options['repo'])) {
       error("Server mode repo tests are not supported");
     }
 

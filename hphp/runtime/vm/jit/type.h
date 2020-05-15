@@ -397,7 +397,7 @@ constexpr bool operator>(Mem a, Mem b) {
 struct Type {
 private:
   static constexpr size_t kRuntime = 28;
-  static constexpr size_t numRuntime = 12;
+  static constexpr size_t numRuntime = 10;
   using bits_t = BitSet<kRuntime + numRuntime>;
 
 public:

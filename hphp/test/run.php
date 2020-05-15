@@ -41,13 +41,6 @@ function test_dir(): string {
   return __DIR__;
 }
 
-// In many places in this file, we use a strings for a single command and a
-// varray of strings for multiple commands. Our logic actually depends on
-// this behavior in complicated ways. Coerce such a value to a varray.
-function to_varray($x): varray {
-  return is_array($x) ? $x : varray[$x];
-}
-
 function get_expect_file_and_type($test, $options) {
   $types = varray[
     'expect',
@@ -98,7 +91,7 @@ function test_repo($options, $test) {
   return "$test.repo";
 }
 
-function jit_serialize_option($cmd, $test, $options, $serialize) {
+function jit_serialize_option(string $cmd, $test, $options, $serialize) {
   $serialized = test_repo($options, $test) . "/jit.dump";
   $cmds = explode(' -- ', $cmd, 2);
   $cmds[0] .=
@@ -526,6 +519,10 @@ function get_options($argv) {
       echo "repo-single/repo and hhbbc2 are mutually exclusive options\n";
       exit(1);
     }
+    if (isset($options['mode'])) {
+      echo "hhbbc2 doesn't support modes; it compares hhas, doesn't run code\n";
+      exit(1);
+    }
   }
 
   if (isset($options['repo-single']) || isset($options['repo-separate'])) {
@@ -792,23 +789,24 @@ function find_debug_config($test, $name) {
   return "";
 }
 
-function mode_cmd($options) {
+function mode_cmd($options): varray<string> {
   $repo_args = '';
   if (!isset($options['repo'])) {
     // Set the non-repo-mode shared repo.
     // When in repo mode, we set our own central path.
     $repo_args = "-vRepo.Local.Mode=-- -vRepo.Central.Path=".verify_hhbc();
   }
+  $interp_args = "$repo_args -vEval.Jit=0";
   $jit_args = "$repo_args -vEval.Jit=true";
   $mode = idx($options, 'mode', '');
   switch ($mode) {
     case '':
     case 'jit':
-      return "$jit_args";
+      return varray[$jit_args];
     case 'interp':
-      return "$repo_args -vEval.Jit=0";
+      return varray[$interp_args];
     case 'interp,jit':
-      return varray["$repo_args -vEval.Jit=0", $jit_args];
+      return varray[$interp_args, $jit_args];
     default:
       error("-m must be one of jit | interp | interp,jit. Got: '$mode'");
   }
@@ -825,11 +823,14 @@ function extra_args($options): string {
   return $args;
 }
 
-function hhvm_cmd_impl($options, $config, $autoload_db_prefix, ...$extra_args) {
-  $modes = to_varray(mode_cmd($options));
-
+function hhvm_cmd_impl(
+  $options,
+  $config,
+  $autoload_db_prefix,
+  ...$extra_args
+): varray<string> {
   $cmds = varray[];
-  foreach ($modes as $mode_num => $mode) {
+  foreach (mode_cmd($options) as $mode_num => $mode) {
     $args = varray[
       hhvm_path(),
       '-c',
@@ -911,8 +912,7 @@ function hhvm_cmd_impl($options, $config, $autoload_db_prefix, ...$extra_args) {
 
     $cmds[] = implode(' ', array_merge($args, $extra_args));
   }
-  if (count($cmds) != 1) return $cmds;
-  return $cmds[0];
+  return $cmds;
 }
 
 function repo_separate($options, $test) {
@@ -921,7 +921,12 @@ function repo_separate($options, $test) {
 }
 
 // Return the command and the env to run it in.
-function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
+function hhvm_cmd(
+  $options,
+  $test,
+  $test_run = null,
+  $is_temp_file = false
+): (varray<string>, darray<string, mixed>) {
   if ($test_run === null) {
     $test_run = $test;
   }
@@ -1022,19 +1027,14 @@ function hhvm_cmd($options, $test, $test_run = null, $is_temp_file = false) {
     $env["TERM"] = "dumb";
   }
 
-  if (is_array($cmds)) {
-    foreach ($cmds as $idx => $_) {
-      $cmds[$idx] .= $cmd;
-    }
-    $cmd = $cmds;
-  } else {
-    $cmd = $cmds . $cmd;
+  foreach ($cmds as $idx => $_) {
+    $cmds[$idx] .= $cmd;
   }
 
-  return varray[$cmd, $env];
+  return tuple($cmds, $env);
 }
 
-function hphp_cmd($options, $test, $program) {
+function hphp_cmd($options, $test, $program): string {
   $extra_args = preg_replace("/-v\s*/", "-vRuntime.", extra_args($options));
 
   $compiler_args = "";
@@ -1912,7 +1912,8 @@ function skip_test($options, $test, $run_skipif = true): ?string {
   unset($options_without_repo['repo']);
 
   list($hhvm, $_) = hhvm_cmd($options_without_repo, $test, $skipif_test);
-  if (is_array($hhvm)) $hhvm=$hhvm[0];
+  // running .skipif, arbitrarily picking a mode
+  $hhvm = $hhvm[0];
 
   $descriptorspec = darray[
     0 => varray["pipe", "r"],
@@ -2094,7 +2095,7 @@ function generate_diff($wanted, $wanted_re, $output)
   return implode("\r\n", $diff);
 }
 
-function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
+function dump_hhas_cmd(string $hhvm_cmd, $test, $hhas_file) {
   $dump_flags = implode(' ', varray[
     '-vEval.AllowHhas=true',
     '-vEval.DumpHhas=1',
@@ -2106,7 +2107,7 @@ function dump_hhas_cmd($hhvm_cmd, $test, $hhas_file) {
   return $cmd;
 }
 
-function dump_hhas_to_temp($hhvm_cmd, $test) {
+function dump_hhas_to_temp(string $hhvm_cmd, $test) {
   $temp_file = $test . '.round_trip.hhas';
   $cmd = dump_hhas_cmd($hhvm_cmd, $test, $temp_file);
   $ret = -1;
@@ -2174,7 +2175,14 @@ function run_config_server($options, $test) {
   return run_config_post(varray[$output, ''], $test, $options);
 }
 
-function run_config_cli($options, $test, $cmd, $cmd_env) {
+function run_config_cli(
+  $options,
+  $test,
+  string $cmd,
+  darray<string, mixed> $cmd_env,
+) {
+  $cmd = timeout_prefix() . $cmd;
+
   if (isset($options['log'])) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
@@ -2391,19 +2399,20 @@ function timeout_prefix() {
   }
 }
 
-function run_one_config($options, $test, $cmd, $cmd_env) {
-  if (is_array($cmd)) {
-    $result = 'skip-empty-cmd';
-    foreach ($cmd as $c) {
-      $result = run_one_config($options, $test, $c, $cmd_env);
-      if (!$result) return $result;
-    }
-    return $result;
+function run_foreach_config(
+  $options,
+  $test,
+  varray<string> $cmds,
+  darray<string, mixed> $cmd_env,
+) {
+  invariant(count($cmds) > 0, "run_foreach_config: no modes");
+  foreach ($cmds as $cmd) {
+    $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
+    if ($outputs === false) return false;
+    $result = run_config_post($outputs, $test, $options);
+    if (!$result) return $result;
   }
-  $cmd = timeout_prefix() . $cmd;
-  $outputs = run_config_cli($options, $test, $cmd, $cmd_env);
-  if ($outputs === false) return false;
-  return run_config_post($outputs, $test, $options);
+  return $result;
 }
 
 function run_and_lock_test($options, $test) {
@@ -2465,15 +2474,14 @@ function run_test($options, $test) {
 
   list($hhvm, $hhvm_env) = hhvm_cmd($options, $test);
 
-  if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/',
-                to_varray($hhvm))) {
+  if (preg_grep('/ --count[ =][0-9]+ .* --count[ =][0-9]+( |$)/', $hhvm)) {
     // we got --count from 2 sources (e.g. .opts file and multi_request_mode)
     // this can't work so skip the test
     return 'skip-count';
   } else if (isset($options['jit-serialize'])) {
     // jit-serialize adds the --count option later, so even 1 --count in the
     // command means we have to skip
-    if (preg_grep('/ --count[ =][0-9]+( |$)/', to_varray($hhvm))) {
+    if (preg_grep('/ --count[ =][0-9]+( |$)/', $hhvm)) {
       return 'skip-count';
     }
   }
@@ -2497,13 +2505,15 @@ function run_test($options, $test) {
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
 
     if (file_exists($test . '.hhbbc_assert')) {
-      $hhvm = hphp_cmd($options, $test, $program);
+      $hphp = hphp_cmd($options, $test, $program);
       if (repo_separate($options, $test)) {
-        $result = exec_with_stack($hhvm);
+        $result = exec_with_stack($hphp);
         if ($result !== true) return false;
-        $hhvm = hhbbc_cmd($options, $test, $program);
+        $hhbbc = hhbbc_cmd($options, $test, $program);
+        return run_foreach_config($options, $test, varray[$hhbbc], $hhvm_env);
+      } else {
+        return run_foreach_config($options, $test, varray[$hphp], $hhvm_env);
       }
-      return run_one_config($options, $test, $hhvm, $hhvm_env);
     }
 
     if (!repo_mode_compile($options, $test, $program)) {
@@ -2511,7 +2521,11 @@ function run_test($options, $test) {
     }
 
     if (isset($options['hhbbc2'])) {
-      $hhas_temp1 = dump_hhas_to_temp($hhvm, "$test.before");
+      invariant(
+        count($hhvm) === 1,
+        "get_options forbids modes because we're not runnig code"
+      );
+      $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
       if ($hhas_temp1 === false) {
         file_put_contents(
           "$test.diff",
@@ -2526,7 +2540,7 @@ function run_test($options, $test) {
         file_put_contents("$test.diff", $result);
         return false;
       }
-      $hhas_temp2 = dump_hhas_to_temp($hhvm, "$test.after");
+      $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
       if ($hhas_temp2 === false) {
         file_put_contents(
           "$test.diff",
@@ -2542,14 +2556,14 @@ function run_test($options, $test) {
     }
 
     if (isset($options['jit-serialize'])) {
-      $cmd = timeout_prefix() .
-        jit_serialize_option($hhvm, $test, $options, true);
+      invariant(count($hhvm) === 1, 'get_options enforces jit mode only');
+      $cmd = jit_serialize_option($hhvm[0], $test, $options, true);
       $outputs = run_config_cli($options, $test, $cmd, $hhvm_env);
       if ($outputs === false) return false;
-      $hhvm = jit_serialize_option($hhvm, $test, $options, false);
+      $hhvm[0] = jit_serialize_option($hhvm[0], $test, $options, false);
     }
 
-    return run_one_config($options, $test, $hhvm, $hhvm_env);
+    return run_foreach_config($options, $test, $hhvm, $hhvm_env);
   }
 
   if (file_exists($test.'.onlyrepo')) {
@@ -2561,10 +2575,11 @@ function run_test($options, $test) {
 
   if (isset($options['hhas-round-trip'])) {
     invariant(substr($test, -5) !== ".hhas", "skip_test should have skipped");
-    $hhas_temp = dump_hhas_to_temp($hhvm, $test);
+    // dumping hhas, not running code so arbitrarily picking a mode
+    $hhas_temp = dump_hhas_to_temp($hhvm[0], $test);
     if ($hhas_temp === false) {
       $err = "system failed: " .
-        dump_hhas_cmd($hhvm, $test, $test.'.round_trip.hhas') .
+        dump_hhas_cmd($hhvm[0], $test, $test.'.round_trip.hhas') .
         "\n";
       file_put_contents("$test.diff", $err);
       return false;
@@ -2575,7 +2590,7 @@ function run_test($options, $test) {
   if (isset($options['server'])) {
     return run_config_server($options, $test);
   }
-  return run_one_config($options, $test, $hhvm, $hhvm_env);
+  return run_foreach_config($options, $test, $hhvm, $hhvm_env);
 }
 
 function num_cpus() {
@@ -2606,9 +2621,9 @@ function print_commands($tests, $options) {
   print make_header("Run these by hand:");
 
   foreach ($tests as $test) {
-    list($command, $_) = hhvm_cmd($options, $test);
+    list($commands, $_) = hhvm_cmd($options, $test);
     if (!isset($options['repo'])) {
-      foreach (to_varray($command) as $c) {
+      foreach ($commands as $c) {
         print "$c\n";
       }
       continue;
@@ -2621,14 +2636,14 @@ function print_commands($tests, $options) {
       $hhbbc_cmd  = hhbbc_cmd($options, $test, $program)."\n";
       $hhbbc_cmds .= $hhbbc_cmd;
       if (isset($options['hhbbc2'])) {
-        foreach (to_varray($command) as $c) {
+        foreach ($commands as $c) {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.before.round_trip.hhas\n";
         }
         $hhbbc_cmds .=
           "mv $test_repo/$program.hhbbc $test_repo/$program.hhbc\n";
         $hhbbc_cmds .= $hhbbc_cmd;
-        foreach (to_varray($command) as $c) {
+        foreach ($commands as $c) {
           $hhbbc_cmds .=
             $c." -vEval.DumpHhas=1 > $test.after.round_trip.hhas\n";
         }
@@ -2638,10 +2653,10 @@ function print_commands($tests, $options) {
     }
     if (isset($options['jit-serialize'])) {
       $hhbbc_cmds .=
-        jit_serialize_option($command, $test, $options, true) . "\n";
-      $command = jit_serialize_option($command, $test, $options, false);
+        jit_serialize_option($commands, $test, $options, true) . "\n";
+      $commands = jit_serialize_option($commands, $test, $options, false);
     }
-    foreach (to_varray($command) as $c) {
+    foreach ($commands as $c) {
       $hhbbc_cmds .= $c."\n";
     }
     print "$hhbbc_cmds\n";
@@ -2911,9 +2926,10 @@ function start_server_proc($options, $config, $port) {
     // load/store counters don't work on Ivy Bridge so disable for tests
     '-vEval.ProfileHWEnable=false'
   );
-  if (is_array($command)) {
+  if (count($command) !== 1) {
     error("Can't run multi-mode tests in server mode");
   }
+  $command = $command[0];
   if (getenv('HHVM_TEST_SERVER_LOG')) {
     echo "Starting server '$command'\n";
   }

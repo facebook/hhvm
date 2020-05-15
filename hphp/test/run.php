@@ -1462,22 +1462,10 @@ class Status {
     self::$use_color = $use;
   }
 
-  // Since we run the tests in forked processes, state is not shared
-  // So we cannot keep a static variable adding individual test times.
-  // But we can put the times files and add the values later.
-  public static function setTestTime($time) {
-    file_put_contents(tempnam(self::$tempdir, "trun"), $time);
-  }
-
-  // The total time running the tests if they were run serially.
-  public static function addTestTimesSerial() {
-    $time = 0;
-    $files = scandir(self::$tempdir);
-    foreach ($files as $file) {
-      if (strpos($file, 'trun') === 0) {
-        $time += floatval(file_get_contents(self::$tempdir . "/" . $file));
-        unlink(self::$tempdir . "/" . $file);
-      }
+  public static function addTestTimesSerial($results) {
+    $time = 0.0;
+    foreach ($results as $result) {
+      $time += $result['time'];
     }
     return $time;
   }
@@ -2431,7 +2419,6 @@ function run_and_lock_test($options, $test) {
   }
   $time = microtime(true) - $time;
   $etime = time();
-  Status::setTestTime($time);
   if ($lock) {
     if ($status) {
       clean_intermediate_files($test, $options);
@@ -3324,7 +3311,7 @@ function main($argv) {
   Status::sayColor("Total time for all executed tests if run serially: ",
                    Status::BLUE,
                    sprintf("%.2fs\n",
-                   Status::addTestTimesSerial()));
+                   Status::addTestTimesSerial($results)));
 
   return $return_value;
 }

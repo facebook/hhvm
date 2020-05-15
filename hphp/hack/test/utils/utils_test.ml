@@ -163,14 +163,14 @@ let test_telemetry_diff () =
     1
     "diff1 a should be -1";
   Int_asserter.assert_equals
-    (Telemetry_test_utils.int_exn diff1 "a:diff")
+    (Telemetry_test_utils.int_exn diff1 "a__diff")
     (-1)
-    "diff1 a:diff should be -1";
+    "diff1 a__diff should be -1";
   assert_throws
     (Telemetry_test_utils.int_exn diff1)
-    "a:prev"
+    "a__prev"
     "not found"
-    "diff1 a:prev should throw";
+    "diff1 a__prev should throw";
 
   (* different values, only show changed *)
   begin
@@ -181,14 +181,14 @@ let test_telemetry_diff () =
       "not found"
       "diff1b a should throw";
     Int_asserter.assert_equals
-      (Telemetry_test_utils.int_exn diff1b "a:diff")
+      (Telemetry_test_utils.int_exn diff1b "a__diff")
       (-1)
-      "diff1b a:diff should be -1";
+      "diff1b a__diff should be -1";
     assert_throws
       (Telemetry_test_utils.int_exn diff1b)
-      "a:prev"
+      "a__prev"
       "not found"
-      "diff1b a:prev should throw"
+      "diff1b a__prev should throw"
   end;
 
   (* same values *)
@@ -202,9 +202,9 @@ let test_telemetry_diff () =
       "diff2 b should be 1";
     assert_throws
       (Telemetry_test_utils.int_exn diff2)
-      "a:prev"
+      "a__prev"
       "not found"
-      "diff2 a:prev should throw";
+      "diff2 a__prev should throw";
 
     (* same value, only show changed *)
     let diff2b = Telemetry.diff ~all:false current2 ~prev:prev2 in
@@ -215,9 +215,9 @@ let test_telemetry_diff () =
       "diff2b a should throw";
     assert_throws
       (Telemetry_test_utils.int_exn diff2b)
-      "a:prev"
+      "a__prev"
       "not found"
-      "diff2b a:prev should throw"
+      "diff2b a__prev should throw"
   end;
 
   (* nested object *)
@@ -246,18 +246,18 @@ let test_telemetry_diff () =
       1
       "diff3 o.a should be 1";
     Int_asserter.assert_equals
-      (Telemetry_test_utils.int_exn diff3 "o.a:diff")
+      (Telemetry_test_utils.int_exn diff3 "o.a__diff")
       (-1)
-      "diff3 o.a:diff should be -1";
+      "diff3 o.a__diff should be -1";
     Int_asserter.assert_equals
       (Telemetry_test_utils.int_exn diff3 "o.b")
       1
       "diff3 o.b should be 1";
     assert_throws
       (Telemetry_test_utils.int_exn diff3)
-      "o.b:prev"
+      "o.b__prev"
       "not found"
-      "diff3 o.b:prev should throw"
+      "diff3 o.b__prev should throw"
   end;
 
   (* nested object, only show different *)
@@ -269,9 +269,9 @@ let test_telemetry_diff () =
       "not found"
       "diff3b o.a should throw";
     Int_asserter.assert_equals
-      (Telemetry_test_utils.int_exn diff3b "o.a:diff")
+      (Telemetry_test_utils.int_exn diff3b "o.a__diff")
       (-1)
-      "diff3 o.a:diff should be -1";
+      "diff3 o.a__diff should be -1";
     assert_throws
       (Telemetry_test_utils.int_exn diff3b)
       "o.b"
@@ -279,9 +279,9 @@ let test_telemetry_diff () =
       "diff3b o.b should throw";
     assert_throws
       (Telemetry_test_utils.int_exn diff3b)
-      "o.b:diff"
+      "o.b__diff"
       "not found"
-      "diff3b o.b:diff should throw"
+      "diff3b o.b__diff should throw"
   end;
 
   (* prev absent, and current absent *)
@@ -304,22 +304,22 @@ let test_telemetry_diff () =
       3
       "diff4 o.c should be 3";
     Bool_asserter.assert_equals
-      (Telemetry_test_utils.value_exn diff4 "o:prev" = Hh_json.JSON_Null)
+      (Telemetry_test_utils.value_exn diff4 "o__prev" = Hh_json.JSON_Null)
       true
-      "diff4 o:prev should be JSON_Null";
+      "diff4 o__prev should be JSON_Null";
     assert_throws
       (Telemetry_test_utils.value_exn diff4)
-      "o.c:prev"
+      "o.c__prev"
       "not found"
-      "diff4 o.c:prev should throw";
+      "diff4 o.c__prev should throw";
     Bool_asserter.assert_equals
       (Telemetry_test_utils.value_exn diff4 "p" = Hh_json.JSON_Null)
       true
       "diff4 p should be JSON_Null";
     Int_asserter.assert_equals
-      (Telemetry_test_utils.int_exn diff4 "p:prev.d:prev")
+      (Telemetry_test_utils.int_exn diff4 "p__prev.d__prev")
       4
-      "diff4 p:prev.d:prev should be 4"
+      "diff4 p__prev.d__prev should be 4"
   end;
   true
 

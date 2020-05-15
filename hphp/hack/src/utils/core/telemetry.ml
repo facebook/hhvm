@@ -155,7 +155,7 @@ and diff_already_sorted (current : t) ~(prev : t) ~(all : bool) (acc : t) : t =
     acc |> diff_both ~all c p |> diff_already_sorted cs ~prev:ps ~all
 
 and diff_no_prev ((key, val_c) : key_value_pair) (acc : t) : t =
-  (key, val_c) :: (key ^ ":prev", Hh_json.JSON_Null) :: acc
+  (key, val_c) :: (key ^ "__prev", Hh_json.JSON_Null) :: acc
 
 and diff_no_current ((key, val_p) : key_value_pair) (acc : t) : t =
   let open Hh_json in
@@ -164,8 +164,8 @@ and diff_no_current ((key, val_p) : key_value_pair) (acc : t) : t =
     let elems =
       elems |> List.fold ~init:[] ~f:(fun acc e -> diff_no_current e acc)
     in
-    (key, JSON_Null) :: (key ^ ":prev", JSON_Object elems) :: acc
-  | _ -> (key, Hh_json.JSON_Null) :: (key ^ ":prev", val_p) :: acc
+    (key, JSON_Null) :: (key ^ "__prev", JSON_Object elems) :: acc
+  | _ -> (key, Hh_json.JSON_Null) :: (key ^ "__prev", val_p) :: acc
 
 and acc_if b elem acc =
   if b then
@@ -204,14 +204,14 @@ and diff_both
     begin
       try
         let (c, p) = (int_of_string c, int_of_string p) in
-        (key ^ ":diff", int_ (c - p)) :: acc_if all (key, int_ c) acc
+        (key ^ "__diff", int_ (c - p)) :: acc_if all (key, int_ c) acc
       with _ ->
         begin
           try
             let (c, p) = (float_of_string c, float_of_string p) in
-            (key ^ ":diff", float_ (c -. p)) :: acc_if all (key, float_ c) acc
+            (key ^ "__diff", float_ (c -. p)) :: acc_if all (key, float_ c) acc
           with _ ->
-            (key, JSON_Number c) :: (key ^ ":prev", JSON_Number p) :: acc
+            (key, JSON_Number c) :: (key ^ "__prev", JSON_Number p) :: acc
         end
     end
-  | (_, _) -> (key, val_c) :: (key ^ ":prev", val_p) :: acc
+  | (_, _) -> (key, val_c) :: (key ^ "__prev", val_p) :: acc

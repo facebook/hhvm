@@ -348,9 +348,11 @@ pid_t do_proc_open_helper(int afdt_fd) {
   if (child == 0) {
     mprotect_1g_pages(PROT_READ);
     Process::OOMScoreAdj(1000);
+    std::map<int, int> dup_fds;
     for (int i = 0; i < pvals.size(); i++) {
-      dup2(pkeys[i], pvals[i]);
+      dup_fds[pvals[i]] = pkeys[i];
     }
+    Process::RemapFDsPreExec(dup_fds);
 
     if (!cwd.empty() && chdir(cwd.c_str())) {
       // non-zero for error

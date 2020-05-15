@@ -467,9 +467,10 @@ std::map<int, int> Process::RemapFDsPreExec(const std::map<int, int>& fds) {
   std::set<int> fds_to_close;
   for (const auto& entry : boost::filesystem::directory_iterator(fd_dir)) {
     char* endptr = nullptr;
-    const char* filename = entry.path().filename().c_str();
-    const int fd = strtol(filename, &endptr, 10);
-    assert(endptr != filename); // no matching characters
+    auto filename = entry.path().filename();
+    const char* filename_c = filename.c_str();
+    const int fd = strtol(filename_c, &endptr, 10);
+    assert(endptr != filename_c); // no matching characters
     assert(*endptr == '\0'); // entire string
     if (preserve_set.find(fd) != preserve_set.end()) {
       continue;

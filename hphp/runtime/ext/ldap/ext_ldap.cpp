@@ -159,10 +159,10 @@ struct LdapLink : SweepableResourceData {
   DECLARE_RESOURCE_ALLOCATION(LdapLink)
 
   LdapLink() {}
-  ~LdapLink() override { closeImpl(); }
+  ~LdapLink() override { closeImpl(false); }
 
   void close() {
-    closeImpl();
+    closeImpl(false);
     rebindproc.unset();
   }
 
@@ -171,7 +171,7 @@ struct LdapLink : SweepableResourceData {
   }
 
 private:
-  void closeImpl();
+  void closeImpl(bool forSweep);
 
 public:
   CLASSNAME_IS("ldap link");
@@ -230,16 +230,18 @@ void clearLdapLink(const LdapLink* link) {
 }
 
 void LdapLink::sweep() {
-  closeImpl();
+  closeImpl(true);
   rebindproc.releaseForSweep();
 }
 
-void LdapLink::closeImpl() {
+void LdapLink::closeImpl(bool forSweep) {
   if (link) {
     ldap_unbind_s(link);
     link = nullptr;
     LDAPG(num_links)--;
-    clearLdapLink(this);
+    if (!forSweep) {
+      clearLdapLink(this);
+    }
   }
 }
 

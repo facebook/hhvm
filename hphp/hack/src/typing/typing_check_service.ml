@@ -378,8 +378,12 @@ let profile_log
       ~path:file.path
       ~telemetry;
     Hh_logger.log
-      "%s [type-check] %fs%s"
+      "%s [%s] %fs%s"
       (Relative_path.suffix file.path)
+      ( if files_to_declare > 0 then
+        "discover-decl-deps"
+      else
+        "type-check" )
       (Unix.gettimeofday () -. start_time)
       ( if SharedMem.hh_log_level () > 0 then
         "\n" ^ Telemetry.to_string telemetry

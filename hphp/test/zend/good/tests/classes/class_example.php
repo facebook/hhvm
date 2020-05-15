@@ -21,7 +21,7 @@ class user {
     $this->address = $address;
     $this->phone_num = $phone_num;
   }
-};
+}
 
 function test($u) {
   /* one can pass classes as arguments */

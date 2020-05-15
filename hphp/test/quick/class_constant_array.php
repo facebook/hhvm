@@ -13,7 +13,7 @@ class Cls1 {
   const ARRAY7 = Cls1::ARRAY1;
   const ARRAY8 = varray[Cls1::ARRAY2, Cls1::ARRAY2];
   const ARRAY9 = varray[BOOLCNS ? Cls1::ARRAY2 : Cls1::ARRAY3];
-};
+}
 
 class Cls2 {
   const VEC1 = vec[];
@@ -25,7 +25,7 @@ class Cls2 {
   const VEC7 = Cls2::VEC1;
   const VEC8 = vec[Cls2::VEC2, Cls2::VEC2];
   const VEC9 = vec[BOOLCNS ? Cls2::VEC2 : Cls2::VEC3];
-};
+}
 
 class Cls3 {
   const DICT1 = dict[];
@@ -45,7 +45,7 @@ class Cls3 {
   const DICT11 = Cls3::DICT1;
   const DICT12 = dict[123 => Cls3::DICT2, 456 => Cls3::DICT2];
   const DICT13 = dict[100 => BOOLCNS ? Cls3::DICT2 : Cls3::DICT3];
-};
+}
 
 class Cls4 {
   const KEYSET1 = keyset[];
@@ -54,7 +54,7 @@ class Cls4 {
   const KEYSET4 = keyset[1, '1', 2, '2'];
   const KEYSET5 = Cls4::KEYSET1;
   const KEYSET6 = keyset[BOOLCNS ? 'a' : 1];
-};
+}
 
 <<__EntryPoint>> function main(): void {
 var_dump(Cls1::ARRAY1);

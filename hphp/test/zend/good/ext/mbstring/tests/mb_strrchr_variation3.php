@@ -117,7 +117,7 @@ foreach($inputs as $key =>$value) {
       else {
          var_dump(bin2hex($res));
       }
-};
+}
 
 fclose($fp);
 

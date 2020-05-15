@@ -1,7 +1,7 @@
 <?hh
-class A {};
-class B extends A {};
-class C extends B {};
+class A {}
+class B extends A {}
+class C extends B {}
 <<__EntryPoint>>
 function main() {
   if (isset($GLOBALS['foo'])) {

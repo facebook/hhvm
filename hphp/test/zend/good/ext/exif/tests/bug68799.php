@@ -7,7 +7,7 @@ class A {
     $a = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa';
     $this->a = $a . $a . $a . $a . $a . $a;
   }
-};
+}
 
 function doStuff ($limit) {
 

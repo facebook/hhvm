@@ -3,7 +3,7 @@
 class Dtor {
 }
 
-class Foo { public $bug; };
+class Foo { public $bug; }
 
 function main() {
   $x = new Foo;

@@ -2,7 +2,7 @@
 
 trait T {
   <<__LateInit>> public property $p;
-};
+}
 
 class C {
   use T;

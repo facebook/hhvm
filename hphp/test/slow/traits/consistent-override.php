@@ -2,11 +2,11 @@
 
 trait T {
   public $params = 42;
-};
+}
 
 class B {
   public $params = "hello";
-};
+}
 
 class B1 extends B {
   use T;

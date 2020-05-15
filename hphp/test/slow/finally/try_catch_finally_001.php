@@ -1,7 +1,7 @@
 <?hh
 
-class AE extends Exception {};
-class BE extends Exception {};
+class AE extends Exception {}
+class BE extends Exception {}
 
 function foo () {
     try {

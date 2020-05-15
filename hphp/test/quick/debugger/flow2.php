@@ -25,7 +25,7 @@ private
 
 
 
-};
+}
 
 // Test the following:
 // - Stepping over instructions that cause destructors to run.

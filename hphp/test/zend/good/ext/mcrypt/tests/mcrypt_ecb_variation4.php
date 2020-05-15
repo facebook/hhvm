@@ -107,7 +107,7 @@ $inputs = darray[
 foreach($inputs as $valueType =>$value) {
       echo "\n--$valueType--\n";
       var_dump(bin2hex(mcrypt_ecb($cipher, $key, $data, $value, $iv)));
-};
+}
 
 fclose($fp);
 

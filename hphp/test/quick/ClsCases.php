@@ -5,7 +5,7 @@ class MyClass {
   public static function foo() {
     echo "in static method foo()\n";
   }
-};
+}
 
 function clsFact() {
   return new MyClass();

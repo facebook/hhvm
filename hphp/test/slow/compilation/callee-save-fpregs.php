@@ -24,7 +24,7 @@ class X {
 
     return (string)$x;
   }
-};
+}
 
 function test($a, $x) {
   return $a == $x;

@@ -35,7 +35,7 @@ class dafna_class {
     function SetMyName($name) {
         $this->myname = $name;
     }
-};
+}
 
 <<__EntryPoint>> function main(): void {
 error_reporting(1023);

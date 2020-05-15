@@ -8,7 +8,7 @@ class base {
     private $p6 = 'base:6';
     public function __clone() {
     }
-};
+}
 
 class test extends base {
     public $p1 = 'test:1';

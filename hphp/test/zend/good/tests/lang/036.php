@@ -6,7 +6,7 @@ class par {
     {
         print $this->id;
     }
-};
+}
 
 class chld extends par {
     public $id = "bar";
@@ -14,7 +14,7 @@ class chld extends par {
     {
         parent::displayMe();
     }
-};
+}
 
 <<__EntryPoint>> function main(): void {
 $obj = new chld();

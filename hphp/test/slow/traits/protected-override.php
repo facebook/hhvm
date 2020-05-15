@@ -2,11 +2,11 @@
 
 trait T {
   protected $params;
-};
+}
 
 class B {
   protected $params;
-};
+}
 
 class B1 extends B {
   use T;

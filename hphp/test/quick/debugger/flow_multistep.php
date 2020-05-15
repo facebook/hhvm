@@ -29,7 +29,7 @@ private
 
 
 
-};
+}
 
 class C2 {
 private
@@ -46,7 +46,7 @@ private
 
 
 
-};
+}
 
 function main() {
   $c1 = new C1(5);

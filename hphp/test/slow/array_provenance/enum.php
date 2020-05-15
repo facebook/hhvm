@@ -1,10 +1,10 @@
 <?hh
 
-enum E0 : int { };
-enum E1 : int { C0 = 0; };
-enum E2 : int { C0 = 0; C1 = 1; };
-enum E3 : int { C0 = 0; C1 = 1; C2 = 2; };
-enum E4 : int { C0 = 0; C1 = 1; C2 = 2; C3 = 3; };
+enum E0 : int { }
+enum E1 : int { C0 = 0; }
+enum E2 : int { C0 = 0; C1 = 1; }
+enum E3 : int { C0 = 0; C1 = 1; C2 = 2; }
+enum E4 : int { C0 = 0; C1 = 1; C2 = 2; C3 = 3; }
 
 <<__EntryPoint>>
 function main() {

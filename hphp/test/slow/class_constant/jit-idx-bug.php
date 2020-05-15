@@ -2,7 +2,7 @@
 
 abstract class B {
   abstract const string NAME;
-};
+}
 
 class C1 extends B {
   const string NAME = 'S1';

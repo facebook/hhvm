@@ -15,7 +15,7 @@ class B extends A
             echo "$key => $val\n";
         }
     }
-};
+}
 <<__EntryPoint>> function main(): void {
 $x = new B;
 $x->go();

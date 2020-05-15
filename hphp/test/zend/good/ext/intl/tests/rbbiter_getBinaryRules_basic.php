@@ -16,7 +16,7 @@ $rules = <<<RULES
 !!safe_reverse;
 RULES;
 $rbbi = new IntlRuleBasedBreakIterator($rules);
-$rbbi->setText('sdfkjsdf88á.... ,;');;
+$rbbi->setText('sdfkjsdf88á.... ,;');
 
 $br = $rbbi->getBinaryRules();
 

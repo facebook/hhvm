@@ -13,7 +13,7 @@ class foo {
   function mul() {
     return $this->a*$this->b;
   }
-};
+}
 
 class bar extends foo {
   public $c;
@@ -23,7 +23,7 @@ class bar extends foo {
     echo "b = ".$this->b."\n";
     echo "c = ".$this->c."\n";
   }
-};
+}
 
 <<__EntryPoint>> function main(): void {
 $foo1 = new foo;

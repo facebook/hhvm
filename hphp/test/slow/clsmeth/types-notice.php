@@ -5,7 +5,7 @@ function handle_error($errno, $errstr, ...) {
   return true;
 }
 
-class K   { const A = 0; const B = 1; };
+class K   { const A = 0; const B = 1; }
 class Foo { static function bar() {} }
 
 function P(bool $b) { return $b ? "True\n" : "False\n"; }

@@ -1,7 +1,7 @@
 <?hh
 
 class :url {
-};
+}
 
 function foo(?:url $xhp_object): void {
 }

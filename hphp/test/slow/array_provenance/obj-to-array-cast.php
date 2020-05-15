@@ -20,7 +20,7 @@ function non_empty_generator() {
 }
 
 class NonIterableObj {
-};
+}
 
 <<__EntryPoint>>
 function main(): void {

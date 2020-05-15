@@ -6,7 +6,7 @@ class e {
 If you DON'T see this, something's wrong.
 THISMUSTNOTERROR;
 
-};
+}
 
 <<__EntryPoint>> function main(): void {
 print e::E . "\n";

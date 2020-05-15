@@ -1,5 +1,5 @@
 <?hh
-class A {};
+class A {}
 <<__EntryPoint>>
 function main(): void {
   var_dump(get_object_vars(new A));

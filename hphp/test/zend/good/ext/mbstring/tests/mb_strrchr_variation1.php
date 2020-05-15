@@ -104,7 +104,7 @@ $inputs = darray[
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       try { var_dump( mb_strrchr($value, $needle, $part, $encoding) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-};
+}
 
 fclose($fp);
 

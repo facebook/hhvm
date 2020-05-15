@@ -5,7 +5,7 @@ const BOOLCNS = false;
 
 class Cls {
   const INTCNS = 123;
-};
+}
 
 const ARRAY1 = varray[];
 const ARRAY2 = varray[1, 2, 3, 4];

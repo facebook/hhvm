@@ -4,7 +4,7 @@
 function func() {}
 
 <<__DynamicallyCallable>>
-function dyn_func() {};
+function dyn_func() {}
 <<__EntryPoint>> function main(): void {
 $dyn_func = 'dyn_func';
 var_dump(HH\fun_get_function(fun('func')));

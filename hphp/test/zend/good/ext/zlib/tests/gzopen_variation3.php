@@ -99,7 +99,7 @@ foreach($inputs as $key =>$value) {
       if ($res === true) {
          gzclose($res);
       }
-};
+}
 
 fclose($fp);
 

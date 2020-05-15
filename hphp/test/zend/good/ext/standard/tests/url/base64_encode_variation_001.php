@@ -71,6 +71,6 @@ $values = varray[
 foreach($values as $value) {
       echo "\nArg value $value\n";
       try { var_dump( base64_encode($value) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-};
+}
 
 echo "Done";

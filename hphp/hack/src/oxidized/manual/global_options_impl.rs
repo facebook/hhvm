@@ -81,7 +81,7 @@ impl Default for GlobalOptions {
             po_abstract_static_props: false,
             po_disable_unset_class_const: false,
             po_parser_errors_only: false,
-            tco_check_attribute_locations: false,
+            tco_check_attribute_locations: true,
             po_disallow_func_ptrs_in_constants: false,
             tco_error_php_lambdas: false,
             tco_disallow_discarded_nullable_awaitables: false,

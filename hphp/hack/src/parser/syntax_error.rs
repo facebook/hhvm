@@ -387,8 +387,8 @@ pub const memoize_lsb_on_non_static: Error =
     Cow::Borrowed("<<__MemoizeLSB>> can only be applied to static methods");
 pub const memoize_lsb_on_non_method: Error =
     Cow::Borrowed("<<__MemoizeLSB>> can only be applied to methods");
-pub const constants_as_attribute_arguments: Error =
-    Cow::Borrowed("User-defined constants are not allowed in user attribute expressions");
+pub const expression_as_attribute_arguments: Error =
+    Cow::Borrowed("Attribute arguments must be literals");
 pub const instanceof_invalid_scope_resolution: Error = Cow::Borrowed(concat!(
     "A scope resolution (::) on the right side of an ",
     "instanceof operator must start with a class name, `self`, `parent`, or `static`, and end with ",

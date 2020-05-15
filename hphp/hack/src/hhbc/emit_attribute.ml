@@ -26,9 +26,7 @@ let from_attribute_base namespace (p, attr_name) arguments =
     in
     Hhas_attribute.make fq_id attribute_arguments
   with Ast_constant_folder.UserDefinedConstant ->
-    Emit_fatal.raise_fatal_parse
-      p
-      "User-defined constants are not allowed in user attribute expressions"
+    Emit_fatal.raise_fatal_parse p "Attribute arguments must be literals"
 
 let from_ast namespace ast_attr =
   from_attribute_base namespace ast_attr.A.ua_name ast_attr.A.ua_params

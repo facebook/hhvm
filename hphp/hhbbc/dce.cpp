@@ -1256,7 +1256,7 @@ void dce(Env& env, const bc::Exit&)  { stack_ops(env); }
 void dce(Env& env, const bc::IsTypeC& op) {
   stack_ops(env, [&] (UseInfo& ui) {
       if (allUnused(ui) &&
-          !is_type_might_raise(type_of_istype(op.subop1), topC(env))) {
+          !is_type_might_raise(op.subop1, topC(env))) {
         return PushFlags::MarkUnused;
       }
       return PushFlags::MarkLive;
@@ -1270,7 +1270,7 @@ void dce(Env& env, const bc::IsTypeL& op) {
       scheduleGenLoc(env, op.nloc1.id);
       if (allUnused(ui) &&
           !readCouldHaveSideEffects(ty) &&
-          !is_type_might_raise(type_of_istype(op.subop2), ty)) {
+          !is_type_might_raise(op.subop2, ty)) {
         return PushFlags::MarkUnused;
       }
       return PushFlags::MarkLive;

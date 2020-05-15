@@ -227,12 +227,7 @@ let from_text (source_text : string) (env : env) : result * bool =
         | Either.First (tast, is_hh_file) ->
           let empty_namespace = Namespace_env.empty_from_popt popt in
           let tast = elaborate_namespaces popt tast in
-          let tast =
-            if Hhbc_options.enable_pocket_universes hhbc_options then
-              Pocket_universes.translate tast
-            else
-              tast
-          in
+          let tast = Pocket_universes.translate tast in
           emit ~env ~is_hh_file ~empty_namespace ~hhbc_options tast
         | Either.Second (pos, msg, is_runtime_error) ->
           emit_fatal ~env ~is_runtime_error ~hhbc_options pos (Some msg)

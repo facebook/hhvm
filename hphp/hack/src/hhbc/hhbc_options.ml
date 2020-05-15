@@ -39,7 +39,6 @@ type t = {
   option_emit_meth_caller_func_pointers: bool;
   option_rx_is_enabled: bool;
   option_disable_lval_as_an_expression: bool;
-  option_enable_pocket_universes: bool;
   option_array_provenance: bool;
   option_enable_class_level_where_clauses: bool;
   option_disable_legacy_soft_typehints: bool;
@@ -95,7 +94,6 @@ let default =
     option_emit_meth_caller_func_pointers = true;
     option_rx_is_enabled = false;
     option_disable_lval_as_an_expression = false;
-    option_enable_pocket_universes = false;
     option_array_provenance = false;
     option_enable_class_level_where_clauses = false;
     option_disable_legacy_soft_typehints = false;
@@ -174,8 +172,6 @@ let emit_meth_caller_func_pointers o = o.option_emit_meth_caller_func_pointers
 let rx_is_enabled o = o.option_rx_is_enabled
 
 let disable_lval_as_an_expression o = o.option_disable_lval_as_an_expression
-
-let enable_pocket_universes o = o.option_enable_pocket_universes
 
 let array_provenance o = o.option_array_provenance
 
@@ -279,7 +275,6 @@ let to_string o =
       Printf.sprintf "rx_is_enabled: %B" @@ rx_is_enabled o;
       Printf.sprintf "disable_lval_as_an_expression: %B"
       @@ disable_lval_as_an_expression o;
-      Printf.sprintf "enable_pocket_universes: %B" @@ enable_pocket_universes o;
       Printf.sprintf "array_provenance: %B" @@ array_provenance o;
       Printf.sprintf "enable_class_level_where_clauses: %B"
       @@ enable_class_level_where_clauses o;
@@ -368,8 +363,6 @@ let set_option options name value =
     { options with option_rx_is_enabled = int_of_string value > 0 }
   | "hack.lang.disable_lval_as_an_expression" ->
     { options with option_disable_lval_as_an_expression = as_bool value }
-  | "hack.lang.enablepocketuniverses" ->
-    { options with option_enable_pocket_universes = as_bool value }
   | "hhvm.array_provenance" ->
     { options with option_array_provenance = as_bool value }
   | "hhvm.lang.enable_class_level_where_clauses" ->
@@ -515,10 +508,6 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v -> { opts with option_disable_lval_as_an_expression = v = 1 }
     );
-    ( set_value
-        "hhvm.hack.lang.enable_pocket_universes"
-        get_value_from_config_int
-    @@ fun opts v -> { opts with option_enable_pocket_universes = v = 1 } );
     ( set_value
         "hhvm.hack.lang.disable_xhp_element_mangling"
         get_value_from_config_int

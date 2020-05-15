@@ -245,7 +245,6 @@ prefixed_flags!(
     ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
     ENABLE_COROUTINES,
     ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
-    ENABLE_POCKET_UNIVERSES,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY,
     RUST_EMITTER,
@@ -664,9 +663,6 @@ mod tests {
   "hhvm.hack.lang.enable_first_class_function_pointers": {
     "global_value": false
   },
-  "hhvm.hack.lang.enable_pocket_universes": {
-    "global_value": false
-  },
   "hhvm.hack.lang.enable_xhp_class_modifier": {
     "global_value": false
   },
@@ -1005,7 +1001,6 @@ bitflags! {
         const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
         const RX_IS_ENABLED = 1 << 29;
         const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;
-        const ENABLE_POCKET_UNIVERSES = 1 << 31;
         const ARRAY_PROVENANCE = 1 << 33;
         const ENABLE_CLASS_LEVEL_WHERE_CLAUSES = 1 << 35;
         const DISABLE_LEGACY_SOFT_TYPEHINTS = 1 << 36;

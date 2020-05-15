@@ -82,9 +82,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(disable_lval_as_an_expression caml)
     Hhbc_options.(disable_lval_as_an_expression rust);
   assert_equal
-    Hhbc_options.(enable_pocket_universes caml)
-    Hhbc_options.(enable_pocket_universes rust);
-  assert_equal
     Hhbc_options.(array_provenance caml)
     Hhbc_options.(array_provenance rust);
   assert_equal
@@ -359,9 +356,6 @@ let test_all_overrides_json_only _ =
   \"hhvm.hack.lang.enable_first_class_function_pointers\": {
     \"global_value\": true
   },
-  \"hhvm.hack.lang.enable_pocket_universes\": {
-    \"global_value\": true
-  },
   \"hhvm.hack.lang.enable_xhp_class_modifier\": {
     \"global_value\": true
   },
@@ -491,9 +485,6 @@ module CliArgOverrides = struct
   let hhvm'hack'lang'enable_first_class_function_pointers =
     "-vhhvm.hack.lang.enable_first_class_function_pointers=2"
 
-  let hhvm'hack'lang'enable_pocket_universes =
-    "-vhack.lang.enablepocketuniverses=true"
-
   let hhvm'hack'lang'enable_xhp_class_modifier =
     "-vhhvm.hack.lang.enable_xhp_class_modifier=true"
 
@@ -562,7 +553,6 @@ let test_all_overrides_cli_only _ =
       hhvm'hack'lang'enable_class_level_where_clauses;
       hhvm'hack'lang'enable_coroutines;
       hhvm'hack'lang'enable_first_class_function_pointers;
-      hhvm'hack'lang'enable_pocket_universes;
       hhvm'hack'lang'enable_xhp_class_modifier;
       hhvm'hack'lang'phpism'disallow_execution_operator;
       hhvm'hack'lang'phpism'disable_nontoplevel_declarations;

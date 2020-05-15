@@ -488,7 +488,6 @@ bool RuntimeOption::TimeoutsUseWallTime = true;
 bool RuntimeOption::CheckFlushOnUserClose = true;
 bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
-bool RuntimeOption::EnablePocketUniverses = false;
 uint32_t RuntimeOption::EvalInitialStaticStringTableSize =
   kDefaultInitialStaticStringTableSize;
 uint32_t RuntimeOption::EvalInitialNamedEntityTableSize = 30000;
@@ -2007,9 +2006,6 @@ void RuntimeOption::Load(
     // some reason.
     Config::Bind(AutoTypecheck, ini, config, "Hack.Lang.AutoTypecheck",
                  LookForTypechecker);
-    Config::Bind(EnablePocketUniverses, ini, config,
-                 "Hack.Lang.EnablePocketUniverses",
-                 false);
     Config::Bind(EnableClassLevelWhereClauses, ini, config,
                  "Hack.Lang.EnableClassLevelWhereClauses",
                  false);

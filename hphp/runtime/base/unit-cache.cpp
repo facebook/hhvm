@@ -837,7 +837,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + repoSchemaId().toString()
     + (RuntimeOption::EnableClassLevelWhereClauses ? '1' : '0')
     + (RuntimeOption::AssertEmitted ? '1' : '0')
-    + (RuntimeOption::EnablePocketUniverses ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
     + (RuntimeOption::EvalEmitSwitch ? '1' : '0')

@@ -123,14 +123,7 @@ where
             ));
             // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
             elaborate_namespaces_visitor::elaborate_program(RcOc::clone(&namespace), ast);
-            if emitter
-                .options()
-                .hhvm
-                .hack_lang_flags
-                .contains(options::LangFlags::ENABLE_POCKET_UNIVERSES)
-            {
-                emit_pu_rust::translate(ast);
-            }
+            emit_pu_rust::translate(ast);
             let e = &mut emitter;
             profile(move || emit(e, &env, namespace, *is_hh_file, ast))
         }

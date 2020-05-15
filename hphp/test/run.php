@@ -805,16 +805,12 @@ function mode_cmd($options) {
     case '':
     case 'jit':
       return "$jit_args";
-    case 'pgo':
-      return $jit_args.
-        ' -vEval.JitPGO=1'.
-        ' -vEval.JitPGORegionSelector=hotcfg';
     case 'interp':
       return "$repo_args -vEval.Jit=0";
     case 'interp,jit':
       return varray["$repo_args -vEval.Jit=0", $jit_args];
     default:
-      error("-m must be one of jit | pgo | interp | interp,jit. Got: '$mode'");
+      error("-m must be one of jit | interp | interp,jit. Got: '$mode'");
   }
 }
 

@@ -54,7 +54,6 @@ pub mod aast_visitor;
 
 mod gen;
 
-
 pub trait ToOxidized {
     type Target;
 

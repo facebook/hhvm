@@ -10,8 +10,76 @@
 open Config_file.Getters
 open Hh_core
 
+module Watchman = struct
+  type t = {
+    (* use_watchman *)
+    enabled: bool;
+    (* in seconds *)
+    debug_logging: bool;
+    init_timeout: int;
+    subscribe: bool;
+    (* in seconds *)
+    synchronous_timeout: int;
+  }
+
+  let default =
+    {
+      debug_logging = false;
+      enabled = false;
+      (* buck and hgwatchman use a 10 second timeout, too *)
+      init_timeout = 10;
+      subscribe = false;
+      synchronous_timeout = 120;
+    }
+
+  let load ~current_version ~default config =
+    let prefix = Some "watchman" in
+    let use_watchman =
+      bool_if_min_version
+        "use_watchman"
+        ~default:default.enabled
+        ~current_version
+        config
+    in
+    let enabled =
+      bool_if_min_version
+        "enabled"
+        ~prefix
+        ~default:use_watchman
+        ~current_version
+        config
+    in
+    let init_timeout =
+      int_ "init_timeout" ~prefix ~default:default.init_timeout config
+    in
+    let subscribe =
+      bool_if_min_version
+        "subscribe_v2"
+        ~prefix
+        ~default:default.subscribe
+        ~current_version
+        config
+    in
+    let synchronous_timeout =
+      int_
+        "synchronous_timeout"
+        ~prefix
+        ~default:default.synchronous_timeout
+        config
+    in
+    let debug_logging =
+      bool_if_min_version
+        "debug_logging"
+        ~prefix
+        ~default:default.debug_logging
+        ~current_version
+        config
+    in
+    { debug_logging; enabled; init_timeout; subscribe; synchronous_timeout }
+end
+
 module RemoteTypeCheck = struct
-  type remote_type_check = {
+  type t = {
     (* Controls the `defer_class_declaration_threshold` setting on the remote worker *)
     declaration_threshold: int;
     (* A list of error phases; if, before type checking, errors in these phases
@@ -34,6 +102,22 @@ module RemoteTypeCheck = struct
     be used by the remote worker *)
     worker_vfs_checkout_threshold: int;
   }
+
+  let default =
+    {
+      enabled = false;
+      declaration_threshold = 2;
+      disabled_on_errors = [];
+      (* Indicates how long to wait between heartbeats (in seconds) *)
+      heartbeat_period = 15;
+      load_naming_table_on_full_init = false;
+      max_batch_size = 8_000;
+      min_batch_size = 5_000;
+      num_workers = 4;
+      recheck_threshold = None;
+      worker_min_log_level = Hh_logger.Level.Info;
+      worker_vfs_checkout_threshold = 10_000;
+    }
 
   let load ~current_version ~default config =
     let prefix = Some "remote_type_check" in
@@ -130,7 +214,7 @@ module RemoteTypeCheck = struct
 end
 
 module RecheckCapture = struct
-  type recheck_capture = {
+  type t = {
     (* Enables recheck environment capture *)
     enabled: bool;
     (* If the error theshold is not met, then the recheck environment that
@@ -151,6 +235,26 @@ module RecheckCapture = struct
         1.0 will be interpreted as 1.0 *)
     sample_threshold: float;
   }
+
+  let default =
+    {
+      enabled = false;
+      (* We wouldn't capture small rechecks unless they have at least
+              this many errors. *)
+      error_threshold = 1;
+      (* If capturing is enabled and the recheck fanout (pre-type-check)
+              meets this threshold, then we would snapshot the changed files. *)
+      fanout_threshold = 40_000;
+      (* If the number of files actually rechecked meets this threshold
+              and we already snapshotted the changed files based on fanout
+              size or sampling, we would capture the recheck environment. *)
+      rechecked_files_threshold = 5_000;
+      (* We wouldn't take changed files snapshots of small fanouts
+              unless they are randomly selected with the probability controlled
+              by the sample_threshold setting. By default, we don't snapshot
+              any small fanouts. *)
+      sample_threshold = 0.0;
+    }
 
   let load ~current_version ~default config =
     let prefix = Some "recheck_capture" in
@@ -206,12 +310,6 @@ type t = {
   experiments: string list;
   (* a free-form diagnostic string *)
   experiments_config_meta: string;
-  use_watchman: bool;
-  watchman_init_timeout: int;
-  (* in seconds *)
-  watchman_subscribe: bool;
-  watchman_synchronous_timeout: int;
-  (* in seconds *)
   use_saved_state: bool;
   (* should we attempt to load saved-state? (subject to further options) *)
   require_saved_state: bool;
@@ -251,7 +349,6 @@ type t = {
   predeclare_ide: bool;
   predeclare_ide_deps: bool;
   max_typechecker_worker_memory_mb: int option;
-  watchman_debug_logging: bool;
   hg_aware: bool;
   hg_aware_parsing_restart_threshold: int;
   hg_aware_redecl_restart_threshold: int;
@@ -300,9 +397,9 @@ type t = {
   (* The whether to use the hook that prefetches files on an Eden checkout *)
   prefetch_deferred_files: bool;
   (* Settings controlling how and whether we capture the recheck environment *)
-  recheck_capture: RecheckCapture.recheck_capture;
+  recheck_capture: RecheckCapture.t;
   (* Remote type check settings that can be changed, e.g., by GK *)
-  remote_type_check: RemoteTypeCheck.remote_type_check;
+  remote_type_check: RemoteTypeCheck.t;
   (* If set, uses the key to fetch type checking jobs *)
   remote_worker_key: string option;
   (* If set, uses the check ID when logging events in the context of remove init/work *)
@@ -332,6 +429,7 @@ type t = {
   profile_desc: string;
   (* Allows the IDE to show the 'find all implementations' button *)
   go_to_implementation: bool;
+  watchman: Watchman.t;
 }
 
 let default =
@@ -340,11 +438,6 @@ let default =
     log_categories = [];
     experiments = [];
     experiments_config_meta = "";
-    use_watchman = false;
-    (* Buck and hgwatchman use a 10 second timeout too *)
-    watchman_init_timeout = 10;
-    watchman_subscribe = false;
-    watchman_synchronous_timeout = 120;
     use_saved_state = false;
     require_saved_state = false;
     load_state_script_timeout = 20;
@@ -376,7 +469,6 @@ let default =
     predeclare_ide = false;
     predeclare_ide_deps = false;
     max_typechecker_worker_memory_mb = None;
-    watchman_debug_logging = false;
     hg_aware = false;
     hg_aware_parsing_restart_threshold = 0;
     hg_aware_redecl_restart_threshold = 0;
@@ -393,42 +485,8 @@ let default =
     defer_class_declaration_threshold = None;
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
-    recheck_capture =
-      RecheckCapture.
-        {
-          enabled = false;
-          (* We wouldn't capture small rechecks unless they have at least
-              this many errors. *)
-          error_threshold = 1;
-          (* If capturing is enabled and the recheck fanout (pre-type-check)
-              meets this threshold, then we would snapshot the changed files. *)
-          fanout_threshold = 40_000;
-          (* If the number of files actually rechecked meets this threshold
-              and we already snapshotted the changed files based on fanout
-              size or sampling, we would capture the recheck environment. *)
-          rechecked_files_threshold = 5_000;
-          (* We wouldn't take changed files snapshots of small fanouts
-              unless they are randomly selected with the probability controlled
-              by the sample_threshold setting. By default, we don't snapshot
-              any small fanouts. *)
-          sample_threshold = 0.0;
-        };
-    remote_type_check =
-      RemoteTypeCheck.
-        {
-          enabled = false;
-          declaration_threshold = 2;
-          disabled_on_errors = [];
-          (* Indicates how long to wait between heartbeats (in seconds) *)
-          heartbeat_period = 15;
-          load_naming_table_on_full_init = false;
-          max_batch_size = 8_000;
-          min_batch_size = 5_000;
-          num_workers = 4;
-          recheck_threshold = None;
-          worker_min_log_level = Hh_logger.Level.Info;
-          worker_vfs_checkout_threshold = 10_000;
-        };
+    recheck_capture = RecheckCapture.default;
+    remote_type_check = RemoteTypeCheck.default;
     remote_worker_key = None;
     remote_check_id = None;
     remote_version_specifier = None;
@@ -446,6 +504,7 @@ let default =
     profile_desc = "";
     (* seconds *)
     go_to_implementation = true;
+    watchman = Watchman.default;
   }
 
 let path =
@@ -559,6 +618,7 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.experiments
       config
   in
+
   let log_categories =
     string_list
       "log_categories"
@@ -578,9 +638,7 @@ let load_ fn ~silent ~current_version overrides =
     | Some level -> level
     | None -> Hh_logger.Level.Debug
   in
-  let use_watchman =
-    bool_if_version "use_watchman" ~default:default.use_watchman config
-  in
+
   let use_saved_state =
     bool_if_version "use_mini_state" ~default:default.use_saved_state config
   in
@@ -653,21 +711,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.extend_fast_bucket_size
       config
   in
-  let watchman_init_timeout =
-    int_ "watchman_init_timeout" ~default:default.watchman_init_timeout config
-  in
-  let watchman_subscribe =
-    bool_if_version
-      "watchman_subscribe_v2"
-      ~default:default.watchman_subscribe
-      config
-  in
-  let watchman_synchronous_timeout =
-    int_
-      "watchman_synchronous_timeout"
-      ~default:default.watchman_synchronous_timeout
-      config
-  in
   let io_priority = int_ "io_priority" ~default:default.io_priority config in
   let cpu_priority = int_ "cpu_priority" ~default:default.cpu_priority config in
   let saved_state_cache_limit =
@@ -729,12 +772,6 @@ let load_ fn ~silent ~current_version overrides =
   in
   let max_typechecker_worker_memory_mb =
     int_opt "max_typechecker_worker_memory_mb" config
-  in
-  let watchman_debug_logging =
-    bool_if_version
-      "watchman_debug_logging"
-      ~default:default.watchman_debug_logging
-      config
   in
   let hg_aware = bool_if_version "hg_aware" ~default:default.hg_aware config in
   let disable_conservative_redecl =
@@ -817,6 +854,9 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.remote_type_check
       config
   in
+  let watchman =
+    Watchman.load ~current_version ~default:default.watchman config
+  in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
@@ -888,10 +928,6 @@ let load_ fn ~silent ~current_version overrides =
     log_categories;
     experiments;
     experiments_config_meta;
-    use_watchman;
-    watchman_init_timeout;
-    watchman_subscribe;
-    watchman_synchronous_timeout;
     use_saved_state;
     require_saved_state;
     load_state_script_timeout;
@@ -922,7 +958,6 @@ let load_ fn ~silent ~current_version overrides =
     prechecked_files;
     predeclare_ide;
     max_typechecker_worker_memory_mb;
-    watchman_debug_logging;
     hg_aware;
     hg_aware_parsing_restart_threshold;
     hg_aware_redecl_restart_threshold;
@@ -958,6 +993,7 @@ let load_ fn ~silent ~current_version overrides =
     profile_owner;
     profile_desc;
     go_to_implementation;
+    watchman;
   }
 
 let load ~silent ~current_version config_overrides =

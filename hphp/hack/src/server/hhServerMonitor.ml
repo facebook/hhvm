@@ -82,14 +82,17 @@ let monitor_daemon_main
   else
     let current_version = ServerConfig.version config in
     let waiting_client = ServerArgs.waiting_client options in
+    let ServerLocalConfig.Watchman.
+          { debug_logging; subscribe = allow_subscriptions; _ } =
+      local_config.ServerLocalConfig.watchman
+    in
     let informant_options =
       {
         HhMonitorInformant.root = ServerArgs.root options;
-        allow_subscriptions = local_config.ServerLocalConfig.watchman_subscribe;
+        allow_subscriptions;
         use_dummy = local_config.ServerLocalConfig.use_dummy_informant;
         watchman_debug_logging =
-          ServerArgs.watchman_debug_logging options
-          || local_config.ServerLocalConfig.watchman_debug_logging;
+          ServerArgs.watchman_debug_logging options || debug_logging;
         min_distance_restart =
           local_config.ServerLocalConfig.informant_min_distance_restart;
         saved_state_cache_limit =

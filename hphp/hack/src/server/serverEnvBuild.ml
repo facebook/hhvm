@@ -68,11 +68,14 @@ let make_genv options config local_config workers =
       target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
       Some mb.ServerMonitorUtils.watchman_clock
   in
+  let SLC.Watchman.{ enabled; subscribe; init_timeout; debug_logging; _ } =
+    local_config.SLC.watchman
+  in
   let watchman_env =
     if check_mode then (
       Hh_logger.log "Not using dfind or watchman";
       Check_mode
-    ) else if not local_config.SLC.use_watchman then (
+    ) else if not enabled then (
       Hh_logger.log "Using dfind";
       Dfind_mode
     ) else (
@@ -82,17 +85,15 @@ let make_genv options config local_config workers =
           ?since_clockspec
           {
             Watchman.init_timeout =
-              Watchman.Explicit_timeout
-                (float local_config.SLC.watchman_init_timeout);
+              Watchman.Explicit_timeout (float init_timeout);
             subscribe_mode =
-              ( if local_config.SLC.watchman_subscribe then
+              ( if subscribe then
                 Some Watchman.Defer_changes
               else
                 None );
             expression_terms = watchman_expression_terms;
             debug_logging =
-              ServerArgs.watchman_debug_logging options
-              || local_config.SLC.watchman_debug_logging;
+              ServerArgs.watchman_debug_logging options || debug_logging;
             subscription_prefix = "hh_type_check_watcher";
             roots = [root];
           }
@@ -176,7 +177,8 @@ let make_genv options config local_config workers =
           let (watchman', changes) =
             (* Timeout is arbitrary. We just use 30 seconds for now. *)
             Watchman.get_changes_synchronously
-              ~timeout:local_config.SLC.watchman_synchronous_timeout
+              ~timeout:
+                local_config.SLC.watchman.SLC.Watchman.synchronous_timeout
               !watchman
           in
           watchman := watchman';

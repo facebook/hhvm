@@ -262,15 +262,16 @@ let load ~silent config_filename options =
   in
   let local_config =
     if Option.is_some (ServerArgs.ai_mode options) then
-      ServerLocalConfig.
-        {
-          local_config with
-          use_watchman = false;
-          watchman_subscribe = false;
-          interrupt_on_watchman = false;
-          interrupt_on_client = false;
-          trace_parsing = false;
-        }
+      let open ServerLocalConfig in
+      let open Watchman in
+      {
+        local_config with
+        watchman =
+          { local_config.watchman with enabled = false; subscribe = false };
+        interrupt_on_watchman = false;
+        interrupt_on_client = false;
+        trace_parsing = false;
+      }
     else
       local_config
   in

@@ -1383,7 +1383,7 @@ functor
         ~after:diag_subscribe;
 
       HackEventLogger.type_check_end
-        telemetry
+        (ServerUtils.log_hash_stats telemetry)
         ~started_count:to_recheck_count
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments

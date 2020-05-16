@@ -59,38 +59,63 @@ let server_progress ~timeout root =
     ~timeout
     (hh_monitor_config root)
 
-let print_hash_stats () =
-  Utils.try_with_stack SharedMem.dep_stats
-  |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
-         Hh_logger.exc ~stack exn)
-  |> Result.iter ~f:(fun { SharedMem.used_slots; slots; nonempty_slots = _ } ->
-         let load_factor = float_of_int used_slots /. float_of_int slots in
-         Hh_logger.log
-           "Dependency table load factor: %d / %d (%.02f)"
-           used_slots
-           slots
-           load_factor);
+let log_hash_stats (telemetry : Telemetry.t) : Telemetry.t =
+  let unwrap (result : (Telemetry.t, Telemetry.t) result) : Telemetry.t =
+    match result with
+    | Ok telemetry -> telemetry
+    | Error telemetry -> telemetry
+  in
+  let (telemetry : Telemetry.t) =
+    Utils.try_with_stack SharedMem.dep_stats
+    |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
+           Hh_logger.exc ~stack exn;
+           Telemetry.string_
+             telemetry
+             ~key:"deptable_stats_error"
+             ~value:(Exn.to_string exn))
+    |> Result.map ~f:(fun { SharedMem.used_slots; slots; nonempty_slots = _ } ->
+           let load_factor = float_of_int used_slots /. float_of_int slots in
+           Hh_logger.log
+             "Dependency table load factor: %d / %d (%.02f)"
+             used_slots
+             slots
+             load_factor;
+           Telemetry.float_
+             telemetry
+             ~key:"deptable_load_factor"
+             ~value:load_factor)
+    |> unwrap
+  in
   Utils.try_with_stack SharedMem.hash_stats
   |> Result.map_error ~f:(fun (exn, Utils.Callstack stack) ->
-         Hh_logger.exc ~stack exn)
-  |> Result.iter ~f:(fun { SharedMem.used_slots; slots; nonempty_slots } ->
+         Hh_logger.exc ~stack exn;
+         Telemetry.string_
+           telemetry
+           ~key:"hashtable_stats_error"
+           ~value:(Exn.to_string exn))
+  |> Result.map ~f:(fun { SharedMem.used_slots; slots; nonempty_slots } ->
          let load_factor = float_of_int used_slots /. float_of_int slots in
          Hh_logger.log
            "Hashtable load factor: %d / %d (%.02f) with %d nonempty slots"
            used_slots
            slots
            load_factor
-           nonempty_slots)
+           nonempty_slots;
+         Telemetry.float_
+           telemetry
+           ~key:"hashtable_load_factor"
+           ~value:load_factor)
+  |> unwrap
 
 let exit_on_exception (exn : exn) ~(stack : Utils.callstack) =
   let (Utils.Callstack stack) = stack in
   match exn with
   | SharedMem.Out_of_shared_memory ->
-    print_hash_stats ();
+    ignore (log_hash_stats (Telemetry.create ()) : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared heap.\n%!";
     Exit_status.(exit Out_of_shared_memory)
   | SharedMem.Hash_table_full ->
-    print_hash_stats ();
+    ignore (log_hash_stats (Telemetry.create ()) : Telemetry.t);
     Printf.eprintf "Error: failed to allocate in the shared hashtable.\n%!";
     Exit_status.(exit Hash_table_full)
   | Watchman.Watchman_error s as e ->

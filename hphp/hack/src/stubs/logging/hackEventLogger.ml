@@ -77,6 +77,7 @@ let init_monitor
 let starting_first_server _ = ()
 
 let init_lazy_end
+    _
     ~informant_use_xdb:_
     ~load_script_timeout:_
     ~state_distance:_
@@ -88,7 +89,7 @@ let init_lazy_end
 
 let server_is_partially_ready () = ()
 
-let server_is_ready () = ()
+let server_is_ready _ = ()
 
 let load_deptable_end _ = ()
 

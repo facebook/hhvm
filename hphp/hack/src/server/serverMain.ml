@@ -141,12 +141,16 @@ module Program = struct
 end
 
 let finalize_init init_env =
-  ServerUtils.print_hash_stats ();
-  let t' = Unix.gettimeofday () in
-  Hh_logger.log "Heap size: %d" (SharedMem.heap_size ());
+  let heap_size = SharedMem.heap_size () in
+  Hh_logger.log "Heap size: %d" heap_size;
+  let telemetry =
+    ServerUtils.log_hash_stats (Telemetry.create ())
+    |> Telemetry.int_ ~key:"heap_size" ~value:heap_size
+  in
   Hh_logger.log "Server is READY";
+  let t' = Unix.gettimeofday () in
   Hh_logger.log "Took %f seconds to initialize." (t' -. init_env.init_start_t);
-  HackEventLogger.server_is_ready ();
+  HackEventLogger.server_is_ready telemetry;
   ServerProgress.send_to_monitor (MonitorRpc.PROGRESS_WARNING None)
 
 let shutdown_persistent_client client env =
@@ -1086,7 +1090,9 @@ let program_init genv env =
     genv.local_config.ServerLocalConfig.load_state_script_timeout
   in
   EventLogger.set_init_type init_type;
+  let telemetry = ServerUtils.log_hash_stats (Telemetry.create ()) in
   HackEventLogger.init_lazy_end
+    telemetry
     ~informant_use_xdb
     ~load_script_timeout
     ~state_distance

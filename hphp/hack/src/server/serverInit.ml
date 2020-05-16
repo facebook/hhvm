@@ -226,5 +226,4 @@ let init
     in
     let env = { env with local_symbol_table = run_search genv env t } in
     SharedMem.init_done ();
-    ServerUtils.print_hash_stats ();
     (env, init_result)

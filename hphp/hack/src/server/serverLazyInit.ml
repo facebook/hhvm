@@ -583,19 +583,30 @@ let type_check_dirty
 
 let get_updates_exn ~(genv : ServerEnv.genv) ~(root : Path.t) :
     Relative_path.Set.t =
-  ServerNotifierTypes.(
-    genv.wait_until_ready ();
-    match genv.notifier_async () with
-    | Notifier_state_enter _
-    | Notifier_state_leave _
-    | Notifier_unavailable ->
-      Relative_path.Set.empty
-    | Notifier_synchronous_changes updates
-    | Notifier_async_changes updates ->
-      let root = Path.to_string root in
-      let filter p = string_starts_with p root && FindUtils.file_filter p in
-      SSet.filter updates ~f:filter
-      |> Relative_path.relativize_set Relative_path.Root)
+  let start_t = Unix.gettimeofday () in
+  Hh_logger.log "Getting files changed while parsing...";
+  let files_changed_while_parsing =
+    ServerNotifierTypes.(
+      genv.wait_until_ready ();
+      match genv.notifier_async () with
+      | Notifier_state_enter _
+      | Notifier_state_leave _
+      | Notifier_unavailable ->
+        Relative_path.Set.empty
+      | Notifier_synchronous_changes updates
+      | Notifier_async_changes updates ->
+        let root = Path.to_string root in
+        let filter p = string_starts_with p root && FindUtils.file_filter p in
+        SSet.filter updates ~f:filter
+        |> Relative_path.relativize_set Relative_path.Root)
+  in
+  ignore
+    ( Hh_logger.log_duration
+        "Finished getting files changed while parsing"
+        start_t
+      : float );
+  HackEventLogger.changed_while_parsing_end start_t;
+  files_changed_while_parsing
 
 let initialize_naming_table
     (progress_message : string)

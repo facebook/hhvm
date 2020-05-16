@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+// Don't put anything else in this namespace - use the one below
 namespace HH\Lib\_Private\Native {
 
 /** Creates a pipe, and a pair of linked file descriptors (resources). The
@@ -26,4 +27,13 @@ namespace HH\Lib\_Private\Native {
 <<__Native>>
 function pipe(): varray<resource>;
 
+}
+
+namespace HH\Lib\_Private\_IO {
+  <<__Native>>
+  function response_write(string $data): int;
+  <<__Native>>
+  function response_flush(): void;
+  <<__Native>>
+  function request_read(int $max_bytes): string;
 }

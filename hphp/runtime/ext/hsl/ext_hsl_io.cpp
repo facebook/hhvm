@@ -17,10 +17,14 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/system/systemlib.h"
 
 namespace HPHP {
 namespace {
+  bool is_any_cli_mode() {
+    return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
+  }
 
   Array HHVM_FUNCTION(HH_io_pipe) {
     int fds[2];
@@ -33,6 +37,46 @@ namespace {
     );
   }
 
+  int64_t HHVM_FUNCTION(HH_io_response_write, const String& data) {
+    if (is_any_cli_mode()) {
+      auto stream = dyn_cast_or_null<File>(BuiltinFiles::getSTDOUT());
+      if (!stream) {
+        return 0;
+      }
+      // Per `File`'s comments:
+      // - write() for PHP stream behavior
+      // - writeImpl() for C-like behavior
+      return stream->writeImpl(data.c_str(), data.length());
+    }
+    // Written length is not returned, assume it wrote all, like OutputFile
+    g_context->write(data);
+    return data.length();
+  }
+
+  void HHVM_FUNCTION(HH_io_response_flush) {
+    g_context->flush();
+  }
+
+  RDS_LOCAL(ssize_t, request_read_offset);
+
+  String HHVM_FUNCTION(HH_io_request_read, int64_t max) {
+    if (is_any_cli_mode()) {
+      auto stream = dyn_cast_or_null<File>(BuiltinFiles::getSTDIN());
+      if (!stream) {
+        return StrNR(staticEmptyString());
+      }
+      return stream->read(max);
+    }
+
+    const auto offset = *request_read_offset.get();
+    const auto raw_post = g_context->getRawPostData();
+    const auto remaining = raw_post.size() - offset;
+    const auto to_read = max > remaining ? remaining : max;
+    const auto result = raw_post.substr(offset, to_read);
+    *request_read_offset.get() += to_read;
+    return result;
+  }
+
   struct IOExtension final : Extension {
 
     IOExtension() : Extension("hsl_io", "1.0") {}
@@ -42,7 +86,23 @@ namespace {
         HH\\Lib\\_Private\\Native\\pipe,
         HH_io_pipe
       );
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\_IO\\response_write,
+        HH_io_response_write
+      );
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\_IO\\response_flush,
+        HH_io_response_flush
+      );
+      HHVM_FALIAS(
+        HH\\Lib\\_Private\\_IO\\request_read,
+        HH_io_request_read
+      );
       loadSystemlib();
+    }
+
+    void requestInit() {
+      *request_read_offset.get() = 0;
     }
   } s_io_extension;
 

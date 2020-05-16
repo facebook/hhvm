@@ -145,15 +145,7 @@ TransLoc genFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs,
   emitVunit(*vunit, env.unit, codeView, fixups);
 
   auto const loc = maker.markEnd().loc();
-
-  if (RuntimeOption::EvalPerfRelocate) {
-    GrowableVector<IncomingBranch> ibs;
-    tc::recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                           loc.frozenCodeStart(), loc.frozenEnd(),
-                           context.initSrcKey, 0, ibs, fixups);
-  }
   fixups.process(nullptr);
-
   return loc;
 }
 

@@ -39,13 +39,6 @@ struct TransEnv;
 namespace tc {
 
 /*
- * If live code relocation is enabled, record metadata for the current
- * translation.
- */
-void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
-                              CGMeta& fixups);
-
-/*
  * Record translation for gdb debugging of the tc.
  */
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,

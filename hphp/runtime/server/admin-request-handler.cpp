@@ -759,22 +759,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       break;
     }
 
-    if (cmd == "relocate") {
-      auto randomParam = transport->getParam("random");
-      auto allParam = transport->getParam("all");
-      auto time = transport->getIntParam("time");
-      bool random = randomParam == "true" || randomParam == "1";
-      if (allParam == "true" || allParam == "1") {
-        jit::tc::liveRelocate(-2);
-      } else if (random || time == 0) {
-        jit::tc::liveRelocate(random);
-      } else {
-        jit::tc::liveRelocate(time);
-      }
-      transport->sendString("OK\n");
-      break;
-    }
-
     if (cmd == "warmup-status") {
       transport->sendString(jit::tc::warmupStatusString());
       break;

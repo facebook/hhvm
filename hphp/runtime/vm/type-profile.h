@@ -64,8 +64,6 @@ inline bool isForcedToInterpret() {
   return rl_typeProfileLocals->forceInterpret;
 }
 
-void setRelocateRequests(int n);
-
 //////////////////////////////////////////////////////////////////////
 
 }

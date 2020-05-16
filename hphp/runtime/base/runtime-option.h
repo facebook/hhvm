@@ -799,7 +799,6 @@ struct RuntimeOption {
   F(string, PerfJitDumpDir,            "/tmp")                          \
   F(bool, PerfDataMap,                 false)                           \
   F(bool, KeepPerfPidMap,              false)                           \
-  F(int, PerfRelocate,                 0)                               \
   F(uint32_t, ThreadTCMainBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCColdBufferSize,  6 << 20)                         \
   F(uint32_t, ThreadTCFrozenBufferSize,4 << 20)                         \

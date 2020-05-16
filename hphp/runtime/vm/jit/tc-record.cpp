@@ -48,32 +48,6 @@ TRACE_SET_MOD(mcg);
 
 namespace HPHP { namespace jit { namespace tc {
 
-void recordPerfRelocMap(
-    TCA start, TCA end,
-    TCA coldStart, TCA coldEnd,
-    SrcKey sk, int argNum,
-    const GrowableVector<IncomingBranch> &incomingBranchesIn,
-    CGMeta& fixups) {
-  auto info = perfRelocMapInfo(start, end,
-                               coldStart, coldEnd,
-                               sk, argNum,
-                               incomingBranchesIn,
-                               fixups);
-  Debug::DebugInfo::Get()->recordRelocMap(start, end, info);
-}
-
-void recordRelocationMetaData(SrcKey sk, SrcRec& srcRec, const TransLoc& loc,
-                              CGMeta& fixups) {
-  if (!RuntimeOption::EvalPerfRelocate) return;
-
-  auto srLock = srcRec.readlock();
-  recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                     loc.coldCodeStart(), loc.coldEnd(),
-                     sk, -1,
-                     srcRec.tailFallbackJumps(),
-                     fixups);
-}
-
 void recordGdbTranslation(SrcKey sk, const Func* srcFunc, const CodeBlock& cb,
                           const TCA start, const TCA end, bool exit,
                           bool inPrologue) {

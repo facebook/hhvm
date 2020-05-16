@@ -1874,9 +1874,6 @@ void RuntimeOption::Load(
     replacePlaceholders(EvalEmbeddedDataExtractPath);
     replacePlaceholders(EvalEmbeddedDataFallbackPath);
 
-    if (EvalPerfRelocate > 0) {
-      setRelocateRequests(EvalPerfRelocate);
-    }
     if (!jit::mcgen::retranslateAllEnabled()) {
       EvalJitWorkerThreads = 0;
       if (EvalJitSerdesMode != JitSerdesMode::Off) {

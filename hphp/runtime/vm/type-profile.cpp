@@ -46,7 +46,6 @@ namespace {
 
 bool warmingUp;
 std::atomic<uint64_t> numRequests;
-std::atomic<int> relocateRequests;
 
 }
 
@@ -57,10 +56,6 @@ ProfileNonVMThread::ProfileNonVMThread() {
 
 ProfileNonVMThread::~ProfileNonVMThread() {
   rl_typeProfileLocals->nonVMThread = false;
-}
-
-void setRelocateRequests(int32_t n) {
-  relocateRequests.store(n);
 }
 
 void profileWarmupStart() {
@@ -116,11 +111,6 @@ void profileRequestStart() {
     if (!RequestInfo::s_requestInfo.isNull()) {
       RID().updateJit();
     }
-  }
-
-  if (okToJit && relocateRequests.load(std::memory_order_relaxed) > 0
-      && !relocateRequests.fetch_sub(1, std::memory_order_relaxed)) {
-    jit::tc::liveRelocate(true);
   }
 }
 

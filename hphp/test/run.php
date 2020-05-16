@@ -70,8 +70,7 @@ function get_expect_file_and_type($test, $options) {
 }
 
 function multi_request_modes() {
-  return varray['relocate',
-               'retranslate-all',
+  return varray['retranslate-all',
                'recycle-tc',
                'jit-serialize',
                'cli-server'];
@@ -167,11 +166,6 @@ Examples:
   # Use a specific HHVM binary
   % {$argv[0]} -b ~/code/hhvm/hphp/hhvm/hhvm
   % {$argv[0]} --hhvm-binary-path ~/code/hhvm/hphp/hhvm/hhvm
-
-  # Use live relocation to run tests in the same thread. e.g, 6 times in the same
-  # thread, where the 3 specifies a random relocation for the 3rd request and the
-  # test is run 3 * 2 times.
-  % {$argv[0]} --relocate 3 test/quick/silencer.php
 
   # Use retranslate all.  Run the test n times, then run retranslate all, then
   # run the test n more on the new code.
@@ -444,7 +438,6 @@ function get_options($argv) {
     'dump-tc' => '',
     'no-clean' => '',
     'list-tests' => '',
-    '*relocate:' => '',
     '*recycle-tc:' => '',
     '*retranslate-all:' => '',
     '*jit-serialize:' => '',
@@ -865,12 +858,6 @@ function hhvm_cmd_impl(
     if (isset($options['hackc'])) {
       $args[] = '-vEval.HackCompilerCommand="'.hh_codegen_cmd($options).'"';
       $args[] = '-vEval.HackCompilerUseEmbedded=false';
-    }
-
-    if (isset($options['relocate'])) {
-      $args[] = '--count='.($options['relocate'] * 2);
-      $args[] = '-vEval.JitAHotSize=6000000';
-      $args[] = '-vEval.PerfRelocate='.$options['relocate'];
     }
 
     if (isset($options['retranslate-all'])) {
@@ -2235,10 +2222,6 @@ function run_config_post($outputs, $test, $options) {
   }
 
   $repeats = 0;
-
-  if (isset($options['relocate'])) {
-    $repeats = $options['relocate'] * 2;
-  }
 
   if (isset($options['retranslate-all'])) {
     $repeats = $options['retranslate-all'] * 2;

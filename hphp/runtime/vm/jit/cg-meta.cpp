@@ -264,10 +264,6 @@ void CGMeta::process_only(
     inProgressTailJumps.swap(*inProgressTailBranches);
   }
   assertx(inProgressTailJumps.empty());
-
-  for (auto& stub : reusedStubs) {
-    Debug::DebugInfo::Get()->recordRelocMap(stub, nullptr, "NewStub");
-  }
   reusedStubs.clear();
 }
 

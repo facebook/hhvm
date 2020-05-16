@@ -166,23 +166,12 @@ bool publishFuncPrologueMeta(Func* func, int nArgs, TransKind kind,
   const auto&    loc = info.loc;
   auto&         meta = info.meta;
 
-  const int nparams = func->numNonVariadicParams();
-  const int paramIndex = nArgs <= nparams ? nArgs : nparams + 1;
   auto codeView = *info.finalView;
   auto const funcBody = SrcKey{func, func->getEntryForNumArgs(nArgs),
                                SrcKey::PrologueTag{}};
 
   if (RuntimeOption::EvalEnableReusableTC) {
     recordFuncPrologue(func, loc);
-  }
-
-  if (RuntimeOption::EvalPerfRelocate) {
-    GrowableVector<IncomingBranch> incomingBranches;
-    recordPerfRelocMap(loc.mainStart(), loc.mainEnd(),
-                       loc.coldCodeStart(), loc.coldEnd(),
-                       funcBody, paramIndex,
-                       incomingBranches,
-                       meta);
   }
   meta.process(nullptr);
 

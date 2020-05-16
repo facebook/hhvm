@@ -114,7 +114,6 @@ TCA allocTCStub(CodeBlock& frozen, CGMeta* fixups, bool* isReused) {
 }
 
 void markStubFreed(TCA stub) {
-  Debug::DebugInfo::Get()->recordRelocMap(stub, 0, "FreeStub");
   s_freeStubs.push(stub);
 }
 

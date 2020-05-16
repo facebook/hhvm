@@ -464,24 +464,6 @@ bool isHotCodeAddress(TCA addr);
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
-  relocate using data from perf.
-  If time is non-negative, its used as the time to run perf record.
-  If time is -1, we pick a random subset of translations, and relocate them
-  in a random order.
-  If time is -2, we relocate all of the translations.
-
-  Currently we don't ever relocate anything from frozen (or prof). We also
-  don't relocate the cold portion of translations; but we still need to know
-  where those are in order to relocate back-references to the code that was
-  relocated.
-*/
-void liveRelocate(int time);
-
-inline void liveRelocate(bool random) {
-  return liveRelocate(random ? -1 : 20);
-}
-
-/*
  * Relocate a new translation to the current frontiers of main and cold. Code
  * in frozen is not moved.
  *
@@ -494,16 +476,6 @@ void relocateTranslation(
   CodeBlock& frozen, CodeAddress frozen_start,
   AsmInfo* ai, CGMeta& meta
 );
-
-/*
- * Record data for live relocations.
- */
-void recordPerfRelocMap(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
 
 ////////////////////////////////////////////////////////////////////////////////
 

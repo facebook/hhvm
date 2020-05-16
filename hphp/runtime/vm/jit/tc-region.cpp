@@ -258,7 +258,6 @@ void publishTranslationMeta(TransMetaInfo& info) {
     }
   }
 
-  recordRelocationMetaData(sk, *srcRec, loc, fixups);
   recordGdbTranslation(sk, sk.func(), view.main(), loc.mainStart(),
                        loc.mainEnd(), false, false);
   recordGdbTranslation(sk, sk.func(), view.cold(), loc.coldCodeStart(),

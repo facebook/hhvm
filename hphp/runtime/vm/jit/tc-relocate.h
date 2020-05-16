@@ -37,13 +37,6 @@ struct IRUnit;
 
 namespace tc {
 
-std::string perfRelocMapInfo(
-  TCA start, TCA end,
-  TCA coldStart, TCA coldEnd,
-  SrcKey sk, int argNum,
-  const GrowableVector<IncomingBranch> &incomingBranches,
-  CGMeta& fixups);
-
 bool relocateNewTranslation(TransLoc& loc, CodeCache::View cache,
                             CGMeta& fixups,
                             TCA* adjust = nullptr);

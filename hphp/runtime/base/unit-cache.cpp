@@ -817,11 +817,12 @@ const std::string mangleUnitPHP7Options() {
   return s;
 }
 
-char mangleAllowHhas(const folly::StringPiece fileName) {
-  if (!RuntimeOption::EvalAllowHhas) return '0'; // dont allow
-  auto const len = fileName.size();
-  if (len >= 5 && fileName.subpiece(len - 5) == ".hhas") return '1';
-  return '2'; // not hhas
+char mangleExtension(const folly::StringPiece fileName) {
+  if (fileName.endsWith(".hack")) return '0';
+  if (fileName.endsWith(".hackpartial")) return '1';
+  if (fileName.endsWith(".php")) return '2';
+  if (fileName.endsWith(".hhas")) return '3';
+  return '4'; // other files
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -876,10 +877,11 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::EvalArrayProvenance ? '1' : '0')
     + (RuntimeOption::EnableFirstClassFunctionPointers ? '1' : '0')
     + (RuntimeOption::EvalEnableFuncStringInterop ? '1' : '0')
+    + (RuntimeOption::EvalAllowHhas ? '1' : '0')
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
-    + mangleAllowHhas(fileName)
+    + mangleExtension(fileName)
     + mangleUnitPHP7Options()
     + hackc_version();
   return string_sha1(t);

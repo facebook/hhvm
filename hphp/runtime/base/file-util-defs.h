@@ -92,7 +92,7 @@ void find(const std::string &root, const std::string& path,
     const char *p = strrchr(ename, '.');
     if (p) {
       isPHP = (strcmp(p + 1, "php") == 0) ||
-        (strcmp(p + 1, "hack") == 0) || (strcmp(p + 1, "hh") == 0);
+        (strcmp(p + 1, "hack") == 0) || ((strcmp(p + 1, "hackpartial") == 0) || strcmp(p + 1, "hh") == 0);
     }
 
     if (isPHP == php) {

@@ -693,9 +693,11 @@ function find_tests($files, darray $options = null) {
     "'(' " .
     "-name '*.php' " .
     "-o -name '*.hack' " .
+    "-o -name '*.hackpartial' " .
     "-o -name '*.hhas' " .
     "-o -name '*.php.type-errors' " .
     "-o -name '*.hack.type-errors' " .
+    "-o -name '*.hackpartial.type-errors' " .
     "')' " .
     "-not -regex '.*round_trip[.]hhas'"
   );

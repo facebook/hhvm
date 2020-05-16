@@ -316,6 +316,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
        strcasecmp(ext, "php") != 0 &&
        strcasecmp(ext, "hh") != 0 &&
        strcasecmp(ext, "hack") != 0 &&
+       strcasecmp(ext, "hackpartial") != 0 &&
        (RuntimeOption::PhpFileExtensions.empty() ||
         !RuntimeOption::PhpFileExtensions.count(ext));
 

@@ -68,7 +68,8 @@ let make_genv options config local_config workers =
       target.ServerMonitorUtils.watchman_mergebase >>= fun mb ->
       Some mb.ServerMonitorUtils.watchman_clock
   in
-  let SLC.Watchman.{ enabled; subscribe; init_timeout; debug_logging; _ } =
+  let SLC.Watchman.
+        { enabled; sockname; subscribe; init_timeout; debug_logging; _ } =
     local_config.SLC.watchman
   in
   let watchman_env =
@@ -94,6 +95,7 @@ let make_genv options config local_config workers =
             expression_terms = watchman_expression_terms;
             debug_logging =
               ServerArgs.watchman_debug_logging options || debug_logging;
+            sockname;
             subscription_prefix = "hh_type_check_watcher";
             roots = [root];
           }

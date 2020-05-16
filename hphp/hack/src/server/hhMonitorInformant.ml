@@ -426,7 +426,7 @@ module Revision_tracker = struct
 
   type instance =
     | Initializing of init_settings * Hg.global_rev Future.t
-    | Reinitializng of env * Hg.global_rev Future.t
+    | Reinitializing of env * Hg.global_rev Future.t
     | Tracking of env
 
   (* Revision_tracker has lots of mutable state anyway, so might as well
@@ -836,10 +836,10 @@ module Revision_tracker = struct
     | Initializing (init_settings, future) ->
       cancel_future future;
       t := Initializing (init_settings, make_new_future init_settings.root)
-    | Reinitializng (env, future) ->
+    | Reinitializing (env, future) ->
       cancel_future future;
-      t := Reinitializng (env, make_new_future env.inits.root)
-    | Tracking env -> t := Reinitializng (env, make_new_future env.inits.root)
+      t := Reinitializing (env, make_new_future env.inits.root)
+    | Tracking env -> t := Reinitializing (env, make_new_future env.inits.root)
 
   let check_init_future future =
     if not @@ Future.is_ready future then
@@ -871,7 +871,7 @@ module Revision_tracker = struct
           process server_state env
         | None -> Informant_sig.Move_along
       end
-    | Reinitializng (env, future) ->
+    | Reinitializing (env, future) ->
       begin
         match check_init_future future with
         | Some global_rev ->
@@ -942,6 +942,8 @@ let init
           init_timeout = Watchman.Explicit_timeout 30.;
           expression_terms = watchman_expression_terms;
           debug_logging = watchman_debug_logging;
+          (* Should also take an arg *)
+          sockname = None;
           subscription_prefix = "hh_informant_watcher";
           roots = [root];
         }

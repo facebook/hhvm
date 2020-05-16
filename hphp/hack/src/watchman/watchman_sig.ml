@@ -41,6 +41,7 @@ module Types = struct
     expression_terms: Hh_json.json list;
     debug_logging: bool;
     roots: Path.t list;
+    sockname: string option;
     subscription_prefix: string;
   }
 
@@ -110,12 +111,14 @@ module type WATCHMAN_PROCESS = sig
   val list_fold_values :
     'a list -> init:'b -> f:('b -> 'a -> 'b result) -> 'b result
 
-  val open_connection : timeout:Types.timeout -> conn result
+  val open_connection :
+    timeout:Types.timeout -> sockname:string option -> conn result
 
   val request :
     debug_logging:bool ->
     ?conn:conn ->
     ?timeout:Types.timeout ->
+    sockname:string option ->
     Hh_json.json ->
     Hh_json.json result
 

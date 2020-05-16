@@ -17,6 +17,7 @@ module Watchman = struct
     (* in seconds *)
     debug_logging: bool;
     init_timeout: int;
+    sockname: string option;
     subscribe: bool;
     (* in seconds *)
     synchronous_timeout: int;
@@ -28,6 +29,7 @@ module Watchman = struct
       enabled = false;
       (* buck and hgwatchman use a 10 second timeout, too *)
       init_timeout = 10;
+      sockname = None;
       subscribe = false;
       synchronous_timeout = 120;
     }
@@ -52,6 +54,7 @@ module Watchman = struct
     let init_timeout =
       int_ "init_timeout" ~prefix ~default:default.init_timeout config
     in
+    let sockname = string_opt "sockname" ~prefix config in
     let subscribe =
       bool_if_min_version
         "subscribe_v2"
@@ -75,7 +78,14 @@ module Watchman = struct
         ~current_version
         config
     in
-    { debug_logging; enabled; init_timeout; subscribe; synchronous_timeout }
+    {
+      debug_logging;
+      enabled;
+      init_timeout;
+      sockname;
+      subscribe;
+      synchronous_timeout;
+    }
 end
 
 module RemoteTypeCheck = struct

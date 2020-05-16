@@ -31,6 +31,7 @@ module Testing_common = struct
       expression_terms = [];
       debug_logging = false;
       roots = [Path.dummy_path];
+      sockname = None;
       subscription_prefix = "dummy_prefix";
     }
 end
@@ -41,7 +42,7 @@ module Watchman_process_helpers = struct
 
   let timeout_to_secs = function
     | No_timeout -> None
-    | Default_timeout -> Some 120.
+    | Default_timeout -> Some 1200.
     | Explicit_timeout timeout -> Some timeout
 
   let debug = false
@@ -180,8 +181,12 @@ end = struct
     J.get_string_val "sockname" json
 
   (* Opens a connection to the watchman process through the socket *)
-  let open_connection ~timeout =
-    let sockname = get_sockname timeout in
+  let open_connection ~timeout ~(sockname : string option) =
+    let sockname =
+      match sockname with
+      | Some sockname -> sockname
+      | None -> get_sockname timeout
+    in
     let (tic, oc) = Timeout.open_connection (Unix.ADDR_UNIX sockname) in
     let reader =
       Buffered_line_reader.create @@ Timeout.descr_of_in_channel @@ tic
@@ -194,8 +199,8 @@ end = struct
 
   (** Open a connection to the watchman socket, call the continuation, then
     * close. *)
-  let with_watchman_conn ~timeout f =
-    let conn = open_connection ~timeout in
+  let with_watchman_conn ~timeout ~(sockname : string option) f =
+    let conn = open_connection ~timeout ~sockname in
     let result =
       try f conn
       with e ->
@@ -208,11 +213,16 @@ end = struct
 
   (* Sends a request to watchman and returns the response. If we don't have a connection,
    * a new connection will be created before the request and destroyed after the response *)
-  let rec request ~debug_logging ?conn ?(timeout = Default_timeout) json =
+  let rec request
+      ~debug_logging
+      ?conn
+      ?(timeout = Default_timeout)
+      ~(sockname : string option)
+      json =
     match conn with
     | None ->
-      with_watchman_conn ~timeout (fun conn ->
-          request ~debug_logging ~conn ~timeout json)
+      with_watchman_conn ~timeout ~sockname (fun conn ->
+          request ~debug_logging ~conn ~timeout ~sockname json)
     | Some (reader, oc) ->
       send_request ~debug_logging oc json;
       sanitize_watchman_response
@@ -523,7 +533,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
    * tell us whether the Watchman service has restarted since clockspec.
    *)
   let assert_watchman_has_not_restarted_since
-      ~debug_logging ~conn ~watch_root ~clockspec =
+      ~debug_logging ~conn ~sockname ~watch_root ~clockspec =
     let hard_to_match_name = "irrelevant.potato" in
     let query =
       Hh_json.(
@@ -541,7 +551,8 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
               ];
           ])
     in
-    Watchman_process.request ~debug_logging ~conn query >>= fun response ->
+    Watchman_process.request ~debug_logging ~conn ~sockname query
+    >>= fun response ->
     match Hh_json_helpers.Jget.bool_opt (Some response) "is_fresh_instance" with
     | Some false -> Watchman_process.return ()
     | Some true ->
@@ -581,14 +592,17 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         expression_terms;
         debug_logging;
         roots;
+        sockname;
         subscription_prefix;
       } =
     with_crash_record_opt "init" @@ fun () ->
-    Watchman_process.open_connection ~timeout:init_timeout >>= fun conn ->
+    Watchman_process.open_connection ~timeout:init_timeout ~sockname
+    >>= fun conn ->
     Watchman_process.request
       ~debug_logging
       ~conn
       ~timeout:Default_timeout
+      ~sockname
       (capability_check ~optional:[flush_subscriptions_cmd] ["relative_root"])
     >>= fun capabilities ->
     let supports_flush = has_capability flush_subscriptions_cmd capabilities in
@@ -610,6 +624,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             Watchman_process.request
               ~debug_logging
               ~conn
+              ~sockname
               (watch_project (Path.to_string path))
             >|= fun response -> Some response)
           ~catch:(fun _ -> Watchman_process.return None)
@@ -662,11 +677,12 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       assert_watchman_has_not_restarted_since
         ~debug_logging
         ~conn
+        ~sockname
         ~watch_root
         ~clockspec
       >>= fun () -> Watchman_process.return clockspec
     | None ->
-      Watchman_process.request ~debug_logging ~conn (clock watch_root)
+      Watchman_process.request ~debug_logging ~conn ~sockname (clock watch_root)
       >|= J.get_string_val "clock")
     >>= fun clockspec ->
     let watched_path_expression_terms =
@@ -681,6 +697,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
             subscribe_mode;
             expression_terms;
             roots;
+            sockname;
             subscription_prefix;
           };
         conn;
@@ -694,7 +711,11 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     (match subscribe_mode with
     | None -> Watchman_process.return ()
     | Some mode ->
-      Watchman_process.request ~debug_logging ~conn (subscribe ~mode env)
+      Watchman_process.request
+        ~debug_logging
+        ~conn
+        ~sockname
+        (subscribe ~mode env)
       >|= ignore)
     >|= fun () -> env
 
@@ -848,6 +869,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         Watchman_process.request
           ~debug_logging:env.settings.debug_logging
           ~timeout:Default_timeout
+          ~sockname:env.settings.sockname
           (all_query env)
         >|= fun response ->
         env.clockspec <- J.get_string_val "clock" response;
@@ -918,6 +940,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           Explicit_timeout Float.(max timeout 0.0))
     in
     let debug_logging = env.settings.debug_logging in
+    let sockname = env.settings.sockname in
     if Option.is_some env.settings.subscribe_mode then
       Watchman_process.blocking_read ~debug_logging ?timeout ~conn:env.conn
       >|= fun response ->
@@ -927,7 +950,12 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       (env, Watchman_pushed result)
     else
       let query = since_query env in
-      Watchman_process.request ~debug_logging ~conn:env.conn ?timeout query
+      Watchman_process.request
+        ~debug_logging
+        ~conn:env.conn
+        ?timeout
+        ~sockname
+        query
       >|= fun response ->
       let (env, changes) =
         transform_asynchronous_get_changes_response env (Some response)
@@ -938,6 +966,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     Watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
+      ~sockname:env.settings.sockname
       (get_changes_since_mergebase_query env)
     >|= extract_file_names env
 
@@ -945,6 +974,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     Watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
+      ~sockname:env.settings.sockname
       (get_changes_since_mergebase_query env)
     >|= fun response ->
     match extract_mergebase response with
@@ -1022,6 +1052,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           ~debug_logging:env.settings.debug_logging
           ~conn:env.conn
           ~timeout
+          ~sockname:env.settings.sockname
           query
         >|= fun response ->
         let (env, changes) =

@@ -1,7 +1,7 @@
 <?hh
 
 function is_soft(mixed $x): void {
-  if ($x is @int) {
+  if ($x is <<__Soft>> int) {
     echo "unreached\n";
   }
 }

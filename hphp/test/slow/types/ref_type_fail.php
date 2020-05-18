@@ -5,7 +5,7 @@ function handler() {
  return true;
  }
 
-function foo(inout @varray $a) {
+function foo(<<__Soft>> inout varray $a) {
  var_dump($a);
  }
 

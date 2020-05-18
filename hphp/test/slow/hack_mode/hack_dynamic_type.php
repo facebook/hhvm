@@ -1,6 +1,6 @@
 <?hh
 
-function foo<T as dynamic>(dynamic $x, @dynamic $z) : ?dynamic {
+function foo<T as dynamic>(dynamic $x, <<__Soft>> dynamic $z) : ?dynamic {
   return "anything";
 }
 

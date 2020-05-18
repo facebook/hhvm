@@ -1,6 +1,6 @@
 <?hh
 
-function foo<T as nonnull>(nonnull $x, @nonnull $z) : ?nonnull {
+function foo<T as nonnull>(nonnull $x, <<__Soft>> nonnull $z) : ?nonnull {
   return "anything";
 }
 type Something = nonnull;

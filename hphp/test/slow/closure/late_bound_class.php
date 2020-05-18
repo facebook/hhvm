@@ -7,12 +7,6 @@ class X {
       var_dump(static::class);
     };
   }
-  function bar() {
-    var_dump(static::class);
-    return static function() {
-      var_dump(static::class);
-    };
-  }
   function bar_nonstatic() {
     var_dump(static::class);
     return function() {
@@ -26,13 +20,6 @@ function test() {
   $a = X::foo();
   $a();
   $a = Y::foo();
-  $a();
-
-  $x = new X;
-  $a = $x->bar();
-  $a();
-  $x = new Y;
-  $a = $x->bar();
   $a();
 
   $x = new X;

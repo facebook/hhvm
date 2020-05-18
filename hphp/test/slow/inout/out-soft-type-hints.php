@@ -1,10 +1,10 @@
 <?hh
 
-function foo($x, inout @int $y): string {
+function foo($x, <<__Soft>> inout int $y): string {
   return ($y = $x);
 }
 
-function bar($x, inout @int $y): void {
+function bar($x, <<__Soft>> inout int $y): void {
   $y = $x;
 }
 

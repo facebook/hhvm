@@ -1,7 +1,7 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-function foo<T super null>(null $x, @null $z): T {
+function foo<T super null>(null $x, <<__Soft>> null $z): T {
   return null;
 }
 

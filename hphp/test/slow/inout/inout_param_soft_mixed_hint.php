@@ -1,6 +1,6 @@
 <?hh
 
-function foo(inout @mixed $thing) {
+function foo(<<__Soft>> inout mixed $thing) {
   $thing = 5;
 }
 

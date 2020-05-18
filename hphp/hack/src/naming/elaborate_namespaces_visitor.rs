@@ -374,9 +374,12 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 }
                 class_get_expr.accept(env, self.object())?;
             }
-            Expr_::Xml(x) if !env.in_codegen() => {
+            Expr_::Xml(x) => {
                 let (xml_id, attributes, el) = (&mut x.0, &mut x.1, &mut x.2);
-                env.elaborate_type_name(xml_id);
+                /* if XHP element mangling is disabled, namespaces are supported */
+                if !env.in_codegen() || env.namespace.disable_xhp_element_mangling {
+                    env.elaborate_type_name(xml_id);
+                }
                 attributes.recurse(env, self.object())?;
                 el.recurse(env, self.object())?;
             }

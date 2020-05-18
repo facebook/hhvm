@@ -1745,7 +1745,7 @@ let hoist_toplevel_functions all_defs =
   in
   funs @ nonfuns
 
-let extract_debugger_main ~empty_namespace all_defs env st =
+let extract_debugger_main ~empty_namespace all_defs =
   let (stmts, defs) =
     List.partition_tf all_defs ~f:(function
         | Stmt _ -> true
@@ -1844,8 +1844,7 @@ let extract_debugger_main ~empty_namespace all_defs env st =
       f_static = false;
     }
   in
-  let (st, fd) = convert_fun env st fd in
-  (Fun fd :: defs, st)
+  Fun fd :: defs
 
 (* For all the definitions in a file unit, convert lambdas into classes with
  * invoke methods, and hoist inline class and function definitions to top
@@ -1865,11 +1864,11 @@ let convert_toplevel_prog ~empty_namespace ~for_debugger_eval defs =
    * function and we place hoisted functions just after that *)
   let env = env_toplevel (count_classes defs) (count_records defs) 1 defs in
   let st = initial_state empty_namespace in
-  let (defs, st) =
+  let defs =
     if for_debugger_eval then
-      extract_debugger_main ~empty_namespace defs env st
+      extract_debugger_main ~empty_namespace defs
     else
-      (defs, st)
+      defs
   in
   let (st, original_defs) = convert_defs env 0 0 0 0 st defs in
   let main_state = st.current_function_state in

@@ -1772,9 +1772,16 @@ Variant HHVM_FUNCTION(ldap_first_attribute,
     return false;
   }
 
+  if (entry->ber) {
+    // we are already iterating the attributes
+    ber_free(entry->ber, 0);
+    entry->ber = nullptr;
+  }
+
   char *attribute;
   if ((attribute =
        ldap_first_attribute(ld->link, entry->data, &entry->ber)) == nullptr) {
+    entry->ber = nullptr;
     return false;
   }
   String ret(attribute, CopyString);
@@ -1803,10 +1810,9 @@ Variant HHVM_FUNCTION(ldap_next_attribute,
   char *attribute;
   if ((attribute =
        ldap_next_attribute(ld->link, entry->data, entry->ber)) == nullptr) {
-    if (entry->ber != nullptr) {
-      ber_free(entry->ber, 0);
-      entry->ber = nullptr;
-    }
+    assertx(entry->ber != nullptr);
+    ber_free(entry->ber, 0);
+    entry->ber = nullptr;
     return false;
   }
   String ret(attribute, CopyString);

@@ -388,6 +388,8 @@ let gen_pu_methods (class_name : string) (extends : bool) (instance : T.pu_enum)
   in
   let methods = m_Members :: accessors in
   methods
+  |> List.sort ~compare:(fun a b ->
+         String.compare (snd a.m_name) (snd b.m_name))
 
 (* Instance of an AST visitor which:
    - updates PU_atom and PU_identifier

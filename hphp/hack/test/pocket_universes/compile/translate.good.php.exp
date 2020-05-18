@@ -50,7 +50,7 @@
     VerifyRetTypeTS
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:12;
     VerifyParamType $atom
     .srcloc 14:8,14:12;
@@ -67,13 +67,13 @@
     JmpNZ L1
     Jmp L2
   L0:
-    .srcloc 26:15,26:21;
-    String "stuff"
+    .srcloc 25:23,25:24;
+    Int 42
     .srcloc 14:8,14:12;
     RetC
   L1:
-    .srcloc 34:15,34:18;
-    Int 1664
+    .srcloc 33:23,33:37;
+    String "default_value"
     .srcloc 14:8,14:12;
     RetC
   L2:
@@ -83,7 +83,7 @@
     NullUninit
     NullUninit
     .srcloc 14:8,14:12;
-    String "\\C:@Field::stuff unknown atom access: "
+    String "\\C:@Field::default_value unknown atom access: "
     .srcloc 14:8,14:12;
     CGetL $atom
     Concat
@@ -144,7 +144,7 @@
     Null
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+  .method [private static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 14:8,14:12;
     VerifyParamType $atom
     .srcloc 14:8,14:12;
@@ -161,13 +161,13 @@
     JmpNZ L1
     Jmp L2
   L0:
-    .srcloc 25:23,25:24;
-    Int 42
+    .srcloc 26:15,26:21;
+    String "stuff"
     .srcloc 14:8,14:12;
     RetC
   L1:
-    .srcloc 33:23,33:37;
-    String "default_value"
+    .srcloc 34:15,34:18;
+    Int 1664
     .srcloc 14:8,14:12;
     RetC
   L2:
@@ -177,7 +177,7 @@
     NullUninit
     NullUninit
     .srcloc 14:8,14:12;
-    String "\\C:@Field::default_value unknown atom access: "
+    String "\\C:@Field::stuff unknown atom access: "
     .srcloc 14:8,14:12;
     CGetL $atom
     Concat
@@ -204,7 +204,7 @@
     MemoSet L:0+0
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
     .srcloc 14:8,14:12;
     VerifyParamType $atom
@@ -218,7 +218,7 @@
     NullUninit
     NullUninit
     CGetL $atom
-    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$Field$stuff$memoize_impl"
+    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$Field$default_value$memoize_impl"
     MemoSet L:1+1
     RetC
   }
@@ -240,7 +240,7 @@
     MemoSet L:1+1
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$default_value(<"HH\\string" "HH\\string" > $atom) {
+  .method [public static "__Memoize"("""y:0:{}""")] (14,14) <"HH\\mixed" N > pu$Field$stuff(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
     .srcloc 14:8,14:12;
     VerifyParamType $atom
@@ -254,7 +254,7 @@
     NullUninit
     NullUninit
     CGetL $atom
-    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$Field$default_value$memoize_impl"
+    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$Field$stuff$memoize_impl"
     MemoSet L:1+1
     RetC
   }

@@ -318,7 +318,7 @@ let test_all_overrides_json_only _ =
     \"global_value\": true
   },
   \"hhvm.hack.lang.check_int_overflow\": {
-    \"global_value\": true
+    \"global_value\": \"\"
   },
   \"hhvm.hack.lang.const_default_func_args\": {
     \"global_value\": true

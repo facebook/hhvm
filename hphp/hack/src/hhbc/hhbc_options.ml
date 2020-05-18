@@ -51,7 +51,7 @@ type t = {
   option_disable_unset_class_const: bool;
   option_disallow_func_ptrs_in_constants: bool;
   option_emit_generics_ub: bool;
-  option_check_int_overflow: bool;
+  option_check_int_overflow: int;
   option_disable_xhp_element_mangling: bool;
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
@@ -106,7 +106,7 @@ let default =
     option_disable_unset_class_const = false;
     option_disallow_func_ptrs_in_constants = false;
     option_emit_generics_ub = false;
-    option_check_int_overflow = false;
+    option_check_int_overflow = 0;
     option_disable_xhp_element_mangling = false;
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
@@ -205,7 +205,7 @@ let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
 
 let emit_generics_ub o = o.option_emit_generics_ub
 
-let check_int_overflow o = o.option_check_int_overflow
+let check_int_overflow o = o.option_check_int_overflow > 0
 
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
@@ -339,6 +339,8 @@ let set_option options name value =
     { options with option_log_extern_compiler_perf = as_bool value }
   | "eval.enableintrinsicsextension" ->
     { options with option_enable_intrinsics_extension = as_bool value }
+  | "hhvm.enable_intrinsics_extension" ->
+    { options with option_enable_intrinsics_extension = as_bool value }
   | "hack.lang.phpism.disallowexecutionoperator" ->
     { options with option_phpism_disallow_execution_operator = as_bool value }
   | "hack.lang.phpism.disablenontopleveldeclarations" ->
@@ -392,7 +394,7 @@ let set_option options name value =
   | "hhvm.hack.lang.disable_xhp_element_mangling" ->
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
-    { options with option_check_int_overflow = int_of_string value > 0 }
+    { options with option_check_int_overflow = int_of_string value }
   | "hhvm.hack.lang.enable_first_class_function_pointers" ->
     {
       options with
@@ -600,7 +602,7 @@ let value_setters =
     ( set_value "hhvm.emit_generics_ub" get_value_from_config_int
     @@ fun opts v -> { opts with option_emit_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
-    @@ fun opts v -> { opts with option_check_int_overflow = v > 0 } );
+    @@ fun opts v -> { opts with option_check_int_overflow = v } );
     ( set_value
         "hhvm.hack.lang.enable_first_class_function_pointers"
         get_value_from_config_int

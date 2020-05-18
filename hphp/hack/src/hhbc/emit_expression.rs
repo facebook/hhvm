@@ -27,7 +27,7 @@ use naming_special_names_rust::{
     special_idents, superglobals, typehints, user_attributes,
 };
 use ocaml_helper::int_of_str_opt;
-use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
+use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast, aast_defs,
     aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -3838,11 +3838,7 @@ fn emit_unop(
 }
 
 fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncdecOp> {
-    let check_int_overflow = opts
-        .hhvm
-        .hack_lang_flags
-        .contains(LangFlags::CHECK_INT_OVERFLOW);
-    let if_check_or = |op1, op2| Ok(if check_int_overflow { op1 } else { op2 });
+    let if_check_or = |op1, op2| Ok(if opts.check_int_overflow() { op1 } else { op2 });
     use {ast_defs::Uop as U, IncdecOp as I};
     match op {
         U::Uincr => if_check_or(I::PreIncO, I::PreInc),
@@ -3854,23 +3850,19 @@ fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncdecOp> {
 }
 
 fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
-    let check_int_overflow = opts
-        .hhvm
-        .hack_lang_flags
-        .contains(LangFlags::CHECK_INT_OVERFLOW);
     use ast_defs::Uop as U;
     Ok(match op {
         U::Utild => instr::bitnot(),
         U::Unot => instr::not(),
         U::Uplus => {
-            if check_int_overflow {
+            if opts.check_int_overflow() {
                 instr::addo()
             } else {
                 instr::add()
             }
         }
         U::Uminus => {
-            if check_int_overflow {
+            if opts.check_int_overflow() {
                 instr::subo()
             } else {
                 instr::sub()
@@ -3886,22 +3878,18 @@ fn from_unop(opts: &Options, op: &ast_defs::Uop) -> Result {
 
 fn binop_to_eqop(opts: &Options, op: &ast_defs::Bop) -> Option<EqOp> {
     use {ast_defs::Bop as B, EqOp::*};
-    let check_int_overflow = opts
-        .hhvm
-        .hack_lang_flags
-        .contains(LangFlags::CHECK_INT_OVERFLOW);
     match op {
-        B::Plus => Some(if check_int_overflow {
+        B::Plus => Some(if opts.check_int_overflow() {
             PlusEqualO
         } else {
             PlusEqual
         }),
-        B::Minus => Some(if check_int_overflow {
+        B::Minus => Some(if opts.check_int_overflow() {
             MinusEqualO
         } else {
             MinusEqual
         }),
-        B::Star => Some(if check_int_overflow {
+        B::Star => Some(if opts.check_int_overflow() {
             MulEqualO
         } else {
             MulEqual
@@ -3926,28 +3914,24 @@ fn optimize_null_checks(e: &Emitter) -> bool {
 }
 
 fn from_binop(opts: &Options, op: &ast_defs::Bop) -> Result {
-    let check_int_overflow = opts
-        .hhvm
-        .hack_lang_flags
-        .contains(LangFlags::CHECK_INT_OVERFLOW);
     use ast_defs::Bop as B;
     Ok(match op {
         B::Plus => {
-            if check_int_overflow {
+            if opts.check_int_overflow() {
                 instr::addo()
             } else {
                 instr::add()
             }
         }
         B::Minus => {
-            if check_int_overflow {
+            if opts.check_int_overflow() {
                 instr::subo()
             } else {
                 instr::sub()
             }
         }
         B::Star => {
-            if check_int_overflow {
+            if opts.check_int_overflow() {
                 instr::mulo()
             } else {
                 instr::mul()

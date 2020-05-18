@@ -118,7 +118,8 @@ where
                 emitter
                     .options()
                     .hhvm
-                    .hack_lang_flags
+                    .hack_lang
+                    .flags
                     .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
             ));
             // TODO(shiqicao): change opts to Rc<Option> to avoid cloning
@@ -203,7 +204,7 @@ fn emit_fatal<'a>(
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {
-    let hack_lang_flags = |flag| opts.hhvm.hack_lang_flags.contains(flag);
+    let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
     let phpism_flags = |flag| opts.phpism_flags.contains(flag);
     let mut popt = ParserOptions::default();
     popt.po_auto_namespace_map = opts.hhvm.aliased_namespaces_cloned().collect();
@@ -259,7 +260,8 @@ fn parse_file(
     aast_env.parser_options = create_parser_options(opts);
     aast_env.lower_coroutines = opts
         .hhvm
-        .hack_lang_flags
+        .hack_lang
+        .flags
         .contains(LangFlags::ENABLE_COROUTINES);
 
     let indexed_source_text = IndexedSourceText::new(source_text);

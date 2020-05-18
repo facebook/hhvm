@@ -199,12 +199,8 @@ pub struct Hhvm {
     )]
     pub flags: HhvmFlags,
 
-    #[serde(
-        flatten,
-        serialize_with = "serialize_flags",
-        deserialize_with = "deserialize_flags"
-    )]
-    pub hack_lang_flags: LangFlags,
+    #[serde(flatten, default)]
+    pub hack_lang: HackLang,
 }
 
 impl Hhvm {
@@ -227,12 +223,25 @@ impl Hhvm {
     }
 }
 
+#[prefix_all("hhvm.hack.lang.")]
+#[derive(Clone, Serialize, Deserialize, Debug, Default, PartialEq)]
+pub struct HackLang {
+    #[serde(
+        flatten,
+        serialize_with = "serialize_flags",
+        deserialize_with = "deserialize_flags"
+    )]
+    pub flags: LangFlags,
+
+    #[serde(default)]
+    pub check_int_overflow: Arg<String>,
+}
+
 prefixed_flags!(
     LangFlags,
     "hhvm.hack.lang.",
     ABSTRACT_STATIC_PROPS,
     ALLOW_NEW_ATTRIBUTE_SYNTAX,
-    CHECK_INT_OVERFLOW,
     CONST_DEFAULT_FUNC_ARGS,
     CONST_DEFAULT_LAMBDA_ARGS,
     CONST_STATIC_PROPS,
@@ -452,6 +461,15 @@ impl Options {
     pub fn array_provenance(&self) -> bool {
         self.hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE)
     }
+
+    pub fn check_int_overflow(&self) -> bool {
+        self.hhvm
+            .hack_lang
+            .check_int_overflow
+            .get()
+            .parse::<i32>()
+            .map_or(false, |x| x.is_positive())
+    }
 }
 
 use serde::de::{self, Deserializer, MapAccess, Visitor};
@@ -501,7 +519,7 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
                 "false" => Ok(false),
                 num => num
                     .parse::<i32>()
-                    .map(|v| v.is_positive())
+                    .map(|v| v == 1)
                     .map_err(de::Error::custom),
             };
             while let Some((ref k, ref v)) = map.next_entry::<String, Arg<GlobalValue>>()? {
@@ -622,7 +640,7 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.check_int_overflow": {
-    "global_value": false
+    "global_value": ""
   },
   "hhvm.hack.lang.const_default_func_args": {
     "global_value": false
@@ -880,11 +898,11 @@ mod tests {
         let act = Options::from_configs(&jsons, &EMPTY_STRS).unwrap();
         assert!(act
             .hhvm
-            .hack_lang_flags
+            .hack_lang.flags
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING));
         assert!(!act
             .hhvm
-            .hack_lang_flags
+            .hack_lang.flags
             .contains(LangFlags::ENABLE_COROUTINES));
         assert!(act.hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED));
     }
@@ -1012,7 +1030,7 @@ bitflags! {
         const DISABLE_UNSET_CLASS_CONST = 1 << 42;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
         const EMIT_GENERICS_UB = 1 << 44;
-        const CHECK_INT_OVERFLOW = 1 << 45;
+        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
         const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;
         /// Widen the default behavior of `is_array` from "is exactly a PHP array" to
@@ -1020,7 +1038,6 @@ bitflags! {
         const WIDEN_IS_ARRAY = 1 << 48;
         const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
         const DISABLE_ARRAY = 1 << 50;
-        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 51;
-        const RUST_EMITTER = 1 << 52;
+        const RUST_EMITTER = 1 << 51;
     }
 }

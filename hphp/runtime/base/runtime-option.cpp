@@ -1855,6 +1855,7 @@ void RuntimeOption::Load(
 #undef F
 
     if (EvalJitSerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
+    if (!EvalEnableReusableTC) EvalReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
       EvalEnableNuma = false;
     }

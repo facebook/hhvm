@@ -1070,6 +1070,8 @@ struct RuntimeOption {
   F(bool, EnableCallBuiltin, true)                                      \
   F(bool, EnableReusableTC,   reuseTCDefault())                         \
   F(bool, LogServerRestartStats, false)                                 \
+  /* Extra bytes added to each area (Hot/Cold/Frozen) of a translation. \
+   * If we don't end up using a reusable TC, we'll drop the padding. */ \
   F(uint32_t, ReusableTCPadding, 128)                                   \
   F(int64_t,  StressUnitCacheFreq, 0)                                   \
   F(int64_t, PerfWarningSampleRate, 1)                                  \

@@ -691,9 +691,7 @@ struct
     let has_client = sleep_and_check socket in
     let env = update_status env monitor_config in
     if not has_client then
-      (* disabled for now - see T67098917
-      let () = EventLogger.flush () in
-      let () = EventLogger.recheck_disk_files () in *)
+      let () = EventLogger.recheck_disk_files () in
       env
     else
       try

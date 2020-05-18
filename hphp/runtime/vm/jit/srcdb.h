@@ -115,6 +115,11 @@ struct TransLoc {
       (frozenStart() <= loc && loc < frozenEnd());
   }
 
+  // The entry may be in any area; entryRange is the range of code for this
+  // translation in the entry's area (it does not contain any colder code).
+  TCA entry() const;
+  TcaRange entryRange() const;
+
   TCA mainStart() const;
   TCA coldStart() const;
   TCA frozenStart() const;

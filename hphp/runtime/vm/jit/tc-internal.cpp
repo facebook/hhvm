@@ -492,10 +492,11 @@ bool reachedTranslationLimit(TransKind kind, SrcKey sk, const SrcRec& srcRec) {
     SKTRACE(2, sk, "{\n");
     TCA topTrans = srcRec.getTopTranslation();
     for (size_t i = 0; i < tns.size(); ++i) {
-      auto const rec = transdb::getTransRec(tns[i].mainStart());
+      auto const tca = tns[i].entry();
+      auto const rec = transdb::getTransRec(tca);
       assertx(rec);
-      SKTRACE(2, sk, "%zd %p\n", i, tns[i].mainStart());
-      if (tns[i].mainStart() == topTrans) {
+      SKTRACE(2, sk, "%zd %p\n", i, tca);
+      if (tca == topTrans) {
         SKTRACE(2, sk, "%zd: *Top*\n", i);
       }
       if (rec->kind == TransKind::Anchor) {

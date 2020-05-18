@@ -194,8 +194,6 @@ bool opcodeMayRaise(Opcode opc);
  */
 const StringData* findClassName(SSATmp* cls);
 
-using TcaRange = folly::Range<TCA>;
-
 } // namespace jit
 } // namespace HPHP
 

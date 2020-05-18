@@ -77,7 +77,7 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
   auto res = genFuncPrologue(transID, kind, func, argc, code(), fixups, locker);
   auto mainOrig = std::get<1>(res);
   loc = std::get<0>(res);
-  info.start = loc.mainStart();
+  info.start = loc.entry();
   auto codeView = std::get<2>(res);
 
   if (kind == TransKind::ProfPrologue) {
@@ -92,8 +92,8 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
     assertOwnsCodeLock();
     assertOwnsMetadataLock();
 
-    auto const ms = loc.mainStart();
-    auto const DEBUG_ONLY me = loc.mainEnd(),
+    auto const entry = loc.entry();
+    auto const DEBUG_ONLY ms = loc.mainStart(), me = loc.mainEnd(),
                           cs = loc.coldStart(), ce = loc.coldEnd(),
                           fs = loc.frozenStart(), fe = loc.frozenEnd(),
                           oldStart = info.start;
@@ -118,7 +118,7 @@ void emitFuncPrologueImpl(Func* func, int argc, TransKind kind,
                  ms, me, cs, ce, fs, fe, oldStart);
     }
 
-    if (loc.mainStart() != ms) {
+    if (loc.entry() != entry) {
       codeView.main().setFrontier(mainOrig); // we may have shifted to align
     }
   }
@@ -320,24 +320,12 @@ void publishFuncBodyDispatchImpl(const Func* func, Address start, Address end) {
 }
 
 void publishFuncBodyDispatch(Func* func, TransLoc loc) {
-  func->setFuncBody(loc.mainStart());
+  func->setFuncBody(loc.entry());
 
-  publishFuncBodyDispatchImpl(
-    func,
-    loc.mainStart(),
-    loc.mainEnd()
-  );
-  publishFuncBodyDispatchImpl(
-    func,
-    loc.coldCodeStart(),
-    loc.coldEnd()
-  );
+  publishFuncBodyDispatchImpl(func, loc.mainStart(), loc.mainEnd());
+  publishFuncBodyDispatchImpl(func, loc.coldCodeStart(), loc.coldEnd());
   if (loc.coldCodeStart() != loc.frozenCodeStart()) {
-    publishFuncBodyDispatchImpl(
-      func,
-      loc.frozenCodeStart(),
-      loc.frozenEnd()
-    );
+    publishFuncBodyDispatchImpl(func, loc.frozenCodeStart(), loc.frozenEnd());
   }
 }
 
@@ -367,7 +355,7 @@ TCA emitFuncBodyDispatch(Func* func, const DVFuncletsVec& dvs, TransKind kind) {
   auto const loc = emitFuncBodyDispatchInternal(func, dvs, kind, nullptr);
   publishFuncBodyDispatch(func, loc);
   updateCodeSizeCounters();
-  return loc.mainStart();
+  return loc.entry();
 }
 
 }}}

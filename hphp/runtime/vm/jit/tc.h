@@ -87,14 +87,6 @@ struct PrologueMetaInfo {
   CodeViewPtr   finalView;
 };
 
-struct BodyDispatchMetaInfo {
-  BodyDispatchMetaInfo(TCA start, TCA end)
-    : start(start), end(end)
-  { }
-  TCA             start;
-  TCA             end;
-};
-
 struct LocalTCBuffer {
   LocalTCBuffer() = default;
   explicit LocalTCBuffer(Address start, size_t initialSize);
@@ -147,9 +139,9 @@ struct FuncMetaInfo {
   // vectors above, and it encodes the order in which they should be published.
   std::vector<Kind> order;
 
-  std::unique_ptr<BodyDispatchMetaInfo> bodyDispatch;
-  std::vector<PrologueMetaInfo>         prologues;
-  std::vector<TransMetaInfo>            translations;
+  std::unique_ptr<TcaRange>     bodyDispatch;
+  std::vector<PrologueMetaInfo> prologues;
+  std::vector<TransMetaInfo>    translations;
 };
 
 ////////////////////////////////////////////////////////////////////////////////

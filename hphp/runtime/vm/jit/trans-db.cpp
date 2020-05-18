@@ -102,6 +102,9 @@ void addTranslation(const TransRec& transRec) {
   if (transRecPtr->acoldLen > 0) {
     s_transDB[transRecPtr->acoldStart] = id;
   }
+  if (transRecPtr->afrozenLen > 0) {
+    s_transDB[transRecPtr->afrozenStart] = id;
+  }
   if (id >= s_translations.size()) {
     s_translations.resize(id + 1);
   }

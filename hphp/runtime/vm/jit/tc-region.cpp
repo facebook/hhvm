@@ -283,11 +283,13 @@ void publishTranslationCode(TransMetaInfo info) {
   always_assert(srcRec);
 
   TRACE(1, "newTranslation: %p  sk: %s\n",
-        loc.mainStart(), showShort(info.sk).c_str());
+        loc.entry(), showShort(info.sk).c_str());
 
   srcRec->newTranslation(loc, info.tailBranches);
 
-  TRACE(1, "mcg: %zd-byte translation\n", (ssize_t)loc.mainSize());
+  TRACE(1, "mcg: %u-byte translation (%u main, %u cold, %u frozen)\n",
+        loc.mainSize() + loc.coldCodeSize() + loc.frozenCodeSize(),
+        loc.mainSize(), loc.coldCodeSize(), loc.frozenCodeSize());
   if (Trace::moduleEnabledRelease(Trace::tcspace, 1)) {
     Trace::traceRelease("%s", getTCSpace().c_str());
   }
@@ -355,9 +357,7 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
     auto const loc = emitFuncBodyDispatchInternal(
       func, func->getDVFunclets(), TransKind::OptPrologue, locker
     );
-    info.bodyDispatch = std::make_unique<BodyDispatchMetaInfo>(
-      loc.mainStart(), loc.mainEnd()
-    );
+    info.bodyDispatch = std::make_unique<TcaRange>(loc.entryRange());
   }
 
   // Relocate/emit all prologues and translations for func in order.
@@ -402,15 +402,15 @@ void relocateOptFunc(FuncMetaInfo& info, SrcKeyTransMap& srcKeyTrans,
                      range.frozen.size();
         auto loc = relocateTranslation(transInfo, info.tcBuf.view(), locker);
         FTRACE(3, "relocateOptFunc: relocated to start loc {}\n",
-               loc ? loc->mainStart() : 0x0);
+               loc ? loc->entry() : 0x0);
         if (loc) {
           auto& vec = srcKeyTrans[transInfo.sk];
+          auto const entry = transInfo.loc.entry();
           assertx(vec.size() < RuntimeOption::EvalJitMaxTranslations);
-          always_assert(code().inHotOrMain(transInfo.loc.mainStart()));
-          FTRACE(3, "appending transInfo {} (mainStart @ {}) to sk {} "
+          always_assert(code().inHotOrMainOrColdOrFrozen(entry));
+          FTRACE(3, "appending transInfo {} (entry @ {}) to sk {} "
                  "at index {}\n",
-                 &transInfo, transInfo.loc.mainStart(), showShort(transInfo.sk),
-                 vec.size());
+                 &transInfo, entry, showShort(transInfo.sk), vec.size());
           vec.emplace_back(&transInfo);
         }
         if (!loc && failedBytes) {
@@ -449,8 +449,8 @@ void publishOptFuncCode(FuncMetaInfo& info,
   auto const func = info.func;
 
   if (info.bodyDispatch) {
-    const auto start = info.bodyDispatch->start;
-    const auto   end = info.bodyDispatch->end;
+    const auto start = info.bodyDispatch->start();
+    const auto   end = info.bodyDispatch->end();
     always_assert(start);
     // NB: this already calls func->setFuncBody() with the new start address
     publishFuncBodyDispatch(func, start, end);
@@ -486,10 +486,10 @@ void publishOptFuncCode(FuncMetaInfo& info,
         const auto      loc = transInfo.loc;
         if (!loc.empty()) {
           publishTranslationCode(std::move(transInfo));
-          if (publishedSet) publishedSet->insert(loc.mainStart());
+          if (publishedSet) publishedSet->insert(loc.entry());
           if (regionSk.offset() == func->base() &&
               func->getDVFunclets().size() == 0) {
-            func->setFuncBody(loc.mainStart());
+            func->setFuncBody(loc.entry());
           }
         }
         translationIdx++;
@@ -562,7 +562,7 @@ void smashOptCalls(TransMetaInfo& transInfo,
            "target prologue @ {} (funcId={}, nArgs={})\n",
            call, target, pid.funcId(), pid.nargs());
     assertx(code().inHotOrMainOrColdOrFrozen(call));
-    assertx(code().inHotOrMain(target));
+    assertx(code().inHotOrMainOrColdOrFrozen(target));
 
     smashCall(call, target);
     optimizeSmashedCall(call);
@@ -589,7 +589,7 @@ TCA findJumpTarget(const TransMetaInfo* info,
   // Case 1: when the jump is in a prologue (info == nullptr) or it jumps to a
   //         different SrcKey, we jump to the first translation in the list.
   if (!isRetrans) {
-    return vec.front()->loc.mainStart();
+    return vec.front()->loc.entry();
   }
 
   // Case 2: when jumping to the same SrcKey, we jump to the translation
@@ -597,7 +597,7 @@ TCA findJumpTarget(const TransMetaInfo* info,
   always_assert(info->sk == vec.front()->sk);
   for (size_t i = 0; i < vec.size() - 1; i++) {
     if (vec[i] == info) {
-      return vec[i + 1]->loc.mainStart();
+      return vec[i + 1]->loc.entry();
     }
   }
 
@@ -634,7 +634,6 @@ void smashOptJumps(CGMeta& meta,
       newSmashableJumpData.emplace(pair);
       continue;
     }
-    assertx(code().inHotOrMain(succTCA));
 
     DEBUG_ONLY auto kindStr = [&] {
       switch (kind) {
@@ -650,6 +649,7 @@ void smashOptJumps(CGMeta& meta,
            "target SrcKey {}\n",
            jump, kindStr, showShort(sk));
     assertx(code().inHotOrMainOrColdOrFrozen(jump));
+    assertx(code().inHotOrMainOrColdOrFrozen(succTCA));
     TCA prevTarget = nullptr;
     switch (kind) {
       case Kind::Bindjmp:
@@ -718,7 +718,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
     for (auto& transInfo : finfo.translations) {
       // Skip if the translation wasn't relocated (e.g. ran out of TC space).
       if (transInfo.loc.empty()) continue;
-      assertx(code().inHotOrMain(transInfo.loc.mainStart()));
+      assertx(code().inHotOrMainOrColdOrFrozen(transInfo.loc.entry()));
 
       smashOptCalls(transInfo, prologueTCAs);
       smashOptJumps(transInfo.meta, &transInfo, srcKeyTrans);
@@ -782,7 +782,7 @@ std::string show(const SrcKeyTransMap& map) {
   for (auto& skt : map) {
     folly::format(&ret, "  - [{}]:", showShort(skt.first));
     for (auto tinfo : skt.second) {
-      folly::format(&ret, " {},", tinfo->loc.mainStart());
+      folly::format(&ret, " {},", tinfo->loc.entry());
     }
     ret += "\n";
   }
@@ -790,15 +790,15 @@ std::string show(const SrcKeyTransMap& map) {
 }
 
 void checkPublishedAddr(TCA tca, const jit::hash_set<TCA>& publishedSet) {
-  always_assert_flog(code().inHotOrMain(tca),
+  always_assert_flog(code().inHotOrMainOrColdOrFrozen(tca),
                      "srcKeyTrans has address not in hot/main: {}", tca);
   always_assert_flog(publishedSet.count(tca),
                      "srcKeyTrans has unpublished translation @ {}", tca);
 }
 
 /*
- * Make sure that every address that we may have smashed to was published in
- * either hot or main.
+ * Make sure that every address that we may have smashed to was published
+ * somewhere in the translation cache.
  */
 void checkPublishedAddresses(const PrologueTCAMap&     prologueTCAs,
                              const SrcKeyTransMap&     srcKeyTrans,
@@ -812,7 +812,7 @@ void checkPublishedAddresses(const PrologueTCAMap&     prologueTCAs,
     for (auto tinfo : vec) {
       auto loc = tinfo->loc;
       if (!loc.empty()) {
-        checkPublishedAddr(loc.mainStart(), publishedSet);
+        checkPublishedAddr(loc.entry(), publishedSet);
       }
     }
   }

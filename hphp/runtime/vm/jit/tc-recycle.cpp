@@ -451,7 +451,7 @@ void recordFuncPrologue(const Func* func, TransLoc loc) {
   auto dataLock = lockData();
 
   FTRACE(1, "Recording Prologue for func {} (id = {}) main={}\n",
-         func->fullName()->data(), func->getFuncId(), loc.mainStart());
+         func->fullName()->data(), func->getFuncId(), loc.entry());
   s_funcTCData[func->getFuncId()].prologues.emplace_back(loc);
 }
 

@@ -55,7 +55,6 @@ namespace HPHP { namespace jit {
 
 struct AsmInfo;
 struct CGMeta;
-using TcaRange = folly::Range<TCA>;
 
 struct RelocationInfo {
   RelocationInfo() {}

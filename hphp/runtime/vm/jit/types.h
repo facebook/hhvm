@@ -37,6 +37,8 @@ namespace HPHP { namespace jit {
 typedef unsigned char* TCA; // "Translation cache address."
 typedef const unsigned char* CTCA;
 
+using TcaRange = folly::Range<TCA>;
+
 using LowTCA = LowPtr<uint8_t>;
 using AtomicLowTCA = AtomicLowPtr<uint8_t,
                                   std::memory_order_acquire,

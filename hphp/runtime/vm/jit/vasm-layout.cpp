@@ -547,6 +547,21 @@ jit::vector<Vlabel> pgoLayout(Vunit& unit) {
       });
   }
 
+  // Our relocation logic requires that no block be in a hotter area than the
+  // entry block's area (e.g. if the entry is Cold, no block is in Main).
+  // In particular, we use this invariant to identify the entry given the list
+  // of code ranges for a translation (see TransLoc::entry()).
+  //
+  // We could lift this requirement with work, but it's probably not useful to
+  // do so - if some blocks are in Main, we should put path from the entry to
+  // those blocks in Main too. Instead, we assert if we break the invariant.
+  //
+  // If we're padding TC entries, we require that entries are in Main.
+  assertx(!labels.empty());
+  assertx(labels[0] == unit.entry);
+  assertx(!RuntimeOption::EvalReusableTCPadding ||
+          unit.blocks[unit.entry].area_idx == AreaIndex::Main);
+
   if (!RuntimeOption::EvalJitPGOLayoutSplitHotCold) {
     for (auto b : labels) {
       if (unit.blocks[b].area_idx == AreaIndex::Cold) {

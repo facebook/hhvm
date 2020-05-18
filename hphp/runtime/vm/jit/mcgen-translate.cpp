@@ -601,7 +601,7 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   TCA result = nullptr;
   if (data) {
     if (auto loc = tc::publishTranslation(std::move(*data))) {
-      result = loc->mainStart();
+      result = loc->entry();
     }
   }
 

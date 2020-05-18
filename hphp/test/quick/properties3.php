@@ -27,7 +27,7 @@ class D {
     var_dump($this);
   }
 }
-
+<<__EntryPoint>> function main() {
 $d = new D;
 // unset all properties
 $d->unsetall();
@@ -43,3 +43,4 @@ $d->setopprop();
 // IncDecProp
 $d->unsetall();
 $d->incdecprop();
+}

@@ -60,13 +60,6 @@ const StaticString s_ArrayKindProfile("ArrayKindProfile");
 
 //////////////////////////////////////////////////////////////////////
 
-bool wantPropSpecializedWarnings() {
-  return !RuntimeOption::RepoAuthoritative ||
-    !RuntimeOption::EvalDisableSomeRepoAuthNotices;
-}
-
-//////////////////////////////////////////////////////////////////////
-
 enum class SimpleOp {
   None,
   Array,
@@ -398,9 +391,7 @@ SSATmp* checkInitProp(IRGS& env,
     [&] { // Taken: Property is Uninit. Raise a warning and return
           // &immutable_null_base.
       hint(env, Block::Hint::Unlikely);
-      if (wantPropSpecializedWarnings()) {
-        gen(env, RaiseUndefProp, baseAsObj, key);
-      }
+      gen(env, RaiseUndefProp, baseAsObj, key);
       return ptrToInitNull(env);
     }
   );

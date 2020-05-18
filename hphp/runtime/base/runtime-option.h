@@ -1060,7 +1060,6 @@ struct RuntimeOption {
   F(string,   JitLogAllInlineRegions,  "")                              \
   F(bool, JitProfileGuardTypes,        false)                           \
   F(uint32_t, JitFilterLease,          1)                               \
-  F(bool, DisableSomeRepoAuthNotices,  true)                            \
   F(uint32_t, PCRETableSize, kPCREInitialTableSize)                     \
   F(uint64_t, PCREExpireInterval, 2 * 60 * 60)                          \
   F(string, PCRECacheType, std::string("static"))                       \

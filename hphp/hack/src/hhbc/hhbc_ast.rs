@@ -392,6 +392,7 @@ pub enum InstructIsset {
     IssetL(local::Type),
     IssetG,
     IssetS,
+    IsUnsetL(local::Type),
     IsTypeC(IstypeOp),
     IsTypeL(local::Type, IstypeOp),
 }

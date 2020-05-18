@@ -1752,14 +1752,15 @@ let extract_debugger_main ~empty_namespace all_defs =
         | _ -> false)
   in
   let vars =
-    SSet.elements
-    @@ Decl_vars.vars_from_ast
-         ~is_closure_body:false
-         ~has_this:false
-         ~params:[]
-         ~is_toplevel:false
-         ~is_in_static_method:false
-         stmts
+    Decl_vars.vars_from_ast
+      ~is_closure_body:false
+      ~has_this:false
+      ~params:[]
+      ~is_toplevel:false
+      ~is_in_static_method:false
+      stmts
+    |> SSet.elements
+    |> List.sort ~compare:String.compare
   in
   let stmts =
     List.filter_map

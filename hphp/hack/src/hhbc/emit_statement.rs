@@ -846,10 +846,12 @@ fn emit_try_finally_<E: Fn(&mut Env, &mut Emitter, &Label) -> Result>(
 }
 
 fn make_finally_catch(e: &mut Emitter, exn_local: local::Type, finally_body: InstrSeq) -> InstrSeq {
+    let l2 = instr::unsetl(e.local_gen_mut().get_retval().clone());
+    let l1 = instr::unsetl(e.local_gen_mut().get_label().clone());
     InstrSeq::gather(vec![
         instr::popl(exn_local.clone()),
-        instr::unsetl(e.local_gen_mut().get_label().clone()),
-        instr::unsetl(e.local_gen_mut().get_retval().clone()),
+        l1,
+        l2,
         InstrSeq::create_try_catch(
             e.label_gen_mut(),
             None,

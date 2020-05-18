@@ -603,6 +603,10 @@ pub mod instr {
         instr(Instruct::IIsset(InstructIsset::IssetS))
     }
 
+    pub fn isunsetl(local: local::Type) -> InstrSeq {
+        instr(Instruct::IIsset(InstructIsset::IsUnsetL(local)))
+    }
+
     pub fn cgets() -> InstrSeq {
         instr(Instruct::IGet(InstructGet::CGetS))
     }

@@ -123,6 +123,10 @@ impl<'a> Scope<'a> {
     }
 
     pub fn has_this(&self) -> bool {
+        if self.items.is_empty() {
+            /* Assume top level has this */
+            return true;
+        }
         for scope_item in self.iter() {
             match scope_item {
                 ScopeItem::Class(_) | ScopeItem::Function(_) => {

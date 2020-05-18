@@ -1654,6 +1654,10 @@ fn print_isset<W: Write>(w: &mut W, isset: &InstructIsset) -> Result<(), W::Erro
             w.write("IssetL ")?;
             print_local(w, local)
         }
+        I::IsUnsetL(local) => {
+            w.write("IsUnsetL ")?;
+            print_local(w, local)
+        }
         I::IssetG => w.write("IssetG"),
         I::IssetS => w.write("IssetS"),
         I::IsTypeC(op) => {

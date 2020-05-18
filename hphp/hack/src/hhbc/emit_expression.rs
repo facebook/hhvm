@@ -2423,6 +2423,27 @@ fn emit_special_function(
                 )),
             }
         }
+        ("__systemlib\\__debugger_is_uninit", _) => {
+            if nargs != 1 {
+                Err(emit_fatal::raise_fatal_runtime(
+                    pos,
+                    format!(
+                        "__debugger_is_uninit() expects exactly 1 parameter {} given",
+                        nargs
+                    ),
+                ))
+            } else {
+                match args {
+                    [E(_, E_::Lvar(id))] => {
+                        Ok(Some(instr::isunsetl(get_local(e, env, pos, id.name())?)))
+                    }
+                    _ => Err(emit_fatal::raise_fatal_runtime(
+                        pos,
+                        "Local variable expected in __debugger_is_uninit()",
+                    )),
+                }
+            }
+        }
         ("HH\\inst_meth", _) => match args {
             [obj_expr, method_name] => Ok(Some(emit_inst_meth(e, env, obj_expr, method_name)?)),
             _ => Err(emit_fatal::raise_fatal_runtime(
@@ -2496,14 +2517,14 @@ fn emit_special_function(
                 ),
             )),
         },
-        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref param))]) if e.context().systemlib() => {
+        ("__hhvm_internal_whresult", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => {
             Ok(Some(InstrSeq::gather(vec![
                 instr::cgetl(local::Type::Named(local_id::get_name(&param.1).into())),
                 instr::whresult(),
             ])))
         }
         ("__hhvm_internal_newlikearrayl", &[E(_, E_::Lvar(ref param)), E(_, E_::Int(ref n))])
-            if e.context().systemlib() =>
+            if e.systemlib() =>
         {
             Ok(Some(instr::newlikearrayl(
                 local::Type::Named(local_id::get_name(&param.1).into()),

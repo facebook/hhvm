@@ -5,8 +5,8 @@
 
 pub type LocalId = (isize, String);
 
-pub fn make_unscoped(name: String) -> LocalId {
-    (0, name)
+pub fn make_unscoped(name: impl Into<String>) -> LocalId {
+    (0, name.into())
 }
 
 pub mod map {

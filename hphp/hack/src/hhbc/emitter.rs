@@ -20,6 +20,8 @@ pub struct Emitter {
     local_gen: local::Gen,
     iterator: Iter,
 
+    pub for_debugger_eval: bool,
+
     // dynamic states are exposed because another crate
     // needs to inject the lazy set/get into these slots,
     // accessed via `emit_state()` on Emitter that
@@ -34,9 +36,11 @@ pub struct Emitter {
 }
 
 impl Emitter {
-    pub fn new(opts: Options) -> Emitter {
+    pub fn new(opts: Options, systemlib: bool, for_debugger_eval: bool) -> Emitter {
         Emitter {
             opts,
+            systemlib,
+            for_debugger_eval,
             ..Default::default()
         }
     }
@@ -48,13 +52,6 @@ impl Emitter {
     /// Destruct the emitter but salvage its options (for use in emitting fatal program).
     pub fn into_options(self) -> Options {
         self.opts
-    }
-
-    pub fn context(&self) -> &dyn Context {
-        self
-    }
-    pub fn context_mut(&mut self) -> &mut dyn Context {
-        self
     }
 
     pub fn iterator(&self) -> &Iter {
@@ -85,19 +82,8 @@ impl Emitter {
         self.local_gen.dedicated.temp_map.pop();
         r
     }
-}
 
-/// Interface for changing the behavior, exposed to hh_single_compile
-pub trait Context {
-    fn set_systemlib(&mut self, flag: bool);
-    fn systemlib(&self) -> bool;
-}
-
-impl Context for Emitter {
-    fn set_systemlib(&mut self, flag: bool) {
-        self.systemlib = flag;
-    }
-    fn systemlib(&self) -> bool {
+    pub fn systemlib(&self) -> bool {
         self.systemlib
     }
 }

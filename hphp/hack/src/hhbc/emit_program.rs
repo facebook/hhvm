@@ -18,7 +18,7 @@ use env::{self, emitter::Emitter, Env};
 use hhas_body_rust::HhasBody;
 use hhas_program_rust::HhasProgram;
 use hhbc_ast_rust::FatalOp;
-use instruction_sequence_rust::{instr, Error, Result};
+use instruction_sequence_rust::{instr, unrecoverable, Error, Result};
 use ocamlrep::rc::RcOc;
 use options::Options;
 use oxidized::{ast as Tast, namespace_env, pos::Pos};
@@ -36,8 +36,7 @@ pub fn emit_fatal_program<'p>(
     pos: &Pos,
     msg: impl AsRef<str>,
 ) -> Result<HhasProgram<'p>> {
-    let mut emitter = Emitter::new(options.clone());
-    emitter.context_mut().set_systemlib(is_systemlib);
+    let mut emitter = Emitter::new(options.clone(), is_systemlib, false);
     let body_instrs = emit_fatal(op, pos, msg);
     let main = make_body(
         &mut emitter,
@@ -57,6 +56,32 @@ pub fn emit_fatal_program<'p>(
         main,
         ..HhasProgram::default()
     })
+}
+
+fn debugger_eval_should_modify(tast: &Tast::Program) -> Result<bool> {
+    /*
+    The AST currently always starts with a Markup statement, so a length of 2
+    means there was 1 user def (statement, function, etc.); we assert that
+    the first thing is a Markup statement, and we only want to modify if
+    there was exactly one user def (both 0 user defs and > 1 user def are
+    valid situations where we pass the program through unmodififed)
+    */
+    if tast
+        .first()
+        .and_then(|x| x.as_stmt())
+        .map(|x| !x.1.is_markup())
+        .unwrap_or(true)
+    {
+        return Err(unrecoverable(
+            "Lowered AST did not start with a Markup statement",
+        ));
+    }
+
+    if tast.len() != 2 {
+        Ok(false)
+    } else {
+        Ok(tast[1].as_stmt().map(|x| x.1.is_expr()).unwrap_or(false))
+    }
 }
 
 /// This is the entry point from hh_single_compile & coroutine
@@ -85,11 +110,9 @@ fn emit_program_<'p>(
     namespace: RcOc<namespace_env::Env>,
     prog: &'p mut Tast::Program,
 ) -> Result<HhasProgram<'p>> {
+    let for_debugger_eval = emitter.for_debugger_eval && debugger_eval_should_modify(prog)?;
     let hoist_kinds = closure_convert::convert_toplevel_prog(emitter, prog)?;
-    emitter
-        .context_mut()
-        .set_systemlib(flags.contains(FromAstFlags::IS_SYSTEMLIB));
-
+    emitter.for_debugger_eval = for_debugger_eval;
     let main = emit_main(emitter, flags, RcOc::clone(&namespace), prog)?;
     let mut functions = emit_functions_from_program(emitter, &hoist_kinds, prog)?;
     let classes = emit_classes_from_program(emitter, &hoist_kinds, prog)?;

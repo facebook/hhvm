@@ -26,7 +26,7 @@ ocaml_ffi! {
 
         let mut options = Options::default();
         options.hack_compiler_flags.set(CompilerFlags::CONSTANT_FOLDING, true);
-        let mut emitter = Emitter::new(options);
+        let mut emitter = Emitter::new(options, false, false);
         closure_convert_rust::convert_toplevel_prog(&mut emitter, &mut res);
         (res, emitter.into_emit_state())
     }

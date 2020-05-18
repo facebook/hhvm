@@ -740,8 +740,7 @@ pub fn emit_class<'a>(
         )?)
     };
 
-    let should_emit_reified_init =
-        !(emitter.context().systemlib() || is_closure || is_interface || is_trait);
+    let should_emit_reified_init = !(emitter.systemlib() || is_closure || is_interface || is_trait);
     let reified_init_method = if should_emit_reified_init {
         emit_reified_init_method(emitter, &env, ast_class)?
     } else {

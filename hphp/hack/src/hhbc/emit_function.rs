@@ -78,8 +78,18 @@ pub fn emit_function<'a>(
     } else {
         None
     };
+    let is_debug_main = match f.user_attributes.as_slice() {
+        [tast::UserAttribute { name, params }]
+            if name.1 == "__DebuggerMain" && params.is_empty() =>
+        {
+            true
+        }
+        _ => false,
+    };
     let mut scope = Scope::toplevel();
-    scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
+    if !is_debug_main {
+        scope.push_item(ScopeItem::Function(ast_scope::Fun::new_ref(&f)));
+    }
 
     let rx_level = rx::Level::from_ast(&f.user_attributes).unwrap_or(rx::Level::NonRx);
     let (ast_body, rx_body) = {

@@ -157,7 +157,7 @@ fn make_memoize_function_with_params_code(
     let add_refied = usize::from(is_reified);
     let first_local = local::Type::Unnamed(param_count + add_refied);
     let deprecation_body =
-        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.context().systemlib())?;
+        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.systemlib())?;
     let (begin_label, default_value_setters) =
         // Default value setters belong in the wrapper method not in the original method
         emit_param::emit_param_default_value_setter(e, env, false, pos, hhas_params)?;
@@ -246,7 +246,7 @@ fn make_memoize_function_no_params_code(
     let suspended_get = e.label_gen_mut().next_regular();
     let eager_set = e.label_gen_mut().next_regular();
     let deprecation_body =
-        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.context().systemlib())?;
+        emit_body::emit_deprecation_info(&env.scope, deprecation_info, e.systemlib())?;
     let fcall_args = FcallArgs::new(
         FcallFlags::default(),
         1,

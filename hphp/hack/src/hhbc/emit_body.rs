@@ -16,10 +16,7 @@ use emit_param_rust as emit_param;
 use emit_pos_rust::{emit_pos, emit_pos_then};
 use emit_statement::emit_final_stmts;
 use emit_type_hint_rust as emit_type_hint;
-use env::{
-    emitter::{Context, Emitter},
-    local, Env,
-};
+use env::{emitter::Emitter, local, Env};
 use generator_rust as generator;
 use global_state::LazyState;
 use hhas_body_rust::HhasBody;
@@ -539,7 +536,7 @@ fn emit_defs(env: &mut Env, emitter: &mut Emitter, prog: &[tast::Def]) -> Result
             Def::Namespace(ns) => emit_defs(env, emitter, &ns.1),
             Def::Class(cd) => {
                 let make_def_instr = |num| {
-                    if emitter.context().systemlib() {
+                    if emitter.systemlib() {
                         instr::defclsnop(num)
                     } else {
                         instr::defcls(num)

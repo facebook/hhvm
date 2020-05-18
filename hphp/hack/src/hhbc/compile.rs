@@ -108,7 +108,11 @@ where
     });
     let log_extern_compiler_perf = opts.log_extern_compiler_perf();
 
-    let mut emitter = Emitter::new(opts);
+    let mut emitter = Emitter::new(
+        opts,
+        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+    );
 
     let (codegen_t, program) = match &mut parse_result {
         Either::Right((ast, is_hh_file)) => {

@@ -811,6 +811,24 @@ fn convert_lambda<'a>(
     Ok(Expr_::mk_efun(inline_fundef, use_vars))
 }
 
+fn make_fn_param(pos: Pos, lid: &LocalId, is_variadic: bool, is_inout: bool) -> FunParam {
+    FunParam {
+        annotation: pos.clone(),
+        type_hint: TypeHint((), None),
+        is_variadic,
+        pos: pos.clone(),
+        name: local_id::get_name(lid).clone(),
+        expr: None,
+        callconv: if is_inout {
+            Some(ParamKind::Pinout)
+        } else {
+            None
+        },
+        user_attributes: vec![],
+        visibility: None,
+    }
+}
+
 fn convert_meth_caller_to_func_ptr<'a>(
     env: &Env,
     st: &mut ClosureConvertVisitor,
@@ -834,19 +852,6 @@ fn convert_meth_caller_to_func_ptr<'a>(
     let dummy_saved_env = ();
     let pos = || pos.clone();
     let expr_id = |name: String| Expr(pos(), Expr_::mk_id(Id(pos(), name)));
-    let make_fn_param = |lid: &LocalId, is_variadic: bool| -> FunParam {
-        FunParam {
-            annotation: pos(),
-            type_hint: TypeHint((), None),
-            is_variadic,
-            pos: pos(),
-            name: local_id::get_name(lid).clone(),
-            expr: None,
-            callconv: None,
-            user_attributes: vec![],
-            visibility: None,
-        }
-    };
     let cname = match env.scope.get_class() {
         Some(cd) => &cd.get_name().1,
         None => "",
@@ -863,7 +868,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
         return fun_handle;
     }
     // AST for: invariant(is_a($o, <cls>), 'object must be an instance of <cls>');
-    let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o".into())));
+    let obj_var = Box::new(Lid(pos(), local_id::make_unscoped("$o")));
     let obj_lvar = Expr(pos(), Expr_::Lvar(obj_var.clone()));
     let assert_invariant = Expr(
         pos(),
@@ -894,8 +899,8 @@ fn convert_meth_caller_to_func_ptr<'a>(
         ),
     );
     // AST for: return $o-><func>(...$args);
-    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args".into())));
-    let variadic_param = make_fn_param(&args_var.1, true);
+    let args_var = Box::new(Lid(pos(), local_id::make_unscoped("$args")));
+    let variadic_param = make_fn_param(pos(), &args_var.1, true, false);
     let meth_caller_handle = Expr(
         pos(),
         Expr_::mk_call(
@@ -923,7 +928,10 @@ fn convert_meth_caller_to_func_ptr<'a>(
         tparams: vec![],
         where_constraints: vec![],
         variadic: FunVariadicity::FVvariadicArg(variadic_param.clone()),
-        params: vec![make_fn_param(&obj_var.1, false), variadic_param],
+        params: vec![
+            make_fn_param(pos(), &obj_var.1, false, false),
+            variadic_param,
+        ],
         body: FuncBody {
             ast: vec![
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
@@ -1364,6 +1372,139 @@ fn flatten_ns(defs: &mut Program) -> Program {
         .collect()
 }
 
+fn extract_debugger_main(
+    empty_namespace: &RcOc<namespace_env::Env>,
+    all_defs: &mut Program,
+) -> std::result::Result<(), String> {
+    let (stmts, mut defs): (Vec<Def>, Vec<Def>) = all_defs.drain(..).partition(|x| x.is_stmt());
+    let mut vars = decl_vars::vars_from_ast(&[], &Either::Left(&stmts), decl_vars::Flags::empty())?
+        .into_iter()
+        .collect::<Vec<_>>();
+    // TODO(hrust) sort is only required when comparing Rust/Ocaml, remove sort after emitter shipped
+    vars.sort();
+    let mut stmts = stmts
+        .into_iter()
+        .filter_map(|x| x.as_stmt_into())
+        .collect::<Vec<_>>();
+    let stmts =
+        if defs.is_empty() && stmts.len() == 2 && stmts[0].1.is_markup() && stmts[1].1.is_expr() {
+            let Stmt(p, s) = stmts.pop().unwrap();
+            let e = s.as_expr_into().unwrap();
+            let m = stmts.pop().unwrap();
+            vec![m, Stmt::new(p, Stmt_::mk_return(Some(e)))]
+        } else {
+            stmts
+        };
+    let p = || Pos::make_none();
+    let id = |n: &str| Expr(p(), Expr_::mk_id(Id(p(), n.into())));
+    let lv = |n: &String| Expr(p(), Expr_::mk_lvar(Lid(p(), local_id::make_unscoped(n))));
+    let mut unsets: Vec<_> = vars
+        .iter()
+        .map(|name| {
+            let unset = Stmt(
+                p(),
+                Stmt_::mk_expr(Expr(
+                    p(),
+                    Expr_::mk_call(
+                        CallType::Cnormal,
+                        id("unset"),
+                        vec![],
+                        vec![lv(&name)],
+                        None,
+                    ),
+                )),
+            );
+            Stmt(
+                p(),
+                Stmt_::mk_if(
+                    Expr(
+                        p(),
+                        Expr_::mk_is(
+                            lv(&name),
+                            Hint::new(
+                                p(),
+                                Hint_::mk_happly(Id(p(), "__uninitSentinel".into()), vec![]),
+                            ),
+                        ),
+                    ),
+                    vec![unset],
+                    vec![],
+                ),
+            )
+        })
+        .collect();
+    let sets: Vec<_> = vars
+        .iter()
+        .map(|name| {
+            let checkfunc = id("\\__systemlib\\__debugger_is_uninit");
+            let isuninit = Expr(
+                p(),
+                Expr_::mk_call(CallType::Cnormal, checkfunc, vec![], vec![lv(name)], None),
+            );
+            let obj = Expr(
+                p(),
+                Expr_::mk_new(
+                    ClassId(p(), ClassId_::CI(Id(p(), "__uninitSentinel".into()))),
+                    vec![],
+                    vec![],
+                    None,
+                    p(),
+                ),
+            );
+            let set = Stmt(
+                p(),
+                Stmt_::mk_expr(Expr(p(), Expr_::mk_binop(Bop::mk_eq(None), lv(name), obj))),
+            );
+            Stmt(p(), Stmt_::mk_if(isuninit, vec![set], vec![]))
+        })
+        .collect();
+    vars.push("$__debugger_exn$output".into());
+    let params: Vec<_> = vars
+        .iter()
+        .map(|var| make_fn_param(p(), &local_id::make_unscoped(var), false, true))
+        .collect();
+    let exnvar = Lid(p(), local_id::make_unscoped("$__debugger_exn$output"));
+    let catch = Stmt(
+        p(),
+        Stmt_::mk_try(
+            stmts,
+            vec![Catch(Id(p(), "Throwable".into()), exnvar, vec![])],
+            sets,
+        ),
+    );
+    unsets.push(catch);
+    let body = unsets;
+    let fd = Fun_ {
+        span: Pos::make_none(),
+        annotation: (),
+        mode: Mode::Mstrict,
+        ret: TypeHint((), None),
+        name: Id(Pos::make_none(), "include".into()),
+        tparams: vec![],
+        where_constraints: vec![],
+        variadic: FunVariadicity::FVnonVariadic,
+        params,
+        body: FuncBody {
+            ast: body,
+            annotation: (),
+        },
+        fun_kind: FunKind::FSync,
+        user_attributes: vec![UserAttribute {
+            name: Id(Pos::make_none(), "__DebuggerMain".into()),
+            params: vec![],
+        }],
+        file_attributes: vec![],
+        external: false,
+        namespace: RcOc::clone(empty_namespace),
+        doc_comment: None,
+        static_: false,
+    };
+    let mut new_defs = vec![Def::mk_fun(fd)];
+    new_defs.append(&mut defs);
+    *all_defs = new_defs;
+    Ok(())
+}
+
 pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<HoistKind>> {
     let empty_namespace = namespace_env::Env::empty(vec![], false, false);
     if e.options()
@@ -1381,9 +1522,13 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
         e.options(),
     )?;
     *defs = flatten_ns(defs);
+    let ns = RcOc::new(empty_namespace);
+    if e.for_debugger_eval {
+        extract_debugger_main(&ns, defs).map_err(unrecoverable)?;
+    }
 
     let mut visitor = ClosureConvertVisitor {
-        state: State::initial_state(RcOc::new(empty_namespace)),
+        state: State::initial_state(ns),
         phantom_lifetime_a: std::marker::PhantomData,
     };
 

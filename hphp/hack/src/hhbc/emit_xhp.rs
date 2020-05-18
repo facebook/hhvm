@@ -52,7 +52,7 @@ pub fn from_attribute_declaration<'a>(
     let mk_var_r = || {
         mk_expr(Expr_::mk_lvar(Lid(
             Pos::make_none(),
-            local_id::make_unscoped("$r".into()),
+            local_id::make_unscoped("$r"),
         )))
     };
     let mk_cache = || {

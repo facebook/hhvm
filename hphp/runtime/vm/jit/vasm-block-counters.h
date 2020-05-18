@@ -24,7 +24,17 @@ namespace HPHP { namespace jit {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+struct RegionDesc;
+
+///////////////////////////////////////////////////////////////////////////////
+
 namespace VasmBlockCounters {
+
+/*
+ * If we have profiling data for the given region, return the profiled weight
+ * of its entry block. Otherwise, return folly::none.
+ */
+folly::Optional<uint64_t> getRegionWeight(const RegionDesc& region);
 
 /*
  * Profile-guided update the given Vunit. This is only applied to optimized

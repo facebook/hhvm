@@ -393,6 +393,13 @@ void Clusterizer::clusterize() {
     // dst must be the first in its cluster
     if (dstC.front() != dst) continue;
 
+    // Don't merge zero and non-zero weight blocks that go in different areas.
+    if (RO::EvalJitLayoutSeparateZeroWeightBlocks) {
+      auto const srcZero = m_unit.blocks[src].weight == 0;
+      auto const dstZero = m_unit.blocks[dst].weight == 0;
+      if (srcZero != dstZero) continue;
+    }
+
     // merge the clusters by append the blocks in dstC to srcC
     for (auto d : dstC) {
       srcC.push_back(d);
@@ -481,7 +488,6 @@ void Clusterizer::sortClusters() {
   m_clusterOrder = dfsSort.sort(m_blockCluster[m_unit.entry]);
 }
 
-
 void Clusterizer::splitHotColdClusters() {
   // compute the average weight of each cluster
   jit::vector<uint64_t> clusterAvgWgt(m_clusters.size());
@@ -496,13 +502,60 @@ void Clusterizer::splitHotColdClusters() {
     clusterAvgWgt[c] = totalSize == 0 ? 0 : totalWeight / totalSize;
   }
 
-  const auto entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
-  const uint64_t hotThreshold = entryAvgWgt *
-                                RuntimeOption::EvalJitLayoutHotThreshold;
-  const uint64_t coldThreshold = entryAvgWgt *
-                                 RuntimeOption::EvalJitLayoutColdThreshold;
-  FTRACE(3, "splitHotColdClusters: entryAvgWgt = {} ; hotThreshold = {} "
-         "coldThreshold = {}\n", entryAvgWgt, hotThreshold, coldThreshold);
+  // The "hot weight" is a measure of how hot this function's entry is that
+  // incorporates information from multiple translations. If we have (say)
+  // two translations and the first is much hotter than the second, we can
+  // use this hint to put the entire second translation into Cold or Frozen.
+  auto const entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
+  auto baseWgt = entryAvgWgt;
+  if (m_unit.context && m_unit.context->region &&
+      RO::EvalJitPGOVasmBlockCountersUseHotWeight) {
+    if (auto const hotWeight = m_unit.context->region->getHotWeight()) {
+      FTRACE(3, "baseWgt = max(entryAvgWgt = {}, hotWeight = {})\n",
+             entryAvgWgt, *hotWeight);
+      baseWgt = std::max(entryAvgWgt, *hotWeight);
+    }
+  }
+
+  // An alternative way to penalize cold translations is to have an absolute
+  // weight threshold in addition to a entry-relative one.
+  uint64_t hotThreshold  = baseWgt * RO::EvalJitLayoutHotThreshold;
+  uint64_t coldThreshold = baseWgt * RO::EvalJitLayoutColdThreshold;
+  if (RO::EvalJitLayoutMinHotThreshold) {
+    hotThreshold = std::max(hotThreshold, RO::EvalJitLayoutMinHotThreshold);
+  }
+  if (RO::EvalJitLayoutMinColdThreshold) {
+    coldThreshold = std::max(coldThreshold, RO::EvalJitLayoutMinColdThreshold);
+  }
+
+  // Finally, for correctness, we can't allow any cluster to be in a hotter
+  // region than the entry cluster. Adjust thresholds so that's the case.
+  assertx(!m_clusterOrder.empty());
+  auto maxAvgWgt = entryAvgWgt;
+  for (auto cid : m_clusterOrder) {
+    maxAvgWgt = std::max(maxAvgWgt, clusterAvgWgt[cid]);
+  }
+  if (maxAvgWgt >= hotThreshold && entryAvgWgt < hotThreshold) {
+    FTRACE(3, "(maxAvgWgt = {}) >= (hotThreshold = {}) > (entryAvgWgt = {}) "
+           "=> lower hotThreshold\n", maxAvgWgt, hotThreshold, entryAvgWgt);
+    hotThreshold = entryAvgWgt;
+  }
+  if (maxAvgWgt >= coldThreshold && entryAvgWgt < coldThreshold) {
+    FTRACE(3, "(maxAvgWgt = {}) >= (coldThreshold = {}) > (entryAvgWgt = {}) "
+           "=> lower coldThreshold\n", maxAvgWgt, coldThreshold, entryAvgWgt);
+    coldThreshold = entryAvgWgt;
+  }
+
+  // Also, for correctness, if we're padding the TC, put the entry in main.
+  if (RO::EvalReusableTCPadding && entryAvgWgt < hotThreshold) {
+    FTRACE(3, "TC includes {} padding bytes => put entry in main\n",
+           RO::EvalReusableTCPadding);
+    hotThreshold  = std::min(hotThreshold, entryAvgWgt);
+    coldThreshold = std::min(coldThreshold, entryAvgWgt);
+  }
+
+  FTRACE(3, "splitHotColdClusters: baseWgt = {} ; hotThreshold = {} "
+         "coldThreshold = {}\n", baseWgt, hotThreshold, coldThreshold);
 
   for (auto cid : m_clusterOrder) {
     if (m_clusters[cid].size() == 0) continue;
@@ -523,9 +576,16 @@ void Clusterizer::splitHotColdClusters() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+bool usedVasmBlockCounters(const Vunit& unit) {
+  auto const opt = unit.context && unit.context->kind == TransKind::Optimize;
+  return opt && RO::EvalJitPGOVasmBlockCounters && isJitDeserializing();
+}
+
 jit::vector<Vlabel> pgoLayout(Vunit& unit) {
   // Make sure block weights are consistent.
-  fixBlockWeights(unit);
+  auto const skip = usedVasmBlockCounters(unit) &&
+                    RO::EvalJitPGOVasmBlockCountersSkipFixWeights;
+  if (!skip) fixBlockWeights(unit);
 
   // Compute arc weights.
   Scale scale(unit);

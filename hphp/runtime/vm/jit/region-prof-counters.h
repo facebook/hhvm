@@ -57,6 +57,19 @@ struct RegionProfCounters {
   }
 
   /*
+   * Retrieve the first counter associated with the given region. We typically
+   * keep counters sorted by e.g. RPO order, so the first one is for the entry.
+   */
+  folly::Optional<T> getFirstCounter(const RegionEntryKey& regionKey) {
+    folly::SharedMutex::ReadHolder lock(m_lock);
+    auto const it = m_regionIndices.find(regionKey);
+    if (it == m_regionIndices.end()) return folly::none;
+    auto const& indices = it->second;
+    if (indices.empty()) return folly::none;
+    return m_counters.get(indices[0]);
+  }
+
+  /*
    * Return a vector with the values of all the counters associated with the
    * given region, as well as a vector with the corresponding associated
    * metadata.

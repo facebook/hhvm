@@ -31,6 +31,7 @@
 #include "hphp/runtime/vm/jit/timer.h"
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/translate-region.h"
+#include "hphp/runtime/vm/jit/vasm-block-counters.h"
 #include "hphp/runtime/vm/jit/vm-protect.h"
 #include "hphp/runtime/vm/jit/vtune-jit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
@@ -140,6 +141,19 @@ void optimize(tc::FuncMetaInfo& info) {
 
   FTRACE(4, "Translating {} regions for {} (includedBody={})\n",
          regions.size(), func->fullName(), includedBody);
+
+  folly::Optional<uint64_t> maxWeight;
+  for (auto region : regions) {
+    auto const weight = VasmBlockCounters::getRegionWeight(*region);
+    if (weight) {
+      FTRACE(5, "  Weight for {}: {}\n", show(region->start()), *weight);
+      if (!maxWeight || *weight > *maxWeight) maxWeight = *weight;
+    }
+  }
+  if (maxWeight) {
+    FTRACE(4, "  Setting hot weight hint: {}\n", *maxWeight);
+    for (auto region : regions) region->setHotWeight(*maxWeight);
+  }
 
   auto optIndex = 0;
   for (auto region : regions) {

@@ -224,6 +224,16 @@ void setWeights(Vunit& unit) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+folly::Optional<uint64_t> getRegionWeight(const RegionDesc& region) {
+  if (!RO::EvalJitPGOVasmBlockCounters || !isJitDeserializing()) {
+    return folly::none;
+  }
+  auto const key = RegionEntryKey(region);
+  auto const weight = s_blockCounters.getFirstCounter(key);
+  if (!weight) return folly::none;
+  return safe_cast<uint64_t>(*weight);
+}
+
 void profileGuidedUpdate(Vunit& unit) {
   if (!RuntimeOption::EvalJitPGOVasmBlockCounters) return;
   if (!unit.context) return;

@@ -147,6 +147,9 @@ struct RegionDesc {
   uint32_t          instrSize() const;
   std::string       toString() const;
 
+  void setHotWeight(uint64_t weight) { m_hotWeight = weight; }
+  folly::Optional<uint64_t> getHotWeight() const { return m_hotWeight; }
+
   const std::vector<Type>& inlineInputTypes() const {
     return m_inlineInputTypes;
   }
@@ -186,6 +189,10 @@ private:
 
   std::vector<BlockPtr>             m_blocks;
   hphp_hash_map<BlockId, BlockData> m_data;
+
+  // When optimizing, we may know what a "hot weight" for this region would be
+  // relative to other regions. Pass this information down to vasm-layout.
+  folly::Optional<uint64_t> m_hotWeight;
 
   // For regions selected for inlining, track the types of input arguments
   std::vector<Type> m_inlineInputTypes;

@@ -36,7 +36,6 @@
 #include "hphp/runtime/vm/jit/fixup.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
-#include "hphp/runtime/vm/jit/release-vv-profile.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
@@ -234,35 +233,10 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto& vc = vcold(env);
 
-  auto const profile = TargetProfile<ReleaseVVProfile> {
-    env.unit.context(), inst->marker(), s_ReleaseVV.get()
-  };
-
-  if (profile.profiling()) {
-    auto const executedOff = offsetof(ReleaseVVProfile, executed);
-    v << incwm{rvmtl()[profile.handle() + executedOff], v.makeReg()};
-  }
-
-  auto const releaseUnlikely = [&] {
-    if (!profile.optimizing()) return true;
-
-    auto const data = profile.data();
-    FTRACE(3, "cgReleaseVVAndSkip({}): percentReleased = {}\n",
-           inst->toString(), data.percentReleased());
-
-    return data.percentReleased() <
-           RuntimeOption::EvalJitPGOReleaseVVMinPercent;
-  }();
-
   auto const sf = v.makeReg();
   v << cmpqim{0, fp[AROFF(m_varEnv)], sf};
 
-  ifThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
-    if (profile.profiling()) {
-      auto const releasedOff = offsetof(ReleaseVVProfile, released);
-      v << incwm{rvmtl()[profile.handle() + releasedOff], v.makeReg()};
-    }
-
+  unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
     cgCallHelper(
       v, env,
       CallSpec::direct(static_cast<void (*)(ActRec*)>(
@@ -272,7 +246,7 @@ void cgReleaseVVAndSkip(IRLS& env, const IRInstruction* inst) {
       argGroup(env, inst).reg(fp)
     );
     v << jmp{label(env, inst->taken())};
-  }, releaseUnlikely);
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

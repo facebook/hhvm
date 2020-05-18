@@ -58,7 +58,6 @@ struct IncRefProfile;
 struct MethProfile;
 struct SwitchProfile;
 struct TypeProfile;
-struct ReleaseVVProfile;
 }
 
 }
@@ -221,7 +220,6 @@ struct StaticMethodF { LowStringPtr name; };
   PR(DecRefProfile)       \
   PR(IncRefProfile)       \
   PR(MethProfile)         \
-  PR(ReleaseVVProfile)    \
   PR(SwitchProfile)       \
   PR(TypeProfile)
 

@@ -253,14 +253,15 @@ fn print_include_region<W: Write>(
         match inc.into_doc_root_relative(include_roots) {
             IncludePath::Absolute(p) => print_if_exists(w, Path::new(&p)),
             IncludePath::SearchPathRelative(p) => {
-                let search_paths = ctx.emitter.options().server.include_search_paths.get();
-                if search_paths.is_empty() {
-                    let dirname = ctx
-                        .path
-                        .and_then(|p| p.path().parent())
-                        .unwrap_or(Path::new(""));
-                    print_if_exists(w, &dirname.join(&p))
+                let path_from_cur_dirname = ctx
+                    .path
+                    .and_then(|p| p.path().parent())
+                    .unwrap_or(Path::new(""))
+                    .join(&p);
+                if path_from_cur_dirname.exists() {
+                    print_path(w, &path_from_cur_dirname)
                 } else {
+                    let search_paths = ctx.emitter.options().server.include_search_paths.get();
                     for prefix in search_paths.iter() {
                         let path = Path::new(prefix).join(&p);
                         if path.exists() {

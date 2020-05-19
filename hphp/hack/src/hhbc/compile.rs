@@ -133,7 +133,7 @@ where
             profile(move || emit(e, &env, namespace, *is_hh_file, ast))
         }
         Either::Left((pos, msg, is_runtime_error)) => {
-            profile(|| emit_fatal(&mut emitter, &env, *is_runtime_error, pos, msg))
+            profile(|| emit_fatal(&mut emitter, *is_runtime_error, pos, msg))
         }
     };
     let program = program.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
@@ -188,7 +188,6 @@ fn emit<'p>(
 
 fn emit_fatal<'a>(
     emitter: &mut Emitter,
-    env: &Env,
     is_runtime_error: bool,
     pos: &Pos,
     msg: impl AsRef<str>,
@@ -198,13 +197,7 @@ fn emit_fatal<'a>(
     } else {
         FatalOp::Parse
     };
-    emit_fatal_program(
-        emitter.options(),
-        env.flags.contains(EnvFlags::IS_SYSTEMLIB),
-        op,
-        pos,
-        msg,
-    )
+    emit_fatal_program(emitter.options(), emitter.systemlib(), op, pos, msg)
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {

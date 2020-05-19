@@ -95,6 +95,23 @@ let init_progress =
   in
   { resultJson = default_json; factIds = JMap.empty }
 
+let should_cache predicate =
+  match predicate with
+  | ClassConstDeclaration
+  | ClassDeclaration
+  | EnumDeclaration
+  | Enumerator
+  | FunctionDeclaration
+  | GlobalConstDeclaration
+  | InterfaceDeclaration
+  | MethodDeclaration
+  | PropertyDeclaration
+  | TraitDeclaration
+  | TypeConstDeclaration
+  | TypedefDeclaration ->
+    true
+  | _ -> false
+
 let update_json_data predicate json progress =
   let json =
     match predicate with
@@ -244,22 +261,28 @@ let add_fact predicate json_key progress =
       {
         resultJson = progress.resultJson;
         factIds =
-          JMap.add
-            json_key
-            [(predicate, newFactId)]
-            progress.factIds
-            ~combine:List.append;
+          ( if should_cache predicate then
+            JMap.add
+              json_key
+              [(predicate, newFactId)]
+              progress.factIds
+              ~combine:List.append
+          else
+            progress.factIds );
       }
     in
     (newFactId, true, progress)
   in
   let (id, is_new, progress) =
-    match JMap.find_opt json_key progress.factIds with
-    | None -> add_id
-    | Some fid_list ->
-      (match find_fid fid_list predicate with
+    if should_cache predicate then
+      match JMap.find_opt json_key progress.factIds with
       | None -> add_id
-      | Some fid -> (fid, false, progress))
+      | Some fid_list ->
+        (match find_fid fid_list predicate with
+        | None -> add_id
+        | Some fid -> (fid, false, progress))
+    else
+      add_id
   in
   let json_fact =
     JSON_Object [("id", JSON_Number (string_of_int id)); ("key", json_key)]

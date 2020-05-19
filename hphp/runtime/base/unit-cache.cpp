@@ -840,7 +840,6 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + (RuntimeOption::AssertEmitted ? '1' : '0')
     + (RuntimeOption::EvalGenerateDocComments ? '1' : '0')
     + (RuntimeOption::EnableXHP ? '1' : '0')
-    + (RuntimeOption::EvalEmitSwitch ? '1' : '0')
     + (RuntimeOption::EvalEnableCallBuiltin ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatNotices ? '1' : '0')
     + (RuntimeOption::EvalHackArrCompatIsArrayNotices ? '1' : '0')

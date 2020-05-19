@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3595477175932da572417fb31c69178>>
+// @generated SignedSource<<425a93a164b7cd166d01f14e0a47a958>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -445,14 +445,13 @@ impl<'a, Hi> TrivialDrop for Targ<'a, Hi> {}
 pub type TypeHint_<'a> = Option<Hint<'a>>;
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct UserAttribute<'a, Ex, Fb, En, Hi> {
     pub name: Sid<'a>,
     /// user attributes are restricted to scalar values
     pub params: &'a [Expr<'a, Ex, Fb, En, Hi>],
 }
-impl<'a, Ex, Fb, En, Hi> TrivialDrop for UserAttribute<'a, Ex, Fb, En, Hi> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -528,15 +527,15 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub name: Sid<'a>,
     /// The type parameters of a class A<T> (T is the parameter)
     pub tparams: ClassTparams<'a, Ex, Fb, En, Hi>,
-    pub extends: &'a [Hint<'a>],
-    pub uses: &'a [Hint<'a>],
+    pub extends: &'a [ClassHint<'a>],
+    pub uses: &'a [TraitHint<'a>],
     pub use_as_alias: &'a [UseAsAlias<'a>],
     pub insteadof_alias: &'a [InsteadofAlias<'a>],
     pub method_redeclarations: &'a [MethodRedeclaration<'a, Ex, Fb, En, Hi>],
-    pub xhp_attr_uses: &'a [Hint<'a>],
+    pub xhp_attr_uses: &'a [XhpAttrHint<'a>],
     pub xhp_category: Option<(&'a Pos<'a>, &'a [Pstring<'a>])>,
-    pub reqs: &'a [(Hint<'a>, oxidized::aast::IsExtends)],
-    pub implements: &'a [Hint<'a>],
+    pub reqs: &'a [(ClassHint<'a>, oxidized::aast::IsExtends)],
+    pub implements: &'a [ClassHint<'a>],
     pub where_constraints: &'a [WhereConstraint<'a>],
     pub consts: &'a [ClassConst<'a, Ex, Fb, En, Hi>],
     pub typeconsts: &'a [ClassTypeconst<'a, Ex, Fb, En, Hi>],
@@ -554,6 +553,12 @@ pub struct Class_<'a, Ex, Fb, En, Hi> {
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
 impl<'a, Ex, Fb, En, Hi> TrivialDrop for Class_<'a, Ex, Fb, En, Hi> {}
+
+pub type ClassHint<'a> = Hint<'a>;
+
+pub type TraitHint<'a> = Hint<'a>;
+
+pub type XhpAttrHint<'a> = Hint<'a>;
 
 pub use oxidized::aast::XhpAttrTag;
 
@@ -700,7 +705,7 @@ pub struct MethodRedeclaration<'a, Ex, Fb, En, Hi> {
     pub params: &'a [&'a FunParam<'a, Ex, Fb, En, Hi>],
     pub fun_kind: oxidized::ast_defs::FunKind,
     pub ret: TypeHint<'a, Hi>,
-    pub trait_: Hint<'a>,
+    pub trait_: TraitHint<'a>,
     pub method: Pstring<'a>,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
 }
@@ -746,7 +751,7 @@ impl<'a, Ex, Fb, En, Hi> TrivialDrop for Gconst<'a, Ex, Fb, En, Hi> {}
 pub struct RecordDef<'a, Ex, Fb, En, Hi> {
     pub annotation: En,
     pub name: Sid<'a>,
-    pub extends: Option<Hint<'a>>,
+    pub extends: Option<RecordHint<'a>>,
     pub abstract_: bool,
     pub fields: &'a [(Sid<'a>, Hint<'a>, Option<Expr<'a, Ex, Fb, En, Hi>>)],
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
@@ -756,6 +761,8 @@ pub struct RecordDef<'a, Ex, Fb, En, Hi> {
     pub emit_id: Option<oxidized::aast::EmitId>,
 }
 impl<'a, Ex, Fb, En, Hi> TrivialDrop for RecordDef<'a, Ex, Fb, En, Hi> {}
+
+pub type RecordHint<'a> = Hint<'a>;
 
 /// Pocket Universe Enumeration, e.g.
 ///
@@ -792,10 +799,16 @@ pub struct PuEnum<'a, Ex, Fb, En, Hi> {
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
     pub is_final: bool,
     pub case_types: &'a [(Sid<'a>, oxidized::aast::ReifyKind)],
-    pub case_values: &'a [(Sid<'a>, Hint<'a>)],
+    pub case_values: &'a [PuCaseValue<'a>],
     pub members: &'a [PuMember<'a, Ex, Fb, En, Hi>],
 }
 impl<'a, Ex, Fb, En, Hi> TrivialDrop for PuEnum<'a, Ex, Fb, En, Hi> {}
+
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub struct PuCaseValue<'a>(pub Sid<'a>, pub Hint<'a>);
+impl<'a> TrivialDrop for PuCaseValue<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep

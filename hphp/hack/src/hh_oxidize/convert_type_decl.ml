@@ -50,6 +50,7 @@ let derive_copy ty =
     match ty with
     | "aast::Expr"
     | "aast::Expr_"
+    | "aast::UserAttribute"
     | "ast_defs::Id"
     | "nast::FuncBodyAnn"
     | "typing_defs_core::ConstraintType"

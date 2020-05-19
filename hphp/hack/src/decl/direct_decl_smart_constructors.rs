@@ -438,12 +438,6 @@ pub struct FunParamDecl<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Attribute<'a> {
-    id: Id<'a>,
-    args: &'a [Node_<'a>],
-}
-
-#[derive(Clone, Debug)]
 pub struct FunctionHeader<'a> {
     name: Node_<'a>,
     modifiers: Node_<'a>,
@@ -535,7 +529,7 @@ pub enum Node_<'a> {
     ListItem(&'a (Node_<'a>, Node_<'a>)),
     Const(&'a ShallowClassConst<'a>),
     FunParam(&'a FunParamDecl<'a>),
-    Attribute(&'a Attribute<'a>),
+    Attribute(nast::UserAttribute<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
     Constructor {
         method: &'a ShallowMethod<'a>,
@@ -740,16 +734,16 @@ impl<'a> Node_<'a> {
             match attribute {
                 // If we see the attribute `__OnlyRxIfImpl(Foo::class)`, set
                 // `reactivity_condition_type` to `Foo`.
-                Node_::Attribute(Attribute {
-                    id: Id(_, "__OnlyRxIfImpl"),
-                    args:
-                        [Node_::Expr(aast::Expr(
+                Node_::Attribute(nast::UserAttribute {
+                    name: Id(_, "__OnlyRxIfImpl"),
+                    params:
+                        [aast::Expr(
                             pos,
                             aast::Expr_::ClassConst((
                                 aast::ClassId(_, aast::ClassId_::CI(class_name)),
                                 (_, "class"),
                             )),
-                        ))],
+                        )],
                 }) => {
                     reactivity_condition_type = Some(Ty(
                         arena.alloc(Reason::hint(*pos)),
@@ -762,7 +756,7 @@ impl<'a> Node_<'a> {
 
         for attribute in self.iter() {
             if let Node_::Attribute(attribute) = attribute {
-                match attribute.id.1.as_ref() {
+                match attribute.name.1.as_ref() {
                     // NB: It is an error to specify more than one of __Rx,
                     // __RxShallow, and __RxLocal, so to avoid cloning the
                     // condition type, we use Option::take here.
@@ -788,13 +782,13 @@ impl<'a> Node_<'a> {
                     }
                     "__MutableReturn" => attributes.returns_mutable = true,
                     "__Deprecated" => {
-                        attributes.deprecated =
-                            attribute.args.first().and_then(|node| match *node {
-                                Node_::StringLiteral(val, _) => Some(val),
-                                _ => None,
-                            })
+                        attributes.deprecated = attribute.params.first().and_then(|expr| match expr
+                        {
+                            &aast::Expr(_, aast::Expr_::String(val)) => Some(val),
+                            _ => None,
+                        })
                     }
-                    "__Reifiable" => attributes.reifiable = Some(attribute.id.0),
+                    "__Reifiable" => attributes.reifiable = Some(attribute.name.0),
                     "__LateInit" => {
                         attributes.late_init = true;
                     }
@@ -814,7 +808,7 @@ impl<'a> Node_<'a> {
                         attributes.at_most_rx_as_func = true;
                     }
                     "__Enforceable" => {
-                        attributes.enforceable = Some(attribute.id.0);
+                        attributes.enforceable = Some(attribute.name.0);
                     }
                     _ => (),
                 }
@@ -2352,22 +2346,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut sprops = Vec::new_in(self.state.arena);
         let mut static_methods = Vec::new_in(self.state.arena);
         let mut methods = Vec::new_in(self.state.arena);
-        let mut user_attributes = Vec::new_in(self.state.arena);
 
+        let mut user_attributes = Vec::new_in(self.state.arena);
         for attribute in attributes?.iter() {
             match attribute {
-                Node_::Attribute(Attribute { id, args }) => {
-                    let args_iter = args.iter();
-                    let mut params = Vec::new_in(self.state.arena);
-                    for node in args_iter {
-                        params.push(node.as_expr(self.state.arena)?);
-                    }
-                    let params = params.into_bump_slice();
-                    user_attributes.push(aast::UserAttribute { name: *id, params });
-                }
+                &Node_::Attribute(attr) => user_attributes.push(attr),
                 _ => (),
             }
         }
+        // Match ordering of attributes produced by the OCaml decl parser (even
+        // though it's the reverse of the syntactic ordering).
+        user_attributes.reverse();
 
         match body? {
             Node_::ClassishBody(body) => {
@@ -2415,10 +2404,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
             body => return Err(format!("Expected a classish body, but was {:?}", body)),
         }
-
-        // Match ordering of attributes produced by the OCaml decl parser (even
-        // though it's the reverse of the syntactic ordering).
-        user_attributes.reverse();
 
         let where_constraints = where_constraints.into_bump_slice();
         let uses = uses.into_bump_slice();
@@ -3049,11 +3034,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         args: Self::R,
         _arg3: Self::R,
     ) -> Self::R {
-        let id = self.get_name("", name?)?;
-        Ok(Node_::Attribute(self.alloc(Attribute {
-            id,
-            args: args?.as_slice(self.state.arena),
-        })))
+        let name = self.get_name("", name?)?;
+        Ok(Node_::Attribute(nast::UserAttribute {
+            name,
+            params: self.map_to_slice(args, |node| node.as_expr(self.state.arena))?,
+        }))
     }
 
     fn make_trait_use(&mut self, _arg0: Self::R, used: Self::R, _arg2: Self::R) -> Self::R {
@@ -3289,8 +3274,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         match attributes? {
             Node_::BracketedList((
                 ltlt_pos,
-                [Node_::Attribute(Attribute {
-                    id: Id(_, "__Soft"),
+                [Node_::Attribute(nast::UserAttribute {
+                    name: Id(_, "__Soft"),
                     ..
                 })],
                 gtgt_pos,

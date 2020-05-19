@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5529def6ba7d3bf01cd8a907e0b5ae13>>
+// @generated SignedSource<<1cde88368d90d9179a6bfbadd089474b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -17,7 +17,13 @@ use crate::*;
 
 pub use crate::ast_defs::shape_map;
 
+pub use aast::ClassHint;
+pub use aast::PuCaseValue;
+pub use aast::RecordHint;
 pub use aast::Sid;
+pub use aast::TraitHint;
+pub use aast::XhpAttrHint;
+pub use ast_defs::ShapeFieldName;
 
 #[derive(
     Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -80,6 +86,10 @@ pub type Afield<'a> = aast::Afield<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()
 
 pub type MethodRedeclaration<'a> =
     aast::MethodRedeclaration<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
+
+pub type PuEnum<'a> = aast::PuEnum<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
+
+pub type PuMember<'a> = aast::PuMember<'a, &'a pos::Pos<'a>, FuncBodyAnn<'a>, (), ()>;
 
 pub type Targ<'a> = aast::Targ<'a, ()>;
 

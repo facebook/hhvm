@@ -74,10 +74,10 @@ struct IRGS {
   InlineState inlineState;
 
   /*
-   * The id of the profiling translation for the code we're currently
-   * generating, if there was one, otherwise kInvalidTransID.
+   * The ids of the profiling translations for the code we're currently
+   * generating (may be empty).
    */
-  TransID profTransID{kInvalidTransID};
+  TransIDSet profTransIDs;
 
   /*
    * True if we're on the first HHBC instruction that will be executed

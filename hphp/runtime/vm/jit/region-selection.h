@@ -129,6 +129,7 @@ struct RegionDesc {
 
   Block*            addBlock(SrcKey sk, int length, FPInvOffset spOffset);
   void              addBlock(BlockPtr newBlock);
+  bool              hasBlock(BlockId id) const;
   void              replaceBlock(BlockId bid, BlockPtr newBlock);
   void              deleteBlock(BlockId bid);
   BlockVec::iterator deleteBlock(RegionDesc::BlockVec::iterator it);
@@ -175,7 +176,6 @@ private:
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}
   };
 
-  bool       hasBlock(BlockId id) const;
   BlockData& data(BlockId id);
   const BlockData& data(BlockId id) const {
     return const_cast<RegionDesc*>(this)->data(id);

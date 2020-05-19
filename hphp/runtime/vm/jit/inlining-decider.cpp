@@ -316,7 +316,7 @@ Vcost computeTranslationCostSlow(SrcKey at,
                                  const RegionDesc& region,
                                  AnnotationData* annotationData) {
   TransContext ctx {
-    kInvalidTransID,
+    TransIDSet{},
     TransKind::Optimize,
     TransFlags{},
     at,

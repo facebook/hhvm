@@ -38,9 +38,9 @@ std::string BCMarker::show() const {
     m_fp ? folly::to<std::string>(m_fp->id()) : "_",
     m_spOff.offset,
     m_sk.func()->fullName(),
-    m_profTransID != kInvalidTransID
-      ? folly::format(" [profTrans={}]", m_profTransID).str()
-      : std::string{}
+    m_profTransIDs.empty()
+      ? ""
+      : folly::sformat(" [profTrans={}]", folly::join(',', m_profTransIDs))
   ).str();
 }
 
@@ -51,7 +51,8 @@ bool BCMarker::valid() const {
   return
     m_sk.valid() &&
     m_sk.offset() >= m_sk.func()->base() &&
-    m_sk.offset() < m_sk.func()->past();
+    m_sk.offset() < m_sk.func()->past() &&
+    m_profTransIDs.find(kInvalidTransID) == m_profTransIDs.end();
 }
 
 //////////////////////////////////////////////////////////////////////

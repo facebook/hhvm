@@ -240,10 +240,12 @@ void emitGuards(irgen::IRGS& irgs,
     }
 
     if (irgs.context.kind == TransKind::Profile) {
+      assertx(irgs.context.transIDs.size() == 1);
+      auto transID = *irgs.context.transIDs.begin();
       if (block.func()->isEntry(bcOff) && !mcgen::retranslateAllEnabled()) {
-        irgen::checkCold(irgs, irgs.context.transID);
+        irgen::checkCold(irgs, transID);
       } else {
-        irgen::incProfCounter(irgs, irgs.context.transID);
+        irgen::incProfCounter(irgs, transID);
       }
     }
     irgen::ringbufferEntry(irgs, Trace::RBTypeTraceletBody, sk);
@@ -354,6 +356,10 @@ static bool isCmp(Op op) {
       op == Op::Cmp;
 }
 
+TransID canonTransID(const TransIDSet& tids) {
+  return tids.size() == 0 ? kInvalidTransID : *tids.begin();
+}
+
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 double profFactor) {
@@ -361,13 +367,13 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
   auto& irb = *irgs.irb;
   auto prevRegion      = irgs.region;      irgs.region      = &region;
   auto prevProfFactor  = irgs.profFactor;  irgs.profFactor  = profFactor;
-  auto prevProfTransID = irgs.profTransID; irgs.profTransID = kInvalidTransID;
+  auto prevProfTransIDs = irgs.profTransIDs; irgs.profTransIDs = TransIDSet{};
   auto prevOffsetMapping = irb.saveAndClearOffsetMapping();
   auto prevGuardFailBlock = irb.guardFailBlock(); irb.resetGuardFailBlock();
   SCOPE_EXIT {
     irgs.region      = prevRegion;
     irgs.profFactor  = prevProfFactor;
-    irgs.profTransID = prevProfTransID;
+    irgs.profTransIDs = prevProfTransIDs;
     irb.restoreOffsetMapping(std::move(prevOffsetMapping));
     irb.setGuardFailBlock(prevGuardFailBlock);
   };
@@ -425,8 +431,12 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
     SCOPE_ASSERT_DETAIL("IRGS") { return show(irgs); };
 
-    irgs.profTransID = hasTransID(blockId) ? getTransID(blockId)
-                                           : kInvalidTransID;
+    irgs.profTransIDs.clear();
+    if (hasTransID(blockId)) {
+      irgs.profTransIDs.insert(blockId);
+      auto& mergedBlocks = irgs.region->merged(blockId);
+      irgs.profTransIDs.insert(mergedBlocks.begin(), mergedBlocks.end());
+    }
     irgs.firstBcInst = inEntryRetransChain(blockId, region) && !inlining;
     irgen::prepareForNextHHBC(irgs, sk);
 
@@ -465,7 +475,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
     // Generate IR for each bytecode instruction in this block.
     for (unsigned i = 0; i < block.length(); ++i, sk.advance(block.unit())) {
-      ProfSrcKey psk { irgs.profTransID, sk };
+      ProfSrcKey psk { canonTransID(irgs.profTransIDs), sk };
       auto const lastInstr = i == block.length() - 1;
       auto const penultimateInst = i == block.length() - 2;
 
@@ -510,7 +520,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
       } catch (const RetryIRGen& e) {
         return TranslateResult::Retry;
       } catch (const FailedIRGen& exn) {
-        ProfSrcKey psk2{irgs.profTransID, sk};
+        ProfSrcKey psk2{canonTransID(irgs.profTransIDs), sk};
         always_assert_flog(!irgs.retryContext->toInterp.count(psk2),
                            "IR generation failed with {}\n",
                            exn.what());
@@ -660,7 +670,7 @@ std::unique_ptr<IRUnit> irGenRegion(const RegionDesc& region,
 
 bool irGenTryInlineFCall(irgen::IRGS& irgs, const Func* callee,
                          const FCallArgs& fca, SSATmp* ctx, bool dynamicCall) {
-  auto const psk = ProfSrcKey { irgs.profTransID, curSrcKey(irgs) };
+  auto const psk = ProfSrcKey { canonTransID(irgs.profTransIDs), curSrcKey(irgs) };
   int calleeCost{0};
 
   // See if we have a callee region we can inline.
@@ -757,7 +767,12 @@ std::unique_ptr<IRUnit> irGenInlineRegion(const TransContext& ctx,
     unit = std::make_unique<IRUnit>(ctx, std::make_unique<AnnotationData>());
     irgen::IRGS irgs{*unit, &region, budgetBCInstrs, &retryContext};
     irgs.inlineState.conjure = true;
-    if (hasTransID(entryBID)) irgs.profTransID = getTransID(entryBID);
+    if (hasTransID(entryBID)) {
+      irgs.profTransIDs.clear();
+      irgs.profTransIDs.insert(entryBID);
+      auto const& mergedBlocks = region.merged(entryBID);
+      irgs.profTransIDs.insert(mergedBlocks.begin(), mergedBlocks.end());
+    }
 
     auto& irb = *irgs.irb;
     auto const& argTypes = region.inlineInputTypes();

@@ -27,7 +27,7 @@ use oxidized_by_ref::{
     pos::Pos,
     relative_path::RelativePath,
     s_set::SSet,
-    shallow_decl_defs,
+    shallow_decl_defs::{self, ShallowMethod, ShallowProp},
     shape_map::ShapeField,
     tany_sentinel::TanySentinel,
     typing_defs,
@@ -200,6 +200,35 @@ fn tarraykey<'a>(arena: &'a Bump) -> Ty<'a> {
     )
 }
 
+#[derive(Debug)]
+struct Modifiers {
+    is_static: bool,
+    visibility: aast::Visibility,
+    is_abstract: bool,
+    is_final: bool,
+}
+
+fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node_<'a>>) -> Modifiers {
+    let mut ret = Modifiers {
+        is_static: false,
+        visibility: aast::Visibility::Private,
+        is_abstract: false,
+        is_final: false,
+    };
+    for modifier in modifiers {
+        if let Ok(vis) = modifier.as_visibility() {
+            ret.visibility = vis;
+        }
+        match modifier {
+            Node_::Static => ret.is_static = true,
+            Node_::Abstract => ret.is_abstract = true,
+            Node_::Final => ret.is_final = true,
+            _ => (),
+        }
+    }
+    ret
+}
+
 #[derive(Clone, Debug)]
 struct NamespaceInfo<'a> {
     name: &'a str,
@@ -294,7 +323,7 @@ enum ClassishNameBuilder<'a> {
 
     /// We saw a classish keyword token followed by a Name, so we make it
     /// available as the name of the containing class declaration.
-    InClassish(&'a (&'a str, &'a Pos<'a>)),
+    InClassish(&'a (&'a str, &'a Pos<'a>, TokenKind)),
 }
 
 impl<'a> ClassishNameBuilder<'a> {
@@ -302,14 +331,20 @@ impl<'a> ClassishNameBuilder<'a> {
         ClassishNameBuilder::NotInClassish
     }
 
-    fn lexed_name_after_classish_keyword(&mut self, arena: &'a Bump, name: &str, pos: &'a Pos<'a>) {
+    fn lexed_name_after_classish_keyword(
+        &mut self,
+        arena: &'a Bump,
+        name: &str,
+        pos: &'a Pos<'a>,
+        token_kind: TokenKind,
+    ) {
         use ClassishNameBuilder::*;
         match self {
             NotInClassish => {
                 let mut class_name = String::with_capacity_in(1 + name.len(), arena);
                 class_name.push('\\');
                 class_name.push_str(name);
-                *self = InClassish(arena.alloc((class_name.into_bump_str(), pos)))
+                *self = InClassish(arena.alloc((class_name.into_bump_str(), pos, token_kind)))
             }
             InClassish(_) => (),
         }
@@ -323,7 +358,15 @@ impl<'a> ClassishNameBuilder<'a> {
         use ClassishNameBuilder::*;
         match self {
             NotInClassish => None,
-            InClassish(name_and_pos) => Some(**name_and_pos),
+            InClassish((name, pos, _)) => Some((name, pos)),
+        }
+    }
+
+    fn in_interface(&self) -> bool {
+        use ClassishNameBuilder::*;
+        match self {
+            InClassish((_, _, TokenKind::Interface)) => true,
+            InClassish((_, _, _)) | NotInClassish => false,
         }
     }
 }
@@ -414,22 +457,6 @@ pub struct FunctionHeader<'a> {
     type_params: Node_<'a>,
     param_list: Node_<'a>,
     ret_hint: Node_<'a>,
-}
-
-#[derive(Clone, Debug)]
-pub struct FunctionDecl<'a> {
-    attributes: Node_<'a>,
-    header: &'a FunctionHeader<'a>,
-    body: Node_<'a>,
-}
-
-#[derive(Clone, Debug)]
-pub struct PropertyDecl<'a> {
-    attrs: Node_<'a>,
-    modifiers: Node_<'a>,
-    hint: Node_<'a>,
-    id: Id<'a>,
-    needs_init: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -547,8 +574,18 @@ pub enum Node_<'a> {
     Variable(&'a VariableDecl<'a>),
     Attribute(&'a Attribute<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
-    Function(&'a FunctionDecl<'a>),
-    Property(&'a [PropertyDecl<'a>]),
+    Constructor {
+        method: &'a ShallowMethod<'a>,
+        properties: &'a [ShallowProp<'a>],
+    },
+    Method {
+        method: &'a ShallowMethod<'a>,
+        is_static: bool,
+    },
+    Property {
+        decls: &'a [ShallowProp<'a>],
+        is_static: bool,
+    },
     TraitUse(&'a Node_<'a>),
     TypeConstant(&'a TypeConstant<'a>),
     RequireClause(&'a RequireClause<'a>),
@@ -1037,7 +1074,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         attributes: Node_<'a>,
         header: &'a FunctionHeader<'a>,
         body: Node_,
-    ) -> Result<(Id<'a>, Ty<'a>, &'a [PropertyDecl<'a>]), ParseError> {
+    ) -> Result<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>]), ParseError> {
         let id = self.get_name(namespace, header.name)?;
         let (params, properties, arity) = self.into_variables_list(header.param_list)?;
         let type_ = match header.name {
@@ -1122,7 +1159,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn into_variables_list(
         &self,
         list: Node_<'a>,
-    ) -> Result<(FunParams<'a>, &'a [PropertyDecl<'a>], FunArity<'a>), ParseError> {
+    ) -> Result<(FunParams<'a>, &'a [ShallowProp<'a>], FunArity<'a>), ParseError> {
         match list {
             Node_::List(nodes) => {
                 let mut variables = Vec::new_in(self.state.arena);
@@ -1139,18 +1176,25 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             variadic,
                             initializer,
                         }) => {
-                            match visibility.as_visibility() {
-                                Ok(_) => properties.push(PropertyDecl {
-                                    attrs: attributes,
-                                    modifiers: visibility,
-                                    hint,
-                                    id,
-                                    needs_init: true,
-                                }),
-                                Err(_) => (),
-                            };
-
                             let attributes = attributes.as_attributes(self.state.arena)?;
+
+                            if let Ok(visibility) = visibility.as_visibility() {
+                                let Id(pos, name) = id;
+                                let name = strip_dollar_prefix(name);
+                                properties.push(ShallowProp {
+                                    const_: false,
+                                    xhp_attr: None,
+                                    lateinit: false,
+                                    lsb: false,
+                                    name: Id(pos, name),
+                                    needs_init: true,
+                                    type_: self.node_to_ty(hint).ok(),
+                                    abstract_: false,
+                                    visibility,
+                                    fixme_codes: ISet::empty(),
+                                });
+                            }
+
                             let type_ = match &hint {
                                 Node_::Ignored => tany(),
                                 _ => self.node_to_ty(hint).map(|ty| match ty {
@@ -1380,7 +1424,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 {
                     self.state
                         .classish_name_builder
-                        .lexed_name_after_classish_keyword(self.state.arena, name, pos);
+                        .lexed_name_after_classish_keyword(
+                            self.state.arena,
+                            name,
+                            pos,
+                            self.state.previous_token_kind,
+                        );
                 }
                 Node_::Name(name, pos)
             }
@@ -2319,36 +2368,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg9: Self::R,
         body: Self::R,
     ) -> Self::R {
-        #[derive(Debug)]
-        struct Modifiers {
-            is_static: bool,
-            visibility: aast::Visibility,
-            is_abstract: bool,
-            is_final: bool,
-        }
-        fn read_member_modifiers<'a: 'b, 'b>(
-            modifiers: impl Iterator<Item = &'b Node_<'a>>,
-        ) -> Modifiers {
-            let mut ret = Modifiers {
-                is_static: false,
-                visibility: aast::Visibility::Private,
-                is_abstract: false,
-                is_final: false,
-            };
-            for modifier in modifiers {
-                if let Ok(vis) = modifier.as_visibility() {
-                    ret.visibility = vis;
-                }
-                match modifier {
-                    Node_::Static => ret.is_static = true,
-                    Node_::Abstract => ret.is_abstract = true,
-                    Node_::Final => ret.is_final = true,
-                    _ => (),
-                }
-            }
-            ret
-        }
-
         let Id(pos, name) =
             self.get_name(self.state.namespace_builder.current_namespace(), name?)?;
 
@@ -2398,37 +2417,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => (),
             }
         }
-
-        let mut handle_property =
-            |this: &Self, decl: &PropertyDecl<'a>| -> Result<(), ParseError> {
-                let attributes = decl.attrs.as_attributes(this.state.arena)?;
-                let modifiers = read_member_modifiers(decl.modifiers.iter());
-                let Id(pos, name) = decl.id;
-                let name = if modifiers.is_static {
-                    name
-                } else {
-                    strip_dollar_prefix(name)
-                };
-                let ty = this.node_to_ty(decl.hint)?;
-                let prop = shallow_decl_defs::ShallowProp {
-                    const_: attributes.const_,
-                    xhp_attr: None,
-                    lateinit: attributes.late_init,
-                    lsb: attributes.lsb,
-                    name: Id(pos, name),
-                    needs_init: decl.needs_init,
-                    type_: Some(ty),
-                    abstract_: modifiers.is_abstract,
-                    visibility: modifiers.visibility,
-                    fixme_codes: ISet::from_slice(&[]),
-                };
-                if modifiers.is_static {
-                    sprops.push(prop)
-                } else {
-                    props.push(prop)
-                }
-                Ok(())
-            };
 
         match body? {
             Node_::ClassishBody(body) => {
@@ -2491,83 +2479,26 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 type_: decl.ty,
                             })
                         }
-                        Node_::Property(decls) => {
-                            for decl in decls {
-                                handle_property(self, decl)?
+                        Node_::Property { decls, is_static } => {
+                            for property in decls {
+                                if is_static {
+                                    sprops.push(property.clone())
+                                } else {
+                                    props.push(property.clone())
+                                }
                             }
                         }
-                        Node_::Function(decl) => {
-                            let modifiers = read_member_modifiers(decl.header.modifiers.iter());
-                            let is_constructor = match decl.header.name {
-                                Node_::Construct(_) => true,
-                                _ => false,
-                            };
-
-                            let attributes = decl.attributes.as_attributes(self.state.arena)?;
-                            let (id, ty, properties) =
-                                self.function_into_ty("", decl.attributes, decl.header, decl.body)?;
+                        Node_::Constructor { method, properties } => {
+                            constructor = Some(method.clone());
                             for property in properties {
-                                handle_property(self, property)?;
+                                props.push(property.clone())
                             }
-                            let deprecated = attributes.deprecated.map(|msg| {
-                                let mut s = String::new_in(self.state.arena);
-                                s.push_str("The method ");
-                                s.push_str(id.1);
-                                s.push_str(" is deprecated: ");
-                                s.push_str(msg);
-                                s.into_bump_str()
-                            });
-                            fn get_condition_type_name<'a>(
-                                ty_opt: Option<Ty<'a>>,
-                            ) -> Option<&'a str> {
-                                ty_opt.and_then(|ty| {
-                                    let Ty(_, ty_) = ty;
-                                    match *ty_ {
-                                        Ty_::Tapply(&(Id(_, class_name), _)) => Some(class_name),
-                                        _ => None,
-                                    }
-                                })
-                            }
-                            let method = shallow_decl_defs::ShallowMethod {
-                                abstract_: class_kind == ClassKind::Cinterface
-                                    || modifiers.is_abstract,
-                                final_: modifiers.is_final,
-                                memoizelsb: attributes.memoizelsb,
-                                name: id,
-                                override_: attributes.override_,
-                                reactivity: match attributes.reactivity {
-                                    Reactivity::Local(condition_type) => {
-                                        Some(MethodReactivity::MethodLocal(
-                                            get_condition_type_name(condition_type),
-                                        ))
-                                    }
-                                    Reactivity::Shallow(condition_type) => {
-                                        Some(MethodReactivity::MethodShallow(
-                                            get_condition_type_name(condition_type),
-                                        ))
-                                    }
-                                    Reactivity::Reactive(condition_type) => {
-                                        Some(MethodReactivity::MethodReactive(
-                                            get_condition_type_name(condition_type),
-                                        ))
-                                    }
-                                    Reactivity::Nonreactive
-                                    | Reactivity::MaybeReactive(_)
-                                    | Reactivity::RxVar(_)
-                                    | Reactivity::Pure(_) => None,
-                                },
-                                dynamicallycallable: false,
-                                type_: ty,
-                                visibility: modifiers.visibility,
-                                fixme_codes: ISet::from_slice(&[]),
-                                deprecated,
-                            };
-                            if is_constructor {
-                                constructor = Some(method);
-                            } else if modifiers.is_static {
-                                static_methods.push(method);
+                        }
+                        Node_::Method { method, is_static } => {
+                            if is_static {
+                                static_methods.push(method.clone());
                             } else {
-                                methods.push(method);
+                                methods.push(method.clone());
                             }
                         }
                         _ => (), // It's not our job to report errors here.
@@ -2678,31 +2609,42 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let attrs = attrs?;
         let modifiers = modifiers?;
+        let modifiers = read_member_modifiers(modifiers.iter());
         let hint = hint?;
         let mut declarators_vec = Vec::new_in(self.state.arena);
         for declarator in declarators.into_iter() {
             match declarator {
                 Node_::ListItem(&(name, initializer)) => {
-                    let needs_init = match initializer {
-                        Node_::Ignored => true,
-                        _ => false,
+                    let needs_init = matches!(initializer, Node_::Ignored);
+                    let attributes = attrs.as_attributes(self.state.arena)?;
+                    let Id(pos, name) = self.get_name("", name)?;
+                    let name = if modifiers.is_static {
+                        name
+                    } else {
+                        strip_dollar_prefix(name)
                     };
-                    declarators_vec.push(PropertyDecl {
-                        attrs,
-                        modifiers,
-                        hint: match hint {
-                            Node_::Ignored => initializer,
-                            hint => hint,
-                        },
-                        id: self.get_name("", name)?,
+                    let ty = self.node_to_ty(hint)?;
+                    declarators_vec.push(ShallowProp {
+                        const_: attributes.const_,
+                        xhp_attr: None,
+                        lateinit: attributes.late_init,
+                        lsb: attributes.lsb,
+                        name: Id(pos, name),
                         needs_init,
-                    })
+                        type_: Some(ty),
+                        abstract_: modifiers.is_abstract,
+                        visibility: modifiers.visibility,
+                        fixme_codes: ISet::empty(),
+                    });
                 }
                 n => return Err(format!("Expected a ListItem, but was {:?}", n)),
             }
         }
         let declarators = declarators_vec.into_bump_slice();
-        Ok(Node_::Property(declarators))
+        Ok(Node_::Property {
+            decls: declarators,
+            is_static: modifiers.is_static,
+        })
     }
 
     fn make_property_declarator(&mut self, name: Self::R, initializer: Self::R) -> Self::R {
@@ -2717,19 +2659,81 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         closer: Self::R,
     ) -> Self::R {
         match header? {
-            Node_::FunctionHeader(header) => Ok(Node_::Function(self.alloc(FunctionDecl {
-                attributes: attributes?,
-                header,
-                body: match body {
-                    // If we don't have a FunctionDecl body, use the closing token.
-                    // A closing token of '}' indicates a regular FunctionDecl,
-                    // while a closing token of ';' indicates an abstract
-                    // FunctionDecl.
+            Node_::FunctionHeader(header) => {
+                let attributes = attributes?;
+                let body = match body {
+                    // If we don't have a body, use the closing token. A closing
+                    // token of '}' indicates a regular function, while a
+                    // closing token of ';' indicates an abstract function.
                     Ok(Node_::Ignored) => closer?,
                     Ok(body) => body,
                     Err(_) => Node_::Ignored,
-                },
-            }))),
+                };
+                let modifiers = read_member_modifiers(header.modifiers.iter());
+                let is_constructor = match header.name {
+                    Node_::Construct(_) => true,
+                    _ => false,
+                };
+                let (id, ty, properties) = self.function_into_ty("", attributes, header, body)?;
+                let attributes = attributes.as_attributes(self.state.arena)?;
+                let deprecated = attributes.deprecated.map(|msg| {
+                    let mut s = String::new_in(self.state.arena);
+                    s.push_str("The method ");
+                    s.push_str(id.1);
+                    s.push_str(" is deprecated: ");
+                    s.push_str(msg);
+                    s.into_bump_str()
+                });
+                fn get_condition_type_name<'a>(ty_opt: Option<Ty<'a>>) -> Option<&'a str> {
+                    ty_opt.and_then(|ty| {
+                        let Ty(_, ty_) = ty;
+                        match *ty_ {
+                            Ty_::Tapply(&(Id(_, class_name), _)) => Some(class_name),
+                            _ => None,
+                        }
+                    })
+                }
+                let method = self.alloc(ShallowMethod {
+                    abstract_: self.state.classish_name_builder.in_interface()
+                        || modifiers.is_abstract,
+                    final_: modifiers.is_final,
+                    memoizelsb: attributes.memoizelsb,
+                    name: id,
+                    override_: attributes.override_,
+                    reactivity: match attributes.reactivity {
+                        Reactivity::Local(condition_type) => Some(MethodReactivity::MethodLocal(
+                            get_condition_type_name(condition_type),
+                        )),
+                        Reactivity::Shallow(condition_type) => {
+                            Some(MethodReactivity::MethodShallow(get_condition_type_name(
+                                condition_type,
+                            )))
+                        }
+                        Reactivity::Reactive(condition_type) => {
+                            Some(MethodReactivity::MethodReactive(get_condition_type_name(
+                                condition_type,
+                            )))
+                        }
+                        Reactivity::Nonreactive
+                        | Reactivity::MaybeReactive(_)
+                        | Reactivity::RxVar(_)
+                        | Reactivity::Pure(_) => None,
+                    },
+                    dynamicallycallable: false,
+                    type_: ty,
+                    visibility: modifiers.visibility,
+                    fixme_codes: ISet::empty(),
+                    deprecated,
+                });
+                if is_constructor {
+                    Ok(Node_::Constructor { method, properties })
+                } else {
+                    Ok(Node_::Method {
+                        method,
+                        is_static: modifiers.is_static,
+                    })
+                }
+            }
             n => Err(format!("Expected a FunctionDecl header, but was {:?}", n)),
         }
     }

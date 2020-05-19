@@ -27,7 +27,7 @@ use oxidized_by_ref::{
     pos::Pos,
     relative_path::RelativePath,
     s_set::SSet,
-    shallow_decl_defs::{self, ShallowMethod, ShallowProp},
+    shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp},
     shape_map::ShapeField,
     tany_sentinel::TanySentinel,
     typing_defs,
@@ -426,14 +426,6 @@ impl<'a> State<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct ConstDecl<'a> {
-    modifiers: Node_<'a>,
-    id: Id<'a>,
-    ty: Ty<'a>,
-    expr: Option<&'a nast::Expr<'a>>,
-}
-
-#[derive(Clone, Debug)]
 pub struct VariableDecl<'a> {
     attributes: Node_<'a>,
     visibility: Node_<'a>,
@@ -570,7 +562,7 @@ pub enum Node_<'a> {
     TypeconstAccess(&'a (Cell<&'a Pos<'a>>, Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node_<'a>, Node_<'a>)),
-    Const(&'a ConstDecl<'a>),
+    Const(&'a ShallowClassConst<'a>),
     Variable(&'a VariableDecl<'a>),
     Attribute(&'a Attribute<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
@@ -2228,20 +2220,26 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     .node_to_ty(hint)
                     .or_else(|_| self.node_to_ty(*initializer))
                     .unwrap_or_else(|_| tany());
-                Node_::Const(
-                    self.alloc(ConstDecl {
-                        modifiers,
-                        id,
-                        ty,
+                let modifiers = read_member_modifiers(modifiers.iter());
+                if self
+                    .state
+                    .classish_name_builder
+                    .get_current_classish_name()
+                    .is_some()
+                {
+                    Node_::Const(self.alloc(shallow_decl_defs::ShallowClassConst {
+                        abstract_: modifiers.is_abstract,
                         expr: match initializer {
-                            Node_::Expr(e) => Some(e),
-                            n => n
-                                .as_expr(self.state.arena)
-                                .ok()
-                                .map(|expr| &*self.alloc(expr)),
+                            Node_::Expr(e) => Some(*e.clone()),
+                            n => n.as_expr(self.state.arena).ok(),
                         },
-                    }),
-                )
+                        name: id,
+                        type_: ty,
+                    }))
+                } else {
+                    Rc::make_mut(&mut self.state.decls).consts.insert(id.1, ty);
+                    Node_::Ignored
+                }
             }
             _ => Node_::Ignored,
         })
@@ -2267,32 +2265,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_namespace_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
         let body = body?;
         let is_empty = matches!(body, Node_::Semicolon);
-        for item in body.iter() {
-            match item {
-                Node_::Const(decl) => {
-                    Rc::make_mut(&mut self.state.decls)
-                        .consts
-                        .insert(decl.id.1, decl.ty);
-                }
-                _ => (),
-            }
-        }
         if !is_empty {
             Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
-        }
-        Ok(Node_::Ignored)
-    }
-
-    fn make_script(&mut self, body: Self::R) -> Self::R {
-        for item in body?.iter() {
-            match item {
-                Node_::Const(decl) => {
-                    Rc::make_mut(&mut self.state.decls)
-                        .consts
-                        .insert(decl.id.1, decl.ty);
-                }
-                _ => (),
-            };
         }
         Ok(Node_::Ignored)
     }
@@ -2470,15 +2444,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                             }
                             _ => {}
                         },
-                        Node_::Const(decl) => {
-                            let modifiers = read_member_modifiers(decl.modifiers.iter());
-                            consts.push(shallow_decl_defs::ShallowClassConst {
-                                abstract_: modifiers.is_abstract,
-                                expr: decl.expr.map(|expr| *expr),
-                                name: decl.id,
-                                type_: decl.ty,
-                            })
-                        }
+                        Node_::Const(const_decl) => consts.push(const_decl.clone()),
                         Node_::Property { decls, is_static } => {
                             for property in decls {
                                 if is_static {

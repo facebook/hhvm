@@ -253,17 +253,24 @@ impl<'a> NamespaceBuilder<'a> {
         }
     }
 
-    fn push_namespace(&mut self, name: &str) {
+    fn push_namespace(&mut self, name: Option<&str>) {
         let current = self.current_namespace();
-        let mut fully_qualified =
-            String::with_capacity_in(current.len() + name.len() + 1, self.arena);
-        fully_qualified.push_str(current);
-        fully_qualified.push_str(name);
-        fully_qualified.push('\\');
-        self.stack.push(NamespaceInfo {
-            name: fully_qualified.into_bump_str(),
-            imports: AssocListMut::new_in(self.arena),
-        });
+        if let Some(name) = name {
+            let mut fully_qualified =
+                String::with_capacity_in(current.len() + name.len() + 1, self.arena);
+            fully_qualified.push_str(current);
+            fully_qualified.push_str(name);
+            fully_qualified.push('\\');
+            self.stack.push(NamespaceInfo {
+                name: fully_qualified.into_bump_str(),
+                imports: AssocListMut::new_in(self.arena),
+            });
+        } else {
+            self.stack.push(NamespaceInfo {
+                name: current,
+                imports: AssocListMut::new_in(self.arena),
+            });
+        }
     }
 
     fn pop_namespace(&mut self) {
@@ -2115,9 +2122,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_namespace_declaration_header(&mut self, _keyword: Self::R, name: Self::R) -> Self::R {
-        if let Ok(Id(_, name)) = self.get_name("", name?) {
-            Rc::make_mut(&mut self.state.namespace_builder).push_namespace(&name);
-        }
+        let name = self.get_name("", name?).map(|Id(_, name)| name).ok();
+        Rc::make_mut(&mut self.state.namespace_builder).push_namespace(name);
         Ok(Node_::Ignored)
     }
 

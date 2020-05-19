@@ -22,12 +22,16 @@ let add_container_decl_fact decl_pred name progress =
   add_fact decl_pred json_fact progress
 
 let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
+  let tparams =
+    List.map clss.c_tparams.c_tparam_list (build_type_param_json ctx source_map)
+  in
   let common_fields =
     [
       ("declaration", build_id_json decl_id);
       ("members", JSON_Array member_decls);
       ( "attributes",
         build_attributes_json_nested source_map clss.c_user_attributes );
+      ("typeParams", JSON_Array tparams);
     ]
     @ build_ns_json_nested clss.c_namespace
   in
@@ -135,6 +139,9 @@ let add_method_decl_fact con_type decl_id name progress =
   add_fact MethodDeclaration json_fact progress
 
 let add_method_defn_fact ctx source_map meth decl_id progress =
+  let tparams =
+    List.map meth.m_tparams (build_type_param_json ctx source_map)
+  in
   let json_fact =
     JSON_Object
       [
@@ -147,6 +154,7 @@ let add_method_defn_fact ctx source_map meth decl_id progress =
         ("isStatic", JSON_Bool meth.m_static);
         ( "attributes",
           build_attributes_json_nested source_map meth.m_user_attributes );
+        ("typeParams", JSON_Array tparams);
       ]
   in
   add_fact MethodDefinition json_fact progress
@@ -251,6 +259,9 @@ let add_func_decl_fact name progress =
   add_fact FunctionDeclaration json_fact progress
 
 let add_func_defn_fact ctx source_map elem decl_id progress =
+  let tparams =
+    List.map elem.f_tparams (build_type_param_json ctx source_map)
+  in
   let json_fields =
     [
       ("declaration", build_id_json decl_id);
@@ -258,16 +269,20 @@ let add_func_defn_fact ctx source_map elem decl_id progress =
       ("isAsync", build_is_async_json elem.f_fun_kind);
       ( "attributes",
         build_attributes_json_nested source_map elem.f_user_attributes );
+      ("typeParams", JSON_Array tparams);
     ]
     @ build_ns_json_nested elem.f_namespace
   in
   add_fact FunctionDefinition (JSON_Object json_fields) progress
 
-let add_typedef_decl_fact source_map name elem progress =
+let add_typedef_decl_fact ctx source_map name elem progress =
   let is_transparent =
     match elem.t_vis with
     | Transparent -> true
     | Opaque -> false
+  in
+  let tparams =
+    List.map elem.t_tparams (build_type_param_json ctx source_map)
   in
   let json_fields =
     [
@@ -275,6 +290,7 @@ let add_typedef_decl_fact source_map name elem progress =
       ("isTransparent", JSON_Bool is_transparent);
       ( "attributes",
         build_attributes_json_nested source_map elem.t_user_attributes );
+      ("typeParams", JSON_Array tparams);
     ]
     @ build_ns_json_nested elem.t_namespace
   in

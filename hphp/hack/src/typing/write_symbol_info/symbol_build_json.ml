@@ -96,6 +96,23 @@ let build_rel_bytespan_json offset len =
       ("length", JSON_Number (string_of_int len));
     ]
 
+let build_constraint_kind_json kind =
+  let num =
+    match kind with
+    | Constraint_as -> 0
+    | Constraint_eq -> 1
+    | Constraint_super -> 2
+  in
+  JSON_Number (string_of_int num)
+
+let build_constraint_json ctx (kind, hint) =
+  let type_string = get_type_from_hint ctx hint in
+  JSON_Object
+    [
+      ("constraintKind", build_constraint_kind_json kind);
+      ("type", build_type_json_nested type_string);
+    ]
+
 let build_decl_target_json json = JSON_Object [("declaration", json)]
 
 let build_file_lines_json filepath lineLengths endsInNewline hasUnicodeOrTabs =
@@ -145,6 +162,15 @@ let build_signature_json ctx params ret_ty =
   in
   build_signature_json_nested parameters return_type_name
 
+let build_reify_kind_json kind =
+  let num =
+    match kind with
+    | Erased -> 0
+    | Reified -> 1
+    | SoftReified -> 2
+  in
+  JSON_Number (string_of_int num)
+
 let build_type_const_kind_json kind =
   let num =
     match kind with
@@ -153,6 +179,28 @@ let build_type_const_kind_json kind =
     | TCPartiallyAbstract -> 2
   in
   JSON_Number (string_of_int num)
+
+let build_variance_json variance =
+  let num =
+    match variance with
+    | Contravariant -> 0
+    | Covariant -> 1
+    | Invariant -> 2
+  in
+  JSON_Number (string_of_int num)
+
+let build_type_param_json ctx source_map tp =
+  let (_, name) = tp.tp_name in
+  let constraints = List.map tp.tp_constraints (build_constraint_json ctx) in
+  JSON_Object
+    [
+      ("name", build_name_json_nested name);
+      ("variance", build_variance_json tp.tp_variance);
+      ("reifyKind", build_reify_kind_json tp.tp_reified);
+      ("constraints", JSON_Array constraints);
+      ( "attributes",
+        build_attributes_json_nested source_map tp.tp_user_attributes );
+    ]
 
 let build_visibility_json (visibility : Aast.visibility) =
   let num =

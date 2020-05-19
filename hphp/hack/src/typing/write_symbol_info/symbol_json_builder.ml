@@ -248,9 +248,9 @@ let process_member_xref ctx member pos mem_decl_fun ref_fun (xrefs, prog) =
           pos
           (xrefs, prog))
 
-let process_typedef_decl source_map elem progress =
+let process_typedef_decl ctx source_map elem progress =
   let (pos, id) = elem.t_name in
-  let (decl_id, prog) = add_typedef_decl_fact source_map id elem progress in
+  let (decl_id, prog) = add_typedef_decl_fact ctx source_map id elem progress in
   let ref_json = build_typedef_decl_json_ref decl_id in
   let (_, prog) = add_decl_loc_fact pos ref_json prog in
   prog
@@ -281,7 +281,7 @@ let build_json ctx symbols files_info =
         | Class cd -> process_container_decl ctx source_map cd acc
         | Constant gd -> process_gconst_decl ctx gd acc
         | Fun fd -> process_func_decl ctx source_map fd acc
-        | Typedef td -> process_typedef_decl source_map td acc
+        | Typedef td -> process_typedef_decl ctx source_map td acc
         | _ -> acc)
   in
   (* file_xrefs : (Hh_json.json * Relative_path.t Pos.pos list) IMap.t SMap.t *)

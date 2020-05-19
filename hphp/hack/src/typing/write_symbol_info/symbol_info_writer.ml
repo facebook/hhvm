@@ -13,6 +13,23 @@ open Provider_context
 open Unix
 module Bucket = Hack_bucket
 
+let write_file file_dir num_tasts json_chunks =
+  let (_out_file, channel) =
+    Caml.Filename.open_temp_file
+      ~temp_dir:file_dir
+      "glean_symbol_info_chunk_"
+      ".json"
+  in
+  let json_string = json_to_string ~pretty:true (JSON_Array json_chunks) in
+  let json_length = String.length json_string in
+  Out_channel.output_string channel json_string;
+  Out_channel.close channel;
+  Hh_logger.log
+    "Wrote %s of JSON facts on %i files"
+    (Byte_units.to_string_hum
+       (Byte_units.create `Bytes (float_of_int json_length)))
+    num_tasts
+
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
@@ -20,36 +37,27 @@ let write_json
     (files_info : Symbol_builder_types.file_info list)
     (start_time : float) : unit =
   try
-    let json_chunks = Symbol_json_builder.build_json ctx files_info tasts in
-    let (_out_file, channel) =
-      Caml.Filename.open_temp_file
-        ~temp_dir:file_dir
-        "glean_symbol_info_chunk_"
-        ".json"
+    let (small, large) =
+      List.partition_tf tasts (fun tast -> List.length tast <= 2000)
     in
-    let json_string = json_to_string ~pretty:true (JSON_Array json_chunks) in
-    let json_length = String.length json_string in
-    Out_channel.output_string channel json_string;
-    Out_channel.close channel;
-    let elapsed = Unix.gettimeofday () -. start_time in
-    let time = Unix.gmtime elapsed in
-    Hh_logger.log
-      "Wrote %s of JSON facts on %i files in %dm%ds"
-      (Byte_units.to_string_hum
-         (Byte_units.create `Bytes (float_of_int json_length)))
-      (List.length files_info)
-      time.tm_min
-      time.tm_sec;
-    if Float.(elapsed > 600.0) then
-      (* Write out files from batches that take more than 10 minutes *)
-      let file_list =
-        String.concat
-          ~sep:","
-          (List.map files_info (fun (fp, _) -> Relative_path.to_absolute fp))
-      in
-      Hh_logger.log "Files processed: %s" file_list
+    if List.is_empty large then
+      let json_chunks = Symbol_json_builder.build_json ctx files_info tasts in
+      write_file file_dir (List.length tasts) json_chunks
     else
-      ()
+      let json_chunks = Symbol_json_builder.build_json ctx files_info small in
+      write_file file_dir (List.length small) json_chunks;
+      List.iter large (fun tast ->
+          let decl_json_chunks =
+            Symbol_json_builder.build_decls_json ctx [tast] files_info
+          in
+          write_file file_dir 1 decl_json_chunks;
+          let xref_json_chunks =
+            Symbol_json_builder.build_xrefs_json ctx [tast]
+          in
+          write_file file_dir 1 xref_json_chunks);
+      let elapsed = Unix.gettimeofday () -. start_time in
+      let time = Unix.gmtime elapsed in
+      Hh_logger.log "Processed batch in %dm%ds" time.tm_min time.tm_sec
   with e ->
     Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e)
 

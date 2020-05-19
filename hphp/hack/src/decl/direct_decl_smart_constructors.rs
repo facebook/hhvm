@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use bumpalo::{
@@ -383,11 +383,6 @@ impl<'a> State<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub enum HintValue<'a> {
-    Access(&'a (Node_<'a>, RefCell<Vec<'a, Id<'a>>>)),
-}
-
-#[derive(Clone, Debug)]
 pub struct ConstDecl<'a> {
     modifiers: Node_<'a>,
     id: Id<'a>,
@@ -544,8 +539,8 @@ pub enum Node_<'a> {
     FloatingLiteral(&'a str, &'a Pos<'a>), // For const expressions.
     BooleanLiteral(&'a str, &'a Pos<'a>), // For const expressions.
     Null(&'a Pos<'a>),                   // For const expressions.
-    Hint(&'a (HintValue<'a>, &'a Pos<'a>)),
     Ty(Ty<'a>),
+    TypeconstAccess(&'a (Cell<&'a Pos<'a>>, Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node_<'a>, Node_<'a>)),
     Const(&'a ConstDecl<'a>),
@@ -607,8 +602,8 @@ impl<'a> Node_<'a> {
     pub fn get_pos(self, arena: &'a Bump) -> Result<&'a Pos<'a>, ParseError> {
         match self {
             Node_::Name(_, pos) => Ok(pos),
-            Node_::Hint(&(_, pos)) => Ok(pos),
             Node_::Ty(ty) => Ok(ty.get_pos().unwrap_or(Pos::none())),
+            Node_::TypeconstAccess((pos, _, _)) => Ok(pos.get()),
             Node_::XhpName(_, pos) => Ok(pos),
             Node_::QualifiedName(_, pos) => Ok(pos),
             Node_::Backslash(pos)
@@ -878,44 +873,15 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn node_to_ty(&self, node: Node_<'a>) -> Result<Ty<'a>, ParseError> {
         match node {
             Node_::Ty(ty) => Ok(ty),
-            Node_::Hint((hv, pos)) => {
-                let reason = self.alloc(Reason::hint(*pos));
-                let ty_ = match hv {
-                    HintValue::Access((ty, names)) => {
-                        let ty = match ty {
-                            Node_::Name("self", self_pos) => {
-                                match self.state.classish_name_builder.get_current_classish_name() {
-                                    Some((name, class_name_pos)) => {
-                                        // In classes, we modify the position when rewriting the
-                                        // `self` keyword to point to the class name. In traits, we
-                                        // don't (for some reason). We indicate that the position
-                                        // shouldn't be rewritten with the none Pos.
-                                        let id_pos = if class_name_pos.is_none() {
-                                            self_pos
-                                        } else {
-                                            class_name_pos
-                                        };
-                                        let reason = self.alloc(Reason::hint(self_pos));
-                                        let ty_ =
-                                            Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
-                                        Ty(reason, self.alloc(ty_))
-                                    }
-                                    None => self.node_to_ty(*ty)?,
-                                }
-                            }
-                            _ => self.node_to_ty(*ty)?,
-                        };
-                        // TODO: Find a way to avoid this copy?
-                        let mut names_copy =
-                            Vec::with_capacity_in(names.borrow().len(), self.state.arena);
-                        for name in names.borrow().iter().copied() {
-                            names_copy.push(name);
-                        }
-                        let names = names_copy.into_bump_slice();
-                        Ty_::Taccess(self.alloc(typing_defs::TaccessType(ty, names)))
-                    }
-                };
-                Ok(Ty(reason, self.alloc(ty_)))
+            Node_::TypeconstAccess((pos, ty, names)) => {
+                let pos = pos.get();
+                let names = Vec::from_iter_in(names.borrow().iter().copied(), self.state.arena);
+                Ok(Ty(
+                    self.alloc(Reason::hint(pos)),
+                    self.alloc(Ty_::Taccess(
+                        self.alloc(typing_defs::TaccessType(*ty, names.into_bump_slice())),
+                    )),
+                ))
             }
             Node_::Array(pos) => Ok(Ty(
                 self.alloc(Reason::hint(pos)),
@@ -3352,17 +3318,43 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             constant_name.get_pos(self.state.arena)?,
         )?;
         match ty {
-            Node_::Hint((HintValue::Access(innards), _)) => {
+            Node_::TypeconstAccess(innards) => {
+                innards.0.set(pos);
                 // Nested typeconst accesses have to be collapsed.
-                innards.1.borrow_mut().push(id);
-                Ok(Node_::Hint(self.alloc((HintValue::Access(innards), pos))))
+                innards.2.borrow_mut().push(id);
+                Ok(Node_::TypeconstAccess(innards))
             }
-            ty => Ok(Node_::Hint(self.alloc((
-                HintValue::Access(
-                    self.alloc((ty, RefCell::new(bumpalo::vec![in self.state.arena; id]))),
-                ),
-                pos,
-            )))),
+            ty => {
+                let ty = match ty {
+                    Node_::Name("self", self_pos) => {
+                        match self.state.classish_name_builder.get_current_classish_name() {
+                            Some((name, class_name_pos)) => {
+                                // In classes, we modify the position when
+                                // rewriting the `self` keyword to point to the
+                                // class name. In traits, we don't (because
+                                // traits are not types). We indicate that the
+                                // position shouldn't be rewritten with the none
+                                // Pos.
+                                let id_pos = if class_name_pos.is_none() {
+                                    self_pos
+                                } else {
+                                    class_name_pos
+                                };
+                                let reason = self.alloc(Reason::hint(self_pos));
+                                let ty_ = Ty_::Tapply(self.alloc((Id(id_pos, name), &[][..])));
+                                Ty(reason, self.alloc(ty_))
+                            }
+                            None => self.node_to_ty(ty.clone())?,
+                        }
+                    }
+                    _ => self.node_to_ty(ty.clone())?,
+                };
+                Ok(Node_::TypeconstAccess(self.alloc((
+                    Cell::new(pos),
+                    ty,
+                    RefCell::new(bumpalo::vec![in self.state.arena; id]),
+                ))))
+            }
         }
     }
 

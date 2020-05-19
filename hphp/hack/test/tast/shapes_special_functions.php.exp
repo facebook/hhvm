@@ -37,9 +37,9 @@
        { fb_ast =
          [([6:3-24],
            (Expr
-              (([6:3-23], int),
+              (([6:3-23], ?int),
                (Call (Cnormal,
-                  (([6:3-14], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default=_): int)),
+                  (([6:3-14], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default=_): ?int)),
                    (Class_const (
                       (([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))),
                       ([6:11-14], "idx")))),

@@ -10,14 +10,14 @@ function expect_open_shape_2(shape('x' => int, 'y' => mixed, ...) $_): void {}
 
 function test1(shape(?'x' => int) $s): void {
   if (Shapes::keyExists($s, 'x')) {
-    expect_int(Shapes::idx($s, 'x'));
+    expect_int($s['x']);
     expect_closed_shape($s);
   }
 }
 
 function test2(shape(?'x' => int, ...) $s): void {
   if (Shapes::keyExists($s, 'x')) {
-    expect_int(Shapes::idx($s, 'x'));
+    expect_int($s['x']);
     expect_open_shape_1($s);
   }
 }

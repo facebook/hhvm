@@ -425,8 +425,6 @@ val default : t
 
 val tco_experimental_isarray : string
 
-val tco_experimental_stronger_shape_idx_ret : string
-
 val tco_experimental_generics_arity : string
 
 val tco_experimental_forbid_nullable_cast : string

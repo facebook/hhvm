@@ -140,9 +140,6 @@ let shapes_idx_not_null env shape_ty (p, field) =
       Typing_union.union_list env r tyl
     | _ -> (env, shape_ty))
 
-let experiment_enabled env experiment =
-  TypecheckerOptions.experimental_feature_enabled (Env.get_tcopt env) experiment
-
 let make_idx_fake_super_shape shape_pos fun_name field_name field_ty =
   mk
     ( Reason.Rshape (shape_pos, fun_name),
@@ -177,10 +174,6 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
   Typing_subtype.is_sub_type_for_coercion env ty1 ty2
 
 (* Typing rules for Shapes::idx
- *
- *     e : shape(sfn => t, ...)
- *     ----------------------------
- *     Shapes::idx(e, sfn) : t       if stronger_shape_idx_return is enabled
  *
  *     e : shape(?sfn => t, ...)
  *     ----------------------------
@@ -217,20 +210,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             { et_type = fake_super_shape_ty; et_enforced = false }
             Errors.unify_error
         in
-        if
-          experiment_enabled
-            env
-            TypecheckerOptions.experimental_stronger_shape_idx_ret
-          && is_shape_field_required
-               env
-               shape_pos
-               "Shapes::idx"
-               field_name
-               shape_ty
-        then
-          (env, res)
-        else
-          TUtils.union env res (MakeType.null fun_pos)
+        TUtils.union env res (MakeType.null fun_pos)
       | Some (default_pos, default_ty) ->
         let env =
           Typing_coercion.coerce_type

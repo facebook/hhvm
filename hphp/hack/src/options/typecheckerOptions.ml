@@ -57,9 +57,6 @@ let default = GlobalOptions.default
 
 let experimental_isarray = GlobalOptions.tco_experimental_isarray
 
-let experimental_stronger_shape_idx_ret =
-  GlobalOptions.tco_experimental_stronger_shape_idx_ret
-
 let experimental_generics_arity = GlobalOptions.tco_experimental_generics_arity
 
 let experimental_forbid_nullable_cast =

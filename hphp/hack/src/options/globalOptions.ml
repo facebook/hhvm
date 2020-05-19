@@ -104,10 +104,6 @@ type t = {
 
 let tco_experimental_isarray = "is_array"
 
-(* Whether Shapes::idx should return a non-nullable type when the input shape
-    is known to contain the field. *)
-let tco_experimental_stronger_shape_idx_ret = "stronger_shape_idx_return"
-
 (**
  * Insist on instantiations for all generic types, even in non-strict files
  *)
@@ -154,7 +150,6 @@ let tco_experimental_all =
        SSet.add
        [
          tco_experimental_isarray;
-         tco_experimental_stronger_shape_idx_ret;
          tco_experimental_generics_arity;
          tco_experimental_forbid_nullable_cast;
          tco_experimental_coroutines;

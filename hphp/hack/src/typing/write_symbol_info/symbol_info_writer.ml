@@ -9,39 +9,18 @@
 module Hack_bucket = Bucket
 open Hh_prelude
 open Hh_json
-open Aast
 open Provider_context
-open Symbol_builder_types
 open Unix
 module Bucket = Hack_bucket
-
-let get_decls (ctx : Provider_context.t) (tast : Tast.program list) :
-    symbol_occurrences =
-  let (all_decls, all_defs) =
-    List.fold tast ~init:([], []) ~f:(fun (decl_acc, def_acc) prog ->
-        List.fold prog ~init:(decl_acc, def_acc) ~f:(fun (decls, defs) def ->
-            match def with
-            | Class _
-            | Constant _
-            | Fun _
-            | Typedef _ ->
-              (def :: decls, def :: defs)
-            | _ -> (decls, def :: defs)))
-  in
-  let symbols = IdentifySymbolService.all_symbols ctx all_defs in
-  { decls = all_decls; occurrences = symbols }
 
 let write_json
     (ctx : Provider_context.t)
     (file_dir : string)
-    (tast_lst : Tast.program list)
+    (tasts : Tast.program list)
     (files_info : Symbol_builder_types.file_info list)
     (start_time : float) : unit =
   try
-    let symbol_occurrences = get_decls ctx tast_lst in
-    let json_chunks =
-      Symbol_json_builder.build_json ctx symbol_occurrences files_info
-    in
+    let json_chunks = Symbol_json_builder.build_json ctx files_info tasts in
     let (_out_file, channel) =
       Caml.Filename.open_temp_file
         ~temp_dir:file_dir

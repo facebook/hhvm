@@ -8,11 +8,6 @@
 
 open Hh_json
 
-type symbol_occurrences = {
-  decls: Tast.def list;
-  occurrences: Relative_path.t SymbolOccurrence.t list;
-}
-
 (* Predicate types for the JSON facts emitted *)
 type predicate =
   | ClassConstDeclaration

@@ -1249,6 +1249,11 @@ void dce(Env& env, const bc::BareThis& op) {
 
 void dce(Env& env, const bc::RetC&)  { pop(env); }
 void dce(Env& env, const bc::RetCSuspended&) { pop(env); }
+void dce(Env& env, const bc::RetM& op) {
+  for (int i =0; i < op.arg1; i++) {
+    pop(env);
+  }
+}
 void dce(Env& env, const bc::Throw&) { pop(env); }
 void dce(Env& env, const bc::Fatal&) { pop(env); }
 void dce(Env& env, const bc::Exit&)  { stack_ops(env); }
@@ -1749,7 +1754,6 @@ void dce(Env& env, const bc::ResolveClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveObjMethod& op) { no_dce(env, op); }
-void dce(Env& env, const bc::RetM& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Select& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetG& op) { no_dce(env, op); }
 void dce(Env& env, const bc::SetOpG& op) { no_dce(env, op); }

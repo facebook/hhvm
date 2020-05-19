@@ -473,41 +473,6 @@ pub struct NamespaceUseClause<'a> {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub enum OperatorType {
-    Tilde,
-    Not,
-    Plus,
-    Minus,
-    PlusPlus,
-    MinusMinus,
-    Silence,
-    Star,
-    Slash,
-    Eqeq,
-    Eqeqeq,
-    Starstar,
-    Diff,
-    Diff2,
-    Ampamp,
-    Barbar,
-    LogXor,
-    Lt,
-    Lte,
-    Gt,
-    Gte,
-    Dot,
-    Amp,
-    Bar,
-    Ltlt,
-    Gtgt,
-    Percent,
-    Xor,
-    Cmp,
-    QuestionQuestion,
-    Assignment,
-}
-
-#[derive(Copy, Clone, Debug)]
 pub enum Node_<'a> {
     List(&'a [Node_<'a>]),
     BracketedList(&'a (&'a Pos<'a>, &'a [Node_<'a>], &'a Pos<'a>)),
@@ -555,7 +520,7 @@ pub enum Node_<'a> {
     },
     NamespaceUseClause(&'a NamespaceUseClause<'a>),
     Expr(&'a nast::Expr<'a>),
-    Operator(&'a (&'a Pos<'a>, OperatorType)),
+    Operator(&'a (&'a Pos<'a>, TokenKind)),
     Construct(&'a Pos<'a>),
     LessThan(&'a Pos<'a>),    // This needs a pos since it shows up in generics.
     GreaterThan(&'a Pos<'a>), // This needs a pos since it shows up in generics.
@@ -1460,72 +1425,32 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Question => Node_::Question(token_pos(self)),
             TokenKind::This => Node_::This(token_pos(self)),
             TokenKind::ColonColon => Node_::ColonColon(token_pos(self)),
-            TokenKind::Tilde => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Tilde)))
-            }
-            TokenKind::Exclamation => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Not)))
-            }
-            TokenKind::Plus => Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Plus))),
-            TokenKind::Minus => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Minus)))
-            }
-            TokenKind::PlusPlus => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::PlusPlus)))
-            }
-            TokenKind::MinusMinus => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::MinusMinus)))
-            }
-            TokenKind::At => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Silence)))
-            }
-            TokenKind::Star => Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Star))),
-            TokenKind::Slash => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Slash)))
-            }
-            TokenKind::EqualEqual => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Eqeq)))
-            }
-            TokenKind::EqualEqualEqual => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Eqeqeq)))
-            }
-            TokenKind::StarStar => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Starstar)))
-            }
-            TokenKind::AmpersandAmpersand => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Ampamp)))
-            }
-            TokenKind::BarBar => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Barbar)))
-            }
-            TokenKind::LessThan => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Lt)))
-            }
-            TokenKind::LessThanEqual => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Lte)))
-            }
-            TokenKind::GreaterThan => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Gt)))
-            }
-            TokenKind::GreaterThanEqual => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Gte)))
-            }
-            TokenKind::Dot => Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Dot))),
-            TokenKind::Ampersand => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Amp)))
-            }
-            TokenKind::Bar => Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Bar))),
-            TokenKind::LessThanLessThan => Node_::LessThanLessThan(token_pos(self)),
-            TokenKind::GreaterThanGreaterThan => Node_::GreaterThanGreaterThan(token_pos(self)),
-            TokenKind::Percent => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Percent)))
-            }
-            TokenKind::QuestionQuestion => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::QuestionQuestion)))
-            }
-            TokenKind::Equal => {
-                Node_::Operator(&*self.alloc((token_pos(self), OperatorType::Assignment)))
-            }
+            TokenKind::Tilde
+            | TokenKind::Exclamation
+            | TokenKind::Plus
+            | TokenKind::Minus
+            | TokenKind::PlusPlus
+            | TokenKind::MinusMinus
+            | TokenKind::At
+            | TokenKind::Star
+            | TokenKind::Slash
+            | TokenKind::EqualEqual
+            | TokenKind::EqualEqualEqual
+            | TokenKind::StarStar
+            | TokenKind::AmpersandAmpersand
+            | TokenKind::BarBar
+            | TokenKind::LessThan
+            | TokenKind::LessThanEqual
+            | TokenKind::GreaterThan
+            | TokenKind::GreaterThanEqual
+            | TokenKind::Dot
+            | TokenKind::Ampersand
+            | TokenKind::Bar
+            | TokenKind::LessThanLessThan
+            | TokenKind::GreaterThanGreaterThan
+            | TokenKind::Percent
+            | TokenKind::QuestionQuestion
+            | TokenKind::Equal => Node_::Operator(&*self.alloc((token_pos(self), kind))),
             TokenKind::Abstract => Node_::Abstract,
             TokenKind::As => Node_::As,
             TokenKind::Super => Node_::Super,
@@ -1766,13 +1691,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let op = match &op {
             Node_::Operator(&(_, op)) => match op {
-                OperatorType::Tilde => Uop::Utild,
-                OperatorType::Not => Uop::Unot,
-                OperatorType::Plus => Uop::Uplus,
-                OperatorType::Minus => Uop::Uminus,
-                OperatorType::PlusPlus => Uop::Uincr,
-                OperatorType::MinusMinus => Uop::Udecr,
-                OperatorType::Silence => Uop::Usilence,
+                TokenKind::Tilde => Uop::Utild,
+                TokenKind::Exclamation => Uop::Unot,
+                TokenKind::Plus => Uop::Uplus,
+                TokenKind::Minus => Uop::Uminus,
+                TokenKind::PlusPlus => Uop::Uincr,
+                TokenKind::MinusMinus => Uop::Udecr,
+                TokenKind::At => Uop::Usilence,
                 op => {
                     return Err(format!(
                         "Operator {:?} cannot be used as a unary operator",
@@ -1799,8 +1724,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         let op = match &op {
             Node_::Operator(&(_, op)) => match op {
-                OperatorType::PlusPlus => Uop::Upincr,
-                OperatorType::MinusMinus => Uop::Updecr,
+                TokenKind::PlusPlus => Uop::Upincr,
+                TokenKind::MinusMinus => Uop::Updecr,
                 op => {
                     return Err(format!(
                         "Operator {:?} cannot be used as a postfix unary operator",
@@ -1833,27 +1758,24 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let op = match &op {
             Node_::Operator(&(_, op)) => match op {
-                OperatorType::Plus => Bop::Plus,
-                OperatorType::Minus => Bop::Minus,
-                OperatorType::Star => Bop::Star,
-                OperatorType::Slash => Bop::Slash,
-                OperatorType::Eqeq => Bop::Eqeq,
-                OperatorType::Eqeqeq => Bop::Eqeqeq,
-                OperatorType::Starstar => Bop::Starstar,
-                OperatorType::Ampamp => Bop::Ampamp,
-                OperatorType::Barbar => Bop::Barbar,
-                OperatorType::LogXor => Bop::LogXor,
-                OperatorType::Lt => Bop::Lt,
-                OperatorType::Lte => Bop::Lte,
-                OperatorType::Gt => Bop::Gt,
-                OperatorType::Gte => Bop::Gte,
-                OperatorType::Dot => Bop::Dot,
-                OperatorType::Amp => Bop::Amp,
-                OperatorType::Bar => Bop::Bar,
-                OperatorType::Percent => Bop::Percent,
-                OperatorType::Xor => Bop::Xor,
-                OperatorType::Cmp => Bop::Cmp,
-                OperatorType::QuestionQuestion => Bop::QuestionQuestion,
+                TokenKind::Plus => Bop::Plus,
+                TokenKind::Minus => Bop::Minus,
+                TokenKind::Star => Bop::Star,
+                TokenKind::Slash => Bop::Slash,
+                TokenKind::EqualEqual => Bop::Eqeq,
+                TokenKind::EqualEqualEqual => Bop::Eqeqeq,
+                TokenKind::StarStar => Bop::Starstar,
+                TokenKind::AmpersandAmpersand => Bop::Ampamp,
+                TokenKind::BarBar => Bop::Barbar,
+                TokenKind::LessThan => Bop::Lt,
+                TokenKind::LessThanEqual => Bop::Lte,
+                TokenKind::GreaterThan => Bop::Gt,
+                TokenKind::GreaterThanEqual => Bop::Gte,
+                TokenKind::Dot => Bop::Dot,
+                TokenKind::Ampersand => Bop::Amp,
+                TokenKind::Bar => Bop::Bar,
+                TokenKind::Percent => Bop::Percent,
+                TokenKind::QuestionQuestion => Bop::QuestionQuestion,
                 op => {
                     return Err(format!(
                         "Operator {:?} cannot be used as a binary operator",
@@ -2011,8 +1933,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         Ok(Node_::TypeParameter(self.alloc(TypeParameterDecl {
             name: name?,
             variance: match variance? {
-                Node_::Operator(&(_, OperatorType::Minus)) => Variance::Contravariant,
-                Node_::Operator(&(_, OperatorType::Plus)) => Variance::Covariant,
+                Node_::Operator(&(_, TokenKind::Minus)) => Variance::Contravariant,
+                Node_::Operator(&(_, TokenKind::Plus)) => Variance::Covariant,
                 _ => Variance::Invariant,
             },
             reified: match reify? {

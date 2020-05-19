@@ -40,15 +40,15 @@ namespace HPHP { namespace jit {
  *
  */
 struct IncRefProfile {
-  uint16_t uncounted() const {
+  uint32_t uncounted() const {
     return total - refcounted;
   }
 
-  uint16_t persistent() const {
+  uint32_t persistent() const {
     return refcounted - incremented;
   }
 
-  float percent(uint16_t value) const {
+  float percent(uint32_t value) const {
     return total ? 100.0 * value / total : 0.0;
   }
 
@@ -75,13 +75,12 @@ struct IncRefProfile {
   }
 
   // overflow handling isn't statistically correct; but its better
-  // than overflowing, and we're expecting threads to all have similar
-  // distributions.
+  // than overflowing.
   static void reduce(IncRefProfile& a, const IncRefProfile& b) {
-    auto const total = static_cast<uint32_t>(a.total + b.total);
+    auto const total = static_cast<uint64_t>(a.total + b.total);
     auto constexpr limit = std::numeric_limits<decltype(a.total)>::max();
     if (total > limit) {
-      auto scale = [&] (uint16_t& x, uint64_t y) {
+      auto scale = [&] (uint32_t& x, uint64_t y) {
         x = ((x + y) * limit + total - 1) / total;
       };
       a.total = limit;
@@ -97,15 +96,15 @@ struct IncRefProfile {
   /*
    * The total number of times this IncRef was executed.
    */
-  uint16_t total;
+  uint32_t total;
   /*
    * The number of times this IncRef made it past the refcounted check.
    */
-  uint16_t refcounted;
+  uint32_t refcounted;
   /*
    * The number of times this IncRef actually incremented the refcount.
    */
-  uint16_t incremented;
+  uint32_t incremented;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

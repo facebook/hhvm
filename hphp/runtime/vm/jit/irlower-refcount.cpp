@@ -106,11 +106,11 @@ Vreg incrAmount(Vout& v, const TargetProfile<T>& profile) {
   if (!profile.profiling()) return Vreg{};
   auto const sf = v.makeReg();
   auto const offset = profile.handle() + offsetof(T, total);
-  v << cmpwim{-1, rvmtl()[offset], sf};
+  v << cmplim{-1, rvmtl()[offset], sf};
   auto const r1 = v.makeReg();
   v << setcc{CC_NE, sf, r1};
   auto const r2 = v.makeReg();
-  v << movzbw{r1, r2};
+  v << movzbl{r1, r2};
   return r2;
 }
 
@@ -118,7 +118,7 @@ template<typename T>
 void incrementProfile(Vout& v, const TargetProfile<T>& profile,
                       Vreg incr, size_t offset) {
   if (profile.profiling()) {
-    v << addwm{incr, rvmtl()[profile.handle() + offset],
+    v << addlm{incr, rvmtl()[profile.handle() + offset],
         v.makeReg()};
   }
 }

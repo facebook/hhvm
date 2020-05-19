@@ -45,25 +45,25 @@ namespace HPHP { namespace jit {
  */
 struct DecRefProfile {
 
-  uint16_t uncounted() const {
+  uint32_t uncounted() const {
     auto const result = int(total) - int(refcounted);
-    return safe_cast<uint16_t>(std::max(result, 0));
+    return safe_cast<uint32_t>(std::max(result, 0));
   }
 
-  uint16_t persistent() const {
+  uint32_t persistent() const {
     auto const result = int(refcounted) - int(released) - int(decremented);
-    return safe_cast<uint16_t>(std::max(result, 0));
+    return safe_cast<uint32_t>(std::max(result, 0));
   }
 
-  uint16_t destroyed() const {
+  uint32_t destroyed() const {
     return released;
   }
 
-  uint16_t survived() const {
+  uint32_t survived() const {
     return decremented;
   }
 
-  float percent(uint16_t value) const {
+  float percent(uint32_t value) const {
     return total ? 100.0 * value / total : 0.0;
   }
 
@@ -93,13 +93,12 @@ struct DecRefProfile {
   }
 
   // overflow handling isn't statistically correct; but its better
-  // than overflowing, and we're expecting threads to all have similar
-  // distributions.
+  // than overflowing.
   static void reduce(DecRefProfile& a, const DecRefProfile& b) {
-    auto const total = static_cast<uint32_t>(a.total + b.total);
+    auto const total = static_cast<uint64_t>(a.total + b.total);
     auto constexpr limit = std::numeric_limits<decltype(a.total)>::max();
     if (total > limit) {
-      auto scale = [&] (uint16_t& x, uint64_t y) {
+      auto scale = [&] (uint32_t& x, uint64_t y) {
         x = ((x + y) * limit + total - 1) / total;
       };
       a.total = limit;
@@ -117,21 +116,21 @@ struct DecRefProfile {
   /*
    * The total number of times this DecRef was executed.
    */
-  uint16_t total;
+  uint32_t total;
   /*
    * The number of times this DecRef made it at least as far as the static
    * check (meaning it was given a refcounted DataType).
    */
-  uint16_t refcounted;
+  uint32_t refcounted;
   /*
    * The number of times this DecRef went to zero and called the release method.
    */
-  uint16_t released;
+  uint32_t released;
   /*
    * The number of times this DecRef actually decremented the count (meaning it
    * got a non-persistent, refcounted value with count > 1).
    */
-  uint16_t decremented;
+  uint32_t decremented;
 };
 
 inline const StringData* decRefProfileKey(const IRInstruction* inst) {

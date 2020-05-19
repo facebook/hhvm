@@ -286,7 +286,7 @@ struct LdapResultEntry : SweepableResourceData {
   }
 
   bool isInvalid() const override {
-    return data == nullptr;
+    return data == nullptr || result->isInvalid();
   }
 
   CLASSNAME_IS("ldap result entry");

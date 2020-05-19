@@ -27,13 +27,14 @@ use oxidized_by_ref::{
     pos::Pos,
     relative_path::RelativePath,
     s_set::SSet,
-    shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp},
+    shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst},
     shape_map::ShapeField,
     tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
         EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
-        PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_, TypedefType,
+        PossiblyEnforcedTy, Reactivity, ShapeFieldType, ShapeKind, Tparam, Ty, Ty_,
+        TypeconstAbstractKind, TypedefType,
     },
     typing_defs_flags::{FunParamFlags, FunTypeFlags},
     typing_reason::Reason,
@@ -490,23 +491,6 @@ pub struct NamespaceUseClause<'a> {
     as_: Option<&'a str>,
 }
 
-#[derive(Clone, Debug)]
-pub struct TypeConstant<'a> {
-    id: Id<'a>,
-    constraint: Node_<'a>,
-    type_: Node_<'a>,
-    abstract_: TypeconstAbstractKind<'a>,
-    reified: Option<&'a Pos<'a>>,
-    enforceable: Option<&'a Pos<'a>>,
-}
-
-#[derive(Clone, Debug)]
-pub enum TypeconstAbstractKind<'a> {
-    TCAbstract(Option<Node_<'a>>),
-    TCPartiallyAbstract,
-    TCConcrete,
-}
-
 #[derive(Copy, Clone, Debug)]
 pub enum OperatorType {
     Tilde,
@@ -579,7 +563,7 @@ pub enum Node_<'a> {
         is_static: bool,
     },
     TraitUse(&'a Node_<'a>),
-    TypeConstant(&'a TypeConstant<'a>),
+    TypeConstant(&'a ShallowTypeconst<'a>),
     RequireClause(&'a RequireClause<'a>),
     ClassishBody(&'a [Node_<'a>]),
     TypeParameter(&'a TypeParameterDecl<'a>),
@@ -2401,42 +2385,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                                 uses.push(self.node_to_ty(*name)?);
                             }
                         }
-                        Node_::TypeConstant(constant) => {
-                            typeconsts.push(shallow_decl_defs::ShallowTypeconst {
-                                abstract_: match constant.abstract_ {
-                                    TypeconstAbstractKind::TCAbstract(Some(ty)) => {
-                                        typing_defs::TypeconstAbstractKind::TCAbstract(Some(
-                                            self.node_to_ty(ty)?,
-                                        ))
-                                    }
-                                    TypeconstAbstractKind::TCAbstract(None) => {
-                                        typing_defs::TypeconstAbstractKind::TCAbstract(None)
-                                    }
-                                    TypeconstAbstractKind::TCPartiallyAbstract => {
-                                        typing_defs::TypeconstAbstractKind::TCPartiallyAbstract
-                                    }
-                                    TypeconstAbstractKind::TCConcrete => {
-                                        typing_defs::TypeconstAbstractKind::TCConcrete
-                                    }
-                                },
-                                constraint: match constant.constraint {
-                                    Node_::TypeConstraint(innards) => {
-                                        self.node_to_ty(innards.1).ok()
-                                    }
-                                    _ => None,
-                                },
-                                name: constant.id,
-                                type_: match self.node_to_ty(constant.type_) {
-                                    Ok(ty) => Some(ty),
-                                    Err(_) => None,
-                                },
-                                enforceable: match constant.enforceable {
-                                    Some(pos) => (pos, true),
-                                    None => (Pos::none(), false),
-                                },
-                                reifiable: constant.reified,
-                            })
-                        }
+                        Node_::TypeConstant(constant) => typeconsts.push(constant.clone()),
                         Node_::RequireClause(require) => match require.require_type {
                             Node_::Extends => req_extends.push(self.node_to_ty(require.name)?),
                             Node_::Implements => {
@@ -3231,10 +3180,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::Abstract => true,
             _ => abstract_,
         });
-        let constraint = constraint?;
-        let type_ = type_?;
-        let has_constraint = !constraint.is_ignored();
-        let has_type = !type_.is_ignored();
+        let constraint = match constraint? {
+            Node_::TypeConstraint(innards) => self.node_to_ty(innards.1).ok(),
+            _ => None,
+        };
+        let type_ = self.node_to_ty(type_?).ok();
+        let has_constraint = constraint.is_some();
+        let has_type = type_.is_some();
         let (type_, abstract_) = match (has_abstract_keyword, has_constraint, has_type) {
             // Has no assigned type. Technically illegal, so if the constraint
             // is present, proceed as if the constraint was the assigned type.
@@ -3254,19 +3206,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             // Has a default type.
             //     abstract const Type TFoo = SomeType;
             //     abstract const Type TFoo as OtherType = SomeType;
-            (true, _, true) => (
-                Node_::Ignored,
-                TypeconstAbstractKind::TCAbstract(Some(type_)),
-            ),
+            (true, _, true) => (None, TypeconstAbstractKind::TCAbstract(type_)),
         };
-        let id = self.get_name("", name?)?;
-        Ok(Node_::TypeConstant(self.alloc(TypeConstant {
-            id,
-            constraint,
-            type_,
+        let name = self.get_name("", name?)?;
+        Ok(Node_::TypeConstant(self.alloc(ShallowTypeconst {
             abstract_,
-            reified: attributes.reifiable,
-            enforceable: attributes.enforceable,
+            constraint,
+            name,
+            type_,
+            enforceable: match attributes.enforceable {
+                Some(pos) => (pos, true),
+                None => (Pos::none(), false),
+            },
+            reifiable: attributes.reifiable,
         })))
     }
 

@@ -522,18 +522,13 @@ pub enum Node_<'a> {
     Expr(&'a nast::Expr<'a>),
     Operator(&'a (&'a Pos<'a>, TokenKind)),
     Construct(&'a Pos<'a>),
-    LessThan(&'a Pos<'a>),    // This needs a pos since it shows up in generics.
-    GreaterThan(&'a Pos<'a>), // This needs a pos since it shows up in generics.
-    LeftParen(&'a Pos<'a>),   // This needs a pos since it shows up in tuples and shapes.
-    RightParen(&'a Pos<'a>),  // This needs a pos since it shows up in tuples and shapes.
-    Shape(&'a Pos<'a>),       // This needs a pos since it shows up in shapes.
-    Question(&'a Pos<'a>),    // This needs a pos since it shows up in nullable types.
-    This(&'a Pos<'a>),        // This needs a pos since it shows up in Taccess.
-    ColonColon(&'a Pos<'a>),  // This needs a pos since it shows up in Taccess.
+    This(&'a Pos<'a>), // This needs a pos since it shows up in Taccess.
     TypeParameters(&'a [Tparam<'a>]),
 
-    LessThanLessThan(&'a Pos<'a>), // This needs a pos since it shows up in attributized type specifiers.
-    GreaterThanGreaterThan(&'a Pos<'a>), // This needs a pos since it shows up in attributized type specifiers.
+    // For cases where the position of a node is included in some outer
+    // position, but we do not need to track any further information about that
+    // node (for instance, the parentheses surrounding a tuple type).
+    Pos(&'a Pos<'a>),
 
     // Simple keywords and tokens.
     Token(TokenKind),
@@ -547,21 +542,13 @@ impl<'a> Node_<'a> {
             Node_::TypeconstAccess((pos, _, _)) => Ok(pos.get()),
             Node_::XhpName(_, pos) => Ok(pos),
             Node_::QualifiedName(_, pos) => Ok(pos),
-            Node_::Backslash(pos)
-            | Node_::ColonColon(pos)
+            Node_::Pos(pos)
+            | Node_::Backslash(pos)
             | Node_::Construct(pos)
-            | Node_::LessThan(pos)
-            | Node_::GreaterThan(pos)
-            | Node_::LeftParen(pos)
-            | Node_::RightParen(pos)
-            | Node_::Question(pos)
-            | Node_::Shape(pos)
             | Node_::This(pos)
             | Node_::Array(pos)
             | Node_::Darray(pos)
             | Node_::Varray(pos)
-            | Node_::LessThanLessThan(pos)
-            | Node_::GreaterThanGreaterThan(pos)
             | Node_::IntLiteral(_, pos)
             | Node_::FloatingLiteral(_, pos)
             | Node_::Null(pos)
@@ -1395,15 +1382,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             TokenKind::Varray => Node_::Varray(token_pos(self)),
             TokenKind::Backslash => Node_::Backslash(token_pos(self)),
             TokenKind::Construct => Node_::Construct(token_pos(self)),
-            TokenKind::LeftParen => Node_::LeftParen(token_pos(self)),
-            TokenKind::RightParen | TokenKind::RightBracket => {
-                // We don't technically need to differentiate these.
-                Node_::RightParen(token_pos(self))
-            }
-            TokenKind::Shape => Node_::Shape(token_pos(self)),
-            TokenKind::Question => Node_::Question(token_pos(self)),
+            TokenKind::LeftParen
+            | TokenKind::RightParen
+            | TokenKind::RightBracket
+            | TokenKind::Shape
+            | TokenKind::Question => Node_::Pos(token_pos(self)),
             TokenKind::This => Node_::This(token_pos(self)),
-            TokenKind::ColonColon => Node_::ColonColon(token_pos(self)),
             TokenKind::Tilde
             | TokenKind::Exclamation
             | TokenKind::Plus
@@ -1751,8 +1735,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 TokenKind::BarBar => Bop::Barbar,
                 TokenKind::LessThan => Bop::Lt,
                 TokenKind::LessThanEqual => Bop::Lte,
+                TokenKind::LessThanLessThan => Bop::Ltlt,
                 TokenKind::GreaterThan => Bop::Gt,
                 TokenKind::GreaterThanEqual => Bop::Gte,
+                TokenKind::GreaterThanGreaterThan => Bop::Gtgt,
                 TokenKind::Dot => Bop::Dot,
                 TokenKind::Ampersand => Bop::Amp,
                 TokenKind::Bar => Bop::Bar,
@@ -1765,8 +1751,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     ))
                 }
             },
-            Node_::LessThanLessThan(_) => Bop::Ltlt,
-            Node_::GreaterThanGreaterThan(_) => Bop::Gtgt,
             op => return Err(format!("Did not recognize operator {:?}", op)),
         };
 
@@ -2800,15 +2784,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_field_specifier(
         &mut self,
-        is_optional: Self::R,
+        question_token: Self::R,
         name: Self::R,
         _arg2: Self::R,
         type_: Self::R,
     ) -> Self::R {
-        let optional = match is_optional? {
-            Node_::Question(_) => true,
-            _ => false,
-        };
+        let optional = !question_token?.is_ignored();
         let name = match name? {
             Node_::StringLiteral(s, pos) => ShapeFieldName::SFlitStr((pos, s)),
             n => {
@@ -3107,10 +3088,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     fn make_type_constant(
         &mut self,
         ty: Self::R,
-        coloncolon: Self::R,
+        _coloncolon: Self::R,
         constant_name: Self::R,
     ) -> Self::R {
-        let (ty, _coloncolon, constant_name) = (ty?, coloncolon?, constant_name?);
+        let (ty, constant_name) = (ty?, constant_name?);
         let id = self.get_name("", constant_name)?;
         let pos = Pos::merge(
             self.state.arena,

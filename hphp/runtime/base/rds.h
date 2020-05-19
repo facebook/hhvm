@@ -55,6 +55,7 @@ struct CallTargetProfile;
 struct ClsCnsProfile;
 struct DecRefProfile;
 struct IncRefProfile;
+struct IsTypeStructProfile;
 struct MethProfile;
 struct SwitchProfile;
 struct TypeProfile;
@@ -218,6 +219,7 @@ struct StaticMethodF { LowStringPtr name; };
   PR(CallTargetProfile)   \
   PR(ClsCnsProfile)       \
   PR(DecRefProfile)       \
+  PR(IsTypeStructProfile) \
   PR(IncRefProfile)       \
   PR(MethProfile)         \
   PR(SwitchProfile)       \
@@ -277,6 +279,10 @@ struct LSBMemoCache {
   FuncId funcId;
 };
 
+struct TSCache {
+  FuncId funcId;
+};
+
 
 using Symbol = boost::variant<
   LinkName,
@@ -289,7 +295,8 @@ using Symbol = boost::variant<
   StaticMemoValue,
   StaticMemoCache,
   LSBMemoValue,
-  LSBMemoCache
+  LSBMemoCache,
+  TSCache
 >;
 
 //////////////////////////////////////////////////////////////////////

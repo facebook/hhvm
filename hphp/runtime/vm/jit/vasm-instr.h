@@ -340,7 +340,7 @@ struct Vunit;
   O(sarq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shlq, I(fl), UH(s,d), DH(d,s) D(sf))\
   O(shrq, I(fl), UH(s,d), DH(d,s) D(sf))\
-  O(crc32q, Inone, U(s0) UH(s1,d), DH(d,s1))\
+  O(crc32q, Inone, UA(s0) UH(s1,d), DH(d,s1))\
   /* arm instructions */\
   O(csincb, I(cc), U(sf) U(f) U(t), D(d))\
   O(csincw, I(cc), U(sf) U(f) U(t), D(d))\

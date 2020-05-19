@@ -22,7 +22,9 @@
 #include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/runtime.h"
 
+#include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/guard-constraint.h"
+#include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/type.h"
 
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -1176,7 +1178,8 @@ SSATmp* handleIsResolutionAndCommonOpts(
   IRGS& env,
   TypeStructResolveOp op,
   bool& done,
-  bool& shouldDecRef
+  bool& shouldDecRef,
+  bool& checkValid
 ) {
   auto const a = topC(env);
   auto const required_ts_type = RuntimeOption::EvalHackArrDVArrs ? TDict : TArr;
@@ -1186,7 +1189,8 @@ SSATmp* handleIsResolutionAndCommonOpts(
       return resolveTypeStructImpl(env, true, true, 1, true);
     }
     shouldDecRef = false;
-    return gen(env, RaiseErrorOnInvalidIsAsExpressionType, popC(env));
+    checkValid = true;
+    return popC(env);
   }
   auto const ts = a->arrLikeVal();
   auto maybe_resolved = ts;
@@ -1207,11 +1211,8 @@ SSATmp* handleIsResolutionAndCommonOpts(
       env, typeStructureCouldBeNonStatic(ts), true, 1, true);
   }
   popC(env);
-  auto const result = cns(env, maybe_resolved);
-  if (op == TypeStructResolveOp::DontResolve) {
-    return gen(env, RaiseErrorOnInvalidIsAsExpressionType, result);
-  }
-  return result;
+  if (op == TypeStructResolveOp::DontResolve) checkValid = true;
+  return cns(env, maybe_resolved);
 }
 
 } // namespace
@@ -1219,8 +1220,9 @@ SSATmp* handleIsResolutionAndCommonOpts(
 void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
   auto const a = topC(env);
   auto const c = topC(env, BCSPRelOffset { 1 });
-  bool done = false, shouldDecRef = true;
-  SSATmp* tc = handleIsResolutionAndCommonOpts(env, op, done, shouldDecRef);
+  bool done = false, shouldDecRef = true, checkValid = false;
+  SSATmp* tc =
+    handleIsResolutionAndCommonOpts(env, op, done, shouldDecRef, checkValid);
   if (done) {
     decRef(env, c);
     decRef(env, a);
@@ -1230,9 +1232,50 @@ void emitIsTypeStructC(IRGS& env, TypeStructResolveOp op) {
   auto block = opcodeMayRaise(IsTypeStruct) && shouldDecRef
     ? create_catch_block(env, [&]{ decRef(env, tc); })
     : nullptr;
-  push(env, gen(env, IsTypeStruct, block, tc, c));
-  decRef(env, c);
-  decRef(env, a);
+  auto const data = RDSHandleData { rds::bindTSCache(curFunc(env)).handle() };
+
+  static const StaticString s_IsTypeStruct{"IsTypeStruct"};
+  auto const profile = TargetProfile<IsTypeStructProfile> {
+    env.context,
+    env.irb->curMarker(),
+    s_IsTypeStruct.get()
+  };
+
+  auto const generic = [&] {
+    if (checkValid) gen(env, RaiseErrorOnInvalidIsAsExpressionType, tc);
+    return gen(env, IsTypeStruct, block, data, tc, c);
+  };
+
+  auto const finish = [&] (SSATmp* result) {
+    push(env, result);
+    decRef(env, c);
+    decRef(env, a);
+  };
+
+  if (profile.profiling()) {
+    gen(env, ProfileIsTypeStruct, RDSHandleData { profile.handle() }, a);
+    finish(generic());
+    return;
+  }
+
+  if (!profile.optimizing() || !profile.data().shouldOptimize()) {
+    finish(generic());
+    return;
+  }
+
+  finish(cond(
+    env,
+    [&] (Block* taken) {
+      return gen(env, IsTypeStructCached, taken, a, c);
+    },
+    [&] (SSATmp* result) { // next
+      return result;
+    },
+    [&] { // taken
+      hint(env, Block::Hint::Unlikely);
+      return generic();
+    }
+  ));
 }
 
 void emitThrowAsTypeStructException(IRGS& env) {

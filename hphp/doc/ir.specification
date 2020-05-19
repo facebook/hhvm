@@ -861,10 +861,21 @@ To string conversions:
   If there is an error during type structure resolution, this instruction raises
   an error. If suppress is set, this error is demoted to a warning.
 
-| IsTypeStruct, D(Bool), SDArr S(Cell), NF
+| IsTypeStruct<handle>, D(Bool), SDArr S(Cell), NF
 
   Returns whether S1 matches the type structure of a defined type in S0 and S1
   is a subtype of S0. The input type structure (S0) must be resolved.
+  Handle is used for caching purposes.
+
+| IsTypeStructCached, D(Bool), SDArr S(Cell), B
+
+  Checks if S0 is cached in TSClassCache and if so, returns whehter S1 is a
+  subtype of S0. Otherwise, it branches.
+
+| ProfileIsTypeStruct<handle>, ND, SDArr, ND
+
+  Profile S0 to determine whether S0 is a type structure holding a reference to
+  a Class*.
 
 | ThrowAsTypeStructException, ND, SDArr S(Cell), T
 

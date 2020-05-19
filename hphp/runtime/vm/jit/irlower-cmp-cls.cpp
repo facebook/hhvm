@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/instance-bits.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
@@ -28,6 +29,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/type.h"
 #include "hphp/runtime/vm/jit/vasm-gen.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
@@ -78,6 +80,25 @@ Vreg check_subcls(Vout& v, Vreg sf, Vreg d, Vreg lhs, Cls rhs, Len rhsVecLen) {
       );
 }
 
+void emitClassofNonIFace(Vout& v, Vreg lhs, Vreg rhs, Vreg dst) {
+  // This essentially inlines Class::classofNonIFace
+  auto const rhsTmp = v.makeReg();
+  auto const rhsLen = v.makeReg();
+  auto const sf = v.makeReg();
+  if (sizeof(Class::veclen_t) == 2) {
+    v << loadw{rhs[Class::classVecLenOff()], rhsTmp};
+    v << movzwq{rhsTmp, rhsLen};
+    v << cmpwm{rhsTmp, lhs[Class::classVecLenOff()], sf};
+  } else if (sizeof(Class::veclen_t) == 4) {
+    v << loadl{rhs[Class::classVecLenOff()], rhsTmp};
+    v << movzlq{rhsTmp, rhsLen};
+    v << cmplm{rhsTmp, lhs[Class::classVecLenOff()], sf};
+  } else {
+    not_implemented();
+  }
+  check_subcls(v, sf, dst, lhs, rhs, rhsLen);
+}
+
 void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const rhs = srcLoc(env, inst, 1).reg();
@@ -106,24 +127,8 @@ void cgInstanceOf(IRLS& env, const IRInstruction* inst) {
     return;
   }
 
-  // This essentially inlines Class::classofNonIFace
   auto const lhs = srcLoc(env, inst, 0).reg();
-  auto const rhsTmp = v.makeReg();
-  auto const rhsLen = v.makeReg();
-  auto const sfVecLen = v.makeReg();
-  if (sizeof(Class::veclen_t) == 2) {
-    v << loadw{rhs[Class::classVecLenOff()], rhsTmp};
-    v << movzwq{rhsTmp, rhsLen};
-    v << cmpwm{rhsTmp, lhs[Class::classVecLenOff()], sfVecLen};
-  } else if (sizeof(Class::veclen_t) == 4) {
-    v << loadl{rhs[Class::classVecLenOff()], rhsTmp};
-    v << movzlq{rhsTmp, rhsLen};
-    v << cmplm{rhsTmp, lhs[Class::classVecLenOff()], sfVecLen};
-  } else {
-    not_implemented();
-  }
-
-  check_subcls(v, sfVecLen, dst, lhs, rhs, rhsLen);
+  emitClassofNonIFace(v, lhs, rhs, dst);
 }
 
 IMPL_OPCODE_CALL(InstanceOfIface)
@@ -247,6 +252,80 @@ void cgInstanceOfBitmask(IRLS& env, const IRInstruction* inst) {
 void cgNInstanceOfBitmask(IRLS& env, const IRInstruction* inst) {
   implInstanceOfBitmask(env, inst, CC_Z);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+void cgIsTypeStructCached(IRLS& env, const IRInstruction* inst) {
+  auto& v = vmain(env);
+  auto const arr = srcLoc(env, inst, 0).reg();
+  auto const cellTy = inst->src(1)->type();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const branch = label(env, inst->taken());
+
+  auto const isObj = inst->src(1)->isA(TObj);
+
+  if (!isObj && cellTy.maybe(TObj)) {
+    // PUNT
+    v << jmp{label(env, inst->taken())};
+    return;
+  }
+
+  auto const pairSize = safe_cast<int32_t>(sizeof(TSClassCache::Pair));
+  auto const hash = emitHashInt64(env, inst, arr);
+  auto const offset = v.makeReg();
+
+  static_assert(folly::isPowTwo(sizeof(TSClassCache::Pair)),
+                "invalid pair size");
+
+  v << andqi{
+    ((int32_t)TSClassCache::kNumLines - 1) * pairSize,
+    hash,
+    offset,
+    v.makeReg()
+  };
+
+  auto const ch = rds::bindTSCache(inst->func());
+  auto const sf = v.makeReg();
+  v << cmpqm{arr, offset[rvmtl() + ch.handle()], sf};
+  ifThen(v, CC_NE, sf, branch);
+
+  // Now that we know it is cached, we can return false
+  if (!isObj) {
+    // Definitely not object
+    v << copy{v.cns(false), dst};
+    return;
+  }
+
+  auto const rhs = v.makeReg();
+  emitLdLowPtr(v, offset[rvmtl() + ch.handle() + sizeof(ArrayData*)],
+               rhs, sizeof(LowPtr<const Class>));
+  auto const lhs = [&] {
+    assertx(isObj);
+    if (auto const exact = cellTy.clsSpec().exactCls()) return v.cns(exact);
+    auto const lhs = v.makeReg();
+    emitLdObjClass(vmain(env), srcLoc(env, inst, 1).reg(), lhs);
+    return lhs;
+  }();
+  emitClassofNonIFace(v, lhs, rhs, dst);
+}
+
+void cgProfileIsTypeStruct(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<RDSHandleData>();
+  auto args = argGroup(env, inst)
+              .ssa(0)
+              .addr(rvmtl(), safe_cast<int32_t>(extra->handle));
+
+  cgCallHelper(
+    vmain(env),
+    env,
+    CallSpec::direct(profileIsTypeStructHelper),
+    kVoidDest,
+    SyncOptions::None,
+    args
+  );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 IMPL_OPCODE_CALL(ProfileInstanceCheck)
 

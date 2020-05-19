@@ -1676,6 +1676,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ProfileType:
   case LdIfaceMethod:
   case InstanceOfIfaceVtable:
+  case IsTypeStructCached:
   case LdARFlags:
   case LdTVAux:
   case MethodExists:
@@ -1686,6 +1687,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LookupSPropSlot:
   case ConvPtrToLval:
   case ProfileProp:
+  case ProfileIsTypeStruct:
     return IrrelevantEffects {};
 
   case StClosureArg:

@@ -23,6 +23,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/bytecode.h"
 
+#include "hphp/runtime/vm/jit/is-type-struct-profile.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 struct _Unwind_Exception;
@@ -190,7 +191,8 @@ ArrayData* resolveTypeStructHelper(
   bool suppress,
   bool isOrAsOp
 );
-bool isTypeStructHelper(ArrayData*, TypedValue);
+bool isTypeStructHelper(ArrayData*, TypedValue, rds::Handle);
+void profileIsTypeStructHelper(ArrayData*, IsTypeStructProfile*);
 [[noreturn]] void throwAsTypeStructExceptionHelper(ArrayData*, TypedValue);
 ArrayData* errorOnIsAsExpressionInvalidTypesHelper(ArrayData*);
 

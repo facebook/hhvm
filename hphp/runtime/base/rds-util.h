@@ -19,6 +19,8 @@
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/typed-value.h"
 
+#include "hphp/runtime/vm/jit/target-cache.h"
+
 namespace HPHP {
   struct NamedEntity;
   struct Class;
@@ -64,6 +66,12 @@ attachLSBMemoValue(const Class*, const Func*);
 
 Link<MemoCacheBase*, rds::Mode::Normal>
 attachLSBMemoCache(const Class*, const Func*);
+
+Link<jit::TSClassCache, rds::Mode::Local>
+bindTSCache(const Func*);
+
+Link<jit::TSClassCache, rds::Mode::Local>
+attachTSCache(const Func*);
 
 //////////////////////////////////////////////////////////////////////
 

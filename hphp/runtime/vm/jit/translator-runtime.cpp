@@ -58,6 +58,7 @@
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/vm/jit/minstr-helpers.h"
+#include "hphp/runtime/vm/jit/target-cache.h"
 #include "hphp/runtime/vm/jit/target-profile.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/unwind-itanium.h"
@@ -880,9 +881,15 @@ ArrayData* resolveTypeStructHelper(
   return resolved.detach();
 }
 
-bool isTypeStructHelper(ArrayData* a, TypedValue c) {
-  auto const ts = ArrNR(a);
-  return checkTypeStructureMatchesTV(ts, c);
+bool isTypeStructHelper(ArrayData* a, TypedValue c, rds::Handle h) {
+  auto const cls = TSClassCache::write(h, a);
+  if (!cls) return checkTypeStructureMatchesTV(ArrNR(a), c);
+  if (!tvIsObject(c)) return false;
+  return c.m_data.pobj->getVMClass()->classofNonIFace(cls);
+}
+
+void profileIsTypeStructHelper(ArrayData* a, IsTypeStructProfile* prof) {
+  prof->update(a);
 }
 
 void throwAsTypeStructExceptionHelper(ArrayData* a, TypedValue c) {

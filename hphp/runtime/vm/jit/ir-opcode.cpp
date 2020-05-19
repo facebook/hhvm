@@ -763,6 +763,7 @@ bool opcodeMayRaise(Opcode opc) {
   case IsNTypeMem:
   case IsType:
   case IsTypeMem:
+  case IsTypeStructCached:
   case IsWaitHandle:
   case IterFree:
   case Jmp:
@@ -931,6 +932,7 @@ bool opcodeMayRaise(Opcode opc) {
   case ProfileDecRef:
   case ProfileDictAccess:
   case ProfileInstanceCheck:
+  case ProfileIsTypeStruct:
   case ProfileKeysetAccess:
   case ProfileMethod:
   case ProfileMixedArrayAccess:

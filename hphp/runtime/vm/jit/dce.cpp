@@ -452,6 +452,7 @@ bool canDCE(IRInstruction* inst) {
   case LdRecDescCached:
   case LdRecDescCachedSafe:
   case LdCns:
+  case IsTypeStructCached:
   case LookupCnsE:
   case LdClsCns:
   case InitClsCns:
@@ -745,6 +746,7 @@ bool canDCE(IRInstruction* inst) {
   case CheckRDSInitialized:
   case MarkRDSInitialized:
   case ProfileProp:
+  case ProfileIsTypeStruct:
     return false;
 
   case SameArr:

@@ -79,6 +79,26 @@ struct ClassCache {
 
 //////////////////////////////////////////////////////////////////////
 
+/*
+ * Per-callsite dynamic type structure class lookups (where the type structure
+ * isn't known at translation time).  4-way cache.
+ */
+struct TSClassCache {
+  static constexpr uint32_t kNumLines = 4;
+
+  struct Pair {
+    ArrayData*  m_key;
+    LowPtr<const Class> m_value;
+  };
+
+  static LowPtr<const Class> write(rds::Handle, ArrayData* lookup);
+
+  Pair m_pairs[kNumLines];
+};
+
+
+//////////////////////////////////////////////////////////////////////
+
 struct StaticMethodCache {
   LowPtr<const Func> m_func;
   LowPtr<const Class> m_cls;

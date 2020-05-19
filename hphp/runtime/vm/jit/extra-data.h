@@ -1769,6 +1769,7 @@ X(CheckClsReifiedGenericMismatch,
 X(CheckFunReifiedGenericMismatch,
                                 FuncData);
 X(IsFunReifiedGenericsMatched,  FuncData);
+X(IsTypeStruct,                 RDSHandleData);
 X(InterpOne,                    InterpOneData);
 X(InterpOneCF,                  InterpOneData);
 X(StClosureArg,                 IndexData);
@@ -1802,6 +1803,7 @@ X(ProfileKeysetAccess,          ArrayAccessProfileData);
 X(ProfileType,                  RDSHandleData);
 X(ProfileCall,                  ProfileCallTargetData);
 X(ProfileMethod,                ProfileCallTargetData);
+X(ProfileIsTypeStruct,          RDSHandleData);
 X(LdRDSAddr,                    RDSHandleData);
 X(CheckRDSInitialized,          RDSHandleData);
 X(MarkRDSInitialized,           RDSHandleData);

@@ -18,6 +18,8 @@
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/named-entity.h"
 
+#include "hphp/runtime/vm/jit/target-cache.h"
+
 namespace HPHP { namespace rds {
 
 //////////////////////////////////////////////////////////////////////
@@ -83,6 +85,20 @@ Link<MemoCacheBase*, rds::Mode::Normal>
 attachLSBMemoCache(const Class* cls, const Func* func) {
   return attach<MemoCacheBase*,Mode::Normal>(
     LSBMemoCache { cls, func->getFuncId() }
+  );
+}
+
+Link<jit::TSClassCache, rds::Mode::Local>
+bindTSCache(const Func* func) {
+  return bind<jit::TSClassCache,Mode::Local>(
+    TSCache { func->getFuncId() }
+  );
+}
+
+Link<jit::TSClassCache, rds::Mode::Local>
+attachTSCache(const Func* func) {
+  return attach<jit::TSClassCache,Mode::Local>(
+    TSCache { func->getFuncId() }
   );
 }
 

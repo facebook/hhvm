@@ -28,6 +28,8 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
+#include "hphp/runtime/base/type-structure.h"
+#include "hphp/runtime/base/type-structure-helpers-defs.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
 #include "hphp/runtime/vm/interp-helpers.h"
@@ -65,7 +67,22 @@ typename Cache::Pair* keyToPair(Cache* cache, const StringData* k) {
   return cache->m_pairs + (k->hash() & (Cache::kNumLines - 1));
 }
 
+typename TSClassCache::Pair* keyToPair(TSClassCache* cache,
+                                       const ArrayData* ad) {
+  static_assert(folly::isPowTwo(TSClassCache::kNumLines),
+                "invalid number of cache lines");
+  auto const pairSize = safe_cast<int32_t>(sizeof(TSClassCache::Pair));
+  auto const hash = hash_int64(reinterpret_cast<uint64_t>(ad));
+  static_assert(folly::isPowTwo(sizeof(TSClassCache::Pair)),
+                "invalid pair size");
+  auto const offset =
+    hash & (((int32_t)TSClassCache::kNumLines - 1) * pairSize);
+  assertx(offset % pairSize == 0);
+  return reinterpret_cast<TSClassCache::Pair*>(
+          reinterpret_cast<char*>(cache->m_pairs) + offset);
 }
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////
 // FuncCache
@@ -153,6 +170,36 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name) {
     TRACE(1, "ClassCache hit: %s\n", name->data());
   }
   return pair->m_value;
+}
+
+//////////////////////////////////////////////////////////////////////
+// TSClassCache
+
+LowPtr<const Class> TSClassCache::write(rds::Handle handle, ArrayData* ad) {
+  assertx(ad);
+  if (!ad->isStatic()) return nullptr;
+  auto const thiz = rds::handleToPtr<TSClassCache, rds::Mode::Local>(handle);
+  auto const pair = keyToPair(thiz, ad);
+  const ArrayData* pairAd = pair->m_key;
+  if (ad == pairAd) {
+    assertx(pair->m_value);
+    FTRACE(1, "TSClassCache hit: {} -> {}\n",
+           ad, pair->m_value->name()->data());
+    return pair->m_value;
+  }
+  FTRACE(1, "TSClassCache miss: {}\n", ad);
+  if (ad->size() != 2) return nullptr;
+  auto const kind = get_ts_kind(ad);
+  if (kind != TypeStructure::Kind::T_class) return nullptr;
+  auto const name = get_ts_classname(ad);
+  Class* c = Unit::loadClass(name);
+  if (UNLIKELY(!c)) return nullptr;
+  assertx(!isInterface(c));
+  pair->m_key = ad;
+  pair->m_value = c;
+  FTRACE(1, "TSClassCache caching: {} -> {} @ {}\n",
+         ad, pair->m_value->name()->data(), &pair);
+  return c;
 }
 
 //=============================================================================

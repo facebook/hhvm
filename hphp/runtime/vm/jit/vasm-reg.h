@@ -112,6 +112,9 @@ struct Vreg {
   Vptr operator+(size_t) const;
   Vptr operator+(int32_t) const;
   Vptr operator+(intptr_t) const;
+  friend void operator+(int, const Vreg&) = delete;
+  friend void operator+(size_t, const Vreg&) = delete;
+  friend void operator+(intptr_t, const Vreg&) = delete;
 
   Vptr operator-(size_t) const = delete;
   Vptr operator-(int32_t) const;

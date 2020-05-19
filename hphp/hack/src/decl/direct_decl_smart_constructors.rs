@@ -2927,7 +2927,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         args: Self::R,
         _arg3: Self::R,
     ) -> Self::R {
-        let name = self.get_name("", name?)?;
+        let name = name?;
+        let unqualified_name = self.get_name("", name)?;
+        let name = if unqualified_name.1.starts_with("__") {
+            unqualified_name
+        } else {
+            self.get_name(self.state.namespace_builder.current_namespace(), name)?
+        };
         Ok(Node_::Attribute(nast::UserAttribute {
             name,
             params: self.map_to_slice(args, |node| node.as_expr(self.state.arena))?,

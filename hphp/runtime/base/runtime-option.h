@@ -246,6 +246,7 @@ struct RuntimeOption {
   static int ServerConnectionLimit;
   static int ServerThreadCount;
   static int ServerQueueCount;
+  static int ServerHighQueueingThreshold;
   static bool ServerLegacyBehavior;
   // Number of worker threads with stack partially on huge pages.
   static int ServerHugeThreadCount;

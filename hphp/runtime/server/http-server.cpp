@@ -191,7 +191,11 @@ HttpServer::HttpServer() {
     [this](std::map<std::string, int64_t>& counters) {
       counters["ev_connections"] = m_pageServer->getLibEventConnectionCount();
       counters["inflight_requests"] = m_pageServer->getActiveWorker();
-      counters["queued_requests"] = m_pageServer->getQueuedJobs();
+      auto queued_requests = m_pageServer->getQueuedJobs();
+      counters["queued_requests"] = queued_requests;
+      counters["queued_requests_high"] =
+        queued_requests > RuntimeOption::ServerHighQueueingThreshold;
+
 
       auto const sat_requests = getSatelliteRequestCount();
       counters["satellite_inflight_requests"] = sat_requests.first;

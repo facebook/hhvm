@@ -547,6 +547,7 @@ int RuntimeOption::ServerBacklog = 128;
 int RuntimeOption::ServerConnectionLimit = 0;
 int RuntimeOption::ServerThreadCount = 50;
 int RuntimeOption::ServerQueueCount = 50;
+int RuntimeOption::ServerHighQueueingThreshold = 60;
 bool RuntimeOption::ServerLegacyBehavior = true;
 int RuntimeOption::ServerHugeThreadCount = 0;
 int RuntimeOption::ServerHugeStackKb = 384;

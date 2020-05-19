@@ -57,7 +57,6 @@ type t = {
   option_enable_xhp_class_modifier: bool;
   option_enable_first_class_function_pointers: bool;
   option_widen_is_array: bool;
-  option_disable_partial: bool;
   option_disable_array: bool;
 }
 [@@deriving eq, ord]
@@ -112,7 +111,6 @@ let default =
     option_enable_xhp_class_modifier = false;
     option_enable_first_class_function_pointers = false;
     option_widen_is_array = false;
-    option_disable_partial = false;
     option_disable_array = false;
   }
 
@@ -209,8 +207,6 @@ let check_int_overflow o = o.option_check_int_overflow > 0
 
 let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
-
-let disable_modes o = o.option_disable_partial
 
 let disable_array o = o.option_disable_array
 

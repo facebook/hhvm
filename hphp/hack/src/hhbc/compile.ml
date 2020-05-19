@@ -125,7 +125,7 @@ let parse_file ~hhbc_options env text :
         ~enable_xhp_class_modifier:(enable_xhp_class_modifier co)
         ~enable_first_class_function_pointers:
           (enable_first_class_function_pointers co)
-        ~disable_modes:(disable_modes co)
+        ~disable_modes:false
         ~disable_array:(disable_array co))
   in
   let env =

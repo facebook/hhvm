@@ -141,6 +141,10 @@ function open(string $path, int $flags, int $mode = 0): FileDescriptor;
 
 function request_stdio_fd(int $stdio_fileno): FileDescriptor;
 
+function mkdtemp(
+  string $template,
+): string;
+
 function mkostemps(
   string $template,
   int $suffixlen,

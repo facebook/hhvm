@@ -41,6 +41,9 @@ function open(string $path, int $flags, int $mode = 0): FileDescriptor;
 function mkostemps(string $template, int $suffixlen, int $flags): varray<mixed> /* (FileDescriptor, string) */;
 
 <<__Native>>
+function mkdtemp(string $template): string;
+
+<<__Native>>
 function read(
   FileDescriptor $fd,
   int $max_to_read,

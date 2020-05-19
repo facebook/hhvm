@@ -537,6 +537,26 @@ Array HHVM_FUNCTION(HSL_os_mkostemps, const String& path_template, int64_t suffi
   );
 }
 
+CLISrvResult<std::string, int>
+CLI_CLIENT_HANDLER(HSL_os_mkdtemp, std::string path_template) {
+  const size_t buf_size = path_template.length() + 1;
+  char* buf = (char*) malloc(buf_size);
+  if (buf == nullptr) {
+    return { CLIError {}, ENOMEM };
+  }
+  SCOPE_EXIT { free(buf); };
+  memcpy(buf, path_template.c_str(), buf_size);
+
+  if (::mkdtemp(buf) == nullptr) {
+    return { CLIError {}, errno };
+  }
+  return { CLISuccess {}, std::string(buf) };
+}
+
+String HHVM_FUNCTION(HSL_os_mkdtemp, const String& path_template) {
+  return HSL_CLI_INVOKE(HSL_os_mkdtemp, path_template.toCppString());
+}
+
 String HHVM_FUNCTION(HSL_os_read, const Object& obj, int64_t max) {
   if (max <= 0) {
     throw_errno_exception(EINVAL, "Max bytes can not be negative");
@@ -1142,6 +1162,8 @@ struct OSExtension final : Extension {
 
     CLI_REGISTER_HANDLER(HSL_os_mkostemps);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\mkostemps, HSL_os_mkostemps);
+    CLI_REGISTER_HANDLER(HSL_os_mkdtemp);
+    HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\mkdtemp, HSL_os_mkdtemp);
 
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\pipe, HSL_os_pipe);
     HHVM_FALIAS(HH\\Lib\\_Private\\_OS\\poll_async, HSL_os_poll_async);

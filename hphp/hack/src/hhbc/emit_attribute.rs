@@ -29,7 +29,7 @@ pub fn from_asts(
 pub fn from_ast(
     e: &mut Emitter,
     namespace: &Namespace,
-    attr: &a::UserAttribute, /*<Ex, Fb, En, Hi>*/
+    attr: &a::UserAttribute,
 ) -> Result<HhasAttribute> {
     let arguments =
         ast_constant_folder::literals_from_exprs(namespace, &mut attr.params.clone(), e).map_err(
@@ -38,7 +38,7 @@ pub fn from_ast(
             "literals_from_expr should have panicked for an error other than UserDefinedConstant");
                 emit_fatal::raise_fatal_parse(
                     &attr.name.0,
-                    format!("User-defined constants are not allowed in user attribute expressions"),
+                    format!("Attribute arguments must be literals"),
                 )
             },
         )?;

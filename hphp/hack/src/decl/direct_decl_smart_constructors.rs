@@ -458,19 +458,6 @@ pub struct RequireClause<'a> {
     name: Node_<'a>,
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct ShapeFieldDecl<'a> {
-    is_optional: bool,
-    name: Node_<'a>,
-    type_: Node_<'a>,
-}
-
-#[derive(Clone, Debug)]
-pub struct ShapeDecl<'a> {
-    kind: ShapeKind,
-    fields: &'a [ShapeFieldDecl<'a>],
-}
-
 #[derive(Clone, Debug)]
 pub struct TypeParameterDecl<'a> {
     name: Node_<'a>,
@@ -568,7 +555,10 @@ pub enum Node_<'a> {
     ClassishBody(&'a [Node_<'a>]),
     TypeParameter(&'a TypeParameterDecl<'a>),
     TypeConstraint(&'a (ConstraintKind, Node_<'a>)),
-    ShapeFieldSpecifier(&'a ShapeFieldDecl<'a>),
+    ShapeFieldSpecifier {
+        name: &'a ShapeField<'a>,
+        type_: &'a ShapeFieldType<'a>,
+    },
     NamespaceUseClause(&'a NamespaceUseClause<'a>),
     Expr(&'a nast::Expr<'a>),
     Operator(&'a (&'a Pos<'a>, OperatorType)),
@@ -2779,38 +2769,21 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         open: Self::R,
         rparen: Self::R,
     ) -> Self::R {
-        let mut specifiers = Vec::new_in(self.state.arena);
-        for node in fields?.iter() {
+        let fields = fields?;
+        let fields_iter = fields.iter();
+        let mut fields = AssocListMut::new_in(self.state.arena);
+        for node in fields_iter {
             match node {
-                Node_::ShapeFieldSpecifier(decl) => specifiers.push(**decl),
+                &Node_::ShapeFieldSpecifier { name, type_ } => {
+                    fields.insert(name.clone(), type_.clone())
+                }
                 n => return Err(format!("Expected a shape field specifier, but was {:?}", n)),
             }
         }
-        let fields = specifiers.into_bump_slice();
         let kind = match open? {
             Node_::DotDotDot => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
-        let fields_iter = fields.iter();
-        let mut fields = AssocListMut::new_in(self.state.arena);
-        for field_decl in fields_iter {
-            let name = match field_decl.name {
-                Node_::StringLiteral(s, pos) => ShapeFieldName::SFlitStr((pos, s)),
-                n => {
-                    return Err(format!(
-                        "Expected a string literal for shape key name, but was {:?}",
-                        n
-                    ))
-                }
-            };
-            fields.insert(
-                ShapeField(name),
-                ShapeFieldType {
-                    optional: field_decl.is_optional,
-                    ty: self.node_to_ty(field_decl.type_)?,
-                },
-            );
-        }
         let pos = Pos::merge(
             self.state.arena,
             shape?.get_pos(self.state.arena)?,
@@ -2938,15 +2911,26 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg2: Self::R,
         type_: Self::R,
     ) -> Self::R {
-        let is_optional = match is_optional? {
+        let optional = match is_optional? {
             Node_::Question(_) => true,
             _ => false,
         };
-        Ok(Node_::ShapeFieldSpecifier(self.alloc(ShapeFieldDecl {
-            is_optional,
-            name: name?,
-            type_: type_?,
-        })))
+        let name = match name? {
+            Node_::StringLiteral(s, pos) => ShapeFieldName::SFlitStr((pos, s)),
+            n => {
+                return Err(format!(
+                    "Expected a string literal for shape key name, but was {:?}",
+                    n
+                ))
+            }
+        };
+        Ok(Node_::ShapeFieldSpecifier {
+            name: self.alloc(ShapeField(name)),
+            type_: self.alloc(ShapeFieldType {
+                optional,
+                ty: self.node_to_ty(type_?)?,
+            }),
+        })
     }
 
     fn make_field_initializer(&mut self, key: Self::R, _arg1: Self::R, value: Self::R) -> Self::R {

@@ -221,9 +221,9 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node_<'
             ret.visibility = vis;
         }
         match modifier {
-            Node_::Static => ret.is_static = true,
-            Node_::Abstract => ret.is_abstract = true,
-            Node_::Final => ret.is_final = true,
+            Node_::Token(TokenKind::Static) => ret.is_static = true,
+            Node_::Token(TokenKind::Abstract) => ret.is_abstract = true,
+            Node_::Token(TokenKind::Final) => ret.is_final = true,
             _ => (),
         }
     }
@@ -536,28 +536,7 @@ pub enum Node_<'a> {
     GreaterThanGreaterThan(&'a Pos<'a>), // This needs a pos since it shows up in attributized type specifiers.
 
     // Simple keywords and tokens.
-    Abstract,
-    As,
-    Async,
-    Coroutine,
-    DotDotDot,
-    Extends,
-    Final,
-    Implements,
-    Inout,
-    Interface,
-    Newtype,
-    Private,
-    Protected,
-    Public,
-    Reify,
-    Semicolon,
-    Static,
-    Super,
-    Trait,
-    Type,
-    XHP,
-    Yield,
+    Token(TokenKind),
 }
 
 impl<'a> Node_<'a> {
@@ -651,9 +630,9 @@ impl<'a> Node_<'a> {
 
     fn as_visibility(&self) -> Result<aast::Visibility, ParseError> {
         match self {
-            Node_::Private => Ok(aast::Visibility::Private),
-            Node_::Protected => Ok(aast::Visibility::Protected),
-            Node_::Public => Ok(aast::Visibility::Public),
+            Node_::Token(TokenKind::Private) => Ok(aast::Visibility::Private),
+            Node_::Token(TokenKind::Protected) => Ok(aast::Visibility::Protected),
+            Node_::Token(TokenKind::Public) => Ok(aast::Visibility::Public),
             n => Err(format!("Expected a visibility modifier, but was {:?}", n)),
         }
     }
@@ -1012,8 +991,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         let (async_, is_coroutine) = header.modifiers.iter().fold(
             (false, false),
             |(async_, is_coroutine), node| match node {
-                Node_::Async => (true, is_coroutine),
-                Node_::Coroutine => (async_, true),
+                Node_::Token(TokenKind::Async) => (true, is_coroutine),
+                Node_::Token(TokenKind::Coroutine) => (async_, true),
                 _ => (async_, is_coroutine),
             },
         );
@@ -1021,7 +1000,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             FunKind::FCoroutine
         } else {
             if body.iter().any(|node| match node {
-                Node_::Yield => true,
+                Node_::Token(TokenKind::Yield) => true,
                 _ => false,
             }) {
                 if async_ {
@@ -1289,7 +1268,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     fn is_zero(s: &Self::S) -> bool {
         fn inner_is_zero(n: &Node_) -> bool {
             match n {
-                Node_::Yield => false,
+                Node_::Token(TokenKind::Yield) => false,
                 Node_::List(inner) => inner.iter().all(inner_is_zero),
                 _ => true,
             }
@@ -1451,28 +1430,28 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::Percent
             | TokenKind::QuestionQuestion
             | TokenKind::Equal => Node_::Operator(&*self.alloc((token_pos(self), kind))),
-            TokenKind::Abstract => Node_::Abstract,
-            TokenKind::As => Node_::As,
-            TokenKind::Super => Node_::Super,
-            TokenKind::Async => Node_::Async,
-            TokenKind::Coroutine => Node_::Coroutine,
-            TokenKind::DotDotDot => Node_::DotDotDot,
-            TokenKind::Extends => Node_::Extends,
-            TokenKind::Final => Node_::Final,
-            TokenKind::Implements => Node_::Implements,
-            TokenKind::Inout => Node_::Inout,
-            TokenKind::Interface => Node_::Interface,
-            TokenKind::Newtype => Node_::Newtype,
-            TokenKind::Type => Node_::Type,
-            TokenKind::XHP => Node_::XHP,
-            TokenKind::Yield => Node_::Yield,
-            TokenKind::Semicolon => Node_::Semicolon,
-            TokenKind::Private => Node_::Private,
-            TokenKind::Protected => Node_::Protected,
-            TokenKind::Public => Node_::Public,
-            TokenKind::Reify => Node_::Reify,
-            TokenKind::Static => Node_::Static,
-            TokenKind::Trait => Node_::Trait,
+            TokenKind::Abstract
+            | TokenKind::As
+            | TokenKind::Super
+            | TokenKind::Async
+            | TokenKind::Coroutine
+            | TokenKind::DotDotDot
+            | TokenKind::Extends
+            | TokenKind::Final
+            | TokenKind::Implements
+            | TokenKind::Inout
+            | TokenKind::Interface
+            | TokenKind::Newtype
+            | TokenKind::Type
+            | TokenKind::XHP
+            | TokenKind::Yield
+            | TokenKind::Semicolon
+            | TokenKind::Private
+            | TokenKind::Protected
+            | TokenKind::Public
+            | TokenKind::Reify
+            | TokenKind::Static
+            | TokenKind::Trait => Node_::Token(kind),
             _ => Node_::Ignored,
         });
         self.state.previous_token_kind = kind;
@@ -1484,8 +1463,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_list(&mut self, items: std::vec::Vec<Self::R>, _: usize) -> Self::R {
-        if items.iter().any(|node| matches!(node, Ok(Node_::Yield))) {
-            Ok(Node_::Yield)
+        if items
+            .iter()
+            .any(|node| matches!(node, Ok(Node_::Token(TokenKind::Yield))))
+        {
+            Ok(Node_::Token(TokenKind::Yield))
         } else {
             let items_iter = items.into_iter();
             let mut items = Vec::new_in(self.state.arena);
@@ -1886,8 +1868,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let typedef = TypedefType {
                     pos,
                     vis: match keyword? {
-                        Node_::Type => aast::TypedefVisibility::Transparent,
-                        Node_::Newtype => aast::TypedefVisibility::Opaque,
+                        Node_::Token(TokenKind::Type) => aast::TypedefVisibility::Transparent,
+                        Node_::Token(TokenKind::Newtype) => aast::TypedefVisibility::Opaque,
                         _ => aast::TypedefVisibility::Transparent,
                     },
                     tparams,
@@ -1910,8 +1892,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_type_constraint(&mut self, kind: Self::R, value: Self::R) -> Self::R {
         let kind = match kind? {
-            Node_::As => ConstraintKind::ConstraintAs,
-            Node_::Super => ConstraintKind::ConstraintSuper,
+            Node_::Token(TokenKind::As) => ConstraintKind::ConstraintAs,
+            Node_::Token(TokenKind::Super) => ConstraintKind::ConstraintSuper,
             n => return Err(format!("Expected either As or Super, but was {:?}", n)),
         };
         Ok(Node_::TypeConstraint(self.alloc((kind, value?))))
@@ -1938,7 +1920,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 _ => Variance::Invariant,
             },
             reified: match reify? {
-                Node_::Reify => aast::ReifyKind::Reified,
+                Node_::Token(TokenKind::Reify) => aast::ReifyKind::Reified,
                 _ => aast::ReifyKind::Erased,
             },
             constraints,
@@ -1969,7 +1951,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             Node_::ListItem(innards) => {
                 let id = self.get_name("", innards.1)?;
                 match innards.0 {
-                    Node_::DotDotDot => (true, id),
+                    Node_::Token(TokenKind::DotDotDot) => (true, id),
                     _ => (false, id),
                 }
             }
@@ -1979,7 +1961,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let visibility = visibility?;
         let initializer = initializer?;
         let kind = match inout? {
-            Node_::Inout => ParamMode::FPinout,
+            Node_::Token(TokenKind::Inout) => ParamMode::FPinout,
             _ => ParamMode::FPnormal,
         };
         let hint = hint?;
@@ -2068,7 +2050,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_yield_expression(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
-        Ok(Node_::Yield)
+        Ok(Node_::Token(TokenKind::Yield))
     }
 
     fn make_yield_from_expression(
@@ -2077,7 +2059,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg1: Self::R,
         _arg2: Self::R,
     ) -> Self::R {
-        Ok(Node_::Yield)
+        Ok(Node_::Token(TokenKind::Yield))
     }
 
     fn make_const_declaration(
@@ -2157,7 +2139,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_namespace_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
         let body = body?;
-        let is_empty = matches!(body, Node_::Semicolon);
+        let is_empty = matches!(body, Node_::Token(TokenKind::Semicolon));
         if !is_empty {
             Rc::make_mut(&mut self.state.namespace_builder).pop_namespace();
         }
@@ -2210,7 +2192,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         aliased_name: Self::R,
     ) -> Self::R {
         let id = self.get_name("", name?)?;
-        let as_ = if let Node_::As = as_? {
+        let as_ = if let Node_::Token(TokenKind::As) = as_? {
             Some(self.get_name("", aliased_name?)?.1)
         } else {
             None
@@ -2239,16 +2221,16 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             self.get_name(self.state.namespace_builder.current_namespace(), name?)?;
 
         let mut class_kind = match class_keyword? {
-            Node_::Interface => ClassKind::Cinterface,
-            Node_::Trait => ClassKind::Ctrait,
+            Node_::Token(TokenKind::Interface) => ClassKind::Cinterface,
+            Node_::Token(TokenKind::Trait) => ClassKind::Ctrait,
             _ => ClassKind::Cnormal,
         };
         let mut final_ = false;
 
         for modifier in modifiers?.iter() {
             match modifier {
-                Node_::Abstract => class_kind = ClassKind::Cabstract,
-                Node_::Final => final_ = true,
+                Node_::Token(TokenKind::Abstract) => class_kind = ClassKind::Cabstract,
+                Node_::Token(TokenKind::Final) => final_ = true,
                 _ => (),
             }
         }
@@ -2291,8 +2273,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         }
                         Node_::TypeConstant(constant) => typeconsts.push(constant.clone()),
                         Node_::RequireClause(require) => match require.require_type {
-                            Node_::Extends => req_extends.push(self.node_to_ty(require.name)?),
-                            Node_::Implements => {
+                            Node_::Token(TokenKind::Extends) => {
+                                req_extends.push(self.node_to_ty(require.name)?)
+                            }
+                            Node_::Token(TokenKind::Implements) => {
                                 req_implements.push(self.node_to_ty(require.name)?)
                             }
                             _ => {}
@@ -2369,7 +2353,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             final_,
             is_xhp: false,
             has_xhp_keyword: match xhp_keyword? {
-                Node_::XHP => true,
+                Node_::Token(TokenKind::XHP) => true,
                 _ => false,
             },
             kind: class_kind,
@@ -2691,7 +2675,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
         let kind = match open? {
-            Node_::DotDotDot => ShapeKind::OpenShape,
+            Node_::Token(TokenKind::DotDotDot) => ShapeKind::OpenShape,
             _ => ShapeKind::ClosedShape,
         };
         let pos = Pos::merge(
@@ -3071,7 +3055,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let attributes = attributes?.as_attributes(self.state.arena)?;
         let has_abstract_keyword = modifiers?.iter().fold(false, |abstract_, node| match node {
-            Node_::Abstract => true,
+            Node_::Token(TokenKind::Abstract) => true,
             _ => abstract_,
         });
         let constraint = match constraint? {

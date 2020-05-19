@@ -447,6 +447,9 @@ impl Options {
         let mut merged = json!({});
         for json in jsons {
             let json: &str = json.as_ref();
+            if json.is_empty() {
+                continue;
+            }
             Self::merge(
                 &mut merged,
                 &serde_json::from_str(json).map_err(|e| e.to_string())?,
@@ -989,6 +992,52 @@ mod tests {
              "hhvm.only.opt2": { "global_value": "" },
         }))
         .expect("boolish-parsing logic wrongly triggered");
+    }
+
+    #[test]
+    fn test_options_de_empty_configs_skipped_no_crash() {
+        let res: Result<Options, String> = Options::from_configs(
+            // a subset (only 30/5K lines) of the real config passed by HHVM
+            &[
+                "", // this should be skipped (it's an invalid JSON)
+                r#"
+          {
+            "hhvm.trusted_db_path": {
+              "access": 4,
+              "local_value": "",
+              "global_value": ""
+            },
+            "hhvm.query": {
+              "access": 4,
+              "local_value": "",
+              "global_value": ""
+            },
+            "hhvm.php7.ltr_assign": {
+              "access": 4,
+              "local_value": "0",
+              "global_value": "0"
+            },
+            "hhvm.aliased_namespaces": {
+              "access": 4,
+              "local_value": {
+                "C": "HH\\Lib\\C"
+              },
+              "global_value": {
+                "Vec": "HH\\Lib\\Vec"
+              }
+            }
+          }
+          "#,
+                r#"
+          {
+            "hhvm.include_roots": {
+              "global_value": {}
+            }
+          }"#,
+            ],
+            &EMPTY_STRS,
+        );
+        assert_eq!(res.err(), None);
     }
 }
 

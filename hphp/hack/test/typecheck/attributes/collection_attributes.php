@@ -12,3 +12,6 @@ class Y {}
 
 <<A(keyset["a", "b", "c"])>>
 class Z {}
+
+<<A(tuple(1, 2, 3))>>
+class W {}

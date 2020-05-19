@@ -3739,8 +3739,8 @@ where
     }
 
     // Arguments to attributes must be literals (int, string, etc), collections
-    // (eg vec, dict, keyset, etc), Foo::class strings, shapes or string
-    // concatenations.
+    // (eg vec, dict, keyset, etc), Foo::class strings, shapes, string
+    // concatenations, or tuples.
     fn is_valid_attribute_arg(node: &Syntax<T, V>, env: &mut Env) {
         let mut is_valid_list = |nodes: &Syntax<T, V>| {
             let _ = Self::could_map(
@@ -3805,6 +3805,7 @@ where
             VarrayIntrinsicExpression(c) => is_valid_list(&c.varray_intrinsic_members),
             VectorIntrinsicExpression(c) => is_valid_list(&c.vector_intrinsic_members),
             ShapeExpression(c) => is_valid_list(&c.shape_expression_fields),
+            TupleExpression(c) => is_valid_list(&c.tuple_expression_items),
             // Collection Internals
             FieldInitializer(c) => {
                 Self::is_valid_attribute_arg(&c.field_initializer_name, env);

@@ -3729,98 +3729,27 @@ where
         }
         let params = Self::could_map(
             |n: &Syntax<T, V>, e: &mut Env| -> Result<ast::Expr> {
-                Self::is_valid_attribute_arg(n, e);
+                if let ScopeResolutionExpression(c) = &n.syntax {
+                    if let Some(TK::Name) = Self::token_kind(&c.scope_resolution_name) {
+                        Self::raise_parsing_error(
+                            n,
+                            e,
+                            &syntax_error::constants_as_attribute_arguments,
+                        );
+                    }
+                } else if let Some(TK::Name) = Self::token_kind(n) {
+                    Self::raise_parsing_error(
+                        n,
+                        e,
+                        &syntax_error::constants_as_attribute_arguments,
+                    );
+                }
                 Self::p_expr(n, e)
             },
             constructor_call_argument_list,
             env,
         )?;
         Ok(ast::UserAttribute { name, params })
-    }
-
-    // Arguments to attributes must be literals (int, string, etc), collections
-    // (eg vec, dict, keyset, etc), Foo::class strings, shapes or string
-    // concatenations.
-    fn is_valid_attribute_arg(node: &Syntax<T, V>, env: &mut Env) {
-        let mut is_valid_list = |nodes: &Syntax<T, V>| {
-            let _ = Self::could_map(
-                |n, e| {
-                    Self::is_valid_attribute_arg(n, e);
-                    Ok(())
-                },
-                nodes,
-                env,
-            );
-            ()
-        };
-        match &node.syntax {
-            ParenthesizedExpression(c) => {
-                Self::is_valid_attribute_arg(&c.parenthesized_expression_expression, env)
-            }
-            // Normal literals (string, int, etc)
-            LiteralExpression(_) => (),
-            // ::class strings
-            ScopeResolutionExpression(c) => {
-                if let Some(TK::Class) = Self::token_kind(&c.scope_resolution_name) {
-                } else {
-                    Self::raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::expression_as_attribute_arguments,
-                    );
-                }
-            }
-            // Negations
-            PrefixUnaryExpression(c) => {
-                Self::is_valid_attribute_arg(&c.prefix_unary_operand, env);
-                let token = Self::token_kind(&c.prefix_unary_operator);
-                match token {
-                    Some(TK::Minus) => (),
-                    Some(TK::Plus) => (),
-                    _ => Self::raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::expression_as_attribute_arguments,
-                    ),
-                }
-            }
-            // String concatenation
-            BinaryExpression(c) => {
-                if let Some(TK::Dot) = Self::token_kind(&c.binary_operator) {
-                    Self::is_valid_attribute_arg(&c.binary_left_operand, env);
-                    Self::is_valid_attribute_arg(&c.binary_right_operand, env);
-                } else {
-                    Self::raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::expression_as_attribute_arguments,
-                    );
-                }
-            }
-            // Top-level Collections
-            ArrayIntrinsicExpression(c) => is_valid_list(&c.array_intrinsic_members),
-            DarrayIntrinsicExpression(c) => is_valid_list(&c.darray_intrinsic_members),
-            DictionaryIntrinsicExpression(c) => is_valid_list(&c.dictionary_intrinsic_members),
-            KeysetIntrinsicExpression(c) => is_valid_list(&c.keyset_intrinsic_members),
-            VarrayIntrinsicExpression(c) => is_valid_list(&c.varray_intrinsic_members),
-            VectorIntrinsicExpression(c) => is_valid_list(&c.vector_intrinsic_members),
-            ShapeExpression(c) => is_valid_list(&c.shape_expression_fields),
-            // Collection Internals
-            FieldInitializer(c) => {
-                Self::is_valid_attribute_arg(&c.field_initializer_name, env);
-                Self::is_valid_attribute_arg(&c.field_initializer_value, env);
-            }
-            ElementInitializer(c) => {
-                Self::is_valid_attribute_arg(&c.element_key, env);
-                Self::is_valid_attribute_arg(&c.element_value, env);
-            }
-            // Everything else is not allowed
-            _ => Self::raise_parsing_error(
-                node,
-                env,
-                &syntax_error::expression_as_attribute_arguments,
-            ),
-        }
     }
 
     fn p_user_attribute(node: &Syntax<T, V>, env: &mut Env) -> Result<Vec<ast::UserAttribute>> {

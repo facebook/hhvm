@@ -898,11 +898,13 @@ mod tests {
         let act = Options::from_configs(&jsons, &EMPTY_STRS).unwrap();
         assert!(act
             .hhvm
-            .hack_lang.flags
+            .hack_lang
+            .flags
             .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING));
         assert!(!act
             .hhvm
-            .hack_lang.flags
+            .hack_lang
+            .flags
             .contains(LangFlags::ENABLE_COROUTINES));
         assert!(act.hhvm.flags.contains(HhvmFlags::RX_IS_ENABLED));
     }

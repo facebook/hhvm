@@ -8,9 +8,9 @@ use aast_parser::{rust_aast_parser_types::Env, AastParser, Error as AastParserEr
 use ocamlrep::FromOcamlRep;
 use ocamlrep_ocamlpool::to_ocaml;
 use parser_core_types::{indexed_source_text::IndexedSourceText, source_text::SourceText};
-use stack_limit::{StackLimit, KI, MI};
+use stack_limit::{StackLimit, GI, KI, MI};
 
-const MAX_STACK_SIZE: usize = 1024 * MI;
+const MAX_STACK_SIZE: usize = GI;
 
 fn stack_slack_for_traversal_and_parsing(stack_size: usize) -> usize {
     // Syntax::to_ocaml is deeply & mutually recursive and uses nearly 2.5x of stack

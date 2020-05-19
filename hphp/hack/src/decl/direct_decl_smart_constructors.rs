@@ -427,7 +427,7 @@ impl<'a> State<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub struct VariableDecl<'a> {
+pub struct FunParamDecl<'a> {
     attributes: Node_<'a>,
     visibility: Node_<'a>,
     kind: ParamMode,
@@ -534,7 +534,7 @@ pub enum Node_<'a> {
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node_<'a>, Node_<'a>)),
     Const(&'a ShallowClassConst<'a>),
-    Variable(&'a VariableDecl<'a>),
+    FunParam(&'a FunParamDecl<'a>),
     Attribute(&'a Attribute<'a>),
     FunctionHeader(&'a FunctionHeader<'a>),
     Constructor {
@@ -1042,7 +1042,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         body: Node_,
     ) -> Result<(Id<'a>, Ty<'a>, &'a [ShallowProp<'a>]), ParseError> {
         let id = self.get_name(namespace, header.name)?;
-        let (params, properties, arity) = self.into_variables_list(header.param_list)?;
+        let (params, properties, arity) = self.as_fun_params(header.param_list)?;
         let type_ = match header.name {
             Node_::Construct(pos) => Ty(
                 self.alloc(Reason::witness(pos)),
@@ -1122,18 +1122,18 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    fn into_variables_list(
+    fn as_fun_params(
         &self,
         list: Node_<'a>,
     ) -> Result<(FunParams<'a>, &'a [ShallowProp<'a>], FunArity<'a>), ParseError> {
         match list {
             Node_::List(nodes) => {
-                let mut variables = Vec::new_in(self.state.arena);
+                let mut params = Vec::new_in(self.state.arena);
                 let mut properties = Vec::new_in(self.state.arena);
                 let mut arity = FunArity::Fstandard;
-                for variable in nodes.iter() {
-                    match variable {
-                        Node_::Variable(&VariableDecl {
+                for node in nodes.iter() {
+                    match node {
+                        Node_::FunParam(&FunParamDecl {
                             attributes,
                             visibility,
                             kind,
@@ -1207,33 +1207,36 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             });
                             arity = match (arity, initializer, variadic) {
                                 (FunArity::Fstandard, Node_::Ignored, false) => {
-                                    variables.push(param);
+                                    params.push(param);
                                     FunArity::Fstandard
                                 }
                                 (FunArity::Fstandard, Node_::Ignored, true) => {
                                     FunArity::Fvariadic(param)
                                 }
                                 (FunArity::Fstandard, _, _) => {
-                                    variables.push(param);
+                                    params.push(param);
                                     FunArity::Fstandard
                                 }
                                 (arity, _, _) => {
-                                    variables.push(param);
+                                    params.push(param);
                                     arity
                                 }
                             };
                         }
-                        n => return Err(format!("Expected a variable, but got {:?}", n)),
+                        n => return Err(format!("Expected a function parameter, but got {:?}", n)),
                     }
                 }
                 Ok((
-                    variables.into_bump_slice(),
+                    params.into_bump_slice(),
                     properties.into_bump_slice(),
                     arity,
                 ))
             }
             Node_::Ignored => Ok((&[], &[], FunArity::Fstandard)),
-            n => Err(format!("Expected a list of variables, but got {:?}", n)),
+            n => Err(format!(
+                "Expected a list of function parameters, but got {:?}",
+                n
+            )),
         }
     }
 
@@ -2064,7 +2067,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             _ => ParamMode::FPnormal,
         };
         let hint = hint?;
-        Ok(Node_::Variable(self.alloc(VariableDecl {
+        Ok(Node_::FunParam(self.alloc(FunParamDecl {
             attributes,
             visibility,
             kind,

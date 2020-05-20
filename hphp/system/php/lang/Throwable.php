@@ -7,6 +7,7 @@ interface Throwable {
   public function getLine(): int;
   public function getTrace(): \HH\Container;
   public function getTraceAsString(): string;
+  <<__Rx, __MaybeMutable>>
   public function getPrevious(): ?Throwable;
   public function __toString(): string;
 }

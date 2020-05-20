@@ -46,6 +46,7 @@ trait BaseException {
    * @return     mixed   Returns the previous Exception if available or NULL
    *                     otherwise.
    */
+  <<__Rx, __MaybeMutable>>
   final public function getPrevious() {
     return $this->previous;
   }

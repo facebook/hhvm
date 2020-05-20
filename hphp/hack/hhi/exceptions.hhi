@@ -26,6 +26,7 @@ interface Throwable {
   public function getLine(): int;
   public function getTrace(): Container<mixed>;
   public function getTraceAsString(): string;
+  <<__Rx, __MaybeMutable>>
   public function getPrevious(): ?Throwable;
   public function __toString(): string;
   public function toString(): string;
@@ -46,6 +47,7 @@ class Error implements Throwable {
   );
   <<__Rx, __MaybeMutable>>
   final public function getMessage(): string;
+  <<__Rx, __MaybeMutable>>
   final public function getPrevious(): ?Throwable;
   <<__Rx, __MaybeMutable>>
   final public function getCode(): mixed;
@@ -82,6 +84,7 @@ class Exception implements Throwable {
   );
   <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage(): string;
+  <<__Rx, __MaybeMutable>>
   final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
   <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>

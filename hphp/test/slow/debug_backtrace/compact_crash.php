@@ -13,10 +13,8 @@ class X {
     var_dump('hello');
   }
 }
-
+<<__EntryPoint>>
 function main() {
   fb_setprofile('profile');
   (new X)->foo();
 }
-
-main();

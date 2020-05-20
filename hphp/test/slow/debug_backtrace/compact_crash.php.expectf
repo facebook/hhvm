@@ -23,11 +23,7 @@ array(3) {
     string(2) "::"
   }
   [2]=>
-  array(3) {
-    ["file"]=>
-    string(%d) "%s/test/slow/debug_backtrace/compact_crash.php"
-    ["line"]=>
-    int(22)
+  array(1) {
     ["function"]=>
     string(4) "main"
   }

@@ -1,4 +1,4 @@
-array(3) {
+array(6) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -14,7 +14,11 @@ array(3) {
     }
   }
   [1]=>
-  array(2) {
+  array(4) {
+    ["file"]=>
+    string(%d) "%s/metadata_async_block.php"
+    ["line"]=>
+    int(15)
     ["function"]=>
     string(3) "foo"
     ["args"]=>
@@ -24,11 +28,23 @@ array(3) {
     }
   }
   [2]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(13)
+  array(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [3]=>
+  array(2) {
+    ["function"]=>
+    string(43) "Closure$__SystemLib\enter_async_entry_point"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [4]=>
+  array(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
@@ -38,8 +54,18 @@ array(3) {
       }
     }
   }
+  [5]=>
+  array(2) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      function(main)
+    }
+  }
 }
-array(3) {
+array(6) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -55,7 +81,11 @@ array(3) {
     }
   }
   [1]=>
-  array(3) {
+  array(5) {
+    ["file"]=>
+    string(%d) "%s/metadata_async_block.php"
+    ["line"]=>
+    int(16)
     ["function"]=>
     string(3) "foo"
     ["args"]=>
@@ -67,11 +97,23 @@ array(3) {
     string(8) "I am foo"
   }
   [2]=>
-  array(4) {
-    ["file"]=>
-    string(%d) "%s"
-    ["line"]=>
-    int(14)
+  array(2) {
+    ["function"]=>
+    string(4) "main"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [3]=>
+  array(2) {
+    ["function"]=>
+    string(43) "Closure$__SystemLib\enter_async_entry_point"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [4]=>
+  array(2) {
     ["function"]=>
     string(12) "HH\Asio\join"
     ["args"]=>
@@ -79,6 +121,16 @@ array(3) {
       [0]=>
       object(HH\AsyncFunctionWaitHandle) (0) {
       }
+    }
+  }
+  [5]=>
+  array(2) {
+    ["function"]=>
+    string(35) "__SystemLib\enter_async_entry_point"
+    ["args"]=>
+    array(1) {
+      [0]=>
+      function(main)
     }
   }
 }

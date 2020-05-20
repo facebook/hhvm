@@ -9,5 +9,8 @@ function foo($options) {
   bar($options);
 }
 
-foo(0);
-foo(DEBUG_BACKTRACE_PROVIDE_METADATA);
+<<__EntryPoint>>
+function main(): void {
+  foo(0);
+  foo(DEBUG_BACKTRACE_PROVIDE_METADATA);
+}

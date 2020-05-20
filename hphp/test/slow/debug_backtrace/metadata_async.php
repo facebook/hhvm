@@ -9,5 +9,8 @@ async function foo($options) {
   await bar($options);
 }
 
-HH\Asio\join(foo(0));
-HH\Asio\join(foo(DEBUG_BACKTRACE_PROVIDE_METADATA));
+<<__EntryPoint>>
+async function main(): Awaitable<void> {
+  await foo(0);
+  await foo(DEBUG_BACKTRACE_PROVIDE_METADATA);
+}

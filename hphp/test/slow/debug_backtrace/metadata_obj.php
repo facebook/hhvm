@@ -12,6 +12,9 @@ class Baz {
   }
 }
 
-$baz = new Baz();
-$baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT);
-$baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_PROVIDE_METADATA);
+<<__EntryPoint>>
+function main(): void {
+  $baz = new Baz();
+  $baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+  $baz->foo(DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_PROVIDE_METADATA);
+}

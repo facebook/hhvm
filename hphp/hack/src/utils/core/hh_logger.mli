@@ -10,7 +10,7 @@
 val timestamp_string : unit -> string
 
 (** enables logging to a file (in addition to stderr which is always enabled) *)
-val set_log : string -> out_channel -> unit
+val set_log : string -> unit
 
 val set_id : string -> unit
 

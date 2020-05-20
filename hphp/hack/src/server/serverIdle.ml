@@ -24,6 +24,8 @@ module Periodical : sig
 
   val one_second : float
 
+  val one_minute : float
+
   val one_hour : float
 
   val one_day : float
@@ -43,6 +45,8 @@ end = struct
   let always = 0.0
 
   let one_second = 1.0
+
+  let one_minute = 60.0
 
   let one_hour = 3600.0
 
@@ -121,6 +125,20 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
       ( Periodical.one_second,
         fun ~env ->
           EventLogger.recheck_disk_files ();
+          env );
+      ( Periodical.one_minute *. 5.,
+        fun ~env ->
+          begin
+            try
+              (* We'll cycle the client-log if it gets bigger than 1Mb.
+              We do this cycling here in the server (rather than in the client)
+              to avoid races when multiple concurrent clients try to cycle it. *)
+              let client_log_fn = ServerFiles.client_log root in
+              let stat = Unix.stat client_log_fn in
+              if stat.Unix.st_size > 1024 * 1024 then
+                Sys.rename client_log_fn (client_log_fn ^ ".old")
+            with _ -> ()
+          end;
           env );
       ( Periodical.one_hour *. 3.,
         fun ~env ->

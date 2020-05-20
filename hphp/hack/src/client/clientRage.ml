@@ -563,6 +563,8 @@ let main (env : env) : Exit_status.t Lwt.t =
   add_fn "logold_server.txt" (ServerFiles.log_link env.root ^ ".old");
   add_fn "log_monitor.txt" (ServerFiles.monitor_log_link env.root);
   add_fn "logold_monitor.txt" (ServerFiles.monitor_log_link env.root ^ ".old");
+  add_fn "log_client.txt" (ServerFiles.client_log env.root);
+  add_fn "logold_client.txt" (ServerFiles.client_log env.root ^ ".old");
   add_fn "log_client_lsp.txt" (ServerFiles.client_lsp_log env.root);
   add_fn "logold_client_lsp.txt" (ServerFiles.client_lsp_log env.root ^ ".old");
   add_fn "log_client_ide.txt" (ServerFiles.client_ide_log env.root);

@@ -40,6 +40,8 @@ let socket_file root = path_of_root root "sock"
 
 let dfind_log root = path_of_root root "dfind"
 
+let client_log root = path_of_root root "client_log"
+
 let client_lsp_log root = path_of_root root "client_lsp_log"
 
 let client_ide_log root = path_of_root root "client_ide_log"

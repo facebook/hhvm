@@ -1096,5 +1096,5 @@ let root = function
   | CDebug { ClientDebug.root; _ }
   | CRage { ClientRage.root; _ }
   | CDownloadSavedState { ClientDownloadSavedState.root; _ } ->
-    root
-  | CLsp _ -> Path.dummy_path
+    Some root
+  | CLsp _ -> None

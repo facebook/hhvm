@@ -276,9 +276,7 @@ let set_up_hh_logger_for_client_lsp (root : Path.t) : unit =
     try Sys.rename client_lsp_log_fn (client_lsp_log_fn ^ ".old")
     with _e -> ()
   end;
-  Hh_logger.set_log
-    client_lsp_log_fn
-    (Out_channel.create client_lsp_log_fn ~append:true);
+  Hh_logger.set_log client_lsp_log_fn;
   log "Starting clientLsp at %s" client_lsp_log_fn
 
 let to_stdout (json : Hh_json.json) : unit =

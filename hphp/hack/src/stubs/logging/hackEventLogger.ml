@@ -166,7 +166,7 @@ let serverless_ide_destroy_ok _ = ()
 
 let serverless_ide_destroy_error _ _ _ = ()
 
-let client_bad_exit ~command:_ _ = ()
+let client_bad_exit ~command_name:_ _ = ()
 
 let glean_globalrev_supplied ~globalrev:_ = ()
 

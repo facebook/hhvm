@@ -211,9 +211,7 @@ let set_up_hh_logger_for_client_ide_service (root : Path.t) : unit =
     try Sys.rename client_ide_log_fn (client_ide_log_fn ^ ".old")
     with _e -> ()
   end;
-  Hh_logger.set_log
-    client_ide_log_fn
-    (Out_channel.create client_ide_log_fn ~append:true);
+  Hh_logger.set_log client_ide_log_fn;
   log "Starting client IDE service at %s" client_ide_log_fn
 
 let write_message

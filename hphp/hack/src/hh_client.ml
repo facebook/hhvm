@@ -20,21 +20,9 @@
  *
  * Usage: hh_client [OPTION]... [WWW DIRECTORY] [FILE]...
  *
- * --from-emacs:
- * --from-arc-diff:
- *   => waits for server to initialize
- *   => retries upto 3x on error conditions
- *   => output debugging info
- * --from-vim:
- *   => does not wait for server to initialize
- *   => does not retry on error conditions
- *   => should minimize output to single lines
- * --from-arc-land:
- *   => waits but does not retry too many times?
- *   => minimal output
- *
- *  Use --help or see clientArgs.ml for more options
  *)
+
+open Hh_prelude
 
 let () = Random.self_init ()
 
@@ -52,9 +40,8 @@ let () =
     (Sys.Signal_handle (fun _ -> raise Exit_status.(Exit_with Interrupted)));
   let init_id = Random_id.short_string () in
   let command = ClientArgs.parse_args ~init_id in
-  let root = ClientArgs.root command in
-  HackEventLogger.client_init ~init_id root;
-  let command_name = function
+  let command_name =
+    match command with
     | ClientCommand.CCheck _ -> "Check"
     | ClientCommand.CStart _ -> "Start"
     | ClientCommand.CStop _ -> "Stop"
@@ -64,6 +51,26 @@ let () =
     | ClientCommand.CDownloadSavedState _ -> "DownloadSavedState"
     | ClientCommand.CRage _ -> "Rage"
   in
+
+  (* Set up logging. *)
+  let root = ClientArgs.root command in
+  HackEventLogger.client_init
+    ~init_id
+    (Option.value root ~default:Path.dummy_path);
+  begin
+    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
+    Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
+    match root with
+    | None -> ()
+    | Some root ->
+      let client_log_fn = ServerFiles.client_log root in
+      Hh_logger.set_log client_log_fn;
+      Hh_logger.log
+        "[hh_client] %s"
+        (String.concat ~sep:" " (Array.to_list Sys.argv))
+  end;
+
   let exit_status =
     try
       match command with
@@ -78,7 +85,7 @@ let () =
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)
     with Exit_status.Exit_with es ->
-      HackEventLogger.client_bad_exit ~command:(command_name command) es;
+      HackEventLogger.client_bad_exit ~command_name es;
       es
   in
   Exit_status.exit exit_status

@@ -3066,46 +3066,18 @@ bool isValidTypeOpForIsAs(const IsTypeOp& op) {
   not_reached();
 }
 
-template<bool asExpression>
-void isAsTypeStructImpl(ISS& env, SArray inputTS) {
+void isTypeStructImpl(ISS& env, SArray inputTS) {
   auto const resolvedTS = resolveTSStatically(env, inputTS, env.ctx.cls);
   auto const ts = resolvedTS ? resolvedTS : inputTS;
   auto const t = loosen_likeness(topC(env, 1)); // operand to is/as
 
   bool may_raise = true;
-  auto result = [&] (
-    const Type& out,
-    const folly::Optional<Type>& test = folly::none
-  ) {
-    if (asExpression && out.subtypeOf(BTrue)) {
-      return reduce(env, bc::PopC {});
-    }
-    auto const location = topStkEquiv(env, 1);
+  auto result = [&] (const Type& out) {
     popC(env); // type structure
     popC(env); // operand to is/as
-    if (!asExpression) {
-      constprop(env);
-      if (!may_raise) nothrow(env);
-      return push(env, out);
-    }
-    if (out.subtypeOf(BFalse)) {
-      push(env, t);
-      return unreachable(env);
-    }
-
-    assertx(out == TBool);
-    if (!test) return push(env, t);
-    auto const newT = intersection_of(*test, t);
-    if (newT == TBottom || !refineLocation(env, location, [&] (Type t) {
-          auto ret = intersection_of(*test, t);
-          if (test->couldBe(BInitNull) && t.couldBe(BUninit)) {
-            ret |= TUninit;
-          }
-          return ret;
-        })) {
-      unreachable(env);
-    }
-    return push(env, newT);
+    constprop(env);
+    if (!may_raise) nothrow(env);
+    return push(env, out);
   };
 
   auto check = [&] (
@@ -3119,9 +3091,7 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
       return result(TFalse);
     }
     auto const op = type_to_istypeop(test);
-    if (asExpression || !op || !isValidTypeOpForIsAs(op.value())) {
-      return result(TBool, test);
-    }
+    if (!op || !isValidTypeOpForIsAs(op.value())) return result(TBool);
     return reduce(env, bc::PopC {}, bc::IsTypeC { *op });
   };
 
@@ -3139,9 +3109,7 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
     return result(TBool);
   }
 
-  if (!asExpression) {
-    if (ts_type && !is_type_might_raise(*ts_type, t)) may_raise = false;
-  }
+  if (ts_type && !is_type_might_raise(*ts_type, t)) may_raise = false;
   switch (get_ts_kind(ts)) {
     case TypeStructure::Kind::T_int:
     case TypeStructure::Kind::T_bool:
@@ -3174,17 +3142,13 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_nonnull:
       if (is_definitely_null) return result(TFalse);
       if (is_definitely_not_null) return result(TTrue);
-      if (!asExpression) {
-        return reduce(env,
-                      bc::PopC {},
-                      bc::IsTypeC { IsTypeOp::Null },
-                      bc::Not {});
-      }
-      return result(TBool);
+      return reduce(env,
+                    bc::PopC {},
+                    bc::IsTypeC { IsTypeOp::Null },
+                    bc::Not {});
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_xhp: {
-      if (asExpression) return result(TBool);
       auto clsname = get_ts_classname(ts);
       auto const rcls = env.index.resolve_class(env.ctx, clsname);
       if (!rcls || !rcls->resolved() || (ts->exists(s_generic_types) &&
@@ -3197,7 +3161,6 @@ void isAsTypeStructImpl(ISS& env, SArray inputTS) {
       return reduce(env, bc::PopC {}, bc::InstanceOfD { clsname });
     }
     case TypeStructure::Kind::T_unresolved: {
-      if (asExpression) return result(TBool);
       auto classname = get_ts_classname(ts);
       auto const has_generics = ts->exists(s_generic_types);
       if (!has_generics && classname->isame(s_this.get())) {
@@ -3345,7 +3308,7 @@ void in(ISS& env, const bc::IsTypeStructC& op) {
       canReduceToDontResolve(a->m_data.parr, false)) {
     return reduce(env, bc::IsTypeStructC { TypeStructResolveOp::DontResolve });
   }
-  isAsTypeStructImpl<false>(env, a->m_data.parr);
+  isTypeStructImpl(env, a->m_data.parr);
 }
 
 void in(ISS& env, const bc::ThrowAsTypeStructException& op) {

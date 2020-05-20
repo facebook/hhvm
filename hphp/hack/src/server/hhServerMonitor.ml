@@ -58,7 +58,14 @@ let monitor_daemon_main
       init_id
       (Unix.gettimeofday ())
       false );
-  Sys_utils.set_signal Sys.sigpipe Sys.Signal_ignore;
+  Sys_utils.set_signal
+    Sys.sigpipe
+    (Sys.Signal_handle
+       (fun i ->
+         let stack =
+           Exception.get_current_callstack_string 99 |> Exception.clean_stack
+         in
+         Hh_logger.log "SIGPIPE(%d) - ignoring.\n%s\n" i stack));
 
   ( if not (ServerArgs.check_mode options) then
     (* Make sure to lock the lockfile before doing *anything*, especially

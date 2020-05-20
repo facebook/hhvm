@@ -1060,7 +1060,14 @@ let program_init genv env =
       begin
         match init_result with
         | ServerInit.Load_state_succeeded distance ->
-          (env, "state_load", None, None, distance)
+          let init_type =
+            match
+              Naming_table.get_forward_naming_fallback_path env.naming_table
+            with
+            | None -> "state_load_blob"
+            | Some _ -> "state_load_sqlite"
+          in
+          (env, init_type, None, None, distance)
         | ServerInit.Load_state_failed (err, stack) ->
           (env, "state_load_failed", Some err, Some stack, None)
         | ServerInit.Load_state_declined reason ->

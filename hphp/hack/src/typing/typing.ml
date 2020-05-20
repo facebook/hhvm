@@ -5961,18 +5961,29 @@ and call_construct p env class_ params el unpacked_element cid =
       let def_pos = get_pos m in
       TVis.check_obj_access ~use_pos:p ~def_pos env vis;
       TVis.check_deprecated ~use_pos:p ~def_pos ce_deprecated;
-      let m =
+      (* Obtain the type of the constructor *)
+      let (env, m) =
         match deref m with
         | (r, Tfun ft) ->
-          mk
-            ( r,
-              Tfun
-                (Typing_enforceability.compute_enforced_and_pessimize_fun_type
-                   env
-                   ft) )
-        | _ -> m
+          let ft =
+            Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
+          in
+          let (env, ft) =
+            Phase.(
+              localize_ft
+                ~instantiation:
+                  { use_name = "constructor"; use_pos = p; explicit_targs = [] }
+                ~ety_env
+                ~def_pos
+                env
+                ft)
+          in
+          (env, mk (r, Tfun ft))
+        | (r, _) ->
+          Errors.internal_error p "Expected function type for constructor";
+          let ty = TUtils.terr env r in
+          (env, ty)
       in
-      let (env, m) = Phase.localize ~ety_env env m in
       let (env, (tel, typed_unpack_element, _ty)) =
         call ~expected:None p env m el unpacked_element
       in

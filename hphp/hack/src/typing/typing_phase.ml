@@ -195,15 +195,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
     (env, lty)
   | (r, Tfun ft) ->
     let pos = Reason.to_pos r in
-    let (env, ft) =
-      localize_ft
-        ~ety_env
-        ~def_pos:pos
-        ~instantiation:
-          { use_pos = pos; use_name = "function"; explicit_targs = [] }
-        env
-        ft
-    in
+    let (env, ft) = localize_ft ~ety_env ~def_pos:pos env ft in
     (env, mk (r, Tfun ft))
   | (r, Tapply ((_, x), [arg]))
     when String.equal x Naming_special_names.FB.cIncorrectType

@@ -42,6 +42,7 @@
 #include "hphp/util/afdt-util.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hash.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
@@ -659,7 +660,7 @@ void LightProcess::runShadow(int afdt_fd) {
 namespace {
 
 int GetId() {
-  return (long)pthread_self() % g_procsCount;
+  return hash_int64((long)pthread_self()) % g_procsCount;
 }
 
 NEVER_INLINE

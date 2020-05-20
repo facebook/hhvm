@@ -20,15 +20,19 @@ Steps to reproduce the behavior:
 4. See error
 
 **Expected behavior**
+
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**Actual behavior**
 
-**Desktop (please complete the following information):**
- - OS: 
-> For example, 'Debian Squeeze', 'Ubuntu 16.04', 'MacOS High Sierra'. Please also mention if you are using Docker or similar images.
- - HHVM Version: 
+Copy-paste output, or add a screenshot to illustrate what actually happens. Copy-pasted text output (e.g. from `hhvm` or `hh_client`) is preferred to screenshots.
+
+**Environment**
+ - Operating system
+> For example, 'Debian Squeeze', 'Ubuntu 18.04', 'MacOS Catalina'.
+ - Installation method
+> For example, 'built from source', 'apt-get with dl.hhvm.com repository', 'hhvm/hhvm on dockerhub', 'homebrew'
+ - HHVM Version
 > Please include the output of `hhvm --version` and `hh_client --version`
 
 **Additional context**

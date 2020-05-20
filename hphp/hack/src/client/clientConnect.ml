@@ -295,10 +295,11 @@ let rec connect
         "For more detailed logs, try `tail -f $(hh_client --monitor-logname) $(hh_client --logname)`\n";
     (match e with
     | SMUtils.Server_died
-    | SMUtils.Monitor_connection_failure ->
+    | SMUtils.Monitor_connection_failure _ ->
       Unix.sleepf 0.1;
       connect env start_time
-    | SMUtils.Server_missing ->
+    | SMUtils.Server_missing_exn _
+    | SMUtils.Server_missing_timeout _ ->
       if env.autostart then (
         ClientStart.start_server
           {
@@ -340,7 +341,7 @@ let rec connect
         ^^ " on next server to be started. Please wait patiently. If you really"
         ^^ " know what you're doing, maybe try --force-dormant-start\n%!" );
       raise Exit_status.(Exit_with No_server_running_should_retry)
-    | SMUtils.Monitor_socket_not_ready ->
+    | SMUtils.Monitor_socket_not_ready _ ->
       HackEventLogger.client_connect_once_busy start_time;
       Unix.sleepf 0.1;
       connect env start_time

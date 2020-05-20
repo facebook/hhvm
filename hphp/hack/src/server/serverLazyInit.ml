@@ -990,8 +990,10 @@ let saved_state_init
   let state_result =
     try
       match
-        Timeout.with_timeout ~timeout ~do_ ~on_timeout:(fun () ->
-            Error Load_state_timeout)
+        Timeout.with_timeout
+          ~timeout
+          ~do_
+          ~on_timeout:(fun (_ : Timeout.timings) -> Error Load_state_timeout)
       with
       | Error error -> Error error
       | Ok loaded_info ->

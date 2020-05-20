@@ -154,7 +154,7 @@ end = struct
         Timeout.with_timeout
           ~do_:(fun _ -> Buffered_line_reader.get_next_line reader)
           ~timeout
-          ~on_timeout:(fun () ->
+          ~on_timeout:(fun (_ : Timeout.timings) ->
             let () = EventLogger.watchman_timeout () in
             raise Read_payload_too_long)
 
@@ -251,7 +251,7 @@ end = struct
           ~timeout
           ~on_timeout:
             begin
-              fun () ->
+              fun (_ : Timeout.timings) ->
               let () =
                 Hh_logger.log "Regular_watchman_process.blocking_read timed out"
               in

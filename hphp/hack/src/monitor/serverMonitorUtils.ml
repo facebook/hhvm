@@ -98,20 +98,21 @@ type connection_error =
    * the version ID check very quickly. Only under very heavy load will that
    * sequence time out. *)
   | Monitor_establish_connection_timeout
-  | Server_missing
+  | Server_missing_exn of Exception.t
+  | Server_missing_timeout of Timeout.timings
   (* There is a brief period of time after the Monitor has grabbed its
    * liveness lock and before it starts listening in on the socket
    * (which can only happen after the socket file is created). During that
    * period, either the socket file doesn't exist yet, or socket connections
    * are refused. *)
-  | Monitor_socket_not_ready
+  | Monitor_socket_not_ready of Exception.t
   | Server_died
   (* Server dormant and can't join the (now full) queue of connections
    * waiting for the next server. *)
   | Server_dormant
   | Server_dormant_out_of_retries
   | Build_id_mismatched of build_mismatch_info option
-  | Monitor_connection_failure
+  | Monitor_connection_failure of Exception.t
 
 type connection_state =
   | Connection_ok

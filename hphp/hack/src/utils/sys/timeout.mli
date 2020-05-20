@@ -9,6 +9,12 @@
 
 (* Helpers for handling timeout, in particular input timeout. *)
 
+type timings = {
+  start_time: float;
+  deadline_time: float;  (** caller-supplied deadline *)
+  timeout_time: float;  (** actual time, after deadline, when we fired *)
+}
+
 type t
 
 (* The function `with_timeout` executes 'do_' for at most 'timeout'
@@ -30,7 +36,8 @@ type t
    `Stdlib.in_channel`.
 
 *)
-val with_timeout : timeout:int -> on_timeout:(unit -> 'a) -> do_:(t -> 'a) -> 'a
+val with_timeout :
+  timeout:int -> on_timeout:(timings -> 'a) -> do_:(t -> 'a) -> 'a
 
 val check_timeout : t -> unit
 
@@ -72,7 +79,7 @@ val close_process_in : in_channel -> Unix.process_status
 
 val read_process :
   timeout:int ->
-  on_timeout:(unit -> 'a) ->
+  on_timeout:(timings -> 'a) ->
   reader:(t -> in_channel -> out_channel -> 'a) ->
   Exec_command.t ->
   string array ->
@@ -82,7 +89,7 @@ val open_connection : ?timeout:t -> Unix.sockaddr -> in_channel * out_channel
 
 val read_connection :
   timeout:int ->
-  on_timeout:(unit -> 'a) ->
+  on_timeout:(timings -> 'a) ->
   reader:(t -> in_channel -> out_channel -> 'a) ->
   Unix.sockaddr ->
   'a

@@ -49,7 +49,8 @@ let nice_kill env =
       end
     | Error (SMUtils.Build_id_mismatched _) ->
       Printf.eprintf "Successfully killed server for %s\n%!" root_s
-    | Error SMUtils.Server_missing ->
+    | Error (SMUtils.Server_missing_exn _)
+    | Error (SMUtils.Server_missing_timeout _) ->
       Printf.eprintf "No server to kill for %s\n%!" root_s
     | Error _ ->
       Printf.eprintf "Failed to kill server nicely for %s\n%!" root_s;

@@ -277,7 +277,7 @@ impl<'a> InferenceEnv<'a> {
                                 if aliases.mem(v0) {
                                     panic!("Two type variables are aliasing each other!");
                                 }
-                                aliases = aliases.add(self.bld, *v0);
+                                aliases = aliases.add(self.bld, v);
                                 v = *v0;
                                 continue;
                             }

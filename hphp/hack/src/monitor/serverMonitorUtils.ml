@@ -83,6 +83,7 @@ type build_mismatch_info = {
   existing_argv: string list;
   existing_launch_time: float;
 }
+[@@deriving show]
 
 let current_build_info =
   {
@@ -113,6 +114,7 @@ type connection_error =
   | Server_dormant_out_of_retries
   | Build_id_mismatched of build_mismatch_info option
   | Monitor_connection_failure of Exception.t
+[@@deriving show]
 
 type connection_state =
   | Connection_ok

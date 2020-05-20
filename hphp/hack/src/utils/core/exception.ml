@@ -96,3 +96,12 @@ let clean_stack (stack : string) : string =
   |> List.map format_one_line
   |> List.filter (fun s -> String.length s > 0)
   |> String.concat "\n"
+
+let pp ppf t =
+  Format.fprintf
+    ppf
+    "@[<1>%s: %s@]@."
+    (get_ctor_string t)
+    (get_backtrace_string t |> clean_stack)
+
+let show t = get_ctor_string t

@@ -12,6 +12,7 @@ type timings = {
   deadline_time: float;  (** caller-supplied deadline *)
   timeout_time: float;  (** actual time we raised the timeout *)
 }
+[@@deriving show]
 
 exception
   Timeout of {

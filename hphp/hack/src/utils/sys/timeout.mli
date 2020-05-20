@@ -14,6 +14,7 @@ type timings = {
   deadline_time: float;  (** caller-supplied deadline *)
   timeout_time: float;  (** actual time, after deadline, when we fired *)
 }
+[@@deriving show]
 
 type t
 

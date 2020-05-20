@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *)
 
-type t
+type t [@@deriving show]
 
 val wrap : exn -> t
 

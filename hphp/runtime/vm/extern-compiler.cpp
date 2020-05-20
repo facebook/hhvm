@@ -64,6 +64,7 @@ bool createHackc(const std::string& path, const std::string& binary) {
     }
   }
   try {
+    FTRACE(3, "writing {} atomically\n", path);
     folly::writeFileAtomic(path, binary, 0755);
   } catch (std::system_error& ex) {
     return false;
@@ -80,7 +81,9 @@ folly::Optional<std::string> hackcExtractPath() {
   if (!RuntimeOption::EvalHackCompilerUseEmbedded) return folly::none;
 
   auto check = [] (const std::string& s) {
-    return !s.empty() && access(s.data(), X_OK) == 0;
+    if (s.empty()) return false;
+    FTRACE(3, "checking file '{}'\n", s);
+    return ::access(s.data(), X_OK) == 0;
   };
   if (!tl_extractPath.isNull() && check(*tl_extractPath)) {
     return *tl_extractPath;
@@ -109,17 +112,26 @@ folly::Optional<std::string> hackcExtractPath() {
     Logger::Error("Embedded hackc binary is missing");
     return folly::none;
   }
-  auto const gz_binary = read_embedded_data(desc);
-  int len = safe_cast<int>(gz_binary.size());
-
-  auto const bin_str = gzdecode(gz_binary.data(), len);
-  SCOPE_EXIT { free(bin_str); };
-  if (!bin_str || !len) {
-    Logger::Error("Embedded hackc binary could not be decompressed");
-    return folly::none;
-  }
-
-  auto const binary = std::string(bin_str, len);
+  auto const binary = [&]() -> std::string {
+    auto const gz_binary = read_embedded_data(desc);
+    tracing::Block _{
+      "compile-unit-uncompress",
+      [&] {
+        return tracing::Props{}
+          .add("binary_size", gz_binary.size());
+      }
+    };
+    FTRACE(3, "attempting gzip uncompress\n");
+    auto len = safe_cast<int>(gz_binary.size());
+    auto const bin_str = gzdecode(gz_binary.data(), len);
+    SCOPE_EXIT { if (bin_str) free(bin_str); };
+    if (!bin_str || !len) {
+      Logger::Error("Embedded hackc binary could not be gz decompressed");
+      return {};
+    }
+    return std::string{bin_str, safe_cast<size_t>(len)};
+  }();
+  if (binary.empty()) return {};
   if (createHackc(location, binary)) return set(location);
 
   int fd = -1;

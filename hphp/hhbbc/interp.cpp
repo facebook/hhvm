@@ -1632,8 +1632,7 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
     }
     return refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
       if (!ty.couldBe(BUninit) || !isect.couldBe(BNull)) {
-        auto ret = intersection_of(std::move(ty), isect);
-        return ty.subtypeOf(BUnc) ? ret : loosen_staticness(ret);
+        return ty.subtypeOf(BUnc) ? isect : loosen_staticness(isect);
       }
 
       if (isect.subtypeOf(BNull)) {

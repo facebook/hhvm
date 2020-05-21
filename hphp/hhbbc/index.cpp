@@ -3464,7 +3464,7 @@ Type context_sensitive_return_type(IndexData& data,
   constexpr auto max_interp_nexting_level = 2;
   static __thread uint32_t interp_nesting_level;
   auto const finfo = func_info(data, callCtx.callee);
-  auto const returnType = return_with_context(finfo->returnTy, callCtx.context);
+  auto returnType = return_with_context(finfo->returnTy, callCtx.context);
 
   auto checkParam = [&] (int i) {
     auto const constraint = finfo->func->params[i].typeConstraint;
@@ -3511,15 +3511,11 @@ Type context_sensitive_return_type(IndexData& data,
     return returnType;
   }
 
-  auto maybe_loosen_staticness = [&] (const Type& ty) {
-    return returnType.subtypeOf(BUnc) ? ty : loosen_staticness(ty);
-  };
-
   {
     ContextRetTyMap::const_accessor acc;
     if (data.contextualReturnTypes.find(acc, callCtx)) {
       if (data.frozen || acc->second == TBottom || is_scalar(acc->second)) {
-        return maybe_loosen_staticness(acc->second);
+        return acc->second;
       }
     }
   }
@@ -3550,18 +3546,22 @@ Type context_sensitive_return_type(IndexData& data,
            show(contextType), show(returnType));
   }
 
-  auto ret = intersection_of(std::move(returnType),
-                             std::move(contextType));
+  if (!returnType.subtypeOf(BUnc)) {
+    // If the context insensitive return type could be non-static, staticness
+    // could be a result of temporary context sensitive bytecode optimizations.
+    contextType = loosen_staticness(std::move(contextType));
+  }
+
+  auto ret = intersection_of(std::move(returnType), std::move(contextType));
+
+  if (!interp_nesting_level) {
+    FTRACE(3, "Context sensitive result: {}\n", show(ret));
+  }
 
   ContextRetTyMap::accessor acc;
   if (data.contextualReturnTypes.insert(acc, callCtx) ||
       ret.strictSubtypeOf(acc->second)) {
     acc->second = ret;
-  }
-
-  if (!interp_nesting_level) {
-    ret = maybe_loosen_staticness(ret);
-    FTRACE(3, "Context sensitive result: {}\n", show(ret));
   }
 
   return ret;

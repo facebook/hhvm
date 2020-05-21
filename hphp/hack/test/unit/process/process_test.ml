@@ -30,12 +30,18 @@ let test_continue_delayed_future_with () =
   true
 
 let test_exception_in_future_continuation () =
+  let on_error_count = ref 0 in
   let make_future (i : int) : int Future.t =
-    if i mod 2 = 0 then
-      Future.of_value 5
-    else
-      Future.continue_with (Future.of_value ()) @@ fun _ ->
-      failwith "Does it fire?"
+    let future =
+      if i mod 2 = 0 then
+        Future.of_value 5
+      else
+        Future.continue_with (Future.of_value ()) @@ fun _ ->
+        failwith "Does it fire?"
+    in
+    Future.on_error future @@ fun error ->
+    ignore error;
+    on_error_count := !on_error_count + 1
   in
 
   let successful_future = make_future 4 in
@@ -44,6 +50,11 @@ let test_exception_in_future_continuation () =
     true
     (Future.is_ready successful_future)
     "Successful future must be ready";
+
+  Asserter.Int_asserter.assert_equals
+    0
+    !on_error_count
+    "On error shouldn't have been called";
 
   let () =
     match Future.get successful_future with
@@ -57,6 +68,11 @@ let test_exception_in_future_continuation () =
     (Future.is_ready failing_future)
     "Failing future must be ready";
 
+  Asserter.Int_asserter.assert_equals
+    1
+    !on_error_count
+    "On error should have been called";
+
   let () =
     match Future.get failing_future with
     | Ok _result -> failwith "Expected a failure"
@@ -69,17 +85,27 @@ let test_exception_in_future_continuation () =
   true
 
 let test_of_error () =
+  let on_error_count = ref 0 in
   let make_future (i : int) : int Future.t =
-    if i mod 2 = 0 then
-      Future.of_value 5
-    else
-      Future.of_error "Does it fail?"
+    let future =
+      if i mod 2 = 0 then
+        Future.of_value 5
+      else
+        Future.of_error "Does it fail?"
+    in
+    Future.on_error future @@ fun error ->
+    ignore error;
+    on_error_count := !on_error_count + 1
   in
   let () =
     match Future.get (make_future 4) with
     | Ok result -> Asserter.Int_asserter.assert_equals 5 result "must be 5"
     | Error error -> failwith (Future.error_to_string error)
   in
+  Asserter.Int_asserter.assert_equals
+    0
+    !on_error_count
+    "On error shouldn't have been called";
   let () =
     match Future.get (make_future 3) with
     | Ok _result -> failwith "Expected a failure"
@@ -89,6 +115,10 @@ let test_of_error () =
         (Future.error_to_string error)
         "expecting the correct error"
   in
+  Asserter.Int_asserter.assert_equals
+    1
+    !on_error_count
+    "On error should have been called";
   true
 
 (* This test verifies that all continuations and result handlers are called

@@ -340,6 +340,16 @@ let continue_and_map_err (a : 'a t) (f : ('a, error) result -> ('b, 'c) result)
   let f res = of_value (f res) in
   make_continue a f
 
+let on_error (future : 'value t) (f : error -> unit) : 'value t =
+  let continuation res =
+    match res with
+    | Ok res -> of_value res
+    | Error error ->
+      f error;
+      (ref (Complete_but_failed error), start_t future)
+  in
+  make_continue future continuation
+
 (* Must explicitly make recursive functions polymorphic. *)
 let rec with_timeout : 'value. 'value t -> timeout:int -> 'value t =
  fun ((promise, start_time) as future) ~timeout ->

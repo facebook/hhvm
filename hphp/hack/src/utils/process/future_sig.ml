@@ -116,6 +116,8 @@ module type S = sig
   val continue_and_map_err :
     'a t -> (('a, error) result -> ('b, 'c) result) -> ('b, 'c) result t
 
+  val on_error : 'value t -> (error -> unit) -> 'value t
+
   (* Wraps a value inside a future. *)
   val of_value : 'a -> 'a t
 

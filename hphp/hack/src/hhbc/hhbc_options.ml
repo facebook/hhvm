@@ -216,6 +216,9 @@ let disable_array o = o.option_disable_array
  *)
 let widen_is_array o = o.option_widen_is_array
 
+let canonical_aliased_namespaces an =
+  List.sort (fun p1 p2 -> String.compare (fst p1) (fst p2)) an
+
 let to_string o =
   let aliased_namespaces_str =
     aliased_namespaces o

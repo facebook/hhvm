@@ -596,11 +596,6 @@ where
         }
     }
 
-    // does the node contain the Final keyword in its modifiers
-    fn has_modifier_final(node: &'a Syntax<Token, Value>) -> bool {
-        Self::has_modifier_helper(|x| x.is_final(), node)
-    }
-
     // does the node contain the Abstract keyword in its modifiers
     fn has_modifier_abstract(node: &'a Syntax<Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_abstract(), node)
@@ -614,6 +609,10 @@ where
     // does the node contain the Private keyword in its modifiers
     fn has_modifier_private(node: &'a Syntax<Token, Value>) -> bool {
         Self::has_modifier_helper(|x| x.is_private(), node)
+    }
+
+    fn get_modifier_final(modifiers: &'a Syntax<Token, Value>) -> Option<&'a Syntax<Token, Value>> {
+        Self::syntax_to_list_no_separators(modifiers).find(|x| x.is_final())
     }
 
     fn is_visibility(x: &'a Syntax<Token, Value>) -> bool {
@@ -879,13 +878,6 @@ where
         let is_abstract = Self::has_modifier_abstract(node);
         let has_private = Self::has_modifier_private(node);
         is_abstract && has_private
-    }
-
-    // Test whether node is a method that is both abstract and final
-    fn methodish_abstract_conflict_with_final(node: &'a Syntax<Token, Value>) -> bool {
-        let is_abstract = Self::has_modifier_abstract(node);
-        let has_final = Self::has_modifier_final(node);
-        is_abstract && has_final
     }
 
     fn methodish_abstract_inside_interface(&self, node: &'a Syntax<Token, Value>) -> bool {
@@ -1865,12 +1857,15 @@ where
                     modifiers,
                 );
 
-                self.produce_error(
-                    |_, x| Self::methodish_abstract_conflict_with_final(x),
-                    node,
-                    || errors::error2019(class_name, method_name),
-                    modifiers,
-                );
+                if let Some(modifier) = Self::get_modifier_final(modifiers) {
+                    self.produce_error(
+                        |_, x| Self::has_modifier_abstract(x),
+                        node,
+                        || errors::error2019(class_name, method_name),
+                        modifier,
+                    );
+                }
+
                 self.produce_error(
                     |self_, x| self_.methodish_abstract_inside_interface(x),
                     node,

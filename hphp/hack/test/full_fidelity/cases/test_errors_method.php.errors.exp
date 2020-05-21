@@ -2,8 +2,8 @@
 (4,10)-(4,16) Methods cannot have multiple visibility modifiers
 (5,3)-(5,34) Redeclared method E::f
 (5,9)-(5,13) Methods cannot have duplicate modifiers
-(6,3)-(6,23) Cannot declare abstract method E::f final
 (6,3)-(6,44) Redeclared method E::f
+(6,19)-(6,23) Cannot declare abstract method E::f final
 (7,3)-(7,18) Cannot declare abstract method E::f private
 (7,3)-(7,39) Redeclared method E::f
 (8,3)-(8,45) Redeclared method E::f

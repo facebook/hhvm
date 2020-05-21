@@ -614,12 +614,19 @@ let value_setters =
   ]
 
 let extract_config_options_from_json ~init config_json =
-  match config_json with
-  | None -> init
-  | Some config_json ->
-    let config = J.get_object_exn config_json in
-    List.fold_left value_setters ~init ~f:(fun opts setter ->
-        setter config opts)
+  let ret =
+    match config_json with
+    | None -> init
+    | Some config_json ->
+      let config = J.get_object_exn config_json in
+      List.fold_left value_setters ~init ~f:(fun opts setter ->
+          setter config opts)
+  in
+  {
+    ret with
+    option_aliased_namespaces =
+      canonical_aliased_namespaces ret.option_aliased_namespaces;
+  }
 
 (* Apply overrides by parsing CLI arguments in format `-vNAME=VALUE` *)
 let override_from_cli config_list init =

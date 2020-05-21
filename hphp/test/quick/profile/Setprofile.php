@@ -42,4 +42,7 @@ function main() {
   fb_setprofile(null);
   pure_function_2(5, 6);
 }
-main();
+<<__EntryPoint>>
+function entrypoint_Setprofile(): void {
+  main();
+}

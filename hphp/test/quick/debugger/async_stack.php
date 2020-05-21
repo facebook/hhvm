@@ -50,5 +50,8 @@ function main($a) {
   var_dump($result);
 }
 
-main(42);
+<<__EntryPoint>>
+function entrypoint_async_stack(): void {
 
+  main(42);
+}

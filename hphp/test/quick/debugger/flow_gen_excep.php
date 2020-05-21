@@ -37,5 +37,8 @@ function main($a) {
   foo($a);
 }
 
-main(1);
+<<__EntryPoint>>
+function entrypoint_flow_gen_excep(): void {
 
+  main(1);
+}

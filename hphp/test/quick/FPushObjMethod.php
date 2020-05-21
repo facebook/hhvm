@@ -1,7 +1,5 @@
 <?hh
 
-print "Test begin\n";
-
 class C {
   function __construct() {
     print "In C::__construct()\n";
@@ -18,22 +16,6 @@ class I extends F {
     print "In I::__construct()\n";
   }
 }
-
-$c = new C;
-  $c->__construct();
-  $c::sMeth();
-$c = new F;
-  $c->__construct();
-$c = new I;
-  $c->__construct();
-
-$c = new C;
-  $m = "__construct"; $c->$m();
-  $m = "sMeth"; $c::$m();
-$c = new F;
-  $m = "__construct"; $c->$m();
-$c = new I;
-  $m = "__construct"; $c->$m();
 
 function anon($o) {
   print "In anon()\n";
@@ -112,28 +94,49 @@ class Z extends Y {
     $this->fPublic();
   }
 }
+<<__EntryPoint>>
+function entrypoint_FPushObjMethod(): void {
 
-print "=== X ===\n";
-$x = new X();
-anon($x);
-W::fW($x);
-$x->fX();
-#$x->fY();
-#$x->fZ();
-print "=== Y ===\n";
-$y = new Y();
-anon($y);
-W::fW($y);
-$y->fX();
-$y->fY();
-#$y->fZ();
-print "=== Z ===\n";
-$z = new Z();
-anon($z);
-W::fW($z);
-$z->fX();
-$z->fY();
-$z->fZ();
+  print "Test begin\n";
 
-$not_a_string = 123;
-$foo = C::$not_a_string();
+  $c = new C;
+    $c->__construct();
+    $c::sMeth();
+  $c = new F;
+    $c->__construct();
+  $c = new I;
+    $c->__construct();
+
+  $c = new C;
+    $m = "__construct"; $c->$m();
+    $m = "sMeth"; $c::$m();
+  $c = new F;
+    $m = "__construct"; $c->$m();
+  $c = new I;
+    $m = "__construct"; $c->$m();
+
+  print "=== X ===\n";
+  $x = new X();
+  anon($x);
+  W::fW($x);
+  $x->fX();
+  #$x->fY();
+  #$x->fZ();
+  print "=== Y ===\n";
+  $y = new Y();
+  anon($y);
+  W::fW($y);
+  $y->fX();
+  $y->fY();
+  #$y->fZ();
+  print "=== Z ===\n";
+  $z = new Z();
+  anon($z);
+  W::fW($z);
+  $z->fX();
+  $z->fY();
+  $z->fZ();
+
+  $not_a_string = 123;
+  $foo = C::$not_a_string();
+}

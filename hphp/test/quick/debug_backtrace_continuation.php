@@ -22,6 +22,9 @@ function my_class_wrapper() {
   $gen->next();
   $gen->send(null);
 }
+<<__EntryPoint>>
+function entrypoint_debug_backtrace_continuation(): void {
 
-my_wrapper();
-my_class_wrapper();
+  my_wrapper();
+  my_class_wrapper();
+}

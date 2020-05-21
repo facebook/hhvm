@@ -176,13 +176,13 @@ int(46)
 Break at main() on line 59 of %s/flow_multistep.php
   58   var_dump(a(42));
   59*}
-  60 
+  60 <<__EntryPoint>>
 
 next
-Break on line 61 of %s/flow_multistep.php
-  60 
-  61*main();
-  62 (END)
+Break at entrypoint_flow_multistep() on line 63 of %s/flow_multistep.php
+  62 
+  63*  main();
+  64 }
 
 continue
 Program %s/flow_multistep.php exited normally.

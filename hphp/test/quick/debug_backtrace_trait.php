@@ -1,8 +1,8 @@
 <?hh
+<<__EntryPoint>>
+function entrypoint_debug_backtrace_trait(): void {
 
-include 'debug_backtrace_trait_helper.inc';
-class C extends P {
-  use T;
+  include 'debug_backtrace_trait_helper.inc';
+  (new C)->bar(new stdClass);
+  (new C)->bar(12);
 }
-(new C)->bar(new stdClass);
-(new C)->bar(12);

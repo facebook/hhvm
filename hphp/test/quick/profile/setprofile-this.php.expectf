@@ -40,4 +40,4 @@ Caught C::method
 
   exit main: a:1:{s:6:"return";N;}
 
-exit : a:1:{s:6:"return";i:1;}
+exit entrypoint_setprofilethis: a:1:{s:6:"return";N;}

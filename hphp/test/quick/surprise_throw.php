@@ -8,7 +8,6 @@ function asd($x, $y) {
   }
   echo "hi $x $y\n";
 }
-fb_setprofile('asd');
 
 function foo() {
   $x = new stdclass;
@@ -16,9 +15,13 @@ function foo() {
   $z = new stdclass;
   return new stdclass;
 }
+<<__EntryPoint>>
+function entrypoint_surprise_throw(): void {
+  fb_setprofile('asd');
 
-try {
-  foo();
-} catch (Exception $x) {
-  echo $x->getMessage() . "\n";
+  try {
+    foo();
+  } catch (Exception $x) {
+    echo $x->getMessage() . "\n";
+  }
 }

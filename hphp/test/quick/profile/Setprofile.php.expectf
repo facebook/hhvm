@@ -168,7 +168,7 @@ array(3) {
       ["line":protected]=>
       int(16)
       ["trace":"Exception":private]=>
-      array(2) {
+      array(3) {
         [0]=>
         array(4) {
           ["file"]=>
@@ -186,9 +186,17 @@ array(3) {
           ["file"]=>
           string(%d) "%s"
           ["line"]=>
-          int(45)
+          int(47)
           ["function"]=>
           string(4) "main"
+          ["args"]=>
+          array(0) {
+          }
+        }
+        [2]=>
+        array(2) {
+          ["function"]=>
+          string(21) "entrypoint_Setprofile"
           ["args"]=>
           array(0) {
           }

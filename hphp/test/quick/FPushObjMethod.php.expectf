@@ -59,4 +59,4 @@ In Z::fZ()
   In Z::fProtected()
   In Z::fPublic()
 
-Fatal error: Function name must be a string in %s on line 139
+Fatal error: Function name must be a string in %s on line 141

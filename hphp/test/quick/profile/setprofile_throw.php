@@ -92,5 +92,8 @@ function main() {
   try { func_entry(); } catch (Exception $x) { echo "caught\n"; }
   try { func_backward(); } catch (Exception $x) { echo "caught\n"; }
 }
+<<__EntryPoint>>
+function entrypoint_setprofile_throw(): void {
 
-main();
+  main();
+}

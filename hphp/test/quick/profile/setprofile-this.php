@@ -38,8 +38,6 @@ function profiler($event, $name, $info) {
   }
 }
 
-fb_setprofile('profiler');
-
 function main() {
   try {
     new C();
@@ -53,4 +51,9 @@ function main() {
     echo "\nCaught ".$e->getMessage()."\n";
   }
 }
-main();
+<<__EntryPoint>>
+function entrypoint_setprofilethis(): void {
+
+  fb_setprofile('profiler');
+  main();
+}

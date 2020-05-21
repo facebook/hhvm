@@ -22,30 +22,33 @@ $this->baz = new D();
 $this->w[] = new D();
 }
 }
-C::$z[] = new D();
+<<__EntryPoint>>
+function entrypoint_prop_order_parens(): void {
+  C::$z[] = new D();
 
-var_dump(C::$x);
-$x = 'foo1';
-var_dump(C::$x());
+  var_dump(C::$x);
+  $x = 'foo1';
+  var_dump(C::$x());
 
-var_dump((C::$y)[0]);
-$y = varray['foo2'];
-var_dump(C::$y[0]());
+  var_dump((C::$y)[0]);
+  $y = varray['foo2'];
+  var_dump(C::$y[0]());
 
-var_dump(((C::$z)[0])->prop);
-var_dump(((C::$z)[0])->prop());
+  var_dump(((C::$z)[0])->prop);
+  var_dump(((C::$z)[0])->prop());
 
-$obj = new C;
-$x = varray['bar1'];
-var_dump(($obj->$x)[0]);
-$x = varray['bar2'];
-var_dump($obj->$x[0]());
+  $obj = new C;
+  $x = varray['bar1'];
+  var_dump(($obj->$x)[0]);
+  $x = varray['bar2'];
+  var_dump($obj->$x[0]());
 
-$obj = new C;
-var_dump(($obj->w)[0]->yo);
-var_dump(($obj->w)[0]->yo());
+  $obj = new C;
+  var_dump(($obj->w)[0]->yo);
+  var_dump(($obj->w)[0]->yo());
 
-$obj = new C;
-$w = varray['baz'];
-var_dump(($obj->$w)[0]->blah);
-var_dump($obj->$w[0]->blah());
+  $obj = new C;
+  $w = varray['baz'];
+  var_dump(($obj->$w)[0]->blah);
+  var_dump($obj->$w[0]->blah());
+}

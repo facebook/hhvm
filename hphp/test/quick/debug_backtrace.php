@@ -30,4 +30,7 @@ function main() {
 
   set_error_handler(fun('error_handler'));
 }
-main();
+<<__EntryPoint>>
+function entrypoint_debug_backtrace(): void {
+  main();
+}

@@ -8,45 +8,60 @@ Breakpoint 1 reached at SplHeap::insert() on line %d of /:systemlib.php
 %w%d     $index = $this->lowestFreeIndex();
 
 list myfunc
-   5 function myfunc($a, $b) {
-   6   error_log($a.$b);
-   7 }
-   8 
-   9 class MyClass {
-  10   function myMeth($a, $b) {
-  11     error_log($a.$b);
-  12   }
-  13 }
-  14 (END)
+   3 function myfunc($a, $b) {
+   4   error_log($a.$b);
+   5 }
+   6 
+   7 class MyClass {
+   8   function myMeth($a, $b) {
+   9     error_log($a.$b);
+  10   }
+  11 }
+  12 <<__EntryPoint>>
+  13 function entrypoint_list(): void {
+  14   $h = new SplMaxHeap();
+  15   $h->insert(1);
+  16 }
+  17 (END)
 
 list MyClass
-   9 class MyClass {
-  10   function myMeth($a, $b) {
-  11     error_log($a.$b);
-  12   }
-  13 }
-  14 (END)
+   7 class MyClass {
+   8   function myMeth($a, $b) {
+   9     error_log($a.$b);
+  10   }
+  11 }
+  12 <<__EntryPoint>>
+  13 function entrypoint_list(): void {
+  14   $h = new SplMaxHeap();
+  15   $h->insert(1);
+  16 }
+  17 (END)
 
 list MyClass::myMeth
-  10   function myMeth($a, $b) {
-  11     error_log($a.$b);
-  12   }
-  13 }
-  14 (END)
+   8   function myMeth($a, $b) {
+   9     error_log($a.$b);
+  10   }
+  11 }
+  12 <<__EntryPoint>>
+  13 function entrypoint_list(): void {
+  14   $h = new SplMaxHeap();
+  15   $h->insert(1);
+  16 }
+  17 (END)
 
 list 3
    1 <?hh
-   2 $h = new SplMaxHeap();
-   3 $h->insert(1);
-   4 
-   5 function myfunc($a, $b) {
-   6   error_log($a.$b);
-   7 }
-   8 
-   9 class MyClass {
-  10   function myMeth($a, $b) {
-  11     error_log($a.$b);
-  12   }
+   2 
+   3 function myfunc($a, $b) {
+   4   error_log($a.$b);
+   5 }
+   6 
+   7 class MyClass {
+   8   function myMeth($a, $b) {
+   9     error_log($a.$b);
+  10   }
+  11 }
+  12 <<__EntryPoint>>
 
 list noSuchFunc
 Unable to read specified function, class or source file location.

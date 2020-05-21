@@ -4,4 +4,4 @@ array(1) {
 }
 Done
 
-Fatal error: Class undefined: NonExistentClass in %s on line 27
+Fatal error: Class undefined: NonExistentClass in %s on line 24

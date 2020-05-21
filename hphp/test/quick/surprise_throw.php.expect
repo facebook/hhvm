@@ -4,4 +4,4 @@ yep
 hi enter Exception::getMessage
 hi exit Exception::getMessage
 yo
-hi exit 
+hi exit entrypoint_surprise_throw

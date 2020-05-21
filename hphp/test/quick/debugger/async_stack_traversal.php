@@ -35,5 +35,8 @@ async function genFoo($a) {
 function main($a) {
   HH\Asio\join(genFoo($a));
 }
+<<__EntryPoint>>
+function entrypoint_async_stack_traversal(): void {
 
-main(42);
+  main(42);
+}

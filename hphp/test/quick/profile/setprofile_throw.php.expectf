@@ -22,8 +22,9 @@ Stack trace:
 #0 (): signal_thrower()
 #1 %s/setprofile_throw.php(48): posix_kill()
 #2 %s/setprofile_throw.php(92): func_entry()
-#3 %s/setprofile_throw.php(96): main()
-#4 {main} in %s/setprofile_throw.php on line 48
+#3 %s/setprofile_throw.php(98): main()
+#4 (): entrypoint_setprofile_throw()
+#5 {main} in %s/setprofile_throw.php on line 48
 __ctor 1
 __ctor 2
 __ctor 3
@@ -46,5 +47,6 @@ Stack trace:
 #0 (): signal_thrower()
 #1 %s/setprofile_throw.php(74): posix_kill()
 #2 %s/setprofile_throw.php(93): func_backward()
-#3 %s/setprofile_throw.php(96): main()
-#4 {main} in %s/setprofile_throw.php on line 74
+#3 %s/setprofile_throw.php(98): main()
+#4 (): entrypoint_setprofile_throw()
+#5 {main} in %s/setprofile_throw.php on line 74

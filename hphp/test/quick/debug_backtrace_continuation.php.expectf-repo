@@ -1,4 +1,4 @@
-array(3) {
+array(4) {
   [0]=>
   array(2) {
     ["function"]=>
@@ -33,15 +33,23 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(26)
+    int(28)
     ["function"]=>
     string(10) "my_wrapper"
     ["args"]=>
     array(0) {
     }
   }
+  [3]=>
+  array(2) {
+    ["function"]=>
+    string(39) "entrypoint_debug_backtrace_continuation"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
-array(3) {
+array(4) {
   [0]=>
   array(4) {
     ["function"]=>
@@ -80,9 +88,17 @@ array(3) {
     ["file"]=>
     string(%d) "%s"
     ["line"]=>
-    int(27)
+    int(29)
     ["function"]=>
     string(16) "my_class_wrapper"
+    ["args"]=>
+    array(0) {
+    }
+  }
+  [3]=>
+  array(2) {
+    ["function"]=>
+    string(39) "entrypoint_debug_backtrace_continuation"
     ["args"]=>
     array(0) {
     }

@@ -8,8 +8,6 @@ class C extends B {
     var_dump(get_class_vars('C'));
   }
 }
-$o = new C;
-$o->dump_vars();
 
 class D {
   public $x = NonExistentClass::FOO;
@@ -21,7 +19,6 @@ function main() {
   $d = new E();
   echo "Done\n";
 }
-main();
 
 class G {
   public static $x = NonExistentClass::FOO;
@@ -44,4 +41,10 @@ function main2() {
   $d = new H();
   echo "Done\n";
 }
-main2();
+<<__EntryPoint>>
+function entrypoint_properties4(): void {
+  $o = new C;
+  $o->dump_vars();
+  main();
+  main2();
+}

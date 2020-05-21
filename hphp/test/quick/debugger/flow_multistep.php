@@ -57,5 +57,8 @@ function main() {
   var_dump($d);
   var_dump(a(42));
 }
+<<__EntryPoint>>
+function entrypoint_flow_multistep(): void {
 
-main();
+  main();
+}

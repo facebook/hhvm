@@ -1,4 +1,4 @@
-array(2) {
+array(3) {
   [0]=>
   array(4) {
     ["file"]=>
@@ -16,7 +16,7 @@ array(2) {
     ["file"]=>
     string(%d) "%Sdebug_backtrace_trait.php"
     ["line"]=>
-    int(7)
+    int(6)
     ["function"]=>
     string(3) "bar"
     ["class"]=>
@@ -33,6 +33,14 @@ array(2) {
       }
     }
   }
+  [2]=>
+  array(2) {
+    ["function"]=>
+    string(32) "entrypoint_debug_backtrace_trait"
+    ["args"]=>
+    array(0) {
+    }
+  }
 }
 
-Catchable fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %Sdebug_backtrace_trait.php on line 8
+Catchable fatal error: Argument 1 passed to C::bar() must be an instance of stdClass, int given in %Sdebug_backtrace_trait.php on line 7

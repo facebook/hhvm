@@ -22,5 +22,8 @@ class Sleeper {
 function bar($b) {
   var_dump($b);
 }
+<<__EntryPoint>>
+function entrypoint_wheresleep(): void {
 
-bar(new Sleeper(1));
+  bar(new Sleeper(1));
+}

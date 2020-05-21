@@ -15,3 +15,7 @@ trait T {
     print_backtrace();
   }
 }
+
+class C extends P {
+  use T;
+}

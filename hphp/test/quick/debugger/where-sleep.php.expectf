@@ -16,5 +16,6 @@ where
     [foo] => 1
 )
 )
-    at %s/where-sleep.php:26
+    at %s/where-sleep.php:28
+#2  entrypoint_wheresleep ()
 quit

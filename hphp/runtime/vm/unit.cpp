@@ -84,6 +84,7 @@
 #include "hphp/runtime/vm/unit-util.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/ext/std/ext_std_closure.h"
@@ -261,6 +262,7 @@ Unit::~Unit() {
 }
 
 void* Unit::operator new(size_t sz) {
+  MemoryStats::LogAlloc(AllocKind::Unit, sz);
   return low_malloc(sz);
 }
 

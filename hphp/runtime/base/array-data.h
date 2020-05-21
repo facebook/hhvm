@@ -647,6 +647,11 @@ public:
    */
   void onSetEvalScalar();
 
+  /*
+   * Total size on the heap.
+   */
+  size_t allocSize() const;
+
   /////////////////////////////////////////////////////////////////////////////
   // Other functions.
   //
@@ -837,6 +842,8 @@ ArrayData* staticEmptyKeysetArray();
  * Call arr->decRefAndRelease().
  */
 void decRefArr(ArrayData* arr);
+
+size_t loadedStaticArrayCount();
 
 ///////////////////////////////////////////////////////////////////////////////
 

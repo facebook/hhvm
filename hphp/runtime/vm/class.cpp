@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/type-structure.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
 #include "hphp/runtime/vm/globals-array.h"
@@ -287,6 +288,7 @@ Class* Class::newClass(PreClass* preClass, Class* parent) {
                     + sizeof(m_classVec[0]) * classVecLen;
 
   auto const mem = lower_malloc(size);
+  MemoryStats::LogAlloc(AllocKind::Class, size);
   auto const classPtr = reinterpret_cast<void*>(
     reinterpret_cast<uintptr_t>(mem) + prefix_sz
   );

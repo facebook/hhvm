@@ -169,9 +169,8 @@ StringData* insertStaticString(StringData* sd) {
   if (!pair.second) {
     sd->destructStatic();
   } else {
-    MemoryStats::GetInstance()->LogStaticStringAlloc(
-      sd->size() + sizeof(StringData)
-    );
+    MemoryStats::LogAlloc(AllocKind::StaticString,
+                          sd->size() + sizeof(StringData));
     if (RuntimeOption::EvalEnableReverseDataMap) {
       data_map::register_start(sd);
     }
@@ -192,7 +191,7 @@ void create_string_data_map() {
   StringDataMap::Config config;
   config.growthFactor = 1;
   config.entryCountThreadCacheSize = 10;
-  MemoryStats::GetInstance()->ResetStaticStringSize();
+  MemoryStats::ResetStaticStringSize();
 
   s_stringDataMap.emplace(RuntimeOption::EvalInitialStaticStringTableSize,
                           config);

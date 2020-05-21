@@ -26,6 +26,7 @@
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-string.h"
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/as-shared.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/cti.h"
@@ -56,7 +57,6 @@
 #include <ostream>
 #include <string>
 #include <vector>
-#include <unordered_set>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -141,6 +141,7 @@ void* Func::allocFuncMem(int numParams) {
     sizeof(Func) + numPrologues * sizeof(m_prologueTable[0])
     - sizeof(m_prologueTable);
 
+  MemoryStats::LogAlloc(AllocKind::Func, funcSize);
   return lower_malloc(funcSize);
 }
 

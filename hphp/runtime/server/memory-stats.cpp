@@ -29,9 +29,9 @@
 #include <sstream>
 #include <string>
 
-#include <folly/portability/Unistd.h>
-
 namespace HPHP {
+
+decltype(MemoryStats::s_allocSizes) MemoryStats::s_allocSizes;
 
 void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   std::ostringstream out;
@@ -78,9 +78,13 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   w->writeEntry("adjustedRSS", procStatus.adjustedRSSKb);
   w->writeEntry("mem.rss_adjusted", procStatus.adjustedRSSKb);
 
-  // static string stats
   w->writeEntry("static_string_count", makeStaticStringCount());
-  w->writeEntry("static_string_size", GetStaticStringSize());
+  w->writeEntry("static_string_size", totalSize(AllocKind::StaticString));
+  w->writeEntry("static_array_count", loadedStaticArrayCount());
+  w->writeEntry("static_array_size", totalSize(AllocKind::StaticArray));
+  w->writeEntry("unit_size", totalSize(AllocKind::Unit));
+  w->writeEntry("class_size", totalSize(AllocKind::Class));
+  w->writeEntry("func_size", totalSize(AllocKind::Func));
 
   w->endObject("Memory");
   w->writeFileFooter();
@@ -89,20 +93,4 @@ void MemoryStats::ReportMemory(std::string& output, Writer::Format format) {
   return;
 }
 
-MemoryStats* MemoryStats::GetInstance() {
-  static MemoryStats s_memoryStats;
-  return &s_memoryStats;
-}
-
-void MemoryStats::ResetStaticStringSize() {
-  m_staticStringSize.store(0);
-}
-
-void MemoryStats::LogStaticStringAlloc(size_t bytes) {
-  m_staticStringSize += bytes;
-}
-
-size_t MemoryStats::GetStaticStringSize() {
-  return m_staticStringSize.load();
-}
 }

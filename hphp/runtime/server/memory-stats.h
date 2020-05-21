@@ -18,23 +18,45 @@
 #ifndef incl_HPHP_MEMORYSTATS_H_
 #define incl_HPHP_MEMORYSTATS_H_
 
-#include <iostream>
-#include <mutex>
+#include <array>
+#include <atomic>
 #include <memory>
+#include <string>
 
 #include "hphp/runtime/server/writer.h"
 
 namespace HPHP {
 
-struct MemoryStats {
-  void ReportMemory(std::string &out, Writer::Format format);
-  static MemoryStats* GetInstance();
-  void ResetStaticStringSize();
-  void LogStaticStringAlloc(size_t bytes);
+enum class AllocKind {
+  StaticString,
+  StaticArray,
+  Unit,
+  Class,
+  Func,
+  NumKinds
+};
 
-private:
-  size_t GetStaticStringSize();
-  std::atomic<size_t> m_staticStringSize;
+struct MemoryStats {
+  static void ReportMemory(std::string &out, Writer::Format format);
+
+  static void ResetStaticStringSize() {
+    s_allocSizes[static_cast<unsigned>(AllocKind::StaticString)]
+      .store(0, std::memory_order_relaxed);
+  }
+
+  static void LogAlloc(AllocKind kind, size_t bytes) {
+    s_allocSizes[static_cast<unsigned>(kind)]
+      .fetch_add(bytes, std::memory_order_relaxed);
+  }
+
+ private:
+  static size_t totalSize(AllocKind kind) {
+    return s_allocSizes[static_cast<unsigned>(kind)]
+      .load(std::memory_order_relaxed);
+  }
+
+  static auto constexpr N = static_cast<unsigned>(AllocKind::NumKinds);
+  static std::array<std::atomic_size_t, N> s_allocSizes;
 };
 
 }

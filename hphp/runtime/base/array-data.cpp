@@ -34,7 +34,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
-
+#include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 
@@ -188,7 +188,18 @@ using ArrayDataMap = tbb::concurrent_unordered_set<ArrayData*,
 ArrayDataMap s_arrayDataMap;
 
 }
+
+size_t loadedStaticArrayCount() {
+  return s_arrayDataMap.size();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
+
+size_t ArrayData::allocSize() const {
+  if (hasVanillaMixedLayout()) return MixedArray::asMixed(this)->heapSize();
+  if (isKeysetKind()) return SetArray::asSet(this)->heapSize();
+  return PackedArray::heapSize(this);
+}
 
 void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   auto const arr = *parr;
@@ -237,8 +248,9 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   } else {
     ad = arr->copyStatic();
   }
-
   assertx(ad->isStatic());
+  MemoryStats::LogAlloc(AllocKind::StaticArray, ad->allocSize());
+
   s_cachedHash.first = ad;
   assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);
   auto const DEBUG_ONLY inserted = s_arrayDataMap.insert(ad).second;

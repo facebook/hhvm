@@ -35,6 +35,7 @@ type environment =
   | Empty
   | Augment of string list
   | Replace of string list
+[@@deriving show]
 
 (* Invocation info is internal book-keeping to record information about
  * the process's original invocation. *)
@@ -44,6 +45,7 @@ type invocation_info = {
   env: environment;
   stack: Utils.callstack;
 }
+[@@deriving show]
 
 (* type 't' represents a process, be it completed or still underway.
  * From the information in 't' we can figure out if it has completed,

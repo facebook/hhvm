@@ -75,6 +75,9 @@ let merge_saved_state_futures
       =
     match dependency_table_saved_state_result with
     | Error error ->
+      Hh_logger.log
+        "Unhandled error from State_loader: %s"
+        (Future.show_error error);
       let e = Exception.wrap_unraised (Future.error_to_exn error) in
       let exn = Exception.to_exn e in
       let stack = Utils.Callstack (Exception.get_backtrace_string e) in

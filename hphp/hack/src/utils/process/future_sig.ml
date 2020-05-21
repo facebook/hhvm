@@ -11,9 +11,14 @@
 type 'a deserializer = string -> 'a
 
 module Types = struct
+  type process_status = Unix.process_status
+
+  let pp_process_status fmt status =
+    Caml.Format.fprintf fmt "%s" (Process.status_to_string status)
+
   type error_mode =
     | Process_failure of {
-        status: Unix.process_status;
+        status: process_status;
         stderr: string;
       }
     | Timed_out of {
@@ -23,14 +28,16 @@ module Types = struct
     | Process_aborted
     | Continuation_raised of Exception.t
     | Transformer_raised of Exception.t
+  [@@deriving show]
 
-  type error = Process_types.invocation_info * error_mode
+  type error = Process_types.invocation_info * error_mode [@@deriving show]
 
   type verbose_error = {
     message: string;
     stack: Utils.callstack;
     environment: string option;
   }
+  [@@deriving show]
 
   type 'a status =
     | Complete_with_result of ('a, error) result

@@ -152,7 +152,7 @@ let init
                 auto_retry;
                 stack = Utils.Callstack stack;
                 environment;
-              } =
+              } as verbose_error =
           load_state_error_to_verbose_string err
         in
         let (next_step_descr, next_step) =
@@ -173,7 +173,7 @@ let init
         HackEventLogger.load_state_exn exception_telemetry;
         Hh_logger.log
           "Could not load saved state: %s\n%s\n"
-          (Telemetry.to_string exception_telemetry)
+          (State_loader.show_verbose_error verbose_error)
           stack;
         (match next_step with
         | Exit_status.No_error ->

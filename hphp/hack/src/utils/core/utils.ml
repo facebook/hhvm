@@ -10,7 +10,7 @@
 open Hh_core
 
 (** Callstack is simply a typed way to indicate that a string is a callstack *)
-type callstack = Callstack of string
+type callstack = Callstack of string [@@deriving show]
 
 let () = Random.self_init ()
 

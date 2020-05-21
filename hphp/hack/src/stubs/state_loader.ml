@@ -23,6 +23,7 @@ type verbose_error = {
   auto_retry: bool;
   environment: string option;
 }
+[@@deriving show]
 
 let error_string_verbose _ =
   {

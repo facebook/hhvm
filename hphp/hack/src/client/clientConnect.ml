@@ -76,7 +76,7 @@ let progress : string option ref = ref None
 (* if the server has something not going right, what? *)
 let progress_warning : string option ref = ref None
 
-let default_progress_message = "processing"
+let default_progress_message = "connecting"
 
 let check_progress (root : Path.t) : unit =
   match ServerUtils.server_progress ~timeout:3 root with

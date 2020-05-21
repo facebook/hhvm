@@ -71,12 +71,10 @@ let tty_progress_reporter () =
 let null_progress_reporter (_status : string option) : unit = ()
 
 (* what is the server doing? or None if nothing *)
-let progress : string option ref = ref None
+let progress : string ref = ref "connecting"
 
 (* if the server has something not going right, what? *)
 let progress_warning : string option ref = ref None
-
-let default_progress_message = "connecting"
 
 let check_progress (root : Path.t) : unit =
   match ServerUtils.server_progress ~timeout:3 root with
@@ -93,7 +91,7 @@ let print_wait_msg (progress_callback : string option -> unit) (root : Path.t) :
   check_progress root;
   if not had_warning then
     Option.iter !progress_warning ~f:(Printf.eprintf "\n%s\n%!");
-  let progress = Option.value !progress ~default:default_progress_message in
+  let progress = !progress in
   let final_suffix =
     if Option.is_some !progress_warning then
       " - this can take a long time, see warning above]"

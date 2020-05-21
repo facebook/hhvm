@@ -1654,17 +1654,14 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
     (* TODO: better to report time that hh_server has spent initializing *)
     let (progress, warning) =
       match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
-      | Error _ -> (None, None)
+      | Error _ -> ("connecting", None)
       | Ok (progress, warning) -> (progress, warning)
     in
     (* [progress] comes from ServerProgress.ml, sent to the monitor, and now we've fetched
     it from the monitor. It's a string "op X/Y units (%)" e.g. "typechecking 5/16 files (78%)",
-    or None if there's no relevant progress to show.
+    or "connecting", if there is no relevant progress to show.
     [warning] comes from the same place, and if pressent is a human-readable string
     that warns about saved-state-init failure. *)
-    let progress =
-      Option.value progress ~default:ClientConnect.default_progress_message
-    in
     let warning =
       if Option.is_some warning then
         " (saved-state not found - will take a while)"

@@ -28,29 +28,31 @@ let read_from_server fd =
 
 let pipe_to_monitor_ref = ref None
 
-let previous_message = ref (MonitorRpc.PROGRESS None)
+let previous_message = ref None
 
 let make_pipe_to_monitor fd = pipe_to_monitor_ref := Some fd
 
-let send_to_monitor msg =
+let send_to_monitor (msg : MonitorRpc.server_to_monitor_message) =
   match !pipe_to_monitor_ref with
   | None -> ()
   (* This function can be invoked in non-server code paths,
    * when there is no monitor. *)
   | Some fd ->
-    (* Avoid sending the same message repeatedly. *)
-    if msg = !previous_message then
-      ()
-    else (
-      previous_message := msg;
-      let (_ : int) = Marshal_tools.to_fd_with_preamble fd msg in
-      ()
-    )
+    begin
+      match (msg, !previous_message) with
+      | (msg, Some previous_message) when msg = previous_message ->
+        (* Avoid sending the same message repeatedly. *)
+        ()
+      | _ ->
+        previous_message := Some msg;
+        let (_ : int) = Marshal_tools.to_fd_with_preamble fd msg in
+        ()
+    end
 
 let send_progress_to_monitor ?(include_in_logs = true) fmt =
   let f s =
     if include_in_logs then Hh_logger.log "%s" s;
-    send_to_monitor (MonitorRpc.PROGRESS (Some s))
+    send_to_monitor (MonitorRpc.PROGRESS s)
   in
   Printf.ksprintf f fmt
 

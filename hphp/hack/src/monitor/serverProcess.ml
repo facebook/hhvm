@@ -22,7 +22,6 @@ type process_data = {
 type server_process =
   | Not_yet_started
   | Alive of process_data
-  | Informant_killed
   (* When the server crashes, we want to track that it has crashed and report
    * that crash info to the next hh_client that connects. We keep that info
    * here. *)

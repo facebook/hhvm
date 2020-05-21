@@ -62,7 +62,7 @@ let send_server_progress_rpc oc =
   in
   ()
 
-let read_server_progress ic : string option * string option =
+let read_server_progress ic : string * string option =
   from_channel_without_buffering ic
 
 let establish_connection ~timeout config =
@@ -360,7 +360,7 @@ let connect_once ~timeout config handoff_options =
     let timeout = max (timeout - elapsed_t) 1 in
     consume_prehandoff_messages ~timeout ic oc)
 
-let connect_to_monitor_and_get_server_progress ~timeout config =
+let connect_to_monitor_and_get_server_progress ~timeout config : (string * string option, ServerMonitorUtils.connection_error) result =
   Result.(
     connect_to_monitor ~timeout config >>= fun (ic, oc, cstate) ->
     verify_cstate ic cstate >>= fun () ->

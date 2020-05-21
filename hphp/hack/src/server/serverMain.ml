@@ -603,7 +603,7 @@ let serve_one_iteration genv env client_provider =
     }
   in
   ServerMonitorUtils.exit_if_parent_dead ();
-  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS None);
+  ServerProgress.send_to_monitor (MonitorRpc.PROGRESS "ready");
   let has_default_client_pending =
     Option.is_some env.default_client_pending_command_needs_full_check
   in

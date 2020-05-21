@@ -119,7 +119,7 @@ struct
     (* Whether to ignore hh version mismatches *)
     ignore_hh_version: bool;
     (* What server is doing now *)
-    server_progress: string option;
+    server_progress: string;
     (* Why what it is doing now might not be going as well as it could *)
     server_progress_warning: string option;
   }
@@ -245,7 +245,6 @@ struct
       start_new_server ?target_saved_state env exit_status
     | (Not_yet_started, false)
     | (Alive _, false)
-    | (Informant_killed, false)
     | (Died_unexpectedly _, false) ->
       (* Can't start server instance. State goes to Died_config_changed
        * See diagram on ServerProcess.server_process docs. *)
@@ -254,7 +253,6 @@ struct
       { env with server = Died_config_changed }
     | (Not_yet_started, true)
     | (Alive _, true)
-    | (Informant_killed, true)
     | (Died_unexpectedly _, true) ->
       (* Start new server instance because config matches.
        * See diagram on ServerProcess.server_process docs. *)
@@ -387,8 +385,7 @@ struct
           client_prehandoff ~is_purgatory_client env handoff_options client_fd
         | Died_unexpectedly _
         | Died_config_changed
-        | Not_yet_started
-        | Informant_killed ->
+        | Not_yet_started ->
           Hh_logger.log
             ( "Unreachable state. Server should be alive after trying a restart"
             ^^ " from Died_config_changed state" );
@@ -398,8 +395,7 @@ struct
         msg_to_channel client_fd PH.Server_died_config_change;
         env
       )
-    | Not_yet_started
-    | Informant_killed ->
+    | Not_yet_started ->
       let env =
         if handoff_options.MonitorRpc.force_dormant_start then (
           msg_to_channel
@@ -484,7 +480,6 @@ struct
       push_purgatory_clients env
     | (Alive _, _) -> push_purgatory_clients env
     | (Not_yet_started, _)
-    | (Informant_killed, _)
     | (Died_unexpectedly _, _) ->
       env
 
@@ -526,8 +521,26 @@ struct
           SC.on_server_exit monitor_config;
           ServerProcessTools.check_exit_status proc_stat process monitor_config;
           { env with server = Died_unexpectedly (proc_stat, was_oom) })
-      | _ -> { env with server_progress = None; server_progress_warning = None }
+      | Not_yet_started ->
+        {
+          env with
+          server_progress = "server is currently stopped";
+          server_progress_warning = None;
+        }
+      | Died_config_changed ->
+        {
+          env with
+          server_progress = "server stopped because its configuration changed";
+          server_progress_warning = None;
+        }
+      | Died_unexpectedly _ ->
+        {
+          env with
+          server_progress = "server stopped because of an error";
+          server_progress_warning = None;
+        }
     in
+
     let (exit_status, server_state) =
       match env.server with
       | Alive _ -> (None, Informant_sig.Server_alive)
@@ -535,8 +548,7 @@ struct
         (Some c, Informant_sig.Server_dead)
       | Not_yet_started -> (None, Informant_sig.Server_not_yet_started)
       | Died_unexpectedly ((Unix.WSIGNALED _ | Unix.WSTOPPED _), _)
-      | Died_config_changed
-      | Informant_killed ->
+      | Died_config_changed ->
         (None, Informant_sig.Server_dead)
     in
     (env, exit_status, server_state)
@@ -771,7 +783,7 @@ struct
         ignore_hh_version =
           Informant.should_ignore_hh_version informant_init_env;
         server_progress_warning = None;
-        server_progress = None;
+        server_progress = "server status is unknown";
       }
     in
     (env, monitor_config, socket)

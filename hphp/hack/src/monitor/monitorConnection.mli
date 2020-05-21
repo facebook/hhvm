@@ -26,4 +26,4 @@ val connect_and_shut_down :
 val connect_to_monitor_and_get_server_progress :
   timeout:int ->
   ServerMonitorUtils.monitor_config ->
-  (string option * string option, ServerMonitorUtils.connection_error) result
+  (string * string option, ServerMonitorUtils.connection_error) result

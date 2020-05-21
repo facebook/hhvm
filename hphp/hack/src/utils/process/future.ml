@@ -141,12 +141,12 @@ let error_to_string (info, e) =
       info
       (Exception.get_ctor_string e)
 
-let error_to_string_verbose (error : error) : string * Utils.callstack =
+let error_to_string_verbose (error : error) : verbose_error =
   let (invocation_info, error_mode) = error in
   let Process_types.{ name; args; env; stack = Utils.Callstack stack } =
     invocation_info
   in
-  let _env = Process.env_to_string env in
+  let env = Process.env_to_string env in
   let stack = stack |> Exception.clean_stack in
   let cmd_and_args =
     Printf.sprintf "`%s %s`" name (String.concat ~sep:" " args)
@@ -159,36 +159,55 @@ let error_to_string_verbose (error : error) : string * Utils.callstack =
       | Unix.WSIGNALED i -> Printf.sprintf "killed with signal %n" i
       | Unix.WSTOPPED i -> Printf.sprintf "stopped with signal %n" i
     in
-    ( Printf.sprintf "%s - %s\n%s" cmd_and_args status stderr,
-      Utils.Callstack stack )
+    {
+      message = Printf.sprintf "%s - %s\n%s\n" cmd_and_args status stderr;
+      environment = Some env;
+      stack = Utils.Callstack stack;
+    }
   | Timed_out { stdout; stderr } ->
-    ( Printf.sprintf
-        "%s timed out\nSTDOUT:\n%s\nSTDERR:\n%s\n"
-        cmd_and_args
-        stdout
-        stderr,
-      Utils.Callstack stack )
+    {
+      message =
+        Printf.sprintf
+          "%s timed out\nSTDOUT:\n%s\nSTDERR:\n%s\n"
+          cmd_and_args
+          stdout
+          stderr;
+      environment = Some env;
+      stack = Utils.Callstack stack;
+    }
   | Process_aborted ->
-    (Printf.sprintf "%s aborted" cmd_and_args, Utils.Callstack stack)
+    {
+      message = Printf.sprintf "%s aborted" cmd_and_args;
+      environment = None;
+      stack = Utils.Callstack stack;
+    }
   | Continuation_raised e ->
     let stack =
       (Exception.get_backtrace_string e |> Exception.clean_stack)
       ^ "-----\n"
       ^ stack
     in
-    ( Printf.sprintf "Continuation failure - %s" (Exception.get_ctor_string e),
-      Utils.Callstack stack )
+    {
+      message =
+        Printf.sprintf "Continuation failure - %s" (Exception.get_ctor_string e);
+      environment = None;
+      stack = Utils.Callstack stack;
+    }
   | Transformer_raised e ->
     let stack =
       (Exception.get_backtrace_string e |> Exception.clean_stack)
       ^ "-----\n"
       ^ stack
     in
-    ( Printf.sprintf
-        "%s - unable to process output - %s"
-        cmd_and_args
-        (Exception.get_ctor_string e),
-      Utils.Callstack stack )
+    {
+      message =
+        Printf.sprintf
+          "%s - unable to process output - %s"
+          cmd_and_args
+          (Exception.get_ctor_string e);
+      environment = None;
+      stack = Utils.Callstack stack;
+    }
 
 let error_to_exn e = Failure e
 

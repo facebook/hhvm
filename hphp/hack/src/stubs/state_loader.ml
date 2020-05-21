@@ -17,7 +17,20 @@ type saved_state_handle = {
 
 type error = unit
 
-let error_string_verbose _ = ("", false, Utils.Callstack "")
+type verbose_error = {
+  message: string;
+  stack: Utils.callstack;
+  auto_retry: bool;
+  environment: string option;
+}
+
+let error_string_verbose _ =
+  {
+    message = "";
+    auto_retry = false;
+    stack = Utils.Callstack "";
+    environment = None;
+  }
 
 let cached_state ?saved_state_handle:_ ~config_hash:_ ~rev:_ = None
 

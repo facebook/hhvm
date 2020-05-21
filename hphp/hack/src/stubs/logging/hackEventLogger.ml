@@ -258,7 +258,7 @@ let type_check_end _ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ = ()
 
 let notifier_returned _ _ = ()
 
-let load_state_exn _ ~stack:_ = ()
+let load_state_exn _ = ()
 
 let prechecked_update_rechecked _ = ()
 

@@ -146,30 +146,47 @@ let init
       | Ok ((env, t), ({ state_distance; _ }, _)) ->
         ((env, t), Load_state_succeeded state_distance, false)
       | Error err ->
-        let (msg, retry, Utils.Callstack stack) =
+        let State_loader.
+              {
+                message;
+                auto_retry;
+                stack = Utils.Callstack stack;
+                environment;
+              } =
           load_state_error_to_verbose_string err
         in
         let (next_step_descr, next_step) =
-          match (genv.local_config.SLC.require_saved_state, retry) with
+          match (genv.local_config.SLC.require_saved_state, auto_retry) with
           | (true, true) -> ("retry", Exit_status.Failed_to_load_should_retry)
           | (true, false) -> ("fatal", Exit_status.Failed_to_load_should_abort)
           | (false, _) -> ("fallback", Exit_status.No_error)
         in
-        let msg = Printf.sprintf "%s [%s]" msg next_step_descr in
-        HackEventLogger.load_state_exn msg stack;
-        Hh_logger.log "Could not load saved state: %s\n%s\n" msg stack;
+        let user_message = Printf.sprintf "%s [%s]" message next_step_descr in
+        let exception_telemetry =
+          Telemetry.create ()
+          |> Telemetry.string_ ~key:"message" ~value:message
+          |> Telemetry.string_ ~key:"stack" ~value:stack
+          |> Telemetry.string_
+               ~key:"environment"
+               ~value:(Option.value environment ~default:"N/A")
+        in
+        HackEventLogger.load_state_exn exception_telemetry;
+        Hh_logger.log
+          "Could not load saved state: %s\n%s\n"
+          (Telemetry.to_string exception_telemetry)
+          stack;
         (match next_step with
         | Exit_status.No_error ->
           ServerProgress.send_to_monitor
-            (MonitorRpc.PROGRESS_WARNING (Some msg));
+            (MonitorRpc.PROGRESS_WARNING (Some user_message));
           ( ServerLazyInit.full_init genv env,
-            Load_state_failed (msg, Utils.Callstack stack),
+            Load_state_failed (user_message, Utils.Callstack stack),
             false )
         | _ ->
           let finale_data =
             {
               ServerCommandTypes.exit_status = next_step;
-              msg;
+              msg = user_message;
               stack = Utils.Callstack stack;
             }
           in

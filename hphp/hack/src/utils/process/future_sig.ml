@@ -26,6 +26,12 @@ module Types = struct
 
   type error = Process_types.invocation_info * error_mode
 
+  type verbose_error = {
+    message: string;
+    stack: Utils.callstack;
+    environment: string option;
+  }
+
   type 'a status =
     | Complete_with_result of ('a, error) result
     | In_progress of { age: float }
@@ -151,7 +157,7 @@ module type S = sig
 
   val error_to_string : error -> string
 
-  val error_to_string_verbose : error -> string * Utils.callstack
+  val error_to_string_verbose : error -> verbose_error
 
   val error_to_exn : error -> exn
 end

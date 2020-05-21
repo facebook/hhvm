@@ -23,10 +23,20 @@ end
 module State_loader_prefetcher_real = struct
   let fetch ~hhconfig_hash ~cache_limit handle =
     let error_to_string (error : State_loader.error) : string =
-      let (msg, _retry, Utils.Callstack stack) =
+      let State_loader.
+            {
+              message;
+              auto_retry = _;
+              stack = Utils.Callstack stack;
+              environment;
+            } =
         State_loader.error_string_verbose error
       in
-      msg ^ "\n" ^ stack
+      message
+      ^ "\n"
+      ^ stack
+      ^ "\nEnvironment:\b"
+      ^ Option.value environment ~default:"N/A"
     in
     let future =
       State_loader.fetch_saved_state

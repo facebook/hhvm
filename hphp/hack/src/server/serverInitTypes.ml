@@ -45,20 +45,37 @@ type init_result =
 
 (** returns human-readable string, an indication of whether auto-retry is sensible, and stack *)
 let load_state_error_to_verbose_string (err : load_state_error) :
-    string * bool * Utils.callstack =
+    State_loader.verbose_error =
+  let open State_loader in
   match err with
   | Load_state_loader_failure err -> State_loader.error_string_verbose err
   | Load_state_dirty_files_failure error ->
-    let (msg, stack) = Future.error_to_string_verbose error in
-    (Printf.sprintf "Problem getting dirty files from hg: %s" msg, false, stack)
+    let Future.{ message; stack; environment } =
+      Future.error_to_string_verbose error
+    in
+    {
+      message = Printf.sprintf "Problem getting dirty files from hg: %s" message;
+      auto_retry = false;
+      stack;
+      environment;
+    }
   | Load_state_timeout ->
-    ("Timed out trying to load state", false, Utils.Callstack "")
+    {
+      message = "Timed out trying to load state";
+      auto_retry = false;
+      stack = Utils.Callstack "";
+      environment = None;
+    }
   | Load_state_unhandled_exception { exn; stack } ->
-    ( Printf.sprintf
-        "Unexpected bug loading saved state - %s"
-        (Printexc.to_string exn),
-      false,
-      stack )
+    {
+      message =
+        Printf.sprintf
+          "Unexpected bug loading saved state - %s"
+          (Printexc.to_string exn);
+      auto_retry = false;
+      stack;
+      environment = None;
+    }
 
 type files_changed_while_parsing = Relative_path.Set.t
 

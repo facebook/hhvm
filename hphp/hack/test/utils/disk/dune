@@ -1,0 +1,5 @@
+(library
+  (name test_disk_utils)
+  (modules test_disk_utils)
+  (libraries
+    sys_utils))

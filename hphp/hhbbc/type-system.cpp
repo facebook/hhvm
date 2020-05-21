@@ -5271,15 +5271,20 @@ ArrKey disect_array_key(const Type& keyTy) {
  * existed in the array.
  */
 std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
+  assert(aval.subtypeOrNull(BArrLike));
   assert(aval.m_dataTag == DataTag::ArrLikeVal);
+  auto const fix_staticness = [&](Type ty) {
+    if (aval.subtypeOrNull(BSArrLike)) return ty;
+    return loosen_staticness(ty);
+  };
   auto ad = aval.m_data.aval;
   if (key.i) {
     auto const r = ad->get(*key.i);
-    if (r.is_init()) return { from_cell(r), true };
+    if (r.is_init()) return { fix_staticness(from_cell(r)), true };
     return { TBottom, false };
   } else if (key.s) {
     auto const r = ad->get(*key.s);
-    if (r.is_init()) return { from_cell(r), true };
+    if (r.is_init()) return { fix_staticness(from_cell(r)), true };
     return { TBottom, false };
   }
 
@@ -5293,7 +5298,7 @@ std::pair<Type,bool> arr_val_elem(const Type& aval, const ArrKey& key) {
       }
       return false;
     });
-  return { ty, false };
+  return { fix_staticness(ty), false };
 }
 
 /*
@@ -5617,6 +5622,7 @@ Type arr_map_newelem(Type& map, const Type& val, ProvTag src) {
 std::pair<Type, ThrowMode> array_like_elem(const Type& arr,
                                            const ArrKey& key,
                                            const Type& defaultTy) {
+  assert(arr.subtypeOrNull(BArrLike));
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
   const bool mustBeStatic = arr.subtypeOrNull(BSArrLike);
 
@@ -6423,6 +6429,7 @@ ArrKey disect_vec_key(const Type& keyTy) {
 
 std::pair<Type, ThrowMode>
 vec_elem(const Type& vec, const Type& undisectedKey, const Type& defaultTy) {
+  assert(vec.subtypeOrNull(BVec));
   auto const key = disect_vec_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(vec, key, defaultTy);
@@ -6479,6 +6486,7 @@ ArrKey disect_strict_key(const Type& keyTy) {
 
 std::pair<Type, ThrowMode>
 dict_elem(const Type& dict, const Type& undisectedKey, const Type& defaultTy) {
+  assert(dict.subtypeOrNull(BDict));
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(dict, key, defaultTy);
@@ -6506,6 +6514,7 @@ std::pair<Type, ThrowMode>
 keyset_elem(const Type& keyset,
             const Type& undisectedKey,
             const Type& defaultTy) {
+  assert(keyset.subtypeOrNull(BKeyset));
   auto const key = disect_strict_key(undisectedKey);
   if (key.type == TBottom) return {TBottom, ThrowMode::BadOperation};
   return array_like_elem(keyset, key, defaultTy);

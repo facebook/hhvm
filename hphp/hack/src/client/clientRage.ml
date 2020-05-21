@@ -19,11 +19,30 @@ type env = {
 let format_failure (message : string) (failure : Lwt_utils.Process_failure.t) :
     string =
   let open Lwt_utils.Process_failure in
+  let status =
+    match failure.process_status with
+    | Unix.WEXITED i ->
+      Printf.sprintf "WEXITED %d (%s)" i (Exit_status.exit_code_to_string i)
+    | Unix.WSIGNALED i ->
+      let msg =
+        if i = Sys.sigkill then
+          " this signal might have been sent by 'hh rage' itself if the command took too long"
+        else
+          ""
+      in
+      Printf.sprintf
+        "WSIGNALED %d (%s)%s"
+        i
+        (PrintSignal.string_of_signal i)
+        msg
+    | Unix.WSTOPPED i ->
+      Printf.sprintf "WSTOPPED %d (%s)" i (PrintSignal.string_of_signal i)
+  in
   Printf.sprintf
     "%s\nCMDLINE: %s\nEXIT STATUS: %s\nSTART: %s\nEND: %s\n\nSTDOUT:\n%s\nSTDERR:\n%s\n"
     message
     failure.command_line
-    (Process.status_to_string failure.process_status)
+    status
     (Utils.timestring failure.start_time)
     (Utils.timestring failure.end_time)
     failure.stdout

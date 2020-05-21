@@ -86,4 +86,6 @@ val exit : t -> 'a
 
 val to_string : t -> string
 
+val exit_code_to_string : int -> string
+
 val unpack : Unix.process_status -> string * int

@@ -7,6 +7,9 @@
  *
  *)
 
+(** care: the integers provided by deriving-enum should not be exposed
+to callers, and are not the same as the 'exit-code' function.
+We use deriving-enum solely to power exit_code_to_string. *)
 type t =
   | No_error
   | Build_error
@@ -76,6 +79,9 @@ type t =
   | Big_rebase_detected
   | Failed_to_load_should_retry
   | Failed_to_load_should_abort
+[@@deriving enum]
+
+let (_ignored : t -> int) = to_enum
 
 exception Exit_with of t
 
@@ -218,6 +224,18 @@ let to_string = function
   | Big_rebase_detected -> "Big_rebase_detected"
   | Failed_to_load_should_retry -> "Failed_to_load_should_retry"
   | Failed_to_load_should_abort -> "Failed_to_load_should_abort"
+
+let exit_code_to_string (code : int) : string =
+  let rec f acc candidate_i =
+    match of_enum candidate_i with
+    | Some candidate when exit_code candidate = code ->
+      f (to_string candidate :: acc) (candidate_i + 1)
+    | _ when candidate_i > max -> acc
+    | _ -> f acc (candidate_i + 1)
+  in
+  match f [] min with
+  | [] -> "?"
+  | candidates -> String.concat "/" candidates
 
 let unpack = function
   | Unix.WEXITED n -> ("exit", n)

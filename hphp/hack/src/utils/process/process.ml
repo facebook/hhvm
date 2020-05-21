@@ -45,6 +45,23 @@ let env_to_array (env : Process_types.environment) : string array option =
     Some fullenv
   | Process_types.Replace fullenv -> Some (Array.of_list fullenv)
 
+let env_to_string (env : Process_types.environment) : string =
+  match env with
+  | Process_types.Default ->
+    Printf.sprintf
+      "=====Process environment inherited from parent process:\n%s\n"
+      (String.concat ~sep:"\n" (Array.to_list (Unix.environment ())))
+  | Process_types.Empty -> "Process environment is explicitly made empty"
+  | Process_types.Augment additions ->
+    Printf.sprintf
+      "=====Process environment is augmented with:\n%s\n\n=====Parent process environment:\n%s\n"
+      (String.concat ~sep:"\n" additions)
+      (String.concat ~sep:"\n" (Array.to_list (Unix.environment ())))
+  | Process_types.Replace fullenv ->
+    Printf.sprintf
+      "=====Process environment explicitly set to:\n%s\n"
+      (String.concat ~sep:"\n" fullenv)
+
 let status_to_string (status : Unix.process_status) : string =
   match status with
   | Unix.WEXITED i -> Printf.sprintf "Unix.WEXITED %d" i
@@ -290,10 +307,12 @@ let exec_no_chdir
     ~(env : Process_types.environment option)
     (args : string list) : Process_types.t =
   let prog = Exec_command.to_string prog in
+  let env = Option.value env ~default:Process_types.Default in
   let info =
     {
       Process_types.name = prog;
       args;
+      env;
       stack =
         Utils.Callstack
           ( Caml.Printexc.get_callstack 100
@@ -308,7 +327,6 @@ let exec_no_chdir
   Unix.set_close_on_exec stdout_parent;
   Unix.set_close_on_exec stderr_parent;
 
-  let env = Option.value env ~default:Process_types.Default in
   let pid =
     match env_to_array env with
     | None ->
@@ -338,15 +356,18 @@ let register_entry_point = Entry.register
 type chdir_params = {
   cwd: string;
   prog: string;
-  env: Process_types.environment option;
+  env: Process_types.environment;
   args: string list;
 }
 
 (** Wraps a entry point inside a Process, so we get Process's
  * goodness for free (read_and_wait_pid and is_ready). The entry will be
  * spawned into a separate process. *)
-let run_entry ?(input : string option) (entry : 'a Entry.t) (params : 'a) :
-    Process_types.t =
+let run_entry
+    ?(input : string option)
+    (env : Process_types.environment)
+    (entry : 'a Entry.t)
+    (params : 'a) : Process_types.t =
   let (stdin_child, stdin_parent) = Unix.pipe () in
   let (stdout_parent, stdout_child) = Unix.pipe () in
   let (stderr_parent, stderr_child) = Unix.pipe () in
@@ -354,6 +375,7 @@ let run_entry ?(input : string option) (entry : 'a Entry.t) (params : 'a) :
     {
       Process_types.name = Daemon.name_of_entry entry;
       args = [];
+      env;
       stack =
         Utils.Callstack
           ( Caml.Printexc.get_callstack 100
@@ -376,10 +398,7 @@ let chdir_main (p : chdir_params) : 'a =
   Unix.chdir p.cwd;
 
   let args = Array.of_list (p.prog :: p.args) in
-  (* NOTE: to preserve original behavior of this code, empty environment is the default here.
-    This is different from exec_no_chdir where the default is Default (current environment). *)
-  let env = Option.value p.env ~default:Process_types.Empty in
-  let env = env_to_array env in
+  let env = env_to_array p.env in
   match env with
   | None -> Unix.execvp p.prog args
   | Some env -> Unix.execvpe p.prog args env
@@ -398,9 +417,10 @@ let exec_with_working_directory
     ~(dir : string)
     (prog : Exec_command.t)
     ?(input : string option)
-    ?(env : Process_types.environment option)
+    ?(env = Process_types.Default)
     (args : string list) : Process_types.t =
   run_entry
     ?input
+    env
     chdir_entry
     { cwd = dir; prog = Exec_command.to_string prog; env; args }

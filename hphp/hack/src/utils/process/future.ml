@@ -143,9 +143,10 @@ let error_to_string (info, e) =
 
 let error_to_string_verbose (error : error) : string * Utils.callstack =
   let (invocation_info, error_mode) = error in
-  let { Process_types.name; args; stack = Utils.Callstack stack } =
+  let Process_types.{ name; args; env; stack = Utils.Callstack stack } =
     invocation_info
   in
+  let _env = Process.env_to_string env in
   let stack = stack |> Exception.clean_stack in
   let cmd_and_args =
     Printf.sprintf "`%s %s`" name (String.concat ~sep:" " args)

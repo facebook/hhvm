@@ -311,7 +311,9 @@ let print_string_entry =
   Process.register_entry_point "print_string_main" print_string_main
 
 let test_entry_point () =
-  let process = Process.run_entry print_string_entry "hello" in
+  let process =
+    Process.run_entry Process_types.Default print_string_entry "hello"
+  in
   let result = Process.read_and_wait_pid ~timeout:10 process in
   match result with
   | Ok { Process_types.stdout; _ } ->
@@ -323,6 +325,7 @@ let test_chdir () =
   let process =
     Process.exec_with_working_directory
       ~dir:"/tmp"
+      ~env:Process_types.Empty
       (Exec_command.For_use_in_testing_only "pwd")
       []
   in

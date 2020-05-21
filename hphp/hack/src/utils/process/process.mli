@@ -55,7 +55,8 @@ val register_entry_point : string -> ('param -> unit) -> 'param Entry.t
 (** Wraps a entry point inside a Process, so we get Process's
  * goodness for free (read_and_wait_pid and is_ready). The entry will be
  * spawned into a separate process. *)
-val run_entry : ?input:string -> 'a Entry.t -> 'a -> Process_types.t
+val run_entry :
+  ?input:string -> environment -> 'a Entry.t -> 'a -> Process_types.t
 
 (**
  * Read data from stdout and stderr until EOF is reached. Waits for
@@ -72,6 +73,8 @@ val read_and_wait_pid : timeout:int -> Process_types.t -> process_result
 val failure_msg : failure -> string
 
 val status_to_string : Unix.process_status -> string
+
+val env_to_string : Process_types.environment -> string
 
 (** Returns true if read_and_close_pid would be nonblocking. *)
 val is_ready : Process_types.t -> bool

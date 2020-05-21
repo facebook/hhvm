@@ -30,19 +30,20 @@ type lifecycle =
   | Lifecycle_exited of Unix.process_status (* the process exited *)
   | Lifecycle_killed_due_to_overflow_stdin
 
-(* Invocation info is internal book-keeping to record information about
- * the process's original invocation. *)
-type invocation_info = {
-  name: string;
-  args: string list;
-  stack: Utils.callstack;
-}
-
 type environment =
   | Default
   | Empty
   | Augment of string list
   | Replace of string list
+
+(* Invocation info is internal book-keeping to record information about
+ * the process's original invocation. *)
+type invocation_info = {
+  name: string;
+  args: string list;
+  env: environment;
+  stack: Utils.callstack;
+}
 
 (* type 't' represents a process, be it completed or still underway.
  * From the information in 't' we can figure out if it has completed,
@@ -85,7 +86,8 @@ and failure =
 
 let dummy =
   {
-    info = { name = "dummy"; args = []; stack = Utils.Callstack "" };
+    info =
+      { name = "dummy"; env = Default; args = []; stack = Utils.Callstack "" };
     stdin_fd = ref None;
     stdout_fd = ref None;
     stderr_fd = ref None;

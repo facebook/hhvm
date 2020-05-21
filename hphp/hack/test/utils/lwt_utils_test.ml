@@ -7,7 +7,7 @@ let test_exec_checked_basic () : bool Lwt.t =
       [| "hello"; "world" |]
   in
   match process_status with
-  | Ok { Lwt_utils.Process_success.command_line; stdout; stderr } ->
+  | Ok { Lwt_utils.Process_success.command_line; stdout; stderr; _ } ->
     String_asserter.assert_equals
       command_line
       "echo hello world"
@@ -32,6 +32,7 @@ let test_exec_checked_failing () : bool Lwt.t =
         stdout;
         stderr;
         exn;
+        _;
       } ->
     assert (exn = None);
     String_asserter.assert_equals

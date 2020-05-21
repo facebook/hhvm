@@ -19,6 +19,8 @@ module Process_success : sig
     command_line: string;
     stdout: string;
     stderr: string;
+    start_time: float;
+    end_time: float;
   }
 end
 
@@ -29,6 +31,8 @@ module Process_failure : sig
     stdout: string;
     stderr: string;
     exn: exn option;
+    start_time: float;
+    end_time: float;
   }
 
   val to_string : t -> string

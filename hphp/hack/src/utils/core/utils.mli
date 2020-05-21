@@ -23,6 +23,8 @@ val print_endlinef : ('a, unit, string, unit) format4 -> 'a
 
 val prerr_endlinef : ('a, unit, string, unit) format4 -> 'a
 
+val timestring : float -> string
+
 val opt : ('a -> 'b -> 'a * 'c) -> 'a -> 'b option -> 'a * 'c option
 
 val opt_fold : ('a -> 'b -> 'a) -> 'a -> 'b option -> 'a

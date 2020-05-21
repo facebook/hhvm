@@ -20,10 +20,12 @@ let format_failure (message : string) (failure : Lwt_utils.Process_failure.t) :
     string =
   let open Lwt_utils.Process_failure in
   Printf.sprintf
-    "%s: %s\n%s\nSTDOUT:\n%s\nSTDERR:\n%s\n"
+    "%s\nCMDLINE: %s\nEXIT STATUS: %s\nSTART: %s\nEND: %s\n\nSTDOUT:\n%s\nSTDERR:\n%s\n"
     message
-    (Process.status_to_string failure.process_status)
     failure.command_line
+    (Process.status_to_string failure.process_status)
+    (Utils.timestring failure.start_time)
+    (Utils.timestring failure.end_time)
     failure.stdout
     failure.stderr
 
@@ -218,7 +220,7 @@ let rage_hh_server_state (env : env) :
   in
   match hh_server_state_result with
   | Error failure ->
-    Lwt.return_error (format_failure "failed to obtain" failure)
+    Lwt.return_error (format_failure "failed to obtain state" failure)
   | Ok { Lwt_utils.Process_success.stdout; _ } ->
     begin
       try
@@ -313,32 +315,26 @@ let rage_www_errors (env : env) : string Lwt.t =
       Exec_command.Hh
       ~timeout:60.0
       [|
-        "--from"; "rage"; "--autostart-server"; "false"; Path.to_string env.root;
+        "check";
+        "--from";
+        "rage";
+        "--autostart-server";
+        "false";
+        Path.to_string env.root;
       |]
   in
-  let (www_errors_cmd, www_errors_stdout, www_errors_stderr, www_errors_exit) =
-    match www_errors_result with
-    | Ok { Lwt_utils.Process_success.command_line; stdout; stderr; _ } ->
-      (command_line, stdout, stderr, "exit 0 ok")
-    | Error
-        {
-          Lwt_utils.Process_failure.command_line;
-          stdout;
-          stderr;
-          process_status;
-          _;
-        } ->
-      (command_line, stdout, stderr, Process.status_to_string process_status)
-  in
-  let www_errors =
-    Printf.sprintf
-      "%s\n%s\n\nSTDOUT:\n%s\n\nSTDERR:\n%s\n"
-      www_errors_cmd
-      www_errors_exit
-      www_errors_stdout
-      www_errors_stderr
-  in
-  Lwt.return www_errors
+  match www_errors_result with
+  | Ok success ->
+    let open Lwt_utils.Process_success in
+    Lwt.return
+      (Printf.sprintf
+         "hh check success\nCMDLINE: %s\nEXIT STATUS: 0\nSTART: %s\nEND: %s\n\nSTDOUT:\n%s\n\nSTDERR:\n%s\n"
+         success.command_line
+         (Utils.timestring success.start_time)
+         (Utils.timestring success.end_time)
+         success.stdout
+         success.stderr)
+  | Error failure -> Lwt.return (format_failure "hh check failure" failure)
 
 let rage_saved_state (env : env) : (string * string) list Lwt.t =
   let watchman_opts =

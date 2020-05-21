@@ -77,6 +77,8 @@ module Process_success = struct
     command_line: string;
     stdout: string;
     stderr: string;
+    start_time: float;
+    end_time: float;
   }
 end
 
@@ -87,6 +89,8 @@ module Process_failure = struct
     stdout: string;
     stderr: string;
     exn: exn option;
+    start_time: float;
+    end_time: float;
   }
 
   let to_string (process_failure : t) : string =
@@ -132,6 +136,7 @@ let exec_checked
     in
     program ^ args
   in
+  let start_time = Unix.gettimeofday () in
   let process =
     let command = (program, Array.append [| program |] args) in
     Lwt_process.open_process_full command ?timeout ?env
@@ -166,12 +171,22 @@ let exec_checked
      Lwt.return (!exn, !stdout, !stderr)
    in
    let%lwt state = process#close in
+   let end_time = Unix.gettimeofday () in
    match state with
    | Unix.WEXITED 0 ->
-     Lwt.return_ok { Process_success.command_line; stdout; stderr }
+     Lwt.return_ok
+       { Process_success.command_line; stdout; stderr; start_time; end_time }
    | process_status ->
      Lwt.return_error
-       { Process_failure.command_line; process_status; stdout; stderr; exn })
+       {
+         Process_failure.command_line;
+         process_status;
+         stdout;
+         stderr;
+         exn;
+         start_time;
+         end_time;
+       })
     [%finally
       let%lwt (_ : Unix.process_status) = process#close in
       Lwt.return_unit]

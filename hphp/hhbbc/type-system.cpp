@@ -3741,8 +3741,8 @@ R tvImpl(const Type& t) {
         return H::template fromVec<KeysetAppendInit>(t.m_data.packed->elems,
                                                      ProvTag::Top);
       } else if (t.subtypeOf(BPArrN)) {
-        return H::template fromVec<PackedArrayInit>(t.m_data.packed->elems,
-                                                    ProvTag::Top);
+        return H::template fromVec<MixedArrayInit>(t.m_data.packed->elems,
+                                                   ProvTag::Top);
       } else if (t.subtypeOf(BVArrN)) {
         assertx(!RuntimeOption::EvalHackArrDVArrs);
         return H::template fromVec<VArrayInit>(t.m_data.packed->elems,

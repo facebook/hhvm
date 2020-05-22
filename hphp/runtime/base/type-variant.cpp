@@ -469,13 +469,15 @@ Array Variant::toPHPArrayHelper() const {
   switch (m_type) {
     case KindOfUninit:
     case KindOfNull:          return empty_array();
-    case KindOfBoolean:       return make_packed_array(*this);
-    case KindOfInt64:         return make_packed_array(m_data.num);
-    case KindOfDouble:        return make_packed_array(*this);
+
+    // These scalars all get converted into single-element arrays.
+    case KindOfBoolean:
+    case KindOfInt64:
+    case KindOfDouble:
     case KindOfPersistentString:
-      return make_packed_array(Variant{m_data.pstr, PersistentStrInit{}});
     case KindOfString:
-      return make_packed_array(Variant{m_data.pstr});
+      return Array::attach(ArrayData::Create(*this));
+
     case KindOfPersistentVec:
     case KindOfVec:
     case KindOfPersistentDict:
@@ -495,15 +497,17 @@ Array Variant::toPHPArrayHelper() const {
       return empty_array();
     case KindOfFunc:
       invalidFuncConversion("array");
-      return make_packed_array(Variant{funcToStringHelper(m_data.pfunc),
-                                       PersistentStrInit{}});
+      return Array::attach(ArrayData::Create(
+        Variant{funcToStringHelper(m_data.pfunc),
+                PersistentStrInit{}}));
     case KindOfClass:
-      return make_packed_array(Variant{classToStringHelper(m_data.pclass),
-                                       PersistentStrInit{}});
+      return Array::attach(ArrayData::Create(
+        Variant{classToStringHelper(m_data.pclass),
+                PersistentStrInit{}}));
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("array");
-      return make_packed_array(
-        m_data.pclsmeth->getClsStr(), m_data.pclsmeth->getFuncStr());
+      return make_map_array(0, m_data.pclsmeth->getClsStr(),
+                            1, m_data.pclsmeth->getFuncStr());
     case KindOfRecord:
       raise_convert_record_to_type("array");
       return empty_array();

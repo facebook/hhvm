@@ -215,15 +215,16 @@ TEST(Type, Ptr) {
 
   EXPECT_EQ(TBottom, TBottom.deref());
 
-  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
-  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
-  auto ptrToConstPackedArray = Type::cns(arrData).ptr(Ptr::Ptr);
-  EXPECT_FALSE(ptrToConstPackedArray.hasConstVal());
-  EXPECT_TRUE(ptrToConstPackedArray.isSpecialized());
-  EXPECT_EQ(TPtrToStaticArr, ptrToConstPackedArray.unspecialize());
-  EXPECT_EQ(packedSpec, ptrToConstPackedArray.arrSpec());
+  auto const mixedSpec = ArraySpec(ArrayData::kMixedKind);
+  auto const arrData = ArrayData::GetScalarArray(make_map_array(1, 2, 3, 4));
+  auto ptrToConstMixedArray = Type::cns(arrData).ptr(Ptr::Ptr);
+  EXPECT_FALSE(ptrToConstMixedArray.hasConstVal());
+  EXPECT_TRUE(ptrToConstMixedArray.isSpecialized());
+  EXPECT_EQ(TPtrToStaticArr, ptrToConstMixedArray.unspecialize());
+  EXPECT_EQ(mixedSpec, ptrToConstMixedArray.arrSpec());
 
-  auto ptrToStaticPackedArray =
+  auto const packedSpec = ArraySpec(ArrayData::kPackedKind);
+  auto const ptrToStaticPackedArray =
     Type::StaticArray(ArrayData::kPackedKind).ptr(Ptr::Ptr);
   EXPECT_FALSE(ptrToStaticPackedArray.hasConstVal());
   EXPECT_TRUE(ptrToStaticPackedArray.isSpecialized());
@@ -450,7 +451,7 @@ TEST(Type, Specialized) {
   EXPECT_EQ(TBottom, TPackedArr & TMixedArr);
   EXPECT_EQ(TBottom, TPackedArr - TArr);
 
-  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto const arrData = ArrayData::GetScalarArray(make_varray(1, 2, 3, 4));
   auto const arrDataMixed = ArrayData::GetScalarArray(make_map_array(1, 1,
                                                                      2, 2));
   auto constArray = Type::cns(arrData);
@@ -776,18 +777,18 @@ TEST(Type, Const) {
   EXPECT_EQ(TBottom, five & True);
   EXPECT_EQ(Type::cns(false), TBool - True);
 
-  auto const arrData = ArrayData::GetScalarArray(make_packed_array(1, 2, 3, 4));
+  auto const arrData = ArrayData::GetScalarArray(make_map_array(1, 2, 3, 4));
   auto const constArray = Type::cns(arrData);
 
-  EXPECT_TRUE(constArray <= TPackedArr);
-  EXPECT_TRUE(constArray < TPackedArr);
-  EXPECT_FALSE(TPackedArr <= constArray);
+  EXPECT_TRUE(constArray <= TMixedArr);
+  EXPECT_TRUE(constArray < TMixedArr);
+  EXPECT_FALSE(TMixedArr <= constArray);
   EXPECT_TRUE(constArray <= constArray);
   EXPECT_FALSE(TPackedArr <= TMixedArr);
   EXPECT_FALSE(TMixedArr <= TPackedArr);
-  EXPECT_FALSE(constArray <= TMixedArr);
+  EXPECT_FALSE(constArray <= TPackedArr);
   EXPECT_FALSE(constArray.arrSpec().dvarray());
-  EXPECT_EQ(constArray, constArray & TPackedArr);
+  EXPECT_EQ(constArray, constArray & TMixedArr);
 
   ArrayTypeTable::Builder ratBuilder;
   auto const rat1 = ratBuilder.packedn(RepoAuthType::Array::Empty::No,

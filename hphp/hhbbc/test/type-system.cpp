@@ -199,32 +199,23 @@ auto const test_array_map_value = folly::lazy([] {
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
-auto const test_array_packed_value = folly::lazy([] {
-  auto ar = make_packed_array(
-    42,
-    23,
-    12
-  );
+// The following helpers produce "vector-like" arrays, in the sense that they
+// have the keys 0...size-1, inserted in that order. They're actually backed
+// by MixedArrays in the runtime, but HHBBC only reasons about Hack-visible
+// types, never about backing layouts.
+
+auto const test_array_vector_value = folly::lazy([] {
+  auto ar = make_map_array(0, 42, 1, 23, 2, 12);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
-auto const test_array_packed_value2 = folly::lazy([] {
-  auto ar = make_packed_array(
-    42,
-    23.0,
-    12
-  );
+auto const test_array_vector_value2 = folly::lazy([] {
+  auto ar = make_map_array(0, 42, 1, 23.0, 2, 12);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
-auto const test_array_packed_value3 = folly::lazy([] {
-  auto ar = make_packed_array(
-    1,
-    2,
-    3,
-    4,
-    5
-  );
+auto const test_array_vector_value3 = folly::lazy([] {
+  auto ar = make_map_array(0, 1, 1, 2, 2, 3, 3, 4, 4, 5);
   return ArrayData::GetScalarArray(std::move(ar));
 });
 
@@ -235,7 +226,7 @@ auto const with_data = folly::lazy([] {
     sval(s_test.get()),
     sval_nonstatic(s_test.get()),
     aval(test_array_map_value()),
-    aval(test_array_packed_value())
+    aval(test_array_vector_value())
   };
 });
 
@@ -762,10 +753,10 @@ TEST(Type, Prim) {
 TEST(Type, CouldBeValues) {
   EXPECT_FALSE(ival(2).couldBe(ival(3)));
   EXPECT_TRUE(ival(2).couldBe(ival(2)));
-  EXPECT_FALSE(aval(test_array_packed_value()).couldBe(
+  EXPECT_FALSE(aval(test_array_vector_value()).couldBe(
     aval(test_array_map_value())));
-  EXPECT_TRUE(aval(test_array_packed_value()).couldBe(
-    aval(test_array_packed_value())));
+  EXPECT_TRUE(aval(test_array_vector_value()).couldBe(
+    aval(test_array_vector_value())));
   EXPECT_TRUE(dval(2.0).couldBe(dval(2.0)));
   EXPECT_FALSE(dval(2.0).couldBe(dval(3.0)));
 
@@ -2041,7 +2032,7 @@ TEST(Type, ArrPacked2) {
   {
     auto const a1 = arr_packed({TInt, TInt, TInt});
     auto const s1 = sarr_packed({TInt, TInt, TInt});
-    auto const s2 = aval(test_array_packed_value());
+    auto const s2 = aval(test_array_vector_value());
     EXPECT_TRUE(s2.subtypeOf(a1));
     EXPECT_TRUE(s2.subtypeOf(s1));
     EXPECT_TRUE(s2.couldBe(a1));
@@ -2050,7 +2041,7 @@ TEST(Type, ArrPacked2) {
 
   {
     auto const s1 = sarr_packed({ival(42), ival(23), ival(12)});
-    auto const s2 = aval(test_array_packed_value());
+    auto const s2 = aval(test_array_vector_value());
     auto const s3 = sarr_packed({TInt});
     auto const a4 = sarr_packed({TInt});
     auto const a5 = arr_packed({ival(42), ival(23), ival(12)});
@@ -2088,7 +2079,7 @@ TEST(Type, ArrPackedUnion) {
   }
 
   {
-    auto const s1 = aval(test_array_packed_value());
+    auto const s1 = aval(test_array_vector_value());
     auto const s2 = sarr_packed({TInt, TInt, TInt});
     auto const s3 = sarr_packed({TInt, TNum, TInt});
     EXPECT_EQ(union_of(s1, s2), s2);
@@ -2111,14 +2102,14 @@ TEST(Type, ArrPackedUnion) {
   }
 
   {
-    auto const s1 = aval(test_array_packed_value());
-    auto const s2 = aval(test_array_packed_value2());
+    auto const s1 = aval(test_array_vector_value());
+    auto const s2 = aval(test_array_vector_value2());
     EXPECT_EQ(union_of(s1, s2), sarr_packed({ival(42), TNum, ival(12)}));
   }
 }
 
 TEST(Type, ArrPackedN) {
-  auto const s1 = aval(test_array_packed_value());
+  auto const s1 = aval(test_array_vector_value());
   auto const s2 = sarr_packed({TInt, TInt});
   EXPECT_EQ(union_of(s1, s2), sarr_packedn(TInt));
 
@@ -2244,7 +2235,7 @@ TEST(Type, ArrMapN) {
 
 TEST(Type, ArrEquivalentRepresentations) {
   {
-    auto const simple = aval(test_array_packed_value());
+    auto const simple = aval(test_array_vector_value());
     auto const bulky  = sarr_packed({ival(42), ival(23), ival(12)});
     EXPECT_EQ(simple, bulky);
   }
@@ -2295,8 +2286,8 @@ TEST(Type, ArrUnions) {
   EXPECT_EQ(union_of(arr_mapn(TInt, TTrue), arr_mapn(TStr, TFalse)),
             arr_mapn(TArrKey, TBool));
 
-  auto const aval1 = aval(test_array_packed_value());
-  auto const aval2 = aval(test_array_packed_value3());
+  auto const aval1 = aval(test_array_vector_value());
+  auto const aval2 = aval(test_array_vector_value3());
   EXPECT_EQ(union_of(aval1, aval2), sarr_packedn(TInt));
 }
 
@@ -2773,7 +2764,7 @@ TEST(Type, LoosenValues) {
     { dval(3.14), TDbl },
     { sval(s_test.get()), TSStr },
     { sval_nonstatic(s_test.get()), TStr },
-    { aval(test_array_packed_value()), TSPArrN },
+    { aval(test_array_vector_value()), TSPArrN },
     { arr_packedn(TInt), TPArrN },
     { arr_packed({TInt, TBool}), TPArrN },
     { arr_packed_varray({TInt, TBool}), TVArrN },
@@ -3033,7 +3024,7 @@ TEST(Type, RemoveCounted) {
     { sval(s_test.get()), sval(s_test.get()) },
     { sval_nonstatic(s_test.get()), sval(s_test.get()) },
     { aval(test_array_map_value()), aval(test_array_map_value()) },
-    { aval(test_array_packed_value()), aval(test_array_packed_value()) },
+    { aval(test_array_vector_value()), aval(test_array_vector_value()) },
     { sarr_packedn(TInt), sarr_packedn(TInt) },
     { arr_packedn(TInitCell), sarr_packedn(TInitUnc) },
     { arr_packedn(TObj), TBottom },
@@ -3191,7 +3182,7 @@ TEST(Type, MustBeCounted) {
     { dval(2.0), false },
     { sval(s_test.get()), false },
     { aval(test_array_map_value()), false },
-    { aval(test_array_packed_value()), false },
+    { aval(test_array_vector_value()), false },
     { arr_packedn(TInt), false },
     { arr_packedn(TObj), true },
     { arr_packed({TInt, TStr}), false },

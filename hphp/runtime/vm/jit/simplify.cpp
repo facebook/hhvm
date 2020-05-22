@@ -2015,7 +2015,7 @@ SSATmp* convToDArrImpl(State& env, const IRInstruction* inst) {
 SSATmp* convNonArrToArrImpl(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
-    auto arr = make_packed_array(src->variantVal());
+    auto arr = Array::attach(ArrayData::Create(src->variantVal()));
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;
@@ -2100,7 +2100,8 @@ SSATmp* simplifyConvClsMethToArr(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
     auto const clsmeth = src->clsmethVal();
-    auto arr = make_packed_array(clsmeth->getClsStr(), clsmeth->getFuncStr());
+    auto arr = make_map_array(0, clsmeth->getClsStr(),
+                              1, clsmeth->getFuncStr());
     return cns(env, ArrayData::GetScalarArray(std::move(arr)));
   }
   return nullptr;

@@ -810,8 +810,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
 
       case KindOfClsMeth: {
         raiseClsMethConvertWarningHelper("array");
-        a = make_packed_array(
-          val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr()
+        a = make_map_array(
+          0, val(tv).pclsmeth->getClsStr(),
+          1, val(tv).pclsmeth->getFuncStr()
         ).detach();
         tvDecRefClsMeth(tv);
         continue;

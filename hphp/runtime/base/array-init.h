@@ -209,18 +209,9 @@ struct MixedPHPArrayInitBase : ArrayInitBase<TArray, KindOfArray> {
   using Mixed = Map;
 
   /*
-   * When you create an MixedPHPArrayInitBase, you must specify the "kind" of
-   * array you are creating, for performance reasons.  "Kinds" that
-   * are relevant to know about for extension code:
-   *
-   *   Packed -- a vector-like array: don't use MixedPHPArrayInitBase,
-   *             use PackedArrayInit
-   *   Map    -- you expect only string keys and any value type
-   *   Mixed  -- you expect either integer keys, mixed keys
-   *
-   * Also, generally it's preferable to use make_map_array or
-   * make_packed_array when it's easy, since you don't have to get 'n'
-   * right in that case.
+   * Extension code should avoid using ArrayInit, and instead use DArrayInit
+   * or VArrayInit. If you really want to create a plain PHP array, your only
+   * option now is to use a mixed array.
    *
    * For large array allocations, consider passing CheckAllocation, which will
    * throw if the allocation would OOM the request.
@@ -469,12 +460,6 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
   }
 
 };
-
-/*
- * Initializer for a PHP vector-shaped array.
- * TODO(T58820726): Remove by migrating remaining callers.
- */
-using PackedArrayInit = PackedArrayInitBase<PackedArray, KindOfArray>;
 
 /*
  * Initializer for a Hack vector array.
@@ -813,14 +798,6 @@ struct KeysetInit : ArrayInitBase<SetArray, KindOfKeyset> {
 
 namespace make_array_detail {
 
-  inline void packed_impl(PackedArrayInit&) {}
-
-  template<class Val, class... Vals>
-  void packed_impl(PackedArrayInit& init, Val&& val, Vals&&... vals) {
-    init.append(Variant(std::forward<Val>(val)));
-    packed_impl(init, std::forward<Vals>(vals)...);
-  }
-
   inline void varray_impl(VArrayInit&) {}
 
   template<class Val, class... Vals>
@@ -896,23 +873,6 @@ namespace make_array_detail {
     keyset_impl(init, std::forward<Vals>(vals)...);
   }
 
-}
-
-/*
- * Helper for creating packed arrays (vector-like).
- *
- * Usage:
- *
- *   auto newArray = make_packed_array(1, 2, 3, 4);
- *
- * TODO(T58820726): Remove by migrating remaining callers.
- */
-template<class... Vals>
-Array make_packed_array(Vals&&... vals) {
-  static_assert(sizeof...(vals), "use Array::Create() instead");
-  PackedArrayInit init(sizeof...(vals));
-  make_array_detail::packed_impl(init, std::forward<Vals>(vals)...);
-  return init.toArray();
 }
 
 /*

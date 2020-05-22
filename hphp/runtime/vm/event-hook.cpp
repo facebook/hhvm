@@ -347,7 +347,7 @@ static Variant call_intercept_handler_callback(
       Variant("The callback for fb_intercept2 cannot have inout parameters"));
   }
   auto const curArgs = get_frame_args(ar);
-  PackedArrayInit args(prepend_this + curArgs.size());
+  VArrayInit args(prepend_this + curArgs.size());
   if (prepend_this) {
     auto const thiz = [&] {
       if (!origCallee->cls()) return make_tv<KindOfNull>();

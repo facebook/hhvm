@@ -791,7 +791,7 @@ bool ArrayData::IsValidKey(const String& k) {
 }
 
 ArrayData* ArrayData::Create(TypedValue value) {
-  PackedArrayInit pai(1);
+  MixedArrayInit pai(1);
   pai.append(value);
   return pai.create();
 }

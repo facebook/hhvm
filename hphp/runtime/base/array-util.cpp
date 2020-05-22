@@ -360,8 +360,15 @@ Variant ArrayUtil::Shuffle(const Array& input) {
       ret.add(input->nvGetVal(pos));
     }
     return ret.toVariant();
+  } else if (input.isVArray()) {
+    VArrayInit ret(count);
+    for (int i = 0; i < count; i++) {
+      ssize_t pos = indices[i];
+      ret.append(input->nvGetVal(pos));
+    }
+    return ret.toVariant();
   } else {
-    PackedArrayInit ret(count);
+    MixedArrayInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
       ret.append(input->nvGetVal(pos));
@@ -401,7 +408,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
   }
   php_array_data_shuffle(indices);
 
-  PackedArrayInit ret(num_req);
+  VArrayInit ret(num_req);
   for (int i = 0; i < num_req; i++) {
     ssize_t pos = indices[i];
     ret.append(input->getKey(pos));

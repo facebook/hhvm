@@ -368,7 +368,7 @@ Variant ArrayUtil::Shuffle(const Array& input) {
     }
     return ret.toVariant();
   } else {
-    MixedArrayInit ret(count);
+    DArrayInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
       ret.append(input->nvGetVal(pos));

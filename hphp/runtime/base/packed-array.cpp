@@ -361,47 +361,6 @@ ArrayData* PackedArray::CopyStatic(const ArrayData* adIn) {
   return ad;
 }
 
-ArrayData* PackedArray::ConvertStatic(const ArrayData* arr) {
-  assertx(arr->isVectorData());
-  assertx(!RuntimeOption::EvalHackArrDVArrs || arr->isNotDVArray());
-  assertx(!arr->isDArray());
-
-  auto const sizeIndex = capacityToSizeIndex(arr->m_size);
-  auto ad = alloc_packed_static(arr);
-  ad->initHeader_16(
-    HeaderKind::Packed,
-    StaticValue,
-    packSizeIndexAndAuxBits(sizeIndex, arr->auxBits())
-  );
-  ad->m_sizeAndPos = arr->m_sizeAndPos;
-
-  uint32_t i = 0;
-  auto pos_limit = arr->iter_end();
-  for (auto pos = arr->iter_begin(); pos != pos_limit;
-       pos = arr->iter_advance(pos), ++i) {
-    tvDup(arr->nvGetVal(pos), LvalUncheckedInt(ad, i));
-  }
-
-  if (RuntimeOption::EvalArrayProvenance) {
-    assertx(!ad->hasProvenanceData());
-    auto const tag = arrprov::getTag(ad);
-    if (tag.valid()) {
-      arrprov::setTag(ad, tag);
-    }
-  }
-
-  assertx(ad->isPackedKind());
-  assertx(capacity(ad) >= arr->m_size);
-  assertx(ad->dvArray() == arr->dvArray());
-  assertx(!arrprov::arrayWantsTag(ad) ||
-          !!arrprov::getTag(ad) == !!arrprov::getTag(arr));
-  assertx(ad->m_size == arr->m_size);
-  assertx(ad->m_pos == arr->m_pos);
-  assertx(ad->isStatic());
-  assertx(checkInvariants(ad));
-  return ad;
-}
-
 /* This helper allocates an ArrayData and initializes the header (including
  * capacity, kind, and refcount). The caller is responsible for initializing
  * m_sizeAndPos, and initializing array entries (if any).

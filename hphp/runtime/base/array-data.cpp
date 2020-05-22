@@ -241,13 +241,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   it = s_arrayDataMap.find(arr);
   if (it != s_arrayDataMap.end()) return replace(*it);
 
-  ArrayData* ad;
-  if (((arr->isMixedKind() && !arr->isDArray()) || arr->isGlobalsArrayKind()) &&
-      arr->isVectorData()) {
-    ad = PackedArray::ConvertStatic(arr);
-  } else {
-    ad = arr->copyStatic();
-  }
+  auto ad = arr->copyStatic();
   assertx(ad->isStatic());
   MemoryStats::LogAlloc(AllocKind::StaticArray, ad->allocSize());
 

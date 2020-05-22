@@ -188,12 +188,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static bool checkInvariants(const ArrayData*);
 
-  /*
-   * Accepts any array of any kind satisfying isVectorData() and makes a
-   * static packed copy, like CopyStatic().
-   */
-  static ArrayData* ConvertStatic(const ArrayData*);
-
   static ptrdiff_t entriesOffset();
 
   static uint32_t capacity(const ArrayData*);

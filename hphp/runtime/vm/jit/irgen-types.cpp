@@ -1442,12 +1442,19 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
   assertx(ind >= 0);
   verifyFunc(tc);
   if (id == TypeConstraint::ReturnId && func->hasReturnWithMultiUBs()) {
-    for (auto const& ub : func->returnUBs()) verifyFunc(ub);
+    auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
+    for (auto& ub : ubs) {
+      applyFlagsToUB(ub, tc);
+      verifyFunc(ub);
+    }
   } else if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(id);
     if (it != ubs.end()) {
-      for (auto const& ub : it->second) verifyFunc(ub);
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
+        verifyFunc(ub);
+      }
     }
   }
 }
@@ -1546,13 +1553,16 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
       }
     );
   };
-
-  verifyFunc(func->params()[id].typeConstraint);
+  auto const& tc = func->params()[id].typeConstraint;
+  verifyFunc(tc);
   if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(id);
     if (it != ubs.end()) {
-      for (auto const& ub : it->second) verifyFunc(ub);
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
+        verifyFunc(ub);
+      }
     }
   }
 }

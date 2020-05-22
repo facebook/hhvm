@@ -38,3 +38,9 @@ string(8) "just foo"
 string(8) "just bar"
 
 Warning: Value returned from function example() must be upper-bounded by Barable, JustFoo given in %s/multiple-ubs-warn.php on line 41
+string(3) "foo"
+
+Warning: Argument 1 to foobaz() must be upper-bounded by Fooable, null given in %s/multiple-ubs-warn.php on line 57
+
+Warning: Argument 1 to foobaz() must be upper-bounded by Barable, null given in %s/multiple-ubs-warn.php on line 57
+string(3) "bar"

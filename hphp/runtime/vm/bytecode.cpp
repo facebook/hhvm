@@ -4896,10 +4896,11 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
   const TypeConstraint& tc = func->params()[param.index].typeConstraint;
   if (tc.isCheckable()) tc.verifyParam(param.lval, func, param.index);
   if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(param.index);
     if (it != ubs.end()) {
-      for (auto const& ub : it->second) {
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
         if (ub.isCheckable()) ub.verifyParam(param.lval, func, param.index);
       }
     }
@@ -4935,10 +4936,11 @@ OPTBLD_INLINE void iopVerifyOutType(uint32_t paramId) {
   auto const& tc = func->params()[paramId].typeConstraint;
   if (tc.isCheckable()) tc.verifyOutParam(vmStack().topTV(), func, paramId);
   if (func->hasParamsWithMultiUBs()) {
-    auto const& ubs = func->paramUBs();
+    auto& ubs = const_cast<Func::ParamUBMap&>(func->paramUBs());
     auto it = ubs.find(paramId);
     if (it != ubs.end()) {
-      for (auto const& ub : it->second) {
+      for (auto& ub : it->second) {
+        applyFlagsToUB(ub, tc);
         if (ub.isCheckable()) {
           ub.verifyOutParam(vmStack().topTV(), func, paramId);
         }
@@ -4954,7 +4956,9 @@ OPTBLD_INLINE void verifyRetTypeImpl(size_t ind) {
   const auto tc = func->returnTypeConstraint();
   if (tc.isCheckable()) tc.verifyReturn(vmStack().indC(ind), func);
   if (func->hasReturnWithMultiUBs()) {
-    for (auto const& ub : func->returnUBs()) {
+    auto& ubs = const_cast<Func::UpperBoundVec&>(func->returnUBs());
+    for (auto& ub : ubs) {
+      applyFlagsToUB(ub, tc);
       if (ub.isCheckable()) ub.verifyReturn(vmStack().indC(ind), func);
     }
   }

@@ -165,6 +165,10 @@ struct TypeConstraint {
     m_flags = static_cast<Flags>(flags);
   }
 
+  void addFlags(Flags flags) {
+    m_flags = static_cast<Flags>(m_flags | flags);
+  }
+
   /*
    * Returns: whether this constraint implies any runtime checking at
    * all.  If this function returns false, it means the
@@ -553,6 +557,8 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
   return !tc.alwaysPasses(KindOfString);
 }
 
+// Add all flags in tc (except TypeVar) to ub
+void applyFlagsToUB(TypeConstraint& ub, const TypeConstraint& tc);
 }
 
 #endif

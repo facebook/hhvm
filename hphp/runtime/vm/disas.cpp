@@ -213,13 +213,13 @@ FuncInfo find_func_info(const Func* func) {
     if (func->hasParamsWithMultiUBs()) {
       auto const& params = func->params();
       for (auto const& p : func->paramUBs()) {
-        auto const& userType = params[p.first].userType;
-        auto& v = finfo.ubs[userType->data()];
+        auto const& typeName = params[p.first].typeConstraint.typeName();
+        auto& v = finfo.ubs[typeName->data()];
         if (v.empty()) v.assign(std::begin(p.second), std::end(p.second));
       }
     }
     if (func->hasReturnWithMultiUBs()) {
-      auto& v = finfo.ubs[func->returnUserType()->data()];
+      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()->data()];
       if (v.empty()) {
         v.assign(std::begin(func->returnUBs()), std::end(func->returnUBs()));
       }
@@ -602,7 +602,6 @@ std::string opt_shadowed_tparams() {
 
 std::string opt_ubs(const FuncInfo& finfo) {
   std::string ret = {};
-  if (finfo.ubs.empty()) return ret;
   ret += "{";
   for (auto const& p : finfo.ubs) {
     ret += "(";

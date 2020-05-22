@@ -2353,36 +2353,21 @@ UpperBoundMap parse_ubs(AsmState& as) {
   return ret;
 }
 
-namespace {
-void findUpperBounds(const StringData* name, const UpperBoundMap& ubs,
-                     TypeConstraint::Flags flags,
-                     UpperBoundVec& out) {
-  auto it = ubs.find(name);
-  if (it != ubs.end()) {
-    assertx(out.empty());
-    for (auto& ub : it->second) {
-      out.push_back(TypeConstraint(ub.typeName(),
-                                   static_cast<TypeConstraint::Flags>(
-                                     ub.flags() | flags)));
-    }
-  }
-}
-}
-UpperBoundVec getUpperBounds(const TypeConstraint& tc,
-                             const UpperBoundMap& ubs,
-                             const UpperBoundMap& class_ubs,
-                             const TParamNameVec& shadowed_tparams) {
+UpperBoundVec getRelevantUpperBounds(const TypeConstraint& tc,
+                                     const UpperBoundMap& ubs,
+                                     const UpperBoundMap& class_ubs,
+                                     const TParamNameVec& shadowed_tparams) {
   UpperBoundVec ret;
   if (!tc.isTypeVar()) return ret;
   auto const typeName = tc.typeName();
-  auto tcFlags = static_cast<TypeConstraint::Flags>(
-      tc.flags() & ~TypeConstraint::Flags::TypeVar);
-  findUpperBounds(typeName, ubs, tcFlags, ret);
+  auto it = ubs.find(typeName);
+  if (it != ubs.end()) return it->second;
   if (std::find(shadowed_tparams.begin(), shadowed_tparams.end(), typeName) ==
                 shadowed_tparams.end()) {
-    findUpperBounds(typeName, class_ubs, tcFlags, ret);
+    it = class_ubs.find(typeName);
+    if (it != class_ubs.end()) return it->second;
   }
-  return ret;
+  return UpperBoundVec{};
 }
 
 /*
@@ -2453,12 +2438,13 @@ void parse_parameter_list(AsmState& as,
     }
 
     std::tie(param.userType, param.typeConstraint) = parse_type_info(as);
-    auto const& ub = getUpperBounds(param.typeConstraint, ubs,
-                                    class_ubs, shadowed_tparams);
-    if (ub.size() == 1 && !hasReifiedGenerics) {
-      param.typeConstraint = ub[0];
-    } else if (!ub.empty()) {
-      param.upperBounds = ub;
+    auto currUBs = getRelevantUpperBounds(param.typeConstraint, ubs,
+                                          class_ubs, shadowed_tparams);
+    if (currUBs.size() == 1 && !hasReifiedGenerics) {
+      applyFlagsToUB(currUBs[0], param.typeConstraint);
+      param.typeConstraint = currUBs[0];
+    } else if (!currUBs.empty()) {
+      param.upperBounds = std::move(currUBs);
       as.fe->hasParamsWithMultiUBs = true;
     }
 
@@ -2720,14 +2706,14 @@ void parse_function(AsmState& as) {
   as.fe = as.ue->newFuncEmitter(makeStaticString(name));
   as.fe->init(line0, line1, as.ue->bcPos(), attrs, isTop, 0);
 
-  auto const& ub = getUpperBounds(retTypeInfo.second,
-                                  ubs, {}, {});
+  auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs, {}, {});
   auto const hasReifiedGenerics =
     userAttrs.find(s___Reified.get()) != userAttrs.end();
-  if (ub.size() == 1 && !hasReifiedGenerics) {
-    retTypeInfo.second = ub[0];
-  } else if (!ub.empty()) {
-    as.fe->retUpperBounds = ub;
+  if (currUBs.size() == 1 && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs[0], retTypeInfo.second);
+    retTypeInfo.second = currUBs[0];
+  } else if (!currUBs.empty()) {
+    as.fe->retUpperBounds = std::move(currUBs);
     as.fe->hasReturnWithMultiUBs = true;
   }
 
@@ -2787,12 +2773,14 @@ void parse_method(AsmState& as, const UpperBoundMap& class_ubs) {
     userAttrs.find(s___Reified.get()) != userAttrs.end() ||
     as.pce->userAttributes().find(s___Reified.get()) !=
     as.pce->userAttributes().end();
-  auto const& ub = getUpperBounds(retTypeInfo.second, ubs,
-                                  class_ubs, shadowed_tparams);
-  if (ub.size() == 1 && !hasReifiedGenerics) {
-    retTypeInfo.second = ub[0];
-  } else if (!ub.empty()) {
-    as.fe->retUpperBounds = ub;
+
+  auto currUBs = getRelevantUpperBounds(retTypeInfo.second, ubs,
+                                        class_ubs, shadowed_tparams);
+  if (currUBs.size() == 1 && !hasReifiedGenerics) {
+    applyFlagsToUB(currUBs[0], retTypeInfo.second);
+    retTypeInfo.second = currUBs[0];
+  } else if (!currUBs.empty()) {
+    as.fe->retUpperBounds = std::move(currUBs);
     as.fe->hasReturnWithMultiUBs = true;
   }
 

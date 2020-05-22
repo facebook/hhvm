@@ -115,10 +115,13 @@ void raise_return_typehint_error(const std::string& msg) {
   }
 }
 
-void raise_property_typehint_error(const std::string& msg, bool isSoft) {
+void raise_property_typehint_error(const std::string& msg,
+                                   bool isSoft, bool isUB) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
 
-  if (RuntimeOption::EvalCheckPropTypeHints == 1 || isSoft) {
+  if (RuntimeOption::EvalCheckPropTypeHints == 1 ||
+      isSoft ||
+      (isUB && RuntimeOption::EvalEnforceGenericsUB < 2)) {
     raise_warning_unsampled(msg);
     return;
   }
@@ -155,14 +158,15 @@ void raise_record_field_error(const StringData* recName,
 
 void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
-                                         bool isSoft) {
+                                         bool isSoft, bool isUB) {
   raise_property_typehint_error(
     folly::sformat(
       "Unsetting property '{}::{}' with type annotation",
       declCls->name(),
       propName
     ),
-    isSoft
+    isSoft,
+    isUB
   );
 }
 

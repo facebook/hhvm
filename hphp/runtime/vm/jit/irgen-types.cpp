@@ -1600,6 +1600,7 @@ void verifyPropType(IRGS& env,
       if (!coerce) return false;
       // If we're not hard enforcing property type mismatches don't coerce
       if (RO::EvalCheckPropTypeHints < 3) return false;
+      if (tc->isUpperBound() && RO::EvalEnforceGenericsUB < 2) return false;
       if (RuntimeOption::EvalVecHintNotices) {
         if (cls->hasConstVal(TCls) && name->hasConstVal(TStr)) {
           auto const msg = makeStaticString(folly::sformat(
@@ -1638,7 +1639,8 @@ void verifyPropType(IRGS& env,
     },
     [&] (Type, bool hard) { // Check failure
       auto const failHard =
-        hard && RuntimeOption::EvalCheckPropTypeHints >= 3;
+        hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
+        (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
       gen(
         env,
         failHard ? VerifyPropFailHard : VerifyPropFail,

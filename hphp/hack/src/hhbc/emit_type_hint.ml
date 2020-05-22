@@ -209,7 +209,7 @@ let rec hint_to_type_constraint ~kind ~tparams ~skipawaitable (p, h) =
   let happly_helper (pos, name) =
     if List.mem ~equal:String.( = ) tparams name then
       let tc_name =
-        if is_param kind || is_return kind then
+        if is_param kind || is_return kind || is_property kind then
           name
         else
           ""

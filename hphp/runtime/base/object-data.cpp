@@ -72,8 +72,9 @@ void verifyTypeHint(const Class* thisCls,
   assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (!prop || !prop->typeConstraint.isCheckable()) return;
-  prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
+  if (prop && prop->typeConstraint.isCheckable()) {
+    prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
+  }
 }
 
 ALWAYS_INLINE
@@ -83,7 +84,8 @@ void unsetTypeHint(const Class::Prop* prop) {
   raise_property_typehint_unset_error(
     prop->cls,
     prop->name,
-    prop->typeConstraint.isSoft()
+    prop->typeConstraint.isSoft(),
+    prop->typeConstraint.isUpperBound()
   );
 }
 
@@ -109,6 +111,8 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
   if (!propDecl.typeConstraint.isCheckable() ||
       propDecl.typeConstraint.isSoft()) return true;
+  if (propDecl.typeConstraint.isUpperBound() &&
+      RuntimeOption::EvalEnforceGenericsUB < 2) return true;
   if (prop.type() == KindOfNull && !(propDecl.attrs & AttrNoImplicitNullable)) {
     return true;
   }

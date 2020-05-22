@@ -322,7 +322,11 @@ std::vector<SString> load_input(F&& fun) {
       gd.ArrayProvenance;
   RO::StrictArrayFillKeys = gd.StrictArrayFillKeys;
   RO::EvalEnableFuncStringInterop = gd.EnableFuncStringInterop;
-  if (gd.HardGenericsUB) RO::EvalEnforceGenericsUB = 2;
+  if (gd.HardGenericsUB) {
+    RO::EvalEnforceGenericsUB = 2;
+  } else {
+    RO::EvalEnforceGenericsUB = 1;
+  }
 
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
   auto const size = units.size();

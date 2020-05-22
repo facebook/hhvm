@@ -774,6 +774,7 @@ struct RuntimeOption {
      1 => warning, 2 => error
   */                                                                    \
   F(int32_t, EnforceGenericsUB,        0)                               \
+  F(bool, EnforcePropUB,               false)                           \
   /* WarnOnTooManyArguments:
    * 0 -> no warning, 1 -> warning, 2 -> exception
    */                                                                   \

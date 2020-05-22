@@ -146,7 +146,8 @@ void raise_return_typehint_error(const std::string& msg);
  * violation of a property type-hint. If isSoft is true, than a warning is
  * always raised.
  */
-void raise_property_typehint_error(const std::string& msg, bool isSoft);
+void raise_property_typehint_error(const std::string& msg,
+                                   bool isSoft, bool isUB);
 
 /*
  * Raise the appropriate warning or error (with the given message) for some
@@ -173,7 +174,7 @@ void raise_record_init_error(const StringData* recName,
  */
 void raise_property_typehint_unset_error(const Class* declCls,
                                          const StringData* propName,
-                                         bool isSoft);
+                                         bool isSoft, bool isUB);
 
 void raise_resolve_undefined(const StringData* name, const Class* c = nullptr);
 [[noreturn]] void raise_call_to_undefined(const StringData* name,

@@ -249,7 +249,8 @@ inline void ObjectData::verifyPropTypeHintImpl(tv_lval val,
     raise_property_typehint_unset_error(
       prop.cls,
       prop.name,
-      tc.isSoft()
+      tc.isSoft(),
+      tc.isUpperBound()
     );
     return;
   }

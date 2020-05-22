@@ -991,9 +991,10 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     newTC.hasConstraint() ? newTC.displayName() : "mixed";
 
   auto const msg = folly::sformat(
-    "Type-hint of '{}::{}' must be {} (as in class {}), not {}",
+    "Type-hint of '{}::{}' must be {}{} (as in class {}), not {}",
     prop.cls->name(),
     prop.name,
+    oldTC.isUpperBound()? "upper-bounded by " : "",
     oldTCName,
     oldProp.cls->name(),
     newTCName
@@ -1004,7 +1005,8 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
     raise_hackarr_compat_notice(msg);
   } else {
-    raise_property_typehint_error(msg, oldTC.isSoft() && newTC.isSoft());
+    raise_property_typehint_error(msg, oldTC.isSoft() && newTC.isSoft(),
+                                  oldTC.isUpperBound());
   }
 }
 
@@ -1266,6 +1268,8 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
         auto const typeOk = [&]{
           if (!decl.typeConstraint.isCheckable() ||
               decl.typeConstraint.isSoft()) return true;
+          if (decl.typeConstraint.isUpperBound() &&
+              RuntimeOption::EvalEnforceGenericsUB < 2) return true;
           if (sProp->m_type == KindOfNull &&
               !(decl.attrs & AttrNoImplicitNullable)) {
             return true;

@@ -2848,7 +2848,10 @@ TypedValue parse_member_tv_initializer(AsmState& as) {
 }
 
 template<typename AttrValidator, typename Adder>
-void parse_prop_or_field_impl(AsmState& as, AttrValidator validate, Adder add) {
+void parse_prop_or_field_impl(AsmState& as,
+                              AttrValidator validate,
+                              Adder add,
+                              const UpperBoundMap& class_ubs) {
   as.in.skipWhitespace();
 
   UserAttributeMap userAttributes;
@@ -2862,6 +2865,15 @@ void parse_prop_or_field_impl(AsmState& as, AttrValidator validate, Adder add) {
   std::tie(userTy, typeConstraint) = parse_type_info(as, false);
   auto const userTyStr = userTy ? userTy : staticEmptyString();
 
+  auto const hasReifiedGenerics =
+    userAttributes.find(s___Reified.get()) != userAttributes.end();
+  auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, {}, {});
+  if (RuntimeOption::EvalEnforcePropUB &&
+      ub.size() == 1 &&
+      !hasReifiedGenerics) {
+    applyFlagsToUB(ub[0], typeConstraint);
+    typeConstraint = ub[0];
+  }
   std::string name;
   as.in.skipSpaceTab();
   as.in.consumePred(!boost::is_any_of(" \t\r\n#;="),
@@ -2888,7 +2900,8 @@ void parse_prop_or_field_impl(AsmState& as, AttrValidator validate, Adder add) {
  *
  * Define a property with an associated type and heredoc.
  */
-void parse_property(AsmState& as, bool class_is_const) {
+void parse_property(AsmState& as, bool class_is_const,
+                    const UpperBoundMap& class_ubs) {
   parse_prop_or_field_impl(
     as,
     [&](Attr attrs) {
@@ -2902,7 +2915,8 @@ void parse_property(AsmState& as, bool class_is_const) {
     },
     [&](auto&&... args) {
       as.pce->addProperty(std::forward<decltype(args)>(args)...);
-    }
+    },
+    class_ubs
   );
 }
 
@@ -2912,7 +2926,8 @@ void parse_record_field(AsmState& as) {
     [](Attr attrs) {},
     [&](auto&&... args) {
       as.re->addField(std::forward<decltype(args)>(args)...);
-    }
+    },
+    {}
   );
 }
 
@@ -3145,7 +3160,7 @@ void parse_class_body(AsmState& as, bool class_is_const,
   std::string directive;
   while (as.in.readword(directive)) {
     if (directive == ".property") {
-      parse_property(as, class_is_const);
+      parse_property(as, class_is_const, class_ubs);
       continue;
     }
     if (directive == ".method")       { parse_method(as, class_ubs); continue; }

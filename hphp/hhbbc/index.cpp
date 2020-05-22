@@ -4934,6 +4934,9 @@ bool Index::prop_tc_maybe_unenforced(const php::Class& propCls,
   if (RuntimeOption::EvalCheckPropTypeHints <= 2) return true;
   if (!tc.isCheckable()) return true;
   if (tc.isSoft()) return true;
+  if (tc.isUpperBound() && RuntimeOption::EvalEnforceGenericsUB < 2) {
+    return true;
+  }
   auto const res = get_type_for_annotated_type(
     Context { nullptr, nullptr, &propCls },
     tc.type(),

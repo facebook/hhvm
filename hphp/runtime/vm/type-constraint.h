@@ -549,6 +549,9 @@ inline bool setOpNeedsTypeCheck(const TypeConstraint& tc,
   if (RuntimeOption::EvalCheckPropTypeHints <= 0 || !tc.isCheckable()) {
     return false;
   }
+  if (RuntimeOption::EvalEnforceGenericsUB <= 0 && tc.isUpperBound()) {
+    return false;
+  }
   if (op != SetOpOp::ConcatEqual) return true;
   // If the target of the concat is already a string, or the type-hint always
   // allows a string, we don't need a check because the concat will always

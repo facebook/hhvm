@@ -119,7 +119,8 @@ static void verifyPropFailImpl(const Class* objCls, TypedValue val, Slot slot) {
   );
 }
 
-static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val, Slot slot) {
+static void verifyStaticPropFailImpl(const Class* objCls, TypedValue val,
+                                     Slot slot) {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(tvIsPlausible(val));
   assertx(slot < objCls->numStaticProperties());

@@ -255,7 +255,7 @@ inline size_t allocSize(const HeapObject* h) {
   static constexpr uint16_t kind_sizes[] = {
     0, /* Packed */
     0, /* Mixed */
-    sizeClass<ArrayData>(), /* Empty */
+    0, /* Plain */
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
     0, /* Dict */
@@ -296,7 +296,6 @@ inline size_t allocSize(const HeapObject* h) {
   };
 #define CHECKSIZE(knd, type) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
-  CHECKSIZE(Empty, ArrayData)
   CHECKSIZE(Globals, GlobalsArray)
   CHECKSIZE(ClsMeth, ClsMethData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
@@ -314,6 +313,7 @@ inline size_t allocSize(const HeapObject* h) {
   static_assert(kind_sizes[(int)HeaderKind::knd] == 0, #knd);
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
+  CHECKSIZE(Plain)
   CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
   CHECKSIZE(VecArray)
@@ -356,6 +356,7 @@ inline size_t allocSize(const HeapObject* h) {
       assertx(size == MemoryManager::sizeClass(size));
       return size;
     case HeaderKind::Mixed:
+    case HeaderKind::Plain:
     case HeaderKind::Dict:
       // size = fn of h->m_scale
       size = static_cast<const MixedArray*>(h)->heapSize();
@@ -450,7 +451,6 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::Slab:
     case HeaderKind::NativeObject:
     case HeaderKind::AsyncFuncWH:
-    case HeaderKind::Empty:
     case HeaderKind::Globals:
     case HeaderKind::Vector:
     case HeaderKind::Map:

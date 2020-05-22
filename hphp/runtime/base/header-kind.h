@@ -44,7 +44,7 @@ namespace HPHP {
  */
 enum class HeaderKind : uint8_t {
   // PHP arrays
-  Packed, Mixed, Empty, Globals, RecordArray,
+  Packed, Mixed, Plain, Globals, RecordArray,
   // Hack arrays
   Dict, VecArray, Keyset,
   // Bespoke arrays

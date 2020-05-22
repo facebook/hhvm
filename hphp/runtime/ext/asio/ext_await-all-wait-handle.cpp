@@ -185,6 +185,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
       });
 
     case ArrayData::kMixedKind:
+    case ArrayData::kPlainKind:
       return c_AwaitAllWaitHandle::Create([=](auto fn) {
         MixedArray::IterateV(MixedArray::asMixed(ad), fn);
       });
@@ -193,10 +194,6 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
       // APC can't store WaitHandles, GlobalsArray is used only for
       // $GLOBALS, which contain non-WaitHandles.
       failArray();
-
-    case ArrayData::kEmptyKind:
-      // Handled by dependencies->size() check.
-      not_reached();
 
     case ArrayData::kVecKind:
     case ArrayData::kDictKind:

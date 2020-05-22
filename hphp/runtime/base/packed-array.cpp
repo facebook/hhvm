@@ -124,21 +124,23 @@ MixedArray* PackedArray::ToMixedHeader(const ArrayData* old,
                                        size_t neededSize) {
   assertx(checkInvariants(old));
 
-  auto const aux =
-    MixedArrayKeys::packIntsForAux() |
-    (old->isVArray() ? ArrayData::kDArray : ArrayData::kNotDVArray);
-
   auto const oldSize = old->m_size;
   auto const scale   = MixedArray::computeScaleFromSize(neededSize);
   auto const ad      = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos   = oldSize | int64_t{old->m_pos} << 32;
-  ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
+  if (old->isVArray()) {
+    auto const aux = MixedArrayKeys::packIntsForAux() | ArrayData::kDArray;
+    ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
+  } else {
+    auto const aux = MixedArrayKeys::packIntsForAux() | ArrayData::kNotDVArray;
+    ad->initHeader_16(HeaderKind::Plain, OneReference, aux);
+  }
   ad->m_scale_used   = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI       = oldSize;
 
   assertx(ad->m_size == oldSize);
   assertx(ad->m_pos == old->m_pos);
-  assertx(ad->kind() == ArrayData::kMixedKind);
+  assertx(ad->hasVanillaMixedLayout());
   assertx(ad->isDArray() == old->isVArray());
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == oldSize);
@@ -936,6 +938,7 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assertx(checkInvariants(adIn));
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
+  ret->m_kind = HeaderKind::Plain;
   ret->setDVArray(ArrayData::kNotDVArray);
   return MixedArray::ArrayMergeGeneric(ret, elems);
 }
@@ -995,6 +998,7 @@ ArrayData* PackedArray::ToPHPArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   if (adIn->empty()) return ArrayData::Create();
   auto ad = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
+  ad->m_kind = HeaderKind::Plain;
   ad->setDVArray(ArrayData::kNotDVArray);
   if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(MixedArray::asMixed(ad));

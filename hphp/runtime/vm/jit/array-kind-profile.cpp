@@ -31,10 +31,9 @@ namespace {
 uint32_t getKindIndex(ArrayData::ArrayKind kind) {
   using AK = ArrayData::ArrayKind;
   switch (kind) {
-    case AK::kEmptyKind : return 0;
-    case AK::kPackedKind: return 1;
-    case AK::kMixedKind : return 2;
-    default:              return 3;
+    case AK::kPackedKind: return 0;
+    case AK::kMixedKind : return 1;
+    default:              return 2;
   }
 }
 

@@ -375,9 +375,7 @@ private:
   friend struct array::HashTable<SetArray, SetArrayElm>;
   friend struct MemoryProfile;
   friend struct jit::ArrayAccessProfile;
-  friend struct EmptyArray;
   friend struct PackedArray;
-  friend struct StructArray;
   friend struct MixedArray;
   friend struct HashCollection;
   friend struct BaseMap;

@@ -194,14 +194,14 @@ MixedArray* RecordArray::ToMixedHeader(const RecordArray* old) {
   auto const scale = MixedArray::computeScaleFromSize(oldSize);
   auto const ad = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos = oldSize;
-  ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
+  ad->initHeader_16(HeaderKind::Plain, OneReference, aux);
   ad->m_scale_used = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI = 0;
 
   assertx(ad->m_size == oldSize);
   assertx(ad->m_pos == old->m_pos);
-  assertx(ad->kind() == ArrayData::kMixedKind);
-  assertx(ad->isDArray() == old->isVArray());
+  assertx(ad->kind() == ArrayData::kPlainKind);
+  assertx(ad->isNotDVArray());
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used == oldSize);
   assertx(ad->m_scale == scale);

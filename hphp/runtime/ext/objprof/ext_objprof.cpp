@@ -428,12 +428,7 @@ void stringsOfArray(
 
 /**
  * Measures the size of the typed value and referenced objects without going
- * into ObjectData* references.
- *
- * These are not measured:
- * kEmptyKind   // The singleton static empty array
- * kSharedKind  // SharedArray
- * kGlobalsKind // GlobalsArray
+ * into ObjectData* references. GlobalsArray is not measured here.
  */
 std::pair<int, double> tvGetSize(
   TypedValue tv,

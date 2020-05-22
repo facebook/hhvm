@@ -154,8 +154,8 @@ inline bool ArrayData::noCopyOnWrite() const {
 
 inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
+inline bool ArrayData::isPlainKind() const { return kind() == kPlainKind; }
 inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
-inline bool ArrayData::isEmptyArrayKind() const { return kind() == kEmptyKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 
 inline bool ArrayData::isVecArrayKind() const { return kind() == kVecKind; }
@@ -184,7 +184,7 @@ inline bool ArrayData::hasVanillaPackedLayout() const {
   return isPackedKind() || isVecArrayKind();
 }
 inline bool ArrayData::hasVanillaMixedLayout() const {
-  return isMixedKind() || isDictKind();
+  return isMixedKind() || isDictKind() || isPlainKind();
 }
 
 inline bool ArrayData::isPHPArrayKind() const {
@@ -271,7 +271,6 @@ inline uint8_t ArrayData::auxBits() const {
 inline bool ArrayData::useWeakKeys() const {
   return isPHPArrayType();
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Iteration.

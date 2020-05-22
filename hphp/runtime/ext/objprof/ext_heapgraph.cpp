@@ -211,6 +211,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
     switch (from_hdr->kind()) {
       // Known generalized cases that don't really need pointer kind
       case HeaderKind::Mixed:
+      case HeaderKind::Plain:
       case HeaderKind::Dict:
       case HeaderKind::Keyset: {
         if (edge.offset >= sizeof(MixedArray)) {
@@ -297,7 +298,6 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       case HeaderKind::ImmSet:
       case HeaderKind::Map:
       case HeaderKind::ImmMap:
-      case HeaderKind::Empty:
       case HeaderKind::Globals:
       case HeaderKind::String:
       case HeaderKind::Resource:

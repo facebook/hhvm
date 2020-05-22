@@ -55,7 +55,7 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad) {
     switch (ad->kind()) {
     case kPackedKind:
     case kMixedKind:
-    case kEmptyKind:
+    case kPlainKind:
     case kGlobalsKind:
     case kRecordKind:
       return HeaderKind::BespokeArray;
@@ -89,7 +89,7 @@ Layout* LoggingLayout::layoutForVanillaArray(const ArrayData* ad) {
   switch (ad->kind()) {
   case ArrayData::kPackedKind:
   case ArrayData::kMixedKind:
-  case ArrayData::kEmptyKind:
+  case ArrayData::kPlainKind:
   case ArrayData::kGlobalsKind:
     return s_phpArrayLayout;
   case ArrayData::kDictKind:

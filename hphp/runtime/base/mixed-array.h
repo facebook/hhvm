@@ -473,7 +473,6 @@ public:
 private:
   friend struct array::HashTable<MixedArray, MixedArrayElm>;
   friend struct MemoryProfile;
-  friend struct EmptyArray;
   friend struct PackedArray;
   friend struct RecordArray;
   friend struct HashCollection;
@@ -667,6 +666,9 @@ private:
 
   struct DArrayInitializer;
   static DArrayInitializer s_darr_initializer;
+
+  struct ArrayInitializer;
+  static ArrayInitializer s_arr_initializer;
 
   int64_t  m_nextKI;        // Next integer key to use for append.
 };

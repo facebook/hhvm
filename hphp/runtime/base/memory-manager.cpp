@@ -432,7 +432,7 @@ void MemoryManager::flush() {
  */
 
 constexpr const std::array<char*,NumHeaderKinds> header_names = {{
-  "PackedArray", "MixedArray", "EmptyArray", "GlobalsArray",
+  "PackedArray", "MixedArray", "PlainArray", "GlobalsArray",
   "RecordArray", "DictArray", "VecArray", "KeysetArray",
   "BespokeArray", "BespokeDict", "BespokeVec", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "Record", "RFunc",
@@ -523,7 +523,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
-      case HeaderKind::Empty:
+      case HeaderKind::Plain:
       case HeaderKind::VecArray:
       case HeaderKind::Keyset:
       case HeaderKind::Globals:

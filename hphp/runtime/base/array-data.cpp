@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/empty-array.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
@@ -275,7 +274,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
 #define DISPATCH(entry)                         \
   { PackedArray::entry,                         \
     MixedArray::entry,                          \
-    EmptyArray::entry,                          \
+    MixedArray::entry,                          \
     GlobalsArray::entry,                        \
     RecordArray::entry,                         \
     MixedArray::entry##Dict,   /* Dict */       \
@@ -717,7 +716,7 @@ DataType ArrayData::toDataType() const {
   switch (kind()) {
     case kPackedKind:
     case kMixedKind:
-    case kEmptyKind:
+    case kPlainKind:
     case kGlobalsKind:
     case kRecordKind:
       return KindOfArray;
@@ -748,7 +747,7 @@ DataType ArrayData::toPersistentDataType() const {
   switch (kind()) {
     case kPackedKind:
     case kMixedKind:
-    case kEmptyKind:
+    case kPlainKind:
     case kGlobalsKind:
     case kRecordKind:
       return KindOfPersistentArray;

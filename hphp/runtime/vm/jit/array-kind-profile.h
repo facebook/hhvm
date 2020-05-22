@@ -27,11 +27,10 @@ namespace HPHP { namespace jit {
 
 /*
  * Target profile for the distribution of a value's observed array kinds.
- *
- * The array kinds currently tracked are Empty, Packed, and Mixed.
+ * The array kinds currently tracked are Packed and Mixed.
  */
 struct ArrayKindProfile {
-  static const uint32_t kNumProfiledArrayKinds = 4;
+  static const uint32_t kNumProfiledArrayKinds = 3;
 
   /*
    * Register an observed `kind'.

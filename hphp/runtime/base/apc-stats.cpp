@@ -177,7 +177,8 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     return size;
   }
   case ArrayData::ArrayKind::kDictKind:
-  case ArrayData::ArrayKind::kMixedKind: {
+  case ArrayData::ArrayKind::kMixedKind:
+  case ArrayData::ArrayKind::kPlainKind: {
     auto const mixed = MixedArray::asMixed(arr);
     auto size = sizeof(MixedArray) +
                 sizeof(MixedArray::Elm) * (mixed->capacity() - mixed->m_used);
@@ -209,8 +210,6 @@ size_t getMemSize(const ArrayData* arr, bool recurse) {
     }
     return size;
   }
-  case ArrayData::ArrayKind::kEmptyKind:
-    return sizeof(ArrayData);
   default:
     assertx(!"Unsupported Array type in getMemSize");
   }

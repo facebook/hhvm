@@ -83,9 +83,9 @@ struct ArrayData : MaybeCountable {
    * kNumKinds-1 since we use these values to index into a table.
    */
   enum ArrayKind : uint8_t {
-    kPackedKind,        // PackedArray with keys in range [0..size)
-    kMixedKind,         // MixedArray arbitrary int or string keys, maybe holes
-    kEmptyKind,         // The singleton static empty array
+    kPackedKind,        // varray: vec-like array with keys in range [0..size)
+    kMixedKind,         // darray: dict-like array int or string keys, maybe holes
+    kPlainKind,         // Plain PHP array (happens to be backed by MixedArray)
     kGlobalsKind,       // GlobalsArray
     kRecordKind,        // RecordArray
     kDictKind,          // Hack dict
@@ -250,6 +250,7 @@ public:
    */
   bool isPackedKind() const;
   bool isMixedKind() const;
+  bool isPlainKind() const;
   bool isGlobalsArrayKind() const;
   bool isEmptyArrayKind() const;
   bool isDictKind() const;
@@ -800,7 +801,7 @@ protected:
 
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
-static_assert(ArrayData::kEmptyKind == uint8_t(HeaderKind::Empty), "");
+static_assert(ArrayData::kPlainKind == uint8_t(HeaderKind::Plain), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
@@ -814,22 +815,19 @@ constexpr size_t kEmptySetArraySize = 96;
 /*
  * Storage for the static empty arrays.
  */
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
+extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyArray;
 extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 
 /*
  * Return the static empty array, for PHP and Hack arrays.
  *
  * These are singleton static arrays that can be used whenever an empty array
- * is needed.  staticEmptyArray() has kEmptyKind, and the others have the
- * corresponding Hack array kind.
- *
- * Builtins should use ArrayData::CreateDArray and similar methods, which also
- * tag the resulting array with provenance information.
+ * is needed. We should avoid using these methods, as these arrays don't have
+ * provenance information; use ArrayData::CreateDArray and friends instead.
  */
 ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();

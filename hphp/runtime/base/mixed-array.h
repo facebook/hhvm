@@ -205,14 +205,6 @@ struct MixedArray final : ArrayData,
   static MixedArray* ToDictInPlace(ArrayData*);
 
   /*
-   * MakeReserveLike will return a PHP array with a memory representation
-   * similar to the one used by `other'.
-   *
-   * The returned array is already incref'd.
-   */
-  static ArrayData* MakeReserveLike(const ArrayData* other, uint32_t capacity);
-
-  /*
    * Allocates a new request-local array with given key,value,key,value,... in
    * natural order. Returns nullptr if there are duplicate keys. Does not check
    * for integer-like keys. Takes ownership of keys and values iff successful.

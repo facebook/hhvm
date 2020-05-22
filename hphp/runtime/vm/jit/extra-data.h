@@ -1784,7 +1784,6 @@ X(NewRecordArray,               NewStructData);
 X(AllocStructArray,             NewStructData);
 X(AllocStructDArray,            NewStructData);
 X(AllocStructDict,              NewStructData);
-X(AllocPackedArray,             PackedArrayData);
 X(AllocVArray,                  PackedArrayData);
 X(AllocVecArray,                PackedArrayData);
 X(NewKeysetArray,               NewKeysetArrayData);

@@ -145,17 +145,6 @@ ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
   return tagArrProv(ad);
 }
 
-ArrayData* MixedArray::MakeReserveLike(const ArrayData* other,
-                                       uint32_t capacity) {
-  capacity = (capacity ? capacity : other->size());
-
-  if (other->hasVanillaPackedLayout()) {
-    return PackedArray::MakeReserve(capacity);
-  } else {
-    return MixedArray::MakeReserveMixed(capacity);
-  }
-}
-
 ALWAYS_INLINE
 MixedArray* MixedArray::MakeStructImpl(uint32_t size,
                                        const StringData* const* keys,

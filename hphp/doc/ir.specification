@@ -1515,10 +1515,6 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewArray, D(Arr), C(Int), PRc
-
-  Allocate a new array with the expected capacity S0.
-
 | NewMixedArray, DArrMixed, C(Int), PRc
 
   Allocate a new array in mixed mode with the expected capacity S0.
@@ -1536,17 +1532,6 @@ To string conversions:
   Allocate a new keyset containing N elements off the stack given by S0, at
   `offset'. This instruction moves the elements off the stack without
   manipulating their reference counts.
-
-| NewLikeArray, D(Arr), S(Arr) C(Int), PRc
-
-  Allocate a new array in the same mode as S0 and with expected capacity S1,
-  unless S1 == 0, in which case the capacity is set to S0's size.
-
-| AllocPackedArray<size>, DArrPacked, NA, PRc
-
-  Allocate a new uninitialized packed array with space for size elements in it.
-  The array will be initialized with values using either InitPackedLayoutArray
-  or InitPackedLayoutArrayLoop.
 
 | AllocVArray<size>, DVArr, NA, PRc
 

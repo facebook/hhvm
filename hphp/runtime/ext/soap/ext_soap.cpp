@@ -2114,7 +2114,7 @@ Variant HHVM_METHOD(SoapServer, getfunctions) {
   assertx(class_name.get());
   Class* cls = Unit::lookupClass(class_name.get());
   assertx(cls);
-  auto ret = Array::attach(PackedArray::MakeReserve(cls->numMethods()));
+  auto ret = DArrayInit(cls->numMethods()).toArray();
   Class::getMethodNames(cls, nullptr, ret);
   return ret.toVArray();
 }

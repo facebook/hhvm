@@ -297,9 +297,6 @@ void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
 
 }
 
-void cgNewArray(IRLS& env, const IRInstruction* inst) {
-  implNewArray(env, inst, PackedArray::MakeReserve);
-}
 void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
@@ -310,20 +307,11 @@ void cgNewDArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
 }
 
-void cgAllocPackedArray(IRLS& env, const IRInstruction* inst) {
-  implAllocArray(env, inst, PackedArray::MakeUninitialized);
-}
 void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVArray);
-}
-
-void cgNewLikeArray(IRLS& env, const IRInstruction* inst) {
-  cgCallHelper(vmain(env), env, CallSpec::direct(MixedArray::MakeReserveLike),
-               callDest(env, inst), SyncOptions::None,
-               argGroup(env, inst).ssa(0).ssa(1));
 }
 
 namespace {

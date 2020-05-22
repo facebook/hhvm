@@ -89,65 +89,12 @@ ArrayData* EmptyArray::Copy(const ArrayData*) { return ArrayData::Create(); }
 //////////////////////////////////////////////////////////////////////
 
 /*
- * Note: if you try to tail-call these helper routines, gcc will
- * unfortunately still generate functions with frames and makes a
- * call instead of a jump.  It's because of std::pair (and is still
- * the case if you return a custom struct).
- *
- * For now we're leaving this, because it's essentially free for these
- * routines to leave the lval pointer in the second return register,
- * and it seems questionable to clone the whole function just to avoid
- * the frame creation in these callers.  (It works to reinterpret_cast
- * these functions to one that returns ArrayData* instead of a pair in
- * the cases we don't need the second value, but this seems a tad too
- * sketchy for probably-unmeasurable benefits.  I'll admit I didn't
- * try to measure it though... ;)
- */
-
-/*
- * Helper for empty array -> packed transitions.  Creates an array
- * with one element.  The element is transferred into the array (should
- * already be incref'd).
- */
-ALWAYS_INLINE
-arr_lval EmptyArray::MakePackedInl(TypedValue tv) {
-  auto const ad = static_cast<ArrayData*>(
-    tl_heap->objMallocIndex(PackedArray::SmallSizeIndex)
-  );
-  ad->initHeader_16(
-    HeaderKind::Packed,
-    OneReference,
-    PackedArray::packSizeIndexAndAuxBits(
-      PackedArray::SmallSizeIndex,
-      ArrayData::kNotDVArray
-    )
-  );
-  ad->m_sizeAndPos = 1; // size=1, pos=0
-
-  auto elem = PackedArray::LvalUncheckedInt(ad, 0);
-  tvCopy(tv, elem);
-
-  assertx(ad->kind() == ArrayData::kPackedKind);
-  assertx(ad->dvArray() == ArrayData::kNotDVArray);
-  assertx(ad->m_size == 1);
-  assertx(ad->m_pos == 0);
-  assertx(ad->hasExactlyOneRef());
-  assertx(PackedArray::checkInvariants(ad));
-  return arr_lval { ad, elem };
-}
-
-NEVER_INLINE
-arr_lval EmptyArray::MakePacked(TypedValue tv) {
-  return MakePackedInl(tv);
-}
-
-/*
  * Helper for creating a single-element mixed array with a string key.
  *
  * Note: the key is not already incref'd, but the value must be.
  */
 NEVER_INLINE
-arr_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
+arr_lval EmptyArray::MakeMixedStr(StringData* key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*size*/, 0/*nextIntKey*/);
   auto const data = ad->data();
@@ -176,7 +123,7 @@ arr_lval EmptyArray::MakeMixed(StringData* key, TypedValue val) {
  * Creating a single-element mixed array with a integer key.  The
  * value is already incref'd.
  */
-arr_lval EmptyArray::MakeMixed(int64_t key, TypedValue val) {
+arr_lval EmptyArray::MakeMixedInt(int64_t key, TypedValue val) {
   auto const ad = MixedArray::reqAlloc(MixedArray::SmallScale);
   MixedArray::InitSmall(ad, 1/*size*/, (key >= 0) ? key + uint64_t{1} : 0);
   auto const data = ad->data();
@@ -212,8 +159,7 @@ ArrayData* EmptyArray::SetInt(ArrayData* ad, int64_t k, TypedValue v) {
 ArrayData* EmptyArray::SetIntMove(ArrayData*, int64_t k, TypedValue v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
-  return k == 0 ? EmptyArray::MakePacked(v).arr
-                : EmptyArray::MakeMixed(k, v).arr;
+  return EmptyArray::MakeMixedInt(k, v).arr;
 }
 
 ArrayData* EmptyArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
@@ -224,7 +170,7 @@ ArrayData* EmptyArray::SetStr(ArrayData* ad, StringData* k, TypedValue v) {
 ArrayData* EmptyArray::SetStrMove(ArrayData*, StringData* k, TypedValue v) {
   // TODO(#3888164): we should make it so we don't need KindOfUninit checks
   if (v.m_type == KindOfUninit) v.m_type = KindOfNull;
-  return EmptyArray::MakeMixed(k, v).arr;
+  return EmptyArray::MakeMixedStr(k, v).arr;
 }
 
 ArrayData* EmptyArray::RemoveInt(ArrayData* ad, int64_t) {
@@ -245,7 +191,7 @@ arr_lval EmptyArray::LvalStr(ArrayData*, StringData*) {
 
 ArrayData* EmptyArray::Append(ArrayData*, TypedValue v) {
   tvIncRefGen(v);
-  return EmptyArray::MakePackedInl(v).arr;
+  return EmptyArray::MakeMixedInt(0, v).arr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -288,7 +234,7 @@ ArrayData* EmptyArray::PopOrDequeue(ArrayData* ad, Variant& value) {
 
 ArrayData* EmptyArray::Prepend(ArrayData*, TypedValue v) {
   tvIncRefGen(v);
-  return EmptyArray::MakePacked(v).arr;
+  return EmptyArray::MakeMixedInt(0, v).arr;
 }
 
 ArrayData* EmptyArray::ToDict(ArrayData*, bool) {

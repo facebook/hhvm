@@ -1427,16 +1427,16 @@ OPTBLD_INLINE void iopNewArray(uint32_t capacity) {
   if (capacity == 0) {
     vmStack().pushArrayNoRc(ArrayData::Create());
   } else {
-    vmStack().pushArrayNoRc(PackedArray::MakeReserve(capacity));
+    vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
   }
 }
 
 OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
-  if (capacity == 0) {
-    vmStack().pushArrayNoRc(ArrayData::Create());
-  } else {
-    vmStack().pushArrayNoRc(MixedArray::MakeReserveMixed(capacity));
-  }
+  iopNewArray(capacity);
+}
+
+OPTBLD_INLINE void iopNewLikeArrayL(tv_lval /*unused*/, uint32_t capacity) {
+  iopNewArray(capacity);
 }
 
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
@@ -1446,23 +1446,13 @@ OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   vmStack().pushDictNoRc(ad);
 }
 
-OPTBLD_INLINE
-void iopNewLikeArrayL(tv_lval fr, uint32_t capacity) {
-  ArrayData* arr;
-  if (LIKELY(isArrayType(type(fr)))) {
-    arr = MixedArray::MakeReserveLike(val(fr).parr, capacity);
-  } else {
-    if (capacity == 0) capacity = PackedArray::SmallSize;
-    arr = PackedArray::MakeReserve(capacity);
-  }
-  vmStack().pushArrayNoRc(arr);
-}
-
 OPTBLD_INLINE void iopNewPackedArray(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
-  auto* a = PackedArray::MakePacked(n, vmStack().topC());
+  auto* vec = PackedArray::MakeVec(n, vmStack().topC());
+  auto* arr = PackedArray::ToPHPArrayVec(vec, vec->cowCheck());
+  if (arr != vec) decRefArr(vec);
   vmStack().ndiscard(n);
-  vmStack().pushArrayNoRc(a);
+  vmStack().pushArrayNoRc(arr);
 }
 
 namespace {

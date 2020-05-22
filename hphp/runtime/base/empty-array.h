@@ -130,10 +130,8 @@ struct EmptyArray final : type_scan::MarkCollectable<EmptyArray> {
   static void OnSetEvalScalar(ArrayData*);
 
 private:
-  static arr_lval MakePacked(TypedValue);
-  static arr_lval MakePackedInl(TypedValue);
-  static arr_lval MakeMixed(StringData*, TypedValue);
-  static arr_lval MakeMixed(int64_t, TypedValue);
+  static arr_lval MakeMixedStr(StringData*, TypedValue);
+  static arr_lval MakeMixedInt(int64_t, TypedValue);
 
 private:
   struct Initializer;

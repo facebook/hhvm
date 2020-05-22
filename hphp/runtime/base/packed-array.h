@@ -125,8 +125,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static arr_lval LvalIntVec(ArrayData*, int64_t);
   static arr_lval LvalStrVec(ArrayData*, StringData*);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
-  static ArrayData* ToPHPArrayVec(ArrayData*, bool);
-  static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArrayVec;
+  static constexpr auto ToPHPArrayVec = &ToPHPArray;
+  static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArray;
   static ArrayData* ToVArrayVec(ArrayData*, bool);
   static ArrayData* ToDictVec(ArrayData*, bool);
   static ArrayData* ToVecVec(ArrayData*, bool);
@@ -196,7 +196,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static void scan(const ArrayData*, type_scan::Scanner&);
 
-  static ArrayData* MakeReserve(uint32_t capacity);
   static ArrayData* MakeReserveVArray(uint32_t capacity);
   static ArrayData* MakeReserveVec(uint32_t capacity);
 
@@ -207,18 +206,15 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
    *
    * This function takes ownership of the Cells in `values'.
    */
-  static ArrayData* MakePacked(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVArray(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVec(uint32_t size, const TypedValue* values);
 
   /*
    * Like MakePacked, but with `values' array in natural (not reversed) order.
    */
-  static ArrayData* MakePackedNatural(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVArrayNatural(uint32_t size, const TypedValue* values);
   static ArrayData* MakeVecNatural(uint32_t size, const TypedValue* values);
 
-  static ArrayData* MakeUninitialized(uint32_t size);
   static ArrayData* MakeUninitializedVArray(uint32_t size);
   static ArrayData* MakeUninitializedVec(uint32_t size);
 

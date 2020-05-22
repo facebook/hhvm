@@ -5408,7 +5408,12 @@ void in(ISS& env, const bc::InitProp& op) {
 
     ITRACE(1, "InitProp: {} = {}\n", op.str1, show(t));
 
-    if (env.index.satisfies_constraint(env.ctx, t, prop.typeConstraint)) {
+    if (env.index.satisfies_constraint(env.ctx, t, prop.typeConstraint) &&
+        std::all_of(prop.ubs.begin(), prop.ubs.end(),
+                    [&](TypeConstraint ub) {
+                      applyFlagsToUB(ub, prop.typeConstraint);
+                      return env.index.satisfies_constraint(env.ctx, t, ub);
+                    })) {
       prop.attrs |= AttrInitialSatisfiesTC;
     } else {
       badPropInitialValue(env);

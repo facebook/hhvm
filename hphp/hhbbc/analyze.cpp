@@ -647,7 +647,12 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     if (is_closure(*ctx.cls) ||
         (prop.attrs & (AttrSystemInitialValue | AttrLateInit)) ||
         (!cellTy.subtypeOf(TUninit) &&
-         index.satisfies_constraint(ctx, cellTy, prop.typeConstraint))) {
+         index.satisfies_constraint(ctx, cellTy, prop.typeConstraint) &&
+         std::all_of(prop.ubs.begin(), prop.ubs.end(),
+                     [&](TypeConstraint ub) {
+                       applyFlagsToUB(ub, prop.typeConstraint);
+                       return index.satisfies_constraint(ctx, cellTy, ub);
+                     }))) {
       prop.attrs |= AttrInitialSatisfiesTC;
     } else {
       prop.attrs = (Attr)(prop.attrs & ~AttrInitialSatisfiesTC);

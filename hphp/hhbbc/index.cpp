@@ -4151,9 +4151,8 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
 
       // We found a property being redeclared. Check if the type-hints on
       // the two are equivalent.
-      auto const equiv = [&] {
-        auto const& tc1 = prop->typeConstraint;
-        auto const& tc2 = pprop->typeConstraint;
+      auto const equivOneTCPair =
+      [&](const TypeConstraint& tc1, const TypeConstraint& tc2) {
         // Try the cheap check first, use the index otherwise. Two
         // type-constraints are equivalent if all the possible values of one
         // satisfies the other, and vice-versa.
@@ -4168,6 +4167,24 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
             lookup_constraint(Context{}, tc2),
             tc1
           );
+      };
+      auto const equiv = [&] {
+        if (!equivOneTCPair(prop->typeConstraint, pprop->typeConstraint)) {
+          return false;
+        }
+        for (auto ub : prop->ubs) {
+          applyFlagsToUB(ub, prop->typeConstraint);
+          auto foundEquiv = false;
+          for (auto pub : pprop->ubs) {
+            applyFlagsToUB(pub, pprop->typeConstraint);
+            if (equivOneTCPair(ub, pub)) {
+              foundEquiv = true;
+              break;
+            }
+          }
+          if (!foundEquiv) return false;
+        }
+        return true;
       };
       // If the property in the parent is static or private, the property in
       // the child isn't actually redeclaring anything. Otherwise, if the

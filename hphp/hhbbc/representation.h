@@ -424,6 +424,7 @@ struct Prop {
 
   LSString userType;
   TypeConstraint typeConstraint;
+  CompactVector<TypeConstraint> ubs;
 
   /*
    * The default value of the property, for properties with scalar

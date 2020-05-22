@@ -1294,7 +1294,7 @@ int CurlResource::curl_progress(void* p,
     log_native_stack("unexpected curl_progress");
   }
 
-  PackedArrayInit pai(5);
+  VArrayInit pai(5);
   pai.append(Resource(curl));
   pai.append(dltotal);
   pai.append(dlnow);

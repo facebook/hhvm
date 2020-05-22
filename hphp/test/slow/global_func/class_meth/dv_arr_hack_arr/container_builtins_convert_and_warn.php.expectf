@@ -74,13 +74,11 @@ Notice: Implicit clsmeth to vec conversion for array_sum() in %s/container_built
 NULL
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 38
-array(2) {
-  [0]=>
+vec(2) {
   array(1) {
     [0]=>
     string(1) "A"
   }
-  [1]=>
   array(1) {
     [0]=>
     string(5) "func1"
@@ -92,8 +90,7 @@ array(0) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 40
-array(1) {
-  [0]=>
+vec(1) {
   string(5) "func1"
 }
 

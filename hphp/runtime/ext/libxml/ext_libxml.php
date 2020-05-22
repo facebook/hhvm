@@ -15,7 +15,7 @@ class LibXMLError {
  * buffer, or an empty array otherwise.
  */
 <<__Native>>
-function libxml_get_errors(): array;
+function libxml_get_errors(): varray;
 
 /* Returns a LibXMLError object if there is any error in the buffer, FALSE
  * otherwise.

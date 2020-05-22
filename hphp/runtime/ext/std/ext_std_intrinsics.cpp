@@ -252,7 +252,7 @@ Array HHVM_FUNCTION(
   Variant& outObj
 ) {
   auto const orig = retOrig
-    ? make_packed_array(s.get(), str, num, i, obj, o.get(), m, mix)
+    ? make_varray(s.get(), str, num, i, obj, o.get(), m, mix)
     : Array::Create();
 
   str += ";; IN =\"";
@@ -267,7 +267,7 @@ Array HHVM_FUNCTION(
   obj = Object{o.get()};
 
   outArr = retOrig
-    ? make_packed_array(outBool, outArr, outObj)
+    ? make_varray(outBool, outArr, outObj)
     : Array::Create();
   outBool = true;
   outObj = SystemLib::AllocStdClassObject();

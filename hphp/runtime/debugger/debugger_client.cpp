@@ -2482,7 +2482,7 @@ void DebuggerClient::loadConfig() {
       for (auto& macro : m_macros) {
         ArrayInit ret_macro(2, ArrayInit::Map{});
         ret_macro.set(s_name, macro->m_name);
-        PackedArrayInit ret_cmds(macro->m_cmds.size());
+        VArrayInit ret_cmds(macro->m_cmds.size());
         for (auto& cmd : macro->m_cmds) {
           ret_cmds.append(cmd);
         }

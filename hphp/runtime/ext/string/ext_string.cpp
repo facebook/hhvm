@@ -1517,7 +1517,7 @@ Array HHVM_FUNCTION(str_getcsv,
                     const String& enclosure /* = "\"" */,
                     const String& escape /* = "\\" */) {
   if (str.empty()) {
-    return make_packed_array(uninit_variant);
+    return make_varray(uninit_variant);
   }
 
   auto check_arg = [](const String& arg, char default_arg) {

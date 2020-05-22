@@ -1593,7 +1593,7 @@ function strlen(string $vstr): int;
 function str_getcsv(string $input,
                     string $delimiter = ",",
                     string $enclosure = "\"",
-                    string $escape = "\\"): array;
+                    string $escape = "\\"): varray;
 
 /**
  * Counts the number of occurrences of every byte-value (0..255) in string and

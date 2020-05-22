@@ -84,7 +84,7 @@ TypedValue HHVM_FUNCTION(array_chunk,
   }
 
   const size_t inputSize = getClsMethCompactContainerSize(cellInput);
-  PackedArrayInit ret((inputSize + chunkSize - 1) / chunkSize);
+  VArrayInit ret((inputSize + chunkSize - 1) / chunkSize);
   Array chunk;
   int current = 0;
   for (ArrayIter iter(cellInput); iter; ++iter) {
@@ -531,9 +531,9 @@ TypedValue HHVM_FUNCTION(array_map,
       if (len > maxLen) maxLen = len;
     }
   }
-  PackedArrayInit ret_ai(maxLen);
+  VArrayInit ret_ai(maxLen);
   for (size_t k = 0; k < maxLen; k++) {
-    PackedArrayInit params_ai(iters.size());
+    VArrayInit params_ai(iters.size());
     for (auto& iter : iters) {
       if (iter) {
         params_ai.append(iter.secondValPlus());
@@ -993,17 +993,17 @@ TypedValue HHVM_FUNCTION(array_slice,
   for (; pos < offset && iter; ++pos, ++iter) {}
 
   if (input_is_packed && (offset == 0 || !preserve_keys)) {
-    PackedArrayInit ret(len);
+    VArrayInit ret(len);
     for (; pos < (offset + len) && iter; ++pos, ++iter) {
       ret.append(iter.secondValPlus());
     }
     return tvReturn(ret.toVariant());
   }
 
-  // Otherwise PackedArrayInit can't be used because non-numeric keys are
+  // Otherwise VArrayInit can't be used because non-numeric keys are
   // preserved even when preserve_keys is false
   bool is_php_array = isArrayType(cell_input.m_type);
-  Array ret = Array::attach(PackedArray::MakeReserve(len));
+  Array ret = Array::attach(MixedArray::MakeReserveDArray(len));
   for (; pos < (offset + len) && iter; ++pos, ++iter) {
     Variant key(iter.first());
     if (!is_php_array && key.isString()) {

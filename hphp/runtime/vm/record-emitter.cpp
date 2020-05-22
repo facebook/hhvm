@@ -106,6 +106,7 @@ bool RecordEmitter::addField(const StringData* n,
                              Attr attrs,
                              const StringData* userType,
                              const TypeConstraint& typeConstraint,
+                             const UpperBoundVec&, // unused
                              const StringData* docComment,
                              const TypedValue* val,
                              RepoAuthType repoAuthType,

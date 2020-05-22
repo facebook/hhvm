@@ -1,0 +1,3 @@
+-vEval.CheckPropTypeHints=3
+-vEval.EmitGenericsUB=true -vEval.EnforceGenericsUB=1
+-vEval.EnforcePropUB=true

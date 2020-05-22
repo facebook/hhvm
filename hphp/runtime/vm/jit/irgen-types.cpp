@@ -1572,6 +1572,7 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
 void verifyPropType(IRGS& env,
                     SSATmp* cls,
                     const HPHP::TypeConstraint* tc,
+                    const Class::UpperBoundVec* ubs,
                     Slot slot,
                     SSATmp* val,
                     SSATmp* name,
@@ -1582,129 +1583,150 @@ void verifyPropType(IRGS& env,
 
   if (coerce) *coerce = val;
   if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (!tc || !tc->isCheckable()) return;
-  assertx(tc->validForProp());
 
-  verifyTypeImpl(
-    env,
-    *tc,
-    false,
-    cls,
-    [&] { // Get value to check
-      env.irb->constrainValue(val, DataTypeSpecific);
-      return val;
-    },
-    [&] (SSATmp*) { return false; }, // No func to string automatic conversions
-    [&] (SSATmp*) { return false; }, // No class to string automatic conversions
-    [&] (SSATmp* val) {
-      if (!coerce) return false;
-      // If we're not hard enforcing property type mismatches don't coerce
-      if (RO::EvalCheckPropTypeHints < 3) return false;
-      if (tc->isUpperBound() && RO::EvalEnforceGenericsUB < 2) return false;
-      if (RuntimeOption::EvalVecHintNotices) {
-        if (cls->hasConstVal(TCls) && name->hasConstVal(TStr)) {
-          auto const msg = makeStaticString(folly::sformat(
-            "class_meth Compat: {} '{}::{}' declared as type {}, clsmeth "
-            "assigned",
-            isSProp ? "Static property" : "Property",
-            cls->clsVal()->name()->data(),
-            name->strVal()->data(),
-            tc->displayName().c_str()
-          ));
-          gen(env, RaiseNotice, cns(env, msg));
-        } else {
+  auto const verifyFunc = [&](const TypeConstraint* tc) {
+    if (!tc || !tc->isCheckable()) return;
+    assertx(tc->validForProp());
+
+    verifyTypeImpl(
+      env,
+      *tc,
+      false,
+      cls,
+      [&] { // Get value to check
+        env.irb->constrainValue(val, DataTypeSpecific);
+        return val;
+      },
+      [&] (SSATmp*) { return false; }, // No func to string automatic conversions
+      [&] (SSATmp*) { return false; }, // No class to string automatic conversions
+      [&] (SSATmp* val) {
+        if (!coerce) return false;
+        // If we're not hard enforcing property type mismatches don't coerce
+        if (RO::EvalCheckPropTypeHints < 3) return false;
+        if (tc->isUpperBound() && RO::EvalEnforceGenericsUB < 2) return false;
+        if (RuntimeOption::EvalVecHintNotices) {
+          if (cls->hasConstVal(TCls) && name->hasConstVal(TStr)) {
+            auto const msg = makeStaticString(folly::sformat(
+              "class_meth Compat: {} '{}::{}' declared as type {}, clsmeth "
+              "assigned",
+              isSProp ? "Static property" : "Property",
+              cls->clsVal()->name()->data(),
+              name->strVal()->data(),
+              tc->displayName().c_str()
+            ));
+            gen(env, RaiseNotice, cns(env, msg));
+          } else {
+            gen(
+              env,
+              RaiseClsMethPropConvertNotice,
+              RaiseClsMethPropConvertNoticeData{tc, isSProp},
+              cls,
+              name
+            );
+          }
+        }
+        if (tc->raiseClsMethHackArrCompatNotice()) {
+          ARRPROV_USE_RUNTIME_LOCATION();
           gen(
             env,
-            RaiseClsMethPropConvertNotice,
-            RaiseClsMethPropConvertNoticeData{tc, isSProp},
+            RaiseHackArrPropNotice,
+            RaiseHackArrTypehintNoticeData { *tc },
             cls,
-            name
+            cns(env, empty_varray().get()),
+            cns(env, slot),
+            cns(env, isSProp)
           );
         }
-      }
-      if (tc->raiseClsMethHackArrCompatNotice()) {
-        ARRPROV_USE_RUNTIME_LOCATION();
+        *coerce = convertClsMethToVec(env, val);
+        return true;
+      },
+      [&] (Type, bool hard) { // Check failure
+        auto const failHard =
+          hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
+          (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
         gen(
           env,
-          RaiseHackArrPropNotice,
-          RaiseHackArrTypehintNoticeData { *tc },
-          cls,
-          cns(env, empty_varray().get()),
-          cns(env, slot),
-          cns(env, isSProp)
-        );
-      }
-      *coerce = convertClsMethToVec(env, val);
-      return true;
-    },
-    [&] (Type, bool hard) { // Check failure
-      auto const failHard =
-        hard && RuntimeOption::EvalCheckPropTypeHints >= 3 &&
-        (!tc->isUpperBound() || RuntimeOption::EvalEnforceGenericsUB >= 2);
-      gen(
-        env,
-        failHard ? VerifyPropFailHard : VerifyPropFail,
-        cls,
-        cns(env, slot),
-        val,
-        cns(env, isSProp)
-      );
-    },
-    [&] (SSATmp* val) { // dvarray mismatch
-      gen(
-        env,
-        RaiseHackArrPropNotice,
-        RaiseHackArrTypehintNoticeData { *tc },
-        cls,
-        val,
-        cns(env, slot),
-        cns(env, isSProp)
-      );
-    },
-    // We don't allow callable as a property type-hint, so we should never need
-    // to check callability.
-    [&] (SSATmp*) { always_assert(false); },
-    [&] (SSATmp* v, SSATmp*, SSATmp* checkCls) { // Class/type-alias check
-      gen(
-        env,
-        VerifyPropCls,
-        cls,
-        cns(env, slot),
-        checkCls,
-        v,
-        cns(env, isSProp)
-      );
-    },
-    [&] (SSATmp*, SSATmp* checkRec, SSATmp* val) { // Record/type-alias check
-      gen(
-        env,
-        VerifyPropRecDesc,
-        cls,
-        cns(env, slot),
-        checkRec,
-        val,
-        cns(env, isSProp)
-      );
-    },
-    [&] {
-      // Unlike the other type-hint checks, we don't punt here. We instead do
-      // the check using a runtime helper. This gives us the freedom to call
-      // verifyPropType without us worrying about it punting the entire
-      // operation.
-      if (coerce && (tc->isArray() || (tc->isObject() && !tc->isResolved()))) {
-        *coerce = gen(
-          env,
-          VerifyPropCoerce,
+          failHard ? VerifyPropFailHard : VerifyPropFail,
+          TypeConstraintData{ tc },
           cls,
           cns(env, slot),
           val,
           cns(env, isSProp)
         );
-      } else {
-        gen(env, VerifyProp, cls, cns(env, slot), val, cns(env, isSProp));
+      },
+      [&] (SSATmp* val) { // dvarray mismatch
+        gen(
+          env,
+          RaiseHackArrPropNotice,
+          RaiseHackArrTypehintNoticeData { *tc },
+          cls,
+          val,
+          cns(env, slot),
+          cns(env, isSProp)
+        );
+      },
+      // We don't allow callable as a property type-hint, so we should never need
+      // to check callability.
+      [&] (SSATmp*) { always_assert(false); },
+      [&] (SSATmp* v, SSATmp*, SSATmp* checkCls) { // Class/type-alias check
+        gen(
+          env,
+          VerifyPropCls,
+          TypeConstraintData{ tc },
+          cls,
+          cns(env, slot),
+          checkCls,
+          v,
+          cns(env, isSProp)
+        );
+      },
+      [&] (SSATmp*, SSATmp* checkRec, SSATmp* val) { // Record/type-alias check
+        gen(
+          env,
+          VerifyPropRecDesc,
+          TypeConstraintData{ tc },
+          cls,
+          cns(env, slot),
+          checkRec,
+          val,
+          cns(env, isSProp)
+        );
+      },
+      [&] {
+        // Unlike the other type-hint checks, we don't punt here. We instead do
+        // the check using a runtime helper. This gives us the freedom to call
+        // verifyPropType without us worrying about it punting the entire
+        // operation.
+        if (coerce && (tc->isArray() || (tc->isObject() && !tc->isResolved()))) {
+          *coerce = gen(
+            env,
+            VerifyPropCoerce,
+            TypeConstraintData { tc },
+            cls,
+            cns(env, slot),
+            val,
+            cns(env, isSProp)
+          );
+        } else {
+          gen(
+            env,
+            VerifyProp,
+            TypeConstraintData { tc },
+            cls,
+            cns(env, slot),
+            val,
+            cns(env, isSProp)
+          );
+        }
       }
+    );
+  };
+  verifyFunc(tc);
+  if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+    for (auto const& ub : *ubs) {
+      verifyFunc(&ub);
     }
-  );
+  }
 }
 
 void emitVerifyRetTypeC(IRGS& env) {

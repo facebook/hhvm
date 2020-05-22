@@ -2868,11 +2868,14 @@ void parse_prop_or_field_impl(AsmState& as,
   auto const hasReifiedGenerics =
     userAttributes.find(s___Reified.get()) != userAttributes.end();
   auto ub = getRelevantUpperBounds(typeConstraint, class_ubs, {}, {});
-  if (RuntimeOption::EvalEnforcePropUB &&
-      ub.size() == 1 &&
-      !hasReifiedGenerics) {
-    applyFlagsToUB(ub[0], typeConstraint);
-    typeConstraint = ub[0];
+  auto needsMultiUBs = false;
+  if (RuntimeOption::EvalEnforcePropUB) {
+    if (ub.size() == 1 && !hasReifiedGenerics) {
+      applyFlagsToUB(ub[0], typeConstraint);
+      typeConstraint = ub[0];
+    } else if (!ub.empty()) {
+      needsMultiUBs = true;
+    }
   }
   std::string name;
   as.in.skipSpaceTab();
@@ -2887,6 +2890,7 @@ void parse_prop_or_field_impl(AsmState& as,
       attrs,
       userTyStr,
       typeConstraint,
+      needsMultiUBs ? std::move(ub) : UpperBoundVec{},
       heredoc,
       &tvInit,
       RepoAuthType{},

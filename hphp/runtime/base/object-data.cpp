@@ -75,6 +75,12 @@ void verifyTypeHint(const Class* thisCls,
   if (prop && prop->typeConstraint.isCheckable()) {
     prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
   }
+  if (RuntimeOption::EvalEnforceGenericsUB <= 0) return;
+  for (auto const& ub : prop->ubs) {
+    if (ub.isCheckable()) {
+      ub.verifyProperty(val, thisCls, prop->cls, prop->name);
+    }
+  }
 }
 
 ALWAYS_INLINE
@@ -94,6 +100,14 @@ void unsetTypeHint(const Class::Prop* prop) {
 //////////////////////////////////////////////////////////////////////
 
 // Check that the given property's type matches its type-hint.
+namespace {
+bool assertATypeHint(const TypeConstraint& tc, tv_rval val) {
+  if (!tc.isCheckable() || tc.isSoft()) return true;
+  if (val.type() == KindOfUninit) return tc.maybeMixed();
+  return tc.assertCheck(val);
+}
+}
+
 bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   assertx(tvIsPlausible(*prop));
   assertx(slot < m_cls->numDeclProperties());
@@ -119,10 +133,12 @@ bool ObjectData::assertTypeHint(tv_rval prop, Slot slot) const {
   if (prop.type() == KindOfUninit && (propDecl.attrs & AttrLateInit)) {
     return true;
   }
-  if (prop.type() == KindOfUninit) {
-    return propDecl.typeConstraint.maybeMixed();
+  assertATypeHint(propDecl.typeConstraint, prop);
+  if (RuntimeOption::EvalEnforceGenericsUB <= 2) return true;
+  for (auto const& ub : propDecl.ubs) {
+    if (!assertATypeHint(ub, prop)) return false;
   }
-  return propDecl.typeConstraint.assertCheck(prop);
+  return true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1382,8 +1398,18 @@ tv_lval ObjectData::setOpProp(TypedValue& tvRef,
       throwMutateConstProp(lookup.slot);
     }
 
-    if (lookup.prop &&
-        setOpNeedsTypeCheck(lookup.prop->typeConstraint, op, prop)) {
+    auto const needsCheck = lookup.prop && [&] {
+      auto const& tc = lookup.prop->typeConstraint;
+      if (setOpNeedsTypeCheck(tc, op, prop)) {
+        return true;
+      }
+      for (auto& ub : lookup.prop->ubs) {
+        if (setOpNeedsTypeCheck(ub, op, prop)) return true;
+      }
+      return false;
+    }();
+
+    if (needsCheck) {
       /*
        * If this property has a type-hint, we can't do the setop truly in
        * place. We need to verify that the new value satisfies the type-hint
@@ -1451,9 +1477,15 @@ TypedValue ObjectData::incDecProp(Class* ctx, IncDecOp op, const StringData* key
      */
     auto const fast = [&]{
       if (RuntimeOption::EvalCheckPropTypeHints <= 0) return true;
-      if (!lookup.prop || !lookup.prop->typeConstraint.isCheckable()) {
-        return true;
-      }
+      auto const isAnyCheckable = lookup.prop && [&] {
+        if (lookup.prop->typeConstraint.isCheckable()) return true;
+        for (auto const& ub : lookup.prop->ubs) {
+          if (ub.isCheckable()) return true;
+        }
+        return false;
+      }();
+      if (!isAnyCheckable) return true;
+
       if (!isIntType(type(prop))) return false;
       return
         op == IncDecOp::PreInc || op == IncDecOp::PostInc ||

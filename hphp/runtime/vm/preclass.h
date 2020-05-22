@@ -99,6 +99,8 @@ using BuiltinDtorFunction = LowPtr<void(ObjectData*, const Class*)>;
  */
 struct PreClass : AtomicCountable {
   friend struct PreClassEmitter;
+  using UpperBoundVec = VMCompactVector<TypeConstraint>;
+  using UpperBoundMap = vm_flat_map<const StringData*, UpperBoundVec>;
 
   /////////////////////////////////////////////////////////////////////////////
   // Types.
@@ -119,6 +121,7 @@ struct PreClass : AtomicCountable {
          Attr attrs,
          const StringData* userType,
          const TypeConstraint& typeConstraint,
+         const CompactVector<TypeConstraint>& ubs,
          const StringData* docComment,
          const TypedValue& val,
          RepoAuthType repoAuthType,
@@ -131,6 +134,7 @@ struct PreClass : AtomicCountable {
     Attr              attrs()          const { return m_attrs; }
     const StringData* userType()       const { return m_userType; }
     const TypeConstraint& typeConstraint() const { return m_typeConstraint; }
+    const UpperBoundVec& upperBounds() const { return m_ubs; }
     const StringData* docComment()     const { return m_docComment; }
     const TypedValue& val()            const { return m_val; }
     RepoAuthType      repoAuthType()   const { return m_repoAuthType; }
@@ -146,6 +150,7 @@ struct PreClass : AtomicCountable {
     TypedValue m_val;
     RepoAuthType m_repoAuthType;
     TypeConstraint m_typeConstraint;
+    UpperBoundVec m_ubs;
     UserAttributeMap m_userAttributes;
   };
 

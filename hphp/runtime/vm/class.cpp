@@ -867,14 +867,22 @@ void Class::initSProps() const {
         sProp.attrs & AttrLSB) {
       if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
           !(sProp.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) &&
-          sProp.val.m_type != KindOfUninit &&
-          sProp.typeConstraint.isCheckable()) {
-        sProp.typeConstraint.verifyStaticProperty(
-          &val,
-          this,
-          sProp.cls,
-          sProp.name
-        );
+          sProp.val.m_type != KindOfUninit) {
+        if (sProp.typeConstraint.isCheckable()) {
+          sProp.typeConstraint.verifyStaticProperty(
+            &val,
+            this,
+            sProp.cls,
+            sProp.name
+          );
+        }
+        if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+          for (auto const& ub : sProp.ubs) {
+            if (ub.isCheckable()) {
+              ub.verifyStaticProperty(&val, this, sProp.cls, sProp.name);
+            }
+          }
+        }
       }
       m_sPropCache[slot]->val = val;
     }
@@ -929,12 +937,18 @@ void Class::checkPropInitialValues() const {
     auto const& prop = m_declProperties[slot];
     if (prop.attrs & (AttrInitialSatisfiesTC|AttrSystemInitialValue)) continue;
     auto const& tc = prop.typeConstraint;
-    if (!tc.isCheckable()) continue;
     auto const index = propSlotToIndex(slot);
     auto const rval = m_declPropInit[index].val;
     if (type(rval) == KindOfUninit) continue;
     auto tv = rval.tv();
-    tc.verifyProperty(&tv, this, prop.cls, prop.name);
+    if (tc.isCheckable()) tc.verifyProperty(&tv, this, prop.cls, prop.name);
+    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+      for (auto const& ub : prop.ubs) {
+        if (ub.isCheckable()) {
+          ub.verifyProperty(&tv, this, prop.cls, prop.name);
+        }
+      }
+    }
 
     // No coercion for statically initialized properties.
     assertx(type(tv) == type(rval));
@@ -983,30 +997,70 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
   auto const& newTC = prop.typeConstraint;
 
   auto const result = oldTC.equivalentForProp(newTC);
-  if (result == TypeConstraint::EquivalentResult::Pass) return;
+  if (result != TypeConstraint::EquivalentResult::Pass) {
+    auto const oldTCName =
+      oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
+    auto const newTCName =
+      newTC.hasConstraint() ? newTC.displayName() : "mixed";
 
-  auto const oldTCName =
-    oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
-  auto const newTCName =
-    newTC.hasConstraint() ? newTC.displayName() : "mixed";
-
-  auto const msg = folly::sformat(
-    "Type-hint of '{}::{}' must be {}{} (as in class {}), not {}",
-    prop.cls->name(),
-    prop.name,
-    oldTC.isUpperBound()? "upper-bounded by " : "",
-    oldTCName,
-    oldProp.cls->name(),
-    newTCName
-  );
+    auto const msg = folly::sformat(
+      "Type-hint of '{}::{}' must be {}{} (as in class {}), not {}",
+      prop.cls->name(),
+      prop.name,
+      oldTC.isUpperBound()? "upper-bounded by " : "",
+      oldTCName,
+      oldProp.cls->name(),
+      newTCName
+    );
 
   if (result == TypeConstraint::EquivalentResult::DVArray &&
       !RO::EvalHackArrCompatSpecialization) {
-    assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
-    raise_hackarr_compat_notice(msg);
-  } else {
-    raise_property_typehint_error(msg, oldTC.isSoft() && newTC.isSoft(),
-                                  oldTC.isUpperBound());
+      assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
+      raise_hackarr_compat_notice(msg);
+    } else {
+      raise_property_typehint_error(
+        msg,
+        oldTC.isSoft() && newTC.isSoft(),
+        oldTC.isUpperBound() || newTC.isUpperBound()
+      );
+    }
+  }
+
+  if (RuntimeOption::EvalEnforceGenericsUB > 0 &&
+      (!prop.ubs.empty() || !oldProp.ubs.empty())) {
+    std::vector<TypeConstraint> newTCs = {newTC};
+    for (auto const& ub : prop.ubs) newTCs.push_back(ub);
+    std::vector<TypeConstraint> oldTCs = {oldTC};
+    for (auto const& ub : oldProp.ubs) oldTCs.push_back(ub);
+
+    for (auto const& ub : newTCs) {
+      if (std::none_of(oldTCs.begin(), oldTCs.end(),
+            [&](const TypeConstraint& tc) {
+              auto r = tc.equivalentForProp(ub);
+              return r == TypeConstraint::EquivalentResult::Pass;
+            })) {
+        auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
+        auto const msg = folly::sformat(
+          "Upper-bound {} of {}::{} has no equivalent upper-bound in {}",
+          ubName, prop.cls->name(), prop.name, oldProp.cls->name()
+        );
+        raise_property_typehint_error(msg, ub.isSoft(), true);
+      }
+    }
+    for (auto const& ub : oldTCs) {
+      if (std::none_of(newTCs.begin(), newTCs.end(),
+            [&](const TypeConstraint& tc) {
+              auto r = tc.equivalentForProp(ub);
+              return r == TypeConstraint::EquivalentResult::Pass;
+            })) {
+        auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
+        auto const msg = folly::sformat(
+          "Upper-bound {} of {}::{} has no equivalent upper-bound in {}",
+          ubName, oldProp.cls->name(), oldProp.name, prop.cls->name()
+        );
+        raise_property_typehint_error(msg, ub.isSoft(), true);
+      }
+    }
   }
 }
 
@@ -1266,15 +1320,23 @@ Class::PropValLookup Class::getSPropIgnoreLateInit(
 
       if (RuntimeOption::EvalCheckPropTypeHints > 2) {
         auto const typeOk = [&]{
-          if (!decl.typeConstraint.isCheckable() ||
-              decl.typeConstraint.isSoft()) return true;
-          if (decl.typeConstraint.isUpperBound() &&
-              RuntimeOption::EvalEnforceGenericsUB < 2) return true;
-          if (sProp->m_type == KindOfNull &&
-              !(decl.attrs & AttrNoImplicitNullable)) {
-            return true;
+          auto skipCheck =
+            !decl.typeConstraint.isCheckable() ||
+            decl.typeConstraint.isSoft() ||
+            (decl.typeConstraint.isUpperBound() &&
+             RuntimeOption::EvalEnforceGenericsUB < 2) ||
+            (sProp->m_type == KindOfNull &&
+             !(decl.attrs & AttrNoImplicitNullable));
+
+          auto res = skipCheck ? true : decl.typeConstraint.assertCheck(sProp);
+          if (RuntimeOption::EvalEnforceGenericsUB >= 2) {
+            for (auto const& ub : decl.ubs) {
+              if (ub.isCheckable() && !ub.isSoft()) {
+                res = res && ub.assertCheck(sProp);
+              }
+            }
           }
-          return decl.typeConstraint.assertCheck(sProp);
+          return res;
         }();
         always_assert(typeOk);
       }
@@ -2344,6 +2406,7 @@ void Class::setProperties() {
       prop.mangledName         = parentProp.mangledName;
       prop.attrs               = parentProp.attrs | AttrNoBadRedeclare;
       prop.typeConstraint      = parentProp.typeConstraint;
+      prop.ubs                 = parentProp.ubs;
       prop.name                = parentProp.name;
       prop.repoAuthType        = parentProp.repoAuthType;
 
@@ -2369,6 +2432,7 @@ void Class::setProperties() {
       sProp.name           = parentProp.name;
       sProp.attrs          = parentProp.attrs | AttrNoBadRedeclare;
       sProp.typeConstraint = parentProp.typeConstraint;
+      sProp.ubs            = parentProp.ubs;
       sProp.cls            = parentProp.cls;
       sProp.repoAuthType   = parentProp.repoAuthType;
       tvWriteUninit(sProp.val);
@@ -2490,7 +2554,9 @@ void Class::setProperties() {
         auto const& tc = preProp->typeConstraint();
         if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
             !(preProp->attrs() & AttrNoBadRedeclare) &&
-            tc.maybeInequivalentForProp(prop.typeConstraint)) {
+            (tc.maybeInequivalentForProp(prop.typeConstraint) ||
+             !preProp->upperBounds().empty() ||
+             !prop.ubs.empty())) {
           // If this property isn't obviously not redeclaring a property in
           // the parent, we need to check that when we initialize the class.
           prop.attrs = Attr(prop.attrs & ~AttrNoBadRedeclare);
@@ -2498,6 +2564,8 @@ void Class::setProperties() {
           m_maybeRedefsPropTy = true;
         }
         prop.typeConstraint = tc;
+
+        prop.ubs = preProp->upperBounds();
 
         if (preProp->attrs() & AttrNoImplicitNullable) {
           prop.attrs |= AttrNoImplicitNullable;
@@ -2894,11 +2962,22 @@ void Class::checkPrePropVal(XProp& prop, const PreClass::Prop* preProp) {
     !(preProp->attrs() & AttrNoImplicitNullable)
   );
 
+  auto const alwaysPassesAll = [&] {
+    if (!tc.alwaysPasses(&tv)) return false;
+    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+      auto& ubs = const_cast<PreClass::UpperBoundVec&>(preProp->upperBounds());
+      for (auto& ub : ubs) {
+        if (!ub.alwaysPasses(&tv)) return false;
+      }
+    }
+    return true;
+  };
+
   if (RuntimeOption::EvalCheckPropTypeHints > 0 &&
       !(preProp->attrs() & AttrInitialSatisfiesTC) &&
       tv.m_type != KindOfUninit) {
     // System provided initial values should always be correct
-    if ((preProp->attrs() & AttrSystemInitialValue) || tc.alwaysPasses(&tv)) {
+    if ((preProp->attrs() & AttrSystemInitialValue) || alwaysPassesAll()) {
       prop.attrs |= AttrInitialSatisfiesTC;
     } else if (preProp->attrs() & AttrStatic) {
       prop.attrs = Attr(prop.attrs & ~AttrPersistent);
@@ -2917,8 +2996,11 @@ void Class::initProp(XProp& prop, const PreClass::Prop* preProp) {
   // This is the first class to declare this property
   prop.cls                 = this;
   prop.typeConstraint      = preProp->typeConstraint();
+  prop.ubs                 = preProp->upperBounds();
   prop.repoAuthType        = preProp->repoAuthType();
 
+  // If type constraint has soft or nullable flags, apply them to upper-bounds.
+  for (auto &ub : prop.ubs) applyFlagsToUB(ub, prop.typeConstraint);
   // Check if this property's initial value needs to be type checked at
   // runtime.
   checkPrePropVal(prop, preProp);

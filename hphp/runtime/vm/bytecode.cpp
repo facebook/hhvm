@@ -3673,6 +3673,13 @@ OPTBLD_INLINE void iopSetS() {
     auto const& sprop = cls->staticProperties()[slot];
     auto const& tc = sprop.typeConstraint;
     if (tc.isCheckable()) tc.verifyStaticProperty(tv1, cls, sprop.cls, name);
+    if (RuntimeOption::EvalEnforceGenericsUB > 0) {
+      for (auto const& ub : sprop.ubs) {
+        if (ub.isCheckable()) {
+          ub.verifyStaticProperty(tv1, cls, sprop.cls, name);
+        }
+      }
+    }
   }
   tvSet(*tv1, *val);
   tvDecRefGen(propn);

@@ -1,10 +1,16 @@
 <?hh
 
-class Foo1 <T as num> {
+interface Fooable {}
+interface Barable {}
+
+class FooBar implements Fooable, Barable {}
+class NoFoo implements Barable {}
+
+class Foo1 <T as num as int> {
   public T $x = 'a';
 }
 
-class Foo2 <T as string> {
+class Foo2 <T as Barable as Fooable> {
   private T $x;
 
   public function __construct() {
@@ -12,14 +18,13 @@ class Foo2 <T as string> {
   }
 }
 
-class Bar {}
-class Foo3 <T as Bar> {
+class Foo3 <T as Fooable as Barable> {
   <<__LateInit>> public static T $sx;
 }
 
-type Ta = num;
-class Foo4 <T as Ta> {
-  public T $x = 10;
+type Ta = Barable;
+class Foo4 <T as Ta as Fooable> {
+  public ?T $x = null;
 }
 
 <<__EntryPoint>> function main() {
@@ -44,13 +49,14 @@ class Foo4 <T as Ta> {
     var_dump($e->getMessage());
   }
   try {
+    Foo3::$sx = new FooBar;
     Foo3::$sx = 1;
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }
   try {
     $o = new Foo4;
-    $o->x = new Bar;
+    $o->x = new NoFoo;
   } catch (Exception $e) {
     var_dump($e->getMessage());
   }

@@ -216,6 +216,7 @@ bool consumesRefImpl(const IRInstruction* inst, int srcNo) {
       return true;
 
     case VerifyPropCoerce:
+    case VerifyPropCoerceAll:
       return move != MustMove && srcNo == 2;
 
     default:

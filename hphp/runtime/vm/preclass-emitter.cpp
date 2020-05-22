@@ -74,6 +74,7 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
                             Attr attrs,
                             const StringData* userType,
                             const TypeConstraint& typeConstraint,
+                            const UpperBoundVec& ubs,
                             const StringData* docComment,
                             const TypedValue* val,
                             RepoAuthType repoAuthType,
@@ -84,6 +85,7 @@ PreClassEmitter::Prop::Prop(const PreClassEmitter* pce,
   , m_docComment(docComment)
   , m_repoAuthType(repoAuthType)
   , m_typeConstraint(typeConstraint)
+  , m_ubs(ubs)
   , m_userAttributes(userAttributes)
 {
   m_mangledName = PreClass::manglePropName(pce->name(), n, attrs);
@@ -153,6 +155,7 @@ void PreClassEmitter::renameMethod(const StringData* oldName,
 bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
                                   const StringData* userType,
                                   const TypeConstraint& typeConstraint,
+                                  const UpperBoundVec& ubs,
                                   const StringData* docComment,
                                   const TypedValue* val,
                                   RepoAuthType repoAuthType,
@@ -168,6 +171,7 @@ bool PreClassEmitter::addProperty(const StringData* n, Attr attrs,
     attrs,
     userType,
     typeConstraint,
+    ubs,
     docComment,
     val,
     repoAuthType,
@@ -312,6 +316,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
                                               prop.attrs(),
                                               prop.userType(),
                                               prop.typeConstraint(),
+                                              prop.upperBounds(),
                                               prop.docComment(),
                                               prop.val(),
                                               prop.repoAuthType(),

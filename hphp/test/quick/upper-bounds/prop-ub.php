@@ -16,4 +16,6 @@ include "prop-ub-class.inc";
   $o->z = 10;
   $o->z = vec[3];
   $o->w = null;
+  $o->v = null; // not enforced
+  $o->u = 'a';  // not enforced
 }

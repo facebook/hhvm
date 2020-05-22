@@ -139,7 +139,8 @@ std::string opt_escaped_long(const StringData* sd) {
 struct EHCatchLegacy { std::string label; };
 struct EHCatch { Offset end; };
 using EHInfo = boost::variant<EHCatchLegacy, EHCatch>;
-
+using UBMap =
+  std::unordered_map<const StringData*, std::vector<TypeConstraint>>;
 struct FuncInfo {
   FuncInfo(const Unit* u, const Func* f) : unit(u), func(f) {}
 
@@ -157,7 +158,7 @@ struct FuncInfo {
   std::vector<std::pair<Offset,const EHEnt*>> ehStarts;
 
   // Upper-bounds for params and return types
-  std::unordered_map<std::string, std::vector<TypeConstraint>> ubs;
+  UBMap ubs;
 };
 
 FuncInfo find_func_info(const Func* func) {
@@ -214,12 +215,12 @@ FuncInfo find_func_info(const Func* func) {
       auto const& params = func->params();
       for (auto const& p : func->paramUBs()) {
         auto const& typeName = params[p.first].typeConstraint.typeName();
-        auto& v = finfo.ubs[typeName->data()];
+        auto& v = finfo.ubs[typeName];
         if (v.empty()) v.assign(std::begin(p.second), std::end(p.second));
       }
     }
     if (func->hasReturnWithMultiUBs()) {
-      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()->data()];
+      auto& v = finfo.ubs[func->returnTypeConstraint().typeName()];
       if (v.empty()) {
         v.assign(std::begin(func->returnUBs()), std::end(func->returnUBs()));
       }
@@ -600,12 +601,12 @@ std::string opt_shadowed_tparams() {
   return "{}";
 }
 
-std::string opt_ubs(const FuncInfo& finfo) {
+std::string opt_ubs(const UBMap& ubs) {
   std::string ret = {};
   ret += "{";
-  for (auto const& p : finfo.ubs) {
+  for (auto const& p : ubs) {
     ret += "(";
-    ret += p.first;
+    ret += p.first->data();
     ret += " as ";
     bool first = true;
     for (auto const& ub : p.second) {
@@ -626,7 +627,7 @@ void print_func(Output& out, const Func* func) {
     out.fmtln(".main{} {{", format_line_pair(func));
   } else {
     out.fmtln(".function{}{}{} {}{}({}){}{{",
-      opt_ubs(finfo),
+      opt_ubs(finfo.ubs),
       opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes(),
                 func->top()),
       format_line_pair(func),
@@ -687,7 +688,7 @@ void print_method(Output& out, const Func* func) {
   auto const finfo = find_func_info(func);
   out.fmtln(".method{}{}{}{} {}{}({}){}{{",
     opt_shadowed_tparams(),
-    opt_ubs(finfo),
+    opt_ubs(finfo.ubs),
     opt_attrs(AttrContext::Func, func->attrs(), &func->userAttributes()),
     format_line_pair(func),
     opt_type_info(func->returnUserType(), func->returnTypeConstraint()),
@@ -830,7 +831,17 @@ void print_cls(Output& out, const PreClass* cls) {
       name = name.substr(0, p);
     }
   }
-  out.fmt(".class{} {}{}",
+  UBMap cls_ubs;
+  for (auto const& prop : cls->allProperties()) {
+    if (prop.upperBounds().empty()) continue;
+    auto& v = cls_ubs[prop.typeConstraint().typeName()];
+    if (v.empty()) {
+      v.assign(std::begin(prop.upperBounds()), std::end(prop.upperBounds()));
+    }
+  }
+
+  out.fmt(".class {} {} {}",
+    opt_ubs(cls_ubs),
     opt_attrs(AttrContext::Class, cls->attrs(), &cls->userAttributes(),
               cls->hoistability() != PreClass::NotHoistable),
     name,

@@ -16,6 +16,7 @@
 #ifndef incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
 #define incl_HPHP_JIT_IRGEN_SPROP_GLOBAL_H_
 
+#include "hphp/runtime/vm/containers.h"
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
@@ -38,6 +39,7 @@ struct IRGS;
 struct ClsPropLookup {
   SSATmp* propPtr;
   const TypeConstraint* tc;
+  const VMCompactVector<TypeConstraint>* ubs;
   Slot slot;
 };
 

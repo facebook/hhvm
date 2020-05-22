@@ -767,7 +767,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case VerifyPropFail:
   case VerifyPropFailHard:
   case VerifyProp:
+  case VerifyPropAll:
   case VerifyPropCoerce:
+  case VerifyPropCoerceAll:
   case VerifyPropRecDesc:
     return may_load_store(AHeapAny, AHeapAny);
 

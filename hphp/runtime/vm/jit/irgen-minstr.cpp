@@ -78,6 +78,7 @@ enum class SimpleOp {
 // Property information.
 
 struct PropInfo {
+  using UpperBoundVec = PreClass::UpperBoundVec;
   explicit PropInfo(Slot slot,
                     uint16_t index,
                     bool isConst,
@@ -85,6 +86,7 @@ struct PropInfo {
                     bool lateInitCheck,
                     Type knownType,
                     const HPHP::TypeConstraint* typeConstraint,
+                    const UpperBoundVec* ubs,
                     const Class* objClass,
                     const Class* propClass)
     : slot{slot}
@@ -94,6 +96,7 @@ struct PropInfo {
     , lateInitCheck{lateInitCheck}
     , knownType{std::move(knownType)}
     , typeConstraint{typeConstraint}
+    , ubs{ubs}
     , objClass{objClass}
     , propClass{propClass}
   {}
@@ -105,6 +108,7 @@ struct PropInfo {
   bool lateInitCheck{false};
   Type knownType{TCell};
   const HPHP::TypeConstraint* typeConstraint{nullptr};
+  const UpperBoundVec* ubs{nullptr};
   const Class* objClass{nullptr};
   const Class* propClass{nullptr};
 };
@@ -199,6 +203,7 @@ getPropertyOffset(IRGS& env,
     (prop.attrs & AttrLateInit) && !ignoreLateInit,
     knownTypeForProp(prop, baseClass, ctx, ignoreLateInit),
     &prop.typeConstraint,
+    &prop.ubs,
     baseClass,
     prop.cls
   );
@@ -1494,6 +1499,7 @@ SSATmp* setPropImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       env,
       gen(env, LdObjClass, obj),
       propInfo->typeConstraint,
+      propInfo->ubs,
       propInfo->slot,
       value,
       key,
@@ -2036,6 +2042,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         env,
         gen(env, LdObjClass, obj),
         propInfo->typeConstraint,
+        propInfo->ubs,
         propInfo->slot,
         result,
         key,

@@ -164,6 +164,7 @@ struct Class : AtomicCountable {
   /*
    * Instance property information.
    */
+  using UpperBoundVec = PreClass::UpperBoundVec;
   struct Prop {
     const PreClass::Prop* preProp;
     /*
@@ -173,6 +174,7 @@ struct Class : AtomicCountable {
      */
     RepoAuthType repoAuthType;
     TypeConstraint typeConstraint;
+    UpperBoundVec  ubs;
 
     LowStringPtr name;
     LowStringPtr mangledName;
@@ -198,6 +200,7 @@ struct Class : AtomicCountable {
     const PreClass::Prop* preProp;
     RepoAuthType repoAuthType;
     TypeConstraint typeConstraint;
+    UpperBoundVec ubs;
 
     LowStringPtr name;
 

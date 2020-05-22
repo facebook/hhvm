@@ -172,6 +172,7 @@ PreClass::Prop::Prop(PreClass* preClass,
                      Attr attrs,
                      const StringData* userType,
                      const TypeConstraint& typeConstraint,
+                     const CompactVector<TypeConstraint>& ubs,
                      const StringData* docComment,
                      const TypedValue& val,
                      RepoAuthType repoAuthType,
@@ -184,8 +185,10 @@ PreClass::Prop::Prop(PreClass* preClass,
   , m_val(val)
   , m_repoAuthType{repoAuthType}
   , m_typeConstraint{typeConstraint}
-  , m_userAttributes(userAttributes)
-{}
+  , m_userAttributes(userAttributes) {
+  m_ubs.resize(ubs.size());
+  std::copy(ubs.begin(), ubs.end(), m_ubs.begin());
+}
 
 void PreClass::Prop::prettyPrint(std::ostream& out,
                                  const PreClass* preClass) const {
@@ -218,6 +221,16 @@ void PreClass::Prop::prettyPrint(std::ostream& out,
   }
   if (m_typeConstraint.hasConstraint()) {
     out << " (tc = " << m_typeConstraint.displayName(nullptr, true) << ")";
+  }
+  if (!m_ubs.empty()) {
+    out << "(ubs = ";
+    for (auto const& ub : m_ubs) {
+      if (ub.hasConstraint()) {
+        out << ub.displayName(nullptr, true);
+        out << " ";
+      }
+    }
+    out << ")";
   }
   out << std::endl;
 }

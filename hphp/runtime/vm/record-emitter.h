@@ -118,10 +118,14 @@ struct RecordEmitter {
   const StringData* docComment() const { return m_docComment; }
 
   const FieldMap::Builder& fieldMap() const { return m_fieldMap; }
+  using UpperBoundVec = CompactVector<TypeConstraint>;
+  void addUpperBound(const StringData*, const UpperBoundVec&) {}
+  bool hasUpperBound(const StringData*) { return false; }
   bool addField(const StringData* n,
                 Attr attrs,
                 const StringData* userType,
                 const TypeConstraint& typeConstraint,
+                const UpperBoundVec&, // unused
                 const StringData* docComment,
                 const TypedValue* val,
                 RepoAuthType,

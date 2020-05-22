@@ -208,8 +208,14 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
       for (Slot slot = 0; slot < props.size(); ++slot) {
         auto const& prop = props[slot];
         if (prop.attrs & AttrInitialSatisfiesTC) continue;
-        auto const& tc = prop.typeConstraint;
-        if (!tc.isCheckable()) continue;
+        auto const isAnyCheckable = [&] {
+          if (prop.typeConstraint.isCheckable()) return true;
+          for (auto const& ub : prop.ubs) {
+            if (ub.isCheckable()) return true;
+          }
+          return false;
+        }();
+        if (!isAnyCheckable) continue;
         auto index = cls->propSlotToIndex(slot);
         auto const tv = cls->declPropInit()[index].val.tv();
         if (tv.m_type == KindOfUninit) continue;
@@ -217,7 +223,8 @@ void checkPropInitialValues(IRGS& env, const Class* cls) {
         verifyPropType(
           env,
           cns(env, cls),
-          &tc,
+          &prop.typeConstraint,
+          &prop.ubs,
           slot,
           cns(env, tv),
           cns(env, makeStaticString(prop.name)),

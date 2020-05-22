@@ -2127,12 +2127,25 @@ To string conversions:
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise.
 
+| VerifyPropAll, ND, S(Cls) S(Int) S(Cell) C(Bool), NF
+
+  Verify that S2 is compatible with the all type hints for the property at slot 
+  S1 on S0 including upper-bounds. S3 is true if this is a static property, 
+  false otherwise.
+
 | VerifyPropCoerce, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
 
   Verify that S2 is compatible with the type hint for the property at slot S1
   on S0. S3 is true if this is a static property, false otherwise. Once support
   for coercing class_meth types is removed this ir instruction can also be
   removed (T61738946).
+
+| VerifyPropCoerceAll, D(InitCell), S(Cls) S(Int) S(Cell) C(Bool), PRc|CRc
+
+  Verify that S2 is compatible with all type hints for the property at slot S1
+  on S0, including upper-bounds. S3 is true if this is a static property, 
+  false otherwise. Once support for coercing class_meth types is removed this 
+  ir instruction can also be removed (T61738946).
 
 | VerifyReifiedLocalType<id>, ND, SDArr, NF
 

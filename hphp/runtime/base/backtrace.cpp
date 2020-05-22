@@ -566,6 +566,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       if (UNLIKELY(mayUseVV) && UNLIKELY(fp->hasVarEnv())) {
         auto const val = fp->getVarEnv()->lookup(s_86metadata.get());
         if (val && type(val) != KindOfUninit) {
+          always_assert(tvIsPlausible(*val));
           frame.set(s_metadata, Variant{variant_ref{val}});
         }
       } else {
@@ -573,6 +574,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         if (local != kInvalidId) {
           auto const val = frame_local(fp, local);
           if (type(val) != KindOfUninit) {
+            always_assert(tvIsPlausible(*val));
             frame.set(s_metadata, Variant{variant_ref{val}});
           }
         }

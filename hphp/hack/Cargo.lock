@@ -1972,8 +1972,10 @@ name = "options"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lru-cache 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "options_serde 0.0.0",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.103 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1985,6 +1987,7 @@ dependencies = [
 name = "options_ffi"
 version = "0.0.0"
 dependencies = [
+ "compile_ffi 0.0.0",
  "fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "hhbc_string_utils_rust 0.0.0",
  "lru-cache 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",

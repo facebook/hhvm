@@ -22,6 +22,22 @@ struct RustOutputConfig {
     output_file: Option<String>,
 }
 
+pub struct OcamlStr<'content>(&'content [u8]);
+
+impl<'content> AsRef<str> for OcamlStr<'content> {
+    fn as_ref(&self) -> &str {
+        unsafe { std::str::from_utf8_unchecked(self.0) }
+    }
+}
+
+impl<'content> FromOcamlRep for OcamlStr<'content> {
+    fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        Ok(Self(unsafe {
+            std::mem::transmute(ocamlrep::bytes_from_ocamlrep(value)?)
+        }))
+    }
+}
+
 #[no_mangle]
 extern "C" fn compile_from_text_ffi(
     env: usize,
@@ -35,7 +51,7 @@ extern "C" fn compile_from_text_ffi(
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
                     let output_config =
                         unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                    let env = unsafe { compile::Env::from_ocaml(env).unwrap() };
+                    let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
                     let mut w = String::new();
                     match compile::from_text_(&env, stack_limit, &mut w, source_text) {
                         Ok(profile) => print_output(w, output_config, &env.filepath, profile),

@@ -92,7 +92,7 @@ fn process_single_file_impl(
         EnvFlags::DISABLE_TOPLEVEL_ELABORATION,
         opts.disable_toplevel_elaboration,
     );
-    let env = Env {
+    let env: Env<String> = Env {
         filepath: rel_path,
         config_jsons: vec![],
         config_list: vec![],

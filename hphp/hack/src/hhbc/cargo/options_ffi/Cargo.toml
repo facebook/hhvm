@@ -10,6 +10,7 @@ path = "../../options_ffi.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+compile_ffi = { path = "../compile_ffi" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

@@ -32,10 +32,10 @@ use stack_limit::StackLimit;
 /// so that everything is easily serializable at the FFI boundary
 /// until the migration from OCaml is fully complete
 #[derive(Debug, FromOcamlRep)]
-pub struct Env {
+pub struct Env<STR: AsRef<str>> {
     pub filepath: RelativePath,
-    pub config_jsons: Vec<String>,
-    pub config_list: Vec<String>,
+    pub config_jsons: Vec<STR>,
+    pub config_list: Vec<STR>,
     pub flags: EnvFlags,
 }
 
@@ -71,8 +71,8 @@ pub struct Profile {
     pub printing_t: f64,
 }
 
-pub fn from_text<W>(
-    env: &Env,
+pub fn from_text<W, S: AsRef<str>>(
+    env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
     text: &[u8],
@@ -85,8 +85,8 @@ where
     from_text_(env, stack_limit, writer, source_text)
 }
 
-pub fn from_text_<W>(
-    env: &Env,
+pub fn from_text_<W, S: AsRef<str>>(
+    env: &Env<S>,
     stack_limit: &StackLimit,
     writer: &mut W,
     source_text: SourceText,
@@ -163,9 +163,9 @@ where
     }
 }
 
-fn emit<'p>(
+fn emit<'p, S: AsRef<str>>(
     emitter: &mut Emitter,
-    env: &Env,
+    env: &Env<S>,
     namespace: RcOc<NamespaceEnv>,
     is_hh: bool,
     ast: &'p mut Tast::Program,

@@ -40,6 +40,8 @@ mod options_cli;
 
 use options_serde::prefix_all;
 
+use lru_cache::LruCache;
+
 extern crate bitflags;
 use bitflags::bitflags;
 
@@ -51,6 +53,7 @@ use serde_json::{json, value::Value as Json};
 
 use itertools::Either;
 use std::{
+    cell::RefCell,
     collections::{BTreeMap, BTreeSet},
     iter::empty,
 };
@@ -383,6 +386,15 @@ mod defaults {
     }
 }
 
+thread_local! {
+    static CACHE: RefCell<Cache> = {
+        let hasher = fnv::FnvBuildHasher::default();
+        RefCell::new(LruCache::with_hasher(100, hasher))
+    }
+}
+
+pub(crate) type Cache = LruCache<(Vec<String>, Vec<String>), Options, fnv::FnvBuildHasher>;
+
 impl Options {
     pub fn to_string(&self) -> String {
         serde_json::to_string_pretty(&self).expect("failed to parse JSON")
@@ -439,7 +451,24 @@ impl Options {
         }
     }
 
-    pub fn from_configs<S1, S2>(jsons: &[S1], cli_args: &[S2]) -> Result<Self, String>
+    pub fn from_configs<S: AsRef<str>>(jsons: &[S], clis: &[S]) -> Result<Self, String> {
+        CACHE.with(|cache| {
+            let key: (Vec<String>, Vec<String>) = (
+                jsons.iter().map(|x| (*x).as_ref().into()).collect(),
+                clis.iter().map(|x| (*x).as_ref().into()).collect(),
+            );
+            let mut cache = cache.borrow_mut();
+            if let Some(o) = cache.get_mut(&key) {
+                Ok(o.clone())
+            } else {
+                let o = Options::from_configs_(&key.0, &key.1)?;
+                cache.insert(key, o.clone());
+                Ok(o)
+            }
+        })
+    }
+
+    fn from_configs_<S1, S2>(jsons: &[S1], cli_args: &[S2]) -> Result<Self, String>
     where
         S1: AsRef<str>,
         S2: AsRef<str>,
@@ -898,7 +927,7 @@ mod tests {
             })
             .to_string(),
         ];
-        let act = Options::from_configs(&jsons, &EMPTY_STRS).unwrap();
+        let act = Options::from_configs_(&jsons, &EMPTY_STRS).unwrap();
         assert!(act
             .hhvm
             .hack_lang
@@ -956,7 +985,7 @@ mod tests {
                 "global_value": "true",
             },
         });
-        let act = Options::from_configs(&[json.to_string()], &cli_args).unwrap();
+        let act = Options::from_configs_(&[json.to_string()], &cli_args).unwrap();
         assert!(act.hhvm.flags.contains(HhvmFlags::HACK_ARR_COMPAT_NOTICES));
     }
 
@@ -965,8 +994,8 @@ mod tests {
         let mut exp_dynamic_invoke_functions = BTreeSet::<String>::new();
         exp_dynamic_invoke_functions.insert("foo".into());
         exp_dynamic_invoke_functions.insert("bar".into());
-        let act =
-            Options::from_configs(&EMPTY_STRS, &["hhvm.dynamic_invoke_functions=foo,bar"]).unwrap();
+        let act = Options::from_configs_(&EMPTY_STRS, &["hhvm.dynamic_invoke_functions=foo,bar"])
+            .unwrap();
         assert_eq!(
             act.hhvm.dynamic_invoke_functions.global_value,
             exp_dynamic_invoke_functions,
@@ -979,7 +1008,7 @@ mod tests {
         exp_include_roots.insert("foo".into(), "bar".into());
         exp_include_roots.insert("bar".into(), "baz".into());
         const CLI_ARG: &str = "hhvm.include_roots=foo:bar,bar:baz";
-        let act = Options::from_configs(&EMPTY_STRS, &[CLI_ARG]).unwrap();
+        let act = Options::from_configs_(&EMPTY_STRS, &[CLI_ARG]).unwrap();
         assert_eq!(act.hhvm.include_roots.global_value, exp_include_roots,);
     }
 
@@ -996,7 +1025,7 @@ mod tests {
 
     #[test]
     fn test_options_de_empty_configs_skipped_no_crash() {
-        let res: Result<Options, String> = Options::from_configs(
+        let res: Result<Options, String> = Options::from_configs_(
             // a subset (only 30/5K lines) of the real config passed by HHVM
             &[
                 "", // this should be skipped (it's an invalid JSON)

@@ -36,6 +36,7 @@
 #include "hphp/util/atomic-vector.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/gzip.h"
+#include "hphp/util/hackc-log.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/match.h"
@@ -808,6 +809,7 @@ std::string ExternCompiler::readResult(StructuredLogEntry* log) const {
   const auto header = folly::parseJson(line);
   const std::string type = header.getDefault("type", "").asString();
   const std::size_t bytes = header.getDefault("bytes", 0).asInt();
+  HackC::logOptions(header.getDefault("config_jsons", nullptr));
 
   const auto logResult = [&] (auto name, auto t) {
     if (log != nullptr) log->setInt(name, t);

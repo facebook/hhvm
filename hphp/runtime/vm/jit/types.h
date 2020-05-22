@@ -24,8 +24,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
-#include "hphp/runtime/vm/jit/containers.h"
-
 #include "hphp/util/assertions.h"
 #include "hphp/util/hash-set.h"
 
@@ -59,7 +57,7 @@ struct ctca_identity_hash {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-using TransIDSet = jit::flat_set<TransID>;
+using TransIDSet = hphp_hash_set<TransID>;
 using TransIDVec = std::vector<TransID>;
 
 using Annotation = std::pair<std::string, std::string>;

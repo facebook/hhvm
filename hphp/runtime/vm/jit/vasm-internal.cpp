@@ -159,16 +159,15 @@ void register_catch_block(const Venv& env, const Venv::LabelPatch& p) {
 namespace {
 
 /*
- * For profiling translations, record in ProfData that the control-transfer
- * instruction `jmp' is associated with the current translation being emitted.
+ * Record in ProfData that the control-transfer instruction `jmp' is associated
+ * with the current translation being emitted.
  */
 void setJmpTransID(Venv& env, TCA jmp) {
-  if (!env.unit.context || env.unit.context->kind != TransKind::Profile) return;
+  if (!env.unit.context) return;
 
-  assertx(env.unit.context->transIDs.size() == 1);
-  auto const transID = *env.unit.context->transIDs.begin();
-
-  env.meta.setJmpTransID(jmp, transID, env.unit.context->kind);
+  env.meta.setJmpTransID(
+    jmp, env.unit.context->transID, env.unit.context->kind
+  );
 }
 
 void registerFallbackJump(Venv& env, TCA jmp, ConditionCode cc) {

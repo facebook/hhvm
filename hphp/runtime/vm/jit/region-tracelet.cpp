@@ -70,7 +70,7 @@ struct Env {
     , prevBlocks()
     // TODO(#5703534): this is using a different TransContext than actual
     // translation will use.
-    , unit(TransContext{TransIDSet{}, kind, TransFlags{},
+    , unit(TransContext{kInvalidTransID, kind, TransFlags{},
                         sk, ctx.spOffset, 0, nullptr},
            std::make_unique<AnnotationData>())
     , irgs(unit, nullptr, 0, nullptr)

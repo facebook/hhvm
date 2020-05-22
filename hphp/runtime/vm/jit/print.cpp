@@ -467,7 +467,7 @@ dynamic getSrcKey(const SrcKey& sk) {
 dynamic getTransContext(const TransContext& ctx) {
   auto const func = ctx.initSrcKey.func();
   return dynamic::object("kind", show(ctx.kind))
-                        ("id", folly::join(",", ctx.transIDs))
+                        ("id", ctx.transID)
                         ("optIndex", ctx.optIndex)
                         ("srcKey", getSrcKey(ctx.initSrcKey))
                         ("funcName", func->fullName()->data())

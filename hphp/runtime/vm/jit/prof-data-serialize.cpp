@@ -882,7 +882,7 @@ struct SymbolFixup : boost::static_visitor<void> {
 
   template<typename T>
   void go(rds::Profile& pt) {
-    TargetProfile<T> prof({pt.transId},
+    TargetProfile<T> prof(pt.transId,
                           TransKind::Profile,
                           pt.bcOff,
                           name,

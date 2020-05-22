@@ -34,9 +34,7 @@ struct SSATmp;
  * the offset from vmfp to vmsp at the beginning of the instruction.  Every
  * IRInstruction has a marker to keep track of which bytecode instruction it
  * came from.  If we're doing an optimized translation, it also holds the
- * TransIDs for the profiling translations associated with this piece of code.
- * Note that there may be multiple corresponding profile translations in case
- * guard relaxation merges multiple profile translations.
+ * TransID for the profiling translation associated with this piece of code.
  */
 struct BCMarker {
   /*
@@ -47,17 +45,17 @@ struct BCMarker {
     return BCMarker {
       SrcKey(DummyFuncId, 0, ResumeMode::None),
       FPInvOffset{0},
-      TransIDSet{},
+      kInvalidTransID,
       nullptr
     };
   }
 
   BCMarker() = default;
 
-  BCMarker(SrcKey sk, FPInvOffset sp, const TransIDSet& tids, SSATmp* fp)
+  BCMarker(SrcKey sk, FPInvOffset sp, TransID tid, SSATmp* fp)
     : m_sk(sk)
     , m_spOff(sp)
-    , m_profTransIDs{tids}
+    , m_profTransID{tid}
     , m_fp{fp}
     , m_fixupSk(sk)
   {
@@ -67,7 +65,7 @@ struct BCMarker {
   bool operator==(const BCMarker& b) const {
     return b.m_sk == m_sk &&
            b.m_spOff == m_spOff &&
-           b.m_profTransIDs == m_profTransIDs &&
+           b.m_profTransID == m_profTransID &&
            b.m_fp == m_fp;
   }
   bool operator!=(const BCMarker& b) const { return !operator==(b); }
@@ -78,19 +76,15 @@ struct BCMarker {
                                 m_sk.funcID() == DummyFuncId; }
   bool hasFunc() const { return valid() && !isDummy(); }
 
-  SrcKey      sk()       const { assertx(valid()); return m_sk;            }
-  const Func* func()     const { assertx(hasFunc()); return m_sk.func();   }
-  Offset      bcOff()    const { assertx(valid()); return m_sk.offset();   }
-  bool        hasThis()  const { assertx(valid()); return m_sk.hasThis();  }
-  bool        prologue() const { assertx(valid()); return m_sk.prologue(); }
-  FPInvOffset spOff()    const { assertx(valid()); return m_spOff;         }
-  SSATmp*     fp()       const { assertx(valid()); return m_fp;            }
-  SrcKey      fixupSk()  const { assertx(valid()); return m_fixupSk;       }
-
-  const TransIDSet& profTransIDs() const {
-    assertx(valid());
-    return m_profTransIDs;
-  }
+  SrcKey      sk()          const { assertx(valid()); return m_sk;             }
+  const Func* func()        const { assertx(hasFunc()); return m_sk.func();    }
+  Offset      bcOff()       const { assertx(valid()); return m_sk.offset();    }
+  bool        hasThis()     const { assertx(valid()); return m_sk.hasThis();   }
+  bool        prologue()    const { assertx(valid()); return m_sk.prologue();  }
+  FPInvOffset spOff()       const { assertx(valid()); return m_spOff;          }
+  TransID     profTransID() const { assertx(valid()); return m_profTransID;    }
+  SSATmp*     fp()          const { assertx(valid()); return m_fp;             }
+  SrcKey      fixupSk()     const { assertx(valid()); return m_fixupSk;        }
 
   // Use the FixupSK resumeMode, if we've elided the frame we will need to
   // ensure that the sp is tracked properly for a resumed function.
@@ -111,10 +105,10 @@ struct BCMarker {
 
   // Return a copy of this marker with an updated sp, fp, or sk.
   BCMarker adjustSP(FPInvOffset sp) const {
-    return BCMarker { m_sk, sp, m_profTransIDs, m_fp };
+    return BCMarker { m_sk, sp, m_profTransID, m_fp };
   }
   BCMarker adjustFP(SSATmp* fp) const {
-    return BCMarker { m_sk, m_spOff, m_profTransIDs, fp };
+    return BCMarker { m_sk, m_spOff, m_profTransID, fp };
   }
   BCMarker adjustFixupSK(SrcKey sk) const {
     auto ret = *this;
@@ -127,16 +121,16 @@ struct BCMarker {
     return ret;
   }
 private:
-  SrcKey      m_sk;
+  SrcKey m_sk;
   FPInvOffset m_spOff{0};
-  TransIDSet  m_profTransIDs;
-  SSATmp*     m_fp{nullptr};
+  TransID m_profTransID{kInvalidTransID};
+  SSATmp* m_fp{nullptr};
 
   // Normally the fixup SrcKey is the same as the SrcKey for the marker,
   // however, when inlining has dropped an inner frame the fixup SrcKey will
   // be inside the parent frame so that its offset is relative to the live
   // ActRec
-  SrcKey      m_fixupSk;
+  SrcKey m_fixupSk;
 };
 
 //////////////////////////////////////////////////////////////////////

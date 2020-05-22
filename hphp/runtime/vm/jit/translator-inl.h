@@ -24,9 +24,9 @@ namespace HPHP { namespace jit {
 // TransContext.
 
 inline TransContext::TransContext(
-  const TransIDSet& ids, TransKind kind, TransFlags flags,
+  TransID id, TransKind kind, TransFlags flags,
   SrcKey sk, FPInvOffset spOff, int optIndex, const RegionDesc* region)
-  : transIDs(ids)
+  : transID(id)
   , optIndex(optIndex)
   , kind(kind)
   , flags(flags)

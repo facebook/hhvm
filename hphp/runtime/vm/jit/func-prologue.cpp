@@ -57,7 +57,7 @@ TransContext prologue_context(TransID transID,
                               int initSpOffset,
                               Offset entry) {
   return TransContext(
-    transID == kInvalidTransID ? TransIDSet{} : TransIDSet{transID},
+    transID,
     kind,
     TransFlags{},
     SrcKey{func, entry, SrcKey::PrologueTag{}},

@@ -26,8 +26,8 @@ namespace HPHP { namespace jit { namespace irgen {
 
 namespace {
 
-BCMarker initial_marker(const TransContext& ctx) {
-  return BCMarker { ctx.initSrcKey, ctx.initSpOffset, ctx.transIDs, nullptr };
+BCMarker initial_marker(TransContext ctx) {
+  return BCMarker { ctx.initSrcKey, ctx.initSpOffset, ctx.transID, nullptr };
 }
 
 }

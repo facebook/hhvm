@@ -38,8 +38,6 @@ Examples:
   find all-hack -name '*.php' | hh_single_compile --input-file-list /dev/stdin\
     | {program} all-hack.expected.hhas  # stops on first mismatch unless --all
   """,
-        # pyre-fixme[6]: Expected `_FormatterClass` for 4th param but got
-        #  `Type[argparse.RawDescriptionHelpFormatter]`.
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     ap.add_argument(

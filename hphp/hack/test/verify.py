@@ -234,6 +234,7 @@ def run_batch_tests(
 
     results = [future.result() for future in futures]
     # Flatten the list
+    # pyre-fixme[10]: Name `sublist` is used but not defined.
     return [item for sublist in results for item in sublist]
 
 
@@ -570,7 +571,6 @@ def run_tests(
         report_failures(
             num_results,
             failures,
-            # pyre-fixme[18]: Global name `args` is undefined.
             args.out_extension,
             args.expect_extension,
             args.fallback_expect_extension,

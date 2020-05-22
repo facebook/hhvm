@@ -22,6 +22,7 @@ JsonObject = Mapping[str, ForwardRef("Json")]
 JsonArray = Iterable[ForwardRef("Json")]
 JsonScalar = Union[str, int, float, bool, None]
 # pyre-fixme[5]: Global expression must be annotated.
+# pyre-fixme[16]: `Union` has no attribute `__getitem__`.
 Json = Union[JsonObject, JsonArray, JsonScalar]
 
 VariableMap = Mapping[str, str]
@@ -87,8 +88,6 @@ def map_json_scalars(json: Json, f: Callable[[JsonScalar], JsonScalar]) -> Json:
 
 # Because HHI folders are different for each process,
 # let's just standardize them
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
 def fixup_hhi_json(payload: Json) -> Json:
     def interpolate(json: JsonScalar) -> JsonScalar:
         if isinstance(json, str):
@@ -100,8 +99,6 @@ def fixup_hhi_json(payload: Json) -> Json:
     return map_json_scalars(json=payload, f=interpolate)
 
 
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
 def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
     def interpolate(json: JsonScalar) -> JsonScalar:
         if isinstance(json, str):
@@ -121,8 +118,6 @@ def interpolate_variables(payload: Json, variables: VariableMap) -> Json:
     return map_json_scalars(json=payload, f=interpolate)
 
 
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
-# pyre-fixme[11]: Annotation `Json` is not defined as a type.
 def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
     # Sort so that we process the variable with the longest-length bindings first.
     variable_bindings = sorted(

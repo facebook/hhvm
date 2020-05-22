@@ -44,6 +44,7 @@ _MessageSpec = Union[
 
 
 # pyre-fixme[5]: Global expression must be annotated.
+# pyre-fixme[16]: `Mapping` has no attribute `__getitem__`.
 _LspIdMap = Mapping[_MessageSpec, Json]
 
 _Traceback = Sequence[inspect.FrameInfo]
@@ -105,12 +106,7 @@ class LspTestSpec:
         return self._update(ignore_status_diagnostics=value)
 
     def ignore_requests(
-        self,
-        *,
-        method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        params: Json,
-        comment: Optional[str] = None,
+        self, *, method: str, params: Json, comment: Optional[str] = None
     ) -> "LspTestSpec":
         ignored_requests = list(self._ignored_requests)
         ignored_requests.append((method, params))
@@ -120,10 +116,8 @@ class LspTestSpec:
         self,
         line: int,
         method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
         *,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         result: Json,
         wait_id: Optional[str] = None,
         comment: Optional[str] = None,
@@ -168,12 +162,7 @@ class LspTestSpec:
         return self._update(messages=messages)
 
     def notification(
-        self,
-        method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        params: Json,
-        *,
-        comment: Optional[str] = None,
+        self, method: str, params: Json, *, comment: Optional[str] = None
     ) -> "LspTestSpec":
         messages = list(self._messages)
         messages.append(
@@ -184,10 +173,8 @@ class LspTestSpec:
     def wait_for_server_request(
         self,
         method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
         *,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         result: Union[Json, NoResponse],
         comment: Optional[str] = None,
     ) -> "LspTestSpec":
@@ -200,12 +187,7 @@ class LspTestSpec:
         return self._update(messages=messages)
 
     def wait_for_notification(
-        self,
-        method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        params: Json,
-        *,
-        comment: Optional[str] = None,
+        self, method: str, params: Json, *, comment: Optional[str] = None
     ) -> "LspTestSpec":
         messages = list(self._messages)
         messages.append(
@@ -330,7 +312,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self,
         messages: Optional[Sequence["_MessageSpec"]] = None,
         ignored_notification_methods: Optional[AbstractSet[str]] = None,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         ignored_requests: Optional[Sequence[Tuple[str, Json]]] = None,
         ignore_status_diagnostics: Optional[bool] = None,
     ) -> "LspTestSpec":
@@ -466,12 +447,7 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         return (json_commands, lsp_id_map)
 
     def _verify_transcript(
-        self,
-        *,
-        variables: VariableMap,
-        transcript: Transcript,
-        # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
-        lsp_id_map: "_LspIdMap",
+        self, *, variables: VariableMap, transcript: Transcript, lsp_id_map: "_LspIdMap"
     ) -> Iterable["_ErrorDescription"]:
         handled_entries = set()
 
@@ -535,7 +511,6 @@ If you want to examine the raw LSP logs, you can check the `.sent.log` and
         self,
         *,
         variables: VariableMap,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         lsp_id: Json,
         entry: TranscriptEntry,
         request: "_RequestSpec",
@@ -667,11 +642,7 @@ This was the associated request:
         return display_filename + "\n" + file_context
 
     def _describe_response_for_remediation(
-        self,
-        variables: VariableMap,
-        request: "_RequestSpec",
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        actual_response: Json,
+        self, variables: VariableMap, request: "_RequestSpec", actual_response: Json
     ) -> str:
         method = request.method
         params = request.params
@@ -743,7 +714,6 @@ make it match:
         handled_entries: AbstractSet[str],
         variables: VariableMap,
         transcript: Transcript,
-        # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
         lsp_id_map: _LspIdMap,
     ) -> Iterable["_ErrorDescription"]:
         for transcript_id, entry in transcript.items():
@@ -850,11 +820,7 @@ received the notification:
             )
 
     def _find_previous_request(
-        self,
-        transcript: Transcript,
-        # pyre-fixme[11]: Annotation `_LspIdMap` is not defined as a type.
-        lsp_id_map: _LspIdMap,
-        current_id: str,
+        self, transcript: Transcript, lsp_id_map: _LspIdMap, current_id: str
     ) -> Optional["_RequestSpec"]:
         previous_transcript_entries = itertools.takewhile(
             lambda kv: kv[0] != current_id, transcript.items()
@@ -880,10 +846,7 @@ received the notification:
         return corresponding_request
 
     def _render_telemetry_rage(
-        self,
-        debug_request: "_DebugRequestSpec",
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-        result: Json,
+        self, debug_request: "_DebugRequestSpec", result: Json
     ) -> "_ErrorDescription":
         sections = []
         for row in result:
@@ -981,9 +944,7 @@ class _RequestSpec:
         self,
         *,
         method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         result: Json,
         wait_id: Optional[str],
         comment: Optional[str],
@@ -1008,7 +969,6 @@ class _DebugRequestSpec:
 class _NotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.
@@ -1023,9 +983,7 @@ class _WaitForRequestSpec:
         self,
         *,
         method: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         params: Json,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         result: Union[Json, NoResponse],
         comment: Optional[str],
     ) -> None:
@@ -1040,7 +998,6 @@ class _WaitForRequestSpec:
 class _WaitForNotificationSpec:
     __slots__ = ["method", "params", "comment"]
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def __init__(self, *, method: str, params: Json, comment: Optional[str]) -> None:
         self.method = method
         # pyre-fixme[4]: Attribute must be annotated.

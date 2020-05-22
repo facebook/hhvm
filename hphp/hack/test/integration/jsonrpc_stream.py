@@ -21,8 +21,6 @@ class JsonRpcStreamReader:
         self.read_thread = Thread(target=self._async_read_loop, daemon=True)
         self.read_thread.start()
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def read(self, timeout_seconds: float) -> Optional[Json]:
         try:
             return self.queue.get(block=True, timeout=timeout_seconds)
@@ -61,8 +59,6 @@ class JsonRpcStreamWriter:
     def __init__(self, stream: BinaryIO) -> None:
         self.stream = stream
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def write(self, json_data: Json) -> None:
         serialized = json.dumps(json_data)
         content_length = len(serialized)

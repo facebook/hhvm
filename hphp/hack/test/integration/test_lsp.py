@@ -94,22 +94,17 @@ class TestLsp(TestCase[LspTestDriver]):
     # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def parse_test_data(self, file: str, variables: Mapping[str, str]) -> Json:
         text = self.read_repo_file(file)
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         data: Json = json.loads(text)
         data = interpolate_variables(data, variables)
         return data
 
     def load_test_data(
-        self,
-        test_name: str,
-        variables: Mapping[str, str]
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
+        self, test_name: str, variables: Mapping[str, str]
     ) -> Tuple[Json, Json]:
         test = self.parse_test_data(test_name + ".json", variables)
         expected = self.parse_test_data(test_name + ".expected", variables)
         return (test, expected)
 
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def write_observed(self, test_name: str, observed_transcript: Json) -> None:
         file = os.path.join(self.test_driver.template_repo, test_name + ".observed.log")
         text = json.dumps(
@@ -130,8 +125,6 @@ class TestLsp(TestCase[LspTestDriver]):
     # this can happen based on how json rpc is specified to work.
     # if 'id' isn't present the response is a notification.  we sort notifications
     # by their entire text.
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
     def sort_responses(self, responses: Iterable[JsonObject]) -> List[JsonObject]:
         return sorted(responses, key=lambda response: self.order_response(response))
 
@@ -140,10 +133,7 @@ class TestLsp(TestCase[LspTestDriver]):
     # by ignoring these when comparing responses we might miss some minor issues
     # but will still catch the core error being thrown or not.
     def sanitize_exceptions(
-        self,
-        # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
-        responses: Iterable[JsonObject]
-        # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
+        self, responses: Iterable[JsonObject]
     ) -> Iterable[JsonObject]:
         sanitized = copy.deepcopy(responses)
         for response in sanitized:
@@ -160,13 +150,11 @@ class TestLsp(TestCase[LspTestDriver]):
     # dumps an LSP response into a standard json format that can be used for
     # doing precise text comparison in a way that is human readable in the case
     # of there being an error.
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def serialize_responses(self, responses: Iterable[Json]) -> List[str]:
         return [json.dumps(response, indent=2) for response in responses]
 
     # generates received responses from an LSP communication transcript
     # ignoring the non-deterministic ones "progress" and "actionRequired"
-    # pyre-fixme[11]: Annotation `Json` is not defined as a type.
     def get_important_received_items(self, transcript: Transcript) -> Iterable[Json]:
         for entry in transcript.values():
             received = entry.received or None
@@ -184,7 +172,6 @@ class TestLsp(TestCase[LspTestDriver]):
 
     # gets a set of loaded responses ready for validation by sorting them
     # by id and serializing them for precise text comparison
-    # pyre-fixme[11]: Annotation `JsonObject` is not defined as a type.
     def prepare_responses(self, responses: Iterable[JsonObject]) -> List[str]:
         return self.serialize_responses(
             self.sanitize_exceptions(self.sort_responses(responses))
@@ -193,9 +180,7 @@ class TestLsp(TestCase[LspTestDriver]):
     def run_lsp_test(
         self,
         test_name: str,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         test: Json,
-        # pyre-fixme[11]: Annotation `Json` is not defined as a type.
         expected: Json,
         wait_for_server: bool,
         use_serverless_ide: bool,

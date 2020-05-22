@@ -27,7 +27,6 @@ class SaveStateCommandResult(NamedTuple):
 
     def get_edges_added(self) -> int:
         assert self.edges_added is not None
-        # pyre-fixme[7]: Expected `int` but got `Optional[int]`.
         return self.edges_added
 
 

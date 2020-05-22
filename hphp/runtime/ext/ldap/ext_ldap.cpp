@@ -468,19 +468,25 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref,
                          int *old_deref) {
   /* sizelimit */
   if (sizelimit > -1) {
-    ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_sizelimit);
+    if (old_sizelimit) {
+      ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_sizelimit);
+    }
     ldap_set_option(ldap, LDAP_OPT_SIZELIMIT, &sizelimit);
   }
 
   /* timelimit */
   if (timelimit > -1) {
-    ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_timelimit);
+    if (old_timelimit) {
+      ldap_get_option(ldap, LDAP_OPT_TIMELIMIT, old_timelimit);
+    }
     ldap_set_option(ldap, LDAP_OPT_TIMELIMIT, &timelimit);
   }
 
   /* deref */
   if (deref > -1) {
-    ldap_get_option(ldap, LDAP_OPT_SIZELIMIT, old_deref);
+    if (old_deref) {
+      ldap_get_option(ldap, LDAP_OPT_DEREF, old_deref);
+    }
     ldap_set_option(ldap, LDAP_OPT_DEREF, &deref);
   }
 }
@@ -495,20 +501,15 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
                               : attributes.toArray();
   int num_attribs = arr_attributes.size();
   int old_sizelimit = -1, old_timelimit = -1, old_deref = -1;
-  int ldap_err = 1, parallel_search = 1;
-  char **ldap_attrs = (char**)malloc((num_attribs+1) * sizeof(char *));
+  auto ldap_attrs = std::unique_ptr<char*[]>{new char*[num_attribs+1]};
   Array stringHolder;
-  Array ret = Array::Create();
-
   char *ldap_base_dn = nullptr;
   char *ldap_filter = nullptr;
-  req::ptr<LdapLink> ld;
 
   for (int i = 0; i < num_attribs; i++) {
     if (!arr_attributes.exists(i)) {
       raise_warning("Array initialization wrong");
-      ldap_err = 0;
-      goto cleanup;
+      return false;
     }
     String attr = arr_attributes[i].toString();
     stringHolder.append(attr);
@@ -521,8 +522,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
     int nlinks = link.toArray().size();
     if (nlinks == 0) {
       raise_warning("No links in link array");
-      ldap_err = 0;
-      goto cleanup;
+      return false;
     }
 
     int nbases;
@@ -531,8 +531,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       if (nbases != nlinks) {
         raise_warning("Base must either be a string, or an array with the "
                       "same number of elements as the links array");
-        ldap_err = 0;
-        goto cleanup;
+        return false;
       }
     } else {
       nbases = 0; /* this means string, not array */
@@ -550,8 +549,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
       if (nfilters != nlinks) {
         raise_warning("Filter must either be a string, or an array with the "
                       "same number of elements as the links array");
-        ldap_err = 0;
-        goto cleanup;
+        return false;
       }
     } else {
       nfilters = 0; /* this means string, not array */
@@ -566,14 +564,14 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
     req::vector<int> rcs;
     rcs.resize(nlinks);
 
+    Array ret = Array::Create();
     ArrayIter iter(link.toArray());
     ArrayIter iterdn(base_dn.toArray());
     ArrayIter iterfilter(filter.toArray());
     for (int i = 0; i < nlinks; i++) {
-      ld = get_valid_ldap_link_resource(iter.second());
+      auto ld = get_valid_ldap_link_resource(iter.second());
       if (!ld) {
-        ldap_err = 0;
-        goto cleanup;
+        return false;
       }
       if (nbases != 0) { /* base_dn an array? */
         Variant entry = iterdn.second();
@@ -594,12 +592,18 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
         ldap_filter = (char*)sentry.data();
       }
 
-      php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit,
-                   &old_timelimit, &old_deref);
+      php_set_opts(ld->link,
+                   sizelimit, timelimit, deref,
+                   &old_sizelimit, &old_timelimit, &old_deref);
 
       /* Run the actual search */
       rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter,
-                           ldap_attrs, attrsonly);
+                           ldap_attrs.get(), attrsonly);
+
+      php_set_opts(ld->link,
+                   old_sizelimit, old_timelimit, old_deref,
+                   nullptr, nullptr, nullptr);
+
       lds[i] = ld;
       ++iter;
     }
@@ -608,7 +612,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
     for (int i = 0; i < nlinks; i++) {
       LDAPMessage *ldap_res;
       if (rcs[i] != -1) {
-        rcs[i] = ldap_result(lds[i]->link, LDAP_RES_ANY, 1 /* LDAP_MSG_ALL */,
+        rcs[i] = ldap_result(lds[i]->link, rcs[i], LDAP_MSG_ALL,
                              nullptr, &ldap_res);
       }
       if (rcs[i] != -1) {
@@ -617,72 +621,58 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
         ret.append(false);
       }
     }
-  } else {
-    /* parallel search? */
-    String sfilter = filter.toString();
-    ldap_filter = (char*)sfilter.data();
 
-    /* If anything else than string is passed, ldap_base_dn = nullptr */
-    if (base_dn.isString()) {
-      ldap_base_dn = (char*)base_dn.toString().data();
-    }
-
-    ld = get_valid_ldap_link_resource(link);
-    if (!ld) {
-      ldap_err = 0;
-      goto cleanup;
-    }
-
-    php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit,
-                 &old_timelimit, &old_deref);
-
-    /* Run the actual search */
-    LDAPMessage *ldap_res;
-    int rc = ldap_search_s(ld->link, ldap_base_dn, scope, ldap_filter,
-                           ldap_attrs, attrsonly, &ldap_res);
-
-    if (rc != LDAP_SUCCESS && rc != LDAP_SIZELIMIT_EXCEEDED
-  #ifdef LDAP_ADMINLIMIT_EXCEEDED
-        && rc != LDAP_ADMINLIMIT_EXCEEDED
-  #endif
-  #ifdef LDAP_REFERRAL
-        && rc != LDAP_REFERRAL
-  #endif
-    ) {
-      raise_warning("Search: %s", ldap_err2string(rc));
-      ldap_err = 0;
-    } else {
-      if (rc == LDAP_SIZELIMIT_EXCEEDED) {
-        raise_warning("Partial search results returned: Sizelimit exceeded");
-      }
-#ifdef LDAP_ADMINLIMIT_EXCEEDED
-      else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
-        raise_warning("Partial search results returned: Adminlimit exceeded");
-      }
-#endif
-      parallel_search = 0;
-      ret.append(Variant(req::make<LdapResult>(ldap_res)));
-    }
-  }
-cleanup:
-  if (ld) {
-    /* Restoring previous options */
-    php_set_opts(ld->link, old_sizelimit, old_timelimit, old_deref, &sizelimit,
-                 &timelimit, &deref);
-  }
-  if (ldap_attrs != nullptr) {
-    free(ldap_attrs);
+    return ret;
   }
 
-  if (!ldap_err) {
+  /* not parallel search */
+  String sfilter = filter.toString();
+  ldap_filter = (char*)sfilter.data();
+
+  /* If anything else than string is passed, ldap_base_dn = nullptr */
+  if (base_dn.isString()) {
+    ldap_base_dn = (char*)base_dn.toString().data();
+  }
+
+  auto ld = get_valid_ldap_link_resource(link);
+  if (!ld) {
     return false;
   }
 
-  if (!parallel_search) {
-    return ret.dequeue();
-  } else {
-    return ret;
+  php_set_opts(ld->link, sizelimit, timelimit, deref, &old_sizelimit,
+               &old_timelimit, &old_deref);
+
+  /* Run the actual search */
+  LDAPMessage *ldap_res;
+  int rc = ldap_search_s(ld->link, ldap_base_dn, scope, ldap_filter,
+                         ldap_attrs.get(), attrsonly, &ldap_res);
+
+  auto result = req::make<LdapResult>(ldap_res);
+  php_set_opts(ld->link,
+               old_sizelimit, old_timelimit, old_deref,
+               nullptr, nullptr, nullptr);
+
+  if (rc != LDAP_SUCCESS && rc != LDAP_SIZELIMIT_EXCEEDED
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+      && rc != LDAP_ADMINLIMIT_EXCEEDED
+#endif
+#ifdef LDAP_REFERRAL
+      && rc != LDAP_REFERRAL
+#endif
+     ) {
+    raise_warning("Search: %s", ldap_err2string(rc));
+    return false;
   }
+
+  if (rc == LDAP_SIZELIMIT_EXCEEDED) {
+    raise_warning("Partial search results returned: Sizelimit exceeded");
+  }
+#ifdef LDAP_ADMINLIMIT_EXCEEDED
+  else if (rc == LDAP_ADMINLIMIT_EXCEEDED) {
+    raise_warning("Partial search results returned: Adminlimit exceeded");
+  }
+#endif
+  return Variant{std::move(result)};
 }
 
 static int _ldap_rebind_proc(LDAP* /*ldap*/, const char* url, ber_tag_t /*req*/,

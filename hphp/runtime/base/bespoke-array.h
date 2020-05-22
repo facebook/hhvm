@@ -18,11 +18,13 @@
 #define HPHP_BESPOKE_ARRAY_H_
 
 #include "hphp/runtime/base/array-data.h"
-#include "hphp/runtime/base/bespoke-layout.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
+
+// Hide "BespokeLayout" and its implementations to the rest of the codebase.
+namespace bespoke { struct Layout; }
 
 /*
  * A bespoke array is an object satisfing the ArrayData interface but backed by

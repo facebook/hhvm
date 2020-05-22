@@ -15,6 +15,7 @@
 */
 
 #include "hphp/runtime/base/bespoke-array.h"
+#include "hphp/runtime/base/bespoke-layout.h"
 
 namespace HPHP {
 

@@ -1631,16 +1631,15 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
       }
     }
     return refineLocation(env, loc1 != NoLocalId ? loc1 : loc0, [&] (Type ty) {
-      if (!ty.couldBe(BUninit) || !isect.couldBe(BNull)) {
-        return ty.subtypeOf(BUnc) ? isect : loosen_staticness(isect);
+        auto const needsUninit =
+          ty.couldBe(BUninit) &&
+          !isect.couldBe(BUninit) &&
+          isect.couldBe(BInitNull);
+        auto ret = ty.subtypeOf(BUnc) ? isect : loosen_staticness(isect);
+        if (needsUninit) ret = union_of(std::move(ret), TUninit);
+        return ret;
       }
-
-      if (isect.subtypeOf(BNull)) {
-        return ty.couldBe(BInitNull) ? TNull : TUninit;
-      }
-
-      return ty;
-    });
+    );
   };
 
   auto handle_differ_side = [&] (LocalId location, const Type& ty) {

@@ -621,26 +621,25 @@ auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
                   FoundFn found, AppendFn append, PromotedFn promoted) {
   assertx(PackedArray::checkInvariants(adIn));
   assertx(adIn->isPackedKind());
+  assertx(adIn->isVArray());
 
   if (LIKELY(size_t(k) < adIn->getSize())) {
     auto const ad = copy ? PackedArray::Copy(adIn) : adIn;
     return found(ad);
   }
 
-  if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+  if (RO::EvalHackArrCompatSpecialization) {
     throwOOBArrayKeyException(k, adIn);
   }
 
   if (size_t(k) == adIn->getSize()) {
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend) &&
-        adIn->isVArray()) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend)) {
       raise_hackarr_compat_notice("Implicit append to varray");
     }
     return append();
   }
 
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
-      adIn->isVArray()) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
     raise_hackarr_compat_notice(
       folly::sformat("varray promoting to darray: out of bounds key {}", k)
     );
@@ -656,13 +655,13 @@ auto MutableOpStr(ArrayData* adIn, StringData* k, bool copy,
                   PromotedFn promoted) {
   assertx(PackedArray::checkInvariants(adIn));
   assertx(adIn->isPackedKind());
+  assertx(adIn->isVArray());
 
-  if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+  if (RO::EvalHackArrCompatSpecialization) {
     throwInvalidArrayKeyException(k, adIn);
   }
 
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
-      adIn->isVArray()) {
+  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
     raise_hackarr_compat_notice(
       "varray promoting to darray: invalid key: expected int, got string"
     );
@@ -801,10 +800,11 @@ ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, TypedValue v) 
 ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPackedKind());
+  assertx(adIn->isVArray());
   if (size_t(k) < adIn->m_size) {
     // After specializing darray and varrays, we can modify varray behavior
     // to avoid the surprising PHP unset/append semantics described below.
-    if (RO::EvalHackArrCompatSpecialization && adIn->isVArray()) {
+    if (RO::EvalHackArrCompatSpecialization) {
       if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
         auto const ad = copy ? Copy(adIn) : adIn;
         auto const size = ad->m_size - 1;
@@ -816,8 +816,7 @@ ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
     }
 
     // Escalate to mixed for correctness; unset preserves m_nextKI.
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote) &&
-        adIn->isVArray()) {
+    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
       raise_hackarr_compat_notice("varray promoting to darray: removing key");
     }
     // TODO(#2606310): If you unset the last element of a vector-like PHP array
@@ -1009,14 +1008,8 @@ ArrayData* PackedArray::ToPHPArray(ArrayData* adIn, bool copy) {
 ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
   assertx(checkInvariants(adIn));
   assertx(adIn->isPackedKind());
-  if (RuntimeOption::EvalHackArrDVArrs) return ToVec(adIn, copy);
-  if (adIn->isVArray()) return adIn;
-  if (adIn->getSize() == 0) return ArrayData::CreateVArray();
-  ArrayData* ad = copy ? Copy(adIn) : adIn;
-  ad->setDVArray(ArrayData::kVArray);
-  if (RO::EvalArrayProvenance) arrprov::reassignTag(ad);
-  assertx(checkInvariants(ad));
-  return ad;
+  assertx(adIn->isVArray());
+  return adIn;
 }
 
 ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
@@ -1114,22 +1107,20 @@ void PackedArray::OnSetEvalScalar(ArrayData* ad) {
 }
 
 void PackedArray::Ksort(ArrayData* ad, int /*flags*/, bool ascending) {
-  assertx(ascending ||
-          (ad->getSize() <= 1 && !(ad->isVecArrayKind() || ad->isVArray())));
+  assertx(ascending);
+  assertx(ad->isVecArrayKind() || ad->isVArray());
 }
 
 void PackedArray::Asort(ArrayData* ad, int, bool) {
-  assertx(ad->getSize() <= 1 && !(ad->isVecArrayKind() || ad->isVArray()));
+  always_assert(false);
 }
 
 bool PackedArray::Uksort(ArrayData* ad, const Variant&) {
-  assertx(ad->getSize() <= 1 && !(ad->isVecArrayKind() || ad->isVArray()));
-  return true;
+  always_assert(false);
 }
 
 bool PackedArray::Uasort(ArrayData* ad, const Variant&) {
-  assertx(ad->getSize() <= 1 && !(ad->isVecArrayKind() || ad->isVArray()));
-  return true;
+  always_assert(false);
 }
 
 ArrayData* PackedArray::MakeUncounted(ArrayData* array,

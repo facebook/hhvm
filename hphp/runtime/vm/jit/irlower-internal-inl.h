@@ -166,16 +166,14 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   assertx(!arrSpec.type());
 
   auto const r = materialize(v, dataSrc);
-  if (arrSpec.dvarray()) {
-    using AK = ArrayData::ArrayKind;
-    auto const kind = arrSpec.kind();
-    assertx(kind && (*kind == AK::kPackedKind || *kind == AK::kMixedKind));
-    auto const mask = *kind == AK::kPackedKind ? ArrayData::kVArray
-                                                : ArrayData::kDArray;
-    // WARNING(kshaunak): We're using the fact that testing the DV array bit
-    // also gives us the kind here. That logic may not apply to bespokes...
-    v << testbim{mask, r[ArrayData::offsetofDVArray()], sf};
-    return doJcc(CC_NE, sf);
+
+  // ArrayKind now implies dvarray-ness, so if we are checking a dvarray type,
+  // check that we also have a kind and use the kind test below.
+  if (debug && arrSpec.dvarray()) {
+    DEBUG_ONLY auto const kind = arrSpec.kind();
+    assertx(kind);
+    assertx(*kind == ArrayData::kPackedKind ||
+            *kind == ArrayData::kMixedKind);
   }
 
   if (arrSpec.kind()) {

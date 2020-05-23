@@ -121,12 +121,12 @@ class SplFileObject extends SplFileInfo
   public function eof(): bool;
   public function fflush(): bool;
   public function fgetc(): string;
+  /** @return varray|false*/
   public function fgetcsv(
     string $delimiter = ",",
     string $enclosure = "\"",
     string $escape = "\\",
-    /* HH_IGNORE_ERROR[2071] */
-  ): varray;
+  ): mixed;
   public function fgets();
   public function fgetss(?string $allowable_tags = null): string;
   public function flock(int $operation, inout mixed $wouldblock): bool;

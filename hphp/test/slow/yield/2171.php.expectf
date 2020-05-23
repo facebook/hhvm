@@ -1,0 +1,8 @@
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/2171.php on line 13
+string(3) "foo"
+array(0) {
+}
+int(32)
+int(32)
+int(64)

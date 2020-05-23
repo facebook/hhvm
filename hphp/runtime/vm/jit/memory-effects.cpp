@@ -32,6 +32,8 @@ namespace HPHP { namespace jit {
 
 namespace {
 
+const StaticString s_GLOBALS("GLOBALS");
+
 uint32_t iterId(const IRInstruction& inst) {
   return inst.extra<IterId>()->iterId;
 }
@@ -1828,8 +1830,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncCls:
   case LdFuncNumParams:
   case LdFuncName:
-  case LdGblAddr:
-  case LdGblAddrDef:
   case LdMethCallerName:
   case LdObjClass:
   case LdRecDesc:
@@ -1877,9 +1877,21 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case GetMemoKeyScalar:
     return IrrelevantEffects{};
 
+  // These opcodes raise notices if we access $GLOBALS['GLOBALS'],
+  // or, due to case insensitivity, $GLOBALS['gLoBAls'], etc.
+  case BaseG:
+  case LdGblAddr:
+  case LdGblAddrDef: {
+    auto const base = inst.op() == BaseG
+      ? may_load_store(AHeapAny, AHeapAny)
+      : may_load_store(AEmpty, AEmpty);
+    auto const& key = inst.src(0)->type();
+    auto const safe = key.hasConstVal() && !s_GLOBALS.equal(key.strVal());
+    return safe ? base : may_reenter(inst, base);
+  }
+
   case LdClsPropAddrOrNull:   // may run 86{s,p}init, which can autoload
   case LdClsPropAddrOrRaise:  // raises errors, and 86{s,p}init
-  case BaseG:
   case Clone:
   case ThrowArrayIndexException:
   case ThrowArrayKeyException:

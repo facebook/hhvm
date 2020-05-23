@@ -1,0 +1,3 @@
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/alias_torture_subscript.php on line 7
+string(2) "of"

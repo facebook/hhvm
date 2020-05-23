@@ -287,7 +287,7 @@ Instruction set
   A no-op at runtime, this instruction serves to mark the end of the initial
   sequence of guards in a trace.
 
-| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|PtrToCell|TCA|Nullptr), B
+| CheckNonNull, DSubtract(0, Nullptr), S(Cls|Func|Obj|Str|MemToCell|TCA|Nullptr), B
 
   If the value in S0 is Nullptr, branch to block B. If S0 cannot be Nullptr, or
   always is Nullptr, this check may be optimized away.
@@ -1315,15 +1315,15 @@ To string conversions:
   Load the address of the object property at physical index `index`. Branch if
   the value at that address is Uninit. T must be a subtype of PtrToPropInitCell.
 
-| LdGblAddr, D(LvalToGblCell), S(Str), B
+| LdGblAddr, D(LvalToGblCell|Nullptr), S(Str), NF
 
-  Loads a pointer to a global. S0 is the global's name. Branches to B if the
-  global is not defined.
+  Loads a pointer to a global with name S0, or a null lval if that global is
+  not already defined.
 
 | LdGblAddrDef, D(LvalToGblCell), S(Str), NF
 
-  Loads a pointer to a global. S0 is the global's name. Defines the global if
-  it is not already defined.
+  Loads a pointer to a global with name S0, defining it to be InitNull if it
+  is not already defined.
 
 | LdClsPropAddrOrNull, D(PtrToSPropCell|Nullptr),
 |                      S(Cls) S(Str) C(Cls|Nullptr) C(Bool) C(Bool),

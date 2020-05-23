@@ -4,6 +4,8 @@ int(2)
 int(3)
 int(1)
 int(4)
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/count-opts.php on line 14
 bool(true)
 int(4)
 int(4)

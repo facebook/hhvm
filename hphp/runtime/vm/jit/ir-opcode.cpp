@@ -415,6 +415,8 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsTypeCnsClsName:
   case LdFunc:
   case LdFuncCached:
+  case LdGblAddr:
+  case LdGblAddrDef:
   case LdRecDescCached:
   case LdObjMethodD:
   case LdObjMethodS:
@@ -814,8 +816,6 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFuncName:
   case LdFuncRxLevel:
   case LdFuncVecLen:
-  case LdGblAddr:
-  case LdGblAddrDef:
   case LdIfaceMethod:
   case LdInitPropAddr:
   case LdInitRDSAddr:

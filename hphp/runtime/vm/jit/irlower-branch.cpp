@@ -226,6 +226,11 @@ void cgCheckNonNull(IRLS& env, const IRInstruction* inst) {
   v << testq{src, src, sf};
   fwdJcc(v, env, CC_Z, sf, inst->taken());
   v << copy{src, dst};
+  auto const regs = inst->dst()->numWords();
+  assertx(regs == 1 || (inst->dst()->isA(TLvalToCell) && regs == 2));
+  if (regs == 2) {
+    v << copy{srcLoc(env, inst, 0).reg(1), dstLoc(env, inst, 0).reg(1)};
+  }
 }
 
 void cgAssertNonNull(IRLS& env, const IRInstruction* inst) {

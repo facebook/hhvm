@@ -1,0 +1,6 @@
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/bool-cast.php on line 11
+bool(true)
+bool(true)
+bool(true)
+bool(false)

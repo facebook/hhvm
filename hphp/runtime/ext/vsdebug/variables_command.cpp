@@ -513,6 +513,7 @@ int VariablesCommand::addConstants(
 }
 
 namespace {
+const auto s_GLOBALS = StaticString{"GLOBALS"};
 const auto globalKeys = {
   StaticString{"_SERVER"},
   StaticString{"_GET"},
@@ -521,8 +522,18 @@ const auto globalKeys = {
   StaticString{"_FILES"},
   StaticString{"_ENV"},
   StaticString{"_REQUEST"},
-  StaticString{"GLOBALS"},
+  s_GLOBALS,
 };
+
+// Don't read the GLOBALS array directly through php_global; doing so warns.
+//
+// When we eliminate this array, we may add a shim to getDefinedVariables that
+// materializes it specifically for debugging. This shim doesn't need to have
+// the reffy behavior that PHP's globals array has. It can be a simple array.
+Variant globals_array() {
+  Array ret = g_context->m_globalVarEnv->getDefinedVariables();
+  return Variant::wrap(ret.lookup(s_GLOBALS));
+}
 }
 
 bool VariablesCommand::isSuperGlobal(const std::string& name) {
@@ -560,7 +571,7 @@ int VariablesCommand::addSuperglobalVariables(
   for (auto const& k : globalKeys) {
     auto const& name = k.toCppString();
     assertx(isSuperGlobal(name));
-    auto const v = php_global(k);
+    auto const v = k.get() == s_GLOBALS.get() ? globals_array() : php_global(k);
     if (!v.isInitialized()) {
       continue;
     }

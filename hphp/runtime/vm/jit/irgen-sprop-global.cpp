@@ -297,7 +297,10 @@ void emitCGetG(IRGS& env) {
 
   auto ret = cond(
     env,
-    [&] (Block* taken) { return gen(env, LdGblAddr, taken, name); },
+    [&] (Block* taken) {
+      auto const ptr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, ptr);
+    },
     [&] (SSATmp* ptr) {
       auto tmp = gen(env, LdMem, TCell, ptr);
       gen(env, IncRef, tmp);
@@ -328,7 +331,8 @@ void emitIssetG(IRGS& env) {
   auto const ret = cond(
     env,
     [&] (Block* taken) {
-      return gen(env, LdGblAddr, taken, name);
+      auto const ptr = gen(env, LdGblAddr, name);
+      return gen(env, CheckNonNull, taken, ptr);
     },
     [&] (SSATmp* ptr) { // Next: global exists
       return gen(env, IsNTypeMem, TNull, ptr);

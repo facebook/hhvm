@@ -4,4 +4,6 @@ array(1) {
   string(%d) "%s/variables/predefined_variables.php"
 }
 array(%d) {%a}
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/predefined_variables.php on line 14
 array(%d) {%a}

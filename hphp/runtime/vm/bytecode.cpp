@@ -443,11 +443,22 @@ void VarEnv::set(const StringData* name, tv_rval tv) {
 }
 
 tv_lval VarEnv::lookup(const StringData* name) {
-  return m_nvTable.lookup(name);
+  auto const lval = m_nvTable.lookup(name);
+  if (lval && isArrayType(type(lval)) && val(lval).parr->isGlobalsArrayKind() &&
+      isGlobalScope() && s_GLOBALS.equal(name)) {
+    raise_hackarr_compat_notice("lookup returning $GLOBALS array");
+  }
+  return lval;
 }
 
 tv_lval VarEnv::lookupAdd(const StringData* name) {
-  return m_nvTable.lookupAdd(name);
+  auto const lval = m_nvTable.lookupAdd(name);
+  assertx(lval);
+  if (isArrayType(type(lval)) && val(lval).parr->isGlobalsArrayKind() &&
+      isGlobalScope() && s_GLOBALS.equal(name)) {
+    raise_hackarr_compat_notice("lookup returning $GLOBALS array");
+  }
+  return lval;
 }
 
 bool VarEnv::unset(const StringData* name) {
@@ -458,6 +469,8 @@ bool VarEnv::unset(const StringData* name) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 Array VarEnv::getDefinedVariables() const {
+  // NOTE: If isGlobalScope, we're exposing a GlobalsArray here with the key
+  // "GLOBALS". That's okay - getDefinedVariables is only used by debuggers.
   Array ret = Array::CreateDArray();
 
   NameValueTable::Iterator iter(&m_nvTable);

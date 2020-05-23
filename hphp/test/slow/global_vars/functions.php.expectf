@@ -1,0 +1,19 @@
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+NULL
+bool(true)
+bool(true)
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/functions.php on line 46
+bool(true)
+bool(true)
+bool(false)
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/functions.php on line 53
+bool(true)
+bool(true)

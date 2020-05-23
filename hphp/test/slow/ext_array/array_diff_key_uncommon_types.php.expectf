@@ -1,0 +1,25 @@
+== empty array ==
+dict(2) {
+  [1]=>
+  int(2)
+  ["1"]=>
+  string(1) "2"
+}
+array(0) {
+}
+== APC local array ==
+bool(true)
+array(0) {
+}
+array(0) {
+}
+== GLOBALS array ==
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/array_diff_key_uncommon_types.php on line 20
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/array_diff_key_uncommon_types.php on line 23
+bool(true)
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/array_diff_key_uncommon_types.php on line 26
+array(0) {
+}

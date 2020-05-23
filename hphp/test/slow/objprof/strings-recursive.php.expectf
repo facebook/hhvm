@@ -1,0 +1,6 @@
+
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/strings-recursive.php on line 31
+---- GLOBALS ----
+---- shallow array ----
+---- deep array ----
+---- the end ----

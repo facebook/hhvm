@@ -457,7 +457,7 @@ static CallMap s_callMap {
     {IncCallCounter,     FuncOrder::incCount, DNone, SNone, {{SSA, 0}}},
 
     /* Global helpers */
-    {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SNone,
+    {LdGblAddrDef,       ldGblAddrDefHelper, DSSA, SSync,
                            {{SSA, 0}}},
 
     /* Switch helpers */

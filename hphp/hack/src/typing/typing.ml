@@ -5610,8 +5610,13 @@ and class_get_
       ( Tvar _ | Tnonnull | Tvarray _ | Tdarray _ | Tvarray_or_darray _
       | Toption _ | Tprim _ | Tfun _ | Ttuple _ | Tobject | Tshape _ | Tpu _
       | Tpu_type_access _ ) ) ->
-    (* should never happen; static_class_id takes care of these *)
-    (env, (Typing_utils.mk_tany env p, []))
+    Errors.non_class_member
+      ~is_method
+      mid
+      p
+      (Typing_print.error env cty)
+      (get_pos cty);
+    (env, (err_witness env p, []))
 
 and class_id_for_new
     ~exact p env (cid : Nast.class_id_) (explicit_targs : Nast.targ list) :

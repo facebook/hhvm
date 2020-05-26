@@ -72,7 +72,7 @@ let record_backtrace = Printexc.record_backtrace
 
 let stack_re =
   Str.regexp
-    {|^\(Called\|Raised\|Re-raised\) .* file "\([^"]*\)", line \([0-9]+\), character.*$|}
+    {|^\(Called\|Raised\|Re-raised\) .* file "\([^"]*\)"\( (inlined)\)?, line \([0-9]+\), character.*$|}
 
 let filename_re = Str.regexp {|^.*hack/\(.*\)$|}
 
@@ -80,7 +80,7 @@ let clean_stack (stack : string) : string =
   let format_one_line (s : string) : string =
     if Str.string_match stack_re s 0 then
       let filename = Str.matched_group 2 s in
-      let line_number = Str.matched_group 3 s in
+      let line_number = Str.matched_group 4 s in
       if Str.string_match filename_re filename 0 then
         (* keep lines under hack source directory *)
         let filename = Str.matched_group 1 filename in

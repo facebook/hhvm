@@ -302,7 +302,7 @@ fn happly_helper(tparams: &[&str], kind: &Kind, pos: &Pos, name: &str) -> Result
     use constraint::{Flags, Type};
     if tparams.contains(&name) {
         let tc_name = match kind {
-            Kind::Param | Kind::Return => name,
+            Kind::Param | Kind::Return | Kind::Property => name,
             _ => "",
         };
         Ok(Type::make(

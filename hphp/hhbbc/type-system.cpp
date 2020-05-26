@@ -5729,9 +5729,10 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const Type& valIn,
                                          ProvTag src) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
-  const bool isVector   = arr.couldBe(BVec);
+  const bool isVector   = arr.subtypeOrNull(BVec);
   DEBUG_ONLY const bool isVArray   = arr.subtypeOrNull(BVArr);
   const bool validKey   = key.type.subtypeOf(isVector ? BInt : BArrKey);
+  assertx(isVector == arr.couldBe(BVec));
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
@@ -5898,8 +5899,9 @@ std::pair<Type,Type> array_like_newelem(Type arr,
   }
 
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
-  const bool isVector = arr.couldBe(BVec);
+  const bool isVector = arr.subtypeOrNull(BVec);
   const bool isVArray = arr.subtypeOrNull(BVArr);
+  assertx(isVector == arr.couldBe(BVec));
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   bits &= ~BArrLikeE;

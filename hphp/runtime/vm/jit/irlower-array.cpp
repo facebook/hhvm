@@ -297,7 +297,7 @@ void implAllocArray(IRLS& env, const IRInstruction* inst, MakeArrayFn target,
 
 }
 
-void cgNewMixedArray(IRLS& env, const IRInstruction* inst) {
+void cgNewPlainArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveMixed);
 }
 void cgNewDictArray(IRLS& env, const IRInstruction* inst) {

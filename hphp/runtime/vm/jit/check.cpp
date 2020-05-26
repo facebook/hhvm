@@ -533,8 +533,6 @@ using TypeNames::TCA;
 #define DDictLastKey
 #define DKeysetFirstElem
 #define DKeysetLastElem
-#define DArrPacked
-#define DArrMixed
 #define DArrRecord
 #define DVArr
 #define DDArr
@@ -596,8 +594,6 @@ using TypeNames::TCA;
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
-#undef DArrPacked
-#undef DArrMixed
 #undef DArrRecord
 #undef DVArr
 #undef DDArr

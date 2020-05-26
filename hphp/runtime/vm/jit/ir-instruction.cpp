@@ -595,8 +595,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DDictLastKey      return dictFirstLastReturn(inst, false, true);
 #define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
-#define DArrPacked      return TPackedArr;
-#define DArrMixed       return TMixedArr;
 #define DArrRecord      return TRecordArr;
 #define DVArr           return RO::EvalHackArrDVArrs ? TVec : TVArr;
 #define DDArr           return RO::EvalHackArrDVArrs ? TDict : TDArr;
@@ -652,8 +650,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
-#undef DArrPacked
-#undef DArrMixed
 #undef DArrRecord
 #undef DVArr
 #undef DDArr

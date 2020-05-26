@@ -393,7 +393,7 @@ void emitNewArray(IRGS& env, uint32_t capacity) {
   if (capacity == 0) {
     push(env, cns(env, ArrayData::Create()));
   } else {
-    push(env, gen(env, NewMixedArray, cns(env, capacity)));
+    push(env, gen(env, NewPlainArray, cns(env, capacity)));
   }
 }
 

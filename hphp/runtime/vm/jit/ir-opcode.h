@@ -57,8 +57,6 @@ struct SSATmp;
  *     DParamMayRelax(t) like DParam, except type may relax
  *     DAllocObj    single dst has a type of a newly allocated object; may be a
  *                    specialized object type if the class is known
- *     DArrPacked   single dst has a packed array type
- *     DArrMixed    single dst has a mixed array type
  *     DVArr        single dst is either a packed array type or vec, depending
                       on configuration
  *     DDArr        single dst is either a mixed array type or dict, depending

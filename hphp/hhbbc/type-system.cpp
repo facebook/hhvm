@@ -649,9 +649,7 @@ folly::Optional<DArrLikePacked> toDArrLikePacked(SArray ar) {
 
   return DArrLikePacked {
     std::move(elems),
-    RuntimeOption::EvalArrayProvenance
-      ? ProvTag::FromSArr(ar)
-      : ProvTag::Top
+    ProvTag::FromSArrOrTop(ar)
   };
 }
 
@@ -689,9 +687,7 @@ folly::Optional<DArrLikeMap> toDArrLikeMap(SArray ar) {
     std::move(map),
     TBottom,
     TBottom,
-    RuntimeOption::EvalArrayProvenance
-      ? ProvTag::FromSArr(ar)
-      : ProvTag::Top
+    ProvTag::FromSArrOrTop(ar)
   };
 }
 
@@ -1369,8 +1365,8 @@ struct DualDispatchUnionImpl {
   Type operator()(SArray a, SArray b) const {
     assert(a != b); // Should've been handled earlier in union_of.
     if (a->empty() && b->empty()) {
-      auto const aTag = ProvTag::FromSArr(a);
-      auto const bTag = ProvTag::FromSArr(b);
+      auto const aTag = ProvTag::FromSArrOrTop(a);
+      auto const bTag = ProvTag::FromSArrOrTop(b);
       assert(aTag != bTag ||
              a->kind() != b->kind());
 

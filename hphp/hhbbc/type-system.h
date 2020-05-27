@@ -596,6 +596,10 @@ struct ProvTag {
     return arrprov::getTag(a);
   }
 
+  static ProvTag FromSArrOrTop(SArray a) {
+    return RO::EvalArrayProvenance ? FromSArr(a) : ProvTag::Top;
+  }
+
   /*
    * Do we have a known provenance tag.
    */

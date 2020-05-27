@@ -5882,6 +5882,7 @@ std::pair<Type, ThrowMode> array_set(Type arr,
                                      const Type& val,
                                      ProvTag src) {
   assert(arr.subtypeOf(BArr));
+  if (!val.couldBe(BInitCell)) return {TBottom, ThrowMode::BadOperation};
 
   auto const key = disect_array_key(undisectedKey);
   assert(key.type != TBottom);

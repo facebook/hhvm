@@ -379,6 +379,7 @@ Type currentChainType(ISS& env, Type val) {
     --it;
     if (it->base.subtypeOf(BArr)) {
       val = array_set(it->base, it->key, val, tag).first;
+      if (val == TBottom) val = TArr;
     } else if (it->base.subtypeOf(BVec)) {
       val = vec_set(it->base, it->key, val, tag).first;
       if (val == TBottom) val = TVec;
@@ -416,6 +417,7 @@ Type resolveArrayChain(ISS& env, Type val) {
     } else {
       assert(arr.subtypeOf(BArr));
       val = array_set(std::move(arr), key, val, tag).first;
+      if (val == TBottom) val = TArr;
     }
   } while (!env.collect.mInstrState.arrayChain.empty());
   FTRACE(5, "{}  = {}\n", prefix, show(val));

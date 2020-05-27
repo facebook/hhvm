@@ -517,6 +517,7 @@ fn serialize_flags<S: Serializer, P: PrefixedFlags>(flags: &P, s: S) -> Result<S
     map.end()
 }
 
+/// Expected JSON layouts for each field that is a valid Hack option
 #[derive(Deserialize)]
 #[serde(untagged)]
 enum GlobalValue {
@@ -525,6 +526,9 @@ enum GlobalValue {
     Int(isize),
     VecStr(Vec<String>),
     MapStr(BTreeMap<String, String>),
+    Json(Json), // support HHVM options with arbitrary layout
+                // (A poorer alternative that risks silent HHVM breakage
+                // would be to explicitly enumerate all possible layouts.)
 }
 
 fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
@@ -1021,6 +1025,27 @@ mod tests {
              "hhvm.only.opt2": { "global_value": "" },
         }))
         .expect("boolish-parsing logic wrongly triggered");
+    }
+
+    #[test]
+    fn test_options_de_untyped_global_value_no_crash() {
+        let res: Result<Options, String> = Options::from_configs(
+            // try parsing an HHVM option whose layout is none of the
+            // typed variants of GlobalValue, i.e., a string-to-int map
+            &[r#"{
+            "hhvm.semr_thread_overrides": {
+              "global_value": {
+                "17":160,
+                "14":300,
+                "0":320
+              },
+              "local_value": { "4":300 },
+                "access":4
+              }
+                 }"#],
+            &EMPTY_STRS,
+        );
+        assert_eq!(res.err(), None);
     }
 
     #[test]

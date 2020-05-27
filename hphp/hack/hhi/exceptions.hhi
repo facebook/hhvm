@@ -22,7 +22,9 @@ interface Throwable {
   // Documented as 'int' in PHP docs, but not actually guaranteed;
   // subclasses (e.g. PDO) can do what they want.
   public function getCode(): mixed;
+  <<__Rx, __MaybeMutable>>
   public function getFile(): string;
+  <<__Rx, __MaybeMutable>>
   public function getLine(): int;
   public function getTrace(): Container<mixed>;
   public function getTraceAsString(): string;

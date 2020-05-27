@@ -120,6 +120,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as an array.
    */
+  <<__Rx, __MaybeMutable>>
   final public function getTrace() {
     if (\is_resource($this->trace)) {
       $this->trace = \__SystemLib\extract_trace($this->trace);
@@ -148,6 +149,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as a string.
    */
+  <<__Rx, __MaybeMutable>>
   final public function getTraceAsString() {
     $i = 0;
     $s = "";

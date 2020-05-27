@@ -26,7 +26,9 @@ interface Throwable {
   public function getFile(): string;
   <<__Rx, __MaybeMutable>>
   public function getLine(): int;
+  <<__Rx, __MaybeMutable>>
   public function getTrace(): Container<mixed>;
+  <<__Rx, __MaybeMutable>>
   public function getTraceAsString(): string;
   <<__Rx, __MaybeMutable>>
   public function getPrevious(): ?Throwable;
@@ -57,7 +59,9 @@ class Error implements Throwable {
   final public function getFile(): string;
   <<__Rx, __MaybeMutable>>
   final public function getLine(): int;
+  <<__Rx, __MaybeMutable>>
   final public function getTrace(): varray<mixed>;
+  <<__Rx, __MaybeMutable>>
   final public function getTraceAsString(): string;
   public function __toString(): string;
   public function toString(): string;
@@ -95,8 +99,10 @@ class Exception implements Throwable {
   final public function getFile(): string;
   <<__Rx, __MaybeMutable>>
   final public function getLine(): int;
+  <<__Rx, __MaybeMutable>>
   final public function getTrace(): varray<mixed>;
   final protected function __prependTrace(Container<mixed> $trace): void;
+  <<__Rx, __MaybeMutable>>
   final public function getTraceAsString(): string;
   public function __toString(): string;
   public function toString(): string;

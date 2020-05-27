@@ -93,8 +93,13 @@ let () =
       | ClientCommand.CRage env -> Lwt_main.run (ClientRage.main env)
       | ClientCommand.CDownloadSavedState env ->
         Lwt_main.run (ClientDownloadSavedState.main env)
-    with Exit_status.Exit_with es ->
-      HackEventLogger.client_bad_exit ~command_name es;
+    with Exit_status.Exit_with es as e ->
+      let e = Exception.wrap e in
+      Hh_logger.log
+        "Client bad exit: %s\n%s"
+        (Exit_status.to_string es)
+        (Exception.get_backtrace_string e |> Exception.clean_stack);
+      HackEventLogger.client_bad_exit ~command_name es e;
       es
   in
   Exit_status.exit exit_status

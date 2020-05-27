@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7fa27546a9064d58cf08d1f273b031aa>>
+// @generated SignedSource<<76785bd1a2a9a3915864f33729feab04>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -81,6 +81,7 @@ pub type IsCoroutine = bool;
     ToOcamlRep
 )]
 pub enum FuncReactive {
+    FPure,
     FReactive,
     FLocal,
     FShallow,

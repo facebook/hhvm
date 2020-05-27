@@ -294,6 +294,13 @@ let method_ env c m =
   let ft = method_type env m in
   let reactivity =
     match ft.ft_reactive with
+    | Pure (Some ty) ->
+      begin
+        match get_node ty with
+        | Tapply ((_, cls), []) -> Some (Method_pure (Some cls))
+        | _ -> None
+      end
+    | Pure None -> Some (Method_pure None)
     | Reactive (Some ty) ->
       begin
         match get_node ty with

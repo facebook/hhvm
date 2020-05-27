@@ -613,14 +613,6 @@ let error_if_reactive_context env f =
   then
     f ()
 
-let error_if_shallow_reactive_context env f =
-  match env_reactivity env with
-  | Reactive _
-  | Shallow _
-    when not (TypecheckerOptions.unsafe_rx env.genv.tcopt) ->
-    f ()
-  | _ -> ()
-
 let add_wclass env x =
   let dep = Dep.Class x in
   Option.iter env.decl_env.droot (fun root -> Typing_deps.add_idep root dep);

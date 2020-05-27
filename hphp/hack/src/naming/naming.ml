@@ -517,6 +517,26 @@ and hint_
           hf_is_mutable_return = _;
         } ->
     hfun env reactivity coroutine hl kl variadic_hint h
+  (* Special case for Pure<function> *)
+  | Aast.Happly
+      ( (_, hname),
+        [
+          ( _,
+            Aast.Hfun
+              Aast.
+                {
+                  hf_reactive_kind = _;
+                  hf_is_coroutine;
+                  hf_param_tys = hl;
+                  hf_param_kinds = kl;
+                  hf_param_mutability = _;
+                  hf_variadic_ty = variadic_hint;
+                  hf_return_ty = h;
+                  hf_is_mutable_return = _;
+                } );
+        ] )
+    when String.equal hname SN.Rx.hPure ->
+    hfun env N.FPure hf_is_coroutine hl kl variadic_hint h
   (* Special case for Rx<function> *)
   | Aast.Happly
       ( (_, hname),

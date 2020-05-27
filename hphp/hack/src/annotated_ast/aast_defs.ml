@@ -31,6 +31,7 @@ and call_type =
 and is_coroutine = bool
 
 and func_reactive =
+  | FPure
   | FReactive
   | FLocal
   | FShallow
@@ -224,6 +225,7 @@ and where_constraint = hint * Ast_defs.constraint_kind * hint
 
 let is_f_non_reactive = function
   | FNonreactive -> true
+  | FPure
   | FReactive
   | FLocal
   | FShallow ->

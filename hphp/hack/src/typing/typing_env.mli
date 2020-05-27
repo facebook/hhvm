@@ -360,8 +360,6 @@ val get_all_tyvars : env -> Ident.t list
 
 val error_if_reactive_context : env -> (unit -> unit) -> unit
 
-val error_if_shallow_reactive_context : env -> (unit -> unit) -> unit
-
 val add_fresh_generic_parameter :
   env ->
   string ->

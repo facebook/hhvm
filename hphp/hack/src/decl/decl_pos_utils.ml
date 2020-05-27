@@ -184,6 +184,7 @@ struct
     | Local (Some ty1) -> Local (Some (ty ty1))
     | Shallow (Some ty1) -> Shallow (Some (ty ty1))
     | Reactive (Some ty1) -> Reactive (Some (ty ty1))
+    | Pure (Some ty1) -> Pure (Some (ty ty1))
     | r -> r
 
   and where_constraint (ty1, c, ty2) = (ty ty1, c, ty ty2)

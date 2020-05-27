@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<3f34519bdd8c4b0caef750fe3a9e1e87>>
+// @generated SignedSource<<2c66e922660d9d2d99c0b6c7f951772a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -30,6 +30,9 @@ impl CallType {
     }
 }
 impl FuncReactive {
+    pub fn mk_fpure() -> Self {
+        FuncReactive::FPure
+    }
     pub fn mk_freactive() -> Self {
         FuncReactive::FReactive
     }
@@ -41,6 +44,12 @@ impl FuncReactive {
     }
     pub fn mk_fnonreactive() -> Self {
         FuncReactive::FNonreactive
+    }
+    pub fn is_fpure(&self) -> bool {
+        match self {
+            FuncReactive::FPure => true,
+            _ => false,
+        }
     }
     pub fn is_freactive(&self) -> bool {
         match self {

@@ -142,6 +142,7 @@ type linearization_kind =
 type condition_type_name = string option [@@deriving eq, show]
 
 type method_reactivity =
+  | Method_pure of condition_type_name
   | Method_reactive of condition_type_name
   | Method_shallow of condition_type_name
   | Method_local of condition_type_name

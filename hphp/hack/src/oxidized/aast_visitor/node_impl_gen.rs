@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be1aa6be356a51f139ac86ab6f3dcef3>>
+// @generated SignedSource<<82d738f123f18ebd09104ff74b5dec3b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1146,6 +1146,7 @@ impl<P: Params> Node<P> for FuncReactive {
         v: &mut dyn Visitor<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
+            FuncReactive::FPure => Ok(()),
             FuncReactive::FReactive => Ok(()),
             FuncReactive::FLocal => Ok(()),
             FuncReactive::FShallow => Ok(()),

@@ -116,6 +116,7 @@ and hint_ p env = function
     in
     let reactivity =
       match reactivity with
+      | FPure -> Pure None
       | FReactive -> Reactive None
       | FShallow -> Shallow None
       | FLocal -> Local None

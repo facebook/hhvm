@@ -1105,27 +1105,15 @@ and method_decl_acc
   in
   let condition_types =
     match get_reactivity m.sm_type with
-    | Reactive (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> SSet.add cls condition_types
-        | _ -> condition_types
-      end
-    | Reactive None -> condition_types
-    | Shallow (Some ty) ->
-      begin
-        match get_node ty with
-        | Tapply ((_, cls), []) -> SSet.add cls condition_types
-        | _ -> condition_types
-      end
-    | Shallow None -> condition_types
+    | Pure (Some ty)
+    | Reactive (Some ty)
+    | Shallow (Some ty)
     | Local (Some ty) ->
       begin
         match get_node ty with
         | Tapply ((_, cls), []) -> SSet.add cls condition_types
         | _ -> condition_types
       end
-    | Local None -> condition_types
     | _ -> condition_types
   in
   let vis =

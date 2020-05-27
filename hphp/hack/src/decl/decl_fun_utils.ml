@@ -33,7 +33,9 @@ let fun_reactivity_opt env user_attributes =
   let has attr = Naming_attributes.mem attr user_attributes in
   let module UA = SN.UserAttributes in
   let rx_condition = condition_type_from_attributes env user_attributes in
-  if has UA.uaReactive then
+  if has UA.uaPure then
+    Some (Pure rx_condition)
+  else if has UA.uaReactive then
     Some (Reactive rx_condition)
   else if has UA.uaShallowReactive then
     Some (Shallow rx_condition)

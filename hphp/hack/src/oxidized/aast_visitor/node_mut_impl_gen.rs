@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4905dcff95c827e08daa8e258f37412f>>
+// @generated SignedSource<<d0ce03ca867bb44b4beb1fb6db8f4280>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1146,6 +1146,7 @@ impl<P: Params> NodeMut<P> for FuncReactive {
         v: &mut dyn VisitorMut<'node, P = P>,
     ) -> Result<(), P::Error> {
         match self {
+            FuncReactive::FPure => Ok(()),
             FuncReactive::FReactive => Ok(()),
             FuncReactive::FLocal => Ok(()),
             FuncReactive::FShallow => Ok(()),

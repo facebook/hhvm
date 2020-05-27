@@ -291,7 +291,7 @@
     server
     state_loader
     typing_service_api
-    vfs_stubs
+    vfs
     watchman_client
     write_symbol_info)
   (preprocess (pps lwt_ppx ppx_deriving.std)))

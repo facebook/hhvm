@@ -21,6 +21,7 @@ interface Throwable {
   public function getMessage(): string;
   // Documented as 'int' in PHP docs, but not actually guaranteed;
   // subclasses (e.g. PDO) can do what they want.
+  <<__Rx, __MaybeMutable>>
   public function getCode(): mixed;
   <<__Rx, __MaybeMutable>>
   public function getFile(): string;
@@ -93,7 +94,7 @@ class Exception implements Throwable {
   <<__Rx, __MaybeMutable>>
   final public function getPrevious(): ?Exception;
   public final function setPrevious(Exception $previous): void;
-  <<__Rx, __OnlyRxIfImpl(HH\Rx\Exception::class), __MaybeMutable>>
+  <<__Rx, __MaybeMutable>>
   public function getCode(): int;
   <<__Rx, __MaybeMutable>>
   final public function getFile(): string;

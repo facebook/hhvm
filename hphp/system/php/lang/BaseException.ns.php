@@ -79,7 +79,7 @@ trait BaseException {
    *                     but possibly as other type in Exception descendants
    *                     (for example as string in PDOException).
    */
-  <<__Rx, __OnlyRxIfImpl(\HH\Rx\Exception::class), __MaybeMutable>>
+  <<__Rx, __MaybeMutable>>
   public function getCode() {
     return $this->code;
   }

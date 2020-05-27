@@ -1,7 +1,9 @@
 <?hh // partial
+
 <<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
+  <<__Rx, __MaybeMutable>>
   public function getCode(): int;
   <<__Rx, __MaybeMutable>>
   public function getFile(): string;

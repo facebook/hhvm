@@ -1032,7 +1032,9 @@ Download a saved-state to disk for the given repository, to make future
 invocations of `hh` faster.|}
       Sys.argv.(0)
   in
-  let valid_types_message = "Valid values are: naming-table" in
+  let valid_types_message =
+    "Valid values are: naming-and-dep-table, naming-table"
+  in
 
   let from = ref "" in
   let saved_state_type = ref None in
@@ -1067,6 +1069,8 @@ invocations of `hh` faster.|}
     | None ->
       Printf.printf "The '--type' option is required. %s\n" valid_types_message;
       exit 2
+    | Some "naming-and-dep-table" ->
+      ClientDownloadSavedState.Naming_and_dep_table
     | Some "naming-table" -> ClientDownloadSavedState.Naming_table
     | Some saved_state_type ->
       Printf.printf

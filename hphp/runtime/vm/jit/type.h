@@ -740,11 +740,6 @@ public:
   static Type SubCls(const Class* cls);
 
   /*
-   * Return a copy of this type with a dvarray ArraySpec.
-   */
-  Type narrowToDVArray() const;
-
-  /*
    * Return a copy of this type with a vanilla ArraySpec. Examples:
    *   TArr.narrowToVanilla()        == TVanillaArr
    *   (TVec|TInt).narrowToVanilla() == TVanillaVec|TInt

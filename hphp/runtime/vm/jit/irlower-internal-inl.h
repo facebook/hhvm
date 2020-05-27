@@ -167,16 +167,6 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   assertx(!arrSpec.type());
 
   auto const r = materialize(v, dataSrc);
-
-  // ArrayKind now implies dvarray-ness, so if we are checking a dvarray type,
-  // check that we also have a kind and use the kind test below.
-  if (debug && arrSpec.dvarray()) {
-    DEBUG_ONLY auto const kind = arrSpec.kind();
-    assertx(kind);
-    assertx(*kind == ArrayData::kPackedKind ||
-            *kind == ArrayData::kMixedKind);
-  }
-
   if (arrSpec.kind()) {
     assertx(type < TArr);
     v << cmpbim{*arrSpec.kind(), r[HeaderKindOffset], sf};

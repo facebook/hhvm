@@ -77,10 +77,10 @@ static auto const TVanillaDict    = TDict.narrowToVanilla();
 static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
 static auto const TVanillaArrLike = TArrLike.narrowToVanilla();
 
-// DV array types that appear in irgen. Always vanilla.
-static auto const TDVArr = TVanillaArr.narrowToDVArray();
-static auto const TDArr = TMixedArr.narrowToDVArray();
-static auto const TVArr = TPackedArr.narrowToDVArray();
+// dvarray types that appear in irgen. In most places that we use these
+// types, we call narrowToVanilla() if AllowBespokeArrayLikes is false.
+static auto const TVArr = TPackedArr.widenToBespoke();
+static auto const TDArr = TMixedArr.widenToBespoke();
 
 /*
  * Abbreviated namespace for predefined types.
@@ -376,8 +376,7 @@ inline Type Type::dropConstVal() const {
 
   if (*this <= TArrLike && arrLikeVal()->isVanilla()) {
     if (!(*this <= TArr)) return result.narrowToVanilla();
-    auto const specialized = Type::StaticArray(arrVal()->kind());
-    return arrVal()->isDVArray() ? specialized.narrowToDVArray() : specialized;
+    return Type::StaticArray(arrVal()->kind());
   }
   return result;
 }
@@ -574,8 +573,7 @@ inline ArraySpec Type::arrSpec() const {
     if (!m_arrVal->isVanilla()) return ArraySpec::Top();
     auto const array = (m_bits & kArr) != kBottom;
     if (!array) return ArraySpec{ArraySpec::LayoutTag::Vanilla};
-    auto const spec = ArraySpec{m_arrVal->kind()};
-    return m_arrVal->isDVArray() ? spec.narrowToDVArray() : spec;
+    return ArraySpec{m_arrVal->kind()};
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

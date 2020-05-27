@@ -2590,16 +2590,16 @@ namespace {
 SSATmp* implSimplifyHackArrTypehint(
     State& env, const IRInstruction* inst, SSATmp* arr) {
   auto const extra = inst->extra<RaiseHackArrTypehintNoticeData>();
-  auto const type = [&]{
+  auto const match = [&]{
+    auto const& type = arr->type();
     switch (extra->tc.type()) {
-      case AnnotType::VArrOrDArr: return TDVArr;
-      case AnnotType::VArray:     return TVArr;
-      case AnnotType::DArray:     return TDArr;
-      default:                    return TBottom;
+      case AnnotType::VArrOrDArr: return type.subtypeOfAny(TVArr, TDArr);
+      case AnnotType::VArray:     return type <= TVArr;
+      case AnnotType::DArray:     return type <= TDArr;
+      default:                    return false;
     }
   }();
-  assertx(arr->isA(TArr));
-  return arr->isA(type) ? gen(env, Nop) : nullptr;
+  return match ? gen(env, Nop) : nullptr;
 }
 
 }
@@ -2615,10 +2615,10 @@ SSATmp* simplifyRaiseHackArrPropNotice(State& env, const IRInstruction* inst) {
 SSATmp* simplifyCheckDVArray(State& env, const IRInstruction* inst) {
   if (!RO::EvalHackArrCompatSpecialization) return nullptr;
   auto const src = inst->src(0);
-  if (src->type() <= TDVArr) {
+  if (src->type().subtypeOfAny(TVArr, TDArr)) {
     gen(env, Nop);
     return src;
-  } else if (!src->type().maybe(TDVArr.widenToBespoke())) {
+  } else if (!src->type().maybe(TVArr) && !src->type().maybe(TDArr)) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }
@@ -2630,7 +2630,7 @@ SSATmp* simplifyCheckVArray(State& env, const IRInstruction* inst) {
   if (src->type() <= TVArr) {
     gen(env, Nop);
     return src;
-  } else if (!src->type().maybe(TVArr.widenToBespoke())) {
+  } else if (!src->type().maybe(TVArr)) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }
@@ -2642,7 +2642,7 @@ SSATmp* simplifyCheckDArray(State& env, const IRInstruction* inst) {
   if (src->type() <= TDArr) {
     gen(env, Nop);
     return src;
-  } else if (!src->type().maybe(TDArr.widenToBespoke())) {
+  } else if (!src->type().maybe(TDArr)) {
     gen(env, Jmp, inst->taken());
     return cns(env, TBottom);
   }

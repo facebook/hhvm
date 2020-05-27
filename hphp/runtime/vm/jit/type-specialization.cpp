@@ -59,7 +59,6 @@ bool ArraySpec::operator<=(const ArraySpec& rhs) const {
       !((lhs.m_sort & HasType) && lhs.m_ptr == rhs.m_ptr)) {
     return false;
   }
-  if (rhs.dvarray() && !lhs.dvarray()) return false;
   if (rhs.vanilla() && !lhs.vanilla()) return false;
   return true;
 }
@@ -145,9 +144,6 @@ std::string ArraySpec::toString() const {
     result += "=Vanilla";
   } else if (!(m_sort & IsVanilla) && !result.empty()) {
     result += "|Bespoke}";
-  }
-  if (m_sort & IsDVArray) {
-    result += ":DV";
   }
   return result;
 }

@@ -61,9 +61,8 @@ struct ArraySpec {
   ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
 
   /*
-   * Set or unset the vanilla and dvarray bits on an ArraySpec.
+   * Set or unset the vanilla bits on an ArraySpec.
    */
-  ArraySpec narrowToDVArray() const;
   ArraySpec narrowToVanilla() const;
   ArraySpec widenToBespoke() const;
 
@@ -93,7 +92,6 @@ struct ArraySpec {
   uintptr_t bits() const;
   folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
-  bool dvarray() const;
   bool vanilla() const;
 
   /*
@@ -148,7 +146,6 @@ private:
     HasKind   = 1 << 1,
     HasType   = 1 << 2,
     IsVanilla = 1 << 3,
-    IsDVArray = 1 << 4,
   };
   friend SortOf operator|(SortOf, SortOf);
   friend SortOf operator&(SortOf, SortOf);

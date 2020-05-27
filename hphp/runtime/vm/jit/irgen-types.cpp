@@ -254,8 +254,8 @@ void verifyTypeImpl(IRGS& env,
       auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
       env.irb->constrainValue(val, gc);
       auto const type = [&]{
-        if (result == AnnotAction::VArrayCheck) return TVArr;
-        if (result == AnnotAction::DArrayCheck) return TDArr;
+        if (result == AnnotAction::VArrayCheck) return TPackedArr;
+        if (result == AnnotAction::DArrayCheck) return TMixedArr;
         return TBottom;
       }();
       if (val->type().maybe(type)) {

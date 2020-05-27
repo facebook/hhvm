@@ -2273,8 +2273,9 @@ Type builtinReturnType(const Func* builtin) {
     return TInitCell;
   }();
 
-  // We're not sure what kind of array-likes builtins will produce.
-  if (RO::EvalAllowBespokeArrayLikes) type = type.widenToBespoke();
+  // Allow builtins to return bespoke array likes if the flag is set.
+  assertx(!type.arrSpec().vanilla());
+  if (!RO::EvalAllowBespokeArrayLikes) type = type.narrowToVanilla();
 
   // "Reference" types (types represented by a pointer) can always be null.
   if (type.isReferenceType()) {

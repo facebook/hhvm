@@ -68,14 +68,7 @@ constexpr Type::bits_t Type::kArrSpecBits;
 constexpr Type::bits_t Type::kClsSpecBits;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Vanilla and dvarray array-spec manipulation.
-
-Type Type::narrowToDVArray() const {
-  if (!supports(SpecKind::Array)) return *this;
-  if (supports(SpecKind::Class) || supports(SpecKind::Record)) return *this;
-  auto const oldSpec = arrSpec();
-  return oldSpec.dvarray() ? *this : Type(*this, oldSpec.narrowToDVArray());
-}
+// Vanilla array-spec manipulation.
 
 Type Type::narrowToVanilla() const {
   if (!supports(SpecKind::Array)) return *this;
@@ -624,8 +617,6 @@ Type Type::modified() const {
 static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
   if (arr->isVanilla()) spec = spec.narrowToVanilla();
-
-  if (spec.dvarray() && !arr->isDVArray()) return false;
   if (spec.kind() && arr->kind() != *spec.kind()) return false;
   if (!spec.type()) return true;
 
@@ -905,19 +896,9 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     return Type::ExactRecord(rec);
   }
 
-  if (tvIsArray(tv)) {
-    auto const result = Type::Array(val(tv).parr->kind());
-    return val(tv).parr->isDVArray() ? result.narrowToDVArray() : result;
-  }
+  if (tvIsArray(tv)) return Type::Array(val(tv).parr->kind());
 
-  auto outer = type(tv);
-
-  if (outer == KindOfPersistentString) outer = KindOfString;
-  else if (outer == KindOfPersistentVec) outer = KindOfVec;
-  else if (outer == KindOfPersistentDict) outer = KindOfDict;
-  else if (outer == KindOfPersistentKeyset) outer = KindOfKeyset;
-
-  auto const result = Type(outer);
+  auto const result = Type(dt_modulo_persistence(type(tv)));
   auto const vanilla = isArrayLikeType(type(tv)) && val(tv).parr->isVanilla();
   return vanilla ? result.narrowToVanilla() : result;
 }
@@ -1057,7 +1038,7 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
         } else {                                                        \
           return Type::B(A);                                            \
         }                                                               \
-      }().narrowToDVArray()
+      }()
 
     case T::SVArr:   return X(ArrayData::kPackedKind, StaticArray, StaticArray);
     case T::VArr:    return X(ArrayData::kPackedKind, Array, CountedArray);
@@ -1160,7 +1141,10 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
   if (!tc.isCheckable() || tc.isSoft()) return TCell;
 
   using A = AnnotType;
-  auto const dvarrays = RO::EvalHackArrCompatSpecialization;
+  auto const specializedArrayType = [](Type type) {
+    if (!RO::EvalHackArrCompatSpecialization) return TArr;
+    return RO::EvalAllowBespokeArrayLikes ? type : type.narrowToVanilla();
+  };
   auto const atToType = [&](AnnotType at) {
     switch (at) {
       case A::Null:       return TNull;
@@ -1183,9 +1167,9 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
       case A::Nonnull:    return TInitCell - TInitNull;
       case A::Number:     return TInt | TDbl;
       case A::ArrayKey:   return TInt | TStr;
-      case A::VArray:     return dvarrays ? TVArr : TArr;
-      case A::DArray:     return dvarrays ? TDArr : TArr;
-      case A::VArrOrDArr: return dvarrays ? TDVArr : TArr;
+      case A::VArray:     return specializedArrayType(TVArr);
+      case A::DArray:     return specializedArrayType(TDArr);
+      case A::VArrOrDArr: return TArr;
       case A::VecOrDict:  return TVec | TDict;
       case A::ArrayLike:  return TArrLike;
       case A::This:

@@ -316,10 +316,8 @@ Type arrSetReturn(const IRInstruction* inst) {
 
   auto const& arr = inst->src(0)->type();
   auto const spec = arr.arrSpec();
-  auto result = arr <= TMixedArr ? TMixedArr : TArr;
-  if (spec.dvarray()) result = result.narrowToDVArray();
-  if (spec.vanilla()) result = result.narrowToVanilla();
-  return result;
+  auto const result = arr <= TMixedArr ? TMixedArr : TArr;
+  return spec.vanilla() ? result.narrowToVanilla() : result;
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
@@ -596,13 +594,13 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
 #define DArrRecord      return TRecordArr;
-#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TVArr;
-#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TDArr;
+#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TPackedArr;
+#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TMixedArr;
 #define DStaticDArr     return (TStaticDict | TStaticArr) & []{ DDArr }();
 // If the inputs to CheckVArray and CheckDArray are vanilla, then the output
 // will have a known type, but if the inputs are generic arrays, we won't.
 #define DCheckDV(kind)  return inst->getPassthroughValue()->type() & \
-                               checkLayoutFlags(T##kind##Arr).narrowToDVArray();
+                               checkLayoutFlags(T##kind##Arr);
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);

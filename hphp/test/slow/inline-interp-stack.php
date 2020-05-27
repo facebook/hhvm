@@ -1,7 +1,7 @@
 <?hh
 
 set_error_handler(($errno, $errstr, $errfile, $errline, $errctx) ==> {
-  if ($errno !== 8 || strpos($errstr, 'Intish') !== false) return;
+  if ($errno !== E_USER_NOTICE || strpos($errstr, 'test_error') === false) return;
   $bfile = basename($errfile);
   $trace = implode(
     ', ',
@@ -17,31 +17,31 @@ function junk() {
 }
 
 <<__ALWAYS_INLINE>>
-function red($x, $y) {
+function red() {
   junk();
-  hphp_array_idx($x, $y, 0);
+  trigger_error('test_error');
 }
 
 <<__ALWAYS_INLINE>>
-function green($x, $y) {
+function green() {
   junk();
-  hphp_array_idx($x, $y, 0);
-  red($x, $y);
+  trigger_error('test_error');
+  red();
 }
 
 <<__ALWAYS_INLINE>>
-function blue($x, $y) {
+function blue() {
   junk();
-  hphp_array_idx($x, $y, 0);
-  green($x, $y);
+  trigger_error('test_error');
+  green();
 }
 
-function main($x, $y) {
+function main() {
   junk();
-  blue($x, $y);
+  blue();
 }
 
-for ($i = 0; $i < 10; $i++) main(varray[], false);
+for ($i = 0; $i < 10; $i++) main();
 
 <<__ALWAYS_INLINE>>
 function junk2() {

@@ -1991,7 +1991,8 @@ and simplify_subtype_reactivity
      accessible as parent::f() but will be treated as non-reactive call.
      *)
     match (r_super, extra_info) with
-    | ( ( Reactive (Some condition_type_super)
+    | ( ( Pure (Some condition_type_super)
+        | Reactive (Some condition_type_super)
         | Shallow (Some condition_type_super)
         | Local (Some condition_type_super) ),
         Some { method_info = Some (method_name, is_static); _ } ) ->
@@ -2015,7 +2016,8 @@ and simplify_subtype_reactivity
             | Tfun
                 {
                   ft_reactive =
-                    (Reactive None | Shallow None | Local None) as fr;
+                    (Pure None | Reactive None | Shallow None | Local None) as
+                    fr;
                   _;
                 } ->
               let extra_info =
@@ -2097,9 +2099,11 @@ and simplify_subtype_reactivity
       super
       env
   | (RxVar _, _) -> invalid ()
-  | ((Local cond_sub | Shallow cond_sub | Reactive cond_sub), Local cond_super)
-  | ((Shallow cond_sub | Reactive cond_sub), Shallow cond_super)
-  | (Reactive cond_sub, Reactive cond_super) ->
+  | ( (Local cond_sub | Shallow cond_sub | Reactive cond_sub | Pure cond_sub),
+      Local cond_super )
+  | ((Shallow cond_sub | Reactive cond_sub | Pure cond_sub), Shallow cond_super)
+  | ((Reactive cond_sub | Pure cond_sub), Reactive cond_super)
+  | (Pure cond_sub, Pure cond_super) ->
     env
     |> simplify_subtype_param_rx_if_impl
          ~subtype_env

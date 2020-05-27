@@ -177,6 +177,11 @@ let check_reactivity_matches
         | r -> r
       in
       match (caller_reactivity, callee_reactivity) with
+      (* Pure functions can only call pure functions *)
+      | ( (MaybeReactive (Pure _) | Pure _),
+          ( MaybeReactive (Reactive _ | Shallow _ | Local _ | Nonreactive)
+          | Reactive _ | Shallow _ | Local _ | Nonreactive ) )
+      (* Reactive functions can only call reactive or pure functions *)
       | ( (MaybeReactive (Reactive _) | Reactive _),
           ( MaybeReactive (Shallow _ | Local _ | Nonreactive)
           | Shallow _ | Local _ | Nonreactive ) ) ->

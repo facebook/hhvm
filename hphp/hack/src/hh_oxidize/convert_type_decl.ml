@@ -18,18 +18,21 @@ open Convert_longident
 open Convert_type
 
 let default_implements () =
-  if Configuration.by_ref () then
-    [(Some "arena_trait", "TrivialDrop")]
-  else
+  match Configuration.mode () with
+  | Configuration.ByRef -> [(Some "arena_trait", "TrivialDrop")]
+  | Configuration.ByBox
+  | Configuration.ByRc ->
     []
 
 let implements_traits _name = default_implements ()
 
 let default_derives () =
-  ( if Configuration.by_ref () then
-    []
-  else
-    [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")] )
+  (match Configuration.mode () with
+  | Configuration.ByBox ->
+    [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")]
+  | Configuration.ByRef
+  | Configuration.ByRc ->
+    [])
   @ [
       (None, "Clone");
       (None, "Debug");
@@ -46,8 +49,9 @@ let derive_copy ty =
   (* By default, we will derive Copy only for enums whose variants all have no
      arguments. But there are some other small types for which implementing Copy is
      convenient. We whitelist them here. *)
-  if Configuration.by_ref () then
-    match ty with
+  match Configuration.mode () with
+  | Configuration.ByRef ->
+    (match ty with
     | "aast::Expr"
     | "aast::Expr_"
     | "aast::UserAttribute"
@@ -58,8 +62,9 @@ let derive_copy ty =
     | "typing_defs_core::Ty"
     | "typing_defs_core::Ty_" ->
       true
-    | _ -> false
-  else
+    | _ -> false)
+  | Configuration.ByBox
+  | Configuration.ByRc ->
     false
 
 let additional_derives ty : (string option * string) list =
@@ -76,6 +81,13 @@ let additional_derives ty : (string option * string) list =
   | _ -> []
 
 let derive_blacklist ty =
+  let is_by_ref_or_rc =
+    match Configuration.mode () with
+    | Configuration.ByRef
+    | Configuration.ByRc ->
+      true
+    | Configuration.ByBox -> false
+  in
   match ty with
   (* A custom implementation of Ord for Error_ matches the sorting behavior of
        errors in OCaml. *)
@@ -87,9 +99,9 @@ let derive_blacklist ty =
    * don't care about comparison or hashing on environments *)
   | "typing_env_types::Env" -> ["Eq"; "Hash"; "Ord"]
   | "typing_env_types::Genv" -> ["Eq"; "Hash"; "Ord"]
-  | "typing_defs_core::Ty" when Configuration.by_ref () ->
+  | "typing_defs_core::Ty" when is_by_ref_or_rc ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
-  | "typing_defs_core::ConstraintType" when Configuration.by_ref () ->
+  | "typing_defs_core::ConstraintType" when is_by_ref_or_rc ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
   | _ -> []
 
@@ -135,10 +147,12 @@ A list of (<module>, <ty1>) where ty1 is enum and all non-empty variant fields s
 be wrapped by Box to keep ty1 size down.
 *)
 let box_variant () =
-  ( if Configuration.by_ref () then
+  (match Configuration.mode () with
+  | Configuration.ByRef ->
     [("nast", "FuncBodyAnn"); ("typing_defs_core", "Ty_")]
-  else
-    [] )
+  | Configuration.ByBox
+  | Configuration.ByRc ->
+    [])
   @ [("aast", "Expr_"); ("aast", "Stmt_"); ("aast", "Def")]
 
 let should_box_variant ty =
@@ -154,16 +168,23 @@ let unbox_field ty =
   || String.is_prefix ty ~prefix:"Vec<"
   || String.is_prefix ty ~prefix:"Block<"
   || String.is_prefix ty ~prefix:"&'a "
-  || Configuration.by_ref ()
-     && ( ty = "oxidized::tany_sentinel::TanySentinel"
-        || ty = "ident::Ident"
-        || ty = "Ty<'a>" )
+  ||
+  match Configuration.mode () with
+  | Configuration.ByRef ->
+    ty = "oxidized::tany_sentinel::TanySentinel"
+    || ty = "ident::Ident"
+    || ty = "Ty<'a>"
+  | Configuration.ByBox -> false
+  | Configuration.ByRc -> false
 
 let add_rcoc = [("aast", "Nsenv")]
 
 let should_add_rcoc ty =
-  (not (Configuration.by_ref ()))
-  && List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
+  match Configuration.mode () with
+  | Configuration.ByRef -> false
+  | Configuration.ByBox
+  | Configuration.ByRc ->
+    List.mem add_rcoc (curr_module_name (), ty) ~equal:( = )
 
 let blacklisted ty_name =
   let ty = (curr_module_name (), ty_name) in
@@ -238,15 +259,17 @@ let type_param (ct, _) = core_type ct
 
 let type_params params =
   if List.is_empty params then
-    if Configuration.by_ref () then
-      "<'a>"
-    else
+    match Configuration.mode () with
+    | Configuration.ByRef -> "<'a>"
+    | Configuration.ByBox
+    | Configuration.ByRc ->
       ""
   else
     let params = params |> map_and_concat ~f:type_param ~sep:", " in
-    if Configuration.by_ref () then
-      sprintf "<'a, %s>" params
-    else
+    match Configuration.mode () with
+    | Configuration.ByRef -> sprintf "<'a, %s>" params
+    | Configuration.ByBox
+    | Configuration.ByRc ->
       sprintf "<%s>" params
 
 let record_label_declaration ?(pub = false) ?(prefix = "") ld =
@@ -291,15 +314,17 @@ let constructor_arguments ?(box_fields = false) = function
         let ty = core_type ty in
         if unbox_field ty then
           sprintf "(%s)" ty
-        else if Configuration.by_ref () then
-          sprintf "(&'a %s)" ty
-        else
-          sprintf "(Box<%s>)" ty
+        else (
+          match Configuration.mode () with
+          | Configuration.ByRef -> sprintf "(&'a %s)" ty
+          | Configuration.ByBox -> sprintf "(Box<%s>)" ty
+          | Configuration.ByRc -> sprintf "(std::rc::Rc<%s>)" ty
+        )
       | _ ->
-        if Configuration.by_ref () then
-          sprintf "(&'a %s)" (tuple types)
-        else
-          sprintf "(Box<%s>)" (tuple types)
+        (match Configuration.mode () with
+        | Configuration.ByRef -> sprintf "(&'a %s)" (tuple types)
+        | Configuration.ByBox -> sprintf "(Box<%s>)" (tuple types)
+        | Configuration.ByRc -> sprintf "(std::rc::Rc<%s>)" (tuple types))
     )
   | Pcstr_record labels -> record_declaration labels
 
@@ -381,10 +406,11 @@ let type_declaration name td =
     | ([({ ptyp_desc = Ptyp_var "ty"; _ }, _)], _)
       when curr_module_name () = "typing_defs_core"
            || curr_module_name () = "typing_defs" ->
-      if Configuration.by_ref () then
-        "<'a>"
-      else
-        ""
+      (match Configuration.mode () with
+      | Configuration.ByRef -> "<'a>"
+      | Configuration.ByBox
+      | Configuration.ByRc ->
+        "")
     | (tparams, _) -> type_params tparams
   in
   match (td.ptype_kind, td.ptype_manifest) with

@@ -9,12 +9,17 @@
 open Core_kernel
 open Reordered_argument_collections
 
+type mode =
+  | ByBox
+  | ByRef
+  | ByRc
+
 type t = {
-  by_ref: bool;
+  mode: mode;
   extern_types: string SMap.t;
 }
 
-let default = { extern_types = SMap.empty; by_ref = false }
+let default = { extern_types = SMap.empty; mode = ByBox }
 
 let config : t option ref = ref None
 
@@ -22,7 +27,7 @@ let set t =
   if Option.is_some !config then failwith "Config already set";
   config := Some t
 
-let by_ref () = (Option.value_exn !config).by_ref
+let mode () = (Option.value_exn !config).mode
 
 let extern_type type_name =
   "" :: State.curr_module_name () :: Output.glob_uses ()

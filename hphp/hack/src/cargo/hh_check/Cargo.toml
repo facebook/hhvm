@@ -15,6 +15,7 @@ multifile_rust = { path = "../../utils/multifile" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../../hhbc/cargo/options" }
 oxidized = { path = "../../oxidized" }
+oxidized_by_rc = { path = "../../oxidized_by_rc" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 stack_limit = { path = "../../utils/stack_limit" }
 typing_ast_rust = { path = "../../typing/cargo/typing_ast_rust" }

@@ -153,7 +153,7 @@ let parse_args () =
   let regen_command = ref None in
   let rustfmt_path = ref None in
   let files = ref [] in
-  let by_ref = ref Configuration.(default.by_ref) in
+  let mode = ref Configuration.ByBox in
   let extern_types_file = ref None in
   let options =
     [
@@ -167,8 +167,11 @@ let parse_args () =
         Arg.String (fun s -> rustfmt_path := Some s),
         " Path to rustfmt binary used to format output" );
       ( "--by-ref",
-        Arg.Set by_ref,
+        Arg.Unit (fun () -> mode := Configuration.ByRef),
         " Use references instead of Box, slices instead of Vec and String" );
+      ( "--by-rc",
+        Arg.Unit (fun () -> mode := Configuration.ByRc),
+        " Use Rc instead of Box." );
       ( "--extern-types-file",
         Arg.String (fun s -> extern_types_file := Some s),
         " Use the types listed in this file rather than assuming all types"
@@ -181,7 +184,7 @@ let parse_args () =
     | None -> Configuration.(default.extern_types)
     | Some filename -> parse_extern_types_file filename
   in
-  Configuration.set { Configuration.by_ref = !by_ref; extern_types };
+  Configuration.set { Configuration.mode = !mode; extern_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   match !files with
   | [] ->

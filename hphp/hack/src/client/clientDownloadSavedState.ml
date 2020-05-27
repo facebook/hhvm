@@ -30,9 +30,7 @@ let main (env : env) : Exit_status.t Lwt.t =
       Hh_json.JSON_Object
         [
           ( "naming_table_path",
-            info
-              .Saved_state_loader.Naming_table_saved_state_info
-               .naming_table_path
+            info.Saved_state_loader.Naming_table_info.naming_table_path
             |> Path.to_string
             |> Hh_json.string_ );
         ]

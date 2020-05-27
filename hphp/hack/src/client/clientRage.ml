@@ -407,23 +407,25 @@ let rage_saved_state (env : env) : (string * string) list Lwt.t =
     match naming_saved_state with
     | Error s -> s
     | Ok (result, s) ->
-      let open Saved_state_loader.Naming_table_saved_state_info in
+      let open Saved_state_loader.Naming_table_info in
       Printf.sprintf
         "naming_table: %s\n\n%s"
         (path_to_string result.naming_table_path)
         s
   in
 
-  let%lwt regular_saved_state = saved_state_check Saved_state_loader.Regular in
+  let%lwt regular_saved_state =
+    saved_state_check Saved_state_loader.Naming_and_dep_table
+  in
   let regular_saved_state =
     match regular_saved_state with
     | Error s -> s
     | Ok (result, s) ->
-      let open Saved_state_loader.Regular_saved_state_info in
+      let open Saved_state_loader.Naming_and_dep_table_info in
       Printf.sprintf
         "naming_table: %s\ndeptable: %s\nhot_decls: %s\n\n%s"
         (path_to_string result.naming_table_path)
-        (path_to_string result.deptable_path)
+        (path_to_string result.dep_table_path)
         (path_to_string result.hot_decls_path)
         s
   in

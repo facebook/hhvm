@@ -249,8 +249,8 @@ let load_saved_state
           (* Test hook, for tests that want to get messages in before init *)
           Lwt.return_ok
             ( {
-                Saved_state_loader.Naming_table_saved_state_info
-                .naming_table_path = naming_table_load_info.path;
+                Saved_state_loader.Naming_table_info.naming_table_path =
+                  naming_table_load_info.path;
               },
               changed_files )
         | None ->
@@ -268,8 +268,7 @@ let load_saved_state
         let path =
           Path.to_string
             saved_state_info
-              .Saved_state_loader.Naming_table_saved_state_info
-               .naming_table_path
+              .Saved_state_loader.Naming_table_info.naming_table_path
         in
         log "[saved-state] Loading naming-table... %s" path;
         let naming_table = Naming_table.load_from_sqlite ctx path in

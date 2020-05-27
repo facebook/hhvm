@@ -69,8 +69,7 @@ let find_saved_symbolindex ~(ignore_hh_version : bool) :
     | Ok (info, _) ->
       Ok
         (Path.to_string
-           info
-             .Saved_state_loader.Symbol_index_saved_state_info.symbol_index_path)
+           info.Saved_state_loader.Symbol_index_info.symbol_index_path)
     | Error load_error ->
       Error (Saved_state_loader.long_user_message_of_error load_error)
   with _ -> Error "Exception searching for saved state"

@@ -30,26 +30,26 @@ module Watchman_options = struct
   }
 end
 
-module Regular_saved_state_info = struct
+module Naming_and_dep_table_info = struct
   type t = {
     naming_table_path: Path.t;
-    deptable_path: Path.t;
+    dep_table_path: Path.t;
     hot_decls_path: Path.t;
   }
 end
 
-module Naming_table_saved_state_info = struct
+module Naming_table_info = struct
   type t = { naming_table_path: Path.t }
 end
 
-module Symbol_index_saved_state_info = struct
+module Symbol_index_info = struct
   type t = { symbol_index_path: Path.t }
 end
 
 type _ saved_state_type =
-  | Regular : Regular_saved_state_info.t saved_state_type
-  | Naming_table : Naming_table_saved_state_info.t saved_state_type
-  | Symbol_index : Symbol_index_saved_state_info.t saved_state_type
+  | Naming_and_dep_table : Naming_and_dep_table_info.t saved_state_type
+  | Naming_table : Naming_table_info.t saved_state_type
+  | Symbol_index : Symbol_index_info.t saved_state_type
 
 (** List of files changed since the saved-state's commit. This list of files may
 include files other than Hack files, so the caller should filter the given list

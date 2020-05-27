@@ -375,18 +375,6 @@ let write_strings_to_file ~file (ss : string list) =
 
 (* could be in control section too *)
 
-let filemtime file = (Unix.stat file).Unix.st_mtime
-
-external lutimes : string -> unit = "hh_lutimes"
-
-let try_touch ~follow_symlinks file =
-  try
-    if follow_symlinks then
-      Unix.utimes file 0.0 0.0
-    else
-      lutimes file
-  with _ -> ()
-
 let mkdir_p ?(skip_mocking = false) =
   if skip_mocking then
     RealDisk.mkdir_p
@@ -408,6 +396,35 @@ let readlink_no_fail fn =
     cat fn
   else
     try Unix.readlink fn with _ -> fn
+
+let filemtime file = (Unix.stat file).Unix.st_mtime
+
+external lutimes : string -> unit = "hh_lutimes"
+
+type touch_mode =
+  | Touch_existing of { follow_symlinks: bool }
+      (** This won't open/close fds, which is important for some callers. *)
+  | Touch_existing_or_create_new of {
+      mkdir_if_new: bool;
+      perm_if_new: Unix.file_perm;
+    }
+
+let touch mode file =
+  match mode with
+  | Touch_existing { follow_symlinks = true } -> Unix.utimes file 0. 0.
+  | Touch_existing { follow_symlinks = false } -> lutimes file
+  | Touch_existing_or_create_new { mkdir_if_new; perm_if_new } ->
+    with_umask 0o000 (fun () ->
+        if mkdir_if_new then mkdir_no_fail (Filename.dirname file);
+        let oc =
+          open_out_gen
+            [Open_wronly; Open_append; Open_creat; Open_binary]
+            perm_if_new
+            file
+        in
+        close_out oc)
+
+let try_touch mode file = (try touch mode file with _ -> ())
 
 let splitext filename =
   let root = Filename.chop_extension filename in

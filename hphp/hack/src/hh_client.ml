@@ -57,19 +57,28 @@ let () =
   HackEventLogger.client_init
     ~init_id
     (Option.value root ~default:Path.dummy_path);
+  Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
+  Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
+  Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
   begin
-    Hh_logger.Level.set_min_level_file Hh_logger.Level.Info;
-    Hh_logger.Level.set_min_level_stderr Hh_logger.Level.Error;
-    Hh_logger.set_id (Printf.sprintf "%s#%s" command_name init_id);
     match root with
     | None -> ()
     | Some root ->
       let client_log_fn = ServerFiles.client_log root in
-      Hh_logger.set_log client_log_fn;
-      Hh_logger.log
-        "[hh_client] %s"
-        (String.concat ~sep:" " (Array.to_list Sys.argv))
+      (try
+         (* For irritating reasons T67177821 we might not have permissions
+         to write to the file. Pending a fix, let's only set up Hh_logger
+         to write to the file if we can indeed safely write to it. *)
+         Sys_utils.touch
+           (Sys_utils.Touch_existing_or_create_new
+              { mkdir_if_new = false; perm_if_new = 0o666 })
+           client_log_fn;
+         Hh_logger.set_log client_log_fn
+       with _ -> ())
   end;
+  Hh_logger.log
+    "[hh_client] %s"
+    (String.concat ~sep:" " (Array.to_list Sys.argv));
 
   let exit_status =
     try

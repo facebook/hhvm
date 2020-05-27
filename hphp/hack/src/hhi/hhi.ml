@@ -26,7 +26,10 @@ let extract_hhis dir = Array.iter (write_hhi dir) hhi_contents
 (* Touch functionality for all hhis below root *)
 let touch_root r =
   let filter file = Filename.check_suffix file ".hhi" in
-  Find.iter_files ~filter [r] (Sys_utils.try_touch ~follow_symlinks:true)
+  Find.iter_files
+    ~filter
+    [r]
+    Sys_utils.(try_touch (Touch_existing { follow_symlinks = true }))
 
 let touch () =
   match !root with

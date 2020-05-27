@@ -167,7 +167,7 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
         fun ~env ->
           Hhi.touch ();
           env );
-      (* try_touch wraps Unix.lutimes, which doesn't open/close any fds, so we
+      (* Touch_existing{false} wraps Unix.lutimes, which doesn't open/close any fds, so we
        * won't lose our lock by doing this. We are only touching the top level
        * of files, however -- we don't want to do it recursively so that old
        * files under e.g. /tmp/hh_server/logs still get cleaned up. *)
@@ -185,7 +185,9 @@ let init (genv : ServerEnv.genv) (root : Path.t) : unit =
               then
                 ()
               else
-                Sys_utils.try_touch ~follow_symlinks:false fn
+                Sys_utils.try_touch
+                  (Sys_utils.Touch_existing { follow_symlinks = false })
+                  fn
             end
             (Sys.readdir GlobalConfig.tmp_dir);
           env );

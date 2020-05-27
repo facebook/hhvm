@@ -1823,7 +1823,9 @@ let decl_and_run_mode
       Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->
           let file_path = Path.concat hhi_root file_name in
           let file = Path.to_string file_path in
-          Sys_utils.try_touch ~follow_symlinks:true file;
+          Sys_utils.try_touch
+            (Sys_utils.Touch_existing { follow_symlinks = true })
+            file;
           Sys_utils.write_file ~file file_contents);
 
       (* Take the builtins (file, contents) array and create relative paths *)

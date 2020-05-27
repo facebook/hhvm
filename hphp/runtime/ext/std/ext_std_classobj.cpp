@@ -108,10 +108,12 @@ Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
 
 Array HHVM_FUNCTION(get_class_constants, const String& className) {
   auto const cls = Unit::loadClass(className.get());
-  if (cls == NULL) return Array::attach(ArrayData::Create());
+  if (cls == NULL) {
+    return empty_darray();
+  }
 
   auto const numConstants = cls->numConstants();
-  ArrayInit arrayInit(numConstants, ArrayInit::Map{});
+  DArrayInit arrayInit(numConstants);
 
   auto const consts = cls->constants();
   for (size_t i = 0; i < numConstants; i++) {

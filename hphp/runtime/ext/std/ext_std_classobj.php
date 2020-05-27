@@ -24,7 +24,7 @@ function class_exists(string $class_name,
  * @return array - Returns an associative array of constants with their values.
  */
 <<__Native, __HipHopSpecific>>
-function get_class_constants(string $class_name): array<string, mixed>;
+function get_class_constants(string $class_name): darray<string, mixed>;
 
 /**
  * Gets the class methods' names
@@ -35,7 +35,7 @@ function get_class_constants(string $class_name): array<string, mixed>;
  *   specified by class_name. In case of an error, it returns NULL.
  */
 <<__Native>>
-function get_class_methods(mixed $class_name): ?array;
+function get_class_methods(mixed $class_name): ?varray;
 
 /**
  * Get the default properties of the class
@@ -74,7 +74,7 @@ function get_class(<<__MaybeMutable>> mixed $object = null): mixed;
  *   Classes section of the appendices.
  */
 <<__Native>>
-function get_declared_classes(): array<string>;
+function get_declared_classes(): varray<string>;
 
 /**
  * Returns an array of all declared interfaces
@@ -83,7 +83,7 @@ function get_declared_classes(): array<string>;
  *   interfaces in the current script.
  */
 <<__Native>>
-function get_declared_interfaces(): array<string>;
+function get_declared_interfaces(): varray<string>;
 
 /**
  * Returns an array of all declared traits
@@ -92,7 +92,7 @@ function get_declared_interfaces(): array<string>;
  *   values. Returns NULL in case of a failure.
  */
 <<__Native>>
-function get_declared_traits(): array<string>;
+function get_declared_traits(): varray<string>;
 
 /**
  * Gets the properties of the given object

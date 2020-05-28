@@ -717,6 +717,13 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   }
 
   /*
+   * For builtins, we assume the runtime can write to the properties
+   * in un-analyzable ways (but won't violate their type-hint). So,
+   * expand the analyzed types to at least include the type-hint.
+   */
+  if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
+
+  /*
    * For classes with non-scalar initializers, the 86pinit, 86sinit, and
    * 86linit methods are guaranteed to run before any other method, and
    * are never called afterwards. Thus, we can analyze these
@@ -856,8 +863,6 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
       widen_props(clsAnalysis.privateStatics);
     }
   }
-
-  if (isHNIBuiltin) expand_hni_prop_types(clsAnalysis);
 
   Trace::Bump bumper{Trace::hhbbc, kSystemLibBump,
       is_systemlib_part(*ctx.unit)};

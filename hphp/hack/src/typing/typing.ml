@@ -6951,6 +6951,9 @@ and user_attribute env ua =
   (env, { Aast.ua_name = ua.ua_name; Aast.ua_params = typed_ua_params })
 
 and file_attributes env file_attrs =
+  (* Disable checking of error positions, as file attributes have spans that
+   * aren't subspans of the class or function into which they are copied *)
+  Errors.run_with_span Pos.none @@ fun () ->
   let uas = List.concat_map ~f:(fun fa -> fa.fa_user_attributes) file_attrs in
   let env = attributes_check_def env SN.AttributeKinds.file uas in
   List.map_env env file_attrs (fun env fa ->

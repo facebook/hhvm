@@ -50,6 +50,8 @@ type name_context =
 let current_context : (Relative_path.t * phase) ref =
   ref (Relative_path.default, Typing)
 
+let current_span : Pos.t ref = ref Pos.none
+
 let allow_errors_in_default_path = ref true
 
 module PhaseMap = Reordered_argument_map (WrappedMap.Make (struct
@@ -145,7 +147,12 @@ let (is_hh_fixme : (Pos.t -> error_code -> bool) ref) = ref (fun _ _ -> false)
 
 let badpos_message =
   Printf.sprintf
-    "Type checking of this file produced an error with the primary position in a different file. %s"
+    "There is an error somewhere in this file. However the type checker reports that the error is in another file. %s"
+    Error_message_sentinel.please_file_a_bug_message
+
+let badpos_message_2 =
+  Printf.sprintf
+    "There is an error somewhere in this definition. However the type checker reports that the error is elsewhere. %s"
     Error_message_sentinel.please_file_a_bug_message
 
 let try_with_result f1 f2 =
@@ -178,7 +185,10 @@ let try_with_result f1 f2 =
      * error position*)
     let l =
       match l with
-      | (_, msg) :: l when String.equal msg badpos_message -> l
+      | (_, msg) :: l
+        when String.equal msg badpos_message
+             || String.equal msg badpos_message_2 ->
+        l
       | _ -> l
     in
     f2 result (code, l)
@@ -213,6 +223,11 @@ let run_in_context path phase f =
   let context_copy = !current_context in
   current_context := (path, phase);
   Utils.try_finally ~f ~finally:(fun () -> current_context := context_copy)
+
+let run_with_span span f =
+  let old_span = !current_span in
+  current_span := span;
+  Utils.try_finally ~f ~finally:(fun () -> current_span := old_span)
 
 (* Log important data if lazy_decl triggers a crash *)
 let lazy_decl_error_logging error error_map to_absolute to_string =
@@ -789,9 +804,14 @@ let add_ignored_fixme_code_error pos code =
 let check_pos_msg pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let current_file = fst !current_context in
+  let current_span = !current_span in
+  (* If error is reported inside the current span, or no span has been set but the error
+   * is reported in the current file, then accept the error *)
   if
-    Relative_path.equal current_file Relative_path.default
-    || Relative_path.equal (Pos.filename pos) current_file
+    Pos.contains current_span pos
+    || Pos.equal current_span Pos.none
+       && Relative_path.equal (Pos.filename pos) current_file
+    || Relative_path.equal current_file Relative_path.default
   then
     pos_msg_l
   else
@@ -807,7 +827,13 @@ let check_pos_msg pos_msg_l =
       ~current_file
       ~message
       ~stack;
-    (Pos.make_from current_file, badpos_message) :: pos_msg_l
+    let err =
+      if Pos.equal current_span Pos.none then
+        (Pos.make_from current_file, badpos_message)
+      else
+        (current_span, badpos_message_2)
+    in
+    err :: pos_msg_l
 
 let rec add_applied_fixme code pos =
   if ServerLoadFlag.get_no_load () then

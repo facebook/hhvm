@@ -347,6 +347,7 @@ let check_pu_in_locl_ty env lty =
 
 let rec fun_def ctx f :
     (Tast.fun_def * Typing_inference_env.t_global_with_pos) option =
+  Errors.run_with_span f.f_span @@ fun () ->
   let env = EnvFromDef.fun_env ctx f in
   with_timeout env f.f_name ~do_:(fun env ->
       (* reset the expression dependent display ids for each function body *)
@@ -499,6 +500,7 @@ let rec fun_def ctx f :
       (fundef, (pos, global_inference_env)))
 
 and method_def env cls m =
+  Errors.run_with_span m.m_span @@ fun () ->
   with_timeout env m.m_name ~do_:(fun env ->
       let initial_env = env in
       (* reset the expression dependent display ids for each method body *)
@@ -804,6 +806,7 @@ let class_type_param env ct =
     } )
 
 let rec class_def ctx c =
+  Errors.run_with_span c.c_span @@ fun () ->
   let env = EnvFromDef.class_env ctx c in
   let tc = Env.get_class env (snd c.c_name) in
   let env = Env.set_env_pessimize env in
@@ -1598,6 +1601,7 @@ and supertype_redeclared_method tc env m =
     |> Option.value ~default:env)
 
 let gconst_def ctx cst =
+  Errors.run_with_span cst.cst_span @@ fun () ->
   let env = EnvFromDef.gconst_env ctx cst in
   let env = Env.set_env_pessimize env in
   add_decl_errors (Option.map (Env.get_gconst env (snd cst.cst_name)) ~f:snd);

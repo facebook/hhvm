@@ -903,6 +903,12 @@ val run_in_context : Relative_path.t -> phase -> (unit -> 'a) -> 'a
 
 val run_in_decl_mode : Relative_path.t -> (unit -> 'a) -> 'a
 
+(* Run this function with span for the definition being checked.
+ * This is used to check that the primary position for errors is not located
+ * outside the span of the definition.
+ *)
+val run_with_span : Pos.t -> (unit -> 'a) -> 'a
+
 (** ignore errors produced by function passed in argument. *)
 val ignore_ : (unit -> 'a) -> 'a
 

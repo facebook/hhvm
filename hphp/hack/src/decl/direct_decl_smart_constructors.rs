@@ -2601,7 +2601,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_enum_declaration(
         &mut self,
-        _arg0: Self::R,
+        attributes: Self::R,
         _arg1: Self::R,
         name: Self::R,
         _arg3: Self::R,
@@ -2639,6 +2639,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
         let consts = consts.into_bump_slice();
+
+        let mut user_attributes = Vec::new_in(self.state.arena);
+        for attribute in attributes?.iter() {
+            match attribute {
+                &Node_::Attribute(attr) => user_attributes.push(attr),
+                _ => (),
+            }
+        }
+        // Match ordering of attributes produced by the OCaml decl parser (even
+        // though it's the reverse of the syntactic ordering).
+        user_attributes.reverse();
+        let user_attributes = user_attributes.into_bump_slice();
+
         let cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -2666,7 +2679,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             constructor: None,
             static_methods: &[],
             methods: &[],
-            user_attributes: &[],
+            user_attributes,
             enum_type: Some(EnumType {
                 base: hint,
                 constraint: None,

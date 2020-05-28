@@ -1404,13 +1404,12 @@ class Status {
   const BLUE = 34;
 
   public static function createTempDir(): void {
-    self::$tempdir = sys_get_temp_dir();
+    $parent = sys_get_temp_dir();
     // Apparently some systems might not put the trailing slash
-    if (substr(self::$tempdir, -1) !== "/") {
-      self::$tempdir .= "/";
+    if (substr($parent, -1) !== "/") {
+      $parent .= "/";
     }
-    self::$tempdir .= getmypid().'-'.rand();
-    mkdir(self::$tempdir);
+    self::$tempdir = HH\Lib\_Private\_OS\mkdtemp($parent.getmypid().'-XXXXXX');
   }
 
   public static function getTestTmpDir(): string {

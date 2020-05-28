@@ -1,0 +1,16 @@
+File "class_const_referencing_global_const.php", line 5, characters 23-31:
+Unbound name: INT32_MAX (a global constant) (Naming[2049])
+File "class_const_referencing_global_const.php", line 6, characters 23-36:
+Unbound name: Math\INT64_MAX (a global constant) (Naming[2049])
+File "class_const_referencing_global_const.php", line 5, characters 23-31:
+Unbound global constant (Typing) (Typing[4106])
+File "class_const_referencing_global_const.php", line 6, characters 23-36:
+Unbound global constant (Typing) (Typing[4106])
+File "class_const_referencing_global_const.php", line 11, characters 25-33:
+Unbound name: NS\INT32_MAX (a global constant) (Naming[2049])
+File "class_const_referencing_global_const.php", line 12, characters 25-38:
+Unbound name: NS\Math\INT64_MAX (a global constant) (Naming[2049])
+File "class_const_referencing_global_const.php", line 11, characters 25-33:
+Unbound global constant (Typing) (Typing[4106])
+File "class_const_referencing_global_const.php", line 12, characters 25-38:
+Unbound global constant (Typing) (Typing[4106])

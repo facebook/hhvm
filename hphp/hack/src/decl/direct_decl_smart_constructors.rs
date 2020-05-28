@@ -631,26 +631,6 @@ impl<'a> Node_<'a> {
         }
     }
 
-    fn as_expr(self, arena: &'a Bump) -> Result<nast::Expr<'a>, ParseError> {
-        let expr_ = match self {
-            Node_::Expr(&expr) => return Ok(expr),
-            Node_::IntLiteral(s, _) => aast::Expr_::Int(s),
-            Node_::FloatingLiteral(s, _) => aast::Expr_::Float(s),
-            Node_::StringLiteral(s, _) => aast::Expr_::String(s),
-            Node_::BooleanLiteral(s, _) => {
-                if s.eq_ignore_ascii_case("true") {
-                    aast::Expr_::True
-                } else {
-                    aast::Expr_::False
-                }
-            }
-            Node_::Null(_) => aast::Expr_::Null,
-            n => return Err(format!("Could not construct an Expr for {:?}", n)),
-        };
-        let pos = self.get_pos(arena)?;
-        Ok(aast::Expr(pos, expr_))
-    }
-
     fn as_attributes(self, arena: &'a Bump) -> Result<Attributes<'a>, ParseError> {
         let mut attributes = Attributes {
             reactivity: Reactivity::Nonreactive,
@@ -839,6 +819,29 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         } else {
             String::from_utf8_lossy_in(slice, self.state.arena).into_bump_str()
         }
+    }
+
+    fn node_to_expr(&self, node: Node_<'a>) -> Result<nast::Expr<'a>, ParseError> {
+        let expr_ = match node {
+            Node_::Expr(&expr) => return Ok(expr),
+            Node_::IntLiteral(s, _) => aast::Expr_::Int(s),
+            Node_::FloatingLiteral(s, _) => aast::Expr_::Float(s),
+            Node_::StringLiteral(s, _) => aast::Expr_::String(s),
+            Node_::BooleanLiteral(s, _) => {
+                if s.eq_ignore_ascii_case("true") {
+                    aast::Expr_::True
+                } else {
+                    aast::Expr_::False
+                }
+            }
+            Node_::Null(_) => aast::Expr_::Null,
+            Node_::Name(..) | Node_::QualifiedName(..) => aast::Expr_::Id(
+                self.alloc(self.get_name(self.state.namespace_builder.current_namespace(), node)?),
+            ),
+            n => return Err(format!("Could not construct an Expr for {:?}", n)),
+        };
+        let pos = node.get_pos(self.state.arena)?;
+        Ok(aast::Expr(pos, expr_))
     }
 
     fn node_to_ty(&self, node: Node_<'a>) -> Result<Ty<'a>, ParseError> {
@@ -1663,11 +1666,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = self.map_to_slice(fields, |node| match node {
             Node_::ListItem(&(key, value)) => {
-                let key = key.as_expr(self.state.arena)?;
-                let value = value.as_expr(self.state.arena)?;
+                let key = self.node_to_expr(key)?;
+                let value = self.node_to_expr(value)?;
                 Ok(aast::Afield::AFkvalue(key, value))
             }
-            node => Ok(aast::Afield::AFvalue(node.as_expr(self.state.arena)?)),
+            node => Ok(aast::Afield::AFvalue(self.node_to_expr(node)?)),
         })?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
@@ -1689,8 +1692,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = self.map_to_slice(fields, |node| match node {
             Node_::ListItem(&(key, value)) => {
-                let key = key.as_expr(self.state.arena)?;
-                let value = value.as_expr(self.state.arena)?;
+                let key = self.node_to_expr(key)?;
+                let value = self.node_to_expr(value)?;
                 Ok((key, value))
             }
             n => return Err(format!("Expected a ListItem but was {:?}", n)),
@@ -1715,8 +1718,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = self.map_to_slice(fields, |node| match node {
             Node_::ListItem(&(key, value)) => {
-                let key = key.as_expr(self.state.arena)?;
-                let value = value.as_expr(self.state.arena)?;
+                let key = self.node_to_expr(key)?;
+                let value = self.node_to_expr(value)?;
                 Ok(aast::Field(key, value))
             }
             n => return Err(format!("Expected a ListItem but was {:?}", n)),
@@ -1739,7 +1742,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields = self.map_to_slice(fields, |node| node.as_expr(self.state.arena))?;
+        let fields = self.map_to_slice(fields, |node| self.node_to_expr(node))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
                 self.state.arena,
@@ -1758,7 +1761,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields = self.map_to_slice(fields, |node| node.as_expr(self.state.arena))?;
+        let fields = self.map_to_slice(fields, |node| self.node_to_expr(node))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
                 self.state.arena,
@@ -1777,7 +1780,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_bracket: Self::R,
     ) -> Self::R {
-        let fields = self.map_to_slice(fields, |node| node.as_expr(self.state.arena))?;
+        let fields = self.map_to_slice(fields, |node| self.node_to_expr(node))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
                 self.state.arena,
@@ -1826,7 +1829,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         Ok(Node_::Expr(self.alloc(aast::Expr(
             pos,
-            aast::Expr_::Unop(self.alloc((op, value.as_expr(self.state.arena)?))),
+            aast::Expr_::Unop(self.alloc((op, self.node_to_expr(value)?))),
         ))))
     }
 
@@ -1854,7 +1857,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         Ok(Node_::Expr(self.alloc(aast::Expr(
             pos,
-            aast::Expr_::Unop(self.alloc((op, value.as_expr(self.state.arena)?))),
+            aast::Expr_::Unop(self.alloc((op, self.node_to_expr(value)?))),
         ))))
     }
 
@@ -1907,11 +1910,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         Ok(Node_::Expr(self.alloc(aast::Expr(
             pos,
-            aast::Expr_::Binop(self.alloc((
-                op,
-                lhs.as_expr(self.state.arena)?,
-                rhs.as_expr(self.state.arena)?,
-            ))),
+            aast::Expr_::Binop(self.alloc((op, self.node_to_expr(lhs)?, self.node_to_expr(rhs)?))),
         ))))
     }
 
@@ -2271,9 +2270,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 {
                     Node_::Const(self.alloc(shallow_decl_defs::ShallowClassConst {
                         abstract_: modifiers.is_abstract,
-                        expr: match initializer {
-                            Node_::Expr(e) => Some(*e.clone()),
-                            n => n.as_expr(self.state.arena).ok(),
+                        expr: match *initializer {
+                            Node_::Expr(e) => Some(e.clone()),
+                            n => self.node_to_expr(n).ok(),
                         },
                         name: id,
                         type_: ty,
@@ -2731,12 +2730,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut consts = Vec::new_in(self.state.arena);
         for node in cases?.iter() {
             match node {
-                Node_::ListItem(innards) => {
-                    let (name, value) = *innards;
+                Node_::ListItem(&innards) => {
+                    let (name, value) = innards;
                     consts.push(shallow_decl_defs::ShallowClassConst {
                         abstract_: false,
-                        expr: Some(value.as_expr(self.state.arena)?),
-                        name: self.get_name("", *name)?,
+                        expr: Some(self.node_to_expr(value)?),
+                        name: self.get_name("", name)?,
                         type_: Ty(
                             self.alloc(Reason::witness(value.get_pos(self.state.arena)?)),
                             hint.1,
@@ -2880,10 +2879,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let mut kv_pairs = Vec::new_in(self.state.arena);
         for node in fields?.iter() {
             match node {
-                Node_::ListItem((key, value)) => {
+                Node_::ListItem(&(key, value)) => {
                     let key = match key {
-                        Node_::IntLiteral(s, p) => ShapeFieldName::SFlitInt((*p, s)),
-                        Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((*p, s)),
+                        Node_::IntLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
+                        Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((p, s)),
                         n => {
                             return Err(format!(
                             "Expected an int literal, string literal, or class const, but was {:?}",
@@ -2891,7 +2890,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         ))
                         }
                     };
-                    let value = value.as_expr(self.state.arena)?;
+                    let value = self.node_to_expr(value)?;
                     kv_pairs.push((key, value))
                 }
                 n => return Err(format!("Expected a ListItem but was {:?}", n)),
@@ -2916,8 +2915,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         right_paren: Self::R,
     ) -> Self::R {
         let mut field_exprs = Vec::new_in(self.state.arena);
-        for field in fields?.iter() {
-            field_exprs.push(field.as_expr(self.state.arena)?);
+        for &field in fields?.iter() {
+            field_exprs.push(self.node_to_expr(field)?);
         }
         let fields = field_exprs.into_bump_slice();
         Ok(Node_::Expr(self.alloc(aast::Expr(
@@ -3130,7 +3129,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         };
         Ok(Node_::Attribute(nast::UserAttribute {
             name,
-            params: self.map_to_slice(args, |node| node.as_expr(self.state.arena))?,
+            params: self.map_to_slice(args, |node| self.node_to_expr(node))?,
         }))
     }
 

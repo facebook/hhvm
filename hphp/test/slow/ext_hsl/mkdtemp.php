@@ -4,14 +4,10 @@ use namespace HH\Lib\_Private\_OS;
 
 <<__EntryPoint>>
 function main(): void {
-  $base = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
-  if (strrpos($base, '/') !== strlen($base) -1) {
-    $base .= '/';
-  }
   // Supported number of 'X's varies by platform; only exactly 6 is portable.
   // Builtin will error if an invalid pattern is given; leave enforcing
   // portability (or not) up to the HSL.
-  $pattern = $base.'hsl-test-XXXXXX';
+  $pattern = __SystemLib\hphp_test_tmproot().'ext_hsl-test-XXXXXX';
   $tmpdir = _OS\mkdtemp($pattern);
   // All of these should be true
   var_dump($tmpdir !== $pattern);

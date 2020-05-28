@@ -431,7 +431,6 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Arr:     return TArr;
   case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
-  case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Res:     return TRes;
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Func:    return TFunc;
@@ -439,6 +438,7 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Dict:
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
+  case IsTypeOp::ArrLike:
   case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
@@ -683,6 +683,18 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
   });
 
   return mc.elseDo([&]{ return cns(env, false); });
+}
+
+SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
+  // We eventually want ClsMeth to be its own DataType, so we must log.
+  if (RO::EvalIsCompatibleClsMethType && src->isA(TClsMeth)) {
+    if (RO::EvalIsVecNotices) {
+      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+      gen(env, RaiseNotice, cns(env, msg));
+    }
+    return cns(env, true);
+  }
+  return gen(env, IsType, TArrLike, src);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1820,27 +1832,17 @@ void emitIsUnsetL(IRGS& env, int32_t id) {
 SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
   switch (subop) {
     case IsTypeOp::VArray: /* intentional fallthrough */
-    case IsTypeOp::DArray: return isDVArrayImpl(env, val, subop);
+    case IsTypeOp::DArray:  return isDVArrayImpl(env, val, subop);
     case IsTypeOp::PHPArr:
       return isArrayImpl(env, val, /*log_on_hack_arrays=*/false);
     case IsTypeOp::Arr:
       return isArrayImpl(env, val, /*log_on_hack_arrays=*/true);
-    case IsTypeOp::Vec:    return isVecImpl(env, val);
-    case IsTypeOp::Dict:   return isDictImpl(env, val);
-    case IsTypeOp::Scalar: return isScalarImpl(env, val);
-    case IsTypeOp::Str:    return isStrImpl(env, val);
+    case IsTypeOp::Vec:     return isVecImpl(env, val);
+    case IsTypeOp::Dict:    return isDictImpl(env, val);
+    case IsTypeOp::Scalar:  return isScalarImpl(env, val);
+    case IsTypeOp::Str:     return isStrImpl(env, val);
+    case IsTypeOp::ArrLike: return isArrLikeImpl(env, val);
     default: break;
-  }
-
-  // We eventually want ClsMeth to be its own DataType, so we must log.
-  if (RO::EvalIsCompatibleClsMethType && subop == IsTypeOp::ArrLike) {
-    if (val->isA(TClsMeth)) {
-      if (RuntimeOption::EvalIsVecNotices) {
-        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-        gen(env, RaiseNotice, cns(env, msg));
-      }
-      return cns(env, true);
-    }
   }
 
   auto const t = typeOpToType(subop);

@@ -1562,8 +1562,11 @@ and convert_class_elt_const (env : env) st cc =
   (st, { cc with cc_expr })
 
 and convert_class_elt_classvar (env : env) st cv =
+  let (st, cv_user_attributes) =
+    convert_user_attributes env st cv.cv_user_attributes
+  in
   let (st, cv_expr) = convert_opt_expr env st cv.cv_expr in
-  (st, { cv with cv_expr })
+  (st, { cv with cv_expr; cv_user_attributes })
 
 and convert_class_elt_method (env : env) st md =
   let cls =

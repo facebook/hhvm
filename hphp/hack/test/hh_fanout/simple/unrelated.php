@@ -1,0 +1,3 @@
+<?hh
+
+function unrelated(): void {}

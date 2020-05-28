@@ -1,12 +1,13 @@
 (alias
   (name exe)
   (deps
-    src/hh_server.exe
-    src/hh_client.exe
-    src/hh_single_type_check.exe
     src/hackfmt.exe
+    src/hh_client.exe
+    src/hh_fanout/hh_fanout.exe
     src/hh_parse.exe
+    src/hh_server.exe
     src/hh_single_compile.exe
+    src/hh_single_type_check.exe
     ))
 
 (alias
@@ -15,16 +16,16 @@
     src/hh_server.exe
     src/hh_client.exe))
 
-(alias 
+(alias
   (name single)
-  (deps 
+  (deps
     src/hh_single_type_check.exe
     src/hh_single_compile.exe
     ))
 
-(alias 
+(alias
   (name debug-single)
-  (deps 
+  (deps
     src/hh_single_type_check.bc
     src/hh_single_compile.bc
     ))
@@ -32,12 +33,14 @@
 (alias
   (name debug)
   (deps
-    src/hh_server.bc
-    src/hh_client.bc
-    src/hh_single_type_check.bc
     src/hackfmt.bc
+    src/hh_client.bc
+    src/hh_fanout/hh_fanout.bc
     src/hh_parse.bc
-    src/hh_single_compile.bc))
+    src/hh_server.bc
+    src/hh_single_compile.bc
+    src/hh_single_type_check.bc
+    ))
 
 (alias
   (name all-hack)

@@ -1,0 +1,13 @@
+Change set #1
+{'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [{'hash': '2135577825',
+                             'variant': 'Class NewSymbol'}],
+           'fanout_dependents': ['2135577825'],
+           'relevant_dep_edges': []},
+ 'explanations': {'new_file.test.php': {'added_symbols': [{'name': '\\NewSymbol',
+                                                           'num_outgoing_edges': 1,
+                                                           'outgoing_files': ['new_file.test.php'],
+                                                           'type': 'FileInfo.Class'}],
+                                        'removed_symbols': []}},
+ 'files': ['new_file.test.php'],
+ 'telemetry': '<telemetry-redacted-for-test>'}

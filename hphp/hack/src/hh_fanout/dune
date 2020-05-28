@@ -1,0 +1,19 @@
+(executable
+  (name hh_fanout)
+  (ocamlc_flags (:standard -custom))
+  (libraries
+    batch_init
+    client_ide_service
+    core
+    default_injector_config
+    hhi
+    lwt
+    relative_path
+    provider_utils
+    server
+    server_env
+    sys_utils
+    utils_core)
+  (modules_without_implementation incremental)
+  (preprocess
+    (pps lwt_ppx ppx_let)))

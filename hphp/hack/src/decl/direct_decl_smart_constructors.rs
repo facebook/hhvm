@@ -665,6 +665,7 @@ impl<'a> Node_<'a> {
             override_: false,
             at_most_rx_as_func: false,
             enforceable: None,
+            returns_void_to_rx: false,
         };
 
         let mut reactivity_condition_type = None;
@@ -719,6 +720,7 @@ impl<'a> Node_<'a> {
                         attributes.param_mutability = Some(ParamMutability::ParamOwnedMutable)
                     }
                     "__MutableReturn" => attributes.returns_mutable = true,
+                    "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
                     "__Deprecated" => {
                         attributes.deprecated = attribute.params.first().and_then(|expr| match expr
                         {
@@ -781,6 +783,7 @@ struct Attributes<'a> {
     override_: bool,
     at_most_rx_as_func: bool,
     enforceable: Option<&'a Pos<'a>>,
+    returns_void_to_rx: bool,
 }
 
 impl<'a> DirectDeclSmartConstructors<'a> {
@@ -1022,6 +1025,21 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         if attributes.returns_mutable {
             flags |= FunTypeFlags::RETURNS_MUTABLE;
         }
+        if attributes.returns_void_to_rx {
+            flags |= FunTypeFlags::RETURNS_VOID_TO_RX;
+        }
+        match attributes.param_mutability {
+            Some(ParamMutability::ParamBorrowedMutable) => {
+                flags |= FunTypeFlags::MUTABLE_FLAGS_BORROWED;
+            }
+            Some(ParamMutability::ParamOwnedMutable) => {
+                flags |= FunTypeFlags::MUTABLE_FLAGS_OWNED;
+            }
+            Some(ParamMutability::ParamMaybeMutable) => {
+                flags |= FunTypeFlags::MUTABLE_FLAGS_MAYBE;
+            }
+            None => (),
+        };
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(header.type_params)?;
         let ft = self.alloc(FunType {

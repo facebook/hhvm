@@ -506,14 +506,21 @@ void Clusterizer::splitHotColdClusters() {
   // incorporates information from multiple translations. If we have (say)
   // two translations and the first is much hotter than the second, we can
   // use this hint to put the entire second translation into Cold or Frozen.
+  //
+  // If we always use this hint, we end up moving a lot of code across areas.
+  // To let us smoothly interpolate between using and not using this hint,
+  // we introduce a "multiplier" here: if it's set to 0, we'll always use this
+  // translation's entry weight, and if it's set to 1, we'll always the entry
+  // weight of the hottest translation for this function.
   auto const entryAvgWgt = clusterAvgWgt[m_blockCluster[m_unit.entry]];
   auto baseWgt = entryAvgWgt;
-  if (m_unit.context && m_unit.context->region &&
-      RO::EvalJitPGOVasmBlockCountersUseHotWeight) {
+  if (m_unit.context && m_unit.context->region) {
     if (auto const hotWeight = m_unit.context->region->getHotWeight()) {
-      FTRACE(3, "baseWgt = max(entryAvgWgt = {}, hotWeight = {})\n",
-             entryAvgWgt, *hotWeight);
-      baseWgt = std::max(entryAvgWgt, *hotWeight);
+      auto const multiplier =
+        RO::EvalJitPGOVasmBlockCountersHotWeightMultiplier;
+      baseWgt = std::max(entryAvgWgt, uint64_t(multiplier * (*hotWeight)));
+      FTRACE(3, "baseWgt:{} = max(entryAvgWgt:{}, multiplier:{} * hotWeight:{})\n",
+             baseWgt, entryAvgWgt, multiplier, *hotWeight);
     }
   }
 

@@ -45,12 +45,12 @@ ALWAYS_INLINE ArrayData* staticEmptyArray() {
 
 ALWAYS_INLINE ArrayData* staticEmptyVArray() {
   void* vp1 = &s_theEmptyVArray;
-  void* vp2 = &s_theEmptyVecArray;
+  void* vp2 = &s_theEmptyVec;
   return static_cast<ArrayData*>(RuntimeOption::EvalHackArrDVArrs ? vp2 : vp1);
 }
 
-ALWAYS_INLINE ArrayData* staticEmptyVecArray() {
-  void* vp = &s_theEmptyVecArray;
+ALWAYS_INLINE ArrayData* staticEmptyVec() {
+  void* vp = &s_theEmptyVec;
   return static_cast<ArrayData*>(vp);
 }
 
@@ -87,8 +87,8 @@ ALWAYS_INLINE ArrayData* ArrayData::CreateVArray(arrprov::Tag tag /* = {} */) {
 ALWAYS_INLINE ArrayData* ArrayData::CreateVec(arrprov::Tag tag /* = {} */) {
   return RO::EvalArrayProvenanceEmpty &&
          RO::EvalArrProvHackArrays
-    ? arrprov::tagStaticArr(staticEmptyVecArray(), tag)
-    : staticEmptyVecArray();
+    ? arrprov::tagStaticArr(staticEmptyVec(), tag)
+    : staticEmptyVec();
 }
 
 ALWAYS_INLINE ArrayData* ArrayData::CreateDArray(arrprov::Tag tag /* = {} */) {
@@ -157,7 +157,7 @@ inline bool ArrayData::isPlainKind() const { return kind() == kPlainKind; }
 inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 
-inline bool ArrayData::isVecArrayKind() const { return kind() == kVecKind; }
+inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
@@ -172,7 +172,7 @@ inline bool ArrayData::isHackArrayType() const {
 inline bool ArrayData::isDictType() const {
   return ((kind() - 4) & 0x13) == 0x01;
 }
-inline bool ArrayData::isVecArrayType() const {
+inline bool ArrayData::isVecType() const {
   return ((kind() - 4) & 0x13) == 0x02;
 }
 inline bool ArrayData::isKeysetType() const {
@@ -180,7 +180,7 @@ inline bool ArrayData::isKeysetType() const {
 }
 
 inline bool ArrayData::hasVanillaPackedLayout() const {
-  return isPackedKind() || isVecArrayKind();
+  return isPackedKind() || isVecKind();
 }
 inline bool ArrayData::hasVanillaMixedLayout() const {
   return isMixedKind() || isDictKind() || isPlainKind();
@@ -210,7 +210,7 @@ inline bool ArrayData::isDVArray() const {
 inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
 
 inline bool ArrayData::isVecOrVArray() const {
-  return RuntimeOption::EvalHackArrDVArrs ? isVecArrayType() : isVArray();
+  return RuntimeOption::EvalHackArrDVArrs ? isVecType() : isVArray();
 }
 inline bool ArrayData::isDictOrDArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
@@ -231,7 +231,7 @@ inline void ArrayData::setLegacyArray(bool legacy) {
   assertx(hasExactlyOneRef());
   assertx(!legacy
           || isDictType()
-          || isVecArrayType()
+          || isVecType()
           || (!RO::EvalHackArrDVArrs && isDVArray()));
   /* TODO(jgriego) we should be asserting that the
    * mark-ee should have provenance here but it's not

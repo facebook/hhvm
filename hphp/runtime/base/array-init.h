@@ -183,7 +183,7 @@ struct DArray {
   static constexpr auto Release = MixedArray::Release;
 };
 
-struct VecArray {
+struct Vec {
   static constexpr auto MakeReserve = &PackedArray::MakeReserveVec;
   static constexpr auto Release = PackedArray::ReleaseVec;
 };
@@ -464,7 +464,7 @@ struct PackedArrayInitBase final : ArrayInitBase<TArray, DT> {
 /*
  * Initializer for a Hack vector array.
  */
-using VecArrayInit = PackedArrayInitBase<detail::VecArray, KindOfVec>;
+using VecInit = PackedArrayInitBase<detail::Vec, KindOfVec>;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -806,10 +806,10 @@ namespace make_array_detail {
     varray_impl(init, std::forward<Vals>(vals)...);
   }
 
-  inline void vec_impl(VecArrayInit&) {}
+  inline void vec_impl(VecInit&) {}
 
   template<class Val, class... Vals>
-  void vec_impl(VecArrayInit& init, Val&& val, Vals&&... vals) {
+  void vec_impl(VecInit& init, Val&& val, Vals&&... vals) {
     init.append(Variant(std::forward<Val>(val)));
     vec_impl(init, std::forward<Vals>(vals)...);
   }
@@ -900,7 +900,7 @@ Array make_varray(Vals&&... vals) {
 template<class... Vals>
 Array make_vec_array(Vals&&... vals) {
   static_assert(sizeof...(vals), "use Array::CreateVec() instead");
-  VecArrayInit init(sizeof...(vals));
+  VecInit init(sizeof...(vals));
   make_array_detail::vec_impl(init, std::forward<Vals>(vals)...);
   return init.toArray();
 }

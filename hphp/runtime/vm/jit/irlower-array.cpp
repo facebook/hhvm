@@ -307,7 +307,7 @@ void cgNewDArray(IRLS& env, const IRInstruction* inst) {
   implNewArray(env, inst, MixedArray::MakeReserveDArray);
 }
 
-void cgAllocVecArray(IRLS& env, const IRInstruction* inst) {
+void cgAllocVec(IRLS& env, const IRInstruction* inst) {
   implAllocArray(env, inst, PackedArray::MakeUninitializedVec);
 }
 void cgAllocVArray(IRLS& env, const IRInstruction* inst) {

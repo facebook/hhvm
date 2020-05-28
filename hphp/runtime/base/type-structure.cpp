@@ -939,7 +939,7 @@ Array TypeStructure::resolvePartial(const Array& ts,
 bool TypeStructure::isValidResolvedTypeStructureList(const Array& arr,
                                                      bool isShape /*= false*/) {
   if (!(RuntimeOption::EvalHackArrDVArrs
-          ? arr.isVecArray() : (arr.isPHPArray() || !arr.isNull()))) {
+          ? arr.isVec() : (arr.isPHPArray() || !arr.isNull()))) {
     return false;
   }
   bool valid = true;

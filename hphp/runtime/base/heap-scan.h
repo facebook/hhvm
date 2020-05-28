@@ -108,7 +108,7 @@ inline void scanMemoSlots(const ObjectData* obj,
 inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
   switch (h->kind()) {
     case HeaderKind::Packed:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
       return PackedArray::scan(static_cast<const ArrayData*>(h), scanner);
     case HeaderKind::Mixed:
     case HeaderKind::Plain:

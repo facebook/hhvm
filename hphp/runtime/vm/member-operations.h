@@ -259,7 +259,7 @@ inline TypedValue ElemVecPre(ArrayData* base, TypedValue key) {
 
 template<MOpMode mode, KeyType keyType>
 inline TypedValue ElemVec(ArrayData* base, key_type<keyType> key) {
-  assertx(base->isVecArrayKind());
+  assertx(base->isVecKind());
   auto const result = ElemVecPre<mode>(base, key);
   if (UNLIKELY(!result.is_init())) {
     if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
@@ -1523,7 +1523,7 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
 
   ArrayData* a = val(base).parr;
   auto* newData = SetElemVecPre<setResult>(a, key, value);
-  assertx(newData->isVecArrayType());
+  assertx(newData->isVecType());
 
   arraySetUpdateBase<KindOfVec>(a, newData, base);
 }
@@ -2297,7 +2297,7 @@ inline void UnsetElemVec(tv_lval base, key_type<keyType> key) {
   assertx(tvIsPlausible(*base));
   ArrayData* a = val(base).parr;
   ArrayData* a2 = UnsetElemVecPre(a, key);
-  assertx(a2->isVecArrayType() || a2->isDictType());
+  assertx(a2->isVecType() || a2->isDictType());
 
   if (a2 != a) {
     type(base) = a2->toDataType();
@@ -2539,7 +2539,7 @@ bool IssetElemArray(ArrayData* a, key_type<keyType> key) {
  */
 template<KeyType keyType>
 bool IssetElemVec(ArrayData* a, key_type<keyType> key) {
-  assertx(a->isVecArrayKind());
+  assertx(a->isVecKind());
   auto const result = ElemVec<MOpMode::None, keyType>(a, key);
   return !tvIsNull(tvAssertPlausible(result));
 }

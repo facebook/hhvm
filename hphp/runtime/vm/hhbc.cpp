@@ -605,7 +605,7 @@ FlavorDesc instrInputFlavor(PC op, uint32_t idx) {
 }
 
 void staticArrayStreamer(const ArrayData* ad, std::string& out) {
-  if (ad->isVecArrayType()) out += "vec(";
+  if (ad->isVecType()) out += "vec(";
   else if (ad->isDictType()) out += "dict(";
   else if (ad->isKeysetType()) out += "keyset(";
   else {
@@ -625,7 +625,7 @@ void staticArrayStreamer(const ArrayData* ad, std::string& out) {
       }
       Variant key = it.first();
 
-      if (!ad->isVecArrayType() && !ad->isKeysetType()) {
+      if (!ad->isVecType() && !ad->isKeysetType()) {
         staticStreamer(key.asTypedValue(), out);
         out += "=>";
       }

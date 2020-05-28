@@ -595,14 +595,14 @@ Variant HHVM_FUNCTION(array_mark_legacy, const Variant& v, bool recursive) {
 
 bool HHVM_FUNCTION(is_array_marked_legacy, const Variant& v) {
   if (!RO::EvalHackArrDVArrs) {
-    if (!v.isVecArray() && !v.isDict() &&
+    if (!v.isVec() && !v.isDict() &&
         !(v.isPHPArray() && (v.asCArrRef().isVArray() ||
                              v.asCArrRef().isDArray()))) {
       raise_warning(
         "is_array_marked_legacy expects a dict, vec, darray, or varray"
       );
     }
-  } else if (!v.isVecArray() && !v.isDict()) {
+  } else if (!v.isVec() && !v.isDict()) {
     raise_warning("is_array_marked_legacy expects a dict or vec");
   }
   return v.isArray() && v.asCArrRef()->isLegacyArray();

@@ -416,7 +416,7 @@ const StaticString
   s_EmptyArray("a:0:{}"),
   s_EmptyVArray("y:0:{}"),
   s_EmptyDArray("Y:0:{}"),
-  s_EmptyVecArray("v:0:{}"),
+  s_EmptyVec("v:0:{}"),
   s_EmptyDictArray("D:0:{}"),
   s_EmptyKeysetArray("k:0:{}");
 
@@ -474,12 +474,12 @@ ALWAYS_INLINE String serialize_impl(const Variant& value,
     case KindOfPersistentVec:
     case KindOfVec: {
       ArrayData* arr = value.getArrayData();
-      assertx(arr->isVecArrayType());
+      assertx(arr->isVecType());
       if (arr->empty()) {
         return UNLIKELY(RuntimeOption::EvalHackArrDVArrs &&
                         !arr->isLegacyArray())
           ? s_EmptyArray
-          : empty_hack(arr, s_EmptyVecArray);
+          : empty_hack(arr, s_EmptyVec);
       }
       break;
     }

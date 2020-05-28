@@ -69,7 +69,7 @@ public:
   bool isString()    const { return isStringType(getType()); }
   bool isArray()     const { return isArrayLikeType(getType()); }
   bool isPHPArray()  const { return isArrayType(getType()); }
-  bool isVecArray()  const { return isVecType(getType()); }
+  bool isVec()       const { return isVecType(getType()); }
   bool isDict()      const { return isDictType(getType()); }
   bool isKeyset()    const { return isKeysetType(getType()); }
   bool isHackArray() const { return isHackArrayType(getType()); }
@@ -725,7 +725,7 @@ struct Variant : private TypedValue {
     return (isArrayType(getType()) && m_data.parr->isVArray()) ||
       isVArrayType(getType());
   }
-  bool isVecArray() const {
+  bool isVec() const {
     return isVecType(getType());
   }
   bool isDict() const {
@@ -943,11 +943,11 @@ struct Variant : private TypedValue {
     return toResourceHelper();
   }
 
-  Array toVecArray() const {
+  Array toVec() const {
     if (isVecType(m_type)) return Array{m_data.parr};
     auto copy = *this;
     tvCastToVecInPlace(copy.asTypedValue());
-    assertx(copy.isVecArray());
+    assertx(copy.isVec());
     return Array::attach(copy.detach().m_data.parr);
   }
 
@@ -968,7 +968,7 @@ struct Variant : private TypedValue {
   }
 
   Array toVArray() const {
-    if (RuntimeOption::EvalHackArrDVArrs) return toVecArray();
+    if (RuntimeOption::EvalHackArrDVArrs) return toVec();
     if (isArrayType(m_type)) return asCArrRef().toVArray();
     auto copy = *this;
     tvCastToVArrayInPlace(copy.asTypedValue());

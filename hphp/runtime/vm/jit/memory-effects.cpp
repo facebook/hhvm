@@ -1488,7 +1488,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case NewPlainArray:
   case FuncCred:
   case AllocVArray:
-  case AllocVecArray:
+  case AllocVec:
   case AllocStructArray:
   case AllocStructDArray:
   case AllocStructDict:

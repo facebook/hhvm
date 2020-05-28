@@ -300,7 +300,7 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Packed:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
       fill_record(static_cast<const ArrayData*>(hdr), addr, record);
       break;
 

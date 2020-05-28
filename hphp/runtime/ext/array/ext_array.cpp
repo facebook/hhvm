@@ -722,7 +722,7 @@ TypedValue HHVM_FUNCTION(array_pad,
   auto arr = [&](){
     if (UNLIKELY(input.isDict() || input.isKeyset())) {
       return arr_input.toDArray();
-    } else if (UNLIKELY(input.isVecArray())) {
+    } else if (UNLIKELY(input.isVec())) {
       return arr_input.toVArray();
     } else {
       return arr_input;
@@ -3255,7 +3255,7 @@ Array HHVM_FUNCTION(HH_keyset, const Variant& input) {
 
 // HH\\vec
 Array HHVM_FUNCTION(HH_vec, const Variant& input) {
-  return input.toVecArray();
+  return input.toVec();
 }
 
 // HH\\varray

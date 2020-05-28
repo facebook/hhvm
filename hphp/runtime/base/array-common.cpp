@@ -61,7 +61,7 @@ ArrayData* ArrayCommon::Dequeue(ArrayData* a, Variant &value) {
 ArrayData* ArrayCommon::ToVec(ArrayData* a, bool) {
   auto const size = a->size();
   if (!size) return ArrayData::CreateVec();
-  VecArrayInit init{size};
+  VecInit init{size};
   IterateVNoInc(a, [&](TypedValue v) { init.append(v); });
   auto const out = init.create();
   return tagArrProv(out);

@@ -2075,7 +2075,7 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::NewDArray(i) => concat_str_by(w, " ", ["NewDArray", i.to_string().as_str()]),
         LC::NewPackedArray(i) => concat_str_by(w, " ", ["NewPackedArray", i.to_string().as_str()]),
         LC::NewVArray(i) => concat_str_by(w, " ", ["NewVArray", i.to_string().as_str()]),
-        LC::NewVecArray(i) => concat_str_by(w, " ", ["NewVecArray", i.to_string().as_str()]),
+        LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
         LC::NewLikeArrayL(local, i) => {
             w.write("NewLikeArrayL ")?;

@@ -223,8 +223,6 @@ let instr_pushl local = instr (IGet (PushL local))
 
 let instr_throw = instr (IContFlow Throw)
 
-let instr_new_vec_array i = instr (ILitConst (NewVecArray i))
-
 let instr_add_elemc = instr (ILitConst AddElemC)
 
 let instr_add_new_elemc = instr (ILitConst AddNewElemC)

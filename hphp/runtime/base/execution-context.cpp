@@ -111,7 +111,7 @@ ExecutionContext::ExecutionContext()
   , m_logger_hook(*this)
 {
   ARRPROV_USE_RUNTIME_LOCATION();
-  m_deferredErrors = staticEmptyVecArray();
+  m_deferredErrors = staticEmptyVec();
   resetCoverageCounters();
   // We don't want a new execution context to cause any request-heap
   // allocations (because it will cause us to hold a slab, even while idle).
@@ -543,7 +543,7 @@ void ExecutionContext::resetCurrentBuffer() {
 void ExecutionContext::registerShutdownFunction(const Variant& function,
                                                 ShutdownType type) {
   auto& funcs = m_shutdowns[type];
-  assertx(funcs.isVecArray());
+  assertx(funcs.isVec());
   funcs.append(function);
 }
 

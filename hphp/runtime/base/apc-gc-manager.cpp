@@ -247,7 +247,7 @@ void APCTypedValue::registerUncountedAllocations() {
      }
    } else if (kind == APCKind::UncountedVec) {
      auto vec = m_data.vec;
-     assertx(vec->isVecArrayKind());
+     assertx(vec->isVecKind());
      PackedArray::RegisterUncountedAllocations(vec, &m_handle);
      return;
    } else if (kind == APCKind::UncountedDict) {

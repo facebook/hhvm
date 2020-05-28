@@ -545,7 +545,7 @@ struct SimpleParser {
       }
       if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
         auto ret = top == fp
-          ? staticEmptyVecArray()->copy()
+          ? staticEmptyVec()->copy()
           : PackedArray::MakeVecNatural(top - fp, fp);
         ret->setLegacyArray(true);
         return ret;
@@ -1400,7 +1400,7 @@ bool JSON_parser(Variant &z, const char *p, int length, bool const assoc,
           } else if (container_type == JSONContainerType::DARRAYS) {
             top = Array::CreateDArray();
           } else if (container_type == JSONContainerType::LEGACY_HACK_ARRAYS) {
-            auto arr = staticEmptyVecArray()->copy();
+            auto arr = staticEmptyVec()->copy();
             arr->setLegacyArray(true);
             top = arr;
           } else {

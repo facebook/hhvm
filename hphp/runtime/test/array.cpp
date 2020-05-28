@@ -85,7 +85,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(arr.size() == 0);
   EXPECT_TRUE(arr.length() == 0);
   EXPECT_TRUE(!arr.isNull());
-  EXPECT_TRUE(arr.isVecArray());
+  EXPECT_TRUE(arr.isVec());
   EXPECT_TRUE(arr.isHackArray());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isKeyset());
@@ -98,7 +98,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isDict());
   EXPECT_TRUE(arr.isHackArray());
-  EXPECT_FALSE(arr.isVecArray());
+  EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isKeyset());
   EXPECT_FALSE(arr.isPHPArray());
 
@@ -109,7 +109,7 @@ TEST(ARRAY, Constructors) {
   EXPECT_TRUE(!arr.isNull());
   EXPECT_TRUE(arr.isKeyset());
   EXPECT_TRUE(arr.isHackArray());
-  EXPECT_FALSE(arr.isVecArray());
+  EXPECT_FALSE(arr.isVec());
   EXPECT_FALSE(arr.isDict());
   EXPECT_FALSE(arr.isPHPArray());
 }

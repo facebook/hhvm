@@ -1054,7 +1054,7 @@ struct CompactReader {
       );
       auto format = tvCastToString(spec.lookup(s_format));
       if (format.equal(s_harray)) {
-        VecArrayInit arr(size);
+        VecInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           arr.append(readField(valueSpec, valueType));
         }

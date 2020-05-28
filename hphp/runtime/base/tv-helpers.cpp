@@ -58,13 +58,13 @@ bool tvIsPlausible(const TypedValue cell) {
       case KindOfPersistentVec:
         assertPtr(cell.m_data.parr);
         assertx(!cell.m_data.parr->isRefCounted());
-        assertx(cell.m_data.parr->isVecArrayType());
+        assertx(cell.m_data.parr->isVecType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfVec:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->checkCountZ());
-        assertx(cell.m_data.parr->isVecArrayType());
+        assertx(cell.m_data.parr->isVecType());
         assertx(cell.m_data.parr->isNotDVArray());
         return;
       case KindOfPersistentDict:

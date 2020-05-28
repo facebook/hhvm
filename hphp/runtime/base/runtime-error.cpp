@@ -208,7 +208,7 @@ HAC_CHECK_OPTS
 
 void raise_hack_arr_compat_serialize_notice(const ArrayData* arr) {
   auto const type = [&]{
-    if (arr->isVecArrayType()) return "vec";
+    if (arr->isVecType()) return "vec";
     if (arr->isDictType())     return "dict";
     if (arr->isKeysetType())   return "keyset";
     return "array";
@@ -353,7 +353,7 @@ void raise_array_serialization_notice(SerializationSite src,
   auto const arrayType = [&] {
     if (arr->isVArray()) return ArrayType::VArray;
     if (arr->isDArray()) return ArrayType::DArray;
-    if (arr->isVecArrayType()) return ArrayType::Vec;
+    if (arr->isVecType()) return ArrayType::Vec;
     if (arr->isDictType()) return ArrayType::Dict;
     return ArrayType::Other;
   }();

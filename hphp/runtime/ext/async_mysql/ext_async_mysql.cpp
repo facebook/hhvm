@@ -83,7 +83,7 @@ am::QueryArgument queryarg_from_variant(const Variant& arg) {
     return nullptr;
   }
 
-  if (arg.isVecArray()) {
+  if (arg.isVec()) {
     const Array& vec = arg.asCArrRef();
     std::vector<am::QueryArgument> elems;
     elems.reserve(vec.size());

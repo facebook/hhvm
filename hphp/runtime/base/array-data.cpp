@@ -208,11 +208,11 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   };
 
   if (arr->empty() && LIKELY(!requested_tag)) {
-    if (arr->isKeysetType())   return replace(staticEmptyKeysetArray());
-    if (arr->isVArray())       return replace(staticEmptyVArray());
-    if (arr->isDArray())       return replace(staticEmptyDArray());
-    if (arr->isVecArrayType()) return replace(staticEmptyVecArray());
-    if (arr->isDictType())     return replace(staticEmptyDictArray());
+    if (arr->isKeysetType()) return replace(staticEmptyKeysetArray());
+    if (arr->isVArray())     return replace(staticEmptyVArray());
+    if (arr->isDArray())     return replace(staticEmptyDArray());
+    if (arr->isVecType())    return replace(staticEmptyVec());
+    if (arr->isDictType())   return replace(staticEmptyDictArray());
     return replace(staticEmptyArray());
   }
 
@@ -943,7 +943,7 @@ int ArrayData::compare(const ArrayData* v2) const {
       if (UNLIKELY(checkHACCompare())) {
         raiseHackArrCompatArrHackArrCmp();
       }
-      if (v2->isVecArrayType()) throw_vec_compare_exception();
+      if (v2->isVecType()) throw_vec_compare_exception();
       if (v2->isDictType()) throw_dict_compare_exception();
       if (v2->isKeysetType()) throw_keyset_compare_exception();
       not_reached();
@@ -951,14 +951,14 @@ int ArrayData::compare(const ArrayData* v2) const {
     return Compare(this, v2);
   }
 
-  if (isVecArrayType()) {
-    if (UNLIKELY(!v2->isVecArrayType())) {
+  if (isVecType()) {
+    if (UNLIKELY(!v2->isVecType())) {
       if (UNLIKELY(checkHACCompare() && v2->isPHPArrayType())) {
         raiseHackArrCompatArrHackArrCmp();
       }
       throw_vec_compare_exception();
     }
-    assertx(isVecArrayKind() && v2->isVecArrayKind());
+    assertx(isVecKind() && v2->isVecKind());
     return PackedArray::VecCmp(this, v2);
   }
 
@@ -987,8 +987,8 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
     return strict ? Same(this, v2) : Equal(this, v2);
   }
 
-  if (isVecArrayKind()) {
-    if (UNLIKELY(!v2->isVecArrayKind())) return mixed();
+  if (isVecKind()) {
+    if (UNLIKELY(!v2->isVecKind())) return mixed();
     return strict
       ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
   }
@@ -1080,7 +1080,7 @@ void ArrayData::getNotFound(int64_t k) const {
 
 void ArrayData::getNotFound(const StringData* k) const {
   assertx(kind() != kGlobalsKind);
-  if (isVecArrayType()) throwInvalidArrayKeyException(k, this);
+  if (isVecType()) throwInvalidArrayKeyException(k, this);
   if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayKeyException(k, false);
 }
@@ -1189,7 +1189,7 @@ std::string describeKeyValue(TypedValue tv) {
 
 void throwInvalidArrayKeyException(const TypedValue* key, const ArrayData* ad) {
   std::pair<const char*, const char*> kind_type = [&]{
-    if (ad->isVecArrayType()) return std::make_pair("vec", "int");
+    if (ad->isVecType()) return std::make_pair("vec", "int");
     if (ad->isDictType()) return std::make_pair("dict", "int or string");
     if (ad->isKeysetType()) return std::make_pair("keyset", "int or string");
     assertx(ad->isPHPArrayType());
@@ -1226,7 +1226,7 @@ void throwMissingElementException(const char* op) {
 
 void throwOOBArrayKeyException(TypedValue key, const ArrayData* ad) {
   const char* type = [&]{
-    if (ad->isVecArrayType()) return "vec";
+    if (ad->isVecType()) return "vec";
     if (ad->isDictType()) return "dict";
     if (ad->isKeysetType()) return "keyset";
     assertx(ad->isPHPArrayType());
@@ -1258,7 +1258,7 @@ void throwInvalidKeysetOperation() {
 void throwInvalidAdditionException(const ArrayData* ad) {
   assertx(ad->isHackArrayType());
   const char* type = [&]{
-    if (ad->isVecArrayType()) return "Vecs";
+    if (ad->isVecType()) return "Vecs";
     if (ad->isDictType()) return "Dicts";
     if (ad->isKeysetType()) return "Keysets";
     not_reached();

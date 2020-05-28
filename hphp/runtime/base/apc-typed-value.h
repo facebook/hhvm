@@ -87,7 +87,7 @@ struct APCTypedValue {
   enum class StaticVec {};
   APCTypedValue(StaticVec, ArrayData* data)
     : m_handle(APCKind::StaticVec, KindOfPersistentVec) {
-    assertx(data->isVecArrayKind());
+    assertx(data->isVecKind());
     assertx(data->isStatic());
     m_data.vec = data;
     assertx(checkInvariants());
@@ -96,7 +96,7 @@ struct APCTypedValue {
   enum class UncountedVec {};
   APCTypedValue(UncountedVec, ArrayData* data)
     : m_handle(APCKind::UncountedVec, KindOfPersistentVec) {
-    assertx(data->isVecArrayKind());
+    assertx(data->isVecKind());
     assertx(data->isUncounted());
     m_data.vec = data;
     assertx(checkInvariants());

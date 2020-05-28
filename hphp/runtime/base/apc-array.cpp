@@ -124,7 +124,7 @@ APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
 APCHandle::Pair
 APCArray::MakeSharedVec(ArrayData* vec, APCHandleLevel level,
                         bool unserializeObj) {
-  assertx(vec->isVecArrayKind());
+  assertx(vec->isVecKind());
   if (auto const value = APCTypedValue::HandlePersistent(
         APCTypedValue::StaticVec{}, APCTypedValue::UncountedVec{}, vec)) {
     return value;
@@ -264,7 +264,7 @@ APCHandle* APCArray::MakeUncountedVec(
     ArrayData* vec,
     DataWalker::PointerMap* m) {
   assertx(apcExtension::UseUncounted);
-  assertx(vec->isVecArrayKind());
+  assertx(vec->isVecKind());
   auto data = PackedArray::MakeUncounted(vec, true, m);
   auto mem = reinterpret_cast<APCTypedValue*>(data) - 1;
   auto value = new(mem) APCTypedValue(APCTypedValue::UncountedVec{}, data);

@@ -198,7 +198,7 @@ bool hasObviousStackOutput(const Bytecode& op, const Interp& interp) {
   case Op::NewStructArray:
   case Op::NewStructDArray:
   case Op::NewStructDict:
-  case Op::NewVecArray:
+  case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::AddNewElemC:
   case Op::NewCol:
@@ -923,7 +923,7 @@ Bytecode gen_constant(const TypedValue& cell) {
     case KindOfVec:
       assert(cell.m_data.parr->isStatic());
     case KindOfPersistentVec:
-      assert(cell.m_data.parr->isVecArrayType());
+      assert(cell.m_data.parr->isVecType());
       return bc::Vec { cell.m_data.parr };
     case KindOfDict:
       assert(cell.m_data.parr->isStatic());

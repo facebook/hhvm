@@ -160,7 +160,7 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::Packed:
     case HeaderKind::Mixed:
     case HeaderKind::Dict:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
     case HeaderKind::Keyset:
     case HeaderKind::Plain:
     case HeaderKind::Cpp:

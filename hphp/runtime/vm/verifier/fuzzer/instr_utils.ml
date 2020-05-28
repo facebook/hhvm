@@ -89,7 +89,7 @@ let stk_data : instruct -> stack_sig = function
   | IMisc CGetCUNop                        -> ["U"], ["C"]
   | IMisc UGetCUNop                        -> ["C"], ["U"]
   | ILitConst NullUninit                   -> [], ["U"]
-  | ILitConst NewVecArray n
+  | ILitConst NewVec n
   | ILitConst NewKeysetArray n
   (*| IOp ConcatN n *)
   | IFinal QueryM (n, _, _)

@@ -288,7 +288,7 @@ bool canDCE(IRInstruction* inst) {
   case AllocStructDArray:
   case AllocStructDict:
   case AllocVArray:
-  case AllocVecArray:
+  case AllocVec:
   case GetMixedPtrIter:
   case GetPackedPtrIter:
   case AdvanceMixedPtrIter:

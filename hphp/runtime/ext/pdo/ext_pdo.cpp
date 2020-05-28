@@ -79,7 +79,7 @@ using std::string;
 
 Array HHVM_FUNCTION(pdo_drivers) {
   const auto& drivers = PDODriver::GetDrivers();
-  VecArrayInit ret{drivers.size()};
+  VecInit ret{drivers.size()};
   for (const auto& driver : drivers) {
     ret.append(driver.second->getName());
   }

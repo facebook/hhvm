@@ -676,7 +676,7 @@ Array Unit::reportCoverage() const {
 
   auto const& c = *m_coverage;
   auto const end = req::dynamic_bitset::npos;
-  VecArrayInit init{m_coverage->count()};
+  VecInit init{m_coverage->count()};
   for (auto i = c.find_first(); i != end; i = c.find_next(i)) {
     init.append(i);
   }

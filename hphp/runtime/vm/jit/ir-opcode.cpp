@@ -542,7 +542,7 @@ bool opcodeMayRaise(Opcode opc) {
   case AllocStructDArray:
   case AllocStructDict:
   case AllocVArray:
-  case AllocVecArray:
+  case AllocVec:
   case AndInt:
   case ArrayIdx:
   case ArrayIsset:

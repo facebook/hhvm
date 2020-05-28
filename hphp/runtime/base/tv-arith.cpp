@@ -42,7 +42,7 @@ namespace {
 [[noreturn]] NEVER_INLINE
 void throw_bad_array_operand(const ArrayData* ad) {
   const char* type = [&]{
-    if (ad->isVecArrayType()) return "vecs";
+    if (ad->isVecType()) return "vecs";
     if (ad->isDictType()) return "dicts";
     if (ad->isKeysetType()) return "keysets";
     assertx(ad->isPHPArrayType());

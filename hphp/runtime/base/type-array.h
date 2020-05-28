@@ -222,7 +222,7 @@ public:
   /*
    * Array kind.
    */
-  bool isVecArray() const { return m_arr && m_arr->isVecArrayType(); }
+  bool isVec() const { return m_arr && m_arr->isVecType(); }
   bool isDict() const { return m_arr && m_arr->isDictType(); }
   bool isKeyset() const { return m_arr && m_arr->isKeysetType(); }
   bool isHackArray() const { return m_arr && m_arr->isHackArrayType(); }

@@ -813,7 +813,7 @@ static ArrayData* addNewElemKeysetImpl(ArrayData* keyset, TypedValue v) {
 }
 
 static ArrayData* addNewElemVecImpl(ArrayData* vec, TypedValue v) {
-  assertx(vec->isVecArrayKind());
+  assertx(vec->isVecKind());
   auto out = PackedArray::AppendVec(vec, v);
   if (vec != out) decRefArr(vec);
   return out;

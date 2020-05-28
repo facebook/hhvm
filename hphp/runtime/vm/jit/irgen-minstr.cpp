@@ -65,7 +65,7 @@ enum class SimpleOp {
   Array,
   ProfiledPackedArray,
   PackedArray,
-  VecArray,
+  Vec,
   Dict,
   Keyset,
   String,
@@ -255,7 +255,7 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledPackedArray:
-    case SimpleOp::VecArray:
+    case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
     case SimpleOp::String:
@@ -621,8 +621,7 @@ SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
 }
 
 template<class Finish>
-SSATmp* emitVecArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
-                        Finish finish) {
+SSATmp* emitVecGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(base->isA(TVec));
 
   if (!key->isA(TInt)) {
@@ -643,8 +642,7 @@ SSATmp* emitVecArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
 }
 
 template<class Finish>
-SSATmp* emitVecArrayQuietGet(IRGS& env, SSATmp* base, SSATmp* key,
-                             Finish finish) {
+SSATmp* emitVecQuietGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   assertx(base->isA(TVec));
 
   if (key->isA(TStr)) return cns(env, TInitNull);
@@ -840,7 +838,7 @@ SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   );
 }
 
-SSATmp* emitVecArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
+SSATmp* emitVecIsset(IRGS& env, SSATmp* base, SSATmp* key) {
   assertx(base->isA(TVec));
 
   if (key->isA(TStr)) return cns(env, false);
@@ -916,8 +914,8 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
       return emitPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::ProfiledPackedArray:
       return emitProfiledPackedArrayGet(env, base, key, mode, finish);
-    case SimpleOp::VecArray:
-      return emitVecArrayGet(env, base, key, finish);
+    case SimpleOp::Vec:
+      return emitVecGet(env, base, key, finish);
     case SimpleOp::Dict:
       return emitDictKeysetGet(env, base, key, false, true, finish);
     case SimpleOp::Keyset:
@@ -945,8 +943,8 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
                           MOpMode mode, SimpleOp simpleOp, Finish finish) {
   assertx(mode != MOpMode::Warn);
   switch (simpleOp) {
-    case SimpleOp::VecArray:
-      return emitVecArrayQuietGet(env, base, key, finish);
+    case SimpleOp::Vec:
+      return emitVecQuietGet(env, base, key, finish);
     case SimpleOp::Dict:
       return emitDictKeysetGet(env, base, key, true, true, finish);
     case SimpleOp::Keyset:
@@ -975,8 +973,8 @@ SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
     return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
     return emitPackedArrayIsset(env, base, key);
-  case SimpleOp::VecArray:
-    return emitVecArrayIsset(env, base, key);
+  case SimpleOp::Vec:
+    return emitVecIsset(env, base, key);
   case SimpleOp::Dict:
     return emitDictIsset(env, base, key);
   case SimpleOp::Keyset:
@@ -1016,7 +1014,7 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
       return SimpleOp::Array;
     }
   } else if (baseType <= TVec) {
-    return SimpleOp::VecArray;
+    return SimpleOp::Vec;
   } else if (baseType <= TDict) {
     return SimpleOp::Dict;
   } else if (baseType <= TKeyset) {
@@ -1709,7 +1707,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
 
     case SimpleOp::Array:
     case SimpleOp::ProfiledPackedArray:
-    case SimpleOp::VecArray:
+    case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
       if (auto result = emitArrayLikeSet(env, key, value)) {

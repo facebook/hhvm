@@ -696,7 +696,7 @@ const char* VariablesCommand::getTypeName(const Variant& variable) {
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray: {
-      if (variable.isVecArray()) {
+      if (variable.isVec()) {
         return "vec";
       }
 

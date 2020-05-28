@@ -433,7 +433,7 @@ public:
 
   ALWAYS_INLINE
   void pushVecNoRc(ArrayData* a) {
-    assertx(a->isVecArrayType());
+    assertx(a->isVecType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfVec>(a);
@@ -495,7 +495,7 @@ public:
   ALWAYS_INLINE
   void pushStaticVec(const ArrayData* a) {
     assertx(a->isStatic()); // No need to call a->incRefCount().
-    assertx(a->isVecArrayType());
+    assertx(a->isVecType());
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfPersistentVec>(a);

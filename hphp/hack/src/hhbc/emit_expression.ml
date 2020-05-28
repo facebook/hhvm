@@ -915,7 +915,7 @@ and emit_reified_targs env pos targs =
                fst @@ emit_reified_arg env ~isas:false pos h);
         instr_lit_const
           ( if hack_arr_dv_arrs () then
-            NewVecArray len
+            NewVec len
           else
             NewVArray len );
       ]
@@ -1910,7 +1910,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
   match expr_ with
   | A.ValCollection (A.Vec, _, _)
   | A.Collection ((_, "vec"), _, _) ->
-    emit_value_only_collection env pos es (fun n -> NewVecArray n)
+    emit_value_only_collection env pos es (fun n -> NewVec n)
   | A.ValCollection (A.Keyset, _, _)
   | A.Collection ((_, "keyset"), _, _) ->
     emit_value_only_collection env pos es (fun n -> NewKeysetArray n)
@@ -1945,7 +1945,7 @@ and emit_dynamic_collection env (expr : Tast.expr) es =
   | A.Varray _ ->
     emit_value_only_collection env pos es (fun n ->
         if hack_arr_dv_arrs () then
-          NewVecArray n
+          NewVec n
         else
           NewVArray n)
   | A.Darray _ ->
@@ -2062,7 +2062,7 @@ and emit_vec_collection env pos es =
   with
   | tv -> emit_static_collection env pos tv ~transform_to_collection:None
   | exception Ast_constant_folder.(NotLiteral | UserDefinedConstant) ->
-    emit_value_only_collection env pos es (fun t -> NewVecArray t)
+    emit_value_only_collection env pos es (fun t -> NewVec t)
 
 and emit_pipe env (e1 : Tast.expr) (e2 : Tast.expr) =
   let lhs_instrs = emit_expr env e1 in
@@ -3971,7 +3971,7 @@ and emit_class_meth env cls meth =
         instr
           (ILitConst
              ( if hack_arr_dv_arrs () then
-               NewVecArray 2
+               NewVec 2
              else
                NewVArray 2 ));
       ]
@@ -4007,7 +4007,7 @@ and emit_inst_meth env obj_expr method_name =
         instr
           (ILitConst
              ( if hack_arr_dv_arrs () then
-               NewVecArray 2
+               NewVec 2
              else
                NewVArray 2 )) );
     ]
@@ -4102,7 +4102,7 @@ and emit_function_pointer env (annot, e) _targs =
             instr
               (ILitConst
                  ( if hack_arr_dv_arrs () then
-                   NewVecArray 2
+                   NewVec 2
                  else
                    NewVArray 2 )) );
           instr_label end_label;

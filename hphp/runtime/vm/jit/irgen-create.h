@@ -35,7 +35,7 @@ struct IRGS;
 void initSProps(IRGS&, const Class*);
 SSATmp* allocObjFast(IRGS&, const Class*);
 
-void emitNewVecArray(IRGS& env, uint32_t numArgs);
+void emitNewVec(IRGS& env, uint32_t numArgs);
 void emitNewVArray(IRGS& env, uint32_t numArgs);
 
 //////////////////////////////////////////////////////////////////////

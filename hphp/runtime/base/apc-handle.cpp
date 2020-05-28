@@ -111,7 +111,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
     case KindOfPersistentVec:
     case KindOfVec: {
       auto const ad = val(cell).parr;
-      assertx(ad->isVecArrayType());
+      assertx(ad->isVecType());
       return APCArray::MakeSharedVec(ad, level, unserializeObj);
     }
 
@@ -158,7 +158,7 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       raiseClsMethToVecWarningHelper();
       auto arr = clsMethToVecHelper(val(cell).pclsmeth);
       if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecArrayType());
+        assertx(arr->isVecType());
         return APCArray::MakeSharedVec(arr.detach(), level, unserializeObj);
       } else {
         assertx(arr->isPHPArrayType());
@@ -209,7 +209,7 @@ Variant APCHandle::toLocalHelper() const {
     case APCKind::SerializedVec: {
       auto const serVec = APCString::fromHandle(this)->getStringData();
       auto const v = apc_unserialize(serVec->data(), serVec->size());
-      assertx(v.isVecArray());
+      assertx(v.isVec());
       return v;
     }
     case APCKind::SerializedDict: {

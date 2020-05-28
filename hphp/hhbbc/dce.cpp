@@ -207,7 +207,7 @@ enum class Use {
   /*
    * Indicates that the stack slot contains an array-like being
    * constructed by AddElemCs, which looks like it can be optimized to
-   * a NewStructArray, NewPackedArray, or NewVecArray.
+   * a NewStructArray, NewPackedArray, or NewVec.
    */
   AddElemC = 3,
 
@@ -1442,7 +1442,7 @@ void dce(Env& env, const bc::NewPackedArray& op)  { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewStructArray& op)  { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewStructDArray& op) { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewStructDict& op)   { dceNewArrayLike(env, op); }
-void dce(Env& env, const bc::NewVecArray& op)     { dceNewArrayLike(env, op); }
+void dce(Env& env, const bc::NewVec& op)          { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewKeysetArray& op)  { dceNewArrayLike(env, op); }
 void dce(Env& env, const bc::NewVArray& op)       { dceNewArrayLike(env, op); }
 

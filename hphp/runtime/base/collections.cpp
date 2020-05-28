@@ -158,8 +158,8 @@ ArrayData* deepCopyArray(ArrayData* arr) {
   return ar.detach();
 }
 
-ArrayData* deepCopyVecArray(ArrayData* arr) {
-  assertx(arr->isVecArrayKind());
+ArrayData* deepCopyVec(ArrayData* arr) {
+  assertx(arr->isVecKind());
   Array ar(arr);
   PackedArray::IterateKV(
     arr,
@@ -217,7 +217,7 @@ void deepCopy(tv_lval lval) {
 
     case KindOfVec: {
       auto& original = val(lval).parr;
-      auto arr = deepCopyVecArray(original);
+      auto arr = deepCopyVec(original);
       decRefArr(original);
       original = arr;
       return;

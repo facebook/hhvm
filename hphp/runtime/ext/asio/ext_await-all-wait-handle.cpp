@@ -222,7 +222,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isVecArrayKind());
+  assertx(ad->isVecKind());
   if (!ad->size()) return Object{returnEmpty()};
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     PackedArray::IterateV(ad, fn);

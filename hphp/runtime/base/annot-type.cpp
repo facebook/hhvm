@@ -209,7 +209,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::ArrayLike:
     case AnnotType::VecOrDict:
     case AnnotType::Vec:
-      return make_tv<KindOfPersistentVec>(staticEmptyVecArray());
+      return make_tv<KindOfPersistentVec>(staticEmptyVec());
     case AnnotType::String:
       return make_tv<KindOfPersistentString>(staticEmptyString());
     case AnnotType::Array:

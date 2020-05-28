@@ -137,7 +137,7 @@ ArrayData* convArrToNonDVArrHelper(ArrayData* adIn) {
 }
 
 ArrayData* convVecToArrHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArrayKind());
+  assertx(adIn->isVecKind());
   auto a = PackedArray::ToPHPArrayVec(adIn, adIn->cowCheck());
   if (a != adIn) decRefArr(adIn);
   assertx(a->isPHPArrayType());
@@ -188,7 +188,7 @@ ArrayData* convKeysetToVecHelper(ArrayData* adIn) {
 
 ArrayData* convObjToVecHelper(ObjectData* obj) {
   auto a = castObjToVec(obj);
-  assertx(a->isVecArrayType());
+  assertx(a->isVecType());
   decRefObj(obj);
   return a;
 }
@@ -201,7 +201,7 @@ ArrayData* convArrToDictHelper(ArrayData* adIn) {
 }
 
 ArrayData* convVecToDictHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArrayKind());
+  assertx(adIn->isVecKind());
   auto a = PackedArray::ToDictVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -230,7 +230,7 @@ ArrayData* convArrToKeysetHelper(ArrayData* adIn) {
 }
 
 ArrayData* convVecToKeysetHelper(ArrayData* adIn) {
-  assertx(adIn->isVecArrayKind());
+  assertx(adIn->isVecKind());
   auto a = PackedArray::ToKeysetVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   decRefArr(adIn);
@@ -600,7 +600,7 @@ TypedValue keysetIdxS(ArrayData* a, StringData* key, TypedValue def) {
 
 template <bool isFirst>
 TypedValue vecFirstLast(ArrayData* a) {
-  assertx(a->isVecArrayKind() || a->isPackedKind());
+  assertx(a->isVecKind() || a->isPackedKind());
   auto const size = a->getSize();
   if (UNLIKELY(size == 0)) return make_tv<KindOfNull>();
   return PackedArray::NvGetIntVec(a, isFirst ? 0 : size - 1);

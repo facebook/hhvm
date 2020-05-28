@@ -232,7 +232,7 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       }
 
       case HeaderKind::Packed:
-      case HeaderKind::VecArray: {
+      case HeaderKind::Vec: {
         if (edge.offset >= sizeof(ArrayData)) {
           auto elm_offset = edge.offset - sizeof(ArrayData);
           uint32_t index = elm_offset / sizeof(TypedValue);

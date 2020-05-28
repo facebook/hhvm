@@ -1392,7 +1392,7 @@ struct DualDispatchUnionImpl {
 
       auto r = [&] {
         auto const tag = unionProvTag(aTag, bTag);
-        if (a->isVecArrayType()) return vec_empty(tag);
+        if (a->isVecType()) return vec_empty(tag);
         if (a->isDictType()) return dict_empty(tag);
         if (a->isVArray()) return aempty_varray(tag);
         if (a->isDArray()) return aempty_darray(tag);
@@ -2688,7 +2688,7 @@ bool Type::checkInvariants() const {
     assert(!isVArray || m_data.aval->isVArray());
     assert(!isDArray || m_data.aval->isDArray());
     assert(!isNotDVArray || m_data.aval->isNotDVArray());
-    assert(!isVector || m_data.aval->isVecArrayType());
+    assert(!isVector || m_data.aval->isVecType());
     assert(!isKeyset || m_data.aval->isKeysetType());
     assert(!isDict || m_data.aval->isDictType());
     assertx(!RuntimeOption::EvalHackArrDVArrs || m_data.aval->isNotDVArray());
@@ -2913,7 +2913,7 @@ Type some_aempty_darray(ProvTag tag) {
 
 Type vec_val(SArray val) {
   assert(val->isStatic());
-  assert(val->isVecArrayType());
+  assert(val->isVecType());
   auto const bits = val->empty() ? BSVecE : BSVecN;
   auto r = Type { bits };
   r.m_data.aval = val;
@@ -2924,8 +2924,8 @@ Type vec_val(SArray val) {
 Type vec_empty(ProvTag tag) {
   auto r = Type { BSVecE };
   r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyVecArray(), tag.get())
-    : staticEmptyVecArray();
+    ? arrprov::tagStaticArr(staticEmptyVec(), tag.get())
+    : staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
@@ -2933,8 +2933,8 @@ Type vec_empty(ProvTag tag) {
 Type some_vec_empty(ProvTag tag) {
   auto r = Type { BVecE };
   r.m_data.aval = tag.valid()
-    ? arrprov::tagStaticArr(staticEmptyVecArray(), tag.get())
-    : staticEmptyVecArray();
+    ? arrprov::tagStaticArr(staticEmptyVec(), tag.get())
+    : staticEmptyVec();
   r.m_dataTag = DataTag::ArrLikeVal;
   return r;
 }
@@ -3655,7 +3655,7 @@ R tvImpl(const Type& t) {
     if (t.m_dataTag == DataTag::ArrLikeVal) {
       return H::template make<KindOfPersistentVec>(t.m_data.aval);
     }
-    return H::template make<KindOfPersistentVec>(staticEmptyVecArray());
+    return H::template make<KindOfPersistentVec>(staticEmptyVec());
   case BDictE:
   case BSDictE:
     if (t.m_dataTag == DataTag::ArrLikeVal) {
@@ -3746,8 +3746,8 @@ R tvImpl(const Type& t) {
       break;
     case DataTag::ArrLikePacked:
       if (t.subtypeOf(BVecN)) {
-        return H::template fromVec<VecArrayInit>(t.m_data.packed->elems,
-                                                 t.m_data.packed->provenance);
+        return H::template fromVec<VecInit>(t.m_data.packed->elems,
+                                            t.m_data.packed->provenance);
       } else if (t.subtypeOf(BDictN)) {
         return H::template fromVec<DictInit>(t.m_data.packed->elems,
                                              t.m_data.packed->provenance);
@@ -4077,7 +4077,7 @@ Type from_cell(TypedValue cell) {
   case KindOfPersistentVec:
   case KindOfVec:
     always_assert(cell.m_data.parr->isStatic());
-    always_assert(cell.m_data.parr->isVecArrayType());
+    always_assert(cell.m_data.parr->isVecType());
     return vec_val(cell.m_data.parr);
 
   case KindOfPersistentDict:

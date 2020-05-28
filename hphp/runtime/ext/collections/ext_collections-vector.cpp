@@ -186,7 +186,7 @@ void BaseVector::addAllImpl(const Variant& t) {
     *t.asTypedValue(),
     [&, this](ArrayData* adata) {
       if (adata->empty()) return true;
-      if (!m_size && adata->isVecArrayKind()) {
+      if (!m_size && adata->isVecKind()) {
         dropImmCopy();
         auto oldAd = arrayData();
         m_arr = adata;
@@ -303,7 +303,7 @@ void BaseVector::reserveImpl(uint32_t newCap) {
   m_arr = PackedArray::MakeReserveVec(newCap);
   arrayData()->m_size = m_size;
   if (LIKELY(!oldAd->cowCheck())) {
-    assertx(oldAd->isVecArrayKind());
+    assertx(oldAd->isVecKind());
     if (m_size > 0) {
       static_assert(PackedArray::stores_typed_values, "");
       size_t bytes = m_size * sizeof(TypedValue);

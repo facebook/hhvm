@@ -269,7 +269,7 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
       auto format = tvCastToString(fieldspec.lookup(s_format));
 
       if (format.equal(s_harray)) {
-        VecArrayInit arr(size);
+        VecInit arr(size);
         for (uint32_t i = 0; i < size; i++) {
           arr.append(binary_deserialize(type, transport, elemspec));
         }

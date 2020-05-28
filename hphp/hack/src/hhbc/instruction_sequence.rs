@@ -684,7 +684,7 @@ pub mod instr {
     }
 
     pub fn new_vec_array(i: isize) -> InstrSeq {
-        instr(Instruct::ILitConst(InstructLitConst::NewVecArray(i)))
+        instr(Instruct::ILitConst(InstructLitConst::NewVec(i)))
     }
 
     pub fn new_varray(i: isize) -> InstrSeq {

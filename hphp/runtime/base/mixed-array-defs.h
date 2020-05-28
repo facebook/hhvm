@@ -227,7 +227,7 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentVec: {
       auto& ad = data.parr;
-      assertx(ad->isVecArrayKind());
+      assertx(ad->isVecKind());
       if (handlePersistent(ad)) break;
       if (ad->empty()) ad = ArrayData::CreateVec();
       else ad = PackedArray::MakeUncounted(ad, false, seen);

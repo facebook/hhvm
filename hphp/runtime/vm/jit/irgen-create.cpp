@@ -472,12 +472,12 @@ void emitNewPackedLayoutArray(IRGS& env, uint32_t numArgs, Opcode op) {
 }
 
 void emitNewPackedArray(IRGS& env, uint32_t numArgs) {
-  emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
+  emitNewPackedLayoutArray(env, numArgs, AllocVec);
   push(env, gen(env, ConvVecToArr, pop(env)));
 }
 
-void emitNewVecArray(IRGS& env, uint32_t numArgs) {
-  emitNewPackedLayoutArray(env, numArgs, AllocVecArray);
+void emitNewVec(IRGS& env, uint32_t numArgs) {
+  emitNewPackedLayoutArray(env, numArgs, AllocVec);
 }
 
 void emitNewVArray(IRGS& env, uint32_t numArgs) {

@@ -176,7 +176,7 @@ the Hack level).
   CountedStr     | `StringData*` where `isRefCounted() == true`
   Str            | `StringData*` `{PersistentStr+CountedStr}`
   \*Arr          | `ArrayData*` (same variants as `Str`)
-  \*Vec          | `ArrayData*` where `kind() == VecArray`
+  \*Vec          | `ArrayData*` where `kind() == Vec`
   \*Dict         | `ArrayData*` where `kind() == Dict`
   \*Keyset       | `ArrayData*` where `kind() == Keyset`
   UncountedInit  | `TypedValue`: `{Null+Bool+Int+Dbl+PersistentStr+PersistentArr}`

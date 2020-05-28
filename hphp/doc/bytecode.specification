@@ -900,7 +900,7 @@ NewStructDict <litstr id vector>    [C..C]  ->  [C:Dict]
 
     NewStructDict < "a" "b" >  [ 1 2 ]  ->  [ dict("a"=>1, "b"=>2) ]
 
-NewVecArray <num elems>   [C..C]  ->  [C:Vec]
+NewVec <num elems>   [C..C]  ->  [C:Vec]
 
   New vec. Creates a new vec from the top %1 cells on the stack, pops those
   cells, then pushes the new vec onto the stack. Elements are pushed on the

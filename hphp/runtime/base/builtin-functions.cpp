@@ -119,7 +119,7 @@ const StaticString s_cmpWithFunc(
 ///////////////////////////////////////////////////////////////////////////////
 
 bool array_is_valid_callback(const Array& arr) {
-  if (!arr.isPHPArray() && !arr.isVecArray() && !arr.isDict()) return false;
+  if (!arr.isPHPArray() && !arr.isVec() && !arr.isDict()) return false;
   if (arr.size() != 2 || !arr.exists(int64_t(0)) || !arr.exists(int64_t(1))) {
     return false;
   }

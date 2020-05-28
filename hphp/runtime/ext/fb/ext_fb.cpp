@@ -515,7 +515,7 @@ static int fb_compact_serialize_variant(
     case KindOfPersistentVec:
     case KindOfVec: {
       Array arr = var.toArray();
-      assertx(arr->isVecArrayType());
+      assertx(arr->isVecType());
       if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance)) {
         raise_array_serialization_notice(SerializationSite::FBCompactSerialize,
                                          arr.get());
@@ -572,7 +572,7 @@ static int fb_compact_serialize_variant(
     case KindOfClsMeth: {
       Array arr = var.toArray();
       if (RuntimeOption::EvalHackArrDVArrs) {
-        assertx(arr->isVecArrayType());
+        assertx(arr->isVecType());
         fb_compact_serialize_vec(sb, std::move(arr), depth);
       } else {
         assertx(arr->isPHPArrayType());

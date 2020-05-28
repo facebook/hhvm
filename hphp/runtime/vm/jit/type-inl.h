@@ -143,7 +143,7 @@ inline Type for_const(const StringData* sd) {
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
   if (ad->isPHPArrayType()) return TStaticArr;
-  if (ad->isVecArrayType()) return TStaticVec;
+  if (ad->isVecType()) return TStaticVec;
   if (ad->isDictType()) return TStaticDict;
   if (ad->isKeysetType()) return TStaticKeyset;
   not_reached();
@@ -321,7 +321,7 @@ inline Type Type::cns(const TypedValue& tv) {
 
       case KindOfPersistentVec:
       case KindOfVec:
-        assertx(val(tv).parr->isVecArrayType());
+        assertx(val(tv).parr->isVecType());
         return type_detail::for_const(tv.m_data.parr);
 
       case KindOfPersistentDict:

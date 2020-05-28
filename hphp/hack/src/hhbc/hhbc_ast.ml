@@ -231,7 +231,7 @@ type instruct_lit_const =
   | NewStructDArray of string list
   | NewStructDict of string list
   | NewVArray of int
-  | NewVecArray of int
+  | NewVec of int
   | NewKeysetArray of int
   | NewPair
   | NewRecord of class_id * string list

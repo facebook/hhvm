@@ -669,7 +669,7 @@ static std::string toStringElm(TypedValue tv) {
       continue;
     case KindOfPersistentVec:
     case KindOfVec:
-      assertx(tv.m_data.parr->isVecArrayType());
+      assertx(tv.m_data.parr->isVecType());
       assertx(tv.m_data.parr->checkCount());
       os << tv.m_data.parr;
       print_count();
@@ -1422,7 +1422,7 @@ OPTBLD_INLINE void iopArray(const ArrayData* a) {
 }
 
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
-  assertx(a->isVecArrayType());
+  assertx(a->isVecType());
   vmStack().pushStaticVec(a);
 }
 
@@ -1506,7 +1506,7 @@ OPTBLD_INLINE void iopNewStructDict(imm_array<int32_t> ids) {
   vmStack().pushDictNoRc(a);
 }
 
-OPTBLD_INLINE void iopNewVecArray(uint32_t n) {
+OPTBLD_INLINE void iopNewVec(uint32_t n) {
   // This constructor moves values, no inc/decref is necessary.
   auto const a = PackedArray::MakeVec(n, vmStack().topC());
   vmStack().ndiscard(n);
@@ -3861,7 +3861,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
       ar->setNumArgs(newNumArgs);
     } else if (UNLIKELY(numArgs > func->numNonVariadicParams())) {
       if (RuntimeOption::EvalHackArrDVArrs) {
-        iopNewVecArray(numArgs - func->numNonVariadicParams());
+        iopNewVec(numArgs - func->numNonVariadicParams());
       } else {
         iopNewVArray(numArgs - func->numNonVariadicParams());
       }

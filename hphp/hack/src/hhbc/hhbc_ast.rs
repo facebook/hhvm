@@ -240,7 +240,7 @@ pub enum InstructLitConst {
     NewStructDArray(Vec<String>),
     NewStructDict(Vec<String>),
     NewVArray(isize),
-    NewVecArray(isize),
+    NewVec(isize),
     NewKeysetArray(isize),
     NewPair,
     NewRecord(ClassId, Vec<String>),

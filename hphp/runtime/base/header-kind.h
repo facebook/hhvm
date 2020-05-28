@@ -46,7 +46,7 @@ enum class HeaderKind : uint8_t {
   // PHP arrays
   Packed, Mixed, Plain, Globals, RecordArray,
   // Hack arrays
-  Dict, VecArray, Keyset,
+  Dict, Vec, Keyset,
   // Bespoke arrays
   BespokeArray, BespokeDict, BespokeVec, BespokeKeyset,
   // Other ordinary refcounted heap objects
@@ -299,13 +299,6 @@ inline constexpr bool hasInstanceDtor(HeaderKind k) {
   static_assert(uint8_t(HeaderKind::NativeObject) + 1 ==
                 uint8_t(detail::FirstCppBuiltin), "");
   return k >= HeaderKind::NativeObject && k <= detail::LastCppBuiltin;
-}
-
-inline constexpr bool isHackArrayKind(HeaderKind k) {
-  return
-    k == HeaderKind::Dict     ||
-    k == HeaderKind::VecArray ||
-    k == HeaderKind::Keyset;
 }
 
 inline constexpr bool isWaithandleKind(HeaderKind k) {

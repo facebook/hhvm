@@ -688,7 +688,7 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
       auto const& pi = func->params[i];
       if (pi.isVariadic) {
         if (RuntimeOption::EvalHackArrDVArrs) {
-          repl.emplace_back(bc::Vec { staticEmptyVecArray() });
+          repl.emplace_back(bc::Vec { staticEmptyVec() });
         } else {
           repl.emplace_back(bc::Array { staticEmptyVArray() });
         }
@@ -705,7 +705,7 @@ void finish_builtin(ISS& env, const php::Func* func, const FCallArgs& fca) {
 
       const uint32_t numToPack = numArgs - func->params.size() + 1;
       if (RuntimeOption::EvalHackArrDVArrs) {
-        repl.emplace_back(bc::NewVecArray { numToPack });
+        repl.emplace_back(bc::NewVec { numToPack });
       } else {
         repl.emplace_back(bc::NewVArray { numToPack });
       }

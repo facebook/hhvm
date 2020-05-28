@@ -118,7 +118,7 @@ static const struct {
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructDArray,{StackN,        Stack1,       OutDArray       }},
   { OpNewStructDict,  {StackN,        Stack1,       OutDict         }},
-  { OpNewVecArray,    {StackN,        Stack1,       OutVec          }},
+  { OpNewVec,         {StackN,        Stack1,       OutVec          }},
   { OpNewKeysetArray, {StackN,        Stack1,       OutKeyset       }},
   { OpNewVArray,   {StackN,           Stack1,       OutVArray       }},
   { OpNewDArray,   {None,             Stack1,       OutDArray       }},
@@ -494,7 +494,7 @@ int64_t getStackPopped(PC pc) {
     case Op::IncDecM:
     case Op::UnsetM:
     case Op::NewPackedArray:
-    case Op::NewVecArray:
+    case Op::NewVec:
     case Op::NewKeysetArray:
     case Op::NewVArray:
     case Op::ConcatN:
@@ -717,7 +717,7 @@ InputInfoVec getInputs(const NormalizedInstruction& ni, FPInvOffset bcSPOff) {
     int numArgs = [&] () -> int {
       switch (ni.op()) {
       case Op::NewPackedArray:
-      case Op::NewVecArray:
+      case Op::NewVec:
       case Op::NewKeysetArray:
       case Op::NewVArray:
       case Op::CombineAndResolveTypeStruct:
@@ -982,7 +982,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewMixedArray:
   case Op::NewDictArray:
   case Op::NewPackedArray:
-  case Op::NewVecArray:
+  case Op::NewVec:
   case Op::NewKeysetArray:
   case Op::NewVArray:
   case Op::NewDArray:

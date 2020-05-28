@@ -240,7 +240,7 @@ public:
   bool isGlobalsArrayKind() const;
   bool isEmptyArrayKind() const;
   bool isDictKind() const;
-  bool isVecArrayKind() const;
+  bool isVecKind() const;
   bool isKeysetKind() const;
   bool isRecordArrayKind() const;
 
@@ -250,7 +250,7 @@ public:
   bool isPHPArrayType() const;
   bool isHackArrayType() const;
   bool isDictType() const;
-  bool isVecArrayType() const;
+  bool isVecType() const;
   bool isKeysetType() const;
 
   /*
@@ -777,7 +777,7 @@ static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kPlainKind == uint8_t(HeaderKind::Plain), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
-static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::VecArray), "");
+static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
 static_assert(ArrayData::kRecordKind == uint8_t(HeaderKind::RecordArray), "");
 
 //////////////////////////////////////////////////////////////////////
@@ -788,7 +788,7 @@ constexpr size_t kEmptySetArraySize = 96;
 /*
  * Storage for the static empty arrays.
  */
-extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVecArray;
+extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVec;
 extern std::aligned_storage<sizeof(ArrayData), 16>::type s_theEmptyVArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDictArray;
 extern std::aligned_storage<kEmptyMixedArraySize, 16>::type s_theEmptyDArray;
@@ -805,7 +805,7 @@ extern std::aligned_storage<kEmptySetArraySize, 16>::type s_theEmptySetArray;
 ArrayData* staticEmptyArray();
 ArrayData* staticEmptyVArray();
 ArrayData* staticEmptyDArray();
-ArrayData* staticEmptyVecArray();
+ArrayData* staticEmptyVec();
 ArrayData* staticEmptyDictArray();
 ArrayData* staticEmptyKeysetArray();
 

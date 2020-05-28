@@ -40,7 +40,7 @@ protected:
     , m_unusedAndSize(arr->m_size)
     , m_arr(arr)
   {
-    assertx(arr->isVecArrayKind());
+    assertx(arr->isVecKind());
   }
   explicit BaseVector(Class* cls, HeaderKind kind, uint32_t cap)
     : ObjectData(cls, NoInit{}, ObjectData::NoAttrs, kind)
@@ -83,11 +83,11 @@ public:
   php_concat(const Variant& iterable);
 
   ArrayData* arrayData() {
-    assertx(m_arr->isVecArrayKind());
+    assertx(m_arr->isVecKind());
     return m_arr;
   }
   const ArrayData* arrayData() const {
-    assertx(m_arr->isVecArrayKind());
+    assertx(m_arr->isVecKind());
     return m_arr;
   }
   void setSize(uint32_t sz) {
@@ -394,7 +394,7 @@ protected:
 
   // The ArrayData's element area can be computed from m_arr via the
   // packedData() helper function. When capacity is non-zero, m_arr points
-  // to a VecArray.
+  // to a Vec.
   ArrayData* m_arr;
 
   // m_immCopy is a smart pointer to an ImmVector that is an up-to-date

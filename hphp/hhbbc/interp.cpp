@@ -172,7 +172,7 @@ bool start_add_elem(ISS& env, Type& ty, Op op) {
       if (arr->isKeysetType()) {
         return bc::Keyset { arr };
       }
-      if (arr->isVecArrayType()) {
+      if (arr->isVecType()) {
         return bc::Vec { arr };
       }
       if (arr->isDictType()) {
@@ -914,7 +914,7 @@ void in(ISS& env, const bc::Array& op) {
 }
 
 void in(ISS& env, const bc::Vec& op) {
-  assert(op.arr1->isVecArrayType());
+  assert(op.arr1->isVecType());
   effect_free(env);
   push(env, vec_val(op.arr1));
 }
@@ -1020,7 +1020,7 @@ void in(ISS& env, const bc::NewStructDict& op) {
   constprop(env);
 }
 
-void in(ISS& env, const bc::NewVecArray& op) {
+void in(ISS& env, const bc::NewVec& op) {
   auto elems = std::vector<Type>{};
   elems.reserve(op.arg1);
   for (auto i = uint32_t{0}; i < op.arg1; ++i) {

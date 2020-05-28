@@ -1347,8 +1347,8 @@ Array VariableUnserializer::unserializeVec() {
   if (size == 0) {
     expectChar('}');
     return Array::attach(provTag
-      ? arrprov::tagStaticArr(staticEmptyVecArray(), provTag)
-      : staticEmptyVecArray()
+      ? arrprov::tagStaticArr(staticEmptyVec(), provTag)
+      : staticEmptyVec()
     );
   }
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
@@ -1362,7 +1362,7 @@ Array VariableUnserializer::unserializeVec() {
     check_non_safepoint_surprise();
   }
 
-  Array arr = VecArrayInit(size).toArray();
+  Array arr = VecInit(size).toArray();
   reserveForAdd(size);
 
   for (int64_t i = 0; i < size; i++) {

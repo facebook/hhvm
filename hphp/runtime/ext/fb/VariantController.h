@@ -344,7 +344,7 @@ struct VariantControllerImpl {
     auto const ad = thing.getArrayData();
 
     if (arrprov::arrayWantsTag(ad) &&
-        (thing.isVecArray() || ad->isVArray())) {
+        (thing.isVec() || ad->isVArray())) {
       raise_array_serialization_notice(SerializationSite::FBSerialize,
                                        thing.asCArrRef().get());
     }

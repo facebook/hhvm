@@ -316,7 +316,7 @@ static ArrayData* convArrToVArrImpl(ArrayData* adIn) {
 
 static ArrayData* convVecToVArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isVecArrayKind());
+  assertx(adIn->isVecKind());
   auto a = PackedArray::ToVArrayVec(adIn, adIn->cowCheck());
   assertx(a->isPackedKind());
   assertx(a->isVArray());
@@ -407,7 +407,7 @@ static ArrayData* convArrToDArrImpl(ArrayData* adIn) {
 
 static ArrayData* convVecToDArrImpl(ArrayData* adIn) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  assertx(adIn->isVecArrayKind());
+  assertx(adIn->isVecKind());
   auto a = PackedArray::ToDArrayVec(adIn, adIn->cowCheck());
   assertx(a != adIn);
   assertx(a->isMixedKind());

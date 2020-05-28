@@ -606,7 +606,7 @@ void emitArray(IRGS& env, const ArrayData* x) {
 }
 
 void emitVec(IRGS& env, const ArrayData* x) {
-  assertx(x->isVecArrayType());
+  assertx(x->isVecType());
   push(env, cns(env, x));
 }
 

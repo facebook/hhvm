@@ -187,7 +187,7 @@ static void testLeak(size_t alloc_size) {
   auto const target_alloc = int64_t{5} << 30;
   auto const vec_cap = (alloc_size - sizeof(ArrayData)) / sizeof(TypedValue);
   auto const vec = [vec_cap] {
-    VecArrayInit vec{vec_cap};
+    VecInit vec{vec_cap};
     for (int j = 0; j < vec_cap; ++j) {
       vec.append(make_tv<KindOfNull>());
     }

@@ -259,7 +259,7 @@ inline size_t allocSize(const HeapObject* h) {
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
     0, /* Dict */
-    0, /* VecArray */
+    0, /* Vec */
     0, /* KeySet */
     0, /* BespokeArray */
     0, /* BespokeDict */
@@ -316,7 +316,7 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Plain)
   CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
-  CHECKSIZE(VecArray)
+  CHECKSIZE(Vec)
   CHECKSIZE(Keyset)
   CHECKSIZE(BespokeArray)
   CHECKSIZE(String)
@@ -349,7 +349,7 @@ inline size_t allocSize(const HeapObject* h) {
   size_t size = 0;
   switch (kind) {
     case HeaderKind::Packed:
-    case HeaderKind::VecArray:
+    case HeaderKind::Vec:
     case HeaderKind::RecordArray:
       // size = kSizeIndex2Size[h->aux16>>8]
       size = PackedArray::heapSize(static_cast<const ArrayData*>(h));

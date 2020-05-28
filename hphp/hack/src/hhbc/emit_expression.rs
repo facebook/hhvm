@@ -1021,7 +1021,7 @@ fn emit_vec_collection(
 ) -> Result {
     match ast_constant_folder::vec_to_typed_value(e, &env.namespace, pos, fields) {
         Ok(tv) => emit_static_collection(e, env, None, pos, tv),
-        Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVecArray),
+        Err(_) => emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec),
     }
 }
 
@@ -1319,10 +1319,10 @@ fn emit_dynamic_collection(
     use tast::Expr_ as E_;
     match &expr.1 {
         E_::ValCollection(v) if v.0 == tast::VcKind::Vec => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVecArray)
+            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
         }
         E_::Collection(v) if (v.0).1 == "vec" => {
-            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVecArray)
+            emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewVec)
         }
         E_::ValCollection(v) if v.0 == tast::VcKind::Keyset => {
             emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewKeysetArray)
@@ -1360,7 +1360,7 @@ fn emit_dynamic_collection(
             let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
             emit_value_only_collection(e, env, pos, fields, |n| {
                 if hack_arr_dv_arrs {
-                    InstructLitConst::NewVecArray(n)
+                    InstructLitConst::NewVec(n)
                 } else {
                     InstructLitConst::NewVArray(n)
                 }

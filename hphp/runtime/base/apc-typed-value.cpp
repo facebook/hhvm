@@ -58,7 +58,7 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.arr->isStatic());
       break;
     case APCKind::StaticVec:
-      assertx(m_data.vec->isVecArrayKind());
+      assertx(m_data.vec->isVecKind());
       assertx(m_data.vec->isStatic());
       break;
     case APCKind::StaticDict:
@@ -74,7 +74,7 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.arr->isUncounted());
       break;
     case APCKind::UncountedVec:
-      assertx(m_data.vec->isVecArrayKind());
+      assertx(m_data.vec->isVecKind());
       assertx(m_data.vec->isUncounted());
       break;
     case APCKind::UncountedDict:
@@ -140,7 +140,7 @@ void APCTypedValue::deleteUncounted() {
       }
       if (kind == APCKind::UncountedVec) {
         auto const vec = m_data.vec;
-        assertx(vec->isVecArrayKind());
+        assertx(vec->isVecKind());
         PackedArray::ReleaseUncounted(vec);
         return vec;
       }

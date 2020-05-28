@@ -339,8 +339,8 @@ Variant ArrayUtil::Shuffle(const Array& input) {
   }
   php_array_data_shuffle(indices);
 
-  if (input.isVecArray()) {
-    VecArrayInit ret(count);
+  if (input.isVec()) {
+    VecInit ret(count);
     for (int i = 0; i < count; i++) {
       ssize_t pos = indices[i];
       ret.append(input->nvGetVal(pos));

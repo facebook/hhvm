@@ -125,7 +125,7 @@ VariableSerializer::getKind(const ArrayData* arr) const {
       ? VariableSerializer::ArrayKind::LegacyDict
       : VariableSerializer::ArrayKind::Dict;
   }
-  if (arr->isVecArrayType()) {
+  if (arr->isVecType()) {
     return getType() == Type::Internal && arr->isLegacyArray()
       ? VariableSerializer::ArrayKind::LegacyVec
       : VariableSerializer::ArrayKind::Vec;
@@ -1579,7 +1579,7 @@ void VariableSerializer::serializeVariant(tv_rval tv,
     case KindOfPersistentVec:
     case KindOfVec:
       assertx(!isArrayKey);
-      assertx(val(tv).parr->isVecArrayType());
+      assertx(val(tv).parr->isVecType());
       serializeArray(val(tv).parr, skipNestCheck);
       return;
 
@@ -1762,7 +1762,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
-        return arr->isVecArrayType()
+        return arr->isVecType()
           ? folly::none
           : folly::make_optional(SerializationSite::JsonEncode);
       case VariableSerializer::Type::Serialize:

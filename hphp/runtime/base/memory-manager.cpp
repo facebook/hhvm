@@ -524,7 +524,7 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::Mixed:
       case HeaderKind::Dict:
       case HeaderKind::Plain:
-      case HeaderKind::VecArray:
+      case HeaderKind::Vec:
       case HeaderKind::Keyset:
       case HeaderKind::Globals:
       case HeaderKind::Object:

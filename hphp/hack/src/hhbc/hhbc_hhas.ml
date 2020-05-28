@@ -98,7 +98,7 @@ let string_of_lit_const instruction =
   | NewCol t -> sep ["NewCol"; CollectionType.to_string t]
   | NewDictArray i -> sep ["NewDictArray"; string_of_int i]
   | NewKeysetArray i -> sep ["NewKeysetArray"; string_of_int i]
-  | NewVecArray i -> sep ["NewVecArray"; string_of_int i]
+  | NewVec i -> sep ["NewVec"; string_of_int i]
   | NewVArray i -> sep ["NewVArray"; string_of_int i]
   | NewDArray i -> sep ["NewDArray"; string_of_int i]
   | NewMixedArray i -> sep ["NewMixedArray"; string_of_int i]

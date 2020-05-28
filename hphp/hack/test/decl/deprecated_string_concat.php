@@ -11,3 +11,15 @@ function singledouble(): void {}
 
 <<__Deprecated('single'."double".'single')>>
 function singledoublesingle(): void {}
+
+<<__Deprecated('single'.<<<EOT
+  heredoc
+EOT
+)>>
+function heredoc(): void {}
+
+<<__Deprecated('single'.<<<'EOT'
+  nowdoc
+EOT
+)>>
+function nowdoc(): void {}

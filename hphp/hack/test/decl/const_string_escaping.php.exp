@@ -64,6 +64,22 @@ Parsed decls:
           scc_type =
           (Rhint (root|const_string_escaping.php line 11, characters 9-14),
            (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_expr = (Some ([12:26-14:4], (String "    \n\t")));
+          scc_name = ([12:16-23], "HEREDOC");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 12, characters 9-14),
+           (Tprim Tstring))
+          };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_expr =
+          (Some ([15:25-17:4],
+                 (String "    no escape sequences are unescaped: \\'\\n\\t")));
+          scc_name = ([15:16-22], "NOWDOC");
+          scc_type =
+          (Rhint (root|const_string_escaping.php line 15, characters 9-14),
+           (Tprim Tstring))
           }
         ];
       sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];

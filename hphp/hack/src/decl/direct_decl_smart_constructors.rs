@@ -1409,6 +1409,22 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 .map_err(|e| e.to_string())?,
                 token_pos(self),
             ),
+            TokenKind::HeredocStringLiteral => Node_::StringLiteral(
+                escaper::unescape_heredoc_in(
+                    self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                    self.state.arena,
+                )
+                .map_err(|e| e.to_string())?,
+                token_pos(self),
+            ),
+            TokenKind::NowdocStringLiteral => Node_::StringLiteral(
+                escaper::unescape_nowdoc_in(
+                    self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                    self.state.arena,
+                )
+                .map_err(|e| e.to_string())?,
+                token_pos(self),
+            ),
             TokenKind::DecimalLiteral
             | TokenKind::OctalLiteral
             | TokenKind::HexadecimalLiteral

@@ -928,12 +928,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             node => {
                 let Id(pos, name) = self.get_name("", node)?;
                 let reason = self.alloc(Reason::hint(pos));
-                let ty_ = if self
-                    .state
-                    .type_parameters
-                    .iter()
-                    .any(|tps| tps.contains(&name))
-                {
+                let ty_ = if self.is_type_param_in_scope(name) {
                     Ty_::Tgeneric(name)
                 } else {
                     match name.as_ref() {
@@ -957,41 +952,6 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
-    /// Converts any node that can represent a list of Node_::TypeParameter
-    /// into the type parameter list and a list of all type variables. Used for
-    /// classes, methods, and functions.
-    fn as_type_params(&self, node: Node_<'a>) -> Result<(&'a [Tparam<'a>], SSet<'a>), ParseError> {
-        let mut type_variables = MultiSetMut::new_in(self.state.arena);
-        let type_params = self.map_to_slice(Ok(node), |node| {
-            let TypeParameterDecl {
-                name,
-                variance,
-                reified,
-                constraints,
-            } = match node {
-                Node_::TypeParameter(decl) => decl,
-                n => return Err(format!("Expected a type parameter, but got {:?}", n)),
-            };
-            let id = self.get_name("", *name)?;
-            let constraints_iter = constraints.iter();
-            let mut constraints = Vec::new_in(self.state.arena);
-            for constraint in constraints_iter {
-                let (kind, value) = *constraint;
-                constraints.push((kind, self.node_to_ty(value)?));
-            }
-            let constraints = constraints.into_bump_slice();
-            type_variables.insert(id.1);
-            Ok(Tparam {
-                variance: *variance,
-                name: id,
-                constraints,
-                reified: *reified,
-                user_attributes: &[],
-            })
-        })?;
-        Ok((type_params, type_variables.into()))
-    }
-
     fn pop_type_params(&mut self, node: Node_<'a>) -> Result<&'a [Tparam<'a>], ParseError> {
         match node {
             Node_::TypeParameters(tparams) => {
@@ -1000,6 +960,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             }
             _ => Ok(&[]),
         }
+    }
+
+    fn is_type_param_in_scope(&self, name: &str) -> bool {
+        self.state
+            .type_parameters
+            .iter()
+            .any(|tps| tps.contains(name))
     }
 
     fn function_into_ty(
@@ -1260,6 +1227,115 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn tany_with_pos(&self, pos: &'a Pos<'a>) -> Ty<'a> {
         Ty(self.alloc(Reason::witness(pos)), &TANY_)
+    }
+
+    fn source_text_at_pos(&self, pos: &'a Pos<'a>) -> &'a [u8] {
+        let start = pos.start_cnum();
+        let end = pos.end_cnum();
+        self.state.source_text.source_text().sub(start, end - start)
+    }
+
+    // While we usually can tell whether to allocate a Tapply or Tgeneric based
+    // on our type_parameters stack, *constraints* on type parameters may
+    // reference type parameters which we have not parsed yet. When constructing
+    // a type parameter list, we use this function to rewrite the type of each
+    // constraint, considering the full list of type parameters to be in scope.
+    fn convert_tapply_to_tgeneric(&self, ty: Ty<'a>) -> Ty<'a> {
+        let ty_ = match *ty.1 {
+            Ty_::Tapply(&(id, [])) => {
+                // If the name contained a namespace delimiter in the original
+                // source text, then it can't have referred to a type parameter
+                // (since type parameters cannot be namespaced).
+                match ty.0.pos {
+                    Some(pos) => {
+                        if self.source_text_at_pos(pos).contains(&b'\\') {
+                            return ty;
+                        }
+                    }
+                    None => return ty,
+                }
+                // However, the direct decl parser will unconditionally prefix
+                // the name with the current namespace (as it does for any
+                // Tapply). We need to remove it.
+                match id.1.rsplit('\\').next() {
+                    Some(name) if self.is_type_param_in_scope(name) => Ty_::Tgeneric(name),
+                    _ => return ty,
+                }
+            }
+            Ty_::Tapply(&(id, targs)) => {
+                let mut converted_targs = Vec::with_capacity_in(targs.len(), self.state.arena);
+                for &targ in targs {
+                    converted_targs.push(self.convert_tapply_to_tgeneric(targ));
+                }
+                Ty_::Tapply(self.alloc((id, converted_targs.into_bump_slice())))
+            }
+            Ty_::Tarray(&(tk, tv)) => Ty_::Tarray(self.alloc((
+                tk.map(|tk| self.convert_tapply_to_tgeneric(tk)),
+                tv.map(|tv| self.convert_tapply_to_tgeneric(tv)),
+            ))),
+            Ty_::Tlike(ty) => Ty_::Tlike(self.convert_tapply_to_tgeneric(ty)),
+            Ty_::TpuAccess(&(ty, id)) => {
+                Ty_::TpuAccess(self.alloc((self.convert_tapply_to_tgeneric(ty), id)))
+            }
+            Ty_::Toption(ty) => Ty_::Toption(self.convert_tapply_to_tgeneric(ty)),
+            Ty_::Tfun(fun_type) => {
+                let convert_param = |param: &'a FunParam<'a>| {
+                    &*self.alloc(FunParam {
+                        type_: PossiblyEnforcedTy {
+                            enforced: param.type_.enforced,
+                            type_: self.convert_tapply_to_tgeneric(param.type_.type_),
+                        },
+                        rx_annotation: param.rx_annotation.clone(),
+                        ..*param
+                    })
+                };
+                let arity = match fun_type.arity {
+                    FunArity::Fstandard => FunArity::Fstandard,
+                    FunArity::Fvariadic(param) => FunArity::Fvariadic(convert_param(param)),
+                };
+                let mut params = Vec::with_capacity_in(fun_type.params.len(), self.state.arena);
+                for &param in fun_type.params {
+                    params.push(convert_param(param));
+                }
+                let params = params.into_bump_slice();
+                let ret = PossiblyEnforcedTy {
+                    enforced: fun_type.ret.enforced,
+                    type_: self.convert_tapply_to_tgeneric(fun_type.ret.type_),
+                };
+                Ty_::Tfun(self.alloc(FunType {
+                    arity,
+                    params,
+                    ret,
+                    reactive: fun_type.reactive.clone(),
+                    ..*fun_type
+                }))
+            }
+            Ty_::Tshape(&(kind, fields)) => {
+                let mut converted_fields =
+                    AssocListMut::with_capacity_in(fields.len(), self.state.arena);
+                for (name, ty) in fields.iter() {
+                    converted_fields.insert(
+                        name.clone(),
+                        ShapeFieldType {
+                            optional: ty.optional,
+                            ty: self.convert_tapply_to_tgeneric(ty.ty),
+                        },
+                    );
+                }
+                Ty_::Tshape(self.alloc((kind, converted_fields.into())))
+            }
+            Ty_::Tdarray(&(tk, tv)) => Ty_::Tdarray(self.alloc((
+                self.convert_tapply_to_tgeneric(tk),
+                self.convert_tapply_to_tgeneric(tv),
+            ))),
+            Ty_::Tvarray(ty) => Ty_::Tvarray(self.convert_tapply_to_tgeneric(ty)),
+            Ty_::TvarrayOrDarray(&(tk, tv)) => Ty_::TvarrayOrDarray(self.alloc((
+                self.convert_tapply_to_tgeneric(tk),
+                self.convert_tapply_to_tgeneric(tv),
+            ))),
+            _ => return ty,
+        };
+        Ty(ty.0, self.alloc(ty_))
     }
 }
 
@@ -1986,15 +2062,47 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         })))
     }
 
-    fn make_type_parameters(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        let node = Node_::BracketedList(self.alloc((
-            arg0?.get_pos(self.state.arena)?,
-            arg1?.as_slice(self.state.arena),
-            arg2?.get_pos(self.state.arena)?,
-        )));
-        let (tparams, tparam_names) = self.as_type_params(node)?;
-        Rc::make_mut(&mut self.state.type_parameters).push(tparam_names);
-        Ok(Node_::TypeParameters(tparams))
+    fn make_type_parameters(&mut self, _lt: Self::R, tparams: Self::R, _gt: Self::R) -> Self::R {
+        let tparams = tparams?;
+        let mut tparams_with_name = Vec::new_in(self.state.arena);
+        let mut tparam_names = MultiSetMut::new_in(self.state.arena);
+        for node in tparams.iter() {
+            match node {
+                &Node_::TypeParameter(decl) => {
+                    let name = self.get_name("", decl.name)?;
+                    tparam_names.insert(name.1);
+                    tparams_with_name.push((decl, name));
+                }
+                n => return Err(format!("Expected a type parameter, but got {:?}", n)),
+            }
+        }
+        Rc::make_mut(&mut self.state.type_parameters).push(tparam_names.into());
+        let mut tparams = Vec::with_capacity_in(tparams_with_name.len(), self.state.arena);
+        for (decl, name) in tparams_with_name.into_iter() {
+            let &TypeParameterDecl {
+                name: _,
+                variance,
+                reified,
+                constraints,
+            } = decl;
+            let constraints_iter = constraints.iter();
+            let mut constraints = Vec::new_in(self.state.arena);
+            for constraint in constraints_iter {
+                let &(kind, ty) = constraint;
+                let ty = self.node_to_ty(ty)?;
+                let ty = self.convert_tapply_to_tgeneric(ty);
+                constraints.push((kind, ty));
+            }
+            let constraints = constraints.into_bump_slice();
+            tparams.push(Tparam {
+                variance,
+                name,
+                constraints,
+                reified,
+                user_attributes: &[],
+            });
+        }
+        Ok(Node_::TypeParameters(tparams.into_bump_slice()))
     }
 
     fn make_parameter_declaration(

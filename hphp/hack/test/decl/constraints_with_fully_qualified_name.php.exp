@@ -1,0 +1,62 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\I" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cinterface;
+      sc_name = ([6:11-12], "\\I");
+      sc_tparams =
+      [(Invariant, ([7:3-5], "Ta"),
+        [(Constraint_as,
+          (Rhint (root|constraints_with_fully_qualified_name.php line 7, characters 9-16),
+           (Tprim Tarraykey)))
+          ]);
+        (Invariant, ([8:3-5], "Tb"),
+         [(Constraint_as,
+           (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 9-19),
+            (Tapply (([8:9-12], "\\HH\\Map"),
+               [(Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 13-14),
+                 (Tgeneric "Ta"));
+                 (Rhint (root|constraints_with_fully_qualified_name.php line 8, characters 17-18),
+                  (Tgeneric "Td"))
+                 ]
+               ))))
+           ]);
+        (Invariant, ([9:3-5], "Tc"),
+         [(Constraint_as,
+           (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 9-21),
+            (Tapply (([9:9-12], "\\HH\\Map"),
+               [(Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 13-15),
+                 (Tapply (([9:13-16], "\\Ta"), [])));
+                 (Rhint (root|constraints_with_fully_qualified_name.php line 9, characters 18-20),
+                  (Tapply (([9:18-21], "\\Td"), [])))
+                 ]
+               ))))
+           ]);
+        (Invariant, ([10:3-5], "Td"), [])];
+      sc_where_constraints = []; sc_extends = []; sc_uses = [];
+      sc_method_redeclarations = []; sc_xhp_attr_uses = [];
+      sc_req_extends = []; sc_req_implements = []; sc_implements = [];
+      sc_consts = []; sc_typeconsts = []; sc_pu_enums = []; sc_props = [];
+      sc_sprops = []; sc_constructor = None; sc_static_methods = [];
+      sc_methods = []; sc_user_attributes = []; sc_enum_type = None;
+      sc_decl_errors = <opaque> } };
+  funs = {};
+  typedefs =
+  { "\\Ta" ->
+    { td_pos = [3:6-8]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|constraints_with_fully_qualified_name.php line 3, characters 11-13),
+       (Tprim Tint))
+      };
+    "\\Td" ->
+    { td_pos = [4:6-8]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|constraints_with_fully_qualified_name.php line 4, characters 11-16),
+       (Tprim Tstring))
+      } };
+  consts = {} }
+
+They matched!

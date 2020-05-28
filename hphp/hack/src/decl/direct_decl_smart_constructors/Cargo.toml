@@ -10,6 +10,7 @@ path = "../direct_decl_smart_constructors.rs"
 
 [dependencies]
 arena_collections = { path = "../../arena_collections" }
+escaper = { path = "../../utils/escaper" }
 flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
 hh_autoimport_rust = { path = "../../parser/cargo/hh_autoimport" }
 hhbc_string_utils_rust = { path = "../../hhbc/cargo/string_utils" }

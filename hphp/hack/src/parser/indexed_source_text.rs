@@ -27,7 +27,7 @@ impl<'a> IndexedSourceText<'a> {
         }))
     }
 
-    pub fn source_text(&self) -> &SourceText {
+    pub fn source_text(&self) -> &SourceText<'a> {
         &self.0.source_text
     }
 

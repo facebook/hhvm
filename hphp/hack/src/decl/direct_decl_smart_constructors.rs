@@ -823,6 +823,24 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn token_bytes(&self, token: &PositionedToken) -> &'a [u8] {
+        self.state.source_text.source_text().sub(
+            token.leading_start_offset().unwrap_or(0) + token.leading_width(),
+            token.width(),
+        )
+    }
+
+    // Check that the slice is valid UTF-8. If it is, return a &str referencing
+    // the same data. Otherwise, copy the slice into our arena using
+    // String::from_utf8_lossy_in, and return a reference to the arena str.
+    fn str_from_utf8(&self, slice: &'a [u8]) -> &'a str {
+        if let Ok(s) = std::str::from_utf8(slice) {
+            s
+        } else {
+            String::from_utf8_lossy_in(slice, self.state.arena).into_bump_str()
+        }
+    }
+
     fn node_to_ty(&self, node: Node_<'a>) -> Result<Ty<'a>, ParseError> {
         match node {
             Node_::Ty(ty) => Ok(ty),
@@ -1316,16 +1334,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
 
 impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors<'a> {
     fn make_token(&mut self, token: Self::Token) -> Self::R {
-        let token_text = |this: &Self| {
-            String::from_utf8_lossy_in(
-                this.state.source_text.source_text().sub(
-                    token.leading_start_offset().unwrap_or(0) + token.leading_width(),
-                    token.width(),
-                ),
-                this.state.arena,
-            )
-            .into_bump_str()
-        };
+        let token_text = |this: &Self| this.str_from_utf8(this.token_bytes(&token));
         let token_pos = |this: &Self| {
             let start = this
                 .state
@@ -1385,15 +1394,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::SelfToken => Node_::Name(token_text(self), token_pos(self)),
             TokenKind::XHPClassName => Node_::XhpName(token_text(self), token_pos(self)),
             TokenKind::SingleQuotedStringLiteral => Node_::StringLiteral(
-                token_text(self)
-                    .trim_start_matches("'")
-                    .trim_end_matches("'"),
+                escaper::unescape_single_in(
+                    self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                    self.state.arena,
+                )
+                .map_err(|e| e.to_string())?,
                 token_pos(self),
             ),
             TokenKind::DoubleQuotedStringLiteral => Node_::StringLiteral(
-                token_text(self)
-                    .trim_start_matches('"')
-                    .trim_end_matches('"'),
+                escaper::unescape_double_in(
+                    self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                    self.state.arena,
+                )
+                .map_err(|e| e.to_string())?,
                 token_pos(self),
             ),
             TokenKind::DecimalLiteral

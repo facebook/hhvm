@@ -32,7 +32,7 @@ const IMAGETYPE_ICO = 17;
 <<__PHPStdLib>>
 function gd_info();
 <<__PHPStdLib>>
-function getimagesize(string $filename, inout $imageinfo);
+function getimagesize(string $filename, inout mixed $imageinfo);
 <<__PHPStdLib>>
 function image_type_to_extension(int $imagetype, bool $include_dot = true);
 <<__PHPStdLib>>

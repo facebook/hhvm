@@ -1666,7 +1666,7 @@ Variant getImageSize(const req::ptr<File>& stream, Array& imageinfo) {
   int itype = 0;
   struct gfxinfo *result = nullptr;
 
-  imageinfo = Array::Create();
+  imageinfo = Array::CreateDArray();
   itype = php_getimagetype(stream);
   switch( itype) {
   case IMAGE_FILETYPE_GIF:

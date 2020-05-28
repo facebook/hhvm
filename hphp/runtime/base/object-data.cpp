@@ -71,8 +71,8 @@ void verifyTypeHint(const Class* thisCls,
                     tv_lval val) {
   assertx(tvIsPlausible(*val));
   assertx(type(val) != KindOfUninit);
-  if (RuntimeOption::EvalCheckPropTypeHints <= 0) return;
-  if (prop && prop->typeConstraint.isCheckable()) {
+  if (!prop || RuntimeOption::EvalCheckPropTypeHints <= 0) return;
+  if (prop->typeConstraint.isCheckable()) {
     prop->typeConstraint.verifyProperty(val, thisCls, prop->cls, prop->name);
   }
   if (RuntimeOption::EvalEnforceGenericsUB <= 0) return;

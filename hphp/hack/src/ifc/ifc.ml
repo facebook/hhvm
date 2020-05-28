@@ -261,7 +261,7 @@ and expr stk env (((_epos, _ety), e) : Tast.expr) =
   | A.Method_id (_, _)
   | A.Method_caller (_, _)
   | A.Smethod_id (_, _)
-  | A.Pair (_, _)
+  | A.Pair _
   | A.Assert _
   | A.PU_atom _
   | A.PU_identifier (_, _, _)

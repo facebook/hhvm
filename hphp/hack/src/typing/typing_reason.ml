@@ -678,6 +678,7 @@ type ureason =
   | URparam
   | URparam_inout
   | URarray_value
+  | URpair_value
   | URtuple_access
   | URpair_access
   | URnewtype_cstr
@@ -720,6 +721,7 @@ let string_of_ureason = function
   | URparam -> "Invalid argument"
   | URparam_inout -> "Invalid argument to an inout parameter"
   | URarray_value -> "Incompatible field values"
+  | URpair_value -> "Incompatible pair values"
   | URtuple_access ->
     "Tuple elements can only be accessed with an integer literal"
   | URpair_access ->

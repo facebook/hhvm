@@ -1689,7 +1689,7 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
     | A.Set -> emit CollectionType.Set
     | A.ImmSet -> emit CollectionType.ImmSet
     | _ -> emit_collection env expr fields)
-  | A.Pair (e1, e2) ->
+  | A.Pair (_, e1, e2) ->
     let fields = [A.AFvalue e1; A.AFvalue e2] in
     emit_named_collection env expr pos CollectionType.Pair fields
   | A.KeyValCollection (name, _, fields) ->
@@ -4224,7 +4224,7 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | Method_id (_, _)
     | Method_caller (_, _)
     | Smethod_id (_, _)
-    | Pair (_, _)
+    | Pair _
     | Assert _
     | Binop _
     | Shape _

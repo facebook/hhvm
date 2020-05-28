@@ -1910,6 +1910,14 @@ and expr_ env p (e : Nast.expr_) =
         N.KeyValCollection
           (Nast.get_kvc_kind cn, ta, List.map l (afield_kvalue env cn))
       | x when String.equal x SN.Collections.cPair ->
+        let ta =
+          match tal with
+          | Some (Aast.CollectionTV _) ->
+            Errors.naming_too_few_arguments p;
+            None
+          | Some (Aast.CollectionTKV (tk, tv)) -> Some (targ env tk, targ env tv)
+          | None -> None
+        in
         begin
           match l with
           | [] ->
@@ -1917,7 +1925,7 @@ and expr_ env p (e : Nast.expr_) =
             N.Any
           | [e1; e2] ->
             let pn = SN.Collections.cPair in
-            N.Pair (afield_value env pn e1, afield_value env pn e2)
+            N.Pair (ta, afield_value env pn e1, afield_value env pn e2)
           | _ ->
             Errors.naming_too_many_arguments p;
             N.Any

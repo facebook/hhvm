@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f19c1ad91f5f34a4b0efafcfddd7eec>>
+// @generated SignedSource<<c256d2bc9fc27c85143a904be8146370>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -195,6 +195,7 @@ pub enum Ureason {
     URparam,
     URparamInout,
     URarrayValue,
+    URpairValue,
     URtupleAccess,
     URpairAccess,
     URnewtypeCstr,

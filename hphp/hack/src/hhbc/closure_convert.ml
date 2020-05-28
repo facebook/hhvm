@@ -799,10 +799,18 @@ let rec convert_expr env st ((p, expr_) as expr) =
           (st, Some targ)
       in
       (st, (p, ValCollection (k, targ, es)))
-    | Pair (e1, e2) ->
+    | Pair (th, e1, e2) ->
       let (st, e1) = convert_expr env st e1 in
       let (st, e2) = convert_expr env st e2 in
-      (st, (p, Pair (e1, e2)))
+      let (st, th) =
+        match th with
+        | None -> (st, None)
+        | Some (t1, t2) ->
+          let (st, t1) = convert_tyarg env st t1 in
+          let (st, t2) = convert_tyarg env st t2 in
+          (st, Some (t1, t2))
+      in
+      (st, (p, Pair (th, e1, e2)))
     | KeyValCollection (k, targ, es) ->
       let rec zip x y =
         match (x, y) with

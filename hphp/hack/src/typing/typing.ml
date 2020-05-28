@@ -2057,21 +2057,47 @@ and expr_
     in
     let ty = MakeType.tuple (Reason.Rwitness p) tyl in
     make_result env p (Aast.List tel) ty
-  | Pair (e1, e2) ->
-    (* Use expected type to determine expected element types *)
-    let (env, expected1, expected2) =
-      match expand_expected_and_get_node env expected with
-      | (env, Some (pos, reason, _ty, Tclass ((_, k), _, [ty1; ty2])))
-        when String.equal k SN.Collections.cPair ->
-        let ty1_expected = ExpectedTy.make pos reason ty1 in
-        let ty2_expected = ExpectedTy.make pos reason ty2 in
-        (env, Some ty1_expected, Some ty2_expected)
-      | _ -> (env, None, None)
+  | Pair (th, e1, e2) ->
+    let (env, expected1, expected2, th) =
+      match th with
+      | Some ((_, t1), (_, t2)) ->
+        let (env, t1, t1_expected) = localize_targ env t1 in
+        let (env, t2, t2_expected) = localize_targ env t2 in
+        (env, Some t1_expected, Some t2_expected, Some (t1, t2))
+      | None ->
+        (* Use expected type to determine expected element types *)
+        (match expand_expected_and_get_node env expected with
+        | (env, Some (pos, reason, _ty, Tclass ((_, k), _, [ty1; ty2])))
+          when String.equal k SN.Collections.cPair ->
+          let ty1_expected = ExpectedTy.make pos reason ty1 in
+          let ty2_expected = ExpectedTy.make pos reason ty2 in
+          (env, Some ty1_expected, Some ty2_expected, None)
+        | _ -> (env, None, None, None))
     in
     let (env, te1, ty1) = expr ?expected:expected1 env e1 in
     let (env, te2, ty2) = expr ?expected:expected2 env e2 in
+    let p1 = fst e1 in
+    let p2 = fst e2 in
+    let (env, ty1) =
+      compute_supertype
+        ~expected:expected1
+        ~reason:Reason.URpair_value
+        ~use_pos:p1
+        (Reason.Rtype_variable_generics (p1, "T1", "Pair"))
+        env
+        [ty1]
+    in
+    let (env, ty2) =
+      compute_supertype
+        ~expected:expected2
+        ~reason:Reason.URpair_value
+        ~use_pos:p2
+        (Reason.Rtype_variable_generics (p2, "T2", "Pair"))
+        env
+        [ty2]
+    in
     let ty = MakeType.pair (Reason.Rwitness p) ty1 ty2 in
-    make_result env p (Aast.Pair (te1, te2)) ty
+    make_result env p (Aast.Pair (th, te1, te2)) ty
   | Expr_list el ->
     (* TODO: use expected type to determine tuple component types *)
     let (env, tel, tyl) = exprs env el in

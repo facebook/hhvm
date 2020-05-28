@@ -211,7 +211,10 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | Method_caller of sid * pstring
       (** meth_caller('Class name', 'method name') *)
   | Smethod_id of sid * pstring
-  | Pair of ('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr
+  | Pair of
+      ('hi targ * 'hi targ) option
+      * ('ex, 'fb, 'en, 'hi) expr
+      * ('ex, 'fb, 'en, 'hi) expr
   | Assert of ('ex, 'fb, 'en, 'hi) assert_expr
   | PU_atom of string
   | PU_identifier of ('ex, 'fb, 'en, 'hi) class_id * pstring * pstring

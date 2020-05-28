@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<958d4fc0eb54bd79cb66d09b2280a6d7>>
+// @generated SignedSource<<c876f5634101add810061a9fc88d4743>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1060,8 +1060,12 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_smethod_id(p0: Sid, p1: Pstring) -> Self {
         Expr_::SmethodId(Box::new((p0, p1)))
     }
-    pub fn mk_pair(p0: Expr<Ex, Fb, En, Hi>, p1: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::Pair(Box::new((p0, p1)))
+    pub fn mk_pair(
+        p0: Option<(Targ<Hi>, Targ<Hi>)>,
+        p1: Expr<Ex, Fb, En, Hi>,
+        p2: Expr<Ex, Fb, En, Hi>,
+    ) -> Self {
+        Expr_::Pair(Box::new((p0, p1, p2)))
     }
     pub fn mk_assert(p0: AssertExpr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Assert(Box::new(p0))
@@ -1788,9 +1792,15 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_pair(&self) -> Option<(&Expr<Ex, Fb, En, Hi>, &Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_pair(
+        &self,
+    ) -> Option<(
+        &Option<(Targ<Hi>, Targ<Hi>)>,
+        &Expr<Ex, Fb, En, Hi>,
+        &Expr<Ex, Fb, En, Hi>,
+    )> {
         match self {
-            Expr_::Pair(p0) => Some((&p0.0, &p0.1)),
+            Expr_::Pair(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -2198,9 +2208,13 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn as_pair_mut(
         &mut self,
-    ) -> Option<(&mut Expr<Ex, Fb, En, Hi>, &mut Expr<Ex, Fb, En, Hi>)> {
+    ) -> Option<(
+        &mut Option<(Targ<Hi>, Targ<Hi>)>,
+        &mut Expr<Ex, Fb, En, Hi>,
+        &mut Expr<Ex, Fb, En, Hi>,
+    )> {
         match self {
-            Expr_::Pair(p0) => Some((&mut p0.0, &mut p0.1)),
+            Expr_::Pair(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -2569,9 +2583,15 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_pair_into(self) -> Option<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)> {
+    pub fn as_pair_into(
+        self,
+    ) -> Option<(
+        Option<(Targ<Hi>, Targ<Hi>)>,
+        Expr<Ex, Fb, En, Hi>,
+        Expr<Ex, Fb, En, Hi>,
+    )> {
         match self {
-            Expr_::Pair(p0) => Some(((*p0).0, (*p0).1)),
+            Expr_::Pair(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }

@@ -523,7 +523,7 @@ module Visitor_DEPRECATED = struct
 
       method on_list : 'a -> expr list -> 'a
 
-      method on_pair : 'a -> expr -> expr -> 'a
+      method on_pair : 'a -> (targ * targ) option -> expr -> expr -> 'a
 
       method on_expr_list : 'a -> expr list -> 'a
 
@@ -805,7 +805,7 @@ module Visitor_DEPRECATED = struct
         | FunctionPointer (e, targs) -> this#on_function_pointer acc e targs
         | String2 el -> this#on_string2 acc el
         | PrefixedString (_, e) -> this#on_expr acc e
-        | Pair (e1, e2) -> this#on_pair acc e1 e2
+        | Pair (ta, e1, e2) -> this#on_pair acc ta e1 e2
         | Cast (hint, e) -> this#on_cast acc hint e
         | Unop (uop, e) -> this#on_unop acc uop e
         | Binop (bop, e1, e2) -> this#on_binop acc bop e1 e2
@@ -972,7 +972,15 @@ module Visitor_DEPRECATED = struct
 
       method on_list acc el = List.fold_left el ~f:this#on_expr ~init:acc
 
-      method on_pair acc e1 e2 =
+      method on_pair acc tap e1 e2 =
+        let acc =
+          match tap with
+          | Some (t1, t2) ->
+            let acc = this#on_targ acc t1 in
+            let acc = this#on_targ acc t2 in
+            acc
+          | None -> acc
+        in
         let acc = this#on_expr acc e1 in
         let acc = this#on_expr acc e2 in
         acc

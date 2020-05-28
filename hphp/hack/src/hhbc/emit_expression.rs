@@ -460,7 +460,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
             emit_named_collection(emitter, env, pos, expression, &fields, collection_typ)
         }
         Expr_::Pair(e) => {
-            let (e1, e2) = (**e).to_owned();
+            let (_, e1, e2) = (**e).to_owned();
             let fields = mk_afvalues(&vec![e1, e2]);
             emit_named_collection(emitter, env, pos, expression, &fields, CollectionType::Pair)
         }

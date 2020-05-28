@@ -3086,9 +3086,8 @@ fn print_statement<W: Write>(
             print_block_(ctx, w, env, block, ident)
         }
         S_::Noop => Ok(()),
-        _ => Err(Error::Fail(
-            "TODO(T29869930) Unimplemented NYI: Default value printing".into(),
-        )),
+        /* TODO(T29869930) */
+        _ => w.write("TODO Unimplemented NYI: Default value printing"),
     }
 }
 

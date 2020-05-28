@@ -8,7 +8,7 @@ enum FactTypeFlags : int {
   _FINAL = 2;
   // if this is set the flags are a union of features from all declarations
   MULTIPLE_DECLARATIONS = 4;
-};
+}
 
 /**
  * Read a set of HH/PHP files and quickly extract the main features aka. "Facts"

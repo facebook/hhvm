@@ -38,7 +38,7 @@ namespace __SystemLib {
       }
       return $this->getMethodNameImpl();
     }
-  };
+  }
 }
 
 namespace HH {

@@ -2714,7 +2714,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         name: Self::R,
         _arg3: Self::R,
         extends: Self::R,
-        _arg5: Self::R,
+        constraint: Self::R,
         _arg6: Self::R,
         cases: Self::R,
         _arg8: Self::R,
@@ -2760,6 +2760,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         user_attributes.reverse();
         let user_attributes = user_attributes.into_bump_slice();
 
+        let constraint = match constraint? {
+            Node_::TypeConstraint(&(_kind, ty)) => self.node_to_ty(ty).ok(),
+            _ => None,
+        };
+
         let cls = shallow_decl_defs::ShallowClass {
             mode: match self.state.file_mode_builder {
                 FileModeBuilder::None | FileModeBuilder::Pending => Mode::Mstrict,
@@ -2790,7 +2795,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             user_attributes,
             enum_type: Some(EnumType {
                 base: hint,
-                constraint: None,
+                constraint,
             }),
             // NB: We have no intention of populating this field. Any errors
             // historically emitted during shallow decl should be migrated to a

@@ -44,18 +44,13 @@ let class_const env c cc =
           match Decl_utils.infer_const e with
           | Some tprim -> (mk (Reason.Rwitness (fst e), Tprim tprim), false)
           | None ->
-            if
-              Partial.should_check_error c.c_mode 2035
-              && not Ast_defs.(equal_class_kind c.c_kind Cenum)
-            then (
-              Errors.missing_typehint pos;
-              (mk (Reason.Rwitness pos, Terr), false)
-            ) else
-              (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false)
+            (* Typing will take care of rejecting constants that have neither
+             * an initializer nor a literal initializer *)
+            (mk (Reason.Rwitness pos, Typing_defs.make_tany ()), false)
         end
       | (None, None) ->
-        if Partial.should_check_error c.c_mode 2035 then
-          Errors.missing_typehint pos;
+        (* Typing will take care of rejecting constants that have neither
+         * an initializer nor a literal initializer *)
         let r = Reason.Rwitness pos in
         (mk (r, Typing_defs.make_tany ()), true)
     in

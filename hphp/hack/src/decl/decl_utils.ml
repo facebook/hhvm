@@ -7,7 +7,6 @@
  *
  *)
 
-open Hh_prelude
 open Reordered_argument_collections
 open Aast
 open Typing_defs
@@ -75,18 +74,17 @@ let split_defs defs split_if_in_defs =
     in
     (r1, r2))
 
-let rec infer_const (_, expr_) =
+let infer_const (_, expr_) =
   match expr_ with
-  | String _ -> Tstring
+  | String _ -> Some Tstring
   | True
   | False ->
-    Tbool
-  | Int _ -> Tint
-  | Float _ -> Tfloat
-  | Unop
-      ((Ast_defs.Uminus | Ast_defs.Uplus | Ast_defs.Utild | Ast_defs.Unot), e2)
-    ->
-    infer_const e2
+    Some Tbool
+  | Int _ -> Some Tint
+  | Float _ -> Some Tfloat
+  | Null -> Some Tnull
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, Int _)) -> Some Tint
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, Float _)) -> Some Tfloat
   | _ ->
     (* We can't infer the type of everything here. Notably, if you
      * define a const in terms of another const, we need an annotation,
@@ -95,9 +93,7 @@ let rec infer_const (_, expr_) =
      * Also note that a number of expressions are considered invalid
      * as constant initializers, even if we can infer their type; see
      * Naming.check_constant_expr. *)
-    raise Exit
-
-let infer_const expr = (try Some (infer_const expr) with Exit -> None)
+    None
 
 let coalesce_consistent parent current =
   (* If the parent's constructor is consistent via <<__ConsistentConstruct>>, then

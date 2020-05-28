@@ -23,7 +23,6 @@ open Typing_deps
 module Reason = Typing_reason
 module Inst = Decl_instantiate
 module Attrs = Naming_attributes
-module Partial = Partial_provider
 module SN = Naming_special_names
 
 let tracked_names : FileInfo.names option ref = ref None
@@ -1270,9 +1269,8 @@ let const_decl (ctx : Provider_context.t) (cst : Nast.gconst) :
   | None ->
     (match Decl_utils.infer_const cst.cst_value with
     | Some tprim -> mk (Reason.Rwitness (fst cst.cst_value), Tprim tprim)
-    | None when Partial.should_check_error cst.cst_mode 2035 ->
-      Errors.missing_typehint cst_pos;
-      mk (Reason.Rwitness cst_pos, Terr)
+    (* A NAST check will take care of rejecting constants that have neither
+     * an initializer nor a literal initializer *)
     | None -> mk (Reason.Rwitness cst_pos, Typing_defs.make_tany ()))
 
 let iconst_decl

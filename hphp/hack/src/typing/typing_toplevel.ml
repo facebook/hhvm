@@ -1004,7 +1004,7 @@ and class_def_ env c tc =
   let (env, typed_typeconsts) =
     List.map_env env c.c_typeconsts (typeconst_def (snd c.c_name))
   in
-  let (env, consts) = List.map_env env c.c_consts class_const_def in
+  let (env, consts) = List.map_env env c.c_consts (class_const_def c) in
   let (typed_consts, const_types) = List.unzip consts in
   let env = Typing_enum.enum_class_check env tc c.c_consts const_types in
   let typed_constructor = class_constr_def env tc constructor in
@@ -1374,11 +1374,37 @@ and pu_enum_def
     Aast.pu_members = members;
   }
 
-and class_const_def env cc =
+(* This should agree with the set of expressions whose type can be inferred in
+ * Decl_utils.infer_const
+ *)
+and is_literal_expr e =
+  match snd e with
+  | String _
+  | True
+  | False
+  | Int _
+  | Float _
+  | Null ->
+    true
+  | Unop ((Ast_defs.Uminus | Ast_defs.Uplus), (_, (Int _ | Float _))) -> true
+  | _ -> false
+
+and class_const_def c env cc =
   let { cc_type = h; cc_id = id; cc_expr = e; _ } = cc in
   let (env, ty, opt_expected) =
     match h with
     | None ->
+      begin
+        match e with
+        | None -> ()
+        | Some e ->
+          if
+            (not (is_literal_expr e))
+            && Partial.should_check_error c.c_mode 2035
+            && not Ast_defs.(equal_class_kind c.c_kind Cenum)
+          then
+            Errors.missing_typehint (fst id)
+      end;
       let (env, ty) = Env.fresh_type env (fst id) in
       (env, MakeType.unenforced ty, None)
     | Some h ->
@@ -1600,6 +1626,11 @@ let gconst_def ctx cst =
       in
       (te, env)
     | None ->
+      if
+        (not (is_literal_expr value))
+        && Partial.should_check_error cst.cst_mode 2035
+      then
+        Errors.missing_typehint (fst cst.cst_name);
       let (env, te, _value_type) = Typing.expr env value in
       (te, env)
   in

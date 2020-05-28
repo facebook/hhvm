@@ -722,9 +722,24 @@ impl<'a> Node_<'a> {
                     "__MutableReturn" => attributes.returns_mutable = true,
                     "__ReturnsVoidToRx" => attributes.returns_void_to_rx = true,
                     "__Deprecated" => {
+                        fn fold_string_concat<'a>(expr: &nast::Expr<'a>, acc: &mut String<'a>) {
+                            match expr {
+                                &aast::Expr(_, aast::Expr_::String(val)) => acc.push_str(val),
+                                &aast::Expr(_, aast::Expr_::Binop(&(Bop::Dot, e1, e2))) => {
+                                    fold_string_concat(&e1, acc);
+                                    fold_string_concat(&e2, acc);
+                                }
+                                _ => (),
+                            }
+                        }
                         attributes.deprecated = attribute.params.first().and_then(|expr| match expr
                         {
                             &aast::Expr(_, aast::Expr_::String(val)) => Some(val),
+                            &aast::Expr(_, aast::Expr_::Binop(_)) => {
+                                let mut acc = String::new_in(arena);
+                                fold_string_concat(expr, &mut acc);
+                                Some(acc.into_bump_str())
+                            }
                             _ => None,
                         })
                     }

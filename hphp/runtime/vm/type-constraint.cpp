@@ -956,6 +956,12 @@ void TypeConstraint::verifyReturnNonNull(TypedValue* tv,
 }
 
 std::string describe_actual_type(tv_rval val) {
+  // Validate TV to catch possible memory corruptions.
+  // We suspect, some rare unexplained typehint notices are caused by memory
+  // corruption. This would detect a problem sooner and give us more info to
+  // debug.
+  always_assert(tvIsPlausible(val.tv()));
+
   switch (val.type()) {
     case KindOfUninit:        return "undefined variable";
     case KindOfNull:          return "null";

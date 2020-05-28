@@ -80,7 +80,9 @@ class Memcached {
    *
    * @return bool -
    */
-  public function addServers(array<array<mixed>> $servers): bool {
+  public function addServers(
+    varray_or_darray<varray_or_darray<mixed>> $servers,
+  ): bool {
     $servers_vals = array_values($servers);
     foreach($servers_vals as $i => $server) {
       $server = array_values($server);
@@ -264,7 +266,7 @@ class Memcached {
    * @return array
    */
   <<__Native>>
-  public function deleteMultiByKey(string $server_key, array $keys,
+  public function deleteMultiByKey(string $server_key, varray $keys,
                                    int $time = 0): mixed;
 
   /**
@@ -276,7 +278,7 @@ class Memcached {
    *
    * @return array
    */
-  public function deleteMulti(array $keys, int $time = 0): mixed {
+  public function deleteMulti(varray $keys, int $time = 0): mixed {
     return $this->deleteMultiByKey('', $keys, $time);
   }
 
@@ -411,7 +413,7 @@ class Memcached {
    */
   <<__Native>>
   public function getDelayedByKey(string $server_key,
-                                  array $keys,
+                                  varray $keys,
                                   bool $with_cas = false,
                                   ?callable $value_cb = null): bool;
 
@@ -457,12 +459,12 @@ class Memcached {
    */
   <<__Native>>
   public function getMultiByKey(string $server_key,
-                                array $keys,
+                                varray $keys,
                                 int $flags = 0): mixed;
 
   <<__Native>>
   public function getMultiByKeyWithCasTokens(string $server_key,
-                                             array $keys,
+                                             varray $keys,
                                              <<__OutOnly>>
                                              inout mixed $cas_tokens,
                                              int $flags = 0): mixed;
@@ -512,7 +514,7 @@ class Memcached {
    * @return array - The list of all servers in the server pool.
    */
   <<__Native>>
-  public function getServerList(): array;
+  public function getServerList(): varray;
 
   /**
    * Clears all server from the list
@@ -704,7 +706,7 @@ class Memcached {
    *
    * @return bool -
    */
-  public function setMulti(array<string, mixed> $items,
+  public function setMulti(darray<string, mixed> $items,
                            int $expiration = 0): bool {
     return $this->setMultiByKey('', $items, $expiration);
   }
@@ -719,7 +721,7 @@ class Memcached {
    * @return bool -
    */
   public function setMultiByKey(string $server_key,
-                                array<string, mixed> $items,
+                                darray<string, mixed> $items,
                                 int $expiration = 0): bool {
     foreach($items as $key => $value) {
       if (is_int($key)) {
@@ -754,7 +756,7 @@ class Memcached {
    *
    * @return bool -
    */
-  public function setOptions(array<int, mixed> $options): bool {
+  public function setOptions(darray<int, mixed> $options): bool {
     foreach($options as $option => $value) {
       if (!$this->setOption($option, $value)) {
         return false;

@@ -246,13 +246,13 @@ function sodium_crypto_kx_publickey(string $keypair): string {
 function sodium_crypto_kx_client_session_keys(
   string $client_keypair,
   string $server_pubkey,
-): array<string>;
+): varray<string>;
 
 <<__Native>>
 function sodium_crypto_kx_server_session_keys(
   string $server_keypair,
   string $client_pubkey,
-): array<string>;
+): varray<string>;
 
 ///// Unauthenticated asymetric (PSK) encryption (you probably don't want this)
 

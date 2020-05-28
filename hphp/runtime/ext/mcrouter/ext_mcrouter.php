@@ -22,11 +22,11 @@ class MCRouterException extends Exception {
  * Thrown when unable to parse an option list
  */
 class MCRouterOptionException extends Exception {
-  public function getErrors(): array<array<string,string>> {
+  public function getErrors(): varray<darray<string,string>> {
     return $this->errors;
   }
 
-  public function __construct(protected array<array<string,string>> $errors) {
+  public function __construct(protected varray<darray<string,string>> $errors) {
     parent::__construct("Failure parsing options", 0);
   }
 }
@@ -48,7 +48,7 @@ class MCRouter {
    */
   <<__Native>>
   public function __construct(
-    array<string,mixed> $options,
+    darray<string,mixed> $options,
     string $pid = "",
   ): void;
 
@@ -236,7 +236,7 @@ class MCRouter {
    * @throws On failure
    */
   <<__Native>>
-  public function gets(string $key): Awaitable<array>;
+  public function gets(string $key): Awaitable<darray>;
 
   /**
    * Get the remote server's current version

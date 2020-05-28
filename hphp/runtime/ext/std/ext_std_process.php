@@ -171,7 +171,7 @@ function proc_close(resource $process): int;
  *
  */
 <<__Native>>
-function proc_get_status(resource $process): array;
+function proc_get_status(resource $process): darray;
 
 /**
  * proc_nice() changes the priority of the current process by the amount

@@ -158,7 +158,7 @@ class IntlCalendar {
    * @return array - An array of strings, one for which locale.
    */
   <<__Native>>
-  public static function getAvailableLocales(): array;
+  public static function getAvailableLocales(): varray;
 
   /**
    * Tell whether a day is a weekday, weekend or a day that has a transition
@@ -697,7 +697,7 @@ function intlcal_get_actual_minimum(IntlCalendar $cal,
  *
  * @return array - An array of strings, one for which locale.
  */
-function intlcal_get_available_locales(): array {
+function intlcal_get_available_locales(): varray {
   return IntlCalendar::getAvailableLocales();
 }
 

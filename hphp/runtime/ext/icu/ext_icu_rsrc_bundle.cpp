@@ -187,7 +187,7 @@ static Variant HHVM_STATIC_METHOD(ResourceBundle, getLocales,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   const char *entry;
   int32_t entry_len;
   while ((entry = uenum_next(le, &entry_len, &error))) {

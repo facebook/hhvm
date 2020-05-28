@@ -52,7 +52,7 @@ function get_headers(string $url, int $format = 0): mixed;
  */
 <<__Native>>
 function get_meta_tags(string $filename,
-                        bool $use_include_path = false): array<string, string>;
+                        bool $use_include_path = false): darray<string, string>;
 
 /**
  * Generate URL-encoded query string

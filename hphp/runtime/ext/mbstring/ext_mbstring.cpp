@@ -1027,7 +1027,7 @@ static String convertArg(const Variant& arg) {
 }
 
 Array HHVM_FUNCTION(mb_list_encodings) {
-  Array ret;
+  Array ret = Array::CreateVArray();
   int i = 0;
   const mbfl_encoding **encodings = mbfl_get_supported_encodings();
   const mbfl_encoding *encoding;

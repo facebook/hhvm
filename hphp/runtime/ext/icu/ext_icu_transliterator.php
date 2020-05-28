@@ -194,7 +194,7 @@ function transliterator_get_error_message(Transliterator $t): string {
  * @return array - An array of registered transliterator IDs on success,
  *   .
  */
-function transliterator_list_ids(): array {
+function transliterator_list_ids(): varray {
   return Transliterator::listIDs();
 }
 

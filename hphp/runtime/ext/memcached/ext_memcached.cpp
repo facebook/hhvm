@@ -854,7 +854,7 @@ doServerListCallback(const memcached_st* /*ptr*/,
 
 Array HHVM_METHOD(Memcached, getserverlist) {
   auto data = Native::data<MemcachedData>(this_);
-  Array returnValue = Array::Create();
+  Array returnValue = Array::CreateVArray();
   memcached_server_function callbacks[] = { doServerListCallback };
   memcached_server_cursor(&data->m_impl->memcached, callbacks, &returnValue, 1);
   return returnValue;

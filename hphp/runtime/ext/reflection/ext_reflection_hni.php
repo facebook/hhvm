@@ -231,7 +231,7 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   }
 
   <<__Native, __Rx, __MaybeMutable>>
-  public function getReifiedTypeParamInfo(): array;
+  public function getReifiedTypeParamInfo(): varray;
 
   /**
    * ( excerpt from
@@ -2181,7 +2181,7 @@ class ReflectionClass implements Reflector {
   use ReflectionTypedAttribute;
 
   <<__Native, __Rx, __MaybeMutable>>
-  public function getAttributesNamespaced(): darray<string, array<mixed>>;
+  public function getAttributesNamespaced(): darray<string, varray<mixed>>;
 
   use ReflectionLegacyAttribute;
 

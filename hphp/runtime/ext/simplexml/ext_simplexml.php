@@ -87,7 +87,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    * @return array
    */
   <<__Native>>
-  public function getNamespaces(bool $recursive = false): array;
+  public function getNamespaces(bool $recursive = false): darray;
 
   /** @param bool $recursive
    * @param bool $from_root
@@ -95,7 +95,7 @@ class SimpleXMLElement implements ArrayAccess, Traversable, Countable {
    */
   <<__Native>>
   public function getDocNamespaces(bool $recursive = false,
-                                   bool $from_root = true): array;
+                                   bool $from_root = true): darray;
 
   /** @param string $ns - An XML namespace.
    * @param bool $is_prefix - If is_prefix is TRUE, ns will be regarded as a

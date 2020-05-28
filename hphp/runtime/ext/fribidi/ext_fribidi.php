@@ -8,7 +8,7 @@ function fribidi_log2vis(
 ): mixed;
 
 <<__Native>>
-function fribidi_charset_info(int $charset): array;
+function fribidi_charset_info(int $charset): darray;
 
 <<__Native>>
-function fribidi_get_charsets(): array;
+function fribidi_get_charsets(): darray;

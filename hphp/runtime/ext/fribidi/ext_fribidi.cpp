@@ -1,5 +1,6 @@
 #include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/array-init.h"
 
 #include <fribidi/fribidi.h>
 
@@ -115,7 +116,7 @@ static Array HHVM_FUNCTION(
   fribidi_charset_info,
   int64_t charset
 ) {
-  Array result;
+  Array result = Array::CreateDArray();
 
   result.set(
     String("name"),
@@ -139,19 +140,14 @@ static Array HHVM_FUNCTION(
 static Array HHVM_FUNCTION(
   fribidi_get_charsets
 ) {
-  Array result;
-
-  result.set(FRIBIDI_CHAR_SET_UTF8, Variant{s_FRIBIDI_CHARSET_UTF8.get()});
-  result.set(FRIBIDI_CHAR_SET_ISO8859_6,
-             Variant{s_FRIBIDI_CHARSET_8859_6.get()});
-  result.set(FRIBIDI_CHAR_SET_ISO8859_8,
-             Variant{s_FRIBIDI_CHARSET_8859_8.get()});
-  result.set(FRIBIDI_CHAR_SET_CP1255, Variant{s_FRIBIDI_CHARSET_CP1255.get()});
-  result.set(FRIBIDI_CHAR_SET_CP1256, Variant{s_FRIBIDI_CHARSET_CP1256.get()});
-  result.set(FRIBIDI_CHAR_SET_CAP_RTL,
-             Variant{s_FRIBIDI_CHARSET_CAP_RTL.get()});
-
-  return result;
+  return make_darray(
+    FRIBIDI_CHAR_SET_UTF8,      Variant{s_FRIBIDI_CHARSET_UTF8.get()},
+    FRIBIDI_CHAR_SET_ISO8859_6, Variant{s_FRIBIDI_CHARSET_8859_6.get()},
+    FRIBIDI_CHAR_SET_ISO8859_8, Variant{s_FRIBIDI_CHARSET_8859_8.get()},
+    FRIBIDI_CHAR_SET_CP1255,    Variant{s_FRIBIDI_CHARSET_CP1255.get()},
+    FRIBIDI_CHAR_SET_CP1256,    Variant{s_FRIBIDI_CHARSET_CP1256.get()},
+    FRIBIDI_CHAR_SET_CAP_RTL,   Variant{s_FRIBIDI_CHARSET_CAP_RTL.get()}
+  );
 }
 
 struct FribidiExtension final : Extension {

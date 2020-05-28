@@ -350,7 +350,7 @@ function mcrypt_get_key_size(string $cipher,
  * @return array - Returns an array with all the supported algorithms.
  */
 <<__Native>>
-function mcrypt_list_algorithms(string $lib_dir = ''): array;
+function mcrypt_list_algorithms(string $lib_dir = ''): varray;
 
 /**
  * Gets an array of all supported modes
@@ -362,7 +362,7 @@ function mcrypt_list_algorithms(string $lib_dir = ''): array;
  * @return array - Returns an array with all the supported modes.
  */
 <<__Native>>
-function mcrypt_list_modes(string $lib_dir = ''): array;
+function mcrypt_list_modes(string $lib_dir = ''): varray;
 
 /**
  * Closes the mcrypt module
@@ -416,7 +416,7 @@ function mcrypt_module_get_algo_key_size(string $algorithm,
  */
 <<__Native>>
 function mcrypt_module_get_supported_key_sizes(string $algorithm,
-                                               string $lib_dir = ''): array;
+                                               string $lib_dir = ''): varray;
 
 /**
  * Returns if the specified module is a block algorithm or not

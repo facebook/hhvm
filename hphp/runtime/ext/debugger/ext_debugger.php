@@ -8,7 +8,7 @@ namespace __SystemLib {
    * and port will be null if the connection is local.
    */
   <<__Native>>
-  function debugger_get_info() : array;
+  function debugger_get_info() : darray;
 
 }
 

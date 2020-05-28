@@ -1013,7 +1013,7 @@ function convert_cyr_string(string $str, string $from, string $to): string;
 <<__Native>>
 function get_html_translation_table(int $table = 0,
                                     int $quote_style = ENT_COMPAT,
-                                    string $encoding = "UTF-8"): array;
+                                    string $encoding = "UTF-8"): darray;
 
 /**
  * Converts logical Hebrew text to visual text.  The function tries to avoid
@@ -1086,7 +1086,7 @@ function setlocale(int $category, mixed $locale, ...$argv): mixed;
  *
  */
 <<__Native>>
-function localeconv(): array;
+function localeconv(): darray;
 
 /**
  * nl_langinfo() is used to access individual elements of the locale

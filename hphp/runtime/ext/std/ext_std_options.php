@@ -176,7 +176,7 @@ function ini_get(string $varname): mixed;
  */
 <<__Native>>
 function ini_get_all(string $extension = "",
-                     bool $details = true): array;
+                     bool $details = true): darray;
 
 /* Restores a given configuration option to its original value.
  */

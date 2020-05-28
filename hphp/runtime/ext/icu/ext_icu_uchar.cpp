@@ -1,3 +1,4 @@
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/icu.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -272,11 +273,11 @@ Variant HHVM_STATIC_METHOD(IntlChar, charAge, const Variant& arg) {
 Array HHVM_STATIC_METHOD(IntlChar, getUnicodeVersion) {
   UVersionInfo version;
   u_getUnicodeVersion(version);
-  Array ret = Array::Create();
+  VArrayInit ret(U_MAX_VERSION_LENGTH);
   for(int i = 0; i < U_MAX_VERSION_LENGTH; ++i) {
     ret.append(version[i]);
   }
-  return ret;
+  return ret.toArray();
 }
 
 Variant HHVM_STATIC_METHOD(IntlChar, getFC_NFKC_Closure, const Variant& arg) {

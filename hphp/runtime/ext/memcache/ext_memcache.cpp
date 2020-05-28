@@ -637,7 +637,7 @@ static Array memcache_build_stats(const memcached_st *ptr,
     return Array();
   }
 
-  Array return_val = Array::Create();
+  Array return_val = Array::CreateDArray();
 
   for (curr_key = stat_keys; *curr_key; curr_key++) {
     char *mc_val;
@@ -701,7 +701,7 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
 
   int server_count = memcached_server_count(&data->m_memcache);
 
-  Array return_val;
+  Array return_val = Array::CreateDArray();
 
   for (int server_id = 0; server_id < server_count; server_id++) {
     memcached_stat_st *stat;
@@ -727,6 +727,9 @@ static Array HHVM_METHOD(Memcache, getextendedstats,
   }
 
   free(stats);
+  if (return_val.empty()) {
+    return Array();
+  }
   return return_val;
 }
 

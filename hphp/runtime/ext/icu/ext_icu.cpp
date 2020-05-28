@@ -320,12 +320,11 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
   const String BEGIN_MARKER("_B_");
   const String END_MARKER("_E_");
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   std::vector<Token> tokens;
   tokenizeString(tokens, getMaster(), UnicodeString::fromUTF8(text.data()));
 
-  int i = 0;
-  ret.set(i++, BEGIN_MARKER);
+  ret.append(BEGIN_MARKER);
   for(std::vector<Token>::iterator iter = tokens.begin();
       iter != tokens.end();
       iter++) {
@@ -333,10 +332,10 @@ static Array HHVM_FUNCTION(icu_tokenize, const String& text) {
     const UnicodeString& word = iter->value;
     // Ignore spaces and empty strings.
     if (!s_spaceMatcher->matches(word) && word.length() > 0) {
-      ret.set(i++, String(icuStringToUTF8(word)));
+      ret.append(String(icuStringToUTF8(word)));
     }
   }
-  ret.set(i++, END_MARKER);
+  ret.append(END_MARKER);
   return ret;
 }
 

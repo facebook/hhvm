@@ -210,6 +210,6 @@ function resourcebundle_get(ResourceBundle $r,
  *
  * @return array - Returns the list of locales supported by the bundle.
  */
-function resourcebundle_locales(string $bundlename): array {
+function resourcebundle_locales(string $bundlename): varray {
   return ResourceBundle::getLocales($bundlename);
 }

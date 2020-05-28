@@ -125,12 +125,13 @@ static void mcr_throwOptionException(
     assertx(c_MCRouterOptionException);
   }
 
-  Array errorArray = Array::Create();
+  VArrayInit errorArray(errors.size());
   for (auto err : errors) {
-    Array e;
-    e.set(s_option, String(err.requestedName));
-    e.set(s_value, String(err.requestedValue));
-    e.set(s_error, String(err.errorMsg));
+    auto e = make_darray(
+      s_option, String(err.requestedName),
+      s_value, String(err.requestedValue),
+      s_error, String(err.errorMsg)
+    );
     errorArray.append(e);
   }
 
@@ -138,7 +139,7 @@ static void mcr_throwOptionException(
   tvDecRefGen(
     g_context->invokeFunc(
       c_MCRouterOptionException->getCtor(),
-      make_vec_array(errorArray),
+      make_vec_array(errorArray.toArray()),
       obj.get()
     )
   );
@@ -264,11 +265,12 @@ struct MCRouterResult : AsioExternalThreadEvent {
       m_stringResult.clear();
     } else if ((m_result.m_type == KindOfArray) && !m_result.m_data.parr) {
       // Deferred string value and cas, see below
-      Array ret = Array::Create();
-      ret.set(s_value,
-        String(m_stringResult.c_str(), m_stringResult.size(), CopyString));
-      ret.set(s_cas, (int64_t)m_cas);
-      ret.set(s_flags, (int64_t)m_flags);
+      Array ret = make_darray(
+        s_value,
+          String(m_stringResult.c_str(), m_stringResult.size(), CopyString),
+        s_cas, (int64_t)m_cas,
+        s_flags, (int64_t)m_flags
+      );
       m_result.m_data.parr = ret.detach();
       m_stringResult.clear();
     }

@@ -14,6 +14,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/icu/ext_icu_calendar.h"
 #include "hphp/runtime/ext/icu/ext_icu_timezone.h"
 #include "hphp/runtime/ext/icu/ext_icu_iterator.h"
@@ -239,13 +240,13 @@ static Variant HHVM_METHOD(IntlCalendar, getActualMinimum, int64_t field) {
 }
 
 static Array HHVM_STATIC_METHOD(IntlCalendar, getAvailableLocales) {
-  Array ret = Array::Create();
   int32_t count;
   const icu::Locale *availLocales = icu::Calendar::getAvailableLocales(count);
+  VArrayInit ret(count);
   for (int i = 0; i < count; ++i) {
     ret.append(String(availLocales[i].getName(), CopyString));
   }
-  return ret;
+  return ret.toArray();
 }
 
 static int64_t HHVM_METHOD(IntlCalendar, getErrorCode) {

@@ -262,7 +262,7 @@ class Memcache {
   <<__Native>>
   public function getstats(string $type = "",
                     int $slabid = 0,
-                    int $limit = 100): array;
+                    int $limit = 100): darray;
 
   /* Memcache::getExtendedStats() returns a two-dimensional associative array
    * with server statistics. Array keys correspond to host:port of server and
@@ -285,7 +285,7 @@ class Memcache {
   <<__Native>>
   public function getextendedstats(string $type = "",
                             int $slabid = 0,
-                            int $limit = 100): array;
+                            int $limit = 100): darray;
 
   /* Memcache::setServerParams() changes server parameters at runtime. You can
    * also use the memcache_set_server_params() function.  This function has been
@@ -650,7 +650,7 @@ function memcache_set_compress_threshold(Memcache $memcache,
 function memcache_get_stats(Memcache $memcache,
                             mixed $type = "",
                             mixed $slabid = 0,
-                            mixed $limit = 100): array {
+                            mixed $limit = 100): darray {
   return $memcache->getstats($type, $slabid, $limit);
 }
 
@@ -663,7 +663,7 @@ function memcache_get_stats(Memcache $memcache,
 function memcache_get_extended_stats(Memcache $memcache,
                                      mixed $type = "",
                                      mixed $slabid = 0,
-                                     mixed $limit = 100): array {
+                                     mixed $limit = 100): darray {
   return $memcache->getextendedstats($type, $slabid, $limit);
 }
 

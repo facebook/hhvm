@@ -7,7 +7,7 @@
  *
  */
 <<__Native>>
-function mb_list_encodings(): array;
+function mb_list_encodings(): varray;
 
 /**
  * @param string $name

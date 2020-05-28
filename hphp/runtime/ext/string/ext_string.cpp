@@ -2229,7 +2229,7 @@ Array HHVM_FUNCTION(localeconv) {
     currlocdata = *res;
   }
 
-  Array ret;
+  Array ret = Array::CreateDArray();
 #define SET_LOCALE_STRING(x) ret.set(s_ ## x, String(currlocdata.x, CopyString))
   SET_LOCALE_STRING(decimal_point);
   SET_LOCALE_STRING(thousands_sep);
@@ -2530,7 +2530,7 @@ Array HHVM_FUNCTION(get_html_translation_table,
 
   bool all = (table == k_HTML_ENTITIES);
 
-  Array ret;
+  Array ret = Array::CreateDArray();
   switch (table) {
   case k_HTML_ENTITIES: {
     if (charset == cs_utf_8) {
@@ -2580,6 +2580,9 @@ Array HHVM_FUNCTION(get_html_translation_table,
     }
     ret.set(s_amp, s_ampsemi);
     break;
+  }
+  if (ret.empty()) {
+    return Array();
   }
 
   return ret;

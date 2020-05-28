@@ -29,7 +29,7 @@ function pg_pconnect(
 ): ?resource;
 
 <<__Native>>
-function pg_connection_pool_stat(): ?array;
+function pg_connection_pool_stat(): ?varray;
 
 <<__Native>>
 function pg_connection_pool_sweep_free(): void;
@@ -53,7 +53,7 @@ function pg_connection_status(resource $connection): int;
 function pg_convert(
   resource $connection,
   string $table_name,
-  array<mixed> $assoc_array,
+  darray<arraykey, mixed> $assoc_array,
   int $option,
 ): mixed;
 
@@ -61,7 +61,7 @@ function pg_convert(
 function pg_copy_from(
   resource $connection,
   string $table_name,
-  array<mixed> $rows,
+  varray<mixed> $rows,
   string $delimiter = "\t",
   string $null_as = "\n",
 ): bool;
@@ -96,13 +96,13 @@ function pg_escape_string(resource $connection, string $data): string;
 function pg_execute(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): ?resource;
 
 function pg_exec(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): ?resource {
   return pg_execute($connection, $stmtname, $params);
 }
@@ -260,7 +260,7 @@ function pg_put_line(resource $connection, string $data): bool;
 function pg_query_params(
   resource $connection,
   string $query,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): ?resource;
 
 <<__Native>>
@@ -282,7 +282,7 @@ function pg_result_status(resource $result, int $type = 1): mixed;
 function pg_send_execute(
   resource $connection,
   string $stmtname,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): bool;
 
 <<__Native>>
@@ -296,7 +296,7 @@ function pg_send_prepare(
 function pg_send_query_params(
   resource $connection,
   string $query,
-  array<mixed> $params,
+  varray<mixed> $params,
 ): bool;
 
 <<__Native>>

@@ -324,10 +324,12 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::BespokeArray:
-    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:
-      // TODO(jgriego)
+      // TODO(kshaunak): Expose an address -> element API for bespokes.
       break;
 
     case HeaderKind::Object:

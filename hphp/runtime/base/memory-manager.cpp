@@ -432,9 +432,9 @@ void MemoryManager::flush() {
  */
 
 constexpr const std::array<char*,NumHeaderKinds> header_names = {{
-  "PackedArray", "MixedArray", "PlainArray", "GlobalsArray",
-  "RecordArray", "DictArray", "VecArray", "KeysetArray",
-  "BespokeArray", "BespokeDict", "BespokeVec", "BespokeKeyset",
+  "PackedArray", "BespokeVArray", "MixedArray", "BespokeDArray",
+  "PlainArray", "BespokeArray", "GlobalsArray", "RecordArray",
+  "Vec", "BespokeVec", "Dict", "BespokeDict", "Keyset", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "Record", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",
   "Closure", "Vector", "Map", "Set", "Pair", "ImmVector", "ImmMap", "ImmSet",
@@ -522,9 +522,9 @@ void MemoryManager::checkHeap(const char* phase) {
         break;
       case HeaderKind::Packed:
       case HeaderKind::Mixed:
-      case HeaderKind::Dict:
       case HeaderKind::Plain:
       case HeaderKind::Vec:
+      case HeaderKind::Dict:
       case HeaderKind::Keyset:
       case HeaderKind::Globals:
       case HeaderKind::Object:
@@ -553,8 +553,10 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::RecordArray:
       case HeaderKind::RFunc: // TODO(T63348446)
       case HeaderKind::BespokeArray:
-      case HeaderKind::BespokeDict:
+      case HeaderKind::BespokeVArray:
+      case HeaderKind::BespokeDArray:
       case HeaderKind::BespokeVec:
+      case HeaderKind::BespokeDict:
       case HeaderKind::BespokeKeyset:
         break;
       case HeaderKind::Hole:

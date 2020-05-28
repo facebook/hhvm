@@ -43,12 +43,23 @@ namespace HPHP {
  * HHVM_REPO_SCHEMA, because kind values are used in HHBC.
  */
 enum class HeaderKind : uint8_t {
-  // PHP arrays
-  Packed, Mixed, Plain, Globals, RecordArray,
-  // Hack arrays
-  Dict, Vec, Keyset,
-  // Bespoke arrays
-  BespokeArray, BespokeDict, BespokeVec, BespokeKeyset,
+  // Array-like header kinds. We use the concrete values of these kinds for
+  // tests in array-data.h, so take care when changing them. Specifically,
+  // we currently require that:
+  //
+  //  1. Array-like HeaderKind values match up with ArrayData::ArrayKind.
+  //  2. All PHP kinds come before any Hack array kinds.
+  //  3. varray-ish and darray-ish kinds come first (used for dvarray tests)
+  //  4. "vanilla" kinds are even, and "bespoke" kinds are odd.
+
+  // Common PHP arrays, with bespoke counterparts
+  Packed, BespokeVArray, Mixed, BespokeDArray, Plain, BespokeArray,
+  // Rare PHP arrays. Globals is supported, but deprecated; RecordArray is
+  // incompatible with both dvarray specialization and with bespoke arrays.
+  Globals, RecordArray,
+  // Hack arrays, with bespoke counterparts
+  Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
+
   // Other ordinary refcounted heap objects
   String, Resource, ClsMeth, Record, RFunc,
 
@@ -146,13 +157,11 @@ enum class GCBits : uint8_t {};
  * [ cnt | kind | marks | Attribute    |           ] Object..ImmSet (ObjectData)
  *
  * Note: arrBits includes several flags, mostly from the Hack array migration:
- *  - 2 bits for DVArrray
  *  - 1 bit for hasAPCTypedValue
  *  - 1 bit for isLegacyArray
  *  - 1 bit for hasProvenanceData
- *  - 1 bit for isBespoke
  *  - 1 bit for hasStrKeyTable
- *  - 1 bit UNUSED
+ *  - 4 bits unused
  *
  * When HAM is complete, we can eliminate DVArray and hasProvenanceData and move
  * the MixedArray keyTypes bitset (which uses 4 bits) to byte 6.

@@ -235,7 +235,7 @@ void APCTypedValue::registerUncountedAllocations() {
    if (kind == APCKind::UncountedString) {
      m_data.str->registerUncountedAllocation(&m_handle);
    } else if (kind == APCKind::UncountedArray) {
-     assertx(m_data.arr->isPHPArrayKind());
+     assertx(m_data.arr->isPHPArrayType());
      if (m_data.arr->hasVanillaPackedLayout()) {
        auto arr = m_data.arr;
        PackedArray::RegisterUncountedAllocations(arr, &m_handle);

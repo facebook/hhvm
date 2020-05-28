@@ -267,7 +267,7 @@ void ConvertTvToUncounted(
     case KindOfPersistentVArray:
     case KindOfPersistentArray: {
       auto& ad = data.parr;
-      assertx(ad->isPHPArrayKind());
+      assertx(ad->isPHPArrayType());
       assertx(!RuntimeOption::EvalHackArrDVArrs || ad->isNotDVArray());
       if (handlePersistent(ad)) break;
       if (ad->empty()) {

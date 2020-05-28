@@ -52,8 +52,10 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Vec:
     case HeaderKind::Keyset:
     case HeaderKind::BespokeArray:
-    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:
     case HeaderKind::Globals:
     case HeaderKind::RecordArray:

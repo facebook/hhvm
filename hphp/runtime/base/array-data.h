@@ -84,25 +84,32 @@ struct ArrayData : MaybeCountable {
    */
   enum ArrayKind : uint8_t {
     kPackedKind,        // varray: vec-like array with keys in range [0..size)
-    kMixedKind,         // darray: dict-like array int or string keys, maybe holes
-    kPlainKind,         // Plain PHP array (happens to be backed by MixedArray)
-    kGlobalsKind,       // GlobalsArray
-    kRecordKind,        // RecordArray
-    kDictKind,          // Hack dict
-    kVecKind,           // Hack vec
-    kKeysetKind,        // Hack keyset
-    kBespokeArrayKind,  // Bespoke array
-    kBespokeDictKind,   // Bespoke array
-    kBespokeVecKind,    // Bespoke array
-    kBespokeKeysetKind, // Bespoke array
-    kNumKinds           // insert new values before kNumKinds.
+    kBespokeVArrayKind,
+    kMixedKind,         // darray: dict-like array with int or string keys
+    kBespokeDArrayKind,
+    kPlainKind,         // Plain PHP array (backed by MixedArray)
+    kBespokeArrayKind,
+    kGlobalsKind,       // GlobalsArray for the awful $GLOBALS['GLOBALS']
+    kRecordKind,        // RecordArray (backed by a record and a MixedArray)
+    kVecKind,
+    kBespokeVecKind,
+    kDictKind,
+    kBespokeDictKind,
+    kKeysetKind,
+    kBespokeKeysetKind,
+    kNumKinds           // Insert new values before kNumKinds.
   };
+
+  /*
+   * This bit is set for bespoke ArrayKinds, and not for vanilla kinds.
+   */
+  static auto constexpr kBespokeKindMask = uint8_t{0x01};
 
   /*
    * For uncounted Packed, Mixed, Dict and Vec, indicates that the
    * array was co-allocated with an APCTypedValue (at apctv+1).
    */
-  static auto constexpr kHasApcTv    = 1;
+  static auto constexpr kHasApcTv = 1;
 
   /*
    * Indicates that this dict or vec should use some legacy (i.e.,
@@ -238,7 +245,6 @@ public:
   bool isMixedKind() const;
   bool isPlainKind() const;
   bool isGlobalsArrayKind() const;
-  bool isEmptyArrayKind() const;
   bool isDictKind() const;
   bool isVecKind() const;
   bool isKeysetKind() const;
@@ -249,8 +255,8 @@ public:
    */
   bool isPHPArrayType() const;
   bool isHackArrayType() const;
-  bool isDictType() const;
   bool isVecType() const;
+  bool isDictType() const;
   bool isKeysetType() const;
 
   /*
@@ -258,12 +264,6 @@ public:
    */
   bool hasVanillaPackedLayout() const;
   bool hasVanillaMixedLayout() const;
-
-  /*
-   * Whether the array is a PHP (non-Hack) or Hack array.
-   */
-  bool isPHPArrayKind() const;
-  bool isHackArrayKind() const;
 
   /*
    * Whether the array-like has the standard layout. This check excludes

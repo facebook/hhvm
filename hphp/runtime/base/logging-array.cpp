@@ -27,8 +27,8 @@ namespace bespoke {
 namespace {
 
 LoggingLayout* s_phpArrayLayout = new LoggingLayout(KindOfArray);
-LoggingLayout* s_dictLayout = new LoggingLayout(KindOfDict);
 LoggingLayout* s_vecLayout = new LoggingLayout(KindOfVec);
+LoggingLayout* s_dictLayout = new LoggingLayout(KindOfDict);
 LoggingLayout* s_keysetLayout = new LoggingLayout(KindOfKeyset);
 
 }
@@ -53,18 +53,22 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad) {
   auto const hk = [&]{
     switch (ad->kind()) {
     case kPackedKind:
+      return HeaderKind::BespokeVArray;
     case kMixedKind:
+      return HeaderKind::BespokeDArray;
     case kPlainKind:
     case kGlobalsKind:
     case kRecordKind:
       return HeaderKind::BespokeArray;
-    case kDictKind:
-      return HeaderKind::BespokeDict;
     case kVecKind:
       return HeaderKind::BespokeVec;
+    case kDictKind:
+      return HeaderKind::BespokeDict;
     case kKeysetKind:
       return HeaderKind::BespokeKeyset;
     case kBespokeArrayKind:
+    case kBespokeVArrayKind:
+    case kBespokeDArrayKind:
     case kBespokeDictKind:
     case kBespokeVecKind:
     case kBespokeKeysetKind:
@@ -90,14 +94,16 @@ Layout* LoggingLayout::layoutForVanillaArray(const ArrayData* ad) {
   case ArrayData::kPlainKind:
   case ArrayData::kGlobalsKind:
     return s_phpArrayLayout;
-  case ArrayData::kDictKind:
-    return s_dictLayout;
   case ArrayData::kVecKind:
     return s_vecLayout;
+  case ArrayData::kDictKind:
+    return s_dictLayout;
   case ArrayData::kKeysetKind:
     return s_keysetLayout;
   case ArrayData::kRecordKind:
   case ArrayData::kBespokeArrayKind:
+  case ArrayData::kBespokeVArrayKind:
+  case ArrayData::kBespokeDArrayKind:
   case ArrayData::kBespokeDictKind:
   case ArrayData::kBespokeVecKind:
   case ArrayData::kBespokeKeysetKind:

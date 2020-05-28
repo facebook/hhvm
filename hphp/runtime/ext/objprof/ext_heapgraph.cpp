@@ -244,10 +244,12 @@ CapturedPtr getEdgeInfo(const HeapGraph& g, int ptr) {
       }
 
       case HeaderKind::BespokeArray:
-      case HeaderKind::BespokeDict:
+      case HeaderKind::BespokeVArray:
+      case HeaderKind::BespokeDArray:
       case HeaderKind::BespokeVec:
+      case HeaderKind::BespokeDict:
       case HeaderKind::BespokeKeyset:
-        always_assert(false); // TODO(jgriego)
+        // TODO(kshaunak): Expose an address -> element API for bespokes.
         break;
 
       case HeaderKind::Pair: {

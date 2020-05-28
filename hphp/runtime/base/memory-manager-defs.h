@@ -254,16 +254,18 @@ inline size_t allocSize(const HeapObject* h) {
   // Ordering depends on header-kind.h.
   static constexpr uint16_t kind_sizes[] = {
     0, /* Packed */
+    0, /* BespokeVArray */
     0, /* Mixed */
+    0, /* BespokeDArray */
     0, /* Plain */
+    0, /* BespokeArray */
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
-    0, /* Dict */
     0, /* Vec */
-    0, /* KeySet */
-    0, /* BespokeArray */
-    0, /* BespokeDict */
     0, /* BespokeVec */
+    0, /* Dict */
+    0, /* BespokeDict */
+    0, /* Keyset */
     0, /* BespokeKeyset */
     0, /* String */
     0, /* Resource */
@@ -366,8 +368,10 @@ inline size_t allocSize(const HeapObject* h) {
       size = static_cast<const SetArray*>(h)->heapSize();
       break;
     case HeaderKind::BespokeArray:
-    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:
       size = static_cast<const BespokeArray*>(h)->heapSize();
       break;

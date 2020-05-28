@@ -198,8 +198,8 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
     case ArrayData::kVecKind:
     case ArrayData::kDictKind:
     case ArrayData::kKeysetKind:
-    case ArrayData::kBespokeDictKind:
     case ArrayData::kBespokeVecKind:
+    case ArrayData::kBespokeDictKind:
     case ArrayData::kBespokeKeysetKind:
       // Shouldn't get Hack arrays
       not_reached();
@@ -209,7 +209,11 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
       not_reached();
 
     case ArrayData::kBespokeArrayKind:
-      always_assert(false); // TODO(jgriego) bespoke
+    case ArrayData::kBespokeVArrayKind:
+    case ArrayData::kBespokeDArrayKind:
+      return c_AwaitAllWaitHandle::Create([=](auto fn) {
+        IterateV(MixedArray::asMixed(ad), fn);
+      });
 
     case ArrayData::kNumKinds:
       not_reached();

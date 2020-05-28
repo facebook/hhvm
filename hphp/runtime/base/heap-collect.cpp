@@ -171,8 +171,10 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::RecordArray:
     case HeaderKind::RFunc: // TODO(T63348446)
     case HeaderKind::BespokeArray:
-    case HeaderKind::BespokeDict:
+    case HeaderKind::BespokeVArray:
+    case HeaderKind::BespokeDArray:
     case HeaderKind::BespokeVec:
+    case HeaderKind::BespokeDict:
     case HeaderKind::BespokeKeyset:
       break;
     case HeaderKind::Free:

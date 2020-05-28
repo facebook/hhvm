@@ -1566,7 +1566,7 @@ ArrayData* MixedArray::Prepend(ArrayData* adInput, TypedValue v) {
 
 ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   auto adIn = asMixed(in);
-  assertx(adIn->isPHPArrayKind());
+  assertx(adIn->isPHPArrayType());
   if (adIn->isNotDVArray()) return adIn;
   assertx(adIn->isDArray());
   if (adIn->getSize() == 0) return ArrayData::Create();
@@ -1628,7 +1628,7 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   // the input array should already be a PHP-array so we just need to
   // clear DV array bits and cast any intish strings that may appear
   auto adIn = asMixed(in);
-  assertx(adIn->isPHPArrayKind());
+  assertx(adIn->isPHPArrayType());
   if (adIn->size() == 0) return ArrayData::Create();
 
   if (copy || adIn->hasIntishKeys()) {

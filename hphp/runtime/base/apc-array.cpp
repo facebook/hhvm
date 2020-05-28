@@ -83,7 +83,7 @@ APCArray::MakeSharedImpl(ArrayData* arr,
 APCHandle::Pair
 APCArray::MakeSharedArray(ArrayData* arr, APCHandleLevel level,
                           bool unserializeObj) {
-  assertx(arr->isPHPArrayKind());
+  assertx(arr->isPHPArrayType());
   if (auto const value = APCTypedValue::HandlePersistent(
         APCTypedValue::StaticArr{}, APCTypedValue::UncountedArr{}, arr)) {
     return value;
@@ -245,7 +245,7 @@ APCHandle* APCArray::MakeUncountedArray(
     ArrayData* array,
     DataWalker::PointerMap* m) {
   assertx(apcExtension::UseUncounted);
-  assertx(array->isPHPArrayKind());
+  assertx(array->isPHPArrayType());
   auto const value = [&] {
     if (array->isPackedKind()) {
       auto const data = PackedArray::MakeUncounted(array, true, m);

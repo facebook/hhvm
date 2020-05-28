@@ -155,28 +155,26 @@ inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
 inline bool ArrayData::isPlainKind() const { return kind() == kPlainKind; }
 inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
-inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
-
 inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
+inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
 inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
 inline bool ArrayData::isPHPArrayType() const {
-  static_assert(kBespokeArrayKind == 8, "");
-  return (kind() & (~0x08)) < kDictKind;
+  return kind() < kVecKind;
 }
 inline bool ArrayData::isHackArrayType() const {
-  return (kind() & (~0x08)) >= kDictKind;
+  return kind() >= kVecKind;
 }
 
-inline bool ArrayData::isDictType() const {
-  return ((kind() - 4) & 0x13) == 0x01;
-}
 inline bool ArrayData::isVecType() const {
-  return ((kind() - 4) & 0x13) == 0x02;
+  return (kind() & ~kBespokeKindMask) == kVecKind;
+}
+inline bool ArrayData::isDictType() const {
+  return (kind() & ~kBespokeKindMask) == kDictKind;
 }
 inline bool ArrayData::isKeysetType() const {
-  return ((kind() - 4) & 0x13) == 0x03;
+  return (kind() & ~kBespokeKindMask) == kKeysetKind;
 }
 
 inline bool ArrayData::hasVanillaPackedLayout() const {
@@ -186,25 +184,26 @@ inline bool ArrayData::hasVanillaMixedLayout() const {
   return isMixedKind() || isDictKind() || isPlainKind();
 }
 
-inline bool ArrayData::isPHPArrayKind() const {
-  return kind() <= kRecordKind;
-}
-
-inline bool ArrayData::isHackArrayKind() const {
-  return kind() >= kDictKind && kind() < kBespokeArrayKind;
-}
-
 inline bool ArrayData::isVanilla() const {
-  return kind() < kBespokeArrayKind;
+  return !(kind() & kBespokeKindMask);
 }
 
-inline bool ArrayData::isVArray() const { return kind() == kPackedKind; }
-inline bool ArrayData::isDArray() const { return kind() == kMixedKind; }
+inline bool ArrayData::isVArray() const {
+  static_assert(kPackedKind == 0);
+  static_assert(kBespokeVArrayKind == 1);
+  return kind() <= kBespokeVArrayKind;
+}
+
+inline bool ArrayData::isDArray() const {
+  return (kind() & ~kBespokeKindMask) == kMixedKind;
+}
 
 inline bool ArrayData::isDVArray() const {
   static_assert(kPackedKind == 0);
-  static_assert(kMixedKind == 1);
-  return kind() <= kMixedKind;
+  static_assert(kBespokeVArrayKind == 1);
+  static_assert(kMixedKind == 2);
+  static_assert(kBespokeDArrayKind == 3);
+  return kind() <= kBespokeDArrayKind;
 }
 
 inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
@@ -218,9 +217,11 @@ inline bool ArrayData::isDictOrDArray() const {
 
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
   static_assert(kPackedKind == 0);
-  static_assert(kMixedKind == 1);
-  return std::min(uint64_t{a->kind()}, uint64_t{2}) ==
-         std::min(uint64_t{b->kind()}, uint64_t{2});
+  static_assert(kBespokeVArrayKind == 1);
+  static_assert(kMixedKind == 2);
+  static_assert(kBespokeDArrayKind == 3);
+  return std::min(uint8_t(a->kind() & ~kBespokeKindMask), uint8_t{4}) ==
+         std::min(uint8_t(b->kind() & ~kBespokeKindMask), uint8_t{4});
 }
 
 inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
@@ -253,6 +254,86 @@ inline uint8_t ArrayData::auxBits() const {
 
 inline bool ArrayData::useWeakKeys() const {
   return isPHPArrayType();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+ALWAYS_INLINE
+DataType ArrayData::toDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfDArray;
+    }
+  }
+  switch (kind()) {
+    case kPackedKind:
+    case kBespokeVArrayKind:
+    case kMixedKind:
+    case kBespokeDArrayKind:
+    case kPlainKind:
+    case kBespokeArrayKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfArray;
+
+    case kVecKind:
+    case kBespokeVecKind:
+      return KindOfVec;
+
+    case kDictKind:
+    case kBespokeDictKind:
+      return KindOfDict;
+
+    case kKeysetKind:
+    case kBespokeKeysetKind:
+      return KindOfKeyset;
+
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
+}
+
+ALWAYS_INLINE
+DataType ArrayData::toPersistentDataType() const {
+  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
+    if (isVArray()) {
+      assertx(isPackedKind());
+      return KindOfPersistentVArray;
+    } else if (isDArray()) {
+      assertx(isMixedKind());
+      return KindOfPersistentDArray;
+    }
+  }
+  switch (kind()) {
+    case kPackedKind:
+    case kBespokeVArrayKind:
+    case kMixedKind:
+    case kBespokeDArrayKind:
+    case kPlainKind:
+    case kBespokeArrayKind:
+    case kGlobalsKind:
+    case kRecordKind:
+      return KindOfPersistentArray;
+
+    case kVecKind:
+    case kBespokeVecKind:
+      return KindOfPersistentVec;
+
+    case kDictKind:
+    case kBespokeDictKind:
+      return KindOfPersistentDict;
+
+    case kKeysetKind:
+    case kBespokeKeysetKind:
+      return KindOfPersistentKeyset;
+
+    case kNumKinds:   not_reached();
+  }
+  not_reached();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

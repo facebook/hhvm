@@ -174,8 +174,8 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
   } else {
     assertx(arrSpec.vanilla());
     assertx(RO::EvalAllowBespokeArrayLikes);
-    v << cmpbim{ArrayData::kBespokeArrayKind, r[HeaderKindOffset], sf};
-    doJcc(CC_L, sf);
+    v << testbim{ArrayData::kBespokeKindMask, r[HeaderKindOffset], sf};
+    doJcc(CC_NZ, sf);
   }
 }
 

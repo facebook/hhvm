@@ -361,6 +361,21 @@ bool canBeOptional(trep bits) {
 }
 
 /*
+ * "vecish" refers to values that are either known to be a ?vec, or,
+ * after dvarray specialization, a ?varray. Most logic that applies
+ * to vecs actually applies to vec-ish types; of course, the goal of
+ * HAM is to turn this "most" into "all".
+ */
+bool isVecish(Type t) {
+  if (t.subtypeOrNull(BVec)) return true;
+  return RO::EvalHackArrCompatSpecialization && t.subtypeOrNull(BVArr);
+}
+bool maybeVecish(Type t) {
+  if (t.couldBe(BVec)) return true;
+  return RO::EvalHackArrCompatSpecialization && t.couldBe(BVArr);
+}
+
+/*
  * Note: currently we're limiting all represented types to predefined
  * bit patterns (instead of arbitrary unions), so this function is
  * around for assertions.
@@ -506,6 +521,7 @@ trep combine_dv_arr_like_bits(trep a, trep b) {
 }
 
 trep maybe_promote_varray(trep a) {
+  if (RO::EvalHackArrCompatSpecialization) return a;
   auto const check = [&] (trep b, trep c) {
     if (a & b) a |= c;
   };
@@ -519,6 +535,7 @@ trep maybe_promote_varray(trep a) {
 }
 
 trep promote_varray(trep a) {
+  if (RO::EvalHackArrCompatSpecialization) return a;
   auto const check = [&] (trep b, trep c) {
     if (a & b) a = (a | c) & ~b;
   };
@@ -2351,10 +2368,6 @@ Type project_data(Type t, trep bits) {
   case DataTag::Record:      return restrict_to(BRecord);
   case DataTag::Cls:         return restrict_to(BCls);
   case DataTag::Str:         return restrict_to(BStr);
-  case DataTag::ArrLikePacked:
-    return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
-  case DataTag::ArrLikeMap:
-    return restrict_to(BDictN | BKeysetN | BArrN);
   case DataTag::ArrLikeVal: {
     auto const ad = t.m_data.aval;
     if (ad->empty()) {
@@ -2365,10 +2378,12 @@ Type project_data(Type t, trep bits) {
     }
     return restrict_to(BArrN | BDictN | BVecN | BKeysetN);
   }
+  case DataTag::ArrLikePacked:
   case DataTag::ArrLikePackedN:
     return restrict_to(BVecN | BDictN | BKeysetN | BArrN);
+  case DataTag::ArrLikeMap:
   case DataTag::ArrLikeMapN:
-    return restrict_to(BDictN | BKeysetN | BArrN);
+    return restrict_to(BDictN | BKeysetN | BDArrN | BPArrN);
   default:
     not_reached();
   }
@@ -5379,18 +5394,21 @@ bool arr_packedn_set(Type& pack,
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
   assert(key.type.subtypeOf(BArrKey));
 
-  auto const isPhpArray = pack.subtypeOrNull(BArr);
-  auto const isVecArray = pack.subtypeOrNull(BVec);
+  auto const canPromoteToMap = pack.subtypeOrNull(
+    RO::EvalHackArrCompatSpecialization ? BArr : (BPArr | BDArr));
+  auto const vecish = isVecish(pack);
+
   auto& ty = pack.m_data.packedn.mutate()->type;
   ty |= val;
 
   if (key.i) {
-    // If the key is known to be in range - its still a packedn
-    if (isPhpArray) {
+    // Setting element 0 of a non-empty PackedN is always safe.
+    if (!maybeEmpty && !*key.i) return true;
+    // Check for "implicit append" cases. In these cases, darrays will keep
+    // the PackedN specializtion, but "vecish" arrays will actually throw.
+    if (canPromoteToMap) {
       if (!*key.i) return true;
       if (!maybeEmpty && *key.i == 1) return true;
-    } else if (!maybeEmpty && !*key.i) {
-      return true;
     }
     pack.m_bits = (*key.i < 0)
       ? promote_varray(pack.m_bits)
@@ -5401,7 +5419,7 @@ bool arr_packedn_set(Type& pack,
       : maybe_promote_varray(pack.m_bits);
   }
 
-  if (!isVecArray) {
+  if (!vecish) {
     pack = mapn_impl(
       pack.m_bits,
       union_of(TInt, key.type),
@@ -5525,26 +5543,23 @@ bool arr_packed_set(Type& pack,
   assert(pack.m_dataTag == DataTag::ArrLikePacked);
   assert(key.type.subtypeOf(BArrKey));
   auto const tag = arr_like_update_prov_tag(pack, src);
+  auto const vecish = isVecish(pack);
 
-  auto const isVecArray = pack.subtypeOrNull(BVec);
   if (key.i) {
     if (*key.i >= 0) {
       if (*key.i < pack.m_data.packed->elems.size()) {
-        auto& current = pack.m_data.packed.mutate()->elems[*key.i];
+        pack.m_data.packed.mutate()->elems[*key.i] = val;
         pack.m_data.packed.mutate()->provenance = tag;
-        // if the element was a ref, its still a ref after assigning to it
-        if (current.subtypeOf(BInitCell)) {
-          current = val;
-        }
         return true;
       }
-      if (!isVecArray && *key.i == pack.m_data.packed->elems.size()) {
+      // "implicit append" on "vecish" types will throw.
+      if (!vecish && *key.i == pack.m_data.packed->elems.size()) {
         pack.m_data.packed.mutate()->elems.push_back(val);
         pack.m_data.packed.mutate()->provenance = tag;
         return true;
       }
     }
-    if (isVecArray) {
+    if (vecish) {
       pack = TBottom;
       return false;
     }
@@ -5555,7 +5570,7 @@ bool arr_packed_set(Type& pack,
       : maybe_promote_varray(pack.m_bits);
   }
 
-  if (!isVecArray) {
+  if (!vecish) {
     if (auto const v = key.tv()) {
       MapElems elems;
       auto idx = int64_t{0};
@@ -5725,10 +5740,10 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
                                          const Type& valIn,
                                          ProvTag src) {
   const bool maybeEmpty = arr.couldBe(BArrLikeE);
-  const bool isVector   = arr.subtypeOrNull(BVec);
-  DEBUG_ONLY const bool isVArray   = arr.subtypeOrNull(BVArr);
-  const bool validKey   = key.type.subtypeOf(isVector ? BInt : BArrKey);
-  assertx(isVector == arr.couldBe(BVec));
+  DEBUG_ONLY const bool isVector = arr.subtypeOrNull(BVec);
+  DEBUG_ONLY const bool isVArray = arr.subtypeOrNull(BVArr);
+  const bool validKey = key.type.subtypeOf(maybeVecish(arr) ? BInt : BArrKey);
+  const bool vecish = isVecish(arr);
 
   trep bits = combine_dv_arr_like_bits(arr.m_bits, BArrLikeN);
   if (validKey) bits &= ~BArrLikeE;
@@ -5747,11 +5762,10 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   if (!arr.couldBe(BArrLikeN)) {
     auto const tag = arr_like_update_prov_tag(arr, src);
     assert(maybeEmpty);
-    if (isVector) return { TBottom, ThrowMode::BadOperation };
+    if (vecish) return { TBottom, ThrowMode::BadOperation };
     if (fixedKey.i) {
       if (!*fixedKey.i) {
-        return { packed_impl(bits, { val }, tag),
-                 throwMode };
+        return { packed_impl(bits, { val }, tag), throwMode };
       }
       bits = promote_varray(bits);
     } else {
@@ -5801,7 +5815,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     return { std::move(arr), ThrowMode::BadOperation };
 
   case DataTag::ArrLikeVal:
-    if (maybeEmpty && !isVector) {
+    if (maybeEmpty && !vecish) {
       auto kv = val_key_values(arr.m_data.aval);
       return emptyHelper(kv.first, kv.second);
     } else {
@@ -5830,7 +5844,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
   case DataTag::ArrLikePacked:
     // Setting element zero of a maybe empty, 1 element packed array
     // turns it into a 1 element packed array.
-    if (maybeEmpty && !isVector &&
+    if (maybeEmpty && !vecish &&
         (!fixedKey.i ||
          *fixedKey.i ||
          arr.m_data.packed->elems.size() != 1)) {
@@ -5841,7 +5855,7 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     }
 
   case DataTag::ArrLikePackedN:
-    if (maybeEmpty && !isVector) {
+    if (maybeEmpty && !vecish) {
       return emptyHelper(TInt, arr.m_data.packedn->type);
     } else {
       auto const inRange = arr_packedn_set(arr, fixedKey, val, false);
@@ -5951,6 +5965,7 @@ std::pair<Type,Type> array_like_newelem(Type arr,
           packed_impl(bits, std::move(d->elems), d->provenance), val, src);
       }
       assert(!isVector);
+      assert(!isVArray);
       // We know its not packed, so this should always succeed.
       auto d = toDArrLikeMap(arr.m_data.aval);
       return array_like_newelem(

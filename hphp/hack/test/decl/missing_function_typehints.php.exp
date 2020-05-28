@@ -21,7 +21,10 @@ Parsed decls:
               ];
             ft_ret =
             { et_enforced = false;
-              et_type = (Rnone (| line 0, characters 0-0), Tany) };
+              et_type =
+              (Rwitness (root|missing_function_typehints.php line 3, characters 10-10),
+               Tany)
+              };
             ft_flags =
             (make_ft_flags sync none ~return_disposable:false
               ~returns_mutable:false ~returns_void_to_rx:false);

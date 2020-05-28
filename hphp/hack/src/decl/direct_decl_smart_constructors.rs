@@ -29,7 +29,6 @@ use oxidized_by_ref::{
     s_set::SSet,
     shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst},
     shape_map::ShapeField,
-    tany_sentinel::TanySentinel,
     typing_defs,
     typing_defs::{
         EnumType, FunArity, FunElt, FunParam, FunParams, FunType, ParamMode, ParamMutability,
@@ -188,7 +187,8 @@ fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
     name.trim_start_matches("$")
 }
 
-const TANY: Ty<'_> = Ty(Reason::none(), &Ty_::Tany(TanySentinel));
+const TANY_: Ty_<'_> = Ty_::Tany(oxidized_by_ref::tany_sentinel::TanySentinel);
+const TANY: Ty<'_> = Ty(Reason::none(), &TANY_);
 
 fn tany() -> Ty<'static> {
     TANY
@@ -851,7 +851,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         PrefixedString(_) => Ok(Ty_::Tprim(arena.alloc(aast::Tprim::Tstring))),
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         ParenthesizedExpr(&expr) => expr_to_ty(arena, expr),
-                        Any => Ok(Ty_::Tany(TanySentinel)),
+                        Any => Ok(TANY_),
 
                         Array(_) | ArrayGet(_) | As(_) | Assert(_) | Await(_) | Binop(_)
                         | BracedExpr(_) | Call(_) | Callconv(_) | Cast(_) | ClassConst(_)
@@ -983,7 +983,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 self.alloc(Reason::witness(pos)),
                 self.alloc(Ty_::Tprim(self.alloc(aast::Tprim::Tvoid))),
             ),
-            _ => self.node_to_ty(header.ret_hint).unwrap_or_else(|_| tany()),
+            _ => self.node_to_ty(header.ret_hint).unwrap_or_else(|_| {
+                self.tany_with_pos(header.name.get_pos(self.state.arena).unwrap_or(Pos::none()))
+            }),
         };
         let (async_, is_coroutine) = header.modifiers.iter().fold(
             (false, false),
@@ -1221,6 +1223,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn prim_ty(&self, tprim: aast::Tprim<'a>, pos: &'a Pos<'a>) -> Node_<'a> {
         self.hint_ty(pos, Ty_::Tprim(self.alloc(tprim)))
+    }
+
+    fn tany_with_pos(&self, pos: &'a Pos<'a>) -> Ty<'a> {
+        Ty(self.alloc(Reason::witness(pos)), &TANY_)
     }
 }
 
@@ -1833,7 +1839,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     tarraykey(self.state.arena),
                     self.node_to_ty(*tv).unwrap_or_else(|_| tany()),
                 ))),
-                _ => Ty_::Tany(TanySentinel),
+                _ => TANY_,
             };
             Ok(self.hint_ty(pos, ty_))
         } else {

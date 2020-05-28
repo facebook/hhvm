@@ -18,6 +18,7 @@
   * --full-fidelity-ast-s-expression
   * --program-text
   * --pretty-print
+  * --pretty-print-json
   * --show-file-name
   *
   * TODO: Parser for things other than scripts:
@@ -46,6 +47,7 @@ module FullFidelityParseArgs = struct
     full_fidelity_ast_s_expr: bool;
     program_text: bool;
     pretty_print: bool;
+    pretty_print_json: bool;
     schema: bool;
     show_file_name: bool;
     (* Configuring the parser *)
@@ -87,6 +89,7 @@ module FullFidelityParseArgs = struct
       full_fidelity_ast_s_expr
       program_text
       pretty_print
+      pretty_print_json
       schema
       codegen
       php5_compat_mode
@@ -124,6 +127,7 @@ module FullFidelityParseArgs = struct
       full_fidelity_ast_s_expr;
       program_text;
       pretty_print;
+      pretty_print_json;
       schema;
       codegen;
       php5_compat_mode;
@@ -174,6 +178,8 @@ module FullFidelityParseArgs = struct
     let set_program_text () = program_text := true in
     let pretty_print = ref false in
     let set_pretty_print () = pretty_print := true in
+    let pretty_print_json = ref false in
+    let set_pretty_print_json () = pretty_print_json := true in
     let schema = ref false in
     let set_schema () = schema := true in
     let codegen = ref false in
@@ -243,6 +249,9 @@ No errors are filtered out."
         ( "--pretty-print",
           Arg.Unit set_pretty_print,
           "Displays the text of the given file after pretty-printing." );
+        ( "--pretty-print-json",
+          Arg.Unit set_pretty_print_json,
+          "Pretty print JSON output." );
         ( "--schema",
           Arg.Unit set_schema,
           "Displays the parser version and schema of nodes." );
@@ -377,6 +386,7 @@ No errors are filtered out."
       !full_fidelity_ast_s_expr
       !program_text
       !pretty_print
+      !pretty_print_json
       !schema
       !codegen
       !php5_compat_mode
@@ -586,7 +596,7 @@ let handle_existing_file args filename =
   end;
   ( if args.full_fidelity_json then
     let json = SyntaxTree.to_json syntax_tree in
-    let str = Hh_json.json_to_string json in
+    let str = Hh_json.json_to_string json ~pretty:args.pretty_print_json in
     Printf.printf "%s\n" str );
   ( if args.full_fidelity_text_json then
     let json = Full_fidelity_editable_syntax.to_json editable in

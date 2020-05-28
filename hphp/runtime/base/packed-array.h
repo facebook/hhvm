@@ -265,11 +265,10 @@ private:
   static ArrayData* PrepareForInsert(ArrayData*, bool);
   static SortFlavor preSort(ArrayData*);
 
-  static ArrayData* MakeReserveImpl(uint32_t, HeaderKind, ArrayData::DVArray);
+  static ArrayData* MakeReserveImpl(uint32_t, HeaderKind);
 
   template<bool reverse>
-  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*,
-                                   HeaderKind, ArrayData::DVArray);
+  static ArrayData* MakePackedImpl(uint32_t, const TypedValue*, HeaderKind);
 
   static void CopyPackedHelper(const ArrayData* adIn, ArrayData* ad);
 

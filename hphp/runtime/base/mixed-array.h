@@ -213,7 +213,7 @@ struct MixedArray final : ArrayData,
   static MixedArray* MakeDArray(uint32_t size, const TypedValue* kvs);
   static MixedArray* MakeDict(uint32_t size, const TypedValue* kvs);
 private:
-  template<HeaderKind hdr, ArrayData::DVArray dv>
+  template<HeaderKind hdr>
   static MixedArray* MakeMixedImpl(uint32_t size, const TypedValue* kvs);
 
 public:
@@ -439,13 +439,10 @@ public:
 
 private:
   MixedArray* copyMixed() const;
-  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk,
-                                    ArrayData::DVArray);
+  static ArrayData* MakeReserveImpl(uint32_t capacity, HeaderKind hk);
   static MixedArray* MakeStructImpl(uint32_t, const StringData* const*,
-                                    const TypedValue*, HeaderKind,
-                                    ArrayData::DVArray);
-  static MixedArray* AllocStructImpl(uint32_t, const int32_t*,
-                                    HeaderKind, ArrayData::DVArray);
+                                    const TypedValue*, HeaderKind);
+  static MixedArray* AllocStructImpl(uint32_t, const int32_t*, HeaderKind);
 
   template <IntishCast IC>
   static ArrayData* FromDictImpl(ArrayData*, bool, bool);
@@ -538,8 +535,7 @@ private:
 private:
   enum class AllocMode : bool { Request, Static };
 
-  static MixedArray* CopyMixed(const MixedArray& other, AllocMode,
-                               HeaderKind, ArrayData::DVArray);
+  static MixedArray* CopyMixed(const MixedArray& other, AllocMode, HeaderKind);
   static MixedArray* CopyReserve(const MixedArray* src, size_t expectedSize);
 
   // Slow paths used for MixedArrays with references or counted string keys.

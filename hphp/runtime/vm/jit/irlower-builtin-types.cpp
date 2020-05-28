@@ -476,21 +476,6 @@ static void hackArrPropNoticeImpl(const Class* cls, const ArrayData* ad,
   );
 }
 
-namespace {
-
-ArrayData::DVArray annotTypeToDVArrKind(AnnotType at) {
-  switch (at) {
-    case AnnotType::VArray: return ArrayData::kVArray;
-    case AnnotType::DArray: return ArrayData::kDArray;
-    case AnnotType::Array:  return ArrayData::kDVArrayMask;
-    case AnnotType::VArrOrDArr: return ArrayData::kDVArrayMask;
-    default: break;
-  }
-  not_reached();
-}
-
-}
-
 void cgRaiseHackArrParamNotice(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<RaiseHackArrParamNotice>();
   auto const name = makeStaticString(extra->tc.displayName());

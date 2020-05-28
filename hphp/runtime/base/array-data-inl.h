@@ -34,7 +34,6 @@ inline ArrayData::ArrayData(ArrayKind kind, RefCount initial_count)
   assertx(m_size == -1);
   assertx(m_pos == 0);
   assertx(m_kind == static_cast<HeaderKind>(kind));
-  assertx(dvArraySanityCheck());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -199,23 +198,17 @@ inline bool ArrayData::isVanilla() const {
   return kind() < kBespokeArrayKind;
 }
 
-inline ArrayData::DVArray ArrayData::dvArray() const {
-  // The darray/varray state is stored in the lower 2-bits of m_aux16. The
-  // array is free to store whatever it wants in the upper 14-bits.
-  return static_cast<DVArray>(m_aux16 & kDVArrayMask);
+inline bool ArrayData::isVArray() const { return kind() == kPackedKind; }
+inline bool ArrayData::isDArray() const { return kind() == kMixedKind; }
+
+inline bool ArrayData::isDVArray() const {
+  static_assert(kPackedKind == 0);
+  static_assert(kMixedKind == 1);
+  return kind() <= kMixedKind;
 }
 
-inline void ArrayData::setDVArray(DVArray d) {
-  assertx(!RuntimeOption::EvalHackArrDVArrs || d == kNotDVArray);
-  assertx(!(d & ~kDVArrayMask));
-  m_aux16 = (m_aux16 & ~kDVArrayMask) | d;
-}
+inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
 
-inline bool ArrayData::isVArray() const { return dvArray() & kVArray; }
-inline bool ArrayData::isDArray() const { return dvArray() & kDArray; }
-
-inline bool ArrayData::isDVArray() const { return dvArray(); }
-inline bool ArrayData::isNotDVArray() const { return dvArray() == kNotDVArray; }
 inline bool ArrayData::isVecOrVArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isVecArrayType() : isVArray();
 }
@@ -223,21 +216,11 @@ inline bool ArrayData::isDictOrDArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
 }
 
-// gcc doesn't optimize (a & 3) == (b & 3) very well; help it a little.
 inline bool ArrayData::dvArrayEqual(const ArrayData* a, const ArrayData* b) {
-  return ((a->m_aux16 ^ b->m_aux16) & kDVArrayMask) == 0;
-}
-
-inline bool ArrayData::dvArraySanityCheck() const {
-  auto const dv = dvArray();
-  if (!RuntimeOption::EvalHackArrDVArrs) {
-    if (isPackedKind()) return !(dv & kDArray);
-    if (isMixedKind())  return !(dv & kVArray);
-    // TODO(jgriego) we should probably have a way of restricting the
-    //               dvarrayness of a bespoke but hack it for now
-    if (!isVanilla()) return true;
-  }
-  return dv == kNotDVArray;
+  static_assert(kPackedKind == 0);
+  static_assert(kMixedKind == 1);
+  return std::min(uint64_t{a->kind()}, uint64_t{2}) ==
+         std::min(uint64_t{b->kind()}, uint64_t{2});
 }
 
 inline bool ArrayData::hasApcTv() const { return m_aux16 & kHasApcTv; }
@@ -265,7 +248,7 @@ inline bool ArrayData::hasStrKeyTable() const {
 }
 
 inline uint8_t ArrayData::auxBits() const {
-  return dvArray() | (isLegacyArray() ? kLegacyArray : 0);
+  return isLegacyArray() ? kLegacyArray : 0;
 }
 
 inline bool ArrayData::useWeakKeys() const {

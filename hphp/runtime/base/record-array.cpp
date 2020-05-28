@@ -189,12 +189,11 @@ MixedArray* RecordArray::ToMixedHeader(const RecordArray* old) {
   auto const keyType = extra->empty() ?
                        MixedArrayKeys::packStaticStrsForAux() :
                        MixedArrayKeys::packStrsForAux();
-  auto const aux = keyType | ArrayData::kNotDVArray;
   auto const oldSize = old->m_size;
   auto const scale = MixedArray::computeScaleFromSize(oldSize);
   auto const ad = MixedArray::reqAlloc(scale);
   ad->m_sizeAndPos = oldSize;
-  ad->initHeader_16(HeaderKind::Plain, OneReference, aux);
+  ad->initHeader_16(HeaderKind::Plain, OneReference, keyType);
   ad->m_scale_used = scale | uint64_t{oldSize} << 32; // used=oldSize
   ad->m_nextKI = 0;
 

@@ -99,42 +99,28 @@ struct ArrayData : MaybeCountable {
   };
 
   /*
-   * A secondary array kind axis for PHP arrays.
-   *
-   * We use darrays and varrays in place of regular arrays for arrays that we
-   * want to replace with Hack arrays.  These arrays will emit notices whenever
-   * we attempt to perform operations on them which would be illegal for Hack
-   * arrays.
-   */
-  enum DVArray : uint8_t {
-    kNotDVArray = 0,
-    kVArray     = 1,
-    kDArray     = 2
-  };
-  static auto constexpr kDVArrayMask = static_cast<DVArray>(3);
-  /*
    * For uncounted Packed, Mixed, Dict and Vec, indicates that the
    * array was co-allocated with an APCTypedValue (at apctv+1).
    */
-  static auto constexpr kHasApcTv    = 4;
+  static auto constexpr kHasApcTv    = 1;
 
   /*
    * Indicates that this dict or vec should use some legacy (i.e.,
    * PHP-compatible) behaviors, including serialization
    */
-  static auto constexpr kLegacyArray = 8;
+  static auto constexpr kLegacyArray = 2;
 
   /*
    * Indicates that this array has provenance data available in a side table
    * See array-provenance.h
    */
-  static auto constexpr kHasProvenanceData = 16;
+  static auto constexpr kHasProvenanceData = 4;
 
   /*
    * Indicates that this array has a side table that contains information about
    * its keys.
    */
-  static auto constexpr kHasStrKeyTable = 32;
+  static auto constexpr kHasStrKeyTable = 8;
 
   /////////////////////////////////////////////////////////////////////////////
   // Creation and destruction.
@@ -284,11 +270,6 @@ public:
    * array-likes with a "bespoke" hidden-class layout.
    */
   bool isVanilla() const;
-  /*
-   * The DVArray kind for the array.
-   */
-  DVArray dvArray() const;
-  void setDVArray(DVArray);
 
   /*
    * Only used for uncounted arrays. Indicates that there's a
@@ -332,11 +313,6 @@ public:
   bool isDictOrDArray() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
-
-  /*
-   * Check whether the array has an sane DVArray setting for its kind.
-   */
-  bool dvArraySanityCheck() const;
 
   /*
    * Whether the array contains "vector-like" data---i.e., iteration order
@@ -693,9 +669,6 @@ public:
    */
   static constexpr size_t offsetofSize() { return offsetof(ArrayData, m_size); }
   static constexpr size_t sizeofSize() { return sizeof(m_size); }
-  static constexpr size_t offsetofDVArray() {
-    return offsetof(ArrayData, m_aux16);
-  }
 
   const StrKeyTable& missingKeySideTable() const {
     assertx(this->hasStrKeyTable());

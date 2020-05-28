@@ -232,14 +232,15 @@ void cgIsNTypeMem(IRLS& env, const IRInstruction* inst) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// dvarray tests. TODO(kshaunak): Make these tests handle bespoke arrays.
 
 void cgCheckVArray(IRLS& env, const IRInstruction* inst) {
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testbim{ArrayData::kVArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << cmpbim{ArrayData::kPackedKind, src[HeaderKindOffset], sf};
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
   v << copy{src, dst};
 }
 
@@ -248,18 +249,20 @@ void cgCheckDArray(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testbim{ArrayData::kDArray, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << cmpbim{ArrayData::kMixedKind, src[HeaderKindOffset], sf};
+  fwdJcc(v, env, CC_NE, sf, inst->taken());
   v << copy{src, dst};
 }
 
 void cgCheckDVArray(IRLS& env, const IRInstruction* inst) {
+  static_assert(ArrayData::kPackedKind == 0);
+  static_assert(ArrayData::kMixedKind == 1);
   auto const src = srcLoc(env, inst, 0).reg();
   auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
   auto const sf = v.makeReg();
-  v << testbim{ArrayData::kDVArrayMask, src + ArrayData::offsetofDVArray(), sf};
-  fwdJcc(v, env, CC_Z, sf, inst->taken());
+  v << cmpbim{ArrayData::kMixedKind, src[HeaderKindOffset], sf};
+  fwdJcc(v, env, CC_NBE, sf, inst->taken());
   v << copy{src, dst};
 }
 

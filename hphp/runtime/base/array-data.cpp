@@ -70,13 +70,8 @@ struct ScalarHash {
     return raw_hash(arr);
   }
   size_t raw_hash(const ArrayData* arr, arrprov::Tag tag = {}) const {
-    auto ret = uint64_t{
-      arr->isHackArrayType()
-      ? arr->kind()
-      : ArrayData::ArrayKind::kMixedKind
-    };
-    ret |= (uint64_t{arr->dvArray()} << 32);
-    ret |= (uint64_t{arr->isLegacyArray()} << 33);
+    auto ret = uint64_t{arr->kind()};
+    ret |= (uint64_t{arr->isLegacyArray()} << 32);
 
     if (RuntimeOption::EvalArrayProvenance) {
       if (!tag.valid()) tag = arrprov::getTag(arr);

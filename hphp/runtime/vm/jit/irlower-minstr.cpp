@@ -554,14 +554,11 @@ void cgCheckMissingKeyInArrLike(IRLS& env, const IRInstruction* inst) {
     v << call{TCA(traceCheckNotInStrKeyTable), arg_regs(2)};
   }
 
-  auto const sf = v.makeReg();
   // If the array doesn't have the table, jump to branch.
-  v << testbim{
-    ArrayData::kHasStrKeyTable,
-    arr[ArrayData::offsetofDVArray()],
-    sf
-  };
+  auto const sf = v.makeReg();
+  v << testbim{ArrayData::kHasStrKeyTable, arr[HeaderAuxOffset], sf};
   ifThen(v, CC_Z, sf, branch);
+
   auto const mask = StrKeyTable::kStrKeyTableMask;
   auto const tableSize = safe_cast<int32_t>(sizeof(StrKeyTable));
   static_assert(sizeof(StrKeyTable) % 8 == 0,

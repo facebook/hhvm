@@ -97,7 +97,6 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(!val(cell).parr->isRefCounted());
         assertx(val(cell).parr->isDArray());
         assertx(val(cell).parr->isPHPArrayType());
-        assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfPersistentVArray:
         assertPtr(val(cell).parr);
@@ -105,14 +104,12 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(!val(cell).parr->isRefCounted());
         assertx(val(cell).parr->isVArray());
         assertx(val(cell).parr->isPHPArrayType());
-        assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfPersistentArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
         assertx(!cell.m_data.parr->isRefCounted());
         assertx(cell.m_data.parr->isPHPArrayType());
-        assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfDArray:
         assertPtr(val(cell).parr);
@@ -120,7 +117,6 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->checkCountZ());
         assertx(val(cell).parr->isDArray());
         assertx(val(cell).parr->isPHPArrayType());
-        assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfVArray:
         assertPtr(val(cell).parr);
@@ -128,14 +124,12 @@ bool tvIsPlausible(const TypedValue cell) {
         assertx(val(cell).parr->checkCountZ());
         assertx(val(cell).parr->isVArray());
         assertx(val(cell).parr->isPHPArrayType());
-        assertx(val(cell).parr->dvArraySanityCheck());
         return;
       case KindOfArray:
         assertPtr(cell.m_data.parr);
         assertx(cell.m_data.parr->kindIsValid());
         assertx(cell.m_data.parr->checkCountZ());
         assertx(cell.m_data.parr->isPHPArrayType());
-        assertx(cell.m_data.parr->dvArraySanityCheck());
         return;
       case KindOfObject:
         assertPtr(cell.m_data.pobj);

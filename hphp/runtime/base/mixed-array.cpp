@@ -82,7 +82,7 @@ struct MixedArray::DArrayInitializer {
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader_16(HeaderKind::Mixed, StaticValue, ArrayData::kDArray);
+    ad->initHeader(HeaderKind::Mixed, StaticValue);
     assertx(RuntimeOption::EvalHackArrDVArrs || ad->checkInvariants());
   }
 };
@@ -95,7 +95,7 @@ struct MixedArray::ArrayInitializer {
     ad->m_sizeAndPos = 0;
     ad->m_scale_used = 1;
     ad->m_nextKI = 0;
-    ad->initHeader_16(HeaderKind::Plain, StaticValue, ArrayData::kNotDVArray);
+    ad->initHeader(HeaderKind::Plain, StaticValue);
     assertx(ad->checkInvariants());
   }
 };
@@ -104,16 +104,11 @@ MixedArray::ArrayInitializer MixedArray::s_arr_initializer;
 //////////////////////////////////////////////////////////////////////
 
 ALWAYS_INLINE
-ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
-                                       HeaderKind hk,
-                                       ArrayData::DVArray dvArray) {
+ArrayData* MixedArray::MakeReserveImpl(uint32_t size, HeaderKind hk) {
   assertx(hk == HeaderKind::Mixed ||
           hk == HeaderKind::Dict ||
           hk == HeaderKind::Plain);
-  assertx(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
-  assertx(hk == HeaderKind::Mixed || dvArray == ArrayData::kNotDVArray);
-  assertx(!RuntimeOption::EvalHackArrDVArrs ||
-         dvArray == ArrayData::kNotDVArray);
+  assertx(!RuntimeOption::EvalHackArrDVArrs || hk != HeaderKind::Mixed);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
@@ -123,12 +118,11 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
   ad->initHash(scale);
 
   ad->m_sizeAndPos   = 0; // size=0, pos=0
-  ad->initHeader_16(hk, OneReference, dvArray);
+  ad->initHeader(hk, OneReference);
   ad->m_scale_used   = scale; // used=0
   ad->m_nextKI       = 0;
 
   assertx(ad->m_kind == hk);
-  assertx(ad->dvArray() == dvArray);
   assertx(ad->m_size == 0);
   assertx(ad->m_pos == 0);
   assertx(ad->hasExactlyOneRef());
@@ -140,7 +134,7 @@ ArrayData* MixedArray::MakeReserveImpl(uint32_t size,
 }
 
 ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
-  auto ad = MakeReserveImpl(size, HeaderKind::Plain, ArrayData::kNotDVArray);
+  auto ad = MakeReserveImpl(size, HeaderKind::Plain);
   assertx(ad->isPlainKind());
   assertx(ad->isNotDVArray());
   return ad;
@@ -148,14 +142,14 @@ ArrayData* MixedArray::MakeReserveMixed(uint32_t size) {
 
 ArrayData* MixedArray::MakeReserveDArray(uint32_t size) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto ad = MakeReserveImpl(size, HeaderKind::Mixed, ArrayData::kDArray);
+  auto ad = MakeReserveImpl(size, HeaderKind::Mixed);
   assertx(ad->isMixedKind());
   assertx(ad->isDArray());
   return tagArrProv(ad);
 }
 
 ArrayData* MixedArray::MakeReserveDict(uint32_t size) {
-  auto ad = MakeReserveImpl(size, HeaderKind::Dict, ArrayData::kNotDVArray);
+  auto ad = MakeReserveImpl(size, HeaderKind::Dict);
   assertx(ad->isDictKind());
   return tagArrProv(ad);
 }
@@ -164,23 +158,16 @@ ALWAYS_INLINE
 MixedArray* MixedArray::MakeStructImpl(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values,
-                                       HeaderKind hk,
-                                       ArrayData::DVArray dvArray) {
+                                       HeaderKind hk) {
   assertx(size > 0);
   assertx(hk == HeaderKind::Mixed ||
           hk == HeaderKind::Dict ||
           hk == HeaderKind::Plain);
-  assertx(dvArray == ArrayData::kNotDVArray ||
-          dvArray == ArrayData::kDArray);
-  assertx(hk == HeaderKind::Mixed || dvArray == ArrayData::kNotDVArray);
-  assertx(!RuntimeOption::EvalHackArrDVArrs ||
-          dvArray == ArrayData::kNotDVArray);
+  assertx(!RuntimeOption::EvalHackArrDVArrs || hk != HeaderKind::Mixed);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
-
-  auto const aux = MixedArrayKeys::packStaticStrsForAux() |
-                   static_cast<uint16_t>(dvArray);
+  auto const aux = MixedArrayKeys::packStaticStrsForAux();
 
   ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader_16(hk, OneReference, aux);
@@ -207,7 +194,6 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
   }
 
   assertx(ad->m_size == size);
-  assertx(ad->dvArray() == dvArray);
   assertx(ad->m_pos == 0);
   assertx(ad->m_kind == hk);
   assertx(ad->m_scale == scale);
@@ -221,17 +207,13 @@ MixedArray* MixedArray::MakeStructImpl(uint32_t size,
 MixedArray* MixedArray::MakeStruct(uint32_t size,
                                    const StringData* const* keys,
                                    const TypedValue* values) {
-  return MakeStructImpl(size, keys, values,
-                        HeaderKind::Plain,
-                        ArrayData::kNotDVArray);
+  return MakeStructImpl(size, keys, values, HeaderKind::Plain);
 }
 
 MixedArray* MixedArray::MakeStructDict(uint32_t size,
                                        const StringData* const* keys,
                                        const TypedValue* values) {
-  auto const ad = MakeStructImpl(size, keys, values,
-                                 HeaderKind::Dict,
-                                 ArrayData::kNotDVArray);
+  auto const ad = MakeStructImpl(size, keys, values, HeaderKind::Dict);
   return asMixed(tagArrProv(ad));
 }
 
@@ -239,32 +221,23 @@ MixedArray* MixedArray::MakeStructDArray(uint32_t size,
                                          const StringData* const* keys,
                                          const TypedValue* values) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const ad = MakeStructImpl(size, keys, values,
-                                 HeaderKind::Mixed,
-                                 ArrayData::kDArray);
+  auto const ad = MakeStructImpl(size, keys, values, HeaderKind::Mixed);
   return asMixed(tagArrProv(ad));
 }
 
 ALWAYS_INLINE
 MixedArray* MixedArray::AllocStructImpl(uint32_t size,
                                         const int32_t* hash,
-                                        HeaderKind hk,
-                                        ArrayData::DVArray dvArray) {
+                                        HeaderKind hk) {
   assertx(size > 0);
   assertx(hk == HeaderKind::Mixed ||
           hk == HeaderKind::Dict ||
           hk == HeaderKind::Plain);
-  assertx(dvArray == ArrayData::kNotDVArray ||
-          dvArray == ArrayData::kDArray);
-  assertx(hk == HeaderKind::Mixed || dvArray == ArrayData::kNotDVArray);
-  assertx(!RuntimeOption::EvalHackArrDVArrs ||
-          dvArray == ArrayData::kNotDVArray);
+  assertx(!RuntimeOption::EvalHackArrDVArrs || hk != HeaderKind::Mixed);
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
-
-  auto const aux = MixedArrayKeys::packStaticStrsForAux() |
-                   static_cast<uint16_t>(dvArray);
+  auto const aux = MixedArrayKeys::packStaticStrsForAux();
 
   ad->m_sizeAndPos       = size; // pos=0
   ad->initHeader_16(hk, OneReference, aux);
@@ -281,7 +254,6 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
   if (debug) memset(ad->data(), kMixedElmFill, sizeof(MixedArrayElm) * size);
 
   assertx(ad->m_size == size);
-  assertx(ad->dvArray() == dvArray);
   assertx(ad->m_pos == 0);
   assertx(ad->m_kind == hk);
   assertx(ad->m_scale == scale);
@@ -293,23 +265,21 @@ MixedArray* MixedArray::AllocStructImpl(uint32_t size,
 }
 
 MixedArray* MixedArray::AllocStruct(uint32_t size, const int32_t* hash) {
-  return AllocStructImpl(size, hash, HeaderKind::Plain, ArrayData::kNotDVArray);
+  return AllocStructImpl(size, hash, HeaderKind::Plain);
 }
 
 MixedArray* MixedArray::AllocStructDict(uint32_t size, const int32_t* hash) {
-  auto const ad = AllocStructImpl(size, hash, HeaderKind::Dict,
-                                  ArrayData::kNotDVArray);
+  auto const ad = AllocStructImpl(size, hash, HeaderKind::Dict);
   return asMixed(tagArrProv(ad));
 }
 
 MixedArray* MixedArray::AllocStructDArray(uint32_t size, const int32_t* hash) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
-  auto const ad = AllocStructImpl(size, hash, HeaderKind::Mixed,
-                                  ArrayData::kDArray);
+  auto const ad = AllocStructImpl(size, hash, HeaderKind::Mixed);
   return asMixed(tagArrProv(ad));
 }
 
-template<HeaderKind hdr, ArrayData::DVArray dv>
+template<HeaderKind hdr>
 MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   assertx(size > 0);
 
@@ -319,7 +289,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
   ad->initHash(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
-  ad->initHeader_16(hdr, OneReference, dv);
+  ad->initHeader(hdr, OneReference);
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
   ad->m_nextKI           = 0;
 
@@ -371,8 +341,7 @@ MixedArray* MixedArray::MakeMixedImpl(uint32_t size, const TypedValue* kvs) {
 }
 
 MixedArray* MixedArray::MakeMixed(uint32_t size, const TypedValue* kvs) {
-  auto const ad =
-    MakeMixedImpl<HeaderKind::Plain, ArrayData::kNotDVArray>(size, kvs);
+  auto const ad = MakeMixedImpl<HeaderKind::Plain>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kMixedKind);
   assertx(ad == nullptr || ad->isNotDVArray());
   return ad;
@@ -381,16 +350,14 @@ MixedArray* MixedArray::MakeMixed(uint32_t size, const TypedValue* kvs) {
 MixedArray* MixedArray::MakeDArray(uint32_t size, const TypedValue* kvs) {
   if (RuntimeOption::EvalHackArrDVArrs) return MakeDict(size, kvs);
 
-  auto const ad =
-    MakeMixedImpl<HeaderKind::Mixed, ArrayData::kDArray>(size, kvs);
+  auto const ad = MakeMixedImpl<HeaderKind::Mixed>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kMixedKind);
   assertx(ad == nullptr || ad->isDArray());
   return ad ? asMixed(tagArrProv(ad)) : nullptr;
 }
 
 MixedArray* MixedArray::MakeDict(uint32_t size, const TypedValue* kvs) {
-  auto const ad =
-    MakeMixedImpl<HeaderKind::Dict, ArrayData::kNotDVArray>(size, kvs);
+  auto const ad = MakeMixedImpl<HeaderKind::Dict>(size, kvs);
   assertx(ad == nullptr || ad->kind() == kDictKind);
   return ad ? asMixed(tagArrProv(ad)) : nullptr;
 }
@@ -401,17 +368,14 @@ MixedArray* MixedArray::MakeDArrayNatural(uint32_t size,
 
   auto const scale = computeScaleFromSize(size);
   auto const ad    = reqAlloc(scale);
+  auto const aux = MixedArrayKeys::packIntsForAux();
 
   ad->initHash(scale);
 
   ad->m_sizeAndPos       = size; // pos=0
   if (RuntimeOption::EvalHackArrDVArrs) {
-    auto const aux = MixedArrayKeys::packIntsForAux() |
-                     static_cast<uint16_t>(ArrayData::kNotDVArray);
     ad->initHeader_16(HeaderKind::Dict, OneReference, aux);
   } else {
-    auto const aux = MixedArrayKeys::packIntsForAux() |
-                     static_cast<uint16_t>(ArrayData::kDArray);
     ad->initHeader_16(HeaderKind::Mixed, OneReference, aux);
   }
   ad->m_scale_used       = scale | uint64_t{size} << 32; // used=size
@@ -459,13 +423,10 @@ MixedArray* MixedArray::SlowCopy(MixedArray* ad, const ArrayData& old,
 ALWAYS_INLINE
 MixedArray* MixedArray::CopyMixed(const MixedArray& other,
                                   AllocMode mode,
-                                  HeaderKind dest_hk,
-                                  ArrayData::DVArray dvArray) {
+                                  HeaderKind dest_hk) {
   assertx(dest_hk == HeaderKind::Mixed ||
           dest_hk == HeaderKind::Dict ||
           dest_hk == HeaderKind::Plain);
-  assertx(dvArray == ArrayData::kNotDVArray || dvArray == ArrayData::kDArray);
-  assertx(dest_hk == HeaderKind::Mixed|| dvArray == ArrayData::kNotDVArray);
   if (mode == AllocMode::Static) {
     assertx(other.m_size == other.m_used);
     assertx(!other.keyTypes().mayIncludeCounted());
@@ -501,7 +462,6 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const count = mode == AllocMode::Request ? OneReference : StaticValue;
   auto const aux =
     other.keyTypes().packForAux() |
-    dvArray |
     (other.isLegacyArray() ? ArrayData::kLegacyArray : 0) |
     (shouldCreateStrKeyTable ? kHasStrKeyTable : 0);
   ad->initHeader_16(dest_hk, count, aux);
@@ -511,7 +471,6 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
   auto const check = [&](MixedArray* res) {
     assertx(res->checkInvariants());
     assertx(res->m_kind == dest_hk);
-    assertx(res->dvArray() == dvArray);
     assertx(res->isLegacyArray() == other.isLegacyArray());
     assertx(res->keyTypes() == other.keyTypes());
     assertx(res->m_size == other.m_size);
@@ -550,7 +509,7 @@ MixedArray* MixedArray::CopyMixed(const MixedArray& other,
 NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
   auto a = asMixed(in);
   assertx(a->checkInvariants());
-  auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind, in->dvArray());
+  auto ret = CopyMixed(*a, AllocMode::Static, in->m_kind);
 
   if (RuntimeOption::EvalArrayProvenance) {
     assertx(!ret->hasProvenanceData());
@@ -566,7 +525,7 @@ NEVER_INLINE ArrayData* MixedArray::CopyStatic(const ArrayData* in) {
 
 NEVER_INLINE MixedArray* MixedArray::copyMixed() const {
   assertx(checkInvariants());
-  auto const out = CopyMixed(*this, AllocMode::Request, m_kind, dvArray());
+  auto const out = CopyMixed(*this, AllocMode::Request, m_kind);
   return asMixed(tagArrProv(out, this));
 }
 
@@ -975,7 +934,7 @@ MixedArray* MixedArray::Grow(MixedArray* old, uint32_t newScale, bool copy) {
     assertx(res->checkInvariants());
     assertx(res->hasExactlyOneRef());
     assertx(res->kind() == old->kind());
-    assertx(res->dvArray() == old->dvArray());
+    assertx(res->isDArray() == old->isDArray());
     assertx(res->isLegacyArray() == old->isLegacyArray());
     assertx(res->keyTypes() == old->keyTypes());
     assertx(res->m_size == old->m_size);
@@ -1372,7 +1331,7 @@ MixedArray* MixedArray::CopyReserve(const MixedArray* src,
   ad->m_used = i;
 
   assertx(ad->kind() == src->kind());
-  assertx(ad->dvArray() == src->dvArray());
+  assertx(ad->isDArray() == src->isDArray());
   assertx(ad->m_size == src->m_size);
   assertx(ad->hasExactlyOneRef());
   assertx(ad->m_used <= oldUsed);
@@ -1613,7 +1572,6 @@ ArrayData* MixedArray::ToPHPArray(ArrayData* in, bool copy) {
   if (adIn->getSize() == 0) return ArrayData::Create();
   auto ad = copy ? adIn->copyMixed() : adIn;
   ad->m_kind = HeaderKind::Plain;
-  ad->setDVArray(ArrayData::kNotDVArray);
   if (RO::EvalArrayProvenance) arrprov::clearTag(ad);
   assertx(ad->checkInvariants());
   return ad;
@@ -1676,10 +1634,9 @@ ArrayData* MixedArray::ToPHPArrayIntishCast(ArrayData* in, bool copy) {
   if (copy || adIn->hasIntishKeys()) {
     return copyWithIntishCast<IntishCast::Cast>(adIn);
   } else {
-    // we don't need to CoW and there were no intish keys, so we can just update
-    // dv-arrayness in place and get on with our day
+    // We don't need to CoW and there were no intish keys, so we can just
+    // update the ArrayKind in place and get on with our day.
     adIn->m_kind = HeaderKind::Plain;
-    adIn->setDVArray(ArrayData::kNotDVArray);
     return adIn;
   }
 }
@@ -1701,12 +1658,7 @@ ArrayData* MixedArray::FromDictImpl(ArrayData* adIn,
   // dict in place.
   if (!copy && !a->hasIntishKeys()) {
     // No int-like string keys, so transform in place.
-    if (toDArray) {
-      a->m_kind = HeaderKind::Mixed;
-      a->setDVArray(ArrayData::kDArray);
-    } else {
-      a->m_kind = HeaderKind::Plain;
-    }
+    a->m_kind = toDArray ? HeaderKind::Mixed : HeaderKind::Plain;
     a->setLegacyArray(false);
     if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
     assertx(a->checkInvariants());
@@ -1741,7 +1693,6 @@ ArrayData* MixedArray::ToDArray(ArrayData* in, bool copy) {
   if (a->getSize() == 0) return ArrayData::CreateDArray();
   auto out = copy ? a->copyMixed() : a;
   out->m_kind = HeaderKind::Mixed;
-  out->setDVArray(ArrayData::kDArray);
   out->setLegacyArray(false);
   assertx(out->checkInvariants());
   if (RO::EvalArrayProvenance) arrprov::reassignTag(out);
@@ -1761,7 +1712,6 @@ MixedArray* MixedArray::ToDictInPlace(ArrayData* ad) {
   assertx(a->isPHPArrayType());
   assertx(!a->cowCheck());
   a->m_kind = HeaderKind::Dict;
-  a->setDVArray(ArrayData::kNotDVArray);
   if (RO::EvalArrayProvenance) arrprov::reassignTag(a);
   return a;
 }
@@ -1773,10 +1723,7 @@ ArrayData* MixedArray::ToDict(ArrayData* ad, bool copy) {
   if (a->empty() && a->m_nextKI == 0) return ArrayData::CreateDict();
 
   if (copy) {
-    auto const out = CopyMixed(
-      *a, AllocMode::Request,
-      HeaderKind::Dict, ArrayData::kNotDVArray
-    );
+    auto const out = CopyMixed(*a, AllocMode::Request, HeaderKind::Dict);
     return tagArrProv(out);
   } else {
     return tagArrProv(ToDictInPlace(a));

@@ -38,7 +38,6 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->hasExactlyOneRef() || wrapped->isStatic());
   assertx(wrapped->isVanilla());
-  assertx(dvArray() == wrapped->dvArray());
   return true;
 }
 
@@ -74,11 +73,10 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad) {
     }
     always_assert(false);
   }();
-  lad->initHeader(hk, OneReference);
-  lad->setDVArray(ad->dvArray());
 
-  lad->wrapped = ad;
+  lad->initHeader(hk, OneReference);
   lad->setLayout(LoggingLayout::layoutForVanillaArray(ad));
+  lad->wrapped = ad;
 
   assertx(lad->checkInvariants());
 

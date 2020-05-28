@@ -1384,14 +1384,11 @@ struct DualDispatchUnionImpl {
     if (a->empty() && b->empty()) {
       auto const aTag = ProvTag::FromSArrOrTop(a);
       auto const bTag = ProvTag::FromSArrOrTop(b);
-      assert(aTag != bTag ||
-             a->kind() != b->kind());
+      assert(aTag != bTag || a->kind() != b->kind());
 
-      if (a->kind() != b->kind() || a->dvArray() != b->dvArray()) {
+      if (a->kind() != b->kind() || !arrprov::arrayWantsTag(a)) {
         return Type { bits };
       }
-
-      if (!arrprov::arrayWantsTag(a)) return Type { bits };
 
       auto r = [&] {
         auto const tag = unionProvTag(aTag, bTag);

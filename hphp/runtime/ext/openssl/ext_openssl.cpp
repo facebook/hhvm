@@ -1025,7 +1025,7 @@ Variant HHVM_FUNCTION(openssl_csr_get_subject, const Variant& csr,
   if (!pcsr) return false;
 
   X509_NAME *subject = X509_REQ_get_subject_name(pcsr->csr());
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   add_assoc_name_entry(ret, nullptr, subject, use_shortnames);
   return ret;
 }
@@ -1398,7 +1398,7 @@ bool HHVM_FUNCTION(openssl_pkcs12_read, const String& pkcs12, Variant& certs,
     X509 *cert = nullptr;
     STACK_OF(X509) *ca = nullptr;
     if (PKCS12_parse(p12, pass.data(), &pkey, &cert, &ca)) {
-      Variant vcerts = Array::Create();
+      Variant vcerts = Array::CreateDArray();
       SCOPE_EXIT {
         certs = vcerts;
       };

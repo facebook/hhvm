@@ -9,6 +9,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
 
 Warning: dn: 0 is not a recognized name in %s/test/slow/ext_openssl/ext_openssl.php on line %d
 
@@ -34,6 +35,7 @@ bool(true)
 bool(true)
 
 Warning: No such file or directory in %s/test/slow/ext_openssl/ext_openssl.php on line %d
+bool(true)
 bool(true)
 bool(true)
 bool(true)

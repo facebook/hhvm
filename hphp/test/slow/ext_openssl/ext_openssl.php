@@ -35,9 +35,10 @@ function test_openssl_csr_get_subject() {
   $ignore = null;
   $csr = openssl_csr_new(null, inout $ignore);
   VERIFY($csr != null);
-  $subject = openssl_csr_get_subject($csr)['O'];
-  VERIFY($subject == "Internet Widgits Pty Ltd" ||
-         $subject == "Default Company Ltd");
+  $subject = openssl_csr_get_subject($csr);
+  VERIFY(is_darray($subject));
+  VERIFY($subject['O'] == "Internet Widgits Pty Ltd" ||
+         $subject['O'] == "Default Company Ltd");
 }
 
 function test_openssl_csr_sign() {
@@ -112,6 +113,7 @@ function test_openssl_pkcs12_read() {
 
   $certs = null;
   VERIFY(openssl_pkcs12_read($pkcs12, inout $certs, "1234"));
+  VERIFY(is_darray($certs));
   VERIFY(strlen($certs['cert']) > 500);
   VERIFY(strlen($certs['pkey']) > 500);
 }

@@ -1973,7 +1973,6 @@ and expr_
             this_ty = cid_ty;
             from_class = Some cid;
             quiet = true;
-            report_cycle = None;
             on_error = Errors.unify_error_at p;
           }
         in
@@ -3723,7 +3722,6 @@ and new_object
               this_ty = obj_ty;
               from_class = None;
               quiet = false;
-              report_cycle = None;
               on_error = Errors.unify_error_at p;
             }
           in
@@ -5463,7 +5461,6 @@ and class_get_
           substs = Subst.make_locl (Cls.tparams class_) paraml;
           from_class = Some cid;
           quiet = true;
-          report_cycle = None;
           on_error = Errors.unify_error_at p;
         }
       in
@@ -5966,7 +5963,6 @@ and call_construct p env class_ params el unpacked_element cid =
       substs = Subst.make_locl (Cls.tparams class_) params;
       from_class = Some cid;
       quiet = true;
-      report_cycle = None;
       on_error = Errors.unify_error_at p;
     }
   in
@@ -6812,7 +6808,6 @@ and safely_refine_class_type
       (* In case `this` appears in constraints *)
       from_class = None;
       quiet = true;
-      report_cycle = None;
       on_error = Errors.unify_error_at p;
     }
   in
@@ -7158,7 +7153,6 @@ and class_get_pu ?from_class env ty name =
         substs;
         from_class;
         quiet = false;
-        report_cycle = None;
         on_error = Errors.unify_error;
       }
     in

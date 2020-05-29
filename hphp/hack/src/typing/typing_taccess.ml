@@ -121,67 +121,59 @@ let create_root_from_type_constant
             ctx.on_error)
   in
   let name = tp_name class_name id in
-  let type_expansions = (id_pos, name) :: ctx.ety_env.type_expansions in
-  (match ctx.ety_env.report_cycle with
-  (* This is a cycle through a type constant that we are defining *)
-  | Some (_, name') when String.equal name name' ->
-    let seen = name :: List.rev_map type_expansions snd in
-    Errors.cyclic_typeconst (fst typeconst.ttc_name) seen
-  | _ ->
+  let type_expansions = (false, id_pos, name) :: ctx.ety_env.type_expansions in
+  match Typing_defs.has_expanded ctx.ety_env name with
+  | Some report ->
+    ( if report then
+      let seen = List.rev_map type_expansions (fun (_, _, x) -> x) in
+      Errors.cyclic_typeconst (fst typeconst.ttc_name) seen );
     (* This is a cycle through a type constant that we are using *)
-    if
-      List.mem
-        ~equal:String.equal
-        (List.map ctx.ety_env.type_expansions snd)
-        name
-    then
-      raise_error (fun () -> ())
-    else
-      ());
-  let drop_exact ty =
-    (* Legacy behavior is to preserve exactness only on `this` and not
+    raise_error (fun () -> ())
+  | None ->
+    let drop_exact ty =
+      (* Legacy behavior is to preserve exactness only on `this` and not
        through `this::T` *)
-    match deref ty with
-    | (r, Tclass (cid, _, tyl)) -> mk (r, Tclass (cid, Nonexact, tyl))
-    | _ -> ty
-  in
-  let ety_env =
-    let from_class = None in
-    let this_ty = drop_exact (Option.value ctx.base ~default:root) in
-    { ctx.ety_env with from_class; type_expansions; this_ty }
-  in
-  let make_abstract env bnd =
-    ( if (not ctx.allow_abstract) && not ety_env.quiet then
-      let tc_pos = fst typeconst.ttc_name in
-      Errors.abstract_tconst_not_allowed id_pos (tc_pos, id_name) );
-    (* TODO(T59448452): this treatment of abstract type constants is unsound *)
-    make_abstract env id class_name [] bnd
-  in
-  (* Quiet: don't report errors in expanded definition or constraint.
-   * These will have been reported at the definition site already. *)
-  let ety_env = { ety_env with quiet = true } in
-  match typeconst with
-  (* Concrete type constants *)
-  | { ttc_type = Some ty; ttc_constraint = None; _ } ->
-    let (env, ty) = Phase.localize ~ety_env env ty in
-    let (r, ty) = deref ty in
-    (env, Exact (mk (make_reason env r id root, ty)))
-  (* A type constant with default can be seen as abstract or exact, depending
+      match deref ty with
+      | (r, Tclass (cid, _, tyl)) -> mk (r, Tclass (cid, Nonexact, tyl))
+      | _ -> ty
+    in
+    let ety_env =
+      let from_class = None in
+      let this_ty = drop_exact (Option.value ctx.base ~default:root) in
+      { ctx.ety_env with from_class; type_expansions; this_ty }
+    in
+    let make_abstract env bnd =
+      ( if (not ctx.allow_abstract) && not ety_env.quiet then
+        let tc_pos = fst typeconst.ttc_name in
+        Errors.abstract_tconst_not_allowed id_pos (tc_pos, id_name) );
+      (* TODO(T59448452): this treatment of abstract type constants is unsound *)
+      make_abstract env id class_name [] bnd
+    in
+    (* Quiet: don't report errors in expanded definition or constraint.
+     * These will have been reported at the definition site already. *)
+    let ety_env = { ety_env with quiet = true } in
+    (match typeconst with
+    (* Concrete type constants *)
+    | { ttc_type = Some ty; ttc_constraint = None; _ } ->
+      let (env, ty) = Phase.localize ~ety_env env ty in
+      let (r, ty) = deref ty in
+      (env, Exact (mk (make_reason env r id root, ty)))
+    (* A type constant with default can be seen as abstract or exact, depending
      on the root and base of the access. *)
-  | { ttc_type = Some ty; ttc_constraint = Some _; _ } ->
-    let (env, ty) = Phase.localize ~ety_env env ty in
-    let (r, ty) = deref ty in
-    let ty = mk (make_reason env r id root, ty) in
-    if Cls.final class_ || Option.is_none ctx.base then
-      (env, Exact ty)
-    else
-      (env, make_abstract env (Some ty))
-  (* Abstract type constants with constraint *)
-  | { ttc_constraint = Some cstr; _ } ->
-    let (env, cstr) = Phase.localize ~ety_env env cstr in
-    (env, make_abstract env (Some cstr))
-  (* Abstract type constant without constraint. *)
-  | _ -> (env, make_abstract env None)
+    | { ttc_type = Some ty; ttc_constraint = Some _; _ } ->
+      let (env, ty) = Phase.localize ~ety_env env ty in
+      let (r, ty) = deref ty in
+      let ty = mk (make_reason env r id root, ty) in
+      if Cls.final class_ || Option.is_none ctx.base then
+        (env, Exact ty)
+      else
+        (env, make_abstract env (Some ty))
+    (* Abstract type constants with constraint *)
+    | { ttc_constraint = Some cstr; _ } ->
+      let (env, cstr) = Phase.localize ~ety_env env cstr in
+      (env, make_abstract env (Some cstr))
+    (* Abstract type constant without constraint. *)
+    | _ -> (env, make_abstract env None))
 
 let rec type_of_result ctx env root res =
   let { id = (id_pos, id_name) as id; _ } = ctx in

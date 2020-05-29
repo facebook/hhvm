@@ -163,7 +163,6 @@ and obj_get_concrete_ty
       substs = Subst.make_locl (Cls.tparams class_info) paraml;
       from_class = Some class_id;
       quiet = true;
-      report_cycle = None;
       on_error;
     }
   in
@@ -442,7 +441,6 @@ and widen_class_for_obj_get ~is_method ~nullsafe ~on_error member_name env ty =
                   this_ty = ty;
                   from_class = None;
                   quiet = true;
-                  report_cycle = None;
                   on_error;
                 }
               in

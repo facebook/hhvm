@@ -1146,7 +1146,6 @@ and simplify_subtype_i
                   this_ty = Option.value this_ty ~default:ty_super;
                   from_class = None;
                   on_error = subtype_env.on_error;
-                  report_cycle = None;
                   quiet = true;
                 }
               in
@@ -1652,7 +1651,6 @@ and simplify_subtype_i
                     this_ty = Option.value this_ty ~default:ty_sub;
                     from_class = None;
                     quiet = true;
-                    report_cycle = None;
                     on_error = subtype_env.on_error;
                   }
                 in

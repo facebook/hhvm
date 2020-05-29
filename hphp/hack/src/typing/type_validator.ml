@@ -154,7 +154,6 @@ class virtual type_validator =
                     ~default:(MakeType.nothing Reason.none);
                 from_class = Some Aast.CIstatic;
                 quiet = true;
-                report_cycle = None;
                 on_error = Errors.unify_error_at use_pos;
               };
             expanded_typedefs = SSet.empty;

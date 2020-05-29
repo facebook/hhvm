@@ -731,7 +731,6 @@ let class_get_pu ?from_class env ty name =
         substs;
         from_class;
         quiet = false;
-        report_cycle = None;
         on_error = Errors.unify_error;
       }
     in

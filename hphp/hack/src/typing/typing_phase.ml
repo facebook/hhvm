@@ -86,12 +86,16 @@ type method_instantiation = {
 let env_with_self ?pos ?(quiet = false) ?report_cycle env =
   let this_ty = mk (Reason.none, TUtils.this_of (Env.get_self env)) in
   {
-    type_expansions = [];
+    type_expansions =
+      begin
+        match report_cycle with
+        | None -> []
+        | Some (pos, id) -> [(true, pos, id)]
+      end;
     substs = SMap.empty;
     this_ty;
     from_class = None;
     quiet;
-    report_cycle;
     on_error =
       (match pos with
       | None -> Errors.unify_error
@@ -213,11 +217,12 @@ let rec localize ~ety_env env (dty : decl_ty) =
       | Some class_info ->
         if Option.is_some (Cls.enum_type class_info) then
           (* if argl <> [], nastInitCheck would have raised an error *)
-          if Typing_defs.has_expanded ety_env cid then (
+          match Typing_defs.has_expanded ety_env cid with
+          | Some _ ->
             Errors.cyclic_enum_constraint p;
             (env, mk (r, Typing_utils.tany env))
-          ) else
-            let type_expansions = cls :: ety_env.type_expansions in
+          | None ->
+            let type_expansions = (false, p, cid) :: ety_env.type_expansions in
             let ety_env = { ety_env with type_expansions } in
             let (env, cstr) =
               match Env.get_enum_constraint env cid with
@@ -711,7 +716,6 @@ and localize_missing_tparams_class env r sid class_ =
       substs = Subst.make_locl (Cls.tparams class_) tyl;
       from_class = Some (Aast.CI sid);
       quiet = false;
-      report_cycle = None;
       on_error = Errors.unify_error_at use_pos;
     }
   in
@@ -764,7 +768,6 @@ and resolve_type_arguments_and_check_constraints
           substs = Subst.make_locl tparaml targs_tys;
           from_class = Some from_class;
           quiet = false;
-          report_cycle = None;
           on_error = Errors.unify_error_at use_pos;
         }
       in

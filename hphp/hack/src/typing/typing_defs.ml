@@ -278,9 +278,11 @@ type deserialization_error =
 
 (** Tracks information about how a type was expanded *)
 type expand_env = {
-  type_expansions: (Pos.t * string) list;
+  type_expansions: (bool * Pos.t * string) list;
       (** A list of the type defs and type access we have expanded thus far. Used
-       * to prevent entering into a cycle when expanding these types
+       * to prevent entering into a cycle when expanding these types.
+       * If the boolean is set, then emit an error because we were checking the
+       * definition of a type (by type, or newtype, or a type constant)
        *)
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
@@ -290,8 +292,6 @@ type expand_env = {
        *)
   quiet: bool;
       (** If set to true, do not report errors, just return Terr or equivalent *)
-  report_cycle: (Pos.t * string) option;
-      (** Report a cycle through this type def / type constant definition *)
   on_error: Errors.typing_error_callback;
       (** If what we are localizing or expanding comes from the decl heap for
           example, then some errors must be silenced since they must have already been
@@ -371,9 +371,9 @@ let is_locl_type = function
   | _ -> false
 
 let has_expanded { type_expansions; _ } x =
-  List.exists type_expansions (function
-      | (_, x') when String.equal x x' -> true
-      | _ -> false)
+  List.find_map type_expansions (function
+      | (report, _, x') when String.equal x x' -> Some report
+      | _ -> None)
 
 let reason = function
   | LoclType t -> fst (deref t)

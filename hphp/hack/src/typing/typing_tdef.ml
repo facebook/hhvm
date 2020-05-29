@@ -27,13 +27,12 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
       =
     unsafe_opt @@ Typing_env.get_typedef env x
   in
-  if Typing_defs.has_expanded ety_env x then (
+  match Typing_defs.has_expanded ety_env x with
+  | Some report ->
     (* Only report a cycle if it's through the specified definition *)
-    (match ety_env.report_cycle with
-    | Some (_, x') when String.equal x x' -> Errors.cyclic_typedef td_pos pos
-    | _ -> ());
+    if report then Errors.cyclic_typedef td_pos pos;
     (env, (ety_env, MakeType.err r))
-  ) else
+  | None ->
     let should_expand =
       force_expand
       ||
@@ -47,7 +46,7 @@ let expand_typedef_ ?(force_expand = false) ety_env env r x argl =
     let ety_env =
       {
         ety_env with
-        type_expansions = (td_pos, x) :: ety_env.type_expansions;
+        type_expansions = (false, td_pos, x) :: ety_env.type_expansions;
         substs = Subst.make_locl td_tparams argl;
         quiet = true;
       }
@@ -88,7 +87,7 @@ let rec force_expand_typedef ~ety_env env (t : locl_ty) =
       expand_typedef_ ~force_expand:true ety_env env r x argl
     in
     force_expand_typedef ~ety_env env ty
-  | _ -> (env, t, List.rev_map ety_env.type_expansions fst)
+  | _ -> (env, t, List.rev_map ety_env.type_expansions (fun (_, x, _) -> x))
 
 (*****************************************************************************)
 (*****************************************************************************)

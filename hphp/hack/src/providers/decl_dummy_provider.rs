@@ -17,6 +17,8 @@ use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use oxidized_by_ref::typing_defs_core::{ConsistentKind, Tparam, Ty, Ty_};
 use oxidized_by_ref::typing_reason::Reason;
 
+type StringMap<'a, T> = arena_collections::SortedAssocList<'a, &'a str, T>;
+
 /// Dummy declaration provider. Implements the functionality needed to run hh_check.
 /// Assumes that all the declarations come from a single file.
 pub struct DummyDeclProvider<'a> {
@@ -64,7 +66,7 @@ impl DeclProvider for DummyDeclProvider<'_> {
 /// Flatten out the class hierarchy.
 fn build_class_types<'a>(
     arena: &'a Bump,
-    decls: &'a SMap<ShallowClass<'a>>,
+    decls: &'a StringMap<ShallowClass<'a>>,
 ) -> HashMap<String, &'a ClassType<'a>> {
     let mut class_types = HashMap::new();
     for (name, _) in decls.iter() {
@@ -77,7 +79,7 @@ fn build_class_types<'a>(
 fn get_class_types_impl<'a, 'b>(
     arena: &'a Bump,
     class_types: &mut HashMap<String, &'a ClassType<'a>>,
-    decls: &SMap<ShallowClass<'a>>,
+    decls: &StringMap<ShallowClass<'a>>,
     name: &str,
 ) -> Option<&'a ClassType<'a>> {
     match class_types.get(name) {
@@ -126,10 +128,10 @@ fn get_class_types_impl<'a, 'b>(
                 methods: SMap::empty(),
                 smethods: SMap::empty(),
                 construct: (None, ConsistentKind::Inconsistent),
-                ancestors: ancestors.into(),
+                ancestors: SMap::from(arena, ancestors.iter().map(|(&k, &v)| (k, v))),
                 req_ancestors: &[],
-                req_ancestors_extends: SSet::empty(),
-                extends: SSet::empty(),
+                req_ancestors_extends: oxidized_by_ref::s_set::SSet::empty(),
+                extends: oxidized_by_ref::s_set::SSet::empty(),
                 enum_type: None,
                 sealed_whitelist: None,
                 decl_errors: None,
@@ -146,7 +148,7 @@ fn make_subst<'a>(
     arena: &'a Bump,
     tparams: &'a [Tparam<'a>],
     paraml: &'a [Ty<'a>],
-) -> SMap<'a, Ty<'a>> {
+) -> StringMap<'a, Ty<'a>> {
     let mut subst = AssocListMut::new_in(arena);
     // TODO(hrust): tany
     for (tparam, ty) in tparams.into_iter().zip(paraml.iter()) {
@@ -155,7 +157,7 @@ fn make_subst<'a>(
     subst.into()
 }
 
-fn instantiate<'a>(arena: &'a Bump, subst: &SMap<'a, Ty<'a>>, ty: Ty<'a>) -> Ty<'a> {
+fn instantiate<'a>(arena: &'a Bump, subst: &StringMap<'a, Ty<'a>>, ty: Ty<'a>) -> Ty<'a> {
     if subst.is_empty() {
         ty
     } else {
@@ -172,7 +174,7 @@ fn instantiate<'a>(arena: &'a Bump, subst: &SMap<'a, Ty<'a>>, ty: Ty<'a>) -> Ty<
     }
 }
 
-fn instantiate_<'a>(arena: &'a Bump, subst: &SMap<'a, Ty<'a>>, ty: &Ty_<'a>) -> Ty_<'a> {
+fn instantiate_<'a>(arena: &'a Bump, subst: &StringMap<'a, Ty<'a>>, ty: &Ty_<'a>) -> Ty_<'a> {
     use Ty_::*;
     match ty {
         Tgeneric(_) => panic!("impossible"),

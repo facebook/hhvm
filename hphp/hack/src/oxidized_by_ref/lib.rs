@@ -9,6 +9,7 @@ pub use oxidized::typing_defs_flags;
 mod manual;
 
 pub use manual::ast;
+pub use manual::direct_decl_parser;
 pub use manual::doc_comment;
 pub use manual::i_map;
 pub use manual::i_set;
@@ -33,7 +34,6 @@ pub use gen::aast;
 pub use gen::aast_defs;
 pub use gen::ast_defs;
 pub use gen::decl_defs;
-pub use gen::direct_decl_parser;
 pub use gen::error_codes;
 pub use gen::errors;
 pub use gen::file_info;

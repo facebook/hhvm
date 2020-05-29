@@ -58,7 +58,7 @@ impl<'a> Env<'a> {
             _ => new_type,
         };
         if let Some(next_cont) = self.next_cont_opt() {
-            let expr_id = match next_cont.local_types.find_ref(&x) {
+            let expr_id = match next_cont.local_types.get(&x) {
                 None => self.ident(),
                 Some(Local(_, y)) => *y,
             };
@@ -129,7 +129,7 @@ impl<'a> Env<'a> {
 
     pub fn set_local_expr_id(&mut self, x: LocalId<'a>, new_eid: Ident) {
         if let Some(next_cont) = self.next_cont_opt() {
-            match next_cont.local_types.find_ref(&x) {
+            match next_cont.local_types.get(&x) {
                 Some(Local(ty, eid)) if *eid != new_eid => {
                     let bld = self.bld();
                     let local = Local(*ty, new_eid);
@@ -151,7 +151,7 @@ impl<'a> Env<'a> {
                 None
             }
             Some(next_cont) => {
-                let lcl = next_cont.local_types.find_ref(&x);
+                let lcl = next_cont.local_types.get(&x);
                 lcl.map(|Local(_, x)| *x)
             }
         }

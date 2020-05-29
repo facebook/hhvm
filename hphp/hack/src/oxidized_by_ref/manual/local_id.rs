@@ -35,9 +35,9 @@ impl<'a> From<&'a oxidized::local_id::LocalId> for LocalId<'a> {
 }
 
 pub mod map {
-    pub type Map<'a, T> = arena_collections::SortedAssocList<'a, super::LocalId<'a>, T>;
+    pub type Map<'a, T> = arena_collections::map::Map<'a, super::LocalId<'a>, T>;
 }
 
 pub mod set {
-    pub type Set<'a> = arena_collections::SortedSet<'a, super::LocalId<'a>>;
+    pub type Set<'a> = arena_collections::set::Set<'a, super::LocalId<'a>>;
 }

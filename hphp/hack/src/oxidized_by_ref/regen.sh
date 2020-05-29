@@ -26,7 +26,6 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/annotated_ast/namespace_env.ml                                \
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/decl/decl_defs.ml                                             \
-  hphp/hack/src/decl/direct_decl_parser.ml                                    \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \

@@ -26,7 +26,6 @@ use oxidized_by_ref::{
     nast,
     pos::Pos,
     relative_path::RelativePath,
-    s_set::SSet,
     shallow_decl_defs::{self, ShallowClassConst, ShallowMethod, ShallowProp, ShallowTypeconst},
     shape_map::ShapeField,
     typing_defs,
@@ -47,6 +46,8 @@ use parser_core_types::{
 mod direct_decl_smart_constructors_generated;
 
 pub use direct_decl_smart_constructors_generated::DirectDeclSmartConstructors;
+
+type SSet<'a> = arena_collections::SortedSet<'a, &'a str>;
 
 impl<'a> DirectDeclSmartConstructors<'a> {
     pub fn new(src: &SourceText<'a>, arena: &'a Bump) -> Self {

@@ -5,4 +5,4 @@
 
 use crate::errors::Phase;
 
-pub type PhaseMap<'a, T> = arena_collections::SortedAssocList<'a, Phase, T>;
+pub type PhaseMap<'a, T> = arena_collections::map::Map<'a, Phase, T>;

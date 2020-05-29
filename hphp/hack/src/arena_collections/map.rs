@@ -177,13 +177,13 @@ impl<'a, K: TrivialDrop + Clone + Ord, V: TrivialDrop + Clone> Map<'a, K, V> {
 
     /// Returns a pointer the current entry belonging to the key,
     /// or returns None, if no such entry exists.
-    pub fn find_ref(self, x: &K) -> Option<&'a V> {
+    pub fn get(self, x: &K) -> Option<&'a V> {
         match self {
             Map(None) => None,
             Map(Some(Node(l, v, d, r, _h))) => match x.cmp(v) {
                 Ordering::Equal => Some(d),
-                Ordering::Less => l.find_ref(x),
-                Ordering::Greater => r.find_ref(x),
+                Ordering::Less => l.get(x),
+                Ordering::Greater => r.get(x),
             },
         }
     }
@@ -517,12 +517,12 @@ mod tests_arbitrary {
             let o: HashMap<u32, u32> = xs.clone().into_iter().collect();
             for (k, v) in o.iter() {
                 assert_eq!(m.mem(k), true);
-                assert_eq!(m.find_ref(k), Some(v));
+                assert_eq!(m.get(k), Some(v));
             }
             for k in ys {
                   let f = o.contains_key(&k);
                   assert_eq!(m.mem(&k), f);
-                  assert_eq!(m.find_ref(&k).is_some(), f);
+                  assert_eq!(m.get(&k).is_some(), f);
             }
             return true
         }

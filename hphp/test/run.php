@@ -857,7 +857,7 @@ function hhvm_cmd_impl(
     ];
 
     if ($autoload_db_prefix !== null) {
-      $args[] = '-vAutoload.DBPath='.escapeshellarg("$autoload_db_prefix.$mode_num.autoloadDB");
+      $args[] = '-vAutoload.DBPath='.escapeshellarg("$autoload_db_prefix.$mode_num");
     }
 
     if (isset($options['hackc'])) {
@@ -933,7 +933,7 @@ function hhvm_cmd(
   $cmds = hhvm_cmd_impl(
     $options,
     find_test_ext($test, 'ini'),
-    $test, // we put the autoload DB next to the test
+    Status::getTestTmpPath($test, 'autoloadDB'),
     $hdf,
     find_debug_config($test, 'hphpd.ini'),
     read_opts_file(find_test_ext($test, 'opts')),
@@ -1876,14 +1876,6 @@ function clean_intermediate_files($test, $options) {
     // tests in --hhbbc2 mode
     'before.round_trip.hhas',
     'after.round_trip.hhas',
-    // temporary autoloader DB and associated cruft
-    // We have at most two modes for now - see hhvm_cmd_impl
-    '0.autoloadDB',
-    '0.autoloadDB-shm',
-    '0.autoloadDB-wal',
-    '1.autoloadDB',
-    '1.autoloadDB-shm',
-    '1.autoloadDB-wal',
   ];
   foreach ($exts as $ext) {
     if ($ext == 'repo') {
@@ -1903,6 +1895,16 @@ function clean_intermediate_files($test, $options) {
     'diff',
     // scratch directory the test may write to
     'tmpdir',
+    // temporary autoloader DB and associated cruft
+    // We have at most two modes for now - see hhvm_cmd_impl
+    'autoloadDB.0',
+    'autoloadDB.0-journal',
+    'autoloadDB.0-shm',
+    'autoloadDB.0-wal',
+    'autoloadDB.1',
+    'autoloadDB.1-journal',
+    'autoloadDB.1-shm',
+    'autoloadDB.1-wal',
   ];
   foreach ($tmp_exts as $ext) {
     $file = Status::getTestTmpPath($test, $ext);

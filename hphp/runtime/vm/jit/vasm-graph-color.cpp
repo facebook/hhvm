@@ -7884,6 +7884,16 @@ BlockVector calculate_block_color_order(const State& state) {
   return order;
 }
 
+// On x86, r8-r15 and xmm8-15 require a REX prefix on any instruction
+// which uses them. This makes instructions larger, so we want to
+// prefer registers (all else being equal) which do not require them.
+bool isREXRegister(PhysReg r) {
+  if (arch() != Arch::X64) return false;
+  return
+    Vreg{r} >= Vreg{reg::r8} &&
+    (Vreg{r} < Vreg{reg::xmm0} || Vreg{r} > Vreg{reg::xmm7});
+}
+
 // FreeRegs is responsible for tracking which physical registers are free and
 // assigning them.
 
@@ -7942,10 +7952,25 @@ struct FreeRegs {
         auto const avail2 = regs.contains(r2);
         if (avail1 != avail2) return avail1 > avail2;
 
-        // If they both have the same weight and the same
-        // availability, select the lesser register.  On x86_64,
-        // this gives preference to the original x86 registers over
-        // the extended ones (x8-x15), which require a REX prefix.
+        // If they have the same availability, prefer the register
+        // which does not require a REX prefix to one that does. On
+        // x86_64, this will generate slightly smaller code.
+        auto const isREX1 = isREXRegister(r1);
+        auto const isREX2 = isREXRegister(r2);
+        if (isREX1 != isREX2) return isREX1 < isREX2;
+
+        // If they are both equal otherwise, then break the tie using
+        // a pseudo-random function. Hash the physical register and
+        // the Vreg we're selecting for. This is preferred to just
+        // using the lesser register, for example, because it helps
+        // provide a wider dispersion of register uses (which
+        // potentially prevents conflicts later).
+        auto const perturb1 = hash_int64_pair(seed, Vreg{r1});
+        auto const perturb2 = hash_int64_pair(seed, Vreg{r2});
+        if (perturb1 != perturb2) return perturb1 < perturb2;
+
+        // In the extremely rare case everything is identical, prefer
+        // the lesser register
         return Vreg{r1} < Vreg{r2};
       };
 

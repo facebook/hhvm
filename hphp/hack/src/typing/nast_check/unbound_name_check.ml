@@ -346,9 +346,6 @@ let handler ctx =
         { env with class_id_allow_typedef = true }
       | Aast.Obj_get (_, (_, Aast.Id (p, name)), _) ->
         { env with seen_names = SMap.add name p env.seen_names }
-      | Aast.Cast _ ->
-        (* TODO: Is it possible for a typedef to be parsed here *)
-        { env with hint_allow_typedef = false }
       | _ -> env
 
     method! at_shape_field_name env sfn =

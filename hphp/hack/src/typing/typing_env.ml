@@ -1092,12 +1092,7 @@ let get_fake_members env =
   | Some next_cont -> next_cont.LEnvC.fake_members
 
 let update_lost_info name blame env ty =
-  let (pos, under_lambda) =
-    match blame with
-    | Fake.Blame_call pos -> (pos, false)
-    | Fake.Blame_lambda pos -> (pos, true)
-  in
-  let info r = Reason.Rlost_info (name, r, pos, under_lambda) in
+  let info r = Reason.Rlost_info (name, r, blame) in
   let rec update_ty (env, seen_tyvars) ty =
     let (env, ty) = expand_type env ty in
     match deref ty with
@@ -1143,6 +1138,11 @@ let forget_members env blame =
   let fake_members = Fake.forget fake_members blame in
   set_fake_members env fake_members
 
+let forget_prefixed_members env lid blame =
+  let fake_members = get_fake_members env in
+  let fake_members = Fake.forget_prefixed fake_members lid blame in
+  set_fake_members env fake_members
+
 module FakeMembers = struct
   let update_fake_members env fake_members =
     let per_cont_env =
@@ -1186,19 +1186,19 @@ module FakeMembers = struct
       end
     | _ -> (env, ty)
 
-  let add_member env fake_id =
+  let add_member env fake_id pos =
     let fake_members = get_fake_members env in
-    let fake_members = Fake.add fake_members fake_id in
+    let fake_members = Fake.add fake_members fake_id pos in
     set_fake_members env fake_members
 
-  let make env obj_name member_name =
+  let make env obj_name member_name pos =
     let my_fake_local_id = Fake.make_id obj_name member_name in
-    let env = add_member env my_fake_local_id in
+    let env = add_member env my_fake_local_id pos in
     (env, my_fake_local_id)
 
-  let make_static env class_name member_name =
+  let make_static env class_name member_name pos =
     let my_fake_local_id = Fake.make_static_id class_name member_name in
-    let env = add_member env my_fake_local_id in
+    let env = add_member env my_fake_local_id pos in
     (env, my_fake_local_id)
 end
 

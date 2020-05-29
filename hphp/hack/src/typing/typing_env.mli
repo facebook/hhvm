@@ -168,7 +168,9 @@ val get_allow_solve_globals : env -> bool
 
 val set_allow_solve_globals : env -> bool -> env
 
-val forget_members : env -> Typing_fake_members.blame -> env
+val forget_members : env -> Reason.blame -> env
+
+val forget_prefixed_members : env -> Local_id.t -> Reason.blame -> env
 
 val get_fake_members : env -> Typing_fake_members.t
 
@@ -185,9 +187,9 @@ module FakeMembers : sig
   val check_instance_invalid :
     env -> Nast.expr -> string -> locl_ty -> env * locl_ty
 
-  val make : env -> Nast.expr -> string -> env * Local_id.t
+  val make : env -> Nast.expr -> string -> Pos.t -> env * Local_id.t
 
-  val make_static : env -> Nast.class_id_ -> string -> env * Local_id.t
+  val make_static : env -> Nast.class_id_ -> string -> Pos.t -> env * Local_id.t
 end
 
 val tany : env -> locl_phase ty_

@@ -49,7 +49,7 @@ type t =
   | Ryield_asyncgen of Pos.t
   | Ryield_asyncnull of Pos.t
   | Ryield_send of Pos.t
-  | Rlost_info of string * t * Pos.t * bool  (** true if due to lambda *)
+  | Rlost_info of string * t * blame
   | Rformat of Pos.t * string * t
   | Rclass_class of Pos.t * string
   | Runknown_class of Pos.t
@@ -107,7 +107,14 @@ and expr_dep_type_reason =
   | ERparent of string
   | ERself of string
   | ERpu of string
-[@@deriving eq]
+
+and blame_source =
+  | BScall
+  | BSlambda
+  | BSassignment
+  | BSout_of_scope
+
+and blame = Blame of Pos.t * blame_source [@@deriving eq]
 
 let arg_pos_str ap =
   match ap with
@@ -263,13 +270,14 @@ let rec to_string prefix r =
   | Runpack_param _ -> [(p, prefix ^ " (it is unpacked with '...')")]
   | Rinout_param _ -> [(p, prefix ^ " (inout parameter)")]
   | Rnullsafe_op _ -> [(p, prefix ^ " (use of ?-> operator)")]
-  | Rlost_info (s, r1, p2, under_lambda) ->
+  | Rlost_info (s, r1, Blame (p2, source_of_loss)) ->
     let s = strip_ns s in
     let cause =
-      if under_lambda then
-        "by this lambda function"
-      else
-        "during this call"
+      match source_of_loss with
+      | BSlambda -> "by this lambda function"
+      | BScall -> "during this call"
+      | BSassignment -> "by this assignment"
+      | BSout_of_scope -> "because of scope change"
     in
     to_string prefix r1
     @ [
@@ -484,7 +492,7 @@ and to_pos = function
   | Ryield_asyncgen p -> p
   | Ryield_asyncnull p -> p
   | Ryield_send p -> p
-  | Rlost_info (_, r, _, _) -> to_pos r
+  | Rlost_info (_, r, _) -> to_pos r
   | Rformat (p, _, _) -> p
   | Rclass_class (p, _) -> p
   | Runknown_class p -> p

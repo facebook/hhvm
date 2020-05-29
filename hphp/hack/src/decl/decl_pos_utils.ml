@@ -56,7 +56,8 @@ struct
     | Ryield_asyncgen p -> Ryield_asyncgen (pos p)
     | Ryield_asyncnull p -> Ryield_asyncnull (pos p)
     | Ryield_send p -> Ryield_send (pos p)
-    | Rlost_info (s, r1, p2, l) -> Rlost_info (s, reason r1, pos p2, l)
+    | Rlost_info (s, r1, Blame (p2, l)) ->
+      Rlost_info (s, reason r1, Blame (pos p2, l))
     | Rformat (p1, s, r) -> Rformat (pos p1, s, reason r)
     | Rclass_class (p, s) -> Rclass_class (pos p, s)
     | Runknown_class p -> Runknown_class (pos p)

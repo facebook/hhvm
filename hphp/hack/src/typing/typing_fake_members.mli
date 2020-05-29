@@ -7,13 +7,10 @@
  *
  *)
 
+module Reason = Typing_reason
+
 (* Validation information for fake members *)
 type t
-
-(* Validation blame: call or lambda *)
-type blame =
-  | Blame_call of Pos.t
-  | Blame_lambda of Pos.t
 
 (* Initial validation *)
 val empty : t
@@ -31,15 +28,19 @@ val join : t -> t -> t
 val is_valid : t -> Local_id.t -> bool
 
 (* Has this identifier been invalidated? If so, return position of
- * call or lambda that is responsible *)
-val is_invalid : t -> Local_id.t -> blame option
+ * the event that is responsible *)
+val is_invalid : t -> Local_id.t -> Reason.blame option
 
-(* Invalidate all fake members, and remember the position of the call
- * or lambda that is responsible *)
-val forget : t -> blame -> t
+(* Invalidate all fake members, and remember the position of the event
+ * that is responsible *)
+val forget : t -> Reason.blame -> t
+
+(* Invalidate fake members that are prefixed by some identifier, and remember
+ * the position of the assignment that is responsible *)
+val forget_prefixed : t -> Local_id.t -> Reason.blame -> t
 
 (* Add a valid fake member access *)
-val add : t -> Local_id.t -> t
+val add : t -> Local_id.t -> Pos.t -> t
 
 (* Convert to a value for logging *)
 val as_log_value : t -> Typing_log_value.value

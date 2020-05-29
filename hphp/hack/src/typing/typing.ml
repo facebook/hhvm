@@ -1372,7 +1372,7 @@ and expr_
       when String.equal func SN.StdlibFunctions.is_null
            || String.equal func SN.PseudoFunctions.isset ->
       env
-    | _ -> Env.forget_members env (Fake.Blame_call p)
+    | _ -> Env.forget_members env Reason.(Blame (p, BScall))
   in
   let check_call
       ~is_using_clause
@@ -2364,7 +2364,7 @@ and expr_
   | Class_const (cid, mid) -> class_const env p (cid, mid)
   | Class_get ((cpos, cid), CGstring mid)
     when Env.FakeMembers.is_valid_static env cid (snd mid) ->
-    let (env, local) = Env.FakeMembers.make_static env cid (snd mid) in
+    let (env, local) = Env.FakeMembers.make_static env cid (snd mid) p in
     let local = (p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, _tal, te, _) =
@@ -2395,7 +2395,7 @@ and expr_
     failwith "AST should not have any CGexprs after naming"
   | Obj_get (e, (pid, Id (py, y)), nf) when Env.FakeMembers.is_valid env e y ->
     let env = might_throw env in
-    let (env, local) = Env.FakeMembers.make env e y in
+    let (env, local) = Env.FakeMembers.make env e y p in
     let local = (p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, t_lhs, _) = expr ~accept_using_var:true env e in
@@ -2522,7 +2522,7 @@ and expr_
         expected_return
         Errors.unify_error
     in
-    let env = Env.forget_members env (Fake.Blame_call p) in
+    let env = Env.forget_members env Reason.(Blame (p, BScall)) in
     let env = LEnv.save_and_merge_next_in_cont env C.Exit in
     make_result
       env
@@ -2589,7 +2589,7 @@ and expr_
         { expected_return with et_enforced = false }
         Errors.unify_error
     in
-    let env = Env.forget_members env (Fake.Blame_call p) in
+    let env = Env.forget_members env Reason.(Blame (p, BScall)) in
     make_result env p (Aast.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
     let env = might_throw env in
@@ -2641,7 +2641,7 @@ and expr_
         el
         unpacked_element
     in
-    let env = Env.forget_members env (Fake.Blame_call p) in
+    let env = Env.forget_members env Reason.(Blame (p, BScall)) in
     make_result
       env
       p
@@ -3349,7 +3349,7 @@ and stash_conts_for_anon env p is_anon captured f =
             next_cont.Typing_per_cont_env.local_types
         in
         let initial_fakes =
-          Fake.forget (Env.get_fake_members env) (Fake.Blame_lambda p)
+          Fake.forget (Env.get_fake_members env) Reason.(Blame (p, BSlambda))
         in
         let tpenv = Env.get_tpenv env in
         (initial_locals, initial_fakes, tpenv))
@@ -3945,6 +3945,15 @@ and is_hack_collection env ty =
     (MakeType.const_collection Reason.Rnone (MakeType.mixed Reason.Rnone))
 
 and assign_ p ur env e1 ty2 =
+  let env =
+    match e1 with
+    | (_, Lvar (_, x)) ->
+      Env.forget_prefixed_members env x Reason.(Blame (p, BSassignment))
+    (* If we ever extend fake members from $x->a to more complicated lvalues
+      such as $x->a->b, we would need to call forget_prefixed_members on
+      other lvalues as well. *)
+    | _ -> env
+  in
   match e1 with
   | (_, Lvar ((_, x) as id)) ->
     let env = set_valid_rvalue p env x ty2 in
@@ -4011,11 +4020,11 @@ and assign_ p ur env e1 ty2 =
     begin
       match obj with
       | (_, This) ->
-        let (env, local) = Env.FakeMembers.make env obj member_name in
+        let (env, local) = Env.FakeMembers.make env obj member_name p in
         let env = set_valid_rvalue p env local ty2 in
         (env, te1, ty2)
       | (_, Lvar _) ->
-        let (env, local) = Env.FakeMembers.make env obj member_name in
+        let (env, local) = Env.FakeMembers.make env obj member_name p in
         let env = set_valid_rvalue p env local ty2 in
         (env, te1, ty2)
       | _ -> (env, te1, ty2)
@@ -4059,7 +4068,7 @@ and assign_ p ur env e1 ty2 =
         (pos_member, y)
         x
     in
-    let (env, local) = Env.FakeMembers.make_static env x y in
+    let (env, local) = Env.FakeMembers.make_static env x y p in
     let env = set_valid_rvalue p env local ty2 in
     (env, te1, ty2)
   | (pos, Array_get (e1, None)) ->
@@ -6500,12 +6509,12 @@ and bad_call env p ty = Errors.bad_call p (Typing_print.error env ty)
 and make_a_local_of env e =
   match e with
   | (p, Class_get ((_, cname), CGstring (_, member_name))) ->
-    let (env, local) = Env.FakeMembers.make_static env cname member_name in
+    let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, Some (p, local))
   | ( p,
       Obj_get ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _)
     ) ->
-    let (env, local) = Env.FakeMembers.make env obj member_name in
+    let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, Some (p, local))
   | (_, Lvar x)
   | (_, Dollardollar x) ->
@@ -6868,12 +6877,12 @@ and is_instance_var = function
 
 and get_instance_var env = function
   | (p, Class_get ((_, cname), CGstring (_, member_name))) ->
-    let (env, local) = Env.FakeMembers.make_static env cname member_name in
+    let (env, local) = Env.FakeMembers.make_static env cname member_name p in
     (env, (p, local))
   | ( p,
       Obj_get ((((_, This) | (_, Lvar _)) as obj), (_, Id (_, member_name)), _)
     ) ->
-    let (env, local) = Env.FakeMembers.make env obj member_name in
+    let (env, local) = Env.FakeMembers.make env obj member_name p in
     (env, (p, local))
   | (_, Dollardollar (p, x))
   | (_, Lvar (p, x)) ->

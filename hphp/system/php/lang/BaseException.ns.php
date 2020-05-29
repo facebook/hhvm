@@ -51,6 +51,7 @@ trait BaseException {
     return $this->previous;
   }
 
+  <<__Rx, __Mutable>>
   final public function setPrevious(\Throwable $previous) {
     $this->previous = $previous;
   }

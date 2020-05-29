@@ -93,6 +93,7 @@ class Exception implements Throwable {
   public function getMessage(): string;
   <<__Rx, __MaybeMutable>>
   final public function getPrevious(): ?Exception;
+  <<__Rx, __Mutable>>
   public final function setPrevious(Exception $previous): void;
   <<__Rx, __MaybeMutable>>
   public function getCode(): int;

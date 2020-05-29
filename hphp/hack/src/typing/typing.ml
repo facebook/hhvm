@@ -6660,6 +6660,9 @@ and condition
     in
     env
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+    when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
+    safely_refine_is_array env `AnyArray p f lv
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet
          && ( String.equal f SN.StdlibFunctions.is_array
             || String.equal f SN.StdlibFunctions.is_php_array ) ->
@@ -6919,28 +6922,40 @@ and safely_refine_is_array env ty p pred_name arg_expr =
           ~newable:false
       in
       let tfresh = MakeType.generic r tfresh_name in
+      (* If we're refining the type for `is_array` we have a slightly more
+       * involved process. Let's separate out that logic so we can re-use it.
+       *)
+      let array_ty =
+        let safe_isarray_enabled =
+          TypecheckerOptions.experimental_feature_enabled
+            (Env.get_tcopt env)
+            TypecheckerOptions.experimental_isarray
+        in
+        let tk = MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r)) in
+        let tv =
+          if safe_isarray_enabled then
+            tfresh
+          else
+            mk (r, TUtils.tany env)
+        in
+        MakeType.varray_or_darray r tk tv
+      in
       (* This is the refined type of e inside the branch *)
       let refined_ty =
         match ty with
         | `HackDict -> MakeType.dict r tarrkey tfresh
         | `HackVec -> MakeType.vec r tfresh
         | `HackKeyset -> MakeType.keyset r tarrkey
-        | `PHPArray ->
-          let safe_isarray_enabled =
-            TypecheckerOptions.experimental_feature_enabled
-              (Env.get_tcopt env)
-              TypecheckerOptions.experimental_isarray
-          in
-          let tk =
-            MakeType.arraykey Reason.(Rvarray_or_darray_key (to_pos r))
-          in
-          let tv =
-            if safe_isarray_enabled then
-              tfresh
-            else
-              mk (r, TUtils.tany env)
-          in
-          MakeType.varray_or_darray r tk tv
+        | `PHPArray -> array_ty
+        | `AnyArray ->
+          MakeType.union
+            r
+            [
+              MakeType.dict r tarrkey tfresh;
+              MakeType.vec r tfresh;
+              MakeType.keyset r tarrkey;
+              array_ty;
+            ]
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>

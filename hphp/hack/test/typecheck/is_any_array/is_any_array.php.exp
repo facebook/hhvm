@@ -1,0 +1,12 @@
+File "is_any_array.php", line 15, characters 15-16:
+Invalid argument (Typing[4110])
+File "is_any_array.php", line 22, characters 20-29:
+Expected vec<mixed>
+File "is_any_array.php", line 13, characters 7-21:
+But got dict<Tk#1, T#1> from the argument to this \HH\is_any_array test
+File "is_any_array.php", line 17, characters 21-22:
+Invalid argument (Typing[4110])
+File "is_any_array.php", line 21, characters 26-41:
+Expected Container<mixed>
+File "is_any_array.php", line 12, characters 15-19:
+But got mixed

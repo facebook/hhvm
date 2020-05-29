@@ -44,50 +44,65 @@ extern "C" fn compile_from_text_ffi(
     rust_output_config: usize,
     source_text: usize,
 ) -> usize {
-    ocamlrep_ocamlpool::catch_unwind(|| {
-        let job_builder = move || {
-            Box::new(
-                move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+    ocamlrep_ocamlpool::catch_unwind_with_handler(
+        || {
+            let job_builder = move || {
+                Box::new(
+                    move |stack_limit: &StackLimit, _nomain_stack_size: Option<usize>| {
+                        let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
+                        let output_config =
+                            unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
+                        let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+                        let mut w = String::new();
+                        match compile::from_text_(&env, stack_limit, &mut w, source_text) {
+                            Ok(profile) => print_output(w, output_config, &env.filepath, profile),
+                            Err(e) => Err(anyhow!("{}", e)),
+                        }
+                    },
+                )
+            };
+            // Assume peak is 2.5x of stack.
+            // This is initial estimation, need to be improved later.
+            let stack_slack = |stack_size| stack_size * 6 / 10;
+            let on_retry = &mut |stack_size_tried: usize| {
+                // Not always printing warning here because this would fail some HHVM tests
+                if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
                     let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                    let output_config =
-                        unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
-                    let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
-                    let mut w = String::new();
-                    match compile::from_text_(&env, stack_limit, &mut w, source_text) {
-                        Ok(profile) => print_output(w, output_config, &env.filepath, profile),
-                        Err(e) => Err(anyhow!("{}", e)),
-                    }
-                },
-            )
-        };
-        // Assume peak is 2.5x of stack.
-        // This is initial estimation, need to be improved later.
-        let stack_slack = |stack_size| stack_size * 6 / 10;
-        let on_retry = &mut |stack_size_tried: usize| {
-            // Not always printing warning here because this would fail some HHVM tests
-            if atty::is(atty::Stream::Stderr) || std::env::var_os("HH_TEST_MODE").is_some() {
-                let source_text = unsafe { SourceText::from_ocaml(source_text).unwrap() };
-                eprintln!(
-                    "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
-                    (stack_size_tried - stack_slack(stack_size_tried)) / KI,
-                    source_text.file_path().path_str(),
-                );
-            }
-        };
-        let job = stack_limit::retry::Job {
-            nonmain_stack_min: 13 * MI,
-            // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like rust compiler produce inconsistent binary.
-            nonmain_stack_max: Some(7 * GI),
-            ..Default::default()
-        };
+                    eprintln!(
+                        "[hrust] warning: compile_from_text_ffi exceeded stack of {} KiB on: {}",
+                        (stack_size_tried - stack_slack(stack_size_tried)) / KI,
+                        source_text.file_path().path_str(),
+                    );
+                }
+            };
+            let job = stack_limit::retry::Job {
+                nonmain_stack_min: 13 * MI,
+                // TODO(hrust) aast_parser_ffi only requies 1 * GI, it's like rust compiler produce inconsistent binary.
+                nonmain_stack_max: Some(7 * GI),
+                ..Default::default()
+            };
 
-        let r: Result<(), String> = job
-            .with_elastic_stack(&job_builder, on_retry, stack_slack)
-            .map_err(|e| format!("{}", e))
-            .expect("Retry Failed")
-            .map_err(|e| e.to_string());
-        unsafe { to_ocaml(&r) }
-    })
+            let r: Result<(), String> = job
+                .with_elastic_stack(&job_builder, on_retry, stack_slack)
+                .map_err(|e| format!("{}", e))
+                .expect("Retry Failed")
+                .map_err(|e| e.to_string());
+            unsafe { to_ocaml(&r) }
+        },
+        /// This handler is to catch `panic` from parser,
+        /// TODO(hrust): parser shouldn't panic instead it should return result
+        /// and then revert this diff.
+        |panic_msg: &str| -> Result<usize, String> {
+            let output_config =
+                unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };
+            let env = unsafe { compile::Env::<OcamlStr>::from_ocaml(env).unwrap() };
+            let mut w = String::new();
+            compile::emit_fatal_program(&env, &mut w, panic_msg)
+                .and_then(|_| print_output(w, output_config, &env.filepath, None))
+                .map(|_| unsafe { to_ocaml(&<Result<(), String>>::Ok(())) })
+                .map_err(|e| e.to_string())
+        },
+    )
 }
 
 fn print_output(

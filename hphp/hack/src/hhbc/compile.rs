@@ -8,7 +8,7 @@ use aast_parser::{
 };
 use anyhow::{anyhow, *};
 use bitflags::bitflags;
-use emit_program_rust::{emit_fatal_program, emit_program, FromAstFlags};
+use emit_program_rust::{self as emit_program, emit_program, FromAstFlags};
 use emit_pu_rust;
 use env::emitter::Emitter;
 use hhas_program_rust::HhasProgram;
@@ -69,6 +69,44 @@ pub struct Profile {
     pub parsing_t: f64,
     pub codegen_t: f64,
     pub printing_t: f64,
+}
+
+pub fn emit_fatal_program<W, S: AsRef<str>>(
+    env: &Env<S>,
+    writer: &mut W,
+    err_msg: &str,
+) -> anyhow::Result<()>
+where
+    W: Write,
+    W::Error: Send + Sync + 'static, // required by anyhow::Error
+{
+    let is_systemlib = env.flags.contains(EnvFlags::IS_SYSTEMLIB);
+    let opts =
+        Options::from_configs(&env.config_jsons, &env.config_list).map_err(anyhow::Error::msg)?;
+    let mut emitter = Emitter::new(
+        opts,
+        is_systemlib,
+        env.flags.contains(EnvFlags::FOR_DEBUGGER_EVAL),
+    );
+    let prog = emit_program::emit_fatal_program(
+        emitter.options(),
+        is_systemlib,
+        FatalOp::Parse,
+        &Pos::make_none(),
+        err_msg,
+    );
+    let prog = prog.map_err(|e| anyhow!("Unhandled Emitter error: {}", e))?;
+    print_program(
+        &mut Context::new(
+            &mut emitter,
+            Some(&env.filepath),
+            env.flags.contains(EnvFlags::DUMP_SYMBOL_REFS),
+            is_systemlib,
+        ),
+        writer,
+        &prog,
+    )?;
+    Ok(())
 }
 
 pub fn from_text<W, S: AsRef<str>>(
@@ -197,7 +235,7 @@ fn emit_fatal<'a>(
     } else {
         FatalOp::Parse
     };
-    emit_fatal_program(emitter.options(), emitter.systemlib(), op, pos, msg)
+    emit_program::emit_fatal_program(emitter.options(), emitter.systemlib(), op, pos, msg)
 }
 
 fn create_parser_options(opts: &Options) -> ParserOptions {

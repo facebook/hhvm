@@ -88,6 +88,16 @@ pub unsafe fn to_ocaml<T: ToOcamlRep>(value: &T) -> usize {
 /// Catches panics in `f` and raises a OCaml exception of type Failure
 /// with the panic message (if the panic was raised with a `&str` or `String`).
 pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
+    catch_unwind_with_handler(f, |msg: &str| -> Result<usize, String> { Err(msg.into()) })
+}
+
+/// Catches panics in `f` and raises a OCaml exception of type Failure
+/// with the panic message (if the panic was raised with a `&str` or `String`).
+/// `h` handles panic msg, it may re-raise by returning Err.
+pub fn catch_unwind_with_handler(
+    f: impl FnOnce() -> usize + UnwindSafe,
+    h: impl FnOnce(&str) -> Result<usize, String>,
+) -> usize {
     let err = match std::panic::catch_unwind(f) {
         Ok(value) => return value,
         Err(err) => err,
@@ -100,9 +110,12 @@ pub fn catch_unwind(f: impl FnOnce() -> usize + UnwindSafe) -> usize {
         // TODO: Build a smarter message in this case (using panic::set_hook?)
         "Panicked with non-string object"
     };
-    unsafe {
-        let msg = CString::new(msg).unwrap();
-        ocaml::core::fail::caml_failwith(msg.as_ptr());
+    match h(msg) {
+        Ok(value) => return value,
+        Err(err) => unsafe {
+            let msg = CString::new(err).unwrap();
+            ocaml::core::fail::caml_failwith(msg.as_ptr());
+        },
     }
     unreachable!();
 }

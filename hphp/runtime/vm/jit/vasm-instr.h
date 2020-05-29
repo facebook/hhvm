@@ -149,24 +149,24 @@ struct Vunit;
   O(vregunrestrict, Inone, Un, Dn)\
   /* arithmetic instructions */\
   O(addwm, I(fl), U(s0) UM(m), D(sf)) \
-  O(addl, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(addl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))    \
   O(addli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addlm, I(fl), U(s0) UM(m), D(sf)) \
   O(addlim, I(s0) I(fl), UM(m), D(sf)) \
-  O(addq, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(addq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(addqmr, I(fl), UA(m) UH(s1,d), DH(d,s1) D(sf))  \
   O(addqrm, I(fl), U(s1) UM(m), D(sf)) \
   O(addqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(addqim, I(s0) I(fl), UM(m), D(sf)) \
   O(addsd, Inone, U(s0) U(s1), D(d))\
-  O(andb, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))    \
   O(andbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andbim, I(s) I(fl), UM(m), D(sf)) \
-  O(andw, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andw, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andl, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
-  O(andq, I(fl), U(s0) U(s1), D(d) D(sf)) \
+  O(andq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(andqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(andqi64, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(decl, I(fl), UH(s,d), DH(d,s) D(sf))\
@@ -192,7 +192,7 @@ struct Vunit;
   O(orwi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(orli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(orlim, I(s0) I(fl), UM(m), D(sf))\
-  O(orq, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(orq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))    \
   O(orqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf)) \
   O(orqim, I(s0) I(fl), UM(m), D(sf))\
   O(sar, I(fl), U(s0) U(s1), D(d) D(sf))\
@@ -203,15 +203,15 @@ struct Vunit;
   O(shlqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(shrqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
-  O(subl, I(fl), UA(s0) U(s1), D(d) D(sf))\
+  O(subl, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf))         \
   O(subli, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
-  O(subq, I(fl), UA(s0) U(s1), D(d) D(sf))\
+  O(subq, I(fl), UA(s0) UH(s1,d), DH(d,s1) D(sf))         \
   O(subqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   O(subsd, Inone, UA(s0) U(s1), D(d))\
-  O(xorb, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(xorb, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))          \
   O(xorbi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
-  O(xorl, I(fl), U(s0) U(s1), D(d) D(sf))\
-  O(xorq, I(fl), U(s0) U(s1), D(d) D(sf))\
+  O(xorl, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))   \
+  O(xorq, I(fl), U(s0) UH(s1,d), DH(d,s1) D(sf))     \
   O(xorqi, I(s0) I(fl), UH(s1,d), DH(d,s1) D(sf))\
   /* compares and tests */\
   O(cmpb, I(fl), U(s0) U(s1), D(sf))\
@@ -330,8 +330,8 @@ struct Vunit;
   O(unpcklpd, Inone, UA(s0) U(s1), D(d))\
   /* other floating-point */\
   O(absdbl, Inone, UH(s,d), DH(d,s))\
-  O(divsd, Inone, UA(s0) U(s1), D(d))\
-  O(mulsd, Inone, U(s0) U(s1), D(d))\
+  O(divsd, Inone, UA(s0) UH(s1,d), DH(d,s1))      \
+  O(mulsd, Inone, U(s0) UH(s1,d), DH(d,s1))        \
   O(roundsd, I(dir), U(s), D(d))\
   O(sqrtsd, Inone, U(s), D(d))\
   /* x64 instructions */\

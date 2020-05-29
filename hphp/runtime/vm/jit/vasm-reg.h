@@ -1210,6 +1210,7 @@ struct Vptr {
     : base(Vreg{})
     , index(Vreg{})
     , disp(0)
+    , scale(1)
     , width(w)
   {}
 

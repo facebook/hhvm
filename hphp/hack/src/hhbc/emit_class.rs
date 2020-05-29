@@ -489,10 +489,10 @@ pub fn emit_class<'a>(
         .uses
         .iter()
         .filter_map(|x| match x.1.as_ref() {
-            tast::Hint_::Happly(tast::Id(p, name), _) => {
+            tast::Hint_::Happly(tast::Id(_, name), _) => {
                 if is_interface {
                     Some(Err(emit_fatal_rust::raise_fatal_parse(
-                        p,
+                        &x.0,
                         "Interfaces cannot use traits",
                     )))
                 } else {

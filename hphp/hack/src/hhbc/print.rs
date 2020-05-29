@@ -2990,6 +2990,7 @@ fn print_efun<W: Write>(
                 w.write(local_id::get_name(id))
             })
         })?;
+        w.write(" ")?;
     }
     print_block_(ctx, w, env, &f.body.ast, None)
 }

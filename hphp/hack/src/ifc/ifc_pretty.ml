@@ -1,5 +1,11 @@
-(* Copyright (c) 2020, Facebook, Inc.
-   All rights reserved. *)
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Core_kernel
 open Format
 open Ifc_types
@@ -15,6 +21,16 @@ let rec list pp_sep pp fmt = function
   | [] -> ()
   | [x] -> fprintf fmt "%a" pp x
   | x :: xs -> fprintf fmt "%a%a%a" pp x pp_sep () (list pp_sep pp) xs
+
+let smap pp_sep pp fmt map =
+  let map_as_list = SMap.fold (fun k v acc -> (k, v) :: acc) map [] in
+  let prop_pol fmt (prop, pol) = fprintf fmt "%s -> %a" prop pp pol in
+  list pp_sep prop_pol fmt map_as_list
+
+let option pp fmt opt =
+  match opt with
+  | Some x -> fprintf fmt "%a" pp x
+  | None -> fprintf fmt "None"
 
 let show_policy = function
   | Pbot -> "Bot"
@@ -91,6 +107,8 @@ let rec ptype fmt ty =
   | Ttuple tl -> list "," tl
   | Tunion tl -> list " |" tl
   | Tinter tl -> list " &" tl
+  | Tclass (name, pol, map) ->
+    fprintf fmt "%s<%a, %a>" name policy pol (smap comma_sep ptype) map
 
 let locals fmt env =
   let pp_lenv fmt { le_vars } = LMap.make_pp Local_id.pp ptype fmt le_vars in
@@ -103,7 +121,27 @@ let locals fmt env =
 let env fmt env =
   fprintf fmt "@[<v>";
   fprintf fmt "@[<hov2>Locals:@ %a@]" locals env;
-  fprintf fmt "@,Return: %a" ptype env.e_ret;
+  fprintf fmt "@,@[<hov2>This:@ @[<hov>%a@]@]" (option ptype) env.e_this;
+  fprintf fmt "@,@[<hov2>Return:@ @[<hov>%a@]@]" ptype env.e_ret;
   let p = Logic.prop_conjoin (List.rev env.e_acc) in
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   fprintf fmt "@]"
+
+let policy_sig fmt { psig_policied_properties } =
+  let property fmt (name, _ty) = fprintf fmt "%s" name in
+  let policied_properties fmt props =
+    List.iter ~f:(fprintf fmt "%a@," property) props
+  in
+  fprintf fmt "@[<v>";
+  fprintf
+    fmt
+    "* Policied properties:@,  @[<v>%a@]"
+    policied_properties
+    psig_policied_properties;
+  fprintf fmt "@]"
+
+let policy_sig_env fmt map =
+  let handle_class class_name psig =
+    fprintf fmt "Policy signature for %s:@,%a@." class_name policy_sig psig
+  in
+  SMap.iter handle_class map

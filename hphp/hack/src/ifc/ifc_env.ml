@@ -1,5 +1,11 @@
-(* Copyright (c) 2020, Facebook, Inc.
-   All rights reserved. *)
+(*
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Ifc_types
 module Logic = Ifc_logic
 module Utils = Ifc_utils
@@ -19,14 +25,16 @@ let new_policy_var =
   in
   (fun stk -> Pfree_var (new_policy_var (), stk.s_scope))
 
-let new_stk scope = { s_scope = scope; s_lpc = []; s_gpc = [] }
+let new_stk psig_env scope =
+  { s_scope = scope; e_psig_env = psig_env; s_lpc = []; s_gpc = [] }
 
 let empty_lenv = { le_vars = LMap.empty }
 
-let new_env saved_env ret_ty =
+let new_env saved_env this_ty ret_ty =
   {
     e_tenv = saved_env;
     e_cont = KMap.singleton K.Next empty_lenv;
+    e_this = this_ty;
     e_ret = ret_ty;
     e_acc = [];
   }

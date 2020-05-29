@@ -1818,6 +1818,7 @@ let decl_and_run_mode
       let magic_builtins =
         match mode with
         | Ai _ -> Array.append magic_builtins Ai.magic_builtins
+        | Ifc _ -> Array.append magic_builtins Ifc.magic_builtins
         | _ -> magic_builtins
       in
       Array.iter magic_builtins ~f:(fun (file_name, file_contents) ->

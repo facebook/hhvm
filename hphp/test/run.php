@@ -2590,7 +2590,13 @@ function make_header($str) {
 }
 
 function print_commands($tests, $options) {
-  print make_header("Run these by hand:");
+  if (isset($options['verbose'])) {
+    print make_header("Run these by hand:");
+  } else {
+    $test = $tests[0];
+    print make_header("Run $test by hand:");
+    $tests = varray[$test];
+  }
 
   foreach ($tests as $test) {
     list($commands, $_) = hhvm_cmd($options, $test);
@@ -2800,40 +2806,61 @@ function print_failure($argv, $results, $options) {
       $passed[] = $result['name'];
     }
   }
-  asort(inout $failed);
-  print "\n".count($failed)." tests failed\n";
-  if (!($options['no-fun'] ?? false)) {
-    // Unicode for table-flipping emoticon
-    print "(\u{256F}\u{00B0}\u{25A1}\u{00B0}\u{FF09}\u{256F}\u{FE35} \u{253B}";
-    print "\u{2501}\u{253B}\n";
-    // TODO: Google indicates that this is some old emoji-thing relating to
-    // table flipping... Maybe replace to stop other people spending time
-    // trying to decipher it?
-    // https://knowyourmeme.com/memes/flipping-tables
-  }
-
-  print make_header("See the diffs:").
-    implode("\n", array_map(
-      function($test) { return 'cat '.$test.'.diff'; },
-    $failed))."\n";
+  sort(inout $failed);
 
   $failing_tests_file = ($options['failure-file'] ?? false)
     ? $options['failure-file']
     : tempnam('/tmp', 'test-failures');
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
-  print make_header('For xargs, list of failures is available using:').
-    'cat '.$failing_tests_file."\n";
-
-  if ($passed ?? false) {
+  if ($passed) {
     $passing_tests_file = ($options['success-file'] ?? false)
       ? $options['success-file']
       : tempnam('/tmp', 'tests-passed');
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
-    print make_header('For xargs, list of passed tests is available using:').
-      'cat '.$passing_tests_file."\n";
+  }
+
+  print "\n".count($failed)." tests failed\n";
+  if (!($options['no-fun'] ?? false)) {
+    // Unicode for table-flipping emoticon
+    // https://knowyourmeme.com/memes/flipping-tables
+    print "(\u{256F}\u{00B0}\u{25A1}\u{00B0}\u{FF09}\u{256F}\u{FE35} \u{253B}";
+    print "\u{2501}\u{253B}\n";
   }
 
   print_commands($failed, $options);
+
+  print make_header("See failed test output and expectations:");
+  foreach ($failed as $n => $test) {
+    if ($n !== 0) print "\n";
+    print 'cat ' . $test.'.diff' . "\n";
+    print 'cat ' . $test.'.out' . "\n";
+    $expect_file = get_expect_file_and_type($test, $options)[0];
+    if ($expect_file is null) {
+      print "# no expect file found for $test\n";
+    } else {
+      print "cat $expect_file\n";
+    }
+
+    // only print 3 tests worth unless verbose is on
+    if ($n === 2 && !isset($options['verbose'])) {
+      $remaining = count($failed) - 1 - $n;
+      if ($remaining > 0) {
+        print make_header("... and $remaining more.");
+      }
+      break;
+    }
+  }
+
+  if ($passed) {
+    print make_header(
+      'For xargs, lists of failed and passed tests are available using:'
+    );
+    print 'cat '.$failing_tests_file."\n";
+    print 'cat '.$passing_tests_file."\n";
+  } else {
+    print make_header('For xargs, list of failures is available using:').
+      'cat '.$failing_tests_file."\n";
+  }
 
   print
     make_header("Re-run just the failing tests:") .

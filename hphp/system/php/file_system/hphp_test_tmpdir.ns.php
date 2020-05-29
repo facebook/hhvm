@@ -16,11 +16,15 @@ use namespace HH\Lib\_Private\_OS;
 function hphp_test_tmproot(): string {
   $override = \getenv('HPHP_TEST_TMPDIR');
   if ($override is string) {
+    /* TODO(alexeyt) invariant temporarily disabled while I fix tests that
+     * depend on HPHP_TEST_TMPDIR ending with '/'
     invariant(
       \rtrim($override, '/') === $override,
       'HPHP_TEST_TMPDIR must not have a trailing slash',
     );
     return $override.'/';
+    */
+    return \rtrim($override, '/').'/';
   }
 
   $pattern = \rtrim(\sys_get_temp_dir(), '/').'/hphp-test-XXXXXX';

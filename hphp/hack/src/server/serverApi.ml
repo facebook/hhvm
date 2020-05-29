@@ -40,7 +40,7 @@ let make_local_server_api
           Hh_logger.log
             "Updating the existing table - moving %s to %s"
             source_path
-            source_path;
+            destination_path;
           FileUtil.cp [source_path] destination_path;
           let (_ : Naming_sqlite.save_result) =
             Naming_table.save naming_table destination_path

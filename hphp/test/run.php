@@ -1365,6 +1365,11 @@ class Queue {
   }
 }
 
+enum TempDirRemove: int {
+  ALWAYS = 0;
+  ON_RUN_SUCCESS = 1;
+  NEVER = 2;
+}
 
 class Status {
   private static $results = varray[];
@@ -1375,6 +1380,8 @@ class Status {
   public static $nofork = false;
   private static ?Queue $queue = null;
   private static $killed = false;
+  public static TempDirRemove $temp_dir_remove = TempDirRemove::ALWAYS;
+  private static int $return_value = 255;
 
   private static $overall_start_time = 0;
   private static $overall_end_time = 0;
@@ -1404,13 +1411,14 @@ class Status {
   const BLUE = 34;
 
   public static function createTempDir(): void {
-    self::$tempdir = sys_get_temp_dir();
-    // Apparently some systems might not put the trailing slash
-    if (substr(self::$tempdir, -1) !== "/") {
-      self::$tempdir .= "/";
-    }
-    self::$tempdir .= getmypid().'-'.rand();
+    // TODO: one day we should have hack-accessible mkdtemp
+    self::$tempdir = tempnam(sys_get_temp_dir(), "hphp-test-");
+    unlink(self::$tempdir);
     mkdir(self::$tempdir);
+  }
+
+  public static function getRunTempDir(): string {
+    return self::$tempdir;
   }
 
   public static function getTestTmpDir(): string {
@@ -1472,18 +1480,47 @@ class Status {
     self::$overall_start_time = microtime(true);
   }
 
-  public static function finished() {
+  public static function finished(int $return_value) {
     self::$overall_end_time = microtime(true);
+    self::$return_value = $return_value;
     self::send(self::MSG_FINISHED, null);
   }
 
   public static function destroy(): void {
     if (!self::$killed) {
       self::$killed = true;
-      self::$queue->destroy();
-      self::$queue = null;
-      self::removeTempDir();
+      if (self::$queue !== null) {
+        self::$queue->destroy();
+        self::$queue = null;
+      }
+      switch (self::$temp_dir_remove) {
+        case TempDirRemove::NEVER:
+          break;
+        case TempDirRemove::ON_RUN_SUCCESS:
+          if (self::$return_value !== 0) break;
+          // FALLTHROUGH
+        case TempDirRemove::ALWAYS:
+          self::removeTempDir();
+      }
     }
+  }
+
+  public static function destroyFromSignal($_signo): void {
+    self::destroy();
+  }
+
+  public static function registerCleanup(bool $no_clean) {
+    if (self::getMode() === self::MODE_TESTPILOT ||
+        self::getMode() === self::MODE_RECORD_FAILURES) {
+      self::$temp_dir_remove = TempDirRemove::ALWAYS;
+    } else if ($no_clean) {
+      self::$temp_dir_remove = TempDirRemove::NEVER;
+    } else {
+      self::$temp_dir_remove = TempDirRemove::ON_RUN_SUCCESS;
+    }
+    register_shutdown_function(class_meth(self::class, 'destroy'));
+    pcntl_signal(SIGTERM, class_meth(self::class, 'destroyFromSignal'));
+    pcntl_signal(SIGINT, class_meth(self::class, 'destroyFromSignal'));
   }
 
   public static function serverRestarted() {
@@ -2810,12 +2847,12 @@ function print_failure($argv, $results, $options) {
 
   $failing_tests_file = ($options['failure-file'] ?? false)
     ? $options['failure-file']
-    : tempnam('/tmp', 'test-failures');
+    : Status::getRunTempDir() . '/test-failures';
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   if ($passed) {
     $passing_tests_file = ($options['success-file'] ?? false)
       ? $options['success-file']
-      : tempnam('/tmp', 'tests-passed');
+      : Status::getRunTempDir() . '/tests-passed';
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   }
 
@@ -3187,6 +3224,7 @@ function main($argv) {
   // A poor man's shared memory.
   $bad_test_files = varray[];
   if (Status::$nofork) {
+    Status::registerCleanup(isset($options['no-clean']));
     $bad_test_file = tempnam('/tmp', 'test-run-');
     $bad_test_files[] = $bad_test_file;
     invariant(count($test_buckets) === 1, "nofork was set erroneously");
@@ -3207,10 +3245,7 @@ function main($argv) {
 
     // Make sure to clean up on exit, or on SIGTERM/SIGINT.
     // Do this here so no children inherit this.
-    $destroy = function(): void { Status::destroy(); };
-    register_shutdown_function($destroy);
-    pcntl_signal(SIGTERM, $destroy);
-    pcntl_signal(SIGINT, $destroy);
+    Status::registerCleanup(isset($options['no-clean']));
 
     // Have the parent wait for all forked children to exit.
     $return_value = 0;
@@ -3244,7 +3279,7 @@ function main($argv) {
     }
   }
 
-  Status::finished();
+  Status::finished($return_value);
 
   // Wait for the printer child to die, if needed.
   if (!Status::$nofork && $printer_pid != 0) {

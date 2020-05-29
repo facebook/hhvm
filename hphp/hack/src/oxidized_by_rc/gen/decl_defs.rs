@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<780b06e043614d5cd8bdf78c8e052bfb>>
+// @generated SignedSource<<6d966238da6e13c6afaaaa767c91c5e3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -138,6 +138,7 @@ pub type ConditionTypeName = Option<std::rc::Rc<String>>;
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum MethodReactivity {
+    MethodPure(ConditionTypeName),
     MethodReactive(ConditionTypeName),
     MethodShallow(ConditionTypeName),
     MethodLocal(ConditionTypeName),

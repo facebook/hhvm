@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<744eb6c7b84bf9f2ab6d2ceb08ccc3d9>>
+// @generated SignedSource<<f84a58d5d6192288132a4ca8c1a5943c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -252,7 +252,13 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     /// meth_caller('Class name', 'method name')
     MethodCaller(std::rc::Rc<(Sid, Pstring)>),
     SmethodId(std::rc::Rc<(Sid, Pstring)>),
-    Pair(std::rc::Rc<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>),
+    Pair(
+        std::rc::Rc<(
+            Option<(Targ<Hi>, Targ<Hi>)>,
+            Expr<Ex, Fb, En, Hi>,
+            Expr<Ex, Fb, En, Hi>,
+        )>,
+    ),
     Assert(std::rc::Rc<AssertExpr<Ex, Fb, En, Hi>>),
     PUAtom(std::rc::Rc<std::rc::Rc<String>>),
     PUIdentifier(std::rc::Rc<(ClassId<Ex, Fb, En, Hi>, Pstring, Pstring)>),

@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 use arena_trait::{Arena, TrivialDrop};
 
-use oxidized::ToOxidized;
 use oxidized_by_ref::aast;
 use oxidized_by_ref::ident::Ident;
 use oxidized_by_ref::pos::Pos;
@@ -39,10 +38,8 @@ pub struct TyvarConstraints<'a> {
 
 impl TrivialDrop for TyvarConstraints<'_> {}
 
-impl<'a> ToOxidized for TyvarConstraints<'a> {
-    type Target = oxidized::typing_inference_env::TyvarConstraints;
-
-    fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarConstraints {
+impl<'a> TyvarConstraints<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarConstraints {
         let TyvarConstraints {
             bld: _,
             appears_contravariantly,
@@ -55,15 +52,19 @@ impl<'a> ToOxidized for TyvarConstraints<'a> {
         oxidized::typing_inference_env::TyvarConstraints {
             appears_contravariantly: *appears_contravariantly,
             appears_covariantly: *appears_covariantly,
-            lower_bounds: lower_bounds.to_oxidized(),
-            upper_bounds: upper_bounds.to_oxidized(),
-            type_constants: type_constants.to_oxidized(),
-            pu_accesses: pu_accesses.to_oxidized(),
+            lower_bounds: lower_bounds.iter().map(|x| x.to_oxidized()).collect(),
+            upper_bounds: upper_bounds.iter().map(|x| x.to_oxidized()).collect(),
+            type_constants: type_constants
+                .iter()
+                .map(|(&k, &(id, ty))| (k.to_string(), (id.to_oxidized(), ty.to_oxidized())))
+                .collect(),
+            pu_accesses: pu_accesses
+                .iter()
+                .map(|(&k, &(id, ty))| (k.to_string(), (id.to_oxidized(), ty.to_oxidized())))
+                .collect(),
         }
     }
-}
 
-impl<'a> TyvarConstraints<'a> {
     fn new(bld: &'a TypeBuilder<'a>) -> &'a Self {
         bld.alloc(TyvarConstraints {
             bld,
@@ -105,10 +106,8 @@ pub enum SolvingInfo<'a> {
     Constraints(&'a TyvarConstraints<'a>),
 }
 
-impl<'a> ToOxidized for SolvingInfo<'a> {
-    type Target = oxidized::typing_inference_env::SolvingInfo;
-
-    fn to_oxidized(&self) -> oxidized::typing_inference_env::SolvingInfo {
+impl<'a> SolvingInfo<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::SolvingInfo {
         match self {
             SolvingInfo::Type(ty) => {
                 oxidized::typing_inference_env::SolvingInfo::TVIType(ty.to_oxidized())
@@ -118,9 +117,7 @@ impl<'a> ToOxidized for SolvingInfo<'a> {
             }
         }
     }
-}
 
-impl<'a> SolvingInfo<'a> {
     fn get_appears_covariantly(&self) -> bool {
         match self {
             SolvingInfo::Type(_) => false,
@@ -149,10 +146,8 @@ pub struct TyvarInfo<'a> {
 
 impl TrivialDrop for TyvarInfo<'_> {}
 
-impl<'a> ToOxidized for TyvarInfo<'a> {
-    type Target = oxidized::typing_inference_env::TyvarInfo;
-
-    fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarInfo {
+impl<'a> TyvarInfo<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarInfo {
         let TyvarInfo {
             bld: _,
             tyvar_pos,
@@ -165,14 +160,12 @@ impl<'a> ToOxidized for TyvarInfo<'a> {
                 None => oxidized::pos::Pos::make_none(),
                 Some(pos) => pos.to_oxidized(),
             },
-            global_reason: global_reason.to_oxidized(),
+            global_reason: global_reason.map(|r| r.to_oxidized()),
             eager_solve_failed: *eager_solve_failed,
             solving_info: solving_info.to_oxidized(),
         }
     }
-}
 
-impl<'a> TyvarInfo<'a> {
     fn with_solving_info(&'a self, solving_info: SolvingInfo<'a>) -> &'a Self {
         let mut tvinfo = self.clone();
         tvinfo.solving_info = solving_info;
@@ -190,10 +183,8 @@ pub struct InferenceEnv<'a> {
     var_id_counter: Ident,
 }
 
-impl<'a> ToOxidized for InferenceEnv<'a> {
-    type Target = oxidized::typing_inference_env::TypingInferenceEnv;
-
-    fn to_oxidized(&self) -> oxidized::typing_inference_env::TypingInferenceEnv {
+impl<'a> InferenceEnv<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TypingInferenceEnv {
         let InferenceEnv {
             bld: _,
             tvenv,
@@ -202,7 +193,7 @@ impl<'a> ToOxidized for InferenceEnv<'a> {
             var_id_counter: _,
         } = self;
         oxidized::typing_inference_env::TypingInferenceEnv {
-            tvenv: tvenv.to_oxidized(),
+            tvenv: tvenv.iter().map(|(&k, &v)| (k, v.to_oxidized())).collect(),
             tyvars_stack: vec![], // TODO(hrust)
             subtype_prop: oxidized::typing_logic::SubtypeProp::Conj(vec![]), // TODO(hrust)
             tyvar_occurrences: oxidized::typing_tyvar_occurrences::TypingTyvarOccurrences {
@@ -212,9 +203,7 @@ impl<'a> ToOxidized for InferenceEnv<'a> {
             allow_solve_globals: *allow_solve_globals,
         }
     }
-}
 
-impl<'a> InferenceEnv<'a> {
     pub fn new(bld: &'a TypeBuilder) -> Self {
         InferenceEnv {
             bld,

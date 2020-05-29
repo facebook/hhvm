@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::ToOxidized;
-
 use crate::ast_defs::*;
 use crate::pos::Pos;
 
@@ -32,22 +30,9 @@ impl<'a> Id<'a> {
     pub fn name(&self) -> &'a str {
         self.1
     }
-}
 
-impl<'a> ToOxidized for Id<'a> {
-    type Target = oxidized::ast_defs::Id;
-
-    /// This is a wasteful implementation of to_oxidized, for debugging only. It
-    /// does not preserve sharing of filenames in positions, and it allocates an
-    /// intermediate Rust Vec to hold an OCaml representation (because we do not
-    /// currently have a generated means of directly converting an
-    /// oxidized_by_ref value to an oxidized one, so we use ToOcamlRep and
-    /// FromOcamlRep instead).
-    fn to_oxidized(&self) -> Self::Target {
-        let arena = ocamlrep::Arena::new();
-        let ocaml_self = arena.add(self);
-        use ocamlrep::FromOcamlRep;
-        oxidized::ast_defs::Id::from_ocamlrep(ocaml_self).unwrap()
+    pub fn to_oxidized(&self) -> oxidized::ast_defs::Id {
+        oxidized::ast_defs::Id(self.0.to_oxidized(), self.1.to_string())
     }
 }
 

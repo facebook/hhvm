@@ -6,7 +6,6 @@ use arena_trait::TrivialDrop;
 use bumpalo::collections::Vec;
 
 use oxidized::typing_reason::Reason as OxReason;
-use oxidized::ToOxidized;
 
 use crate::pos::Pos;
 use crate::{aast, ast_defs, ast_defs::Id};
@@ -154,12 +153,8 @@ impl<'a> Reason<'a> {
     pub fn instantiate(r1: &'a Reason<'a>, x: &'a str, r2: &'a Reason<'a>) -> Self {
         Self::new(r2.pos, Reason_::Rinstantiate(r1, x, r2))
     }
-}
 
-impl<'a> ToOxidized for Reason<'a> {
-    type Target = OxReason;
-
-    fn to_oxidized(&self) -> Self::Target {
+    pub fn to_oxidized(&self) -> OxReason {
         use OxReason as O;
         use Reason_ as R;
 

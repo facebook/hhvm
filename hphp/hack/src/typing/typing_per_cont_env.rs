@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use arena_trait::Arena;
-use oxidized::ToOxidized;
 use std::collections::{BTreeMap, BTreeSet};
 use typing_collections_rust::Map;
 
@@ -20,13 +19,14 @@ pub struct PerContEntry<'a> {
     // TODO(hrust): tpenv
 }
 
-impl<'a> ToOxidized for PerContEntry<'a> {
-    type Target = oxidized::typing_per_cont_env::PerContEntry;
-
-    fn to_oxidized(&self) -> Self::Target {
+impl<'a> PerContEntry<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_per_cont_env::PerContEntry {
         let PerContEntry { local_types } = self;
         oxidized::typing_per_cont_env::PerContEntry {
-            local_types: local_types.to_oxidized(),
+            local_types: local_types
+                .iter()
+                .map(|(&k, &v)| (k.to_oxidized(), v.to_oxidized()))
+                .collect(),
             fake_members: oxidized::typing_fake_members::TypingFakeMembers::Valid(BTreeSet::new()),
             tpenv: oxidized::type_parameter_env::TypeParameterEnv {
                 tparams: BTreeMap::new(),
@@ -57,12 +57,12 @@ impl<'a> PerContEntry<'a> {
 #[derive(Debug, Copy, Clone)]
 pub struct TypingPerContEnv<'a>(Map<'a, TypingContKey<'a>, &'a PerContEntry<'a>>);
 
-impl<'a> ToOxidized for TypingPerContEnv<'a> {
-    type Target = oxidized::typing_per_cont_env::TypingPerContEnv;
-
-    fn to_oxidized(&self) -> Self::Target {
+impl<'a> TypingPerContEnv<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_per_cont_env::TypingPerContEnv {
         let TypingPerContEnv(map) = self;
-        map.to_oxidized()
+        map.iter()
+            .map(|(&k, &v)| (k.to_oxidized(), v.to_oxidized()))
+            .collect()
     }
 }
 

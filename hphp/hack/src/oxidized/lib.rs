@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::cmp::Ord;
-use std::collections::{BTreeMap, BTreeSet};
-
 mod manual;
 
 pub use manual::aast_defs_impl;
@@ -54,97 +51,6 @@ pub mod aast_visitor;
 
 mod gen;
 
-pub trait ToOxidized {
-    type Target;
-
-    fn to_oxidized(&self) -> Self::Target;
-}
-
-impl ToOxidized for &str {
-    type Target = String;
-
-    fn to_oxidized(&self) -> Self::Target {
-        self.to_string()
-    }
-}
-
-impl<T: ToOxidized> ToOxidized for Option<&T> {
-    type Target = Option<T::Target>;
-
-    fn to_oxidized(&self) -> Option<T::Target> {
-        self.as_ref().map(|x| x.to_oxidized())
-    }
-}
-
-impl<Tk: ToOxidized, T: ToOxidized> ToOxidized for arena_collections::map::Map<'_, Tk, &T>
-where
-    Tk::Target: Ord,
-{
-    type Target = BTreeMap<Tk::Target, T::Target>;
-
-    fn to_oxidized(&self) -> Self::Target {
-        self.into_iter()
-            .map(|(k, v)| (k.to_oxidized(), v.to_oxidized()))
-            .collect()
-    }
-}
-
-impl<T: ToOxidized> ToOxidized for arena_collections::set::Set<'_, T>
-where
-    T::Target: Ord,
-{
-    type Target = BTreeSet<T::Target>;
-
-    fn to_oxidized(&self) -> Self::Target {
-        self.into_iter().map(|x| x.to_oxidized()).collect()
-    }
-}
-
-impl<Ta: ToOxidized, Tb: ToOxidized> ToOxidized for (Ta, Tb) {
-    type Target = (Ta::Target, Tb::Target);
-
-    fn to_oxidized(&self) -> Self::Target {
-        let (a, b) = self;
-        (a.to_oxidized(), b.to_oxidized())
-    }
-}
-
-impl<Ta: ToOxidized, Tb: ToOxidized, Tc: ToOxidized> ToOxidized for (Ta, Tb, Tc) {
-    type Target = (Ta::Target, Tb::Target, Tc::Target);
-
-    fn to_oxidized(&self) -> Self::Target {
-        let (a, b, c) = self;
-        (a.to_oxidized(), b.to_oxidized(), c.to_oxidized())
-    }
-}
-
-impl<Ta: ToOxidized, Tb: ToOxidized, Tc: ToOxidized, Td: ToOxidized> ToOxidized
-    for (Ta, Tb, Tc, Td)
-{
-    type Target = (Ta::Target, Tb::Target, Tc::Target, Td::Target);
-
-    fn to_oxidized(&self) -> Self::Target {
-        let (a, b, c, d) = self;
-        (
-            a.to_oxidized(),
-            b.to_oxidized(),
-            c.to_oxidized(),
-            d.to_oxidized(),
-        )
-    }
-}
-
-pub trait Oxide: Clone {}
-
-impl Oxide for isize {}
-impl Oxide for ast_defs::Id {}
-
-impl<T: Oxide> ToOxidized for T {
-    type Target = Self;
-    fn to_oxidized(&self) -> Self::Target {
-        self.clone()
-    }
-}
 pub use gen::aast;
 pub use gen::aast_defs;
 pub use gen::ast_defs;

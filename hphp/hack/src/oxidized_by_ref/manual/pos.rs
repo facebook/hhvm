@@ -11,7 +11,6 @@ use serde::Serialize;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos_large::FilePosLarge;
 use oxidized::file_pos_small::FilePosSmall;
-use oxidized::ToOxidized;
 
 use crate::relative_path::RelativePath;
 
@@ -367,12 +366,8 @@ impl<'a> Pos<'a> {
             Large { start, .. } => start.offset(),
         }
     }
-}
 
-impl<'a> ToOxidized for Pos<'a> {
-    type Target = oxidized::pos::Pos;
-
-    fn to_oxidized(&self) -> oxidized::pos::Pos {
+    pub fn to_oxidized(&self) -> oxidized::pos::Pos {
         match &self.0 {
             Small { file, start, end } => {
                 let start = start.line_beg_offset();

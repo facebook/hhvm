@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::typing_reason::Reason as OxReason;
-use oxidized::ToOxidized;
 use std::rc::Rc;
 
 use crate::pos::Pos;
@@ -145,12 +144,8 @@ impl Reason {
     pub fn instantiate(r1: Rc<Reason>, x: String, r2: Rc<Reason>) -> Self {
         Self::new(r2.pos.clone(), Reason_::Rinstantiate(r1, x, r2))
     }
-}
 
-impl ToOxidized for Reason {
-    type Target = OxReason;
-
-    fn to_oxidized(&self) -> Self::Target {
+    pub fn to_oxidized(&self) -> OxReason {
         use OxReason as O;
         use Reason_ as R;
 

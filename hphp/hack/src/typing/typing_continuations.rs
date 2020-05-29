@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::ToOxidized;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum TypingContKey<'a> {
     Next,
@@ -18,10 +16,8 @@ pub enum TypingContKey<'a> {
     Goto(&'a str),
 }
 
-impl<'a> ToOxidized for TypingContKey<'a> {
-    type Target = oxidized::typing_cont_key::TypingContKey;
-
-    fn to_oxidized(&self) -> Self::Target {
+impl<'a> TypingContKey<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_cont_key::TypingContKey {
         use oxidized::typing_cont_key::TypingContKey as C;
         match self {
             TypingContKey::Next => C::Next,
@@ -32,7 +28,7 @@ impl<'a> ToOxidized for TypingContKey<'a> {
             TypingContKey::Exit => C::Exit,
             TypingContKey::Fallthrough => C::Fallthrough,
             TypingContKey::Finally => C::Finally,
-            TypingContKey::Goto(l) => C::Goto(l.to_oxidized()),
+            TypingContKey::Goto(l) => C::Goto(l.to_string()),
         }
     }
 }

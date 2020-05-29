@@ -6,7 +6,6 @@
 use serde::Serialize;
 
 use ocamlrep_derive::ToOcamlRep;
-use oxidized::ToOxidized;
 
 #[derive(
     Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -21,21 +20,17 @@ impl<'a> LocalId<'a> {
     pub fn name(self) -> &'a str {
         self.1
     }
+
+    pub fn to_oxidized(&self) -> oxidized::local_id::LocalId {
+        let &LocalId(id, name) = self;
+        (id, name.to_string())
+    }
 }
 
 impl<'a> From<&'a oxidized::local_id::LocalId> for LocalId<'a> {
     fn from(x: &'a oxidized::local_id::LocalId) -> LocalId<'a> {
         let (a, b) = x;
         LocalId(*a, b.as_str())
-    }
-}
-
-impl<'a> ToOxidized for LocalId<'a> {
-    type Target = oxidized::local_id::LocalId;
-
-    fn to_oxidized(&self) -> Self::Target {
-        let LocalId(id, name) = self;
-        (id.to_oxidized(), name.to_oxidized())
     }
 }
 

@@ -5,17 +5,14 @@
 
 use crate::typing_env_types::LocalId;
 pub use oxidized::typing_local_types::ExpressionId;
-use oxidized::ToOxidized;
 use typing_collections_rust::Map;
 use typing_defs_rust::Ty;
 
 #[derive(Debug, Copy, Clone)]
 pub struct Local<'a>(pub Ty<'a>, pub ExpressionId);
 
-impl<'a> ToOxidized for Local<'a> {
-    type Target = oxidized::typing_local_types::Local;
-
-    fn to_oxidized(&self) -> Self::Target {
+impl<'a> Local<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_local_types::Local {
         let Local(ty, eid) = self;
         oxidized::typing_local_types::Local(ty.to_oxidized(), eid.clone())
     }

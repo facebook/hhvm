@@ -12,7 +12,6 @@ use oxidized::aast::{Hint, Hint_};
 use oxidized::ast;
 use oxidized::ast_defs::Id as OwnedId;
 use oxidized::pos::Pos as OwnedPos;
-use oxidized::ToOxidized;
 use oxidized_by_ref::ast::ClassId;
 use oxidized_by_ref::ast_defs::Id;
 use oxidized_by_ref::pos::Pos;

@@ -9,7 +9,6 @@ use arena_trait::Arena;
 use decl_provider_rust::DeclProvider;
 use ocamlrep::{Allocator, ToOcamlRep, Value};
 use oxidized::pos::Pos as OwnedPos;
-use oxidized::ToOxidized;
 use oxidized::{relative_path, typechecker_options};
 use oxidized_by_ref::pos::Pos;
 use std::cell::RefCell;
@@ -73,10 +72,8 @@ impl<'a> Env<'a> {
     }
 }
 
-impl<'a> ToOxidized for Env<'a> {
-    type Target = oxidized::typing_env_types::Env;
-
-    fn to_oxidized(&self) -> oxidized::typing_env_types::Env {
+impl<'a> Env<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_env_types::Env {
         let Env {
             ident_counter: _,
             function_pos,
@@ -125,10 +122,8 @@ pub struct Genv<'a> {
     pub provider: &'a dyn DeclProvider,
 }
 
-impl<'a> ToOxidized for Genv<'a> {
-    type Target = oxidized::typing_env_types::Genv;
-
-    fn to_oxidized(&self) -> oxidized::typing_env_types::Genv {
+impl<'a> Genv<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_env_types::Genv {
         // TODO(hrust) most fields of Genv
         oxidized::typing_env_types::Genv {
             tcopt: oxidized::global_options::GlobalOptions::default(),
@@ -177,10 +172,8 @@ impl<'a> LocalEnv<'a> {
     }
 }
 
-impl<'a> ToOxidized for LocalEnv<'a> {
-    type Target = oxidized::typing_env_types::LocalEnv;
-
-    fn to_oxidized(&self) -> oxidized::typing_env_types::LocalEnv {
+impl<'a> LocalEnv<'a> {
+    pub fn to_oxidized(&self) -> oxidized::typing_env_types::LocalEnv {
         let LocalEnv { per_cont_env } = self;
         oxidized::typing_env_types::LocalEnv {
             per_cont_env: per_cont_env.to_oxidized(),

@@ -6,8 +6,6 @@
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use oxidized::ToOxidized;
-
 use crate::aast_defs::Tprim;
 use crate::ident::Ident;
 use crate::pos::Pos;
@@ -114,10 +112,6 @@ impl Ty {
             _ => None,
         }
     }
-}
-
-impl ToOxidized for Ty {
-    type Target = oxidized::typing_defs_core::Ty;
 
     /// This is a wasteful implementation of to_oxidized, for debugging only. It
     /// does not preserve sharing of filenames in positions, and it allocates an
@@ -125,7 +119,7 @@ impl ToOxidized for Ty {
     /// currently have a generated means of directly converting an
     /// oxidized_by_ref value to an oxidized one, so we use ToOcamlRep and
     /// FromOcamlRep instead).
-    fn to_oxidized(&self) -> Self::Target {
+    pub fn to_oxidized(&self) -> oxidized::typing_defs_core::Ty {
         let arena = ocamlrep::Arena::new();
         let ocaml_ty = arena.add(self);
         use ocamlrep::FromOcamlRep;
@@ -164,10 +158,6 @@ impl InternalType {
             InternalType::ConstraintType(_) => None,
         }
     }
-}
-
-impl ToOxidized for InternalType {
-    type Target = oxidized::typing_defs_core::InternalType;
 
     /// This is a wasteful implementation of to_oxidized, for debugging only. It
     /// does not preserve sharing of filenames in positions, and it allocates an
@@ -175,7 +165,7 @@ impl ToOxidized for InternalType {
     /// currently have a generated means of directly converting an
     /// oxidized_by_ref value to an oxidized one, so we use ToOcamlRep and
     /// FromOcamlRep instead).
-    fn to_oxidized(&self) -> Self::Target {
+    pub fn to_oxidized(&self) -> oxidized::typing_defs_core::InternalType {
         unimplemented!()
     }
 }

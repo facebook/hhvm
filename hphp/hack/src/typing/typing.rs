@@ -17,7 +17,6 @@ use crate::{Env, LocalId, ParamMode};
 use arena_trait::Arena;
 use decl_rust::decl_subst as subst;
 use lazy_static::lazy_static;
-use oxidized::ToOxidized;
 use oxidized::{aast_defs, ast, ast_defs};
 use oxidized_by_ref::aast_defs::Sid;
 use oxidized_by_ref::ast::{ClassId, ClassId_, Id};

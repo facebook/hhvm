@@ -12,8 +12,18 @@ type state = unit [@@deriving show]
 
 let default = ()
 
-let create ~job_runner ~max_batch_size ~min_batch_size ~raise_on_failure =
-  ignore (job_runner, max_batch_size, min_batch_size, raise_on_failure)
+let create
+    ~job_runner
+    ~artifact_store_config
+    ~max_batch_size
+    ~min_batch_size
+    ~raise_on_failure =
+  ignore
+    ( job_runner,
+      artifact_store_config,
+      max_batch_size,
+      min_batch_size,
+      raise_on_failure )
 
 let start delegate_env state =
   ignore delegate_env;

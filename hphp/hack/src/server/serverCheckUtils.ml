@@ -112,6 +112,7 @@ let start_typing_delegate genv env : env =
   let delegate_state =
     Typing_service_delegate.create
       ~job_runner:(JobRunner.get JobRunner.Remote)
+      ~artifact_store_config
       ~max_batch_size
       ~min_batch_size
       ~raise_on_failure
@@ -126,7 +127,6 @@ let start_typing_delegate genv env : env =
           Typing_service_delegate.start
             Typing_service_types.
               {
-                artifact_store_config;
                 defer_class_declaration_threshold;
                 heartbeat_period;
                 init_id;

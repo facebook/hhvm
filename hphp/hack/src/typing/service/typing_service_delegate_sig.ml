@@ -16,6 +16,7 @@ module type Delegate_sig = sig
 
   val create :
     job_runner:(module JobRunner_sig.S) ->
+    artifact_store_config:ArtifactStore.config ->
     max_batch_size:int ->
     min_batch_size:int ->
     raise_on_failure:bool ->

@@ -116,7 +116,6 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
-  artifact_store_config: ArtifactStore.config;
   defer_class_declaration_threshold: int;
   (* The amount of time to wait between heartbeat checks, in seconds *)
   heartbeat_period: int;

@@ -8,9 +8,9 @@ use crate::typing_local_types::Local;
 use crate::typing_per_cont_env::{PerContEntry, TypingContKey};
 
 use decl_provider_rust as decl_provider;
-use oxidized::ident::Ident;
 use oxidized::pos::Pos;
 use oxidized::relative_path::RelativePath;
+use oxidized_by_ref::ident::Ident;
 use oxidized_by_ref::shallow_decl_defs::{ShallowClass, ShallowMethod};
 use typing_collections_rust::Map;
 use typing_defs_rust as typing_defs;
@@ -183,7 +183,7 @@ impl<'a> Env<'a> {
         }
     }
 
-    pub fn tany(&self, r: PReason<'a>) -> Ty<'a> {
+    pub fn tany(&self, r: &'a Reason<'a>) -> Ty<'a> {
         // TODO(hrust) check dynamic view
         self.bld().any(r)
     }

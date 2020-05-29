@@ -20,11 +20,6 @@ impl<'a> LocalId<'a> {
     pub fn name(self) -> &'a str {
         self.1
     }
-
-    pub fn to_oxidized(&self) -> oxidized::local_id::LocalId {
-        let &LocalId(id, name) = self;
-        (id, name.to_string())
-    }
 }
 
 impl<'a> From<&'a oxidized::local_id::LocalId> for LocalId<'a> {

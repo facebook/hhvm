@@ -4,12 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod ast;
+pub mod decl_env;
 pub mod direct_decl_parser;
 pub mod doc_comment;
 pub mod i_map;
 pub mod i_set;
 pub mod ident;
 pub mod internal_type_set;
+pub mod lazy;
 pub mod local_id;
 pub mod opaque_digest;
 pub mod phase_map;

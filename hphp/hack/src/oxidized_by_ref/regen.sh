@@ -38,6 +38,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/typing/typing_cont_key.ml                                     \
   hphp/hack/src/typing/typing_defs_core.ml                                    \
   hphp/hack/src/typing/typing_defs.ml                                         \
+  hphp/hack/src/typing/typing_env_return_info.ml                              \
   hphp/hack/src/typing/typing_env_types.ml                                    \
   hphp/hack/src/typing/typing_fake_members.ml                                 \
   hphp/hack/src/typing/typing_inference_env.ml                                \

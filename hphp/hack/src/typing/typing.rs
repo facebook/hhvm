@@ -681,7 +681,7 @@ fn static_class_id<'a>(
                         targs,
                         tast::ClassId(
                             (p, ty),
-                            tast::ClassId_::CI(tast::Id(cid.0.to_oxidized(), cid.1.to_string())),
+                            tast::ClassId_::CI(tast::Id(cid.0.to_owned(), cid.1.to_string())),
                         ),
                     )
                 }

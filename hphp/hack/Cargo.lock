@@ -2037,6 +2037,7 @@ version = "0.0.0"
 dependencies = [
  "arena_collections 0.0.0",
  "arena_trait 0.0.0",
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "hh_autoimport_rust 0.0.0",
  "ocamlrep 0.0.0",

@@ -367,7 +367,7 @@ impl<'a> Pos<'a> {
         }
     }
 
-    pub fn to_oxidized(&self) -> oxidized::pos::Pos {
+    pub fn to_owned(&self) -> oxidized::pos::Pos {
         match &self.0 {
             Small { file, start, end } => {
                 let start = start.line_beg_offset();

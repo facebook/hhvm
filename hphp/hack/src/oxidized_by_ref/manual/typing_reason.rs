@@ -138,6 +138,10 @@ impl<'a> Reason<'a> {
         RNONE
     }
 
+    pub fn pos(&self) -> Option<&'a Pos<'a>> {
+        self.pos
+    }
+
     pub fn with_pos(pos: &'a Pos<'a>, reason: Reason_<'a>) -> Self {
         let pos = if pos.is_none() { None } else { Some(pos) };
         Self { pos, reason }
@@ -160,7 +164,7 @@ impl<'a> Reason<'a> {
         use Reason_ as R;
 
         let pos = match self.pos {
-            Some(pos) => pos.to_oxidized(),
+            Some(pos) => pos.to_owned(),
             None => oxidized::pos::Pos::make_none(),
         };
         match self.reason {
@@ -186,7 +190,7 @@ impl<'a> Reason<'a> {
             R::RsolveFail => O::RsolveFail(pos),
             R::RcstrOnGenerics(Id(id_pos, id)) => O::RcstrOnGenerics(
                 pos,
-                oxidized::ast_defs::Id(id_pos.to_oxidized(), id.to_string()),
+                oxidized::ast_defs::Id((*id_pos).to_owned(), id.to_string()),
             ),
             _ => unimplemented!("Reason::to_oxidized for {:?}", &self.reason),
         }

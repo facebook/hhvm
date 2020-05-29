@@ -57,6 +57,7 @@ let derive_copy ty =
     | "aast::UserAttribute"
     | "ast_defs::Id"
     | "nast::FuncBodyAnn"
+    | "typing_cont_key::TypingContKey"
     | "typing_defs_core::ConstraintType"
     | "typing_defs_core::InternalType"
     | "typing_defs_core::Ty"
@@ -257,17 +258,25 @@ let doc_comment_of_attribute_list attrs =
 
 let type_param (ct, _) = core_type ct
 
-let type_params params =
+let type_params name params =
   if List.is_empty params then
     match Configuration.mode () with
-    | Configuration.ByRef -> "<'a>"
+    | Configuration.ByRef ->
+      if Convert_type.never_add_lifetime_parameter name then
+        ""
+      else
+        "<'a>"
     | Configuration.ByBox
     | Configuration.ByRc ->
       ""
   else
     let params = params |> map_and_concat ~f:type_param ~sep:", " in
     match Configuration.mode () with
-    | Configuration.ByRef -> sprintf "<'a, %s>" params
+    | Configuration.ByRef ->
+      if Convert_type.never_add_lifetime_parameter name then
+        sprintf "<%s>" params
+      else
+        sprintf "<'a, %s>" params
     | Configuration.ByBox
     | Configuration.ByRc ->
       sprintf "<%s>" params
@@ -416,7 +425,7 @@ let type_declaration name td =
       | Configuration.ByBox
       | Configuration.ByRc ->
         "")
-    | (tparams, _) -> type_params tparams
+    | (tparams, _) -> type_params name tparams
   in
   match (td.ptype_kind, td.ptype_manifest) with
   | (_, Some ty) ->

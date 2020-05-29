@@ -74,7 +74,9 @@ let is_owned_builtin = SSet.mem owned_builtins
 
 let never_add_lifetime_parameter ty =
   match ty with
-  | "ident::Ident" -> true
+  | "ident::Ident"
+  | "ExpressionId" ->
+    true
   | _ -> false
 
 let rec core_type ?(seen_indirection = false) ct =

@@ -16,7 +16,7 @@ pub struct FuncBodyAnn;
 
 impl ToOcamlRep for FuncBodyAnn {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        oxidized::tast::FuncBodyAnn::default().to_ocamlrep(alloc)
+        oxidized_by_ref::tast::FuncBodyAnn::default().to_ocamlrep(alloc)
     }
 }
 
@@ -25,6 +25,6 @@ pub struct SavedEnv;
 
 impl ToOcamlRep for SavedEnv {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        oxidized::tast::SavedEnv::default().to_ocamlrep(alloc)
+        oxidized_by_ref::tast::SavedEnv::default().to_ocamlrep(alloc)
     }
 }

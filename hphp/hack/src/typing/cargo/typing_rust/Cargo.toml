@@ -9,6 +9,7 @@ include = ["../../typing.rs", "../../typing_continuations.rs", "../../typing_enu
 path = "../../typing_toplevel.rs"
 
 [dependencies]
+arena_collections = { path = "../../../arena_collections" }
 arena_trait = { path = "../../../arena_trait" }
 decl_provider_rust = { path = "../../../providers/cargo/decl_provider_rust" }
 decl_rust = { path = "../../../decl/decl_rust" }

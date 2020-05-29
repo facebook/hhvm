@@ -7,7 +7,6 @@ use arena_trait::{Arena, TrivialDrop};
 use oxidized_by_ref::aast;
 use oxidized_by_ref::ident::Ident;
 use oxidized_by_ref::pos::Pos;
-use std::collections::BTreeMap;
 use typing_collections_rust::*;
 use typing_defs_rust::typing_make_type::TypeBuilder;
 use typing_defs_rust::*;
@@ -27,20 +26,20 @@ pub struct TyvarConstraints<'a> {
     /// Whenever we localize "T1::T" in a constraint, we add a fresh type variable
     /// indexed by "T" in the type_constants of the type variable representing T1.
     /// This allows to properly check constraints on "T1::T".
-    pub type_constants: SMap<'a, &'a (aast::Sid<'a>, Ty<'a>)>,
+    pub type_constants: SMap<'a, (aast::Sid<'a>, Ty<'a>)>,
     /// Map associating PU information to each instance of
     /// #v:@T
     /// when the type variable #v is not resolved yet. We introduce a new type
     /// variable to 'postpone' the checking of this expression until the end,
     /// when #v will be known.
-    pub pu_accesses: SMap<'a, &'a (aast::Sid<'a>, Ty<'a>)>,
+    pub pu_accesses: SMap<'a, (aast::Sid<'a>, Ty<'a>)>,
 }
 
 impl TrivialDrop for TyvarConstraints<'_> {}
 
 impl<'a> TyvarConstraints<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarConstraints {
-        let TyvarConstraints {
+    pub fn to_oxidized(&self) -> oxidized_by_ref::typing_inference_env::TyvarConstraints<'a> {
+        let &TyvarConstraints {
             bld: _,
             appears_contravariantly,
             appears_covariantly,
@@ -49,19 +48,13 @@ impl<'a> TyvarConstraints<'a> {
             type_constants,
             pu_accesses,
         } = self;
-        oxidized::typing_inference_env::TyvarConstraints {
-            appears_contravariantly: *appears_contravariantly,
-            appears_covariantly: *appears_covariantly,
-            lower_bounds: lower_bounds.iter().map(|x| x.to_oxidized()).collect(),
-            upper_bounds: upper_bounds.iter().map(|x| x.to_oxidized()).collect(),
-            type_constants: type_constants
-                .iter()
-                .map(|(&k, &(id, ty))| (k.to_string(), (id.to_oxidized(), ty.to_oxidized())))
-                .collect(),
-            pu_accesses: pu_accesses
-                .iter()
-                .map(|(&k, &(id, ty))| (k.to_string(), (id.to_oxidized(), ty.to_oxidized())))
-                .collect(),
+        oxidized_by_ref::typing_inference_env::TyvarConstraints {
+            appears_contravariantly,
+            appears_covariantly,
+            lower_bounds,
+            upper_bounds,
+            type_constants,
+            pu_accesses,
         }
     }
 
@@ -107,13 +100,15 @@ pub enum SolvingInfo<'a> {
 }
 
 impl<'a> SolvingInfo<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::SolvingInfo {
+    pub fn to_oxidized(&self) -> oxidized_by_ref::typing_inference_env::SolvingInfo<'a> {
         match self {
-            SolvingInfo::Type(ty) => {
-                oxidized::typing_inference_env::SolvingInfo::TVIType(ty.to_oxidized())
+            &SolvingInfo::Type(ty) => {
+                oxidized_by_ref::typing_inference_env::SolvingInfo::TVIType(ty)
             }
             SolvingInfo::Constraints(cstr) => {
-                oxidized::typing_inference_env::SolvingInfo::TVIConstraints(cstr.to_oxidized())
+                oxidized_by_ref::typing_inference_env::SolvingInfo::TVIConstraints(
+                    cstr.to_oxidized(),
+                )
             }
         }
     }
@@ -139,7 +134,7 @@ pub struct TyvarInfo<'a> {
     /// Where was the type variable introduced? (e.g. generic method invocation,
     /// new object construction)
     pub tyvar_pos: Option<&'a Pos<'a>>,
-    pub global_reason: Option<PReason<'a>>,
+    pub global_reason: Option<&'a Reason<'a>>,
     pub eager_solve_failed: bool,
     pub solving_info: SolvingInfo<'a>,
 }
@@ -147,7 +142,7 @@ pub struct TyvarInfo<'a> {
 impl TrivialDrop for TyvarInfo<'_> {}
 
 impl<'a> TyvarInfo<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TyvarInfo {
+    pub fn to_oxidized(&self) -> oxidized_by_ref::typing_inference_env::TyvarInfo<'a> {
         let TyvarInfo {
             bld: _,
             tyvar_pos,
@@ -155,12 +150,12 @@ impl<'a> TyvarInfo<'a> {
             eager_solve_failed,
             solving_info,
         } = self;
-        oxidized::typing_inference_env::TyvarInfo {
+        oxidized_by_ref::typing_inference_env::TyvarInfo {
             tyvar_pos: match tyvar_pos {
-                None => oxidized::pos::Pos::make_none(),
-                Some(pos) => pos.to_oxidized(),
+                None => Pos::none(),
+                Some(pos) => pos,
             },
-            global_reason: global_reason.map(|r| r.to_oxidized()),
+            global_reason: *global_reason,
             eager_solve_failed: *eager_solve_failed,
             solving_info: solving_info.to_oxidized(),
         }
@@ -184,7 +179,13 @@ pub struct InferenceEnv<'a> {
 }
 
 impl<'a> InferenceEnv<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_inference_env::TypingInferenceEnv {
+    pub fn to_oxidized<'b>(
+        &self,
+        arena: &'b impl Arena,
+    ) -> oxidized_by_ref::typing_inference_env::TypingInferenceEnv<'b>
+    where
+        'a: 'b,
+    {
         let InferenceEnv {
             bld: _,
             tvenv,
@@ -192,13 +193,13 @@ impl<'a> InferenceEnv<'a> {
             allow_solve_globals,
             var_id_counter: _,
         } = self;
-        oxidized::typing_inference_env::TypingInferenceEnv {
-            tvenv: tvenv.iter().map(|(&k, &v)| (k, v.to_oxidized())).collect(),
-            tyvars_stack: vec![], // TODO(hrust)
-            subtype_prop: oxidized::typing_logic::SubtypeProp::Conj(vec![]), // TODO(hrust)
-            tyvar_occurrences: oxidized::typing_tyvar_occurrences::TypingTyvarOccurrences {
-                tyvar_occurrences: BTreeMap::new(),
-                tyvars_in_tyvar: BTreeMap::new(),
+        oxidized_by_ref::typing_inference_env::TypingInferenceEnv {
+            tvenv: IMap::from(arena, tvenv.iter().map(|(&k, v)| (k, v.to_oxidized()))),
+            tyvars_stack: &[], // TODO(hrust)
+            subtype_prop: oxidized_by_ref::typing_logic::SubtypeProp::Conj(&[]), // TODO(hrust)
+            tyvar_occurrences: oxidized_by_ref::typing_tyvar_occurrences::TypingTyvarOccurrences {
+                tyvar_occurrences: Default::default(),
+                tyvars_in_tyvar: Default::default(),
             },
             allow_solve_globals: *allow_solve_globals,
         }
@@ -242,12 +243,12 @@ impl<'a> InferenceEnv<'a> {
         }
     }
 
-    fn expand_var(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+    fn expand_var(&mut self, r: &'a Reason<'a>, v: Ident) -> Option<Ty<'a>> {
         self.get_type(r, v)
         // TODO(hrust) port eager_solve_fail logic
     }
 
-    fn get_type(&mut self, r: PReason<'a>, v: Ident) -> Option<Ty<'a>> {
+    fn get_type(&mut self, r: &'a Reason<'a>, v: Ident) -> Option<Ty<'a>> {
         let mut aliases = ISet::empty();
         let mut v = v;
         let mut r = r;
@@ -301,9 +302,9 @@ impl<'a> InferenceEnv<'a> {
         self.tvenv = self.tvenv.add(self.bld, v, self.bld.alloc(tvinfo))
     }
 
-    pub fn fresh_type_reason(&mut self, r: PReason<'a>) -> Ty<'a> {
+    pub fn fresh_type_reason(&mut self, r: &'a Reason<'a>) -> Ty<'a> {
         let v = self.new_var_id();
-        self.add_current_tyvar(r.pos, v);
+        self.add_current_tyvar(r.pos(), v);
         self.bld.tyvar(r, v)
     }
 

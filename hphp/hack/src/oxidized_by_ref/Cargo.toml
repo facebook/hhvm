@@ -16,6 +16,7 @@ ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
 typing_collections_rust = { path = "../typing/cargo/typing_collections_rust" }
+bitflags = "1.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 

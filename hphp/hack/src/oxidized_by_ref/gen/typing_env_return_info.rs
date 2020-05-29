@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<858319091b684f20100da08205a5081a>>
+// @generated SignedSource<<fe4bb18b7f04aa6fd0746eb9cf0ccc5f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -15,14 +15,14 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-pub use typing_defs::*;
-
-pub type ExpressionId = ident::Ident;
-
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
-pub struct Local<'a>(pub Ty<'a>, pub ExpressionId);
-impl<'a> TrivialDrop for Local<'a> {}
-
-pub type TypingLocalTypes<'a> = local_id::map::Map<'a, Local<'a>>;
+pub struct TypingEnvReturnInfo<'a> {
+    pub type_: typing_defs::PossiblyEnforcedTy<'a>,
+    pub disposable: bool,
+    pub mutable: bool,
+    pub explicit: bool,
+    pub void_to_rx: bool,
+}
+impl<'a> TrivialDrop for TypingEnvReturnInfo<'a> {}

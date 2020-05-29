@@ -95,6 +95,5 @@ oxidized::typing_defs::TypedefVisibility
 oxidized::typing_defs::ValKind
 oxidized::typing_defs::XhpAttr
 oxidized::typing_defs::XhpAttrTag
-oxidized::typing_env_return_info::TypingEnvReturnInfo
 oxidized::typing_mutability_env::MutType
 oxidized::typing_reason::ArgPosition

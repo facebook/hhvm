@@ -12,7 +12,6 @@ use oxidized::pos::Pos as OwnedPos;
 use oxidized::{relative_path, typechecker_options};
 use oxidized_by_ref::pos::Pos;
 use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet};
 use typing_ast_rust::typing_inference_env::InferenceEnv;
 
 pub use typing_collections_rust::*;
@@ -73,7 +72,13 @@ impl<'a> Env<'a> {
 }
 
 impl<'a> Env<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_env_types::Env {
+    pub fn to_oxidized<'b>(
+        &'b self,
+        arena: &'b impl Arena,
+    ) -> oxidized_by_ref::typing_env_types::Env<'b>
+    where
+        'a: 'b,
+    {
         let Env {
             ident_counter: _,
             function_pos,
@@ -83,10 +88,10 @@ impl<'a> Env<'a> {
             log_levels: _,
             inference_env,
         } = self;
-        oxidized::typing_env_types::Env {
-            function_pos: function_pos.to_oxidized(),
-            fresh_typarams: BTreeSet::new(), // TODO(hrust)
-            lenv: lenv.to_oxidized(),
+        oxidized_by_ref::typing_env_types::Env {
+            function_pos,
+            fresh_typarams: Default::default(), // TODO(hrust)
+            lenv: lenv.to_oxidized(arena),
             genv: genv.to_oxidized(),
             decl_env: (),
             in_loop: false,
@@ -94,14 +99,14 @@ impl<'a> Env<'a> {
             in_case: false,
             inside_constructor: false,
             inside_ppl_class: false,
-            global_tpenv: oxidized::type_parameter_env::TypeParameterEnv {
-                tparams: BTreeMap::new(),
+            global_tpenv: oxidized_by_ref::type_parameter_env::TypeParameterEnv {
+                tparams: Default::default(),
                 consistent: true,
             },
-            log_levels: BTreeMap::new(), // TODO(hrust)
-            inference_env: inference_env.to_oxidized(),
+            log_levels: Default::default(), // TODO(hrust)
+            inference_env: inference_env.to_oxidized(arena),
             allow_wildcards: false,
-            big_envs: RefCell::new(vec![]),
+            big_envs: RefCell::new(&[]),
             pessimize: false,
         }
     }
@@ -109,7 +114,8 @@ impl<'a> Env<'a> {
 
 impl ToOcamlRep for Env<'_> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        self.to_oxidized().to_ocamlrep(alloc)
+        let arena = bumpalo::Bump::new();
+        self.to_oxidized(&arena).to_ocamlrep(alloc)
     }
 }
 
@@ -123,34 +129,31 @@ pub struct Genv<'a> {
 }
 
 impl<'a> Genv<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_env_types::Genv {
+    pub fn to_oxidized(&self) -> oxidized_by_ref::typing_env_types::Genv<'a> {
         // TODO(hrust) most fields of Genv
-        oxidized::typing_env_types::Genv {
+        oxidized_by_ref::typing_env_types::Genv {
             tcopt: oxidized::global_options::GlobalOptions::default(),
-            return_: oxidized::typing_env_return_info::TypingEnvReturnInfo {
-                type_: oxidized::typing_defs::PossiblyEnforcedTy {
+            return_: oxidized_by_ref::typing_env_return_info::TypingEnvReturnInfo {
+                type_: oxidized_by_ref::typing_defs::PossiblyEnforcedTy {
                     enforced: true,
-                    type_: oxidized::typing_defs_core::Ty(
-                        oxidized::typing_reason::Reason::Rnone,
-                        Box::new(oxidized::typing_defs_core::Ty_::Tmixed),
-                    ),
+                    type_: oxidized_by_ref::typing_defs_core::Ty(Reason::none(), &Ty_::Tmixed),
                 },
                 disposable: false,
                 mutable: false,
                 explicit: true,
                 void_to_rx: false,
             },
-            params: BTreeMap::new(),
-            condition_types: oxidized::s_map::SMap::new(),
+            params: Default::default(),
+            condition_types: Default::default(),
             parent: None,
             self_: None,
             static_: false,
-            fun_kind: oxidized::ast_defs::FunKind::FSync,
-            val_kind: oxidized::typing_defs::ValKind::Lval,
+            fun_kind: oxidized_by_ref::ast_defs::FunKind::FSync,
+            val_kind: oxidized_by_ref::typing_defs::ValKind::Lval,
             fun_mutable: None,
-            file: oxidized::relative_path::RelativePath::make(
-                oxidized::relative_path::Prefix::Root,
-                std::path::PathBuf::new(),
+            file: oxidized_by_ref::relative_path::RelativePath::make(
+                oxidized_by_ref::relative_path::Prefix::Root,
+                "",
             ),
         }
     }
@@ -173,13 +176,19 @@ impl<'a> LocalEnv<'a> {
 }
 
 impl<'a> LocalEnv<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_env_types::LocalEnv {
+    pub fn to_oxidized<'b>(
+        &self,
+        arena: &'b impl Arena,
+    ) -> oxidized_by_ref::typing_env_types::LocalEnv<'b>
+    where
+        'a: 'b,
+    {
         let LocalEnv { per_cont_env } = self;
-        oxidized::typing_env_types::LocalEnv {
-            per_cont_env: per_cont_env.to_oxidized(),
-            local_mutability: BTreeMap::new(),
-            local_reactive: oxidized::typing_env_types::Reactivity::Nonreactive,
-            local_using_vars: BTreeSet::new(),
+        oxidized_by_ref::typing_env_types::LocalEnv {
+            per_cont_env: per_cont_env.to_oxidized(arena),
+            local_mutability: Default::default(),
+            local_reactive: oxidized_by_ref::typing_env_types::Reactivity::Nonreactive,
+            local_using_vars: Default::default(),
         }
     }
 }

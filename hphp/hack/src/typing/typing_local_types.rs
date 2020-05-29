@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use crate::typing_env_types::LocalId;
-pub use oxidized::typing_local_types::ExpressionId;
+pub use oxidized_by_ref::typing_local_types::ExpressionId;
 use typing_collections_rust::Map;
 use typing_defs_rust::Ty;
 
@@ -12,9 +12,9 @@ use typing_defs_rust::Ty;
 pub struct Local<'a>(pub Ty<'a>, pub ExpressionId);
 
 impl<'a> Local<'a> {
-    pub fn to_oxidized(&self) -> oxidized::typing_local_types::Local {
-        let Local(ty, eid) = self;
-        oxidized::typing_local_types::Local(ty.to_oxidized(), eid.clone())
+    pub fn to_oxidized(&self) -> oxidized_by_ref::typing_local_types::Local<'a> {
+        let &Local(ty, eid) = self;
+        oxidized_by_ref::typing_local_types::Local(ty, eid)
     }
 }
 

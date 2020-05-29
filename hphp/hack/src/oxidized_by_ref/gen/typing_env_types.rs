@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e0ff9bc96e81930171d94ed727d2e1a6>>
+// @generated SignedSource<<667a4434bbb8341bb056c17d5d9d4204>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -58,7 +58,7 @@ impl<'a> TrivialDrop for Env<'a> {}
 #[derive(Clone, Debug, PartialEq, PartialOrd, Serialize, ToOcamlRep)]
 pub struct Genv<'a> {
     pub tcopt: oxidized::typechecker_options::TypecheckerOptions,
-    pub return_: oxidized::typing_env_return_info::TypingEnvReturnInfo,
+    pub return_: typing_env_return_info::TypingEnvReturnInfo<'a>,
     pub params: local_id::map::Map<'a, (Ty<'a>, oxidized::typing_defs::ParamMode)>,
     pub condition_types: s_map::SMap<'a, Ty<'a>>,
     pub parent: Option<(&'a str, Ty<'a>)>,

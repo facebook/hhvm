@@ -49,10 +49,7 @@ pub fn stmt_env<'a>(
     provider: &'a dyn decl_provider::DeclProvider,
     s: &'a ast::Stmt,
 ) -> Env<'a> {
-    let r = builder.alloc(PReason_ {
-        pos: Some(Pos::from_oxidized_in(&s.0, builder.bumpalo())),
-        reason: Reason::Rhint,
-    });
+    let r = builder.alloc(Reason::hint(Pos::from_oxidized_in(&s.0, builder.bumpalo())));
     let rty = builder.void(r);
     let genv = empty_global_env(builder, provider, s.0.filename().clone());
     let mut env = Env::new(&s.0, genv);

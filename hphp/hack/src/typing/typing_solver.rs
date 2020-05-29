@@ -4,7 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 use crate::typing_union;
 use crate::Env;
-use oxidized::ident::Ident;
+use oxidized_by_ref::ident::Ident;
 use typing_collections_rust::Set;
 use typing_defs_rust::{InternalType, Ty};
 

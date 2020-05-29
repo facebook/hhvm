@@ -30,10 +30,6 @@ impl<'a> Id<'a> {
     pub fn name(&self) -> &'a str {
         self.1
     }
-
-    pub fn to_oxidized(&self) -> oxidized::ast_defs::Id {
-        oxidized::ast_defs::Id(self.0.to_oxidized(), self.1.to_string())
-    }
 }
 
 impl<'a> Bop<'a> {

@@ -291,6 +291,7 @@ where
     fn assert_left_angle_in_type_list_with_possible_attribute(&mut self) -> S::R {
         let parser1 = self.clone();
         let lexer = self.lexer_mut();
+        lexer.scan_leading_php_trivia();
         let tparam_open = lexer.peek_char(0);
         let attr1 = lexer.peek_char(1);
         let attr2 = lexer.peek_char(2);

@@ -83,8 +83,7 @@ async function main(): Awaitable<void> {
   await do_test($sin);
 
   print("\n\n***** Testing AF_UNIX server ***\n");
-  $tmp = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
-  $path = $tmp.'/hsl-os-server-test-'.random_int(0, PHP_INT_MAX).'.sock';
+  $path = getenv('HPHP_TEST_TMPDIR') . 'sock';
   $sun = new _OS\sockaddr_un_pathname($path);
   try {
     await do_test($sun);

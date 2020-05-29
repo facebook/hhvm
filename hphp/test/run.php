@@ -1386,7 +1386,7 @@ class Status {
   private static $overall_start_time = 0;
   private static $overall_end_time = 0;
 
-  private static $tempdir = "";
+  private static $tmpdir = "";
 
   public static $passed = 0;
   public static $skipped = 0;
@@ -1410,24 +1410,30 @@ class Status {
   const YELLOW = 33;
   const BLUE = 34;
 
-  public static function createTempDir(): void {
+  public static function createTmpDir(): void {
     // TODO: one day we should have hack-accessible mkdtemp
-    self::$tempdir = tempnam(sys_get_temp_dir(), "hphp-test-");
-    unlink(self::$tempdir);
-    mkdir(self::$tempdir);
+    self::$tmpdir = tempnam(sys_get_temp_dir(), "hphp-test-");
+    unlink(self::$tmpdir);
+    mkdir(self::$tmpdir);
   }
 
-  public static function getRunTempDir(): string {
-    return self::$tempdir;
+  public static function getRunTmpDir(): string {
+    return self::$tmpdir;
   }
 
-  public static function getTestTmpDir(): string {
-    $test_tmp_dir = self::$tempdir . "/test-data";
-    mkdir($test_tmp_dir);
-    return $test_tmp_dir;
+  // Return a path in the run tmpdir that's unique to this test and ext.
+  // Remember to teach clean_intermediate_files to clean up all the exts you use
+  public static function getTestTmpPath(string $test, string $ext): string {
+    return self::$tmpdir . '/' . $test . '.' . $ext;
   }
 
-  private static function removeDirectory($dir) {
+  public static function createTestTmpDir(string $test): string {
+    $test_temp_dir = self::getTestTmpPath($test, 'tmpdir');
+    @mkdir($test_temp_dir, 0777, true);
+    return $test_temp_dir . '/';
+  }
+
+  public static function removeDirectory($dir) {
     $files = scandir($dir);
     foreach ($files as $file) {
       if ($file == '.' || $file == '..') {
@@ -1443,8 +1449,35 @@ class Status {
     rmdir($dir);
   }
 
-  private static function removeTempDir() {
-    self::removeDirectory(self::$tempdir);
+  // This is similar to removeDirectory but it only removes empty directores
+  // and won't enter directories whose names end with '.tmpdir'. This allows
+  // us to clean up paths like test/quick/vec in our run's temporary directory
+  // if all the tests in them passed, but it leaves test tmpdirs of failed
+  // tests (that we didn't remove with clean_intermediate_files because the
+  // test failed) and directores under them alone even if they're empty.
+  public static function removeEmptyTestParentDirs($dir): bool {
+    $is_now_empty = true;
+    $files = scandir($dir);
+    foreach ($files as $file) {
+      if ($file == '.' || $file == '..') {
+        continue;
+      }
+      if (strrpos($file, '.tmpdir') === (strlen($file) - strlen('.tmpdir'))) {
+        $is_now_empty = false;
+        continue;
+      }
+      $path = $dir . "/" . $file;
+      if (!is_dir($path)) {
+        $is_now_empty = false;
+        continue;
+      }
+      if (self::removeEmptyTestParentDirs($path)) {
+        rmdir($path);
+      } else {
+        $is_now_empty = false;
+      }
+    }
+    return $is_now_empty;
   }
 
   public static function setMode($mode) {
@@ -1497,10 +1530,13 @@ class Status {
         case TempDirRemove::NEVER:
           break;
         case TempDirRemove::ON_RUN_SUCCESS:
-          if (self::$return_value !== 0) break;
+          if (self::$return_value !== 0) {
+            self::removeEmptyTestParentDirs(self::$tmpdir);
+            break;
+          }
           // FALLTHROUGH
         case TempDirRemove::ALWAYS:
-          self::removeTempDir();
+          self::removeDirectory(self::$tmpdir);
       }
     }
   }
@@ -1793,7 +1829,7 @@ class Status {
   public static function getQueue() {
     if (!self::$queue) {
       if (self::$killed) error("Killed!");
-      self::$queue = new Queue(self::$tempdir);
+      self::$queue = new Queue(self::$tmpdir);
     }
     return self::$queue;
   }
@@ -1829,19 +1865,22 @@ function clean_intermediate_files($test, $options) {
     } else {
       $file = "$test.$ext";
     }
-    if (file_exists($file)) {
-      if (is_dir($file)) {
-        foreach(new RecursiveIteratorIterator(new
-            RecursiveDirectoryIterator($file, FilesystemIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::CHILD_FIRST) as $path) {
-          $path->isDir()
-          ? rmdir($path->getPathname())
-          : unlink($path->getPathname());
-        }
-        rmdir($file);
-      } else {
-        unlink($file);
-      }
+    if (is_dir($file)) {
+      Status::removeDirectory($file);
+    } else if (file_exists($file)) {
+      unlink($file);
+    }
+  }
+  $tmp_exts = varray[
+    // scratch directory the test may write to
+    'tmpdir',
+  ];
+  foreach ($tmp_exts as $ext) {
+    $file = Status::getTestTmpPath($test, $ext);
+    if (is_dir($file)) {
+      Status::removeDirectory($file);
+    } else if (file_exists($file)) {
+      unlink($file);
     }
   }
 }
@@ -2172,6 +2211,7 @@ const SERVER_TIMEOUT = 45;
 function run_config_server($options, $test) {
   invariant(can_run_server_test($test, $options), "skip_test should have skipped this");
 
+  Status::createTestTmpDir($test); // force it to be created
   $config = find_file_for_dir(dirname($test), 'config.ini');
   $port = $options['servers']['configs'][$config]->server['port'];
   $ch = curl_init("localhost:$port/$test");
@@ -2197,6 +2237,7 @@ function run_config_cli(
 ) {
   $cmd = timeout_prefix() . $cmd;
 
+  $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
   if (isset($options['log'])) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
@@ -2847,12 +2888,12 @@ function print_failure($argv, $results, $options) {
 
   $failing_tests_file = ($options['failure-file'] ?? false)
     ? $options['failure-file']
-    : Status::getRunTempDir() . '/test-failures';
+    : Status::getRunTmpDir() . '/test-failures';
   file_put_contents($failing_tests_file, implode("\n", $failed)."\n");
   if ($passed) {
     $passing_tests_file = ($options['success-file'] ?? false)
       ? $options['success-file']
-      : Status::getRunTempDir() . '/tests-passed';
+      : Status::getRunTmpDir() . '/tests-passed';
     file_put_contents($passing_tests_file, implode("\n", $passed)."\n");
   }
 
@@ -2931,6 +2972,9 @@ function start_server_proc($options, $config, $port) {
   $thread_option = isset($options['cli-server'])
     ? '-vEval.UnixServerWorkers='.$threads
     : '-vServer.ThreadCount='.$threads;
+  $prelude = isset($options['server'])
+    ? '-vEval.PreludePath=' . Status::getRunTmpDir() . '/server-prelude.php'
+    : "";
   $command = hhvm_cmd_impl(
     $options,
     $config,
@@ -2945,6 +2989,7 @@ function start_server_proc($options, $config, $port) {
     '-vPageletServer.ThreadCount=0',
     '-vLog.UseRequestLog=1',
     '-vLog.File=/dev/null',
+    $prelude,
 
     // The server will unlink the temp file
     '-vEval.UnixServerPath='.$cli_sock,
@@ -3001,6 +3046,19 @@ final class ServerRef {
  * information about the server.
  */
 function start_servers($options, $configs) {
+  if (isset($options['server'])) {
+    $prelude = <<<'EOT'
+<?hh
+<<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
+  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}.tmpdir/");
+}
+EOT;
+    file_put_contents(
+      Status::getRunTmpDir() . '/server-prelude.php',
+      str_replace('BASEDIR', Status::getRunTmpDir(), $prelude),
+    );
+  }
+
   $starting = varray[];
   foreach ($configs as $config) {
     $starting[] = start_server_proc($options, $config, find_open_port());
@@ -3107,6 +3165,8 @@ function main($argv) {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
 
+  Status::createTmpDir();
+
   $servers = null;
   if (isset($options['server']) || isset($options['cli-server'])) {
     if (isset($options['server']) && isset($options['cli-server'])) {
@@ -3194,11 +3254,6 @@ function main($argv) {
     Status::setMode(Status::MODE_RECORD_FAILURES);
   }
   Status::setUseColor(isset($options['color']) ? true : posix_isatty(STDOUT));
-
-  Status::createTempDir();
-
-  // NOTE: This is passed down to forked test processes.
-  $_ENV['HPHP_TEST_TMPDIR'] = Status::getTestTmpDir();
 
   Status::$nofork = count($tests) == 1 && !$servers;
 

@@ -111,6 +111,8 @@ module RemoteTypeCheck = struct
     (* Indicates the size of the job below which a virtual file system should
     be used by the remote worker *)
     worker_vfs_checkout_threshold: int;
+    (* File system mode used by ArtifactStore *)
+    file_system_mode: string;
   }
 
   let default =
@@ -127,6 +129,7 @@ module RemoteTypeCheck = struct
       recheck_threshold = None;
       worker_min_log_level = Hh_logger.Level.Info;
       worker_vfs_checkout_threshold = 10_000;
+      file_system_mode = "Distributed";
     }
 
   let load ~current_version ~default config =
@@ -136,6 +139,13 @@ module RemoteTypeCheck = struct
         "declaration_threshold"
         ~prefix
         ~default:default.declaration_threshold
+        config
+    in
+    let file_system_mode =
+      string_
+        "file_system_mode"
+        ~prefix
+        ~default:default.file_system_mode
         config
     in
     let enabled_on_errors =
@@ -220,6 +230,7 @@ module RemoteTypeCheck = struct
       recheck_threshold;
       worker_min_log_level;
       worker_vfs_checkout_threshold;
+      file_system_mode;
     }
 end
 

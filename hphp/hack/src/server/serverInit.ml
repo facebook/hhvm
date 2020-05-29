@@ -119,6 +119,9 @@ let init
         ~check_id
         ~transport_channel:
           genv.local_config.ServerLocalConfig.remote_transport_channel
+        ~file_system_mode:
+          genv.local_config.ServerLocalConfig.remote_type_check
+            .ServerLocalConfig.RemoteTypeCheck.file_system_mode
         ~ci_info:env.init_env.ci_info
         ~init_id:env.init_env.init_id
         ~init_start_t:env.init_env.init_start_t
@@ -146,13 +149,13 @@ let init
       | Ok ((env, t), ({ state_distance; _ }, _)) ->
         ((env, t), Load_state_succeeded state_distance, false)
       | Error err ->
-        let State_loader.
-              {
-                message;
-                auto_retry;
-                stack = Utils.Callstack stack;
-                environment;
-              } as verbose_error =
+        let ( State_loader.
+                {
+                  message;
+                  auto_retry;
+                  stack = Utils.Callstack stack;
+                  environment;
+                } as verbose_error ) =
           load_state_error_to_verbose_string err
         in
         let (next_step_descr, next_step) =

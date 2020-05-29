@@ -24,6 +24,7 @@ module type S = sig
     hash:string ->
     check_id:string ->
     transport_channel:string option ->
+    file_system_mode:string ->
     defer_class_declaration_threshold:int ->
     root:string ->
     min_log_level:Hh_logger.Level.t ->

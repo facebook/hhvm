@@ -174,7 +174,7 @@ class APCIterator implements Iterator{
     return $this->totals['size'];
   }
 
-  private function preg_match_recursive(array $patterns, $string) {
+  private function preg_match_recursive(Traversable<string> $patterns, $string) {
     foreach ($patterns as $pattern) {
       if (preg_match($pattern, $string)) {
         return true;

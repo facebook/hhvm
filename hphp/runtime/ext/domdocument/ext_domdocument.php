@@ -192,7 +192,7 @@ class DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 /**
@@ -221,7 +221,7 @@ class DOMAttr extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 /**
@@ -302,7 +302,7 @@ class DOMCharacterData extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 /**
@@ -368,7 +368,7 @@ class DOMText extends DOMCharacterData {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 class DOMCdataSection extends DOMText {
@@ -819,7 +819,7 @@ class DOMDocument extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 class DOMDocumentFragment extends DOMNode {
@@ -856,7 +856,7 @@ class DOMDocumentType extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 <<__NativeData("DOMElement")>>
@@ -1110,7 +1110,7 @@ class DOMElement extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 
 }
 
@@ -1126,7 +1126,7 @@ class DOMEntity extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 class DOMEntityReference extends DOMNode {
@@ -1142,7 +1142,7 @@ class DOMNotation extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 class DOMProcessingInstruction extends DOMNode {
@@ -1155,7 +1155,7 @@ class DOMProcessingInstruction extends DOMNode {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 class DOMNameSpaceNode extends DOMNode {
@@ -1259,7 +1259,7 @@ class DOMNodeList implements IteratorAggregate {
    *
    */
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 /**
@@ -1402,7 +1402,7 @@ class DOMXPath {
   public function registerPHPFunctions(mixed $funcs = null): mixed;
 
   <<__Native>>
-  public function __debuginfo(): array;
+  public function __debuginfo(): darray;
 }
 
 function dom_document_create_element(DOMDocument $obj,

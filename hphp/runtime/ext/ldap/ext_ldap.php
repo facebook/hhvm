@@ -278,7 +278,7 @@ function ldap_close(resource $link): bool;
 function ldap_list(mixed $link,
                    mixed $base_dn,
                    mixed $filter,
-                   ?array $attributes = null,
+                   ?varray $attributes = null,
                    int $attrsonly = 0,
                    int $sizelimit = -1,
                    int $timelimit = -1,

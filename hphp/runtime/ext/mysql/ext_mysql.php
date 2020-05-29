@@ -323,7 +323,7 @@ function mysql_fetch_lengths(resource $result): mixed;
 <<__Native>>
 function mysql_fetch_object(mixed $result,
                             string $class_name = 'stdClass',
-                            ?array $params = null): mixed;
+                            ?varray $params = null): mixed;
 
 /**
  * Used with mysql_multi_query() to return a mysql result for the current

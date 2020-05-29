@@ -556,6 +556,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "deps_rust"
+version = "0.0.0"
+dependencies = [
+ "fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocaml 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "ocamlrep 0.0.0",
+]
+
+[[package]]
 name = "difference"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

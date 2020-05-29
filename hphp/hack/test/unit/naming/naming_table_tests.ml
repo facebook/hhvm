@@ -428,6 +428,67 @@ let test_context_changes_typedefs () =
         (Naming_provider.get_type_canon_name ctx "\\BAZ")
         "Old typedef in context should NOT be accessible by canon name")
 
+let test_naming_table_hash () =
+  (* Dep hash is 31 bits. *)
+  let dep_hash = 0b111_1000_1000_1000_1000_1000_1000_1000L in
+  (* Naming hash is 64 bits, but we only take the bottom 31. *)
+  let naming_hash =
+    0b0100_0100_0100_0100_0100_0100_0100_0100_1____110_1110_1110_1110_1110_1110_1110_1110L
+  in
+  (* Note that the sign bit (63rd bit) should remain zero. *)
+  let expected =
+    0b0____111_1000_1000_1000_1000_1000_1000_1000____110_1110_1110_1110_1110_1110_1110_1110
+  in
+  let actual = Typing_deps.ForTest.combine_hashes ~dep_hash ~naming_hash in
+  Asserter.Int_asserter.assert_equals
+    expected
+    (Int64.to_int_exn actual)
+    "Expected to move dep hash to upper 31 bits";
+
+  let foo_dep = Typing_deps.Dep.Class "\\Foo" in
+  let foo_dep_hash = Typing_deps.ForTest.compute_dep_hash foo_dep in
+  Asserter.Int_asserter.assert_equals
+    0b011_1101_0111_1011_0110_1111_1110_1011
+    foo_dep_hash
+    "Expected foo dep hash to be correct (this test must be updated if the hashing logic changes)";
+
+  let foo_naming_hash = Typing_deps.NamingHash.make foo_dep in
+  let hash_to_int (hash : Typing_deps.NamingHash.t) : int =
+    hash |> Typing_deps.NamingHash.to_int64 |> Int64.to_int_exn
+  in
+
+  let foo_lower_bound =
+    Typing_deps.NamingHash.make_lower_bound (Typing_deps.Dep.make foo_dep)
+  in
+  Asserter.Int_asserter.assert_equals
+    0b011_1101_0111_1011_0110_1111_1110_1011____000_0000_0000_0000_0000_0000_0000_0000
+    (hash_to_int foo_lower_bound)
+    "Expected foo lower bound to be correct (this test must be updated if the hashing logic changes)";
+  Asserter.Bool_asserter.assert_equals
+    true
+    (foo_lower_bound <= foo_naming_hash)
+    (Printf.sprintf
+       "sanity check: foo_lower_bound (%d) <= foo_naming_hash (%d)"
+       (hash_to_int foo_lower_bound)
+       (hash_to_int foo_naming_hash));
+
+  let foo_upper_bound =
+    Typing_deps.NamingHash.make_upper_bound (Typing_deps.Dep.make foo_dep)
+  in
+  Asserter.Int_asserter.assert_equals
+    0b011_1101_0111_1011_0110_1111_1110_1011____111_1111_1111_1111_1111_1111_1111_1111
+    (hash_to_int foo_upper_bound)
+    "Expected foo upper bound to be correct";
+  Asserter.Bool_asserter.assert_equals
+    true
+    (foo_naming_hash <= foo_upper_bound)
+    (Printf.sprintf
+       "sanity check: foo_naming_hash (%d) <= foo_upper_bound (%d)"
+       (hash_to_int foo_naming_hash)
+       (hash_to_int foo_upper_bound));
+
+  true
+
 let () =
   let config =
     SharedMem.
@@ -454,4 +515,5 @@ let () =
       ("test_context_changes_funs", test_context_changes_funs);
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
+      ("test_naming_table_hash", test_naming_table_hash);
     ]

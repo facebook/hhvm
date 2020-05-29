@@ -1521,11 +1521,11 @@ G ; K |- < e1 : ? `KeyedContainer` < t , u > , e2 : ? t , e3 : u >
 -------------------------------------------------- :: idx_default
 G ; K |- `idx` ( e1 , e2 , e3 ) : u
 
-G ; K |- e : shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
+G ; K |- e : ? shape ( ?sfn => t , vardots \ sfn1 , .. , sfnm )
 -------------------------------------------------- :: shapes_idx_optional
 G ; K |- `Shapes` :: `idx` ( e , sfn ) : ? t
 
-G ; K |- < e1 : shape ( ?sfn => t , vardots \ sfn1 , .., sfnm ) , e2 : t >
+G ; K |- < e1 : ? shape ( ?sfn => t , vardots \ sfn1 , .., sfnm ) , e2 : t >
 -------------------------------------------------- :: shapes_idx_default
 G ; K |- `Shapes` :: `idx` ( e1 , sfn , e2 ) : t
 

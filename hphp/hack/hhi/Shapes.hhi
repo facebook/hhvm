@@ -19,8 +19,8 @@ abstract final class Shapes {
  * This behavior cannot be expressed with type hints, so it's hardcoded in the
  * typechecker. Depending on arity, it will be one of the
  *
- * idx(S $shape, arraykey $index) : ?Tv,
- * idx(S $shape, arraykey $index, Tv $default) : Tv,
+ * idx(?S $shape, arraykey $index) : ?Tv,
+ * idx(?S $shape, arraykey $index, Tv $default) : Tv,
  *
  * where $index must be statically known (literal or class constant), and S is
  * a shape containing such key:
@@ -32,7 +32,7 @@ abstract final class Shapes {
  * )
  */
   <<__Rx>>
-  public static function idx<T as shape(...)>(
+  public static function idx<T as ?shape(...)>(
     T $shape,
     arraykey $index,
     $default = null,

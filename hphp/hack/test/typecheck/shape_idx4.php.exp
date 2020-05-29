@@ -1,10 +1,6 @@
 File "shape_idx4.php", line 7, characters 15-16:
-Invalid argument (Typing[4323])
-File "Shapes.hhi", line 35, characters 35-44:
-Some type constraint(s) are violated here
-File "Shapes.hhi", line 35, characters 30-30:
-T is a constrained type parameter
-File "Shapes.hhi", line 35, characters 35-44:
+Invalid argument (Typing[4110])
+File "Shapes.hhi", line 35, characters 36-45:
 Expected shape(...)
 File "shape_idx4.php", line 6, characters 15-17:
 But got int

@@ -175,11 +175,11 @@ let is_shape_field_required env shape_pos fun_name field_name shape_ty =
 
 (* Typing rules for Shapes::idx
  *
- *     e : shape(?sfn => t, ...)
+ *     e : ?shape(?sfn => t, ...)
  *     ----------------------------
  *     Shapes::idx(e, sfn) : ?t
  *
- *     e1 : shape(?sfn => t, ...)
+ *     e1 : ?shape(?sfn => t, ...)
  *     e2 : t
  *     ----------------------------
  *     Shapes::idx(e1, sfn, e2) : t
@@ -199,6 +199,10 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
           field_name
           { sft_optional = true; sft_ty = res }
       in
+      let nullable_super_shape =
+        mk (Reason.Rnone, Toption fake_super_shape_ty)
+      in
+
       (match default with
       | None ->
         let env =
@@ -207,7 +211,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             Reason.URparam
             env
             shape_ty
-            { et_type = fake_super_shape_ty; et_enforced = false }
+            { et_type = nullable_super_shape; et_enforced = false }
             Errors.unify_error
         in
         TUtils.union env res (MakeType.null fun_pos)
@@ -218,7 +222,7 @@ let idx env ~expr_pos ~fun_pos ~shape_pos shape_ty field default =
             Reason.URparam
             env
             shape_ty
-            { et_type = fake_super_shape_ty; et_enforced = false }
+            { et_type = nullable_super_shape; et_enforced = false }
             Errors.unify_error
         in
         let env =

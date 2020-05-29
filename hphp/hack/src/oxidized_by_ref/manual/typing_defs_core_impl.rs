@@ -171,3 +171,9 @@ impl<'a> InternalType<'a> {
         oxidized::typing_defs_core::InternalType::from_ocamlrep(ocaml_ty).unwrap()
     }
 }
+
+impl Default for Reactivity<'_> {
+    fn default() -> Self {
+        Reactivity::Nonreactive
+    }
+}

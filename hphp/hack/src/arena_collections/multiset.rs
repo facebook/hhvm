@@ -373,6 +373,12 @@ impl<T> Clone for SortedSet<'_, T> {
     }
 }
 
+impl<T> Default for SortedSet<'_, T> {
+    fn default() -> Self {
+        Self::from_slice(&[])
+    }
+}
+
 impl<'a, T> SortedSet<'a, T> {
     /// Returns the empty set
     pub fn empty() -> Self {

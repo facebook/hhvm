@@ -29,14 +29,24 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/decl/direct_decl_parser.ml                                    \
   hphp/hack/src/decl/shallow_decl_defs.ml                                     \
   hphp/hack/src/deps/fileInfo.ml                                              \
-  hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
+  hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
-  hphp/hack/src/typing/typing_defs.ml                                         \
-  hphp/hack/src/typing/typing_defs_core.ml                                    \
-  hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
+  hphp/hack/src/typing/tast.ml                                                \
+  hphp/hack/src/typing/type_parameter_env.ml                                  \
+  hphp/hack/src/typing/typing_cont_key.ml                                     \
+  hphp/hack/src/typing/typing_defs_core.ml                                    \
+  hphp/hack/src/typing/typing_defs.ml                                         \
+  hphp/hack/src/typing/typing_env_types.ml                                    \
+  hphp/hack/src/typing/typing_fake_members.ml                                 \
+  hphp/hack/src/typing/typing_inference_env.ml                                \
+  hphp/hack/src/typing/typing_local_types.ml                                  \
+  hphp/hack/src/typing/typing_mutability_env.ml                               \
+  hphp/hack/src/typing/typing_per_cont_env.ml                                 \
+  hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
+  hphp/hack/src/utils/core/prim_defs.ml                                       \
 
 # Re-export generated modules (listed in gen/mod.rs) in the crate root, lib.rs
 cd "$(dirname "${REGEN_COMMAND}")"

@@ -3,13 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use serde::Serialize;
+
 use crate::map::{Map, MapIter};
 use arena_trait::{Arena, TrivialDrop};
+use ocamlrep::ToOcamlRep;
 
 /// An arena-allocated map.
 ///
 /// See `Map` for more info.
-#[derive(Debug)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 #[must_use]
 pub struct Set<'a, K>(Map<'a, K, ()>);
 
@@ -21,13 +24,20 @@ impl<'a, K> Clone for Set<'a, K> {
 
 impl<'a, K> Copy for Set<'a, K> {}
 
-impl<'a, K: PartialEq> PartialEq for Set<'a, K> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0.eq(&other.0)
+impl<K> Default for Set<'_, K> {
+    fn default() -> Self {
+        Set(Map::default())
     }
 }
 
-impl<'a, K: Eq> Eq for Set<'a, K> {}
+impl<K: ToOcamlRep + Ord> ToOcamlRep for Set<'_, K> {
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
+        let len = self.count();
+        let mut iter = self.iter();
+        let (value, _) = ocamlrep::sorted_iter_to_ocaml_set(&mut iter, alloc, len);
+        value
+    }
+}
 
 #[macro_export]
 macro_rules! set {
@@ -54,11 +64,21 @@ impl<'a, K: Ord> Set<'a, K> {
     }
 }
 
-impl<'a, K: TrivialDrop + Clone + Ord> Set<'a, K> {
+impl<'a, K: Ord> Set<'a, K> {
     pub fn empty() -> Self {
         Set(Map::empty())
     }
 
+    pub fn is_empty(self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn count(self) -> usize {
+        self.0.count()
+    }
+}
+
+impl<'a, K: TrivialDrop + Clone + Ord> Set<'a, K> {
     pub fn singleton<A: Arena>(arena: &'a A, x: K) -> Self {
         Set(Map::singleton(arena, x, ()))
     }
@@ -74,14 +94,6 @@ impl<'a, K: TrivialDrop + Clone + Ord> Set<'a, K> {
         }
 
         return s;
-    }
-
-    pub fn is_empty(self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn count(self) -> isize {
-        self.0.count()
     }
 
     pub fn add<A: Arena>(self, arena: &'a A, x: K) -> Self {

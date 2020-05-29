@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32705e66a10b1a5a7fd03e8f001f95db>>
+// @generated SignedSource<<e48b3d902723780b37536ab537fc0d28>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -22,5 +22,15 @@ pub mod nast;
 pub mod prim_defs;
 pub mod scoured_comments;
 pub mod shallow_decl_defs;
+pub mod tast;
+pub mod type_parameter_env;
+pub mod typing_cont_key;
 pub mod typing_defs;
 pub mod typing_defs_core;
+pub mod typing_env_types;
+pub mod typing_fake_members;
+pub mod typing_inference_env;
+pub mod typing_local_types;
+pub mod typing_mutability_env;
+pub mod typing_per_cont_env;
+pub mod typing_tyvar_occurrences;

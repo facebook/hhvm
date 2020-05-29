@@ -2,6 +2,7 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+
 use arena_trait::TrivialDrop;
 use bumpalo::collections::Vec;
 
@@ -12,7 +13,7 @@ use crate::{aast, ast_defs, ast_defs::Id};
 
 pub use oxidized::typing_reason::ArgPosition;
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Reason<'a> {
     pub pos: Option<&'a Pos<'a>>,
     pub reason: Reason_<'a>,
@@ -20,7 +21,7 @@ pub struct Reason<'a> {
 
 impl TrivialDrop for Reason<'_> {}
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Reason_<'a> {
     Rnone,
     Rwitness,
@@ -117,7 +118,7 @@ pub enum Reason_<'a> {
 
 impl TrivialDrop for Reason_<'_> {}
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum ExprDepTypeReason<'a> {
     ERexpr(isize),
     ERstatic,

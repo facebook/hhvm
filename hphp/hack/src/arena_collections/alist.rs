@@ -898,6 +898,12 @@ impl<K, V> Clone for SortedAssocList<'_, K, V> {
     }
 }
 
+impl<K, V> Default for SortedAssocList<'_, K, V> {
+    fn default() -> Self {
+        Self::from_slice(&[])
+    }
+}
+
 impl<'a, K: Ord, V> From<AssocListMut<'a, K, V>> for SortedAssocList<'a, K, V> {
     #[inline]
     fn from(mut alist: AssocListMut<'a, K, V>) -> Self {

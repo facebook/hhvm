@@ -8,6 +8,7 @@ pub mod doc_comment;
 pub mod i_map;
 pub mod i_set;
 pub mod ident;
+pub mod internal_type_set;
 pub mod local_id;
 pub mod opaque_digest;
 pub mod phase_map;
@@ -16,7 +17,10 @@ pub mod relative_path;
 pub mod s_map;
 pub mod s_set;
 pub mod shape_map;
+pub mod typing_continuations;
+pub mod typing_logic;
 pub mod typing_reason;
+pub mod typing_set;
 
 mod ast_defs_impl;
 mod errors_impl;

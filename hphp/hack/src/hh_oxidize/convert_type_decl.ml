@@ -366,7 +366,13 @@ let ctor_arg_len (ctor_args : constructor_arguments) : int =
 
 let type_declaration name td =
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
-  let attrs_and_vis additional_derives =
+  let attrs_and_vis ~force_derive_copy =
+    let additional_derives =
+      if force_derive_copy then
+        [(None, "Copy")]
+      else
+        []
+    in
     let derive_attr =
       derived_traits name @ additional_derives
       |> List.dedup_and_sort ~compare:(fun (_, t1) (_, t2) ->
@@ -379,13 +385,12 @@ let type_declaration name td =
     in
     doc ^ derive_attr ^ "\npub"
   in
-  let does_derive t =
-    let ts = derived_traits name |> List.map ~f:(fun (_, t) -> t) in
-    List.mem ts t ~equal:String.equal
-  in
-  let implements tparams =
+  let implements tparams ~force_derive_copy =
     implements_traits name
-    |> ( if does_derive "Copy" then
+    |> ( if
+         derive_copy (sprintf "%s::%s" (curr_module_name ()) name)
+         || force_derive_copy
+       then
          List.filter ~f:(fun (_, t) -> not (String.equal t "TrivialDrop"))
        else
          ident )
@@ -483,21 +488,15 @@ let type_declaration name td =
         in
         sprintf
           "%s struct %s%s %s;%s"
-          (attrs_and_vis [])
+          (attrs_and_vis ~force_derive_copy:false)
           name
           tparams
           ty
-          (implements tparams))
+          (implements tparams ~force_derive_copy:false))
   (* Variant types, including GADTs. *)
   | (Ptype_variant ctors, None) ->
     let all_nullary =
       List.for_all ctors (fun c -> 0 = ctor_arg_len c.pcd_args)
-    in
-    let derives =
-      if all_nullary then
-        [(None, "Copy")]
-      else
-        []
     in
     let should_box_variant = should_box_variant name in
     let ctors =
@@ -507,21 +506,21 @@ let type_declaration name td =
     in
     sprintf
       "%s enum %s%s {\n%s}%s"
-      (attrs_and_vis derives)
+      (attrs_and_vis ~force_derive_copy:all_nullary)
       name
       tparams
       ctors
-      (implements tparams)
+      (implements tparams ~force_derive_copy:all_nullary)
   (* Record types. *)
   | (Ptype_record labels, None) ->
     let labels = record_declaration labels ~pub:true in
     sprintf
       "%s struct %s%s %s%s"
-      (attrs_and_vis [])
+      (attrs_and_vis ~force_derive_copy:false)
       name
       tparams
       labels
-      (implements tparams)
+      (implements tparams ~force_derive_copy:false)
   (* `type foo`; an abstract type with no specified implementation. This doesn't
      mean much outside of an .mli, I don't think. *)
   | (Ptype_abstract, None) ->

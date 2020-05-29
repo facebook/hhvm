@@ -20,6 +20,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   --regen-command "$REGEN_COMMAND"                                            \
   --rustfmt-path "$RUSTFMT_PATH"                                              \
   --extern-types-file hphp/hack/src/oxidized_by_ref/extern_types.txt          \
+  --owned-types-file hphp/hack/src/oxidized_by_ref/owned_types.txt            \
   --by-ref                                                                    \
   hphp/hack/src/annotated_ast/aast_defs.ml                                    \
   hphp/hack/src/annotated_ast/aast.ml                                         \

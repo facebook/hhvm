@@ -28,6 +28,11 @@ type t = {
           [Bar.t] in the OCaml source will be converted to [foo::bar::Bar]
           rather than [bar::Bar]. All extern_types are assumed to take no
           lifetime parameter. *)
+  owned_types: SSet.t;
+      (** The owned_types setting allows specifying a set of types which do not
+          need a lifetime parameter (so that hh_oxidize need not use global
+          knowledge of all types being converted to track which do and do not
+          need lifetime parameters). *)
 }
 
 val default : t
@@ -43,3 +48,7 @@ val mode : unit -> mode
     return its fully-qualified name, else None. Raises an exception if invoked
     before [set]. *)
 val extern_type : string -> string option
+
+(** If the given type name does not need a lifetime parameter, return true.
+    Raises an exception if invoked before [set]. *)
+val owned_type : string -> bool

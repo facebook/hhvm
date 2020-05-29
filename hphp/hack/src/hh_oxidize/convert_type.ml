@@ -72,13 +72,6 @@ let owned_builtins =
 
 let is_owned_builtin = SSet.mem owned_builtins
 
-let never_add_lifetime_parameter ty =
-  match ty with
-  | "ident::Ident"
-  | "ExpressionId" ->
-    true
-  | _ -> false
-
 let rec core_type ?(seen_indirection = false) ct =
   let is_by_ref =
     match Configuration.mode () with
@@ -143,7 +136,7 @@ let rec core_type ?(seen_indirection = false) ct =
       is_by_ref
       && Option.is_none extern_type
       && (not (is_owned_builtin id))
-      && not (never_add_lifetime_parameter id)
+      && not (Configuration.owned_type id)
     in
     let args = type_args ~seen_indirection ~add_lifetime args in
     if should_add_reference id then

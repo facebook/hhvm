@@ -100,7 +100,7 @@ let convert_single_file env filename =
   write_format_and_sign env out_filename src;
   printf "%s" (read out_filename)
 
-let parse_extern_types_file filename =
+let parse_types_file filename =
   let lines = ref [] in
   let ic = Caml.open_in filename in
   (try
@@ -109,7 +109,7 @@ let parse_extern_types_file filename =
      done;
      Caml.close_in ic
    with End_of_file -> Caml.close_in ic);
-  List.fold !lines ~init:SMap.empty ~f:(fun map name ->
+  List.filter_map !lines ~f:(fun name ->
       (* Ignore comments beginning with '#' *)
       let name =
         match String.index name '#' with
@@ -118,18 +118,49 @@ let parse_extern_types_file filename =
       in
       (* Strip whitespace *)
       let name = String.strip name in
-      try
-        (* Map the name with the crate prefix stripped (since we do not expect to see
-           the crate name in our OCaml source) to the fully-qualified name. *)
-        let coloncolon_idx = String.substr_index_exn name ~pattern:"::" in
-        let after_coloncolon_idx = coloncolon_idx + 2 in
-        assert (name.[after_coloncolon_idx] <> ':');
-        let name_without_crate = String.subo name ~pos:after_coloncolon_idx in
-        SMap.add map name_without_crate name
-      with _ ->
+      if String.is_substring name ~substring:"::" then
+        Some name
+      else (
         if name <> "" then
-          log "Failed to parse line in extern types file: %S" name;
-        map)
+          failwith
+            (Printf.sprintf
+               "Failed to parse line in types file %S: %S"
+               filename
+               name);
+        None
+      ))
+
+let parse_extern_types_file filename =
+  parse_types_file filename
+  |> List.fold ~init:SMap.empty ~f:(fun map name ->
+         (* Ignore comments beginning with '#' *)
+         let name =
+           match String.index name '#' with
+           | Some idx -> String.sub name ~pos:0 ~len:idx
+           | None -> name
+         in
+         (* Strip whitespace *)
+         let name = String.strip name in
+         try
+           (* Map the name with the crate prefix stripped (since we do not expect to see
+           the crate name in our OCaml source) to the fully-qualified name. *)
+           let coloncolon_idx = String.substr_index_exn name ~pattern:"::" in
+           let after_coloncolon_idx = coloncolon_idx + 2 in
+           assert (name.[after_coloncolon_idx] <> ':');
+           let name_without_crate =
+             String.subo name ~pos:after_coloncolon_idx
+           in
+           SMap.add map name_without_crate name
+         with _ ->
+           if name <> "" then
+             failwith
+               (Printf.sprintf
+                  "Failed to parse line in extern types file %S: %S"
+                  filename
+                  name);
+           map)
+
+let parse_owned_types_file filename = SSet.of_list (parse_types_file filename)
 
 let usage =
   "Usage: buck run hphp/hack/src/hh_oxidize -- [out_directory] [target_files]
@@ -155,6 +186,7 @@ let parse_args () =
   let files = ref [] in
   let mode = ref Configuration.ByBox in
   let extern_types_file = ref None in
+  let owned_types_file = ref None in
   let options =
     [
       ( "--out-dir",
@@ -176,6 +208,10 @@ let parse_args () =
         Arg.String (fun s -> extern_types_file := Some s),
         " Use the types listed in this file rather than assuming all types"
         ^ " are defined within the set of files being oxidized" );
+      ( "--owned-types-file",
+        Arg.String (fun s -> owned_types_file := Some s),
+        " Do not add a lifetime parameter to the types listend in this file"
+        ^ " (when --by-ref is enabled)" );
     ]
   in
   Arg.parse options (fun file -> files := file :: !files) usage;
@@ -184,7 +220,12 @@ let parse_args () =
     | None -> Configuration.(default.extern_types)
     | Some filename -> parse_extern_types_file filename
   in
-  Configuration.set { Configuration.mode = !mode; extern_types };
+  let owned_types =
+    match !owned_types_file with
+    | None -> Configuration.(default.owned_types)
+    | Some filename -> parse_owned_types_file filename
+  in
+  Configuration.set { Configuration.mode = !mode; extern_types; owned_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
   match !files with
   | [] ->

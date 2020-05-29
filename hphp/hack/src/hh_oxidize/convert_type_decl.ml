@@ -262,7 +262,7 @@ let type_params name params =
   if List.is_empty params then
     match Configuration.mode () with
     | Configuration.ByRef ->
-      if Convert_type.never_add_lifetime_parameter name then
+      if Configuration.owned_type name then
         ""
       else
         "<'a>"
@@ -273,7 +273,7 @@ let type_params name params =
     let params = params |> map_and_concat ~f:type_param ~sep:", " in
     match Configuration.mode () with
     | Configuration.ByRef ->
-      if Convert_type.never_add_lifetime_parameter name then
+      if Configuration.owned_type name then
         sprintf "<%s>" params
       else
         sprintf "<'a, %s>" params

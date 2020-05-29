@@ -449,6 +449,7 @@ function get_options($argv) {
     '*ignore-oids' => '',
     'jitsample:' => '',
     '*hh_single_type_check:' => '',
+    'write-to-checkout' => '',
   ];
   $options = darray[];
   $files = varray[];
@@ -549,6 +550,10 @@ function get_options($argv) {
     echo "The options\n -", implode("\n -", $multi_request_modes),
          "\nare mutually exclusive options\n";
     exit(1);
+  }
+
+  if (isset($options['write-to-checkout'])) {
+    Status::$write_to_checkout = true;
   }
 
   return varray[$options, $files];
@@ -1171,7 +1176,7 @@ function repo_mode_compile($options, $test, $program) {
     $result = exec_with_stack($hhbbc);
   }
   if ($result === true) return true;
-  file_put_contents("$test.diff", $result);
+  Status::writeDiff($test, $result);
 }
 
 
@@ -1387,6 +1392,7 @@ class Status {
   private static $overall_end_time = 0;
 
   private static $tmpdir = "";
+  public static $write_to_checkout = false;
 
   public static $passed = 0;
   public static $skipped = 0;
@@ -1427,10 +1433,30 @@ class Status {
     return self::$tmpdir . '/' . $test . '.' . $ext;
   }
 
+  // Similar to getTestTmpPath, but if we're run with --write-to-checkout
+  // then we put the files next to the test instead of in the tmpdir.
+  public static function getTestOutputPath(string $test, string $ext): string {
+    if (self::$write_to_checkout) {
+      return "$test.$ext";
+    }
+    return static::getTestTmpPath($test, $ext);
+  }
+
   public static function createTestTmpDir(string $test): string {
     $test_temp_dir = self::getTestTmpPath($test, 'tmpdir');
     @mkdir($test_temp_dir, 0777, true);
     return $test_temp_dir . '/';
+  }
+
+  public static function writeDiff(string $test, string $diff): void {
+    $path = Status::getTestOutputPath($test, 'diff');
+    @mkdir(dirname($path), 0777, true);
+    file_put_contents($path, $diff);
+  }
+
+  public static function diffForTest(string $test): string {
+    $diff = @file_get_contents(Status::getTestOutputPath($test, 'diff'));
+    return $diff === false ? '' : $diff;
   }
 
   public static function removeDirectory($dir) {
@@ -1691,7 +1717,7 @@ class Status {
             if (Status::hasCursorControl()) {
               print "\033[2K\033[1G";
             }
-            $diff = (string)@file_get_contents($test.'.diff');
+            $diff = Status::diffForTest($test);
             Status::sayColor(Status::RED, "\nFAILED",
                              ": $test\n$diff\n");
             break;
@@ -1758,7 +1784,7 @@ class Status {
     $end = darray['op' => 'test_done', 'test' => $test, 'status' => $status,
                  'start_time' => $stime, 'end_time' => $etime];
     if ($status == 'failed') {
-      $end['details'] = self::utf8Sanitize(@file_get_contents("$test.diff"));
+      $end['details'] = self::utf8Sanitize(Status::diffForTest($test));
     }
     self::say($start, $end);
   }
@@ -1840,7 +1866,7 @@ function clean_intermediate_files($test, $options) {
     return;
   }
   $exts = varray[
-    // normal test output
+    // normal test output will go here if we're run with --write-to-checkout
     'out',
     'diff',
     // repo mode tests
@@ -1872,6 +1898,9 @@ function clean_intermediate_files($test, $options) {
     }
   }
   $tmp_exts = varray[
+    // normal test output goes here by default
+    'out',
+    'diff',
     // scratch directory the test may write to
     'tmpdir',
   ];
@@ -2253,7 +2282,7 @@ function run_config_cli(
     "$cmd 2>&1", $descriptorspec, inout $pipes, null, $cmd_env
   );
   if (!is_resource($process)) {
-    file_put_contents("$test.diff", "Couldn't invoke $cmd");
+    Status::writeDiff($test, "Couldn't invoke $cmd");
     return false;
   }
 
@@ -2280,14 +2309,14 @@ function replace_object_resource_ids($str, $replacement) {
 function run_config_post($outputs, $test, $options) {
   $output = $outputs[0];
   $stderr = $outputs[1];
-  file_put_contents("$test.out", $output);
+  file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
 
   $error_ok = isset($options['repo']) && file_exists($test . '.hhbbc_assert');
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
   if ($stderr && !$error_ok) {
-    file_put_contents(
-      "$test.diff",
+    Status::writeDiff(
+      $test,
       "Test failed because the process wrote on stderr:\n$stderr"
     );
     return false;
@@ -2315,11 +2344,12 @@ function run_config_post($outputs, $test, $options) {
 
   list($file, $type) = get_expect_file_and_type($test, $options);
   if ($file === null || $type === null) {
-    file_put_contents(
-      "$test.diff", "No $test.expect, $test.expectf, " .
-      "$test.hhvm.expect, $test.hhvm.expectf, " .
-      "nor $test.expectregex. If $test is meant to be included by other ".
-      "tests, use a different file extension.\n"
+    Status::writeDiff(
+      $test,
+      "No $test.expect, $test.expectf, $test.hhvm.expect, " .
+      "$test.hhvm.expectf, or $test.expectregex. " .
+      "If $test is meant to be included by other tests, " .
+      "use a different file extension.\n"
     );
     return false;
   }
@@ -2334,7 +2364,7 @@ function run_config_post($outputs, $test, $options) {
     if (!$repeats) {
       $passed = !strcmp($output, $wanted);
       if (!$passed) {
-        file_put_contents("$test.diff", generate_diff($wanted, null, $output));
+        Status::writeDiff($test, generate_diff($wanted, null, $output));
       }
       return $passed;
     }
@@ -2438,7 +2468,7 @@ function run_config_post($outputs, $test, $options) {
     // but since the line by line diff came up empty, we're fine
     return true;
   }
-  file_put_contents("$test.diff", $diff);
+  Status::writeDiff($test, $diff);
   return false;
 }
 
@@ -2486,7 +2516,7 @@ function run_and_lock_test($options, $test) {
     if ($status) {
       clean_intermediate_files($test, $options);
     } else if ($failmsg === '') {
-      $failmsg = @file_get_contents("$test.diff");
+      $failmsg = Status::diffForTest($test);
       if (!$failmsg) $failmsg = "Test failed with empty diff";
     }
     if (!flock($lock, LOCK_UN, inout $wouldblock)) {
@@ -2577,30 +2607,24 @@ function run_test($options, $test) {
       );
       $hhas_temp1 = dump_hhas_to_temp($hhvm[0], "$test.before");
       if ($hhas_temp1 === false) {
-        file_put_contents(
-          "$test.diff",
-          "dumping hhas after first hhbbc pass failed"
-        );
+        Status::writeDiff($test, "dumping hhas after first hhbbc pass failed");
         return false;
       }
       shell_exec("mv $test_repo/$program.hhbbc $test_repo/$program.hhbc");
       $hhbbc = hhbbc_cmd($options, $test, $program);
       $result = exec_with_stack($hhbbc);
       if ($result !== true) {
-        file_put_contents("$test.diff", $result);
+        Status::writeDiff($test, $result);
         return false;
       }
       $hhas_temp2 = dump_hhas_to_temp($hhvm[0], "$test.after");
       if ($hhas_temp2 === false) {
-        file_put_contents(
-          "$test.diff",
-          "dumping hhas after second hhbbc pass failed"
-        );
+        Status::writeDiff($test, "dumping hhas after second hhbbc pass failed");
         return false;
       }
-      $diff = shell_exec("diff $hhas_temp1 $hhas_temp2 | wc -l");
-      if (trim($diff) != '0') {
-        shell_exec("diff $hhas_temp1 $hhas_temp2 > $test.diff");
+      $diff = shell_exec("diff $hhas_temp1 $hhas_temp2");
+      if (trim($diff) !== '') {
+        Status::writeDiff($test, $diff);
         return false;
       }
     }
@@ -2631,7 +2655,7 @@ function run_test($options, $test) {
       $err = "system failed: " .
         dump_hhas_cmd($hhvm[0], $test, $test.'.round_trip.hhas') .
         "\n";
-      file_put_contents("$test.diff", $err);
+      Status::writeDiff($test, $err);
       return false;
     }
     list($hhvm, $hhvm_env) = hhvm_cmd($options, $test, $hhas_temp);
@@ -2910,8 +2934,8 @@ function print_failure($argv, $results, $options) {
   print make_header("See failed test output and expectations:");
   foreach ($failed as $n => $test) {
     if ($n !== 0) print "\n";
-    print 'cat ' . $test.'.diff' . "\n";
-    print 'cat ' . $test.'.out' . "\n";
+    print 'cat ' . Status::getTestOutputPath($test, 'diff') . "\n";
+    print 'cat ' . Status::getTestOutputPath($test, 'out') . "\n";
     $expect_file = get_expect_file_and_type($test, $options)[0];
     if ($expect_file is null) {
       print "# no expect file found for $test\n";

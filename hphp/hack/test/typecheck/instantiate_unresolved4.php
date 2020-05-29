@@ -9,8 +9,8 @@
  *
  */
 
-/* HH_FIXME[4336] */
 function foo<T>(mixed $x): array<T> {
+  return varray[];
 }
 
 function a<T>(): array<T> {

@@ -16,7 +16,7 @@ abstract class Bar {
   abstract const type Talias as num;
   const type Tnum = this::Talias;
 
-  /* HH_FIXME[4336] */
   final public function go(I<this::Tnum> $x): this {
+    return $this;
   }
 }

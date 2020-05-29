@@ -50,37 +50,47 @@
        c_user_attributes = []; c_file_attributes = []; c_enum = None;
        c_pu_enums = []; c_doc_comment = None; c_emit_id = None });
   (Fun
-     { f_span = [9:1-10:2]; f_annotation = (); f_mode = Mstrict;
+     { f_span = [8:1-10:2]; f_annotation = (); f_mode = Mstrict;
        f_ret =
        ((I<T>),
-        (Some ([9:34-38],
-               (Happly (([9:34-35], "\\I"), [([9:36-37], (Habstr "T"))])))));
-       f_name = ([9:10-11], "\\f");
+        (Some ([8:34-38],
+               (Happly (([8:34-35], "\\I"), [([8:36-37], (Habstr "T"))])))));
+       f_name = ([8:10-11], "\\f");
        f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([9:12-13], "T");
+       [{ tp_variance = Invariant; tp_name = ([8:12-13], "T");
           tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
-       [{ param_annotation = ([9:20-22], I<T>);
+       [{ param_annotation = ([8:20-22], I<T>);
           param_type_hint =
           ((I<T>),
-           (Some ([9:15-19],
-                  (Happly (([9:15-16], "\\I"), [([9:17-18], (Habstr "T"))])))));
-          param_is_variadic = false; param_pos = [9:20-22];
+           (Some ([8:15-19],
+                  (Happly (([8:15-16], "\\I"), [([8:17-18], (Habstr "T"))])))));
+          param_is_variadic = false; param_pos = [8:20-22];
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None };
-         { param_annotation = ([9:29-31], I<T>);
+         { param_annotation = ([8:29-31], I<T>);
            param_type_hint =
            ((I<T>),
-            (Some ([9:24-28],
-                   (Happly (([9:24-25], "\\I"), [([9:26-27], (Habstr "T"))])))));
-           param_is_variadic = false; param_pos = [9:29-31];
+            (Some ([8:24-28],
+                   (Happly (([8:24-25], "\\I"), [([8:26-27], (Habstr "T"))])))));
+           param_is_variadic = false; param_pos = [8:29-31];
            param_name = "$_"; param_expr = None; param_callconv = None;
            param_user_attributes = []; param_visibility = None }
          ];
        f_body =
-       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       { fb_ast =
+         [([9:3-25],
+           (Throw
+              (([9:9-24], Exception),
+               (New (
+                  (([9:13-22], Exception), (CI ([9:13-22], "\\Exception"))),
+                  [], [], None,
+                  ([9:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
+                  )))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -90,26 +100,36 @@
          ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
        f_doc_comment = None; f_static = false });
   (Fun
-     { f_span = [13:1-14:2]; f_annotation = (); f_mode = Mstrict;
+     { f_span = [12:1-14:2]; f_annotation = (); f_mode = Mstrict;
        f_ret =
        ((E<T>),
-        (Some ([13:22-26],
-               (Happly (([13:22-23], "\\E"), [([13:24-25], (Habstr "T"))])))));
-       f_name = ([13:10-11], "\\g");
+        (Some ([12:22-26],
+               (Happly (([12:22-23], "\\E"), [([12:24-25], (Habstr "T"))])))));
+       f_name = ([12:10-11], "\\g");
        f_tparams =
-       [{ tp_variance = Invariant; tp_name = ([13:12-13], "T");
+       [{ tp_variance = Invariant; tp_name = ([12:12-13], "T");
           tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }
          ];
        f_where_constraints = []; f_variadic = FVnonVariadic;
        f_params =
-       [{ param_annotation = ([13:17-19], T);
-          param_type_hint = ((T), (Some ([13:15-16], (Habstr "T"))));
-          param_is_variadic = false; param_pos = [13:17-19];
+       [{ param_annotation = ([12:17-19], T);
+          param_type_hint = ((T), (Some ([12:15-16], (Habstr "T"))));
+          param_is_variadic = false; param_pos = [12:17-19];
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
        f_body =
-       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       { fb_ast =
+         [([13:3-25],
+           (Throw
+              (([13:9-24], Exception),
+               (New (
+                  (([13:13-22], Exception), (CI ([13:13-22], "\\Exception"))),
+                  [], [], None,
+                  ([13:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
+                  )))))
+           ];
+         fb_annotation = No unsafe blocks };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

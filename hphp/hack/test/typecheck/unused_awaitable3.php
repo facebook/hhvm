@@ -9,9 +9,8 @@
  *
  */
 
-/* HH_FIXME[4336] */
 function prep<T>(Awaitable<T> $x): T {
-
+  throw new Exception();
 }
 
 async function a(): Awaitable<int> {

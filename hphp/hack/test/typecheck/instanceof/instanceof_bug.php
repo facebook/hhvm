@@ -8,8 +8,8 @@ abstract class S<Tfb, Tsf, T> implements I<Tfb, Tsf, T> {
 }
 
 abstract class SF<Tfb, Tsf, T> extends S<Tfb, Tsf, T> {
-  /* HH_FIXME[4336] */
   final public function getBaseField(): S<Tfb, Tsf, T> {
+    throw new Exception();
   }
 }
 

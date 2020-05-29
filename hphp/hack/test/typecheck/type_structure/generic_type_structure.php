@@ -1,7 +1,7 @@
 <?hh // strict
 
-/* HH_FIXME[4336] */
 function ts<T>(typename<T> $tn): TypeStructure<T> {
+  throw new Exception();
 }
 
 function swap<T1, T2>(

@@ -43,8 +43,9 @@ function make_vector<T>(classname<T> $classname): Vector<T> {
   return $ret;
 }
 
-/* HH_FIXME[4336] */
 function factory<T>(classname<T> $classname): T {
+  // No way to make this function typecheck without appropriate constraints on T
+  throw new Exception();
 }
 
 function foo(): void {

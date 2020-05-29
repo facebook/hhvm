@@ -1,8 +1,8 @@
 <?hh // strict
 
 <<__Rx>>
-/* HH_FIXME[4336] */
 function returnsReactive(): Rx<(function(): void)> {
+  throw new Exception();
 }
 
 <<__Rx>>

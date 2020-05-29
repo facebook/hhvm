@@ -7,8 +7,8 @@
 class C {
   const type T as arraykey = arraykey;
 
-  /* HH_FIXME[4336] */
   public function get(): this::T {
+    throw new Exception();
   }
 
   public static function takesThis(this $c): void {}

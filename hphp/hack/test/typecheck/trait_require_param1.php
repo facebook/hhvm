@@ -1,8 +1,8 @@
 <?hh // partial
 
 abstract class Foo<T> {
-  /* HH_FIXME[4336] */
   protected function bar(): T {
+    throw new Exception();
   }
 }
 

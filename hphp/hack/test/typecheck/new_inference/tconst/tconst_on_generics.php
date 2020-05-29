@@ -7,8 +7,8 @@ abstract class Box {
 }
 class IntBox extends Box {
   const type T = int;
-  /* HH_FIXME[4336] */
   public function getK() : this::T {
+    return 4;
   }
   public function setK(this::T $x) : void {}
 

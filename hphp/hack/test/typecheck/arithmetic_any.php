@@ -69,11 +69,11 @@ function doDivIntAny(int $x): void {
   hh_show($y);
 }
 
-/* HH_FIXME[4336] */
 function sorted<T>(
   Traversable<T> $collection,
   ?(function(T, T): int) $comparator = null,
 ): Vector<T> {
+  return Vector {};
 }
 
 function TestSort():void {

@@ -1,7 +1,7 @@
 <?hh // strict
 
-/* HH_FIXME[4336] */
 function f(): ?int {
+  return null;
 }
 
 function g(): int {

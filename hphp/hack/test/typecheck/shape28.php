@@ -6,9 +6,8 @@
 
 interface I<-T> {}
 
-/* HH_FIXME[4336] */
 function f<Tv>(Tv $_): I<Tv> {
-
+  throw new Exception();
 }
 
 type s = shape(

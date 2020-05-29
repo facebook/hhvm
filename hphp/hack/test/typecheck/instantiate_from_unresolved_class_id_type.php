@@ -17,6 +17,6 @@ abstract class InstantiateTypeConstantFromClassname {
   }
 }
 
-/* HH_FIXME[4336] */
 function getClassname<T>(mixed $x, classname<T> $y): classname<T> {
+  return $y;
 }

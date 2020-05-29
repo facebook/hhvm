@@ -12,8 +12,8 @@ abstract class B extends A {
   public function g(): void {}
 }
 
-/* HH_FIXME[4336] */
 function b(): B {
+  throw new Exception();
 }
 
 //// file2.php

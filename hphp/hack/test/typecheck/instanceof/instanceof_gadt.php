@@ -170,7 +170,7 @@ function IEval<T>(Exp<T> $e): T {
   throw new Exception('Unknown expression');
 }
 
-/* HH_FIXME[1002] */
-TestOOP();
-/* HH_FIXME[1002] */
-TestInstanceof();
+function main(): void {
+  TestOOP();
+  TestInstanceof();
+}

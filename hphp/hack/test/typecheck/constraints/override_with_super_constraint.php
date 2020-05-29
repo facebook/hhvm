@@ -14,7 +14,7 @@ class TR<+Trv> implements MyIterable<Trv> {
   // So now we need to check MyIterable<Trv> <: MyIterable<Tu>
   // under constraint Tu super Trv i.e. Trv <: Tu
   // So this should hold!
-  /* HH_FIXME[4336] */
   public function concat<Tu super Trv>(): MyIterable<Trv> {
+    throw new Exception();
   }
 }

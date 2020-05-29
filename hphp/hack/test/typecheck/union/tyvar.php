@@ -1,7 +1,7 @@
 <?hh // strict
 
-/* HH_FIXME[4336] */
 function make_tvar<T>(): T { // actually this does not work creating a tvar...
+  throw new Exception();
 }
 function make_tvaropt<T>(): ?T { // ... but this does
   return null;

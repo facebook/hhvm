@@ -14,8 +14,7 @@ interface IFoo<T> {
 }
 
 class Foo implements IFoo<Awaitable<this>> {
-  /* HH_FIXME[4336] */
   public function run(): Awaitable<Awaitable<this>> {
-
+    throw new Exception();
   }
 }

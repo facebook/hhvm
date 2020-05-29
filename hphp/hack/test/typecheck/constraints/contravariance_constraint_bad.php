@@ -35,5 +35,6 @@ class TestClass {
   }
 }
 
-/* HH_FIXME[1002] */
-TestClass::BreakIt();
+function main(): void {
+  TestClass::BreakIt();
+}

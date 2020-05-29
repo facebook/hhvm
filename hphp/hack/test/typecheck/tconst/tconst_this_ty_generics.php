@@ -2,8 +2,9 @@
 
 abstract class Box<T> {
   abstract const type TValue;
-  /* HH_FIXME[4336] */
+
   final public function getResult(): T {
+    throw new Exception();
   }
 
 }
@@ -15,8 +16,8 @@ abstract class ReadResult extends Box2 {}
 abstract class TaoQuery<TGen, TGenw as Box<TGen>> {
   abstract const type TResult as Box2;
 
-  /* HH_FIXME[4336] */
   final public function genw(): TGenw {
+    throw new Exception();
   }
 
 }

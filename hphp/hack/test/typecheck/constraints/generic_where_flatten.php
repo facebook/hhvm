@@ -51,5 +51,6 @@ function TestIt():void {
   echo $n;
 }
 
-/* HH_FIXME[1002] */
-TestIt();
+function main(): void {
+  TestIt();
+}

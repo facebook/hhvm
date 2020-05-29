@@ -1,8 +1,8 @@
 <?hh //strict
 
 class A {
-  /* HH_FIXME[4336] */
   protected static function invariant_violation(): noreturn {
+    throw new Exception();
   }
 }
 

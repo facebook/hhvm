@@ -19,5 +19,6 @@ function test_it(bool $b): void {
   $x = new $t(2);
 }
 
-/* HH_FIXME[1002] */
-test_it(true);
+function main(): void {
+  test_it(true);
+}

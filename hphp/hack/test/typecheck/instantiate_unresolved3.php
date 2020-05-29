@@ -9,8 +9,8 @@
  *
  */
 
-/* HH_FIXME[4336] */
 function cached_result<T>(T $x): Awaitable<T> {
+  throw new Exception();
 }
 
 function any() {}

@@ -12,7 +12,7 @@ trait ATrait {
 }
 
 class Base<+T> {
-  /* HH_FIXME[4336] */
   public function get(): T {
+    throw new Exception();
   }
 }

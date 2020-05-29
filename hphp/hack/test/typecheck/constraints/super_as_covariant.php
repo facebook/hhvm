@@ -2,12 +2,12 @@
 
 class Cov<+T> {}
 
-/* HH_FIXME[4336] */
 function UseAs<Tv, Tu as Tv>(Cov<Tv> $x, Cov<Tu> $y): Tu {
+  throw new Exception();
 }
 
-/* HH_FIXME[4336] */
 function UseSuper<Tv super Tu, Tu>(Cov<Tv> $x, Cov<Tu> $y): Tu {
+  throw new Exception();
 }
 
 class MyBase {}

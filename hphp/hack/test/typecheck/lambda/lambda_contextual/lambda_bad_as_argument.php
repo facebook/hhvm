@@ -41,5 +41,6 @@ function breakIt(): void {
   $c($x);
 }
 
-/* HH_FIXME[1002] */
-breakIt();
+function main(): void {
+  breakIt();
+}

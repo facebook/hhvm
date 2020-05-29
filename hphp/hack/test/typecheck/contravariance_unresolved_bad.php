@@ -37,5 +37,6 @@ function BreakIt(): void {
   $c2->f(42);
 }
 
-/* HH_FIXME[1002] */
-BreakIt();
+function main(): void {
+  BreakIt();
+}

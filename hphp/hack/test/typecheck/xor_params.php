@@ -1,8 +1,8 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-/* HH_FIXME[4336] */
 function nullthrows<T>(?T $x): T {
+  return $x as nonnull;
 }
 
 final class XorParam<Tx, Ty> {

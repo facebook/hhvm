@@ -31,5 +31,6 @@ function breakIt(): void {
   use_with_ints($caller);
 }
 
-/* HH_FIXME[1002] */
-breakIt();
+function main(): void {
+  breakIt();
+}

@@ -5,12 +5,12 @@ interface I<-T> {}
 
 class E<T> implements I<T> {}
 
-/* HH_FIXME[4336] */
 function f<T>(I<T> $_, I<T> $_): I<T> {
+  throw new Exception();
 }
 
-/* HH_FIXME[4336] */
 function g<T>(T $_): E<T> {
+  throw new Exception();
 }
 
 function test(): void {

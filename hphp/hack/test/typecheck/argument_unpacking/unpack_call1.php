@@ -21,16 +21,16 @@ class C2 extends C1 {
   }
 }
 
-/* HH_FIXME[4336] */
 function make_int_args(): Container<int> {
+  return vec[];
 }
 
-/* HH_FIXME[4336] */
 function make_mixed_args(): array<mixed> {
+  return varray[];
 }
 
-/* HH_FIXME[4336] */
 function make_str_args(): Vector<string> {
+  return Vector {};
 }
 
 function test_basic(): void {

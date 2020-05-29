@@ -15,8 +15,8 @@ function f(): void {
   $z = $x.", world!";
 }
 
-/* HH_FIXME[4336] Don't care what this returns, just that it is of type T */
 function goodbye<T as HH\Lib\Regex\Match>(HH\Lib\Regex\Pattern<T> $pattern): T {
+  throw new Exception();
 }
 
 /* Bad regex patterns that can't be compiled by PCRE give type errors */

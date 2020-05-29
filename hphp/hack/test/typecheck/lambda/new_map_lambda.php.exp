@@ -10,5 +10,5 @@ File "new_map_lambda.php", line 25, characters 26-31:
 Expected MyEnum
 File "new_map_lambda.php", line 22, characters 30-35:
 But got string
-File "new_map_lambda.php", line 12, characters 15-16:
+File "new_map_lambda.php", line 11, characters 15-16:
   via this generic Tk

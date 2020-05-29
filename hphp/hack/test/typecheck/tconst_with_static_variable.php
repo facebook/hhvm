@@ -2,8 +2,8 @@
 
 abstract class Foo {
   abstract const type T;
-  /* HH_FIXME[4336] */
   public function get(): this::T {
+    throw new Exception();
   }
   public function instance(): this::T {
     $instance = $this->get();

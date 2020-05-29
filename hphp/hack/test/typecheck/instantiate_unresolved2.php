@@ -15,8 +15,8 @@ class C {
   }
 }
 
-/* HH_FIXME[4336] */
 function nullthrows<T>(?T $x): T {
+  return $x as nonnull;
 }
 
 async function f(): Awaitable<int> {

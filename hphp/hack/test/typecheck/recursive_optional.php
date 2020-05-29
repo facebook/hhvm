@@ -1,7 +1,7 @@
 <?hh // partial
 
-/* HH_FIXME[4336] */
 function my_compact<T>(Vector<?T> $vector): Vector<T> {
+  return Vector {};
 }
 
 function test(bool $b): ?string {

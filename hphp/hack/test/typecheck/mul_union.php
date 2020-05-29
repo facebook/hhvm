@@ -16,5 +16,6 @@ function badInt(bool $b): int {
   return $z;
 }
 
-/* HH_FIXME[1002] */
-badInt(false);
+function main(): void {
+  badInt(false);
+}

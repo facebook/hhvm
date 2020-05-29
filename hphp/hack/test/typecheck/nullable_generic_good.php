@@ -1,11 +1,11 @@
 <?hh // strict
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-/* HH_FIXME[4336] */
 function coerce<T>(
   TypeStructure<T> $ts,
   mixed $value,
 ): T {
+  throw new Exception();
 }
 
 function getNullableParamOfType<T>(

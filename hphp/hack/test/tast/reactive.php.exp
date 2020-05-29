@@ -1,5 +1,5 @@
 [(Fun
-    { f_span = [2:1-5:2]; f_annotation = (); f_mode = Mstrict;
+    { f_span = [2:1-6:2]; f_annotation = (); f_mode = Mstrict;
       f_ret =
       (((function(int): void)),
        (Some ([4:18-45],
@@ -13,7 +13,17 @@
       f_name = ([4:10-13], "\\foo"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
       f_body =
-      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+      { fb_ast =
+        [([5:3-25],
+          (Throw
+             (([5:9-24], Exception),
+              (New (
+                 (([5:13-22], Exception), (CI ([5:13-22], "\\Exception"))),
+                 [], [], None,
+                 ([5:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
+                 )))))
+          ];
+        fb_annotation = No unsafe blocks };
       f_fun_kind = FSync;
       f_user_attributes = [{ ua_name = ([2:3-7], "__Rx"); ua_params = [] }];
       f_file_attributes = []; f_external = false;

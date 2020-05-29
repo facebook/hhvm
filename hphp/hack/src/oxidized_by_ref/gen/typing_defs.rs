@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<223eed14448f804c316013ba08361d41>>
+// @generated SignedSource<<80c803d99a036d0cb7c273c3234dcf17>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -24,11 +24,11 @@ pub use typing_defs_core::*;
 )]
 pub struct ClassElt<'a> {
     pub visibility: Visibility<'a>,
-    pub type_: oxidized::lazy::Lazy<Ty<'a>>,
+    pub type_: lazy::Lazy<Ty<'a>>,
     /// identifies the class from which this elt originates
     pub origin: &'a str,
     pub deprecated: Option<&'a str>,
-    pub pos: oxidized::lazy::Lazy<&'a pos::Pos<'a>>,
+    pub pos: lazy::Lazy<&'a pos::Pos<'a>>,
     pub flags: isize,
 }
 impl<'a> TrivialDrop for ClassElt<'a> {}
@@ -109,7 +109,7 @@ pub struct ClassType<'a> {
     pub methods: s_map::SMap<'a, ClassElt<'a>>,
     pub smethods: s_map::SMap<'a, ClassElt<'a>>,
     /// the consistent_kind represents final constructor or __ConsistentConstruct
-    pub construct: (Option<ClassElt<'a>>, oxidized::typing_defs::ConsistentKind),
+    pub construct: (Option<ClassElt<'a>>, ConsistentKind),
     /// This includes all the classes, interfaces and traits this class is
     /// using.
     pub ancestors: s_map::SMap<'a, Ty<'a>>,
@@ -178,7 +178,13 @@ pub struct EnumType<'a> {
 }
 impl<'a> TrivialDrop for EnumType<'a> {}
 
-pub use oxidized::typing_defs::RecordFieldReq;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum RecordFieldReq {
+    ValueRequired,
+    HasDefaultValue,
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -186,7 +192,7 @@ pub use oxidized::typing_defs::RecordFieldReq;
 pub struct RecordDefType<'a> {
     pub name: nast::Sid<'a>,
     pub extends: Option<nast::Sid<'a>>,
-    pub fields: &'a [(nast::Sid<'a>, oxidized::typing_defs::RecordFieldReq)],
+    pub fields: &'a [(nast::Sid<'a>, RecordFieldReq)],
     pub abstract_: bool,
     pub pos: &'a pos::Pos<'a>,
     pub errors: Option<errors::Errors<'a>>,

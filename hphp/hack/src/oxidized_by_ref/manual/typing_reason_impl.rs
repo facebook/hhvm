@@ -1,19 +1,35 @@
-use crate::gen::ast_defs::Id;
-use crate::gen::typing_reason::Reason;
-use crate::gen::typing_reason::Reason::*;
-use crate::pos::Pos;
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
 
-// Helper functions on Reason
-impl Reason {
-    // Position is owned by reason
-    pub fn get_pos(&self) -> &Pos {
+use crate::ast_defs::Id;
+use crate::pos::Pos;
+use crate::typing_reason::*;
+
+const RNONE: &Reason<'_> = &Reason::Rnone;
+
+impl<'a> Reason<'a> {
+    pub const fn none() -> &'static Reason<'static> {
+        RNONE
+    }
+
+    pub fn hint(pos: &'a Pos<'a>) -> Self {
+        Reason::Rhint(pos)
+    }
+
+    pub fn witness(pos: &'a Pos<'a>) -> Self {
+        Reason::Rwitness(pos)
+    }
+
+    pub fn instantiate(r1: &'a Reason<'a>, x: &'a str, r2: &'a Reason<'a>) -> Self {
+        Reason::Rinstantiate(r1, x, r2)
+    }
+
+    pub fn pos(&self) -> Option<&'a Pos<'a>> {
+        use Reason::*;
         match self {
-            Rnone => {
-                // TODO: not sure what to do about this
-                // Maybe return an Option<_> instead
-                let _p = Pos::make_none();
-                panic!("NYI");
-            }
+            Rnone => None,
             Rwitness(p)
             | Ridx(p, _)
             | RidxVector(p)
@@ -46,7 +62,10 @@ impl Reason {
             | RvarParam(p)
             | RunpackParam(p, _, _)
             | RinoutParam(p)
+            | Rtypeconst(Rnone, (p, _), _, _)
+            | RarrayFilter(p, _)
             | RnullsafeOp(p)
+            | RtconstNoCstr(Id(p, _))
             | Rpredicated(p, _)
             | Ris(p)
             | Ras(p)
@@ -57,7 +76,6 @@ impl Reason {
             | RidxDict(p)
             | RmissingRequiredField(p, _)
             | RmissingOptionalField(p, _)
-            | RarrayFilter(p, _)
             | RunsetField(p, _)
             | Rregex(p)
             | RlambdaUse(p)
@@ -79,19 +97,14 @@ impl Reason {
             | RkeyValueCollectionKey(p)
             | RglobalClassProp(p)
             | RglobalFunParam(p)
-            | RglobalFunRet(p) => p,
+            | RglobalFunRet(p) => Some(p),
             RlostInfo(_, r, _, _)
             | Rinstantiate(_, _, r)
+            | Rtypeconst(r, _, _, _)
             | RtypeAccess(r, _)
             | RexprDepType(r, _, _)
             | RcontravariantGeneric(r, _)
-            | RinvariantGeneric(r, _) => (*r).get_pos(),
-            Rtypeconst(r, (p, _), _, _) => match r.as_ref() {
-                Rnone => p,
-                r => r.get_pos(),
-            },
-            // Need to get pos out of sid
-            RtconstNoCstr(Id(p, _)) => p,
+            | RinvariantGeneric(r, _) => r.pos(),
         }
     }
 }

@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use oxidized::typing_reason::Reason as OxReason;
 use std::rc::Rc;
 
 use crate::pos::Pos;
-use crate::{aast, ast_defs, ast_defs::Id};
+use crate::{aast, ast_defs};
 
-pub use oxidized::typing_reason::ArgPosition;
+pub use oxidized_by_ref::typing_reason::ArgPosition;
 
 #[derive(Clone, Debug, Hash)]
 pub struct Reason {
@@ -116,81 +115,14 @@ pub enum ExprDepTypeReason {
     ERself(String),
 }
 
-impl Reason {
-    pub const fn new(pos: Option<Rc<Pos>>, reason: Reason_) -> Self {
-        Self { pos, reason }
-    }
-
-    pub const fn none() -> Reason {
-        Self {
-            pos: None,
-            reason: Reason_::Rnone,
-        }
-    }
-
-    pub fn with_pos(pos: Rc<Pos>, reason: Reason_) -> Self {
-        let pos = if pos.is_none() { None } else { Some(pos) };
-        Self { pos, reason }
-    }
-
-    pub fn hint(pos: Rc<Pos>) -> Self {
-        Self::with_pos(pos, Reason_::Rhint)
-    }
-
-    pub fn witness(pos: Rc<Pos>) -> Self {
-        Self::with_pos(pos, Reason_::Rwitness)
-    }
-
-    pub fn instantiate(r1: Rc<Reason>, x: String, r2: Rc<Reason>) -> Self {
-        Self::new(r2.pos.clone(), Reason_::Rinstantiate(r1, x, r2))
-    }
-
-    pub fn to_oxidized(&self) -> OxReason {
-        use OxReason as O;
-        use Reason_ as R;
-
-        let pos = match &self.pos {
-            Some(pos) => pos.as_ref().clone(),
-            None => oxidized::pos::Pos::make_none(),
-        };
-        match &self.reason {
-            R::Rnone => O::Rnone,
-            R::Rwitness => O::Rwitness(pos),
-            R::RnoReturn => O::RnoReturn(pos),
-            R::Rhint => O::Rhint(pos),
-            R::Rinstantiate(r_orig, generic_name, r_inst) => O::Rinstantiate(
-                Box::new(r_orig.to_oxidized()),
-                generic_name.to_string(),
-                Box::new(r_inst.to_oxidized()),
-            ),
-            R::RcontravariantGeneric(r_orig, class_name) => {
-                O::RcontravariantGeneric(Box::new(r_orig.to_oxidized()), class_name.to_string())
-            }
-            R::RinvariantGeneric(r_orig, class_name) => {
-                O::RinvariantGeneric(Box::new(r_orig.to_oxidized()), class_name.to_string())
-            }
-            R::RtypeVariable => O::RtypeVariable(pos),
-            R::RtypeVariableGenerics(tp_name, s) => {
-                O::RtypeVariableGenerics(pos, tp_name.to_string(), s.to_string())
-            }
-            R::RsolveFail => O::RsolveFail(pos),
-            R::RcstrOnGenerics(Id(id_pos, id)) => O::RcstrOnGenerics(
-                pos,
-                oxidized::ast_defs::Id(id_pos.as_ref().clone(), id.to_string()),
-            ),
-            _ => unimplemented!("Reason::to_oxidized for {:?}", &self.reason),
-        }
-    }
-}
-
 impl serde::Serialize for Reason {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.to_oxidized().serialize(serializer)
+    fn serialize<S: serde::Serializer>(&self, _serializer: S) -> Result<S::Ok, S::Error> {
+        unimplemented!()
     }
 }
 
 impl ocamlrep::ToOcamlRep for Reason {
-    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, alloc: &'a A) -> ocamlrep::Value<'a> {
-        self.to_oxidized().to_ocamlrep(alloc)
+    fn to_ocamlrep<'a, A: ocamlrep::Allocator>(&self, _alloc: &'a A) -> ocamlrep::Value<'a> {
+        unimplemented!()
     }
 }

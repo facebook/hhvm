@@ -172,9 +172,7 @@ let unbox_field ty =
   ||
   match Configuration.mode () with
   | Configuration.ByRef ->
-    ty = "oxidized::tany_sentinel::TanySentinel"
-    || ty = "ident::Ident"
-    || ty = "Ty<'a>"
+    ty = "tany_sentinel::TanySentinel" || ty = "ident::Ident" || ty = "Ty<'a>"
   | Configuration.ByBox -> false
   | Configuration.ByRc -> false
 

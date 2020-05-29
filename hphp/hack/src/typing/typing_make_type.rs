@@ -415,7 +415,7 @@ impl<'a> TypeBuilder<'a> {
         name: &'a str,
         r1: &'a Reason<'a>,
     ) -> &'a Reason<'a> {
-        self.alloc(Reason::instantiate(r0, name, r1))
+        self.alloc(Reason::Rinstantiate(r0, name, r1))
     }
 
     pub fn mk_rtype_variable_generics(
@@ -424,10 +424,7 @@ impl<'a> TypeBuilder<'a> {
         param_name: &'a str,
         fn_name: &'a str,
     ) -> &'a Reason<'a> {
-        self.alloc(Reason {
-            pos: Some(pos),
-            reason: Reason_::RtypeVariableGenerics(param_name, fn_name),
-        })
+        self.alloc(Reason::RtypeVariableGenerics(pos, param_name, fn_name))
     }
 
     pub fn mk_rwitness(&'a self, pos: &'a Pos) -> &'a Reason<'a> {

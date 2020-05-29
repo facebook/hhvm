@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<92270aaf16b743ed68e31ef80f331b15>>
+// @generated SignedSource<<e4b759e6f4596bb8812ee8967d9a900d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -63,7 +63,7 @@ pub struct ShallowPuEnum {
 )]
 pub struct ShallowProp {
     pub const_: bool,
-    pub xhp_attr: Option<oxidized::shallow_decl_defs::XhpAttr>,
+    pub xhp_attr: Option<oxidized_by_ref::shallow_decl_defs::XhpAttr>,
     pub lateinit: bool,
     pub lsb: bool,
     pub name: aast::Sid,

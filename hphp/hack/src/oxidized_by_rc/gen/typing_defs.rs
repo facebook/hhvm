@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<09520b00a0ddd65f348b3cad46107ff5>>
+// @generated SignedSource<<711f1947db0e5421e9631cb2b98a27fe>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -23,11 +23,11 @@ pub use typing_defs_core::*;
 )]
 pub struct ClassElt {
     pub visibility: Visibility,
-    pub type_: oxidized::lazy::Lazy<Ty>,
+    pub type_: oxidized_by_ref::lazy::Lazy<Ty>,
     /// identifies the class from which this elt originates
     pub origin: std::rc::Rc<String>,
     pub deprecated: Option<std::rc::Rc<String>>,
-    pub pos: oxidized::lazy::Lazy<std::rc::Rc<pos::Pos>>,
+    pub pos: oxidized_by_ref::lazy::Lazy<std::rc::Rc<pos::Pos>>,
     pub flags: isize,
 }
 
@@ -104,7 +104,10 @@ pub struct ClassType {
     pub methods: s_map::SMap<ClassElt>,
     pub smethods: s_map::SMap<ClassElt>,
     /// the consistent_kind represents final constructor or __ConsistentConstruct
-    pub construct: (Option<ClassElt>, oxidized::typing_defs::ConsistentKind),
+    pub construct: (
+        Option<ClassElt>,
+        oxidized_by_ref::typing_defs::ConsistentKind,
+    ),
     /// This includes all the classes, interfaces and traits this class is
     /// using.
     pub ancestors: s_map::SMap<Ty>,
@@ -167,7 +170,7 @@ pub struct EnumType {
     pub constraint: Option<Ty>,
 }
 
-pub use oxidized::typing_defs::RecordFieldReq;
+pub use oxidized_by_ref::typing_defs::RecordFieldReq;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -175,7 +178,7 @@ pub use oxidized::typing_defs::RecordFieldReq;
 pub struct RecordDefType {
     pub name: nast::Sid,
     pub extends: Option<nast::Sid>,
-    pub fields: Vec<(nast::Sid, oxidized::typing_defs::RecordFieldReq)>,
+    pub fields: Vec<(nast::Sid, oxidized_by_ref::typing_defs::RecordFieldReq)>,
     pub abstract_: bool,
     pub pos: std::rc::Rc<pos::Pos>,
     pub errors: Option<errors::Errors>,

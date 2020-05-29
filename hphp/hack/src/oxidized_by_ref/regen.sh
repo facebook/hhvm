@@ -46,6 +46,7 @@ BUILD_AND_RUN="hphp/hack/scripts/build_and_run.sh"
   hphp/hack/src/typing/typing_local_types.ml                                  \
   hphp/hack/src/typing/typing_mutability_env.ml                               \
   hphp/hack/src/typing/typing_per_cont_env.ml                                 \
+  hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/utils/core/prim_defs.ml                                       \
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<398f7b8d67d551a0f791af3548ca119f>>
+// @generated SignedSource<<bbd1f2fba8a8ba25825a809aa5a1ed95>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -68,7 +68,7 @@ impl<'a> TrivialDrop for ShallowPuEnum<'a> {}
 )]
 pub struct ShallowProp<'a> {
     pub const_: bool,
-    pub xhp_attr: Option<oxidized::shallow_decl_defs::XhpAttr>,
+    pub xhp_attr: Option<XhpAttr>,
     pub lateinit: bool,
     pub lsb: bool,
     pub name: aast::Sid<'a>,

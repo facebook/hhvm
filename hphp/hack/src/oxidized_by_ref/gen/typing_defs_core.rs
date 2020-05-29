@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<b33e7b64b711feee6f8a44cd74bc3f26>>
+// @generated SignedSource<<57a7c990841db96844589f330cdd2bce>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -27,23 +27,96 @@ pub enum Visibility<'a> {
 }
 impl<'a> TrivialDrop for Visibility<'a> {}
 
-pub use oxidized::typing_defs_core::Exact;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum Exact {
+    Exact,
+    Nonexact,
+}
 
-pub use oxidized::typing_defs_core::ValKind;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum ValKind {
+    Lval,
+    LvalSubexpr,
+    Other,
+}
 
-pub use oxidized::typing_defs_core::ParamMutability;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum ParamMutability {
+    ParamOwnedMutable,
+    ParamBorrowedMutable,
+    ParamMaybeMutable,
+}
 
-pub use oxidized::typing_defs_core::FunTparamsKind;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum FunTparamsKind {
+    /// If ft_tparams is empty, the containing fun_type is a concrete function type.
+    /// Otherwise, it is a generic function and ft_tparams specifies its type parameters.
+    FTKtparams,
+    /// The containing fun_type is a concrete function type which is an
+    /// instantiation of a generic function with at least one reified type
+    /// parameter. This means that the function requires explicit type arguments
+    /// at every invocation, and ft_tparams specifies the type arguments with
+    /// which the generic function was instantiated, as well as whether each
+    /// explicit type argument must be reified.
+    FTKinstantiatedTargs,
+}
 
-pub use oxidized::typing_defs_core::ShapeKind;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum ShapeKind {
+    ClosedShape,
+    OpenShape,
+}
 
-pub use oxidized::typing_defs_core::ParamMode;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum ParamMode {
+    FPnormal,
+    FPinout,
+}
 
-pub use oxidized::typing_defs_core::XhpAttrTag;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum XhpAttrTag {
+    Required,
+    Lateinit,
+}
 
-pub use oxidized::typing_defs_core::XhpAttr;
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub struct XhpAttr {
+    pub tag: Option<XhpAttrTag>,
+    pub has_default: bool,
+}
+impl TrivialDrop for XhpAttr {}
 
-pub use oxidized::typing_defs_core::ConsistentKind;
+/// Denotes the categories of requirements we apply to constructor overrides.
+///
+/// In the default case, we use Inconsistent. If a class has <<__ConsistentConstruct>>,
+/// or if it inherits a class that has <<__ConsistentConstruct>>, we use inherited.
+/// If we have a new final class that doesn't extend from <<__ConsistentConstruct>>,
+/// then we use Final. Only classes that are Inconsistent or Final can have reified
+/// generics.
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum ConsistentKind {
+    Inconsistent,
+    ConsistentConstruct,
+    FinalClass,
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -55,7 +128,13 @@ pub enum DependentType<'a> {
 }
 impl<'a> TrivialDrop for DependentType<'a> {}
 
-pub use oxidized::typing_defs_core::DestructureKind;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum DestructureKind {
+    ListDestructure,
+    SplatUnpack,
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -153,7 +232,7 @@ pub enum Ty_<'a> {
     /// Will be refined to Tpu, or to the actual type associated with an
     /// atom, once typechecking is successful.
     TpuAccess(&'a (Ty<'a>, nast::Sid<'a>)),
-    Tany(oxidized::tany_sentinel::TanySentinel),
+    Tany(tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
     /// A dynamic type is a special type which sometimes behaves as if it were a
@@ -177,12 +256,7 @@ pub enum Ty_<'a> {
     Ttuple(&'a [Ty<'a>]),
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
-    Tshape(
-        &'a (
-            oxidized::typing_defs_core::ShapeKind,
-            nast::shape_map::ShapeMap<'a, ShapeFieldType<'a>>,
-        ),
-    ),
+    Tshape(&'a (ShapeKind, nast::shape_map::ShapeMap<'a, ShapeFieldType<'a>>)),
     Tvar(ident::Ident),
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
@@ -229,13 +303,7 @@ pub enum Ty_<'a> {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
-    Tclass(
-        &'a (
-            nast::Sid<'a>,
-            oxidized::typing_defs_core::Exact,
-            &'a [Ty<'a>],
-        ),
-    ),
+    Tclass(&'a (nast::Sid<'a>, Exact, &'a [Ty<'a>])),
     /// Typing of Pocket Universe Expressions
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
@@ -293,7 +361,7 @@ pub struct Destructure<'a> {
     pub variadic: Option<Ty<'a>>,
     /// list() destructuring allows for partial matches on lists, even when the operation
     /// might throw i.e. list($a) = vec[];
-    pub kind: oxidized::typing_defs_core::DestructureKind,
+    pub kind: DestructureKind,
 }
 impl<'a> TrivialDrop for Destructure<'a> {}
 
@@ -356,7 +424,7 @@ pub struct FunType<'a> {
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy<'a>,
     pub reactive: Reactivity<'a>,
-    pub flags: oxidized::typing_defs_flags::FunTypeFlags,
+    pub flags: typing_defs_flags::FunTypeFlags,
 }
 impl<'a> TrivialDrop for FunType<'a> {}
 
@@ -401,7 +469,7 @@ pub struct FunParam<'a> {
     pub name: Option<&'a str>,
     pub type_: PossiblyEnforcedTy<'a>,
     pub rx_annotation: Option<ParamRxAnnotation<'a>>,
-    pub flags: oxidized::typing_defs_flags::FunParamFlags,
+    pub flags: typing_defs_flags::FunParamFlags,
 }
 impl<'a> TrivialDrop for FunParam<'a> {}
 

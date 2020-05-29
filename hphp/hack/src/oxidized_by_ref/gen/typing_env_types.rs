@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<667a4434bbb8341bb056c17d5d9d4204>>
+// @generated SignedSource<<80e05d98df5c0150a5601ef62b1b4601>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -40,13 +40,13 @@ pub struct Env<'a> {
     pub fresh_typarams: s_set::SSet<'a>,
     pub lenv: LocalEnv<'a>,
     pub genv: Genv<'a>,
-    pub decl_env: oxidized::decl_env::Env,
+    pub decl_env: decl_env::Env<'a>,
     pub in_loop: bool,
     pub in_try: bool,
     pub in_case: bool,
     pub inside_constructor: bool,
     pub inside_ppl_class: bool,
-    pub global_tpenv: oxidized::type_parameter_env::TypeParameterEnv,
+    pub global_tpenv: type_parameter_env::TypeParameterEnv<'a>,
     pub log_levels: s_map::SMap<'a, isize>,
     pub inference_env: typing_inference_env::TypingInferenceEnv<'a>,
     pub allow_wildcards: bool,
@@ -59,14 +59,14 @@ impl<'a> TrivialDrop for Env<'a> {}
 pub struct Genv<'a> {
     pub tcopt: oxidized::typechecker_options::TypecheckerOptions,
     pub return_: typing_env_return_info::TypingEnvReturnInfo<'a>,
-    pub params: local_id::map::Map<'a, (Ty<'a>, oxidized::typing_defs::ParamMode)>,
+    pub params: local_id::map::Map<'a, (Ty<'a>, ParamMode)>,
     pub condition_types: s_map::SMap<'a, Ty<'a>>,
     pub parent: Option<(&'a str, Ty<'a>)>,
     pub self_: Option<(&'a str, Ty<'a>)>,
     pub static_: bool,
     pub fun_kind: oxidized::ast_defs::FunKind,
-    pub val_kind: oxidized::typing_defs::ValKind,
-    pub fun_mutable: Option<oxidized::typing_defs::ParamMutability>,
+    pub val_kind: typing_defs::ValKind,
+    pub fun_mutable: Option<ParamMutability>,
     pub file: relative_path::RelativePath<'a>,
 }
 impl<'a> TrivialDrop for Genv<'a> {}

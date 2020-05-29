@@ -3,9 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use oxidized::tany_sentinel;
-pub use oxidized::typing_defs_flags;
-
 mod manual;
 
 pub use manual::ast;
@@ -25,9 +22,10 @@ pub use manual::relative_path;
 pub use manual::s_map;
 pub use manual::s_set;
 pub use manual::shape_map;
+pub use manual::tany_sentinel;
 pub use manual::typing_continuations;
+pub use manual::typing_defs_flags;
 pub use manual::typing_logic;
-pub use manual::typing_reason;
 pub use manual::typing_set;
 
 mod gen;
@@ -57,4 +55,5 @@ pub use gen::typing_inference_env;
 pub use gen::typing_local_types;
 pub use gen::typing_mutability_env;
 pub use gen::typing_per_cont_env;
+pub use gen::typing_reason;
 pub use gen::typing_tyvar_occurrences;

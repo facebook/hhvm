@@ -3,15 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use crate::gen::ident::Ident;
+use crate::tast::FuncBodyAnn;
 
-pub trait New {
-    fn new() -> Self;
-}
-
-impl New for Ident {
-    fn new() -> Self {
-        // TODO(hrust)
-        0
+impl Default for FuncBodyAnn {
+    fn default() -> Self {
+        FuncBodyAnn::NoUnsafeBlocks
     }
 }

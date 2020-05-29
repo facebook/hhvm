@@ -6,6 +6,7 @@
 use std::cmp::Ordering;
 
 use crate::aast_defs::Tprim;
+use crate::ast_defs::ParamKind;
 use crate::ident::Ident;
 use crate::pos::Pos;
 use crate::typing_defs_core::*;
@@ -149,5 +150,14 @@ impl<'a> InternalType<'a> {
 impl Default for Reactivity<'_> {
     fn default() -> Self {
         Reactivity::Nonreactive
+    }
+}
+
+impl From<Option<ParamKind>> for ParamMode {
+    fn from(callconv: Option<ParamKind>) -> Self {
+        match callconv {
+            Some(ParamKind::Pinout) => ParamMode::FPinout,
+            None => ParamMode::FPnormal,
+        }
     }
 }

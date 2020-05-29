@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-pub use oxidized::tany_sentinel;
-pub use oxidized::typing_defs_flags;
+pub use oxidized_by_ref::tany_sentinel;
+pub use oxidized_by_ref::typing_defs_flags;
 
 mod manual;
 

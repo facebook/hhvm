@@ -1250,7 +1250,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 // If the name contained a namespace delimiter in the original
                 // source text, then it can't have referred to a type parameter
                 // (since type parameters cannot be namespaced).
-                match ty.0.pos {
+                match ty.0.pos() {
                     Some(pos) => {
                         if self.source_text_at_pos(pos).contains(&b'\\') {
                             return ty;

@@ -20,11 +20,14 @@ pub mod relative_path;
 pub mod s_map;
 pub mod s_set;
 pub mod shape_map;
+pub mod tany_sentinel;
 pub mod typing_continuations;
+pub mod typing_defs_flags;
 pub mod typing_logic;
-pub mod typing_reason;
 pub mod typing_set;
 
 mod ast_defs_impl;
 mod errors_impl;
+mod tast_impl;
 mod typing_defs_core_impl;
+mod typing_reason_impl;

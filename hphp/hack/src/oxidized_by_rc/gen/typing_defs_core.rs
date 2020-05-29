@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<de608e5c295eedb4757ed5a287187589>>
+// @generated SignedSource<<52749c0021e4a4899616a2b544692bb2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -25,23 +25,23 @@ pub enum Visibility {
     Vprotected(std::rc::Rc<String>),
 }
 
-pub use oxidized::typing_defs_core::Exact;
+pub use oxidized_by_ref::typing_defs_core::Exact;
 
-pub use oxidized::typing_defs_core::ValKind;
+pub use oxidized_by_ref::typing_defs_core::ValKind;
 
-pub use oxidized::typing_defs_core::ParamMutability;
+pub use oxidized_by_ref::typing_defs_core::ParamMutability;
 
-pub use oxidized::typing_defs_core::FunTparamsKind;
+pub use oxidized_by_ref::typing_defs_core::FunTparamsKind;
 
-pub use oxidized::typing_defs_core::ShapeKind;
+pub use oxidized_by_ref::typing_defs_core::ShapeKind;
 
-pub use oxidized::typing_defs_core::ParamMode;
+pub use oxidized_by_ref::typing_defs_core::ParamMode;
 
-pub use oxidized::typing_defs_core::XhpAttrTag;
+pub use oxidized_by_ref::typing_defs_core::XhpAttrTag;
 
-pub use oxidized::typing_defs_core::XhpAttr;
+pub use oxidized_by_ref::typing_defs_core::XhpAttr;
 
-pub use oxidized::typing_defs_core::ConsistentKind;
+pub use oxidized_by_ref::typing_defs_core::ConsistentKind;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -52,7 +52,7 @@ pub enum DependentType {
     DTexpr(ident::Ident),
 }
 
-pub use oxidized::typing_defs_core::DestructureKind;
+pub use oxidized_by_ref::typing_defs_core::DestructureKind;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -143,7 +143,7 @@ pub enum Ty_ {
     /// Will be refined to Tpu, or to the actual type associated with an
     /// atom, once typechecking is successful.
     TpuAccess(Ty, nast::Sid),
-    Tany(oxidized::tany_sentinel::TanySentinel),
+    Tany(oxidized_by_ref::tany_sentinel::TanySentinel),
     Terr,
     Tnonnull,
     /// A dynamic type is a special type which sometimes behaves as if it were a
@@ -168,7 +168,7 @@ pub enum Ty_ {
     /// Whether all fields of this shape are known, types of each of the
     /// known arms.
     Tshape(
-        oxidized::typing_defs_core::ShapeKind,
+        oxidized_by_ref::typing_defs_core::ShapeKind,
         nast::shape_map::ShapeMap<ShapeFieldType>,
     ),
     Tvar(ident::Ident),
@@ -217,7 +217,7 @@ pub enum Ty_ {
     /// An instance of a class or interface, ty list are the arguments
     /// If exact=Exact, then this represents instances of *exactly* this class
     /// If exact=Nonexact, this also includes subclasses
-    Tclass(nast::Sid, oxidized::typing_defs_core::Exact, Vec<Ty>),
+    Tclass(nast::Sid, oxidized_by_ref::typing_defs_core::Exact, Vec<Ty>),
     /// Typing of Pocket Universe Expressions
     /// - first parameter is the enclosing class
     /// - second parameter is the name of the Pocket Universe Enumeration
@@ -273,7 +273,7 @@ pub struct Destructure {
     pub variadic: Option<Ty>,
     /// list() destructuring allows for partial matches on lists, even when the operation
     /// might throw i.e. list($a) = vec[];
-    pub kind: oxidized::typing_defs_core::DestructureKind,
+    pub kind: oxidized_by_ref::typing_defs_core::DestructureKind,
 }
 
 #[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
@@ -336,7 +336,7 @@ pub struct FunType {
     /// Carries through the sync/async information from the aast
     pub ret: PossiblyEnforcedTy,
     pub reactive: Reactivity,
-    pub flags: oxidized::typing_defs_flags::FunTypeFlags,
+    pub flags: oxidized_by_ref::typing_defs_flags::FunTypeFlags,
 }
 
 /// Arity information for a fun_type; indicating the minimum number of
@@ -377,7 +377,7 @@ pub struct FunParam {
     pub name: Option<std::rc::Rc<String>>,
     pub type_: PossiblyEnforcedTy,
     pub rx_annotation: Option<ParamRxAnnotation>,
-    pub flags: oxidized::typing_defs_flags::FunParamFlags,
+    pub flags: oxidized_by_ref::typing_defs_flags::FunParamFlags,
 }
 
 pub type FunParams = Vec<FunParam>;

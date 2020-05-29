@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27b7848c073f9173227c95a69efe0439>>
+// @generated SignedSource<<bef8d9e7e19718b7e39263e616460400>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -57,7 +57,18 @@ pub struct SubstContext<'a> {
 }
 impl<'a> TrivialDrop for SubstContext<'a> {}
 
-pub use oxidized::decl_defs::SourceType;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum SourceType {
+    Child,
+    Parent,
+    Trait,
+    XHPAttr,
+    Interface,
+    ReqImpl,
+    ReqExtends,
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -131,7 +142,13 @@ pub struct MroElement<'a> {
 }
 impl<'a> TrivialDrop for MroElement<'a> {}
 
-pub use oxidized::decl_defs::LinearizationKind;
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum LinearizationKind {
+    MemberResolution,
+    AncestorTypes,
+}
 
 /// name of condition type for conditional reactivity of methods.
 /// If None - method is unconditionally reactive
@@ -176,7 +193,7 @@ pub struct DeclClassType<'a> {
     pub sprops: s_map::SMap<'a, Element<'a>>,
     pub methods: s_map::SMap<'a, Element<'a>>,
     pub smethods: s_map::SMap<'a, Element<'a>>,
-    pub construct: (Option<Element<'a>>, oxidized::decl_defs::ConsistentKind),
+    pub construct: (Option<Element<'a>>, ConsistentKind),
     pub ancestors: s_map::SMap<'a, Ty<'a>>,
     pub req_ancestors: &'a [Requirement<'a>],
     pub req_ancestors_extends: s_set::SSet<'a>,

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6d966238da6e13c6afaaaa767c91c5e3>>
+// @generated SignedSource<<f6de7fa4949133237f98d7c513eb329e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -55,7 +55,7 @@ pub struct SubstContext {
     pub from_req_extends: bool,
 }
 
-pub use oxidized::decl_defs::SourceType;
+pub use oxidized_by_ref::decl_defs::SourceType;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -128,7 +128,7 @@ pub struct MroElement {
     pub passthrough_abstract_typeconst: bool,
 }
 
-pub use oxidized::decl_defs::LinearizationKind;
+pub use oxidized_by_ref::decl_defs::LinearizationKind;
 
 /// name of condition type for conditional reactivity of methods.
 /// If None - method is unconditionally reactive
@@ -172,7 +172,7 @@ pub struct DeclClassType {
     pub sprops: s_map::SMap<Element>,
     pub methods: s_map::SMap<Element>,
     pub smethods: s_map::SMap<Element>,
-    pub construct: (Option<Element>, oxidized::decl_defs::ConsistentKind),
+    pub construct: (Option<Element>, oxidized_by_ref::decl_defs::ConsistentKind),
     pub ancestors: s_map::SMap<Ty>,
     pub req_ancestors: Vec<Requirement>,
     pub req_ancestors_extends: s_set::SSet,

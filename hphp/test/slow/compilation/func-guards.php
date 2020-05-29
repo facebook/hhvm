@@ -18,7 +18,7 @@ function setup() {
   }
   $text .= "class Y { const C = $i; }\n";
 
-  $file = __FILE__ . ".$i.inc";
+  $file = getenv('HPHP_TEST_TMPDIR') . $i . '.inc';
   file_put_contents($file, "<?hh $text");
   include $file;
   unlink($file);

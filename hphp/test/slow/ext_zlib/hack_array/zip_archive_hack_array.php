@@ -1,7 +1,7 @@
 <?hh
 
-const string ZIP_NAME = __FILE__ . '.output.zip';
-const string OUTPUT_DIR = __FILE__ . '.output';
+const string ZIP_NAME = 'output.zip';
+const string OUTPUT_DIR = 'output';
 const varray<string> TARGETS = varray['bing', 'bong'];
 const OPTS = darray[
   'add_path' => 1,
@@ -26,21 +26,21 @@ function stat_targets(ZipArchive $zip): void {
 function main() {
   try {
     $zip = new ZipArchive();
-    $zip->open(ZIP_NAME, ZipArchive::CREATE);
+    $zip->open(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME, ZipArchive::CREATE);
     $zip->addGlob(__DIR__ . '/test_files/foo*', 0, OPTS);
     $zip->addPattern('/b[io]ng/', __DIR__ . '/test_files', OPTS);
     $zip->close();
-    $zip->open(ZIP_NAME);
+    $zip->open(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME);
     stat_archive($zip);
     stat_targets($zip);
-    $zip->extractTo(OUTPUT_DIR, TARGETS);
-    var_dump(scandir(OUTPUT_DIR));
+    $zip->extractTo(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR, TARGETS);
+    var_dump(scandir(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR));
   } finally {
     // Cleanup
     foreach (TARGETS as $target) {
-      unlink(OUTPUT_DIR . "/$target");
+      unlink(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR . "/$target");
     }
-    rmdir(OUTPUT_DIR);
-    unlink(ZIP_NAME);
+    rmdir(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR);
+    unlink(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME);
   }
 }

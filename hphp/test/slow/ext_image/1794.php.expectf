@@ -5,7 +5,7 @@ Warning: File not supported in %s/test/slow/ext_image/1794.php on line 11
 Array
 (
     [FileName] => simpletext.jpg
-    [FileDateTime] => 1234567890
+    [FileDateTime] => %d
     [FileSize] => 1298
     [FileType] => 2
     [MimeType] => image/jpeg
@@ -30,7 +30,7 @@ Warning: File not supported in %s/test/slow/ext_image/1794.php on line 19
 Array
 (
     [FileName] => test1pix.jpg
-    [FileDateTime] => 1234567890
+    [FileDateTime] => %d
     [FileSize] => 523
     [FileType] => 2
     [MimeType] => image/jpeg
@@ -47,7 +47,7 @@ Array
 Array
 (
     [FileName] => test2.jpg
-    [FileDateTime] => 1234567890
+    [FileDateTime] => %d
     [FileSize] => 122298
     [FileType] => 2
     [MimeType] => image/jpeg

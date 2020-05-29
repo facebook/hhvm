@@ -1,7 +1,7 @@
 <?hh
 
 
-include __DIR__.'/../../../test/sample_dir/fix_mtimes.inc';
+
 <<__EntryPoint>> function main(): void {
 $info = new SplFileInfo(__DIR__.'/../../sample_dir');
 if (!$info->isFile()) {

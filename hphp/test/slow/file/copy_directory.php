@@ -4,9 +4,9 @@
 
 <<__EntryPoint>>
 function main_copy_directory() {
-$file_path = dirname(__FILE__);
-$src_dir = "$file_path/copy_dir_src";
-$dest_dir = "$file_path/copy_dir_dest";
+
+$src_dir = getenv('HPHP_TEST_TMPDIR') . 'copy_dir_src';
+$dest_dir = getenv('HPHP_TEST_TMPDIR') . 'copy_dir_dest';
 
 // Create the source directory
 mkdir("$src_dir");

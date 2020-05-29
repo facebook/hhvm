@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_follow_symlink() {
-$p = dirname(__FILE__) . '/recursivedirectoryiterator_followsymlink_test/';
+$p = getenv('HPHP_TEST_TMPDIR') . 'recursivedirectoryiterator_followsymlink_test/';
 
 mkdir($p . "test/dir1", 0777, true);
 touch($p . "test/dir1/file1.txt");

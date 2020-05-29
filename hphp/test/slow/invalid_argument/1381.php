@@ -39,10 +39,10 @@ try { var_dump(stream_get_contents('', -1)); } catch (Exception $e) { echo "\n".
 $fp = fopen(__DIR__.'/../../sample_dir/file', 'r');
 var_dump(fgets($fp, -1));
 fclose($fp);
-$tmpfname = tempnam('', str_repeat('a', 128));
+$tmpfname = tempnam(getenv('HPHP_TEST_TMPDIR'), str_repeat('a', 128));
 var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
-$tmpfname = tempnam('', '/var/www' . str_repeat('a', 128));
+$tmpfname = tempnam(getenv('HPHP_TEST_TMPDIR'), '/var/www' . str_repeat('a', 128));
 var_dump(strlen(basename($tmpfname)));
 unlink($tmpfname);
 $ar1 = varray[10, 100, 100, 0];

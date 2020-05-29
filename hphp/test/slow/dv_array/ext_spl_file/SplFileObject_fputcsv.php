@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_spl_file_object_fputcsv() {
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+$file = getenv('HPHP_TEST_TMPDIR') . 'SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
 $list = darray [
@@ -52,6 +52,5 @@ echo '$list = ';var_export($res);echo ";\n";
 
 echo '===DONE===';
 
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
 unlink($file);
 }

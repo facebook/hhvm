@@ -99,6 +99,10 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_map;
   }
 
+  Facts* getFacts() {
+    return m_facts;
+  }
+
   folly::Optional<String> getFile(const String& name,
                                   AutoloadMap::KindOf kind,
                                   bool toLower);
@@ -124,7 +128,7 @@ private:
    * boolean true. Note that calling this method may throw if the failure
    * callback throws an exception or raises a fatal error.
    *
-   * This method may return Success, Failure, or StopAutoloading. If the 
+   * This method may return Success, Failure, or StopAutoloading. If the
    * failure callback was called, this method will not return Failure.
    */
   template <class T>
@@ -149,30 +153,34 @@ private:
 
 private:
 
-  // m_map points to either the request-scoped userland AutoloadMap or
-  // a statically-scoped native AutoloadMap
-  AutoloadMap* m_map = nullptr;
+  // The value of m_map determines which data structure, if any, we'll be
+  // using for autoloading within this request. m_map may have the same value
+  // as m_req_map (a request-scoped AutoloadMap set from userland) or m_facts
+  // (a statically-scoped native AutoloadMap that can answer additional
+  // queries about the codebase).
+  Facts* m_facts = nullptr;
   req::unique_ptr<UserAutoloadMap> m_req_map;
+  AutoloadMap* m_map = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////
 
 /**
  * Set this inside of an extension's moduleLoad() to provide an
- * implementation for a native AutoloadMap.
+ * implementation for a native AutoloadMap/Facts.
  */
-struct AutoloadMapFactory {
+struct FactsFactory {
 
-  static AutoloadMapFactory* getInstance();
-  static void setInstance(AutoloadMapFactory* instance);
+  static FactsFactory* getInstance();
+  static void setInstance(FactsFactory* instance);
 
-  virtual ~AutoloadMapFactory() = default;
+  virtual ~FactsFactory() = default;
 
   /**
-   * Return an AutoloadMap corresponding to the given root. If one
-   * doesn't exist yet, create it.
+   * Return a Facts corresponding to the given root. If one doesn't exist yet,
+   * create it.
    */
-  virtual AutoloadMap* getForRoot(const folly::fs::path& root) = 0;
+  virtual Facts* getForRoot(const folly::fs::path& root) = 0;
 };
 
 }

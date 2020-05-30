@@ -134,4 +134,22 @@ struct AutoloadMap {
                                const Variant& err) const = 0;
 };
 
+/**
+ * An AutoloadMap which can also return data not directly related to
+ * autoloading.
+ */
+struct Facts : public AutoloadMap {
+  virtual ~Facts() = default;
+
+  /**
+   * Return all types in the repo which the given type extends.
+   */
+  virtual Array getBaseTypes(const String& derivedType) = 0;
+
+  /**
+   * Return all types in the repo which extend the given type.
+   */
+  virtual Array getDerivedTypes(const String& baseType) = 0;
+};
+
 } // namespace HPHP

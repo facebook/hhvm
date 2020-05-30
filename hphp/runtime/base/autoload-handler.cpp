@@ -41,27 +41,22 @@ namespace HPHP {
 
 IMPLEMENT_REQUEST_LOCAL(AutoloadHandler, AutoloadHandler::s_instance);
 
-static AutoloadMapFactory* s_mapFactory = nullptr;
+static FactsFactory* s_mapFactory = nullptr;
 
-AutoloadMapFactory* AutoloadMapFactory::getInstance() {
+FactsFactory* FactsFactory::getInstance() {
   return s_mapFactory;
 }
 
-void AutoloadMapFactory::setInstance(AutoloadMapFactory* instance) {
+void FactsFactory::setInstance(FactsFactory* instance) {
   s_mapFactory = instance;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-static AutoloadMap* getAutoloadMapForRequest() {
-  if (RuntimeOption::RepoAuthoritative) {
-    auto map = Repo::get().global().AutoloadMap.get();
-    if (map) {
-      return map;
-    }
-  }
+namespace {
 
-  auto* factory = AutoloadMapFactory::getInstance();
+Facts* getFactsForRequest() {
+  auto* factory = FactsFactory::getInstance();
   if (!factory) {
     return nullptr;
   }
@@ -94,14 +89,23 @@ static AutoloadMap* getAutoloadMapForRequest() {
   return nullptr;
 }
 
+} // namespace
+
 void AutoloadHandler::requestInit() {
   assertx(!m_map);
+  assertx(!m_facts);
   assertx(!m_req_map);
-  m_map = getAutoloadMapForRequest();
+  m_facts = getFactsForRequest();
+  if (RuntimeOption::RepoAuthoritative) {
+    m_map = Repo::get().global().AutoloadMap.get();
+  } else {
+    m_map = m_facts;
+  }
 }
 
 void AutoloadHandler::requestShutdown() {
   m_map = nullptr;
+  m_facts = nullptr;
   m_req_map = nullptr;
 }
 

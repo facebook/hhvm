@@ -260,62 +260,32 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
   return data.percent(data.destroyed());
 }
 
-CallSpec getDtorCallSpec(Vout& v, Vreg obj, DataType type, ArgGroup& args) {
-  switch (type) {
-    case KindOfString:
-      return CallSpec::method(&StringData::release);
-    case KindOfDArray:
-    case KindOfVArray:
-    case KindOfArray:
-      return CallSpec::method(&ArrayData::release);
-    case KindOfVec:
-      return CallSpec::direct(PackedArray::Release);
-    case KindOfDict:
-      return CallSpec::direct(MixedArray::Release);
-    case KindOfKeyset:
-      return CallSpec::direct(SetArray::Release);
-    case KindOfObject: {
-      auto const cls = emitLdObjClass(v, obj, v.makeReg());
-      args.reg(cls);
-      return CallSpec::objDestruct(cls);
-    }
-    case KindOfResource:
-      return CallSpec::method(&ResourceHdr::release);
-    case KindOfRecord:
-      return CallSpec::method(&RecordData::release);
-    case KindOfRFunc:
-      return CallSpec::method(&RFuncData::release);
-    case KindOfClsMeth:
-      if (!use_lowptr) return CallSpec::direct(ClsMethDataRef::Release);
-      // fallthrough
-    DT_UNCOUNTED_CASE:
-      break;
-  }
-  always_assert(false);
-}
-
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
   if (ty <= TArr) {
     return CallSpec::array(ty, &g_array_funcs.release, &ArrayData::release);
   }
 
-  if (ty <= TObj && ty.clsSpec().cls()) {
-    auto const cls = ty.clsSpec().cls();
-    if (ty.clsSpec().exact() || (cls->attrs() & AttrNoOverride)) {
-      args.immPtr(cls);
-      return CallSpec::direct(cls->releaseFunc().get());
+  if (ty <= TObj) {
+    if (auto const cls = ty.clsSpec().cls()) {
+      if (ty.clsSpec().exact() || (cls->attrs() & AttrNoOverride)) {
+        args.immPtr(cls);
+        return CallSpec::direct(cls->releaseFunc().get());
+      }
+      // Call the release function if the base class is a real class and not
+      // a builtin, as only builtins can override release method and builtins
+      // never subclass non-builtins.
+      if (!isInterface(cls) && !cls->isBuiltin()) {
+        args.reg(emitLdObjClass(v, loc.reg(0), v.makeReg()));
+        return CallSpec::direct(cls->releaseFunc().get());
+      }
     }
-    // Call the release function if the base class is a real class and not
-    // a builtin, as only builtins can override release method and builtins
-    // never subclass non-builtins.
-    if (!isInterface(cls) && !cls->isBuiltin()) {
-      args.reg(emitLdObjClass(v, loc.reg(0), v.makeReg()));
-      return CallSpec::direct(cls->releaseFunc().get());
-    }
+    auto const cls = emitLdObjClass(v, loc.reg(0), v.makeReg());
+    args.reg(cls);
+    return CallSpec::objDestruct(cls);
   }
 
   return ty.isKnownDataType()
-    ? getDtorCallSpec(v, loc.reg(0), ty.toDataType(), args)
+    ? CallSpec::direct(destructorForType(ty.toDataType()))
     : CallSpec::destruct(loc.reg(1));
 }
 

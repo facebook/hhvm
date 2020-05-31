@@ -14,35 +14,33 @@
   +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/bespoke-layout.h"
+#include "hphp/runtime/base/bespoke/layout.h"
 
 #include "folly/SharedMutex.h"
 #include "folly/Synchronized.h"
 
-#include <vector>
 #include <atomic>
 #include <limits>
+#include <vector>
 
 namespace HPHP { namespace bespoke {
 
 namespace {
-
+auto constexpr kMaxNumLayouts = 1 << 16;
 folly::Synchronized<std::vector<Layout*>, folly::SharedMutex> s_layoutTable;
-
 }
 
 Layout::Layout() {
   auto table = s_layoutTable.wlock();
   m_index = table->size();
-  assertx(table->size() <= std::numeric_limits<decltype(m_index)>::max());
+  always_assert(m_index < kMaxNumLayouts);
   table->push_back(this);
 }
 
-const Layout* layoutForIndex(int16_t idx) {
-  auto const layout = s_layoutTable.rlock()->at(idx);
-  assertx(layout->index() == idx);
+const Layout* layoutForIndex(uint32_t index) {
+  auto const layout = s_layoutTable.rlock()->at(index);
+  assertx(layout->index() == index);
   return layout;
 }
 
-} // namespace bespoke
-} // namespace HPHP
+}}

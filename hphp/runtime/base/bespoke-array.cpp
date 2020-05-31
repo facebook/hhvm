@@ -15,271 +15,190 @@
 */
 
 #include "hphp/runtime/base/bespoke-array.h"
-#include "hphp/runtime/base/bespoke-layout.h"
+#include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
 
-const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
-  return asBespoke(const_cast<ArrayData*>(ad));
-}
+//////////////////////////////////////////////////////////////////////////////
 
 BespokeArray* BespokeArray::asBespoke(ArrayData* ad) {
   assertx(!ad->isVanilla());
   return reinterpret_cast<BespokeArray*>(ad);
 }
+const BespokeArray* BespokeArray::asBespoke(const ArrayData* ad) {
+  return asBespoke(const_cast<ArrayData*>(ad));
+}
 
 const bespoke::Layout* BespokeArray::layout() const {
-  return bespoke::layoutForIndex(static_cast<uint16_t>(~m_size));
+  return bespoke::layoutForIndex(~m_size);
 }
-
 void BespokeArray::setLayout(const bespoke::Layout* layout) {
-  m_size = ~static_cast<uint32_t>(layout->index());
-}
-
-DataType BespokeArray::toDataType() const {
-  return layout()->datatype();
+  m_sizeAndPos = uint32_t(~layout->index());
 }
 
 size_t BespokeArray::heapSize() const {
   return layout()->heapSize(this);
 }
-
-ArrayData* BespokeArray::escalate() const {
-  return layout()->escalate(this);
-}
-
 void BespokeArray::scan(type_scan::Scanner& scan) const {
   return layout()->scan(this, scan);
 }
+ArrayData* BespokeArray::escalateToVanilla() const {
+  return layout()->escalateToVanilla(this);
+}
 
+//////////////////////////////////////////////////////////////////////////////
+
+// ArrayData interface
 void BespokeArray::Release(ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  bad->layout()->release(bad);
+  asBespoke(ad)->layout()->release(ad);
 }
-
-
-// accessors
-TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
-  auto const bad = asBespoke(ad);
-  return bad->layout()->getInt(bad, key);
-}
-
-TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
-  auto const bad = asBespoke(ad);
-  return bad->layout()->getStr(bad, key);
-}
-
-ssize_t BespokeArray::NvGetIntPos(const ArrayData* ad, int64_t key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->getIntPos(bad, key);
-}
-
-ssize_t BespokeArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->getStrPos(bad, key);
-}
-
-TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->getKey(bad, pos);
-}
-
-TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->getVal(bad, pos);
-}
-
-// inspection
 size_t BespokeArray::Vsize(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->size(bad);
+  return asBespoke(ad)->layout()->size(ad);
 }
-
 bool BespokeArray::IsVectorData(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->isVectorData(bad);
+  return asBespoke(ad)->layout()->isVectorData(ad);
 }
 
+// RO access
+TypedValue BespokeArray::NvGetInt(const ArrayData* ad, int64_t key) {
+  return asBespoke(ad)->layout()->getInt(ad, key);
+}
+TypedValue BespokeArray::NvGetStr(const ArrayData* ad, const StringData* key) {
+  return asBespoke(ad)->layout()->getStr(ad, key);
+}
+TypedValue BespokeArray::GetPosKey(const ArrayData* ad, ssize_t pos) {
+  return asBespoke(ad)->layout()->getKey(ad, pos);
+}
+TypedValue BespokeArray::GetPosVal(const ArrayData* ad, ssize_t pos) {
+  return asBespoke(ad)->layout()->getVal(ad, pos);
+}
+ssize_t BespokeArray::NvGetIntPos(const ArrayData* ad, int64_t key) {
+  return asBespoke(ad)->layout()->getIntPos(ad, key);
+}
+ssize_t BespokeArray::NvGetStrPos(const ArrayData* ad, const StringData* key) {
+  return asBespoke(ad)->layout()->getStrPos(ad, key);
+}
 bool BespokeArray::ExistsInt(const ArrayData* ad, int64_t key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->existsInt(bad, key);
+  return NvGetInt(ad, key).is_init();
 }
-
 bool BespokeArray::ExistsStr(const ArrayData* ad, const StringData* key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->existsStr(bad, key);
+  return NvGetStr(ad, key).is_init();
 }
 
-
-// mutators
-ArrayData* BespokeArray::SetInt(ArrayData* ad, int64_t key, TypedValue v) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->setInt(bad, key, v);
-}
-
-ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue v) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->setInt(bad, key, v);
-}
-
-ArrayData* BespokeArray::SetStr(ArrayData* ad, StringData* key, TypedValue v) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->setStr(bad, key, v);
-}
-
-ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue v) {
-  always_assert(false);
-}
-
-
-// rw access
+// RW access
 arr_lval BespokeArray::LvalInt(ArrayData* ad, int64_t key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->lvalInt(bad, key);
+  return asBespoke(ad)->layout()->lvalInt(ad, key);
 }
-
 arr_lval BespokeArray::LvalStr(ArrayData* ad, StringData* key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->lvalStr(bad, key);
+  return asBespoke(ad)->layout()->lvalStr(ad, key);
 }
 
+// insertion
+ArrayData* BespokeArray::SetInt(ArrayData* ad, int64_t key, TypedValue v) {
+  return asBespoke(ad)->layout()->setInt(ad, key, v);
+}
+ArrayData* BespokeArray::SetStr(ArrayData* ad, StringData* key, TypedValue v) {
+  return asBespoke(ad)->layout()->setStr(ad, key, v);
+}
+ArrayData* BespokeArray::SetIntMove(ArrayData* ad, int64_t key, TypedValue val) {
+  auto const result = SetInt(ad, key, val);
+  if (result != ad) decRefArr(ad);
+  tvDecRefGen(val);
+  return result;
+}
+ArrayData* BespokeArray::SetStrMove(ArrayData* ad, StringData* key, TypedValue val) {
+  auto const result = SetStr(ad, key, val);
+  if (result != ad) decRefArr(ad);
+  tvDecRefGen(val);
+  return result;
+}
 
 // deletion
 ArrayData* BespokeArray::RemoveInt(ArrayData* ad, int64_t key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->deleteInt(bad, key);
+  return asBespoke(ad)->layout()->removeInt(ad, key);
 }
-
 ArrayData* BespokeArray::RemoveStr(ArrayData* ad, const StringData* key) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->deleteStr(bad, key);
+  return asBespoke(ad)->layout()->removeStr(ad, key);
 }
-
 
 // iteration
-ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->iterEnd(bad);
-}
-
 ssize_t BespokeArray::IterBegin(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->iterBegin(bad);
+  return asBespoke(ad)->layout()->iterBegin(ad);
 }
-
 ssize_t BespokeArray::IterLast(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->iterLast(bad);
+  return asBespoke(ad)->layout()->iterLast(ad);
 }
-
+ssize_t BespokeArray::IterEnd(const ArrayData* ad) {
+  return asBespoke(ad)->layout()->iterEnd(ad);
+}
 ssize_t BespokeArray::IterAdvance(const ArrayData* ad, ssize_t pos) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->iterAdvance(bad, pos);
+  return asBespoke(ad)->layout()->iterAdvance(ad, pos);
 }
-
 ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->iterRewind(bad, pos);
+  return asBespoke(ad)->layout()->iterRewind(ad, pos);
 }
 
-
-// garbage
+// sorting
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  auto const bad = asBespoke(ad);
-  return bad->layout()->escalate(bad);
+  return asBespoke(ad)->layout()->escalateToVanilla(ad);
 }
 
-
-// copies
-ArrayData* BespokeArray::Copy(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->copy(bad);
-}
-
-ArrayData* BespokeArray::CopyStatic(const ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->copy(bad);
-}
-
-
-// high level ops
+// high-level ops
 ArrayData* BespokeArray::Append(ArrayData* ad, TypedValue v) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->append(bad, v);
+  return asBespoke(ad)->layout()->append(ad, v);
 }
-
 ArrayData* BespokeArray::Prepend(ArrayData* ad, TypedValue v) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->prepend(bad, v);
+  return asBespoke(ad)->layout()->prepend(ad, v);
 }
-
 ArrayData* BespokeArray::PlusEq(ArrayData* ad, const ArrayData* other) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->plusEq(bad, other);
+  return asBespoke(ad)->layout()->plusEq(ad, other);
 }
-
 ArrayData* BespokeArray::Merge(ArrayData* ad, const ArrayData* elems) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->plusEq(bad, elems);
+  return asBespoke(ad)->layout()->plusEq(ad, elems);
 }
-
 ArrayData* BespokeArray::Pop(ArrayData* ad, Variant& out) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->pop(bad, out);
+  return asBespoke(ad)->layout()->pop(ad, out);
 }
-
 ArrayData* BespokeArray::Dequeue(ArrayData* ad, Variant& out) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->dequeue(bad, out);
+  return asBespoke(ad)->layout()->dequeue(ad, out);
 }
-
 ArrayData* BespokeArray::Renumber(ArrayData* ad) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->renumber(bad);
+  return asBespoke(ad)->layout()->renumber(ad);
 }
-
 void BespokeArray::OnSetEvalScalar(ArrayData*) {
   always_assert(false);
 }
 
-
-// conversions
+// copies and conversions
+ArrayData* BespokeArray::Copy(const ArrayData* ad) {
+  return asBespoke(ad)->layout()->copy(ad);
+}
+ArrayData* BespokeArray::CopyStatic(const ArrayData*) {
+  always_assert(false);
+}
 ArrayData* BespokeArray::ToPHPArray(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toPHPArray(bad, copy);
+  return asBespoke(ad)->layout()->toPHPArray(ad, copy);
 }
-
 ArrayData* BespokeArray::ToPHPArrayIntishCast(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toPHPArrayIntishCast(bad, copy);
+  return asBespoke(ad)->layout()->toPHPArrayIntishCast(ad, copy);
 }
-
-ArrayData* BespokeArray::ToDict(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toDict(bad, copy);
-}
-
-ArrayData* BespokeArray::ToVec(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toVec(bad, copy);
-}
-
-ArrayData* BespokeArray::ToKeyset(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toKeyset(bad, copy);
-}
-
 ArrayData* BespokeArray::ToVArray(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toVArray(bad, copy);
+  return asBespoke(ad)->layout()->toVArray(ad, copy);
 }
-
 ArrayData* BespokeArray::ToDArray(ArrayData* ad, bool copy) {
-  auto bad = asBespoke(ad);
-  return bad->layout()->toDArray(bad, copy);
+  return asBespoke(ad)->layout()->toDArray(ad, copy);
+}
+ArrayData* BespokeArray::ToVec(ArrayData* ad, bool copy) {
+  return asBespoke(ad)->layout()->toVec(ad, copy);
+}
+ArrayData* BespokeArray::ToDict(ArrayData* ad, bool copy) {
+  return asBespoke(ad)->layout()->toDict(ad, copy);
+}
+ArrayData* BespokeArray::ToKeyset(ArrayData* ad, bool copy) {
+  return asBespoke(ad)->layout()->toKeyset(ad, copy);
 }
 
+//////////////////////////////////////////////////////////////////////////////
 
-
-
-} // namespace HPHP
+}

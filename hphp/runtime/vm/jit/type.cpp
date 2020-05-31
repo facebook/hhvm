@@ -1241,7 +1241,7 @@ Type negativeCheckType(Type srcType, Type typeParam) {
     if (tmp.maybe(TCountedDict)) tmp |= TDict;
     if (tmp.maybe(TCountedKeyset)) tmp |= TKeyset;
   }
-  return tmp;
+  return tmp & srcType;
 }
 
 //////////////////////////////////////////////////////////////////////

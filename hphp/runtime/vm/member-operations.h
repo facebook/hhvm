@@ -21,6 +21,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/array-data-defs.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/mixed-array.h"
@@ -338,6 +339,42 @@ inline TypedValue ElemKeyset(ArrayData* base, key_type<keyType> key) {
 }
 
 /**
+ * Elem when base is a bespoke Hack array
+ */
+template<MOpMode mode>
+inline TypedValue ElemBespokePre(ArrayData* base, int64_t key) {
+  return BespokeArray::NvGetInt(base, key);
+}
+
+template<MOpMode mode>
+inline TypedValue ElemBespokePre(ArrayData* base, StringData* key) {
+  if ((mode == MOpMode::Warn || mode == MOpMode::InOut) && base->isVecType()) {
+    throwInvalidArrayKeyException(key, base);
+  }
+  return BespokeArray::NvGetStr(base, key);
+}
+
+template<MOpMode mode>
+inline TypedValue ElemBespokePre(ArrayData* base, TypedValue key) {
+  auto const dt = key.m_type;
+  if (isIntType(dt))    return ElemBespokePre<mode>(base, key.m_data.num);
+  if (isStringType(dt)) return ElemBespokePre<mode>(base, key.m_data.pstr);
+  throwInvalidArrayKeyException(&key, base);
+}
+
+template<MOpMode mode, KeyType keyType>
+inline TypedValue ElemBespoke(ArrayData* base, key_type<keyType> key) {
+  assertx(!base->isVanilla());
+  assertx(base->isHackArrayType());
+  auto const result = ElemBespokePre<mode>(base, key);
+  if (UNLIKELY(!result.is_init())) {
+    if (mode != MOpMode::Warn && mode != MOpMode::InOut) return ElemEmptyish();
+    throwOOBArrayKeyException(key, base);
+  }
+  return result;
+}
+
+/**
  * Elem when base is a ClsMeth
  */
 template<MOpMode mode>
@@ -492,22 +529,22 @@ NEVER_INLINE TypedValue ElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfPersistentString:
     case KindOfString:
       return ElemString<mode, keyType>(base.val().pstr, key);
+
+    // These types are handled in Elem.
     case KindOfPersistentVec:
     case KindOfVec:
-      return ElemVec<mode, keyType>(base.val().parr, key);
     case KindOfPersistentDict:
     case KindOfDict:
-      return ElemDict<mode, keyType>(base.val().parr, key);
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      return ElemKeyset<mode, keyType>(base.val().parr, key);
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      return ElemArray<mode, keyType>(base.val().parr, key);
+      always_assert(false);
+
     case KindOfObject:
       return ElemObject<mode, keyType>(base.val().pobj, key);
 
@@ -530,14 +567,14 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
   if (LIKELY(tvIsArray(base))) {
     return ElemArray<mode, keyType>(base.val().parr, key);
   }
-  if (LIKELY(tvIsVec(base))) {
-    return ElemVec<mode, keyType>(base.val().parr, key);
-  }
-  if (LIKELY(tvIsDict(base))) {
-    return ElemDict<mode, keyType>(base.val().parr, key);
-  }
-  if (LIKELY(tvIsKeyset(base))) {
-    return ElemKeyset<mode, keyType>(base.val().parr, key);
+
+  if (tvIsArrayLike(base)) {
+    auto const ad = base.val().parr;
+    assertx(ad->isHackArrayType());
+    if (!ad->isVanilla()) return ElemBespoke<mode, keyType>(ad, key);
+    if (tvIsVec(base))    return ElemVec<mode, keyType>(ad, key);
+    if (tvIsDict(base))   return ElemDict<mode, keyType>(ad, key);
+    return ElemKeyset<mode, keyType>(ad, key);
   }
 
   if (mode == MOpMode::InOut) throw_invalid_inout_base();
@@ -2565,6 +2602,15 @@ bool IssetElemKeyset(ArrayData* a, key_type<keyType> key) {
 }
 
 /**
+ * IssetElem when base is a bespoke Hack array
+ */
+template<KeyType keyType>
+bool IssetElemBespoke(ArrayData* a, key_type<keyType> key) {
+  auto const result = ElemBespoke<MOpMode::None, keyType>(a, key);
+  return !tvIsNull(tvAssertPlausible(result));
+}
+
+/**
  * IssetElem when base is a ClsMeth
  */
 template<KeyType keyType>
@@ -2614,25 +2660,20 @@ NEVER_INLINE bool IssetElemSlow(tv_rval base, key_type<keyType> key) {
     case KindOfString:
       return IssetElemString<keyType>(val(base).pstr, key);
 
+    // These types are handled in IssetElem.
     case KindOfPersistentVec:
     case KindOfVec:
-      return IssetElemVec<keyType>(val(base).parr, key);
-
     case KindOfPersistentDict:
     case KindOfDict:
-      return IssetElemDict<keyType>(val(base).parr, key);
-
     case KindOfPersistentKeyset:
     case KindOfKeyset:
-      return IssetElemKeyset<keyType>(val(base).parr, key);
-
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      return IssetElemArray<keyType>(val(base).parr, key);
+      always_assert(false);
 
     case KindOfObject:
       return IssetElemObj<keyType>(val(base).pobj, key);
@@ -2655,15 +2696,16 @@ bool IssetElem(tv_rval base, key_type<keyType> key) {
   if (LIKELY(tvIsArray(base))) {
     return IssetElemArray<keyType>(val(base).parr, key);
   }
-  if (LIKELY(tvIsVec(base))) {
-    return IssetElemVec<keyType>(val(base).parr, key);
+
+  if (tvIsArrayLike(base)) {
+    auto const ad = val(base).parr;
+    assertx(ad->isHackArrayType());
+    if (!ad->isVanilla()) return IssetElemBespoke<keyType>(ad, key);
+    if (tvIsVec(base))    return IssetElemVec<keyType>(ad, key);
+    if (tvIsDict(base))   return IssetElemDict<keyType>(ad, key);
+    return IssetElemKeyset<keyType>(ad, key);
   }
-  if (LIKELY(tvIsDict(base))) {
-    return IssetElemDict<keyType>(val(base).parr, key);
-  }
-  if (LIKELY(tvIsKeyset(base))) {
-    return IssetElemKeyset<keyType>(val(base).parr, key);
-  }
+
   return IssetElemSlow<keyType>(base, key);
 }
 

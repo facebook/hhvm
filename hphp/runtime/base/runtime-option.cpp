@@ -33,6 +33,7 @@
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/access-log.h"
@@ -2808,6 +2809,10 @@ void RuntimeOption::Load(
   if (TraceFunctions.size() || TraceFuncId != InvalidFuncId) {
     Trace::ensureInit(getTraceOutputFile());
   }
+
+  // If we aren't going to generate any bespoke array-likes, specialize
+  // (native and JIT) destructors for the vanilla layouts.
+  if (!RO::EvalAllowBespokeArrayLikes) specializeVanillaDestructors();
 
   // Hack Array Compats
 

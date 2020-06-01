@@ -60,6 +60,11 @@ ALWAYS_INLINE RefCount tvGetCount(TypedValue tv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Optimize array-like destructors, given the fact that all array-likes are
+// "vanilla" - that is, that they have their standard layouts. Vanilla Hack
+// arrays have a single known layout.
+void specializeVanillaDestructors();
+
 ALWAYS_INLINE RawDestructor destructorForType(DataType dt) {
   // We want g_destructors[(dt - kMinRefCountedDataType) >> 1]. Unfortunately,
   // gcc and clang can't quite figure out the optimal way to emit this, so we

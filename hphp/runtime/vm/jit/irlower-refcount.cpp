@@ -265,6 +265,12 @@ CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
     return CallSpec::array(ty, &g_array_funcs.release, &ArrayData::release);
   }
 
+  // Even if AllowBespokeArrayLikes is set, we can optimize destructors
+  // if the value being destructed is a vanilla array-like.
+  if (ty <= TVanillaVec) return CallSpec::direct(PackedArray::Release);
+  if (ty <= TVanillaDict) return CallSpec::direct(MixedArray::Release);
+  if (ty <= TVanillaKeyset) return CallSpec::direct(SetArray::Release);
+
   if (ty <= TObj) {
     if (auto const cls = ty.clsSpec().cls()) {
       if (ty.clsSpec().exact() || (cls->attrs() & AttrNoOverride)) {

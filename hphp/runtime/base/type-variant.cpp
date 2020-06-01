@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/type-variant.h"
 
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/double-to-int64.h"
@@ -93,6 +94,18 @@ Variant::Variant(const_variant_ref v) noexcept {
 
 namespace {
 
+void keysetReleaseWrapper(ArrayData* ad) noexcept {
+  ad->isVanilla() ? SetArray::Release(ad) : BespokeArray::Release(ad);
+}
+
+void dictReleaseWrapper(ArrayData* ad) noexcept {
+  ad->isVanilla() ? MixedArray::Release(ad) : BespokeArray::Release(ad);
+}
+
+void vecReleaseWrapper(ArrayData* ad) noexcept {
+  ad->isVanilla() ? PackedArray::Release(ad) : BespokeArray::Release(ad);
+}
+
 void objReleaseWrapper(ObjectData* obj) noexcept {
   auto const cls = obj->getVMClass();
   cls->releaseFunc()(obj, cls);
@@ -122,9 +135,9 @@ RawDestructor g_destructors[] = {
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfDArray
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfVArray
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
-  (RawDestructor)&SetArray::Release,                  // KindOfKeyset
-  (RawDestructor)&MixedArray::Release,                // KindOfDict
-  (RawDestructor)&PackedArray::Release,               // KindOfVec
+  (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
+  (RawDestructor)&dictReleaseWrapper,                 // KindOfDict
+  (RawDestructor)&vecReleaseWrapper,                  // KindOfVec
   (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
   (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
   nullptr, // hole
@@ -137,6 +150,13 @@ RawDestructor g_destructors[] = {
 #endif
   (RawDestructor)getMethodPtr(&RFuncData::release),   // KindOfRFunc
 };
+
+void specializeVanillaDestructors() {
+  using Dtor = RawDestructor;
+  g_destructors[typeToDestrIdx(KindOfVec)] = (Dtor)&PackedArray::Release;
+  g_destructors[typeToDestrIdx(KindOfDict)] = (Dtor)&MixedArray::Release;
+  g_destructors[typeToDestrIdx(KindOfKeyset)] = (Dtor)&SetArray::Release;
+}
 
 #define IMPLEMENT_SET(argType, setOp)                     \
   void Variant::set(argType v) noexcept {                 \

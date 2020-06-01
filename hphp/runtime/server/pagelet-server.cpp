@@ -413,16 +413,23 @@ Resource PageletServer::TaskStart(
   static auto pageletOverflowCounter =
     ServiceData::createTimeSeries("pagelet_overflow",
                                   { ServiceData::StatsType::COUNT });
+  static auto pageletQueuedCounter =
+    ServiceData::createTimeSeries("pagelet_queued",
+                                  { ServiceData::StatsType::COUNT });
   {
     Lock l(s_dispatchMutex);
     if (!s_dispatcher) {
       return Resource();
     }
-    if (RuntimeOption::PageletServerQueueLimit > 0 &&
-        s_dispatcher->getQueuedJobs() >
-        RuntimeOption::PageletServerQueueLimit) {
-      pageletOverflowCounter->addValue(1);
-      return Resource();
+    if (RuntimeOption::PageletServerQueueLimit > 0) {
+      auto num_queued_jobs = s_dispatcher->getQueuedJobs();
+      if (num_queued_jobs > RuntimeOption::PageletServerQueueLimit) {
+        pageletOverflowCounter->addValue(1);
+        return Resource();
+      }
+      if (num_queued_jobs > 0) {
+        pageletQueuedCounter->addValue(1);
+      }
     }
   }
   auto task = req::make<PageletTask>(url, headers, remote_host, post_data,

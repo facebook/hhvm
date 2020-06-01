@@ -397,6 +397,7 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
 namespace {
 
 const char* arrayToName(const ArrayData* ad) {
+  always_assert(ad->kindIsValid());
   if (ad->isVArray()) return "varray";
   if (ad->isDArray()) return "darray";
   return "array";

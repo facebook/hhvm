@@ -949,25 +949,26 @@ bool ArrayData::equal(const ArrayData* v2, bool strict) const {
 
 Variant ArrayData::reset() {
   setPosition(iter_begin());
-  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
+  auto const cur_pos = getPosition();
+  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
 Variant ArrayData::next() {
-  // We call iter_advance() without checking if m_pos is the canonical invalid
-  // position. This is okay, since all IterAdvance() impls handle this
-  // correctly, but it means that EmptyArray::IterAdvance() is reachable.
-  setPosition(iter_advance(m_pos));
-  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
+  // iter_advance must handle the case where the pos is iter_end already.
+  setPosition(iter_advance(getPosition()));
+  auto const cur_pos = getPosition();
+  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
 Variant ArrayData::prev() {
-  // We only call iter_rewind() if m_pos is not the canonical invalid position.
-  // Thus, EmptyArray::IterRewind() is not reachable.
+  // iter_rewind can assume pos is already a valid position.
   auto pos_limit = iter_end();
-  if (m_pos != pos_limit) {
-    setPosition(iter_rewind(m_pos));
-    if (m_pos != pos_limit) {
-      return getValue(m_pos);
+  auto const old_pos = getPosition();
+  if (old_pos != pos_limit) {
+    setPosition(iter_rewind(old_pos));
+    auto const cur_pos = getPosition();
+    if (cur_pos != pos_limit) {
+      return getValue(cur_pos);
     }
   }
   return Variant(false);
@@ -975,19 +976,18 @@ Variant ArrayData::prev() {
 
 Variant ArrayData::end() {
   setPosition(iter_last());
-  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
+  auto const cur_pos = getPosition();
+  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
 Variant ArrayData::key() const {
-  return m_pos != iter_end() ? getKey(m_pos) : uninit_null();
-}
-
-Variant ArrayData::value(int32_t pos) const {
-  return pos != iter_end() ? getValue(pos) : Variant(false);
+  auto const cur_pos = getPosition();
+  return cur_pos != iter_end() ? getKey(cur_pos) : uninit_null();
 }
 
 Variant ArrayData::current() const {
-  return m_pos != iter_end() ? getValue(m_pos) : Variant(false);
+  auto const cur_pos = getPosition();
+  return cur_pos != iter_end() ? getValue(cur_pos) : Variant(false);
 }
 
 const StaticString
@@ -995,15 +995,16 @@ const StaticString
   s_key("key");
 
 Variant ArrayData::each() {
-  if (m_pos != iter_end()) {
+  auto const cur_pos = getPosition();
+  if (cur_pos != iter_end()) {
     ArrayInit ret(4, ArrayInit::Mixed{});
-    Variant key(getKey(m_pos));
-    Variant value(getValue(m_pos));
+    Variant key(getKey(cur_pos));
+    Variant value(getValue(cur_pos));
     ret.set(1, value);
     ret.set(s_value, value);
     ret.set(0, key);
     ret.set(s_key, key);
-    setPosition(iter_advance(m_pos));
+    setPosition(iter_advance(cur_pos));
     return ret.toVariant();
   }
   return Variant(false);

@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/array-provenance.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -1374,13 +1375,20 @@ static Variant iter_op_impl(Variant& refParam, OpPtr op,
     return Variant(nonArray);
   }
 
-  auto ad = cell.m_data.parr;
-  auto constexpr doCow = !std::is_same<DoCow, NoCow>::value;
-  if (doCow && ad->cowCheck() && !(ad->*pred)() &&
-      !ad->noCopyOnWrite()) {
-    ad = ad->copy();
-    refParam = Variant::attach(ad);
-  }
+  // In order to perform an operation that mutates an array's internal cursor,
+  // we escalate bespoke arrays to vanilla and copy arrays that need CoW.
+  auto const orig = cell.m_data.parr;
+  auto const ad = [&]{
+    auto ad = orig;
+    if (std::is_same<DoCow, NoCow>::value) return ad;
+    if (!ad->cowCheck() && ad->isVanilla()) return ad;
+    if ((ad->*pred)()) return ad;
+
+    // If !ad->noCopyOnWrite, ad->copy is a no-op, so we don't need to check it.
+    if (!ad->isVanilla()) ad = BespokeArray::asBespoke(ad)->escalateToVanilla();
+    return ad->cowCheck() ? ad->copy() : ad;
+  }();
+  if (ad != orig) refParam = Variant::attach(ad);
   return (ad->*op)();
 }
 

@@ -340,24 +340,25 @@ DataType ArrayData::toPersistentDataType() const {
 // Iteration.
 
 inline int32_t ArrayData::getPosition() const {
-  return m_pos;
+  return isVanilla() ? m_pos : iter_begin();
 }
 
 inline void ArrayData::setPosition(int32_t p) {
-  assertx(m_pos == p || !isStatic());
-  m_pos = p;
+  auto const cur_pos = getPosition();
+  assertx(cur_pos == p || (!isStatic() && isVanilla()));
+  if (cur_pos != p) m_pos = p;
 }
 
 inline bool ArrayData::isHead() const {
-  return m_pos == iter_begin();
+  return getPosition() == iter_begin();
 }
 
 inline bool ArrayData::isTail() const {
-  return m_pos == iter_last();
+  return getPosition() == iter_last();
 }
 
 inline bool ArrayData::isInvalid() const {
-  return m_pos == iter_end();
+  return getPosition() == iter_end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

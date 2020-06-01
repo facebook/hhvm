@@ -1,7 +1,5 @@
 begin baz
-constructing in baz
 begin bar
-constructing in bar
 foo 42
 bar 42
 baz 42

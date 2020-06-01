@@ -572,7 +572,7 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         let new_offset = loop {
             if i >= n {
                 has_error0012 = true;
-                break n - 1;
+                break n;
             } else {
                 let ch = peek(i);
                 match ch {
@@ -2019,7 +2019,13 @@ impl<'a, Token: LexableToken<'a>> Lexer<'a, Token> {
         {
             token
         } else {
-            panic!("failed to make progress at {}\n", self.offset)
+            panic!(
+                "failed to make progress at {} {} {} {:?}\n",
+                self.offset,
+                original_remaining,
+                new_remaining,
+                token.kind()
+            )
         }
     }
 

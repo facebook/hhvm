@@ -2727,7 +2727,10 @@ fn print_expr<W: Write>(
                 match unpacked_element {
                     None => Ok(()),
                     Some(e) => {
-                        w.write(", ")?;
+                        if es.len() > 0 {
+                            w.write(", ")?;
+                        }
+                        // TODO: Should probably have ... also but we are not doing that in ocaml
                         print_expr(ctx, w, env, e)
                     }
                 }

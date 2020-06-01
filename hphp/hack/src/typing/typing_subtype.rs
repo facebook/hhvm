@@ -313,7 +313,7 @@ fn add_tyvar_lower_bound_and_close<'a>(
         .fold(prop, |prop, &lower_bound| {
             // TODO(hrust) make all type consts and pu equal
             upper_bounds.into_iter().fold(prop, |prop, &upper_bound| {
-                simplify_subtype_i(env, upper_bound, lower_bound).conj(env.bld().bumpalo(), prop)
+                simplify_subtype_i(env, lower_bound, upper_bound).conj(env.bld().bumpalo(), prop)
             })
         })
 }

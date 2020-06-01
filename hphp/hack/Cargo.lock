@@ -779,10 +779,12 @@ dependencies = [
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "naming_special_names_rust 0.0.0",
  "ocaml_helper 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
+ "regex 1.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "runtime 0.0.0",
  "scope_rust 0.0.0",
 ]

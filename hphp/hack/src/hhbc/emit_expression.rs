@@ -22,6 +22,7 @@ use instruction_sequence_rust::{
 };
 use itertools::{Either, Itertools};
 use label_rust::Label;
+use lazy_static::lazy_static;
 use naming_special_names_rust::{
     emitter_special_functions, fb, pseudo_consts, pseudo_functions, special_functions,
     special_idents, superglobals, typehints, user_attributes,
@@ -34,6 +35,7 @@ use oxidized::{
     ast as tast, ast_defs, local_id,
     pos::Pos,
 };
+use regex::Regex;
 use runtime::TypedValue;
 use scope_rust::scope;
 
@@ -1223,6 +1225,72 @@ fn emit_keyvalue_collection(
     ]))
 }
 
+fn non_numeric(s: &str) -> bool {
+    // Note(hrust): OCaml Int64.of_string and float_of_string ignore underscores
+    let s = s.replace("_", "");
+    lazy_static! {
+        static ref HEX: Regex = Regex::new(r"(?P<sign>-?)0[xX](?P<digits>.*)").unwrap();
+        static ref OCTAL: Regex = Regex::new(r"(?P<sign>-?)0[oO](?P<digits>.*)").unwrap();
+        static ref BINARY: Regex = Regex::new(r"(?P<sign>-?)0[bB](?P<digits>.*)").unwrap();
+        static ref FLOAT: Regex =
+            Regex::new(r"(?P<int>\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap();
+        static ref NEG_FLOAT: Regex =
+            Regex::new(r"(?P<int>-\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap();
+        static ref HEX_RADIX: u32 = 16;
+        static ref OCTAL_RADIX: u32 = 8;
+        static ref BINARY_RADIX: u32 = 2;
+    }
+    fn int_from_str(s: &str) -> std::result::Result<i64, ()> {
+        // Note(hrust): OCaml Int64.of_string reads decimal, hexadecimal, octal, and binary
+        (if HEX.is_match(s) {
+            u64::from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX).map(|x| x as i64)
+        } else if OCTAL.is_match(s) {
+            u64::from_str_radix(&OCTAL.replace(s, "${sign}${digits}"), *OCTAL_RADIX)
+                .map(|x| x as i64)
+        } else if BINARY.is_match(s) {
+            u64::from_str_radix(&BINARY.replace(s, "${sign}${digits}"), *BINARY_RADIX)
+                .map(|x| x as i64)
+        } else {
+            i64::from_str(&s)
+        })
+        .map_err(|_| ())
+    };
+    fn float_from_str_radix(s: &str, radix: u32) -> std::result::Result<f64, ()> {
+        let i = i64::from_str_radix(&s.replace(".", ""), radix).map_err(|_| ())?;
+        Ok(match s.matches(".").count() {
+            0 => i as f64,
+            1 => {
+                let pow = s.split('.').last().unwrap().len();
+                (i as f64) / f64::from(radix).powi(pow as i32)
+            }
+            _ => return Err(()),
+        })
+    };
+    fn out_of_bounds(s: &str) -> bool {
+        // compare strings instead of floats to avoid rounding imprecision
+        FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MAX.to_string()
+            || NEG_FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MIN.to_string()
+    }
+    fn validate_float(f: f64) -> std::result::Result<f64, ()> {
+        if f.is_infinite() || f.is_nan() {
+            return Err(());
+        }
+        Ok(f)
+    }
+    fn float_from_str(s: &str) -> std::result::Result<f64, ()> {
+        // Note(hrust): OCaml float_of_string ignores leading whitespace, reads decimal and hexadecimal
+        let s = s.trim_start();
+        if HEX.is_match(s) {
+            float_from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX)
+        } else if out_of_bounds(s) {
+            Err(())
+        } else {
+            f64::from_str(s).map_err(|_| ()).and_then(validate_float)
+        }
+    };
+    int_from_str(&s).is_err() && float_from_str(&s).is_err()
+}
+
 fn is_struct_init(
     e: &mut Emitter,
     env: &Env,
@@ -1237,12 +1305,13 @@ fn is_struct_init(
             let mut key = key.clone();
             ast_constant_folder::fold_expr(&mut key, e, &env.namespace);
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
-                are_all_keys_non_numeric_strings = are_all_keys_non_numeric_strings
-                    && !i64::from_str(&s.replace("_", "")).is_ok()
-                    && !(f64::from_str(&s).map_or(false, |f| f.is_finite()));
+                are_all_keys_non_numeric_strings =
+                    are_all_keys_non_numeric_strings && non_numeric(&s);
                 uniq_keys.insert(s);
-                continue;
+            } else {
+                are_all_keys_non_numeric_strings = false;
             }
+            continue;
         }
         are_all_keys_non_numeric_strings = false;
     }

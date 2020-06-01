@@ -276,7 +276,7 @@ prefixed_flags!(
 );
 impl Default for PhpismFlags {
     fn default() -> PhpismFlags {
-        PhpismFlags::empty()
+        PhpismFlags::DISABLE_STATIC_CLOSURES
     }
 }
 

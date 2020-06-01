@@ -33,10 +33,6 @@ function invoke_it($x) { $x(); }
     echo "closure\n";
     var_dump($this);
   });
-  invoke_it(static function() {
-    echo "static closure\n";
-    var_dump($this);
-  });
   echo "About to fail:\n";
   invoke_it(new InvokeFailure);
 }

@@ -48,7 +48,7 @@ fn add_symbol_refs(
     emitter: &mut Emitter,
     base: &Option<class::Type>,
     implements: &Vec<class::Type>,
-    uses: &Vec<class::Type>,
+    uses: &Vec<&str>,
     requirements: &Vec<(class::Type, TraitReqKind)>,
 ) {
     base.iter()
@@ -57,7 +57,7 @@ fn add_symbol_refs(
         .iter()
         .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
     uses.iter()
-        .for_each(|x| emit_symbol_refs::State::add_class(emitter, x.clone()));
+        .for_each(|x| emit_symbol_refs::State::add_class(emitter, class::Type::from_ast_name(x)));
     requirements
         .iter()
         .for_each(|(x, _)| emit_symbol_refs::State::add_class(emitter, x.clone()));
@@ -496,7 +496,7 @@ pub fn emit_class<'a>(
                         "Interfaces cannot use traits",
                     )))
                 } else {
-                    Some(Ok(class::Type::from_ast_name(name)))
+                    Some(Ok(name.as_str()))
                 }
             }
             _ => None,

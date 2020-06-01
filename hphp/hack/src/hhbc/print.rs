@@ -657,11 +657,7 @@ fn print_uses<W: Write>(ctx: &mut Context, w: &mut W, c: &HhasClass) -> Result<(
     if c.uses.is_empty() && c.method_trait_resolutions.is_empty() {
         Ok(())
     } else {
-        let unique_ids: IndexSet<&str> = c
-            .uses
-            .iter()
-            .map(|e| strip_global_ns(e.to_raw_string()))
-            .collect();
+        let unique_ids: IndexSet<&str> = c.uses.iter().map(|e| strip_global_ns(e)).collect();
         let unique_ids: Vec<_> = unique_ids.into_iter().collect();
 
         newline(w)?;

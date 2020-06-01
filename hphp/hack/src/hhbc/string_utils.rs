@@ -104,9 +104,7 @@ fn unmangle_xhp_id(name: &str) -> String {
 pub fn mangle(mut name: String) -> String {
     if !ignore_id(&name) {
         if let Some(pos) = name.rfind('\\') {
-            if is_xhp(&name[pos + 1..]) {
-                name.replace_range(pos + 1.., &mangle_xhp_id(name[pos + 1..].to_string()))
-            }
+            name.replace_range(pos + 1.., &mangle_xhp_id(name[pos + 1..].to_string()))
         } else {
             name = mangle_xhp_id(name);
         }

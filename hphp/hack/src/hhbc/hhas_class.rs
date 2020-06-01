@@ -29,7 +29,7 @@ pub struct HhasClass<'a> {
     pub name: class::Type<'a>,
     pub span: Span,
     pub hoisted: closure_convert::HoistKind,
-    pub uses: Vec<class::Type<'a>>,
+    pub uses: Vec<&'a str>,
     // Deprecated - kill please
     pub use_aliases: Vec<(
         Option<class::Type<'a>>,

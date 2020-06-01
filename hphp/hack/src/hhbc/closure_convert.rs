@@ -1207,70 +1207,66 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     }
                 } =>
             {
-                let (pc, cls, pf, func) = {
-                    if let [Expr(pc, cls), Expr(pf, fname)] = &mut *x.3 {
-                        (pc, cls, pf, fname)
-                    } else {
-                        return Err(emit_fatal::raise_fatal_parse(
-                            pos,
-                            format!(
-                                "meth_caller must have exactly two arguments. Received {}",
-                                x.3.len()
-                            ),
-                        ));
-                    }
-                };
-                match (&cls, func.as_string()) {
-                    (Expr_::ClassConst(cc), Some(fname)) if string_utils::is_class(&(cc.1).1) => {
-                        let mut cls_const = cls.as_class_const_mut();
-                        let (cid, _) = match cls_const {
-                            None => unreachable!(),
-                            Some((ref mut cid, (_, cs))) => (cid, cs),
-                        };
-                        use hhbc_id::Id;
-                        visit_class_id(env, self, cid)?;
-                        match &cid.1 {
-                            cid if cid
-                                .as_ciexpr()
-                                .and_then(|x| x.as_id())
-                                .map(|id| {
-                                    !(string_utils::is_self(id)
-                                        || string_utils::is_parent(id)
-                                        || string_utils::is_static(id))
-                                })
-                                .unwrap_or(false) =>
-                            {
-                                let id = cid.as_ciexpr().unwrap().as_id().unwrap();
-                                let mangled_class_name = class::Type::from_ast_name(id.as_ref())
-                                    .to_raw_string()
-                                    .into();
-                                convert_meth_caller_to_func_ptr(
-                                    env,
-                                    self,
-                                    &*pos,
-                                    pc,
-                                    &mangled_class_name,
-                                    pf,
-                                    fname,
-                                )
-                            }
-                            _ => {
-                                return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
+                if let [Expr(pc, cls), Expr(pf, func)] = &mut *x.3 {
+                    match (&cls, func.as_string()) {
+                        (Expr_::ClassConst(cc), Some(fname))
+                            if string_utils::is_class(&(cc.1).1) =>
+                        {
+                            let mut cls_const = cls.as_class_const_mut();
+                            let (cid, _) = match cls_const {
+                                None => unreachable!(),
+                                Some((ref mut cid, (_, cs))) => (cid, cs),
+                            };
+                            use hhbc_id::Id;
+                            visit_class_id(env, self, cid)?;
+                            match &cid.1 {
+                                cid if cid
+                                    .as_ciexpr()
+                                    .and_then(|x| x.as_id())
+                                    .map(|id| {
+                                        !(string_utils::is_self(id)
+                                            || string_utils::is_parent(id)
+                                            || string_utils::is_static(id))
+                                    })
+                                    .unwrap_or(false) =>
+                                {
+                                    let id = cid.as_ciexpr().unwrap().as_id().unwrap();
+                                    let mangled_class_name =
+                                        class::Type::from_ast_name(id.as_ref())
+                                            .to_raw_string()
+                                            .into();
+                                    convert_meth_caller_to_func_ptr(
+                                        env,
+                                        self,
+                                        &*pos,
+                                        pc,
+                                        &mangled_class_name,
+                                        pf,
+                                        fname,
+                                    )
+                                }
+                                _ => {
+                                    return Err(emit_fatal::raise_fatal_parse(pc, "Invalid class"));
+                                }
                             }
                         }
-                    }
-                    (Expr_::ClassConst(_), Some(_)) => {
-                        return Err(emit_fatal::raise_fatal_parse(
-                            pc,
-                            "Class must be a Class or string type",
-                        ));
-                    }
-                    (Expr_::String(cls_name), Some(fname)) => {
-                        convert_meth_caller_to_func_ptr(env, self, &*pos, pc, &cls_name, pf, fname)
-                    }
+                        (Expr_::ClassConst(_), Some(_)) => {
+                            return Err(emit_fatal::raise_fatal_parse(
+                                pc,
+                                "Class must be a Class or string type",
+                            ));
+                        }
+                        (Expr_::String(cls_name), Some(fname)) => convert_meth_caller_to_func_ptr(
+                            env, self, &*pos, pc, &cls_name, pf, fname,
+                        ),
 
-                    // For other cases, fallback to create __SystemLib\MethCallerHelper
-                    _ => Expr_::Call(x),
+                        // For other cases, fallback to create __SystemLib\MethCallerHelper
+                        _ => Expr_::Call(x),
+                    }
+                } else {
+                    let mut res = Expr_::Call(x);
+                    res.recurse(env, self.object())?;
+                    res
                 }
             }
             Expr_::Call(x)

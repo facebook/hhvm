@@ -2387,7 +2387,10 @@ fn emit_special_function(
             if nargs != 1 {
                 Err(emit_fatal::raise_fatal_runtime(
                     pos,
-                    "Constant string expected in fun()",
+                    format!(
+                        "fun() expects exactly 1 parameter, {} given",
+                        nargs.to_string()
+                    ),
                 ))
             } else {
                 match args {
@@ -4987,8 +4990,14 @@ fn can_use_as_rhs_in_list_assignment(expr: &tast::Expr_) -> Result<bool> {
         | E_::Await(_)
         | E_::ClassConst(_) => true,
         E_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).1)?,
-        E_::Binop(b) if b.0.is_eq() => can_use_as_rhs_in_list_assignment(&(b.2).1)?,
-        E_::Binop(b) => b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq(),
+        E_::Binop(b) => {
+            if let ast_defs::Bop::Eq(None) = &b.0 {
+                if (b.1).1.is_list() {
+                    return can_use_as_rhs_in_list_assignment(&(b.2).1);
+                }
+            }
+            b.0.is_plus() || b.0.is_question_question() || b.0.is_any_eq()
+        }
         E_::PUIdentifier(_) => {
             return Err(Unrecoverable(
                 "TODO(T35357243): Pocket Universes syntax must be erased by now".into(),

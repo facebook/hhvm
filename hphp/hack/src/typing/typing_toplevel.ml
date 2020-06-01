@@ -761,39 +761,6 @@ and check_const_trait_members pos env use_list =
 let shallow_decl_enabled (ctx : Provider_context.t) : bool =
   TypecheckerOptions.shallow_class_decl (Provider_context.get_tcopt ctx)
 
-(* If the current class inherits from classes that take type arguments, we need
- * to check that the arguments provided are consistent with the constraints on
- * the type parameters. *)
-let check_implements_tparaml (env : env) ht =
-  let (_r, (_, c), paraml) = TUtils.unwrap_class_type ht in
-  let class_ = Env.get_class_dep env c in
-  match class_ with
-  | None ->
-    (* The class lives in PHP land *)
-    env
-  | Some class_ ->
-    let subst = Inst.make_subst (Cls.tparams class_) paraml in
-    fold2_shortest
-      ~f:(fun env t ty ->
-        let ty_pos = get_pos ty in
-        List.fold t.tp_constraints ~init:env ~f:(fun env (ck, cstr) ->
-            (* Constraint might contain uses of generic type parameters *)
-            let cstr = Inst.instantiate subst cstr in
-            match ck with
-            | Ast_defs.Constraint_as ->
-              Type.sub_type_decl ty_pos Reason.URnone env ty cstr
-            | Ast_defs.Constraint_eq ->
-              (* This code could well be unreachable, because we don't allow
-               * equality constraints on class generics. *)
-              let env = Type.sub_type_decl ty_pos Reason.URnone env ty cstr in
-              let env = Type.sub_type_decl ty_pos Reason.URnone env cstr ty in
-              env
-            | Ast_defs.Constraint_super ->
-              Type.sub_type_decl ty_pos Reason.URnone env cstr ty))
-      ~init:env
-      (Cls.tparams class_)
-      paraml
-
 let class_type_param env ct =
   let (env, tparam_list) =
     List.map_env env ct.c_tparam_list Typing.type_param
@@ -914,7 +881,6 @@ and class_def_ env c tc =
       (Cls.where_constraints tc)
   in
   Typing_variance.class_ (Env.get_ctx env) (snd c.c_name) tc impl;
-  let env = List.fold impl ~init:env ~f:check_implements_tparaml in
   let check_where_constraints env ht =
     let (_, (p, _), _) = TUtils.unwrap_class_type ht in
     let (env, locl_ty) = Phase.localize_with_self env ht in

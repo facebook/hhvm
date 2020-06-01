@@ -2647,22 +2647,23 @@ fn print_expr<W: Write>(
         E_::Lvar(lid) => w.write(escaper::escape(&(lid.1).1)),
         E_::Float(f) => {
             if f.contains('E') || f.contains('e') {
-                let mut s = format!(
+                let s = format!(
                     "{:.1E}",
                     f.parse::<f64>()
                         .map_err(|_| Error::fail(format!("ParseFloatError: {}", f)))?
-                );
-                if s.contains("E-") {
-                    lazy_static! {
-                        static ref NEG_SINGLE_DIGIT_EXP: Regex = Regex::new(r".*E-\d$").unwrap();
-                    }
-                    if NEG_SINGLE_DIGIT_EXP.is_match(&s) {
-                        s.insert(s.len() - 1, '0');
-                    }
-                    w.write(s)
-                } else {
-                    w.write(s.replace('E', "E+"))
+                )
+                // to_uppercase() here because s might be "inf" or "nan"
+                .to_uppercase();
+
+                lazy_static! {
+                    static ref UNSIGNED_EXP : Regex = Regex::new(r"(?P<first>E)(?P<second>\d+)").unwrap();
+                    static ref SIGNED_SINGLE_DIGIT_EXP: Regex = Regex::new(r"(?P<first>E[+-])(?P<second>\d$)").unwrap();
                 }
+                // turn mEn into mE+n
+                let s = UNSIGNED_EXP.replace(&s, "${first}+${second}");
+                // turn mE+n or mE-n into mE+0n or mE-0n (where n is a single digit)
+                let s = SIGNED_SINGLE_DIGIT_EXP.replace(&s, "${first}0${second}");
+                w.write(s)
             } else {
                 w.write(f)
             }

@@ -169,38 +169,32 @@ mod inout_locals {
 
     fn handle_arg(env: &Env, is_top: bool, i: usize, arg: &tast::Expr, acc: &mut AliasInfoMap) {
         use tast::{Expr, Expr_};
-
         let Expr(_, e) = arg;
-        match e {
-            Expr_::Callconv(x) => {
-                if let (ast_defs::ParamKind::Pinout, Expr(_, Expr_::Lvar(lid))) = &**x {
-                    let Lid(_, lid) = &**lid;
-                    if !is_local_this(env, &lid) {
-                        add_use(lid.1.to_string(), acc);
-                        if is_top {
-                            add_inout(lid.1.to_string(), i, acc);
-                        } else {
-                            add_write(lid.1.to_string(), i, acc);
-                        }
-                    }
-                }
-            }
-            Expr_::Lvar(lid) => {
-                let Lid(_, (_, id)) = &**lid;
-                add_use(id.to_string(), acc);
-            }
-            _ => {
-                // dive into argument value
-                aast_visitor::visit(
-                    &mut Visitor {
-                        phantom: PhantomData,
-                    },
-                    &mut Ctx { state: acc, env, i },
-                    arg,
-                )
-                .unwrap();
+        // inout $v
+        if let Some((ast_defs::ParamKind::Pinout, Expr(_, Expr_::Lvar(lid)))) = e.as_callconv() {
+            let Lid(_, lid) = &**lid;
+            if !is_local_this(env, &lid) {
+                add_use(lid.1.to_string(), acc);
+                return if is_top {
+                    add_inout(lid.1.to_string(), i, acc);
+                } else {
+                    add_write(lid.1.to_string(), i, acc);
+                };
             }
         }
+        // $v
+        if let Some(Lid(_, (_, id))) = e.as_lvar() {
+            return add_use(id.to_string(), acc);
+        }
+        // dive into argument value
+        aast_visitor::visit(
+            &mut Visitor {
+                phantom: PhantomData,
+            },
+            &mut Ctx { state: acc, env, i },
+            arg,
+        )
+        .unwrap();
     }
 
     struct Visitor<'a> {
@@ -226,34 +220,40 @@ mod inout_locals {
             c: &mut Ctx<'a>,
             p: &'ast tast::Expr_,
         ) -> std::result::Result<(), ()> {
-            p.recurse(c, self.object())?;
-            Ok(match p {
-                tast::Expr_::Binop(expr) => {
-                    let (bop, left, _) = &**expr;
-                    if let ast_defs::Bop::Eq(_) = bop {
-                        collect_lvars_hs(c, left)
+            // f(inout $v) or f(&$v)
+            if let tast::Expr_::Call(expr) = p {
+                let (_, _, _, args, uarg) = &**expr;
+                args.iter()
+                    .for_each(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
+                uarg.as_ref()
+                    .map(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
+                Ok(())
+            } else {
+                p.recurse(c, self.object())?;
+                Ok(match p {
+                    // lhs op= _
+                    tast::Expr_::Binop(expr) => {
+                        let (bop, left, _) = &**expr;
+                        if let ast_defs::Bop::Eq(_) = bop {
+                            collect_lvars_hs(c, left)
+                        }
                     }
-                }
-                tast::Expr_::Unop(expr) => {
-                    let (uop, e) = &**expr;
-                    match uop {
-                        ast_defs::Uop::Uincr | ast_defs::Uop::Udecr => collect_lvars_hs(c, e),
-                        _ => (),
+                    // $i++ or $i--
+                    tast::Expr_::Unop(expr) => {
+                        let (uop, e) = &**expr;
+                        match uop {
+                            ast_defs::Uop::Uincr | ast_defs::Uop::Udecr => collect_lvars_hs(c, e),
+                            _ => (),
+                        }
                     }
-                }
-                tast::Expr_::Lvar(expr) => {
-                    let Lid(_, (_, id)) = &**expr;
-                    add_use(id.to_string(), &mut c.state);
-                }
-                tast::Expr_::Call(expr) => {
-                    let (_, _, _, args, uarg) = &**expr;
-                    args.iter()
-                        .for_each(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
-                    uarg.as_ref()
-                        .map(|arg| handle_arg(&c.env, false, c.i, arg, &mut c.state));
-                }
-                _ => (),
-            })
+                    // $v
+                    tast::Expr_::Lvar(expr) => {
+                        let Lid(_, (_, id)) = &**expr;
+                        add_use(id.to_string(), &mut c.state);
+                    }
+                    _ => (),
+                })
+            }
         }
     }
 

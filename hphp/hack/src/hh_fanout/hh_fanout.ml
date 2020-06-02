@@ -16,7 +16,8 @@ type env = {
   root: Path.t;
   ignore_hh_version: bool;
   verbosity: Calculate_fanout.Verbosity.t;
-  naming_table_and_dep_table_path: (Path.t * Path.t) option;
+  naming_table_path: Path.t option;
+  dep_table_path: Path.t option;
   watchman_sockname: Path.t option;
   changed_files: Relative_path.Set.t;
   state_path: Path.t option;
@@ -24,7 +25,6 @@ type env = {
 }
 
 type setup_result = {
-  server_env: ServerEnv.env;
   workers: MultiWorker.worker list;
   ctx: Provider_context.t;
 }
@@ -69,34 +69,36 @@ let set_up_global_environment (env : env) : setup_result =
       ~tcopt:server_env.ServerEnv.tcopt
       (Unix.gettimeofday ())
   in
-  { server_env; workers; ctx }
-
-let populate_dependency_naming_table (naming_table : Naming_table.t) : unit =
-  Naming_table.iter naming_table ~f:(fun path file_info ->
-      Typing_deps.update_file path file_info)
+  { workers; ctx }
 
 let load_saved_state ~(env : env) ~(setup_result : setup_result) :
     saved_state_result Lwt.t =
-  let%lwt (naming_table, naming_table_path, dep_table_path, changed_files) =
-    match env.naming_table_and_dep_table_path with
-    | Some (naming_table_path, dep_table_path) ->
-      Hh_logger.log
-        ( "Saved-state files were given on the command-line. "
-        ^^ "Assuming that there are no changed files locally (beyond the ones that are being checked)."
-        );
-      let naming_table_blob =
-        Marshal.from_channel
-          (In_channel.create (Path.to_string naming_table_path))
+  let%lwt (naming_table_path, naming_table_changed_files) =
+    match env.naming_table_path with
+    | Some naming_table_path -> Lwt.return (naming_table_path, [])
+    | None ->
+      let%lwt naming_table_saved_state =
+        State_loader_lwt.load
+          ~watchman_opts:
+            Saved_state_loader.Watchman_options.
+              { root = env.root; sockname = env.watchman_sockname }
+          ~ignore_hh_version:env.ignore_hh_version
+          ~saved_state_type:Saved_state_loader.Naming_table
       in
-      let naming_table = Naming_table.from_saved naming_table_blob in
-      Naming_table.iter naming_table ~f:(fun path file_info ->
-          let (_errors, _failed_naming) =
-            Naming_global.ndecl_file setup_result.ctx path file_info
-          in
-          ());
-      let () = populate_dependency_naming_table naming_table in
-      let changed_files = Relative_path.Set.empty in
-      Lwt.return (naming_table, naming_table_path, dep_table_path, changed_files)
+      (match naming_table_saved_state with
+      | Error load_error ->
+        failwith
+          (Printf.sprintf
+             "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
+             (Saved_state_loader.debug_details_of_error load_error))
+      | Ok (saved_state_info, changed_files) ->
+        Lwt.return
+          ( saved_state_info
+              .Saved_state_loader.Naming_table_info.naming_table_path,
+            changed_files ))
+  and (dep_table_path, dep_table_changed_files) =
+    match env.dep_table_path with
+    | Some dep_table_path -> Lwt.return (dep_table_path, [])
     | None ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
@@ -105,68 +107,23 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
               { root = env.root; sockname = env.watchman_sockname }
           ~ignore_hh_version:env.ignore_hh_version
           ~saved_state_type:Saved_state_loader.Naming_and_dep_table
-      and naming_table_saved_state =
-        State_loader_lwt.load
-          ~watchman_opts:
-            Saved_state_loader.Watchman_options.
-              { root = env.root; sockname = env.watchman_sockname }
-          ~ignore_hh_version:env.ignore_hh_version
-          ~saved_state_type:Saved_state_loader.Naming_table
       in
-
-      let (naming_table, naming_table_path, naming_table_changed_files) =
-        match naming_table_saved_state with
-        | Error load_error ->
-          failwith
-            (Printf.sprintf
-               "Failed to load naming-table saved-state, and saved-state files were not manually provided on command-line: %s"
-               (Saved_state_loader.debug_details_of_error load_error))
-        | Ok (saved_state_info, changed_files) ->
-          let naming_table_path =
-            saved_state_info
-              .Saved_state_loader.Naming_table_info.naming_table_path
-          in
-          let naming_table =
-            Naming_table.load_from_sqlite
-              setup_result.ctx
-              (Path.to_string naming_table_path)
-          in
-          (naming_table, naming_table_path, changed_files)
-      in
-
       (match dep_table_saved_state with
       | Error load_error ->
         failwith
           (Printf.sprintf
              "Failed to load dep-table saved-state, and saved-state files were not manually provided on command-line: %s"
              (Saved_state_loader.debug_details_of_error load_error))
-      | Ok (saved_state_info, dep_table_changed_files) ->
-        (* TODO: change the naming table saved-state so that we can query it
-        by dependency hash, so that we don't need to load the naming table
-        blob from the dependency table saved-state here. *)
-        let forward_naming_table_blob =
-          Marshal.from_channel
-            (In_channel.create
-               (Path.to_string
-                  saved_state_info
-                    .Saved_state_loader.Naming_and_dep_table_info
-                     .naming_table_path))
-        in
-        let forward_naming_table =
-          Naming_table.from_saved forward_naming_table_blob
-        in
-        let () = populate_dependency_naming_table forward_naming_table in
-
-        let changed_files =
-          naming_table_changed_files @ dep_table_changed_files
-          |> Relative_path.Set.of_list
-        in
+      | Ok (saved_state_info, changed_files) ->
         Lwt.return
-          ( naming_table,
-            naming_table_path,
-            saved_state_info
+          ( saved_state_info
               .Saved_state_loader.Naming_and_dep_table_info.dep_table_path,
             changed_files ))
+  in
+  let changed_files =
+    Relative_path.Set.union
+      (Relative_path.Set.of_list naming_table_changed_files)
+      (Relative_path.Set.of_list dep_table_changed_files)
   in
   let changed_files =
     Relative_path.Set.filter changed_files ~f:(fun path ->
@@ -177,6 +134,11 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
     (Path.to_string dep_table_path)
     env.ignore_hh_version;
   let naming_table =
+    Naming_table.load_from_sqlite
+      setup_result.ctx
+      (Path.to_string naming_table_path)
+  in
+  let naming_table =
     Relative_path.Set.fold
       changed_files
       ~init:naming_table
@@ -184,7 +146,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
         let { ClientIdeIncremental.naming_table; _ } =
           ClientIdeIncremental.update_naming_tables_for_changed_file
             ~naming_table
-            ~sienv:setup_result.server_env.ServerEnv.local_symbol_table
+            ~sienv:SearchUtils.quiet_si_env
             ~backend:(Provider_context.get_backend setup_result.ctx)
             ~popt:(Provider_context.get_popt setup_result.ctx)
             ~path
@@ -227,6 +189,7 @@ let advance_cursor
     ~(setup_result : setup_result)
     ~(saved_state_result : saved_state_result)
     ~(incremental_state : Incremental.state)
+    ~(input_files : Relative_path.Set.t)
     ~(cursor_id : string option) : Incremental.cursor * Incremental.cursor_id =
   Utils.try_finally
     ~finally:(fun () -> incremental_state#save)
@@ -259,6 +222,9 @@ let advance_cursor
       let cursor_changed_files =
         Relative_path.Set.union cursor_changed_files env.changed_files
       in
+      let cursor_changed_files =
+        Relative_path.Set.union cursor_changed_files input_files
+      in
       let cursor =
         cursor#advance
           setup_result.ctx
@@ -266,15 +232,6 @@ let advance_cursor
           cursor_changed_files
       in
       let new_cursor_id = incremental_state#add_cursor cursor in
-      let file_deltas = cursor#get_file_deltas in
-      Hh_logger.log
-        "Populating reverse dependency naming table with %d files"
-        (Relative_path.Map.cardinal file_deltas);
-      Relative_path.Map.iter file_deltas ~f:(fun path file_delta ->
-          match file_delta with
-          | Naming_sqlite.Modified file_info ->
-            Typing_deps.update_file path file_info
-          | Naming_sqlite.Deleted -> ());
       let dep_graph_delta = cursor#get_dep_graph_delta in
       HashSet.iter dep_graph_delta ~f:(fun (dependent, dependency) ->
           Typing_deps.add_idep_directly_to_graph dependent dependency);
@@ -282,41 +239,59 @@ let advance_cursor
       (cursor, new_cursor_id))
 
 let mode_calculate
-    ~(env : env) ~(files_to_process : Path.Set.t) ~(cursor_id : string option) :
+    ~(env : env) ~(input_files : Path.Set.t) ~(cursor_id : string option) :
     unit Lwt.t =
-  let ({ ctx; _ } as setup_result) = set_up_global_environment env in
-  let%lwt ({ naming_table; _ } as saved_state_result) =
+  let telemetry = Telemetry.create () in
+  let setup_result = set_up_global_environment env in
+  let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
     load_saved_state ~env ~setup_result
   in
+
+  let input_files =
+    Path.Set.fold input_files ~init:Relative_path.Set.empty ~f:(fun path acc ->
+        let path = Relative_path.create_detect_prefix (Path.to_string path) in
+        Relative_path.Set.add acc path)
+  in
   let incremental_state = make_incremental_state ~env in
-  let (_cursor, cursor_id) =
+  let (cursor, cursor_id) =
     advance_cursor
       ~env
       ~setup_result
       ~saved_state_result
       ~incremental_state
+      ~input_files
       ~cursor_id
+  in
+  let file_deltas = cursor#get_file_deltas in
+  let new_naming_table =
+    Naming_table.update_from_deltas old_naming_table file_deltas
   in
 
   let {
-    Calculate_fanout.naming_table = _;
-    fanout_dependents = _;
+    Calculate_fanout.fanout_dependents = _;
     fanout_files;
     explanations;
-    telemetry;
+    telemetry = calculate_fanout_telemetry;
   } =
     Calculate_fanout.go
       ~verbosity:env.verbosity
-      ctx
-      naming_table
-      files_to_process
+      ~old_naming_table
+      ~new_naming_table
+      ~file_deltas
+      ~input_files
+  in
+  let telemetry =
+    Telemetry.object_
+      telemetry
+      ~key:"calculate_fanout"
+      ~value:calculate_fanout_telemetry
   in
 
   let telemetry =
     Telemetry.int_
       telemetry
       ~key:"num_input_files"
-      ~value:(Path.Set.cardinal files_to_process)
+      ~value:(Relative_path.Set.cardinal input_files)
   in
   let telemetry =
     Telemetry.int_
@@ -394,7 +369,7 @@ let parse_env () =
     flag
       "--naming-table-path"
       (optional path_arg)
-      ~doc:"PATH The path to the naming table blob saved-state."
+      ~doc:"PATH The path to the naming table SQLite saved-state."
   and dep_table_path =
     flag
       "--dep-table-path"
@@ -445,20 +420,6 @@ let parse_env () =
       we can write `hh_fanout --root ~/www foo/bar.php` and it will work regardless
       of the directory that we invoked this executable from. *)
   Sys.chdir (Path.to_string root);
-
-  let naming_table_and_dep_table_path =
-    match (naming_table_path, dep_table_path) with
-    | (Some naming_table_path, Some dep_table_path) ->
-      Some (naming_table_path, dep_table_path)
-    | (Some _, None)
-    | (None, Some _) ->
-      print_endline
-        ( "The --naming-table-path and --dep-table-path options "
-        ^ "must be provided together." );
-      exit 1
-    | (None, None) -> None
-  in
-
   Relative_path.set_path_prefix Relative_path.Root root;
   let changed_files =
     changed_files
@@ -472,7 +433,8 @@ let parse_env () =
     root;
     ignore_hh_version;
     verbosity;
-    naming_table_and_dep_table_path;
+    naming_table_path;
+    dep_table_path;
     watchman_sockname;
     changed_files;
     state_path;
@@ -485,7 +447,7 @@ let calculate_subcommand =
   Command.basic
     ~summary:"Determines which files must be rechecked after a change"
     (let%map env = parse_env ()
-     and files_to_process = anon (sequence ("filename" %: string))
+     and input_files = anon (sequence ("filename" %: string))
      and cursor_id =
        flag
          "--cursor"
@@ -493,25 +455,60 @@ let calculate_subcommand =
          ~doc:"CURSOR The cursor that the previous request returned."
      in
 
-     let files_to_process =
-       files_to_process
+     let input_files =
+       input_files
        |> Sys_utils.parse_path_list
        |> List.map ~f:Path.make
        |> Path.Set.of_list
      in
-     if Path.Set.is_empty files_to_process then
-       Hh_logger.warn "Warning: list of files to process is empty.";
+     if Path.Set.is_empty input_files then
+       Hh_logger.warn "Warning: list of input files is empty.";
 
-     (fun () -> Lwt_main.run (mode_calculate ~env ~files_to_process ~cursor_id)))
+     (fun () -> Lwt_main.run (mode_calculate ~env ~input_files ~cursor_id)))
 
-let mode_debug ~(env : env) ~(path : Path.t) : unit Lwt.t =
+let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
+    unit Lwt.t =
   let ({ ctx; workers; _ } as setup_result) = set_up_global_environment env in
-  let%lwt { naming_table; _ } = load_saved_state ~env ~setup_result in
+  let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
+    load_saved_state ~env ~setup_result
+  in
+
+  let path = Relative_path.create_detect_prefix (Path.to_string path) in
+  let input_files = Relative_path.Set.singleton path in
+  let incremental_state = make_incremental_state ~env in
+  let (cursor, cursor_id) =
+    advance_cursor
+      ~env
+      ~setup_result
+      ~saved_state_result
+      ~incremental_state
+      ~input_files
+      ~cursor_id
+  in
+  let file_deltas = cursor#get_file_deltas in
+  let new_naming_table =
+    Naming_table.update_from_deltas old_naming_table file_deltas
+  in
+
   let json =
-    Debug_fanout.go ~naming_table ~ctx ~workers ~path
+    Debug_fanout.go
+      ~ctx
+      ~workers
+      ~old_naming_table
+      ~new_naming_table
+      ~file_deltas
+      ~path
     |> Debug_fanout.result_to_json
   in
-  let json = Hh_json.JSON_Object [("debug", json)] in
+  let json =
+    Hh_json.JSON_Object
+      [
+        ( "cursor",
+          let (Incremental.Cursor_id cursor_id) = cursor_id in
+          Hh_json.JSON_String cursor_id );
+        ("debug", json);
+      ]
+  in
   Hh_json.json_to_multiline_output Out_channel.stdout json;
   Lwt.return_unit
 
@@ -520,9 +517,16 @@ let debug_subcommand =
   let open Command.Let_syntax in
   Command.basic
     ~summary:"Produces debugging information about the fanout of a certain file"
-    (let%map env = parse_env () and path = anon ("FILE" %: string) in
+    (let%map env = parse_env ()
+     and path = anon ("FILE" %: string)
+     and cursor_id =
+       flag
+         "--cursor"
+         (optional string)
+         ~doc:"CURSOR The cursor that the previous request returned."
+     in
      let path = Path.make path in
-     (fun () -> Lwt_main.run (mode_debug ~env ~path)))
+     (fun () -> Lwt_main.run (mode_debug ~env ~path ~cursor_id)))
 
 let mode_query
     ~(env : env) ~(dep_hash : Typing_deps.Dep.t) ~(include_extends : bool) :

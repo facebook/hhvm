@@ -28,11 +28,11 @@ type changed_symbol = {
 
 type explanation = {
   removed_symbols: changed_symbol list;
+  modified_symbols: changed_symbol list;
   added_symbols: changed_symbol list;
 }
 
 type result = {
-  naming_table: Naming_table.t;
   fanout_dependents: Typing_deps.DepSet.t;
   fanout_files: Relative_path.Set.t;
   explanations: explanation Relative_path.Map.t;
@@ -74,6 +74,9 @@ let explanation_to_json (explanation : explanation) : Hh_json.json =
       ( "added_symbols",
         Hh_json.JSON_Array
           (List.map ~f:changed_symbol_to_json explanation.added_symbols) );
+      ( "modified_symbols",
+        Hh_json.JSON_Array
+          (List.map ~f:changed_symbol_to_json explanation.modified_symbols) );
       ( "removed_symbols",
         Hh_json.JSON_Array
           (List.map ~f:changed_symbol_to_json explanation.removed_symbols) );
@@ -108,8 +111,10 @@ let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
         ~f:(fun name -> Typing_deps.Dep.Class name);
     ]
 
-let file_info_to_dep_set ~(verbosity : Verbosity.t) (file_info : FileInfo.t) :
-    Typing_deps.DepSet.t * changed_symbol list =
+let file_info_to_dep_set
+    ~(verbosity : Verbosity.t)
+    (naming_table : Naming_table.t)
+    (file_info : FileInfo.t) : Typing_deps.DepSet.t * changed_symbol list =
   List.fold
     (get_symbol_edges_for_file_info file_info)
     ~init:(Typing_deps.DepSet.empty, [])
@@ -130,7 +135,8 @@ let file_info_to_dep_set ~(verbosity : Verbosity.t) (file_info : FileInfo.t) :
             symbol_edge;
             num_outgoing_edges =
               Some (Typing_deps.DepSet.cardinal outgoing_edges);
-            outgoing_files = Some (Typing_deps.get_files outgoing_edges);
+            outgoing_files =
+              Some (Naming_table.get_dep_set_files naming_table outgoing_edges);
           }
       in
       let changed_symbols = changed_symbol :: changed_symbols in
@@ -142,79 +148,94 @@ dependencies that can be traversed to find the fanout of the changes to those
 symbols. *)
 let calculate_dep_set_for_path
     ~(verbosity : Verbosity.t)
-    (ctx : Provider_context.t)
-    (naming_table : Naming_table.t)
-    (path : Relative_path.t) :
-    FileInfo.t option * Typing_deps.DepSet.t * explanation =
-  let (old_deps, removed_symbols) =
-    Naming_table.get_file_info naming_table path
-    |> Option.map ~f:(file_info_to_dep_set ~verbosity)
+    ~(old_naming_table : Naming_table.t)
+    ~(new_naming_table : Naming_table.t)
+    ~(path : Relative_path.t)
+    ~(delta : 'a Naming_sqlite.forward_naming_table_delta) :
+    Typing_deps.DepSet.t * explanation =
+  let (old_deps, old_symbols) =
+    Naming_table.get_file_info old_naming_table path
+    |> Option.map ~f:(file_info_to_dep_set ~verbosity old_naming_table)
     |> Option.value ~default:(Typing_deps.DepSet.empty, [])
   in
-  let new_file_info =
-    match Sys_utils.cat_or_failed (Relative_path.to_absolute path) with
-    | None -> None
-    | Some contents ->
-      let (ctx, entry) =
-        Provider_context.add_or_overwrite_entry_contents ~ctx ~path ~contents
-      in
-      Some
-        (Ast_provider.compute_file_info
-           ~popt:(Provider_context.get_popt ctx)
-           ~entry)
+  let (new_deps, new_symbols) =
+    match delta with
+    | Naming_sqlite.Modified new_file_info ->
+      file_info_to_dep_set ~verbosity new_naming_table new_file_info
+    | Naming_sqlite.Deleted -> (Typing_deps.DepSet.empty, [])
   in
-  let (new_deps, added_symbols) =
-    match new_file_info with
-    | Some new_file_info -> file_info_to_dep_set ~verbosity new_file_info
-    | None -> (Typing_deps.DepSet.empty, [])
+
+  (* NB: could be optimized by constructing sets or by not using polymorphic
+  equality. *)
+  let (modified_symbols, removed_symbols) =
+    List.partition_tf old_symbols ~f:(fun old_symbol ->
+        List.exists new_symbols ~f:(fun new_symbol ->
+            old_symbol.symbol_edge = new_symbol.symbol_edge))
   in
-  let explanation = { removed_symbols; added_symbols } in
-  (new_file_info, Typing_deps.DepSet.union old_deps new_deps, explanation)
+  let added_symbols =
+    List.filter new_symbols ~f:(fun new_symbol ->
+        not
+          (List.exists old_symbols ~f:(fun old_symbol ->
+               old_symbol.symbol_edge = new_symbol.symbol_edge)))
+  in
+
+  let explanation = { removed_symbols; modified_symbols; added_symbols } in
+  (Typing_deps.DepSet.union old_deps new_deps, explanation)
 
 let go
     ~(verbosity : Verbosity.t)
-    (ctx : Provider_context.t)
-    (naming_table : Naming_table.t)
-    (files_to_process : Path.Set.t) : result =
-  let files_to_process =
-    Path.Set.fold
-      files_to_process
-      ~init:Relative_path.Set.empty
-      ~f:(fun path acc ->
-        path
-        |> Path.to_string
-        |> Relative_path.create_detect_prefix
-        |> Relative_path.Set.add acc)
-  in
+    ~(old_naming_table : Naming_table.t)
+    ~(new_naming_table : Naming_table.t)
+    ~(file_deltas : Naming_sqlite.file_deltas)
+    ~(input_files : Relative_path.Set.t) : result =
   let calculate_dep_set_telemetry = Telemetry.create () in
   let start_time = Unix.gettimeofday () in
-  let (naming_table, fanout_dependents, explanations) =
+  let (fanout_dependencies, explanations) =
     Relative_path.Set.fold
-      files_to_process
-      ~init:(naming_table, Typing_deps.DepSet.empty, Relative_path.Map.empty)
-      ~f:(fun path (naming_table, dep_set, explanations) ->
-        let (new_file_info, file_deps, explanation) =
-          calculate_dep_set_for_path ~verbosity ctx naming_table path
+      input_files
+      ~init:(Typing_deps.DepSet.empty, Relative_path.Map.empty)
+      ~f:(fun path (fanout_dependencies, explanations) ->
+        let delta =
+          match Relative_path.Map.find_opt file_deltas path with
+          | Some delta -> delta
+          | None ->
+            failwith
+              ( "Input path %s was not in the map of `file_deltas`. "
+              ^ "This is an internal invariant failure -- please report it. "
+              ^ "This means that we can't process it, "
+              ^ "as we haven't calculated its `FileInfo.t`. "
+              ^ "The caller should have included any elements in `input_files` "
+              ^ "when performing the calculation of `file_deltas`." )
         in
-        let fanout_deps = Typing_deps.add_all_deps file_deps in
-        let new_naming_table =
-          match new_file_info with
-          | Some new_file_info ->
-            Naming_table.update naming_table path new_file_info
-          | None -> Naming_table.remove naming_table path
+        let (file_deps, explanation) =
+          calculate_dep_set_for_path
+            ~verbosity
+            ~old_naming_table
+            ~new_naming_table
+            ~path
+            ~delta
         in
-        let new_deps = Typing_deps.DepSet.union dep_set fanout_deps in
-        ( new_naming_table,
-          new_deps,
+        let fanout_dependencies =
+          Typing_deps.DepSet.union fanout_dependencies file_deps
+        in
+        ( fanout_dependencies,
           Relative_path.Map.add explanations path explanation ))
   in
+
+  (* We have the dependencies -- now traverse the dependency graph to get
+  their dependents. *)
+  let fanout_dependents = Typing_deps.add_all_deps fanout_dependencies in
+
   let calculate_dep_set_telemetry =
     Telemetry.duration ~start_time calculate_dep_set_telemetry
   in
 
   let calculate_fanout_telemetry = Telemetry.create () in
   let start_time = Unix.gettimeofday () in
-  let fanout_files = Typing_deps.get_files fanout_dependents in
+  let fanout_files =
+    Naming_table.get_dep_set_files new_naming_table fanout_dependents
+  in
+
   let calculate_fanout_telemetry =
     Telemetry.duration ~start_time calculate_fanout_telemetry
   in
@@ -233,4 +254,4 @@ let go
       ~value:calculate_fanout_telemetry
   in
 
-  { naming_table; fanout_dependents; fanout_files; explanations; telemetry }
+  { fanout_dependents; fanout_files; explanations; telemetry }

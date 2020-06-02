@@ -64,6 +64,8 @@ val update : t -> Relative_path.t -> FileInfo.t -> t
 
 val update_many : t -> FileInfo.t Relative_path.Map.t -> t
 
+val update_from_deltas : t -> Naming_sqlite.file_deltas -> t
+
 val save : t -> string -> Naming_sqlite.save_result
 
 (* Creation functions. *)

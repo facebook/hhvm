@@ -24,15 +24,6 @@ type cursor_state =
       changed_files: Naming_sqlite.file_deltas;
           (** The files that have changed since the saved-state. This field
           is cumulative, so previous cursors need not be consulted. *)
-      changed_files_dep_reverse_file_mapping:
-        (Typing_deps.Dep.t, Relative_path.Set.t) Hashtbl.t;
-          (** The mapping from typing dependency hashes to files that may
-          have defined them. This field is cumulative, so previous cursors
-          need not be consulted.
-
-          NOTE: This field should be removed when typing and dependency
-          hashes are unified, since `Naming_sqlite.file_deltas` will
-          contain that information. *)
       changed_files_deps: Incremental.dep_graph_delta;
           (** The dependency edges that were produces from typechecking
           `changed_files`. This field is not cumulative, so it must be
@@ -123,12 +114,6 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
         (ctx : Provider_context.t)
         (workers : MultiWorker.worker list)
         (changed_paths : Relative_path.Set.t) : cursor =
-      let changed_files_dep_reverse_file_mapping =
-        match cursor_state with
-        | Saved_state _ -> Hashtbl.Poly.create ()
-        | Saved_state_delta { changed_files_dep_reverse_file_mapping; _ } ->
-          Hashtbl.copy changed_files_dep_reverse_file_mapping
-      in
       let changed_paths =
         Relative_path.Set.union changed_paths self#get_files_to_typecheck
       in
@@ -152,19 +137,6 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
                   ~popt:(Provider_context.get_popt ctx)
                   ~entry
               in
-              let (dep_set, _changed_symbols) =
-                Calculate_fanout.file_info_to_dep_set
-                  ~verbosity:Calculate_fanout.Verbosity.Low
-                  file_info
-              in
-              Typing_deps.DepSet.iter dep_set ~f:(fun dep ->
-                  Hashtbl.update
-                    changed_files_dep_reverse_file_mapping
-                    dep
-                    ~f:(fun existing ->
-                      match existing with
-                      | None -> Relative_path.Set.singleton path
-                      | Some existing -> Relative_path.Set.add existing path));
               Relative_path.Map.add
                 acc
                 ~key:path
@@ -190,7 +162,6 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
           {
             previous = cursor_state;
             changed_files;
-            changed_files_dep_reverse_file_mapping;
             changed_files_deps;
             fanout_result = None;
           }

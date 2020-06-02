@@ -81,26 +81,34 @@ let calculate_dep_edges
       dep_edges)
 
 let go
-    ~(naming_table : Naming_table.t)
     ~(ctx : Provider_context.t)
     ~(workers : MultiWorker.worker list)
-    ~(path : Path.t) : result =
+    ~(old_naming_table : Naming_table.t)
+    ~(new_naming_table : Naming_table.t)
+    ~(file_deltas : Naming_sqlite.file_deltas)
+    ~(path : Relative_path.t) : result =
   let { Calculate_fanout.fanout_dependents; fanout_files; explanations; _ } =
     Calculate_fanout.go
       ~verbosity:Calculate_fanout.Verbosity.Low
-      ctx
-      naming_table
-      (Path.Set.singleton path)
+      ~old_naming_table
+      ~new_naming_table
+      ~file_deltas
+      ~input_files:(Relative_path.Set.singleton path)
   in
 
-  let path = path |> Path.to_string |> Relative_path.create_detect_prefix in
   let explanation = Relative_path.Map.find explanations path in
-  let { Calculate_fanout.removed_symbols; added_symbols } = explanation in
+  let { Calculate_fanout.removed_symbols; modified_symbols; added_symbols } =
+    explanation
+  in
   let dependencies =
     List.map
       removed_symbols
       ~f:(fun Calculate_fanout.{ symbol_edge = { symbol_dep; _ }; _ } ->
         symbol_dep)
+    @ List.map
+        modified_symbols
+        ~f:(fun Calculate_fanout.{ symbol_edge = { symbol_dep; _ }; _ } ->
+          symbol_dep)
     @ List.map
         added_symbols
         ~f:(fun Calculate_fanout.{ symbol_edge = { symbol_dep; _ }; _ } ->

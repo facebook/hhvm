@@ -9,10 +9,12 @@
 type result
 
 val go :
-  naming_table:Naming_table.t ->
   ctx:Provider_context.t ->
   workers:MultiWorker.worker list ->
-  path:Path.t ->
+  old_naming_table:Naming_table.t ->
+  new_naming_table:Naming_table.t ->
+  file_deltas:Naming_sqlite.file_deltas ->
+  path:Relative_path.t ->
   result
 
 val result_to_json : result -> Hh_json.json

@@ -355,6 +355,29 @@ let update_many a updates =
         },
         db_path )
 
+let update_from_deltas a file_deltas =
+  match a with
+  | Unbacked file_infos ->
+    let file_infos =
+      Relative_path.Map.fold
+        file_deltas
+        ~init:file_infos
+        ~f:(fun path file_delta acc ->
+          match file_delta with
+          | Naming_sqlite.Modified file_info ->
+            Relative_path.Map.add acc ~key:path ~data:file_info
+          | Naming_sqlite.Deleted -> Relative_path.Map.remove acc path)
+    in
+    Unbacked file_infos
+  | Backed (local_changes, db_path) ->
+    let file_deltas =
+      (* Reverse the order because union always takes the first value. *)
+      Relative_path.Map.union
+        file_deltas
+        local_changes.Naming_sqlite.file_deltas
+    in
+    Backed ({ local_changes with Naming_sqlite.file_deltas }, db_path)
+
 let combine a b =
   match b with
   | Unbacked b -> update_many a b

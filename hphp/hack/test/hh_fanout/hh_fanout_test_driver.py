@@ -26,6 +26,8 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, cast
 
 
+DEBUGGING = False
+
 Path = str
 
 
@@ -59,14 +61,26 @@ class SavedStateInfo:
 
 
 def generate_saved_state(env: Env, target_dir: Path) -> SavedStateInfo:
-    saved_state_path = os.path.join(target_dir, "saved_state")
+    saved_state_path = os.path.join(target_dir, "dep_table")
+    naming_table_path = os.path.join(target_dir, "naming_table.sqlite")
     subprocess.check_call(
         [env.hh_server_path, env.root_dir, "--save-state", saved_state_path],
         # Don't include the "No errors!" output in the test output.
         stdout=sys.stderr,
     )
+    subprocess.check_call(
+        [
+            env.hh_server_path,
+            "--check",
+            env.root_dir,
+            "--save-naming",
+            naming_table_path,
+        ],
+        # Don't include the "No errors!" output in the test output.
+        stdout=sys.stderr,
+    )
     return SavedStateInfo(
-        dep_table_path=saved_state_path + ".sql", naming_table_path=saved_state_path
+        dep_table_path=saved_state_path + ".sql", naming_table_path=naming_table_path
     )
 
 
@@ -193,6 +207,15 @@ def main() -> None:
                 saved_state_info=saved_state_info,
                 test_path=test_path,
                 changed_files=changed_files,
+            )
+
+        if DEBUGGING:
+            debug_dir = "/tmp/hh_fanout_debug"
+            shutil.rmtree(debug_dir, ignore_errors=True)
+            shutil.copytree(work_dir, debug_dir)
+            sys.stderr.write(
+                f"DEBUGGING is enabled. "
+                + f"You can examine the saved states at: {debug_dir}\n"
             )
 
 

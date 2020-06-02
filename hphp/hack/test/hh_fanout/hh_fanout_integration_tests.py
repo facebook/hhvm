@@ -75,17 +75,7 @@ function deleted(): void {
                 cursor=None,
             )
             result_files = cast(List[str], result["files"])
-            self.assertSetEqual(
-                set(result_files),
-                {
-                    file("foo.php"),
-                    # Currently, `deleted.php` is included in the fanout. This
-                    # is probably a bug. It no longer exists on disk, so it
-                    # shouldn't be included in the fanout. It may be resolved
-                    # once we unify naming and dependency hashes (T64327364).
-                    file("deleted.php"),
-                },
-            )
+            self.assertSetEqual(set(result_files), {file("foo.php")})
 
     def test_cursor_advance(self) -> None:
         work_dir: str

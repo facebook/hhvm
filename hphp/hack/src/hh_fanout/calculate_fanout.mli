@@ -26,12 +26,11 @@ type changed_symbol = {
 
 type explanation = {
   removed_symbols: changed_symbol list;
+  modified_symbols: changed_symbol list;
   added_symbols: changed_symbol list;
 }
 
 type result = {
-  naming_table: Naming_table.t;
-      (** The naming table resulting from re-parsing the changed files. *)
   fanout_dependents: Typing_deps.DepSet.t;
       (** The set of dependents in the fanout. *)
   fanout_files: Relative_path.Set.t;
@@ -46,12 +45,16 @@ val explanation_to_json : explanation -> Hh_json.json
 
 val go :
   verbosity:Verbosity.t ->
-  Provider_context.t ->
-  Naming_table.t ->
-  Path.Set.t ->
+  old_naming_table:Naming_table.t ->
+  new_naming_table:Naming_table.t ->
+  file_deltas:Naming_sqlite.file_deltas ->
+  input_files:Relative_path.Set.t ->
   result
+
+val get_symbol_edges_for_file_info : FileInfo.t -> symbol_edge list
 
 val file_info_to_dep_set :
   verbosity:Verbosity.t ->
+  Naming_table.t ->
   FileInfo.t ->
   Typing_deps.DepSet.t * changed_symbol list

@@ -38,6 +38,17 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 /*
+ * Strict equality check between two vecs, accounting for bespoke vecs.
+ */
+bool vecSameHelper(const ArrayData* ad1, const ArrayData* ad2) {
+  assertx(ad1->isVecType());
+  assertx(ad2->isVecType());
+  return ArrayData::bothVanilla(ad1, ad2)
+    ? PackedArray::VecSame(ad1, ad2)
+    : ArrayData::Same(ad1, ad2);
+}
+
+/*
  * Family of relative op functions.
  *
  * These are used to implement the common parts of the php operators
@@ -1076,19 +1087,25 @@ struct Eq {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecEqual(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecEqual(ad1, ad2)
+      : ArrayData::Equal(ad1, ad2);
   }
   bool dict(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isDictKind());
-    assertx(ad2->isDictKind());
-    return MixedArray::DictEqual(ad1, ad2);
+    assertx(ad1->isDictType());
+    assertx(ad2->isDictType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? MixedArray::DictEqual(ad1, ad2)
+      : ArrayData::Equal(ad1, ad2);
   }
   bool keyset(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isKeysetKind());
-    assertx(ad2->isKeysetKind());
-    return SetArray::Equal(ad1, ad2);
+    assertx(ad1->isKeysetType());
+    assertx(ad2->isKeysetType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? SetArray::Equal(ad1, ad2)
+      : ArrayData::Equal(ad1, ad2);
   }
 
   bool funcVsNonFunc() const { return false; }
@@ -1252,9 +1269,11 @@ struct Lt : CompareBase<bool, std::less<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecLt(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecLt(ad1, ad2)
+      : ArrayData::Lt(ad1, ad2);
   }
 };
 
@@ -1276,9 +1295,11 @@ struct Lte : CompareBase<bool, std::less_equal<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecLte(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecLte(ad1, ad2)
+      : ArrayData::Lte(ad1, ad2);
   }
 };
 
@@ -1300,9 +1321,11 @@ struct Gt : CompareBase<bool, std::greater<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecGt(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecGt(ad1, ad2)
+      : ArrayData::Gt(ad1, ad2);
   }
 };
 
@@ -1324,9 +1347,11 @@ struct Gte : CompareBase<bool, std::greater_equal<>> {
   }
 
   bool vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecGte(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecGte(ad1, ad2)
+      : ArrayData::Gte(ad1, ad2);
   }
 };
 
@@ -1355,9 +1380,11 @@ struct Cmp : CompareBase<int64_t, struct PHPPrimitiveCmp> {
   }
 
   int64_t vec(const ArrayData* ad1, const ArrayData* ad2) const {
-    assertx(ad1->isVecKind());
-    assertx(ad2->isVecKind());
-    return PackedArray::VecCmp(ad1, ad2);
+    assertx(ad1->isVecType());
+    assertx(ad2->isVecType());
+    return ArrayData::bothVanilla(ad1, ad2)
+      ? PackedArray::VecCmp(ad1, ad2)
+      : ArrayData::Compare(ad1, ad2);
   }
 };
 
@@ -1436,7 +1463,7 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       if (isClsMethType(c2.m_type)) {
         if (RuntimeOption::EvalHackArrDVArrs) {
           raiseClsMethToVecWarningHelper();
-          return PackedArray::VecSame(
+          return vecSameHelper(
             c1.m_data.parr, clsMethToVecHelper(c2.m_data.pclsmeth).get());
         } else {
           if (UNLIKELY(checkHACCompare())) {
@@ -1450,23 +1477,33 @@ bool tvSame(TypedValue c1, TypedValue c2) {
         phpArrayCheck();
         return false;
       }
-      return PackedArray::VecSame(c1.m_data.parr, c2.m_data.parr);
+      return vecSameHelper(c1.m_data.parr, c2.m_data.parr);
 
     case KindOfPersistentDict:
-    case KindOfDict:
+    case KindOfDict: {
       if (!isDictType(c2.m_type)) {
         phpArrayCheck();
         return false;
       }
-      return MixedArray::DictSame(c1.m_data.parr, c2.m_data.parr);
+      auto const ad1 = c1.m_data.parr;
+      auto const ad2 = c2.m_data.parr;
+      return ArrayData::bothVanilla(ad1, ad2)
+        ? MixedArray::DictSame(ad1, ad2)
+        : ArrayData::Same(ad1, ad2);
+    }
 
     case KindOfPersistentKeyset:
-    case KindOfKeyset:
+    case KindOfKeyset: {
       if (!isKeysetType(c2.m_type)) {
         phpArrayCheck();
         return false;
       }
-      return SetArray::Same(c1.m_data.parr, c2.m_data.parr);
+      auto const ad1 = c1.m_data.parr;
+      auto const ad2 = c2.m_data.parr;
+      return ArrayData::bothVanilla(ad1, ad2)
+        ? SetArray::Same(ad1, ad2)
+        : ArrayData::Same(ad1, ad2);
+    }
 
     case KindOfPersistentDArray:
     case KindOfDArray:
@@ -1500,7 +1537,7 @@ bool tvSame(TypedValue c1, TypedValue c2) {
       if (RuntimeOption::EvalHackArrDVArrs) {
         if (isVecType(c2.m_type)) {
           raiseClsMethToVecWarningHelper();
-          return PackedArray::VecSame(
+          return vecSameHelper(
             clsMethToVecHelper(c1.m_data.pclsmeth).get(), c2.m_data.parr);
         }
       } else {

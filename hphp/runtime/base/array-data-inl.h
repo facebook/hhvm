@@ -188,6 +188,10 @@ inline bool ArrayData::isVanilla() const {
   return !(kind() & kBespokeKindMask);
 }
 
+inline bool ArrayData::bothVanilla(const ArrayData* ad1, const ArrayData* ad2) {
+  return !((ad1->kind() | ad2->kind()) & kBespokeKindMask);
+}
+
 inline bool ArrayData::isVArray() const {
   static_assert(kPackedKind == 0);
   static_assert(kBespokeVArrayKind == 1);

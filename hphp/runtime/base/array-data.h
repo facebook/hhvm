@@ -272,6 +272,11 @@ public:
   bool isVanilla() const;
 
   /*
+   * A faster test to see if both of the array-likes are vanilla.
+   */
+  static bool bothVanilla(const ArrayData*, const ArrayData*);
+
+  /*
    * Only used for uncounted arrays. Indicates that there's a
    * co-allocated APCTypedValue preceding this array.
    */

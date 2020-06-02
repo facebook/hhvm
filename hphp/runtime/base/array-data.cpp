@@ -744,8 +744,12 @@ ArrayData* ArrayData::Create(TypedValue name, TypedValue value) {
 ALWAYS_INLINE
 bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
                             bool strict) {
-  assertx(ad1->isPHPArrayType());
-  assertx(ad2->isPHPArrayType());
+  // There are only two cases where we should call this slow, generic method:
+  //  1. We have two PHP arrays.
+  //  2. We have two Hack arrays (of same type), and at least one is bespoke.
+  assertx((ad1->isPHPArrayType() && ad2->isPHPArrayType()) ||
+          (ad1->toDataType() == ad2->toDataType()));
+  assertx(IMPLIES(ad1->isHackArrayType(), !bothVanilla(ad1, ad2)));
 
   if (ad1 == ad2) return true;
 
@@ -789,8 +793,12 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
 
 ALWAYS_INLINE
 int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
-  assertx(ad1->isPHPArrayType());
-  assertx(ad2->isPHPArrayType());
+  // There are only two cases where we should call this slow, generic method:
+  //  1. We have two PHP arrays.
+  //  2. We have two vecs, and at least one is bespoke.
+  assertx((ad1->isPHPArrayType() && ad2->isPHPArrayType()) ||
+          (ad1->isVecType() && ad2->isVecType()));
+  assertx(IMPLIES(ad1->isVecType(), !bothVanilla(ad1, ad2)));
 
   if (!ArrayData::dvArrayEqual(ad1, ad2)) {
     if (RO::EvalHackArrCompatSpecialization) {
@@ -898,6 +906,7 @@ int ArrayData::compare(const ArrayData* v2) const {
       }
       throw_vec_compare_exception();
     }
+    if (!bothVanilla(this, v2)) return Compare(this, v2);
     assertx(isVecKind() && v2->isVecKind());
     return PackedArray::VecCmp(this, v2);
   }
@@ -915,32 +924,28 @@ int ArrayData::compare(const ArrayData* v2) const {
 bool ArrayData::equal(const ArrayData* v2, bool strict) const {
   assertx(v2);
 
-  auto const mixed = [&]{
+  if (toDataType() != v2->toDataType()) {
     if (UNLIKELY(checkHACCompare() && v2->isHackArrayType())) {
       raiseHackArrCompatArrHackArrCmp();
     }
     return false;
-  };
+  }
 
-  if (isPHPArrayType()) {
-    if (UNLIKELY(!v2->isPHPArrayType())) return mixed();
+  if (isPHPArrayType() || !bothVanilla(this, v2)) {
     return strict ? Same(this, v2) : Equal(this, v2);
   }
 
-  if (isVecKind()) {
-    if (UNLIKELY(!v2->isVecKind())) return mixed();
+  if (isVecType()) {
     return strict
       ? PackedArray::VecSame(this, v2) : PackedArray::VecEqual(this, v2);
   }
 
   if (isDictKind()) {
-    if (UNLIKELY(!v2->isDictKind())) return mixed();
     return strict
       ? MixedArray::DictSame(this, v2) : MixedArray::DictEqual(this, v2);
   }
 
   if (isKeysetKind()) {
-    if (UNLIKELY(!v2->isKeysetKind())) return mixed();
     return strict ? SetArray::Same(this, v2) : SetArray::Equal(this, v2);
   }
 

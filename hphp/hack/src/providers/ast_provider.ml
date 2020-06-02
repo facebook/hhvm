@@ -97,6 +97,8 @@ let get_from_local_cache ~full ctx file_name =
         | Some FileInfo.Mphp ->
           []
         | Some _ ->
+          (* It's up to Parsing_service to add parsing errors. *)
+          Errors.ignore_ @@ fun () ->
           (Full_fidelity_ast.defensive_program
              ~quick:(not full)
              popt

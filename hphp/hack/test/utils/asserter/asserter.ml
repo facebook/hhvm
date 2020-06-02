@@ -158,7 +158,12 @@ module Make_asserter (Comp : Comparator) = struct
         exp
         actual
     else
-      let () = Printf.eprintf "assert_list_equals failed. Counts not equal\n" in
+      let () =
+        Printf.eprintf
+          "assert_list_equals failed. Counts not equal (%d expected, %d actual)\n"
+          (List.length exp)
+          (List.length actual)
+      in
       let exp_strs = List.map Comp.to_string exp in
       let actual_strs = List.map Comp.to_string actual in
       let () =

@@ -1850,6 +1850,7 @@ dependencies = [
 name = "names"
 version = "0.0.0"
 dependencies = [
+ "deps_rust 0.0.0",
  "md-5 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",

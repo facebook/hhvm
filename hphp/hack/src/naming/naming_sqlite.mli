@@ -70,10 +70,19 @@ val get_type_pos :
   case_insensitive:bool ->
   (Relative_path.t * Naming_types.kind_of_type) option
 
+val get_type_paths_by_dep_hash :
+  db_path -> Typing_deps.Dep.t -> Relative_path.Set.t
+
 val get_fun_pos :
   db_path -> string -> case_insensitive:bool -> Relative_path.t option
 
+val get_fun_paths_by_dep_hash :
+  db_path -> Typing_deps.Dep.t -> Relative_path.Set.t
+
 val get_const_pos : db_path -> string -> Relative_path.t option
+
+val get_const_paths_by_dep_hash :
+  db_path -> Typing_deps.Dep.t -> Relative_path.Set.t
 
 (** The canonical name (and assorted *Canon heaps) store the canonical name for a
     symbol, keyed off of the lowercase version of its name. We use the canon

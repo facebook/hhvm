@@ -93,7 +93,7 @@ pub(crate) mod convert {
         }
     }
 
-    pub fn name_to_hash(name: &str) -> i64 {
+    fn make_naming_hash(name: &str) -> i64 {
         let mut digest = Md5::new();
         digest.input(name);
 
@@ -102,6 +102,13 @@ pub(crate) mod convert {
         // Chop off extra bytes
         let mut b: [u8; 8] = Default::default();
         b.copy_from_slice(&bytes[..8]);
-        return i64::from_ne_bytes(b);
+        i64::from_ne_bytes(b)
+    }
+
+    pub fn name_to_hash(dep_type: deps_rust::DepType, name: &str) -> i64 {
+        let naming_hash = make_naming_hash(name);
+        let dep_hash = deps_rust::hash1(dep_type, name.as_bytes());
+        let result = deps_rust::combine_hashes(dep_hash, naming_hash);
+        result
     }
 }

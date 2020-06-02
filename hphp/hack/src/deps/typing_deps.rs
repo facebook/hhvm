@@ -101,7 +101,8 @@ fn get_dep_type_hash_key(dep_type: DepType) -> u8 {
     }
 }
 
-fn hash1(dep_type: DepType, name1: &[u8]) -> i32 {
+/// Hash a one-argument `Typing_deps.Dep.variant`'s fields.
+pub fn hash1(dep_type: DepType, name1: &[u8]) -> i32 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
@@ -144,7 +145,8 @@ pub unsafe extern "C" fn hash1_ocaml(dep_type_tag: usize, name1: usize) -> usize
     Value::to_bits(result)
 }
 
-fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> i32 {
+/// Hash a two-argument `Typing_deps.Dep.variant`'s fields.
+pub fn hash2(dep_type: DepType, name1: &[u8], name2: &[u8]) -> i32 {
     let mut hasher = make_hasher();
     hasher.write_u8(get_dep_type_hash_key(dep_type));
     hasher.write(name1);
@@ -190,6 +192,13 @@ pub unsafe extern "C" fn hash2_ocaml(dep_type_tag: usize, name1: usize, name2: u
     let name2 = Value::from_bits(name2);
     let result = do_hash(dep_type_tag, name1, name2);
     Value::to_bits(result)
+}
+
+/// Rust implementation of `Typing_deps.NamingHash.combine_hashes`.
+pub fn combine_hashes(dep_hash: i32, naming_hash: i64) -> i64 {
+    let upper_31_bits = (dep_hash as i64) << 31;
+    let lower_31_bits = naming_hash & 0b01111111_11111111_11111111_11111111;
+    upper_31_bits | lower_31_bits
 }
 
 #[cfg(all(test, use_unstable_features))]

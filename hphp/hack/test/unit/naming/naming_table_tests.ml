@@ -489,6 +489,75 @@ let test_naming_table_hash () =
 
   true
 
+let test_naming_table_query_by_dep_hash () =
+  run_naming_table_test
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+      let db_path =
+        Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
+      in
+      let db_path = Option.value_exn db_path in
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "qux.php"]
+        ( Typing_deps.Dep.GConst "\\Qux"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_const_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up const by dep hash should return file path";
+      Asserter.Relative_path_asserter.assert_list_equals
+        []
+        ( Typing_deps.Dep.GConst "\\Nonexistent"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_const_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up non-existent const by dep hash should return empty list";
+
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "bar.php"]
+        ( Typing_deps.Dep.Fun "\\bar"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_fun_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up fun by dep hash should return file path";
+      Asserter.Relative_path_asserter.assert_list_equals
+        []
+        ( Typing_deps.Dep.Fun "\\nonexistent"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_fun_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up non-existent fun by dep hash should return empty list";
+
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "foo.php"]
+        ( Typing_deps.Dep.Class "\\Foo"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_type_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up class by dep hash should return file path";
+      Asserter.Relative_path_asserter.assert_list_equals
+        []
+        ( Typing_deps.Dep.Class "\\nonexistent"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_type_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up non-existent class by dep hash should return empty list";
+
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "baz.php"]
+        ( Typing_deps.Dep.Class "\\Baz"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_type_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up class by dep hash should return file path";
+      Asserter.Relative_path_asserter.assert_list_equals
+        []
+        ( Typing_deps.Dep.Class "\\nonexistent"
+        |> Typing_deps.Dep.make
+        |> Naming_sqlite.get_type_paths_by_dep_hash db_path
+        |> Relative_path.Set.elements )
+        "Look up non-existent typedef by dep hash should return empty list";
+
+      ())
+
 let () =
   let config =
     SharedMem.
@@ -516,4 +585,6 @@ let () =
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
       ("test_naming_table_hash", test_naming_table_hash);
+      ( "test_naming_table_query_by_dep_hash",
+        test_naming_table_query_by_dep_hash );
     ]

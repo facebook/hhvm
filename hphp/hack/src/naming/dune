@@ -57,9 +57,10 @@
     heap_shared_mem
     heap_shared_mem_hash
     naming_types
+    relative_path
     sqlite3
     sqlite_utils
-    relative_path)
+    typing_deps)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

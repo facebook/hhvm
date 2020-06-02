@@ -44,7 +44,7 @@ fn insert(connection: &Connection, items: &[TypeItem]) -> Result<()> {
     let mut insert_statement = connection.prepare(&insert_statement)?;
 
     for item in items {
-        let hash = convert::name_to_hash(&item.name);
+        let hash = convert::name_to_hash(deps_rust::DepType::Class, &item.name);
 
         insert_statement.execute(params![hash, item.kind as isize, item.file_info_id])?;
     }
@@ -68,7 +68,7 @@ pub fn get_path(connection: &Connection, name: &str) -> Result<Option<(RelativeP
         ";
 
     let mut select_statement = connection.prepare_cached(&select_statement)?;
-    let hash = convert::name_to_hash(&name);
+    let hash = convert::name_to_hash(deps_rust::DepType::Class, &name);
     select_statement
         .query_row(params![hash], |row| {
             let prefix: SqlitePrefix = row.get(0)?;

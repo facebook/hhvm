@@ -147,10 +147,12 @@ end
 module NamingHash = struct
   type t = int64
 
-  (* In [Dep.make], we produce a 31-bit hash. In the naming table
-  saved-state, we want to use a hash to identify entries, but to avoid
-  collisions, we want to preserve as many bits as possible of the hash. This
-  can be done by combining it with a larger hash to set the other bits.
+  (** NOTE: MUST KEEP IN SYNC with the implementation in `typing_deps.rs`.
+
+  In [Dep.make], we produce a 31-bit hash. In the naming table saved-state,
+  we want to use a hash to identify entries, but to avoid collisions, we want
+  to preserve as many bits as possible of the hash. This can be done by
+  combining it with a larger hash to set the other bits.
 
   When it comes time to query the naming table, we can get an conservative
   overestimate of the symbols corresponding to dependency hashes by arranging

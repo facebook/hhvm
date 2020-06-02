@@ -2611,10 +2611,13 @@ fn emit_special_function(
                 istype_op(e.options(), lower_fq_name),
                 is_isexp_op(lower_fq_name),
             ) {
-                (&[ref arg_expr], _, Some(ref h)) => Some(InstrSeq::gather(vec![
-                    emit_expr(e, env, &arg_expr)?,
-                    emit_is(e, env, pos, &h)?,
-                ])),
+                (&[ref arg_expr], _, Some(ref h)) => {
+                    let is_expr = emit_is(e, env, pos, &h)?;
+                    Some(InstrSeq::gather(vec![
+                        emit_expr(e, env, &arg_expr)?,
+                        is_expr,
+                    ]))
+                }
                 (&[E(_, E_::Lvar(ref arg_id))], Some(i), _)
                     if superglobals::is_any_global(arg_id.name()) =>
                 {

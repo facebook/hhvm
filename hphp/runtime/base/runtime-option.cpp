@@ -2810,8 +2810,10 @@ void RuntimeOption::Load(
     Trace::ensureInit(getTraceOutputFile());
   }
 
-  // If we aren't going to generate any bespoke array-likes, specialize
-  // (native and JIT) destructors for the vanilla layouts.
+  // Make sure that we JIT checks for bespoke array-likes if we emit them.
+  // If we won't see them, specialize destructors for the vanilla layouts.
+  RO::EvalAllowBespokeArrayLikes =
+    RO::EvalAllowBespokeArrayLikes || RO::EvalEmitBespokeArrayLikes;
   if (!RO::EvalAllowBespokeArrayLikes) specializeVanillaDestructors();
 
   // Hack Array Compats

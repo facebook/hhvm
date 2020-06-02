@@ -23,8 +23,12 @@
 
 namespace HPHP {
 
+namespace bespoke {
 // Hide "BespokeLayout" and its implementations to the rest of the codebase.
-namespace bespoke { struct Layout; }
+struct Layout;
+// Maybe wrap this array in a LoggingArray, based on runtime options.
+ArrayData* maybeEnableLogging(ArrayData*);
+}
 
 /*
  * A bespoke array is an array satisfing the ArrayData interface but backed by

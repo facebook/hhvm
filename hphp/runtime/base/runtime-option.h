@@ -1083,10 +1083,14 @@ struct RuntimeOption {
   F(int64_t, PerfWarningSampleRate, 1)                                  \
   F(int64_t, FunctionCallSampleRate, 0)                                 \
   F(double, InitialLoadFactor, 1.0)                                     \
-  /* When this flag is off, we may assume that all array-likes have     \
+  /* When the "allow" flag is off, we assume that all array-likes have  \
    * their standard (aka "vanilla") layouts. When the flag is on, we    \
-   * must check for "bespoke" hidden classes as well. */                \
+   * must check for "bespoke" hidden classes as well.                   \
+   *                                                                    \
+   * The "allow" flag affects the JIT, but setting it doesn't cause us  \
+   * to produce BespokeArrays - to set the "emit" flag to do that. */   \
   F(bool, AllowBespokeArrayLikes, false)                                \
+  F(bool, EmitBespokeArrayLikes,  false)                                \
   /* Raise notices on various array operations which may present        \
    * compatibility issues with Hack arrays.                             \
    *                                                                    \

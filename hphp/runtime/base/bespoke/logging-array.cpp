@@ -20,8 +20,16 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/runtime-option.h"
 
 namespace HPHP { namespace bespoke {
+
+//////////////////////////////////////////////////////////////////////////////
+
+ArrayData* maybeEnableLogging(ArrayData* ad) {
+  if (!RO::EvalEmitBespokeArrayLikes) return ad;
+  return LoggingArray::MakeFromVanilla(ad);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 

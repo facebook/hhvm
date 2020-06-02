@@ -653,10 +653,7 @@ fn emit_switch(
                     res.into_iter().unzip();
                 let (case_exprs, default_labels): (Vec<Option<(&tast::Expr, Label)>>, Vec<_>) =
                     case_exprs_and_default_labels.into_iter().unzip();
-                let case_expr_instrs = case_exprs
-                    .into_iter()
-                    .filter_map(|x| x.map(|x| emit_check_case(e, env, scrutinee_expr, x)))
-                    .collect::<Result<Vec<_>>>()?;
+
                 let default_label = match default_labels
                     .iter()
                     .filter_map(|lopt| lopt.as_ref())
@@ -672,6 +669,11 @@ fn emit_switch(
                         ))
                     }
                 };
+                let case_expr_instrs = case_exprs
+                    .into_iter()
+                    .filter_map(|x| x.map(|x| emit_check_case(e, env, scrutinee_expr, x)))
+                    .collect::<Result<Vec<_>>>()?;
+
                 Ok((
                     InstrSeq::gather(case_expr_instrs),
                     InstrSeq::gather(case_body_instrs),

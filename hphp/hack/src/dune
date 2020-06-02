@@ -88,8 +88,7 @@
     logging
     utils_multifile
     naming
-    naming_elaborate_namespaces_endo
-    typing)
+    naming_elaborate_namespaces_endo)
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp))))
 

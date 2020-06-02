@@ -20,7 +20,7 @@
     ident)
   (libraries
     collections
-    heap_libc)
+    utils_core)
   (preprocess (pps ppx_deriving.std visitors.ppx)))
 
 (library

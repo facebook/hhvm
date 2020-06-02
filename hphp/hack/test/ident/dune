@@ -4,6 +4,7 @@
   (modules test_early)
   (libraries
     heap_ident
+    heap_libc
     test_injector_config))
 
 (alias

@@ -756,16 +756,7 @@ pub fn emit_class<'a>(
     let mut methods = emit_method::from_asts(emitter, ast_class, &ast_class.methods)?;
     methods.extend(additional_methods.into_iter());
     let type_constants = from_class_elt_typeconsts(emitter, ast_class)?;
-    let upper_bounds = if emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
-    {
-        emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, &[], false)
-    } else {
-        vec![]
-    };
+    let upper_bounds = emit_body::emit_generics_upper_bounds(&ast_class.tparams.list, &[], false);
 
     if !no_xhp_attributes {
         properties.extend(emit_xhp::properties_for_cache(

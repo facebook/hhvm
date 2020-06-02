@@ -18,7 +18,7 @@
   RetC
 }
 
-.function ["__EntryPoint"("""y:0:{}""")] (23,49) <"HH\\void" N > main() {
+.function {} ["__EntryPoint"("""y:0:{}""")] (23,49) <"HH\\void" N > main() {
   .numiters 1;
   .declvars $k;
   .srcloc 25:8,25:23;
@@ -176,8 +176,8 @@ L6:
   RetC
 }
 
-.class C (3,8) {
-  .method [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+.class {} C (3,8) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
     .srcloc 4:8,4:8;
     Keyset @A_1
     .srcloc 4:8,4:8;
@@ -185,7 +185,7 @@ L6:
     VerifyRetTypeTS
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 4:8,4:8;
     VerifyParamType $atom
     .srcloc 4:8,4:8;
@@ -221,7 +221,7 @@ L6:
     Null
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
     .ismemoizewrapper;
     .srcloc 4:8,4:8;
     MemoGet L0 L:0+0
@@ -234,7 +234,7 @@ L6:
     MemoSet L:0+0
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (4,4) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
     .srcloc 4:8,4:8;
     VerifyParamType $atom
@@ -254,11 +254,11 @@ L6:
   }
 }
 
-.class XX (10,10) extends C {
+.class {} XX (10,10) extends C {
 }
 
-.class D (12,20) extends XX {
-  .method [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (13,13) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+.class {} D (12,20) extends XX {
+  .method {}{} [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (13,13) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
     .numiters 1;
     .declvars $result $class $method $parent_members $p $_;
     .srcloc 13:8,13:8;
@@ -350,7 +350,7 @@ L6:
     VerifyRetTypeTS
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (13,13) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (13,13) <"HH\\mixed" N > pu$E$val$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 13:8,13:8;
     VerifyParamType $atom
     .srcloc 13:8,13:8;
@@ -380,7 +380,7 @@ L6:
     Null
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$F$Members$memoize_impl() {
+  .method {}{} [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$F$Members$memoize_impl() {
     .numiters 1;
     .declvars $result $class $method $parent_members $p $_;
     .srcloc 16:8,16:8;
@@ -472,7 +472,7 @@ L6:
     VerifyRetTypeTS
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$F$fal$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$F$fal$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
     .srcloc 16:8,16:8;
     VerifyParamType $atom
     .srcloc 16:8,16:8;
@@ -502,7 +502,7 @@ L6:
     Null
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (13,13) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (13,13) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
     .ismemoizewrapper;
     .srcloc 13:8,13:8;
     MemoGet L0 L:0+0
@@ -515,7 +515,7 @@ L6:
     MemoSet L:0+0
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (13,13) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (13,13) <"HH\\mixed" N > pu$E$val(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
     .srcloc 13:8,13:8;
     VerifyParamType $atom
@@ -533,7 +533,7 @@ L6:
     MemoSet L:1+1
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$F$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$F$Members() {
     .ismemoizewrapper;
     .srcloc 16:8,16:8;
     MemoGet L0 L:0+0
@@ -546,7 +546,7 @@ L6:
     MemoSet L:0+0
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$F$fal(<"HH\\string" "HH\\string" > $atom) {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$F$fal(<"HH\\string" "HH\\string" > $atom) {
     .ismemoizewrapper;
     .srcloc 16:8,16:8;
     VerifyParamType $atom

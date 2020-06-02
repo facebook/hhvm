@@ -114,10 +114,7 @@ let assert_opts_equal caml rust =
   assert_equal
     Hhbc_options.(disallow_func_ptrs_in_constants caml)
     Hhbc_options.(disallow_func_ptrs_in_constants rust);
-  assert_equal
-    Hhbc_options.(emit_generics_ub caml)
-    Hhbc_options.(emit_generics_ub rust);
-  assert_equal
+ assert_equal
     Hhbc_options.(check_int_overflow caml)
     Hhbc_options.(check_int_overflow rust);
   assert_equal
@@ -299,10 +296,7 @@ let test_all_overrides_json_only _ =
   \"hhvm.emit_func_pointers\": {
     \"global_value\": false
   },
-  \"hhvm.emit_generics_ub\": {
-    \"global_value\": true
-  },
-  \"hhvm.emit_inst_meth_pointers\": {
+ \"hhvm.emit_inst_meth_pointers\": {
     \"global_value\": false
   },
   \"hhvm.emit_meth_caller_func_pointers\": {
@@ -433,8 +427,6 @@ module CliArgOverrides = struct
 
   let hhvm'emit_func_pointers = "-vhhvm.emit_func_pointers=0"
 
-  let hhvm'emit_generics_ub = "-vhhvm.emit_generics_ub=2"
-
   let hhvm'emit_inst_meth_pointers = "-vhhvm.emit_inst_meth_pointers=0"
 
   let hhvm'emit_meth_caller_func_pointers =
@@ -535,7 +527,6 @@ let test_all_overrides_cli_only _ =
       (* hhvm'dynamic_invoke_functions; *)
       hhvm'emit_cls_meth_pointers;
       hhvm'emit_func_pointers;
-      hhvm'emit_generics_ub;
       hhvm'emit_inst_meth_pointers;
       hhvm'emit_meth_caller_func_pointers;
       hhvm'enable_intrinsics_extension;

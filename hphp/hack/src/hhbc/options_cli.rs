@@ -36,7 +36,6 @@ lazy_static! {
             "eval.jitenablerenamefunction" => "hhvm.jit_enable_rename_function",
             "eval.logexterncompilerperf" => "hhvm.log_extern_compiler_perf",
             "eval.enableintrinsicsextension" => "hhvm.enable_intrinsics_extension",
-            "eval.emitgenericsub" => "hhvm.emit_generics_ub",
             // group 3: we could ignore hhvm. part of prefix in deser.
             "hack.lang.disable_lval_as_an_expression" => "hhvm.hack.lang.disable_lval_as_an_expression",
             // group 4: combination of group 3 & 1

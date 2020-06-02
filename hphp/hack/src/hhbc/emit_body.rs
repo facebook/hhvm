@@ -29,7 +29,7 @@ use instruction_sequence_rust::{instr, unrecoverable, Error, InstrSeq, Result};
 use label_rewriter_rust as label_rewriter;
 use naming_special_names_rust::classes;
 use ocamlrep::rc::RcOc;
-use options::{CompilerFlags, HhvmFlags};
+use options::CompilerFlags;
 use oxidized::{aast, ast as tast, ast_defs, doc_comment::DocComment, namespace_env, pos::Pos};
 use reified_generics_helpers as RGH;
 use runtime::TypedValue;
@@ -138,14 +138,12 @@ pub fn emit_body<'a, 'b>(
         args.flags,
     )?;
 
-    let upper_bounds = make_upper_bounds(
-        emitter,
+    let upper_bounds = emit_generics_upper_bounds(
         args.immediate_tparams,
         args.class_tparam_names,
         args.flags.contains(Flags::SKIP_AWAITABLE),
     );
-    let shadowed_tparams =
-        make_shadowed_tparams(emitter, args.immediate_tparams, args.class_tparam_names);
+    let shadowed_tparams = emit_shadowed_tparams(args.immediate_tparams, args.class_tparam_names);
     let (need_local_this, decl_vars) = make_decl_vars(
         emitter,
         &scope,
@@ -415,41 +413,6 @@ pub fn make_env<'a>(
     env.with_need_local_this(need_local_this);
     env.with_rx_body(is_rx_body);
     env
-}
-
-fn make_upper_bounds(
-    emitter: &mut Emitter,
-    immediate_tparams: &[tast::Tparam],
-    class_tparam_names: &[&str],
-    skip_awaitable: bool,
-) -> Vec<(String, Vec<HhasTypeInfo>)> {
-    if emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_GENERICS_UB)
-    {
-        emit_generics_upper_bounds(immediate_tparams, class_tparam_names, skip_awaitable)
-    } else {
-        vec![]
-    }
-}
-
-fn make_shadowed_tparams(
-    emitter: &mut Emitter,
-    immediate_tparams: &[tast::Tparam],
-    class_tparam_names: &[&str],
-) -> Vec<String> {
-    if emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_GENERICS_UB)
-    {
-        emit_shadowed_tparams(immediate_tparams, class_tparam_names)
-    } else {
-        vec![]
-    }
 }
 
 fn make_params(

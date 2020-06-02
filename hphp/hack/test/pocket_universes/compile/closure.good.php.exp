@@ -13,8 +13,8 @@
   RetC
 }
 
-.class C (4,13) {
-  .method [public static] (10,12) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
+.class {} C (4,13) {
+  .method {}{(TE as <"HH\\mixed" N upper_bound>)} [public static] (10,12) <"HH\\void" N > derive(<"TE" "TE" extended_hint type_var> $field) {
     .declvars $_;
     .srcloc 10:17,12:116;
     VerifyParamType $field
@@ -34,7 +34,7 @@
     Null
     RetC
   }
-  .method [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members$memoize_impl() {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members$memoize_impl() {
     .srcloc 5:8,5:12;
     Keyset @A_1
     .srcloc 5:8,5:12;
@@ -42,7 +42,7 @@
     VerifyRetTypeTS
     RetC
   }
-  .method [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members() {
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$Entry$Members() {
     .ismemoizewrapper;
     .srcloc 5:8,5:12;
     MemoGet L0 L:0+0

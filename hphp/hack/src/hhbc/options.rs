@@ -163,7 +163,6 @@ prefixed_flags!(
     ARRAY_PROVENANCE,
     EMIT_CLS_METH_POINTERS,
     EMIT_FUNC_POINTERS,
-    EMIT_GENERICS_UB,
     EMIT_INST_METH_POINTERS,
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
@@ -657,9 +656,6 @@ mod tests {
   "hhvm.emit_func_pointers": {
     "global_value": true
   },
-  "hhvm.emit_generics_ub": {
-    "global_value": false
-  },
   "hhvm.emit_inst_meth_pointers": {
     "global_value": false
   },
@@ -1134,7 +1130,6 @@ bitflags! {
         const ABSTRACT_STATIC_PROPS = 1 << 41;
         const DISABLE_UNSET_CLASS_CONST = 1 << 42;
         const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
-        const EMIT_GENERICS_UB = 1 << 44;
         const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
         const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
         const ENABLE_FIRST_CLASS_FUNCTION_POINTERS = 1 << 47;

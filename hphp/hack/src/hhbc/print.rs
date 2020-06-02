@@ -386,16 +386,8 @@ fn print_fun_def<W: Write>(
     let body = &fun_def.body;
     newline(w)?;
     w.write(".function ")?;
-    if ctx
-        .emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
-    {
-        print_upper_bounds(w, &body.upper_bounds)?;
-        w.write(" ")?;
-    }
+    print_upper_bounds(w, &body.upper_bounds)?;
+    w.write(" ")?;
     print_fun_attrs(ctx, w, fun_def)?;
     print_span(w, &fun_def.span)?;
     w.write(" ")?;
@@ -792,17 +784,9 @@ fn print_method_def<W: Write>(
     let body = &method_def.body;
     newline(w)?;
     w.write("  .method ")?;
-    if ctx
-        .emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
-    {
-        print_shadowed_tparams(w, &body.shadowed_tparams)?;
-        print_upper_bounds(w, &body.upper_bounds)?;
-        w.write(" ")?;
-    }
+    print_shadowed_tparams(w, &body.shadowed_tparams)?;
+    print_upper_bounds(w, &body.upper_bounds)?;
+    w.write(" ")?;
     print_method_attrs(ctx, w, method_def)?;
     print_span(w, &method_def.span)?;
     w.write(" ")?;
@@ -894,16 +878,8 @@ fn print_class_def<W: Write>(
 ) -> Result<(), W::Error> {
     newline(w)?;
     w.write(".class ")?;
-    if ctx
-        .emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(options::HhvmFlags::EMIT_GENERICS_UB)
-    {
-        print_upper_bounds(w, &class_def.upper_bounds)?;
-        w.write(" ")?;
-    }
+    print_upper_bounds(w, &class_def.upper_bounds)?;
+    w.write(" ")?;
     print_class_special_attributes(ctx, w, class_def)?;
     w.write(class_def.name.to_raw_string())?;
     w.write(" ")?;

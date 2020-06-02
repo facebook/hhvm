@@ -614,13 +614,10 @@ let emit_class (ast_class, hoisted) =
     && List.is_empty ast_class.A.c_extends
   in
   let class_upper_bounds =
-    if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
-      Emit_body.emit_generics_upper_bounds
-        ast_class.A.c_tparams.A.c_tparam_list
-        []
-        ~skipawaitable:false
-    else
+    Emit_body.emit_generics_upper_bounds
+      ast_class.A.c_tparams.A.c_tparam_list
       []
+      ~skipawaitable:false
   in
   let additional_methods =
     additional_methods

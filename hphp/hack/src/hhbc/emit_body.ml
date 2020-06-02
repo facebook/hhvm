@@ -616,22 +616,16 @@ let emit_body
       body_instrs
   in
   let upper_bounds =
-    if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
-      emit_generics_upper_bounds
-        immediate_tparams
-        class_tparam_names
-        ~skipawaitable
-    else
-      []
+    emit_generics_upper_bounds
+      immediate_tparams
+      class_tparam_names
+      ~skipawaitable
   in
   let shadowed_tparams =
-    if Hhbc_options.emit_generics_ub !Hhbc_options.compiler_options then
-      let immediate_tparam_names =
-        List.map immediate_tparams (fun t -> snd t.A.tp_name)
-      in
-      emit_shadowed_tparams immediate_tparam_names class_tparam_names
-    else
-      []
+    let immediate_tparam_names =
+      List.map immediate_tparams (fun t -> snd t.A.tp_name)
+    in
+    emit_shadowed_tparams immediate_tparam_names class_tparam_names
   in
   ( make_body
       body_instrs

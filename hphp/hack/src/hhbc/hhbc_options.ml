@@ -50,7 +50,6 @@ type t = {
   option_abstract_static_props: bool;
   option_disable_unset_class_const: bool;
   option_disallow_func_ptrs_in_constants: bool;
-  option_emit_generics_ub: bool;
   option_check_int_overflow: int;
   option_disable_xhp_element_mangling: bool;
   option_disable_xhp_children_declarations: bool;
@@ -104,7 +103,6 @@ let default =
     option_abstract_static_props = false;
     option_disable_unset_class_const = false;
     option_disallow_func_ptrs_in_constants = false;
-    option_emit_generics_ub = false;
     option_check_int_overflow = 0;
     option_disable_xhp_element_mangling = false;
     option_disable_xhp_children_declarations = false;
@@ -201,8 +199,6 @@ let disable_xhp_children_declarations o =
 
 let enable_xhp_class_modifier o = o.option_enable_xhp_class_modifier
 
-let emit_generics_ub o = o.option_emit_generics_ub
-
 let check_int_overflow o = o.option_check_int_overflow > 0
 
 let enable_first_class_function_pointers o =
@@ -292,7 +288,6 @@ let to_string o =
       @@ disable_unset_class_const o;
       Printf.sprintf "disallow_func_ptrs_in_constants: %B"
       @@ disallow_func_ptrs_in_constants o;
-      Printf.sprintf "emit_generics_ub: %B" @@ emit_generics_ub o;
       Printf.sprintf "check_int_overflow: %B" @@ check_int_overflow o;
       Printf.sprintf "enable_xhp_class_modifier: %B"
       @@ enable_xhp_class_modifier o;
@@ -388,8 +383,6 @@ let set_option options name value =
     { options with option_disallow_func_ptrs_in_constants = as_bool value }
   | "hhvm.hack.lang.enable_xhp_class_modifier" ->
     { options with option_enable_xhp_class_modifier = as_bool value }
-  | "hhvm.emit_generics_ub" ->
-    { options with option_emit_generics_ub = as_bool value }
   | "hhvm.hack.lang.disable_xhp_element_mangling" ->
     { options with option_disable_xhp_element_mangling = as_bool value }
   | "hhvm.hack.lang.check_int_overflow" ->
@@ -598,8 +591,6 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
       { opts with option_disallow_func_ptrs_in_constants = v = 1 } );
-    ( set_value "hhvm.emit_generics_ub" get_value_from_config_int
-    @@ fun opts v -> { opts with option_emit_generics_ub = v = 1 } );
     ( set_value "hhvm.hack.lang.check_int_overflow" get_value_from_config_int
     @@ fun opts v -> { opts with option_check_int_overflow = v } );
     ( set_value

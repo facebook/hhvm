@@ -3,7 +3,7 @@
 // Create test ZIP file
 <<__EntryPoint>>
 function main_write_after_read_works() {
-$tempfile = getenv('HPHP_TEST_TMPDIR') . 'hello.zip';
+$tempfile = __SystemLib\hphp_test_tmppath('hello.zip');
 $zip_setup = new ZipArchive();
 $zip_setup->open($tempfile, ZipArchive::OVERWRITE | ZipArchive::CREATE);
 $zip_setup->addFromString('hello.txt', 'Old value here');

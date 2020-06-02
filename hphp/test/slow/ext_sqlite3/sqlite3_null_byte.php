@@ -5,7 +5,7 @@
 function main_sqlite3_null_byte() {
 $file = '/etc/passwd'.chr(0).'asdf';
 
-$db = getenv('HPHP_TEST_TMPDIR') . 'example.db';
+$db = __SystemLib\hphp_test_tmppath('example.db');
 
 set_error_handler(function() use ($db) { unlink($db); return false; });
 

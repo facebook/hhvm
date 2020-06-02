@@ -34,9 +34,9 @@ var_dump(is_executable($tempfile));
 
 // in order to create a file outside the source tree but have a relative
 // path to it, we need to chdir into the temporary directory
-$tempfile = getenv('HPHP_TEST_TMPDIR') . 'vmextfiletest';
+$tempfile = __SystemLib\hphp_test_tmppath('vmextfiletest');
 touch($tempfile);
-chdir(getenv('HPHP_TEST_TMPDIR'));
+chdir(__SystemLib\hphp_test_tmproot());
 $relativetempfile = './vmextfiletest';
 var_dump(is_file($relativetempfile));
 var_dump(is_dir($relativetempfile));

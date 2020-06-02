@@ -1,6 +1,9 @@
-<?hh <<__EntryPoint>> function main(): void {
-$jpeg_file = getenv('HPHP_TEST_TMPDIR') . 'imagick_test.jpg';
-$png_file = getenv('HPHP_TEST_TMPDIR') . 'imagick_test.png';
+<?hh
+
+<<__EntryPoint>>
+function main(): void {
+$jpeg_file = __SystemLib\hphp_test_tmppath('imagick_test.jpg');
+$png_file = __SystemLib\hphp_test_tmppath('imagick_test.png');
 
 $im = new imagick ('magick:rose');
 $im->writeImage ($jpeg_file);

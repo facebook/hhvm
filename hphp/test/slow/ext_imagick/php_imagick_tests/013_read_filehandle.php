@@ -1,6 +1,8 @@
 <?hh
-<<__EntryPoint>> function main(): void {
-$file = getenv('HPHP_TEST_TMPDIR') . '__tmp_rose.jpg';
+
+<<__EntryPoint>>
+function main(): void {
+$file = __SystemLib\hphp_test_tmppath('__tmp_rose.jpg');
 
 $imagick = new Imagick('magick:rose');
 $imagick->setImageFormat('jpg');

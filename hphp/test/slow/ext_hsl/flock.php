@@ -17,8 +17,7 @@ function try_lock(string $path, int $type): void {
 
 <<__EntryPoint>>
 function main(): void {
-  $tmpdir = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
-  $path = $tmpdir.'/hsl-os-flock-'.bin2hex(random_bytes(16));
+  $path = __SystemLib\hphp_test_tmppath('hsl-os-flock');
   try {
     $fd = _OS\open($path, _OS\O_CREAT | _OS\O_RDWR | _OS\O_EXCL, 0644);
     print("Acquiring first exclusive lock\n");

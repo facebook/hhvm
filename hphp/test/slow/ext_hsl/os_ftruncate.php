@@ -4,8 +4,8 @@ use namespace HH\Lib\_Private\_OS;
 
 <<__EntryPoint>>
 function main(): void {
-  $tmpdir = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
-  $temp = tempnam($tmpdir, 'hsl_lseek_test');
+  $temp = __SystemLib\hphp_test_tmppath('hsl_os_ftruncate');
+  touch($temp);
   $fd = _OS\open($temp, _OS\O_WRONLY);
 
   _OS\write($fd, 'foobarbaz');
@@ -54,4 +54,6 @@ function main(): void {
       throw $e;
     }
   }
+
+  unlink($temp);
 }

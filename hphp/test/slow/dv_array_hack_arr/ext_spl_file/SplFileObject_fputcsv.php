@@ -2,7 +2,7 @@
 
 <<__EntryPoint>>
 function main_spl_file_object_fputcsv() {
-$file = getenv('HPHP_TEST_TMPDIR') . 'SplFileObject_fputcsv.csv';
+$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv.csv');
 $fo = new SplFileObject($file, 'w');
 
 $list = darray [

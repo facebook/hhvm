@@ -2,7 +2,7 @@
 
 <<__EntryPoint>> function main(): void {
   $origdir = getcwd();
-  $dirname = getenv('HPHP_TEST_TMPDIR') . 'hhvm_chdir';
+  $dirname = __SystemLib\hphp_test_tmppath('hhvm_chdir');
   mkdir($dirname);
 
   var_dump(chdir($dirname));

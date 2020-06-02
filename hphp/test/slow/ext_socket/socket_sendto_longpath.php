@@ -55,8 +55,7 @@ async function main(): Awaitable<void> {
   }
 
   $junk = \bin2hex(\random_bytes($max_len)); // much longer than the safe value
-  $tmp = getenv('HPHP_TEST_TMPDIR') ?: sys_get_temp_dir();
-  $path = $tmp.'/sendto-test-'.$junk;
+  $path = __SystemLib\hphp_test_tmppath("sendto-test-$junk");
   invariant(strlen($path) > $max_len, "Path is too short :/");
 
   print("Definitely too-long path\n");

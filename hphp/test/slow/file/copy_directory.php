@@ -5,8 +5,8 @@
 <<__EntryPoint>>
 function main_copy_directory() {
 
-$src_dir = getenv('HPHP_TEST_TMPDIR') . 'copy_dir_src';
-$dest_dir = getenv('HPHP_TEST_TMPDIR') . 'copy_dir_dest';
+$src_dir = __SystemLib\hphp_test_tmppath('copy_dir_src');
+$dest_dir = __SystemLib\hphp_test_tmppath('copy_dir_dest');
 
 // Create the source directory
 mkdir("$src_dir");

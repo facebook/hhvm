@@ -24,23 +24,21 @@ function stat_targets(ZipArchive $zip): void {
 
 <<__EntryPoint>>
 function main() {
-  try {
-    $zip = new ZipArchive();
-    $zip->open(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME, ZipArchive::CREATE);
-    $zip->addGlob(__DIR__ . '/test_files/foo*', 0, OPTS);
-    $zip->addPattern('/b[io]ng/', __DIR__ . '/test_files', OPTS);
-    $zip->close();
-    $zip->open(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME);
-    stat_archive($zip);
-    stat_targets($zip);
-    $zip->extractTo(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR, TARGETS);
-    var_dump(scandir(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR));
-  } finally {
-    // Cleanup
-    foreach (TARGETS as $target) {
-      unlink(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR . "/$target");
-    }
-    rmdir(getenv('HPHP_TEST_TMPDIR') . OUTPUT_DIR);
-    unlink(getenv('HPHP_TEST_TMPDIR') . ZIP_NAME);
+  $zip = new ZipArchive();
+  $zip->open(__SystemLib\hphp_test_tmppath(ZIP_NAME), ZipArchive::CREATE);
+  $zip->addGlob(__DIR__ . '/test_files/foo*', 0, OPTS);
+  $zip->addPattern('/b[io]ng/', __DIR__ . '/test_files', OPTS);
+  $zip->close();
+  $zip->open(__SystemLib\hphp_test_tmppath(ZIP_NAME));
+  stat_archive($zip);
+  stat_targets($zip);
+  $zip->extractTo(__SystemLib\hphp_test_tmppath(OUTPUT_DIR), TARGETS);
+  var_dump(scandir(__SystemLib\hphp_test_tmppath(OUTPUT_DIR)));
+
+  // Cleanup
+  foreach (TARGETS as $target) {
+    unlink(__SystemLib\hphp_test_tmppath(OUTPUT_DIR . "/$target"));
   }
+  rmdir(__SystemLib\hphp_test_tmppath(OUTPUT_DIR));
+  unlink(__SystemLib\hphp_test_tmppath(ZIP_NAME));
 }

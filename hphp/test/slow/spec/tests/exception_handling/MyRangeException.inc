@@ -6,9 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
-class MyRangeException extends Exception 
+class MyRangeException extends Exception
 {
 	private $badValue;
 	private $lowerValue;
@@ -27,7 +25,7 @@ class MyRangeException extends Exception
 	public function getLowerValue() { return $this->lowerValue; }
 	public function getUpperValue() { return $this->upperValue; }
 
-	public function __toString() 
+	public function __toString()
 	{
 		return parent::__toString()
 			. ", badValue: " . $this->badValue

@@ -148,5 +148,8 @@ function run_tests() {
   try {echo noinline(3) >> noinline(-1), "\n";}
     catch (\Throwable $e) {exn($e);}
 }
+<<__EntryPoint>>
+function entrypoint_shift(): void {
 
-run_tests();
+  run_tests();
+}

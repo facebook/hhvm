@@ -5,5 +5,3 @@
           echo "goo called\n";
         }
       }
-
-$x = 1;

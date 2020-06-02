@@ -1,7 +1,5 @@
 <?hh
 
-include "xenonUtil.inc";
-
 // Basic Xenon test.  PHP stacks but no Async stacks.
 
 async function fa3($a) {
@@ -38,31 +36,37 @@ async function fa0($a) {
 function main($a) {
   return \HH\Asio\join(fa0($a));
 }
+<<__EntryPoint>>
+function entrypoint_xenon_init(): void {
 
-echo main(42) . "\n";
+  include "xenonUtil.inc";
 
-// get the Xenon data then verify that there are no unknown functions
-// and that all of the functions in this file are in the stack
-$stacks = xenon_get_data();
-$required_functions = varray[
-  'HH\Asio\join',
-  'HH\Asio\v',
-  'HH\Asio\result',
+  echo main(42) . "\n";
 
-  'fa0',
-  'fa1',
-  'fa2',
-  'fa3',
-  'fn0',
-  'fn1',
-  'main',
-];
-$optional_functions = varray[
-  'include',
-  'count',
-  Vector::class.'::__construct',
-  AwaitAllWaitHandle::class.'::fromVector',
-  RescheduleWaitHandle::class.'::create',
-];
+  // get the Xenon data then verify that there are no unknown functions
+  // and that all of the functions in this file are in the stack
+  $stacks = xenon_get_data();
+  $required_functions = varray[
+    'HH\Asio\join',
+    'HH\Asio\v',
+    'HH\Asio\result',
 
-verifyTestRun($stacks, $required_functions, $optional_functions);
+    'fa0',
+    'fa1',
+    'fa2',
+    'fa3',
+    'fn0',
+    'fn1',
+    'main',
+    'entrypoint_xenon_init',
+  ];
+  $optional_functions = varray[
+    'include',
+    'count',
+    Vector::class.'::__construct',
+    AwaitAllWaitHandle::class.'::fromVector',
+    RescheduleWaitHandle::class.'::create',
+  ];
+
+  verifyTestRun($stacks, $required_functions, $optional_functions);
+}

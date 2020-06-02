@@ -1,7 +1,5 @@
 <?hh
 
-error_reporting(-1);
-
 class Foo {
   static $bar = darray['baz' => 'myfunc'];
 }
@@ -9,5 +7,10 @@ class Foo {
 function myfunc() {
   return 'quux';
 }
+<<__EntryPoint>>
+function entrypoint_static_dim_call(): void {
 
-var_dump(Foo::$bar['baz']());
+  error_reporting(-1);
+
+  var_dump(Foo::$bar['baz']());
+}

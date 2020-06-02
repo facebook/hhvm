@@ -12,9 +12,12 @@ class obj {
 function foo($x) {
   return $x['a'] . $x['a'] . $x['a'];
 }
+<<__EntryPoint>>
+function entrypoint_globals(): void {
 
-for ($i = 0; $i < 100; ++$i) {
-  $x = 0;
-  $a = new obj;
-  var_dump(foo($GLOBALS['GLOBALS']));
+  for ($i = 0; $i < 100; ++$i) {
+    $GLOBALS['x'] = 0;
+    $GLOBALS['a'] = new obj;
+    var_dump(foo($GLOBALS['GLOBALS']));
+  }
 }

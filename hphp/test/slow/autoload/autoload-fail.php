@@ -13,16 +13,17 @@ function fail($t, $n, $e) {
     include 'autoload-fail-2.inc';
   }
 }
+<<__EntryPoint>>
+function entrypoint_autoloadfail(): void {
 
-\HH\autoload_set_paths(
-  darray['class' => darray[
-          'c' => 'autoload-fail-c.inc', // syntax error
-          'd' => 'autoload-fail-d.inc', // throws exception in pseudomain
-        ],
-        'failure' => 'fail',
-       ],
-  __DIR__ . '/'
-);
+  \HH\autoload_set_paths(
+    darray['class' => darray[
+            'c' => 'autoload-fail-c.inc', // syntax error
+          ],
+          'failure' => 'fail',
+         ],
+    __DIR__ . '/'
+  );
 
-$x = new C;
-$x = new D;
+  $x = new C;
+}

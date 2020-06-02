@@ -1,13 +1,5 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
 class Point
 {
   private $x;
@@ -37,19 +29,7 @@ class Point
   }
 }
 
-echo "---------------- start -------------------\n";
-
-$av1 = new Point(0, 1);
-
-echo "---------------- after \$av1 init -------------------\n";
-
 class State { static $sv1 = TRUE; static $sv2 = 0; static $sv3 = NULL; }
-
-echo "---------------- after \$sv1 decl -------------------\n";
-
-State::$sv1 = new Point(0, 2);
-
-echo "---------------- after \$sv1 init -------------------\n";
 
 function doit($p1)
 {
@@ -87,19 +67,42 @@ function doit($p1)
   echo "---------------- after \$av1 reinit -------------------\n";
 }
 
-doit(TRUE);
-
-echo "---------------- after call to func -------------------\n";
-
 function factorial($i)
 {
   if ($i > 1) return $i * factorial($i - 1);
   else if ($i == 1) return $i;
   else return 0;
 }
+<<__EntryPoint>>
+function entrypoint_storage_duration(): void {
 
-$count = 10;
-$result = factorial($count);
-echo "\$result = $result\n";
+  /*
+     +-------------------------------------------------------------+
+     | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
+     +-------------------------------------------------------------+
+  */
 
-echo "---------------- end -------------------\n";
+  error_reporting(-1);
+
+  echo "---------------- start -------------------\n";
+
+  $av1 = new Point(0, 1);
+
+  echo "---------------- after \$av1 init -------------------\n";
+
+  echo "---------------- after \$sv1 decl -------------------\n";
+
+  State::$sv1 = new Point(0, 2);
+
+  echo "---------------- after \$sv1 init -------------------\n";
+
+  doit(TRUE);
+
+  echo "---------------- after call to func -------------------\n";
+
+  $count = 10;
+  $result = factorial($count);
+  echo "\$result = $result\n";
+
+  echo "---------------- end -------------------\n";
+}

@@ -49,29 +49,15 @@ class D implements iZ
     public static function f3 () {}
 }
 
-include_once 'MyCollection.inc';
-include_once 'MyList.inc';
-
-class MyQueue implements MyCollection
-{
-    public function put($item)
-    {
-        // ...
-    }
-
-    public function get()
-    {
-        // ...
-    }
-
-    // ...
-}
-
 function processCollection(MyCollection $p1)
 {
     var_dump($p1);
 }
 <<__EntryPoint>> function main(): void {
+  include_once 'MyCollection.inc';
+  include_once 'MyList.inc';
+  include_once 'interfaces.inc';
+
 error_reporting(-1);
 
 var_dump(D::C1);

@@ -3,7 +3,6 @@
 function error_handler() {
   throw new Exception('nooo');
 }
-set_error_handler(fun('error_handler'));
 
 class Media {}
 
@@ -14,5 +13,9 @@ function crash(): string {
     return $media;
   }
 }
+<<__EntryPoint>>
+function entrypoint_hardreturntypethrow(): void {
+  set_error_handler(fun('error_handler'));
 
-crash();
+  crash();
+}

@@ -1,9 +1,10 @@
 <?hh
 /**
- * require this in your tests if you want to make sure the mtimes and iterator 
+ * require this in your tests if you want to make sure the mtimes and iterator
  * order of files in this directory is consistent
  */
 
+function fix_mtimes(): void {
 $dir = dirname(__FILE__).'/';
 $base = 1234567890;
 touch($dir, $base++);
@@ -15,3 +16,4 @@ touch($dir.'fix_mtimes.inc', $base++);
 
 // Tests that include this like to work out of the 'hphp' dir
 chdir($dir.'../..');
+}

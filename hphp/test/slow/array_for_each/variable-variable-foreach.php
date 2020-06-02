@@ -1,5 +1,4 @@
 <?hh
-ArrayForEachVariableVariableForeach::$rows=varray[1,2,3];
 
 
 function fn1() {
@@ -24,16 +23,20 @@ function fn2() {
     echo "row={$row}\n";
 }
 
-// ORIGINAL ARRAY
-print_r(ArrayForEachVariableVariableForeach::$rows);
-
-// SOME ITERATIONS
-fn1();
-
-// THE MALFORMED ARRAY
-print_r(ArrayForEachVariableVariableForeach::$rows);
-
 abstract final class ArrayForEachVariableVariableForeach {
   public static $rows;
   public static $row;
+}
+<<__EntryPoint>>
+function entrypoint_variablevariableforeach(): void {
+  ArrayForEachVariableVariableForeach::$rows=varray[1,2,3];
+
+  // ORIGINAL ARRAY
+  print_r(ArrayForEachVariableVariableForeach::$rows);
+
+  // SOME ITERATIONS
+  fn1();
+
+  // THE MALFORMED ARRAY
+  print_r(ArrayForEachVariableVariableForeach::$rows);
 }

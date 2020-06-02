@@ -8,8 +8,6 @@
 
 namespace Graphics\D2
 {
-\error_reporting(-1);
-include_once 'Point.inc';
 
 class Circle
 {

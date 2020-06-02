@@ -3,5 +3,8 @@
 function foo(): int {
   return 'Hi';
 }
+<<__EntryPoint>>
+function entrypoint_typeerrorssuffix_php_typeerrors(): void {
 
-foo();
+  foo();
+}

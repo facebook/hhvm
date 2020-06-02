@@ -1,7 +1,4 @@
 <?hh // strict
-
-NullsafeNullsafeProp10Php::$z = new stdClass;
-NullsafeNullsafeProp10Php::$z->m = 1;
 function something($x) {
 return NullsafeNullsafeProp10Php::$z;
 }
@@ -13,8 +10,14 @@ function test() {
   var_dump(NullsafeNullsafeProp10Php::$z);
 }
 
-test();
-
 abstract final class NullsafeNullsafeProp10Php {
   public static $z;
+}
+<<__EntryPoint>>
+function entrypoint_nullsafeprop10(): void {
+
+  NullsafeNullsafeProp10Php::$z = new stdClass;
+  NullsafeNullsafeProp10Php::$z->m = 1;
+
+  test();
 }

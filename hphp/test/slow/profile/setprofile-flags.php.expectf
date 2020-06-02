@@ -30,4 +30,4 @@ enter some_function args
 enter stdClass::86ctor args
 exit stdClass::86ctor return
 exit some_function return
-exit  return
+exit entrypoint_setprofileflags return

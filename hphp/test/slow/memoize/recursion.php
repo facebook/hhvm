@@ -1,7 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-MemoizeRecursion::$counter = 10;
 
 class C {
   public function __construct($x) {
@@ -17,9 +14,15 @@ class C {
   return new C(func()->x + 1);
 }
 
-var_dump(func()->x);
-var_dump(func()->x);
-
 abstract final class MemoizeRecursion {
   public static $counter;
+}
+<<__EntryPoint>>
+function entrypoint_recursion(): void {
+  // Copyright 2004-present Facebook. All Rights Reserved.
+
+  MemoizeRecursion::$counter = 10;
+
+  var_dump(func()->x);
+  var_dump(func()->x);
 }

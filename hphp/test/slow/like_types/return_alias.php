@@ -1,7 +1,5 @@
 <?hh
 
-include_once 'parameter_alias.inc';
-
 function f(mixed $x): MyAlias {
   return $x;
 }
@@ -12,6 +10,8 @@ function g(mixed $x): void {
 
 <<__EntryPoint>>
 function main(): void {
+  include_once 'parameter_alias.inc';
+
   g(1);
   g(1.5);
   g('foo');

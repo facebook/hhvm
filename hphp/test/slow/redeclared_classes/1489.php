@@ -1,25 +1,5 @@
 <?hh
 
-if (isset($g)) {
-  include '1489-1.inc';
-}
-else {
-  include '1489-2.inc';
-}
-class Y extends X {
-  protected $prot_over_prot = 4;
-  public $pub_over_pub = 5;
-  public $pub_over_prot = 6;
-  protected $prot_base = 7;
-  public $pub_base = 8;
-}
-class Z extends Y {
-  public $prot_over_prot = 9;
-  public $pub_over_pub = 10;
-  public $pub_over_prot = 11;
-  public $prot_base = 12;
-  public $pub_base = 13;
-}
 function foo($x) {
   $s = serialize($x);
   var_dump($s);
@@ -37,8 +17,21 @@ function foo($x) {
   unset($z, $y);
   var_dump($x);
 }
-$y = new y;
-foo($y);
-$z = new z;
-foo($z);
-unset($z, $y);
+<<__EntryPoint>>
+function entrypoint_1489(): void {
+
+  if (isset($g)) {
+    include '1489-1.inc';
+  }
+  else {
+    include '1489-2.inc';
+  }
+
+  include '1489-classes.inc';
+
+  $y = new y;
+  foo($y);
+  $z = new z;
+  foo($z);
+  unset($z, $y);
+}

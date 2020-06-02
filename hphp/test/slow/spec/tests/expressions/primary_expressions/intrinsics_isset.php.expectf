@@ -6,7 +6,7 @@ bool(false)
 bool(false)
 --------- undefined parameter -------------
 
-Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_isset.php on line 30
+Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_isset.php on line 11
 NULL
 bool(false)
 NULL

@@ -1,9 +1,12 @@
 <?hh
 
 function err($x, $y) { echo $y; echo "\n"; }
-set_error_handler(fun('err'));
 abstract class Asd {
   private function __construct() {}
 }
 
-function x() { new Asd(); } x();
+function x() { new Asd(); } <<__EntryPoint>>
+function entrypoint_ctor_fail_abstract(): void {
+  set_error_handler(fun('err'));
+  x();
+}

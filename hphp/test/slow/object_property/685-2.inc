@@ -10,4 +10,3 @@ class X {
   static $y4 = 4;
   static $y5 = 5;
 }
-$x = 1;

@@ -10,4 +10,7 @@ function main() {
 
   return 0;
 }
-main();
+<<__EntryPoint>>
+function entrypoint_error_func(): void {
+  main();
+}

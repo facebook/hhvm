@@ -1,11 +1,14 @@
 <?hh
+<<__EntryPoint>>
+function entrypoint_dimmable_object_access(): void {
 
 
-error_reporting(-1);
+  error_reporting(-1);
 
-$foo = new stdclass();
-$foo->someprop = darray['baz' => 'quux'];
+  $foo = new stdclass();
+  $foo->someprop = darray['baz' => 'quux'];
 
-$bar = 'someprop';
+  $bar = 'someprop';
 
-var_dump($foo->$bar['baz']);
+  var_dump($foo->$bar['baz']);
+}

@@ -26,5 +26,8 @@ function main() {
 
   partial(inout $v); // error
 }
+<<__EntryPoint>>
+function entrypoint_autoloader(): void {
 
-main();
+  main();
+}

@@ -1,5 +1,6 @@
 <?hh
-
+<<__EntryPoint>>
+function entrypoint_openssl_pkey_get_details_3(): void {
 $key = <<<EOF
 -----BEGIN PUBLIC KEY-----
 MIIGOjCCBC0GByqGSM44BAEwggQgAoICAQCUIaZcoOGXfYHvScSlFY3jR30N9RNq
@@ -43,3 +44,4 @@ print $key;
 $res = openssl_pkey_get_public($key);
 include __DIR__.'/recursive.inc';
 var_dump(openssl_pkey_get_bin2hex_details($res));
+}

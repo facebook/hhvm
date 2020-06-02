@@ -1,7 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-GvnCrash13368505Php::$gmt = new DateTimeZone('GMT');
 
 class XDate extends DateTime
 {
@@ -23,9 +20,15 @@ function main() {
   $date->myFormat();
 }
 
-main();
-echo "DONE\n";
-
 abstract final class GvnCrash13368505Php {
   public static $gmt;
+}
+<<__EntryPoint>>
+function entrypoint_gvncrash13368505(): void {
+  // Copyright 2004-present Facebook. All Rights Reserved.
+
+  GvnCrash13368505Php::$gmt = new DateTimeZone('GMT');
+
+  main();
+  echo "DONE\n";
 }

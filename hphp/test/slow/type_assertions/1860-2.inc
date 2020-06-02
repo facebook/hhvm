@@ -5,4 +5,3 @@ class X {
     var_dump('X2::f');
   }
 }
-$x = 1;

@@ -18,5 +18,8 @@ function foo(): ?int {
   // operator
   return $b?->baz();
 }
+<<__EntryPoint>>
+function entrypoint_notnullable_php_typeerrors(): void {
 
-\var_dump(foo());
+  \var_dump(foo());
+}

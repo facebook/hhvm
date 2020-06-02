@@ -28,5 +28,8 @@ function run_tests() {
   try { noinline(1) % noinline(0.0); }
     catch (\Throwable $e) { exn($e); }
 }
+<<__EntryPoint>>
+function entrypoint_mod(): void {
 
-run_tests();
+  run_tests();
+}

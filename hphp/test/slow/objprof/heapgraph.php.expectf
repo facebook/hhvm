@@ -1,5 +1,5 @@
 
-Warning: json_encode(): type is unsupported, encoded as false in %s/heapgraph.php on line 15
+Warning: json_encode(): type is unsupported, encoded as false in %s/heapgraph.php on line 14
 Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)

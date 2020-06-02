@@ -28,13 +28,16 @@ function visit_root($node) {
     echo "\n";
   }
 }
+<<__EntryPoint>>
+function entrypoint_deadstaticprops(): void {
 
-echo "start\n";
-$filename = '/tmp/dead-static-props.php';
-gen();
-include $filename;
-$c = new C;
-$c->f(); // access static prop
-$hg = heapgraph_create();
-HH\heapgraph_foreach_root_node($hg, 'visit_root');
-unlink($filename);
+  echo "start\n";
+  $GLOBALS['filename'] = '/tmp/dead-static-props.php';
+  gen();
+  include $GLOBALS['filename'];
+  $c = new C;
+  $c->f(); // access static prop
+  $hg = heapgraph_create();
+  HH\heapgraph_foreach_root_node($hg, 'visit_root');
+  unlink($GLOBALS['filename']);
+}

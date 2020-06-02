@@ -28,12 +28,6 @@ enum Enum4 : mixed {
   VAL3 = 3;
 }
 
-if (__hhvm_intrinsics\launder_value(true)) {
-  include 'redefine1.inc';
-} else {
-  include 'redefine2.inc';
-}
-
 type Alias1 = int;
 type Alias2 = string;
 type Alias3 = this;
@@ -559,7 +553,16 @@ class C extends B {
     new C();
   }
 }
+<<__EntryPoint>>
+function entrypoint_redefinebad(): void {
 
-C::test();
-C::test();
-echo "DONE\n";
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include 'redefine1.inc';
+  } else {
+    include 'redefine2.inc';
+  }
+
+  C::test();
+  C::test();
+  echo "DONE\n";
+}

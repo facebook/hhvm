@@ -13,5 +13,8 @@ function h<reify Ta, Tb>() { g<Ta, Tb>(); }
 function a<T>() {
   g<int, T>();
 }
+<<__EntryPoint>>
+function entrypoint_backtraceerasure(): void {
 
-a();
+  a();
+}

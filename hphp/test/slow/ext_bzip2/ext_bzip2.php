@@ -6,8 +6,6 @@ function VS($x, $y) {
 }
 function VERIFY($x) { VS($x, true); }
 
-ExtBzip2ExtBzip2Php::$tmpfile = tempnam('/tmp', 'hhbztest.tmp');
-
 function test_bzwrite() {
 
 
@@ -55,10 +53,15 @@ function test_bzerror() {
                  "errstr" => "DATA_ERROR_MAGIC"]);
 }
 
-test_bzwrite();
-test_bzerrstr();
-test_bzerror();
-
 abstract final class ExtBzip2ExtBzip2Php {
   public static $tmpfile;
+}
+<<__EntryPoint>>
+function entrypoint_ext_bzip2(): void {
+
+  ExtBzip2ExtBzip2Php::$tmpfile = tempnam('/tmp', 'hhbztest.tmp');
+
+  test_bzwrite();
+  test_bzerrstr();
+  test_bzerror();
 }

@@ -5,5 +5,3 @@ class bar {
     echo "bar called\n";
   }
 }
-
-$x = 1;

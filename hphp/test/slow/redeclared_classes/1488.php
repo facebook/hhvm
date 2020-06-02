@@ -1,17 +1,14 @@
 <?hh
 
-if (isset($g)) {
-  include '1488-1.inc';
-}
-else {
-  include '1488-2.inc';
-}
-class Z extends Y {
-  static function foo() {
-    var_dump(__METHOD__);
+<<__EntryPoint>>
+function entrypoint_1488(): void {
+
+  if (isset($g)) {
+    include '1488-1.inc';
   }
-  static function bar() {
-    X::foo();
+  else {
+    include '1488-2.inc';
   }
+  include '1488-classes.inc';
+  Z::bar();
 }
-Z::bar();

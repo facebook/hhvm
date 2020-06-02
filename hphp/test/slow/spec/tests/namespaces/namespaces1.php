@@ -7,28 +7,32 @@
 */
 
 namespace NS1;          // define a level-1 namespace
-echo "Inside namespace " . __NAMESPACE__ . "\n";
-
-\error_reporting(-1);
-
+function foo() {
+  echo "Inside namespace " . __NAMESPACE__ . "\n";
+}
 
 // namespace;   // cannot omit name (unlike namespace {)
 
 
 
 namespace NS1\Sub1;     // define a level-2 namespace that happens to have a level-1 prefix
-echo "Inside namespace " . __NAMESPACE__ . "\n";
-
+function foo() {
+  echo "Inside namespace " . __NAMESPACE__ . "\n";
+}
 
 
 namespace NS2;          // define a level-1 namespace
-echo "Inside namespace " . __NAMESPACE__ . "\n";
+function foo() {
+  echo "Inside namespace " . __NAMESPACE__ . "\n";
+}
 
 use NS2;
 
 
 namespace NS3\Sub1;     // define a level-2 namespace who's prefix is not an existing level-1 ns
-echo "Inside namespace " . __NAMESPACE__ . "\n";
+function foo() {
+  echo "Inside namespace " . __NAMESPACE__ . "\n";
+}
 
 //class NS3\Sub1\C1     // prefix not allowed in definition
 class C1
@@ -44,9 +48,6 @@ class C1
     }
 }
 
-$c1 = new C1;
-$c1->f();
-
 interface I1 {}
 //Interface NS3\Sub1\I1 {}  // prefix not allowed in definition
 
@@ -56,3 +57,13 @@ namespace NS10 {    // Cannot mix bracketed namespace declarations with unbracke
     echo "Inside namespace " . __NAMESPACE__ . "\n";
 }
 */
+<<__EntryPoint>>
+function entrypoint_namespaces1(): void {
+  \NS1\foo();
+  \NS1\Sub1\foo();
+  \NS2\foo();
+  \NS3\Sub1\foo();
+
+  $c1 = new C1;
+  $c1->f();
+}

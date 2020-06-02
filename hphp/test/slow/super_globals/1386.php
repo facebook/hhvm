@@ -8,7 +8,10 @@ class X {
     return varray[$GLOBALS[__FUNCTION__],                 $GLOBALS[__CLASS__],                 $GLOBALS[__METHOD__]];
   }
 }
-$test = 'this_is_function_test';
-$X = 'this_is_class_x';
-$GLOBALS['X::test'] = 'this_is_method_test::x';
-var_dump(X::test());
+<<__EntryPoint>>
+function entrypoint_1386(): void {
+  $GLOBALS['test'] = 'this_is_function_test';
+  $GLOBALS['X'] = 'this_is_class_x';
+  $GLOBALS['X::test'] = 'this_is_method_test::x';
+  var_dump(X::test());
+}

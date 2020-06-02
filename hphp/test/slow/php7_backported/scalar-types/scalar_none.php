@@ -4,6 +4,7 @@
 <<__EntryPoint>>
 function main_scalar_none() {
 require 'fix_exceptions.inc';
+fix_exceptions();
 
 $functions = darray[
     'int' => function (int $i) { return $i; },

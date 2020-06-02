@@ -1,6 +1,6 @@
 <?hh
 
-error_reporting(-1);
+
 
 
 
@@ -31,18 +31,21 @@ class B extends A {
   }
 }
 
-B::test(new A, varray["a"]);
-B::test(new A, varray["\0A\0a"]);
-B::test(new A, varray["\0*\0a"]);
-B::test(new A, varray["\0*\0b"], "b");
-B::test(new A, varray["\0B\0b"], "b");
-B::test(new A, "foo");
-B::test(new B, varray["a"]);
-B::test(new B, varray["\0A\0a"]);
-B::test(new B, varray["\0*\0a"]);
-B::test(new B, varray["\0*\0b"], "b");
-B::test(new B, varray["\0B\0b"], "b");
-
 abstract final class SerializationPrivateProperties {
   public static $g;
+}
+<<__EntryPoint>>
+function entrypoint_private_properties(): void {
+  error_reporting(-1);
+  B::test(new A, varray["a"]);
+  B::test(new A, varray["\0A\0a"]);
+  B::test(new A, varray["\0*\0a"]);
+  B::test(new A, varray["\0*\0b"], "b");
+  B::test(new A, varray["\0B\0b"], "b");
+  B::test(new A, "foo");
+  B::test(new B, varray["a"]);
+  B::test(new B, varray["\0A\0a"]);
+  B::test(new B, varray["\0*\0a"]);
+  B::test(new B, varray["\0*\0b"], "b");
+  B::test(new B, varray["\0B\0b"], "b");
 }

@@ -9,7 +9,7 @@ bool(true)
 bool(false)
 --------- undefined parameter -------------
 
-Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_unset.php on line 36
+Notice: Undefined variable: p in %s/expressions/primary_expressions/intrinsics_unset.php on line 11
 NULL
 bool(false)
 bool(false)

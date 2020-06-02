@@ -6,16 +6,19 @@ class X {
     yield $this->a;
   }
 }
-if (isset($g)) {
-  include '2182-1.inc';
-} else {
-  include '2182-2.inc';
-}
-class Z extends Y {}
 function test() {
   $z = new Z;
   foreach ($z->foo() as $v) {
     var_dump($v);
   }
 }
-test();
+<<__EntryPoint>>
+function entrypoint_2182(): void {
+  if (isset($g)) {
+    include '2182-1.inc';
+  } else {
+    include '2182-2.inc';
+  }
+  include '2182-after.inc';
+  test();
+}

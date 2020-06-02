@@ -1,15 +1,15 @@
-__LINE__: int(17)
+__LINE__: int(77)
 __FILE__: string(%d) "%s/constants/core_predefined_constants.php"
 __DIR__: string(%d) "%s/constants"
 string(%d) "%s/constants"
-__LINE__: int(24)
+__LINE__: int(84)
 __NAMESPACE__: string(0) ""
 -----------------------------------------
 At the top level of a script
-__FUNCTION__: string(0) ""
+__FUNCTION__: string(36) "entrypoint_core_predefined_constants"
 -----------------------------------------
 At the top level of a script and outside all classes
-__METHOD__: string(0) ""
+__METHOD__: string(36) "entrypoint_core_predefined_constants"
 -----------------------------------------
 Outside all classes
 __CLASS__: string(0) ""
@@ -31,7 +31,7 @@ __TRAIT__: string(0) ""
 __NAMESPACE__: string(0) ""
 Inside Date::setDay
 __FUNCTION__: string(6) "setDay"
-__LINE__: int(81)
+__LINE__: int(42)
 Inside Date::priv1
 __FUNCTION__: string(5) "priv1"
 Inside Date::spf1

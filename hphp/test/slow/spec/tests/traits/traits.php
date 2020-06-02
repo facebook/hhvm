@@ -1,25 +1,8 @@
 <?hh
 
-/*
-   +-------------------------------------------------------------+
-   | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
-   +-------------------------------------------------------------+
-*/
-
-error_reporting(-1);
-
-echo "Inside >" . __TRAIT__ . "<\n";
-echo "Inside >" . __CLASS__ . "<\n";
-echo "Inside >" . __METHOD__ . "<\n";
-echo "Inside >" . __FUNCTION__ . "<\n";
-
-echo "===================== Test an Empty Trait =========================\n";
-
 trait T1 {}     // allowed to be empty
 
 class C1 { use T1; }
-
-echo "========== Test Overriding and Collisions Between Traits =====\n";
 
 trait T2a
 {
@@ -64,21 +47,6 @@ class C2Derived extends C2Base
 //  public function f() { echo "Inside " . __METHOD__ . "\n"; }
 }
 
-$c2 = new C2Derived;
-
-echo "-------\n";
-$c2->f();       // call T2a::f
-
-echo "-------\n";
-$c2->g();       // call T2b::f via its alias g
-
-echo "-------\n";
-$c2->h();       // call T2a::f via its alias h
-
-// confirmed that lookup starts with current class, then trait(s), then base classes
-
-echo "===================== Changing Visibility =========================\n";
-
 trait T3
 {
     public function m1() { echo "Inside " . __METHOD__ . "\n"; }
@@ -98,14 +66,6 @@ class C3
         m3 as protected z3;
     }
 }
-
-$c3 = new C3;
-//$c3->m1();        // accessible, by default, but not once protected
-//$c3->m2();        // inaccessible, by default
-$c3->m3();          // inaccessible, by default
-$c3->m4();          // accessible, by default
-
-echo "===================== Traits using other Traits =========================\n";
 
 
 trait Tx1
@@ -143,22 +103,6 @@ class C4
     use T4;
 }
 
-$c4 = new C4;
-
-echo "-------\n";
-$c4->f();
-
-echo "-------\n";
-$c4->m1();
-
-echo "-------\n";
-$c4->k();
-
-echo "-------\n";
-$c4->m();
-
-echo "===================== static properties =========================\n";
-
 trait T5
 {
     public static $prop;
@@ -173,13 +117,6 @@ class C5b
 {
     use T5;
 }
-
-C5a::$prop = 123;
-C5b::$prop = "red";
-echo C5a::$prop . "\n"; // ==> 123
-echo C5b::$prop . "\n"; // ==> red
-
-echo "===================== function statics =========================\n";
 
 trait T6
 {
@@ -202,19 +139,6 @@ class C6b
     use T6;
 }
 
-$v1 = new C6a;
-$v1->f();       // method run twice with same $v
-$v1->f();
-
-echo "-------\n";
-
-$v2 = new C6b;
-$v2->f();       // method run three times with a different $v
-$v2->f();
-$v2->f();
-
-echo "===================== Using a Trait without a Class =========================\n";
-
 trait T7
 {
     public static $pubs = 123;
@@ -234,18 +158,6 @@ trait T7
         echo "Inside " . __METHOD__ . "\n";
     }
 }
-
-
-
-
-T7::g();
-
-/*
-echo "-------\n";
-var_dump(T7::pubs); // doesn't work for static properties
-*/
-
-echo "===================== examples for spec =========================\n";
 
 trait T9a
 {
@@ -279,4 +191,95 @@ trait T10
     public $prop3;
     public function compute() {}
     public static function getData() {}
+}
+<<__EntryPoint>>
+function entrypoint_traits(): void {
+
+  /*
+     +-------------------------------------------------------------+
+     | Copyright (c) 2015 Facebook, Inc. (http://www.facebook.com) |
+     +-------------------------------------------------------------+
+  */
+
+  error_reporting(-1);
+
+  echo "Inside >" . __TRAIT__ . "<\n";
+  echo "Inside >" . __CLASS__ . "<\n";
+  echo "Inside >" . __METHOD__ . "<\n";
+  echo "Inside >" . __FUNCTION__ . "<\n";
+
+  echo "===================== Test an Empty Trait =========================\n";
+
+  echo "========== Test Overriding and Collisions Between Traits =====\n";
+
+  $c2 = new C2Derived;
+
+  echo "-------\n";
+  $c2->f();       // call T2a::f
+
+  echo "-------\n";
+  $c2->g();       // call T2b::f via its alias g
+
+  echo "-------\n";
+  $c2->h();       // call T2a::f via its alias h
+
+  // confirmed that lookup starts with current class, then trait(s), then base classes
+
+  echo "===================== Changing Visibility =========================\n";
+
+  $c3 = new C3;
+  //$c3->m1();        // accessible, by default, but not once protected
+  //$c3->m2();        // inaccessible, by default
+  $c3->m3();          // inaccessible, by default
+  $c3->m4();          // accessible, by default
+
+  echo "===================== Traits using other Traits =========================\n";
+
+  $c4 = new C4;
+
+  echo "-------\n";
+  $c4->f();
+
+  echo "-------\n";
+  $c4->m1();
+
+  echo "-------\n";
+  $c4->k();
+
+  echo "-------\n";
+  $c4->m();
+
+  echo "===================== static properties =========================\n";
+
+  C5a::$prop = 123;
+  C5b::$prop = "red";
+  echo C5a::$prop . "\n"; // ==> 123
+  echo C5b::$prop . "\n"; // ==> red
+
+  echo "===================== function statics =========================\n";
+
+  $v1 = new C6a;
+  $v1->f();       // method run twice with same $v
+  $v1->f();
+
+  echo "-------\n";
+
+  $v2 = new C6b;
+  $v2->f();       // method run three times with a different $v
+  $v2->f();
+  $v2->f();
+
+  echo "===================== Using a Trait without a Class =========================\n";
+
+
+
+
+  T7::g();
+
+  /*
+  echo "-------\n";
+  var_dump(T7::pubs); // doesn't work for static properties
+  */
+
+  echo "===================== examples for spec =========================\n";
 }

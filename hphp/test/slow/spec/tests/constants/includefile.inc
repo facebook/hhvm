@@ -6,9 +6,11 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
+function include_file() {
+   error_reporting(-1);
 
-echo "Inside includefile.php\n";
+   echo "Inside includefile.php\n";
 
-var_dump(__FILE__);
-var_dump(__DIR__);
+   var_dump(__FILE__);
+   var_dump(__DIR__);
+}

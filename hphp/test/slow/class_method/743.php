@@ -1,6 +1,4 @@
 <?hh
-
-$a = 'A';
 class A {
   public static function f($value) {
     $filter = 'g';
@@ -10,4 +8,8 @@ class A {
     return $value;
   }
 }
-var_dump(A::f('test'));
+<<__EntryPoint>>
+function entrypoint_743(): void {
+  $GLOBALS['a'] = 'A';
+  var_dump(A::f('test'));
+}

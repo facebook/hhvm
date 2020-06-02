@@ -1,7 +1,6 @@
 <?hh
-
-require 'fix_exceptions.inc';
 <<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
 $functions = darray[
     'int' => function (int $i) { return $i; },
     'float' => function (float $f) { return $f; },

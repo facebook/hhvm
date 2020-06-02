@@ -1,7 +1,5 @@
 <?hh
 
-include_once 'parameter_alias.inc';
-
 /**
  * Like-types are treated as mixed, allowing any argument value.
  */
@@ -11,6 +9,8 @@ function f(MyAlias $x): void {
 
 <<__EntryPoint>>
 function main(): void {
+  include_once 'parameter_alias.inc';
+
   f(1);
   f(1.5);
   f('foo');

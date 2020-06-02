@@ -50,10 +50,10 @@ class DummyTransport {
 
 class DummyStruct {
   const SPEC = vec[];
-};
+}
 class DummyStruct2 {
   const SPEC = vec[];
-};
+}
 
 class TestStruct1 {
   public bool $p1 = true;

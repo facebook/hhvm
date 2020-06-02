@@ -6,21 +6,10 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
+<<__EntryPoint>>
+function entrypoint_mylist(): void {
+  error_reporting(-1);
 
-include_once 'MyCollection.inc';
-
-class MyList implements MyCollection
-{
-    public function put($item)
-    {
-        // ...
-    }
-
-    public function get()
-    {
-        // ...
-    }
-
-    // ...
+  include_once 'MyCollection.inc';
+  include_once 'mylist.inc';
 }

@@ -5,12 +5,15 @@ class C<reify T> {}
 
 function f(C<@int> $_) { echo "done\n"; }
 
-f(new C<int>());       // correct
-f(new C<string>());    // only warn
-
 function g(B<C<@int>> $_) { echo "done\n"; }
+<<__EntryPoint>>
+function entrypoint_paramwarn2(): void {
 
-g(new B<C<int>>());    // correct
-g(new B<C<string>>()); // only warn
+  f(new C<int>());       // correct
+  f(new C<string>());    // only warn
 
-g(new B<string>());    // error
+  g(new B<C<int>>());    // correct
+  g(new B<C<string>>()); // only warn
+
+  g(new B<string>());    // error
+}

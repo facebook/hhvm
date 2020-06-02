@@ -1,4 +1,5 @@
 #0 %s: f<int,_>()
 #1 %s: g<int,_>()
 #2 %s: a()
-#3 {main}
+#3 (): entrypoint_backtraceerasure()
+#4 {main}

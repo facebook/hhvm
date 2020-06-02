@@ -1,15 +1,16 @@
 <?hh
 
-if (isset($g)) {
-  include '1722-1.inc';
-}
-else {
-  include '1722-2.inc';
-}
-class Y extends X {
-  function __construct($a, $b) {
-    var_dump(__METHOD__);
-    parent::__construct($a,$b);
+<<__EntryPoint>>
+function entrypoint_1722(): void {
+
+  if (isset($g)) {
+    include '1722-1.inc';
   }
+  else {
+    include '1722-2.inc';
+  }
+
+  include '1722.y.inc';
+
+  $y = new Y(1,2);
 }
-$y = new Y(1,2);

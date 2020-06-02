@@ -2,5 +2,3 @@
 
  class base {
 }
-
-$x = 1;

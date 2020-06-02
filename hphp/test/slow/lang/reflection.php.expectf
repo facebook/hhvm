@@ -5,10 +5,10 @@ string(35) "/**
  */"
 
 --- getStartLine("f") ---
-int(15)
+int(13)
 
 --- getEndLine("f") ---
-int(20)
+int(18)
 
 --- getFileName("f") ---
 string(%d) "%s/test/slow/lang/reflection.php"
@@ -206,7 +206,7 @@ string(%d) "/**
  * This is f's doc comment.
  */
 Function [ <user> function f ] {
-  @@ %s/test/slow/lang/reflection.php 15 - 20
+  @@ %s/test/slow/lang/reflection.php 13 - 18
 
   - Parameters [4] {
     Parameter #0 [ <required> $a ]
@@ -232,7 +232,7 @@ string(%d) "/**
  * This is g's doc comment.
  */
 Function [ <user> function g ] {
-  @@ %s/test/slow/lang/reflection.php 88 - 90
+  @@ %s/test/slow/lang/reflection.php 36 - 38
 
   - Parameters [3] {
     Parameter #0 [ <optional> $a = NULL ]
@@ -251,7 +251,7 @@ string(%d) "/**
  * This is B's doc comment.
  */
 Class [ <user> class B extends A implements I, K, H, J ] {
-  @@ %s/test/slow/lang/reflection.php 127-143
+  @@ %s/test/slow/lang/reflection.php 64-80
 
   - Constants [2] {
     Constant [ string C0 {B::C0} ]
@@ -266,10 +266,10 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Static methods [2] {
     Method [ <user> static public method smethB0 ] {
-      @@ %s/test/slow/lang/reflection.php 137 - 137
+      @@ %s/test/slow/lang/reflection.php 74 - 74
     }
     Method [ <user> static private method smethB1 ] {
-      @@ %s/test/slow/lang/reflection.php 138 - 138
+      @@ %s/test/slow/lang/reflection.php 75 - 75
     }
   }
 
@@ -282,22 +282,22 @@ Class [ <user> class B extends A implements I, K, H, J ] {
 
   - Methods [6] {
     Method [ <user, implements I> public method methI ] {
-      @@ %s/test/slow/lang/reflection.php 139 - 139
+      @@ %s/test/slow/lang/reflection.php 76 - 76
     }
     Method [ <user, implements J> public method methJ ] {
-      @@ %s/test/slow/lang/reflection.php 140 - 140
+      @@ %s/test/slow/lang/reflection.php 77 - 77
     }
     Method [ <user, implements K> public method methK ] {
-      @@ %s/test/slow/lang/reflection.php 141 - 141
+      @@ %s/test/slow/lang/reflection.php 78 - 78
     }
     Method [ <user> private method methB ] {
-      @@ %s/test/slow/lang/reflection.php 142 - 142
+      @@ %s/test/slow/lang/reflection.php 79 - 79
     }
     Method [ <user, inherits A> public method methH ] {
-      @@ %s/test/slow/lang/reflection.php 121 - 121
+      @@ %s/test/slow/lang/reflection.php 58 - 58
     }
     Method [ <user, inherits A> protected method methA ] {
-      @@ %s/test/slow/lang/reflection.php 122 - 122
+      @@ %s/test/slow/lang/reflection.php 59 - 59
     }
   }
 }
@@ -324,10 +324,10 @@ string(35) "/**
  */"
 
 --- getStartLine() ---
-int(127)
+int(64)
 
 --- getEndLine() ---
-int(143)
+int(80)
 
 --- getFileName() ---
 string(%d) "%s/test/slow/lang/reflection.php"
@@ -448,10 +448,12 @@ object(B) (4) {
 }
 
 --- get_defined_functions() ---
-array(2) {
+array(3) {
   [0]=>
-  string(1) "f"
+  string(21) "entrypoint_reflection"
   [1]=>
+  string(1) "f"
+  [2]=>
   string(1) "g"
 }
 --- get_defined_constants() ---

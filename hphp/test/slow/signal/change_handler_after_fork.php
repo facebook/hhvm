@@ -1,8 +1,5 @@
 <?hh
 
-SignalChangeHandlerAfterForkPhp::$parent = posix_getpid();
-SignalChangeHandlerAfterForkPhp::$child = 0;
-
 // parent and child processes share the same handler here
 function handler($signo) {
 
@@ -61,9 +58,15 @@ function main() {
   echo "this shouldn't be printed.";
 }
 
-main();
-
 abstract final class SignalChangeHandlerAfterForkPhp {
   public static $parent;
   public static $child;
+}
+<<__EntryPoint>>
+function entrypoint_change_handler_after_fork(): void {
+
+  SignalChangeHandlerAfterForkPhp::$parent = posix_getpid();
+  SignalChangeHandlerAfterForkPhp::$child = 0;
+
+  main();
 }

@@ -1,7 +1,5 @@
 <?hh
 
-CompilationCalleeSaveFpregs::$g = vec[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
 class X {
   function __toString() {
 
@@ -30,11 +28,16 @@ function test($a, $x) {
   return $a == $x;
 }
 
-$x = vec[new X];
-for ($i = 0; $i < 5; $i++) {
-  var_dump(test(vec["78"], $x));
-}
-
 abstract final class CompilationCalleeSaveFpregs {
   public static $g;
+}
+<<__EntryPoint>>
+function entrypoint_calleesavefpregs(): void {
+
+  CompilationCalleeSaveFpregs::$g = vec[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+  $x = vec[new X];
+  for ($i = 0; $i < 5; $i++) {
+    var_dump(test(vec["78"], $x));
+  }
 }

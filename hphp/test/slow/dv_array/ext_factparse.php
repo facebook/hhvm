@@ -63,150 +63,153 @@ enum E0 : int {
   EV0 = 0;
   EV1 = 1;
 }
+<<__EntryPoint>>
+function entrypoint_ext_factparse(): void {
 
-#
-# Execute single-threaded test
-#
+  #
+  # Execute single-threaded test
+  #
 
-$source = file(__FILE__);
-$source[0] = '<?hh namespace NS {';
-$source[] = '}';
-$namespace_file1 = tempnam(sys_get_temp_dir(), "factparsetest");
-file_put_contents($namespace_file1, $source);
+  $source = file(__FILE__);
+  $source[0] = '<?hh namespace NS {';
+  $source[] = '}';
+  $namespace_file1 = tempnam(sys_get_temp_dir(), "factparsetest");
+  file_put_contents($namespace_file1, $source);
 
-$source = file(__FILE__);
-$source[0] = '<?hh namespace NS\NS {';
-$source[] = '}';
-$namespace_file2 = tempnam(sys_get_temp_dir(), "factparsetest");
-file_put_contents($namespace_file2, $source);
+  $source = file(__FILE__);
+  $source[0] = '<?hh namespace NS\NS {';
+  $source[] = '}';
+  $namespace_file2 = tempnam(sys_get_temp_dir(), "factparsetest");
+  file_put_contents($namespace_file2, $source);
 
-try {
-  $res = HH\facts_parse(
-    null,
-    varray[__FILE__, $namespace_file1, $namespace_file2],
-    true, // allowHipHopSyntax
-    false, // useThreads
-  );
-  var_dump($res);
-  if ($res[__FILE__]['md5sum0'] === $res[$namespace_file1]['md5sum0']) {
-    print "FAILED md5sum\n";
-  } else {
-    print "PASSED md5sum\n";
-  }
-} finally {
-  unlink($namespace_file1);
-  unlink($namespace_file2);
-}
-
-
-#
-# Execute erroneous files test
-#
-
-$garbage_file = tempnam(sys_get_temp_dir(), "factparsetest");
-file_put_contents($garbage_file, "<?hh }");
-
-try {
-  $res = HH\facts_parse(
-    null,
-    varray[$garbage_file, 'garbage_filename', '/tmp'],
-    true,
-    false,
-  );
-  var_dump($res);
-  if ($res[$garbage_file] === null
-    && $res['garbage_filename'] === null
-    && $res['/tmp'] === null
-  ) {
-    print "PASSED erroneous files test\n";
-  } else {
-    print "FAILED erroneous files test\n";
-  }
-} finally {
-  unlink($garbage_file);
-}
-
-#
-# Test path mangling
-#
-
-$simplefile = tempnam(sys_get_temp_dir(), "factparsetest");
-file_put_contents($simplefile, "<?hh function f(){}");
-
-try {
-  $res = HH\facts_parse(
-    sys_get_temp_dir(),
-    varray[basename($simplefile), $simplefile, 'garbagename'],
-    false,
-    false,
-  );
-  if ($res[basename($simplefile)] === $res[$simplefile]
-    && $res['garbagename'] === null
-  ){
-    print "PASSED path mangling test\n";
-  } else {
-    print "FAILED path mangling test\n";
-  }
-} finally {
-  unlink($simplefile);
-}
-
-
-#
-# Execute multi-threaded test
-#
-
-$many_files = varray[];
-for ($i = 0; $i < 10000; $i++) {
-  $many_files[] = tempnam(sys_get_temp_dir(), "factparsetest");
-  file_put_contents($many_files[$i], $source);
-}
-$failed = false;
-try {
-  $facts = HH\facts_parse(null, $many_files, true, true);
-  $first = serialize($facts[$many_files[0]]);
-  foreach ($facts as $fact) {
-    if ($first !== serialize($fact)) {
-      print "FAILED multi-threaded test\n";
-      $failed = true;
-      break;
+  try {
+    $res = HH\facts_parse(
+      null,
+      varray[__FILE__, $namespace_file1, $namespace_file2],
+      true, // allowHipHopSyntax
+      false, // useThreads
+    );
+    var_dump($res);
+    if ($res[__FILE__]['md5sum0'] === $res[$namespace_file1]['md5sum0']) {
+      print "FAILED md5sum\n";
+    } else {
+      print "PASSED md5sum\n";
     }
+  } finally {
+    unlink($namespace_file1);
+    unlink($namespace_file2);
   }
-} finally {
-  array_map('unlink', $many_files);
-}
-if (!$failed) {
-  print "PASSED multi-threaded test\n";
-}
 
 
-#
-# Test version get (not checking actual number)
-#
+  #
+  # Execute erroneous files test
+  #
 
-if ((int)HH\ext_factparse_version()) {
-  print "PASSED version get test\n";
-} else {
-  print "FAILED version get test\n";
-}
+  $garbage_file = tempnam(sys_get_temp_dir(), "factparsetest");
+  file_put_contents($garbage_file, "<?hh }");
+
+  try {
+    $res = HH\facts_parse(
+      null,
+      varray[$garbage_file, 'garbage_filename', '/tmp'],
+      true,
+      false,
+    );
+    var_dump($res);
+    if ($res[$garbage_file] === null
+      && $res['garbage_filename'] === null
+      && $res['/tmp'] === null
+    ) {
+      print "PASSED erroneous files test\n";
+    } else {
+      print "FAILED erroneous files test\n";
+    }
+  } finally {
+    unlink($garbage_file);
+  }
+
+  #
+  # Test path mangling
+  #
+
+  $simplefile = tempnam(sys_get_temp_dir(), "factparsetest");
+  file_put_contents($simplefile, "<?hh function f(){}");
+
+  try {
+    $res = HH\facts_parse(
+      sys_get_temp_dir(),
+      varray[basename($simplefile), $simplefile, 'garbagename'],
+      false,
+      false,
+    );
+    if ($res[basename($simplefile)] === $res[$simplefile]
+      && $res['garbagename'] === null
+    ){
+      print "PASSED path mangling test\n";
+    } else {
+      print "FAILED path mangling test\n";
+    }
+  } finally {
+    unlink($simplefile);
+  }
 
 
-#
-# Check bad arg handling
-#
+  #
+  # Execute multi-threaded test
+  #
 
-try {
-  HH\facts_parse(null, null, null, null);
-} catch (Exception $e) {
-  var_dump($e->getMessage());
-}
-try {
-  HH\facts_parse(null, varray[null], null, null);
-} catch (Exception $e) {
-  var_dump($e->getMessage());
-}
-try {
-  HH\facts_parse(null, varray[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])], null, null);
-} catch (Exception $e) {
-  var_dump($e->getMessage());
+  $many_files = varray[];
+  for ($i = 0; $i < 10000; $i++) {
+    $many_files[] = tempnam(sys_get_temp_dir(), "factparsetest");
+    file_put_contents($many_files[$i], $source);
+  }
+  $failed = false;
+  try {
+    $facts = HH\facts_parse(null, $many_files, true, true);
+    $first = serialize($facts[$many_files[0]]);
+    foreach ($facts as $fact) {
+      if ($first !== serialize($fact)) {
+        print "FAILED multi-threaded test\n";
+        $failed = true;
+        break;
+      }
+    }
+  } finally {
+    array_map('unlink', $many_files);
+  }
+  if (!$failed) {
+    print "PASSED multi-threaded test\n";
+  }
+
+
+  #
+  # Test version get (not checking actual number)
+  #
+
+  if ((int)HH\ext_factparse_version()) {
+    print "PASSED version get test\n";
+  } else {
+    print "FAILED version get test\n";
+  }
+
+
+  #
+  # Check bad arg handling
+  #
+
+  try {
+    HH\facts_parse(null, null, null, null);
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    HH\facts_parse(null, varray[null], null, null);
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
+  try {
+    HH\facts_parse(null, varray[__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])], null, null);
+  } catch (Exception $e) {
+    var_dump($e->getMessage());
+  }
 }

@@ -15,16 +15,18 @@ array(3) {
       string(3) "CO4"
     }
     ["functions"]=>
-    array(1) {
+    array(2) {
       [0]=>
       string(2) "f1"
+      [1]=>
+      string(24) "entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(5383210645591052495)
+    int(-4510344253095386689)
     ["md5sum1"]=>
-    int(5498716529136131158)
+    int(4671823585930114530)
     ["sha1sum"]=>
-    string(40) "22630a86f69ee31b40a544efa782aea4be244b77"
+    string(40) "48307baf242787fe019b472b133d1f70df6f0c83"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -267,16 +269,18 @@ array(3) {
       string(6) "NS\CO4"
     }
     ["functions"]=>
-    array(1) {
+    array(2) {
       [0]=>
       string(5) "NS\f1"
+      [1]=>
+      string(27) "NS\entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(1828494342176036087)
+    int(5272147912580324223)
     ["md5sum1"]=>
-    int(-7704395858480189882)
+    int(6281803590603473432)
     ["sha1sum"]=>
-    string(40) "2394a27bbb4ea1948027c41f48ba0f07ad7d650e"
+    string(40) "30dddb20b49e3538bad21b7f428b0b0dc9531350"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -519,16 +523,18 @@ array(3) {
       string(9) "NS\NS\CO4"
     }
     ["functions"]=>
-    array(1) {
+    array(2) {
       [0]=>
       string(8) "NS\NS\f1"
+      [1]=>
+      string(30) "NS\NS\entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(5244681438478042754)
+    int(5359441402941816566)
     ["md5sum1"]=>
-    int(-5619760028927422977)
+    int(-7829954738973599347)
     ["sha1sum"]=>
-    string(40) "d82b038b0ef695c40b770ab72b74f299dbd6ed20"
+    string(40) "e3a5ada74c73c48e2b7c6d8ae31dd8acf7fce996"
     ["typeAliases"]=>
     array(3) {
       [0]=>

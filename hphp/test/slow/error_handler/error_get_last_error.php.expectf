@@ -4,5 +4,5 @@ NULL
 no x
 NULL
 
-Fatal error: Call to undefined function nosuchfunc() in %s on line 28
-int(28)
+Fatal error: Call to undefined function nosuchfunc() in %s on line 30
+int(30)

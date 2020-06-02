@@ -3,13 +3,16 @@
 function f() {
  return true;
 }
-if (f()) {
-  include '1880-1.inc';
-} else {
-  include '1880-2.inc';
+<<__EntryPoint>>
+function entrypoint_1880(): void {
+  if (f()) {
+    include '1880-1.inc';
+  } else {
+    include '1880-2.inc';
+  }
+
+  include '1880-classes.inc';
+
+  $b = new B;
+  $b->g();
 }
-class B extends A {
- static $a = 'B';
-}
-$b = new B;
-$b->g();

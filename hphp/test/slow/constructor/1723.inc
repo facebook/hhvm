@@ -13,5 +13,3 @@ class A {
   protected $bb = false;
   private $cc = 1.22;
 }
-
-$x = 1;

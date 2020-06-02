@@ -5,5 +5,5 @@ array(1) {
 }
 array(%d) {%a}
 
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/predefined_variables.php on line 14
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/predefined_variables.php on line 16
 array(%d) {%a}

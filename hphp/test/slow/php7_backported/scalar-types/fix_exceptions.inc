@@ -1,6 +1,6 @@
 <?hh
 
-
+function fix_exceptions() {
 set_error_handler(function (int $errno, string $errmsg, string $file, int $line) {
   $errnames = darray[
     E_NOTICE => 'E_NOTICE',
@@ -26,3 +26,4 @@ set_error_handler(function (int $errno, string $errmsg, string $file, int $line)
     $errmsg = str_replace("Value returned from closure must be of type", "Return value of {closure}() must be of the type", $errmsg);
     throw new TypeError("$errmsg, called in $file on line $line");
 });
+}

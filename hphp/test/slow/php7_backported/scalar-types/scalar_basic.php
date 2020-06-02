@@ -1,13 +1,13 @@
 <?hh
 
-require 'fix_exceptions.inc';
-
 class Stringable {
     public function __toString() {
         return "foobar";
     }
 }
+
 <<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
 $errnames = darray[
     E_NOTICE => 'E_NOTICE',
     E_WARNING => 'E_WARNING',

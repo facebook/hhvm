@@ -5,5 +5,3 @@
     }
     class c extends p {
     }
-
-    $x = 1;

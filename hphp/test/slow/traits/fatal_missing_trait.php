@@ -1,11 +1,13 @@
 <?hh
 
-if (isset($g)) {
-  include 'fatal_missing_trait.inc';
-}
+<<__EntryPoint>>
+function entrypoint_fatal_missing_trait(): void {
 
-class C {
-  use T;
-}
+  if (isset($g)) {
+    include 'fatal_missing_trait.inc';
+  }
 
-var_dump(new C());
+  include 'fatal_missing_trait-class.inc';
+
+  var_dump(new C());
+}

@@ -6,10 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
-include_once 'MyCollection.inc';
-
 class MyList implements MyCollection
 {
 	public function put($item)

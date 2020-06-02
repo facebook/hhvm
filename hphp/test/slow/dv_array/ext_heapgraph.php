@@ -7,7 +7,6 @@ class RootClass {
     return new RootClass();
   }
 }
-$r = RootClass::getInstance();
 
 class ChildWithClosureMember {
   public $closure;
@@ -33,15 +32,8 @@ class ParentWithClosureTarget {
     };
   }
 }
-$r->children['MemoizedSingleton'] = new ParentWithClosureTarget();
-$r->children['MemoizedSingleton']->child->doWork();
 
 class ClassForSecondCapture { }
-
-// We do some consolidation here because the behavior when testing
-// is really non-deterministic. Both on order of scans and also
-// whether things are in CPP or PHP (based on mode of test)
-DvArrayExtHeapgraphPhp::$echobuf = varray[];
 function echo_buffer($str) {
 
   // new root names
@@ -59,9 +51,6 @@ function echo_flush() {
   }
   DvArrayExtHeapgraphPhp::$echobuf = varray[];
 }
-
-DvArrayExtHeapgraphPhp::$hg_for_closure = null;
-DvArrayExtHeapgraphPhp::$id_of_rootclass = null;
 function showTestClasses($node) {
 
 
@@ -160,8 +149,6 @@ function printEdge($edge) {
   echo $edge['kind'].' '.$edge['from']."->".$edge['to'];
   echo "\n";
 }
-
-DvArrayExtHeapgraphPhp::$visited = darray[];
 function dfsPrintNode($hg, $node) {
 
   $id = $node['index'];
@@ -179,76 +166,94 @@ function dfsPrintNode($hg, $node) {
   }
 }
 
-////////////////////////////////////////////////////
-// Test starts here:
-
-echo "Capturing two snapshots...\n";
-// FIRST CAPTURE
-$hg = heapgraph_create();
-var_dump($hg);
-
-// SECOND CAPTURE
-$b = new ClassForSecondCapture();
-$hg2 = heapgraph_create();
-var_dump($hg2);
-
-// STATS
-echo "Stats for first capture:\n";
-$stats = heapgraph_stats($hg);
-var_dump($stats);
-
-// OUT OF BOUNDS
-echo "Getting invalid nodes and edges:\n";
-$inv_edge = heapgraph_edge($hg, -1) ?: heapgraph_edge($hg, 999999);
-$inv_node = heapgraph_node($hg, -1) ?: heapgraph_node($hg, 999999);
-echo $inv_edge ?: $inv_node ?: "Invalid nodes and edges work OK.\n";
-echo_flush();
-
-// TRAVERSAL
-echo "\nTraversing second capture:\n";
-DvArrayExtHeapgraphPhp::$hg_for_closure = $hg2;
-heapgraph_foreach_node($hg2, 'showTestClasses');
-echo_flush();
-
-echo "\nTraversing first capture:\n";
-DvArrayExtHeapgraphPhp::$hg_for_closure = $hg;
-heapgraph_foreach_node($hg, 'showTestClasses');
-echo_flush();
-
-echo "\nTraversing edges for first capture:\n";
-DvArrayExtHeapgraphPhp::$hg_for_closure = $hg;
-heapgraph_foreach_edge($hg, 'showTestEdge');
-echo_flush();
-
-echo "\nTraversing roots for first capture:\n";
-heapgraph_foreach_root($hg, 'showTestEdge');
-echo_flush();
-
-// CHILDREN / PARENTS
-echo "\nGetting in edges of root class:\n";
-$in_edges = heapgraph_node_in_edges($hg, DvArrayExtHeapgraphPhp::$id_of_rootclass);
-showAllEdges($hg, $in_edges);
-echo_flush();
-
-echo "\nGetting out edges of root class:\n";
-$out_edges = heapgraph_node_out_edges($hg, DvArrayExtHeapgraphPhp::$id_of_rootclass);
-showAllEdges($hg, $out_edges);
-echo_flush();
-
-// DFS NODES
-echo "\nDoing DFS from root class on nodes:\n";
-heapgraph_dfs_nodes($hg, varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], varray[], 'showClassOnly');
-echo_flush();
-
-echo "\nDoing DFS from root class on nodes (skipping root):\n";
-heapgraph_dfs_nodes(
-  $hg, varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], 'showClass'
-);
-echo_flush();
-
 abstract final class DvArrayExtHeapgraphPhp {
   public static $echobuf;
   public static $hg_for_closure;
   public static $id_of_rootclass;
   public static $visited;
+}
+<<__EntryPoint>>
+function entrypoint_ext_heapgraph(): void {
+  $r = RootClass::getInstance();
+  $r->children['MemoizedSingleton'] = new ParentWithClosureTarget();
+  $r->children['MemoizedSingleton']->child->doWork();
+
+  // We do some consolidation here because the behavior when testing
+  // is really non-deterministic. Both on order of scans and also
+  // whether things are in CPP or PHP (based on mode of test)
+  DvArrayExtHeapgraphPhp::$echobuf = varray[];
+
+  DvArrayExtHeapgraphPhp::$hg_for_closure = null;
+  DvArrayExtHeapgraphPhp::$id_of_rootclass = null;
+
+  DvArrayExtHeapgraphPhp::$visited = darray[];
+
+  ////////////////////////////////////////////////////
+  // Test starts here:
+
+  echo "Capturing two snapshots...\n";
+  // FIRST CAPTURE
+  $hg = heapgraph_create();
+  var_dump($hg);
+
+  // SECOND CAPTURE
+  $b = new ClassForSecondCapture();
+  $hg2 = heapgraph_create();
+  var_dump($hg2);
+
+  // STATS
+  echo "Stats for first capture:\n";
+  $stats = heapgraph_stats($hg);
+  var_dump($stats);
+
+  // OUT OF BOUNDS
+  echo "Getting invalid nodes and edges:\n";
+  $inv_edge = heapgraph_edge($hg, -1) ?: heapgraph_edge($hg, 999999);
+  $inv_node = heapgraph_node($hg, -1) ?: heapgraph_node($hg, 999999);
+  echo $inv_edge ?: $inv_node ?: "Invalid nodes and edges work OK.\n";
+  echo_flush();
+
+  // TRAVERSAL
+  echo "\nTraversing second capture:\n";
+  DvArrayExtHeapgraphPhp::$hg_for_closure = $hg2;
+  heapgraph_foreach_node($hg2, 'showTestClasses');
+  echo_flush();
+
+  echo "\nTraversing first capture:\n";
+  DvArrayExtHeapgraphPhp::$hg_for_closure = $hg;
+  heapgraph_foreach_node($hg, 'showTestClasses');
+  echo_flush();
+
+  echo "\nTraversing edges for first capture:\n";
+  DvArrayExtHeapgraphPhp::$hg_for_closure = $hg;
+  heapgraph_foreach_edge($hg, 'showTestEdge');
+  echo_flush();
+
+  echo "\nTraversing roots for first capture:\n";
+  heapgraph_foreach_root($hg, 'showTestEdge');
+  echo_flush();
+
+  // CHILDREN / PARENTS
+  echo "\nGetting in edges of root class:\n";
+  $in_edges = heapgraph_node_in_edges($hg, DvArrayExtHeapgraphPhp::$id_of_rootclass);
+  showAllEdges($hg, $in_edges);
+  echo_flush();
+
+  echo "\nGetting out edges of root class:\n";
+  $out_edges = heapgraph_node_out_edges($hg, DvArrayExtHeapgraphPhp::$id_of_rootclass);
+  showAllEdges($hg, $out_edges);
+  echo_flush();
+
+  // DFS NODES
+  echo "\nDoing DFS from root class on nodes:\n";
+  heapgraph_dfs_nodes($hg, varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], varray[], 'showClassOnly');
+  echo_flush();
+
+  echo "\nDoing DFS from root class on nodes (skipping root):\n";
+  heapgraph_dfs_nodes(
+    $hg, varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], varray[DvArrayExtHeapgraphPhp::$id_of_rootclass], 'showClass'
+  );
+  echo_flush();
+
+   __hhvm_intrinsics\launder_value($b);
 }

@@ -21,10 +21,6 @@ class Y extends X {
     echo 'Y';
   }
 }
-$y = new Y;
-$y->propX = 16;
-$y->propY = 32;
-var_dump($y->foo());
 class A1 {
   public $a1prop;
   function a1method() {
@@ -55,26 +51,28 @@ class B1 extends A1 {
     return 1;
   }
 }
-if (rand(0, 1)) {
-  include '1862-1.inc';
-} else {
-  include '1862-2.inc';
-}
-class D1 extends C1 {
-  public $d1prop;
-  function d1method() {
-    return 3;
+<<__EntryPoint>>
+function entrypoint_1862(): void {
+  $y = new Y;
+  $y->propX = 16;
+  $y->propY = 32;
+  var_dump($y->foo());
+  if (rand(0, 1)) {
+    include '1862-1.inc';
+  } else {
+    include '1862-2.inc';
   }
+  include '1862-after.inc';
+  $a1 = new A1;
+  $a1->a1prop = 0;
+  $a1->doStuff();
+  $b1 = new B1;
+  $b1->b1prop = 1;
+  $b1->doStuff();
+  $c1 = new C1;
+  $c1->c1prop = 2;
+  $c1->doStuff();
+  $d1 = new D1;
+  $d1->d1prop = 3;
+  $d1->doStuff();
 }
-$a1 = new A1;
-$a1->a1prop = 0;
-$a1->doStuff();
-$b1 = new B1;
-$b1->b1prop = 1;
-$b1->doStuff();
-$c1 = new C1;
-$c1->c1prop = 2;
-$c1->doStuff();
-$d1 = new D1;
-$d1->d1prop = 3;
-$d1->doStuff();

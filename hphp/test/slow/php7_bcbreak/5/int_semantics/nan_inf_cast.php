@@ -48,10 +48,13 @@ function get_inf() {
 function c_inf() {
   return (int)get_inf();
 }
+<<__EntryPoint>>
+function entrypoint_nan_inf_cast(): void {
 
-var_dump(a_nan());
-var_dump(b_nan());
-var_dump(c_nan());
-var_dump(a_inf());
-var_dump(b_inf());
-var_dump(c_inf());
+  var_dump(a_nan());
+  var_dump(b_nan());
+  var_dump(c_nan());
+  var_dump(a_inf());
+  var_dump(b_inf());
+  var_dump(c_inf());
+}

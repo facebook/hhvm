@@ -1,9 +1,9 @@
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 7
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 5
 bool(false)
 bool(false)
 
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 11
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 9
 bool(true)
 
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 13
+Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/1114.php on line 11
 bool(false)

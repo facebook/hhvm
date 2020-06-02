@@ -23,28 +23,10 @@ object(HH\Map) (2) {
   int(123)
 }
 
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;s:5:"extra";}]. Expected '}' but got 's'. in %s/test/slow/serialization/map_unser.php on line 23
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;s:5:"extra";}]. Expected '}' but got 's'. in %s/test/slow/serialization/map_unser.php on line 33
 bool(false)
 
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;s:5:"extra";i:456;}]. Expected '}' but got 's'. in %s/test/slow/serialization/map_unser.php on line 23
-bool(false)
-object(HH\Map) (2) {
-  ["bar"]=>
-  int(3)
-  ["bling"]=>
-  int(123)
-}
-
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 23
-bool(false)
-
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 23
-bool(false)
-
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:-3:"bar";i:3;s:5:"bling";i:123;}]. Size of serialized string (-3) must not be negative. in %s/test/slow/serialization/map_unser.php on line 23
-bool(false)
-
-Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:55:"bling";i:123;}]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 23
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;s:5:"extra";i:456;}]. Expected '}' but got 's'. in %s/test/slow/serialization/map_unser.php on line 33
 bool(false)
 object(HH\Map) (2) {
   ["bar"]=>
@@ -53,7 +35,25 @@ object(HH\Map) (2) {
   int(123)
 }
 
-Notice: Unable to unserialize: [K:7:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;}]. Expected '"' but got ':'. in %s/test/slow/serialization/map_unser.php on line 23
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 33
+bool(false)
+
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 33
+bool(false)
+
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:-3:"bar";i:3;s:5:"bling";i:123;}]. Size of serialized string (-3) must not be negative. in %s/test/slow/serialization/map_unser.php on line 33
+bool(false)
+
+Notice: Unable to unserialize: [K:6:"HH\Map":2:{s:3:"bar";i:3;s:55:"bling";i:123;}]. Unexpected end of buffer during unserialization. in %s/test/slow/serialization/map_unser.php on line 33
+bool(false)
+object(HH\Map) (2) {
+  ["bar"]=>
+  int(3)
+  ["bling"]=>
+  int(123)
+}
+
+Notice: Unable to unserialize: [K:7:"HH\Map":2:{s:3:"bar";i:3;s:5:"bling";i:123;}]. Expected '"' but got ':'. in %s/test/slow/serialization/map_unser.php on line 33
 bool(false)
 object(HH\Map) (2) {
   ["foo"]=>

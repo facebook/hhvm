@@ -40,5 +40,8 @@ function testCycleBackTrace() {
     var_dump($e->getMessage());
   }
 }
+<<__EntryPoint>>
+function entrypoint_cycle_debug_backtrace(): void {
 
-testCycleBackTrace();
+  testCycleBackTrace();
+}

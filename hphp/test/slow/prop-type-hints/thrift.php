@@ -1,8 +1,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-require 'thrift-defs.inc';
-
 function serde($x) {
   $p = new DummyProtocol();
   thrift_protocol_write_binary($p, 'blah', 1, $x, 20, true);
@@ -22,6 +20,8 @@ function serde($x) {
 
 <<__EntryPoint>>
 function test() {
+  require 'thrift-defs.inc';
+
   serde(@new TestStruct1());
   serde(@new TestStruct2());
   serde(@new TestStruct3());

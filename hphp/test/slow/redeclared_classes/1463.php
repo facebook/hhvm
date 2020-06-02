@@ -1,50 +1,5 @@
 <?hh
 
-if (__hhvm_intrinsics\launder_value(true)) {
-  include '1463-1.inc';
-} else {
-  include '1463-2.inc';
-}
-
-class child1 extends base {
-  public $child1Val = 'child1';
-  public $childProp = 'IamChild1';
-  static $child1Static = 'child1Stat';
-  function childMeth() {
-    return 'I am child1';
-  }
-  static function child1StatMeth() {
-    return 'Child 1 static method';
-  }
-  function parentChildMeth() {
-    return parent::childMeth();
-  }
-}
-
-class child2 extends child1 {
-  public $child2Val = 'child2';
-  public $childProp = 'IamChild2';
-  static $child2Static = 'child2Stat';
-  static function child2StatMeth() {
-    return 'Child 2 static method';
-  }
-  function childMeth() {
-    return 'I am child2';
-  }
-  function parentChildMeth() {
-    return parent::childMeth();
-  }
-  function testChildMeth2() {
-    return $this->childMeth();
-  }
-}
-
-if (__hhvm_intrinsics\launder_value(true)) {
-  include '1463-3.inc';
-} else {
-  include '1463-4.inc';
-}
-
 function test($val, $exp, $feature) {
   if ($val !== $exp) {
     echo $feature . " failed. Got:\n";
@@ -58,6 +13,21 @@ function test($val, $exp, $feature) {
 
 <<__EntryPoint>>
 function run() {
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include '1463-1.inc';
+  } else {
+    include '1463-2.inc';
+  }
+
+  include '1463-child1.inc';
+  include '1463-child2.inc';
+
+  if (__hhvm_intrinsics\launder_value(true)) {
+    include '1463-3.inc';
+  } else {
+    include '1463-4.inc';
+  }
+
   $base = new base;
   test($base->baseVal, 'base', 'Base object member');
   test(base::$baseStatic, 'baseStat', 'Base static member');

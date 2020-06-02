@@ -1,13 +1,16 @@
 <?hh
 
-set_error_handler(($no, $string) ==> {
-  throw new Exception($string);
-});
-
 function is_nonexistent(mixed $x): void {
   if ($x is BlerpityBlerp) {
     echo "unreached\n";
   }
 }
+<<__EntryPoint>>
+function entrypoint_isexpressionnonexistent2(): void {
 
-is_nonexistent(new stdClass());
+  set_error_handler(($no, $string) ==> {
+    throw new Exception($string);
+  });
+
+  is_nonexistent(new stdClass());
+}

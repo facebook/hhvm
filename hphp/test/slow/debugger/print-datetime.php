@@ -1,2 +1,5 @@
 <?hh
-hphpd_break();
+<<__EntryPoint>>
+function entrypoint_printdatetime(): void {
+  hphpd_break();
+}

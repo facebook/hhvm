@@ -20,10 +20,13 @@ class Z extends X {
   }
 }
 
-HhbbcThisType003::$g = new Y;
-(new Z)->f();
-echo "OK!\n";
-
 abstract final class HhbbcThisType003 {
   public static $g;
+}
+<<__EntryPoint>>
+function entrypoint_this_type_003(): void {
+
+  HhbbcThisType003::$g = new Y;
+  (new Z)->f();
+  echo "OK!\n";
 }

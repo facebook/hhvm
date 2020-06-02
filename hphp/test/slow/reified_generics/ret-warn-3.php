@@ -5,12 +5,15 @@ class C<reify T> {}
 
 function f($x): C<@int> { return $x; }
 
-f(new C<int>());       // correct
-f(new C<string>());    // only warn
-
 function g($x): B<C<@int>>{ return $x; }
+<<__EntryPoint>>
+function entrypoint_retwarn3(): void {
 
-g(new B<C<int>>());    // correct
-g(new B<C<string>>()); // only warn
+  f(new C<int>());       // correct
+  f(new C<string>());    // only warn
 
-g(new B<string>());    // error
+  g(new B<C<int>>());    // correct
+  g(new B<C<string>>()); // only warn
+
+  g(new B<string>());    // error
+}

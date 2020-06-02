@@ -5,4 +5,3 @@ class X {
     var_dump(__METHOD__);
   }
 }
-$x = 1;

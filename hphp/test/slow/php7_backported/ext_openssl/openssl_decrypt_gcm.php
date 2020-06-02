@@ -1,5 +1,5 @@
 <?hh
-require_once __DIR__ . "/cipher_tests.inc";
+
 
 function test_decryption($method) {
   $tests = openssl_get_cipher_tests($method);
@@ -19,6 +19,7 @@ function test_decryption($method) {
   var_dump(openssl_decrypt($test['ct'], $method, $test['key'], 0, $test['iv'], str_repeat('x', 16), $test['aad']));
 }
 <<__EntryPoint>> function main(): void {
+require_once __DIR__ . "/cipher_tests.inc";
 // 128 bit GCM
 test_decryption('aes-128-gcm');
 // 192 bit GCM

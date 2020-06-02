@@ -8,13 +8,6 @@ class Base {
 function get() {
  return true;
 }
-if (get()) {
-  include '1860-1.inc';
-} else {
-  include '1860-2.inc';
-}
-class Y extends X {
-}
 function f($x) {
   if ($x is Base) {
     $x->f();
@@ -26,6 +19,15 @@ function f($x) {
     $x->f();
   }
 }
-f(new Base);
-f(new X);
-f(new Y);
+<<__EntryPoint>>
+function entrypoint_1860(): void {
+  if (get()) {
+    include '1860-1.inc';
+  } else {
+    include '1860-2.inc';
+  }
+  include '1860-after.inc';
+  f(new Base);
+  f(new X);
+  f(new Y);
+}

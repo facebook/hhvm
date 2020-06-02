@@ -10,23 +10,26 @@ class C {
     return "toString";
   }
 }
+<<__EntryPoint>>
+function entrypoint_zend_assertions(): void {
 
 
-assert_options(ASSERT_ACTIVE, 1);
-assert_options(ASSERT_WARNING, 1);
+  assert_options(ASSERT_ACTIVE, 1);
+  assert_options(ASSERT_WARNING, 1);
 
-ini_set("zend.assertions", 1);
-$x = assert(false, new C);
-var_dump($x);
+  ini_set("zend.assertions", 1);
+  $x = assert(false, new C);
+  var_dump($x);
 
-echo "-\n";
+  echo "-\n";
 
-ini_set("zend.assertions", 0);
-$x = assert(false, new C);
-var_dump($x);
+  ini_set("zend.assertions", 0);
+  $x = assert(false, new C);
+  var_dump($x);
 
-ini_set("zend.assertions", -1);
-var_dump(ini_get("zend.assertions"));
+  ini_set("zend.assertions", -1);
+  var_dump(ini_get("zend.assertions"));
 
-$f = 'assert';
-$f(false, new C);
+  $f = 'assert';
+  $f(false, new C);
+}

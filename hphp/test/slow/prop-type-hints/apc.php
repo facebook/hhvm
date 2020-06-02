@@ -10,14 +10,6 @@ function get_count() {
   return $count;
 }
 
-if ((get_count() % 2) == 0) {
-  require 'apc2.inc';
-} else {
-  require 'apc3.inc';
-}
-
-require 'apc1.inc';
-
 function store() {
   echo "store()\n";
   $a = new A();
@@ -47,5 +39,16 @@ function run() {
   }
   apc_store('count', $count+1);
 }
+<<__EntryPoint>>
+function entrypoint_apc(): void {
 
-run();
+  if ((get_count() % 2) == 0) {
+    require 'apc2.inc';
+  } else {
+    require 'apc3.inc';
+  }
+
+  require 'apc1.inc';
+
+  run();
+}

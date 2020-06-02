@@ -1,7 +1,4 @@
 <?hh
-// Copyright 2004-present Facebook. All Rights Reserved.
-
-MemoizeKeyCountsFuncPhp::$do_echo = true;
 
 <<__Memoize>> function func0() {
 
@@ -160,8 +157,14 @@ function test() {
   var_dump(func12(1.19, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 10.1, 11.11, 12.12));
 
 }
-test();
 
 abstract final class MemoizeKeyCountsFuncPhp {
   public static $do_echo;
+}
+<<__EntryPoint>>
+function entrypoint_keycountsfunc(): void {
+  // Copyright 2004-present Facebook. All Rights Reserved.
+
+  MemoizeKeyCountsFuncPhp::$do_echo = true;
+  test();
 }

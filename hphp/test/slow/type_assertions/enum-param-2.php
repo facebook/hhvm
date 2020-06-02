@@ -11,7 +11,10 @@ function b() {
 function test2(NotAnObject $o) {
   var_dump($o);
 }
+<<__EntryPoint>>
+function entrypoint_enumparam2(): void {
 
 
-a();  // define it as an enum in this request
-test2(NotAnObject::FOO);
+  a();  // define it as an enum in this request
+  test2(NotAnObject::FOO);
+}

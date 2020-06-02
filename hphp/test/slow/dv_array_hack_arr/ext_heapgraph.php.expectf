@@ -1,4 +1,4 @@
-Warning: json_encode(): type is unsupported, encoded as false in %s/test/slow/dv_array_hack_arr/ext_heapgraph.php on line 15
+Warning: json_encode(): type is unsupported, encoded as false in %s/test/slow/dv_array_hack_arr/ext_heapgraph.php on line 14
 Capturing two snapshots...
 resource(%d) of type (HeapGraphContext)
 resource(%d) of type (HeapGraphContext)

@@ -1,19 +1,15 @@
 <?hh
 
-if (getenv("NOFOO")) {
-  include 'non-unique-base-1.inc';
-} else {
-  include 'non-unique-base-2.inc';
-}
+<<__EntryPoint>>
+function entrypoint_nonuniquebase(): void {
 
-trait T {
-  abstract protected function foo();
-  public function main() { $this->foo(); }
-}
+  if (getenv("NOFOO")) {
+    include 'non-unique-base-1.inc';
+  } else {
+    include 'non-unique-base-2.inc';
+  }
+  include 'non-unique-base-main.inc';
 
-class C extends B {
-  use T;
+  $obj = new C;
+  $obj->main();
 }
-
-$obj = new C;
-$obj->main();

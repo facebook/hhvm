@@ -17,20 +17,22 @@ array(3) {
       string(3) "CO5"
     }
     ["functions"]=>
-    array(3) {
+    array(4) {
       [0]=>
       string(2) "f1"
       [1]=>
       string(2) "f2"
       [2]=>
       string(2) "f6"
+      [3]=>
+      string(24) "entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(8781767682381707636)
+    int(-3473718262674997378)
     ["md5sum1"]=>
-    int(-3156636896085497918)
+    int(-2184420665833432478)
     ["sha1sum"]=>
-    string(40) "1d0681ec36bc1abd0fc6775b99c4a6e7be1e37b5"
+    string(40) "23c93fe1632ce968f8c2c843e3c03baf0183f8fa"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -275,20 +277,22 @@ array(3) {
       string(6) "NS\CO5"
     }
     ["functions"]=>
-    array(3) {
+    array(4) {
       [0]=>
       string(5) "NS\f1"
       [1]=>
       string(5) "NS\f2"
       [2]=>
       string(5) "NS\f6"
+      [3]=>
+      string(27) "NS\entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(2802414017818693552)
+    int(6232939544107321464)
     ["md5sum1"]=>
-    int(1913397533999515745)
+    int(-3625618707922112292)
     ["sha1sum"]=>
-    string(40) "ac841a125f4667497d00f18daaa426016eb064f5"
+    string(40) "d01f6b1d0ba0dbe0c8c6f3a50f49f9c07c079277"
     ["typeAliases"]=>
     array(3) {
       [0]=>
@@ -533,20 +537,22 @@ array(3) {
       string(9) "NS\NS\CO5"
     }
     ["functions"]=>
-    array(3) {
+    array(4) {
       [0]=>
       string(8) "NS\NS\f1"
       [1]=>
       string(8) "NS\NS\f2"
       [2]=>
       string(8) "NS\NS\f6"
+      [3]=>
+      string(30) "NS\NS\entrypoint_ext_factparse"
     }
     ["md5sum0"]=>
-    int(-8212125415082374001)
+    int(-6807311658022174106)
     ["md5sum1"]=>
-    int(-4369043958613640048)
+    int(-1698087833325446643)
     ["sha1sum"]=>
-    string(40) "6156515683a0893dbbbf41f9a81639af842018cd"
+    string(40) "2419b66e8f152f77b6b8aba30b9be5b836d363aa"
     ["typeAliases"]=>
     array(3) {
       [0]=>

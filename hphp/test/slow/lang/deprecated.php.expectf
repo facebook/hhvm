@@ -1,21 +1,21 @@
 = basic =
-E_USER_DEPRECATED: f: message for %s/lang/deprecated.php:35
+E_USER_DEPRECATED: f: message for %s/lang/deprecated.php:33
 f
-E_USER_DEPRECATED: C::stMeth: message for %s/lang/deprecated.php:27
+E_USER_DEPRECATED: C::stMeth: message for %s/lang/deprecated.php:25
 C::stMeth
-E_USER_DEPRECATED: C::meth: message for %s/lang/deprecated.php:25
+E_USER_DEPRECATED: C::meth: message for %s/lang/deprecated.php:23
 C::meth
-E_USER_DEPRECATED: f_gen: message for %s/lang/deprecated.php:37
+E_USER_DEPRECATED: f_gen: message for %s/lang/deprecated.php:35
 
 = via_trait =
-E_USER_DEPRECATED: C_T::stMeth: message for %s/lang/deprecated.php:20
+E_USER_DEPRECATED: C_T::stMeth: message for %s/lang/deprecated.php:18
 Tr::stMeth
-E_USER_DEPRECATED: C_T::meth: message for %s/lang/deprecated.php:18
+E_USER_DEPRECATED: C_T::meth: message for %s/lang/deprecated.php:16
 Tr::meth
 
 = memoized =
-E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:41
+E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:39
 fMem
-E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:41
+E_USER_DEPRECATED: fMem: message for %s/lang/deprecated.php:39
 
 Done

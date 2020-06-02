@@ -6,9 +6,7 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
-interface MyCollection 
+interface MyCollection
 {
 	function put($item);
 	function get();

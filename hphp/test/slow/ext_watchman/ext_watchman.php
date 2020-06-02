@@ -1,13 +1,5 @@
 <?hh // decl
 
-# !!! Please contact devx_www oncall if this breaks. !!!
-#
-# The Watchman extension is a core part of www infrastructure on devservers.
-
-require_once 'constants.inc';
-require_once 'callback.inc';
-require_once 'wminst.inc';
-
 function waitFor(string $filename, WatchmanInstance $wminst): void {
   print("Waiting for $filename\n");
   $timeout = 5;
@@ -317,26 +309,37 @@ function test_core(WatchmanInstance $wminst): void {
   }
   HH\watchman_unsubscribe(SUB_NAME) |> HH\asio\join($$);
 }
+<<__EntryPoint>>
+function entrypoint_ext_watchman(): void {
 
-$tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
-@unlink($tmpdir);
-if (!mkdir($tmpdir)) {
-  throw new Exception("FAIL failed creating dir '$tmpdir'\n");
-}
-$wminst = null;
-try {
-  if (!chdir($tmpdir)) {
-    throw new Exception("FAIL (creating temporary directory)\n");
+  # !!! Please contact devx_www oncall if this breaks. !!!
+  #
+  # The Watchman extension is a core part of www infrastructure on devservers.
+
+  require_once 'constants.inc';
+  require_once 'callback.inc';
+  require_once 'wminst.inc';
+
+  $tmpdir = tempnam(sys_get_temp_dir(), 'wmt');
+  @unlink($tmpdir);
+  if (!mkdir($tmpdir)) {
+    throw new Exception("FAIL failed creating dir '$tmpdir'\n");
   }
-  $wminst = new WatchmanInstance($tmpdir);
-  test_core($wminst);
-} finally {
-  apc_delete('stress_counter');  // Stops async callback_checksub() if running
-  $wminst->terminateProcess();
-  if (is_dir($tmpdir)) {
-    foreach (glob($tmpdir.'/*') as $file) {
-      unlink($file);
+  $wminst = null;
+  try {
+    if (!chdir($tmpdir)) {
+      throw new Exception("FAIL (creating temporary directory)\n");
     }
-    rmdir($tmpdir);
+    $wminst = new WatchmanInstance($tmpdir);
+    test_core($wminst);
+  } finally {
+    apc_delete('stress_counter');  // Stops async callback_checksub() if running
+    $wminst->terminateProcess();
+    if (is_dir($tmpdir)) {
+      foreach (glob($tmpdir.'/*') as $file) {
+        unlink($file);
+      }
+      rmdir($tmpdir);
+    }
   }
 }

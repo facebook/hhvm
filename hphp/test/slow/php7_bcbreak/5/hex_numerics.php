@@ -7,11 +7,6 @@
 function errorHandler($errno, $errstr, $errfile, $errline) {
   throw new Exception;
 }
-set_error_handler(fun('errorHandler'));
-
-print("\n# is_numeric tests\n");
-printf("#%9s, %5s, %7s, %7s\n",
-  'input', 'isnum', 'int', 'float');
 
 function do_is_numeric($x) {
   $numeric = is_numeric($x) ? "true" : "false";
@@ -20,36 +15,6 @@ function do_is_numeric($x) {
   printf("%10s, %5s, %7s, %7s\n",
     $x, $numeric, $int_cast, $float_cast);
 }
-
-do_is_numeric("100");
-do_is_numeric("0100");
-do_is_numeric("0x100");
-do_is_numeric("0x0100");
-do_is_numeric("-100");
-do_is_numeric("-0100");
-do_is_numeric("-0x100");
-do_is_numeric("-0x0100");
-do_is_numeric("+100");
-do_is_numeric("+0100");
-do_is_numeric("+0x100");
-do_is_numeric("+0x0100");
-
-do_is_numeric("100.5");
-do_is_numeric("0100.5");
-do_is_numeric("0x100.5");
-do_is_numeric("0x0100.5");
-do_is_numeric("-100.5");
-do_is_numeric("-0100.5");
-do_is_numeric("-0x100.5");
-do_is_numeric("-0x0100.5");
-do_is_numeric("+100.5");
-do_is_numeric("+0100.5");
-do_is_numeric("+0x100.5");
-do_is_numeric("+0x0100.5");
-
-print("\n# implicit cast on operators (out is var_export)\n");
-printf("#%12s, %3s, %10s, %10s\n",
-  'in_num', 'op', 'in_str', 'out');
 
 abstract class Operator {
   const COMP_EQ = '==';
@@ -108,30 +73,6 @@ function do_op($x, $op, $y) {
     var_export($x, true), $op, var_export($y, true), $res);
 }
 
-do_op(100, Operator::COMP_EQ, "100");
-do_op(100, Operator::COMP_EQ, "0100");
-do_op(0x100, Operator::COMP_EQ, "0x100");
-do_op(0x100, Operator::COMP_EQ, "0x0100");
-do_op(-100, Operator::COMP_EQ, "-100");
-do_op(-100, Operator::COMP_EQ, "-0100");
-do_op(0x100 * -1, Operator::COMP_EQ, "-0x100");
-do_op(0x100 * -1, Operator::COMP_EQ, "-0x0100");
-do_op(100, Operator::COMP_EQ, "+100");
-do_op(100, Operator::COMP_EQ, "+0100");
-do_op(0x100, Operator::COMP_EQ, "+0x100");
-do_op(0x100, Operator::COMP_EQ, "+0x0100");
-
-do_op(100.5, Operator::COMP_EQ, "100.5");
-do_op(100.5, Operator::COMP_EQ, "0100.5");
-do_op(0x100 + 5/16.0, Operator::COMP_EQ, "0x100.5");
-do_op(0x100 + 5/16.0, Operator::COMP_EQ, "0x0100.5");
-do_op(-100.5, Operator::COMP_EQ, "-100.5");
-do_op(-100.5, Operator::COMP_EQ, "-0100.5");
-do_op(100.5, Operator::COMP_EQ, "+100.5");
-do_op(100.5, Operator::COMP_EQ, "+0100.5");
-do_op(0x100 + 5/16.0, Operator::COMP_EQ, "+0x100.5");
-do_op(0x100 + 5/16.0, Operator::COMP_EQ, "+0x0100.5");
-
 /*
  * Now just a meaningful subset of the above, since lots of them are not number
  * in any context on any version, and we've proven that in a couple ways
@@ -155,34 +96,96 @@ function do_all_op($op) {
   do_op(10.5, $op, "+10.5");
   do_op(10.5, $op, "+010.5");
 }
+<<__EntryPoint>>
+function entrypoint_hex_numerics(): void {
+  set_error_handler(fun('errorHandler'));
 
-do_all_op(Operator::PLUS);
-do_all_op(Operator::MINUS);
-do_all_op(Operator::TIMES);
+  print("\n# is_numeric tests\n");
+  printf("#%9s, %5s, %7s, %7s\n",
+    'input', 'isnum', 'int', 'float');
 
-/*
- * using reasonable numbers for these operators. We're pretty close to wasting
- * time with test cases at this point.
- */
+  do_is_numeric("100");
+  do_is_numeric("0100");
+  do_is_numeric("0x100");
+  do_is_numeric("0x0100");
+  do_is_numeric("-100");
+  do_is_numeric("-0100");
+  do_is_numeric("-0x100");
+  do_is_numeric("-0x0100");
+  do_is_numeric("+100");
+  do_is_numeric("+0100");
+  do_is_numeric("+0x100");
+  do_is_numeric("+0x0100");
 
-do_op(11, Operator::DIVIDE, "2");
-do_op(0x21, Operator::DIVIDE, "0x10");
-do_op("11", Operator::DIVIDE, 2);
-do_op("0x21", Operator::DIVIDE, 0x10);
-do_op(11, Operator::MOD, "2");
-do_op(0x21, Operator::MOD, "0x10");
-do_op("11", Operator::MOD, 2);
-do_op("0x21", Operator::MOD, 0x10);
+  do_is_numeric("100.5");
+  do_is_numeric("0100.5");
+  do_is_numeric("0x100.5");
+  do_is_numeric("0x0100.5");
+  do_is_numeric("-100.5");
+  do_is_numeric("-0100.5");
+  do_is_numeric("-0x100.5");
+  do_is_numeric("-0x0100.5");
+  do_is_numeric("+100.5");
+  do_is_numeric("+0100.5");
+  do_is_numeric("+0x100.5");
+  do_is_numeric("+0x0100.5");
 
-do_op(11, Operator::POWER, "2");
-do_op(0x21, Operator::POWER, "0x10");
-do_op("11", Operator::POWER, 2);
-do_op("0x21", Operator::POWER, 0x10);
+  print("\n# implicit cast on operators (out is var_export)\n");
+  printf("#%12s, %3s, %10s, %10s\n",
+    'in_num', 'op', 'in_str', 'out');
 
-print("# Warning: ++ and -- do odd things to strings.\n");
-print("# ++ increments the final character by 1.\n");
-print("# -- seems to do nothing, leaving the string as-is.\n");
-do_op("11", Operator::PLUSPLUS, 'ign');
-do_op("0x21", Operator::PLUSPLUS, 'ign');
-do_op("11", Operator::MINMIN, 'ign');
-do_op("0x21", Operator::MINMIN, 'ign');
+  do_op(100, Operator::COMP_EQ, "100");
+  do_op(100, Operator::COMP_EQ, "0100");
+  do_op(0x100, Operator::COMP_EQ, "0x100");
+  do_op(0x100, Operator::COMP_EQ, "0x0100");
+  do_op(-100, Operator::COMP_EQ, "-100");
+  do_op(-100, Operator::COMP_EQ, "-0100");
+  do_op(0x100 * -1, Operator::COMP_EQ, "-0x100");
+  do_op(0x100 * -1, Operator::COMP_EQ, "-0x0100");
+  do_op(100, Operator::COMP_EQ, "+100");
+  do_op(100, Operator::COMP_EQ, "+0100");
+  do_op(0x100, Operator::COMP_EQ, "+0x100");
+  do_op(0x100, Operator::COMP_EQ, "+0x0100");
+
+  do_op(100.5, Operator::COMP_EQ, "100.5");
+  do_op(100.5, Operator::COMP_EQ, "0100.5");
+  do_op(0x100 + 5/16.0, Operator::COMP_EQ, "0x100.5");
+  do_op(0x100 + 5/16.0, Operator::COMP_EQ, "0x0100.5");
+  do_op(-100.5, Operator::COMP_EQ, "-100.5");
+  do_op(-100.5, Operator::COMP_EQ, "-0100.5");
+  do_op(100.5, Operator::COMP_EQ, "+100.5");
+  do_op(100.5, Operator::COMP_EQ, "+0100.5");
+  do_op(0x100 + 5/16.0, Operator::COMP_EQ, "+0x100.5");
+  do_op(0x100 + 5/16.0, Operator::COMP_EQ, "+0x0100.5");
+
+  do_all_op(Operator::PLUS);
+  do_all_op(Operator::MINUS);
+  do_all_op(Operator::TIMES);
+
+  /*
+   * using reasonable numbers for these operators. We're pretty close to wasting
+   * time with test cases at this point.
+   */
+
+  do_op(11, Operator::DIVIDE, "2");
+  do_op(0x21, Operator::DIVIDE, "0x10");
+  do_op("11", Operator::DIVIDE, 2);
+  do_op("0x21", Operator::DIVIDE, 0x10);
+  do_op(11, Operator::MOD, "2");
+  do_op(0x21, Operator::MOD, "0x10");
+  do_op("11", Operator::MOD, 2);
+  do_op("0x21", Operator::MOD, 0x10);
+
+  do_op(11, Operator::POWER, "2");
+  do_op(0x21, Operator::POWER, "0x10");
+  do_op("11", Operator::POWER, 2);
+  do_op("0x21", Operator::POWER, 0x10);
+
+  print("# Warning: ++ and -- do odd things to strings.\n");
+  print("# ++ increments the final character by 1.\n");
+  print("# -- seems to do nothing, leaving the string as-is.\n");
+  do_op("11", Operator::PLUSPLUS, 'ign');
+  do_op("0x21", Operator::PLUSPLUS, 'ign');
+  do_op("11", Operator::MINMIN, 'ign');
+  do_op("0x21", Operator::MINMIN, 'ign');
+}

@@ -1,9 +1,5 @@
 <?hh
 
-set_error_handler(($no, $string) ==> {
-  throw new Exception($string);
-});
-
 enum KeyType: int as int {
   ZERO = 0;
   ONE = 1;
@@ -21,6 +17,13 @@ function is_shape(mixed $x): void {
     echo "not shape\n";
   }
 }
+<<__EntryPoint>>
+function entrypoint_isexpressiontashape5(): void {
 
-is_shape(darray[0 => 0, 1 => 'one']);
-is_shape(varray[0, 'one']); // TODO(T29967020)
+  set_error_handler(($no, $string) ==> {
+    throw new Exception($string);
+  });
+
+  is_shape(darray[0 => 0, 1 => 'one']);
+  is_shape(varray[0, 'one']); // TODO(T29967020)
+}

@@ -1,7 +1,7 @@
 <?hh
-require 'fix_exceptions.inc';
 class Stringable { public function __toString() { return "foobar"; } }
 <<__EntryPoint>> function main(): void {
+require 'fix_exceptions.inc'; fix_exceptions();
 $functions = darray[
     'int' => function ($i): int { return $i; },
     'float' => function ($f): float { return $f; },

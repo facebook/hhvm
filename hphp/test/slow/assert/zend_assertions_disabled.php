@@ -4,4 +4,5 @@
 <<__EntryPoint>>
 function main_zend_assertions_disabled() {
 require_once __DIR__.'/zend_assertions.php';
+entrypoint_zend_assertions();
 }

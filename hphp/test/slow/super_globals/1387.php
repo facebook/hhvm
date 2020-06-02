@@ -1,7 +1,5 @@
 <?hh
 
-$a = 100;
-
 function f() {
   foreach (HH\global_keys() as $k) {
     if ($k == 'a') {
@@ -14,4 +12,9 @@ function f() {
   $b['a'] = 0;
   var_dump($GLOBALS['a']);
 }
-f();
+<<__EntryPoint>>
+function entrypoint_1387(): void {
+
+  $GLOBALS['a'] = 100;
+  f();
+}

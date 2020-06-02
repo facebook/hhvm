@@ -34,7 +34,6 @@ namespace Type {
 }
 
 namespace {
-  new Type\Hello();
   use type MyNS\{Foo, Bar};
   use type MyNS\{
     Herp,
@@ -42,6 +41,7 @@ namespace {
   };
 
   <<__EntryPoint>> function main(): void {
+    new Type\Hello();
     new Foo();
     new Bar();
     new Herp();

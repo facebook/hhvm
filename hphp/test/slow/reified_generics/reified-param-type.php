@@ -1,32 +1,35 @@
 <?hh
 
-set_error_handler(
-  (int $errno,
-  string $errstr,
-  string $errfile,
-  int $errline,
-  darray $errcontext
-  ) ==> {
-    echo "ERROR: ".$errstr." on line ".(string)$errline."\n";
-    return true;
-  }
-);
-
 function f<reify T>(@T $x) { echo "done\n"; }
 
 class C<reify T> {}
+<<__EntryPoint>>
+function entrypoint_reifiedparamtype(): void {
 
-f<int>(1);
-f<num>(1);
-f<int>(1.1);
-f<num>(1.1);
-f<int>(true);
+  set_error_handler(
+    (int $errno,
+    string $errstr,
+    string $errfile,
+    int $errline,
+    darray $errcontext
+    ) ==> {
+      echo "ERROR: ".$errstr." on line ".(string)$errline."\n";
+      return true;
+    }
+  );
 
-f<bool>(true);
-f<bool>(1);
+  f<int>(1);
+  f<num>(1);
+  f<int>(1.1);
+  f<num>(1.1);
+  f<int>(true);
 
-f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => string)>());
-f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => int)>());
+  f<bool>(true);
+  f<bool>(1);
 
-f<C<(int, string)>>(new C<(int, string)>());
-f<C<(int, string)>>(new C<(int, int)>());
+  f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => string)>());
+  f<C<shape('x' => int, 'y' => string)>>(new C<shape('x' => int, 'y' => int)>());
+
+  f<C<(int, string)>>(new C<(int, string)>());
+  f<C<(int, string)>>(new C<(int, int)>());
+}

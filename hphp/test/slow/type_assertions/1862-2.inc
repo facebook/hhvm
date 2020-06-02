@@ -6,4 +6,3 @@ class C1 extends B1 {
     return 2;
   }
 }
-$x = 1;

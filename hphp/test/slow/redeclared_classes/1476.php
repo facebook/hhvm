@@ -8,9 +8,6 @@ class PEAR {
     echo 'This is g()';
   }
 }
-if ($x) {
-  include '1476.inc';
-}
 class D1 extends PEAR {
   public $foo;
   private $bar;
@@ -25,4 +22,10 @@ class D2 extends D1 {
     return $this->foo + $this->bar;
   }
 }
-PEAR::f();
+<<__EntryPoint>>
+function entrypoint_1476(): void {
+  if ($x) {
+    include '1476.inc';
+  }
+  PEAR::f();
+}

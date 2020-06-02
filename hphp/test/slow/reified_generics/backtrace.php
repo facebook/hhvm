@@ -12,6 +12,9 @@ class C<reify Ta, reify Tb> {
     $this->g<T1>();
   }
 }
+<<__EntryPoint>>
+function entrypoint_backtrace(): void {
 
-$c = new C<int, shape('a' => int, 'b' => string)>();
-$c->f<string>();
+  $c = new C<int, shape('a' => int, 'b' => string)>();
+  $c->f<string>();
+}

@@ -10,11 +10,14 @@ function f($i) {
     include '1467-2.inc';
  }
 }
-if ($i == 1) {
-  include '1467-3.inc';
+<<__EntryPoint>>
+function entrypoint_1467(): void {
+  if ($i == 1) {
+    include '1467-3.inc';
+  }
+  f(1);
+  $obj = new p();
+  var_dump($obj);
+  $obj = new c();
+  var_dump($obj);
 }
-f(1);
-$obj = new p();
-var_dump($obj);
-$obj = new c();
-var_dump($obj);

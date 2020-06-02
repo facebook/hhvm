@@ -1,14 +1,5 @@
 <?hh
 
-$b = 123;
-if ($b) {
-  include '1461-1.inc';
-} else {
-  include '1461-2.inc';
-}
-
-class Exception2 extends Exception1 {}
-
 function foo() {
   $e = new Exception();
   try {
@@ -18,4 +9,17 @@ function foo() {
     var_dump($e->getCode());
   }
 }
-foo();
+<<__EntryPoint>>
+function entrypoint_1461(): void {
+
+  $b = 123;
+  if ($b) {
+    include '1461-1.inc';
+  } else {
+    include '1461-2.inc';
+  }
+
+  include '1461-classes.inc';
+
+  foo();
+}

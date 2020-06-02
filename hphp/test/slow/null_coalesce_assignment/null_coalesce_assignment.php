@@ -35,7 +35,6 @@ class CounterArray
 
 function f0(): ?int { return null; }
 function fortyseven(): int { return 47; }
-$x_global = 45;
 
 class Foo2 {
     const bar3 = 'I three am a constant';
@@ -263,26 +262,30 @@ function test_multi_dim_side_effects(): void {
   VS($x[speak('a')]->b[speak('c')] ??= 42, 42);
   n_dump($x);
 }
+<<__EntryPoint>>
+function entrypoint_null_coalesce_assignment(): void {
+  $GLOBALS['x_global'] = 45;
 
-/*
- * CALL TEST FUNCTIONS
- */
+  /*
+   * CALL TEST FUNCTIONS
+   */
 
-test_basic();
-echo "\n";
-test_falsey();
-echo "\n";
-test_array_get();
-echo "\n";
-test_object_get();
-echo "\n";
-test_associativity();
-echo "\n";
-test_multi_dim_basic();
-echo "\n";
-test_null_base();
-echo "\n";
-test_multi_dim_lvars();
-echo "\n";
-test_multi_dim_side_effects();
-echo "\n";
+  test_basic();
+  echo "\n";
+  test_falsey();
+  echo "\n";
+  test_array_get();
+  echo "\n";
+  test_object_get();
+  echo "\n";
+  test_associativity();
+  echo "\n";
+  test_multi_dim_basic();
+  echo "\n";
+  test_null_base();
+  echo "\n";
+  test_multi_dim_lvars();
+  echo "\n";
+  test_multi_dim_side_effects();
+  echo "\n";
+}

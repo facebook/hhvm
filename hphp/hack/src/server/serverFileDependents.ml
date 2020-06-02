@@ -19,40 +19,8 @@ let deps_of_paths workers naming_table relative_paths =
       List.filter_map ~f:(Naming_table.get_file_info naming_table) paths
     in
     let initial_deps =
-      List.fold_left
-        ~init:DepSet.empty
-        ~f:(fun acc fileinfo ->
-          let FileInfo.{ funs; classes; typedefs; consts; _ } = fileinfo in
-          let acc =
-            List.fold_left
-              ~init:acc
-              ~f:(fun acc (_, const_id) ->
-                DepSet.add acc (Dep.make (Dep.GConst const_id)))
-              consts
-          in
-          let acc =
-            List.fold_left
-              ~init:acc
-              ~f:(fun acc (_, fun_id) ->
-                DepSet.add acc (Dep.make (Dep.Fun fun_id)))
-              funs
-          in
-          let acc =
-            List.fold_left
-              ~init:acc
-              ~f:(fun acc (_, class_id) ->
-                DepSet.add acc (Dep.make (Dep.Class class_id)))
-              classes
-          in
-          let acc =
-            List.fold_left
-              ~init:acc
-              ~f:(fun acc (_, type_id) ->
-                DepSet.add acc (Dep.make (Dep.Class type_id)))
-              typedefs
-          in
-          acc)
-        fileinfos
+      List.fold_left fileinfos ~init:DepSet.empty ~f:(fun acc fileinfo ->
+          DepSet.union acc (Typing_deps.deps_of_file_info fileinfo))
     in
     DepSet.union acc (Typing_deps.add_all_deps initial_deps)
   in

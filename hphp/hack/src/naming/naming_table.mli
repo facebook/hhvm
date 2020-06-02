@@ -46,6 +46,14 @@ val get_file_info : t -> Relative_path.t -> FileInfo.t option
 
 val get_file_info_unsafe : t -> Relative_path.t -> FileInfo.t
 
+(** Look up the files declaring the symbols provided in the given set of
+dependency hashes. This may return an overestimate of the files, since
+dependency hashes are smaller than naming table hashes, and consequently
+can't uniquely identify entries in the naming table.
+
+Only works for backed naming tables. *)
+val get_dep_set_files : t -> Typing_deps.DepSet.t -> Relative_path.Set.t
+
 val has_file : t -> Relative_path.t -> bool
 
 val iter : t -> f:(Relative_path.t -> FileInfo.t -> unit) -> unit

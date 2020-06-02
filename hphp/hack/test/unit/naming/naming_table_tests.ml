@@ -491,7 +491,7 @@ let test_naming_table_hash () =
 
 let test_naming_table_query_by_dep_hash () =
   run_naming_table_test
-    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table:_ ~db_name:_ ->
+    (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name:_ ->
       let db_path =
         Db_path_provider.get_naming_db_path (Provider_context.get_backend ctx)
       in
@@ -555,6 +555,91 @@ let test_naming_table_query_by_dep_hash () =
         |> Naming_sqlite.get_type_paths_by_dep_hash db_path
         |> Relative_path.Set.elements )
         "Look up non-existent typedef by dep hash should return empty list";
+
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "qux.php"]
+        ( Typing_deps.Dep.GConst "\\Qux"
+        |> Typing_deps.Dep.make
+        |> Typing_deps.DepSet.singleton
+        |> Naming_table.get_dep_set_files backed_naming_table
+        |> Relative_path.Set.elements )
+        "Bulk lookup for const should be correct";
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "bar.php"]
+        ( Typing_deps.Dep.Fun "\\bar"
+        |> Typing_deps.Dep.make
+        |> Typing_deps.DepSet.singleton
+        |> Naming_table.get_dep_set_files backed_naming_table
+        |> Relative_path.Set.elements )
+        "Bulk lookup for fun should be correct";
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "baz.php"]
+        ( Typing_deps.Dep.Class "\\Baz"
+        |> Typing_deps.Dep.make
+        |> Typing_deps.DepSet.singleton
+        |> Naming_table.get_dep_set_files backed_naming_table
+        |> Relative_path.Set.elements )
+        "Bulk lookup for class should be correct";
+
+      Asserter.Relative_path_asserter.assert_list_equals
+        [
+          Relative_path.from_root "bar.php";
+          Relative_path.from_root "baz.php";
+          Relative_path.from_root "qux.php";
+        ]
+        ( Typing_deps.DepSet.empty
+        |> Typing_deps.DepSet.union
+             ( Typing_deps.Dep.GConst "\\Qux"
+             |> Typing_deps.Dep.make
+             |> Typing_deps.DepSet.singleton )
+        |> Typing_deps.DepSet.union
+             ( Typing_deps.Dep.Fun "\\bar"
+             |> Typing_deps.Dep.make
+             |> Typing_deps.DepSet.singleton )
+        |> Typing_deps.DepSet.union
+             ( Typing_deps.Dep.Class "\\Baz"
+             |> Typing_deps.Dep.make
+             |> Typing_deps.DepSet.singleton )
+        |> Naming_table.get_dep_set_files backed_naming_table
+        |> Relative_path.Set.elements )
+        "Bulk lookup for multiple elements should be correct";
+
+      (* Simulate moving \Baz from baz.php to bar.php. *)
+      let baz_file_info = FileInfo.empty_t in
+      let bar_file_info =
+        {
+          (Naming_table.get_file_info_unsafe
+             backed_naming_table
+             (Relative_path.from_root "bar.php"))
+          with
+          FileInfo.classes =
+            [
+              ( FileInfo.File (FileInfo.Class, Relative_path.from_root "bar.php"),
+                "\\Baz" );
+            ];
+        }
+      in
+      let new_naming_table = backed_naming_table in
+      let new_naming_table =
+        Naming_table.update
+          new_naming_table
+          (Relative_path.from_root "baz.php")
+          baz_file_info
+      in
+      let new_naming_table =
+        Naming_table.update
+          new_naming_table
+          (Relative_path.from_root "bar.php")
+          bar_file_info
+      in
+      Asserter.Relative_path_asserter.assert_list_equals
+        [Relative_path.from_root "bar.php"]
+        ( Typing_deps.Dep.Class "\\Baz"
+        |> Typing_deps.Dep.make
+        |> Typing_deps.DepSet.singleton
+        |> Naming_table.get_dep_set_files new_naming_table
+        |> Relative_path.Set.elements )
+        "\\Baz should now be located in bar.php";
 
       ())
 

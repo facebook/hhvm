@@ -320,8 +320,7 @@ let get_files deps =
     deps
     ~init:Relative_path.Set.empty
 
-let update_file filename info =
-  (* TODO: Figure out if we need GConstName and FunName as well here *)
+let deps_of_file_info (file_info : FileInfo.t) : DepSet.t =
   let {
     FileInfo.funs;
     classes;
@@ -332,7 +331,7 @@ let update_file filename info =
     file_mode = _;
     hash = _;
   } =
-    info
+    file_info
   in
   let consts =
     List.fold_left
@@ -386,17 +385,14 @@ let update_file filename info =
   in
   let defs = DepSet.union funs classes in
   let defs = DepSet.union defs consts in
-  DepSet.iter
-    ~f:
-      begin
-        fun def ->
-        let previous =
-          try Hashtbl.find !ifiles def
-          with Not_found -> Relative_path.Set.empty
-        in
-        Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename)
-      end
-    defs
+  defs
+
+let update_file filename info =
+  DepSet.iter (deps_of_file_info info) ~f:(fun def ->
+      let previous =
+        try Hashtbl.find !ifiles def with Not_found -> Relative_path.Set.empty
+      in
+      Hashtbl.replace !ifiles def (Relative_path.Set.add previous filename))
 
 let rec get_extend_deps ~visited ~source_class ~acc =
   if DepSet.mem !visited source_class then

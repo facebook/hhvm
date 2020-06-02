@@ -147,6 +147,8 @@ val get_ideps : Dep.dependency Dep.variant -> DepSet.t
 
 val get_files : DepSet.t -> Relative_path.Set.t
 
+val deps_of_file_info : FileInfo.t -> DepSet.t
+
 val update_file : Relative_path.t -> FileInfo.t -> unit
 
 (* Add to accumulator all extend dependencies of source_class. Visited is used

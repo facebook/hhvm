@@ -29,6 +29,7 @@ module type S = sig
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
+    prefetch_deferred_files:bool ->
     eden:bool ->
     command
 

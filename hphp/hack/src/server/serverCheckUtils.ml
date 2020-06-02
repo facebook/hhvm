@@ -85,6 +85,7 @@ let start_typing_delegate genv env : env =
     max_batch_size;
     min_batch_size;
     num_workers;
+    prefetch_deferred_files;
     worker_min_log_level;
     file_system_mode;
     _;
@@ -132,6 +133,7 @@ let start_typing_delegate genv env : env =
                 init_id;
                 mergebase;
                 num_workers;
+                prefetch_deferred_files;
                 recheck_id;
                 root;
                 server =

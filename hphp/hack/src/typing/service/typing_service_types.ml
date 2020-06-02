@@ -116,6 +116,7 @@ type delegate_env = {
   init_id: string;
   mergebase: Hg.hg_rev option;
   num_workers: int;
+  prefetch_deferred_files: bool;
   recheck_id: string;
   root: string;
   (* This module exposes to the controller the limited set of operations that

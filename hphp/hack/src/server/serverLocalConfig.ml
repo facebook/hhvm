@@ -104,6 +104,9 @@ module RemoteTypeCheck = struct
     min_batch_size: int;
     (* Dictates the number of remote type checking workers *)
     num_workers: int;
+    (* Indicates whether files-to-declare should be fetched by VFS
+        (see `declaration_threshold`) *)
+    prefetch_deferred_files: bool;
     (* If set, distributes type checking to remote workers if the number of files to
     type check exceeds the threshold. If not set, then always checks everything locally. *)
     recheck_threshold: int option;
@@ -126,6 +129,7 @@ module RemoteTypeCheck = struct
       max_batch_size = 8_000;
       min_batch_size = 5_000;
       num_workers = 4;
+      prefetch_deferred_files = false;
       recheck_threshold = None;
       worker_min_log_level = Hh_logger.Level.Info;
       worker_vfs_checkout_threshold = 10_000;
@@ -180,6 +184,14 @@ module RemoteTypeCheck = struct
     let min_batch_size =
       int_ "min_batch_size" ~prefix ~default:default.min_batch_size config
     in
+    let prefetch_deferred_files =
+      bool_if_min_version
+        "prefetch_deferred_files"
+        ~prefix
+        ~default:default.prefetch_deferred_files
+        ~current_version
+        config
+    in
     let recheck_threshold = int_opt "recheck_threshold" ~prefix config in
     let load_naming_table_on_full_init =
       bool_if_min_version
@@ -227,6 +239,7 @@ module RemoteTypeCheck = struct
       max_batch_size;
       min_batch_size;
       num_workers;
+      prefetch_deferred_files;
       recheck_threshold;
       worker_min_log_level;
       worker_vfs_checkout_threshold;

@@ -1385,7 +1385,7 @@ static Variant iter_op_impl(Variant& refParam, OpPtr op,
     if ((ad->*pred)()) return ad;
 
     // If !ad->noCopyOnWrite, ad->copy is a no-op, so we don't need to check it.
-    if (!ad->isVanilla()) ad = BespokeArray::asBespoke(ad)->escalateToVanilla();
+    if (!ad->isVanilla()) ad = BespokeArray::ToVanilla(ad, "internal iterator");
     return ad->cowCheck() ? ad->copy() : ad;
   }();
   if (ad != orig) refParam = Variant::attach(ad);

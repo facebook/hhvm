@@ -54,7 +54,7 @@ APCArray::MakeSharedImpl(ArrayData** arr, APCHandleLevel level,
   ArrayData* escalated = nullptr;
   SCOPE_EXIT { if (escalated) decRefArr(escalated); };
   if (!(*arr)->isVanilla()) {
-    escalated = BespokeArray::asBespoke(*arr)->escalateToVanilla();
+    escalated = BespokeArray::ToVanilla(*arr, "APCArray::MakeShared");
     *arr = escalated;
   }
 

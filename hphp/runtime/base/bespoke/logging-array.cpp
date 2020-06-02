@@ -89,7 +89,8 @@ void LoggingLayout::scan(const ArrayData* ad, type_scan::Scanner& scan) const {
   scan.scan(LoggingArray::asLogging(ad)->wrapped);
 }
 
-ArrayData* LoggingLayout::escalateToVanilla(const ArrayData* ad) const {
+ArrayData* LoggingLayout::escalateToVanilla(
+    const ArrayData* ad, const char* /*reason*/) const {
   auto wrapped = LoggingArray::asLogging(ad)->wrapped;
   wrapped->incRefCount();
   return wrapped;

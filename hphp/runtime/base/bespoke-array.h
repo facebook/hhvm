@@ -47,7 +47,10 @@ struct BespokeArray : ArrayData {
 
   size_t heapSize() const;
   void scan(type_scan::Scanner& scan) const;
-  ArrayData* escalateToVanilla() const;
+
+  // Escalate the given bespoke array-like to a vanilla array-like.
+  // The provided `reason` may be logged.
+  static ArrayData* ToVanilla(const ArrayData* ad, const char* reason);
 
 private:
   template <typename T, typename ... Args>

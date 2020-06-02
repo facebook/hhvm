@@ -39,7 +39,8 @@ struct LoggingArray : BespokeArray {
 struct LoggingLayout : public Layout {
   size_t heapSize(const ArrayData* ad) const final;
   void scan(const ArrayData* ad, type_scan::Scanner& scan) const final;
-  ArrayData* escalateToVanilla(const ArrayData*) const final;
+  ArrayData* escalateToVanilla(
+    const ArrayData*, const char* reason) const final;
 
   void release(ArrayData*) const final;
   size_t size(const ArrayData*) const final;

@@ -43,8 +43,9 @@ size_t BespokeArray::heapSize() const {
 void BespokeArray::scan(type_scan::Scanner& scan) const {
   return layout()->scan(this, scan);
 }
-ArrayData* BespokeArray::escalateToVanilla() const {
-  return layout()->escalateToVanilla(this);
+
+ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
+  return BespokeArray::asBespoke(ad)->layout()->escalateToVanilla(ad, reason);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -141,7 +142,8 @@ ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
 
 // sorting
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  return asBespoke(ad)->layout()->escalateToVanilla(ad);
+  return asBespoke(ad)->layout()->escalateToVanilla(
+    ad, "BespokeArray::EscalateForSort");
 }
 
 // high-level ops

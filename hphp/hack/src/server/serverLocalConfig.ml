@@ -121,12 +121,12 @@ module RemoteTypeCheck = struct
   let default =
     {
       enabled = false;
-      declaration_threshold = 2;
+      declaration_threshold = 50;
       disabled_on_errors = [];
       (* Indicates how long to wait between heartbeats (in seconds) *)
       heartbeat_period = 15;
       load_naming_table_on_full_init = false;
-      max_batch_size = 8_000;
+      max_batch_size = 25_000;
       min_batch_size = 5_000;
       num_workers = 4;
       prefetch_deferred_files = false;

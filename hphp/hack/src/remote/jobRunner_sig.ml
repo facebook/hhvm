@@ -29,7 +29,6 @@ module type S = sig
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
-    bundle_everstore_handle:string option ->
     eden:bool ->
     command
 

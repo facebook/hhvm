@@ -26,7 +26,7 @@ use ocamlrep::rc::RcOc;
 use options::{CompilerFlags, HhvmFlags, Options};
 use oxidized::{
     aast_defs,
-    aast_visitor::{AstParams, NodeMut, VisitorMut},
+    aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
     ast::*,
     ast_defs::*,
     file_info::Mode,
@@ -1033,17 +1033,18 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             function_state,
             rx::Level::NonRx,
         );
-        for mut param in &mut md.params {
-            self.visit_fun_param(&mut env, &mut param)?;
-        }
-        Ok(())
+        visit_mut(self, &mut env, &mut md.params)
     }
 
     fn visit_class_<'b>(&mut self, env: &mut Env<'a>, cd: &'b mut Class_) -> Result<()> {
         let mut env = env.clone();
         env.with_class(cd);
         self.state.reset_function_counts();
-        cd.recurse(&mut env, self.object())?;
+        visit_mut(self, &mut env, &mut cd.methods)?;
+        visit_mut(self, &mut env, &mut cd.consts)?;
+        visit_mut(self, &mut env, &mut cd.vars)?;
+        visit_mut(self, &mut env, &mut cd.xhp_attrs)?;
+        visit_mut(self, &mut env, &mut cd.user_attributes)?;
         Ok(add_reified_property(&cd.tparams, &mut cd.vars))
     }
 
@@ -1061,13 +1062,8 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     function_state,
                     rx::Level::NonRx,
                 );
-                for mut param in &mut x.params {
-                    self.visit_fun_param(&mut env, &mut param)?
-                }
-                for mut ua in &mut x.user_attributes {
-                    self.visit_user_attribute(&mut env, &mut ua)?
-                }
-                Ok(())
+                visit_mut(self, &mut env, &mut x.params)?;
+                visit_mut(self, &mut env, &mut x.user_attributes)
             }
             _ => def.recurse(env, self.object()),
         }
@@ -1088,21 +1084,13 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
             }
             Stmt_::Do(x) => {
                 let (b, e) = (&mut x.0, &mut x.1);
-                env.with_in_using(false, |env| {
-                    Ok(for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt)?;
-                    })
-                })?;
+                env.with_in_using(false, |env| visit_mut(self, env, b))?;
                 self.visit_expr(env, e)
             }
             Stmt_::While(x) => {
                 let (e, b) = (&mut x.0, &mut x.1);
                 self.visit_expr(env, e)?;
-                env.with_in_using(false, |env| {
-                    Ok(for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt)?;
-                    })
-                })
+                env.with_in_using(false, |env| visit_mut(self, env, b))
             }
             Stmt_::Foreach(x) => {
                 if x.1.is_await_as_v() || x.1.is_await_as_kv() {
@@ -1114,35 +1102,19 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                 let (e1, e2, e3, b) = (&mut x.0, &mut x.1, &mut x.2, &mut x.3);
                 self.visit_expr(env, e1)?;
                 self.visit_expr(env, e2)?;
-                env.with_in_using(false, |env| {
-                    Ok(for stmt in b.iter_mut() {
-                        self.visit_stmt(env, stmt)?;
-                    })
-                })?;
+                env.with_in_using(false, |env| visit_mut(self, env, b))?;
                 self.visit_expr(env, e3)
             }
             Stmt_::Switch(x) => {
                 let (e, cl) = (&mut x.0, &mut x.1);
                 self.visit_expr(env, e)?;
-                env.with_in_using(false, |env| {
-                    Ok(for c in cl.iter_mut() {
-                        self.visit_case(env, c)?;
-                    })
-                })
+                env.with_in_using(false, |env| visit_mut(self, env, cl))
             }
             Stmt_::Try(x) => {
                 let (b1, cl, b2) = (&mut x.0, &mut x.1, &mut x.2);
-                for stmt in b1.iter_mut() {
-                    self.visit_stmt(env, stmt)?;
-                }
-                for c in cl.iter_mut() {
-                    self.visit_catch(env, c)?;
-                }
-                env.with_in_using(false, |env| {
-                    Ok(for stmt in b2.iter_mut() {
-                        self.visit_stmt(env, stmt)?;
-                    })
-                })?;
+                visit_mut(self, env, b1)?;
+                visit_mut(self, env, cl)?;
+                visit_mut(self, env, b2)?;
                 Ok(self.state.current_function_state.has_finally |= !x.2.is_empty())
             }
             Stmt_::Using(x) => {
@@ -1150,11 +1122,7 @@ impl<'ast, 'a> VisitorMut<'ast> for ClosureConvertVisitor<'a> {
                     env.check_if_in_async_context()?;
                 }
                 self.visit_expr(env, &mut x.expr)?;
-                env.with_in_using(true, |env| {
-                    Ok(for stmt in x.block.iter_mut() {
-                        self.visit_stmt(env, stmt)?;
-                    })
-                })?;
+                env.with_in_using(true, |env| visit_mut(self, env, &mut x.block))?;
                 Ok(self.state.current_function_state.has_finally = true)
             }
             Stmt_::GotoLabel(x) => {

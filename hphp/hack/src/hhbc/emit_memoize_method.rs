@@ -236,7 +236,7 @@ fn make_memoize_method_with_params_code(
     hhas_params: &[HhasParam],
     args: &Args,
 ) -> Result<InstrSeq> {
-    let mut param_count = args.params.len();
+    let mut param_count = hhas_params.len();
     let notfound = emitter.label_gen_mut().next_regular();
     let suspended_get = emitter.label_gen_mut().next_regular();
     let eager_set = emitter.label_gen_mut().next_regular();

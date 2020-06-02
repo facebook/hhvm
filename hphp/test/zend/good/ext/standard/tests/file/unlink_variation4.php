@@ -5,10 +5,10 @@
 
 /* Try deleting a file which is already deleted */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 
 // temp file used
-$filename = "$file_path/unlink_variation4.tmp";
+$filename = __SystemLib\hphp_test_tmppath('unlink_variation4.tmp');
 
 echo "*** Testing unlink() on deleted file ***\n";
 // create temp file

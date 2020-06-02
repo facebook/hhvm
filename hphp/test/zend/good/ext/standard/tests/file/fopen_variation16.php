@@ -44,8 +44,7 @@ function runtest() {
     rmdir($extraDir);
 }
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$thisTestDir = $file_path."/fopenVariation16.dir";
+$thisTestDir = __SystemLib\hphp_test_tmppath('fopenVariation16.dir');
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

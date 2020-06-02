@@ -19,8 +19,7 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation5 {
 }
 
 <<__EntryPoint>> function main(): void {
-$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$thisTestDir = $test_dir . '/' .basename(__FILE__, ".php") . ".directory";
+$thisTestDir = __SystemLib\hphp_test_tmppath('directory');
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

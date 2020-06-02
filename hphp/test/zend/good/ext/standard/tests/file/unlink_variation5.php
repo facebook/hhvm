@@ -5,10 +5,9 @@
 
 /* delete files with different file permission(0000 to 0777) */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 // temp file used
-$filename = "$file_path/unlink_variation5.tmp";
+$filename = __SystemLib\hphp_test_tmppath('unlink_variation5.tmp');
 
 echo "*** Testing unlink() on a file ***\n";
 

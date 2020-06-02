@@ -6,10 +6,10 @@
 
 /* Passing file names with different notations, using slashes, wild-card chars */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 
 echo "*** Testing fileinode() with different notations of file names ***\n";
-$dir_name = $file_path."/fileinode_variation3";
+$dir_name = __SystemLib\hphp_test_tmppath('fileinode_variation3');
 mkdir($dir_name);
 $file_handle = fopen($dir_name."/fileinode_variation3.tmp", "w");
 fclose($file_handle);
@@ -35,15 +35,13 @@ $count = 1;
 /* loop through to test each element in the above array */
 foreach($files_arr as $file) {
   echo "- Iteration $count -\n";
-  var_dump( fileinode( $file_path."/".$file ) );
+  var_dump( fileinode(__SystemLib\hphp_test_tmppath($file)) );
   clearstatcache();
   $count++;
 }
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$dir_name = $file_path."/fileinode_variation3";
+
 unlink($dir_name."/fileinode_variation3.tmp");
 rmdir($dir_name);
 }

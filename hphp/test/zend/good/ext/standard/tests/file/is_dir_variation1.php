@@ -6,10 +6,9 @@
 
 /* Testing is_dir() with base and sub dirs */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "-- Testing is_dir() with an empty dir --\n";
-$dirname = $file_path."/is_dir_variation1";
+$dirname = __SystemLib\hphp_test_tmppath('is_dir_variation1');
 mkdir($dirname);
 var_dump( is_dir($dirname) );
 clearstatcache();
@@ -21,9 +20,7 @@ var_dump( is_dir($subdirname) );
 var_dump( is_dir($dirname) );
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$dir_name = $file_path."/is_dir_variation1";
-rmdir($dir_name."/is_dir_variation1_sub");
-rmdir($dir_name);
+
+rmdir($subdirname);
+rmdir($dirname);
 }

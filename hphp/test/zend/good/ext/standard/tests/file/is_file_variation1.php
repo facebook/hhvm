@@ -7,10 +7,9 @@
 /* Testing is_file() with file containing data, truncating its size 
      and the file created by touch() */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 echo "-- Testing is_file() with file containing data --\n";
-$filename = $file_path."/is_file_variation1.tmp";
+$filename = __SystemLib\hphp_test_tmppath('is_file_variation1.tmp');
 $file_handle = fopen($filename, "w" );
 fwrite( $file_handle, "Hello, world....." ); // exptected true
 fclose($file_handle);
@@ -18,25 +17,25 @@ var_dump( is_file($filename) );
 clearstatcache();
 
 echo "\n-- Testing is_file() after truncating filesize to zero bytes --\n";
-$file_handle = fopen( $file_path."/is_file_variation1.tmp", "r");
+$file_handle = fopen($filename, "r");
 ftruncate($file_handle, 0);
 fclose($file_handle);
-var_dump( is_file($file_path."/is_file_variation1.tmp") ); // expected true
+var_dump( is_file($filename) ); // expected true
 clearstatcache();
-unlink($file_path."/is_file_variation1.tmp");
+unlink($filename);
 
 echo "\n-- Testing is_file() with an empty file --\n";
 /* created by fopen() */
-fclose( fopen($file_path."/is_file_variation1.tmp", "w") );
-var_dump( is_file($file_path."/is_file_variation1.tmp") );  //expected true
+fclose( fopen($filename, "w") );
+var_dump( is_file($filename) );  //expected true
 clearstatcache();
-unlink($file_path."/is_file_variation1.tmp");
+unlink($filename);
 
 /* created by touch() */
-touch($file_path."/is_file_variation1.tmp");
-var_dump( is_file($file_path."/is_file_variation1.tmp") ); // expected true
+touch($filename);
+var_dump( is_file($filename) ); // expected true
 clearstatcache();
-unlink($file_path."/is_file_variation1.tmp");
+unlink($filename);
 
 echo "\n*** Done ***";
 }

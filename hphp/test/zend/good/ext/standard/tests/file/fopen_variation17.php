@@ -43,8 +43,7 @@ function runtest() {
         rmdir($extraDir);
 }
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$thisTestDir = $file_path.'.'.basename(__FILE__, ".php") . ".dir";
+$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

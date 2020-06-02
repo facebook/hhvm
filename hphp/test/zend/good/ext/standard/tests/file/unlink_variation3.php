@@ -5,16 +5,15 @@
 
 /* Delete link files - soft and hard links */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 // temp file used
-$filename = "$file_path/unlink_variation3.tmp";
+$filename = __SystemLib\hphp_test_tmppath('unlink_variation3.tmp');
 
 echo "*** Testing unlink() on soft and hard links ***\n";
 // create temp file
 $fp = fopen($filename, "w");
 fclose($fp);
 // link name used here
-$linkname = "$file_path/unlink_variation3_link.tmp";
+$linkname = __SystemLib\hphp_test_tmppath('unlink_variation3_link.tmp');
 
 echo "-- Testing unlink() on soft link --\n";
 // create soft link

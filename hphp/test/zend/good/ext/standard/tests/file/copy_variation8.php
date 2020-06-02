@@ -9,20 +9,18 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing copy() function: copying links across different directories ***\n";
 
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-
-$base_dir = $file_path."/copy_variation8";
+$base_dir = __SystemLib\hphp_test_tmppath('copy_variation8');
 mkdir($base_dir);
 $sub_dir = $base_dir."/copy_variation8_sub";
 mkdir($sub_dir);
 $dirname_with_blank = $sub_dir."/copy variation6";
 mkdir($dirname_with_blank);
 
-$file = $file_path."/copy_variation8.tmp";
+$file = __SystemLib\hphp_test_tmppath('copy_variation8.tmp');
 fclose( fopen($file, "w") );
 
-$symlink = $file_path."/copy_variation8_symlink.tmp";
-$hardlink = $file_path."/copy_variation8_hardlink.tmp";
+$symlink = __SystemLib\hphp_test_tmppath('copy_variation8_symlink.tmp');
+$hardlink = __SystemLib\hphp_test_tmppath('copy_variation8_hardlink.tmp');
 
 symlink($file, $symlink);  //creating symlink
 link($file, $hardlink);  //creating hardlink

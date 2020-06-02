@@ -2,7 +2,7 @@
 
 /* creating directory */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$file_path = __SystemLib\hphp_test_tmproot();
 // rename dirs across directories
 echo "\n*** Testing rename() : renaming directory across directories ***\n";
 $src_dirs = varray [
@@ -39,7 +39,6 @@ foreach($src_dirs as $src_dir) {
 }
 
 echo "Done\n";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 rmdir($file_path."/rename_variation1_dir");
 }

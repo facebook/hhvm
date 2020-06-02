@@ -28,8 +28,7 @@ function writeFile($file) {
    readFile2($file);
 }
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$tmpDir = $file_path.'/fopenVar19.Dir';
+$tmpDir = __SystemLib\hphp_test_tmppath('fopenVar19.Dir');
 $realFilename = basename(__FILE__).'.real';
 $sortFilename = basename(__FILE__).'.soft';
 $hardFilename = basename(__FILE__).'.hard';

@@ -1,9 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-chdir($file_path);
-for ($i = 1; $i < 6; $i++) {
-    @unlink("./TEST{$i}");
-}
+chdir(__SystemLib\hphp_test_tmproot());
 
 echo "String Test: ";
 echo file_put_contents("TEST1", file_get_contents(__FILE__)) !== FALSE ? 'OK' : 'FAIL';

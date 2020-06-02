@@ -23,12 +23,11 @@ class object_temp {
 <<__EntryPoint>>
 function main(): void {
   // creating temp directory which will contain temp file and links created
-  $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-  $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1/test/home";
+  $dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation1/test/home');
   mkdir($dirname, 0777, true);
 
   // creating temp file; links are created to this file later on
-  $filename = "$file_path/symlink_link_linkinfo_is_link_variation1/symlink_link_linkinfo_is_link_variation1.tmp";
+  $filename = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation1/symlink_link_linkinfo_is_link_variation1.tmp');
   $fp = fopen($filename, "w");
   fclose($fp);
 
@@ -91,9 +90,8 @@ function main(): void {
   clearstatcache();
 
   echo "Done\n";
-  error_reporting(0);
-  $file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-  $dirname = "$file_path/symlink_link_linkinfo_is_link_variation1";
+
+  $dirname = __SystemLib\hphp_test_tmppath('symlink_link_linkinfo_is_link_variation1');
   unlink("$dirname/symlink_link_linkinfo_is_link_variation1.tmp");
   rmdir("$dirname/test/home");
   rmdir("$dirname/test");

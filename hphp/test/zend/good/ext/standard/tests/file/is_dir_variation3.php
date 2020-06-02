@@ -6,8 +6,8 @@
 
 /* Passing invalid arguments to is_dir() */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$dir_handle = opendir( $file_path );
+
+$dir_handle = opendir('/');
 
 echo "*** Testing is_dir() with Invalid arguments: expected bool(false) ***\n";
 $dirnames = varray[

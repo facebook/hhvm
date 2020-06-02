@@ -8,8 +8,7 @@
 require_once('fopen_include_path.inc');
 
 function runtest() {
-    $test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-    $tempDir = $test_dir.'/fopen_variation13.dir.tmp';
+    $tempDir = __SystemLib\hphp_test_tmppath('fopen_variation13.dir.tmp');
     $tmpfile = 'fopen_variation13.tmp';
     $absFile = $tempDir.'/'.$tmpfile;
 

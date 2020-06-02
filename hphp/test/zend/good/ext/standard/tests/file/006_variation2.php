@@ -12,10 +12,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
-$file_name = getenv('HPHP_TEST_TMPDIR')."/006_variation2.tmp.".mt_rand();
+$file_name = __SystemLib\hphp_test_tmppath('006_variation2.tmp');
 $file_handle = fopen($file_name, "w");
 try { fclose($file_handle); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-$dir_name = getenv('HPHP_TEST_TMPDIR')."/006_variation2_".mt_rand();
+$dir_name = __SystemLib\hphp_test_tmppath('006_variation2');
 mkdir($dir_name);
 
 echo "\n*** Testing fileperms(), chmod() with miscellaneous permissions ***\n";
@@ -60,9 +60,7 @@ foreach($perms_array as $permission) {
   $count++;
 }
 echo "*** Done ***\n";
-error_reporting(0);
-chmod(dirname(__FILE__)."/006_variation2.tmp", 0777);
-chmod(dirname(__FILE__)."/006_variation2", 0777);
-unlink(dirname(__FILE__)."/006_variation2.tmp");
-rmdir(dirname(__FILE__)."/006_variation2");
+
+unlink($file_name);
+rmdir($dir_name);
 }

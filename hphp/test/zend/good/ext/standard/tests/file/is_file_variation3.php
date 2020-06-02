@@ -6,8 +6,8 @@
 
 /* Testing is_file() with invalid arguments -int, float, bool, NULL, resource */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$file_handle = fopen($file_path."/is_file_variation3.tmp", "w");
+
+$file_handle = fopen(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'), "w");
 
 echo "*** Testing Invalid file types ***\n";
 $filenames = varray[
@@ -33,7 +33,6 @@ foreach( $filenames as $filename ) {
 fclose($file_handle);
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-unlink($file_path."/is_file_variation3.tmp");
+
+unlink(__SystemLib\hphp_test_tmppath('is_file_variation3.tmp'));
 }

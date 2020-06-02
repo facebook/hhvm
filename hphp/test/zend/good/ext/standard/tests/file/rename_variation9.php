@@ -4,13 +4,12 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "\n*** Testing rename() by giving stream context as third argument ***\n";
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
 
 $context = stream_context_create();
 
 // on directory
-$dir_name = "$file_path/rename_variation9.phpt_dir9";
-$new_dir_name = "$file_path/rename_variation9.phpt_dir9_new";
+$dir_name = __SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9');
+$new_dir_name = __SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9_new');
 
 mkdir($dir_name);
 
@@ -19,8 +18,8 @@ var_dump( file_exists($dir_name) );  // expecting false
 var_dump( file_exists($new_dir_name) ); // expecting true
 
 //on file
-$src_name = "$file_path/rename_variation9.tmp";
-$dest_name = "$file_path/rename_variation9_new.tmp";
+$src_name = __SystemLib\hphp_test_tmppath('rename_variation9.tmp');
+$dest_name = __SystemLib\hphp_test_tmppath('rename_variation9_new.tmp');
 
 // create the file
 $fp = fopen($src_name, "w");
@@ -32,8 +31,7 @@ var_dump( file_exists($src_name) );  // expecting false
 var_dump( file_exists($dest_name) );  // expecting true
 
 echo "Done\n";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-unlink($file_path."/rename_variation9_new.tmp");
-rmdir($file_path."/rename_variation9.phpt_dir9_new");
+
+unlink(__SystemLib\hphp_test_tmppath('rename_variation9_new.tmp'));
+rmdir(__SystemLib\hphp_test_tmppath('rename_variation9.phpt_dir9_new'));
 }

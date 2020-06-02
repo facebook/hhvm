@@ -2,8 +2,7 @@
 
 const PERMISSIONS_MASK = 0777;
 <<__EntryPoint>> function main(): void {
-$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$dirname = $test_dir . "/" . basename(__FILE__, ".php") . "testdir";
+$dirname = __SystemLib\hphp_test_tmppath('testdir');
 mkdir($dirname);
 
 for ($perms_to_set = 0777; $perms_to_set >= 0; $perms_to_set--) {

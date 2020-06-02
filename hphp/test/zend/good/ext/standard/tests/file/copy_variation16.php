@@ -8,8 +8,7 @@
      into different destination dir paths given in various notations */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing copy() function: copying data file across directories ***\n";
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$base_dir = $file_path."/copy_variation16";
+$base_dir = __SystemLib\hphp_test_tmppath('copy_variation16');
 mkdir($base_dir);
 
 $sub_dir = $base_dir."/copy_variation16_sub";
@@ -18,7 +17,7 @@ mkdir($sub_dir);
 $dirname_with_blank = $sub_dir."/copy variation16";
 mkdir($dirname_with_blank);
 
-$src_file_name = $file_path."/copy_variation16.tmp";
+$src_file_name = __SystemLib\hphp_test_tmppath('copy_variation16.tmp');
 $file_handle = fopen($src_file_name, "w");
 fwrite($file_handle, str_repeat("Hello world, this is 2007 year ...\n", 100));
 fclose($file_handle);

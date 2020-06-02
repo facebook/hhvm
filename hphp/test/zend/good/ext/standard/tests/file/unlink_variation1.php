@@ -8,10 +8,10 @@
 */
 
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 
 // temp dir name used here
-$dirname = "$file_path/unlink_variation1";
+$dirname = __SystemLib\hphp_test_tmppath('unlink_variation1');
 // temp filename used here
 $filename = "$dirname/unlink_variation1.tmp";
 

@@ -5,7 +5,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 
 // zero argument
 echo "-- Testing fflush(): with zero argument --\n";
@@ -14,7 +14,7 @@ try { var_dump( fflush() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->g
 // more than expected no. of args
 echo "-- Testing fflush(): with more than expected number of arguments --\n";
 
-$filename = "$file_path/fflush_error.tmp";
+$filename = __SystemLib\hphp_test_tmppath('fflush_error.tmp');
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
@@ -39,7 +39,6 @@ for($loop_counter = 1; $loop_counter <= count($invalid_args); $loop_counter++) {
   try { var_dump( fflush($invalid_args[$loop_counter - 1]) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 }
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-unlink("$file_path/fflush_error.tmp");
+
+unlink($filename);
 }

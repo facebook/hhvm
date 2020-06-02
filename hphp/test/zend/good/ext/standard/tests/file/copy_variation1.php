@@ -9,8 +9,7 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Test copy() function: destination file names containing numerics/strings ***\n";
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$src_file_name = $file_path."/copy_variation1.tmp";
+$src_file_name = __SystemLib\hphp_test_tmppath('copy_variation1.tmp');
 $file_handle = fopen($src_file_name, "w");
 fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
 fclose($file_handle);
@@ -39,7 +38,7 @@ $count = 1;
 foreach($dest_files as $dest_file) {
   echo "\n-- Iteration $count --\n";
 
-  $dest_file_name = "$file_path/$dest_file";
+  $dest_file_name = __SystemLib\hphp_test_tmppath($dest_file);
 
   echo "Copy operation => ";
   var_dump( copy($src_file_name, $dest_file_name) );
@@ -65,6 +64,6 @@ foreach($dest_files as $dest_file) {
 }
 
 echo "*** Done ***\n";
-error_reporting(0);
-unlink(dirname(__FILE__)."/copy_variation1.tmp");
+
+unlink(__SystemLib\hphp_test_tmppath('copy_variation1.tmp'));
 }

@@ -6,24 +6,27 @@
 /* Creating soft and hard links to a file and applying fileinode() on links */
 <<__EntryPoint>> function main(): void {
 
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-fclose( fopen($file_path."/fileinode_variation1.tmp", "w") );
+fclose( fopen(__SystemLib\hphp_test_tmppath('fileinode_variation1.tmp'), "w") );
 
 echo "*** Testing fileinode() with links ***\n";
 /* With symlink */
-symlink($file_path."/fileinode_variation1.tmp", $file_path."/fileinode_variation1_symlink.tmp");
-var_dump( fileinode($file_path."/fileinode_variation1_symlink.tmp") ); //expected true
+symlink(
+  __SystemLib\hphp_test_tmppath('fileinode_variation1.tmp'),
+  __SystemLib\hphp_test_tmppath('fileinode_variation1_symlink.tmp')
+);
+var_dump( fileinode(__SystemLib\hphp_test_tmppath('fileinode_variation1_symlink.tmp')) ); //expected true
 clearstatcache();
 
 /* With hardlink */
-link($file_path."/fileinode_variation1.tmp", $file_path."/fileinode_variation1_link.tmp");
-var_dump( fileinode($file_path."/fileinode_variation1_link.tmp") );  // expected: true
+link(
+  __SystemLib\hphp_test_tmppath('fileinode_variation1.tmp'),
+  __SystemLib\hphp_test_tmppath('fileinode_variation1_link.tmp'));
+var_dump( fileinode(__SystemLib\hphp_test_tmppath('fileinode_variation1_link.tmp')) );  // expected: true
 clearstatcache();
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-unlink($file_path."/fileinode_variation1_symlink.tmp");
-unlink($file_path."/fileinode_variation1_link.tmp");
-unlink($file_path."/fileinode_variation1.tmp");
+
+unlink(__SystemLib\hphp_test_tmppath('fileinode_variation1_symlink.tmp'));
+unlink(__SystemLib\hphp_test_tmppath('fileinode_variation1_link.tmp'));
+unlink(__SystemLib\hphp_test_tmppath('fileinode_variation1.tmp'));
 }

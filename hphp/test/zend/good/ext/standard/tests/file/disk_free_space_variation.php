@@ -6,7 +6,7 @@
  *               filesystem or disk partition
  */
 <<__EntryPoint>> function main(): void {
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+$file_path = __SystemLib\hphp_test_tmproot();
 
 echo "*** Testing with a directory ***\n";
 var_dump( disk_free_space($file_path."/..") ); 
@@ -51,7 +51,6 @@ foreach($dirs_arr as $dir1) {
 }
 
 echo"\n--- Done ---";
-error_reporting(0);
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
+
 rmdir($file_path."/disk_free_space");
 }

@@ -6,12 +6,11 @@
 */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing filetype() with various types ***\n";
-$file_path = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$file1 = $file_path."/filetype1_variation.tmp";
-$file2 = $file_path."/filetype2_variation.tmp";
-$file3 = $file_path."/filetype3_variation.tmp";
-$link1 = $file_path."/filetype1_variation_link.tmp";
-$link2 = $file_path."/filetype2_variation_link.tmp";
+$file1 = __SystemLib\hphp_test_tmppath('filetype1_variation.tmp');
+$file2 = __SystemLib\hphp_test_tmppath('filetype2_variation.tmp');
+$file3 = __SystemLib\hphp_test_tmppath('filetype3_variation.tmp');
+$link1 = __SystemLib\hphp_test_tmppath('filetype1_variation_link.tmp');
+$link2 = __SystemLib\hphp_test_tmppath('filetype2_variation_link.tmp');
 
 fclose( fopen($file1, "w") );
 fclose( fopen($file2, "w") );
@@ -35,9 +34,9 @@ unlink($file1);
 unlink($file2);
 
 echo "-- Checking with directory --\n";
-mkdir("$file_path/filetype_variation");
-print( filetype("$file_path/filetype_variation") )."\n";
-rmdir( "$file_path/filetype_variation" );
+mkdir(__SystemLib\hphp_test_tmppath('filetype_variation'));
+print( filetype(__SystemLib\hphp_test_tmppath('filetype_variation')) )."\n";
+rmdir(__SystemLib\hphp_test_tmppath('filetype_variation'));
 
 echo "-- Checking with fifo --\n";
 posix_mkfifo( $file3, 0755);

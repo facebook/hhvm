@@ -26,8 +26,7 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_put_contents() : variation ***\n";
 
-$test_dir = getenv('HPHP_TEST_TMPDIR') ?? dirname(__FILE__);
-$thisTestDir = $test_dir.'/'.basename(__FILE__, ".php") . ".dir";
+$thisTestDir = __SystemLib\hphp_test_tmppath('dir');
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

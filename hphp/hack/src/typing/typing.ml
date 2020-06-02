@@ -5891,7 +5891,7 @@ and static_class_id
       | Some class_ ->
         let (env, ty, tal) =
           List.map ~f:snd tal
-          |> Phase.resolve_type_arguments_and_check_constraints
+          |> Phase.localize_targs_and_check_constraints
                ~exact
                ~check_constraints
                ~def_pos:(Cls.pos class_)

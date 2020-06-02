@@ -103,7 +103,7 @@ val decl : decl_ty -> phase_ty
 
 val locl : locl_ty -> phase_ty
 
-val resolve_type_arguments_and_check_constraints :
+val localize_targs_and_check_constraints :
   exact:exact ->
   check_constraints:bool ->
   def_pos:Pos.t ->

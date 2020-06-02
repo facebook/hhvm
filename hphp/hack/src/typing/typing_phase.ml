@@ -475,7 +475,8 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
  * 2) When the type arguments are explicitly specified, in which case we instantiate
  * the type parameters to the provided types.
  *)
-and localize_ft ?instantiation ~ety_env ~def_pos env ft =
+and localize_ft
+    ?(instantiation : method_instantiation option) ~ety_env ~def_pos env ft =
   (* set reactivity to Nonreactive to prevent occasional setting
      of condition types when expanding type constants *)
   let saved_r = env_reactivity env in
@@ -526,10 +527,9 @@ and localize_ft ?instantiation ~ety_env ~def_pos env ft =
           let (env, ty) = localize_cstr_ty ~ety_env env ty t.tp_name in
           let name_str = snd t.tp_name in
           (* In order to access type constants on generics on where clauses,
-        we need to add the constraints from the type parameters into the
-        environment before localizing the where clauses with them. Temporarily
-        add them to the environment here, and reset the environment later.
-      *)
+             we need to add the constraints from the type parameters into the
+             environment before localizing the where clauses with them. Temporarily
+             add them to the environment here, and reset the environment later. *)
           let env =
             match ck with
             | Ast_defs.Constraint_as -> Env.add_upper_bound env name_str ty
@@ -694,6 +694,14 @@ and localize_hint ~ety_env env hint =
   let hint_ty = Decl_hint.hint env.decl_env hint in
   localize ~ety_env env hint_ty
 
+(**
+ * If a type annotation for a class is missing type arguments, create a type variable
+ * for them and apply constraints.
+ *
+ * This is not used for local inference on constructors, but rather for global inference
+ * for partial files where function signatures are allowed to contain types ommitting type
+ * arguments.
+ *)
 and localize_missing_tparams_class env r sid class_ =
   let use_pos = Reason.to_pos r in
   let use_name = Utils.strip_ns (snd sid) in
@@ -733,9 +741,7 @@ and localize_missing_tparams_class env r sid class_ =
   in
   (env, tyl)
 
-(* Do all of the above, and also check any constraints associated with the type parameters.
- *)
-and resolve_type_arguments_and_check_constraints
+and localize_targs_and_check_constraints
     ~exact
     ~check_constraints
     ~def_pos

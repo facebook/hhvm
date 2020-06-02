@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
-
 use hhbc_id_rust::{class, Id};
 use hhbc_string_utils_rust as string_utils;
 use instruction_sequence_rust::{unrecoverable, Result};

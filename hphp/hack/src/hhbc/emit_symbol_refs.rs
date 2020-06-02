@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
-
 use env::emitter::Emitter;
 use hhas_symbol_refs_rust::*;
 use hhbc_id_rust::{class, function, r#const, Id};

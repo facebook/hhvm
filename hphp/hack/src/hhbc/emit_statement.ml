@@ -91,19 +91,6 @@ let emit_markup env s ~check_for_hashbang =
   in
   markup
 
-let get_level p op e =
-  match A.get_break_continue_level e with
-  | A.Level_ok (Some i) -> i
-  | A.Level_ok None -> 1
-  | A.Level_non_positive ->
-    Emit_fatal.raise_fatal_parse
-      p
-      ("'" ^ op ^ "' operator accepts only positive numbers")
-  | A.Level_non_literal ->
-    Emit_fatal.raise_fatal_parse
-      p
-      ("'" ^ op ^ "' with non-constant operand is not supported")
-
 let rec set_bytes_kind name =
   let re =
     Str.regexp_case_fold
@@ -262,22 +249,6 @@ and emit_continue env pos =
     env
     pos
     1
-
-and emit_temp_break env pos level =
-  TFR.emit_break_or_continue
-    ~is_break:true
-    ~in_finally_epilogue:false
-    env
-    pos
-    level
-
-and emit_temp_continue env pos level =
-  TFR.emit_break_or_continue
-    ~is_break:false
-    ~in_finally_epilogue:false
-    env
-    pos
-    level
 
 and get_instrs r = r.Emit_expression.instrs
 

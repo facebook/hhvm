@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
-
 use ast_scope_rust::Scope;
 use emit_attribute_rust as emit_attribute;
 use emit_expression_rust as emit_expression;
@@ -212,6 +210,7 @@ pub fn emit_param_default_value_setter(
 
 struct ResolverVisitor<'a>(PhantomData<&'a ()>);
 
+#[allow(dead_code)]
 struct Ctx<'a> {
     emitter: &'a mut Emitter,
     scope: &'a Scope<'a>,
@@ -226,7 +225,7 @@ impl<'ast, 'a> aast_visitor::Visitor<'ast> for ResolverVisitor<'a> {
 
     fn visit_expr(&mut self, c: &mut Ctx<'a>, p: &a::Expr) -> std::result::Result<(), ()> {
         p.recurse(c, self.object())
-        // TODO(implement on_CIexpr)
+        // TODO(hrust) implement on_CIexpr & remove dead_code on struct Ctx
     }
 }
 

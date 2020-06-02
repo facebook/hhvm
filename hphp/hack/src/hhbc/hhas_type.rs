@@ -5,8 +5,7 @@
 
 extern crate bitflags;
 
-/// Type info has additional optional user type *)
-#[allow(dead_code)]
+/// Type info has additional optional user type
 #[derive(Clone, Debug)]
 pub struct Info {
     pub user_type: Option<String>,

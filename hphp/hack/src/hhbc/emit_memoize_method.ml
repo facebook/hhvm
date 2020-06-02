@@ -16,10 +16,6 @@ module T = Aast
 
 (* Precomputed information required for generation of memoized methods *)
 type memoize_info = {
-  (* Prefix on method and property names *)
-  memoize_class_prefix: string;
-  (* Number of instance methods with <<__Memoize>> *)
-  memoize_instance_method_count: int;
   (* True if the enclosing class is a trait *)
   memoize_is_trait: bool;
   (* Enclosing class ID *)
@@ -53,22 +49,7 @@ let make_info ast_class class_id ast_methods =
   in
   List.iter ast_methods check_method;
   let is_trait = Ast_defs.is_c_trait ast_class.T.c_kind in
-  let class_prefix =
-    if is_trait then
-      "$" ^ String.lowercase (Hhbc_id.Class.to_raw_string class_id)
-    else
-      ""
-  in
-  let instance_count =
-    List.count ast_methods ~f:(fun ast_method ->
-        is_memoize ast_method && not ast_method.T.m_static)
-  in
-  {
-    memoize_is_trait = is_trait;
-    memoize_class_prefix = class_prefix;
-    memoize_instance_method_count = instance_count;
-    memoize_class_id = class_id;
-  }
+  { memoize_is_trait = is_trait; memoize_class_id = class_id }
 
 let call_cls_method info fcall_args method_id with_lsb =
   let method_id = Hhbc_id.Method.add_suffix method_id memoize_suffix in

@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
-
 use emit_expression_rust::{emit_reified_arg, is_reified_tparam};
 use env::{emitter::Emitter, Env};
 use instruction_sequence_rust::*;

@@ -3,8 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(dead_code)]
-
 use crate::emit_statement::{LazyState, Level};
 use crate::reified_generics_helpers as reified;
 

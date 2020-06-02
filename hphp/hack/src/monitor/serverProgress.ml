@@ -56,11 +56,14 @@ let send_progress_to_monitor ?(include_in_logs = true) fmt =
   in
   Printf.ksprintf f fmt
 
+(* The message will look roughly like this:
+  <operation> <done_count>/<total_count> <unit> <percent done> <extra>*)
 let make_percentage_progress_message
     ~(operation : string)
     ~(done_count : int)
     ~(total_count : int)
-    ~(unit : string) : string =
+    ~(unit : string)
+    ~(extra : string option) : string =
   let unit =
     if unit = "" then
       unit
@@ -68,20 +71,31 @@ let make_percentage_progress_message
       unit ^ " "
   in
   let percent = 100.0 *. float_of_int done_count /. float_of_int total_count in
-  Printf.sprintf
-    "%s %d/%d %s(%.1f%%)"
-    operation
-    done_count
-    total_count
-    unit
-    percent
+  let main_message =
+    Printf.sprintf
+      "%s %d/%d %s(%.1f%%)"
+      operation
+      done_count
+      total_count
+      unit
+      percent
+  in
+  match extra with
+  | Some extra -> main_message ^ " " ^ extra
+  | None -> main_message
 
 let send_percentage_progress_to_monitor
     ~(operation : string)
     ~(done_count : int)
     ~(total_count : int)
-    ~(unit : string) : unit =
+    ~(unit : string)
+    ~(extra : string option) : unit =
   send_progress_to_monitor
     ~include_in_logs:false
     "%s"
-    (make_percentage_progress_message ~operation ~done_count ~total_count ~unit)
+    (make_percentage_progress_message
+       ~operation
+       ~done_count
+       ~total_count
+       ~unit
+       ~extra)

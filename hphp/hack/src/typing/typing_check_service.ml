@@ -559,11 +559,15 @@ let merge
   let completed_check_count = completed_check_count - deferred_check_count in
 
   files_checked_count := !files_checked_count + completed_check_count;
+  let delegate_progress =
+    Typing_service_delegate.get_progress !delegate_state
+  in
   ServerProgress.send_percentage_progress_to_monitor
     ~operation:"typechecking"
     ~done_count:!files_checked_count
     ~total_count:files_initial_count
-    ~unit:"files";
+    ~unit:"files"
+    ~extra:delegate_progress;
   Errors.merge errors acc
 
 let next
@@ -685,11 +689,16 @@ let process_in_parallel
   let files_in_progress = Hash_set.Poly.create () in
   let files_processed_count = ref 0 in
   let files_initial_count = List.length fnl in
+  let delegate_progress =
+    Typing_service_delegate.get_progress !delegate_state
+  in
   ServerProgress.send_percentage_progress_to_monitor
     ~operation:"typechecking"
     ~done_count:0
     ~total_count:files_initial_count
-    ~unit:"files";
+    ~unit:"files"
+    ~extra:delegate_progress;
+
   let next = next workers delegate_state files_to_process files_in_progress in
   let should_prefetch_deferred_files =
     Vfs.is_vfs ()

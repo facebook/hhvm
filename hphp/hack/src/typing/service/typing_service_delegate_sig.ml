@@ -41,4 +41,7 @@ module type Delegate_sig = sig
   val steal : state -> int -> file_computation list * state
 
   val add_telemetry : state -> Telemetry.t -> Telemetry.t
+
+  (* Get delegate progress message *)
+  val get_progress : state -> string option
 end

@@ -17,9 +17,6 @@ let make_local_server_api
     let send_progress (message : string) : unit =
       ServerProgress.send_progress_to_monitor "%s" message
 
-    let send_percentage_progress =
-      ServerProgress.send_percentage_progress_to_monitor
-
     let update_state ~(state_filename : string) : unit =
       let start_t = Unix.gettimeofday () in
       let edges =

@@ -50,3 +50,7 @@ let steal state n =
 let add_telemetry state telemetry =
   ignore state;
   telemetry
+
+let get_progress state =
+  ignore state;
+  None

@@ -107,9 +107,9 @@ fn remove_awaitable(h: aast::Hint) -> aast::Hint {
         // For @Awaitable<T>, the soft type hint is moved to the inner type, i.e @T
         Hint_::Hsoft(h) => Hint(pos, Box::new(Hint_::Hsoft(remove_awaitable(h)))),
         // For ~Awaitable<T>, the like-type  hint is moved to the inner type, i.e ~T
-        Hint_::Hlike(h) => Hint(pos, Box::new(Hint_::Hsoft(remove_awaitable(h)))),
+        Hint_::Hlike(h) => Hint(pos, Box::new(Hint_::Hlike(remove_awaitable(h)))),
         // For ?Awaitable<T>, the optional is dropped
-        Hint_::Hoption(h) => Hint(pos, Box::new(Hint_::Hlike(remove_awaitable(h)))),
+        Hint_::Hoption(h) => remove_awaitable(h),
         Hint_::Htuple(_)
         | Hint_::Hunion(_)
         | Hint_::Hintersection(_)

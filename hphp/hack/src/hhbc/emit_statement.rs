@@ -613,24 +613,25 @@ fn emit_switch(
                 let mut res = rest
                     .iter()
                     .map(|case| emit_case(e, env, case))
-                    .collect::<Vec<_>>();
+                    .into_iter()
+                    .collect::<Result<Vec<_>>>()?;
 
                 if has_default {
                     // If there is a default, emit the last case as usual
-                    res.push(emit_case(e, env, last))
+                    res.push(emit_case(e, env, last)?)
                 } else {
                     // Otherwise, emit the last case with an added break
                     match last {
                         tast::Case::Case(expr, block) => {
                             let l = e.label_gen_mut().next_regular();
-                            res.push(Ok((
+                            res.push((
                                 InstrSeq::gather(vec![
                                     instr::label(l.clone()),
                                     emit_block(env, e, block)?,
                                     emit_break(e, env, &Pos::make_none()),
                                 ]),
                                 (Some((expr, l)), None),
-                            )))
+                            ))
                         }
                         tast::Case::Default(_, _) => {
                             return Err(Unrecoverable(
@@ -640,19 +641,16 @@ fn emit_switch(
                     };
                     // ...and emit warning/exception for missing default
                     let l = e.label_gen_mut().next_regular();
-                    res.push(Ok((
+                    res.push((
                         InstrSeq::gather(vec![
                             instr::label(l.clone()),
                             emit_pos_then(pos, instr::throw_non_exhaustive_switch()),
                         ]),
                         (None, Some(l)),
-                    )))
+                    ))
                 };
                 let (case_body_instrs, case_exprs_and_default_labels): (Vec<InstrSeq>, Vec<_>) =
-                    res.into_iter()
-                        .collect::<Result<Vec<_>>>()?
-                        .into_iter()
-                        .unzip();
+                    res.into_iter().unzip();
                 let (case_exprs, default_labels): (Vec<Option<(&tast::Expr, Label)>>, Vec<_>) =
                     case_exprs_and_default_labels.into_iter().unzip();
                 let case_expr_instrs = case_exprs

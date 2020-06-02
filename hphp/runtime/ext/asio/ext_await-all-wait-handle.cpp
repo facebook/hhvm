@@ -171,6 +171,10 @@ ObjectData* c_AwaitAllWaitHandle::fromFrameNoCheck(
   return result.detach();
 }
 
+Object c_AwaitAllWaitHandle::fromArrLike(const ArrayData* ad) {
+  return c_AwaitAllWaitHandle::Create([=](auto fn) { IterateV(ad, fn); });
+}
+
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                           const Array& dependencies) {
   auto ad = dependencies.get();
@@ -211,9 +215,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
     case ArrayData::kBespokeArrayKind:
     case ArrayData::kBespokeVArrayKind:
     case ArrayData::kBespokeDArrayKind:
-      return c_AwaitAllWaitHandle::Create([=](auto fn) {
-        IterateV(MixedArray::asMixed(ad), fn);
-      });
+      return c_AwaitAllWaitHandle::fromArrLike(ad);
 
     case ArrayData::kNumKinds:
       not_reached();
@@ -226,8 +228,9 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isVecKind());
   if (!ad->size()) return Object{returnEmpty()};
+  if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
+  assertx(ad->isVecKind());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     PackedArray::IterateV(ad, fn);
   });
@@ -237,8 +240,9 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
                           const Array& dependencies) {
   auto ad = dependencies.get();
   assertx(ad);
-  assertx(ad->isDictKind());
   if (!ad->size()) return Object{returnEmpty()};
+  if (!ad->isVanilla()) return c_AwaitAllWaitHandle::fromArrLike(ad);
+  assertx(ad->isDictKind());
   return c_AwaitAllWaitHandle::Create([=](auto fn) {
     MixedArray::IterateV(MixedArray::asMixed(ad), fn);
   });

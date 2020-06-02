@@ -117,6 +117,9 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   void markAsFailed(const Object& exception);
   void setState(uint8_t state) { setKindState(Kind::AwaitAll, state); }
 
+  // Construct an AAWH from an array-like without making layout assumptions.
+  static Object fromArrLike(const ArrayData* ad);
+
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
                                    const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,

@@ -211,8 +211,10 @@ private:
   APCArray& operator=(const APCArray&) = delete;
 
 private:
+  // NOTE: This function takes the ArrayData* by ref because it may escalate
+  // it before calling a templated helper. These helpers use the new value.
   template <typename A, typename B, typename C>
-  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, C);
+  static APCHandle::Pair MakeSharedImpl(ArrayData**, APCHandleLevel, A, B, C);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
                                   bool unserializeObj);

@@ -1,6 +1,7 @@
 
 (executable
   (name hh_oxidize)
+  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
   (modules
     configuration
     convert_longident

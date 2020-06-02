@@ -30,6 +30,7 @@
 
 (executable
   (name runner)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules
     runner
     test_added_parent

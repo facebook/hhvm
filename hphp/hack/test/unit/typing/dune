@@ -1,6 +1,7 @@
 (test
   (name typeSimplifierTest)
   (flags (:standard -w @a-4-27-44-48))
+  (link_flags (:standard (:include ../../../src/dune_config/ld-opts.sexp)))
   (libraries
     collections
     core_kernel

@@ -58,6 +58,21 @@ HACK_OPAM_SWITCH="${HACK_OCAML_VERSION}"
 HACK_OPAM_DEFAULT_NAME="hack-switch"
 HACK_OPAM_NAME=${HACK_OPAM_NAME:-$HACK_OPAM_DEFAULT_NAME}
 SKIP_MINI_REPO=${SKIP_MINI_REPO:-0}
+OCAML_PATCH=${OCAML_PATCH:-""}
+
+# building the right compiler name, depending on the version.
+# It might be ocaml-base-compiler.VERSION
+# or ocaml-variants.VERSION+OPTION
+OCAML_COMPILER_NAME="ocaml"
+OCAML_BASE_NAME="ocaml"
+
+if [[ "$HACK_OCAML_VERSION" == *"+"* ]]; then
+  OCAML_BASE_NAME="$OCAML_BASE_NAME-variants"
+  OCAML_COMPILER_NAME="$OCAML_BASE_NAME.$HACK_OCAML_VERSION"
+else 
+  OCAML_BASE_NAME="$OCAML_BASE_NAME-base-compiler"
+  OCAML_COMPILER_NAME="$OCAML_BASE_NAME.$HACK_OCAML_VERSION"
+fi
 
 if [[ "${SKIP_MINI_REPO}" -eq 1 ]]; then
   echo "SKIP_MINI_REPO is set."
@@ -76,6 +91,24 @@ if [[ -f "${MINI_REPO_FETCH_SCRIPT}" && "${SKIP_MINI_REPO}" -eq 0 ]]; then
   rm -rf "$MINI_REPO_DIR" ||:
   tar xzf "$MINI_REPO_TARBALL" -C "$SOURCE_ROOT/facebook"
   opam init --disable-sandboxing --reinit offline_clone "$MINI_REPO_DIR" --no-setup --bare
+
+  if [ -n "$OCAML_PATCH" ]; then
+    # Patching ocaml base compiler so we can pass it CFLAGS/LDFLAGS
+    # The goal is to make it use the right glibc, not the system one
+    opam switch create "$HACK_OPAM_NAME" --empty
+    pushd "$OPAMROOT/repo/offline_clone" || exit 1
+    mkdir -p base-compiler-source
+    cd base-compiler-source
+    opam source "$OCAML_COMPILER_NAME"
+    cd "$OCAML_COMPILER_NAME"
+    patchname="$OCAML_COMPILER_NAME.patch"
+    cp "$OCAML_PATCH" "$patchname"
+    patch < "$patchname"
+
+    opam pin "$OCAML_COMPILER_NAME" .
+    popd  || exit 1
+    opam switch set-base "$OCAML_BASE_NAME"
+  fi
 else
   opam init --disable-sandboxing --reinit --no-setup --bare
 fi

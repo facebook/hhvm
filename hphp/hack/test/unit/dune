@@ -7,6 +7,7 @@
 (executable
   (name server_tests)
   (modules server_tests)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (libraries 
     asserter
     decl

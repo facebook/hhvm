@@ -1,6 +1,7 @@
 (executable
   (name hh_fanout)
   (ocamlc_flags (:standard -custom))
+  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
   (libraries
     batch_init
     client_ide_service

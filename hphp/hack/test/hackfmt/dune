@@ -1,5 +1,6 @@
 (executable
   (name hackfmt_range_unit_test)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules hackfmt_range_unit_test)
   (libraries
     default_injector_config
@@ -13,6 +14,7 @@
 
 (executable
   (name hackfmt_node_unit_test)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules hackfmt_node_unit_test)
   (libraries
     default_injector_config

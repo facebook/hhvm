@@ -17,6 +17,7 @@
 (executable
   (name watcher_bin)
   (modules watcher_bin)
+  (link_flags (:standard (:include ../dune_config/ld-opts.sexp)))
   (libraries
     default_injector_config
     watchman_config

@@ -1,5 +1,6 @@
 (executable
   (name test_method_override)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_method_override)
   (libraries
     integration_test_base))
@@ -11,6 +12,7 @@
 
 (executable
   (name test_inconsistent_state)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_inconsistent_state)
   (libraries
     integration_test_base))
@@ -22,6 +24,7 @@
 
 (executable
   (name test_enum_exhaustiveness)
+  (link_flags (:standard (:include ../../src/dune_config/ld-opts.sexp)))
   (modules test_enum_exhaustiveness)
   (libraries
     integration_test_base))

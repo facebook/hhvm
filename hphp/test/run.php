@@ -1445,7 +1445,7 @@ class Status {
   public static function createTestTmpDir(string $test): string {
     $test_temp_dir = self::getTestTmpPath($test, 'tmpdir');
     @mkdir($test_temp_dir, 0777, true);
-    return $test_temp_dir . '/';
+    return $test_temp_dir;
   }
 
   public static function writeDiff(string $test, string $diff): void {
@@ -3076,7 +3076,7 @@ function start_servers($options, $configs) {
     $prelude = <<<'EOT'
 <?hh
 <<__EntryPoint>> function UNIQUE_NAME_I_DONT_EXIST_IN_ANY_TEST(): void {
-  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}.tmpdir/");
+  putenv("HPHP_TEST_TMPDIR=BASEDIR{$_SERVER['SCRIPT_NAME']}.tmpdir");
 }
 EOT;
     file_put_contents(

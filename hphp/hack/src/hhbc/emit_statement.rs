@@ -438,29 +438,27 @@ fn emit_using(e: &mut Emitter, env: &mut Env, pos: &Pos, using: &tast::UsingStmt
         ),
         _ => e.local_scope(|e| {
             let (local, preamble) = match &(using.expr).1 {
-                tast::Expr_::Binop(x) if x.0.is_eq() && (x.1).1.is_lvar() => {
-                    match (x.1).1.as_lvar() {
-                        Some(tast::Lid(_, id)) => (
-                            local::Type::Named(local_id::get_name(&id).into()),
+                tast::Expr_::Binop(x) => match (&x.0, (x.1).1.as_lvar()) {
+                    (ast_defs::Bop::Eq(None), Some(tast::Lid(_, id))) => (
+                        local::Type::Named(local_id::get_name(&id).into()),
+                        InstrSeq::gather(vec![
+                            emit_expr::emit_expr(e, env, &using.expr)?,
+                            emit_pos(&block_pos),
+                            instr::popc(),
+                        ]),
+                    ),
+                    _ => {
+                        let l = e.local_gen_mut().get_unnamed();
+                        (
+                            l.clone(),
                             InstrSeq::gather(vec![
                                 emit_expr::emit_expr(e, env, &using.expr)?,
-                                emit_pos(&block_pos),
+                                instr::setl(l),
                                 instr::popc(),
                             ]),
-                        ),
-                        None => {
-                            let l = e.local_gen_mut().get_unnamed();
-                            (
-                                l.clone(),
-                                InstrSeq::gather(vec![
-                                    emit_expr::emit_expr(e, env, &using.expr)?,
-                                    instr::setl(l),
-                                    instr::popc(),
-                                ]),
-                            )
-                        }
+                        )
                     }
-                }
+                },
                 tast::Expr_::Lvar(lid) => (
                     local::Type::Named(local_id::get_name(&lid.1).into()),
                     InstrSeq::gather(vec![

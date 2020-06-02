@@ -243,23 +243,18 @@ pub mod types {
 
 /* Integers are represented as strings */
 pub mod integer {
-    pub fn to_decimal(s: &str) -> Result<String, std::num::ParseIntError> {
+    pub fn to_decimal(s: &str) -> Option<String> {
         /* Don't accidentally convert 0 to 0o */
-        let num = if s.len() > 1 && s.as_bytes()[0] == b'0' {
-            match s.as_bytes()[1] {
-                /* Binary */
-                b'b' | b'B' => i64::from_str_radix(&s[2..], 2),
-                /* Hex */
-                b'x' | b'X' => i64::from_str_radix(&s[2..], 16),
-                /* Octal */
-                _ => i64::from_str_radix(s, 8),
-            }
+        let r = if s.len() > 1
+            && s.as_bytes()[0] == b'0'
+            && s.as_bytes()[1] >= b'0'
+            && s.as_bytes()[1] <= b'9'
+        {
+            ocaml_helper::int_of_string_wrap(format!("0o{}", &s[1..]).as_bytes())
         } else {
-            i64::from_str_radix(s, 10)
-        }
-        .map(|n| n.to_string());
-
-        num
+            ocaml_helper::int_of_string_wrap(s.as_bytes())
+        };
+        r.map(|n| n.to_string())
     }
 }
 
@@ -690,69 +685,69 @@ mod string_utils_tests {
 
             #[test]
             fn decimal_zero() {
-                assert_eq!(to_decimal("0"), Ok("0".to_string()));
+                assert_eq!(to_decimal("0"), Some("0".to_string()));
             }
 
             #[test]
             fn octal_zero() {
-                assert_eq!(to_decimal("00"), Ok("0".to_string()));
+                assert_eq!(to_decimal("00"), Some("0".to_string()));
             }
 
             #[test]
             fn binary_zero_lowercase() {
-                assert_eq!(to_decimal("0b0"), Ok("0".to_string()));
+                assert_eq!(to_decimal("0b0"), Some("0".to_string()));
             }
 
             #[test]
             fn binary_zero_uppercase() {
-                assert_eq!(to_decimal("0B0"), Ok("0".to_string()));
+                assert_eq!(to_decimal("0B0"), Some("0".to_string()));
             }
 
             #[test]
             fn hex_zero_lowercase() {
-                assert_eq!(to_decimal("0x0"), Ok("0".to_string()));
+                assert_eq!(to_decimal("0x0"), Some("0".to_string()));
             }
 
             #[test]
             fn hex_zero_uppercase() {
-                assert_eq!(to_decimal("0X0"), Ok("0".to_string()));
+                assert_eq!(to_decimal("0X0"), Some("0".to_string()));
             }
 
             #[test]
             fn decimal_random_value() {
-                assert_eq!(to_decimal("1245"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("1245"), Some("1245".to_string()));
             }
 
             #[test]
             fn octal_random_value() {
-                assert_eq!(to_decimal("02335"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("02335"), Some("1245".to_string()));
             }
 
             #[test]
             fn binary_random_value_lowercase() {
-                assert_eq!(to_decimal("0b10011011101"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("0b10011011101"), Some("1245".to_string()));
             }
 
             #[test]
             fn binary_random_value_uppercase() {
-                assert_eq!(to_decimal("0B10011011101"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("0B10011011101"), Some("1245".to_string()));
             }
 
             #[test]
             fn hex_random_value_lowercase() {
-                assert_eq!(to_decimal("0x4DD"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("0x4DD"), Some("1245".to_string()));
             }
 
             #[test]
             fn hex_random_value_uppercase() {
-                assert_eq!(to_decimal("0X4DD"), Ok("1245".to_string()));
+                assert_eq!(to_decimal("0X4DD"), Some("1245".to_string()));
             }
 
             #[test]
             fn decimal_max_value() {
                 assert_eq!(
                     to_decimal("9223372036854775807"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
@@ -760,7 +755,7 @@ mod string_utils_tests {
             fn octal_max_value() {
                 assert_eq!(
                     to_decimal("0777777777777777777777"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
@@ -768,7 +763,7 @@ mod string_utils_tests {
             fn binary_max_value_lowercase() {
                 assert_eq!(
                     to_decimal("0b111111111111111111111111111111111111111111111111111111111111111"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
@@ -776,7 +771,7 @@ mod string_utils_tests {
             fn binary_max_value_uppercase() {
                 assert_eq!(
                     to_decimal("0B111111111111111111111111111111111111111111111111111111111111111"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
@@ -784,7 +779,7 @@ mod string_utils_tests {
             fn hex_max_value_lowercase() {
                 assert_eq!(
                     to_decimal("0x7FFFFFFFFFFFFFFF"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
@@ -792,13 +787,13 @@ mod string_utils_tests {
             fn hex_max_value_uppercase() {
                 assert_eq!(
                     to_decimal("0X7FFFFFFFFFFFFFFF"),
-                    Ok("9223372036854775807".to_string())
+                    Some("9223372036854775807".to_string())
                 );
             }
 
             #[test]
             fn unparsable_string() {
-                assert!(to_decimal("bad_string").is_err());
+                assert!(to_decimal("bad_string").is_none());
             }
         }
     }

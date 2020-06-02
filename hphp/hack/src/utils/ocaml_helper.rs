@@ -46,7 +46,7 @@ fn parse_digit(c: u8) -> Option<u8> {
 
 pub fn int_of_string_opt(p: &[u8]) -> Option<i64> {
     let (sign, base, p) = parse_sign_and_base(p);
-    if p.len() == 0 {
+    if p.is_empty() {
         return None;
     }
     let mut r = 0i64;
@@ -63,6 +63,31 @@ pub fn int_of_string_opt(p: &[u8]) -> Option<i64> {
                 r = i64::checked_add(r, d as i64)?;
             } else {
                 r = i64::checked_sub(r, d as i64)?;
+            }
+        }
+    }
+    Some(r)
+}
+
+pub fn int_of_string_wrap(p: &[u8]) -> Option<i64> {
+    let (sign, base, p) = parse_sign_and_base(p);
+    if p.is_empty() {
+        return None;
+    }
+    let mut r = 0i64;
+    for i in 0..p.len() {
+        if i != 0 && p[i] == b'_' {
+            continue;
+        }
+        let d = parse_digit(p[i])?;
+        if d >= base {
+            return None;
+        } else {
+            r = i64::overflowing_mul(r, base as i64).0;
+            if sign >= 0 {
+                r = i64::overflowing_add(r, d as i64).0;
+            } else {
+                r = i64::overflowing_sub(r, d as i64).0;
             }
         }
     }

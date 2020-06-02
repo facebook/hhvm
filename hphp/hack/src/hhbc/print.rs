@@ -2471,7 +2471,10 @@ fn print_shape_field_name<W: Write>(
 }
 
 fn print_expr_int<W: Write>(w: &mut W, i: &String) -> Result<(), W::Error> {
-    w.write(integer::to_decimal(i.as_str()).map_err(|_| Error::fail("ParseIntError"))?)
+    match integer::to_decimal(i.as_str()) {
+        Some(s) => w.write(s),
+        None => Err(Error::fail("ParseIntError")),
+    }
 }
 
 fn print_expr_string<W: Write>(w: &mut W, s: &String) -> Result<(), W::Error> {

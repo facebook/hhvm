@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/collections.h"
 
 #include "hphp/runtime/base/array-init.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"
 #include "hphp/runtime/ext/collections/ext_collections-map.h"
@@ -33,10 +34,6 @@ COLLECTIONS_ALL_TYPES(X)
 /////////////////////////////////////////////////////////////////////////////
 // Constructor/Initializer
 
-ObjectData* allocPair(TypedValue c1, TypedValue c2) {
-  return req::make<c_Pair>(c1, c2, c_Pair::NoIncRef{}).detach();
-}
-
 #define X(type)                                    \
 ObjectData* allocEmpty##type() {                   \
   return req::make<c_##type>().detach();           \
@@ -46,6 +43,16 @@ ObjectData* allocFromArray##type(ArrayData* arr) { \
 }
 COLLECTIONS_PAIRED_TYPES(X)
 #undef X
+
+newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
+  switch (ctype) {
+#define X(type) case CollectionType::type: return allocEmpty##type;
+COLLECTIONS_PAIRED_TYPES(X)
+#undef X
+    case CollectionType::Pair: not_reached();
+  }
+  not_reached();
+}
 
 newFromArrayFunc allocFromArrayFunc(CollectionType ctype) {
   switch (ctype) {
@@ -57,14 +64,17 @@ COLLECTIONS_PAIRED_TYPES(X)
   not_reached();
 }
 
-newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype) {
-  switch (ctype) {
-#define X(type) case CollectionType::type: return allocEmpty##type;
-COLLECTIONS_PAIRED_TYPES(X)
-#undef X
-    case CollectionType::Pair: not_reached();
+ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
+  if (!arr->isVanilla()) {
+    auto const vanilla = BespokeArray::ToVanilla(arr, "collections::alloc");
+    decRefArr(arr);
+    arr = vanilla;
   }
-  not_reached();
+  return allocFromArrayFunc(ctype)(arr);
+}
+
+ObjectData* allocPair(TypedValue c1, TypedValue c2) {
+  return req::make<c_Pair>(c1, c2, c_Pair::NoIncRef{}).detach();
 }
 
 /////////////////////////////////////////////////////////////////////////////

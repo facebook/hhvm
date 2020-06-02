@@ -57,8 +57,11 @@ COLLECTIONS_ALL_TYPES(X)
 using newEmptyInstanceFunc = ObjectData* (*)();
 using newFromArrayFunc = ObjectData* (*)(ArrayData* arr);
 
-/* Get a function capable of creating a collection class.
+/*
+ * Get a constructor for the collections class.
+ *
  * This is primarily used by the JIT to burn the initializer into the TC.
+ * The newFromArrayFunc result requires that its input is a vanilla array-like.
  */
 newEmptyInstanceFunc allocEmptyFunc(CollectionType ctype);
 newFromArrayFunc allocFromArrayFunc(CollectionType ctype);
@@ -74,11 +77,9 @@ inline ObjectData* alloc(CollectionType ctype) {
  * Create a collection from an array, with refcount set to 1.
  *
  * Pre: The array must have a kind that's compatible with the collection type
- * we're creating.
+ * we're creating. However it MAY have a "bespoke" layout.
  */
-inline ObjectData* alloc(CollectionType ctype, ArrayData* arr) {
-  return allocFromArrayFunc(ctype)(arr);
-}
+ObjectData* alloc(CollectionType ctype, ArrayData* arr);
 
 /*
  * Creates a Pair. Takes ownership of the TypedValues passed in.

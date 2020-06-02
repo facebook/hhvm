@@ -43,7 +43,6 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->isVanilla());
   assertx(wrapped->kindIsValid());
   assertx(wrapped->toDataType() == toDataType());
-  assertx(wrapped->hasExactlyOneRef() || wrapped->isStatic());
   assertx(asBespoke(this)->layout() == s_layout);
   return true;
 }

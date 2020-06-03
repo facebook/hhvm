@@ -89,9 +89,9 @@ extern "C" fn compile_from_text_ffi(
                 .map_err(|e| e.to_string());
             unsafe { to_ocaml(&r) }
         },
-        /// This handler is to catch `panic` from parser,
-        /// TODO(hrust): parser shouldn't panic instead it should return result
-        /// and then revert this diff.
+        // This handler is to catch `panic` from parser,
+        // TODO(hrust): parser shouldn't panic instead it should return result
+        // and then revert this diff.
         |panic_msg: &str| -> Result<usize, String> {
             let output_config =
                 unsafe { RustOutputConfig::from_ocaml(rust_output_config).unwrap() };

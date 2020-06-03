@@ -1656,9 +1656,7 @@ and expr_
     let env = Type.sub_type p Reason.URclone env ty tobj Errors.unify_error in
     make_result env p (Aast.Clone te) ty
   | This ->
-    let self = Env.get_self env in
-    if Reason.equal (get_reason self) Reason.Rnone then
-      Errors.this_var_outside_class p;
+    if Option.is_none (Env.get_self_ty env) then Errors.this_var_outside_class p;
     if not accept_using_var then check_escaping_var env (p, this);
     let ty = Env.get_local env this in
     let r = Reason.Rwitness p in

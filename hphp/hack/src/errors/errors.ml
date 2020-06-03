@@ -842,13 +842,7 @@ let rec add_applied_fixme code pos =
   else
     ()
 
-and add code pos msg =
-  let pos_msg_l = check_pos_msg [(pos, msg)] in
-  if (not (is_ignored_fixme pos code)) && !is_hh_fixme pos code then
-    add_applied_fixme code pos
-  else
-    add_error_impl (make_error code pos_msg_l);
-  add_ignored_fixme_code_error pos code
+and add code pos msg = add_list code [(pos, msg)]
 
 and add_error_with_check (error : error) : unit =
   add_list (fst error) (snd error)

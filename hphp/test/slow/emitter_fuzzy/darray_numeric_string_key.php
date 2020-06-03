@@ -17,6 +17,9 @@ function h() {
   var_dump( $start, 0, opendir);
   $count= '/fgetcsv_variation10.tmp'.darray[
     '0x12ab' => 'koi8-r',
+    '158x158' => 160,
+    '400x400' => 403,
+    '7.3' => "ok",
     "ffffffffffffef7f" => new in_array
   ].wordwrap(clearstatcache(
     $db.'FileGetContentsVar3.tmp',

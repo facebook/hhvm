@@ -1229,9 +1229,9 @@ fn non_numeric(s: &str) -> bool {
     // Note(hrust): OCaml Int64.of_string and float_of_string ignore underscores
     let s = s.replace("_", "");
     lazy_static! {
-        static ref HEX: Regex = Regex::new(r"(?P<sign>-?)0[xX](?P<digits>.*)").unwrap();
-        static ref OCTAL: Regex = Regex::new(r"(?P<sign>-?)0[oO](?P<digits>.*)").unwrap();
-        static ref BINARY: Regex = Regex::new(r"(?P<sign>-?)0[bB](?P<digits>.*)").unwrap();
+        static ref HEX: Regex = Regex::new(r"(?P<sign>^-?)0[xX](?P<digits>.*)").unwrap();
+        static ref OCTAL: Regex = Regex::new(r"(?P<sign>^-?)0[oO](?P<digits>.*)").unwrap();
+        static ref BINARY: Regex = Regex::new(r"(?P<sign>^-?)0[bB](?P<digits>.*)").unwrap();
         static ref FLOAT: Regex =
             Regex::new(r"(?P<int>\d*)\.(?P<dec>[0-9--0]*)(?P<zeros>0*)").unwrap();
         static ref NEG_FLOAT: Regex =
@@ -1268,8 +1268,13 @@ fn non_numeric(s: &str) -> bool {
     };
     fn out_of_bounds(s: &str) -> bool {
         // compare strings instead of floats to avoid rounding imprecision
-        FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MAX.to_string()
-            || NEG_FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MIN.to_string()
+        if FLOAT.is_match(s) {
+            FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MAX.to_string()
+        } else if NEG_FLOAT.is_match(s) {
+            NEG_FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MIN.to_string()
+        } else {
+            false
+        }
     }
     fn validate_float(f: f64) -> std::result::Result<f64, ()> {
         if f.is_infinite() || f.is_nan() {

@@ -69,12 +69,15 @@ let check_param : env -> Nast.fun_param -> unit =
       let env = Env.open_tyvars env p in
       let (env, type_param) = Env.fresh_type env p in
       let container_type = MakeType.container Reason.none type_param in
-      let (env, is_container) =
-        Errors.try_
-          (fun () ->
-            (SubType.sub_type env ty container_type Errors.unify_error, true))
-          (fun _ -> (env, false))
+      let (env, props) =
+        SubType.simplify_subtype_i
+          env
+          (LoclType ty)
+          (LoclType container_type)
+          Errors.unify_error
       in
+      let (env, prop) = SubType.prop_to_env env props Errors.unify_error in
+      let is_container = Typing_logic.is_valid prop in
       let env = Env.set_tyvar_variance env container_type in
       let env = Typing_solver.close_tyvars_and_solve env Errors.unify_error in
       if is_container then

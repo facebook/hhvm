@@ -184,6 +184,13 @@ fn prefix_slash<'a>(arena: &'a Bump, name: &str) -> &'a str {
     s.into_bump_str()
 }
 
+fn concat<'a>(arena: &'a Bump, str1: &str, str2: &str) -> &'a str {
+    let mut result = String::with_capacity_in(str1.len() + str2.len(), arena);
+    result.push_str(str1);
+    result.push_str(str2);
+    result.into_bump_str()
+}
+
 fn strip_dollar_prefix<'a>(name: &'a str) -> &'a str {
     name.trim_start_matches("$")
 }
@@ -317,6 +324,14 @@ impl<'a> NamespaceBuilder<'a> {
         }
         if let Some(renamed) = hh_autoimport::TYPES_MAP.get(name) {
             return prefix_slash(self.arena, renamed);
+        }
+        for ns in hh_autoimport::NAMESPACES {
+            if name.starts_with(ns) {
+                let ns_trimmed = &name[ns.len()..];
+                if ns_trimmed.starts_with('\\') {
+                    return concat(self.arena, "\\HH\\", name);
+                }
+            }
         }
         name
     }
@@ -801,11 +816,9 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    #[inline(always)]
     fn concat(&self, str1: &str, str2: &str) -> &'a str {
-        let mut result = String::with_capacity_in(str1.len() + str2.len(), self.state.arena);
-        result.push_str(str1);
-        result.push_str(str2);
-        result.into_bump_str()
+        concat(self.state.arena, str1, str2)
     }
 
     fn token_bytes(&self, token: &PositionedToken) -> &'a [u8] {

@@ -1,0 +1,35 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {}; funs = {};
+  typedefs =
+  { "\\BackslashRxException" ->
+    { td_pos = [5:6-26]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_namespaces.php line 5, characters 29-41),
+       (Tapply (([5:29-42], "\\Rx\\Exception"), [])))
+      };
+    "\\MyRx" ->
+    { td_pos = [9:6-10]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_namespaces.php line 9, characters 13-14),
+       (Tapply (([9:13-15], "\\Rx"), [])))
+      };
+    "\\RxException" ->
+    { td_pos = [3:6-17]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_namespaces.php line 3, characters 20-31),
+       (Tapply (([3:20-32], "\\HH\\Rx\\Exception"), [])))
+      };
+    "\\RxRxException" ->
+    { td_pos = [7:6-19]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_namespaces.php line 7, characters 22-35),
+       (Tapply (([7:22-36], "\\RxRx\\Exception"), [])))
+      } };
+  consts = {} }
+
+They matched!

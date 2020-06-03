@@ -110,7 +110,7 @@ static FUNCS: &'static [&'static str] = &[
 
 static CONSTS: &'static [&'static str] = &[];
 
-static NAMESPACES: &'static [&'static str] = &["Rx"];
+pub static NAMESPACES: &'static [&'static str] = &["Rx"];
 
 fn make_map(items: &[&str]) -> BTreeMap<String, String> {
     items.iter().fold(BTreeMap::new(), |mut map, s| {

@@ -1,0 +1,24 @@
+Fanout calculation at time #0
+{'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [],
+           'fanout_dependents': [],
+           'relevant_dep_edges': []},
+ 'explanations': {'new_file.php': {'added_symbols': [],
+                                   'modified_symbols': [],
+                                   'removed_symbols': []}},
+ 'files': [],
+ 'telemetry': '<telemetry-redacted-for-test>'}
+
+Fanout calculation at time #1
+{'cursor': 'cursor,2,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [{'hash': '34021815', 'variant': 'Class NewSymbol'}],
+           'fanout_dependents': ['34021815'],
+           'relevant_dep_edges': []},
+ 'explanations': {'new_file.php': {'added_symbols': [{'name': '\\NewSymbol',
+                                                      'num_outgoing_edges': 1,
+                                                      'outgoing_files': ['new_file.php'],
+                                                      'type': 'FileInfo.Class'}],
+                                   'modified_symbols': [],
+                                   'removed_symbols': []}},
+ 'files': ['new_file.php'],
+ 'telemetry': '<telemetry-redacted-for-test>'}

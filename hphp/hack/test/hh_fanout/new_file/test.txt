@@ -1,0 +1,3 @@
+calculate-fanout new_file.php
+advance-time
+calculate-fanout new_file.php

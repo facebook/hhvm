@@ -1,0 +1,18 @@
+Fanout calculation at time #0
+{'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
+ 'debug': {'dependencies': [{'hash': '531250547', 'variant': 'Class Simple'}],
+           'fanout_dependents': ['196570478', '531250547'],
+           'relevant_dep_edges': [{'dependency': {'hash': '531250547',
+                                                  'variant': 'Class Simple'},
+                                   'dependent': {'hash': '196570478',
+                                                 'variant': 'Fun uses_simple'},
+                                   'dependent_path': 'uses_simple.php'}]},
+ 'explanations': {'simple.php': {'added_symbols': [],
+                                 'modified_symbols': [{'name': '\\Simple',
+                                                       'num_outgoing_edges': 2,
+                                                       'outgoing_files': ['uses_simple.php',
+                                                                          'simple.php'],
+                                                       'type': 'FileInfo.Class'}],
+                                 'removed_symbols': []}},
+ 'files': ['simple.php', 'uses_simple.php'],
+ 'telemetry': '<telemetry-redacted-for-test>'}

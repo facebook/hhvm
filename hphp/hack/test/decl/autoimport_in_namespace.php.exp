@@ -1,0 +1,47 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {}; funs = {};
+  typedefs =
+  { "\\A" ->
+    { td_pos = [4:8-9]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_in_namespace.php line 4, characters 12-27),
+       (Tapply (([4:12-23], "\\HH\\Traversable"),
+          [(Rhint (root|autoimport_in_namespace.php line 4, characters 24-26),
+            (Tprim Tint))]
+          )))
+      };
+    "\\B" ->
+    { td_pos = [5:8-9]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_in_namespace.php line 5, characters 12-28),
+       (Tapply (([5:12-24], "\\Traversable"),
+          [(Rhint (root|autoimport_in_namespace.php line 5, characters 25-27),
+            (Tprim Tint))]
+          )))
+      };
+    "\\NS\\A" ->
+    { td_pos = [8:10-11]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_in_namespace.php line 8, characters 14-29),
+       (Tapply (([8:14-25], "\\HH\\Traversable"),
+          [(Rhint (root|autoimport_in_namespace.php line 8, characters 26-28),
+            (Tprim Tint))]
+          )))
+      };
+    "\\NS\\B" ->
+    { td_pos = [9:10-11]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|autoimport_in_namespace.php line 9, characters 14-30),
+       (Tapply (([9:14-26], "\\Traversable"),
+          [(Rhint (root|autoimport_in_namespace.php line 9, characters 27-29),
+            (Tprim Tint))]
+          )))
+      } };
+  consts = {} }
+
+They matched!

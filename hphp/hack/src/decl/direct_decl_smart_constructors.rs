@@ -293,35 +293,32 @@ impl<'a> NamespaceBuilder<'a> {
             .last_mut()
             .expect("Attempted to get the current import map, but namespace stack was empty")
             .imports;
-        match aliased_name {
-            Some(aliased_name) => {
-                imports.insert(aliased_name, name);
-            }
-            None => {
-                let aliased_name = name
-                    .rsplit_terminator('\\')
-                    .nth(0)
-                    .expect("Expected at least one entry in import name");
-                imports.insert(aliased_name, name);
-            }
+        let aliased_name = aliased_name.unwrap_or_else(|| {
+            name.rsplit_terminator('\\')
+                .nth(0)
+                .expect("Expected at least one entry in import name")
+        });
+        let name = if name.starts_with('\\') {
+            name
+        } else {
+            prefix_slash(self.arena, name)
         };
+        imports.insert(aliased_name, name);
     }
 
     fn rename_import(&self, name: &'a str) -> &'a str {
-        let trimmed_name = name.trim_start_matches('\\');
+        if name.starts_with('\\') {
+            return name;
+        }
         for ni in self.stack.iter().rev() {
-            if let Some(name) = ni.imports.get(trimmed_name) {
-                if name.starts_with('\\') {
-                    return name;
-                } else {
-                    return prefix_slash(self.arena, name);
-                }
+            if let Some(name) = ni.imports.get(name) {
+                return name;
             }
         }
-        hh_autoimport::TYPES_MAP
-            .get(trimmed_name)
-            .map(|renamed| prefix_slash(self.arena, renamed))
-            .unwrap_or(name)
+        if let Some(renamed) = hh_autoimport::TYPES_MAP.get(name) {
+            return prefix_slash(self.arena, renamed);
+        }
+        name
     }
 }
 
@@ -804,6 +801,13 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn concat(&self, str1: &str, str2: &str) -> &'a str {
+        let mut result = String::with_capacity_in(str1.len() + str2.len(), self.state.arena);
+        result.push_str(str1);
+        result.push_str(str2);
+        result.into_bump_str()
+    }
+
     fn token_bytes(&self, token: &PositionedToken) -> &'a [u8] {
         self.state.source_text.source_text().sub(
             token.leading_start_offset().unwrap_or(0) + token.leading_width(),
@@ -943,10 +947,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             Ty_::TvarrayOrDarray(self.alloc((tarraykey(self.state.arena), tany())))
                         }
                         _ => {
-                            let name = self
-                                .state
-                                .namespace_builder
-                                .rename_import(self.prefix_ns(name));
+                            let name =
+                                self.prefix_ns(self.state.namespace_builder.rename_import(name));
                             Ty_::Tapply(self.alloc((Id(pos, name), &[][..])))
                         }
                     }
@@ -1202,21 +1204,16 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         type_arguments: Node_<'a>,
         pos_to_merge: Option<&'a Pos<'a>>,
     ) -> Node<'a> {
-        let Id(base_ty_pos, base_ty_name) = base_ty;
-        let id = Id(
-            base_ty_pos,
-            self.state.namespace_builder.rename_import(base_ty_name),
-        );
         let type_arguments_iter = type_arguments.iter();
         let mut type_arguments = Vec::new_in(self.state.arena);
         for node in type_arguments_iter {
             type_arguments.push(self.node_to_ty(*node)?);
         }
         let type_arguments = type_arguments.into_bump_slice();
-        let ty_ = Ty_::Tapply(self.alloc((id, type_arguments)));
+        let ty_ = Ty_::Tapply(self.alloc((base_ty, type_arguments)));
         let pos = match pos_to_merge {
-            Some(p) => Pos::merge(self.state.arena, base_ty_pos, p)?,
-            None => base_ty_pos,
+            Some(p) => Pos::merge(self.state.arena, base_ty.0, p)?,
+            None => base_ty.0,
         };
         Ok(self.hint_ty(pos, ty_))
     }
@@ -1963,8 +1960,13 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             };
             Ok(self.hint_ty(pos, ty_))
         } else {
-            let Id(pos, class_type) =
-                self.get_name(self.state.namespace_builder.current_namespace(), class_type)?;
+            let Id(pos, class_type) = self.get_name("", class_type)?;
+            let class_type = self.state.namespace_builder.rename_import(class_type);
+            let class_type = if class_type.starts_with("\\") {
+                class_type
+            } else {
+                self.concat(self.state.namespace_builder.current_namespace(), class_type)
+            };
             self.make_apply(
                 Id(pos, class_type),
                 type_arguments,
@@ -2939,11 +2941,11 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         gt: Self::R,
     ) -> Self::R {
         let (classname, targ, gt) = (classname?, targ?, gt?);
-        let id = self.get_name("\\", classname)?;
+        let id = self.get_name("", classname)?;
         match gt {
             Node_::Ignored => Ok(self.prim_ty(aast::Tprim::Tstring, id.0)),
             gt => self.make_apply(
-                id,
+                Id(id.0, self.state.namespace_builder.rename_import(id.1)),
                 targ,
                 Some(Pos::merge(
                     self.state.arena,
@@ -3398,11 +3400,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(
-            self.get_name("", vec?)?,
-            hint?,
-            greater_than?.get_pos(self.state.arena).ok(),
-        )
+        let id = self.get_name("", vec?)?;
+        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        self.make_apply(id, hint?, greater_than?.get_pos(self.state.arena).ok())
     }
 
     fn make_dictionary_type_specifier(
@@ -3412,11 +3412,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         hint: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(
-            self.get_name("", dict?)?,
-            hint?,
-            greater_than?.get_pos(self.state.arena).ok(),
-        )
+        let id = self.get_name("", dict?)?;
+        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        self.make_apply(id, hint?, greater_than?.get_pos(self.state.arena).ok())
     }
 
     fn make_keyset_type_specifier(
@@ -3427,10 +3425,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         _arg3: Self::R,
         greater_than: Self::R,
     ) -> Self::R {
-        self.make_apply(
-            self.get_name("", keyset?)?,
-            hint?,
-            greater_than?.get_pos(self.state.arena).ok(),
-        )
+        let id = self.get_name("", keyset?)?;
+        let id = Id(id.0, self.state.namespace_builder.rename_import(id.1));
+        self.make_apply(id, hint?, greater_than?.get_pos(self.state.arena).ok())
     }
 }

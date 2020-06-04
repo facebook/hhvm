@@ -220,7 +220,7 @@ struct Modifiers {
 fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node_<'a>>) -> Modifiers {
     let mut ret = Modifiers {
         is_static: false,
-        visibility: aast::Visibility::Private,
+        visibility: aast::Visibility::Public,
         is_abstract: false,
         is_final: false,
     };

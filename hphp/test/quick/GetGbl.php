@@ -14,7 +14,10 @@ function bar() {
   var_dump($GLOBALS['a2']);
 }
 
-$x = 42;
-$a = varray[];
-foo();
-bar();
+<<__EntryPoint>>
+function main() {
+  $GLOBALS['x'] = 42;
+  $GLOBALS['a'] = varray[];
+  foo();
+  bar();
+}

@@ -27,30 +27,34 @@ function newInstanceOfA($line) {
   return (new A())->x($line, 1);
 }
 
-// non-PopC
-(new A())->x(__LINE__)->
-  x(__LINE__)->
-  x(__LINE__);
-
-// PopC
-(new A())->x(__LINE__)
-  ;
-
 // Box
 function box(inout $_);
-$x = newInstanceOfA(__LINE__); box(inout $x);
 
-$x = newInstanceOfA(__LINE__); box(inout $x);
+<<__EntryPoint>>
+function main(): void {
+  // non-PopC
+  (new A())->x(__LINE__)->
+    x(__LINE__)->
+    x(__LINE__);
+
+  // PopC
+  (new A())->x(__LINE__)
+    ;
+
+  $x = newInstanceOfA(__LINE__); box(inout $x);
+
+  $x = newInstanceOfA(__LINE__); box(inout $x);
 
 
-$x = newInstanceOfA(__LINE__); box(inout $x);
+  $x = newInstanceOfA(__LINE__); box(inout $x);
 
-// handled exception
-try {
+  // handled exception
+  try {
+    throw new Exception(__LINE__);
+  } catch (Exception $e) {
+    compare_lines($e->getMessage(), $e->getLine());
+  }
+
+  // unhandled exception
   throw new Exception(__LINE__);
-} catch (Exception $e) {
-  compare_lines($e->getMessage(), $e->getLine());
 }
-
-// unhandled exception
-throw new Exception(__LINE__);

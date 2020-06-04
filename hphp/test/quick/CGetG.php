@@ -1,8 +1,8 @@
 <?hh
 
-$n = 10;
-
+<<__EntryPoint>>
 function main() {
+  $GLOBALS['n'] = 10;
   $vals = varray[];
   for ($i = 0; $i < 10; $i++) {
     $vals[] = $GLOBALS['n'];
@@ -25,5 +25,3 @@ function main() {
   $a[] = $GLOBALS["42"];
   var_dump($a);
 }
-
-main();

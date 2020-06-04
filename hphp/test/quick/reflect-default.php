@@ -18,8 +18,9 @@ function do_function($fn) {
   echo "$str\n";
   var_dump($param->getDefaultValue());
   $fn .= '_eval';
-  eval(sprintf('function %s($v = %s) { var_dump($v); } %s();',
-               $fn, $str, $fn));
+  eval(sprintf('function %s($v = %s) { var_dump($v); }',
+               $fn, $str));
+  $fn();
 }
 
 <<__EntryPoint>> function main(): void {

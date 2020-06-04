@@ -1,5 +1,7 @@
 <?hh
 
+abstract final class GuardBug { public static $x; }
+
 function k() {
   // a comment!
   if (!isset(GuardBug::$x)) {
@@ -8,10 +10,12 @@ function k() {
   return GuardBug::$x;
 }
 
-while ($line = fgets(k())) {
-    $parts = explode(' ', $line);
-    $file = $parts[0];
+<<__EntryPoint>>
+function main(): void {
+  while ($line = fgets(k())) {
+      $parts = explode(' ', $line);
+      $file = $parts[0];
 
-    echo "$file -\n";
+      echo "$file -\n";
+  }
 }
-abstract final class GuardBug { public static $x; }

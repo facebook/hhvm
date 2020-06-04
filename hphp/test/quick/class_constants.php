@@ -6,41 +6,20 @@ class X {
   const BIZ = Y::BAR;
 }
 
-if (!isset($g)) {
-  include 'class_constants-1.inc';
-}
-
-class A {
-  const FOO = B::FOO;
-  const BAR = "A::BAR";
-}
-if (!isset($g)) {
-  include 'class_constants-2.inc';
-}
-class C extends A {
-}
-
-# Test recursive non-scalar class constant initialization.
-class D {
-}
-class E extends D {
-}
-class F extends E {
-}
-
-# Test inheritance of interface constants
-interface I {
-  const WEE = 123;
-}
-interface J extends I {
-  const WOO = self::WEE;
-}
-class K implements J {
-}
-class L implements J {
-}
-
+<<__EntryPoint>>
 function main() {
+  if (!isset($g)) {
+    include 'class_constants-1.inc';
+  }
+
+  require_once(__DIR__.'/class_constants-classes1.inc');
+
+  if (!isset($g)) {
+    include 'class_constants-2.inc';
+  }
+
+  require_once(__DIR__.'/class_constants-classes2.inc');
+
   HH\autoload_set_paths(
     dict[
       'class' => dict[
@@ -81,5 +60,3 @@ function main() {
   var_dump(D::FakeConstant);
 
 }
-
-main();

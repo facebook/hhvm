@@ -1,3 +1,3 @@
 <?hh
 
-print "In ReqOnce_b.php\n";
+class ReqOnce2 {}

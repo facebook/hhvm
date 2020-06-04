@@ -1943,6 +1943,20 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ))))
     }
 
+    fn make_parenthesized_expression(
+        &mut self,
+        lparen: Self::R,
+        expr: Self::R,
+        rparen: Self::R,
+    ) -> Self::R {
+        let (lparen, expr, rparen) = (lparen?, expr?, rparen?);
+        let pos = lparen.get_pos(self.state.arena)?;
+        let pos = Pos::merge(self.state.arena, pos, rparen.get_pos(self.state.arena)?)?;
+        Ok(Node_::Expr(
+            self.alloc(aast::Expr(pos, self.node_to_expr(expr)?.1)),
+        ))
+    }
+
     fn make_list_item(&mut self, item: Self::R, sep: Self::R) -> Self::R {
         Ok(match (item?, sep?) {
             (Node_::Ignored, Node_::Ignored) => Node_::Ignored,

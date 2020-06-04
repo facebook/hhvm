@@ -1,0 +1,46 @@
+The following class(es) differed between the legacy and parsed versions:
+
+
+[\C]
+--- legacy
++++ parsed
+@@ -1,35 +1,35 @@
+ { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false; sc_is_xhp = false;
+   sc_has_xhp_keyword = false; sc_kind = Cnormal; sc_name = ([3:7-8], "\\C");
+   sc_tparams = []; sc_where_constraints = []; sc_extends = []; sc_uses = [];
+   sc_method_redeclarations = []; sc_xhp_attr_uses = []; sc_req_extends = [];
+   sc_req_implements = []; sc_implements = [];
+   sc_consts =
+   [{ Shallow_decl_defs.scc_abstract = false;
+      scc_expr =
+-     (Some ([4:18-23],
++     (Some ([4:17-24],
+             (Binop (Star, ([4:18-19], (Int "3")), ([4:22-23], (Int "5"))))));
+      scc_name = ([4:13-14], "X");
+      scc_type =
+      (Rhint (root|class_const_with_parens.php line 4, characters 9-11),
+       (Tprim Tint))
+      };
+     { Shallow_decl_defs.scc_abstract = false;
+       scc_expr =
+       (Some ([5:17-34],
+              (Binop (Plus,
+-                ([5:18-23],
++                ([5:17-24],
+                  (Binop (Star, ([5:18-19], (Int "3")), ([5:22-23], (Int "5"))
+                     ))),
+-                ([5:28-33],
++                ([5:27-34],
+                  (Binop (Star, ([5:28-29], (Int "7")), ([5:32-33], (Int "9"))
+                     )))
+                 ))));
+       scc_name = ([5:13-14], "Y");
+       scc_type =
+       (Rhint (root|class_const_with_parens.php line 5, characters 9-11),
+        (Tprim Tint))
+       }
+     ];
+   sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+   sc_constructor = None; sc_static_methods = []; sc_methods = [];
+   sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque> }
+\ No newline at end of file

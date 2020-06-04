@@ -343,7 +343,7 @@ class ArrayDataPrinter(object):
     def to_string(self):
         kind_int = int(self.kind.cast(T('uint8_t')))
 
-        if kind_int > 9:
+        if kind_int >= 14:
             return 'Invalid ArrayData (kind=%d)' % kind_int
 
         kind = str(self.kind)[len('HPHP::ArrayData::'):]

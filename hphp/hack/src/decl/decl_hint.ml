@@ -13,7 +13,6 @@
 open Hh_prelude
 open Aast
 open Typing_defs
-module Partial = Partial_provider
 
 (* Unpacking a hint for typing *)
 let rec hint env (p, h) =
@@ -42,9 +41,6 @@ and hint_ p env = function
   | Hdynamic -> Tdynamic
   | Hnothing -> Tunion []
   | Harray (h1, h2) ->
-    if Partial.should_check_error env.Decl_env.mode 4045 && Option.is_none h1
-    then
-      Errors.generic_array_strict p;
     let h1 = Option.map h1 (hint env) in
     let h2 = Option.map h2 (hint env) in
     Tarray (h1, h2)
@@ -59,18 +55,6 @@ and hint_ p env = function
     Tvarray_or_darray (t1, hint env h2)
   | Hprim p -> Tprim p
   | Habstr x -> Tgeneric x
-  | Hoption (_, Hprim Tnull) ->
-    Errors.option_null p;
-    Terr
-  | Hoption (_, Hprim Tvoid) ->
-    Errors.option_return_only_typehint p `void;
-    Terr
-  | Hoption (_, Hprim Tnoreturn) ->
-    Errors.option_return_only_typehint p `noreturn;
-    Terr
-  | Hoption (_, Hmixed) ->
-    Errors.option_mixed p;
-    Terr
   | Hoption h ->
     let h = hint env h in
     Toption h
@@ -141,10 +125,6 @@ and hint_ p env = function
             ~returns_mutable:mut_ret;
         ft_reactive = reactivity;
       }
-  | Happly ((p, "\\Tuple"), _)
-  | Happly ((p, "\\tuple"), _) ->
-    Errors.tuple_syntax p;
-    Terr
   | Happly (((_p, c) as id), argl) ->
     Decl_env.add_wclass env c;
     let argl = List.map argl (hint env) in

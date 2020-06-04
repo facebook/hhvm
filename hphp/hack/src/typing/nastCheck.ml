@@ -32,6 +32,7 @@ module TGenConstraint = Typing_generic_constraint
 module Subst = Decl_subst
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
+module Partial = Partial_provider
 
 type env = {
   typedef_tparams: Nast.tparam list;
@@ -84,7 +85,17 @@ and hint_ env p = function
   | Hdynamic
   | Hnothing ->
     ()
+  | Hoption (_, Hprim Tnull) -> Errors.option_null p
+  | Hoption (_, Hprim Tvoid) -> Errors.option_return_only_typehint p `void
+  | Hoption (_, Hprim Tnoreturn) ->
+    Errors.option_return_only_typehint p `noreturn
+  | Hoption (_, Hmixed) -> Errors.option_mixed p
   | Harray (ty1, ty2) ->
+    if
+      Partial.should_check_error (Env.get_mode env.tenv) 4045
+      && Option.is_none ty1
+    then
+      Errors.generic_array_strict p;
     maybe hint env ty1;
     maybe hint env ty2
   | Hdarray (ty1, ty2) ->
@@ -116,6 +127,9 @@ and hint_ env p = function
     List.iter hl (hint env);
     hint env h;
     Option.iter variadic_hint (hint env)
+  | Happly ((p, "\\Tuple"), _)
+  | Happly ((p, "\\tuple"), _) ->
+    Errors.tuple_syntax p
   | Happly ((_, x), hl) as h when Env.is_typedef env.tenv x ->
     begin
       match Decl_provider.get_typedef (get_ctx env) x with

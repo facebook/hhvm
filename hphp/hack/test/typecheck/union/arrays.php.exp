@@ -90,10 +90,6 @@ File "arrays.php", line 14, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 15, characters 3-7:
 You cannot have an array without generics in strict mode (Typing[4045])
-File "arrays.php", line 14, characters 3-7:
-You cannot have an array without generics in strict mode (Typing[4045])
-File "arrays.php", line 15, characters 3-7:
-You cannot have an array without generics in strict mode (Typing[4045])
 File "arrays.php", line 53, characters 16-17:
 Invalid argument (Typing[4110])
 File "arrays.php", line 184, characters 26-33:

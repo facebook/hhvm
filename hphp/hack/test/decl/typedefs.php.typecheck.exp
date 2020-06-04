@@ -2,5 +2,3 @@ File "typedefs.php", line 6, characters 1-50:
 No code may exist outside of namespace {} (Parsing[1002])
 File "typedefs.php", line 10, characters 16-20:
 You cannot have an array without generics in strict mode (Typing[4045])
-File "typedefs.php", line 10, characters 16-20:
-You cannot have an array without generics in strict mode (Typing[4045])

@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/request-info.h"
@@ -189,12 +190,6 @@ size_t loadedStaticArrayCount() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-size_t ArrayData::allocSize() const {
-  if (hasVanillaMixedLayout()) return MixedArray::asMixed(this)->heapSize();
-  if (isKeysetKind()) return SetArray::asSet(this)->heapSize();
-  return PackedArray::heapSize(this);
-}
-
 void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
   auto const arr = *parr;
   auto const requested_tag = RuntimeOption::EvalArrayProvenance && tag.valid();
@@ -237,7 +232,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
 
   auto ad = arr->copyStatic();
   assertx(ad->isStatic());
-  MemoryStats::LogAlloc(AllocKind::StaticArray, ad->allocSize());
+  MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
 
   s_cachedHash.first = ad;
   assertx(ScalarHash{}.raw_hash(ad) == s_cachedHash.second);

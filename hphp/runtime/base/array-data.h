@@ -629,11 +629,6 @@ public:
    */
   void onSetEvalScalar();
 
-  /*
-   * Total size on the heap.
-   */
-  size_t allocSize() const;
-
   /////////////////////////////////////////////////////////////////////////////
   // Other functions.
   //

@@ -540,7 +540,7 @@ pub struct ShapeFieldNode<'a> {
 
 #[derive(Copy, Clone, Debug)]
 pub enum Node_<'a> {
-    List(&'a [Node_<'a>]),
+    List(&'a &'a [Node_<'a>]),
     BracketedList(&'a (&'a Pos<'a>, &'a [Node_<'a>], &'a Pos<'a>)),
     Ignored,
     Name(&'a (&'a str, &'a Pos<'a>)),
@@ -554,7 +554,7 @@ pub enum Node_<'a> {
     FloatingLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     BooleanLiteral(&'a (&'a str, &'a Pos<'a>)), // For const expressions.
     Null(&'a Pos<'a>),                         // For const expressions.
-    Ty(Ty<'a>),
+    Ty(&'a Ty<'a>),
     TypeconstAccess(&'a (Cell<&'a Pos<'a>>, Ty<'a>, RefCell<Vec<'a, Id<'a>>>)),
     Backslash(&'a Pos<'a>), // This needs a pos since it shows up in names.
     ListItem(&'a (Node_<'a>, Node_<'a>)),
@@ -568,7 +568,7 @@ pub enum Node_<'a> {
     TraitUse(&'a Node_<'a>),
     TypeConstant(&'a ShallowTypeconst<'a>),
     RequireClause(&'a RequireClause<'a>),
-    ClassishBody(&'a [Node_<'a>]),
+    ClassishBody(&'a &'a [Node_<'a>]),
     TypeParameter(&'a TypeParameterDecl<'a>),
     TypeConstraint(&'a (ConstraintKind, Node_<'a>)),
     ShapeFieldSpecifier(&'a ShapeFieldNode<'a>),
@@ -577,7 +577,7 @@ pub enum Node_<'a> {
     Operator(&'a (&'a Pos<'a>, TokenKind)),
     Construct(&'a Pos<'a>),
     This(&'a Pos<'a>), // This needs a pos since it shows up in Taccess.
-    TypeParameters(&'a [Tparam<'a>]),
+    TypeParameters(&'a &'a [Tparam<'a>]),
 
     // For cases where the position of a node is included in some outer
     // position, but we do not need to track any further information about that
@@ -662,7 +662,7 @@ impl<'a> Node_<'a> {
         'a: 'b,
     {
         match self {
-            &Node_::List(items) | Node_::BracketedList(&(_, items, _)) => {
+            &Node_::List(&items) | Node_::BracketedList(&(_, items, _)) => {
                 NodeIterHelper::Vec(items.iter())
             }
             Node_::Ignored => NodeIterHelper::Empty,
@@ -674,7 +674,7 @@ impl<'a> Node_<'a> {
     // Must return the upper bound returned by NodeIterHelper::size_hint.
     fn len(&self) -> usize {
         match self {
-            &Node_::List(items) | Node_::BracketedList(&(_, items, _)) => items.len(),
+            &Node_::List(&items) | Node_::BracketedList(&(_, items, _)) => items.len(),
             Node_::Ignored => 0,
             _ => 1,
         }
@@ -909,7 +909,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
 
     fn node_to_ty(&self, node: Node_<'a>) -> Result<Ty<'a>, ParseError> {
         match node {
-            Node_::Ty(ty) => Ok(ty),
+            Node_::Ty(&ty) => Ok(ty),
             Node_::TypeconstAccess((pos, ty, names)) => {
                 let pos = pos.get();
                 let names = self.slice_from_iter(names.borrow().iter().copied());
@@ -1286,7 +1286,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     fn hint_ty(&self, pos: &'a Pos<'a>, ty_: Ty_<'a>) -> Node_<'a> {
-        Node_::Ty(Ty(self.alloc(Reason::hint(pos)), self.alloc(ty_)))
+        Node_::Ty(self.alloc(Ty(self.alloc(Reason::hint(pos)), self.alloc(ty_))))
     }
 
     fn prim_ty(&self, tprim: aast::Tprim<'a>, pos: &'a Pos<'a>) -> Node_<'a> {
@@ -1467,7 +1467,7 @@ impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
         Ok(match r.into_bump_slice() {
             [] => Node_::Ignored,
             [node] => *node,
-            slice => Node_::List(slice),
+            slice => Node_::List(self.alloc(slice)),
         })
     }
 
@@ -1624,10 +1624,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             ),
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
-            TokenKind::Mixed => Node_::Ty(Ty(
+            TokenKind::Mixed => Node_::Ty(self.alloc(Ty(
                 self.alloc(Reason::hint(token_pos(self))),
                 self.alloc(Ty_::Tmixed),
-            )),
+            ))),
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
             TokenKind::Arraykey => self.prim_ty(aast::Tprim::Tarraykey, token_pos(self)),
             TokenKind::Noreturn => self.prim_ty(aast::Tprim::Tnoreturn, token_pos(self)),
@@ -1723,7 +1723,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             if items.is_empty() {
                 Ok(Node_::Ignored)
             } else {
-                Ok(Node_::List(items))
+                Ok(Node_::List(self.alloc(items)))
             }
         }
     }
@@ -2223,7 +2223,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 user_attributes: &[],
             });
         }
-        Ok(Node_::TypeParameters(tparams.into_bump_slice()))
+        Ok(Node_::TypeParameters(self.alloc(tparams.into_bump_slice())))
     }
 
     fn make_parameter_declaration(
@@ -2412,9 +2412,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let (name, initializer) = (name?, initializer?);
         Ok(match name {
             Node_::Ignored => Node_::Ignored,
-            _ => {
-                Node_::List(bumpalo::vec![in self.state.arena; name, initializer].into_bump_slice())
-            }
+            _ => Node_::List(
+                self.alloc(bumpalo::vec![in self.state.arena; name, initializer].into_bump_slice()),
+            ),
         })
     }
 
@@ -2860,7 +2860,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_classish_body(&mut self, _arg0: Self::R, body: Self::R, _arg2: Self::R) -> Self::R {
-        Ok(Node_::ClassishBody(body?.as_slice(self.state.arena)))
+        Ok(Node_::ClassishBody(
+            self.alloc(body?.as_slice(self.state.arena)),
+        ))
     }
 
     fn make_enum_declaration(

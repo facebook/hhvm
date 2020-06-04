@@ -38,7 +38,8 @@ impl<P: Ord> Ord for Error_<'_, P> {
         let (self_pos, self_msg) = self_first;
         let (other_pos, other_msg) = other_first;
         // The primary sort order is the position of the first message.
-        self_pos.cmp(other_pos)
+        self_pos
+            .cmp(other_pos)
             // If the positions are the same, sort by error code.
             .then((*self_code as isize).cmp(&(*other_code as isize)))
             // If the error codes are the same, sort by message text.
@@ -46,7 +47,12 @@ impl<P: Ord> Ord for Error_<'_, P> {
             // If the first message text is the same, compare the rest of the
             // messages (which contain further explanation for the error
             // reported in the first message).
-            .then(self_messages.iter().skip(1).cmp(other_messages.iter().skip(1)))
+            .then(
+                self_messages
+                    .iter()
+                    .skip(1)
+                    .cmp(other_messages.iter().skip(1)),
+            )
     }
 }
 

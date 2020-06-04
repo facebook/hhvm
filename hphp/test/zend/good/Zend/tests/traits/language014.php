@@ -1,5 +1,4 @@
 <?hh
-error_reporting(E_ALL);
 
 trait Hello {
    public function hello() {
@@ -18,7 +17,11 @@ class MyClass {
    use Hello, World { world as hello; }
 }
 
-$o = new MyClass();
-$o->hello();
-$o->world();
+<<__EntryPoint>>
+function entrypoint_language014(): void {
+  error_reporting(E_ALL);
 
+  $o = new MyClass();
+  $o->hello();
+  $o->world();
+}

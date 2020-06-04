@@ -1,8 +1,10 @@
 <?hh
-ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
+<<__EntryPoint>>
+function entrypoint_msgfmt_format_simple_types_numeric_strings(): void {
+  ini_set("intl.error_level", E_WARNING);
+  //ini_set("intl.default_locale", "nl");
 
-$mf = new MessageFormatter('en_US',"
+  $mf = new MessageFormatter('en_US',"
 	none			{a}
 	number			{b,number}
 	number integer	{c,number,integer}
@@ -14,18 +16,19 @@ $mf = new MessageFormatter('en_US',"
 	ordinal			{i,ordinal}
 	duration		{j,duration}
 	");
-	
-$ex = "1336317965.5 str";
-var_dump($mf->format(darray[
-'a' => $ex,
-'b' => $ex,
-'c' => $ex,
-'d' => $ex,
-'e' => $ex,
-'f' => "  1336317965.5",
-'g' => "  1336317965.5",
-'h' => $ex,
-'i' => $ex,
-'j' => $ex,
-]));
-echo "==DONE==";
+
+  $ex = "1336317965.5 str";
+  var_dump($mf->format(darray[
+  'a' => $ex,
+  'b' => $ex,
+  'c' => $ex,
+  'd' => $ex,
+  'e' => $ex,
+  'f' => "  1336317965.5",
+  'g' => "  1336317965.5",
+  'h' => $ex,
+  'i' => $ex,
+  'j' => $ex,
+  ]));
+  echo "==DONE==";
+}

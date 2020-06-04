@@ -1,8 +1,10 @@
 <?hh
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
+<<__EntryPoint>>
+function entrypoint_rbbiter_getRuleStatus_basic(): void {
+  ini_set("intl.error_level", E_WARNING);
+  ini_set("intl.default_locale", "pt_PT");
 
-$rules = <<<RULES
+  $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];
 \$S = [.;,:];
 
@@ -15,11 +17,12 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new IntlRuleBasedBreakIterator($rules);
-$rbbi->setText('sdfkjsdf88á.... ,;');
+  $rbbi = new IntlRuleBasedBreakIterator($rules);
+  $rbbi->setText('sdfkjsdf88á.... ,;');
 
-do {
-	echo "pos        : {$rbbi->current()}\n",
-		 "rule status: {$rbbi->getRuleStatus()}\n";
-} while ($rbbi->next() != IntlBreakIterator::DONE);
-echo "==DONE==";
+  do {
+  	echo "pos        : {$rbbi->current()}\n",
+  		 "rule status: {$rbbi->getRuleStatus()}\n";
+  } while ($rbbi->next() != IntlBreakIterator::DONE);
+  echo "==DONE==";
+}

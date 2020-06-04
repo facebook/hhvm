@@ -1,9 +1,12 @@
 <?hh
 
-$test = $v ==> $v;
+<<__EntryPoint>>
+function entrypoint_anonymous_func_002(): void {
 
-$arr = varray[() ==> $GLOBALS['arr'], 2];
+  $test = $v ==> $v;
 
-var_dump($arr[$test(1)]);
-var_dump($arr[$test(0)]() == $arr);
+  $GLOBALS['arr'] = varray[() ==> $GLOBALS['arr'], 2];
 
+  var_dump($GLOBALS['arr'][$test(1)]);
+  var_dump($GLOBALS['arr'][$test(0)]() == $GLOBALS['arr']);
+}

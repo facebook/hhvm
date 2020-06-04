@@ -1,7 +1,5 @@
 <?hh
 
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-
 class Person {
     public $test = NULL;
     public function __construct() {
@@ -11,6 +9,8 @@ class Person {
 
 <<__EntryPoint>>
 function main_entry(): void {
+  require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+
   $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
   $stmt = $db->query("SELECT 'foo' test, 1");

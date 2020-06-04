@@ -1,6 +1,8 @@
 <?hh
-include_once(dirname(__FILE__).'/inc.inc');
-require_once(dirname(__FILE__).'/inc.inc');
 <<__EntryPoint>> function main(): void {
-echo "END";
+  include_once(dirname(__FILE__).'/bug32924.inc');
+  require_once(dirname(__FILE__).'/bug32924.inc');
+
+  foo();
+  echo "END";
 }

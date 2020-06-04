@@ -14,4 +14,7 @@ function c() {
     debug_print_backtrace(0, 4);
 }
 
-a();
+<<__EntryPoint>>
+function entrypoint_debug_print_backtrace_limit(): void {
+  a();
+}

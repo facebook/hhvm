@@ -5,13 +5,13 @@ class C
     public static $a = darray[K => D::V, E::A => K];
 }
 
-eval('class D extends C { const V = \'test\'; }');
-
-class E extends D
-{
-    const A = "hello";
-}
-
 const K = "nasty";
+<<__EntryPoint>>
+function entrypoint_constants_basic_006(): void {
 
-var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
+  eval('class D extends C { const V = \'test\'; }');
+
+  include(__DIR__.'/constants_basic_006.inc');
+
+  var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
+}

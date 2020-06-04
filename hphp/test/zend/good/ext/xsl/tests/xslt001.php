@@ -5,8 +5,9 @@
 function main_entry(): void {
   echo "Test 1: Transform To XML String";
   include("prepare.inc");
-  $proc->importStylesheet($xsl);
+  $proc = XSLTPrepare::getProc();
+  $proc->importStylesheet(XSLTPrepare::getXSL());
   print "\n";
-  print $proc->transformToXml($dom);
+  print $proc->transformToXml(XSLTPrepare::getDOM());
   print "\n";
 }

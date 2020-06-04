@@ -1,26 +1,4 @@
 <?hh 
-$xml =<<<EOF
-<people>
-   <person name="Joe">
-     Text1
-     <child name="Ann" />
-     Text2
-     <child name="Marray" />
-     Text3
-   </person>
-   <person name="Boe">
-     <child name="Joe" />
-     <child name="Ann" />
-   </person>
-</people>
-EOF;
-$xml1 =<<<EOF
-<people>
-   <person name="Joe">
-     <child />
-   </person>
-</people>
-EOF;
 
 function traverse_xml($pad,$xml) {
   foreach($xml->children() as $name => $node) {
@@ -33,8 +11,33 @@ function traverse_xml($pad,$xml) {
     echo $pad."</$name>\n";
   }
 }
+<<__EntryPoint>>
+function entrypoint_018(): void {
+  $xml =<<<EOF
+<people>
+    <person name="Joe">
+      Text1
+      <child name="Ann" />
+      Text2
+      <child name="Marray" />
+      Text3
+    </person>
+    <person name="Boe">
+      <child name="Joe" />
+      <child name="Ann" />
+    </person>
+</people>
+EOF;
+  $xml1 =<<<EOF
+<people>
+    <person name="Joe">
+      <child />
+    </person>
+</people>
+EOF;
 
-traverse_xml("",simplexml_load_string($xml));
-echo "----------\n";
-traverse_xml("",simplexml_load_string($xml1));
-echo "---Done---\n";
+  traverse_xml("",simplexml_load_string($xml));
+  echo "----------\n";
+  traverse_xml("",simplexml_load_string($xml1));
+  echo "---Done---\n";
+}

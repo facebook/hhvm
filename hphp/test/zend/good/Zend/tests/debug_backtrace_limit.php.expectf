@@ -64,8 +64,17 @@ Array
     [2] => Array
         (
             [file] => %sdebug_backtrace_limit.php
-            [line] => 17
+            [line] => 19
             [function] => a
+            [args] => Array
+                (
+                )
+
+        )
+
+    [3] => Array
+        (
+            [function] => entrypoint_debug_backtrace_limit
             [args] => Array
                 (
                 )
@@ -100,8 +109,17 @@ Array
     [2] => Array
         (
             [file] => %sdebug_backtrace_limit.php
-            [line] => 17
+            [line] => 19
             [function] => a
+            [args] => Array
+                (
+                )
+
+        )
+
+    [3] => Array
+        (
+            [function] => entrypoint_debug_backtrace_limit
             [args] => Array
                 (
                 )

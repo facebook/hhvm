@@ -1,108 +1,108 @@
 *** Testing base64_encode() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(63)
-Error: 8 - Undefined variable: unset_var, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(66)
+Error: 8 - Undefined variable: undefined_var, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(65)
+Error: 8 - Undefined variable: unset_var, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(68)
 
 Arg value 0
 
-Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 1
 
-Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 12345
 
-Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value -2345
 
-Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, integer given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 10.5
 
-Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value -10.5
 
-Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 101234567000
 
-Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 1.07654321E-9
 
-Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 0.5
 
-Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Warning: base64_encode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
-Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 1
 
-Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 1
 
-Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 string(0) ""
 
 Arg value 
 string(0) ""
-Error: 4096 - Object of class stdClass could not be converted to string, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(72)
+Error: 4096 - Object of class stdClass could not be converted to string, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, object given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 
-Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 73
+Warning: base64_encode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 Done

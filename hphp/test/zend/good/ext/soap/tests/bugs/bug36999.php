@@ -22,8 +22,6 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-ZendGoodExtSoapTestsBugsBug36999::$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
-
 function test($num) {
 
   try {
@@ -35,8 +33,13 @@ function test($num) {
 	  var_dump($ex);
 	}
 }
-test(3706790240);
 
 abstract final class ZendGoodExtSoapTestsBugsBug36999 {
   public static $soap;
+}
+<<__EntryPoint>>
+function entrypoint_bug36999(): void {
+
+  ZendGoodExtSoapTestsBugsBug36999::$soap = new LocalSoapClient(dirname(__FILE__)."/bug36999.wsdl");
+  test(3706790240);
 }

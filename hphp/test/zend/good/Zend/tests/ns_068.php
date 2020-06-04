@@ -1,7 +1,9 @@
 <?hh
-echo __NAMESPACE__ . "\n";
+function foo() {}
 namespace foo;
-echo __NAMESPACE__ . "\n";
 namespace bar;
-echo __NAMESPACE__ . "\n";
-echo "===DONE===\n";
+
+<<__EntryPoint>>
+function entrypoint_ns_068(): void {
+  echo "===DONE===\n";
+}

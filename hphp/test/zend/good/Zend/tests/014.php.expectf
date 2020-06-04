@@ -9,7 +9,7 @@ array(2) {
   string(%d) "%s/014.inc"
 }
 
-Warning: get_included_files() expects exactly 0 parameters, 2 given in %s/014.php on line 8
+Warning: get_included_files() expects exactly 0 parameters, 2 given in %s/014.php on line 10
 array(2) {
   [0]=>
   string(%d) "%s/014.php"
@@ -17,7 +17,7 @@ array(2) {
   string(%d) "%s/014.inc"
 }
 
-Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/014.php on line 13
+Warning: get_included_files() expects exactly 0 parameters, 1 given in %s/014.php on line 15
 array(2) {
   [0]=>
   string(%d) "%s/014.php"

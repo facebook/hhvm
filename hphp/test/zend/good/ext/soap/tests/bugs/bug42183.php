@@ -2,19 +2,22 @@
 class PHPObject {
 }
 
-$req = <<<EOF
+function test() {
+	return new PHPObject();
+}
+<<__EntryPoint>>
+function entrypoint_bug42183(): void {
+
+  $req = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://ws.sit.com" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:test/></SOAP-ENV:Body></SOAP-ENV:Envelope>
 EOF;
 
-function test() {
-	return new PHPObject();
+  $server = new SoapServer(NULL, darray['uri' => 'http://ws.sit.com', 
+  	'classmap' => darray['Object' => 'PHPObject']]);
+  $server->addFunction("test");
+  ob_start();
+  $server->handle($req);
+  ob_end_clean();
+  echo "ok\n";
 }
-
-$server = new SoapServer(NULL, darray['uri' => 'http://ws.sit.com', 
-	'classmap' => darray['Object' => 'PHPObject']]);
-$server->addFunction("test");
-ob_start();
-$server->handle($req);
-ob_end_clean();
-echo "ok\n";

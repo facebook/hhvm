@@ -2,10 +2,6 @@
 
 namespace test;
 
-\var_dump(__DIR__);
-\var_dump(__FILE__);
-\var_dump(__LINE__);
-
 class foo {
 	public function __construct() {
 		\var_dump(__METHOD__);
@@ -13,7 +9,14 @@ class foo {
 		\var_dump(__FUNCTION__);
 	}
 }
+<<__EntryPoint>>
+function entrypoint_constants_006(): void {
 
-new foo;
+  \var_dump(__DIR__);
+  \var_dump(__FILE__);
+  \var_dump(__LINE__);
 
-\var_dump(__NAMESPACE__);
+  new foo;
+
+  \var_dump(__NAMESPACE__);
+}

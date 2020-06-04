@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-require_once('fopen_include_path.inc');
-
 function runtest() {
     $tempDir = __SystemLib\hphp_test_tmppath('fopen_variation13.dir.tmp');
     $tmpfile = 'fopen_variation13.tmp';
@@ -31,6 +29,8 @@ function runtest() {
 
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
+
 echo "*** Testing fopen() : variation ***\n";
 $newpath = create_include_path();
 set_include_path($newpath);

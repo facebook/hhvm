@@ -3,7 +3,6 @@ function my_error_handler($errno, $errmsg, $filename, $linenum, $vars)
 {
 	echo "$errno: $errmsg\n";
 }
-set_error_handler(fun('my_error_handler'));
 
 function do_single_test($header)
 {
@@ -53,15 +52,19 @@ HERE
 );
 }
 
-ZendGoodExtIconvTestsIconvMimeDecode::$mode = 0;
-do_regression_test();
-ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT;
-do_regression_test();
-ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
-do_regression_test();
-ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT | ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
-do_regression_test();
-
 abstract final class ZendGoodExtIconvTestsIconvMimeDecode {
   public static $mode;
+}
+<<__EntryPoint>>
+function entrypoint_iconv_mime_decode(): void {
+  set_error_handler(fun('my_error_handler'));
+
+  ZendGoodExtIconvTestsIconvMimeDecode::$mode = 0;
+  do_regression_test();
+  ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT;
+  do_regression_test();
+  ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
+  do_regression_test();
+  ZendGoodExtIconvTestsIconvMimeDecode::$mode = ICONV_MIME_DECODE_STRICT | ICONV_MIME_DECODE_CONTINUE_ON_ERROR;
+  do_regression_test();
 }

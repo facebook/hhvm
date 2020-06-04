@@ -5,9 +5,6 @@
  * Alias to functions:
  */
 
-
-require_once('fopen_include_path.inc');
-
 function runtest() {
 
    //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists
@@ -22,7 +19,9 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation4 {
   public static $filename;
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
 $thisTestDir = __SystemLib\hphp_test_tmppath('dir');
+
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

@@ -1,5 +1,6 @@
 <?hh
-$urls = varray[
+function urls() {
+  return varray[
 // Parsable URLs:
 '64.246.30.37',
 'http://64.246.30.37',
@@ -108,5 +109,4 @@ $urls = varray[
 'http://blah.com:123456',
 'http://blah.com:abcdef',
 ];
-
-
+}

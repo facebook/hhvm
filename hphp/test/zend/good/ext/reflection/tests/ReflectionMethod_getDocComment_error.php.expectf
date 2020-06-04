@@ -1,4 +1,4 @@
 
-Warning: ReflectionFunctionAbstract::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionMethod_getDocComment_error.php on line 4
+Warning: ReflectionFunctionAbstract::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionMethod_getDocComment_error.php on line 6
 
-Warning: ReflectionFunctionAbstract::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionMethod_getDocComment_error.php on line 5
+Warning: ReflectionFunctionAbstract::getDocComment() expects exactly 0 parameters, 1 given in %s/ReflectionMethod_getDocComment_error.php on line 7

@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-require_once('fopen_include_path.inc');
-
 function runtest() {
 
 
@@ -44,7 +42,9 @@ function runtest() {
     rmdir($extraDir);
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
 $thisTestDir = __SystemLib\hphp_test_tmppath('fopenVariation16.dir');
+
 mkdir($thisTestDir);
 $oldDirPath = getcwd();
 chdir($thisTestDir);

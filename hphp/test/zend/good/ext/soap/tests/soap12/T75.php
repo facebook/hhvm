@@ -1,8 +1,10 @@
 <?hh
-$HTTP_RAW_POST_DATA = <<<EOF
+<<__EntryPoint>>
+function entrypoint_T75(): void {
+  $GLOBALS['HTTP_RAW_POST_DATA'] = <<<EOF
 <?xml version='1.0' ?>
 <env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"> 
- <env:Header>
+  <env:Header>
   <test:echoResolvedRef xmlns:test="http://example.org/ts-tests"
         env:role="http://www.w3.org/2003/05/soap-envelope/role/next"
         env:mustUnderstand="1">
@@ -10,9 +12,11 @@ $HTTP_RAW_POST_DATA = <<<EOF
           xlink:href="new.xml"
           xmlns:xlink="http://www.w3.org/1999/xlink" />
   </test:echoResolvedRef>
- </env:Header>
- <env:Body>
- </env:Body>
+  </env:Header>
+  <env:Body>
+  </env:Body>
 </env:Envelope>
 EOF;
-include "soap12-test.inc";
+  include "soap12-test.inc";
+  test();
+}

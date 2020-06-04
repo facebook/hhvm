@@ -15,9 +15,9 @@
 101
 == WRONG PARAMETERS ==
 
-Warning: strlen() expects parameter 1 to be string, array given in %s/mb_strlen.php on line 55
+Warning: strlen() expects parameter 1 to be string, array given in %s/mb_strlen.php on line 57
 
 
-Warning: strlen() expects parameter 1 to be string, object given in %s/mb_strlen.php on line 60
+Warning: strlen() expects parameter 1 to be string, object given in %s/mb_strlen.php on line 62
 
 ERR: Warning

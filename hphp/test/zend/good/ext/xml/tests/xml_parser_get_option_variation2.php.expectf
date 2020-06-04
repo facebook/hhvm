@@ -2,107 +2,107 @@
 
 Arg value 12345 
 
-Warning: Unknown option in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: Unknown option in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 bool(false)
 
 Arg value -2345 
 
-Warning: Unknown option in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: Unknown option in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 bool(false)
 
 Arg value 10.5 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value -10.5 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value 101234567000 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value 1.07654321E-9 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value 0.5 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, double given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Array 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Array 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Array 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Array 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Array 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value 1 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value 1 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value string 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value string 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, string given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Some Ascii Data 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, object given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, object given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value Resource id #5 
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, resource given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, resource given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 81
+Warning: xml_parser_get_option() expects parameter 2 to be integer, null given in %s/zend/good/ext/xml/tests/xml_parser_get_option_variation2.php on line 83
 Done

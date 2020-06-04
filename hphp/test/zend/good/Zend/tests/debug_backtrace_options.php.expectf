@@ -2,26 +2,32 @@
 #0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==1
 #0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==0
 #0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==DEBUG_BACKTRACE_PROVIDE_OBJECT
 #0  doit(a, b, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall(doit, debug_print_backtrace) called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==DEBUG_BACKTRACE_IGNORE_ARGS
 #0  doit() called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall() called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall() called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==both
 #0  doit() called at [%sdebug_backtrace_options.php:%d]
 #1  foo->doCall() called at [%sdebug_backtrace_options.php:%d]
 #2  foo::statCall() called at [%sdebug_backtrace_options.php:%d]
+#3  entrypoint_debug_backtrace_options()
 ==default
 Array
 (
@@ -81,6 +87,15 @@ Array
                 (
                     [0] => doit
                     [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Array
+                (
                 )
 
         )
@@ -149,6 +164,15 @@ Array
 
         )
 
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Array
+                (
+                )
+
+        )
+
 )
 ==0
 Array
@@ -205,6 +229,15 @@ Array
                 (
                     [0] => doit
                     [1] => backtrace_print
+                )
+
+        )
+
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Array
+                (
                 )
 
         )
@@ -273,6 +306,15 @@ Array
 
         )
 
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
+            [args] => Array
+                (
+                )
+
+        )
+
 )
 ==DEBUG_BACKTRACE_IGNORE_ARGS
 Array
@@ -307,6 +349,11 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
+        )
+
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
         )
 
 )
@@ -347,6 +394,11 @@ Array
             [function] => statCall
             [class] => foo
             [type] => ::
+        )
+
+    [4] => Array
+        (
+            [function] => entrypoint_debug_backtrace_options
         )
 
 )

@@ -1,2 +1,2 @@
 
-Fatal error: Method 'hello' declared in multiple traits (THello1, THello2) in %s/conflict001.php on line 16
+Fatal error: Method 'hello' declared in multiple traits (THello1, THello2) in %s/conflict001.php on line 15

@@ -1,8 +1,10 @@
 <?hh
-ini_set("intl.error_level", E_WARNING);
-ini_set("intl.default_locale", "pt_PT");
+<<__EntryPoint>>
+function entrypoint_rbbiter_getBinaryRules_basic(): void {
+  ini_set("intl.error_level", E_WARNING);
+  ini_set("intl.default_locale", "pt_PT");
 
-$rules = <<<RULES
+  $rules = <<<RULES
 \$LN = [[:letter:] [:number:]];
 \$S = [.;,:];
 
@@ -15,13 +17,16 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new IntlRuleBasedBreakIterator($rules);
-$rbbi->setText('sdfkjsdf88á.... ,;');
+  $rbbi = new IntlRuleBasedBreakIterator($rules);
+  $rbbi->setText('sdfkjsdf88á.... ,;');
 
-$br = $rbbi->getBinaryRules();
+  $br = $rbbi->getBinaryRules();
 
-$rbbi2 = new IntlRuleBasedBreakIterator($br, true);
+  $rbbi2 = new IntlRuleBasedBreakIterator($br, true);
 
-var_dump($rbbi->getRules(), $rbbi2->getRules());
-var_dump($rbbi->getRules() == $rbbi2->getRules());
-echo "==DONE==";
+  var_dump($rbbi->getRules(), $rbbi2->getRules());
+  var_dump($rbbi->getRules() == $rbbi2->getRules());
+  echo "==DONE==";
+
+  __hhvm_intrinsics\launder_value($br);
+}

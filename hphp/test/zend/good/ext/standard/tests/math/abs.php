@@ -5,15 +5,12 @@ $long_min = -$long_max - 1;
 printf("%d,%d,%d,%d\n",is_float($long_min  ),is_float($long_max  ),
                        is_int($long_min-1),is_int($long_max+1));
 
-$tests = <<<TESTS
- 1   === abs(-1)
- 1.5 === abs(-1.5)
- 1   === abs("-1")
- 1.5 === abs("-1.5")
--($long_min+1) === abs($long_min-1)
--($long_min)   === abs($long_min)
--($long_min+1) === abs($long_min+1)
-TESTS;
-
 include(dirname(__FILE__) . '/../../../../tests/quicktester.inc');
+quicktester(() ==> 1, () ==> abs(-1));
+quicktester(() ==> 1.5, () ==> abs(-1.5));
+quicktester(() ==> 1, () ==> abs("-1"));
+quicktester(() ==> 1.5, () ==> abs("-1.5"));
+quicktester(() ==> -($long_min+1), () ==> abs($long_min-1));
+quicktester(() ==> -($long_min), () ==> abs($long_min));
+quicktester(() ==> -($long_min+1), () ==> abs($long_min+1));
 }

@@ -1,6 +1,6 @@
 <?hh
-require_once 'nowdoc.inc';
 <<__EntryPoint>> function main(): void {
+require_once 'nowdoc.inc';
 include 'nowdoc_vars.inc';
 print <<<'ENDOFNOWDOC'
 This is nowdoc test #$a.

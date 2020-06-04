@@ -1,3 +1,0 @@
-<?hh
-include("inc.inc");
-

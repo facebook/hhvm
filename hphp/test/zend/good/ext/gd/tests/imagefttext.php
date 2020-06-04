@@ -1,6 +1,4 @@
 <?hh
-    $cwd = dirname(__FILE__);
-    $fontfile_8859 = "$cwd/test8859.ttf";
 
     function testrun($im, $fontfile) {
         $sx = imagesx($im);
@@ -26,11 +24,16 @@
 
         return ($cnt < ($sx * $sy));
     }
+<<__EntryPoint>>
+function entrypoint_imagefttext(): void {
+      $cwd = dirname(__FILE__);
+      $fontfile_8859 = "$cwd/test8859.ttf";
 
-    $im = imagecreate(256, 256);
-    var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
+      $im = imagecreate(256, 256);
+      var_dump(testrun($im, $fontfile_8859));
+      imagedestroy($im);
 
-    $im = imagecreatetruecolor(256, 256);
-    var_dump(testrun($im, $fontfile_8859));
-    imagedestroy($im);
+      $im = imagecreatetruecolor(256, 256);
+      var_dump(testrun($im, $fontfile_8859));
+      imagedestroy($im);
+}

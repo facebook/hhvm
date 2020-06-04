@@ -2,7 +2,8 @@
 <<__EntryPoint>>
 function main_entry(): void {
   include dirname(__FILE__) .'/prepare.inc';
-  $proc->importStylesheet($xsl);
+  $proc = XSLTPrepare::getProc();
+  $proc->importStylesheet(XSLTPrepare::getXSL());
   $proc->setParameter('', 'key', 'value');
   var_dump($proc->getParameter('', 'key'));
 }

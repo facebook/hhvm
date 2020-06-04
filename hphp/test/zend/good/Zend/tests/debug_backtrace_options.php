@@ -32,11 +32,15 @@ class foo {
 	{
 	   $dowhat('a','b', $how);
 	}
+	<<__NEVER_INLINE>>
 	static function statCall($dowhat, $how)
 	{
 		$obj = new self();
 		$obj->doCall($dowhat, $how);
 	}
 }
-foo::statCall("doit", "debug_print_backtrace");
-foo::statCall("doit", "backtrace_print");
+<<__EntryPoint>>
+function entrypoint_debug_backtrace_options(): void {
+  foo::statCall("doit", "debug_print_backtrace");
+  foo::statCall("doit", "backtrace_print");
+}

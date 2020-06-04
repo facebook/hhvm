@@ -1,9 +1,4 @@
 <?hh
-$xml =<<<EOF
-<people>
-  <person>Jane</person>
-</people>
-EOF;
 
 function traverse_xml($xml, $pad = '')
 {
@@ -20,9 +15,17 @@ function traverse_xml($xml, $pad = '')
   }
   echo $pad."</$name>\n";
 }
+<<__EntryPoint>>
+function entrypoint_026(): void {
+  $xml =<<<EOF
+<people>
+  <person>Jane</person>
+</people>
+EOF;
 
 
-$people = simplexml_load_string($xml);
-traverse_xml($people);
+  $people = simplexml_load_string($xml);
+  traverse_xml($people);
 
-echo "===DONE===\n";
+  echo "===DONE===\n";
+}

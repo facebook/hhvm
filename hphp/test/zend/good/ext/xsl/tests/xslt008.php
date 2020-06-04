@@ -12,7 +12,8 @@ function main_entry(): void {
     exit;
   }
   chdir(dirname(__FILE__));
+  $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($xsl);
   print "\n";
-  print $proc->transformToXML($dom);
+  print $proc->transformToXML(XSLTPrepare::getDOM());
 }

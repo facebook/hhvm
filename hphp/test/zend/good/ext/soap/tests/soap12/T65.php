@@ -1,5 +1,7 @@
 <?hh
-$HTTP_RAW_POST_DATA = <<<EOF
+<<__EntryPoint>>
+function entrypoint_T65(): void {
+  $GLOBALS['HTTP_RAW_POST_DATA'] = <<<EOF
 <?xml version='1.0' ?>
 <!DOCTYPE DOC [
 <!ELEMENT Envelope (Body) >
@@ -14,4 +16,6 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </env:Body>
 </env:Envelope>
 EOF;
-include "soap12-test.inc";
+  include "soap12-test.inc";
+  test();
+}

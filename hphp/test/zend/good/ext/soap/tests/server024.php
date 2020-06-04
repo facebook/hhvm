@@ -18,10 +18,16 @@ function test() {
 	return "Hello Body!";
 }
 
-ZendGoodExtSoapTestsServer024::$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
-ZendGoodExtSoapTestsServer024::$server->addfunction("test");
+abstract final class ZendGoodExtSoapTestsServer024 {
+  public static $server;
+}
+<<__EntryPoint>>
+function entrypoint_server024(): void {
 
-$HTTP_RAW_POST_DATA = <<<EOF
+  ZendGoodExtSoapTestsServer024::$server = new soapserver(null,darray['uri'=>"http://testuri.org"]);
+  ZendGoodExtSoapTestsServer024::$server->addfunction("test");
+
+  $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
@@ -35,9 +41,6 @@ $HTTP_RAW_POST_DATA = <<<EOF
 </SOAP-ENV:Envelope>
 EOF;
 
-ZendGoodExtSoapTestsServer024::$server->handle($HTTP_RAW_POST_DATA);
-echo "ok\n";
-
-abstract final class ZendGoodExtSoapTestsServer024 {
-  public static $server;
+  ZendGoodExtSoapTestsServer024::$server->handle($HTTP_RAW_POST_DATA);
+  echo "ok\n";
 }

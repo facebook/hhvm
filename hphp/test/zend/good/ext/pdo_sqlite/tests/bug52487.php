@@ -1,6 +1,6 @@
 <?hh
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 <<__EntryPoint>> function main(): void {
+require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $stmt = $db->prepare("select 1 as attr");
 for ($i = 0; $i < 10; $i++) {

@@ -48,14 +48,14 @@ OK_STR
 OK_NEWLINE
 == INVALID PARAMETER TEST ==
 
-Warning: mb_strpos() expects parameter 3 to be integer, string given in %s/mb_strpos.php on line 101
+Warning: mb_strpos() expects parameter 3 to be integer, string given in %s/mb_strpos.php on line 103
 OK_NULL
 
-Warning: mb_strpos() expects parameter 2 to be string, array given in %s/mb_strpos.php on line 104
+Warning: mb_strpos() expects parameter 2 to be string, array given in %s/mb_strpos.php on line 106
 OK_ARRAY
 
-Warning: mb_strpos() expects parameter 2 to be string, object given in %s/mb_strpos.php on line 107
+Warning: mb_strpos() expects parameter 2 to be string, object given in %s/mb_strpos.php on line 109
 OK_OBJECT
 
-Warning: mb_strpos() expects parameter 2 to be string, object given in %s/mb_strpos.php on line 110
+Warning: mb_strpos() expects parameter 2 to be string, object given in %s/mb_strpos.php on line 112
 OK_BAD_ENCODING

@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-require_once('fopen_include_path.inc');
-
 function runtest() {
 
    $h = fopen(ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile, "w");
@@ -22,6 +20,8 @@ abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
   public static $filename = "readfile_variation6.txt";
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
+
 echo "*** Testing readfile() : variation ***\n";
 // this doesn't create the include dirs in this directory
 // we change to this to ensure we are not part of the

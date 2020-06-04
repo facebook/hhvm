@@ -7,21 +7,24 @@ class C {
 	public $d = "Original d";
 	public $e = "Original e";
 }
+<<__EntryPoint>>
+function entrypoint_foreachLoopObjects_004(): void {
 
-echo "\nRemoving the current element from an iterated object.\n";
-$obj = new C;
-$count=0;
-foreach ($obj as $v) {
-	if ($v==$obj->b) {
-		unset($obj->b);	
-	}
-	var_dump($v);
-	if (++$count>10) {
-		echo "Loop detected.\n";
-		break;
-	}	
+  echo "\nRemoving the current element from an iterated object.\n";
+  $obj = new C;
+  $count=0;
+  foreach ($obj as $v) {
+  	if ($v==$obj->b) {
+  		unset($obj->b);
+  	}
+  	var_dump($v);
+  	if (++$count>10) {
+  		echo "Loop detected.\n";
+  		break;
+  	}
+  }
+  var_dump($obj);
+
+
+  echo "===DONE===\n";
 }
-var_dump($obj);
-
-
-echo "===DONE===\n";

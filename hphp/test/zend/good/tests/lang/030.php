@@ -11,11 +11,14 @@ class foo {
     $GLOBALS['names'][] = $this->Name;
 	}
 }
+<<__EntryPoint>>
+function entrypoint_030(): void {
 
 
-$bar1 =new foo('constructor');
-$bar1->Name = 'outside';
-$bar1->echoName();
-$List->echoName();
+  $bar1 =new foo('constructor');
+  $bar1->Name = 'outside';
+  $bar1->echoName();
+  $GLOBALS['List']->echoName();
 
-print ($names==varray['constructor','outside','outside']) ? 'success':'failure';
+  print ($GLOBALS['names']==varray['constructor','outside','outside']) ? 'success':'failure';
+}

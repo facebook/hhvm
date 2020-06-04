@@ -1,13 +1,6 @@
 <?hh
 
 /*
- * Sort arrays using various locales.
- */
-
-
-ZendGoodExtIntlTestsCollatorSortWithSortKeysVariant2::$test_num = 1;
-
-/*
  * Sort arrays in the given list using specified locale.
  */
 function sort_arrays( $locale, $arrays )
@@ -81,9 +74,19 @@ function ut_main()
     return $res_str . "\n";
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
 abstract final class ZendGoodExtIntlTestsCollatorSortWithSortKeysVariant2 {
   public static $test_num;
+}
+<<__EntryPoint>>
+function entrypoint_collator_sort_with_sort_keys_variant2(): void {
+
+  /*
+   * Sort arrays using various locales.
+   */
+
+
+  ZendGoodExtIntlTestsCollatorSortWithSortKeysVariant2::$test_num = 1;
+
+  include_once( 'ut_common.inc' );
+  ut_run();
 }

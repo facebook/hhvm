@@ -1,5 +1,4 @@
 <?hh
-error_reporting(E_ALL);
 
 abstract class Base {
    public abstract function sayHello(varray $a);
@@ -10,9 +9,6 @@ class SubClass extends Base {
      echo "World!\n";
    }
 }
-
-$s = new SubClass();
-$s->sayHello(varray[]);
 
 
 trait SayWorld {
@@ -25,6 +21,13 @@ class MyHelloWorld extends Base {
    use SayWorld;
 }
 
-$o = new MyHelloWorld();
-$o->sayHello(varray[]);
+<<__EntryPoint>>
+function entrypoint_inheritance003(): void {
+  error_reporting(E_ALL);
 
+  $s = new SubClass();
+  $s->sayHello(varray[]);
+
+  $o = new MyHelloWorld();
+  $o->sayHello(varray[]);
+}

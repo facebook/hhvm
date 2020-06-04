@@ -12,13 +12,13 @@
             $this->offsetSet($item->id, $item);
         }
     }
-
+<<__EntryPoint>> function main(): void {
     $projects = new ProjectsList();
     $projects->add(new Project('1'));
     $projects->add(new Project(2));
 
     var_dump($projects->offsetExists(1));
     var_dump($projects->offsetExists('2'));
-<<__EntryPoint>> function main(): void {
-echo "===DONE===\n";
+    echo "===DONE===\n";
 }
+

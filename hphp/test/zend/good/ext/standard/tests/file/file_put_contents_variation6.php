@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-require_once('fopen_include_path.inc');
-
 function runtest() {
 
 
@@ -24,6 +22,8 @@ abstract final class ZendGoodExtStandardTestsFileFilePutContentsVariation6 {
   public static $filename;
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
+
 echo "*** Testing file_put_contents() : variation ***\n";
 
 $thisTestDir = __SystemLib\hphp_test_tmppath('dir');

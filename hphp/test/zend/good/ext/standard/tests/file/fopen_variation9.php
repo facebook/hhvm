@@ -5,8 +5,6 @@
  * Alias to functions:
  */
 
-require_once('fopen_include_path.inc');
-
 function runtest() {
     $tmpfile =  basename(__FILE__, ".php") . ".tmp";
     $h = fopen($tmpfile, "w", true);
@@ -35,6 +33,8 @@ function runtest() {
     }
 }
 <<__EntryPoint>> function main(): void {
+require_once('fopen_include_path.inc');
+
 $thisTestDir =  basename(__FILE__, ".php") . ".dir";
 mkdir($thisTestDir);
 chdir($thisTestDir);

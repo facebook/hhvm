@@ -8,8 +8,9 @@ function main_entry(): void {
     echo "Error while parsing the xsl document\n";
     exit;
   }
+  $proc = XSLTPrepare::getProc();
   $proc->importStylesheet($phpfuncxsl);
   var_dump($proc->registerPHPFunctions('ucwords'));
   var_dump($proc->registerPHPFunctions(null));
-  var_dump($proc->transformToXml($dom));
+  var_dump($proc->transformToXml(XSLTPrepare::getDOM()));
 }

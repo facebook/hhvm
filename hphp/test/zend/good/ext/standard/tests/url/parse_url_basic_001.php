@@ -14,7 +14,7 @@
 function main_entry(): void {
   include_once(dirname(__FILE__) . '/urls.inc');
 
-  foreach ($urls as $url) {
+  foreach (urls() as $url) {
   	echo "\n--> $url: ";
   	var_dump(parse_url($url));
   }

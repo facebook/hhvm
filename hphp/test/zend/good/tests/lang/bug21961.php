@@ -33,7 +33,7 @@ class bar extends man {
     if($who == NULL) {
       return 'nobody';
     }
-    return eval("return ".$who.'::getName();');
+    return man::getName();
   }
 }
 

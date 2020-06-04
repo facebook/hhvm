@@ -1,19 +1,19 @@
 
-Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 30
+Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 37
 
-Warning: File write for %s/zend/good/ext/xsl/tests/bug54446test.txt refused in %s/bug54446.php on line 30
+Warning: File write for %s/zend/good/ext/xsl/tests/bug54446test.txt refused in %s/bug54446.php on line 37
 
-Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 30
+Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 37
 
-Warning: xsltDocumentElem: write rights for %s/zend/good/ext/xsl/tests/bug54446test.txt denied in %s/bug54446.php on line 30
+Warning: xsltDocumentElem: write rights for %s/zend/good/ext/xsl/tests/bug54446test.txt denied in %s/bug54446.php on line 37
 OK, no file created
 OK, file exists
 
-Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 58
+Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 65
 
-Warning: File write for %s/zend/good/ext/xsl/tests/bug54446test.txt refused in %s/bug54446.php on line 58
+Warning: File write for %s/zend/good/ext/xsl/tests/bug54446test.txt refused in %s/bug54446.php on line 65
 
-Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 58
+Warning: runtime error: file %s/ line 7 element output in %s/bug54446.php on line 65
 
-Warning: xsltDocumentElem: write rights for %s/zend/good/ext/xsl/tests/bug54446test.txt denied in %s/bug54446.php on line 58
+Warning: xsltDocumentElem: write rights for %s/zend/good/ext/xsl/tests/bug54446test.txt denied in %s/bug54446.php on line 65
 OK, no file created

@@ -1,13 +1,6 @@
 <?hh
 
 /*
- * Sort associative arrays using various locales.
- */
-
-
-ZendGoodExtIntlTestsCollatorAsortVariant2::$test_num = 1;
-
-/*
  * Sort various arrays in specified locale.
  */
 function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR )
@@ -125,9 +118,19 @@ function ut_main()
     return $res_str . "\n";
 }
 
-include_once( 'ut_common.inc' );
-ut_run();
-
 abstract final class ZendGoodExtIntlTestsCollatorAsortVariant2 {
   public static $test_num;
+}
+<<__EntryPoint>>
+function entrypoint_collator_asort_variant2(): void {
+
+  /*
+   * Sort associative arrays using various locales.
+   */
+
+
+  ZendGoodExtIntlTestsCollatorAsortVariant2::$test_num = 1;
+
+  include_once( 'ut_common.inc' );
+  ut_run();
 }

@@ -1,4 +1,0 @@
-<?hh
-
-yield "Test";
-

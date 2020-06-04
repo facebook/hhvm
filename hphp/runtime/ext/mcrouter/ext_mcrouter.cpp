@@ -74,7 +74,7 @@ namespace detail {
 // used instead.
 template <typename Message>
 uint64_t getFlagsImpl(std::true_type, Message& message) {
-  return message.flags();
+  return *message.flags_ref();
 }
 template <typename Message>
 uint64_t getFlagsImpl(std::false_type, Message&) {
@@ -86,7 +86,7 @@ template <typename Message>
 class HasFlagsTrait<
     Message,
     std::enable_if_t<std::is_same<
-        decltype(std::declval<std::remove_const_t<Message>&>().flags()),
+        decltype(std::declval<std::remove_const_t<Message>&>().flags_ref()),
         std::uint64_t&>{}>> : public std::true_type {};
 // Return flags if it exists in Message and 0 otherwise.
 template <class Message>
@@ -156,10 +156,10 @@ uint64_t getDelta(const Reply& /*reply*/) {
       mc::OpFromType<Reply, mc::ReplyOpMapping>::value);
 }
 uint64_t getDelta(const mc::McIncrReply& reply) {
-  return reply.delta();
+  return *reply.delta_ref();
 }
 uint64_t getDelta(const mc::McDecrReply& reply) {
-  return reply.delta();
+  return *reply.delta_ref();
 }
 
 // Helpers for retrieving 'casToken' field
@@ -170,7 +170,7 @@ uint64_t getCasToken(const Reply& /*reply*/) {
       mc::OpFromType<Reply, mc::ReplyOpMapping>::value);
 }
 uint64_t getCasToken(const mc::McGetsReply& reply) {
-  return reply.casToken();
+  return *reply.casToken_ref();
 }
 
 } // anonymous
@@ -281,14 +281,14 @@ struct MCRouterResult : AsioExternalThreadEvent {
    * We're in the worker thread here, so we can't do any request
    * allocations or the memory manager will get confused.
    * We also can't store `msg' directly on the object as it'll be
-   * freed after the result() method returns.
+   * freed after the result_ref() method returns.
    *
    * Marshal the data we actually care about into fields on this
    * object, then remarshal them into smart_ptr structures during unserialize()
    */
   template <class Request>
   void result(const Request& request, mc::ReplyT<Request>&& reply) {
-    if (mc::isErrorResult(reply.result())) {
+    if (mc::isErrorResult(*reply.result_ref())) {
       setResultException(request, reply);
     } else {
       const auto mc_op =
@@ -300,21 +300,21 @@ struct MCRouterResult : AsioExternalThreadEvent {
         case mc_op_replace:
         case mc_op_prepend:
         case mc_op_append:
-          if (!mc::isStoredResult(reply.result())) {
+          if (!mc::isStoredResult(*reply.result_ref())) {
             setResultException(request, reply);
             break;
           }
           break;
 
         case mc_op_flushall:
-          if (reply.result() != compatibility::mc_res_ok) {
+          if (*reply.result_ref() != compatibility::mc_res_ok) {
             setResultException(request, reply);
             break;
           }
           break;
 
         case mc_op_delete:
-          if (reply.result() != compatibility::mc_res_deleted) {
+          if (*reply.result_ref() != compatibility::mc_res_deleted) {
             setResultException(request, reply);
             break;
           }
@@ -322,7 +322,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
 
         case mc_op_incr:
         case mc_op_decr:
-          if (!mc::isStoredResult(reply.result())) {
+          if (!mc::isStoredResult(*reply.result_ref())) {
             setResultException(request, reply);
             break;
           }
@@ -335,7 +335,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
           /* fallthrough */
         case mc_op_get:
           m_flags = detail::getFlagsIfExist(reply);
-          if (mc::isMissResult(reply.result())) {
+          if (mc::isMissResult(*reply.result_ref())) {
             setResultException(request, reply);
             break;
           }
@@ -363,15 +363,15 @@ struct MCRouterResult : AsioExternalThreadEvent {
   void setResultException(const Request& request,
                           const mc::ReplyT<Request>& reply) {
     m_op = mc::OpFromType<Request, mc::RequestOpMapping>::value;
-    m_replyCode = reply.result();
+    m_replyCode = *reply.result_ref();
     m_exception  = mc_op_to_string(m_op);
     m_exception += " failed with result ";
     m_exception += compatibility::carbonResultToString(m_replyCode);
-    if (!reply.message().empty()) {
+    if (!reply.message_ref()->empty()) {
       m_exception += ": ";
-      m_exception += reply.message();
+      m_exception += *reply.message_ref();
     }
-    m_key = request.key().fullKey().str();
+    m_key = request.key_ref()->fullKey().str();
   }
 
   TypedValue m_result;
@@ -395,7 +395,7 @@ void MCRouter::send(std::unique_ptr<const Request> request,
       *requestPtr,
       [res, request = std::move(request)](const Request& req,
                                           mc::ReplyT<Request>&& reply) {
-        if (reply.result() == compatibility::mc_res_unknown) {
+        if (*reply.result_ref() == compatibility::mc_res_unknown) {
           // McrouterClient has signaled this request is cancelled
           res->cancel();
         } else {
@@ -435,10 +435,10 @@ static Object mcr_set(ObjectData* this_,
                       int64_t flags, int64_t expiration) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
-  request->value() = folly::IOBuf(
+  request->value_ref() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
-  request->flags() = flags;
-  request->exptime() = expiration;
+  request->flags_ref() = flags;
+  request->exptime_ref() = expiration;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
@@ -448,7 +448,7 @@ static Object mcr_aprepend(ObjectData* this_,
                            const String& key, const String& val) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
-  request->value() = folly::IOBuf(
+  request->value_ref() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
@@ -459,7 +459,7 @@ static Object mcr_str_delta(ObjectData* this_,
                             const String& key, int64_t val) {
   auto request =
       std::make_unique<Request>(folly::StringPiece(key.c_str(), key.size()));
-  request->delta() = val;
+  request->delta_ref() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
@@ -468,7 +468,7 @@ static Object mcr_flushall(ObjectData* this_, int64_t val) {
   using Request = mc::McFlushAllRequest;
 
   auto request = std::make_unique<Request>("unused");
-  request->delay() = val;
+  request->delay_ref() = val;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }
@@ -487,10 +487,10 @@ static Object HHVM_METHOD(MCRouter, cas,
 
   auto request = std::make_unique<Request>(
       folly::StringPiece(key.c_str(), key.size()));
-  request->value() = folly::IOBuf(
+  request->value_ref() = folly::IOBuf(
       folly::IOBuf::COPY_BUFFER, folly::StringPiece(val.c_str(), val.size()));
-  request->exptime() = expiration;
-  request->casToken() = cas;
+  request->exptime_ref() = expiration;
+  request->casToken_ref() = cas;
 
   return Native::data<MCRouter>(this_)->issue<Request>(std::move(request));
 }

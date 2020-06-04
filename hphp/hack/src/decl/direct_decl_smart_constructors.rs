@@ -57,8 +57,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     }
 
     #[inline(always)]
-    #[allow(clippy::mut_from_ref)]
-    pub fn alloc<T>(&self, val: T) -> &'a mut T {
+    pub fn alloc<T>(&self, val: T) -> &'a T {
         self.state.arena.alloc(val)
     }
 
@@ -1179,7 +1178,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             if !initializer.is_ignored() {
                                 flags |= FunParamFlags::HAS_DEFAULT;
                             }
-                            let param = &*self.alloc(FunParam {
+                            let param = self.alloc(FunParam {
                                 pos: id.0,
                                 name: Some(id.1),
                                 type_: PossiblyEnforcedTy {
@@ -1307,7 +1306,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Ty_::Toption(ty) => Ty_::Toption(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Tfun(fun_type) => {
                 let convert_param = |param: &'a FunParam<'a>| {
-                    &*self.alloc(FunParam {
+                    self.alloc(FunParam {
                         type_: PossiblyEnforcedTy {
                             enforced: param.type_.enforced,
                             type_: self.convert_tapply_to_tgeneric(param.type_.type_),
@@ -1596,7 +1595,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             | TokenKind::GreaterThanGreaterThan
             | TokenKind::Percent
             | TokenKind::QuestionQuestion
-            | TokenKind::Equal => Node_::Operator(&*self.alloc((token_pos(self), kind))),
+            | TokenKind::Equal => Node_::Operator(self.alloc((token_pos(self), kind))),
             TokenKind::Abstract
             | TokenKind::As
             | TokenKind::Super
@@ -3235,7 +3234,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let mut params = Vec::new_in(self.state.arena);
         for node in args?.iter().copied() {
-            params.push(&*self.alloc(FunParam {
+            params.push(self.alloc(FunParam {
                 pos: node.get_pos(self.state.arena)?,
                 name: None,
                 type_: PossiblyEnforcedTy {

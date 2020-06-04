@@ -6,7 +6,7 @@
 use bumpalo::Bump;
 
 use direct_decl_smart_constructors::{DirectDeclSmartConstructors, Node, State};
-use parser::{parser::Parser, WithKind};
+use parser::parser::Parser;
 use parser_core_types::{
     parser_env::ParserEnv, source_text::SourceText, syntax_error::SyntaxError,
 };
@@ -18,7 +18,7 @@ pub fn parse_script<'a>(
     arena: &'a Bump,
     stack_limit: Option<&'a StackLimit>,
 ) -> (Node<'a>, Vec<SyntaxError>, State<'a>) {
-    let sc = WithKind::new(DirectDeclSmartConstructors::new(&source, arena));
+    let sc = DirectDeclSmartConstructors::new(&source, arena);
     let mut parser = Parser::new(&source, env, sc);
     let root = parser.parse_script(stack_limit);
     let errors = parser.errors();

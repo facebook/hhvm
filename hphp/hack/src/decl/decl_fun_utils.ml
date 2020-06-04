@@ -140,6 +140,17 @@ let hint_to_type_opt ~is_lambda env reason hint =
               mk (r, Tvarray_or_darray (tvar, tvar))
             else
               ty
+          | (r, Tvarray ty) ->
+            let ty = create_vars_for_reinfer_types ty in
+            mk (r, Tvarray ty)
+          | (r, Tdarray (tyk, tyv)) ->
+            let tyk = create_vars_for_reinfer_types tyk in
+            let tyv = create_vars_for_reinfer_types tyv in
+            mk (r, Tdarray (tyk, tyv))
+          | (r, Tvarray_or_darray (tyk, tyv)) ->
+            let tyk = create_vars_for_reinfer_types tyk in
+            let tyv = create_vars_for_reinfer_types tyv in
+            mk (r, Tvarray_or_darray (tyk, tyv))
           | (_r, ty_) ->
             if must_reinfer_type tcopt ty_ then
               tvar

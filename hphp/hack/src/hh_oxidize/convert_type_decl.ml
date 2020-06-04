@@ -100,8 +100,11 @@ let derive_blacklist ty =
    * don't care about comparison or hashing on environments *)
   | "typing_env_types::Env" -> ["Eq"; "Hash"; "Ord"]
   | "typing_env_types::Genv" -> ["Eq"; "Hash"; "Ord"]
+  | "ast_defs::Id" when Configuration.(mode () = ByRef) -> ["Debug"]
+  | "errors::Errors" when Configuration.(mode () = ByRef) -> ["Debug"]
   | "typing_defs_core::Ty" when is_by_ref_or_rc ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
+  | "typing_defs_core::Ty_" when Configuration.(mode () = ByRef) -> ["Debug"]
   | "typing_defs_core::ConstraintType" when is_by_ref_or_rc ->
     ["Eq"; "PartialEq"; "Ord"; "PartialOrd"]
   | _ -> []

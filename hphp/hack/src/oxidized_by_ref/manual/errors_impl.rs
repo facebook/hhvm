@@ -132,3 +132,17 @@ impl<'a> Errors<'a> {
         errors
     }
 }
+
+impl std::fmt::Debug for Errors<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let Errors(errors, applied_fixmes) = self;
+        if errors.is_empty() && applied_fixmes.is_empty() {
+            write!(f, "Errors::empty()")
+        } else {
+            f.debug_struct("Errors")
+                .field("errors", errors)
+                .field("applied_fixmes", applied_fixmes)
+                .finish()
+        }
+    }
+}

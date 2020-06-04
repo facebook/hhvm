@@ -114,6 +114,65 @@ impl Ty<'_> {
     }
 }
 
+impl std::fmt::Debug for Ty_<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use Ty_::*;
+        match self {
+            Tthis => write!(f, "Tthis"),
+            Tapply((id, tys)) => f.debug_tuple("Tapply").field(id).field(tys).finish(),
+            Taccess(taccess) => f.debug_tuple("Taccess").field(taccess).finish(),
+            Tarray((tk, tv)) => f.debug_tuple("Tarray").field(tk).field(tv).finish(),
+            Tmixed => write!(f, "Tmixed"),
+            Tlike(ty) => f.debug_tuple("Tlike").field(ty).finish(),
+            TpuAccess((ty, id)) => f.debug_tuple("TpuAccess").field(ty).field(id).finish(),
+            Tany(_) => write!(f, "Tany"),
+            Terr => write!(f, "Terr"),
+            Tnonnull => write!(f, "Tnonnull"),
+            Tdynamic => write!(f, "Tdynamic"),
+            Toption(ty) => f.debug_tuple("Toption").field(ty).finish(),
+            Tprim(tprim) => write!(f, "Tprim({:?})", tprim),
+            Tfun(fun_type) => f.debug_tuple("Tfun").field(fun_type).finish(),
+            Ttuple(tys) => f.debug_tuple("Ttuple").field(tys).finish(),
+            Tshape((kind, fields)) => f.debug_tuple("Tshape").field(kind).field(fields).finish(),
+            Tvar(ident) => f.debug_tuple("Tvar").field(ident).finish(),
+            Tgeneric(name) => write!(f, "Tgeneric({:?})", name),
+            Tunion(tys) => f.debug_tuple("Tunion").field(tys).finish(),
+            Tintersection(tys) => f.debug_tuple("Tintersection").field(tys).finish(),
+            Tdarray((tk, tv)) => f.debug_tuple("Tdarray").field(tk).field(tv).finish(),
+            Tvarray(ty) => f.debug_tuple("Tvarray").field(ty).finish(),
+            TvarrayOrDarray((tk, tv)) => f
+                .debug_tuple("TvarrayOrDarray")
+                .field(tk)
+                .field(tv)
+                .finish(),
+            Tnewtype((name, tys, constraint)) => f
+                .debug_tuple("Tnewtype")
+                .field(name)
+                .field(tys)
+                .field(constraint)
+                .finish(),
+            Tdependent((dependent_type, ty)) => f
+                .debug_tuple("Tdependent")
+                .field(dependent_type)
+                .field(ty)
+                .finish(),
+            Tobject => write!(f, "Tobject"),
+            Tclass((id, exact, tys)) => f
+                .debug_tuple("Tclass")
+                .field(id)
+                .field(exact)
+                .field(tys)
+                .finish(),
+            Tpu((ty, id)) => f.debug_tuple("Tpu").field(ty).field(id).finish(),
+            TpuTypeAccess((root, id)) => f
+                .debug_tuple("TpuTypeAccess")
+                .field(root)
+                .field(id)
+                .finish(),
+        }
+    }
+}
+
 impl PartialEq for ConstraintType<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.1 == other.1

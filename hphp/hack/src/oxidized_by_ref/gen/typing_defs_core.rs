@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<57a7c990841db96844589f330cdd2bce>>
+// @generated SignedSource<<6486de40f9223104c2631e2b14a01285>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -180,7 +180,7 @@ pub struct ShapeFieldType<'a> {
 impl<'a> TrivialDrop for ShapeFieldType<'a> {}
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum Ty_<'a> {
     /// The late static bound type of a class

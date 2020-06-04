@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::fmt::{self, Display};
+use std::fmt::{self, Debug, Display};
 use std::path::{Path, PathBuf};
 
 use bumpalo::Bump;
@@ -20,7 +20,7 @@ pub const EMPTY: RelativePath<'_> = RelativePath {
     path: None,
 };
 
-#[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct RelativePath<'a> {
     prefix: Prefix,
     // Invariant: if Some, the path has length > 0. The use of Option here is
@@ -88,6 +88,14 @@ impl<'a> RelativePath<'a> {
         let path_str =
             bumpalo::collections::String::from_str_in(path.path_str(), arena).into_bump_str();
         arena.alloc(Self::make(path.prefix(), path_str))
+    }
+}
+
+impl Debug for RelativePath<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Use a format string rather than Formatter::debug_struct to prevent
+        // adding line breaks (they don't help readability here).
+        write!(f, "RelativePath({})", self)
     }
 }
 

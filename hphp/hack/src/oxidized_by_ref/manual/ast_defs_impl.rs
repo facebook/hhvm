@@ -32,6 +32,12 @@ impl<'a> Id<'a> {
     }
 }
 
+impl std::fmt::Debug for Id<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Id({:?}, {:?})", self.pos(), self.name())
+    }
+}
+
 impl<'a> Bop<'a> {
     pub fn is_any_eq(&self) -> bool {
         match self {

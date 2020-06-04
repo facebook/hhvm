@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f323ff1eda44f85d18a437add5a4764>>
+// @generated SignedSource<<00b47b7eae4782f6ac888bac23f51ad6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -52,8 +52,6 @@ pub type Error<'a> = Error_<'a, &'a pos::Pos<'a>>;
 pub struct AppliedFixme<'a>(pub &'a pos::Pos<'a>, pub isize);
 impl<'a> TrivialDrop for AppliedFixme<'a> {}
 
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
+#[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep)]
 pub struct Errors<'a>(pub FilesT<'a, Error<'a>>, pub FilesT<'a, AppliedFixme<'a>>);
 impl<'a> TrivialDrop for Errors<'a> {}

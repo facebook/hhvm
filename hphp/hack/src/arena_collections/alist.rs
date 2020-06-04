@@ -22,6 +22,7 @@
 
 use std::borrow::Borrow;
 use std::convert::From;
+use std::fmt::Debug;
 
 use bumpalo::Bump;
 use serde::Serialize;
@@ -58,7 +59,7 @@ where
 ///
 /// * Lookups run in linear time
 /// * Entries with duplicate keys are permitted (but only observable using iterators)
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct AssocList<'a, K: 'a, V: 'a> {
     entries: &'a [(K, V)],
 }
@@ -253,6 +254,12 @@ impl<K, V> Clone for AssocList<'_, K, V> {
     }
 }
 
+impl<K: Debug, V: Debug> Debug for AssocList<'_, K, V> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_map().entries(self.iter()).finish()
+    }
+}
+
 impl<'a, K, V> From<AssocListMut<'a, K, V>> for AssocList<'a, K, V> {
     #[inline]
     fn from(alist: AssocListMut<'a, K, V>) -> Self {
@@ -265,7 +272,7 @@ impl<'a, K, V> From<AssocListMut<'a, K, V>> for AssocList<'a, K, V> {
 /// * Lookups, replacements, and removals run in linear time
 /// * Insertions run in constant time
 /// * Entries with duplicate keys are permitted (but only observable using iterators)
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct AssocListMut<'bump, K: 'bump, V: 'bump> {
     entries: bumpalo::collections::Vec<'bump, (K, V)>,
 }
@@ -640,6 +647,12 @@ impl<'bump, K, V> AssocListMut<'bump, K, V> {
     }
 }
 
+impl<K: Debug, V: Debug> Debug for AssocListMut<'_, K, V> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_map().entries(self.iter()).finish()
+    }
+}
+
 /// Get an entry in the slice with the given key. Performs a linear search on
 /// small slices, and a binary search otherwise.
 #[inline(always)]
@@ -668,7 +681,7 @@ where
 ///   `SortedAssocList` from an `AssocListMut`, entries will be deduplicated by
 ///   key, and only the most recently inserted entry for each key will be
 ///   retained.
-#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct SortedAssocList<'a, K: 'a, V: 'a> {
     entries: &'a [(K, V)],
 }
@@ -901,6 +914,12 @@ impl<K, V> Clone for SortedAssocList<'_, K, V> {
 impl<K, V> Default for SortedAssocList<'_, K, V> {
     fn default() -> Self {
         Self::from_slice(&[])
+    }
+}
+
+impl<K: Debug, V: Debug> Debug for SortedAssocList<'_, K, V> {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_map().entries(self.iter()).finish()
     }
 }
 

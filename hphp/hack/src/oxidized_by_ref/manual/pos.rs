@@ -14,7 +14,7 @@ use oxidized::file_pos_small::FilePosSmall;
 
 use crate::relative_path::RelativePath;
 
-#[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Hash, Serialize, ToOcamlRep)]
 enum PosImpl<'a> {
     Small {
         file: &'a RelativePath<'a>,
@@ -30,7 +30,7 @@ enum PosImpl<'a> {
 
 use PosImpl::*;
 
-#[derive(Clone, Debug, Hash, Serialize, ToOcamlRep)]
+#[derive(Clone, Hash, Serialize, ToOcamlRep)]
 pub struct Pos<'a>(PosImpl<'a>);
 
 const NONE: Pos<'_> = Pos(Small {
@@ -410,6 +410,43 @@ impl<'a> Pos<'a> {
     }
 }
 
+impl std::fmt::Debug for Pos<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fn do_fmt<P: FilePos>(
+            f: &mut std::fmt::Formatter<'_>,
+            file: &RelativePath,
+            start: &P,
+            end: &P,
+        ) -> std::fmt::Result {
+            let (start_line, start_col, _) = start.line_column_beg();
+            let (end_line, end_col, _) = end.line_column_beg();
+            // Use a format string rather than Formatter::debug_tuple to prevent
+            // adding line breaks. Positions occur very frequently in ASTs and
+            // types, so the Debug implementation of those data structures is
+            // more readable if we minimize the vertical space taken up by
+            // positions. Depends upon RelativePath's implementation of Display
+            // also being single-line.
+            if start_line == end_line {
+                write!(
+                    f,
+                    "Pos({}, {}:{}-{})",
+                    &file, &start_line, &start_col, &end_col,
+                )
+            } else {
+                write!(
+                    f,
+                    "Pos({}, {}:{}-{}:{})",
+                    &file, &start_line, &start_col, &end_line, &end_col,
+                )
+            }
+        }
+        match &self.0 {
+            Small { file, start, end } => do_fmt(f, file, start, end),
+            Large { file, start, end } => do_fmt(f, file, &**start, &**end),
+        }
+    }
+}
+
 impl std::fmt::Display for Pos<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fn do_fmt<P: FilePos>(
@@ -484,7 +521,7 @@ impl std::fmt::Display for PosString<'_> {
     }
 }
 
-trait FilePos {
+trait FilePos: Copy {
     fn offset(self) -> usize;
     fn line_column_beg(self) -> (usize, usize, usize);
 }

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ed46e4b39dd9c0a8ec79173af2b8b41d>>
+// @generated SignedSource<<2d6b3112ac87de32a785c234e135be15>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -20,7 +20,7 @@ pub use crate::shape_map;
 pub use pos::Pos;
 
 #[derive(
-    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+    Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub struct Id<'a>(pub &'a Pos<'a>, pub &'a str);
 

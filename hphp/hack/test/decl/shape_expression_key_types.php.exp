@@ -1,0 +1,48 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\C" ->
+    { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+      sc_is_xhp = false; sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([3:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
+      sc_extends = []; sc_uses = []; sc_method_redeclarations = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements = [];
+      sc_consts =
+      [{ Shallow_decl_defs.scc_abstract = false;
+         scc_expr = (Some ([4:22-27], (String "KEY")));
+         scc_name = ([4:16-19], "KEY");
+         scc_type =
+         (Rhint (root|shape_expression_key_types.php line 4, characters 9-14),
+          (Tprim Tstring))
+         };
+        { Shallow_decl_defs.scc_abstract = false;
+          scc_expr =
+          (Some ([6:19-11:4],
+                 (Shape
+                    [((SFlit_str ([7:5-6], "0")), ([7:10-11], (Int "0")));
+                      ((SFlit_str ([8:5-8], "s")), ([8:12-15], (String "s")));
+                      ((SFclass_const (([9:5-6], "\\C"), ([9:8-13], "class")
+                          )),
+                       ([9:17-25],
+                        (Class_const (([9:17-18], (CI ([9:17-18], "\\C"))),
+                           ([9:20-25], "class")))));
+                      ((SFclass_const (([10:5-6], "\\C"), ([10:8-11], "KEY")
+                          )),
+                       ([10:15-21],
+                        (Class_const (([10:15-16], (CI ([10:15-16], "\\C"))),
+                           ([10:18-21], "KEY")))))
+                      ])));
+          scc_name = ([6:15-16], "X");
+          scc_type =
+          (Rhint (root|shape_expression_key_types.php line 6, characters 9-13),
+           Tmixed)
+          }
+        ];
+      sc_typeconsts = []; sc_pu_enums = []; sc_props = []; sc_sprops = [];
+      sc_constructor = None; sc_static_methods = []; sc_methods = [];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
+  funs = {}; typedefs = {}; consts = {} }
+
+They matched!

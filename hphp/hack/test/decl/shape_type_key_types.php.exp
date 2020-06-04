@@ -1,0 +1,42 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes = {}; funs = {};
+  typedefs =
+  { "\\Shape" ->
+    { td_pos = [3:6-11]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type =
+      (Rhint (root|shape_type_key_types.php line 3, characters 14-98),
+       (Tshape (Closed_shape,
+          { (SFlit_str ([4:3-4], "0")) ->
+            { sft_optional = false;
+              sft_ty =
+              (Rhint (root|shape_type_key_types.php line 4, characters 8-10),
+               (Tprim Tint))
+              };
+            (SFlit_str ([5:3-6], "s")) ->
+            { sft_optional = false;
+              sft_ty =
+              (Rhint (root|shape_type_key_types.php line 5, characters 10-15),
+               (Tprim Tstring))
+              };
+            (SFclass_const (([7:3-4], "\\C"), ([7:6-9], "KEY"))) ->
+            { sft_optional = false;
+              sft_ty =
+              (Rhint (root|shape_type_key_types.php line 7, characters 13-18),
+               (Tprim Tstring))
+              };
+            (SFclass_const (([6:3-4], "\\C"), ([6:6-11], "class"))) ->
+            { sft_optional = false;
+              sft_ty =
+              (Rhint (root|shape_type_key_types.php line 6, characters 15-26),
+               (Tapply (([6:15-24], "\\HH\\classname"),
+                  [(Rhint (root|shape_type_key_types.php line 6, characters 25-25),
+                    (Tapply (([6:25-26], "\\C"), [])))]
+                  )))
+              } }
+          )))
+      } };
+  consts = {} }
+
+They matched!

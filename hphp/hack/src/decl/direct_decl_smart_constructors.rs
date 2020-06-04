@@ -1269,6 +1269,28 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         }
     }
 
+    fn make_shape_field_name(name: Node_<'a>) -> Result<ShapeFieldName<'a>, ParseError> {
+        Ok(match name {
+            Node_::StringLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s)),
+            // TODO: OCaml decl produces SFlitStr here instead of SFlitInt, so
+            // we must also. Looks like int literal keys have become a parse
+            // error--perhaps that's why.
+            Node_::IntLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s)),
+            Node_::Expr(aast::Expr(_, aast::Expr_::ClassConst(&(
+                aast::ClassId(_, aast::ClassId_::CI(class_name)),
+                const_name,
+            )))) => ShapeFieldName::SFclassConst(class_name, const_name),
+            Node_::Expr(aast::Expr(_, aast::Expr_::ClassConst(&(
+                aast::ClassId(pos, aast::ClassId_::CIself),
+                const_name,
+            )))) => ShapeFieldName::SFclassConst(Id(pos, "self"), const_name),
+            n => return Err(format!(
+                "Expected a string literal, int literal, or class const for shape key, but got {:?}",
+                n
+            )),
+        })
+    }
+
     fn make_apply(
         &self,
         base_ty: Id<'a>,
@@ -3025,16 +3047,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     ) -> Self::R {
         let fields = self.maybe_slice_from_iter(fields?.iter().map(|node| match node {
             Node_::ListItem(&(key, value)) => {
-                let key = match key {
-                    Node_::IntLiteral(&(s, p)) => ShapeFieldName::SFlitInt((p, s)),
-                    Node_::StringLiteral(&(s, p)) => ShapeFieldName::SFlitStr((p, s)),
-                    n => {
-                        return Err(format!(
-                            "Expected an int literal, string literal, or class const, but was {:?}",
-                            n
-                        ))
-                    }
-                };
+                let key = Self::make_shape_field_name(key)?;
                 let value = self.node_to_expr(value)?;
                 Ok((key, value))
             }
@@ -3129,15 +3142,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         type_: Self::R,
     ) -> Self::R {
         let optional = !question_token?.is_ignored();
-        let name = match name? {
-            Node_::StringLiteral(&(s, pos)) => ShapeFieldName::SFlitStr((pos, s)),
-            n => {
-                return Err(format!(
-                    "Expected a string literal for shape key name, but was {:?}",
-                    n
-                ))
-            }
-        };
+        let name = Self::make_shape_field_name(name?)?;
         Ok(Node_::ShapeFieldSpecifier(self.alloc(ShapeFieldNode {
             name: self.alloc(ShapeField(name)),
             type_: self.alloc(ShapeFieldType {

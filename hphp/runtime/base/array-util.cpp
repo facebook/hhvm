@@ -54,7 +54,7 @@ Variant ArrayUtil::Splice(const Array& input, int offset, int64_t length /* = 0 
     length = num_in - offset;
   }
 
-  Array out_hash = Array::Create();
+  Array out_hash = Array::CreateDArray();
   int pos = 0;
   ArrayIter iter(input);
   for (; pos < offset && iter; ++pos, ++iter) {
@@ -251,7 +251,7 @@ Variant ArrayUtil::Range(int64_t low, int64_t high, int64_t step /* = 1 */) {
 // information and calculations
 
 Variant ArrayUtil::CountValues(const Array& input) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const inner = iter.secondVal();
     if (isIntType(type(inner)) || isStringType(type(inner)) ||
@@ -274,7 +274,7 @@ Variant ArrayUtil::CountValues(const Array& input) {
 // manipulations
 
 Variant ArrayUtil::ChangeKeyCase(const Array& input, bool lower) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   for (ArrayIter iter(input); iter; ++iter) {
     Variant key(iter.first());
     if (key.isString()) {
@@ -295,7 +295,7 @@ Variant ArrayUtil::Reverse(const Array& input, bool preserve_keys /* = false */)
     return empty_array();
   }
 
-  auto ret = Array::Create();
+  auto ret = Array::CreateDArray();
   auto pos_limit = input->iter_end();
   for (ssize_t pos = input->iter_last(); pos != pos_limit;
        pos = input->iter_rewind(pos)) {
@@ -418,7 +418,7 @@ Variant ArrayUtil::RandomKeys(const Array& input, int num_req /* = 1 */) {
 
 Variant ArrayUtil::StringUnique(const Array& input) {
   Array seenValues = Array::CreateKeyset();
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const str = tvCastToString(iter.secondVal());
     if (!seenValues.exists(str)) {
@@ -432,7 +432,7 @@ Variant ArrayUtil::StringUnique(const Array& input) {
 
 Variant ArrayUtil::NumericUnique(const Array& input) {
   std::set<double> seenValues;
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   for (ArrayIter iter(input); iter; ++iter) {
     auto const value = tvCastToDouble(iter.secondVal());
     std::pair<std::set<double>::iterator, bool> res =

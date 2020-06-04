@@ -1017,7 +1017,7 @@ Variant preg_grep(const String& pattern, const Array& input, int flags /* = 0 */
   const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   /* Initialize return array */
-  auto ret = hackArrOutput ? Array::CreateDict() : Array::Create();
+  auto ret = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
   *rl_last_error_code = PHP_PCRE_NO_ERROR;
 
   /* Go through the input array */
@@ -1839,7 +1839,7 @@ Variant preg_split(const String& pattern, const String& subject,
   const bool hackArrOutput = flags & PREG_FB_HACK_ARRAYS;
 
   // Get next piece if no limit or limit not yet reached and something matched
-  Array return_value = hackArrOutput ? Array::CreateDict() : Array::Create();
+  Array return_value = hackArrOutput ? Array::CreateDict() : Array::CreateDArray();
   int g_notempty = 0;   /* If the match should not be empty */
   int utf8_check = 0;
   PCRECache::Accessor bump_accessor;
@@ -2105,7 +2105,7 @@ Variant php_split(const String& spliton, const String& str, int count,
     return false;
   }
 
-  Array return_value = Array::Create();
+  Array return_value = Array::CreateVArray();
   regmatch_t subs[1];
 
   /* churn through str, generating array entries as we go */

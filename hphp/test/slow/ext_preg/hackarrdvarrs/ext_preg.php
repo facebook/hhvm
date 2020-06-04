@@ -18,7 +18,7 @@ function test_preg_grep() {
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", varray["c", "b"]), __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[]));
+  VS(preg_grep("/a/", varray["c", "b"]), darray[]);
 }
 
 function test_preg_match() {

@@ -670,7 +670,7 @@ TypedValue HHVM_FUNCTION(array_replace,
                          const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   php_array_replace(ret, arr_array1);
 
   if (UNLIKELY(array2.isNull() && args.empty())) {
@@ -693,7 +693,7 @@ TypedValue HHVM_FUNCTION(array_replace_recursive,
                          const Variant& array2 /* = uninit_variant */,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   PointerSet seen;
   php_array_replace_recursive(seen, false, ret, arr_array1);
   assertx(seen.empty());
@@ -1023,7 +1023,7 @@ TypedValue HHVM_FUNCTION(array_slice,
 Variant array_splice(Variant& input, int offset,
                      const Variant& length, const Variant& replacement) {
   getCheckedArrayVariant(input);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   int64_t len = length.isNull() ? 0x7FFFFFFF : length.toInt64();
   input = ArrayUtil::Splice(arr_input, offset, len, replacement, &ret);
   return ret;
@@ -1760,7 +1760,7 @@ TypedValue HHVM_FUNCTION(array_diff,
       return tvReturn(container1.toArray<IntishCast::Cast>());
     }
   }
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
 
   // Put all of the values from all the containers (except container1 into a
   // Set. All types aside from integer and string will be cast to string, and
@@ -2359,7 +2359,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
     return make_persistent_array_like_tv(ArrayData::Create());
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   // Build up a Set containing the values that are present in all the
   // containers (except container1)
   auto st = req::make<c_Set>();

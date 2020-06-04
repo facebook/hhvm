@@ -3,7 +3,7 @@
 function array_count_values_test_cases(
 ): vec<mixed> {
   return vec[
-    tuple(varray[], __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[])),
+    tuple(varray[], dict[]),
     tuple(
       varray[
         'foo',
@@ -13,12 +13,12 @@ function array_count_values_test_cases(
         'baz',
         'zar',
       ],
-      __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
+      dict[
         'foo' => 2,
         'bar' => 1,
         'baz' => 2,
         'zar' => 1,
-      ]),
+      ],
     ),
     tuple(
       darray[
@@ -29,10 +29,10 @@ function array_count_values_test_cases(
         'cro' => 1,
         'sby' => 1,
       ],
-      __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
+      dict[
         1 => 4,
         42 => 2,
-      ]),
+      ],
     ),
     tuple(
       Vector {
@@ -42,14 +42,14 @@ function array_count_values_test_cases(
         0,
         1,
       },
-      __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[
+      dict[
         0 => 3,
         1 => 2,
-      ]),
+      ],
     ),
     tuple(
       __hhvm_intrinsics\dummy_cast_to_kindofarray(vec[null, 0, false, 0.2]),
-      __hhvm_intrinsics\dummy_cast_to_kindofarray(dict[0 => 1]),
+      dict[0 => 1],
     )
   ];
 }
@@ -62,7 +62,7 @@ function main(): void {
     invariant($output === $expected, 'Expected output to be equal to expected');
     // We're not changing the output: only asserting that the _input_ can be a
     // Hack Array
-    invariant(is_array($output), 'Expected output to be an array');
+    invariant(is_darray($output), 'Expected output to be an array');
   }
   // Also test an error case
   array_count_values('foo');

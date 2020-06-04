@@ -170,7 +170,7 @@ Array Array::diffImpl(const Array& array, bool by_key, bool by_value, bool match
     value_cmp_as_string_function = CompareAsStrings;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   if (by_key && !key_cmp_function) {
     // Fast case
     for (ArrayIter iter(*this); iter; ++iter) {
@@ -918,7 +918,7 @@ void Array::SortImpl(std::vector<int> &indices, const Array& source,
 
 void Array::sort(PFUNC_CMP cmp_func, bool by_key, bool renumber,
                  const void *data /* = NULL */) {
-  Array sorted = Array::Create();
+  Array sorted = Array::CreateDArray();
   SortData opaque;
   std::vector<int> indices;
   SortImpl(indices, *this, opaque, cmp_func, by_key, data);

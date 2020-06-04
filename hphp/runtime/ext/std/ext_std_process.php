@@ -123,7 +123,7 @@ function system(string $command,
 <<__Native>>
 function proc_open(string $cmd,
                    darray<int, mixed> $descriptorspec,
-                   <<__OutOnly("KindOfArray")>>
+                   <<__OutOnly("darray")>>
                    inout mixed $pipes,
                    ?string $cwd = null,
                    mixed $env = null,

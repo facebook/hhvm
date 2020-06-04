@@ -552,6 +552,12 @@ static MaybeDataType typeForOutParam(TypedValue attr) {
   if (!isStringType(type.m_type)) return {};
 
   auto const str = type.m_data.pstr->data();
+  if (strcmp(str, "varray") == 0) {
+    return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfArray;
+  }
+  if (strcmp(str, "darray") == 0) {
+    return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray;
+  }
 
 #define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;
   DATATYPES

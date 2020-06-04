@@ -1142,6 +1142,19 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                         fun_type.reactive = Reactivity::RxVar(None);
                                         Ty(r, self.alloc(Ty_::Tfun(self.alloc(fun_type))))
                                     }
+                                    Ty(r, &Ty_::Toption(Ty(r1, &Ty_::Tfun(ref fun_type))))
+                                        if attributes.at_most_rx_as_func =>
+                                    {
+                                        let mut fun_type = (*fun_type).clone();
+                                        fun_type.reactive = Reactivity::RxVar(None);
+                                        Ty(
+                                            r,
+                                            self.alloc(Ty_::Toption(Ty(
+                                                r1,
+                                                self.alloc(Ty_::Tfun(self.alloc(fun_type))),
+                                            ))),
+                                        )
+                                    }
                                     ty => ty,
                                 })?,
                             };

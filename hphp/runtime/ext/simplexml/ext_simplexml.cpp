@@ -15,6 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/ext/simplexml/ext_simplexml.h"
 #include <vector>
 #include "hphp/runtime/base/builtin-functions.h"
@@ -767,9 +768,7 @@ static void sxe_properties_add(Array& rv, char* name, const Variant& value) {
       arr.append(value);
       rv.set(sName, arr);
     } else {
-      Array arr = Array::Create();
-      arr.append(existVal);
-      arr.append(value);
+      Array arr = make_varray(existVal, value);
       rv.set(sName, arr);
     }
   } else {
@@ -795,7 +794,7 @@ static void sxe_get_prop_hash(SimpleXMLElement* sxe, bool is_debug,
     }
     if (!node || node->type != XML_ENTITY_DECL) {
       xmlAttrPtr attr = node ? (xmlAttrPtr)node->properties : nullptr;
-      Array zattr = Array::Create();
+      Array zattr = Array::CreateDArray();
       bool test = sxe->iter.name && sxe->iter.type == SXE_ITER_ATTRLIST;
       while (attr) {
         if ((!test || !xmlStrcmp(attr->name, sxe->iter.name)) &&
@@ -894,12 +893,12 @@ Variant SimpleXMLElement_objectCast(const ObjectData* obj, DataType type) {
   if (type == KindOfBoolean) {
     xmlNodePtr node = php_sxe_get_first_node(sxe, nullptr);
     if (node) return true;
-    Array properties = Array::Create();
+    Array properties = Array::CreateDArray();
     sxe_get_prop_hash(sxe, true, properties, true);
     return properties.size() != 0;
   }
   if (isArrayType((DataType)type)) {
-    Array properties = Array::Create();
+    Array properties = Array::CreateDArray();
     sxe_get_prop_hash(sxe, true, properties);
     return properties;
   }

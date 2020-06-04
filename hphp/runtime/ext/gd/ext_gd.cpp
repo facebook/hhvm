@@ -3156,7 +3156,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
   double dm1[6];
   double dm2[6];
   double dmr[6];
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
 
   if (nelem1 != 6 || nelem2 != 6) {
     raise_warning("imageaffinematrixconcat(): Affine array must "
@@ -3197,7 +3197,7 @@ Variant HHVM_FUNCTION(imageaffinematrixconcat,
 Variant HHVM_FUNCTION(imageaffinematrixget,
                       int64_t type,
                       const Variant& options /* = Array() */) {
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   double affine[6];
   int res = GD_FALSE, i;
 

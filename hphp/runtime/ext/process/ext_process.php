@@ -129,7 +129,7 @@ function pcntl_signal(int $signo,
 function pcntl_sigprocmask(
   int $how,
   varray $set,
-  <<__OutOnly("KindOfArray")>>
+  <<__OutOnly("varray")>>
   inout mixed $oldset
 ): bool;
 

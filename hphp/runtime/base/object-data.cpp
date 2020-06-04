@@ -622,7 +622,7 @@ Array ObjectData::o_toIterArray(const String& context) {
       // not returning Array&; makes a copy
       return props;
     }
-    return Array::Create();
+    return Array::CreateDArray();
   }
 
   size_t accessibleProps = m_cls->declPropNumAccessible();

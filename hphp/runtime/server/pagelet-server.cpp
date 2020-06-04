@@ -251,7 +251,7 @@ String PageletTransport::getResults(
   }
 
   String response(m_response.c_str(), m_response.size(), CopyString);
-  headers = Array::Create();
+  headers = Array::CreateVArray();
   for (HeaderMap::const_iterator iter = m_responseHeaders.begin();
        iter != m_responseHeaders.end(); ++iter) {
     for (unsigned int i = 0; i < iter->second.size(); i++) {

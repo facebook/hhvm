@@ -283,7 +283,7 @@ Variant HHVM_FUNCTION(dns_get_record, const String& hostname, int type,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   int type2;
   Array authns;
   Array addtl;

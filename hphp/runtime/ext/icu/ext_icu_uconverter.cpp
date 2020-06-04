@@ -161,7 +161,7 @@ static void ucnvFromUCallback(ObjectData *objval,
                               UErrorCode *pErrorCode) {
   if (MemoryManager::sweeping()) return;
   auto data = Native::data<IntlUConverter>(objval);
-  Array source = Array::Create();
+  Array source = Array::CreateVArray();
   for(int i = 0; i < length; i++) {
     UChar32 c;
     U16_NEXT(codeUnits, i, length, c);
@@ -449,7 +449,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
     return init_null();
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for(i = 0; i < count; ++i) {
     error = U_ZERO_ERROR;
     const char *alias = ucnv_getAlias(encoding.c_str(), i, &error);
@@ -464,7 +464,7 @@ static Variant HHVM_STATIC_METHOD(UConverter, getAliases,
 
 static Variant HHVM_STATIC_METHOD(UConverter, getStandards) {
   int16_t i, count = ucnv_countStandards();
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
 
   for(i = 0; i < count; ++i) {
     UErrorCode error = U_ZERO_ERROR;

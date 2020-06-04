@@ -411,7 +411,7 @@ static void _xml_add_to_info(const req::ptr<XmlParser>& parser,
   }
   forceToArray(parser->info);
   if (!parser->info.asCArrRef().exists(nameStr)) {
-    parser->info.asArrRef().set(nameStr, Array::Create());
+    parser->info.asArrRef().set(nameStr, Array::CreateVArray());
   }
   auto const inner = parser->info.asArrRef().lval(nameStr);
   forceToArray(inner).append(parser->curtag);
@@ -520,7 +520,6 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             );
           }
         } else {
-          Array tag;
           String myval;
           String mytype;
 
@@ -542,14 +541,15 @@ void _xml_characterDataHandler(void *userData, const XML_Char *s, int len) {
             }
           }
           if (parser->level <= XML_MAXLEVEL && parser->level > 0) {
-            tag = Array::Create();
             _xml_add_to_info(parser, parser->ltags[parser->level-1] +
                              parser->toffset);
-            tag.set(s_tag, String(parser->ltags[parser->level-1] +
-                                  parser->toffset, CopyString));
-            tag.set(s_value, decoded_value);
-            tag.set(s_type, s_cdata);
-            tag.set(s_level, parser->level);
+            Array tag = make_darray(
+              s_tag, String(parser->ltags[parser->level-1] +
+                                  parser->toffset, CopyString),
+              s_value, decoded_value,
+              s_type, s_cdata,
+              s_level, parser->level
+            );
             parser->data.asArrRef().append(tag);
           } else if (parser->level == (XML_MAXLEVEL + 1)) {
             raise_warning("Maximum depth exceeded - Results truncated");
@@ -576,7 +576,6 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
   auto parser = getParserFromToken(userData);
   const char **attrs = (const char **) attributes;
   Variant retval;
-  Array args = Array::Create();
 
   if (parser) {
     parser->level++;
@@ -584,9 +583,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
     String tag_name = _xml_decode_tag(parser, (const char*)name);
 
     if (parser->startElementHandler.toBoolean()) {
-      args.append(Variant(parser));
-      args.append(tag_name);
-      args.append(Array::CreateDArray());
+      Array args = make_varray(
+        Variant(parser),
+        tag_name,
+        Array::CreateDArray()
+      );
 
       while (attributes && *attributes) {
         String att = _xml_decode_tag(parser, (const char*)attributes[0]);
@@ -810,8 +811,8 @@ int64_t HHVM_FUNCTION(xml_parse_into_struct,
   SYNC_VM_REGS_SCOPED();
   int ret;
   auto p = cast<XmlParser>(parser);
-  p->data = Array::Create();
-  p->info = Array::Create();
+  p->data = Array::CreateVArray();
+  p->info = Array::CreateDArray();
   SCOPE_EXIT {
     values = p->data;
     index = p->info;

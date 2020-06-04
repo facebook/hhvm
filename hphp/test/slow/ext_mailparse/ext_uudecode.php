@@ -10,7 +10,7 @@
  * package... not what a human might actually expect.
  */
 
-function describe(array<string, mixed> $info): void {
+function describe(darray<string, mixed> $info): void {
   $ofname = "origfilename not set";
   if (array_key_exists('origfilename', $info)) {
     $ofname = $info['origfilename'];

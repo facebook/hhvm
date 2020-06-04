@@ -627,7 +627,7 @@ function ldap_next_reference(resource $link, resource $result_entry): mixed;
 <<__Native>>
 function ldap_parse_reference(resource $link,
                               resource $result_entry,
-                              <<__OutOnly("KindOfArray")>>
+                              <<__OutOnly("varray")>>
                               inout mixed $referrals): bool;
 
 <<__Native>>
@@ -639,7 +639,7 @@ function ldap_parse_result(resource $link,
                            inout mixed $matcheddn,
                            <<__OutOnly("KindOfString")>>
                            inout mixed $errmsg,
-                           <<__OutOnly("KindOfArray")>>
+                           <<__OutOnly("varray")>>
                            inout mixed $referrals): bool;
 
 /**

@@ -75,11 +75,11 @@ struct XSLTProcessorData {
   m_secprefs(k_XSL_SECPREF_DEFAULT),
   m_registerPhpFunctions(0) {
     if (m_params.empty()) {
-      m_params = Array::Create();
+      m_params = Array::CreateDArray();
     }
 
     if (m_registered_phpfunctions.empty()) {
-      m_registered_phpfunctions = Array::Create();
+      m_registered_phpfunctions = Array::CreateDArray();
     }
   };
 
@@ -333,7 +333,7 @@ static void xslt_ext_function_php(xmlXPathParserContextPtr ctxt,
         arg = String(str, CopyString);
         xmlFree(str);
       } else if (type == 2) {
-        arg = Array::Create();
+        arg = Array::CreateVArray();
         if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
           for (int j = 0; j < obj->nodesetval->nodeNr; j++) {
             // TODO: not sure this is the right thing to do.

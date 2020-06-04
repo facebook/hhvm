@@ -389,11 +389,11 @@ function fb_curl_getopt(resource $ch, int $opt = 0): mixed;
  */
 <<__Native, __HipHopSpecific>>
 function fb_curl_multi_fdset(resource $mh,
-                              <<__OutOnly("KindOfArray")>>
+                              <<__OutOnly("varray")>>
                              inout mixed $read_fd_set,
-                              <<__OutOnly("KindOfArray")>>
+                              <<__OutOnly("varray")>>
                              inout mixed $write_fd_set,
-                              <<__OutOnly("KindOfArray")>>
+                              <<__OutOnly("varray")>>
                              inout mixed $exc_fd_set,
                               <<__OutOnly("KindOfInt64")>>
                              inout ?int $max_fd): mixed;

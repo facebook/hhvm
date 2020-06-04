@@ -973,7 +973,7 @@ static std::shared_ptr<sdlFunction> deserialize_function_call
     }
   }
 
-  headers = Array::Create();
+  headers = Array::CreateVArray();
   if (head) {
     attr = head->properties;
     while (attr != nullptr) {
@@ -2581,7 +2581,7 @@ Variant HHVM_METHOD(SoapClient, soapcallImpl,
     }
   }
 
-  Array soap_headers = Array::Create();
+  Array soap_headers = Array::CreateVArray();
   if (input_headers.isNull()) {
   } else if (input_headers.isArray()) {
     Array arr = input_headers.toArray();

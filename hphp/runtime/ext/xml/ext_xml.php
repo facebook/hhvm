@@ -67,9 +67,9 @@ function xml_parse(resource $parser, string $data, bool $is_final = true): int;
 <<__Native>>
 function xml_parse_into_struct(resource $parser,
                                string $data,
-                               <<__OutOnly("KindOfArray")>>
+                               <<__OutOnly("varray")>>
                                inout mixed $values,
-                               <<__OutOnly("KindOfArray")>>
+                               <<__OutOnly("darray")>>
                                inout mixed $index): int;
 
 /**

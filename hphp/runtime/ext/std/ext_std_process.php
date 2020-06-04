@@ -31,7 +31,7 @@ function shell_exec(string $cmd): mixed;
  */
 <<__Native>>
 function exec(string $command,
-              <<__OutOnly("KindOfArray")>>
+              <<__OutOnly("varray")>>
               inout mixed $output,
               <<__OutOnly("KindOfInt64")>>
               inout mixed $return_var): string;

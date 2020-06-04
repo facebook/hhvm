@@ -691,7 +691,7 @@ Variant str_replace(const Variant& search, const Variant& replace,
   count = 0;
   if (subject.isArray()) {
     Array arr = subject.toArray();
-    Array ret = Array::Create();
+    Array ret = Array::CreateDArray();
     int64_t c;
     for (ArrayIter iter(arr); iter; ++iter) {
       if (iter.second().isArray() || iter.second().is(KindOfObject)) {
@@ -1542,7 +1542,7 @@ Variant HHVM_FUNCTION(count_chars,
     chars[*buf++]++;
   }
 
-  Array retarr = Array::Create();
+  Array retarr = Array::CreateDArray();
   char retstr[256];
   int retlen = 0;
   switch (mode) {
@@ -1642,7 +1642,7 @@ Variant HHVM_FUNCTION(str_word_count,
     e--;
   }
 
-  Array ret;
+  Array ret = Array::CreateDArray();
   while (p < e) {
     const char *s = p;
     while (p < e &&
@@ -1669,7 +1669,7 @@ Variant HHVM_FUNCTION(str_word_count,
   if (!format) {
     return word_count;
   }
-  return ret.isNull() ? Array::Create() : ret;
+  return ret;
 }
 
 int64_t HHVM_FUNCTION(levenshtein,

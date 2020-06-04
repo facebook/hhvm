@@ -306,16 +306,16 @@ Variant HHVM_FUNCTION(mailparse_uudecode_all, const Resource& fp) {
 
       /* make the return an array */
       if (nparts == 0) {
-        return_value = Array::Create();
+        return_value = Array::CreateVArray();
         /* create an initial item representing the file with all uuencoded
            parts removed */
-        Array item = Array::Create();
+        Array item = Array::CreateDArray();
         item.set(s_filename, String(outstream->getName()));
         return_value.append(item);
       }
 
       /* add an item */
-      Array item = Array::Create();
+      Array item = Array::CreateDArray();
       item.set(s_origfilename, String(origfilename, namelen, CopyString));
 
       /* create a temp file for the data */

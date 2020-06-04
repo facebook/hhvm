@@ -17,6 +17,7 @@
 #include "hphp/runtime/ext/soap/packet.h"
 #include "hphp/runtime/ext/soap/ext_soap.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/system/systemlib.h"
 #include <memory>
@@ -269,7 +270,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
   }
 
   /* Parse content of <Body> element */
-  return_value = Array::Create();
+  return_value = Array::CreateDArray();
   resp = body->children;
   while (resp != nullptr && resp->type != XML_ELEMENT_NODE) {
     resp = resp->next;
@@ -378,8 +379,7 @@ bool parse_packet_soap(SoapClient* obj, const char* buffer, int buffer_size,
                 }
                 asArrRef(lval).append(tmp);
               } else if (val->next && get_node(val->next, (char*)val->name)) {
-                Array arr = Array::Create();
-                arr.append(tmp);
+                Array arr = make_varray(tmp);
                 return_value.asArrRef().set(key, arr);
               } else {
                 return_value.asArrRef().set(key, tmp);

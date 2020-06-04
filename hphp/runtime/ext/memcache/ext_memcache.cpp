@@ -425,7 +425,7 @@ HHVM_METHOD(Memcache, get, const Variant& key) {
       memcached_result_create(&data->m_memcache, &result);
 
       // To mimic PHP5 should return empty array at failure.
-      Array return_val = Array::Create();
+      Array return_val = Array::CreateDArray();
 
       while ((memcached_fetch_result(&data->m_memcache, &result, &ret))
              != nullptr) {

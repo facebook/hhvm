@@ -606,7 +606,7 @@ Variant HHVM_FUNCTION(unserialize, const String& str,
 void HHVM_FUNCTION(parse_str,
                    const String& str,
                    Array& arr) {
-  arr = Array::Create();
+  arr = Array::CreateDArray();
   HttpProtocol::DecodeParameters(arr, str.data(), str.size());
 }
 

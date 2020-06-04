@@ -1215,7 +1215,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
       Variant val = master_to_zval(get_conversion(XSD_ANYXML), node);
 
       if (!any.isNull() && !any.isArray()) {
-        Array arr = Array::Create();
+        Array arr = Array::CreateDArray();
         if (name) {
           arr.set(String(name, CopyString), any);
         } else {
@@ -1241,7 +1241,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
 
       if (any.isNull()) {
         if (name) {
-          Array arr = Array::Create();
+          Array arr = Array::CreateDArray();
           arr.set(String(name, CopyString), val);
           any = arr;
           name = nullptr;
@@ -1256,7 +1256,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             auto const el = any.asArrRef().lval(name_str);
             if (!isArrayLikeType(el.type())) {
               /* Convert into array */
-              Array arr = Array::Create();
+              Array arr = Array::CreateVArray();
               arr.append(el.tv());
               tvSet(make_array_like_tv(arr.get()), el);
             }
@@ -1319,7 +1319,7 @@ static void model_to_zval_object(Variant &ret, sdlContentModelPtr model,
         }
         if ((node = get_node(node->next,
                            (char*)model->u_element->name.c_str())) != nullptr) {
-          Array array = Array::Create();
+          Array array = Array::CreateVArray();
           array.append(val);
           do {
             if (node && node->children && node->children->content) {
@@ -1356,7 +1356,7 @@ static void model_to_zval_object(Variant &ret, sdlContentModelPtr model,
         } else if ((!val.isNull() || !model->u_element->nillable) &&
                    (SOAP_GLOBAL(features) & SOAP_SINGLE_ELEMENT_ARRAYS) &&
                    (model->max_occurs == -1 || model->max_occurs > 1)) {
-          Array array = Array::Create();
+          Array array = Array::CreateVArray();
           array.append(val);
           val = array;
         }
@@ -2160,7 +2160,7 @@ xmlNodePtr to_xml_array(encodeType* type, const Variant& data_, int style,
 
   if (data.isObject() &&
       data.toObject().instanceof(SystemLib::s_HH_IteratorClass)) {
-    array_copy = Array::Create();
+    array_copy = Array::CreateDArray();
     for (ArrayIter iter(data.toObject().get()); iter; ++iter) {
       if (!iter.first().isNull() && iter.first().isString()) {
         array_copy.asArrRef().set(iter.first(), iter.second());
@@ -2471,7 +2471,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
     get_position_ex(dimension, tmp, &pos);
   }
 
-  ret = Array::Create();
+  ret = Array::CreateDArray();
   trav = data->children;
   while (trav) {
     if (trav->type == XML_ELEMENT_NODE) {
@@ -2494,7 +2494,7 @@ static Variant to_zval_array(encodeType* type, xmlNodePtr data) {
       while (i < dimension-1) {
         auto& arr = asArrRef(ar);
         if (!arr.exists(pos[i])) {
-          arr.set(pos[i], Array::Create());
+          arr.set(pos[i], Array::CreateDArray());
         }
         ar = arr.lval(pos[i]);
         i++;

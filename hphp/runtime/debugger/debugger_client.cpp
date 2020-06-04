@@ -78,11 +78,7 @@ const StaticString
 static String wordwrap(const String& str, int width /* = 75 */,
                        const String& wordbreak /* = "\n" */,
                        bool cut /* = false */) {
-  Array args = Array::Create();
-  args.append(str);
-  args.append(width);
-  args.append(wordbreak);
-  args.append(cut);
+  Array args = make_varray(str, width, wordbreak, cut);
   return vm_call_user_func("wordwrap", args).toString();
 }
 

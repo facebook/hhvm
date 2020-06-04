@@ -564,7 +564,7 @@ static Variant php_ldap_do_search(const Variant& link, const Variant& base_dn,
     req::vector<int> rcs;
     rcs.resize(nlinks);
 
-    Array ret = Array::Create();
+    Array ret = Array::CreateVArray();
     ArrayIter iter(link.toArray());
     ArrayIter iterdn(base_dn.toArray());
     ArrayIter iterfilter(filter.toArray());
@@ -1676,7 +1676,7 @@ Variant HHVM_FUNCTION(ldap_get_entries,
 
   num_entries = 0;
   while (ldap_result_entry != nullptr) {
-    Array tmp1 = Array::Create();
+    Array tmp1 = Array::CreateDArray();
     get_attributes(tmp1, ldap, ldap_result_entry, true);
 
     char *dn = ldap_get_dn(ldap, ldap_result_entry);
@@ -1745,7 +1745,7 @@ Variant HHVM_FUNCTION(ldap_get_attributes,
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   get_attributes(ret, ld->link, entry->data, false);
   return ret;
 }
@@ -1869,7 +1869,7 @@ bool HHVM_FUNCTION(ldap_parse_reference,
     return false;
   }
 
-  referrals = Array::Create();
+  referrals = Array::CreateVArray();
   if (lreferrals != nullptr) {
     refp = lreferrals;
     while (*refp) {
@@ -1911,7 +1911,7 @@ bool HHVM_FUNCTION(ldap_parse_result,
   errcode = lerrcode;
 
   /* Reverse -> fall through */
-  referrals = Array::Create();
+  referrals = Array::CreateVArray();
   if (lreferrals != nullptr) {
     refp = lreferrals;
     while (*refp) {

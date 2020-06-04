@@ -1047,7 +1047,7 @@ Variant HHVM_FUNCTION(mb_encoding_aliases, const String& name) {
     return false;
   }
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   if (encoding->aliases != nullptr) {
     while ((*encoding->aliases)[i] != nullptr) {
       ret.append((*encoding->aliases)[i]);
@@ -2275,7 +2275,7 @@ bool HHVM_FUNCTION(mb_parse_str,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = req::strndup(encoded_string.data(), encoded_string.size());
-  result = Array::Create();
+  result = Array::CreateVArray();
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, result, encstr);
   req::free(encstr);

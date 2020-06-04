@@ -1877,7 +1877,7 @@ void VariableSerializer::serializeCollection(ObjectData* obj) {
  */
 Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
   if (getType() == VariableSerializer::Type::VarExport) {
-    Array props = Array::Create();
+    Array props = Array::CreateDArray();
     for (ArrayIter iter(obj->toArray(false, true)); iter; ++iter) {
       auto key = iter.first().toString();
       // Jump over any class attribute mangling
@@ -1907,7 +1907,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // When ArrayIterator is cast to an array, it returns its array object,
     // however when it's being var_dump'd or print_r'd, it shows its properties
     if (UNLIKELY(obj->instanceof(SystemLib::s_ArrayIteratorClass))) {
-      auto ret = Array::Create();
+      auto ret = Array::CreateDArray();
       obj->o_getArray(ret, false, true);
       return ret;
     }
@@ -1915,7 +1915,7 @@ Array VariableSerializer::getSerializeProps(const ObjectData* obj) const {
     // Same with Closure, since it's a dynamic object but still has its own
     // different behavior for var_dump and cast to array
     if (UNLIKELY(obj->instanceof(c_Closure::classof()))) {
-      auto ret = Array::Create();
+      auto ret = Array::CreateDArray();
       obj->o_getArray(ret, false, true);
       return ret;
     }
@@ -2006,7 +2006,7 @@ void VariableSerializer::serializeObjectImpl(const ObjectData* obj) {
   if (UNLIKELY(handleSleep)) {
     assertx(!obj->isCollection());
     if (ret.isArray()) {
-      Array wanted = Array::Create();
+      Array wanted = Array::CreateDArray();
       assertx(isArrayType(ret.getType()));
       const Array &props = ret.asCArrRef();
       for (ArrayIter iter(props); iter; ++iter) {

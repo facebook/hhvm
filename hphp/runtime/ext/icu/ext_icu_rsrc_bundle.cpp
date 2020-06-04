@@ -50,7 +50,7 @@ static Variant extractValue(ResourceBundle* data,
       int32_t len;
       auto vec = bundle.getIntVector(len, error);
       EXTRACT_ERR(vector);
-      Array ret = Array::Create();
+      Array ret = Array::CreateVArray();
       for (int i = 0; i < len; ++i) {
         ret.append((int64_t)vec[i]);
       }

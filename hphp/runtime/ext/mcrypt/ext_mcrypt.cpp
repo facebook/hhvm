@@ -589,7 +589,7 @@ Variant HHVM_FUNCTION(mcrypt_enc_get_supported_key_sizes, const Resource& td) {
   int *key_sizes =
     mcrypt_enc_get_supported_key_sizes(pm->m_td, &count);
 
-  Array ret = Array::Create();
+  Array ret = Array::CreateVArray();
   for (int i = 0; i < count; i++) {
     ret.append(key_sizes[i]);
   }

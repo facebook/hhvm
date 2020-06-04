@@ -101,7 +101,7 @@ static void sqlite3_do_callback(sqlite3_context *context,
                                 int argc,
                                 sqlite3_value **argv,
                                 bool is_agg) {
-  Array params = Array::Create();
+  Array params = Array::CreateVArray();
   php_sqlite3_agg_context *agg_context = nullptr;
   if (is_agg) {
     agg_context = (php_sqlite3_agg_context *)sqlite3_aggregate_context
@@ -397,7 +397,7 @@ Variant HHVM_METHOD(SQLite3, querysingle,
       switch (sqlite3_step(pstmt)) {
       case SQLITE_ROW: /* Valid Row */
         if (entire_row) {
-          Array ret = Array::Create();
+          Array ret = Array::CreateDArray();
           for (int i = 0; i < sqlite3_data_count(pstmt); i++) {
             ret.set(String((char*)sqlite3_column_name(pstmt, i), CopyString),
                     get_column_value(pstmt, i));
@@ -720,7 +720,7 @@ Variant HHVM_METHOD(SQLite3Result, fetcharray,
   switch (sqlite3_step(data->m_stmt->m_raw_stmt)) {
   case SQLITE_ROW:
     if (mode & PHP_SQLITE3_BOTH) {
-      Array ret = Array::Create();
+      Array ret = Array::CreateDArray();
       for (int i = 0; i < sqlite3_data_count(data->m_stmt->m_raw_stmt); i++) {
         Variant value = get_column_value(data->m_stmt->m_raw_stmt, i);
         if (mode & PHP_SQLITE3_NUM) {

@@ -523,7 +523,7 @@ bool HHVM_FUNCTION(pcntl_sigprocmask,
     return false;
   }
 
-  oldset = Array::Create();
+  oldset = Array::CreateVArray();
   for (int signum = 1; signum < Process::kNSig; ++signum) {
     auto const result = sigismember(&coldset, signum);
     if (result == 1) {

@@ -797,19 +797,19 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     fn set_mode(&mut self, token: &PositionedToken) {
         for trivia in &token.trailing {
             if trivia.kind == TriviaKind::SingleLineComment {
-                match &*String::from_utf8_lossy_in(
-                    trivia.text_raw(self.state.source_text.source_text()),
-                    self.state.arena,
-                )
-                .trim_start_matches('/')
-                .trim()
+                if let Ok(text) =
+                    std::str::from_utf8(trivia.text_raw(self.state.source_text.source_text()))
                 {
-                    "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
-                    "partial" => {
-                        self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mpartial)
+                    match text.trim_start_matches('/').trim() {
+                        "decl" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mdecl),
+                        "partial" => {
+                            self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mpartial)
+                        }
+                        "strict" => {
+                            self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict)
+                        }
+                        _ => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
                     }
-                    "strict" => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
-                    _ => self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict),
                 }
             }
         }

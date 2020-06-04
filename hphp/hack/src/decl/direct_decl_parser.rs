@@ -13,22 +13,15 @@ use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use parser_core_types::{parser_env::ParserEnv, source_text::SourceText};
 
-pub fn parse_decls<'a>(
-    filename: RelativePath,
-    text: &'a [u8],
-    arena: &'a Bump,
-) -> Result<Decls<'a>, String> {
+pub fn parse_decls<'a>(filename: RelativePath, text: &'a [u8], arena: &'a Bump) -> Decls<'a> {
     let text = SourceText::make(RcOc::new(filename), text);
-    let (root, _errors, state) =
+    let (_, _errors, state) =
         direct_decl_parser::parse_script(&text, ParserEnv::default(), arena, None);
-    let decls = root.map(|_| {
-        let decls = Rc::try_unwrap(state.decls).unwrap();
-        Decls {
-            classes: decls.classes.into(),
-            funs: decls.funs.into(),
-            typedefs: decls.typedefs.into(),
-            consts: decls.consts.into(),
-        }
-    });
-    decls
+    let decls = Rc::try_unwrap(state.decls).unwrap();
+    Decls {
+        classes: decls.classes.into(),
+        funs: decls.funs.into(),
+        typedefs: decls.typedefs.into(),
+        consts: decls.consts.into(),
+    }
 }

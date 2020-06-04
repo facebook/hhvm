@@ -28,10 +28,8 @@ pub struct DummyDeclProvider<'a> {
 
 impl<'a> DummyDeclProvider<'a> {
     pub fn new(path: &RelativePath, text: &'a [u8], arena: &'a Bump) -> Self {
-        let decls = match decl_rust::direct_decl_parser::parse_decls(path.clone(), text, arena) {
-            Err(e) => panic!("{:?}", e),
-            Ok(decls) => arena.alloc(decls),
-        };
+        let decls = decl_rust::direct_decl_parser::parse_decls(path.clone(), text, arena);
+        let decls = arena.alloc(decls);
 
         // Unlike the existing OCaml decl provider, classes in the direct decl parser don't seem to
         // have namespace qualification

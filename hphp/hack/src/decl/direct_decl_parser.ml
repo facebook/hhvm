@@ -17,7 +17,7 @@ type decls = {
 }
 [@@deriving show]
 
-external parse_decls_ffi : Relative_path.t -> string -> (decls, string) result
+external parse_decls_ffi : Relative_path.t -> string -> decls
   = "parse_decls_ffi"
 
 let parse_decls ?contents relative_path =
@@ -29,7 +29,7 @@ let parse_decls ?contents relative_path =
   match contents with
   | Some contents -> parse_decls_ffi relative_path contents
   | None ->
-    Error
+    failwith
       (Printf.sprintf
          "Could not load file contents for %s"
          (Relative_path.to_absolute relative_path))

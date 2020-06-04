@@ -12,9 +12,15 @@ use ocamlrep_ocamlpool::{ocaml_ffi, to_ocaml};
 use oxidized::relative_path::RelativePath;
 
 ocaml_ffi! {
-    fn parse_decls_ffi(filename: RelativePath, text: Vec<u8>) -> Result<UnsafeOcamlPtr, String> {
+    fn parse_decls_ffi(filename: RelativePath, text: Vec<u8>) -> UnsafeOcamlPtr {
         let arena = Bump::new();
-        parse_decls(filename, &text, &arena)
-            .map(|decls| unsafe { UnsafeOcamlPtr::new(to_ocaml(&decls)) })
+        let decls = parse_decls(filename, &text, &arena);
+        // SAFETY: We immediately hand this pointer to the OCaml runtime.
+        // The use of UnsafeOcamlPtr is necessary here because we cannot return
+        // `decls`, since it borrows `arena`, which is destroyed at the end of
+        // this function scope. Instead, we convert the decls to OCaml
+        // ourselves, and return the pointer (the converted OCaml value does not
+        // borrow the arena).
+        unsafe { UnsafeOcamlPtr::new(to_ocaml(&decls)) }
     }
 }

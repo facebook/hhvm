@@ -1419,22 +1419,22 @@ OPTBLD_INLINE void iopString(const StringData* s) {
 OPTBLD_INLINE void iopArray(const ArrayData* a) {
   assertx(a->isPHPArrayType());
   assertx(!RuntimeOption::EvalHackArrDVArrs || a->isNotDVArray());
-  vmStack().pushStaticArray(a);
+  vmStack().pushStaticArray(bespoke::maybeEnableLogging(a));
 }
 
 OPTBLD_INLINE void iopVec(const ArrayData* a) {
   assertx(a->isVecType());
-  vmStack().pushStaticVec(a);
+  vmStack().pushStaticVec(bespoke::maybeEnableLogging(a));
 }
 
 OPTBLD_INLINE void iopDict(const ArrayData* a) {
   assertx(a->isDictType());
-  vmStack().pushStaticDict(a);
+  vmStack().pushStaticDict(bespoke::maybeEnableLogging(a));
 }
 
 OPTBLD_INLINE void iopKeyset(const ArrayData* a) {
   assertx(a->isKeysetType());
-  vmStack().pushStaticKeyset(a);
+  vmStack().pushStaticKeyset(bespoke::maybeEnableLogging(a));
 }
 
 OPTBLD_INLINE void iopNewArray(uint32_t capacity) {

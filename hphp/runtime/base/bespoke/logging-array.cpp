@@ -20,7 +20,13 @@
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
+#include "hphp/runtime/server/memory-stats.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "folly/SharedMutex.h"
+#include "folly/container/F14Map.h"
 
 namespace HPHP { namespace bespoke {
 
@@ -28,13 +34,47 @@ namespace HPHP { namespace bespoke {
 
 ArrayData* maybeEnableLogging(ArrayData* ad) {
   if (!RO::EvalEmitBespokeArrayLikes) return ad;
-  return LoggingArray::MakeFromVanilla(ad);
+  VMRegAnchor _;
+  auto const fp = vmfp();
+  auto const sk = SrcKey(fp->func(), vmpc(), resumeModeFromActRec(fp));
+  return ad->isStatic() ? LoggingArray::MakeFromStatic(ad, sk)
+                        : LoggingArray::MakeFromVanilla(ad, sk);
+}
+
+const ArrayData* maybeEnableLogging(const ArrayData* ad) {
+  return maybeEnableLogging(const_cast<ArrayData*>(ad));
 }
 
 //////////////////////////////////////////////////////////////////////////////
 
 namespace {
+
 LoggingLayout* s_layout = new LoggingLayout();
+
+// The bespoke kind for a vanilla kind. Assumes the kind supports bespokes.
+HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
+  switch (kind) {
+    case ArrayData::kPackedKind: return HeaderKind::BespokeVArray;
+    case ArrayData::kMixedKind:  return HeaderKind::BespokeDArray;
+    case ArrayData::kPlainKind:  return HeaderKind::BespokeArray;
+    case ArrayData::kVecKind:    return HeaderKind::BespokeVec;
+    case ArrayData::kDictKind:   return HeaderKind::BespokeDict;
+    case ArrayData::kKeysetKind: return HeaderKind::BespokeKeyset;
+
+    case ArrayData::kGlobalsKind:
+    case ArrayData::kRecordKind:
+    case ArrayData::kBespokeArrayKind:
+    case ArrayData::kBespokeVArrayKind:
+    case ArrayData::kBespokeDArrayKind:
+    case ArrayData::kBespokeVecKind:
+    case ArrayData::kBespokeDictKind:
+    case ArrayData::kBespokeKeysetKind:
+    case ArrayData::kNumKinds:
+      always_assert(false);
+  }
+  not_reached();
+}
+
 }
 
 bool LoggingArray::checkInvariants() const {
@@ -56,33 +96,61 @@ const LoggingArray* LoggingArray::asLogging(const ArrayData* ad) {
   return asLogging(const_cast<ArrayData*>(ad));
 }
 
-LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad) {
-  assertx(ad->getPosition() == 0);
+LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad, SrcKey sk) {
+  assertx(ad->isVanilla());
+  assertx(ad->getPosition() == ad->iter_begin());
+
   auto const size_index = MemoryManager::size2Index(sizeof(LoggingArray));
   auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(size_index));
 
-  assertx(ad->isVanilla());
-  auto const kind = [&]{
-    switch (ad->kind()) {
-      case kPackedKind: return HeaderKind::BespokeVArray;
-      case kMixedKind:  return HeaderKind::BespokeDArray;
-      case kPlainKind:  return HeaderKind::BespokeArray;
-      case kVecKind:    return HeaderKind::BespokeVec;
-      case kDictKind:   return HeaderKind::BespokeDict;
-      case kKeysetKind: return HeaderKind::BespokeKeyset;
-      default: always_assert(false);
-    }
-  }();
-
-  lad->initHeader(kind, OneReference);
+  lad->initHeader(getBespokeKind(ad->kind()), OneReference);
   lad->setLayout(s_layout);
   lad->wrapped = ad;
+  lad->srckey = sk;
   assertx(lad->checkInvariants());
   return lad;
 }
 
+LoggingArray* LoggingArray::MakeFromStatic(ArrayData* ad, SrcKey sk) {
+  assertx(ad->isStatic());
+  assertx(ad->isVanilla());
+  assertx(ad->getPosition() == ad->iter_begin());
+
+  static folly::SharedMutex s_mutex;
+  static folly::F14FastMap<SrcKey, LoggingArray*, SrcKey::Hasher> s_map;
+
+  auto const result = [&](LoggingArray* lad) {
+    assertx(lad->wrapped == ad);
+    assertx(lad->checkInvariants());
+    return lad;
+  };
+
+  {
+    folly::SharedMutex::ReadHolder lock(s_mutex);
+    auto const it = s_map.find(sk);
+    if (it != s_map.end()) return result(it->second);
+  }
+
+  folly::SharedMutex::WriteHolder lock(s_mutex);
+  auto insert = s_map.insert({sk, nullptr});
+  if (!insert.second) return result(insert.first->second);
+
+  auto const size = sizeof(LoggingArray);
+  auto lad = static_cast<LoggingArray*>(
+    RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
+  MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(lad));
+  insert.first->second = lad;
+
+  lad->initHeader(getBespokeKind(ad->kind()), StaticValue);
+  lad->setLayout(s_layout);
+  lad->wrapped = ad;
+  lad->srckey = sk;
+  return result(lad);
+}
+
 size_t LoggingLayout::heapSize(const ArrayData*) const {
-  return sizeof(LoggingArray);
+  auto const size_index = MemoryManager::size2Index(sizeof(LoggingArray));
+  return MemoryManager::sizeIndex2Size(size_index);
 }
 void LoggingLayout::scan(const ArrayData* ad, type_scan::Scanner& scan) const {
   scan.scan(LoggingArray::asLogging(ad)->wrapped);
@@ -129,7 +197,8 @@ ssize_t LoggingLayout::getStrPos(const ArrayData* ad, const StringData* k) const
 namespace {
 
 ArrayData* escalate(LoggingArray* lad, ArrayData* result) {
-  return result == lad->wrapped ? lad : LoggingArray::MakeFromVanilla(result);
+  if (result == lad->wrapped) return lad;
+  return LoggingArray::MakeFromVanilla(result, lad->srckey);
 }
 
 arr_lval escalate(LoggingArray* lad, arr_lval result) {
@@ -198,7 +267,7 @@ ArrayData* LoggingLayout::pop(ArrayData* ad, Variant& ret) const {
   return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
 }
 ArrayData* LoggingLayout::dequeue(ArrayData* ad, Variant& ret) const {
-  return mutate(ad, [&](ArrayData* w) { return w->pop(ret); });
+  return mutate(ad, [&](ArrayData* w) { return w->dequeue(ret); });
 }
 ArrayData* LoggingLayout::renumber(ArrayData* ad) const {
   return mutate(ad, [&](ArrayData* w) { return w->renumber(); });
@@ -208,15 +277,15 @@ namespace {
 
 template <typename F>
 ArrayData* conv(ArrayData* ad, F&& f) {
-  auto lad = LoggingArray::asLogging(ad);
-  auto ret = f(lad->wrapped);
-  return ret == lad->wrapped ? lad : LoggingArray::MakeFromVanilla(ret);
+  auto const lad = LoggingArray::asLogging(ad);
+  return escalate(lad, f(lad->wrapped));
 }
 
 }
 
 ArrayData* LoggingLayout::copy(const ArrayData* ad) const {
-  return LoggingArray::MakeFromVanilla(ad->copy());
+  auto const lad = LoggingArray::asLogging(ad);
+  return LoggingArray::MakeFromVanilla(lad->wrapped->copy(), lad->srckey);
 }
 ArrayData* LoggingLayout::toPHPArray(ArrayData* ad, bool copy) const {
   return conv(ad, [=](ArrayData* w) { return w->toPHPArray(copy); });

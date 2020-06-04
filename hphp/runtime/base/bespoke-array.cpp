@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -142,8 +143,9 @@ ssize_t BespokeArray::IterRewind(const ArrayData* ad, ssize_t pos) {
 
 // sorting
 ArrayData* BespokeArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  return asBespoke(ad)->layout()->escalateToVanilla(
-    ad, "BespokeArray::EscalateForSort");
+  auto const reason = "BespokeArray::EscalateForSort";
+  auto const vad = asBespoke(ad)->layout()->escalateToVanilla(ad, reason);
+  return vad->escalateForSort(sf);
 }
 
 // high-level ops

@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/typed-value.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace bespoke {
 
@@ -29,11 +30,15 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* asLogging(ArrayData* ad);
   static const LoggingArray* asLogging(const ArrayData* ad);
 
-  static LoggingArray* MakeFromVanilla(ArrayData* ad);
+  // `sk` is the array creation site for this array. Note that if we copy
+  // or convert an array, we'll still attribute later ops to the same site.
+  static LoggingArray* MakeFromVanilla(ArrayData* ad, SrcKey sk);
+  static LoggingArray* MakeFromStatic(ArrayData* ad, SrcKey sk);
 
   bool checkInvariants() const;
 
   ArrayData* wrapped;
+  SrcKey srckey;
 };
 
 struct LoggingLayout : public Layout {

@@ -1,0 +1,89 @@
+Parsed decls:
+
+{ Direct_decl_parser.classes =
+  { "\\C" ->
+    { Shallow_decl_defs.sc_mode = Mdecl; sc_final = false; sc_is_xhp = false;
+      sc_has_xhp_keyword = false; sc_kind = Cnormal;
+      sc_name = ([9:7-8], "\\C"); sc_tparams = []; sc_where_constraints = [];
+      sc_extends = []; sc_uses = []; sc_method_redeclarations = [];
+      sc_xhp_attr_uses = []; sc_req_extends = []; sc_req_implements = [];
+      sc_implements = []; sc_consts = []; sc_typeconsts = [];
+      sc_pu_enums = []; sc_props = []; sc_sprops = []; sc_constructor = None;
+      sc_static_methods = [];
+      sc_methods =
+      [{ Shallow_decl_defs.sm_abstract = false; sm_final = false;
+         sm_memoizelsb = false; sm_name = ([10:19-20], "g");
+         sm_override = false; sm_dynamicallycallable = false;
+         sm_reactivity = None;
+         sm_type =
+         (Rwitness (root|hhi.hhi line 10, characters 19-19),
+          (Tfun
+             { ft_arity = (Fstandard ()); ft_tparams = [];
+               ft_where_constraints = [];
+               ft_params =
+               [{ fp_pos = [10:23-25]; fp_name = (Some "$x");
+                  fp_type =
+                  { et_enforced = false;
+                    et_type =
+                    (Rhint (root|hhi.hhi line 10, characters 21-21),
+                     (Tapply (([10:21-22], "\\X"), [])))
+                    };
+                  fp_flags =
+                  (make_fp_flags ~mutability:none ~accept_disposable:false
+                    ~has_default:false ~mode:FPnormal);
+                   }
+                 ];
+               ft_ret =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|hhi.hhi line 10, characters 28-30),
+                  (Tprim Tint))
+                 };
+               ft_flags =
+               (make_ft_flags sync none ~return_disposable:false
+                 ~returns_mutable:false ~returns_void_to_rx:false);
+               ft_reactive = Nonreactive }));
+         sm_visibility = Public; sm_fixme_codes = {}; sm_deprecated = None }
+        ];
+      sc_user_attributes = []; sc_enum_type = None; sc_decl_errors = <opaque>
+      } };
+  funs =
+  { "\\f" ->
+    { fe_pos = [7:10-11];
+      fe_type =
+      (Rwitness (root|hhi.hhi line 7, characters 10-10),
+       (Tfun
+          { ft_arity = (Fstandard ()); ft_tparams = [];
+            ft_where_constraints = [];
+            ft_params =
+            [{ fp_pos = [7:19-21]; fp_name = (Some "$s");
+               fp_type =
+               { et_enforced = false;
+                 et_type =
+                 (Rhint (root|hhi.hhi line 7, characters 12-17),
+                  (Tprim Tstring))
+                 };
+               fp_flags =
+               (make_fp_flags ~mutability:none ~accept_disposable:false
+                 ~has_default:false ~mode:FPnormal);
+                }
+              ];
+            ft_ret =
+            { et_enforced = false;
+              et_type =
+              (Rhint (root|hhi.hhi line 7, characters 24-26), (Tprim Tint)) };
+            ft_flags =
+            (make_ft_flags sync none ~return_disposable:false
+              ~returns_mutable:false ~returns_void_to_rx:false);
+            ft_reactive = Nonreactive }));
+      fe_deprecated = None;  } };
+  typedefs =
+  { "\\X" ->
+    { td_pos = [3:6-7]; td_vis = Transparent; td_tparams = [];
+      td_constraint = None;
+      td_type = (Rhint (root|hhi.hhi line 3, characters 10-12), (Tprim Tint))
+      } };
+  consts =
+  { "\\Y" -> (Rhint (root|hhi.hhi line 5, characters 7-9), (Tprim Tint)) } }
+
+They matched!

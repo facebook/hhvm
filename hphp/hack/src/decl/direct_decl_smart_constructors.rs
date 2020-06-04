@@ -1448,7 +1448,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 self.set_mode(&token);
             }
             (FileModeBuilder::None, _) | (FileModeBuilder::Pending, _) => {
-                self.state.file_mode_builder = FileModeBuilder::Set(Mode::Mstrict)
+                self.state.file_mode_builder =
+                    FileModeBuilder::Set(if self.state.filename.has_extension("hhi") {
+                        Mode::Mdecl
+                    } else {
+                        Mode::Mstrict
+                    });
             }
             (_, _) => (),
         }

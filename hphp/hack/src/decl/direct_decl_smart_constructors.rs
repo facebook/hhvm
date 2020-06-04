@@ -83,17 +83,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                             qualified_name.push_str(&name);
                             qualified_name.push_str("\\");
                         } else {
-                            return Err(format!(
-                                "Expected a name or backslash, but got {:?}",
-                                listitem
-                            ));
+                            panic!("Expected a name or backslash, but got {:?}", listitem);
                         }
                     }
                     n => {
-                        return Err(format!(
-                            "Expected a name, backslash, or list item, but got {:?}",
-                            n
-                        ))
+                        panic!("Expected a name, backslash, or list item, but got {:?}", n);
                     }
                 }
             }
@@ -247,7 +241,7 @@ fn read_member_modifiers<'a: 'b, 'b>(modifiers: impl Iterator<Item = &'b Node_<'
         is_final: false,
     };
     for modifier in modifiers {
-        if let Ok(vis) = modifier.as_visibility() {
+        if let Some(vis) = modifier.as_visibility() {
             ret.visibility = vis;
         }
         match modifier {
@@ -616,33 +610,32 @@ impl<'a> Node_<'a> {
                     (Ok(fst_pos), Ok(snd_pos)) => Pos::merge(arena, fst_pos, snd_pos),
                     (Ok(pos), Err(_)) => Ok(pos),
                     (Err(_), Ok(pos)) => Ok(pos),
-                    (Err(_), Err(_)) => Err(format!("No pos found for {:?} or {:?}", fst, snd)),
+                    (Err(_), Err(_)) => panic!("No pos found for {:?} or {:?}", fst, snd),
                 }
             }
-            Node_::List(items) => self.pos_from_slice(&items, arena),
+            Node_::List(items) => Ok(self.pos_from_slice(&items, arena).unwrap()),
             Node_::BracketedList(&(first_pos, inner_list, second_pos)) => Pos::merge(
                 arena,
                 first_pos,
-                Pos::merge(arena, self.pos_from_slice(&inner_list, arena)?, second_pos)?,
+                Pos::merge(
+                    arena,
+                    self.pos_from_slice(&inner_list, arena).unwrap(),
+                    second_pos,
+                )?,
             ),
             Node_::Expr(&aast::Expr(pos, _)) => Ok(pos),
-            _ => Err(format!("No pos found for node {:?}", self)),
+            _ => panic!("No pos found for node {:?}", self),
         }
     }
 
-    fn pos_from_slice(
-        &self,
-        nodes: &'a [Node_<'a>],
-        arena: &'a Bump,
-    ) -> Result<&'a Pos<'a>, ParseError> {
-        nodes.iter().fold(
-            Err(format!("No pos found for any children under {:?}", self)),
-            |acc, elem| match (acc, elem.get_pos(arena)) {
-                (Ok(acc_pos), Ok(elem_pos)) => Pos::merge(arena, acc_pos, elem_pos),
-                (Err(_), Ok(elem_pos)) => Ok(elem_pos),
+    fn pos_from_slice(&self, nodes: &'a [Node_<'a>], arena: &'a Bump) -> Option<&'a Pos<'a>> {
+        nodes
+            .iter()
+            .fold(None, |acc, elem| match (acc, elem.get_pos(arena)) {
+                (Some(acc_pos), Ok(elem_pos)) => Pos::merge(arena, acc_pos, elem_pos).ok(),
+                (None, Ok(elem_pos)) => Some(elem_pos),
                 (acc, Err(_)) => acc,
-            },
-        )
+            })
     }
 
     fn as_slice(self, b: &'a Bump) -> &'a [Self] {
@@ -680,12 +673,12 @@ impl<'a> Node_<'a> {
         }
     }
 
-    fn as_visibility(&self) -> Result<aast::Visibility, ParseError> {
+    fn as_visibility(&self) -> Option<aast::Visibility> {
         match self {
-            Node_::Token(TokenKind::Private) => Ok(aast::Visibility::Private),
-            Node_::Token(TokenKind::Protected) => Ok(aast::Visibility::Protected),
-            Node_::Token(TokenKind::Public) => Ok(aast::Visibility::Public),
-            n => Err(format!("Expected a visibility modifier, but was {:?}", n)),
+            Node_::Token(TokenKind::Private) => Some(aast::Visibility::Private),
+            Node_::Token(TokenKind::Protected) => Some(aast::Visibility::Protected),
+            Node_::Token(TokenKind::Public) => Some(aast::Visibility::Public),
+            _ => None,
         }
     }
 
@@ -806,7 +799,7 @@ impl<'a> Node_<'a> {
                     _ => (),
                 }
             } else {
-                return Err(format!("Expected an attribute, but was {:?}", self));
+                panic!("Expected an attribute, but was {:?}", self);
             }
         }
 
@@ -1160,7 +1153,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         }) => {
                             let attributes = attributes.as_attributes(self.state.arena)?;
 
-                            if let Ok(visibility) = visibility.as_visibility() {
+                            if let Some(visibility) = visibility.as_visibility() {
                                 let Id(pos, name) = id;
                                 let name = strip_dollar_prefix(name);
                                 properties.push(ShallowProp {
@@ -1252,7 +1245,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                                 }
                             };
                         }
-                        n => return Err(format!("Expected a function parameter, but got {:?}", n)),
+                        n => panic!("Expected a function parameter, but got {:?}", n),
                     }
                 }
                 Ok((
@@ -1262,10 +1255,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 ))
             }
             Node_::Ignored => Ok((&[], &[], FunArity::Fstandard)),
-            n => Err(format!(
-                "Expected a list of function parameters, but got {:?}",
-                n
-            )),
+            n => panic!("Expected a list of function parameters, but got {:?}", n),
         }
     }
 
@@ -1284,10 +1274,10 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 aast::ClassId(pos, aast::ClassId_::CIself),
                 const_name,
             )))) => ShapeFieldName::SFclassConst(Id(pos, "self"), const_name),
-            n => return Err(format!(
+            n => panic!(
                 "Expected a string literal, int literal, or class const for shape key, but got {:?}",
                 n
-            )),
+            ),
         })
     }
 
@@ -1823,7 +1813,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let value = self.node_to_expr(value)?;
                 Ok((key, value))
             }
-            n => return Err(format!("Expected a ListItem but was {:?}", n)),
+            n => panic!("Expected a ListItem but was {:?}", n),
         })?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
@@ -1849,7 +1839,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let value = self.node_to_expr(value)?;
                 Ok(aast::Field(key, value))
             }
-            n => return Err(format!("Expected a ListItem but was {:?}", n)),
+            n => panic!("Expected a ListItem but was {:?}", n),
         })?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
@@ -1929,6 +1919,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_prefix_unary_expression(&mut self, op: Self::R, value: Self::R) -> Self::R {
         let (op, value) = (op?, value?);
+        if op.is_ignored() || value.is_ignored() {
+            return Ok(Node_::Ignored);
+        }
         let pos = match (
             op.get_pos(self.state.arena),
             value.get_pos(self.state.arena),
@@ -1962,6 +1955,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_postfix_unary_expression(&mut self, value: Self::R, op: Self::R) -> Self::R {
         let (value, op) = (value?, op?);
+        if value.is_ignored() || op.is_ignored() {
+            return Ok(Node_::Ignored);
+        }
         let pos = match (
             value.get_pos(self.state.arena),
             op.get_pos(self.state.arena),
@@ -1990,6 +1986,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_binary_expression(&mut self, lhs: Self::R, op: Self::R, rhs: Self::R) -> Self::R {
         let (lhs, op, rhs) = (lhs?, op?, rhs?);
+        if lhs.is_ignored() || op.is_ignored() || rhs.is_ignored() {
+            return Ok(Node_::Ignored);
+        }
         let pos = match (
             lhs.get_pos(self.state.arena),
             op.get_pos(self.state.arena),
@@ -2174,7 +2173,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let kind = match kind? {
             Node_::Token(TokenKind::As) => ConstraintKind::ConstraintAs,
             Node_::Token(TokenKind::Super) => ConstraintKind::ConstraintSuper,
-            n => return Err(format!("Expected either As or Super, but was {:?}", n)),
+            n => panic!("Expected either As or Super, but was {:?}", n),
         };
         Ok(Node_::TypeConstraint(self.alloc((kind, value?))))
     }
@@ -2190,7 +2189,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         let constraints = self.filter_map_to_slice(constraints, |node| match node {
             Node_::TypeConstraint(&constraint) => Ok(Some(constraint)),
             Node_::Ignored => Ok(None),
-            n => return Err(format!("Expected a type constraint, but was {:?}", n)),
+            n => panic!("Expected a type constraint, but was {:?}", n),
         })?;
         Ok(Node_::TypeParameter(self.alloc(TypeParameterDecl {
             name: name?,
@@ -2219,7 +2218,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     tparam_names.insert(name.1);
                     tparams_with_name.push((decl, name));
                 }
-                n => return Err(format!("Expected a type parameter, but got {:?}", n)),
+                n => panic!("Expected a type parameter, but got {:?}", n),
             }
         }
         Rc::make_mut(&mut self.state.type_parameters).push(tparam_names.into());
@@ -2416,6 +2415,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         abstract_: modifiers.is_abstract,
                         expr: match *initializer {
                             Node_::Expr(e) => Some(e.clone()),
+                            Node_::Ignored => None,
                             n => self.node_to_expr(n).ok(),
                         },
                         name: id,
@@ -2548,7 +2548,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
         let body = match body? {
             Node_::ClassishBody(body) => body,
-            body => return Err(format!("Expected a classish body, but was {:?}", body)),
+            body => panic!("Expected a classish body, but was {:?}", body),
         };
 
         let mut uses_len = 0;
@@ -2780,7 +2780,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         fixme_codes: ISet::empty(),
                     })
                 }
-                n => Err(format!("Expected a ListItem, but was {:?}", n)),
+                n => panic!("Expected a ListItem, but was {:?}", n),
             }))?;
         Ok(Node_::Property(self.alloc(PropertyNode {
             decls: declarators,
@@ -2877,7 +2877,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     })))
                 }
             }
-            n => Err(format!("Expected a FunctionDecl header, but was {:?}", n)),
+            n => panic!("Expected a FunctionDecl header, but was {:?}", n),
         }
     }
 
@@ -2918,7 +2918,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                     hint.1,
                 ),
             }),
-            n => Err(format!("Expected an enum case, got {:?}", n)),
+            n => panic!("Expected an enum case, got {:?}", n),
         }))?;
 
         let attributes = attributes?;
@@ -3023,7 +3023,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 &Node_::ShapeFieldSpecifier(&ShapeFieldNode { name, type_ }) => {
                     fields.insert(name.clone(), type_.clone())
                 }
-                n => return Err(format!("Expected a shape field specifier, but was {:?}", n)),
+                n => panic!("Expected a shape field specifier, but was {:?}", n),
             }
         }
         let kind = match open? {
@@ -3051,7 +3051,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 let value = self.node_to_expr(value)?;
                 Ok((key, value))
             }
-            n => Err(format!("Expected a ListItem but was {:?}", n)),
+            n => panic!("Expected a ListItem but was {:?}", n),
         }))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
@@ -3251,10 +3251,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 nodes,
                 gtgt?.get_pos(self.state.arena)?,
             )))),
-            node => Err(format!(
+            node => panic!(
                 "Expected List in old_attribute_specification, but got {:?}",
                 node
-            )),
+            ),
         }
     }
 

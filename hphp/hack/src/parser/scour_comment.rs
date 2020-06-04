@@ -30,6 +30,7 @@ pub struct ScourComment<'a, T, V> {
     pub include_line_comments: bool,
     pub disallowed_decl_fixmes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
+    pub disable_hh_ignore_error: bool,
 }
 
 impl<'src, T, V> ScourComment<'src, T, V>
@@ -52,7 +53,8 @@ where
                             && t.has_trivia_kind(TriviaKind::SingleLineComment))
                         || (self.collect_fixmes
                             && (t.has_trivia_kind(TriviaKind::FixMe)
-                                || t.has_trivia_kind(TriviaKind::IgnoreError)))
+                                || (t.has_trivia_kind(TriviaKind::IgnoreError)
+                                    && !self.disable_hh_ignore_error)))
                     {
                         for tr in t.leading().iter().chain(t.trailing().iter()) {
                             self.on_trivia(in_block, node, tr, &mut acc);

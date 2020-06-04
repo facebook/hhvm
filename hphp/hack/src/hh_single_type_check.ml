@@ -239,6 +239,7 @@ let parse_options () =
   let verbosity = ref 0 in
   let enable_first_class_function_pointers = ref false in
   let disable_modes = ref false in
+  let disable_hh_ignore_error = ref false in
   let enable_systemlib_annotations = ref false in
   let enable_pocket_universes_syntax = ref false in
   let options =
@@ -534,6 +535,9 @@ let parse_options () =
         Arg.Set enable_first_class_function_pointers,
         "Enable first class funciton pointers using <> syntax" );
       ("--disable-modes", Arg.Set disable_modes, "Treat partial as strict");
+      ( "--disable-hh-ignore-error",
+        Arg.Set disable_hh_ignore_error,
+        "Treat HH_IGNORE_ERROR comments as normal comments" );
       ( "--enable-systemlib-annotations",
         Arg.Set enable_systemlib_annotations,
         "Enable systemlib annotations" );
@@ -607,6 +611,7 @@ let parse_options () =
       ~po_enable_first_class_function_pointers:
         !enable_first_class_function_pointers
       ~po_disable_modes:!disable_modes
+      ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
       ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
       ()

@@ -126,6 +126,7 @@ let parse_file ~hhbc_options env text :
         ~enable_first_class_function_pointers:
           (enable_first_class_function_pointers co)
         ~disable_modes:false
+        ~disable_hh_ignore_error:false
         ~disable_array:(disable_array co))
   in
   let env =

@@ -248,6 +248,7 @@ impl<'a> AastParser {
             collect_fixmes: env.keep_errors,
             include_line_comments: env.include_line_comments,
             disallowed_decl_fixmes: &env.parser_options.po_disallowed_decl_fixmes,
+            disable_hh_ignore_error: env.parser_options.po_disable_hh_ignore_error,
         };
         Ok(scourer.scour_comments(script))
     }

@@ -117,6 +117,8 @@ let with_enable_first_class_function_pointers po b =
 
 let disable_modes = GlobalOptions.po_disable_modes
 
+let disable_hh_ignore_error = GlobalOptions.po_disable_hh_ignore_error
+
 let disable_array = GlobalOptions.po_disable_array
 
 let make
@@ -142,6 +144,7 @@ let make
     ~disable_xhp_children_declarations
     ~enable_first_class_function_pointers
     ~disable_modes
+    ~disable_hh_ignore_error
     ~disable_array =
   GlobalOptions.
     {
@@ -169,6 +172,7 @@ let make
       po_enable_first_class_function_pointers =
         enable_first_class_function_pointers;
       po_disable_modes = disable_modes;
+      po_disable_hh_ignore_error = disable_hh_ignore_error;
       po_disable_array = disable_array;
     }
 

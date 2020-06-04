@@ -12,9 +12,9 @@ namespace HH {
 
 type XenonSample = shape(
   'time' => int,
-  /* HH_IGNORE_ERROR[2071] */
+  /* HH_FIXME[2071] */
   'stack' => varray,
-  /* HH_IGNORE_ERROR[2071] */
+  /* HH_FIXME[2071] */
   'phpStack' => varray,
   'ioWaitSample' => bool,
 );

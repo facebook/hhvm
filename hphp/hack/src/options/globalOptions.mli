@@ -242,6 +242,7 @@ type t = {
   po_enable_first_class_function_pointers: bool;
   (* Treats partial files as strict *)
   po_disable_modes: bool;
+  po_disable_hh_ignore_error: bool;
   (* Disable array(...) *)
   po_disable_array: bool;
   (* Enable features used to typecheck systemlib *)
@@ -343,6 +344,7 @@ val make :
   ?po_disable_xhp_children_declarations:bool ->
   ?po_enable_first_class_function_pointers:bool ->
   ?po_disable_modes:bool ->
+  ?po_disable_hh_ignore_error:bool ->
   ?po_disable_array:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
@@ -550,6 +552,8 @@ val po_disable_xhp_children_declarations : t -> bool
 val po_enable_first_class_function_pointers : t -> bool
 
 val po_disable_modes : t -> bool
+
+val po_disable_hh_ignore_error : t -> bool
 
 val po_disable_array : t -> bool
 

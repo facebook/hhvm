@@ -150,7 +150,11 @@ pub fn prefix_namespace(n: &str, s: &str) -> String {
 }
 
 pub fn strip_global_ns(s: &str) -> &str {
-    s.trim_start_matches("\\")
+    if s.starts_with("\\") {
+        &s[1..]
+    } else {
+        s
+    }
 }
 
 // Strip zero or more chars followed by a backslash
@@ -448,7 +452,9 @@ mod string_utils_tests {
     #[test]
     fn strip_global_ns_test() {
         let some_string = "\\test";
+        let another_string = "\\\\";
         assert_eq!(super::strip_global_ns(&some_string), "test");
+        assert_eq!(super::strip_global_ns(&another_string), "\\");
     }
 
     #[test]

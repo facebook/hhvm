@@ -2166,7 +2166,7 @@ fn emit_call_lhs_and_fcall(
         }
         E_::String(s) => {
             // TODO(hrust) should be able to accept `let fq_id = function::from_raw_string(s);`
-            let fq_id = string_utils::strip_global_ns(s).to_string().into();
+            let fq_id = s.to_string().into();
             let generics = emit_generics(e, env, &mut fcall_args)?;
             Ok((
                 InstrSeq::gather(vec![

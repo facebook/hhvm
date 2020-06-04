@@ -132,9 +132,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         mut f: impl FnMut(Node_<'a>) -> Result<T, ParseError>,
     ) -> Result<&'a [T], ParseError> {
         let node = node?;
-        let nodes = node.iter();
-        let mut result = Vec::new_in(self.state.arena);
-        for node in nodes {
+        let mut result = Vec::with_capacity_in(node.len(), self.state.arena);
+        for node in node.iter() {
             result.push(f(*node)?)
         }
         Ok(result.into_bump_slice())
@@ -146,12 +145,36 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         mut f: impl FnMut(Node_<'a>) -> Result<Option<T>, ParseError>,
     ) -> Result<&'a [T], ParseError> {
         let node = node?;
-        let nodes = node.iter();
-        let mut result = Vec::new_in(self.state.arena);
-        for node in nodes {
+        let mut result = Vec::with_capacity_in(node.len(), self.state.arena);
+        for node in node.iter() {
             if let Some(mapped) = f(*node)? {
                 result.push(mapped)
             }
+        }
+        Ok(result.into_bump_slice())
+    }
+
+    fn slice_from_iter<T>(&self, iter: impl Iterator<Item = T>) -> &'a [T] {
+        let mut result = match iter.size_hint().1 {
+            Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.state.arena),
+            None => Vec::new_in(self.state.arena),
+        };
+        for item in iter {
+            result.push(item);
+        }
+        result.into_bump_slice()
+    }
+
+    fn maybe_slice_from_iter<T>(
+        &self,
+        iter: impl Iterator<Item = Result<T, ParseError>>,
+    ) -> Result<&'a [T], ParseError> {
+        let mut result = match iter.size_hint().1 {
+            Some(upper_bound) => Vec::with_capacity_in(upper_bound, self.state.arena),
+            None => Vec::new_in(self.state.arena),
+        };
+        for item in iter {
+            result.push(item?);
         }
         Ok(result.into_bump_slice())
     }
@@ -627,10 +650,21 @@ impl<'a> Node_<'a> {
         'a: 'b,
     {
         match self {
-            Node_::List(items) => NodeIterHelper::Vec(items.iter()),
-            Node_::BracketedList(&(_, items, _)) => NodeIterHelper::Vec(items.iter()),
+            &Node_::List(items) | Node_::BracketedList(&(_, items, _)) => {
+                NodeIterHelper::Vec(items.iter())
+            }
             Node_::Ignored => NodeIterHelper::Empty,
             n => NodeIterHelper::Single(n),
+        }
+    }
+
+    // The number of elements which would be yielded by `self.iter()`.
+    // Must return the upper bound returned by NodeIterHelper::size_hint.
+    fn len(&self) -> usize {
+        match self {
+            &Node_::List(items) | Node_::BracketedList(&(_, items, _)) => items.len(),
+            Node_::Ignored => 0,
+            _ => 1,
         }
     }
 
@@ -866,11 +900,11 @@ impl<'a> DirectDeclSmartConstructors<'a> {
             Node_::Ty(ty) => Ok(ty),
             Node_::TypeconstAccess((pos, ty, names)) => {
                 let pos = pos.get();
-                let names = Vec::from_iter_in(names.borrow().iter().copied(), self.state.arena);
+                let names = self.slice_from_iter(names.borrow().iter().copied());
                 Ok(Ty(
                     self.alloc(Reason::hint(pos)),
                     self.alloc(Ty_::Taccess(
-                        self.alloc(typing_defs::TaccessType(*ty, names.into_bump_slice())),
+                        self.alloc(typing_defs::TaccessType(*ty, names)),
                     )),
                 ))
             }
@@ -1098,7 +1132,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
     ) -> Result<(FunParams<'a>, &'a [ShallowProp<'a>], FunArity<'a>), ParseError> {
         match list {
             Node_::List(nodes) => {
-                let mut params = Vec::new_in(self.state.arena);
+                let mut params = Vec::with_capacity_in(nodes.len(), self.state.arena);
                 let mut properties = Vec::new_in(self.state.arena);
                 let mut arity = FunArity::Fstandard;
                 for node in nodes.iter() {
@@ -1229,12 +1263,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
         type_arguments: Node_<'a>,
         pos_to_merge: Option<&'a Pos<'a>>,
     ) -> Node<'a> {
-        let type_arguments_iter = type_arguments.iter();
-        let mut type_arguments = Vec::new_in(self.state.arena);
-        for node in type_arguments_iter {
-            type_arguments.push(self.node_to_ty(*node)?);
-        }
-        let type_arguments = type_arguments.into_bump_slice();
+        let type_arguments =
+            self.maybe_slice_from_iter(type_arguments.iter().map(|&node| self.node_to_ty(node)))?;
         let ty_ = Ty_::Tapply(self.alloc((base_ty, type_arguments)));
         let pos = match pos_to_merge {
             Some(p) => Pos::merge(self.state.arena, base_ty.0, p)?,
@@ -1289,11 +1319,12 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                 }
             }
             Ty_::Tapply(&(id, targs)) => {
-                let mut converted_targs = Vec::with_capacity_in(targs.len(), self.state.arena);
-                for &targ in targs {
-                    converted_targs.push(self.convert_tapply_to_tgeneric(targ));
-                }
-                Ty_::Tapply(self.alloc((id, converted_targs.into_bump_slice())))
+                let converted_targs = self.slice_from_iter(
+                    targs
+                        .iter()
+                        .map(|&targ| self.convert_tapply_to_tgeneric(targ)),
+                );
+                Ty_::Tapply(self.alloc((id, converted_targs)))
             }
             Ty_::Tarray(&(tk, tv)) => Ty_::Tarray(self.alloc((
                 tk.map(|tk| self.convert_tapply_to_tgeneric(tk)),
@@ -1319,11 +1350,8 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                     FunArity::Fstandard => FunArity::Fstandard,
                     FunArity::Fvariadic(param) => FunArity::Fvariadic(convert_param(param)),
                 };
-                let mut params = Vec::with_capacity_in(fun_type.params.len(), self.state.arena);
-                for &param in fun_type.params {
-                    params.push(convert_param(param));
-                }
-                let params = params.into_bump_slice();
+                let params =
+                    self.slice_from_iter(fun_type.params.iter().cloned().map(convert_param));
                 let ret = PossiblyEnforcedTy {
                     enforced: fun_type.ret.enforced,
                     type_: self.convert_tapply_to_tgeneric(fun_type.ret.type_),
@@ -1385,21 +1413,38 @@ impl<'a, 'b> Iterator for NodeIterHelper<'a, 'b> {
             NodeIterHelper::Vec(ref mut iter) => iter.next(),
         }
     }
+
+    // Must return the upper bound returned by Node_::len.
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        match self {
+            NodeIterHelper::Empty => (0, Some(0)),
+            NodeIterHelper::Single(_) => (1, Some(1)),
+            NodeIterHelper::Vec(iter) => iter.size_hint(),
+        }
+    }
 }
 
 impl<'a> FlattenOp for DirectDeclSmartConstructors<'a> {
     type S = Node<'a>;
 
     fn flatten(&self, lst: std::vec::Vec<Self::S>) -> Self::S {
-        let lst_iter = lst.iter().cloned();
-        let mut r = Vec::new_in(self.state.arena);
-        for s in lst_iter {
-            match s? {
-                Node_::List(children) => {
-                    for child in children.iter().cloned() {
-                        r.push(child)
+        let size = lst
+            .iter()
+            .map(|s| match s {
+                Ok(Node_::List(children)) => children.len(),
+                x => {
+                    if Self::is_zero(x) {
+                        0
+                    } else {
+                        1
                     }
                 }
+            })
+            .sum();
+        let mut r = Vec::with_capacity_in(size, self.state.arena);
+        for s in lst.into_iter() {
+            match s? {
+                Node_::List(children) => r.extend(children.iter().cloned()),
                 x => {
                     if !Self::is_zero(&Ok(x)) {
                         r.push(x)
@@ -1635,10 +1680,14 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         {
             Ok(Node_::Token(TokenKind::Yield))
         } else {
+            let size = items
+                .iter()
+                .filter(|node| !matches!(node, Ok(Node_::Ignored)))
+                .count();
             let items_iter = items.into_iter();
-            let mut items = Vec::new_in(self.state.arena);
+            let mut items = Vec::with_capacity_in(size, self.state.arena);
             for node in items_iter {
-                if !(matches!(node, Ok(Node_::Ignored))) {
+                if !matches!(node, Ok(Node_::Ignored)) {
                     items.push(node?);
                 }
             }
@@ -2110,8 +2159,9 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
 
     fn make_type_parameters(&mut self, _lt: Self::R, tparams: Self::R, _gt: Self::R) -> Self::R {
         let tparams = tparams?;
-        let mut tparams_with_name = Vec::new_in(self.state.arena);
-        let mut tparam_names = MultiSetMut::new_in(self.state.arena);
+        let size = tparams.len();
+        let mut tparams_with_name = Vec::with_capacity_in(size, self.state.arena);
+        let mut tparam_names = MultiSetMut::with_capacity_in(size, self.state.arena);
         for node in tparams.iter() {
             match node {
                 &Node_::TypeParameter(decl) => {
@@ -2131,15 +2181,12 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 reified,
                 constraints,
             } = decl;
-            let constraints_iter = constraints.iter();
-            let mut constraints = Vec::new_in(self.state.arena);
-            for constraint in constraints_iter {
+            let constraints = self.maybe_slice_from_iter(constraints.iter().map(|constraint| {
                 let &(kind, ty) = constraint;
                 let ty = self.node_to_ty(ty)?;
                 let ty = self.convert_tapply_to_tgeneric(ty);
-                constraints.push((kind, ty));
-            }
-            let constraints = constraints.into_bump_slice();
+                Ok((kind, ty))
+            }))?;
             tparams.push(Tparam {
                 variance,
                 name,
@@ -2447,24 +2494,74 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             }
         }
 
+        let attributes = attributes?;
+
+        let body = match body? {
+            Node_::ClassishBody(body) => body,
+            body => return Err(format!("Expected a classish body, but was {:?}", body)),
+        };
+
+        let mut uses_len = 0;
+        let mut req_extends_len = 0;
+        let mut req_implements_len = 0;
+        let mut consts_len = 0;
+        let mut typeconsts_len = 0;
+        let mut props_len = 0;
+        let mut sprops_len = 0;
+        let mut static_methods_len = 0;
+        let mut methods_len = 0;
+
+        let mut user_attributes_len = 0;
+        for attribute in attributes.iter() {
+            match attribute {
+                &Node_::Attribute(..) => user_attributes_len += 1,
+                _ => (),
+            }
+        }
+
+        for element in body.iter().copied() {
+            match element {
+                Node_::TraitUse(names) => uses_len += names.len(),
+                Node_::TypeConstant(..) => typeconsts_len += 1,
+                Node_::RequireClause(require) => match require.require_type {
+                    Node_::Token(TokenKind::Extends) => req_extends_len += 1,
+                    Node_::Token(TokenKind::Implements) => req_implements_len += 1,
+                    _ => {}
+                },
+                Node_::Const(..) => consts_len += 1,
+                Node_::Property { decls, is_static } => {
+                    if is_static {
+                        sprops_len += decls.len()
+                    } else {
+                        props_len += decls.len()
+                    }
+                }
+                Node_::Constructor { properties, .. } => props_len += properties.len(),
+                Node_::Method { is_static, .. } => {
+                    if is_static {
+                        static_methods_len += 1
+                    } else {
+                        methods_len += 1
+                    }
+                }
+                _ => (),
+            }
+        }
+
         let mut constructor = None;
 
-        let where_constraints = Vec::new_in(self.state.arena);
-        let mut uses = Vec::new_in(self.state.arena);
-        let method_redeclarations = Vec::new_in(self.state.arena);
-        let xhp_attr_uses = Vec::new_in(self.state.arena);
-        let mut req_extends = Vec::new_in(self.state.arena);
-        let mut req_implements = Vec::new_in(self.state.arena);
-        let mut consts = Vec::new_in(self.state.arena);
-        let mut typeconsts = Vec::new_in(self.state.arena);
-        let pu_enums = Vec::new_in(self.state.arena);
-        let mut props = Vec::new_in(self.state.arena);
-        let mut sprops = Vec::new_in(self.state.arena);
-        let mut static_methods = Vec::new_in(self.state.arena);
-        let mut methods = Vec::new_in(self.state.arena);
+        let mut uses = Vec::with_capacity_in(uses_len, self.state.arena);
+        let mut req_extends = Vec::with_capacity_in(req_extends_len, self.state.arena);
+        let mut req_implements = Vec::with_capacity_in(req_implements_len, self.state.arena);
+        let mut consts = Vec::with_capacity_in(consts_len, self.state.arena);
+        let mut typeconsts = Vec::with_capacity_in(typeconsts_len, self.state.arena);
+        let mut props = Vec::with_capacity_in(props_len, self.state.arena);
+        let mut sprops = Vec::with_capacity_in(sprops_len, self.state.arena);
+        let mut static_methods = Vec::with_capacity_in(static_methods_len, self.state.arena);
+        let mut methods = Vec::with_capacity_in(methods_len, self.state.arena);
 
-        let mut user_attributes = Vec::new_in(self.state.arena);
-        for attribute in attributes?.iter() {
+        let mut user_attributes = Vec::with_capacity_in(user_attributes_len, self.state.arena);
+        for attribute in attributes.iter() {
             match attribute {
                 &Node_::Attribute(attr) => user_attributes.push(attr),
                 _ => (),
@@ -2474,64 +2571,55 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         // though it's the reverse of the syntactic ordering).
         user_attributes.reverse();
 
-        match body? {
-            Node_::ClassishBody(body) => {
-                for element in body.iter().copied() {
-                    match element {
-                        Node_::TraitUse(names) => {
-                            for name in names.iter() {
-                                uses.push(self.node_to_ty(*name)?);
-                            }
-                        }
-                        Node_::TypeConstant(constant) => typeconsts.push(constant.clone()),
-                        Node_::RequireClause(require) => match require.require_type {
-                            Node_::Token(TokenKind::Extends) => {
-                                req_extends.push(self.node_to_ty(require.name)?)
-                            }
-                            Node_::Token(TokenKind::Implements) => {
-                                req_implements.push(self.node_to_ty(require.name)?)
-                            }
-                            _ => {}
-                        },
-                        Node_::Const(const_decl) => consts.push(const_decl.clone()),
-                        Node_::Property { decls, is_static } => {
-                            for property in decls {
-                                if is_static {
-                                    sprops.push(property.clone())
-                                } else {
-                                    props.push(property.clone())
-                                }
-                            }
-                        }
-                        Node_::Constructor { method, properties } => {
-                            constructor = Some(method.clone());
-                            for property in properties {
-                                props.push(property.clone())
-                            }
-                        }
-                        Node_::Method { method, is_static } => {
-                            if is_static {
-                                static_methods.push(method.clone());
-                            } else {
-                                methods.push(method.clone());
-                            }
-                        }
-                        _ => (), // It's not our job to report errors here.
+        for element in body.iter().copied() {
+            match element {
+                Node_::TraitUse(names) => {
+                    for name in names.iter() {
+                        uses.push(self.node_to_ty(*name)?);
                     }
                 }
+                Node_::TypeConstant(constant) => typeconsts.push(constant.clone()),
+                Node_::RequireClause(require) => match require.require_type {
+                    Node_::Token(TokenKind::Extends) => {
+                        req_extends.push(self.node_to_ty(require.name)?)
+                    }
+                    Node_::Token(TokenKind::Implements) => {
+                        req_implements.push(self.node_to_ty(require.name)?)
+                    }
+                    _ => {}
+                },
+                Node_::Const(const_decl) => consts.push(const_decl.clone()),
+                Node_::Property { decls, is_static } => {
+                    for property in decls {
+                        if is_static {
+                            sprops.push(property.clone())
+                        } else {
+                            props.push(property.clone())
+                        }
+                    }
+                }
+                Node_::Constructor { method, properties } => {
+                    constructor = Some(method.clone());
+                    for property in properties {
+                        props.push(property.clone())
+                    }
+                }
+                Node_::Method { method, is_static } => {
+                    if is_static {
+                        static_methods.push(method.clone());
+                    } else {
+                        methods.push(method.clone());
+                    }
+                }
+                _ => (), // It's not our job to report errors here.
             }
-            body => return Err(format!("Expected a classish body, but was {:?}", body)),
         }
 
-        let where_constraints = where_constraints.into_bump_slice();
         let uses = uses.into_bump_slice();
-        let method_redeclarations = method_redeclarations.into_bump_slice();
-        let xhp_attr_uses = xhp_attr_uses.into_bump_slice();
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
         let consts = consts.into_bump_slice();
         let typeconsts = typeconsts.into_bump_slice();
-        let pu_enums = pu_enums.into_bump_slice();
         let props = props.into_bump_slice();
         let sprops = sprops.into_bump_slice();
         let static_methods = static_methods.into_bump_slice();
@@ -2571,17 +2659,17 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             kind: class_kind,
             name: Id(pos, name),
             tparams,
-            where_constraints,
+            where_constraints: &[],
             extends,
             uses,
-            method_redeclarations,
-            xhp_attr_uses,
+            method_redeclarations: &[],
+            xhp_attr_uses: &[],
             req_extends,
             req_implements,
             implements,
             consts,
             typeconsts,
-            pu_enums,
+            pu_enums: &[],
             props,
             sprops,
             constructor,
@@ -2613,18 +2701,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         declarators: Self::R,
         _arg4: Self::R,
     ) -> Self::R {
-        // Sometimes the declarator is a single element list.
-        let declarators = match declarators? {
-            Node_::List(nodes) => nodes,
-            node => return Err(format!("Expected a List, but got {:?}", node)),
-        };
-        let attrs = attrs?;
-        let modifiers = modifiers?;
+        let (attrs, modifiers, hint) = (attrs?, modifiers?, hint?);
         let modifiers = read_member_modifiers(modifiers.iter());
-        let hint = hint?;
-        let mut declarators_vec = Vec::new_in(self.state.arena);
-        for declarator in declarators.into_iter() {
-            match declarator {
+        let declarators =
+            self.maybe_slice_from_iter(declarators?.iter().map(|declarator| match declarator {
                 Node_::ListItem(&(name, initializer)) => {
                     let needs_init = matches!(initializer, Node_::Ignored);
                     let attributes = attrs.as_attributes(self.state.arena)?;
@@ -2635,7 +2715,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         strip_dollar_prefix(name)
                     };
                     let ty = self.node_to_ty(hint)?;
-                    declarators_vec.push(ShallowProp {
+                    Ok(ShallowProp {
                         const_: attributes.const_,
                         xhp_attr: None,
                         lateinit: attributes.late_init,
@@ -2646,12 +2726,10 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                         abstract_: modifiers.is_abstract,
                         visibility: modifiers.visibility,
                         fixme_codes: ISet::empty(),
-                    });
+                    })
                 }
-                n => return Err(format!("Expected a ListItem, but was {:?}", n)),
-            }
-        }
-        let declarators = declarators_vec.into_bump_slice();
+                n => Err(format!("Expected a ListItem, but was {:?}", n)),
+            }))?;
         Ok(Node_::Property {
             decls: declarators,
             is_static: modifiers.is_static,
@@ -2774,28 +2852,22 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             None,
         )?)?;
         let key = id.1;
-        let mut consts = Vec::new_in(self.state.arena);
-        for node in cases?.iter() {
-            match node {
-                Node_::ListItem(&innards) => {
-                    let (name, value) = innards;
-                    consts.push(shallow_decl_defs::ShallowClassConst {
-                        abstract_: false,
-                        expr: Some(self.node_to_expr(value)?),
-                        name: self.get_name("", name)?,
-                        type_: Ty(
-                            self.alloc(Reason::witness(value.get_pos(self.state.arena)?)),
-                            hint.1,
-                        ),
-                    })
-                }
-                n => return Err(format!("Expected an enum case, got {:?}", n)),
-            }
-        }
-        let consts = consts.into_bump_slice();
+        let consts = self.maybe_slice_from_iter(cases?.iter().map(|node| match node {
+            Node_::ListItem(&(name, value)) => Ok(shallow_decl_defs::ShallowClassConst {
+                abstract_: false,
+                expr: Some(self.node_to_expr(value)?),
+                name: self.get_name("", name)?,
+                type_: Ty(
+                    self.alloc(Reason::witness(value.get_pos(self.state.arena)?)),
+                    hint.1,
+                ),
+            }),
+            n => Err(format!("Expected an enum case, got {:?}", n)),
+        }))?;
 
-        let mut user_attributes = Vec::new_in(self.state.arena);
-        for attribute in attributes?.iter() {
+        let attributes = attributes?;
+        let mut user_attributes = Vec::with_capacity_in(attributes.len(), self.state.arena);
+        for attribute in attributes.iter() {
             match attribute {
                 &Node_::Attribute(attr) => user_attributes.push(attr),
                 _ => (),
@@ -2875,13 +2947,7 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
             left_paren?.get_pos(self.state.arena)?,
             right_paren?.get_pos(self.state.arena)?,
         )?;
-        let tys = tys?;
-        let tys_iter = tys.iter();
-        let mut tys = Vec::new_in(self.state.arena);
-        for node in tys_iter {
-            tys.push(self.node_to_ty(*node)?);
-        }
-        let tys = tys.into_bump_slice();
+        let tys = self.maybe_slice_from_iter(tys?.iter().map(|&node| self.node_to_ty(node)))?;
         Ok(self.hint_ty(pos, Ty_::Ttuple(tys)))
     }
 
@@ -2923,27 +2989,23 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let mut kv_pairs = Vec::new_in(self.state.arena);
-        for node in fields?.iter() {
-            match node {
-                Node_::ListItem(&(key, value)) => {
-                    let key = match key {
-                        Node_::IntLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
-                        Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((p, s)),
-                        n => {
-                            return Err(format!(
+        let fields = self.maybe_slice_from_iter(fields?.iter().map(|node| match node {
+            Node_::ListItem(&(key, value)) => {
+                let key = match key {
+                    Node_::IntLiteral(s, p) => ShapeFieldName::SFlitInt((p, s)),
+                    Node_::StringLiteral(s, p) => ShapeFieldName::SFlitStr((p, s)),
+                    n => {
+                        return Err(format!(
                             "Expected an int literal, string literal, or class const, but was {:?}",
                             n
                         ))
-                        }
-                    };
-                    let value = self.node_to_expr(value)?;
-                    kv_pairs.push((key, value))
-                }
-                n => return Err(format!("Expected a ListItem but was {:?}", n)),
+                    }
+                };
+                let value = self.node_to_expr(value)?;
+                Ok((key, value))
             }
-        }
-        let fields = kv_pairs.into_bump_slice();
+            n => Err(format!("Expected a ListItem but was {:?}", n)),
+        }))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
                 self.state.arena,
@@ -2961,11 +3023,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         fields: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let mut field_exprs = Vec::new_in(self.state.arena);
-        for &field in fields?.iter() {
-            field_exprs.push(self.node_to_expr(field)?);
-        }
-        let fields = field_exprs.into_bump_slice();
+        let fields =
+            self.maybe_slice_from_iter(fields?.iter().map(|&field| self.node_to_expr(field)))?;
         Ok(Node_::Expr(self.alloc(aast::Expr(
             Pos::merge(
                 self.state.arena,
@@ -3232,9 +3291,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
         ret_hint: Self::R,
         right_paren: Self::R,
     ) -> Self::R {
-        let mut params = Vec::new_in(self.state.arena);
-        for node in args?.iter().copied() {
-            params.push(self.alloc(FunParam {
+        let params = self.maybe_slice_from_iter(args?.iter().map(|&node| {
+            Ok(self.alloc(FunParam {
                 pos: node.get_pos(self.state.arena)?,
                 name: None,
                 type_: PossiblyEnforcedTy {
@@ -3243,9 +3301,8 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 },
                 flags: FunParamFlags::empty(),
                 rx_annotation: None,
-            }));
-        }
-        let params = params.into_bump_slice();
+            }))
+        }))?;
         let ret = self.node_to_ty(ret_hint?)?;
         let pos = Pos::merge(
             self.state.arena,

@@ -180,7 +180,7 @@ pub struct MultiSetMut<'bump, T: 'bump> {
 impl<'bump, T> MultiSetMut<'bump, T> {
     /// Constructs a new, empty `MultiSetMut`.
     ///
-    /// The list will not allocate until an element is inserted.
+    /// The set will not allocate until an element is inserted.
     ///
     /// # Examples
     ///
@@ -195,6 +195,42 @@ impl<'bump, T> MultiSetMut<'bump, T> {
     pub fn new_in(bump: &'bump Bump) -> Self {
         MultiSetMut {
             list: AssocListMut::new_in(bump),
+        }
+    }
+
+    /// Constructs a new, empty `MultiSetMut` with the specified capacity.
+    ///
+    /// The set will be able to hold exactly `capacity` elements without
+    /// reallocating. If `capacity` is 0, the set will not allocate.
+    ///
+    /// It is important to note that although the returned set has the
+    /// *capacity* specified, the set will have a zero *length*.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use bumpalo::Bump;
+    /// use arena_collections::MultiSetMut;
+    ///
+    /// let b = Bump::new();
+    ///
+    /// let mut set = MultiSetMut::with_capacity_in(10, &b);
+    ///
+    /// // The set contains no items, even though it has capacity for more
+    /// assert_eq!(set.len(), 0);
+    ///
+    /// // These are all done without reallocating...
+    /// for i in 0..10 {
+    ///     set.insert(i);
+    /// }
+    ///
+    /// // ...but this may make the set reallocate
+    /// set.insert(11);
+    /// ```
+    #[inline]
+    pub fn with_capacity_in(capacity: usize, bump: &'bump Bump) -> Self {
+        MultiSetMut {
+            list: AssocListMut::with_capacity_in(capacity, bump),
         }
     }
 

@@ -50,13 +50,13 @@ let weaken stk env ty =
     in
     match ty with
     | Tprim p ->
-      let p' = Env.new_policy_var stk in
+      let p' = Env.new_policy_var stk.s_scope in
       (L.(p < p') acc, Tprim p')
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass (name, pol, prop_pol_map) ->
-      let super_pol = Env.new_policy_var stk in
+      let super_pol = Env.new_policy_var stk.s_scope in
       let acc = L.(pol < super_pol) acc in
       (acc, Tclass (name, super_pol, prop_pol_map))
   in
@@ -94,7 +94,7 @@ let policy_join stk env p1 p2 =
       when equal_policy_var v1 v2 && Scope.equal s1 s2 ->
       (env, p1)
     | _ ->
-      let pv = Env.new_policy_var stk in
+      let pv = Env.new_policy_var stk.s_scope in
       let env = Env.acc env L.(p1 < pv && p2 < pv) in
       (env, pv))
 
@@ -177,7 +177,7 @@ let rec class_ptype stk name =
     | Some class_policy_sig -> class_policy_sig
     | None -> fail ("Could not found a class policy signature for " ^ name)
   in
-  let class_policy = Env.new_policy_var stk in
+  let class_policy = Env.new_policy_var stk.s_scope in
   let policy_map =
     List.map psig_policied_properties (fun (prop, ty) -> (prop, ptype stk ty))
     |> SMap.of_list
@@ -188,7 +188,7 @@ let rec class_ptype stk name =
    the policy annotations are fresh policy variables *)
 and ptype stk (t : T.locl_ty) =
   match T.get_node t with
-  | T.Tprim _ -> Tprim (Env.new_policy_var stk)
+  | T.Tprim _ -> Tprim (Env.new_policy_var stk.s_scope)
   | T.Ttuple tyl -> Ttuple (List.map ~f:(ptype stk) tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:(ptype stk) tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:(ptype stk) tyl)
@@ -409,7 +409,8 @@ let func_or_method psig_env class_name_opt name saved_env params body lrty =
   begin
     try
       let scope = Scope.alloc () in
-      let stk = Env.new_stk psig_env scope in
+      let global_pc = Env.new_policy_var scope in
+      let stk = Env.new_stk psig_env scope global_pc in
       let this_ty = Option.map class_name_opt (class_ptype stk) in
       let ret = ptype stk lrty in
       let env = Env.new_env saved_env this_ty ret in
@@ -419,6 +420,7 @@ let func_or_method psig_env class_name_opt name saved_env params body lrty =
       let end_env = env in
       Format.printf "Analyzing %s:@." name;
       Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
+      Format.printf "* pc: %a@." Pp.policy global_pc;
       Format.printf "* Final env:@.  %a@." Pp.env end_env
     with FlowInference s -> Format.printf "  Failure: %s@." s
   end;

@@ -1,37 +1,41 @@
 Analyzing \binop:
-* Params: { $x -> <v2>; $y -> <v3> }
+* Params: { $x -> <v3>; $y -> <v4> }
+* pc: v1
 * Final env:
-  Locals: { $x -> <v2>; $y -> <v3> }
+  Locals: { $x -> <v3>; $y -> <v4> }
   This: None
-  Return: <v1>
+  Return: <v2>
   Constraints:
-    v2 < v1
+    v3 < v2
 
 Analyzing \assign0:
-* Params: { $arg -> <v5> }
+* Params: { $arg -> <v7> }
+* pc: v5
 * Final env:
-  Locals: { $arg -> <v5>; $x -> <v7> }
+  Locals: { $arg -> <v7>; $x -> <v9> }
   This: None
-  Return: <v4>
+  Return: <v6>
   Constraints:
-    [v5 < v6, Bot < v7, v7 < v4]
+    [v7 < v8, Bot < v9, v9 < v6]
 
 Analyzing \assign1:
-* Params: { $arg -> <v9> }
+* Params: { $arg -> <v12> }
+* pc: v10
 * Final env:
-  Locals: { $arg -> <v9>; $x -> <v11> }
+  Locals: { $arg -> <v12>; $x -> <v14> }
   This: None
-  Return: <v8>
+  Return: <v11>
   Constraints:
-    [v9 < v10, v10 < v11, v11 < v8]
+    [v12 < v13, v13 < v14, v14 < v11]
 
 Analyzing \condition:
-* Params: { $a0 -> <v13>; $a1 -> <v14>; $a2 -> <v15> }
+* Params: { $a0 -> <v17>; $a1 -> <v18>; $a2 -> <v19> }
+* pc: v15
 * Final env:
-  Locals: { $a0 -> <v13>; $a1 -> <v14>; $a2 -> <v15>; $x -> <v18> }
+  Locals: { $a0 -> <v17>; $a1 -> <v18>; $a2 -> <v19>; $x -> <v22> }
   This: None
-  Return: <v12>
+  Return: <v16>
   Constraints:
-    [v13 < v16, v15 < v16, v14 < v17, v15 < v17, v16 < v18, v17 < v18,
-     v18 < v12]
+    [v17 < v20, v19 < v20, v18 < v21, v19 < v21, v20 < v22, v21 < v22,
+     v22 < v16]
 

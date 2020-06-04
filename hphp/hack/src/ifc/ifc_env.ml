@@ -23,10 +23,10 @@ let new_policy_var =
       incr next;
       !next
   in
-  (fun stk -> Pfree_var (new_policy_var (), stk.s_scope))
+  (fun scope -> Pfree_var (new_policy_var (), scope))
 
-let new_stk psig_env scope =
-  { s_scope = scope; e_psig_env = psig_env; s_lpc = []; s_gpc = [] }
+let new_stk psig_env scope global_pc =
+  { s_scope = scope; e_psig_env = psig_env; s_lpc = []; s_gpc = [global_pc] }
 
 let empty_lenv = { le_vars = LMap.empty }
 

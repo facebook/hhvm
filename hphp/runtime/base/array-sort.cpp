@@ -175,9 +175,8 @@ ArrayData* SetArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
 }
 
 ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
-  if (sf == SORTFUNC_KSORT) {
-    return ad;                          // trivial for packed arrays.
-  }
+  assertx(checkInvariants(ad));
+  assertx(sf != SORTFUNC_KSORT);
   if (isSortFamily(sf)) {               // sort/rsort/usort
     if (UNLIKELY(ad->cowCheck())) {
       auto ret = PackedArray::Copy(ad);
@@ -186,10 +185,6 @@ ArrayData* PackedArray::EscalateForSort(ArrayData* ad, SortFunction sf) {
     }
     return ad;
   }
-  if (ad->m_size <= 1 && !(ad->isVecKind() || ad->isVArray())) {
-    return ad;
-  }
-  assertx(checkInvariants(ad));
   auto ret = ad->isVecKind()
     // TODO(T39123862)
     ? PackedArray::ToDictVec(ad, ad->cowCheck())

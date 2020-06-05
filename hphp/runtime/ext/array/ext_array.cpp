@@ -2790,9 +2790,7 @@ namespace {
 struct ArraySortTmp {
   ArraySortTmp(TypedValue* arr, SortFunction sf) : m_arr(arr) {
     m_ad = arr->m_data.parr->escalateForSort(sf);
-    assertx(m_ad == val(arr).parr ||
-            m_ad->empty() ||
-            m_ad->hasExactlyOneRef());
+    assertx(m_ad->empty() || m_ad->hasExactlyOneRef());
   }
   ~ArraySortTmp() {
     if (m_ad != val(m_arr).parr) {
@@ -2860,6 +2858,8 @@ php_asort(Variant& container, int sort_flags, bool ascending) {
 static bool
 php_ksort(Variant& container, int sort_flags, bool ascending) {
   if (container.isArray()) {
+    auto const ad = container.asTypedValue()->val().parr;
+    if (ascending && (ad->isVArray() || ad->isVecType())) return true;
     SortFunction sf = getSortFunction(SORTFUNC_KSORT, ascending);
     ArraySortTmp ast(container.asTypedValue(), sf);
     ast->ksort(sort_flags, ascending);

@@ -92,7 +92,7 @@ interface ConstVector extends ConstCollection,
 <<__Sealed(Vector::class)>>
 interface MutableVector extends ConstVector,
                                 \HH\Collection,
-                                IndexAccess {
+                                MutableKeyedContainer {
 }
 
 <<__Sealed(ImmMap::class, MutableMap::class)>>
@@ -105,6 +105,7 @@ interface ConstMap extends ConstCollection,
 <<__Sealed(Map::class)>>
 interface MutableMap extends ConstMap,
                              \HH\Collection,
+                             MutableKeyedContainer,
                              MapAccess {
 }
 

@@ -298,6 +298,19 @@ interface MapAccess<Tk as arraykey, Tv> extends ConstMapAccess<Tk, Tv>,
 }
 
 /**
+ * Represents a write-enabled (mutable) sequence of key/value pairs
+ * that can be both indexed using square-bracket syntax (e.g.
+ * `$keyed_container[key]`) and mutated.
+ *
+ * This interface provides no new methods, but it combines the
+ * iterability and mutability of some Hack collections into a common
+ * superclass.
+ */
+interface MutableKeyedContainer<Tk, Tv> extends IndexAccess<Tk, Tv>,
+                                                KeyedContainer<Tk, Tv> {
+}
+
+/**
  * Represents a read-only (immutable) sequence of values, indexed by integers
  * (i.e., a vector).
  *
@@ -583,8 +596,8 @@ interface ConstVector<+Tv> extends ConstCollection<Tv>,
  */
 <<__Sealed(Vector::class)>>
 interface MutableVector<Tv> extends ConstVector<Tv>,
-                                    Collection<Tv>,
-                                    IndexAccess<int, Tv> {
+                                    MutableKeyedContainer<int, Tv>,
+                                    Collection<Tv> {
   /**
    * Returns a `MutableVector` containing the values of the current
    * `MutableVector`. Essentially a copy of the current `MutableVector`.
@@ -1135,6 +1148,7 @@ interface ConstMap<Tk as arraykey, +Tv> extends ConstCollection<Pair<Tk, Tv>>,
 <<__Sealed(Map::class)>>
 interface MutableMap<Tk as arraykey, Tv> extends ConstMap<Tk, Tv>,
                                      Collection<Pair<Tk, Tv>>,
+                                     MutableKeyedContainer<Tk, Tv>,
                                      MapAccess<Tk, Tv> {
   /**
    * Returns a `MutableVector` containing the values of the current

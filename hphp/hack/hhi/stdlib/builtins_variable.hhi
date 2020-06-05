@@ -34,7 +34,7 @@ function is_object($var): bool;
 <<__PHPStdLib, __Rx>>
 function is_resource($var): bool;
 <<__Rx>>
-function is_null($var): bool;
+function is_null(<<__AcceptDisposable>>$var): bool;
 <<__PHPStdLib, __Rx>>
 function gettype($v);
 <<__PHPStdLib, __Rx>>

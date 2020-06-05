@@ -118,11 +118,16 @@ let locals fmt env =
   in
   pp_lenv_opt fmt (Env.get_lenv_opt env Typing_cont_key.Next)
 
+let renv fmt renv =
+  fprintf fmt "@[<v>";
+  fprintf fmt "* @[<hov2>pc: @[<hov>%a@]@]" policy (List.last_exn renv.re_gpc);
+  fprintf fmt "@,* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
+  fprintf fmt "@,* @[<hov2>Return:@ @[<hov>%a@]@]" ptype renv.re_ret;
+  fprintf fmt "@]"
+
 let env fmt env =
   fprintf fmt "@[<v>";
   fprintf fmt "@[<hov2>Locals:@ %a@]" locals env;
-  fprintf fmt "@,@[<hov2>This:@ @[<hov>%a@]@]" (option ptype) env.e_this;
-  fprintf fmt "@,@[<hov2>Return:@ @[<hov>%a@]@]" ptype env.e_ret;
   let p = Logic.prop_conjoin (List.rev env.e_acc) in
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   fprintf fmt "@]"

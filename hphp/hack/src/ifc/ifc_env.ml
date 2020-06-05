@@ -11,7 +11,7 @@ module Logic = Ifc_logic
 module Utils = Ifc_utils
 module K = Typing_cont_key
 
-(* Only elementary logic about env and stk should
+(* Only elementary logic about the (read-only) environment should
    be in this file to avoid circular dependencies;
    use higher-order functions to parameterize
    complex behavior! *)
@@ -23,21 +23,24 @@ let new_policy_var =
       incr next;
       !next
   in
-  (fun scope -> Pfree_var (new_policy_var (), scope))
+  (fun { pre_scope; _ } -> Pfree_var (new_policy_var (), pre_scope))
 
-let new_stk psig_env scope global_pc =
-  { s_scope = scope; e_psig_env = psig_env; s_lpc = []; s_gpc = [global_pc] }
+let new_proto_renv scope psig_env =
+  { pre_scope = scope; pre_psig_env = psig_env }
+
+let new_renv proto_renv saved_tenv global_pc this_ty ret_ty =
+  {
+    re_proto = proto_renv;
+    re_tenv = saved_tenv;
+    re_lpc = [];
+    re_gpc = [global_pc];
+    re_this = this_ty;
+    re_ret = ret_ty;
+  }
 
 let empty_lenv = { le_vars = LMap.empty }
 
-let new_env saved_env this_ty ret_ty =
-  {
-    e_tenv = saved_env;
-    e_cont = KMap.singleton K.Next empty_lenv;
-    e_this = this_ty;
-    e_ret = ret_ty;
-    e_acc = [];
-  }
+let new_env = { e_cont = KMap.singleton K.Next empty_lenv; e_acc = [] }
 
 let acc env update = { env with e_acc = update env.e_acc }
 

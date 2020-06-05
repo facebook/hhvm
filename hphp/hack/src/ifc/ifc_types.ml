@@ -65,37 +65,42 @@ type ptype =
 
 type local_env = { le_vars: ptype LMap.t }
 
-(* The environment is a mix of global immutable
-   information (e.g., e_ret) and mutable data that
-   has to be threaded through (e.g., e_acc) *)
+(* The environment is mutable data that
+   has to be threaded through *)
 type env = {
-  e_tenv: Tast.saved_env;
   (* Constraints accumulator. *)
   e_acc: prop list;
   (* Maps storing the type of local variables; one
-     per continuation, for flow-sensitive typing.  *)
+  per continuation, for flow-sensitive typing.  *)
   e_cont: local_env KMap.t;
-  (* Policy type of $this . *)
-  e_this: ptype option;
-  (* Return type of the function being checked. *)
-  e_ret: ptype;
 }
 
-(* We aggregate in renv the information managed following
-   a stack discipline when walking the Hack syntax (it is
-   a "read-only" env) *)
+(* Read-only environment containing just enough information to compute flow
+   types from Hack types *)
+type proto_renv = {
+  (* during flow inference, types are always given relative to a scope. *)
+  pre_scope: Scope.t;
+  (* policy signatures for classes indexed by class name *)
+  pre_psig_env: policy_sig SMap.t;
+}
+
+(* Read-only environment information managed following a stack discipline
+   when walking the Hack syntax *)
 type renv = {
-  (* During flow inference, types are always given
-     relative to a scope. *)
-  s_scope: Scope.t;
-  (* Policy signatures for classes indexed by class name *)
-  e_psig_env: policy_sig SMap.t;
+  (* Section of renv needed to initialize full renv *)
+  re_proto: proto_renv;
+  (* Hack type environment *)
+  re_tenv: Tast.saved_env;
   (* Policy tracking local effects, these effects
      are not observable outside the current function.
      Assignments to local variables fall into this
      category. *)
-  s_lpc: policy list;
+  re_lpc: policy list;
   (* Policy tracking effects with global visibility,
      like assignments to fields of an argument. *)
-  s_gpc: policy list;
+  re_gpc: policy list;
+  (* Policy type of $this. *)
+  re_this: ptype option;
+  (* Return type of the function being checked. *)
+  re_ret: ptype;
 }

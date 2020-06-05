@@ -581,6 +581,49 @@ inline TypedValue Elem(tv_rval base, key_type<keyType> key) {
   return ElemSlow<mode, keyType>(base, key);
 }
 
+/**
+ * ElemD when base is a bespoke array-like
+ */
+inline arr_lval ElemDBespokePre(tv_lval base, int64_t key) {
+  return BespokeArray::LvalInt(base.val().parr, key);
+}
+
+inline arr_lval ElemDBespokePre(tv_lval base, StringData* key) {
+  return BespokeArray::LvalStr(base.val().parr, key);
+}
+
+inline arr_lval ElemDBespokePre(tv_lval base, TypedValue key) {
+  auto const dt = key.m_type;
+  if (isIntType(dt))    return ElemDBespokePre(base, key.m_data.num);
+  if (isStringType(dt)) return ElemDBespokePre(base, key.m_data.pstr);
+  if (!tvIsArray(base)) throwInvalidArrayKeyException(&key, base.val().parr);
+  // PHP arrays may coerce keys. lval() handles refcounting, so we return an
+  // arr_lval with the original array here (even though lval() may escalate).
+  auto const ad = base.val().parr;
+  return arr_lval { ad, asArrRef(base).lval(key) };
+}
+
+template <KeyType keyType>
+inline tv_lval ElemDBespoke(tv_lval base, key_type<keyType> key) {
+  assertx(tvIsArrayLike(base));
+  assertx(tvIsPlausible(*base));
+
+  auto const oldArr = base.val().parr;
+  assertx(!oldArr->isVanilla());
+  auto const result = ElemDBespokePre(base, key);
+  if (result.arr != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result.arr;
+    decRefArr(oldArr);
+  }
+  assertx(tvIsPlausible(*base));
+  assertx(result.type() != KindOfUninit);
+  return result;
+}
+
+/**
+ * ElemD when base is an Array
+ */
 inline tv_lval ElemDArrayPre(tv_lval base, int64_t key) {
   auto const oldArr = val(base).parr;
   auto const lval = oldArr->lval(key);
@@ -617,9 +660,6 @@ inline tv_lval ElemDArrayPre(tv_lval base, TypedValue key) {
   return asArrRef(base).lval(key);
 }
 
-/**
- * ElemD when base is an Array
- */
 template<KeyType keyType>
 inline tv_lval ElemDArray(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArray(base));
@@ -842,6 +882,10 @@ tv_lval ElemD(tv_lval base, key_type<keyType> key) {
   // it won't be updated. Confirm that we never do an illegal update on it.
   assertx(type(immutable_null_base) == KindOfNull);
 
+  if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    return ElemDBespoke<keyType>(base, key);
+  }
+
   switch (base.type()) {
     case KindOfUninit:
     case KindOfNull:
@@ -897,6 +941,56 @@ inline tv_lval ElemUEmptyish() {
   return const_cast<TypedValue*>(&immutable_null_base);
 }
 
+/**
+ * ElemU when base is a bespoke array-like
+ */
+inline arr_lval ElemUBespokePre(tv_lval base, int64_t key) {
+  if (tvIsKeyset(base)) throwInvalidKeysetOperation();
+  auto const ad = base.val().parr;
+  if (!BespokeArray::ExistsInt(ad, key)) return {ad, ElemUEmptyish()};
+  return BespokeArray::LvalInt(ad, key);
+}
+
+inline arr_lval ElemUBespokePre(tv_lval base, StringData* key) {
+  if (tvIsKeyset(base)) throwInvalidKeysetOperation();
+  auto const ad = base.val().parr;
+  if (!BespokeArray::ExistsStr(ad, key)) return {ad, ElemUEmptyish()};
+  return BespokeArray::LvalStr(ad, key);
+}
+
+inline arr_lval ElemUBespokePre(tv_lval base, TypedValue key) {
+  auto const dt = key.m_type;
+  if (isIntType(dt))    return ElemUBespokePre(base, key.m_data.num);
+  if (isStringType(dt)) return ElemUBespokePre(base, key.m_data.pstr);
+  if (!tvIsArray(base)) throwInvalidArrayKeyException(&key, base.val().parr);
+  // PHP arrays may coerce keys. lval() handles refcounting, so we return an
+  // arr_lval with the original array here (even though lval() may escalate).
+  auto const ad = base.val().parr;
+  auto& arr = asArrRef(base);
+  return {ad, arr.exists(key) ? arr.lval(key) : ElemUEmptyish()};
+}
+
+template <KeyType keyType>
+inline tv_lval ElemUBespoke(tv_lval base, key_type<keyType> key) {
+  assertx(tvIsArrayLike(base));
+  assertx(tvIsPlausible(*base));
+
+  auto const oldArr = base.val().parr;
+  assertx(!oldArr->isVanilla());
+  auto const result = ElemUBespokePre(base, key);
+  if (result.arr != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result.arr;
+    decRefArr(oldArr);
+  }
+  assertx(tvIsPlausible(*base));
+  assertx(result.type() != KindOfUninit);
+  return result;
+}
+
+/**
+ * ElemU when base is an Array
+ */
 inline tv_lval ElemUArrayImpl(tv_lval base, int64_t key) {
   auto const oldArr = val(base).parr;
   if (!oldArr->exists(key)) return ElemUEmptyish();
@@ -942,9 +1036,6 @@ inline tv_lval ElemUArrayImpl(tv_lval base, TypedValue key) {
   return arr.lval(tvAsCVarRef(&key));
 }
 
-/**
- * ElemU when base is an Array
- */
 template <KeyType keyType>
 inline tv_lval ElemUArray(tv_lval base, key_type<keyType> key) {
   assertx(tvIsArray(base));
@@ -1101,6 +1192,10 @@ tv_lval ElemU(tv_lval base, key_type<keyType> key) {
   // ElemU helpers hand out lvals to immutable_null_base in cases where we know
   // it won't be updated. Confirm that we never do an illegal update on it.
   assertx(type(immutable_null_base) == KindOfNull);
+
+  if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    return ElemUBespoke<keyType>(base, key);
+  }
 
   switch (type(base)) {
     case KindOfUninit:
@@ -1610,6 +1705,44 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
 }
 
 /**
+ * SetElem when base is a bespoke vec or dict
+ */
+inline ArrayData* SetElemBespokePre(
+    ArrayData* a, int64_t key, TypedValue* value) {
+  return BespokeArray::SetInt(a, key, *value);
+}
+
+inline ArrayData* SetElemBespokePre(
+    ArrayData* a, StringData* key, TypedValue* value) {
+  return BespokeArray::SetStr(a, key, *value);
+}
+
+inline ArrayData* SetElemBespokePre(
+    ArrayData* a, TypedValue key, TypedValue* value) {
+  if (tvIsInt(key))    return SetElemBespokePre(a, key.m_data.num, value);
+  if (tvIsString(key)) return SetElemBespokePre(a, key.m_data.pstr, value);
+  throwInvalidArrayKeyException(&key, a);
+}
+
+template <KeyType keyType>
+inline void SetElemBespoke(
+    tv_lval base, key_type<keyType> key, TypedValue* value) {
+  assertx(tvIsVec(base) || tvIsDict(base));
+  assertx(tvIsPlausible(*base));
+
+  auto const oldArr = base.val().parr;
+  assertx(!oldArr->isVanilla());
+  auto const result = SetElemBespokePre(oldArr, key, value);
+
+  if (result != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result;
+    decRefArr(oldArr);
+  }
+  assertx(tvIsPlausible(*base));
+}
+
+/**
  * SetElem() leaves the result in 'value', rather than returning it as in
  * SetOpElem(), because doing so avoids a dup operation that SetOpElem() can't
  * get around.
@@ -1639,25 +1772,23 @@ StringData* SetElemSlow(tv_lval base, key_type<keyType> key,
     case KindOfPersistentString:
     case KindOfString:
       return SetElemString<setResult, keyType>(base, key, value);
-    case KindOfPersistentVec:
-    case KindOfVec:
-      SetElemVec<setResult, keyType>(base, key, value);
-      return nullptr;
-    case KindOfPersistentDict:
-    case KindOfDict:
-      SetElemDict<setResult, keyType>(base, key, value);
-      return nullptr;
     case KindOfPersistentKeyset:
     case KindOfKeyset:
       throwInvalidKeysetOperation();
+
+    // Handled in SetElem
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfPersistentDict:
+    case KindOfDict:
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      SetElemArray<setResult, keyType>(base, key, value);
-      return nullptr;
+      always_assert(false);
+
     case KindOfObject:
       SetElemObject<keyType>(base, key, value);
       return nullptr;
@@ -1689,11 +1820,15 @@ inline StringData* SetElem(tv_lval base, key_type<keyType> key,
     return nullptr;
   }
   if (LIKELY(tvIsVec(base))) {
-    SetElemVec<setResult, keyType>(base, key, value);
+    base.val().parr->isVanilla()
+      ? SetElemVec<setResult, keyType>(base, key, value)
+      : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
   }
   if (LIKELY(tvIsDict(base))) {
-    SetElemDict<setResult, keyType>(base, key, value);
+    base.val().parr->isVanilla()
+      ? SetElemDict<setResult, keyType>(base, key, value)
+      : SetElemBespoke<keyType>(base, key, value);
     return nullptr;
   }
   return SetElemSlow<setResult, keyType>(base, key, value);
@@ -1739,6 +1874,22 @@ inline void SetNewElemBoolean(tv_lval base, TypedValue* value) {
 inline void SetNewElemString(tv_lval base) {
   if (!val(base).pstr->size()) return SetNewElemEmptyish(base);
   raise_error("[] operator not supported for strings");
+}
+
+/**
+ * SetNewElem when base is a bespoke array-like
+ */
+inline void SetNewElemBespoke(tv_lval base, TypedValue* value) {
+  assertx(tvIsArrayLike(base));
+  assertx(tvIsPlausible(*base));
+  auto const oldArr = base.val().parr;
+  auto const result = BespokeArray::Append(oldArr, *value);
+  if (result != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result;
+    decRefArr(oldArr);
+  }
+  assertx(tvIsPlausible(*base));
 }
 
 /**
@@ -1821,6 +1972,10 @@ template <bool setResult>
 inline void SetNewElem(tv_lval base, TypedValue* value) {
   assertx(tvIsPlausible(*base));
 
+  if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    return SetNewElemBespoke(base, value);
+  }
+
   switch (type(base)) {
     case KindOfUninit:
     case KindOfNull:
@@ -1891,12 +2046,19 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
                             TypedValue key, TypedValue* rhs) {
   assertx(tvIsPlausible(*base));
 
+  if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    if (base.val().parr->isKeysetType()) throwInvalidKeysetOperation();
+    auto const result = ElemDBespoke<KeyType::Any>(base, key);
+    setopBody(result, op, rhs);
+    return *result;
+  }
+
   auto const handleArray = [&] {
     if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
       throwMissingElementException("Set-op");
     }
     auto const result = ElemDArray<KeyType::Any>(base, key);
-    setopBody(result, op, rhs);
+    setopBody(tvAssertPlausible(result), op, rhs);
     return *result;
   };
 
@@ -2087,19 +2249,20 @@ inline TypedValue IncDecElemScalar() {
   return make_tv<KindOfNull>();
 }
 
-inline TypedValue IncDecElem(
-  IncDecOp op,
-  tv_lval base,
-  TypedValue key
-) {
+inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
   assertx(tvIsPlausible(*base));
+
+  if (tvIsArrayLike(base) && !base.val().parr->isVanilla()) {
+    auto const result = ElemDBespoke<KeyType::Any>(base, key);
+    return IncDecBody(op, tvAssertPlausible(result));
+  }
 
   auto const handleArray = [&] {
     if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
       throwMissingElementException("Inc/dec");
     }
-    auto result = ElemDArray<KeyType::Any>(base, key);
-    return IncDecBody(op, result);
+    auto const result = ElemDArray<KeyType::Any>(base, key);
+    return IncDecBody(op, tvAssertPlausible(result));
   };
 
   auto const handleVec = [&] {
@@ -2413,6 +2576,41 @@ inline void UnsetElemKeyset(tv_lval base, key_type<keyType> key) {
 }
 
 /**
+ * UnsetElem when base is a bespoke Hack array
+ */
+inline ArrayData* UnsetElemBespokePre(ArrayData* a, int64_t key) {
+  return BespokeArray::RemoveInt(a, key);
+}
+
+inline ArrayData* UnsetElemBespokePre(ArrayData* a, StringData* key) {
+  return BespokeArray::RemoveStr(a, key);
+}
+
+inline ArrayData* UnsetElemBespokePre(ArrayData* a, TypedValue key) {
+  if (tvIsInt(key))    return UnsetElemBespokePre(a, key.m_data.num);
+  if (tvIsString(key)) return UnsetElemBespokePre(a, key.m_data.pstr);
+  throwInvalidArrayKeyException(&key, a);
+}
+
+template <KeyType keyType>
+inline void UnsetElemBespoke(tv_lval base, key_type<keyType> key) {
+  assertx(tvIsArrayLike(base));
+  assertx(tvIsPlausible(*base));
+
+  auto const oldArr = base.val().parr;
+  assertx(!oldArr->isVanilla());
+  assertx(oldArr->isHackArrayType());
+  auto const result = UnsetElemBespokePre(oldArr, key);
+
+  if (result != oldArr) {
+    type(base) = dt_with_rc(type(base));
+    val(base).parr = result;
+    decRefArr(oldArr);
+  }
+  assertx(tvIsPlausible(*base));
+}
+
+/**
  * unset($base[$member])
  */
 template <KeyType keyType>
@@ -2501,13 +2699,12 @@ inline void UnsetElem(tv_lval base, key_type<keyType> key) {
   if (LIKELY(tvIsArray(base))) {
     return UnsetElemArray<keyType>(base, key);
   }
-  if (LIKELY(tvIsVec(base))) {
-    return UnsetElemVec<keyType>(base, key);
-  }
-  if (LIKELY(tvIsDict(base))) {
-    return UnsetElemDict<keyType>(base, key);
-  }
-  if (LIKELY(tvIsKeyset(base))) {
+  if (tvIsArrayLike(base)) {
+    auto const ad = base.val().parr;
+    assertx(ad->isHackArrayType());
+    if (!ad->isVanilla()) return UnsetElemBespoke<keyType>(base, key);
+    if (tvIsVec(base))    return UnsetElemVec<keyType>(base, key);
+    if (tvIsDict(base))   return UnsetElemDict<keyType>(base, key);
     return UnsetElemKeyset<keyType>(base, key);
   }
   return UnsetElemSlow<keyType>(base, key);

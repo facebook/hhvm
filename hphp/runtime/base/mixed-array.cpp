@@ -1080,7 +1080,10 @@ ArrayData* MixedArray::update(K k, TypedValue data) {
 
 arr_lval MixedArray::LvalInt(ArrayData* adIn, int64_t key) {
   auto const pos = asMixed(adIn)->find(key, hash_int64(key));
-  if (!validPos(pos)) throwMissingElementException("Lval");
+  if (!validPos(pos)) {
+    adIn->isDictType() ? throwOOBArrayKeyException(key, adIn)
+                       : throwMissingElementException("Lval");
+  }
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   auto const& elm = asMixed(ad)->data()[pos];
   assertx(elm.intKey() == key);
@@ -1089,7 +1092,10 @@ arr_lval MixedArray::LvalInt(ArrayData* adIn, int64_t key) {
 
 arr_lval MixedArray::LvalStr(ArrayData* adIn, StringData* key) {
   auto const pos = asMixed(adIn)->find(key, key->hash());
-  if (!validPos(pos)) throwMissingElementException("Lval");
+  if (!validPos(pos)) {
+    adIn->isDictType() ? throwOOBArrayKeyException(key, adIn)
+                       : throwMissingElementException("Lval");
+  }
   auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
   auto const& elm = asMixed(ad)->data()[pos];
   assertx(elm.strKey()->same(key));

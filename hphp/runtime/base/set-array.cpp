@@ -591,27 +591,19 @@ bool SetArray::ExistsStr(const ArrayData* ad, const StringData* k) {
 }
 
 arr_lval SetArray::LvalInt(ArrayData*, int64_t) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval int)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 arr_lval SetArray::LvalStr(ArrayData*, StringData*) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (lval string)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* SetArray::SetInt(ArrayData*, int64_t, TypedValue) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set int)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 ArrayData* SetArray::SetStr(ArrayData*, StringData*, TypedValue) {
-  SystemLib::throwInvalidOperationExceptionObject(
-    "Invalid keyset operation (set string)"
-  );
+  throwInvalidKeysetOperation();
 }
 
 template<class K> ArrayData*

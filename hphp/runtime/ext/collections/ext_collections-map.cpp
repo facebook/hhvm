@@ -4,8 +4,10 @@
 #include "hphp/runtime/ext/collections/ext_collections-pair.h"
 #include "hphp/runtime/ext/collections/ext_collections-set.h"
 #include "hphp/runtime/ext/collections/ext_collections-vector.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -69,15 +71,28 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         reserve(m_size + sz);
         mutate();
         return false;
-      } else if (adata->isDictKind()) {
-        replaceArray(adata);
-        return true;
-      } else {
-        auto dict = adata->toDict(adata->cowCheck());
-        replaceArray(dict);
-        if (dict != adata) dict->decRefCount();
-        return true;
       }
+      // We're using a smart pointer here (which inc-refs on construction),
+      // since we have to do two orthogonal escalations. Refcount examples:
+      //
+      //  1. If adata is a vanilla dict, we'll inc-ref adata, then replaceArray
+      //     will take ownership and inc-ref, and then we dec-ref: +1 to adata.
+      //
+      //  2. If adata is a bespoke dict, we'll inc-ref adata, create an (RC 1)
+      //     vanilla dict, and dec-ref adata. replaceArray will take ownership
+      //     of the vanilla dict (now RC 2), then we dec-ref the vanilla dict.
+      //     +0 to adata, and the new vanilla dict ends up with RC 1.
+      //
+      auto array = req::ptr<ArrayData>(adata);
+      if (!array->isVanilla()) {
+        auto const reason = "BaseMap::addAllImpl";
+        array.reset(BespokeArray::ToVanilla(array.get(), reason));
+      }
+      if (!array->isDictKind()) {
+        array.reset(array->toDict(array->cowCheck()));
+      }
+      replaceArray(array.get());
+      return true;
     },
     [this](TypedValue k, TypedValue v) {
       setRaw(k, v);

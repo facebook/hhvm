@@ -1276,20 +1276,21 @@ fn non_numeric(s: &str) -> bool {
             false
         }
     }
-    fn validate_float(f: f64) -> std::result::Result<f64, ()> {
-        if f.is_infinite() || f.is_nan() {
-            return Err(());
-        }
-        Ok(f)
-    }
     fn float_from_str(s: &str) -> std::result::Result<f64, ()> {
         // Note(hrust): OCaml float_of_string ignores leading whitespace, reads decimal and hexadecimal
         let s = s.trim_start();
         if HEX.is_match(s) {
             float_from_str_radix(&HEX.replace(s, "${sign}${digits}"), *HEX_RADIX)
-        } else if out_of_bounds(s) {
-            Err(())
         } else {
+            let out_of_bounds =
+                |f: f64| out_of_bounds(s) && (f > i64::MAX as f64 || f < i64::MIN as f64);
+            let validate_float = |f: f64| {
+                if out_of_bounds(f) || f.is_infinite() || f.is_nan() {
+                    Err(())
+                } else {
+                    Ok(f)
+                }
+            };
             f64::from_str(s).map_err(|_| ()).and_then(validate_float)
         }
     };

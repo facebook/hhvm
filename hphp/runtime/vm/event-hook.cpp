@@ -242,8 +242,7 @@ static Array get_frame_args(const ActRec* ar) {
   auto const variadic = ar->func()->hasVariadicCaptureParam();
   if (variadic && numArgs > numNonVariadic) {
     auto const arr = frame_local(ar, numNonVariadic);
-    if (tvIsArray(arr) &&
-        val(arr).parr->hasVanillaPackedLayout()) {
+    if (tvIsVecOrVArray(arr)) {
       numArgs = numNonVariadic + val(arr).parr->size();
     } else {
       numArgs = numNonVariadic;

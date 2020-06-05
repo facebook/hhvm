@@ -18,7 +18,7 @@ function test_preg_grep() {
   VS(count($fl_array), 1);
   VS($fl_array[2], "123.1");
 
-  VS(preg_grep("/a/", varray["c", "b"]), varray[]);
+  VS(preg_grep("/a/", varray["c", "b"]), darray[]);
 }
 
 function test_preg_match() {
@@ -193,7 +193,7 @@ function test_preg_replace() {
   $expFoo[0] = "FOO";
   $expFoo[1] = "FOO";
   $expFoo[2] = "FOO";
-  VS(preg_replace("/some pattern/", "", varray[]), varray[]);
+  VS(preg_replace("/some pattern/", "", varray[]), darray[]);
   VS(preg_replace("/foo/i", "FOO", $foos), $expFoo);
 
   $patterns = varray["/(19|20)(\\d{2})-(\\d{1,2})-(\\d{1,2})/",
@@ -214,15 +214,15 @@ function test_preg_replace() {
   VS(preg_replace("/xxx/", "w", "xxxx"), "wx");
   VS(preg_replace("/xxy/", "w", "xxxx"), "xxxx");
 
-  VS(preg_replace("/xxx", "w", varray["xxxx"]), varray[]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx"]), varray["wx"]);
-  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), varray["wx", "yyyy"]);
-  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), varray[]);
-  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), varray["wx"]);
+  VS(preg_replace("/xxx", "w", varray["xxxx"]), darray[]);
+  VS(preg_replace("/xxx/", "w", varray["xxxx"]), darray[0 => "wx"]);
+  VS(preg_replace("/xxx/", "w", varray["xxxx", "yyyy"]), darray[0 => "wx", 1 => "yyyy"]);
+  VS(preg_replace(varray["/xxx/", "/xxx"], "w", varray["xxxx"]), darray[]);
+  VS(preg_replace(varray["/xxx/", "/xxx/"], "w", varray["xxxx"]), darray[0 => "wx"]);
 
   VS(preg_replace("/xxx", varray["w"], varray["xxxx"]), false);
-  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), varray[]);
-  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), varray["wx"]);
+  VS(preg_replace(varray["/xxx"], varray["w"], varray["xxxx"]), darray[]);
+  VS(preg_replace(varray["/xxx/"], varray["w"], varray["xxxx"]), darray[0 => "wx"]);
 }
 
 function next_year($m) {

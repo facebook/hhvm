@@ -730,17 +730,20 @@ ArrayData* SetArray::Dequeue(ArrayData* ad, Variant& value) {
 }
 
 ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
-  auto a = asSet(ad);
-  if (a->cowCheck()) a = a->copySet();
   Elm e;
   assertx(ClearElms(&e, 1));
-  if (isIntType(v.m_type)) {
-    e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
-  } else if (isStringType(v.m_type)) {
-    e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
-  } else {
-    throwInvalidArrayKeyException(&v, ad);
-  }
+  auto a = [&]{
+    if (isIntType(v.m_type)) {
+      e.setIntKey(v.m_data.num, hash_int64(v.m_data.num));
+      return asSet(RemoveInt(ad, v.m_data.num));
+    } else if (isStringType(v.m_type)) {
+      e.setStrKey(v.m_data.pstr, v.m_data.pstr->hash());
+      return asSet(RemoveStr(ad, v.m_data.pstr));
+    } else {
+      throwInvalidArrayKeyException(&v, ad);
+    }
+  }();
+  if (a->cowCheck()) a = a->copySet();
 
   auto elms = a->data();
   if (!elms[0].isTombstone()) {
@@ -748,12 +751,12 @@ ArrayData* SetArray::Prepend(ArrayData* ad, TypedValue v) {
     elms = a->data();
     memmove(&elms[1], &elms[0], a->m_used * sizeof(Elm));
     ++a->m_used;
-    ++a->m_pos;
   }
 
   ++a->m_size;
   elms[0] = e;
   assertx(!elms[0].isInvalid());
+  a->m_pos = 0; // Like all other array-likes
   a->compact(); // Rebuild the hash table.
   return a;
 }

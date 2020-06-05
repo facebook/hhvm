@@ -1,0 +1,10 @@
+unshift(varray[0, 1], 17): current = 17
+unshift(varray[4, 5], 17): current = 17
+unshift(vec[0, 1], 17): current = 17
+unshift(vec[4, 5], 17): current = 17
+unshift(darray[0 => 0, 1 => 1], 17): current = 17
+unshift(darray[4 => 4, 5 => 5], 17): current = 17
+unshift(dict[0 => 0, 1 => 1], 17): current = 17
+unshift(dict[4 => 4, 5 => 5], 17): current = 17
+unshift(keyset[0, 1], 17): current = 17
+unshift(keyset[4, 5], 17): current = 17

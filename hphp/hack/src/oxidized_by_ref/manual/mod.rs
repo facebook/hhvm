@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 pub mod ast;
+pub mod blame_set;
 pub mod decl_env;
 pub mod direct_decl_parser;
 pub mod doc_comment;

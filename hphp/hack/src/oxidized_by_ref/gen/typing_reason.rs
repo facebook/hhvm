@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<882882673cf3f1115399df5682dee099>>
+// @generated SignedSource<<e75487266db92af08bfee204e1eaa105>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -59,8 +59,7 @@ pub enum Reason<'a> {
     RyieldAsyncgen(&'a pos::Pos<'a>),
     RyieldAsyncnull(&'a pos::Pos<'a>),
     RyieldSend(&'a pos::Pos<'a>),
-    /// true if due to lambda
-    RlostInfo(&'a str, &'a Reason<'a>, &'a pos::Pos<'a>, bool),
+    RlostInfo(&'a str, &'a Reason<'a>, Blame<'a>),
     Rformat(&'a pos::Pos<'a>, &'a str, &'a Reason<'a>),
     RclassClass(&'a pos::Pos<'a>, &'a str),
     RunknownClass(&'a pos::Pos<'a>),
@@ -135,6 +134,24 @@ pub enum ExprDepTypeReason<'a> {
     ERpu(&'a str),
 }
 impl<'a> TrivialDrop for ExprDepTypeReason<'a> {}
+
+#[derive(
+    Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum BlameSource {
+    BScall,
+    BSlambda,
+    BSassignment,
+    BSoutOfScope,
+}
+
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub enum Blame<'a> {
+    Blame(&'a pos::Pos<'a>, BlameSource),
+}
+impl<'a> TrivialDrop for Blame<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep

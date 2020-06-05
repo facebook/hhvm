@@ -6,6 +6,7 @@
 mod manual;
 
 pub use manual::ast;
+pub use manual::blame_set;
 pub use manual::decl_env;
 pub use manual::direct_decl_parser;
 pub use manual::doc_comment;

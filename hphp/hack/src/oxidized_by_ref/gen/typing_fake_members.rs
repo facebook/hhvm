@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d050b4e531d9c56231d20750b5d4c0b7>>
+// @generated SignedSource<<fbfed8228abe28f68f475bf544c8d533>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -15,24 +15,16 @@ use serde::Serialize;
 #[allow(unused_imports)]
 use crate::*;
 
-#[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
-)]
-pub enum Blame<'a> {
-    BlameCall(&'a pos::Pos<'a>),
-    BlameLambda(&'a pos::Pos<'a>),
-}
-impl<'a> TrivialDrop for Blame<'a> {}
+pub use crate::typing_reason as reason;
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
 )]
 pub enum TypingFakeMembers<'a> {
-    Valid(local_id::set::Set<'a>),
+    Valid(blame_set::BlameSet<'a>),
     Invalidated {
-        valid: local_id::set::Set<'a>,
-        invalid: local_id::set::Set<'a>,
-        blame: Blame<'a>,
+        valid: blame_set::BlameSet<'a>,
+        invalid: blame_set::BlameSet<'a>,
     },
 }
 impl<'a> TrivialDrop for TypingFakeMembers<'a> {}

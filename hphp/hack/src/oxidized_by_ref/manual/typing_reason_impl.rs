@@ -98,7 +98,7 @@ impl<'a> Reason<'a> {
             | RglobalClassProp(p)
             | RglobalFunParam(p)
             | RglobalFunRet(p) => Some(p),
-            RlostInfo(_, r, _, _)
+            RlostInfo(_, r, _)
             | Rinstantiate(_, _, r)
             | Rtypeconst(r, _, _, _)
             | RtypeAccess(r, _)

@@ -38,3 +38,4 @@ typing_defs::XhpAttrTag
 typing_local_types::ExpressionId
 typing_mutability_env::MutType
 typing_reason::ArgPosition
+typing_reason::BlameSource

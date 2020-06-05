@@ -22,7 +22,7 @@ Warning: Property 'A::p11' declared as type HH\dict, HH\vec assigned in %s/initi
 
 Warning: Property 'A::p12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Property 'A::p13' declared as type HH\vec_or_dict, array assigned in %s/initial-value-bad.inc on line 204
+Warning: Property 'A::p13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Property 'A::p14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.inc on line 204
 
@@ -90,7 +90,7 @@ Warning: Property 'A::p45' declared as type arraykey, bool assigned in %s/initia
 
 Warning: Property 'A::p46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.inc on line 206
 
-Warning: Property 'A::p47' declared as type HH\dict, array assigned in %s/initial-value-bad.inc on line 206
+Warning: Property 'A::p47' declared as type HH\dict, %rd?%rarray assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Property 'A::p48' declared as type array, HH\vec assigned in %s/initial-value-bad.inc on line 206
 
@@ -196,7 +196,7 @@ Warning: Static property 'A::s11' declared as type HH\dict, HH\vec assigned in %
 
 Warning: Static property 'A::s12' declared as type HH\keyset, HH\vec assigned in %s/initial-value-bad.inc on line 204
 
-Warning: Static property 'A::s13' declared as type HH\vec_or_dict, array assigned in %s/initial-value-bad.inc on line 204
+Warning: Static property 'A::s13' declared as type HH\vec_or_dict, %rv?%rarray assigned in %s/initial-value-bad.inc on line 204
 
 Warning: Static property 'A::s14' declared as type HH\arraylike, null assigned in %s/initial-value-bad.inc on line 204
 
@@ -262,7 +262,7 @@ Warning: Static property 'A::s44' declared as type HH\Map, HH\Vector assigned in
 
 Warning: Static property 'A::s46' declared as type HH\vec, HH\keyset assigned in %s/initial-value-bad.inc on line 206
 
-Warning: Static property 'A::s47' declared as type HH\dict, array assigned in %s/initial-value-bad.inc on line 206
+Warning: Static property 'A::s47' declared as type HH\dict, %rd?%rarray assigned in %s/initial-value-bad.inc on line 206
 
 Warning: Static property 'A::s48' declared as type array, HH\vec assigned in %s/initial-value-bad.inc on line 206
 

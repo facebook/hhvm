@@ -25,5 +25,4 @@ function entrypoint_isexpressiontashape5(): void {
   });
 
   is_shape(darray[0 => 0, 1 => 'one']);
-  is_shape(varray[0, 'one']); // TODO(T29967020)
 }

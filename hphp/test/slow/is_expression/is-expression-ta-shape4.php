@@ -19,6 +19,4 @@ function is_shape(mixed $x): void {
 }
 <<__EntryPoint>> function main(): void {
 is_shape(darray[0 => 0, 1 => 'one']);
-is_shape(varray[0, 'one']); // TODO(T29967020)
-is_shape(varray[0, 'one']);
 }

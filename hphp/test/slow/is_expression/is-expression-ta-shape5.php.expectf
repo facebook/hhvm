@@ -1,8 +1,1 @@
 shape
-
-Fatal error: Uncaught exception 'Exception' with message 'Hack Array Compat: is/as operator used with varray and shape' in %s
-Stack trace:
-#0 %s(%d): Closure$entrypoint_isexpressiontashape5()
-#1 %s(%d): is_shape()
-#2 (): entrypoint_isexpressiontashape5()
-#3 {main}

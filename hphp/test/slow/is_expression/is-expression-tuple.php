@@ -18,11 +18,6 @@ function main() {
     'false' => false,
     'string' => 'string',
   ]);
-  is_tuple(darray[
-    0 => 2,
-    1 => false,
-    2 => 'string',
-  ]); // TODO(T29967020)
   is_tuple(varray[]);
   is_tuple(tuple(1, false));
   is_tuple(tuple(1, 'string'));

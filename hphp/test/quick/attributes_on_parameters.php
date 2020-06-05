@@ -14,8 +14,8 @@ function f(
 }
 
 function test($caption, $parameters, $i, $attribute) {
-    $p = $parameters[$i]->getAttribute($attribute);
-    print $caption . ":" . (isset($p) ? "SET" : "NOTSET") . "\n";
+    $p = $parameters[$i]->hasAttribute($attribute);
+    print $caption . ":" . ($p ? "SET" : "NOTSET") . "\n";
 }
 
 function run() {

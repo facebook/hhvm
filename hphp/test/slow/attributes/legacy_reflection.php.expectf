@@ -9,6 +9,7 @@ array(1) {
   [0]=>
   int(3)
 }
+bool(true)
 array(1) {
   ["Hippo"]=>
   array(1) {
@@ -20,6 +21,7 @@ array(1) {
   [0]=>
   int(7)
 }
+bool(true)
 array(1) {
   ["Cat"]=>
   array(1) {
@@ -31,6 +33,7 @@ array(1) {
   [0]=>
   int(4)
 }
+bool(true)
 array(1) {
   ["Dolphin"]=>
   array(1) {
@@ -42,6 +45,7 @@ array(1) {
   [0]=>
   int(5)
 }
+bool(true)
 array(1) {
   ["Baboon"]=>
   array(1) {
@@ -53,3 +57,4 @@ array(1) {
   [0]=>
   int(6)
 }
+bool(true)

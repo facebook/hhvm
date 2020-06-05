@@ -19,7 +19,9 @@ $x = new ReflectionTypeAlias('MyType');
 echo $x->__toString();
 var_dump($x->getAttributes());
 var_dump($x->getAttribute('NonExistentAttr'));
+var_dump($x->hasAttribute('NonExistentAttr'));
 var_dump($x->getAttribute('Attr1'));
+var_dump($x->hasAttribute('Attr1'));
 
 $x = new ReflectionTypeAlias('MyNewType');
 echo $x->__toString();

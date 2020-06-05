@@ -9,7 +9,9 @@ array(3) {
     int(3)
   }
 }
+bool(true)
 NULL
+bool(false)
 array(2) {
   [0]=>
   string(1) "a"
@@ -19,7 +21,9 @@ array(2) {
     string(1) "c"
   }
 }
+bool(true)
 NULL
+bool(false)
 array(2) {
   [0]=>
   string(7) "promote"
@@ -28,5 +32,8 @@ array(2) {
     string(2) "me"
   }
 }
+bool(true)
 NULL
+bool(false)
 NULL
+bool(false)

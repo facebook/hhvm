@@ -10,10 +10,12 @@ array(1) {
   }
 }
 NULL
+bool(false)
 array(1) {
   [0]=>
   int(1337)
 }
+bool(true)
 TypeAlias [ MyNewType : HH\int ]
 array(2) {
   ["Attr2"]=>

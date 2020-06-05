@@ -39,6 +39,11 @@ trait ReflectionLegacyAttribute {
   }
 
   <<__Rx, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool {
+    return array_key_exists($name, $this->getAttributes());
+  }
+
+  <<__Rx, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed> {
     return hphp_array_idx($this->getAttributes(), $name, null);
   }

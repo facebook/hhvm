@@ -181,7 +181,7 @@ inline ArraySpec::ArraySpec(ArrayData::ArrayKind kind)
 }
 
 inline ArraySpec::ArraySpec(const RepoAuthType::Array* arrTy)
-  : m_sort(HasType | IsVanilla)
+  : m_sort(HasType)
   , m_kind(ArrayData::ArrayKind{})
   , m_ptr(reinterpret_cast<uintptr_t>(arrTy))
 {
@@ -228,8 +228,7 @@ inline folly::Optional<ArrayData::ArrayKind> ArraySpec::kind() const {
 }
 
 inline const RepoAuthType::Array* ArraySpec::type() const {
-  auto const test = (HasType | IsVanilla);
-  return ((m_sort & test) == test)
+  return m_sort & HasType
     ? reinterpret_cast<const RepoAuthType::Array*>(m_ptr)
     : nullptr;
 }

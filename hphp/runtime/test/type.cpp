@@ -815,16 +815,16 @@ TEST(Type, Const) {
   EXPECT_TRUE(packedRat < ratArray1);
   EXPECT_TRUE(packedRat.arrSpec().vanilla());
 
-  auto const widenedRat = ratArray1.widenToBespoke();
+  auto const narrowedRat = ratArray1.narrowToVanilla();
   EXPECT_EQ("Arr=N([Str])", ratArray1.toString());
-  EXPECT_EQ("Arr={N([Str])|Bespoke}", widenedRat.toString());
-  EXPECT_TRUE(ratArray1 < widenedRat);
-  EXPECT_TRUE(ratArray1 <= widenedRat);
-  EXPECT_FALSE(widenedRat < ratArray1);
-  EXPECT_FALSE(widenedRat <= ratArray1);
-  EXPECT_EQ(ratArray1, widenedRat & TVanillaArr);
-  EXPECT_EQ(ratArray1, widenedRat.narrowToVanilla());
-  EXPECT_FALSE(widenedRat.arrSpec().vanilla());
+  EXPECT_EQ("Arr=Vanilla:N([Str])", narrowedRat.toString());
+  EXPECT_TRUE(narrowedRat < ratArray1);
+  EXPECT_TRUE(narrowedRat <= ratArray1);
+  EXPECT_FALSE(ratArray1 < narrowedRat);
+  EXPECT_FALSE(ratArray1 <= narrowedRat);
+  EXPECT_EQ(narrowedRat, ratArray1 & TVanillaArr);
+  EXPECT_EQ(ratArray1, narrowedRat.widenToBespoke());
+  EXPECT_FALSE(ratArray1.arrSpec().vanilla());
 
   auto darray = ArrayData::GetScalarArray(make_darray(1, 1, 10, 10));
   auto const constDArray = Type::cns(darray);
@@ -928,9 +928,9 @@ TEST(Type, VanillaArray) {
   EXPECT_TRUE(packedRat.arrSpec().vanilla());
 
   auto const widenedRat = packedRat.widenToBespoke();
-  EXPECT_EQ("Arr={PackedKind:N([Str])|Bespoke}", widenedRat.toString());
+  EXPECT_EQ("Arr={PackedKind|Bespoke}:N([Str])", widenedRat.toString());
   EXPECT_FALSE(widenedRat.arrSpec().kind());
-  EXPECT_FALSE(widenedRat.arrSpec().type());
+  EXPECT_TRUE(widenedRat.arrSpec().type());
   EXPECT_FALSE(widenedRat.arrSpec().vanilla());
   EXPECT_EQ(packedRat, widenedRat & TVanillaArr);
   EXPECT_EQ(packedRat, widenedRat & TPackedArr);

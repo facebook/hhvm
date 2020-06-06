@@ -52,8 +52,8 @@ struct ArraySpec {
   enum class LayoutTag { Unknown, Vanilla };
 
   /*
-   * Constructors. The default constructor produces a "Top" specialization
-   * without the vanilla bit set, but all other constructors have it set.
+   * Constructors. If an ArrayKind is provided as one of the arguments, then
+   * we'll also set the vanilla bit, but otherwise, we'll leave it unset.
    */
   constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
   explicit ArraySpec(ArrayData::ArrayKind kind);

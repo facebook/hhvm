@@ -130,20 +130,20 @@ ArraySpec ArraySpec::operator&(const ArraySpec& rhs) const {
 
 std::string ArraySpec::toString() const {
   std::string result;
-  auto const init = (m_sort & IsVanilla) ? "=" : "={";
   if (m_sort & HasKind) {
     auto const kind = ArrayData::ArrayKind(m_kind);
+    auto const init = (m_sort & IsVanilla) ? "=" : "={";
     result += folly::to<std::string>(init, ArrayData::kindToString(kind));
-  }
-  if (m_sort & HasType) {
-    auto const type = reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
-    auto const sign = result.empty() ? init : ":";
-    result += folly::to<std::string>(sign, show(*type));
   }
   if ((m_sort & IsVanilla) && result.empty()) {
     result += "=Vanilla";
   } else if (!(m_sort & IsVanilla) && !result.empty()) {
     result += "|Bespoke}";
+  }
+  if (m_sort & HasType) {
+    auto const type = reinterpret_cast<const RepoAuthType::Array*>(m_ptr);
+    auto const sign = result.empty() ? '=' : ':';
+    result += folly::to<std::string>(sign, show(*type));
   }
   return result;
 }

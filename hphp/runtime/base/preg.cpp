@@ -646,8 +646,13 @@ get_subpat_names(const pcre_cache_entry* pce) {
       raise_warning("Internal pcre_fullinfo() error %d", rc);
       return nullptr;
     }
+    // The table returned by PCRE_INFO_NAMETABLE is an array of fixed length
+    // strings of size PCRE_INFO_NAMEENTRYSIZE.  The first two bytes are a
+    // big-endian uint16_t defining the array index followed by the
+    // zero-terminated name string.
+    // (See https://www.pcre.org/original/doc/html/pcreapi.html)
     while (ni++ < name_count) {
-      name_idx = 0xff * (unsigned char)name_table[0] +
+      name_idx = 0x100 * (unsigned char)name_table[0] +
                  (unsigned char)name_table[1];
       subpat_names[name_idx] = name_table + 2;
       if (is_numeric_string(subpat_names[name_idx],

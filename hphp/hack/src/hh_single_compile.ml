@@ -112,7 +112,7 @@ let parse_options () =
   let log_stats = ref false in
   let for_debugger_eval = ref false in
   let disable_toplevel_elaboration = ref false in
-  let rust_emitter = ref false in
+  let rust_emitter = ref true in
   let include_header = ref false in
   let usage =
     P.sprintf "Usage: hh_single_compile (%s) filename\n" Sys.argv.(0)
@@ -162,9 +162,9 @@ let parse_options () =
       ( "--disable-toplevel-elaboration",
         Arg.Unit (fun () -> disable_toplevel_elaboration := true),
         "Disable toplevel definition elaboration" );
-      ( "--rust-emitter",
-        Arg.Unit (fun () -> rust_emitter := true),
-        "Enable rust emitter" );
+      ( "--disable-rust-emitter",
+        Arg.Unit (fun () -> rust_emitter := false),
+        "Disable rust emitter" );
       ( "--include-header",
         Arg.Unit (fun () -> include_header := true),
         "Include JSON header" );

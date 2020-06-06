@@ -478,7 +478,7 @@ bool RuntimeOption::ServerMode = false;
 
 bool RuntimeOption::EnableHipHopSyntax = true;
 bool RuntimeOption::EnableShortTags = true;
-bool RuntimeOption::EnableRustEmitter = false;
+bool RuntimeOption::EnableRustEmitter = true;
 bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::EnableIntrinsicsExtension = false;
 bool RuntimeOption::CheckSymLink = true;
@@ -890,7 +890,7 @@ static inline std::string hackCompilerArgsDefault() {
   return folly::sformat(
     "--daemon{}{}",
     RuntimeOption::RepoAuthoritative ? " --dump-symbol-refs" : "",
-    RuntimeOption::EnableRustEmitter ? " --rust-emitter" : ""
+    RuntimeOption::EnableRustEmitter ? "" : " --disable-rust-emitter"
   );
 }
 

@@ -31,7 +31,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception message as a string.
    */
-  <<__Rx, __OnlyRxIfImpl(\HH\Rx\Exception::class), __MaybeMutable>>
+  <<__Pure, __OnlyRxIfImpl(\HH\Rx\Exception::class), __MaybeMutable>>
   public function getMessage() {
     return $this->message;
   }
@@ -46,12 +46,12 @@ trait BaseException {
    * @return     mixed   Returns the previous Exception if available or NULL
    *                     otherwise.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   final public function getPrevious() {
     return $this->previous;
   }
 
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   final public function setPrevious(\Throwable $previous) {
     $this->previous = $previous;
   }
@@ -66,7 +66,7 @@ trait BaseException {
    *                     but possibly as other type in Exception descendants
    *                     (for example as string in PDOException).
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getCode() {
     return $this->code;
   }
@@ -80,7 +80,7 @@ trait BaseException {
    * @return     mixed   Returns the filename in which the exception was
    *                     created.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   final public function getFile() {
     return $this->file;
   }
@@ -94,7 +94,7 @@ trait BaseException {
    * @return     mixed   Returns the line number where the exception was
    *                     created.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   final public function getLine() {
     return $this->line;
   }
@@ -107,7 +107,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as an array.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   final public function getTrace() {
     if (\is_resource($this->trace)) {
       $this->trace = \__SystemLib\extract_trace($this->trace);
@@ -136,7 +136,7 @@ trait BaseException {
    *
    * @return     mixed   Returns the Exception stack trace as a string.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   final public function getTraceAsString() {
     $i = 0;
     $s = "";

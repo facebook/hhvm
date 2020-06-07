@@ -40,25 +40,25 @@ function server_warmup_status_monotonic(): string;
 <<__Native>>
 function execution_context(): string;
 
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function mark_legacy_hack_array(mixed $v, bool $recursive = false): mixed;
 
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function is_marked_legacy_hack_array(mixed $v): bool;
 
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function enable_legacy_behavior(mixed $v, bool $recursive = false): mixed;
 
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function is_legacy_behavior_enabled(mixed $v): bool;
 
 /*
  * TODO(jgriego) delete the above aliases, these are the preferred names
 */
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function array_mark_legacy(mixed $v, bool $recursive = false): mixed;
 
-<<__Rx, __Native, __IsFoldable>>
+<<__Pure, __Native, __IsFoldable>>
 function is_array_marked_legacy(mixed $v): bool;
 
 
@@ -107,7 +107,7 @@ function constant(string $name): mixed;
  * @return bool - Returns TRUE if the named constant given by name has been
  * defined, FALSE otherwise.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function defined(string $name,
                  bool $autoload = true): bool;
 
@@ -155,7 +155,7 @@ function ignore_user_abort(bool $setting = false): int;
  * byte X Back up one byte @ NUL-fill to absolute position
  * @return mixed - Returns a binary string containing data.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function pack(string $format, ...$args): mixed;
 
 /** @param int $seconds - Halt time in seconds.
@@ -227,7 +227,7 @@ function uniqid(string $prefix = "",
  * @return mixed - Returns an associative array containing unpacked elements
  * of binary string.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function unpack(string $format,
                 string $data): mixed;
 
@@ -244,7 +244,7 @@ function sys_getloadavg(): varray;
  * @param mixed $v - The value being casted to a string.
  * @return string - The result of the string cast.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function hphp_to_string(mixed $v): string;
 
 function __hhas_adata(string $incorrect_hhas_adata) {
@@ -262,7 +262,7 @@ namespace __SystemLib {
  * @param mixed $arg2 - The second operand of max.
  * @return mixed - The max of two operands.
  */
-<<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
+<<__Native, __HipHopSpecific, __IsFoldable, __Pure>>
 function max2(mixed $arg1, mixed $arg2): mixed;
 
 /** min2() returns the min of two operands (optimized FCallBuiltin for min).
@@ -270,7 +270,7 @@ function max2(mixed $arg1, mixed $arg2): mixed;
  * @param mixed $arg2 - The second operand of min.
  * @return mixed - The min of two operands.
  */
-<<__Native, __HipHopSpecific, __IsFoldable, __Rx>>
+<<__Native, __HipHopSpecific, __IsFoldable, __Pure>>
 function min2(mixed $arg1, mixed $arg2): mixed;
 
 }

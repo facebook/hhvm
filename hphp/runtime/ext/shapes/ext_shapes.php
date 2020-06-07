@@ -3,14 +3,14 @@
 namespace HH {
   abstract final class Shapes {
 
-    <<__Native, __Rx, __IsFoldable>>
+    <<__Native, __Pure, __IsFoldable>>
     public static function idx(
       ?darray $shape,
       arraykey $index,
       mixed $default = null,
     ): mixed;
 
-    <<__Rx>>
+    <<__Pure>>
     public static function at(
       darray $shape,
       arraykey $index,
@@ -18,7 +18,7 @@ namespace HH {
       return $shape[$index];
     }
 
-    <<__Rx>>
+    <<__Pure>>
     public static function keyExists(
       darray $shape,
       arraykey $index,
@@ -26,7 +26,7 @@ namespace HH {
       return \array_key_exists($index, $shape);
     }
 
-    <<__Rx>>
+    <<__Pure>>
     public static function removeKey(
       inout darray $shape,
       arraykey $index,
@@ -34,14 +34,14 @@ namespace HH {
       unset($shape[$index]);
     }
 
-    <<__Rx>>
+    <<__Pure>>
     public static function toArray(
       darray $shape,
     ): darray {
       return $shape;
     }
 
-    <<__Rx>>
+    <<__Pure>>
     public static function toDict(
       darray $shape,
     ): dict {

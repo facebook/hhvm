@@ -3,7 +3,7 @@
 namespace HH\Rx {
 
 interface IteratorAggregate extends namespace\Traversable, \IteratorAggregate {
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator();
 }
 

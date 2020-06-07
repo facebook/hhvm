@@ -810,7 +810,7 @@ function symlink(string $target, string $link): bool;
  * @return string - Returns the base name of the given path.
  *
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function basename(string $path, string $suffix = ""): string;
 
 /**
@@ -1342,7 +1342,7 @@ function rmdir(string $dirname, mixed $context = null): bool;
  *   removed.
  *
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function dirname(string $path): string;
 
 /**

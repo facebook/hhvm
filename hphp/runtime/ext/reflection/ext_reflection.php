@@ -44,7 +44,7 @@ class Reflection {
    *
    * @return     mixed   An array of modifier names.
    */
-  <<__Rx>>
+  <<__Pure>>
   public static function getModifierNames($modifiers) {
     $ret = varray[];
 

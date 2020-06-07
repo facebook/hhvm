@@ -4,12 +4,12 @@ namespace __SystemLib {
 
 /* Special function used by nullsafe FPushObjMethodD.
  */
-<<__Rx>>
+<<__Pure>>
 function __86null() {}
 
 /* Special function used by nullsafe 86reifiedinit.
  */
-<<__Rx>>
+<<__Pure>>
 function __86single_arg_null($_) {}
 
 }

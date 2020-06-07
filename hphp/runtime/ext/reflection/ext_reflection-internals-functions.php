@@ -8,7 +8,7 @@
  * @return array - A map containing the extension's name, version, info string
  *                 ini settings, constants, functions and classes.
  */
-<<__Native("NoInjection"), __HipHopSpecific, __Rx>>
+<<__Native("NoInjection"), __HipHopSpecific, __Pure>>
 function hphp_get_extension_info(string $name): darray<string, mixed>;
 
 /**

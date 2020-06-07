@@ -3,17 +3,17 @@
 <<__Sealed(Error::class, Exception::class)>>
 interface Throwable {
   public function getMessage(): string;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getCode(): int;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getFile(): string;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getLine(): int;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getTrace(): \HH\Container;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getTraceAsString(): string;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function getPrevious(): ?Throwable;
   public function __toString(): string;
 }

@@ -32,7 +32,7 @@ interface JsonSerializable {
  *   TRUE, FALSE and NULL respectively. NULL is returned if the json cannot
  *   be decoded or if the encoded data is deeper than the recursion limit.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function json_decode(string $json,
                      bool $assoc = false,
                      int $depth = 512,
@@ -52,7 +52,7 @@ function json_decode(string $json,
  *
  * @return mixed - Returns a JSON encoded string on success .
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function json_encode(mixed $value,
                      int $options = 0,
                      int $depth = 512): mixed;

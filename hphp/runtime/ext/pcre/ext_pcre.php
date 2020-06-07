@@ -12,7 +12,7 @@
  * occurred, an empty array is returned when subject is an array or NULL
  * otherwise.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_filter(mixed $pattern,
                      mixed $replacement,
                      mixed $subject,
@@ -31,7 +31,7 @@ function preg_filter(mixed $pattern,
  * @return array - Returns an array indexed using the keys from the input
  *   array.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_grep(string $pattern,
                    varray_or_darray $input,
                    int $flags = 0): mixed;
@@ -81,13 +81,13 @@ function preg_last_error(): int;
  * @return int - Returns the number of full pattern matches (which might
  *   be zero), or FALSE if an error occurred.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_match_all(string $pattern,
                         string $subject,
                         int $flags = 0,
                         int $offset = 0): mixed;
 
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_match_all_with_matches(string $pattern,
                                      string $subject,
                                      <<__OutOnly>>
@@ -121,13 +121,13 @@ function preg_match_all_with_matches(string $pattern,
  * @return int - preg_match() returns 1 if the pattern matches given
  *   subject, 0 if it does not, or FALSE if an error occurred.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_match(string $pattern,
                     string $subject,
                     int $flags = 0,
                     int $offset = 0): mixed;
 
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_match_with_matches(string $pattern,
                                  string $subject,
                                  <<__OutOnly>>
@@ -146,7 +146,7 @@ function preg_match_with_matches(string $pattern,
  *
  * @return string - Returns the quoted (escaped) string.
  */
-<<__IsFoldable, __Rx, __Native>>
+<<__IsFoldable, __Pure, __Native>>
 function preg_quote(string $str,
                     ?string $delimiter = NULL): string;
 
@@ -177,7 +177,7 @@ function preg_quote(string $str,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_replace_callback(mixed $pattern,
                                mixed $callback,
                                mixed $subject,
@@ -215,7 +215,7 @@ function preg_replace_callback(mixed $pattern,
  *   return value is NULL   If matches are found, the new subject will be
  *   returned, otherwise subject will be returned unchanged.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_replace_callback_array(mixed $patterns_and_callbacks,
                                      mixed $subject,
                                      int $limit,
@@ -270,13 +270,13 @@ function preg_replace_callback_array(mixed $patterns_and_callbacks,
  *   the new subject will be returned, otherwise subject will be returned
  *   unchanged or NULL if an error occurred.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_replace(mixed $pattern,
                       mixed $replacement,
                       mixed $subject,
                       int $limit = -1): mixed;
 
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_replace_with_count(mixed $pattern,
                                  mixed $replacement,
                                  mixed $subject,
@@ -308,7 +308,7 @@ function preg_replace_with_count(mixed $pattern,
  * @return array - Returns an array containing substrings of subject
  *   split along boundaries matched by pattern.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function preg_split(string $pattern,
                     string $subject,
                     mixed $limit = null,

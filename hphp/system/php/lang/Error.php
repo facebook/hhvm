@@ -14,7 +14,7 @@ class Error implements Throwable {
    * @previous   mixed   The previous exception used for the exception
    *                     chaining.
    */
-  <<__Rx>>
+  <<__Pure>>
   public function __construct($message = '', $code = 0,
                               <<__MaybeMutable>> Throwable $previous = null) {
 

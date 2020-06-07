@@ -17,7 +17,7 @@ namespace {
  * FB_SERIALIZE_HACK_ARRAYS_AND_KEYSETS.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __Rx>>
+<<__HipHopSpecific, __Native, __Pure>>
 function fb_serialize(mixed $thing, int $options = 0): mixed;
 
 /** Unserialize previously fb_serialize()-ed data.
@@ -43,7 +43,7 @@ function fb_unserialize(mixed $thing,
  * supported.
  * @return mixed - Serialized data.
  */
-<<__HipHopSpecific, __Native, __Rx>>
+<<__HipHopSpecific, __Native, __Pure>>
 function fb_compact_serialize(mixed $thing): mixed;
 
 /** Unserialize a previously fb_compact_serialize()-ed data.
@@ -137,7 +137,7 @@ function fb_rename_function(string $orig_func_name,
  * @param mixed $input - What string to sanitize.
  * @return bool - Sanitized string.
  */
-<<__HipHopSpecific, __Native, __Rx>>
+<<__HipHopSpecific, __Native, __Pure>>
 function fb_utf8ize(inout mixed $input): bool;
 
 /** Count the number of UTF-8 code points in string or byte count if it's not
@@ -146,7 +146,7 @@ function fb_utf8ize(inout mixed $input): bool;
  * @return int - Returns the count of code points if valid UTF-8 else byte
  * count.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
+<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
 function fb_utf8_strlen_deprecated(string $input): int;
 
 /** Count the number of UTF-8 code points in string, substituting U+FFFD for
@@ -155,7 +155,7 @@ function fb_utf8_strlen_deprecated(string $input): int;
  * @return int - Returns the number of code points interpreting string as
  * UTF-8.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
+<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
 function fb_utf8_strlen(string $input): int;
 
 /** Cuts a portion of str specified by the start and length parameters.
@@ -175,7 +175,7 @@ function fb_utf8_strlen(string $input): int;
  * length parameters.  If str is shorter than start characters long, the empty
  * string will be returned.
  */
-<<__HipHopSpecific, __Native, __IsFoldable, __Rx>>
+<<__HipHopSpecific, __Native, __IsFoldable, __Pure>>
 function fb_utf8_substr(string $str,
                         int $start,
                         int $length = PHP_INT_MAX): string;
@@ -263,7 +263,7 @@ function disable_code_coverage_with_frequency(): darray<string, mixed>;
  * The faster and quite effective xxhash64 is generally recommended for
  * non-crypto hashing needs when no backward compatibility is needed.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function non_crypto_md5_upper(string $str): int;
 
 /** Returns an int for the lower (last) 64 bits of an md5 hash of a string.
@@ -279,7 +279,7 @@ function non_crypto_md5_upper(string $str): int;
  * The faster and quite effective xxhash64 is generally recommended for
  * non-crypto hashing needs when no backward compatibility is needed.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function non_crypto_md5_lower(string $str): int;
 
 /** Returns the overflow part of multiplying two ints, as if they were unsigned.
@@ -287,7 +287,7 @@ function non_crypto_md5_lower(string $str): int;
  * (unsigned)$a and (unsigned)$b. (The lower 64 bits is just `$a * $b`
  * regardless of signed/unsigned).
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function int_mul_overflow(int $a, int $b): int;
 
 /** Returns the overflow part of multiplying two ints plus another int, as if
@@ -295,7 +295,7 @@ function int_mul_overflow(int $a, int $b): int;
  * full (unsigned)$a * (unsigned)$b + (unsigned)$bias. $bias can be used to
  * manipulate rounding of the result.
  */
-<<__Native, __IsFoldable, __Rx>>
+<<__Native, __IsFoldable, __Pure>>
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
 
 type INCORRECT_TYPE<T> = T;

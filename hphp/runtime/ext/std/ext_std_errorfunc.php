@@ -193,7 +193,7 @@ function set_exception_handler(mixed $exception_handler): ?callable;
  * @return bool - This function returns FALSE if wrong error_type is
  *   specified, TRUE otherwise.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function trigger_error(string $error_msg,
                        int $error_type = E_USER_NOTICE): bool;
 
@@ -245,7 +245,7 @@ function hphp_clear_unflushed(): void;
  *    indicate the filename, function, line number and class name (if in class
  *    context) of the callsite that invoked the current function or method.
  */
-<<__Native, __HipHopSpecific, __Rx>>
+<<__Native, __HipHopSpecific, __Pure>>
 function hphp_debug_caller_info(): darray<string, mixed>;
 
 <<__Native("NoInjection"), __HipHopSpecific>>

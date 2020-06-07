@@ -192,14 +192,14 @@ function get_compiled_units(int $kind = 0): keyset;
  * Construct a function pointer for the function with $name. The function should
  * be marked __DynamicallyCallable.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function dynamic_fun(string $name): mixed;
 
 /**
  * Construct a cls_meth pointer for the method $cls::$meth. The method should be
  * a static method marked __DynamicallyCallable.
  */
-<<__Native, __Rx>>
+<<__Native, __Pure>>
 function dynamic_class_meth(string $cls, string $meth): mixed;
 
 /**
@@ -334,7 +334,7 @@ interface IMemoizeParam extends \HH\IMemoizeParam {
    * Serialize this object to a string that can be used as a
    * dictionary key to differentiate instances of this class.
    */
-  <<__Rx>>
+  <<__Pure>>
   public function getInstanceKey(): string;
 }
 }
@@ -390,7 +390,7 @@ namespace HH\ReifiedGenerics {
   /**
    * Returns the type structure representation of the reified type
    */
-  <<__Rx>>
+  <<__Pure>>
   function get_type_structure<reify T>(): mixed {
     return ${'0ReifiedGenerics'}[0];
   }
@@ -399,7 +399,7 @@ namespace HH\ReifiedGenerics {
    * Returns the name of the class represented by this reified type.
    * If this type does not represent a class, throws an exception
    */
-  <<__Rx>>
+  <<__Pure>>
   function get_classname<reify T>(): classname<T> {
     $clsname = idx(namespace\get_type_structure<T>(), 'classname', null);
     if ($clsname is null) {

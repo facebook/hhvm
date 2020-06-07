@@ -4,19 +4,19 @@ namespace {
 
 <<__Sealed(\HH\Collection::class, ConstMap::class, ConstSet::class, ConstVector::class)>>
 interface ConstCollection extends HH\Rx\Countable {
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function isEmpty();
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function count();
-  <<__Rx, __MutableReturn>>
+  <<__Pure, __MutableReturn>>
   public function items();
 }
 
 <<__Sealed(\HH\Collection::class)>>
 interface OutputCollection {
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function add($e);
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(
     <<__OnlyRxIfImpl(HH\Rx\Traversable::class)>> $iterable
   );
@@ -29,7 +29,7 @@ namespace HH {
 <<__Sealed(\MutableMap::class, \MutableSet::class, \MutableVector::class)>>
 interface Collection extends \ConstCollection,
                              \OutputCollection {
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function clear();
 }
 
@@ -39,35 +39,35 @@ namespace {
 
 <<__Sealed(ConstMapAccess::class, SetAccess::class, ConstSet::class)>>
 interface ConstSetAccess {
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function contains($m);
 }
 
 <<__Sealed(MapAccess::class, MutableSet::class)>>
 interface SetAccess extends ConstSetAccess {
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function remove($m);
 }
 
 <<__Sealed(ConstMapAccess::class, IndexAccess::class, ConstVector::class)>>
 interface ConstIndexAccess {
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function at($k);
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function get($k);
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function containsKey($k);
 }
 
 <<__Sealed(MapAccess::class, MutableVector::class)>>
 interface IndexAccess extends ConstIndexAccess {
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function set($k,$v);
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(
     <<__OnlyRxIfImpl(HH\Rx\KeyedTraversable::class)>> $iterable
   );
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function removeKey($k);
 }
 

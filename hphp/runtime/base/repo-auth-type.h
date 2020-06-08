@@ -97,12 +97,12 @@ struct RepoAuthType {
     TAG(InitCell)                                 \
     TAG(Cell)                                     \
     /* Types where array() may be non-null. */    \
-    TAG(PArrLike)                              \
-    TAG(OptPArrLike)                           \
-    TAG(VArrLike)                                 \
-    TAG(VecLike)                                  \
-    TAG(OptVArrLike)                              \
-    TAG(OptVecLike)                               \
+    TAG(PArrCompat)                               \
+    TAG(OptPArrCompat)                            \
+    TAG(VArrCompat)                               \
+    TAG(VecCompat)                                \
+    TAG(OptVArrCompat)                            \
+    TAG(OptVecCompat)                             \
     TAG(SArr)                                     \
     TAG(OptSArr)                                  \
     TAG(Arr)                                      \
@@ -246,8 +246,8 @@ struct RepoAuthType {
     case Tag::OptDict: case Tag::OptSDict: case Tag::Dict: case Tag::SDict:
     case Tag::OptKeyset: case Tag::OptSKeyset:
     case Tag::Keyset:    case Tag::SKeyset:
-    case Tag::PArrLike:  case Tag::OptPArrLike:
-    case Tag::VecLike:   case Tag::OptVecLike:
+    case Tag::PArrCompat:  case Tag::OptPArrCompat:
+    case Tag::VecCompat:   case Tag::OptVecCompat:
       return true;
     default:
       return false;

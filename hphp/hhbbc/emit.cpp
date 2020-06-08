@@ -1162,12 +1162,12 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
   case T::OptKeyset:
   case T::SKeyset:
   case T::Keyset:
-  case T::PArrLike:
-  case T::VArrLike:
-  case T::VecLike:
-  case T::OptPArrLike:
-  case T::OptVArrLike:
-  case T::OptVecLike:
+  case T::PArrCompat:
+  case T::VArrCompat:
+  case T::VecCompat:
+  case T::OptPArrCompat:
+  case T::OptVArrCompat:
+  case T::OptVecCompat:
     // NOTE: In repo mode, RAT's in Array's might only contain global litstr
     // id's. No need to merge. In non-repo mode, RAT's in Array's might contain
     // local litstr id's.

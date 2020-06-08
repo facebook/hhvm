@@ -390,23 +390,23 @@ enum trep : uint64_t {
   BOptStrLike    = BInitNull | BStrLike,
   BOptUncStrLike = BInitNull | BUncStrLike,
 
-  BVArrLike   = BClsMeth | BVArr,
-  BVArrLikeSA = BClsMeth | BSVArr,
+  BVArrCompat   = BClsMeth | BVArr,
+  BVArrCompatSA = BClsMeth | BSVArr,
 
-  BOptVArrLike = BInitNull | BVArrLike,
-  BOptVArrLikeSA = BInitNull | BVArrLikeSA,
+  BOptVArrCompat = BInitNull | BVArrCompat,
+  BOptVArrCompatSA = BInitNull | BVArrCompatSA,
 
-  BVecLike   = BClsMeth | BVec,
-  BVecLikeSA = BClsMeth | BSVec,
+  BVecCompat   = BClsMeth | BVec,
+  BVecCompatSA = BClsMeth | BSVec,
 
-  BOptVecLike    = BInitNull | BVecLike,
-  BOptVecLikeSA  = BInitNull | BVecLikeSA,
+  BOptVecCompat    = BInitNull | BVecCompat,
+  BOptVecCompatSA  = BInitNull | BVecCompatSA,
 
-  BPArrLike   = BClsMeth | BArr,
-  BPArrLikeSA = BClsMeth | BSArr,
+  BPArrCompat   = BClsMeth | BArr,
+  BPArrCompatSA = BClsMeth | BSArr,
 
-  BOptPArrLike   = BInitNull | BPArrLike,
-  BOptPArrLikeSA = BInitNull | BPArrLikeSA,
+  BOptPArrCompat   = BInitNull | BPArrCompat,
+  BOptPArrCompatSA = BInitNull | BPArrCompatSA,
 
   BInitPrim = BInitNull | BBool | BNum | BFunc | BCls | BFuncS |
               (use_lowptr ? BClsMeth : 0),
@@ -1028,12 +1028,12 @@ X(ArrKey)                                       \
 X(FuncOrCls)                                    \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
-X(PArrLikeSA)                                   \
-X(PArrLike)                                     \
-X(VArrLikeSA)                                   \
-X(VArrLike)                                     \
-X(VecLikeSA)                                    \
-X(VecLike)                                      \
+X(PArrCompatSA)                                 \
+X(PArrCompat)                                   \
+X(VArrCompatSA)                                 \
+X(VArrCompat)                                   \
+X(VecCompatSA)                                  \
+X(VecCompat)                                    \
 X(InitPrim)                                     \
 X(Prim)                                         \
 X(InitUnc)                                      \
@@ -1100,12 +1100,12 @@ X(OptArrKey)                                    \
 X(OptFuncOrCls)                                 \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \
-X(OptPArrLikeSA)                                \
-X(OptPArrLike)                                  \
-X(OptVArrLikeSA)                                \
-X(OptVArrLike)                                  \
-X(OptVecLikeSA)                                 \
-X(OptVecLike)                                   \
+X(OptPArrCompatSA)                              \
+X(OptPArrCompat)                                \
+X(OptVArrCompatSA)                              \
+X(OptVArrCompat)                                \
+X(OptVecCompatSA)                               \
+X(OptVecCompat)                                 \
 X(InitCell)                                     \
 X(Cell)                                         \
 X(Top)

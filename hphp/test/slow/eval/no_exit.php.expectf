@@ -1,4 +1,4 @@
 Before error, there should be an 'After error'
 
-Fatal error: A semicolon (';') is expected here. in %s/test/slow/eval/no_exit.php(7)(fedb2d84cafe20862cb4399751a8a7e3) : eval()'d code on line 1
+Fatal error: A semicolon (';') is expected here. in %s/test/slow/eval/no_exit.php(7)(8502ee21e3b82bd59a5f2f94a566e519) : eval()'d code on line 1
 After error

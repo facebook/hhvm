@@ -1,3 +1,6 @@
 <?hh
 
-var_dump("Hello world!");
+<<__EntryPoint>>
+function main() {
+  var_dump("Hello world!");
+}

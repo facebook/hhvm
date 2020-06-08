@@ -7,5 +7,3 @@ interface I {
 class C {
  const FOO = 3;
 }
-
-$x = 1;

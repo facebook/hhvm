@@ -6,4 +6,3 @@ class X {
     yield 1;
   }
 }
-$x = 1;

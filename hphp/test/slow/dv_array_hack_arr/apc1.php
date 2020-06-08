@@ -5,4 +5,5 @@
 <<__EntryPoint>>
 function main_apc1() {
 include 'apc.inc';
+test();
 }

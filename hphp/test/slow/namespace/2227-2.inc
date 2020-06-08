@@ -8,4 +8,3 @@ class B {
     return Foo::NoSuchConstant;
   }
 }
-$x = 1;

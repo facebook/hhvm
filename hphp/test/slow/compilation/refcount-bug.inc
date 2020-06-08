@@ -1,3 +1,5 @@
 <?hh
 
-echo "Included\n";
+function included() {
+  echo "Included\n";
+}

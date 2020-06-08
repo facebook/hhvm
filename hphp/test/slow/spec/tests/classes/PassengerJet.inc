@@ -6,9 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
-include_once 'Aircraft.inc';
 
 class PassengerJet extends Aircraft 
 {

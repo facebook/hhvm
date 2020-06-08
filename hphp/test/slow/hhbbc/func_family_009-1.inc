@@ -11,4 +11,3 @@ abstract class Middle extends Base {
 class Derived extends Middle {
   function abs() {}
 }
-$x = 1;

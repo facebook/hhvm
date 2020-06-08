@@ -2,6 +2,8 @@
 
 <<__EntryPoint>>
 function main_high_ascii_label() {
-var_dump(eval("return <<<\xff\nXYZ\n\xff\n;"));
-var_dump(eval("return <<<'\xff'\nXYZ\n\xff\n;"));
+  eval("function foo() { return <<<\xff\nXYZ\n\xff\n; }");
+ var_dump(foo());
+ eval("function bar() { return <<<'\xff'\nXYZ\n\xff\n; }");
+ var_dump(bar());
 }

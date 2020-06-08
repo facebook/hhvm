@@ -1,30 +1,30 @@
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@35: Closure$#2:?, trigger_error:35, blue:41, main:44
-[1024] test_error inline-interp-stack.php@28: Closure$#2:?, trigger_error:28, green:36, blue:41, main:44
-[1024] test_error inline-interp-stack.php@22: Closure$#2:?, trigger_error:22, red:29, green:36, blue:41, main:44
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@24: Closure$main#2:?, trigger_error:24, blue:43, main:?
+[1024] test_error inline-interp-stack.php@17: Closure$main#2:?, trigger_error:17, green:25, blue:43, main:?
+[1024] test_error inline-interp-stack.php@11: Closure$main#2:?, trigger_error:11, red:18, green:25, blue:43, main:?

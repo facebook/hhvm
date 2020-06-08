@@ -1,3 +1,4 @@
 <?hh
-$x = "test1.inc";
+
+function test1() {}
 

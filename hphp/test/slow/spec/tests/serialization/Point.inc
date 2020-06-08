@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 class Point implements Serializable
 {
 	public $x;

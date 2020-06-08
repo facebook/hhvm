@@ -2,5 +2,6 @@
 
 <<__EntryPoint>>
 function main_symlink() {
-require_once "symlink.inc";
+  require_once "symlink.inc";
+  symlink_foo();
 }

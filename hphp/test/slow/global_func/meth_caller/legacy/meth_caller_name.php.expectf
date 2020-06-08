@@ -72,10 +72,10 @@ string(5) "Ans\D"
 string(1) "f"
 bool(false)
 
-Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 68
+Warning: getClassName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 108
 
-Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 68
+Warning: getMethodName() called on __SystemLib\MethCallerHelper in %s/meth_caller_name.php on line 108
 string(8) "Ans\Acls"
 string(5) "bfunc"
 
-Fatal error: Argument 1 passed to meth_caller_get_method() must be a MethCaller in %s/meth_caller_name.php on line 107
+Fatal error: Argument 1 passed to meth_caller_get_method() must be a MethCaller in %s/meth_caller_name.php on line 121

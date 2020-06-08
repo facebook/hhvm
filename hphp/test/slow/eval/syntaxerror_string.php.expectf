@@ -1,4 +1,4 @@
 Before error
 
-Fatal error: A semicolon (';') is expected here. in %s/test/slow/eval/syntaxerror_string.php(6)(97f9a3e0590ade71b12bd49a981b77d0) : eval()'d code on line 1
+Fatal error: A semicolon (';') is expected here. in %s/test/slow/eval/syntaxerror_string.php(6)(d0130e5dab9d19ada27b0360a29e3621) : eval()'d code on line 1
 eval returns false

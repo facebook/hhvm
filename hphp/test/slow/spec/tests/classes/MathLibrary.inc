@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 final class MathLibrary 
 {
 	private function MathLibrary() {}	// disallows instantiation

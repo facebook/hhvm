@@ -6,8 +6,6 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
-
 class Point 
 {
 	private $x;		// Cartesian x-coordinate

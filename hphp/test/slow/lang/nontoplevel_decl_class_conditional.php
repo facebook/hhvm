@@ -1,7 +1,10 @@
 <?hh
 
-if (true) {
-  class A {} // bad
-} else {
-  class B {} // bad
+<<__EntryPoint>>
+function main() {
+  if (true) {
+    class A {} // bad
+  } else {
+    class B {} // bad
+  }
 }

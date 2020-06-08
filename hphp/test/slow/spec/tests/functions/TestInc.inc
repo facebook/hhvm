@@ -7,7 +7,6 @@
 */
 
 namespace NS1;
-\error_reporting(-1);
 
 function f2()
 {

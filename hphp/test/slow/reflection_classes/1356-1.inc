@@ -5,4 +5,3 @@ class AaaA {
     var_dump(get_class());
   }
 }
-$x = 1;

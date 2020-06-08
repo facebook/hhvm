@@ -1,17 +1,17 @@
 <?hh
 
-function reproduce( $code ) {
-        $template = eval( $code );
-        return $template( varray[] );
+function reproduce( $code, $func ) {
+        eval( $code );
+        return $func( varray[] );
 }
 
 
 <<__EntryPoint>>
 function main_eval_closure() {
-echo reproduce('return function () {
+echo reproduce('function foo() {
     return (function() {return "first\n";})();
-};');
-echo reproduce('return function () {
+}', 'foo');
+echo reproduce('function bar() {
     return (function() {return "second\n";})();
-};');
+}', 'bar');
 }

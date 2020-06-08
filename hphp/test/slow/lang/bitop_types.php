@@ -20,37 +20,34 @@ function test_uninit() {
 
 <<__EntryPoint>>
 function main_bitop_types() {
-$format = '
-  function %s($a, $b) {
-    if (false) {} // force translation
-    $x = $a %s $b;
-    printf("%%s($a) %s %%s($b) = %%s($x)\n",
-           gettype($a), gettype($b), gettype($x));
-  }
-  %s(%s, %s);';
+  $func = ($a, $b, $bitop_str, $bitop) ==> {
+    $res = $bitop($a, $b);
+    printf("%s(%s) %s %s(%s) = %s(%s)\n",
+           gettype($a), $a, $bitop_str, gettype($b),
+           $b, gettype($res), $res);
+  };
 
 $ops = varray[
-  '&',
-  '^',
-  '|',
+  tuple('&', ($a, $b) ==> $a & $b),
+  tuple('^', ($a, $b) ==> $a ^ $b),
+  tuple('|', ($a, $b) ==> $a | $b),
 ];
 
 $values = varray[
-  'true',
-  '42',
-  '24.1987',
-  '"str"',
-  'varray[1, 2, 3]',
-  'new c()',
-  'null',
+  true,
+  42,
+  24.1987,
+  "str",
+  varray[1, 2, 3],
+  new c(),
+  null,
 ];
 
 for ($o = 0; $o < count($ops); ++$o) {
   for ($i = 0; $i < count($values); ++$i) {
     for ($j = 0; $j < count($values); ++$j) {
-      $f_name = sprintf("f%d%d%d", $o, $i, $j);
-      eval(sprintf($format, $f_name, $ops[$o], $ops[$o],
-                   $f_name, $values[$i], $values[$j]));
+      list($op_str, $op_lambda) = $ops[$o];
+      $func($values[$i], $values[$j], $op_str, $op_lambda);
     }
   }
 }

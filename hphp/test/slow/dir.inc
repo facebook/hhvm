@@ -1,3 +1,5 @@
 <?hh
 
-var_dump(__FILE__, __DIR__);
+function symlink_foo() {
+  var_dump(__FILE__, __DIR__);
+}

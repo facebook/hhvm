@@ -6,13 +6,16 @@
    +-------------------------------------------------------------+
 */
 
-error_reporting(-1);
+<<__EntryPoint>>
+function main() {
+   error_reporting(-1);
 
-include_once 'MyRangeException.inc';
+   include_once 'MyRangeException.inc';
 
-$re = new MyRangeException("xxx", 5, 20, 30);
-var_dump($re);
+   $re = new MyRangeException("xxx", 5, 20, 30);
+   var_dump($re);
 
-echo "======\n";
+   echo "======\n";
 
-echo "\$re = >$re<\n";
+   echo "\$re = >$re<\n";
+}

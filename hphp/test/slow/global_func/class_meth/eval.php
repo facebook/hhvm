@@ -6,16 +6,18 @@ class A {
   }
 }
 
-function test_eval($f) {
+function test_eval($name, $f) {
   var_export($f);
   echo "\n";
-  eval("\$m = ".var_export($f, true).";");
+  $func = "eval_".$name;
+  eval("function ".$func."() { return ".var_export($f, true)."; }");
+  $m = $func();
   var_dump($m);
   var_dump($m());
 }
 
 <<__EntryPoint>>
 function main() {
-  test_eval(varray[A::class, 'f1']);
-  test_eval(HH\class_meth(A::class, 'f1'));
+  test_eval('varray', varray[A::class, 'f1']);
+  test_eval('class_meth', HH\class_meth(A::class, 'f1'));
 }

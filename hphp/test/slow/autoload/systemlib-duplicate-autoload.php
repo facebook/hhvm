@@ -42,6 +42,8 @@ function main() {
 
   var_dump(HPHP_VERSION);
   var_dump(HERP_DERP);
+  
+  var_dump(get_included_files());
 }
 
 

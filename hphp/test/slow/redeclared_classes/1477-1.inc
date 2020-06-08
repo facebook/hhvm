@@ -6,5 +6,3 @@
  }
   interface C {
  }
-
-$x = 1;

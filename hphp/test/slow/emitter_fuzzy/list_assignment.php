@@ -1,3 +1,6 @@
 <?hh
 
-list($a, $i, $version) = $testProcess= 0;
+<<__EntryPoint>>
+function foo() {
+  list($a, $i, $version) = $testProcess= 0;
+}

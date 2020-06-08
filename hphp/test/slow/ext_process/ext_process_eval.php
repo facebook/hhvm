@@ -5,14 +5,14 @@
 function main_ext_process_eval() {
 $pid = pcntl_fork();
 if ($pid == 0) {
-  $a = 1;
-  eval('$a = 42;');
+  eval('function a() { return 42; }');
+  $a = a();
   print $a . "\n";
   exit(5);
 }
 $status = null;
 pcntl_wait(inout $status);
-$a = 2;
-eval('$a = 53;');
+eval('function a() { return 53; }');
+$a = a();
 print $a . "\n";
 }

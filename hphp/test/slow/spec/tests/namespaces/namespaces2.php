@@ -8,11 +8,11 @@
 
 namespace NS1
 {
-\error_reporting(-1);
-
-echo "Inside namespace " . __NAMESPACE__ . "\n";
-echo "Inside function " . __FUNCTION__ . "\n";
-echo "Inside method " . __METHOD__ . "\n";
+   function foo() {
+      echo "Inside namespace " . __NAMESPACE__ . "\n";
+      echo "Inside function " . __FUNCTION__ . "\n";
+      echo "Inside method " . __METHOD__ . "\n";
+   }
 
 //namespace NSX; //Cannot mix bracketed namespace declarations with unbracketed namespace declarations
 
@@ -23,13 +23,26 @@ echo "Inside method " . __METHOD__ . "\n";
 
 namespace
 {
-echo "Inside namespace " . __NAMESPACE__ . "\n";
-echo "Inside function " . __FUNCTION__ . "\n";
-echo "Inside method " . __METHOD__ . "\n";
+   <<__EntryPoint>>
+   function main() {
+      \error_reporting(-1);
+
+      \NS1\foo();
+
+      echo "Inside namespace " . __NAMESPACE__ . "\n";
+      echo "Inside function " . __FUNCTION__ . "\n";
+      echo "Inside method " . __METHOD__ . "\n";
+
+      \NS2\foo();
+   }
 }
 
 
 namespace NS2
 {
-echo "Inside namespace " . __NAMESPACE__ . "\n";
+   function foo() {
+      echo "Inside namespace " . __NAMESPACE__ . "\n";
+      echo "Inside function " . __FUNCTION__ . "\n";
+      echo "Inside method " . __METHOD__ . "\n";
+   }
 }

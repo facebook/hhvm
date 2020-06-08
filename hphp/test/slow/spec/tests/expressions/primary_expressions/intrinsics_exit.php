@@ -18,6 +18,7 @@ function main_entry(): void {
 
   echo "--------- test with/without string -------------\n";
 
+  error_reporting(-1);
   include_once 'Point2.inc';
 
   $p1 = new Point2(5, 3);

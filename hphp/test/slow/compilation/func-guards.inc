@@ -6,5 +6,3 @@ class X extends Y {
     var_dump($this->priv + self::C);
   }
 }
-
-$x = 1;

@@ -32,4 +32,4 @@ string(5) "Ans\D"
 string(1) "f"
 bool(false)
 
-Fatal error: Argument 1 passed to meth_caller_get_class() must be a MethCaller in %s/meth_caller_name.php on line 112
+Fatal error: Argument 1 passed to meth_caller_get_class() must be a MethCaller in %s/meth_caller_name.php on line 128

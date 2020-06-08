@@ -17,7 +17,7 @@ function main_entry(): void {
   // ensure that we're not getting a false negative when the clock flips over.
   for ($i = 0; $i < 2; $i++) {
     if ($i != 0) sleep(1);
-    file_put_contents($file, "<?hh\n\$j=1;\n");
+    file_put_contents($file, "<?hh\nfunction f() { return 1; }");
     include($file);
     include($file);
     echo count(array_filter(get_included_files(), $x ==> $x == $file)) . "\n";
@@ -27,11 +27,11 @@ function main_entry(): void {
 
   // Ensure that if we write the file multiple times that the file is actually
   // re-read and not cached.
-  file_put_contents($file, "<?hh\n\$i=1;\n");
+  file_put_contents($file, "<?hh\nfunction f2() { return 1; }");
   include($file);
-  echo $i . "\n";
+  echo f2() . "\n";
   sleep(1);
-  file_put_contents($file, "<?hh\n\$i=2;\n");
+  file_put_contents($file, "<?hh\nfunction f2() { return 2; }");
   include($file);
-  echo $i . "\n";
+  echo f2() . "\n";
 }

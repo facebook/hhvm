@@ -18,4 +18,5 @@ HH\autoload_set_paths(
   __DIR__.'/'
 );
 include 'autoload-enum-hint-1.inc';
+test();
 }

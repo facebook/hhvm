@@ -1,1 +1,5 @@
-<?hh echo "prepend\n";
+<?hh 
+
+function prepend() {
+  echo "prepend\n";
+}

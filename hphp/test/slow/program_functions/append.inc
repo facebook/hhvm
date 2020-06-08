@@ -1,1 +1,5 @@
-<?hh echo "append\n";
+<?hh 
+
+function append() {
+  echo "append\n";
+}

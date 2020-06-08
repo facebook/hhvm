@@ -107,7 +107,8 @@ function main_entry(): void {
 
   echo "---------------- calling eval -------------------\n";
 
-  eval('$z = ' . $v . ";");
+  eval('function eval_point() { return ' . $v . ';}');
+  $z = eval_point();
   echo "Point \$z is $z\n";
 
   unset($p, $v, $z);
@@ -120,7 +121,8 @@ function main_entry(): void {
   $v = var_export($b, TRUE);
   var_dump($v);
 
-  $r = eval('$z = ' . $v . ";");
+  eval('function eval_b() { return ' . $v . ';}');
+  $z = eval_b();
   var_dump($z);
 
   echo "---------------- test with type D -------------------\n";
@@ -129,7 +131,8 @@ function main_entry(): void {
   $v = var_export($d, TRUE);
   var_dump($v);
 
-  $r = eval('$z = ' . $v . ";");
+  eval('function eval_d() { return ' . $v . ';}');
+  $z = eval_d();
   var_dump($z);
 
   echo "---------------- end -------------------\n";

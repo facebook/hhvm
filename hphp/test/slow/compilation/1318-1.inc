@@ -6,5 +6,3 @@ class X {
     self::$i = $this;
   }
 }
-
-$x = 1;

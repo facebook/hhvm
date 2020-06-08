@@ -62,14 +62,18 @@ echo "=============================================\n";
         use T;
     }
 
-    $d = new D;
-    \var_dump($d);
-
-    echo "CON1 = " . \NS1\CON1 . "\n";
-
-    \NS1\f();
-
     use \NS1\C as C2;
-    $c2 = new C2;
-    \var_dump($c2);
+
+    <<__EntryPoint>>
+    function main() {
+        $d = new D;
+        \var_dump($d);
+
+        echo "CON1 = " . \NS1\CON1 . "\n";
+
+        \NS1\f();
+
+        $c2 = new C2;
+        \var_dump($c2);
+    }
 }

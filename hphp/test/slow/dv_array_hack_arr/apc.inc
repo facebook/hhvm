@@ -63,24 +63,26 @@ function make_circular_darray() {
   return $d;
 }
 
-$values = dict[
-  'varray1' => varray[],
-  'varray2' => varray[1, 2, 3],
-  'varray3' => varray['a', 'b', 'c'],
-  'varray4' => varray[launder(7), launder(8), launder(9)],
-  'varray5' => make_circular_varray(),
-  'darray1' => darray[],
-  'darray2' => darray[0 => 'a', 1 => 'b', 2 => 'c'],
-  'darray3' => darray['a' => 100, 'b' => 200],
-  'darray4' => darray[0 => launder('x'), 1 => launder('y'), 2 => launder('z')],
-  'darray5' => darray[launder('j') => 11, launder('k') => 222],
-  'darray6' => make_circular_darray()
-];
+function test() {
+  $values = dict[
+    'varray1' => varray[],
+    'varray2' => varray[1, 2, 3],
+    'varray3' => varray['a', 'b', 'c'],
+    'varray4' => varray[launder(7), launder(8), launder(9)],
+    'varray5' => make_circular_varray(),
+    'darray1' => darray[],
+    'darray2' => darray[0 => 'a', 1 => 'b', 2 => 'c'],
+    'darray3' => darray['a' => 100, 'b' => 200],
+    'darray4' => darray[0 => launder('x'), 1 => launder('y'), 2 => launder('z')],
+    'darray5' => darray[launder('j') => 11, launder('k') => 222],
+    'darray6' => make_circular_darray()
+  ];
 
-if (__hhvm_intrinsics\apc_fetch_no_check('second-time') === false) {
-  set_all($values);
-  apc_store('second-time', true);
-} else {
-  get_all($values);
-  echo "============ DONE ================\n";
+  if (__hhvm_intrinsics\apc_fetch_no_check('second-time') === false) {
+    set_all($values);
+    apc_store('second-time', true);
+  } else {
+    get_all($values);
+    echo "============ DONE ================\n";
+  }
 }

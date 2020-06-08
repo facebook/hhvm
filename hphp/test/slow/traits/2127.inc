@@ -8,4 +8,3 @@
   class C {
  use T;
  }
-$x = 1;

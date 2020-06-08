@@ -3,6 +3,7 @@
 class X {
   static function test() : X {
     require_once "refcount-bug.inc";
+    included();
     $ret = self::foo();
     return $ret;
   }

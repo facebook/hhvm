@@ -3,5 +3,6 @@
 
 <<__EntryPoint>>
 function main_file_include() {
-include 'file://'.__DIR__.'/hello.inc';
+  include 'file://'.__DIR__.'/hello.inc';
+  hello();
 }

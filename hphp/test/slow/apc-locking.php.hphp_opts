@@ -1,0 +1,2 @@
+--ffile=test/slow/apc-locking2.inc
+--ffile=hphp/test/slow/apc-locking2.inc

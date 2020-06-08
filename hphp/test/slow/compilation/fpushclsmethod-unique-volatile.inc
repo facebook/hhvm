@@ -9,4 +9,3 @@ class X {
 }
 class Y extends X {}
 
-$x = 1;

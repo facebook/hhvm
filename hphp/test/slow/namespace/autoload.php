@@ -1,6 +1,7 @@
 <?hh
 
 namespace A {
+  <<__EntryPoint>>
   function main() {
 
     \HH\autoload_set_paths(
@@ -17,6 +18,4 @@ namespace A {
 
     echo 'Done';
   }
-
-  main();
 }

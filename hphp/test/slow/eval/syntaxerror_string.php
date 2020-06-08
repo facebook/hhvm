@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main_syntaxerror_string() {
 print "Before error\n";
-$result = eval("echo foo");
+$result = eval("function foo() { echo foo }");
 if ($result === false) {
   echo "eval returns false\n";
 } else {

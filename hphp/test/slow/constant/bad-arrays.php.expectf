@@ -1,9 +1,9 @@
-"$a = 123; const BADARRAY = [$a];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(2df23d346ae21584ffbd53615a72f749) : eval()'d code on line 1
+"const BADARRAY = [$a];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(289813d82008e046f76cb804933460db) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADARRAY = [100 + $a + 200];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(c087c3ef4e57724ed1a61b05ace4675c) : eval()'d code on line 1
+"const BADARRAY = [100 + $a + 200];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(23613acee8db6e4282e093df21a2b230) : eval()'d code on line 1
 
 ==============================================================
 "const BADARRAY = [new stdclass];" ====>
@@ -26,20 +26,20 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(9b0f8039d51cbc98c2175ce725aa58b7) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADARRAY = [1, [2, $a], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(a8eea019cb14d2b13f8b5019f5e7cc25) : eval()'d code on line 1
+"const BADARRAY = [1, [2, $a], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(540a37a49686a5eb499f596edd372fb0) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADARRAY = [1, [2, 100 + $a + 200], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(1edf7f9d3b05a0c59200be5030dc456f) : eval()'d code on line 1
+"const BADARRAY = [1, [2, 100 + $a + 200], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(9abf43f8246ee90a755948eb68217bce) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADVEC = vec[$a];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(693784aecd5af71a4bb1a72645b3b35d) : eval()'d code on line 1
+"const BADVEC = vec[$a];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(2cba27bc1f1f878da75e2b6174f306f3) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADVEC = vec[100 + $a + 200];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(1ee720cab5399817e5701c19381249e2) : eval()'d code on line 1
+"const BADVEC = vec[100 + $a + 200];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(c1df4c4ce7f27f00d1d90c200dfa280c) : eval()'d code on line 1
 
 ==============================================================
 "const BADVEC = vec[new stdclass];" ====>
@@ -62,20 +62,20 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(28728fcbd98e05b89cb269e26def9ac4) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADVEC = vec[1, vec[2, $a], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(a19dcdf25d29308b30511a0573d29cd1) : eval()'d code on line 1
+"const BADVEC = vec[1, vec[2, $a], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(d36769e0816cc71e0acaf1e025ae1cbb) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADVEC = vec[1, vec[2, 100 + $a + 200], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(4037e239ef8ba7b6340a8edb222f0bf5) : eval()'d code on line 1
+"const BADVEC = vec[1, vec[2, 100 + $a + 200], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(af73f46f70f2dd50ed641ba2f310341c) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADDICT = dict[0 => $a];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(d1a638511841ce499539a55ee5002d31) : eval()'d code on line 1
+"const BADDICT = dict[0 => $a];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(f0f1fa186d33d37610eff24d24afc100) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADDICT = dict[100 => 100 + $a + 200];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(7d8705592a00acd9bcec24d1cf6d84f4) : eval()'d code on line 1
+"const BADDICT = dict[100 => 100 + $a + 200];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(d70c73ae5c2946270d9f78cdb8aa743a) : eval()'d code on line 1
 
 ==============================================================
 "const BADDICT = dict[1 => new stdclass];" ====>
@@ -98,20 +98,20 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(1f8f68d32fb6b1cc6d6cdc0510a8a7d0) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(e80ae3f5029815e26f2a0d5dd04cc230) : eval()'d code on line 1
+"const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => $a], 3 => 33];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(6b80710dcdd54c78bdd435b34828b7c5) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => 100 + $a + 200], 3 => 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(178d27bcc862b11cd826e6a1fa4d7c54) : eval()'d code on line 1
+"const BADDICT = dict[1 => 1, 2 => dict[100 => 2, 200 => 100 + $a + 200], 3 => 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(ca835caa0c4a3a3de6a95c07e15a2a51) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADKEYSET = keyset[$a];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(fd60d54ee1427e4ac6c13116a605c54a) : eval()'d code on line 1
+"const BADKEYSET = keyset[$a];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(c1ca2f0c5a57dd2ef0744ec0d819651a) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADKEYSET = keyset[100 + $a + 200];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(44742f3f9379595081608e64c422298c) : eval()'d code on line 1
+"const BADKEYSET = keyset[100 + $a + 200];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(26de30408fb89a439c48fad46140d26a) : eval()'d code on line 1
 
 ==============================================================
 "const BADKEYSET = keyset[foobaz()];" ====>
@@ -122,11 +122,11 @@ Fatal error: Invalid expression in constant initializer in %s/test/slow/constant
 Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(0d64fa4036ec7c410c9e5c60da521430) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADKEYSET = keyset[1, keyset[2, $a], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(6f876a737ff0a412611eaee4cbbbd36e) : eval()'d code on line 1
+"const BADKEYSET = keyset[1, keyset[2, $a], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(c0400f5c5789e0d871908997ac7b019c) : eval()'d code on line 1
 
 ==============================================================
-"$a = 123; const BADKEYSET = keyset[1, ketset[2, 100 + $a + 200], 3];" ====>
-Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(d0daf5289142fe7728abb98ff9935d1e) : eval()'d code on line 1
+"const BADKEYSET = keyset[1, ketset[2, 100 + $a + 200], 3];" ====>
+Fatal error: Invalid expression in constant initializer in %s/test/slow/constant/bad-arrays.php(%d)(176ff94f619716935132b9a3813bec86) : eval()'d code on line 1
 
 ==============================================================

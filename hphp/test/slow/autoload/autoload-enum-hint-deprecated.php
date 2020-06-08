@@ -18,4 +18,5 @@ fb_autoload_map(
   __DIR__.'/'
 );
 include 'autoload-enum-hint-1.inc';
+test();
 }

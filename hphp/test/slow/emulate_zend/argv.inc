@@ -1,3 +1,6 @@
 <?hh
 
-var_dump($argv);
+<<__EntryPoint>>
+function main() {
+  var_dump($GLOBALS['argv']);
+}

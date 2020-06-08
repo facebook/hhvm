@@ -3,6 +3,8 @@
 function main_entry(): void {
   error_reporting(-1);
 
+  include_once 'Vehicle.inc';
+  include_once 'Aircraft.inc';
   include_once 'PassengerJet.inc';
 
   // $v = new Vehicle;        // can't instantiate an abstract class

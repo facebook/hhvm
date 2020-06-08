@@ -1,16 +1,5 @@
 <?hh
 
-set_error_handler(($errno, $errstr, $errfile, $errline, $errctx) ==> {
-  if ($errno !== E_USER_NOTICE || strpos($errstr, 'test_error') === false) return;
-  $bfile = basename($errfile);
-  $trace = implode(
-    ', ',
-    array_map($x ==> $x['function'].':'.($x['line'] ?? '?'), debug_backtrace())
-  );
-  echo "[$errno] $errstr $bfile@$errline: $trace\n";
-  return true;
-});
-
 <<__ALWAYS_INLINE>>
 function junk() {
   junk2();
@@ -36,12 +25,24 @@ function blue() {
   green();
 }
 
+<<__EntryPoint>>
 function main() {
-  junk();
-  blue();
-}
+  set_error_handler(($errno, $errstr, $errfile, $errline, $errctx) ==> {
+    if ($errno !== E_USER_NOTICE || strpos($errstr, 'test_error') === false) return;
+    $bfile = basename($errfile);
+    $trace = implode(
+      ', ',
+      array_map($x ==> $x['function'].':'.($x['line'] ?? '?'), debug_backtrace())
+    );
+    echo "[$errno] $errstr $bfile@$errline: $trace\n";
+    return true;
+  });
 
-for ($i = 0; $i < 10; $i++) main();
+  for ($i = 0; $i < 10; $i++) {
+    junk();
+    blue();
+  }
+}
 
 <<__ALWAYS_INLINE>>
 function junk2() {

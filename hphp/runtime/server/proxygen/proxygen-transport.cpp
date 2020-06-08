@@ -22,7 +22,7 @@
 #include "hphp/util/timer.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
+#include <folly/Range.h>
 #include <memory>
 #include <set>
 
@@ -43,6 +43,8 @@ using std::unique_ptr;
 using namespace proxygen;
 
 namespace {
+constexpr folly::StringPiece k100Continue{"100-continue"};
+
 static std::set<std::string> s_post_methods{
   "OPTIONS",
   "REPORT",
@@ -203,7 +205,7 @@ bool ProxygenTransport::handlePOST(const proxygen::HTTPHeaders& headers) {
   // invalid request, we need to return a 417 (Expectation Failed).
   auto expectation = headers.getSingleOrEmpty(HTTP_HEADER_EXPECT);
   bool expects_100 = false;
-  if (!expectation.empty() && !boost::iequals(expectation, "100-continue")) {
+  if (!expectation.empty() && !k100Continue.equals(expectation, folly::AsciiCaseInsensitive())) {
     sendErrorResponse(417);
     return false;
   } else if (!expectation.empty()) {

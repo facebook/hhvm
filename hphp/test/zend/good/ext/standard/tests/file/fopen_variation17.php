@@ -10,7 +10,7 @@ function runtest() {
 
     $extraDir = "extraDir17";
 
-    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+    mkdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$extraDir);
     mkdir($extraDir);
 
     $tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
@@ -18,7 +18,7 @@ function runtest() {
     fwrite($h, (string)"This is the test file");
     fclose($h);
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
+    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }
@@ -37,7 +37,7 @@ function runtest() {
     }
 
     unlink($tmpfile);
-        rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$extraDir);
+        rmdir(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$extraDir);
         rmdir($extraDir);
 }
 <<__EntryPoint>> function main(): void {

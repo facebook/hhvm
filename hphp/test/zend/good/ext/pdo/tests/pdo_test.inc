@@ -1,18 +1,11 @@
 <?hh
 # PDO test framework utilities
 
-if (getenv('PDOTEST_DSN') === false) {
-	$common = '';
-	$append = false;
-	foreach(file(dirname($_SERVER['PHP_SELF']).'/common.phpt') as $line) {
-		if ($append) {
-			$common .= $line;
-		} elseif (trim($line) == '--REDIRECTTEST--') {
-			$append = true;
-		}
+function updateEnv() {
+	if (getenv('PDOTEST_DSN') === false) {
+		$conf = PDOTest::get_config(dirname($_SERVER['PHP_SELF']).'/common.phpt');
+		foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 	}
-	$conf = eval($common);
-	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 }
 
 class PDOTest {
@@ -73,11 +66,11 @@ class PDOTest {
 		return self::factory();
 	}
 
+	<<__Memoize>>
 	static function get_config($file) {
 		$data = file_get_contents($file);
 		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
-		$config = eval($data);
-
-		return $config;
+		eval($data);
+		return redirecttest();
 	}
 }

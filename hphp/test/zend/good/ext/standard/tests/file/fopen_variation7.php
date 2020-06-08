@@ -23,14 +23,14 @@ function runtest() {
        unlink($tmpfile);
     }
 
-    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile, "r");
+    $h = @fopen(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile, "r");
     if ($h === false) {
        echo "Not created in dir1\n";
     }
     else {
        echo "created in dir1\n";
        fclose($h);
-       unlink(ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir1.'/'.$tmpfile);
+       unlink(ZendGoodExtStandardTestsFileFopenIncludePathInc::dir1().'/'.$tmpfile);
     }
 }
 <<__EntryPoint>> function main(): void {

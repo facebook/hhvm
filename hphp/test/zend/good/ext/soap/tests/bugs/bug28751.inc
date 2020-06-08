@@ -4,5 +4,3 @@ class SoapServerActions {
     return "Hello World";
   }
 }
-
-$x = 1;

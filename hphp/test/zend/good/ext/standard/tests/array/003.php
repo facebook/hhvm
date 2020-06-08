@@ -10,6 +10,7 @@ function cmp($a, $b) {
 
 <<__EntryPoint>> function main(): void {
 require(dirname(__FILE__) . '/data.inc');
+$data = data();
 
 echo " -- Testing uasort() -- \n";
 uasort(inout $data, fun('cmp'));

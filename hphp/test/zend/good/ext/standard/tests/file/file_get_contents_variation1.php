@@ -32,7 +32,7 @@ mkdir($thisTestDir);
 chdir($thisTestDir);
 
 
-ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2."/".ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename;
+ZendGoodExtStandardTestsFileFileGetContentsVariation1::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::dir2()."/".ZendGoodExtStandardTestsFileFileGetContentsVariation1::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);

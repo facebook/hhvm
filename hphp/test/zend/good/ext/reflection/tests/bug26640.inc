@@ -7,5 +7,3 @@ class autoload_class
     print "autoload success\n";
   }
 }
-
-$x = 1;

@@ -21,6 +21,7 @@ abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
+ZendGoodExtStandardTestsFileFopenIncludePathInc::base();
 
 echo "*** Testing readfile() : variation ***\n";
 // this doesn't create the include dirs in this directory
@@ -32,7 +33,7 @@ mkdir($thisTestDir);
 chdir($thisTestDir);
 
 
-ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::$dir2."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
+ZendGoodExtStandardTestsFileReadfileVariation6::$secondFile = ZendGoodExtStandardTestsFileFopenIncludePathInc::dir2()."/".ZendGoodExtStandardTestsFileReadfileVariation6::$filename;
 
 $newpath = create_include_path();
 set_include_path($newpath);

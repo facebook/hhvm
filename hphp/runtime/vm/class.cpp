@@ -1394,7 +1394,10 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
     if (cns.isType()) {
       // Type constants with the low bit set are already resolved and can be
       // returned after masking out that bit.
-      assertx(isDictOrArrayType(type(cnsVal)));
+      //
+      // We can't check isDictOrDArray here because we're using that low bit as
+      // a marker; instead, check isArrayLike and do the stricter check below.
+      assertx(isArrayLikeType(type(cnsVal)));
       assertx(!isRefcountedType(type(cnsVal)));
       typeCns = val(cnsVal).parr;
       auto const rawData = reinterpret_cast<intptr_t>(typeCns);

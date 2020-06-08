@@ -52,10 +52,17 @@ ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
   return field.is_init();
 }
 
-ALWAYS_INLINE const ArrayData* get_ts_array(const ArrayData* ts,
-                                            const String& s) {
+ALWAYS_INLINE const ArrayData* get_ts_varray(const ArrayData* ts,
+                                             const String& s) {
   auto const field = ts->get(s.get());
-  assertx(isVecOrArrayType(field.type()));
+  assertx(tvIsVecOrVArray(field));
+  return field.val().parr;
+}
+
+ALWAYS_INLINE const ArrayData* get_ts_darray(const ArrayData* ts,
+                                             const String& s) {
+  auto const field = ts->get(s.get());
+  assertx(tvIsDictOrDArray(field));
   return field.val().parr;
 }
 
@@ -63,7 +70,7 @@ ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
                                                  const String& s) {
   auto const field = ts->get(s.get());
   if (!field.is_init()) return nullptr;
-  assertx(isDictOrArrayType(field.type()));
+  assertx(tvIsDictOrDArray(field));
   return field.val().parr;
 }
 
@@ -99,15 +106,15 @@ ALWAYS_INLINE const bool does_ts_shape_allow_unknown_fields(
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_elem_types(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_elem_types);
+  return detail::get_ts_varray(ts, s_elem_types);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_param_types(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_param_types);
+  return detail::get_ts_varray(ts, s_param_types);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_return_type(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_return_type);
+  return detail::get_ts_darray(ts, s_return_type);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_variadic_type_opt(const ArrayData* ts) {
@@ -115,19 +122,19 @@ ALWAYS_INLINE const ArrayData* get_ts_variadic_type_opt(const ArrayData* ts) {
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_fields(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_fields);
+  return detail::get_ts_darray(ts, s_fields);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_value(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_value);
+  return detail::get_ts_darray(ts, s_value);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_access_list(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_access_list);
+  return detail::get_ts_varray(ts, s_access_list);
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_generic_types(const ArrayData* ts) {
-  return detail::get_ts_array(ts, s_generic_types);
+  return detail::get_ts_varray(ts, s_generic_types);
 }
 
 ALWAYS_INLINE const StringData* get_ts_classname(const ArrayData* ts) {

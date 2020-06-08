@@ -357,12 +357,6 @@ inline bool isDictType(MaybeDataType t) {
   return t && isDictType(*t);
 }
 
-/*
- * Based on EvalHackArrDVArrs checks whether t is vec/dict or array
- */
-bool isVecOrArrayType(DataType t);
-bool isDictOrArrayType(DataType t);
-
 constexpr bool isKeysetType(DataType t) {
   return
     static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentKeyset;

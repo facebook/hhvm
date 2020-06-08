@@ -161,7 +161,7 @@ ALWAYS_INLINE
 folly::Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   auto const generics_field = ts->get(s_generic_types.get());
   if (!generics_field.is_init()) return folly::none;
-  assertx(isArrayType(generics_field.type()));
+  assertx(tvIsVecOrVArray(generics_field));
   return generics_field.val().parr;
 }
 
@@ -1044,7 +1044,7 @@ bool errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields,
       auto arr = v.m_data.parr;
       auto const value_field = arr->get(s_value.get());
       if (value_field.is_init()) {
-        assertx(isArrayType(value_field.type()));
+        assertx(tvIsDictOrDArray(value_field));
         arr = value_field.val().parr;
       }
       if (!errorOnIsAsExpressionInvalidTypes(ArrNR(arr), dryrun,
@@ -1267,11 +1267,10 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
         result = true;
         return true; // short circuit
       }
-      if (tvIsDictOrDArray(v) || tvIsVecOrVArray(v)) {
-        result |= doesTypeStructureContainTUnresolved(v.m_data.parr);
-        return result; // short circuit if need be
-      }
-      return false;
+      if (!isArrayLikeType(type(v))) return false;
+      assertx(tvIsVecOrVArray(v) || tvIsDictOrDArray(v));
+      result |= doesTypeStructureContainTUnresolved(v.m_data.parr);
+      return result; // short circuit if true
     }
   );
   return result;

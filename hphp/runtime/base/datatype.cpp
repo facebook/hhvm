@@ -408,14 +408,6 @@ MaybeDataType get_datatype(
   return KindOfObject;
 }
 
-bool isVecOrArrayType(DataType t) {
-  return RuntimeOption::EvalHackArrDVArrs ? isVecType(t) : isArrayType(t);
-}
-
-bool isDictOrArrayType(DataType t) {
-  return RuntimeOption::EvalHackArrDVArrs ? isDictType(t) : isArrayType(t);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }

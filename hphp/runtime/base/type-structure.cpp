@@ -938,24 +938,13 @@ Array TypeStructure::resolvePartial(const Array& ts,
 
 namespace {
 
-template<typename T>
-ALWAYS_INLINE bool tvIsVecOrVArray_REAL(const T& tv) {
-  if (RO::EvalHackArrDVArrs) return tvIsVec(tv);
-  return tvIsArray(tv) && val(tv).parr->isVArray();
-}
-template<typename T>
-ALWAYS_INLINE bool tvIsDictOrDArray_REAL(const T& tv) {
-  if (RO::EvalHackArrDVArrs) return tvIsDict(tv);
-  return tvIsArray(tv) && val(tv).parr->isDArray();
-}
-
 // Coerces vector-like darrays / dicts to varrays / vecs. Returns true if the
 // lval is now a varray (either coerced, or if it started off that way).
 bool coerceToVecOrVArray(tv_lval lval) {
-  if (tvIsVecOrVArray_REAL(lval)) return true;
+  if (tvIsVecOrVArray(lval)) return true;
 
   // Must be a dict or darray with vector-like data.
-  if (!tvIsDictOrDArray_REAL(lval)) return false;
+  if (!tvIsDictOrDArray(lval)) return false;
   auto const ad = val(lval).parr;
   if (!ad->isVectorData()) return false;
 
@@ -977,7 +966,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape=false);
 bool coerceTSField(Array& arr, const String& name) {
   assertx(one_bit_refcount || !arr->cowCheck());
   auto field = arr.lvalForce(name);
-  if (!tvIsDictOrDArray_REAL(field)) return false;
+  if (!tvIsDictOrDArray(field)) return false;
   return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
 }
 
@@ -987,7 +976,7 @@ bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
   assertx(one_bit_refcount || !arr->cowCheck());
   auto field = arr.lvalForce(name);
   if (!coerceToVecOrVArray(field)) return false;
-  assertx(tvIsVecOrVArray_REAL(field));
+  assertx(tvIsVecOrVArray(field));
   return coerceToTypeStructureList(ArrNR(val(field).parr).asArray(), shape);
 }
 
@@ -1012,7 +1001,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape) {
     auto const ad = [&] {
       if (shape) {
         auto const value = arr.lookup(s_value);
-        if (tvIsDictOrDArray_REAL(value)) return val(value).parr;
+        if (tvIsDictOrDArray(value)) return val(value).parr;
         if (value.is_init()) valid = false;
       }
       return val(tv).parr;

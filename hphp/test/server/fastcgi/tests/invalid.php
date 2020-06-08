@@ -1,7 +1,5 @@
 <?hh
 
-require_once('test_base.inc');
-
 function invalidTestController($port) {
   $host = 'localhost';
 
@@ -27,5 +25,7 @@ function invalidTestController($port) {
   echo "\n";
 }
 <<__EntryPoint>> function main(): void {
-runTest("invalidTestController");
+  require_once('test_base.inc');
+  init();
+  runTest("invalidTestController");
 }

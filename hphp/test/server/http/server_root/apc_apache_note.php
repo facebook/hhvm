@@ -6,5 +6,8 @@ function apc_apache_note() {
   apc_store('what', 'hello' . rand(100));
 }
 
+<<__EntryPoint>>
+function apc_apache_note_entrypoint() {
 apc_apache_note();
 var_dump('OK');
+}

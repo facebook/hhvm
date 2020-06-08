@@ -1,9 +1,9 @@
 <?hh
 
-require_once('test_base.inc');
-
 <<__EntryPoint>>
 function main() {
+  require_once('test_base.inc');
+  init();
   runTest(
     function($server_port) {
       echo http_request(

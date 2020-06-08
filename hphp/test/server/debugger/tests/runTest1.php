@@ -1,7 +1,5 @@
 <?hh
 
-require_once('test_base.inc');
-
 function test1Controller($hphpdOutput, $hphpdProcessId, $serverPort) {
   // Request a page so that the client can debug it.
   waitForClientToOutput($hphpdOutput, "Waiting for server response");
@@ -12,4 +10,9 @@ function test1Controller($hphpdOutput, $hphpdProcessId, $serverPort) {
   waitForClientToOutput($hphpdOutput, "quit");
 }
 
-runTest('test1', "test1Controller");
+<<__EntryPoint>>
+function main() {
+  require_once('test_base.inc');
+  init();
+  runTest('test1', "test1Controller");
+}

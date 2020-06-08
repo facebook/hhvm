@@ -1,5 +1,6 @@
 <?hh
 
+<<__EntryPoint>>
 function main() {
   $r = pagelet_server_task_start("pagelet.php");
   var_dump($r);
@@ -8,5 +9,3 @@ function main() {
   } while ($res !== null && $c === 0);
   var_dump($c);
 }
-
-main();

@@ -1,8 +1,8 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-
   require_once('test_base.inc');
+  init();
 
   runTest(function ($port) {
       var_dump(http_request(php_uname('n'), $port, 'static_content.txt', 1200, '--head'));

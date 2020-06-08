@@ -1,7 +1,5 @@
 <?hh
 
-require_once('test_base.inc');
-
 function opts(bool $hack_arr = false): string {
   $args = varray[
     '-vEval.HackArrCompatTypeHintNotices=1',
@@ -23,6 +21,8 @@ function hphp_opts(bool $hack_arr = false): string {
 }
 
 <<__EntryPoint>> function main(): void {
+  require_once('test_base.inc');
+  init();
   requestAll(
     varray[
       varray[

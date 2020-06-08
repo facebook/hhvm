@@ -1,5 +1,6 @@
 <?hh
 
+<<__EntryPoint>>
 function main() {
   $port = $_ENV['SERVERPORT'];
   $host = php_uname('n');
@@ -38,11 +39,9 @@ function main() {
   }
 
   curl_multi_close($mh);
-  return $ret;
+  echo $ret;
 }
 
 function except() {
   throw new Exception("oops");
 }
-
-echo main();

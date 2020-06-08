@@ -1,12 +1,13 @@
 <?hh
 
-require __DIR__ . '/../../util/server_tests.inc';
-ServerUtilServerTests::$LOG_ROOT = '/tmp/hphpd';
-
+function init() {
+  require __DIR__ . '/../../util/server_tests.inc';
+  ServerUtilServerTests::$LOG_ROOT = '/tmp/hphpd';
+}
 
 function startDebuggerClient($debugPort, $input_path, inout $pipes) {
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
-  $test_run_id = ServerUtilServerTests::$test_run_id;
+  $test_run_id = ServerUtilServerTests::test_run_id();
 
 
   $home = hphp_home().'/hphp/test/server/debugger';

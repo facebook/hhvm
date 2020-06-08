@@ -2,29 +2,34 @@
 
 
 abstract final class ServerUtilServerTests {
-  public static $error_log_file;
-  public static $test_run_id = 0;
   public static $LOG_ROOT;
   public static $DOC_ROOT;
   public static $next_instance_id = 0;
   public static $repo_builds = dict[];
-}
 
-ServerUtilServerTests::$test_run_id = posix_getpid();
-ServerUtilServerTests::$error_log_file = fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::$test_run_id.".log", 'w');
+  <<__Memoize>>
+  public static function test_run_id() {
+    return posix_getpid();
+  }
+
+  <<__Memoize>>
+  public static function error_log_file() {
+    return fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::test_run_id().".log", 'w');
+  }
+}
 
 function tlog($str) {
 
 
-  fwrite(ServerUtilServerTests::$error_log_file, $str ?? '');
-  fwrite(ServerUtilServerTests::$error_log_file, "\n");
-  fflush(ServerUtilServerTests::$error_log_file);
+  fwrite(ServerUtilServerTests::error_log_file(), $str ?? '');
+  fwrite(ServerUtilServerTests::error_log_file(), "\n");
+  fflush(ServerUtilServerTests::error_log_file());
   // error_log($str);
 }
 
 function dumpLogFilesToStdoutAndDie() {
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
-  $test_run_id = ServerUtilServerTests::$test_run_id;
+  $test_run_id = ServerUtilServerTests::test_run_id();
 
   sleep(1);
   error_log('-------------------------------------------');
@@ -77,7 +82,7 @@ function get_random_port($exclude1, $exclude2) {
 function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
                       $customArgs = '', $serverId = null, $repoArgs = '') {
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
-  $test_run_id = ServerUtilServerTests::$test_run_id;
+  $test_run_id = ServerUtilServerTests::test_run_id();
 
   $instance_id = ServerUtilServerTests::$next_instance_id;
   ++ServerUtilServerTests::$next_instance_id;
@@ -184,6 +189,7 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
 
 // Check if the server id is in the expected list of ids.
 function checkServerId($serverPort, $expectedIds) {
+  create_request_func_if_needed();
   $host = 'localhost';
   $r = request($host, $serverPort, "hello.php");
   $matches = null;
@@ -199,8 +205,8 @@ function checkServerId($serverPort, $expectedIds) {
 }
 
 function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null, $expect404 = false) {
-
-  $serverId ??= ServerUtilServerTests::$test_run_id;
+  create_request_func_if_needed();
+  $serverId ??= ServerUtilServerTests::test_run_id();
   for ($i = 1; $i <= 20; $i++) {
     $status = proc_get_status($serverProc);
     if ($status === false || !$status['running']) {
@@ -224,8 +230,9 @@ function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null, $ex
 }
 
 function stopServer($adminPort, $serverProc) {
+  create_request_func_if_needed();
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
-  $test_run_id = ServerUtilServerTests::$test_run_id;
+  $test_run_id = ServerUtilServerTests::test_run_id();
 
 
   $r = "";
@@ -302,7 +309,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
   $host_name = "hphpd.debugger.".\php_uname('n');
 
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
-  $test_run_id = ServerUtilServerTests::$test_run_id;
+  $test_run_id = ServerUtilServerTests::test_run_id();
   $cmd = "curl $post --trace-ascii {$LOG_ROOT}_curl$test_run_id.log ".
     "--silent $curl_opts --connect-timeout $timeout ".
     "-H 'Host: $host_name' $headers --url \"$url\"";
@@ -314,6 +321,7 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 }
 
 function requestAll(varray $requests, $customArgs = '', $repoArgs = '') {
+  create_request_func_if_needed();
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
@@ -327,8 +335,11 @@ function requestAll(varray $requests, $customArgs = '', $repoArgs = '') {
   );
 }
 
-if (!function_exists("request")) {
-  include 'server_tests1.inc';
+<<__Memoize>>
+function create_request_func_if_needed() {
+  if (!function_exists("request")) {
+    require_once 'server_tests1.inc';
+  }
 }
 
 function killChildren($pid, $safe_children = darray[]) {

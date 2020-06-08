@@ -1,5 +1,7 @@
 <?hh
 
+<<__EntryPoint>>
+function test_status_entrypoint() {
 $uptime = HH\server_uptime();
 var_dump($uptime);
 
@@ -11,3 +13,4 @@ var_dump($prepared);
 
 $health = HH\server_health_level();
 var_dump($health);
+}

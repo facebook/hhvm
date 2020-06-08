@@ -1,7 +1,5 @@
 <?hh
 
-require_once('test_base.inc');
-
 function BadAuthDigestTestController($serverPort) {
   $args = darray['Authorization' => 'Digest "username="admin", ' .
     'realm="Restricted area", nonce="564a12f5c065e", ' .
@@ -22,6 +20,8 @@ function GoodAuthDigestTestController($serverPort) {
                   darray[], darray[], $args));
 }
 <<__EntryPoint>> function main(): void {
+require_once('test_base.inc');
+init();
 runTest("BadAuthDigestTestController");
 runTest("GoodAuthDigestTestController");
 }

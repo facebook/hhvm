@@ -1,13 +1,14 @@
 <?hh
 
-require __DIR__ . '/../../util/server_tests.inc';
-ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
-require __DIR__ . '/../Adoy/Client.php';
+function init() {
+  require __DIR__ . '/../../util/server_tests.inc';
+  ServerUtilServerTests::$LOG_ROOT = '/tmp/hhvm_server';
+  require __DIR__ . '/../Adoy/Client.php';
 
-ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
+  ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
+}
 
 function runTest($testController, $customArgs = '') {
-
   $pid = posix_getpid();
   try {
     $serverProc = $serverPort = $adminPort = null;
@@ -25,8 +26,6 @@ function runTest($testController, $customArgs = '') {
 }
 
 function request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
-
-
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);

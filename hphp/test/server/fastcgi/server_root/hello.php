@@ -1,3 +1,7 @@
 <?hh
-$testid = getenv('TESTID');
-echo "Hello, World!{$testid}";
+
+<<__EntryPoint>>
+function hello_entrypoint() {
+  $testid = getenv('TESTID');
+  echo "Hello, World!{$testid}";
+}

@@ -1,6 +1,9 @@
 <?hh
 
+<<__EntryPoint>>
+function main() {
 require_once('test_base.inc');
+init();
 require_once('globalDocumentTestUtils.inc');
 
 echo "No global doc\n";
@@ -50,3 +53,4 @@ runTestWith404HealthCheck(
   },
   "-vServer.GlobalDocument=/this_file_does_not_exist.php",
 );
+}

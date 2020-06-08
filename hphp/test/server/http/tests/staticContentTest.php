@@ -2,6 +2,7 @@
 
 <<__EntryPoint>> function main(): void {
 require_once('test_base.inc');
+init();
 
 // Limit the server to 1 thread only to ensure that both requests are served by
 // the same thread

@@ -1,7 +1,8 @@
 <?hh
 
-require_once(__DIR__ . '/test_base.inc');
 <<__EntryPoint>> function main(): void {
+require_once(__DIR__ . '/test_base.inc');
+init();
 $requests = varray[
   varray[
     '-dalways_populate_raw_post_data=1',

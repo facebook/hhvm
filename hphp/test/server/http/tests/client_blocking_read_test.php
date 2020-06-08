@@ -1,8 +1,5 @@
 <?hh
 
-require_once('test_base.inc');
-
-
 function createSocketStream($serverPort) {
   $errorCode = null;
   $errorMessage = null;
@@ -25,6 +22,8 @@ function createReq(){
   return $message;
 }
 <<__EntryPoint>> function main(): void {
+require_once('test_base.inc');
+init();
 runTest(function ($serverPort) {
   $stream = createSocketStream($serverPort);
   fwrite($stream, createReq());

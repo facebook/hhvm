@@ -936,45 +936,97 @@ Array TypeStructure::resolvePartial(const Array& ts,
   return resolved;
 }
 
-bool TypeStructure::isValidResolvedTypeStructureList(const Array& arr,
-                                                     bool isShape /*= false*/) {
-  if (!(RuntimeOption::EvalHackArrDVArrs
-          ? arr.isVec() : (arr.isPHPArray() || !arr.isNull()))) {
-    return false;
-  }
-  bool valid = true;
-  IterateV(
-    arr.get(),
-    [&](TypedValue v) {
-      if (!tvIsDictOrDArray(v)) {
-        valid = false;
-        return true;
-      }
-      auto const parr = [&] {
-        if (isShape) {
-          auto const value = arr.lookup(s_value);
-          // TODO(T64074168): Should we check for a missing value with is_init?
-          if (!isDictOrArrayType(value.type())) {
-            valid = false;
-          } else {
-            return value.val().parr;
-          }
-        }
-        return v.m_data.parr;
-      }();
-      if (!valid) return true;
-      valid &= TypeStructure::isValidResolvedTypeStructure(ArrNR(parr));
-      return !valid; // if valid is false, let's short circuit
+namespace {
+
+template<typename T>
+ALWAYS_INLINE bool tvIsVecOrVArray_REAL(const T& tv) {
+  if (RO::EvalHackArrDVArrs) return tvIsVec(tv);
+  return tvIsArray(tv) && val(tv).parr->isVArray();
+}
+template<typename T>
+ALWAYS_INLINE bool tvIsDictOrDArray_REAL(const T& tv) {
+  if (RO::EvalHackArrDVArrs) return tvIsDict(tv);
+  return tvIsArray(tv) && val(tv).parr->isDArray();
+}
+
+// Coerces vector-like darrays / dicts to varrays / vecs. Returns true if the
+// lval is now a varray (either coerced, or if it started off that way).
+bool coerceToVecOrVArray(tv_lval lval) {
+  if (tvIsVecOrVArray_REAL(lval)) return true;
+
+  // Must be a dict or darray with vector-like data.
+  if (!tvIsDictOrDArray_REAL(lval)) return false;
+  auto const ad = val(lval).parr;
+  if (!ad->isVectorData()) return false;
+
+  // Do the coercion and replace the value.
+  auto const varray = RO::EvalHackArrDVArrs
+    ? ad->toVec(/*copy=*/true)
+    : ad->toVArray(/*copy=*/true);
+  tvCopy(make_array_like_tv(varray), lval);
+  assertx(ad != varray);
+  decRefArr(ad);
+  return true;
+}
+
+bool coerceToTypeStructure(Array& arr);
+bool coerceToTypeStructureList(Array& arr, bool shape=false);
+
+// Returns true and performs coercion if the given field of `arr` can be
+// coerced to a valid, resolved TypeStructure.
+bool coerceTSField(Array& arr, const String& name) {
+  assertx(one_bit_refcount || !arr->cowCheck());
+  auto field = arr.lvalForce(name);
+  if (!tvIsDictOrDArray_REAL(field)) return false;
+  return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
+}
+
+// Returns true and performs coercion if the given field of `arr` can be
+// coerced to a list of valid, resolved TypeStructures.
+bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
+  assertx(one_bit_refcount || !arr->cowCheck());
+  auto field = arr.lvalForce(name);
+  if (!coerceToVecOrVArray(field)) return false;
+  assertx(tvIsVecOrVArray_REAL(field));
+  return coerceToTypeStructureList(ArrNR(val(field).parr).asArray(), shape);
+}
+
+// Same as above, except that they allow the field to be missing.
+bool coerceOptTSField(Array& arr, const String& name) {
+  return arr.exists(name) ? coerceTSField(arr, name) : true;
+}
+bool coerceOptTSListField(Array& arr, const String& name, bool shape=false) {
+  return arr.exists(name) ? coerceTSListField(arr, name, shape) : true;
+}
+
+bool coerceToTypeStructureList(Array& arr, bool shape) {
+  assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
+  if (!arr->isVecOrVArray()) return false;
+
+  auto valid = true;
+  IterateV(arr.get(), [&](TypedValue tv) {
+    if (!tvIsDictOrDArray(tv)) {
+      valid = false;
+      return true;
     }
-  );
+    auto const ad = [&] {
+      if (shape) {
+        auto const value = arr.lookup(s_value);
+        if (tvIsDictOrDArray_REAL(value)) return val(value).parr;
+        if (value.is_init()) valid = false;
+      }
+      return val(tv).parr;
+    }();
+    valid = valid && coerceToTypeStructure(ArrNR(ad).asArray());
+    return !valid;
+  });
   return valid;
 }
 
-bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
-  if (!(RuntimeOption::EvalHackArrDVArrs
-          ? arr.isDict() : (arr.isPHPArray() && !arr.isNull()))) {
-    return false;
-  }
+bool coerceToTypeStructure(Array& arr) {
+  assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
+  if (!arr->isDictOrDArray()) return false;
+
   auto const kindfield = arr.lookup(s_kind);
   if (!isIntType(kindfield.type()) ||
       kindfield.val().num > TypeStructure::kMaxResolvedKind) {
@@ -1004,57 +1056,46 @@ bool TypeStructure::isValidResolvedTypeStructure(const Array& arr) {
     case TypeStructure::Kind::T_noreturn:
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_dynamic:
-    case TypeStructure::Kind::T_nonnull:
+    case TypeStructure::Kind::T_nonnull: {
       return true;
+    }
     case TypeStructure::Kind::T_fun: {
-      auto const rtype = arr.lookup(s_return_type);
-      if (!isDictOrArrayType(rtype.type())) return false;
-      if (!TypeStructure::isValidResolvedTypeStructure(
-            ArrNR(rtype.val().parr))) {
-        return false;
-      }
-      auto const vtype = arr.lookup(s_variadic_type);
-      // TODO(T64074168): Should we check for a missing value with is_init?
-      if (!isDictOrArrayType(vtype.type())) return false;
-      auto const varr = ArrNR(rtype.val().parr);
-      if (!TypeStructure::isValidResolvedTypeStructure(varr)) return false;
-      auto const ptypes = arr.lookup(s_param_types);
-      if (!isVecOrArrayType(ptypes.type())) return false;
-      return isValidResolvedTypeStructureList(ArrNR(ptypes.val().parr));
+      return coerceTSField(arr, s_return_type) &&
+             coerceTSListField(arr, s_param_types) &&
+             coerceOptTSField(arr, s_variadic_type);
     }
     case TypeStructure::Kind::T_typevar: {
-      auto const name = arr.lookup(s_name);
-      return isStringType(name.type());
+      return tvIsString(arr.lookup(s_name));
     }
     case TypeStructure::Kind::T_shape: {
-      auto const fields = arr.lookup(s_fields);
-      if (!isVecOrArrayType(fields.type())) return false;
-      return isValidResolvedTypeStructureList(ArrNR(fields.val().parr), true);
+      return coerceTSListField(arr, s_fields, /*shape=*/true);
     }
     case TypeStructure::Kind::T_tuple: {
-      auto const elems = arr.lookup(s_elem_types);
-      if (!isVecOrArrayType(elems.type())) return false;
-      return isValidResolvedTypeStructureList(ArrNR(elems.val().parr));
+      return coerceTSListField(arr, s_elem_types);
     }
     case TypeStructure::Kind::T_class:
     case TypeStructure::Kind::T_interface:
     case TypeStructure::Kind::T_trait:
     case TypeStructure::Kind::T_enum: {
-      auto const clsname = arr.lookup(s_classname);
-      if (!isStringType(clsname.type())) return false;
-      auto const generics = arr.lookup(s_generic_types);
-      // TODO(T64074168): Should we check for a missing value with is_init?
-      if (!isVecOrArrayType(generics.type())) return false;
-      return isValidResolvedTypeStructureList(ArrNR(generics.val().parr));
+      return tvIsString(arr.lookup(s_classname)) &&
+             coerceOptTSListField(arr, s_generic_types);
     }
     case TypeStructure::Kind::T_unresolved:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_xhp:
-    case TypeStructure::Kind::T_reifiedtype:
-      // Kinds denoting unresolved types should not appear
+    case TypeStructure::Kind::T_reifiedtype: {
+      // Unresolved types should not appear in valid resolved type structures.
       return false;
+    }
   }
   return false;
+}
+
+}
+
+bool TypeStructure::coerceToTypeStructureList_SERDE_ONLY(tv_lval lval) {
+  return coerceToVecOrVArray(lval) &&
+         coerceToTypeStructureList(ArrNR(val(lval).parr).asArray());
 }
 
 } // namespace HPHP

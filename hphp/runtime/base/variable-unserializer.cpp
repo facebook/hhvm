@@ -990,12 +990,10 @@ void VariableUnserializer::unserializeVariant(
             TypedValue tv = make_tv<KindOfNull>();
             auto const t = tv_lval{&tv};
             unserializePropertyValue(t, remainingProps--);
-            if (!isVecOrArrayType(t.type()) ||
-                (this->type() == VariableUnserializer::Type::Serialize &&
-                 !TypeStructure::isValidResolvedTypeStructureList(
-                   ArrNR(t.val().parr)))) {
+            if (!TypeStructure::coerceToTypeStructureList_SERDE_ONLY(t)) {
               throwInvalidOFormat(clsName);
             }
+            assertx(tvIsVecOrVArray(t));
             obj = Object{cls, t.val().parr};
           } else {
             obj = Object{cls};

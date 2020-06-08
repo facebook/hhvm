@@ -95,12 +95,23 @@ enum class TSDisplayType : uint8_t {
 String toString(const Array& arr, TSDisplayType type);
 
 /*
- * Checks whether the given type structure is a valid resolved type structure,
- * i.e. whether it contains all required fields and that it does not require
- * resolution
+ * Coerces the given array to a valid, resolved, list of type structures that
+ * may be used as an object's reified-generics property.
+ *
+ * This function does coercion in place; for that to be possible, all arrays
+ * reachable from the given array must either have refcount 1 or be empty.
+ *
+ * The only coercion this function performs are to convert list-like darrays
+ * in the appropriate places to varrays. The reason we have to do that is a
+ * consequence of how our serialization format for PHP arrays broke down:
+ * we cannot distinguish between list-like darrays and varrays based on the
+ * serialized data. Post HackArrDVArrs, it converts list-like dicts to vecs.
+ *
+ * In summary, this function is tied closely to variable-unserializer formats.
+ * If you think you need to use it for any other reason: THINK AGAIN. Think
+ * very hard, and then come talk to kshaunak@ or dneiter@.
  */
-bool isValidResolvedTypeStructure(const Array& arr);
-bool isValidResolvedTypeStructureList(const Array& arr, bool isShape = false);
+bool coerceToTypeStructureList_SERDE_ONLY(tv_lval lval);
 
 /*
  * All resolve functions ignore the initial value present in the

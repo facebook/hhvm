@@ -36,7 +36,7 @@ let show_policy = function
   | Pbot -> "Bot"
   | Ptop -> "Top"
   | Ppurpose p -> p
-  | Pfree_var (v, _s) -> Printf.sprintf "v%d" v
+  | Pfree_var (v, _s) -> v
   | Pbound_var n -> Printf.sprintf "<bound%d>" n
 
 let policy fmt p = fprintf fmt "%s" (show_policy p)

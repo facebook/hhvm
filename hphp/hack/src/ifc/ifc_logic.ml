@@ -93,14 +93,14 @@ let shift ?(delta = -1) = function
 let quantify ~pred ~quant:q c =
   let n = ref 0 in
   let idx =
-    let m = ref IMap.empty in
+    let m = ref SMap.empty in
     fun v ->
-      match IMap.find !m v with
+      match SMap.find_opt v !m with
       | Some i -> i
       | None ->
         let i = !n in
         incr n;
-        m := IMap.set ~key:v ~data:i !m;
+        m := SMap.add v i !m;
         i
   in
   let quantpol b = function

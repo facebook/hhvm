@@ -54,7 +54,9 @@ let rec subtype t1 t2 acc =
 and equivalent t1 t2 acc = subtype t1 t2 (subtype t2 t1 acc)
 
 (* Generates a fresh supertype of the argument type *)
-let weaken renv env ty =
+let weaken ?prefix renv env ty =
+  (* Prefix to use for policy variables generated through weakning *)
+  let pvar_prefix = Option.value prefix ~default:"weak" in
   let rec freshen acc ty =
     let on_list mk tl =
       let (acc, tl') = List.map_env acc tl ~f:freshen in
@@ -62,13 +64,13 @@ let weaken renv env ty =
     in
     match ty with
     | Tprim p ->
-      let p' = Env.new_policy_var renv.re_proto in
+      let p' = Env.new_policy_var renv.re_proto pvar_prefix in
       (L.(p < p') acc, Tprim p')
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass class_ ->
-      let super_pol = Env.new_policy_var renv.re_proto in
+      let super_pol = Env.new_policy_var renv.re_proto pvar_prefix in
       let acc = L.(class_.c_self < super_pol) acc in
       (acc, Tclass { class_ with c_self = super_pol })
   in
@@ -98,6 +100,8 @@ let rec add_dependencies pl t acc =
     List.fold tl ~init:acc ~f
 
 let policy_join renv env p1 p2 =
+  (* Prefix to use for policy variables generated through policy joins *)
+  let pvar_prefix = "join" in
   match Logic.policy_join p1 p2 with
   | Some p -> (env, p)
   | None ->
@@ -106,7 +110,7 @@ let policy_join renv env p1 p2 =
       when equal_policy_var v1 v2 && Scope.equal s1 s2 ->
       (env, p1)
     | _ ->
-      let pv = Env.new_policy_var renv.re_proto in
+      let pv = Env.new_policy_var renv.re_proto pvar_prefix in
       let env = Env.acc env L.(p1 < pv && p2 < pv) in
       (env, pv))
 
@@ -188,10 +192,12 @@ let union_types renv env t1 t2 =
 
 (* If there is a lump policy variable in effect, return that otherwise
    generate a new policy variable. *)
-let get_policy_var lump_pol_opt proto_renv =
+let get_policy_var ?prefix lump_pol_opt proto_renv =
   match lump_pol_opt with
   | Some lump_pol -> lump_pol
-  | None -> Env.new_policy_var proto_renv
+  | None ->
+    let prefix = Option.value prefix ~default:"v" in
+    Env.new_policy_var proto_renv prefix
 
 let rec class_ptype lump_pol_opt proto_renv name =
   let { psig_policied_properties; psig_unpolicied_properties } =
@@ -201,12 +207,12 @@ let rec class_ptype lump_pol_opt proto_renv name =
   in
   let policied_props =
     List.map psig_policied_properties (fun (prop, ty) ->
-        (prop, ptype lump_pol_opt proto_renv ty))
+        (prop, ptype ~prefix:("." ^ prop) lump_pol_opt proto_renv ty))
   in
-  let lump_pol = get_policy_var lump_pol_opt proto_renv in
+  let lump_pol = get_policy_var lump_pol_opt proto_renv ~prefix:"lump" in
   let unpolicied_props =
     List.map psig_unpolicied_properties (fun (prop, ty) ->
-        (prop, ptype (Some lump_pol) proto_renv ty))
+        (prop, ptype ~prefix:("." ^ prop) (Some lump_pol) proto_renv ty))
   in
   let property_ptype_map =
     SMap.of_list (List.append policied_props unpolicied_props)
@@ -214,20 +220,20 @@ let rec class_ptype lump_pol_opt proto_renv name =
   Tclass
     {
       c_name = name;
-      c_self = get_policy_var lump_pol_opt proto_renv;
+      c_self = get_policy_var lump_pol_opt proto_renv ~prefix:name;
       c_lump = lump_pol;
       c_property_map = property_ptype_map;
     }
 
 (* Turns a locl_ty into a type with policy annotations;
    the policy annotations are fresh policy variables *)
-and ptype lump_pol_opt proto_renv (t : T.locl_ty) =
-  let ptype = ptype lump_pol_opt in
+and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
+  let ptype = ptype ?prefix lump_pol_opt proto_renv in
   match T.get_node t with
-  | T.Tprim _ -> Tprim (get_policy_var lump_pol_opt proto_renv)
-  | T.Ttuple tyl -> Ttuple (List.map ~f:(ptype proto_renv) tyl)
-  | T.Tunion tyl -> Tunion (List.map ~f:(ptype proto_renv) tyl)
-  | T.Tintersection tyl -> Tinter (List.map ~f:(ptype proto_renv) tyl)
+  | T.Tprim _ -> Tprim (get_policy_var lump_pol_opt proto_renv ?prefix)
+  | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
+  | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
+  | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
   | T.Tclass ((_, name), _, _) -> class_ptype lump_pol_opt proto_renv name
   (* ---  types below are not yet unpported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
@@ -250,7 +256,8 @@ and ptype lump_pol_opt proto_renv (t : T.locl_ty) =
 
 let add_params renv env params =
   let add_param env p =
-    let pty = ptype None renv.re_proto (fst p.A.param_type_hint) in
+    let prefix = p.A.param_name in
+    let pty = ptype None renv.re_proto (fst p.A.param_type_hint) ~prefix in
     let lid = Local_id.make_unscoped p.A.param_name in
     Env.set_local_type env lid pty
   in
@@ -315,7 +322,8 @@ and expr renv env (((_epos, _ety), e) : Tast.expr) =
             let lty = Env.get_local_type env lid in
             binop renv env lty ty
         in
-        let (env, ty) = weaken renv env ty in
+        let prefix = Local_id.to_string lid in
+        let (env, ty) = weaken renv env ty ~prefix in
         let env = Env.acc env (add_dependencies renv.re_lpc ty) in
         Env.set_local_type env lid ty
       | Property prop_ptype ->
@@ -337,7 +345,9 @@ and expr renv env (((_epos, _ety), e) : Tast.expr) =
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
     let prop_ptype = property_ptype obj_ptype property in
-    let (env, super_ptype) = weaken renv env prop_ptype in
+    let (env, super_ptype) =
+      weaken ~prefix:("." ^ property) renv env prop_ptype
+    in
     let obj_class = receiver_of_obj_get obj_ptype property in
     let env = Env.acc env (add_dependencies [obj_class.c_self] super_ptype) in
     (env, super_ptype)
@@ -437,9 +447,9 @@ let func_or_method psig_env class_name_opt name saved_env params body lrty =
       let scope = Scope.alloc () in
       let proto_renv = Env.new_proto_renv scope psig_env in
 
-      let global_pc = Env.new_policy_var proto_renv in
+      let global_pc = Env.new_policy_var proto_renv "pc" in
       let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
-      let ret_ty = ptype None proto_renv lrty in
+      let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
       let renv = Env.new_renv proto_renv saved_env global_pc this_ty ret_ty in
 
       (* Initialise the mutable environment *)

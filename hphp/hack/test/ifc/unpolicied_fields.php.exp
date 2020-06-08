@@ -7,56 +7,63 @@ Policy signature for \D:
 * Unpolicied properties: di
 
 Analyzing __construct:
-* pc: v1
-* This: \C<v4, v3, cy -> <v3>, cx -> <v2>, cd -> \D<v3, v3, di -> <v3>>>
-* Return: <v5>
-* Params: { $cd -> \D<v7, v6, di -> <v6>> }
+* pc: pc
+* This:
+    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
+    cd -> \D<lump, lump, di -> <lump>>>
+* Return: <ret>
+* Params: { $cd -> \D<\D, lump'1, di -> <lump'1>> }
 * Final environment:
-  Locals: { $cd -> \D<v7, v6, di -> <v6>> }
+  Locals: { $cd -> \D<\D, lump'1, di -> <lump'1>> }
   Constraints:
-    [v4 < v3, v3 < v6, v6 < v3, v6 = v3, v7 < v3, v1 < v3]
+    [\C < lump, lump < lump'1, lump'1 < lump, lump'1 = lump, \D < lump,
+     pc < lump]
 
 Analyzing testGetUnpolicied:
-* pc: v8
+* pc: pc
 * This:
-    \C<v11, v10, cy -> <v10>, cx -> <v9>, cd -> \D<v10, v10, di -> <v10>>>
-* Return: \D<v13, v12, di -> <v12>>
+    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
+    cd -> \D<lump, lump, di -> <lump>>>
+* Return: \D<\D, lump'1, di -> <lump'1>>
 * Params: {}
 * Final environment:
   Locals: {}
   Constraints:
-    [v10 < v14, v11 < v14, v12 < v10, v10 < v12, v10 = v12, v14 < v13]
+    [lump < .cd, \C < .cd, lump'1 < lump, lump < lump'1, lump = lump'1,
+     .cd < \D]
 
 Analyzing testSetMultipleUnpolicied:
-* pc: v15
+* pc: pc
 * This:
-    \C<v18, v17, cy -> <v17>, cx -> <v16>, cd -> \D<v17, v17, di -> <v17>>>
-* Return: <v19>
-* Params: { $d -> \D<v21, v20, di -> <v20>> }
+    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
+    cd -> \D<lump, lump, di -> <lump>>>
+* Return: <ret>
+* Params: { $d -> \D<\D, lump'1, di -> <lump'1>> }
 * Final environment:
-  Locals: { $d -> \D<v21, v20, di -> <v20>> }
+  Locals: { $d -> \D<\D, lump'1, di -> <lump'1>> }
   Constraints:
-    [v18 < v17, Bot < v17, v15 < v17, v18 < v17, v17 < v20, v20 < v17,
-     v20 = v17, v21 < v17, v15 < v17]
+    [\C < lump, Bot < lump, pc < lump, \C < lump, lump < lump'1,
+     lump'1 < lump, lump'1 = lump, \D < lump, pc < lump]
 
 Analyzing testSetDeep:
-* pc: v22
+* pc: pc
 * This:
-    \C<v25, v24, cy -> <v24>, cx -> <v23>, cd -> \D<v24, v24, di -> <v24>>>
-* Return: <v26>
-* Params: { $i -> <v27> }
+    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
+    cd -> \D<lump, lump, di -> <lump>>>
+* Return: <ret>
+* Params: { $i -> <$i> }
 * Final environment:
-  Locals: { $i -> <v27> }
+  Locals: { $i -> <$i> }
   Constraints:
-    [v24 < v28, v25 < v28, v28 < v24, v27 < v24, v22 < v24]
+    [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
 
 Analyzing __construct:
-* pc: v29
-* This: \D<v31, v30, di -> <v30>>
-* Return: <v32>
-* Params: { $di -> <v33> }
+* pc: pc
+* This: \D<\D, lump, di -> <lump>>
+* Return: <ret>
+* Params: { $di -> <$di> }
 * Final environment:
-  Locals: { $di -> <v33> }
+  Locals: { $di -> <$di> }
   Constraints:
-    [v31 < v30, v33 < v30, v29 < v30]
+    [\D < lump, $di < lump, pc < lump]
 

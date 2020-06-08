@@ -17,7 +17,7 @@ module Type = Typing_defs
 type purpose = string [@@deriving ord, eq, show]
 
 (* A policy variable *)
-type policy_var = int [@@deriving ord, eq, show]
+type policy_var = string [@@deriving ord, eq, show]
 
 (* In policies, variables are handled using a locally-nameless
    representation. This means that variables bound in a
@@ -90,6 +90,8 @@ type env = {
 type proto_renv = {
   (* during flow inference, types are always given relative to a scope. *)
   pre_scope: Scope.t;
+  (* Hashtable keeping track of counters to generate variable names *)
+  pre_pvar_counters: (string, int ref) Hashtbl.t;
   (* policy signatures for classes indexed by class name *)
   pre_psig_env: policy_sig SMap.t;
 }

@@ -16,17 +16,24 @@ module K = Typing_cont_key
    use higher-order functions to parameterize
    complex behavior! *)
 
-let new_policy_var =
-  let new_policy_var =
-    let next = ref 0 in
-    fun () ->
-      incr next;
-      !next
+let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
+  let suffix =
+    match Hashtbl.find_opt pre_pvar_counters prefix with
+    | Some counter ->
+      incr counter;
+      "'" ^ string_of_int !counter
+    | None ->
+      Hashtbl.add pre_pvar_counters prefix (ref 0);
+      ""
   in
-  (fun { pre_scope; _ } -> Pfree_var (new_policy_var (), pre_scope))
+  Pfree_var (prefix ^ suffix, pre_scope)
 
 let new_proto_renv scope psig_env =
-  { pre_scope = scope; pre_psig_env = psig_env }
+  {
+    pre_scope = scope;
+    pre_psig_env = psig_env;
+    pre_pvar_counters = Hashtbl.create 10;
+  }
 
 let new_renv proto_renv saved_tenv global_pc this_ty ret_ty =
   {

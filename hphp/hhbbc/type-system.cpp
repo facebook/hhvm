@@ -120,6 +120,30 @@ bool mayHaveData(trep bits) {
   case BOptCDictE: case BOptSDictE: case BOptDictE:
     return true;
 
+  case BSArrLikeE:
+  case BCArrLikeE:
+  case BSArrLikeN:
+  case BCArrLikeN:
+  case BSArrLike:
+  case BCArrLike:
+  case BArrLikeE:
+  case BArrLikeN:
+  case BArrLike:
+  case BOptSArrLikeE:
+  case BOptCArrLikeE:
+  case BOptSArrLikeN:
+  case BOptCArrLikeN:
+  case BOptSArrLike:
+  case BOptCArrLike:
+  case BOptArrLikeE:
+  case BOptArrLikeN:
+  case BOptArrLike:
+  case BArrLikeCompat:
+  case BArrLikeCompatSA:
+  case BOptArrLikeCompat:
+  case BOptArrLikeCompatSA:
+    return true;
+
   case BVArrCompat: case BVArrCompatSA:
   case BOptVArrCompat: case BOptVArrCompatSA:
   case BVecCompat: case BVecCompatSA:
@@ -271,6 +295,14 @@ bool canBeOptional(trep bits) {
   case BKeysetE:
   case BKeysetN:
   case BKeyset:
+  case BArrLikeE:
+  case BArrLikeN:
+  case BArrLike:
+  case BArrLikeCompat:
+  case BSArrLikeE:
+  case BSArrLikeN:
+  case BSArrLike:
+  case BArrLikeCompatSA:
     return true;
 
   case BOptTrue:
@@ -341,6 +373,14 @@ bool canBeOptional(trep bits) {
   case BOptCls:
   case BOptClsMeth:
   case BOptRecord:
+  case BOptArrLikeE:
+  case BOptArrLikeN:
+  case BOptArrLike:
+  case BOptSArrLikeE:
+  case BOptSArrLikeN:
+  case BOptSArrLike:
+  case BOptArrLikeCompat:
+  case BOptArrLikeCompatSA:
     return false;
 
   case BInitPrim:
@@ -3878,6 +3918,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Func:
     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case IsTypeOp::ArrLike:
+    return RO::EvalIsCompatibleClsMethType ? TArrLikeCompat : TArrLike;
   case IsTypeOp::Scalar: always_assert(0);
   }
   not_reached();
@@ -6247,19 +6288,15 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   } else if (testTy == TDict) {
     return mayLogProv ||
            (RO::EvalHackArrCompatIsVecDictNotices && valTy.couldBe(BDArr));
+  } else if (testTy == TArrLikeCompat) {
+    return RO::EvalIsVecNotices && valTy.couldBe(BClsMeth);
   }
   return false;
 }
 
 bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
-  switch (testOp) {
-    case IsTypeOp::ArrLike:
-      return RuntimeOption::EvalIsVecNotices && valTy.couldBe(BClsMeth);
-    case IsTypeOp::Scalar:
-      return false;
-    default:
-      return is_type_might_raise(type_of_istype(testOp), valTy);
-  }
+  return testOp != IsTypeOp::Scalar &&
+    is_type_might_raise(type_of_istype(testOp), valTy);
 }
 
 bool inner_types_might_raise(const Type& t1, const Type& t2) {

@@ -1935,7 +1935,7 @@ bool isTypeHelper(ISS& env,
                   LocalId location,
                   Op op,
                   const JmpOp& jmp) {
-  if (typeOp == IsTypeOp::Scalar || typeOp == IsTypeOp::ArrLike) {
+  if (typeOp == IsTypeOp::Scalar) {
     return false;
   }
 
@@ -2938,16 +2938,6 @@ void isTypeObj(ISS& env, const Type& ty) {
   push(env, TBool);
 }
 
-void isTypeArrLike(ISS& env, const Type& ty) {
-  auto arrlike = BArr | BVec | BDict | BKeyset;
-  if (RuntimeOption::EvalIsCompatibleClsMethType) {
-    arrlike |= BClsMeth;
-  }
-  if (ty.subtypeOf(arrlike)) return push(env, TTrue);
-  if (!ty.couldBe(arrlike)) return push(env, TFalse);
-  push(env, TBool);
-}
-
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   auto const loc = locAsCell(env, op.nloc1.id);
@@ -2960,7 +2950,6 @@ void isTypeLImpl(ISS& env, const Op& op) {
   switch (op.subop2) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, loc);
-  case IsTypeOp::ArrLike: return isTypeArrLike(env, loc);
   default: return isTypeImpl(env, loc, type_of_istype(op.subop2));
   }
 }
@@ -2976,7 +2965,6 @@ void isTypeCImpl(ISS& env, const Op& op) {
   switch (op.subop1) {
   case IsTypeOp::Scalar: return push(env, TBool);
   case IsTypeOp::Obj: return isTypeObj(env, t1);
-  case IsTypeOp::ArrLike: return isTypeArrLike(env, t1);
   default: return isTypeImpl(env, t1, type_of_istype(op.subop1));
   }
 }

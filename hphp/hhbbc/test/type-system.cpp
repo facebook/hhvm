@@ -380,7 +380,10 @@ auto const optionals = folly::lazy([] {
     TOptObj,
     TOptRecord,
     TOptRes,
-    TOptClsMeth
+    TOptClsMeth,
+    TOptArrLikeE,
+    TOptArrLikeN,
+    TOptArrLike
   };
 });
 
@@ -422,6 +425,10 @@ auto const non_opt_unions = folly::lazy([] {
     TKeysetN,
     TSKeyset,
     TKeyset,
+    TArrLikeE,
+    TArrLikeN,
+    TArrLike,
+    TArrLikeCompat,
     TInitPrim,
     TPrim,
     TInitUnc,
@@ -2682,11 +2689,7 @@ TEST(Type, LoosenEmptiness) {
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
-    if (t.subtypeOfAny(TOptArrE, TOptArrN,
-                       TOptVecE, TOptVecN,
-                       TOptDictE, TOptDictN,
-                       TOptKeysetE, TOptKeysetN) &&
-        t != TInitNull) continue;
+    if (t.subtypeOfAny(TOptArrLike) && t != TInitNull) continue;
     EXPECT_EQ(loosen_emptiness(t), t);
   }
 
@@ -2724,7 +2727,9 @@ TEST(Type, LoosenEmptiness) {
     { arr_packedn(TInt), union_of(TPArrE, arr_packedn(TInt)) },
     { arr_packed({TInt, TBool}), union_of(TPArrE, arr_packed({TInt, TBool})) },
     { arr_mapn(TStr, TInt), union_of(TPArrE, arr_mapn(TStr, TInt)) },
-    { arr_map(test_map), union_of(TPArrE, arr_map(test_map)) }
+    { arr_map(test_map), union_of(TPArrE, arr_map(test_map)) },
+    { TArrLikeE, TArrLike },
+    { TArrLikeE, TArrLike },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_emptiness(p.first), p.second);
@@ -2797,8 +2802,7 @@ TEST(Type, AddNonEmptiness) {
   Index index{ program.get() };
 
   for (auto const& t : all_with_waithandles(index)) {
-    if (t.subtypeOfAny(TOptArrE, TOptVecE, TOptDictE, TOptKeysetE)
-        && t != TInitNull) continue;
+    if (t.subtypeOfAny(TOptArrLikeE) && t != TInitNull) continue;
     EXPECT_EQ(add_nonemptiness(t), t);
   }
 
@@ -2817,6 +2821,8 @@ TEST(Type, AddNonEmptiness) {
     { TSDictE, TSDict },
     { TKeysetE, TKeyset },
     { TSKeysetE, TSKeyset },
+    { TSArrLikeE, TSArrLike },
+    { TArrLikeE, TArrLike },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(add_nonemptiness(p.first), p.second);
@@ -3852,6 +3858,70 @@ TEST(Type, ContextDependent) {
 #undef REFINE_EQ
 }
 
+TEST(Type, ArrLike) {
+  const std::initializer_list<std::pair<Type, Type>> subtype_true{
+    // Expect all static arrays to be subtypes
+    { TSArr,    TArrLike },
+    { TSKeyset, TArrLike },
+    { TSDict,   TArrLike },
+    { TSVec,    TArrLike },
+    // Expect other arrays to be subtypes
+    { TArr,     TArrLike },
+    { TKeyset,  TArrLike },
+    { TDict,    TArrLike },
+    { TVec,     TArrLike },
+    // Expect VArray and DArray to be subtypes
+    { TDArr,    TArrLike },
+    { TVArr,    TArrLike },
+    // Expect ClsMeth to be included in ArrLikeCompat
+    { TClsMeth, TArrLikeCompat },
+  };
+
+  const std::initializer_list<std::pair<Type, Type>> subtype_false{
+    // ClsMeth is not an array
+    { TClsMeth, TArrLike },
+    // Ints are not arrays
+    { TInt,     TArrLike },
+    // ArrLike doesn't contain null
+    { TOptVec,  TArrLike },
+  };
+
+  const std::initializer_list<std::pair<Type, Type>> couldbe_true{
+    { TArrLike, TVecCompat },
+    { TArrLike, TOptKeysetE },
+    { TArrLike, TPArrCompatSA },
+  };
+
+  const std::initializer_list<std::pair<Type, Type>> couldbe_false{
+    { TArrLike, TPrim },
+    { TArrLike, TNull },
+  };
+
+  for (auto kv : subtype_true) {
+    EXPECT_TRUE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " subtypeOf " << show(kv.second);
+  }
+
+  for (auto kv : subtype_false) {
+    EXPECT_FALSE(kv.first.subtypeOf(kv.second))
+      << show(kv.first) << " !subtypeOf " << show(kv.second);
+  }
+
+  for (auto kv : couldbe_true) {
+    EXPECT_TRUE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " couldbe " << show(kv.second);
+    EXPECT_TRUE(kv.second.couldBe(kv.first))
+      << show(kv.first) << " couldbe " << show(kv.second);
+  }
+
+  for (auto kv : couldbe_false) {
+    EXPECT_FALSE(kv.first.couldBe(kv.second))
+      << show(kv.first) << " !couldbe " << show(kv.second);
+    EXPECT_FALSE(kv.second.couldBe(kv.first))
+      << show(kv.first) << " !couldbe " << show(kv.second);
+  }
+
+}
 //////////////////////////////////////////////////////////////////////
 
 }}

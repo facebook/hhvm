@@ -4,6 +4,7 @@ function main_entry(): void {
 
   ini_set('include_path', dirname(__FILE__));
   include_once('common.inc');
+  set_custom_error_handler();
 
   // Note: It does not return TRUE/FALSE for setting char
 

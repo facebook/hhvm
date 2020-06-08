@@ -31,18 +31,21 @@ function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	}
 }
 
-set_error_handler('test_error_handler');
-
+function set_custom_error_handler() {
+	set_error_handler('test_error_handler');
+}
 
 // Var def for testing
-$t_ary = darray[
-		's1' => 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó',
+function t_ary() {
+	return darray[
+		's1' => 'ï¿½ï¿½ï¿½Ü¸ï¿½EUC-JPï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½',
 		's2' => 'English Text'
 		];
+}
 
 class tc
 {
-	public $s1 = 'ÆüËÜ¸ìEUC-JP¤ÎÊ¸»úÎó';
+	public $s1 = 'ï¿½ï¿½ï¿½Ü¸ï¿½EUC-JPï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½';
 	public $s2 = 'English Text';
 
 	function tc() 
@@ -50,7 +53,9 @@ class tc
 	}
 }
 
-$t_obj = new tc;
+function t_obj() {
+	return new tc;
+}
 
 abstract final class ZendGoodExtMbstringTestsCommonInc {
   public static $debug;

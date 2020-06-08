@@ -1,7 +1,8 @@
 <?hh
 <<__EntryPoint>> function f() {
-  $x = "ok\n";
-  echo $x;
+  $GLOBALS['x'] = "ok\n";
+  echo $GLOBALS['x'];
   include "unset.inc";
-  echo $x;
+  unset_();
+  echo $GLOBALS['x'];
 }

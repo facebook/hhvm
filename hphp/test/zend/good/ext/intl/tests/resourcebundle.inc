@@ -1,5 +1,8 @@
 <?hh
-$bundle = dirname(__FILE__)."/_files/resourcebundle";
+
+function bundle() {
+	return dirname(__FILE__)."/_files/resourcebundle";
+}
 
 function debug( $res ) {
 	if (is_null( $res )) {

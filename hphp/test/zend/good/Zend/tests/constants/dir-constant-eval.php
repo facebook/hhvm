@@ -1,3 +1,4 @@
 <?hh <<__EntryPoint>> function main(): void {
-eval('echo __DIR__ . "\n";');
+eval('function foo() { echo __DIR__ . "\n";}');
+foo();
 }

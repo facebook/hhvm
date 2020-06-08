@@ -1,8 +1,9 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $x = "ok\n";
-  echo $x;
+  $GLOBALS['x'] = "ok\n";
+  echo $GLOBALS['x'];
   include "unset.inc";
-  echo $x;
+  unset_();
+  echo $GLOBALS['x'];
 }

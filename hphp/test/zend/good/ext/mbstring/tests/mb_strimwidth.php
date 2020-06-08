@@ -5,6 +5,7 @@ function main_entry(): void {
 
   ini_set('include_path', dirname(__FILE__));
   include_once('common.inc');
+  set_custom_error_handler();
 
   // EUC-JP
   $euc_jp = '0123この文字列は日本語です。EUC-JPを使っています。日本語は面倒臭い。';

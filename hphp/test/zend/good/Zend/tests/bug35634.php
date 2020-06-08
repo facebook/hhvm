@@ -1,6 +1,7 @@
 <?hh
 const pass3 = 1;
 const pass2 = 1;
+
 function errorHandler($errorNumber, $errorMessage, $fileName, $lineNumber) {
   include(__FILE__);
   die("Error: $errorMessage ($fileName:$lineNumber)\n");

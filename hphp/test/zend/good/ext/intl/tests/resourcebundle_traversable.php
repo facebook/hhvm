@@ -4,7 +4,7 @@
 function main_entry(): void {
     include "resourcebundle.inc";
 
-  	$r = new ResourceBundle( 'es', $bundle );
+  	$r = new ResourceBundle( 'es', bundle() );
 
   	// This is actually HH\Traversable due to autoimport
   	var_dump($r is Traversable);

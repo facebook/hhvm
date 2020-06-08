@@ -6,5 +6,3 @@ class TestClass {
     $this->__construct();
   }
 }
-
-$x = 1;

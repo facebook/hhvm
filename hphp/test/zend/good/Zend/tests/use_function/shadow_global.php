@@ -6,11 +6,23 @@ namespace {
 }
 
 namespace {
-    var_dump(bar());
+    function test1() {
+        var_dump(bar());
+    }
 }
 
 namespace {
     use function foo\bar;
-    var_dump(bar());
-    echo "Done\n";
+    function test2() {
+        var_dump(bar());
+        echo "Done\n";
+    }
+}
+
+namespace {
+    <<__EntryPoint>>
+    function main() {
+        test1();
+        test2();
+    }
 }

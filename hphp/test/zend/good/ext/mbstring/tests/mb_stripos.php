@@ -6,6 +6,7 @@ function entrypoint_mb_stripos(): void {
 
   ini_set('include_path','.');
   include_once('common.inc');
+  set_custom_error_handler();
 
 
   // Test string
@@ -101,10 +102,10 @@ function entrypoint_mb_stripos(): void {
 
   try { $r = mb_stripos($euc_jp,'','EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   ($r === FALSE) ? print("OK_NULL\n") : print("NG_NULL\n");
-  try { $r = mb_stripos($euc_jp, $t_ary, 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $r = mb_stripos($euc_jp, t_ary(), 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   ($r === FALSE) ? print("OK_ARRAY\n") : print("NG_ARRAY\n");
-  try { $r = mb_stripos($euc_jp, $t_obj, 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $r = mb_stripos($euc_jp, t_obj(), 'EUC-JP'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   ($r === FALSE) ? print("OK_OBJECT\n") : print("NG_OBJECT\n");
-  try { $r = mb_stripos($euc_jp, $t_obj, 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $r = mb_stripos($euc_jp, t_obj(), 'BAD_ENCODING'); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   ($r === FALSE) ? print("OK_BAD_ENCODING\n") : print("NG_BAD_ENCODING\n");
 }

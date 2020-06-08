@@ -25,14 +25,17 @@ namespace Foo\Bar {
             \var_dump($one, $two, $three, $four);
         }
     }
-    echo "In NS\n";
-    \var_dump(Moo::class); // resolve in namespace
+    function test() {
+        echo "In NS\n";
+        \var_dump(Moo::class); // resolve in namespace
+    }
 }
 
 namespace {
     use Bee\Bop as Moo,
         Foo\Bar\One;
     <<__EntryPoint>> function main(): void {
+    \Foo\Bar\test();
     echo "Top\n";
     \var_dump(One::class); // resolve from use
     \var_dump(Boo::class); // resolve in global namespace

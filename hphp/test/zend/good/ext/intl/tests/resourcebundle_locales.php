@@ -38,5 +38,5 @@ function ut_run2($bundle) {
 <<__EntryPoint>> function main_entry(): void {
   include "resourcebundle.inc";
   include_once( 'ut_common.inc' );
-  ut_run2($bundle);
+  ut_run2(bundle());
 }

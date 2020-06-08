@@ -6,6 +6,7 @@ function entrypoint_mb_strlen(): void {
 
   ini_set('include_path', dirname(__FILE__));
   include_once('common.inc');
+  set_custom_error_handler();
 
   // restore detect_order to 'auto'
   mb_detect_order('auto');
@@ -54,12 +55,12 @@ function entrypoint_mb_strlen(): void {
   // Array
   // Note: PHP Warning, strlen() expects parameter 1 to be string, array given
   $r = null;
-  try { $r = strlen($t_ary); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $r = strlen(t_ary()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo $r."\n";
   // Object
   // Note: PHP Warning, strlen() expects parameter 1 to be string, object given
   $r = null;
-  try { $r = strlen($t_obj); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+  try { $r = strlen(t_obj()); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
   echo $r."\n";
   // Wrong encoding
   mb_internal_encoding('EUC-JP');

@@ -1,7 +1,9 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 require_once 'nowdoc.inc';
-include 'nowdoc_vars.inc';
+require_once 'nowdoc_vars.inc';
+$a = a();
+$b = b();
 print <<<ENDOFHEREDOC
 This is heredoc test #$a.
 

@@ -5191,7 +5191,10 @@ and dispatch_call
                   Errors.pocket_universes_typing
               in
               let (env, substs) =
-                let f env _key (pu_case_type_name, _reified) =
+                let f
+                    env
+                    _key
+                    { tp_name = pu_case_type_name; tp_reified = _reified; _ } =
                   (* Update position to point to the function call site
                    * rather than to the PU enum definition
                    *)

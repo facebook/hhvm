@@ -360,7 +360,9 @@ let pu_enum_fold
           List.fold_left
             spu.spu_case_types
             ~init:tpu.tpu_case_types
-            ~f:(fun acc ((sid, _) as item) -> SMap.add (snd sid) item acc);
+            ~f:(fun acc tp ->
+              let sid = snd tp.tp_name in
+              SMap.add sid tp acc);
         tpu_case_values =
           List.fold_left
             spu.spu_case_values

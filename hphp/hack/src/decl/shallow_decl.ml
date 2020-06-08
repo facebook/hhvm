@@ -116,6 +116,7 @@ let pu_enum
     in
     List.map ~f:case_member pu_members
   in
+  let spu_case_types = List.map ~f:(type_param env) spu_case_types in
   {
     spu_name = pu_name;
     spu_is_final = pu_is_final;

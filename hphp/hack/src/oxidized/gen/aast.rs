@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ec62e7aab0a3dd2f1dd21ffc52fbb875>>
+// @generated SignedSource<<bd4fd9eb20c51888cf71296eeae6719d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1199,7 +1199,7 @@ pub struct PuEnum<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub is_final: bool,
-    pub case_types: Vec<(Sid, ReifyKind)>,
+    pub case_types: Vec<Tparam<Ex, Fb, En, Hi>>,
     pub case_values: Vec<PuCaseValue>,
     pub members: Vec<PuMember<Ex, Fb, En, Hi>>,
 }

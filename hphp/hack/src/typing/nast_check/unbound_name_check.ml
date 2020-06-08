@@ -244,7 +244,8 @@ let handler ctx =
       let pu_case_types =
         List.fold_left
           ~init:SMap.empty
-          ~f:(fun acc ((_, name), reified) -> SMap.add name reified acc)
+          ~f:(fun acc Aast.{ tp_name = (_, name); tp_reified = reified; _ } ->
+            SMap.add name reified acc)
           pu_enum.Aast.pu_case_types
       in
       let pu_member_types =

@@ -38,7 +38,7 @@ type shallow_pu_member = {
 type shallow_pu_enum = {
   spu_name: Aast.sid;
   spu_is_final: bool;
-  spu_case_types: (Aast.sid * Aast.reify_kind) list;
+  spu_case_types: decl_tparam list;
   spu_case_values: (Aast.sid * decl_ty) list;
   spu_members: shallow_pu_member list;
 }

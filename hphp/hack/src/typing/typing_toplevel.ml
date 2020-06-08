@@ -1234,15 +1234,6 @@ and pu_enum_def
       (SMap.empty, SMap.empty)
     | Some pu_enum -> (pu_enum.tpu_case_types, pu_enum.tpu_case_values)
   in
-  let make_ty_tparam (sid, reified) =
-    {
-      tp_variance = Ast_defs.Invariant;
-      tp_name = sid;
-      tp_constraints = [];
-      tp_reified = reified;
-      tp_user_attributes = [];
-    }
-  in
   let make_aast_tparam (sid, hint) =
     let hint_ty = Decl_hint.hint env.decl_env hint in
     {
@@ -1259,10 +1250,7 @@ and pu_enum_def
   (* Adds all of the PU case types as generics in the environment. *)
   let (env, constraints) =
     let case_types =
-      SMap.fold
-        (fun _ case_ty acc -> make_ty_tparam case_ty :: acc)
-        pu_enum_case_types
-        []
+      SMap.fold (fun _ case_ty acc -> case_ty :: acc) pu_enum_case_types []
     in
     Phase.localize_generic_parameters_with_bounds
       env
@@ -1338,17 +1326,21 @@ and pu_enum_def
     in
     List.fold_map ~init:env ~f:process_member pu_members
   in
+  let (env, locl_case_types) =
+    List.map_env env pu_case_types Typing.type_param
+  in
   let local_tpenv = Env.get_tpenv env in
   let local_tpenv =
     List.fold
       ~init:local_tpenv
-      ~f:(fun tpenv ((_, name), reified) ->
+      ~f:(fun tpenv { tp_name; tp_reified; _ } ->
+        let name = snd tp_name in
         let tpinfo =
           TPEnv.
             {
               lower_bounds = TySet.empty;
               upper_bounds = TySet.empty;
-              reified;
+              reified = tp_reified;
               enforceable = false;
               (* TODO(T35357243) improve to support that *)
               newable = false (* TODO(T35357243) improve to support that *);
@@ -1363,7 +1355,7 @@ and pu_enum_def
       pu_name;
       pu_user_attributes;
       pu_is_final;
-      pu_case_types;
+      pu_case_types = locl_case_types;
       pu_case_values;
       pu_members = members;
     }

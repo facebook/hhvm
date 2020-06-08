@@ -2472,19 +2472,6 @@ and attr env at =
 and string2 env idl = List.map idl (expr env)
 
 and class_pu_enum env pu_enum =
-  let make_tparam (sid, reified) def =
-    Aast.
-      {
-        tp_variance = Ast_defs.Invariant;
-        tp_name = sid;
-        tp_constraints =
-          (match def with
-          | None -> []
-          | Some hint -> [(Ast_defs.Constraint_eq, hint)]);
-        tp_reified = reified;
-        tp_user_attributes = [];
-      }
-  in
   let pu_case_types = pu_enum.Aast.pu_case_types in
   (* We create here an extended environment to type the abstract part
      of a PU enumeration (namely `case type` and `case` statement).
@@ -2493,8 +2480,7 @@ and class_pu_enum env pu_enum =
   *)
   let env_with_case_types =
     let (genv, lenv) = env in
-    let make_tparam tp = make_tparam tp None in
-    (extend_params genv (List.map ~f:make_tparam pu_case_types), lenv)
+    (extend_params genv pu_case_types, lenv)
   in
   let pu_case_values =
     List.map
@@ -2563,8 +2549,16 @@ and class_pu_enum env pu_enum =
       *)
       let env_with_mapped_types =
         let (genv, lenv) = env in
-        let make_tparam (tp, h) = make_tparam (tp, Aast.Erased) (Some h) in
-        (extend_params genv (List.map ~f:make_tparam pum_types), lenv)
+        let make_tparam tp =
+          let f (sid, _) = String.equal (snd sid) (snd tp.Aast.tp_name) in
+          match List.find ~f pum_types with
+          | None -> tp
+          | Some (_, def) ->
+            let member_hint = (Ast_defs.Constraint_eq, def) in
+            let tp_constraints = member_hint :: tp.Aast.tp_constraints in
+            Aast.{ tp with tp_constraints }
+        in
+        (extend_params genv (List.map ~f:make_tparam pu_case_types), lenv)
       in
       let pum_types =
         List.map pum_types ~f:(fun (id, h) ->

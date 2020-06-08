@@ -4527,12 +4527,7 @@ where
                         PocketFieldTypeDeclaration(c) => {
                             let case_type =
                                 Self::p_tparam(false, &c.pocket_field_type_type_parameter, env)?;
-                            let ast::Tparam {
-                                name: id,
-                                reified: is_reified,
-                                ..
-                            } = case_type;
-                            case_types.push((id, is_reified));
+                            case_types.push(case_type);
                         }
                         _ => {
                             Self::missing_syntax("pufield", fld, env)?;

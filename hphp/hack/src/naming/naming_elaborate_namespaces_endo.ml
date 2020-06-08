@@ -161,7 +161,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let type_params =
         List.fold
           pue.pu_case_types
-          ~f:(fun acc (sid, _) -> SSet.add (snd sid) acc)
+          ~f:(fun acc { tp_name = sid; _ } -> SSet.add (snd sid) acc)
           ~init:env.type_params
       in
       let env = { env with type_params } in

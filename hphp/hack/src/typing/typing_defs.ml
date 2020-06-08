@@ -215,7 +215,7 @@ and typeconst_type = {
 and pu_enum_type = {
   tpu_name: Nast.sid;
   tpu_is_final: bool;
-  tpu_case_types: (Nast.sid * Aast.reify_kind) SMap.t;
+  tpu_case_types: decl_tparam SMap.t;
   tpu_case_values: (Nast.sid * decl_ty) SMap.t;
   tpu_members: pu_member_type SMap.t;
 }

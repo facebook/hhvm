@@ -66,12 +66,6 @@ impl Env {
         }
     }
 
-    fn extend_tparams_puenum(&mut self, cases: &[(Sid, ReifyKind)]) {
-        for case in cases {
-            self.type_params.insert((case.0).1.clone());
-        }
-    }
-
     fn elaborate_type_name(&self, id: &mut Id) {
         let name = &id.1;
         if self.type_params.contains::<str>(name)
@@ -199,7 +193,7 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
 
     fn visit_pu_enum(&mut self, env: &mut Env, pue: &mut PuEnum) -> Result<(), ()> {
         let mut env = env.clone();
-        env.extend_tparams_puenum(&pue.case_types);
+        env.extend_tparams(&pue.case_types);
         pue.recurse(&mut env, self.object())
     }
 

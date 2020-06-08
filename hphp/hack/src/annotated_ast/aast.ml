@@ -587,7 +587,7 @@ and ('ex, 'fb, 'en, 'hi) pu_enum = {
   pu_name: sid;
   pu_user_attributes: ('ex, 'fb, 'en, 'hi) user_attribute list;
   pu_is_final: bool;
-  pu_case_types: (sid * reify_kind) list;
+  pu_case_types: ('ex, 'fb, 'en, 'hi) tparam list;
   pu_case_values: pu_case_value list;
   pu_members: ('ex, 'fb, 'en, 'hi) pu_member list;
 }

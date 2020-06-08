@@ -1,6 +1,6 @@
 File "pu_type_access.bad.php", line 20, characters 60-61:
-Illegal Pocket Universe invocation : TP:@S is unknown (Naming[2110])
+Invalid Pocket Universe invocation: type is unknown (Naming[2110])
 File "pu_type_access.bad.php", line 27, characters 55-56:
-Illegal Pocket Universe invocation : TP:@X is unknown (Naming[2110])
+Invalid Pocket Universe invocation: type is unknown (Naming[2110])
 File "pu_type_access.bad.php", line 32, characters 59-60:
-Illegal Pocket Universe invocation : TP:@X is unknown (Naming[2110])
+Invalid Pocket Universe invocation: type is unknown (Naming[2110])

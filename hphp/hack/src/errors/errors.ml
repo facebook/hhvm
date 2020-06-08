@@ -1713,12 +1713,11 @@ let pu_localize pos pu dep_ty =
     pos
     (sprintf "In the context of %s, cannot expand %s" pu dep_ty)
 
-let pu_localize_unknown pos msg =
-  let msg = strip_ns msg in
+let pu_invalid_access pos msg =
   add
     (Naming.err_code Naming.PocketUniversesLocalization)
     pos
-    (sprintf "Illegal Pocket Universe invocation %s" msg)
+    ("Invalid Pocket Universe invocation" ^ msg)
 
 let pu_reserved_syntax pos =
   add

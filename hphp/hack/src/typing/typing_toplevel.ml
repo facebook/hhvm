@@ -321,25 +321,17 @@ let check_pu_in_locl_ty env lty =
       inherit [env] Type_visitor.locl_type_visitor as super
 
       method! on_tpu env r base enum =
-        let lty = mk (r, Tpu (base, enum)) in
         let (env, res) = Typing_utils.class_get_pu env base (snd enum) in
-        if Option.is_none res then
-          Errors.pu_localize_unknown
-            (Reason.to_pos r)
-            (Typing_print.full env lty);
+        if Option.is_none res then Errors.pu_invalid_access (Reason.to_pos r) "";
         super#on_type env base
 
       method! on_tpu_type_access env r tp name =
-        let lty = mk (r, Tpu_type_access (tp, name)) in
         let (env, is_pu, is_pu_type_access) = check env (snd tp) (snd name) in
+        let p = Reason.to_pos r in
         if is_pu && is_pu_type_access then
-          Errors.pu_localize_unknown
-            (Reason.to_pos r)
-            (sprintf ": %s is ambiguous" (Typing_print.full env lty))
+          Errors.pu_invalid_access p ": type is ambiguous"
         else if not (is_pu || is_pu_type_access) then
-          Errors.pu_localize_unknown
-            (Reason.to_pos r)
-            (sprintf ": %s is unknown" (Typing_print.full env lty));
+          Errors.pu_invalid_access p ": type is unknown";
         env
     end
   in

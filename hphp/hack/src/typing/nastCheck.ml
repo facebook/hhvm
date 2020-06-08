@@ -148,7 +148,15 @@ and hint_ env p = function
   | Hshape { nsi_allows_unknown_fields = _; nsi_field_map } ->
     let compute_hint_for_shape_field_info { sfi_hint; _ } = hint env sfi_hint in
     List.iter ~f:compute_hint_for_shape_field_info nsi_field_map
-  | Hpu_access (h, _) -> hint env h
+  | Hpu_access (h, _) ->
+    (* We explicitly forbid any syntax other than Foo:@Bar in here, since it
+       brings more complexity to the type checker and do not allow anything
+       interesting at the moment. If one need a variable ranging over PU
+       member, one should use "C:@E" instead, and for a type parameter TP
+       bound by a PU, projecting its type T must be TP:@T *)
+    (match snd h with
+    | Hpu_access _ -> Errors.pu_invalid_access p ""
+    | _ -> hint env h)
 
 and check_happly unchecked_tparams env h =
   let decl_ty = Decl_hint.hint env.decl_env h in
@@ -252,7 +260,8 @@ and class_ tenv c =
   List.iter c_static_vars (class_var env);
   List.iter c_vars (class_var env);
   List.iter c_statics (method_ env);
-  List.iter c_methods (method_ env)
+  List.iter c_methods (method_ env);
+  List.iter c.c_pu_enums (pu_enum env)
 
 and typeconst (env, _) tconst =
   maybe hint env tconst.c_tconst_type;
@@ -283,6 +292,12 @@ and method_ env m =
 
 and fun_param env param =
   maybe hint env (hint_of_type_hint param.param_type_hint)
+
+and pu_enum env pu =
+  let f (_, h) = hint env h in
+  let pu_member { pum_types; _ } = List.iter ~f pum_types in
+  List.iter ~f pu.pu_case_values;
+  List.iter ~f:pu_member pu.pu_members
 
 let typedef tenv t =
   let env =

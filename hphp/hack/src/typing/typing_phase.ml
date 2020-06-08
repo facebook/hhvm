@@ -305,19 +305,7 @@ let rec localize ~ety_env env (dty : decl_ty) =
   | (r, Tshape (shape_kind, tym)) ->
     let (env, tym) = ShapeFieldMap.map_env (localize ~ety_env) env tym in
     (env, mk (r, Tshape (shape_kind, tym)))
-  | (r, Tpu_access _) ->
-    (* We explicitly forbid any syntax other than Foo:@Bar in here, since it
-       brings more complexity to the type checker and do not allow anything
-       interesting at the moment. If one need a variable ranging over PU
-       member, one should use "C:@E" instead, and for a type parameter TP
-       bound by a PU, projecting its type T must be TP:@T *)
-    let rec build_access dty =
-      match get_node dty with
-      | Tpu_access (base, sid) ->
-        let (base, trailing) = build_access base in
-        (base, sid :: trailing)
-      | _ -> (dty, [])
-    in
+  | (r, Tpu_access (dbase, enum_or_tyname)) ->
     (* Env.get_upper_bounds might not be populated every time localization
      * is called, but so far it is when it really matters, so we'll stick
      * with this approximation: if no upper bounds info is available,
@@ -336,32 +324,17 @@ let rec localize ~ety_env env (dty : decl_ty) =
       in
       res
     in
-    let (dbase, trailing) = build_access dty in
     let (env, base) = localize ~ety_env env dbase in
-    (match trailing with
-    | [enum_or_tyname] ->
-      (match deref base with
-      | (r, Tgeneric tp) ->
-        let member = (Reason.to_pos r, tp) in
-        if guess_if_pu env tp then
-          (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
-        else
-          (env, mk (r, Tpu (base, enum_or_tyname)))
-      | (r, Tvar v) ->
-        Typing_subtype_pocket_universes.get_tyvar_pu_access
-          env
-          r
-          v
-          enum_or_tyname
-      | _ -> (env, mk (r, Tpu (base, enum_or_tyname))))
-    (* Invalid number of :@, report an error *)
-    | _ ->
-      (* TODO(T64285771):
-         change the parser to only access Foo:@Bar and get rid of that *)
-      Errors.pu_localize_unknown
-        (Reason.to_pos r)
-        (Typing_print.full_decl (Typing_env.get_ctx env) dty);
-      (env, TUtils.terr env r))
+    (match deref base with
+    | (r, Tgeneric tp) ->
+      let member = (Reason.to_pos r, tp) in
+      if guess_if_pu env tp then
+        (env, mk (r, Tpu_type_access (member, enum_or_tyname)))
+      else
+        (env, mk (r, Tpu (base, enum_or_tyname)))
+    | (r, Tvar v) ->
+      Typing_subtype_pocket_universes.get_tyvar_pu_access env r v enum_or_tyname
+    | _ -> (env, mk (r, Tpu (base, enum_or_tyname))))
 
 and localize_tparams ~ety_env env pos tyl tparams =
   let length = min (List.length tyl) (List.length tparams) in

@@ -1047,7 +1047,7 @@ val pu_atom_unknown : Pos.t -> string -> string -> string -> string -> unit
 
 val pu_localize : Pos.t -> string -> string -> unit
 
-val pu_localize_unknown : Pos.t -> string -> unit
+val pu_invalid_access : Pos.t -> string -> unit
 
 val pu_reserved_syntax : Pos.t -> unit
 

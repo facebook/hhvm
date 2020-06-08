@@ -1220,9 +1220,19 @@ and pu_enum_def
     Here we check that all definitions are well-typed.
  *)
   let pos = fst pu_name in
+  (* Query the decl provider to get all case type and case expressions
+   * from the parent hierarchy, flattened
+   *)
   let cls = Decl_provider.get_class (Env.get_ctx env) c_name in
   let pu_enum =
     Option.bind cls ~f:(fun cls -> Cls.get_pu_enum cls (snd pu_name))
+  in
+  let (pu_enum_case_types, pu_enum_case_values) =
+    match pu_enum with
+    | None ->
+      Errors.internal_error pos "Missing PU decl in provider";
+      (SMap.empty, SMap.empty)
+    | Some pu_enum -> (pu_enum.tpu_case_types, pu_enum.tpu_case_values)
   in
   let make_ty_tparam (sid, reified) =
     {
@@ -1246,23 +1256,44 @@ and pu_enum_def
   let (env, pu_user_attributes) =
     List.map_env env pu_user_attributes Typing.user_attribute
   in
+  (* Adds all of the PU case types as generics in the environment. *)
   let (env, constraints) =
-    let (env, constraints) =
-      Phase.localize_generic_parameters_with_bounds
-        env
-        ~ety_env:(Phase.env_with_self env)
-        (List.map ~f:make_ty_tparam pu_case_types)
+    let case_types =
+      SMap.fold
+        (fun _ case_ty acc -> make_ty_tparam case_ty :: acc)
+        pu_enum_case_types
+        []
     in
-    let env =
-      List.fold pu_case_values ~init:env ~f:(fun env (_sid, hint) ->
-          let (env, _ty) = Phase.localize_hint_with_self env hint in
-          env)
-    in
-    (env, constraints)
+    Phase.localize_generic_parameters_with_bounds
+      env
+      ~ety_env:(Phase.env_with_self env)
+      case_types
   in
   let env = SubType.add_constraints pos env constraints in
-  let (env, members) =
+  (* Localize the type of local case values, to check they are correct types *)
+  let () =
+    List.iter pu_case_values ~f:(fun (_sid, hint) ->
+        let (_ : env * locl_ty) = Phase.localize_hint_with_self env hint in
+        ())
+  in
+  (* Localize the case values once *)
+  let (env, pu_enum_case_values) =
+    SMap.map_env
+      (fun env _key (sid, decl_ty) ->
+        let (env, locl_ty) = Phase.localize_with_self env decl_ty in
+        (env, (sid, locl_ty)))
+      env
+      pu_enum_case_values
+  in
+  (* Now we are going to check that each member is well-typed.
+   * Since case types don't yet have constraints, we only check
+   * that the case value matches its expected type.
+   *)
+  let (_, members) =
     let process_member env pum =
+      (* generate some `T = actual type` constraints to bind the generic
+       * case types to their value in this member
+       *)
       let (env, cstrs) =
         let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
         Phase.localize_generic_parameters_with_bounds
@@ -1272,23 +1303,18 @@ and pu_enum_def
       in
       let env = SubType.add_constraints (fst pum.pum_atom) env cstrs in
       let process_mapping env (sid, map_expr) =
-        let (env, ty, expected) =
-          let equal ((_, s1) : sid) ((_, s2) : sid) = String.equal s1 s2 in
-          let (env, ty) =
-            match List.Assoc.find ~equal pu_case_values sid with
-            | None ->
-              ((* Check in parent hierarchy *)
-              match pu_enum with
-              | None -> raise InvalidPocketUniverse
-              | Some pu_enum ->
-                (match SMap.find_opt (snd sid) pu_enum.tpu_case_values with
-                | None -> raise InvalidPocketUniverse
-                | Some (_, decl_ty) -> Phase.localize_with_self env decl_ty))
-            | Some hint -> Phase.localize_hint_with_self env hint
+        (* Fetch expected type from the case types map *)
+        let (ty, expected) =
+          let ty =
+            match SMap.find_opt (snd sid) pu_enum_case_values with
+            | None -> raise InvalidPocketUniverse
+            | Some (_, locl_ty) -> locl_ty
           in
-          (env, ty, Some (ExpectedTy.make (fst sid) Reason.URhint ty))
+          (ty, Some (ExpectedTy.make (fst sid) Reason.URhint ty))
         in
+        (* Infer the type of the expression *)
         let (env, expr, ty') = Typing.expr ?expected env map_expr in
+        (* Type checking *)
         let env =
           Typing_ops.sub_type
             (fst sid)
@@ -1300,9 +1326,7 @@ and pu_enum_def
         in
         (env, (sid, expr))
       in
-      let (env, pum_exprs) =
-        List.fold_map pum.pum_exprs ~init:env ~f:process_mapping
-      in
+      let (env, pum_exprs) = List.map_env env pum.pum_exprs process_mapping in
       let members =
         {
           Aast.pum_atom = pum.pum_atom;
@@ -1333,15 +1357,16 @@ and pu_enum_def
         TPEnv.add name tpinfo tpenv)
       pu_case_types
   in
-  {
-    Aast.pu_annotation = Env.save local_tpenv env;
-    Aast.pu_name;
-    Aast.pu_user_attributes;
-    Aast.pu_is_final;
-    Aast.pu_case_types;
-    Aast.pu_case_values;
-    Aast.pu_members = members;
-  }
+  Aast.
+    {
+      pu_annotation = Env.save local_tpenv env;
+      pu_name;
+      pu_user_attributes;
+      pu_is_final;
+      pu_case_types;
+      pu_case_values;
+      pu_members = members;
+    }
 
 (* This should agree with the set of expressions whose type can be inferred in
  * Decl_utils.infer_const

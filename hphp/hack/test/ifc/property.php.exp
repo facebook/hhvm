@@ -1,103 +1,120 @@
 Policy signature for \My:
-* Policied properties:
-  mInt
-  other
-  
+* Policied properties: mInt, other
+* Unpolicied properties: mBool
+
 Policy signature for \Other:
-* Policied properties:
-  oBool
-  
+* Policied properties: oBool
+* Unpolicied properties: oString
+
 Analyzing __construct:
 * pc: v1
-* This: \My<v2, other -> \Other<v4, oBool -> <v5>>, mInt -> <v3>>
-* Return: <v6>
-* Params: { $o -> \Other<v7, oBool -> <v8>> }
+* This:
+    \My<v7, v6, other -> \Other<v5, v4, oString -> <v4>, oBool -> <v3>>,
+    mInt -> <v2>, mBool -> <v6>>
+* Return: <v8>
+* Params: { $o -> \Other<v11, v10, oString -> <v10>, oBool -> <v9>> }
 * Final environment:
-  Locals: { $o -> \Other<v7, oBool -> <v8>> }
+  Locals: { $o -> \Other<v11, v10, oString -> <v10>, oBool -> <v9>> }
   Constraints:
-    [v2 < v4, v5 < v8, v8 < v5, v7 < v4, v1 < v4]
+    [v7 < v5, v4 < v10, v10 < v4, v3 < v9, v9 < v3, v10 = v4, v11 < v5,
+     v1 < v5]
 
 Analyzing getMInt:
-* pc: v9
-* This: \My<v10, other -> \Other<v12, oBool -> <v13>>, mInt -> <v11>>
-* Return: <v14>
+* pc: v12
+* This:
+    \My<v18, v17, other -> \Other<v16, v15, oString -> <v15>,
+    oBool -> <v14>>, mInt -> <v13>, mBool -> <v17>>
+* Return: <v19>
 * Params: {}
 * Final environment:
   Locals: {}
   Constraints:
-    [v11 < v15, v10 < v15, v15 < v14]
+    [v13 < v20, v18 < v20, v20 < v19]
 
 Analyzing setMInt:
-* pc: v16
-* This: \My<v17, other -> \Other<v19, oBool -> <v20>>, mInt -> <v18>>
-* Return: <v21>
-* Params: { $candidate -> <v22> }
+* pc: v21
+* This:
+    \My<v27, v26, other -> \Other<v25, v24, oString -> <v24>,
+    oBool -> <v23>>, mInt -> <v22>, mBool -> <v26>>
+* Return: <v28>
+* Params: { $candidate -> <v29> }
 * Final environment:
-  Locals: { $candidate -> <v22> }
+  Locals: { $candidate -> <v29> }
   Constraints:
-    [v17 < v18, v22 < v18, v16 < v18]
+    [v27 < v22, v29 < v22, v21 < v22]
 
 Analyzing \tlGetMyInt:
-* pc: v23
-* This: None
-* Return: <v24>
-* Params:
-    { $obj -> \My<v25, other -> \Other<v27, oBool -> <v28>>, mInt -> <v26>> }
-* Final environment:
-  Locals:
-    { $obj -> \My<v25, other -> \Other<v27, oBool -> <v28>>, mInt -> <v26>> }
-  Constraints:
-    [v26 < v29, v25 < v29, v29 < v24]
-
-Analyzing \tlSetMyInt:
 * pc: v30
 * This: None
 * Return: <v31>
 * Params:
-    { $obj -> \My<v32, other -> \Other<v34, oBool -> <v35>>, mInt -> <v33>>;
-      $val -> <v36> }
+    { $obj -> \My<v37, v36, other -> \Other<v35, v34, oString -> <v34>,
+      oBool -> <v33>>, mInt -> <v32>, mBool -> <v36>> }
 * Final environment:
   Locals:
-    { $obj -> \My<v32, other -> \Other<v34, oBool -> <v35>>, mInt -> <v33>>;
-      $val -> <v36> }
+    { $obj -> \My<v37, v36, other -> \Other<v35, v34, oString -> <v34>,
+      oBool -> <v33>>, mInt -> <v32>, mBool -> <v36>> }
   Constraints:
-    [v32 < v33, v36 < v33, v30 < v33]
+    [v32 < v38, v37 < v38, v38 < v31]
+
+Analyzing \tlSetMyInt:
+* pc: v39
+* This: None
+* Return: <v40>
+* Params:
+    { $obj -> \My<v46, v45, other -> \Other<v44, v43, oString -> <v43>,
+      oBool -> <v42>>, mInt -> <v41>, mBool -> <v45>>;
+      $val -> <v47> }
+* Final environment:
+  Locals:
+    { $obj -> \My<v46, v45, other -> \Other<v44, v43, oString -> <v43>,
+      oBool -> <v42>>, mInt -> <v41>, mBool -> <v45>>;
+      $val -> <v47> }
+  Constraints:
+    [v46 < v41, v47 < v41, v39 < v41]
 
 Analyzing \tlGetOther:
-* pc: v37
+* pc: v48
 * This: None
-* Return: \Other<v38, oBool -> <v39>>
+* Return: \Other<v51, v50, oString -> <v50>, oBool -> <v49>>
 * Params:
-    { $obj -> \My<v40, other -> \Other<v42, oBool -> <v43>>, mInt -> <v41>> }
+    { $obj -> \My<v57, v56, other -> \Other<v55, v54, oString -> <v54>,
+      oBool -> <v53>>, mInt -> <v52>, mBool -> <v56>> }
 * Final environment:
   Locals:
-    { $obj -> \My<v40, other -> \Other<v42, oBool -> <v43>>, mInt -> <v41>> }
+    { $obj -> \My<v57, v56, other -> \Other<v55, v54, oString -> <v54>,
+      oBool -> <v53>>, mInt -> <v52>, mBool -> <v56>> }
   Constraints:
-    [v42 < v44, v40 < v44, v39 < v43, v43 < v39, v44 < v38]
+    [v55 < v58, v57 < v58, v50 < v54, v54 < v50, v49 < v53, v53 < v49,
+     v54 = v50, v58 < v51]
 
 Analyzing \tlGetOtherBool:
-* pc: v45
+* pc: v59
 * This: None
-* Return: <v46>
+* Return: <v60>
 * Params:
-    { $obj -> \My<v47, other -> \Other<v49, oBool -> <v50>>, mInt -> <v48>> }
+    { $obj -> \My<v66, v65, other -> \Other<v64, v63, oString -> <v63>,
+      oBool -> <v62>>, mInt -> <v61>, mBool -> <v65>> }
 * Final environment:
   Locals:
-    { $obj -> \My<v47, other -> \Other<v49, oBool -> <v50>>, mInt -> <v48>> }
+    { $obj -> \My<v66, v65, other -> \Other<v64, v63, oString -> <v63>,
+      oBool -> <v62>>, mInt -> <v61>, mBool -> <v65>> }
   Constraints:
-    [v49 < v51, v47 < v51, v50 < v52, v51 < v52, v52 < v46]
+    [v64 < v67, v66 < v67, v62 < v68, v67 < v68, v68 < v60]
 
 Analyzing \tlSetOtherBool:
-* pc: v53
+* pc: v69
 * This: None
-* Return: <v54>
+* Return: <v70>
 * Params:
-    { $bool -> <v59>;
-      $obj -> \My<v55, other -> \Other<v57, oBool -> <v58>>, mInt -> <v56>> }
+    { $bool -> <v77>;
+      $obj -> \My<v76, v75, other -> \Other<v74, v73, oString -> <v73>,
+      oBool -> <v72>>, mInt -> <v71>, mBool -> <v75>> }
 * Final environment:
   Locals:
-    { $bool -> <v59>;
-      $obj -> \My<v55, other -> \Other<v57, oBool -> <v58>>, mInt -> <v56>> }
+    { $bool -> <v77>;
+      $obj -> \My<v76, v75, other -> \Other<v74, v73, oString -> <v73>,
+      oBool -> <v72>>, mInt -> <v71>, mBool -> <v75>> }
   Constraints:
-    [v57 < v60, v55 < v60, v60 < v58, v59 < v58, v53 < v58]
+    [v74 < v78, v76 < v78, v78 < v72, v77 < v72, v69 < v72]
 

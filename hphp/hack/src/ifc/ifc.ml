@@ -25,18 +25,30 @@ let rec subtype t1 t2 acc =
     | Some zip ->
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> fail "incompatible tuple types")
-  | (Tclass (name, pol, prop_pol_map), Tclass (name', pol', prop_pol_map'))
-    when String.equal name name' ->
+  | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
     let pol_zip =
-      match List.zip (SMap.values prop_pol_map) (SMap.values prop_pol_map') with
+      match
+        List.zip
+          (SMap.values cl1.c_property_map)
+          (SMap.values cl2.c_property_map)
+      with
       | Some zip -> zip
       | None -> fail "Same class with differing policied properties"
     in
     (* Invariant in property policies *)
     List.fold pol_zip ~init:acc ~f:(fun acc (t1, t2) -> equivalent t1 t2 acc)
+    (* Invariant in lump policy *)
+    |> L.(cl1.c_lump = cl2.c_lump)
     (* Covariant in class policy *)
-    |> L.(pol < pol')
-  | _ -> fail "unhandled subtyping query"
+    |> L.(cl1.c_self < cl2.c_self)
+  | (pty1, pty2) ->
+    fail
+      (Format.asprintf
+         "unhandled subtyping query for %a <: %a"
+         Pp.ptype
+         pty1
+         Pp.ptype
+         pty2)
 
 (* A constraint accumulator that registers that t1 = t2 *)
 and equivalent t1 t2 acc = subtype t1 t2 (subtype t2 t1 acc)
@@ -55,10 +67,10 @@ let weaken renv env ty =
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
-    | Tclass (name, pol, prop_pol_map) ->
+    | Tclass class_ ->
       let super_pol = Env.new_policy_var renv.re_proto in
-      let acc = L.(pol < super_pol) acc in
-      (acc, Tclass (name, super_pol, prop_pol_map))
+      let acc = L.(class_.c_self < super_pol) acc in
+      (acc, Tclass { class_ with c_self = super_pol })
   in
   let (acc, ty') = freshen env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
@@ -77,7 +89,7 @@ let rec add_dependencies pl t acc =
   | Tprim pol
   (* For classes, we only add a dependency to the class policy and not to its
      properties *)
-  | Tclass (_, pol, _) ->
+  | Tclass { c_self = pol; _ } ->
     L.(pl <* [pol]) acc
   | Tunion tl
   | Ttuple tl
@@ -138,14 +150,15 @@ let rec union_types_exn renv env t1 t2 =
       List.map_env env i ~f
     in
     (env, Tinter i')
-  | ( Tclass (name1, class_pol1, prop_ptype_map1),
-      Tclass (name2, class_pol2, prop_ptype_map2) )
-    when String.equal name1 name2 ->
-    let (env, class_pol) = policy_join renv env class_pol1 class_pol2 in
-    let (env, prop_ptype_map) =
+  | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
+    let (env, c_self) = policy_join renv env cl1.c_self cl2.c_self in
+    (* Equivalent lump policies due to invariance *)
+    let env = Env.acc env L.(cl1.c_lump = cl2.c_lump) in
+    let (env, c_property_map) =
       let combine env prop_name ptype1_opt ptype2_opt =
         match (ptype1_opt, ptype2_opt) with
         | (Some ptype1, Some ptype2) ->
+          (* Equivalent policy types due to invariance *)
           let e_acc = equivalent ptype1 ptype2 env.e_acc in
           ({ env with e_acc }, Some ptype1)
         | (_, _) ->
@@ -155,9 +168,11 @@ let rec union_types_exn renv env t1 t2 =
             ^ prop_name
             ^ "'." )
       in
-      SMap.merge_env env prop_ptype_map1 prop_ptype_map2 ~combine
+      SMap.merge_env env cl1.c_property_map cl2.c_property_map ~combine
     in
-    (env, Tclass (name1, class_pol, prop_ptype_map))
+    ( env,
+      Tclass
+        { c_name = cl1.c_name; c_lump = cl1.c_lump; c_self; c_property_map } )
   | _ -> raise NoUnion
 
 let mk_union t1 t2 =
@@ -171,29 +186,49 @@ let mk_union t1 t2 =
 let union_types renv env t1 t2 =
   (try union_types_exn renv env t1 t2 with NoUnion -> (env, mk_union t1 t2))
 
-let rec class_ptype proto_renv name =
-  let { psig_policied_properties } =
+(* If there is a lump policy variable in effect, return that otherwise
+   generate a new policy variable. *)
+let get_policy_var lump_pol_opt proto_renv =
+  match lump_pol_opt with
+  | Some lump_pol -> lump_pol
+  | None -> Env.new_policy_var proto_renv
+
+let rec class_ptype lump_pol_opt proto_renv name =
+  let { psig_policied_properties; psig_unpolicied_properties } =
     match SMap.find_opt name proto_renv.pre_psig_env with
     | Some class_policy_sig -> class_policy_sig
     | None -> fail ("Could not found a class policy signature for " ^ name)
   in
-  let class_policy = Env.new_policy_var proto_renv in
-  let policy_map =
+  let policied_props =
     List.map psig_policied_properties (fun (prop, ty) ->
-        (prop, ptype proto_renv ty))
-    |> SMap.of_list
+        (prop, ptype lump_pol_opt proto_renv ty))
   in
-  Tclass (name, class_policy, policy_map)
+  let lump_pol = get_policy_var lump_pol_opt proto_renv in
+  let unpolicied_props =
+    List.map psig_unpolicied_properties (fun (prop, ty) ->
+        (prop, ptype (Some lump_pol) proto_renv ty))
+  in
+  let property_ptype_map =
+    SMap.of_list (List.append policied_props unpolicied_props)
+  in
+  Tclass
+    {
+      c_name = name;
+      c_self = get_policy_var lump_pol_opt proto_renv;
+      c_lump = lump_pol;
+      c_property_map = property_ptype_map;
+    }
 
 (* Turns a locl_ty into a type with policy annotations;
    the policy annotations are fresh policy variables *)
-and ptype proto_renv (t : T.locl_ty) =
+and ptype lump_pol_opt proto_renv (t : T.locl_ty) =
+  let ptype = ptype lump_pol_opt in
   match T.get_node t with
-  | T.Tprim _ -> Tprim (Env.new_policy_var proto_renv)
+  | T.Tprim _ -> Tprim (get_policy_var lump_pol_opt proto_renv)
   | T.Ttuple tyl -> Ttuple (List.map ~f:(ptype proto_renv) tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:(ptype proto_renv) tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:(ptype proto_renv) tyl)
-  | T.Tclass ((_, name), _, _) -> class_ptype proto_renv name
+  | T.Tclass ((_, name), _, _) -> class_ptype lump_pol_opt proto_renv name
   (* ---  types below are not yet unpported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
@@ -215,7 +250,7 @@ and ptype proto_renv (t : T.locl_ty) =
 
 let add_params renv env params =
   let add_param env p =
-    let pty = ptype renv.re_proto (fst p.A.param_type_hint) in
+    let pty = ptype None renv.re_proto (fst p.A.param_type_hint) in
     let lid = Local_id.make_unscoped p.A.param_name in
     Env.set_local_type env lid pty
   in
@@ -232,31 +267,25 @@ let binop renv env ty1 ty2 =
     (env, Tprim pj)
   | _ -> fail "unexpected Binop types"
 
-let property_ptype obj_ptype property =
-  let get_property prop_ptype_map =
-    match SMap.find_opt property prop_ptype_map with
-    | Some ptype -> ptype
-    | None -> Tprim Pbot
-  in
+let receiver_of_obj_get obj_ptype property =
   match obj_ptype with
-  | Tclass (_, _, prop_ptype_map) -> get_property prop_ptype_map
-  | _ ->
+  | Tclass class_ -> class_
+  | _ -> fail ("Couldn't find a class for the property '" ^ property ^ "'.")
+
+let property_ptype obj_ptype property =
+  let class_ = receiver_of_obj_get obj_ptype property in
+  match SMap.find_opt property class_.c_property_map with
+  | Some ptype -> ptype
+  | None ->
     fail
-      ( "Impossible happened."
-      ^ " Couldn't find a class for the property '"
-      ^ property
-      ^ "'." )
+      ("Property '" ^ property ^ "' doesn't exist in '" ^ class_.c_name ^ "'.")
 
 let rec lvalue renv env (((_epos, _ety), e) : Tast.expr) =
   match e with
   | A.Lvar (_pos, lid) -> (env, Local lid)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr renv env obj in
-    let obj_pol =
-      match obj_ptype with
-      | Tclass (_, obj_pol, _) -> obj_pol
-      | _ -> fail ("Couldn't find a class for the property '" ^ property ^ "'.")
-    in
+    let obj_pol = (receiver_of_obj_get obj_ptype property).c_self in
     let prop_ptype = property_ptype obj_ptype property in
     let env = Env.acc env (add_dependencies [obj_pol] prop_ptype) in
     (env, Property prop_ptype)
@@ -309,12 +338,8 @@ and expr renv env (((_epos, _ety), e) : Tast.expr) =
     let (env, obj_ptype) = expr env obj in
     let prop_ptype = property_ptype obj_ptype property in
     let (env, super_ptype) = weaken renv env prop_ptype in
-    let env =
-      match obj_ptype with
-      | Tclass (_, obj_pol, _) ->
-        Env.acc env (add_dependencies [obj_pol] super_ptype)
-      | _ -> fail ("Couldn't find a class for the property '" ^ property ^ "'.")
-    in
+    let obj_class = receiver_of_obj_get obj_ptype property in
+    let env = Env.acc env (add_dependencies [obj_class.c_self] super_ptype) in
     (env, super_ptype)
   | A.This ->
     (match renv.re_this with
@@ -413,8 +438,8 @@ let func_or_method psig_env class_name_opt name saved_env params body lrty =
       let proto_renv = Env.new_proto_renv scope psig_env in
 
       let global_pc = Env.new_policy_var proto_renv in
-      let this_ty = Option.map class_name_opt (class_ptype proto_renv) in
-      let ret_ty = ptype proto_renv lrty in
+      let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
+      let ret_ty = ptype None proto_renv lrty in
       let renv = Env.new_renv proto_renv saved_env global_pc this_ty ret_ty in
 
       (* Initialise the mutable environment *)

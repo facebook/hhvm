@@ -107,8 +107,17 @@ let rec ptype fmt ty =
   | Ttuple tl -> list "," tl
   | Tunion tl -> list " |" tl
   | Tinter tl -> list " &" tl
-  | Tclass (name, pol, map) ->
-    fprintf fmt "%s<%a, %a>" name policy pol (smap comma_sep ptype) map
+  | Tclass { c_name; c_self; c_lump; c_property_map } ->
+    fprintf
+      fmt
+      "%s<%a, %a, %a>"
+      c_name
+      policy
+      c_self
+      policy
+      c_lump
+      (smap comma_sep ptype)
+      c_property_map
 
 let locals fmt env =
   let pp_lenv fmt { le_vars } = LMap.make_pp Local_id.pp ptype fmt le_vars in
@@ -132,21 +141,24 @@ let env fmt env =
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   fprintf fmt "@]"
 
-let policy_sig fmt { psig_policied_properties } =
+let policy_sig fmt { psig_policied_properties; psig_unpolicied_properties } =
   let property fmt (name, _ty) = fprintf fmt "%s" name in
-  let policied_properties fmt props =
-    List.iter ~f:(fprintf fmt "%a@," property) props
-  in
+  let properties fmt = list comma_sep property fmt in
   fprintf fmt "@[<v>";
   fprintf
     fmt
-    "* Policied properties:@,  @[<v>%a@]"
-    policied_properties
+    "* @[<hov2>Policied properties:@ @[<hov>%a@]@]"
+    properties
     psig_policied_properties;
+  fprintf
+    fmt
+    "@,* @[<hov2>Unpolicied properties:@ @[<hov>%a@]@]"
+    properties
+    psig_unpolicied_properties;
   fprintf fmt "@]"
 
 let policy_sig_env fmt map =
   let handle_class class_name psig =
-    fprintf fmt "Policy signature for %s:@,%a@." class_name policy_sig psig
+    fprintf fmt "Policy signature for %s:@,%a@.@." class_name policy_sig psig
   in
   SMap.iter handle_class map

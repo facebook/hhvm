@@ -53,7 +53,10 @@ type prop =
   | Cflow of (policy * policy)
 
 (* Policy signature for a class. Used for generating policy types for objects *)
-type policy_sig = { psig_policied_properties: (string * Type.locl_ty) list }
+type policy_sig = {
+  psig_policied_properties: (string * Type.locl_ty) list;
+  psig_unpolicied_properties: (string * Type.locl_ty) list;
+}
 
 (* Types with policies *)
 type ptype =
@@ -61,7 +64,14 @@ type ptype =
   | Ttuple of ptype list
   | Tunion of ptype list
   | Tinter of ptype list
-  | Tclass of string * policy * ptype SMap.t
+  | Tclass of class_
+
+and class_ = {
+  c_name: string;
+  c_self: policy;
+  c_lump: policy;
+  c_property_map: ptype SMap.t;
+}
 
 type local_env = { le_vars: ptype LMap.t }
 

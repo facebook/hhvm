@@ -39,7 +39,7 @@
                         OG_nullthrows))),
                     (([7:16-18], int), (Lvar ([7:16-18], $x))))))))
              ];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([6:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
@@ -57,7 +57,7 @@
                            (([13:19-20], int), (Id ([13:19-20], "x"))),
                            OG_nullthrows))))))
               ];
-            fb_annotation = No unsafe blocks };
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = []; m_ret = ((int), None);
           m_external = false; m_doc_comment = None }
         ];
@@ -87,7 +87,7 @@
                       ([18:12-13], (function(int $x): void)))))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

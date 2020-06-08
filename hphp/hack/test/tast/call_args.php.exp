@@ -10,8 +10,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_body =
-      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -35,7 +34,7 @@
                    (Id ([6:3-15], "\\takes_string"))),
                   [], [(([6:16-23], string), (String "hello"))], None)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

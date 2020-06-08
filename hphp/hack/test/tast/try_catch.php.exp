@@ -3,8 +3,7 @@
       f_ret = ((void), (Some ([11:25-29], (Hprim Tvoid))));
       f_name = ([11:10-21], "\\might_throw"); f_tparams = [];
       f_where_constraints = []; f_variadic = FVnonVariadic; f_params = [];
-      f_body =
-      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -76,7 +75,7 @@
            ([30:3-13],
             (Return (Some (([30:10-12], int), (Lvar ([30:10-12], $a))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

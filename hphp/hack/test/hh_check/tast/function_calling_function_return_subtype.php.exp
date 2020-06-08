@@ -13,7 +13,7 @@
                         (Id ([5:10-11], "\\g"))),
                        [], [], None))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -37,7 +37,7 @@
                          (Id ([9:10-11], "\\g"))),
                         [], [], None))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

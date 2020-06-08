@@ -36,7 +36,7 @@ Errors:
                (New ((([7:7-11], Tcat), (CI ([7:7-11], "Tcat"))), [], 
                   [], None, ([7:7-11], _))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -58,7 +58,7 @@ Errors:
                (New ((([11:7-11], Tcat), (CI ([11:7-11], "\\Tcat"))), 
                   [], [], None, ([11:7-11], _))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

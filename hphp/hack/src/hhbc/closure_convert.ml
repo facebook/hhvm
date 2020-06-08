@@ -701,7 +701,7 @@ let convert_meth_caller_to_func_ptr env st ann pc cls pf func =
               [
                 (p, Expr assert_invariant); (p, Return (Some meth_caller_handle));
               ];
-            fb_annotation = Tast.NoUnsafeBlocks;
+            fb_annotation = ();
           };
         f_fun_kind = Ast_defs.FSync;
         f_user_attributes =
@@ -1845,7 +1845,7 @@ let extract_debugger_main ~empty_namespace all_defs =
       f_where_constraints = [];
       f_variadic = FVnonVariadic;
       f_params = params;
-      f_body = { fb_ast = body; fb_annotation = Tast.NoUnsafeBlocks };
+      f_body = { fb_ast = body; fb_annotation = () };
       f_fun_kind = Ast_defs.FSync;
       f_user_attributes =
         [{ ua_name = (Pos.none, "__DebuggerMain"); ua_params = [] }];

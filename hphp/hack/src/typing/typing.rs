@@ -23,7 +23,7 @@ use oxidized_by_ref::ast::{ClassId, ClassId_, Id};
 use oxidized_by_ref::pos::Pos;
 use oxidized_by_ref::shallow_decl_defs::ShallowClass;
 use typing_ast_rust::typing_inference_env::IntoUnionIntersectionIterator;
-use typing_defs_rust::{tast, ExpandEnv, FunParam, FuncBodyAnn, SavedEnv, Ty, Ty_};
+use typing_defs_rust::{tast, ExpandEnv, FunParam, SavedEnv, Ty, Ty_};
 
 pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
     let ast = f.body.ast.iter().map(|x| stmt(env, x)).collect();
@@ -51,7 +51,7 @@ pub fn fun<'a>(env: &mut Env<'a>, f: &'a ast::Fun_) -> tast::Fun_<'a> {
         where_constraints: f.where_constraints.clone(),
         body: tast::FuncBody {
             ast,
-            annotation: FuncBodyAnn,
+            annotation: (),
         },
         fun_kind: f.fun_kind,
         variadic: tast::FunVariadicity::FVnonVariadic,

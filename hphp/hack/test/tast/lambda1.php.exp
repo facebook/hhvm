@@ -49,7 +49,7 @@
                                          (([4:34-38], string), (String "\\n"))
                                          ))))))
                             ];
-                          fb_annotation = No unsafe blocks };
+                          fb_annotation = () };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
                         f_namespace =
@@ -84,7 +84,7 @@
                       [], [(([6:11-16], string), (String "bar"))], None)))
                   )))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

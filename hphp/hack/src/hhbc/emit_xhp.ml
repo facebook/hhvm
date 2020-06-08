@@ -22,7 +22,7 @@ let get_array3 i0 i1 i2 =
 
 let xhp_attribute_declaration_method
     ?p name final abstract static visibility stmtl =
-  let m_body = T.{ fb_ast = stmtl; fb_annotation = Tast.NoUnsafeBlocks } in
+  let m_body = T.{ fb_ast = stmtl; fb_annotation = () } in
   let p =
     match p with
     | Some p -> p

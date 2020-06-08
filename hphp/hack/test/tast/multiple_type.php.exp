@@ -16,7 +16,7 @@
          m_body =
          { fb_ast =
            [([6:5-14], (Return (Some (([6:12-13], int), (Int "5")))))];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((int), (Some ([5:26-29], (Hprim Tint))));
          m_external = false; m_doc_comment = None }
@@ -49,7 +49,7 @@
           { fb_ast =
             [([12:5-16], (Return (Some (([12:12-15], string), (String "s")))))
               ];
-            fb_annotation = No unsafe blocks };
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((string), (Some ([11:26-32], (Hprim Tstring))));
           m_external = false; m_doc_comment = None }
@@ -111,7 +111,7 @@
                              OG_nullthrows))),
                          [], [], None))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

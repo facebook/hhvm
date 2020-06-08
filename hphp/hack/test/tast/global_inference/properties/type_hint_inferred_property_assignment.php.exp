@@ -44,7 +44,7 @@
                         OG_nullthrows))),
                     (([8:16-18], string), (Lvar ([8:16-18], $y))))))))
              ];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([7:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
@@ -70,7 +70,7 @@
                          (CGstring ([12:8-10], "$x"))))),
                      (([12:13-15], int), (Lvar ([12:13-15], $x))))))))
               ];
-            fb_annotation = No unsafe blocks };
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((void), (Some ([11:40-44], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None }

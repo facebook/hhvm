@@ -28,7 +28,7 @@
               [([5:20-29], (Return (Some (([5:27-28], int), (Int "2")))))],
               [([Pos.none], Noop)])));
           ([6:3-12], (Return (Some (([6:10-11], int), (Int "0")))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

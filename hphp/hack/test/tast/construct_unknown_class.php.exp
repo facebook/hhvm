@@ -38,7 +38,7 @@ Errors:
                               (Lvar ([4:41-43], $x)))),
                        ([4:14-21], _)))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

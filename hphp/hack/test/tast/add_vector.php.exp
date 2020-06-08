@@ -45,7 +45,7 @@
                      (ValCollection (<vc_kind>, None, [])))
                     )))))
              ];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([15:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
@@ -75,7 +75,7 @@
                          None))),
                      (([20:18-20], T), (Lvar ([20:18-20], $x))))))))
               ];
-            fb_annotation = No unsafe blocks };
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((void), (Some ([19:30-34], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None };
@@ -103,7 +103,7 @@
                                OG_nullthrows))),
                            (Some (([24:21-22], int), (Int "0")))))))))
               ];
-            fb_annotation = No unsafe blocks };
+            fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((T), (Some ([23:32-33], (Habstr "T"))));
           m_external = false; m_doc_comment = None }
@@ -247,7 +247,7 @@
                    [(([36:8-10], MyPhonyVector<X>), (Lvar ([36:8-10], $x)))],
                    None)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

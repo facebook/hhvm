@@ -25,7 +25,7 @@
                            OG_nullthrows))),
                        [], [], None))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -67,7 +67,7 @@
          m_variadic = FVnonVariadic; m_params = [];
          m_body =
          { fb_ast = [([5:5-17], (Return (Some (([5:12-16], null), Null))))];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret =
          ((?T), (Some ([4:26-28], (Hoption ([4:27-28], (Habstr "T"))))));

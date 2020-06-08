@@ -25,7 +25,7 @@
                    (Id ([5:5-8], "\\bar"))),
                   [], [(([5:9-11], int), (Lvar ([5:9-11], $y)))], None)))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -46,8 +46,7 @@
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_body =
-       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

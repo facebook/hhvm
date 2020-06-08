@@ -30,7 +30,7 @@
                          (Lvar ([8:10-12], $m))),
                         (Some (([8:13-17], string), (String "ho")))))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

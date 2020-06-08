@@ -63,7 +63,7 @@ Errors:
                                 (Some (([11:12-17], int),
                                        (Lvar ([11:12-17], $item))))))
                             ];
-                          fb_annotation = No unsafe blocks };
+                          fb_annotation = () };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
                         f_namespace =
@@ -94,7 +94,7 @@ Errors:
                          (Lvar ([14:10-12], $f))),
                         [], [], None))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

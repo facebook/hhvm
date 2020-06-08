@@ -40,7 +40,7 @@
                 [([19:7-16], (Return (Some (([19:14-15], int), (Int "0")))))]
                 )))
              ];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((int), (Some ([15:33-36], (Hprim Tint))));
          m_external = false; m_doc_comment = None }

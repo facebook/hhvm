@@ -10,8 +10,7 @@
          param_expr = None; param_callconv = None;
          param_user_attributes = []; param_visibility = None }
         ];
-      f_body =
-      { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+      f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -50,7 +49,7 @@
                 ]
               )))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -83,8 +82,7 @@
                param_callconv = None; param_user_attributes = [];
                param_visibility = None });
           m_params = [];
-          m_body =
-          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((void), (Some ([12:35-39], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None }

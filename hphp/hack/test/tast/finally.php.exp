@@ -18,7 +18,7 @@ Errors:
       f_body =
       { fb_ast =
         [([5:3-18], (Return (Some (([5:10-17], shape()), (Shape [])))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -81,7 +81,7 @@ Errors:
                 ]
               )))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FAsync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

@@ -164,10 +164,7 @@ let gen_pu_accessor
   in
   let cases = cases @ [default] in
   let body =
-    {
-      fb_ast = [(pos, Switch (var_atom, cases))];
-      fb_annotation = T.HasUnsafeBlocks;
-    }
+    { fb_ast = [(pos, Switch (var_atom, cases))]; fb_annotation = () }
   in
   {
     m_tparams = [];
@@ -300,7 +297,7 @@ let gen_Members_extends instance_name pos (pu_members : T.pu_member list) =
           (* return $result; *)
           return pos (lvar pos "$result");
         ];
-      fb_annotation = T.HasUnsafeBlocks;
+      fb_annotation = ();
     }
   in
   {
@@ -339,7 +336,7 @@ let gen_Members_no_extends instance_name pos (pu_members : T.pu_member list) =
   let body =
     {
       fb_ast = [return pos (tany, Collection ((pos, "keyset"), None, mems))];
-      fb_annotation = T.HasUnsafeBlocks;
+      fb_annotation = ();
     }
   in
   {

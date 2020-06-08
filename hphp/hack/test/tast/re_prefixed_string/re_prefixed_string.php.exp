@@ -64,7 +64,7 @@ Errors:
                       (([15:11-21], string), (String ", world!")))))
                   )))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -109,7 +109,7 @@ Errors:
                   ([19:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -307,7 +307,7 @@ Errors:
                        )))
                    )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -411,7 +411,7 @@ Errors:
                    (([58:3-9], _), (Lvar ([58:3-9], $bad11))),
                    (([58:14-22], _), (String "HelloH")))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -441,7 +441,7 @@ Errors:
                       )))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

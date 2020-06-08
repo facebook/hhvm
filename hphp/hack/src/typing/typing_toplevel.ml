@@ -285,12 +285,6 @@ let merge_decl_header_with_hints ~params ~ret ~variadic decl_header env =
   in
   (ret_decl_ty, params_decl_ty, variadicity_decl_ty)
 
-let map_funcbody_annotation an =
-  match an with
-  | Nast.NamedWithUnsafeBlocks -> Tast.HasUnsafeBlocks
-  | Nast.Named -> Tast.NoUnsafeBlocks
-  | Nast.Unnamed _ -> failwith "Should not map over unnamed body"
-
 (* Given a locl_ty type of params, check, in case it is a Tpu or a
  * Tpu_type_access, if the invocation is correct:
  * - Tpu(base, enum): enum must be a valid PU in base or its upper bounds
@@ -477,11 +471,7 @@ let rec fun_def ctx f :
           Aast.f_fun_kind = f.f_fun_kind;
           Aast.f_file_attributes = file_attrs;
           Aast.f_user_attributes = user_attributes;
-          Aast.f_body =
-            {
-              Aast.fb_ast = tb;
-              fb_annotation = map_funcbody_annotation f.f_body.fb_annotation;
-            };
+          Aast.f_body = { Aast.fb_ast = tb; fb_annotation = () };
           Aast.f_external = f.f_external;
           Aast.f_namespace = f.f_namespace;
           Aast.f_doc_comment = f.f_doc_comment;
@@ -655,12 +645,6 @@ and method_def env cls m =
           hint_of_type_hint m.m_ret
       in
       let m = { m with m_ret = (fst m.m_ret, type_hint') } in
-      let annotation =
-        if Nast.named_body_is_unsafe nb then
-          Tast.HasUnsafeBlocks
-        else
-          Tast.NoUnsafeBlocks
-      in
       let (env, tparams) = List.map_env env m.m_tparams Typing.type_param in
       let (env, user_attributes) =
         List.map_env env m.m_user_attributes Typing.user_attribute
@@ -687,7 +671,7 @@ and method_def env cls m =
           Aast.m_fun_kind = m.m_fun_kind;
           Aast.m_user_attributes = user_attributes;
           Aast.m_ret = (locl_ty, hint_of_type_hint m.m_ret);
-          Aast.m_body = { Aast.fb_ast = tb; fb_annotation = annotation };
+          Aast.m_body = { Aast.fb_ast = tb; fb_annotation = () };
           Aast.m_external = m.m_external;
           Aast.m_doc_comment = m.m_doc_comment;
         }

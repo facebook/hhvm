@@ -22,7 +22,7 @@
           ([5:3-13],
            (Return (Some (([5:10-12], int), (Lvar ([5:10-12], $x))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

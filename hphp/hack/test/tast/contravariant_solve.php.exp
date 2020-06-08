@@ -90,7 +90,7 @@
                   ([9:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -129,7 +129,7 @@
                   ([13:13-22], (function(string $message=_, int $code=_, ?Exception $previous=_): void))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -174,7 +174,7 @@
                       None)))
                   )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

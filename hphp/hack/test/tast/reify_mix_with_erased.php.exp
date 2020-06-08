@@ -25,7 +25,7 @@ Errors:
       { fb_ast =
         [([4:3-13], (Return (Some (([4:10-12], Tu), (Lvar ([4:10-12], $f))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -51,7 +51,7 @@ Errors:
                     ((string), ([8:10-16], (Hprim Tstring)))],
                   [(([8:18-20], int), (Int "42"))], None)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

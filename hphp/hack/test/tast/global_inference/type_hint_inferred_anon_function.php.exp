@@ -38,7 +38,7 @@
                                     (([4:30-32], int), (Lvar ([4:30-32], $x))),
                                     (([4:35-36], int), (Int "1"))))))))
                        ];
-                     fb_annotation = No unsafe blocks };
+                     fb_annotation = () };
                    f_fun_kind = FSync; f_user_attributes = [];
                    f_file_attributes = []; f_external = false;
                    f_namespace =
@@ -51,7 +51,7 @@
                    f_doc_comment = None; f_static = false },
                  [])))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

@@ -27,7 +27,7 @@
                ],
              (([6:12-17], nothing), (Lvar ([6:12-17], $cond))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

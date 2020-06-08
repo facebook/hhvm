@@ -24,7 +24,7 @@
          { fb_ast =
            [([5:5-15],
              (Return (Some (([5:12-14], string), (Lvar ([5:12-14], $x))))))];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -73,7 +73,7 @@
                           [(([5:22-24], string), (Lvar ([5:22-24], $x)))],
                           None))))))
              ];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((string), None); m_external = false; m_doc_comment = None }
         ];
@@ -128,7 +128,7 @@
                          ],
                        None))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

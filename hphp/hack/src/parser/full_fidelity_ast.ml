@@ -276,7 +276,7 @@ let aast_to_tast aast =
 
       method on_'ex _ pos = (pos, tany)
 
-      method on_'fb _ _ = Tast.HasUnsafeBlocks
+      method on_'fb _ _ = ()
 
       method on_'en _ _ = Tast.dummy_saved_env
 

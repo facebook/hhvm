@@ -71,7 +71,7 @@
                 ],
               (([25:12-14], bool), (Lvar ([25:12-14], $b))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

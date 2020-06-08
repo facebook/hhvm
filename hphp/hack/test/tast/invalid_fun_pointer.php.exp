@@ -11,7 +11,7 @@ Errors:
       { fb_ast =
         [([4:3-23],
           (Expr (([4:3-22], _), (Fun_id ([4:7-21], "\\unbound_func")))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

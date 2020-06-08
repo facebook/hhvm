@@ -8,18 +8,6 @@ pub use oxidized_by_ref::typing_defs_core::*;
 
 pub type PrimKind<'a> = oxidized_by_ref::aast_defs::Tprim<'a>;
 
-// Rust versions of oxidized tast uses dummy placeholders for FuncBodyAnn and SavedEnv, which are converted
-// to similarly dummy (using Default trait) OCaml representations. This is OK for now, since we use this conversion
-// only to call into OCaml tast printer, and the simple types we are printing doesn't use annotations or saved envs.
-#[derive(Debug)]
-pub struct FuncBodyAnn;
-
-impl ToOcamlRep for FuncBodyAnn {
-    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        oxidized_by_ref::tast::FuncBodyAnn::default().to_ocamlrep(alloc)
-    }
-}
-
 #[derive(Debug)]
 pub struct SavedEnv;
 

@@ -67,76 +67,64 @@ type saved_env = {
 }
 [@@deriving show]
 
-type func_body_ann =
-  (* True if there are any UNSAFE blocks *)
-  | HasUnsafeBlocks
-  | NoUnsafeBlocks
-[@@deriving eq, show]
+type program = (Pos.t * ty, unit, saved_env, ty) Aast.program [@@deriving show]
 
-type program = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.program
-[@@deriving show]
+type def = (Pos.t * ty, unit, saved_env, ty) Aast.def
 
-type def = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.def
+type expr = (Pos.t * ty, unit, saved_env, ty) Aast.expr
 
-type expr = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.expr
+type expr_ = (Pos.t * ty, unit, saved_env, ty) Aast.expr_
 
-type expr_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.expr_
+type stmt = (Pos.t * ty, unit, saved_env, ty) Aast.stmt
 
-type stmt = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.stmt
+type block = (Pos.t * ty, unit, saved_env, ty) Aast.block
 
-type block = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.block
+type class_ = (Pos.t * ty, unit, saved_env, ty) Aast.class_
 
-type class_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_
-
-type class_id = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_id
+type class_id = (Pos.t * ty, unit, saved_env, ty) Aast.class_id
 
 type type_hint = ty Aast.type_hint
 
 type targ = ty Aast.targ
 
-type class_get_expr =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_get_expr
+type class_get_expr = (Pos.t * ty, unit, saved_env, ty) Aast.class_get_expr
 
-type class_typeconst =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_typeconst
+type class_typeconst = (Pos.t * ty, unit, saved_env, ty) Aast.class_typeconst
 
-type user_attribute =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.user_attribute
+type user_attribute = (Pos.t * ty, unit, saved_env, ty) Aast.user_attribute
 
-type fun_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_
+type fun_ = (Pos.t * ty, unit, saved_env, ty) Aast.fun_
 
-type file_attribute =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.file_attribute
+type file_attribute = (Pos.t * ty, unit, saved_env, ty) Aast.file_attribute
 
-type fun_def = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_def
+type fun_def = (Pos.t * ty, unit, saved_env, ty) Aast.fun_def
 
-type fun_param = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.fun_param
+type fun_param = (Pos.t * ty, unit, saved_env, ty) Aast.fun_param
 
-type func_body = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.func_body
+type func_body = (Pos.t * ty, unit, saved_env, ty) Aast.func_body
 
-type method_ = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.method_
+type method_ = (Pos.t * ty, unit, saved_env, ty) Aast.method_
 
 type method_redeclaration =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.method_redeclaration
+  (Pos.t * ty, unit, saved_env, ty) Aast.method_redeclaration
 
-type class_var = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_var
+type class_var = (Pos.t * ty, unit, saved_env, ty) Aast.class_var
 
-type class_tparams =
-  (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_tparams
+type class_tparams = (Pos.t * ty, unit, saved_env, ty) Aast.class_tparams
 
-type class_const = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.class_const
+type class_const = (Pos.t * ty, unit, saved_env, ty) Aast.class_const
 
-type tparam = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.tparam
+type tparam = (Pos.t * ty, unit, saved_env, ty) Aast.tparam
 
-type typedef = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.typedef
+type typedef = (Pos.t * ty, unit, saved_env, ty) Aast.typedef
 
-type record_def = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.record_def
+type record_def = (Pos.t * ty, unit, saved_env, ty) Aast.record_def
 
-type gconst = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.gconst
+type gconst = (Pos.t * ty, unit, saved_env, ty) Aast.gconst
 
-type pu_enum = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_enum
+type pu_enum = (Pos.t * ty, unit, saved_env, ty) Aast.pu_enum
 
-type pu_member = (Pos.t * ty, func_body_ann, saved_env, ty) Aast.pu_member
+type pu_member = (Pos.t * ty, unit, saved_env, ty) Aast.pu_member
 
 let empty_saved_env tcopt : saved_env =
   {
@@ -184,10 +172,7 @@ let nast_converter =
 
     method on_'ex _ (p, _ex) = p
 
-    method on_'fb _ fb =
-      match fb with
-      | HasUnsafeBlocks -> Nast.NamedWithUnsafeBlocks
-      | _ -> Nast.Named
+    method on_'fb _ _fb = Nast.Named
 
     method on_'en _ _ = ()
 

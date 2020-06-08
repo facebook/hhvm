@@ -38,7 +38,7 @@ Errors:
       f_body =
       { fb_ast =
         [([4:3-16], (Return (Some (([4:10-15], string), (String "foo")))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -89,7 +89,7 @@ Errors:
       f_variadic = FVnonVariadic; f_params = [];
       f_body =
       { fb_ast = [([4:3-12], (Return (Some (([4:10-11], int), (Int "0")))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

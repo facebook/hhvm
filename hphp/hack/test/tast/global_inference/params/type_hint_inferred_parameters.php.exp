@@ -28,7 +28,7 @@
                      (Cast (([7:11-14], (Hprim Tint)),
                         (([7:16-18], mixed), (Lvar ([7:16-18], $x)))))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -58,7 +58,7 @@
                         (([11:10-12], num), (Lvar ([11:10-12], $x))),
                         (([11:15-16], int), (Int "4"))))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

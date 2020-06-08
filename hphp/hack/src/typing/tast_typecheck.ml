@@ -215,11 +215,8 @@ and check_block env (block : ETast.block) gamma =
   go block gamma (empty_delta_with_next_cont gamma)
 
 let check_func_body env (body : ETast.func_body) gamma =
-  if Tast.equal_func_body_ann body.fb_annotation Tast.HasUnsafeBlocks then
-    raise Cant_check
-  else
-    let _ = check_block env body.fb_ast gamma in
-    ()
+  let _ = check_block env body.fb_ast gamma in
+  ()
 
 (* TODO It's annoying to have to carry this giant 'env' everywhere. Can we
  * localize without it? *)

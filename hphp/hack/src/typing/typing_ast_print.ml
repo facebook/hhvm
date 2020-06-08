@@ -12,14 +12,7 @@ let print_tast ctx =
   let print_pos_and_ty (pos, ty) =
     Format.asprintf "(%a, %s)" Pos.pp pos (Typing_print.full_strip_ns env ty)
   in
-  let pp_fb fmt fb =
-    let s =
-      match fb with
-      | Tast.HasUnsafeBlocks -> "Has unsafe blocks"
-      | Tast.NoUnsafeBlocks -> "No unsafe blocks"
-    in
-    Format.pp_print_string fmt s
-  in
+  let pp_fb fmt _ = Format.pp_print_string fmt "()" in
   let pp_en fmt _ = Format.pp_print_string fmt "()" in
   let pp_ex fmt ex = Format.pp_print_string fmt (print_pos_and_ty ex) in
   let pp_hi fmt ty =

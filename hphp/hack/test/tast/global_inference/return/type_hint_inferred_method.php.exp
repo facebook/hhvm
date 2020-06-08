@@ -23,7 +23,7 @@
          m_body =
          { fb_ast =
            [([5:5-14], (Return (Some (([5:12-13], int), (Int "1")))))];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = []; m_ret = ((int), None);
          m_external = false; m_doc_comment = None }
         ];

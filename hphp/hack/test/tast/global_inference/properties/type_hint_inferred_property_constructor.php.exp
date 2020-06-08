@@ -40,7 +40,7 @@
                         OG_nullthrows))),
                     (([4:38-40], int), (Lvar ([4:38-40], $x))))))));
              ([Pos.none], Noop)];
-           fb_annotation = No unsafe blocks };
+           fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([4:19-30], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None }
@@ -65,8 +65,7 @@
           param_name = "$_"; param_expr = None; param_callconv = None;
           param_user_attributes = []; param_visibility = None }
          ];
-       f_body =
-       { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+       f_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -108,7 +107,7 @@
                     (Id ([12:3-6], "\\foo"))),
                    [], [(([12:7-9], int), (Lvar ([12:7-9], $x)))], None)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

@@ -13,8 +13,7 @@
          m_abstract = false; m_static = true; m_visibility = Public;
          m_name = ([4:26-35], "staticFoo"); m_tparams = [];
          m_where_constraints = []; m_variadic = FVnonVariadic; m_params = [];
-         m_body =
-         { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+         m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
          m_fun_kind = FSync; m_user_attributes = [];
          m_ret = ((void), (Some ([4:39-43], (Hprim Tvoid))));
          m_external = false; m_doc_comment = None };
@@ -23,8 +22,7 @@
           m_name = ([5:19-30], "instanceFoo"); m_tparams = [];
           m_where_constraints = []; m_variadic = FVnonVariadic;
           m_params = [];
-          m_body =
-          { fb_ast = [([Pos.none], Noop)]; fb_annotation = No unsafe blocks };
+          m_body = { fb_ast = [([Pos.none], Noop)]; fb_annotation = () };
           m_fun_kind = FSync; m_user_attributes = [];
           m_ret = ((void), (Some ([5:34-38], (Hprim Tvoid))));
           m_external = false; m_doc_comment = None }
@@ -118,7 +116,7 @@
                     (Id ([22:3-22], "\\HH\\invariant_violation"))),
                    [], [(([22:23-28], string), (String "foo"))], None)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -161,7 +159,7 @@
                        [(([28:23-25], C), (Lvar ([28:23-25], $c)))], None)))
                    )))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync;
        f_user_attributes = [{ ua_name = ([25:3-7], "__Rx"); ua_params = [] }];
        f_file_attributes = []; f_external = false;

@@ -43,7 +43,7 @@ Errors:
                                           (Lvar ([15:20-22], $z)))
                                          ))))))
                             ];
-                          fb_annotation = No unsafe blocks };
+                          fb_annotation = () };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
                         f_namespace =
@@ -98,7 +98,7 @@ Errors:
                                           (Lvar ([19:17-19], $z)))
                                          ))))))
                             ];
-                          fb_annotation = No unsafe blocks };
+                          fb_annotation = () };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
                         f_namespace =
@@ -161,7 +161,7 @@ Errors:
                                           (Lvar ([23:26-28], $b)))
                                          ))))))
                             ];
-                          fb_annotation = No unsafe blocks };
+                          fb_annotation = () };
                         f_fun_kind = FSync; f_user_attributes = [];
                         f_file_attributes = []; f_external = false;
                         f_namespace =
@@ -189,7 +189,7 @@ Errors:
                       None)))
                   )))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =

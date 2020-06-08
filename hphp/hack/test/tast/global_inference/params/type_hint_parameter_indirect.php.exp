@@ -22,7 +22,7 @@ Errors:
                        (([4:14-17], nothing), (Id ([4:14-17], "foo"))),
                        OG_nullthrows))))))
           ];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -58,7 +58,7 @@ Errors:
                          (Lvar ([8:10-12], $x))),
                         (Some (([8:13-15], mixed), (Lvar ([8:13-15], $i))))))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -96,7 +96,7 @@ Errors:
                       OG_nullthrows))),
                   (([12:13-15], mixed), (Lvar ([12:13-15], $w))))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =
@@ -143,7 +143,7 @@ Errors:
                       (Some (([16:6-8], int), (Lvar ([16:6-8], $i))))))),
                   (([16:12-14], mixed), (Lvar ([16:12-14], $w))))))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

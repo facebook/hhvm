@@ -6,7 +6,7 @@
       f_body =
       { fb_ast =
         [([3:42-55], (Return (Some (([3:49-54], string), (String "foo")))))];
-        fb_annotation = No unsafe blocks };
+        fb_annotation = () };
       f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
       f_external = false;
       f_namespace =
@@ -53,7 +53,7 @@
                 (Obj_get ((([9:3-5], dynamic), (Lvar ([9:3-5], $c))),
                    (([9:8-29], dynamic), Any), OG_nullthrows)))))
            ];
-         fb_annotation = No unsafe blocks };
+         fb_annotation = () };
        f_fun_kind = FSync; f_user_attributes = []; f_file_attributes = [];
        f_external = false;
        f_namespace =

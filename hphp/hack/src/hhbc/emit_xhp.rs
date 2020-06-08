@@ -432,7 +432,7 @@ fn from_xhp_attribute_declaration_method<'a>(
         params: vec![],
         body: FuncBody {
             ast,
-            annotation: (), //FuncBodyAnn::NoUnsafeBlocks,
+            annotation: (),
         },
         fun_kind: ast_defs::FunKind::FSync,
         user_attributes: vec![],

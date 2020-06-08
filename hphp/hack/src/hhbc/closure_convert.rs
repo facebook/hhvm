@@ -937,7 +937,7 @@ fn convert_meth_caller_to_func_ptr<'a>(
                 Stmt(pos(), Stmt_::Expr(Box::new(assert_invariant))),
                 Stmt(pos(), Stmt_::Return(Box::new(Some(meth_caller_handle)))),
             ],
-            annotation: (), // FuncBodyAnn::Named,
+            annotation: (),
         },
         fun_kind: FunKind::FSync,
         user_attributes: vec![UserAttribute {

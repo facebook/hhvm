@@ -25,7 +25,13 @@ namespace HPHP {
 
 TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
                          int64_t options = 0, int64_t depth = 512);
+TypedValue HHVM_FUNCTION(json_encode_with_error, const Variant& value,
+                         Variant& error,  int64_t options = 0,
+                         int64_t depth = 512);
 TypedValue HHVM_FUNCTION(json_decode, const String& json, bool assoc = false,
+                         int64_t depth = 512, int64_t options = 0);
+TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
+                         Variant& error, bool assoc = false,
                          int64_t depth = 512, int64_t options = 0);
 int64_t HHVM_FUNCTION(json_last_error);
 String HHVM_FUNCTION(json_last_error_msg);

@@ -39,6 +39,18 @@ function json_decode(string $json,
                      int $options = 0): mixed;
 
 /**
+ * Like json_decode, but includes json_last_error(_msg) results.
+ */
+<<__Native, __Pure>>
+function json_decode_with_error(
+  string $json,
+  inout mixed /* ?(int, string) */ $error,
+  bool $assoc = false,
+  int $depth = 512,
+  int $options = 0,
+): mixed;
+
+/**
  * Returns the JSON representation of a value
  *
  * @param mixed $value - The value being encoded. Can be any type except
@@ -56,6 +68,18 @@ function json_decode(string $json,
 function json_encode(mixed $value,
                      int $options = 0,
                      int $depth = 512): mixed;
+
+
+/**
+ * Like json_encode, but includes json_last_error(_msg) results.
+ */
+<<__Native, __Pure>>
+function json_encode_with_error(
+  mixed $value,
+  inout mixed /* ?(int, string) */ $error,
+  int $options = 0,
+  int $depth = 512,
+): mixed;
 
 /**
  * Returns the error string of the last json_encode() or json_decode() call

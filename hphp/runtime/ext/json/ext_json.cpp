@@ -18,6 +18,7 @@
 #include "hphp/runtime/ext/json/ext_json.h"
 #include "hphp/runtime/ext/json/JSON_parser.h"
 
+#include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/struct-log-util.h"
 #include "hphp/runtime/base/utf8-decode.h"
@@ -151,6 +152,25 @@ TypedValue HHVM_FUNCTION(json_encode, const Variant& value,
   return tvReturn(std::move(json));
 }
 
+TypedValue HHVM_FUNCTION(json_encode_with_error, const Variant& value,
+                         Variant& error, int64_t options, int64_t depth) {
+  // fn is pure, so prior state must be preserved and restored
+  auto prior_error_code = json_get_last_error_code();
+
+  auto result = HHVM_FN(json_encode)(value, options, depth);
+
+  auto error_code = json_get_last_error_code();
+  if (error_code == k_JSON_ERROR_NONE) {
+    error.setNull();
+  } else {
+    error = make_varray(error_code, json_get_last_error_msg());
+  }
+
+  json_set_last_error_code(prior_error_code);
+
+  return result;
+}
+
 TypedValue HHVM_FUNCTION(json_decode, const String& json,
                          bool assoc, int64_t depth, int64_t options) {
   json_set_last_error_code(json_error_codes::JSON_ERROR_NONE);
@@ -257,6 +277,26 @@ TypedValue HHVM_FUNCTION(json_decode, const String& json,
   return make_tv<KindOfNull>();
 }
 
+TypedValue HHVM_FUNCTION(json_decode_with_error, const String& json,
+                         Variant& error, bool assoc, int64_t depth,
+                         int64_t options) {
+  // fn is pure, so prior state must be preserved and restored
+  auto prior_error_code = json_get_last_error_code();
+
+  auto result = HHVM_FN(json_decode)(json, assoc, depth, options);
+
+  auto error_code = json_get_last_error_code();
+  if (error_code == k_JSON_ERROR_NONE) {
+    error.setNull();
+  } else {
+    error = make_varray(error_code, json_get_last_error_msg());
+  }
+
+  json_set_last_error_code(prior_error_code);
+
+  return result;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 struct JsonExtension final : Extension {
@@ -308,7 +348,9 @@ struct JsonExtension final : Extension {
     HHVM_FE(json_last_error);
     HHVM_FE(json_last_error_msg);
     HHVM_FE(json_encode);
+    HHVM_FE(json_encode_with_error);
     HHVM_FE(json_decode);
+    HHVM_FE(json_decode_with_error);
 
     loadSystemlib();
   }

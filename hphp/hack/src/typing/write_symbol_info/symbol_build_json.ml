@@ -32,16 +32,42 @@ let build_name_json_nested name =
   let basename = Utils.strip_ns name in
   JSON_Object [("key", JSON_String basename)]
 
+let rec build_namespaceqname_json_nested ns =
+  let fields =
+    match split_name ns with
+    | None -> [("name", build_name_json_nested ns)]
+    | Some (parent_ns, namespace) ->
+      [
+        ("name", build_name_json_nested namespace);
+        ("parent", build_namespaceqname_json_nested parent_ns);
+      ]
+  in
+  JSON_Object [("key", JSON_Object fields)]
+
+let build_qname_json_nested qname =
+  let fields =
+    match split_name qname with
+    (* Global namespace *)
+    | None -> [("name", build_name_json_nested qname)]
+    | Some (ns, name) ->
+      [
+        ("name", build_name_json_nested name);
+        ("namespace_", build_namespaceqname_json_nested ns);
+      ]
+  in
+  JSON_Object [("key", JSON_Object fields)]
+
 (* Returns a singleton list containing the JSON field if there
 is a non-empty namespace in the nsenv, or else an empty list *)
-let build_ns_json_nested nsenv =
+let build_namespace_decl_json_nested nsenv =
   match nsenv.ns_name with
   | None -> [] (* Global namespace *)
   | Some "" -> []
   | Some ns ->
     [
       ( "namespace_",
-        JSON_Object [("key", JSON_Object [("name", build_name_json_nested ns)])]
+        JSON_Object
+          [("key", JSON_Object [("name", build_namespaceqname_json_nested ns)])]
       );
     ]
 

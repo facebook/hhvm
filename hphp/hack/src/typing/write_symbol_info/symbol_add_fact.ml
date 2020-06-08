@@ -18,7 +18,7 @@ open Symbol_builder_types
 open Symbol_json_util
 
 let add_container_decl_fact decl_pred name progress =
-  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact decl_pred json_fact progress
 
 let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
@@ -33,7 +33,7 @@ let add_container_defn_fact ctx source_map clss decl_id member_decls prog =
         build_attributes_json_nested source_map clss.c_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_ns_json_nested clss.c_namespace
+    @ build_namespace_decl_json_nested clss.c_namespace
   in
   let add_decls decls pred prog =
     List.fold decls ~init:([], prog) ~f:(fun (decl_refs, prog) decl ->
@@ -215,7 +215,7 @@ let add_type_const_defn_fact ctx source_map tc decl_id progress =
   add_fact TypeConstDefinition (JSON_Object json_fields) progress
 
 let add_enum_decl_fact name progress =
-  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact EnumDeclaration json_fact progress
 
 let add_enum_defn_fact ctx source_map enm enum_id enumerators progress =
@@ -227,7 +227,7 @@ let add_enum_defn_fact ctx source_map enm enum_id enumerators progress =
         ( "attributes",
           build_attributes_json_nested source_map enm.c_user_attributes );
       ]
-      @ build_ns_json_nested enm.c_namespace
+      @ build_namespace_decl_json_nested enm.c_namespace
     in
     match enm.c_enum with
     | None -> json_fields
@@ -255,7 +255,7 @@ let add_enumerator_fact decl_id const_name progress =
   add_fact Enumerator json_fact progress
 
 let add_func_decl_fact name progress =
-  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact FunctionDeclaration json_fact progress
 
 let add_func_defn_fact ctx source_map elem decl_id progress =
@@ -271,7 +271,7 @@ let add_func_defn_fact ctx source_map elem decl_id progress =
         build_attributes_json_nested source_map elem.f_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_ns_json_nested elem.f_namespace
+    @ build_namespace_decl_json_nested elem.f_namespace
   in
   add_fact FunctionDefinition (JSON_Object json_fields) progress
 
@@ -286,24 +286,24 @@ let add_typedef_decl_fact ctx source_map name elem progress =
   in
   let json_fields =
     [
-      ("name", build_name_json_nested name);
+      ("name", build_qname_json_nested name);
       ("isTransparent", JSON_Bool is_transparent);
       ( "attributes",
         build_attributes_json_nested source_map elem.t_user_attributes );
       ("typeParams", JSON_Array tparams);
     ]
-    @ build_ns_json_nested elem.t_namespace
+    @ build_namespace_decl_json_nested elem.t_namespace
   in
   add_fact TypedefDeclaration (JSON_Object json_fields) progress
 
 let add_gconst_decl_fact name progress =
-  let json_fact = JSON_Object [("name", build_name_json_nested name)] in
+  let json_fact = JSON_Object [("name", build_qname_json_nested name)] in
   add_fact GlobalConstDeclaration json_fact progress
 
 let add_gconst_defn_fact ctx elem decl_id progress =
   let base_fields =
     [("declaration", build_id_json decl_id)]
-    @ build_ns_json_nested elem.cst_namespace
+    @ build_namespace_decl_json_nested elem.cst_namespace
   in
   let json_fields =
     match elem.cst_type with

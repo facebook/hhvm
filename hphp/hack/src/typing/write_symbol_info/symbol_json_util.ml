@@ -48,6 +48,21 @@ let rec find_fid fid_list pred =
     else
       find_fid tail pred
 
+(* Split name or subnamespace from its parent namespace, and return
+either Some (parent, name), or None if the name has no parent namespace.
+The trailing slash is removed from the parent. *)
+let split_name (s : string) : (string * string) option =
+  match String.rindex s '\\' with
+  | None -> None
+  | Some pos ->
+    let name_start = pos + 1 in
+    let name = String.sub s name_start (String.length s - name_start) in
+    let parent_namespace = String.sub s 0 (name_start - 1) in
+    if String.is_empty parent_namespace || String.is_empty name then
+      None
+    else
+      Some (parent_namespace, name)
+
 (* Get the container name and predicate type for a given container kind. *)
 let container_decl_predicate container_type =
   match container_type with

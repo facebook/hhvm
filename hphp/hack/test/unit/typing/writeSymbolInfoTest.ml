@@ -18,7 +18,16 @@ open OUnit2
 let test_add_fact _test_ctxt =
   let progress = init_progress in
   let json_key =
-    JSON_Object [("name", JSON_Object [("key", JSON_String "TestName")])]
+    JSON_Object
+      [
+        ( "name",
+          JSON_Object
+            [
+              ( "key",
+                JSON_Object
+                  [("name", JSON_Object [("key", JSON_String "TestName")])] );
+            ] );
+      ]
   in
   let (res_id, progress) = add_fact ClassDeclaration json_key progress in
   Int_asserter.assert_equals
@@ -57,7 +66,12 @@ let test_add_decl_fact _test_ctxt =
   let fact_json = List.nth prog.resultJson.globalConstDeclaration 0 in
   let fact_id = Jget.int_d (Some fact_json) "id" (-1) in
   let decl_name =
-    return fact_json >>= get_obj "key" >>= get_obj "name" >>= get_string "key"
+    return fact_json
+    >>= get_obj "key"
+    >>= get_obj "name"
+    >>= get_obj "key"
+    >>= get_obj "name"
+    >>= get_string "key"
   in
   Int_asserter.assert_equals id fact_id "Id returned is JSON id of new fact";
   match decl_name with

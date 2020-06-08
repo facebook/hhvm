@@ -228,7 +228,6 @@ void HttpServer::onServerShutdown() {
     m_satellites[i]->stop();
     Logger::Info("satellite server %s stopped", name.c_str());
   }
-  XboxServer::Stop();
   if (RuntimeOption::AdminServerPort) {
     m_adminServer->waitForEnd();
     Logger::Info("admin server stopped");

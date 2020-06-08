@@ -483,5 +483,5 @@
     }
   },
   "program_text":"<?hh\nfunction bar() : void {\n  $a = 11;\n  $b = \"This ${a} is an interpolated   {$a}    string.\";\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -1900,5 +1900,5 @@
     }
   },
   "program_text":"<?hh\n\ntype t = @darray<int, @string>;\ntype u = varray<@int>;\n\nfunction f<T>(): void {}\n\nfunction g(@int $_): @string {\n  f<@float>();\n  return \"hello\";\n}\n\nabstract class C {\n  <<TestAttr>> protected @float $x;\n  const type T = @int;\n  public function __construct(<<TestAttr>> public @int $y) {}\n  public async function f(): Awaitable<@int> {\n    return 42;\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

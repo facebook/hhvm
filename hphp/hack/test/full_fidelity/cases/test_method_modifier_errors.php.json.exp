@@ -1327,5 +1327,5 @@
     }
   },
   "program_text":"<?hh\n\nclass A {\n  function a1() {} //error2054\n  static function a2() {}\n  protected static function a3() {}\n}\n\ninterface B {\n  function b1();  //error2054\n  final function b2();\n  public final function b3();\n}\n\ntrait C {\n  function c1() {}  //error2054\n  static function c2() {}\n  private static function c3() {}\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -716,5 +716,5 @@
     }
   },
   "program_text":"<?hh\nnamespace {}\nnamespace SampleNamespace {}\nnamespace SampleNamespace;\nnamespace SampleNamespace {\n  function f () {}\n  class C {}\n}\nnamespace {\n  function f () {}\n  class C {}\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

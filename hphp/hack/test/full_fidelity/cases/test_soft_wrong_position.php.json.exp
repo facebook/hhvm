@@ -305,5 +305,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass C {\n  public <<__Soft>> int $x;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -605,5 +605,5 @@
     }
   },
   "program_text":"<?php\nfunction foo() {\n  $a = 1;\n}\n?>\n\n<?hh\nclass foo {\n  public function bar(): int {\n    return 5;\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

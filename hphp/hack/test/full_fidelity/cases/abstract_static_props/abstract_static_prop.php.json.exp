@@ -632,5 +632,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  abstract static int $p;\n  abstract int $l;\n  <<__Const>> abstract static int $m;\n  <<__Const>> abstract int $n;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

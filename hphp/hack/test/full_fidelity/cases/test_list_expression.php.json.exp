@@ -827,5 +827,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(Bar $vector){\n  list($a, $b) = $vector;\n  list($a, list($b, $c)) = $vector;\n  list(,,$a,,) = $vector; // Missing binders should be `$_`-style ignores.\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

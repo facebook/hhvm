@@ -2178,5 +2178,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo(): Awaitable<void> {\n  $x = async { await genx(); };\n  $x = async { f(await genx()); };\n  $x = async () ==> await genx();\n  $x = async () ==> f(await genx());\n  $x = async () ==> { await genx(); };\n  $x = async () ==> { f(await genx()); };\n  $x = async function () { await genx(); };\n  $x = async function () { f(await genx()); };\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

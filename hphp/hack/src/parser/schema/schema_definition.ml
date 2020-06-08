@@ -2432,8 +2432,7 @@ let schema : schema_node list =
         [
           ("case", Token);
           ("type", Token);
-          ("reified", ZeroOrOne (Aggregate Specifier));
-          ("name", Aggregate Expression);
+          ("type_parameter", Just "TypeParameter");
           ("semicolon", Token);
         ];
     };

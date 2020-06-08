@@ -1607,5 +1607,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I1 {\n  public function i1(): void; // legal\n  public abstract function i2(): void; // error2045\n}\n\nclass C1 { // technically is half of errror2044, but we report error2044 later\n  public function c2(): void { } // legal\n  public abstract function c3(): void; // error2044 reported here\n}\n\nabstract class C2 { // legal\n  public function c1(): void { } // legal\n  public abstract function c2(): void; // legal\n}\n\ntrait T {\n  public function t1(): void { } // legal\n  public abstract function t2(): void; // legal\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

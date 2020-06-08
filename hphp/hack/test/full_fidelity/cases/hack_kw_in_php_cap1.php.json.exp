@@ -460,5 +460,5 @@
     }
   },
   "program_text":"<?php\n\nclass InOut {}\n\nfunction foo(): InOut {\n  return new InOut();\n}\n\nclass bar extends InOut {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

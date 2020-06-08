@@ -770,5 +770,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nclass :Foo {\n    attribute enum {} a; // error\n    attribute enum {\"xy\", 'z', 123} b; // legal\n    attribute enum {true, false} c; // error\n    attribute enum {1.0} d; // error\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

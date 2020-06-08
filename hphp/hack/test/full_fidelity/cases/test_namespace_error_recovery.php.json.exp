@@ -1536,5 +1536,5 @@
     }
   },
   "program_text":"<?hh\n\nnamespace NS1 // error1038, and recover to declaration level\n  class C1 { }\n  interface I1 { }\n  trait T1 { }\n\nnamespace NS2; // error2052, cannot mix bracketed and unbracketed namespaces\nclass C2 { }\ninterface I2 { }\ntrait T2 { }\n\nnamespace NS3 { // no error\n  class C3 { }\n  interface I3 { }\n  trait T3 { }\n}\n\n// NS4 demonstrates a case of suboptimal error recovery. The hypothetical\n// programmer writing it probably just forgot a left brace after 'NS4', but the\n// FFP reports error1038 and an extra right brace. Still, this isn't too\n// bad--these messages should do a reasonable job of nudging the programmer\n// towards the actual mistake.\n// TODO T20730184: currently the FFP gives the error \"An expression is expected\n// here.\" when encountering an unexpected right brace. Change this to something\n// clearer, like \"This right brace does not have a corresponding left brace.\"\nnamespace NS4 // error1038, and recover to declaration level\n  class C4 {}\n  interface I4 { }\n  trait T4 { }\n} // report extra right brace here\n\nnamespace NS5 {\n  class C5 { }\n  interface I5 { }\n  trait T5 { } // report missing right brace here\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

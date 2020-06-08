@@ -760,5 +760,5 @@
     }
   },
   "program_text":"<?hh //strict\n\n/* There should be no errors due to the absence of typehints on $a and $b */\nfunction test():void {\n  $lambda = ($a, $b) ==> {\n    return 1;\n  };\n\n  bar(($a, $b) ==> {\n    return 1;\n  });\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

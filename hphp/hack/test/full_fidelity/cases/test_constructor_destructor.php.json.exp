@@ -1429,5 +1429,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  private function __construct($a) {}\n  public function __construct($a = null) {}\n  public function __construct($a) {}\n  private function __construct($a = null) {}\n  <<attr>> public function __construct ($a){}\n  <<attr>> public function __construct ($a) {}\n  public function __construct (public $a = null) {}\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -1444,9 +1444,9 @@ impl<'src> SmartConstructors<'src, State> for VerifySmartConstructors
         r
     }
 
-    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        let args = arg_kinds!(arg0, arg1, arg2, arg3, arg4);
-        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_pocket_field_type_declaration(self, arg0, arg1, arg2, arg3, arg4);
+    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
+        let args = arg_kinds!(arg0, arg1, arg2, arg3);
+        let r = <Self as SyntaxSmartConstructors<'src, PositionedSyntax, State>>::make_pocket_field_type_declaration(self, arg0, arg1, arg2, arg3);
         self.state_mut().verify(&args);
         self.state_mut().push(r.kind());
         r

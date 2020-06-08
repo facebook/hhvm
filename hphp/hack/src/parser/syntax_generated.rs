@@ -1881,12 +1881,11 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_pocket_field_type_declaration(_: &C, pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_reified: Self, pocket_field_type_name: Self, pocket_field_type_semicolon: Self) -> Self {
+    fn make_pocket_field_type_declaration(_: &C, pocket_field_type_case: Self, pocket_field_type_type: Self, pocket_field_type_type_parameter: Self, pocket_field_type_semicolon: Self) -> Self {
         let syntax = SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
             pocket_field_type_case,
             pocket_field_type_type,
-            pocket_field_type_reified,
-            pocket_field_type_name,
+            pocket_field_type_type_parameter,
             pocket_field_type_semicolon,
         }));
         let value = V::from_syntax(&syntax);
@@ -3275,11 +3274,10 @@ where
                 acc
             },
             SyntaxVariant::PocketFieldTypeDeclaration(x) => {
-                let PocketFieldTypeDeclarationChildren { pocket_field_type_case, pocket_field_type_type, pocket_field_type_reified, pocket_field_type_name, pocket_field_type_semicolon } = *x;
+                let PocketFieldTypeDeclarationChildren { pocket_field_type_case, pocket_field_type_type, pocket_field_type_type_parameter, pocket_field_type_semicolon } = *x;
                 let acc = f(pocket_field_type_case, acc);
                 let acc = f(pocket_field_type_type, acc);
-                let acc = f(pocket_field_type_reified, acc);
-                let acc = f(pocket_field_type_name, acc);
+                let acc = f(pocket_field_type_type_parameter, acc);
                 let acc = f(pocket_field_type_semicolon, acc);
                 acc
             },
@@ -4656,10 +4654,9 @@ where
                  pocket_field_type_expr_case: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::PocketFieldTypeDeclaration, 5) => SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
+             (SyntaxKind::PocketFieldTypeDeclaration, 4) => SyntaxVariant::PocketFieldTypeDeclaration(Box::new(PocketFieldTypeDeclarationChildren {
                  pocket_field_type_semicolon: ts.pop().unwrap(),
-                 pocket_field_type_name: ts.pop().unwrap(),
-                 pocket_field_type_reified: ts.pop().unwrap(),
+                 pocket_field_type_type_parameter: ts.pop().unwrap(),
                  pocket_field_type_type: ts.pop().unwrap(),
                  pocket_field_type_case: ts.pop().unwrap(),
                  
@@ -6025,8 +6022,7 @@ pub struct PocketFieldTypeExprDeclarationChildren<T, V> {
 pub struct PocketFieldTypeDeclarationChildren<T, V> {
     pub pocket_field_type_case: Syntax<T, V>,
     pub pocket_field_type_type: Syntax<T, V>,
-    pub pocket_field_type_reified: Syntax<T, V>,
-    pub pocket_field_type_name: Syntax<T, V>,
+    pub pocket_field_type_type_parameter: Syntax<T, V>,
     pub pocket_field_type_semicolon: Syntax<T, V>,
 }
 
@@ -7932,12 +7928,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             PocketFieldTypeDeclaration(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(4).and_then(|index| { match index {
                         0 => Some(&x.pocket_field_type_case),
                     1 => Some(&x.pocket_field_type_type),
-                    2 => Some(&x.pocket_field_type_reified),
-                    3 => Some(&x.pocket_field_type_name),
-                    4 => Some(&x.pocket_field_type_semicolon),
+                    2 => Some(&x.pocket_field_type_type_parameter),
+                    3 => Some(&x.pocket_field_type_semicolon),
                         _ => None,
                     }
                 })

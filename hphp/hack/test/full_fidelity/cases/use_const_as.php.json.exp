@@ -951,5 +951,5 @@
     }
   },
   "program_text":"<?hh\n\nnamespace consts {\n  const x = \"x\";\n}\n\nuse const consts\\x as a;\nuse const consts\\x as b;\nuse const consts\\x as c;\nuse const consts\\x as d;\n\nuse const consts\\x as a;\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

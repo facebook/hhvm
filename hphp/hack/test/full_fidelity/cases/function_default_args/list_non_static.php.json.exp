@@ -728,5 +728,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction get(): int {\n  return 1;\n}\n\nfunction f((int, int, int) $list_tuple = list(get(), 3, 4)): void{}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

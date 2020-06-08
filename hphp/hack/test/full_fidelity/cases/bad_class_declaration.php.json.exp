@@ -251,5 +251,5 @@
     }
   },
   "program_text":"<?hh\n\nclass <this>should extends fail {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

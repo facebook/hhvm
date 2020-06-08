@@ -1379,5 +1379,5 @@
     }
   },
   "program_text":"<?hh\n\n<<Attr1, Attr2(5)>> function f(): void {}\n<<__Memoize>>\nfunction g<<<__Soft>> reify T>(<<__Soft>> string $_): <<__Soft>> void {}\n\n<<Oncalls('test')>>\nclass C {\n  <<Attr1>> public int $x;\n}\n\ng<<<__Soft>> int>('blah');\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

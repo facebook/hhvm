@@ -550,5 +550,5 @@
     }
   },
   "program_text":"<?hh // partial\n\n\nfunction f($_) {}\nfunction g() {\n  f($GLOBALS['derp']); // ok\n  f($GLOBALS); // not ok\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -2407,5 +2407,5 @@
     }
   },
   "program_text":"<?hh\n\nfoo((...$x, $y) ==> {});\n\nfoo((int ...$x, int $y) ==> {});\n\nfoo((..., $y) ==> {});\n\nfoo((int ...$x,) ==> {});\n\nfoo(function (int ...$x, int $y): void {});\n\nfoo(function (...$x, int $y): void {});\n\nfoo(function (..., int $y): void {});\n\nfoo((inout int ...$x) ==> {});\n\nfoo(function (inout int ...$x): void {});\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -3240,5 +3240,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright 2004-present Facebook. All Rights Reserved.\n\ntrait T1 extraNonsense {\n  require extends T2 extraNonsense;\n\n  private\n    $x = CAPITAL_LETTERS !;\n\n  final protected async function f1 extraNonsense (array $inputs extra) {\n    $x = $x->getSomething());\n    $x = await X::forSomething($x)->gen('s');\n\n    if extraNonsense (!$x) {\n      $x->y = false;\n      $x->y[] = 's' 67835;\n      // known error recovery suboptimality: './.65$' isn't parsed as\n      // a contiguous token\n      $x->y[] = 's' ./.65$;\n      return false extraNonsense;\n    }\n\n    // All code below this point is error-free.\n\n    if ((count($inputs) != 1) || (f($inputs) != $x->getSomething())) {\n      $x->y[] = 's';\n      $x->y = false;\n      return false;\n    }\n\n    if (!$x->test()) {\n      $x->y[] = 's';\n      $x->y= false;\n      return false;\n    }\n\n    list(\n      $x,\n      $x,\n    ) = await genSomething(\n      X::genSomething($x),\n      X::get()->genSomething($x),\n    );\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

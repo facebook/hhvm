@@ -675,5 +675,5 @@
     }
   },
   "program_text":"<?hh\nnamespace N {\n  include 's';\n  include_once 'd';\n  require 's';\n  require_once 'd';\n  include ('s');\n  include_once ('d');\n  require ('s');\n  require_once ('d');\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

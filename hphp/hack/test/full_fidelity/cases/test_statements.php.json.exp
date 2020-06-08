@@ -971,5 +971,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  if ($a)\n    if ($b)\n      switch ($c) {\n        case 123: fallthrough; // fallthrough parsed but not yet supported\n        default: break;\n      }\n    else\n      return $d;\n  elseif($e)\n    do {\n      while($f)\n        throw $g;\n      continue;\n    } while ($h);\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

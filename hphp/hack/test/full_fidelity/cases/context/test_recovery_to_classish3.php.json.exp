@@ -691,5 +691,5 @@
     }
   },
   "program_text":"<?hh // partial\n\n// report the right braces as missing at the ends of lines 4, 6, 8, and 11\ntrait T1 {\n\ninterface I {\n\nclass C {\n  public $showingThat = 'this still works on partially completed classishes';\n\ntrait T2 {\n\n// class D still parses as nested inside of f, though.\nclass C {\n  function f() {\n\n    class D{\n    }\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

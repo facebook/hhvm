@@ -669,5 +669,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n\n  public static function get_int():int {return 5;}\n  public function take_int(int $a = A::get_int()): void{}\n\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

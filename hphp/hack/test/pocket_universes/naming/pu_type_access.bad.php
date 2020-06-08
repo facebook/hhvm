@@ -14,20 +14,19 @@ abstract class Base {
 }
 
 final class C<TBase as Base> {
-  public function __construct(
-    private classname<TBase> $classdef,
-  ){}
+  public function __construct(private classname<TBase> $classdef) {}
 
   // No type S in TP, Param only provides T
   public final function set<TP as TBase:@Param>(TP $param, TP:@S $value): this {
     $cname = $this->classdef;
     $key = $cname::get($param);
-    echo $key. "\n";
+    echo $key."\n";
     return $this;
   }
 
   public function foo<TP as TBase:@Param>(TP $param): TP:@X {
-    while (true) {}
+    while (true) {
+    }
   }
 
   public function bar<TP as TBase:@Param>(TP $param): vec<TP:@X> {

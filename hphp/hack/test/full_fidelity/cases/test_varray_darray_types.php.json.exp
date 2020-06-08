@@ -522,5 +522,5 @@
     }
   },
   "program_text":"<?hh // strict\nfinal class VarrayDarrayTypesTest {\n  use DarrayTrait<darray<string,string>>;\n  use VarrayTrait<varray<string>>;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

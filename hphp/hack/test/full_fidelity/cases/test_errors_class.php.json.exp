@@ -891,5 +891,5 @@
     }
   },
   "program_text":"<?hh\nfinal abstract class C {} // no error\nabstract final class C {} // no error\nfinal class C {} // no error\nabstract class C {} // no error\nclass C {} // no error\nfinal final class C {} // error\nabstract abstract class C {} // error\nabstract final abstract class C {} // error\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -271,5 +271,5 @@
     }
   },
   "program_text":"<?hh\nclass C {\n  <<__Override>>\n  int $x;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

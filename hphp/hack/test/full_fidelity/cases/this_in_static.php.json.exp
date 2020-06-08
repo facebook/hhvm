@@ -412,5 +412,5 @@
     }
   },
   "program_text":"<?hh // strict\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nclass Foo {\n  public static function toto() {\n    return $this->bar();\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

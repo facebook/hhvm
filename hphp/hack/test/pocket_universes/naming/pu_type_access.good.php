@@ -12,16 +12,15 @@ abstract class Base {
 }
 
 final class C<TBase as Base> {
-  public function __construct(
-    private classname<TBase> $classdef,
-  ){}
+  public function __construct(private classname<TBase> $classdef) {}
 
   public final function set<TP as TBase:@Param>(TP $_, TP:@T $_): this {
     return $this;
   }
 
   public function foo<TP as TBase:@Param>(TP $param): TP:@T {
-    while (true) {}
+    while (true) {
+    }
   }
 
   public function bar<TP as TBase:@Param>(TP $param): vec<TP:@T> {

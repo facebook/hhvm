@@ -1475,5 +1475,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function foo1(): Awaitable<void> {\n  $obj = new stdClass();\n  $obj_alias = $obj;\n  $vec = vec[];\n  concurrent {\n    $obj->prop1 = await gen_id(1);\n    $obj_alias->prop1 = await gen_id(2);\n    $vec[] = await gen_id(3);\n    $vec[] = await gen_id(4);\n    $obj->prop2 = await gen_id(5);\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

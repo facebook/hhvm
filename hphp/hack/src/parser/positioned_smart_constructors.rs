@@ -747,8 +747,8 @@ impl<'src> SmartConstructors<'src, NoState> for PositionedSmartConstructors {
         <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_pocket_field_type_expr_declaration(self, arg0, arg1, arg2, arg3)
     }
 
-    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R, arg4: Self::R) -> Self::R {
-        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_pocket_field_type_declaration(self, arg0, arg1, arg2, arg3, arg4)
+    fn make_pocket_field_type_declaration(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R, arg3: Self::R) -> Self::R {
+        <Self as SyntaxSmartConstructors<'src, PositionedSyntax, NoState>>::make_pocket_field_type_declaration(self, arg0, arg1, arg2, arg3)
     }
 
     fn make_pocket_mapping_id_declaration(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {

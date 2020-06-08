@@ -2485,19 +2485,16 @@ where
                 match self.peek_token_kind() {
                     TokenKind::Type => {
                         let type_tok = self.assert_token(TokenKind::Type);
-                        let reify_tok = match self.peek_token_kind() {
-                            TokenKind::Reify => self.assert_token(TokenKind::Reify),
-                            _ => S!(make_missing, self, self.pos()),
-                        };
-                        let name = self.require_name();
+                        let type_param = self.with_type_parser(|p: &mut TypeParser<'a, S, T>| {
+                            p.parse_type_parameter()
+                        });
                         let semi = self.require_semicolon();
                         S!(
                             make_pocket_field_type_declaration,
                             self,
                             case_tok,
                             type_tok,
-                            reify_tok,
-                            name,
+                            type_param,
                             semi
                         )
                     }

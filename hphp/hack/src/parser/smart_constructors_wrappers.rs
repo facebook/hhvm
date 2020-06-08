@@ -583,8 +583,8 @@ where S: SmartConstructors<'src, State> {
     fn make_pocket_field_type_expr_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
         compose(SyntaxKind::PocketFieldTypeExprDeclaration, self.s.make_pocket_field_type_expr_declaration(arg0.1, arg1.1, arg2.1, arg3.1))
     }
-    fn make_pocket_field_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R, arg4 : Self::R) -> Self::R {
-        compose(SyntaxKind::PocketFieldTypeDeclaration, self.s.make_pocket_field_type_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    fn make_pocket_field_type_declaration(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R, arg3 : Self::R) -> Self::R {
+        compose(SyntaxKind::PocketFieldTypeDeclaration, self.s.make_pocket_field_type_declaration(arg0.1, arg1.1, arg2.1, arg3.1))
     }
     fn make_pocket_mapping_id_declaration(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::PocketMappingIdDeclaration, self.s.make_pocket_mapping_id_declaration(arg0.1, arg1.1))

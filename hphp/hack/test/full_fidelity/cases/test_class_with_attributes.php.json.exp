@@ -346,5 +346,5 @@
     }
   },
   "program_text":"<?hh\n<<a, b() >> class C extends B implements I {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

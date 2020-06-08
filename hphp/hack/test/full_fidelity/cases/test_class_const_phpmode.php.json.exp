@@ -898,5 +898,5 @@
     }
   },
   "program_text":"<?php\n\nclass MyClassName {\n  const WHITE = \"white\";\n  const string TRUE = \"true\";\n  const Serializable<string> BLUE = \"blue\\u{0123}\";\n  public const string PublicConst = \"this is fine in PHP mode\";\n  protected const string ProtectedConst = \"this is fine in PHP mode\";\n  private const string PrivateConst = \"this is fine in PHP mode\";\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

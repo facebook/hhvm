@@ -401,7 +401,7 @@ where
     // or one as indicated in the spec.
     // https://github.com/hhvm/hack-langspec/issues/83
     // TODO: Update the spec with reified
-    fn parse_type_parameter(&mut self) -> S::R {
+    pub fn parse_type_parameter(&mut self) -> S::R {
         let attributes = self.with_decl_parser(|x: &mut DeclarationParser<'a, S, T>| {
             x.parse_attribute_specification_opt()
         });

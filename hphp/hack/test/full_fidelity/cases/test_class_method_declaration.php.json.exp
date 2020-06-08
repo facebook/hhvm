@@ -829,5 +829,5 @@
     }
   },
   "program_text":"<?hh\nclass C {\n  public static function f () : void {}\n  public abstract function g () ;\n  <<attr>> public function h () {}\n  <<attr>> public static function ff () : void {}\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

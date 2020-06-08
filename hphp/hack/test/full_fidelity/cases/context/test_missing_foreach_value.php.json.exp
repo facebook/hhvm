@@ -2391,5 +2391,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nabstract class C {\n\n  public static function f1(): SomeMap {\n    foreach($type_map as $key => ) { // missing '$value'\n      $type_string_map[(string)$key] =\n        Str\\lowercase((string)str_replace('_', ' ', (string)$value));\n    }\n    return new SomeMap(\n      new Map($type_string_map)\n    );\n  }\n\n  public static function f2():SomeMap {\n    $other_type_map = Numbers::getValues();\n    $other_type_string_map = Map {};\n    foreach($other_type_map as $key => $value) {\n      $other_type_string_map[(string)$key] =\n        Str\\lowercase((string)str_replace('_', ' ', (string)$value));\n    }\n    return new SomeMap(\n      new Map($other_type_string_map)\n    );\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

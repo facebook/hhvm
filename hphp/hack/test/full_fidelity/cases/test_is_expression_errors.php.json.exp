@@ -351,5 +351,5 @@
     }
   },
   "program_text":"<?hh\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nfunction test(mixed $e): void {\n  $e is @int; // error\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

@@ -3,7 +3,9 @@
 class C {
   enum E {
     case string val;
-    :@S(val = "Hello");
+    :@S(
+      val = "Hello"
+    );
   }
 }
 
@@ -11,16 +13,20 @@ class XX extends C {}
 
 class D extends XX {
   enum E {
-    :@S2(val = "youpi");
+    :@S2(
+      val = "youpi"
+    );
   }
   enum F {
     case string fal;
-    :@S (fal = "blu");
+    :@S(
+      fal = "blu"
+    );
   }
 }
 
 <<__EntryPoint>>
-function main() : void {
+function main(): void {
 
   echo "Members in C\n";
   foreach (C:@E::Members() as $k) {

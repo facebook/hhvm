@@ -213,5 +213,5 @@
     }
   },
   "program_text":"<?hh\n\n// namespace should not be allowed to be the name of a namespace\n// This checks for case sensitivity. Should still not be allowed\n\nnamespace namespace\\Foo {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

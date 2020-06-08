@@ -745,5 +745,5 @@
     }
   },
   "program_text":"<?hh\n\nclass :test {\n  attribute int id @required;\n  attribute string name @lateinit;\n}\n\n@@Attr\nfunction f(): void {}\n\n@Attr @\nfunction g(): void {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

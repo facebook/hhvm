@@ -345,5 +345,5 @@
     }
   },
   "program_text":"<?hh\n\n// The clauses in namespace use should not have preceding backslashes\n\nuse NS1\\{\\C, \\D, E};\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

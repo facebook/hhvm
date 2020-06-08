@@ -2652,5 +2652,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f<<<__Attr>> reify T>() {}\nfunction g< <<__Attr>> reify U>() {}\nfunction h<reify V>() {}\n\nclass C {\n  const type TyC<<<Attr>> T> = int;\n  public function ff<<<__Attr>> reify Tt>() {}\n  public function gg< <<__Attr>> reify Uu>() {}\n  public function hh<reify Vv>() {}\n}\n\nclass CC<<<__Attr>> reify Tt>{}\nclass DD< <<__Attr>> reify Tt>{}\nclass EE<reify Tt>{}\n\ntype Ty<<<Attr>> T> = int;\nnewtype Ty2<<<Attr>> T> = int;\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

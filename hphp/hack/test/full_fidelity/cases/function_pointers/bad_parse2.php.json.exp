@@ -277,5 +277,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction main(): void {\n  // Ambiguity with heredocs\n  $var = prefix<<<\"MYLABEL\"\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

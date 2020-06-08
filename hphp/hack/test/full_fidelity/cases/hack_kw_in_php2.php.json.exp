@@ -460,5 +460,5 @@
     }
   },
   "program_text":"<?php\n\nclass using {}\n\nfunction foo(): using {\n  return new using();\n}\n\nclass bar extends using {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

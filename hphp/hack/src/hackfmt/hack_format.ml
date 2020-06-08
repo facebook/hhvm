@@ -2357,8 +2357,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
         {
           pocket_field_type_case = case_keyword;
           pocket_field_type_type = type_keyword;
-          pocket_field_type_reified = reify_keyword;
-          pocket_field_type_name = name;
+          pocket_field_type_type_parameter = type_parameter;
           pocket_field_type_semicolon = semicolon;
         } ->
       Concat
@@ -2367,9 +2366,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present case_keyword space;
           t env type_keyword;
           when_present type_keyword space;
-          t env reify_keyword;
-          when_present reify_keyword space;
-          t env name;
+          t env type_parameter;
           t env semicolon;
         ]
     | Syntax.PocketFieldTypeExprDeclaration

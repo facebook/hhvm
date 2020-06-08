@@ -708,5 +708,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass Foo {\n  public function __construct(inout $bar) {}\n}\n\nfunction foo($bar) {\n  new Foo(inout $bar);\n  PHP\\var_dump($bar);\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

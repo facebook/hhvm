@@ -461,5 +461,5 @@
     }
   },
   "program_text":"<?hh\n\nnamespace X ;\n\nfunction f($x) {\n  $x = HH\\Vector {1, 2};\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

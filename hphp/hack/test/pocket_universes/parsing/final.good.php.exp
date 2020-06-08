@@ -21,7 +21,10 @@
              (list 61
               ((pocket_field_type_declaration 12
                 ((((whitespace 4)) case 4 ((whitespace 1)))
-                 (() type 4 ((whitespace 1))) (missing 0 ()) (() name 1 ())
+                 (() type 4 ((whitespace 1)))
+                 (type_parameter 1
+                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
+                   (() name 1 ()) (missing 0 ())))
                  (() ";" 1 ((end_of_line 1)))))
                (pocket_field_type_expr_declaration 18
                 ((((whitespace 4)) case 4 ((whitespace 1)))

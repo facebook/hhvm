@@ -357,5 +357,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass C {\n  attribute\n    SomeAttributeType attr_name,\n    SomeAttributeType parent,  // allow using a keyword as a name\n    OtherAttributeType self; // and another\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

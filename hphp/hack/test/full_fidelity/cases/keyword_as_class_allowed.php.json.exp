@@ -2845,5 +2845,5 @@
     }
   },
   "program_text":"<?hh\n\nclass attribute {}\nclass binary {}\nclass category {}\nclass children {}\nclass coroutine {}\nclass define {}\nclass enum {}\nclass fallthrough {}\nclass from {}\nclass is {}\nclass let {}\nclass newtype {}\nclass Object {}\nclass object {}\nclass super {}\nclass suspend {}\nclass type {}\nclass where {}\n\nnew attribute();\nnew binary();\nnew category();\nnew children();\nnew coroutine();\nnew define();\nnew enum();\nnew fallthrough();\nnew from();\nnew is();\nnew let();\nnew newtype();\nnew Object();\nnew object();\nnew super();\nnew suspend();\nnew type();\nnew where();\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

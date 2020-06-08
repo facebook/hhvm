@@ -2007,5 +2007,5 @@
     }
   },
   "program_text":"<?hh\nreturn <a> << </a>;\nreturn <a> < </a>;\nreturn <a> <= </a>;\nreturn <a> <=> </a>;\nreturn <a> <<= </a>;\nreturn <a> <> </a>;\nreturn <a> << something </a>;\nreturn <a> < something </a>;\nreturn <a> <= something </a>;\nreturn <a> <=> something </a>;\nreturn <a> <<= something </a>;\nreturn <a> <> something </a>;\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

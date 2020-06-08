@@ -460,5 +460,5 @@
     }
   },
   "program_text":"<?php\n\nclass usiNG {}\n\nfunction foo(): usiNG {\n  return new usiNG();\n}\n\nclass bar extends usiNG {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

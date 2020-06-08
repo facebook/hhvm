@@ -593,5 +593,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f($x) {\n  return $x{123}; // error: deprecated subscript syntax\n}\n\nfunction g($a, $b) {\n  return $a ? : $b; // error: expected elvis operator\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

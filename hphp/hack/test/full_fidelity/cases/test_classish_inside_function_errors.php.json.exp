@@ -1020,5 +1020,5 @@
     }
   },
   "program_text":"<?php\n\nfunction earlier(){\n  function later(){\n      class BadClass{ // error2039\n      }\n      interface BadInterface{ // error2039\n      }\n      trait BadTrait{ // error2039\n      }\n    }\n}\n\nclass ThisIsFine{ // legal\n}\ninterface ThisIsFine{ // legal\n}\ntrait ThisIsFine{ // legal\n}\n\nclass C {\n  public function foo() {\n    class D {} // error2039 triggered from inside methods too\n  }\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

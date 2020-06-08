@@ -279,5 +279,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(self::name1::name3 $a){}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

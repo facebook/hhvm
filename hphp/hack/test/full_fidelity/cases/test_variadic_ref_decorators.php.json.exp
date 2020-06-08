@@ -1340,5 +1340,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction variadic(mixed ... $x) : void {}\n\nfunction ref(int & $x) : void {}\n\nfunction varvar(mixed ... ... $x) : void {}\n\nfunction refref(int & & $x) : void {}\n\nfunction varref(int ... & $x) : void {}\n\nfunction refvar(mixed & ... $x) : void {}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

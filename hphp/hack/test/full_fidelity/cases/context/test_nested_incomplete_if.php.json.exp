@@ -1212,5 +1212,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  public function g() {\n  }\n}\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  private function g() {\n  }\n}\n\nclass C {\n  public function f() {\n    if ($x // ERROR RECOVERY: report missing right paren and right brace here\n\n  protected function g() {\n  }\n}\n\n// there are three of basically the same case just to make sure that\n// 'public', 'private', and 'protected' are all treated the same in\n// with respect to error recovery.\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

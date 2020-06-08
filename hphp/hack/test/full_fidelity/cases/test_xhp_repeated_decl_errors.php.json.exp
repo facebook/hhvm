@@ -427,5 +427,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass :foo {\n  children empty;\n  children empty;\n}\n\nclass :bar {\n  category %foo;\n  category %foo;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

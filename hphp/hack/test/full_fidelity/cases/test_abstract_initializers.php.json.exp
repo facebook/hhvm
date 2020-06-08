@@ -1196,5 +1196,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nclass ConcreteRight {\n  const int i1 = 4;\n}\n\nclass ConcreteWrong {\n  const int i1;\n}\n\nabstract class AbstractRight {\n  abstract const int i1;\n}\n\nabstract class AbstractWrong {\n  abstract const int i1 = 3;\n}\n\nabstract class MixedRight {\n  const int i1 = 5;\n}\n\nabstract class MixedWrong {\n  const int i1;\n}\n",
-  "version":"2020-04-14-0002"
+  "version":"2020-06-02-0001"
 }

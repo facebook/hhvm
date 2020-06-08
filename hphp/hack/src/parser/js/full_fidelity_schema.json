@@ -1,6 +1,6 @@
 { "description" :
   "@generated JSON schema of the Hack Full Fidelity Parser AST",
-  "version" : "2020-04-14-0002",
+  "version" : "2020-06-02-0001",
   "trivia" : [
     { "trivia_kind_name" : "WhiteSpace",
       "trivia_type_name" : "whitespace" },
@@ -2129,8 +2129,7 @@
       "fields" : [
         { "field_name" : "case" },
         { "field_name" : "type" },
-        { "field_name" : "reified" },
-        { "field_name" : "name" },
+        { "field_name" : "type_parameter" },
         { "field_name" : "semicolon" }
       ] },
     { "kind_name" : "PocketMappingIdDeclaration",

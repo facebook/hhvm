@@ -47,11 +47,6 @@ namespace HH {
  * are being removed. When a new key is added or an element is removed, all
  * iterators that point to the `Map` shall be considered invalid.
  *
- * `Map`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used with an element of a `Map`, or if an element of a `Map` is
- * passed by reference, of if a `Map` is used with `foreach` by reference, an
- * exception will be thrown.
- *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */

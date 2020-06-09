@@ -33,11 +33,6 @@ namespace HH {
  * also support `isset($m[$k])` and `empty($m[$k])` syntax, and they provide
  * similar semantics as arrays.
  *
- * `Pair`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used with an element of a `Pair`, if an element of a `Pair` is
- * passed by reference, or if a `Pair` is used with foreach by reference, an
- * exception will be thrown.
- *
  * `Pair` keys are always 0 and 1, respectively.
  *
  * You may notice that many methods affecting the instace of `Pair` return an

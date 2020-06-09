@@ -4,5 +4,5 @@ File "map_lambda_bad_pos.php", line 6, characters 24-26:
 Expected int
 File "map_lambda_bad_pos.php", line 4, characters 19-24:
 But got string
-File "collections/Map.hhi", line 230, characters 64-65:
+File "collections/Map.hhi", line 225, characters 64-65:
   via this generic Tk

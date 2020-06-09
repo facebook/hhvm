@@ -38,11 +38,6 @@ namespace HH {
  * elements are being removed. When a new element is added or removed, all
  * iterators that point to the `Vector` shall be considered invalid.
  *
- * `Vector`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used with an element of a `Vector`, or if an element of a `Vector`
- * is passed by reference, or if a `Vector` is used with `foreach` by
- * reference, an exception will be thrown.
- *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */

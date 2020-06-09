@@ -40,10 +40,6 @@ namespace HH {
  * When an element is added or removed, all iterators that point to the `Set`
  * shall be considered invalid.
  *
- * `Set`s do not support taking elements by reference. If binding assignment
- * (`=&`) is used when adding a new element to a `Set` (ex. `$c[] =& ...`), or
- * if a `Set` is used with `foreach` by reference, an exception will be thrown.
- *
  * @guide /hack/collections/introduction
  * @guide /hack/collections/classes
  */

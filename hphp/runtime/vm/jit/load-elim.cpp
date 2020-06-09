@@ -566,6 +566,9 @@ void handle_call_effects(Local& env,
    * across php calls, which currently always leads to spilling.
    */
   auto const keep = env.global.ainfo.all_stack    |
+                    env.global.ainfo.all_fcontext |
+                    env.global.ainfo.all_ffunc    |
+                    env.global.ainfo.all_fmeta    |
                     env.global.ainfo.all_local    |
                     env.global.ainfo.all_iter;
   env.state.avail &= keep;

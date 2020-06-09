@@ -1055,10 +1055,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   X("StrLike",T::StrLike);
   X("VecCompat",T::VecCompat);
   X("VArrCompat",T::VArrCompat);
-  X("PArrCompat",T::PArrCompat);
+  X("ArrCompat",T::ArrCompat);
   X("?VecCompat",T::OptVecCompat);
   X("?VArrCompat",T::OptVArrCompat);
-  X("?PArrCompat",T::OptPArrCompat);
+  X("?ArrCompat",T::OptArrCompat);
   X("Uninit",   T::Uninit);
 
 #undef X
@@ -1130,10 +1130,10 @@ RepoAuthType read_repo_auth_type(AsmState& as) {
   case T::StrLike:
   case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::OptPArrCompat:
+  case T::OptArrCompat:
   case T::VArrCompat:
   case T::VecCompat:
-  case T::PArrCompat:
+  case T::ArrCompat:
   case T::InitCell:
   case T::Cell:
   case T::ExactObj:

@@ -435,8 +435,8 @@ auto const non_opt_unions = folly::lazy([] {
     TUnc,
     TUncArrKey,
     TArrKey,
-    TPArrCompat,
-    TPArrCompatSA,
+    TArrCompat,
+    TArrCompatSA,
     TVArrCompat,
     TVArrCompatSA,
     TVecCompat,
@@ -686,7 +686,7 @@ TEST(Type, Prim) {
     { TPrim, dval(0.0) },
     { TVArrCompat, TPrim },
     { TVecCompat, TPrim },
-    { TPArrCompat, TPrim },
+    { TArrCompat, TPrim },
     { TStrLike, TPrim },
   };
 
@@ -747,13 +747,13 @@ TEST(Type, Prim) {
     EXPECT_TRUE(TPrim.couldBe(TClsMeth));
     EXPECT_TRUE(TPrim.couldBe(TVArrCompat));
     EXPECT_TRUE(TPrim.couldBe(TVecCompat));
-    EXPECT_TRUE(TPrim.couldBe(TPArrCompat));
+    EXPECT_TRUE(TPrim.couldBe(TArrCompat));
   } else {
     EXPECT_FALSE(TClsMeth.subtypeOf(TInitPrim));
     EXPECT_FALSE(TPrim.couldBe(TClsMeth));
     EXPECT_FALSE(TPrim.couldBe(TVArrCompat));
     EXPECT_FALSE(TPrim.couldBe(TVecCompat));
-    EXPECT_FALSE(TPrim.couldBe(TPArrCompat));
+    EXPECT_FALSE(TPrim.couldBe(TArrCompat));
   }
 }
 
@@ -794,17 +794,17 @@ TEST(Type, Unc) {
     EXPECT_TRUE(TClsMeth.subtypeOf(BInitUnc));
     EXPECT_TRUE(TVArrCompatSA.subtypeOf(BInitUnc));
     EXPECT_TRUE(TVecCompatSA.subtypeOf(BInitUnc));
-    EXPECT_TRUE(TPArrCompatSA.subtypeOf(BInitUnc));
+    EXPECT_TRUE(TArrCompatSA.subtypeOf(BInitUnc));
   } else {
     EXPECT_FALSE(TClsMeth.subtypeOf(BInitUnc));
     EXPECT_FALSE(TVArrCompatSA.subtypeOf(BInitUnc));
     EXPECT_FALSE(TVecCompatSA.subtypeOf(BInitUnc));
-    EXPECT_FALSE(TPArrCompatSA.subtypeOf(BInitUnc));
+    EXPECT_FALSE(TArrCompatSA.subtypeOf(BInitUnc));
   }
 
   EXPECT_FALSE(TVArrCompat.subtypeOf(BInitUnc));
   EXPECT_FALSE(TVecCompat.subtypeOf(BInitUnc));
-  EXPECT_FALSE(TPArrCompat.subtypeOf(BInitUnc));
+  EXPECT_FALSE(TArrCompat.subtypeOf(BInitUnc));
 
   const std::initializer_list<std::tuple<Type, Type, bool>> tests{
     { TUnc, TInitUnc, true },
@@ -825,10 +825,10 @@ TEST(Type, Unc) {
     { TClsMeth, TInitUnc, use_lowptr },
     { TVArrCompat, TInitUnc, true },
     { TVecCompat, TInitUnc, true },
-    { TPArrCompat, TInitUnc, true },
+    { TArrCompat, TInitUnc, true },
     { TVArrCompatSA, TInitUnc, true },
     { TVecCompatSA, TInitUnc, true },
-    { TPArrCompatSA, TInitUnc, true },
+    { TArrCompatSA, TInitUnc, true },
   };
   for (auto const& t : tests) {
     auto const& ty1 = std::get<0>(t);
@@ -1002,8 +1002,8 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptVArrCompat, union_of(TOptClsMeth, TVArr));
   EXPECT_EQ(TOptVArrCompatSA, union_of(TOptClsMeth, TSVArr));
 
-  EXPECT_EQ(TOptPArrCompat, union_of(TOptClsMeth, TPArr));
-  EXPECT_EQ(TOptPArrCompatSA, union_of(TOptClsMeth, TSPArr));
+  EXPECT_EQ(TOptArrCompat, union_of(TOptClsMeth, TPArr));
+  EXPECT_EQ(TOptArrCompatSA, union_of(TOptClsMeth, TSPArr));
 
   EXPECT_EQ(TOptVecCompat, union_of(TOptClsMeth, TVec));
   EXPECT_EQ(TOptVecCompatSA, union_of(TOptClsMeth, TSVec));
@@ -1156,8 +1156,8 @@ TEST(Type, SpecificExamples) {
             use_lowptr ? TVecCompatSA : TSVec);
   EXPECT_EQ(intersection_of(TVArrCompat, TInitUnc),
             use_lowptr ? TVArrCompatSA : TSVArr);
-  EXPECT_EQ(intersection_of(TPArrCompat, TInitUnc),
-            use_lowptr ? TPArrCompatSA : TSArr);
+  EXPECT_EQ(intersection_of(TArrCompat, TInitUnc),
+            use_lowptr ? TArrCompatSA : TSArr);
 
   auto test_map_a = MapElems{};
   test_map_a[tv(s_A)] = TDbl;
@@ -2608,7 +2608,7 @@ TEST(Type, LoosenStaticness) {
                         TOptKeyset,
                         TOptSStr,
                         TOptUncStrLike,
-                        TOptPArrCompatSA,
+                        TOptArrCompatSA,
                         TOptVArrCompatSA,
                         TOptVecCompatSA) &&
          t != TInitNull)) continue;
@@ -2668,8 +2668,8 @@ TEST(Type, LoosenStaticness) {
     { TVArrCompatSA, TVArrCompat },
     { TVecCompat, TVecCompat },
     { TVecCompatSA, TVecCompat },
-    { TPArrCompat, TPArrCompat },
-    { TPArrCompatSA, TPArrCompat },
+    { TArrCompat, TArrCompat },
+    { TArrCompatSA, TArrCompat },
   };
   for (auto const& p : tests) {
     EXPECT_EQ(loosen_staticness(p.first), p.second);
@@ -3125,8 +3125,8 @@ TEST(Type, RemoveCounted) {
     { TVArrCompatSA, use_lowptr ? TVArrCompatSA : TSVArr },
     { TVecCompat, use_lowptr ? TVecCompatSA : TSVec },
     { TVecCompatSA, use_lowptr ? TVecCompatSA : TSVec },
-    { TPArrCompat, use_lowptr ? TPArrCompatSA : TSArr },
-    { TPArrCompatSA, use_lowptr ? TPArrCompatSA : TSArr },
+    { TArrCompat, use_lowptr ? TArrCompatSA : TSArr },
+    { TArrCompatSA, use_lowptr ? TArrCompatSA : TSArr },
   };
   for (auto const& p : cases) {
     EXPECT_EQ(remove_counted(p.first), p.second);
@@ -3208,8 +3208,8 @@ TEST(Type, MustBeCounted) {
     { TVArrCompatSA, false },
     { TVecCompat, false },
     { TVecCompatSA, false },
-    { TPArrCompat, false },
-    { TPArrCompatSA, false },
+    { TArrCompat, false },
+    { TArrCompatSA, false },
   };
   for (auto const& p : cases) {
     if (p.second) {
@@ -3889,7 +3889,7 @@ TEST(Type, ArrLike) {
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
     { TArrLike, TVecCompat },
     { TArrLike, TOptKeysetE },
-    { TArrLike, TPArrCompatSA },
+    { TArrLike, TArrCompatSA },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_false{

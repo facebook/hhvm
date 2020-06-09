@@ -148,8 +148,8 @@ bool mayHaveData(trep bits) {
   case BOptVArrCompat: case BOptVArrCompatSA:
   case BVecCompat: case BVecCompatSA:
   case BOptVecCompat: case BOptVecCompatSA:
-  case BPArrCompat: case BPArrCompatSA:
-  case BOptPArrCompat: case BOptPArrCompatSA:
+  case BArrCompat: case BArrCompatSA:
+  case BOptArrCompat: case BOptArrCompatSA:
     return true;
 
   case BBottom:
@@ -273,8 +273,8 @@ bool canBeOptional(trep bits) {
   case BFuncOrCls:
   case BUncStrLike:
   case BStrLike:
-  case BPArrCompatSA:
-  case BPArrCompat:
+  case BArrCompatSA:
+  case BArrCompat:
   case BVArrCompatSA:
   case BVArrCompat:
   case BVecCompatSA:
@@ -362,8 +362,8 @@ bool canBeOptional(trep bits) {
   case BOptFuncOrCls:
   case BOptUncStrLike:
   case BOptStrLike:
-  case BOptPArrCompatSA:
-  case BOptPArrCompat:
+  case BOptArrCompatSA:
+  case BOptArrCompat:
   case BOptVArrCompatSA:
   case BOptVArrCompat:
   case BOptVecCompatSA:
@@ -3901,7 +3901,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::PHPArr:
   case IsTypeOp::Arr:
     return !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
-      ? TPArrCompat : TArr;
+      ? TArrCompat : TArr;
   case IsTypeOp::Vec:
     return RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
       ? TVecCompat : TVec;
@@ -4597,8 +4597,8 @@ Type union_of(Type a, Type b) {
   Y(VecCompatSA)
   Y(VecCompat)
 
-  Y(PArrCompatSA)
-  Y(PArrCompat)
+  Y(ArrCompatSA)
+  Y(ArrCompat)
 
   // non-optional types that contain other types above (and hence
   // must come after them).
@@ -4933,7 +4933,7 @@ Type loosen_arrays(Type a) {
   if (a.couldBe(BVec))     a |= TVec;
   if (a.couldBe(BDict))    a |= TDict;
   if (a.couldBe(BKeyset))  a |= TKeyset;
-  if (a.couldBe(BClsMeth)) a |= RO::EvalHackArrDVArrs ? TVecCompat : TPArrCompat;
+  if (a.couldBe(BClsMeth)) a |= RO::EvalHackArrDVArrs ? TVecCompat : TArrCompat;
   return a;
 }
 
@@ -4985,7 +4985,7 @@ Type loosen_likeness(Type t) {
     if (!RuntimeOption::EvalHackArrDVArrs) {
       // Ideally we would loosen to TVArrLike, however, varray and darray need
       // to behave the same in most instances.
-      t = union_of(std::move(t), TPArrCompat);
+      t = union_of(std::move(t), TArrCompat);
     } else {
       t = union_of(std::move(t), TVecCompat);
     }
@@ -6270,7 +6270,7 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
   if (is_opt(testTy)) return is_type_might_raise(unopt(testTy), valTy);
   if (testTy == TStrLike) {
     return valTy.couldBe(BFunc | BCls);
-  } else if (testTy == TArr || testTy == TPArrCompat) {
+  } else if (testTy == TArr || testTy == TArrCompat) {
     return mayLogProv ||
            (RO::EvalIsVecNotices && !hackarr && valTy.couldBe(BClsMeth)) ||
            (RO::EvalHackArrCompatIsArrayNotices && valTy.couldBe(BHackArr));
@@ -6759,8 +6759,8 @@ RepoAuthType make_repo_type(ArrayTypeTable::Builder& arrTable, const Type& t) {
   X(VecCompat)
   X(OptVArrCompat)
   X(OptVecCompat)
-  X(PArrCompat)
-  X(OptPArrCompat)
+  X(ArrCompat)
+  X(OptArrCompat)
   X(InitUnc)
   X(Unc)
   X(InitCell)

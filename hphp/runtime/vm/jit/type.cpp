@@ -1021,10 +1021,10 @@ Type typeFromRATImpl(RepoAuthType ty, const Class* ctx) {
     case T::OptKeyset:      return X(TKeyset, Keyset, Keyset)
                                    | TInitNull;
     case T::OptVecCompat:   return X(TVec, Vec, CountedVec)
-                                | TClsMeth | TInitNull;
-    case T::PArrCompat:     return X(TArr, Array, CountedArray) | TClsMeth;
-    case T::OptPArrCompat:  return X(TArr, Array, CountedArray)
-                                   | TInitNull | TClsMeth;
+                                   | TClsMeth | TInitNull;
+    case T::ArrCompat:      return X(TArr, Array, CountedArray) | TClsMeth;
+    case T::OptArrCompat:   return X(TArr, Array, CountedArray)
+                                   | TClsMeth | TInitNull;
 #undef X
 
 #define X(A, B, C)                                                      \

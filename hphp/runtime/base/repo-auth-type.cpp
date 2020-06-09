@@ -172,8 +172,8 @@ bool RepoAuthType::operator==(RepoAuthType o) const {
   case T::VecCompat:
   case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::PArrCompat:
-  case T::OptPArrCompat:
+  case T::ArrCompat:
+  case T::OptArrCompat:
     // array id equals to either kInvalidArrayId for null array info, or a
     // regular id. in each case, we just need to compare their id.
     return arrayId() == o.arrayId();
@@ -274,10 +274,10 @@ bool tvMatchesRepoAuthType(TypedValue tv, RepoAuthType ty) {
     }
     return true;
 
-  case T::OptPArrCompat:
+  case T::OptArrCompat:
     if (initNull) return true;
     // fallthrough
-  case T::PArrCompat:
+  case T::ArrCompat:
     if (isClsMethType(tv.m_type)) return true;
     if (!isArrayType(tv.m_type)) return false;
     if (auto const arr = ty.array()) {
@@ -599,8 +599,8 @@ std::string show(RepoAuthType rat) {
   case T::VecCompat:
   case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::PArrCompat:
-  case T::OptPArrCompat:
+  case T::ArrCompat:
+  case T::OptArrCompat:
     {
       auto ret = std::string{};
       if (tag == T::OptArr    || tag == T::OptSArr ||
@@ -610,11 +610,11 @@ std::string show(RepoAuthType rat) {
           tag == T::OptDict   || tag == T::OptSDict ||
           tag == T::OptKeyset || tag == T::OptSKeyset ||
           tag == T::OptVArrCompat || tag == T::OptVecCompat ||
-          tag == T::OptPArrCompat) {
+          tag == T::OptArrCompat) {
         ret += '?';
       }
-      if (tag == T::PArrCompat || tag == T::OptPArrCompat) {
-        ret += "PArrCompat";
+      if (tag == T::ArrCompat || tag == T::OptArrCompat) {
+        ret += "ArrCompat";
       }
       if (tag == T::VArrCompat || tag == T::OptVArrCompat) {
         ret += "VArrCompat";

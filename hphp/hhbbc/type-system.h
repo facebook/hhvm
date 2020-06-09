@@ -402,11 +402,11 @@ enum trep : uint64_t {
   BOptVecCompat    = BInitNull | BVecCompat,
   BOptVecCompatSA  = BInitNull | BVecCompatSA,
 
-  BPArrCompat   = BClsMeth | BArr,
-  BPArrCompatSA = BClsMeth | BSArr,
+  BArrCompat   = BClsMeth | BArr,
+  BArrCompatSA = BClsMeth | BSArr,
 
-  BOptPArrCompat   = BInitNull | BPArrCompat,
-  BOptPArrCompatSA = BInitNull | BPArrCompatSA,
+  BOptArrCompat   = BInitNull | BArrCompat,
+  BOptArrCompatSA = BInitNull | BArrCompatSA,
 
   BInitPrim = BInitNull | BBool | BNum | BFunc | BCls | BFuncS |
               (use_lowptr ? BClsMeth : 0),
@@ -1046,8 +1046,8 @@ X(ArrKey)                                       \
 X(FuncOrCls)                                    \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
-X(PArrCompatSA)                                 \
-X(PArrCompat)                                   \
+X(ArrCompatSA)                                  \
+X(ArrCompat)                                    \
 X(VArrCompatSA)                                 \
 X(VArrCompat)                                   \
 X(VecCompatSA)                                  \
@@ -1118,8 +1118,8 @@ X(OptArrKey)                                    \
 X(OptFuncOrCls)                                 \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \
-X(OptPArrCompatSA)                              \
-X(OptPArrCompat)                                \
+X(OptArrCompatSA)                               \
+X(OptArrCompat)                                 \
 X(OptVArrCompatSA)                              \
 X(OptVArrCompat)                                \
 X(OptVecCompatSA)                               \

@@ -115,8 +115,8 @@ size_t encodedRATSize(const unsigned char* pc) {
   case T::VecCompat:
   case T::OptVArrCompat:
   case T::OptVecCompat:
-  case T::PArrCompat:
-  case T::OptPArrCompat:
+  case T::ArrCompat:
+  case T::OptArrCompat:
     if (highBitSet) {
       return ((int8_t(nextPcVal) < 0) ? 4 : 1) + tagSize;
     }

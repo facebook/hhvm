@@ -360,32 +360,28 @@ void raise_array_serialization_notice(SerializationSite src,
 
   counterFor(src, arrayType)->addValue(1);
 
-  auto const bail = [&](arrprov::Tag tag) {
-    auto const isEmpty = arr->empty();
-    auto const isStatic = arr->isStatic();
-    auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
-    unknownCounters[counterIdx]->addValue(1);
-    raise_dynamically_sampled_notice(
-      "Observing {}{}{} in {} from {}",
-      isEmpty ? "empty, " : "",
-      isStatic ? "static, " : "",
-      arrayTypeName(arrayType),
-      srcName(src),
-      tag.toString()
-    );
-  };
+  auto const isEmpty = arr->empty();
+  auto const isStatic = arr->isStatic();
+  auto const isList = !isEmpty && arr->isVectorData();
 
   static auto const sampl_threshold =
     RAND_MAX / RuntimeOption::EvalLogArrayProvenanceSampleRatio;
   if (std::rand() >= sampl_threshold) return;
   auto const tag = arrprov::getTag(arr);
-  if (!tag.concrete()) { bail(tag); return; }
+  if (tag.concrete()) {
+    knownCounter->addValue(1);
+  } else {
+    auto const counterIdx = (isEmpty ? 2 : 0) + (isStatic ? 1 : 0);
+    unknownCounters[counterIdx]->addValue(1);
+  }
 
-  knownCounter->addValue(1);
-  raise_dynamically_sampled_notice("Observing {} in {} from {}",
-                                   arrayTypeName(arrayType),
-                                   srcName(src),
-                                   tag.toString());
+  raise_dynamically_sampled_notice(
+      "Observing {}{}{} in {} from {}",
+      isStatic ? "static " : "",
+      (isEmpty ? "empty " : isList ? "list-like " : "map-like "),
+      arrayTypeName(arrayType),
+      srcName(src),
+      tag.toString());
 }
 
 void

@@ -1,20 +1,20 @@
 ---- is vec_or_dict ----
 
-Notice: Observing vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 51
+Notice: Observing static list-like vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 51
 bool(true)
 
-Notice: Observing dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 52
+Notice: Observing static map-like dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 52
 bool(true)
 ---- as vec_or_dict ----
 
-Notice: Observing vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 24
+Notice: Observing static list-like vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 24
 vec(3) {
   int(1)
   int(2)
   int(3)
 }
 
-Notice: Observing dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 24
+Notice: Observing static map-like dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 24
 dict(2) {
   ["foo"]=>
   int(5)
@@ -23,12 +23,12 @@ dict(2) {
 }
 ---- is vec ----
 
-Notice: Observing vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 57
+Notice: Observing static list-like vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 57
 bool(true)
 bool(false)
 ---- as vec ----
 
-Notice: Observing vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 16
+Notice: Observing static list-like vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 16
 vec(3) {
   int(1)
   int(2)
@@ -38,12 +38,12 @@ string(6) "failed"
 ---- is dict ----
 bool(false)
 
-Notice: Observing dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 64
+Notice: Observing static map-like dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 64
 bool(true)
 ---- as dict ----
 string(6) "failed"
 
-Notice: Observing dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 8
+Notice: Observing static map-like dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 8
 dict(2) {
   ["foo"]=>
   int(5)
@@ -52,33 +52,33 @@ dict(2) {
 }
 ---- is_vec ----
 
-Notice: Observing vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 69
+Notice: Observing static list-like vec in is_vec from %s/is-tests.php:48 in %s/is-tests.php on line 69
 bool(true)
 bool(false)
 ---- is_dict ----
 bool(false)
 
-Notice: Observing dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 73
+Notice: Observing static map-like dict in is_dict from %s/is-tests.php:49 in %s/is-tests.php on line 73
 bool(true)
 --- is $tuple ----
 
-Notice: Observing vec in is_tuple from %s/is-tests.php:48 in %s/is-tests.php on line 75
+Notice: Observing static list-like vec in is_tuple from %s/is-tests.php:48 in %s/is-tests.php on line 75
 bool(false)
 bool(false)
 --- as $tuple ----
 
-Notice: Observing vec in is_tuple from %s/is-tests.php:48 in %s/is-tests.php on line 40
+Notice: Observing static list-like vec in is_tuple from %s/is-tests.php:48 in %s/is-tests.php on line 40
 string(6) "failed"
 string(6) "failed"
 --- is $shape ----
 bool(false)
 
-Notice: Observing dict in is_shape from %s/is-tests.php:49 in %s/is-tests.php on line 82
+Notice: Observing static map-like dict in is_shape from %s/is-tests.php:49 in %s/is-tests.php on line 82
 bool(false)
 --- as $tuple ----
 string(6) "failed"
 
-Notice: Observing dict in is_shape from %s/is-tests.php:49 in %s/is-tests.php on line 32
+Notice: Observing static map-like dict in is_shape from %s/is-tests.php:49 in %s/is-tests.php on line 32
 string(6) "failed"
 --- is $tuple  (no match) ----
 bool(false)

@@ -28,17 +28,17 @@ let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
   in
   Pfree_var (prefix ^ suffix, pre_scope)
 
-let new_proto_renv scope psig_env =
+let new_proto_renv saved_tenv scope psig_env =
   {
     pre_scope = scope;
     pre_psig_env = psig_env;
     pre_pvar_counters = Hashtbl.create 10;
+    pre_tenv = saved_tenv;
   }
 
-let new_renv proto_renv saved_tenv global_pc this_ty ret_ty =
+let new_renv proto_renv global_pc this_ty ret_ty =
   {
     re_proto = proto_renv;
-    re_tenv = saved_tenv;
     re_lpc = [];
     re_gpc = [global_pc];
     re_this = this_ty;

@@ -141,7 +141,7 @@ let env fmt env =
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   fprintf fmt "@]"
 
-let policy_sig fmt { psig_policied_properties; psig_unpolicied_properties } =
+let policy_sig fmt { psig_policied_properties } =
   let property fmt (name, _ty) = fprintf fmt "%s" name in
   let properties fmt = list comma_sep property fmt in
   fprintf fmt "@[<v>";
@@ -150,11 +150,6 @@ let policy_sig fmt { psig_policied_properties; psig_unpolicied_properties } =
     "* @[<hov2>Policied properties:@ @[<hov>%a@]@]"
     properties
     psig_policied_properties;
-  fprintf
-    fmt
-    "@,* @[<hov2>Unpolicied properties:@ @[<hov>%a@]@]"
-    properties
-    psig_unpolicied_properties;
   fprintf fmt "@]"
 
 let policy_sig_env fmt map =

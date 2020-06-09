@@ -10,6 +10,7 @@ module Pp = Ifc_pretty
 module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
+module Reason = Typing_reason
 
 exception FlowInference of string
 
@@ -200,7 +201,7 @@ let get_policy_var ?prefix lump_pol_opt proto_renv =
     Env.new_policy_var proto_renv prefix
 
 let rec class_ptype lump_pol_opt proto_renv name =
-  let { psig_policied_properties; psig_unpolicied_properties } =
+  let { psig_policied_properties } =
     match SMap.find_opt name proto_renv.pre_psig_env with
     | Some class_policy_sig -> class_policy_sig
     | None -> fail ("Could not found a class policy signature for " ^ name)
@@ -210,19 +211,12 @@ let rec class_ptype lump_pol_opt proto_renv name =
         (prop, ptype ~prefix:("." ^ prop) lump_pol_opt proto_renv ty))
   in
   let lump_pol = get_policy_var lump_pol_opt proto_renv ~prefix:"lump" in
-  let unpolicied_props =
-    List.map psig_unpolicied_properties (fun (prop, ty) ->
-        (prop, ptype ~prefix:("." ^ prop) (Some lump_pol) proto_renv ty))
-  in
-  let property_ptype_map =
-    SMap.of_list (List.append policied_props unpolicied_props)
-  in
   Tclass
     {
       c_name = name;
       c_self = get_policy_var lump_pol_opt proto_renv ~prefix:name;
       c_lump = lump_pol;
-      c_property_map = property_ptype_map;
+      c_property_map = SMap.of_list policied_props;
     }
 
 (* Turns a locl_ty into a type with policy annotations;
@@ -235,6 +229,18 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
   | T.Tclass ((_, name), _, _) -> class_ptype lump_pol_opt proto_renv name
+  | T.Tvar id ->
+    (* Drops the environment `expand_var` returns. This is logically
+     * correct, but threading the envrionment would lead to faster future
+     * `Tvar` lookups.
+     *)
+    let (_, ty) =
+      Typing_inference_env.expand_var
+        proto_renv.pre_tenv.Tast.inference_env
+        Reason.Rnone
+        id
+    in
+    ptype ty
   (* ---  types below are not yet unpported *)
   | T.Tdependent (_, _ty) -> fail "Tdependent"
   | T.Tdarray (_keyty, _valty) -> fail "Tdarray"
@@ -247,7 +253,6 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Toption _ty -> fail "Toption"
   | T.Tfun _fun_ty -> fail "Tfun"
   | T.Tshape (_sh_kind, _sh_type_map) -> fail "Tshape"
-  | T.Tvar _id -> fail "Tvar"
   | T.Tgeneric _name -> fail "Tgeneric"
   | T.Tnewtype (_name, _ty_list, _as_bound) -> fail "Tnewtype"
   | T.Tobject -> fail "Tobject"
@@ -279,27 +284,26 @@ let receiver_of_obj_get obj_ptype property =
   | Tclass class_ -> class_
   | _ -> fail ("Couldn't find a class for the property '" ^ property ^ "'.")
 
-let property_ptype obj_ptype property =
+let property_ptype proto_renv obj_ptype property property_ty =
   let class_ = receiver_of_obj_get obj_ptype property in
   match SMap.find_opt property class_.c_property_map with
   | Some ptype -> ptype
   | None ->
-    fail
-      ("Property '" ^ property ^ "' doesn't exist in '" ^ class_.c_name ^ "'.")
+    ptype ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
 
-let rec lvalue renv env (((_epos, _ety), e) : Tast.expr) =
+let rec lvalue renv env (((_epos, ety), e) : Tast.expr) =
   match e with
   | A.Lvar (_pos, lid) -> (env, Local lid)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr renv env obj in
     let obj_pol = (receiver_of_obj_get obj_ptype property).c_self in
-    let prop_ptype = property_ptype obj_ptype property in
+    let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
     let env = Env.acc env (add_dependencies [obj_pol] prop_ptype) in
     (env, Property prop_ptype)
   | _ -> fail "unsupported lvalue"
 
 (* Generate flow constraints for an expression *)
-and expr renv env (((_epos, _ety), e) : Tast.expr) =
+and expr renv env (((_epos, ety), e) : Tast.expr) =
   let expr = expr renv in
   match e with
   | A.True
@@ -344,7 +348,7 @@ and expr renv env (((_epos, _ety), e) : Tast.expr) =
   | A.Lvar (_pos, lid) -> (env, Env.get_local_type env lid)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
-    let prop_ptype = property_ptype obj_ptype property in
+    let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
     let (env, super_ptype) =
       weaken ~prefix:("." ^ property) renv env prop_ptype
     in
@@ -445,12 +449,12 @@ let func_or_method psig_env class_name_opt name saved_env params body lrty =
     try
       (* Setup the read-only environment *)
       let scope = Scope.alloc () in
-      let proto_renv = Env.new_proto_renv scope psig_env in
+      let proto_renv = Env.new_proto_renv saved_env scope psig_env in
 
       let global_pc = Env.new_policy_var proto_renv "pc" in
       let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
       let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
-      let renv = Env.new_renv proto_renv saved_env global_pc this_ty ret_ty in
+      let renv = Env.new_renv proto_renv global_pc this_ty ret_ty in
 
       (* Initialise the mutable environment *)
       let env = Env.new_env in

@@ -53,10 +53,7 @@ type prop =
   | Cflow of (policy * policy)
 
 (* Policy signature for a class. Used for generating policy types for objects *)
-type policy_sig = {
-  psig_policied_properties: (string * Type.locl_ty) list;
-  psig_unpolicied_properties: (string * Type.locl_ty) list;
-}
+type policy_sig = { psig_policied_properties: (string * Type.locl_ty) list }
 
 (* Types with policies *)
 type ptype =
@@ -94,6 +91,8 @@ type proto_renv = {
   pre_pvar_counters: (string, int ref) Hashtbl.t;
   (* policy signatures for classes indexed by class name *)
   pre_psig_env: policy_sig SMap.t;
+  (* Hack type environment *)
+  pre_tenv: Tast.saved_env;
 }
 
 (* Read-only environment information managed following a stack discipline
@@ -101,8 +100,6 @@ type proto_renv = {
 type renv = {
   (* Section of renv needed to initialize full renv *)
   re_proto: proto_renv;
-  (* Hack type environment *)
-  re_tenv: Tast.saved_env;
   (* Policy tracking local effects, these effects
      are not observable outside the current function.
      Assignments to local variables fall into this

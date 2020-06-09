@@ -1,33 +1,27 @@
 Policy signature for \My:
 * Policied properties: mInt, other
-* Unpolicied properties: mBool
 
 Policy signature for \Other:
 * Policied properties: oBool
-* Unpolicied properties: oString
 
 Analyzing __construct:
 * pc: pc
 * This:
-    \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-    oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>>
+    \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+    mInt -> <.mInt>>
 * Return: <ret>
-* Params:
-    { $o -> \Other<\Other'1, lump'2, oString -> <lump'2>,
-      oBool -> <.oBool'1>> }
+* Params: { $o -> \Other<\Other'1, lump'2, oBool -> <.oBool'1>> }
 * Final environment:
-  Locals:
-    { $o -> \Other<\Other'1, lump'2, oString -> <lump'2>,
-      oBool -> <.oBool'1>> }
+  Locals: { $o -> \Other<\Other'1, lump'2, oBool -> <.oBool'1>> }
   Constraints:
-    [\My < \Other, lump < lump'2, lump'2 < lump, .oBool < .oBool'1,
-     .oBool'1 < .oBool, lump'2 = lump, \Other'1 < \Other, pc < \Other]
+    [\My < \Other, .oBool < .oBool'1, .oBool'1 < .oBool, lump'2 = lump,
+     \Other'1 < \Other, pc < \Other]
 
 Analyzing getMInt:
 * pc: pc
 * This:
-    \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-    oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>>
+    \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+    mInt -> <.mInt>>
 * Return: <ret>
 * Params: {}
 * Final environment:
@@ -38,8 +32,8 @@ Analyzing getMInt:
 Analyzing setMInt:
 * pc: pc
 * This:
-    \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-    oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>>
+    \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+    mInt -> <.mInt>>
 * Return: <ret>
 * Params: { $candidate -> <$candidate> }
 * Final environment:
@@ -53,13 +47,13 @@ Analyzing \tlGetMyInt:
 * Return: <ret>
 * Params:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
 * Final environment:
   Locals:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
   Constraints:
     [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
 
@@ -69,14 +63,14 @@ Analyzing \tlSetMyInt:
 * Return: <ret>
 * Params:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>>;
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>>;
       $val -> <$val> }
 * Final environment:
   Locals:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>>;
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>>;
       $val -> <$val> }
   Constraints:
     [\My < .mInt, $val < .mInt, pc < .mInt]
@@ -84,19 +78,19 @@ Analyzing \tlSetMyInt:
 Analyzing \tlGetOther:
 * pc: pc
 * This: None
-* Return: \Other<\Other, lump, oString -> <lump>, oBool -> <.oBool>>
+* Return: \Other<\Other, lump, oBool -> <.oBool>>
 * Params:
     { $obj ->
-      \My<\My, lump'2, other -> \Other<\Other'1, lump'1, oString -> <lump'1>,
-      oBool -> <.oBool'1>>, mInt -> <.mInt>, mBool -> <lump'2>> }
+      \My<\My, lump'2, other -> \Other<\Other'1, lump'1, oBool -> <.oBool'1>>,
+      mInt -> <.mInt>> }
 * Final environment:
   Locals:
     { $obj ->
-      \My<\My, lump'2, other -> \Other<\Other'1, lump'1, oString -> <lump'1>,
-      oBool -> <.oBool'1>>, mInt -> <.mInt>, mBool -> <lump'2>> }
+      \My<\My, lump'2, other -> \Other<\Other'1, lump'1, oBool -> <.oBool'1>>,
+      mInt -> <.mInt>> }
   Constraints:
-    [\Other'1 < .other, \My < .other, lump < lump'1, lump'1 < lump,
-     .oBool < .oBool'1, .oBool'1 < .oBool, lump'1 = lump, .other < \Other]
+    [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
+     lump'1 = lump, .other < \Other]
 
 Analyzing \tlGetOtherBool:
 * pc: pc
@@ -104,13 +98,13 @@ Analyzing \tlGetOtherBool:
 * Return: <ret>
 * Params:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
 * Final environment:
   Locals:
     { $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
   Constraints:
     [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
      .oBool'1 < ret]
@@ -122,14 +116,14 @@ Analyzing \tlSetOtherBool:
 * Params:
     { $bool -> <$bool>;
       $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
 * Final environment:
   Locals:
     { $bool -> <$bool>;
       $obj ->
-      \My<\My, lump'1, other -> \Other<\Other, lump, oString -> <lump>,
-      oBool -> <.oBool>>, mInt -> <.mInt>, mBool -> <lump'1>> }
+      \My<\My, lump'1, other -> \Other<\Other, lump, oBool -> <.oBool>>,
+      mInt -> <.mInt>> }
   Constraints:
     [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
      pc < .oBool]

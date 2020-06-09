@@ -1,55 +1,43 @@
 Policy signature for \C:
 * Policied properties: cx
-* Unpolicied properties: cy, cd
 
 Policy signature for \D:
 * Policied properties: 
-* Unpolicied properties: di
 
 Analyzing __construct:
 * pc: pc
-* This:
-    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
-    cd -> \D<lump, lump, di -> <lump>>>
+* This: \C<\C, lump, cx -> <.cx>>
 * Return: <ret>
-* Params: { $cd -> \D<\D, lump'1, di -> <lump'1>> }
+* Params: { $cd -> \D<\D, lump'1, > }
 * Final environment:
-  Locals: { $cd -> \D<\D, lump'1, di -> <lump'1>> }
+  Locals: { $cd -> \D<\D, lump'1, > }
   Constraints:
-    [\C < lump, lump < lump'1, lump'1 < lump, lump'1 = lump, \D < lump,
-     pc < lump]
+    [\C < lump, lump'1 = lump, \D < lump, pc < lump]
 
 Analyzing testGetUnpolicied:
 * pc: pc
-* This:
-    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
-    cd -> \D<lump, lump, di -> <lump>>>
-* Return: \D<\D, lump'1, di -> <lump'1>>
+* This: \C<\C, lump, cx -> <.cx>>
+* Return: \D<\D, lump'1, >
 * Params: {}
 * Final environment:
   Locals: {}
   Constraints:
-    [lump < .cd, \C < .cd, lump'1 < lump, lump < lump'1, lump = lump'1,
-     .cd < \D]
+    [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
 
 Analyzing testSetMultipleUnpolicied:
 * pc: pc
-* This:
-    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
-    cd -> \D<lump, lump, di -> <lump>>>
+* This: \C<\C, lump, cx -> <.cx>>
 * Return: <ret>
-* Params: { $d -> \D<\D, lump'1, di -> <lump'1>> }
+* Params: { $d -> \D<\D, lump'1, > }
 * Final environment:
-  Locals: { $d -> \D<\D, lump'1, di -> <lump'1>> }
+  Locals: { $d -> \D<\D, lump'1, > }
   Constraints:
-    [\C < lump, Bot < lump, pc < lump, \C < lump, lump < lump'1,
-     lump'1 < lump, lump'1 = lump, \D < lump, pc < lump]
+    [\C < lump, Bot < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
+     pc < lump]
 
 Analyzing testSetDeep:
 * pc: pc
-* This:
-    \C<\C, lump, cy -> <lump>, cx -> <.cx>,
-    cd -> \D<lump, lump, di -> <lump>>>
+* This: \C<\C, lump, cx -> <.cx>>
 * Return: <ret>
 * Params: { $i -> <$i> }
 * Final environment:
@@ -59,7 +47,7 @@ Analyzing testSetDeep:
 
 Analyzing __construct:
 * pc: pc
-* This: \D<\D, lump, di -> <lump>>
+* This: \D<\D, lump, >
 * Return: <ret>
 * Params: { $di -> <$di> }
 * Final environment:

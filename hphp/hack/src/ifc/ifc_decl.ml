@@ -30,15 +30,10 @@ let collect_class_policy_sigs =
   let extract { A.cv_id; A.cv_type; _ } = (snd cv_id, fst cv_type) in
   let def psig_env = function
     | A.Class { A.c_name = (_, name); c_vars = properties; _ } ->
-      let (policied_props, unpolicied_props) =
-        List.partition_tf ~f:is_policied_property properties
-      in
+      let policied_props = List.filter ~f:is_policied_property properties in
       SMap.add
         name
-        {
-          psig_policied_properties = List.map policied_props extract;
-          psig_unpolicied_properties = List.map unpolicied_props extract;
-        }
+        { psig_policied_properties = List.map policied_props extract }
         psig_env
     | _ -> psig_env
   in

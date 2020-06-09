@@ -1254,7 +1254,8 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   }
 
   auto const cls = exactCls ? cns(env, exactCls) : gen(env, LdObjClass, obj);
-  auto const callee = gen(env, LdClsCtor, cls, fp(env));
+  auto const ctx = curClass(env) ? cns(env, curClass(env)) : cns(env, nullptr);
+  auto const callee = gen(env, LdClsCtor, cls, ctx);
   prepareAndCallProfiled(env, callee, fca, obj, false, false);
 }
 

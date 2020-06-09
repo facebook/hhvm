@@ -1111,10 +1111,10 @@ To string conversions:
 
   Loads into D the value of m_cls from S0.
 
-| LdClsCtor, D(Func), S(Cls) S(FramePtr), NF
+| LdClsCtor, D(Func), S(Cls) S(Cls|Nullptr), NF
 
   Loads into D the constructor of class S0. If the constructor cannot be called
-  from the context in S1, raise an error.
+  from the context S1, raise an error.
 
 | LdSmashable, D(Smashable), NA, NF
 

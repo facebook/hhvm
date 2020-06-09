@@ -760,10 +760,9 @@ void checkFrame(ActRec* fp, TypedValue* sp, bool fullCheck) {
   );
 }
 
-const Func* loadClassCtor(Class* cls, ActRec* fp) {
+const Func* loadClassCtor(Class* cls, Class* ctx) {
   const Func* f = cls->getCtor();
   if (UNLIKELY(!(f->attrs() & AttrPublic))) {
-    auto const ctx = arGetContextClass(fp);
     UNUSED auto func =
       lookupMethodCtx(cls, nullptr, ctx, CallType::CtorMethod, true);
     assertx(func == f);

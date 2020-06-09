@@ -37,7 +37,6 @@
   TIMER_NAME(optimize_phis)                     \
   TIMER_NAME(optimize_licm)                     \
   TIMER_NAME(hoist_type_checks)                 \
-  TIMER_NAME(partial_dce_DefInlineFP)           \
   TIMER_NAME(regionizeFunc)                     \
   TIMER_NAME(selectTracelet)                    \
   TIMER_NAME(mcg_translate)                     \

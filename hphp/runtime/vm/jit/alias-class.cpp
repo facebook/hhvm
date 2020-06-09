@@ -169,15 +169,14 @@ FPRelOffset frame_base_offset(SSATmp* fp) {
 
   fp = canonical(fp);
   auto fpInst = fp->inst();
-  if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
   if (fpInst->is(DefFP, DefFuncEntryFP)) return FPRelOffset{0};
-  always_assert(fpInst->is(DefInlineFP));
+  always_assert(fpInst->is(BeginInlining));
   auto const spInst = fpInst->src(0)->inst();
   assertx(spInst->is(DefFrameRelSP, DefRegSP));
   auto const offsetOfSp = spInst->extra<FPInvOffsetData>()->offset;
 
   // FP-relative offset of the inlined frame.
-  return fpInst->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(offsetOfSp);
+  return fpInst->extra<BeginInlining>()->spOffset.to<FPRelOffset>(offsetOfSp);
 }
 }
 
@@ -188,15 +187,14 @@ AStack::AStack(SSATmp* fp, FPRelOffset o, int32_t s)
   always_assert(fp->isA(TFramePtr));
 
   fp = canonical(fp);
-  auto defInlineFP = fp->inst();
-  if (UNLIKELY(defInlineFP->is(DefLabel))) defInlineFP = resolveFpDefLabel(fp);
-  if (!defInlineFP->is(DefInlineFP)) return;
-  auto const sp = defInlineFP->src(0)->inst();
+  auto beginInlining = fp->inst();
+  if (!beginInlining->is(BeginInlining)) return;
+  auto const sp = beginInlining->src(0)->inst();
   assertx(sp->is(DefFrameRelSP, DefRegSP));
 
   // FP-relative offset of the inlined frame.
   auto const innerFPRel =
-    defInlineFP->extra<DefInlineFP>()->spOffset.to<FPRelOffset>(
+    beginInlining->extra<BeginInlining>()->spOffset.to<FPRelOffset>(
       sp->extra<FPInvOffsetData>()->offset);
 
   // Offset from the outermost FP is simply the sum of (inner frame relative to

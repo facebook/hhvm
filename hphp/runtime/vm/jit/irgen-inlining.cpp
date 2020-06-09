@@ -34,23 +34,17 @@ particularly the DefinlineFP. Below is an annotated version of this setup.
                 # effectively popping them. These loads and the preceding
                 # stores are generally elided by load and store elimination.
 
-  BeginInlining # Has no side-effects, sets up memory effects for the inlined
-                # frame. Most importantly it marks any values on the callee
-                # stack from before the call as dead.
+  BeginInlining # Sets up memory effects for the inlined frame and returns a new
+                # fp that can be used for stores into the frame.
 
-  DefInlineFP   # This instruction spills ActRec and sets up the inlined frame,
-                # redefining the fp SSATmp to refer to the callee frame. In most
-                # cases the DCE or partial-DCE passes are able to elide this
-                # instruction.
+  InlineCall    # This instruction links the new frame to the old frame via the
+                # m_sfp field and loads the new frame into rvmfp(). It can be
+                # thought of as doing the work of a Call.
 
   StLoc ...     # At this point the arguments are stored back to the frame
                 # locations for their corresponding locals in the callee. N.B.
                 # that in memory these are the same addresses as the stack
                 # locations above.
-
-While initializing the frame we also attempt to extract the type and SSATmp for
-the context, which is stored in the extra-data for DefInlineFP so that, while
-generating the inlined function, frame-state has access to the context.
 
 Once the inlined function returns, the callee must be torn down and the return
 value moved into the caller. The sequence for this is annotated below.
@@ -62,11 +56,12 @@ value moved into the caller. The sequence for this is annotated below.
   ty := LdFrameThis     # The context is DecRef'ed
   DecRef ty
 
-  tz := LdStk     # The InlineReturn instruction will kill the callee frame
-  InlineReturn    # making any frame or stack locations therein invalid, so
-  StStk tz        # we load the return value before killing the frame and store
-                  # it back to its proper location once the return is complete
-                  # so that the value is live in the caller.
+  tz := LdStk     # The InlineReturn instruction will restore rvmfp() to the
+  InlineReturn    # Calling frame. The frame itself may still be used but the
+  StStk tz        # locals and context have explicitly been decrefed.
+
+  EndInlining     # This instruction marks the end of the inlined region, beyond
+                  # this point the frame should no longer considered to be live.
 
 We also support inlining of async functions. Returning from an inlined region
 is handled differently depending on whether or not the caller entered the
@@ -83,10 +78,9 @@ tCallee := DefLabel   # The callee region may suspend from multiple locations,
                       # execution of the caller at the opcode following FCall,
                       # usually an Await.
 
-InlineSuspend         # This instruction behaves identically to InlineReturn,
-                      # killing the callee region. Note that in this case we
-                      # do not DecRef locals or context as these have been moved
-                      # into the waithandle.
+InlineReturn          # The return sequence looks the same as a regular call but
+EndInlining           # rather than killing the frame it has been teleported to
+                      # the heap.
 
 If a FCall with an async eager offset was followed by an Await, this HHIR
 sequence follows the InlineSuspend:
@@ -115,11 +109,8 @@ Inlined regions maintain the following invariants, which later optimization
 passes may depend on (most notably DCE and partial-DCE):
 
   - Every callee region must contain a single BeginInlining
-  - Every callee region must contain exactly one of InlineReturn or
-    InlineReturnNoFrame. This is why suspend blocks must use InlineSuspend.
-  - No block may be reachable by both InlineReturn and InlineSuspend.
   - BeginInlining must dominate every instruction within the callee.
-  - Excluding side-exits and early returns, InlineReturn must post-dominate
+  - Excluding side-exits and early returns, EndInlining must post-dominate
     every instruction in the callee.
   - The callee must contain a return or await.
 
@@ -147,7 +138,7 @@ Outer:                                 | Inner:
 +-------------------+
 | ...               |
 | BeginInlining     |
-| DefInlineFP       |
+| InlineCall        |
 | StLoc             |
 | ...               |
 +-------------------+
@@ -166,13 +157,14 @@ Outer:                                 | Inner:
 | ... // aeo2       |               |                          v
 | Jmp returnTarget  |               v               +---------------------+
 +-------------------+    +---------------------+    | tb = LdStk          |
-           |             | tb = LdStk          |    | InlineSuspend       |
-           v             | InlineSuspend       |    | StStk tb            |
-+-------------------+    | StStk tb            |    +---------------------+
-| DecRef Locals     |    | tc = LdStk          |               |
+           |             | tb = LdStk          |    | InlineReturn        |
+           v             | InlineSuspend       |    | EndInlining         |
++-------------------+    | StStk tb            |    | StStk tb            |
+| DecRef Locals     |    | tc = LdStk          |    +---------------------+
 | DecRef This       |    | te = LdWhState tc   |               v
 | tr = LdStk        |    | JmpZero te          |--------->*Side Exit*
 | InlineReturn      |    +---------------------+
+| EndInlining       |               |
 | StStk tr          |               |
 | CreateSSWH (*)    |               v
 +-------------------+    +---------------------+
@@ -292,21 +284,25 @@ void beginInlining(IRGS& env,
   // The top of the stack now points to the space for ActRec.
   IRSPRelOffset calleeAROff = spOffBCFromIRSP(env);
 
-  gen(
+  auto const calleeFP = gen(
     env,
     BeginInlining,
-    BeginInliningData{calleeAROff - 1, target, cost},
-    sp(env)
+    BeginInliningData{calleeAROff, target, cost, int(numArgs)},
+    sp(env),
+    fp(env)
   );
 
-  DefInlineFPData data;
-  data.target        = target;
-  data.callBCOff     = callBcOffset;
-  data.retSPOff      = offsetFromFP(env, calleeAROff) - kNumActRecCells;
-  data.spOffset      = calleeAROff;
-  data.numArgs       = numArgs;
-  data.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
-  data.syncVmfp = false;
+  StFrameMetaData meta;
+  meta.callBCOff     = callBcOffset;
+  meta.numArgs       = numArgs;
+  meta.asyncEagerReturn = returnTarget.asyncEagerOffset != kInvalidOffset;
+
+  gen(env, StFrameMeta, meta, calleeFP);
+  gen(env, StFrameFunc, calleeFP, cns(env, target));
+
+  InlineCallData data;
+  data.spOffset = calleeAROff;
+  data.syncVmpc = nullptr;
 
   assertx(startSk.func() == target &&
           startSk.offset() == target->getEntryForNumArgs(numArgs) &&
@@ -321,7 +317,9 @@ void beginInlining(IRGS& env,
   env.bcState = startSk;
   updateMarker(env);
 
-  auto const calleeFP = gen(env, DefInlineFP, data, sp(env), fp(env), ctx);
+  gen(env, InlineCall, data, calleeFP, fp(env));
+
+  if (!(ctx->type() <= TNullptr)) gen(env, StFrameCtx, fp(env), ctx);
 
   for (unsigned i = 0; i < numArgs; ++i) {
     stLocRaw(env, i, calleeFP, params[i]);
@@ -462,12 +460,11 @@ InlineFrame implInlineReturn(IRGS& env, bool suspend) {
     // ...plus the offset of our parent's fp relative to vmsp.
     + FPInvOffset{0}.to<IRSPRelOffset>(fs.callerIRSPOff()).offset;
 
+  auto const calleeFp = fp(env);
+  auto const prevFp = calleeFp->inst()->src(1);
   // Return to the caller function.
-  if (suspend) {
-    gen(env, InlineSuspend, FPRelOffsetData { callerFPOff }, fp(env));
-  } else {
-    gen(env, InlineReturn, FPRelOffsetData { callerFPOff }, fp(env));
-  }
+  gen(env, InlineReturn, FPRelOffsetData { callerFPOff }, fp(env), prevFp);
+  gen(env, EndInlining, calleeFp);
 
   return popInlineFrame(env);
 }

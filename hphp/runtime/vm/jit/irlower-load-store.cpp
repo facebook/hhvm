@@ -47,25 +47,21 @@ TRACE_SET_MOD(irlower);
 
 void cgLdLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<LdLoc>();
-  auto const off = localOffset(extra->locId, extra->fpOffset);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  auto const off = localOffset(inst->extra<LdLoc>()->locId);
   loadTV(vmain(env), inst->dst(), dstLoc(env, inst, 0), fp[off]);
 }
 
 void cgLdLocAddr(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<LdLocAddr>();
-  auto const off = localOffset(extra->locId, extra->fpOffset);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
-  vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
+  auto const off = localOffset(inst->extra<LdLocAddr>()->locId);
+  if (dstLoc(env, inst, 0).hasReg()) {
+    vmain(env) << lea{fp[off], dstLoc(env, inst, 0).reg()};
+  }
 }
 
 void cgStLoc(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  auto const extra = inst->extra<StLoc>();
-  auto const off = localOffset(extra->locId, extra->fpOffset);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+  auto const off = localOffset(inst->extra<StLoc>()->locId);
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
 }
 
@@ -117,7 +113,6 @@ void cgLdLocPseudoMain(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const off = localOffset(inst->extra<LdLocPseudoMain>()->locId);
   auto& v = vmain(env);
-  assertx(inst->extra<LdLocPseudoMain>()->fpOffset.offset == 0);
 
   irlower::emitTypeCheck(v, env, inst->typeParam(), fp[off + TVOFF(m_type)],
                          fp[off + TVOFF(m_data)], inst->taken());
@@ -126,7 +121,6 @@ void cgLdLocPseudoMain(IRLS& env, const IRInstruction* inst) {
 
 void cgStLocPseudoMain(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
-  assertx(inst->extra<StLocPseudoMain>()->fpOffset.offset == 0);
   auto const off = localOffset(inst->extra<StLocPseudoMain>()->locId);
   storeTV(vmain(env), fp[off], srcLoc(env, inst, 1), inst->src(1));
 }
@@ -183,16 +177,11 @@ void cgDbgTrashStk(IRLS& env, const IRInstruction* inst) {
 namespace {
 
 const Func* funcFromFp(const SSATmp* fp) {
-  fp = canonical(fp);
   auto inst = fp->inst();
-  if (UNLIKELY(inst->is(DefLabel))) {
-    inst = resolveFpDefLabel(fp);
-    assertx(inst);
-  }
-  assertx(inst->is(DefFP, DefFuncEntryFP, DefInlineFP));
+  assertx(inst->is(DefFP, DefFuncEntryFP, BeginInlining));
   if (inst->is(DefFP)) return inst->marker().func();
   if (inst->is(DefFuncEntryFP)) return inst->extra<DefFuncEntryFP>()->func;
-  if (inst->is(DefInlineFP)) return inst->extra<DefInlineFP>()->target;
+  if (inst->is(BeginInlining)) return inst->extra<BeginInlining>()->func;
   always_assert(false);
 }
 

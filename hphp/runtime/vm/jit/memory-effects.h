@@ -102,6 +102,20 @@ struct PureLoad       { AliasClass src; };
 struct PureStore    { AliasClass dst; SSATmp* value; SSATmp* dep; };
 
 /*
+ * The effect of simulating a Call to an inlined function. This effect is a pure
+ * store of fp into the AFBasePtr location, base. The instruction also simulates
+ * a load of fields of ActRec which may be read by the VM once fp is live (e.g.
+ * the AFFunc and AFMeta locations).
+ */
+struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
+
+/*
+ * A PureInlineReturn represents the inverse operation of a PureInlineCall, it
+ * undoes a call into calleeFp, returning the frame to callerFp.
+ */
+struct PureInlineReturn { AliasClass base; SSATmp* calleeFp; SSATmp* callerFp;};
+
+/*
  * Calls are somewhat special enough that they get a top-level effect.
  *
  * The `kills' set are locations that cannot be read by this instruction unless
@@ -153,32 +167,6 @@ struct ReturnEffects  { AliasClass kills; };
 struct ExitEffects    { AliasClass live; AliasClass kills; };
 
 /*
- * InlineEnterEffects indicate that an update to the vmfp for an inlined frame.
- * In effect the instruction represents a move of inlStack locations to inlFrame
- * locations. In actuality these alias locations occupy the same memory on the
- * VM stack. Additionally the rbp chain is updated with actrec becoming the live
- * frame.
- *
- * Stores to frame locations on the caller frame cannot be propagated passed
- * an InlineEnterEffects unless they are moved after the corresponding
- * InlineExitEffects instruction.
- */
-struct InlineEnterEffects { AliasClass inlStack;
-                            AliasClass inlFrame;
-                            AliasClass actrec; };
-
-/*
- * InlineExitEffects denotes the update of the vmfp for a return from an inlined
- * frame. Logically it kills the inlStack, inlFrame, and inlMeta locations. In
- * addition, following this instruction it is incorrect to propgate writes to
- * inlFrame and inlMeta as they represent locations no longer accessible due to
- * the reserved nature fo the frame pointer.
- */
-struct InlineExitEffects { AliasClass inlStack;
-                           AliasClass inlFrame;
-                           AliasClass inlMeta; };
-
-/*
  * "Irrelevant" effects means it doesn't do anything we currently care about
  * for consumers of this module.  If you want to care about a new kind of
  * memory effect, you get to re-audit everything---have fun. :)
@@ -194,11 +182,11 @@ struct UnknownEffects {};
 using MemEffects = boost::variant< GeneralEffects
                                  , PureLoad
                                  , PureStore
+                                 , PureInlineCall
+                                 , PureInlineReturn
                                  , CallEffects
                                  , ReturnEffects
                                  , ExitEffects
-                                 , InlineEnterEffects
-                                 , InlineExitEffects
                                  , IrrelevantEffects
                                  , UnknownEffects
                                  >;

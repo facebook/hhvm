@@ -19,8 +19,6 @@
 namespace HPHP { namespace jit {
 
 struct IRUnit;
-struct IRInstruction;
-struct SSATmp;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -39,53 +37,6 @@ void mandatoryDCE(IRUnit&);
  * fullDCE run to fix.
  */
 void fullDCE(IRUnit&);
-
-/*
- * Converts an instruction that operates on a FramePtr in an inlined
- * function to one that operates on a parent FramePtr along with a
- * static offset. This is only allowed for instructions which only
- * need the FramePtr as a base for some other address calculation (and
- * does not actually access the ActRec). The parent FramePtr must not
- * be a resumed frame, and the instruction cannot raise an
- * error. Useful for eliding DefInlineFP.
- */
-void convertToUseParentFrameWithOffset(IRUnit& unit, IRInstruction& inst,
-                                       SSATmp* parentFp);
-
-/*
- * Converts an InlineReturn instruction to a noop instruction that still models
- * the memory effects of InlineReturn to ensure that stores from the callee are
- * not pushed into the caller, and to hopefully prevent some stores from
- * occuring at all.
- *
- * Precondition: inst is InlineReturn
- * Postcondition: inst is InlineReturnNoFrame
- */
-void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst);
-
-/*
- * Given a SSATmp representing a FramePtr which comes from a DefLabel
- * instruction, chase the definitions to the first non-DefLabel instruction it
- * can find. This assumes that all inputs to the DefLabel are equivalent.
- *
- * Precondition: fp->inst()->is(DefLabel) && fp->is(TFramePtr)
- */
-IRInstruction* resolveFpDefLabel(const SSATmp* fp);
-
-/*
- * Checks if the given FramePtr points to a resumed frame, looking
- * through chains of DefLabels if necessary.
- */
-bool fpIsResumed(const SSATmp* fp);
-
-/*
- * Checks if the immediate parent of the given FramePtr points to a
- * resumed frame, looking through chains of DefLabels if
- * necessary. Note: if the given FramePtr has no parent (because its
- * not an inlined frame), this returns false, even if the given
- * FramePtr itself is a resumed frame.
- */
-bool parentFpIsResumed(const SSATmp* fp);
 
 //////////////////////////////////////////////////////////////////////
 

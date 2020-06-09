@@ -192,14 +192,6 @@ struct IRUnit {
   SSATmp* mainFP() const;
 
   /*
-   * Return the main StkPtr for the unit, a result of DefFrameRelSP or DefRegSP
-   * instruction on the entry block. This is used only when eliding DefInlineFP,
-   * which assumes that there are no other stack pointers in the unit. This
-   * assumption is no true in general, as prologues redefine their SP.
-   */
-  SSATmp* mainSP() const;
-
-  /*
    * Return the "start" timestamp when this IRUnit was constructed.
    */
   int64_t startNanos() const;

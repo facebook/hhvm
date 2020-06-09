@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/memory-effects.h"
 #include "hphp/runtime/vm/jit/mutation.h"
 #include "hphp/runtime/vm/jit/pass-tracer.h"
+#include "hphp/runtime/vm/jit/state-multi-map.h"
 #include "hphp/runtime/vm/jit/state-vector.h"
 #include "hphp/runtime/vm/jit/timer.h"
 
@@ -327,6 +328,12 @@ struct Global {
   StateVector<Block,uint32_t> seenStores;
   uint32_t seenStoreId{0};
   bool needsReflow{false};
+  bool adjustedInlineCalls{false};
+
+  // We can't safely remove InlineReturn instructions, once we've moved or
+  // killed InlineCall instructions we handle InlineReturns in a final dataflow
+  // analysis that tracks inline frames.
+  IdSet<IRInstruction> deadInlineReturns;
 };
 
 // Block-local environment.
@@ -426,6 +433,8 @@ bool removeDead(Local& env, IRInstruction& inst, bool trash) {
       break;
     }
   }
+
+  if (inst.is(InlineCall)) env.global.adjustedInlineCalls = true;
 
   auto block = inst.block();
   auto pos = block->erase(&inst);
@@ -528,19 +537,53 @@ void visit(Local& env, IRInstruction& inst) {
          inst.toString(),
          show(effects));
 
+  auto const doPureStore = [&] (PureStore l) {
+    if (auto bit = pure_store_bit(env, l.dst)) {
+      if (l.dep) addPhiDeps(env, *bit, l.dep);
+      if (isDead(env, *bit)) {
+        if (!removeDead(env, inst, true)) {
+          mayStore(env, l.dst);
+          mustStore(env, *bit);
+        }
+        return;
+      }
+      if (!env.antLoc[*bit] &&
+          !env.mayLoad[*bit] &&
+          !env.mayStore[*bit] &&
+          (!env.containsCall ||
+           srcsCanSpanCall(inst))) {
+        env.avlLoc[*bit] = 1;
+        set_movable_store(env, *bit, inst);
+      }
+      mayStore(env, l.dst);
+      mustStore(env, *bit);
+      if (!l.value || l.value->inst()->block() != inst.block()) return;
+      auto const le = memory_effects(*l.value->inst());
+      auto pl = boost::get<PureLoad>(&le);
+      if (!pl) return;
+      auto lbit = pure_store_bit(env, pl->src);
+      if (!lbit || *lbit != *bit) return;
+      /*
+       * The source of the store is a load from the same address, which is
+       * also in this block. If there's no interference, we can kill this
+       * store. We won't know until we see the load though.
+       */
+      if (env.global.reStores.size() <= *bit) {
+        env.global.reStores.resize(*bit + 1);
+      }
+      env.global.reStores[*bit] = &inst;
+      env.reStores[*bit] = 1;
+      return;
+    }
+    mayStore(env, l.dst);
+  };
+
   match<void>(
     effects,
     [&] (IrrelevantEffects) {
       switch (inst.op()) {
       case AssertLoc:
-        load(
-          env,
-          ALocal {
-            inst.src(0),
-            inst.extra<AssertLoc>()->locId,
-            inst.extra<AssertLoc>()->fpOffset
-          }
-        );
+        load(env, ALocal { inst.src(0), inst.extra<AssertLoc>()->locId });
         return;
       case AssertStk:
         load(env, AStack { inst.src(0), inst.extra<AssertStk>()->offset, 1 });
@@ -586,45 +629,19 @@ void visit(Local& env, IRInstruction& inst) {
       kill(env, l.kills);
     },
 
-    [&] (InlineEnterEffects l) {
-      load(env, l.inlStack);
-      store(env, l.actrec);
-
-      // This effect is a lie, but we can't push any stores that use a caller
-      // frame pointer into the callee, as the frame pointer will be updated.
-      // Ideally, this wouldn't be an issue, but the TFramePtr is still stored
-      // as a reserved register. Both locals and iterators are on the frame.
-      mayStore(env, ALocalAny | AIterAny);
+    [&] (PureInlineCall l) {
+      doPureStore(PureStore { l.base, l.fp });
+      load(env, l.actrec);
     },
 
-    [&] (InlineExitEffects l) {
-      // These locations are dead, but it's unsafe to sync stores
-      // passed InlineReturn as they reference the callee safe. Kill
-      // sets are conservative so we must also indicate mayStore. In
-      // practice this value will generally be AMIStateAny so this is
-      // fine.
-      mayStore(env, l.inlMeta);
-
-      // The same applies to the frame, but we're more likely to end up with
-      // sub-optimal code in the case that the kill-set cannot be expaneded so
-      // below we attempt to iterate the locals in the frame and kill them
-      // individually.
-      //
-      // Even if we're processing an InlineSuspend we've already created the
-      // AFWH and moved the frame to the heap.
-      if (auto const frame = l.inlFrame.is_local()) {
-        auto const callee = inst.marker().func();
-        for (uint32_t id = 0; id < callee->numLocals(); id++) {
-          auto const acls = ALocal { frame->base, id };
-          if (frame->ids.test(id)) kill(env, canonicalize(acls));
-        }
-      } else {
-        mayStore(env, l.inlFrame);
-        kill(env, l.inlFrame);
+    [&] (PureInlineReturn l) {
+      if (auto bit = pure_store_bit(env, l.base)) {
+        if (isDead(env, *bit)) env.global.deadInlineReturns.add(inst);
+        mayStore(env, l.base);
+        mustStore(env, *bit);
+        return;
       }
-
-      kill(env, l.inlStack);
-      kill(env, l.inlMeta);
+      mayStore(env, l.base);
     },
 
     /*
@@ -642,46 +659,7 @@ void visit(Local& env, IRInstruction& inst) {
       kill(env, l.kills);
     },
 
-    [&] (PureStore l) {
-      if (auto bit = pure_store_bit(env, l.dst)) {
-        if (l.dep) addPhiDeps(env, *bit, l.dep);
-        if (isDead(env, *bit)) {
-          if (!removeDead(env, inst, true)) {
-            mayStore(env, l.dst);
-            mustStore(env, *bit);
-          }
-          return;
-        }
-        if (!env.antLoc[*bit] &&
-            !env.mayLoad[*bit] &&
-            !env.mayStore[*bit] &&
-            (!env.containsCall ||
-             srcsCanSpanCall(inst))) {
-          env.avlLoc[*bit] = 1;
-          set_movable_store(env, *bit, inst);
-        }
-        mayStore(env, l.dst);
-        mustStore(env, *bit);
-        if (!l.value || l.value->inst()->block() != inst.block()) return;
-        auto const le = memory_effects(*l.value->inst());
-        auto pl = boost::get<PureLoad>(&le);
-        if (!pl) return;
-        auto lbit = pure_store_bit(env, pl->src);
-        if (!lbit || *lbit != *bit) return;
-        /*
-         * The source of the store is a load from the same address, which is
-         * also in this block. If there's no interference, we can kill this
-         * store. We won't know until we see the load though.
-         */
-        if (env.global.reStores.size() <= *bit) {
-          env.global.reStores.resize(*bit + 1);
-        }
-        env.global.reStores[*bit] = &inst;
-        env.reStores[*bit] = 1;
-        return;
-      }
-      mayStore(env, l.dst);
-    }
+    [&] (PureStore l) { doPureStore(l); }
   );
 }
 
@@ -1012,6 +990,7 @@ void optimize_block_pre(Global& genv, Block* block,
         FTRACE(1, " Inserting store {}: {}\n", i, cinst->toString());
         auto const inst = genv.unit.clone(cinst);
         block->prepend(inst);
+        if (inst->is(InlineCall)) genv.adjustedInlineCalls = true;
       }
     );
   }
@@ -1421,6 +1400,279 @@ void compute_placement_possible(
     });
 }
 
+void fix_inlined_call(Global& genv, IRInstruction* call, SSATmp* fp) {
+  // Nothing to do if the frame hasn't changed.
+  if (fp == call->src(1)) return;
+
+  auto const origFp = call->src(1);
+  auto const extra = call->extra<Call>();
+  auto const callOffset = extra->callOffset;
+  assertx(origFp->inst()->is(BeginInlining));
+
+  // Adjust the fp and callOffset to reflect the caller frame for this call.
+  auto const sk = call->marker().fixupSk();
+  extra->callOffset = sk.offset() - sk.func()->base();
+  call->setSrc(1, fp);
+
+  // If we've already inserted a SyncReturnBC instruction there's no need
+  // to insert any more.
+  if (extra->hasInlFixup) return;
+  extra->hasInlFixup = true;
+
+  auto const catchBlock = call->taken();
+  auto it = catchBlock->skipHeader();
+
+  auto syncInst = genv.unit.gen(
+    SyncReturnBC,
+    it->bcctx(),
+    SyncReturnBCData{callOffset, extra->spOffset + extra->numInputs()},
+    call->src(0),
+    origFp
+  );
+  catchBlock->insert(it, syncInst);
+}
+
+struct FPState {
+  PC catchPC;      // PC at dominating BeginCatch or nullptr
+  int exitDepth;   // number of live frames at end of block
+  SSATmp* entry;   // live fp at start of block
+  SSATmp* exit;    // live fp at end of block
+  SSATmp* catchFP; // live fp at dominating BeginCatch or nullptr
+};
+
+void append_inline_returns(Global& genv, Block* b, SSATmp* start, SSATmp* end) {
+  auto const it = b->backIter();
+  for (; start != end; start = start->inst()->src(1)) {
+    assertx(start->inst()->is(BeginInlining));
+
+    auto const sInst = start->inst();
+    auto const next = start->inst()->src(1);
+    auto const nInst = next->inst();
+    auto const startOff = sInst->extra<BeginInlining>()->spOffset.offset;
+    auto const nextOff = [&] {
+      if (next->inst()->is(BeginInlining)) {
+        return nInst->extra<BeginInlining>()->spOffset;
+      }
+      auto const sp = sInst->src(0);
+      assertx(sp->inst()->is(DefRegSP, DefFrameRelSP));
+
+      // The IRSPRelOffset of `next` relative to `sp` is the same as the
+      // FPInvOffset of `sp` relative to `next`.
+      auto const off = sp->inst()->extra<FPInvOffsetData>()->offset;
+      return IRSPRelOffset{off.offset};
+    }().offset;
+
+    /*
+     * IRSPRel offsets get smaller the further down the stack they are, and
+     * start will by definition always be below next. The offset computed by
+     * nextOff - startOff will therefore be > 0. We want the FPRelOff, relative
+     * to start of next. FPRel offsets are positive above the fp they are
+     * are relative to ane negative below.
+     *
+     * +---------------------------+
+     * |            ...            |
+     * |                           |
+     * +---------------------------+
+     * |                           |
+     * +---------------------------+ <- sp ----+--+
+     * |                           |           |  |
+     * +---------------------------+  nextOff >|  |
+     * |                           |           |  |
+     * +---------------------------+ <- next --+--|-+
+     * |                           |              | |
+     * +---------------------------+    startOff >| |< nextOff - startOff
+     * |                           |              | |
+     * +---------------------------+ <- start ----+-+
+     * |                           |
+     * |            ...            |
+     * +---------------------------+
+     */
+    auto const callerFpOff = FPRelOffset{nextOff - startOff};
+
+    auto returnInst = genv.unit.gen(
+      InlineReturn,
+      it->bcctx(),
+      FPRelOffsetData { callerFpOff },
+      start,
+      next
+    );
+    b->insert(it, returnInst);
+  }
+}
+
+void adjust_inline_marker(IRInstruction& inst, SSATmp* fp) {
+  if (inst.marker().fp() == fp) return;
+  if (!inst.mayRaiseError() && !inst.is(BeginCatch)) return;
+  auto const curFp = inst.marker().fp();
+  assertx(curFp->inst()->is(BeginInlining));
+  auto const curOff = curFp->inst()->extra<BeginInlining>()->spOffset.offset;
+  auto const newOff = [&] {
+    if (fp->inst()->is(BeginInlining)) {
+      return fp->inst()->extra<BeginInlining>()->spOffset.offset;
+    }
+    assertx(fp->inst()->is(DefFP, DefFuncEntryFP));
+    auto const defSP = curFp->inst()->src(0)->inst();
+    return defSP->extra<FPInvOffsetData>()->offset.offset;
+  }();
+
+  // Compute the difference in spoffset between the current and the previous
+  // marker fp.
+  auto const spAdj = newOff - curOff;
+
+  // Find the source key for the last inlined call from a published frame.
+  auto const callSK = [&] {
+    auto next = curFp;
+    for (;next->inst()->src(1) != fp; next = next->inst()->src(1)) {
+      assertx(next->inst()->is(BeginInlining));
+    }
+    return next->inst()->marker().sk();
+  }();
+
+  inst.marker() = inst.marker().adjustFP(fp)
+                               .adjustSP(inst.marker().spOff() + spAdj)
+                               .adjustFixupSK(callSK);
+}
+
+void insert_eager_sync(Global& genv, IRInstruction& endCatch) {
+  auto const block = endCatch.block();
+  auto sync = genv.unit.gen(
+    EagerSyncVMRegs,
+    endCatch.bcctx(),
+    IRSPRelOffsetData { endCatch.extra<EndCatch>()->offset },
+    endCatch.src(0),
+    endCatch.src(1)
+  );
+  block->insert(--block->end(), sync);
+}
+
+void fix_inline_frames(Global& genv) {
+  using ECM = EndCatchData::CatchMode;
+  StateVector<Block,FPState> blockState{
+    genv.unit, FPState{nullptr, 0, nullptr, nullptr, nullptr}
+  };
+  const BlockList rpoBlocks{genv.poBlockList.rbegin(), genv.poBlockList.rend()};
+  auto const rpoIDs = numberBlocks(genv.unit, rpoBlocks);
+  dataflow_worklist<uint32_t> incompleteQ(rpoBlocks.size());
+  DEBUG_ONLY std::unordered_map<SSATmp*,SSATmp*> parentFPs;
+
+  for (auto rpoId = uint32_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
+    incompleteQ.push(rpoId);
+  }
+
+  while (!incompleteQ.empty()) {
+    auto const rpoId = incompleteQ.pop();
+    auto const blk = rpoBlocks[rpoId];
+    auto& state = blockState[blk];
+
+    state.entry = nullptr;
+    bool needFixup = false;
+    blk->forEachPred([&] (Block* pred) {
+      auto const& bs = blockState[pred];
+      needFixup |= bs.exit && state.entry && state.entry != bs.exit;
+      if (bs.catchPC) state.catchPC = bs.catchPC;
+      if (bs.catchFP) state.catchFP = bs.catchFP;
+
+      if (!bs.exit) return;
+      if (!state.entry || bs.exitDepth < state.exitDepth) {
+        state.entry = bs.exit;
+        state.exitDepth = bs.exitDepth;
+      }
+    });
+
+    // We split critical edges so it should be safe to insert InlineReturns into
+    // predecessors in this case.
+    if (needFixup) {
+      assertx(blk->numPreds() > 1);
+      blk->forEachPred([&] (Block* pred) {
+        assertx(pred->numSuccs() == 1);
+        auto& bs = blockState[pred];
+        if (bs.exitDepth > state.exitDepth) {
+          append_inline_returns(genv, pred, bs.exit, state.entry);
+          bs.exit = state.entry;
+        }
+      });
+    }
+
+    auto fp = state.entry;
+    folly::Optional<IRSPRelOffset> lastSync;
+    for (auto& inst : *blk) {
+      adjust_inline_marker(inst, fp);
+
+      if (inst.is(InlineReturn)) {
+        if (fp == inst.src(0)) {
+          // If we didn't elide the InlineCall paired with this return we can't
+          // have removed any of its parent calls as they should each depend on
+          // each other.
+          assertx(inst.src(1) == parentFPs[fp]);
+          state.exitDepth--;
+
+          fp = inst.src(1);
+          continue;
+        }
+
+        // The InlineCall was removed, we can remove the InlineReturn, determine
+        // if the InlineReturn needs to be converted to an InlineCall. This
+        // can happen when the InlineCall was killed or moved but the store for
+        // the InlineReturn is still live.
+        auto const parent = inst.src(1)->inst();
+        if (genv.deadInlineReturns[inst] || fp == parent->dst()) {
+          inst.convertToNop();
+          continue;
+        }
+        assertx(parent->is(BeginInlining));
+
+        InlineCallData data;
+        data.syncVmpc = state.catchPC;
+        data.spOffset = parent->extra<BeginInlining>()->spOffset;
+        genv.unit.replace(&inst, InlineCall, data, parent->dst(), fp);
+        // fallthrough to the InlineCall logic
+      }
+
+      if (inst.is(InlineCall)) {
+        fp = inst.src(0);
+        inst.extra<InlineCall>()->syncVmpc = state.catchPC;
+        state.exitDepth++;
+      }
+
+      if (debug && inst.is(BeginInlining)) parentFPs[inst.dst()] = inst.src(1);
+      if (inst.is(DefFP, DefFuncEntryFP)) fp = inst.dst();
+      if (inst.is(Call)) fix_inlined_call(genv, &inst, fp);
+      if (inst.is(CallBuiltin)) inst.setSrc(0, fp);
+
+      if (inst.is(EagerSyncVMRegs)) {
+        inst.setSrc(0, fp);
+        lastSync = inst.extra<EagerSyncVMRegs>()->offset;
+      }
+
+      if (inst.is(BeginCatch)) {
+        state.catchPC = inst.marker().sk().pc();
+        state.catchFP = fp;
+      }
+      if (inst.is(EndCatch)) {
+        if (state.catchFP != fp &&
+            inst.extra<EndCatch>()->mode != ECM::CallCatch &&
+            lastSync != inst.extra<EndCatch>()->offset) {
+          insert_eager_sync(genv, inst);
+        }
+      }
+
+      // This isn't a correctness problem but it may save us a register
+      if (inst.is(CheckSurpriseFlags) && inst.src(0)->isA(TFramePtr)) {
+        if (fp->inst()->marker().resumeMode() == ResumeMode::None) {
+          inst.setSrc(0, fp);
+        }
+      }
+    }
+
+    if (state.exit && state.exit != fp) {
+      blk->forEachSucc([&] (Block* succ) {
+        incompleteQ.push(rpoIDs[succ]);
+      });
+    }
+    state.exit = fp;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 }
@@ -1531,6 +1783,11 @@ void optimizeStores(IRUnit& unit) {
   for (auto& block : poBlockList) {
     optimize_block_pre(genv, block, blockAnalysis);
   }
+
+  if (genv.adjustedInlineCalls) {
+    fix_inline_frames(genv);
+  }
+
   if (genv.needsReflow) {
     reflowTypes(genv.unit);
   }

@@ -131,21 +131,6 @@ bool storesCell(const IRInstruction& inst, uint32_t srcIdx) {
 
 //////////////////////////////////////////////////////////////////////
 
-PhysReg forceAlloc(const SSATmp& tmp) {
-  if (tmp.type() <= TBottom) return InvalidReg;
-
-  auto inst = tmp.inst();
-  auto opc = inst->op();
-
-  // LdContActRec and LdAFWHActRec, loading a generator's AR, is the only time
-  // we have a pointer to an AR that is not in rvmfp().
-  if (opc != LdContActRec && opc != LdAFWHActRec && tmp.isA(TFramePtr)) {
-    return rvmfp();
-  }
-
-  return InvalidReg;
-}
-
 // Assign virtual registers to all SSATmps used or defined in reachable
 // blocks. This assigns a value register to constants defined by DefConst,
 // because some HHIR instructions require them. Ordinary Gen values with
@@ -178,14 +163,6 @@ void assignRegs(const IRUnit& unit, Vunit& vunit, irlower::IRLS& state,
   // visit each tmp, assign 1 or 2 registers to each.
   for (auto tmp : tmps) {
     if (!tmp) continue;
-    auto forced = forceAlloc(*tmp);
-    if (forced != InvalidReg) {
-      state.locs[tmp] = Vloc{forced};
-      UNUSED Reg64 r = forced;
-      FTRACE(kVasmRegAllocDetailLevel,
-             "force t{} in {}\n", tmp->id(), reg::regname(r));
-      continue;
-    }
     if (tmp->inst()->is(DefConst)) {
       auto const loc = make_const(vunit, tmp->type());
       state.locs[tmp] = loc;

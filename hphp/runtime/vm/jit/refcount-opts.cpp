@@ -1017,7 +1017,8 @@ void mrinfo_step_impl(Env& env,
     [&](ReturnEffects) {}, [&](GeneralEffects) {},
     [&](UnknownEffects) { kill(ALocBits{}.set()); },
     [&](PureStore x) { do_store(x.dst, x.value); },
-    [&] (InlineEnterEffects) {}, [&] (InlineExitEffects) {},
+    [&] (PureInlineCall) {},
+    [&] (PureInlineReturn) {},
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1370,14 +1371,16 @@ bool irrelevant_inst(const IRInstruction& inst) {
     [&] (PureLoad) { return true; },
     [&] (PureStore) { return true; },
     [&] (IrrelevantEffects) { return true; },
-    [&] (InlineEnterEffects) { return true; },
-    [&] (InlineExitEffects) { return true; },
+    [&] (PureInlineCall) { return true; },
+    [&] (PureInlineReturn) { return true; },
 
     // Inlining related instructions can manipulate the frame but don't
     // observe reference counts.
     [&] (GeneralEffects g) {
       if (inst.is(BeginInlining,
-                  InlineReturnNoFrame,
+                  EndInlining,
+                  InlineCall,
+                  InlineReturn,
                   SyncReturnBC
                  )) {
         return true;
@@ -2055,24 +2058,6 @@ void pure_store(Env& env,
   if (tmp) create_store_support(env, state, dst, tmp, add_node);
 }
 
-void inline_enter_effects(Env& env,
-                          RCState& state,
-                          InlineEnterEffects& ief,
-                          PreAdder add_node) {
-  // We're converting a pre-live actrec to a live actrec, which effectively
-  // changes some stack AliasClasses to not exist anymore.
-  observe_unbalanced_decrefs(env, state, add_node);
-
-  // Kill locations that are going to be overwritten by the ActRec.
-  drop_support_bits(env, state, env.ainfo.expand(ief.actrec));
-
-  // DefInlineFP may store a $this to the ActRec. We don't need to treat it
-  // as a memory support, as LdCtx doesn't need that. The only way that
-  // reference can be DecRef'd in a semantically correct program is in a return
-  // sequence, and if it's done inside this region, we will see the relevant
-  // DecRef instructions and handle that.
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void analyze_mem_effects(Env& env,
@@ -2085,11 +2070,8 @@ void analyze_mem_effects(Env& env,
     effects,
     [&] (IrrelevantEffects) {},
 
-    [&] (InlineEnterEffects x) {
-      inline_enter_effects(env, state, x, add_node);
-    },
-
-    [&] (InlineExitEffects) {},
+    [&] (PureInlineCall) {},
+    [&] (PureInlineReturn) {},
 
     [&] (GeneralEffects x)  {
       if (inst.is(CallBuiltin)) {
@@ -2107,7 +2089,8 @@ void analyze_mem_effects(Env& env,
       // prevent store sinking, but don't actually change any
       // refcounts, so we don't need to reduce lower bounds.
       auto const may_decref = !inst.is(BeginInlining,
-                                       InlineReturnNoFrame,
+                                       EndInlining,
+                                       InlineReturn,
                                        SyncReturnBC
                                       );
       if (may_decref && x.stores != AEmpty) {
@@ -2487,10 +2470,9 @@ bool can_sink_inc_through(const IRInstruction& inst) {
     case LdLoc:
     case LdStk:
     case BeginInlining:
-    case DefInlineFP:
     case InlineReturn:
-    case InlineSuspend:
-    case InlineReturnNoFrame:
+    case EndInlining:
+    case InlineCall:
     case FinishMemberOp:
     case Nop:        return true;
 

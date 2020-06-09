@@ -25,14 +25,12 @@ namespace HPHP { namespace jit {
 //////////////////////////////////////////////////////////////////////
 
 struct IRUnit;
-struct IRInstruction;
 
 //////////////////////////////////////////////////////////////////////
 
 /*
  * The main optimization passes.
  */
-void optimizeInlineReturns(IRUnit&);
 void optimizeRefcounts(IRUnit&);
 void selectiveWeakenDecRefs(IRUnit&);
 void optimizePredictions(IRUnit&);
@@ -53,9 +51,6 @@ void insertAsserts(IRUnit&);
  * Run all the optimization passes.
  */
 void optimize(IRUnit& unit, TransKind kind);
-
-using SSATmpSet = IdSet<SSATmp>;
-folly::Optional<int32_t> findSPOffset(const IRUnit&, const SSATmp*, SSATmpSet&);
 
 //////////////////////////////////////////////////////////////////////
 

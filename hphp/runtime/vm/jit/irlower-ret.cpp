@@ -197,8 +197,7 @@ void cgGenericRetDecRefs(IRLS& env, const IRInstruction* inst) {
   auto const numLocals = marker.func()->numLocals();
   auto& v = vmain(env);
 
-  assertx(fp == rvmfp() &&
-          "freeLocalsHelper assumes the frame pointer is rvmfp()");
+  // TODO: assert that fp is the same value stored in rvmfp here.
 
   if (numLocals == 0) return;
 

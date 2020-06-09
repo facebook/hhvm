@@ -36,8 +36,7 @@ struct InlineReturnTarget {
   Block* callerTarget;
 
   /*
-   * Block that will suspend the inlined frame and optionally contain the
-   * InlineSuspend instruction.
+   * Block that will suspend the inlined frame.
    */
   Block* suspendTarget;
 

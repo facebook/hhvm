@@ -205,25 +205,9 @@ bool collapseDiamond(IRUnit& unit, Block* block) {
   for (uint32_t i = 0; i < nextJmp->numSrcs(); ++i) {
     auto const t = term.is(JmpZero) ? nextJmp->src(i) : takenJmp->src(i);
     auto const f = term.is(JmpZero) ? takenJmp->src(i) : nextJmp->src(i);
-    newSrcs[i] = [&] {
-      // T64778346: The simplifier will handle this for us but the call to the
-      //            DCE when cleanCfg() finishes will choke if it sees any
-      //            Select instructions joining FramePtrs. It shouldn't be
-      //            possible to get here though as Phi nodes are only created
-      //            when incoming edges have differing FramePtrs.
-      if (t == f) return t;
-
-      // If two sides of a diamond pattern have differing FramePtrs then at
-      // least one of them must contain a DefInlineFP which should be caught
-      // above. If neither block defines a new frame, and both blocks are
-      // necessarily dominated by the head of the diamond, they must all share
-      // the same frame pointer.
-      assertx(!t->isA(TFramePtr));
-
-      auto select = unit.gen(Select, term.bcctx(), term.src(0), t, f);
-      block->insert(block->backIter(), select);
-      return select->dst();
-    }();
+    auto select = unit.gen(Select, term.bcctx(), term.src(0), t, f);
+    block->insert(block->backIter(), select);
+    newSrcs[i] = select->dst();
   }
 
   // Instead of conditionally jumping into either branch in the diamond, now

@@ -271,13 +271,6 @@ inline SSATmp* IRUnit::mainFP() const {
   return entry()->begin()->dst();
 }
 
-inline SSATmp* IRUnit::mainSP() const {
-  assertx(!entry()->empty() && entry()->begin()->is(DefFP));
-  auto it = ++entry()->begin();
-  assertx(it != entry()->end() && it->is(DefFrameRelSP, DefRegSP));
-  return it->dst();
-}
-
 inline int64_t IRUnit::startNanos() const {
   return m_startNanos;
 }

@@ -669,7 +669,6 @@ bool opcodeMayRaise(Opcode opc) {
   case DefConst:
   case DefFP:
   case DefFuncEntryFP:
-  case DefInlineFP:
   case DefLabel:
   case DefFrameRelSP:
   case DefRegSP:
@@ -690,6 +689,7 @@ bool opcodeMayRaise(Opcode opc) {
   case EndBlock:
   case EndCatch:
   case EndGuards:
+  case EndInlining:
   case EnterPrologue:
   case EnterTCUnwind:
   case EqArrayDataPtr:
@@ -739,9 +739,8 @@ bool opcodeMayRaise(Opcode opc) {
   case InitPackedLayoutArray:
   case InitPackedLayoutArrayLoop:
   case InitThrowableFileAndLine:
+  case InlineCall:
   case InlineReturn:
-  case InlineReturnNoFrame:
-  case InlineSuspend:
   case InstanceOf:
   case InstanceOfBitmask:
   case InstanceOfIface:
@@ -961,6 +960,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StContArValue:
   case StFrameCtx:
   case StFrameFunc:
+  case StFrameMeta:
   case StIterBase:
   case StIterType:
   case StIterPos:

@@ -46,138 +46,96 @@ TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  auto const extra = inst->extra<BeginInlining>();
-  v << inlinestart{extra->func, extra->cost};
-}
-
-void cgDefInlineFP(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<DefInlineFP>();
-  auto const callerSP = srcLoc(env, inst, 0).reg();
-  auto const callerFP = srcLoc(env, inst, 1).reg();
-  auto const ctx = srcLoc(env, inst, 2).reg();
-  auto& v = vmain(env);
-
-  auto const ar = callerSP[cellsToBytes(extra->spOffset.offset)];
-
-  // Do roughly the same work as an HHIR Call.
-  v << store{callerFP, ar + AROFF(m_sfp)};
-  emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
-                ar + AROFF(m_savedRip));
-  emitImmStoreq(v, uintptr_t(extra->target), ar + AROFF(m_func));
-
-  // Set m_callOffAndFlags.
-  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
-    extra->callBCOff,
-    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
-  ));
-  v << storeli{coaf, ar + AROFF(m_callOffAndFlags)};
-
-  // Set m_numArgs.
-  v << storeli{safe_cast<int32_t>(extra->numArgs), ar + AROFF(m_numArgs)};
-
-  // Set m_this/m_cls.
-  auto const ctxTmp = inst->src(2);
-  assertx(ctxTmp->isA(TCls) || ctxTmp->isA(TObj) || ctxTmp->isA(TNullptr));
-  if (ctxTmp->hasConstVal(TCls)) {
-    auto const ctxVal = uintptr_t(ctxTmp->clsVal());
-    emitImmStoreq(v, ctxVal, ar + AROFF(m_thisUnsafe));
-  } else if (ctxTmp->isA(TCls) || ctxTmp->isA(TObj)) {
-    // Store the ObjectData* or Class*
-    v << store{ctx, ar + AROFF(m_thisUnsafe)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    // No $this or class; this happens in FCallFunc*.
-    emitImmStoreq(v, ActRec::kTrashedThisSlot, ar + AROFF(m_thisUnsafe));
-  }
-
-  if (extra->target->attrs() & AttrMayUseVV) {
-    v << storeqi{0, ar + AROFF(m_varEnv)};
-  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
-    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, ar + AROFF(m_varEnv));
-  }
-
-  if (extra->syncVmfp) {
-    // If we are in a catch block, update the vmfp() to point to the inlined
-    // frame if it was pointing to the parent frame, letting the unwinder see
-    // the inlined frame.
-    auto const newFP = v.makeReg();
-    auto const sf = v.makeReg();
-    v << lea{ar, newFP};
-    v << cmpqm{callerFP, rvmtl()[rds::kVmfpOff], sf};
-    ifThen(v, CC_E, sf, [&](Vout& v) {
-      v << store{newFP, rvmtl()[rds::kVmfpOff]};
-      emitImmStoreq(v, intptr_t(inst->marker().sk().pc()),
-                    rvmtl()[rds::kVmpcOff]);
-    });
-  }
-
-  v << pushframe{};
-  v << lea{ar, dstLoc(env, inst, 0).reg()};
-}
-
 namespace {
 
 bool isResumedParent(const IRInstruction* inst) {
   auto const fp = inst->src(0);
-  assertx(canonical(fp)->inst()->is(DefInlineFP, DefLabel));
+  assertx(fp->inst()->is(BeginInlining));
 
-  auto const chaseFpTmp = [](const SSATmp* s) {
-    s = canonical(s);
-    auto i = s->inst();
-    if (UNLIKELY(i->is(DefLabel))) {
-      i = resolveFpDefLabel(s);
-      assertx(i);
-    }
-    always_assert(i->is(DefInlineFP));
-    return i->dst();
-  };
-
-  auto const calleeFp = chaseFpTmp(fp);
-  assertx(calleeFp->inst()->is(DefInlineFP));
-
-  auto const callerFp = calleeFp->inst()->src(1);
+  auto const callerFp = fp->inst()->src(1);
   return callerFp->inst()->marker().resumeMode() != ResumeMode::None;
 }
 
 }
 
+void cgBeginInlining(IRLS& env, const IRInstruction* inst) {
+  auto const callerSP = srcLoc(env, inst, 0).reg();
+  auto const calleeFP = dstLoc(env, inst, 0).reg();
+  auto const extra = inst->extra<BeginInlining>();
+  auto& v = vmain(env);
+
+  v << inlinestart{extra->func, extra->cost};
+
+  // We could use callerFP in a non-resumed context but vasm-copy should clean
+  // this up for us since callerSP was computed as an lea{} from rvmfp.
+  v << lea{callerSP[cellsToBytes(extra->spOffset.offset)], calleeFP};
+}
+
+void cgInlineCall(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<InlineCall>();
+  auto const calleeFP = srcLoc(env, inst, 0).reg();
+  auto const callerFP = srcLoc(env, inst, 1).reg();
+  auto& v = vmain(env);
+
+  assertx(inst->src(0)->inst()->is(BeginInlining));
+  auto const target = inst->src(0)->inst()->extra<BeginInlining>()->func;
+
+  // Do roughly the same work as an HHIR Call.
+  v << store{callerFP, calleeFP[AROFF(m_sfp)]};
+  emitImmStoreq(v, uintptr_t(tc::ustubs().retInlHelper),
+                calleeFP[AROFF(m_savedRip)]);
+
+  if (target->attrs() & AttrMayUseVV) {
+    v << storeqi{0, calleeFP[AROFF(m_varEnv)]};
+  } else if (RuntimeOption::EvalHHIRGenerateAsserts) {
+    emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, calleeFP[AROFF(m_varEnv)]);
+  }
+
+  if (extra->syncVmpc) {
+    // If we are in a catch block, update the vmfp() to point to the inlined
+    // frame if it was pointing to the parent frame, letting the unwinder see
+    // the inlined frame.
+    auto const sf = v.makeReg();
+    v << cmpqm{callerFP, rvmtl()[rds::kVmfpOff], sf};
+
+    // Do this store now to hopefully allow vasm-copy to replace the store of
+    // calleeFP below with rvmfp.
+    v << stvmfp{calleeFP};
+
+    ifThen(v, CC_E, sf, [&](Vout& v) {
+      v << store{calleeFP, rvmtl()[rds::kVmfpOff]};
+      emitImmStoreq(v, intptr_t(extra->syncVmpc), rvmtl()[rds::kVmpcOff]);
+    });
+  } else {
+    v << stvmfp{calleeFP};
+  }
+
+  v << pushframe{};
+}
+
 void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
+  auto const callerFp = srcLoc(env, inst, 1).reg();
   if (isResumedParent(inst)) {
-    v << load{fp[AROFF(m_sfp)], rvmfp()};
+    v << stvmfp{callerFp};
   } else {
+    auto const tmp = v.makeReg();
     auto const callerFPOff = inst->extra<InlineReturn>()->offset;
-    v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
+    v << lea{fp[cellsToBytes(callerFPOff.offset)], tmp};
+    v << stvmfp{tmp};
   }
   v << popframe{};
-  v << inlineend{};
 }
 
-void cgInlineSuspend(IRLS& env, const IRInstruction* inst) {
+void cgEndInlining(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const fp = srcLoc(env, inst, 0).reg();
-  if (isResumedParent(inst)) {
-    v << load{fp[AROFF(m_sfp)], rvmfp()};
-  } else {
-    auto const callerFPOff = inst->extra<InlineSuspend>()->offset;
-    v << lea{fp[cellsToBytes(callerFPOff.offset)], rvmfp()};
-  }
-  v << popframe{};
-  v << inlineend{};
-}
-
-void cgInlineReturnNoFrame(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
 
   if (RuntimeOption::EvalHHIRGenerateAsserts) {
     if (env.unit.context().initSrcKey.resumeMode() == ResumeMode::None) {
-      auto const extra = inst->extra<InlineReturnNoFrame>();
-      auto const offset = extra->offset.offset;
-      auto const sp = srcLoc(env, inst, 0).reg();
       for (auto i = 0; i < kNumActRecCells; ++i) {
-        trashFullTV(v, sp[cellsToBytes(offset + i)], kTVTrashJITFrame);
+        trashFullTV(v, fp[i], kTVTrashJITFrame);
       }
     }
   }

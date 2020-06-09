@@ -591,11 +591,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
     switch (inst.op()) {
     case AssertLoc:
       return AliasClass {
-        ALocal {
-          inst.src(0),
-          inst.extra<AssertLoc>()->locId,
-          inst.extra<AssertLoc>()->fpOffset
-        }
+        ALocal { inst.src(0), inst.extra<AssertLoc>()->locId }
       };
     case AssertStk:
       return AliasClass {
@@ -645,6 +641,19 @@ void check_decref_eligible(
     }
   };
 
+int32_t findSPOffset(const IRUnit& unit, const SSATmp* fp,
+                     const IRInstruction* defSP) {
+  assertx(fp->isA(TFramePtr));
+  auto const inst = fp->inst();
+
+  if (inst->is(BeginInlining)) {
+    return inst->extra<BeginInlining>()->spOffset.offset;
+  }
+  assertx(inst->is(DefFP, DefFuncEntryFP));
+  assertx(defSP->is(DefFrameRelSP, DefRegSP));
+  return defSP->extra<FPInvOffsetData>()->offset.offset;
+}
+
 Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   if (!RuntimeOption::EvalHHIRLoadEnableTeardownOpts) return FNone{};
   assertx(inst.op() == EndCatch);
@@ -688,7 +697,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   |                                 | <-] inst.src(0) [ sp ]      | <-+
   +---------------------------------+   |                         |   |
   | ActRec for inlined func one     |   |                         |   |
-  +---------------------------------+ <-+ DefInlineFp             |   |
+  +---------------------------------+ <-+ BeginInlining           |   |
   | Locals for inlined func one     |   |                         |   |
   +---------------------------------+   |                         |   |
   | Stack slots for inlined func one|   |                         |   |
@@ -704,14 +713,12 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
   */
 
   auto const adjustSP = [&]() -> int32_t {
-    SSATmpSet visited;
     auto const fpReg = inst.src(0);
     auto const defSP = inst.src(1)->inst();
-    auto const spOff = findSPOffset(env.global.unit, fpReg, visited);
-    if (!spOff) return 0;
+    auto const spOff = findSPOffset(env.global.unit, fpReg, defSP);
     auto const defSPOff = defSP->extra<FPInvOffsetData>()->offset.offset;
-    assertx(!fpReg->inst()->is(DefFP, DefFuncEntryFP) || defSPOff == *spOff);
-    return *spOff - defSPOff;
+    assertx(!fpReg->inst()->is(DefFP, DefFuncEntryFP) || defSPOff == spOff);
+    return spOff - defSPOff;
   }();
 
   // We need to adjust the number of stack elements since we only want to emit
@@ -832,11 +839,8 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
     [&] (PureStore m)       { store(env, m.dst, m.value); },
     [&] (PureLoad m)        { flags = load(env, inst, m.src); },
 
-    [&] (InlineEnterEffects m) { store(env, m.inlFrame, nullptr);
-                                 store(env, m.inlStack, nullptr);
-                                 store(env, m.actrec, nullptr); },
-    [&] (InlineExitEffects m) { store(env, m.inlFrame, nullptr);
-                                store(env, m.inlMeta, nullptr); },
+    [&] (PureInlineCall m)    { store(env, m.base, m.fp); },
+    [&] (PureInlineReturn m)  { store(env, m.base, m.callerFp); },
     [&] (GeneralEffects m)  { flags = handle_general_effects(env, inst, m); },
     [&] (CallEffects x)     { handle_call_effects(env, inst, x); }
   );

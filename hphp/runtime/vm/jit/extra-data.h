@@ -366,23 +366,12 @@ struct FuncArgTypeData : IRExtraData {
 struct LocalId : IRExtraData {
   explicit LocalId(uint32_t id) : locId(id) {}
 
-  std::string show() const {
-    if (fpOffset.offset == 0) return folly::to<std::string>(locId);
-    return folly::sformat("{}, FPInvOff {}", locId, fpOffset.offset);
-  }
+  std::string show() const { return folly::to<std::string>(locId); }
 
-  bool equals(LocalId o) const {
-    return locId == o.locId && fpOffset == o.fpOffset;
-  }
-  size_t hash() const {
-    return folly::hash::hash_combine(
-      std::hash<uint32_t>()(locId),
-      std::hash<int32_t>()(fpOffset.offset)
-    );
-  }
+  bool equals(LocalId o) const { return locId == o.locId; }
+  size_t hash() const { return std::hash<uint32_t>()(locId); }
 
   uint32_t locId;
-  FPInvOffset fpOffset{0};
 };
 
 /*
@@ -745,27 +734,33 @@ struct ReqRetranslateData : IRExtraData {
 };
 
 /*
- * DefInlineFP is present when we need to create a frame for inlining.  This
+ * InlineCall is present when we need to create a frame for inlining.  This
  * instruction also carries some metadata used by IRBuilder to track state
  * during an inlined call.
  */
-struct DefInlineFPData : IRExtraData {
+struct InlineCallData : IRExtraData {
   std::string show() const {
     return folly::to<std::string>(
-      target->fullName()->data(), "(),",
-      callBCOff, ',',
-      retSPOff.offset, ',',
       spOffset.offset
     );
   }
 
-  const Func* target;
-  Offset callBCOff;
-  FPInvOffset retSPOff;
   IRSPRelOffset spOffset; // offset from caller SP to bottom of callee's ActRec
+  PC syncVmpc{nullptr};
+};
+
+struct StFrameMetaData : IRExtraData {
+  std::string show() const {
+    return folly::to<std::string>(
+      callBCOff, ',',
+      numArgs, ',',
+      asyncEagerReturn
+    );
+  }
+
+  Offset callBCOff;
   uint32_t numArgs;
   bool asyncEagerReturn;
-  bool syncVmfp;
 };
 
 struct SyncReturnBCData : IRExtraData {
@@ -861,6 +856,10 @@ struct CallData : IRExtraData {
   bool asyncEagerReturn;
   bool formingRegion;
   bool skipNumArgsCheck;
+
+  // Set if the catch trace for this call has a SyncReturnBC instruction because
+  // an inline frame was elided around it.
+  bool hasInlFixup{false};
 };
 
 struct CallUnpackData : IRExtraData {
@@ -1275,16 +1274,12 @@ struct MemoCacheStaticData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
-    p->fpOffset = fpOffset;
     return p;
   }
 
   std::string show() const {
     std::string ret;
     ret += folly::sformat("{},{}", func->fullName(), HPHP::show(keys));
-    if (fpOffset.offset != 0) {
-      ret += folly::sformat(",FPInvOffset {}", fpOffset.offset);
-    }
     if (keys.count > 0) {
       ret += ",<";
       for (auto i = 0; i < keys.count; ++i) {
@@ -1301,7 +1296,6 @@ struct MemoCacheStaticData : IRExtraData {
   const bool* types;
   folly::Optional<bool> asyncEager;
   bool loadAux;
-  FPInvOffset fpOffset{0};
 };
 
 struct MemoCacheInstanceData : IRExtraData {
@@ -1327,19 +1321,15 @@ struct MemoCacheInstanceData : IRExtraData {
     auto tmp = new (arena) bool[keys.count];
     std::copy(types, types + keys.count, tmp);
     p->types = tmp;
-    p->fpOffset = fpOffset;
     return p;
   }
 
   std::string show() const {
     return folly::sformat(
-      "{},{},{},{}<{}>,{}",
+      "{},{},{}<{}>,{}",
       slot,
       func->fullName(),
       HPHP::show(keys),
-      fpOffset.offset != 0
-        ? folly::sformat("FPInvOffset {},", fpOffset.offset)
-        : "",
       [&]{
         using namespace folly::gen;
         return range<uint32_t>(0, keys.count)
@@ -1357,7 +1347,6 @@ struct MemoCacheInstanceData : IRExtraData {
   bool shared;
   folly::Optional<bool> asyncEager;
   bool loadAux;
-  FPInvOffset fpOffset{0};
 };
 
 struct MOpModeData : IRExtraData {
@@ -1493,20 +1482,22 @@ struct ProfileCallTargetData : IRExtraData {
 };
 
 struct BeginInliningData : IRExtraData {
-  BeginInliningData(IRSPRelOffset offset, const Func* func, int cost)
-    : offset(offset)
+  BeginInliningData(IRSPRelOffset offset, const Func* func, int cost, int na)
+    : spOffset(offset)
     , func(func)
     , cost(cost)
+    , numArgs(na)
   {}
 
   std::string show() const {
-    return folly::to<std::string>("IRSPOff ", offset.offset,
+    return folly::to<std::string>("IRSPOff ", spOffset.offset,
                                   " FUNC ", func->fullName()->data());
   }
 
-  IRSPRelOffset offset;
+  IRSPRelOffset spOffset;
   const Func* func;
   int cost;
+  int numArgs;
 };
 
 struct ParamData : IRExtraData {
@@ -1730,12 +1721,11 @@ X(DefFrameRelSP,                FPInvOffsetData);
 X(DefRegSP,                     FPInvOffsetData);
 X(LdStk,                        IRSPRelOffsetData);
 X(LdStkAddr,                    IRSPRelOffsetData);
-X(DefInlineFP,                  DefInlineFPData);
+X(InlineCall,                   InlineCallData);
+X(StFrameMeta,                  StFrameMetaData);
 X(BeginInlining,                BeginInliningData);
 X(SyncReturnBC,                 SyncReturnBCData);
 X(InlineReturn,                 FPRelOffsetData);
-X(InlineSuspend,                FPRelOffsetData);
-X(InlineReturnNoFrame,          IRSPRelOffsetData);
 X(ReqRetranslate,               ReqRetranslateData);
 X(ReqBindJmp,                   ReqBindJmpData);
 X(ReqRetranslateOpt,            IRSPRelOffsetData);

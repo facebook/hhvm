@@ -1994,7 +1994,7 @@ void nativeImplInlined(IRGS& env) {
   auto const numArgs = callee->numParams();
   auto const paramThis = callee->isMethod() ? ldCtx(env) : nullptr;
 
-  auto numNonDefault = fp(env)->inst()->extra<DefInlineFP>()->numArgs;
+  auto numNonDefault = fp(env)->inst()->extra<BeginInlining>()->numArgs;
   auto params = prepare_params(
     env,
     callee,

@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
@@ -165,10 +164,9 @@ void cgCheckTypeMem(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgCheckLoc(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<CheckLoc>();
-  auto const baseOff = localOffset(extra->locId, extra->fpOffset);
+  auto const baseOff = localOffset(inst->extra<CheckLoc>()->locId);
   auto const base = srcLoc(env, inst, 0).reg()[baseOff];
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
+
   emitTypeCheck(vmain(env), env, inst->typeParam(),
                 base + TVOFF(m_type), base + TVOFF(m_data), inst->taken());
 }
@@ -294,10 +292,7 @@ void cgAssertType(IRLS& env, const IRInstruction* inst) {
   copyTV(v, src, dst, dtype);
 }
 
-void cgAssertLoc(IRLS&, const IRInstruction* inst) {
-  assertx(inst->extra<AssertLoc>()->fpOffset.offset == 0 ||
-          !fpIsResumed(inst->src(0)));
-}
+void cgAssertLoc(IRLS&, const IRInstruction*) {}
 void cgAssertStk(IRLS&, const IRInstruction*) {}
 void cgAssertMBase(IRLS&, const IRInstruction*) {}
 

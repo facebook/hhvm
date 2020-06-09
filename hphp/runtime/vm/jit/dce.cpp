@@ -212,7 +212,6 @@ bool canDCE(IRInstruction* inst) {
   case DefCallFunc:
   case DefCallNumArgs:
   case DefCallCtx:
-  case DefInlineFP:
   case LdRetVal:
   case Mov:
   case CountArray:
@@ -498,7 +497,7 @@ bool canDCE(IRInstruction* inst) {
   case NewStructDict:
   case Clone:
   case InlineReturn:
-  case InlineSuspend:
+  case InlineCall:
   case CallUnpack:
   case Call:
   case NativeImpl:
@@ -718,8 +717,8 @@ bool canDCE(IRInstruction* inst) {
   case ThrowParamInOutMismatchRange:
   case StMBase:
   case FinishMemberOp:
-  case InlineReturnNoFrame:
   case BeginInlining:
+  case EndInlining:
   case SyncReturnBC:
   case SetOpTV:
   case SetOpTVVerify:
@@ -748,6 +747,7 @@ bool canDCE(IRInstruction* inst) {
   case ProfileIsTypeStruct:
   case StFrameCtx:
   case StFrameFunc:
+  case StFrameMeta:
     return false;
 
   case SameArr:
@@ -770,31 +770,11 @@ bool canDCE(IRInstruction* inst) {
 struct DceFlags {
   DceFlags()
     : m_state(DEAD)
-    , m_weakUseCount(0)
   {}
 
   bool isDead() const { return m_state == DEAD; }
   void setDead()      { m_state = DEAD; }
   void setLive()      { m_state = LIVE; }
-
-  /*
-   * "Weak" uses are used in optimizeActRecs.
-   *
-   * If a frame pointer is used for something that can be modified to
-   * not be a use as long as the whole frame can go away, we'll track
-   * that here.
-   */
-  void incWeakUse() {
-    if (m_weakUseCount + 1 > kMaxWeakUseCount) {
-      // Too many weak uses for us to know we can optimize it away.
-      return;
-    }
-    ++m_weakUseCount;
-  }
-
-  int32_t weakUseCount() const {
-    return m_weakUseCount;
-  }
 
   std::string toString() const {
     std::array<const char*,2> const names = {{
@@ -813,8 +793,6 @@ private:
     LIVE,
   };
   uint8_t m_state:1;
-  static constexpr uint8_t kMaxWeakUseCount = 0x7f;
-  uint8_t m_weakUseCount:7;
 };
 static_assert(sizeof(DceFlags) == 1, "sizeof(DceFlags) should be 1 byte");
 
@@ -891,234 +869,6 @@ WorkList initInstructions(const IRUnit& unit, const BlockList& blocks,
   });
   TRACE(1, "DCE:^^^^^^^^^^^^^^^^^^^^\n");
   return wl;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-/*
- * A use of an inlined frame that can be modified to work without the
- * frame is called a "weak use" here.  For example, storing to a local
- * on a frame is weak because if no other uses of the frame are
- * keeping it alive (for example a load of that same local), we can
- * just remove the store.
- *
- * This routine counts the weak uses of inlined frames and marks them
- * dead if they have no non-weak uses.  Returns true if any inlined
- * frames were marked dead.
- */
-bool findWeakActRecUses(const BlockList& blocks,
-                        DceState& state,
-                        IRUnit& unit,
-                        const UseCounts& uses) {
-  bool killedFrames = false;
-
-  auto const incWeak = [&] (const IRInstruction* inst, const SSATmp* src) {
-    assertx(src->isA(TFramePtr));
-    auto const frameInst = src->inst();
-    if (frameInst->op() == DefInlineFP) {
-      ITRACE(3, "weak use of {} from {}\n", *frameInst, *inst);
-      state[frameInst].incWeakUse();
-    }
-  };
-
-  forEachInst(blocks, [&] (IRInstruction* inst) {
-    if (state[inst].isDead()) return;
-
-    switch (inst->op()) {
-    // These can use a static offset from a parent FP
-    case StLoc: {
-      auto const id = inst->marker().func()->lookupVarId(s_86metadata.get());
-      if (inst->extra<StLoc>()->locId != id &&
-          !parentFpIsResumed(inst->src(0))) {
-        incWeak(inst, inst->src(0));
-      }
-      break;
-    }
-    case LdLoc:
-    case CheckLoc:
-    case AssertLoc:
-    case LdLocAddr:
-    case MemoGetStaticCache:
-    case MemoSetStaticCache:
-    case MemoGetLSBCache:
-    case MemoSetLSBCache:
-    case MemoGetInstanceCache:
-    case MemoSetInstanceCache:
-      if (!parentFpIsResumed(inst->src(0))) incWeak(inst, inst->src(0));
-      break;
-
-    case InlineReturn:
-      {
-        auto const frameInst = inst->src(0)->inst();
-        assertx(frameInst->is(DefInlineFP));
-        auto const frameUses = uses[frameInst->dst()];
-        auto const weakUses  = state[frameInst].weakUseCount();
-        /*
-         * We can kill the frame if all uses of the frame are counted
-         * as weak uses.  Note that this InlineReturn counts as a weak
-         * use, but we haven't incremented for it yet, which is where
-         * the "+ 1" comes from below.
-         */
-        ITRACE(2, "frame {}: weak/strong {}/{}\n",
-          *frameInst, weakUses, frameUses);
-        if (frameUses - (weakUses + 1) == 0) {
-          ITRACE(1, "killing frame {}\n", *frameInst);
-          killedFrames = true;
-          state[frameInst].setDead();
-
-          // Ensure that the frame is still dead for the purposes of
-          // memory-effects
-          convertToInlineReturnNoFrame(unit, *inst);
-        }
-      }
-      break;
-
-    default:
-      // Default is conservative: we don't increment a weak use if it
-      // uses the frame (or stack), so they can't be eliminated.
-      break;
-    }
-  });
-
-  return killedFrames;
-}
-
-/*
- * The first time through, we've counted up weak uses of the frame and then
- * finally marked it dead.  The instructions in between that were weak uses may
- * need modifications now that their frame is going away.
- *
- * Finally, any removed frame pointers in BCMarkers must be rewritten to point
- * to the outer frame of that frame.
- */
-void performActRecFixups(const BlockList& blocks,
-                         DceState& state,
-                         IRUnit& unit,
-                         const UseCounts& uses) {
-  for (auto block : blocks) {
-    ITRACE(2, "Visiting block {}\n", block->id());
-    Trace::Indent indenter;
-
-    for (auto& inst : *block) {
-      if (state[inst].isDead()) continue;
-
-      ITRACE(5, "{}\n", inst.toString());
-
-      if (auto const fp = inst.marker().fp()) {
-        if (state[fp->inst()].isDead()) {
-          always_assert(fp->inst()->is(DefInlineFP));
-          auto const prev = fp->inst()->src(1);
-          inst.marker() = inst.marker().adjustFP(prev);
-          assertx(!state[prev->inst()].isDead());
-        }
-      }
-
-      switch (inst.op()) {
-      case DefInlineFP:
-        ITRACE(3, "DefInlineFP ({}): weak/strong uses: {}/{}\n",
-             inst, state[inst].weakUseCount(), uses[inst.dst()]);
-        break;
-
-      case StLoc:
-      case LdLoc:
-      case LdLocAddr:
-      case AssertLoc:
-      case CheckLoc:
-      case MemoGetStaticCache:
-      case MemoGetLSBCache:
-      case MemoGetInstanceCache:
-      case MemoSetStaticCache:
-      case MemoSetLSBCache:
-      case MemoSetInstanceCache:
-        if (state[inst.src(0)->inst()].isDead()) {
-          assertx(inst.src(0)->inst()->is(DefInlineFP));
-          convertToUseParentFrameWithOffset(
-            unit,
-            inst,
-            inst.src(0)->inst()->src(1)
-          );
-        }
-        break;
-
-      default:
-        break;
-      }
-    }
-  }
-}
-
-/*
- * Look for InlineReturn instructions that are the only "non-weak" use
- * of a DefInlineFP.  In this case we can kill both, avoiding the ActRec
- * spill.
- *
- * Prior to calling this routine, `uses' should contain the direct
- * (non-transitive) use counts of each DefInlineFP instruction.  If
- * the weak references are equal to the normal references, the
- * instruction is not necessary and can be removed (if we make the
- * required changes to each instruction that used it weakly).
- */
-void optimizeActRecs(const BlockList& blocks,
-                     DceState& state,
-                     IRUnit& unit,
-                     const UseCounts& uses) {
-  FTRACE(1, "AR:vvvvvvvvvvvvvvvvvvvvv\n");
-  SCOPE_EXIT { FTRACE(1, "AR:^^^^^^^^^^^^^^^^^^^^^\n"); };
-
-  // Make a pass to find if we can kill any of the frames.  If so, we
-  // have to do some fixups.  These two routines are coupled---most
-  // cases in findWeakActRecUses should have a corresponding case in
-  // performActRecFixups to deal with the frame being removed.
-  auto const killedFrames = findWeakActRecUses(blocks, state, unit, uses);
-  if (killedFrames) {
-    ITRACE(1, "Killed some frames. Iterating over blocks for fixups.\n");
-    performActRecFixups(blocks, state, unit, uses);
-  }
-}
-
-IRInstruction* resolveFpDefLabelImpl(
-  const SSATmp* fp,
-  IdSet<SSATmp>& visited
-) {
-  auto const inst = fp->inst();
-  assertx(inst->is(DefLabel));
-
-  // We already examined this, avoid loops.
-  if (visited[fp]) return nullptr;
-
-  auto const dests = inst->dsts();
-  auto const destIdx =
-    std::find(dests.begin(), dests.end(), fp) - dests.begin();
-  always_assert(destIdx >= 0 && destIdx < inst->numDsts());
-
-  // If any of the inputs to the Phi aren't Phis themselves, then just choose
-  // that.
-  IRInstruction* outInst = nullptr;
-  inst->block()->forEachSrc(
-    destIdx,
-    [&] (const IRInstruction*, const SSATmp* tmp) {
-      if (outInst) return;
-      auto const i = canonical(tmp)->inst();
-      if (!i->is(DefLabel)) outInst = i;
-    }
-  );
-  if (outInst) return outInst;
-
-  // Otherwise we need to recursively look at the linked Phis, avoiding visiting
-  // this Phi again.
-  visited.add(fp);
-  inst->block()->forEachSrc(
-    destIdx,
-    [&] (const IRInstruction*, const SSATmp* tmp) {
-      if (outInst) return;
-      tmp = canonical(tmp);
-      auto const DEBUG_ONLY label = tmp->inst();
-      assertx(label->is(DefLabel));
-      outInst = resolveFpDefLabelImpl(tmp, visited);
-    }
-  );
-
-  return outInst;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1209,12 +959,12 @@ void processCatchBlock(IRUnit& unit, DceState& state, Block* block,
       [&] (PureLoad x)           { return process_stack(x.src); },
       [&] (PureStore x)          { return do_store(x.dst, &*inst); },
       [&] (ExitEffects x)        { return process_stack(x.live); },
-      [&] (InlineEnterEffects x) {
+      [&] (PureInlineCall x) {
         return
-          process_stack(x.inlStack) ||
+          process_stack(x.base) ||
           process_stack(x.actrec);
       },
-      [&] (InlineExitEffects x)  { return process_stack(x.inlStack); }
+      [&] (PureInlineReturn x)   { return process_stack(x.base); }
     );
   }
 
@@ -1347,74 +1097,6 @@ struct TrackedInstr {
 
 } // anonymous namespace
 
-IRInstruction* resolveFpDefLabel(const SSATmp* fp) {
-  IdSet<SSATmp> visited;
-  auto const fpInst = resolveFpDefLabelImpl(fp, visited);
-  assertx(fpInst);
-  return fpInst;
-}
-
-bool fpIsResumed(const SSATmp* fp) {
-  fp = canonical(fp);
-  auto fpInst = fp->inst();
-  if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
-  return fpInst->marker().resumeMode() != ResumeMode::None;
-}
-
-bool parentFpIsResumed(const SSATmp* fp) {
-  if (!fp->inst()->is(DefInlineFP)) return false;
-  return fpIsResumed(fp->inst()->src(1));
-}
-
-void convertToUseParentFrameWithOffset(IRUnit& unit,
-                                       IRInstruction& inst,
-                                       SSATmp* parentFp) {
-  assertx(!inst.mayRaiseErrorWithSources());
-  assertx(inst.src(0)->inst()->is(DefInlineFP));
-  assertx(inst.src(0)->inst()->src(1) == parentFp);
-  assertx(!parentFpIsResumed(inst.src(0)));
-
-  auto const update = [&] (FPInvOffset& offset) {
-    auto const parentFpOffset =
-      inst.src(0)->inst()->extra<DefInlineFP>()->retSPOff + kNumActRecCells;
-    offset += parentFpOffset.offset;
-    inst.setSrc(0, parentFp);
-  };
-
-  switch (inst.op()) {
-    case StLoc:
-    case LdLoc:
-    case CheckLoc:
-    case AssertLoc:
-    case LdLocAddr:
-      return update(inst.extra<LocalId>()->fpOffset);
-    case MemoGetStaticCache:
-    case MemoSetStaticCache:
-    case MemoGetLSBCache:
-    case MemoSetLSBCache:
-      return update(inst.extra<MemoCacheStaticData>()->fpOffset);
-    case MemoGetInstanceCache:
-    case MemoSetInstanceCache:
-      return update(inst.extra<MemoCacheInstanceData>()->fpOffset);
-    default:
-      always_assert(false);
-  }
-  not_reached();
-}
-
-void convertToInlineReturnNoFrame(IRUnit& unit, IRInstruction& inst) {
-  assertx(inst.is(InlineReturn));
-  auto const frameInst = inst.src(0)->inst();
-  assertx(frameInst->is(DefInlineFP));
-  auto const calleeAROff = frameInst->extra<DefInlineFP>()->spOffset;
-  unit.replace(
-    &inst,
-    InlineReturnNoFrame,
-    IRSPRelOffsetData { calleeAROff },
-    frameInst->src(0)
-  );
-}
-
 void mandatoryDCE(IRUnit& unit) {
   if (removeUnreachable(unit)) {
     // Removing unreachable incoming edges can change types, so if we changed
@@ -1458,13 +1140,6 @@ void fullDCE(IRUnit& unit) {
       IRInstruction* srcInst = src->inst();
       if (srcInst->op() == DefConst) continue;
 
-      if (RuntimeOption::EvalHHIRInlineFrameOpts) {
-        if (srcInst->is(DefInlineFP)) {
-          FTRACE(3, "adding use to {} from {}\n", *src, *inst);
-          ++uses[src];
-        }
-      }
-
       if (srcInst->producesReference() && canDCE(srcInst)) {
         ++uses[src];
         if (inst->is(DecRef)) {
@@ -1493,10 +1168,6 @@ void fullDCE(IRUnit& unit) {
   }
 
   optimizeCatchBlocks(blocks, state, unit, uses);
-
-  if (RuntimeOption::EvalHHIRInlineFrameOpts) {
-    optimizeActRecs(blocks, state, unit, uses);
-  }
 
   // Now remove instructions whose state is DEAD.
   removeDeadInstructions(unit, state);

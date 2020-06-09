@@ -1629,22 +1629,23 @@ To string conversions:
 
 8. Call & Return
 
-| BeginInlining<offset>, ND, S(StkPtr), NF
+| BeginInlining<func, offset>, D(FramePtr), S(StkPtr) S(FramePtr), NF
 
   Marks the start of an inlined function whose stack resides offset cells below
-  the SP. It has no effect other than to hint to optimization passes that at the
-  start of the inlined function its stack is dead.
+  the SP.
 
-| DefInlineFP<func,callBCOff,retSPOff>,
-|   D(FramePtr),
-|   S(StkPtr) S(FramePtr) S(Cls|Obj|Nullptr),
-|   NF
+  Defines a new frame pointer for an ActRec at callBCOff for use in an inlined
+  region. In resumed contexts the new frame is computed relative to S0 as S1 is
+  not a stack location.
 
-  Defines a frame pointer for an inlined function.
+| EndInlining, ND, S(FramePtr), NF
 
-  `func' is the function being inlined. `callBCOff' points to the caller's
-  FCall instruction, `retSPOff' represents what the stack offset should be
-  after the FCall instruction in the caller.
+  Marks the end of an inlined function. S0 is no longer a valid frame location.
+
+| InlineCall<retSPOff>, ND, S(FramePtr) S(FramePtr), NF
+
+  Sets the current vmfp for an inlined call to S0, and the m_sfp of S0 to the
+  previous vmfp, S1.
 
   This instruction is primarily used to represent a frame in the IR in a way
   that allows us to eliminate it entirely. When it cannot be eliminated (or if
@@ -1655,31 +1656,15 @@ To string conversions:
   The caller frame pointer is passed as S1. This is used to keep track of the
   call chain of inlined functions for simplification and dead code elimination.
 
-  S2 is the context (nullptr, $this or static::class).
+| InlineReturn<callerFPOff>, ND, S(FramePtr) S(FramePtr), NF
 
-| InlineReturn<callerFPOff>, ND, S(FramePtr), NF
+  Unlinks a frame activated with InlineCall.  `callerFPOff' is the offset of
+  the caller's frame pointer, S1, relative to S0. Every InlineCall should be
+  post-dominated by InlineReturn instructions and terminal instructions on any
+  path that does not side exit within the callee.
 
-  Unlinks a frame constructed by DefInlineFP.  `callerFPOff' is the offset of
-  the caller's frame pointer relative to S0. Every inline region must contain
-  exactly one InlineReturn or InlineReturnNoFrame. Optimization passes which
-  attempt to elide DefInlineFP detect "main" blocks within an inlined region as
-  those which are dominated by BeginInlining and post-dominated by InlineReturn.
-
-| InlineSuspend<callerFPOff>, ND, S(FramePtr), NF
-
-  Identical to an InlineReturn, but for use when the frame is being suspended in
-  a side exit and will be torn down via an InlineReturn in the main trace. The
-  behavior of InlineSuspend is identical to inline return, but it allows us to
-  preserve the invariant that an inline region has a single InlineReturn for
-  every DefInlineFP (while still allowing InlineSuspend in the case of a side
-  exit).
-
-| InlineReturnNoFrame<InlineFrameStart>, ND, S(StkPtr), NF
-
-  Mark the end of an inlined function for which no DefInlineFP was required. The
-  primary purpose of this instruction is to hint the optimization passes that
-  after return everything below InlineFrameStart is dead. InlineFrameStart is
-  the SP-relative offset of the start of the callee frame.
+  The frame itself is still valid until killed by an EndInlining instruction,
+  but is no longer part of the m_sfp chain of active frames.
 
 | DefFuncEntryFP<func>,
 |   D(FramePtr),
@@ -1903,6 +1888,9 @@ To string conversions:
 
   Store the Func* in m_func for S0.
 
+| StFrameMeta<callBCOff,numArgs,flags>, ND, S(FramePtr), NF
+
+  Store the m_callOffAndFlags and m_numArgs fields of S0.
 
 10. Trace exits
 

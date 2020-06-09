@@ -94,11 +94,7 @@ AliasClass pointee(
     if (type <= TMemToFrameCell) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
-          ALocal {
-            sinst->src(0),
-            sinst->extra<LdLocAddr>()->locId,
-            sinst->extra<LdLocAddr>()->fpOffset
-          }
+          ALocal { sinst->src(0), sinst->extra<LdLocAddr>()->locId }
         };
       }
       return ALocalAny;
@@ -256,114 +252,76 @@ AliasClass livefp(const IRInstruction& inst) {
   return livefp(inst.marker().fp());
 }
 
-/*
- * Returning from an inlined function kills the stack below the
- * function's ActRec and all locals in the inlined frame.
- */
-InlineExitEffects inline_exit_effects(SSATmp* fp) {
-  fp = canonical(fp);
-  auto fpInst = fp->inst();
-  if (UNLIKELY(fpInst->is(DefLabel))) fpInst = resolveFpDefLabel(fp);
-  assertx(fpInst && fpInst->is(DefInlineFP));
-  auto const func = fpInst->extra<DefInlineFP>()->target;
-  auto const frame = [&] () -> AliasClass {
-    if (!func->numLocals()) return AEmpty;
-    return ALocal {fp, AliasIdSet::IdRange(0, func->numLocals())};
-  }();
-  auto const stack = stack_below(fp, FPRelOffset{kNumActRecCells - 1});
-  return InlineExitEffects{
-    stack,
-    frame | AActRec { fp },
-    AMIStateAny | AFBasePtr
-  };
-}
-
-/*
- * Returning from an inlined function where we've elided the frame
- * have the same effects as the non-elided case, but we must calculate
- * the offsets a different way (since we have no frame pointer).
- */
-InlineExitEffects inline_exit_effects_no_frame(const IRInstruction& inst) {
-  assertx(inst.is(InlineReturnNoFrame));
-
-  // We don't have a frame pointer for this frame, but
-  // InlineReturnNoFrame has the SP relative offset of where the frame
-  // would be. Use this to calculate the FPRelOffset from the
-  // outermost frame pointer, which is what ALocal and AStack would
-  // canonicalize to if given a frame pointer anyways.
-  auto const spInst = inst.src(0)->inst();
-  assertx(spInst->is(DefFrameRelSP, DefRegSP));
-  auto const spOffset = spInst->extra<FPInvOffsetData>()->offset;
-  auto const frameOffset =
-    inst.extra<InlineReturnNoFrame>()->offset.to<FPRelOffset>(spOffset);
-
-  auto const stack = AStack {
-    frameOffset + int32_t{kNumActRecCells} - 1,
-    std::numeric_limits<int32_t>::max()
-  };
-  auto const frame = [&] () -> AliasClass {
-    auto const func = inst.marker().func();
-    if (!func->numLocals()) return AEmpty;
-    return ALocal { frameOffset, AliasIdSet::IdRange(0, func->numLocals()) };
-  }();
-
-  return InlineExitEffects { stack, frame, AMIStateAny };
-}
-
 //////////////////////////////////////////////////////////////////////
 
 // Determine an AliasClass representing any locals in the instruction's frame
 // which might be accessed via debug_backtrace().
 
-AliasClass backtrace_locals(const IRInstruction& inst) {
-  auto const func = [&]() -> const Func* {
-    auto fp = inst.marker().fp();
-    if (!fp) return nullptr;
-    fp = canonical(fp);
-    auto fpInst = fp->inst();
-    if (UNLIKELY(fpInst->is(DefLabel))) {
-      fpInst = resolveFpDefLabel(fp);
-      assertx(fpInst);
+const Func* func_from_fp(SSATmp* fp) {
+  if (!fp) return nullptr;
+  auto fpInst = fp->inst();
+  if (fpInst->is(DefFP)) return fpInst->marker().func();
+  if (fpInst->is(DefFuncEntryFP)) return fpInst->extra<DefFuncEntryFP>()->func;
+  if (fpInst->is(BeginInlining)) return fpInst->extra<BeginInlining>()->func;
+  always_assert(false);
+}
+
+bool any_frame_has_metadata(SSATmp* fp) {
+  while (fp) {
+    auto const func = func_from_fp(fp);
+    if (!func || func->lookupVarId(s_86metadata.get()) != kInvalidId) {
+      return true;
     }
-    if (fpInst->is(DefFP)) return fpInst->marker().func();
-    if (fpInst->is(DefFuncEntryFP)) return fpInst->extra<DefFuncEntryFP>()->func;
-    if (fpInst->is(DefInlineFP)) return fpInst->extra<DefInlineFP>()->target;
-    always_assert(false);
-  }();
+    fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
+  }
+  return false;
+}
 
-  // Either there's no func or no frame-pointer. Either way, be conservative and
-  // assume anything can be read. This can happen in test code, for instance.
-  if (!func) return ALocalAny;
+AliasClass backtrace_locals(const IRInstruction& inst) {
+  auto eachFunc = [&] (auto fn) {
+    auto ac = AEmpty;
+    for (auto fp = inst.marker().fp(); fp; ) {
+      ac |= fn(func_from_fp(fp), fp);
+      fp = fp->inst()->is(BeginInlining) ? fp->inst()->src(1) : nullptr;
+    }
+    return ac;
+  };
 
-  auto const add86meta = [&] (AliasClass ac) {
+  auto const add86meta = [&] (const Func* func, SSATmp* fp) -> AliasClass {
     // The 86metadata variable can also exist in a VarEnv, but accessing that is
     // considered a heap effect, so we can ignore it.
     auto const local = func->lookupVarId(s_86metadata.get());
-    if (local == kInvalidId) return ac;
-    return ac | ALocal { inst.marker().fp(), (uint32_t)local };
+    if (local == kInvalidId) return AEmpty;
+    return ALocal { fp, (uint32_t)local };
   };
 
-  auto ac = AEmpty;
-  auto const numParams = func->numParams();
+  // Either there's no func or no frame-pointer. Either way, be conservative and
+  // assume anything can be read. This can happen in test code, for instance.
+  if (!inst.marker().fp()) return ALocalAny;
 
-  if (!RuntimeOption::EnableArgsInBacktraces) return add86meta(ac);
+  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(add86meta);
 
-  if (func->hasReifiedGenerics()) {
-    // First non param local contains reified generics
-    AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
-    ac |= ALocal { inst.marker().fp(), reifiedgenerics };
-  }
+  return eachFunc([&] (const Func* func, SSATmp* fp) {
+    auto ac = AEmpty;
+    auto const numParams = func->numParams();
 
-  if (func->cls() && func->cls()->hasReifiedGenerics()) {
-    // There is no way to access the SSATmp for ObjectData of `this` here,
-    // so be very pessimistic
-    ac |= APropAny;
-  }
+    if (func->hasReifiedGenerics()) {
+      // First non param local contains reified generics
+      AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
+      ac |= ALocal { fp, reifiedgenerics };
+    }
 
-  if (!numParams) return add86meta(ac);
+    if (func->cls() && func->cls()->hasReifiedGenerics()) {
+      // There is no way to access the SSATmp for ObjectData of `this` here,
+      // so be very pessimistic
+      ac |= APropAny;
+    }
 
-  AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-  return add86meta(ac | ALocal { inst.marker().fp(), params });
+    if (!numParams) return add86meta(func, fp) | ac;
+
+    AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
+    return add86meta(func, fp) | ac | ALocal { fp, params };
+  });
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -380,13 +338,6 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
  *
  * For kills, locations on the eval stack below the re-entry depth should all
  * be added.
- *
- * Important note: because of the `kills' set modifications, an instruction may
- * not report that it can re-enter if it actually can't.  The reason this can
- * go wrong is that if the instruction was in an inlined function, if we've
- * removed the DefInlineFP its spOff will not be meaningful.  In this case
- * the `kills' set will refer to the wrong stack locations.  This
- * means instructions that can re-enter must have catch traces.
  */
 GeneralEffects may_reenter(const IRInstruction& inst, GeneralEffects x) {
   auto const may_reenter_is_ok =
@@ -643,62 +594,16 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   }
 
   /*
-   * DefInlineFP has some special treatment here.
-   *
-   * It's logically `publishing' a pointer to a pre-live ActRec, making it
-   * live.  It doesn't actually load from this ActRec, but after it's done this
-   * the set of things that can load from it is large enough that the easiest
-   * way to model this is to consider it as a load on behalf of `publishing'
-   * the ActRec.  Once it's published, it's a live activation record, and
-   * doesn't get written to as if it were a stack slot anymore (we've
-   * effectively converted AStack locations into a frame until the
-   * InlineReturn).
-   *
-   * Note: We may push the publishing of the inline frame below the start of
-   * the inline function so that we can avoid spilling the inline frame in the
-   * common case. Because of this we cannot add the stack positions within the
-   * inline function to the kill set here as they may be live having been stored
-   * on the main trace.
-   *
-   * TODO(#3634984): Additionally, DefInlineFP is marking may-load on all the
-   * locals of the outer frame.  This is probably not necessary anymore, but we
-   * added it originally because a store sinking prototype needed to know it
-   * can't push StLocs past a DefInlineFP, because of reserved registers.
-   * Right now it's just here because we need to think about and test it before
-   * removing that set.
-   */
-  case DefInlineFP: {
-    /*
-     * Notice that the stack positions and frame locals described here are
-     * exactly the set of alias locations that are about to be overlapping
-     * inside the inlined frame.
-     */
-    auto const func = inst.extra<DefInlineFP>()->target;
-    AliasClass stack = func->numLocals()
-      ? AStack{inst.dst(), FPRelOffset{-1}, func->numLocals()}
-      : AEmpty;
-    AliasClass frame = func->numLocals()
-      ? ALocal{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
-      : AEmpty;
-    AliasClass actrec = AStack {
-      inst.src(0),
-      inst.extra<DefInlineFP>()->spOffset + int32_t{kNumActRecCells} - 1,
-      int32_t{kNumActRecCells}
-    };
-    return InlineEnterEffects{ stack, frame | livefp(inst.dst()), actrec };
-  }
-
-  /*
-   * BeginInlining is similar to DefInlineFP, however, it must always be the
-   * first instruction in the inlined call and has no effect serving only as
-   * a marker to memory effects that the stack cells within the inlined call
-   * are now dead.
+   * BeginInlining must always be the first instruction in the inlined call. It
+   * defines a new FP for the callee but does not perform any stores or
+   * otherwise initialize the FP.
    */
   case BeginInlining: {
     /*
-     * SP relative offset of the first non-frame cell within the inlined call.
+     * SP relative offset of the firstin the inlined call.
      */
-    auto inlineStackOff = inst.extra<BeginInlining>()->offset;
+    auto inlineStackOff =
+      inst.extra<BeginInlining>()->spOffset + kNumActRecCells - 1;
     return may_load_store_kill(
       AEmpty,
       AEmpty,
@@ -712,20 +617,49 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
   }
 
-  case InlineSuspend:
-  case InlineReturn: {
-    return inline_exit_effects(inst.src(0));
+  case EndInlining: {
+    assertx(inst.src(0)->inst()->is(BeginInlining));
+    auto const fp = inst.src(0);
+    auto const callee = inst.src(0)->inst()->extra<BeginInlining>()->func;
+    const AliasClass ar = AActRec { inst.src(0) };
+    auto const locals = [&] () -> AliasClass {
+      if (!callee->numLocals()) return AEmpty;
+      return ALocal {fp, AliasIdSet::IdRange(0, callee->numLocals())};
+    }();
+
+    // NB: It's okay if the AliasIdSet for locals cannot be precise. We want to
+    //     kill *every* local in the frame so there's nothing else that can
+    //     accidentally be included in the set.
+    return may_load_store_kill(AEmpty, AEmpty, ar | locals | AMIStateAny);
   }
 
-  case InlineReturnNoFrame:
-    return inline_exit_effects_no_frame(inst);
+  case InlineCall:
+    return PureInlineCall {
+      AFBasePtr,
+      inst.src(0),
+
+      // Right now when we "publish" a frame by storing it in rvmfp() we
+      // implicitly depend on the AFFunc and AFMeta bits being stored. In the
+      // future we may want to track this explicitly.
+      //
+      // We also need to ensure that all of our parent frames have this stored
+      // this information. To achieve this we also register a load on AFBasePtr,
+      // forcing them to also be published. Notice that we doin't actually
+      // depend on this load to properly initialize m_sfp or rvmfp().
+      AliasClass(AFFunc { inst.src(0) }) | AFMeta { inst.src(0) } | AFBasePtr
+    };
+
+  case InlineReturn:
+    // Unlike InlineCall we don't need to explicitly require the frame be
+    // published. Unlike InlineCall, however, it is not safe to "move" an
+    // InlineReturn, it may only be killed once it has been made redundant by
+    // the removal of its associated InlineCall.
+    return PureInlineReturn { AFBasePtr, inst.src(0), inst.src(1) };
 
   case SyncReturnBC: {
     auto const spOffset = inst.extra<SyncReturnBC>()->spOffset;
     auto const arStack = actrec(inst.src(0), spOffset);
-    // This instruction doesn't actually load but DefInlineFP cannot be pushed
-    // past it
-    return may_load_store(arStack, arStack);
+    return may_load_store(AEmpty, arStack);
   }
 
   case InterpOne:
@@ -836,6 +770,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case Call:
     {
+      // If any frames in the inlined stack have metadata we need to materialize
+      // all of the frames so that debug_backtrace() can find it.
+      AliasClass ar = any_frame_has_metadata(inst.src(1))
+        ? livefp(inst.src(1))
+        : AliasClass(AActRec {inst.src(1)});
       auto const extra = inst.extra<Call>();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
@@ -855,8 +794,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
             extra->numOut - 1,
           static_cast<int32_t>(extra->numOut)
         },
-        // Locals.
-        backtrace_locals(inst) | livefp(inst.src(1))
+        // Locals. We intentionally leave off a dependency on AFBasePtr to allow
+        // store-elim to elide the new frame.
+        backtrace_locals(inst) | ar
       };
     }
 
@@ -901,11 +841,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAFWHNoVV: {
     auto const fp = canonical(inst.src(0));
     auto fpInst = fp->inst();
-    if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(fp);
     auto const frame = [&] () -> AliasClass {
       if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny;
-      assertx(fpInst->is(DefInlineFP));
-      auto const nlocals = fpInst->extra<DefInlineFP>()->target->numLocals();
+      assertx(fpInst->is(BeginInlining));
+      auto const nlocals = fpInst->extra<BeginInlining>()->func->numLocals();
       return nlocals
         ? ALocal { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
@@ -1027,11 +966,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StLoc:
     return PureStore {
-      ALocal {
-        inst.src(0),
-        inst.extra<StLoc>()->locId,
-        inst.extra<StLoc>()->fpOffset
-      },
+      ALocal { inst.src(0), inst.extra<StLoc>()->locId },
       inst.src(1),
       nullptr
     };
@@ -1048,24 +983,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case LdLoc:
-    return PureLoad {
-      ALocal {
-        inst.src(0),
-        inst.extra<LocalId>()->locId,
-        inst.extra<LocalId>()->fpOffset
-      }
-    };
+    return PureLoad { ALocal { inst.src(0), inst.extra<LocalId>()->locId } };
 
   case CheckLoc:
   case LdLocPseudoMain:
     // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
     // PureLoad.
     return may_load_store(
-      ALocal {
-        inst.src(0),
-        inst.extra<LocalId>()->locId,
-        inst.extra<LocalId>()->fpOffset
-      },
+      ALocal { inst.src(0), inst.extra<LocalId>()->locId },
       AEmpty
     );
 
@@ -1253,8 +1178,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
           extra->keys.first,
           extra->keys.first + extra->keys.count
         }
-      },
-      extra->fpOffset
+      }
     };
 
     return may_load_store(frame, AEmpty);
@@ -1276,8 +1200,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
             extra->keys.first,
             extra->keys.first + extra->keys.count
           }
-        },
-        extra->fpOffset
+        }
       };
     }();
     return may_load_store(frame, AEmpty);
@@ -1746,6 +1669,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StFrameFunc:
     return PureStore { AFFunc { inst.src(0) }, inst.src(1) };
 
+  case StFrameMeta:
+    return PureStore { AFMeta { inst.src(0) }, nullptr };
+
   case EagerSyncVMRegs:
     return may_load_store(AEmpty, AEmpty);
 
@@ -2195,12 +2121,9 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
                                check(x.actrec);
                                check(x.outputs);
                                check(x.locals); },
-    [&] (InlineEnterEffects x){ check(x.inlStack);
-                                check(x.inlFrame);
-                                check(x.actrec); },
-    [&] (InlineExitEffects x){ check(x.inlStack);
-                               check(x.inlFrame);
-                               check(x.inlMeta); },
+    [&] (PureInlineCall x)   { check(x.base);
+                               check(x.actrec); },
+    [&] (PureInlineReturn x) { check(x.base); },
     [&] (ReturnEffects x)    { check(x.kills); }
   );
 
@@ -2237,8 +2160,8 @@ MemEffects memory_effects(const IRInstruction& inst) {
       [&] (PureLoad)           { return fail(); },
       [&] (PureStore)          { return fail(); },
       [&] (ExitEffects)        { return fail(); },
-      [&] (InlineExitEffects)  { return fail(); },
-      [&] (InlineEnterEffects) { return fail(); },
+      [&] (PureInlineCall)     { return fail(); },
+      [&] (PureInlineReturn)   { return fail(); },
       [&] (IrrelevantEffects)  { return fail(); },
       [&] (ReturnEffects)      { return fail(); }
     );
@@ -2274,18 +2197,18 @@ MemEffects canonicalize(MemEffects me) {
     [&] (ExitEffects x) -> R {
       return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
     },
-    [&] (InlineEnterEffects x) -> R {
-      return InlineEnterEffects {
-        canonicalize(x.inlStack),
-        canonicalize(x.inlFrame),
-        canonicalize(x.actrec),
+    [&] (PureInlineCall x) -> R {
+      return PureInlineCall {
+        canonicalize(x.base),
+        x.fp,
+        canonicalize(x.actrec)
       };
     },
-    [&] (InlineExitEffects x) -> R {
-      return InlineExitEffects {
-        canonicalize(x.inlStack),
-        canonicalize(x.inlFrame),
-        canonicalize(x.inlMeta)
+    [&] (PureInlineReturn x) -> R {
+      return PureInlineReturn {
+        canonicalize(x.base),
+        x.calleeFp,
+        x.callerFp
       };
     },
     [&] (CallEffects x) -> R {
@@ -2322,19 +2245,14 @@ std::string show(MemEffects effects) {
     [&] (ExitEffects x) {
       return sformat("exit({} ; {})", show(x.live), show(x.kills));
     },
-    [&] (InlineEnterEffects x) {
-      return sformat("inline_enter({} ; {} ; {})",
-        show(x.inlStack),
-        show(x.inlFrame),
+    [&] (PureInlineCall x) {
+      return sformat("inline_call({} ; {})",
+        show(x.base),
         show(x.actrec)
       );
     },
-    [&] (InlineExitEffects x) {
-      return sformat("inline_exit({} ; {} ; {})",
-        show(x.inlStack),
-        show(x.inlFrame),
-        show(x.inlMeta)
-      );
+    [&] (PureInlineReturn x) {
+      return sformat("inline_return({})", show(x.base));
     },
     [&] (CallEffects x) {
       return sformat("call({} ; {} ; {} ; {} ; {})",

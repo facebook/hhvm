@@ -330,9 +330,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
   assertx(checkInvariants());
 
   switch (inst->op()) {
-  case DefInlineFP:    trackDefInlineFP(inst);  break;
-  case InlineSuspend:
+  case InlineCall:     trackInlineCall(inst); break;
   case InlineReturn:   trackInlineReturn(); break;
+  case StFrameCtx:
+    if (cur().fpValue == inst->src(0)) cur().ctx = inst->src(1);
+    break;
   case Call:
     {
       auto const extra = inst->extra<Call>();
@@ -470,7 +472,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
 
   case AssertLoc:
   case CheckLoc: {
-    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     auto const id = inst->extra<LocalId>()->locId;
     if (inst->marker().func()->isPseudoMain()) {
       setLocalPredictedType(id, inst->typeParam());
@@ -493,13 +494,11 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StLoc:
-    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     setValue(loc(inst->extra<LocalId>()->locId), inst->src(1));
     break;
 
   case LdLoc:
     {
-      assertx(inst->extra<LdLoc>()->fpOffset.offset == 0);
       auto const id = inst->extra<LdLoc>()->locId;
       refinePredictedTmpType(inst->dst(), cur().locals[id].predictedType);
       setValue(loc(id), inst->dst());
@@ -507,7 +506,6 @@ void FrameStateMgr::update(const IRInstruction* inst) {
     break;
 
   case StLocPseudoMain:
-    assertx(inst->extra<LocalId>()->fpOffset.offset == 0);
     setLocalPredictedType(inst->extra<LocalId>()->locId,
                           inst->src(1)->type());
     break;
@@ -821,8 +819,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
               },
               [&](PureLoad /*m*/) {}, [&](ReturnEffects) {},
               [&](ExitEffects) {}, [&](IrrelevantEffects) {},
-              [&](InlineEnterEffects x) { handle_stores(x.actrec); },
-              [&](InlineExitEffects) {},
+              [&](PureInlineCall) {}, [&](PureInlineReturn) {},
               [&](UnknownEffects) { pessimize_mbase(); });
 }
 
@@ -1073,14 +1070,14 @@ void FrameStateMgr::clearForUnprocessedPred() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
-  auto const extra      = inst->extra<DefInlineFP>();
-  auto const target     = extra->target;
-  auto const savedSPOff = extra->retSPOff;
-  auto const calleeFP   = inst->dst();
-  auto const calleeSP   = inst->src(0);
-
-  always_assert(calleeSP == cur().spValue);
+void FrameStateMgr::trackInlineCall(const IRInstruction* inst) {
+  assertx(inst->src(0)->inst()->is(BeginInlining));
+  auto const extra      = inst->extra<InlineCall>();
+  auto const extraBI    = inst->src(0)->inst()->extra<BeginInlining>();
+  auto const target     = extraBI->func;
+  auto const calleeFP   = inst->src(0);
+  auto const savedSPOff =
+    extra->spOffset.to<FPInvOffset>(irSPOff()) - kNumActRecCells;
 
   /*
    * Push a new state for the inlined callee; saving the state we'll need to
@@ -1097,7 +1094,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    * Set up the callee state.
    */
   cur().fpValue          = calleeFP;
-  cur().ctx              = inst->src(2);
+  cur().ctx              = nullptr;
   cur().curFunc          = target;
   cur().bcSPOff          = FPInvOffset{target->numSlotsInFrame()};
 
@@ -1114,7 +1111,7 @@ void FrameStateMgr::trackDefInlineFP(const IRInstruction* inst) {
    *    spValue = fpValue - extra->spOffset (an FPInvOffset)
    */
   cur().irSPOff = FPInvOffset{extra->spOffset.offset};
-  FTRACE(6, "DefInlineFP setting irSPOff: {}\n", cur().irSPOff.offset);
+  FTRACE(6, "InlineCall setting irSPOff: {}\n", cur().irSPOff.offset);
 
   /*
    * Initialize tracked memory state for locals and stack slots to empty

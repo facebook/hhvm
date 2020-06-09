@@ -495,13 +495,17 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
         String clsname{const_cast<StringData*>(ctx->name())};
         if (RuntimeOption::EnableArgsInBacktraces &&
             !fp->localsDecRefd() &&
+            !fp->isInlined() &&
             ctx->hasReifiedGenerics() &&
             fp->hasThis()) {
           auto const reified_generics = getClsReifiedGenericsProp(ctx, fp);
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class, clsname);
-        if (!fp->localsDecRefd() && fp->hasThis() && btArgs.m_withThis) {
+        if (!fp->localsDecRefd() &&
+            !fp->isInlined() &&
+            fp->hasThis() &&
+            btArgs.m_withThis) {
           frame.set(s_object, Object(fp->getThis()));
         }
         frame.set(s_type, fp->func()->isStatic() ? s_double_colon : s_arrow);
@@ -768,7 +772,7 @@ void CompactTraceData::insert(const ActRec* fp, int32_t prevPc) {
   m_frames.emplace_back(
     fp->func(),
     prevPc,
-    !fp->localsDecRefd() && arGetContextClass(fp) && fp->hasThis()
+    !fp->localsDecRefd() && fp->func()->hasThisInBody()
   );
 }
 

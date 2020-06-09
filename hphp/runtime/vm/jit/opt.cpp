@@ -211,12 +211,6 @@ void optimize(IRUnit& unit, TransKind kind) {
       printUnit(6, unit, " after optimizeStores ");
     }
 
-    if (RuntimeOption::EvalHHIRPartialInlineFrameOpts) {
-      rqtrace::EventGuard trace{"OPT_INLRET"};
-      doPass(unit, optimizeInlineReturns, DCE::Full);
-      printUnit(6, unit, " after optimizeInlineReturns ");
-    }
-
     auto const prev_inline_returns = inline_returns;
     if (inline_returns) inline_returns = count_inline_returns(unit);
 

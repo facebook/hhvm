@@ -31,7 +31,6 @@
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
-#include "hphp/runtime/vm/jit/dce.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
@@ -61,7 +60,11 @@ void cgJmpPlaceholder(IRLS&, const IRInstruction*) {}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void cgDefFP(IRLS&, const IRInstruction*) {}
+void cgDefFP(IRLS& env, const IRInstruction* inst) {
+  auto const fp = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << defvmfp{fp};
+}
 
 void cgDefFrameRelSP(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
@@ -363,7 +366,7 @@ void doMemoGetCache(
   auto const addKeysAddr = [&] (ArgGroup& args) {
     args.addr(
       fp,
-      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+      localOffset(extra->keys.first + extra->keys.count - 1)
     );
   };
 
@@ -447,7 +450,7 @@ void doMemoSetCache(
   auto const addKeysAddr = [&] (ArgGroup& args) {
     args.addr(
       fp,
-      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+      localOffset(extra->keys.first + extra->keys.count - 1)
     );
   };
 
@@ -530,7 +533,6 @@ void cgMemoGetStaticCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<MemoGetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->asyncEager);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
   doMemoGetCache(env, inst, extra, fp, cache.handle());
 }
 
@@ -541,7 +543,6 @@ void cgMemoGetLSBCache(IRLS& env, const IRInstruction* inst) {
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->asyncEager);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
   doMemoGetCache(env, inst, extra, fp, handle);
 }
 
@@ -550,7 +551,6 @@ void cgMemoSetStaticCache(IRLS& env, const IRInstruction* inst) {
   auto const extra = inst->extra<MemoSetStaticCache>();
   auto const cache = rds::bindStaticMemoCache(extra->func);
   assertx(!extra->loadAux);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
   doMemoSetCache(env, inst, extra, fp, cache.handle(), 1);
 }
 
@@ -561,7 +561,6 @@ void cgMemoSetLSBCache(IRLS& env, const IRInstruction* inst) {
   auto const handle =
     getLSBMemoHandle(env, inst, lsbCls, extra->func, false);
   assertx(!extra->loadAux);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
   doMemoSetCache(env, inst, extra, fp, handle, 2);
 }
 
@@ -661,7 +660,6 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoGetInstanceCache>();
   assertx(!extra->asyncEager);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
 
   // Unlike for the static case, we can have zero keys here (because of shared
   // caches).
@@ -680,7 +678,7 @@ void cgMemoGetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const addKeysAddr = [&] (ArgGroup& args) {
     args.addr(
       fp,
-      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+      localOffset(extra->keys.first + extra->keys.count - 1)
     );
   };
 
@@ -763,7 +761,6 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const extra = inst->extra<MemoSetInstanceCache>();
   assertx(!extra->loadAux);
-  assertx(extra->fpOffset.offset == 0 || !fpIsResumed(inst->src(0)));
 
   // Unlike the static case, we can have zero keys here (because of shared
   // caches).
@@ -795,7 +792,7 @@ void cgMemoSetInstanceCache(IRLS& env, const IRInstruction* inst) {
   auto const addKeysAddr = [&] (ArgGroup& args) {
     args.addr(
       fp,
-      localOffset(extra->keys.first + extra->keys.count - 1, extra->fpOffset)
+      localOffset(extra->keys.first + extra->keys.count - 1)
     );
   };
 

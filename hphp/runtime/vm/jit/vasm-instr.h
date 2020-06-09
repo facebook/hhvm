@@ -120,6 +120,8 @@ struct Vunit;
   O(loadstubret, Inone, Un, D(d))\
   /* php function abi */\
   O(defvmsp, Inone, Un, D(d))\
+  O(defvmfp, Inone, Un, D(d))\
+  O(stvmfp, Inone, U(s), Dn)\
   O(syncvmsp, Inone, U(s), Dn)\
   O(defvmretdata, Inone, Un, D(data))\
   O(defvmrettype, Inone, Un, D(type))\
@@ -780,6 +782,20 @@ struct loadstubret { Vreg d; };
  * boundary.
  */
 struct defvmsp { Vreg d; };
+
+/*
+ * Copy rvmfp() into `d'.
+ *
+ * Used once per region to define the initial value of the fp register.
+ */
+struct defvmfp { Vreg d; };
+
+/*
+ * Copy `s` into rvmfp().
+ *
+ * Used during inlining to link and unlink new inline frames.
+ */
+struct stvmfp { Vreg s; };
 
 /*
  * Copy `s' into rvmsp().

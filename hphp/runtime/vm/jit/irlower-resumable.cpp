@@ -94,14 +94,14 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
   v << store{fp, genFP[AROFF(m_sfp)]};
   v << storeli{callOffAndFlags, genFP[AROFF(m_callOffAndFlags)]};
 
-  v << copy{genFP, fp};
+  v << stvmfp{genFP};
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(spOff.offset - 1)], sync_sp};
   v << syncvmsp{sync_sp};
 
   storeTV(v, sync_sp[0], sendVal, inst->src(4));
 
-  v << contenter{fp, target, cross_trace_regs_resumed(),
+  v << contenter{genFP, target, cross_trace_regs_resumed(),
                  {next, label(env, inst->taken())}};
   v = next;
 

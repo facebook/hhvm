@@ -38,6 +38,7 @@
 #include "hphp/runtime/vm/unit.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
 #include "hphp/runtime/vm/jit/bc-marker.h"
@@ -107,7 +108,8 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
     emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, newFP + AROFF(m_varEnv));
   }
 
-  v << copy{newFP, dstLoc(env, inst, 0).reg()};
+  v << stvmfp{newFP};
+  v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
 }
 
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {
@@ -177,8 +179,23 @@ void cgStFrameCtx(IRLS& env, const IRInstruction* inst) {
   vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
 }
 
+void cgStFrameMeta(IRLS& env, const IRInstruction* inst) {
+  auto const extra = inst->extra<StFrameMeta>();
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+
+  // Set m_callOffAndFlags.
+  auto const coaf = safe_cast<int32_t>(ActRec::encodeCallOffsetAndFlags(
+    extra->callBCOff,
+    extra->asyncEagerReturn ? (1 << ActRec::AsyncEagerRet) : 0
+  ));
+  v << storeli{coaf, fp[AROFF(m_callOffAndFlags)]};
+
+  // Set m_numArgs.
+  v << storeli{safe_cast<int32_t>(extra->numArgs), fp[AROFF(m_numArgs)]};
+}
+
 void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
-  assertx(!inst->func() || inst->ctx() || inst->func()->isClosureBody());
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const func = srcLoc(env, inst, 1).reg();
   vmain(env) << store{func, fp[AROFF(m_func)]};

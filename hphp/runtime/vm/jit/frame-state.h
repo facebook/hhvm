@@ -405,7 +405,7 @@ private:
   bool checkInvariants() const;
   void updateMInstr(const IRInstruction*);
   void updateMBase(const IRInstruction*);
-  void trackDefInlineFP(const IRInstruction* inst);
+  void trackInlineCall(const IRInstruction* inst);
   void trackInlineReturn();
   void trackCall();
 

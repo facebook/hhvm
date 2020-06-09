@@ -699,9 +699,9 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
       return folly::none;
     };
 
-    if (auto const bframe = base.frame()) {
+    if (auto const blocal = base.local()) {
       if (!isPM) {
-        auto const l = loc(bframe->ids.singleValue());
+        auto const l = loc(blocal->ids.singleValue());
         apply_one(l, Ptr::Frame);
       }
     }
@@ -724,9 +724,9 @@ void FrameStateMgr::updateMInstr(const IRInstruction* inst) {
     return;
   }
 
-  if (base.maybe(AFrameAny) && !isPM) {
+  if (base.maybe(ALocalAny) && !isPM) {
     for (uint32_t i = 0; i < cur().locals.size(); ++i) {
-      if (base.maybe(AFrame { fp(), i })) {
+      if (base.maybe(ALocal { fp(), i })) {
         apply(loc(i));
       }
     }
@@ -767,7 +767,7 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
     if (UNTRACKED_ALIAS_CLASSES false) {
       // AliasClass doesn't support intersection yet, so if `base' and `stores'
       // might intersect outside of frame locals and stack slots, we pessimize.
-      // FrameState only tracks type information for AFrame and AStack anyway,
+      // FrameState only tracks type information for ALocal and AStack anyway,
       // so we aren't actually losing any information.
       return pessimize_mbase();
     }
@@ -777,9 +777,9 @@ void FrameStateMgr::updateMBase(const IRInstruction* inst) {
 
     auto updated = false;
 
-    if (base.maybe(AFrameAny) && stores.maybe(AFrameAny)) {
+    if (base.maybe(ALocalAny) && stores.maybe(ALocalAny)) {
       for (uint32_t i = 0; i < cur().locals.size(); ++i) {
-        auto const aloc = AFrame { fp(), i };
+        auto const aloc = ALocal { fp(), i };
         if (base.maybe(aloc) && stores.maybe(aloc)) {
           if (!updated) {
             cur().mbase = local(i);

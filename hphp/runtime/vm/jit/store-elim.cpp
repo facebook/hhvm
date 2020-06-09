@@ -534,7 +534,7 @@ void visit(Local& env, IRInstruction& inst) {
       case AssertLoc:
         load(
           env,
-          AFrame {
+          ALocal {
             inst.src(0),
             inst.extra<AssertLoc>()->locId,
             inst.extra<AssertLoc>()->fpOffset
@@ -576,7 +576,7 @@ void visit(Local& env, IRInstruction& inst) {
       // function return---so mark everything read before we start killing
       // things.
       addAllLoad(env);
-      killSet(env, env.global.ainfo.all_frame);
+      killSet(env, env.global.ainfo.all_local);
       kill(env, l.kills);
     },
 
@@ -593,7 +593,7 @@ void visit(Local& env, IRInstruction& inst) {
       // frame pointer into the callee, as the frame pointer will be updated.
       // Ideally, this wouldn't be an issue, but the TFramePtr is still stored
       // as a reserved register. Both locals and iterators are on the frame.
-      mayStore(env, AFrameAny | AIterAny);
+      mayStore(env, ALocalAny | AIterAny);
     },
 
     [&] (InlineExitEffects l) {
@@ -611,10 +611,10 @@ void visit(Local& env, IRInstruction& inst) {
       //
       // Even if we're processing an InlineSuspend we've already created the
       // AFWH and moved the frame to the heap.
-      if (auto const frame = l.inlFrame.is_frame()) {
+      if (auto const frame = l.inlFrame.is_local()) {
         auto const callee = inst.marker().func();
         for (uint32_t id = 0; id < callee->numLocals(); id++) {
-          auto const acls = AFrame { frame->base, id };
+          auto const acls = ALocal { frame->base, id };
           if (frame->ids.test(id)) kill(env, canonicalize(acls));
         }
       } else {

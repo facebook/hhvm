@@ -33,7 +33,7 @@ namespace {
 
 std::vector<AliasClass> generic_classes() {
   return {
-    AFrameAny,
+    ALocalAny,
     APropAny,
     AHeapAny,
     AStackAny,
@@ -56,9 +56,9 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
 
   return {
     // Frame locals.
-    AFrame { mainFP, 1 },
-    AFrame { mainFP, 2 },
-    AFrame { mainFP, 6 },
+    ALocal { mainFP, 1 },
+    ALocal { mainFP, 2 },
+    ALocal { mainFP, 6 },
 
     // Some stack locations.
     AStack { SP, IRSPRelOffset { -1 }, 1 },
@@ -266,12 +266,12 @@ TEST(AliasClass, SpecializedUnions) {
   AliasClass const unrelated_stk = AStack { FP, FPRelOffset { -14 }, 1 };
   AliasClass const related_stk = AStack { FP, FPRelOffset { -11 }, 2 };
 
-  auto const stk_and_frame = stk | AFrameAny;
+  auto const stk_and_frame = stk | ALocalAny;
   EXPECT_TRUE(!stk_and_frame.is_stack());
-  EXPECT_TRUE(AFrameAny <= stk_and_frame);
+  EXPECT_TRUE(ALocalAny <= stk_and_frame);
   EXPECT_TRUE(stk <= stk_and_frame);
   EXPECT_TRUE(AStackAny.maybe(stk_and_frame));
-  EXPECT_TRUE(AFrameAny.maybe(stk_and_frame));
+  EXPECT_TRUE(ALocalAny.maybe(stk_and_frame));
   EXPECT_FALSE(unrelated_stk <= stk_and_frame);
   EXPECT_FALSE(stk_and_frame.maybe(unrelated_stk));
 
@@ -297,7 +297,7 @@ TEST(AliasClass, SpecializedUnions) {
   EXPECT_FALSE(stk_and_frame <= AHeapAny);
   EXPECT_FALSE(stk_and_frame.maybe(AHeapAny));
 
-  auto const rel_stk_and_frame = related_stk | AFrameAny;
+  auto const rel_stk_and_frame = related_stk | ALocalAny;
   EXPECT_TRUE(stk_and_frame.maybe(rel_stk_and_frame));
   EXPECT_TRUE(rel_stk_and_frame.maybe(stk_and_frame));
   EXPECT_TRUE(related_stk <= stk);
@@ -311,7 +311,7 @@ TEST(AliasClass, SpecializedUnions) {
   {
     auto const some_heap = AElemIAny;
     auto const u1 = some_heap | some_mis;
-    auto const u2 = AFrameAny | u1;
+    auto const u2 = ALocalAny | u1;
     EXPECT_TRUE((AHeapAny | some_heap) == AHeapAny);
     EXPECT_TRUE(AHeapAny <= (AHeapAny | u1));
     EXPECT_TRUE(AHeapAny <= (AHeapAny | u2));
@@ -431,14 +431,14 @@ TEST(AliasClass, IterUnion) {
   }
 
   {
-    AliasClass const local = AFrame { FP, 0 };
+    AliasClass const local = ALocal { FP, 0 };
     AliasClass const iter  = aiter_pos(FP, 0);
     auto const u1 = local | iter;
     EXPECT_TRUE(local <= u1);
     EXPECT_TRUE(iter <= u1);
     EXPECT_FALSE(!!u1.is_iter());
-    EXPECT_FALSE(!!u1.is_frame());
-    EXPECT_TRUE(!!u1.frame());  // locals are preferred in unions to iters
+    EXPECT_FALSE(!!u1.is_local());
+    EXPECT_TRUE(!!u1.local());  // locals are preferred in unions to iters
     EXPECT_FALSE(!!u1.iter());
   }
 
@@ -482,7 +482,7 @@ TEST(AliasClass, Pointees) {
   auto const bcctx = BCContext { BCMarker::Dummy(), 0 };
   auto ptr = unit.gen(LdMBase, bcctx, TLvalToCell)->dst();
   auto const acls = pointee(ptr);
-  EXPECT_EQ(AHeapAny | AFrameAny | AStackAny | AMIStateTempBase | ARdsAny, acls);
+  EXPECT_EQ(AHeapAny | ALocalAny | AStackAny | AMIStateTempBase | ARdsAny, acls);
 }
 
 //////////////////////////////////////////////////////////////////////

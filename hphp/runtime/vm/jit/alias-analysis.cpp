@@ -237,8 +237,8 @@ ALocBits AliasAnalysis::may_alias(AliasClass acls) const {
     ret |= may_alias_part(*this, acls, acls.stack(), AStackAny, all_stack);
   }
 
-  ret |= may_alias_component(*this, acls, acls.frame(), loc_expand_map,
-                             AFrameAny, all_frame);
+  ret |= may_alias_component(*this, acls, acls.local(), loc_expand_map,
+                             ALocalAny, all_local);
   ret |= may_alias_component(*this, acls, acls.iter(), iter_expand_map,
                              AIterAny, all_iter);
 
@@ -285,8 +285,8 @@ ALocBits AliasAnalysis::expand(AliasClass acls) const {
     ret |= all_stack;
   }
 
-  ret |= expand_component(*this, acls, acls.frame(), loc_expand_map,
-                          AFrameAny, all_frame);
+  ret |= expand_component(*this, acls, acls.local(), loc_expand_map,
+                          ALocalAny, all_local);
   ret |= expand_component(*this, acls, acls.iter(), iter_expand_map,
                           AIterAny, all_iter);
 
@@ -365,7 +365,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
     }
 
     if (collect_component(ret, acls.iter(), ret.iter_expand_map)) return;
-    if (collect_component(ret, acls.frame(), ret.loc_expand_map)) return;
+    if (collect_component(ret, acls.local(), ret.loc_expand_map)) return;
 
     /*
      * Note that unlike the above we're going to assign location ids to the
@@ -456,8 +456,8 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
       return;
     }
 
-    if (auto const frame = acls.is_frame()) {
-      ret.all_frame.set(meta.index);
+    if (auto const frame = acls.is_local()) {
+      ret.all_local.set(meta.index);
       return;
     }
 
@@ -509,7 +509,7 @@ AliasAnalysis collect_aliases(const IRUnit& unit, const BlockList& blocks) {
           ent.second.set(kv.second.index);
         }
       }
-    } else if (kv.first.is_frame()) {
+    } else if (kv.first.is_local()) {
       for (auto& ent : ret.loc_expand_map) {
         if (kv.first <= ent.first) {
           FTRACE(2, "  ({}) {} <= {}\n",
@@ -581,7 +581,7 @@ std::string show(const AliasAnalysis& ainfo) {
       "all elemIs",         show(ainfo.all_elemIs),
       "all elemSs",         show(ainfo.all_elemSs),
       "all rds",            show(ainfo.all_rds),
-      "all frame",          show(ainfo.all_frame)
+      "all local",          show(ainfo.all_local)
   );
   std::vector<std::string> tmp;
   for (auto& kv : ainfo.loc_expand_map) {

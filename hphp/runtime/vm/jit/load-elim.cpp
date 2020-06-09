@@ -566,7 +566,7 @@ void handle_call_effects(Local& env,
    * across php calls, which currently always leads to spilling.
    */
   auto const keep = env.global.ainfo.all_stack    |
-                    env.global.ainfo.all_frame    |
+                    env.global.ainfo.all_local    |
                     env.global.ainfo.all_iter;
   env.state.avail &= keep;
   for (auto aloc = uint32_t{0};
@@ -588,7 +588,7 @@ Flags handle_assert(Local& env, const IRInstruction& inst) {
     switch (inst.op()) {
     case AssertLoc:
       return AliasClass {
-        AFrame {
+        ALocal {
           inst.src(0),
           inst.extra<AssertLoc>()->locId,
           inst.extra<AssertLoc>()->fpOffset
@@ -735,7 +735,7 @@ Flags handle_end_catch(Local& env, const IRInstruction& inst) {
         env,
         elems,
         i,
-        AliasClass { AFrame { inst.marker().fp(), i }});
+        AliasClass { ALocal { inst.marker().fp(), i }});
     }
 
     // Iterate from higher addresses to lower so that tracing prints them in
@@ -780,7 +780,7 @@ Flags handle_enter_tc_unwind(Local& env, const IRInstruction& inst) {
       env,
       locals,
       i,
-      AliasClass { AFrame { inst.marker().fp(), i }});
+      AliasClass { ALocal { inst.marker().fp(), i }});
   }
 
   if (locals.size() > RuntimeOption::EvalHHIRLoadThrowMaxDecrefs) {

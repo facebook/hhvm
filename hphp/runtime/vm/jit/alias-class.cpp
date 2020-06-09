@@ -56,7 +56,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
   case A::BUnknown:        return "Unk";
   case A::BElem:           return "Elem";
   case A::BMIState:        return "Mis";
-  case A::BFrame:          break;
+  case A::BLocal:          break;
   case A::BIter:           break;
   case A::BProp:           break;
   case A::BElemI:          break;
@@ -80,7 +80,7 @@ std::string bit_str(AliasClass::rep bits, AliasClass::rep skip) {
     case A::BElem:
     case A::BMIState:
       always_assert(0);
-    case A::BFrame:          ret += "Fr"; break;
+    case A::BLocal:          ret += "Lv"; break;
     case A::BIter:           ret += "It"; break;
     case A::BProp:           ret += "Pr"; break;
     case A::BElemI:          ret += "Ei"; break;
@@ -142,9 +142,9 @@ AliasClass AliasClass::framelike_union(rep newBits, T a, T b) {
   return ret;
 }
 
-void AliasClass::framelike_union_set(AFrame cls) {
-  m_stag = STag::Frame;
-  m_frame = cls;
+void AliasClass::framelike_union_set(ALocal cls) {
+  m_stag = STag::Local;
+  m_local = cls;
 }
 void AliasClass::framelike_union_set(AIter cls) {
   m_stag = STag::Iter;
@@ -216,7 +216,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return hash;
 
   case STag::Iter:  return framelike_hash(hash, acls.m_iter);
-  case STag::Frame: return framelike_hash(hash, acls.m_frame);
+  case STag::Local: return framelike_hash(hash, acls.m_local);
 
   case STag::Prop:
     return folly::hash::hash_combine(hash,
@@ -257,7 +257,7 @@ size_t AliasClass::Hash::operator()(AliasClass acls) const {
     return folly::none;                                     \
   }
 
-X(Frame, frame)
+X(Local, local)
 X(Iter, iter)
 X(Prop, prop)
 X(ElemI, elemI)
@@ -273,7 +273,7 @@ X(Rds, rds)
     return folly::none;                                     \
   }
 
-X(Frame, frame)
+X(Local, local)
 X(Iter, iter)
 X(Prop, prop)
 X(ElemI, elemI)
@@ -298,7 +298,7 @@ folly::Optional<AliasClass> AliasClass::is_mis() const {
 AliasClass::rep AliasClass::stagBits(STag tag) {
   switch (tag) {
   case STag::None:           return BEmpty;
-  case STag::Frame:          return BFrame;
+  case STag::Local:          return BLocal;
   case STag::Iter:           return BIter;
   case STag::Prop:           return BProp;
   case STag::ElemI:          return BElemI;
@@ -313,7 +313,7 @@ bool AliasClass::checkInvariants() const {
   switch (m_stag) {
   case STag::None:           break;
   case STag::Iter:           framelike_checkInvariants(m_iter);  break;
-  case STag::Frame:          framelike_checkInvariants(m_frame); break;
+  case STag::Local:          framelike_checkInvariants(m_local); break;
   case STag::Prop:           break;
   case STag::ElemI:          break;
   case STag::Stack:
@@ -336,7 +336,7 @@ bool AliasClass::equivData(AliasClass o) const {
   assertx(m_stag == o.m_stag);
   switch (m_stag) {
   case STag::None:     return true;
-  case STag::Frame:    return framelike_equal(m_frame, o.m_frame);
+  case STag::Local:    return framelike_equal(m_local, o.m_local);
   case STag::Iter:     return framelike_equal(m_iter, o.m_iter);
   case STag::Prop:     return m_prop.obj == o.m_prop.obj &&
                               m_prop.offset == o.m_prop.offset;
@@ -369,7 +369,7 @@ AliasClass AliasClass::unionData(rep newBits, AliasClass a, AliasClass b) {
     assertx(!a.equivData(b));
     break;
   case STag::Iter:  return framelike_union(newBits, a.m_iter, b.m_iter);
-  case STag::Frame: return framelike_union(newBits, a.m_frame, b.m_frame);
+  case STag::Local: return framelike_union(newBits, a.m_local, b.m_local);
 
   case STag::Stack:
     {
@@ -402,7 +402,7 @@ folly::Optional<AliasClass> AliasClass::precise_union(AliasClass o) const {
   // bigger than it should be.  This means we can't deal with situations where
   // we have different stags, and right now we also don't try to deal with
   // situations that have the same stag in a combinable way.  (E.g. two
-  // adjacent AStack ranges, multiple AFrame locals.)
+  // adjacent AStack ranges, multiple ALocal locals.)
   auto const stag1 = m_stag;
   auto const stag2 = o.m_stag;
   if (stag1 == STag::None && stag2 == STag::None) {
@@ -470,7 +470,7 @@ AliasClass AliasClass::operator|(AliasClass o) const {
   case STag::None:
     break;
   case STag::Iter:     new (&ret.m_iter) AIter(best->m_iter); break;
-  case STag::Frame:    new (&ret.m_frame) AFrame(best->m_frame); break;
+  case STag::Local:    new (&ret.m_local) ALocal(best->m_local); break;
   case STag::Prop:     new (&ret.m_prop) AProp(best->m_prop); break;
   case STag::ElemI:    new (&ret.m_elemI) AElemI(best->m_elemI); break;
   case STag::ElemS:    new (&ret.m_elemS) AElemS(best->m_elemS); break;
@@ -492,8 +492,8 @@ bool AliasClass::subclassData(AliasClass o) const {
     return equivData(o);
   case STag::Iter:
     return framelike_subclass(m_iter, o.m_iter);
-  case STag::Frame:
-    return framelike_subclass(m_frame, o.m_frame);
+  case STag::Local:
+    return framelike_subclass(m_local, o.m_local);
   case STag::Stack:
     return m_stack.offset <= o.m_stack.offset &&
            lowest_offset(m_stack) >= lowest_offset(o.m_stack);
@@ -540,7 +540,7 @@ bool AliasClass::maybeData(AliasClass o) const {
   case STag::None:
     not_reached();  // handled outside
   case STag::Iter:   return framelike_maybe(m_iter, o.m_iter);
-  case STag::Frame:  return framelike_maybe(m_frame, o.m_frame);
+  case STag::Local:  return framelike_maybe(m_local, o.m_local);
   case STag::Prop:
     /*
      * We can't tell if two objects could be the same from here in general, but
@@ -622,8 +622,8 @@ bool AliasClass::isSingleLocation() const {
   // location.
   if (m_stag == STag::None) return *this <= AMIStateAny;
 
-  // AFrame, AStack, and AIter can contain multiple locations.
-  if (auto const frame = is_frame()) {
+  // ALocal, AStack, and AIter can contain multiple locations.
+  if (auto const frame = is_local()) {
     return frame->ids.hasSingleValue();
   }
   if (auto const iter = is_iter()) {
@@ -654,7 +654,7 @@ AliasClass canonicalize(AliasClass a) {
   using T = AliasClass::STag;
   switch (a.m_stag) {
   case T::None:           return a;
-  case T::Frame:          return a;
+  case T::Local:          return a;
   case T::Iter:           return a;
   case T::Stack:          return a;
   case T::Rds:            return a;
@@ -678,9 +678,9 @@ std::string show(AliasClass acls) {
   switch (acls.m_stag) {
   case A::STag::None:
     break;
-  case A::STag::Frame:
-    folly::format(&ret, "Fr {}:{}", acls.m_frame.base.offset,
-                  show(acls.m_frame.ids));
+  case A::STag::Local:
+    folly::format(&ret, "Lv {}:{}", acls.m_local.base.offset,
+                  show(acls.m_local.ids));
     break;
   case A::STag::Iter:
     folly::format(&ret, "It {}:{}", acls.m_iter.base.offset,

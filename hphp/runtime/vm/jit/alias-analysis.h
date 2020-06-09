@@ -86,7 +86,7 @@ struct AliasAnalysis {
   LocationMap stack_ranges;
 
   /*
-   * Similar to `stack_ranges', if an AFrame covers multiple locations, it will
+   * Similar to `stack_ranges', if an ALocal covers multiple locations, it will
    * have an entry in this map.
    */
   LocationMap loc_expand_map;
@@ -106,7 +106,7 @@ struct AliasAnalysis {
   ALocBits all_props;
   ALocBits all_elemIs;
   ALocBits all_elemSs;
-  ALocBits all_frame;
+  ALocBits all_local;
   ALocBits all_stack;
   ALocBits all_rds;
   ALocBits all_iter;
@@ -145,7 +145,7 @@ struct AliasAnalysis {
    *
    * Right now, this function will work for specific AliasClasses we've
    * assigned ids---for larger classes, it only supports stack ranges observed
-   * during alias collection, AFrameAny, and some cases of unions of those---if
+   * during alias collection, ALocalAny, and some cases of unions of those---if
    * you need more to work, the implementation will need some improvements.
    */
   ALocBits expand(AliasClass acls) const;

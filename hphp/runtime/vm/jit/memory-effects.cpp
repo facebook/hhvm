@@ -94,14 +94,14 @@ AliasClass pointee(
     if (type <= TMemToFrameCell) {
       if (sinst->is(LdLocAddr)) {
         return AliasClass {
-          AFrame {
+          ALocal {
             sinst->src(0),
             sinst->extra<LdLocAddr>()->locId,
             sinst->extra<LdLocAddr>()->fpOffset
           }
         };
       }
-      return AFrameAny;
+      return ALocalAny;
     }
 
     if (type <= TMemToStkCell) {
@@ -197,7 +197,7 @@ AliasClass pointee(
    */
   auto ret = AEmpty;
   if (type.maybe(TMemToStkCell))     ret = ret | AStackAny;
-  if (type.maybe(TMemToFrameCell))   ret = ret | AFrameAny;
+  if (type.maybe(TMemToFrameCell))   ret = ret | ALocalAny;
   if (type.maybe(TMemToPropCell))    ret = ret | APropAny;
   if (type.maybe(TMemToElemCell))    ret = ret | AElemAny;
   if (type.maybe(TMemToMISCell))     ret = ret | AMIStateTempBase;
@@ -257,7 +257,7 @@ InlineExitEffects inline_exit_effects(SSATmp* fp) {
   auto const func = fpInst->extra<DefInlineFP>()->target;
   auto const frame = [&] () -> AliasClass {
     if (!func->numLocals()) return AEmpty;
-    return AFrame {fp, AliasIdSet::IdRange(0, func->numLocals())};
+    return ALocal {fp, AliasIdSet::IdRange(0, func->numLocals())};
   }();
   auto const stack = stack_below(fp, FPRelOffset{kNumActRecCells - 1});
   return InlineExitEffects{ stack, frame, AMIStateAny };
@@ -274,7 +274,7 @@ InlineExitEffects inline_exit_effects_no_frame(const IRInstruction& inst) {
   // We don't have a frame pointer for this frame, but
   // InlineReturnNoFrame has the SP relative offset of where the frame
   // would be. Use this to calculate the FPRelOffset from the
-  // outermost frame pointer, which is what AFrame and AStack would
+  // outermost frame pointer, which is what ALocal and AStack would
   // canonicalize to if given a frame pointer anyways.
   auto const spInst = inst.src(0)->inst();
   assertx(spInst->is(DefFrameRelSP, DefRegSP));
@@ -289,7 +289,7 @@ InlineExitEffects inline_exit_effects_no_frame(const IRInstruction& inst) {
   auto const frame = [&] () -> AliasClass {
     auto const func = inst.marker().func();
     if (!func->numLocals()) return AEmpty;
-    return AFrame { frameOffset, AliasIdSet::IdRange(0, func->numLocals()) };
+    return ALocal { frameOffset, AliasIdSet::IdRange(0, func->numLocals()) };
   }();
 
   return InlineExitEffects { stack, frame, AMIStateAny };
@@ -318,14 +318,14 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
 
   // Either there's no func or no frame-pointer. Either way, be conservative and
   // assume anything can be read. This can happen in test code, for instance.
-  if (!func) return AFrameAny;
+  if (!func) return ALocalAny;
 
   auto const add86meta = [&] (AliasClass ac) {
     // The 86metadata variable can also exist in a VarEnv, but accessing that is
     // considered a heap effect, so we can ignore it.
     auto const local = func->lookupVarId(s_86metadata.get());
     if (local == kInvalidId) return ac;
-    return ac | AFrame { inst.marker().fp(), (uint32_t)local };
+    return ac | ALocal { inst.marker().fp(), (uint32_t)local };
   };
 
   auto ac = AEmpty;
@@ -336,7 +336,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
   if (func->hasReifiedGenerics()) {
     // First non param local contains reified generics
     AliasIdSet reifiedgenerics{ AliasIdSet::IdRange{numParams, numParams + 1} };
-    ac |= AFrame { inst.marker().fp(), reifiedgenerics };
+    ac |= ALocal { inst.marker().fp(), reifiedgenerics };
   }
 
   if (func->cls() && func->cls()->hasReifiedGenerics()) {
@@ -348,7 +348,7 @@ AliasClass backtrace_locals(const IRInstruction& inst) {
   if (!numParams) return add86meta(ac);
 
   AliasIdSet params{ AliasIdSet::IdRange{0, numParams} };
-  return add86meta(ac | AFrame { inst.marker().fp(), params });
+  return add86meta(ac | ALocal { inst.marker().fp(), params });
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -464,13 +464,13 @@ GeneralEffects iter_effects(const IRInstruction& inst,
  */
 GeneralEffects interp_one_effects(const IRInstruction& inst) {
   auto const extra  = inst.extra<InterpOne>();
-  auto loads  = AHeapAny | AStackAny | AFrameAny | ARdsAny;
+  auto loads  = AHeapAny | AStackAny | ALocalAny | ARdsAny;
   auto stores = AHeapAny | AStackAny | ARdsAny;
   if (extra->smashesAllLocals) {
-    stores = stores | AFrameAny;
+    stores = stores | ALocalAny;
   } else {
     for (auto i = uint32_t{0}; i < extra->nChangedLocals; ++i) {
-      stores = stores | AFrame { inst.src(1), extra->changedLocals[i].id };
+      stores = stores | ALocal { inst.src(1), extra->changedLocals[i].id };
     }
   }
 
@@ -558,7 +558,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case ReturnHook:
     return may_load_store_kill(
       AHeapAny, AHeapAny,
-      *AStackAny.precise_union(AFrameAny)->precise_union(AMIStateAny)
+      *AStackAny.precise_union(ALocalAny)->precise_union(AMIStateAny)
     );
 
   // The suspend hooks can load anything (re-entering the VM), but can't write
@@ -568,7 +568,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SuspendHookAwaitR:
   case SuspendHookCreateCont:
   case SuspendHookYield:
-    // TODO: may-load here probably doesn't need to include AFrameAny normally.
+    // TODO: may-load here probably doesn't need to include ALocalAny normally.
     return may_load_store_kill(AUnknown, AHeapAny, AMIStateAny);
 
   /*
@@ -582,7 +582,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return UnknownEffects {};
     }
     return ReturnEffects {
-      AStackAny | AFrameAny | AMIStateAny
+      AStackAny | ALocalAny | AMIStateAny
     };
 
   case AsyncFuncRet:
@@ -663,7 +663,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       ? AStack{inst.dst(), FPRelOffset{-1}, func->numLocals()}
       : AEmpty;
     AliasClass frame = func->numLocals()
-      ? AFrame{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
+      ? ALocal{inst.dst(), AliasIdSet::IdRange(0, func->numLocals())}
       : AEmpty;
     AliasClass actrec = AStack {
       inst.src(0),
@@ -742,7 +742,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     assertx(extra->paramId >= 0);
     auto const stores =
       AHeapAny |
-      AFrame{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   case VerifyReifiedLocalType: {
@@ -750,7 +750,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     assertx(extra->paramId >= 0);
     auto const stores =
       AHeapAny |
-      AFrame{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
+      ALocal{inst.marker().fp(), safe_cast<uint32_t>(extra->paramId)};
     return may_load_store(AUnknown, stores);
   }
   // However the following ones can't read locals from our frame on the way
@@ -888,11 +888,11 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto fpInst = fp->inst();
     if (fpInst->is(DefLabel)) fpInst = resolveFpDefLabel(fp);
     auto const frame = [&] () -> AliasClass {
-      if (fpInst->is(DefFP, DefFuncEntryFP)) return AFrameAny;
+      if (fpInst->is(DefFP, DefFuncEntryFP)) return ALocalAny;
       assertx(fpInst->is(DefInlineFP));
       auto const nlocals = fpInst->extra<DefInlineFP>()->target->numLocals();
       return nlocals
-        ? AFrame { fp, AliasIdSet::IdRange(0, nlocals)}
+        ? ALocal { fp, AliasIdSet::IdRange(0, nlocals)}
         : AEmpty;
     }();
     return may_load_store_move(
@@ -909,7 +909,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CreateAAWH:
     {
       auto const extra = inst.extra<CreateAAWH>();
-      auto const frame = AFrame {
+      auto const frame = ALocal {
         inst.src(0),
         AliasIdSet {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
@@ -921,7 +921,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CountWHNotDone:
     {
       auto const extra = inst.extra<CountWHNotDone>();
-      auto const frame = AFrame {
+      auto const frame = ALocal {
         inst.src(0),
         AliasIdSet {
           AliasIdSet::IdRange{ extra->first, extra->first + extra->count }
@@ -953,7 +953,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const& args = inst.extra<IterData>()->args;
     assertx(!args.hasKey());
     auto const fp = inst.src(inst.op() == IterNext ? 0 : 1);
-    AliasClass val = AFrame { fp, safe_cast<uint32_t>(args.valId) };
+    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
     return iter_effects(inst, fp, val);
   }
 
@@ -964,8 +964,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const& args = inst.extra<IterData>()->args;
     assertx(args.hasKey());
     auto const fp = inst.src(inst.op() == IterNextK ? 0 : 1);
-    AliasClass key = AFrame { fp, safe_cast<uint32_t>(args.keyId) };
-    AliasClass val = AFrame { fp, safe_cast<uint32_t>(args.valId) };
+    AliasClass key = ALocal { fp, safe_cast<uint32_t>(args.keyId) };
+    AliasClass val = ALocal { fp, safe_cast<uint32_t>(args.valId) };
     return iter_effects(inst, fp, key | val);
   }
 
@@ -1012,7 +1012,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
 
   case StLoc:
     return PureStore {
-      AFrame {
+      ALocal {
         inst.src(0),
         inst.extra<StLoc>()->locId,
         inst.extra<StLoc>()->fpOffset
@@ -1027,14 +1027,14 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       auto acls = AEmpty;
 
       for (auto locId = extra->start; locId < extra->end; ++locId) {
-        acls = acls | AFrame { inst.src(0), locId };
+        acls = acls | ALocal { inst.src(0), locId };
       }
       return PureStore { acls, inst.src(1), nullptr };
     }
 
   case LdLoc:
     return PureLoad {
-      AFrame {
+      ALocal {
         inst.src(0),
         inst.extra<LocalId>()->locId,
         inst.extra<LocalId>()->fpOffset
@@ -1046,7 +1046,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Note: LdLocPseudoMain is both a guard and a load, so it must not be a
     // PureLoad.
     return may_load_store(
-      AFrame {
+      ALocal {
         inst.src(0),
         inst.extra<LocalId>()->locId,
         inst.extra<LocalId>()->fpOffset
@@ -1231,7 +1231,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     // Reads some (non-zero) set of locals for keys, and reads/writes from the
     // memo cache (which isn't modeled).
     auto const extra = inst.extra<MemoCacheStaticData>();
-    auto const frame = AFrame {
+    auto const frame = ALocal {
       inst.src(0),
       AliasIdSet{
         AliasIdSet::IdRange{
@@ -1254,7 +1254,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       // Unlike MemoGet/SetStaticCache, we can have an empty key range here.
       if (extra->keys.count == 0) return AEmpty;
 
-      return AFrame {
+      return ALocal {
         inst.src(0),
         AliasIdSet{
           AliasIdSet::IdRange{
@@ -1539,7 +1539,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     );
 
   case DbgTraceCall:
-    return may_load_store(AStackAny | AFrameAny, AEmpty);
+    return may_load_store(AStackAny | ALocalAny, AEmpty);
 
   case Unreachable:
     // Unreachable code kills every memory location.
@@ -2043,12 +2043,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     return may_load_store(AElemAny, AEmpty);
 
   case ReleaseVVAndSkip:
-    return may_load_store(AHeapAny|AFrameAny, AHeapAny|AFrameAny);
+    return may_load_store(AHeapAny|ALocalAny, AHeapAny|ALocalAny);
 
   // debug_backtrace() traverses stack and WaitHandles on the heap.
   case DebugBacktrace:
   case DebugBacktraceFast:
-    return may_load_store(AHeapAny|AFrameAny|AStackAny, AHeapAny);
+    return may_load_store(AHeapAny|ALocalAny|AStackAny, AHeapAny);
 
   // This instruction doesn't touch memory we track, except that it may
   // re-enter to construct php Exception objects.  During this re-entry anything
@@ -2110,7 +2110,7 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
   };
 
   auto check = [&] (AliasClass a) {
-    if (auto const fr = a.frame()) check_fp(fr->base);
+    if (auto const fr = a.local()) check_fp(fr->base);
     if (auto const pr = a.prop())  check_obj(pr->obj);
   };
 

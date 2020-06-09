@@ -88,7 +88,7 @@ struct AliasClass;
 
 //////////////////////////////////////////////////////////////////////
 
-struct AFrame;
+struct ALocal;
 struct AIter;
 
 namespace detail {
@@ -115,7 +115,7 @@ static constexpr uint32_t kAIterEndOffset = 3;
 /*
  * Special data for locations known to be a set of locals on the frame `fp'.
  */
-FRAME_RELATIVE(AFrame);
+FRAME_RELATIVE(ALocal);
 
 /*
  * Iterator state. We model the different fields of the iterator as 4
@@ -200,7 +200,7 @@ struct AElemS { SSATmp* arr; const StringData* key; };
  *   o Since AStack locations are always canonicalized, different AStack
  *     locations must not alias if there is no overlap in the ranges.
  *
- *   o In situations with inlined calls, we may in fact have AFrame locations
+ *   o In situations with inlined calls, we may in fact have ALocal locations
  *     that refer to the same concrete memory locations (in the evaluation
  *     stack) as other AStack locations in the same HHIR program.  However, the
  *     portions of the HHIR program that may use that memory location in either
@@ -239,7 +239,7 @@ struct AliasClass {
     BEmpty    = 0,
     // The relative order of the values are used in operator| to decide
     // which specialization is more useful.
-    BFrame      = 1U << 0,
+    BLocal      = 1U << 0,
     BIter       = 1U << 1,
     BProp       = 1U << 2,
     BElemI      = 1U << 3,
@@ -275,7 +275,7 @@ struct AliasClass {
    * Create an alias class with more precise specialized information about
    * where it is.
    */
-  /* implicit */ AliasClass(AFrame);
+  /* implicit */ AliasClass(ALocal);
   /* implicit */ AliasClass(AIter);
   /* implicit */ AliasClass(AProp);
   /* implicit */ AliasClass(AElemI);
@@ -333,7 +333,7 @@ struct AliasClass {
    *
    * Returns folly::none if this alias class has no specialization in that way.
    */
-  folly::Optional<AFrame>          frame() const;
+  folly::Optional<ALocal>          local() const;
   folly::Optional<AIter>           iter() const;
   folly::Optional<AProp>           prop() const;
   folly::Optional<AElemI>          elemI() const;
@@ -349,7 +349,7 @@ struct AliasClass {
    *
    *   cls <= AFooAny ? cls.foo() : folly::none
    */
-  folly::Optional<AFrame>          is_frame() const;
+  folly::Optional<ALocal>          is_local() const;
   folly::Optional<AIter>           is_iter() const;
   folly::Optional<AProp>           is_prop() const;
   folly::Optional<AElemI>          is_elemI() const;
@@ -367,7 +367,7 @@ struct AliasClass {
 private:
   enum class STag {
     None,
-    Frame,
+    Local,
     Iter,
     Prop,
     ElemI,
@@ -379,7 +379,7 @@ private:
   friend std::string show(AliasClass);
   friend AliasClass canonicalize(AliasClass);
 
-  void framelike_union_set(AFrame);
+  void framelike_union_set(ALocal);
   void framelike_union_set(AIter);
 
   template <typename T>
@@ -396,7 +396,7 @@ private:
   rep m_bits;
   STag m_stag{STag::None};
   union {
-    AFrame          m_frame;
+    ALocal          m_local;
     AIter           m_iter;
     AProp           m_prop;
     AElemI          m_elemI;
@@ -410,7 +410,7 @@ private:
 
 /* General alias classes. */
 auto const AEmpty             = AliasClass{AliasClass::BEmpty};
-auto const AFrameAny          = AliasClass{AliasClass::BFrame};
+auto const ALocalAny          = AliasClass{AliasClass::BLocal};
 auto const AIterAny           = AliasClass{AliasClass::BIter};
 auto const APropAny           = AliasClass{AliasClass::BProp};
 auto const AHeapAny           = AliasClass{AliasClass::BHeap};

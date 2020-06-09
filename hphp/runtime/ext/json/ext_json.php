@@ -44,7 +44,7 @@ function json_decode(string $json,
 <<__Native, __Pure>>
 function json_decode_with_error(
   string $json,
-  inout mixed /* ?(int, string) */ $error,
+  inout ?(int, string) $error,
   bool $assoc = false,
   int $depth = 512,
   int $options = 0,
@@ -76,7 +76,7 @@ function json_encode(mixed $value,
 <<__Native, __Pure>>
 function json_encode_with_error(
   mixed $value,
-  inout mixed /* ?(int, string) */ $error,
+  inout ?(int, string) $error,
   int $options = 0,
   int $depth = 512,
 ): mixed;

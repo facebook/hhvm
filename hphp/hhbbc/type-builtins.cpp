@@ -118,7 +118,11 @@ Type native_function_out_type(const php::Func* f, uint32_t index) {
 
     if (index-- == 0) {
       auto dt = Native::builtinOutType(p.typeConstraint, p.userAttributes);
-      return dt ? from_DataType(*dt) : TInitCell;
+      if (!dt) return TInitCell;
+      auto t = from_DataType(*dt);
+      return p.typeConstraint.isNullable()
+        ? union_of(std::move(t), TInitNull)
+        : t;
     }
   }
 

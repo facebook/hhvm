@@ -2198,9 +2198,12 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
   assertx(builtin->isCPPBuiltin());
   assertx(builtin->isInOut(i));
 
-  if (auto const dt = Native::builtinOutType(builtin, i)) return Type{*dt};
-
-  auto const& tc = builtin->params()[i].typeConstraint;
+  auto const& pinfo = builtin->params()[i];
+  auto const& tc = pinfo.typeConstraint;
+  if (auto const dt = Native::builtinOutType(tc, pinfo.userAttributes)) {
+    const auto ty = Type{*dt};
+    return pinfo.typeConstraint.isNullable() ? TInitNull | ty : ty;
+  }
 
   if (tc.isSoft() || tc.isMixed()) return TInitCell;
 

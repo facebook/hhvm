@@ -622,11 +622,6 @@ static folly::Optional<TypedValue> builtinInValue(
   not_reached();
 }
 
-MaybeDataType builtinOutType(const Func* builtin, uint32_t i) {
-  auto const& pinfo = builtin->params()[i];
-  return builtinOutType(pinfo.typeConstraint, pinfo.userAttributes);
-}
-
 folly::Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
   return builtinInValue(builtin->params()[i]);
 }

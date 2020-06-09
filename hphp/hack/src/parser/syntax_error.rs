@@ -429,6 +429,18 @@ pub const invalid_class_in_collection_initializer: Error =
 pub const invalid_brace_kind_in_collection_initializer: Error = Cow::Borrowed(
     "Initializers of 'vec', 'dict' and 'keyset' should use '[...]' instead of '{...}'.",
 );
+pub fn invalid_value_initializer(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use value initializer for {}. It require key => value.",
+        name.to_string(),
+    ))
+}
+pub fn invalid_key_value_initializer(name: &str) -> Error {
+    Cow::Owned(format!(
+        "Cannot use key value initializer for {}. It does not allow keys.",
+        name.to_string(),
+    ))
+}
 pub const nested_ternary: Error = Cow::Borrowed(
     "Nested ternary expressions inside ternary expressions are ambiguous. Please add parentheses",
 );

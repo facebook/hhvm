@@ -3397,6 +3397,9 @@ where
                         || lc_name.eq_ignore_ascii_case("immmap")
                         || lc_name.eq_ignore_ascii_case("immset")
                 };
+                let use_key_value_initializers = |lc_name: &str| {
+                    lc_name.eq_ignore_ascii_case("map") || lc_name.eq_ignore_ascii_case("immmap")
+                };
                 let is_qualified_std_collection = |l, r| {
                     Self::token_kind(l) == Some(TokenKind::Name)
                         && Self::token_kind(r) == Some(TokenKind::Name)
@@ -3458,8 +3461,37 @@ where
                     },
                     _ => InvalidClass,
                 };
-                let num_initializers = Self::syntax_to_list_no_separators(initializers).count();
+
+                let is_key_value = |s: &Syntax<Token, Value>| {
+                    if let ElementInitializer(_) = s.syntax {
+                        true
+                    } else {
+                        false
+                    }
+                };
+                let initializer_list = || Self::syntax_to_list_no_separators(initializers);
+                let num_initializers = initializer_list().count();
                 match &status {
+                    ValidClass(name)
+                        if use_key_value_initializers(name)
+                            && initializer_list().any(|i| !is_key_value(i)) =>
+                    {
+                        self.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::invalid_value_initializer(self.text(n)),
+                        ));
+                    }
+
+                    ValidClass(name)
+                        if !use_key_value_initializers(name)
+                            && initializer_list().any(|i| is_key_value(i)) =>
+                    {
+                        self.errors.push(Self::make_error_from_node(
+                            node,
+                            errors::invalid_key_value_initializer(self.text(n)),
+                        ));
+                    }
+
                     ValidClass(pair) if pair == "pair" && num_initializers != 2 => {
                         let msg = if num_initializers == 0 {
                             errors::pair_initializer_needed
@@ -3472,6 +3504,7 @@ where
                             ErrorType::RuntimeError,
                         ));
                     }
+
                     ValidClass(_) => (),
                     InvalidBraceKind => self.errors.push(Self::make_error_from_node(
                         node,

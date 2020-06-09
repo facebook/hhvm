@@ -102,15 +102,27 @@ static constexpr uint32_t kAIterEndOffset = 3;
 
 }
 
+struct UFrameBase {
+  UFrameBase(SSATmp* fp) : base{detail::frame_base_offset(fp)} {}
+  UFrameBase(FPRelOffset off) : base{off} {}
+  FPRelOffset base;
+};
+
 #define FRAME_RELATIVE(Name)                                                  \
-  struct Name {                                                               \
+  struct Name : UFrameBase {                                                  \
     Name(SSATmp* fp, AliasIdSet ids, FPInvOffset off = FPInvOffset{0})        \
-      : base{detail::frame_base_offset(fp) - off.offset}, ids{ids} {}         \
-    Name(FPRelOffset off, AliasIdSet ids) : base{off}, ids{ids} {}            \
-    FPRelOffset base;                                                         \
+      : UFrameBase{detail::frame_base_offset(fp) - off.offset}, ids{ids} {}   \
+    Name(FPRelOffset off, AliasIdSet ids) : UFrameBase{off}, ids{ids} {}      \
     AliasIdSet ids;                                                           \
   }
 
+#define FRAME_RELATIVE0(Name)                                                 \
+  struct Name : UFrameBase {                                                  \
+    using UFrameBase::UFrameBase;                                             \
+    Name() = default;                                                         \
+    /* implicit */ Name(const UFrameBase& base) : UFrameBase{base} {}         \
+    Name& operator=(const UFrameBase& b) { base = b.base; return *this; }     \
+  }
 
 /*
  * Special data for locations known to be a set of locals on the frame `fp'.
@@ -153,6 +165,21 @@ inline AIter aiter_all(SSATmp* fp, uint32_t id,
     off
   };
 }
+
+/*
+ * These singleton values are each associated with a given frame. AFContext
+ * is the m_thisUnsafe field of ActRec, AFFunc is m_func, AFMeta holds the
+ * flags, numArgs, hardware, and VM return fields (m_savedRip, m_numArgs, and
+ * m_callOffAndFlags),
+ */
+FRAME_RELATIVE0(AFContext);
+FRAME_RELATIVE0(AFFunc);
+FRAME_RELATIVE0(AFMeta);
+
+/*
+ * AActRec is a union of AFContext, AFFunc, and AFMeta
+ */
+FRAME_RELATIVE0(AActRec);
 
 /*
  * A location inside of an object property, with base `obj' at physical index
@@ -231,6 +258,19 @@ struct AStack {
 struct ARds { rds::Handle handle; };
 
 #undef FRAME_RELATIVE
+#undef FRAME_RELATIVE0
+
+#define ALIAS_CLASS_SPEC          \
+  O(None,     BEmpty)             \
+  O(Local,    (BLocal | BActRec)) \
+  O(Iter,     (BIter | BActRec))  \
+  O(Prop,     BProp)              \
+  O(ElemI,    BElemI)             \
+  O(ElemS,    BElemS)             \
+  O(Stack,    BStack)             \
+  O(Rds,      BRds)               \
+  O(FrameAll, BActRec)            \
+/**/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -246,16 +286,22 @@ struct AliasClass {
     BElemS      = 1U << 4,
     BStack      = 1U << 5,
     BRds        = 1U << 6,
+    BFContext   = 1U << 7,
+    BFFunc      = 1U << 8,
+    BFMeta      = 1U << 9,
 
     // Have no specialization, put them last.
-    BMITempBase = 1U << 7,
-    BMIBase     = 1U << 8,
+    BMITempBase = 1U << 10,
+    BMIBase     = 1U << 11,
+    BFBasePtr   = 1U << 12,
 
     BElem      = BElemI | BElemS,
     BHeap      = BElem | BProp,
     BMIState   = BMITempBase | BMIBase,
 
-    BUnknownTV = ~(BIter | BMIBase),
+    BActRec = BFContext | BFFunc | BFMeta,
+
+    BUnknownTV = ~(BIter | BMIBase | BActRec),
 
     BUnknown   = static_cast<uint32_t>(-1),
   };
@@ -282,6 +328,10 @@ struct AliasClass {
   /* implicit */ AliasClass(AElemS);
   /* implicit */ AliasClass(AStack);
   /* implicit */ AliasClass(ARds);
+  /* implicit */ AliasClass(AFContext);
+  /* implicit */ AliasClass(AFFunc);
+  /* implicit */ AliasClass(AFMeta);
+  /* implicit */ AliasClass(AActRec);
 
   /*
    * Exact equality.
@@ -340,6 +390,10 @@ struct AliasClass {
   folly::Optional<AElemS>          elemS() const;
   folly::Optional<AStack>          stack() const;
   folly::Optional<ARds>            rds() const;
+  folly::Optional<AFContext>       fcontext() const;
+  folly::Optional<AFFunc>          ffunc() const;
+  folly::Optional<AFMeta>          fmeta() const;
+  folly::Optional<AActRec>         actrec() const;
 
   /*
    * Conditionally access specific known information, but also checking that
@@ -356,6 +410,10 @@ struct AliasClass {
   folly::Optional<AElemS>          is_elemS() const;
   folly::Optional<AStack>          is_stack() const;
   folly::Optional<ARds>            is_rds() const;
+  folly::Optional<AFContext>       is_fcontext() const;
+  folly::Optional<AFFunc>          is_ffunc() const;
+  folly::Optional<AFMeta>          is_fmeta() const;
+  folly::Optional<AActRec>         is_actrec() const;
 
   /*
    * Like the other foo() and is_foo() methods, but since we don't have an
@@ -363,17 +421,14 @@ struct AliasClass {
    */
   folly::Optional<AliasClass> mis() const;
   folly::Optional<AliasClass> is_mis() const;
+  folly::Optional<AliasClass> frame_base() const;
+  folly::Optional<AliasClass> is_frame_base() const;
 
 private:
   enum class STag {
-    None,
-    Local,
-    Iter,
-    Prop,
-    ElemI,
-    ElemS,
-    Stack,
-    Rds,
+#define O(name, ...) name,
+    ALIAS_CLASS_SPEC
+#undef O
   };
 private:
   friend std::string show(AliasClass);
@@ -383,18 +438,21 @@ private:
   void framelike_union_set(AIter);
 
   template <typename T>
-  static AliasClass framelike_union(rep, T, T);
+  static AliasClass framelike_union(rep newBits, rep frm, T a, T b);
 
   bool checkInvariants() const;
   bool equivData(AliasClass) const;
   bool subclassData(AliasClass) const;
   bool maybeData(AliasClass) const;
+  bool diffSTagSubclassData(rep relevant_bits, AliasClass) const;
+  bool diffSTagMaybeData(rep relevant_bits, AliasClass) const;
+  folly::Optional<UFrameBase> asUFrameBase() const;
   static AliasClass unionData(rep newBits, AliasClass, AliasClass);
-  static rep stagBits(STag tag);
+  static STag stagFor(rep bits);
 
 private:
   rep m_bits;
-  STag m_stag{STag::None};
+  rep m_stagBits{BEmpty};
   union {
     ALocal          m_local;
     AIter           m_iter;
@@ -403,6 +461,8 @@ private:
     AElemS          m_elemS;
     AStack          m_stack;
     ARds            m_rds;
+
+    UFrameBase      m_frameAll;
   };
 };
 
@@ -420,12 +480,19 @@ auto const AElemIAny          = AliasClass{AliasClass::BElemI};
 auto const AElemSAny          = AliasClass{AliasClass::BElemS};
 auto const AElemAny           = AliasClass{AliasClass::BElem};
 auto const AMIStateAny        = AliasClass{AliasClass::BMIState};
+auto const AFContextAny       = AliasClass{AliasClass::BFContext};
+auto const AFFuncAny          = AliasClass{AliasClass::BFFunc};
+auto const AFMetaAny          = AliasClass{AliasClass::BFMeta};
+auto const AActRecAny         = AliasClass{AliasClass::BActRec};
 auto const AUnknownTV         = AliasClass{AliasClass::BUnknownTV};
 auto const AUnknown           = AliasClass{AliasClass::BUnknown};
 
 /* Alias classes for specific MInstrState fields. */
 auto const AMIStateTempBase   = AliasClass{AliasClass::BMITempBase};
 auto const AMIStateBase       = AliasClass{AliasClass::BMIBase};
+
+/* Alias class for the frame base register */
+auto const AFBasePtr          = AliasClass{AliasClass::BFBasePtr};
 
 //////////////////////////////////////////////////////////////////////
 

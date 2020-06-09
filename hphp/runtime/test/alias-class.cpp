@@ -40,7 +40,11 @@ std::vector<AliasClass> generic_classes() {
     AElemIAny,
     AElemSAny,
     AElemAny,
-    AIterAny
+    AIterAny,
+    AFContextAny,
+    AFFuncAny,
+    AFMetaAny,
+    AActRecAny
   };
 }
 
@@ -69,6 +73,12 @@ std::vector<AliasClass> specialized_classes(IRUnit& unit) {
     AStack { mainFP, FPRelOffset { -12 }, 4 },
     AStack { mainFP, FPRelOffset { -11 }, 3 },
     AStack { mainFP, FPRelOffset { -52 }, 10 },
+
+    // ActRec locations
+    AFContext { mainFP },
+    AFFunc    { mainFP },
+    AFMeta    { mainFP },
+    AActRec   { mainFP },
   };
 }
 
@@ -475,6 +485,41 @@ TEST(AliasClass, IterUnion) {
     // too big for that right now.
     EXPECT_TRUE(!u1.precise_union(iterP1));
   }
+}
+
+TEST(AliasClass, FrameUnion) {
+  auto const FP1 = FPRelOffset { 0 };
+  auto const FP2 = FPRelOffset { -1 };
+
+  AliasClass const local1 = ALocal { FP1, 0 };
+  AliasClass const localR = ALocal { FP1, AliasIdSet::IdRange(0, 2) };
+  AliasClass const fctx1   = AFContext { FP1 };
+  AliasClass const fctx2   = AFContext { FP2 };
+
+  EXPECT_TRUE(local1.maybe(localR));
+  EXPECT_TRUE(local1 <= localR);
+  EXPECT_FALSE(local1.maybe(fctx1));
+  EXPECT_FALSE(localR.maybe(fctx1));
+  EXPECT_TRUE(fctx1.maybe(AFContextAny));
+  EXPECT_TRUE(fctx1.maybe(AActRecAny));
+  EXPECT_TRUE(fctx1.maybe(AActRec{FP1}));
+
+  auto const u1 = local1 | fctx1;
+  auto const u2 = localR | fctx1;
+  auto const u3 = local1 | fctx2;
+  auto const u4 = u3 | fctx1;
+  auto const u5 = u4 | AMIStateAny;
+  EXPECT_TRUE(u1 <= u2);
+  EXPECT_TRUE(u1.maybe(u2));
+  EXPECT_FALSE(u1 <= localR);
+  EXPECT_FALSE(u1.maybe(fctx2));
+  EXPECT_FALSE(u2.maybe(fctx2));
+  EXPECT_TRUE(u3.local().hasValue());
+  EXPECT_FALSE(u3.fcontext().hasValue());
+  EXPECT_EQ(u3, u4);
+  EXPECT_TRUE(u5.local().hasValue());
+  EXPECT_EQ(u5.local()->base, local1.local()->base);
+  EXPECT_EQ(u5.local()->ids, local1.local()->ids);
 }
 
 TEST(AliasClass, Pointees) {

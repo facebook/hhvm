@@ -129,7 +129,7 @@ VS(serialize($v),
   VS($v->name, null);
 }
 {
-  $v1 = darray["a" => "apple", "b" => 2,"c" => varray[1,"y",3]];
+  $v1 = darray["a" => "apple", "b" => 2,"c" => darray(varray[1,"y",3])];
   $v2 = unserialize("a:3:{s:1:\"a\";s:5:\"apple\";s:1:\"b\";i:2;s:1:\"c\";a:3:{i:0;i:1;i:1;s:1:\"y\";i:2;i:3;}}");
   VS($v1, $v2);
 }

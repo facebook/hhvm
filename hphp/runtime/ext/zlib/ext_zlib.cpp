@@ -114,12 +114,12 @@ Variant HHVM_FUNCTION(gzfile, const String& filename,
     return false;
   }
 
-  Array ret;
+  Array ret = Array::CreateVArray();
   Variant line;
   while (!same(line = HHVM_FN(gzgets)(stream.toResource()), false)) {
     ret.append(line);
   }
-  return ret;
+  return ret.empty() ? init_null() : ret;
 }
 
 /////////////////////////////////////////////////////////////////////////////

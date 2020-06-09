@@ -46,7 +46,7 @@ VS($db->querysingle("SELECT * FROM foo", true), darray["bar" => "ABC"]);
   VS($res->columnname(0), "bar");
   VS($res->columntype(0), SQLITE3_TEXT);
 
-  VS($res->fetcharray(SQLITE3_NUM), varray["DEF"]);
+  VS($res->fetcharray(SQLITE3_NUM), darray[0 => "DEF"]);
   $res->finalize();
 }
 
@@ -60,7 +60,7 @@ VS($db->querysingle("SELECT * FROM foo", true), darray["bar" => "ABC"]);
   $id = "ABC";
   {
     $res = $stmt->execute();
-    VS($res->fetcharray(SQLITE3_NUM), varray["DEF"]);
+    VS($res->fetcharray(SQLITE3_NUM), darray[0 => "DEF"]);
     $res->finalize();
   }
 
@@ -72,13 +72,13 @@ VS($db->querysingle("SELECT * FROM foo", true), darray["bar" => "ABC"]);
 {
   VERIFY($db->createfunction("tolower", "lower", 1));
   $res = $db->query("SELECT tolower(bar) FROM foo");
-  VS($res->fetcharray(SQLITE3_NUM), varray["abc"]);
+  VS($res->fetcharray(SQLITE3_NUM), darray[0 => "abc"]);
   $res->finalize();
 }
 {
   VERIFY($db->createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
   $res = $db->query("SELECT sumlen(bar) FROM foo");
-  VS($res->fetcharray(SQLITE3_NUM), varray[6]);
+  VS($res->fetcharray(SQLITE3_NUM), darray[0 => 6]);
   $res->finalize();
 }
 

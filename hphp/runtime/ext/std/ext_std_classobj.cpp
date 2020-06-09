@@ -164,7 +164,7 @@ Variant HHVM_FUNCTION(get_class_vars, const String& className) {
     [] (const ActRec* fp, Offset) { return fp->func()->cls(); }
   );
 
-  ArrayInit arr(numDeclProps + numSProps, ArrayInit::Map{});
+  DArrayInit arr(numDeclProps + numSProps);
 
   for (size_t slot = 0; slot < numDeclProps; ++slot) {
     auto index = cls->propSlotToIndex(slot);

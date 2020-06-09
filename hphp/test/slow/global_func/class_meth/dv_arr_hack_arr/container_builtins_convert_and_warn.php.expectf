@@ -138,7 +138,7 @@ array(4) {
 }
 
 Notice: Implicit clsmeth to vec conversion in %s/container_builtins_convert_and_warn.php on line 49
-array(4) {
+dict(4) {
   [0]=>
   string(1) "A"
   [1]=>

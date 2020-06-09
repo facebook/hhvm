@@ -423,12 +423,8 @@ TypedValue HHVM_FUNCTION(array_keys,
   return make_array_like_tv(ai.create());
 }
 
-static bool couldRecur(const Variant& v, const ArrayData* arr) {
-  return arr->kind() == ArrayData::kGlobalsKind;
-}
-
-static bool couldRecur(tv_lval lval, const ArrayData* arr) {
-  return arr->kind() == ArrayData::kGlobalsKind;
+static bool couldRecur(const Array& arr) {
+  return arr->isGlobalsArrayKind();
 }
 
 using PointerSet = ArrayUtil::PointerSet;
@@ -454,10 +450,10 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
       auto const arrkey =
         arr1.convertKey<IntishCast::Cast>(*key.asTypedValue());
       auto const lval = arr1.lval(arrkey, AccessFlags::Key);
-      auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv())
-        .toPHPArray();
+      auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv());
+      if (!couldRecur(subarr1)) subarr1 = subarr1.toDArray();
       php_array_merge_recursive(
-        seen, couldRecur(lval, subarr1.get()), subarr1,
+        seen, couldRecur(subarr1), subarr1,
         tvCastToArrayLike<IntishCast::Cast>(iter.secondVal())
       );
       tvUnset(lval); // avoid contamination of the value that was strongly bound
@@ -588,7 +584,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
                          const Variant& array1,
                          const Array& arrays /* = null array */) {
   getCheckedArray(array1);
-  Array ret = Array::Create();
+  auto ret = Array::CreateDArray();
   PointerSet seen;
   php_array_merge_recursive(seen, false, ret, arr_array1);
   assertx(seen.empty());
@@ -649,7 +645,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
         ).toPHPArrayIntishCast();
-        php_array_replace_recursive(seen, couldRecur(lval, subarr1.get()),
+        php_array_replace_recursive(seen, couldRecur(subarr1),
                                     subarr1, ArrNR(val(tv).parr));
         tvSet(make_array_like_tv(subarr1.get()), lval);
       } else {

@@ -186,6 +186,12 @@ std::unique_ptr<Vunit> lowerUnit(const IRUnit& unit,
   }
 
   fixBlockWeights(*vunit);
+
+  // This pass requires on some invariants about rvmfp() from HHIR, so we do it
+  // here rather than in optimize() as those optimizations may be called for non
+  // HHIR Vunits.
+  fixupVmfpUses(*vunit);
+
   printUnit(kInitialVasmLevel, "after initial vasm generation", *vunit);
   assertx(check(*vunit));
   timer.stop();

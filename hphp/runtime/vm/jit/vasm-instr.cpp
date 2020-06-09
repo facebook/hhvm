@@ -154,7 +154,8 @@ Width width(Vinstr::Opcode op) {
     // php function abi
     case Vinstr::defvmsp:
     case Vinstr::defvmfp:
-    case Vinstr::stvmfp:
+    case Vinstr::pushvmfp:
+    case Vinstr::popvmfp:
     case Vinstr::syncvmsp:
     case Vinstr::defvmretdata:
     case Vinstr::defvmrettype:

@@ -233,6 +233,11 @@ void getEffects(const Abi& abi, const Vinstr& i,
       across = RegSet(reg::rcx);
       break;
 
+    case Vinstr::pushvmfp:
+    case Vinstr::popvmfp:
+      defs = RegSet(rvmfp());
+      break;
+
     case Vinstr::pop:
     case Vinstr::popf:
     case Vinstr::popm:

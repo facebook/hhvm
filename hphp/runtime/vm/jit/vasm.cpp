@@ -16,9 +16,11 @@
 
 #include "hphp/runtime/vm/jit/vasm.h"
 
+#include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/containers.h"
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
+#include "hphp/runtime/vm/jit/vasm-visit.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -68,6 +70,115 @@ boost::dynamic_bitset<> backedgeTargets(const Vunit& unit,
   }
 
   return ret;
+}
+
+/*
+ * Rewrite any references to livefp to rvmfp(), and any Vloc references to
+ * livefp or its descendants (per regchain) to be relative to rvmfp() instead.
+ *
+ * livepf is the SSA register currently in rmvfp() and regchain contains the
+ * SSA parent FP registers of each SSA FP register.
+ */
+struct FpVisit {
+  Vunit& unit;
+  Vreg livefp;
+  const jit::fast_map<size_t, std::pair<Vreg,int32_t>>& regchain;
+
+  template<class T> void imm(T&) {}
+  template<class T> void across(T& t) { use(t); }
+  template<class T, class H> void useHint(T& t, H&) { use(t); }
+  template<class T, class H> void defHint(T& t, H&) { def(t); }
+  template<class T> void def(T&) {}
+
+  void use(RegSet) {}
+  void use(VregSF) {}
+  void use(Vreg128) {}
+
+  void use(Vtuple t) { for (auto& reg : unit.tuples[t]) use(reg); }
+  void use(VcallArgsId id) {
+    for (auto& reg : unit.vcallArgs[id].args) use(reg);
+  }
+
+  void use(Vptr& ptr) {
+    // Rewrite memory operands that are based on registers we've copied or
+    // lea'd off of other registers.
+    if (ptr.seg != Segment::DS) return;
+
+    int32_t off = 0;
+    for (auto v = livefp; v != ptr.base;) {
+      auto const it = regchain.find(v);
+      if (it == regchain.end() || !it->second.second) return;
+      off += it->second.second;
+      v = it->second.first;
+    }
+
+    ptr.base = rvmfp();
+    ptr.disp += off;
+  }
+
+  template<class T>
+  typename std::enable_if<
+    std::is_same<Vreg,T>::value ||
+    std::is_same<Vreg8,T>::value ||
+    std::is_same<Vreg16,T>::value ||
+    std::is_same<Vreg32,T>::value ||
+    std::is_same<Vreg64,T>::value ||
+    std::is_same<VregDbl,T>::value
+  >::type use(T& reg) {
+    if (reg == livefp) reg = rvmfp();
+  }
+};
+
+void fixupVmfpUses(Vunit& unit) {
+  auto const rpo = sortBlocks(unit);
+  jit::vector<Vreg> livefp{unit.blocks.size(), InvalidReg};
+  jit::fast_map<size_t, std::pair<Vreg,int32_t>> regchain;
+
+  livefp[rpo[0]] = rvmfp();
+
+  for (auto const b : rpo) {
+    auto& block = unit.blocks[b];
+    auto fp = livefp[b];
+    always_assert_flog(fp.isValid(), "B{} cannot have unknown vmfp", b);
+
+    for (auto& inst : block.code) {
+      auto const curFp = fp;
+      switch (inst.op) {
+      case Vinstr::defvmfp:
+        always_assert(fp == rvmfp());
+        fp = inst.defvmfp_.d;
+        break;
+      case Vinstr::pushvmfp: {
+        auto const& p = inst.pushvmfp_;
+        auto const& r = regchain.emplace(
+          p.s, std::make_pair(fp, p.offset)).first->second;
+        always_assert(r.first == fp);
+        always_assert(r.second == p.offset);
+        fp = p.s;
+        break;
+      }
+      case Vinstr::contenter:
+      case Vinstr::popvmfp: {
+        auto const it = regchain.find(fp);
+        always_assert(it != regchain.end());
+        fp = it->second.first;
+        if (inst.op != Vinstr::contenter) break;
+      }
+      default:
+        FpVisit visit{unit, curFp, regchain};
+        visitOperands(inst, visit);
+      }
+    }
+
+    for (auto const s : succs(block)) {
+      always_assert_flog(
+        !livefp[s].isValid() || livefp[s] == fp,
+        "B{} has multiple known vmfp values ({} and {} via B{})",
+        s, show(livefp[s]), show(fp), b
+      );
+      livefp[s] = fp;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

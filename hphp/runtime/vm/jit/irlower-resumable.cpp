@@ -94,7 +94,7 @@ void cgContEnter(IRLS& env, const IRInstruction* inst) {
   v << store{fp, genFP[AROFF(m_sfp)]};
   v << storeli{callOffAndFlags, genFP[AROFF(m_callOffAndFlags)]};
 
-  v << stvmfp{genFP};
+  v << pushvmfp{genFP};
   auto const sync_sp = v.makeReg();
   v << lea{sp[cellsToBytes(spOff.offset - 1)], sync_sp};
   v << syncvmsp{sync_sp};

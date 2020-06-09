@@ -71,6 +71,7 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
   auto const callFlags = srcLoc(env, inst, 2).reg();
   auto const numArgs = srcLoc(env, inst, 3).reg();
   auto const ctx = srcLoc(env, inst, 4).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
   auto& v = vmain(env);
 
   v << store{prevFP, newFP + AROFF(m_sfp)};
@@ -108,8 +109,8 @@ void cgDefFuncEntryFP(IRLS& env, const IRInstruction* inst) {
     emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, newFP + AROFF(m_varEnv));
   }
 
-  v << stvmfp{newFP};
-  v << copy{rvmfp(), dstLoc(env, inst, 0).reg()};
+  v << copy{newFP, dst};
+  v << pushvmfp{dst};
 }
 
 void cgIsFunReifiedGenericsMatched(IRLS& env, const IRInstruction* inst) {

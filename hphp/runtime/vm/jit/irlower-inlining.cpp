@@ -79,6 +79,20 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
 
   assertx(inst->src(0)->inst()->is(BeginInlining));
   auto const target = inst->src(0)->inst()->extra<BeginInlining>()->func;
+  auto const off = [&] () -> int32_t {
+    if (isResumedParent(inst)) return 0;
+    auto const be = inst->src(0)->inst();
+    auto const defsp = be->src(0)->inst();
+    auto const parentToSp = [&] {
+      if (be->src(1)->inst()->is(BeginInlining)) {
+        auto const extra = be->src(1)->inst()->extra<BeginInlining>();
+        return FPInvOffset{extra->spOffset.offset};
+      }
+      return defsp->extra<FPInvOffsetData>()->offset;
+    }();
+    auto const spoff = inst->src(0)->inst()->extra<BeginInlining>()->spOffset;
+    return spoff.to<FPInvOffset>(parentToSp).offset;
+  }();
 
   // Do roughly the same work as an HHIR Call.
   v << store{callerFP, calleeFP[AROFF(m_sfp)]};
@@ -100,14 +114,14 @@ void cgInlineCall(IRLS& env, const IRInstruction* inst) {
 
     // Do this store now to hopefully allow vasm-copy to replace the store of
     // calleeFP below with rvmfp.
-    v << stvmfp{calleeFP};
+    v << pushvmfp{calleeFP, cellsToBytes(off)};
 
     ifThen(v, CC_E, sf, [&](Vout& v) {
       v << store{calleeFP, rvmtl()[rds::kVmfpOff]};
       emitImmStoreq(v, intptr_t(extra->syncVmpc), rvmtl()[rds::kVmpcOff]);
     });
   } else {
-    v << stvmfp{calleeFP};
+    v << pushvmfp{calleeFP, cellsToBytes(off)};
   }
 
   v << pushframe{};
@@ -118,12 +132,12 @@ void cgInlineReturn(IRLS& env, const IRInstruction* inst) {
   auto const fp = srcLoc(env, inst, 0).reg();
   auto const callerFp = srcLoc(env, inst, 1).reg();
   if (isResumedParent(inst)) {
-    v << stvmfp{callerFp};
+    v << popvmfp{callerFp};
   } else {
     auto const tmp = v.makeReg();
     auto const callerFPOff = inst->extra<InlineReturn>()->offset;
     v << lea{fp[cellsToBytes(callerFPOff.offset)], tmp};
-    v << stvmfp{tmp};
+    v << popvmfp{tmp};
   }
   v << popframe{};
 }

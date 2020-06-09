@@ -131,6 +131,7 @@ template<typename Folder> void foldImms(Vunit&);
 void simplify(Vunit&);
 void postRASimplify(Vunit&);
 void sfPeepholes(Vunit&, const Abi&);
+void fixupVmfpUses(Vunit& unit);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -21,6 +21,11 @@ struct IntlBreakIterator : IntlError {
   }
   ~IntlBreakIterator() { setBreakIterator(nullptr); }
 
+  void sweep() {
+    setBreakIterator(nullptr);
+    std::destroy_at(&m_text);
+  }
+
   void setBreakIterator(icu::BreakIterator *bi) {
     if (m_breakIterator) {
       delete m_breakIterator;
@@ -99,6 +104,7 @@ struct IntlBreakIterator : IntlError {
   // BreakIterator doesn't keep track of this for us, so we have to
   // A value of -1 means unknown and unknowable
   int32_t m_key{0};
+  String m_compiledRules;
  private:
   icu::BreakIterator *m_breakIterator{nullptr};
   std::string m_text;

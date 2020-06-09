@@ -258,6 +258,12 @@ static void HHVM_METHOD(IntlRuleBasedBreakIterator, __construct,
   if (compiled) {
 #if U_ICU_VERSION_MAJOR_NUM * 100 + U_ICU_VERSION_MINOR_NUM >= 408
     UErrorCode error = U_ZERO_ERROR;
+
+    // NB: Ownership of the storage containing the compiled rules remains with
+    // the caller of this function. The compiled rules must not be modified or
+    // deleted during the life of the break iterator.
+    data->m_compiledRules = rules;
+
     auto bi = new RuleBasedBreakIterator((uint8_t*)rules.c_str(), rules.size(),
                                          error);
     if (U_FAILURE(error)) {

@@ -103,9 +103,6 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// sweep() { this->~Image(); }
-IMPLEMENT_RESOURCE_ALLOCATION(Image)
-
 void Image::reset() {
   if (m_gdImage) {
     gdImageDestroy(m_gdImage);
@@ -113,7 +110,6 @@ void Image::reset() {
   }
 }
 
-Image::~Image() { reset(); }
 
 struct ImageMemoryAlloc final : RequestEventHandler {
   ImageMemoryAlloc() : m_mallocSize(0) {}
@@ -3354,6 +3350,7 @@ bool HHVM_FUNCTION(imagesettile, const Resource& image, const Resource& tile) {
   gdImagePtr til = get_valid_image_resource(tile);
   if (!til) return false;
   gdImageSetTile(im, til);
+  unsafe_cast_or_null<Image>(image)->m_tile = unsafe_cast_or_null<Image>(tile);
   return true;
 }
 
@@ -3364,6 +3361,8 @@ bool HHVM_FUNCTION(imagesetbrush,
   gdImagePtr tile = get_valid_image_resource(brush);
   if (!tile) return false;
   gdImageSetBrush(im, tile);
+  unsafe_cast_or_null<Image>(image)->m_brush =
+    unsafe_cast_or_null<Image>(brush);
   return true;
 }
 

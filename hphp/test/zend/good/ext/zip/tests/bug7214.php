@@ -12,5 +12,4 @@ function entrypoint_bug7214(): void {
   } else {
   	echo "failed";
   }
-  zip_close($zip);
 }

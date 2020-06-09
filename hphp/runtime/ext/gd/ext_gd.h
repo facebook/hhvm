@@ -37,16 +37,20 @@ struct gfxinfo {
 struct Image : SweepableResourceData {
   Image() : m_gdImage(nullptr) {}
   explicit Image(gdImagePtr gdImage) : m_gdImage(gdImage) {}
-  ~Image();
+  ~Image() { sweep(); }
   gdImagePtr get() { return m_gdImage;}
   void reset();
+  void sweep() { reset(); }
 
   CLASSNAME_IS("gd")
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
   bool isInvalid() const override { return m_gdImage == nullptr; }
 
-  DECLARE_RESOURCE_ALLOCATION(Image)
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(Image)
+
+  req::ptr<Image> m_brush;
+  req::ptr<Image> m_tile;
 private:
   gdImagePtr m_gdImage;
 };

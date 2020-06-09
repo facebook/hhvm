@@ -70,6 +70,4 @@ function entrypoint_bug24594(): void {
       $res .= imagecolorat($base,0,0)==$black?'1':'0';
 
       echo "$res\n";
-
-      __hhvm_intrinsics\launder_value($tile);
 }

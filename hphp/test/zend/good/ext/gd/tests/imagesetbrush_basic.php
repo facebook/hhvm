@@ -22,6 +22,4 @@ function entrypoint_imagesetbrush_basic(): void {
   $result_image = ob_get_contents();
   ob_end_clean();
   echo md5(base64_encode($result_image));
-
-  __hhvm_intrinsics\launder_value($img);
 }

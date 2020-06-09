@@ -27,6 +27,4 @@ RULES;
   var_dump($rbbi->getRules(), $rbbi2->getRules());
   var_dump($rbbi->getRules() == $rbbi2->getRules());
   echo "==DONE==";
-
-  __hhvm_intrinsics\launder_value($br);
 }

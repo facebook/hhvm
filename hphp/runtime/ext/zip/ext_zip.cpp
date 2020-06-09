@@ -148,22 +148,63 @@ struct ZipStreamWrapper final : Stream::Wrapper {
   }
 };
 
+struct ZipDirectory : SweepableResourceData {
+  DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
+
+  CLASSNAME_IS("ZipDirectory");
+  // overriding ResourceData
+  const String& o_getClassNameHook() const override { return classnameof(); }
+
+  explicit ZipDirectory(zip *z) : m_zip(z),
+                                  m_numFiles(zip_get_num_files(z)),
+                                  m_curIndex(0) {}
+
+  ~ZipDirectory() override { close(); }
+
+  bool close() {
+    bool noError = true;
+    if (isValid()) {
+      if (zip_close(m_zip) != 0) {
+        zip_discard(m_zip);
+        noError = false;
+      }
+      m_zip = nullptr;
+    }
+    return noError;
+  }
+
+  bool isValid() const {
+    return m_zip != nullptr;
+  }
+
+  Variant nextFile();
+
+  zip* getZip() {
+    return m_zip;
+  }
+
+ private:
+  zip* m_zip;
+  int  m_numFiles;
+  int  m_curIndex;
+};
+IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory);
+
 struct ZipEntry : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(ZipEntry);
+  DECLARE_RESOURCE_ALLOCATION_NO_SWEEP(ZipEntry);
 
   CLASSNAME_IS("ZipEntry");
   // overriding ResourceData
   const String& o_getClassNameHook() const override { return classnameof(); }
 
-  ZipEntry(zip* z, int index) : m_zipFile(nullptr) {
-    if (zip_stat_index(z, index, 0, &m_zipStat) == 0) {
-      m_zipFile = zip_fopen_index(z, index, 0);
+  ZipEntry(ZipDirectory* d, int index) : m_zipDir(d), m_zipFile(nullptr) {
+    if (zip_stat_index(d->getZip(), index, 0, &m_zipStat) == 0) {
+      m_zipFile = zip_fopen_index(d->getZip(), index, 0);
     }
   }
 
-  ~ZipEntry() override {
-    close();
-  }
+  ~ZipEntry() override { sweep(); }
+  void sweep() override { close(); }
 
   bool close() {
     bool noError = true;
@@ -230,66 +271,27 @@ struct ZipEntry : SweepableResourceData {
   }
 
  private:
+  req::ptr<ZipDirectory> m_zipDir;
   struct zip_stat m_zipStat;
   zip_file*       m_zipFile;
 };
-IMPLEMENT_RESOURCE_ALLOCATION(ZipEntry);
 
-struct ZipDirectory : SweepableResourceData {
-  DECLARE_RESOURCE_ALLOCATION(ZipDirectory);
 
-  CLASSNAME_IS("ZipDirectory");
-  // overriding ResourceData
-  const String& o_getClassNameHook() const override { return classnameof(); }
-
-  explicit ZipDirectory(zip *z) : m_zip(z),
-                                  m_numFiles(zip_get_num_files(z)),
-                                  m_curIndex(0) {}
-
-  ~ZipDirectory() override { close(); }
-
-  bool close() {
-    bool noError = true;
-    if (isValid()) {
-      if (zip_close(m_zip) != 0) {
-        zip_discard(m_zip);
-        noError = false;
-      }
-      m_zip = nullptr;
-    }
-    return noError;
+Variant ZipDirectory::nextFile() {
+  if (m_curIndex >= m_numFiles) {
+    return false;
   }
 
-  bool isValid() const {
-    return m_zip != nullptr;
+  auto zipEntry = req::make<ZipEntry>(this, m_curIndex);
+
+  if (!zipEntry->isValid()) {
+    return false;
   }
 
-  Variant nextFile() {
-    if (m_curIndex >= m_numFiles) {
-      return false;
-    }
+  ++m_curIndex;
 
-    auto zipEntry = req::make<ZipEntry>(m_zip, m_curIndex);
-
-    if (!zipEntry->isValid()) {
-      return false;
-    }
-
-    ++m_curIndex;
-
-    return Variant(std::move(zipEntry));
-  }
-
-  zip* getZip() {
-    return m_zip;
-  }
-
- private:
-  zip* m_zip;
-  int  m_numFiles;
-  int  m_curIndex;
-};
-IMPLEMENT_RESOURCE_ALLOCATION(ZipDirectory);
+  return Variant(std::move(zipEntry));
+}
 
 const StaticString s_ZipArchive("ZipArchive");
 

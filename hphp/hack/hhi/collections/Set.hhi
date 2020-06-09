@@ -56,7 +56,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @param $it - any `Traversable` object from which to create the `Set`
    *              (e.g., `array`). If `null`, then an empty `Set` is created.
    */
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it);
 
   /**
@@ -67,7 +67,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - an `array` containing the values from the current `Set`, where
    *           each key of the `array` are the same as each value.
    */
-  <<__Rx, __MaybeMutable, __PHPStdLib>>
+  <<__Pure, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<arraykey, Tv>;
 
   /**
@@ -80,7 +80,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toKeysArray(): varray<Tv>;
 
   /**
@@ -91,7 +91,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toValuesArray(): varray<Tv>;
 
   /**
@@ -100,7 +100,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) that contains the values of the
    *           current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toVector(): Vector<Tv>;
 
   /**
@@ -110,7 +110,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - an `ImmVector` (integer-indexed) with the values of the current
    *           `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
   /**
@@ -121,7 +121,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Map` that that contains the values of the current `Set`, with
    *           each key of the `Map` being the same as its value.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toMap(): Map<arraykey, Tv>;
 
   /**
@@ -133,7 +133,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - an `ImmMap` that that contains the values of the current `Set`,
    *           with each key of the Map being the same as its value.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmMap(): ImmMap<arraykey, Tv>;
 
   /**
@@ -141,7 +141,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - a `Set` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toSet(): Set<Tv>;
 
   /**
@@ -151,7 +151,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmSet(): ImmSet<Tv>;
 
   /**
@@ -161,7 +161,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - an `ImmSet` that is a deep copy of the current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function immutable(): ImmSet<Tv>;
 
   /**
@@ -177,7 +177,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function lazy(): \HH\Rx\KeyedIterable<arraykey, Tv>;
 
   /**
@@ -188,7 +188,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) containing the values of the
    *           current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function values(): Vector<Tv>;
 
   /**
@@ -201,7 +201,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Vector` (integer-indexed) containing the values of the
    *           current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function keys(): Vector<arraykey>;
 
   /**
@@ -219,7 +219,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Set<Tu>;
 
   /**
@@ -239,7 +239,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - a `Set` containing the values after a user-specified operation
    *           on the current `Set`'s values is applied.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey<Tu as arraykey>(<<__AtMostRxAsFunc>>(function(arraykey, Tv): Tu) $callback): Set<Tu>;
 
   /**
@@ -257,7 +257,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
@@ -278,7 +278,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           is applied to the values of the current `Set`.
    *
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
@@ -296,7 +296,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function retain(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Set<Tv>;
 
   /**
@@ -317,7 +317,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function retainWithKey(<<__AtMostRxAsFunc>>(function(arraykey, Tv): bool) $callback): Set<Tv>;
 
   /**
@@ -336,7 +336,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *           the provided `Traversable`; one of these must be empty or an
    *           exception is thrown.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(
     <<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable
   ): Set<nothing>;
@@ -353,7 +353,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` up to `n`
    *           elements.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function take(int $n): Set<Tv>;
 
   /**
@@ -368,7 +368,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` up until
    *           the callback returns `false`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
@@ -385,7 +385,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` containing
    *           values after the specified `n`-th element.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function skip(int $n): Set<Tv>;
 
   /**
@@ -401,7 +401,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` starting
    *           after the callback returns `true`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Set<Tv>;
 
   /**
@@ -420,7 +420,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` that is a proper subset of the current `Set` starting at
    *           `$start` up to but not including the element `$start + $len`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len): Set<Tv>;
 
   /**
@@ -437,7 +437,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
@@ -446,7 +446,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function firstValue(): ?Tv;
 
   /**
@@ -459,7 +459,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The first value in the current `Set`, or `null` if the `Set` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function firstKey(): ?arraykey;
 
   /**
@@ -468,7 +468,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function lastValue(): ?Tv;
 
   /**
@@ -481,7 +481,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - The last value in the current `Set`, or `null` if the current
    *           `Set` is empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function lastKey(): ?arraykey;
 
   /**
@@ -489,7 +489,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - `true` if the current `Set` is empty; `false` otherwise.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function isEmpty(): bool;
 
   /**
@@ -497,7 +497,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - The number of elements in the current `Set`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function count(): int;
 
   /**
@@ -508,7 +508,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function clear(): Set<Tv>;
 
   /**
@@ -518,7 +518,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - `true` if the specified value is present in the current `Set`;
    *           `false` otherwise.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function contains(arraykey $v): bool;
 
   /**
@@ -534,7 +534,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function add(Tv $v): Set<Tv>;
 
   /**
@@ -549,7 +549,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $it): Set<Tv>;
 
   /**
@@ -563,7 +563,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function addAllKeysOf(
     ?KeyedContainer<Tv,mixed> $container,
   ): Set<Tv>;
@@ -576,7 +576,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @param $sz - The pre-determined size you want for the current `Set`.
    */
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function reserve(int $sz): void;
 
   /**
@@ -589,7 +589,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function remove(Tv $v): Set<Tv>;
 
   /**
@@ -606,7 +606,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function removeAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tv> $other): Set<Tv>;
 
   /**
@@ -614,7 +614,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator(): \HH\Rx\KeyedIterator<arraykey, Tv>;
 
   /**
@@ -636,7 +636,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - A `Set` with the values from the passed `array`(s).
    */
-  <<__Rx, __MutableReturn>>
+  <<__Pure, __MutableReturn>>
   public static function fromArrays(...$argv): Set<Tv>;
 
   /**
@@ -651,7 +651,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    * @return - A `Set` with the values from the `Traversable`; or an empty `Set`
    *           if the `Traversable` is `null`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Tv> $items): Set<Tv>;
 
   /**
@@ -663,7 +663,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - A `Set` built from the keys of the specified container.
    */
-  <<__Rx, __MutableReturn>>
+  <<__Pure, __MutableReturn>>
   public static function fromKeysOf<Tk as arraykey>(
     ?KeyedContainer<Tk,mixed> $container,
   ): Set<Tk>;
@@ -673,7 +673,7 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - The `string` `"Set"`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function __toString(): string;
 
   /**
@@ -684,12 +684,12 @@ final class Set<Tv as arraykey> implements \MutableSet<Tv> {
    *
    * @return - The `Iterable` view of the current `Set`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function items(): \HH\Rx\Iterable<Tv>;
 
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tv, Tv>;
 }
 
@@ -703,17 +703,17 @@ namespace {
  * Methods and functions should take and return the KeyedIterator interface.
  */
 class SetIterator<+Tv> implements HH\Rx\KeyedIterator<arraykey, Tv> {
-  <<__Rx>>
+  <<__Pure>>
   public function __construct();
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function current(): Tv;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function key(): arraykey;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function valid(): bool;
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function next(): void;
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function rewind(): void;
 }
 

@@ -8,9 +8,9 @@
  *
  */
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function hash(string $algo, string $data, bool $raw_output = false);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function hash_algos();
 <<__PHPStdLib>>
 function hash_init(string $algo, int $options = 0, string $key = "");
@@ -24,7 +24,7 @@ function hash_file(string $algo, string $filename, bool $raw_output = false);
 function hash_final(resource $context, bool $raw_output = false);
 <<__PHPStdLib>>
 function hash_hmac_file($algo, $filename, $key, $raw_output = false);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function hash_hmac($algo, $data, $key, $raw_output = false);
 <<__PHPStdLib>>
 function hash_pbkdf2(string $algo, string $password, string $salt, int $iterations, int $length = 0, bool $raw_output = false);
@@ -34,9 +34,9 @@ function hash_update_file($init_context, string $filename, $stream_context = nul
 function hash_update_stream($context, $handle, int $length = -1);
 <<__PHPStdLib>>
 function hash_update(resource $context, string $data);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function furchash_hphp_ext(string $key, int $len, int $nPart);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function furchash_hphp_ext_supported();
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function hphp_murmurhash(string $key, int $len, int $seed);

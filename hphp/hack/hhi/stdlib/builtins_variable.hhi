@@ -9,35 +9,35 @@
  */
 
 namespace {
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_bool($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_int($var): bool;
-<<__Deprecated('Use is_int().'), __Rx>>
+<<__Deprecated('Use is_int().'), __Pure>>
 function is_integer($var): bool;
-<<__Deprecated('Use is_int().'), __Rx>>
+<<__Deprecated('Use is_int().'), __Pure>>
 function is_long($var): bool;
-<<__Deprecated('Use is_float().'), __Rx>>
+<<__Deprecated('Use is_float().'), __Pure>>
 function is_double($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_float($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_numeric($var): bool;
-<<__Deprecated('Use is_float().'), __Rx>>
+<<__Deprecated('Use is_float().'), __Pure>>
 function is_real($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_string($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_scalar($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_object($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function is_resource($var): bool;
-<<__Rx>>
+<<__Pure>>
 function is_null($var): bool;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function gettype($v);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function get_resource_type(resource $handle);
 <<__PHPStdLib>>
 function print_r($expression, bool $ret = false);
@@ -47,34 +47,34 @@ function var_export($expression, bool $ret = false);
 function var_dump(<<__AcceptDisposable>> mixed $expression, mixed ...$rest);
 <<__PHPStdLib>>
 function debug_zval_dump(<<__AcceptDisposable>> $variable);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function serialize($value);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function unserialize(string $str, darray $options = darray[]);
 <<__PHPStdLib>>
 function import_request_variables(string $types, string $prefix = "");
 }
 
 namespace HH\Lib\_Private\Native {
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   function first<Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     Container<Tv> $container,
   ): ?Tv;
 
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   function first_key<Tk as arraykey>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     KeyedContainer<Tk, mixed> $container,
   ): ?Tk;
 
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   function last<Tv>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     Container<Tv> $container,
   ): ?Tv;
 
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   function last_key<Tk as arraykey>(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>>
     KeyedContainer<Tk, mixed> $container,

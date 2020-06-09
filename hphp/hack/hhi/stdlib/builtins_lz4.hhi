@@ -8,9 +8,9 @@
  *
  */
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function lz4_compress(string $uncompressed, bool $high = false): mixed;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function lz4_hccompress(string $uncompressed): mixed;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function lz4_uncompress(string $compressed): mixed;

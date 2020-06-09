@@ -177,7 +177,7 @@ function inst_meth($inst, string $meth_name); // becomes:
 /**
  * See http://docs.hhvm.com/hack/reference/function/HH.invariant/
  */
-<<__Rx>>
+<<__Pure>>
 function invariant(
   $condition, // e.g. is_int($x) or ($y instanceof SomeClass)
   FormatString<\PlainSprintf> $f, ...$f_args

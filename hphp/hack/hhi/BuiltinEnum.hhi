@@ -30,7 +30,7 @@ abstract class BuiltinEnum<+T> {
    *
    * @return array ('CONST_NAME' => $value, ....)
    */
-  <<__Rx>>
+  <<__Pure>>
   final public static function getValues(): darray<string, T>;
 
   /**
@@ -39,34 +39,34 @@ abstract class BuiltinEnum<+T> {
    *
    * @return array($value => 'CONST_NAME', ....)
    */
-  <<__Rx>>
+  <<__Pure>>
   final public static function getNames(): darray<T, string> where T as arraykey;
 
   /**
    * Returns whether or not the value is defined as a constant.
    */
-  <<__Rx>>
+  <<__Pure>>
   final public static function isValid(mixed $value): bool;
 
   /**
    * Coerce to a valid value or null.
    * This is useful for typing deserialized enum values.
    */
-  <<__Rx>>
+  <<__Pure>>
   final public static function coerce(mixed $value): ?T;
 
   /**
    * Coerce to valid value or throw UnexpectedValueException
    * This is useful for typing deserialized enum values.
    */
-  <<__Rx>>
+  <<__Pure>>
   final public static function assert(mixed $value): T;
 
   /**
    * Coerce all the values in a traversable. If the value is not an
    * array of valid items, an UnexpectedValueException is thrown
    */
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   final public static function assertAll(
     <<__OnlyRxIfImpl(\HH\Rx\Traversable::class), __MaybeMutable>> Traversable<mixed> $values,
   ): Container<T>;

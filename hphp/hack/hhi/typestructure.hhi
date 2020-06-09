@@ -121,7 +121,7 @@ newtype TypeStructure<T> as shape(
 /*
  * returns the shape associated with the type constant.
  */
-<<__Rx>>
+<<__Pure>>
 function type_structure(mixed $cls_or_obj, string $cns_name);
 // becomes:
 // type_structure(C::class or new C, 'type_const_name')
@@ -130,7 +130,7 @@ function type_structure(mixed $cls_or_obj, string $cns_name);
 /*
  * Retrieves the TypeStructure for a type alias.
  */
-<<__Rx>>
+<<__Pure>>
 function type_structure_for_alias<T>(typename<T> $cls_or_obj): TypeStructure<T>;
 
 } // namespace HH

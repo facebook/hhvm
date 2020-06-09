@@ -17,52 +17,52 @@
 // isset, and unset only look like functions to static analysis, but
 // in fact act as special expression subtypes within the runtime
 namespace {
-<<__Rx>>
+<<__Pure>>
 function isset(<<__MaybeMutable>> $x): bool;
-<<__Rx>>
+<<__Pure>>
 function unset(<<__MaybeMutable>> $x): void;
 //
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_fill<T>(int $start_index, int $num, T $value): array<T>;
 // TODO make non-nullable once Thrift files are fixed
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function chr(int $ascii): string;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function count(<<__MaybeMutable>> mixed $x, int $mode = COUNT_NORMAL): int; // count takes Countable or array. We'll need to hardcode this...
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function dechex(int $number): string;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function implode(string $glue, <<__MaybeMutable>> $pieces): string; // could be Container<Stringish>
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function explode(string $delimiter, string $str, int $limit = 0x7FFFFFFF): array; // : array<string> & false for '' delimiter
-<<__Rx>>
+<<__Pure>>
 function is_array(<<__MaybeMutable>> mixed $arg): bool;
 }
 
 namespace HH {
-<<__Rx>>
+<<__Pure>>
 function is_vec(<<__MaybeMutable>> mixed $arg): bool;
-<<__Rx>>
+<<__Pure>>
 function is_dict(<<__MaybeMutable>> mixed $arg): bool;
-<<__Rx>>
+<<__Pure>>
 function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
 }
 
 namespace {
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function ord(string $string): int;
 <<__PHPStdLib>>
 function strip_tags(string $str, string $allowable_tags = ''): string;
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function intval($v, int $base = 10): int;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function doubleval($v): float;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function floatval($v): float;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function strval($v): string;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function boolval($v): bool;
 
 <<__PHPStdLib>>
@@ -133,16 +133,16 @@ namespace HH {
   function clear_lsb_memoization(string $cls, ?string $func = null) : bool;
   function clear_instance_memoization($obj) : bool;
 
-  <<__Rx>>
+  <<__Pure>>
   function is_list_like(<<__MaybeMutable>> mixed $arg): bool;
-  <<__Rx>>
+  <<__Pure>>
   function is_class_meth(<<__MaybeMutable>> mixed $arg): bool;
-  <<__Rx>>
+  <<__Pure>>
   function is_meth_caller(<<__MaybeMutable>> mixed $arg): bool;
-  <<__Rx>>
+  <<__Pure>>
   function is_fun(<<__MaybeMutable>> mixed $arg): bool;
 
-  <<__Rx>>
+  <<__Pure>>
   function set_frame_metadata(mixed $metadata): void;
 
   // Code coverage

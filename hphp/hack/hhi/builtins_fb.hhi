@@ -29,11 +29,11 @@ const SETPROFILE_FLAGS_RESUME_AWARE = 16;
  * setprofile handler. It *may break* in the future. */
 const SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK = 32;
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function fb_serialize($thing, int $options = 0);
 <<__PHPStdLib>>
 function fb_unserialize($thing, inout $success, int $options = 0);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function fb_compact_serialize($thing);
 <<__PHPStdLib>>
 function fb_compact_unserialize($thing, inout $success, inout $errcode);
@@ -45,9 +45,9 @@ function fb_intercept2(string $name, $handler);
 function fb_rename_function(string $orig_func_name, string $new_func_name);
 <<__PHPStdLib>>
 function fb_utf8ize(inout $input);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function fb_utf8_strlen(string $input);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function fb_utf8_substr(string $str, int $start, int $length = PHP_INT_MAX);
 <<__PHPStdLib>>
 function fb_get_code_coverage(bool $flush);

@@ -27,7 +27,7 @@ namespace HH {
  * provided. If the key is `null`, the default value will be returned even if
  * `null` is a valid key in the container.
  */
-<<__Rx>>
+<<__Pure>>
 function idx<Tk as arraykey, Tv>(
   ?KeyedContainer<Tk, Tv> $collection,
   ?Tk $index,

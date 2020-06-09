@@ -43,9 +43,9 @@ function preg_replace_callback($pattern, $callback, $subject, int $limit,
 <<__PHPStdLib>>
 function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      int $limit, inout ?int $count);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function preg_quote(string $str, $delimiter = null);
 <<__PHPStdLib, __NonRx('Reads from global')>>
 function preg_last_error();

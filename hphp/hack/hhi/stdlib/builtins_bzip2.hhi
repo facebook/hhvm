@@ -24,7 +24,7 @@ function bzerrstr(resource $bz);
 function bzerror(resource $bz);
 <<__PHPStdLib>>
 function bzerrno(resource $bz);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function bzdecompress(string $source, int $small = 0);

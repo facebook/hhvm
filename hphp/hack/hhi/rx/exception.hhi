@@ -18,6 +18,6 @@ namespace HH\Rx;
 
 interface Exception {
  require extends \Exception;
- <<__Rx, __MaybeMutable>>
+ <<__Pure, __MaybeMutable>>
  public function getMessage(): string;
 }

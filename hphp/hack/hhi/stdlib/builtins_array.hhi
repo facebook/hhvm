@@ -52,21 +52,21 @@ const int UCOL_NUMERIC_COLLATION = 0;
 
 const int TAG_PROVENANCE_HERE_DONT_WARN_ON_OBJECTS = 0;
 
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_change_key_case($input, int $upper = CASE_LOWER);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_chunk($input, int $size, bool $preserve_keys = false);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_combine($keys, $values);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_count_values($input);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_column(
   array<array<arraykey, mixed>> $array,
   ?arraykey $column_key,
   ?arraykey $index_key = null,
 ): array;
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_fill_keys($keys, $value);
 /*
  * Calls to array_filter are rewritten depending on the type
@@ -83,11 +83,11 @@ function array_fill_keys($keys, $value);
  */
 <<__PHPStdLib>>
 function array_filter<Tv>(Container<Tv> $input, ?(function(Tv):bool) $callback = null);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_flip($trans);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function key_exists($key, $search);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_keys<Tk as arraykey>(
   KeyedContainer<Tk, mixed> $input,
 ): varray<Tk>;
@@ -116,13 +116,13 @@ function array_keys<Tk as arraykey>(
  */
 <<__PHPStdLib>>
 function array_map($callback, $arr1, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_merge_recursive($array1, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_merge($array1, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_replace_recursive($array1, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_replace($array1, ...$args);
 <<__PHPStdLib>>
 function array_multisort1(
@@ -196,7 +196,7 @@ function array_multisort9(
   inout mixed $arg8,
   inout mixed $arg9,
 );
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_pad($input, int $pad_size, $pad_value);
 <<__PHPStdLib>>
 function array_pop(inout $array);
@@ -206,31 +206,31 @@ function array_push(inout $array, $var, ...$args);
 function array_rand($input, int $num_req = 1);
 <<__PHPStdLib>>
 function array_reduce($input, $callback, $initial = null);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_reverse($array, bool $preserve_keys = false);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_search($needle, $haystack, bool $strict = false);
 <<__PHPStdLib>>
 function array_shift(inout $array);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_slice($array, int $offset, $length = null, bool $preserve_keys = false);
-<<__PHPStdLib, __Rx, __AtMostRxAsArgs>>
+<<__PHPStdLib, __Pure, __AtMostRxAsArgs>>
 function array_splice(
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> inout mixed $input,
   int $offset,
   mixed $length = null,
   <<__OnlyRxIfImpl(\HH\Rx\Traversable::class)>> mixed $replacement = null,
 );
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_unique($array, int $sort_flags = 2);
 <<__PHPStdLib>>
 function array_unshift(inout $array, $var, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_values<Tv>(Container<Tv> $input): array<Tv>;
 <<__PHPStdLib>>
 function shuffle(inout $array);
 <<__Deprecated('Use count(), it does the same thing as sizeof() in PHP and '.
-  'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Rx>>
+  'doesn\'t suggest that it\'s counting bytes.'), __PHPStdLib, __Pure>>
 function sizeof($var);
 <<__PHPStdLib>>
 function each(inout $array);
@@ -248,15 +248,15 @@ function end(inout $array);
 function key($array);
 <<__PHPStdLib>>
 function hphp_get_iterator($iterable);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function in_array($needle, $haystack, bool $strict = false);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function range($low, $high, $step = 1);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_diff($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_udiff($array1, $array2, $data_compare_func, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_diff_assoc($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_diff_uassoc($array1, $array2, $key_compare_func, ...$args);
@@ -264,15 +264,15 @@ function array_diff_uassoc($array1, $array2, $key_compare_func, ...$args);
 function array_udiff_assoc($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib>>
 function array_udiff_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_diff_key($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_diff_ukey($array1, $array2, $key_compare_func, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_intersect($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_uintersect($array1, $array2, $data_compare_func, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_intersect_assoc($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_intersect_uassoc($array1, $array2, $key_compare_func, ...$args);
@@ -280,7 +280,7 @@ function array_intersect_uassoc($array1, $array2, $key_compare_func, ...$args);
 function array_uintersect_assoc($array1, $array2, $data_compare_func, ...$args);
 <<__PHPStdLib>>
 function array_uintersect_uassoc($array1, $array2, $data_compare_func, $key_compare_func, ...$args);
-<<__PHPStdLib, __Rx>>
+<<__PHPStdLib, __Pure>>
 function array_intersect_key($array1, $array2, ...$args);
 <<__PHPStdLib>>
 function array_intersect_ukey($array1, $array2, $key_compare_func, ...$args);

@@ -31,7 +31,7 @@ abstract final class Shapes {
  *   ...
  * )
  */
-  <<__Rx>>
+  <<__Pure>>
   public static function idx<T as ?shape(...)>(
     T $shape,
     arraykey $index,
@@ -42,7 +42,7 @@ abstract final class Shapes {
    * Check if a field in shape exists.
    * Similar to array_key_exists, but for shapes.
    */
-  <<__Rx>>
+  <<__Pure>>
   public static function keyExists<T as shape(...)>(
     T $shape,
     arraykey $index
@@ -52,18 +52,18 @@ abstract final class Shapes {
    * Removes the $index field from the $shape (passed in as an inout argument).
    * As with all inout arguments, it can only be used with local variables.
    */
-  <<__Rx>>
+  <<__Pure>>
   public static function removeKey<T as shape(...)>(
     inout T $shape,
     arraykey $index
   ): void;
 
-  <<__Rx>>
+  <<__Pure>>
   public static function toArray<T as shape(...)>(
     T $shape
   ): darray<arraykey, mixed>;
 
-  <<__Rx>>
+  <<__Pure>>
   public static function toDict<T as shape(...)>(
     T $shape
   ): dict<arraykey, mixed>;
@@ -73,7 +73,7 @@ abstract final class Shapes {
    * throws if the field is missing.
    * Use this to access optional fields on shapes.
    */
-  <<__Rx>>
+  <<__Pure>>
   public static function at<T as shape(...)>(
     T $shape,
     arraykey $index,

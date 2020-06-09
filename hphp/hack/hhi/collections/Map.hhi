@@ -64,7 +64,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @param $it - any `Traversable` object from which to create a `Map`
    *              (e.g., `array`). If `null`, then an empty `Map` is created.
    */
-  <<__Rx, __AtMostRxAsArgs>>
+  <<__Pure, __AtMostRxAsArgs>>
   public function __construct(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it);
 
   /**
@@ -73,7 +73,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - an `array` containing the key and value pairs from the current
    *           `Map`.
    */
-  <<__Rx, __MaybeMutable, __PHPStdLib>>
+  <<__Pure, __MaybeMutable, __PHPStdLib>>
   public function toArray(): array<Tk, Tv>;
 
   /**
@@ -82,7 +82,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - an integer-indexed `array` containing the values from the
    *           current `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toValuesArray(): varray<Tv>;
 
   /**
@@ -91,7 +91,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - an integer-indexed `array` containing the keys from the current
    *           `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toKeysArray(): varray<Tk>;
 
   /**
@@ -99,7 +99,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Vector` that contains the values of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toVector(): Vector<Tv>;
 
   /**
@@ -108,7 +108,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - an `ImmVector` that is an immutable copy of the current `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmVector(): ImmVector<Tv>;
 
   /**
@@ -116,7 +116,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Map` that is a deep copy of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toMap(): Map<Tk, Tv>;
 
   /**
@@ -124,7 +124,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - an `ImmMap` that is a copy of this `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmMap(): ImmMap<Tk, Tv>;
 
   /**
@@ -132,7 +132,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Set` with the current values of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function toSet(): Set<Tv> where Tv as arraykey;
 
   /**
@@ -141,7 +141,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - an `ImmSet` with the current values of the current `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function toImmSet(): ImmSet<Tv> where Tv as arraykey;
 
   /**
@@ -151,7 +151,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - an `ImmMap` that is a deep copy of this `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function immutable(): ImmMap<Tk, Tv>;
 
   /**
@@ -167,7 +167,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function lazy(): \HH\Rx\KeyedIterable<Tk, Tv>;
 
   /**
@@ -177,7 +177,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Vector` containing the values of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function values(): Vector<Tv>;
 
   /**
@@ -185,7 +185,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - a `Vector` containing the keys of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function keys(): Vector<Tk>;
 
   /**
@@ -206,7 +206,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function map<Tu>(<<__AtMostRxAsFunc>>(function(Tv): Tu) $callback): Map<Tk, Tu>;
 
   /**
@@ -226,7 +226,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - a `Map` containing the values after a user-specified operation
    *           on the current `Map`'s keys and values is applied.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function mapWithKey<Tu>(<<__AtMostRxAsFunc>>(function(Tk, Tv): Tu) $callback): Map<Tk, Tu>;
 
   /**
@@ -247,7 +247,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/collections/examples
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__AtMostRxAsFunc>>(function(Tv): bool) $callback): Map<Tk, Tv>;
 
   /**
@@ -268,7 +268,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *           is applied to the keys and values of the current `Map`.
    *
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__AtMostRxAsFunc>>(function(Tk, Tv): bool) $callback):
     Map<Tk, Tv>;
 
@@ -290,7 +290,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The `Map` that combines the values of the current `Map` with
    *           the provided `Traversable`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function zip<Tu>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Map<Tk, Pair<Tv, Tu>>;
 
   /**
@@ -304,7 +304,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - A `Map` that is a proper subset of this `Map` up to `n` elements.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function take(int $n): Map<Tk, Tv>;
 
   /**
@@ -319,7 +319,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` up until
    *           the callback returns `false`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
 
   /**
@@ -336,7 +336,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` containing
    *           values after the specified `n`-th element.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function skip(int $n): Map<Tk, Tv>;
 
   /**
@@ -352,7 +352,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` starting
    *           after the callback returns `true`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__AtMostRxAsFunc>>(function(Tv): bool) $fn): Map<Tk, Tv>;
 
   /**
@@ -372,7 +372,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` that is a proper subset of the current `Map` starting at
    *           `$start` up to but not including the element `$start + $len`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function slice(int $start, int $len): Map<Tk, Tv>;
 
   /**
@@ -389,7 +389,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function concat<Tu super Tv>(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> Traversable<Tu> $traversable): Vector<Tu>;
 
   /**
@@ -398,7 +398,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The first value in the current `Map`,  or `null` if the `Map` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function firstValue(): ?Tv;
 
   /**
@@ -407,7 +407,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The first key in the current `Map`, or `null` if the `Map` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function firstKey(): ?Tk;
 
   /**
@@ -416,7 +416,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The last value in the current `Map`, or `null` if the `Map` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function lastValue(): ?Tv;
 
   /**
@@ -425,7 +425,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The last key in the current `Map`, or `null` if the `Map` is
    *           empty.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function lastKey(): ?Tk;
 
   /**
@@ -433,7 +433,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - `true` if the current `Map` is empty; `false` otherwise.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function isEmpty(): bool;
 
   /**
@@ -441,7 +441,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - The number of elements in the current `Map`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function count(): int;
 
   /**
@@ -457,7 +457,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The value at the specified key; or an exception if the key does
    *           not exist.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function at(Tk $k): Tv;
 
   /**
@@ -471,7 +471,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - The value at the specified key; or `null` if the key does not
    *           exist.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function get(Tk $k): ?Tv;
 
   /**
@@ -493,7 +493,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function set(Tk $k, Tv $v): Map<Tk, Tv>;
 
   /**
@@ -514,7 +514,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function setAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> ?KeyedTraversable<Tk, Tv> $it): Map<Tk, Tv>;
 
   /**
@@ -525,7 +525,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function clear(): Map<Tk, Tv>;
 
   /**
@@ -540,7 +540,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function contains(mixed $k): bool;
 
   /**
@@ -555,7 +555,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @guide /hack/generics/constraints
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function containsKey(mixed $k): bool;
 
   /**
@@ -574,7 +574,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function add(Pair<Tk, Tv> $p): Map<Tk, Tv>;
 
   /**
@@ -593,7 +593,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __AtMostRxAsArgs, __ReturnsVoidToRx>>
   public function addAll(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $it): Map<Tk, Tv>;
 
   /**
@@ -604,7 +604,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @param $sz - The pre-determined size you want for the current `Map`.
    */
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function reserve(int $sz): void;
 
   /**
@@ -619,7 +619,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function remove(Tk $k): Map<Tk, Tv>;
 
   /**
@@ -634,7 +634,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - Returns itself.
    */
-  <<__Rx, __Mutable, __ReturnsVoidToRx>>
+  <<__Pure, __Mutable, __ReturnsVoidToRx>>
   public function removeKey(Tk $k): Map<Tk, Tv>;
 
   /**
@@ -646,7 +646,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` containing the keys (and associated values) of the
    *           current `Map` that are not in the `KeyedTraversable`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function differenceByKey(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\KeyedTraversable::class)>> KeyedTraversable<Tk, Tv> $traversable):
     Map<Tk, Tv>;
 
@@ -655,7 +655,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - A `KeyedIterator` that allows you to traverse the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function getIterator(): \HH\Rx\KeyedIterator<Tk, Tv>;
 
   /**
@@ -682,7 +682,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    * @return - A `Map` with the key/value pairs from the `Traversable`; or an
    *           empty `Map` if the `Traversable` is `null`.
    */
-  <<__Rx, __AtMostRxAsArgs, __MutableReturn>>
+  <<__Pure, __AtMostRxAsArgs, __MutableReturn>>
   public static function fromItems(<<__MaybeMutable, __OnlyRxIfImpl(\HH\Rx\Traversable::class)>> ?Traversable<Pair<Tk, Tv>> $items)
     : Map<Tk, Tv>;
 
@@ -691,7 +691,7 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - The `string` `"Map"`.
    */
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function __toString(): string;
 
   /**
@@ -702,11 +702,11 @@ final class Map<Tk as arraykey, Tv> implements \MutableMap<Tk, Tv> {
    *
    * @return - The `Iterable` view of the current `Map`.
    */
-  <<__Rx, __MutableReturn, __MaybeMutable>>
+  <<__Pure, __MutableReturn, __MaybeMutable>>
   public function items(): \HH\Rx\Iterable<Pair<Tk, Tv>>;
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[0002] */
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0002] */
   public function toVArray(): varray<Tv>;
-  <<__Rx, __MaybeMutable>> /* HH_FIXME[0001] */
+  <<__Pure, __MaybeMutable>> /* HH_FIXME[0001] */
   public function toDArray(): darray<Tk, Tv>;
 }
 
@@ -720,17 +720,17 @@ namespace {
  * Methods and functions should take and return the KeyedIterator interface.
  */
 class MapIterator<Tk, +Tv> implements HH\Rx\KeyedIterator<Tk, Tv> {
-  <<__Rx>>
+  <<__Pure>>
   public function __construct();
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function current(): Tv;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function key(): Tk;
-  <<__Rx, __MaybeMutable>>
+  <<__Pure, __MaybeMutable>>
   public function valid(): bool;
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function next(): void;
-  <<__Rx, __Mutable>>
+  <<__Pure, __Mutable>>
   public function rewind(): void;
 }
 

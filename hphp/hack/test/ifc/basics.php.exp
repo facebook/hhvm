@@ -34,8 +34,8 @@ Analyzing \condition:
 * Return: <ret>
 * Params: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
 * Final environment:
-  Locals: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <join> }
+  Locals: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
   Constraints:
-    [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < join, $x'1 < join,
-     join < ret]
+    [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
+     $x'2 < ret]
 

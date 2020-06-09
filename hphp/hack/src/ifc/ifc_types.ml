@@ -56,7 +56,9 @@ type prop =
 type policy_sig = { psig_policied_properties: (string * Type.locl_ty) list }
 
 (* Types with policies *)
-and ptype =
+(* Warning: do not use [@@deriving]; the thunks will lead
+   to diverging functions *)
+type ptype =
   | Tprim of policy
   | Ttuple of ptype list
   | Tunion of ptype list

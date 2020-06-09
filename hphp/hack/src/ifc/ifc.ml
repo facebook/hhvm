@@ -14,7 +14,7 @@ module Reason = Typing_reason
 
 exception FlowInference of string
 
-let fail s = raise (FlowInference s)
+let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
 
 (* A constraint accumulator that registers a subtyping
    requirement t1 <: t2 *)
@@ -34,7 +34,7 @@ let rec subtype t1 t2 acc =
           (SMap.values cl2.c_property_map)
       with
       | Some zip -> zip
-      | None -> fail "Same class with differing policied properties"
+      | None -> fail "same class with differing policied properties"
     in
     (* Invariant in property policies *)
     (* When forcing an unevaluated ptype thunk, only policied properties
@@ -48,14 +48,10 @@ let rec subtype t1 t2 acc =
     |> L.(cl1.c_lump = cl2.c_lump)
     (* Covariant in class policy *)
     |> L.(cl1.c_self < cl2.c_self)
+  | (Tunion tl, _) ->
+    List.fold tl ~init:acc ~f:(fun acc t1 -> subtype t1 t2 acc)
   | (pty1, pty2) ->
-    fail
-      (Format.asprintf
-         "unhandled subtyping query for %a <: %a"
-         Pp.ptype
-         pty1
-         Pp.ptype
-         pty2)
+    fail "unhandled subtyping query for %a <: %a" Pp.ptype pty1 Pp.ptype pty2
 
 (* A constraint accumulator that registers that t1 = t2 *)
 and equivalent t1 t2 acc = subtype t1 t2 (subtype t2 t1 acc)
@@ -121,83 +117,21 @@ let policy_join renv env p1 p2 =
       let env = Env.acc env L.(p1 < pv && p2 < pv) in
       (env, pv))
 
-exception NoUnion
-
-let rec union_types_exn renv env t1 t2 =
-  let union_types_exn = union_types_exn renv in
-  match (t1, t2) with
-  | (Tprim p1, Tprim p2) ->
-    let (env, p) = policy_join renv env p1 p2 in
-    (env, Tprim p)
-  | (Ttuple tl1, Ttuple tl2) ->
-    let tpairs =
-      match List.zip tl1 tl2 with
-      | Some l -> l
-      | None -> raise NoUnion
-    in
-    let (env, tl) =
-      let f env (t1, t2) = union_types_exn env t1 t2 in
-      List.map_env env tpairs ~f
-    in
-    (env, Ttuple tl)
-  | (Tunion u, t)
-  | (t, Tunion u) ->
-    let rec try_union env t = function
-      | tu :: u ->
-        (try
-           let (env, t') = union_types_exn env tu t in
-           (env, t' :: u)
-         with NoUnion ->
-           let (env, u') = try_union env t u in
-           (env, tu :: u'))
-      | [] -> (env, [t])
-    in
-    let (env, u) = try_union env t u in
-    (env, Tunion u)
-  | (Tinter i, t)
-  | (t, Tinter i) ->
-    let (env, i') =
-      let f env = union_types_exn env t in
-      List.map_env env i ~f
-    in
-    (env, Tinter i')
-  | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
-    let (env, c_self) = policy_join renv env cl1.c_self cl2.c_self in
-    (* Equivalent lump policies due to invariance *)
-    let env = Env.acc env L.(cl1.c_lump = cl2.c_lump) in
-    let (env, c_property_map) =
-      let combine env prop_name ptype1_opt ptype2_opt =
-        match (ptype1_opt, ptype2_opt) with
-        | (Some ptype1, Some ptype2) ->
-          (* Equivalent policy types due to invariance *)
-          let e_acc =
-            equivalent (Lazy.force ptype1) (Lazy.force ptype2) env.e_acc
-          in
-          ({ env with e_acc }, Some ptype1)
-        | (_, _) ->
-          fail
-            ( "Impossible happened."
-            ^ " One of the two property types of the same class do not have the property '"
-            ^ prop_name
-            ^ "'." )
-      in
-      SMap.merge_env env cl1.c_property_map cl2.c_property_map ~combine
-    in
-    ( env,
-      Tclass
-        { c_name = cl1.c_name; c_lump = cl1.c_lump; c_self; c_property_map } )
-  | _ -> raise NoUnion
-
 let mk_union t1 t2 =
-  match (t1, t2) with
-  | (Tunion u1, Tunion u2) -> Tunion (u1 @ u2)
-  | (Tunion u, t)
-  | (t, Tunion u) ->
-    Tunion (t :: u)
-  | _ -> Tunion [t1; t2]
-
-let union_types renv env t1 t2 =
-  (try union_types_exn renv env t1 t2 with NoUnion -> (env, mk_union t1 t2))
+  let (l1, l2) =
+    match (t1, t2) with
+    | (Tunion u1, Tunion u2) -> (u1, u2)
+    | (Tunion u, t) -> ([t], u)
+    | (t, Tunion u) -> ([t], u)
+    | _ -> ([t1], [t2])
+  in
+  let merge_type_lists l1 l2 =
+    let f t = not (List.exists l2 ~f:(phys_equal t)) in
+    List.filter ~f l1 @ l2
+  in
+  match merge_type_lists l1 l2 with
+  | [t] -> t
+  | u -> Tunion u
 
 (* If there is a lump policy variable in effect, return that otherwise
    generate a new policy variable. *)
@@ -212,7 +146,7 @@ let rec class_ptype lump_pol_opt proto_renv name =
   let { psig_policied_properties } =
     match SMap.find_opt name proto_renv.pre_psig_env with
     | Some class_policy_sig -> class_policy_sig
-    | None -> fail ("Could not found a class policy signature for " ^ name)
+    | None -> fail "could not found a class policy signature for %s" name
   in
   let policied_props =
     List.map psig_policied_properties (fun (prop, ty) ->
@@ -267,6 +201,28 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Tpu (_locl_ty, _sid) -> fail "Tpu"
   | T.Tpu_type_access (_sid1, _sid2) -> fail "Tpu_type_access"
 
+(* Uses a Hack-inferred type to update the flow type of a local
+   variable *)
+let refresh_lvar_type renv env lid (ety : T.locl_ty) =
+  (* TODO(T68306543): make this faster when ety is the skeleton
+     of the type we already have for lid *)
+  let is_simple pty =
+    match pty with
+    | Tunion _ -> false
+    | _ -> true
+  in
+  let pty = Env.get_local_type env lid in
+  if is_simple pty then
+    (* if the type is already simple, do not refresh it with
+       what Hack found *)
+    (env, pty)
+  else
+    let prefix = Local_id.to_string lid in
+    let new_pty = ptype None renv.re_proto ety ~prefix in
+    let env = Env.acc env (subtype pty new_pty) in
+    let env = Env.set_local_type env lid new_pty in
+    (env, new_pty)
+
 let add_params renv env params =
   let add_param env p =
     let prefix = p.A.param_name in
@@ -290,7 +246,7 @@ let binop renv env ty1 ty2 =
 let receiver_of_obj_get obj_ptype property =
   match obj_ptype with
   | Tclass class_ -> class_
-  | _ -> fail ("Couldn't find a class for the property '" ^ property ^ "'.")
+  | _ -> fail "couldn't find a class for the property '%s'" property
 
 let property_ptype proto_renv obj_ptype property property_ty =
   let class_ = receiver_of_obj_get obj_ptype property in
@@ -353,7 +309,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
     binop renv env ty1 ty2
-  | A.Lvar (_pos, lid) -> (env, Env.get_local_type env lid)
+  | A.Lvar (_pos, lid) -> refresh_lvar_type renv env lid ety
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_ptype) = expr env obj in
     let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
@@ -366,7 +322,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.This ->
     (match renv.re_this with
     | Some ptype -> (env, ptype)
-    | None -> fail "Encountered $this outside of a class context")
+    | None -> fail "encountered $this outside of a class context")
   | A.BracedExpr e -> expr env e
   (* --- expressions below are not yet supported *)
   | A.Array _
@@ -442,7 +398,8 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     let cenv1 = Env.get_cenv env in
     let env = block renv' (Env.set_cenv env cenv) b2 in
     let cenv2 = Env.get_cenv env in
-    Env.merge_and_set_cenv ~union:(union_types renv) env cenv1 cenv2
+    let union _env t1 t2 = (env, mk_union t1 t2) in
+    Env.merge_and_set_cenv ~union env cenv1 cenv2
   | A.Return (Some e) ->
     let (env, te) = expr renv env e in
     Env.acc env (subtype te renv.re_ret)

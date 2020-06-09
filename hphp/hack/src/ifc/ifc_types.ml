@@ -56,7 +56,7 @@ type prop =
 type policy_sig = { psig_policied_properties: (string * Type.locl_ty) list }
 
 (* Types with policies *)
-type ptype =
+and ptype =
   | Tprim of policy
   | Ttuple of ptype list
   | Tunion of ptype list
@@ -67,7 +67,7 @@ and class_ = {
   c_name: string;
   c_self: policy;
   c_lump: policy;
-  c_property_map: ptype SMap.t;
+  c_property_map: ptype Lazy.t SMap.t;
 }
 
 type local_env = { le_vars: ptype LMap.t }

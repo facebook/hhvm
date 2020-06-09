@@ -27,7 +27,7 @@ let rec subtype t1 t2 acc =
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> fail "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
-    let pol_zip =
+    let policied_prop_pol_zip =
       match
         List.zip
           (SMap.values cl1.c_property_map)
@@ -37,7 +37,13 @@ let rec subtype t1 t2 acc =
       | None -> fail "Same class with differing policied properties"
     in
     (* Invariant in property policies *)
-    List.fold pol_zip ~init:acc ~f:(fun acc (t1, t2) -> equivalent t1 t2 acc)
+    (* When forcing an unevaluated ptype thunk, only policied properties
+     * will be populated. This invariant, and the ban on recursive class cycles
+     * through policied properties (enforcement still to be done, see T68078692)
+     * ensures termination here.
+     *)
+    List.fold policied_prop_pol_zip ~init:acc ~f:(fun acc (t1, t2) ->
+        equivalent (Lazy.force t1) (Lazy.force t2) acc)
     (* Invariant in lump policy *)
     |> L.(cl1.c_lump = cl2.c_lump)
     (* Covariant in class policy *)
@@ -164,7 +170,9 @@ let rec union_types_exn renv env t1 t2 =
         match (ptype1_opt, ptype2_opt) with
         | (Some ptype1, Some ptype2) ->
           (* Equivalent policy types due to invariance *)
-          let e_acc = equivalent ptype1 ptype2 env.e_acc in
+          let e_acc =
+            equivalent (Lazy.force ptype1) (Lazy.force ptype2) env.e_acc
+          in
           ({ env with e_acc }, Some ptype1)
         | (_, _) ->
           fail
@@ -208,7 +216,7 @@ let rec class_ptype lump_pol_opt proto_renv name =
   in
   let policied_props =
     List.map psig_policied_properties (fun (prop, ty) ->
-        (prop, ptype ~prefix:("." ^ prop) lump_pol_opt proto_renv ty))
+        (prop, lazy (ptype ~prefix:("." ^ prop) lump_pol_opt proto_renv ty)))
   in
   let lump_pol = get_policy_var lump_pol_opt proto_renv ~prefix:"lump" in
   Tclass
@@ -287,7 +295,7 @@ let receiver_of_obj_get obj_ptype property =
 let property_ptype proto_renv obj_ptype property property_ty =
   let class_ = receiver_of_obj_get obj_ptype property in
   match SMap.find_opt property class_.c_property_map with
-  | Some ptype -> ptype
+  | Some ptype -> Lazy.force ptype
   | None ->
     ptype ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
 

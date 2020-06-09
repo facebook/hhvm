@@ -116,8 +116,14 @@ let rec ptype fmt ty =
       c_self
       policy
       c_lump
-      (smap comma_sep ptype)
+      (smap comma_sep lazy_ptype)
       c_property_map
+
+and lazy_ptype fmt ty =
+  if Lazy.is_val ty then
+    ptype fmt (Lazy.force ty)
+  else
+    fprintf fmt "<thunk>"
 
 let locals fmt env =
   let pp_lenv fmt { le_vars } = LMap.make_pp Local_id.pp ptype fmt le_vars in

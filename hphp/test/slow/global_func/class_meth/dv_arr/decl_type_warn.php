@@ -18,9 +18,9 @@ function test_varray_as_param(varray $x) { var_dump($x); }
 function test_vdarray_as_param(varray_or_darray $x) { var_dump($x); }
 function test_container_as_param(HH\Container $x) { var_dump($x); }
 
-function test_soft_type_array_as_param(@array $x) { var_dump($x); }
-function test_soft_type_vec_as_param(@vec $x) { var_dump($x); }
-function test_soft_type_vec_dict_as_param(@vec_or_dict $x) { var_dump($x); }
+function test_soft_type_array_as_param(<<__Soft>> array $x) { var_dump($x); }
+function test_soft_type_vec_as_param(<<__Soft>> vec $x) { var_dump($x); }
+function test_soft_type_vec_dict_as_param(<<__Soft>> vec_or_dict $x) { var_dump($x); }
 
 function test_param_type_cast($c, $f) {
   test_clsmeth_as_param(CM($c, $f));
@@ -39,9 +39,9 @@ function test_varry_as_io_param(inout varray $x) { var_dump($x); }
 function test_vdarray_as_io_param(inout varray_or_darray $x) { var_dump($x); }
 function test_container_as_io_param(inout HH\Container $x) { var_dump($x); }
 
-function test_soft_type_array_as_io_param(inout @array $x) { var_dump($x); }
-function test_soft_type_vec_as_io_param(inout @vec $x) { var_dump($x); }
-function test_soft_type_vec_dict_as_io_param(inout @vec_or_dict $x) { var_dump($x); }
+function test_soft_type_array_as_io_param(<<__Soft>> inout array $x) { var_dump($x); }
+function test_soft_type_vec_as_io_param(<<__Soft>> inout vec $x) { var_dump($x); }
+function test_soft_type_vec_dict_as_io_param(<<__Soft>> inout vec_or_dict $x) { var_dump($x); }
 
 function test_inout_param_type_cast($c, $f) {
   $x = CM($c, $f); test_clsmeth_as_io_param(inout $x);

@@ -3,7 +3,7 @@
 class C<reify T> {}
 class D {}
 
-async function f(mixed $x): Awaitable<C<@int>> {
+async function f(mixed $x): Awaitable<C<<<__Soft>> int>> {
   return $x;
 }
 <<__EntryPoint>> function main(): void {

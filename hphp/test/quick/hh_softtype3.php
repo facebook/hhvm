@@ -3,7 +3,7 @@
 class :url {
 }
 
-function foo(@?:url $xhp_object): void {
+function foo(<<__Soft>> ?:url $xhp_object): void {
 }
 <<__EntryPoint>> function main(): void {
 foo(<url />);

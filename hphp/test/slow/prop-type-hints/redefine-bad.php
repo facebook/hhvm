@@ -121,8 +121,8 @@ class A {
   public ?Alias14 $p75;
   public ?Alias4 $p76;
   public ?Alias4 $p77;
-  public @int $p78;
-  public @?int $p79;
+  <<__Soft>> public int $p78;
+  <<__Soft>> public ?int $p79;
   public int $p80;
   public CondEnum1 $p81;
   public CondAlias $p82;
@@ -207,8 +207,8 @@ class A {
   private ?Alias14 $pp75;
   private ?Alias4 $pp76;
   private ?Alias4 $pp77;
-  private @int $pp78;
-  private @?int $pp79;
+  <<__Soft>> private int $pp78;
+  <<__Soft>> private ?int $pp79;
   private int $pp80;
   private CondEnum1 $pp81;
   private CondAlias $pp82;
@@ -293,8 +293,8 @@ class A {
   public static ?Alias14 $s75;
   public static ?Alias4 $s76;
   public static ?Alias4 $s77;
-  public static @int $s78;
-  public static @?int $s79;
+  <<__Soft>> public static int $s78;
+  <<__Soft>> public static ?int $s79;
   public static int $s80;
   public static CondEnum1 $s81;
   public static CondAlias $s82;
@@ -383,9 +383,9 @@ class C extends B {
   public ?int $p80;
   public ?CondEnum1 $p81;
   public ?CondAlias $p82;
-  public @int $p83;
-  public ?@CondEnum1 $p84;
-  public ?@CondAlias $p85;
+  <<__Soft>> public int $p83;
+  <<__Soft>> public ?CondEnum1 $p84;
+  <<__Soft>> public ?CondAlias $p85;
 
   private string $pp1;
   private int $pp2;
@@ -463,9 +463,9 @@ class C extends B {
   private ?int $pp80;
   private ?CondEnum1 $pp81;
   private ?CondAlias $pp82;
-  private @int $pp83;
-  private ?@CondEnum1 $pp84;
-  private ?@CondAlias $pp85;
+  <<__Soft>> private int $pp83;
+  <<__Soft>> private ?CondEnum1 $pp84;
+  <<__Soft>> private ?CondAlias $pp85;
 
   public static string $s1;
   public static int $s2;
@@ -543,9 +543,9 @@ class C extends B {
   public static ?int $s80;
   public static ?CondEnum1 $s81;
   public static ?CondAlias $s82;
-  public static @int $s83;
-  public static ?@CondEnum1 $s84;
-  public static ?@CondAlias $s85;
+  <<__Soft>> public static int $s83;
+  <<__Soft>> public static ?CondEnum1 $s84;
+  <<__Soft>> public static ?CondAlias $s85;
 
   public static function test() {
     new A();

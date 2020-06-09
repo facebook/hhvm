@@ -8,7 +8,7 @@ type T4 = darray;
 type T5 = varray_or_darray;
 
 class C {
-  const type T = ?array<int, @bool>;
+  const type T = ?array<int, <<__Soft>> bool>;
   const type U = Map<arraykey, Vector<array<int>>>;
   const type V = (int, ?float, bool);
   const type W = (function (): void);

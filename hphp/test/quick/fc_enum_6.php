@@ -6,7 +6,7 @@ enum Bar : int as int {
 }
 type Foo = Bar;
 
-function test(@Foo $x): void {
+function test(<<__Soft>> Foo $x): void {
   var_dump($x);
 }
 <<__EntryPoint>> function main(): void {

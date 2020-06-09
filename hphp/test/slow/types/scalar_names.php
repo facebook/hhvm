@@ -21,21 +21,21 @@ class myarraykey {
 class mynum {
 }
 
-function test_hh_string(@HH\string $foo) { var_dump($foo); }
-function test_hh_int(@HH\int $foo) { var_dump($foo); }
-function test_hh_float(@HH\float $foo) { var_dump($foo); }
-function test_hh_bool(@HH\bool $foo) { var_dump($foo); }
-function test_hh_resource(@HH\resource $foo) { var_dump($foo); }
-function test_hh_arraykey(@HH\arraykey $foo) { var_dump($foo); }
-function test_hh_num(@HH\num $foo) { var_dump($foo); }
+function test_hh_string(<<__Soft>> HH\string $foo) { var_dump($foo); }
+function test_hh_int(<<__Soft>> HH\int $foo) { var_dump($foo); }
+function test_hh_float(<<__Soft>> HH\float $foo) { var_dump($foo); }
+function test_hh_bool(<<__Soft>> HH\bool $foo) { var_dump($foo); }
+function test_hh_resource(<<__Soft>> HH\resource $foo) { var_dump($foo); }
+function test_hh_arraykey(<<__Soft>> HH\arraykey $foo) { var_dump($foo); }
+function test_hh_num(<<__Soft>> HH\num $foo) { var_dump($foo); }
 
-function test_string(@string $foo) { var_dump($foo); }
-function test_int(@int $foo) { var_dump($foo); }
-function test_float(@float $foo) { var_dump($foo); }
-function test_bool(@bool $foo) { var_dump($foo); }
-function test_resource(@resource $foo) { var_dump($foo); }
-function test_arraykey(@arraykey $foo) { var_dump($foo); }
-function test_num(@num $foo) { var_dump($foo); }
+function test_string(<<__Soft>> string $foo) { var_dump($foo); }
+function test_int(<<__Soft>> int $foo) { var_dump($foo); }
+function test_float(<<__Soft>> float $foo) { var_dump($foo); }
+function test_bool(<<__Soft>> bool $foo) { var_dump($foo); }
+function test_resource(<<__Soft>> resource $foo) { var_dump($foo); }
+function test_arraykey(<<__Soft>> arraykey $foo) { var_dump($foo); }
+function test_num(<<__Soft>> num $foo) { var_dump($foo); }
 
 
 // It's important that we're in a "<?hh" file and that HH syntax

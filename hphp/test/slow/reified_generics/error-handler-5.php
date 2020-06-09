@@ -2,7 +2,7 @@
 
 class C<reify T> {}
 
-function f(mixed $x): @C<int> {
+function f(mixed $x): <<__Soft>> C<int> {
   return $x;
 }
 <<__EntryPoint>> function main(): void {

@@ -3,7 +3,7 @@
 class C {}
 class D {}
 
-function f<reify T>(@T $x): @T { return $x; }
+function f<reify T>(<<__Soft>> T $x): <<__Soft>> T { return $x; }
 <<__EntryPoint>>
 function main_entry(): void {
 

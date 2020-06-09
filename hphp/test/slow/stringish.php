@@ -32,7 +32,7 @@ class CThruTrait {
   use TStringish;
 }
 
-function f1(@?Stringish $x): void {
+function f1(<<__Soft>> ?Stringish $x): void {
   $s = Stringish::class;
   echo ($x is Stringish) ? "true" : "false", ", ";
   echo (is_a($x, $s)) ? "true" : "false", ", ";
@@ -40,7 +40,7 @@ function f1(@?Stringish $x): void {
   echo "\n";
 }
 
-function f2(@Stringish $x): void {
+function f2(<<__Soft>> Stringish $x): void {
   $s = Stringish::class;
   echo ($x is Stringish) ? "true" : "false", ", ";
   echo (is_a($x, $s)) ? "true" : "false", ", ";

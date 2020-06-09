@@ -2,7 +2,7 @@
 
 class Foo {}
 
-function f(@Foo $a) {
+function f(<<__Soft>> Foo $a) {
   return $a;
 }
 <<__EntryPoint>> function main(): void {

@@ -1,12 +1,13 @@
 <?hh
 
-function foo<T as int>(@T $x) : @T {
+function foo<T as int>(<<__Soft>> T $x) : <<__Soft>> T {
   return $x;
 }
 
 class Bar<T as int> {
-  public @T $x = 'a';
-  static public function baz(@?T $x) : @?T {
+  <<__Soft>>
+  public T $x = 'a';
+  static public function baz(<<__Soft>> ?T $x) : <<__Soft>> ?T {
     return $x;
   }
 }

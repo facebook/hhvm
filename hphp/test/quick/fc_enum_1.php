@@ -19,11 +19,11 @@ enum Baz : mixed {
 }
 
 
-function test(): @Foo {
+function test(): <<__Soft>> Foo {
   return Foo::FOO;
 }
 
-function test2(@int $x): void {
+function test2(<<__Soft>> int $x): void {
   var_dump($x);
 }
 
@@ -31,7 +31,7 @@ function lurr(): void {
   test2(Foo::BAR);
 }
 
-function do_case(@Bar $x): int {
+function do_case(<<__Soft>> Bar $x): int {
   switch ($x) {
     case Bar::FOO:
       return 0;
@@ -43,7 +43,7 @@ function do_case(@Bar $x): int {
   return -1;
 }
 
-function welp(@Baz $x): void {
+function welp(<<__Soft>> Baz $x): void {
   var_dump($x);
 }
 <<__EntryPoint>> function main(): void {

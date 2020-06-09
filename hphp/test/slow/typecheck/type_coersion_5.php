@@ -24,16 +24,16 @@ require_once('fix_exceptions.inc');
 set_error_handler(fun('errHandler'), E_ALL);
 
 check("Boolean", function ($v) { return sha1("abc", $v); },
-      function (@bool $v) { });
+      function (<<__Soft>> bool $v) { });
 check("Int64", function ($v) { return str_pad("abc", $v); },
-      function (@int $v) { });
+      function (<<__Soft>> int $v) { });
 check("Double", function ($v) { return number_format($v); },
-      function (@float $v) { });
+      function (<<__Soft>> float $v) { });
 check("String", function ($v) { return rtrim($v); },
-      function (@string $v) { });
+      function (<<__Soft>> string $v) { });
 check("varray",
       function ($v) { return __hhvm_intrinsics\dummy_varray_builtin($v); },
-      function (@varray $v) { });
+      function (<<__Soft>> varray $v) { });
 check("Object", function ($v) { return get_object_vars($v); },
-      function (@object $v) { });
+      function (<<__Soft>> object $v) { });
 }

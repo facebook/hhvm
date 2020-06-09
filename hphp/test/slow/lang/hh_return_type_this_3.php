@@ -19,45 +19,45 @@ type my_t = int;
 
 function f1($p) { return $p; }
 function f2($p): int { return $p; }
-function f2_soft($p): @int { return $p; }
+function f2_soft($p): <<__Soft>> int { return $p; }
 function f3($p): string { return $p; }
-function f3_soft($p): @string { return $p; }
+function f3_soft($p): <<__Soft>> string { return $p; }
 function f4($p): bool { return $p; }
-function f4_soft($p): @bool { return $p; }
+function f4_soft($p): <<__Soft>> bool { return $p; }
 function f5($p): float { return $p; }
-function f5_soft($p): @float { return $p; }
+function f5_soft($p): <<__Soft>> float { return $p; }
 function f6($p): resource { return $p; }
-function f6_soft($p): @resource { return $p; }
+function f6_soft($p): <<__Soft>> resource { return $p; }
 function f7($p): varray { return $p; }
-function f7_soft($p): @varray { return $p; }
+function f7_soft($p): <<__Soft>> varray { return $p; }
 function f8($p): callable { return $p; }
-function f8_soft($p): @callable { return $p; }
+function f8_soft($p): <<__Soft>> callable { return $p; }
 function f9($p): Figure { return $p; }
-function f9_soft($p): @Figure { return $p; }
+function f9_soft($p): <<__Soft>> Figure { return $p; }
 function f10($p): Square { return $p; }
-function f10_soft($p): @Square { return $p; }
+function f10_soft($p): <<__Soft>> Square { return $p; }
 function f11($p): :div { return $p; }
-function f11_soft($p): @:div { return $p; }
+function f11_soft($p): <<__Soft>> :div { return $p; }
 function f12($p): Fractal<Square> { return $p; }
-function f12_soft($p): @Fractal<Square> { return $p; }
+function f12_soft($p): <<__Soft>> Fractal<Square> { return $p; }
 function f13<T>($p): Fractal<T> { return $p; }
-function f13_soft<T>($p): @Fractal<T> { return $p; }
+function f13_soft<T>($p): <<__Soft>> Fractal<T> { return $p; }
 function f14($p): my_t { return $p; }
-function f14_soft($p): @my_t { return $p; }
+function f14_soft($p): <<__Soft>> my_t { return $p; }
 function f15($p): void { return $p; }
-function f15_soft($p): @void { return $p; }
+function f15_soft($p): <<__Soft>> void { return $p; }
 function f16($p): mixed { return $p; }
-function f16_soft($p): @mixed { return $p; }
+function f16_soft($p): <<__Soft>> mixed { return $p; }
 function f17($p): ?int { return $p; }
-function f17_soft($p): @?int { return $p; }
+function f17_soft($p): <<__Soft>> ?int { return $p; }
 function f18($p): (string, int) { return $p; }
-function f18_soft($p): @(string, int) { return $p; }
+function f18_soft($p): <<__Soft>> (string, int) { return $p; }
 function f19($p): (function(int): int) { return $p; }
-function f19_soft($p): @(function(int): int) { return $p; }
+function f19_soft($p): <<__Soft>> (function(int): int) { return $p; }
 function f20($p): callable { return $p; }
-function f20_soft($p): @callable { return $p; }
+function f20_soft($p): <<__Soft>> callable { return $p; }
 function f21($p): noreturn { return $p; }
-function f21_soft($p): @noreturn { return $p; }
+function f21_soft($p): <<__Soft>> noreturn { return $p; }
 
 class Figure {}
 class Square extends Figure {}
@@ -67,13 +67,13 @@ class :div {}
 class A {}
 class B extends A {
   public function f21(): this { return $this; }
-  public function f21_soft(): @this { return $this; }
+  public function f21_soft(): <<__Soft>> this { return $this; }
   public function f22($p): this { return $p; }
-  public function f22_soft($p): @this { return $p; }
+  public function f22_soft($p): <<__Soft>> this { return $p; }
   public static function f23($p): self { return $p; }
-  public static function f23_soft($p): @self { return $p; }
+  public static function f23_soft($p): <<__Soft>> self { return $p; }
   public static function f24($p): parent { return $p; }
-  public static function f24_soft($p): @parent { return $p; }
+  public static function f24_soft($p): <<__Soft>> parent { return $p; }
   public static function testfunc() {}
 }
 class C extends B {}

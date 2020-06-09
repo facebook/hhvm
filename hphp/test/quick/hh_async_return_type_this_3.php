@@ -19,43 +19,43 @@ type my_t = int;
 
 async function f1($p) { return $p; }
 async function f2($p): Awaitable<int> { return $p; }
-async function f2_soft($p): @Awaitable<int> { return $p; }
+async function f2_soft($p): <<__Soft>> Awaitable<int> { return $p; }
 async function f3($p): Awaitable<string> { return $p; }
-async function f3_soft($p): @Awaitable<string> { return $p; }
+async function f3_soft($p): <<__Soft>> Awaitable<string> { return $p; }
 async function f4($p): Awaitable<bool> { return $p; }
-async function f4_soft($p): @Awaitable<bool> { return $p; }
+async function f4_soft($p): <<__Soft>> Awaitable<bool> { return $p; }
 async function f5($p): Awaitable<float> { return $p; }
-async function f5_soft($p): @Awaitable<float> { return $p; }
+async function f5_soft($p): <<__Soft>> Awaitable<float> { return $p; }
 async function f6($p): Awaitable<resource> { return $p; }
-async function f6_soft($p): @Awaitable<resource> { return $p; }
+async function f6_soft($p): <<__Soft>> Awaitable<resource> { return $p; }
 async function f7($p): Awaitable<varray> { return $p; }
-async function f7_soft($p): @Awaitable<varray> { return $p; }
+async function f7_soft($p): <<__Soft>> Awaitable<varray> { return $p; }
 async function f8($p): Awaitable<callable> { return $p; }
-async function f8_soft($p): @Awaitable<callable> { return $p; }
+async function f8_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
 async function f9($p): Awaitable<Figure> { return $p; }
-async function f9_soft($p): @Awaitable<Figure> { return $p; }
+async function f9_soft($p): <<__Soft>> Awaitable<Figure> { return $p; }
 async function f10($p): Awaitable<Square> { return $p; }
-async function f10_soft($p): @Awaitable<Square> { return $p; }
+async function f10_soft($p): <<__Soft>> Awaitable<Square> { return $p; }
 async function f11($p): Awaitable<:div> { return $p; }
-async function f11_soft($p): @Awaitable<:div> { return $p; }
+async function f11_soft($p): <<__Soft>> Awaitable<:div> { return $p; }
 async function f12($p): Awaitable<Fractal<Square>> { return $p; }
-async function f12_soft($p): @Awaitable<Fractal<Square>> { return $p; }
+async function f12_soft($p): <<__Soft>> Awaitable<Fractal<Square>> { return $p; }
 async function f13<T>($p): Awaitable<Fractal<T>> { return $p; }
-async function f13_soft<T>($p): @Awaitable<Fractal<T>> { return $p; }
+async function f13_soft<T>($p): <<__Soft>> Awaitable<Fractal<T>> { return $p; }
 async function f14($p): Awaitable<my_t> { return $p; }
-async function f14_soft($p): @Awaitable<my_t> { return $p; }
+async function f14_soft($p): <<__Soft>> Awaitable<my_t> { return $p; }
 async function f15($p): Awaitable<void> { return $p; }
-async function f15_soft($p): @Awaitable<void> { return $p; }
+async function f15_soft($p): <<__Soft>> Awaitable<void> { return $p; }
 async function f16($p): Awaitable<mixed> { return $p; }
-async function f16_soft($p): @Awaitable<mixed> { return $p; }
+async function f16_soft($p): <<__Soft>> Awaitable<mixed> { return $p; }
 async function f17($p): Awaitable<?int> { return $p; }
-async function f17_soft($p): @Awaitable<?int> { return $p; }
+async function f17_soft($p): <<__Soft>> Awaitable<?int> { return $p; }
 async function f18($p): Awaitable<(string, int)> { return $p; }
-async function f18_soft($p): @Awaitable<(string, int)> { return $p; }
+async function f18_soft($p): <<__Soft>> Awaitable<(string, int)> { return $p; }
 async function f19($p): Awaitable<(function(int): int)> { return $p; }
-async function f19_soft($p): @Awaitable<(function(int): int)> { return $p; }
+async function f19_soft($p): <<__Soft>> Awaitable<(function(int): int)> { return $p; }
 async function f20($p): Awaitable<callable> { return $p; }
-async function f20_soft($p): @Awaitable<callable> { return $p; }
+async function f20_soft($p): <<__Soft>> Awaitable<callable> { return $p; }
 
 class Figure {}
 class Square extends Figure {}
@@ -65,13 +65,13 @@ class :div {}
 class A {}
 class B extends A {
   public async function f21(): Awaitable<this> { return $this; }
-  public async function f21_soft(): @Awaitable<this> { return $this; }
+  public async function f21_soft(): <<__Soft>> Awaitable<this> { return $this; }
   public async function f22($p): Awaitable<this> { return $p; }
-  public async function f22_soft($p): @Awaitable<this> { return $p; }
+  public async function f22_soft($p): <<__Soft>> Awaitable<this> { return $p; }
   public static async function f23($p): Awaitable<self> { return $p; }
-  public static async function f23_soft($p): @Awaitable<self> { return $p; }
+  public static async function f23_soft($p): <<__Soft>> Awaitable<self> { return $p; }
   public static async function f24($p): Awaitable<parent> { return $p; }
-  public static async function f24_soft($p): @Awaitable<parent> { return $p; }
+  public static async function f24_soft($p): <<__Soft>> Awaitable<parent> { return $p; }
   public static function testfunc() {}
 }
 class C extends B {}

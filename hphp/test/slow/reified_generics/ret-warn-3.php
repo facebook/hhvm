@@ -3,9 +3,9 @@
 class B<reify T> {}
 class C<reify T> {}
 
-function f($x): C<@int> { return $x; }
+function f($x): C<<<__Soft>> int> { return $x; }
 
-function g($x): B<C<@int>>{ return $x; }
+function g($x): B<C<<<__Soft>> int>>{ return $x; }
 <<__EntryPoint>>
 function entrypoint_retwarn3(): void {
 

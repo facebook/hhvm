@@ -1,7 +1,7 @@
 <?hh
 
 // Test autoloading to get an enum type hint
-function foo(@Foo $x) {
+function foo(<<__Soft>> Foo $x) {
   var_dump($x);
 }
 
@@ -9,7 +9,7 @@ function foo(@Foo $x) {
 enum Quux : Baz {
   BAZ = 100; // this is dubious, but should work in HHVM
 }
-function quux(@Quux $x) {
+function quux(<<__Soft>> Quux $x) {
   var_dump($x);
 }
 

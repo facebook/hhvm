@@ -5,8 +5,8 @@ class A {
   public static function func() {}
 }
 
-function takes_callable(@callable $x) {}
-function returns_callable($x): @callable { return $x; }
+function takes_callable(<<__Soft>> callable $x) {}
+function returns_callable($x): <<__Soft>> callable { return $x; }
 
 function test() {
   takes_callable(vec['A', 'func']);

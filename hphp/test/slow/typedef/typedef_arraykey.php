@@ -6,10 +6,10 @@ newtype A = arraykey;
 type B = ?arraykey;
 newtype C = X;
 type D = Y;
-function a(@A $x) {}
-function b(@B $x) {}
-function c(@C $x) {}
-function d(@D $x) {}
+function a(<<__Soft>> A $x) {}
+function b(<<__Soft>> B $x) {}
+function c(<<__Soft>> C $x) {}
+function d(<<__Soft>> D $x) {}
 
 <<__EntryPoint>>
 function main() {

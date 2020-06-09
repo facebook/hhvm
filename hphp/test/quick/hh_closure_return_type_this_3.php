@@ -21,45 +21,45 @@ type my_t = int;
 
 function f1() { return function ($p) { return $p; }; }
 function f2() { return function ($p): int { return $p; }; }
-function f2_soft() { return function ($p): @int { return $p; }; }
+function f2_soft() { return function ($p): <<__Soft>> int { return $p; }; }
 function f3() { return function ($p): string { return $p; }; }
-function f3_soft() { return function ($p): @string { return $p; }; }
+function f3_soft() { return function ($p): <<__Soft>> string { return $p; }; }
 function f4() { return function ($p): bool { return $p; }; }
-function f4_soft() { return function ($p): @bool { return $p; }; }
+function f4_soft() { return function ($p): <<__Soft>> bool { return $p; }; }
 function f5() { return function ($p): float { return $p; }; }
-function f5_soft() { return function ($p): @float { return $p; }; }
+function f5_soft() { return function ($p): <<__Soft>> float { return $p; }; }
 function f6() { return function ($p): resource { return $p; }; }
-function f6_soft() { return function ($p): @resource { return $p; }; }
+function f6_soft() { return function ($p): <<__Soft>> resource { return $p; }; }
 function f7() { return function ($p): varray { return $p; }; }
-function f7_soft() { return function ($p): @varray { return $p; }; }
+function f7_soft() { return function ($p): <<__Soft>> varray { return $p; }; }
 function f8() { return function ($p): callable { return $p; }; }
-function f8_soft() { return function ($p): @callable { return $p; }; }
+function f8_soft() { return function ($p): <<__Soft>> callable { return $p; }; }
 function f9() { return function ($p): Figure { return $p; }; }
-function f9_soft() { return function ($p): @Figure { return $p; }; }
+function f9_soft() { return function ($p): <<__Soft>> Figure { return $p; }; }
 function f10() { return function ($p): Square { return $p; }; }
-function f10_soft() { return function ($p): @Square { return $p; }; }
+function f10_soft() { return function ($p): <<__Soft>> Square { return $p; }; }
 function f11() { return function ($p): :div { return $p; }; }
-function f11_soft() { return function ($p): @:div { return $p; }; }
+function f11_soft() { return function ($p): <<__Soft>> :div { return $p; }; }
 function f12() { return function ($p): Fractal<Square> { return $p; }; }
-function f12_soft() { return function ($p): @Fractal<Square> { return $p; }; }
+function f12_soft() { return function ($p): <<__Soft>> Fractal<Square> { return $p; }; }
 function f13<T>() { return function ($p): Fractal<T> { return $p; }; }
-function f13_soft<T>() { return function ($p): @Fractal<T> { return $p; }; }
+function f13_soft<T>() { return function ($p): <<__Soft>> Fractal<T> { return $p; }; }
 function f14() { return function ($p): my_t { return $p; }; }
-function f14_soft() { return function ($p): @my_t { return $p; }; }
+function f14_soft() { return function ($p): <<__Soft>> my_t { return $p; }; }
 function f15() { return function ($p): void { return $p; }; }
-function f15_soft() { return function ($p): @void { return $p; }; }
+function f15_soft() { return function ($p): <<__Soft>> void { return $p; }; }
 function f16() { return function ($p): mixed { return $p; }; }
-function f16_soft() { return function ($p): @mixed { return $p; }; }
+function f16_soft() { return function ($p): <<__Soft>> mixed { return $p; }; }
 function f17() { return function ($p): ?int { return $p; }; }
-function f17_soft() { return function ($p): @?int { return $p; }; }
+function f17_soft() { return function ($p): <<__Soft>> ?int { return $p; }; }
 function f18() { return function ($p): (string, int) { return $p; }; }
-function f18_soft() { return function ($p): @(string, int) { return $p; }; }
+function f18_soft() { return function ($p): <<__Soft>> (string, int) { return $p; }; }
 function f19() { return function ($p): (function(int): int) { return $p; }; }
 function f19_soft() {
-  return function ($p): @(function(int): int) { return $p; };
+  return function ($p): <<__Soft>> (function(int): int) { return $p; };
 }
 function f20() { return function ($p): callable { return $p; }; }
-function f20_soft() { return function ($p): @callable { return $p; }; }
+function f20_soft() { return function ($p): <<__Soft>> callable { return $p; }; }
 
 class Figure {}
 class Square extends Figure {}
@@ -69,16 +69,16 @@ class :div {}
 class A {}
 class B extends A {
   public function f21() { return function (): this { return $this; }; }
-  public function f21_soft() { return function (): @this { return $this; }; }
+  public function f21_soft() { return function (): <<__Soft>> this { return $this; }; }
   public function f22() { return function ($p): this { return $p; }; }
-  public function f22_soft() { return function ($p): @this { return $p; }; }
+  public function f22_soft() { return function ($p): <<__Soft>> this { return $p; }; }
   public static function f23() { return function ($p): self { return $p; }; }
   public static function f23_soft() {
-    return function ($p): @self { return $p; };
+    return function ($p): <<__Soft>> self { return $p; };
   }
   public static function f24() { return function ($p): parent { return $p; }; }
   public static function f24_soft() {
-    return function ($p): @parent { return $p; };
+    return function ($p): <<__Soft>> parent { return $p; };
   }
   public static function testfunc() {}
 }

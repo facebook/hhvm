@@ -2,7 +2,7 @@
 
 class C<reify T> {}
 
-function f<reify T>($x): @T { return $x; }
+function f<reify T>($x): <<__Soft>> T { return $x; }
 <<__EntryPoint>>
 function entrypoint_reifiedreturntype(): void {
 

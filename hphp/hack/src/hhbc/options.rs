@@ -262,7 +262,7 @@ prefixed_flags!(
 );
 impl Default for LangFlags {
     fn default() -> LangFlags {
-        LangFlags::ENABLE_COROUTINES
+        LangFlags::ENABLE_COROUTINES | LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS
     }
 }
 
@@ -690,7 +690,7 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.disable_legacy_soft_typehints": {
-    "global_value": false
+    "global_value": true
   },
   "hhvm.hack.lang.disable_lval_as_an_expression": {
     "global_value": false

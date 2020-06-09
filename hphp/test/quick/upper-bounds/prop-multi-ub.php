@@ -11,7 +11,7 @@ class Foo <T1 as int, T2 as Fooable as Barable> {
 	public ?T2 $y = 1;
 	public static T2 $sy = 10;
 	private T2 $z;
-	<<__LateInit>> public @T2 $w;
+	<<__Soft, __LateInit>> public T2 $w;
 
 	public function __construct() {
 		$this->z = 1;

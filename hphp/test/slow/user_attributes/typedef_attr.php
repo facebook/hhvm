@@ -6,7 +6,7 @@ type FBID = int;
 <<__StrictType>>
 newtype FBID2 as int = FBID;
 
-function wat(@FBID $x) {
+function wat(<<__Soft>> FBID $x) {
   var_dump($x);
 }
 function make_fbid2(int $id): FBID2 {

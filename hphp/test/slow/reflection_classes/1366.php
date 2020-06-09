@@ -30,7 +30,7 @@ function f() {
 }
 function f1(int $t) {
 }
-function f2(@string $s) {
+function f2(<<__Soft>> string $s) {
 }
 function f3(?:xhp:hello $x) {
 }
@@ -45,7 +45,7 @@ function f102(): Vector<:xhp:element> {
 }
 function f200((string, Template<A, B, ?C>, ?int, Vector<Map<C, B>>) $tuple): ?int {
 }
-function f201((function (@int, Map<string, Map<int, Vector<string>>>):Vector<C>) $i): ClassA {
+function f201((function (<<__Soft>> int, Map<string, Map<int, Vector<string>>>):Vector<C>) $i): ClassA {
 }
 function f202(:xhp:html-element $html): Map<string, Vector<:xhp:html-element>> {
 }
@@ -60,7 +60,7 @@ function f301<X, Y>((function (): Vector<Y>) $f): darray<string, X> {
 function f302<X, Y>((Y, X, float, string) $f): ?Y {
 }
 class C {
-  public @int $a;
+  <<__Soft>> public int $a;
   public ?string $b;
   public Vector<C> $v;
   public (string, (function(?int, (string, string)):void)) $c;
@@ -68,15 +68,15 @@ class C {
 }
   static public function m1() {
 }
-  public function m2(@float $d) : void {
+  public function m2(<<__Soft>> float $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : @darray<int, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?string>>> $v, :xhp:html $x) : <<__Soft>> darray<int, ?Vector<string>> {
 }
-  public function m4((function(@int, (string, string)): void) $v) : varray<Map<string, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (string, string)): void) $v) : varray<Map<string, :xhp:html>> {
 }
 }
 class CT<X, Y> {
-  public @int $a;
+  <<__Soft>> public int $a;
   public ?string $b;
   public Vector<X> $v;
   public (string, (function(?int, (X, Y)):void)) $c;
@@ -84,27 +84,27 @@ class CT<X, Y> {
 }
   static public function m1() {
 }
-  public function m2(@Y $d) : void {
+  public function m2(<<__Soft>> Y $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : @darray<Y, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?X>>> $v, :xhp:html $x) : <<__Soft>> darray<Y, ?Vector<string>> {
 }
-  public function m4((function(@int, (X, string)): void) $v) : varray<Map<Y, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (X, string)): void) $v) : varray<Map<Y, :xhp:html>> {
 }
 }
 trait T {
   static public function m1() {
 }
-  public function m2(@int $d) : void {
+  public function m2(<<__Soft>> int $d) : void {
 }
-  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : @darray<C, ?Vector<string>> {
+  static public function m3(Vector<Map<int, Vector<?C>>> $v, :xhp:html $x) : <<__Soft>> darray<C, ?Vector<string>> {
 }
-  public function m4((function(@int, (float, string)): void) $v) : varray<Map<CT<int, string>, :xhp:html>> {
+  public function m4((function(<<__Soft>> int, (float, string)): void) $v) : varray<Map<CT<int, string>, :xhp:html>> {
 }
 }
 class TC {
   use T;
 }
-function ff(Vector<int> $i, ?string $s, @C $c,
+function ff(Vector<int> $i, ?string $s, <<__Soft>> C $c,
             array $a, arraykey $k, this $t) {
 }
 

@@ -13,7 +13,7 @@ function g<reify T>() {
 
 function h<reify T>() {
  g<?T>();
- g<@?T>();
+ g<<<__Soft>> ?T>();
 }
 <<__EntryPoint>>
 function main_entry(): void {

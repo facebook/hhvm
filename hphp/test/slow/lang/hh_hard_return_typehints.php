@@ -15,13 +15,13 @@ class Foo {
 class Bar {
   public function go() { echo "Bar::go()\n"; }
 }
-function test1(): @Foo {
+function test1(): <<__Soft>> Foo {
   return new Foo();
 }
 function test2(): Foo {
   return new Foo();
 }
-function test3(): @Bar {
+function test3(): <<__Soft>> Bar {
   return new Foo();
 }
 function test4(): Bar {

@@ -3,70 +3,70 @@
 
 class Foo {}
 
-function takes_keyset1(@keyset $ks): keyset {
+function takes_keyset1(<<__Soft>> keyset $ks): keyset {
   return $ks;
 }
-function takes_keyset2(@keyset<int> $ks): keyset<int> {
+function takes_keyset2(<<__Soft>> keyset<int> $ks): keyset<int> {
   return $ks;
 }
-function takes_keyset3(@keyset<string> $ks): keyset<string> {
+function takes_keyset3(<<__Soft>> keyset<string> $ks): keyset<string> {
   return $ks;
 }
-function takes_keyset4(@?keyset $ks): ?keyset {
+function takes_keyset4(<<__Soft>> ?keyset $ks): ?keyset {
   return $ks;
 }
-function takes_container1(@Container<Foo> $c): Container<Foo> {
+function takes_container1(<<__Soft>> Container<Foo> $c): Container<Foo> {
   return $c;
 }
-function takes_container2(@?Container<Foo> $c): ?Container<Foo> {
+function takes_container2(<<__Soft>> ?Container<Foo> $c): ?Container<Foo> {
   return $c;
 }
-function takes_keyed_container(@KeyedContainer $c): KeyedContainer {
+function takes_keyed_container(<<__Soft>> KeyedContainer $c): KeyedContainer {
   return $c;
 }
-function takes_traversable(@Traversable<Foo> $t): Traversable<Foo> {
+function takes_traversable(<<__Soft>> Traversable<Foo> $t): Traversable<Foo> {
   return $t;
 }
-function takes_keyed_traversable(@KeyedTraversable $t): KeyedTraversable {
+function takes_keyed_traversable(<<__Soft>> KeyedTraversable $t): KeyedTraversable {
   return $t;
 }
-function takes_vec(@vec $v): vec {
+function takes_vec(<<__Soft>> vec $v): vec {
   return $v;
 }
-function takes_dict(@dict $d): dict {
+function takes_dict(<<__Soft>> dict $d): dict {
   return $d;
 }
-function takes_bool(@bool $b): bool {
+function takes_bool(<<__Soft>> bool $b): bool {
   return $b;
 }
-function takes_string(@string $s): string {
+function takes_string(<<__Soft>> string $s): string {
   return $s;
 }
-function takes_array1(@varray $a): varray {
+function takes_array1(<<__Soft>> varray $a): varray {
   return $a;
 }
-function takes_array2(@?varray $a): ?varray {
+function takes_array2(<<__Soft>> ?varray $a): ?varray {
   return $a;
 }
-function takes_xhp_child(@XHPChild $x): XHPChild {
+function takes_xhp_child(<<__Soft>> XHPChild $x): XHPChild {
   return $x;
 }
-function takes_foo(@Foo $f): Foo {
+function takes_foo(<<__Soft>> Foo $f): Foo {
   return $f;
 }
-function takes_vector_container(@Vector $v): Vector {
+function takes_vector_container(<<__Soft>> Vector $v): Vector {
   return $v;
 }
-function takes_map_container(@Map $m): Map {
+function takes_map_container(<<__Soft>> Map $m): Map {
   return $m;
 }
-function takes_null(@null $x): null {
+function takes_null(<<__Soft>> null $x): null {
   return $x;
 }
-function takes_nonnull(@nonnull $x): nonnull {
+function takes_nonnull(<<__Soft>> nonnull $x): nonnull {
   return $x;
 }
-function takes_mixed(@mixed $m): mixed {
+function takes_mixed(<<__Soft>> mixed $m): mixed {
   return $m;
 }
 

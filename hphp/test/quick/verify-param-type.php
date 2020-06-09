@@ -7,7 +7,7 @@ function error_handler(...$args) {
   return true;
 }
 
-function test_soft(@int $foo) {
+function test_soft(<<__Soft>> int $foo) {
   echo "in test_soft\n";
   var_dump(is_int($foo));
 }

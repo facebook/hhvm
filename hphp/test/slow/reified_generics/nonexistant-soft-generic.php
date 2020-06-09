@@ -1,7 +1,7 @@
 <?hh
 
 class C<reify T> {}
-function f(@C<T> $x) { echo "done\n"; }
+function f(<<__Soft>> C<T> $x) { echo "done\n"; }
 
 <<__EntryPoint>>
 function main() {

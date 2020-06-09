@@ -55,8 +55,8 @@ function throws1(varray $x) { return $x; }
 function throws2($x): varray { return $x; }
 function throws3(inout varray $x) { $x = darray[]; }
 
-function vsoft(@varray $x) { return $x; }
-function dsoft(@darray $x) { return $x; }
+function vsoft(<<__Soft>> varray $x) { return $x; }
+function dsoft(<<__Soft>> darray $x) { return $x; }
 
 function handler($errno, $errstr) { throw new Exception($errstr); }
 

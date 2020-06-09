@@ -1,6 +1,6 @@
 <?hh
 
-function bar(): @string {
+function bar(): <<__Soft>> string {
   return HH\fun('bar');
 }
 

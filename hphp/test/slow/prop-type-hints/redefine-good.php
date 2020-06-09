@@ -120,8 +120,8 @@ class A {
   public ?Alias14 $p75;
   public ?Alias4 $p76;
   public ?Alias4 $p77;
-  public @int $p78;
-  public @?int $p79;
+  <<__Soft>> public int $p78;
+  <<__Soft>> public ?int $p79;
   public int $p80;
   public CondEnum1 $p81;
   public CondAlias $p82;
@@ -161,9 +161,9 @@ class A {
   public static mixed $s30;
   public static ?int $s31;
   public static int $s32;
-  public static @int $s33;
+  <<__Soft>> public static int $s33;
   public static int $s34;
-  public static @?int $s35;
+  <<__Soft>> public static ?int $s35;
   public static int $s36;
 
   private int $pp1;
@@ -198,9 +198,9 @@ class A {
   private mixed $pp30;
   private ?int $pp31;
   private int $pp32;
-  private @int $pp33;
+  <<__Soft>> private int $pp33;
   private int $pp34;
-  private @?int $pp35;
+  <<__Soft>> private ?int $pp35;
   private int $pp36;
 }
 
@@ -250,8 +250,8 @@ class C extends B {
   public array $p40;
   public ?int $p49;
   public ?Alias12 $p52;
-  public @int $p78;
-  public @?int $p79;
+  <<__Soft>> public int $p78;
+  <<__Soft>> public ?int $p79;
   public int $p80;
   public CondEnum1 $p81;
   public CondAlias $p82;
@@ -367,9 +367,9 @@ class E extends D {
   public static int $s31;
   public static ?int $s32;
   public static int $s33;
-  public static @int $s34;
+  <<__Soft>> public static int $s34;
   public static int $s35;
-  public static @?int $s36;
+  <<__Soft>> public static ?int $s36;
 
   private string $pp1;
   private int $pp2;
@@ -404,9 +404,9 @@ class E extends D {
   private int $pp31;
   private ?int $pp32;
   private int $pp33;
-  private @int $pp34;
+  <<__Soft>> private int $pp34;
   private int $pp35;
-  private @?int $pp36;
+  <<__Soft>> private ?int $pp36;
 }
 
 class F extends E {

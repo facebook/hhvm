@@ -1,5 +1,5 @@
 <?hh
-function foo(@int $x){
+function foo(<<__Soft>> int $x){
  echo 1;
  }
 

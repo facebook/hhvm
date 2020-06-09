@@ -34,12 +34,12 @@ function helper_ref(inout $x) {
 
 function f1(varray $x) { helper($x); }
 function f2(?varray $x) { helper($x); }
-function f3(@varray $x) { helper($x); }
-function f4(@?varray $x) { helper($x); }
+function f3(<<__Soft>> varray $x) { helper($x); }
+function f4(<<__Soft>> ?varray $x) { helper($x); }
 function f5(inout varray $x) { helper_ref(inout $x); }
 function f6(inout ?varray $x) { helper_ref(inout $x); }
-function f7(inout @varray $x) { helper_ref(inout $x); }
-function f8(inout @?varray $x) { helper_ref(inout $x); }
+function f7(<<__Soft>> inout varray $x) { helper_ref(inout $x); }
+function f8(<<__Soft>> inout ?varray $x) { helper_ref(inout $x); }
 
 function main() {
   $containers = Map {

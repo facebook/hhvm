@@ -170,6 +170,20 @@ void cgLdFrameCls(IRLS& env, const IRInstruction* inst) {
   return cgLdFrameThis(env, inst);
 }
 
+void cgStFrameCtx(IRLS& env, const IRInstruction* inst) {
+  assertx(!inst->func() || inst->ctx() || inst->func()->isClosureBody());
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const ctx = srcLoc(env, inst, 1).reg();
+  vmain(env) << store{ctx, fp[AROFF(m_thisUnsafe)]};
+}
+
+void cgStFrameFunc(IRLS& env, const IRInstruction* inst) {
+  assertx(!inst->func() || inst->ctx() || inst->func()->isClosureBody());
+  auto const fp = srcLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 1).reg();
+  vmain(env) << store{func, fp[AROFF(m_func)]};
+}
+
 void cgDbgCheckLocalsDecRefd(IRLS& env, const IRInstruction* inst) {
   if (!debug) return;
   auto& v = vmain(env);

@@ -371,6 +371,7 @@ std::string show(TrackedStore ts) {
 }
 
 bool srcsCanSpanCall(const IRInstruction& inst) {
+  if (inst.is(StFrameCtx)) return true;
   for (auto i = inst.numSrcs(); i--; ) {
     auto const src = inst.src(i);
     if (!src->isA(TStkPtr) &&

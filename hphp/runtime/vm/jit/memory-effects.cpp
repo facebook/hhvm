@@ -1740,6 +1740,12 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFrameCls:
     return PureLoad { AFContext { inst.src(0) }};
 
+  case StFrameCtx:
+    return PureStore { AFContext { inst.src(0) }, inst.src(1) };
+
+  case StFrameFunc:
+    return PureStore { AFFunc { inst.src(0) }, inst.src(1) };
+
   case EagerSyncVMRegs:
     return may_load_store(AEmpty, AEmpty);
 

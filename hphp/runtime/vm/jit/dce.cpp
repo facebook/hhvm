@@ -746,6 +746,8 @@ bool canDCE(IRInstruction* inst) {
   case MarkRDSInitialized:
   case ProfileProp:
   case ProfileIsTypeStruct:
+  case StFrameCtx:
+  case StFrameFunc:
     return false;
 
   case SameArr:

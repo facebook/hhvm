@@ -1895,6 +1895,14 @@ To string conversions:
   generics table and returns the input varray of reified generics, possibly
   static
 
+| StFrameCtx, ND, S(FramePtr) S(Obj,Cls), NF
+
+  Store object or class S1 on frame S0.
+
+| StFrameFunc, ND, S(FramePtr) S(Func), NF
+
+  Store the Func* in m_func for S0.
+
 
 10. Trace exits
 

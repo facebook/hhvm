@@ -959,6 +959,8 @@ bool opcodeMayRaise(Opcode opc) {
   case StContArKey:
   case StContArState:
   case StContArValue:
+  case StFrameCtx:
+  case StFrameFunc:
   case StIterBase:
   case StIterType:
   case StIterPos:

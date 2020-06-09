@@ -5541,13 +5541,13 @@ F       T       T       T       F       T       F       F       -1
 array arr1 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr1 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr1 cmp array arr25:
 F       T       T       T       F       T       F       F       -1
 array arr1 cmp array arr26:
@@ -5789,13 +5789,13 @@ F       T       T       T       F       T       F       F       -1
 array arr2 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr2 cmp array arr25:
 F       T       T       T       F       T       F       F       -1
 array arr2 cmp array arr26:
@@ -6037,13 +6037,13 @@ F       T       T       T       F       T       F       F       -1
 array arr3 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr3 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr3 cmp array arr25:
 F       T       T       T       F       T       F       F       -1
 array arr3 cmp array arr26:
@@ -6285,13 +6285,13 @@ F       T       T       T       F       T       T       T       -1
 array arr4 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr4 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr4 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr4 cmp array arr26:
@@ -6533,13 +6533,13 @@ F       T       T       T       F       T       T       T       -1
 array arr5 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr5 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr5 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr5 cmp array arr26:
@@ -6781,13 +6781,13 @@ F       T       T       T       F       T       T       T       -1
 array arr6 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr6 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr6 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr6 cmp array arr26:
@@ -7029,13 +7029,13 @@ F       T       T       T       F       T       T       T       -1
 array arr7 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr7 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr7 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr7 cmp array arr26:
@@ -7277,13 +7277,13 @@ F       T       T       T       F       T       T       T       -1
 array arr8 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr8 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr8 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr8 cmp array arr26:
@@ -7525,13 +7525,13 @@ F       T       T       T       F       T       T       T       -1
 array arr9 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr9 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr9 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr9 cmp array arr26:
@@ -7773,13 +7773,13 @@ F       T       T       T       F       T       T       T       -1
 array arr10 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr10 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr10 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr10 cmp array arr26:
@@ -8021,13 +8021,13 @@ F       T       T       T       F       T       T       T       -1
 array arr11 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr11 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr11 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr11 cmp array arr26:
@@ -8269,13 +8269,13 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr12 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr25:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr12 cmp array arr26:
@@ -8517,13 +8517,13 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr13 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr25:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr13 cmp array arr26:
@@ -8765,13 +8765,13 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr14 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr25:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr14 cmp array arr26:
@@ -9013,13 +9013,13 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr15 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr25:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr15 cmp array arr26:
@@ -9261,13 +9261,13 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr16 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr25:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr16 cmp array arr26:
@@ -9509,13 +9509,13 @@ F       T       T       T       F       T       T       T       -1
 array arr17 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr17 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr17 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr17 cmp array arr26:
@@ -9757,13 +9757,13 @@ F       T       T       T       F       T       T       T       -1
 array arr18 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr18 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr18 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr18 cmp array arr26:
@@ -10005,13 +10005,13 @@ T       F       T       T       T       F       T       T       -1
 array arr19 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr19 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr19 cmp array arr25:
 F       T       T       T       F       T       T       T       -1
 array arr19 cmp array arr26:
@@ -10253,13 +10253,13 @@ F       T       F       F       F       T       T       T       1
 array arr20 cmp array arr20:
 T       F       T       T       T       F       T       T       -1
 array arr20 cmp array arr21:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp array arr22:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp array arr23:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp array arr24:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr20 cmp array arr25:
 F       T       F       F       F       T       T       T       1
 array arr20 cmp array arr26:
@@ -10461,57 +10461,57 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp "BAZ":
 F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr19:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr20:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr21:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr21 cmp array arr22:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr21 cmp array arr23:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr24:
-F       T       F       T       T       F       T       F       0
+F       T       Err     Err     T       F       Err     Err     Err
 array arr21 cmp array arr25:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp array arr26:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp vec vec1:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr21 cmp vec vec2:
@@ -10709,57 +10709,57 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp "BAZ":
 F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr19:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr20:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr21:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr22 cmp array arr22:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr22 cmp array arr23:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr24:
-F       T       F       T       T       F       T       F       0
+F       T       Err     Err     T       F       Err     Err     Err
 array arr22 cmp array arr25:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp array arr26:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp vec vec1:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr22 cmp vec vec2:
@@ -10957,57 +10957,57 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp "BAZ":
 F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr19:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr20:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr21:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr22:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr23:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr23 cmp array arr24:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr25:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp array arr26:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp vec vec1:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr23 cmp vec vec2:
@@ -11205,57 +11205,57 @@ F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp "BAZ":
 F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr1:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr2:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr3:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr4:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr5:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr6:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr7:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr8:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr9:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr10:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr11:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr12:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr13:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr14:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr15:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr16:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr17:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr18:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr19:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr20:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr21:
-F       T       F       T       T       F       T       F       0
+F       T       Err     Err     T       F       Err     Err     Err
 array arr24 cmp array arr22:
-F       T       F       T       T       F       T       F       0
+F       T       Err     Err     T       F       Err     Err     Err
 array arr24 cmp array arr23:
-F       T       F       F       F       T       F       F       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr24:
-T       F       F       T       T       F       T       F       0
+T       F       Err     Err     T       F       Err     Err     Err
 array arr24 cmp array arr25:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp array arr26:
-F       T       F       F       F       T       T       T       1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp vec vec1:
 F       T       Err     Err     F       T       Err     Err     Err
 array arr24 cmp vec vec2:
@@ -11493,13 +11493,13 @@ F       T       T       T       F       T       T       T       -1
 array arr25 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr25 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr25 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr25 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr25 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr25 cmp array arr25:
 T       F       F       T       T       F       T       F       0
 array arr25 cmp array arr26:
@@ -11741,13 +11741,13 @@ F       T       T       T       F       T       T       T       -1
 array arr26 cmp array arr20:
 F       T       T       T       F       T       F       F       -1
 array arr26 cmp array arr21:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr26 cmp array arr22:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr26 cmp array arr23:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr26 cmp array arr24:
-F       T       T       T       F       T       F       F       -1
+F       T       Err     Err     F       T       Err     Err     Err
 array arr26 cmp array arr25:
 F       T       Err     Err     Err     Err     Err     Err     Err
 array arr26 cmp array arr26:

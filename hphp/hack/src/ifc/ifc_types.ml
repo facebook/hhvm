@@ -52,8 +52,14 @@ type prop =
   | Cconj of prop * prop
   | Cflow of (policy * policy)
 
+type policied_property = {
+  pp_name: string;
+  pp_type: Type.locl_ty;
+  pp_purpose: purpose option;
+}
+
 (* Policy signature for a class. Used for generating policy types for objects *)
-type policy_sig = { psig_policied_properties: (string * Type.locl_ty) list }
+type policy_sig = { psig_policied_properties: policied_property list }
 
 (* Types with policies *)
 (* Warning: do not use [@@deriving]; the thunks will lead

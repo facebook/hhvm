@@ -135,7 +135,7 @@ let mk_union t1 t2 =
 
 (* If there is a lump policy variable in effect, return that otherwise
    generate a new policy variable. *)
-let get_policy_var ?prefix lump_pol_opt proto_renv =
+let get_policy ?prefix lump_pol_opt proto_renv =
   match lump_pol_opt with
   | Some lump_pol -> lump_pol
   | None ->
@@ -148,17 +148,25 @@ let rec class_ptype lump_pol_opt proto_renv name =
     | Some class_policy_sig -> class_policy_sig
     | None -> fail "could not found a class policy signature for %s" name
   in
-  let policied_props =
-    List.map psig_policied_properties (fun (prop, ty) ->
-        (prop, lazy (ptype ~prefix:("." ^ prop) lump_pol_opt proto_renv ty)))
+  let prop_ptype { pp_name; pp_type; pp_purpose } =
+    (* Purpose of the property takes precedence over any lump policy. *)
+    let lump_pol_opt =
+      Option.merge
+        (Option.map ~f:(fun pur -> Ppurpose pur) pp_purpose)
+        lump_pol_opt
+        ~f:(fun a _ -> a)
+    in
+    ( pp_name,
+      lazy (ptype ~prefix:("." ^ pp_name) lump_pol_opt proto_renv pp_type) )
   in
-  let lump_pol = get_policy_var lump_pol_opt proto_renv ~prefix:"lump" in
+  let lump_pol = get_policy lump_pol_opt proto_renv ~prefix:"lump" in
   Tclass
     {
       c_name = name;
-      c_self = get_policy_var lump_pol_opt proto_renv ~prefix:name;
+      c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
       c_lump = lump_pol;
-      c_property_map = SMap.of_list policied_props;
+      c_property_map =
+        SMap.of_list (List.map ~f:prop_ptype psig_policied_properties);
     }
 
 (* Turns a locl_ty into a type with policy annotations;
@@ -166,7 +174,7 @@ let rec class_ptype lump_pol_opt proto_renv name =
 and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   let ptype = ptype ?prefix lump_pol_opt proto_renv in
   match T.get_node t with
-  | T.Tprim _ -> Tprim (get_policy_var lump_pol_opt proto_renv ?prefix)
+  | T.Tprim _ -> Tprim (get_policy lump_pol_opt proto_renv ?prefix)
   | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
@@ -498,10 +506,14 @@ let magic_builtins =
   [|
     ( "ifc_magic.hhi",
       {|<?hh // strict
-class Policied implements
-  HH\InstancePropertyAttribute,
-  HH\ClassAttribute,
-  HH\ParameterAttribute { }
+class Policied
+  implements
+    HH\InstancePropertyAttribute,
+    HH\ClassAttribute,
+    HH\ParameterAttribute,
+    HH\FunctionAttribute {
+  public function __construct(public string $purpose = "") { }
+}
 |}
     );
   |]

@@ -148,8 +148,12 @@ let env fmt env =
   fprintf fmt "@]"
 
 let policy_sig fmt { psig_policied_properties } =
-  let property fmt (name, _ty) = fprintf fmt "%s" name in
-  let properties fmt = list comma_sep property fmt in
+  let policied_property fmt { pp_name; pp_purpose; _ } =
+    match pp_purpose with
+    | Some purpose -> fprintf fmt "%s: %s" pp_name purpose
+    | None -> fprintf fmt "%s" pp_name
+  in
+  let properties fmt = list comma_sep policied_property fmt in
   fprintf fmt "@[<v>";
   fprintf
     fmt

@@ -1,0 +1,67 @@
+Policy signature for \C:
+* Policied properties: ci: Secret, d: Secret
+
+Policy signature for \D:
+* Policied properties: 
+
+Analyzing __construct:
+* pc: pc
+* This: \D<\D, lump, >
+* Return: <ret>
+* Params: { $di -> <$di> }
+* Final environment:
+  Locals: { $di -> <$di> }
+  Constraints:
+    [\D < lump, $di < lump, pc < lump]
+
+Analyzing __construct:
+* pc: pc
+* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <Secret>>
+* Return: <ret>
+* Params: { $ci -> <$ci>; $d -> \D<\D, lump'1, > }
+* Final environment:
+  Locals: { $ci -> <$ci>; $d -> \D<\D, lump'1, > }
+  Constraints:
+    [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
+     \D < Secret, pc < Secret]
+
+Analyzing getShallow1:
+* pc: pc
+* This: \C<\C, lump, d -> <thunk>, ci -> <Secret>>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Locals: {}
+  Constraints:
+    [Secret < .ci, \C < .ci, .ci < ret]
+
+Analyzing getShallow2:
+* pc: pc
+* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
+* Return: \D<\D, lump'1, >
+* Params: {}
+* Final environment:
+  Locals: {}
+  Constraints:
+    [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
+
+Analyzing getDeep:
+* pc: pc
+* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Locals: {}
+  Constraints:
+    [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
+
+Analyzing writeDeep:
+* pc: pc
+* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Locals: {}
+  Constraints:
+    [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
+

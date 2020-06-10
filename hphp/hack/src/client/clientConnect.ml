@@ -104,7 +104,10 @@ let check_for_deadline deadline_opt =
   let now = Unix.time () in
   match deadline_opt with
   | Some deadline when now >. deadline ->
-    log "check_for_deadline expired: %f > %f" now deadline;
+    log
+      "check_for_deadline expired: %s > %s"
+      (Utils.timestring now)
+      (Utils.timestring deadline);
     Printf.eprintf "\nError: hh_client hit timeout, giving up!\n%!";
     raise Exit_status.(Exit_with Out_of_time)
   | _ -> ()

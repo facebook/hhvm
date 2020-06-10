@@ -337,6 +337,8 @@ let load ~silent config_filename options =
       ?po_disable_lval_as_an_expression:
         (bool_opt "disable_lval_as_an_expression" config)
       ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
+      ~allowed_fixme_codes_strict:
+        (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
       ~tco_experimental_features:(config_experimental_tc_features config)
       ~tco_log_inference_constraints:
@@ -428,6 +430,8 @@ let load ~silent config_filename options =
       ()
   in
   Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;
+  Errors.allowed_fixme_codes_strict :=
+    GlobalOptions.allowed_fixme_codes_strict global_opts;
   Errors.error_codes_treated_strictly :=
     GlobalOptions.error_codes_treated_strictly global_opts;
   ( {

@@ -31,7 +31,7 @@ namespace {
 }
 
 template <typename Compare>
-static folly::Optional<String> getPathFromSymbol(
+static std::optional<String> getPathFromSymbol(
     const RepoAutoloadMap::Map<Compare>& map,
     const String& name) {
   auto search = map.find(name.get());
@@ -70,22 +70,22 @@ Array getSymbolFromPath(
   return ret;
 }
 
-folly::Optional<String> RepoAutoloadMap::getTypeFile(
+std::optional<String> RepoAutoloadMap::getTypeFile(
   const String& typeName) {
   return getPathFromSymbol(m_types, typeName);
 }
 
-folly::Optional<String> RepoAutoloadMap::getFunctionFile(
+std::optional<String> RepoAutoloadMap::getFunctionFile(
   const String& funcName) {
   return getPathFromSymbol(m_functions, funcName);
 }
 
-folly::Optional<String> RepoAutoloadMap::getConstantFile(
+std::optional<String> RepoAutoloadMap::getConstantFile(
   const String& constName) {
   return getPathFromSymbol(m_constants, constName);
 }
 
-folly::Optional<String> RepoAutoloadMap::getTypeAliasFile(
+std::optional<String> RepoAutoloadMap::getTypeAliasFile(
   const String& typeAliasName) {
   return getPathFromSymbol(m_typeAliases, typeAliasName);
 }

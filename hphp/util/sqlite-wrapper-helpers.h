@@ -16,11 +16,10 @@
 
 #pragma once
 
+#include <optional>
 #include <stdexcept>
 #include <string>
-
-#include <folly/Optional.h>
-#include <folly/Range.h>
+#include <string_view>
 
 struct sqlite3_stmt;
 
@@ -56,7 +55,7 @@ struct SQLiteTxn {
    * Run a one-off query without storing the prepared statement or
    * returning results.
    */
-  void exec(folly::StringPiece sql);  // throws(SQLiteExc)
+  void exec(std::string_view sql);  // throws(SQLiteExc)
 
   /**
    * Complete the transaction.
@@ -90,7 +89,7 @@ struct SQLiteStmt {
   /**
    * Return the SQL string used to prepare this statement.
    */
-  folly::StringPiece sql() const noexcept;
+  std::string_view sql() const noexcept;
 
  private:
   friend struct SQLite;
@@ -102,7 +101,7 @@ struct SQLiteStmt {
   SQLiteStmt& operator=(const SQLiteStmt&) = delete;
   void* operator new(size_t) = delete;
 
-  SQLiteStmt(SQLite& db, const folly::StringPiece sql);  // throws(SQLiteExc)
+  SQLiteStmt(SQLite& db, const std::string_view sql);  // throws(SQLiteExc)
 
   /**
    * Return a query object to run this statement.
@@ -138,7 +137,7 @@ struct SQLiteQuery {
 
   bool done() const noexcept { return m_done; }
 
-  folly::StringPiece sql() const noexcept;
+  std::string_view sql() const noexcept;
 
   void step();  // throws(SQLiteExc)
 
@@ -146,7 +145,7 @@ struct SQLiteQuery {
                 bool isStatic = false) noexcept;
   void bindText(const char* paramName, const char* text, int size,
                 bool isStatic = false) noexcept;
-  void bindString(const char* paramName, const folly::StringPiece s) noexcept;
+  void bindString(const char* paramName, const std::string_view s) noexcept;
   void bindDouble(const char* paramName, double val) noexcept;
   void bindInt(const char* paramName, int val) noexcept;
   void bindBool(const char* paramName, bool b) noexcept;
@@ -160,8 +159,8 @@ struct SQLiteQuery {
   int64_t getInt64(int iCol);                               // throws(SQLiteExc)
   double getDouble(int iCol);                               // throws(SQLiteExc)
   void getBlob(int iCol, const void*& blob, size_t& size);  // throws(SQLiteExc)
-  const folly::StringPiece getString(int iCol);             // throws(SQLiteExc)
-  folly::Optional<const folly::StringPiece> getNullableString(
+  const std::string_view getString(int iCol);               // throws(SQLiteExc)
+  std::optional<const std::string_view> getNullableString(
       int iCol);                                            // throws(SQLiteExc)
 
  private:

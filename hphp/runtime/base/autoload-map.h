@@ -16,9 +16,8 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
-
-#include <folly/Optional.h>
 
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/util/assertions.h"
@@ -72,7 +71,7 @@ struct AutoloadMap {
    * Return None if the file is defined in zero places or more than
    * one place.
    */
-  folly::Optional<String> getFile(KindOf kind,
+  std::optional<String> getFile(KindOf kind,
                                   const String& typeName) {
     switch (kind) {
       case AutoloadMap::KindOf::Type:
@@ -112,13 +111,13 @@ struct AutoloadMap {
   /**
    * Map symbols to files
    */
-  virtual folly::Optional<String> getTypeFile(
+  virtual std::optional<String> getTypeFile(
       const String& typeName) = 0;
-  virtual folly::Optional<String> getFunctionFile(
+  virtual std::optional<String> getFunctionFile(
       const String& functionName) = 0;
-  virtual folly::Optional<String> getConstantFile(
+  virtual std::optional<String> getConstantFile(
       const String& constantName) = 0;
-  virtual folly::Optional<String> getTypeAliasFile(
+  virtual std::optional<String> getTypeAliasFile(
       const String& typeAliasName) = 0;
 
   /**

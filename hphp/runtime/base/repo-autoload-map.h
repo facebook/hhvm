@@ -16,9 +16,8 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
-
-#include <folly/Optional.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -56,13 +55,13 @@ struct RepoAutoloadMap final : AutoloadMap {
       m_constants{std::move(constants)},
       m_typeAliases{std::move(typeAliases)} {}
 
-  virtual folly::Optional<String> getTypeFile(
+  virtual std::optional<String> getTypeFile(
       const String& typeName) override;
-  virtual folly::Optional<String> getFunctionFile(
+  virtual std::optional<String> getFunctionFile(
       const String& functionName) override;
-  virtual folly::Optional<String> getConstantFile(
+  virtual std::optional<String> getConstantFile(
       const String& constantName) override;
-  virtual folly::Optional<String> getTypeAliasFile(
+  virtual std::optional<String> getTypeAliasFile(
       const String& typeAliasName) override;
 
   virtual Array getFileTypes(const String& path) override;

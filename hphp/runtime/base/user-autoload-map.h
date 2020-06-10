@@ -16,9 +16,8 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
-
-#include <folly/Optional.h>
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/autoload-map.h"
@@ -76,13 +75,13 @@ struct UserAutoloadMap : AutoloadMap {
 
   virtual Array getAllFiles() const override;
 
-  virtual folly::Optional<String> getTypeFile(
+  virtual std::optional<String> getTypeFile(
       const String& typeName) override;
-  virtual folly::Optional<String> getFunctionFile(
+  virtual std::optional<String> getFunctionFile(
       const String& functionName) override;
-  virtual folly::Optional<String> getConstantFile(
+  virtual std::optional<String> getConstantFile(
       const String& constantName) override;
-  virtual folly::Optional<String> getTypeAliasFile(
+  virtual std::optional<String> getTypeAliasFile(
       const String& typeAliasName) override;
 
   virtual Array getFileTypes(const String& path) override;
@@ -98,7 +97,7 @@ struct UserAutoloadMap : AutoloadMap {
                                             const Variant& err) const override;
 
  private:
-  folly::Optional<String> getFileFromMap(const Array& map,
+  std::optional<String> getFileFromMap(const Array& map,
                                          const String& key) const;
 };
 

@@ -73,7 +73,7 @@ struct SQLite {
    * Compile the given SQL query into a statement object which can run and rerun
    * the query.
    */
-  SQLiteStmt prepare(const folly::StringPiece sql);  // throws(SQLiteExc)
+  SQLiteStmt prepare(const std::string_view sql);  // throws(SQLiteExc)
 
   /**
    * Begin a SQLite transaction to run queries within.

@@ -17,6 +17,7 @@
 #define incl_HPHP_AUTOLOAD_HANDLER_H_
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include <folly/experimental/io/FsUtil.h>
@@ -103,7 +104,7 @@ struct AutoloadHandler final : RequestEventHandler {
     return m_facts;
   }
 
-  folly::Optional<String> getFile(const String& name,
+  std::optional<String> getFile(const String& name,
                                   AutoloadMap::KindOf kind,
                                   bool toLower);
 

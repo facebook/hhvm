@@ -215,9 +215,9 @@ const StaticString
   s_file("file"),
   s_line("line");
 
-folly::Optional<String> AutoloadHandler::getFile(const String& clsName,
-                                                 AutoloadMap::KindOf kind,
-                                                 bool toLower) {
+std::optional<String> AutoloadHandler::getFile(const String& clsName,
+                                               AutoloadMap::KindOf kind,
+                                               bool toLower) {
   assertx(m_map);
   // Always normalize name before autoloading
   const String& name = normalizeNS(clsName);

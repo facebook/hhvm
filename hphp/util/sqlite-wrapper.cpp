@@ -26,7 +26,7 @@ namespace HPHP {
 
 namespace {
 
-folly::StringPiece journalModeName(
+std::string_view journalModeName(
   SQLite::JournalMode mode) noexcept {
   switch (mode) {
     case SQLite::JournalMode::DELETE:
@@ -118,7 +118,7 @@ SQLite SQLite::connect(const char* path, OpenMode mode) {
  * Compile the given SQL query into a statement object which can run and rerun
  * the query.
  */
-SQLiteStmt SQLite::prepare(const folly::StringPiece sql) {
+SQLiteStmt SQLite::prepare(const std::string_view sql) {
   return {*this, sql};
 }
 
@@ -250,7 +250,7 @@ SQLiteTxn::~SQLiteTxn() {
 
 SQLiteQuery SQLiteTxn::query(SQLiteStmt& stmt) noexcept { return stmt.query(); }
 
-void SQLiteTxn::exec(folly::StringPiece sql) {
+void SQLiteTxn::exec(std::string_view sql) {
   assertx(m_db != nullptr);
   SQLiteStmt stmt{m_db->prepare(sql)};
   SQLiteQuery query{stmt.query()};
@@ -294,19 +294,19 @@ SQLiteStmt::~SQLiteStmt() {
   m_stmt = nullptr;
 }
 
-folly::StringPiece SQLiteStmt::sql() const noexcept {
+std::string_view SQLiteStmt::sql() const noexcept {
 #if SQLITE_VERSION_NUMBER >= 3014000
-  return folly::StringPiece{sqlite3_expanded_sql(m_stmt)};
+  return std::string_view{sqlite3_expanded_sql(m_stmt)};
 #else
-  return folly::StringPiece{sqlite3_sql(m_stmt)};
+  return std::string_view{sqlite3_sql(m_stmt)};
 #endif
 }
 
-SQLiteStmt::SQLiteStmt(SQLite& db, const folly::StringPiece sql) {
+SQLiteStmt::SQLiteStmt(SQLite& db, const std::string_view sql) {
   int rc =
       sqlite3_prepare_v2(db.m_dbc, sql.data(), sql.size(), &m_stmt, nullptr);
   if (rc) {
-    throw SQLiteExc{rc, sql.str()};
+    throw SQLiteExc{rc, std::string{sql}};
   }
   assertx(m_stmt != nullptr);
 }
@@ -353,7 +353,7 @@ SQLiteQuery::~SQLiteQuery() {
   }
 }
 
-folly::StringPiece SQLiteQuery::sql() const noexcept {
+std::string_view SQLiteQuery::sql() const noexcept {
   assertx(m_stmt != nullptr);
   return m_stmt->sql();
 }
@@ -371,7 +371,7 @@ void SQLiteQuery::step() {
       m_done = false;
       break;
     default:
-      throw SQLiteExc{rc, sql().str()};
+      throw SQLiteExc{rc, std::string{sql()}};
   }
 }
 
@@ -397,7 +397,7 @@ void SQLiteQuery::bindText(const char* paramName, const char* text, int size,
 }
 
 void SQLiteQuery::bindString(const char* paramName,
-                             const folly::StringPiece s) noexcept {
+                             const std::string_view s) noexcept {
   bindText(paramName, s.data(), s.size(), true);
 }
 
@@ -463,7 +463,7 @@ void SQLiteQuery::getBlob(int iCol, const void*& blob, size_t& size) {
   size = sqlite3_column_bytes(stmt, iCol);
 }
 
-const folly::StringPiece SQLiteQuery::getString(int iCol) {
+const std::string_view SQLiteQuery::getString(int iCol) {
   assertx(m_stmt != nullptr);
   sqlite3_stmt* stmt = m_stmt->m_stmt;
   const char* text =
@@ -473,7 +473,7 @@ const folly::StringPiece SQLiteQuery::getString(int iCol) {
   return {text, static_cast<size_t>(size)};
 }
 
-folly::Optional<const folly::StringPiece> SQLiteQuery::getNullableString(
+std::optional<const std::string_view> SQLiteQuery::getNullableString(
     int iCol) {
   assertx(m_stmt != nullptr);
   sqlite3_stmt* stmt = m_stmt->m_stmt;

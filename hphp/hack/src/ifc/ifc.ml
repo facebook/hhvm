@@ -498,7 +498,10 @@ let magic_builtins =
   [|
     ( "ifc_magic.hhi",
       {|<?hh // strict
-class Policied implements HH\InstancePropertyAttribute, HH\ClassAttribute { }
+class Policied implements
+  HH\InstancePropertyAttribute,
+  HH\ClassAttribute,
+  HH\ParameterAttribute { }
 |}
     );
   |]

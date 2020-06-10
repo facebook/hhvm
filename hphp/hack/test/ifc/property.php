@@ -7,13 +7,13 @@ class Other {
 }
 
 class My {
-  <<Policied>>
-  public int $mInt = 42;
-  <<Policied>>
-  public Other $other;
-  public bool $mBool = true;
-
-  public function __construct(Other $o) { $this->other = $o; }
+  public function __construct(
+    <<Policied>>
+    public int $mInt,
+    <<Policied>>
+    public Other $other,
+    public bool $mBool,
+  ) { }
 
   public function getMInt(): int {
     return $this->mInt;

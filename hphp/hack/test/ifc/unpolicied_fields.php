@@ -1,11 +1,12 @@
 <?hh // strict
 
 class C {
-  <<Policied>>
-  public int $cx = 0;
-  public int $cy = 0;
-
-  public function __construct(public D $cd) { }
+  public function __construct(
+    <<Policied>>
+    public int $cx,
+    public int $cy,
+    public D $cd,
+  ) { }
 
   public function testGetUnpolicied(): D {
     return $this->cd;

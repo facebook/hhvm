@@ -5,11 +5,12 @@ Analyzing __construct:
 * pc: pc
 * This: \R<\R, lump, >
 * Return: <ret>
-* Params: { $r -> \R<\R'1, lump'1, > }
+* Params: { $prop -> <$prop>; $r -> \R<\R'1, lump'1, > }
 * Final environment:
-  Locals: { $r -> \R<\R'1, lump'1, > }
+  Locals: { $prop -> <$prop>; $r -> \R<\R'1, lump'1, > }
   Constraints:
-    [\R < lump, lump'1 = lump, \R'1 < lump, pc < lump]
+    [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump,
+     \R'1 < lump, pc < lump]
 
 Analyzing recursiveGet:
 * pc: pc

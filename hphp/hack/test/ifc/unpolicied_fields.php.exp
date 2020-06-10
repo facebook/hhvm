@@ -6,13 +6,14 @@ Policy signature for \D:
 
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump, cx -> <thunk>>
+* This: \C<\C, lump, cx -> <.cx>>
 * Return: <ret>
-* Params: { $cd -> \D<\D, lump'1, > }
+* Params: { $cd -> \D<\D, lump'1, >; $cx -> <$cx>; $cy -> <$cy> }
 * Final environment:
-  Locals: { $cd -> \D<\D, lump'1, > }
+  Locals: { $cd -> \D<\D, lump'1, >; $cx -> <$cx>; $cy -> <$cy> }
   Constraints:
-    [\C < lump, lump'1 = lump, \D < lump, pc < lump]
+    [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
+     \C < lump, lump'1 = lump, \D < lump, pc < lump]
 
 Analyzing testGetUnpolicied:
 * pc: pc

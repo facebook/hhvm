@@ -1,9 +1,10 @@
 <?hh // strict
 
 class R {
-  public int $prop = 0;
-
-  public function __construct(public R $r) {}
+  public function __construct(
+    public int $prop,
+    public R $r,
+  ) { }
 
   public function recursiveGet(): int {
     return $this->r->r->r->prop;

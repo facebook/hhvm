@@ -191,10 +191,16 @@ size_t loadedStaticArrayCount() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
-  auto const arr = *parr;
-  auto const requested_tag = RuntimeOption::EvalArrayProvenance && tag.valid();
+  auto const base = *parr;
+  auto const requested_tag = RO::EvalArrayProvenance && tag.valid();
+  if (base->isStatic() && LIKELY(!requested_tag)) return;
 
-  if (arr->isStatic() && LIKELY(!requested_tag)) return;
+  auto const arr = [&]{
+    if (base->isVanilla()) return base;
+    *parr = BespokeArray::ToVanilla(base, "ArrayData::GetScalarArray");
+    decRefArr(base);
+    return *parr;
+  }();
 
   auto replace = [&] (ArrayData* rep) {
     *parr = rep;

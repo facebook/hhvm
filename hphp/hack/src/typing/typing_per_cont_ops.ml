@@ -67,7 +67,7 @@ let is_sub_entry is_subtype env ctx1 ctx2 =
       match (tyopt1, tyopt2) with
       | (_, None) -> true
       | (None, Some _) -> false
-      | (Some (ty1, _id1), Some (ty2, _id2)) -> is_subtype env ty1 ty2)
+      | (Some (ty1, _, _id1), Some (ty2, _, _id2)) -> is_subtype env ty1 ty2)
     ctx1.local_types
     ctx2.local_types
   && Typing_fake_members.sub ctx1.fake_members ctx2.fake_members

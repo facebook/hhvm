@@ -26,7 +26,7 @@ let get_all_locals env = env.lenv.per_cont_env
 (*****************************************************************************)
 
 let union env local1 local2 =
-  let ((ty1, eid1), (ty2, eid2)) = (local1, local2) in
+  let ((ty1, pos1, eid1), (ty2, pos2, eid2)) = (local1, local2) in
   let eid =
     if Ident.equal eid1 eid2 then
       eid1
@@ -34,7 +34,15 @@ let union env local1 local2 =
       Ident.tmp ()
   in
   let (env, ty) = Union.union env ty1 ty2 in
-  (env, (ty, eid))
+  ( env,
+    ( ty,
+      ( if phys_equal ty ty1 || Pos.equal Pos.none pos2 then
+        pos1
+      else if phys_equal ty ty2 || Pos.equal Pos.none pos1 then
+        pos2
+      else
+        Pos.none ),
+      eid ) )
 
 let get_cont_option env cont =
   let local_types = get_all_locals env in

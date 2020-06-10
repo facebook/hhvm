@@ -292,8 +292,8 @@ let rec bind_param env (ty1, param) =
   in
   let mode = get_param_mode param.param_callconv in
   let id = Local_id.make_unscoped param.param_name in
-  let env = Env.set_local env id ty1 in
-  let env = Env.set_param env id (ty1, mode) in
+  let env = Env.set_local env id ty1 param.param_pos in
+  let env = Env.set_param env id (ty1, param.param_pos, mode) in
   let env =
     if has_accept_disposable_attribute param then
       Env.set_using_var env id
@@ -322,18 +322,25 @@ let rec bind_param env (ty1, param) =
   in
   (env, tparam)
 
-and check_inout_return env =
+and check_inout_return ret_pos env =
   let params = Local_id.Map.elements (Env.get_params env) in
-  List.fold params ~init:env ~f:(fun env (id, (ty, mode)) ->
+  List.fold params ~init:env ~f:(fun env (id, (ty, param_pos, mode)) ->
       match mode with
       | FPinout ->
         (* Whenever the function exits normally, we require that each local
          * corresponding to an inout parameter be compatible with the original
          * type for the parameter (under subtyping rules). *)
-        let local_ty = Env.get_local env id in
+        let (local_ty, local_pos) = Env.get_local_pos env id in
         let (env, ety) = Env.expand_type env local_ty in
-        let pos = get_pos ty in
-        let param_ty = mk (Reason.Rinout_param pos, get_node ty) in
+        let pos =
+          if not (Pos.equal Pos.none local_pos) then
+            local_pos
+          else if not (Pos.equal Pos.none ret_pos) then
+            ret_pos
+          else
+            param_pos
+        in
+        let param_ty = mk (Reason.Rinout_param (get_pos ty), get_node ty) in
         Type.sub_type
           pos
           Reason.URassign_inout
@@ -389,7 +396,7 @@ and fun_implicit_return env pos ret = function
   | Ast_defs.FSync ->
     (* A function without a terminal block has an implicit return; the
      * "void" type *)
-    let env = check_inout_return env in
+    let env = check_inout_return Pos.none env in
     let r = Reason.Rno_return pos in
     let rty = MakeType.void r in
     Typing_return.implicit_return env pos ~expected:ret ~actual:rty
@@ -409,7 +416,7 @@ and set_local ?(is_using_clause = false) env (pos, x) ty =
       Errors.duplicate_using_var pos
     else
       Errors.illegal_disposable pos "assigned";
-  let env = Env.set_local env x ty in
+  let env = Env.set_local env x ty pos in
   if is_using_clause then
     Env.set_using_var env x
   else
@@ -596,7 +603,7 @@ and stmt_ env pos st =
     (* TODO TAST: annotate with joined types *)
     (env, Aast.If (te, tb1, tb2))
   | Return None ->
-    let env = check_inout_return env in
+    let env = check_inout_return pos env in
     let rty = MakeType.void (Reason.Rwitness pos) in
     let { Typing_env_return_info.return_type = expected_return; _ } =
       Env.get_return env
@@ -619,7 +626,7 @@ and stmt_ env pos st =
     let env = LEnv.move_and_merge_next_in_cont env C.Exit in
     (env, Aast.Return None)
   | Return (Some e) ->
-    let env = check_inout_return env in
+    let env = check_inout_return pos env in
     let expr_pos = fst e in
     let Typing_env_return_info.
           {
@@ -2303,16 +2310,16 @@ and expr_
     let dd_var = Local_id.make_unscoped SN.SpecialIdents.dollardollar in
     let dd_old_ty =
       if Env.is_local_defined env dd_var then
-        Some (Env.get_local env dd_var)
+        Some (Env.get_local_pos env dd_var)
       else
         None
     in
-    let env = Env.set_local env dd_var ty1 in
+    let env = Env.set_local env dd_var ty1 Pos.none in
     let (env, te2, ty2) = expr env e2 in
     let env =
       match dd_old_ty with
       | None -> Env.unset_local env dd_var
-      | Some ty -> Env.set_local env dd_var ty
+      | Some (ty, pos) -> Env.set_local env dd_var ty pos
     in
     make_result env p (Aast.Pipe (e0, te1, te2)) ty2
   | Unop (uop, e) ->

@@ -917,7 +917,7 @@ let set_local_ env x ty =
  * that the local currently has, and an expression_id generated from
  * the last assignment to this local.
  *)
-let set_local env x new_type =
+let set_local env x new_type pos =
   let new_type =
     match get_node new_type with
     | Tunion [ty] -> ty
@@ -929,9 +929,9 @@ let set_local env x new_type =
     let expr_id =
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
       | None -> Ident.tmp ()
-      | Some (_, y) -> y
+      | Some (_, _, y) -> y
     in
-    let local = (new_type, expr_id) in
+    let local = (new_type, pos, expr_id) in
     set_local_ env x local
 
 let is_using_var env x = LID.Set.mem x env.lenv.local_using_vars
@@ -1011,7 +1011,7 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
   | None ->
     (* If the continuation is absent, we are in dead code so the variable should
     have type nothing. *)
-    Some (Typing_make_type.nothing Reason.Rnone, 0)
+    Some (Typing_make_type.nothing Reason.Rnone, Pos.none, 0)
   | Some ctx ->
     let lcl = LID.Map.find_opt x ctx.LEnvC.local_types in
     begin
@@ -1027,17 +1027,24 @@ let get_local_in_ctx env ?error_if_undef_at_pos:p x ctx_opt =
 
 let get_local_ty_in_ctx env ?error_if_undef_at_pos x ctx_opt =
   match get_local_in_ctx env ?error_if_undef_at_pos x ctx_opt with
-  | None -> (false, mk (Reason.Rnone, tany env))
-  | Some (x, _) -> (true, x)
+  | None -> (false, mk (Reason.Rnone, tany env), Pos.none)
+  | Some (x, pos, _) -> (true, x, pos)
 
 let get_local_in_next_continuation ?error_if_undef_at_pos:p env x =
   let next_cont = next_cont_opt env in
   get_local_ty_in_ctx env ?error_if_undef_at_pos:p x next_cont
 
 let get_local_ ?error_if_undef_at_pos:p env x =
-  get_local_in_next_continuation ?error_if_undef_at_pos:p env x
+  let (mut, ty, _) =
+    get_local_in_next_continuation ?error_if_undef_at_pos:p env x
+  in
+  (mut, ty)
 
 let get_local env x = snd (get_local_ env x)
+
+let get_local_pos env x =
+  let (_, ty, pos) = get_local_in_next_continuation env x in
+  (ty, pos)
 
 let get_locals env plids =
   let next_cont = next_cont_opt env in
@@ -1063,9 +1070,9 @@ let set_local_expr_id env x new_eid =
   | Some next_cont ->
     begin
       match LID.Map.find_opt x next_cont.LEnvC.local_types with
-      | Some (type_, eid)
+      | Some (type_, pos, eid)
         when not (Typing_local_types.equal_expression_id eid new_eid) ->
-        let local = (type_, new_eid) in
+        let local = (type_, pos, new_eid) in
         let per_cont_env = LEnvC.add_to_cont C.Next x local per_cont_env in
         let env = { env with lenv = { env.lenv with per_cont_env } } in
         env
@@ -1077,7 +1084,7 @@ let get_local_expr_id env x =
   | None -> (* dead code *) None
   | Some next_cont ->
     let lcl = LID.Map.find_opt x next_cont.LEnvC.local_types in
-    Option.map lcl ~f:(fun (_, x) -> x)
+    Option.map lcl ~f:(fun (_, _, x) -> x)
 
 let set_fake_members env fake_members =
   let per_cont_env =

@@ -19,10 +19,12 @@ let pp_locl_ty _ _ = Printf.printf "%s\n" "<locl_ty>"
 * it. This is used when generating expression dependent types for the 'this'
 * then they refer to the same late bound type, and thus have compatible
 * 'this' types.
+* It also has an optional position that indicates where the local got this type.
+*
 *)
 type expression_id = Ident.t [@@deriving eq, show]
 
-type local = locl_ty * expression_id [@@deriving show]
+type local = locl_ty * Pos.t * expression_id [@@deriving show]
 
 let show_t _ = "<local_types.t>"
 

@@ -104,9 +104,9 @@ val get_return : env -> Typing_env_return_info.t
 
 val set_return : env -> Typing_env_return_info.t -> env
 
-val get_params : env -> (locl_ty * param_mode) Local_id.Map.t
+val get_params : env -> (locl_ty * Pos.t * param_mode) Local_id.Map.t
 
-val set_param : env -> Local_id.t -> locl_ty * param_mode -> env
+val set_param : env -> Local_id.t -> locl_ty * Pos.t * param_mode -> env
 
 val set_log_level : env -> string -> int -> env
 
@@ -200,7 +200,7 @@ val next_cont_opt : env -> Typing_per_cont_env.per_cont_entry option
 
 val all_continuations : env -> Typing_continuations.t list
 
-val set_local : env -> Local_id.t -> locl_ty -> env
+val set_local : env -> Local_id.t -> locl_ty -> Pos.t -> env
 
 val is_using_var : env -> Local_id.t -> bool
 
@@ -209,6 +209,8 @@ val set_using_var : env -> Local_id.t -> env
 val unset_local : env -> Local_id.t -> env
 
 val get_local : env -> Local_id.t -> locl_ty
+
+val get_local_pos : env -> Local_id.t -> locl_ty * Pos.t
 
 val get_locals : env -> Aast.lid list -> Typing_local_types.t
 

@@ -49,13 +49,13 @@ let lookup local_id gamma =
   (* Convert from type (local = ty * expression_id) to
    * (Tast.annotation = Pos.t * ty). Ignore the expression id.
    * TODO Avoid this conversion? Do we need the expression ids? *)
-  let local_to_pos_ty (ty, _expr_id) = (Typing_defs.get_pos ty, ty) in
+  let local_to_pos_ty (ty, _pos, _expr_id) = (Typing_defs.get_pos ty, ty) in
   Option.map tyopt local_to_pos_ty
 
 let add_to_gamma local_id ty gamma =
   let local_id = dummify_local_id local_id in
   let pos_ty_to_local (p, ty) =
-    Typing_defs.(mk (Reason.Rwitness p, get_node ty), 0)
+    Typing_defs.(mk (Reason.Rwitness p, get_node ty), Pos.none, 0)
   in
   let ty = pos_ty_to_local ty in
   {
@@ -87,9 +87,9 @@ let empty_delta_with_next_cont = empty_delta_with_cont C.Next
  *)
 let union env delta1 delta2 =
   let union env local1 local2 =
-    let (env, (ty, eid)) = LEnv.union env local1 local2 in
+    let (env, (ty, pos, eid)) = LEnv.union env local1 local2 in
     let (env, ty) = Env.expand_type env ty in
-    (env, (ty, eid))
+    (env, (ty, pos, eid))
   in
   let (_env, delta) = LEnvOps.union_by_cont env union delta1 delta2 in
   delta

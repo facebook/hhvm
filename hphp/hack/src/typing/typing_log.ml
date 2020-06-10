@@ -370,7 +370,7 @@ let continuations_map_as_value f m =
        m
        SMap.empty)
 
-let local_as_value env (ty, _expr_id) = type_as_value env ty
+let local_as_value env (ty, _pos, _expr_id) = type_as_value env ty
 
 let per_cont_env_as_value env per_cont_env =
   continuations_map_as_value
@@ -464,7 +464,7 @@ let lenv_as_value env lenv =
         string_as_value (reactivity_to_string env local_reactive) );
     ]
 
-let param_as_value env (ty, mode) =
+let param_as_value env (ty, _pos, mode) =
   let ty_str = Typing_print.debug env ty in
   match mode with
   | FPnormal -> Atom ty_str

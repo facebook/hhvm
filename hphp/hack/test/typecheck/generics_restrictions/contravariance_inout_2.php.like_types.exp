@@ -4,7 +4,7 @@ File "contravariance_inout_2.php", line 4, characters 10-10:
 This is where the parameter was declared as contravariant (-)
 File "contravariance_inout_2.php", line 6, characters 41-41:
 Inout/ref function parameters are both covariant and contravariant
-File "contravariance_inout_2.php", line 7, characters 19-19:
+File "contravariance_inout_2.php", line 7, characters 31-46:
 Invalid assignment to an inout parameter (Typing[4337])
 File "contravariance_inout_2.php", line 7, characters 19-19:
 Expected T (inout parameter)

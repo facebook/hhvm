@@ -1,4 +1,4 @@
-File "bad_inout_use_assign3.php", line 7, characters 18-23:
+File "bad_inout_use_assign3.php", line 7, characters 25-26:
 Invalid assignment to an inout parameter (Typing[4337])
 File "bad_inout_use_assign3.php", line 7, characters 18-23:
 Expected string (inout parameter)

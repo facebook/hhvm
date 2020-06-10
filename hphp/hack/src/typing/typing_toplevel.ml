@@ -538,7 +538,7 @@ and method_def env cls m =
         if Env.is_static env then
           env
         else
-          Env.set_local env this (Env.get_self env)
+          Env.set_local env this (Env.get_self env) Pos.none
       in
       let env =
         match Env.get_self_class env with

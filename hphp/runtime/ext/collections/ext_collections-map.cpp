@@ -72,26 +72,20 @@ void BaseMap::addAllImpl(const Variant& iterable) {
         mutate();
         return false;
       }
-      // We're using a smart pointer here (which inc-refs on construction),
-      // since we have to do two orthogonal escalations. Refcount examples:
-      //
-      //  1. If adata is a vanilla dict, we'll inc-ref adata, then replaceArray
-      //     will take ownership and inc-ref, and then we dec-ref: +1 to adata.
-      //
-      //  2. If adata is a bespoke dict, we'll inc-ref adata, create an (RC 1)
-      //     vanilla dict, and dec-ref adata. replaceArray will take ownership
-      //     of the vanilla dict (now RC 2), then we dec-ref the vanilla dict.
-      //     +0 to adata, and the new vanilla dict ends up with RC 1.
-      //
-      auto array = req::ptr<ArrayData>(adata);
+      // We have to do two orthogonal escalations. Careful with refcounting:
+      // we should not dec-ref the original adata, but we should dec-ref any
+      // intermediate values we create here.
+      auto array = adata;
       if (!array->isVanilla()) {
-        auto const reason = "BaseMap::addAllImpl";
-        array.reset(BespokeArray::ToVanilla(array.get(), reason));
+        array = BespokeArray::ToVanilla(array, "BaseMap::addAllImpl");
       }
       if (!array->isDictKind()) {
-        array.reset(array->toDict(array->cowCheck()));
+        auto const dict = array->toDict(array->cowCheck());
+        if (array != adata && array != dict) decRefArr(array);
+        array = dict;
       }
-      replaceArray(array.get());
+      replaceArray(array);
+      if (array != adata) decRefArr(array);
       return true;
     },
     [this](TypedValue k, TypedValue v) {

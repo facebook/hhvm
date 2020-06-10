@@ -1576,11 +1576,8 @@ OPTBLD_INLINE void iopAddElemC() {
   if (!isArrayType(c3->m_type) && !isDictType(c3->m_type)) {
     raise_error("AddElemC: $3 must be an array or dict");
   }
-  if (c2->m_type == KindOfInt64) {
-    tvAsVariant(*c3).asArrRef().set(c2->m_data.num, tvAsCVarRef(c1));
-  } else {
-    tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
-  }
+  tvAsVariant(*c3).asArrRef().set(tvAsCVarRef(c2), tvAsCVarRef(c1));
+  assertx(tvIsPlausible(*c3));
   vmStack().popC();
   vmStack().popC();
 }
@@ -1588,23 +1585,12 @@ OPTBLD_INLINE void iopAddElemC() {
 OPTBLD_INLINE void iopAddNewElemC() {
   TypedValue* c1 = vmStack().topC();
   TypedValue* c2 = vmStack().indC(1);
-  if (isArrayType(c2->m_type)) {
-    tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
-  } else if (isVecType(c2->m_type)) {
-    auto in = c2->m_data.parr;
-    auto out = PackedArray::AppendVec(in, *c1);
-    if (in != out) decRefArr(in);
-    c2->m_type = KindOfVec;
-    c2->m_data.parr = out;
-  } else if (isKeysetType(c2->m_type)) {
-    auto in = c2->m_data.parr;
-    auto out = SetArray::Append(in, *c1);
-    if (in != out) decRefArr(in);
-    c2->m_type = KindOfKeyset;
-    c2->m_data.parr = out;
-  } else {
+  auto const okay = tvIsArrayLike(c2) && !tvIsDict(c2);
+  assertx(okay == (tvIsArray(c2) || tvIsVec(c2) || tvIsKeyset(c2)));
+  if (!okay) {
     raise_error("AddNewElemC: $2 must be an array, vec, or keyset");
   }
+  tvAsVariant(*c2).asArrRef().append(tvAsCVarRef(c1));
   assertx(tvIsPlausible(*c2));
   vmStack().popC();
 }

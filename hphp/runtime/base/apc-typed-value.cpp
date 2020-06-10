@@ -58,15 +58,15 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.arr->isStatic());
       break;
     case APCKind::StaticVec:
-      assertx(m_data.vec->isVecKind());
+      assertx(m_data.vec->isVecType());
       assertx(m_data.vec->isStatic());
       break;
     case APCKind::StaticDict:
-      assertx(m_data.dict->isDictKind());
+      assertx(m_data.dict->isDictType());
       assertx(m_data.dict->isStatic());
       break;
     case APCKind::StaticKeyset:
-      assertx(m_data.keyset->isKeysetKind());
+      assertx(m_data.keyset->isKeysetType());
       assertx(m_data.keyset->isStatic());
       break;
     case APCKind::UncountedArray:
@@ -74,15 +74,15 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.arr->isUncounted());
       break;
     case APCKind::UncountedVec:
-      assertx(m_data.vec->isVecKind());
+      assertx(m_data.vec->isVecType());
       assertx(m_data.vec->isUncounted());
       break;
     case APCKind::UncountedDict:
-      assertx(m_data.dict->isDictKind());
+      assertx(m_data.dict->isDictType());
       assertx(m_data.dict->isUncounted());
       break;
     case APCKind::UncountedKeyset:
-      assertx(m_data.keyset->isKeysetKind());
+      assertx(m_data.keyset->isKeysetType());
       assertx(m_data.keyset->isUncounted());
       break;
     case APCKind::FuncEntity:

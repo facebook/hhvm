@@ -74,6 +74,20 @@ let debug_describe_cmd : type a. a command -> string = function
   | Rpc rpc -> debug_describe_t rpc
   | Debug -> "Debug"
 
+let debug_describe_message_type : type a. a message_type -> string = function
+  | Push _ -> "Push"
+  | Response _ -> "Response"
+  | Hello -> "Hello"
+  | Ping -> "Ping"
+
+let debug_describe_finale_data (data : finale_data) : string =
+  let (Utils.Callstack stack) = data.stack in
+  Printf.sprintf
+    "Exit status %s - %s\n%s"
+    (Exit_status.to_string data.exit_status)
+    data.msg
+    (Exception.clean_stack stack)
+
 let extract_labelled_file (labelled_file : ServerCommandTypes.labelled_file) :
     Relative_path.t * ServerCommandTypes.file_input =
   match labelled_file with

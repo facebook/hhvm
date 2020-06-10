@@ -172,7 +172,11 @@ let should_start env =
         pipe_name = HhServerMonitorConfig.(pipe_type_to_string Default);
       }
   in
-  match ServerUtils.connect_to_monitor ~timeout:3 env.root handoff_options with
+  let id = Random_id.short_string () in
+  Hh_logger.log "[mc#%s] ClientStart.should_start" id;
+  match
+    ServerUtils.connect_to_monitor ~id ~timeout:3 env.root handoff_options
+  with
   | Ok _conn -> false
   | Error
       ( SMUtils.Server_missing_exn _ | SMUtils.Server_missing_timeout _

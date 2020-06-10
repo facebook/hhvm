@@ -1674,8 +1674,9 @@ let get_hh_server_status (state : state) : ShowStatusFB.params option =
         int_of_float (time -. ienv.first_start_time) |> string_of_int
     in
     (* TODO: better to report time that hh_server has spent initializing *)
+    let id = Random_id.short_string () in
     let (progress, warning) =
-      match ServerUtils.server_progress ~timeout:3 (get_root_exn ()) with
+      match ServerUtils.server_progress ~id ~timeout:3 (get_root_exn ()) with
       | Error _ -> ("connecting", None)
       | Ok (progress, warning) -> (progress, warning)
     in

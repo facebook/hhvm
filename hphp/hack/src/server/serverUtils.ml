@@ -49,13 +49,15 @@ let hh_monitor_config root =
       monitor_log_file = ServerFiles.monitor_log_link root;
     }
 
-let shut_down_server root = MC.connect_and_shut_down (hh_monitor_config root)
+let shut_down_server ~id root =
+  MC.connect_and_shut_down ~id (hh_monitor_config root)
 
-let connect_to_monitor ~timeout root =
-  MC.connect_once ~timeout (hh_monitor_config root)
+let connect_to_monitor ~id ~timeout root =
+  MC.connect_once ~id ~timeout (hh_monitor_config root)
 
-let server_progress ~timeout root =
+let server_progress ~id ~timeout root =
   MC.connect_to_monitor_and_get_server_progress
+    ~id
     ~timeout
     (hh_monitor_config root)
 

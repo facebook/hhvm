@@ -77,11 +77,22 @@ let progress : string ref = ref "connecting"
 let progress_warning : string option ref = ref None
 
 let check_progress (root : Path.t) : unit =
-  match ServerUtils.server_progress ~timeout:3 root with
+  let id = Random_id.short_string () in
+  log "[mc#%s] ClientConnect.check_progress..." id;
+  match ServerUtils.server_progress ~id ~timeout:3 root with
   | Ok (msg, warning) ->
+    log
+      "[mc#%s] check_progress: %s / %s"
+      id
+      msg
+      (Option.value warning ~default:"[none]");
     progress := msg;
     progress_warning := warning
-  | _ -> ()
+  | Error e ->
+    log
+      "[mc#%s] check_progress: %s"
+      id
+      (ServerMonitorUtils.show_connection_error e)
 
 let delta_t : float = 3.0
 
@@ -144,19 +155,25 @@ let rec wait_for_server_message
       let msg : 'a ServerCommandTypes.message_type =
         Marshal_tools.from_fd_with_preamble fd
       in
-      let is_not_ping =
+      let is_ping =
         match msg with
-        | ServerCommandTypes.Ping -> false
-        | _ -> true
+        | ServerCommandTypes.Ping -> true
+        | _ -> false
       in
       let matches_expected =
         Option.value_map ~default:true ~f:(Poly.( = ) msg) expected_message
       in
-      if is_not_ping && matches_expected then (
+      if matches_expected && not is_ping then (
+        log
+          "wait_for_server_message: got expected %s"
+          (ServerCommandTypesUtils.debug_describe_message_type msg);
         progress_callback None;
         Lwt.return msg
       ) else (
-        if is_not_ping then print_wait_msg progress_callback root;
+        log
+          "wait_for_server_message: didn't want %s"
+          (ServerCommandTypesUtils.debug_describe_message_type msg);
+        if not is_ping then print_wait_msg progress_callback root;
         wait_for_server_message
           ~expected_message
           ~ic
@@ -166,9 +183,16 @@ let rec wait_for_server_message
           ~root
       )
     with
-    | End_of_file
-    | Sys_error _ ->
+    | (End_of_file | Sys_error _) as e ->
+      let e = Exception.wrap e in
       let finale_data = get_finale_data server_finale_file in
+      log
+        "wait_for_server_message: %s\nfinale_data: %s"
+        (e |> Exception.to_string |> Exception.clean_stack)
+        (Option.value_map
+           finale_data
+           ~f:ServerCommandTypesUtils.debug_describe_finale_data
+           ~default:"[none]");
       progress_callback None;
       raise (Server_hung_up finale_data)
 
@@ -228,9 +252,10 @@ let rec connect
             HhServerMonitorConfig.Default );
     }
   in
-  log "connect: attempting connect_to_monitor";
+  let id = Random_id.short_string () in
+  log "[mc#%s] ClientConnect.connect: attempting connect_to_monitor" id;
   let conn =
-    ServerUtils.connect_to_monitor ~timeout:1 env.root handoff_options
+    ServerUtils.connect_to_monitor ~id ~timeout:1 env.root handoff_options
   in
   HackEventLogger.client_connect_once connect_once_start_t;
   match conn with

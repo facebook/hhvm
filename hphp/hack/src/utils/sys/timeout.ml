@@ -12,7 +12,15 @@ type timings = {
   deadline_time: float;  (** caller-supplied deadline *)
   timeout_time: float;  (** actual time we raised the timeout *)
 }
-[@@deriving show]
+
+let show_timings (t : timings) : string =
+  Printf.sprintf
+    "{start=%s deadline=%s timeout=%s}"
+    (Utils.timestring t.start_time)
+    (Utils.timestring t.deadline_time)
+    (Utils.timestring t.timeout_time)
+
+let pp_timings fmt t = Format.fprintf fmt "Timeout.timings%s" (show_timings t)
 
 exception
   Timeout of {
@@ -20,6 +28,18 @@ exception
     timeout_time: float;
     deadline_time: float;
   }
+
+let () =
+  Caml.Printexc.register_printer (fun exn ->
+      match exn with
+      | Timeout t ->
+        Some
+          (Printf.sprintf
+             "Timeout.Timeout(id=%d timeout=%s deadline=%s)"
+             t.exn_id
+             (Utils.timestring t.timeout_time)
+             (Utils.timestring t.deadline_time))
+      | _ -> None)
 
 (* The IDs are used to tell the difference between timeout A timing out and timeout B timing out.
  * So they only really need to be unique between any two active timeouts in the same process. *)

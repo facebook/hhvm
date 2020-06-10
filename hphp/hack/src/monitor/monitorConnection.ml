@@ -10,7 +10,7 @@
 open Hh_prelude
 open ServerMonitorUtils
 
-let log s = Hh_logger.log ("[monitor-connection] " ^^ s)
+let log s ~id = Hh_logger.log ("[monitor-connection#%s] " ^^ s) id
 
 let server_exists lock_file = not (Lock.check lock_file)
 
@@ -29,7 +29,8 @@ let wait_on_server_restart ic =
     (* Server has exited and hung up on us *)
     ()
 
-let send_version oc =
+let send_version ~id oc =
+  log "send version" ~id;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
     Build_id.build_revision
@@ -41,20 +42,22 @@ let send_version oc =
   in
   ()
 
-let send_server_handoff_rpc handoff_options oc =
-  log "send_server_handoff_rpc";
+let send_server_handoff_rpc ~id handoff_options oc =
+  log "send_server_handoff_rpc" ~id;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
     (MonitorRpc.HANDOFF_TO_SERVER handoff_options)
   |> ignore
 
-let send_shutdown_rpc oc =
+let send_shutdown_rpc ~id oc =
+  log "send_shutdown" ~id;
   Marshal_tools.to_fd_with_preamble
     (Unix.descr_of_out_channel oc)
     MonitorRpc.SHUT_DOWN
   |> ignore
 
-let send_server_progress_rpc oc =
+let send_server_progress_rpc ~id oc =
+  log "send_server_process_rpc" ~id;
   let (_ : int) =
     Marshal_tools.to_fd_with_preamble
       (Unix.descr_of_out_channel oc)
@@ -62,12 +65,13 @@ let send_server_progress_rpc oc =
   in
   ()
 
-let read_server_progress ic : string * string option =
+let read_server_progress ~id ic : string * string option =
+  log "read_server_progress" ~id;
   from_channel_without_buffering ic
 
-let establish_connection ~timeout config =
+let establish_connection ~id ~timeout config =
   let sock_name = Socket.get_path config.socket_file in
-  log "establish_connection %s" sock_name;
+  log "establish_connection %s" ~id sock_name;
   let sockaddr =
     if Sys.win32 then (
       let ic = In_channel.create ~binary:true sock_name in
@@ -86,16 +90,18 @@ let establish_connection ~timeout config =
     else
       Error (Monitor_socket_not_ready e)
 
-let get_cstate config (ic, oc) =
+let get_cstate ~id config (ic, oc) =
   try
-    log "send version";
-    send_version oc;
-    log "get cstate";
+    send_version ~id oc;
+    log "get cstate" ~id;
     let cstate : connection_state = from_channel_without_buffering ic in
     Ok (ic, oc, cstate)
   with e ->
     let e = Exception.wrap e in
-    log "error getting cstate; closing connection. %s" (Exception.to_string e);
+    log
+      "error getting cstate; closing connection. %s"
+      ~id
+      (Exception.to_string e);
     Timeout.shutdown_connection ic;
     Timeout.close_in_noerr ic;
     if not (server_exists config.lock_file) then
@@ -103,7 +109,7 @@ let get_cstate config (ic, oc) =
     else
       Error (Monitor_connection_failure e)
 
-let verify_cstate ic cstate =
+let verify_cstate ~id ic cstate =
   match cstate with
   | Connection_ok -> Ok ()
   | Build_id_mismatch_ex mismatch_info ->
@@ -118,9 +124,9 @@ let verify_cstate ic cstate =
      *
      * See also: ServerMonitor.client_out_of_date
      *)
-    log "verify_cstate: waiting on server restart";
+    log "verify_cstate: waiting on server restart" ~id;
     wait_on_server_restart ic;
-    log "verify_cstate: closing ic";
+    log "verify_cstate: closing ic" ~id;
     Timeout.close_in_noerr ic;
     Error (Build_id_mismatched (Some mismatch_info))
   | Build_id_mismatch ->
@@ -129,12 +135,15 @@ let verify_cstate ic cstate =
 
 (* Consume sequence of Prehandoff messages. *)
 let rec consume_prehandoff_messages
-    ~(timeout : Timeout.t) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
+    ~(id : string)
+    ~(timeout : Timeout.t)
+    (ic : Timeout.in_channel)
+    (oc : Stdlib.out_channel) :
     ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
   let module PH = Prehandoff in
-  log "consume_prehandoff_messages";
+  log "consume_prehandoff_messages" ~id;
   let m : PH.msg = from_channel_without_buffering ~timeout ic in
   match m with
   | PH.Sentinel finale_file -> Ok (ic, oc, finale_file)
@@ -147,7 +156,7 @@ let rec consume_prehandoff_messages
     Printf.eprintf
       "Waiting for a server to be started...%s\n%!"
       ClientMessages.waiting_for_server_to_be_started_doc;
-    consume_prehandoff_messages ~timeout ic oc
+    consume_prehandoff_messages ~id ~timeout ic oc
   | PH.Server_died_config_change ->
     Printf.eprintf
       ( "Last server exited due to config change. Please re-run client"
@@ -169,22 +178,25 @@ let rec consume_prehandoff_messages
     Error Server_died
 
 let consume_prehandoff_messages
-    ~(timeout : int) (ic : Timeout.in_channel) (oc : Stdlib.out_channel) :
+    ~(id : string)
+    ~(timeout : int)
+    (ic : Timeout.in_channel)
+    (oc : Stdlib.out_channel) :
     ( Timeout.in_channel * Stdlib.out_channel * string,
       ServerMonitorUtils.connection_error )
     result =
   Timeout.with_timeout
     ~timeout
-    ~do_:(fun timeout -> consume_prehandoff_messages ~timeout ic oc)
+    ~do_:(fun timeout -> consume_prehandoff_messages ~id ~timeout ic oc)
     ~on_timeout:(fun _ ->
       Error ServerMonitorUtils.Server_dormant_out_of_retries)
 
-let connect_to_monitor ~timeout config =
-  Result.(
-    Timeout.with_timeout
-      ~timeout
-      ~on_timeout:(fun timings ->
-        (*
+let connect_to_monitor ~id ~timeout config =
+  let open Result.Monad_infix in
+  Timeout.with_timeout
+    ~timeout
+    ~on_timeout:(fun timings ->
+      (*
       * Monitor should always readily accept connections. In theory, this will
       * only timeout if the Monitor is being very heavily DDOS'd, or the Monitor
       * has wedged itself (a bug).
@@ -215,43 +227,44 @@ let connect_to_monitor ~timeout config =
         *    We ameliorate this by having the timeout be quite large
         *    (many seconds) and by not auto-retrying connections to the Monitor.
       * *)
-        HackEventLogger.client_connect_to_monitor_timeout ();
-        let exists_lock_file = server_exists config.lock_file in
-        log
-          "connect_to_monitor: lockfile=%b timeout=%s"
-          exists_lock_file
-          (Timeout.show_timings timings);
-        if not exists_lock_file then
-          Error (Server_missing_timeout timings)
-        else
-          Error ServerMonitorUtils.Monitor_establish_connection_timeout)
-      ~do_:
-        begin
-          fun timeout ->
-          establish_connection ~timeout config >>= fun (ic, oc) ->
-          get_cstate config (ic, oc)
-        end)
+      HackEventLogger.client_connect_to_monitor_timeout ();
+      let exists_lock_file = server_exists config.lock_file in
+      log
+        "connect_to_monitor: lockfile=%b timeout=%s"
+        ~id
+        exists_lock_file
+        (Timeout.show_timings timings);
+      if not exists_lock_file then
+        Error (Server_missing_timeout timings)
+      else
+        Error ServerMonitorUtils.Monitor_establish_connection_timeout)
+    ~do_:
+      begin
+        fun timeout ->
+        establish_connection ~id ~timeout config >>= fun (ic, oc) ->
+        get_cstate ~id config (ic, oc)
+      end
 
-let connect_and_shut_down config =
-  Result.(
-    connect_to_monitor ~timeout:3 config >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate >>= fun () ->
-    send_shutdown_rpc oc;
-    Timeout.with_timeout
-      ~timeout:3
-      ~on_timeout:(fun timings ->
-        if not (server_exists config.lock_file) then
-          Error (Server_missing_timeout timings)
-        else
-          Ok ServerMonitorUtils.SHUTDOWN_UNVERIFIED)
-      ~do_:
-        begin
-          fun _ ->
-          wait_on_server_restart ic;
-          Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
-        end)
+let connect_and_shut_down ~id config =
+  let open Result.Monad_infix in
+  connect_to_monitor ~id ~timeout:3 config >>= fun (ic, oc, cstate) ->
+  verify_cstate ~id ic cstate >>= fun () ->
+  send_shutdown_rpc ~id oc;
+  Timeout.with_timeout
+    ~timeout:3
+    ~on_timeout:(fun timings ->
+      if not (server_exists config.lock_file) then
+        Error (Server_missing_timeout timings)
+      else
+        Ok ServerMonitorUtils.SHUTDOWN_UNVERIFIED)
+    ~do_:
+      begin
+        fun _ ->
+        wait_on_server_restart ic;
+        Ok ServerMonitorUtils.SHUTDOWN_VERIFIED
+      end
 
-let connect_once ~timeout config handoff_options =
+let connect_once ~id ~timeout config handoff_options =
   (***************************************************************************)
   (* CONNECTION HANDSHAKES                                                   *)
   (* Explains what connect_once does+returns, and how callers use the result.*)
@@ -351,20 +364,21 @@ let connect_once ~timeout config handoff_options =
   (*       -> "hh_client lsp" -> raise Lsp.Error_server_start.               *)
   (*   | catch any exception -> unhandled.                                   *)
   (***************************************************************************)
-  Result.(
-    let start_t = Unix.gettimeofday () in
-    connect_to_monitor ~timeout config >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate >>= fun () ->
-    send_server_handoff_rpc handoff_options oc;
-    let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
-    let timeout = max (timeout - elapsed_t) 1 in
-    consume_prehandoff_messages ~timeout ic oc)
+  let open Result.Monad_infix in
+  let start_t = Unix.gettimeofday () in
+  connect_to_monitor ~id ~timeout config >>= fun (ic, oc, cstate) ->
+  verify_cstate ~id ic cstate >>= fun () ->
+  send_server_handoff_rpc ~id handoff_options oc;
+  let elapsed_t = int_of_float (Unix.gettimeofday () -. start_t) in
+  let timeout = max (timeout - elapsed_t) 1 in
+  consume_prehandoff_messages ~id ~timeout ic oc
 
-let connect_to_monitor_and_get_server_progress ~timeout config : (string * string option, ServerMonitorUtils.connection_error) result =
-  Result.(
-    connect_to_monitor ~timeout config >>= fun (ic, oc, cstate) ->
-    verify_cstate ic cstate >>= fun () ->
-    (* This is similar to connect_once up to this point, where instead of
-     * being handed off to server we just get our answer from monitor *)
-    send_server_progress_rpc oc;
-    Ok (read_server_progress ic))
+let connect_to_monitor_and_get_server_progress ~id ~timeout config :
+    (string * string option, ServerMonitorUtils.connection_error) result =
+  let open Result.Monad_infix in
+  connect_to_monitor ~id ~timeout config >>= fun (ic, oc, cstate) ->
+  verify_cstate ~id ic cstate >>= fun () ->
+  (* This is similar to connect_once up to this point, where instead of
+    * being handed off to server we just get our answer from monitor *)
+  send_server_progress_rpc ~id oc;
+  Ok (read_server_progress ~id ic)

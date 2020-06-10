@@ -72,6 +72,8 @@ class ReflectionClass implements Reflector {
   <<__Pure, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
+  <<__Pure, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Pure, __MaybeMutable>>
   final public function getAttributeClass<T as HH\ClassLikeAttribute>(classname<T> $c): ?T;
@@ -205,6 +207,8 @@ abstract class ReflectionFunctionAbstract implements Reflector {
   public function getReturnTypeText();
   <<__Pure, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
+  <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
   <<__Pure, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Pure, __MaybeMutable>>
@@ -346,6 +350,8 @@ class ReflectionParameter implements Reflector {
   <<__Pure, __MaybeMutable>>
   public function getType(): ?ReflectionType;
   <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
+  <<__Pure, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Pure, __MaybeMutable>>
   final public function getAttributeClass<T as HH\ParameterAttribute>(classname<T> $c): ?T;
@@ -391,8 +397,12 @@ class ReflectionProperty implements Reflector {
   public function setAccessible($accessible);
   <<__Pure, __MaybeMutable>>
   public function getTypeText();
-  public function getAttributes(): darray<string, varray<mixed>>;
-  public function getAttribute(string $name): ?varray<mixed>;
+  <<__Pure, __MaybeMutable>>
+  final public function getAttributes(): darray<string, varray<mixed>>;
+  <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
+  <<__Pure, __MaybeMutable>>
+  final public function getAttribute(string $name): ?varray<mixed>;
 }
 
 class ReflectionExtension implements Reflector {
@@ -464,6 +474,8 @@ class ReflectionTypeAlias implements Reflector {
   <<__Pure, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
   <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
+  <<__Pure, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Pure, __MaybeMutable>>
   final public function getAttributeClass<T as HH\TypeAliasAttribute>(classname<T> $c): ?T;
@@ -492,6 +504,8 @@ class ReflectionFile implements Reflector {
   public function getName(): string;
   <<__Pure, __MaybeMutable>>
   final public function getAttributes(): darray<string, varray<mixed>>;
+  <<__Pure, __MaybeMutable>>
+  final public function hasAttribute(string $name): bool;
   <<__Pure, __MaybeMutable>>
   final public function getAttribute(string $name): ?varray<mixed>;
   <<__Pure, __MaybeMutable>>

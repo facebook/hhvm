@@ -139,9 +139,10 @@ let rage_pstacks (env : env) : string Lwt.t =
 let rage_ps () : string Lwt.t =
   (* Flags to ps:
   -A means "all processes"
-  -F means "extra full output" i.e. lots of fields of output. *)
+  -F means "extra full output" i.e. lots of fields of output.
+  --forest means "ascii art process tree" *)
   let%lwt result =
-    Lwt_utils.exec_checked ~timeout:20.0 Exec_command.Ps [| "-AF" |]
+    Lwt_utils.exec_checked ~timeout:20.0 Exec_command.Ps [| "-AF"; "--forest" |]
   in
   match result with
   | Ok { Lwt_utils.Process_success.stdout; _ } -> Lwt.return stdout

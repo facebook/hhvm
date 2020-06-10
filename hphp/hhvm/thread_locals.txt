@@ -100,14 +100,14 @@ HPHP::(anonymous namespace)::s_localCounters
 HPHP::arrprov::(anonymous namespace)::tl_tag_override
 HPHP::tracing::detail::tl_active
 
-# The native autoloader is not request-scoped.
-HPHP::WatchmanAutoload::t_adb
-HPHP::WatchmanAutoload::(anonymous namespace)::t_savedStates
+# Native Facts is not request-scoped.
+HPHP::Facts::t_adb
+HPHP::Facts::(anonymous namespace)::t_savedStates
 
-# Thread locals to allow the native autoloader to use memcache.
+# Thread locals to allow Native Facts to use memcache.
 # "guard variable for" is a clang-ism, leaving it out is a GCC-ism
-facebook::datatype::MemcacheFetcher<HPHP::WatchmanAutoload::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
-guard variable for facebook::datatype::MemcacheFetcher<HPHP::WatchmanAutoload::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
+guard variable for facebook::datatype::MemcacheFetcher<HPHP::Facts::(anonymous namespace)::FactsMemcacheDataType, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::timeToLive() const::gen
 
 # TODO: (T9683397) Un-whitelist these Call Threaded Interpreter TLS vars.
 HPHP::(anonymous namespace)::cc_lookups

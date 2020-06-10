@@ -138,8 +138,8 @@ struct AutoloadMap {
  * An AutoloadMap which can also return data not directly related to
  * autoloading.
  */
-struct Facts : public AutoloadMap {
-  virtual ~Facts() = default;
+struct FactsStore : public AutoloadMap {
+  virtual ~FactsStore() = default;
 
   /**
    * Return all types in the repo which the given type extends.

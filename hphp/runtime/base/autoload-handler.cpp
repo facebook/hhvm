@@ -55,7 +55,7 @@ void FactsFactory::setInstance(FactsFactory* instance) {
 
 namespace {
 
-Facts* getFactsForRequest() {
+FactsStore* getFactsForRequest() {
   auto* factory = FactsFactory::getInstance();
   if (!factory) {
     return nullptr;

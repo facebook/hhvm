@@ -370,10 +370,9 @@ private:
 /*
  * Information about the context in which we are selecting a region.
  *
- * Right now this is a source location, plus information about the
- * live types that we need to be compiling for.  There is no
- * implication that the region selected will necessarily specialize
- * for those types.
+ * Right now this is a source location, plus information about the live
+ * types that we need to be compiling for. There is no implication that
+ * the region selected will necessarily be specialized for those types.
  */
 struct RegionContext {
   struct LiveType;
@@ -382,8 +381,9 @@ struct RegionContext {
     : sk(sk), spOffset(spOff) {}
 
   SrcKey sk;
-  FPInvOffset spOffset;
   jit::vector<LiveType> liveTypes;
+  bool liveBespoke = false;
+  FPInvOffset spOffset;
 };
 
 /*

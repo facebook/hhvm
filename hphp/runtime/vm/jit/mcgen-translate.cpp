@@ -529,6 +529,9 @@ TCA retranslate(TransArgs args, const RegionContext& ctx) {
   if (RID().isJittingDisabled()) {
     SKTRACE(2, args.sk, "punting because jitting code was disabled\n");
     return nullptr;
+  } else if (ctx.liveBespoke) {
+    SKTRACE(2, args.sk, "punting because region includes a live bespoke\n");
+    return nullptr;
   }
 
   auto sr = tc::findSrcRec(args.sk);

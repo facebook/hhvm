@@ -896,7 +896,10 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     return Type::ExactRecord(rec);
   }
 
-  if (tvIsArray(tv)) return Type::Array(val(tv).parr->kind());
+  if (tvIsArray(tv)) {
+    auto const ad = val(tv).parr;
+    return ad->isVanilla() ? Type::Array(ad->kind()) : TArr;
+  }
 
   auto const result = Type(dt_modulo_persistence(type(tv)));
   auto const vanilla = isArrayLikeType(type(tv)) && val(tv).parr->isVanilla();

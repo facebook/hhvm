@@ -59,14 +59,18 @@ RegionContext getContext(SrcKey sk) {
   auto const sp = vmsp();
 
   always_assert(func == fp->m_func);
-
   auto const ctxClass = func->cls();
+  auto const addLiveType = [&](Location loc, tv_rval tv) {
+    auto const bespoke = tvIsArrayLike(tv) && !val(tv).parr->isVanilla();
+    ctx.liveTypes.push_back({loc, typeFromTV(tv, ctxClass)});
+    ctx.liveBespoke |= bespoke;
+    FTRACE(2, "Added live type: {}{}\n", show(ctx.liveTypes.back()),
+           bespoke ? " (bespoke)" : "");
+  };
+
   // Track local types.
   for (uint32_t i = 0; i < func->numLocals(); ++i) {
-    ctx.liveTypes.push_back(
-      { Location::Local{i}, typeFromTV(frame_local(fp, i), ctxClass) }
-    );
-    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+    addLiveType(Location::Local{i}, frame_local(fp, i));
   }
 
   // Track stack types.
@@ -74,11 +78,8 @@ RegionContext getContext(SrcKey sk) {
   visitStackElems(
     fp, sp,
     [&] (const TypedValue* tv) {
-      ctx.liveTypes.push_back(
-        { Location::Stack{ctx.spOffset - stackOff}, typeFromTV(tv, ctxClass) }
-      );
+      addLiveType(Location::Stack{ctx.spOffset - stackOff}, tv);
       stackOff++;
-      FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
     }
   );
 
@@ -98,9 +99,7 @@ RegionContext getContext(SrcKey sk) {
   if (isMemberDimOp(op) || isMemberFinalOp(op)) {
     auto const mbase = vmMInstrState().base;
     assertx(mbase != nullptr);
-
-    ctx.liveTypes.push_back({ Location::MBase{}, typeFromTV(mbase, ctxClass) });
-    FTRACE(2, "added live type {}\n", show(ctx.liveTypes.back()));
+    addLiveType(Location::MBase{}, mbase);
   }
 
   return ctx;

@@ -1222,7 +1222,7 @@ void translateInstr(irgen::IRGS& irgs, const NormalizedInstruction& ni) {
   }
 
   if (isAlwaysNop(ni)) return;
-  handleBespokeInputs(irgs, ni);
+  handleBespokeInputs(irgs, ni.source);
   if (ni.interp || RuntimeOption::EvalJitAlwaysInterpOne) {
     irgen::interpOne(irgs);
     return;

@@ -18,7 +18,7 @@
 #define incl_HPHP_IRGEN_BESPOKE_H
 
 #include "hphp/runtime/vm/jit/irgen-state.h"
-#include "hphp/runtime/vm/jit/normalized-instruction.h"
+#include "hphp/runtime/vm/srckey.h"
 
 namespace HPHP { namespace jit { namespace irgen {
 
@@ -28,7 +28,7 @@ namespace HPHP { namespace jit { namespace irgen {
  * If this bytecode makes use of the layout of any of its array-like inputs,
  * check that we have a specific enough type to continue a tracelet.
  */
-bool checkBespokeInputs(IRGS&, const NormalizedInstruction&);
+bool checkBespokeInputs(IRGS&, SrcKey);
 
 /*
  * If this bytecode makes use of the layout of any of its array-like inputs,
@@ -38,7 +38,7 @@ bool checkBespokeInputs(IRGS&, const NormalizedInstruction&);
  * Having this hook allows us to handle these cases in wildly different ways
  * based on runtime flags, profiling vs. optimizing, etc.
  */
-void handleBespokeInputs(IRGS&, const NormalizedInstruction&);
+void handleBespokeInputs(IRGS&, SrcKey);
 
 ///////////////////////////////////////////////////////////////////////////////
 

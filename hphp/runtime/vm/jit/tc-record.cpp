@@ -137,13 +137,12 @@ void reportJitMaturity() {
   auto const before = jitMaturityCounter->getValue();
   if (before == 100) return;
 
-  // Limit jit maturity to 70 before retranslateAll finishes (if enabled).  If
-  // the JIT is running in jumpstart seeder mode with profiling of optimized
-  // code enabled, don't consider retranslateAll to ever finish because, even
-  // when it's done, it'll be running instrumented optimizing code.
+  // Limit jit maturity to 70 before retranslateAll finishes (if enabled). If
+  // the JIT running in jumpstart seeer mode, don't consider retranslateAll to
+  // ever finish.
   constexpr uint64_t kMaxMaturityBeforeRTA = 70;
-  auto const beforeRetranslateAll = mcgen::retranslateAllPending() ||
-    (isJitSerializing() && serializeOptProfEnabled());
+  auto const beforeRetranslateAll =
+    mcgen::retranslateAllPending() || isJitSerializing();
   // If retranslateAll is enabled, wait until it finishes before counting in
   // optimized translations.
   auto const hotSize = beforeRetranslateAll ? 0 : code().hot().used();
@@ -170,10 +169,6 @@ void reportJitMaturity() {
   // based on the rate in which JITed code is being produced.
   if (RuntimeOption::EvalJitMatureAfterWarmup && warmupStatusString().empty()) {
     maturity = 100;
-  }
-
-  if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {
-    maturity = std::max(decltype(maturity){99}, maturity);
   }
 
   if (maturity > before) {

@@ -42,7 +42,7 @@ use std::{
     slice::Iter,
 };
 
-use crate::lowerer_modifier as modifier;
+use crate::modifier;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum LiftedAwaitKind {

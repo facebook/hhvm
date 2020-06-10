@@ -14,7 +14,7 @@ coroutine_parser_leak_tree = { path = "../../api/cargo/coroutine_parser_leak_tre
 coroutine_smart_constructors = { path = "../coroutine_smart_constructors" }
 decl_mode_parser = { path = "../../api/cargo/decl_mode_parser" }
 lint_rust = { path = "../../../utils/lint" }
-lowerer = { path = "../lowerer" }
+lowerer = { path = "../../lowerer" }
 mode_parser = { path = "../mode_parser" }
 namespaces_rust = { path = "../namespaces" }
 naming_special_names_rust = { path = "../../../naming" }

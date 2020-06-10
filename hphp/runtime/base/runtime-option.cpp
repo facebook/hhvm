@@ -2810,10 +2810,16 @@ void RuntimeOption::Load(
     Trace::ensureInit(getTraceOutputFile());
   }
 
-  // Make sure that we JIT checks for bespoke array-likes if we emit them.
-  // If we won't see them, specialize destructors for the vanilla layouts.
-  RO::EvalAllowBespokeArrayLikes =
-    RO::EvalAllowBespokeArrayLikes || RO::EvalEmitBespokeArrayLikes;
+  // Bespoke array-likes
+
+  // We don't support provenance for bespoke array-likes, so don't construct
+  // any at runtime if we're logging provenance instrumentation results.
+  RO::EvalEmitBespokeArrayLikes &= !RO::EvalLogArrayProvenance;
+
+  // If we're going to construct bespoke array-likes at runtime, ensure that
+  // we JIT checks for these types as well. We support JIT-ing these checks
+  // even if there are no runtime bespokes as way to test our guard logic.
+  RO::EvalAllowBespokeArrayLikes |= RO::EvalEmitBespokeArrayLikes;
   if (!RO::EvalAllowBespokeArrayLikes) specializeVanillaDestructors();
 
   // Hack Array Compats

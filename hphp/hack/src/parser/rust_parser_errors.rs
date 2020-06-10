@@ -3536,7 +3536,7 @@ where
         let mut check = |sname, names: &mut HashSet<String>| {
             let name = self.text(sname);
             // If the name is empty, then there was an earlier
-            // parsing error that should supercede this one.
+            // parsing error that should supersede this one.
             if name == "" {
             } else if names.contains(name) {
                 self.errors.push(Self::make_error_from_node(
@@ -4982,7 +4982,7 @@ where
             PostfixUnaryExpression(x) => check_unary_expression(self, &x.postfix_unary_operator),
 
             // FIXME: Array_get ((_, Class_const _), _) is not a valid lvalue. *)
-            _ => {} // Ideally we should put all the rest of the syntax here so everytime
+            _ => {} // Ideally we should put all the rest of the syntax here so every time
                     // a new syntax is added people need to consider whether the syntax
                     // can be a valid lvalue or not. However, there are too many of them.
         }

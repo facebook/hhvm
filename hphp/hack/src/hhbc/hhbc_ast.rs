@@ -218,7 +218,7 @@ pub enum InstructLitConst {
     Int(i64),
     Double(String),
     String(String),
-    /// Pseudo instruction that will get translated into appropraite literal
+    /// Pseudo instruction that will get translated into appropriate literal
     /// bytecode, with possible reference to .adata *)
     TypedValue(TypedValue),
     Array(AdataId),

@@ -9,7 +9,7 @@
 //! to parsing with `positioned_parser` and calling `OcamlRep::to_ocaml` on resulting value (while bypassing the cost
 //! of allocating intermediate Rust structure).
 //!
-//! The fancy sounding "coroutine" part refers to the fact that the parser tracks (and returns in its state) occurence
+//! The fancy sounding "coroutine" part refers to the fact that the parser tracks (and returns in its state) occurrence
 //! of coroutine related features in the file (`coroutine`, `susped` keywords, `__PPL` attribute) which is used
 //! in codegen pipeline to decide whether file needs additional processing to handle those things.
 //!

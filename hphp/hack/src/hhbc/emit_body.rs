@@ -641,7 +641,7 @@ pub fn emit_method_prolog(
         .filter(|p| !(p.is_variadic && p.name == "..."))
         .collect::<Vec<_>>();
     if params.len() != ast_params.len() {
-        return Err(Error::Unrecoverable("lenth mismatch".into()));
+        return Err(Error::Unrecoverable("length mismatch".into()));
     }
     let param_instrs = params
         .iter()

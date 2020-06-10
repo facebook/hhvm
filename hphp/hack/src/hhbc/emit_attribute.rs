@@ -56,7 +56,7 @@ pub fn from_ast(
 
 /// Adds an __Reified attribute for functions and classes with reified type
 /// parameters. The arguments to __Reified are number of type parameters
-/// followed by the indicies of these reified type parameters and whether they
+/// followed by the indices of these reified type parameters and whether they
 /// are soft reified or not
 pub fn add_reified_attribute(tparams: &[a::Tparam]) -> Option<HhasAttribute> {
     let reified_data: Vec<(usize, bool, bool)> = tparams

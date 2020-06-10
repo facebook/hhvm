@@ -9,7 +9,7 @@
 //! to completely (with _full fidelity_ one might say) describe the structure of the file.
 //! This information is syntax / token / trivia kinds and widths of individual nodes.
 //!
-//! The idea was that the simplicty of this format makes it easy to serialize (but the most successful
+//! The idea was that the simplicity of this format makes it easy to serialize (but the most successful
 //! serialization story so far, `HackAST` chooses `JSON` version of `PositionedSyntax` instead anyway).
 //! In practice, the only existing applications of this parser are:
 //!

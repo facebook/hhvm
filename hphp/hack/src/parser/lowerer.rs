@@ -1892,7 +1892,7 @@ where
                 };
 
                 /**
-                 * FFP does not destinguish between ++$i and $i++ on the level of token
+                 * FFP does not distinguish between ++$i and $i++ on the level of token
                  * kind annotation. Prevent duplication by switching on `postfix` for
                  * the two operatores for which AST /does/ differentiate between
                  * fixities.

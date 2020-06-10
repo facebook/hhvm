@@ -744,17 +744,15 @@ let default_ignored_fixme_codes =
 
 let ignored_fixme_codes = ref default_ignored_fixme_codes
 
-let allowed_fixme_codes_strict = ref ISet.empty
-
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
-let is_allowed_code_strict code = ISet.mem code !allowed_fixme_codes_strict
+let is_ignored_code code = ISet.mem code !ignored_fixme_codes || code / 1000 = 5
 
-let is_allowed_fixme pos code =
+let is_ignored_fixme pos code =
   if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
-    true
+    false
   else
-    is_allowed_code_strict code
+    is_ignored_code code
 
 let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)
@@ -775,7 +773,7 @@ let add_ignored_fixme_code_error pos code =
                "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d in declarations"
                code );
          ])
-  else if !is_hh_fixme pos code && not (is_allowed_code_strict code) then
+  else if !is_hh_fixme pos code && is_ignored_code code then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
     if code / 1000 = 5 then
       add_error_impl
@@ -852,7 +850,7 @@ and add_error_with_check (error : error) : unit =
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let pos_msg_l = check_pos_msg pos_msg_l in
-  if is_allowed_fixme pos code && !is_hh_fixme pos code then
+  if (not (is_ignored_fixme pos code)) && !is_hh_fixme pos code then
     add_applied_fixme code pos
   else
     add_error_impl (make_error code pos_msg_l);

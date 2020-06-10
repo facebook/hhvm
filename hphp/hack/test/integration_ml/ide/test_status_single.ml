@@ -29,25 +29,8 @@ let check_status_single_response = function
   | Some ([], _) -> ()
   | Some _ -> Test.fail "Expected no errors"
 
-let root = "/"
-
-let hhconfig_filename = Filename.concat root ".hhconfig"
-
-let hhconfig_contents = "
-allowed_fixme_codes_strict = 4110
-"
-
 let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
-  let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
-  in
-  let env = Test.setup_server ~custom_config () in
+  let env = Test.setup_server () in
   let env = Test.setup_disk env [(foo_name, foo_contents)] in
   Test.assert_no_errors env;
 

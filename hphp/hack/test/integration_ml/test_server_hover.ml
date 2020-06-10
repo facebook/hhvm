@@ -70,7 +70,16 @@ abstract class ClassMembers {
     );
   }
 }
-"
+
+function pow(
+  int $base,
+  int $exponent): int {
+  return $base; // TODO: why isn't Math\\pow getting resolved?
+}
+
+function sqrt(int $value): int {
+  return $value;
+}"
 
 let class_members_cases =
   [
@@ -962,10 +971,6 @@ function test_duplicate_result_class(bool $x): void {
 }
 "
 
-let hhconfig = "
-allowed_fixme_codes_strict = 4030
-"
-
 let files =
   [
     ("class_members.php", class_members);
@@ -979,14 +984,6 @@ let files =
     ("class_id_positions.php", class_id_positions);
   ]
 
-let root = "/"
-
-let hhconfig_filename = Filename.concat root ".hhconfig"
-
-let hhconfig_contents = "
-allowed_fixme_codes_strict = 4030
-"
-
 let cases =
   class_id_positions_cases
   @ doc_block_fallback_cases
@@ -999,19 +996,9 @@ let cases =
   @ bounded_generic_fun_cases
 
 let test () =
-  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
-  TestDisk.set hhconfig_filename hhconfig_contents;
-  let hhconfig_path =
-    Relative_path.create Relative_path.Root hhconfig_filename
-  in
-  let options = ServerArgs.default_options ~root in
-  let (custom_config, _) =
-    ServerConfig.load ~silent:false hhconfig_path options
-  in
   let env =
     Test.setup_server
       ()
-      ~custom_config
       ~hhi_files:(Hhi.get_raw_hhi_contents () |> Array.to_list)
   in
   let env = Test.setup_disk env files in

@@ -124,8 +124,6 @@ type t = {
   tco_disallow_byref_calls: bool;
   (* Error codes for which we do not allow HH_FIXMEs *)
   ignored_fixme_codes: ISet.t;
-  (* Error codes for which we allow HH_FIXMEs in strict mode *)
-  allowed_fixme_codes_strict: ISet.t;
   (* Initial hh_log_level settings *)
   log_levels: int SMap.t;
   (* Flag to disable using lvals as expressions. *)
@@ -295,7 +293,6 @@ val make :
   ?tco_disallow_byref_dynamic_calls:bool ->
   ?tco_disallow_byref_calls:bool ->
   ?ignored_fixme_codes:ISet.t ->
-  ?allowed_fixme_codes_strict:ISet.t ->
   ?log_levels:int SMap.t ->
   ?po_disable_lval_as_an_expression:bool ->
   ?tco_shallow_class_decl:bool ->
@@ -449,8 +446,6 @@ val tco_experimental_all : SSet.t
 val tco_migration_flags_all : SSet.t
 
 val ignored_fixme_codes : t -> ISet.t
-
-val allowed_fixme_codes_strict : t -> ISet.t
 
 val log_levels : t -> int SMap.t
 

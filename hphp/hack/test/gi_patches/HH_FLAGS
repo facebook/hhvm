@@ -1,3 +1,2 @@
---allowed-fixme-codes-strict 4101
 --rewrite
 --global-inference

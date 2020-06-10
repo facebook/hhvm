@@ -84,6 +84,7 @@ bool LoggingArray::checkInvariants() const {
   assertx(wrapped->kindIsValid());
   assertx(wrapped->toDataType() == toDataType());
   assertx(asBespoke(this)->layout() == s_layout);
+  assertx(m_kind == getBespokeKind(wrapped->kind()));
   return true;
 }
 
@@ -146,6 +147,14 @@ LoggingArray* LoggingArray::MakeFromStatic(ArrayData* ad, SrcKey sk) {
   lad->wrapped = ad;
   lad->srckey = sk;
   return result(lad);
+}
+
+LoggingArray* LoggingArray::updateKind() {
+  auto const kind = getBespokeKind(wrapped->kind());
+  assertx(IMPLIES(kind != m_kind, hasExactlyOneRef()));
+  m_kind = kind;
+  assertx(checkInvariants());
+  return this;
 }
 
 size_t LoggingLayout::heapSize(const ArrayData*) const {
@@ -278,7 +287,9 @@ namespace {
 template <typename F>
 ArrayData* conv(ArrayData* ad, F&& f) {
   auto const lad = LoggingArray::asLogging(ad);
-  return escalate(lad, f(lad->wrapped));
+  auto const result = f(lad->wrapped);
+  if (result == lad->wrapped) return lad->updateKind();
+  return LoggingArray::MakeFromVanilla(result, lad->srckey);
 }
 
 }

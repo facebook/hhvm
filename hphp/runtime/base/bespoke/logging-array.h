@@ -35,6 +35,9 @@ struct LoggingArray : BespokeArray {
   static LoggingArray* MakeFromVanilla(ArrayData* ad, SrcKey sk);
   static LoggingArray* MakeFromStatic(ArrayData* ad, SrcKey sk);
 
+  // Updates m_kind in place to match the wrapped array's kind. Returns this.
+  LoggingArray* updateKind();
+
   bool checkInvariants() const;
 
   ArrayData* wrapped;

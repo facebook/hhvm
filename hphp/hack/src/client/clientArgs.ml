@@ -95,11 +95,12 @@ let parse_check_args cmd =
   let gen_saved_ignore_type_errors = ref false in
   let ignore_hh_version = ref false in
   let saved_state_ignore_hhconfig = ref false in
-  let logname = ref false in
   let log_inference_constraints = ref false in
   let max_errors = ref None in
   let mode = ref None in
+  let logname = ref false in
   let monitor_logname = ref false in
+  let client_logname = ref false in
   let ide_logname = ref false in
   let lsp_logname = ref false in
   let no_load = ref false in
@@ -490,13 +491,16 @@ let parse_check_args cmd =
         Arg.Set log_inference_constraints,
         "  (for hh debugging purpose only) log type"
         ^ " inference constraints into external logger (e.g. Scuba)" );
-      ("--logname", Arg.Set logname, " (mode) show log filename and exit");
       ( "--max-errors",
         Arg.Int (fun num_errors -> max_errors := Some num_errors),
         " Maximum number of errors to display" );
+      ("--logname", Arg.Set logname, " (mode) show log filename and exit");
       ( "--monitor-logname",
         Arg.Set monitor_logname,
         " (mode) show monitor log filename and exit" );
+      ( "--client-logname",
+        Arg.Set client_logname,
+        " (mode) show client log filename and exit" );
       ( "--ide-logname",
         Arg.Set ide_logname,
         " (mode) show client ide log filename and exit" );
@@ -699,6 +703,12 @@ let parse_check_args cmd =
   if !monitor_logname then (
     let monitor_log_link = ServerFiles.monitor_log_link root in
     Printf.printf "%s\n%!" monitor_log_link;
+    exit 0
+  );
+
+  if !client_logname then (
+    let client_log_link = ServerFiles.client_log root in
+    Printf.printf "%s\n%!" client_log_link;
     exit 0
   );
 

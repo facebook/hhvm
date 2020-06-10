@@ -1,7 +1,7 @@
 <?hh
 
 function a($ary) {
-    return (is_array($ary) ? array_reduce($ary, 'cb', 0) : 1);
+    return (is_array($ary) ? array_reduce($ary, fun('cb'), 0) : 1);
 }
 
 function cb($v, $elem) {

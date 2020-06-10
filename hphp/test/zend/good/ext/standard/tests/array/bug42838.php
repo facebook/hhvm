@@ -11,6 +11,6 @@ function key_compare_func($a, $b)
 $array1 = darray["a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red'];
 $array2 = darray["a" => "green", "b" => "Brown", 'c' => 'blue', 0 => 'red'];
 
-$result = array_diff_uassoc($array1, $array2, "key_compare_func");
+$result = array_diff_uassoc($array1, $array2, fun("key_compare_func"));
 print_r($result);
 }

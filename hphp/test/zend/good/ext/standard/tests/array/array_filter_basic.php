@@ -24,7 +24,7 @@ echo "*** Testing array_filter() : basic functionality ***\n";
 $input = varray[1, 2, 3, 0, -1];  // 0 will be considered as FALSE and removed in default callback
 
 // with all possible arguments
-var_dump( array_filter($input,"even") );
+var_dump( array_filter($input,fun("even")) );
 
 // with default arguments
 var_dump( array_filter($input) );

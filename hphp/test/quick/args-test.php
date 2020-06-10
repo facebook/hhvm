@@ -451,7 +451,7 @@ function test($f, $a) {
   }
 }
 <<__EntryPoint>> function main(): void {
-test("f", range(0, 149));
-test("g", range(0, 149));
-test("gr", range(0, 149));
+test(fun("f"), range(0, 149));
+test(fun("g"), range(0, 149));
+test(fun("gr"), range(0, 149));
 }

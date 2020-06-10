@@ -36,5 +36,5 @@ function test($a, $f1, $f2) {
   echo "\n";
 }
 <<__EntryPoint>> function main(): void {
-test(1, "f3", "f4");
+test(1, fun("f3"), fun("f4"));
 }

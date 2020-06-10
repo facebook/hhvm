@@ -19,10 +19,10 @@ echo "*** Testing array_reduce() : variation ***\n";
 $array = varray[1];
 
 echo "\n--- Testing with a callback with too few parameters ---\n";
-var_dump(array_reduce($array, "oneArg", 2));
+var_dump(array_reduce($array, fun("oneArg"), 2));
 
 echo "\n--- Testing with a callback with too many parameters ---\n";
-try { var_dump(array_reduce($array, "threeArgs", 2)); } catch (Exception $e) { var_dump($e->getMessage()); }
+try { var_dump(array_reduce($array, fun("threeArgs"), 2)); } catch (Exception $e) { var_dump($e->getMessage()); }
 
 echo "===DONE===\n";
 }

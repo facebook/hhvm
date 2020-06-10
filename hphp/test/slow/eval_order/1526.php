@@ -17,5 +17,5 @@ function test($x, $y) {
 
 <<__EntryPoint>>
 function main_1526() {
-test(new X, 'y');
+test(new X, fun('y'));
 }

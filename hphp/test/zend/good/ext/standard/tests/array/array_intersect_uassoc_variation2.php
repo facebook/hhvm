@@ -99,8 +99,8 @@ $inputs = darray[
 // loop through each element of the array for arr1
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( array_intersect_uassoc($array1, $value, 'key_compare_func') );
-      var_dump( array_intersect_uassoc($array1, $value, $array3, 'key_compare_func') );
+      var_dump( array_intersect_uassoc($array1, $value, fun('key_compare_func')) );
+      var_dump( array_intersect_uassoc($array1, $value, $array3, fun('key_compare_func')) );
 };
 
 fclose($fp);

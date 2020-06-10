@@ -11,7 +11,7 @@ function test() {}
 $it = new MyArrayIterator(varray[1, 21, 22]);
 
 try {
-    $res = iterator_apply($it, 'test');
+    $res = iterator_apply($it, fun('test'));
 } catch (Exception $e) {
     echo $e->getMessage();
 }

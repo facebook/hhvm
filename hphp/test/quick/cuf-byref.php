@@ -30,5 +30,5 @@ function test($cuf, $f) {
 <<__EntryPoint>>
 function main_entry(): void {
   error_reporting(-1);
-  test('call_user_func_array', 'foo');
+  test('call_user_func_array', fun('foo'));
 }

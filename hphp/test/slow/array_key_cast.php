@@ -59,6 +59,6 @@ function make_tests($func) {
 
 <<__EntryPoint>>
 function main_array_key_cast() {
-run_tests(make_tests('func_maker1'));
-run_tests(make_tests('func_maker2'));
+run_tests(make_tests(fun('func_maker1')));
+run_tests(make_tests(fun('func_maker2')));
 }

@@ -17,8 +17,8 @@ $float_indx_array = darray[0.0 => '0.0', 10.5 => '10.5', -30.5 => '-30.5'];
 
 echo "\n-- Testing array_diff_ukey() function with float indexed array --\n";
 
-var_dump( array_diff_ukey($float_indx_array, $input_array, 'key_compare_func') );
-var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') );
+var_dump( array_diff_ukey($float_indx_array, $input_array, fun('key_compare_func')) );
+var_dump( array_diff_ukey($input_array, $float_indx_array, fun('key_compare_func')) );
 
 echo "===DONE===\n";
 }

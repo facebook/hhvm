@@ -25,7 +25,7 @@ while(FALSE !== ($file = readdir($dir_handle))){
 
 closedir($dir_handle);
 
-usort(inout $entries, "mysort");
+usort(inout $entries, fun("mysort"));
 foreach($entries as $entry) {
     var_dump($entry);
 }

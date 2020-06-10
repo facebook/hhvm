@@ -34,18 +34,18 @@ abstract final class LangEngineAssignexecutionorder003 {
 $b = "bb";
 LangEngineAssignexecutionorder003::$a = "aa";
 
-$bb = "baa";
+$bb = fun("baa");
 
-$aa = "foo";
+$aa = fun("foo");
 
 LangEngineAssignexecutionorder003::$a = $b;
 $c = $bb;
 
 $c();
 
-$a1 = varray["dead","dead","dead"];
-$a2 = varray["dead","dead","live"];
-$a3 = varray["dead","dead","dead"];
+$a1 = varray[fun("dead"),fun("dead"),fun("dead")];
+$a2 = varray[fun("dead"),fun("dead"),fun("live")];
+$a3 = varray[fun("dead"),fun("dead"),fun("dead")];
 
 LangEngineAssignexecutionorder003::$a = varray[$a1,$a2,$a3];
 

@@ -15,5 +15,5 @@ $array2 = darray[
   0 => "yellow",
   1 => "red"
 ];
-var_dump(array_uintersect_assoc($array1, $array2, 'strcasecmp'));
+var_dump(array_uintersect_assoc($array1, $array2, fun('strcasecmp')));
 }

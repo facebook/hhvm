@@ -21,9 +21,9 @@ $arr_string = darray['0' => '1', '1' => '2', '2' => '3'];
 $arr_string_float = darray['0.00' => '1.00', '1.00' => '2.00'];
 
 echo "\n-- Result of floating points and strings containing integers intersection --\n";
-var_dump( array_intersect_ukey($arr_float, $arr_string, 'key_compare_func') );
+var_dump( array_intersect_ukey($arr_float, $arr_string, fun('key_compare_func')) );
 
 echo "\n-- Result of floating points and strings containing floating point intersection --\n";
-var_dump( array_intersect_ukey($arr_float, $arr_string_float, 'key_compare_func') );
+var_dump( array_intersect_ukey($arr_float, $arr_string_float, fun('key_compare_func')) );
 echo "===DONE===\n";
 }

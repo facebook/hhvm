@@ -19,7 +19,7 @@ function a() {
     1 => "red"
   ];
 
-  $result = array_diff_uassoc($array1, $array2, "comp_func");
+  $result = array_diff_uassoc($array1, $array2, fun("comp_func"));
   var_dump($result);
 }
 

@@ -27,7 +27,7 @@ Warning: fread() expects parameter 1 to be resource, double given in %s/zend/goo
 Warning: fread() expects parameter 1 to be resource, boolean given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 5 --
 
-Warning: fread() expects parameter 1 to be resource, array given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
+Warning: fread() expects parameter 1 to be resource, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42
 -- Iteration 6 --
 
 Warning: fread() expects parameter 1 to be resource, object given in %s/zend/good/ext/standard/tests/file/fread_error.php on line 42

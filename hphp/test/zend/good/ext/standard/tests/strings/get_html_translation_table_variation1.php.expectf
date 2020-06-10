@@ -3,38 +3,38 @@
 --- Testing get_html_translation_table() by supplying different values for 'table' argument ---
 -- Iteration 1 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 2 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 3 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 4 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 5 --
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 73
 NULL
 
-Warning: get_html_translation_table() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
+Warning: get_html_translation_table() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/get_html_translation_table_variation1.php on line 84
 NULL
 -- Iteration 6 --
 

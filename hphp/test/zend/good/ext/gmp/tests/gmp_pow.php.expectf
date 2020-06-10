@@ -21,9 +21,9 @@ Warning: gmp_pow() expects exactly 2 parameters, 1 given in %s/gmp_pow.php on li
 
 Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s/gmp_pow.php on line 21
 
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s/gmp_pow.php on line 22
+Warning: gmp_pow() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_pow.php on line 22
 
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s/gmp_pow.php on line 23
+Warning: gmp_pow() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_pow.php on line 23
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s/gmp_pow.php on line 24
 bool(false)

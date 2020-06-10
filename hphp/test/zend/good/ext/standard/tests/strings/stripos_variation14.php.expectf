@@ -16,19 +16,19 @@ Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/go
 Warning: stripos() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 6 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 7 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 8 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 9 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
+Warning: stripos() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78
 -- Iteration 11 --
 
 Warning: stripos() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/stripos_variation14.php on line 78

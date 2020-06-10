@@ -41,27 +41,27 @@ Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base6
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php(74)
 
 Arg value Array
 
-Warning: base64_encode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
+Warning: base64_encode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_encode_variation_001.php on line 75
 
 Arg value 
 

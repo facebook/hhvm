@@ -38,23 +38,23 @@ Warning: quoted_printable_decode() expects parameter 1 to be string, double give
 
 -- Iteration 10 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
+Warning: quoted_printable_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 11 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
+Warning: quoted_printable_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 12 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
+Warning: quoted_printable_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 13 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
+Warning: quoted_printable_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 14 --
 
-Warning: quoted_printable_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
+Warning: quoted_printable_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/quoted_printable_decode_variation1.php on line 87
 
 -- Iteration 15 --
 

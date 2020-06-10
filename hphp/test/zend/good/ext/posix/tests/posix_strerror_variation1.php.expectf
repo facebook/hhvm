@@ -28,31 +28,31 @@ Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 6
 
 Arg value Array
 
-Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
+Warning: posix_strerror() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_strerror_variation1.php on line 65
 
 Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 64
 
 Arg value Array
 
-Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
+Warning: posix_strerror() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_strerror_variation1.php on line 65
 
 Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 64
 
 Arg value Array
 
-Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
+Warning: posix_strerror() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_strerror_variation1.php on line 65
 
 Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 64
 
 Arg value Array
 
-Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
+Warning: posix_strerror() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_strerror_variation1.php on line 65
 
 Notice: Array to string conversion in %s/posix_strerror_variation1.php on line 64
 
 Arg value Array
 
-Warning: posix_strerror() expects parameter 1 to be integer, array given in %s/posix_strerror_variation1.php on line 65
+Warning: posix_strerror() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_strerror_variation1.php on line 65
 
 Arg value 
 

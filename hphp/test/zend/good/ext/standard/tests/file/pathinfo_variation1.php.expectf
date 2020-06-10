@@ -38,19 +38,19 @@ Warning: pathinfo() expects parameter 1 to be string, double given in %s/zend/go
 
 --empty array--
 
-Warning: pathinfo() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
+Warning: pathinfo() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --int indexed array--
 
-Warning: pathinfo() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
+Warning: pathinfo() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --associative array--
 
-Warning: pathinfo() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
+Warning: pathinfo() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --nested arrays--
 
-Warning: pathinfo() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
+Warning: pathinfo() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/pathinfo_variation1.php on line 98
 
 --uppercase NULL--
 

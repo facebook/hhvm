@@ -32,23 +32,23 @@ Warning: xml_parser_set_option() expects parameter 2 to be integer, double given
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
+Warning: xml_parser_set_option() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
+Warning: xml_parser_set_option() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
+Warning: xml_parser_set_option() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
+Warning: xml_parser_set_option() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
 
 Arg value Array 
 
-Warning: xml_parser_set_option() expects parameter 2 to be integer, array given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
+Warning: xml_parser_set_option() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/xml_parser_set_option_variation2.php on line 78
 
 Arg value  
 

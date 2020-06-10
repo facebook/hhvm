@@ -165,7 +165,7 @@ Warning: strtoupper() expects parameter 1 to be string, boolean given in %s/test
 
 -- Iteration 9 --
 
-Warning: strtoupper() expects parameter 1 to be string, array given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
+Warning: strtoupper() expects parameter 1 to be string, %rv?%rarray given in %s/test/zend/good/ext/standard/tests/strings/strtoupper1.php on line 42
 
 *** Testing strtoupper() with two different case strings ***
 strings are same, with Case Insensitive

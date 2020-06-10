@@ -19,13 +19,13 @@ Warning: strtr() expects parameter 1 to be string, double given in %s/zend/good/
 Warning: strtr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 7 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 8 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 9 --
 
-Warning: strtr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
+Warning: strtr() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80
 -- Iteration 10 --
 
 Warning: strtr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtr_variation5.php on line 80

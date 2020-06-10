@@ -47,22 +47,22 @@ bool(false)
 
 --empty array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
+Warning: mb_stristr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
 bool(false)
 
 --int indexed array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
+Warning: mb_stristr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
 bool(false)
 
 --associative array--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
+Warning: mb_stristr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
 bool(false)
 
 --nested arrays--
 
-Warning: mb_stristr() expects parameter 3 to be boolean, array given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
+Warning: mb_stristr() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_stristr_variation3.php on line 115
 bool(false)
 
 --uppercase NULL--

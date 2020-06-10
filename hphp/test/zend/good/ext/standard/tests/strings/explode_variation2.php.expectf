@@ -28,13 +28,13 @@ Warning: explode() expects parameter 2 to be string, double given in %s/zend/goo
 Warning: explode() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
 -- Iteration 10 --
 
-Warning: explode() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
+Warning: explode() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
 -- Iteration 11 --
 
-Warning: explode() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
+Warning: explode() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
 -- Iteration 12 --
 
-Warning: explode() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
+Warning: explode() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74
 -- Iteration 13 --
 
 Warning: explode() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/explode_variation2.php on line 74

@@ -160,7 +160,7 @@ Warning: date_sun_info() expects parameter 2 to be double, string given in %s/ze
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 2 to be double, array given in %s/zend/good/ext/date/tests/date_sun_info_variation2.php on line 72
+Warning: date_sun_info() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/date/tests/date_sun_info_variation2.php on line 72
 
 -- Iteration 19 --
 

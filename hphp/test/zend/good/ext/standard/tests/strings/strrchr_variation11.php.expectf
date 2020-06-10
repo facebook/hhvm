@@ -28,19 +28,19 @@ Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/goo
 Warning: strrchr() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 10 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 11 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 12 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 13 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 14 --
 
-Warning: strrchr() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
+Warning: strrchr() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80
 -- Iteration 15 --
 
 Warning: strrchr() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strrchr_variation11.php on line 80

@@ -2,7 +2,7 @@ Warning: openssl_seal() expects parameter 1 to be string, integer given in %s/ze
 
 Warning: openssl_seal() expects parameter 1 to be string, integer given in %s/zend/good/ext/openssl/tests/002.php on line %d
 
-Warning: openssl_seal() expects parameter 1 to be string, array given in %s/zend/good/ext/openssl/tests/002.php on line %d
+Warning: openssl_seal() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/openssl/tests/002.php on line %d
 
-Warning: openssl_seal() expects parameter 1 to be string, array given in %s/zend/good/ext/openssl/tests/002.php on line %d
+Warning: openssl_seal() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/openssl/tests/002.php on line %d
 Done

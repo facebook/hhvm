@@ -70,7 +70,7 @@ Warning: imap_fetchbody() expects parameter 1 to be resource, string given in %s
 
 -- Iteration 18 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, array given in %s/imap_fetchbody_variation1.php on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, %rv?%rarray given in %s/imap_fetchbody_variation1.php on line 85
 
 -- Iteration 19 --
 

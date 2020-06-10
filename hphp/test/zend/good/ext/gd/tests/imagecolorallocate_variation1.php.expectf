@@ -38,19 +38,19 @@ Warning: imagecolorallocate() expects parameter 1 to be resource, double given i
 
 -- empty array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 104
+Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line 104
 
 -- int indexed array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 104
+Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line 104
 
 -- associative array --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 104
+Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line 104
 
 -- nested arrays --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, array given in %s/imagecolorallocate_variation1.php on line 104
+Warning: imagecolorallocate() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imagecolorallocate_variation1.php on line 104
 
 -- uppercase NULL --
 

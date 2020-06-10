@@ -17,19 +17,19 @@ Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend
 Warning: array_fill() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 6 --
 
-Warning: array_fill() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 7 --
 
-Warning: array_fill() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 8 --
 
-Warning: array_fill() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 9 --
 
-Warning: array_fill() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 10 --
 
-Warning: array_fill() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
+Warning: array_fill() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86
 -- Iteration 11 --
 
 Warning: array_fill() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/array/array_fill_variation2.php on line 86

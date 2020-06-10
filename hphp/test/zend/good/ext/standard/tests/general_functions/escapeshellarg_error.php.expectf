@@ -18,5 +18,5 @@ Warning: escapeshellarg() expects parameter 1 to be string, resource given in %s
 
 -- Testing escapeshellarg() function with a array supplied for argument --
 
-Warning: escapeshellarg() expects parameter 1 to be string, array given in %s/escapeshellarg_error.php on line 39
+Warning: escapeshellarg() expects parameter 1 to be string, %rv?%rarray given in %s/escapeshellarg_error.php on line 39
 ===Done===

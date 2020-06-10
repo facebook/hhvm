@@ -26,19 +26,19 @@ Warning: gmdate() expects parameter 2 to be integer, double given in %s/gmdate_v
 
 --empty array--
 
-Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 105
+Warning: gmdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/gmdate_variation2.php on line 105
 
 --int indexed array--
 
-Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 105
+Warning: gmdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/gmdate_variation2.php on line 105
 
 --associative array--
 
-Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 105
+Warning: gmdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/gmdate_variation2.php on line 105
 
 --nested arrays--
 
-Warning: gmdate() expects parameter 2 to be integer, array given in %s/gmdate_variation2.php on line 105
+Warning: gmdate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/gmdate_variation2.php on line 105
 
 --uppercase NULL--
 bool(true)

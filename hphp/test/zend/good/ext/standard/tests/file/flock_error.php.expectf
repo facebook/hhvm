@@ -15,10 +15,10 @@ Warning: flock() expects parameter 2 to be integer, boolean given in %s/zend/goo
 Warning: flock() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
 
 --- Iteration 4 ---
-Warning: flock() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
 
 --- Iteration 5 ---
-Warning: flock() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
+Warning: flock() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d
 
 --- Iteration 6 ---
 Warning: flock() expects parameter 2 to be integer, string given in %s/zend/good/ext/standard/tests/file/flock_error.php on line %d

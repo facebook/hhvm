@@ -34,19 +34,19 @@ Warning: strtok() expects parameter 1 to be string, double given in %s/zend/good
 Warning: strtok() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 10 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
+Warning: strtok() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 11 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
+Warning: strtok() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 12 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
+Warning: strtok() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 13 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
+Warning: strtok() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 14 --
 
-Warning: strtok() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
+Warning: strtok() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89
 -- Iteration 15 --
 
 Warning: strtok() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strtok_variation1.php on line 89

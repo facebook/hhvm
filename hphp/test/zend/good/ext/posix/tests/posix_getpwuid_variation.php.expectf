@@ -28,31 +28,31 @@ Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s/posix_getpwuid_variation.php on line 74
+Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
 
 Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s/posix_getpwuid_variation.php on line 74
+Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
 
 Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s/posix_getpwuid_variation.php on line 74
+Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
 
 Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s/posix_getpwuid_variation.php on line 74
+Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
 
 Notice: Array to string conversion in %s/posix_getpwuid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s/posix_getpwuid_variation.php on line 74
+Warning: posix_getpwuid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getpwuid_variation.php on line 74
 
 Arg value 
 

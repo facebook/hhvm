@@ -42,43 +42,43 @@ Warning: array_chunk() expects parameter 2 to be integer, double given in %s/zen
 
 -- Iteration 6 --
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
 
 -- Iteration 7 --
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
 
 -- Iteration 8 --
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
 
 -- Iteration 9 --
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
 
 -- Iteration 10 --
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 65
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 66
 
-Warning: array_chunk() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
+Warning: array_chunk() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_chunk_variation2.php on line 67
 
 -- Iteration 11 --
 

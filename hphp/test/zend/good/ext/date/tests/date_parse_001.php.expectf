@@ -281,5 +281,5 @@ array(12) {
   bool(false)
 }
 
-Warning: date_parse() expects parameter 1 to be string, array given in %s/date_parse_001.php on line 12
+Warning: date_parse() expects parameter 1 to be string, %rv?%rarray given in %s/date_parse_001.php on line 12
 Done

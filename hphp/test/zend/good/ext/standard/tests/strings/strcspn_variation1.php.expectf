@@ -74,43 +74,43 @@ Warning: strcspn() expects parameter 1 to be string, double given in %s/zend/goo
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
-
--- Iteration with str value as "Array"
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
-
--- Iteration with str value as "Array"
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
-
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
 
 -- Iteration with str value as "Array"
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
 
-Warning: strcspn() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
+
+-- Iteration with str value as "Array"
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 92
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 93
+
+Warning: strcspn() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation1.php on line 94
 
 -- Iteration with str value as ""
 

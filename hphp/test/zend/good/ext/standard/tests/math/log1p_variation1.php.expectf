@@ -73,7 +73,7 @@ Warning: log1p() expects parameter 1 to be double, string given in %s/zend/good/
 
 -- Iteration 20 --
 
-Warning: log1p() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
+Warning: log1p() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/log1p_variation1.php on line 81
 
 -- Iteration 21 --
 

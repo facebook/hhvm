@@ -22,11 +22,11 @@ Warning: image_type_to_mime_type() expects parameter 1 to be integer, double giv
 
 -- Iteration 6 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 70
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 70
 
 -- Iteration 7 --
 
-Warning: image_type_to_mime_type() expects parameter 1 to be integer, array given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 70
+Warning: image_type_to_mime_type() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/image/image_type_to_mime_type_variation1.php on line 70
 
 -- Iteration 8 --
 

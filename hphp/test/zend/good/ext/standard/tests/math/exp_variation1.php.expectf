@@ -69,7 +69,7 @@ Warning: exp() expects parameter 1 to be double, string given in %s/zend/good/ex
 
 -- Iteration 19 --
 
-Warning: exp() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
+Warning: exp() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/exp_variation1.php on line 80
 
 -- Iteration 20 --
 

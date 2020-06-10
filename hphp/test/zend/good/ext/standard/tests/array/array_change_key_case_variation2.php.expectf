@@ -94,7 +94,7 @@ Warning: array_change_key_case() expects parameter 2 to be integer, string given
 
 -- Iteration 18 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/array/array_change_key_case_variation2.php on line 76
+Warning: array_change_key_case() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/array/array_change_key_case_variation2.php on line 76
 
 -- Iteration 19 --
 

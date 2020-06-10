@@ -13,7 +13,7 @@ bool(true)
 Warning: libxml_set_streams_context() expects parameter 1 to be resource, object given in %s/004.php on line 16
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, array given in %s/004.php on line 16
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, %rv?%rarray given in %s/004.php on line 16
 bool(true)
 NULL
 bool(true)

@@ -20,7 +20,7 @@ Warning: fgetc() expects parameter 1 to be resource, double given in %s/fgetc_er
 Warning: fgetc() expects parameter 1 to be resource, boolean given in %s/fgetc_error.php on line 31
 -- Iteration 5 --
 
-Warning: fgetc() expects parameter 1 to be resource, array given in %s/fgetc_error.php on line 31
+Warning: fgetc() expects parameter 1 to be resource, %rv?%rarray given in %s/fgetc_error.php on line 31
 -- Iteration 6 --
 
 Warning: fgetc() expects parameter 1 to be resource, object given in %s/fgetc_error.php on line 31

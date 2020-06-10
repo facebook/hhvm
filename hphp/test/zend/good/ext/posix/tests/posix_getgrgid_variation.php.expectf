@@ -28,31 +28,31 @@ Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 73
+Warning: posix_getgrgid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getgrgid_variation.php on line 73
 
 Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 73
+Warning: posix_getgrgid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getgrgid_variation.php on line 73
 
 Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 73
+Warning: posix_getgrgid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getgrgid_variation.php on line 73
 
 Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 73
+Warning: posix_getgrgid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getgrgid_variation.php on line 73
 
 Notice: Array to string conversion in %s/posix_getgrgid_variation.php on line 64
 
 Arg value Array
 
-Warning: posix_getgrgid() expects parameter 1 to be integer, array given in %s/posix_getgrgid_variation.php on line 73
+Warning: posix_getgrgid() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/posix_getgrgid_variation.php on line 73
 
 Arg value 
 

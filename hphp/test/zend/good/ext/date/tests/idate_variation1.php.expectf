@@ -56,27 +56,27 @@ Warning: idate() expects parameter 1 to be string, double given in %s/zend/good/
 
 --empty array--
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --int indexed array--
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --associative array--
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --nested arrays--
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 90
 
-Warning: idate() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
+Warning: idate() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/idate_variation1.php on line 91
 
 --uppercase NULL--
 

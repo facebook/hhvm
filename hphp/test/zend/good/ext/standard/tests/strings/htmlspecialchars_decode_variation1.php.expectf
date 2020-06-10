@@ -28,19 +28,19 @@ Warning: htmlspecialchars_decode() expects parameter 1 to be string, double give
 Warning: htmlspecialchars_decode() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 10 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 11 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 12 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 13 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 14 --
 
-Warning: htmlspecialchars_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
+Warning: htmlspecialchars_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82
 -- Iterator 15 --
 
 Warning: htmlspecialchars_decode() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/htmlspecialchars_decode_variation1.php on line 82

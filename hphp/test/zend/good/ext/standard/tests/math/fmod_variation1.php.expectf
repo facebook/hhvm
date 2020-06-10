@@ -74,7 +74,7 @@ Warning: fmod() expects parameter 1 to be double, string given in %s/zend/good/e
 
 -- Iteration 19 --
 
-Warning: fmod() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/fmod_variation1.php on line 79
+Warning: fmod() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/fmod_variation1.php on line 79
 
 -- Iteration 20 --
 

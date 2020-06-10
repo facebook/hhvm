@@ -38,19 +38,19 @@ Warning: file_get_contents() expects parameter 2 to be boolean, double given in 
 
 --empty array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --int indexed array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --associative array--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --nested arrays--
 
-Warning: file_get_contents() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
+Warning: file_get_contents() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation3.php on line 111
 
 --uppercase NULL--
 

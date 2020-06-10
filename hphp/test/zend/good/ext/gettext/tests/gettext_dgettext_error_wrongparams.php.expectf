@@ -3,6 +3,6 @@ Warning: dgettext() expects exactly 2 parameters, 1 given in %s/gettext_dgettext
 
 Warning: dgettext() expects exactly 2 parameters, 0 given in %s/gettext_dgettext_error_wrongparams.php on line 5
 
-Warning: dgettext() expects parameter 1 to be string, array given in %s/gettext_dgettext_error_wrongparams.php on line 7
+Warning: dgettext() expects parameter 1 to be string, %rv?%rarray given in %s/gettext_dgettext_error_wrongparams.php on line 7
 
-Warning: dgettext() expects parameter 2 to be string, array given in %s/gettext_dgettext_error_wrongparams.php on line 8
+Warning: dgettext() expects parameter 2 to be string, %rv?%rarray given in %s/gettext_dgettext_error_wrongparams.php on line 8

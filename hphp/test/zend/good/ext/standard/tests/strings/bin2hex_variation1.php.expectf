@@ -19,13 +19,13 @@ Warning: bin2hex() expects parameter 1 to be string, double given in %s/zend/goo
 Warning: bin2hex() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 7 --
 
-Warning: bin2hex() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 8 --
 
-Warning: bin2hex() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 9 --
 
-Warning: bin2hex() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
+Warning: bin2hex() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69
 -- Iteration 10 --
 
 Warning: bin2hex() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/bin2hex_variation1.php on line 69

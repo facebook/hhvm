@@ -34,35 +34,35 @@ Warning: date_sunset() expects parameter 3 to be double, integer given in %s/zen
 
 --empty array--
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --associative array--
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 92
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 93
 
-Warning: date_sunset() expects parameter 3 to be double, array given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
+Warning: date_sunset() expects parameter 3 to be double, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation3.php on line 94
 
 --uppercase NULL--
 string(5) "18:24"

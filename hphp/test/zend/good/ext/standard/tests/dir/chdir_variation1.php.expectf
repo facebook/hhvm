@@ -72,7 +72,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: chdir() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 100
+Warning: chdir() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/dir/chdir_variation1.php on line 100
 
 -- Iteration 19 --
 bool(true)

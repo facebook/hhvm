@@ -34,19 +34,19 @@ Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/z
 Warning: exif_imagetype() expects parameter 1 to be string, double given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 10 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
+Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 11 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
+Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 12 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
+Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 13 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
+Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 14 --
 
-Warning: exif_imagetype() expects parameter 1 to be string, array given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
+Warning: exif_imagetype() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82
 -- Iteration 15 --
 
 Warning: exif_imagetype() expects parameter 1 to be string, boolean given in %s/zend/good/ext/exif/tests/exif_imagetype_variation1.php on line 82

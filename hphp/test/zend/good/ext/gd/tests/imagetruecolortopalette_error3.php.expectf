@@ -3,6 +3,6 @@ Warning: imagetruecolortopalette() expects parameter 3 to be integer, string giv
 
 Warning: imagetruecolortopalette() expects parameter 3 to be integer, resource given in %s/imagetruecolortopalette_error3.php on line 6
 
-Warning: imagetruecolortopalette() expects parameter 3 to be integer, array given in %s/imagetruecolortopalette_error3.php on line 7
+Warning: imagetruecolortopalette() expects parameter 3 to be integer, %rv?%rarray given in %s/imagetruecolortopalette_error3.php on line 7
 
 Warning: imagetruecolortopalette() expects parameter 3 to be integer, null given in %s/imagetruecolortopalette_error3.php on line 8

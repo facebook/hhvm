@@ -14,19 +14,19 @@ Warning: strftime() expects parameter 2 to be integer, double given in %s/strfti
 
 --empty array--
 
-Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 98
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --int indexed array--
 
-Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 98
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --associative array--
 
-Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 98
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --nested arrays--
 
-Warning: strftime() expects parameter 2 to be integer, array given in %s/strftime_variation2.php on line 98
+Warning: strftime() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/strftime_variation2.php on line 98
 
 --uppercase NULL--
 bool(true)

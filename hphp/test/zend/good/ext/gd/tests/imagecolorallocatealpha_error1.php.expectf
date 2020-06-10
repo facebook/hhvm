@@ -3,6 +3,6 @@ Warning: supplied resource is not a valid Image resource in %s/imagecolorallocat
 
 Warning: imagecolorallocatealpha() expects parameter 1 to be resource, string given in %s/imagecolorallocatealpha_error1.php on line 5
 
-Warning: imagecolorallocatealpha() expects parameter 1 to be resource, array given in %s/imagecolorallocatealpha_error1.php on line 6
+Warning: imagecolorallocatealpha() expects parameter 1 to be resource, %rv?%rarray given in %s/imagecolorallocatealpha_error1.php on line 6
 
 Warning: imagecolorallocatealpha() expects parameter 1 to be resource, null given in %s/imagecolorallocatealpha_error1.php on line 7

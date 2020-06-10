@@ -1,2 +1,2 @@
 
-Warning: socket_set_nonblock() expects parameter 1 to be resource, array given in %s/socket_set_nonblock-wrongparams.php on line 2
+Warning: socket_set_nonblock() expects parameter 1 to be resource, %rv?%rarray given in %s/socket_set_nonblock-wrongparams.php on line 2

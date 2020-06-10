@@ -30,7 +30,7 @@ Warning: fputcsv() expects parameter 1 to be resource, boolean given in %s/fputc
 
 Warning: fputcsv() expects at least 2 parameters, 1 given in %s/fputcsv_error.php on line 35
 
-Warning: fputcsv() expects parameter 1 to be resource, array given in %s/fputcsv_error.php on line 36
+Warning: fputcsv() expects parameter 1 to be resource, %rv?%rarray given in %s/fputcsv_error.php on line 36
 -- Iteration 6 --
 
 Warning: fputcsv() expects at least 2 parameters, 1 given in %s/fputcsv_error.php on line 35

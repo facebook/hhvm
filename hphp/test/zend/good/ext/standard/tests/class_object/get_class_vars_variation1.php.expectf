@@ -38,19 +38,19 @@ Warning: get_class_vars() expects parameter 1 to be string, double given in %s/z
 
 --empty array--
 
-Warning: get_class_vars() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
+Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
 
 --int indexed array--
 
-Warning: get_class_vars() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
+Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
 
 --associative array--
 
-Warning: get_class_vars() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
+Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
 
 --nested arrays--
 
-Warning: get_class_vars() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
+Warning: get_class_vars() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/get_class_vars_variation1.php on line 86
 
 --uppercase NULL--
 

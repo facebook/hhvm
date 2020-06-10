@@ -27,7 +27,7 @@ Warning: microtime() expects parameter 1 to be boolean, string given in %s/zend/
   }
 }
 
-Warning: microtime() expects parameter 1 to be boolean, array given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
+Warning: microtime() expects parameter 1 to be boolean, %rd?%rarray given in %s/zend/good/ext/date/tests/microtime_error.php on line 25
 
 --> bad arg: object(stdClass) (0) {
 }

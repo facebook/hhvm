@@ -38,19 +38,19 @@ Warning: fwrite() expects parameter 2 to be string, double given in %s/zend/good
 
 --empty array--
 
-Warning: fwrite() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
+Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --int indexed array--
 
-Warning: fwrite() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
+Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --associative array--
 
-Warning: fwrite() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
+Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --nested arrays--
 
-Warning: fwrite() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
+Warning: fwrite() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/fwrite_variation5.php on line 102
 
 --uppercase NULL--
 

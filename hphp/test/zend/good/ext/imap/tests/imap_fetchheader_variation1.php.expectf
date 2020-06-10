@@ -82,19 +82,19 @@ Warning: imap_fetchheader() expects parameter 1 to be resource, string given in 
 
 -- Iteration 21 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, array given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
 
 -- Iteration 22 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, array given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
 
 -- Iteration 23 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, array given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
 
 -- Iteration 24 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, array given in %s/imap_fetchheader_variation1.php on line 96
+Warning: imap_fetchheader() expects parameter 1 to be resource, %r[vd]?%rarray given in %s/imap_fetchheader_variation1.php on line 96
 
 -- Iteration 25 --
 

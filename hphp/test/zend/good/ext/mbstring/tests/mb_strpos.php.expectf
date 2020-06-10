@@ -51,7 +51,7 @@ OK_NEWLINE
 Warning: mb_strpos() expects parameter 3 to be integer, string given in %s/mb_strpos.php on line 104
 OK_NULL
 
-Warning: mb_strpos() expects parameter 2 to be string, array given in %s/mb_strpos.php on line 107
+Warning: mb_strpos() expects parameter 2 to be string, %rd?%rarray given in %s/mb_strpos.php on line 107
 OK_ARRAY
 
 Warning: mb_strpos() expects parameter 2 to be string, object given in %s/mb_strpos.php on line 110

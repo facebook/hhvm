@@ -51,7 +51,7 @@ OK_NEWLINE
 Warning: mb_stripos() expects parameter 3 to be integer, string given in %s/mb_stripos.php on line 103
 OK_NULL
 
-Warning: mb_stripos() expects parameter 2 to be string, array given in %s/mb_stripos.php on line 105
+Warning: mb_stripos() expects parameter 2 to be string, %rd?%rarray given in %s/mb_stripos.php on line 105
 OK_ARRAY
 
 Warning: mb_stripos() expects parameter 2 to be string, object given in %s/mb_stripos.php on line 107

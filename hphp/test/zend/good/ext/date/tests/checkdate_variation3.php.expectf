@@ -14,19 +14,19 @@ Warning: checkdate() expects parameter 3 to be integer, double given in %s/zend/
 
 -- empty array --
 
-Warning: checkdate() expects parameter 3 to be integer, array given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
+Warning: checkdate() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
 
 -- int indexed array --
 
-Warning: checkdate() expects parameter 3 to be integer, array given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
+Warning: checkdate() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
 
 -- associative array --
 
-Warning: checkdate() expects parameter 3 to be integer, array given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
+Warning: checkdate() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
 
 -- nested arrays --
 
-Warning: checkdate() expects parameter 3 to be integer, array given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
+Warning: checkdate() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/checkdate_variation3.php on line 90
 
 -- uppercase NULL --
 

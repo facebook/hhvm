@@ -2,7 +2,7 @@
 
 Arg value is: this is a string
 
-Warning: preg_grep() expects parameter 2 to be array, string given in %s/preg_grep_error2.php on line 15
+Warning: preg_grep() expects parameter 2 to be %r(varray_or_d)?%rarray, string given in %s/preg_grep_error2.php on line 15
 
 Arg value is: Array
 array(2) {
@@ -12,5 +12,5 @@ array(2) {
   string(10) "a subarray"
 }
 
-Warning: preg_grep() expects parameter 2 to be array, object given in %s/preg_grep_error2.php on line 18
+Warning: preg_grep() expects parameter 2 to be %r(varray_or_d)?%rarray, object given in %s/preg_grep_error2.php on line 18
 Done

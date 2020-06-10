@@ -38,19 +38,19 @@ Warning: mb_strrchr() expects parameter 2 to be string, double given in %s/zend/
 
 --empty array--
 
-Warning: mb_strrchr() expects parameter 2 to be string, array given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
+Warning: mb_strrchr() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
 
 --int indexed array--
 
-Warning: mb_strrchr() expects parameter 2 to be string, array given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
+Warning: mb_strrchr() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
 
 --associative array--
 
-Warning: mb_strrchr() expects parameter 2 to be string, array given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
+Warning: mb_strrchr() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
 
 --nested arrays--
 
-Warning: mb_strrchr() expects parameter 2 to be string, array given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
+Warning: mb_strrchr() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mbstring/tests/mb_strrchr_variation2.php on line 108
 
 --uppercase NULL--
 

@@ -28,19 +28,19 @@ Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend
 Warning: chunk_split() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 10 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 11 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 12 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 13 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 14 --
 
-Warning: chunk_split() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
+Warning: chunk_split() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87
 -- Iteration 15 --
 
 Warning: chunk_split() expects parameter 1 to be string, null given in %s/zend/good/ext/standard/tests/strings/chunk_split_variation1.php on line 87

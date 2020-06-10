@@ -34,19 +34,19 @@ Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/e
 Warning: chop() expects parameter 2 to be string, double given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 10 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 11 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 12 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 13 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 14 --
 
-Warning: chop() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
+Warning: chop() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90
 -- Iteration 15 --
 
 Warning: chop() expects parameter 2 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/chop_variation2.php on line 90

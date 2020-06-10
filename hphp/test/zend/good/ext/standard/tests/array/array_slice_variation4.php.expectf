@@ -94,7 +94,7 @@ Warning: array_slice() expects parameter 4 to be boolean, string given in %s/zen
 
 -- Iteration 18 --
 
-Warning: array_slice() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 85
+Warning: array_slice() expects parameter 4 to be boolean, %rv?%rarray given in %s/zend/good/ext/standard/tests/array/array_slice_variation4.php on line 85
 
 -- Iteration 19 --
 

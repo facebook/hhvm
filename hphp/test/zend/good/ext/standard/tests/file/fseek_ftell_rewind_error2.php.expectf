@@ -20,7 +20,7 @@ Warning: ftell() expects parameter 1 to be resource, double given in %s/fseek_ft
 Warning: ftell() expects parameter 1 to be resource, boolean given in %s/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 5 --
 
-Warning: ftell() expects parameter 1 to be resource, array given in %s/fseek_ftell_rewind_error2.php on line 36
+Warning: ftell() expects parameter 1 to be resource, %rv?%rarray given in %s/fseek_ftell_rewind_error2.php on line 36
 -- Iteration 6 --
 
 Warning: ftell() expects parameter 1 to be resource, object given in %s/fseek_ftell_rewind_error2.php on line 36

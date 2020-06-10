@@ -102,59 +102,59 @@ Warning: wordwrap() expects parameter 1 to be string, double given in %s/zend/go
 Warning: wordwrap() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 10 --
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 11 --
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 12 --
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 83
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 84
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 88
 
-Warning: wordwrap() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
+Warning: wordwrap() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 92
 -- Iteration 15 --
 
 Warning: wordwrap() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation1.php on line 82

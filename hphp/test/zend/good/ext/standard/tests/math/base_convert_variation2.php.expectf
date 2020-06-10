@@ -79,7 +79,7 @@ Warning: base_convert() expects parameter 2 to be integer, string given in %s/ze
 
 -- Iteration 19 --
 
-Warning: base_convert() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/math/base_convert_variation2.php on line 65
+Warning: base_convert() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/base_convert_variation2.php on line 65
 
 -- Iteration 20 --
 

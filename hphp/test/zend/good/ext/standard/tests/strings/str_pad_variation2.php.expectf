@@ -18,13 +18,13 @@ Warning: str_pad() expects parameter 2 to be integer, double given in %s/zend/go
 Warning: str_pad() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
 -- Iteration 8 --
 
-Warning: str_pad() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
+Warning: str_pad() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
+Warning: str_pad() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
+Warning: str_pad() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76
 -- Iteration 11 --
 
 Warning: str_pad() expects parameter 2 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation2.php on line 76

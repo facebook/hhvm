@@ -30,7 +30,7 @@ Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 
 bool(false)
 string(8) "-3373333"
 
-Warning: gmp_strval() expects parameter 2 to be integer, array given in %s/gmp_strval.php on line 24
+Warning: gmp_strval() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_strval.php on line 24
 
 Warning: gmp_strval() expects parameter 2 to be integer, object given in %s/gmp_strval.php on line 25
 

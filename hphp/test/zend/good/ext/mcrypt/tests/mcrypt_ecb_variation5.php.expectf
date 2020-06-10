@@ -38,19 +38,19 @@ Warning: mcrypt_ecb() expects parameter 5 to be string, double given in %s/zend/
 
 --empty array--
 
-Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --int indexed array--
 
-Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --associative array--
 
-Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --nested arrays--
 
-Warning: mcrypt_ecb() expects parameter 5 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
+Warning: mcrypt_ecb() expects parameter 5 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_ecb_variation5.php on line 111
 
 --uppercase NULL--
 string(32) "6438db90653c4d300909aa02fd6163c2"

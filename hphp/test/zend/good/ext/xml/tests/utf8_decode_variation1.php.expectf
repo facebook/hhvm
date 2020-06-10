@@ -38,23 +38,23 @@ Warning: utf8_decode() expects parameter 1 to be string, double given in %s/zend
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
+Warning: utf8_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
+Warning: utf8_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
+Warning: utf8_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
+Warning: utf8_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
 
 Arg value Array 
 
-Warning: utf8_decode() expects parameter 1 to be string, array given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
+Warning: utf8_decode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/xml/tests/utf8_decode_variation1.php on line 76
 
 Arg value  
 

@@ -30,19 +30,19 @@ Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/g
 Warning: wordwrap() expects parameter 4 to be boolean, double given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 10 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 11 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 12 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
+Warning: wordwrap() expects parameter 4 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73
 -- Iteration 15 --
 
 Warning: wordwrap() expects parameter 4 to be boolean, string given in %s/zend/good/ext/standard/tests/strings/wordwrap_variation4.php on line 73

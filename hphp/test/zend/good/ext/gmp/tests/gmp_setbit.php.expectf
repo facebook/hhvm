@@ -14,7 +14,7 @@ Warning: gmp_setbit() expects at least 2 parameters, 1 given in %s/gmp_setbit.ph
 
 Warning: gmp_setbit() expects at most 3 parameters, 4 given in %s/gmp_setbit.php on line 32
 
-Warning: gmp_setbit() expects parameter 2 to be integer, array given in %s/gmp_setbit.php on line 33
+Warning: gmp_setbit() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_setbit.php on line 33
 
-Warning: gmp_setbit() expects parameter 2 to be integer, array given in %s/gmp_setbit.php on line 35
+Warning: gmp_setbit() expects parameter 2 to be integer, %rv?%rarray given in %s/gmp_setbit.php on line 35
 Done

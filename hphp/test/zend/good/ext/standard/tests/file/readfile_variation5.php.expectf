@@ -47,22 +47,22 @@ File not read
 
 --empty array--
 
-Warning: readfile() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --int indexed array--
 
-Warning: readfile() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --associative array--
 
-Warning: readfile() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --nested arrays--
 
-Warning: readfile() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
+Warning: readfile() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/readfile_variation5.php on line 109
 File not read
 
 --uppercase NULL--

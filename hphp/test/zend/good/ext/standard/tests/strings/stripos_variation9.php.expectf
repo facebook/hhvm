@@ -38,23 +38,23 @@ Warning: stripos() expects parameter 1 to be string, double given in %s/zend/goo
 
 -- Iteration 10 --
 
-Warning: stripos() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 11 --
 
-Warning: stripos() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 12 --
 
-Warning: stripos() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 13 --
 
-Warning: stripos() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 14 --
 
-Warning: stripos() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
+Warning: stripos() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripos_variation9.php on line 81
 
 -- Iteration 15 --
 

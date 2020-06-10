@@ -41,27 +41,27 @@ Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/rawur
 
 Arg value Array
 
-Warning: rawurldecode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
+Warning: rawurldecode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php(73)
 
 Arg value Array
 
-Warning: rawurldecode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
+Warning: rawurldecode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php(73)
 
 Arg value Array
 
-Warning: rawurldecode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
+Warning: rawurldecode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php(73)
 
 Arg value Array
 
-Warning: rawurldecode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
+Warning: rawurldecode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php(73)
 
 Arg value Array
 
-Warning: rawurldecode() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
+Warning: rawurldecode() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/rawurldecode_variation_001.php on line 74
 
 Arg value 
 

@@ -56,27 +56,27 @@ Warning: strftime() expects parameter 1 to be string, double given in %s/zend/go
 
 --empty array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --int indexed array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --associative array--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --nested arrays--
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 91
 
-Warning: strftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
+Warning: strftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/strftime_variation1.php on line 92
 
 --uppercase NULL--
 

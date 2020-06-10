@@ -30,19 +30,19 @@ Warning: date() expects parameter 1 to be string, double given in %s/zend/good/e
 
 -- empty array --
 
-Warning: date() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- int indexed array --
 
-Warning: date() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- associative array --
 
-Warning: date() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- nested arrays --
 
-Warning: date() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
+Warning: date() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_variation1.php on line 98
 
 -- uppercase NULL --
 

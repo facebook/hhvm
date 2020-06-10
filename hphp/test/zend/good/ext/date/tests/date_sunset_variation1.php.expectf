@@ -58,35 +58,35 @@ Warning: date_sunset() expects parameter 1 to be integer, double given in %s/zen
 
 --empty array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
 
 --associative array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 97
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 98
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
+Warning: date_sunset() expects parameter 1 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/date_sunset_variation1.php on line 99
 
 --uppercase NULL--
 

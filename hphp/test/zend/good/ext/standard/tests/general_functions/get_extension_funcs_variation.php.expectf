@@ -28,13 +28,13 @@ Warning: get_extension_funcs() expects parameter 1 to be string, double given in
 Warning: get_extension_funcs() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
 -- Iteration 10 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
+Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
 -- Iteration 11 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
+Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
 -- Iteration 12 --
 
-Warning: get_extension_funcs() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
+Warning: get_extension_funcs() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72
 -- Iteration 13 --
 
 Warning: get_extension_funcs() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/general_functions/get_extension_funcs_variation.php on line 72

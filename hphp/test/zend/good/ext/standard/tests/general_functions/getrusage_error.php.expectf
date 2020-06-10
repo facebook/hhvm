@@ -10,7 +10,7 @@ Warning: getrusage() expects parameter 1 to be integer, string given in %s/getru
 
 -- Testing getrusage() function with invalid argument - ARRAY--
 
-Warning: getrusage() expects parameter 1 to be integer, array given in %s/getrusage_error.php on line 24
+Warning: getrusage() expects parameter 1 to be integer, %rv?%rarray given in %s/getrusage_error.php on line 24
 
 -- Testing getrusage() function with invalid argument - OBJECT --
 

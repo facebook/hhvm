@@ -38,19 +38,19 @@ Warning: mkdir() expects parameter 3 to be boolean, double given in %s/zend/good
 
 --empty array--
 
-Warning: mkdir() expects parameter 3 to be boolean, array given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --int indexed array--
 
-Warning: mkdir() expects parameter 3 to be boolean, array given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --associative array--
 
-Warning: mkdir() expects parameter 3 to be boolean, array given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --nested arrays--
 
-Warning: mkdir() expects parameter 3 to be boolean, array given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
+Warning: mkdir() expects parameter 3 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/mkdir_variation3.php on line 106
 
 --uppercase NULL--
 

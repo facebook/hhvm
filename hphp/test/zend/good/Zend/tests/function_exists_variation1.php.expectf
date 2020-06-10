@@ -28,13 +28,13 @@ Warning: function_exists() expects parameter 1 to be string, double given in %s/
 Warning: function_exists() expects parameter 1 to be string, double given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
 -- Iteration 10 --
 
-Warning: function_exists() expects parameter 1 to be string, array given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
+Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
 -- Iteration 11 --
 
-Warning: function_exists() expects parameter 1 to be string, array given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
+Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
 -- Iteration 12 --
 
-Warning: function_exists() expects parameter 1 to be string, array given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
+Warning: function_exists() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74
 -- Iteration 13 --
 
 Warning: function_exists() expects parameter 1 to be string, boolean given in %s/zend/good/Zend/tests/function_exists_variation1.php on line 74

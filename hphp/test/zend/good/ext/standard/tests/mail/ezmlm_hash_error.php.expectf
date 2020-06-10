@@ -10,7 +10,7 @@ Warning: ezmlm_hash() expects exactly 1 parameter, 2 given in %s/ezmlm_hash_erro
 
 -- Testing ezmlm_hash() function with invalid input - ARRAY --
 
-Warning: ezmlm_hash() expects parameter 1 to be string, array given in %s/ezmlm_hash_error.php on line 23
+Warning: ezmlm_hash() expects parameter 1 to be string, %rv?%rarray given in %s/ezmlm_hash_error.php on line 23
 
 -- Testing ezmlm_hash() function with invalid input - OBJECT without 'cast_object' method --
 

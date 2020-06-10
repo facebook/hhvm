@@ -32,33 +32,33 @@ Warning: strcspn() expects parameter 3 to be integer, double given in %s/zend/go
 
 -- Iteration with start value as "Array" --
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
-
--- Iteration with start value as "Array" --
-
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
-
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
 
 -- Iteration with start value as "Array" --
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
-
--- Iteration with start value as "Array" --
-
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
-
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
 
 -- Iteration with start value as "Array" --
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
 
-Warning: strcspn() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
+
+-- Iteration with start value as "Array" --
+
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
+
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
+
+-- Iteration with start value as "Array" --
+
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 89
+
+Warning: strcspn() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation3.php on line 90
 
 -- Iteration with start value as "" --
 

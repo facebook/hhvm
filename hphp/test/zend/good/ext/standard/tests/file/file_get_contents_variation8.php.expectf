@@ -25,7 +25,7 @@ Warning: file_get_contents() expects parameter 1 to be a valid path, string give
 NULL
 -- Iteration 7 --
 
-Warning: file_get_contents() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
+Warning: file_get_contents() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29
 -- Iteration 8 --
 
 Warning: No such file or directory in %s/zend/good/ext/standard/tests/file/file_get_contents_variation8.php on line 29

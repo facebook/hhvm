@@ -142,7 +142,7 @@ Warning: date_sun_info() expects parameter 1 to be integer, string given in %s/z
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, array given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line 72
+Warning: date_sun_info() expects parameter 1 to be integer, %rv?%rarray given in %s/zend/good/ext/date/tests/date_sun_info_variation1.php on line 72
 
 -- Iteration 19 --
 

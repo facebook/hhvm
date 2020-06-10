@@ -28,19 +28,19 @@ Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/z
 Warning: array_reverse() expects parameter 2 to be boolean, double given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 10 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
+Warning: array_reverse() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 11 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
+Warning: array_reverse() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 12 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
+Warning: array_reverse() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 13 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
+Warning: array_reverse() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 14 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
+Warning: array_reverse() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87
 -- Iteration 15 --
 
 Warning: array_reverse() expects parameter 2 to be boolean, null given in %s/zend/good/ext/standard/tests/array/array_reverse_variation2.php on line 87

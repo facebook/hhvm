@@ -69,7 +69,7 @@ Warning: round() expects parameter 2 to be integer, string given in %s/zend/good
 
 -- Iteration 19 --
 
-Warning: round() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
+Warning: round() expects parameter 2 to be integer, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/round_variation2.php on line 80
 
 -- Iteration 20 --
 

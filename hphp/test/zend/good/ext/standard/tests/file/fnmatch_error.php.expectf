@@ -1,5 +1,5 @@
 *** Testing error conditions for fnmatch() ***
-Warning: fnmatch() expects parameter 1 to be string, array given in %s/fnmatch_error.php on line 10
+Warning: fnmatch() expects parameter 1 to be string, %rv?%rarray given in %s/fnmatch_error.php on line 10
 
 Warning: fnmatch() expects parameter 1 to be string, resource given in %s/fnmatch_error.php on line 13
 

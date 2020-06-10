@@ -16,19 +16,19 @@ Warning: str_split() expects parameter 2 to be integer, double given in %s/zend/
 Warning: str_split() expects parameter 2 to be integer, double given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 6 --
 
-Warning: str_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
+Warning: str_split() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 7 --
 
-Warning: str_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
+Warning: str_split() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 8 --
 
-Warning: str_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
+Warning: str_split() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 9 --
 
-Warning: str_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
+Warning: str_split() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 10 --
 
-Warning: str_split() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
+Warning: str_split() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82
 --Iteration 11 --
 
 Warning: str_split() expects parameter 2 to be integer, null given in %s/zend/good/ext/standard/tests/strings/str_split_variation2_64bit.php on line 82

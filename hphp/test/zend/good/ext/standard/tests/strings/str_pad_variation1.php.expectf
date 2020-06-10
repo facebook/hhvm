@@ -25,13 +25,13 @@ Warning: str_pad() expects parameter 1 to be string, double given in %s/zend/goo
 Warning: str_pad() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
 -- Iteration 9 --
 
-Warning: str_pad() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
+Warning: str_pad() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
 -- Iteration 10 --
 
-Warning: str_pad() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
+Warning: str_pad() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
 -- Iteration 11 --
 
-Warning: str_pad() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
+Warning: str_pad() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77
 -- Iteration 12 --
 
 Warning: str_pad() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/str_pad_variation1.php on line 77

@@ -41,27 +41,27 @@ Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/class_obj
 
 Arg value Array
 
-Warning: is_subclass_of() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(72)
 
 Arg value Array
 
-Warning: is_subclass_of() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(72)
 
 Arg value Array
 
-Warning: is_subclass_of() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(72)
 
 Arg value Array
 
-Warning: is_subclass_of() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php(72)
 
 Arg value Array
 
-Warning: is_subclass_of() expects parameter 2 to be string, array given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
+Warning: is_subclass_of() expects parameter 2 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/class_object/is_subclass_of_variation_002.php on line 73
 
 Arg value 
 

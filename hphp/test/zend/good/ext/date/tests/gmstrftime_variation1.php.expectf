@@ -56,27 +56,27 @@ Warning: gmstrftime() expects parameter 1 to be string, double given in %s/zend/
 
 --empty array--
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
 
 --int indexed array--
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
 
 --associative array--
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
 
 --nested arrays--
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 89
 
-Warning: gmstrftime() expects parameter 1 to be string, array given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
+Warning: gmstrftime() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/gmstrftime_variation1.php on line 90
 
 --uppercase NULL--
 

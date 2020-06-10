@@ -33,7 +33,7 @@ string(8) "12twelve"
 
 #### Testing Miscelleneous inputs ####
 --- Testing arrays ---
-Warning: ucfirst() expects parameter 1 to be string, array given in %s/ucfirst.php on line 49
+Warning: ucfirst() expects parameter 1 to be string, %rv?%rarray given in %s/ucfirst.php on line 49
 
 --- Testing objects ---
 string(12) "Hello, world"

@@ -38,19 +38,19 @@ Warning: mcrypt_encrypt() expects parameter 4 to be string, double given in %s/z
 
 --empty array--
 
-Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
+Warning: mcrypt_encrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
 
 --int indexed array--
 
-Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
+Warning: mcrypt_encrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
 
 --associative array--
 
-Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
+Warning: mcrypt_encrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
 
 --nested arrays--
 
-Warning: mcrypt_encrypt() expects parameter 4 to be string, array given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
+Warning: mcrypt_encrypt() expects parameter 4 to be string, %r[vd]?%rarray given in %s/zend/good/ext/mcrypt/tests/mcrypt_encrypt_variation4.php on line 109
 
 --uppercase NULL--
 

@@ -28,9 +28,9 @@ Warning: fgetcsv() expects parameter 1 to be resource, boolean given in %s/fgetc
 Warning: fgetcsv() expects parameter 1 to be resource, boolean given in %s/fgetcsv_error.php on line 36
 -- Iteration 5 --
 
-Warning: fgetcsv() expects parameter 1 to be resource, array given in %s/fgetcsv_error.php on line 35
+Warning: fgetcsv() expects parameter 1 to be resource, %rv?%rarray given in %s/fgetcsv_error.php on line 35
 
-Warning: fgetcsv() expects parameter 1 to be resource, array given in %s/fgetcsv_error.php on line 36
+Warning: fgetcsv() expects parameter 1 to be resource, %rv?%rarray given in %s/fgetcsv_error.php on line 36
 -- Iteration 6 --
 
 Warning: fgetcsv() expects parameter 1 to be resource, object given in %s/fgetcsv_error.php on line 35

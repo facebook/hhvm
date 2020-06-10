@@ -25,27 +25,27 @@ Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse
 
 Arg value Array
 
-Warning: parse_url() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+Warning: parse_url() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php(70)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+Warning: parse_url() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php(70)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+Warning: parse_url() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php(70)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+Warning: parse_url() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 Error: 8 - Array to string conversion, %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php(70)
 
 Arg value Array
 
-Warning: parse_url() expects parameter 2 to be integer, array given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
+Warning: parse_url() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/parse_url_variation_002_64bit.php on line 71
 
 Arg value 
 

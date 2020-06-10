@@ -26,19 +26,19 @@ Warning: date() expects parameter 2 to be integer, double given in %s/date_varia
 
 -- empty array --
 
-Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 108
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- int indexed array --
 
-Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 108
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- associative array --
 
-Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 108
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- nested arrays --
 
-Warning: date() expects parameter 2 to be integer, array given in %s/date_variation2.php on line 108
+Warning: date() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/date_variation2.php on line 108
 
 -- uppercase NULL --
 bool(true)

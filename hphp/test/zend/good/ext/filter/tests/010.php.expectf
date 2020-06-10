@@ -33,7 +33,7 @@ array(7) {
   }
 }
 
-Warning: filter_var() expects parameter 2 to be integer, array given in %s/010.php on line 5
+Warning: filter_var() expects parameter 2 to be integer, %rv?%rarray given in %s/010.php on line 5
 string(1) "1"
 string(1) "1"
 string(1) "1"

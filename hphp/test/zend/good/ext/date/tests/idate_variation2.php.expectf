@@ -14,19 +14,19 @@ Warning: idate() expects parameter 2 to be integer, double given in %s/idate_var
 
 --empty array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
 
 --int indexed array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
 
 --associative array--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
 
 --nested arrays--
 
-Warning: idate() expects parameter 2 to be integer, array given in %s/idate_variation2.php on line 98
+Warning: idate() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/idate_variation2.php on line 98
 
 --uppercase NULL--
 bool(true)

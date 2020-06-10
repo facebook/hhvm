@@ -10,7 +10,7 @@ Warning: Invalid argument: Unknown source charset:  in %s/convert_cyr_string.php
 Warning: Invalid argument: Unknown destination charset:  in %s/convert_cyr_string.php on line 6
 string(0) ""
 
-Warning: convert_cyr_string() expects parameter 1 to be string, array given in %s/convert_cyr_string.php on line 7
+Warning: convert_cyr_string() expects parameter 1 to be string, %rv?%rarray given in %s/convert_cyr_string.php on line 7
 
 Warning: Invalid argument: Unknown source charset: q in %s/convert_cyr_string.php on line 9
 string(6) "[[[[[["

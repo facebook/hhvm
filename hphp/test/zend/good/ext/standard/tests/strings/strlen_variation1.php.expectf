@@ -25,13 +25,13 @@ Warning: strlen() expects parameter 1 to be string, double given in %s/zend/good
 Warning: strlen() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
 -- Iteration 9 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
+Warning: strlen() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
 -- Iteration 10 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
+Warning: strlen() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
 -- Iteration 11 --
 
-Warning: strlen() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
+Warning: strlen() expects parameter 1 to be string, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74
 -- Iteration 12 --
 
 Warning: strlen() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/strlen_variation1.php on line 74

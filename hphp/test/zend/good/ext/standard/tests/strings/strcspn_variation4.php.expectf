@@ -22,23 +22,23 @@ Warning: strcspn() expects parameter 4 to be integer, double given in %s/zend/go
 
 -- Iteration with len value as "Array" --
 
-Warning: strcspn() expects parameter 4 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: strcspn() expects parameter 4 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: strcspn() expects parameter 4 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: strcspn() expects parameter 4 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "Array" --
 
-Warning: strcspn() expects parameter 4 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
+Warning: strcspn() expects parameter 4 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strcspn_variation4.php on line 89
 
 -- Iteration with len value as "" --
 

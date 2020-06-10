@@ -20,7 +20,7 @@ Warning: fflush() expects parameter 1 to be resource, double given in %s/fflush_
 Warning: fflush() expects parameter 1 to be resource, boolean given in %s/fflush_error.php on line 39
 -- Iteration 5 --
 
-Warning: fflush() expects parameter 1 to be resource, array given in %s/fflush_error.php on line 39
+Warning: fflush() expects parameter 1 to be resource, %rv?%rarray given in %s/fflush_error.php on line 39
 -- Iteration 6 --
 
 Warning: fflush() expects parameter 1 to be resource, object given in %s/fflush_error.php on line 39

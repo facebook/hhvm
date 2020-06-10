@@ -6,7 +6,7 @@ Warning: uniqid() expects at most 2 parameters, 3 given in %s/uniqid_error.php o
 
 -- Testing uniqid() function with invalid values for $prefix --
 
-Warning: uniqid() expects parameter 1 to be string, array given in %s/uniqid_error.php on line 20
+Warning: uniqid() expects parameter 1 to be string, %rv?%rarray given in %s/uniqid_error.php on line 20
 
 Warning: uniqid() expects parameter 1 to be string, resource given in %s/uniqid_error.php on line 21
 

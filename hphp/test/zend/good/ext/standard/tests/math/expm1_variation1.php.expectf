@@ -65,7 +65,7 @@ Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/
 
 -- Iteration 18 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 19 --
 
@@ -81,11 +81,11 @@ Warning: expm1() expects parameter 1 to be double, string given in %s/zend/good/
 
 -- Iteration 22 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 23 --
 
-Warning: expm1() expects parameter 1 to be double, array given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
+Warning: expm1() expects parameter 1 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/math/expm1_variation1.php on line 85
 
 -- Iteration 24 --
 

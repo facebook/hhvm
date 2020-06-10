@@ -9,7 +9,7 @@ Warning: openssl_verify() expects parameter 2 to be string, object given in %s/z
 
 Warning: openssl_verify() expects parameter 2 to be string, object given in %s/zend/good/ext/openssl/tests/bug38255.php on line 20
 
-Warning: openssl_verify() expects parameter 2 to be string, array given in %s/zend/good/ext/openssl/tests/bug38255.php on line 21
+Warning: openssl_verify() expects parameter 2 to be string, %rv?%rarray given in %s/zend/good/ext/openssl/tests/bug38255.php on line 21
 
 Warning: openssl_verify() expects at least 3 parameters, 0 given in %s/zend/good/ext/openssl/tests/bug38255.php on line 22
 

@@ -38,19 +38,19 @@ Warning: basename() expects parameter 1 to be string, double given in %s/zend/go
 
 --empty array--
 
-Warning: basename() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --int indexed array--
 
-Warning: basename() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --associative array--
 
-Warning: basename() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --nested arrays--
 
-Warning: basename() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
+Warning: basename() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/file/basename_variation3.php on line 95
 
 --uppercase NULL--
 

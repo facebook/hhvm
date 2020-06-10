@@ -30,19 +30,19 @@ int(0)
 Warning: strncmp() expects parameter 3 to be integer, double given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 11 --
 
-Warning: strncmp() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
+Warning: strncmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 12 --
 
-Warning: strncmp() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
+Warning: strncmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 13 --
 
-Warning: strncmp() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
+Warning: strncmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 14 --
 
-Warning: strncmp() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
+Warning: strncmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 15 --
 
-Warning: strncmp() expects parameter 3 to be integer, array given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
+Warning: strncmp() expects parameter 3 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89
 -- Iteration 16 --
 
 Warning: strncmp() expects parameter 3 to be integer, boolean given in %s/zend/good/ext/standard/tests/strings/strncmp_variation5.php on line 89

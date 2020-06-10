@@ -40,23 +40,23 @@ Warning: base64_decode() expects parameter 2 to be boolean, double given in %s/z
 
 -- Arg value array() --
 
-Warning: base64_decode() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
 
 -- Arg value array(0) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
 
 -- Arg value array(1) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
 
 -- Arg value array(1, 2) --
 
-Warning: base64_decode() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
 
-Warning: base64_decode() expects parameter 2 to be boolean, array given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
+Warning: base64_decode() expects parameter 2 to be boolean, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/url/base64_decode_variation_002.php on line 78
 
 -- Arg value NULL --
 

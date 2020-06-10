@@ -34,19 +34,19 @@ Warning: stripcslashes() expects parameter 1 to be string, double given in %s/ze
 Warning: stripcslashes() expects parameter 1 to be string, double given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 10 --
 
-Warning: stripcslashes() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
+Warning: stripcslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 11 --
 
-Warning: stripcslashes() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
+Warning: stripcslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 12 --
 
-Warning: stripcslashes() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
+Warning: stripcslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 13 --
 
-Warning: stripcslashes() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
+Warning: stripcslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 14 --
 
-Warning: stripcslashes() expects parameter 1 to be string, array given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
+Warning: stripcslashes() expects parameter 1 to be string, %r[vd]?%rarray given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88
 -- Iteration 15 --
 
 Warning: stripcslashes() expects parameter 1 to be string, boolean given in %s/zend/good/ext/standard/tests/strings/stripcslashes_variation1.php on line 88

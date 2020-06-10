@@ -23,19 +23,19 @@ Warning: timezone_name_from_abbr() expects parameter 2 to be integer, double giv
 
 -- empty array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- int indexed array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- associative array --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- nested arrays --
 
-Warning: timezone_name_from_abbr() expects parameter 2 to be integer, array given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
+Warning: timezone_name_from_abbr() expects parameter 2 to be integer, %r[vd]?%rarray given in %s/zend/good/ext/date/tests/timezone_name_from_abbr_variation2.php on line 99
 
 -- uppercase NULL --
 

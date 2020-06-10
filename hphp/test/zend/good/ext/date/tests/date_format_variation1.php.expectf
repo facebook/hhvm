@@ -30,19 +30,19 @@ Warning: date_format() expects parameter 1 to be object, double given in %s/date
 
 -- empty array --
 
-Warning: date_format() expects parameter 1 to be object, array given in %s/date_format_variation1.php on line 99
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- int indexed array --
 
-Warning: date_format() expects parameter 1 to be object, array given in %s/date_format_variation1.php on line 99
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- associative array --
 
-Warning: date_format() expects parameter 1 to be object, array given in %s/date_format_variation1.php on line 99
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- nested arrays --
 
-Warning: date_format() expects parameter 1 to be object, array given in %s/date_format_variation1.php on line 99
+Warning: date_format() expects parameter 1 to be object, %r[vd]?%rarray given in %s/date_format_variation1.php on line 99
 
 -- uppercase NULL --
 

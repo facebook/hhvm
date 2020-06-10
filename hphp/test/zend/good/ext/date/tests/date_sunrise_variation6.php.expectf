@@ -34,35 +34,35 @@ Warning: date_sunrise() expects parameter 6 to be double, integer given in %s/da
 
 --empty array--
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 91
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 92
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 93
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --int indexed array--
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 91
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 92
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 93
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --associative array--
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 91
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 92
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 93
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --nested arrays--
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 91
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 91
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 92
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 92
 
-Warning: date_sunrise() expects parameter 6 to be double, array given in %s/date_sunrise_variation6.php on line 93
+Warning: date_sunrise() expects parameter 6 to be double, %r[vd]?%rarray given in %s/date_sunrise_variation6.php on line 93
 
 --uppercase NULL--
 string(5) "10:48"

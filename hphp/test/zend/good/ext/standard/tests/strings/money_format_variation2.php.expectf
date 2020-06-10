@@ -25,13 +25,13 @@ string
 string
 -- Iteration 10 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 11 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 12 --
 
-Warning: money_format() expects parameter 2 to be double, array given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
+Warning: money_format() expects parameter 2 to be double, %rv?%rarray given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88
 -- Iteration 13 --
 
 Warning: money_format() expects parameter 2 to be double, boolean given in %s/zend/good/ext/standard/tests/strings/money_format_variation2.php on line 88

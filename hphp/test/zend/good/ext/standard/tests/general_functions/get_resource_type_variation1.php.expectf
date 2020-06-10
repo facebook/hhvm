@@ -18,7 +18,7 @@ Warning: get_resource_type() expects parameter 1 to be resource, string given in
 
 -- array --
 
-Warning: get_resource_type() expects parameter 1 to be resource, array given in %s/get_resource_type_variation1.php on line 29
+Warning: get_resource_type() expects parameter 1 to be resource, %rv?%rarray given in %s/get_resource_type_variation1.php on line 29
 
 -- NULL --
 

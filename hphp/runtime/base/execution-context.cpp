@@ -2162,7 +2162,7 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     Array globals{get_global_variables()};
     auto& env = [&] () -> Array& {
-      if (fp->m_varEnv && fp->m_varEnv->isGlobalScope()) return globals;
+      if (fp && fp->m_varEnv && fp->m_varEnv->isGlobalScope()) return globals;
       if (m_debuggerEnv.isNull()) m_debuggerEnv = Array::CreateDArray();
       return m_debuggerEnv;
     }();

@@ -988,7 +988,7 @@ static bool set_execution_mode(folly::StringPiece mode) {
     return true;
   } else if (mode == "run" || mode == "debug" || mode == "translate" ||
              mode == "dumphhas" || mode == "verify" || mode == "vsdebug" ||
-             mode == "getoption") {
+             mode == "getoption" || mode == "eval") {
     // We don't run PHP in "translate" mode, so just treat it like cli mode.
     RuntimeOption::ServerMode = false;
     Logger::Escape = false;
@@ -1441,7 +1441,7 @@ static int execute_program_impl(int argc, char** argv) {
     ("repo-schema", "display the repository schema id")
     ("mode,m", value<std::string>(&po.mode)->default_value("run"),
      "run | debug (d) | vsdebug | server (s) | daemon | replay | "
-     "translate (t) | verify | getoption")
+     "translate (t) | verify | getoption | eval")
     ("interactive,a", "Shortcut for --mode debug") // -a is from PHP5
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),
      "load specified config file")
@@ -1995,7 +1995,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (argc <= 1 || po.mode == "run" || po.mode == "debug" ||
-      po.mode == "vsdebug") {
+      po.mode == "vsdebug" || po.mode == "eval") {
     set_stack_size();
 
     if (po.isTempFile) {
@@ -2014,12 +2014,17 @@ static int execute_program_impl(int argc, char** argv) {
 
     std::string const cliFile = !po.file.empty() ? po.file :
                                 new_argv[0] ? new_argv[0] : "";
-    if (po.mode != "debug" && cliFile.empty()) {
+    if (po.mode != "debug" && po.mode != "eval" && cliFile.empty()) {
       std::cerr << "Nothing to do. Either pass a hack file to run, or "
         "use -m server\n";
       return 1;
     }
     Repo::setCliFile(cliFile);
+
+    if (po.mode == "eval" && po.args.empty()) {
+      std::cerr << "Nothing to do. Pass a command to run with mode eval\n";
+      return 1;
+    }
 
     int ret = 0;
     hphp_process_init();
@@ -2029,7 +2034,7 @@ static int execute_program_impl(int argc, char** argv) {
 
     if (RuntimeOption::EvalUseRemoteUnixServer != "no" &&
         !RuntimeOption::EvalUnixServerPath.empty() &&
-        (!po.file.empty() || !po.args.empty())) {
+        (!po.file.empty() || !po.args.empty()) && po.mode != "eval") {
       std::vector<std::string> args;
       if (!po.file.empty()) {
         args.emplace_back(po.file);
@@ -2111,7 +2116,11 @@ static int execute_program_impl(int argc, char** argv) {
       for (int i = 0; i < po.count; i++) {
         execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
         ret = 255;
-        if (hphp_invoke_simple(file, false /* warmup only */)) {
+        if (po.mode == "eval") {
+          String code{"<?hh " + file};
+          auto const r = g_context->evalPHPDebugger(code.get(), 0);
+          if (!r.failed) ret = 0;
+        } else if (hphp_invoke_simple(file, false /* warmup only */)) {
           ret = *rl_exit_code;
         }
         const bool last = i == po.count - 1;

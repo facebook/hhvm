@@ -1,1 +1,2 @@
 --like-type-hints
+--allowed-fixme-codes-strict 3011,4101

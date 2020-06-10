@@ -1455,8 +1455,10 @@ functor
   end
 
 let check_kind_to_string = function
-  | Full_check -> "Full_check"
-  | Lazy_check -> "Lazy_check"
+  | Full_check ->
+    "will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('Full_check')"
+  | Lazy_check ->
+    "will check only those files already open in IDE or with reported errors ('Lazy_check')"
 
 module FC = Make (FullCheckKind)
 module LC = Make (LazyCheckKind)

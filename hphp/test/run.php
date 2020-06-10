@@ -744,12 +744,19 @@ function find_tests($files, darray $options = null) {
 function list_tests($files, $options) {
   $args = implode(' ', \HH\global_get('recorded_options'));
 
+  // Disable escaping of test info when listing. We check if the environment
+  // variable is set so we can make the change in a backwards compatible way.
+  $escape_info = getenv("LISTING_NO_ESCAPE") === false;
+
   foreach (find_tests($files, $options) as $test) {
-    print str_replace('\\', '\\\\',
-                      Status::jsonEncode(
-                        darray['args' => $args, 'name' => $test]
-                      )
-                     )."\n";
+    $test_info = Status::jsonEncode(
+        darray['args' => $args, 'name' => $test],
+    );
+    if ($escape_info) {
+        print str_replace('\\', '\\\\', $test_info)."\n";
+    } else {
+        print $test_info."\n";
+    }
   }
 }
 

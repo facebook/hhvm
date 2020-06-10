@@ -150,8 +150,8 @@ ArrayData* asArray(ObjectData* obj) {
 
 namespace {
 
-ArrayData* deepCopyArray(ArrayData* arr) {
-  assertx(arr->isPHPArrayType());
+ArrayData* deepCopyArrayLike(ArrayData* arr) {
+  assertx(!arr->isKeysetType());
   Array ar(arr);
   IterateKV(
     arr,
@@ -168,51 +168,6 @@ ArrayData* deepCopyArray(ArrayData* arr) {
   return ar.detach();
 }
 
-ArrayData* deepCopyVec(ArrayData* arr) {
-  assertx(arr->isVecKind());
-  Array ar(arr);
-  PackedArray::IterateKV(
-    arr,
-    [&](TypedValue k, TypedValue v) {
-      if (!isRefcountedType(v.m_type)) return false;
-      Variant value{tvAsCVarRef(&v)};
-      deepCopy(value.asTypedValue());
-      if (value.asTypedValue()->m_data.num != v.m_data.num) {
-        assertx(k.m_type == KindOfInt64);
-        ar.set(k.m_data.num, value);
-      }
-      return false;
-    }
-  );
-  return ar.detach();
-}
-
-ArrayData* deepCopyDict(ArrayData* arr) {
-  assertx(arr->isDictKind());
-  Array ar(arr);
-  MixedArray::IterateKV(
-    MixedArray::asMixed(arr),
-    [&](TypedValue k, TypedValue v) {
-      if (!isRefcountedType(v.m_type)) return false;
-      Variant value{tvAsCVarRef(&v)};
-      deepCopy(value.asTypedValue());
-      if (value.asTypedValue()->m_data.num != v.m_data.num) {
-        ar.set(k, *value.asTypedValue());
-      }
-      return false;
-    }
-  );
-  return ar.detach();
-}
-
-ObjectData* deepCopySet(c_Set* st) {
-  return c_Set::Clone(st);
-}
-
-ObjectData* deepCopyImmSet(c_ImmSet* st) {
-  return c_ImmSet::Clone(st);
-}
-
 }  // namespace
 
 void deepCopy(tv_lval lval) {
@@ -225,27 +180,14 @@ void deepCopy(tv_lval lval) {
     case KindOfRFunc:
       return;
 
-    case KindOfVec: {
-      auto& original = val(lval).parr;
-      auto arr = deepCopyVec(original);
-      decRefArr(original);
-      original = arr;
-      return;
-    }
-
-    case KindOfDict: {
-      auto& original = val(lval).parr;
-      auto arr = deepCopyDict(original);
-      decRefArr(original);
-      original = arr;
-      return;
-    }
-
+    case KindOfVec:
+    case KindOfDict:
     case KindOfDArray:
     case KindOfVArray:
     case KindOfArray: {
       auto& original = val(lval).parr;
-      auto arr = deepCopyArray(original);
+      if (!original->isRefCounted()) return;
+      auto arr = deepCopyArrayLike(original);
       decRefArr(original);
       original = arr;
       return;

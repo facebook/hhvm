@@ -1325,7 +1325,8 @@ struct Gt : CompareBase<bool, std::greater<>> {
     assertx(ad2->isVecType());
     return ArrayData::bothVanilla(ad1, ad2)
       ? PackedArray::VecGt(ad1, ad2)
-      : ArrayData::Gt(ad1, ad2);
+      // WARNING: ArrayData::Gt(ad1, ad2) is incorrect; param order matters.
+      : !ArrayData::Lte(ad1, ad2);
   }
 };
 
@@ -1351,7 +1352,8 @@ struct Gte : CompareBase<bool, std::greater_equal<>> {
     assertx(ad2->isVecType());
     return ArrayData::bothVanilla(ad1, ad2)
       ? PackedArray::VecGte(ad1, ad2)
-      : ArrayData::Gte(ad1, ad2);
+      // WARNING: ArrayData::Gte(ad1, ad2) is incorrect; param order matters.
+      : !ArrayData::Lt(ad1, ad2);
   }
 };
 

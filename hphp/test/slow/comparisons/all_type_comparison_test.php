@@ -167,8 +167,11 @@ function main(): void {
   $arr14 = varray[varray[1, 2], varray[99]];
   $arr15 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
   $arr16 = varray[Vector{0, 1, 2, 3, 4}, Vector{5, 6, 7, 8}];
-  $arr17 = varray[1, NAN];
-  $arr18 = varray[1, NAN];
+  // The behavior of this test critically relies on $arr17 and $arr18 being
+  // equal by identity; they would not compare equal otherwise. Be explicit.
+  $make_nan_array = () ==> varray[1, NAN];
+  $arr17 = $make_nan_array();
+  $arr18 = $make_nan_array();
   $arr19 = varray[NAN, 1];
   $arr20 = varray[1, NAN, 2];
   $arr21 = darray['key1' => 1, 'key2' => 2, 'key3' => 3];

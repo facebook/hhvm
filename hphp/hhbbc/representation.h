@@ -569,10 +569,23 @@ struct Class : ClassBase {
   bool hasConstProp : 1;
 };
 
-//////////////////////////////////////////////////////////////////////
+struct Constant {
+  Unit* unit;
+  LSString name;
+  TypedValue val;
+  Attr attrs;
+};
 
-using TypeAlias = ::HPHP::TypeAlias;
-using Constant = ::HPHP::Constant;
+struct TypeAlias {
+  Unit* unit;
+  LSString name;
+  LSString value;
+  Attr attrs;
+  AnnotType type;
+  bool nullable;  // null is allowed; for ?Foo aliases
+  UserAttributeMap userAttrs;
+  Array typeStructure{ArrayData::CreateDArray(ARRPROV_HERE())};
+};
 
 //////////////////////////////////////////////////////////////////////
 /*

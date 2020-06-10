@@ -1496,15 +1496,29 @@ void emit_class(EmitUnitState& state,
 
 void emit_typealias(UnitEmitter& ue, const php::TypeAlias& alias,
                     const EmitUnitState& state) {
-  auto const id = ue.addTypeAlias(alias);
+  TypeAlias t {
+    alias.name,
+    alias.value,
+    alias.attrs,
+    alias.type,
+    alias.nullable,
+    alias.userAttrs,
+    alias.typeStructure,
+  };
+  auto const id = ue.addTypeAlias(t);
   if (state.processedTypeAlias.find(id) == state.processedTypeAlias.end()) {
     ue.pushMergeableId(Unit::MergeKind::TypeAlias, id);
   }
 }
 
-void emit_constant(UnitEmitter& ue, const Constant& constant,
+void emit_constant(UnitEmitter& ue, const php::Constant& constant,
                    const EmitUnitState& state) {
-  auto const id = ue.addConstant(constant);
+  Constant c {
+    constant.name,
+    constant.val,
+    constant.attrs,
+  };
+  auto const id = ue.addConstant(c);
   if (state.processedConstant.find(id) == state.processedConstant.end()) {
     ue.pushMergeableId(Unit::MergeKind::Define, id);
   }

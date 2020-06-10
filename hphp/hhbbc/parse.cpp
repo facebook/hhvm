@@ -1057,6 +1057,28 @@ void find_additional_metadata(const ParseUnitState& puState,
 
 }
 
+std::unique_ptr<php::Constant> parse_constant(const Constant& c, php::Unit* unit) {
+  return std::unique_ptr<php::Constant>(new php::Constant{
+    unit,
+    c.name,
+    c.val,
+    c.attrs
+  });
+}
+
+std::unique_ptr<php::TypeAlias> parse_type_alias(const TypeAlias& ta, php::Unit* unit) {
+  return std::unique_ptr<php::TypeAlias>(new php::TypeAlias{
+    unit,
+    ta.name,
+    ta.value,
+    ta.attrs,
+    ta.type,
+    ta.nullable,
+    ta.userAttrs,
+    ta.typeStructure,
+  });
+}
+
 void parse_unit(php::Program& prog, const UnitEmitter* uep) {
   Trace::Bump bumper{Trace::hhbbc_parse, kSystemLibBump, uep->isASystemLib()};
   FTRACE(2, "parse_unit {}\n", uep->m_filepath->data());
@@ -1114,13 +1136,13 @@ void parse_unit(php::Program& prog, const UnitEmitter* uep) {
 
   for (auto& ta : ue.typeAliases()) {
     ret->typeAliases.push_back(
-      std::make_unique<php::TypeAlias>(ta)
+      parse_type_alias(ta, ret.get())
     );
   }
 
   for (auto& c : ue.constants()) {
     ret->constants.push_back(
-      std::make_unique<Constant>(c)
+      parse_constant(c, ret.get())
     );
   }
 

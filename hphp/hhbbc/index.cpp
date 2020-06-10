@@ -1896,12 +1896,8 @@ void add_system_constants_to_index(IndexData& index) {
   for (auto cnsPair : Native::getConstants()) {
     assertx(cnsPair.second.m_type != KindOfUninit ||
             cnsPair.second.dynamic());
-    auto c = new Constant();
-    c->name = cnsPair.first;
-    c->val = cnsPair.second;
-    c->attrs = AttrNone;
-
-    index.constants.insert({c->name, c});
+    auto pc = new php::Constant { nullptr, cnsPair.first, cnsPair.second, AttrNone };
+    index.constants.insert({pc->name, pc});
   }
 }
 

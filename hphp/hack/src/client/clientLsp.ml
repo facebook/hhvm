@@ -207,7 +207,9 @@ let get_root_opt () : Path.t option =
 
 let get_root_exn () : Path.t = Option.value_exn (get_root_opt ())
 
-let hhconfig_version : string ref = ref "[NotYetInitialized]"
+(** We remember the last version of .hhconfig, and hack_rc_mode switch,
+so that if they change then we know we must terminate and be restarted. *)
+let hhconfig_version_and_switch : string ref = ref "[NotYetInitialized]"
 
 (** This flag is used to control how much will be written
 to log-files. It can be turned on initially by --verbose at the command-line or
@@ -564,6 +566,23 @@ let read_hhconfig_version () : string Lwt.t =
       in
       Lwt.return version
     | Error message -> Lwt.return (Printf.sprintf "[NoHhconfig:%s]" message))
+
+let read_hhconfig_version_and_switch () : string Lwt.t =
+  let%lwt hack_rc_mode_result =
+    Lwt_utils.read_all (Sys_utils.expanduser "~/.hack_rc_mode")
+  in
+  let hack_rc_mode =
+    match hack_rc_mode_result with
+    | Ok s -> " hack_rc_mode=" ^ s
+    | Error _ -> ""
+  in
+  let hh_home =
+    match Sys.getenv_opt "HH_HOME" with
+    | Some s -> " HH_HOME=" ^ s
+    | None -> ""
+  in
+  let%lwt hhconfig_version = read_hhconfig_version () in
+  Lwt.return (hhconfig_version ^ hack_rc_mode ^ hh_home)
 
 (** get_uris_with_unsaved_changes is the set of files for which we've
 received didChange but haven't yet received didSave/didOpen. It is purely
@@ -1317,9 +1336,12 @@ and reconnect_from_lost_if_necessary
       | (_, _) -> false
     in
     if should_reconnect then
-      let%lwt current_version = read_hhconfig_version () in
+      let%lwt current_version_and_switch =
+        read_hhconfig_version_and_switch ()
+      in
       let needs_to_terminate =
-        not (String.equal !hhconfig_version current_version)
+        not
+          (String.equal !hhconfig_version_and_switch current_version_and_switch)
       in
       if needs_to_terminate then (
         (* In these cases we have to terminate our LSP server, and trust the    *)
@@ -1335,10 +1357,10 @@ and reconnect_from_lost_if_necessary
         let message =
           "Unsaved files:\n"
           ^ unsaved_str
-          ^ "\nVersion in hhconfig that spawned the current hh_client: "
-          ^ !hhconfig_version
-          ^ "\nVersion in hhconfig currently: "
-          ^ current_version
+          ^ "\nVersion in hhconfig and switch that spawned the current hh_client: "
+          ^ !hhconfig_version_and_switch
+          ^ "\nVersion in hhconfig and switch currently: "
+          ^ current_version_and_switch
           ^ "\n"
         in
         Lsp_helpers.telemetry_log to_stdout message;
@@ -2094,7 +2116,7 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
     List.map ~f:server_state_to_string !hh_server_state_log
     |> String.concat ~sep:"\n"
   in
-  let%lwt current_version = read_hhconfig_version () in
+  let%lwt current_version_and_switch = read_hhconfig_version_and_switch () in
 
   (* spawn hh rage --rageid <rageid>, and write <rageid> in our own rage output *)
   let rageid = Random_id.short_string () in
@@ -2140,13 +2162,13 @@ let do_rageFB (state : state) : RageFB.result Lwt.t =
     Printf.sprintf
       ( "%s\n\n"
       ^^ "%s\n\n"
-      ^^ "version previously read from .hhconfig: %s\n"
-      ^^ "version in .hhconfig: %s\n\n"
+      ^^ "version previously read from .hhconfig and switch: %s\n"
+      ^^ "version in .hhconfig and switch: %s\n\n"
       ^^ "clientLsp belief of hh_server_state:\n%s\n" )
       rage
       (state_to_rage state)
-      !hhconfig_version
-      current_version
+      !hhconfig_version_and_switch
+      current_version_and_switch
       server_state
   in
   Lwt.return [{ RageFB.title = None; data }]
@@ -3917,9 +3939,10 @@ let handle_client_message
       end;
 
       let%lwt version = read_hhconfig_version () in
-      hhconfig_version := version;
       HackEventLogger.set_hhconfig_version
-        (Some (String_utils.lstrip !hhconfig_version "^"));
+        (Some (String_utils.lstrip version "^"));
+      let%lwt version_and_switch = read_hhconfig_version_and_switch () in
+      hhconfig_version_and_switch := version_and_switch;
       let%lwt new_state = connect ~env !state in
       state := new_state;
       Relative_path.set_path_prefix Relative_path.Root root;
@@ -3960,7 +3983,7 @@ let handle_client_message
       if not @@ Sys_utils.is_test_mode () then
         Lsp_helpers.telemetry_log
           to_stdout
-          ("Version in hhconfig=" ^ !hhconfig_version);
+          ("Version in hhconfig and switch=" ^ !hhconfig_version_and_switch);
       Lwt.return_some { result_count = 0; result_extra_telemetry = None }
     (* any request/notification if we haven't yet initialized *)
     | (Pre_init, _, _) ->

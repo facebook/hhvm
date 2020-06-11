@@ -112,6 +112,7 @@ let parse_check_args cmd =
   let remote = ref false in
   let replace_state_after_saving = ref false in
   let sort_results = ref false in
+  let stdin_name = ref None in
   let timeout = ref None in
   let version = ref false in
   let watchman_debug_logging = ref false in
@@ -631,6 +632,9 @@ let parse_check_args cmd =
       ( "--stats",
         Arg.Unit (set_mode MODE_STATS),
         " display some server statistics" );
+      ( "--stdin-name",
+        Arg.String (fun x -> stdin_name := Some x),
+        " substitute stdin for contents of file with specified name" );
       ( "--status",
         Arg.Unit (set_mode MODE_STATUS),
         " (mode) show a human readable list of errors (default)" );
@@ -751,6 +755,7 @@ let parse_check_args cmd =
       replace_state_after_saving = !replace_state_after_saving;
       root;
       sort_results = !sort_results;
+      stdin_name = !stdin_name;
       deadline = Option.map ~f:(fun t -> Unix.time () +. t) !timeout;
       watchman_debug_logging = !watchman_debug_logging;
       allow_non_opt_build = !allow_non_opt_build;

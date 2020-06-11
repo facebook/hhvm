@@ -91,6 +91,7 @@ type client_check_env = {
   replace_state_after_saving: bool;
   root: Path.t;
   sort_results: bool;
+  stdin_name: string option;
   deadline: float option;
   watchman_debug_logging: bool;
   allow_non_opt_build: bool;

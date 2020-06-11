@@ -353,11 +353,16 @@ let main (args : client_check_env) : Exit_status.t Lwt.t =
     | MODE_IDENTIFY_SYMBOL2 arg
     | MODE_IDENTIFY_SYMBOL3 arg ->
       let (line, char) = parse_position_string arg in
+      let file =
+        match args.stdin_name with
+        | None -> ""
+        | Some f -> expand_path f
+      in
       let content =
         ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
       in
       let%lwt result =
-        rpc args @@ Rpc.IDENTIFY_FUNCTION ("", content, line, char)
+        rpc args @@ Rpc.IDENTIFY_FUNCTION (file, content, line, char)
       in
       ClientGetDefinition.go result args.output_json;
       Lwt.return Exit_status.No_error

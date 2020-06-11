@@ -79,6 +79,8 @@ auto_namespace_map = {}
         self.proc_call(
             [
                 hh_paths.hh_single_type_check,
+                "--allowed-fixme-codes-strict",
+                "4101",
                 "--auto-namespace-map",
                 self.auto_namespace_map,
                 "--batch-files",

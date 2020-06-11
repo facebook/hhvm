@@ -1,1 +1,2 @@
 --hh-log-level prop 1
+--allowed-fixme-codes-strict 2053,4110

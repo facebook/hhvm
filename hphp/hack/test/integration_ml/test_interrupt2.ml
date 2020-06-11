@@ -37,8 +37,25 @@ File "/foo.php", line 3, characters 18-23:
 But got string
 |}
 
+let root = "/"
+
+let hhconfig_filename = Filename.concat root ".hhconfig"
+
+let hhconfig_contents = "
+allowed_fixme_codes_strict = 4336
+"
+
 let test () =
-  let env = Test.setup_server () in
+  Relative_path.set_path_prefix Relative_path.Root (Path.make root);
+  TestDisk.set hhconfig_filename hhconfig_contents;
+  let hhconfig_path =
+    Relative_path.create Relative_path.Root hhconfig_filename
+  in
+  let options = ServerArgs.default_options ~root in
+  let (custom_config, _) =
+    ServerConfig.load ~silent:false hhconfig_path options
+  in
+  let env = Test.setup_server ~custom_config () in
   ServerMain.force_break_recheck_loop_for_test false;
 
   (* There are initially no errors *)

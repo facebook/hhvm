@@ -518,6 +518,7 @@ let save_state
     ?(store_decls_in_saved_state =
       ServerLocalConfig.(default.store_decls_in_saved_state))
     ?(enable_naming_table_fallback = false)
+    ?custom_config
     disk_changes
     temp_dir =
   in_daemon @@ fun () ->
@@ -527,7 +528,7 @@ let save_state
     else
       []
   in
-  let env = setup_server () ~hhi_files in
+  let env = setup_server () ?custom_config ~hhi_files in
   let env = setup_disk env disk_changes in
   assert_no_errors env;
   genv :=
@@ -539,6 +540,7 @@ let save_state
           ServerLocalConfig.store_decls_in_saved_state;
           ServerLocalConfig.enable_naming_table_fallback;
         };
+      ServerEnv.config = Option.value custom_config ~default:!genv.ServerEnv.config;
     };
   let _edges_added =
     ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
@@ -600,6 +602,7 @@ let load_state
     ?(load_decls_from_saved_state =
       ServerLocalConfig.(default.load_decls_from_saved_state))
     ?(enable_naming_table_fallback = false)
+    ?custom_config
     ~disk_state
     saved_state_dir =
   (* In production, saved state is only used in conjunction with lazy init
@@ -625,6 +628,7 @@ let load_state
               None );
           enable_naming_table_fallback;
         };
+      ServerEnv.config = Option.value custom_config ~default:!genv.ServerEnv.config;
     };
   let hhi_files =
     if load_hhi_files then

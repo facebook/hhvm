@@ -25,6 +25,7 @@ val save_state :
   ?load_hhi_files:bool ->
   ?store_decls_in_saved_state:bool ->
   ?enable_naming_table_fallback:bool ->
+  ?custom_config:ServerConfig.t ->
   disk_changes_type ->
   string ->
   unit
@@ -46,6 +47,7 @@ val load_state :
   ?predeclare_ide_deps:bool ->
   ?load_decls_from_saved_state:bool ->
   ?enable_naming_table_fallback:bool ->
+  ?custom_config:ServerConfig.t ->
   disk_state:disk_changes_type ->
   string (* saved_state_dir *) ->
   ServerEnv.env

@@ -256,6 +256,8 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     // and interactions well enough to feel comfortable fixing now.
     RuntimeOption::EnableIntrinsicsExtension =
       s_globalData.EnableIntrinsicsExtension;
+    RuntimeOption::EvalHackArrCompatSpecialization =
+      s_globalData.HackArrCompatSpecialization;
     RuntimeOption::PHP7_Builtins            = s_globalData.PHP7_Builtins;
     RuntimeOption::PHP7_NoHexNumerics       = s_globalData.PHP7_NoHexNumerics;
     RuntimeOption::PHP7_Substr              = s_globalData.PHP7_Substr;

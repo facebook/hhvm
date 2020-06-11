@@ -294,7 +294,21 @@ void VariableUnserializer::add(tv_lval v, UnserializeMode mode) {
 }
 
 void VariableUnserializer::reserveForAdd(size_t count) {
-  m_refs.reserve(m_refs.size() + count);
+  // If the array is large, the space for the backrefs could be
+  // significant, so we need to check for OOM beforehand. To do this,
+  // we need to do some guess work to estimate what memory the vector
+  // will consume once we've done the reserve (we assume the vector
+  // doubles in capacity as necessary).
+  auto const newSize = m_refs.size() + count;
+  auto const capacity = m_refs.capacity();
+  if (newSize <= capacity) return;
+  auto const total =
+    (folly::nextPowTwo(newSize) - capacity) *
+    sizeof(decltype(m_refs)::value_type);
+  if (UNLIKELY(total > kMaxSmallSize && tl_heap->preAllocOOM(total))) {
+    check_non_safepoint_surprise();
+  }
+  m_refs.reserve(newSize);
 }
 
 TypedValue VariableUnserializer::getByVal(int id) {
@@ -1203,10 +1217,8 @@ Array VariableUnserializer::unserializeArray() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = MixedArray::computeScaleFromSize(size);
-  auto const allocsz = MixedArray::computeAllocBytes(scale);
-
   // For large arrays, do a naive pre-check for OOM.
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1309,10 +1321,9 @@ Array VariableUnserializer::unserializeDict() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = MixedArray::computeScaleFromSize(size);
-  auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1353,7 +1364,7 @@ Array VariableUnserializer::unserializeVec() {
     throwArraySizeOutOfBounds();
   }
   auto const sizeClass = PackedArray::capacityToSizeIndex(size);
-  auto const allocsz = kSizeIndex2PackedArrayCapacity[sizeClass];
+  auto const allocsz = MemoryManager::sizeIndex2Size(sizeClass);
 
   // For large arrays, do a naive pre-check for OOM.
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
@@ -1415,11 +1426,11 @@ Array VariableUnserializer::unserializeVArray() {
   auto arr = Array{};
   if (m_forceDArrays && m_type == Type::Serialize) {
     // Deserialize to vector-ish darray. Use direct calls to MixedArray.
-    auto const scale = MixedArray::computeScaleFromSize(size);
-    oomCheck(MixedArray::computeAllocBytes(scale));
-    reserveForAdd(size);
+    oomCheck(MixedArray::computeAllocBytesFromMaxElms(size));
 
     arr = DArrayInit(size).toArray();
+    reserveForAdd(size);
+
     for (int64_t i = 0; i < size; i++) {
       unserializeVariant(MixedArray::LvalInPlace(arr.get(), i));
       if (i < size - 1) checkElemTermination();
@@ -1427,10 +1438,11 @@ Array VariableUnserializer::unserializeVArray() {
   } else {
     // Deserialize to varray. Use direct calls to MixedArray.
     auto const index = PackedArray::capacityToSizeIndex(size);
-    oomCheck(kSizeIndex2PackedArrayCapacity[index]);
-    reserveForAdd(size);
+    oomCheck(MemoryManager::sizeIndex2Size(index));
 
     arr = VArrayInit(size).toArray();
+    reserveForAdd(size);
+
     for (int64_t i = 0; i < size; i++) {
       unserializeVariant(PackedArray::LvalNewInPlace(arr.get()));
       if (i < size - 1) checkElemTermination();
@@ -1463,10 +1475,9 @@ Array VariableUnserializer::unserializeDArray() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = MixedArray::computeScaleFromSize(size);
-  auto const allocsz = MixedArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1499,10 +1510,9 @@ Array VariableUnserializer::unserializeKeyset() {
   if (UNLIKELY(size < 0 || size > std::numeric_limits<int>::max())) {
     throwArraySizeOutOfBounds();
   }
-  auto const scale = SetArray::computeScaleFromSize(size);
-  auto const allocsz = SetArray::computeAllocBytes(scale);
 
   // For large arrays, do a naive pre-check for OOM.
+  auto const allocsz = SetArray::computeAllocBytesFromMaxElms(size);
   if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
     check_non_safepoint_surprise();
   }
@@ -1582,6 +1592,14 @@ void VariableUnserializer::unserializeCollection(ObjectData* obj, int64_t sz,
 void VariableUnserializer::unserializeVector(ObjectData* obj, int64_t sz,
                                              char type) {
   if (type != 'V') throwBadFormat(obj, type);
+
+  auto const sizeClass = PackedArray::capacityToSizeIndex(sz);
+  auto const allocsz = MemoryManager::sizeIndex2Size(sizeClass);
+  // For large vectors, do a naive pre-check for OOM.
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
   auto bvec = static_cast<BaseVector*>(obj);
   bvec->reserve(sz);
   reserveForAdd(sz);
@@ -1649,12 +1667,20 @@ bool VariableUnserializer::tryUnserializeStrIntMap(BaseMap* map, int64_t sz) {
 void VariableUnserializer::unserializeMap(ObjectData* obj, int64_t sz,
                                           char type) {
   if (type != 'K') throwBadFormat(obj, type);
+
+  // For large maps, do a naive pre-check for OOM.
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(sz);
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
   auto map = static_cast<BaseMap*>(obj);
   map->reserve(sz);
   if (sz >= RuntimeOption::UnserializationBigMapThreshold &&
       tryUnserializeStrIntMap(map, sz)) {
     return;
   }
+
   reserveForAdd(sz + sz); // keys + values
   for (int64_t i = 0; i < sz; ++i) {
     Variant k;
@@ -1688,8 +1714,16 @@ do_unserialize:
 void VariableUnserializer::unserializeSet(ObjectData* obj, int64_t sz,
                                           char type) {
   if (type != 'V') throwBadFormat(obj, type);
+
+  // For large maps, do a naive pre-check for OOM.
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(sz);
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
   auto set = static_cast<BaseSet*>(obj);
   set->reserve(sz);
+
   reserveForAdd(sz);
   for (int64_t i = 0; i < sz; ++i) {
     // When unserializing an element of a Set, we use Mode::ColKey for now.

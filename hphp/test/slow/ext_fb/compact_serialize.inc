@@ -1,5 +1,16 @@
 <?hh
 
+function darray_recursive($x) {
+  if (!HH\is_php_array($x)) {
+    return $x;
+  }
+  $result = darray[];
+  foreach ($x as $k => $v) {
+    $result[$k] = darray_recursive($v);
+  }
+  return $result;
+}
+
 function hexdump(string $s): string {
   $out = "\n";
   for ($i=0; $i < strlen($s); ++$i) {
@@ -56,7 +67,7 @@ function fb_cs_test_impl($v) {
     ."type(fb_cu(fb_s(%s))) === %s\n"
     ."fbcu success: %s\n",
     var_export($v_, true), var_export($compact_unserialize_result, true),
-    var_export($compact_unserialize_result ===  $v_, true),
+    var_export($compact_unserialize_result === darray_recursive($v_), true),
     gettype($v_), gettype($compact_unserialize_result),
     var_export($ret === true, true),
   );
@@ -75,7 +86,7 @@ function fb_cs_test_impl($v) {
     "fb_u(fb_cs(x)) === x: %s\n"
     ."type(fb_u(fb_s(type:%s))) === %s\n"
     ."fbcu success: %s\n",
-    var_export($unserialize_result === $v_, true),
+    var_export($unserialize_result === darray_recursive($v_), true),
     gettype($v_), gettype($unserialize_result),
     var_export($ret === true, true),
   );

@@ -2054,9 +2054,6 @@ inline TypedValue SetOpElem(SetOpOp op, tv_lval base,
   }
 
   auto const handleArray = [&] {
-    if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
-      throwMissingElementException("Set-op");
-    }
     auto const result = ElemDArray<KeyType::Any>(base, key);
     setopBody(tvAssertPlausible(result), op, rhs);
     return *result;
@@ -2258,9 +2255,6 @@ inline TypedValue IncDecElem(IncDecOp op, tv_lval base, TypedValue key) {
   }
 
   auto const handleArray = [&] {
-    if (UNLIKELY(!asCArrRef(base).exists(tvAsCVarRef(&key)))) {
-      throwMissingElementException("Inc/dec");
-    }
     auto const result = ElemDArray<KeyType::Any>(base, key);
     return IncDecBody(op, tvAssertPlausible(result));
   };

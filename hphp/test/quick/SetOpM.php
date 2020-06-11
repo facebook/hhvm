@@ -31,5 +31,11 @@ $zero = 0;
 $a[$zero] += 1;
 var_dump($a);
 
+try {
+  $a[17] += 1;
+} catch (Exception $e) {
+  print(get_class($e).': '.$e->getMessage()."\n");
+}
+
 print "Test end\n";
 }

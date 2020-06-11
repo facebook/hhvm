@@ -13,4 +13,5 @@ array(1) {
   [0]=>
   int(6)
 }
+OutOfBoundsException: Lval on missing array element
 Test end

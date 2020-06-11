@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/member-operations.h"
 
+#include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/packed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -219,7 +220,7 @@ void setRangeString(
  * common int case.
  */
 template<bool reverse, int64_t size, DataType elem_type>
-void setRangeVecLoop(char* dest, const TypedValue* vec_data, int64_t count) {
+void setRangeVecLoop(char* dest, const ArrayData* vec, int64_t count) {
   static_assert(
     (isBoolType(elem_type) && size == 1) ||
     (isIntType(elem_type) &&
@@ -228,9 +229,9 @@ void setRangeVecLoop(char* dest, const TypedValue* vec_data, int64_t count) {
     "Unsupported elem_type and/or size"
   );
 
+  auto i = 0;
   if (reverse) dest += (count - 1) * size;
-  for (int64_t i = 0; i < count; ++i) {
-    auto elem = vec_data + i;
+  IterateV(vec, [&](TypedValue elem) {
     if (UNLIKELY(type(elem) != elem_type)) {
       fail_invalid(
         "Multiple types in vec source: {} at index 0; {} at index {}",
@@ -247,25 +248,24 @@ void setRangeVecLoop(char* dest, const TypedValue* vec_data, int64_t count) {
       copy_int(dest, val(elem).num, size);
     }
     dest += reverse ? -size : size;
-  }
+    return (++i) == count;
+  });
 }
 
 template<bool reverse, typename F>
 void setRangeVec(
-  char* dest, TypedValue src, int64_t count, int64_t size, F range_check
+  char* dest, const ArrayData* vec, int64_t count, int64_t size, F range_check
 ) {
-  auto const vec = val(src).parr;
   auto const vec_size = vec->size();
   if (count == -1) {
     count = vec_size;
   } else if (count < 0 || count > vec_size) {
-    fail_oob("Cannot read {} elements from vec of size {}",
-             count, vec_size);
+    fail_oob("Cannot read {} elements from vec of size {}", count, vec_size);
   }
 
   range_check(count * size);
-  auto const vec_data = packedData(vec);
-  auto const elem_type = type(vec_data[0]);
+  auto const elem_type = type(vec->at(int64_t{0}));
+  assertx(elem_type != KindOfUninit);
   auto bad_type = [&]() {
     fail_invalid(
       "Bad type ({}) and element size ({}) combination in vec source",
@@ -276,9 +276,9 @@ void setRangeVec(
   switch (size) {
   case 1:
     if (isIntType(elem_type)) {
-      setRangeVecLoop<reverse, 1, KindOfInt64>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 1, KindOfInt64>(dest, vec, count);
     } else if (isBoolType(elem_type)) {
-      setRangeVecLoop<reverse, 1, KindOfBoolean>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 1, KindOfBoolean>(dest, vec, count);
     } else {
       bad_type();
     }
@@ -286,7 +286,7 @@ void setRangeVec(
 
   case 2:
     if (isIntType(elem_type)) {
-      setRangeVecLoop<reverse, 2, KindOfInt64>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 2, KindOfInt64>(dest, vec, count);
     } else {
       bad_type();
     }
@@ -294,9 +294,9 @@ void setRangeVec(
 
   case 4:
     if (isIntType(elem_type)) {
-      setRangeVecLoop<reverse, 4, KindOfInt64>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 4, KindOfInt64>(dest, vec, count);
     } else if (isDoubleType(elem_type)) {
-      setRangeVecLoop<reverse, 4, KindOfDouble>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 4, KindOfDouble>(dest, vec, count);
     } else {
       bad_type();
     }
@@ -304,9 +304,9 @@ void setRangeVec(
 
   case 8:
     if (isIntType(elem_type)) {
-      setRangeVecLoop<reverse, 8, KindOfInt64>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 8, KindOfInt64>(dest, vec, count);
     } else if (isDoubleType(elem_type)) {
-      setRangeVecLoop<reverse, 8, KindOfDouble>(dest, vec_data, count);
+      setRangeVecLoop<reverse, 8, KindOfDouble>(dest, vec, count);
     } else {
       bad_type();
     }
@@ -389,7 +389,7 @@ void SetRange(
   } else if (tvIsString(src)) {
     setRangeString<reverse>(dest, src, count, size, range_check);
   } else if (tvIsVec(src)) {
-    setRangeVec<reverse>(dest, src, count, size, range_check);
+    setRangeVec<reverse>(dest, val(src).parr, count, size, range_check);
   } else {
     fail_invalid("Invalid source type %s for range set operation",
                  tname(type(src)));

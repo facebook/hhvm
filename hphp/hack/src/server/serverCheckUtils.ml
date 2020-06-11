@@ -72,6 +72,7 @@ let should_do_remote
 
 let start_typing_delegate genv env : env =
   let {
+    recli_version;
     remote_version_specifier = version_specifier;
     remote_transport_channel = transport_channel;
     num_local_workers;
@@ -94,16 +95,11 @@ let start_typing_delegate genv env : env =
   in
   let { init_id; mergebase; recheck_id; _ } = env.init_env in
   let recheck_id = Option.value recheck_id ~default:init_id in
-  let file_system_mode =
-    match ArtifactStore.parse_file_system_mode file_system_mode with
-    | Some mode -> mode
-    | None ->
-      failwith (Printf.sprintf "Unknown file_system_mode: %s" file_system_mode)
-  in
   let artifact_store_config =
-    ArtifactStore.default_config
-      ~file_system_mode
-      ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+    let open ArtifactStore in
+    let temp_dir = Path.make GlobalConfig.tmp_dir in
+    let config = default_config ~recli_version ~temp_dir in
+    { config with mode = file_system_mode }
   in
   let raise_on_failure =
     match num_local_workers with
@@ -112,8 +108,8 @@ let start_typing_delegate genv env : env =
   in
   let delegate_state =
     Typing_service_delegate.create
-      ~job_runner:(JobRunner.get JobRunner.Remote)
       ~artifact_store_config
+      ~job_runner:(JobRunner.get JobRunner.Remote)
       ~max_batch_size
       ~min_batch_size
       ~raise_on_failure

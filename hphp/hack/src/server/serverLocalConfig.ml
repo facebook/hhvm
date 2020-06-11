@@ -115,7 +115,7 @@ module RemoteTypeCheck = struct
     be used by the remote worker *)
     worker_vfs_checkout_threshold: int;
     (* File system mode used by ArtifactStore *)
-    file_system_mode: string;
+    file_system_mode: ArtifactStore.file_system_mode;
   }
 
   let default =
@@ -133,7 +133,7 @@ module RemoteTypeCheck = struct
       recheck_threshold = None;
       worker_min_log_level = Hh_logger.Level.Info;
       worker_vfs_checkout_threshold = 10_000;
-      file_system_mode = "Distributed";
+      file_system_mode = ArtifactStore.Distributed;
     }
 
   let load ~current_version ~default config =
@@ -145,12 +145,19 @@ module RemoteTypeCheck = struct
         ~default:default.declaration_threshold
         config
     in
+
     let file_system_mode =
-      string_
-        "file_system_mode"
-        ~prefix
-        ~default:default.file_system_mode
-        config
+      let open ArtifactStore in
+      let file_system_mode =
+        string_
+          "file_system_mode"
+          ~prefix
+          ~default:(string_of_file_system_mode Distributed)
+          config
+      in
+      match file_system_mode_of_string file_system_mode with
+      | Some mode -> mode
+      | None -> Distributed
     in
     let enabled_on_errors =
       string_list
@@ -432,6 +439,8 @@ type t = {
   prefetch_deferred_files: bool;
   (* Settings controlling how and whether we capture the recheck environment *)
   recheck_capture: RecheckCapture.t;
+  (* The version of the Remote Execution CLI tool to use *)
+  recli_version: string;
   (* Remote type check settings that can be changed, e.g., by GK *)
   remote_type_check: RemoteTypeCheck.t;
   (* If set, uses the key to fetch type checking jobs *)
@@ -520,6 +529,7 @@ let default =
     max_times_to_defer_type_checking = None;
     prefetch_deferred_files = false;
     recheck_capture = RecheckCapture.default;
+    recli_version = "STABLE";
     remote_type_check = RemoteTypeCheck.default;
     remote_worker_key = None;
     remote_check_id = None;
@@ -891,6 +901,9 @@ let load_ fn ~silent ~current_version overrides =
   let watchman =
     Watchman.load ~current_version ~default:default.watchman config
   in
+  let recli_version =
+    string_ "recli_version" ~default:default.recli_version config
+  in
   let remote_worker_key = string_opt "remote_worker_key" config in
   let remote_check_id = string_opt "remote_check_id" config in
   let remote_version_specifier = string_opt "remote_version_specifier" config in
@@ -1010,6 +1023,7 @@ let load_ fn ~silent ~current_version overrides =
     max_times_to_defer_type_checking;
     prefetch_deferred_files;
     recheck_capture;
+    recli_version;
     remote_type_check;
     remote_worker_key;
     remote_check_id;

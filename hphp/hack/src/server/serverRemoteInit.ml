@@ -11,8 +11,9 @@ let init
     (workers : MultiWorker.worker list option)
     ~(worker_key : string)
     ~(check_id : string)
+    ~(recli_version : string)
     ~(transport_channel : string option)
-    ~(file_system_mode : string)
+    ~(file_system_mode : ArtifactStore.file_system_mode)
     ~(ci_info : Ci_util.info option Future.t option)
     ~(init_id : string)
     ~(init_start_t : float)
@@ -23,16 +24,12 @@ let init
              with type naming_table = Naming_table.t option)) =
     ServerApi.make_remote_server_api ctx workers
   in
-  let file_system_mode =
-    match ArtifactStore.parse_file_system_mode file_system_mode with
-    | Some mode -> mode
-    | None ->
-      failwith (Printf.sprintf "Unknown file_system_mode: %s" file_system_mode)
-  in
   let artifact_store_config =
-    ArtifactStore.default_config
-      ~file_system_mode
-      ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+    let open ArtifactStore in
+    let config =
+      default_config ~recli_version ~temp_dir:(Path.make GlobalConfig.tmp_dir)
+    in
+    { config with mode = file_system_mode }
   in
   let (worker_env : Naming_table.t option RemoteWorker.work_env) =
     RemoteWorker.make_env

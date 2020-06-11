@@ -19,14 +19,21 @@ type file_system_mode =
 [@@deriving show]
 
 type config = {
-  file_system_mode: file_system_mode;
+  mode: file_system_mode;
   temp_dir: Path.t;
 }
 
-let parse_file_system_mode mode_str =
+let file_system_mode_of_string mode_str =
   match mode_str with
   | "Local" -> Some Local
   | "Distributed" -> Some Distributed
   | _ -> None
 
-let default_config ~file_system_mode ~temp_dir = { file_system_mode; temp_dir }
+let string_of_file_system_mode file_system_mode =
+  match file_system_mode with
+  | Local -> "Local"
+  | Distributed -> "Distributed"
+
+let default_config ~recli_version ~temp_dir =
+  ignore recli_version;
+  { mode = Distributed; temp_dir }

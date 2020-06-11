@@ -112,19 +112,24 @@ let init
       let bin_root = Path.make (Filename.dirname Sys.argv.(0)) in
       let t = Unix.gettimeofday () in
       let ctx = Provider_utils.ctx_from_server_env env in
+      let open ServerLocalConfig in
+      let open RemoteTypeCheck in
+      let { recli_version; remote_transport_channel = transport_channel; _ } =
+        genv.local_config
+      in
+      let { file_system_mode; _ } = genv.local_config.remote_type_check in
+      let { init_id; ci_info; init_start_t; _ } = env.init_env in
       ServerRemoteInit.init
         ctx
         genv.workers
         ~worker_key
         ~check_id
-        ~transport_channel:
-          genv.local_config.ServerLocalConfig.remote_transport_channel
-        ~file_system_mode:
-          genv.local_config.ServerLocalConfig.remote_type_check
-            .ServerLocalConfig.RemoteTypeCheck.file_system_mode
-        ~ci_info:env.init_env.ci_info
-        ~init_id:env.init_env.init_id
-        ~init_start_t:env.init_env.init_start_t
+        ~recli_version
+        ~transport_channel
+        ~file_system_mode
+        ~ci_info
+        ~init_id
+        ~init_start_t
         ~bin_root
         ~root;
       let t = Hh_logger.log_duration "Remote type check" t in

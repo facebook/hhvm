@@ -16,6 +16,7 @@ module Recheck_stats = struct
     id: string;
     time: float;
     count: int;
+    telemetry: Telemetry.t;
   }
 end
 

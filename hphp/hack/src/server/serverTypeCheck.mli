@@ -16,6 +16,7 @@ val check_kind_to_string : check_kind -> string
 type check_results = {
   reparse_count: int;
   total_rechecked_count: int;
+  telemetry: Telemetry.t;
 }
 
 val type_check :

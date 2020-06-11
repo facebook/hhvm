@@ -78,6 +78,7 @@ module Program = struct
             ServerCommandTypes.Recheck_stats.id = info.recheck_id;
             time = info.recheck_time;
             count = info.stats.total_rechecked_count;
+            telemetry = info.stats.telemetry;
           }
     in
     ServerError.print_error_list
@@ -507,15 +508,25 @@ let rec recheck_loop acc genv env select_outcome =
       else
         ServerTypeCheck.Full_check
     in
-    let (env, res) = recheck genv env check_kind in
+    let ( env,
+          ServerTypeCheck.{ reparse_count; total_rechecked_count; telemetry } )
+        =
+      recheck genv env check_kind
+    in
+    let telemetry =
+      Telemetry.object_
+        acc.telemetry
+        ~key:(Printf.sprintf "batch_%d" acc.rechecked_batches)
+        ~value:telemetry
+    in
     let acc =
       {
         acc with
         rechecked_batches = acc.rechecked_batches + 1;
-        rechecked_count =
-          acc.rechecked_count + res.ServerTypeCheck.reparse_count;
+        rechecked_count = acc.rechecked_count + reparse_count;
         total_rechecked_count =
-          acc.total_rechecked_count + res.ServerTypeCheck.total_rechecked_count;
+          acc.total_rechecked_count + total_rechecked_count;
+        telemetry;
       }
     in
     (* Avoid batching ide rechecks with disk rechecks - there might be

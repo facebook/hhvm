@@ -45,6 +45,7 @@ type check_kind =
 type check_results = {
   reparse_count: int;
   total_rechecked_count: int;
+  telemetry: Telemetry.t;
 }
 
 let shallow_decl_enabled (ctx : Provider_context.t) =
@@ -1451,7 +1452,7 @@ functor
         }
       in
 
-      (env, { reparse_count; total_rechecked_count })
+      (env, { reparse_count; total_rechecked_count; telemetry })
   end
 
 let check_kind_to_string = function

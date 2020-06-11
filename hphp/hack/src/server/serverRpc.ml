@@ -63,6 +63,7 @@ let handle : type a. genv -> env -> is_stale:bool -> a t -> env * a =
             Recheck_stats.id = info.recheck_id;
             time = info.recheck_time;
             count = info.stats.total_rechecked_count;
+            telemetry = info.stats.telemetry;
           }
     in
     ( env,

@@ -495,6 +495,9 @@ and json_to_multiline ?(sort_keys = false) json =
   in
   loop "" json
 
+let pp_json fmt json =
+  Format.fprintf fmt "%s" (Printf.sprintf "%s" (json_to_multiline json))
+
 let json_to_output oc (json : json) : unit =
   Out_channel.add_json ~sort_keys:false oc json
 

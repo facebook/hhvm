@@ -21,6 +21,11 @@ type json =
 
 exception Syntax_error of string
 
+(* A function conforming to `show`'s pretty printing signature;
+    calls `json_to_multiline` internally
+ *)
+val pp_json : Format.formatter -> json -> unit
+
 val json_to_string : ?sort_keys:bool -> ?pretty:bool -> json -> string
 
 val json_to_multiline : ?sort_keys:bool -> json -> string

@@ -21,6 +21,7 @@ type recheck_loop_stats = {
   rechecked_count: int;
   (* includes dependencies *)
   total_rechecked_count: int;
+  telemetry: Telemetry.t;
 }
 [@@deriving show]
 
@@ -30,6 +31,7 @@ let empty_recheck_loop_stats =
     rechecked_batches = 0;
     rechecked_count = 0;
     total_rechecked_count = 0;
+    telemetry = Telemetry.create ();
   }
 
 type recheck_info = {

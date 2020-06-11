@@ -56,14 +56,15 @@ let get_error_list_json
     let properties =
       match recheck_stats with
       | None -> properties
-      | Some stats ->
+      | Some { id; time; count; telemetry } ->
         let last_recheck_result =
           ( "last_recheck",
             Hh_json.JSON_Object
               [
-                ("id", Hh_json.JSON_String stats.id);
-                ("time", Hh_json.JSON_Number (string_of_float stats.time));
-                ("count", Hh_json.JSON_Number (string_of_int stats.count));
+                ("id", Hh_json.JSON_String id);
+                ("time", Hh_json.JSON_Number (string_of_float time));
+                ("count", Hh_json.JSON_Number (string_of_int count));
+                ("telemetry", Telemetry.to_json telemetry);
               ] )
         in
         last_recheck_result :: properties

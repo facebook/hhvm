@@ -8,9 +8,12 @@
 
 open Hh_prelude
 
-type t = key_value_pair list
+type key_value_pair = string * Hh_json.json [@@deriving show]
 
-and key_value_pair = string * Hh_json.json
+type t = key_value_pair list [@@deriving show]
+
+(* Ignore - we only use the generated `pp_key_value_pair` in deriving `show` for t *)
+let _ = show_key_value_pair
 
 let compare (left : key_value_pair) (right : key_value_pair) : int =
   String.compare (fst left) (fst right)

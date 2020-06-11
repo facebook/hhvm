@@ -6,6 +6,7 @@ function init() {
   require __DIR__ . '/../Adoy/Client.php';
 
   ServerUtilServerTests::$DOC_ROOT = dirname(__DIR__).'/server_root';
+  ServerUtilServerTests::$request = fun('fastcgi_request');
 }
 
 function runTest($testController, $customArgs = '') {
@@ -25,7 +26,7 @@ function runTest($testController, $customArgs = '') {
   }
 }
 
-function request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
+function fastcgi_request($host, $port, $path, $post = darray[], $headers = darray[], $extra_args = darray[]) {
   try {
     $client = new \Adoy\FastCGI\Client($host, $port);
     $content = http_build_query($post);

@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>>
-function main() {
+function main_test_curl_multi_except() {
   $port = $_ENV['SERVERPORT'];
   $host = php_uname('n');
   $url = "http://$host:$port/hello.php";

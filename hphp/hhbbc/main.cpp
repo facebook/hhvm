@@ -50,6 +50,7 @@
 #include "hphp/hhbbc/representation.h"
 
 #include "hphp/util/rds-local.h"
+#include "hphp/util/logger.h"
 
 namespace HPHP { namespace HHBBC {
 
@@ -436,7 +437,7 @@ void write_global_data(
     gd.ConstantFunctions.push_back(elm);
   }
 
-  globalArrayTypeTable().repopulate(*arrTable);
+  if (arrTable) globalArrayTypeTable().repopulate(*arrTable);
   // NOTE: There's no way to tell if saveGlobalData() fails for some reason.
   Repo::get().saveGlobalData(std::move(gd), autoloadMapBuilder);
 }
@@ -458,11 +459,17 @@ void compile_repo() {
 
   UnitEmitterQueue ueq;
   std::unique_ptr<ArrayTypeTable::Builder> arrTable;
+  std::exception_ptr wp_thread_ex = nullptr;
   VMWorker wp_thread(
     [&] {
       HphpSession _{Treadmill::SessionKind::CompileRepo};
       Trace::BumpRelease bumper(Trace::hhbbc_time, -1, logging);
-      whole_program(std::move(program), ueq, arrTable);
+      try {
+        whole_program(std::move(program), ueq, arrTable);
+      } catch (...) {
+        wp_thread_ex = std::current_exception();
+        ueq.push(nullptr);
+      }
     }
   );
   wp_thread.start();
@@ -471,7 +478,11 @@ void compile_repo() {
     write_units(ueq, autoloadMapBuilder);
     write_global_data(arrTable, apcProfile, autoloadMapBuilder);
   }
+
   wp_thread.waitForEnd();
+  if (wp_thread_ex) {
+    rethrow_exception(wp_thread_ex);
+  }
 }
 
 void print_repo_bytecode_stats() {
@@ -559,6 +570,7 @@ int main(int argc, char** argv) try {
   register_process_init();
 
   hphp_process_init();
+  LitstrTable::get().setWriting();
   SCOPE_EXIT { hphp_process_exit(); };
 
   Repo::shutdown();
@@ -574,7 +586,7 @@ int main(int argc, char** argv) try {
 }
 
 catch (std::exception& e) {
-  std::cerr << e.what() << '\n';
+  Logger::Error("std::exception: %s", e.what());
   return 1;
 }
 

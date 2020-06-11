@@ -119,6 +119,14 @@ template<class T> using ISStringToOneT =
     string_data_isame
   >;
 
+template<class T> using SStringToOneT =
+  hphp_hash_map<
+    SString,
+    T,
+    string_data_hash,
+    string_data_same
+  >;
+
 /*
  * One-to-one case insensitive map, where the keys are static strings
  * and the values are some T.
@@ -1059,7 +1067,7 @@ struct ResTypeHelper;
 template <>
 struct ResTypeHelper<res::Class> {
   using InfoT = ClassInfo;
-  using InfoMapT = ISStringToMany<InfoT>;
+  using InfoMapT = ISStringToOneT<InfoT*>;
   using OtherT = res::Record;
   static std::string name() { return "class"; }
 };
@@ -1067,7 +1075,7 @@ struct ResTypeHelper<res::Class> {
 template <>
 struct ResTypeHelper<res::Record> {
   using InfoT = RecordInfo;
-  using InfoMapT = ISStringToMany<InfoT>;
+  using InfoMapT = ISStringToOneT<InfoT*>;
   using OtherT = res::Class;
   static std::string name() { return "record"; }
 };
@@ -1090,14 +1098,14 @@ struct Index::IndexData {
 
   std::unique_ptr<ArrayTypeTable::Builder> arrTableBuilder;
 
-  ISStringToMany<const php::Class>       classes;
+  ISStringToOneT<const php::Class*>      classes;
   ISStringToMany<const php::Func>        methods;
   ISStringToOneT<uint64_t>               method_inout_params_by_name;
-  ISStringToMany<const php::Func>        funcs;
-  ISStringToMany<const php::TypeAlias>   typeAliases;
-  ISStringToMany<const php::Class>       enums;
-  SStringToMany<const php::Constant>     constants;
-  ISStringToMany<const php::Record>      records;
+  ISStringToOneT<const php::Func*>       funcs;
+  ISStringToOneT<const php::TypeAlias*>  typeAliases;
+  ISStringToOneT<const php::Class*>      enums;
+  SStringToOneT<const php::Constant*>    constants;
+  ISStringToOneT<const php::Record*>     records;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -1120,7 +1128,7 @@ struct Index::IndexData {
    * inheritance hierarchy, potentially excluding cases that we know
    * would definitely fatal when defined.
    */
-  ISStringToMany<ClassInfo> classInfo;
+  ISStringToOneT<ClassInfo*> classInfo;
 
   /*
    * All the ClassInfos, sorted topologically (ie all the parents,
@@ -1141,7 +1149,7 @@ struct Index::IndexData {
    * inheritance hierarchy, potentially excluding cases that we know
    * would definitely fatal when defined.
    */
-  ISStringToMany<RecordInfo> recordInfo;
+  ISStringToOneT<RecordInfo*> recordInfo;
 
   /*
    * All the RecordInfos, sorted topologically (ie all the parents of
@@ -1890,6 +1898,22 @@ bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
   return true;
 }
 
+template <typename T, typename R>
+static void add_symbol(R& map, const T* t, const char* type) {
+  auto ret = map.insert({t->name, t});
+  if (!ret.second) {
+    auto filename = [](const T* t) {
+      auto unit = t->unit;
+      if (!unit) return "BUILTIN";
+      return unit->filename->data();
+    };
+
+    throw Index::NonUniqueSymbolException(folly::sformat(
+      "More than one {} with the name {}. In {} and {}", type,
+      t->name->data(), filename(t), filename(ret.first->second)));
+  }
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void add_system_constants_to_index(IndexData& index) {
@@ -1897,7 +1921,7 @@ void add_system_constants_to_index(IndexData& index) {
     assertx(cnsPair.second.m_type != KindOfUninit ||
             cnsPair.second.dynamic());
     auto pc = new php::Constant { nullptr, cnsPair.first, cnsPair.second, AttrNone };
-    index.constants.insert({pc->name, pc});
+    add_symbol(index.constants, pc, "constant");
   }
 }
 
@@ -1987,25 +2011,10 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
     }
 
     if (c->attrs & AttrEnum) {
-      index.enums.emplace(c->name, c.get());
+      add_symbol(index.enums, c.get(), "enum");
     }
 
-    /*
-     * A class can be defined with the same name as a builtin in the
-     * repo. Any such attempts will fatal at runtime, so we can safely
-     * ignore any such definitions. This ensures that names referring
-     * to builtins are always fully resolvable.
-     */
-    auto const classes = find_range(index.classes, c->name);
-    if (classes.begin() != classes.end()) {
-      if (c->attrs & AttrBuiltin) {
-        index.classes.erase(classes.begin(), classes.end());
-      } else if (classes.begin()->second->attrs & AttrBuiltin) {
-        assertx(std::next(classes.begin()) == classes.end());
-        continue;
-      }
-    }
-    index.classes.emplace(c->name, c.get());
+    add_symbol(index.classes, c.get(), "class");
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
@@ -2051,44 +2060,20 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   }
 
   for (auto& f : unit.funcs) {
-    /*
-     * A function can be defined with the same name as a builtin in the
-     * repo. Any such attempts will fatal at runtime, so we can safely ignore
-     * any such definitions. This ensures that names referring to builtins are
-     * always fully resolvable.
-     */
-    auto const funcs = index.funcs.equal_range(f->name);
-    if (funcs.first != funcs.second) {
-      if (f->attrs & AttrIsMethCaller) {
-        // meth_caller has builtin attr and can have duplicates definitions
-        assertx(std::next(funcs.first) == funcs.second);
-        assertx(funcs.first->second->attrs & AttrIsMethCaller);
-        continue;
-      }
-
-      auto const& old_func = funcs.first->second;
-      // If there is a builtin, it will always be the first (and only) func on
-      // the list.
-      if (old_func->attrs & AttrBuiltin) {
-        always_assert(!(f->attrs & AttrBuiltin));
-        continue;
-      }
-      if (f->attrs & AttrBuiltin) index.funcs.erase(funcs.first, funcs.second);
-    }
     if (f->attrs & AttrInterceptable) index.any_interceptable_functions = true;
-    index.funcs.insert({f->name, f.get()});
+    add_symbol(index.funcs, f.get(), "function");
   }
 
   for (auto& ta : unit.typeAliases) {
-    index.typeAliases.insert({ta->name, ta.get()});
+    add_symbol(index.typeAliases, ta.get(), "type alias");
   }
 
   for (auto& c : unit.constants) {
-    index.constants.insert({c->name, c.get()});
+    add_symbol(index.constants, c.get(), "constant");
   }
 
   for (auto& rec : unit.records) {
-    index.records.insert({rec->name, rec.get()});
+    add_symbol(index.records, rec.get(), "record");
   }
 
 }
@@ -2108,23 +2093,16 @@ struct NamingEnv {
   // a) that name corresponds to a unique TypeInfo, or
   // b) he TypeInfo for that name was selected in scope with NamingEnv::Define
   TypeInfo<T>* try_lookup(SString name,
-                          const ISStringToMany<TypeInfo<T>>& map) const {
-    auto const range = map.equal_range(name);
+                          const ISStringToOneT<TypeInfo<T>*>& map) const {
+    auto const it = map.find(name);
     // We're resolving in topological order; we shouldn't be here
     // unless we know there's at least one resolution of this class.
-    assertx(range.first != range.second);
-    // Common case will be exactly one resolution. Lets avoid the
-    // copy_range, and iteration for that case.
-    if (std::next(range.first) == range.second) {
-      return range.first->second;
-    }
-    auto const it = names.find(name);
-    if (it != end(names)) return it->second;
-    return nullptr;
+    assertx(it != map.end());
+    return it->second;
   }
 
   TypeInfo<T>* lookup(SString name,
-                      const ISStringToMany<TypeInfo<T>>& map) const {
+                      const ISStringToOneT<TypeInfo<T>*>& map) const {
     auto const ret = try_lookup(name, map);
     assertx(ret);
     return ret;
@@ -2592,7 +2570,8 @@ void resolve_combinations(RecordNamingEnv& env,
   rinfo->baseList.shrink_to_fit();
   ITRACE(2, "  resolved: {}\n", rec->name);
   env.resolved.emplace(rec, rinfo.get());
-  env.index.recordInfo.emplace(rec->name, rinfo.get());
+  auto const UNUSED it = env.index.recordInfo.emplace(rec->name, rinfo.get());
+  assertx(it.second);
   env.index.allRecordInfos.push_back(std::move(rinfo));
 }
 
@@ -2682,7 +2661,8 @@ void resolve_combinations(ClassNamingEnv& env,
   }
   cinfo->baseList.shrink_to_fit();
   env.resolved.emplace(cls, cinfo.get());
-  env.index.classInfo.emplace(cls->name, cinfo.get());
+  auto const UNUSED it = env.index.classInfo.emplace(cls->name, cinfo.get());
+  assertx(it.second);
   env.index.allClassInfos.push_back(std::move(cinfo));
 }
 
@@ -3320,22 +3300,6 @@ void mark_no_override_methods(IndexData& index) {
   }
 }
 
-template <class T, class S, class F>
-void mark_unique_entities(
-    std::unordered_multimap<SString, T*, string_data_hash, S> entities,
-    F marker) {
-  auto key_eq = entities.key_eq();
-  for (auto it = entities.begin(), end = entities.end(); it != end; ) {
-    auto first = it++;
-    auto flag = true;
-    while (it != end && key_eq(it->first, first->first)) {
-      marker(it++->second, false);
-      flag = false;
-    }
-    marker(first->second, flag);
-  }
-}
-
 const StaticString s__Reified("__Reified");
 
 /*
@@ -3798,7 +3762,7 @@ Type lookup_public_prop_impl(
 namespace {
 template<typename T>
 void buildTypeInfoData(TypeInfoData<T>& tid,
-                       const ISStringToMany<const T>& tmap) {
+                       const ISStringToOneT<const T*>& tmap) {
   for (auto const& elm : tmap) {
     auto const t = elm.second;
     auto const addUser = [&] (SString rName) {
@@ -3832,7 +3796,7 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
 template<typename T>
 void preresolveTypes(NamingEnv<T>& env,
                      TypeInfoData<T>& tid,
-                     const ISStringToMany<TypeInfo<T>>& tmap) {
+                     const ISStringToOneT<TypeInfo<T>*>& tmap) {
   while(true) {
     auto const ix = tid.cqFront++;
     if (ix == tid.cqBack) {
@@ -3916,22 +3880,18 @@ Index::Index(php::Program* program)
     preresolveTypes(env, cid, m_data->classInfo);
   }
 
-  mark_unique_entities(
-    m_data->typeAliases,
-    [&] (const php::TypeAlias* ta, bool flag) {
-      attribute_setter(
-        ta->attrs,
-        flag &&
-        !m_data->classInfo.count(ta->name) &&
-        !m_data->records.count(ta->name),
-        AttrUnique);
-    });
+  for (auto &it : m_data->typeAliases) {
+    const php::TypeAlias* ta = it.second;
+    attribute_setter(
+      ta->attrs,
+      !m_data->classInfo.count(ta->name) &&
+      !m_data->records.count(ta->name),
+      AttrUnique);
+  }
 
-  mark_unique_entities(
-    m_data->constants,
-    [&] (const php::Constant* c, bool flag) {
-      attribute_setter(c->attrs, flag, AttrUnique);
-    });
+  for (auto &it : m_data->constants) {
+    attribute_setter(it.second->attrs, true, AttrUnique);
+  }
 
   for (auto& rinfo : m_data->allRecordInfos) {
     auto const set = [&] {
@@ -3974,11 +3934,9 @@ Index::Index(php::Program* program)
     attribute_setter(cinfo->cls->attrs, set, AttrUnique);
   }
 
-  mark_unique_entities(
-    m_data->funcs,
-    [&] (const php::Func* func, bool flag) {
-      attribute_setter(func->attrs, flag, AttrUnique);
-    });
+  for (auto &it : m_data->funcs) {
+    attribute_setter(it.second->attrs, true, AttrUnique);
+  }
 
   m_data->funcInfo.resize(program->nextFuncId);
 

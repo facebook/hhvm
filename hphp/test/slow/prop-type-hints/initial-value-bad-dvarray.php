@@ -3,11 +3,7 @@
 
 <<__EntryPoint>>
 function entrypoint_initialvaluebaddvarray(): void {
-  if (__hhvm_intrinsics\launder_value(true)) {
-    include 'redefine1.inc';
-  } else {
-    include 'redefine2.inc';
-  }
+  include 'redefine1.inc';
 
   include 'initial-value-bad-dvarray.inc';
 

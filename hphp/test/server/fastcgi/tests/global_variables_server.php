@@ -24,7 +24,7 @@ foreach($requests as $request) {
     $path = 'global_variables.php?var=GET&get=1';
     $post = darray['var' => 'POST', 'post' => 2];
     $headers = darray['Cookie' => 'var=COOKIE;cookie=3;'];
-    echo request('localhost', $port, $path, $post, $headers, $extra) . "\n";
+    echo fastcgi_request('localhost', $port, $path, $post, $headers, $extra) . "\n";
   }, $request[0]);
 }
 }

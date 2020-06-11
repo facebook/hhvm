@@ -19,11 +19,7 @@ enum Enum3 : mixed {
   VAL3 = 2;
 }
 
-if (__hhvm_intrinsics\launder_value(true)) {
-  include 'redefine1.inc';
-} else {
-  include 'redefine2.inc';
-}
+include 'redefine1.inc';
 
 type Alias1 = int;
 type Alias2 = string;

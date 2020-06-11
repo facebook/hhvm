@@ -1,0 +1,60 @@
+Notice: Hack Array Compat: Property 'A::p2' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p3' declared as type array, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p4' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p5' declared as type array, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p6' declared as type HH\varray, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p8' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p9' declared as type array, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p10' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p11' declared as type array, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p12' declared as type HH\varray, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p14' declared as type DAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p15' declared as type AAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p16' declared as type DAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p17' declared as type AAlias, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Property 'A::p18' declared as type VAlias, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s2' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s3' declared as type array, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s4' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s5' declared as type array, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s6' declared as type HH\varray, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s8' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s9' declared as type array, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s10' declared as type HH\darray, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s11' declared as type array, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s12' declared as type HH\varray, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s14' declared as type DAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s15' declared as type AAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s16' declared as type DAlias, varray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s17' declared as type AAlias, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+
+Notice: Hack Array Compat: Static property 'A::s18' declared as type VAlias, darray assigned in %s/initial-value-bad-dvarray.inc on line 43
+DONE

@@ -188,11 +188,11 @@ int compiler_main(int argc, char **argv) {
     }
     return ret;
   } catch (Exception& e) {
-    Logger::Error("Exception: %s\n", e.getMessage().c_str());
+    Logger::Error("Exception: %s", e.getMessage().c_str());
   } catch (std::exception& e) {
-    Logger::Error("std::exception: %s\n", e.what());
+    Logger::Error("std::exception: %s", e.what());
   } catch (...) {
-    Logger::Error("(unknown exception was thrown)\n");
+    Logger::Error("(unknown exception was thrown)");
   }
   return -1;
 }
@@ -608,6 +608,16 @@ int process(const CompilerOptions &po) {
       package.resetAr();
     });
 
+  SCOPE_EXIT {
+    if (unit_cache_thread.joinable()) {
+      unit_cache_thread.join();
+    }
+
+    if (!po.filecache.empty()) {
+      fileCacheThread.waitForEnd();
+    }
+  };
+
   int ret = 0;
   if (po.target == "hhbc" || po.target == "run") {
     ret = hhbcTarget(po, std::move(ar), fileCacheThread);
@@ -618,13 +628,6 @@ int process(const CompilerOptions &po) {
     return 1;
   }
 
-  if (unit_cache_thread.joinable()) {
-    unit_cache_thread.join();
-  }
-
-  if (!po.filecache.empty()) {
-    fileCacheThread.waitForEnd();
-  }
   return ret;
 }
 

@@ -37,12 +37,12 @@ vec(0) {
 string(0) ""
 NULL
 NULL
-NULL
-NULL
+int(0)
+int(0)
 int(0)
 int(0)
 NULL
-NULL
+int(0)
 NULL
 int(0)
 NULL
@@ -115,8 +115,8 @@ vec(0) {
 string(0) ""
 NULL
 NULL
-NULL
-NULL
+int(0)
+int(0)
 int(0)
 int(0)
 int(0)

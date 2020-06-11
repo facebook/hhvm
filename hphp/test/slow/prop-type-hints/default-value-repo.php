@@ -457,11 +457,7 @@ function test($x) {
 }
 <<__EntryPoint>>
 function main_entry(): void {
-  if (__hhvm_intrinsics\launder_value(true)) {
-    include 'redefine1.inc';
-  } else {
-    include 'redefine2.inc';
-  }
+  include 'redefine1.inc';
 
   test(new A());
 }

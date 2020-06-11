@@ -2,7 +2,7 @@
 
 function headerTestController($serverPort) {
   $args = darray['Authorization' => 'foo'];
-  var_dump(request('localhost', $serverPort, "test_headers.php",
+  var_dump(fastcgi_request('localhost', $serverPort, "test_headers.php",
                   darray[], darray['PROXY' => 'foobar'], $args));
 }
 <<__EntryPoint>> function main(): void {

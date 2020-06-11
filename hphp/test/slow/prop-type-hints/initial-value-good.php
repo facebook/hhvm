@@ -22,11 +22,7 @@ enum Enum3 : mixed {
 <<__EntryPoint>>
 function entrypoint_initialvaluegood(): void {
 
-  if (__hhvm_intrinsics\launder_value(true)) {
-    include 'redefine1.inc';
-  } else {
-    include 'redefine2.inc';
-  }
+  include 'redefine1.inc';
 
   include 'initial-value-good.inc';
 

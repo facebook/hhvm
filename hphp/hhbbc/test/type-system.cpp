@@ -59,13 +59,9 @@ const StaticString s_IBase("IBase");
 const StaticString s_IA("IA");
 const StaticString s_IAA("IAA");
 const StaticString s_IB("IB");
-const StaticString s_NonUnique("NonUnique");
-const StaticString s_NonUniqueA("NonUniqueA");
 const StaticString s_UniqueRecBase("UniqueRecBase");
 const StaticString s_UniqueRec("UniqueRec");
 const StaticString s_UniqueRecA("UniqueRecA");
-const StaticString s_NonUniqueRecBase("NonUniqueRecBase");
-const StaticString s_NonUniqueRec("NonUniqueRec");
 const StaticString s_Awaitable("HH\\Awaitable");
 
 // A test program so we can actually test things involving object or
@@ -143,22 +139,9 @@ void add_test_unit(php::Program& program) {
       .default_ctor;
     }
 
-    .class NonUnique { .default_ctor; }
-    .class NonUnique { .default_ctor; }
-
-    .class NonUniqueA extends NonUnique {
-      .default_ctor;
-    }
-    .class NonUniqueA extends NonUnique {
-      .default_ctor;
-    }
-
     .record [abstract persistent unique] UniqueRecBase {}
     .record [final unique] UniqueRec extends UniqueRecBase {}
     .record [final unique] UniqueRecA extends UniqueRecBase {}
-    .record [abstract] NonUniqueRecBase {}
-    .record [abstract] NonUniqueRecBase {}
-    .record [final] NonUniqueRec extends NonUniqueRecBase {}
 
     .function test() {
       Int 1
@@ -1381,8 +1364,6 @@ TEST(Type, Hierarchies) {
   if (!clsBAA) ADD_FAILURE();
   auto const clsTestClass = idx.resolve_class(ctx, s_TestClass.get());
   if (!clsTestClass) ADD_FAILURE();
-  auto const clsNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
-  if (!clsNonUnique) ADD_FAILURE();
 
   auto const recBaseUnique = idx.resolve_record(s_UniqueRecBase.get());
   if (!recBaseUnique) ADD_FAILURE();
@@ -1390,10 +1371,6 @@ TEST(Type, Hierarchies) {
   if (!recUnique) ADD_FAILURE();
   auto const recUniqueA = idx.resolve_record(s_UniqueRecA.get());
   if (!recUniqueA) ADD_FAILURE();
-  auto const recBaseNonUnique = idx.resolve_record(s_NonUniqueRecBase.get());
-  if (!recBaseNonUnique) ADD_FAILURE();
-  auto const recNonUnique = idx.resolve_record(s_NonUniqueRec.get());
-  if (!recNonUnique) ADD_FAILURE();
 
   // make *exact type* and *sub type* types and objects for all loaded classes
   auto const objExactBaseTy = objExact(*clsBase);
@@ -1441,13 +1418,6 @@ TEST(Type, Hierarchies) {
   auto const clsExactTestClassTy = clsExact(*clsTestClass);
   auto const subClsTestClassTy   = subCls(*clsTestClass);
 
-  auto const objExactNonUniqueTy = objExact(*clsNonUnique);
-  auto const subObjNonUniqueTy   = subObj(*clsNonUnique);
-  auto const clsExactNonUniqueTy = clsExact(*clsNonUnique);
-  auto const subClsNonUniqueTy   = subCls(*clsNonUnique);
-
-  auto const exactRecNonUniqueTy = exactRecord(*recNonUnique);
-  auto const subRecNonUniqueTy   = subRecord(*recNonUnique);
   auto const exactRecUniqueBaseTy = exactRecord(*recBaseUnique);
   auto const subRecUniqueBaseTy = subRecord(*recBaseUnique);
   auto const exactRecUniqueTy = exactRecord(*recUnique);
@@ -1646,8 +1616,6 @@ TEST(Type, Hierarchies) {
   EXPECT_TRUE((*(*clsBase).commonAncestor(*clsAA)).same(*clsBase));
   EXPECT_FALSE((*clsAA).commonAncestor(*clsTestClass));
   EXPECT_FALSE((*clsTestClass).commonAncestor(*clsAA));
-  EXPECT_FALSE((*clsBAA).commonAncestor(*clsNonUnique));
-  EXPECT_FALSE((*clsNonUnique).commonAncestor(*clsBAA));
 
   // check union_of
   // union of subCls
@@ -1658,7 +1626,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(subClsBAATy, subClsBBTy), subClsBTy);
   EXPECT_EQ(union_of(subClsAATy, subClsBaseTy), subClsBaseTy);
   EXPECT_EQ(union_of(subClsAATy, subClsTestClassTy), TCls);
-  EXPECT_EQ(union_of(subClsBAATy, subClsNonUniqueTy), TCls);
   // union of subCls and clsExact mixed
   EXPECT_EQ(union_of(clsExactATy, subClsBTy), subClsBaseTy);
   EXPECT_EQ(union_of(subClsAATy, clsExactABTy), subClsATy);
@@ -1667,7 +1634,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(clsExactBAATy, subClsBBTy), subClsBTy);
   EXPECT_EQ(union_of(subClsAATy, clsExactBaseTy), subClsBaseTy);
   EXPECT_EQ(union_of(clsExactAATy, subClsTestClassTy), TCls);
-  EXPECT_EQ(union_of(subClsBAATy, clsExactNonUniqueTy), TCls);
   // union of clsExact
   EXPECT_EQ(union_of(clsExactATy, clsExactBTy), subClsBaseTy);
   EXPECT_EQ(union_of(clsExactAATy, clsExactABTy), subClsATy);
@@ -1676,7 +1642,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(clsExactBAATy, clsExactBBTy), subClsBTy);
   EXPECT_EQ(union_of(clsExactAATy, clsExactBaseTy), subClsBaseTy);
   EXPECT_EQ(union_of(clsExactAATy, subClsTestClassTy), TCls);
-  EXPECT_EQ(union_of(clsExactBAATy, clsExactNonUniqueTy), TCls);
   // union of subObj
   EXPECT_EQ(union_of(subObjATy, subObjBTy), subObjBaseTy);
   EXPECT_EQ(union_of(subObjAATy, subObjABTy), subObjATy);
@@ -1685,8 +1650,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(subObjBAATy, subObjBBTy), subObjBTy);
   EXPECT_EQ(union_of(subObjAATy, subObjBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(subObjAATy, subObjTestClassTy), TObj);
-  EXPECT_EQ(union_of(subObjBAATy, subObjNonUniqueTy), TObj);
-  EXPECT_EQ(union_of(subRecNonUniqueTy, subRecUniqueTy), TRecord);
   EXPECT_EQ(union_of(subRecUniqueTy, subRecUniqueATy), subRecUniqueBaseTy);
   // union of subObj and objExact mixed
   EXPECT_EQ(union_of(objExactATy, subObjBTy), subObjBaseTy);
@@ -1696,8 +1659,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(objExactBAATy, subObjBBTy), subObjBTy);
   EXPECT_EQ(union_of(subObjAATy, objExactBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(objExactAATy, subObjTestClassTy), TObj);
-  EXPECT_EQ(union_of(subObjBAATy, objExactNonUniqueTy), TObj);
-  EXPECT_EQ(union_of(subRecUniqueATy, exactRecNonUniqueTy), TRecord);
   EXPECT_EQ(union_of(subRecUniqueATy, exactRecUniqueTy), subRecUniqueBaseTy);
   // union of objExact
   EXPECT_EQ(union_of(objExactATy, objExactBTy), subObjBaseTy);
@@ -1707,8 +1668,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(objExactBAATy, objExactBBTy), subObjBTy);
   EXPECT_EQ(union_of(objExactAATy, objExactBaseTy), subObjBaseTy);
   EXPECT_EQ(union_of(objExactAATy, objExactTestClassTy), TObj);
-  EXPECT_EQ(union_of(objExactBAATy, objExactNonUniqueTy), TObj);
-  EXPECT_EQ(union_of(subRecUniqueATy, exactRecNonUniqueTy), TRecord);
   EXPECT_EQ(union_of(subRecUniqueATy, exactRecUniqueTy), subRecUniqueBaseTy);
   // optional sub obj
   EXPECT_EQ(union_of(opt(subObjATy), opt(subObjBTy)), opt(subObjBaseTy));
@@ -1718,8 +1677,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(opt(subObjBAATy), subObjBBTy), opt(subObjBTy));
   EXPECT_EQ(union_of(opt(subObjAATy), opt(subObjBaseTy)), opt(subObjBaseTy));
   EXPECT_EQ(union_of(subObjAATy, opt(subObjTestClassTy)), opt(TObj));
-  EXPECT_EQ(union_of(subObjBAATy, opt(subObjNonUniqueTy)), opt(TObj));
-  EXPECT_EQ(union_of(subRecUniqueATy, opt(exactRecNonUniqueTy)), opt(TRecord));
   EXPECT_EQ(union_of(opt(subRecUniqueATy), exactRecUniqueTy),
             opt(subRecUniqueBaseTy));
   EXPECT_EQ(union_of(opt(subRecUniqueATy), opt(exactRecUniqueTy)),
@@ -1732,7 +1689,6 @@ TEST(Type, Hierarchies) {
   EXPECT_EQ(union_of(opt(subObjBAATy), objExactBBTy), opt(subObjBTy));
   EXPECT_EQ(union_of(objExactAATy, opt(objExactBaseTy)), opt(subObjBaseTy));
   EXPECT_EQ(union_of(opt(subObjAATy), objExactTestClassTy), opt(TObj));
-  EXPECT_EQ(union_of(subObjBAATy, opt(objExactNonUniqueTy)), opt(TObj));
 }
 
 TEST(Type, Interface) {
@@ -1801,42 +1757,6 @@ TEST(Type, Interface) {
   // important that the below union is more or equally refined than the
   // above union.
   EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
-}
-
-TEST(Type, NonUnique) {
-  auto const program = make_test_program();
-  auto const unit = program->units.back().get();
-  auto const func = [&]() -> php::Func* {
-    for (auto& f : unit->funcs) {
-      if (f->name->isame(s_test.get())) return f.get();
-    }
-    return nullptr;
-  }();
-  EXPECT_TRUE(func != nullptr);
-
-  auto const ctx = Context { unit, func };
-  Index idx{program.get()};
-
-  auto const clsA = idx.resolve_class(ctx, s_A.get());
-  if (!clsA) ADD_FAILURE();
-  auto const clssNonUnique = idx.resolve_class(ctx, s_NonUnique.get());
-  if (!clssNonUnique) ADD_FAILURE();
-  auto const clssNonUniqueA = idx.resolve_class(ctx, s_NonUniqueA.get());
-  if (!clssNonUniqueA) ADD_FAILURE();
-
-  // non unique types are funny because we cannot really make any conclusion
-  // about them so they resolve to "non precise" subtype relationship
-  auto const subObjATy          = subObj(*clsA);
-  auto const subClsATy          = subCls(*clsA);
-  auto const subObjNonUniqueTy  = subObj(*clssNonUnique);
-  auto const subClsNonUniqueTy  = subCls(*clssNonUnique);
-  auto const subObjNonUniqueATy = subObj(*clssNonUniqueA);
-  auto const subClsNonUniqueATy = subCls(*clssNonUniqueA);
-
-  // all are obviously "non precise" but what can you do?....
-  EXPECT_FALSE(subClsNonUniqueATy.subtypeOf(objcls(subObjNonUniqueTy)));
-  EXPECT_FALSE(objcls(subObjNonUniqueATy).strictSubtypeOf(subClsNonUniqueTy));
-  EXPECT_TRUE(subClsATy.couldBe(objcls(subObjNonUniqueTy)));
 }
 
 TEST(Type, WaitH) {

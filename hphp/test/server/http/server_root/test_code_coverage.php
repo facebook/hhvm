@@ -5,7 +5,7 @@ function foo() {
 }
 
 <<__EntryPoint>>
-function main() {
+function main_test_code_coverage() {
   if (isset($_GET['enable_code_coverage'])) {
     echo "Code coverage: ".$_GET['enable_code_coverage']."\n";
   }

@@ -1,0 +1,1 @@
+std::exception: More than one enum with the name CondEnum1. In %s and %s

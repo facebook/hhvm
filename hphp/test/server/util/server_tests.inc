@@ -6,6 +6,7 @@ abstract final class ServerUtilServerTests {
   public static $DOC_ROOT;
   public static $next_instance_id = 0;
   public static $repo_builds = dict[];
+  public static $request = null;
 
   <<__Memoize>>
   public static function test_run_id() {
@@ -15,6 +16,13 @@ abstract final class ServerUtilServerTests {
   <<__Memoize>>
   public static function error_log_file() {
     return fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::test_run_id().".log", 'w');
+  }
+  
+  public static function getRequest() {
+    if (self::$request !== null) {
+      return self::$request;
+    }
+    return fun('http_request');
   }
 }
 
@@ -189,7 +197,6 @@ function startServer(inout $serverPort, inout $adminPort, inout $debugPort, $hom
 
 // Check if the server id is in the expected list of ids.
 function checkServerId($serverPort, $expectedIds) {
-  create_request_func_if_needed();
   $host = 'localhost';
   $r = request($host, $serverPort, "hello.php");
   $matches = null;
@@ -205,7 +212,6 @@ function checkServerId($serverPort, $expectedIds) {
 }
 
 function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null, $expect404 = false) {
-  create_request_func_if_needed();
   $serverId ??= ServerUtilServerTests::test_run_id();
   for ($i = 1; $i <= 20; $i++) {
     $status = proc_get_status($serverProc);
@@ -230,7 +236,6 @@ function waitForServerToGetGoing($serverPort, $serverProc, $serverId = null, $ex
 }
 
 function stopServer($adminPort, $serverProc) {
-  create_request_func_if_needed();
   $LOG_ROOT = ServerUtilServerTests::$LOG_ROOT;
   $test_run_id = ServerUtilServerTests::test_run_id();
 
@@ -284,6 +289,7 @@ function takeoverOldServer($serverPort, $adminPort, $home, $root,
   return $serverProc;
 }
 
+<<__DynamicallyCallable>>
 function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 
   if (is_array($path)) {
@@ -321,7 +327,6 @@ function http_request($host, $port, $path, $timeout = 1200, $curl_opts = '') {
 }
 
 function requestAll(varray $requests, $customArgs = '', $repoArgs = '') {
-  create_request_func_if_needed();
   runTest(
     function($serverPort) use ($requests) {
       foreach ($requests as $request) {
@@ -335,11 +340,9 @@ function requestAll(varray $requests, $customArgs = '', $repoArgs = '') {
   );
 }
 
-<<__Memoize>>
-function create_request_func_if_needed() {
-  if (!function_exists("request")) {
-    require_once 'server_tests1.inc';
-  }
+function request($host, $port, $path) {
+  $request = ServerUtilServerTests::getRequest();
+  return $request($host, $port, $path);
 }
 
 function killChildren($pid, $safe_children = darray[]) {

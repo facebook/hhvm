@@ -2320,10 +2320,11 @@ function run_config_post($outputs, $test, $options) {
   $stderr = $outputs[1];
   file_put_contents(Status::getTestOutputPath($test, 'out'), $output);
 
-  $error_ok = isset($options['repo']) && file_exists($test . '.hhbbc_assert');
+  $check_hhbbc_error = isset($options['repo'])
+    && file_exists($test . '.hhbbc_assert');
 
   // hhvm redirects errors to stdout, so anything on stderr is really bad.
-  if ($stderr && !$error_ok) {
+  if ($stderr && !$check_hhbbc_error) {
     Status::writeDiff(
       $test,
       "Test failed because the process wrote on stderr:\n$stderr"
@@ -2338,17 +2339,18 @@ function run_config_post($outputs, $test, $options) {
   }
 
   $repeats = 0;
+  if (!$check_hhbbc_error) {
+    if (isset($options['retranslate-all'])) {
+      $repeats = $options['retranslate-all'] * 2;
+    }
 
-  if (isset($options['retranslate-all'])) {
-    $repeats = $options['retranslate-all'] * 2;
-  }
+    if (isset($options['recycle-tc'])) {
+      $repeats = $options['recycle-tc'];
+    }
 
-  if (isset($options['recycle-tc'])) {
-    $repeats = $options['recycle-tc'];
-  }
-
-  if (isset($options['cli-server'])) {
-    $repeats = 3;
+    if (isset($options['cli-server'])) {
+      $repeats = 3;
+    }
   }
 
   list($file, $type) = get_expect_file_and_type($test, $options);

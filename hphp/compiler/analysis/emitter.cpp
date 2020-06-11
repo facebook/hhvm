@@ -202,6 +202,7 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
   auto const outputPath = ar->getOutputPath();
 
   std::thread wp_thread;
+  std::exception_ptr wp_thread_ex = nullptr;
   auto unexpectedException = [&] (const char* what) {
     if (wp_thread.joinable()) {
       Logger::Error("emitAllHHBC exited via an exception "
@@ -287,9 +288,14 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
       wp_thread = std::thread([&] {
           Timer timer(Timer::WallTime, "running HHBBC");
           HphpSessionAndThread _(Treadmill::SessionKind::CompilerEmit);
-          HHBBC::whole_program(
-            std::move(program), ueq, arrTable,
-            Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
+          try {
+            HHBBC::whole_program(
+              std::move(program), ueq, arrTable,
+              Option::ParserThreadCount > 0 ? Option::ParserThreadCount : 0);
+          } catch (...) {
+            wp_thread_ex = std::current_exception();
+            ueq.push(nullptr);
+          }
         });
 
       {
@@ -297,7 +303,11 @@ void emitAllHHBC(AnalysisResultPtr&& ar) {
         commitGlobalData(std::move(arrTable), autoloadMapBuilder);
       }
     }
+
     wp_thread.join();
+    if (wp_thread_ex != nullptr) {
+      rethrow_exception(wp_thread_ex);
+    }
   } catch (std::exception& ex) {
     unexpectedException(ex.what());
   } catch (const Object& o) {

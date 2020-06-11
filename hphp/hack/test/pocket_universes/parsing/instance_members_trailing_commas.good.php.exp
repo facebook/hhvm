@@ -1,0 +1,94 @@
+((script 191
+  ((list 191
+    ((markup_section 4
+      ((() markup 0 ())
+       (markup_suffix 4
+        ((() <? 2 ())
+         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))
+     (classish_declaration 86
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 78
+        ((() { 1 ((end_of_line 1)))
+         (list 72
+          ((pocket_enum_declaration 72
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) enum 4 ((whitespace 1)))
+             (() name 1 ((whitespace 1))) (() { 1 ((end_of_line 1)))
+             (list 57
+              ((pocket_field_type_declaration 12
+                ((((whitespace 2)) case 4 ((whitespace 1)))
+                 (() type 4 ((whitespace 1)))
+                 (type_parameter 1
+                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
+                   (() name 1 ()) (missing 0 ())))
+                 (() ";" 1 ((end_of_line 1)))))
+               (pocket_field_type_expr_declaration 11
+                ((((whitespace 2)) case 4 ((whitespace 1)))
+                 (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+                 (() name 3 ()) (() ";" 1 ((end_of_line 1)))))
+               (pocket_atom_mapping 28
+                ((((whitespace 2)) :@ 2 ()) (() name 1 ()) (() "(" 1 ())
+                 (list 22
+                  ((list_item 13
+                    ((pocket_mapping_type_declaration 12
+                      ((() type 4 ((whitespace 1)))
+                       (() name 1 ((whitespace 1))) (() = 1 ((whitespace 1)))
+                       (simple_type_specifier 3 ((() int 3 ())))))
+                     (() , 1 ((whitespace 1)))))
+                   (list_item 8
+                    ((pocket_mapping_id_declaration 8
+                      ((() name 3 ((whitespace 1)))
+                       (simple_initializer 4
+                        ((() = 1 ((whitespace 1)))
+                         (literal 2 ((() decimal_literal 2 ())))))))
+                     (missing 0 ())))))
+                 (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
+             (((whitespace 2)) } 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (classish_declaration 87
+      ((missing 0 ()) (missing 0 ()) (missing 0 ())
+       (((end_of_line 1)) class 5 ((whitespace 1)))
+       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
+       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
+       (classish_body 79
+        ((() { 1 ((end_of_line 1)))
+         (list 73
+          ((pocket_enum_declaration 73
+            ((missing 0 ()) (missing 0 ())
+             (((whitespace 2)) enum 4 ((whitespace 1)))
+             (() name 1 ((whitespace 1))) (() { 1 ((end_of_line 1)))
+             (list 58
+              ((pocket_field_type_declaration 12
+                ((((whitespace 2)) case 4 ((whitespace 1)))
+                 (() type 4 ((whitespace 1)))
+                 (type_parameter 1
+                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
+                   (() name 1 ()) (missing 0 ())))
+                 (() ";" 1 ((end_of_line 1)))))
+               (pocket_field_type_expr_declaration 11
+                ((((whitespace 2)) case 4 ((whitespace 1)))
+                 (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
+                 (() name 3 ()) (() ";" 1 ((end_of_line 1)))))
+               (pocket_atom_mapping 29
+                ((((whitespace 2)) :@ 2 ()) (() name 1 ()) (() "(" 1 ())
+                 (list 23
+                  ((list_item 13
+                    ((pocket_mapping_type_declaration 12
+                      ((() type 4 ((whitespace 1)))
+                       (() name 1 ((whitespace 1))) (() = 1 ((whitespace 1)))
+                       (simple_type_specifier 3 ((() int 3 ())))))
+                     (() , 1 ((whitespace 1)))))
+                   (list_item 9
+                    ((pocket_mapping_id_declaration 8
+                      ((() name 3 ((whitespace 1)))
+                       (simple_initializer 4
+                        ((() = 1 ((whitespace 1)))
+                         (literal 2 ((() decimal_literal 2 ())))))))
+                     (() , 1 ())))))
+                 (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
+             (((whitespace 2)) } 1 ((end_of_line 1)))))))
+         (() } 1 ((end_of_line 1)))))))
+     (end_of_file 0 ((() end_of_file 0 ()))))))))

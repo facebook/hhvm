@@ -2446,9 +2446,13 @@ where
 
     fn parse_pocket_field(&mut self) -> S::R {
         // SPEC
+        // pocket-mapping-list ::=
+        //   | pocket-mapping
+        //   | pocket-mapping-list ',' pocket-mapping
+        //
         // pocket-field ::=
         //   | enum-member ;
-        //   | enum-member '(' (pocket-mapping ',')')' ;
+        //   | enum-member '(' pocket-mapping-list ','-opt ')' ;
         //   | 'case' type-expression identifier ;
         //   | 'case' 'type' identifier ;
         //   | 'case' 'type' 'reify' identifier ;
@@ -2460,7 +2464,9 @@ where
                 let enum_name = self.require_name();
                 let (left_paren, mappings, right_paren) = match self.peek_token_kind() {
                     TokenKind::LeftParen => {
-                        self.parse_parenthesized_comma_list(|x| x.parse_pocket_mapping())
+                        self.parse_parenthesized_comma_list_opt_allow_trailing(|x| {
+                            x.parse_pocket_mapping()
+                        })
                     }
                     _ => (
                         S!(make_missing, self, self.pos()),

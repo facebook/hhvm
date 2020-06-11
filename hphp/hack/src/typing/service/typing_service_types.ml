@@ -87,7 +87,7 @@ module type LocalServerApi = sig
     from a worker that contains such state.
     It may be called many times during execution.
     *)
-  val update_state : state_filename:string -> unit
+  val update_state : state_filename:string -> check_id:string option -> unit
 
   (* Tells the server to save the naming table state to a given
     destination path.

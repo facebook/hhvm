@@ -17,14 +17,19 @@ let make_local_server_api
     let send_progress (message : string) : unit =
       ServerProgress.send_progress_to_monitor "%s" message
 
-    let update_state ~(state_filename : string) : unit =
+    let update_state ~(state_filename : string) ~(check_id : string option) :
+        unit =
+      let check_id =
+        Option.value check_id ~default:(Random_id.short_string ())
+      in
+      HackEventLogger.with_id ~stage:`Recheck check_id @@ fun () ->
       let start_t = Unix.gettimeofday () in
       let edges =
         SharedMem.load_dep_table_blob state_filename ignore_hh_version
       in
       HackEventLogger.remote_scheduler_update_dependency_graph_end edges start_t;
       let (_t : float) =
-        Hh_logger.log_duration "Updated dependency graph: %d seconds" start_t
+        Hh_logger.log_duration "Updated dependency graph" start_t
       in
       ()
 

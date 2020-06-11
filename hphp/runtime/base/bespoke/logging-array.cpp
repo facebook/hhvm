@@ -175,7 +175,7 @@ ArrayData* LoggingLayout::escalateToVanilla(
 //////////////////////////////////////////////////////////////////////////////
 
 void LoggingLayout::release(ArrayData* ad) const {
-  LoggingArray::asLogging(ad)->wrapped->decRefCount();
+  LoggingArray::asLogging(ad)->wrapped->decRefAndRelease();
 }
 size_t LoggingLayout::size(const ArrayData* ad) const {
   return LoggingArray::asLogging(ad)->wrapped->size();

@@ -11,6 +11,11 @@ function f(): void {
   // $y_0 will be a string
   $y_0 = $y[0];
 
+  $x_single = re'/Hello/';
+  // $x_single is an HH\Lib\Regex\Pattern, but with single quotes
+  $y_single = goodbye($x_single);
+  $y_single0 = $y_single[0];
+
   // `re`-prefixed strings can still be concatenated like strings
   $z = $x.", world!";
 

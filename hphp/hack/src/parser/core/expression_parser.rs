@@ -364,7 +364,7 @@ where
                 let mut parser1 = self.clone();
                 let str_maybe = parser1.next_token_no_trailing();
                 match str_maybe.kind() {
-                    | TokenKind::SingleQuotedStringLiteral | TokenKind::NowdocStringLiteral
+                    TokenKind::NowdocStringLiteral
                     // for now, try generic type argument list with attributes before resorting to bad prefix
                     | TokenKind::HeredocStringLiteral => {
                         match self.try_parse_specified_function_call(&qualified_name) {
@@ -383,8 +383,10 @@ where
                         self.with_error(Errors::prefixed_invalid_string_kind );
                         self.parse_name_or_collection_literal_expression(qualified_name)
                     }
+                    | TokenKind::SingleQuotedStringLiteral
                     | TokenKind::DoubleQuotedStringLiteral => {
-                        // This name prefixes a double-quoted string
+                        // This name prefixes a double-quoted string or a single
+                        // quoted string
                         self.continue_from(parser1);
                         let str_ = S!(make_token, self, str_maybe);
                         let str_ = S!(make_literal_expression, self, str_);

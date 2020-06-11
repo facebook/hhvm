@@ -428,7 +428,7 @@ static void fb_compact_serialize_array_as_list_map(
 static void fb_compact_serialize_vec(
     StringBuffer& sb, const Array& arr, int depth) {
   fb_compact_serialize_code(sb, FB_CS_LIST_MAP);
-  PackedArray::IterateV(
+  IterateV(
     arr.get(),
     [&](TypedValue v) {
       fb_compact_serialize_variant(sb, VarNR(v), depth + 1);
@@ -458,8 +458,8 @@ static void fb_compact_serialize_array_as_map(
 static void fb_compact_serialize_keyset(
     StringBuffer& sb, const Array& arr) {
   fb_compact_serialize_code(sb, FB_CS_MAP);
-  SetArray::Iterate(
-    SetArray::asSet(arr.get()),
+  IterateV(
+    arr.get(),
     [&](TypedValue v) {
       if (isStringType(v.m_type)) {
         fb_compact_serialize_string(sb, StrNR{v.m_data.pstr});

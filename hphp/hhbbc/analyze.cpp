@@ -679,7 +679,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_all(cellTy);
+      auto t = loosen_all(loosen_dvarrayness_always(cellTy));
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit

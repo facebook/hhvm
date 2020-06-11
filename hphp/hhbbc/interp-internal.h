@@ -946,8 +946,9 @@ folly::Optional<Type> thisPropAsCell(ISS& env, SString name) {
 void mergeThisProp(ISS& env, SString name, Type type) {
   auto const elem = thisPropRaw(env, name);
   if (!elem) return;
-  auto const adjusted =
-    adjust_type_for_prop(env.index, *env.ctx.cls, elem->tc, loosen_all(type));
+  auto const adjusted = adjust_type_for_prop(
+    env.index, *env.ctx.cls, elem->tc,
+    loosen_all(loosen_dvarrayness_always(type)));
   elem->ty |= adjusted;
 }
 

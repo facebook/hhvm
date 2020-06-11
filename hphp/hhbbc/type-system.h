@@ -866,7 +866,12 @@ private:
   friend bool could_contain_objects(const Type&);
   friend bool could_copy_on_write(const Type&);
   friend Type loosen_staticness(Type);
+  // loosen_dvarrayness has no effect post dvarray specialization.
+  //
+  // For object properties, we still need to loosen types afterwards -
+  // loosen_dvarrayness_always doesn't check specialization status.
   friend Type loosen_dvarrayness(Type);
+  friend Type loosen_dvarrayness_always(Type);
   friend Type loosen_provenance(Type);
   friend Type loosen_values(Type);
   friend Type loosen_emptiness(Type);

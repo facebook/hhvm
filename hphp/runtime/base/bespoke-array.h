@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/array-data.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/typed-value.h"
 
 namespace HPHP {
@@ -52,6 +53,11 @@ struct BespokeArray : ArrayData {
   // Escalate the given bespoke array-like to a vanilla array-like.
   // The provided `reason` may be logged.
   static ArrayData* ToVanilla(const ArrayData* ad, const char* reason);
+
+  // Bespoke arrays can be converted to uncounted values for APC.
+  static ArrayData* MakeUncounted(ArrayData* array, bool hasApcTv,
+                                  DataWalker::PointerMap* seen);
+  static void ReleaseUncounted(ArrayData*);
 
 private:
   template <typename T, typename ... Args>

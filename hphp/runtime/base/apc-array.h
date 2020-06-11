@@ -43,13 +43,14 @@ struct APCArray {
                                           APCHandleLevel level,
                                           bool unserializeObj);
 
-  static APCHandle* MakeUncountedArray(ArrayData* array,
-                                       DataWalker::PointerMap* m = nullptr);
-  static APCHandle* MakeUncountedVec(ArrayData* vec,
-                                     DataWalker::PointerMap* m = nullptr);
-  static APCHandle* MakeUncountedDict(ArrayData* dict,
-                                      DataWalker::PointerMap* m = nullptr);
-  static APCHandle* MakeUncountedKeyset(ArrayData* dict);
+  static APCHandle* MakeUncountedArray(
+      ArrayData* array, DataWalker::PointerMap* m);
+  static APCHandle* MakeUncountedVec(
+      ArrayData* vec, DataWalker::PointerMap* m);
+  static APCHandle* MakeUncountedDict(
+      ArrayData* dict, DataWalker::PointerMap* m);
+  static APCHandle* MakeUncountedKeyset(
+      ArrayData* dict, DataWalker::PointerMap* m);
 
   static APCHandle::Pair MakeSharedEmptyArray();
   static void Delete(APCHandle* handle);
@@ -211,10 +212,8 @@ private:
   APCArray& operator=(const APCArray&) = delete;
 
 private:
-  // NOTE: This function takes the ArrayData* by ref because it may escalate
-  // it before calling a templated helper. These helpers use the new value.
   template <typename A, typename B, typename C>
-  static APCHandle::Pair MakeSharedImpl(ArrayData**, APCHandleLevel, A, B, C);
+  static APCHandle::Pair MakeSharedImpl(ArrayData*, APCHandleLevel, A, B, C);
 
   static APCHandle::Pair MakeHash(ArrayData* data, APCKind kind,
                                   bool unserializeObj);

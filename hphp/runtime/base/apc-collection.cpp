@@ -105,10 +105,11 @@ APCHandle::Pair APCCollection::Make(const ObjectData* obj,
     assertx(!features.isCircular);
     if (!features.hasObjectOrResource) {
       auto const makeUncounted = [&] () {
+        auto const ad = const_cast<ArrayData*>(array);
         if (isVectorCollection(obj->collectionType())) {
-          return APCArray::MakeUncountedVec(const_cast<ArrayData*>(array));
+          return APCArray::MakeUncountedVec(ad, /*PointerMap*/nullptr);
         }
-        return APCArray::MakeUncountedDict(const_cast<ArrayData*>(array));
+        return APCArray::MakeUncountedDict(ad, /*PointerMap*/nullptr);
       };
       return WrapArray(
         { makeUncounted(), getMemSize(array) + sizeof(APCTypedValue) },

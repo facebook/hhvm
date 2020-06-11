@@ -34,6 +34,13 @@ struct Layout {
   virtual ArrayData* escalateToVanilla(
     const ArrayData*, const char* reason) const = 0;
 
+  // convertToUncounted only has to convert the array's values in place;
+  // the array has already been copied bitwise into an uncounted allocation.
+  // By the same token, releaseUncounted only has to free the array's values.
+  virtual void convertToUncounted(
+    ArrayData*, DataWalker::PointerMap* seen) const = 0;
+  virtual void releaseUncounted(ArrayData*) const = 0;
+
   virtual void release(ArrayData*) const = 0;
   virtual size_t size(const ArrayData*) const = 0;
   virtual bool isVectorData(const ArrayData*) const = 0;

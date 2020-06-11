@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-helpers.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/data-walker.h"
 #include "hphp/runtime/base/packed-array.h"
 #include "hphp/runtime/base/runtime-option.h"
@@ -227,10 +228,15 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentVec: {
       auto& ad = data.parr;
-      assertx(ad->isVecKind());
+      assertx(ad->isVecType());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = ArrayData::CreateVec();
-      else ad = PackedArray::MakeUncounted(ad, false, seen);
+      if (ad->empty()) {
+        ad = ArrayData::CreateVec();
+      } else if (ad->isVanilla()) {
+        ad = PackedArray::MakeUncounted(ad, false, seen);
+      } else {
+        ad = BespokeArray::MakeUncounted(ad, false, seen);
+      }
       break;
     }
 
@@ -239,10 +245,15 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentDict: {
       auto& ad = data.parr;
-      assertx(ad->isDictKind());
+      assertx(ad->isDictType());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = ArrayData::CreateDict();
-      else ad = MixedArray::MakeUncounted(ad, false, seen);
+      if (ad->empty()) {
+        ad = ArrayData::CreateDict();
+      } else if (ad->isVanilla()) {
+        ad = MixedArray::MakeUncounted(ad, false, seen);
+      } else {
+        ad = BespokeArray::MakeUncounted(ad, false, seen);
+      }
       break;
     }
 
@@ -251,10 +262,15 @@ void ConvertTvToUncounted(
       // Fall-through.
     case KindOfPersistentKeyset: {
       auto& ad = data.parr;
-      assertx(ad->isKeysetKind());
+      assertx(ad->isKeysetType());
       if (handlePersistent(ad)) break;
-      if (ad->empty()) ad = ArrayData::CreateKeyset();
-      else ad = SetArray::MakeUncounted(ad, false, seen);
+      if (ad->empty()) {
+        ad = ArrayData::CreateKeyset();
+      } else if (ad->isVanilla()) {
+        ad = SetArray::MakeUncounted(ad, false, seen);
+      } else {
+        ad = BespokeArray::MakeUncounted(ad, false, seen);
+      }
       break;
     }
 
@@ -276,9 +292,10 @@ void ConvertTvToUncounted(
         else ad = ArrayData::Create();
       } else if (ad->hasVanillaPackedLayout()) {
         ad = PackedArray::MakeUncounted(ad, false, seen);
-      } else {
-        assertx(ad->hasVanillaMixedLayout());
+      } else if (ad->hasVanillaMixedLayout()) {
         ad = MixedArray::MakeUncounted(ad, false, seen);
+      } else {
+        ad = BespokeArray::MakeUncounted(ad, false, seen);
       }
       break;
     }
@@ -337,11 +354,9 @@ void ReleaseUncountedTv(tv_lval lval) {
     assertx(!arr->isRefCounted());
     if (!arr->isStatic()) {
       if (arr->hasVanillaPackedLayout()) PackedArray::ReleaseUncounted(arr);
+      else if (arr->hasVanillaMixedLayout()) MixedArray::ReleaseUncounted(arr);
       else if (arr->isKeysetKind()) SetArray::ReleaseUncounted(arr);
-      else {
-        assertx(arr->hasVanillaMixedLayout());
-        MixedArray::ReleaseUncounted(arr);
-      }
+      else BespokeArray::ReleaseUncounted(arr);
     }
     return;
   }

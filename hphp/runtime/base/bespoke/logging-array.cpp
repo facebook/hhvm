@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
@@ -170,6 +171,19 @@ ArrayData* LoggingLayout::escalateToVanilla(
   auto wrapped = LoggingArray::asLogging(ad)->wrapped;
   wrapped->incRefCount();
   return wrapped;
+}
+
+void LoggingLayout::convertToUncounted(
+    ArrayData* ad, DataWalker::PointerMap* seen) const {
+  auto lad = LoggingArray::asLogging(ad);
+  auto tv = make_array_like_tv(lad->wrapped);
+  ConvertTvToUncounted(&tv, seen);
+  lad->wrapped = val(tv).parr;
+}
+
+void LoggingLayout::releaseUncounted(ArrayData* ad) const {
+  auto tv = make_array_like_tv(LoggingArray::asLogging(ad)->wrapped);
+  ReleaseUncountedTv(&tv);
 }
 
 //////////////////////////////////////////////////////////////////////////////

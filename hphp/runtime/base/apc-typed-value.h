@@ -89,7 +89,7 @@ struct APCTypedValue {
     : m_handle(APCKind::StaticVec, KindOfPersistentVec) {
     assertx(data->isVecType());
     assertx(data->isStatic());
-    m_data.vec = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -98,7 +98,7 @@ struct APCTypedValue {
     : m_handle(APCKind::UncountedVec, KindOfPersistentVec) {
     assertx(data->isVecType());
     assertx(data->isUncounted());
-    m_data.vec = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -107,7 +107,7 @@ struct APCTypedValue {
     : m_handle(APCKind::StaticDict, KindOfPersistentDict) {
     assertx(data->isDictType());
     assertx(data->isStatic());
-    m_data.dict = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -116,7 +116,7 @@ struct APCTypedValue {
     : m_handle(APCKind::UncountedDict, KindOfPersistentDict) {
     assertx(data->isDictType());
     assertx(data->isUncounted());
-    m_data.dict = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -125,7 +125,7 @@ struct APCTypedValue {
     : m_handle(APCKind::StaticKeyset, KindOfPersistentKeyset) {
     assertx(data->isKeysetType());
     assertx(data->isStatic());
-    m_data.keyset = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -134,7 +134,7 @@ struct APCTypedValue {
     : m_handle(APCKind::UncountedKeyset, KindOfPersistentKeyset) {
     assertx(data->isKeysetType());
     assertx(data->isUncounted());
-    m_data.keyset = data;
+    m_data.arr = data;
     assertx(checkInvariants());
   }
 
@@ -193,21 +193,21 @@ struct APCTypedValue {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticVec ||
            m_handle.kind() == APCKind::UncountedVec);
-    return m_data.vec;
+    return m_data.arr;
   }
 
   ArrayData* getDictData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticDict ||
            m_handle.kind() == APCKind::UncountedDict);
-    return m_data.dict;
+    return m_data.arr;
   }
 
   ArrayData* getKeysetData() const {
     assertx(checkInvariants());
     assertx(m_handle.kind() == APCKind::StaticKeyset ||
            m_handle.kind() == APCKind::UncountedKeyset);
-    return m_data.keyset;
+    return m_data.arr;
   }
 
   TypedValue toTypedValue() const {
@@ -253,10 +253,6 @@ private:
     double dbl;
     StringData* str;
     ArrayData* arr;
-    ArrayData* vec;
-    ArrayData* dict;
-    ArrayData* shape;
-    ArrayData* keyset;
     const Func* func;
   } m_data;
   APCHandle m_handle;

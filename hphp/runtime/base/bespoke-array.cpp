@@ -14,9 +14,11 @@
   +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/bespoke/layout.h"
+#include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/tv-refcount.h"
 
 namespace HPHP {
@@ -47,6 +49,54 @@ void BespokeArray::scan(type_scan::Scanner& scan) const {
 
 ArrayData* BespokeArray::ToVanilla(const ArrayData* ad, const char* reason) {
   return BespokeArray::asBespoke(ad)->layout()->escalateToVanilla(ad, reason);
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+ArrayData* BespokeArray::MakeUncounted(ArrayData* ad, bool hasApcTv,
+                                       DataWalker::PointerMap* seen) {
+  assertx(ad->isRefCounted());
+  auto const updateSeen = seen && ad->hasMultipleRefs();
+  if (updateSeen) {
+    auto const it = seen->find(ad);
+    assertx(it != seen->end());
+    if (auto const result = static_cast<ArrayData*>(it->second)) {
+      if (result->uncountedIncRef()) return result;
+    }
+  }
+
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().addAPCUncountedBlock();
+  }
+  auto const layout = BespokeArray::asBespoke(ad)->layout();
+  auto const extra = uncountedAllocExtra(ad, hasApcTv);
+  auto const bytes = layout->heapSize(ad);
+  assertx(bytes % 16 == 0);
+
+  // "Help" out by copying the array's raw bytes to an uncounted allocation.
+  auto const mem = static_cast<char*>(uncounted_malloc(bytes + extra));
+  auto const result = reinterpret_cast<ArrayData*>(mem + extra);
+  memcpy16_inline(reinterpret_cast<char*>(result),
+                  reinterpret_cast<char*>(ad), bytes);
+  auto const aux = ad->auxBits() | (hasApcTv ? ArrayData::kHasApcTv : 0);
+  result->initHeader_16(HeaderKind(ad->kind()), UncountedValue, aux);
+  assertx(BespokeArray::asBespoke(result)->layout() == layout);
+
+  layout->convertToUncounted(result, seen);
+  if (updateSeen) (*seen)[ad] = result;
+  return result;
+}
+
+void BespokeArray::ReleaseUncounted(ArrayData* ad) {
+  if (!ad->uncountedDecRef()) return;
+  auto const layout = BespokeArray::asBespoke(ad)->layout();
+  asBespoke(ad)->layout()->releaseUncounted(ad);
+  if (APCStats::IsCreated()) {
+    APCStats::getAPCStats().removeAPCUncountedBlock();
+  }
+  auto const extra = uncountedAllocExtra(ad, ad->hasApcTv());
+  auto const bytes = layout->heapSize(ad);
+  uncounted_sized_free(reinterpret_cast<char*>(ad) - extra, bytes + extra);
 }
 
 //////////////////////////////////////////////////////////////////////////////

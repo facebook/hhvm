@@ -186,11 +186,6 @@ public:
 
   static void Release(ArrayData*);
   static void ReleaseUncounted(ArrayData*);
-  /*
-   * Recursively register {allocation, rootAPCHandle} with APCGCManager
-   */
-  static void RegisterUncountedAllocations(ArrayData* ad,
-                                           APCHandle* rootAPCHandle);
 
   /*
    * Safe downcast helpers.

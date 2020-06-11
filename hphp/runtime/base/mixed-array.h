@@ -353,9 +353,6 @@ public:
   static ArrayData* Renumber(ArrayData*);
   static void OnSetEvalScalar(ArrayData*);
   static void Release(ArrayData*);
-  // Recursively register {allocation, rootAPCHandle} with APCGCManager
-  static void RegisterUncountedAllocations(ArrayData* ad,
-                                           APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
 
   static ArrayData* EscalateForSort(ArrayData* ad, SortFunction sf);

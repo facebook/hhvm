@@ -210,12 +210,6 @@ struct StringData final : MaybeCountable,
   static void ReleaseUncounted(const StringData*);
 
   /*
-   * root is the address of the top-level APCHandle which contains this string
-   * register {allocation, root} with APCGCManager
-   */
-  void registerUncountedAllocation(APCHandle* rootAPCHandle);
-
-  /*
    * Reference-counting related.
    */
   ALWAYS_INLINE void decRefAndRelease() {

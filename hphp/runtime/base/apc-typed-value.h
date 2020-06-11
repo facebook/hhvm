@@ -224,8 +224,6 @@ struct APCTypedValue {
   static APCTypedValue* tvFalse();
 
   void deleteUncounted();
-  // Recursively register all {allocation, root} with APCGCManager
-  void registerUncountedAllocations();
 
   template <class StaticKey, class UncountedKey, class XData>
   static APCHandle::Pair HandlePersistent(StaticKey skey,

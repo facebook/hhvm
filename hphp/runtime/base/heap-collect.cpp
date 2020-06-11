@@ -13,7 +13,6 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/base/apc-gc-manager.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/memory-manager-defs.h"
 #include "hphp/runtime/base/heap-scan.h"
@@ -89,9 +88,6 @@ constexpr auto MaxMark = GCBits(3);
  *
  * Experimental options
  *
- * Eval.GCForAPC - enable whole-process APC collection. See APCGCManager.
- * Eval.GCForAPCTrigger - trigger threshold; see APCGCManager.
- *
  * Eval.TwoPhaseGC - perform tracing in two phases, the second of which
  * must only encounter exactly-scanned pointers, to enable object copying.
  */
@@ -100,25 +96,24 @@ constexpr auto MaxMark = GCBits(3);
  * Collector state needed during a single whole-heap mark-sweep collection.
  */
 struct Collector {
-  explicit Collector(HeapImpl& heap, APCGCManager* apcgc, GCBits mark_version)
-    : heap_(heap), mark_version_{mark_version}, apcgc_(apcgc)
+  explicit Collector(HeapImpl& heap, GCBits mark_version)
+    : heap_(heap), mark_version_{mark_version}
   {}
-  template<bool apcgc> void collect();
+  void collect();
   void init();
   void sweep();
-  template<bool apcgc> void traceAll();
-  template<bool apcgc> void traceConservative();
-  template<bool apcgc> void traceExact();
+  void traceAll();
+  void traceConservative();
+  void traceExact();
 
   // mark ambiguous pointers in the range [start,start+len)
-  template<bool apcgc>
   void conservativeScan(const void* start, size_t len);
 
   bool marked(const HeapObject* h) {
     return h->marks() == mark_version_;
   }
-  template<bool apcgc> void checkedEnqueue(const void* p);
-  template<bool apcgc> void exactEnqueue(const void* p);
+  void checkedEnqueue(const void* p);
+  void exactEnqueue(const void* p);
   HeapObject* find(const void*);
 
   size_t slab_index(const void* h) {
@@ -141,7 +136,6 @@ struct Collector {
   boost::dynamic_bitset<> slab_map_; // 1 bit per 2M
   type_scan::Scanner type_scanner_;
   std::vector<const HeapObject*> cwork_, xwork_;
-  APCGCManager* const apcgc_;
 };
 
 HeapObject* Collector::find(const void* ptr) {
@@ -223,7 +217,6 @@ bool willScanConservative(const HeapObject* h) {
          );
 }
 
-template <bool apcgc>
 void Collector::checkedEnqueue(const void* p) {
   if (auto h = find(p)) {
     // enqueue h the first time. If it's an object with no pointers (eg String),
@@ -237,9 +230,6 @@ void Collector::checkedEnqueue(const void* p) {
       max_worklist_ = std::max(max_worklist_, cwork_.size() + xwork_.size());
       assertx(checkEnqueuedKind(h));
     }
-  } else if (apcgc) {
-    // If p doesn't belong to any APC data, APCGCManager won't do anything
-    apcgc_->mark(p);
   }
 }
 
@@ -253,7 +243,6 @@ void Collector::checkedEnqueue(const void* p) {
 // owns it, will scan it using the container's iterator api; OR
 // * p could be a stale pointer of any interesting type, that randomly
 // is pointing to recycled memory. ignoring it is actually desireable.
-template <bool apcgc>
 void Collector::exactEnqueue(const void* p) {
   if (auto h = find(p)) {
     auto old = h->marks();
@@ -264,15 +253,11 @@ void Collector::exactEnqueue(const void* p) {
       max_worklist_ = std::max(max_worklist_, xwork_.size());
       assertx(checkEnqueuedKind(h));
     }
-  } else if (apcgc) {
-    // If p doesn't belong to any APC data, APCGCManager won't do anything
-    apcgc_->mark(p);
   }
 }
 
 // mark ambigous pointers in the range [start,start+len). If the start or
 // end is a partial word, don't scan that word.
-template <bool apcgc>
 void FOLLY_DISABLE_ADDRESS_SANITIZER
 Collector::conservativeScan(const void* start, size_t len) {
   constexpr uintptr_t M{7}; // word size - 1
@@ -280,7 +265,7 @@ Collector::conservativeScan(const void* start, size_t len) {
   auto e = (char**)((uintptr_t(start) + len) & ~M); // round down
   cscanned_ += uintptr_t(e) - uintptr_t(s);
   for (; s < e; s++) {
-    checkedEnqueue<apcgc>(
+    checkedEnqueue(
       // Mask off the upper 16-bits to handle things like
       // DiscriminatedPtr which stores things up there.
       (void*)(uintptr_t(*s) & (-1ULL >> 16))
@@ -360,24 +345,23 @@ NEVER_INLINE void Collector::init() {
 //    expect to have found all pointers to them. Any other objects allocated
 //    this way are treated similarly.
 
-template <bool apcgc> void Collector::collect() {
+void Collector::collect() {
   init();
   if (type_scan::hasNonConservative() && RuntimeOption::EvalTwoPhaseGC) {
-    traceConservative<apcgc>();
-    traceExact<apcgc>();
+    traceConservative();
+    traceExact();
   } else {
-    traceAll<apcgc>();
+    traceAll();
   }
   sweep();
 }
 
 // Phase 1: Scan only conservative or mixed conservative/exact roots, plus any
 // malloc'd heap objects that are themselves fully conservatively scanned.
-template <bool apcgc>
 NEVER_INLINE void Collector::traceConservative() {
   auto finish = [&] {
     for (auto r : type_scanner_.m_conservative) {
-      conservativeScan<apcgc>(r.first, r.second);
+      conservativeScan(r.first, r.second);
     }
     type_scanner_.m_conservative.clear();
     // Accumulate m_addrs until traceExact()
@@ -406,13 +390,12 @@ NEVER_INLINE void Collector::traceConservative() {
 // of the heap, which is expected to be fully exactly-scannable. Assert if
 // any conservatively-scanned regions are found in this phase. Any unmarked
 // objects found in this phase may be safely copied.
-template <bool apcgc>
 NEVER_INLINE void Collector::traceExact() {
   auto finish = [&] {
     assertx(cwork_.empty() && type_scanner_.m_conservative.empty());
     for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
-      exactEnqueue<apcgc>(*addr);
+      exactEnqueue(*addr);
     }
     type_scanner_.m_addrs.clear();
     // Accumulate m_weak until sweep()
@@ -437,16 +420,15 @@ NEVER_INLINE void Collector::traceExact() {
 }
 
 // Scan all roots & heap in one pass
-template <bool apcgc>
 NEVER_INLINE void Collector::traceAll() {
   auto finish = [&] {
     for (auto r : type_scanner_.m_conservative) {
-      conservativeScan<apcgc>(r.first, r.second);
+      conservativeScan(r.first, r.second);
     }
     type_scanner_.m_conservative.clear();
     for (auto addr : type_scanner_.m_addrs) {
       xscanned_ += sizeof(*addr);
-      checkedEnqueue<apcgc>(*addr);
+      checkedEnqueue(*addr);
     }
     type_scanner_.m_addrs.clear();
     // Accumulate m_weak until sweep()
@@ -543,11 +525,6 @@ NEVER_INLINE void Collector::sweep() {
         }
       });
     });
-  if (apcgc_) {
-    // This should be removed after global GC API is provided
-    // Currently we do this to sweeping only when script mode
-    apcgc_->sweep();
-  }
 }
 
 StructuredLogEntry logCommon() {
@@ -637,16 +614,8 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
   VMRegAnchor _;
   if (t_eager_gc && RuntimeOption::EvalFilterGCPoints) {
     t_eager_gc = false;
-    auto pc = vmpc();
-    if (rl_gcdata->t_surprise_filter.test(pc)) {
-      if (RuntimeOption::EvalGCForAPC) {
-        if (!APCGCManager::getInstance().excessedGCTriggerBar()) {
-          return;
-        }
-      } else {
-        return;
-      }
-    }
+    auto const pc = vmpc();
+    if (rl_gcdata->t_surprise_filter.test(pc)) return;
     rl_gcdata->t_surprise_filter.insert(pc);
     TRACE(2, "eager gc %s at %p\n", phase, pc);
     phase = "eager";
@@ -661,16 +630,8 @@ void collectImpl(HeapImpl& heap, const char* phase, GCBits& mark_version) {
     tl_heap->getStatsCopy(); // don't check or trigger OOM
   mark_version = (mark_version == MaxMark) ? MinMark :
                  GCBits(uint8_t(mark_version) + 1);
-  Collector collector(
-    heap,
-    RuntimeOption::EvalGCForAPC ? &APCGCManager::getInstance() : nullptr,
-    mark_version
-  );
-  if (RuntimeOption::EvalGCForAPC) {
-    collector.collect<true>();
-  } else {
-    collector.collect<false>();
-  }
+  Collector collector(heap, mark_version);
+  collector.collect();
   if (Trace::moduleEnabledRelease(Trace::gc, 1)) {
     traceCollection(collector);
   }

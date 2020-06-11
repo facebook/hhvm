@@ -62,9 +62,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
                 "Size index must fit into 8-bits");
 
   static void Release(ArrayData*);
-  // Recursively register {allocation, rootAPCHandle} with APCGCManager
-  static void RegisterUncountedAllocations(ArrayData* ad,
-                                           APCHandle* rootAPCHandle);
   static void ReleaseUncounted(ArrayData*);
   static TypedValue NvGetInt(const ArrayData*, int64_t ki);
   static TypedValue NvGetStr(const ArrayData*, const StringData*);

@@ -1016,8 +1016,6 @@ struct RuntimeOption {
   F(uint32_t, HeapAllocSampleBytes,    256 * 1024)                      \
   F(int64_t, GCMinTrigger,             64L<<20)                         \
   F(double, GCTriggerPct,              0.5)                             \
-  F(bool, GCForAPC,                    false)                           \
-  F(int64_t, GCForAPCTrigger,          1024*1024*1024)                  \
   F(bool, TwoPhaseGC,                  false)                           \
   F(bool, EnableGC,                    enableGcDefault())               \
   /* End of GC Options */                                               \

@@ -23,7 +23,7 @@ let make_workers n =
   in
   workers
 
-let cleanup () = WorkerController.killall ()
+let cleanup () = WorkerController.force_quit_all ()
 
 let run_interrupter limit =
   let (fd_in, fd_out) = Unix.pipe () in

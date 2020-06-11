@@ -18,7 +18,7 @@ type metadata_out = {
   log_globals: HackEventLogger.serialized_globals;
 }
 
-type slave_job_status = Slave_terminated of Unix.process_status
+type subprocess_job_status = Subprocess_terminated of Unix.process_status
 
 val win32_worker_main :
   ('a -> 'b) ->

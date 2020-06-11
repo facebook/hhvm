@@ -18,8 +18,8 @@ module TestHeap = SharedMem.NoCache (SharedMem.Immediate) (StringKey) (IntVal)
 let sum acc x = acc + x
 
 let do_work (acc : int) (jobs : int list) : int =
-  (* Since slaves are forked from the same process that doesn't do any calls to
-   * random, the per-slave sequences are not really random without injecting a
+  (* Since worker clones are forked from the same process that doesn't do any calls to
+   * random, the per-clone sequences are not really random without injecting a
    * bit more of enthropy. *)
   Random.self_init ();
 

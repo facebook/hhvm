@@ -23,7 +23,7 @@ type process_id = int
 type worker_id = int
 
 type worker_failure =
-  (* Worker killed by Out Of Memory. *)
+  (* Worker foce quit by Out Of Memory. *)
   | Worker_oomed
   | Worker_quit of Unix.process_status
 
@@ -58,8 +58,8 @@ type void
 (* Get the worker's id *)
 val worker_id : worker -> worker_id
 
-(* Has the worker been killed *)
-val is_killed : worker -> bool
+(* Has the worker been force quit *)
+val is_force_quit : worker -> bool
 
 (* Mark the worker as busy. Throw if it is already busy *)
 val mark_busy : worker -> unit
@@ -121,7 +121,7 @@ val select : ('a, 'b) handle list -> Unix.file_descr list -> ('a, 'b) selected
 (* Returns the worker which produces this handle *)
 val get_worker : ('a, 'b) handle -> worker
 
-(* Killall the workers *)
-val killall : unit -> unit
+(* Force quit the workers *)
+val force_quit_all : unit -> unit
 
 val cancel : ('a, 'b) handle list -> unit

@@ -90,7 +90,7 @@ module Program = struct
       ~save_state_result
       ~recheck_stats;
 
-    WorkerController.killall ();
+    WorkerController.force_quit_all ();
 
     (* as Warnings shouldn't break CI, don't change the exit status except for Errors *)
     let has_errors =

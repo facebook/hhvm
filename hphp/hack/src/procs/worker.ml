@@ -16,9 +16,9 @@ module Gc = CamlGc
  *
  * The 'serializer' is the job continuation: it is a function that must
  * be called at the end of the request ir order to send back the result
- * to the master (this is "internal business", this is not visible outside
- * this module). The slave will provide the expected function.
- * cf 'send_result' in 'slave_main'.
+ * to the worker process (this is "internal business", this is not visible outside
+ * this module). The clone process will provide the expected function.
+ * cf 'send_result' in 'subprocess_main'.
  *
  *****************************************************************************)
 
@@ -33,9 +33,9 @@ type metadata_out = {
   log_globals: HackEventLogger.serialized_globals;
 }
 
-type slave_job_status = Slave_terminated of Unix.process_status
+type subprocess_job_status = Subprocess_terminated of Unix.process_status
 
-let on_slave_cancelled parent_outfd =
+let on_clone_cancelled parent_outfd =
   (* The cancelling controller will ignore result of cancelled job anyway (see
    * wait_for_cancel function), so we can send back anything. Write twice, since
    * the normal response writes twice too *)
@@ -47,7 +47,7 @@ let on_slave_cancelled parent_outfd =
  *
  *****************************************************************************)
 
-let slave_main ic oc =
+let subprocess_main ic oc =
   let start_user_time = ref 0. in
   let start_system_time = ref 0. in
   let start_minor_words = ref 0. in
@@ -148,7 +148,7 @@ let slave_main ic oc =
       Measure.time "worker_read_request" (fun () ->
           Marshal_tools.from_fd_with_preamble infd)
     in
-    WorkerCancel.set_on_worker_cancelled (fun () -> on_slave_cancelled outfd);
+    WorkerCancel.set_on_worker_cancelled (fun () -> on_clone_cancelled outfd);
     let tm = Unix.times () in
     let gc = Gc.quick_stat () in
     Sys_utils.start_gc_profiling ();
@@ -185,15 +185,18 @@ let slave_main ic oc =
     let e_backtrace = Caml.Printexc.get_backtrace () in
     let e_str = Caml.Printexc.to_string e in
     let pid = Unix.getpid () in
-    Printf.printf "Worker slave %d exception: %s\n%!" pid e_str;
+    Printf.printf "Worker subprocess %d exception: %s\n%!" pid e_str;
     EventLogger.log_if_initialized (fun () ->
         EventLogger.worker_exception e_str);
-    Printf.printf "Worker slave %d Potential backtrace:\n%s\n%!" pid e_backtrace;
+    Printf.printf
+      "Worker subprocess %d Potential backtrace:\n%s\n%!"
+      pid
+      e_backtrace;
     exit 2
 
 let win32_worker_main restore (state, _controller_fd) (ic, oc) =
   restore state;
-  slave_main ic oc
+  subprocess_main ic oc
 
 let maybe_send_status_to_controller fd status =
   match fd with
@@ -205,9 +208,9 @@ let maybe_send_status_to_controller fd status =
     (match status with
     | Unix.WEXITED 0 -> ()
     | Unix.WEXITED 1 ->
-      (* 1 is an expected exit code. On unix systems, when the master process exits, the pipe
-       * becomes readable. We fork a worker slave, which reads 0 bytes and exits with code 1.
-       * In this case, the master is dead so trying to write a message to the master will
+      (* 1 is an expected exit code. On unix systems, when the controller process exits, the pipe
+       * becomes readable. We fork a worker clone, which reads 0 bytes and exits with code 1.
+       * In this case, the controller is dead so trying to write a message to the controller will
        * cause an exception *)
       ()
     | _ ->
@@ -215,7 +218,7 @@ let maybe_send_status_to_controller fd status =
         ~timeout:10
         ~on_timeout:(fun _ ->
           Hh_logger.log "Timed out sending status to controller")
-        ~do_:(fun _ -> to_controller fd (Slave_terminated status)))
+        ~do_:(fun _ -> to_controller fd (Subprocess_terminated status)))
 
 (* On Unix each job runs in a forked process. The first thing these jobs do is
  * deserialize a marshaled closure which is the job.
@@ -229,27 +232,27 @@ let maybe_send_status_to_controller fd status =
 let dummy_closure () = ()
 
 (**
- * On Windows, the Worker is a process and runs the job directly. See above.
+ * On Windows, the worker is a process and runs the job directly. See above.
  *
- * On Unix, the Worker is split into a Worker Master and a Worker Slave
- * process with the Master reaping the Slave's process with waitpid.
- * The Slave runs the actual job and sends the results over the oc.
- * If the Slave exits normally (exit code 0), the Master keeps living and
- * waits for the next incoming job before forking a new slave.
+ * On Unix, the worker is split into a main worker process and a clone worker
+ * process with the main process reaping the clone process with waitpid.
+ * The clone runs the actual job and sends the results over the output channel.
+ * If the clone exits normally (exit code 0), the main worker process keeps
+ * running and waiting for the next incoming job before forking a new clone.
  *
- * If the Slave exits with a non-zero code, the Master also exits with the
- * same code. Thus, the owning process of this Worker can just waitpid
- * directly on this process and see correct exit codes.
+ * If the clone exits with a non-zero code, the main worker process also exits
+ * with the same code. Thus, the contoller process of this worker can just
+ * waitpid directly on the main worker process and see correct exit codes.
  *
- * Except `WSIGNALED i` and `WSTOPPED i` are all compressed to `exit 2`
- * and `exit 3` respectively. Thus some resolution is lost. So if
- * the underling Worker Slave is for example SIGKILL'd by the OOM killer,
- * then the owning process won't be aware of it.
+ * NOTE: `WSIGNALED i` and `WSTOPPED i` are all coalesced into `exit 2`
+ * and `exit 3` respectively, so some resolution is lost. If the clone worker
+ * is, for example, SIGKILL'd by the OOM killer, the controller process won't
+ * be aware of this.
  *
  * To regain this lost resolution, controller_fd can be optionally set. The
- * real exit statuses (includinng WSIGNALED and WSTOPPED) will be sent over
- * this file descriptor to the Controller when the Worker Slave exits
- * abnormally (non-zero exit code).
+ * real exit status (includinng WSIGNALED and WSTOPPED) will be sent over
+ * this file descriptor to the controller when the clone worker exits
+ * abnormally (with a non-zero exit code).
  *)
 let unix_worker_main restore (state, controller_fd) (ic, oc) =
   restore state;
@@ -261,16 +264,16 @@ let unix_worker_main restore (state, controller_fd) (ic, oc) =
   try
     while true do
       (* Wait for an incoming job : is there something to read?
-         But we don't read it yet. It will be read by the forked slave. *)
+          But we don't read it yet. It will be read by the forked clone. *)
       let (readyl, _, _) = Unix.select [in_fd] [] [] (-1.0) in
       if List.is_empty readyl then exit 0;
 
-      (* We fork a slave for every incoming request.
-         And let it die after one request. This is the quickest GC. *)
+      (* We fork a clone process for every incoming request
+          and we let it exit after one request. This is the quickest GC. *)
       match Fork.fork () with
-      | 0 -> slave_main ic oc
+      | 0 -> subprocess_main ic oc
       | pid ->
-        (* Wait for the slave termination... *)
+        (* Wait for the clone process termination... *)
         let status = snd (Sys_utils.waitpid_non_intr [] pid) in
         let () = maybe_send_status_to_controller controller_fd status in
         (match status with

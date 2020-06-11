@@ -315,7 +315,7 @@ let close { channels = (ic, oc); _ } =
   Timeout.close_in ic;
   close_out oc
 
-let kill h =
+let force_quit h =
   close h;
   Sys_utils.terminate_process h.pid
 

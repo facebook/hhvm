@@ -92,7 +92,7 @@ end = struct
     in
     loop SSet.empty
 
-  let stop handle = Daemon.kill handle.daemon_handle
+  let stop handle = Daemon.force_quit handle.daemon_handle
 end
 
 module RegularMarshalTools :

@@ -51,7 +51,7 @@ val input_value : 'a in_channel -> 'b
    to Unix specifics parts.
 
    This module provides a mechanism to "spawn" new instance of the
-   current program, but with a custom entry point (e.g. Slaves,
+   current program, but with a custom entry point (e.g. workers,
    DfindServer, ...). Then, alternate entry points should not depend
    on global references that may not have been (re)initialised in the
    new process.
@@ -111,8 +111,8 @@ val spawn :
 (* Close the typed channels associated to a 'spawned' child. *)
 val close : ('a, 'b) handle -> unit
 
-(* Kill a 'spawned' child and close the associated typed channels. *)
-val kill : ('a, 'b) handle -> unit
+(* Force quit the spawned child process and close the associated typed channels. *)
+val force_quit : ('a, 'b) handle -> unit
 
 (* Main function, that execute a alternate entry point.
    It should be called only once. Just before the main entry point.

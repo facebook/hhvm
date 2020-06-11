@@ -393,7 +393,7 @@ let destroy (t : t) ~(tracking_id : string) : unit Lwt.t =
           HackEventLogger.serverless_ide_destroy_error start_time message data;
           log "ClientIdeService.destroy %s" message
       in
-      Daemon.kill t.daemon_handle;
+      Daemon.force_quit t.daemon_handle;
       Lwt.return_unit
   in
   Lwt_message_queue.close t.messages_to_send;
@@ -428,7 +428,7 @@ let stop
   (* Correctness here is very subtle... During the course of that call to
   'destroy', we do let%lwt on an rpc call to shutdown the daemon.
   Either that will return in 5s, or it won't; either way, we will
-  synchronously kill the daemon handle and close the message queus.
+  synchronously force quit the daemon handle and close the message queue.
   The interleaving we have to worry about is: what will other code
   do while the state is still "Initialized", after we've sent the shutdown
   message to the daemon, and we're let%lwt awaiting for a responnse?

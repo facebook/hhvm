@@ -115,20 +115,23 @@ let rage_pstacks (env : env) : string Lwt.t =
         IMap.add pid reason acc)
   in
   let pids = IMap.bindings pids in
-  (* Pstacks take a while to collect. And some are uninteresting.
-  We'll filter out all scuba, and all but one slave. Keep just
-  one slave in case the workers are stuck for some reason. *)
+  (* Pstacks take a while to collect and some are uninteresting.
+  We'll filter out all Scuba, and all but one worker subprocess. Keep just
+  one worker in case the workers are stuck for some reason. *)
   let (pids, _) =
-    List.fold pids ~init:([], false) ~f:(fun (acc, has_slave) (pid, reason) ->
+    List.fold
+      pids
+      ~init:([], false)
+      ~f:(fun (acc, has_subprocess) (pid, reason) ->
         if String_utils.is_substring "scuba for process" reason then
-          (acc, has_slave)
-        else if String_utils.string_starts_with reason "slave" then
-          if has_slave then
-            (acc, has_slave)
+          (acc, has_subprocess)
+        else if String_utils.string_starts_with reason "subprocess" then
+          if has_subprocess then
+            (acc, has_subprocess)
           else
             ((pid, reason) :: acc, true)
         else
-          ((pid, reason) :: acc, has_slave))
+          ((pid, reason) :: acc, has_subprocess))
   in
   (* I don't know why pstacks are slow; I don't know what their
   bottleneck is. But I observed that doing them in parallel didn't hurt. *)

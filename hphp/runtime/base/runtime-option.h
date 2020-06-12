@@ -950,7 +950,6 @@ struct RuntimeOption {
   F(double,   JitPGODecRefNopDecPercentCOW,                             \
                                        ServerExecutionMode() ? 0.5 : 0) \
   F(double,   JitPGODecRefNopDecPercent, ServerExecutionMode() ? 5 : 0) \
-  F(uint32_t, JitPGOReleaseVVMinPercent, 8)                             \
   F(bool,     JitPGOArrayGetStress,    false)                           \
   F(double,   JitPGOMinBlockCountPercent, 0.025)                        \
   F(double,   JitPGOMinArcProbability, 0.0)                             \

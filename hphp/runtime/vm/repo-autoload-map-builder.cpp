@@ -33,8 +33,12 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
   for (size_t n = 0; n < ue.numPreClasses(); ++n) {
     auto pce = ue.pce(n);
     if (!boost::starts_with(pce->name()->slice(), "Closure$")) {
-      m_classes.insert(std::make_pair(pce->name(), unitSn));
+      m_types.insert(std::make_pair(pce->name(), unitSn));
     }
+  }
+  for (size_t n = 0; n < ue.numRecords(); ++n) {
+    auto re = ue.re(n);
+    m_types.insert(std::make_pair(re->name(), unitSn));
   }
   for (auto& fe : ue.fevec()) {
     if (fe->top && !boost::ends_with(fe->name->slice(), "$memoize_impl")) {
@@ -51,18 +55,18 @@ void RepoAutoloadMapBuilder::addUnit(const UnitEmitter& ue) {
 }
 
 void RepoAutoloadMapBuilder::serde(BlobEncoder& sd) const {
-  serdeMap(sd, m_classes);
+  serdeMap(sd, m_types);
   serdeMap(sd, m_funcs);
   serdeMap(sd, m_typeAliases);
   serdeMap(sd, m_constants);
 }
 
 std::unique_ptr<RepoAutoloadMap> RepoAutoloadMapBuilder::serde(BlobDecoder& sd) {
-  RepoAutoloadMap::CaseInsensitiveMap classes = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
+  RepoAutoloadMap::CaseInsensitiveMap types = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
   RepoAutoloadMap::CaseInsensitiveMap funcs = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
   RepoAutoloadMap::CaseInsensitiveMap typeAliases = serdeMap<RepoAutoloadMap::CaseInsensitiveMap>(sd);
   RepoAutoloadMap::CaseSensitiveMap constants = serdeMap<RepoAutoloadMap::CaseSensitiveMap>(sd);
-  return std::make_unique<RepoAutoloadMap>(classes, funcs, constants, typeAliases);
+  return std::make_unique<RepoAutoloadMap>(types, funcs, constants, typeAliases);
 }
 
 //////////////////////////////////////////////////////////////////////

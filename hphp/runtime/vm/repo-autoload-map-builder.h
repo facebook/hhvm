@@ -80,7 +80,7 @@ private:
     return map;
   }
 
-  CaseInsensitiveMap m_classes;
+  CaseInsensitiveMap m_types;
   CaseInsensitiveMap m_funcs;
   CaseInsensitiveMap m_typeAliases;
   CaseSensitiveMap m_constants;

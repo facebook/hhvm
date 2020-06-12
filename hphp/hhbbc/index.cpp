@@ -1898,20 +1898,33 @@ bool build_cls_info(IndexData& index, ClassInfo* cinfo) {
   return true;
 }
 
+template <typename T>
+static const char* filename_from_symbol(const T* t) {
+  auto unit = t->unit;
+  if (!unit) return "BUILTIN";
+  return unit->filename->data();
+}
+
 template <typename T, typename R>
-static void add_symbol(R& map, const T* t, const char* type) {
+static void add_symbol(R&& map, const T* t, const char* type) {
   auto ret = map.insert({t->name, t});
   if (!ret.second) {
-    auto filename = [](const T* t) {
-      auto unit = t->unit;
-      if (!unit) return "BUILTIN";
-      return unit->filename->data();
-    };
-
     throw Index::NonUniqueSymbolException(folly::sformat(
       "More than one {} with the name {}. In {} and {}", type,
-      t->name->data(), filename(t), filename(ret.first->second)));
+      t->name->data(), filename_from_symbol(t), filename_from_symbol(ret.first->second)));
   }
+}
+
+template <typename T, typename R, typename F>
+static void add_symbol(R&& map, const T* t, const char* type, F&& other_map) {
+  auto iter = other_map.find(t->name);
+  if (iter != other_map.end()) {
+    throw Index::NonUniqueSymbolException(folly::sformat(
+      "More than one symbol with the name {}. In {} and {}",
+      t->name->data(), filename_from_symbol(t), filename_from_symbol(iter->second)));
+  }
+
+  add_symbol(std::forward<R>(map), t, type);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2014,7 +2027,7 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
       add_symbol(index.enums, c.get(), "enum");
     }
 
-    add_symbol(index.classes, c.get(), "class");
+    add_symbol(index.classes, c.get(), "class", index.records);
 
     for (auto& m : c->methods) {
       attribute_setter(m->attrs, false, AttrNoOverride);
@@ -2073,9 +2086,8 @@ void add_unit_to_index(IndexData& index, const php::Unit& unit) {
   }
 
   for (auto& rec : unit.records) {
-    add_symbol(index.records, rec.get(), "record");
+    add_symbol(index.records, rec.get(), "record", index.classes);
   }
-
 }
 
 template<class T>

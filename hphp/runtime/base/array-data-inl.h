@@ -178,10 +178,19 @@ inline bool ArrayData::isKeysetType() const {
 }
 
 inline bool ArrayData::hasVanillaPackedLayout() const {
-  return isPackedKind() || isVecKind();
+  static_assert(kNumKinds == 14);
+  static_assert(kPackedKind == 0);
+  static_assert(kVecKind == 8);
+  // Equivalent to: isPackedKind() || isVecKind()
+  return kind() % 8 == kPackedKind;
 }
 inline bool ArrayData::hasVanillaMixedLayout() const {
-  return isMixedKind() || isDictKind() || isPlainKind();
+  static_assert(kNumKinds == 14);
+  static_assert(kMixedKind == 2);
+  static_assert(kPlainKind == 6);
+  static_assert(kDictKind == 10);
+  // Equivalent to: isMixedKind() || isPlainKind() || isDictKind()
+  return kind() % 4 == kMixedKind;
 }
 
 inline bool ArrayData::isVanilla() const {

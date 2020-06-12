@@ -433,7 +433,7 @@ void MemoryManager::flush() {
 
 constexpr const std::array<char*,NumHeaderKinds> header_names = {{
   "PackedArray", "BespokeVArray", "MixedArray", "BespokeDArray",
-  "PlainArray", "BespokeArray", "GlobalsArray", "RecordArray",
+  "GlobalsArray", "RecordArray", "PlainArray", "BespokeArray",
   "Vec", "BespokeVec", "Dict", "BespokeDict", "Keyset", "BespokeKeyset",
   "String", "Resource", "ClsMeth", "Record", "RFunc",
   "Object", "NativeObject", "WaitHandle", "AsyncFuncWH", "AwaitAllWH",

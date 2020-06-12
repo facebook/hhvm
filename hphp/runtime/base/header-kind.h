@@ -51,12 +51,13 @@ enum class HeaderKind : uint8_t {
   //  2. All PHP kinds come before any Hack array kinds.
   //  3. varray-ish and darray-ish kinds come first (used for dvarray tests)
   //  4. "vanilla" kinds are even, and "bespoke" kinds are odd.
+  //  5. We support fast mask-compare tests for packed and mixed layouts.
 
-  // Common PHP arrays, with bespoke counterparts
-  Packed, BespokeVArray, Mixed, BespokeDArray, Plain, BespokeArray,
-  // Rare PHP arrays. Globals is supported, but deprecated; RecordArray is
+  // dvarrays, with bespoke counterparts
+  Packed, BespokeVArray, Mixed, BespokeDArray,
+  // Plain PHP arrays. Globals is supported, but deprecated; RecordArray is
   // incompatible with both dvarray specialization and with bespoke arrays.
-  Globals, RecordArray,
+  Globals, RecordArray, Plain, BespokeArray,
   // Hack arrays, with bespoke counterparts
   Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
 

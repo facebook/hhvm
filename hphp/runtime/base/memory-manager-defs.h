@@ -257,10 +257,10 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* BespokeVArray */
     0, /* Mixed */
     0, /* BespokeDArray */
-    0, /* Plain */
-    0, /* BespokeArray */
     sizeClass<GlobalsArray>(),
     0, /* RecordArray */
+    0, /* Plain */
+    0, /* BespokeArray */
     0, /* Vec */
     0, /* BespokeVec */
     0, /* Dict */

@@ -87,10 +87,10 @@ struct ArrayData : MaybeCountable {
     kBespokeVArrayKind,
     kMixedKind,         // darray: dict-like array with int or string keys
     kBespokeDArrayKind,
-    kPlainKind,         // Plain PHP array (backed by MixedArray)
-    kBespokeArrayKind,
     kGlobalsKind,       // GlobalsArray for the awful $GLOBALS['GLOBALS']
     kRecordKind,        // RecordArray (backed by a record and a MixedArray)
+    kPlainKind,         // Plain PHP array (backed by MixedArray)
+    kBespokeArrayKind,
     kVecKind,
     kBespokeVecKind,
     kDictKind,

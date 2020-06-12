@@ -272,10 +272,10 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     BespokeArray::entry,     /* bespoke varray */ \
     MixedArray::entry,       /* darray */         \
     BespokeArray::entry,     /* bespoke darray */ \
-    MixedArray::entry,       /* plain array */    \
-    BespokeArray::entry,     /* bespoke array */  \
     GlobalsArray::entry,                          \
     RecordArray::entry,                           \
+    MixedArray::entry,       /* plain array */    \
+    BespokeArray::entry,     /* bespoke array */  \
     PackedArray::entry##Vec, /* vec */            \
     BespokeArray::entry,     /* bespoke vec */    \
     MixedArray::entry##Dict, /* dict */           \
@@ -1038,10 +1038,10 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "BespokeVArrayKind",
     "MixedKind",
     "BespokeDArrayKind",
-    "PlainKind",
-    "BespokeArrayKind",
     "GlobalsKind",
     "RecordKind",
+    "PlainKind",
+    "BespokeArrayKind",
     "VecKind",
     "BespokeVecKind",
     "DictKind",

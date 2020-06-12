@@ -140,7 +140,7 @@ LoggingArray* LoggingArray::MakeFromStatic(ArrayData* ad, SrcKey sk) {
   auto const size = sizeof(LoggingArray);
   auto lad = static_cast<LoggingArray*>(
     RO::EvalLowStaticArrays ? low_malloc(size) : uncounted_malloc(size));
-  MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(lad));
+  MemoryStats::LogAlloc(AllocKind::StaticArray, size);
   insert.first->second = lad;
 
   lad->initHeader(getBespokeKind(ad->kind()), StaticValue);
@@ -159,8 +159,7 @@ LoggingArray* LoggingArray::updateKind() {
 }
 
 size_t LoggingLayout::heapSize(const ArrayData*) const {
-  auto const size_index = MemoryManager::size2Index(sizeof(LoggingArray));
-  return MemoryManager::sizeIndex2Size(size_index);
+  return sizeof(LoggingArray);
 }
 void LoggingLayout::scan(const ArrayData* ad, type_scan::Scanner& scan) const {
   scan.scan(LoggingArray::asLogging(ad)->wrapped);

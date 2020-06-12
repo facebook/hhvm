@@ -238,6 +238,7 @@ void ArrayData::GetScalarArray(ArrayData** parr, arrprov::Tag tag) {
 
   auto ad = arr->copyStatic();
   assertx(ad->isStatic());
+  // TODO(T68458896): allocSize rounds up to size class, which we shouldn't do.
   MemoryStats::LogAlloc(AllocKind::StaticArray, allocSize(ad));
 
   s_cachedHash.first = ad;

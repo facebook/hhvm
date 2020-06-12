@@ -777,26 +777,15 @@ let add_ignored_fixme_code_error pos code =
          ])
   else if !is_hh_fixme pos code && not (is_allowed_code_strict code) then
     let pos = Option.value (!get_hh_fixme_pos pos code) ~default:pos in
-    if code / 1000 = 5 then
-      add_error_impl
-        (make_error
-           code
-           [
-             ( pos,
-               Printf.sprintf
-                 "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d.Please use @lint-ignore."
-                 code );
-           ])
-    else
-      add_error_impl
-        (make_error
-           code
-           [
-             ( pos,
-               Printf.sprintf
-                 "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d"
-                 code );
-           ])
+    add_error_impl
+      (make_error
+         code
+         [
+           ( pos,
+             Printf.sprintf
+               "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d"
+               code );
+         ])
 
 (*****************************************************************************)
 (* Errors accumulator. *)

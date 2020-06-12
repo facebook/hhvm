@@ -65,6 +65,7 @@ let tests =
     ("interrupt", run Test_interrupt.test);
     ("isfunlocallable", run Test_isfunlocallable.test);
     ("lazy_decl_idempotence", run Test_lazy_decl_idempotence.test);
+    ("mixed_hack_hackpartial", run Test_mixed_hack_hackpartial.test);
     ("modify_file", run Test_modify_file.test);
     ("new_file", run Test_new_file.test);
     ("property_initializer", run Test_property_initializer.test);

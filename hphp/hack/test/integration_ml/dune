@@ -53,6 +53,7 @@
     test_interrupt2
     test_isfunlocallable
     test_lazy_decl_idempotence
+    test_mixed_hack_hackpartial
     test_modify_file
     test_new_file
     test_property_initializer
@@ -106,6 +107,11 @@
   (name capitalization)
   (deps test_all.exe)
   (action (run ./test_all.exe capitalization)))
+
+(alias
+  (name mixed_hack_hackpartial)
+  (deps test_all.exe)
+  (action (run ./test_all.exe mixed_hack_hackpartial)))
 
 (alias
   (name modify_file)
@@ -322,6 +328,7 @@
     (alias coverage_counts)
     (alias new_file)
     (alias capitalization)
+    (alias mixed_hack_hackpartial)
     (alias modify_file)
     (alias delete_file)
     (alias duplicated_file)

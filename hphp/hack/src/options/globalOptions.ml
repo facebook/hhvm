@@ -47,6 +47,7 @@ type t = {
   ignored_fixme_codes: ISet.t;
   allowed_fixme_codes_strict: ISet.t;
   allowed_fixme_codes_partial: ISet.t;
+  codes_not_raised_partial: ISet.t;
   log_levels: int SMap.t;
   po_disable_lval_as_an_expression: bool;
   tco_shallow_class_decl: bool;
@@ -207,6 +208,7 @@ let default =
     ignored_fixme_codes = Errors.default_ignored_fixme_codes;
     allowed_fixme_codes_strict = ISet.empty;
     allowed_fixme_codes_partial = ISet.empty;
+    codes_not_raised_partial = ISet.empty;
     log_levels = SMap.empty;
     po_disable_lval_as_an_expression = true;
     tco_shallow_class_decl = false;
@@ -308,6 +310,7 @@ let make
     ?(ignored_fixme_codes = default.ignored_fixme_codes)
     ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
     ?(allowed_fixme_codes_partial = default.allowed_fixme_codes_partial)
+    ?(codes_not_raised_partial = default.codes_not_raised_partial)
     ?(log_levels = default.log_levels)
     ?(po_disable_lval_as_an_expression =
       default.po_disable_lval_as_an_expression)
@@ -402,6 +405,7 @@ let make
     ignored_fixme_codes;
     allowed_fixme_codes_strict;
     allowed_fixme_codes_partial;
+    codes_not_raised_partial;
     po_deregister_php_stdlib;
     po_disallow_execution_operator;
     po_disallow_toplevel_requires;
@@ -562,6 +566,8 @@ let ignored_fixme_codes t = t.ignored_fixme_codes
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
 
 let allowed_fixme_codes_partial t = t.allowed_fixme_codes_partial
+
+let codes_not_raised_partial t = t.codes_not_raised_partial
 
 let log_levels t = t.log_levels
 

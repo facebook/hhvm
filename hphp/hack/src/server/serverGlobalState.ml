@@ -16,6 +16,7 @@ type t = {
   fixme_codes: ISet.t;
   allowed_fixme_codes_strict: ISet.t;
   allowed_fixme_codes_partial: ISet.t;
+  codes_not_raised_partial: ISet.t;
   strict_codes: ISet.t;
   paths_to_ignore: Str.regexp list;
   no_load: bool;
@@ -32,6 +33,7 @@ let save ~logging_init =
     fixme_codes = !Errors.ignored_fixme_codes;
     allowed_fixme_codes_strict = !Errors.allowed_fixme_codes_strict;
     allowed_fixme_codes_partial = !Errors.allowed_fixme_codes_partial;
+    codes_not_raised_partial = !Errors.codes_not_raised_partial;
     strict_codes = !Errors.error_codes_treated_strictly;
     paths_to_ignore = FilesToIgnore.get_paths_to_ignore ();
     no_load = ServerLoadFlag.get_no_load ();
@@ -54,6 +56,7 @@ let restore state ~(worker_id : int) =
   Errors.ignored_fixme_codes := state.fixme_codes;
   Errors.allowed_fixme_codes_strict := state.allowed_fixme_codes_strict;
   Errors.allowed_fixme_codes_partial := state.allowed_fixme_codes_partial;
+  Errors.codes_not_raised_partial := state.codes_not_raised_partial;
   Errors.error_codes_treated_strictly := state.strict_codes;
   FilesToIgnore.set_paths_to_ignore state.paths_to_ignore;
   ServerLoadFlag.set_no_load state.no_load;

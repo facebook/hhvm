@@ -342,6 +342,8 @@ let load ~silent config_filename options =
         (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
       ~allowed_fixme_codes_partial:
         (prepare_iset config "allowed_fixme_codes_partial" ISet.empty)
+      ~codes_not_raised_partial:
+        (prepare_iset config "codes_not_raised_partial" ISet.empty)
       ~po_auto_namespace_map:(prepare_auto_namespace_map config)
       ~tco_experimental_features:(config_experimental_tc_features config)
       ~tco_log_inference_constraints:
@@ -437,6 +439,8 @@ let load ~silent config_filename options =
     GlobalOptions.allowed_fixme_codes_strict global_opts;
   Errors.allowed_fixme_codes_partial :=
     GlobalOptions.allowed_fixme_codes_partial global_opts;
+  Errors.codes_not_raised_partial :=
+    GlobalOptions.codes_not_raised_partial global_opts;
   Errors.error_codes_treated_strictly :=
     GlobalOptions.error_codes_treated_strictly global_opts;
   ( {

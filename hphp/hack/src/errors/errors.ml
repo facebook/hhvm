@@ -748,11 +748,15 @@ let allowed_fixme_codes_strict = ref ISet.empty
 
 let allowed_fixme_codes_partial = ref ISet.empty
 
+let codes_not_raised_partial = ref ISet.empty
+
 let set_allow_errors_in_default_path x = allow_errors_in_default_path := x
 
 let is_allowed_code_strict code = ISet.mem code !allowed_fixme_codes_strict
 
 let is_allowed_code_partial code = ISet.mem code !allowed_fixme_codes_partial
+
+let is_not_raised_partial code = ISet.mem code !codes_not_raised_partial
 
 let (get_hh_fixme_pos : (Pos.t -> error_code -> Pos.t option) ref) =
   ref (fun _ _ -> None)
@@ -821,7 +825,10 @@ and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let pos_msg_l = check_pos_msg pos_msg_l in
 
-  if not (!is_hh_fixme pos code || !is_hh_fixme_disallowed pos code) then
+  if is_not_raised_partial code && Relative_path.is_partial (Pos.filename pos)
+  then
+    ()
+  else if not (!is_hh_fixme pos code || !is_hh_fixme_disallowed pos code) then
     (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
      * the position information after the fact. This is the default case, where an HH_FIXME
      * comment is not present. Therefore, the remaining cases are variations on behavior when

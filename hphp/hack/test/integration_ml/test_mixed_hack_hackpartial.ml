@@ -43,24 +43,11 @@ let hhconfig_contents =
   "
 allowed_fixme_codes_strict = 4063
 allowed_fixme_codes_partial = 4110
+codes_not_raised_partial = 4336
 "
 
 let errors =
   {|
-File "/f.hackpartial", line 2, characters 12-13:
-Invalid return type (Typing[4336])
-File "/f.hackpartial", line 2, characters 12-13:
-Expected void because this function does not always return a value
-File "/f.hackpartial", line 2, characters 20-22:
-But got int
-
-File "/f.hackpartial", line 2, characters 12-13:
-Invalid return type (Typing[4336])
-File "/f.hackpartial", line 2, characters 20-22:
-Expected int
-File "/f.hackpartial", line 2, characters 12-13:
-But got void because this function does not always return a value
-
 File "/g.hack", line 9, characters 12-12:
 Invalid return type (Typing[4110])
 File "/g.hack", line 7, characters 18-23:

@@ -59,6 +59,32 @@ let _ = show_forward_naming_table_delta
 
 let _ = show_local_changes
 
+module StatementCache = struct
+  type t = {
+    db: Sqlite3.db;
+    statements: (string, Sqlite3.stmt) Hashtbl.t;
+  }
+
+  let make ~db = { db; statements = Hashtbl.Poly.create () }
+
+  (** Prepared statements must be finalized before we can close the database
+  connection, or else an exception is thrown. Call this function before
+  attempting `Sqlite3.close_db`. *)
+  let close t =
+    Hashtbl.iter t.statements ~f:(fun stmt ->
+        Sqlite3.finalize stmt |> check_rc t.db);
+    Hashtbl.clear t.statements
+
+  let make_stmt t query =
+    let stmt =
+      Hashtbl.find_or_add t.statements query ~default:(fun () ->
+          Sqlite3.prepare t.db query)
+    in
+    (* Clear any previous bindings for prepared statement parameters. *)
+    Sqlite3.reset stmt |> check_rc t.db;
+    stmt
+end
+
 let make_relative_path ~prefix_int ~suffix =
   let prefix =
     let open Option in
@@ -83,7 +109,7 @@ let fold_sqlite stmt ~f ~init =
   helper init
 
 module Common = struct
-  let get_paths_by_dep_hash db ~stmt ~hash =
+  let get_paths_by_dep_hash db stmt_cache ~stmt ~hash =
     let lower_bound =
       hash
       |> Typing_deps.NamingHash.make_lower_bound
@@ -94,7 +120,7 @@ module Common = struct
       |> Typing_deps.NamingHash.make_upper_bound
       |> Typing_deps.NamingHash.to_int64
     in
-    let stmt = Sqlite3.prepare db stmt in
+    let stmt = StatementCache.make_stmt stmt_cache stmt in
     Sqlite3.bind stmt 1 (Sqlite3.Data.INT lower_bound) |> check_rc db;
     Sqlite3.bind stmt 2 (Sqlite3.Data.INT upper_bound) |> check_rc db;
     fold_sqlite stmt ~init:Relative_path.Set.empty ~f:(fun stmt acc ->
@@ -144,18 +170,17 @@ module LocalChanges = struct
         "
       table_name
 
-  let prime db base_content_version =
-    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+  let prime db stmt_cache base_content_version =
+    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     let empty =
       Marshal.to_string Relative_path.Map.empty [Marshal.No_sharing]
     in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.BLOB empty) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.TEXT base_content_version)
     |> check_rc db;
-    Sqlite3.step insert_stmt |> check_rc db;
-    Sqlite3.finalize insert_stmt |> check_rc db
+    Sqlite3.step insert_stmt |> check_rc db
 
-  let update db (local_changes : local_changes) =
+  let update db stmt_cache (local_changes : local_changes) =
     let local_changes_saved =
       Relative_path.Map.map local_changes.file_deltas ~f:(fun delta ->
           match delta with
@@ -165,14 +190,13 @@ module LocalChanges = struct
     let local_changes_blob =
       Marshal.to_string local_changes_saved [Marshal.No_sharing]
     in
-    let update_stmt = Sqlite3.prepare db update_sqlite in
+    let update_stmt = StatementCache.make_stmt stmt_cache update_sqlite in
     Sqlite3.bind update_stmt 1 (Sqlite3.Data.BLOB local_changes_blob)
     |> check_rc db;
-    Sqlite3.step update_stmt |> check_rc db;
-    Sqlite3.finalize update_stmt |> check_rc db
+    Sqlite3.step update_stmt |> check_rc db
 
-  let get db =
-    let get_stmt = Sqlite3.prepare db get_sqlite in
+  let get stmt_cache =
+    let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     match Sqlite3.step get_stmt with
     (* We don't include Sqlite3.Rc.DONE in this match because we always expect
      * exactly one row. *)
@@ -269,6 +293,7 @@ module FileInfoTable = struct
 
   let insert
       db
+      stmt_cache
       relative_path
       ~(type_checker_mode : FileInfo.mode option)
       ~(decl_hash : OpaqueDigest.t option)
@@ -303,7 +328,7 @@ module FileInfoTable = struct
       | 0 -> Sqlite3.Data.NULL
       | _ -> Sqlite3.Data.TEXT names
     in
-    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 prefix_type |> check_rc db;
 
     Sqlite3.bind insert_stmt 2 suffix |> check_rc db;
@@ -316,8 +341,7 @@ module FileInfoTable = struct
     Sqlite3.bind insert_stmt 7 (names_to_data_type funs) |> check_rc db;
     Sqlite3.bind insert_stmt 8 (names_to_data_type recs) |> check_rc db;
     Sqlite3.bind insert_stmt 9 (names_to_data_type typedefs) |> check_rc db;
-    Sqlite3.step insert_stmt |> check_rc db;
-    Sqlite3.finalize insert_stmt |> check_rc db
+    Sqlite3.step insert_stmt |> check_rc db
 
   let read_row ~stmt ~path ~base_index =
     let file_mode =
@@ -373,8 +397,8 @@ module FileInfoTable = struct
         comments = None;
       }
 
-  let get_file_info db path =
-    let get_stmt = Sqlite3.prepare db get_sqlite in
+  let get_file_info db stmt_cache path =
+    let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     let prefix_type =
       Relative_path.prefix_to_enum (Relative_path.prefix path)
     in
@@ -389,8 +413,8 @@ module FileInfoTable = struct
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 
-  let fold db ~init ~f =
-    let iter_stmt = Sqlite3.prepare db iter_sqlite in
+  let fold stmt_cache ~init ~f =
+    let iter_stmt = StatementCache.make_stmt stmt_cache iter_sqlite in
     let f iter_stmt acc =
       let prefix_int = column_int64 iter_stmt 0 in
       let suffix = column_str iter_stmt 1 in
@@ -476,7 +500,8 @@ module TypesTable = struct
         WHERE {table_name}.HASH BETWEEN ? AND ?
       "
 
-  let insert db ~name ~flags ~file_info_id : (unit, insertion_error) result =
+  let insert db stmt_cache ~name ~flags ~file_info_id :
+      (unit, insertion_error) result =
     let hash =
       Typing_deps.Dep.Class name
       |> Typing_deps.NamingHash.make
@@ -487,7 +512,7 @@ module TypesTable = struct
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
-    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT flags) |> check_rc db;
@@ -496,21 +521,21 @@ module TypesTable = struct
       Naming_types.kind_of_type_of_enum (Option.value_exn (Int64.to_int flags))
     in
     insert_safe ~name ~kind_of_type ~hash ~canon_hash:(Some canon_hash)
-    @@ fun () ->
-    Sqlite3.step insert_stmt |> check_rc db;
-    Sqlite3.finalize insert_stmt |> check_rc db
+    @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
 
-  let insert_class db ~name ~file_info_id : (unit, insertion_error) result =
-    insert db ~name ~flags:class_flag ~file_info_id
+  let insert_class db stmt_cache ~name ~file_info_id :
+      (unit, insertion_error) result =
+    insert db stmt_cache ~name ~flags:class_flag ~file_info_id
 
-  let insert_typedef db ~name ~file_info_id : (unit, insertion_error) result =
-    insert db ~name ~flags:typedef_flag ~file_info_id
+  let insert_typedef db stmt_cache ~name ~file_info_id :
+      (unit, insertion_error) result =
+    insert db stmt_cache ~name ~flags:typedef_flag ~file_info_id
 
-  let insert_record_def db ~name ~file_info_id : (unit, insertion_error) result
-      =
-    insert db ~name ~flags:record_def_flag ~file_info_id
+  let insert_record_def db stmt_cache ~name ~file_info_id :
+      (unit, insertion_error) result =
+    insert db stmt_cache ~name ~flags:record_def_flag ~file_info_id
 
-  let get db ~name ~case_insensitive =
+  let get db stmt_cache ~name ~case_insensitive =
     let name =
       if case_insensitive then
         Caml.String.lowercase_ascii name
@@ -528,7 +553,7 @@ module TypesTable = struct
       else
         get_sqlite
     in
-    let get_stmt = Sqlite3.prepare db get_sqlite in
+    let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     match Sqlite3.step get_stmt with
     | Sqlite3.Rc.DONE -> None
@@ -545,8 +570,12 @@ module TypesTable = struct
       failwith
         (Printf.sprintf "Failure retrieving row: %s" (Sqlite3.Rc.to_string rc))
 
-  let get_paths_by_dep_hash db ~hash =
-    Common.get_paths_by_dep_hash db ~stmt:get_by_dep_hash_sqlite ~hash
+  let get_paths_by_dep_hash db stmt_cache ~hash =
+    Common.get_paths_by_dep_hash
+      db
+      stmt_cache
+      ~stmt:get_by_dep_hash_sqlite
+      ~hash
 end
 
 module FunsTable = struct
@@ -608,7 +637,8 @@ module FunsTable = struct
         WHERE {table_name}.HASH BETWEEN ? AND ?
       "
 
-  let insert db ~name ~file_info_id : (unit, insertion_error) result =
+  let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result
+      =
     let hash =
       Typing_deps.Dep.Fun name
       |> Typing_deps.NamingHash.make
@@ -619,16 +649,14 @@ module FunsTable = struct
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
-    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT canon_hash) |> check_rc db;
     Sqlite3.bind insert_stmt 3 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:(Some canon_hash)
-    @@ fun () ->
-    Sqlite3.step insert_stmt |> check_rc db;
-    Sqlite3.finalize insert_stmt |> check_rc db
+    @@ fun () -> Sqlite3.step insert_stmt |> check_rc db
 
-  let get db ~name ~case_insensitive =
+  let get db stmt_cache ~name ~case_insensitive =
     let name =
       if case_insensitive then
         Caml.String.lowercase_ascii name
@@ -646,7 +674,7 @@ module FunsTable = struct
       else
         get_sqlite
     in
-    let get_stmt = Sqlite3.prepare db get_sqlite in
+    let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     match Sqlite3.step get_stmt with
     | Sqlite3.Rc.DONE -> None
@@ -710,26 +738,26 @@ module ConstsTable = struct
         WHERE {table_name}.HASH BETWEEN ? AND ?
       "
 
-  let insert db ~name ~file_info_id : (unit, insertion_error) result =
+  let insert db stmt_cache ~name ~file_info_id : (unit, insertion_error) result
+      =
     let hash =
       Typing_deps.Dep.GConst name
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
-    let insert_stmt = Sqlite3.prepare db insert_sqlite in
+    let insert_stmt = StatementCache.make_stmt stmt_cache insert_sqlite in
     Sqlite3.bind insert_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     Sqlite3.bind insert_stmt 2 (Sqlite3.Data.INT file_info_id) |> check_rc db;
     insert_safe ~name ~kind_of_type:None ~hash ~canon_hash:None @@ fun () ->
-    Sqlite3.step insert_stmt |> check_rc db;
-    Sqlite3.finalize insert_stmt |> check_rc db
+    Sqlite3.step insert_stmt |> check_rc db
 
-  let get db ~name =
+  let get db stmt_cache ~name =
     let hash =
       Typing_deps.Dep.GConst name
       |> Typing_deps.NamingHash.make
       |> Typing_deps.NamingHash.to_int64
     in
-    let get_stmt = Sqlite3.prepare db get_sqlite in
+    let get_stmt = StatementCache.make_stmt stmt_cache get_sqlite in
     Sqlite3.bind get_stmt 1 (Sqlite3.Data.INT hash) |> check_rc db;
     match Sqlite3.step get_stmt with
     | Sqlite3.Rc.DONE -> None
@@ -746,7 +774,10 @@ module ConstsTable = struct
 end
 
 let db_cache :
-    [ `Not_yet_cached | `Cached of (db_path * Sqlite3.db) option ] ref =
+    [ `Not_yet_cached
+    | `Cached of (db_path * Sqlite3.db * StatementCache.t) option
+    ]
+    ref =
   ref `Not_yet_cached
 
 let open_db (Db_path path) : Sqlite3.db =
@@ -755,89 +786,90 @@ let open_db (Db_path path) : Sqlite3.db =
   Sqlite3.exec db "PRAGMA journal_mode = MEMORY;" |> check_rc db;
   db
 
-let get_db (path : db_path) : Sqlite3.db =
+let get_db_and_stmt_cache (path : db_path) : Sqlite3.db * StatementCache.t =
   match !db_cache with
-  | `Cached (Some (existing_path, db)) when equal_db_path path existing_path ->
-    db
+  | `Cached (Some (existing_path, db, stmt_cache))
+    when equal_db_path path existing_path ->
+    (db, stmt_cache)
   | _ ->
     let db = open_db path in
-    db_cache := `Cached (Some (path, db));
-    db
+    let stmt_cache = StatementCache.make db in
+    db_cache := `Cached (Some (path, db, stmt_cache));
+    (db, stmt_cache)
 
 let validate_can_open_db (db_path : db_path) : unit =
-  let (_ : Sqlite3.db) = get_db db_path in
+  let (_ : Sqlite3.db * StatementCache.t) = get_db_and_stmt_cache db_path in
   ()
 
 let free_db_cache () : unit = db_cache := `Not_yet_cached
 
-let save_file_info db relative_path file_info : int * insertion_error list =
-  Core_kernel.(
-    FileInfoTable.insert
-      db
-      relative_path
-      ~type_checker_mode:file_info.FileInfo.file_mode
-      ~decl_hash:file_info.FileInfo.hash
-      ~consts:file_info.FileInfo.consts
-      ~classes:file_info.FileInfo.classes
-      ~funs:file_info.FileInfo.funs
-      ~recs:file_info.FileInfo.record_defs
-      ~typedefs:file_info.FileInfo.typedefs;
-    let file_info_id = ref None in
-    Sqlite3.exec_not_null_no_headers
-      db
-      "SELECT last_insert_rowid()"
-      ~cb:(fun row ->
-        match row with
-        | [| row_id |] -> file_info_id := Some (Int64.of_string row_id)
-        | [||] -> failwith "Got no columns when querying last inserted row ID"
-        | _ ->
-          failwith "Got too many columns when querying last inserted row ID")
-    |> check_rc db;
-    let file_info_id =
-      match !file_info_id with
-      | Some id -> id
-      | None -> failwith "Could not get last inserted row ID"
-    in
-    let insert insert_fun (symbols_inserted, errors) (_, name) =
-      match insert_fun db ~name ~file_info_id with
-      | Ok () -> (symbols_inserted + 1, errors)
-      | Error error -> (symbols_inserted, error :: errors)
-    in
-    let results = (0, []) in
-    let results =
-      List.fold
-        ~init:results
-        ~f:(insert FunsTable.insert)
-        file_info.FileInfo.funs
-    in
-    let results =
-      List.fold
-        ~init:results
-        ~f:(insert TypesTable.insert_class)
-        file_info.FileInfo.classes
-    in
-    let results =
-      List.fold
-        ~init:results
-        ~f:(insert TypesTable.insert_typedef)
-        file_info.FileInfo.typedefs
-    in
-    let results =
-      List.fold
-        ~init:results
-        ~f:(insert TypesTable.insert_record_def)
-        file_info.FileInfo.record_defs
-    in
-    let results =
-      List.fold
-        ~init:results
-        ~f:(insert ConstsTable.insert)
-        file_info.FileInfo.consts
-    in
-    results)
+let save_file_info db stmt_cache relative_path file_info :
+    int * insertion_error list =
+  let open Core_kernel in
+  FileInfoTable.insert
+    db
+    stmt_cache
+    relative_path
+    ~type_checker_mode:file_info.FileInfo.file_mode
+    ~decl_hash:file_info.FileInfo.hash
+    ~consts:file_info.FileInfo.consts
+    ~classes:file_info.FileInfo.classes
+    ~funs:file_info.FileInfo.funs
+    ~recs:file_info.FileInfo.record_defs
+    ~typedefs:file_info.FileInfo.typedefs;
+  let file_info_id = ref None in
+  Sqlite3.exec_not_null_no_headers
+    db
+    "SELECT last_insert_rowid()"
+    ~cb:(fun row ->
+      match row with
+      | [| row_id |] -> file_info_id := Some (Int64.of_string row_id)
+      | [||] -> failwith "Got no columns when querying last inserted row ID"
+      | _ -> failwith "Got too many columns when querying last inserted row ID")
+  |> check_rc db;
+  let file_info_id =
+    match !file_info_id with
+    | Some id -> id
+    | None -> failwith "Could not get last inserted row ID"
+  in
+  let insert insert_fun (symbols_inserted, errors) (_, name) =
+    match insert_fun db stmt_cache ~name ~file_info_id with
+    | Ok () -> (symbols_inserted + 1, errors)
+    | Error error -> (symbols_inserted, error :: errors)
+  in
+  let results = (0, []) in
+  let results =
+    List.fold ~init:results ~f:(insert FunsTable.insert) file_info.FileInfo.funs
+  in
+  let results =
+    List.fold
+      ~init:results
+      ~f:(insert TypesTable.insert_class)
+      file_info.FileInfo.classes
+  in
+  let results =
+    List.fold
+      ~init:results
+      ~f:(insert TypesTable.insert_typedef)
+      file_info.FileInfo.typedefs
+  in
+  let results =
+    List.fold
+      ~init:results
+      ~f:(insert TypesTable.insert_record_def)
+      file_info.FileInfo.record_defs
+  in
+  let results =
+    List.fold
+      ~init:results
+      ~f:(insert ConstsTable.insert)
+      file_info.FileInfo.consts
+  in
+  results
 
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in
+  let stmt_cache = StatementCache.make ~db in
   Sqlite3.exec db "BEGIN TRANSACTION;" |> check_rc db;
   try
     Sqlite3.exec db LocalChanges.create_table_sqlite |> check_rc db;
@@ -848,13 +880,13 @@ let save_file_infos db_name file_info_map ~base_content_version =
 
     (* Incremental updates only update the single row in this table, so we need
      * to write in some dummy data to start. *)
-    LocalChanges.prime db base_content_version;
+    LocalChanges.prime db stmt_cache base_content_version;
     let save_result =
       Relative_path.Map.fold
         file_info_map
         ~init:empty_save_result
         ~f:(fun path fi acc ->
-          let (symbols_added, errors) = save_file_info db path fi in
+          let (symbols_added, errors) = save_file_info db stmt_cache path fi in
           {
             files_added = acc.files_added + 1;
             symbols_added = acc.symbols_added + symbols_added;
@@ -865,6 +897,7 @@ let save_file_infos db_name file_info_map ~base_content_version =
     Sqlite3.exec db TypesTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db FunsTable.create_index_sqlite |> check_rc db;
     Sqlite3.exec db "END TRANSACTION;" |> check_rc db;
+    StatementCache.close stmt_cache;
     if not @@ Sqlite3.db_close db then
       failwith @@ Printf.sprintf "Could not close database at %s" db_name;
     save_result
@@ -878,11 +911,14 @@ let copy_and_update
   let (Db_path existing_path, Db_path new_path) = (existing_db, new_db) in
   FileUtil.cp ~force:(FileUtil.Ask (fun _ -> false)) [existing_path] new_path;
   let new_db = open_db new_db in
-  LocalChanges.update new_db local_changes;
+  let stmt_cache = StatementCache.make new_db in
+  LocalChanges.update new_db stmt_cache local_changes;
+  StatementCache.close stmt_cache;
   ()
 
 let get_local_changes (db_path : db_path) : local_changes =
-  LocalChanges.get (get_db db_path)
+  let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
+  LocalChanges.get stmt_cache
 
 let fold ~(db_path : db_path) ~init ~f ~file_deltas =
   (* We depend on [Relative_path.Map.bindings] returning results in increasing
@@ -922,9 +958,12 @@ let fold ~(db_path : db_path) ~init ~f ~file_deltas =
       end
     | _ -> (sorted_changes, f path fi acc)
   in
-  let db = get_db db_path in
+  let (_db, stmt_cache) = get_db_and_stmt_cache db_path in
   let (remaining_changes, acc) =
-    FileInfoTable.fold db ~init:(sorted_changes, init) ~f:consume_sorted_changes
+    FileInfoTable.fold
+      stmt_cache
+      ~init:(sorted_changes, init)
+      ~f:consume_sorted_changes
   in
   List.fold_left
     ~f:
@@ -938,25 +977,33 @@ let fold ~(db_path : db_path) ~init ~f ~file_deltas =
     remaining_changes
 
 let get_file_info (db_path : db_path) path =
-  FileInfoTable.get_file_info (get_db db_path) path
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  FileInfoTable.get_file_info db stmt_cache path
 
 let get_type_pos (db_path : db_path) name ~case_insensitive =
-  TypesTable.get (get_db db_path) ~name ~case_insensitive
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  TypesTable.get db stmt_cache ~name ~case_insensitive
 
 let get_type_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =
-  TypesTable.get_paths_by_dep_hash (get_db db_path) ~hash
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+
+  TypesTable.get_paths_by_dep_hash db stmt_cache ~hash
 
 let get_fun_pos (db_path : db_path) name ~case_insensitive =
-  FunsTable.get (get_db db_path) ~name ~case_insensitive
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  FunsTable.get db stmt_cache ~name ~case_insensitive
 
 let get_fun_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =
-  FunsTable.get_paths_by_dep_hash (get_db db_path) ~hash
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  FunsTable.get_paths_by_dep_hash db stmt_cache ~hash
 
 let get_const_pos (db_path : db_path) name =
-  ConstsTable.get (get_db db_path) ~name
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  ConstsTable.get db stmt_cache ~name
 
 let get_const_paths_by_dep_hash (db_path : db_path) (hash : Typing_deps.Dep.t) :
     Relative_path.Set.t =
-  ConstsTable.get_paths_by_dep_hash (get_db db_path) ~hash
+  let (db, stmt_cache) = get_db_and_stmt_cache db_path in
+  ConstsTable.get_paths_by_dep_hash db stmt_cache ~hash

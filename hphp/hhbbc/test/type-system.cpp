@@ -2759,7 +2759,7 @@ TEST(Type, LoosenDVArrayness) {
         t != TInitNull) {
       continue;
     }
-    EXPECT_EQ(loosen_dvarrayness(t), t);
+    EXPECT_EQ(loosen_dvarrayness_always(t), t);
   }
 
   std::vector<std::pair<Type, Type>> tests = {
@@ -2785,8 +2785,8 @@ TEST(Type, LoosenDVArrayness) {
     { TDArr,   TArr }
   };
   for (auto const& p : tests) {
-    EXPECT_EQ(loosen_dvarrayness(p.first), p.second);
-    EXPECT_EQ(loosen_dvarrayness(opt(p.first)), opt(p.second));
+    EXPECT_EQ(loosen_dvarrayness_always(p.first), p.second);
+    EXPECT_EQ(loosen_dvarrayness_always(opt(p.first)), opt(p.second));
   }
 }
 

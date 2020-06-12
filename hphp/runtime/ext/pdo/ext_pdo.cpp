@@ -835,8 +835,8 @@ static bool pdo_stmt_set_fetch_mode(sp_PDOStatement stmt, int _argc,
 ///////////////////////////////////////////////////////////////////////////////
 // forward declarations
 
-static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
-                        const Variant& value);
+bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+                 const Variant& value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
@@ -848,10 +848,10 @@ namespace {
 
 const StaticString s_PDO("PDO");
 
-static void HHVM_METHOD(PDO, __construct, const String& dsn,
-                        const String& username /* = null_string */,
-                        const String& password /* = null_string */,
-                        const Variant& optionsV /* = null_array */) {
+void HHVM_METHOD(PDO, __construct, const String& dsn,
+                 const String& username /* = null_string */,
+                 const String& password /* = null_string */,
+                 const Variant& optionsV /* = null_array */) {
   auto data = Native::data<PDOData>(this_);
   auto options = optionsV.isNull() ? null_array : optionsV.toArray();
 
@@ -985,8 +985,8 @@ static void HHVM_METHOD(PDO, __construct, const String& dsn,
   }
 }
 
-static Variant HHVM_METHOD(PDO, prepare, const String& statement,
-                           const Array& options = null_array) {
+Variant HHVM_METHOD(PDO, prepare, const String& statement,
+                    const Array& options = null_array) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1086,8 +1086,8 @@ static bool HHVM_METHOD(PDO, rollback) {
   return false;
 }
 
-static bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
-                        const Variant& value) {
+bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
+                 const Variant& value) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1260,7 +1260,7 @@ static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   return ret;
 }
 
-static Variant HHVM_METHOD(PDO, exec, const String& query) {
+Variant HHVM_METHOD(PDO, exec, const String& query) {
   auto data = Native::data<PDOData>(this_);
 
   SYNC_VM_REGS_SCOPED();
@@ -2650,8 +2650,8 @@ PDOStatementData::PDOStatementData() : m_rowIndex(-1) {
 
 PDOStatementData::~PDOStatementData() { }
 
-static Variant HHVM_METHOD(PDOStatement, execute,
-                           const Variant& paramsV /* = null_array */) {
+Variant HHVM_METHOD(PDOStatement, execute,
+                    const Variant& paramsV /* = null_array */) {
   auto data = Native::data<PDOStatementData>(this_);
   auto params = paramsV.isNull() ? null_array : paramsV.toArray();
 
@@ -2827,9 +2827,9 @@ static Variant HHVM_METHOD(PDOStatement, fetchcolumn,
   return ret;
 }
 
-static Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
-                           const Variant& class_name /* = null */,
-                           const Variant& ctor_args /* = null */) {
+Variant HHVM_METHOD(PDOStatement, fetchall, int64_t how /* = 0 */,
+                    const Variant& class_name /* = null */,
+                    const Variant& ctor_args /* = null */) {
   auto self = Native::data<PDOStatementData>(this_);
   if (self->m_stmt == nullptr) {
     return false;

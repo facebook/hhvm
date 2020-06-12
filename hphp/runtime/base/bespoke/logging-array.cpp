@@ -50,6 +50,12 @@ const ArrayData* maybeEnableLogging(const ArrayData* ad) {
 
 namespace {
 
+constexpr size_t kSizeIndex = 1;
+static_assert(kSizeIndex2Size[kSizeIndex] >= sizeof(LoggingArray),
+              "kSizeIndex must be large enough to fit a LoggingArray");
+static_assert(kSizeIndex2Size[kSizeIndex - 1] < sizeof(LoggingArray),
+              "kSizeIndex must be the smallest size for LoggingArray");
+
 LoggingLayout* s_layout = new LoggingLayout();
 
 // The bespoke kind for a vanilla kind. Assumes the kind supports bespokes.
@@ -102,9 +108,7 @@ LoggingArray* LoggingArray::MakeFromVanilla(ArrayData* ad, SrcKey sk) {
   assertx(ad->isVanilla());
   assertx(ad->getPosition() == ad->iter_begin());
 
-  auto const size_index = MemoryManager::size2Index(sizeof(LoggingArray));
-  auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(size_index));
-
+  auto lad = static_cast<LoggingArray*>(tl_heap->objMallocIndex(kSizeIndex));
   lad->initHeader(getBespokeKind(ad->kind()), OneReference);
   lad->setLayout(s_layout);
   lad->wrapped = ad;
@@ -189,6 +193,7 @@ void LoggingLayout::releaseUncounted(ArrayData* ad) const {
 
 void LoggingLayout::release(ArrayData* ad) const {
   LoggingArray::asLogging(ad)->wrapped->decRefAndRelease();
+  tl_heap->objFreeIndex(ad, kSizeIndex);
 }
 size_t LoggingLayout::size(const ArrayData* ad) const {
   return LoggingArray::asLogging(ad)->wrapped->size();

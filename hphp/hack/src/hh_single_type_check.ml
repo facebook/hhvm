@@ -243,6 +243,7 @@ let parse_options () =
   let enable_systemlib_annotations = ref false in
   let enable_pocket_universes_syntax = ref false in
   let allowed_fixme_codes_strict = ref ISet.empty in
+  let allowed_fixme_codes_partial = ref ISet.empty in
   let allowed_decl_fixme_codes = ref ISet.empty in
   let options =
     [
@@ -554,6 +555,14 @@ let parse_options () =
               |> List.map ~f:int_of_string
               |> ISet.of_list),
         "List of fixmes that are allowed in strict mode." );
+      ( "--allowed-fixme-codes-partial",
+        Arg.String
+          (fun s ->
+            allowed_fixme_codes_partial :=
+              Str.split (Str.regexp ", *") s
+              |> List.map ~f:int_of_string
+              |> ISet.of_list),
+        "List of fixmes that are allowed in partial mode." );
       ( "--allowed-decl-fixme-codes",
         Arg.String
           (fun s ->
@@ -584,6 +593,7 @@ let parse_options () =
       ?tco_disallow_byref_dynamic_calls:!disallow_byref_dynamic_calls
       ?tco_disallow_byref_calls:!disallow_byref_calls
       ~allowed_fixme_codes_strict:!allowed_fixme_codes_strict
+      ~allowed_fixme_codes_partial:!allowed_fixme_codes_partial
       ?tco_disallow_invalid_arraykey_constraint:
         !disallow_invalid_arraykey_constraint
       ?tco_disallow_trait_reuse:!disallow_trait_reuse
@@ -638,6 +648,8 @@ let parse_options () =
   in
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
+  Errors.allowed_fixme_codes_partial :=
+    GlobalOptions.allowed_fixme_codes_partial tcopt;
   let tcopt =
     {
       tcopt with

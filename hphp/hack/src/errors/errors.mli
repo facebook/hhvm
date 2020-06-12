@@ -75,6 +75,8 @@ val ignored_fixme_codes : ISet.t ref
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 
+val allowed_fixme_codes_partial : ISet.t ref
+
 (* Error codes that should be treated strictly, regardless of their file mode. *)
 val error_codes_treated_strictly : ISet.t ref
 

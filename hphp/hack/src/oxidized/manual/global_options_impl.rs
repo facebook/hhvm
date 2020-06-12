@@ -46,6 +46,7 @@ impl Default for GlobalOptions {
             tco_disallow_byref_calls: true,
             ignored_fixme_codes: i_set::ISet::new(),
             allowed_fixme_codes_strict: i_set::ISet::new(),
+            allowed_fixme_codes_partial: i_set::ISet::new(),
             log_levels: s_map::SMap::new(),
             po_disable_lval_as_an_expression: false,
             tco_shallow_class_decl: false,

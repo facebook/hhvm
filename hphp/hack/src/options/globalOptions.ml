@@ -44,7 +44,6 @@ type t = {
   tco_disallow_invalid_arraykey: bool;
   tco_disallow_byref_dynamic_calls: bool;
   tco_disallow_byref_calls: bool;
-  ignored_fixme_codes: ISet.t;
   allowed_fixme_codes_strict: ISet.t;
   allowed_fixme_codes_partial: ISet.t;
   codes_not_raised_partial: ISet.t;
@@ -205,7 +204,6 @@ let default =
     tco_disallow_invalid_arraykey = true;
     tco_disallow_byref_dynamic_calls = false;
     tco_disallow_byref_calls = true;
-    ignored_fixme_codes = Errors.default_ignored_fixme_codes;
     allowed_fixme_codes_strict = ISet.empty;
     allowed_fixme_codes_partial = ISet.empty;
     codes_not_raised_partial = ISet.empty;
@@ -307,7 +305,6 @@ let make
     ?(tco_disallow_byref_dynamic_calls =
       default.tco_disallow_byref_dynamic_calls)
     ?(tco_disallow_byref_calls = default.tco_disallow_byref_calls)
-    ?(ignored_fixme_codes = default.ignored_fixme_codes)
     ?(allowed_fixme_codes_strict = default.allowed_fixme_codes_strict)
     ?(allowed_fixme_codes_partial = default.allowed_fixme_codes_partial)
     ?(codes_not_raised_partial = default.codes_not_raised_partial)
@@ -402,7 +399,6 @@ let make
     so_naming_sqlite_path;
     po_auto_namespace_map;
     po_codegen = false;
-    ignored_fixme_codes;
     allowed_fixme_codes_strict;
     allowed_fixme_codes_partial;
     codes_not_raised_partial;
@@ -560,8 +556,6 @@ let tco_disallow_invalid_arraykey_constraint t =
 let tco_disallow_byref_dynamic_calls t = t.tco_disallow_byref_dynamic_calls
 
 let tco_disallow_byref_calls t = t.tco_disallow_byref_calls
-
-let ignored_fixme_codes t = t.ignored_fixme_codes
 
 let allowed_fixme_codes_strict t = t.allowed_fixme_codes_strict
 

@@ -122,8 +122,6 @@ type t = {
    * [e.g. foo(&$bar)].
    *)
   tco_disallow_byref_calls: bool;
-  (* Error codes for which we do not allow HH_FIXMEs *)
-  ignored_fixme_codes: ISet.t;
   (* Error codes for which we allow HH_FIXMEs in strict mode *)
   allowed_fixme_codes_strict: ISet.t;
   allowed_fixme_codes_partial: ISet.t;
@@ -296,7 +294,6 @@ val make :
   ?tco_disallow_invalid_arraykey:bool ->
   ?tco_disallow_byref_dynamic_calls:bool ->
   ?tco_disallow_byref_calls:bool ->
-  ?ignored_fixme_codes:ISet.t ->
   ?allowed_fixme_codes_strict:ISet.t ->
   ?allowed_fixme_codes_partial:ISet.t ->
   ?codes_not_raised_partial:ISet.t ->
@@ -451,8 +448,6 @@ val tco_experimental_abstract_type_const_with_default : string
 val tco_experimental_all : SSet.t
 
 val tco_migration_flags_all : SSet.t
-
-val ignored_fixme_codes : t -> ISet.t
 
 val allowed_fixme_codes_strict : t -> ISet.t
 

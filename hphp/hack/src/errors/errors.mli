@@ -66,12 +66,6 @@ val add_error : error -> unit
 
 val add_error_with_check : error -> unit
 
-(* Error codes that can never be suppressed with a FIXME. *)
-val default_ignored_fixme_codes : ISet.t
-
-(* Error codes that cannot be suppressed with a FIXME based on configuration. *)
-val ignored_fixme_codes : ISet.t ref
-
 (* Error codes that can be suppressed in strict mode with a FIXME based on configuration. *)
 val allowed_fixme_codes_strict : ISet.t ref
 

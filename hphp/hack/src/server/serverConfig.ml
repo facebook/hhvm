@@ -237,9 +237,6 @@ let prepare_iset config config_name initial_values =
   |> List.map ~f:int_of_string
   |> List.fold_right ~init:initial_values ~f:ISet.add
 
-let prepare_ignored_fixme_codes config =
-  prepare_iset config "ignored_fixme_codes" Errors.default_ignored_fixme_codes
-
 let prepare_error_codes_treated_strictly config =
   prepare_iset config "error_codes_treated_strictly" (ISet.of_list [])
 
@@ -337,7 +334,6 @@ let load ~silent config_filename options =
       ?tco_disallow_byref_calls:(bool_opt "disallow_byref_calls" config)
       ?po_disable_lval_as_an_expression:
         (bool_opt "disable_lval_as_an_expression" config)
-      ~ignored_fixme_codes:(prepare_ignored_fixme_codes config)
       ~allowed_fixme_codes_strict:
         (prepare_iset config "allowed_fixme_codes_strict" ISet.empty)
       ~allowed_fixme_codes_partial:
@@ -434,7 +430,6 @@ let load ~silent config_filename options =
               List.map ~f:(fun suffix -> Relative_path.from_root ~suffix) l ))
       ()
   in
-  Errors.ignored_fixme_codes := GlobalOptions.ignored_fixme_codes global_opts;
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict global_opts;
   Errors.allowed_fixme_codes_partial :=

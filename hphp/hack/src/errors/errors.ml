@@ -725,7 +725,7 @@ let error_codes_treated_strictly = ref (ISet.of_list [])
 let is_strict_code code = ISet.mem code !error_codes_treated_strictly
 
 (* The 'phps FixmeAllHackErrors' tool must be kept in sync with this list *)
-let default_ignored_fixme_codes =
+let hard_banned_codes =
   ISet.of_list
     [
       Typing.err_code Typing.InvalidIsAsExpressionHint;
@@ -741,8 +741,6 @@ let default_ignored_fixme_codes =
       Typing.err_code Typing.ClassGetReified;
       Typing.err_code Typing.PocketUniversesReservedSyntax;
     ]
-
-let ignored_fixme_codes = ref default_ignored_fixme_codes
 
 let allowed_fixme_codes_strict = ref ISet.empty
 
@@ -821,22 +819,34 @@ and add code pos msg = add_list code [(pos, msg)]
 and add_error_with_check (error : error) : unit =
   add_list (fst error) (snd error)
 
+and fixme_present pos code =
+  !is_hh_fixme pos code || !is_hh_fixme_disallowed pos code
+
 and add_list code pos_msg_l =
   let pos = fst (List.hd_exn pos_msg_l) in
   let pos_msg_l = check_pos_msg pos_msg_l in
 
-  if is_not_raised_partial code && Relative_path.is_partial (Pos.filename pos)
+  if ISet.mem code hard_banned_codes then
+    if fixme_present pos code then
+      let explanation =
+        Printf.sprintf
+          "You cannot use HH_FIXME or HH_IGNORE_ERROR comments to suppress error %d, and this cannot be enabled by configuration"
+          code
+      in
+      add_error_with_fixme_error code explanation pos_msg_l
+    else
+      add_error_impl (make_error code pos_msg_l)
+  else if
+    is_not_raised_partial code && Relative_path.is_partial (Pos.filename pos)
   then
     ()
-  else if not (!is_hh_fixme pos code || !is_hh_fixme_disallowed pos code) then
+  else if not (fixme_present pos code) then
     (* Fixmes and banned decl fixmes are separated by the parser because Errors can't recover
      * the position information after the fact. This is the default case, where an HH_FIXME
      * comment is not present. Therefore, the remaining cases are variations on behavior when
      * a fixme is present *)
     add_error_impl (make_error code pos_msg_l)
-  else if
-    Relative_path.(is_hhi (prefix (Pos.filename pos)))
-  then
+  else if Relative_path.(is_hhi (prefix (Pos.filename pos))) then
     add_applied_fixme code pos
   else if !is_hh_fixme_disallowed pos code then
     let explanation =

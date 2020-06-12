@@ -44,7 +44,6 @@ impl Default for GlobalOptions {
             tco_disallow_invalid_arraykey: false,
             tco_disallow_byref_dynamic_calls: false,
             tco_disallow_byref_calls: true,
-            ignored_fixme_codes: i_set::ISet::new(),
             allowed_fixme_codes_strict: i_set::ISet::new(),
             allowed_fixme_codes_partial: i_set::ISet::new(),
             codes_not_raised_partial: i_set::ISet::new(),

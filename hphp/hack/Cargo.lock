@@ -1140,6 +1140,7 @@ dependencies = [
 name = "escaper"
 version = "0.0.0"
 dependencies = [
+ "bstr 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pretty_assertions 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1181,6 +1182,7 @@ dependencies = [
 name = "facts_smart_constructors"
 version = "0.0.0"
 dependencies = [
+ "bstr 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "digest 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "escaper 0.0.0",
  "flatten_smart_constructors 0.0.0",
@@ -1743,6 +1745,7 @@ dependencies = [
 name = "lowerer"
 version = "0.0.0"
 dependencies = [
+ "bstr 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "escaper 0.0.0",
  "hh_autoimport_rust 0.0.0",
  "html_entities 0.0.0",

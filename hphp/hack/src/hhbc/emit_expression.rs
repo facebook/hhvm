@@ -1269,9 +1269,10 @@ fn non_numeric(s: &str) -> bool {
     fn out_of_bounds(s: &str) -> bool {
         // compare strings instead of floats to avoid rounding imprecision
         if FLOAT.is_match(s) {
-            FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MAX.to_string()
+            FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > i64::MAX.to_string().as_str()
         } else if NEG_FLOAT.is_match(s) {
-            NEG_FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".") > &i64::MIN.to_string()
+            NEG_FLOAT.replace(s, "${int}.${dec}").trim_end_matches(".")
+                > i64::MIN.to_string().as_str()
         } else {
             false
         }

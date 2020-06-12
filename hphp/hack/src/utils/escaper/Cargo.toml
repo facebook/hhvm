@@ -9,6 +9,7 @@ include = ["../escaper.rs"]
 path = "../escaper.rs"
 
 [dependencies]
+bstr = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
 
 [dev-dependencies]

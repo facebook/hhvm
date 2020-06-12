@@ -9,6 +9,7 @@
 
 use std::{borrow::Cow, error::Error, fmt, io::Write};
 
+use bstr::{BStr, BString};
 use bumpalo::Bump;
 
 #[derive(Debug)]
@@ -210,7 +211,13 @@ pub enum LiteralKind {
 }
 
 /// Copies `s` into `output`, replacing escape sequences with the characters
-/// they represent. The bytes added to `output` will be valid UTF-8.
+/// they represent.
+///
+/// The output is NOT guaranteed to be valid UTF-8. While this function will
+/// return `Err` in some cases where the input contains an escape sequence
+/// specifying an invalid codepoint, it will return invalid UTF-8 in some
+/// circumstances (e.g., for invalid UTF-8 encoded as hex or octal byte escapes,
+/// or UTF-16 encoded as \u escapes).
 fn unescape_literal(
     literal_kind: LiteralKind,
     s: &str,
@@ -336,48 +343,43 @@ fn unescape_literal(
 fn unescape_literal_into_string(
     literal_kind: LiteralKind,
     s: &str,
-) -> Result<String, InvalidString> {
+) -> Result<BString, InvalidString> {
     let mut output = Vec::with_capacity(s.len());
     unescape_literal(literal_kind, s, &mut output)?;
-    // Safety: s is a valid &str, and unescape_literal copies it into output,
-    // only adding and removing valid UTF-8 codepoints.
-    Ok(unsafe { String::from_utf8_unchecked(output) })
+    Ok(output.into())
 }
 
 fn unescape_literal_into_arena<'a>(
     literal_kind: LiteralKind,
     s: &str,
     arena: &'a Bump,
-) -> Result<&'a str, InvalidString> {
+) -> Result<&'a BStr, InvalidString> {
     let mut output = bumpalo::collections::Vec::with_capacity_in(s.len(), arena);
     unescape_literal(literal_kind, s, &mut output)?;
-    // Safety: s is a valid &str, and unescape_literal copies it into output,
-    // only adding and removing valid UTF-8 codepoints.
-    let string = unsafe { bumpalo::collections::String::from_utf8_unchecked(output) };
-    Ok(string.into_bump_str())
+    Ok(output.into_bump_slice().into())
 }
 
-pub fn unescape_double(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_double(s: &str) -> Result<BString, InvalidString> {
     unescape_literal_into_string(LiteralKind::LiteralDoubleQuote, s)
 }
 
-pub fn unescape_backtick(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_backtick(s: &str) -> Result<BString, InvalidString> {
     unescape_literal_into_string(LiteralKind::LiteralBacktick, s)
 }
 
-pub fn unescape_heredoc(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_heredoc(s: &str) -> Result<BString, InvalidString> {
     unescape_literal_into_string(LiteralKind::LiteralHeredoc, s)
 }
 
-pub fn unescape_double_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+pub fn unescape_double_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a BStr, InvalidString> {
     unescape_literal_into_arena(LiteralKind::LiteralDoubleQuote, s, arena)
 }
 
-pub fn unescape_backtick_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+pub fn unescape_backtick_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a BStr, InvalidString> {
     unescape_literal_into_arena(LiteralKind::LiteralBacktick, s, arena)
 }
 
-pub fn unescape_heredoc_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+pub fn unescape_heredoc_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a BStr, InvalidString> {
     unescape_literal_into_arena(LiteralKind::LiteralHeredoc, s, arena)
 }
 
@@ -455,11 +457,11 @@ pub fn unescape_nowdoc_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, Inval
     unescape_single_or_nowdoc_into_arena(true, s, arena)
 }
 
-pub fn unescape_long_string(s: &str) -> Result<String, InvalidString> {
+pub fn unescape_long_string(s: &str) -> Result<BString, InvalidString> {
     unescape_literal_into_string(LiteralKind::LiteralLongString, s)
 }
 
-pub fn unescape_long_string_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a str, InvalidString> {
+pub fn unescape_long_string_in<'a>(s: &str, arena: &'a Bump) -> Result<&'a BStr, InvalidString> {
     unescape_literal_into_arena(LiteralKind::LiteralLongString, s, arena)
 }
 
@@ -541,6 +543,7 @@ pub fn unquote_slice(content: &[u8]) -> &[u8] {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bstr::B;
     use pretty_assertions::assert_eq; // make assert_eq print huge diffs more human-readable
 
     #[test]
@@ -588,26 +591,26 @@ mod tests {
             unescape_backtick("\\a\\b\\n\\r\\t").unwrap(),
             "\\a\\b\n\r\t".to_string()
         );
-        assert_eq!(unescape_long_string("\\xb1").unwrap().as_bytes(), &[177u8]);
+        assert_eq!(unescape_long_string("\\xb1").unwrap(), B(&[177u8]));
 
         let euro = "\u{20AC}"; // as bytes [226, 130, 172]
         assert_eq!(
-            unescape_long_string(euro).unwrap().as_bytes(),
-            &[226u8, 130u8, 172u8]
+            unescape_long_string(euro).unwrap(),
+            B(&[226u8, 130u8, 172u8])
         );
         assert_eq!(unescape_backtick("\\`").unwrap(), "`");
-        assert_eq!(unescape_long_string("\\xb1").unwrap().as_bytes(), &[177u8]);
+        assert_eq!(unescape_long_string("\\xb1").unwrap(), B(&[177u8]));
 
         let euro = "\u{20AC}"; // as bytes [226, 130, 172]
         assert_eq!(
-            unescape_long_string(euro).unwrap().as_bytes(),
-            &[226u8, 130u8, 172u8]
+            unescape_long_string(euro).unwrap(),
+            B(&[226u8, 130u8, 172u8])
         );
 
         let invalid = r#"\u{D800}\u{DF1E}"#;
         assert_eq!(
-            unescape_double(invalid).unwrap().as_bytes(),
-            &[237u8, 160u8, 128u8, 237u8, 188u8, 158u8]
+            unescape_double(invalid).unwrap(),
+            B(&[237u8, 160u8, 128u8, 237u8, 188u8, 158u8])
         );
     }
 

@@ -44,6 +44,30 @@ use std::{
 
 use crate::modifier;
 
+fn unescape_double(s: &str) -> std::result::Result<String, escaper::InvalidString> {
+    // FIXME: This is NOT SAFE--`unescape_double` may return invalid UTF-8, and
+    // constructing a String containing invalid UTF-8 can trigger undefined
+    // behavior. We should consistently represent unescaped string literals with
+    // `bstr::BString` instead.
+    Ok(unsafe { String::from_utf8_unchecked(escaper::unescape_double(s)?.into()) })
+}
+
+fn unescape_backtick(s: &str) -> std::result::Result<String, escaper::InvalidString> {
+    // FIXME: This is NOT SAFE--`unescape_backtick` may return invalid UTF-8, and
+    // constructing a String containing invalid UTF-8 can trigger undefined
+    // behavior. We should consistently represent unescaped string literals with
+    // `bstr::BString` instead.
+    Ok(unsafe { String::from_utf8_unchecked(escaper::unescape_backtick(s)?.into()) })
+}
+
+fn unescape_heredoc(s: &str) -> std::result::Result<String, escaper::InvalidString> {
+    // FIXME: This is NOT SAFE--`unescape_heredoc` may return invalid UTF-8, and
+    // constructing a String containing invalid UTF-8 can trigger undefined
+    // behavior. We should consistently represent unescaped string literals with
+    // `bstr::BString` instead.
+    Ok(unsafe { String::from_utf8_unchecked(escaper::unescape_heredoc(s)?.into()) })
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum LiftedAwaitKind {
     LiftedFromStatement,

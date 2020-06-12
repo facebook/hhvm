@@ -197,6 +197,12 @@ impl<'a> FlattenSmartConstructors<'a, HasScriptContent<'a>> for FactsSmartConstr
                 string: token_text(),
                 unescape: |string| {
                     let tmp = unescape_double(string.as_str()).ok().unwrap();
+                    // FIXME: This is NOT SAFE--`unescape_double` may return
+                    // invalid UTF-8, and constructing a String containing
+                    // invalid UTF-8 can trigger undefined behavior. We should
+                    // use `String::from_utf8_lossy` or consistently represent
+                    // unescaped string literals with `bstr::BString` instead.
+                    let tmp = unsafe { String::from_utf8_unchecked(tmp.into()) };
                     extract_unquoted_string(&tmp, 0, tmp.len()).ok().unwrap()
                 },
             }),

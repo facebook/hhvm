@@ -1637,19 +1637,19 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
                 token_pos(self),
             ))),
             TokenKind::DoubleQuotedStringLiteral => Node::StringLiteral(self.alloc((
-                unwrap_or_return!(escaper::unescape_double_in(
-                        self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
-                        self.state.arena,
-                    )
-                    .ok()),
+                self.str_from_utf8(unwrap_or_return!(escaper::unescape_double_in(
+                            self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
+                            self.state.arena,
+                        )
+                        .ok())),
                 token_pos(self),
             ))),
             TokenKind::HeredocStringLiteral => Node::StringLiteral(self.alloc((
-                unwrap_or_return!(escaper::unescape_heredoc_in(
+                self.str_from_utf8(unwrap_or_return!(escaper::unescape_heredoc_in(
                         self.str_from_utf8(escaper::unquote_slice(self.token_bytes(&token))),
                         self.state.arena,
                     )
-                    .ok()),
+                    .ok())),
                 token_pos(self),
             ))),
             TokenKind::NowdocStringLiteral => Node::StringLiteral(self.alloc((

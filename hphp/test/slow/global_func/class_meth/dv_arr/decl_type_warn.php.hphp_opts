@@ -8,3 +8,4 @@
 -vRuntime.Eval.HackArrCompatTypeHintNotices=1
 
 -vHackArrDVArrs=0
+-vRuntime.Eval.HackArrCompatSpecialization=0

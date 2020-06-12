@@ -16,13 +16,13 @@ function main() {
     include '684-2.inc';
   }
   $vars = get_class_vars('A');
-  asort(inout $vars);
+  ksort(inout $vars);
   var_dump($vars);
   A::$a = 1;
   $vars = get_class_vars('A');
-  asort(inout $vars);
+  ksort(inout $vars);
   var_dump($vars);
   $vars = get_class_vars('B');
-  asort(inout $vars);
+  ksort(inout $vars);
   var_dump($vars);
 }

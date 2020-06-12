@@ -23,7 +23,7 @@ class X {
   }
 
   function __construct() {
-    $this->arr = varray[];
+    $this->arr = darray[];
     for ($i = 0; $i < N; $i++) {
       $this->arr[] = new Obj();
     }

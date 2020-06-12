@@ -1,10 +1,10 @@
 <?hh
 
 function provide_constant_vec_like_array() {
-  return varray[
+  return __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[
     'first value',
     'second value',
-  ];
+  ]);
 }
 
 // Provides the same as the above, but using __hhas_adata with a nowdoc.

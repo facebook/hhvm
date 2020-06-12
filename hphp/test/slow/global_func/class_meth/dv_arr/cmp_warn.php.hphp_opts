@@ -3,3 +3,4 @@
 -vRuntime.Eval.IsCompatibleClsMethType=1
 
 -vHackArrDVArrs=0
+-vRuntime.Eval.HackArrCompatSpecialization=0

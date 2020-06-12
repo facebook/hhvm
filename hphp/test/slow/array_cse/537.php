@@ -13,7 +13,9 @@ function f2($x) {
 
 function f3($x) {
   foreach ($x['foo'] as $k => $v) {
-    if ($v) unset($x['foo'][$k]);
+    try {
+      if ($v) unset($x['foo'][$k]);
+    } catch (Exception $e) { echo $e->getMessage()."\n"; }
   }
   var_dump($x);
 }

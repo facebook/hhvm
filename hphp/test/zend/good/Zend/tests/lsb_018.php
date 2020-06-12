@@ -1,7 +1,7 @@
 <?hh
 abstract class Singleton
 {
-    static private $instances = varray[];
+    static private $instances = darray[];
     static private $nextInstanceId = 0;
     private $instanceId = NULL;
     static final public function getInstance()

@@ -9,6 +9,6 @@ function run(inout $a) {
 
 <<__EntryPoint>>
 function main() {
-  $a = varray[1, 2, 3];
+  $a = darray[0 => 1, 1 => 2, 2 => 3];
   run(inout $a);
 }

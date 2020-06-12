@@ -3,7 +3,7 @@ class C { static $p; }
 function f() { return 0; }
 <<__EntryPoint>> function main(): void {
 error_reporting(E_ALL & ~E_STRICT);
-$a = varray[varray[], varray[]];
+$a = varray[darray[], darray[]];
 $a[0][1] = 'good';
 $a[1][1] = 'bad';
 
@@ -21,7 +21,7 @@ echo $a[$i[0]=f()][++$i[0]];
 unset($i);
 
 echo "\n" . '$i[0][0]=f(): ';
-$i = varray[varray[]];
+$i = varray[darray[]];
 echo $a[$i[0][0]=f()][++$i[0][0]];
 unset($i);
 

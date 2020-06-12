@@ -9,3 +9,4 @@
 -vEval.HackArrCompatTypeHintNotices=1
 
 -vEval.HackArrDVArrs=0
+-vEval.HackArrCompatSpecialization=0

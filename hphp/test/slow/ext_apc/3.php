@@ -16,7 +16,10 @@ apc_store("ts", "TestString");
 apc_store("ta", darray["a" => 1, "b" => 2]);
 apc_store("ts", "NewValue");
 apc_store("ta", varray["newelement"]);
-if (apc_store($complexMap) != varray[]) echo "no\n";
+if (apc_store($complexMap) !==
+    __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[])) {
+  echo "set failed\n";
+}
 
 if (__hhvm_intrinsics\apc_fetch_no_check("ts") !== "NewValue") echo "no\n";
 if (__hhvm_intrinsics\apc_fetch_no_check("ta") !== varray["newelement"]) echo "no\n";

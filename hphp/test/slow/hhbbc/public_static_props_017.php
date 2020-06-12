@@ -1,10 +1,10 @@
 <?hh
 
 class X {
-  static $y = varray[1,2,3];
+  static $y = darray['a' => 17, 'b' => 34];
 
   static function go() {
-    unset(self::$y[0]);
+    unset(self::$y['a']);
   }
   static function y() {
     return self::$y;

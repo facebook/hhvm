@@ -12,7 +12,7 @@ function g() {
 
 class C {
     public static $name = "original";
-    public static $a = varray[];
+    public static $a = darray[];
     public static $string = "hello";
 }
 

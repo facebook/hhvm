@@ -1,4 +1,18 @@
-<?hh <<__EntryPoint>> function main(): void {
+<?hh
+
+function darray_recursive($x) {
+  if (!HH\is_php_array($x)) {
+    return $x;
+  }
+  $result = darray[];
+  foreach ($x as $k => $v) {
+    $result[$k] = darray_recursive($v);
+  }
+  return $result;
+}
+
+<<__EntryPoint>>
+function main(): void {
 $a = varray[varray['A'], varray['B'], varray['C'], varray['D']];
 $b = varray[$a, $a, $a, $a];
 $c = varray[$b, $b, $b, $b];
@@ -11,5 +25,5 @@ var_dump(json_encode($e, 0, 6));
 var_dump(json_encode($e, 0, 7));
 var_dump(json_encode($e));
 $E = json_decode(json_encode($e));
-var_dump($E == $e);
+var_dump($E == darray_recursive($e));
 }

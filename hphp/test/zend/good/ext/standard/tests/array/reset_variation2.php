@@ -16,7 +16,7 @@ echo "\n-- Initial Position: --\n";
 echo current($array) . " => " . key($array) . "\n";
 
 echo "\n-- Unset First element in array and check reset() --\n";
-unset($array[0]);
+unset($array[2]);
 var_dump(reset(inout $array));
 echo "===DONE===\n";
 }

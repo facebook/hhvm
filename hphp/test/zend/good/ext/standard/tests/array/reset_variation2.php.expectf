@@ -4,5 +4,5 @@
 a => 0
 
 -- Unset First element in array and check reset() --
-string(1) "b"
+string(1) "a"
 ===DONE===

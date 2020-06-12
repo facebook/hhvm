@@ -2,7 +2,7 @@
 
 function f1() {
   $x = varray[1,2,3];
-  unset($x[0]);
+  unset($x[2]);
   var_dump($x);
 }
 function f2() {
@@ -12,7 +12,7 @@ function f2() {
 }
 function f3() {
   $x = varray[varray[4,5,6],2,3];
-  unset($x[0][0]);
+  unset($x[0][2]);
   var_dump($x);
 }
 function f4() {

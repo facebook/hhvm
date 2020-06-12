@@ -52,7 +52,7 @@ const int ASYNC_OP_CONNECT = 0;
 const int ASYNC_OP_QUERY = 0;
 
 class AsyncMysqlClient {
-  public function __construct() { }
+  private function __construct() { }
   static public function setPoolsConnectionLimit(int $limit) { }
   static public function connect(
       string $host,

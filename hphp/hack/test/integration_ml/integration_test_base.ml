@@ -540,7 +540,8 @@ let save_state
           ServerLocalConfig.store_decls_in_saved_state;
           ServerLocalConfig.enable_naming_table_fallback;
         };
-      ServerEnv.config = Option.value custom_config ~default:!genv.ServerEnv.config;
+      ServerEnv.config =
+        Option.value custom_config ~default:!genv.ServerEnv.config;
     };
   let _edges_added =
     ServerInit.save_state !genv env (temp_dir ^ "/" ^ saved_state_filename)
@@ -628,7 +629,8 @@ let load_state
               None );
           enable_naming_table_fallback;
         };
-      ServerEnv.config = Option.value custom_config ~default:!genv.ServerEnv.config;
+      ServerEnv.config =
+        Option.value custom_config ~default:!genv.ServerEnv.config;
     };
   let hhi_files =
     if load_hhi_files then

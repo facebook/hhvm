@@ -67,7 +67,7 @@ end
     line number guarded by HH_FIXME =>
     error_node_number =>
     position of HH_FIXME comment *)
-type fixme_map = Pos.t IMap.t IMap.t
+type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
 
 module Fixme_store : sig
   type t

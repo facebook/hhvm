@@ -17,13 +17,13 @@ open Reordered_argument_collections
 open ServerLocalConfig
 
 type t = {
-  version: Config_file.version;
+  version: Config_file.version; [@printer (fun fmt _ -> fprintf fmt "version")]
   load_script_timeout: int;
   (* in seconds *)
 
   (* Configures only the workers. Workers can have more relaxed GC configs as
    * they are short-lived processes *)
-  gc_control: Gc.control;
+  gc_control: Gc.control; [@printer (fun fmt _ -> fprintf fmt "control")]
   sharedmem_config: SharedMem.config;
   tc_options: TypecheckerOptions.t;
   parser_options: ParserOptions.t;
@@ -39,6 +39,7 @@ type t = {
   coroutine_whitelist_paths: string list;
   warn_on_non_opt_build: bool;
 }
+[@@deriving show]
 
 let filename =
   Relative_path.from_root ~suffix:Config_file.file_path_relative_to_repo_root
@@ -242,8 +243,8 @@ let prepare_ignored_fixme_codes config =
 let prepare_error_codes_treated_strictly config =
   prepare_iset config "error_codes_treated_strictly" (ISet.of_list [])
 
-let prepare_disallowed_decl_fixmes config =
-  prepare_iset config "disallowed_decl_fixmes" (ISet.of_list [])
+let prepare_allowed_decl_fixme_codes config =
+  prepare_iset config "allowed_decl_fixme_codes" (ISet.of_list [])
 
 let load ~silent config_filename options =
   let config_overrides = SMap.of_list @@ ServerArgs.config options in
@@ -374,7 +375,7 @@ let load ~silent config_filename options =
         (bool_opt "disable_legacy_soft_typehints" config)
       ?po_disallow_toplevel_requires:
         (bool_opt "disallow_toplevel_requires" config)
-      ~po_disallowed_decl_fixmes:(prepare_disallowed_decl_fixmes config)
+      ~po_allowed_decl_fixme_codes:(prepare_allowed_decl_fixme_codes config)
       ?po_allow_new_attribute_syntax:
         (bool_opt "allow_new_attribute_syntax" config)
       ?po_disable_legacy_attribute_syntax:

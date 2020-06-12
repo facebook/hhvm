@@ -243,6 +243,7 @@ let parse_options () =
   let enable_systemlib_annotations = ref false in
   let enable_pocket_universes_syntax = ref false in
   let allowed_fixme_codes_strict = ref ISet.empty in
+  let allowed_decl_fixme_codes = ref ISet.empty in
   let options =
     [
       ("--ifc", Arg.String set_ifc, " Run the flow analysis");
@@ -553,6 +554,14 @@ let parse_options () =
               |> List.map ~f:int_of_string
               |> ISet.of_list),
         "List of fixmes that are allowed in strict mode." );
+      ( "--allowed-decl-fixme-codes",
+        Arg.String
+          (fun s ->
+            allowed_decl_fixme_codes :=
+              Str.split (Str.regexp ", *") s
+              |> List.map ~f:int_of_string
+              |> ISet.of_list),
+        "List of fixmes that are allowed in declarations." );
     ]
   in
   let options = Arg.align ~limit:25 options in
@@ -624,6 +633,7 @@ let parse_options () =
       ~po_disable_hh_ignore_error:!disable_hh_ignore_error
       ~tco_enable_systemlib_annotations:!enable_systemlib_annotations
       ~tco_pu_enabled_paths:(!enable_pocket_universes_syntax, [])
+      ~po_allowed_decl_fixme_codes:!allowed_decl_fixme_codes
       ()
   in
   Errors.allowed_fixme_codes_strict :=

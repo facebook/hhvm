@@ -68,7 +68,7 @@ type t = {
   tco_disallow_invalid_arraykey_constraint: bool;
   po_enable_class_level_where_clauses: bool;
   po_disable_legacy_soft_typehints: bool;
-  po_disallowed_decl_fixmes: ISet.t;
+  po_allowed_decl_fixme_codes: ISet.t;
   po_allow_new_attribute_syntax: bool;
   tco_global_inference: bool;
   tco_gi_reinfer_types: string list;
@@ -227,7 +227,7 @@ let default =
     tco_disallow_invalid_arraykey_constraint = false;
     po_enable_class_level_where_clauses = false;
     po_disable_legacy_soft_typehints = true;
-    po_disallowed_decl_fixmes = ISet.of_list [];
+    po_allowed_decl_fixme_codes = ISet.of_list [];
     po_allow_new_attribute_syntax = false;
     tco_global_inference = false;
     tco_gi_reinfer_types = [];
@@ -335,7 +335,7 @@ let make
       default.po_enable_class_level_where_clauses)
     ?(po_disable_legacy_soft_typehints =
       default.po_disable_legacy_soft_typehints)
-    ?(po_disallowed_decl_fixmes = default.po_disallowed_decl_fixmes)
+    ?(po_allowed_decl_fixme_codes = default.po_allowed_decl_fixme_codes)
     ?(po_allow_new_attribute_syntax = default.po_allow_new_attribute_syntax)
     ?(tco_global_inference = default.tco_global_inference)
     ?(tco_gi_reinfer_types = default.tco_gi_reinfer_types)
@@ -436,7 +436,7 @@ let make
     tco_disallow_invalid_arraykey_constraint;
     po_enable_class_level_where_clauses;
     po_disable_legacy_soft_typehints;
-    po_disallowed_decl_fixmes;
+    po_allowed_decl_fixme_codes;
     po_allow_new_attribute_syntax;
     tco_global_inference;
     tco_gi_reinfer_types;
@@ -603,7 +603,7 @@ let po_enable_class_level_where_clauses t =
 
 let po_disable_legacy_soft_typehints t = t.po_disable_legacy_soft_typehints
 
-let po_disallowed_decl_fixmes t = t.po_disallowed_decl_fixmes
+let po_allowed_decl_fixme_codes t = t.po_allowed_decl_fixme_codes
 
 let po_allow_new_attribute_syntax t = t.po_allow_new_attribute_syntax
 

@@ -9,7 +9,7 @@
 
 open Core_kernel
 
-type t
+type t [@@deriving show]
 
 val set_parser_options : t -> ParserOptions.t -> t
 

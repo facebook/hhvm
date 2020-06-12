@@ -28,6 +28,7 @@ type config = {
   log_level: int;
   sample_rate: float;
 }
+[@@deriving show]
 
 (* Allocated in C only. *)
 type handle = private {

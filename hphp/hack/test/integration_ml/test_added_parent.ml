@@ -58,8 +58,10 @@ let root = "/"
 
 let hhconfig_filename = Filename.concat root ".hhconfig"
 
-let hhconfig_contents = "
+let hhconfig_contents =
+  "
 allowed_fixme_codes_strict = 2049,4110,4123,4336
+allowed_decl_fixme_codes = 2049,4123,4336
 "
 
 let test () =

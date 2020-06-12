@@ -84,7 +84,7 @@ end
 
 module Linearization_cache = Lru_cache.Cache (Linearization_cache_entry)
 
-type fixme_map = Pos.t IMap.t IMap.t
+type fixme_map = Pos.t IMap.t IMap.t [@@deriving show]
 
 module Fixme_store = struct
   type t = fixme_map Relative_path.Map.t ref

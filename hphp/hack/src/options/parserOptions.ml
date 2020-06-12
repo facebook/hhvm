@@ -55,7 +55,7 @@ let disable_legacy_soft_typehints =
 let with_disable_legacy_soft_typehints po b =
   { po with GlobalOptions.po_disable_legacy_soft_typehints = b }
 
-let disallowed_decl_fixmes = GlobalOptions.po_disallowed_decl_fixmes
+let allowed_decl_fixme_codes = GlobalOptions.po_allowed_decl_fixme_codes
 
 let allow_new_attribute_syntax = GlobalOptions.po_allow_new_attribute_syntax
 

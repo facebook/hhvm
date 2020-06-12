@@ -68,7 +68,7 @@ impl Default for GlobalOptions {
             tco_disallow_invalid_arraykey_constraint: false,
             po_enable_class_level_where_clauses: false,
             po_disable_legacy_soft_typehints: true,
-            po_disallowed_decl_fixmes: i_set::ISet::new(),
+            po_allowed_decl_fixme_codes: i_set::ISet::new(),
             po_allow_new_attribute_syntax: false,
             tco_global_inference: false,
             tco_gi_reinfer_types: vec![],

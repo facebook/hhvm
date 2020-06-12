@@ -983,8 +983,10 @@ let root = "/"
 
 let hhconfig_filename = Filename.concat root ".hhconfig"
 
-let hhconfig_contents = "
+let hhconfig_contents =
+  "
 allowed_fixme_codes_strict = 4030
+allowed_decl_fixme_codes = 4030
 "
 
 let cases =

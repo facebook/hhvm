@@ -180,7 +180,7 @@ type t = {
   (* Disable legacy soft typehint syntax (@int) and only allow the __Soft attribute. *)
   po_disable_legacy_soft_typehints: bool;
   (* Set of error codes disallowed in decl positions *)
-  po_disallowed_decl_fixmes: ISet.t;
+  po_allowed_decl_fixme_codes: ISet.t;
   (* Enable @ attribute syntax *)
   po_allow_new_attribute_syntax: bool;
   (* Perform global inference globally on the code base to infer missing type annotations. *)
@@ -318,7 +318,7 @@ val make :
   ?tco_disallow_invalid_arraykey_constraint:bool ->
   ?po_enable_class_level_where_clauses:bool ->
   ?po_disable_legacy_soft_typehints:bool ->
-  ?po_disallowed_decl_fixmes:ISet.t ->
+  ?po_allowed_decl_fixme_codes:ISet.t ->
   ?po_allow_new_attribute_syntax:bool ->
   ?tco_global_inference:bool ->
   ?tco_gi_reinfer_types:string list ->
@@ -496,7 +496,7 @@ val po_enable_class_level_where_clauses : t -> bool
 
 val po_disable_legacy_soft_typehints : t -> bool
 
-val po_disallowed_decl_fixmes : t -> ISet.t
+val po_allowed_decl_fixme_codes : t -> ISet.t
 
 val po_allow_new_attribute_syntax : t -> bool
 

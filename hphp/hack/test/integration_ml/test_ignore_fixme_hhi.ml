@@ -31,10 +31,7 @@ let hhi_contents = "<?hh
 const string C = 4;
 "
 
-let hhconfig_contents =
-  "ignored_fixme_codes = 4110
-disallowed_decl_fixmes = 4110
-"
+let hhconfig_contents = ""
 
 let errors =
   {|

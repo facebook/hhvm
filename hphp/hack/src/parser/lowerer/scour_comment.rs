@@ -28,7 +28,7 @@ pub struct ScourComment<'a, T, V> {
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub collect_fixmes: bool,
     pub include_line_comments: bool,
-    pub disallowed_decl_fixmes: &'a ISet,
+    pub allowed_decl_fixme_codes: &'a ISet,
     pub phantom: std::marker::PhantomData<(*const T, *const V)>,
     pub disable_hh_ignore_error: bool,
 }
@@ -124,7 +124,10 @@ where
                             let code = std::str::from_utf8(code).unwrap();
                             let code: isize = std::str::FromStr::from_str(code).unwrap();
                             let in_hhi = pos.filename().prefix() == Prefix::Hhi;
-                            if !in_block && !in_hhi && self.disallowed_decl_fixmes.contains(&code) {
+                            if !(in_block
+                                || in_hhi
+                                || self.allowed_decl_fixme_codes.contains(&code))
+                            {
                                 acc.add_to_misuses(line, code, p);
                             } else {
                                 acc.add_to_fixmes(line, code, p);

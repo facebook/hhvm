@@ -2276,7 +2276,7 @@ bool HHVM_FUNCTION(mb_parse_str,
   info.from_language          = MBSTRG(current_language);
 
   char *encstr = req::strndup(encoded_string.data(), encoded_string.size());
-  result = Array::CreateVArray();
+  result = Array::CreateDArray();
   mbfl_encoding *detected =
     _php_mb_encoding_handler_ex(&info, result, encstr);
   req::free(encstr);

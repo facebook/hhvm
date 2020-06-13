@@ -440,8 +440,7 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
   (env, explicit_targs @ implicit_targs)
 
 (* For the majority of cases when we localize a function type we instantiate
- * the function's type parameters to be a Tunion wrapped in a Tvar so the
- * type can grow. There are two cases where we do not do this.
+ * the function's type parameters to Tvars. There are two cases where we do not do this.
 
  * 1) In Typing_subtype.subtype_method. See the comment for that function for why
  * this is necessary.
@@ -450,10 +449,6 @@ and localize_targs ~is_method ~def_pos ~use_pos ~use_name env tparaml targl =
  *)
 and localize_ft
     ?(instantiation : method_instantiation option) ~ety_env ~def_pos env ft =
-  (* set reactivity to Nonreactive to prevent occasional setting
-     of condition types when expanding type constants *)
-  let saved_r = env_reactivity env in
-  let env = Env.set_env_reactive env Nonreactive in
   (* If no explicit type parameters are provided, set the instantiated type parameter to
    * initially point to unresolved, so that it can grow and eventually be a subtype of
    * something like "mixed".
@@ -486,13 +481,6 @@ and localize_ft
           ~init:ety_env.substs )
   in
   let ety_env = { ety_env with substs } in
-  (* restore reactivity *)
-  let env =
-    if not (equal_reactivity saved_r (env_reactivity env)) then
-      Env.set_env_reactive env saved_r
-    else
-      env
-  in
   (* Localize the constraints for a type parameter declaration *)
   let localize_tparam env t =
     let (env, cstrl) =

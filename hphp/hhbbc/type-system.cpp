@@ -67,6 +67,18 @@ constexpr int kTypeWidenMaxDepth = 8;
 
 //////////////////////////////////////////////////////////////////////
 
+// HHBBC consumes a LOT of memory, and much of it is used by Types.
+// We keep the type representation compact; don't expand it accidentally.
+template <typename T, size_t Expected, size_t Actual = sizeof(T)>
+constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
+static_assert(CheckSize<Type, 48>(), "");
+static_assert(CheckSize<DCls, 24>(), "");
+static_assert(CheckSize<DObj, 32>(), "");
+static_assert(CheckSize<DRecord, 24>(), "");
+static_assert(CheckSize<copy_ptr<DArrLikeMapN>, 8>(), "");
+
+//////////////////////////////////////////////////////////////////////
+
 // Legal to call with !isPredefined(bits)
 bool mayHaveData(trep bits) {
   bits &= ~BUninit;

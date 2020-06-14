@@ -601,10 +601,7 @@ const MagicMapInfo magicMethods[] {
 //////////////////////////////////////////////////////////////////////
 
 namespace res {
-Record::Record(const Index* idx, Either<SString, RecordInfo*> val)
-  : index(idx)
-  , val(val)
-{}
+Record::Record(Either<SString, RecordInfo*> val) : val(val) {}
 
 bool Record::same(const Record& o) const {
   return val == o.val;
@@ -683,14 +680,10 @@ folly::Optional<Record> Record::commonAncestor(const Record& r) const {
   if (ancestor == nullptr) {
     return folly::none;
   }
-  return res::Record { index, ancestor };
+  return res::Record { ancestor };
 }
 
-Class::Class(const Index* idx,
-             Either<SString,ClassInfo*> val)
-  : index(idx)
-  , val(val)
-{}
+Class::Class(Either<SString,ClassInfo*> val) : val(val) {}
 
 // Class type operations here are very conservative for now.
 
@@ -872,14 +865,14 @@ folly::Optional<Class> Class::commonAncestor(const Class& o) const {
   if (ancestor == nullptr) {
     return folly::none;
   }
-  return res::Class { index, ancestor };
+  return res::Class { ancestor };
 }
 
 folly::Optional<res::Class> Class::parent() const {
   if (!val.right()) return folly::none;
   auto parent = val.right()->parent;
   if (!parent) return folly::none;
-  return res::Class { index, parent };
+  return res::Class { parent };
 }
 
 const php::Class* Class::cls() const {
@@ -4408,7 +4401,7 @@ folly::Optional<T> Index::resolve_type_impl(SString name) const {
         }
         always_assert(0);
       }
-      return T { this, tinfo };
+      return T { tinfo };
     }
     break;
   }
@@ -4417,7 +4410,7 @@ folly::Optional<T> Index::resolve_type_impl(SString name) const {
   if (!m_data->enums.count(name) &&
       !m_data->typeAliases.count(name) &&
       !omap.count(name)) {
-    return T { this, name };
+    return T { name };
   }
 
   return folly::none;
@@ -4453,12 +4446,12 @@ res::Class Index::resolve_class(const php::Class* cls) const {
   if (result && (RuntimeOption::RepoAuthoritative ||
                  (!RuntimeOption::EvalJitEnableRenameFunction &&
                   cls->attrs & AttrBuiltin))) {
-    return res::Class { this, result };
+    return res::Class { result };
   }
 
   // We know its a class, not an enum or type alias, so return
   // by name
-  return res::Class { this, cls->name.get() };
+  return res::Class { cls->name.get() };
 }
 
 folly::Optional<res::Class> Index::resolve_class(Context ctx,
@@ -4497,10 +4490,10 @@ Index::resolve_type_name(SString inName) const {
     [&] (boost::blank) { return Ret{}; },
     [&] (SString s) {
       return (res.type == AnnotType::Record) ?
-             Ret{res::Record{this, s}} : Ret{res::Class{this, s}};
+             Ret{res::Record{s}} : Ret{res::Class{s}};
     },
-    [&] (ClassInfo* c) { return res::Class{this, c}; },
-    [&] (RecordInfo* r) { return res::Record{this, r}; }
+    [&] (ClassInfo* c) { return res::Class{c}; },
+    [&] (RecordInfo* r) { return res::Record{r}; }
   );
   return { res.type, res.nullable, val };
 }
@@ -4628,7 +4621,7 @@ Index::ConstraintResolution Index::resolve_named_type(
       [&] (RecordInfo*) { always_assert(false); return nullptr; }
     );
     if (val.isNull()) return ConstraintResolution{ folly::none, true };
-    auto ty = resolve({ this, val });
+    auto ty = resolve(res::Class { val });
     if (ty && res.nullable) *ty = opt(std::move(*ty));
     return ConstraintResolution{ std::move(ty), false };
   } else if (res.type == AnnotType::Record) {
@@ -4640,7 +4633,7 @@ Index::ConstraintResolution Index::resolve_named_type(
       [&] (RecordInfo* r) { return r; }
     );
     if (val.isNull()) return ConstraintResolution{ folly::none, true };
-    return subRecord({ this, val });
+    return subRecord(res::Record { val });
   }
 
   return get_type_for_annotated_type(ctx, res.type, res.nullable,
@@ -5090,7 +5083,7 @@ bool Index::could_have_reified_type(Context ctx,
     [&] (ClassInfo* c) { return c; },
     [&] (RecordInfo*) { always_assert(false); return nullptr; }
   );
-  res::Class rcls{this, val};
+  res::Class rcls{val};
   return rcls.couldHaveReifiedGenerics();
 }
 
@@ -6323,9 +6316,9 @@ bool Index::must_be_derived_from(const php::Class* cls,
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);
   for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { this, kvCls.second };
+    auto const rCls = res::Class { kvCls.second };
     for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { this, kvPar.second };
+      auto const rPar = res::Class { kvPar.second };
       if (!rCls.mustBeSubtypeOf(rPar)) return false;
     }
   }
@@ -6341,9 +6334,9 @@ Index::could_be_related(const php::Class* cls,
   auto const clsClasses    = find_range(m_data->classInfo, cls->name);
   auto const parentClasses = find_range(m_data->classInfo, parent->name);
   for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { this, kvCls.second };
+    auto const rCls = res::Class { kvCls.second };
     for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { this, kvPar.second };
+      auto const rPar = res::Class { kvPar.second };
       if (rCls.couldBe(rPar)) return true;
     }
   }

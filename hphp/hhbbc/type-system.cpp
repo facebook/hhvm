@@ -71,10 +71,10 @@ constexpr int kTypeWidenMaxDepth = 8;
 // We keep the type representation compact; don't expand it accidentally.
 template <typename T, size_t Expected, size_t Actual = sizeof(T)>
 constexpr bool CheckSize() { static_assert(Expected == Actual); return true; };
-static_assert(CheckSize<Type, 48>(), "");
-static_assert(CheckSize<DCls, 24>(), "");
-static_assert(CheckSize<DObj, 32>(), "");
-static_assert(CheckSize<DRecord, 24>(), "");
+static_assert(CheckSize<Type, 40>(), "");
+static_assert(CheckSize<DCls, 16>(), "");
+static_assert(CheckSize<DObj, 24>(), "");
+static_assert(CheckSize<DRecord, 16>(), "");
 static_assert(CheckSize<copy_ptr<DArrLikeMapN>, 8>(), "");
 
 //////////////////////////////////////////////////////////////////////

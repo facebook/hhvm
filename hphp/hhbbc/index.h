@@ -307,14 +307,13 @@ struct Class {
   const php::Class* cls() const;
 
 private:
-  Class(const Index*, Either<SString,ClassInfo*>);
+  explicit Class(Either<SString,ClassInfo*>);
   template <bool> bool subtypeOfImpl(const Class&) const;
 
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
-  const Index* index;
   Either<SString,ClassInfo*> val;
 };
 
@@ -386,13 +385,12 @@ struct Record {
   const php::Record* rec() const;
 
 private:
-  Record(const Index*, Either<SString,RecordInfo*>);
+  explicit Record(Either<SString,RecordInfo*>);
   template <bool> bool subtypeOfImpl(const Record&) const;
 
 private:
   friend std::string show(const Record&);
   friend struct ::HPHP::HHBBC::Index;
-  const Index* index;
   Either<SString,RecordInfo*> val;
 };
 

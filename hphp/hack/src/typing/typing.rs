@@ -226,7 +226,7 @@ fn expr<'a>(env: &mut Env<'a>, ast::Expr(pos, e): &'a ast::Expr) -> tast::Expr<'
 
 lazy_static! {
     static ref PSEUDO_FUNCTIONS: std::collections::HashSet<&'static str> =
-        { vec!["hh_force_solve", "hh_show_env"].into_iter().collect() };
+        vec!["hh_force_solve", "hh_show_env"].into_iter().collect();
 }
 
 fn is_pseudo_function(fun_expr: &ast::Expr) -> Option<&ast::Id> {

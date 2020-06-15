@@ -12,27 +12,52 @@ open Ifc_types
 module A = Aast
 module T = Typing_defs
 
+(* Everything done in this file should eventually be merged in Hack's
+   regular decl phase. Right now it is more convenient to keep things
+   simple and separate here. *)
+
 exception FlowDecl of string
 
 let fail s = raise (FlowDecl s)
 
-let collect_class_policy_sigs =
-  let policied_id = "\\Policied" in
+let policied_id = "\\Policied"
+
+let infer_flows_id = "\\InferFlows"
+
+let make_callable_name cls_name_opt name =
+  match cls_name_opt with
+  | None -> name
+  | Some cls_name -> cls_name ^ "#" ^ name
+
+let get_attr attr attrs =
+  let is_attr a = String.equal (snd a.A.ua_name) attr in
+  match List.filter ~f:is_attr attrs with
+  | [] -> None
+  | [a] -> Some a
+  | _ -> fail ("multiple '" ^ attr ^ "' attributes found")
+
+let callable_decl attrs =
+  let fd_kind =
+    if Option.is_some (get_attr infer_flows_id attrs) then
+      FDInferFlows
+    else
+      FDPublic
+  in
+  { fd_kind }
+
+let collect_sigs =
   let find_policy property =
-    let attrs = property.A.cv_user_attributes in
-    let is_policied attr = String.equal (snd attr.A.ua_name) policied_id in
-    match List.filter attrs ~f:is_policied with
-    | [] -> `No_policy
-    | [attr] ->
+    match get_attr policied_id property.A.cv_user_attributes with
+    | None -> `No_policy
+    | Some attr ->
       (match attr.A.ua_params with
       | [] -> `Policy
       | [(_, A.String purpose)] -> `Purpose purpose
       | _ -> fail "expected a string literal as a purpose argument.")
-    | _ ->
-      fail "a property can have only one 'Policied' or `Property` attribute."
   in
-  let def psig_env = function
-    | A.Class { A.c_name = (_, name); c_vars = properties; _ } ->
+  let def decl_env = function
+    | A.Class
+        { A.c_name = (_, name); c_vars = properties; c_methods = methods; _ } ->
       let mk_policied_prop
           ({ A.cv_id = (_, pp_name); A.cv_type = (pp_type, _); _ } as prop) =
         match find_policy prop with
@@ -40,8 +65,26 @@ let collect_class_policy_sigs =
         | `Policy -> Some { pp_name; pp_type; pp_purpose = None }
         | `Purpose purp -> Some { pp_name; pp_type; pp_purpose = Some purp }
       in
-      let policied_props = List.filter_map properties ~f:mk_policied_prop in
-      SMap.add name { psig_policied_properties = policied_props } psig_env
-    | _ -> psig_env
+      let cd_policied_properties =
+        List.filter_map ~f:mk_policied_prop properties
+      in
+      let de_class =
+        SMap.add name { cd_policied_properties } decl_env.de_class
+      in
+      let de_fun =
+        let meth de_fun m =
+          let callable_name = make_callable_name (Some name) (snd m.A.m_name) in
+          let decl = callable_decl m.A.m_user_attributes in
+          SMap.add callable_name decl de_fun
+        in
+        List.fold ~init:decl_env.de_fun ~f:meth methods
+      in
+      { de_class; de_fun }
+    | A.Fun { A.f_name = (_, name); f_user_attributes = attrs; _ } ->
+      let callable_name = make_callable_name None name in
+      let decl = callable_decl attrs in
+      let de_fun = SMap.add callable_name decl decl_env.de_fun in
+      { decl_env with de_fun }
+    | _ -> decl_env
   in
-  List.fold ~f:def ~init:SMap.empty
+  List.fold ~f:def ~init:{ de_class = SMap.empty; de_fun = SMap.empty }

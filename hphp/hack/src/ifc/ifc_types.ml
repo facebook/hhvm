@@ -8,7 +8,6 @@
 
 module KMap = Typing_continuations.Map
 module LMap = Local_id.Map
-module PMap = SMap
 module Scope = Ifc_scope
 module Type = Typing_defs
 
@@ -43,27 +42,7 @@ type quant =
   | Qforall
   | Qexists
 
-(* Flow constraints with quantifiers and implication *)
-type prop =
-  | Ctrue
-  | Cquant of quant * int * prop
-  (* if policy <= purpose then prop0 else prop1 *)
-  | Ccond of (policy * purpose) * prop * prop
-  | Cconj of prop * prop
-  | Cflow of (policy * policy)
-
-type policied_property = {
-  pp_name: string;
-  pp_type: Type.locl_ty;
-  pp_purpose: purpose option;
-}
-
-(* Policy signature for a class. Used for generating policy types for objects *)
-type policy_sig = { psig_policied_properties: policied_property list }
-
 (* Types with policies *)
-(* Warning: do not use [@@deriving]; the thunks will lead
-   to diverging functions *)
 type ptype =
   | Tprim of policy
   | Ttuple of ptype list
@@ -78,6 +57,26 @@ and class_ = {
   c_property_map: ptype Lazy.t SMap.t;
 }
 
+type fun_proto = {
+  fp_name: string;
+  fp_pc: policy;
+  fp_this: ptype option;
+  fp_args: ptype list;
+  fp_ret: ptype;
+}
+
+(* Flow constraints with quantifiers and implication *)
+type prop =
+  | Ctrue
+  | Cquant of quant * int * prop
+  (* if policy <= purpose then prop0 else prop1 *)
+  | Ccond of (policy * purpose) * prop * prop
+  | Cconj of prop * prop
+  | Cflow of (policy * policy)
+  (* holes are introduced by calls to functions for which
+     we do not have a flow type at hand *)
+  | Chole of fun_proto
+
 type local_env = { le_vars: ptype LMap.t }
 
 (* The environment is mutable data that
@@ -86,8 +85,35 @@ type env = {
   (* Constraints accumulator. *)
   e_acc: prop list;
   (* Maps storing the type of local variables; one
-  per continuation, for flow-sensitive typing.  *)
+     per continuation, for flow-sensitive typing.  *)
   e_cont: local_env KMap.t;
+  (* Callable on which the current function depends. *)
+  e_deps: SSet.t;
+}
+
+type policied_property = {
+  pp_name: string;
+  pp_type: Type.locl_ty;
+  pp_purpose: purpose option;
+}
+
+type class_decl = {
+  (* the list of policied properties in the class *)
+  cd_policied_properties: policied_property list;
+}
+
+type fun_decl_kind =
+  | FDPublic
+  | FDCIPP
+  | FDInferFlows
+
+type fun_decl = { fd_kind: fun_decl_kind }
+
+type decl_env = {
+  (* policy decls for classes indexed by class name *)
+  de_class: class_decl SMap.t;
+  (* policy decls for functions indexed by function name *)
+  de_fun: fun_decl SMap.t;
 }
 
 (* Read-only environment containing just enough information to compute flow
@@ -95,10 +121,10 @@ type env = {
 type proto_renv = {
   (* during flow inference, types are always given relative to a scope. *)
   pre_scope: Scope.t;
-  (* Hashtable keeping track of counters to generate variable names *)
+  (* hash table keeping track of counters to generate variable names *)
   pre_pvar_counters: (string, int ref) Hashtbl.t;
-  (* policy signatures for classes indexed by class name *)
-  pre_psig_env: policy_sig SMap.t;
+  (* extended decls for IFC *)
+  pre_decl: decl_env;
   (* Hack type environment *)
   pre_tenv: Tast.saved_env;
 }
@@ -120,4 +146,19 @@ type renv = {
   re_this: ptype option;
   (* Return type of the function being checked. *)
   re_ret: ptype;
+}
+
+(* The analysis result for a callable *)
+type callable_result = {
+  (* The callable signature, with flow types *)
+  res_proto: fun_proto;
+  (* The scope of the free policy variables in res_proto
+     and res_constraint *)
+  res_scope: Scope.t;
+  (* Constraints abstracting the callable body; the
+     constrain the policies appearing in res_proto *)
+  res_constraint: prop;
+  (* The set of callable that appear in holes of
+     res_constraint *)
+  res_deps: SSet.t;
 }

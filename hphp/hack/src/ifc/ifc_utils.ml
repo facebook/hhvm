@@ -6,6 +6,8 @@
  *
  *)
 
+let identity x = x
+
 let rec funpow n ~f ~init =
   if n <= 0 then
     init

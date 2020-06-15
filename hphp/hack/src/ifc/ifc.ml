@@ -3,10 +3,12 @@
 open Hh_prelude
 open Hh_core
 open Ifc_types
+module Decl = Ifc_decl
 module Env = Ifc_env
 module Logic = Ifc_logic
-module Decl = Ifc_decl
+module Mapper = Ifc_mapper
 module Pp = Ifc_pretty
+module Utils = Ifc_utils
 module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
@@ -57,9 +59,7 @@ let rec subtype t1 t2 acc =
 and equivalent t1 t2 acc = subtype t1 t2 (subtype t2 t1 acc)
 
 (* Generates a fresh supertype of the argument type *)
-let weaken ?prefix renv env ty =
-  (* Prefix to use for policy variables generated through weakning *)
-  let pvar_prefix = Option.value prefix ~default:"weak" in
+let weaken ?(prefix = "weak") renv env ty =
   let rec freshen acc ty =
     let on_list mk tl =
       let (acc, tl') = List.map_env acc tl ~f:freshen in
@@ -67,13 +67,13 @@ let weaken ?prefix renv env ty =
     in
     match ty with
     | Tprim p ->
-      let p' = Env.new_policy_var renv.re_proto pvar_prefix in
+      let p' = Env.new_policy_var renv.re_proto prefix in
       (L.(p < p') acc, Tprim p')
     | Ttuple tl -> on_list (fun l -> Ttuple l) tl
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass class_ ->
-      let super_pol = Env.new_policy_var renv.re_proto pvar_prefix in
+      let super_pol = Env.new_policy_var renv.re_proto prefix in
       let acc = L.(class_.c_self < super_pol) acc in
       (acc, Tclass { class_ with c_self = super_pol })
   in
@@ -102,9 +102,7 @@ let rec add_dependencies pl t acc =
     let f acc t = add_dependencies pl t acc in
     List.fold tl ~init:acc ~f
 
-let policy_join renv env p1 p2 =
-  (* Prefix to use for policy variables generated through policy joins *)
-  let pvar_prefix = "join" in
+let policy_join renv env ?(prefix = "join") p1 p2 =
   match Logic.policy_join p1 p2 with
   | Some p -> (env, p)
   | None ->
@@ -113,7 +111,7 @@ let policy_join renv env p1 p2 =
       when equal_policy_var v1 v2 && Scope.equal s1 s2 ->
       (env, p1)
     | _ ->
-      let pv = Env.new_policy_var renv.re_proto pvar_prefix in
+      let pv = Env.new_policy_var renv.re_proto prefix in
       let env = Env.acc env L.(p1 < pv && p2 < pv) in
       (env, pv))
 
@@ -143,9 +141,9 @@ let get_policy ?prefix lump_pol_opt proto_renv =
     Env.new_policy_var proto_renv prefix
 
 let rec class_ptype lump_pol_opt proto_renv name =
-  let { psig_policied_properties } =
-    match SMap.find_opt name proto_renv.pre_psig_env with
-    | Some class_policy_sig -> class_policy_sig
+  let { cd_policied_properties } =
+    match SMap.find_opt name proto_renv.pre_decl.de_class with
+    | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
   in
   let prop_ptype { pp_name; pp_type; pp_purpose } =
@@ -166,7 +164,7 @@ let rec class_ptype lump_pol_opt proto_renv name =
       c_self = get_policy lump_pol_opt proto_renv ~prefix:name;
       c_lump = lump_pol;
       c_property_map =
-        SMap.of_list (List.map ~f:prop_ptype psig_policied_properties);
+        SMap.of_list (List.map ~f:prop_ptype cd_policied_properties);
     }
 
 (* Turns a locl_ty into a type with policy annotations;
@@ -231,14 +229,15 @@ let refresh_lvar_type renv env lid (ety : T.locl_ty) =
     let env = Env.set_local_type env lid new_pty in
     (env, new_pty)
 
-let add_params renv env params =
+let add_params renv =
   let add_param env p =
     let prefix = p.A.param_name in
     let pty = ptype None renv.re_proto (fst p.A.param_type_hint) ~prefix in
     let lid = Local_id.make_unscoped p.A.param_name in
-    Env.set_local_type env lid pty
+    let env = Env.set_local_type env lid pty in
+    (env, pty)
   in
-  List.fold params ~init:env ~f:add_param
+  List.map_env ~f:add_param
 
 type lvalue =
   | Local of A.local_id
@@ -247,7 +246,7 @@ type lvalue =
 let binop renv env ty1 ty2 =
   match (ty1, ty2) with
   | (Tprim p1, Tprim p2) ->
-    let (env, pj) = policy_join renv env p1 p2 in
+    let (env, pj) = policy_join renv env ~prefix:"bop" p1 p2 in
     (env, Tprim pj)
   | _ -> fail "unexpected Binop types"
 
@@ -262,6 +261,35 @@ let property_ptype proto_renv obj_ptype property property_ty =
   | Some ptype -> Lazy.force ptype
   | None ->
     ptype ~prefix:("." ^ property) (Some class_.c_lump) proto_renv property_ty
+
+let call renv env callable_name that_pty_opt args_pty ret_ty =
+  let ret_pty =
+    let prefix = callable_name ^ "_ret" in
+    ptype ~prefix None renv.re_proto ret_ty
+  in
+  let env =
+    match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
+    | Some { fd_kind = FDInferFlows } ->
+      let (env, pc_joined) =
+        let join (env, pc) pc' = policy_join renv env ~prefix:"pcjoin" pc pc' in
+        List.fold ~f:join ~init:(env, Pbot) renv.re_gpc
+      in
+      let fp =
+        {
+          fp_name = callable_name;
+          fp_this = that_pty_opt;
+          fp_pc = pc_joined;
+          fp_args = args_pty;
+          fp_ret = ret_pty;
+        }
+      in
+      let env = Env.acc env (fun acc -> Chole fp :: acc) in
+      let env = Env.add_dep env callable_name in
+      env
+    | Some _ -> fail "TODO(T68007489): function calls"
+    | None -> fail "unknown function '%s'" callable_name
+  in
+  (env, ret_pty)
 
 let rec lvalue renv env (((_epos, ety), e) : Tast.expr) =
   match e with
@@ -332,6 +360,20 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
     | Some ptype -> (env, ptype)
     | None -> fail "encountered $this outside of a class context")
   | A.BracedExpr e -> expr env e
+  | A.Call (_call_type, (_, A.Id (_, name)), _type_args, args, _extra_args) ->
+    let (env, args_pty) = List.map_env ~f:expr env args in
+    let callable_name = Decl.make_callable_name None name in
+    call renv env callable_name None args_pty ety
+  | A.Call (_, (_, A.Obj_get (obj, (_, A.Id (_, meth_name)), _)), _, args, _) ->
+    let (env, args_pty) = List.map_env ~f:expr env args in
+    let (env, obj_pty) = expr env obj in
+    (match obj_pty with
+    | Tclass class_ ->
+      let callable_name =
+        Decl.make_callable_name (Some class_.c_name) meth_name
+      in
+      call renv env callable_name (Some obj_pty) args_pty ety
+    | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty)
   (* --- expressions below are not yet supported *)
   | A.Array _
   | A.Darray (_, _)
@@ -410,44 +452,68 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     Env.merge_and_set_cenv ~union env cenv1 cenv2
   | A.Return (Some e) ->
     let (env, te) = expr renv env e in
-    Env.acc env (subtype te renv.re_ret)
+    (* to account for enclosing conditionals, make the return
+       type depend on the local pc *)
+    Env.acc
+      env
+      L.(add_dependencies renv.re_lpc renv.re_ret && subtype te renv.re_ret)
   | A.Return None -> env
   | _ -> env
 
 and block renv env (blk : Tast.block) =
   List.fold_left ~f:(stmt renv) ~init:env blk
 
-let func_or_method psig_env class_name_opt name saved_env params body lrty =
-  begin
-    try
-      (* Setup the read-only environment *)
-      let scope = Scope.alloc () in
-      let proto_renv = Env.new_proto_renv saved_env scope psig_env in
+let callable decl_env class_name_opt name saved_env params body lrty =
+  try
+    (* Setup the read-only environment *)
+    let scope = Scope.alloc () in
+    let proto_renv = Env.new_proto_renv saved_env scope decl_env in
 
-      let global_pc = Env.new_policy_var proto_renv "pc" in
-      let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
-      let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
-      let renv = Env.new_renv proto_renv global_pc this_ty ret_ty in
+    let global_pc = Env.new_policy_var proto_renv "pc" in
+    let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
+    let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
+    let renv = Env.new_renv proto_renv global_pc this_ty ret_ty in
 
-      (* Initialise the mutable environment *)
-      let env = Env.new_env in
-      let env = add_params renv env params in
+    (* Initialise the mutable environment *)
+    let env = Env.new_env in
+    let (env, param_tys) = add_params renv env params in
 
-      (* Run the analysis *)
-      let beg_env = env in
-      let env = block renv env body.A.fb_ast in
-      let end_env = env in
+    (* Run the analysis *)
+    let beg_env = env in
+    let env = block renv env body.A.fb_ast in
+    let end_env = env in
 
-      (* Display the analysis results *)
-      Format.printf "Analyzing %s:@." name;
-      Format.printf "%a@." Pp.renv renv;
-      Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
-      Format.printf "* Final environment:@,  %a@." Pp.env end_env
-    with FlowInference s -> Format.printf "  Failure: %s@." s
-  end;
-  Format.printf "@."
+    (* Display the analysis results *)
+    Format.printf "Analyzing %s:@." name;
+    Format.printf "%a@." Pp.renv renv;
+    Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
+    Format.printf "* Final environment:@,  %a@." Pp.env end_env;
+    Format.printf "@.";
 
-let walk_tast psig_env =
+    (* Return the results *)
+    let res =
+      let proto =
+        {
+          fp_name = Decl.make_callable_name class_name_opt name;
+          fp_pc = global_pc;
+          fp_this = this_ty;
+          fp_args = param_tys;
+          fp_ret = ret_ty;
+        }
+      in
+      {
+        res_proto = proto;
+        res_scope = scope;
+        res_constraint = Logic.conjoin env.e_acc;
+        res_deps = env.e_deps;
+      }
+    in
+    Some res
+  with FlowInference s ->
+    Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
+    None
+
+let walk_tast decl_env =
   let def = function
     | A.Fun
         {
@@ -458,7 +524,9 @@ let walk_tast psig_env =
           f_ret = (lrty, _);
           _;
         } ->
-      func_or_method psig_env None name saved_env params body lrty
+      Option.map
+        ~f:(fun x -> [x])
+        (callable decl_env None name saved_env params body lrty)
     | A.Class { A.c_name = (_, class_name); c_methods = methods; _ } ->
       let handle_method
           {
@@ -469,19 +537,94 @@ let walk_tast psig_env =
             m_ret = (lrty, _);
             _;
           } =
-        func_or_method
-          psig_env
-          (Some class_name)
-          name
-          saved_env
-          params
-          body
-          lrty
+        callable decl_env (Some class_name) name saved_env params body lrty
       in
-      List.iter methods ~f:handle_method
-    | _ -> ()
+      Some (List.filter_map ~f:handle_method methods)
+    | _ -> None
   in
-  List.iter ~f:def
+  (fun tast -> List.concat (List.filter_map ~f:def tast))
+
+(* Combine the results of each individual function into a global
+   constraint. If the resulting constraint is satisfiable all the
+   flows in the program are safe *)
+let global_solving callable_results =
+  let results_map =
+    let add_result resm res = SMap.add res.res_proto.fp_name res resm in
+    List.fold ~init:SMap.empty ~f:add_result callable_results
+  in
+  let topsort_schedule =
+    let module Err = struct
+      exception Cycle
+
+      exception Missing of string
+    end in
+    let schedule = ref [] in
+    try
+      let rec dfs seen name =
+        if SSet.mem name seen then raise Err.Cycle;
+        match SMap.find_opt name results_map with
+        | None -> raise (Err.Missing name)
+        | Some res ->
+          SSet.iter (dfs (SSet.add name seen)) res.res_deps;
+          if not (List.exists ~f:(String.equal name) !schedule) then
+            schedule := name :: !schedule
+      in
+      SMap.iter (fun name _ -> dfs SSet.empty name) results_map;
+      List.rev !schedule
+    with
+    | Err.Cycle -> fail "global solving does not work yet for recursive code"
+    | Err.Missing name -> fail "missing results for '%s'" name
+  in
+  Format.printf "Global solving:@.  @[<v>";
+  let close_one closed_results_map res_name =
+    let result = SMap.find res_name results_map in
+    let rec subst depth = function
+      | Chole proto ->
+        let callee = SMap.find proto.fp_name closed_results_map in
+        assert (not (Scope.equal callee.res_scope result.res_scope));
+        let arg_pairs =
+          match List.zip proto.fp_args callee.res_proto.fp_args with
+          | None ->
+            fail "arity mismatch in call to '%s' in '%s'" proto.fp_name res_name
+          | Some l -> l
+        in
+        let pred (_, s) = Scope.equal s callee.res_scope in
+        arg_pairs
+        |> List.fold ~init:[callee.res_constraint] ~f:(fun prop (t1, t2) ->
+               subtype t1 t2 prop)
+        |> L.(proto.fp_pc < callee.res_proto.fp_pc)
+        |> (match (proto.fp_this, callee.res_proto.fp_this) with
+           | (Some t1, Some t2) -> subtype t1 t2
+           | (None, Some _) -> fail "mismatched method call"
+           | (Some _, None) -> fail "mismatched method call"
+           | (None, None) -> Utils.identity)
+        |> subtype callee.res_proto.fp_ret proto.fp_ret
+        |> Logic.conjoin
+        (* the assertion on scopes above ensures that we quantify
+           only the callee policy variables *)
+        |> Logic.quantify ~pred ~quant:Qexists ~depth
+      | c -> Mapper.prop Utils.identity subst depth c
+    in
+    let closed_constr = subst 0 result.res_constraint in
+    begin
+      (* simplify the resulting closed constraint and print it *)
+      Format.printf "Flows for %s:@,  @[<v>" res_name;
+      Format.printf "@[<hov>%a@]@," Pp.prop closed_constr;
+      let simpl_constr =
+        let pred _ = true in
+        Logic.simplify (Logic.quantify ~pred ~quant:Qexists closed_constr)
+      in
+      Format.printf "simplified: @[<hov>%a@]" Pp.prop simpl_constr;
+      Format.printf "@]@,"
+    end;
+    let closed_result = { result with res_constraint = closed_constr } in
+    SMap.add res_name closed_result closed_results_map
+  in
+  let _closed_results_map =
+    List.fold_left ~init:SMap.empty ~f:close_one topsort_schedule
+  in
+  Format.printf "@]@.";
+  ()
 
 let do_ files_info opts ctx =
   Relative_path.Map.iter files_info ~f:(fun path i ->
@@ -492,13 +635,14 @@ let do_ files_info opts ctx =
         let { Tast_provider.Compute_tast.tast; _ } =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
-        let psig_env = Decl.collect_class_policy_sigs tast in
-        Format.printf "%a" Pp.policy_sig_env psig_env;
+        let decl_env = Decl.collect_sigs tast in
+        Format.printf "%a@." Pp.decl_env decl_env;
 
         if String.equal opts "prtast" then
           Format.printf "TAST: %a@." Tast.pp_program tast;
 
-        walk_tast psig_env tast
+        let results = walk_tast decl_env tast in
+        global_solving results
       | _ -> ());
   ()
 
@@ -506,6 +650,10 @@ let magic_builtins =
   [|
     ( "ifc_magic.hhi",
       {|<?hh // strict
+class InferFlows
+  implements
+    HH\FunctionAttribute,
+    HH\MethodAttribute {}
 class Policied
   implements
     HH\InstancePropertyAttribute,

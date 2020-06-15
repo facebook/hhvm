@@ -23,9 +23,8 @@ let rec list pp_sep pp fmt = function
   | x :: xs -> fprintf fmt "%a%a%a" pp x pp_sep () (list pp_sep pp) xs
 
 let smap pp_sep pp fmt map =
-  let map_as_list = SMap.fold (fun k v acc -> (k, v) :: acc) map [] in
-  let prop_pol fmt (prop, pol) = fprintf fmt "%s -> %a" prop pp pol in
-  list pp_sep prop_pol fmt map_as_list
+  let prop_pol fmt (prop, pol) = fprintf fmt "%s=%a" prop pp pol in
+  list pp_sep prop_pol fmt (SMap.bindings map)
 
 let option pp fmt opt =
   match opt with
@@ -40,6 +39,35 @@ let show_policy = function
   | Pbound_var n -> Printf.sprintf "<bound%d>" n
 
 let policy fmt p = fprintf fmt "%s" (show_policy p)
+
+let rec ptype fmt ty =
+  let list sep l =
+    let pp_sep fmt () = fprintf fmt "%s@ " sep in
+    fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
+  in
+  match ty with
+  | Tprim p -> fprintf fmt "<%a>" policy p
+  | Ttuple tl -> list "," tl
+  | Tunion tl -> list " |" tl
+  | Tinter tl -> list " &" tl
+  | Tclass { c_name; c_self; c_lump; c_property_map } ->
+    fprintf fmt "%s<%a, %a" c_name policy c_self policy c_lump;
+    if SMap.is_empty c_property_map then
+      fprintf fmt ">"
+    else
+      fprintf fmt ", %a>" (smap comma_sep lazy_ptype) c_property_map
+
+and lazy_ptype fmt ty =
+  if Lazy.is_val ty then
+    ptype fmt (Lazy.force ty)
+  else
+    fprintf fmt "?thunk"
+
+let fun_proto fmt fp =
+  Option.iter ~f:(fprintf fmt "(this: %a)->" ptype) fp.fp_this;
+  fprintf fmt "%s<%a>" fp.fp_name policy fp.fp_pc;
+  fprintf fmt "(@[<hov>%a@])" (list comma_sep ptype) fp.fp_args;
+  fprintf fmt ":@ %a" ptype fp.fp_ret
 
 let prop =
   let rec conjuncts = function
@@ -91,39 +119,12 @@ let prop =
       let cct = conjuncts ct in
       let cce = conjuncts ce in
       fprintf fmt "then %a@ else %a@]" (aux b) cct (aux b) cce
+    | [`c (Chole fp)] -> fprintf fmt "@[<h>{%a}@]" fun_proto fp
     | l ->
       let pp = list comma_sep (fun fmt c -> aux b fmt [c]) in
       fprintf fmt "[@[<hov>%a@]]" pp l
   in
   (fun fmt c -> aux 0 fmt (conjuncts c))
-
-let rec ptype fmt ty =
-  let list sep l =
-    let pp_sep fmt () = fprintf fmt "%s@ " sep in
-    fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
-  in
-  match ty with
-  | Tprim p -> fprintf fmt "<%a>" policy p
-  | Ttuple tl -> list "," tl
-  | Tunion tl -> list " |" tl
-  | Tinter tl -> list " &" tl
-  | Tclass { c_name; c_self; c_lump; c_property_map } ->
-    fprintf
-      fmt
-      "%s<%a, %a, %a>"
-      c_name
-      policy
-      c_self
-      policy
-      c_lump
-      (smap comma_sep lazy_ptype)
-      c_property_map
-
-and lazy_ptype fmt ty =
-  if Lazy.is_val ty then
-    ptype fmt (Lazy.force ty)
-  else
-    fprintf fmt "<thunk>"
 
 let locals fmt env =
   let pp_lenv fmt { le_vars } = LMap.make_pp Local_id.pp ptype fmt le_vars in
@@ -134,36 +135,46 @@ let locals fmt env =
   pp_lenv_opt fmt (Env.get_lenv_opt env Typing_cont_key.Next)
 
 let renv fmt renv =
-  fprintf fmt "@[<v>";
+  pp_open_vbox fmt 0;
   fprintf fmt "* @[<hov2>pc: @[<hov>%a@]@]" policy (List.last_exn renv.re_gpc);
   fprintf fmt "@,* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
   fprintf fmt "@,* @[<hov2>Return:@ @[<hov>%a@]@]" ptype renv.re_ret;
-  fprintf fmt "@]"
+  pp_close_box fmt ()
 
 let env fmt env =
-  fprintf fmt "@[<v>";
-  fprintf fmt "@[<hov2>Locals:@ %a@]" locals env;
-  let p = Logic.prop_conjoin (List.rev env.e_acc) in
+  pp_open_vbox fmt 0;
+  fprintf fmt "@[<hov2>Deps:@ %a@]" SSet.pp env.e_deps;
+  fprintf fmt "@,@[<hov2>Locals:@ %a@]" locals env;
+  let p = Logic.conjoin env.e_acc in
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
-  fprintf fmt "@]"
+  pp_close_box fmt ()
 
-let policy_sig fmt { psig_policied_properties } =
+let class_decl fmt { cd_policied_properties = props } =
   let policied_property fmt { pp_name; pp_purpose; _ } =
     match pp_purpose with
-    | Some purpose -> fprintf fmt "%s: %s" pp_name purpose
+    | Some purpose -> fprintf fmt "%s:%s" pp_name purpose
     | None -> fprintf fmt "%s" pp_name
   in
   let properties fmt = list comma_sep policied_property fmt in
-  fprintf fmt "@[<v>";
-  fprintf
-    fmt
-    "* @[<hov2>Policied properties:@ @[<hov>%a@]@]"
-    properties
-    psig_policied_properties;
-  fprintf fmt "@]"
+  fprintf fmt "{ policied_props = [@[<hov>%a@]] }" properties props
 
-let policy_sig_env fmt map =
-  let handle_class class_name psig =
-    fprintf fmt "Policy signature for %s:@,%a@.@." class_name policy_sig psig
+let fun_decl fmt decl =
+  let kind =
+    match decl.fd_kind with
+    | FDPublic -> "public"
+    | FDCIPP -> "cipp"
+    | FDInferFlows -> "infer"
   in
-  SMap.iter handle_class map
+  fprintf fmt "{ kind = %s }" kind
+
+let decl_env fmt de =
+  let handle_class name decl =
+    fprintf fmt "class %s: %a@ " name class_decl decl
+  in
+  let handle_fun name decl =
+    fprintf fmt "function %s: %a@ " name fun_decl decl
+  in
+  fprintf fmt "Decls:@.  @[<v>";
+  SMap.iter handle_class de.de_class;
+  SMap.iter handle_fun de.de_fun;
+  fprintf fmt "@]"

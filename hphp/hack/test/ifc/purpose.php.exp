@@ -1,67 +1,98 @@
-Policy signature for \C:
-* Policied properties: ci: Secret, d: Secret
-
-Policy signature for \D:
-* Policied properties: 
-
+Decls:
+  class \C: { policied_props = [ci:Secret, d:Secret] }
+  class \D: { policied_props = [] }
+  function \C#__construct: { kind = public }
+  function \C#getDeep: { kind = public }
+  function \C#getShallow1: { kind = public }
+  function \C#getShallow2: { kind = public }
+  function \C#writeDeep: { kind = public }
+  function \D#__construct: { kind = public }
+  
 Analyzing __construct:
 * pc: pc
-* This: \D<\D, lump, >
+* This: \D<\D, lump>
 * Return: <ret>
 * Params: { $di -> <$di> }
 * Final environment:
+  Deps: {}
   Locals: { $di -> <$di> }
   Constraints:
     [\D < lump, $di < lump, pc < lump]
 
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <Secret>>
+* This: \C<\C, lump, ci=<Secret>, d=\D<Secret, Secret>>
 * Return: <ret>
-* Params: { $ci -> <$ci>; $d -> \D<\D, lump'1, > }
+* Params: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
 * Final environment:
-  Locals: { $ci -> <$ci>; $d -> \D<\D, lump'1, > }
+  Deps: {}
+  Locals: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
   Constraints:
     [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
      \D < Secret, pc < Secret]
 
 Analyzing getShallow1:
 * pc: pc
-* This: \C<\C, lump, d -> <thunk>, ci -> <Secret>>
+* This: \C<\C, lump, ci=<Secret>, d=?thunk>
 * Return: <ret>
 * Params: {}
 * Final environment:
+  Deps: {}
   Locals: {}
   Constraints:
     [Secret < .ci, \C < .ci, .ci < ret]
 
 Analyzing getShallow2:
 * pc: pc
-* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
-* Return: \D<\D, lump'1, >
+* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
+* Return: \D<\D, lump'1>
 * Params: {}
 * Final environment:
+  Deps: {}
   Locals: {}
   Constraints:
     [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
 
 Analyzing getDeep:
 * pc: pc
-* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
+* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
 * Return: <ret>
 * Params: {}
 * Final environment:
+  Deps: {}
   Locals: {}
   Constraints:
     [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
 
 Analyzing writeDeep:
 * pc: pc
-* This: \C<\C, lump, d -> \D<Secret, Secret, >, ci -> <thunk>>
+* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
 * Return: <ret>
 * Params: {}
 * Final environment:
+  Deps: {}
   Locals: {}
   Constraints:
     [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
 
+Global solving:
+  Flows for \C#__construct:
+    [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
+     \D < Secret, pc < Secret]
+    simplified: True
+  Flows for \C#getDeep:
+    [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
+    simplified: True
+  Flows for \C#getShallow1:
+    [Secret < .ci, \C < .ci, .ci < ret]
+    simplified: True
+  Flows for \C#getShallow2:
+    [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
+    simplified: True
+  Flows for \C#writeDeep:
+    [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
+    simplified: Bot < Secret
+  Flows for \D#__construct:
+    [\D < lump, $di < lump, pc < lump]
+    simplified: True
+  

@@ -1,0 +1,56 @@
+Decls:
+  class \R: { policied_props = [] }
+  function \R#__construct: { kind = public }
+  function \R#recursiveGet: { kind = public }
+  function \R#recursiveWrite: { kind = public }
+  
+Analyzing __construct:
+* pc: pc
+* This: \R<\R, lump>
+* Return: <ret>
+* Params: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
+  Constraints:
+    [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump,
+     \R'1 < lump, pc < lump]
+
+Analyzing recursiveGet:
+* pc: pc
+* This: \R<\R, lump>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: {}
+  Constraints:
+    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+     lump < .prop, .r'2 < .prop, .prop < ret]
+
+Analyzing recursiveWrite:
+* pc: pc
+* This: \R<\R, lump>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: {}
+  Constraints:
+    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+     .r'2 < lump, Bot < lump, pc < lump]
+
+Global solving:
+  Flows for \R#__construct:
+    [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump,
+     \R'1 < lump, pc < lump]
+    simplified: True
+  Flows for \R#recursiveGet:
+    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+     lump < .prop, .r'2 < .prop, .prop < ret]
+    simplified: True
+  Flows for \R#recursiveWrite:
+    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+     .r'2 < lump, Bot < lump, pc < lump]
+    simplified: True
+  

@@ -28,10 +28,10 @@ let new_policy_var { pre_scope; pre_pvar_counters; _ } prefix =
   in
   Pfree_var (prefix ^ suffix, pre_scope)
 
-let new_proto_renv saved_tenv scope psig_env =
+let new_proto_renv saved_tenv scope decl_env =
   {
     pre_scope = scope;
-    pre_psig_env = psig_env;
+    pre_decl = decl_env;
     pre_pvar_counters = Hashtbl.create 10;
     pre_tenv = saved_tenv;
   }
@@ -47,9 +47,12 @@ let new_renv proto_renv global_pc this_ty ret_ty =
 
 let empty_lenv = { le_vars = LMap.empty }
 
-let new_env = { e_cont = KMap.singleton K.Next empty_lenv; e_acc = [] }
+let new_env =
+  { e_cont = KMap.singleton K.Next empty_lenv; e_acc = []; e_deps = SSet.empty }
 
 let acc env update = { env with e_acc = update env.e_acc }
+
+let add_dep env name = { env with e_deps = SSet.add name env.e_deps }
 
 let get_cenv env = env.e_cont
 

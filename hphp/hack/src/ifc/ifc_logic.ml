@@ -10,6 +10,7 @@ open Hh_prelude
 open Ifc_utils
 open Ifc_types
 module IMap = Int.Map
+module Mapper = Ifc_mapper
 
 (* A note on the lattice. Policies form a lattice with the
    partial order <. This relation reads 'flows to'. Bottom,
@@ -68,17 +69,9 @@ let policy_join p1 p2 =
       Some Ptop
   | _ -> None
 
-let prop_conjoin = function
+let conjoin = function
   | [] -> Ctrue
-  | f :: l -> List.fold_left ~f:(fun c f -> Cconj (c, f)) ~init:f l
-
-(* Shallow map on flow constraints *)
-let map fp f = function
-  | Ctrue -> Ctrue
-  | Cquant (q, n, c) -> Cquant (q, n, f c)
-  | Ccond ((p, x), ct, ce) -> Ccond ((fp p, x), f ct, f ce)
-  | Cconj (cl, cr) -> Cconj (f cl, f cr)
-  | Cflow (p1, p2) -> Cflow (fp p1, fp p2)
+  | f :: l -> List.fold_left ~f:(fun c f -> Cconj (f, c)) ~init:f l
 
 (* Shift bound variables by 'delta' in a policy *)
 let shift ?(delta = -1) = function
@@ -89,9 +82,12 @@ let shift ?(delta = -1) = function
   | c -> c
 
 (* Quantify variables matching a predicate in
-   a constraint *)
-let quantify ~pred ~quant:q c =
+   a constraint; when the quantification happens
+   under D binders, ~depth:D should be passed *)
+let quantify ~pred ~quant:q ?(depth = 0) c =
   let n = ref 0 in
+  (* idx maps a free variable name to a bound
+     variable index *)
   let idx =
     let m = ref SMap.empty in
     fun v ->
@@ -103,19 +99,21 @@ let quantify ~pred ~quant:q c =
         m := SMap.add v i !m;
         i
   in
-  let quantpol b = function
-    | Pfree_var (v, s) when pred (v, s) -> Pbound_var (b + idx v)
+  (* quantifies all free variables matching the predicate
+     "pred" inside a policy under d binders *)
+  let quantpol d = function
+    | Pfree_var (v, s) when pred (v, s) -> Pbound_var (d + idx v)
     | c -> c
   in
-  let rec quant b = function
-    | Cquant (q, n, c) -> Cquant (q, n, quant (n + b) c)
-    | c -> map (quantpol b) (quant b) c
-  in
-  let c' = quant 0 c in
+  (* lifts quantpol to work on constraints *)
+  let rec quant d = Mapper.prop (quantpol d) quant d in
+  let quant_c = quant depth c in
   if !n = 0 then
+    (* no free variable matched the predicate,
+       simply return the original constraint *)
     c
   else
-    Cquant (q, !n, c')
+    Cquant (q, !n, quant_c)
 
 (* A intermediate form for constraints where conditionals
    are pushed as far outside as possible and no quantifiers
@@ -213,10 +211,11 @@ let simplify c =
     | Cflow (p1, p2) -> FLW [(p1, p2)]
     | Cconj (cl, cr) -> cat (qelim cl) (qelim cr)
     | Ctrue -> FLW []
+    | Chole _ -> invalid_arg "cannot simplify constraint with hole"
   in
   let rec import = function
     (* Convert an if_tree constraint into a regular constraint *)
-    | FLW l -> prop_conjoin (List.map ~f:(fun f -> Cflow f) l)
+    | FLW l -> conjoin (List.map ~f:(fun f -> Cflow f) l)
     | ITE (c, t1, t2) -> Ccond (c, import t1, import t2)
   in
   import (qelim c)

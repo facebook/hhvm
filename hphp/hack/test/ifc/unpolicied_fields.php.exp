@@ -1,58 +1,85 @@
-Policy signature for \C:
-* Policied properties: cx
-
-Policy signature for \D:
-* Policied properties: 
-
+Decls:
+  class \C: { policied_props = [cx] }
+  class \D: { policied_props = [] }
+  function \C#__construct: { kind = public }
+  function \C#testGetUnpolicied: { kind = public }
+  function \C#testSetDeep: { kind = public }
+  function \C#testSetMultipleUnpolicied: { kind = public }
+  function \D#__construct: { kind = public }
+  
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump, cx -> <.cx>>
+* This: \C<\C, lump, cx=<.cx>>
 * Return: <ret>
-* Params: { $cd -> \D<\D, lump'1, >; $cx -> <$cx>; $cy -> <$cy> }
+* Params: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
 * Final environment:
-  Locals: { $cd -> \D<\D, lump'1, >; $cx -> <$cx>; $cy -> <$cy> }
+  Deps: {}
+  Locals: { $cd -> \D<\D, lump'1>; $cx -> <$cx>; $cy -> <$cy> }
   Constraints:
     [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
      \C < lump, lump'1 = lump, \D < lump, pc < lump]
 
 Analyzing testGetUnpolicied:
 * pc: pc
-* This: \C<\C, lump, cx -> <thunk>>
-* Return: \D<\D, lump'1, >
+* This: \C<\C, lump, cx=?thunk>
+* Return: \D<\D, lump'1>
 * Params: {}
 * Final environment:
+  Deps: {}
   Locals: {}
   Constraints:
     [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
 
 Analyzing testSetMultipleUnpolicied:
 * pc: pc
-* This: \C<\C, lump, cx -> <thunk>>
+* This: \C<\C, lump, cx=?thunk>
 * Return: <ret>
-* Params: { $d -> \D<\D, lump'1, > }
+* Params: { $d -> \D<\D, lump'1> }
 * Final environment:
-  Locals: { $d -> \D<\D, lump'1, > }
+  Deps: {}
+  Locals: { $d -> \D<\D, lump'1> }
   Constraints:
     [\C < lump, Bot < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
      pc < lump]
 
 Analyzing testSetDeep:
 * pc: pc
-* This: \C<\C, lump, cx -> <thunk>>
+* This: \C<\C, lump, cx=?thunk>
 * Return: <ret>
 * Params: { $i -> <$i> }
 * Final environment:
+  Deps: {}
   Locals: { $i -> <$i> }
   Constraints:
     [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
 
 Analyzing __construct:
 * pc: pc
-* This: \D<\D, lump, >
+* This: \D<\D, lump>
 * Return: <ret>
 * Params: { $di -> <$di> }
 * Final environment:
+  Deps: {}
   Locals: { $di -> <$di> }
   Constraints:
     [\D < lump, $di < lump, pc < lump]
 
+Global solving:
+  Flows for \C#__construct:
+    [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
+     \C < lump, lump'1 = lump, \D < lump, pc < lump]
+    simplified: True
+  Flows for \C#testGetUnpolicied:
+    [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
+    simplified: True
+  Flows for \C#testSetDeep:
+    [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
+    simplified: True
+  Flows for \C#testSetMultipleUnpolicied:
+    [\C < lump, Bot < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
+     pc < lump]
+    simplified: True
+  Flows for \D#__construct:
+    [\D < lump, $di < lump, pc < lump]
+    simplified: True
+  

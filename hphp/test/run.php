@@ -668,7 +668,7 @@ function find_tests($files, darray $options = null) {
     $files = varray['quick'];
   }
   if ($files == varray['all']) {
-    $files = varray['quick', 'slow', 'zend', 'fastcgi'];
+    $files = varray['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
     if (is_dir(hphp_home() . '/hphp/facebook/test')) {
       $files[] = 'facebook';
     }

@@ -149,6 +149,7 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     ' -vServer.ExitOnBindFail=true' .
     ' --instance-id=' . $test_run_id .
     ' -vPageletServer.ThreadCount=5' .
+    ' -vPidFile=' . escapeshellarg(__SystemLib\hphp_test_tmppath('www.pid')) .
     $portConfig . $srcRootConfig .
     $includePathConfig . $sandboxHomeConfig . $adminPortConfig .
     $debugPortConfig . $repoConfig . $jitConfig . ' ' . $customArgs .

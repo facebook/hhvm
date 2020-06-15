@@ -1677,7 +1677,7 @@ class Status {
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'passed', $stime, $etime);
+            Status::sayTestpilot($test, 'passed', $stime, $etime, $time);
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1708,7 +1708,7 @@ class Status {
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'not_relevant', $stime, $etime);
+            Status::sayTestpilot($test, 'not_relevant', $stime, $etime, $time);
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1735,7 +1735,7 @@ class Status {
             break;
 
           case Status::MODE_TESTPILOT:
-            Status::sayTestpilot($test, 'failed', $stime, $etime);
+            Status::sayTestpilot($test, 'failed', $stime, $etime, $time);
             break;
 
           case Status::MODE_RECORD_FAILURES:
@@ -1786,10 +1786,10 @@ class Status {
     }
   }
 
-  public static function sayTestpilot($test, $status, $stime, $etime) {
+  public static function sayTestpilot($test, $status, $stime, $etime, $time) {
     $start = darray['op' => 'start', 'test' => $test];
     $end = darray['op' => 'test_done', 'test' => $test, 'status' => $status,
-                 'start_time' => $stime, 'end_time' => $etime];
+                 'start_time' => $stime, 'end_time' => $etime, 'time' => $time];
     if ($status == 'failed') {
       $end['details'] = self::utf8Sanitize(Status::diffForTest($test));
     }

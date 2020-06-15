@@ -1365,7 +1365,8 @@ and simplify_subtype_i
        *   1. A is no more optional than B
        *   2. A's type <: B.type
        *)
-      let simplify_subtype_shape_field r_sub name res sft_sub sft_super =
+      let simplify_subtype_shape_field
+          r_sub name res (sft_sub, explicit_sub) (sft_super, _) =
         match (sft_sub.sft_optional, sft_super.sft_optional) with
         | (_, true)
         | (false, false) ->
@@ -1381,15 +1382,14 @@ and simplify_subtype_i
                  let printable_name =
                    TUtils.get_printable_shape_field_name name
                  in
-                 match get_reason sft_sub.sft_ty with
-                 | Reason.Rmissing_required_field _ ->
-                   Errors.missing_field
+                 if explicit_sub then
+                   Errors.required_field_is_optional
                      (Reason.to_pos r_sub)
                      (Reason.to_pos r_super)
                      printable_name
                      subtype_env.on_error
-                 | _ ->
-                   Errors.required_field_is_optional
+                 else
+                   Errors.missing_field
                      (Reason.to_pos r_sub)
                      (Reason.to_pos r_super)
                      printable_name
@@ -1397,7 +1397,7 @@ and simplify_subtype_i
       in
       let lookup_shape_field_type name r shape_kind fdm =
         match ShapeMap.find_opt name fdm with
-        | Some sft -> sft
+        | Some sft -> (sft, true)
         | None ->
           let printable_name = TUtils.get_printable_shape_field_name name in
           let sft_ty =
@@ -1409,7 +1409,7 @@ and simplify_subtype_i
               MakeType.mixed
                 (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
           in
-          { sft_ty; sft_optional = true }
+          ({ sft_ty; sft_optional = true }, false)
       in
       (match ety_sub with
       | ConstraintType _ -> default_subtype env

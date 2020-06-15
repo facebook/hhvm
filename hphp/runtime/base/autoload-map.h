@@ -141,6 +141,12 @@ struct FactsStore : public AutoloadMap {
   virtual ~FactsStore() = default;
 
   /**
+   * Return the kind of the given type (such as "class" or "enum"),
+   * or `null` if the given type does not have a single kind.
+   */
+  virtual Variant getKind(const String& type) = 0;
+
+  /**
    * Return all types in the repo which the given type extends.
    */
   virtual Array getBaseTypes(const String& derivedType) = 0;

@@ -21,7 +21,6 @@ abstract final class ZendGoodExtStandardTestsFileReadfileVariation6 {
 }
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
-ZendGoodExtStandardTestsFileFopenIncludePathInc::base();
 
 echo "*** Testing readfile() : variation ***\n";
 // this doesn't create the include dirs in this directory

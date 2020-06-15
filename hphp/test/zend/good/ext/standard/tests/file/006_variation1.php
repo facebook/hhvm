@@ -10,10 +10,10 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fileperms() & chmod() : usage variations ***\n";
 
-$file_name = dirname(__FILE__)."/006_variation1.tmp";
+$file_name = __SystemLib\hphp_test_tmppath('006_variation1.tmp');
 $file_handle = fopen($file_name, "w");
 fclose($file_handle);
-$dir_name = dirname(__FILE__)."/006_variation1";
+$dir_name = __SystemLib\hphp_test_tmppath('006_variation1');
 mkdir($dir_name);
 
 $count = 1;
@@ -33,9 +33,9 @@ for($mode = 0000; $mode <= 0777; $mode++) {
 }
 
 echo "*** Done ***\n";
-error_reporting(0);
-chmod(dirname(__FILE__)."/006_variation1.tmp", 0777);
-chmod(dirname(__FILE__)."/006_variation1", 0777);
-unlink(dirname(__FILE__)."/006_variation1.tmp");
-rmdir(dirname(__FILE__)."/006_variation1");
+
+chmod($file_name, 0777);
+chmod($dir_name, 0777);
+unlink($file_name);
+rmdir($dir_name);
 }

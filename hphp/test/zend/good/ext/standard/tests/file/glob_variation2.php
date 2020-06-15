@@ -3,7 +3,8 @@
    Description: Find pathnames matching a pattern
 */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
+$file_path = __SystemLib\hphp_test_tmppath('glob_variation2');
+mkdir($file_path);
 
 // temp dirname used here
 $dir_name = 'glob_test';
@@ -26,8 +27,8 @@ var_dump( glob("$dir_name/*"));
 var_dump( glob("$dir_name"));
 
 echo "Done\n";
-error_reporting(0);
-$file_path = dirname(__FILE__);
+
 unlink("$file_path/glob_test/file.text");
 rmdir("$file_path/glob_test/");
+rmdir($file_path);
 }

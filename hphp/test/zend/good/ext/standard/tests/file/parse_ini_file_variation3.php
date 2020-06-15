@@ -6,14 +6,10 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing parse_ini_file() : variation ***\n";
-$pwd = getcwd();
-$f = "parse_ini_file_variation3";
-$dir1 = $pwd."/".$f.".dir1";
-$dir2 = $pwd."/".$f.".dir2";
-$dir3 = $pwd."/".$f.".dir3";
-$iniFile = "php.ini";
+chdir(__SystemLib\hphp_test_tmproot());
 
-$newdirs = varray[$dir1, $dir2, $dir3];
+$iniFile = "php.ini";
+$newdirs = varray['dir1', 'dir2', 'dir3'];
 $pathSep = ":";
 $newIncludePath = "";
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
@@ -28,7 +24,7 @@ set_include_path($newIncludePath);
 $path = get_include_path();
 echo "New include path is : " . $path . "\n";
 
-$output_file = $dir2."/".$iniFile;
+$output_file = "dir2/".$iniFile;
 $iniContent = <<<FILE
 error_reporting  =  E_ALL
 display_errors = On
@@ -48,18 +44,7 @@ file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
 echo "===Done===\n";
-error_reporting(0);
-$pwd = getcwd();
-$f = "parse_ini_file_variation3";
-$iniFile = "php.ini";
 
-$dir1 = $pwd."/".$f.".dir1";
-$dir2 = $pwd."/".$f.".dir2";
-$dir3 = $pwd."/".$f.".dir3";
-$newdirs = varray[$dir1, $dir2, $dir3];
-$output_file = $dir2."/".$iniFile;
-
-// Tidy up after test
 unlink($output_file);
 foreach($newdirs as $newdir) {
    rmdir($newdir);

@@ -6,9 +6,9 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing readfile() : variation ***\n";
-$mainDir = "readfileVar8";
-$subDir = "readfileVar8Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$mainDir = 'readfile_variation9';
+$subDir = 'readfile_variation9_sub';
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
@@ -22,8 +22,8 @@ fwrite($h, "The File Contents");
 fclose($h);
 
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+
+chdir(__SystemLib\hphp_test_tmproot());
 
 $allDirs = varray[
   // absolute paths
@@ -54,7 +54,6 @@ for($i = 0; $i<count($allDirs); $i++) {
 }
 
 unlink($absFile);
-chdir($old_dir_path);
 rmdir($absSubDir);
 rmdir($absMainDir);
 

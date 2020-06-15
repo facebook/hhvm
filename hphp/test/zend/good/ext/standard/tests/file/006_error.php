@@ -27,19 +27,19 @@ var_dump( fileperms("/no/such/file/dir") );
 echo "\n";
 
 /* With args less than expected */
-$fp = fopen(dirname(__FILE__)."/006_error.tmp", "w");
-fclose($fp);
-try { var_dump( chmod(dirname(__FILE__)."/006_error.tmp") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+$file_path = __SystemLib\hphp_test_tmppath('006_error.tmp');
+fclose(fopen($file_path, "w"));
+try { var_dump( chmod($file_path) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( chmod("nofile") ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( chmod() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( fileperms() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 /* With args greater than expected */
-try { var_dump( chmod(dirname(__FILE__)."/006_error.tmp", 0755, TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-try { var_dump( fileperms(dirname(__FILE__)."/006_error.tmp", 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( chmod($file_path, 0755, TRUE) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
+try { var_dump( fileperms($file_path, 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 try { var_dump( fileperms("nofile", 0777) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 
 echo "\n*** Done ***\n";
-error_reporting(0);
-unlink( dirname(__FILE__)."/006_error.tmp");
+
+unlink($file_path);
 }

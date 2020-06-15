@@ -1,9 +1,9 @@
 <?hh
 <<__EntryPoint>>
 function main_entry(): void {
-  $dirname = dirname(__FILE__) . '/';
-  $file = $dirname . 'test_with_comment.zip';
-  include $dirname . 'utils.inc';
+  include dirname(__FILE__) . '/utils.inc';
+  $file = dirname(__FILE__) . '/test_with_comment.zip';
+  $dirname = __SystemLib\hphp_test_tmproot() . '/';
   $zip = new ZipArchive;
   if ($zip->open($file) !== TRUE) {
   	echo "open failed.\n";

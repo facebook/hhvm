@@ -265,7 +265,7 @@ array(0) {
 }
 array(1) {
   [0]=>
-  string(%d) "$file_path/glob_variation/wonder5"
+  string(%d) "$dirname/wonder5"
 }
 array(0) {
 }

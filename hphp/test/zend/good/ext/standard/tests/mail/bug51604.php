@@ -5,8 +5,7 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = "KHeaders\n\n\n\n\n";
-$outFile = "mail_bug51604.out";
-@unlink($outFile);
+$outFile = __SystemLib\hphp_test_tmppath('mail_bug51604.out');
 
 // Calling mail() with all additional headers
 var_dump( mail($to, $subject, $message, $additional_headers) );

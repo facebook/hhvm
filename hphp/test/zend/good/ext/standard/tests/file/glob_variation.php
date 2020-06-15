@@ -5,30 +5,30 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing glob() : usage variations ***\n";
 
-$file_path = dirname(__FILE__);
+$dirname = __SystemLib\hphp_test_tmppath('glob_variation');
 
 // temp dir created
-mkdir("$file_path/glob_variation");
-mkdir("$file_path/glob_variation/wonder");
+mkdir($dirname);
+mkdir("$dirname/wonder");
 
 // temp files created
-$fp = fopen("$file_path/glob_variation/wonder12345", "w");
+$fp = fopen("$dirname/wonder12345", "w");
 fclose($fp);
-$fp = fopen("$file_path/glob_variation/wonder;123456", "w");
+$fp = fopen("$dirname/wonder;123456", "w");
 fclose($fp);
 
 $patterns = varray [
-  "$file_path/glob_variation/*der*",
-  "$file_path/glob_variation/?onder*",
-  "$file_path/glob_variation/w*der?*",
-  "$file_path/glob_variation/*der5",
-  "$file_path/glob_variation/??onder*",
-  "$file_path/glob_variation/***der***",
-  "$file_path/glob_variation/++onder*",
-  "$file_path/glob_variation/WONDER5\0",
-  '$file_path/glob_variation/wonder5',
-  "$file_path/glob_variation/?wonder?",
-  "$file_path/glob_variation/wonder?",
+  "$dirname/*der*",
+  "$dirname/?onder*",
+  "$dirname/w*der?*",
+  "$dirname/*der5",
+  "$dirname/??onder*",
+  "$dirname/***der***",
+  "$dirname/++onder*",
+  "$dirname/WONDER5\0",
+  '$dirname/wonder5',
+  "$dirname/?wonder?",
+  "$dirname/wonder?",
   '1'  // boolean true
 ];
 $counter = 1;
@@ -46,17 +46,17 @@ foreach($patterns as $pattern) {
 }
 
 echo "\n*** Testing glob() with pattern within braces ***\n";
-var_dump( glob("$file_path/glob_variation/*{5}", GLOB_BRACE) );
+var_dump( glob("$dirname/*{5}", GLOB_BRACE) );
 
 // delete temp files and dir
-unlink("$file_path/glob_variation/wonder12345");
-unlink("$file_path/glob_variation/wonder;123456");
-rmdir("$file_path/glob_variation/wonder");
-rmdir("$file_path/glob_variation");
+unlink("$dirname/wonder12345");
+unlink("$dirname/wonder;123456");
+rmdir("$dirname/wonder");
+rmdir($dirname);
 
 echo "\n*** Testing glob() on directories ***\n";
 // temp dir created to check for pattern matching the sub dir created in it
-mkdir("$file_path/glob_variation/wonder1/wonder2", 0777, true);
+mkdir("$dirname/wonder1/wonder2", 0777, true);
 
 $counter = 1;
 /* loop through $patterns to match each $pattern with the directories created
@@ -68,9 +68,8 @@ foreach($patterns as $pattern) {
 }
 
 echo "Done\n";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-rmdir("$file_path/glob_variation/wonder1/wonder2");
-rmdir("$file_path/glob_variation/wonder1/");
-rmdir("$file_path/glob_variation/");
+
+rmdir("$dirname/wonder1/wonder2");
+rmdir("$dirname/wonder1");
+rmdir($dirname);
 }

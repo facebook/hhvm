@@ -1,7 +1,8 @@
-<?hh <<__EntryPoint>> function main(): void {
-chdir(dirname(__FILE__));
-@unlink('test.file');
-@unlink('test.link');
+<?hh
+<<__EntryPoint>> function main(): void {
+$scratch = __SystemLib\hphp_test_tmppath('file');
+mkdir($scratch);
+chdir($scratch);
 if (file_exists('test.file')) {
     echo "test.file exists\n";
 } else {
@@ -107,4 +108,5 @@ if (file_exists('test.file')) {
 } else {
     echo "test.file does not exist\n";
 }
+rmdir($scratch);
 }

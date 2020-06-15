@@ -7,13 +7,13 @@ echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 
 $context = stream_context_create();
 
-$file_path = dirname(__FILE__);
+$tmpdir = __SystemLib\hphp_test_tmproot();
 $counter = 1;
 
 for($mode = 0000; $mode <= 0777; $mode++) {
   echo "-- Changing mode of directory to $mode --\n";
-  var_dump( mkdir("$file_path/mkdir_variation1/", $mode, true) );
-  var_dump( rmdir("$file_path/mkdir_variation1/") );
+  var_dump( mkdir("$tmpdir/mkdir_variation1/", $mode, true) );
+  var_dump( rmdir("$tmpdir/mkdir_variation1/") );
   $counter++;
 }
 

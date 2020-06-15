@@ -4,21 +4,21 @@
 
 -- No filename --
 
-Warning: Filename cannot be empty in %s/sha1_file.php on line 35
+Warning: Filename cannot be empty in %s/sha1_file.php on line 21
 bool(false)
 
 -- invalid filename --
 
-Warning: No such file or directory in %s/sha1_file.php on line 38
+Warning: No such file or directory in %s/sha1_file.php on line 24
 bool(false)
 
 -- Zero arguments --
 
-Warning: sha1_file() expects at least 1 parameter, 0 given in %s/sha1_file.php on line 41
+Warning: sha1_file() expects at least 1 parameter, 0 given in %s/sha1_file.php on line 27
 
 -- More than valid number of arguments ( valid is 2) --
 
-Warning: sha1_file() expects at most 2 parameters, 3 given in %s/sha1_file.php on line 44
+Warning: sha1_file() expects at most 2 parameters, 3 given in %s/sha1_file.php on line 30
 
 -- Hexadecimal Output for Empty file as Argument --
 string(40) "da39a3ee5e6b4b0d3255bfef95601890afd80709"

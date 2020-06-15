@@ -9,8 +9,8 @@ $no_arg_filters = varray[
     "IMG_FILTER_MEAN_REMOVAL"
 ];
 
-$SAVE_DIR = dirname(__FILE__);
-$SOURCE_IMG = $SAVE_DIR . "/test.png";
+$SAVE_DIR = __SystemLib\hphp_test_tmproot();
+$SOURCE_IMG = __DIR__ . "/test.png";
 
     foreach ($no_arg_filters as $filt) {
         $im = imagecreatefrompng($SOURCE_IMG);

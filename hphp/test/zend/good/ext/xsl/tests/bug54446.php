@@ -5,7 +5,7 @@
 function entrypoint_bug54446(): void {
   include("prepare.inc");
 
-  $outputfile = dirname(__FILE__)."/bug54446test.txt";
+  $outputfile = __SystemLib\hphp_test_tmppath('bug54446test.txt');
   if (file_exists($outputfile)) {
       unlink($outputfile);
   }

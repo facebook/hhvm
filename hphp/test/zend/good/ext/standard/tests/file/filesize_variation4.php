@@ -7,12 +7,11 @@
 
 /* Testing filesize() with data written using different file modes and by creating holes in file */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 
 echo "\n*** Testing filesize() with data written using different file modes and by creating holes in file ***\n";
 
-$filename = $file_path."/filesize_variation4.tmp";
+$filename = __SystemLib\hphp_test_tmppath('filesize_variation4.tmp');
 $string = "Test 2 test the filesize() fn, with data containing all the types like !@@##$%^&*():<>?|~+!;',.\][{}(special) cha
 rs, 12345(numeric) chars, and \n(newline char), \t(tab), \0, \r and so on........\0";
 echo "-- opening the file in 'w' mode and get the size --\n";
@@ -65,13 +64,12 @@ var_dump( filesize($filename) );  //0 bytes
 clearstatcache();
 
 echo "-- with empty file --\n";
-$filename = dirname(__FILE__)."/filesize_variation4_empty.tmp";
-fclose( fopen($filename, "w") );
-var_dump( filesize($filename) );  //0 bytes
+$empty_filename = __SystemLib\hphp_test_tmppath('filesize_variation4_empty.tmp');
+fclose( fopen($empty_filename, "w") );
+var_dump( filesize($empty_filename) );  //0 bytes
 
 echo "*** Done ***\n";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-unlink($file_path."/filesize_variation4.tmp");
-unlink($file_path."/filesize_variation4_empty.tmp");
+
+unlink($empty_filename);
+unlink($filename);
 }

@@ -89,27 +89,19 @@ abstract final class ZendGoodExtStandardTestsFileFopenIncludePathInc {
 	}
 
 	public static function dir1() {
-		return self::base().".dir1";
+		return __SystemLib\hphp_test_tmppath('dir1');
 	}
 
 	public static function dir2() {
-		return self::base().".dir2";
+		return __SystemLib\hphp_test_tmppath('dir2');
 	}
 
 	public static function dir3() {
-		return self::base().".dir3";
+		return __SystemLib\hphp_test_tmppath('dir3');
 	}
 
 	//invalid directory
-  public static function dir4() {
-		return self::base().".dir4";
-	}
-
-	<<__Memoize>>
-	public static function base(): string {
-		$pwd = getcwd();
-		$included_files = get_included_files();
-		$f = basename(current($included_files), ".php");
-		return $pwd."/".$f;
+    public static function dir4() {
+		return __SystemLib\hphp_test_tmppath('dir4');
 	}
 }

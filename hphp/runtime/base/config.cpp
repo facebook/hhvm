@@ -26,6 +26,7 @@
 
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/array-iterator.h"
+#include "hphp/runtime/base/preg.h"
 #include "hphp/util/logger.h"
 
 namespace HPHP {
@@ -379,6 +380,24 @@ void Config::Iterate(std::function<void (const IniSettingMap&,
       }
     }
   }
+}
+
+bool Config::matchHdfPattern(const std::string &value,
+                             const IniSettingMap& ini, Hdf hdfPattern,
+                             const std::string& name,
+                             const std::string& suffix) {
+  std::string pattern = Config::GetString(ini, hdfPattern, name, "", false);
+  if (!pattern.empty()) {
+    if (!suffix.empty()) pattern += suffix;
+    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                    CopyString),
+                             String(value.c_str(), value.size(),
+                                    CopyString));
+    if (ret.toInt64() <= 0) {
+      return false;
+    }
+  }
+  return true;
 }
 
 }

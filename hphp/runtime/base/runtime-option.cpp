@@ -30,7 +30,6 @@
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/tv-refcount.h"
@@ -1228,24 +1227,6 @@ static void normalizePath(std::string &path) {
   }
 }
 
-static bool matchHdfPattern(const std::string &value,
-                            const IniSetting::Map& ini, Hdf hdfPattern,
-                            const std::string& name,
-                            const std::string& suffix = "") {
-  string pattern = Config::GetString(ini, hdfPattern, name, "", false);
-  if (!pattern.empty()) {
-    if (!suffix.empty()) pattern += suffix;
-    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                    CopyString),
-                             String(value.c_str(), value.size(),
-                                    CopyString));
-    if (ret.toInt64() <= 0) {
-      return false;
-    }
-  }
-  return true;
-}
-
 static bool matchShard(
   const std::string& hostname,
   const IniSetting::Map& ini, Hdf hdfPattern,
@@ -1324,13 +1305,16 @@ static std::vector<std::string> getTierOverwrites(IniSetting::Map& ini,
   }
 
   auto const checkPatterns = [&] (Hdf hdf) {
+    // Check the patterns using "&" rather than "&&" so they all get
+    // evaluated; otherwise with multiple patterns, if an earlier
+    // one fails to match, the later one is reported as unused.
     return
-      matchHdfPattern(hostname, ini, hdf, "machine") &
-      matchHdfPattern(tier, ini, hdf, "tier") &
-      matchHdfPattern(task, ini, hdf, "task") &
-      matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
-      matchHdfPattern(tags, ini, hdf, "tags", "m") &
-      matchHdfPattern(cpu, ini, hdf, "cpu");
+      Config::matchHdfPattern(hostname, ini, hdf, "machine") &
+      Config::matchHdfPattern(tier, ini, hdf, "tier") &
+      Config::matchHdfPattern(task, ini, hdf, "task") &
+      Config::matchHdfPattern(tiers, ini, hdf, "tiers", "m") &
+      Config::matchHdfPattern(tags, ini, hdf, "tags", "m") &
+      Config::matchHdfPattern(cpu, ini, hdf, "cpu");
   };
 
   std::vector<std::string> messages;

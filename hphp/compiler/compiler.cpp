@@ -199,6 +199,48 @@ int compiler_main(int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace {
+
+void applyBuildOverrides(IniSetting::Map& ini, Hdf& config) {
+  std::string push_phases = Config::GetString(ini, config, "Build.PushPhases");
+  // convert push phases to newline-separated, to make matching them less
+  // error-prone.
+  replaceAll(push_phases, ",", "\n");
+  bool loggedOnce = false;
+
+  for (Hdf hdf = config["Overrides"].firstChild();
+       hdf.exists();
+       hdf = hdf.next()) {
+    if (!loggedOnce) {
+      Logger::Info(folly::sformat(
+                       "Matching build overrides using: push_phases='{}'",
+                       push_phases));
+      loggedOnce = true;
+    }
+    if (Config::matchHdfPattern(push_phases, ini, hdf, "push_phase" , "m")) {
+      Logger::Info(folly::sformat("Matched override: {}", hdf.getName()));
+
+      if (hdf.exists("clear")) {
+        std::vector<std::string> list;
+        hdf["clear"].configGet(list);
+        for (auto const& s : list) {
+          config.remove(s);
+        }
+      }
+      config.copy(hdf["overwrite"]);
+      // no break here, so we can continue to match more overrides
+    }
+    hdf["overwrite"].setVisited(); // avoid lint complaining
+    if (hdf.exists("clear")) {
+      // when the tier does not match, "clear" is not accessed
+      // mark it visited, so the linter does not complain
+      hdf["clear"].setVisited();
+    }
+  }
+}
+
+}
+
 int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   options_description desc("HipHop Compiler for PHP Usage:\n\n"
                            "\thphp <options> <inputs>\n\n"
@@ -405,6 +447,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   for (auto const& confString : po.confStrings) {
     Config::ParseHdfString(confString, config);
   }
+  applyBuildOverrides(ini, config);
   Hdf runtime = config["Runtime"];
   // The configuration command line strings were already processed above
   // Don't process them again.

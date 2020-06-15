@@ -284,6 +284,11 @@ struct Config {
                       const IniSettingMap &ini, const Hdf& config,
                       const std::string &name, const bool prepend_hhvm = true);
 
+  static bool matchHdfPattern(const std::string &value,
+                              const IniSettingMap& ini, Hdf hdfPattern,
+                              const std::string& name,
+                              const std::string& suffix = "");
+
   private:
 
   static void SetParsedIni(IniSettingMap &ini, const std::string confStr,

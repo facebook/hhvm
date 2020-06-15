@@ -1,9 +1,12 @@
-<?hh <<__EntryPoint>> function main(): void {
-$cwd = dirname(__FILE__);
+<?hh
+<<__EntryPoint>> function main(): void {
 
 echo "GIF to PNG conversion: ";
-echo imagepng(imagecreatefromgif($cwd . "/conv_test.gif"), $cwd . "/test_gif.png") ? 'ok' : 'failed';
+echo imagepng(
+  imagecreatefromgif(__DIR__ . '/conv_test.gif'),
+  __SystemLib\hphp_test_tmppath('test_gif.png')
+) ? 'ok' : 'failed';
 echo "\n";
 
-@unlink($cwd . "/test_gif.png");
+unlink(__SystemLib\hphp_test_tmppath('test_gif.png'));
 }

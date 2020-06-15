@@ -18,7 +18,7 @@ echo "*** Testing opendir() : usage variations ***\n";
  *      |-> child_dir  ( child dir)
  */
 
-$parent_dir_path = dirname(__FILE__) . "/opendir_variation5";
+$parent_dir_path = __SystemLib\hphp_test_tmppath('opendir_variation5');
 mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 
@@ -53,10 +53,6 @@ if (is_resource($dir_handle2)) {
     closedir($dir_handle2);
 }
 echo "===DONE===\n";
-error_reporting(0);
-$parent_dir_path = dirname(__FILE__) . "/opendir_variation5";
-$sub_dir_path = $parent_dir_path."/sub_dir";
-$child_dir_path = $sub_dir_path."/child_dir";
 
 // changing permissions for each temporary directory to delete them
 chmod($parent_dir_path, 0777);

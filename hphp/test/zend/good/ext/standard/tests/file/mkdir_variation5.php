@@ -6,7 +6,7 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing mkdir() : variation ***\n";
-
+chdir(__SystemLib\hphp_test_tmproot());
 $workDir = "mkdirVar5.tmp";
 $subDir = "aSubDir";
 mkdir($workDir);

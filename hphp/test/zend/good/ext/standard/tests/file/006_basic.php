@@ -7,23 +7,22 @@
   Description: Attempts to change the mode of the file specified by
     filename to that given in mode */
 <<__EntryPoint>> function main(): void {
-$path = dirname(__FILE__);
 
 echo "*** Testing fileperms(), chmod() with files and dirs ***\n";
-fopen($path."/perm.tmp", "w");
-var_dump( chmod($path."/perm.tmp", 0755 ) );
-printf("%o", fileperms($path."/perm.tmp") );
+fopen(__SystemLib\hphp_test_tmppath('perm.tmp'), "w");
+var_dump( chmod(__SystemLib\hphp_test_tmppath('perm.tmp'), 0755 ) );
+printf("%o", fileperms(__SystemLib\hphp_test_tmppath('perm.tmp')) );
 echo "\n";
 clearstatcache();
 
-mkdir($path."/perm");
-var_dump( chmod( $path."/perm", 0777 ) );
-printf("%o", fileperms($path."/perm") );
+mkdir(__SystemLib\hphp_test_tmppath('perm'));
+var_dump( chmod(__SystemLib\hphp_test_tmppath('perm'), 0777 ) );
+printf("%o", fileperms(__SystemLib\hphp_test_tmppath('perm')) );
 echo "\n";
 clearstatcache();
 
 echo "Done\n";
-error_reporting(0);
-unlink(dirname(__FILE__)."/perm.tmp");
-rmdir(dirname(__FILE__)."/perm");
+
+unlink(__SystemLib\hphp_test_tmppath('perm.tmp'));
+rmdir(__SystemLib\hphp_test_tmppath('perm'));
 }

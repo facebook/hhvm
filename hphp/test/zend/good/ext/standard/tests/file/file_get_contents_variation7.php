@@ -6,15 +6,15 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing file_get_contents() : variation ***\n";
+chdir(__SystemLib\hphp_test_tmproot());
 $mainDir = "fileGetContentsVar7.dir";
 $subDir = "fileGetContentsVar7Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+
 
 $allDirs = varray[
   // absolute paths
@@ -47,7 +47,6 @@ for($i = 0; $i<count($allDirs); $i++) {
   var_dump(file_get_contents($dir."/".$filename));
 }
 
-chdir($old_dir_path);
 unlink($absFile);
 rmdir($absSubDir);
 rmdir($absMainDir);

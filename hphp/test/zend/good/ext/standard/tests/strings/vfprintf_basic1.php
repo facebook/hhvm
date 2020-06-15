@@ -17,7 +17,7 @@ $arg3 = varray["one","two","three"];
 
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic1.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic1.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

@@ -1,5 +1,5 @@
 <?hh <<__EntryPoint>> function main(): void {
-$filename = "gzwrite_error.txt.gz";
+$filename = __SystemLib\hphp_test_tmppath("gzwrite_error.txt.gz");
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

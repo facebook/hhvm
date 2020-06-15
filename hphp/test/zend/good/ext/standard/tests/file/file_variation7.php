@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filepath = __FILE__ . ".tmp";
+$filepath = __SystemLib\hphp_test_tmppath('tmp');
 $fd = fopen($filepath, "w+");
 fwrite($fd, "Line 1\n\n \n  \n\Line 3");
 fclose($fd);

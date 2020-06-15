@@ -6,15 +6,15 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing parse_ini_file() : variation ***\n";
+chdir(__SystemLib\hphp_test_tmproot());
 $mainDir = "parseIniFileVar6.dir";
 $subDir = "parseIniFileVar6Sub";
-$absMainDir = dirname(__FILE__)."/".$mainDir;
+$absMainDir = __SystemLib\hphp_test_tmppath($mainDir);
 mkdir($absMainDir);
 $absSubDir = $absMainDir."/".$subDir;
 mkdir($absSubDir);
 
-$old_dir_path = getcwd();
-chdir(dirname(__FILE__));
+
 
 $allDirs = varray[
   // absolute paths
@@ -49,7 +49,6 @@ for($i = 0; $i<count($allDirs); $i++) {
 }
 
 unlink($absFile);
-chdir($old_dir_path);
 rmdir($absSubDir);
 rmdir($absMainDir);
 

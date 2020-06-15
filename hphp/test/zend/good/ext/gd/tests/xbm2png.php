@@ -1,9 +1,12 @@
-<?hh <<__EntryPoint>> function main(): void {
-$cwd = dirname(__FILE__);
+<?hh
+<<__EntryPoint>> function main(): void {
 
 echo "XBM to PNG conversion: ";
-echo imagepng(imagecreatefromxbm($cwd . "/conv_test.xbm"), $cwd . "/test_xbm.png") ? 'ok' : 'failed';
+echo imagepng(
+  imagecreatefromxbm(__DIR__ . '/conv_test.xbm'),
+  __SystemLib\hphp_test_tmppath('test_xbm.png')
+) ? 'ok' : 'failed';
 echo "\n";
 
-@unlink($cwd . "/test_xbm.png");
+unlink(__SystemLib\hphp_test_tmppath('test_xbm.png'));
 }

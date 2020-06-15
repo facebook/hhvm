@@ -78,7 +78,7 @@ $values = varray[
 ];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation21.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_variation21.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

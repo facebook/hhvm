@@ -5,7 +5,7 @@ Description: Reads to EOF on the given file pointer from the current position
   and writes the results to the output buffer.
 */
 <<__EntryPoint>> function main(): void {
-$file_name = dirname(__FILE__)."/passthru.tmp";
+$file_name = __SystemLib\hphp_test_tmppath('passthru.tmp');
 $write_handle = fopen($file_name, "w");
 
 $string = "Hello, world\n, abcdefg\tadsdsfdf\n8u2394723947\t$%$%#$%#$%#^#%^ 
@@ -53,6 +53,6 @@ var_dump( fpassthru($read_handle) );
 fclose($read_handle);
 
 echo "*** Done ***\n";
-error_reporting(0);
-unlink(dirname(__FILE__)."/passthru.tmp");
+
+unlink($file_name);
 }

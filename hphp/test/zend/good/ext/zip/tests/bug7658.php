@@ -20,7 +20,7 @@ function main_entry(): void {
   ];
   $dirname = dirname(__FILE__) . '/';
   include $dirname . 'utils.inc';
-  $file = $dirname . '__tmp_bug7658.odt';
+  $file = __SystemLib\hphp_test_tmppath('__tmp_bug7658.odt');
   $zip = new ZipArchive();
   copy($dirname . 'bug7658.odt', $file);
   if(!$zip->open($file)) {

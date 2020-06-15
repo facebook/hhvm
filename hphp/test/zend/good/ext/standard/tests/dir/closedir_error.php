@@ -15,7 +15,7 @@ echo "*** Testing closedir() : error conditions ***\n";
 //Test closedir with one more than the expected number of arguments
 echo "\n-- Testing closedir() function with more than expected no. of arguments --\n";
 
-$dir_path = dirname(__FILE__) . '\closedir_error';
+$dir_path = __SystemLib\hphp_test_tmppath('closedir_error');
 mkdir($dir_path);
 $dir_handle = opendir($dir_path);
 
@@ -25,8 +25,6 @@ try { var_dump( closedir($dir_handle, $extra_arg) ); } catch (Exception $e) { ec
 //successfully close the directory handle so can delete in CLEAN section
 closedir($dir_handle);
 echo "===DONE===\n";
-error_reporting(0);
-$base_dir = dirname(__FILE__);
-$dir_path = $base_dir . '\closedir_error';
+
 rmdir($dir_path);
 }

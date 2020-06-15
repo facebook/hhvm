@@ -6,9 +6,9 @@
  */
 
 // Open handle
-<<__EntryPoint>> function main(): void { $file = 'vfprintf_error2.phpt.txt';
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('vfprintf_error2.phpt.txt');
 $fp = fopen( $file, "a+" );
-
 echo "\n-- Testing vfprintf() function with less than expected no. of arguments --\n";
 $format = 'string_val';
 try { var_dump( vfprintf($fp, $format) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
@@ -19,7 +19,6 @@ try { var_dump( vfprintf() ); } catch (Exception $e) { echo "\n".'Warning: '.$e-
 fclose($fp);
 
 echo "===DONE===\n";
-error_reporting(0);
-$file = 'vfprintf_error2.phpt.txt';
+
 unlink( $file );
 }

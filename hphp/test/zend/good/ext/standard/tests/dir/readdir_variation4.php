@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing readdir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/readdir_variation4/";
+$dir_path = __SystemLib\hphp_test_tmppath('readdir_variation4') . '/';
 mkdir($dir_path);
 
 // heredoc string
@@ -73,7 +73,6 @@ var_dump($contents);
 
 closedir($dir_handle);
 echo "===DONE===\n";
-error_reporting(0);
-$dir_path = dirname(__FILE__) . "/readdir_variation4/";
+
 rmdir($dir_path);
 }

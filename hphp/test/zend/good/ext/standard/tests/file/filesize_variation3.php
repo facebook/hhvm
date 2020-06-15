@@ -5,10 +5,9 @@
    (and generates an error of level E_WARNING) in case of an error.
 */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
 
 echo "*** Testing filesize(): usage variations ***\n"; 
-$filename =  $file_path."/filesize_variation3.tmp";
+$filename =  __SystemLib\hphp_test_tmppath('filesize_variation3.tmp');
 $file_handle = fopen($filename, "w");
 fwrite($file_handle, str_repeat("Hello,World ", 1000) ); // create file of size 12000 bytes
 fclose($file_handle);
@@ -26,7 +25,6 @@ for($size = filesize($filename); $size>=-1200; $size-=1200) {
 }
 
 echo "*** Done ***\n";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-unlink($file_path."/filesize_variation3.tmp");
+
+unlink($filename);
 }

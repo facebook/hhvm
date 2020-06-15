@@ -1,6 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function main(): void {
+  chdir(__SystemLib\hphp_test_tmproot());
   file_put_contents('SplFileObject_setCsvControl_variation001.csv',
 <<<CDATA
 "groene appelen",10

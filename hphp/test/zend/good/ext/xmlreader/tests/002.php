@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function entrypoint_002(): void {
   /* $Id$ */
-  $filename = dirname(__FILE__) . '/_002.xml';
+  $filename = __SystemLib\hphp_test_tmppath('_002.xml');
   $xmlstring = '<?xml version="1.0" encoding="UTF-8"?>
   <books></books>';
   file_put_contents($filename, $xmlstring);

@@ -13,7 +13,7 @@ class test {
 }
 DATA;
 
-  $filename = dirname(__FILE__)."/cc003.dat";
+  $filename = __SystemLib\hphp_test_tmppath('cc003.dat');
   file_put_contents($filename, $class_data);
 
   include $filename;

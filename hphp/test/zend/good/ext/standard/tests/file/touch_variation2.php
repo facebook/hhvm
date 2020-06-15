@@ -1,7 +1,7 @@
 <?hh
 
 <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/touch_variation2.dat";
+$filename = __SystemLib\hphp_test_tmppath('touch_variation2.dat');
 $fp=fopen($filename,"w");
 fwrite ($fp,"mydata");
 fclose($fp);

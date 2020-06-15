@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$outputFileName = __FILE__.'tmp';
+<?hh
+<<__EntryPoint>> function main(): void {
+$outputFileName = __SystemLib\hphp_test_tmppath('tmp');
 $outFile = "compress.zlib://$outputFileName";
 $data = <<<EOT
 Here is some plain

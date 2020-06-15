@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>> function main(): void {
 $dirname = dirname(__FILE__) . '/';
-$file = $dirname . '__property_test.zip';
+$file = __SystemLib\hphp_test_tmppath('__property_test.zip');
 
 copy($dirname . 'test_with_comment.zip', $file);
 

@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing touch() : basic functionality ***\n";
 
-$filename = dirname(__FILE__)."/touch_basic.dat";
+$filename = __SystemLib\hphp_test_tmppath('touch_basic.dat');
 
 echo "\n--- testing touch creates a file ---\n";
 @unlink($filename);

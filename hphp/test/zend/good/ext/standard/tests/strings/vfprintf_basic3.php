@@ -21,7 +21,7 @@ $arg2 = varray[11.11,22.22];
 $arg3 = varray[11.11,22.22,33.33];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic3.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic3.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

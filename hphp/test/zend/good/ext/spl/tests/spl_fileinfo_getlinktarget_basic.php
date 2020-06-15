@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$link = __DIR__ . '/test_link';
+<?hh
+<<__EntryPoint>> function main(): void {
+$link = __SystemLib\hphp_test_tmppath('test_link');
 symlink(__FILE__, $link );
 $fileInfo = new SplFileInfo($link);
 

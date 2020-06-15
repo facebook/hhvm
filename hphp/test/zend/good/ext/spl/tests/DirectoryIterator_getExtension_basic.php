@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$dir = __DIR__ . DIRECTORY_SEPARATOR . md5('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;
+<?hh
+<<__EntryPoint>> function main(): void {
+$dir = __SystemLib\hphp_test_tmppath('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;
 mkdir($dir);
 
 $files = varray['test.txt', 'test.extension', 'test..', 'test.', 'test'];
@@ -21,9 +22,7 @@ foreach (new DirectoryIterator($dir) as $file) {
 var_dump($dit_exts === $nfo_exts);
 sort(inout $dit_exts);
 var_dump($dit_exts);
-error_reporting(0);
-$dir   = __DIR__ . DIRECTORY_SEPARATOR . md5('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;
-$files = varray['test.txt', 'test.extension', 'test..', 'test.', 'test'];
+
 foreach ($files as $file) {
     unlink($dir . $file);
 }

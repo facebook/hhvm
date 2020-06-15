@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $str = str_repeat("test", 3456);
 
-$filename = dirname(__FILE__).'/bug39673.txt';
+$filename = __SystemLib\hphp_test_tmppath('bug39673.txt');
 file_put_contents($filename, $str);
 
 $offsets = varray[

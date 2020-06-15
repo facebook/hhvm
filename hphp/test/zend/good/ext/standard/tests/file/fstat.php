@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/fstat.dat";
+$filename = __SystemLib\hphp_test_tmppath('fstat.dat');
 
 $fp = fopen($filename, "w");
 var_dump(fstat($fp));

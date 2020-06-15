@@ -10,7 +10,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing chdir() : usage variations ***\n";
 
-$base_dir_path = dirname(__FILE__);
+$base_dir_path = __SystemLib\hphp_test_tmproot();
 
 $level2_one_dir_name = "level2_one";
 $level2_one_dir_path = "$base_dir_path/$level2_one_dir_name";
@@ -56,8 +56,7 @@ var_dump(chdir("../../$level2_one_dir_name"));
 var_dump(getcwd());
 
 echo "===DONE===\n";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-rmdir("$file_path/level2_one/level2_two");
-rmdir("$file_path/level2_one");
+
+rmdir($level2_two_dir_path);
+rmdir($level2_one_dir_path);
 }

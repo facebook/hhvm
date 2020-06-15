@@ -7,7 +7,7 @@
 
 // Open handle
 <<__EntryPoint>> function main(): void {
-$file = 'vfprintf_error3.phpt.txt';
+$file = __SystemLib\hphp_test_tmppath('vfprintf_error3.phpt.txt');
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
@@ -29,7 +29,6 @@ rewind( $fp );
 fclose( $fp );
 
 echo "===DONE===\n";
-error_reporting(0);
-$file = 'vfprintf_error3.phpt.txt';
+
 unlink( $file );
 }

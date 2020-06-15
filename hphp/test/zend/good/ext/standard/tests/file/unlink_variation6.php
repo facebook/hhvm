@@ -14,7 +14,7 @@ function f_exists($file) {
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing unlink() : variation: contexts and relative files ***\n";
-
+chdir(__SystemLib\hphp_test_tmproot());
 // test relative directories and stream contexts.
 $subdir = 'subdir';
 $testfile = $subdir.'/testfile.txt';

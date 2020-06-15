@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/ftruncate.dat";
+$filename = __SystemLib\hphp_test_tmppath('ftruncate.dat');
 
 file_put_contents($filename, "some test data inside");
 

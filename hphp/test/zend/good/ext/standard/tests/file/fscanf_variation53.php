@@ -7,7 +7,6 @@
 
 /* Test fscanf() to read a file when file pointer is pointing to EOF */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read a file when file pointer is pointing to EOF ***\n"; 
 
@@ -27,7 +26,7 @@ $counter = 1;
 foreach($modes as $mode) {
   
   // create an empty file
-  $filename = "$file_path/fscanf_variation53.tmp";
+  $filename = __SystemLib\hphp_test_tmppath('fscanf_variation53.tmp');
   $file_handle = fopen($filename, "w");
   if($file_handle == false)
     exit("Error:failed to open file $filename");
@@ -66,10 +65,4 @@ foreach($modes as $mode) {
 }
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-$filename = "$file_path/fscanf_variation53.tmp";
-if(file_exists($filename)) {
-  unlink($filename);
-}
 }

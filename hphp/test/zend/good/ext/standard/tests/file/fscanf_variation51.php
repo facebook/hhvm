@@ -7,12 +7,11 @@
 
 /* Test fscanf() to scan a file for read when file is opened inwrite only mode */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
 
 echo "*** Test fscanf(): to read from a file opened in write only mode ***\n"; 
 
 // create a file
-$filename = "$file_path/fscanf_variation51.tmp";
+$filename = __SystemLib\hphp_test_tmppath('fscanf_variation51.tmp');
 $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
@@ -53,10 +52,4 @@ foreach($modes as $mode) {
 }
 
 echo "\n*** Done ***";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-$filename = "$file_path/fscanf_variation51.tmp";
-if(file_exists($filename)) {
-  unlink($filename);
-}
 }

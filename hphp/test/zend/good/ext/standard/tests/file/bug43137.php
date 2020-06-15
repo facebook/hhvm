@@ -1,4 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
+<?hh
+<<__EntryPoint>> function main(): void {
+chdir(__SystemLib\hphp_test_tmproot());
 $toname = "TO_" . md5(microtime());
 $dirname = "FROM_" . md5(microtime());
 

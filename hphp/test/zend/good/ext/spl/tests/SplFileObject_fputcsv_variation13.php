@@ -5,14 +5,14 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing fputcsv() : with default enclosure & delimiter of two chars ***\n";
 
-$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv_variation13.csv', 'w');
+$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv_variation13.csv');
+$fo = new SplFileObject($file, 'w');
 
 var_dump($fo->fputcsv(varray['water', 'fruit'], ',,', '"'));
 
 unset($fo);
 
 echo "Done\n";
-error_reporting(0);
-$file = __DIR__ . '/SplFileObject_fputcsv_variation13.csv';
+
 unlink($file);
 }

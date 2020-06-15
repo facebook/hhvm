@@ -47,9 +47,9 @@ var_dump(imagesy($im_crop));
 echo "IMG_CROP_THRESHOLD\n";
 $im = imagecreatefrompng(__DIR__ . "/logo_noise.png");
 $im_crop = imagecropauto($im, IMG_CROP_THRESHOLD, 0.1, 0x0);
-imagepng($im_crop, __DIR__ . "/crop_threshold.png");
+imagepng($im_crop, __SystemLib\hphp_test_tmppath('crop_threshold.png'));
 var_dump(imagesx($im_crop));
 var_dump(imagesy($im_crop));
 
-@unlink(__DIR__ . "/crop_threshold.png");
+unlink(__SystemLib\hphp_test_tmppath('crop_threshold.png'));
 }

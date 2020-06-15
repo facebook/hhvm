@@ -6,8 +6,8 @@
  */
 <<__EntryPoint>> function main(): void {
 echo "*** Testing lchown() : basic functionality ***\n";
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
+$filename = __SystemLib\hphp_test_tmppath('lchown_basic.txt');
+$symlink = __SystemLib\hphp_test_tmppath('lchown_basic_symlink.txt');
 
 $uid = posix_getuid();
 
@@ -17,9 +17,7 @@ var_dump( lchown( $filename, $uid ) );
 var_dump( fileowner( $symlink ) === $uid );
 
 echo "===DONE===\n";
-error_reporting(0);
-$filename = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic.txt';
-$symlink = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'lchown_basic_symlink.txt';
+
 unlink($filename);
 unlink($symlink);
 }

@@ -8,7 +8,7 @@
 echo "*** Testing hash_file() : basic functionality ***\n";
 
 // Set up file
-$filename = 'hash_file_basic_example.txt';
+$filename = __SystemLib\hphp_test_tmppath('hash_file_basic_example.txt');
 file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 
 var_dump( hash_file( 'md5', $filename ) );
@@ -19,7 +19,6 @@ var_dump( hash_file( 'sha512', $filename ) );
 var_dump( base64_encode( hash_file( 'md5', $filename, true ) ) );
 
 echo "===DONE===\n";
-error_reporting(0);
-$filename = 'hash_file_basic_example.txt';
+
 unlink( $filename );
 }

@@ -4,7 +4,7 @@ function main_entry(): void {
 
   $dirname = dirname(__FILE__) . '/';
   include $dirname . 'utils.inc';
-  $file = $dirname . '__tmp_oo_addfile2.zip';
+  $file = __SystemLib\hphp_test_tmppath('__tmp_oo_addfile2.zip');
 
   copy($dirname . 'test.zip', $file);
 

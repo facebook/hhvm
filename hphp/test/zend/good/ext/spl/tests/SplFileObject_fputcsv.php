@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+<?hh
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('SplFileObject_fputcsv.csv');
 $fo = new SplFileObject($file, 'w');
 
 $list = darray [

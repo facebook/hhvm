@@ -16,7 +16,7 @@ $arg2 = varray[TRUE,FALSE];
 $arg3 = varray[TRUE,FALSE,TRUE];
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic4.txt';
+$data_file = __SystemLib\hphp_test_tmppath('vfprintf_basic4.txt');
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

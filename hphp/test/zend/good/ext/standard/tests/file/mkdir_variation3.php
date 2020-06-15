@@ -29,7 +29,7 @@ echo "*** Testing mkdir() : usage variation ***\n";
 set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
-$pathname = 'mkdirVar3.tmp';
+$pathname = __SystemLib\hphp_test_tmppath('mkdirVar3.tmp');
 $mode = 0777;
 
 //get an unset variable

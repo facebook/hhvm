@@ -8,10 +8,10 @@ function custom_readfunction($oCurl, $hReadHandle, $iMaxOut)
   }
   return $sData;
 }
+
 <<__EntryPoint>> function main(): void {
-$sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
-$sReadFile  = $sFileBase.'_in.tmp';
-$sWriteFile = $sFileBase.'_out.tmp';
+$sReadFile  = __SystemLib\hphp_test_tmppath('in.tmp');
+$sWriteFile = __SystemLib\hphp_test_tmppath('out.tmp');
 $sWriteUrl  = 'file://'.$sWriteFile;
 
 file_put_contents($sReadFile,'contents of tempfile');
@@ -30,10 +30,7 @@ fclose ($hReadHandle);
 $sOutput = file_get_contents($sWriteFile);
 var_dump($sOutput);
 echo "===DONE===\n";
-error_reporting(0);
-$sFileBase  = dirname(__FILE__).DIRECTORY_SEPARATOR.'curl_opt_CURLOPT_READFUNCTION';
-$sReadFile  = $sFileBase.'_in.tmp';
-$sWriteFile = $sFileBase.'_out.tmp';
+
 unlink($sReadFile);
 unlink($sWriteFile);
 }

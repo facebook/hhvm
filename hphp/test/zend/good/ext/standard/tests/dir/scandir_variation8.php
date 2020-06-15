@@ -11,7 +11,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing scandir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/scandir_variation8/";
+$dir_path = __SystemLib\hphp_test_tmppath('scandir_variation8') . '/';
 mkdir($dir_path);
 
 // heredoc string
@@ -62,7 +62,6 @@ foreach ($content as $file_name) {
     @unlink($dir_path . $file_name);
 }
 echo "===DONE===\n";
-error_reporting(0);
-$dir_path = dirname(__FILE__) . "/scandir_variation8";
+
 rmdir($dir_path);
 }

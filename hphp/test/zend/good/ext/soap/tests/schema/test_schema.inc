@@ -50,7 +50,7 @@ $wsdl  = <<<EOF
 </definitions>
 EOF;
 
-  $fname = tempnam ("./", "wsdl");
+  $fname = __SystemLib\hphp_test_tmppath('wsdl');
   $f = fopen($fname,"w");
   fwrite($f,$wsdl);
   fclose($f);

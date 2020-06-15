@@ -22,7 +22,7 @@ $list = varray[
     'aaa"\\"a","bbb"'
 ];
 
-$file = dirname(__FILE__) . 'fgetcsv.csv';
+$file = __SystemLib\hphp_test_tmppath('fgetcsv.csv');
 @unlink($file);
 foreach ($list as $v) {
     $fp = fopen($file, "w");

@@ -35,7 +35,7 @@ function runtest() {
 <<__EntryPoint>> function main(): void {
 require_once('fopen_include_path.inc');
 
-$thisTestDir =  basename(__FILE__, ".php") . ".dir";
+$thisTestDir =  __SystemLib\hphp_test_tmppath('fopen_variation9.dir');
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
@@ -49,7 +49,7 @@ runtest();
 
 teardown_relative_path();
 restore_include_path();
-chdir("..");
+
 rmdir($thisTestDir);
 
 echo "===DONE===\n";

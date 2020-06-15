@@ -6,8 +6,8 @@ function entrypoint_png2wbmp_error1(): void {
   $text_color = imagecolorallocate($im, 255, 255, 255);
   imagestring($im, 1, 5, 5,  'A Simple Text String', $text_color);
 
-  $file = dirname(__FILE__) .'/simpletext.png';
-  $file2 = dirname(__FILE__) .'/simpletext.wbmp';
+  $file = __SystemLib\hphp_test_tmppath('simpletext.png');
+  $file2 = __SystemLib\hphp_test_tmppath('simpletext.wbmp');
 
   // Save the image as 'simpletext.png'
   imagepng($im, $file);
@@ -17,7 +17,6 @@ function entrypoint_png2wbmp_error1(): void {
 
   png2wbmp($file, $file2, 20, 120, 9);
   png2wbmp($file, $file2, 20, 120, -1);
-  error_reporting(0);
-  unlink(dirname(__FILE__) .'/simpletext.png');
-  unlink(dirname(__FILE__) .'/simpletext.wbmp');
+
+  unlink($file);
 }

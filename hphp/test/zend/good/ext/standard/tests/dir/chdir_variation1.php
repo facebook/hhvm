@@ -26,8 +26,8 @@ function main(): void {
   echo "*** Testing chdir() : usage variations ***\n";
 
   // create the temporary directory
-  $file_path = dirname(__FILE__);
-  $dir_path = $file_path."/chdir_basic";
+
+  $dir_path = __SystemLib\hphp_test_tmppath('chdir_basic');
   @mkdir($dir_path);
 
   //get an unset variable
@@ -105,9 +105,6 @@ EOT;
   fclose($fp);
 
   echo "===DONE===\n";
-  error_reporting(0);
-  $file_path = dirname(__FILE__);
-  $dir_path = $file_path."/chdir_basic";
 
   rmdir($dir_path);
 }

@@ -16,14 +16,13 @@ try { var_dump( scandir() ); } catch (Exception $e) { echo "\n".'Warning: '.$e->
 
 //Test scandir with one more than the expected number of arguments
 echo "\n-- Testing scandir() function with more than expected no. of arguments --\n";
-$dir = dirname(__FILE__) . '/scandir_error';
+$dir = __SystemLib\hphp_test_tmppath('scandir_error');
 mkdir($dir);
 $sorting_order = 10;
 $context = stream_context_create();
 $extra_arg = 10;
 try { var_dump( scandir($dir, $sorting_order, $context, $extra_arg) ); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
 echo "===DONE===\n";
-error_reporting(0);
-$directory = dirname(__FILE__) . '/scandir_error';
-rmdir($directory);
+
+rmdir($dir);
 }

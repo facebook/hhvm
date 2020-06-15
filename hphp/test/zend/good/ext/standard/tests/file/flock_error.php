@@ -7,7 +7,7 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing error conditions ***\n";
 
-$file = dirname(__FILE__)."/flock.tmp";
+$file = __SystemLib\hphp_test_tmppath('flock.tmp');
 $fp = fopen($file, "w");
 
 /* array of operatons */

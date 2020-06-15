@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/DOMDocument_saveHTMLFile_formatOutput".time().".html";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('formatOutput.html');
 $doc = new DOMDocument('1.0');
 $doc->formatOutput = true;
 $root = $doc->createElement('html');

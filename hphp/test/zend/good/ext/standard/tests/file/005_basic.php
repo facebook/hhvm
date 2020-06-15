@@ -21,16 +21,16 @@ echo "*** Testing the basic functionality with file ***\n";
 print( @date('Y:M:D:H:i:s', fileatime(__FILE__)) )."\n";
 print( @date('Y:M:D:H:i:s', filemtime(__FILE__)) )."\n";
 print( @date('Y:M:D:H:i:s', filectime(__FILE__)) )."\n";
-print( @date('Y:M:D:H:i:s', (int)touch(dirname(__FILE__)."/005_basic.tmp")) )."\n";
+print( @date('Y:M:D:H:i:s', (int)touch(__SystemLib\hphp_test_tmppath('005_basic.tmp'))) )."\n";
 
 echo "*** Testing the basic functionality with dir ***\n";
 print( @date('Y:M:D:H:i:s', fileatime(".")) )."\n";
 print( @date('Y:M:D:H:i:s', filemtime(".")) )."\n";
 print( @date('Y:M:D:H:i:s', filectime(".")) )."\n";
-print( @date('Y:M:D:H:i:s', (int)touch(dirname(__FILE__)."/005_basic")) )."\n";
+print( @date('Y:M:D:H:i:s', (int)touch(__SystemLib\hphp_test_tmppath('005_basic'))) )."\n";
 
 echo "\n*** Done ***\n";
-error_reporting(0);
-unlink(dirname(__FILE__)."/005_basic.tmp");
-unlink(dirname(__FILE__)."/005_basic");
+
+unlink(__SystemLib\hphp_test_tmppath('005_basic.tmp'));
+unlink(__SystemLib\hphp_test_tmppath('005_basic'));
 }

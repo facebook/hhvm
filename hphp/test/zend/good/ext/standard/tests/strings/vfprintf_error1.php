@@ -6,9 +6,9 @@
  */
 
 // Open handle
-<<__EntryPoint>> function main(): void { $file = 'vfprintf_error1.phpt.txt';
+<<__EntryPoint>> function main(): void {
+$file = __SystemLib\hphp_test_tmppath('vfprintf_error1.phpt.txt');
 $fp = fopen( $file, "a+" );
-
 echo "\n-- Testing vfprintf() function with more than expected no. of arguments --\n";
 $format = 'string_val';
 $args = varray[ 1, 2 ];
@@ -20,7 +20,6 @@ try { var_dump( vfprintf( $fp, "Foo %d", varray[6], "bar" ) ); } catch (Exceptio
 fclose($fp);
 
 echo "===DONE===\n";
-error_reporting(0);
-$file = 'vfprintf_error1.phpt.txt';
+
 unlink( $file );
 }

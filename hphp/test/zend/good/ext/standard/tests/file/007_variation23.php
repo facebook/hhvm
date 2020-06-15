@@ -17,9 +17,9 @@
    checking for the warning msg when trying to open an existing file in "xb" mode,
    and fclose function */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
+
 $string = b"abcdefghij\nmnopqrst\tuvwxyz\n0123456789";
-$file = $file_path."/007_variation23.tmp";
+$file = __SystemLib\hphp_test_tmppath('007_variation23.tmp');
 
 echo "*** Test fopen() & fclose() functions:  with 'xb' mode ***\n";
 $file_handle = fopen($file, "xb");  //opening the non-existing file in "xb" mode, file will be created
@@ -35,6 +35,6 @@ var_dump( fclose($file_handle) );  //Check for close operation on the file handl
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 $file_handle = fopen($file, "xb");  //Opening the existing data file in 'xb' mode to check for the warning message
 echo "*** Done ***\n";
-error_reporting(0);
-unlink(dirname(__FILE__)."/007_variation23.tmp");
+
+unlink($file);
 }

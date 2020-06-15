@@ -14,7 +14,7 @@ echo "*** Testing readdir() : error conditions ***\n";
 //Test readdir with one more than the expected number of arguments
 echo "\n-- Testing readdir() function with more than expected no. of arguments --\n";
 
-$path = dirname(__FILE__) . "/readdir_error";
+$path = __SystemLib\hphp_test_tmppath('readdir_error');
 mkdir($path);
 $dir_handle = opendir($path);
 $extra_arg = 10;
@@ -24,7 +24,6 @@ try { var_dump( readdir($dir_handle, $extra_arg) ); } catch (Exception $e) { ech
 // close the handle so can remove dir in CLEAN section
 closedir($dir_handle);
 echo "===DONE===\n";
-error_reporting(0);
-$path = dirname(__FILE__) . "/readdir_error";
+
 rmdir($path);
 }

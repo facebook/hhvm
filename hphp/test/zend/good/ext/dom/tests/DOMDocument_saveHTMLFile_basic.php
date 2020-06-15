@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/DOMDocument_saveHTMLFile_basic".time().".html";
+<?hh
+<<__EntryPoint>> function main(): void {
+$filename = __SystemLib\hphp_test_tmppath('basic.html');
 $doc = new DOMDocument('1.0');
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);

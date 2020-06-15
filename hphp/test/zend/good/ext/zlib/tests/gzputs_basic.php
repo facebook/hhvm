@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$filename = dirname(__FILE__)."/gzputs_basic.txt.gz";
+$filename = __SystemLib\hphp_test_tmppath('gzputs_basic.txt.gz');
 $h = gzopen($filename, 'w');
 $str = "Here is the string to be written. ";
 $length = 10;

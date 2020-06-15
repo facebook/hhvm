@@ -9,10 +9,9 @@ function sort_var_dump($results) {
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing glob() : basic functions ***\n";
-$file_path = dirname(__FILE__);
 
 // temp dirname used here
-$dirname = "$file_path/glob_basic";
+$dirname = __SystemLib\hphp_test_tmppath('glob_basic');
 
 // temp dir created
 mkdir($dirname);
@@ -35,10 +34,8 @@ sort_var_dump( glob($dirname."/*.*") );
 
 echo "Done\n";
 
-error_reporting(0);
-$file_path = dirname(__FILE__);
-unlink("$file_path/glob_basic/wonder12345");
-unlink("$file_path/glob_basic/wonder.txt");
-unlink("$file_path/glob_basic/file.text");
-rmdir("$file_path/glob_basic/");
+unlink("$dirname/wonder12345");
+unlink("$dirname/wonder.txt");
+unlink("$dirname/file.text");
+rmdir($dirname);
 }

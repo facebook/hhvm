@@ -21,8 +21,8 @@ class classA
 echo "*** Testing dir() : unexpected values for \$context argument ***\n";
 
 // create the temporary directory
-$file_path = dirname(__FILE__);
-$directory = $file_path."/dir_variation2";
+
+$directory = __SystemLib\hphp_test_tmppath('dir_variation2');
 @mkdir($directory);
 
 // get an unset variable
@@ -95,9 +95,6 @@ foreach( $unexpected_values as $unexpected_value ) {
 }
 
 echo "Done";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-$directory = $file_path."/dir_variation2";
 
 rmdir($directory);
 }

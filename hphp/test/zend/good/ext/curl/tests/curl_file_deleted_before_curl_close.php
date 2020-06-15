@@ -5,7 +5,7 @@ include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init($host);
 
-$temp_file = dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp';
+$temp_file = __SystemLib\hphp_test_tmppath('curl_file_deleted_before_curl_close.tmp');
 if (file_exists($temp_file)) {
     unlink($temp_file); // file should not exist before test
 }
@@ -24,6 +24,6 @@ fclose($handle); // causes glibc memory error
 
 curl_close($ch);
 echo "Closed correctly\n";
-error_reporting(0);
-unlink(dirname(__FILE__) . '/curl_file_deleted_before_curl_close.tmp');
+
+unlink($temp_file);
 }

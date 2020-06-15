@@ -7,7 +7,7 @@ Description: PHP supports a portable way of locking complete files
 <<__EntryPoint>> function main(): void {
 echo "*** Testing flock() fun with the various operation and
             wouldblock values                                ***\n";
-$file = dirname(__FILE__)."/flock.tmp";
+$file = __SystemLib\hphp_test_tmppath('flock.tmp');
 $fp = fopen($file, "w");
 
 /* array of operatons */

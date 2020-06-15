@@ -29,8 +29,8 @@ echo "*** Testing file_get_contents() : usage variation ***\n";
 set_error_handler(fun('test_error_handler'));
 
 // Initialise function arguments not being substituted (if any)
-$filename = 'FileGetContentsVar3.tmp';
-$absFile = dirname(__FILE__).'/'.$filename;
+
+$absFile = __SystemLib\hphp_test_tmppath('FileGetContentsVar3.tmp');
 $h = fopen($absFile,"w");
 fwrite($h, "contents read");
 fclose($h);

@@ -9,8 +9,8 @@ as it turns around
 and I know that it descends down on me
 EOT;
 
-$inputFileName = __FILE__.'.org';
-$outputFileName = __FILE__.'.tmp';
+$inputFileName = __SystemLib\hphp_test_tmppath('org');
+$outputFileName = __SystemLib\hphp_test_tmppath('tmp');
 
 file_put_contents($inputFileName, $org_data);
 

@@ -3,15 +3,14 @@
    Description: Changes the current umask
 */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
 
 /* Check umask() on file/dir */
 
 echo "*** Testing umask() on file and directory ***\n";
 // temp filename used
-$filename = "$file_path/umask_variation2.tmp";
+$filename = __SystemLib\hphp_test_tmppath('umask_variation2.tmp');
 // temp dir used
-$dirname = "$file_path/umask_variation2";
+$dirname = __SystemLib\hphp_test_tmppath('umask_variation2');
 
 for($mask = 0351; $mask <= 0777; $mask++) {
   echo "-- Setting umask to ";

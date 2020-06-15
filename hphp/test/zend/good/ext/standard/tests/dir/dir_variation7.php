@@ -18,8 +18,8 @@ echo "*** Testing dir() : remove execute permission from the parent dir ***\n";
     |-> sub_dir    ( sub parent )
          |-> child_dir  ( child dir)
 */
-$file_path = dirname(__FILE__);
-$parent_dir_path = $file_path."/dir_variation7";
+
+$parent_dir_path = __SystemLib\hphp_test_tmppath('dir_variation7');
 @mkdir($parent_dir_path);
 chmod($parent_dir_path, 0777);
 
@@ -46,11 +46,6 @@ $d = dir($child_dir_path); // try to open, expected failure
 var_dump( $d ); // dump it
 
 echo "Done";
-error_reporting(0);
-$file_path = dirname(__FILE__);
-$parent_dir_path = $file_path."/dir_variation7";
-$sub_dir_path = $parent_dir_path."/sub_dir";
-$child_dir_path = $sub_dir_path."/child_dir";
 
 // changing permissions for each temporary directory to delete them
 chmod($parent_dir_path, 0777);

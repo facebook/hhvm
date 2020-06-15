@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-$file = dirname(__FILE__) .'/fgetcsv-test.csv';
+$file = __SystemLib\hphp_test_tmppath('fgetcsv-test.csv');
 
 $data = varray[1, 2, 'foo', 'haha', varray[4, 5, 6], 1.3, null];
 

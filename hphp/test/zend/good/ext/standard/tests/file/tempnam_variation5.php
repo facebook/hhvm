@@ -5,10 +5,10 @@
 
 /* Passing an existing file as $prefix for tempnam() fn */
 <<__EntryPoint>> function main(): void {
-$file_path = dirname(__FILE__);
+
 
 echo "*** Test tempnam() function: by passing an existing filename as prefix ***\n";
-$dir_name = $file_path."/tempnam_variation5";
+$dir_name = __SystemLib\hphp_test_tmppath('tempnam_variation5');
 mkdir($dir_name);
 $h = fopen($dir_name."/tempnam_variation5.tmp", "w");
 

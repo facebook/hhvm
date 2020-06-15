@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-$prefix = __FILE__;
+<?hh
+<<__EntryPoint>> function main(): void {
+$prefix = __SystemLib\hphp_test_tmppath('symlink_to_symlink.php');
 
 touch($prefix . "_file");
 

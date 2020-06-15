@@ -59,7 +59,7 @@ var_dump(ucfirst("$obj_string"));
 
 
 echo "\n--- Testing Resources ---\n";
-$filename1 = "dummy-ucfirst.txt";
+$filename1 = __SystemLib\hphp_test_tmppath("dummy-ucfirst.txt");
 $file1 = fopen($filename1, "w");                // creating new file
 
 /* getting resource type for file handle */

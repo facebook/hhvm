@@ -1,6 +1,6 @@
 <?hh
 <<__EntryPoint>> function main(): void {
-@unlink("bz_open_002.txt");
+chdir(__SystemLib\hphp_test_tmproot());
 
 $fp = fopen("bz_open_002.txt", "w");
 var_dump(bzopen($fp, "w"));

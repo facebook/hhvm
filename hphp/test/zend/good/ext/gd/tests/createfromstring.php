@@ -1,12 +1,12 @@
-<?hh <<__EntryPoint>> function main(): void {
-$dir = dirname(__FILE__);
+<?hh
+<<__EntryPoint>> function main(): void {
 
 $im = imagecreatetruecolor(5,5);
 imagefill($im, 0,0, 0xffffff);
 imagesetpixel($im, 3,3, 0x0);
-imagepng($im, $dir . '/tc.png');
+imagepng($im, __SystemLib\hphp_test_tmppath('tc.png'));
 
-$im_string = file_get_contents(dirname(__FILE__) . '/tc.png');
+$im_string = file_get_contents(__SystemLib\hphp_test_tmppath('tc.png'));
 $im = imagecreatefromstring($im_string);
 echo 'createfromstring truecolor png: ';
 if (imagecolorat($im, 3,3) != 0x0) {
@@ -15,7 +15,7 @@ if (imagecolorat($im, 3,3) != 0x0) {
     echo 'ok';
 }
 echo "\n";
-unlink($dir . '/tc.png');
+unlink(__SystemLib\hphp_test_tmppath('tc.png'));
 
 
 
@@ -24,9 +24,9 @@ $c1 = imagecolorallocate($im, 255,255,255);
 $c2 = imagecolorallocate($im, 255,0,0);
 imagefill($im, 0,0, $c1);
 imagesetpixel($im, 3,3, $c2);
-imagepng($im, $dir . '/p.png');
+imagepng($im, __SystemLib\hphp_test_tmppath('p.png'));
 
-$im_string = file_get_contents(dirname(__FILE__) . '/p.png');
+$im_string = file_get_contents(__SystemLib\hphp_test_tmppath('p.png'));
 $im = imagecreatefromstring($im_string);
 
 echo'createfromstring palette png: ';
@@ -39,7 +39,7 @@ if ($c['red'] != 255 || $c['green'] != 0 || $c['blue'] != 0) {
     echo 'ok';
 }
 echo "\n";
-unlink($dir . '/p.png');
+unlink(__SystemLib\hphp_test_tmppath('p.png'));
 
 
 //empty string

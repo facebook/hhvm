@@ -1,5 +1,6 @@
-<?hh <<__EntryPoint>> function main(): void {
-chdir(dirname(__FILE__));
+<?hh
+<<__EntryPoint>> function main(): void {
+chdir(__SystemLib\hphp_test_tmproot());
 $dirpath = "./tmp/foo//bar/logs";
 mkdir($dirpath, 0777, true);
 

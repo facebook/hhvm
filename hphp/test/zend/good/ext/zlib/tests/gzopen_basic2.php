@@ -9,7 +9,7 @@ echo "*** Testing gzopen() : basic functionality ***\n";
 
 
 // Initialise all required variables
-$filename = "gzopen_basic2.txt.gz";
+$filename = __SystemLib\hphp_test_tmppath("gzopen_basic2.txt.gz");
 $modes = varray['w', 'w+'];
 $data = "This was the information that was written";
 

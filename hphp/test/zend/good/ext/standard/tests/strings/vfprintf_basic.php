@@ -18,7 +18,7 @@ function writeAndDump($fp, $format, $args)
 echo "*** Testing vfprintf() : basic functionality ***\n";
 
 // Open handle
-$file = 'vfprintf_basic.phpt.txt';
+$file = __SystemLib\hphp_test_tmppath('vfprintf_basic.phpt.txt');
 $fp = fopen( $file, "a+" );
 
 // Test vfprintf()
@@ -35,7 +35,6 @@ writeAndDump( $fp, "Testing %b %d %f %s %x %X", varray[ 9, 6, 2.5502, "foobar", 
 fclose( $fp );
 
 echo "===DONE===\n";
-error_reporting(0);
-$file = 'vfprintf_basic.phpt.txt';
+
 unlink( $file );
 }

@@ -85,9 +85,9 @@ function has_multi_request_mode($options) {
 
 function test_repo($options, $test) {
   if (isset($options['repo-out'])) {
-    $test = $options['repo-out'] . '/' . str_replace('/', '.', $test);
+    return $options['repo-out'] . '/' . str_replace('/', '.', $test) . '.repo';
   }
-  return "$test.repo";
+  return Status::getTestTmpPath($test, 'repo');
 }
 
 function jit_serialize_option(string $cmd, $test, $options, $serialize) {
@@ -1876,8 +1876,6 @@ function clean_intermediate_files($test, $options) {
     // normal test output will go here if we're run with --write-to-checkout
     'out',
     'diff',
-    // repo mode tests
-    'repo',
     // tests in --hhas-round-trip mode
     'round_trip.hhas',
     // tests in --hhbbc2 mode
@@ -1885,11 +1883,7 @@ function clean_intermediate_files($test, $options) {
     'after.round_trip.hhas',
   ];
   foreach ($exts as $ext) {
-    if ($ext == 'repo') {
-      $file = test_repo($options, $test);
-    } else {
-      $file = "$test.$ext";
-    }
+    $file = "$test.$ext";
     if (is_dir($file)) {
       Status::removeDirectory($file);
     } else if (file_exists($file)) {
@@ -1920,6 +1914,11 @@ function clean_intermediate_files($test, $options) {
     } else if (file_exists($file)) {
       unlink($file);
     }
+  }
+  // repo mode uses a directory that may or may not be in the run's tmpdir
+  $repo = test_repo($options, $test);
+  if (is_dir($repo)) {
+    Status::removeDirectory($repo);
   }
 }
 
@@ -2275,7 +2274,12 @@ function run_config_cli(
 ) {
   $cmd = timeout_prefix() . $cmd;
 
-  $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
+  if (isset($options['repo']) && !isset($options['repo-out'])) {
+    // we already created it in run_test
+    $cmd_env['HPHP_TEST_TMPDIR'] = Status::getTestTmpPath($test, 'tmpdir');
+  } else {
+    $cmd_env['HPHP_TEST_TMPDIR'] = Status::createTestTmpDir($test);
+  }
   if (isset($options['log'])) {
     $cmd_env['TRACE'] = 'printir:1';
     $cmd_env['HPHP_TRACE_FILE'] = $test . '.log';
@@ -2587,11 +2591,16 @@ function run_test($options, $test) {
     }
 
     $test_repo = test_repo($options, $test);
-    $hphp_hhvm_repo = "$test_repo/hhvm.hhbc";
-    $hhbbc_hhvm_repo = "$test_repo/hhvm.hhbbc";
-    $hphp_hackc_repo = "$test_repo/hackc.hhbc";
-    $hhbbc_hackc_repo = "$test_repo/hackc.hhbbc";
-    shell_exec("rm -f \"$hphp_hhvm_repo\" \"$hhbbc_hhvm_repo\" \"$hphp_hackc_repo\" \"$hhbbc_hackc_repo\" ");
+    if (isset($options['repo-out'])) {
+      // we may need to clean up after a previous run
+      $repo_files = vec['hhvm.hhbc', 'hhvm.hhbbc', 'hackc.hhbc', 'hackc.hhbbc'];
+      foreach ($repo_files as $repo_file) {
+        @unlink("$test_repo/$repo_file");
+      }
+    } else {
+      // create tmpdir now so that we can write repos
+      Status::createTestTmpDir($test);
+    }
 
     $program = isset($options['hackc']) ? "hackc" : "hhvm";
 

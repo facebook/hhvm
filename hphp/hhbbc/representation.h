@@ -69,14 +69,14 @@ struct SrcInfo {
  */
 struct Block {
   /*
-   * The id of this block's ExnNode, or NoExnNodeId if there is none.
-   */
-  ExnNodeId exnNodeId{NoExnNodeId};
-
-  /*
    * Instructions in the block.  Never empty guarantee.
    */
   BytecodeVec hhbcs;
+
+  /*
+   * The id of this block's ExnNode, or NoExnNodeId if there is none.
+   */
+  ExnNodeId exnNodeId{NoExnNodeId};
 
   /*
    * Edges coming out of blocks are repesented in three ways:
@@ -95,11 +95,17 @@ struct Block {
    */
   BlockId fallthrough{NoBlockId};
   BlockId throwExit{NoBlockId};
-  bool catchEntry{false};
-  bool fallthroughNS{false};
-  bool multiPred{false};
-  bool multiSucc{false};
-  bool dead{false};
+
+  union {
+    uint8_t initializer{0};
+    struct {
+      bool catchEntry: 1;
+      bool fallthroughNS: 1;
+      bool multiPred: 1;
+      bool multiSucc: 1;
+      bool dead: 1;
+    };
+  };
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -170,16 +176,16 @@ struct Param {
   CompactVector<TypeConstraint> upperBounds;
 
   /*
+   * Each parameter of a func can have arbitrary user attributes.
+   */
+  UserAttributeMap userAttributes;
+
+  /*
    * Evalable php code that will give the default argument.  This is
    * redundant with the dv initializer, but gets propagated through
    * for reflection.
    */
   LSString phpCode;
-
-  /*
-   * Each parameter of a func can have arbitrary user attributes.
-   */
-  UserAttributeMap userAttributes;
 
   /*
    * The type of the arguments for builtin functions, or for HNI
@@ -228,7 +234,7 @@ struct Local {
   LSString  name;
   uint32_t id         : 31;
   uint32_t killed     : 1;
-  uint32_t nameId         : 31;
+  uint32_t nameId     : 31;
   uint32_t unusedName : 1;
 };
 

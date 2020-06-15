@@ -1,18 +1,24 @@
-(* Copyright (c) 2020, Facebook, Inc.
-   All rights reserved. *)
+(*
+ * Copyright (c) 2015, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the "hack" directory of this source tree.
+ *
+ *)
+
 open Hh_prelude
 open Hh_core
 open Ifc_types
 module Decl = Ifc_decl
 module Env = Ifc_env
 module Logic = Ifc_logic
-module Mapper = Ifc_mapper
 module Pp = Ifc_pretty
+module Solver = Ifc_solver
 module Utils = Ifc_utils
 module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
-module Reason = Typing_reason
 
 exception FlowInference of string
 
@@ -185,7 +191,7 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
     let (_, ty) =
       Typing_inference_env.expand_var
         proto_renv.pre_tenv.Tast.inference_env
-        Reason.Rnone
+        Typing_reason.Rnone
         id
     in
     ptype ty
@@ -544,88 +550,6 @@ let walk_tast decl_env =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-(* Combine the results of each individual function into a global
-   constraint. If the resulting constraint is satisfiable all the
-   flows in the program are safe *)
-let global_solving callable_results =
-  let results_map =
-    let add_result resm res = SMap.add res.res_proto.fp_name res resm in
-    List.fold ~init:SMap.empty ~f:add_result callable_results
-  in
-  let topsort_schedule =
-    let module Err = struct
-      exception Cycle
-
-      exception Missing of string
-    end in
-    let schedule = ref [] in
-    try
-      let rec dfs seen name =
-        if SSet.mem name seen then raise Err.Cycle;
-        match SMap.find_opt name results_map with
-        | None -> raise (Err.Missing name)
-        | Some res ->
-          SSet.iter (dfs (SSet.add name seen)) res.res_deps;
-          if not (List.exists ~f:(String.equal name) !schedule) then
-            schedule := name :: !schedule
-      in
-      SMap.iter (fun name _ -> dfs SSet.empty name) results_map;
-      List.rev !schedule
-    with
-    | Err.Cycle -> fail "global solving does not work yet for recursive code"
-    | Err.Missing name -> fail "missing results for '%s'" name
-  in
-  Format.printf "Global solving:@.  @[<v>";
-  let close_one closed_results_map res_name =
-    let result = SMap.find res_name results_map in
-    let rec subst depth = function
-      | Chole proto ->
-        let callee = SMap.find proto.fp_name closed_results_map in
-        assert (not (Scope.equal callee.res_scope result.res_scope));
-        let arg_pairs =
-          match List.zip proto.fp_args callee.res_proto.fp_args with
-          | None ->
-            fail "arity mismatch in call to '%s' in '%s'" proto.fp_name res_name
-          | Some l -> l
-        in
-        let pred (_, s) = Scope.equal s callee.res_scope in
-        arg_pairs
-        |> List.fold ~init:[callee.res_constraint] ~f:(fun prop (t1, t2) ->
-               subtype t1 t2 prop)
-        |> L.(proto.fp_pc < callee.res_proto.fp_pc)
-        |> (match (proto.fp_this, callee.res_proto.fp_this) with
-           | (Some t1, Some t2) -> subtype t1 t2
-           | (None, Some _) -> fail "mismatched method call"
-           | (Some _, None) -> fail "mismatched method call"
-           | (None, None) -> Utils.identity)
-        |> subtype callee.res_proto.fp_ret proto.fp_ret
-        |> Logic.conjoin
-        (* the assertion on scopes above ensures that we quantify
-           only the callee policy variables *)
-        |> Logic.quantify ~pred ~quant:Qexists ~depth
-      | c -> Mapper.prop Utils.identity subst depth c
-    in
-    let closed_constr = subst 0 result.res_constraint in
-    begin
-      (* simplify the resulting closed constraint and print it *)
-      Format.printf "Flows for %s:@,  @[<v>" res_name;
-      Format.printf "@[<hov>%a@]@," Pp.prop closed_constr;
-      let simpl_constr =
-        let pred _ = true in
-        Logic.simplify (Logic.quantify ~pred ~quant:Qexists closed_constr)
-      in
-      Format.printf "simplified: @[<hov>%a@]" Pp.prop simpl_constr;
-      Format.printf "@]@,"
-    end;
-    let closed_result = { result with res_constraint = closed_constr } in
-    SMap.add res_name closed_result closed_results_map
-  in
-  let _closed_results_map =
-    List.fold_left ~init:SMap.empty ~f:close_one topsort_schedule
-  in
-  Format.printf "@]@.";
-  ()
-
 let do_ files_info opts ctx =
   Relative_path.Map.iter files_info ~f:(fun path i ->
       (* skip decls and partial *)
@@ -642,7 +566,19 @@ let do_ files_info opts ctx =
           Format.printf "TAST: %a@." Tast.pp_program tast;
 
         let results = walk_tast decl_env tast in
-        global_solving results
+        begin
+          try Solver.global_exn ~subtype results with
+          | Solver.Error Solver.RecursiveCycle ->
+            fail "solver error: cyclic call graph"
+          | Solver.Error (Solver.MissingResults callable) ->
+            fail "solver error: missing results for callable '%s'" callable
+          | Solver.Error (Solver.InvalidCall (reason, caller, callee)) ->
+            fail
+              "solver error: invalid call to '%s' in '%s' (%s)"
+              callee
+              caller
+              reason
+        end
       | _ -> ());
   ()
 

@@ -29,6 +29,8 @@ const SETPROFILE_FLAGS_RESUME_AWARE = 16;
  * setprofile handler. It *may break* in the future. */
 const SETPROFILE_FLAGS_THIS_OBJECT__MAY_BREAK = 32;
 
+const int PREG_FB__PRIVATE__HSL_IMPL = (1 << 29);
+
 <<__PHPStdLib, __Pure>>
 function fb_serialize($thing, int $options = 0);
 <<__PHPStdLib>>
@@ -104,6 +106,4 @@ function int_mul_overflow(int $a, int $b): int;
  * manipulate rounding of the result.
  */
 function int_mul_add_overflow(int $a, int $b, int $bias): int;
-
-const int PREG_FB__PRIVATE__HSL_IMPL = (1 << 29);
 } // HH namespace

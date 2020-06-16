@@ -12,6 +12,7 @@ open Typing_service_types
 val make_local_server_api :
   Naming_table.t ->
   root:string ->
+  init_id:string ->
   ignore_hh_version:bool ->
   (module LocalServerApi)
 

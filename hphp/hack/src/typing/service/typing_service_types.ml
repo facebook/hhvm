@@ -92,7 +92,7 @@ module type LocalServerApi = sig
   (* Tells the server to save the naming table state to a given
     destination path.
     *)
-  val snapshot_naming_table_base : destination_path:string -> unit
+  val snapshot_naming_table_base : destination_path:string -> unit Future.t
 
   (* Tells the server to save just the portion of the naming table that
     changed since the loaded naming table base. If there were no base, then

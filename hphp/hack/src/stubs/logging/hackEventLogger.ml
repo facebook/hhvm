@@ -74,6 +74,8 @@ let init_monitor
     _ =
   ()
 
+let init_batch_tool ~init_id:_ ~root:_ ~time:_ = ()
+
 let starting_first_server _ = ()
 
 let init_lazy_end

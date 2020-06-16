@@ -12,5 +12,5 @@ path = "main.rs"
 [dependencies]
 names = { path = "sqlite" }
 oxidized = { path = "../oxidized" }
-rusqlite = "0.23"
+rusqlite = { version = "0.23", features = ["blob"] }
 structopt = "0.3.7"

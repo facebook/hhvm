@@ -11,8 +11,10 @@ open RemoteWorker
 open Typing_service_types
 
 let make_local_server_api
-    (naming_table : Naming_table.t) ~(root : string) ~(ignore_hh_version : bool)
-    : (module LocalServerApi) =
+    (naming_table : Naming_table.t)
+    ~(root : string)
+    ~(init_id : string)
+    ~(ignore_hh_version : bool) : (module LocalServerApi) =
   ( module struct
     let send_progress (message : string) : unit =
       ServerProgress.send_progress_to_monitor "%s" message
@@ -33,10 +35,10 @@ let make_local_server_api
       in
       ()
 
-    let snapshot_naming_table_base ~(destination_path : string) : unit =
+    let snapshot_naming_table_base ~destination_path : unit Future.t =
       send_progress "Snapshotting the naming table for delegated type checking";
-      let t = Unix.gettimeofday () in
-      let () =
+      let start_t = Unix.gettimeofday () in
+      let future =
         match Naming_table.get_forward_naming_fallback_path naming_table with
         | Some source_path ->
           Hh_logger.log
@@ -47,21 +49,19 @@ let make_local_server_api
           let (_ : Naming_sqlite.save_result) =
             Naming_table.save naming_table destination_path
           in
-          ()
+          Future.of_value ()
         | None ->
-          Hh_logger.log "Creating a new table %s" destination_path;
-          let _symbols_added =
-            Naming_table.save naming_table destination_path
-          in
-          ()
+          Naming_table.save_async naming_table ~init_id ~root ~destination_path
       in
-      HackEventLogger.remote_scheduler_save_naming_end t;
-      let (t : float) =
+      Future.continue_with future @@ fun () ->
+      HackEventLogger.remote_scheduler_save_naming_end start_t;
+      let (start_t : float) =
         Hh_logger.log_duration
           (Printf.sprintf "Saved SQLite naming table to %s" destination_path)
-          t
+          start_t
       in
-      send_progress (Printf.sprintf "Snapshotted the naming table base: %f" t)
+      send_progress
+        (Printf.sprintf "Snapshotted the naming table base: %f" start_t)
 
     let snapshot_naming_table_diff ~(destination_path : string) : unit =
       Hh_logger.log "snapshot_naming_table_diff: %s" destination_path;

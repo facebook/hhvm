@@ -136,6 +136,7 @@ let start_typing_delegate genv env : env =
                   ServerApi.make_local_server_api
                     env.naming_table
                     ~root
+                    ~init_id
                     ~ignore_hh_version:
                       (ServerArgs.ignore_hh_version genv.options);
                 version_specifier;

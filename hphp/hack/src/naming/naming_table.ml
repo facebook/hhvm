@@ -682,6 +682,55 @@ let get_forward_naming_fallback_path a : string option =
   | Unbacked _ -> None
   | Backed (_, Naming_sqlite.Db_path db_path) -> Some db_path
 
+module SaveAsync = struct
+  (* The input record that gets passed from the main process to the daemon process *)
+  type input = {
+    blob_path: string;
+    destination_path: string;
+    init_id: string;
+    root: string;
+  }
+
+  (* The main entry point of the daemon process that saves the naming table
+      from a blob to the SQLite format. *)
+  let save { blob_path; destination_path; root; init_id } : unit =
+    HackEventLogger.init_batch_tool
+      ~init_id
+      ~root:(Path.make root)
+      ~time:(Unix.gettimeofday ());
+    let chan = In_channel.create ~binary:true blob_path in
+    let (naming_table : t) = Marshal.from_channel chan in
+    Sys_utils.close_in_no_fail blob_path chan;
+    Sys_utils.rm_dir_tree (Filename.dirname blob_path);
+    let (_save_result : Naming_sqlite.save_result) =
+      save naming_table destination_path
+    in
+    (* The intention here is to force the daemon process to exit with
+        an failed exit code so that the main process can detect
+        the condition and log the outcome. *)
+    assert (Disk.file_exists destination_path)
+
+  (* The daemon entry registration - used by the main process *)
+  let save_entry =
+    Process.register_entry_point "naming_table_save_async_entry" save
+end
+
+let save_async naming_table ~init_id ~root ~destination_path =
+  Hh_logger.log "Saving naming table to %s" destination_path;
+  let blob_dir = Tempfile.mkdtemp_with_dir (Path.make GlobalConfig.tmp_dir) in
+  let blob_path = Path.(to_string (concat blob_dir "naming_bin")) in
+  let chan = Stdlib.open_out_bin blob_path in
+  Marshal.to_channel chan naming_table [];
+  Stdlib.close_out chan;
+
+  let open SaveAsync in
+  Future.make
+    (Process.run_entry
+       Process_types.Default
+       save_entry
+       { blob_path; destination_path; init_id; root })
+    (fun output -> Hh_logger.log "Output from out-of-proc: %s" output)
+
 (*****************************************************************************)
 (* Testing functions *)
 (*****************************************************************************)

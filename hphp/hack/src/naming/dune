@@ -85,9 +85,12 @@
     ast_provider
     db_path_provider
     file_info
+    future
+    global_config
     naming_provider
     naming_sqlite
-    relative_path)
+    relative_path
+    temp_file)
   (preprocess (pps ppx_deriving.std))) ; See T41851208
 
 (library

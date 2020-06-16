@@ -13,4 +13,4 @@ deps_rust = { path = "../../deps" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 md-5 = "0.8"
-rusqlite = "0.23"
+rusqlite = { version = "0.23", features = ["blob"] }

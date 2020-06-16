@@ -130,5 +130,8 @@ val saved_to_fast : saved_state_info -> fast
 
 val save_changes_since_baseline : t -> destination_path:string -> unit
 
+val save_async :
+  t -> init_id:string -> root:string -> destination_path:string -> unit Future.t
+
 (* Test functions, do not use. *)
 val assert_is_backed : t -> bool -> unit

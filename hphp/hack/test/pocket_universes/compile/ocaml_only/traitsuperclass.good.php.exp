@@ -1,0 +1,297 @@
+# traitsuperclass.good.php starts here
+
+.filepath "traitsuperclass.good.php";
+
+.hh_file 1;
+.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """k:1:{s:1:\"J\";}""";
+.adata A_2 = """k:1:{s:1:\"K\";}""";
+.adata A_3 = """v:1:{s:8:\"MyTraitA\";}""";
+
+.main (1,1) {
+  .srcloc 4:7,4:14;
+  DefCls 0
+  .srcloc 13:7,13:7;
+  DefCls 1
+  .srcloc 26:7,26:7;
+  DefCls 2
+  Int 1
+  RetC
+}
+
+.function {} ["__EntryPoint"("""y:0:{}""")] (29,32) <"HH\\void" N > main() {
+  .srcloc 30:8,30:23;
+  NullUninit
+  NullUninit
+  NullUninit
+  .srcloc 30:20,30:22;
+  String "K"
+  .srcloc 30:8,30:23;
+  FCallClsMethodD <> 1 1 "0" - "" "" "D" "pu$E$value"
+  .srcloc 30:25,30:28;
+  String "\n"
+  .srcloc 30:8,30:28;
+  Concat
+  .srcloc 30:3,30:29;
+  Print
+  .srcloc 30:3,30:29;
+  PopC
+  .srcloc 31:8,31:23;
+  NullUninit
+  NullUninit
+  NullUninit
+  .srcloc 31:20,31:22;
+  String "J"
+  .srcloc 31:8,31:23;
+  FCallClsMethodD <> 1 1 "0" - "" "" "D" "pu$E$value"
+  .srcloc 31:25,31:28;
+  String "\n"
+  .srcloc 31:8,31:28;
+  Concat
+  .srcloc 31:3,31:29;
+  Print
+  .srcloc 31:3,31:29;
+  PopC
+  .srcloc 32:2,32:2;
+  Null
+  RetC
+}
+
+.class {} [final trait] MyTraitA (4,11) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .srcloc 5:8,5:8;
+    Keyset @A_1
+    .srcloc 5:8,5:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 5:8,5:8;
+    VerifyParamType $atom
+    .srcloc 5:8,5:8;
+    String "J"
+    .srcloc 5:8,5:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 8:15,8:18;
+    Int 1664
+    .srcloc 5:8,5:8;
+    RetC
+  L1:
+    .srcloc 5:8,5:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 5:8,5:8;
+    String "\\MyTraitA:@E::value unknown atom access: "
+    .srcloc 5:8,5:8;
+    CGetL $atom
+    Concat
+    .srcloc 5:8,5:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 5:8,5:8;
+    Throw
+    .srcloc 5:9,5:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 5:8,5:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 5:8,5:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodSD <> 1 1 "" - "" "" Self "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} C (13,24) {
+  .use MyTraitA;
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .srcloc 16:8,16:8;
+    Keyset @A_2
+    .srcloc 16:8,16:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .numiters 1;
+    .declvars $trait_classes $trait_class $class $method $_;
+    .srcloc 16:8,16:8;
+    VerifyParamType $atom
+    .srcloc 16:8,16:8;
+    String "K"
+    .srcloc 16:8,16:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 21:15,21:18;
+    String "yo"
+    .srcloc 16:8,16:8;
+    RetC
+  L1:
+    .srcloc 16:8,16:8;
+    Vec @A_3
+    .srcloc 16:8,16:8;
+    SetL $trait_classes
+    .srcloc 16:8,16:8;
+    PopC
+    .srcloc 16:8,16:8;
+    CGetL $trait_classes
+    .srcloc 16:8,16:8;
+    IterInit 0 NK V:$trait_class L2
+    .try {
+    L5:
+      .try {
+        .srcloc 16:8,16:8;
+        NewObjD "ReflectionClass"
+        Dup
+        NullUninit
+        NullUninit
+        .srcloc 16:8,16:8;
+        CGetL $trait_class
+        .srcloc 16:8,16:8;
+        FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+        PopC
+        LockObj
+        .srcloc 16:8,16:8;
+        SetL $class
+        .srcloc 16:8,16:8;
+        PopC
+        .srcloc 16:8,16:8;
+        CGetL $class
+        NullUninit
+        NullUninit
+        .srcloc 16:8,16:8;
+        String "pu$E$value"
+        .srcloc 16:8,16:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+        .srcloc 16:8,16:8;
+        SetL $method
+        .srcloc 16:8,16:8;
+        PopC
+        .srcloc 16:8,16:8;
+        CGetL $method
+        NullUninit
+        NullUninit
+        .srcloc 16:8,16:8;
+        Null
+        .srcloc 16:8,16:8;
+        CGetL $atom
+        .srcloc 16:8,16:8;
+        FCallObjMethodD <> 2 1 "00" - "" "" NullThrows "invoke"
+        .srcloc 16:8,16:8;
+        IterFree 0
+        RetC
+        .srcloc 16:8,16:8;
+        Jmp L3
+      } .catch {
+        Dup
+        InstanceOfD "Exception"
+        JmpZ L4
+        SetL $_
+        PopC
+        .srcloc 16:8,16:8;
+        Jmp L3
+      L4:
+        Throw
+      }
+    L3:
+      .srcloc 16:8,16:8;
+      IterNext 0 NK V:$trait_class L5
+      Jmp L2
+    } .catch {
+      IterFree 0
+      Throw
+    }
+  L2:
+    .srcloc 16:8,16:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 16:8,16:8;
+    String "\\C:@E::value unknown atom access: "
+    .srcloc 16:8,16:8;
+    CGetL $atom
+    Concat
+    .srcloc 16:8,16:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 16:8,16:8;
+    Throw
+    .srcloc 16:9,16:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 16:8,16:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (16,16) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 16:8,16:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} D (26,26) extends C {
+}
+
+# traitsuperclass.good.php ends here

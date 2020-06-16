@@ -1616,9 +1616,10 @@ let handle_mode
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
     let genv = ServerEnvBuild.default_genv in
+    let init_id = Random_id.short_string () in
     let env =
       {
-        (ServerEnvBuild.make_env genv.ServerEnv.config) with
+        (ServerEnvBuild.make_env ~init_id genv.ServerEnv.config) with
         ServerEnv.naming_table;
         ServerEnv.tcopt = Provider_context.get_tcopt ctx;
       }
@@ -1651,9 +1652,10 @@ let handle_mode
     let naming_table = Naming_table.create files_info in
     Naming_table.iter naming_table Typing_deps.update_file;
     let genv = ServerEnvBuild.default_genv in
+    let init_id = Random_id.short_string () in
     let env =
       {
-        (ServerEnvBuild.make_env genv.ServerEnv.config) with
+        (ServerEnvBuild.make_env ~init_id genv.ServerEnv.config) with
         ServerEnv.naming_table;
         ServerEnv.tcopt = Provider_context.get_tcopt ctx;
       }

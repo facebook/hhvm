@@ -292,7 +292,7 @@ let default_genv =
     debug_channels = None;
   }
 
-let make_env ?init_id config =
+let make_env ~init_id config =
   {
     tcopt = ServerConfig.typechecker_options config;
     popt = ServerConfig.parser_options config;
@@ -328,10 +328,7 @@ let make_env ?init_id config =
         approach_name = "";
         ci_info = None;
         init_error = None;
-        init_id =
-          (match init_id with
-          | Some init_id -> init_id
-          | None -> Random_id.short_string ());
+        init_id;
         init_start_t = Unix.gettimeofday ();
         init_type = "";
         mergebase = None;

@@ -397,8 +397,9 @@ let initialize1 (param : ClientIdeMessage.Initialize_from_saved_state.t) :
   let genv =
     ServerEnvBuild.make_genv server_args server_config server_local_config []
   in
+  let init_id = Random_id.short_string () in
   let { ServerEnv.tcopt; popt; gleanopt; _ } =
-    ServerEnvBuild.make_env genv.ServerEnv.config
+    ServerEnvBuild.make_env ~init_id genv.ServerEnv.config
   in
 
   (* We need shallow class declarations so that we can invalidate individual

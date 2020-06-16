@@ -82,10 +82,11 @@ files, but to test incremental mode behavior with Hhi files present.
 let setup_server ?custom_config ?(hhi_files = []) () =
   test_init_common () ~hhi_files;
 
+  let init_id = Random_id.short_string () in
   let result =
     match custom_config with
-    | Some config -> ServerEnvBuild.make_env config
-    | None -> ServerEnvBuild.make_env !genv.ServerEnv.config
+    | Some config -> ServerEnvBuild.make_env ~init_id config
+    | None -> ServerEnvBuild.make_env ~init_id !genv.ServerEnv.config
   in
   let hhi_file_list =
     List.map hhi_files ~f:(fun (fn, _) ->
@@ -666,7 +667,8 @@ let load_state
         changes;
       }
   in
-  let env = ServerEnvBuild.make_env !genv.ServerEnv.config in
+  let init_id = Random_id.short_string () in
+  let env = ServerEnvBuild.make_env ~init_id !genv.ServerEnv.config in
   match
     ServerInit.init
       ~init_approach:(ServerInit.Saved_state_init load_state_approach)

@@ -16,4 +16,4 @@ val make_genv :
 
 val default_genv : ServerEnv.genv
 
-val make_env : ?init_id:string -> ServerConfig.t -> ServerEnv.env
+val make_env : init_id:string -> ServerConfig.t -> ServerEnv.env

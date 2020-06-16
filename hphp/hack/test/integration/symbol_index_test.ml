@@ -194,7 +194,8 @@ let test_sqlite_plus_local (harness : Test_harness.t) : bool =
       (foo3path, Full foo3fileinfo, TypeChecker);
     ]
   in
-  let env = ServerEnvBuild.make_env ServerConfig.default_config in
+  let init_id = Random_id.short_string () in
+  let env = ServerEnvBuild.make_env ~init_id ServerConfig.default_config in
   let ctx = Provider_utils.ctx_from_server_env env in
   let sienv = SymbolIndex.update_files ~ctx ~sienv ~paths:changelist in
   let n = LocalSearchService.count_local_fileinfos sienv in
@@ -359,7 +360,8 @@ let test_namespace_map (harness : Test_harness.t) : bool =
 (* Rapid unit tests to verify docblocks are found and correct *)
 let test_docblock_finder (harness : Test_harness.t) : bool =
   let _ = harness in
-  let env = ServerEnvBuild.make_env ServerConfig.default_config in
+  let init_id = Random_id.short_string () in
+  let env = ServerEnvBuild.make_env ~init_id ServerConfig.default_config in
   let handle =
     SharedMem.init ~num_workers:0 GlobalConfig.default_sharedmem_config
   in

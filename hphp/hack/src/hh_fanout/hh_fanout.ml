@@ -47,7 +47,8 @@ let set_up_global_environment (env : env) : setup_result =
     ServerEnvBuild.make_genv server_args server_config server_local_config []
     (* no workers *)
   in
-  let server_env = ServerEnvBuild.make_env genv.ServerEnv.config in
+  let init_id = Random_id.short_string () in
+  let server_env = ServerEnvBuild.make_env ~init_id genv.ServerEnv.config in
   (* We need shallow class declarations so that we can invalidate individual
   members in a class hierarchy. *)
   let server_env =

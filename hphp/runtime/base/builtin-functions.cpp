@@ -418,6 +418,12 @@ void checkMethCaller(const Func* func, const Class* ctx) {
     ));
   }
 
+  if (isTrait(cls)) {
+    SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(
+      "meth_caller(): class {} is a trait", func->methCallerClsName()->data()
+    ));
+  }
+
   auto const meth = cls->lookupMethod(func->methCallerMethName());
   if (!meth) {
     SystemLib::throwInvalidArgumentExceptionObject(folly::sformat(

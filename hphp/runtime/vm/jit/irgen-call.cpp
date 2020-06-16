@@ -1055,7 +1055,7 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
 
   auto const ok = [&] () -> bool {
     auto const cls = lookupUniqueClass(env, className);
-    if (cls) {
+    if (cls && !isTrait(cls)) {
       auto const res = lookupImmutableObjMethod(cls, methodName, curClass(env),
                                                 false);
       return res.func && checkMethCallerTarget(res.func, curClass(env), false);

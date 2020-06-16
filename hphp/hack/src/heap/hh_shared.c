@@ -2679,7 +2679,7 @@ static void verify_sqlite_header(sqlite3 *db, int ignore_hh_version) {
             BuildInfo_kRevision) != 0) {
           caml_failwith(
             "There was a build version mismatch when loading "
-            "dep table SQLite database (and `ignore_hh_version` is not set). "
+            "dep table SQLite database (and `--ignore-hh-version` was not passed). "
             "Not continuing with loading. "
           );
         }

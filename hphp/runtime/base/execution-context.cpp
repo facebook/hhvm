@@ -1942,7 +1942,7 @@ Variant ExecutionContext::getEvaledArg(const StringData* val,
 
   // Default arg values are not currently allowed to depend on class context.
   auto v = Variant::attach(
-    g_context->invokeFuncFew(func, nullptr)
+    g_context->invokeFuncFew(func, nullptr, 0, nullptr, true, true)
   );
   auto const lv = m_evaledArgs.lvalForce(key, AccessFlags::Key);
   tvSet(*v.asTypedValue(), lv);

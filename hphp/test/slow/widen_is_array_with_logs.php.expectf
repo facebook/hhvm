@@ -2,8 +2,14 @@
 ---------------------- is_array --------------------
 arrkind: non-array, check: 0
 arrkind: array, check: 1
+
+Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 66
 arrkind: vec, check: 1
+
+Notice: Hack Array Compat: is_array() called on dict in %s/hphp/test/slow/widen_is_array_with_logs.php on line 67
 arrkind: dict, check: 1
+
+Notice: Hack Array Compat: is_array() called on keyset in %s/hphp/test/slow/widen_is_array_with_logs.php on line 68
 arrkind: keyset, check: 1
 arrkind: varray, check: 1
 arrkind: darray, check: 1
@@ -59,8 +65,14 @@ arrkind: darray, check: 1
 ---------------------- is_array ----------------------
 arrkind: non-array, check: 0
 arrkind: array, check: 1
+
+Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 18
 arrkind: vec, check: 1
+
+Notice: Hack Array Compat: is_array() called on dict in %s/hphp/test/slow/widen_is_array_with_logs.php on line 18
 arrkind: dict, check: 1
+
+Notice: Hack Array Compat: is_array() called on keyset in %s/hphp/test/slow/widen_is_array_with_logs.php on line 18
 arrkind: keyset, check: 1
 arrkind: varray, check: 1
 arrkind: darray, check: 1
@@ -116,8 +128,14 @@ arrkind: darray, check: 1
 ---------------------- is_array ----------------------
 arrkind: non-array, check: 0
 arrkind: array, check: 1
+
+Notice: Hack Array Compat: is_array() called on vec in %s/hphp/test/slow/widen_is_array_with_logs.php on line 40
 arrkind: vec, check: 1
+
+Notice: Hack Array Compat: is_array() called on dict in %s/hphp/test/slow/widen_is_array_with_logs.php on line 40
 arrkind: dict, check: 1
+
+Notice: Hack Array Compat: is_array() called on keyset in %s/hphp/test/slow/widen_is_array_with_logs.php on line 40
 arrkind: keyset, check: 1
 arrkind: varray, check: 1
 arrkind: darray, check: 1

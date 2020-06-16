@@ -1,1 +1,1 @@
--vEval.WidenIsArray=true
+-vEval.WidenIsArray=true -vEval.WidenIsArrayLogs=false

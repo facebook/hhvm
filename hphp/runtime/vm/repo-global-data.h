@@ -115,6 +115,11 @@ struct Repo::GlobalData {
    */
   bool HackArrDVArrs = false;
 
+  /* Do we widen the behavior of `is_array` to `is_any_array`? */
+  bool WidenIsArray = false;
+  /* Do we logs for Hack arrays flowing into `is_array` post widening? */
+  bool WidenIsArrayLogs = true;
+
   /*
    * Should the extension containing HHVM intrinsics be enabled?
    */
@@ -222,6 +227,8 @@ struct Repo::GlobalData {
       (ArrayProvenance)
       (StrictArrayFillKeys)
       (EnableFuncStringInterop)
+      (WidenIsArray)
+      (WidenIsArrayLogs)
       ;
   }
 };

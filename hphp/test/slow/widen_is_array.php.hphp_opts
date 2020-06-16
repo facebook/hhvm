@@ -1,1 +1,1 @@
--vRuntime.Eval.WidenIsArray=true
+-vRuntime.Eval.WidenIsArray=true -vRuntime.Eval.WidenIsArrayLogs=false

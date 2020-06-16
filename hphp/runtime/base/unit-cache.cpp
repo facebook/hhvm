@@ -880,6 +880,8 @@ std::string mangleUnitSha1(const std::string& fileSha1,
     + std::to_string(RuntimeOption::EvalEnforceGenericsUB)
     + (RuntimeOption::EvalEnforcePropUB ? '1' : '0')
     + (RuntimeOption::EvalEmitMethCallerFuncPointers ? '1' : '0')
+    + (RuntimeOption::EvalWidenIsArray ? '1' : '0')
+    + (RuntimeOption::EvalWidenIsArrayLogs ? '1' : '0')
     + std::to_string(RuntimeOption::EvalAssemblerMaxScalarSize)
     + opts.cacheKeyRaw()
     + mangleExtension(fileName)

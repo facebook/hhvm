@@ -293,9 +293,6 @@ let hack_arr_dv_arrs () =
 let php7_ltr_assign () =
   Hhbc_options.php7_ltr_assign !Hhbc_options.compiler_options
 
-let widen_is_array () =
-  Hhbc_options.widen_is_array !Hhbc_options.compiler_options
-
 (* Strict binary operations; assumes that operands are already on stack *)
 let from_binop op =
   let check_int_overflow =
@@ -422,14 +419,7 @@ let istype_op id =
   | "is_double" ->
     Some OpDbl
   | "is_string" -> Some OpStr
-  | "is_array" ->
-    Some
-      begin
-        if widen_is_array () then
-          OpArrLike
-        else
-          OpArr
-      end
+  | "is_array" -> Some OpArr
   | "is_object" -> Some OpObj
   | "is_null" -> Some OpNull
   (* We don't use IsType with the resource type because `is_resource()` does

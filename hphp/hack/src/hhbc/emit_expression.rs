@@ -2875,7 +2875,6 @@ fn emit_is(e: &mut Emitter, env: &Env, pos: &Pos, h: &tast::Hint) -> Result {
 }
 
 fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
-    let widen_is_array = opts.hhvm.flags.contains(HhvmFlags::WIDEN_IS_ARRAY);
     let hack_arr_dv_arrs = hack_arr_dv_arrs(opts);
     use IstypeOp::*;
     match id.as_ref() {
@@ -2883,7 +2882,7 @@ fn istype_op(opts: &Options, id: impl AsRef<str>) -> Option<IstypeOp> {
         "is_bool" => Some(OpBool),
         "is_float" | "is_real" | "is_double" => Some(OpDbl),
         "is_string" => Some(OpStr),
-        "is_array" => Some(if widen_is_array { OpArrLike } else { OpArr }),
+        "is_array" => Some(OpArr),
         "is_object" => Some(OpObj),
         "is_null" => Some(OpNull),
         "is_scalar" => Some(OpScalar),

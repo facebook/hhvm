@@ -129,7 +129,7 @@ bool HHVM_FUNCTION(HH_is_php_array, const Variant& v) {
 
 bool HHVM_FUNCTION(is_array, const Variant& v) {
   if (UNLIKELY(RuntimeOption::EvalWidenIsArray)) {
-    return HHVM_FUNCTION(HH_is_any_array, v);
+    return is_any_array(v.asTypedValue(), /* logOnHackArrays = */ true);
   }
   return is_array(v.asTypedValue(), /*logOnHackArrays=*/true);
 }

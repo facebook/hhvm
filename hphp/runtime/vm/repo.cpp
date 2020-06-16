@@ -292,6 +292,9 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RO::EvalHackArrCompatIsArrayNotices =
       s_globalData.HackArrCompatIsArrayNotices;
 
+    RO::EvalWidenIsArray = s_globalData.WidenIsArray;
+    RO::EvalWidenIsArrayLogs = s_globalData.WidenIsArrayLogs;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

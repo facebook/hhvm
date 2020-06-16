@@ -55,7 +55,6 @@ type t = {
   option_disable_xhp_children_declarations: bool;
   option_enable_xhp_class_modifier: bool;
   option_enable_first_class_function_pointers: bool;
-  option_widen_is_array: bool;
   option_disable_array: bool;
 }
 [@@deriving eq, ord]
@@ -108,7 +107,6 @@ let default =
     option_disable_xhp_children_declarations = false;
     option_enable_xhp_class_modifier = false;
     option_enable_first_class_function_pointers = false;
-    option_widen_is_array = false;
     option_disable_array = false;
   }
 
@@ -205,12 +203,6 @@ let enable_first_class_function_pointers o =
   o.option_enable_first_class_function_pointers
 
 let disable_array o = o.option_disable_array
-
-(**
- * Widen the default behavior of `is_array` from "is exactly a PHP array to"
- * "is any kind of CoW container" (i.e. `HH\is_any_array`)
- *)
-let widen_is_array o = o.option_widen_is_array
 
 let canonical_aliased_namespaces an =
   List.sort (fun p1 p2 -> String.compare (fst p1) (fst p2)) an
@@ -392,8 +384,6 @@ let set_option options name value =
       options with
       option_enable_first_class_function_pointers = int_of_string value > 0;
     }
-  | "hhvm.widen_is_array" ->
-    { options with option_widen_is_array = as_bool value }
   | "hhvm.hack.lang.disable_array" ->
     { options with option_disable_array = as_bool value }
   | _ -> options
@@ -598,8 +588,6 @@ let value_setters =
         get_value_from_config_int
     @@ fun opts v ->
       { opts with option_enable_first_class_function_pointers = v = 1 } );
-    ( set_value "hhvm.widen_is_array" get_value_from_config_int @@ fun opts v ->
-      { opts with option_widen_is_array = v = 1 } );
     ( set_value "hhvm.hack.lang.disable_array" get_value_from_config_int
     @@ fun opts v -> { opts with option_disable_array = v = 1 } );
   ]

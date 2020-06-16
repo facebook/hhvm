@@ -3902,6 +3902,8 @@ folly::Optional<size_t> array_size(const Type& t) {
 
 Type type_of_istype(IsTypeOp op) {
   using RO = RuntimeOption;
+  const auto php_arr = !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
+      ? TArrCompat : TArr;
   switch (op) {
   case IsTypeOp::Null:   return TNull;
   case IsTypeOp::Bool:   return TBool;
@@ -3909,10 +3911,7 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dbl:    return TDbl;
   case IsTypeOp::Str:    return TStrLike;
   case IsTypeOp::Res:    return TRes;
-  case IsTypeOp::PHPArr:
-  case IsTypeOp::Arr:
-    return !RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
-      ? TArrCompat : TArr;
+  case IsTypeOp::PHPArr: return php_arr;
   case IsTypeOp::Vec:
     return RO::EvalHackArrDVArrs && RO::EvalIsCompatibleClsMethType
       ? TVecCompat : TVec;
@@ -3928,6 +3927,9 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::ClsMeth: return TClsMeth;
   case IsTypeOp::Func:
     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
+  case IsTypeOp::Arr:
+    if (!RO::EvalWidenIsArray) return php_arr;
+    /* fallthrough */
   case IsTypeOp::ArrLike:
     return RO::EvalIsCompatibleClsMethType ? TArrLikeCompat : TArrLike;
   case IsTypeOp::Scalar: always_assert(0);
@@ -3941,7 +3943,7 @@ folly::Optional<IsTypeOp> type_to_istypeop(const Type& t) {
   if (t.subtypeOf(BInt))    return IsTypeOp::Int;
   if (t.subtypeOf(BDbl))    return IsTypeOp::Dbl;
   if (t.subtypeOf(BStr))    return IsTypeOp::Str;
-  if (t.subtypeOf(BArr))    return IsTypeOp::Arr;
+  if (t.subtypeOf(BArr))    return IsTypeOp::PHPArr;
   if (t.subtypeOf(BVec))    return IsTypeOp::Vec;
   if (t.subtypeOf(BDict))   return IsTypeOp::Dict;
   if (t.subtypeOf(BRes))    return IsTypeOp::Res;
@@ -6309,8 +6311,15 @@ bool is_type_might_raise(const Type& testTy, const Type& valTy) {
 }
 
 bool is_type_might_raise(IsTypeOp testOp, const Type& valTy) {
-  return testOp != IsTypeOp::Scalar &&
-    is_type_might_raise(type_of_istype(testOp), valTy);
+  switch (testOp) {
+    case IsTypeOp::Scalar:
+      return false;
+    case IsTypeOp::Arr:
+      if (RO::EvalWidenIsArray && valTy.couldBe(BVec | BDict | BKeyset)) return true;
+      /* fallthrough */
+    default:
+      return is_type_might_raise(type_of_istype(testOp), valTy);
+  }
 }
 
 bool inner_types_might_raise(const Type& t1, const Type& t2) {

@@ -3448,7 +3448,6 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Bool:   return is_bool(&val);
   case IsTypeOp::Int:    return is_int(&val);
   case IsTypeOp::Dbl:    return is_double(&val);
-  case IsTypeOp::Arr:    return is_array(&val, !vmfp()->m_func->isBuiltin());
   case IsTypeOp::PHPArr: return is_array(&val, /* logOnHackArrays = */ false);
   case IsTypeOp::Vec:    return is_vec(&val);
   case IsTypeOp::Dict:   return is_dict(&val);
@@ -3459,15 +3458,13 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Str:    return is_string(&val);
   case IsTypeOp::Res:    return tvIsResource(val);
   case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
-  case IsTypeOp::ArrLike:
-    if (RuntimeOption::EvalIsCompatibleClsMethType &&
-        tvIsClsMeth(val)) {
-      if (RO::EvalIsVecNotices) {
-        raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-      }
-      return true;
+  case IsTypeOp::Arr:
+    if (!RO::EvalWidenIsArray) {
+      return is_array(&val, !vmfp()->m_func->isBuiltin());
     }
-    return tvIsArrayLike(val);
+    return is_any_array(&val, !vmfp()->m_func->isBuiltin());
+  case IsTypeOp::ArrLike:
+    return is_any_array(&val, /* logOnHackArrays = */ false);
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
   case IsTypeOp::Func: return is_fun(&val);
   }

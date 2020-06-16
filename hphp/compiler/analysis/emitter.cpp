@@ -180,6 +180,8 @@ void commitGlobalData(std::unique_ptr<ArrayTypeTable::Builder> arrTable,
   gd.IsCompatibleClsMethType = RuntimeOption::EvalIsCompatibleClsMethType;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.EnableFuncStringInterop = RO::EvalEnableFuncStringInterop;
+  gd.WidenIsArray = RO::EvalWidenIsArray;
+  gd.WidenIsArrayLogs = RO::EvalWidenIsArrayLogs;
 
   for (auto a : Option::APCProfile) {
     gd.APCProfile.emplace_back(StringData::MakeStatic(folly::StringPiece(a)));

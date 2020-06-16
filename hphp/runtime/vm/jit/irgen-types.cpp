@@ -427,8 +427,6 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::Dbl:     return TDbl;
   case IsTypeOp::Bool:    return TBool;
   case IsTypeOp::Str:     return TStr;
-  case IsTypeOp::PHPArr:
-  case IsTypeOp::Arr:     return TArr;
   case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
   case IsTypeOp::Res:     return TRes;
@@ -439,6 +437,8 @@ Type typeOpToType(IsTypeOp op) {
   case IsTypeOp::VArray:
   case IsTypeOp::DArray:
   case IsTypeOp::ArrLike:
+  case IsTypeOp::Arr:
+  case IsTypeOp::PHPArr:
   case IsTypeOp::Scalar: not_reached();
   }
   not_reached();
@@ -685,16 +685,33 @@ SSATmp* isDVArrayImpl(IRGS& env, SSATmp* src, IsTypeOp subop) {
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
-SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src) {
+SSATmp* isArrLikeImpl(IRGS& env, SSATmp* src, bool log_on_hack_arrays) {
+  MultiCond mc{env};
+
   // We eventually want ClsMeth to be its own DataType, so we must log.
-  if (RO::EvalIsCompatibleClsMethType && src->isA(TClsMeth)) {
-    if (RO::EvalIsVecNotices) {
-      auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
-      gen(env, RaiseNotice, cns(env, msg));
-    }
-    return cns(env, true);
+  if (RO::EvalIsCompatibleClsMethType) {
+    mc.ifTypeThen(src, TClsMeth, [&](SSATmp* src) {
+      if (RO::EvalIsVecNotices) {
+        auto const msg = makeStaticString(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+        gen(env, RaiseNotice, cns(env, msg));
+      }
+      return cns(env, true);
+    });
   }
-  return gen(env, IsType, TArrLike, src);
+
+  if (log_on_hack_arrays && RO::EvalWidenIsArrayLogs) {
+    auto const widenIsArrayLogging = [&](Type t, const char* msg) {
+      mc.ifTypeThen(src, t, [&](SSATmp* src) {
+        gen(env, RaiseHackArrCompatNotice, cns(env, makeStaticString(msg)));
+        return cns(env, true);
+      });
+    };
+    widenIsArrayLogging(TVec, Strings::HACKARR_COMPAT_VEC_IS_ARR);
+    widenIsArrayLogging(TDict, Strings::HACKARR_COMPAT_DICT_IS_ARR);
+    widenIsArrayLogging(TKeyset, Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
+  }
+
+  return mc.elseDo([&]{ return gen(env, IsType, TArrLike, src); });
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1836,12 +1853,15 @@ SSATmp* isTypeHelper(IRGS& env, IsTypeOp subop, SSATmp* val) {
     case IsTypeOp::PHPArr:
       return isArrayImpl(env, val, /*log_on_hack_arrays=*/false);
     case IsTypeOp::Arr:
-      return isArrayImpl(env, val, /*log_on_hack_arrays=*/true);
+      return RO::EvalWidenIsArray
+        ? isArrLikeImpl(env, val, /* log_on_hack_arrays = */ true)
+        : isArrayImpl(env, val, /*log_on_hack_arrays=*/true);
     case IsTypeOp::Vec:     return isVecImpl(env, val);
     case IsTypeOp::Dict:    return isDictImpl(env, val);
     case IsTypeOp::Scalar:  return isScalarImpl(env, val);
     case IsTypeOp::Str:     return isStrImpl(env, val);
-    case IsTypeOp::ArrLike: return isArrLikeImpl(env, val);
+    case IsTypeOp::ArrLike:
+      return isArrLikeImpl(env, val, /*log_on_hack_arrays = */ false);
     default: break;
   }
 

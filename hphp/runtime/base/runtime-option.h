@@ -1319,10 +1319,14 @@ struct RuntimeOption {
      2 - throw */                                                       \
   F(uint64_t, DynamicClsMethLevel, 1)                                   \
   F(bool, APCSerializeFuncs, true)                                      \
-  /* When set, `is_array` becomes equivalent to `is_any_array` or
-   * `isTvArrayLike` instead of being a strict KindOfArray check.
+  /* When set:
+   * - `is_array` becomes equivalent to `is_any_array` or
+   *  `isTvArrayLike` instead of being a strict KindOfArray check.
+   * - For safety, we still log when these calls receive Hack arrays.
+   *   See `SuppressWidenIsArrayLogs`.
    */                                                                   \
   F(bool, WidenIsArray, false)                                          \
+  F(bool, WidenIsArrayLogs, true)                                       \
   F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, NoUseMagicMethods, false)                                     \
   /* Should we use the autoload map from the repo */                    \

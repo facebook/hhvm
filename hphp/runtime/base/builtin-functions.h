@@ -118,6 +118,27 @@ inline void maybe_raise_array_serialization_notice(
   }
 }
 
+inline bool is_any_array(const TypedValue* c, bool logOnHackArrays) {
+  assertx(tvIsPlausible(*c));
+  if (tvIsClsMeth(c) && RO::EvalIsCompatibleClsMethType) {
+    if (RO::EvalIsVecNotices) {
+      raise_notice(Strings::CLSMETH_COMPAT_IS_ANY_ARR);
+    }
+    return true;
+  }
+
+  if (logOnHackArrays && RO::EvalWidenIsArrayLogs) {
+    if (tvIsVec(c)) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_VEC_IS_ARR);
+    } else if (tvIsDict(c)) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_DICT_IS_ARR);
+    } else if (tvIsKeyset(c)) {
+      raise_hackarr_compat_notice(Strings::HACKARR_COMPAT_KEYSET_IS_ARR);
+    }
+  }
+  return tvIsArrayLike(c);
+}
+
 inline bool is_array(const TypedValue* c, bool logOnHackArrays) {
   assertx(tvIsPlausible(*c));
 

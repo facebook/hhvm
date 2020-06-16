@@ -307,6 +307,15 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
                "EnableFuncStringInterop",
                RuntimeOption::EvalEnableFuncStringInterop);
 
+  Config::Bind(RuntimeOption::EvalWidenIsArray, ini, config,
+               "WidenIsArray",
+               RuntimeOption::EvalWidenIsArray);
+
+  Config::Bind(RuntimeOption::EvalWidenIsArrayLogs, ini, config,
+               "WidenIsArrayLogs",
+               RuntimeOption::EvalWidenIsArrayLogs);
+
+
   // Temporary, during file-cache migration.
   Config::Bind(FileCache::UseNewCache, ini, config, "UseNewCache", false);
 }

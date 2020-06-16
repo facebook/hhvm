@@ -121,9 +121,6 @@ let assert_opts_equal caml rust =
     Hhbc_options.(enable_first_class_function_pointers caml)
     Hhbc_options.(enable_first_class_function_pointers rust);
   assert_equal
-    Hhbc_options.(widen_is_array caml)
-    Hhbc_options.(widen_is_array rust);
-  assert_equal
     Hhbc_options.(disable_xhp_element_mangling caml)
     Hhbc_options.(disable_xhp_element_mangling rust);
   assert_equal
@@ -388,9 +385,6 @@ let test_all_overrides_json_only _ =
   },
   \"hhvm.server.include_search_paths\": {
     \"global_value\": [\"path1\", \"path2\"]
-  },
-  \"hhvm.widen_is_array\": {
-    \"global_value\": true
   }
 }
 "
@@ -506,8 +500,6 @@ module CliArgOverrides = struct
   let hhvm'rx_is_enabled = "-vhhvm.rx_is_enabled=2"
 
   (* let hhvm'server'include_search_paths = "UNSUPPORTED BY CLI" *)
-
-  let hhvm'widen_is_array = "-vhhvm.widen_is_array=true"
 end
 
 let test_all_overrides_cli_only _ =
@@ -557,7 +549,6 @@ let test_all_overrides_cli_only _ =
       hhvm'php7'uvs;
       hhvm'rx_is_enabled;
       (* hhvm'server'include_search_paths; *)
-      hhvm'widen_is_array;
       hhvm'hack'lang'const_default_lambda_args;
     ]
   in

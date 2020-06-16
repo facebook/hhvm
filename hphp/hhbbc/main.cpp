@@ -329,6 +329,9 @@ std::vector<SString> load_input(F&& fun) {
     RO::EvalEnforceGenericsUB = 1;
   }
 
+  RO::EvalWidenIsArray = gd.WidenIsArray;
+  RO::EvalWidenIsArrayLogs = gd.WidenIsArrayLogs;
+
   auto const units = Repo::get().enumerateUnits(RepoIdCentral, true);
   auto const size = units.size();
   fun(size, nullptr);
@@ -432,6 +435,8 @@ void write_global_data(
   gd.ArrayProvenance = RuntimeOption::EvalArrayProvenance;
   gd.StrictArrayFillKeys = RuntimeOption::StrictArrayFillKeys;
   gd.EnableFuncStringInterop = RO::EvalEnableFuncStringInterop;
+  gd.WidenIsArray = RO::EvalWidenIsArray;
+  gd.WidenIsArrayLogs = RO::EvalWidenIsArrayLogs;
 
   for (auto const& elm : RuntimeOption::ConstantFunctions) {
     gd.ConstantFunctions.push_back(elm);

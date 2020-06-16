@@ -289,6 +289,9 @@ void Repo::loadGlobalData(bool readGlobalTables /* = true */) {
     RuntimeOption::EvalEmitClsMethPointers = s_globalData.EmitClsMethPointers;
     RO::EvalEnableFuncStringInterop = s_globalData.EnableFuncStringInterop;
 
+    RO::EvalHackArrCompatIsArrayNotices =
+      s_globalData.HackArrCompatIsArrayNotices;
+
     RuntimeOption::ConstantFunctions.clear();
     for (auto const& elm : s_globalData.ConstantFunctions) {
       RuntimeOption::ConstantFunctions.insert(elm);

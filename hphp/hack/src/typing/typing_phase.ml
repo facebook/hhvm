@@ -393,14 +393,14 @@ and localize_cstr_ty ~ety_env env ty tp_name =
 (* Localize an explicit type argument to a constructor or function. We
  * support the use of wildcards at the top level only *)
 and localize_targ env hint =
-  let ty = Decl_hint.hint env.decl_env hint in
   (* For explicit type arguments we support a wildcard syntax `_` for which
-  * Hack will generate a fresh type variable *)
-  match deref ty with
-  | (r, Tapply ((_, id), [])) when String.equal id SN.Typehints.wildcard ->
-    let (env, ty) = Env.fresh_type env (Reason.to_pos r) in
+   * Hack will generate a fresh type variable *)
+  match hint with
+  | (_, Aast.Happly ((p, id), [])) when String.equal id SN.Typehints.wildcard ->
+    let (env, ty) = Env.fresh_type env p in
     (env, (ty, hint))
   | _ ->
+    let ty = Decl_hint.hint env.decl_env hint in
     let (env, ty) = localize_with_self env ty in
     (env, (ty, hint))
 

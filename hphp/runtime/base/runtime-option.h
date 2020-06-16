@@ -1326,7 +1326,7 @@ struct RuntimeOption {
   F(bool, EnablePerFileCoverage, false)                                 \
   F(bool, NoUseMagicMethods, false)                                     \
   /* Should we use the autoload map from the repo */                    \
-  F(bool, UseRepoAutoloadMap, false)                                    \
+  F(bool, UseRepoAutoloadMap, true)                                     \
   /* */
 
 private:

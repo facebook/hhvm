@@ -615,7 +615,6 @@ let next
         | ([], []) when Hash_set.Poly.is_empty files_in_progress -> Bucket.Done
         | ([], []) -> Bucket.Wait
         | (jobs, stolen_jobs) ->
-          ignore (jobs, stolen_jobs, num_workers, state);
           let jobs =
             if List.length jobs > List.length stolen_jobs then
               jobs

@@ -236,9 +236,9 @@ let parsing_end _ _ ~parsed_count:_ = ()
 
 let updating_deps_end _ = ()
 
-let naming_end _ = ()
+let naming_end _ _ = ()
 
-let global_naming_end _ = ()
+let global_naming_end _ _ = ()
 
 let run_search_end _ = ()
 
@@ -256,7 +256,9 @@ let type_check_primary_position_bug ~current_file:_ ~message:_ ~stack:_ = ()
 
 let type_check_exn_bug ~path:_ ~pos:_ ~e:_ = ()
 
-let type_check_end _ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ = ()
+let type_check_end
+    _ ~heap_size:_ ~started_count:_ ~count:_ ~experiments:_ ~start_t:_ =
+  ()
 
 let notifier_returned _ _ = ()
 

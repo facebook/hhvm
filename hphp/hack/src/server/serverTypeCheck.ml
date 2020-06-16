@@ -1142,8 +1142,12 @@ functor
           ~files_to_parse
           ~stop_at_errors
       in
-      HackEventLogger.naming_end t;
+
       let t = Hh_logger.log_duration logstring t in
+      let heap_size = SharedMem.heap_size () in
+      Hh_logger.log "Heap size: %d" heap_size;
+      HackEventLogger.naming_end t heap_size;
+
       (* REDECL PHASE 1 ********************************************************)
       ServerProgress.send_progress_to_monitor
         ~include_in_logs:false
@@ -1383,8 +1387,12 @@ functor
         ~before:old_env.diag_subscribe
         ~after:diag_subscribe;
 
+      let heap_size = SharedMem.heap_size () in
+      Hh_logger.log "Heap size: %d" heap_size;
+
       HackEventLogger.type_check_end
         (ServerUtils.log_hash_stats telemetry)
+        ~heap_size
         ~started_count:to_recheck_count
         ~count:total_rechecked_count
         ~experiments:genv.local_config.ServerLocalConfig.experiments
@@ -1393,9 +1401,6 @@ functor
         Printf.sprintf "Typechecked %d files" total_rechecked_count
       in
       let t = Hh_logger.log_duration logstring t in
-      let hs = SharedMem.heap_size () in
-      Hh_logger.log "Heap size: %d" hs;
-
       Hh_logger.log "Total: %f\n%!" (t -. start_t);
 
       (* INVALIDATE FILES (EXPERIMENTAL TYPES IN CODEGEN) **********************)

@@ -466,7 +466,7 @@ void CompactVector<T, A>::emplace_back(Args&&... args) {
 template <typename T, typename A>
 void CompactVector<T, A>::pop_back() {
   if (m_data && m_data->m_len > 0) {
-    // Otherwise, we just decrement the length
+    back().~T();
     --(m_data->m_len);
   }
 }

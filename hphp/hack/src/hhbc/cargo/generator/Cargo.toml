@@ -11,4 +11,3 @@ path = "../../generator.rs"
 [dependencies]
 ast_body = { path = "../ast_body" }
 oxidized = { path = "../../../oxidized" }
-itertools = "0.8"

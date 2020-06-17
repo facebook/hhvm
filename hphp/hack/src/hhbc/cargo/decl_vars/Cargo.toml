@@ -16,4 +16,3 @@ naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 unique_list_rust = { path = "../unique_list" }
 bitflags = "1.2"
-itertools = "0.8"

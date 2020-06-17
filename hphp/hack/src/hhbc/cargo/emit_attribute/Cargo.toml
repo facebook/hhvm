@@ -20,4 +20,3 @@ instruction_sequence_rust = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../naming" }
 oxidized = { path = "../../../oxidized" }
 runtime = { path = "../runtime" }
-itertools = "0.8"

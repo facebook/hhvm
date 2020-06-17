@@ -13,5 +13,4 @@ ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 parser_core_types = { path = "../core_types" }
 smart_constructors = { path = "../smart_constructors" }
-libc = "0.2"
 ocaml = "0.8"

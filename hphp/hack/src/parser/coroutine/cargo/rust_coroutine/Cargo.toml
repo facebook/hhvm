@@ -11,4 +11,3 @@ path = "../../coroutine_syntax.rs"
 [dependencies]
 parser_core_types = { path = "../../../cargo/core_types" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
-ocaml = "0.8"

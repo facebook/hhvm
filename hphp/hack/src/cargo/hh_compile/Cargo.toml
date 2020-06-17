@@ -13,7 +13,6 @@ path = "../../hh_compile.rs"
 compile_rust = { path = "../../hhbc/cargo/compile" }
 hhbc_hhas_rust = { path = "../../hhbc/cargo/hhbc_hhas" }
 multifile_rust = { path = "../../utils/multifile" }
-ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../../hhbc/cargo/options" }
 oxidized = { path = "../../oxidized" }
 stack_limit = { path = "../../utils/stack_limit" }

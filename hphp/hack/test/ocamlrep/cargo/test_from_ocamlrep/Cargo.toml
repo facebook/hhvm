@@ -11,4 +11,3 @@ path = "../../test_from_ocamlrep.rs"
 [dependencies]
 ocamlrep = { path = "../../../../src/ocamlrep" }
 ocamlrep_derive = { path = "../../../../src/ocamlrep_derive" }
-ocaml = "0.8"

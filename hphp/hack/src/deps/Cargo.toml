@@ -12,4 +12,3 @@ crate-type = ["lib", "staticlib"]
 [dependencies]
 ocamlrep = { path = "../ocamlrep" }
 fnv = "1.0"
-ocaml = "0.8"

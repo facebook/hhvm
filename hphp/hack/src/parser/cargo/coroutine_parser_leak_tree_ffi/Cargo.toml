@@ -10,7 +10,6 @@ path = "../../coroutine_parser_leak_tree_ffi.rs"
 
 [dependencies]
 coroutine_parser_leak_tree = { path = "../../api/cargo/coroutine_parser_leak_tree" }
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
@@ -19,5 +18,3 @@ rust_parser_ffi = { path = "../rust_parser_ffi" }
 rust_to_ocaml = { path = "../rust_to_ocaml" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
-libc = "0.2"
-ocaml = "0.8"

@@ -10,19 +10,11 @@ path = "../../hh_check.rs"
 
 [dependencies]
 decl_dummy_provider_rust = { path = "../../providers/cargo/decl_dummy_provider_rust" }
-decl_provider_rust = { path = "../../providers/cargo/decl_provider_rust" }
-multifile_rust = { path = "../../utils/multifile" }
-ocamlrep = { path = "../../ocamlrep" }
-options = { path = "../../hhbc/cargo/options" }
 oxidized = { path = "../../oxidized" }
-oxidized_by_rc = { path = "../../oxidized_by_rc" }
-oxidized_by_ref = { path = "../../oxidized_by_ref" }
 stack_limit = { path = "../../utils/stack_limit" }
-typing_ast_rust = { path = "../../typing/cargo/typing_ast_rust" }
 typing_check_service_rust = { path = "../../typing/cargo/typing_check_service_rust" }
 typing_defs_rust = { path = "../../typing/cargo/typing_defs_rust" }
 anyhow = "1.0"
 atty = "0.2"
 bumpalo = { version = "3.2.1", features = ["collections"] }
-itertools = "0.8"
 structopt = "0.3.7"

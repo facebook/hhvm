@@ -10,8 +10,3 @@ path = "lib.rs"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive", "rc"] }
-
-[dev-dependencies]
-ocamlrep_derive = { path = "../ocamlrep_derive" }
-ocamlrep_ocamlpool = { path = "../ocamlrep_ocamlpool" }
-ocaml = "0.8"

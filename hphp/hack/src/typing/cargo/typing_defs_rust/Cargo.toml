@@ -12,9 +12,7 @@ path = "../../typing_defs_rust.rs"
 arena_trait = { path = "../../../arena_trait" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 typing_collections_rust = { path = "../typing_collections_rust" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-im-rc = { version = "14.2", features = ["serde"] }

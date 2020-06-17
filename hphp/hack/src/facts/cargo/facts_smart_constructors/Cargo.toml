@@ -11,19 +11,5 @@ path = "../../facts_smart_constructors.rs"
 [dependencies]
 escaper = { path = "../../../utils/escaper" }
 flatten_smart_constructors = { path = "../../../parser/cargo/flatten_smart_constructors" }
-hhbc_string_utils_rust = { path = "../../../hhbc/cargo/string_utils" }
-ocamlrep = { path = "../../../ocamlrep" }
-oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 smart_constructors = { path = "../../../parser/cargo/smart_constructors" }
-bstr = "0.2"
-digest = "0.8"
-hex = "0.4"
-md-5 = "0.8"
-serde = { version = "1.0", features = ["derive", "rc"] }
-serde_derive = "1.0"
-serde_json = "1.0"
-sha-1 = "0.8"
-
-[dev-dependencies]
-pretty_assertions = "0.6"

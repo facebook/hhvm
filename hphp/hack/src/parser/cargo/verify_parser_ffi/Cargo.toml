@@ -9,7 +9,6 @@ include = ["../../verify_parser_ffi.rs"]
 path = "../../verify_parser_ffi.rs"
 
 [dependencies]
-ocamlpool_rust = { path = "../../../utils/ocamlpool_rust" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
@@ -19,5 +18,3 @@ rust_to_ocaml = { path = "../rust_to_ocaml" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
 verify_parser = { path = "../../api/cargo/verify_parser" }
-libc = "0.2"
-ocaml = "0.8"

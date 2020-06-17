@@ -11,11 +11,6 @@ path = "../lib.rs"
 [dependencies]
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 direct_decl_smart_constructors = { path = "../direct_decl_smart_constructors" }
-flatten_smart_constructors = { path = "../../parser/cargo/flatten_smart_constructors" }
-hh_autoimport_rust = { path = "../../parser/cargo/hh_autoimport" }
-hhbc_string_utils_rust = { path = "../../hhbc/cargo/string_utils" }
-mode_parser = { path = "../../parser/cargo/mode_parser" }
-naming_special_names_rust = { path = "../../naming" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }

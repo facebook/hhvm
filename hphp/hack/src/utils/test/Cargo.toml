@@ -10,8 +10,4 @@ path = "line_break_map_tests.rs"
 
 [dependencies]
 line_break_map = { path = "../line_break_map" }
-ocamlpool_rust = { path = "../ocamlpool_rust" }
-ocamlrep = { path = "../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../ocamlrep_ocamlpool" }
-libc = "0.2"
-ocaml = "0.8"

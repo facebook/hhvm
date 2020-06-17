@@ -13,4 +13,3 @@ path = "../../facts_parse.rs"
 facts_rust = { path = "../../../../src/facts/cargo/facts_rust" }
 oxidized = { path = "../../../../src/oxidized" }
 clap = "2.33"
-ocaml = "0.8"

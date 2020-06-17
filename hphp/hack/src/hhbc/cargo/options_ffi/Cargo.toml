@@ -11,10 +11,5 @@ crate-type = ["lib", "staticlib"]
 
 [dependencies]
 compile_ffi = { path = "../compile_ffi" }
-hhbc_string_utils_rust = { path = "../string_utils" }
-ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 options = { path = "../options" }
-fnv = "1.0"
-lru-cache = "0.1.2"
-ocaml = "0.8"

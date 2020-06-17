@@ -12,8 +12,6 @@ path = "utf32_to_utf8.rs"
 name = "bench"
 path = "bench.rs"
 
-[dependencies]
-html_entities = { path = ".." }
-
 [dev-dependencies]
+html_entities = { path = ".." }
 pretty_assertions = "0.6"

@@ -10,10 +10,7 @@ path = "../../typing_ast_rust.rs"
 
 [dependencies]
 arena_trait = { path = "../../../arena_trait" }
-decl_provider_rust = { path = "../../../providers/cargo/decl_provider_rust" }
-oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 typing_collections_rust = { path = "../typing_collections_rust" }
 typing_defs_rust = { path = "../typing_defs_rust" }
 bumpalo = { version = "3.2.1", features = ["collections"] }
-im-rc = { version = "14.2", features = ["serde"] }

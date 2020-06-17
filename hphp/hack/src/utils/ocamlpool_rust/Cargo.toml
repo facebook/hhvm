@@ -9,6 +9,4 @@ include = ["lib.rs", "utils.rs"]
 path = "lib.rs"
 
 [dependencies]
-ocamlrep = { path = "../../ocamlrep" }
-libc = "0.2"
 ocaml = "0.8"

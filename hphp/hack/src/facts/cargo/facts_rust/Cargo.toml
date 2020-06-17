@@ -9,12 +9,9 @@ include = ["../../facts.rs", "../../facts_parser.rs", "../../lib.rs"]
 path = "../../lib.rs"
 
 [dependencies]
-escaper = { path = "../../../utils/escaper" }
 facts_parser = { path = "../../../parser/api/cargo/facts_parser" }
 facts_smart_constructors = { path = "../facts_smart_constructors" }
-flatten_smart_constructors = { path = "../../../parser/cargo/flatten_smart_constructors" }
 hhbc_string_utils_rust = { path = "../../../hhbc/cargo/string_utils" }
-mode_parser = { path = "../../../parser/cargo/mode_parser" }
 ocamlrep = { path = "../../../ocamlrep" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }

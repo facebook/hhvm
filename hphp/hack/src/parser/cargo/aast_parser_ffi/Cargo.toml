@@ -15,4 +15,3 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 parser_core_types = { path = "../core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
 libc = "0.2"
-ocaml = "0.8"

@@ -13,4 +13,3 @@ parser_core_types = { path = "../../../cargo/core_types" }
 rewriter = { path = "../../../cargo/rewriter" }
 rust_coroutine = { path = "../../../coroutine/cargo/rust_coroutine" }
 rust_editable_positioned_syntax = { path = "../../../cargo/editable_positioned_syntax" }
-lazy_static = "1.0"

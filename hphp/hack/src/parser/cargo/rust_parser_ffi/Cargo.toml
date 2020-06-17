@@ -20,4 +20,3 @@ rust_to_ocaml = { path = "../rust_to_ocaml" }
 smart_constructors = { path = "../smart_constructors" }
 stack_limit = { path = "../../../utils/stack_limit" }
 libc = "0.2"
-ocaml = "0.8"

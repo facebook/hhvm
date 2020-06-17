@@ -16,4 +16,3 @@ oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../core_types" }
 rust_parser_errors = { path = ".." }
 rust_to_ocaml = { path = "../../rust_to_ocaml" }
-ocaml = "0.8"

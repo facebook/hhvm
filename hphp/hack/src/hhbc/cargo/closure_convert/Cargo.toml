@@ -25,5 +25,4 @@ options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }
 rx_rust = { path = "../rx" }
 unique_list_rust = { path = "../unique_list" }
-bitflags = "1.2"
 itertools = "0.8"

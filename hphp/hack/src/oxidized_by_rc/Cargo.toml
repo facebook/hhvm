@@ -9,15 +9,10 @@ include = ["**/*.rs"]
 path = "lib.rs"
 
 [dependencies]
-arena_collections = { path = "../arena_collections" }
-arena_trait = { path = "../arena_trait" }
-hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 oxidized = { path = "../oxidized" }
 oxidized_by_ref = { path = "../oxidized_by_ref" }
-typing_collections_rust = { path = "../typing/cargo/typing_collections_rust" }
-bumpalo = { version = "3.2.1", features = ["collections"] }
 serde = { version = "1.0", features = ["derive", "rc"] }
 
 [dev-dependencies]

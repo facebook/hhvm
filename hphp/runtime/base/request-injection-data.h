@@ -19,6 +19,7 @@
 
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/ham-runtime-option.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"
 #include "hphp/util/process.h"

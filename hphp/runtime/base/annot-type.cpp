@@ -222,6 +222,190 @@ TypedValue annotDefaultValue(AnnotType at) {
   always_assert(false);
 }
 
+AnnotAction
+annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
+  assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
+
+  // Returns true if a clsmeth may be coerced to a (plain) PHP array.
+  auto const clsmeth_array_compat = []{
+    return !RO::EvalHackArrDVArrs && !RO::EvalHackArrCompatSpecialization;
+  };
+
+  auto const metatype = getAnnotMetaType(at);
+  switch (metatype) {
+    case AnnotMetaType::Mixed:
+      return AnnotAction::Pass;
+    case AnnotMetaType::Nonnull:
+      return (dt == KindOfNull) ? AnnotAction::Fail : AnnotAction::Pass;
+    case AnnotMetaType::Number:
+      return (isIntType(dt) || isDoubleType(dt))
+        ? AnnotAction::Pass : AnnotAction::Fail;
+    case AnnotMetaType::ArrayKey:
+      return (isIntType(dt) || isStringType(dt))
+        ? AnnotAction::Pass : AnnotAction::Fail;
+    case AnnotMetaType::Self:
+    case AnnotMetaType::Parent:
+      // For "self" and "parent", if `dt' is not an object we know
+      // it's not compatible, otherwise more checks are required
+      return (dt == KindOfObject)
+        ? AnnotAction::ObjectCheck : AnnotAction::Fail;
+    case AnnotMetaType::This:
+      return (dt == KindOfObject)
+        ? AnnotAction::ObjectCheck
+        : AnnotAction::Fail;
+    case AnnotMetaType::Callable:
+      // For "callable", if `dt' is not string/array/object/func we know
+      // it's not compatible, otherwise more checks are required
+      return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
+              isFuncType(dt) || dt == KindOfObject || isClsMethType(dt) ||
+              isRFuncType(dt))
+        ? AnnotAction::CallableCheck : AnnotAction::Fail;
+    case AnnotMetaType::VArray:
+      if (isClsMethType(dt)) {
+        return RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::VArrayCheck
+        : AnnotAction::Pass;
+    case AnnotMetaType::DArray:
+      if (isClsMethType(dt)) {
+        return clsmeth_array_compat() ? AnnotAction::ClsMethCheck
+                                      : AnnotAction::Fail;
+      }
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::DArrayCheck
+        : AnnotAction::Pass;
+    case AnnotMetaType::VArrOrDArr:
+      if (isClsMethType(dt)) {
+        return RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
+      if (!isArrayType(dt)) return AnnotAction::Fail;
+      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
+        ? AnnotAction::VArrayOrDArrayCheck
+        : AnnotAction::Pass;
+    case AnnotMetaType::VecOrDict:
+      if (isClsMethType(dt)) {
+        return !RuntimeOption::EvalHackArrDVArrs ?
+          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+      }
+      return (isVecType(dt) || isDictType(dt))
+        ? AnnotAction::Pass
+        : AnnotAction::Fail;
+    case AnnotMetaType::ArrayLike:
+      if (isClsMethType(dt)) {
+        return AnnotAction::ClsMethCheck;
+      }
+      return (isArrayType(dt) || isVecType(dt) ||
+              isDictType(dt) || isKeysetType(dt))
+        ? AnnotAction::Pass
+        : AnnotAction::Fail;
+    case AnnotMetaType::Nothing:
+    case AnnotMetaType::NoReturn:
+      return AnnotAction::Fail;
+    case AnnotMetaType::Precise:
+      if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
+          at == AnnotType::Array && isArrayType(dt)) {
+        return AnnotAction::NonVArrayOrDArrayCheck;
+      }
+      break;
+  }
+
+  assertx(metatype == AnnotMetaType::Precise);
+  if (at == AnnotType::String && dt == KindOfFunc &&
+      RO::EvalEnableFuncStringInterop) {
+    return RuntimeOption::EvalStringHintNotices
+      ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
+  }
+  if (at == AnnotType::String && dt == KindOfClass) {
+    return RuntimeOption::EvalStringHintNotices
+      ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+  }
+  if (isClsMethType(dt)) {
+    auto const resolve = [] (bool okay) {
+      return okay ? AnnotAction::ClsMethCheck : AnnotAction::Fail;
+    };
+    if (at == AnnotType::Vec)       return resolve(RO::EvalHackArrDVArrs);
+    if (at == AnnotType::VArray)    return resolve(!RO::EvalHackArrDVArrs);
+    if (at == AnnotType::Array)     return resolve(clsmeth_array_compat());
+    if (at == AnnotType::ArrayLike) return resolve(true);
+  }
+
+  if (at == AnnotType::Record) {
+    return dt == KindOfRecord ? AnnotAction::RecordCheck : AnnotAction::Fail;
+  }
+
+  if (at != AnnotType::Object) {
+    // If `at' is "bool", "int", "float", "string", "array", or "resource",
+    // then equivDataTypes() can definitively tell us whether or not `dt'
+    // is compatible.
+    return equivDataTypes(getAnnotDataType(at), dt)
+      ? AnnotAction::Pass : AnnotAction::Fail;
+  }
+
+  // If `dt' is not an object, check for "magic" interfaces that
+  // support non-object datatypes
+  if (dt != KindOfObject && interface_supports_non_objects(annotClsName)) {
+    switch (dt) {
+      case KindOfInt64:
+        return interface_supports_int(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfDouble:
+        return interface_supports_double(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentString:
+      case KindOfString:
+        return interface_supports_string(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfPersistentDArray:
+      case KindOfDArray:
+      case KindOfPersistentVArray:
+      case KindOfVArray:
+      case KindOfPersistentArray:
+      case KindOfArray:
+      case KindOfPersistentVec:
+      case KindOfVec:
+      case KindOfPersistentDict:
+      case KindOfDict:
+      case KindOfPersistentKeyset:
+      case KindOfKeyset:
+        return interface_supports_arrlike(annotClsName)
+          ? AnnotAction::Pass : AnnotAction::Fail;
+      case KindOfFunc:
+        if (interface_supports_string(annotClsName) &&
+            RO::EvalEnableFuncStringInterop) {
+          return RuntimeOption::EvalStringHintNotices
+            ? AnnotAction::WarnFunc : AnnotAction::ConvertFunc;
+        }
+        return AnnotAction::Fail;
+      case KindOfClass:
+        if (interface_supports_string(annotClsName)) {
+          return RuntimeOption::EvalStringHintNotices
+            ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+        }
+        return AnnotAction::Fail;
+      case KindOfClsMeth:
+        return interface_supports_arrlike(annotClsName) ?
+          AnnotAction::ClsMethCheck : AnnotAction::Fail;
+      case KindOfRFunc:
+      case KindOfUninit:
+      case KindOfNull:
+      case KindOfBoolean:
+      case KindOfResource:
+      case KindOfRecord:
+        return AnnotAction::Fail;
+      case KindOfObject:
+        not_reached();
+        break;
+    }
+  }
+
+  return AnnotAction::ObjectCheck;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 }

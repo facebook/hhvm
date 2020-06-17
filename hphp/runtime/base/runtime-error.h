@@ -21,8 +21,8 @@
 #include <string>
 
 #include "hphp/util/portability.h"
-#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/base/ham-runtime-option.h"
 
 #ifdef ERROR
 #undef ERROR
@@ -41,6 +41,7 @@ struct Func;
 struct ArrayData;
 struct StringData;
 struct TypeConstraint;
+struct TypedValue;
 
 enum class HackStrictOption;
 

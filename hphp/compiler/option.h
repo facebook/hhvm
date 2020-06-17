@@ -20,8 +20,8 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/functional.h"
+#include "hphp/util/hash-map.h"
 #include "hphp/util/string-bag.h"
 
 namespace HPHP {

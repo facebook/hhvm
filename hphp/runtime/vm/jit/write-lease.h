@@ -18,7 +18,6 @@
 
 #include "hphp/util/assertions.h"
 #include "hphp/util/compilation-flags.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/jit/types.h"
 

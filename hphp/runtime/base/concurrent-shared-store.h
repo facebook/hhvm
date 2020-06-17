@@ -33,8 +33,6 @@
 
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/apc/snapshot-loader.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/treadmill.h"

@@ -18,7 +18,6 @@
 #define incl_HPHP_REQUEST_INJECTION_DATA_H_
 
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/vm/async-flow-stepper.h"
 #include "hphp/runtime/vm/pc-filter.h"

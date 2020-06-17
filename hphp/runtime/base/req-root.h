@@ -18,7 +18,6 @@
 #define incl_HPHP_REQ_ROOT_H_
 
 #include "hphp/runtime/base/typed-value.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include <utility>
 
 namespace HPHP { namespace req {

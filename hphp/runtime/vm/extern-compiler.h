@@ -19,7 +19,6 @@
 #include <boost/variant.hpp>
 #include <folly/Range.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/as.h"
 #include "hphp/runtime/vm/unit-emitter.h"
 

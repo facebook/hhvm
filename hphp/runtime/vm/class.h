@@ -615,6 +615,11 @@ public:
    */
   bool isDynamicallyConstructible() const;
 
+  /*
+   * If the class is called dynamically should we sample the calls?
+   */
+  folly::Optional<int64_t> dynamicConstructSampleRete() const;
+
 
   /////////////////////////////////////////////////////////////////////////////
   // Magic methods.                                                     [const]

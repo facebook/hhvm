@@ -692,6 +692,8 @@ void add_frame_variables(php::Func& func, const FuncEmitter& fe) {
   func.numIters = fe.numIterators();
 }
 
+const StaticString s_DynamicallyCallable("__DynamicallyCallable");
+
 std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
                                       php::Unit* unit,
                                       php::Class* cls,
@@ -732,6 +734,20 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
   ret->hasInOutArgs        = [&] {
     for (auto& a : fe.params) if (a.isInOut()) return true;
     return false;
+  }();
+
+  ret->sampleDynamicCalls = [&] {
+    if (!(fe.attrs & AttrDynamicallyCallable)) return false;
+
+    auto const it = fe.userAttributes.find(s_DynamicallyCallable.get());
+    if (it == fe.userAttributes.end()) return false;
+
+    assertx(isArrayLikeType(type(it->second)));
+    auto const rate = val(it->second).parr->get(int64_t(0));
+    if (!isIntType(type(rate)) || val(rate).num < 0) return false;
+
+    ret->attrs = Attr(ret->attrs & ~AttrDynamicallyCallable);
+    return true;
   }();
 
   add_frame_variables(*ret, fe);
@@ -897,6 +913,8 @@ std::unique_ptr<php::Record> parse_record(php::Unit* unit,
   return ret;
 }
 
+const StaticString s_DynamicallyConstructible("__DynamicallyConstructible");
+
 std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
                                         php::Unit* unit,
                                         const PreClassEmitter& pce) {
@@ -917,6 +935,21 @@ std::unique_ptr<php::Class> parse_class(ParseUnitState& puState,
   ret->hasReifiedGenerics = ret->userAttributes.find(s___Reified.get()) !=
                             ret->userAttributes.end();
   ret->hasConstProp       = false;
+
+  ret->sampleDynamicConstruct = [&] {
+    if (!(ret->attrs & AttrDynamicallyConstructible)) return false;
+
+    auto const it = ret->userAttributes.find(s_DynamicallyConstructible.get());
+    if (it == ret->userAttributes.end()) return false;
+
+    assertx(isArrayLikeType(type(it->second)));
+    auto const rate = val(it->second).parr->get(int64_t(0));
+    if (!isIntType(type(rate)) || val(rate).num < 0) return false;
+
+    ret->attrs = Attr(ret->attrs & ~AttrDynamicallyConstructible);
+    return true;
+  }();
+
 
   for (auto& iface : pce.interfaces()) {
     ret->interfaceNames.push_back(iface);

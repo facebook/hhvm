@@ -286,6 +286,13 @@ inline bool Class::isDynamicallyConstructible() const {
   return attrs() & AttrDynamicallyConstructible;
 }
 
+inline folly::Optional<int64_t> Class::dynamicConstructSampleRete() const {
+  auto const rate = preClass()->dynamicConstructSampleRete();
+  if (rate < 0) return {};
+  return rate;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Magic methods.
 

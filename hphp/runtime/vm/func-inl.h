@@ -633,6 +633,13 @@ inline bool Func::isDynamicallyCallable() const {
   return m_attrs & AttrDynamicallyCallable;
 }
 
+inline folly::Optional<int64_t> Func::dynCallSampleRate() const {
+  if (auto const ex = extShared()) {
+    if (ex->m_dynCallSampleRate >= 0) return ex->m_dynCallSampleRate;
+  }
+  return folly::none;
+}
+
 inline bool Func::isMethCaller() const {
   return m_attrs & AttrIsMethCaller;
 }

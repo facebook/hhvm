@@ -35,6 +35,8 @@
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
+#include <folly/Random.h>
+
 namespace HPHP { namespace jit { namespace irlower {
 
 TRACE_SET_MOD(irlower);
@@ -133,12 +135,17 @@ void cgRaiseHackArrCompatNotice(IRLS& env, const IRInstruction* inst) {
 
 static void raiseForbiddenDynCall(const Func* func) {
   assertx(!func->isDynamicallyCallable() || RO::EvalForbidDynamicCallsWithAttr);
-  auto const level = func->isMethod()
+  auto level = func->isMethod()
     ? (func->isStatic()
         ? RO::EvalForbidDynamicCallsToClsMeth
         : RO::EvalForbidDynamicCallsToInstMeth)
     : RO::EvalForbidDynamicCallsToFunc;
   if (level <= 0) return;
+
+  if (auto const rate = func->dynCallSampleRate()) {
+    if (folly::Random::rand32(*rate) != 0) return;
+    level = 1;
+  }
 
   auto error_msg = func->isDynamicallyCallable() ?
     Strings::FUNCTION_CALLED_DYNAMICALLY_WITH_ATTRIBUTE :
@@ -163,7 +170,13 @@ static void raiseForbiddenDynConstruct(const Class* cls) {
   assertx(RuntimeOption::EvalForbidDynamicConstructs > 0);
   assertx(!cls->isDynamicallyConstructible());
 
-  if (RuntimeOption::EvalForbidDynamicConstructs >= 2) {
+  auto level = RuntimeOption::EvalForbidDynamicConstructs;
+  if (auto const rate = cls->dynamicConstructSampleRete()) {
+    if (folly::Random::rand32(*rate) != 0) return;
+    level = 1;
+  }
+
+  if (level >= 2) {
     std::string msg;
     string_printf(
       msg,

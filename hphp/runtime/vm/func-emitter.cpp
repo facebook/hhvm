@@ -127,6 +127,8 @@ void FuncEmitter::commit(RepoTxn& txn) const {
      .insert(*this, txn, usn, m_sn, m_pce ? m_pce->id() : -1, name, top);
 }
 
+const StaticString s_DynamicallyCallable("__DynamicallyCallable");
+
 Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   bool isGenerated = isdigit(name->data()[0]);
 
@@ -169,6 +171,21 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     attrs |= AttrSupportsAsyncEagerReturn;
   }
 
+  auto const dynCallSampleRate = [&] () -> folly::Optional<int64_t> {
+    if (!(attrs & AttrDynamicallyCallable)) return {};
+
+    auto const uattr = userAttributes.find(s_DynamicallyCallable.get());
+    if (uattr == userAttributes.end()) return {};
+
+    auto const tv = uattr->second;
+    assertx(isArrayLikeType(type(tv)));
+    auto const rate = val(tv).parr->get(int64_t(0));
+    if (!isIntType(type(rate)) || val(rate).num < 0) return {};
+
+    attrs = Attr(attrs & ~AttrDynamicallyCallable);
+    return val(rate).num;
+  }();
+
   assertx(!m_pce == !preClass);
   auto f = m_ue.newFunc(this, unit, name, attrs, params.size());
 
@@ -183,7 +200,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     past - base >= Func::kSmallDeltaLimit ||
     hasReifiedGenerics ||
     hasParamsWithMultiUBs ||
-    hasReturnWithMultiUBs;
+    hasReturnWithMultiUBs ||
+    dynCallSampleRate;
 
   f->m_shared.reset(
     needsExtendedSharedData
@@ -204,6 +222,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_returnByValue = false;
     ex->m_isMemoizeWrapper = false;
     ex->m_isMemoizeWrapperLSB = false;
+    ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
   }
 
   std::vector<Func::ParamInfo> fParams;

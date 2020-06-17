@@ -1305,7 +1305,7 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
     std::get<0>(func.srcInfo.loc),
     std::get<1>(func.srcInfo.loc),
     fe.ue().bcPos(),
-    func.attrs,
+    func.attrs | (func.sampleDynamicCalls ? AttrDynamicallyCallable : AttrNone),
     func.top,
     func.srcInfo.docComment
   );
@@ -1379,7 +1379,8 @@ void emit_class(EmitUnitState& state,
     std::get<0>(cls.srcInfo.loc),
     std::get<1>(cls.srcInfo.loc),
     offset == kInvalidOffset ? ue.bcPos() : offset,
-    cls.attrs,
+    cls.attrs |
+      (cls.sampleDynamicConstruct ? AttrDynamicallyConstructible : AttrNone),
     cls.parentName ? cls.parentName : staticEmptyString(),
     cls.srcInfo.docComment
   );

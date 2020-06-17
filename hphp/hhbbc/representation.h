@@ -402,6 +402,8 @@ struct Func : FuncBase {
 
   bool hasInOutArgs : 1;
 
+  bool sampleDynamicCalls : 1;
+
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").
    * HHVM checks if the a function's return value matches it's return type
@@ -573,6 +575,11 @@ struct Class : ClassBase {
    * This class has at least one const instance property.
    */
   bool hasConstProp : 1;
+  /*
+   * Dynamic construction of this class can yield at most a warning and is
+   * sampled at a user defined rate.
+   */
+  bool sampleDynamicConstruct : 1;
 };
 
 struct Constant {

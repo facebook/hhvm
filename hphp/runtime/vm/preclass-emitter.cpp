@@ -244,7 +244,9 @@ void PreClassEmitter::commit(RepoTxn& txn) const {
   }
 }
 
-const StaticString s_nativedata("__nativedata");
+const StaticString
+  s_nativedata("__nativedata"),
+  s_DynamicallyConstructible("__DynamicallyConstructible");
 
 PreClass* PreClassEmitter::create(Unit& unit) const {
   Attr attrs = m_attrs;
@@ -252,6 +254,20 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
       !RuntimeOption::RepoAuthoritative && SystemLib::s_inited) {
     attrs = Attr(attrs & ~AttrPersistent);
   }
+
+  auto const dynamicConstructSampleRate = [&] () -> int64_t {
+    if (!(attrs & AttrDynamicallyConstructible)) return -1;
+
+    auto const it = m_userAttributes.find(s_DynamicallyConstructible.get());
+    if (it == m_userAttributes.end()) return -1;
+
+    assertx(isArrayLikeType(type(it->second)));
+    auto const rate = val(it->second).parr->get(int64_t(0));
+    if (!isIntType(type(rate)) || val(rate).num < 0) return -1;
+
+    attrs = Attr(attrs & ~AttrDynamicallyConstructible);
+    return val(rate).num;
+  }();
 
   assertx(attrs & AttrPersistent || SystemLib::s_inited);
 
@@ -267,6 +283,7 @@ PreClass* PreClassEmitter::create(Unit& unit) const {
   pc->m_enumBaseTy = m_enumBaseTy;
   pc->m_numDeclMethods = -1;
   pc->m_ifaceVtableSlot = m_ifaceVtableSlot;
+  pc->m_dynamicConstructSampleRate = dynamicConstructSampleRate;
 
   // Set user attributes.
   [&] {

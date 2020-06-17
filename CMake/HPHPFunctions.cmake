@@ -358,26 +358,6 @@ function(auto_source_group rootName rootDir)
   endforeach()
 endfunction()
 
-macro(add_precompiled_header PrecompiledHead PrecompiledSrc SourcesVar)
-  if (MSVC AND MSVC_ENABLE_PCH)
-    get_filename_component(PrecompiledHeader "${PrecompiledHead}" ABSOLUTE)
-    get_filename_component(PrecompiledSource "${PrecompiledSrc}" ABSOLUTE)
-    get_filename_component(PrecompiledBasename "${PrecompiledHeader}" NAME_WE)
-    get_filename_component(PrecompiledHeaderFilename "${PrecompiledHeader}" NAME)
-    set(PrecompiledBinary "${CMAKE_CURRENT_BINARY_DIR}/${PrecompiledBasename}.pch")
-    set(Sources ${${SourcesVar}})
-
-    set_source_files_properties(${PrecompiledSource} PROPERTIES
-      COMPILE_FLAGS "/Yc\"${PrecompiledHeaderFilename}\" /Fp\"${PrecompiledBinary}\""
-      OBJECT_OUTPUTS "${PrecompiledBinary}")
-    set_source_files_properties(${Sources} PROPERTIES
-      COMPILE_FLAGS "/Yu\"${PrecompiledHeader}\" /FI\"${PrecompiledHeader}\" /Fp\"${PrecompiledBinary}\""
-      OBJECT_DEPENDS "${PrecompiledBinary}")
-
-    list(APPEND ${SourcesVar} ${PrecompiledSource} ${PrecompiledHeader})
-  endif()
-endmacro()
-
 function(parse_version PREFIX VERSION)
   if (NOT ${VERSION} MATCHES "^[0-9]+\\.[0-9]+(\\.[0-9]+)?(-.+)?$")
     message(FATAL_ERROR "VERSION must conform to X.Y(.Z)?(-.+)?")

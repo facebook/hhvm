@@ -38,12 +38,6 @@ HHVM_EXTENSION_BUILD_SOURCE_LISTS()
 set(EXTENSION_SYSTEMLIB_SOURCES ${PHP_SOURCES} CACHE INTERNAL "" FORCE)
 set(HRE_LINK_LIBRARIES ${HRE_LIBARIES} CACHE INTERNAL "" FORCE)
 
-add_precompiled_header(
-  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.h"
-  "${HPHP_HOME}/hphp/pch/hphp_runtime_ext.cpp"
-  CXX_SOURCES
-)
-
 add_object_library(hphp_runtime_ext
   ${CXX_SOURCES} ${C_SOURCES} ${ASM_SOURCES} ${HEADER_SOURCES})
 auto_source_group("hphp_runtime_ext" "${CMAKE_CURRENT_SOURCE_DIR}"

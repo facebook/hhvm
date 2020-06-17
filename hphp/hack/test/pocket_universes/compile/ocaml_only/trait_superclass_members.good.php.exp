@@ -1,0 +1,944 @@
+# trait_superclass_members.good.php starts here
+
+.filepath "trait_superclass_members.good.php";
+
+.hh_file 1;
+.adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
+.adata A_1 = """k:1:{s:1:\"R\";}""";
+.adata A_2 = """k:1:{s:1:\"J\";}""";
+.adata A_3 = """v:1:{s:8:\"MyTraitC\";}""";
+.adata A_4 = """k:1:{s:1:\"X\";}""";
+.adata A_5 = """k:1:{s:1:\"K\";}""";
+.adata A_6 = """k:1:{s:1:\"Y\";}""";
+.adata A_7 = """v:2:{s:8:\"MyTraitA\";s:8:\"MyTraitB\";}""";
+
+.main (1,1) {
+  .srcloc 4:7,4:14;
+  DefCls 0
+  .srcloc 13:7,13:14;
+  DefCls 1
+  .srcloc 23:7,23:14;
+  DefCls 2
+  .srcloc 32:7,32:7;
+  DefCls 3
+  .srcloc 46:7,46:7;
+  DefCls 4
+  Int 1
+  RetC
+}
+
+.function {} ["__EntryPoint"("""y:0:{}""")] (58,65) <"HH\\void" N > main() {
+  .numiters 1;
+  .declvars $member;
+  .srcloc 59:12,59:26;
+  NullUninit
+  NullUninit
+  NullUninit
+  .srcloc 59:12,59:26;
+  FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$E$Members"
+  .srcloc 59:12,59:26;
+  IterInit 0 NK V:$member L0
+  .try {
+  L1:
+    .srcloc 60:18,60:21;
+    String ": "
+    .srcloc 60:10,60:21;
+    CGetL2 $member
+    Concat
+    .srcloc 60:24,60:43;
+    NullUninit
+    NullUninit
+    NullUninit
+    .srcloc 60:36,60:42;
+    CGetL $member
+    .srcloc 60:24,60:43;
+    FCallClsMethodD <> 1 1 "0" - "" "" "D" "pu$E$value"
+    .srcloc 60:10,60:44;
+    Concat
+    .srcloc 60:46,60:49;
+    String "\n"
+    .srcloc 60:10,60:49;
+    Concat
+    .srcloc 60:5,60:50;
+    Print
+    .srcloc 60:5,60:50;
+    PopC
+    .srcloc 59:3,61:95;
+    IterNext 0 NK V:$member L1
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L0:
+  .srcloc 62:12,62:26;
+  NullUninit
+  NullUninit
+  NullUninit
+  .srcloc 62:12,62:26;
+  FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$E$Members"
+  .srcloc 62:12,62:26;
+  IterInit 0 NK V:$member L2
+  .try {
+  L3:
+    .srcloc 63:18,63:21;
+    String ": "
+    .srcloc 63:10,63:21;
+    CGetL2 $member
+    Concat
+    .srcloc 63:24,63:43;
+    NullUninit
+    NullUninit
+    NullUninit
+    .srcloc 63:36,63:42;
+    CGetL $member
+    .srcloc 63:24,63:43;
+    FCallClsMethodD <> 1 1 "0" - "" "" "D" "pu$E$value"
+    .srcloc 63:10,63:44;
+    Concat
+    .srcloc 63:46,63:49;
+    String "\n"
+    .srcloc 63:10,63:49;
+    Concat
+    .srcloc 63:5,63:50;
+    Print
+    .srcloc 63:5,63:50;
+    PopC
+    .srcloc 62:3,64:95;
+    IterNext 0 NK V:$member L3
+    Jmp L2
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L2:
+  .srcloc 65:2,65:2;
+  Null
+  RetC
+}
+
+.class {} [final trait] MyTraitC (4,11) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .srcloc 5:8,5:8;
+    Keyset @A_1
+    .srcloc 5:8,5:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 5:8,5:8;
+    VerifyParamType $atom
+    .srcloc 5:8,5:8;
+    String "R"
+    .srcloc 5:8,5:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 8:15,8:18;
+    Int 1792
+    .srcloc 5:8,5:8;
+    RetC
+  L1:
+    .srcloc 5:8,5:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 5:8,5:8;
+    String "\\MyTraitC:@E::value unknown atom access: "
+    .srcloc 5:8,5:8;
+    CGetL $atom
+    Concat
+    .srcloc 5:8,5:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 5:8,5:8;
+    Throw
+    .srcloc 5:9,5:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 5:8,5:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (5,5) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 5:8,5:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodSD <> 1 1 "" - "" "" Self "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} [final trait] MyTraitA (13,21) {
+  .use MyTraitC;
+  .method {}{} [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (15,15) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .numiters 2;
+    .declvars $result $traits_classes $traits_class $class $method $parent_members $p $_;
+    .srcloc 15:8,15:8;
+    Keyset @A_2
+    .srcloc 15:8,15:8;
+    SetL $result
+    .srcloc 15:8,15:8;
+    PopC
+    .srcloc 15:8,15:8;
+    Vec @A_3
+    .srcloc 15:8,15:8;
+    SetL $traits_classes
+    .srcloc 15:8,15:8;
+    PopC
+    .srcloc 15:8,15:8;
+    CGetL $traits_classes
+    .srcloc 15:8,15:8;
+    IterInit 0 NK V:$traits_class L0
+    .try {
+    L5:
+      .try {
+        .srcloc 15:8,15:8;
+        NewObjD "ReflectionClass"
+        Dup
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        CGetL $traits_class
+        .srcloc 15:8,15:8;
+        FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+        PopC
+        LockObj
+        .srcloc 15:8,15:8;
+        SetL $class
+        .srcloc 15:8,15:8;
+        PopC
+        .srcloc 15:8,15:8;
+        CGetL $class
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        String "pu$E$Members"
+        .srcloc 15:8,15:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+        .srcloc 15:8,15:8;
+        SetL $method
+        .srcloc 15:8,15:8;
+        PopC
+        .srcloc 15:8,15:8;
+        CGetL $method
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        Null
+        .srcloc 15:8,15:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "invoke"
+        .srcloc 15:8,15:8;
+        SetL $parent_members
+        .srcloc 15:8,15:8;
+        PopC
+        .srcloc 15:8,15:8;
+        CGetL $parent_members
+        .srcloc 15:8,15:8;
+        IterInit 1 NK V:$p L1
+        .try {
+        L2:
+          .srcloc 15:8,15:8;
+          CGetL $p
+          .srcloc 15:8,15:8;
+          BaseL $result Define
+          .srcloc 15:8,15:8;
+          SetM 0 W
+          .srcloc 15:8,15:8;
+          PopC
+          .srcloc 15:8,15:8;
+          IterNext 1 NK V:$p L2
+          Jmp L1
+        } .catch {
+          IterFree 1
+          Throw
+        }
+      L1:
+        .srcloc 15:8,15:8;
+        Jmp L3
+      } .catch {
+        Dup
+        InstanceOfD "ReflectionException"
+        JmpZ L4
+        SetL $_
+        PopC
+        .srcloc 15:8,15:8;
+        Jmp L3
+      L4:
+        Throw
+      }
+    L3:
+      .srcloc 15:8,15:8;
+      IterNext 0 NK V:$traits_class L5
+      Jmp L0
+    } .catch {
+      IterFree 0
+      Throw
+    }
+  L0:
+    .srcloc 15:8,15:8;
+    CGetL $result
+    .srcloc 15:8,15:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (15,15) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .numiters 1;
+    .declvars $trait_classes $trait_class $class $method $_;
+    .srcloc 15:8,15:8;
+    VerifyParamType $atom
+    .srcloc 15:8,15:8;
+    String "J"
+    .srcloc 15:8,15:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 18:15,18:18;
+    Int 1664
+    .srcloc 15:8,15:8;
+    RetC
+  L1:
+    .srcloc 15:8,15:8;
+    Vec @A_3
+    .srcloc 15:8,15:8;
+    SetL $trait_classes
+    .srcloc 15:8,15:8;
+    PopC
+    .srcloc 15:8,15:8;
+    CGetL $trait_classes
+    .srcloc 15:8,15:8;
+    IterInit 0 NK V:$trait_class L2
+    .try {
+    L5:
+      .try {
+        .srcloc 15:8,15:8;
+        NewObjD "ReflectionClass"
+        Dup
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        CGetL $trait_class
+        .srcloc 15:8,15:8;
+        FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+        PopC
+        LockObj
+        .srcloc 15:8,15:8;
+        SetL $class
+        .srcloc 15:8,15:8;
+        PopC
+        .srcloc 15:8,15:8;
+        CGetL $class
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        String "pu$E$value"
+        .srcloc 15:8,15:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+        .srcloc 15:8,15:8;
+        SetL $method
+        .srcloc 15:8,15:8;
+        PopC
+        .srcloc 15:8,15:8;
+        CGetL $method
+        NullUninit
+        NullUninit
+        .srcloc 15:8,15:8;
+        Null
+        .srcloc 15:8,15:8;
+        CGetL $atom
+        .srcloc 15:8,15:8;
+        FCallObjMethodD <> 2 1 "00" - "" "" NullThrows "invoke"
+        .srcloc 15:8,15:8;
+        IterFree 0
+        RetC
+        .srcloc 15:8,15:8;
+        Jmp L3
+      } .catch {
+        Dup
+        InstanceOfD "Exception"
+        JmpZ L4
+        SetL $_
+        PopC
+        .srcloc 15:8,15:8;
+        Jmp L3
+      L4:
+        Throw
+      }
+    L3:
+      .srcloc 15:8,15:8;
+      IterNext 0 NK V:$trait_class L5
+      Jmp L2
+    } .catch {
+      IterFree 0
+      Throw
+    }
+  L2:
+    .srcloc 15:8,15:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 15:8,15:8;
+    String "\\MyTraitA:@E::value unknown atom access: "
+    .srcloc 15:8,15:8;
+    CGetL $atom
+    Concat
+    .srcloc 15:8,15:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 15:8,15:8;
+    Throw
+    .srcloc 15:9,15:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (15,15) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 15:8,15:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (15,15) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 15:8,15:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodSD <> 1 1 "" - "" "" Self "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} [final trait] MyTraitB (23,30) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (24,24) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .srcloc 24:8,24:8;
+    Keyset @A_4
+    .srcloc 24:8,24:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (24,24) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 24:8,24:8;
+    VerifyParamType $atom
+    .srcloc 24:8,24:8;
+    String "X"
+    .srcloc 24:8,24:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 27:15,27:16;
+    Int 42
+    .srcloc 24:8,24:8;
+    RetC
+  L1:
+    .srcloc 24:8,24:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 24:8,24:8;
+    String "\\MyTraitB:@E::value unknown atom access: "
+    .srcloc 24:8,24:8;
+    CGetL $atom
+    Concat
+    .srcloc 24:8,24:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 24:8,24:8;
+    Throw
+    .srcloc 24:9,24:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (24,24) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 24:8,24:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodSD <> 0 1 "" - "" "" Self "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (24,24) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 24:8,24:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodSD <> 1 1 "" - "" "" Self "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} C (32,44) {
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (36,36) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .srcloc 36:8,36:8;
+    Keyset @A_5
+    .srcloc 36:8,36:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (36,36) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .srcloc 36:8,36:8;
+    VerifyParamType $atom
+    .srcloc 36:8,36:8;
+    String "K"
+    .srcloc 36:8,36:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 41:15,41:18;
+    String "yo"
+    .srcloc 36:8,36:8;
+    RetC
+  L1:
+    .srcloc 36:8,36:8;
+    NewObjD "Exception"
+    Dup
+    NullUninit
+    NullUninit
+    .srcloc 36:8,36:8;
+    String "\\C:@E::value unknown atom access: "
+    .srcloc 36:8,36:8;
+    CGetL $atom
+    Concat
+    .srcloc 36:8,36:8;
+    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+    PopC
+    LockObj
+    .srcloc 36:8,36:8;
+    Throw
+    .srcloc 36:9,36:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (36,36) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 36:8,36:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (36,36) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 36:8,36:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "C" "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+.class {} D (46,55) extends C {
+  .use MyTraitA MyTraitB;
+  .method {}{} [private static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (49,49) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members$memoize_impl() {
+    .numiters 2;
+    .declvars $result $traits_classes $traits_class $class $method $parent_members $p $_;
+    .srcloc 49:8,49:8;
+    Keyset @A_6
+    .srcloc 49:8,49:8;
+    SetL $result
+    .srcloc 49:8,49:8;
+    PopC
+    .srcloc 49:8,49:8;
+    Vec @A_7
+    .srcloc 49:8,49:8;
+    SetL $traits_classes
+    .srcloc 49:8,49:8;
+    PopC
+    .srcloc 49:8,49:8;
+    CGetL $traits_classes
+    .srcloc 49:8,49:8;
+    IterInit 0 NK V:$traits_class L0
+    .try {
+    L5:
+      .try {
+        .srcloc 49:8,49:8;
+        NewObjD "ReflectionClass"
+        Dup
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        CGetL $traits_class
+        .srcloc 49:8,49:8;
+        FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+        PopC
+        LockObj
+        .srcloc 49:8,49:8;
+        SetL $class
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        CGetL $class
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        String "pu$E$Members"
+        .srcloc 49:8,49:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+        .srcloc 49:8,49:8;
+        SetL $method
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        CGetL $method
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        Null
+        .srcloc 49:8,49:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "invoke"
+        .srcloc 49:8,49:8;
+        SetL $parent_members
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        CGetL $parent_members
+        .srcloc 49:8,49:8;
+        IterInit 1 NK V:$p L1
+        .try {
+        L2:
+          .srcloc 49:8,49:8;
+          CGetL $p
+          .srcloc 49:8,49:8;
+          BaseL $result Define
+          .srcloc 49:8,49:8;
+          SetM 0 W
+          .srcloc 49:8,49:8;
+          PopC
+          .srcloc 49:8,49:8;
+          IterNext 1 NK V:$p L2
+          Jmp L1
+        } .catch {
+          IterFree 1
+          Throw
+        }
+      L1:
+        .srcloc 49:8,49:8;
+        Jmp L3
+      } .catch {
+        Dup
+        InstanceOfD "ReflectionException"
+        JmpZ L4
+        SetL $_
+        PopC
+        .srcloc 49:8,49:8;
+        Jmp L3
+      L4:
+        Throw
+      }
+    L3:
+      .srcloc 49:8,49:8;
+      IterNext 0 NK V:$traits_class L5
+      Jmp L0
+    } .catch {
+      IterFree 0
+      Throw
+    }
+  L0:
+    .try {
+      .srcloc 49:8,49:8;
+      NewObjD "ReflectionClass"
+      Dup
+      NullUninit
+      NullUninit
+      .srcloc 49:8,49:8;
+      String "C"
+      .srcloc 49:8,49:8;
+      FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+      PopC
+      LockObj
+      .srcloc 49:8,49:8;
+      SetL $class
+      .srcloc 49:8,49:8;
+      PopC
+      .srcloc 49:8,49:8;
+      CGetL $class
+      NullUninit
+      NullUninit
+      .srcloc 49:8,49:8;
+      String "pu$E$Members"
+      .srcloc 49:8,49:8;
+      FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+      .srcloc 49:8,49:8;
+      SetL $method
+      .srcloc 49:8,49:8;
+      PopC
+      .srcloc 49:8,49:8;
+      CGetL $method
+      NullUninit
+      NullUninit
+      .srcloc 49:8,49:8;
+      Null
+      .srcloc 49:8,49:8;
+      FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "invoke"
+      .srcloc 49:8,49:8;
+      SetL $parent_members
+      .srcloc 49:8,49:8;
+      PopC
+      .srcloc 49:8,49:8;
+      CGetL $parent_members
+      .srcloc 49:8,49:8;
+      IterInit 0 NK V:$p L6
+      .try {
+      L7:
+        .srcloc 49:8,49:8;
+        CGetL $p
+        .srcloc 49:8,49:8;
+        BaseL $result Define
+        .srcloc 49:8,49:8;
+        SetM 0 W
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        IterNext 0 NK V:$p L7
+        Jmp L6
+      } .catch {
+        IterFree 0
+        Throw
+      }
+    L6:
+      .srcloc 49:8,49:8;
+      Jmp L8
+    } .catch {
+      Dup
+      InstanceOfD "ReflectionException"
+      JmpZ L9
+      SetL $_
+      PopC
+      .srcloc 49:8,49:8;
+      Jmp L8
+    L9:
+      Throw
+    }
+  L8:
+    .srcloc 49:8,49:8;
+    CGetL $result
+    .srcloc 49:8,49:8;
+    Array @A_0
+    VerifyRetTypeTS
+    RetC
+  }
+  .method {}{} [private static "__Memoize"("""y:0:{}""")] (49,49) <"HH\\mixed" N > pu$E$value$memoize_impl(<"HH\\string" "HH\\string" > $atom) {
+    .numiters 1;
+    .declvars $trait_classes $trait_class $class $method $_;
+    .srcloc 49:8,49:8;
+    VerifyParamType $atom
+    .srcloc 49:8,49:8;
+    String "Y"
+    .srcloc 49:8,49:8;
+    CGetL2 $atom
+    Eq
+    JmpNZ L0
+    Jmp L1
+  L0:
+    .srcloc 52:15,52:16;
+    Int 44
+    .srcloc 49:8,49:8;
+    RetC
+  L1:
+    .srcloc 49:8,49:8;
+    Vec @A_7
+    .srcloc 49:8,49:8;
+    SetL $trait_classes
+    .srcloc 49:8,49:8;
+    PopC
+    .srcloc 49:8,49:8;
+    CGetL $trait_classes
+    .srcloc 49:8,49:8;
+    IterInit 0 NK V:$trait_class L2
+    .try {
+    L5:
+      .try {
+        .srcloc 49:8,49:8;
+        NewObjD "ReflectionClass"
+        Dup
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        CGetL $trait_class
+        .srcloc 49:8,49:8;
+        FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+        PopC
+        LockObj
+        .srcloc 49:8,49:8;
+        SetL $class
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        CGetL $class
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        String "pu$E$value"
+        .srcloc 49:8,49:8;
+        FCallObjMethodD <> 1 1 "0" - "" "" NullThrows "getMethod"
+        .srcloc 49:8,49:8;
+        SetL $method
+        .srcloc 49:8,49:8;
+        PopC
+        .srcloc 49:8,49:8;
+        CGetL $method
+        NullUninit
+        NullUninit
+        .srcloc 49:8,49:8;
+        Null
+        .srcloc 49:8,49:8;
+        CGetL $atom
+        .srcloc 49:8,49:8;
+        FCallObjMethodD <> 2 1 "00" - "" "" NullThrows "invoke"
+        .srcloc 49:8,49:8;
+        IterFree 0
+        RetC
+        .srcloc 49:8,49:8;
+        Jmp L3
+      } .catch {
+        Dup
+        InstanceOfD "Exception"
+        JmpZ L4
+        SetL $_
+        PopC
+        .srcloc 49:8,49:8;
+        Jmp L3
+      L4:
+        Throw
+      }
+    L3:
+      .srcloc 49:8,49:8;
+      IterNext 0 NK V:$trait_class L5
+      Jmp L2
+    } .catch {
+      IterFree 0
+      Throw
+    }
+  L2:
+    .srcloc 49:8,49:8;
+    NullUninit
+    NullUninit
+    NullUninit
+    .srcloc 49:8,49:8;
+    CGetL $atom
+    .srcloc 49:8,49:8;
+    FCallClsMethodSD <> 1 1 "0" - "" "" Parent "pu$E$value"
+    .srcloc 49:8,49:8;
+    RetC
+    .srcloc 49:9,49:9;
+    Null
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""") "__Override"("""y:0:{}""")] (49,49) <"HH\\keyset<HH\\string>" "HH\\keyset" extended_hint> pu$E$Members() {
+    .ismemoizewrapper;
+    .srcloc 49:8,49:8;
+    MemoGet L0 L:0+0
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    FCallClsMethodD <> 0 1 "" - "" "" "D" "pu$E$Members$memoize_impl"
+    MemoSet L:0+0
+    RetC
+  }
+  .method {}{} [public static "__Memoize"("""y:0:{}""")] (49,49) <"HH\\mixed" N > pu$E$value(<"HH\\string" "HH\\string" > $atom) {
+    .ismemoizewrapper;
+    .srcloc 49:8,49:8;
+    VerifyParamType $atom
+    GetMemoKeyL $atom
+    SetL _1
+    PopC
+    MemoGet L0 L:1+1
+    RetC
+  L0:
+    NullUninit
+    NullUninit
+    NullUninit
+    CGetL $atom
+    FCallClsMethodD <> 1 1 "" - "" "" "D" "pu$E$value$memoize_impl"
+    MemoSet L:1+1
+    RetC
+  }
+}
+
+# trait_superclass_members.good.php ends here

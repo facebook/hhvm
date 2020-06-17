@@ -1,6 +1,6 @@
-# trait.good.php starts here
+# trait_members.good.php starts here
 
-.filepath "trait.good.php";
+.filepath "trait_members.good.php";
 
 .hh_file 1;
 .adata A_0 = """Y:2:{s:4:\"kind\";i:21;s:13:\"generic_types\";y:1:{Y:1:{s:4:\"kind\";i:4;}}}""";
@@ -20,88 +20,51 @@
   RetC
 }
 
-.function {} ["__EntryPoint"("""y:0:{}""")] (37,43) <"HH\\void" N > main() {
-  .srcloc 38:8,38:23;
+.function {} ["__EntryPoint"("""y:0:{}""")] (37,41) <"HH\\void" N > main() {
+  .numiters 1;
+  .declvars $member;
+  .srcloc 38:12,38:26;
   NullUninit
   NullUninit
   NullUninit
-  .srcloc 38:20,38:22;
-  String "K"
-  .srcloc 38:8,38:23;
-  FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
-  .srcloc 38:25,38:28;
-  String "\n"
-  .srcloc 38:8,38:28;
-  Concat
-  .srcloc 38:3,38:29;
-  Print
-  .srcloc 38:3,38:29;
-  PopC
-  .srcloc 39:8,39:23;
-  NullUninit
-  NullUninit
-  NullUninit
-  .srcloc 39:20,39:22;
-  String "J"
-  .srcloc 39:8,39:23;
-  FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
-  .srcloc 39:25,39:28;
-  String "\n"
-  .srcloc 39:8,39:28;
-  Concat
-  .srcloc 39:3,39:29;
-  Print
-  .srcloc 39:3,39:29;
-  PopC
-  .srcloc 40:8,40:23;
-  NullUninit
-  NullUninit
-  NullUninit
-  .srcloc 40:20,40:22;
-  String "X"
-  .srcloc 40:8,40:23;
-  FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
-  .srcloc 40:25,40:28;
-  String "\n"
-  .srcloc 40:8,40:28;
-  Concat
-  .srcloc 40:3,40:29;
-  Print
-  .srcloc 40:3,40:29;
-  PopC
-  .srcloc 41:8,41:23;
-  NullUninit
-  NullUninit
-  NullUninit
-  .srcloc 41:20,41:22;
-  String "X"
-  .srcloc 41:8,41:23;
-  FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
-  .srcloc 41:25,41:28;
-  String "\n"
-  .srcloc 41:8,41:28;
-  Concat
-  .srcloc 41:3,41:29;
-  Print
-  .srcloc 41:3,41:29;
-  PopC
-  .srcloc 42:8,42:23;
-  NullUninit
-  NullUninit
-  NullUninit
-  .srcloc 42:20,42:22;
-  String "K"
-  .srcloc 42:8,42:23;
-  FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
-  .srcloc 42:25,42:28;
-  String "\n"
-  .srcloc 42:8,42:28;
-  Concat
-  .srcloc 42:3,42:29;
-  Print
-  .srcloc 42:3,42:29;
-  PopC
-  .srcloc 43:2,43:2;
+  .srcloc 38:12,38:26;
+  FCallClsMethodD <> 0 1 "" - "" "" "C" "pu$E$Members"
+  .srcloc 38:12,38:26;
+  IterInit 0 NK V:$member L0
+  .try {
+  L1:
+    .srcloc 39:18,39:21;
+    String ": "
+    .srcloc 39:10,39:21;
+    CGetL2 $member
+    Concat
+    .srcloc 39:24,39:43;
+    NullUninit
+    NullUninit
+    NullUninit
+    .srcloc 39:36,39:42;
+    CGetL $member
+    .srcloc 39:24,39:43;
+    FCallClsMethodD <> 1 1 "0" - "" "" "C" "pu$E$value"
+    .srcloc 39:10,39:44;
+    Concat
+    .srcloc 39:46,39:49;
+    String "\n"
+    .srcloc 39:10,39:49;
+    Concat
+    .srcloc 39:5,39:50;
+    Print
+    .srcloc 39:5,39:50;
+    PopC
+    .srcloc 38:3,40:95;
+    IterNext 0 NK V:$member L1
+    Jmp L0
+  } .catch {
+    IterFree 0
+    Throw
+  }
+L0:
+  .srcloc 41:2,41:2;
   Null
   RetC
 }
@@ -522,4 +485,4 @@
   }
 }
 
-# trait.good.php ends here
+# trait_members.good.php ends here

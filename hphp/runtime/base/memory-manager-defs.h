@@ -60,13 +60,12 @@ namespace HPHP {
  * (a pointer to somewhere in the body). The start-bit map marks the location
  * of the start of each object. One bit represents kSmallSizeAlign bytes.
  */
-struct alignas(kSmallSizeAlign) Slab : HeapObject {
+struct Slab : HeapObject {
 
   char* init() {
     initHeader_32(HeaderKind::Slab, 0);
     clearStarts();
     return start();
-    static_assert(sizeof(*this) % kSmallSizeAlign == 0, "");
   }
 
   /*
@@ -108,9 +107,16 @@ struct alignas(kSmallSizeAlign) Slab : HeapObject {
     return slab;
   }
 
-  char* start() { return (char*)(this + 1); }
+  static char* align(const void* addr) {
+    auto const a = reinterpret_cast<intptr_t>(addr);
+    auto const mask = RO::EvalSlabAllocAlign - 1;
+    assertx((mask & (mask + 1)) == 0);
+    return reinterpret_cast<char*>(a + (-a & mask));
+  }
+
+  char* start() { return align(this + 1); }
   char* end() { return (char*)this + size(); }
-  const char* start() const { return (const char*)(this + 1); }
+  const char* start() const { return align(this + 1); }
   const char* end() const { return (const char*)this + size(); }
 
   struct InitMasks;

@@ -115,7 +115,8 @@ void test_starts(size_t index, size_t offset, size_t len, Slab* s1, Slab* s2) {
 TEST(Slab, set_starts) {
   auto const Q = kSmallSizeAlign;
   auto const line_size = 64 * Q;
-  auto const slab_cap = kSlabSize - sizeof(Slab);
+  auto const slab_cap =
+    (kSlabSize - sizeof(Slab)) & ~(RO::EvalSlabAllocAlign - 1);
   auto const numSizes = MemoryManager::size2Index(line_size) + 2;
   auto s1 = static_cast<Slab*>(aligned_alloc(kSlabSize, kSlabSize));
   auto s2 = static_cast<Slab*>(aligned_alloc(kSlabSize, kSlabSize));

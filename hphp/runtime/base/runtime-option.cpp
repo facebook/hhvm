@@ -1893,6 +1893,9 @@ void RuntimeOption::Load(
     Config::Bind(DisableSmallAllocator, ini, config,
                  "Eval.DisableSmallAllocator", DisableSmallAllocator);
     SetArenaSlabAllocBypass(DisableSmallAllocator);
+    EvalSlabAllocAlign = folly::nextPowTwo(EvalSlabAllocAlign);
+    EvalSlabAllocAlign = std::min(EvalSlabAllocAlign,
+                                  decltype(EvalSlabAllocAlign){4096});
 
     if (RecordCodeCoverage) CheckSymLink = true;
     Config::Bind(CodeCoverageOutputFile, ini, config,

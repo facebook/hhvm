@@ -35,33 +35,28 @@ module Dep : sig
         (** Represents either a class depending on something, or something
         depending on a class. *)
     | Extends : string -> dependency variant
-        (** Represents a class depending on an another class via an
+        (** Represents another class depending on a class via an
         inheritance-like mechanism (`extends`, `implements`, `use`, `require
         extends`, `require implements`, etc.) *)
     | RecordDef : string -> 'a variant
         (** Represents either a record depending on something, or something
         depending on a record. *)
     | Const : string * string -> dependency variant
-        (** Represents either a class constant depending on something, or
-        something depending on a class constant. *)
+        (** Represents something depending on a class constant. *)
     | Cstr : string -> dependency variant
         (** Represents something depending on a class constructor. *)
     | Prop : string * string -> dependency variant
-        (** Represents either a class's instance property depending on
-        something, or something depending on that property. *)
+        (** Represents something depending on a class's instance property. *)
     | SProp : string * string -> dependency variant
-        (** Represents either a class's static property depending on
-        something, or something depending on that property. *)
+        (** Represents something depending on a class's static property. *)
     | Method : string * string -> dependency variant
-        (** Represents either a class's instance method depending on
-        something, or something depending on that method. *)
+        (** Represents something depending on a class's instance method. *)
     | SMethod : string * string -> dependency variant
-        (** Represents either a class's static method depending on
-        something, or something depending on that method. *)
+        (** Represents something depending on a class's static method. *)
     | AllMembers : string -> dependency variant
-        (** Represents a dependency on all members of a class. Particularly
-        useful for switch exhaustiveness-checking. We establish a dependency
-        on all members of an enum in that case. *)
+        (** Represents something depending on all members of a class.
+        Particularly useful for switch exhaustiveness-checking. We establish
+        a dependency on all members of an enum in that case. *)
     | FunName : string -> 'a variant
         (** Like [Fun], but used only in conservative redecl. May not be
         necessary anymore. *)

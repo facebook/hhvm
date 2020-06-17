@@ -21,7 +21,6 @@
 
 #include <folly/Optional.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/assertions.h"
@@ -236,20 +235,6 @@ inline folly::Optional<AreaIndex> nameToAreaIndex(const std::string name) {
   if (name == "Cold") return AreaIndex::Cold;
   if (name == "Frozen") return AreaIndex::Frozen;
   return folly::none;
-}
-
-/*
- * Multiplying factors used to compute the block weights for each code area.
- * We multiply the corresponding IR block's profile counter by the following
- * factors, depending on the code area the block is assigned to.
- */
-inline uint64_t areaWeightFactor(AreaIndex area) {
-  switch (area) {
-    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
-    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
-    case AreaIndex::Frozen: return 1;
-  };
-  always_assert(false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

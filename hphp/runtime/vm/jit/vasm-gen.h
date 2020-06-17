@@ -232,6 +232,13 @@ TCA vwrap2(CodeBlock& main, CodeBlock& cold, DataBlock& data, GenFunc gen) {
   return detail::vwrap_impl(main, cold, data, nullptr, gen);
 }
 
+/*
+ * Multiplying factors used to compute the block weights for each code area.
+ * We multiply the corresponding IR block's profile counter by the following
+ * factors, depending on the code area the block is assigned to.
+ */
+uint64_t areaWeightFactor(AreaIndex area);
+
 ///////////////////////////////////////////////////////////////////////////////
 }}
 

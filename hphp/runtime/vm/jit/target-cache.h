@@ -20,12 +20,13 @@
 #include "hphp/runtime/vm/jit/types.h"
 
 namespace HPHP {
-struct Func;
 struct ActRec;
+struct ArrayData;
+struct Class;
+struct Func;
+struct NamedEntity;
 struct StringData;
 struct TypedValue;
-struct Class;
-struct NamedEntity;
 }
 
 namespace HPHP { namespace jit {

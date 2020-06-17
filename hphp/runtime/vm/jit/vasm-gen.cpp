@@ -169,5 +169,14 @@ Vauto::~Vauto() {
   }
 }
 
+uint64_t areaWeightFactor(AreaIndex area) {
+  switch (area) {
+    case AreaIndex::Main:   return RuntimeOption::EvalJitLayoutMainFactor;
+    case AreaIndex::Cold:   return RuntimeOption::EvalJitLayoutColdFactor;
+    case AreaIndex::Frozen: return 1;
+  };
+  always_assert(false);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

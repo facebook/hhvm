@@ -460,3 +460,5 @@ val get_pos : 'phase ty -> Pos.t
 val mk_constraint_type : Reason.t * constraint_type_ -> constraint_type
 
 val deref_constraint_type : constraint_type -> Reason.t * constraint_type_
+
+val get_reason_i : internal_type -> Reason.t

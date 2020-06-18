@@ -462,3 +462,7 @@ let get_pos t = Reason.to_pos (get_reason t)
 let mk_constraint_type p = p
 
 let deref_constraint_type p = p
+
+let get_reason_i = function
+  | LoclType lty -> get_reason lty
+  | ConstraintType (r, _) -> r

@@ -11,7 +11,7 @@ module TUtils = Typing_utils
 let make_pocket_universes_type_equal
     env new_ty (ty : internal_type) base enum name ~on_error =
   let error = Errors.type_constant_mismatch on_error in
-  let reason = get_reason new_ty in
+  let reason = get_reason_i ty in
   let rec make_equal env ty =
     match ty with
     | LoclType lty ->
@@ -101,7 +101,7 @@ let make_all_pu_equal env var (ty : internal_type) ~on_error =
     env
 
 let get_tyvar_pu_access env reason var name =
-  let pos = Reason.to_pos @@ reason in
+  let pos = Reason.to_pos reason in
   let uppers = Env.get_tyvar_upper_bounds env var in
   let upper_pus = extract_pu_from_upper_bounds uppers in
   match upper_pus with

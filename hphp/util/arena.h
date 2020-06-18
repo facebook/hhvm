@@ -27,9 +27,14 @@ namespace HPHP {
 //////////////////////////////////////////////////////////////////////
 
 /**
- * Arena/ArenaImpl is an allocator that frees all memory when the
- * arena instance is destroyed.  No destructors of allocated objects
- * will be called!  It is a bump-pointer allocator.
+ * Arena/ArenaImpl is an allocator that frees all its memory when the arena
+ * instance is destroyed.  It is a bump-pointer allocator.
+ *
+ * There are two main methods to allocate memory from the arena:
+ *   1) alloc() allocates raw memory for which no destructor is invoked when the
+ *      arena is destroyed.
+ *   2) allocD<C>() allocates memory for an object of class C, whose destructor
+ *      (or a custom callback) is invoked when the arena is destroyed.
  *
  * Allocations smaller than kMinBytes bytes are rounded up to kMinBytes, and
  * all allocations are kMinBytes-aligned.
@@ -51,7 +56,22 @@ struct ArenaImpl {
   ArenaImpl();
   ~ArenaImpl();
 
+  /*
+   * Allocate a raw chunk of memory with `nbytes' bytes.  No destructors will be
+   * called when the arena is destroyed.
+   */
   void* alloc(size_t nbytes);
+
+  /*
+   * Allocate a chunk of memory large enough to hold an object of class C, and
+   * register a destructor to be invoked when the arena is destroyed.  A custom
+   * `dtor' to be invoked can be provided, otherwise C's destructor is invoked.
+   */
+  template<class C>
+  C* allocD();
+
+  template<class C, class D>
+  C* allocD(D dtor);
 
   /*
    * Return the amount of memory this arena has handed out via alloc().
@@ -69,6 +89,12 @@ struct ArenaImpl {
   size_t slackEstimate() const { return kChunkBytes - m_offset; }
 
  private:
+  struct Destroyer {
+    void* obj;
+    void (*dtor)(void*);
+    Destroyer* next;
+  };
+
   // copying Arenas will end badly.
   ArenaImpl(const ArenaImpl&);
   ArenaImpl& operator=(const ArenaImpl&);
@@ -82,6 +108,7 @@ struct ArenaImpl {
   uint32_t m_offset;
   std::vector<char*> m_ptrs;
   PointerList<char> m_externalPtrs;
+  Destroyer* m_dtors;
   bool m_bypassSlabAlloc;
 #ifndef NDEBUG
   size_t m_externalAllocSize;
@@ -100,6 +127,24 @@ inline void* ArenaImpl<kChunkBytes>::alloc(size_t nbytes) {
     return ptr;
   }
   return allocSlow(nbytes);
+}
+
+template<size_t kChunkBytes>
+template<class C, class D>
+inline C* ArenaImpl<kChunkBytes>::allocD(D dtor) {
+  auto ptr = (C*)alloc(sizeof(C));
+  auto dtorPtr = (Destroyer*)alloc(sizeof(Destroyer));
+  dtorPtr->obj = ptr;
+  dtorPtr->dtor = dtor;
+  dtorPtr->next = m_dtors;
+  m_dtors = dtorPtr;
+  return ptr;
+}
+
+template<size_t kChunkBytes>
+template<class C>
+inline C* ArenaImpl<kChunkBytes>::allocD() {
+  return allocD([](void* p) { static_cast<C*>(p)->~C(); });
 }
 
 void SetArenaSlabAllocBypass(bool f);

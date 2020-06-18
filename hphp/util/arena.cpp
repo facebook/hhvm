@@ -42,6 +42,7 @@ ArenaImpl<kChunkBytes>::ArenaImpl() {
   m_offset = 0;
   m_current = static_cast<char*>(malloc(kChunkBytes));
   m_ptrs.push_back(m_current);
+  m_dtors = nullptr;
   m_bypassSlabAlloc = s_bypassSlabAlloc;
 #ifndef NDEBUG
   m_externalAllocSize = 0;
@@ -50,6 +51,9 @@ ArenaImpl<kChunkBytes>::ArenaImpl() {
 
 template<size_t kChunkBytes>
 ArenaImpl<kChunkBytes>::~ArenaImpl() {
+  for (auto d = m_dtors; d != nullptr; d = d->next) {
+    d->dtor(d->obj);
+  }
   for (size_t i = 0, sz = m_ptrs.size(); i < sz; ++i) {
     free(m_ptrs[i]);
   }

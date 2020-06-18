@@ -1,2 +1,0 @@
--vRuntime.Eval.HackArrCompatDVCmpNotices=true -d hhvm.php7.all=0
--vRuntime.Eval.HackArrCompatSpecialization=0

@@ -1,9 +1,0 @@
--vEval.EmitFuncPointers=1
--vEval.EmitClsMethPointers=1
--vEval.IsCompatibleClsMethType=1
-
--vEval.RaiseClsMethConversionWarning=1
--vEval.RaiseClsMethComparisonWarning=1
-
--vEval.HackArrDVArrs=0
--vEval.HackArrCompatSpecialization=0

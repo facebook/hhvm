@@ -1,4 +1,0 @@
--vRuntime.Eval.HackArrCompatNotices=true
--vRuntime.Eval.HackArrCompatCheckImplicitVarrayAppend=true
--d hhvm.php7.all=0
--vRuntime.Eval.HackArrCompatSpecialization=false

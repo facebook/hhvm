@@ -2109,26 +2109,7 @@ struct NamingEnv {
   NamingEnv(php::Program* program, IndexData& index, TypeInfoData<T>& tid) :
       program{program}, index{index}, tid{tid} {}
 
-  struct Define;
 
-  // Returns TypeInfo for a given name, if either:
-  // a) that name corresponds to a unique TypeInfo, or
-  // b) he TypeInfo for that name was selected in scope with NamingEnv::Define
-  TypeInfo<T>* try_lookup(SString name,
-                          const ISStringToOneT<TypeInfo<T>*>& map) const {
-    auto const it = map.find(name);
-    // We're resolving in topological order; we shouldn't be here
-    // unless we know there's at least one resolution of this class.
-    assertx(it != map.end());
-    return it->second;
-  }
-
-  TypeInfo<T>* lookup(SString name,
-                      const ISStringToOneT<TypeInfo<T>*>& map) const {
-    auto const ret = try_lookup(name, map);
-    assertx(ret);
-    return ret;
-  }
 
   php::Program*                              program;
   IndexData&                                 index;
@@ -2137,29 +2118,6 @@ struct NamingEnv {
     const T*,
     TypeInfo<T>*,
     pointer_hash<T>>                          resolved;
-private:
-  ISStringToOne<TypeInfo<T>>   names;
-};
-
-template<typename T>
-struct NamingEnv<T>::Define {
-  explicit Define(NamingEnv& env, SString n, TypeInfo<T>* ti, const T* t)
-      : env(env), n(n) {
-    ITRACE(2, "defining {} {} for {}\n", PhpTypeHelper<T>::name(), n, t->name);
-    always_assert(!env.names.count(n));
-    env.names[n] = ti;
-  }
-  ~Define() {
-    env.names.erase(n);
-  }
-
-  Define(const Define&) = delete;
-  Define& operator=(const Define&) = delete;
-
-private:
-  Trace::Indent indent;
-  NamingEnv<T>& env;
-  SString n;
 };
 
 using ClassNamingEnv = NamingEnv<php::Class>;
@@ -2554,30 +2512,10 @@ void flatten_traits(ClassNamingEnv& env, ClassInfo* cinfo) {
  */
 void resolve_combinations(RecordNamingEnv& env,
                           const php::Record* rec) {
-
-  auto resolve_one = [&] (SString name) {
-    if (env.try_lookup(name, env.index.recordInfo)) return true;
-    auto const range = copy_range(env.index.recordInfo, name);
-    assertx(range.size() > 1);
-    for (auto& kv : range) {
-      RecordNamingEnv::Define def{env, name, kv.second, rec};
-      resolve_combinations(env, rec);
-    }
-    return false;
-  };
-
-  // Recurse with all combinations of parents.
-  if (rec->parentName) {
-    if (!resolve_one(rec->parentName)) return;
-  }
-
-  // Everything is defined in the naming environment here.  (We
-  // returned early if something didn't exist.)
-
   auto rinfo = std::make_unique<RecordInfo>();
   rinfo->rec = rec;
   if (rec->parentName) {
-    auto const parent = env.lookup(rec->parentName, env.index.recordInfo);
+    auto const parent = env.index.recordInfo.at(rec->parentName);
     if (parent->rec->attrs & AttrFinal) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because "
@@ -2603,38 +2541,11 @@ void resolve_combinations(RecordNamingEnv& env,
  */
 void resolve_combinations(ClassNamingEnv& env,
                           const php::Class* cls) {
-
-  auto resolve_one = [&] (SString name) {
-    if (env.try_lookup(name, env.index.classInfo)) return true;
-    auto const range = copy_range(env.index.classInfo, name);
-    assertx(range.size() > 1);
-    for (auto& kv : range) {
-      ClassNamingEnv::Define def{env, name, kv.second, cls};
-      resolve_combinations(env, cls);
-    }
-    return false;
-  };
-
-  // Recurse with all combinations of bases and interfaces in the
-  // naming environment.
-  if (cls->parentName) {
-    if (!resolve_one(cls->parentName)) return;
-  }
-  for (auto& iname : cls->interfaceNames) {
-    if (!resolve_one(iname)) return;
-  }
-  for (auto& tname : cls->usedTraitNames) {
-    if (!resolve_one(tname)) return;
-  }
-
-  // Everything is defined in the naming environment here.  (We
-  // returned early if something didn't exist.)
-
   auto cinfo = std::make_unique<ClassInfo>();
   cinfo->cls = cls;
   auto const& map = env.index.classInfo;
   if (cls->parentName) {
-    cinfo->parent   = env.lookup(cls->parentName, map);
+    cinfo->parent   = map.at(cls->parentName);
     cinfo->baseList = cinfo->parent->baseList;
     if (cinfo->parent->cls->attrs & (AttrInterface | AttrTrait)) {
       ITRACE(2,
@@ -2647,7 +2558,7 @@ void resolve_combinations(ClassNamingEnv& env,
   cinfo->baseList.push_back(cinfo.get());
 
   for (auto& iname : cls->interfaceNames) {
-    auto const iface = env.lookup(iname, map);
+    auto const iface = map.at(iname);
     if (!(iface->cls->attrs & AttrInterface)) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because `{}' "
@@ -2659,7 +2570,7 @@ void resolve_combinations(ClassNamingEnv& env,
   }
 
   for (auto& tname : cls->usedTraitNames) {
-    auto const trait = env.lookup(tname, map);
+    auto const trait = map.at(tname);
     if (!(trait->cls->attrs & AttrTrait)) {
       ITRACE(2,
              "Resolve combinations failed for `{}' because `{}' "
@@ -3817,11 +3728,10 @@ void buildTypeInfoData(TypeInfoData<T>& tid,
 
 template<typename T>
 void preresolveTypes(NamingEnv<T>& env,
-                     TypeInfoData<T>& tid,
                      const ISStringToOneT<TypeInfo<T>*>& tmap) {
   while(true) {
-    auto const ix = tid.cqFront++;
-    if (ix == tid.cqBack) {
+    auto const ix = env.tid.cqFront++;
+    if (ix == env.tid.cqBack) {
       // we've consumed everything where all dependencies are
       // satisfied. There may still be some pseudo-cycles that can
       // be broken though.
@@ -3830,8 +3740,8 @@ void preresolveTypes(NamingEnv<T>& env,
       // A', and then end up here, since both A and B' still have
       // one dependency. But both A and B' can be resolved at this
       // point
-      for (auto it = tid.depCounts.begin();
-           it != tid.depCounts.end();
+      for (auto it = env.tid.depCounts.begin();
+           it != env.tid.depCounts.end();
           ) {
         auto canResolve = true;
         auto const checkCanResolve = [&] (SString name) {
@@ -3841,18 +3751,18 @@ void preresolveTypes(NamingEnv<T>& env,
         if (canResolve) {
           FTRACE(2, "Breaking pseudo-cycle for {} {}:{}\n",
                  PhpTypeHelper<T>::name(), it->first->name, (void*)it->first);
-          tid.queue[tid.cqBack++] = it->first;
-          it = tid.depCounts.erase(it);
-          tid.hasPseudoCycles = true;
+          env.tid.queue[env.tid.cqBack++] = it->first;
+          it = env.tid.depCounts.erase(it);
+          env.tid.hasPseudoCycles = true;
         } else {
           ++it;
         }
       }
-      if (ix == tid.cqBack) {
+      if (ix == env.tid.cqBack) {
         break;
       }
     }
-    auto const t = tid.queue[ix];
+    auto const t = env.tid.queue[ix];
     Trace::Bump bumper{
       Trace::hhbbc_index, kSystemLibBump, is_systemlib_part(*t->unit)
     };
@@ -3887,7 +3797,7 @@ Index::Index(php::Program* program)
   {
     trace_time preresolve_records("preresolve records");
     RecordNamingEnv env{program, *m_data, rid};
-    preresolveTypes(env, rid, m_data->recordInfo);
+    preresolveTypes(env, m_data->recordInfo);
   }
 
   ClassInfoData cid;
@@ -3899,7 +3809,7 @@ Index::Index(php::Program* program)
   {
     trace_time preresolve_classes("preresolve classes");
     ClassNamingEnv env{program, *m_data, cid};
-    preresolveTypes(env, cid, m_data->classInfo);
+    preresolveTypes(env, m_data->classInfo);
   }
 
   for (auto &it : m_data->typeAliases) {

@@ -3,8 +3,8 @@ hh\is_any_array($m): (error: is_any_array() called on clsmeth) True
 is_varray($m): (error: is_varray() called on clsmeth) True
 is_varray($m): (error: is_varray() called on clsmeth) True
 $m is arraylike: (error: is_any_array() called on clsmeth) True
-$m is shape(...): (error: is_shape() called on clsmeth) (error: Hack Array Compat: is/as operator used with varray and shape) True
-$m is shape(str,str): (error: is_shape() called on clsmeth) (error: Hack Array Compat: is/as operator used with varray and shape) True
+$m is shape(...): (error: is_shape() called on clsmeth) False
+$m is shape(str,str): (error: is_shape() called on clsmeth) False
 $m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
 $m is Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
 $m is KeyedTraversable: (error: Implicit clsmeth to HH\KeyedTraversable conversion) True
@@ -24,8 +24,8 @@ hh\is_any_array($m): (error: is_any_array() called on clsmeth) True
 is_varray($m): (error: is_varray() called on clsmeth) True
 is_varray($m): (error: is_varray() called on clsmeth) True
 $m is arraylike: (error: is_any_array() called on clsmeth) True
-$m is shape(...): (error: is_shape() called on clsmeth) (error: Hack Array Compat: is/as operator used with varray and shape) True
-$m is shape(str,str): (error: is_shape() called on clsmeth) (error: Hack Array Compat: is/as operator used with varray and shape) True
+$m is shape(...): (error: is_shape() called on clsmeth) False
+$m is shape(str,str): (error: is_shape() called on clsmeth) False
 $m is HH\Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
 $m is Traversable: (error: Implicit clsmeth to HH\Traversable conversion) True
 $m is KeyedTraversable: (error: Implicit clsmeth to HH\KeyedTraversable conversion) True

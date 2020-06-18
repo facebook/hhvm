@@ -11,12 +11,12 @@ function unset_static(): void {
   $dm = darray[0 => $cm];
   $om = new P($cm);
 
-  unset($cm[0]);
   unset($cm[1]);
+  unset($cm[0]);
   unset($am[0][1]);
   unset($am[0][0]);
-  unset($dm[0][0]);
   unset($dm[0][1]);
+  unset($dm[0][0]);
   unset($om->m[1]);
   unset($om->m[0]);
 
@@ -29,12 +29,12 @@ function unset_dynamic(): void {
   $dm = LV(darray[0 => $cm]);
   $om = LV(new P($cm));
 
-  unset($cm[0]);
   unset($cm[1]);
+  unset($cm[0]);
   unset($am[0][1]);
   unset($am[0][0]);
-  unset($dm[0][0]);
   unset($dm[0][1]);
+  unset($dm[0][0]);
   unset($om->m[1]);
   unset($om->m[0]);
 

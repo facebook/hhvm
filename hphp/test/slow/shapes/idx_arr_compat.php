@@ -11,6 +11,10 @@ function main() {
   ];
   foreach ($arrs as $arr) {
     var_dump($arr);
-    var_dump(Shapes::idx($arr, 'x'));
+    try {
+      var_dump(Shapes::idx($arr, 'x'));
+    } catch (Exception $e) {
+      var_dump($e->getMessage());
+    }
   }
 }

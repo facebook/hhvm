@@ -2,9 +2,7 @@ array(1) {
   ["x"]=>
   int(1)
 }
-
-Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, array given in %s/test/slow/shapes/idx_arr_compat.php on line 14
-int(1)
+string(51) "idx() expects parameter 1 to be darray, array given"
 array(1) {
   ["x"]=>
   int(1)
@@ -21,14 +19,9 @@ array(2) {
   [1]=>
   bool(false)
 }
-
-Notice: Hack Array Compat: Argument 1 to HH\Shapes::idx() must be of type ?HH\darray, varray given in %s/test/slow/shapes/idx_arr_compat.php on line 14
-NULL
+string(52) "idx() expects parameter 1 to be darray, varray given"
 object(HH\Map) (1) {
   ["x"]=>
   int(1)
 }
-
-Fatal error: Uncaught exception 'RuntimeException' with message 'idx() expects parameter 1 to be array, object given' in %s/hphp/test/slow/shapes/idx_arr_compat.php:14
-Stack trace:
-%A
+string(52) "idx() expects parameter 1 to be darray, object given"

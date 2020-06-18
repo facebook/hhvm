@@ -1,2 +1,1 @@
--vEval.EmitClsMethPointers=1 -vEval.IsCompatibleClsMethType=1 -vEval.HackArrCompatTypeHintNotices=0
--vEval.HackArrCompatSpecialization=0
+-vEval.EmitClsMethPointers=1 -vEval.IsCompatibleClsMethType=1 -vEval.HackArrCompatTypeHintNotices=1

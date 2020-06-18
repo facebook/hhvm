@@ -119,9 +119,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
     I($cm<=>$va);
-  begin_row('da');
-    C($cm<$da);C($cm<=$da);C($cm>$da);C($cm>=$da);C($cm==$da);C($cm===$da);
-    I($cm<=>$da);
   begin_row('cp');
     C($cm<$cp);C($cm<=$cp);C($cm>$cp);C($cm>=$cp);C($cm==$cp);C($cm===$cp);
     I($cm<=>$cp);
@@ -162,9 +159,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPA');
     C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
     I($xx<=>$vx);
-  begin_row('da', 'WRAPA');
-    C($xx<$dx);C($xx<=$dx);C($xx>$dx);C($xx>=$dx);C($xx==$dx);C($xx===$dx);
-    I($xx<=>$dx);
   begin_row('cp', 'WRAPA');
     C($xx<$cx);C($xx<=$cx);C($xx>$cx);C($xx>=$cx);C($xx==$cx);C($xx===$cx);
     I($xx<=>$cx);
@@ -205,9 +199,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPO');
     C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
     I($xy<=>$vy);
-  begin_row('da', 'WRAPO');
-    C($xy<$dy);C($xy<=$dy);C($xy>$dy);C($xy>=$dy);C($xy==$dy);C($xy===$dy);
-    I($xy<=>$dy);
   begin_row('cp', 'WRAPO');
     C($xy<$cy);C($xy<=$cy);C($xy>$cy);C($xy>=$cy);C($xy==$cy);C($xy===$cy);
     I($xy<=>$cy);
@@ -248,9 +239,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPD');
     C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
     I($xz<=>$vz);
-  begin_row('da', 'WRAPD');
-    C($xz<$dz);C($xz<=$dz);C($xz>$dz);C($xz>=$dz);C($xz==$dz);C($xz===$dz);
-    I($xz<=>$dz);
   begin_row('cp', 'WRAPD');
     C($xz<$cz);C($xz<=$cz);C($xz>$cz);C($xz>=$cz);C($xz==$cz);C($xz===$cz);
     I($xz<=>$cz);
@@ -296,9 +284,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
     I($va<=>$cm);
-  begin_row('da');
-    C($da<$cm);C($da<=$cm);C($da>$cm);C($da>=$cm);C($da==$cm);C($da===$cm);
-    I($da<=>$cm);
   begin_row('cp');
     C($cp<$cm);C($cp<=$cm);C($cp>$cm);C($cp>=$cm);C($cp==$cm);C($cp===$cm);
     I($cp<=>$cm);
@@ -339,9 +324,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPA');
     C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
     I($vx<=>$xx);
-  begin_row('da', 'WRAPA');
-    C($dx<$xx);C($dx<=$xx);C($dx>$xx);C($dx>=$xx);C($dx==$xx);C($dx===$xx);
-    I($dx<=>$xx);
   begin_row('cp', 'WRAPA');
     C($cx<$xx);C($cx<=$xx);C($cx>$xx);C($cx>=$xx);C($cx==$xx);C($cx===$xx);
     I($cx<=>$xx);
@@ -382,9 +364,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPO');
     C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
     I($vy<=>$xy);
-  begin_row('da', 'WRAPO');
-    C($dy<$xy);C($dy<=$xy);C($dy>$xy);C($dy>=$xy);C($dy==$xy);C($dy===$xy);
-    I($dy<=>$xy);
   begin_row('cp', 'WRAPO');
     C($cy<$xy);C($cy<=$xy);C($cy>$xy);C($cy>=$xy);C($cy==$xy);C($cy===$xy);
     I($cy<=>$xy);
@@ -425,9 +404,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPD');
     C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
     I($vz<=>$xz);
-  begin_row('da', 'WRAPD');
-    C($dz<$xz);C($dz<=$xz);C($dz>$xz);C($dz>=$xz);C($dz==$xz);C($dz===$xz);
-    I($dz<=>$xz);
   begin_row('cp', 'WRAPD');
     C($cz<$xz);C($cz<=$xz);C($cz>$xz);C($cz>=$xz);C($cz==$xz);C($cz===$xz);
     I($cz<=>$xz);
@@ -506,9 +482,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($cm<$va);C($cm<=$va);C($cm>$va);C($cm>=$va);C($cm==$va);C($cm===$va);
     I($cm<=>$va);
-  begin_row('da');
-    C($cm<$da);C($cm<=$da);C($cm>$da);C($cm>=$da);C($cm==$da);C($cm===$da);
-    I($cm<=>$da);
   begin_row('cp');
     C($cm<$cp);C($cm<=$cp);C($cm>$cp);C($cm>=$cp);C($cm==$cp);C($cm===$cp);
     I($cm<=>$cp);
@@ -549,9 +522,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPA');
     C($xx<$vx);C($xx<=$vx);C($xx>$vx);C($xx>=$vx);C($xx==$vx);C($xx===$vx);
     I($xx<=>$vx);
-  begin_row('da', 'WRAPA');
-    C($xx<$dx);C($xx<=$dx);C($xx>$dx);C($xx>=$dx);C($xx==$dx);C($xx===$dx);
-    I($xx<=>$dx);
   begin_row('cp', 'WRAPA');
     C($xx<$cx);C($xx<=$cx);C($xx>$cx);C($xx>=$cx);C($xx==$cx);C($xx===$cx);
     I($xx<=>$cx);
@@ -592,9 +562,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPO');
     C($xy<$vy);C($xy<=$vy);C($xy>$vy);C($xy>=$vy);C($xy==$vy);C($xy===$vy);
     I($xy<=>$vy);
-  begin_row('da', 'WRAPO');
-    C($xy<$dy);C($xy<=$dy);C($xy>$dy);C($xy>=$dy);C($xy==$dy);C($xy===$dy);
-    I($xy<=>$dy);
   begin_row('cp', 'WRAPO');
     C($xy<$cy);C($xy<=$cy);C($xy>$cy);C($xy>=$cy);C($xy==$cy);C($xy===$cy);
     I($xy<=>$cy);
@@ -635,9 +602,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPD');
     C($xz<$vz);C($xz<=$vz);C($xz>$vz);C($xz>=$vz);C($xz==$vz);C($xz===$vz);
     I($xz<=>$vz);
-  begin_row('da', 'WRAPD');
-    C($xz<$dz);C($xz<=$dz);C($xz>$dz);C($xz>=$dz);C($xz==$dz);C($xz===$dz);
-    I($xz<=>$dz);
   begin_row('cp', 'WRAPD');
     C($xz<$cz);C($xz<=$cz);C($xz>$cz);C($xz>=$cz);C($xz==$cz);C($xz===$cz);
     I($xz<=>$cz);
@@ -683,9 +647,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va');
     C($va<$cm);C($va<=$cm);C($va>$cm);C($va>=$cm);C($va==$cm);C($va===$cm);
     I($va<=>$cm);
-  begin_row('da');
-    C($da<$cm);C($da<=$cm);C($da>$cm);C($da>=$cm);C($da==$cm);C($da===$cm);
-    I($da<=>$cm);
   begin_row('cp');
     C($cp<$cm);C($cp<=$cm);C($cp>$cm);C($cp>=$cm);C($cp==$cm);C($cp===$cm);
     I($cp<=>$cm);
@@ -726,9 +687,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPA');
     C($vx<$xx);C($vx<=$xx);C($vx>$xx);C($vx>=$xx);C($vx==$xx);C($vx===$xx);
     I($vx<=>$xx);
-  begin_row('da', 'WRAPA');
-    C($dx<$xx);C($dx<=$xx);C($dx>$xx);C($dx>=$xx);C($dx==$xx);C($dx===$xx);
-    I($dx<=>$xx);
   begin_row('cp', 'WRAPA');
     C($cx<$xx);C($cx<=$xx);C($cx>$xx);C($cx>=$xx);C($cx==$xx);C($cx===$xx);
     I($cx<=>$xx);
@@ -769,9 +727,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPO');
     C($vy<$xy);C($vy<=$xy);C($vy>$xy);C($vy>=$xy);C($vy==$xy);C($vy===$xy);
     I($vy<=>$xy);
-  begin_row('da', 'WRAPO');
-    C($dy<$xy);C($dy<=$xy);C($dy>$xy);C($dy>=$xy);C($dy==$xy);C($dy===$xy);
-    I($dy<=>$xy);
   begin_row('cp', 'WRAPO');
     C($cy<$xy);C($cy<=$xy);C($cy>$xy);C($cy>=$xy);C($cy==$xy);C($cy===$xy);
     I($cy<=>$xy);
@@ -812,9 +767,6 @@ function WRAPD($x) { $r = new stdclass; $r->x = $x; return LV($r); }
   begin_row('va', 'WRAPD');
     C($vz<$xz);C($vz<=$xz);C($vz>$xz);C($vz>=$xz);C($vz==$xz);C($vz===$xz);
     I($vz<=>$xz);
-  begin_row('da', 'WRAPD');
-    C($dz<$xz);C($dz<=$xz);C($dz>$xz);C($dz>=$xz);C($dz==$xz);C($dz===$xz);
-    I($dz<=>$xz);
   begin_row('cp', 'WRAPD');
     C($cz<$xz);C($cz<=$xz);C($cz>$xz);C($cz>=$xz);C($cz==$xz);C($cz===$xz);
     I($cz<=>$xz);

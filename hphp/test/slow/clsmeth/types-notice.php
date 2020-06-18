@@ -25,8 +25,8 @@ function is_as_static() {
 
   try { $m    as arraylike;       } catch (Exception $e) { echo "Failed!\n"; }
   try { $m    as shape(K::A => string, K::B => string);
-                                  } catch (Exception $e) { echo "Failed!\n"; }
-  try { $m    as shape(...);      } catch (Exception $e) { echo "Failed!\n"; }
+                                  } catch (Exception $e) { echo "shape!\n"; }
+  try { $m    as shape(...);      } catch (Exception $e) { echo "shape!\n"; }
   try { $m    as Traversable;     } catch (Exception $e) { echo "Failed!\n"; }
   try { $m    as Container;       } catch (Exception $e) { echo "Failed!\n"; }
   try { $m    as (string,string); } catch (Exception $e) { echo "Failed!\n"; }
@@ -50,8 +50,8 @@ function is_as_dynamic() {
 
   try { $m    as arraylike;       } catch (Exception $e) { echo "failed!\n"; }
   try { $m    as shape(K::A => string, K::B => string);
-                                  } catch (Exception $e) { echo "Failed!\n"; }
-  try { $m    as shape(...);      } catch (Exception $e) { echo "Failed!\n"; }
+                                  } catch (Exception $e) { echo "shape!\n"; }
+  try { $m    as shape(...);      } catch (Exception $e) { echo "shape!\n"; }
   try { $m    as Traversable;     } catch (Exception $e) { echo "Failed!\n"; }
   try { $m    as Container;       } catch (Exception $e) { echo "Failed!\n"; }
   try { $m    as (string,string); } catch (Exception $e) { echo "Failed!\n"; }
@@ -65,8 +65,8 @@ function is_as_shuffle_static() {
   $m = class_meth(Foo::class, 'bar');
 
   if (is_array($m)) {
-    $x = $m as shape(...);
-    echo '$m === ($m as shape(...)): '.P($m === $x);
+    $x = varray($m);
+    echo '$m === varray($m): '.P($m === $x);
 
     if ($m is Traversable) {
       $x = $m as Traversable;
@@ -83,8 +83,8 @@ function is_as_shuffle_dynamic() {
   $m = LV(class_meth(Foo::class, 'bar'));
 
   if (is_array($m)) {
-    $x = $m as shape(...);
-    echo '$m === ($m as shape(...)): '.P($m === $x);
+    $x = varray($m);
+    echo '$m === varray($m): '.P($m === $x);
 
     if ($m is arraylike) {
       $x = $m as Traversable;

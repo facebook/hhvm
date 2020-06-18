@@ -510,6 +510,7 @@ bool canDCE(IRInstruction* inst) {
   case GenericRetDecRefs:
   case StClsInitElem:
   case StMem:
+  case StImplicitContext:
   case StIterBase:
   case StIterType:
   case StIterEnd:

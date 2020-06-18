@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 
 #include "hphp/runtime/vm/jit/abi.h"
@@ -208,6 +209,18 @@ void cgStMem(IRLS& env, const IRInstruction* inst) {
 
   storeTV(vmain(env), type, srcLoc,
           memTVTypePtr(ptr, ptrLoc), memTVValPtr(ptr, ptrLoc));
+}
+
+void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
+  assertx(RO::EvalEnableImplicitContext);
+  auto& v = vmain(env);
+  auto const wh = srcLoc(env, inst, 0).reg();
+  auto const ctx = v.makeReg();
+  v << load{
+    rvmtl()[ImplicitContext::ActiveCtx.handle()],
+    ctx
+  };
+  v << store{ctx, wh[c_ResumableWaitHandle::implicitContextOff()]};
 }
 
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {

@@ -319,8 +319,67 @@ function clear_all_coverage_data(): void {
   }
 }
 
+/**
+ * Returns the implicit context keyed by $key or null if such doesn't exist
+ */
+<<__Native>>
+function get_implicit_context(string $key): mixed;
+
+/**
+ * Sets implicit context $context keyed by $key using the $memokey when
+ * memoization is needed. Returns the previous implicit context's index.
+ */
+<<__Native>>
+function set_implicit_context(
+  string $key,
+  mixed $context,
+  string $memokey
+): int;
+
+/*
+ * Sets the implicit context to the implicit context that is at $index
+ */
+<<__Native>>
+function restore_implicit_context(int $index): void;
+
+abstract class ImplicitContext {
+  abstract const type T as nonnull;
+
+  protected static async function genSet<Tout>(
+    this::T $context,
+    (function (): Awaitable<Tout>) $f
+  ): Awaitable<Tout> {
+    $memokey = (string)\__hhvm_internal_getmemokeyl($context);
+    $prev = set_implicit_context(static::class, $context, $memokey);
+    try {
+      $result = $f();
+    } finally {
+      restore_implicit_context($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    return await $result;
+  }
+
+  protected static function set<Tout>(
+    this::T $context,
+    (function (): Tout) $f
+  ): Tout {
+    $memokey = (string)\__hhvm_internal_getmemokeyl($context);
+    $prev = set_implicit_context(static::class, $context, $memokey);
+    try {
+      return $f();
+    } finally {
+      restore_implicit_context($prev);
+    }
+  }
+
+  protected static function get(): this::T {
+    return get_implicit_context(static::class);
+  }
 }
 
+} // HH
 
 namespace HH\Rx {
 /**

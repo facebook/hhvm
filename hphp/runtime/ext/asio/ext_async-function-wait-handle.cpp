@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -214,6 +215,9 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
                                       req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
+  if (RO::EvalEnableImplicitContext) {
+    this->m_implicitContext = *ImplicitContext::ActiveCtx;
+  }
 
   // Suspend the async function.
   resumable()->setResumeAddr(nullptr, suspendOffset);

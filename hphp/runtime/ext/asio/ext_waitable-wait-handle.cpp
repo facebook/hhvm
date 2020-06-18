@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -41,6 +42,9 @@ void c_WaitableWaitHandle::join() {
 
   assertx(!isFinished());
 
+  auto const context =
+    RO::EvalEnableImplicitContext ? *ImplicitContext::ActiveCtx : nullptr;
+
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
     session->onJoin(this);
@@ -57,6 +61,9 @@ void c_WaitableWaitHandle::join() {
   // run queues until we are finished
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
+  if (RO::EvalEnableImplicitContext) {
+    *ImplicitContext::ActiveCtx = context;
+  }
 }
 
 String c_WaitableWaitHandle::getName() {

@@ -227,6 +227,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
       );
     }();
 
+    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContext, waitHandle);
+
     if (RuntimeOption::EvalHHIRGenerateAsserts) {
       gen(env, DbgTrashRetVal, fp(env));
     }
@@ -251,6 +253,8 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     suspendHook(env, [&] {
       gen(env, SuspendHookAwaitEG, fp(env), waitHandle);
     });
+
+    if (RO::EvalEnableImplicitContext) gen(env, StImplicitContext, waitHandle);
 
     // Return control to the caller (AG::next()).
     auto const spAdjust = offsetFromIRSP(env, BCSPRelOffset{-1});

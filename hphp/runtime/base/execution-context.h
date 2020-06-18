@@ -47,6 +47,7 @@
 namespace HPHP {
 struct RequestEventHandler;
 struct EventHook;
+struct ImplicitContext;
 struct Resumable;
 }
 
@@ -630,6 +631,8 @@ private:
   folly::Optional<RepoOptions> m_requestOptions;
 
   Array m_debuggerEnv; // variables read/written in the REPL
+public:
+  req::vector<ImplicitContext*> m_implicitContexts;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

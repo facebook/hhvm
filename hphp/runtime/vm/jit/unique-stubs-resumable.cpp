@@ -16,8 +16,9 @@
 
 #include "hphp/runtime/vm/jit/unique-stubs.h"
 
-#include "hphp/runtime/base/surprise-flags.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/surprise-flags.h"
 
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/event-hook.h"
@@ -183,6 +184,15 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
       afwh[AFWH::stateOff()]
     };
 
+    if (RO::EvalEnableImplicitContext) {
+      auto const implicitContext = v.makeReg();
+      v << load {
+        afwh[c_ResumableWaitHandle::implicitContextOff()],
+        implicitContext
+      };
+      v << store{implicitContext, rvmtl()[ImplicitContext::ActiveCtx.handle()]};
+    }
+
     auto const child = v.makeReg();
     v << load{afwh[AFWH::childrenOff() + AFWH::Node::childOff()], child};
 
@@ -306,6 +316,12 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
     c_ResumableWaitHandle::STATE_RUNNING
   );
   v << storebi{runningState, parentBl[afwhToBl(AFWH::stateOff())]};
+
+  if (RO::EvalEnableImplicitContext) {
+    auto const implicitContext = v.makeReg();
+    v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
+    v << store{implicitContext, rvmtl()[ImplicitContext::ActiveCtx.handle()]};
+  }
 
   // Transfer control to the resume address.
   v << jmpm{rvmfp()[afwhToAr(AFWH::resumeAddrOff())], vm_regs_with_sp()};

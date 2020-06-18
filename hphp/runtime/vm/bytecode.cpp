@@ -50,6 +50,7 @@
 #include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/hhprof.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/base/object-data.h"
@@ -3531,9 +3532,15 @@ OPTBLD_INLINE void iopAKExists() {
   vmStack().replaceTV<KindOfBoolean>(result);
 }
 
+const StaticString
+  s_implicit_context_set("HH\\ImplicitContext::set"),
+  s_implicit_context_genSet("HH\\ImplicitContext::genSet");
+
 OPTBLD_INLINE void iopGetMemoKeyL(named_local_var loc) {
   DEBUG_ONLY auto const func = vmfp()->m_func;
-  assertx(func->isMemoizeWrapper());
+  assertx(func->isMemoizeWrapper() ||
+          func->fullName()->isame(s_implicit_context_set.get()) ||
+          func->fullName()->isame(s_implicit_context_genSet.get()));
 
   assertx(tvIsPlausible(*loc.lval));
 
@@ -5457,6 +5464,9 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncFunctionWaitHandle::Create<true>(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
+    if (RO::EvalEnableImplicitContext) {
+      waitHandle->m_implicitContext = *ImplicitContext::ActiveCtx;
+    }
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
     EventHook::FunctionSuspendAwaitEF(fp, waitHandle->actRec());
@@ -5479,6 +5489,10 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
+
+    if (RO::EvalEnableImplicitContext) {
+      waitHandle->m_implicitContext = *ImplicitContext::ActiveCtx;
+    }
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5513,10 +5527,16 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
+    if (RO::EvalEnableImplicitContext) {
+      frame_afwh(fp)->m_implicitContext = *ImplicitContext::ActiveCtx;
+    }
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
+    if (RO::EvalEnableImplicitContext) {
+      gen->getWaitHandle()->m_implicitContext = *ImplicitContext::ActiveCtx;
+    }
     gen->getWaitHandle()->await(std::move(child));
   }
 

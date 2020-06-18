@@ -51,6 +51,7 @@
 #include "hphp/runtime/base/apc-stats.h"
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/extended-logger.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/debugger/debugger.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/ext/string/ext_string.h"
@@ -640,6 +641,13 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       RuntimeOption::PspCpuTimeoutSeconds
   );
 
+  if (RO::EvalEnableImplicitContext) {
+    // If the main request terminated with a C++ exception, we would not
+    // have cleared the implicit context since that logic is
+    // done in a PHP try-finally. Let's clear the implicit context here.
+    *ImplicitContext::ActiveCtx = nullptr;
+  }
+
   // We mustn't destroy any callbacks until we're done with all
   // of them. So hold them in tmp.
   // XXX still true in a world without destructors?
@@ -652,6 +660,9 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
       funcs.get(),
       [](TypedValue v) {
         vm_call_user_func(VarNR{v}, init_null_variant);
+        // Implicit context should not have leaked between each call
+        assertx(!RO::EvalEnableImplicitContext ||
+                !(*ImplicitContext::ActiveCtx));
       }
     );
     tmp.append(funcs);
@@ -1415,6 +1426,8 @@ void ExecutionContext::requestInit() {
     assertx(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
   }
 
+  if (RO::EvalEnableImplicitContext) *ImplicitContext::ActiveCtx = nullptr;
+
   profileRequestStart();
 
   HHProf::Request::StartProfiling();
@@ -1752,6 +1765,15 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   SCOPE_EXIT { assertx(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
+
+  if (RO::EvalEnableImplicitContext) {
+    *ImplicitContext::ActiveCtx = [&] {
+      if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
+      auto gen = frame_async_generator(fp);
+      return gen->getWaitHandle()->m_implicitContext;
+    }();
+  }
+
   // We don't need to check for space for the ActRec (unlike generally
   // in normal re-entry), because the ActRec isn't on the stack.
   checkStack(vmStack(), fp->func(), 0);
@@ -1787,6 +1809,15 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   SCOPE_EXIT { assertx(tl_regState == VMRegState::CLEAN); };
 
   auto fp = resumable->actRec();
+
+  if (RO::EvalEnableImplicitContext) {
+    *ImplicitContext::ActiveCtx = [&] {
+      if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
+      auto gen = frame_async_generator(fp);
+      return gen->getWaitHandle()->m_implicitContext;
+    }();
+  }
+
   checkStack(vmStack(), fp->func(), 0);
 
   // decref after we hold reference to the exception

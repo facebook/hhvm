@@ -1007,6 +1007,9 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case StMem:
     return PureStore { pointee(inst.src(0)), inst.src(1), inst.src(0) };
 
+  case StImplicitContext:
+    return may_load_store(AEmpty, AEmpty);
+
   case LdClsInitElem:
     return PureLoad { AHeapAny };
 

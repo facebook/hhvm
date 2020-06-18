@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/irlower-internal.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/resumable.h"
@@ -486,6 +487,13 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   // parent->m_child = child;
   auto const childOff = AFWH::childrenOff() + AFWH::Node::childOff();
   v << store{child, parentAR[ar_rel(childOff)]};
+
+  if (RO::EvalEnableImplicitContext) {
+    // parent->m_implicitContext = *ImplicitContext::ActiveCtx
+    auto const implicitContext = v.makeReg();
+    v << load{rvmtl()[ImplicitContext::ActiveCtx.handle()], implicitContext};
+    v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
+  }
 }
 
 void cgAFWHPushTailFrame(IRLS& env, const IRInstruction* inst) {

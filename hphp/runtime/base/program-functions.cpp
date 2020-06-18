@@ -27,6 +27,7 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/file-util-defs.h"
 #include "hphp/runtime/base/hhprof.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/member-reflection.h"
@@ -2382,6 +2383,12 @@ void hphp_process_init() {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
     BootStats::mark("extra_process_init_concurrent_wait");
   };
+
+  if (RO::EvalEnableImplicitContext) {
+    // Needs to run prior to emitting unique stubs
+    ImplicitContext::ActiveCtx
+      .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::ActiveCtx"});
+  }
   jit::mcgen::processInit();
   jit::processInitProfData();
   g_vmProcessInit();

@@ -2612,6 +2612,9 @@ fn emit_special_function(
                 })?,
             )))
         }
+        ("__hhvm_internal_getmemokeyl", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => Ok(Some(
+            instr::getmemokeyl(local::Type::Named(local_id::get_name(&param.1).into())),
+        )),
         _ => Ok(
             match (
                 args,

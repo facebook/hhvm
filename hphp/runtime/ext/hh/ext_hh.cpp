@@ -26,9 +26,11 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/autoload-map.h"
 #include "hphp/runtime/base/backtrace.h"
+#include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/container-functions.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-stream-wrapper.h"
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/base/request-tracing.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -923,7 +925,83 @@ void HHVM_FUNCTION(clear_coverage_for_file, StringArg file) {
   u->clearCoverage();
 }
 
+TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
+  if (!RO::EvalEnableImplicitContext) {
+    throw_implicit_context_exception("Implicit context feature is not enabled");
+  }
+  auto const context = *ImplicitContext::ActiveCtx;
+  if (!context) return make_tv<KindOfNull>();
+  auto const it = context->m_map.find(key.get());
+  if (it == context->m_map.end()) return make_tv<KindOfNull>();
+  auto const result = it->second.first;
+  if (isRefcountedType(result.m_type)) tvIncRefCountable(result);
+  return result;
 }
+
+int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
+                                            TypedValue data,
+                                            StringArg memokey) {
+  if (!RO::EvalEnableImplicitContext) {
+    throw_implicit_context_exception("Implicit context feature is not enabled");
+  }
+  auto const key = keyarg.get();
+  // Reserve the underscore prefix for the time being in case we want to
+  // emit keys from the compiler. This would allow us to avoid having
+  // conflicts with other key generation mechanisms.
+  if (key->size() == 0 || key->data()[0] == '_') {
+    throw_implicit_context_exception(
+      "Implicit context keys cannot be empty or start with _");
+  }
+  auto const prev = *ImplicitContext::ActiveCtx;
+  auto const context = req::make_raw<ImplicitContext>();
+  assertx(context);
+  if (prev) context->m_map = prev->m_map;
+  // Leak `data`, `key` and `memokey` to the end of the request
+  if (isRefcountedType(data.m_type)) tvIncRefCountable(data);
+  key->incRefCount();
+  memokey.get()->incRefCount();
+  auto entry = std::make_pair(data, memokey.get());
+  auto const it = context->m_map.insert({key, entry});
+  // If the insertion failed, overwrite
+  if (!it.second) it.first->second = entry;
+
+  using Elem = std::pair<const StringData*, StringData*>;
+  req::vector<Elem> vec;
+  for (auto const& p : context->m_map) {
+    vec.push_back(std::make_pair(p.first, p.second.second));
+  }
+  std::sort(vec.begin(), vec.end(), [](const Elem e1, const Elem e2) {
+                                      return compare(e1.first, e1.first);
+                                    });
+  StringBuffer sb;
+  for (auto const& e : vec) {
+    sb.append(e.first->data(), e.first->size());
+    sb.append(e.second->data(), e.second->size());
+  }
+  context->m_memokey = sb.detach().detach();
+  context->m_index = g_context->m_implicitContexts.size();
+  *ImplicitContext::ActiveCtx = context;
+  g_context->m_implicitContexts.push_back(context);
+  return prev ? prev->m_index : ImplicitContext::kEmptyIndex;
+}
+
+void HHVM_FUNCTION(restore_implicit_context, int64_t index) {
+  if (!RO::EvalEnableImplicitContext) {
+    throw_implicit_context_exception("Implicit context feature is not enabled");
+  }
+  if (index == ImplicitContext::kEmptyIndex) {
+    *ImplicitContext::ActiveCtx = nullptr;
+    return;
+  }
+  if (index >= g_context->m_implicitContexts.size()) {
+    throw_implicit_context_exception(
+      folly::to<std::string>("Implicit context at index ", index,
+                             " does not exist"));
+  }
+  *ImplicitContext::ActiveCtx = g_context->m_implicitContexts[index];
+}
+
+} // namespace
 
 static struct HHExtension final : Extension {
   HHExtension(): Extension("hh", NO_EXTENSION_VERSION_YET) { }
@@ -958,6 +1036,9 @@ static struct HHExtension final : Extension {
     X(get_files_with_coverage);
     X(get_coverage_for_file);
     X(clear_coverage_for_file);
+    X(get_implicit_context);
+    X(set_implicit_context);
+    X(restore_implicit_context);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

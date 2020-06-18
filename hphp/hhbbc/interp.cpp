@@ -2642,8 +2642,19 @@ void in(ISS& env, const bc::AKExists& /*op*/) {
   push(env, TBool);
 }
 
+const StaticString
+  s_implicit_context_set("HH\\ImplicitContext::set"),
+  s_implicit_context_genSet("HH\\ImplicitContext::genSet");
+
 void in(ISS& env, const bc::GetMemoKeyL& op) {
-  always_assert(env.ctx.func->isMemoizeWrapper);
+  auto const func = env.ctx.func;
+  auto const name = folly::to<std::string>(
+    func && func->cls ? func->cls->name->data() : "",
+    func && func->cls ? "::" : "",
+    func ? func->name->data() : "");
+  always_assert(func->isMemoizeWrapper ||
+                name == s_implicit_context_set.get()->toCppString() ||
+                name == s_implicit_context_genSet.get()->toCppString());
 
   auto const rclsIMemoizeParam = env.index.builtin_class(s_IMemoizeParam.get());
   auto const tyIMemoizeParam = subObj(rclsIMemoizeParam);

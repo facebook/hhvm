@@ -970,6 +970,7 @@ bool opcodeMayRaise(Opcode opc) {
   case StLocRange:
   case StMBase:
   case StMem:
+  case StImplicitContext:
   case StOutValue:
   case StrictlyIntegerConv:
   case StringIsset:

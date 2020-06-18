@@ -747,6 +747,10 @@ void throw_call_reified_func_without_generics(const Func* f) {
   SystemLib::throwBadMethodCallExceptionObject(msg);
 }
 
+void throw_implicit_context_exception(std::string s) {
+  SystemLib::throwInvalidOperationExceptionObject(s);
+}
+
 void throw_iterator_not_valid() {
   SystemLib::throwInvalidOperationExceptionObject(
     "Iterator is not valid");

@@ -1812,6 +1812,10 @@ To string conversions:
 
   Store S1 into the location pointed to by S0.
 
+| StImplicitContext, ND, S(Obj), NF
+
+  Stores the implicit context from RDS to the WaitHandle in S0.
+
 | StLoc<localId>, ND, S(FramePtr) S(Cell), NF
 
   Store S1 to local number localId on the frame pointed to by S0.

@@ -10,7 +10,6 @@
 module SourceText = Full_fidelity_source_text
 module Syntax = Full_fidelity_positioned_syntax
 module SyntaxTree = Full_fidelity_syntax_tree.WithSyntax (Syntax)
-module DebugPos = Debug.WithSyntax (Syntax)
 open Hh_prelude
 
 type debug_config = {
@@ -128,18 +127,6 @@ let debug_chunk_groups env ~range source_text chunk_groups =
 let debug_full_text source_text =
   Printf.printf "%s\n" (SourceText.text source_text)
 
-let debug_ast syntax_tree =
-  let root = SyntaxTree.root syntax_tree in
-  Printf.printf "%s\n" @@ DebugPos.dump_syntax root
-
 let debug_text_range source_text start_char end_char =
   Printf.printf "Subrange passed:\n%s\n"
   @@ String.sub (SourceText.text source_text) start_char (end_char - start_char)
-
-let debug env ~range source_text syntax_tree doc chunk_groups =
-  if !debug_config.print_ast then debug_ast syntax_tree;
-  if !debug_config.print_doc then ignore (Doc.dump doc);
-  let range =
-    Option.value range ~default:(0, Full_fidelity_source_text.length source_text)
-  in
-  debug_chunk_groups env ~range source_text chunk_groups

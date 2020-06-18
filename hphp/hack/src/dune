@@ -99,7 +99,6 @@
   (ocamlc_flags (:standard -custom))
   (link_flags (:standard (:include dune_config/ld-opts.sexp)))
   (libraries
-    debug
     default_injector_config
     global_config
     hackfmt

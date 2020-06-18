@@ -14,7 +14,6 @@
   * --full-fidelity-json
   * --full-fidelity-errors
   * --full-fidelity-errors-all
-  * --full-fidelity-s-expression
   * --full-fidelity-ast-s-expression
   * --program-text
   * --pretty-print
@@ -32,7 +31,6 @@ module SyntaxTree =
 module SourceText = Full_fidelity_source_text
 module ParserErrors =
   Full_fidelity_parser_errors.WithSyntax (Full_fidelity_positioned_syntax)
-module DebugPos = Debug.WithSyntax (Full_fidelity_positioned_syntax)
 
 module FullFidelityParseArgs = struct
   type t = {
@@ -43,7 +41,6 @@ module FullFidelityParseArgs = struct
     full_fidelity_dot_edges: bool;
     full_fidelity_errors: bool;
     full_fidelity_errors_all: bool;
-    full_fidelity_s_expr: bool;
     full_fidelity_ast_s_expr: bool;
     program_text: bool;
     pretty_print: bool;
@@ -85,7 +82,6 @@ module FullFidelityParseArgs = struct
       full_fidelity_dot_edges
       full_fidelity_errors
       full_fidelity_errors_all
-      full_fidelity_s_expr
       full_fidelity_ast_s_expr
       program_text
       pretty_print
@@ -123,7 +119,6 @@ module FullFidelityParseArgs = struct
       full_fidelity_text_json;
       full_fidelity_errors;
       full_fidelity_errors_all;
-      full_fidelity_s_expr;
       full_fidelity_ast_s_expr;
       program_text;
       pretty_print;
@@ -170,9 +165,7 @@ module FullFidelityParseArgs = struct
     let set_full_fidelity_errors () = full_fidelity_errors := true in
     let full_fidelity_errors_all = ref false in
     let set_full_fidelity_errors_all () = full_fidelity_errors_all := true in
-    let full_fidelity_s_expr = ref false in
     let full_fidelity_ast_s_expr = ref false in
-    let set_full_fidelity_s_expr () = full_fidelity_s_expr := true in
     let set_full_fidelity_ast_s_expr () = full_fidelity_ast_s_expr := true in
     let program_text = ref false in
     let set_program_text () = program_text := true in
@@ -237,9 +230,6 @@ Some errors may be filtered out."
           "Displays the full-fidelity parser errors, if any.
 No errors are filtered out."
         );
-        ( "--full-fidelity-s-expression",
-          Arg.Unit set_full_fidelity_s_expr,
-          "Displays the full-fidelity parse tree in S-expression format." );
         ( "--full-fidelity-ast-s-expression",
           Arg.Unit set_full_fidelity_ast_s_expr,
           "Displays the AST produced by the FFP in S-expression format." );
@@ -366,7 +356,6 @@ No errors are filtered out."
         !full_fidelity_dot_edges;
         !full_fidelity_errors;
         !full_fidelity_errors_all;
-        !full_fidelity_s_expr;
         !full_fidelity_ast_s_expr;
         !program_text;
         !pretty_print;
@@ -382,7 +371,6 @@ No errors are filtered out."
       !full_fidelity_dot_edges
       !full_fidelity_errors
       !full_fidelity_errors_all
-      !full_fidelity_s_expr
       !full_fidelity_ast_s_expr
       !program_text
       !pretty_print
@@ -531,10 +519,6 @@ let handle_existing_file args filename =
   ( if args.pretty_print then
     let pretty = Libhackfmt.format_tree syntax_tree in
     Printf.printf "%s\n" pretty );
-  ( if args.full_fidelity_s_expr then
-    let root = SyntaxTree.root syntax_tree in
-    let str = DebugPos.dump_syntax root in
-    Printf.printf "%s\n" str );
 
   ( if print_errors then
     let level =

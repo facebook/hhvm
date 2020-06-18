@@ -1,94 +1,1058 @@
-((script 191
-  ((list 191
-    ((markup_section 4
-      ((() markup 0 ())
-       (markup_suffix 4
-        ((() <? 2 ())
-         (() name 2 ((whitespace 1) (single_line_comment 9) (end_of_line 1)))))))
-     (classish_declaration 86
-      ((missing 0 ()) (missing 0 ()) (missing 0 ())
-       (((end_of_line 1)) class 5 ((whitespace 1)))
-       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 78
-        ((() { 1 ((end_of_line 1)))
-         (list 72
-          ((pocket_enum_declaration 72
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) enum 4 ((whitespace 1)))
-             (() name 1 ((whitespace 1))) (() { 1 ((end_of_line 1)))
-             (list 57
-              ((pocket_field_type_declaration 12
-                ((((whitespace 2)) case 4 ((whitespace 1)))
-                 (() type 4 ((whitespace 1)))
-                 (type_parameter 1
-                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
-                   (() name 1 ()) (missing 0 ())))
-                 (() ";" 1 ((end_of_line 1)))))
-               (pocket_field_type_expr_declaration 11
-                ((((whitespace 2)) case 4 ((whitespace 1)))
-                 (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
-                 (() name 3 ()) (() ";" 1 ((end_of_line 1)))))
-               (pocket_atom_mapping 28
-                ((((whitespace 2)) :@ 2 ()) (() name 1 ()) (() "(" 1 ())
-                 (list 22
-                  ((list_item 13
-                    ((pocket_mapping_type_declaration 12
-                      ((() type 4 ((whitespace 1)))
-                       (() name 1 ((whitespace 1))) (() = 1 ((whitespace 1)))
-                       (simple_type_specifier 3 ((() int 3 ())))))
-                     (() , 1 ((whitespace 1)))))
-                   (list_item 8
-                    ((pocket_mapping_id_declaration 8
-                      ((() name 3 ((whitespace 1)))
-                       (simple_initializer 4
-                        ((() = 1 ((whitespace 1)))
-                         (literal 2 ((() decimal_literal 2 ())))))))
-                     (missing 0 ())))))
-                 (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
-             (((whitespace 2)) } 1 ((end_of_line 1)))))))
-         (() } 1 ((end_of_line 1)))))))
-     (classish_declaration 87
-      ((missing 0 ()) (missing 0 ()) (missing 0 ())
-       (((end_of_line 1)) class 5 ((whitespace 1)))
-       (() name 1 ((whitespace 1))) (missing 0 ()) (missing 0 ())
-       (missing 0 ()) (missing 0 ()) (missing 0 ()) (missing 0 ())
-       (classish_body 79
-        ((() { 1 ((end_of_line 1)))
-         (list 73
-          ((pocket_enum_declaration 73
-            ((missing 0 ()) (missing 0 ())
-             (((whitespace 2)) enum 4 ((whitespace 1)))
-             (() name 1 ((whitespace 1))) (() { 1 ((end_of_line 1)))
-             (list 58
-              ((pocket_field_type_declaration 12
-                ((((whitespace 2)) case 4 ((whitespace 1)))
-                 (() type 4 ((whitespace 1)))
-                 (type_parameter 1
-                  ((missing 0 ()) (missing 0 ()) (missing 0 ())
-                   (() name 1 ()) (missing 0 ())))
-                 (() ";" 1 ((end_of_line 1)))))
-               (pocket_field_type_expr_declaration 11
-                ((((whitespace 2)) case 4 ((whitespace 1)))
-                 (simple_type_specifier 1 ((() name 1 ((whitespace 1)))))
-                 (() name 3 ()) (() ";" 1 ((end_of_line 1)))))
-               (pocket_atom_mapping 29
-                ((((whitespace 2)) :@ 2 ()) (() name 1 ()) (() "(" 1 ())
-                 (list 23
-                  ((list_item 13
-                    ((pocket_mapping_type_declaration 12
-                      ((() type 4 ((whitespace 1)))
-                       (() name 1 ((whitespace 1))) (() = 1 ((whitespace 1)))
-                       (simple_type_specifier 3 ((() int 3 ())))))
-                     (() , 1 ((whitespace 1)))))
-                   (list_item 9
-                    ((pocket_mapping_id_declaration 8
-                      ((() name 3 ((whitespace 1)))
-                       (simple_initializer 4
-                        ((() = 1 ((whitespace 1)))
-                         (literal 2 ((() decimal_literal 2 ())))))))
-                     (() , 1 ())))))
-                 (() ")" 1 ()) (() ";" 1 ((end_of_line 1)))))))
-             (((whitespace 2)) } 1 ((end_of_line 1)))))))
-         (() } 1 ((end_of_line 1)))))))
-     (end_of_file 0 ((() end_of_file 0 ()))))))))
+{
+  "parse_tree":{
+    "kind":"script",
+    "script_declarations":{
+      "kind":"list",
+      "elements":[
+        {
+          "kind":"markup_section",
+          "markup_text":{
+            "kind":"token",
+            "token":{
+              "kind":"markup",
+              "text":"",
+              "offset":0,
+              "leading_width":0,
+              "width":0,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":1
+            }
+          },
+          "markup_suffix":{
+            "kind":"markup_suffix",
+            "markup_suffix_less_than_question":{
+              "kind":"token",
+              "token":{
+                "kind":"<?",
+                "text":"<?",
+                "offset":0,
+                "leading_width":0,
+                "width":2,
+                "trailing_width":0,
+                "leading":[],
+                "trailing":[],
+                "line_number":1
+              }
+            },
+            "markup_suffix_name":{
+              "kind":"token",
+              "token":{
+                "kind":"name",
+                "text":"hh",
+                "offset":2,
+                "leading_width":0,
+                "width":2,
+                "trailing_width":11,
+                "leading":[],
+                "trailing":[
+                  {"kind":"whitespace","text":" ","offset":4,"width":1},
+                  {"kind":"single_line_comment","text":"// strict","offset":5,"width":9},
+                  {"kind":"end_of_line","text":"\n","offset":14,"width":1}
+                ],
+                "line_number":1
+              }
+            }
+          }
+        },
+        {
+          "kind":"classish_declaration",
+          "classish_attribute":{"kind":"missing"},
+          "classish_modifiers":{"kind":"missing"},
+          "classish_xhp":{"kind":"missing"},
+          "classish_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"class",
+              "text":"class",
+              "offset":15,
+              "leading_width":1,
+              "width":5,
+              "trailing_width":1,
+              "leading":[{"kind":"end_of_line","text":"\n","offset":15,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":21,"width":1}],
+              "line_number":3
+            }
+          },
+          "classish_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"C",
+              "offset":22,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":23,"width":1}],
+              "line_number":3
+            }
+          },
+          "classish_type_parameters":{"kind":"missing"},
+          "classish_extends_keyword":{"kind":"missing"},
+          "classish_extends_list":{"kind":"missing"},
+          "classish_implements_keyword":{"kind":"missing"},
+          "classish_implements_list":{"kind":"missing"},
+          "classish_where_clause":{"kind":"missing"},
+          "classish_body":{
+            "kind":"classish_body",
+            "classish_body_left_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"{",
+                "text":"{",
+                "offset":24,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":25,"width":1}],
+                "line_number":3
+              }
+            },
+            "classish_body_elements":{
+              "kind":"list",
+              "elements":[
+                {
+                  "kind":"pocket_enum_declaration",
+                  "pocket_enum_attributes":{"kind":"missing"},
+                  "pocket_enum_modifiers":{"kind":"missing"},
+                  "pocket_enum_enum":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"enum",
+                      "text":"enum",
+                      "offset":26,
+                      "leading_width":2,
+                      "width":4,
+                      "trailing_width":1,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":26,"width":2}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":32,"width":1}],
+                      "line_number":4
+                    }
+                  },
+                  "pocket_enum_name":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"name",
+                      "text":"E",
+                      "offset":33,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":34,"width":1}],
+                      "line_number":4
+                    }
+                  },
+                  "pocket_enum_left_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"{",
+                      "text":"{",
+                      "offset":35,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":36,"width":1}],
+                      "line_number":4
+                    }
+                  },
+                  "pocket_enum_fields":{
+                    "kind":"list",
+                    "elements":[
+                      {
+                        "kind":"pocket_field_type_declaration",
+                        "pocket_field_type_case":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"case",
+                            "text":"case",
+                            "offset":37,
+                            "leading_width":2,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":37,"width":2}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":43,"width":1}],
+                            "line_number":5
+                          }
+                        },
+                        "pocket_field_type_type":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"type",
+                            "text":"type",
+                            "offset":44,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":48,"width":1}],
+                            "line_number":5
+                          }
+                        },
+                        "pocket_field_type_type_parameter":{
+                          "kind":"type_parameter",
+                          "type_attribute_spec":{"kind":"missing"},
+                          "type_reified":{"kind":"missing"},
+                          "type_variance":{"kind":"missing"},
+                          "type_name":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"name",
+                              "text":"T",
+                              "offset":49,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":0,
+                              "leading":[],
+                              "trailing":[],
+                              "line_number":5
+                            }
+                          },
+                          "type_constraints":{"kind":"missing"}
+                        },
+                        "pocket_field_type_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":50,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":51,"width":1}],
+                            "line_number":5
+                          }
+                        }
+                      },
+                      {
+                        "kind":"pocket_field_type_expr_declaration",
+                        "pocket_field_type_expr_case":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"case",
+                            "text":"case",
+                            "offset":52,
+                            "leading_width":2,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":52,"width":2}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":58,"width":1}],
+                            "line_number":6
+                          }
+                        },
+                        "pocket_field_type_expr_type":{
+                          "kind":"simple_type_specifier",
+                          "simple_type_specifier":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"name",
+                              "text":"T",
+                              "offset":59,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":1,
+                              "leading":[],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":60,"width":1}],
+                              "line_number":6
+                            }
+                          }
+                        },
+                        "pocket_field_type_expr_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"val",
+                            "offset":61,
+                            "leading_width":0,
+                            "width":3,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":6
+                          }
+                        },
+                        "pocket_field_type_expr_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":64,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":65,"width":1}],
+                            "line_number":6
+                          }
+                        }
+                      },
+                      {
+                        "kind":"pocket_atom_mapping",
+                        "pocket_atom_mapping_glyph":{
+                          "kind":"token",
+                          "token":{
+                            "kind":":@",
+                            "text":":@",
+                            "offset":66,
+                            "leading_width":2,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":66,"width":2}],
+                            "trailing":[],
+                            "line_number":7
+                          }
+                        },
+                        "pocket_atom_mapping_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"I",
+                            "offset":70,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":7
+                          }
+                        },
+                        "pocket_atom_mapping_left_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"(",
+                            "text":"(",
+                            "offset":71,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":7
+                          }
+                        },
+                        "pocket_atom_mapping_mappings":{
+                          "kind":"list",
+                          "elements":[
+                            {
+                              "kind":"list_item",
+                              "list_item":{
+                                "kind":"pocket_mapping_type_declaration",
+                                "pocket_mapping_type_keyword":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"type",
+                                    "text":"type",
+                                    "offset":72,
+                                    "leading_width":0,
+                                    "width":4,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":76,"width":1}],
+                                    "line_number":7
+                                  }
+                                },
+                                "pocket_mapping_type_name":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"name",
+                                    "text":"T",
+                                    "offset":77,
+                                    "leading_width":0,
+                                    "width":1,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":78,"width":1}],
+                                    "line_number":7
+                                  }
+                                },
+                                "pocket_mapping_type_equal":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"=",
+                                    "text":"=",
+                                    "offset":79,
+                                    "leading_width":0,
+                                    "width":1,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":80,"width":1}],
+                                    "line_number":7
+                                  }
+                                },
+                                "pocket_mapping_type_type":{
+                                  "kind":"simple_type_specifier",
+                                  "simple_type_specifier":{
+                                    "kind":"token",
+                                    "token":{
+                                      "kind":"int",
+                                      "text":"int",
+                                      "offset":81,
+                                      "leading_width":0,
+                                      "width":3,
+                                      "trailing_width":0,
+                                      "leading":[],
+                                      "trailing":[],
+                                      "line_number":7
+                                    }
+                                  }
+                                }
+                              },
+                              "list_separator":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":",",
+                                  "text":",",
+                                  "offset":84,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":1,
+                                  "leading":[],
+                                  "trailing":[{"kind":"whitespace","text":" ","offset":85,"width":1}],
+                                  "line_number":7
+                                }
+                              }
+                            },
+                            {
+                              "kind":"list_item",
+                              "list_item":{
+                                "kind":"pocket_mapping_id_declaration",
+                                "pocket_mapping_id_name":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"name",
+                                    "text":"val",
+                                    "offset":86,
+                                    "leading_width":0,
+                                    "width":3,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":89,"width":1}],
+                                    "line_number":7
+                                  }
+                                },
+                                "pocket_mapping_id_initializer":{
+                                  "kind":"simple_initializer",
+                                  "simple_initializer_equal":{
+                                    "kind":"token",
+                                    "token":{
+                                      "kind":"=",
+                                      "text":"=",
+                                      "offset":90,
+                                      "leading_width":0,
+                                      "width":1,
+                                      "trailing_width":1,
+                                      "leading":[],
+                                      "trailing":[{"kind":"whitespace","text":" ","offset":91,"width":1}],
+                                      "line_number":7
+                                    }
+                                  },
+                                  "simple_initializer_value":{
+                                    "kind":"literal",
+                                    "literal_expression":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":"decimal_literal",
+                                        "text":"42",
+                                        "offset":92,
+                                        "leading_width":0,
+                                        "width":2,
+                                        "trailing_width":0,
+                                        "leading":[],
+                                        "trailing":[],
+                                        "line_number":7
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "list_separator":{"kind":"missing"}
+                            }
+                          ]
+                        },
+                        "pocket_atom_mapping_right_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":")",
+                            "text":")",
+                            "offset":94,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":7
+                          }
+                        },
+                        "pocket_atom_mapping_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":95,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":96,"width":1}],
+                            "line_number":7
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "pocket_enum_right_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"}",
+                      "text":"}",
+                      "offset":97,
+                      "leading_width":2,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":97,"width":2}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":100,"width":1}],
+                      "line_number":8
+                    }
+                  }
+                }
+              ]
+            },
+            "classish_body_right_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"}",
+                "text":"}",
+                "offset":101,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":102,"width":1}],
+                "line_number":9
+              }
+            }
+          }
+        },
+        {
+          "kind":"classish_declaration",
+          "classish_attribute":{"kind":"missing"},
+          "classish_modifiers":{"kind":"missing"},
+          "classish_xhp":{"kind":"missing"},
+          "classish_keyword":{
+            "kind":"token",
+            "token":{
+              "kind":"class",
+              "text":"class",
+              "offset":103,
+              "leading_width":1,
+              "width":5,
+              "trailing_width":1,
+              "leading":[{"kind":"end_of_line","text":"\n","offset":103,"width":1}],
+              "trailing":[{"kind":"whitespace","text":" ","offset":109,"width":1}],
+              "line_number":11
+            }
+          },
+          "classish_name":{
+            "kind":"token",
+            "token":{
+              "kind":"name",
+              "text":"D",
+              "offset":110,
+              "leading_width":0,
+              "width":1,
+              "trailing_width":1,
+              "leading":[],
+              "trailing":[{"kind":"whitespace","text":" ","offset":111,"width":1}],
+              "line_number":11
+            }
+          },
+          "classish_type_parameters":{"kind":"missing"},
+          "classish_extends_keyword":{"kind":"missing"},
+          "classish_extends_list":{"kind":"missing"},
+          "classish_implements_keyword":{"kind":"missing"},
+          "classish_implements_list":{"kind":"missing"},
+          "classish_where_clause":{"kind":"missing"},
+          "classish_body":{
+            "kind":"classish_body",
+            "classish_body_left_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"{",
+                "text":"{",
+                "offset":112,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":113,"width":1}],
+                "line_number":11
+              }
+            },
+            "classish_body_elements":{
+              "kind":"list",
+              "elements":[
+                {
+                  "kind":"pocket_enum_declaration",
+                  "pocket_enum_attributes":{"kind":"missing"},
+                  "pocket_enum_modifiers":{"kind":"missing"},
+                  "pocket_enum_enum":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"enum",
+                      "text":"enum",
+                      "offset":114,
+                      "leading_width":2,
+                      "width":4,
+                      "trailing_width":1,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":114,"width":2}],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":120,"width":1}],
+                      "line_number":12
+                    }
+                  },
+                  "pocket_enum_name":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"name",
+                      "text":"E",
+                      "offset":121,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"whitespace","text":" ","offset":122,"width":1}],
+                      "line_number":12
+                    }
+                  },
+                  "pocket_enum_left_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"{",
+                      "text":"{",
+                      "offset":123,
+                      "leading_width":0,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":124,"width":1}],
+                      "line_number":12
+                    }
+                  },
+                  "pocket_enum_fields":{
+                    "kind":"list",
+                    "elements":[
+                      {
+                        "kind":"pocket_field_type_declaration",
+                        "pocket_field_type_case":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"case",
+                            "text":"case",
+                            "offset":125,
+                            "leading_width":2,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":125,"width":2}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":131,"width":1}],
+                            "line_number":13
+                          }
+                        },
+                        "pocket_field_type_type":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"type",
+                            "text":"type",
+                            "offset":132,
+                            "leading_width":0,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":136,"width":1}],
+                            "line_number":13
+                          }
+                        },
+                        "pocket_field_type_type_parameter":{
+                          "kind":"type_parameter",
+                          "type_attribute_spec":{"kind":"missing"},
+                          "type_reified":{"kind":"missing"},
+                          "type_variance":{"kind":"missing"},
+                          "type_name":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"name",
+                              "text":"T",
+                              "offset":137,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":0,
+                              "leading":[],
+                              "trailing":[],
+                              "line_number":13
+                            }
+                          },
+                          "type_constraints":{"kind":"missing"}
+                        },
+                        "pocket_field_type_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":138,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":139,"width":1}],
+                            "line_number":13
+                          }
+                        }
+                      },
+                      {
+                        "kind":"pocket_field_type_expr_declaration",
+                        "pocket_field_type_expr_case":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"case",
+                            "text":"case",
+                            "offset":140,
+                            "leading_width":2,
+                            "width":4,
+                            "trailing_width":1,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":140,"width":2}],
+                            "trailing":[{"kind":"whitespace","text":" ","offset":146,"width":1}],
+                            "line_number":14
+                          }
+                        },
+                        "pocket_field_type_expr_type":{
+                          "kind":"simple_type_specifier",
+                          "simple_type_specifier":{
+                            "kind":"token",
+                            "token":{
+                              "kind":"name",
+                              "text":"T",
+                              "offset":147,
+                              "leading_width":0,
+                              "width":1,
+                              "trailing_width":1,
+                              "leading":[],
+                              "trailing":[{"kind":"whitespace","text":" ","offset":148,"width":1}],
+                              "line_number":14
+                            }
+                          }
+                        },
+                        "pocket_field_type_expr_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"val",
+                            "offset":149,
+                            "leading_width":0,
+                            "width":3,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":14
+                          }
+                        },
+                        "pocket_field_type_expr_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":152,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":153,"width":1}],
+                            "line_number":14
+                          }
+                        }
+                      },
+                      {
+                        "kind":"pocket_atom_mapping",
+                        "pocket_atom_mapping_glyph":{
+                          "kind":"token",
+                          "token":{
+                            "kind":":@",
+                            "text":":@",
+                            "offset":154,
+                            "leading_width":2,
+                            "width":2,
+                            "trailing_width":0,
+                            "leading":[{"kind":"whitespace","text":"  ","offset":154,"width":2}],
+                            "trailing":[],
+                            "line_number":15
+                          }
+                        },
+                        "pocket_atom_mapping_name":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"name",
+                            "text":"I",
+                            "offset":158,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":15
+                          }
+                        },
+                        "pocket_atom_mapping_left_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":"(",
+                            "text":"(",
+                            "offset":159,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":15
+                          }
+                        },
+                        "pocket_atom_mapping_mappings":{
+                          "kind":"list",
+                          "elements":[
+                            {
+                              "kind":"list_item",
+                              "list_item":{
+                                "kind":"pocket_mapping_type_declaration",
+                                "pocket_mapping_type_keyword":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"type",
+                                    "text":"type",
+                                    "offset":160,
+                                    "leading_width":0,
+                                    "width":4,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":164,"width":1}],
+                                    "line_number":15
+                                  }
+                                },
+                                "pocket_mapping_type_name":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"name",
+                                    "text":"T",
+                                    "offset":165,
+                                    "leading_width":0,
+                                    "width":1,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":166,"width":1}],
+                                    "line_number":15
+                                  }
+                                },
+                                "pocket_mapping_type_equal":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"=",
+                                    "text":"=",
+                                    "offset":167,
+                                    "leading_width":0,
+                                    "width":1,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":168,"width":1}],
+                                    "line_number":15
+                                  }
+                                },
+                                "pocket_mapping_type_type":{
+                                  "kind":"simple_type_specifier",
+                                  "simple_type_specifier":{
+                                    "kind":"token",
+                                    "token":{
+                                      "kind":"int",
+                                      "text":"int",
+                                      "offset":169,
+                                      "leading_width":0,
+                                      "width":3,
+                                      "trailing_width":0,
+                                      "leading":[],
+                                      "trailing":[],
+                                      "line_number":15
+                                    }
+                                  }
+                                }
+                              },
+                              "list_separator":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":",",
+                                  "text":",",
+                                  "offset":172,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":1,
+                                  "leading":[],
+                                  "trailing":[{"kind":"whitespace","text":" ","offset":173,"width":1}],
+                                  "line_number":15
+                                }
+                              }
+                            },
+                            {
+                              "kind":"list_item",
+                              "list_item":{
+                                "kind":"pocket_mapping_id_declaration",
+                                "pocket_mapping_id_name":{
+                                  "kind":"token",
+                                  "token":{
+                                    "kind":"name",
+                                    "text":"val",
+                                    "offset":174,
+                                    "leading_width":0,
+                                    "width":3,
+                                    "trailing_width":1,
+                                    "leading":[],
+                                    "trailing":[{"kind":"whitespace","text":" ","offset":177,"width":1}],
+                                    "line_number":15
+                                  }
+                                },
+                                "pocket_mapping_id_initializer":{
+                                  "kind":"simple_initializer",
+                                  "simple_initializer_equal":{
+                                    "kind":"token",
+                                    "token":{
+                                      "kind":"=",
+                                      "text":"=",
+                                      "offset":178,
+                                      "leading_width":0,
+                                      "width":1,
+                                      "trailing_width":1,
+                                      "leading":[],
+                                      "trailing":[{"kind":"whitespace","text":" ","offset":179,"width":1}],
+                                      "line_number":15
+                                    }
+                                  },
+                                  "simple_initializer_value":{
+                                    "kind":"literal",
+                                    "literal_expression":{
+                                      "kind":"token",
+                                      "token":{
+                                        "kind":"decimal_literal",
+                                        "text":"42",
+                                        "offset":180,
+                                        "leading_width":0,
+                                        "width":2,
+                                        "trailing_width":0,
+                                        "leading":[],
+                                        "trailing":[],
+                                        "line_number":15
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "list_separator":{
+                                "kind":"token",
+                                "token":{
+                                  "kind":",",
+                                  "text":",",
+                                  "offset":182,
+                                  "leading_width":0,
+                                  "width":1,
+                                  "trailing_width":0,
+                                  "leading":[],
+                                  "trailing":[],
+                                  "line_number":15
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        "pocket_atom_mapping_right_paren":{
+                          "kind":"token",
+                          "token":{
+                            "kind":")",
+                            "text":")",
+                            "offset":183,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":0,
+                            "leading":[],
+                            "trailing":[],
+                            "line_number":15
+                          }
+                        },
+                        "pocket_atom_mapping_semicolon":{
+                          "kind":"token",
+                          "token":{
+                            "kind":";",
+                            "text":";",
+                            "offset":184,
+                            "leading_width":0,
+                            "width":1,
+                            "trailing_width":1,
+                            "leading":[],
+                            "trailing":[{"kind":"end_of_line","text":"\n","offset":185,"width":1}],
+                            "line_number":15
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "pocket_enum_right_brace":{
+                    "kind":"token",
+                    "token":{
+                      "kind":"}",
+                      "text":"}",
+                      "offset":186,
+                      "leading_width":2,
+                      "width":1,
+                      "trailing_width":1,
+                      "leading":[{"kind":"whitespace","text":"  ","offset":186,"width":2}],
+                      "trailing":[{"kind":"end_of_line","text":"\n","offset":189,"width":1}],
+                      "line_number":16
+                    }
+                  }
+                }
+              ]
+            },
+            "classish_body_right_brace":{
+              "kind":"token",
+              "token":{
+                "kind":"}",
+                "text":"}",
+                "offset":190,
+                "leading_width":0,
+                "width":1,
+                "trailing_width":1,
+                "leading":[],
+                "trailing":[{"kind":"end_of_line","text":"\n","offset":191,"width":1}],
+                "line_number":17
+              }
+            }
+          }
+        },
+        {
+          "kind":"end_of_file",
+          "end_of_file_token":{
+            "kind":"token",
+            "token":{
+              "kind":"end_of_file",
+              "text":"",
+              "offset":192,
+              "leading_width":0,
+              "width":0,
+              "trailing_width":0,
+              "leading":[],
+              "trailing":[],
+              "line_number":18
+            }
+          }
+        }
+      ]
+    }
+  },
+  "program_text":"<?hh // strict\n\nclass C {\n  enum E {\n  case type T;\n  case T val;\n  :@I(type T = int, val = 42);\n  }\n}\n\nclass D {\n  enum E {\n  case type T;\n  case T val;\n  :@I(type T = int, val = 42,);\n  }\n}\n",
+  "version":"2020-06-02-0001"
+}

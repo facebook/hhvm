@@ -1,15 +1,7 @@
 (library
-    (name full_fidelity_test_utils)
-    (wrapped false)
-    (modules full_fidelity_test_utils)
-    (libraries
-      full_fidelity sexplib))
-
-(library
     (name call_order)
     (wrapped false)
     (modules callOrder)
     (libraries
       default_injector_config
-      full_fidelity_test_utils
       full_fidelity))

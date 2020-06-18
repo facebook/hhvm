@@ -10,7 +10,8 @@
     --program %{exe:../../../src/hh_parse.exe}
     --in-extension .good.php --flags
     --full-fidelity-errors --full-fidelity-errors-all
-    --full-fidelity-s-expression)))
+    --full-fidelity-json
+    --pretty-print-json)))
 
 (alias
     (name pocket_universes_parsing_bad)

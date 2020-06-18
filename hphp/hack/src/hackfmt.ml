@@ -119,7 +119,6 @@ let opt_default opt def =
 
 module Env = struct
   type t = {
-    debug: bool;
     test: bool;
     mutable mode: string option;
     mutable text_source: text_source;
@@ -141,7 +140,6 @@ let parse_options () =
   let inplace = ref false in
   let diff = ref false in
   let diff_dry = ref false in
-  let debug = ref false in
   let test = ref false in
   (* The following are either inferred from context (cwd and .hhconfig),
    * or via CLI flags, with priority given to the latter. *)
@@ -150,7 +148,7 @@ let parse_options () =
   let cli_line_width = ref None in
   let cli_root = ref None in
   let cli_format_generated_code = ref false in
-  let rec options =
+  let options =
     ref
       [
         ( "--range",
@@ -204,12 +202,6 @@ let parse_options () =
         ( "--diff-dry-run",
           Arg.Set diff_dry,
           " Preview the files that would be overwritten by --diff mode" );
-        ( "--debug",
-          Arg.Unit
-            (fun () ->
-              debug := true;
-              options := Hackfmt_debug.init_with_options ()),
-          " Print debug statements" );
         ( "--filename-for-logging",
           Arg.String (fun x -> filename_for_logging := Some x),
           " The filename for logging purposes, when providing file contents "
@@ -263,7 +255,7 @@ let parse_options () =
       config ),
     root,
     parser_env,
-    (!debug, !test) )
+    !test )
 
 type format_options =
   | Print of {
@@ -340,7 +332,6 @@ let validate_options
   (* Let --diff-dry-run imply --diff *)
   let diff = diff || diff_dry in
   match { diff; inplace; text_source; range; at_char } with
-  | _ when env.Env.debug && diff -> fail "Can't format diff in debug mode"
   | { diff = true; text_source = File _; _ }
   | { diff = true; text_source = Stdin (Some _); _ } ->
     fail "--diff mode expects no files"
@@ -483,17 +474,6 @@ let format_diff_intervals ?config env intervals tree =
         format_intervals ?config intervals tree)
   with Invalid_argument s -> raise (InvalidDiff s)
 
-let debug_print ?range ?config text_source =
-  let tree = parse ~parser_env:Full_fidelity_parser_env.default text_source in
-  let source_text = SyntaxTree.text tree in
-  let range = Option.map range (expand_or_convert_range source_text) in
-  let env = Libhackfmt.env_from_config config in
-  let doc =
-    Hack_format.transform env (SyntaxTransforms.editable_from_positioned tree)
-  in
-  let chunk_groups = Chunk_builder.build doc in
-  Hackfmt_debug.debug env ~range source_text tree doc chunk_groups
-
 let main
     (env : Env.t)
     (options : format_options)
@@ -502,14 +482,10 @@ let main
   match options with
   | Print { text_source; range; config } ->
     env.Env.text_source <- text_source;
-    if env.Env.debug then
-      debug_print ?range ~config text_source
-    else
-      text_source |> parse ~parser_env |> format ?range ~config env |> output
+    text_source |> parse ~parser_env |> format ?range ~config env |> output
   | InPlace { filename; config } ->
     let text_source = File filename in
     env.Env.text_source <- text_source;
-    if env.Env.debug then debug_print ~config text_source;
     text_source
     |> parse ~parser_env
     |> format ~config env
@@ -523,7 +499,6 @@ let main
             format_at_offset ~config tree pos)
       with Invalid_argument s -> raise (InvalidCliArg s)
     in
-    if env.Env.debug then debug_print text_source ~range:(Byte range) ~config;
     Printf.printf "%d %d\n" (fst range) (snd range);
     output formatted
   | Diff { dry; config } ->
@@ -579,11 +554,10 @@ let () =
      HackfmtEventLogger) to behave correctly *)
   Daemon.check_entry_point ();
 
-  let (options, root, parser_env, (debug, test)) = parse_options () in
+  let (options, root, parser_env, test) = parse_options () in
   let env =
     {
-      Env.debug;
-      test;
+      Env.test;
       mode = None;
       text_source = Stdin None;
       root = Path.to_string root;

@@ -1187,6 +1187,8 @@ and pu_enum_def
         are well-formed in an environment
       - all values are defined one and only one times in pum_types, and
         are correctly typed according to pum_types instances.
+      - all types satisfy their case type constraints. This is actually
+        done in NastCheck
 
     Note: Structural correctness (mostly uniqueness and exhaustivity)
     is checked during Nast check.
@@ -1210,20 +1212,10 @@ and pu_enum_def
       (SMap.empty, SMap.empty)
     | Some pu_enum -> (pu_enum.tpu_case_types, pu_enum.tpu_case_values)
   in
-  let make_aast_tparam (sid, hint) =
-    let hint_ty = Decl_hint.hint env.decl_env hint in
-    {
-      tp_variance = Ast_defs.Invariant;
-      tp_name = sid;
-      tp_constraints = [(Ast_defs.Constraint_eq, hint_ty)];
-      tp_reified = Aast.Erased;
-      tp_user_attributes = [];
-    }
-  in
   let (env, pu_user_attributes) =
     List.map_env env pu_user_attributes Typing.user_attribute
   in
-  (* Adds all of the PU case types as generics in the environment. *)
+  (* Adds all of the PU case types (not just the local one) as generics in the environment. *)
   let (env, constraints) =
     let case_types =
       SMap.fold (fun _ case_ty acc -> case_ty :: acc) pu_enum_case_types []
@@ -1234,13 +1226,14 @@ and pu_enum_def
       case_types
   in
   let env = SubType.add_constraints pos env constraints in
-  (* Localize the type of local case values, to check they are correct types *)
+  (* Localize local case values, to check they are correct types *)
   let () =
     List.iter pu_case_values ~f:(fun (_sid, hint) ->
         let (_ : env * locl_ty) = Phase.localize_hint_with_self env hint in
         ())
   in
-  (* Localize the case values once *)
+  (* Localize all case values once, since checking members might need non
+   * local information *)
   let (env, pu_enum_case_values) =
     SMap.map_env
       (fun env _key (sid, decl_ty) ->
@@ -1249,15 +1242,24 @@ and pu_enum_def
       env
       pu_enum_case_values
   in
-  (* Now we are going to check that each member is well-typed.
-   * Since case types don't yet have constraints, we only check
-   * that the case value matches its expected type.
-   *)
+  (* Now we are going to check that each member is well-typed. *)
   let (_, members) =
     let process_member env pum =
-      (* generate some `T = actual type` constraints to bind the generic
-       * case types to their value in this member
+      (* As mentioned above, we only check that the expressions have the
+       * right type. Types constraints have already been validated in
+       * NastCheck
        *)
+      (* Check that case expression are correctly typed *)
+      let make_aast_tparam (sid, hint) =
+        let hint_ty = Decl_hint.hint env.decl_env hint in
+        {
+          tp_variance = Ast_defs.Invariant;
+          tp_name = sid;
+          tp_constraints = [(Ast_defs.Constraint_eq, hint_ty)];
+          tp_reified = Aast.Erased;
+          tp_user_attributes = [];
+        }
+      in
       let (env, cstrs) =
         let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
         Phase.localize_generic_parameters_with_bounds
@@ -1302,6 +1304,7 @@ and pu_enum_def
     in
     List.fold_map ~init:env ~f:process_member pu_members
   in
+  (* Localize local case types *)
   let (env, locl_case_types) =
     List.map_env env pu_case_types Typing.type_param
   in

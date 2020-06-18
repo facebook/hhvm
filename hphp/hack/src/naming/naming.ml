@@ -2524,6 +2524,7 @@ and class_pu_enum env pu_enum =
     in
     List.map ~f:member pu_enum.pu_members
   in
+  let pu_case_types = type_paraml env pu_case_types in
   {
     pu_annotation = ();
     pu_name = pu_enum.pu_name;

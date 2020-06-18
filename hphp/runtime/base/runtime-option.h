@@ -1123,7 +1123,7 @@ struct RuntimeOption {
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
   /* This is the flag for "specialization", meaning that darray and     \
    * varray are their own types, distinct from array and each other. */ \
-  F(bool, HackArrCompatSpecialization, false)                           \
+  F(bool, HackArrCompatSpecialization, true)                            \
   /* This is the flag for "unification", meaning that darrays are       \
    * replaced by dicts and varrays by vecs. */                          \
   F(bool, HackArrDVArrs, false)                                         \

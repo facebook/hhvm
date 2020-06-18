@@ -14,29 +14,103 @@ module Cls = Decl_provider.Class
 
 let build ?(sep = ":@") prefix name = prefix ^ sep ^ name
 
-(* Checks that the visited class definition does not have local duplicated
- * case types/values, and stores the position of each one *)
-let check_enum err l =
+(* Checks that the visited pu definition does not have local duplicated
+ * case types/case expressions, and stores the position of each one *)
+let check_dup ~key err l =
   List.fold
-    ~f:(fun seen (p, ty) ->
-      if SMap.mem ty seen then (
-        err p ty;
+    ~f:(fun seen elt ->
+      let (p, name) = key elt in
+      if SMap.mem name seen then (
+        err p name;
         seen
       ) else
-        SMap.add ty p seen)
+        SMap.add name p seen)
+    ~init:SMap.empty
+    l
+
+let check_dup_case_types err l =
+  check_dup ~key:(fun tp -> tp.Aast.tp_name) err l
+
+let check_dup_case_exprs err l = check_dup ~key:fst err l
+
+(* handy wrappers around Errors *)
+let dup_case_type_in_instance p full_name spotted =
+  Errors.pu_duplication_in_instance p "case type" full_name spotted
+
+let dup_case_value_in_instance p full_name spotted =
+  Errors.pu_duplication_in_instance p "case value" full_name spotted
+
+(* Checks that the visited pu definition does not have local duplicated
+ * instances, and that each instances do not have duplicate case types/
+ * expressions. Stores the position of each instances in a map
+ *)
+let check_dup_instances err prefix l =
+  List.fold
+    ~f:(fun seen instance ->
+      let (p, name) = instance.pum_atom in
+      let prefix = build prefix name in
+      let err_type p tyname = dup_case_type_in_instance p tyname prefix in
+      let err_expr p name = dup_case_value_in_instance p name prefix in
+      let (_ : pos SMap.t) = check_dup ~key:fst err_type instance.pum_types in
+      let (_ : pos SMap.t) = check_dup ~key:fst err_expr instance.pum_exprs in
+      if SMap.mem name seen then (
+        err p name;
+        seen
+      ) else
+        SMap.add name p seen)
     ~init:SMap.empty
     l
 
 type err_callback = pos -> string -> string -> string -> unit
 
-(* Checks that the visited case types/values do not appear in any parent class *)
+(* Checks that the visited case types/values do not appear in any parent
+ * class. The only exception is when a PU is extending (adding a case type,
+ * case expr) and needs to provide the content for existing instances.
+ * So this test is a bit more involved, but only check that we don't declare
+ * existing case type/expressions
+ *)
 let check_parent
     ctx
     (err_types : err_callback)
     (err_values : err_callback)
     seen_types
     seen_values
+    seen_instances
+    local_pu_enums
     c_extends =
+  let keys l = SSet.of_list @@ SMap.keys l in
+  let diff p c_name enum_name instance_name parent =
+    let prefix = build c_name enum_name in
+    let prefix = build prefix instance_name in
+    let local_enum =
+      List.find_exn
+        ~f:(fun pu -> String.equal (snd pu.pu_name) enum_name)
+        local_pu_enums
+    in
+    let instance =
+      List.find_exn
+        ~f:(fun memb -> String.equal (snd memb.pum_atom) instance_name)
+        local_enum.pu_members
+    in
+    let instance_type_keys =
+      List.fold
+        ~init:SSet.empty
+        ~f:(fun acc (name, _) -> SSet.add (snd name) acc)
+        instance.pum_types
+    in
+    let instance_expr_keys =
+      List.fold
+        ~init:SSet.empty
+        ~f:(fun acc (name, _) -> SSet.add (snd name) acc)
+        instance.pum_exprs
+    in
+    let parent_type_keys = keys parent.tpum_types in
+    let parent_expr_keys = keys parent.tpum_exprs in
+    let diff_types = SSet.inter instance_type_keys parent_type_keys in
+    let diff_exprs = SSet.inter instance_expr_keys parent_expr_keys in
+    SSet.iter (fun name -> dup_case_type_in_instance p name prefix) diff_types;
+    SSet.iter (fun name -> dup_case_type_in_instance p name prefix) diff_exprs
+  in
   List.iter
     ~f:(fun parent ->
       match Decl_provider.get_class ctx parent with
@@ -57,15 +131,30 @@ let check_parent
                     | None -> ())
                   pu_enum.tpu_case_types
             end;
-            match SMap.find_opt enum_name seen_values with
+            begin
+              match SMap.find_opt enum_name seen_values with
+              | None -> ()
+              | Some seen ->
+                SMap.iter
+                  (fun _ ((_, name), _) ->
+                    match SMap.find_opt name seen with
+                    | Some p -> err_values p c_name enum_name name
+                    | None -> ())
+                  pu_enum.tpu_case_values
+            end;
+            match SMap.find_opt enum_name seen_instances with
             | None -> ()
-            | Some seen ->
+            | Some (_, seen) ->
               SMap.iter
-                (fun _ ((_, name), _) ->
+                (* If a parent class already has an instance, we check that
+                 * their content is disjoint (because a Pu can extend
+                 * a parent instance
+                 *)
+                  (fun name parent ->
                   match SMap.find_opt name seen with
-                  | Some p -> err_values p c_name enum_name name
+                  | Some p -> diff p c_name enum_name name parent
                   | None -> ())
-                pu_enum.tpu_case_values)
+                pu_enum.tpu_members)
           c_pu_enums)
     c_extends
 
@@ -78,63 +167,52 @@ let check_class env c =
   let dup_case_value p full_name spotted =
     Errors.pu_duplication p "case value" full_name spotted
   in
-  (* Gather the case types and values defined in the current class *)
-  let (seen_types, seen_values) =
+  let dup_instance p full_name spotted =
+    Errors.pu_duplication p "instance" full_name spotted
+  in
+  (* Gather the case types, values and instances defined in the current class
+   * Also stores the pos of enum in the instance map, in case some missing
+   * atom is spotted
+   *)
+  let (seen_types, seen_values, seen_instances) =
     List.fold
-      ~init:(SMap.empty, SMap.empty)
-      ~f:(fun (seen_types, seen_values) pu_enum ->
+      ~init:(SMap.empty, SMap.empty, SMap.empty)
+      ~f:(fun (seen_types, seen_values, seen_instances) pu_enum ->
         let (p, enum_name) = pu_enum.pu_name in
         let prefix = build c_name enum_name in
         if SMap.mem enum_name seen_types then
           Errors.pu_duplication p "enumeration" prefix c_name;
+        (* Check that there is no multiple `case type T` with the same `T` *)
         let seen_types =
-          let err p ty = dup_case_type p (build prefix ty) prefix in
-          let s =
-            check_enum
-              err
-              (List.map ~f:(fun tp -> tp.tp_name) pu_enum.pu_case_types)
-          in
+          let err p tyname = dup_case_type p tyname prefix in
+          let s = check_dup_case_types err pu_enum.pu_case_types in
           SMap.add enum_name s seen_types
         in
+        (* Check that there is no multiple `case T x` with the same `x` *)
         let seen_values =
-          let err p ty = dup_case_value p (build ~sep:"::" prefix ty) prefix in
-          let s = check_enum err (List.map ~f:fst pu_enum.pu_case_values) in
+          let err p name = dup_case_value p name prefix in
+          let s = check_dup_case_exprs err pu_enum.pu_case_values in
           SMap.add enum_name s seen_values
         in
-        (seen_types, seen_values))
+        (* Check that there is no multiple `:@I(...)` with the same `I,
+         * and that each instance does not contain duplicated assignements
+         *)
+        let seen_instances =
+          let err p name = dup_instance p name prefix in
+          let s = check_dup_instances err prefix pu_enum.pu_members in
+          SMap.add enum_name (p, s) seen_instances
+        in
+        (seen_types, seen_values, seen_instances))
       c.c_pu_enums
   in
   (* More precise wrappers around Errors *)
-  let get_pp_names ?(sep = ":@") c_name enum_name name =
-    (build ~sep enum_name name, build c_name enum_name)
-  in
   let err_types p spotted_c_name spotted_enum_name ty =
-    let (full, spotted) = get_pp_names spotted_c_name spotted_enum_name ty in
-    dup_case_type p (build c_name full) spotted
+    let spotted = build spotted_c_name spotted_enum_name in
+    dup_case_type p ty spotted
   in
   let err_values p spotted_c_name spotted_enum_name value =
-    let (full, spotted) =
-      get_pp_names ~sep:"::" spotted_c_name spotted_enum_name value
-    in
-    dup_case_value p (build c_name full) spotted
-  in
-  (* Map to find the position of the atoms in the local file. Also
-   * stores the pos of enum, in case some missing atom is spotted *)
-  let pos_map =
-    List.fold
-      ~init:SMap.empty
-      ~f:(fun acc { pu_name; pu_members; _ } ->
-        let (p, enum_name) = pu_name in
-        let atom_pos_map =
-          List.fold
-            ~init:SMap.empty
-            ~f:(fun acc { pum_atom; _ } ->
-              let (p, name) = pum_atom in
-              SMap.add name p acc)
-            pu_members
-        in
-        SMap.add enum_name (p, atom_pos_map) acc)
-      c.c_pu_enums
+    let spotted = build spotted_c_name spotted_enum_name in
+    dup_case_value p value spotted
   in
   match Decl_provider.get_class env.Nast_check_env.ctx c_name with
   | None -> ()
@@ -150,6 +228,8 @@ let check_class env c =
       err_values
       seen_types
       seen_values
+      seen_instances
+      c.c_pu_enums
       c_extends;
 
     (* Gather information about atoms definitions and instances to check
@@ -157,7 +237,7 @@ let check_class env c =
     List.iter
       ~f:
         (fun (enum_name, { tpu_case_types; tpu_case_values; tpu_members; _ }) ->
-        match SMap.find_opt enum_name pos_map with
+        match SMap.find_opt enum_name seen_instances with
         (* This enum is not defined in the current file, skip it *)
         | None -> ()
         | Some (enum_pos, atom_pos_map) ->

@@ -1,7 +1,13 @@
 File "dup_check.bad.php", line 9, characters 15-15:
-Pocket Universe case type A:@F:@T is already declared in A:@F (Naming[2101])
+Pocket Universe case type T is already declared in A:@F (Naming[2101])
 File "dup_check.bad.php", line 12, characters 12-12:
-Pocket Universe case value A:@F::x is already declared in A:@F (Naming[2101])
+Pocket Universe case value x is already declared in A:@F (Naming[2101])
+File "dup_check.bad.php", line 20, characters 12-12:
+case type T is already assigned in A:@F:@A (Naming[2101])
+File "dup_check.bad.php", line 23, characters 7-7:
+case value x is already assigned in A:@F:@A (Naming[2101])
+File "dup_check.bad.php", line 18, characters 7-7:
+Pocket Universe instance A is already declared in A:@F (Naming[2101])
 File "dup_check.bad.php", line 27, characters 8-8:
 Pocket Universe enumeration A:@F is already declared in A (Naming[2101])
 File "dup_check.bad.php", line 22, characters 7-7:

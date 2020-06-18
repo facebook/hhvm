@@ -1,0 +1,12 @@
+File "dup_instances.bad.php--file1.php", line 5, characters 7-7:
+case type key is already assigned in A:@F:@A (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 13, characters 7-7:
+case type key is already assigned in A:@F:@A (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 21, characters 28-28:
+case type T is already assigned in D:@F:@I (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 22, characters 33-35:
+case value key is already assigned in D:@F:@J (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 23, characters 28-28:
+case type T is already assigned in D:@F:@K (Naming[2101])
+File "dup_instances.bad.php--file2.php", line 23, characters 51-53:
+case value key is already assigned in D:@F:@K (Naming[2101])

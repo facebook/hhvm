@@ -1690,6 +1690,14 @@ let pu_duplication pos kind name seen =
     pos
     (sprintf "Pocket Universe %s %s is already declared in %s" kind name seen)
 
+let pu_duplication_in_instance pos kind name seen =
+  let name = strip_ns name in
+  let seen = strip_ns seen in
+  add
+    (Naming.err_code Naming.PocketUniversesDuplication)
+    pos
+    (sprintf "%s %s is already assigned in %s" kind name seen)
+
 let pu_not_in_class pos name loc =
   let name = strip_ns name in
   let loc = strip_ns loc in

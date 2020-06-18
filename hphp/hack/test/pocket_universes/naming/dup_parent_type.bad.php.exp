@@ -1,17 +1,17 @@
 File "dup_parent_type.bad.php--file1.php", line 10, characters 15-15:
-Pocket Universe case type C:@F:@T is already declared in A:@F (Naming[2101])
+Pocket Universe case type T is already declared in A:@F (Naming[2101])
 File "dup_parent_type.bad.php--file1.php", line 10, characters 15-15:
-Pocket Universe case type C:@F:@T is already declared in B:@F (Naming[2101])
+Pocket Universe case type T is already declared in B:@F (Naming[2101])
 File "dup_parent_type.bad.php--file1.php", line 11, characters 12-14:
-Pocket Universe case value C:@F::foo is already declared in B:@F (Naming[2101])
+Pocket Universe case value foo is already declared in B:@F (Naming[2101])
 File "dup_parent_type.bad.php--file1.php", line 9, characters 8-8:
 In Pocket Universe C:@F, atom A is missing type S (Naming[2108])
 File "dup_parent_type.bad.php--file1.php", line 9, characters 8-8:
 In Pocket Universe C:@F, atom A is missing value foo (Naming[2108])
 File "dup_parent_type.bad.php--file2.php", line 5, characters 15-15:
-Pocket Universe case type B:@F:@T is already declared in A:@F (Naming[2101])
+Pocket Universe case type T is already declared in A:@F (Naming[2101])
 File "dup_parent_type.bad.php--file2.php", line 7, characters 17-19:
-Pocket Universe case value B:@F::key is already declared in A:@F (Naming[2101])
+Pocket Universe case value key is already declared in A:@F (Naming[2101])
 File "dup_parent_type.bad.php--file2.php", line 4, characters 8-8:
 In Pocket Universe B:@F, atom A is missing type S (Naming[2108])
 File "dup_parent_type.bad.php--file2.php", line 4, characters 8-8:

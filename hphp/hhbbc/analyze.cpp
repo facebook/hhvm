@@ -142,8 +142,7 @@ State entry_state(const Index& index, Context const ctx,
       auto const& constraint = param.typeConstraint;
       if (constraint.hasConstraint() && !constraint.isTypeVar() &&
           !constraint.isTypeConstant()) {
-        ret.locals[locId] =
-          loosen_dvarrayness(index.lookup_constraint(ctx, constraint));
+        ret.locals[locId] = index.lookup_constraint(ctx, constraint);
         continue;
       }
     }
@@ -679,7 +678,7 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
     }
 
     if (!(prop.attrs & AttrStatic)) {
-      auto t = loosen_all(loosen_dvarrayness_always(cellTy));
+      auto t = loosen_all(loosen_dvarrayness(cellTy));
       if (!is_closure(*ctx.cls) && t.subtypeOf(BUninit)) {
         /*
          * For non-closure classes, a property of type KindOfUninit

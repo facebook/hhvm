@@ -948,7 +948,7 @@ void mergeThisProp(ISS& env, SString name, Type type) {
   if (!elem) return;
   auto const adjusted = adjust_type_for_prop(
     env.index, *env.ctx.cls, elem->tc,
-    loosen_all(loosen_dvarrayness_always(type)));
+    loosen_all(loosen_dvarrayness(type)));
   elem->ty |= adjusted;
 }
 

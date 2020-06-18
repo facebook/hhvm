@@ -572,38 +572,6 @@ trep combine_dv_arr_like_bits(trep a, trep b) {
   not_reached();
 }
 
-trep maybe_promote_varray(trep a) {
-  if (RO::EvalHackArrCompatSpecialization) return a;
-  auto const check = [&] (trep b, trep c) {
-    if (a & b) a |= c;
-  };
-  assert(isPredefined(a));
-  check(BSVArrE, BSArrE);
-  check(BCVArrE, BCArrE);
-  check(BSVArrN, BSArrN);
-  check(BCVArrN, BCArrN);
-  assert(isPredefined(a));
-  return a;
-}
-
-trep promote_varray(trep a) {
-  if (RO::EvalHackArrCompatSpecialization) return a;
-  auto const check = [&] (trep b, trep c) {
-    if (a & b) a = (a | c) & ~b;
-  };
-  assert(isPredefined(a));
-  // If the array is more than just a varray, we can't just switch the bits and
-  // keep the combination predefined. Just use the maybe path which will keep
-  // the bits predefined.
-  if ((a & (BVArr | BNull)) != a) return maybe_promote_varray(a);
-  check(BSVArrE, BSDArrE);
-  check(BCVArrE, BCDArrE);
-  check(BSVArrN, BSDArrN);
-  check(BCVArrN, BCDArrN);
-  assert(isPredefined(a));
-  return a;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -4845,13 +4813,6 @@ Type loosen_staticness(Type t) {
 }
 
 Type loosen_dvarrayness(Type t) {
-  // If this flag is on, the runtime will treat darrays and varrays as their
-  // own types (that are also distinct from array), enforcing typehints.
-  if (RO::EvalHackArrCompatSpecialization) return t;
-  return loosen_dvarrayness_always(t);
-}
-
-Type loosen_dvarrayness_always(Type t) {
   auto const check = [&] (trep a) {
     if (t.bits() & a) t.m_bits |= a;
   };
@@ -5064,12 +5025,10 @@ Type loosen_likeness(Type t) {
 }
 
 Type loosen_all(Type t) {
-  return loosen_dvarrayness(
-    loosen_staticness(
-      loosen_emptiness(
-        loosen_values(
-          loosen_likeness(std::move(t))
-        )
+  return loosen_staticness(
+    loosen_emptiness(
+      loosen_values(
+        loosen_likeness(std::move(t))
       )
     )
   );
@@ -5464,13 +5423,6 @@ bool arr_packedn_set(Type& pack,
       if (!*key.i) return true;
       if (!maybeEmpty && *key.i == 1) return true;
     }
-    pack.m_bits = (*key.i < 0)
-      ? promote_varray(pack.bits())
-      : maybe_promote_varray(pack.bits());
-  } else {
-    pack.m_bits = key.type.subtypeOf(BStr)
-      ? promote_varray(pack.bits())
-      : maybe_promote_varray(pack.bits());
   }
 
   if (!vecish) {
@@ -5617,11 +5569,6 @@ bool arr_packed_set(Type& pack,
       pack = TBottom;
       return false;
     }
-    pack.m_bits = promote_varray(pack.bits());
-  } else {
-    pack.m_bits = key.type.subtypeOf(BStr)
-      ? promote_varray(pack.bits())
-      : maybe_promote_varray(pack.bits());
   }
 
   if (!vecish) {
@@ -5821,11 +5768,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
       if (!*fixedKey.i) {
         return { packed_impl(bits, { val }, tag), throwMode };
       }
-      bits = promote_varray(bits);
-    } else {
-      bits = fixedKey.type.subtypeOf(BStr)
-        ? promote_varray(bits)
-        : maybe_promote_varray(bits);
     }
     if (auto const k = fixedKey.tv()) {
       MapElems m;
@@ -5837,9 +5779,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
 
   auto emptyHelper = [&] (const Type& inKey,
                           const Type& inVal) -> std::pair<Type,ThrowMode> {
-    bits = fixedKey.type.subtypeOf(BStr)
-      ? promote_varray(bits)
-      : maybe_promote_varray(bits);
     return {
       mapn_impl_from_map(
         bits,
@@ -5863,9 +5802,6 @@ std::pair<Type,ThrowMode> array_like_set(Type arr,
     not_reached();
 
   case DataTag::None:
-    arr.m_bits = fixedKey.type.subtypeOf(BStr)
-      ? promote_varray(arr.bits())
-      : maybe_promote_varray(arr.bits());
     return { std::move(arr), ThrowMode::BadOperation };
 
   case DataTag::ArrLikeVal:
@@ -6803,9 +6739,7 @@ Type adjust_type_for_prop(const Index& index,
   if (!tc || index.prop_tc_maybe_unenforced(propCls, *tc)) return ret;
   auto const ctx = Context { nullptr, nullptr, &propCls };
   // Otherwise lookup what we know about the constraint.
-  auto tcType = unctx(
-    loosen_dvarrayness(remove_uninit(index.lookup_constraint(ctx, *tc, ret)))
-  );
+  auto tcType = unctx(remove_uninit(index.lookup_constraint(ctx, *tc, ret)));
   // For the same reason as property/return type enforcement, we have to be
   // pessimistic with interfaces to ensure that types in the index always
   // shrink.

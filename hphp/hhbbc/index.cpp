@@ -3369,8 +3369,7 @@ Type context_sensitive_return_type(IndexData& data,
         const_cast<php::Func*>(finfo->func),
         finfo->func->cls
       };
-      auto t = loosen_dvarrayness(
-        data.m_index->lookup_constraint(ctx, constraint));
+      auto t = data.m_index->lookup_constraint(ctx, constraint);
       return callCtx.args[i].strictlyMoreRefined(t);
     }
     return callCtx.args[i].strictSubtypeOf(TInitCell);
@@ -4973,18 +4972,7 @@ Type Index::lookup_constraint(Context ctx,
 bool Index::satisfies_constraint(Context ctx, const Type& t,
                                  const TypeConstraint& tc) const {
   auto const tcType = get_type_for_constraint<false>(ctx, tc, t);
-  if (t.moreRefined(loosen_dvarrayness(tcType))) {
-    // For d/varrays, we might satisfy the constraint, but still not want to
-    // optimize away the type-check (because we'll raise a notice on a d/varray
-    // mismatch), so do some additional checking here to rule that out.
-    if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return true;
-    if (!tcType.subtypeOrNull(BArr) || tcType.subtypeOf(BNull)) return true;
-    assertx(t.subtypeOrNull(BArr));
-    if (tcType.subtypeOrNull(BVArr)) return t.subtypeOrNull(BVArr);
-    if (tcType.subtypeOrNull(BDArr)) return t.subtypeOrNull(BDArr);
-    if (tcType.subtypeOrNull(BPArr)) return t.subtypeOrNull(BPArr);
-  }
-  return false;
+  return t.moreRefined(tcType);
 }
 
 bool Index::could_have_reified_type(Context ctx,
@@ -5702,15 +5690,14 @@ void Index::init_return_type(const php::Func* func) {
         (RuntimeOption::EvalEnforceGenericsUB < 2 && tc.isUpperBound())) {
       return TBottom;
     }
-    return loosen_dvarrayness(
-      lookup_constraint(
-        Context {
-          func->unit,
-            const_cast<php::Func*>(func),
-            func->cls && func->cls->closureContextCls ?
-            func->cls->closureContextCls : func->cls
-            },
-        tc)
+    return lookup_constraint(
+      Context {
+        func->unit,
+          const_cast<php::Func*>(func),
+          func->cls && func->cls->closureContextCls ?
+          func->cls->closureContextCls : func->cls
+      },
+      tc
     );
   };
 

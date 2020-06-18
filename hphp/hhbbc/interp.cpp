@@ -1590,12 +1590,8 @@ bool sameJmpImpl(ISS& env, Op sameOp, const JmpOp& jmp) {
   if (ty0.couldBe(BFunc | BCls) && ty1.couldBe(BStr)) return false;
   if (ty1.couldBe(BFunc | BCls) && ty0.couldBe(BStr)) return false;
 
-  // We need to loosen away the d/varray bits here because array comparison does
-  // not take into account the difference.
-  auto isect = intersection_of(
-    loosen_provenance(loosen_dvarrayness(ty0)),
-    loosen_provenance(loosen_dvarrayness(ty1))
-  );
+  // We need to loosen provenance here because it doesn't affect same / equal.
+  auto isect = intersection_of(loosen_provenance(ty0), loosen_provenance(ty1));
 
   // Unfortunately, floating point negative zero and positive zero are
   // different, but are identical using as far as Same is concerened. We should
@@ -4876,8 +4872,7 @@ void in(ISS& env, const bc::VerifyParamType& op) {
   for (auto const& constraint : tcs) {
     if (constraint->hasConstraint() && !constraint->isTypeVar() &&
       !constraint->isTypeConstant()) {
-      auto t =
-        loosen_dvarrayness(env.index.lookup_constraint(env.ctx, *constraint));
+      auto t = env.index.lookup_constraint(env.ctx, *constraint);
       if (constraint->isThis() && couldBeMocked(t)) {
         t = unctx(std::move(t));
       }
@@ -4957,8 +4952,7 @@ void verifyRetImpl(ISS& env, const TCVec& tcs,
     // We can safely assume that either VerifyRetTypeC will
     // throw or it will produce a value whose type is compatible with the
     // return type constraint.
-    auto tcT = remove_uninit(
-      loosen_dvarrayness(env.index.lookup_constraint(env.ctx, *constraint)));
+    auto tcT = remove_uninit(env.index.lookup_constraint(env.ctx, *constraint));
 
     // If tcT could be an interface or trait, we upcast it to TObj/TOptObj.
     // Why?  Because we want uphold the invariant that we only refine return

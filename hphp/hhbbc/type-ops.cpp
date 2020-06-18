@@ -231,8 +231,8 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
 //////////////////////////////////////////////////////////////////////
 
 Type typeSame(const Type& a, const Type& b) {
-  auto const nsa = loosen_likeness(loosen_provenance(loosen_dvarrayness(a)));
-  auto const nsb = loosen_likeness(loosen_provenance(loosen_dvarrayness(b)));
+  auto const nsa = loosen_likeness(loosen_provenance(a));
+  auto const nsb = loosen_likeness(loosen_provenance(b));
   if (!nsa.couldBe(nsb)) return TFalse;
   return TBool;
 }

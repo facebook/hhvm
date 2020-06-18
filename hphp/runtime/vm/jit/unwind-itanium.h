@@ -54,12 +54,7 @@ struct UnwindRDS {
     Either<ObjectData*, Exception*> exn;
     c_StaticWaitHandle* fswh;
   };
-
-  TYPE_SCAN_CUSTOM_FIELD(exn) {
-    if (exn.isNull()) return;
-    if (exn.left()) scanner.scan(exn.left());
-    else scanner.scan(exn.right());
-  }
+  TYPE_SCAN_CONSERVATIVE_FIELD(exn);
 
   /* Some helpers need to signal an error along with a TypedValue to be pushed
    * on the eval stack. When present, that value lives here. */

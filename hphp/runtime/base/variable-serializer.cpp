@@ -1671,12 +1671,13 @@ void VariableSerializer::serializeString(const String& str) {
   }
 }
 
-void VariableSerializer::serializeArrayImpl(const ArrayData* arr) {
+void VariableSerializer::serializeArrayImpl(const ArrayData* arr,
+                                            bool isVectorData) {
   using AK = VariableSerializer::ArrayKind;
   AK kind = getKind(arr);
   writeArrayHeader(
     arr->size(),
-    arr->isVectorData(),
+    isVectorData,
     kind
   );
 
@@ -1756,13 +1757,16 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     }
   }
 
+  const bool isVectorData = arr->isVectorData();
+
   if (UNLIKELY(RuntimeOption::EvalLogArrayProvenance &&
                !m_forcePHPArrays &&
                arrprov::arrayWantsTag(arr))) {
     auto const source = [&]() -> folly::Optional<SerializationSite> {
       switch (getType()) {
       case VariableSerializer::Type::JSON:
-        return arr->isVecType()
+        // json_encode only observes provenance on list-like darrays
+        return arr->isVecType() || arr->isVArray() || !isVectorData
           ? folly::none
           : folly::make_optional(SerializationSite::JsonEncode);
       case VariableSerializer::Type::Serialize:
@@ -1780,7 +1784,7 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
 
   if (arr->size() == 0 && LIKELY(!RuntimeOption::EvalArrayProvenance)) {
     auto const kind = getKind(arr);
-    writeArrayHeader(0, arr->isVectorData(), kind);
+    writeArrayHeader(0, isVectorData, kind);
     writeArrayFooter(kind);
     return;
   }
@@ -1790,13 +1794,13 @@ void VariableSerializer::serializeArray(const ArrayData* arr,
     if (incNestedLevel(&tv)) {
       writeOverflow(&tv);
     } else {
-      serializeArrayImpl(arr);
+      serializeArrayImpl(arr, isVectorData);
     }
     decNestedLevel(&tv);
   } else {
     // If isObject, the array is temporary and we should not check or save
     // its pointer.
-    serializeArrayImpl(arr);
+    serializeArrayImpl(arr, isVectorData);
   }
 }
 

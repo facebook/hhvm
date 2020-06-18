@@ -201,7 +201,7 @@ private:
   void serializeCollection(ObjectData* obj);
   void serializeArray(const Array&, bool isObject = false);
   void serializeArray(const ArrayData*, bool skipNestCheck = false);
-  void serializeArrayImpl(const ArrayData* arr);
+  void serializeArrayImpl(const ArrayData* arr, bool isVectorData);
   void serializeResource(const ResourceData*);
   void serializeResourceImpl(const ResourceData* res);
   void serializeString(const String&);

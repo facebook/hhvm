@@ -35,5 +35,5 @@ function main() {
   $o = new O('29857923');
   $c = $o->frob();
   $d = $c->get();
-  json_encode($d);
+  serialize($d);
 }

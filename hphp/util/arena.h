@@ -31,16 +31,11 @@ namespace HPHP {
  * arena instance is destroyed.  No destructors of allocated objects
  * will be called!  It is a bump-pointer allocator.
  *
- * At various points in the lifetime of the arena, you can introduce a
- * new `frame' by calling beginFrame.  This is essentially a marker of
- * the current allocator state, which you can pop back to by calling
- * endFrame.
- *
  * Allocations smaller than kMinBytes bytes are rounded up to kMinBytes, and
  * all allocations are kMinBytes-aligned.
  *
  * Allocations larger than kChunkBytes are acquired directly from
- * malloc, and don't (currently) get freed with frames.
+ * malloc.
  *
  * The Arena typedef is for convenience when you want a default
  * configuration.  Use ArenaImpl if you want something specific.
@@ -71,45 +66,20 @@ struct ArenaImpl {
    * Note that this is only an estimate, because we will include
    * fragmentation on the ends of slabs or due to alignment.
    */
-  size_t slackEstimate() const { return kChunkBytes - m_frame.offset; }
-
-  /*
-   * Framed arena allocation.
-   *
-   * Nesting allocations between beginFrame() and endFrame() will
-   * release memory in a stack-like fashion.  Calling endFrame() more
-   * times than beginFrame() will break things.
-   *
-   * Chunks allocated larger than kChunkBytes are not freed until the
-   * entire arena is destroyed.
-   *
-   * Memory is not released back to malloc until the entire arena is
-   * destroyed.
-   */
-  void beginFrame();
-  void endFrame();
+  size_t slackEstimate() const { return kChunkBytes - m_offset; }
 
  private:
   // copying Arenas will end badly.
   ArenaImpl(const ArenaImpl&);
   ArenaImpl& operator=(const ArenaImpl&);
 
- private:
-  struct Frame {
-    Frame*   prev;
-    uint32_t index;
-    uint32_t offset;
-  };
-
   static const size_t kMinBytes = 8;
 
- private:
   void* allocSlow(size_t nbytes);
   void createSlab();
 
- private:
   char* m_current;
-  Frame m_frame;
+  uint32_t m_offset;
   std::vector<char*> m_ptrs;
   PointerList<char> m_externalPtrs;
   bool m_bypassSlabAlloc;
@@ -123,28 +93,13 @@ struct ArenaImpl {
 template<size_t kChunkBytes>
 inline void* ArenaImpl<kChunkBytes>::alloc(size_t nbytes) {
   nbytes = (nbytes + (kMinBytes - 1)) & ~(kMinBytes - 1); // round up
-  size_t newOff = m_frame.offset + nbytes;
+  size_t newOff = m_offset + nbytes;
   if (newOff <= kChunkBytes) {
-    char* ptr = m_current + m_frame.offset;
-    m_frame.offset = newOff;
+    char* ptr = m_current + m_offset;
+    m_offset = newOff;
     return ptr;
   }
   return allocSlow(nbytes);
-}
-
-template<size_t kChunkBytes>
-inline void ArenaImpl<kChunkBytes>::beginFrame() {
-  Frame curFrame = m_frame; // don't include the Frame allocation
-  Frame* oldFrame = static_cast<Frame*>(alloc(sizeof(Frame)));
-  *oldFrame = curFrame;
-  m_frame.prev = oldFrame;
-}
-
-template<size_t kChunkBytes>
-inline void ArenaImpl<kChunkBytes>::endFrame() {
-  assert(m_frame.prev);
-  m_frame = *m_frame.prev;
-  m_current = m_ptrs[m_frame.index];
 }
 
 void SetArenaSlabAllocBypass(bool f);

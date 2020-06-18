@@ -119,22 +119,22 @@ auto call_tostring(const T& t, uint64_t size) -> decltype(auto) {
  */
 template<class T>
 struct TargetProfile {
-  TargetProfile(TransID profTransID,
+  TargetProfile(const TransIDSet& profTransIDs,
                 TransKind kind,
                 Offset bcOff,
                 const StringData* name,
                 size_t extraSize = 0)
-    : m_link(createLink(profTransID, kind, bcOff, name, extraSize))
-    , m_kind(kind)
-    , m_key{(T*)nullptr, profTransID, bcOff, name}
+    : m_kind(kind)
+    , m_links(createLinks(profTransIDs, kind, bcOff, name, extraSize))
+    , m_keys(createKeys(profTransIDs, bcOff, name))
   {}
 
   TargetProfile(const TransContext& context,
                 const BCMarker& marker,
                 const StringData* name,
                 size_t extraSize = 0)
-    : TargetProfile(context.kind == TransKind::Profile ? context.transID
-                                                       : marker.profTransID(),
+    : TargetProfile(context.kind == TransKind::Profile ? context.transIDs
+                                                       : marker.profTransIDs(),
                     context.kind,
                     marker.bcOff(),
                     name,
@@ -168,9 +168,16 @@ struct TargetProfile {
    */
   void data(T& out, uint32_t size) const {
     assertx(optimizing());
-    reduce(out, handle(), size);
+    for (auto const& link : m_links) {
+      if (link.bound()) {
+        reduce(out, link.handle(), size);
+      }
+    }
+
     if (RuntimeOption::EvalDumpTargetProfiles) {
-      detail::addTargetProfileInfo(m_key, detail::call_tostring(out, size));
+      for (auto const& key : m_keys) {
+        detail::addTargetProfileInfo(key, detail::call_tostring(out, size));
+      }
     }
   }
 
@@ -190,15 +197,26 @@ struct TargetProfile {
     return m_kind == TransKind::Profile;
   }
   bool optimizing() const {
-    return m_kind == TransKind::Optimize && m_link.bound();
+    if (m_kind != TransKind::Optimize) return false;
+    for (auto const& link : m_links) {
+      if (link.bound()) return true;
+    }
+    return false;
   }
 
   /*
-   * Access the handle to the link.  You generally should only need to do this
-   * if profiling().
+   * Access the handle to the link.  You can only do this if profiling().
    */
-  rds::Handle handle() const { return m_link.handle(); }
-  T& value() const { return *m_link; }
+  rds::Handle handle() const {
+    assertx(profiling());
+    assertx(m_links.size() == 1);
+    return m_links.front().handle();
+  }
+  T& value() const {
+    assertx(profiling());
+    assertx(m_links.size() == 1);
+    return *m_links.front();
+  }
 
 private:
   static rds::Link<T, rds::Mode::Local>
@@ -231,10 +249,53 @@ private:
     not_reached();
   }
 
+  static jit::vector<rds::Link<T, rds::Mode::Local>>
+  createLinks(const TransIDSet& profTransIDs,
+              TransKind kind,
+              Offset bcOff,
+              const StringData* name,
+              size_t extraSize) {
+    auto const size = profTransIDs.size();
+    // NB: size can be zero during tracelet formation. In this case, create a
+    // dummy link corresponding to kInvalidTransID.
+    if (size == 0) {
+      jit::vector<rds::Link<T, rds::Mode::Local>> links;
+      links.push_back(createLink(kInvalidTransID, kind, bcOff, name,
+                                 extraSize));
+      return links;
+    }
+    jit::vector<rds::Link<T, rds::Mode::Local>> links;
+    links.reserve(size);
+    for (auto tid : profTransIDs) {
+      links.push_back(createLink(tid, kind, bcOff, name, extraSize));
+    }
+    return links;
+  }
+
+  static jit::vector<rds::Profile>
+  createKeys(const TransIDSet& profTransIDs,
+             Offset bcOff,
+             const StringData* name) {
+    auto const size = profTransIDs.size();
+    // NB: size can be zero during tracelet formation. In this case, create a
+    // dummy key corresponding to kInvalidTransID.
+    if (size == 0) {
+      jit::vector<rds::Profile> keys;
+      keys.push_back({(T*)nullptr, kInvalidTransID, bcOff, name});
+      return keys;
+    }
+    jit::vector<rds::Profile> keys;
+    keys.reserve(size);
+    for (auto tid : profTransIDs) {
+      keys.push_back({(T*)nullptr, tid, bcOff, name});
+    }
+    return keys;
+  }
+
 private:
-  rds::Link<T, rds::Mode::Local> const m_link;
-  TransKind const m_kind;
-  rds::Profile const m_key;
+  const TransKind m_kind;
+  const jit::vector<rds::Link<T, rds::Mode::Local>> m_links;
+  const jit::vector<rds::Profile> m_keys;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

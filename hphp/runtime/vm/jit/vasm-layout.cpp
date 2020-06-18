@@ -134,9 +134,9 @@ struct Scale {
  private:
   static const int64_t kUnknownWeight = std::numeric_limits<int64_t>::max();
 
-  void    computeArcWeights();
-  TransID findProfTransID(Vlabel blk) const;
-  int64_t findProfCount(Vlabel blk)   const;
+  void       computeArcWeights();
+  TransIDSet findProfTransIDs(Vlabel blk) const;
+  int64_t    findProfCount(Vlabel blk)   const;
 
   static uint64_t arcId(Vlabel src, Vlabel dst) { return (src << 32) + dst; }
 
@@ -154,14 +154,14 @@ int64_t Scale::weight(Vlabel src, Vlabel dst) const {
   return folly::get_default(m_arcWgts, arcId(src, dst), 0);
 }
 
-TransID Scale::findProfTransID(Vlabel blk) const {
+TransIDSet Scale::findProfTransIDs(Vlabel blk) const {
   for (auto& i : m_unit.blocks[blk].code) {
     if (!i.origin) continue;
-    auto profTransID = i.origin->marker().profTransID();
-    if (profTransID == kInvalidTransID) continue;
-    return profTransID;
+    auto profTransIDs = i.origin->marker().profTransIDs();
+    if (profTransIDs.empty()) continue;
+    return profTransIDs;
   }
-  return kInvalidTransID;
+  return TransIDSet{};
 }
 
 int64_t Scale::findProfCount(Vlabel blk) const {
@@ -278,7 +278,8 @@ std::string Scale::toString() const {
     out << folly::format(
       "{} [label=\"{}\\nw: {}\\nptid: {}\\narea: {}\\nprof: {}\\ninsts: {}\","
       "shape=box,style=filled,fillcolor=\"#ff{:02x}{:02x}\"]\n",
-      b, b, weight(b), findProfTransID(b), unsigned(block.area_idx),
+      b, b, weight(b), folly::join(',', findProfTransIDs(b)),
+      unsigned(block.area_idx),
       findProfCount(b), block.code.size(), coldness, coldness);
     for (auto s : succs(block)) {
       out << folly::format("{} -> {} [label={}];\n", b, s, weight(b, s));

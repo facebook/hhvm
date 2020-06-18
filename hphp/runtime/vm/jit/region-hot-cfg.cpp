@@ -97,7 +97,7 @@ private:
 
     auto sk = profRegion.blocks().back()->last();
     assertx(sk.op() == OpSwitch);
-    TargetProfile<SwitchProfile> profile(tid,
+    TargetProfile<SwitchProfile> profile({tid},
                                          TransKind::Optimize,
                                          sk.offset(),
                                          s_switchProfile.get());

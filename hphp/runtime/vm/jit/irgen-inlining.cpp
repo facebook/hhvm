@@ -487,19 +487,19 @@ void implReturnBlock(IRGS& env, const RegionDesc& calleeRegion) {
   env.bcState.setOffset(bcContext.marker.sk().offset());
   env.irb->setCurMarker(bcContext.marker);
 
-  // At this point, env.profTransID and env.region are already set with the
+  // At this point, env.profTransIDs and env.region are already set with the
   // caller's information.  We temporarily reset both of these with the callee's
   // information, so that the HHIR instructions emitted for the RetC have their
   // markers associated with the callee.  This is necessary to successfully look
   // up any profile data associated with them.
-  auto const callerProfTransID = env.profTransID;
-  auto const callerRegion      = env.region;
+  auto const callerProfTransIDs = env.profTransIDs;
+  auto const callerRegion       = env.region;
   SCOPE_EXIT{
-    env.profTransID = callerProfTransID;
-    env.region      = callerRegion;
+    env.profTransIDs = callerProfTransIDs;
+    env.region       = callerRegion;
   };
-  auto const calleeTransID = bcContext.marker.profTransID();
-  env.profTransID = calleeTransID;
+  auto const& calleeTransIDs = bcContext.marker.profTransIDs();
+  env.profTransIDs = calleeTransIDs;
   env.region = &calleeRegion;
   updateMarker(env);
   env.irb->resetCurIROff(bcContext.iroff + 1);

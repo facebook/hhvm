@@ -506,7 +506,9 @@ translate(TransArgs args, FPInvOffset spOff,
       }
     );
     auto const transContext =
-      TransContext{env.transID, args.kind, args.flags, args.sk,
+      TransContext{env.transID == kInvalidTransID ? TransIDSet{}
+                                                  : TransIDSet{env.transID},
+                   args.kind, args.flags, args.sk,
                    env.initSpOffset, args.optIndex, args.region.get()};
 
     env.unit = irGenRegion(*args.region, transContext, env.pconds);

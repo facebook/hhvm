@@ -314,8 +314,8 @@ public:
   bool isDArray() const;
   bool isDVArray() const;
   bool isNotDVArray() const;
-  bool isVecOrVArray() const;
-  bool isDictOrDArray() const;
+  bool isHAMSafeVArray() const;
+  bool isHAMSafeDArray() const;
 
   static bool dvArrayEqual(const ArrayData* a, const ArrayData* b);
 

@@ -1374,7 +1374,7 @@ TypeAliasReq typeAliasFromRecordDesc(Unit* unit, const TypeAlias* thisType,
   req.type = AnnotType::Record;
   req.rec = rec;
   req.userAttrs = thisType->userAttrs;
-  assertx(thisType->typeStructure.isDictOrDArray());
+  assertx(thisType->typeStructure.isHAMSafeDArray());
   req.typeStructure = thisType->typeStructure;
   return req;
 }
@@ -1398,7 +1398,7 @@ TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
     req.klass = klass;
   }
   req.userAttrs = thisType->userAttrs;
-  assertx(thisType->typeStructure.isDictOrDArray());
+  assertx(thisType->typeStructure.isHAMSafeDArray());
   req.typeStructure = thisType->typeStructure;
   return req;
 }
@@ -2293,7 +2293,7 @@ std::string mangleReifiedGenericsName(const ArrayData* tsList) {
   IterateV(
     tsList,
     [&](TypedValue v) {
-      assertx(tvIsDictOrDArray(v));
+      assertx(tvIsHAMSafeDArray(v));
       auto str =
         TypeStructure::toString(ArrNR(v.m_data.parr),
           TypeStructure::TSDisplayType::TSDisplayTypeInternal).toCppString();

@@ -258,7 +258,7 @@ static void set_empty_doc_comment(Array& ret) {
 static void set_doc_comment(Array& ret,
                             const StringData* comment,
                             bool isBuiltin) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   if (comment == nullptr || comment->empty()) {
     set_empty_doc_comment(ret);
   } else if (isBuiltin && !HHVM_FUNCTION(hphp_debugger_attached)) {
@@ -272,7 +272,7 @@ static void set_doc_comment(Array& ret,
 static void set_instance_prop_info(Array& ret,
                                    const Class::Prop* prop,
                                    TypedValue default_val) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, default_val);
@@ -292,7 +292,7 @@ static void set_dyn_prop_info(
     Array &ret,
     TypedValue name,
     const StringData* className) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   ret.set(s_name, name);
   set_attrs(ret, get_modifiers(AttrPublic, false, true) & ~0x66);
   ret.set(s_class, make_tv<KindOfPersistentString>(className));
@@ -301,7 +301,7 @@ static void set_dyn_prop_info(
 }
 
 static void set_static_prop_info(Array &ret, const Class::SProp* prop) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(prop->name));
   ret.set(s_default, make_tv<KindOfBoolean>(true));
   ret.set(s_defaultValue, prop->val);
@@ -556,7 +556,7 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
 
     auto const typeStructure = typeAlias->typeStructure;
     assertx(!typeStructure.empty());
-    assertx(typeStructure.isDictOrDArray());
+    assertx(typeStructure.isHAMSafeDArray());
     Array resolved;
     try {
       bool persistent = true;
@@ -567,7 +567,7 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
                   name.get()->data());
     }
     assertx(!resolved.empty());
-    assertx(resolved.isDictOrDArray());
+    assertx(resolved.isHAMSafeDArray());
     return resolved;
   }
 
@@ -591,7 +591,7 @@ Array implTypeStructure(const Variant& cls_or_obj, const Variant& cns_name) {
   }
 
   assertx(isArrayLikeType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isDictOrDArray());
+  assertx(typeCns.m_data.parr->isHAMSafeDArray());
   assertx(typeCns.m_data.parr->isStatic());
   return Array::attach(typeCns.m_data.parr);
 }
@@ -2034,7 +2034,7 @@ static Array HHVM_METHOD(ReflectionTypeAlias, getTypeStructure) {
   assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
-  assertx(typeStructure.isDictOrDArray());
+  assertx(typeStructure.isHAMSafeDArray());
   return typeStructure;
 }
 
@@ -2043,7 +2043,7 @@ static String HHVM_METHOD(ReflectionTypeAlias, getAssignedTypeText) {
   assertx(req);
   auto const typeStructure = req->typeStructure;
   assertx(!typeStructure.empty());
-  assertx(typeStructure.isDictOrDArray());
+  assertx(typeStructure.isHAMSafeDArray());
   return TypeStructure::toString(typeStructure,
     TypeStructure::TSDisplayType::TSDisplayTypeReflection);
 }
@@ -2240,7 +2240,7 @@ void set_debugger_source_info(Array &ret, const StringData* file, int line1,
 }
 
 static void set_debugger_return_type_constraint(Array &ret, const StringData* retType) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   if (retType && retType->size()) {
     assertx(!retType->isRefCounted());
     ret.set(s_return_type, make_tv<KindOfPersistentString>(retType));
@@ -2251,7 +2251,7 @@ static void set_debugger_return_type_constraint(Array &ret, const StringData* re
 
 static void set_debugger_reflection_method_prototype_info(Array& ret,
                                                           const Func *func) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   const Class *prototypeCls = nullptr;
   if (func->baseCls() != nullptr && func->baseCls() != func->implCls()) {
     prototypeCls = func->baseCls();
@@ -2273,7 +2273,7 @@ static void set_debugger_reflection_method_prototype_info(Array& ret,
 
 static void set_debugger_reflection_function_info(Array& ret,
                                                   const Func* func) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   // return type
   if (func->isBuiltin()) {
     ret.set(s_internal, make_tv<KindOfBoolean>(true));
@@ -2296,7 +2296,7 @@ static void set_debugger_reflection_function_info(Array& ret,
 
 static void set_debugger_reflection_method_info(Array& ret, const Func* func,
                                                 const Class* cls) {
-  assertx(ret.isDictOrDArray());
+  assertx(ret.isHAMSafeDArray());
   ret.set(s_name, make_tv<KindOfPersistentString>(func->name()));
   set_attrs(ret, get_modifiers(func->attrs(), false, false));
 

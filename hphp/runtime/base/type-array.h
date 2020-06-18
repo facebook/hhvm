@@ -229,8 +229,8 @@ public:
   bool isPHPArray() const { return !m_arr || m_arr->isPHPArrayType(); }
   bool isVArray() const { return m_arr && m_arr->isVArray(); }
   bool isDArray() const { return m_arr && m_arr->isDArray(); }
-  bool isVecOrVArray() const { return m_arr && m_arr->isVecOrVArray(); }
-  bool isDictOrDArray() const { return m_arr && m_arr->isDictOrDArray(); }
+  bool isHAMSafeVArray() const { return m_arr && m_arr->isHAMSafeVArray(); }
+  bool isHAMSafeDArray() const { return m_arr && m_arr->isHAMSafeDArray(); }
 
   /////////////////////////////////////////////////////////////////////////////
 

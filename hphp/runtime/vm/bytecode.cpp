@@ -1045,7 +1045,7 @@ static void prepareFuncEntry(ActRec *ar, Array&& generics) {
   if (UNLIKELY(nargs > nparams)) {
     // All extra arguments are expected to be packed in a varray.
     assertx(nargs == nparams + 1);
-    assertx(tvIsVecOrVArray(stack.topC()));
+    assertx(tvIsHAMSafeVArray(stack.topC()));
     auto const unpackArgs = stack.topC()->m_data.parr;
     assertx(!unpackArgs->empty());
     if (!func->hasVariadicCaptureParam()) {
@@ -2677,7 +2677,7 @@ OPTBLD_INLINE void iopClassGetC() {
 
 OPTBLD_INLINE void iopClassGetTS() {
   auto const cell = vmStack().topC();
-  if (!tvIsDictOrDArray(cell)) {
+  if (!tvIsHAMSafeDArray(cell)) {
     raise_error("Reified type must be a type structure");
   }
   auto const ts = cell->m_data.parr;
@@ -3835,7 +3835,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
         int(vmfp()->func()->base()));
 
   try {
-    assertx(!callFlags.hasGenerics() || tvIsVecOrVArray(vmStack().topC()));
+    assertx(!callFlags.hasGenerics() || tvIsHAMSafeVArray(vmStack().topC()));
     auto generics = callFlags.hasGenerics()
       ? Array::attach(vmStack().topC()->m_data.parr) : Array();
     if (callFlags.hasGenerics()) vmStack().discard();
@@ -4477,7 +4477,7 @@ OPTBLD_INLINE void iopNewObjR() {
 
   auto const reified = [&] () -> ArrayData* {
     if (reifiedCell->m_type == KindOfNull) return nullptr;
-    if (!tvIsVecOrVArray(reifiedCell)) {
+    if (!tvIsHAMSafeVArray(reifiedCell)) {
       raise_error("Attempting NewObjR with invalid reified generics");
     }
     return reifiedCell->m_data.parr;
@@ -4499,7 +4499,7 @@ OPTBLD_INLINE void iopNewObjRD(Id id) {
 
   auto const reified = [&] () -> ArrayData* {
     if (tsList->m_type == KindOfNull) return nullptr;
-    if (!tvIsVecOrVArray(tsList)) {
+    if (!tvIsHAMSafeVArray(tsList)) {
       raise_error("Attempting NewObjRD with invalid reified generics");
     }
     return tsList->m_data.parr;
@@ -4916,7 +4916,7 @@ OPTBLD_INLINE void iopVerifyParamType(local_var param) {
 OPTBLD_INLINE void iopVerifyParamTypeTS(local_var param) {
   iopVerifyParamType(param);
   auto const cell = vmStack().topC();
-  assertx(tvIsDictOrDArray(cell));
+  assertx(tvIsHAMSafeDArray(cell));
   auto isTypeVar = tcCouldBeReified(vmfp()->m_func, param.index);
   bool warn = false;
   if ((isTypeVar || tvIsObject(param.lval)) &&
@@ -4979,7 +4979,7 @@ OPTBLD_INLINE void iopVerifyRetTypeC() {
 OPTBLD_INLINE void iopVerifyRetTypeTS() {
   verifyRetTypeImpl(1); // TypedValue is the second element on the stack
   auto const ts = vmStack().topC();
-  assertx(tvIsDictOrDArray(ts));
+  assertx(tvIsHAMSafeDArray(ts));
   auto const cell = vmStack().indC(1);
   bool isTypeVar = tcCouldBeReified(vmfp()->m_func, TypeConstraint::ReturnId);
   bool warn = false;

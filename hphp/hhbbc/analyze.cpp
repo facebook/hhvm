@@ -69,7 +69,7 @@ Type get_type_of_reified_list(const UserAttributeMap& ua) {
   auto const it = ua.find(s___Reified.get());
   assertx(it != ua.end());
   auto const tv = it->second;
-  assertx(tvIsVecOrVArray(&tv));
+  assertx(tvIsHAMSafeVArray(&tv));
   auto const info = extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   auto const numGenerics = info.m_typeParamInfo.size();
   assertx(numGenerics > 0);

@@ -55,14 +55,14 @@ ALWAYS_INLINE bool is_ts_bool(const ArrayData* ts, const String& s) {
 ALWAYS_INLINE const ArrayData* get_ts_varray(const ArrayData* ts,
                                              const String& s) {
   auto const field = ts->get(s.get());
-  assertx(tvIsVecOrVArray(field));
+  assertx(tvIsHAMSafeVArray(field));
   return field.val().parr;
 }
 
 ALWAYS_INLINE const ArrayData* get_ts_darray(const ArrayData* ts,
                                              const String& s) {
   auto const field = ts->get(s.get());
-  assertx(tvIsDictOrDArray(field));
+  assertx(tvIsHAMSafeDArray(field));
   return field.val().parr;
 }
 
@@ -70,7 +70,7 @@ ALWAYS_INLINE const ArrayData* get_ts_darray_opt(const ArrayData* ts,
                                                  const String& s) {
   auto const field = ts->get(s.get());
   if (!field.is_init()) return nullptr;
-  assertx(tvIsDictOrDArray(field));
+  assertx(tvIsHAMSafeDArray(field));
   return field.val().parr;
 }
 

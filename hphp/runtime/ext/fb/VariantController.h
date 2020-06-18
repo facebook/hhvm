@@ -91,7 +91,7 @@ struct VariantControllerImpl {
       case KindOfPersistentArray:
       case KindOfArray:
         if (HackArraysMode == VariantControllerHackArraysMode::MIGRATORY) {
-          return obj.asCArrRef().isVecOrVArray()
+          return obj.asCArrRef().isHAMSafeVArray()
             ? HPHP::serialize::Type::LIST
             : HPHP::serialize::Type::MAP;
         }

@@ -344,7 +344,7 @@ static ArrayData* loadClsTypeCnsHelper(
   }
 
   assertx(isArrayLikeType(typeCns.m_type));
-  assertx(typeCns.m_data.parr->isDictOrDArray());
+  assertx(typeCns.m_data.parr->isHAMSafeDArray());
   assertx(typeCns.m_data.parr->isStatic());
   return typeCns.m_data.parr;
 }

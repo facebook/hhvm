@@ -332,7 +332,7 @@ ArrayData* impl_type_structure_opts(ISS& env, const bc::FCallBuiltin& op,
     }
     if (check_lsb && !cnst->isNoOverride) return nullptr;
     auto const typeCns = cnst->val;
-    if (!tvIsDictOrDArray(&*typeCns)) return nullptr;
+    if (!tvIsHAMSafeDArray(&*typeCns)) return nullptr;
     return resolveTSStatically(env, typeCns->m_data.parr, env.ctx.cls);
   };
   if (op.arg1 != 2) return nullptr;
@@ -529,7 +529,7 @@ void in(ISS& env, const bc::FCallBuiltin& op) {
       auto const v = tv(*val);
       assertx(v);
 
-      assertx(tvIsVecOrVArray(*v));
+      assertx(tvIsHAMSafeVArray(*v));
       auto const ad = v->m_data.parr;
       assertx(ad->isStatic());
       assertx(ad->size() == op.arg3 + 1);

@@ -61,7 +61,7 @@ ArrayData* getClsReifiedGenericsProp(Class* cls, ObjectData* obj) {
   assertx(slot != kInvalidSlot);
   auto index = cls->propSlotToIndex(slot);
   auto tv = obj->props()->at(index).tv();
-  assertx(tvIsVecOrVArray(tv));
+  assertx(tvIsHAMSafeVArray(tv));
   return tv.m_data.parr;
 }
 

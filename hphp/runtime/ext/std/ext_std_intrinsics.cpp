@@ -41,12 +41,12 @@ TypedValue HHVM_FUNCTION(launder_value, const Variant& val) {
 }
 
 Array HHVM_FUNCTION(dummy_varray_builtin, const Array& arr) {
-  if (arr.isVecOrVArray()) return arr;
+  if (arr.isHAMSafeVArray()) return arr;
   return Array::CreateVArray();
 }
 
 Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
-  if (arr.isDictOrDArray()) return arr;
+  if (arr.isHAMSafeDArray()) return arr;
   return Array::CreateDArray();
 }
 
@@ -67,8 +67,8 @@ TypedValue HHVM_FUNCTION(dummy_kindofvarray_builtin) {
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
   if (var.isArray()) {
     auto const& arr = var.asCArrRef();
-    if (arr.isVecOrVArray() ||
-        arr.isDictOrDArray()) return tvReturn(arr);
+    if (arr.isHAMSafeVArray() ||
+        arr.isHAMSafeDArray()) return tvReturn(arr);
   }
   return tvReturn(ArrayData::CreateVArray());
 }
@@ -112,7 +112,7 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Array& arr) {
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
-  if (!arr.isVecOrVArray() && !arr.isDictOrDArray()) return arr;
+  if (!arr.isHAMSafeVArray() && !arr.isHAMSafeDArray()) return arr;
   return Array::Create();
 }
 

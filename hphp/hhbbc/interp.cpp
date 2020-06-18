@@ -710,7 +710,7 @@ resolveTSStaticallyImpl(ISS& env, hphp_fast_set<SArray>& seenTs, SArray ts,
                                                            cnsName.m_data.pstr,
                                                            true);
         if (!cnst || !cnst->val || !cnst->isTypeconst ||
-            !tvIsDictOrDArray(&*cnst->val)) {
+            !tvIsHAMSafeDArray(&*cnst->val)) {
           return nullptr;
         }
         if (checkNoOverrideOnFirst && i == 0 && !cnst->isNoOverride) {

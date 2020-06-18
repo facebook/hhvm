@@ -46,7 +46,7 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, const TypeAlias& alias) {
   req.nullable = alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDictOrDArray());
+  assertx(req.typeStructure.isHAMSafeDArray());
   return req;
 }
 
@@ -63,7 +63,7 @@ inline TypeAliasReq TypeAliasReq::From(Unit* unit, TypeAliasReq req,
   req.nullable |= alias.nullable;
   req.typeStructure = alias.typeStructure;
   req.userAttrs = alias.userAttrs;
-  assertx(req.typeStructure.isDictOrDArray());
+  assertx(req.typeStructure.isHAMSafeDArray());
   return req;
 }
 

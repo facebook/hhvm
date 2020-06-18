@@ -485,7 +485,7 @@ Array getAlias(TSEnv& env, const String& aliasName) {
   }
 
   // this returned type structure is unresolved.
-  assertx(typeAliasReq->typeStructure.isDictOrDArray());
+  assertx(typeAliasReq->typeStructure.isHAMSafeDArray());
   env.persistent &= persistentTA;
   return typeAliasReq->typeStructure;
 }
@@ -802,7 +802,7 @@ Array resolveTS(TSEnv& env, const TSCtx& ctx, const Array& arr) {
         }
         assertx(isArrayLikeType(tv.m_type));
         typeCnsVal = Array(tv.m_data.parr);
-        assertx(typeCnsVal.isDictOrDArray());
+        assertx(typeCnsVal.isHAMSafeDArray());
         if (i == sz - 1) break;
 
         // if there are more accesses, keep resolving
@@ -941,10 +941,10 @@ namespace {
 // Coerces vector-like darrays / dicts to varrays / vecs. Returns true if the
 // lval is now a varray (either coerced, or if it started off that way).
 bool coerceToVecOrVArray(tv_lval lval) {
-  if (tvIsVecOrVArray(lval)) return true;
+  if (tvIsHAMSafeVArray(lval)) return true;
 
   // Must be a dict or darray with vector-like data.
-  if (!tvIsDictOrDArray(lval)) return false;
+  if (!tvIsHAMSafeDArray(lval)) return false;
   auto const ad = val(lval).parr;
   if (!ad->isVectorData()) return false;
 
@@ -966,7 +966,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape=false);
 bool coerceTSField(Array& arr, const String& name) {
   assertx(one_bit_refcount || !arr->cowCheck());
   auto field = arr.lvalForce(name);
-  if (!tvIsDictOrDArray(field)) return false;
+  if (!tvIsHAMSafeDArray(field)) return false;
   return coerceToTypeStructure(ArrNR(val(field).parr).asArray());
 }
 
@@ -976,7 +976,7 @@ bool coerceTSListField(Array& arr, const String& name, bool shape=false) {
   assertx(one_bit_refcount || !arr->cowCheck());
   auto field = arr.lvalForce(name);
   if (!coerceToVecOrVArray(field)) return false;
-  assertx(tvIsVecOrVArray(field));
+  assertx(tvIsHAMSafeVArray(field));
   return coerceToTypeStructureList(ArrNR(val(field).parr).asArray(), shape);
 }
 
@@ -990,18 +990,18 @@ bool coerceOptTSListField(Array& arr, const String& name, bool shape=false) {
 
 bool coerceToTypeStructureList(Array& arr, bool shape) {
   assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
-  if (!arr->isVecOrVArray()) return false;
+  if (!arr->isHAMSafeVArray()) return false;
 
   auto valid = true;
   IterateV(arr.get(), [&](TypedValue tv) {
-    if (!tvIsDictOrDArray(tv)) {
+    if (!tvIsHAMSafeDArray(tv)) {
       valid = false;
       return true;
     }
     auto const ad = [&] {
       if (shape) {
         auto const value = arr.lookup(s_value);
-        if (tvIsDictOrDArray(value)) return val(value).parr;
+        if (tvIsHAMSafeDArray(value)) return val(value).parr;
         if (value.is_init()) valid = false;
       }
       return val(tv).parr;
@@ -1014,7 +1014,7 @@ bool coerceToTypeStructureList(Array& arr, bool shape) {
 
 bool coerceToTypeStructure(Array& arr) {
   assertx(one_bit_refcount || arr->empty() || !arr->cowCheck());
-  if (!arr->isDictOrDArray()) return false;
+  if (!arr->isHAMSafeDArray()) return false;
 
   auto const kindfield = arr.lookup(s_kind);
   if (!isIntType(kindfield.type()) ||

@@ -242,7 +242,7 @@ static Array get_frame_args(const ActRec* ar) {
   auto const variadic = ar->func()->hasVariadicCaptureParam();
   if (variadic && numArgs > numNonVariadic) {
     auto const arr = frame_local(ar, numNonVariadic);
-    if (tvIsVecOrVArray(arr)) {
+    if (tvIsHAMSafeVArray(arr)) {
       numArgs = numNonVariadic + val(arr).parr->size();
     } else {
       numArgs = numNonVariadic;
@@ -360,7 +360,7 @@ static Variant call_intercept_handler_callback(
     if (!origCallee->hasReifiedGenerics()) return Array();
     // Reified generics is the first non param local
     auto const generics = frame_local(ar, origCallee->numParams());
-    assertx(tvIsVecOrVArray(generics));
+    assertx(tvIsHAMSafeVArray(generics));
     return Array(val(generics).parr);
   }();
   auto ret = Variant::attach(

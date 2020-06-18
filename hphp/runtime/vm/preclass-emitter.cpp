@@ -205,7 +205,7 @@ bool PreClassEmitter::addConstant(const StringData* n,
   }
   TypedValue tvVal;
   if (typeconst && !typeStructure.empty())  {
-    assertx(typeStructure.isDictOrDArray());
+    assertx(typeStructure.isHAMSafeDArray());
     tvVal = make_persistent_array_like_tv(typeStructure.get());
     assertx(tvIsPlausible(tvVal));
   } else {

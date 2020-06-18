@@ -611,7 +611,7 @@ SSATmp* opt_foldable(IRGS& env,
     variadicArgs = variadic->variantVal().asCArrRef().get();
     numVariadicArgs = variadicArgs->size();
 
-    if (numVariadicArgs && !variadicArgs->isVecOrVArray()) return nullptr;
+    if (numVariadicArgs && !variadicArgs->isHAMSafeVArray()) return nullptr;
 
     assertx(variadicArgs->isStatic());
     numNonDefaultArgs = func->numNonVariadicParams();

@@ -221,10 +221,10 @@ inline bool ArrayData::isDVArray() const {
 
 inline bool ArrayData::isNotDVArray() const { return !isDVArray(); }
 
-inline bool ArrayData::isVecOrVArray() const {
+inline bool ArrayData::isHAMSafeVArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isVecType() : isVArray();
 }
-inline bool ArrayData::isDictOrDArray() const {
+inline bool ArrayData::isHAMSafeDArray() const {
   return RuntimeOption::EvalHackArrDVArrs ? isDictType() : isDArray();
 }
 

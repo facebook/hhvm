@@ -1395,7 +1395,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
       // Type constants with the low bit set are already resolved and can be
       // returned after masking out that bit.
       //
-      // We can't check isDictOrDArray here because we're using that low bit as
+      // We can't check isHAMSafeDArray here because we're using that low bit as
       // a marker; instead, check isArrayLike and do the stricter check below.
       assertx(isArrayLikeType(type(cnsVal)));
       assertx(!isRefcountedType(type(cnsVal)));
@@ -1403,7 +1403,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
       auto const rawData = reinterpret_cast<intptr_t>(typeCns);
       if (rawData & 0x1) {
         auto const resolved = reinterpret_cast<ArrayData*>(rawData ^ 0x1);
-        assertx(resolved->isDictOrDArray());
+        assertx(resolved->isHAMSafeDArray());
         return make_persistent_array_like_tv(resolved);
       }
       if (what == ClsCnsLookup::IncludeTypesPartial) {
@@ -1481,7 +1481,7 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
     } catch (const Exception& e) {
       raise_error(e.getMessage());
     }
-    assertx(resolvedTS.isDictOrDArray());
+    assertx(resolvedTS.isHAMSafeDArray());
 
     auto const ad = ArrayData::GetScalarArray(std::move(resolvedTS));
     if (persistent) {
@@ -3112,7 +3112,7 @@ void Class::setReifiedData() {
   }
   if (m_hasReifiedGenerics) {
     auto tv = it->second;
-    assertx(tvIsVecOrVArray(tv));
+    assertx(tvIsHAMSafeVArray(tv));
     allocExtraData();
     m_extra.raw()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);

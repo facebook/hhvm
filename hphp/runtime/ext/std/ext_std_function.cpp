@@ -113,7 +113,7 @@ Array hhvm_get_frame_args(const ActRec* ar, int offset) {
   bool variadic = ar->func()->hasVariadicCaptureParam();
   if (variadic && numArgs > numParams) {
     auto const arr = frame_local(ar, numParams);
-    if (tvIsVecOrVArray(arr)) {
+    if (tvIsHAMSafeVArray(arr)) {
       numArgs = numParams + val(arr).parr->size();
     } else {
       numArgs = numParams;

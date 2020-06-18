@@ -279,7 +279,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
   if (hasReifiedGenerics) {
     auto tv = uait->second;
-    assertx(tvIsVecOrVArray(tv));
+    assertx(tvIsHAMSafeVArray(tv));
     f->extShared()->m_reifiedGenericsInfo =
       extractSizeAndPosFromReifiedAttribute(tv.m_data.parr);
   }

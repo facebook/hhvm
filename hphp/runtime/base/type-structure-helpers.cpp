@@ -149,11 +149,11 @@ bool isOptionalShapeField(const ArrayData* field) {
 
 ALWAYS_INLINE
 ArrayData* getShapeFieldElement(const TypedValue& v) {
-  assertx(tvIsDictOrDArray(&v));
+  assertx(tvIsHAMSafeDArray(&v));
   auto const result = v.m_data.parr;
   auto const valueField = result->get(s_value.get());
   if (!valueField.is_init()) return result;
-  assertx(tvIsDictOrDArray(valueField));
+  assertx(tvIsHAMSafeDArray(valueField));
   return valueField.val().parr;
 }
 
@@ -161,7 +161,7 @@ ALWAYS_INLINE
 folly::Optional<ArrayData*> getGenericTypesOpt(const ArrayData* ts) {
   auto const generics_field = ts->get(s_generic_types.get());
   if (!generics_field.is_init()) return folly::none;
-  assertx(tvIsVecOrVArray(generics_field));
+  assertx(tvIsHAMSafeVArray(generics_field));
   return generics_field.val().parr;
 }
 
@@ -289,7 +289,7 @@ bool typeStructureIsType(
       IterateKV(
         typeFields,
         [&](TypedValue k, TypedValue v) {
-          assertx(tvIsDictOrDArray(v));
+          assertx(tvIsHAMSafeDArray(v));
           auto typeField = getShapeFieldElement(v);
           if (!inputFields->exists(k)) {
             result = false;
@@ -386,7 +386,7 @@ bool typeStructureIsTypeList(
     if (found && !tpinfo[i].m_isReified) continue;
     auto const inputElem = inputL->get(i);
     auto const typeElem = typeL->get(i);
-    assertx(tvIsDictOrDArray(inputElem) && tvIsDictOrDArray(typeElem));
+    assertx(tvIsHAMSafeDArray(inputElem) && tvIsHAMSafeDArray(typeElem));
     if (!typeStructureIsType(inputElem.val().parr, typeElem.val().parr,
                              warn, strict)) {
       if (warn || (found && (tpinfo[i].m_isWarn ||
@@ -434,7 +434,7 @@ bool checkReifiedGenericsMatch(
   for (size_t i = 0; i < size; ++i) {
     auto const objrg = obj_generics->get(i);
     auto const rg = generics->get(i);
-    assertx(tvIsDictOrDArray(objrg) && tvIsDictOrDArray(rg));
+    assertx(tvIsHAMSafeDArray(objrg) && tvIsHAMSafeDArray(rg));
     auto const tsvalue = rg.val().parr;
     if (get_ts_kind(tsvalue) == TypeStructure::Kind::T_typevar &&
         tsvalue->exists(s_name.get()) &&
@@ -1044,7 +1044,7 @@ bool errorOnIsAsExpressionInvalidTypesList(const ArrayData* tsFields,
       auto arr = v.m_data.parr;
       auto const value_field = arr->get(s_value.get());
       if (value_field.is_init()) {
-        assertx(tvIsDictOrDArray(value_field));
+        assertx(tvIsHAMSafeDArray(value_field));
         arr = value_field.val().parr;
       }
       if (!errorOnIsAsExpressionInvalidTypes(ArrNR(arr), dryrun,
@@ -1203,7 +1203,7 @@ Array resolveAndVerifyTypeStructure(
   bool suppress
 ) {
   assertx(!ts.empty());
-  assertx(ts.isDictOrDArray());
+  assertx(ts.isHAMSafeDArray());
   auto const handleResolutionException = [&](auto const& errMsg) {
     if (!suppress || !IsOrAsOp) raise_error(errMsg);
     if (RuntimeOption::EvalIsExprEnableUnresolvedWarning) raise_warning(errMsg);
@@ -1228,7 +1228,7 @@ Array resolveAndVerifyTypeStructure(
     resolved = handleResolutionException(errMsg);
   }
   assertx(!resolved.empty());
-  assertx(resolved.isDictOrDArray());
+  assertx(resolved.isHAMSafeDArray());
   if (IsOrAsOp) errorOnIsAsExpressionInvalidTypes(resolved, false);
   return resolved;
 }
@@ -1268,7 +1268,7 @@ bool doesTypeStructureContainTUnresolved(const ArrayData* ts) {
         return true; // short circuit
       }
       if (!isArrayLikeType(type(v))) return false;
-      assertx(tvIsVecOrVArray(v) || tvIsDictOrDArray(v));
+      assertx(tvIsHAMSafeVArray(v) || tvIsHAMSafeDArray(v));
       result |= doesTypeStructureContainTUnresolved(v.m_data.parr);
       return result; // short circuit if true
     }

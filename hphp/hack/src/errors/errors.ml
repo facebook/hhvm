@@ -1541,6 +1541,19 @@ let abstract_const_usage usage_pos decl_pos name =
       (decl_pos, "Declaration is here");
     ]
 
+let concrete_const_interface_override
+    child_pos parent_pos parent_origin name (on_error : typing_error_callback) =
+  let parent_origin = strip_ns parent_origin in
+  on_error
+    ~code:(Typing.err_code Typing.ConcreteConstInterfaceOverride)
+    [
+      ( child_pos,
+        "Non-abstract constants defined in an interface cannot be overridden when implementing or extending that interface."
+      );
+      ( parent_pos,
+        "You could make " ^ name ^ " abstract in " ^ parent_origin ^ "." );
+    ]
+
 let const_without_typehint sid =
   let (pos, name) = sid in
   let msg =

@@ -279,6 +279,9 @@ val new_abstract_record : Pos.t * string -> unit
 
 val abstract_const_usage : Pos.t -> Pos.t -> string -> unit
 
+val concrete_const_interface_override :
+  Pos.t -> Pos.t -> string -> string -> typing_error_callback -> unit
+
 val const_without_typehint : Pos.t * string -> unit
 
 val prop_without_typehint : string -> Pos.t * string -> unit

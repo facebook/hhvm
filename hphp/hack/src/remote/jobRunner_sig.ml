@@ -25,11 +25,9 @@ module type S = sig
     check_id:string ->
     transport_channel:string option ->
     file_system_mode:string ->
-    defer_class_declaration_threshold:int ->
     root:string ->
     min_log_level:Hh_logger.Level.t ->
     version_specifier:string option ->
-    prefetch_deferred_files:bool ->
     eden:bool ->
     command
 

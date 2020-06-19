@@ -256,7 +256,7 @@ type t = {
    *)
   tco_pu_enabled_paths: bool * Relative_path.t list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 val make :
   ?po_deregister_php_stdlib:bool ->

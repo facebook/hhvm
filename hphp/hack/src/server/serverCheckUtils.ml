@@ -80,7 +80,7 @@ let start_typing_delegate genv env : env =
     genv.local_config
   in
   let {
-    declaration_threshold = defer_class_declaration_threshold;
+    declaration_threshold;
     heartbeat_period;
     max_batch_size;
     min_batch_size;
@@ -113,6 +113,14 @@ let start_typing_delegate genv env : env =
       ~min_batch_size
       ~raise_on_failure
   in
+  let tcopt =
+    GlobalOptions.
+      {
+        env.tcopt with
+        tco_defer_class_declaration_threshold = Some declaration_threshold;
+        tco_prefetch_deferred_files = prefetch_deferred_files;
+      }
+  in
   let root = Relative_path.path_of_prefix Relative_path.Root in
   {
     env with
@@ -123,12 +131,10 @@ let start_typing_delegate genv env : env =
           Typing_service_delegate.start
             Typing_service_types.
               {
-                defer_class_declaration_threshold;
                 heartbeat_period;
                 init_id;
                 mergebase;
                 num_workers;
-                prefetch_deferred_files;
                 recheck_id;
                 root;
                 server =
@@ -138,6 +144,7 @@ let start_typing_delegate genv env : env =
                     ~init_id
                     ~ignore_hh_version:
                       (ServerArgs.ignore_hh_version genv.options);
+                tcopt;
                 version_specifier;
                 worker_min_log_level;
                 transport_channel;

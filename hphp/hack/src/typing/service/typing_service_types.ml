@@ -110,15 +110,14 @@ module type LocalServerApi = sig
 end
 
 type delegate_env = {
-  defer_class_declaration_threshold: int;
   (* The amount of time to wait between heartbeat checks, in seconds *)
   heartbeat_period: int;
   init_id: string;
   mergebase: Hg.hg_rev option;
   num_workers: int;
-  prefetch_deferred_files: bool;
   recheck_id: string;
   root: string;
+  tcopt: TypecheckerOptions.t;
   (* This module exposes to the controller the limited set of operations that
     it needs, without exposing the underlying types or implementation details.
     It is also helpful in simplifying the isolation of the controller

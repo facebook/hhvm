@@ -103,7 +103,7 @@ type t = {
   tco_enable_systemlib_annotations: bool;
   tco_pu_enabled_paths: bool * Relative_path.t list;
 }
-[@@deriving show]
+[@@deriving eq, show]
 
 let tco_experimental_isarray = "is_array"
 

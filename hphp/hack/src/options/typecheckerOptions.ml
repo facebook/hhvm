@@ -7,7 +7,7 @@
  *
  *)
 
-type t = GlobalOptions.t [@@deriving show]
+type t = GlobalOptions.t [@@deriving eq, show]
 
 let num_local_workers = GlobalOptions.tco_num_local_workers
 

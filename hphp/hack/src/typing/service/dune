@@ -12,5 +12,6 @@
     hg
     job_runner_stubs
     relative_path
+    typechecker_options
   )
   (preprocess (pps ppx_deriving.std)))

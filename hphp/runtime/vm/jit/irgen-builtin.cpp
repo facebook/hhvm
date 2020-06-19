@@ -981,7 +981,7 @@ SSATmp* opt_shapes_idx(IRGS& env, const ParamPrep& params) {
   // params[0] is the array, for which we may need to do a dvarray check.
   auto const arr = [&]() -> SSATmp* {
     auto const val = params[0].value;
-    if (!(RO::EvalHackArrCompatTypeHintNotices && val->isA(TArr))) return val;
+    if (!val->isA(TArr)) return val;
 
     // Rather than just emitting a notice here, we interp and side-exit for
     // non-darrays so that we can use layout information in the main trace.
@@ -1663,7 +1663,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   };
 
   auto const needDVCheck = [&](uint32_t param, const Type& ty) {
-    if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) return false;
     if (!callee->params()[param].typeConstraint.isArray()) return false;
     return ty <= TArr;
   };

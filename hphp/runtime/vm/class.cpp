@@ -1012,18 +1012,11 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
       oldProp.cls->name(),
       newTCName
     );
-
-  if (result == TypeConstraint::EquivalentResult::DVArray &&
-      !RO::EvalHackArrCompatSpecialization) {
-      assertx(RuntimeOption::EvalHackArrCompatTypeHintNotices);
-      raise_hackarr_compat_notice(msg);
-    } else {
-      raise_property_typehint_error(
-        msg,
-        oldTC.isSoft() && newTC.isSoft(),
-        oldTC.isUpperBound() || newTC.isUpperBound()
-      );
-    }
+    raise_property_typehint_error(
+      msg,
+      oldTC.isSoft() && newTC.isSoft(),
+      oldTC.isUpperBound() || newTC.isUpperBound()
+    );
   }
 
   if (RuntimeOption::EvalEnforceGenericsUB > 0 &&

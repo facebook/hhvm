@@ -1114,6 +1114,7 @@ struct RuntimeOption {
    * inserting at n == count(arr)                                       \
    */                                                                   \
   F(bool, HackArrCompatCheckImplicitVarrayAppend, false)                \
+  /* This option only exists to be set in tests - it does nothing. */   \
   F(bool, HackArrCompatTypeHintNotices, true)                           \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \

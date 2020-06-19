@@ -776,11 +776,7 @@ bool checkTypeStructureMatchesTVImpl(
       }();
 
       if (is_tuple_like && ad->isPHPArrayType() && !ad->isVArray()) {
-        if (RO::EvalHackArrCompatSpecialization) return false;
-        if (RO::EvalHackArrCompatTypeHintNotices) {
-          auto const name = ad->isDArray() ? "darray" : "array";
-          raise_hackarr_compat_is_operator(name, "tuple");
-        }
+        return false;
       }
       return with_prov_check(is_tuple_like);
     }
@@ -959,11 +955,7 @@ bool checkTypeStructureMatchesTVImpl(
       }
 
       if (!warn && ad->isPHPArrayType() && !ad->isDArray()) {
-        if (RO::EvalHackArrCompatSpecialization) return false;
-        if (RO::EvalHackArrCompatTypeHintNotices) {
-          auto const name = ad->isVArray() ? "varray" : "array";
-          raise_hackarr_compat_is_operator(name, "shape");
-        }
+        return false;
       }
       return with_prov_check(!warn);
     }

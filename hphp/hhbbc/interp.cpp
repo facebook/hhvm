@@ -3113,14 +3113,11 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_null:
       return check(ts_type);
+    // TODO(kshaunak): Change `deopt` for tuple to "vec", for shape to "dict".
     case TypeStructure::Kind::T_tuple:
-      return RuntimeOption::EvalHackArrCompatTypeHintNotices
-        ? check(ts_type, TDArr)
-        : check(ts_type);
+      return check(ts_type, TDArr);
     case TypeStructure::Kind::T_shape:
-      return RuntimeOption::EvalHackArrCompatTypeHintNotices
-        ? check(ts_type, TVArr)
-        : check(ts_type);
+      return check(ts_type, TVArr);
     case TypeStructure::Kind::T_dict:
       return check(ts_type, TDArr);
     case TypeStructure::Kind::T_vec:

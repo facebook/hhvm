@@ -101,7 +101,6 @@ struct Repo::GlobalData {
   bool HackArrCompatNotices = false;
   bool HackArrCompatIsArrayNotices = false;
   bool HackArrCompatIsVecDictNotices = false;
-  bool HackArrCompatTypeHintNotices = false;
   bool HackArrCompatSerializeNotices = false;
 
   /*
@@ -204,7 +203,6 @@ struct Repo::GlobalData {
       (HackArrCompatNotices)
       (HackArrCompatIsArrayNotices)
       (HackArrCompatIsVecDictNotices)
-      (HackArrCompatTypeHintNotices)
       (HackArrCompatSerializeNotices)
       (HackArrCompatSpecialization)
       (HackArrDVArrs)

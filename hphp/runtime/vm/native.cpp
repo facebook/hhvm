@@ -369,8 +369,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
     // Precondition: the DataType of the TypedValue is correct.
     auto const check_dvarray = [&]{
       assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (!RO::EvalHackArrCompatTypeHintNotices ||
-          !tvIsArray(tv) || !tc.isArray()) {
+      if (!tvIsArray(tv) || !tc.isArray()) {
         return;
       }
 
@@ -381,12 +380,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
         if (tc.isVArrayOrDArray()) return !ad->isDVArray();
         return ad->isDVArray();
       }();
-
-      if (error) {
-        if (RO::EvalHackArrCompatSpecialization) raise_type_error();
-        auto const name = tc.displayName();
-        raise_hackarr_compat_type_hint_param_notice(func, ad, name.data(), i);
-      }
+      if (error) raise_type_error();
     };
 
     // Check if we have the right type, or if its a Variant.

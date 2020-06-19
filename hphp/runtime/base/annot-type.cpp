@@ -266,27 +266,21 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           AnnotAction::Fail : AnnotAction::ClsMethCheck;
       }
       if (!isArrayType(dt)) return AnnotAction::Fail;
-      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
-        ? AnnotAction::VArrayCheck
-        : AnnotAction::Pass;
+      return AnnotAction::VArrayCheck;
     case AnnotMetaType::DArray:
       if (isClsMethType(dt)) {
         return clsmeth_array_compat() ? AnnotAction::ClsMethCheck
                                       : AnnotAction::Fail;
       }
       if (!isArrayType(dt)) return AnnotAction::Fail;
-      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
-        ? AnnotAction::DArrayCheck
-        : AnnotAction::Pass;
+      return AnnotAction::DArrayCheck;
     case AnnotMetaType::VArrOrDArr:
       if (isClsMethType(dt)) {
         return RuntimeOption::EvalHackArrDVArrs ?
           AnnotAction::Fail : AnnotAction::ClsMethCheck;
       }
       if (!isArrayType(dt)) return AnnotAction::Fail;
-      return UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices)
-        ? AnnotAction::VArrayOrDArrayCheck
-        : AnnotAction::Pass;
+      return AnnotAction::VArrayOrDArrayCheck;
     case AnnotMetaType::VecOrDict:
       if (isClsMethType(dt)) {
         return !RuntimeOption::EvalHackArrDVArrs ?
@@ -307,8 +301,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:
-      if (UNLIKELY(RuntimeOption::EvalHackArrCompatTypeHintNotices) &&
-          at == AnnotType::Array && isArrayType(dt)) {
+      if (at == AnnotType::Array && isArrayType(dt)) {
         return AnnotAction::NonVArrayOrDArrayCheck;
       }
       break;

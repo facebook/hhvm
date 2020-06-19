@@ -336,12 +336,7 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
     return !other.isObject() || !m_typeName->isame(other.m_typeName);
   }
   if (other.isObject()) return true;
-
-  if (type() == other.type()) return false;
-  if (!RuntimeOption::EvalHackArrCompatTypeHintNotices) {
-    return !isArray() || !other.isArray();
-  }
-  return true;
+  return type() != other.type();
 }
 
 TypeConstraint::EquivalentResult
@@ -447,9 +442,7 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
         std::get<2>(resolved1) != std::get<2>(resolved2)) {
       return EquivalentResult::Fail;
     }
-    return RuntimeOption::EvalHackArrCompatTypeHintNotices
-      ? EquivalentResult::DVArray
-      : EquivalentResult::Pass;
+    return EquivalentResult::DVArray;
   }
 
   // The resolutions are the same. However, both could have failed to resolve to
@@ -1038,9 +1031,6 @@ folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
     }
     return at;
   };
-  if (LIKELY(!RuntimeOption::EvalHackArrCompatTypeHintNotices)) {
-    return folly::none;
-  }
   if (!isArrayType(val.type())) return folly::none;
   if (isArray()) return check(m_type);
   if (!isObject()) return folly::none;
@@ -1056,8 +1046,7 @@ bool TypeConstraint::convertClsMethToArrLike() const {
 }
 
 bool TypeConstraint::raiseClsMethHackArrCompatNotice() const {
-  return RO::EvalHackArrCompatTypeHintNotices &&
-         (m_type == AnnotType::Array || isDArray());
+  return m_type == AnnotType::Array || isDArray();
 }
 
 void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
@@ -1065,8 +1054,8 @@ void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
   verifyFail(func, val, paramNums);
   assertx(
     isSoft() ||
+    isArrayType(val.type()) ||
     (isThis() && couldSeeMockObject()) ||
-    (RO::EvalHackArrCompatTypeHintNotices && isArrayType(val.type())) ||
     (RO::EvalEnforceGenericsUB < 2 && isUpperBound()) ||
     check(val, func->cls())
   );

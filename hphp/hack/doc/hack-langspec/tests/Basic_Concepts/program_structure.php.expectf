@@ -1,3 +1,0 @@
-
-Fatal error: HH mode: ?> not allowed (Line: 3, Char: 30)
-syntax error, unexpected T_HH_ERROR, expecting $end in %s/tests/Basic_Concepts/program_structure.php on line 3

@@ -1,3 +1,0 @@
-
-Fatal error: HH mode: content before <?hh (Line: 1, Char: 38)
-syntax error, unexpected T_HH_ERROR, expecting $end in %s/tests/Namespaces/use_groups.php on line 1

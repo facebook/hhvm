@@ -1,5 +1,5 @@
 -vEval.CheckPropTypeHints=2
 -vEval.EmitClsMethPointers=1
 -vEval.IsCompatibleClsMethType=1
--vEval.HackArrCompatSpecialization=true
+
 --count 37

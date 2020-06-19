@@ -1,4 +1,3 @@
 -vHackArrCompatNotices=1
 -vHackArrCompatIsArrayNotices=1
--vHackArrCompatTypeHintNotices=1
 -vRuntime.Eval.HackArrCompatIsVecDictNotices=1

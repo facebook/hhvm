@@ -1,9 +1,7 @@
 <?hh
 
 function opts(bool $hack_arr = false): string {
-  $args = varray[
-    '-vEval.HackArrCompatTypeHintNotices=1',
-  ];
+  $args = varray[];
   if ($hack_arr) {
     $args[] = '-vEval.HackArrDVArrs=true';
   }
@@ -11,9 +9,7 @@ function opts(bool $hack_arr = false): string {
 }
 
 function hphp_opts(bool $hack_arr = false): string {
-  $args = varray[
-    '-vRuntime.Eval.HackArrCompatTypeHintNotices=1',
-  ];
+  $args = varray[];
   if ($hack_arr) {
     $args[] = '-vHackArrDVArrs=1';
   }

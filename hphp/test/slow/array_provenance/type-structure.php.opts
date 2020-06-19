@@ -3,5 +3,5 @@
 -vEval.ArrProvHackArrays=1
 -vEval.LogArrayProvenance=1
 -vEval.LogArrayProvenanceSampleRatio=1
--vEval.HackArrCompatTypeHintNotices=1
--vEval.HackArrCompatSpecialization=1
+
+

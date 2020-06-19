@@ -1105,16 +1105,12 @@ struct RuntimeOption {
   F(bool, HackArrCompatIsArrayNotices, false)                           \
   /* Raise notices when is_vec or is_dict  is called with a v/darray */ \
   F(bool, HackArrCompatIsVecDictNotices, false)                         \
-  /* This option only exists to be set in tests - it does nothing. */   \
-  F(bool, HackArrCompatTypeHintNotices, true)                           \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
   F(bool, HackArrCompatCompactSerializeNotices, false)                  \
   /* Raises notice when a function that returns a PHP array, not */     \
   /* a v/darray, is called */                                           \
   F(bool, HackArrCompatArrayProducingFuncNotices, false)                \
-  /* This option only exists to be set in tests - it does nothing. */   \
-  F(bool, HackArrCompatSpecialization, true)                            \
   /* This is the flag for "unification", meaning that darrays are       \
    * replaced by dicts and varrays by vecs. */                          \
   F(bool, HackArrDVArrs, false)                                         \

@@ -41,21 +41,24 @@ let show_policy = function
 let policy fmt p = fprintf fmt "%s" (show_policy p)
 
 let rec ptype fmt ty =
-  let list sep l =
+  let list' sep l =
     let pp_sep fmt () = fprintf fmt "%s@ " sep in
     fprintf fmt "(@[<hov2>%a@])" (list pp_sep ptype) l
   in
   match ty with
   | Tprim p -> fprintf fmt "<%a>" policy p
-  | Ttuple tl -> list "," tl
-  | Tunion tl -> list " |" tl
-  | Tinter tl -> list " &" tl
-  | Tclass { c_name; c_self; c_lump; c_property_map } ->
-    fprintf fmt "%s<%a, %a" c_name policy c_self policy c_lump;
-    if SMap.is_empty c_property_map then
-      fprintf fmt ">"
-    else
-      fprintf fmt ", %a>" (smap comma_sep lazy_ptype) c_property_map
+  | Ttuple tl -> list' "," tl
+  | Tunion tl -> list' " |" tl
+  | Tinter tl -> list' " &" tl
+  | Tclass { c_name; c_self; c_lump; c_property_map; c_tparams } ->
+    fprintf fmt "%s" c_name;
+    ( if not @@ List.is_empty c_tparams then
+      let tparams = List.map ~f:fst c_tparams in
+      fprintf fmt "<@[<hov2>%a@]>" (list comma_sep ptype) tparams );
+    fprintf fmt "<@[<hov2>%a,@ %a" policy c_self policy c_lump;
+    if not (SMap.is_empty c_property_map) then
+      fprintf fmt ",@ %a" (smap comma_sep lazy_ptype) c_property_map;
+    fprintf fmt "@]>"
 
 and lazy_ptype fmt ty =
   if Lazy.is_val ty then
@@ -149,7 +152,7 @@ let env fmt env =
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   pp_close_box fmt ()
 
-let class_decl fmt { cd_policied_properties = props } =
+let class_decl fmt { cd_policied_properties = props; _ } =
   let policied_property fmt { pp_name; pp_purpose; _ } =
     match pp_purpose with
     | Some purpose -> fprintf fmt "%s:%s" pp_name purpose

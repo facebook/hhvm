@@ -35,7 +35,7 @@ let rec subtype t1 t2 acc =
       List.fold zip ~init:acc ~f:(fun acc (t1, t2) -> subtype t1 t2 acc)
     | None -> fail "incompatible tuple types")
   | (Tclass cl1, Tclass cl2) when String.equal cl1.c_name cl2.c_name ->
-    let policied_prop_pol_zip =
+    let policied_properties_zip =
       match
         List.zip
           (SMap.values cl1.c_property_map)
@@ -44,14 +44,31 @@ let rec subtype t1 t2 acc =
       | Some zip -> zip
       | None -> fail "same class with differing policied properties"
     in
+    let tparams_subtype acc =
+      let tparam_subtype acc (pty1, variance1) (pty2, variance2) =
+        assert (Ast_defs.equal_variance variance1 variance2);
+        match variance1 with
+        | Ast_defs.Invariant -> equivalent pty1 pty2 acc
+        | Ast_defs.Covariant -> subtype pty1 pty2 acc
+        | Ast_defs.Contravariant -> subtype pty2 pty1 acc
+      in
+      match
+        List.fold2 ~init:acc ~f:tparam_subtype cl1.c_tparams cl2.c_tparams
+      with
+      | List.Or_unequal_lengths.Ok acc -> acc
+      | _ -> fail "unequal number of type parameters during subtyping"
+    in
     (* Invariant in property policies *)
     (* When forcing an unevaluated ptype thunk, only policied properties
      * will be populated. This invariant, and the ban on recursive class cycles
      * through policied properties (enforcement still to be done, see T68078692)
      * ensures termination here.
      *)
-    List.fold policied_prop_pol_zip ~init:acc ~f:(fun acc (t1, t2) ->
+    List.fold policied_properties_zip ~init:acc ~f:(fun acc (t1, t2) ->
         equivalent (Lazy.force t1) (Lazy.force t2) acc)
+    (* Use the declared variance for subtyping constraints of
+     * type parameters *)
+    |> tparams_subtype
     (* Invariant in lump policy *)
     |> L.(cl1.c_lump = cl2.c_lump)
     (* Covariant in class policy *)
@@ -79,9 +96,17 @@ let weaken ?(prefix = "weak") renv env ty =
     | Tunion tl -> on_list (fun l -> Tunion l) tl
     | Tinter tl -> on_list (fun l -> Tinter l) tl
     | Tclass class_ ->
+      let weaken_tparam acc ((pty, variance) as tparam) =
+        match variance with
+        | Ast_defs.Covariant ->
+          let (acc, pty) = freshen acc pty in
+          (acc, (pty, variance))
+        | _ -> (acc, tparam)
+      in
       let super_pol = Env.new_policy_var renv.re_proto prefix in
       let acc = L.(class_.c_self < super_pol) acc in
-      (acc, Tclass { class_ with c_self = super_pol })
+      let (acc, tparams) = List.map_env ~f:weaken_tparam acc class_.c_tparams in
+      (acc, Tclass { class_ with c_self = super_pol; c_tparams = tparams })
   in
   let (acc, ty') = freshen env.e_acc ty in
   (Env.acc env (fun _ -> acc), ty')
@@ -146,8 +171,8 @@ let get_policy ?prefix lump_pol_opt proto_renv =
     let prefix = Option.value prefix ~default:"v" in
     Env.new_policy_var proto_renv prefix
 
-let rec class_ptype lump_pol_opt proto_renv name =
-  let { cd_policied_properties } =
+let rec class_ptype lump_pol_opt proto_renv tparams name =
+  let { cd_policied_properties; cd_tparam_variance } =
     match SMap.find_opt name proto_renv.pre_decl.de_class with
     | Some class_sig -> class_sig
     | None -> fail "could not found a class policy signature for %s" name
@@ -164,6 +189,13 @@ let rec class_ptype lump_pol_opt proto_renv name =
       lazy (ptype ~prefix:("." ^ pp_name) lump_pol_opt proto_renv pp_type) )
   in
   let lump_pol = get_policy lump_pol_opt proto_renv ~prefix:"lump" in
+  let c_tparams =
+    let prefix = "tp" in
+    let pair_tparam tp var = (ptype ~prefix lump_pol_opt proto_renv tp, var) in
+    match List.map2 ~f:pair_tparam tparams cd_tparam_variance with
+    | List.Or_unequal_lengths.Ok zip -> zip
+    | _ -> fail "unequal number of type parameters and variance spec"
+  in
   Tclass
     {
       c_name = name;
@@ -171,6 +203,7 @@ let rec class_ptype lump_pol_opt proto_renv name =
       c_lump = lump_pol;
       c_property_map =
         SMap.of_list (List.map ~f:prop_ptype cd_policied_properties);
+      c_tparams;
     }
 
 (* Turns a locl_ty into a type with policy annotations;
@@ -182,7 +215,8 @@ and ptype ?prefix lump_pol_opt proto_renv (t : T.locl_ty) =
   | T.Ttuple tyl -> Ttuple (List.map ~f:ptype tyl)
   | T.Tunion tyl -> Tunion (List.map ~f:ptype tyl)
   | T.Tintersection tyl -> Tinter (List.map ~f:ptype tyl)
-  | T.Tclass ((_, name), _, _) -> class_ptype lump_pol_opt proto_renv name
+  | T.Tclass ((_, name), _, tparams) ->
+    class_ptype lump_pol_opt proto_renv tparams name
   | T.Tvar id ->
     (* Drops the environment `expand_var` returns. This is logically
      * correct, but threading the envrionment would lead to faster future
@@ -476,7 +510,10 @@ let callable decl_env class_name_opt name saved_env params body lrty =
     let proto_renv = Env.new_proto_renv saved_env scope decl_env in
 
     let global_pc = Env.new_policy_var proto_renv "pc" in
-    let this_ty = Option.map class_name_opt (class_ptype None proto_renv) in
+    (* Here, we ignore the type parameters of this because at the moment we
+     * lack Tgeneric policy type. This will be fixed (T68414656) in the future.
+     *)
+    let this_ty = Option.map class_name_opt (class_ptype None proto_renv []) in
     let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
     let renv = Env.new_renv proto_renv global_pc this_ty ret_ty in
 

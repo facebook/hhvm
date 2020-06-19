@@ -57,7 +57,8 @@ let collect_sigs =
   in
   let def decl_env = function
     | A.Class
-        { A.c_name = (_, name); c_vars = properties; c_methods = methods; _ } ->
+        { A.c_name = (_, name); c_vars = properties; c_methods; c_tparams; _ }
+      ->
       let mk_policied_prop
           ({ A.cv_id = (_, pp_name); A.cv_type = (pp_type, _); _ } as prop) =
         match find_policy prop with
@@ -68,16 +69,18 @@ let collect_sigs =
       let cd_policied_properties =
         List.filter_map ~f:mk_policied_prop properties
       in
-      let de_class =
-        SMap.add name { cd_policied_properties } decl_env.de_class
+      let cd_tparam_variance =
+        List.map ~f:(fun tp -> tp.A.tp_variance) c_tparams.A.c_tparam_list
       in
+      let class_decl = { cd_policied_properties; cd_tparam_variance } in
+      let de_class = SMap.add name class_decl decl_env.de_class in
       let de_fun =
         let meth de_fun m =
           let callable_name = make_callable_name (Some name) (snd m.A.m_name) in
           let decl = callable_decl m.A.m_user_attributes in
           SMap.add callable_name decl de_fun
         in
-        List.fold ~init:decl_env.de_fun ~f:meth methods
+        List.fold ~init:decl_env.de_fun ~f:meth c_methods
       in
       { de_class; de_fun }
     | A.Fun { A.f_name = (_, name); f_user_attributes = attrs; _ } ->

@@ -27,6 +27,7 @@ let ptype fty fpol = function
         c_self = fpol cls.c_self;
         c_lump = fpol cls.c_lump;
         c_property_map = prop_map;
+        c_tparams = List.map ~f:(fun (pty, var) -> (fty pty, var)) cls.c_tparams;
       }
 
 (* "fprop: int -> prop -> prop" takes as first argument the

@@ -55,6 +55,7 @@ and class_ = {
   c_self: policy;
   c_lump: policy;
   c_property_map: ptype Lazy.t SMap.t;
+  c_tparams: (ptype * Ast_defs.variance) list;
 }
 
 type fun_proto = {
@@ -100,6 +101,7 @@ type policied_property = {
 type class_decl = {
   (* the list of policied properties in the class *)
   cd_policied_properties: policied_property list;
+  cd_tparam_variance: Ast_defs.variance list;
 }
 
 type fun_decl_kind =

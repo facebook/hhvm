@@ -1500,26 +1500,16 @@ and supertype_redeclared_method tc env m =
         in
         match (deref ty_child, deref ty_parent) with
         | ((r_child, Tfun ft_child), (r_parent, Tfun ft_parent)) ->
-          let ety_env = Phase.env_with_self env ~quiet:true in
-          let (env, ft_child) =
-            Phase.localize_ft
-              ~ety_env
-              ~def_pos:(Reason.to_pos r_child)
-              env
-              ft_child
-          in
-          let (env, ft_parent) =
-            Phase.localize_ft
-              ~ety_env
-              ~def_pos:(Reason.to_pos r_parent)
-              env
-              ft_parent
-          in
-          Typing_subtype.(
-            subtype_method
+          Typing_subtype_method.(
+            subtype_method_decl
               ~check_return:true
               ~extra_info:
-                { method_info = None; class_ty = None; parent_class_ty = None }
+                Typing_subtype.
+                  {
+                    method_info = None;
+                    class_ty = None;
+                    parent_class_ty = None;
+                  }
               env
               r_child
               ft_child

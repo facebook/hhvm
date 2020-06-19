@@ -58,19 +58,6 @@ val sub_type_with_dynamic_as_bottom :
 val sub_type_i :
   env -> internal_type -> internal_type -> Errors.typing_error_callback -> env
 
-(** Check that the method with signature ft_sub can be used to override
-(is a subtype of) method with signature ft_super. *)
-val subtype_method :
-  check_return:bool ->
-  extra_info:reactivity_extra_info ->
-  env ->
-  Reason.t ->
-  locl_fun_type ->
-  Reason.t ->
-  locl_fun_type ->
-  Errors.typing_error_callback ->
-  env
-
 val subtype_reactivity :
   ?extra_info:reactivity_extra_info ->
   ?is_call_site:bool ->
@@ -97,6 +84,17 @@ val simplify_subtype_i :
   internal_type ->
   on_error:Errors.typing_error_callback ->
   env * Typing_logic.subtype_prop
+
+val subtype_funs :
+  check_return:bool ->
+  extra_info:reactivity_extra_info ->
+  on_error:Errors.typing_error_callback ->
+  Reason.t ->
+  locl_fun_type ->
+  Reason.t ->
+  locl_fun_type ->
+  env ->
+  env
 
 (* Given a subtype proposition, resolve conjunctions of subtype assertions
  * of the form #v <: t or t <: #v by adding bounds to #v in env. Close env

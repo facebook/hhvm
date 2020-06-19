@@ -92,6 +92,7 @@
     typing_special_fun
     typing_substring
     typing_subtype
+    typing_subtype_method
     typing_subtype_tconst
     typing_subtype_pocket_universes
     typing_taccess

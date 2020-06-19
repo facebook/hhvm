@@ -21,7 +21,6 @@ module Phase = Typing_phase
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 module MakeType = Typing_make_type
-module SubType = Typing_subtype
 
 (*****************************************************************************)
 (* Helpers *)
@@ -352,23 +351,16 @@ let check_override
            * which is checked elsewhere *)
           env
         | _ ->
-          (* these unify errors are collected into errorl *)
-          let ety_env = Phase.env_with_self env ~quiet:true in
-          let (env, ft2) =
-            Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r2) env ft2
-          in
-          let (env, ft1) =
-            Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r1) env ft1
-          in
-          SubType.(
+          Typing_subtype_method.(
             (* Add deps here when we override *)
-            subtype_method
+            subtype_method_decl
               ~extra_info:
-                {
-                  method_info = Some (member_name, is_static);
-                  class_ty = Some (DeclTy class_ty);
-                  parent_class_ty = Some (DeclTy parent_ty);
-                }
+                Typing_subtype.
+                  {
+                    method_info = Some (member_name, is_static);
+                    class_ty = Some (DeclTy class_ty);
+                    parent_class_ty = Some (DeclTy parent_ty);
+                  }
               ~check_return:(not ignore_fun_return)
               env
               r2

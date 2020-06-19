@@ -1145,7 +1145,6 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
 
   using A = AnnotType;
   auto const specializedArrayType = [](Type type) {
-    if (!RO::EvalHackArrCompatSpecialization) return TArr;
     return RO::EvalAllowBespokeArrayLikes ? type : type.narrowToVanilla();
   };
   auto const atToType = [&](AnnotType at) {

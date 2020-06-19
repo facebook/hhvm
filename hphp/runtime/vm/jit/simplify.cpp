@@ -2613,7 +2613,6 @@ SSATmp* simplifyRaiseHackArrPropNotice(State& env, const IRInstruction* inst) {
 }
 
 SSATmp* simplifyCheckDVArray(State& env, const IRInstruction* inst) {
-  if (!RO::EvalHackArrCompatSpecialization) return nullptr;
   auto const src = inst->src(0);
   if (src->type().subtypeOfAny(TVArr, TDArr)) {
     gen(env, Nop);

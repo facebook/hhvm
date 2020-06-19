@@ -226,11 +226,6 @@ AnnotAction
 annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
   assertx(IMPLIES(at == AnnotType::Object, annotClsName != nullptr));
 
-  // Returns true if a clsmeth may be coerced to a (plain) PHP array.
-  auto const clsmeth_array_compat = []{
-    return !RO::EvalHackArrDVArrs && !RO::EvalHackArrCompatSpecialization;
-  };
-
   auto const metatype = getAnnotMetaType(at);
   switch (metatype) {
     case AnnotMetaType::Mixed:
@@ -268,10 +263,6 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return AnnotAction::VArrayCheck;
     case AnnotMetaType::DArray:
-      if (isClsMethType(dt)) {
-        return clsmeth_array_compat() ? AnnotAction::ClsMethCheck
-                                      : AnnotAction::Fail;
-      }
       if (!isArrayType(dt)) return AnnotAction::Fail;
       return AnnotAction::DArrayCheck;
     case AnnotMetaType::VArrOrDArr:
@@ -323,7 +314,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     };
     if (at == AnnotType::Vec)       return resolve(RO::EvalHackArrDVArrs);
     if (at == AnnotType::VArray)    return resolve(!RO::EvalHackArrDVArrs);
-    if (at == AnnotType::Array)     return resolve(clsmeth_array_compat());
+    if (at == AnnotType::Array)     return resolve(false);
     if (at == AnnotType::ArrayLike) return resolve(true);
   }
 

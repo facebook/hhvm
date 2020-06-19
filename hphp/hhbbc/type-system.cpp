@@ -419,12 +419,10 @@ bool canBeOptional(trep bits) {
  * HAM is to turn this "most" into "all".
  */
 bool isVecish(Type t) {
-  if (t.subtypeOrNull(BVec)) return true;
-  return RO::EvalHackArrCompatSpecialization && t.subtypeOrNull(BVArr);
+  return t.subtypeOrNull(BVec) || t.subtypeOrNull(BVArr);
 }
 bool maybeVecish(Type t) {
-  if (t.couldBe(BVec)) return true;
-  return RO::EvalHackArrCompatSpecialization && t.couldBe(BVArr);
+  return t.couldBe(BVec) || t.couldBe(BVArr);
 }
 
 /*
@@ -5407,8 +5405,7 @@ bool arr_packedn_set(Type& pack,
   assert(pack.m_dataTag == DataTag::ArrLikePackedN);
   assert(key.type.subtypeOf(BArrKey));
 
-  auto const canPromoteToMap = pack.subtypeOrNull(
-    RO::EvalHackArrCompatSpecialization ? BArr : (BPArr | BDArr));
+  auto const canPromoteToMap = pack.subtypeOrNull(BArr);
   auto const vecish = isVecish(pack);
 
   auto& ty = pack.m_data.packedn.mutate()->type;

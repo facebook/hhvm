@@ -738,7 +738,7 @@ std::string param_type_error_message(
   assertx(param_num > 0);
 
   auto const actual_type = [&]{
-    if (RO::EvalHackArrCompatSpecialization && tvIsArray(actual_value)) {
+    if (tvIsArray(actual_value)) {
       auto const ad = val(actual_value).parr;
       if (ad->isVArray()) return "varray";
       if (ad->isDArray()) return "darray";

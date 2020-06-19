@@ -306,7 +306,6 @@ std::vector<SString> load_input(F&& fun) {
     gd.HackArrCompatIsArrayNotices;
   RO::EvalHackArrCompatSerializeNotices =
     gd.HackArrCompatSerializeNotices;
-  RO::EvalHackArrCompatSpecialization = gd.HackArrCompatSpecialization;
   RO::EvalHackArrDVArrs = gd.HackArrDVArrs;
   RO::EvalAbortBuildOnVerifyError = gd.AbortBuildOnVerifyError;
   RO::EnableArgsInBacktraces = gd.EnableArgsInBacktraces;
@@ -414,8 +413,6 @@ void write_global_data(
     RuntimeOption::EvalHackArrCompatIsArrayNotices;
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
-  gd.HackArrCompatSpecialization =
-    RuntimeOption::EvalHackArrCompatSpecialization;
   gd.HackArrDVArrs = RuntimeOption::EvalHackArrDVArrs;
   gd.InitialNamedEntityTableSize  =
     RuntimeOption::EvalInitialNamedEntityTableSize;

@@ -979,7 +979,6 @@ std::string describe_actual_type(tv_rval val) {
         ? "varray" : "array";
     case KindOfPersistentArray:
     case KindOfArray: {
-      if (!RO::EvalHackArrCompatSpecialization) return "array";
       auto const arr = val.val().parr;
       if (arr->isVArray()) return "varray";
       if (arr->isDArray()) return "darray";
@@ -1003,41 +1002,6 @@ std::string describe_actual_type(tv_rval val) {
     }
   }
   not_reached();
-}
-
-ALWAYS_INLINE
-folly::Optional<AnnotType> TypeConstraint::checkDVArray(tv_rval val) const {
-  // This function returns a truthy result if we should emit a HackArrCompat
-  // *notice* for a mismatch for this TypeConstraint. Post specialization,
-  // we'll always emit an error instead, so short-circuit these notices.
-  if (RO::EvalHackArrCompatSpecialization) return folly::none;
-
-  auto const check = [&](AnnotType at) -> folly::Optional<AnnotType> {
-    switch (at) {
-      case AnnotType::Array:
-        assertx(!val.val().parr->isNotDVArray());
-        break;
-      case AnnotType::VArray:
-        assertx(!val.val().parr->isVArray());
-        break;
-      case AnnotType::DArray:
-        assertx(!val.val().parr->isDArray());
-        break;
-      case AnnotType::VArrOrDArr:
-        assertx(val.val().parr->isNotDVArray());
-        break;
-      default:
-        return folly::none;
-    }
-    return at;
-  };
-  if (!isArrayType(val.type())) return folly::none;
-  if (isArray()) return check(m_type);
-  if (!isObject()) return folly::none;
-  if (auto alias = getTypeAliasWithAutoload(m_namedEntity, m_typeName)) {
-    return check(alias->type);
-  }
-  return folly::none;
 }
 
 bool TypeConstraint::convertClsMethToArrLike() const {
@@ -1080,13 +1044,6 @@ void castClsMeth(tv_lval c, F make) {
 void TypeConstraint::verifyOutParamFail(const Func* func,
                                         TypedValue* c,
                                         int paramNum) const {
-  if (checkDVArray(c)) {
-    raise_hackarr_compat_type_hint_outparam_notice(
-      func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum
-    );
-    return;
-  }
-
   if ((RO::EvalEnableFuncStringInterop && isFuncType(c->m_type)) ||
       isClassType(c->m_type)) {
     if (isString() || (isObject() && interface_supports_string(m_typeName))) {
@@ -1145,13 +1102,6 @@ void TypeConstraint::verifyRecFieldFail(tv_rval val,
                                      const StringData* fieldName) const {
   assertx(validForRecField());
 
-  if (checkDVArray(val)) {
-    raise_hackarr_compat_type_hint_rec_field_notice(
-      recordName, val.val().parr, displayName().c_str(), fieldName
-    );
-    return;
-  }
-
   raise_record_field_typehint_error(
     folly::sformat(
       "Record field '{}::{}' declared as type {}, {} assigned",
@@ -1170,13 +1120,6 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
                                     bool isStatic) const {
   assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
   assertx(validForProp());
-
-  if (checkDVArray(val)) {
-    raise_hackarr_compat_type_hint_property_notice(
-      declCls, val.val().parr, displayName().c_str(), propName, isStatic
-    );
-    return;
-  }
 
   if (UNLIKELY(isThis() && val.type() == KindOfObject)) {
     auto const valCls = val.val().pobj->getVMClass();
@@ -1226,24 +1169,6 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
   VMRegAnchor _;
   std::string name = displayName(func->cls());
   auto const givenType = describe_actual_type(c);
-
-  if (checkDVArray(c)) {
-    if (id == ReturnId) {
-      raise_hackarr_compat_type_hint_ret_notice(
-        func,
-        val(c).parr,
-        name.c_str()
-      );
-    } else {
-      raise_hackarr_compat_type_hint_param_notice(
-        func,
-        val(c).parr,
-        name.c_str(),
-        id
-      );
-    }
-    return;
-  }
 
   if (UNLIKELY(isThis() && c.type() == KindOfObject)) {
     Class* cls = val(c).pobj->getVMClass();

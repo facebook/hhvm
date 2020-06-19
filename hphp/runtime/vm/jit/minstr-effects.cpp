@@ -79,8 +79,7 @@ void getBaseType(Opcode rawOp, bool predict,
      * to CountedArr/CountedStr. */
     baseValChanged = true;
     if (baseType.maybe(TArr)) {
-      if ((rawOp == SetNewElemArray || RO::EvalHackArrCompatSpecialization) &&
-          baseType.subtypeOfAny(TPackedArr)) {
+      if (baseType <= TPackedArr) {
         baseType = TPackedArr;
       } else if (baseType <= TMixedArr) {
         baseType = TMixedArr;

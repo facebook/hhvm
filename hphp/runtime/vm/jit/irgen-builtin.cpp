@@ -1649,7 +1649,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const genFail = [&](uint32_t param, SSATmp* val) {
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
-      if (RO::EvalHackArrCompatSpecialization && tc.isArray()) {
+      if (tc.isArray()) {
         if (tc.isVArray()) return s_varray.get();
         if (tc.isDArray()) return s_darray.get();
         if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
@@ -1670,20 +1670,9 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const dvCheck = [&](uint32_t param, SSATmp* val) {
     assertx(needDVCheck(param, val->type()));
     auto const& tc = callee->params()[param].typeConstraint;
-    ifThen(
-      env,
+    ifThen(env,
       [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
-      [&]{
-        if (RO::EvalHackArrCompatSpecialization) return genFail(param, val);
-        gen(
-          env,
-          RaiseHackArrParamNotice,
-          RaiseHackArrParamNoticeData { tc, int32_t(param), false },
-          maker.makeUnusualCatch(),
-          val,
-          cns(env, callee)
-        );
-      }
+      [&]{ genFail(param, val); }
     );
   };
 

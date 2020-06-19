@@ -263,7 +263,8 @@ void verifyTypeImpl(IRGS& env,
       }
       ifThen(env,
         [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
-        [&]{ RO::EvalHackArrCompatSpecialization ? genFail() : dvArr(val); });
+        [&]{ genFail(); }
+      );
       return;
     }
     case AnnotAction::WarnFunc:

@@ -473,8 +473,6 @@ private:
   void verifyFail(const Func* func, TypedValue* tv, int id,
                   bool useStrictTypes) const;
 
-  folly::Optional<AnnotType> checkDVArray(tv_rval) const;
-
 private:
   // m_type represents the type to check on.  We don't know whether a
   // bare name is a class/interface name or a type alias or an enum,

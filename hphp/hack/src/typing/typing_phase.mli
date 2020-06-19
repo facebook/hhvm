@@ -75,15 +75,6 @@ val localize_targ : env -> Aast.hint -> env * Tast.targ
 
 val localize_hint : ety_env:expand_env -> env -> Aast.hint -> env * locl_ty
 
-val localize_generic_parameters_with_bounds :
-  ety_env:expand_env ->
-  env ->
-  decl_tparam list ->
-  env * (locl_ty * Ast_defs.constraint_kind * locl_ty) list
-
-val localize_where_constraints :
-  ety_env:expand_env -> env -> Aast.where_constraint list -> env
-
 val sub_type_decl :
   env -> decl_ty -> decl_ty -> Errors.typing_error_callback -> env
 
@@ -114,3 +105,16 @@ val localize_targs_and_check_constraints :
   decl_tparam list ->
   Aast.hint list ->
   env * locl_ty * Tast.targ list
+
+(* Add generic parameters to the environment, with localized bounds,
+ * and also add any consequences of `where` constraints *)
+val localize_and_add_generic_parameters :
+  Pos.t -> env -> decl_tparam list -> env
+
+(* As above but from AST of generic parameters *)
+val localize_and_add_ast_generic_parameters_and_where_constraints :
+  Pos.t ->
+  env ->
+  (Pos.t, Nast.func_body_ann, unit, unit) Aast.tparam list ->
+  (Aast.hint * Ast_defs.constraint_kind * Aast.hint) list ->
+  env

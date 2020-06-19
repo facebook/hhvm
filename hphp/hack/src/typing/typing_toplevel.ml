@@ -357,18 +357,12 @@ let rec fun_def ctx f :
       let env = Env.set_env_reactive env reactive in
       let env = Env.set_fun_mutable env mut in
       NastCheck.fun_ env f;
-      let ety_env = Phase.env_with_self env in
-      let f_tparams : decl_tparam list =
-        List.map
-          f.f_tparams
-          ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
-      in
-      let (env, constraints) =
-        Phase.localize_generic_parameters_with_bounds env f_tparams ~ety_env
-      in
-      let env = SubType.add_constraints pos env constraints in
       let env =
-        Phase.localize_where_constraints ~ety_env env f.f_where_constraints
+        Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+          pos
+          env
+          f.f_tparams
+          f.f_where_constraints
       in
       let env = Env.set_fn_kind env f.f_fun_kind in
       let (return_decl_ty, params_decl_ty, variadicity_decl_ty) =
@@ -519,20 +513,12 @@ and method_def env cls m =
       in
       let env = Env.set_env_reactive env reactive in
       let env = Env.set_fun_mutable env mut in
-      let ety_env =
-        { (Phase.env_with_self env) with from_class = Some CIstatic }
-      in
-      let m_tparams : decl_tparam list =
-        List.map
-          m.m_tparams
-          ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
-      in
-      let (env, constraints) =
-        Phase.localize_generic_parameters_with_bounds env m_tparams ~ety_env
-      in
-      let env = SubType.add_constraints pos env constraints in
       let env =
-        Phase.localize_where_constraints ~ety_env env m.m_where_constraints
+        Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+          pos
+          env
+          m.m_tparams
+          m.m_where_constraints
       in
       let env =
         if Env.is_static env then
@@ -829,22 +815,11 @@ and class_def_ env c tc =
       (c.c_extends @ c.c_implements @ c.c_uses)
       (Decl_hint.hint env.decl_env)
   in
-  let c_tparam_list : decl_tparam list =
-    List.map
-      c.c_tparams.c_tparam_list
-      ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
-  in
-  let (env, constraints) =
-    Phase.localize_generic_parameters_with_bounds
-      env
-      c_tparam_list
-      ~ety_env:(Phase.env_with_self env)
-  in
-  let env = SubType.add_constraints (fst c.c_name) env constraints in
   let env =
-    Phase.localize_where_constraints
-      ~ety_env:(Phase.env_with_self env)
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      (fst c.c_name)
       env
+      c.c_tparams.c_tparam_list
       c.c_where_constraints
   in
   let env =
@@ -1216,16 +1191,10 @@ and pu_enum_def
     List.map_env env pu_user_attributes Typing.user_attribute
   in
   (* Adds all of the PU case types (not just the local one) as generics in the environment. *)
-  let (env, constraints) =
-    let case_types =
-      SMap.fold (fun _ case_ty acc -> case_ty :: acc) pu_enum_case_types []
-    in
-    Phase.localize_generic_parameters_with_bounds
-      env
-      ~ety_env:(Phase.env_with_self env)
-      case_types
+  let case_types =
+    SMap.fold (fun _ case_ty acc -> case_ty :: acc) pu_enum_case_types []
   in
-  let env = SubType.add_constraints pos env constraints in
+  let env = Phase.localize_and_add_generic_parameters pos env case_types in
   (* Localize local case values, to check they are correct types *)
   let () =
     List.iter pu_case_values ~f:(fun (_sid, hint) ->
@@ -1260,14 +1229,13 @@ and pu_enum_def
           tp_user_attributes = [];
         }
       in
-      let (env, cstrs) =
-        let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
-        Phase.localize_generic_parameters_with_bounds
+      let pum_types = List.map ~f:make_aast_tparam pum.pum_types in
+      let env =
+        Phase.localize_and_add_generic_parameters
+          (fst pum.pum_atom)
           env
-          ~ety_env:(Phase.env_with_self env)
           pum_types
       in
-      let env = SubType.add_constraints (fst pum.pum_atom) env cstrs in
       let process_mapping env (sid, map_expr) =
         (* Fetch expected type from the case types map *)
         let (ty, expected) =

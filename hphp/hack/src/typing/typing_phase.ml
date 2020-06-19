@@ -761,7 +761,7 @@ let localize_generic_parameters_with_bounds
   let (env, cstrss) = List.map_env env tparams localize_bound in
   (env, List.concat cstrss)
 
-let localize_where_constraints ~ety_env (env : env) where_constraints =
+let localize_and_add_where_constraints ~ety_env (env : env) where_constraints =
   let add_constraint env (h1, ck, h2) =
     let (env, ty1) = localize env (Decl_hint.hint env.decl_env h1) ~ety_env in
     let (env, ty2) = localize env (Decl_hint.hint env.decl_env h2) ~ety_env in
@@ -775,6 +775,30 @@ let sub_type_decl env ty1 ty2 on_error =
   let (env, ty1) = localize_with_self env ty1 in
   let (env, ty2) = localize_with_self env ty2 in
   let env = TUtils.sub_type env ty1 ty2 on_error in
+  env
+
+let add_constraints p env constraints =
+  let add_constraint env (ty1, ck, ty2) =
+    Typing_utils.add_constraint p env ck ty1 ty2
+  in
+  List.fold_left constraints ~f:add_constraint ~init:env
+
+let localize_and_add_generic_parameters pos env tparams =
+  let ety_env = env_with_self env in
+  let (env, constraints) =
+    localize_generic_parameters_with_bounds env tparams ~ety_env
+  in
+  let env = add_constraints pos env constraints in
+  env
+
+let localize_and_add_ast_generic_parameters_and_where_constraints
+    pos env tparams where_constraints =
+  let tparams : decl_tparam list =
+    List.map tparams ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
+  in
+  let env = localize_and_add_generic_parameters pos env tparams in
+  let ety_env = env_with_self env in
+  let env = localize_and_add_where_constraints ~ety_env env where_constraints in
   env
 
 let () = TUtils.localize_with_self_ref := localize_with_self

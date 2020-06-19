@@ -7034,18 +7034,13 @@ and typedef_def ctx typedef =
   let tdecl = Env.get_typedef env (snd typedef.t_name) in
   Typing_helpers.add_decl_errors
     Option.(map tdecl (fun tdecl -> value_exn tdecl.td_decl_errors));
-  let t_tparams : decl_tparam list =
-    List.map
-      typedef.t_tparams
-      ~f:(Decl_hint.aast_tparam_to_decl_tparam env.decl_env)
-  in
-  let (env, constraints) =
-    Phase.localize_generic_parameters_with_bounds
+  let env =
+    Phase.localize_and_add_ast_generic_parameters_and_where_constraints
+      (fst typedef.t_name)
       env
-      t_tparams
-      ~ety_env:(Phase.env_with_self env)
+      typedef.t_tparams
+      []
   in
-  let env = SubType.add_constraints (fst typedef.t_name) env constraints in
   NastCheck.typedef env typedef;
   let {
     t_annotation = ();

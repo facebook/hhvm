@@ -590,67 +590,9 @@ bool PackedArray::ExistsStr(const ArrayData* ad, const StringData* /*s*/) {
 
 namespace {
 
-template<typename FoundFn, typename AppendFn, typename PromotedFn>
-auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy,
-                  FoundFn found, AppendFn append, PromotedFn promoted) {
-  assertx(PackedArray::checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
-  assertx(adIn->isVArray());
-
-  if (LIKELY(size_t(k) < adIn->getSize())) {
-    auto const ad = copy ? PackedArray::Copy(adIn) : adIn;
-    return found(ad);
-  }
-
-  if (RO::EvalHackArrCompatSpecialization) {
-    throwOOBArrayKeyException(k, adIn);
-  }
-
-  if (size_t(k) == adIn->getSize()) {
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend)) {
-      raise_hackarr_compat_notice("Implicit append to varray");
-    }
-    return append();
-  }
-
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
-    raise_hackarr_compat_notice(
-      folly::sformat("varray promoting to darray: out of bounds key {}", k)
-    );
-  }
-
-  auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
-                          : PackedArray::ToMixed(adIn);
-  return promoted(mixed);
-}
-
-template <typename PromotedFn>
-auto MutableOpStr(ArrayData* adIn, StringData* k, bool copy,
-                  PromotedFn promoted) {
-  assertx(PackedArray::checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
-  assertx(adIn->isVArray());
-
-  if (RO::EvalHackArrCompatSpecialization) {
-    throwInvalidArrayKeyException(k, adIn);
-  }
-
-  if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
-    raise_hackarr_compat_notice(
-      "varray promoting to darray: invalid key: expected int, got string"
-    );
-  }
-
-  auto const mixed = copy ? PackedArray::ToMixedCopy(adIn)
-                          : PackedArray::ToMixed(adIn);
-  return promoted(mixed);
-}
-
 template<typename FoundFn>
-auto MutableOpIntVec(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
+auto MutableOpInt(ArrayData* adIn, int64_t k, bool copy, FoundFn found) {
   assertx(PackedArray::checkInvariants(adIn));
-  assertx(adIn->isVecKind());
-
   if (UNLIKELY(size_t(k) >= adIn->getSize())) {
     throwOOBArrayKeyException(k, adIn);
   }
@@ -668,7 +610,7 @@ arr_lval PackedArray::LvalInt(ArrayData* adIn, int64_t k) {
 }
 
 arr_lval PackedArray::LvalIntVec(ArrayData* adIn, int64_t k) {
-  return MutableOpIntVec(adIn, k, adIn->cowCheck(),
+  return MutableOpInt(adIn, k, adIn->cowCheck(),
     [&] (ArrayData* ad) { return arr_lval { ad, LvalUncheckedInt(ad, k) }; }
   );
 }
@@ -701,45 +643,16 @@ tv_lval PackedArray::LvalNewInPlace(ArrayData* ad) {
 }
 
 ArrayData* PackedArray::SetInt(ArrayData* adIn, int64_t k, TypedValue v) {
-  auto const copy = adIn->cowCheck();
-  return MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; },
-    [&] { return AppendImpl(adIn, v, copy); },
-    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
-  );
-}
-
-ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
-  auto done = false;
-  auto const copy = adIn->cowCheck();
-  auto const result = MutableOpInt(adIn, k, copy,
-    [&] (ArrayData* ad) {
-      assertx((adIn != ad) == copy);
-      if (copy && adIn->decReleaseCheck()) PackedArray::Release(adIn);
-      setElem(LvalUncheckedInt(ad, k), v, true);
-      done = true;
-      return ad;
-    },
-    [&] { return AppendImpl(adIn, v, copy); },
-    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
-  );
-  if (done) return result;
-  if (adIn != result && adIn->decReleaseCheck()) PackedArray::Release(adIn);
-  tvDecRefGen(v);
-  return result;
-}
-
-ArrayData* PackedArray::SetIntVec(ArrayData* adIn, int64_t k, TypedValue v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
-  return MutableOpIntVec(adIn, k, adIn->cowCheck(),
+  return MutableOpInt(adIn, k, adIn->cowCheck(),
     [&] (ArrayData* ad) { setElem(LvalUncheckedInt(ad, k), v); return ad; }
   );
 }
 
-ArrayData* PackedArray::SetIntMoveVec(ArrayData* adIn, int64_t k, TypedValue v) {
+ArrayData* PackedArray::SetIntMove(ArrayData* adIn, int64_t k, TypedValue v) {
   assertx(adIn->cowCheck() || adIn->notCyclic(v));
   auto const copy = adIn->cowCheck();
-  return MutableOpIntVec(adIn, k, copy,
+  return MutableOpInt(adIn, k, copy,
     [&] (ArrayData* ad) {
       assertx((adIn != ad) == copy);
       if (copy && adIn->decReleaseCheck()) PackedArray::Release(adIn);
@@ -750,87 +663,34 @@ ArrayData* PackedArray::SetIntMoveVec(ArrayData* adIn, int64_t k, TypedValue v) 
 }
 
 ArrayData* PackedArray::SetStr(ArrayData* adIn, StringData* k, TypedValue v) {
-  return MutableOpStr(adIn, k, adIn->cowCheck(),
-    [&] (MixedArray* mixed) { return mixed->addVal(k, v); }
-  );
-}
-
-ArrayData* PackedArray::SetStrMove(ArrayData* adIn, StringData* k, TypedValue v) {
-  auto const result = SetStr(adIn, k, v);
-  assertx(result != adIn);
-  if (adIn->decReleaseCheck()) PackedArray::Release(adIn);
-  tvDecRefGen(v);
-  return result;
-}
-
-ArrayData* PackedArray::SetStrVec(ArrayData* adIn, StringData* k, TypedValue v) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->isVecKind());
   throwInvalidArrayKeyException(k, adIn);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ArrayData* PackedArray::RemoveImpl(ArrayData* adIn, int64_t k, bool copy) {
-  assertx(checkInvariants(adIn));
-  assertx(adIn->isPackedKind());
-  assertx(adIn->isVArray());
-  if (size_t(k) < adIn->m_size) {
-    // After specializing darray and varrays, we can modify varray behavior
-    // to avoid the surprising PHP unset/append semantics described below.
-    if (RO::EvalHackArrCompatSpecialization) {
-      if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
-        auto const ad = copy ? Copy(adIn) : adIn;
-        auto const size = ad->m_size - 1;
-        ad->m_sizeAndPos = size; // pos = 0
-        tvDecRefGen(LvalUncheckedInt(ad, size));
-        return ad;
-      }
-      throwVarrayUnsetException();
-    }
-
-    // Escalate to mixed for correctness; unset preserves m_nextKI.
-    if (UNLIKELY(RuntimeOption::EvalHackArrCompatCheckVarrayPromote)) {
-      raise_hackarr_compat_notice("varray promoting to darray: removing key");
-    }
-    // TODO(#2606310): If you unset the last element of a vector-like PHP array
-    // and then append to it, PHP skips over the unset index! Since PackedArray
-    // doesn't track m_nextKI, we escalate to mixed to match this behavior.
-    auto const mixed = copy ? ToMixedCopy(adIn) : ToMixed(adIn);
-    return MixedArray::RemoveInt(mixed, k);
-  }
-  // Key doesn't exist---we're still packed.
-  return copy ? Copy(adIn) : adIn;
-}
-
 ArrayData* PackedArray::RemoveInt(ArrayData* adIn, int64_t k) {
-  return RemoveImpl(adIn, k, adIn->cowCheck());
-}
-
-ArrayData*
-PackedArray::RemoveImplVec(ArrayData* adIn, int64_t k, bool copy) {
   assertx(checkInvariants(adIn));
-  assertx(adIn->isVecKind());
 
-  // You're only allowed to remove an element at the end of the vec (or beyond,
-  // which is a no-op).
+  // You're only allowed to remove an element at the end of the varray or
+  // vec (or beyond the end, which is a no-op).
   if (UNLIKELY(size_t(k) >= adIn->m_size)) return adIn;
   if (LIKELY(size_t(k) + 1 == adIn->m_size)) {
-    auto const ad = copy ? Copy(adIn) : adIn;
+    auto const ad = adIn->cowCheck() ? Copy(adIn) : adIn;
     auto const size = ad->m_size - 1;
     ad->m_sizeAndPos = size; // pos = 0
     tvDecRefGen(LvalUncheckedInt(ad, size));
     return ad;
   }
-  throwVecUnsetException();
+
+  if (adIn->isVecKind()) {
+    throwVecUnsetException();
+  } else {
+    throwVarrayUnsetException();
+  }
 }
 
-ArrayData* PackedArray::RemoveIntVec(ArrayData* adIn, int64_t k) {
-  return RemoveImplVec(adIn, k, adIn->cowCheck());
-}
-
-ArrayData*
-PackedArray::RemoveStr(ArrayData* adIn, const StringData*) {
+ArrayData* PackedArray::RemoveStr(ArrayData* adIn, const StringData*) {
   assertx(checkInvariants(adIn));
   return adIn;
 }

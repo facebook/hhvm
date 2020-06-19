@@ -74,7 +74,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static ArrayData* SetInt(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetIntMove(ArrayData*, int64_t k, TypedValue v);
   static ArrayData* SetStr(ArrayData*, StringData* k, TypedValue v);
-  static ArrayData* SetStrMove(ArrayData*, StringData* k, TypedValue v);
+  static constexpr auto SetStrMove = &SetStr;
   static size_t Vsize(const ArrayData*);
   static bool IsVectorData(const ArrayData*) { return true; }
   static bool ExistsInt(const ArrayData* ad, int64_t k);
@@ -114,11 +114,6 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
 
   static constexpr auto ToKeyset = &ArrayCommon::ToKeyset;
 
-  static ArrayData* SetIntVec(ArrayData*, int64_t, TypedValue);
-  static ArrayData* SetIntMoveVec(ArrayData*, int64_t, TypedValue);
-  static ArrayData* SetStrVec(ArrayData*, StringData*, TypedValue);
-  static constexpr auto SetStrMoveVec = &SetStrVec;
-  static ArrayData* RemoveIntVec(ArrayData*, int64_t);
   static arr_lval LvalIntVec(ArrayData*, int64_t);
   static arr_lval LvalStrVec(ArrayData*, StringData*);
   static ArrayData* PlusEqVec(ArrayData*, const ArrayData*);
@@ -138,6 +133,11 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto IsVectorDataVec = &IsVectorData;
   static constexpr auto ExistsIntVec = &ExistsInt;
   static constexpr auto ExistsStrVec = &ExistsStr;
+  static constexpr auto SetIntVec = &SetInt;
+  static constexpr auto SetIntMoveVec = &SetIntMove;
+  static constexpr auto SetStrVec = &SetStr;
+  static constexpr auto SetStrMoveVec = &SetStr;
+  static constexpr auto RemoveIntVec = &RemoveInt;
   static constexpr auto RemoveStrVec = &RemoveStr;
   static constexpr auto IterBeginVec = &IterBegin;
   static constexpr auto IterLastVec = &IterLast;
@@ -271,9 +271,6 @@ private:
 
   static bool VecEqualHelper(const ArrayData*, const ArrayData*, bool);
   static int64_t VecCmpHelper(const ArrayData*, const ArrayData*);
-
-  static ArrayData* RemoveImpl(ArrayData*, int64_t, bool);
-  static ArrayData* RemoveImplVec(ArrayData*, int64_t, bool);
 
   static ArrayData* AppendImpl(ArrayData*, TypedValue v, bool copy);
 

@@ -1303,14 +1303,15 @@ fn is_struct_init(
     env: &Env,
     fields: &[tast::Afield],
     allow_numerics: bool,
-) -> bool {
+) -> Result<bool> {
     let mut are_all_keys_non_numeric_strings = true;
     let mut uniq_keys = std::collections::HashSet::<String>::new();
     for f in fields.iter() {
         if let tast::Afield::AFkvalue(key, _) = f {
             // TODO(hrust): if key is String, don't clone and call fold_expr
             let mut key = key.clone();
-            ast_constant_folder::fold_expr(&mut key, e, &env.namespace);
+            ast_constant_folder::fold_expr(&mut key, e, &env.namespace)
+                .map_err(|e| unrecoverable(format!("{}", e)))?;
             if let tast::Expr(_, tast::Expr_::String(s)) = key {
                 are_all_keys_non_numeric_strings =
                     are_all_keys_non_numeric_strings && non_numeric(&s);
@@ -1324,10 +1325,10 @@ fn is_struct_init(
     }
     let num_keys = fields.len();
     let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
-    (allow_numerics || are_all_keys_non_numeric_strings)
+    Ok((allow_numerics || are_all_keys_non_numeric_strings)
         && uniq_keys.len() == num_keys
         && num_keys <= limit
-        && num_keys != 0
+        && num_keys != 0)
 }
 
 fn emit_struct_array<C: FnOnce(&mut Emitter, Vec<String>) -> Result<InstrSeq>>(
@@ -1345,7 +1346,8 @@ fn emit_struct_array<C: FnOnce(&mut Emitter, Vec<String>) -> Result<InstrSeq>>(
                 E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
                 _ => {
                     let mut k = k.clone();
-                    ast_constant_folder::fold_expr(&mut k, e, &env.namespace);
+                    ast_constant_folder::fold_expr(&mut k, e, &env.namespace)
+                        .map_err(|e| unrecoverable(format!("{}", e)))?;
                     match k {
                         E(_, E_::String(s)) => Ok((s.clone(), emit_expr(e, env, v)?)),
                         _ => Err(unrecoverable("Key must be a string")),
@@ -1373,7 +1375,7 @@ fn emit_dynamic_collection(
     let pos = &expr.0;
     let count = fields.len();
     let emit_dict = |e: &mut Emitter| {
-        if is_struct_init(e, env, fields, true) {
+        if is_struct_init(e, env, fields, true)? {
             emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructdict(x)))
         } else {
             let ctor = InstructLitConst::NewDictArray(count as isize);
@@ -1381,7 +1383,7 @@ fn emit_dynamic_collection(
         }
     };
     let emit_collection_helper = |e: &mut Emitter, ctype| {
-        if is_struct_init(e, env, fields, true) {
+        if is_struct_init(e, env, fields, true)? {
             Ok(InstrSeq::gather(vec![
                 emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructdict(x)))?,
                 emit_pos(pos),
@@ -1443,7 +1445,7 @@ fn emit_dynamic_collection(
             })
         }
         E_::Darray(_) => {
-            if is_struct_init(e, env, fields, false /* allow_numerics */) {
+            if is_struct_init(e, env, fields, false /* allow_numerics */)? {
                 let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
                 emit_struct_array(e, env, pos, fields, |_, arg| {
                     let instr = if hack_arr_dv_arrs {
@@ -1465,7 +1467,7 @@ fn emit_dynamic_collection(
         _ => {
             if is_packed_init(e.options(), fields, true /* hack_arr_compat */) {
                 emit_value_only_collection(e, env, pos, fields, InstructLitConst::NewPackedArray)
-            } else if is_struct_init(e, env, fields, false /* allow_numerics */) {
+            } else if is_struct_init(e, env, fields, false /* allow_numerics */)? {
                 emit_struct_array(e, env, pos, fields, |_, x| Ok(instr::newstructarray(x)))
             } else if is_packed_init(e.options(), fields, false /* hack_arr_compat*/) {
                 let constr = InstructLitConst::NewArray(count as isize);

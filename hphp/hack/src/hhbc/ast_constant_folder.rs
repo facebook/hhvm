@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 use indexmap::IndexMap;
-use std::{cell::Cell, collections::hash_map::RandomState, iter::FromIterator};
+use std::{cell::Cell, collections::hash_map::RandomState, fmt, iter::FromIterator};
 
 use ast_class_expr_rust as ast_class_expr;
 use ast_scope_rust as ast_scope;
@@ -26,6 +26,23 @@ use itertools::Itertools;
 pub enum Error {
     NotLiteral,
     UserDefinedConstant,
+    Unrecoverable(String),
+}
+
+impl Error {
+    fn unrecoverable(s: impl Into<String>) -> Self {
+        Self::Unrecoverable(s.into())
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NotLiteral => write!(f, "NotLiteral"),
+            Self::UserDefinedConstant => write!(f, "UserDefinedConstant"),
+            Self::Unrecoverable(msg) => write!(f, "{}", msg),
+        }
+    }
 }
 
 enum Radix {
@@ -177,7 +194,9 @@ fn set_afield_to_typed_value_pair(
 ) -> Result<(TypedValue, TypedValue), Error> {
     match afield {
         tast::Afield::AFvalue(v) => set_afield_value_to_typed_value_pair(e, ns, v),
-        _ => panic!("set_afield_to_typed_value_pair: unexpected key=>value"),
+        _ => Err(Error::unrecoverable(
+            "set_afield_to_typed_value_pair: unexpected key=>value",
+        )),
     }
 }
 
@@ -196,7 +215,9 @@ fn afield_to_typed_value_pair(
     afield: &tast::Afield,
 ) -> Result<(TypedValue, TypedValue), Error> {
     match afield {
-        tast::Afield::AFvalue(_) => panic!("afield_to_typed_value_pair: unexpected value"),
+        tast::Afield::AFvalue(_) => Err(Error::unrecoverable(
+            "afield_to_typed_value_pair: unexpected value",
+        )),
         tast::Afield::AFkvalue(key, value) => kv_to_typed_value_pair(emitter, ns, key, value),
     }
 }
@@ -220,9 +241,9 @@ fn value_afield_to_typed_value(
 ) -> Result<TypedValue, Error> {
     match afield {
         tast::Afield::AFvalue(e) => expr_to_typed_value(emitter, ns, e),
-        tast::Afield::AFkvalue(_, _) => {
-            panic!("value_afield_to_typed_value: unexpected key=>value")
-        }
+        tast::Afield::AFkvalue(_, _) => Err(Error::unrecoverable(
+            "value_afield_to_typed_value: unexpected key=>value",
+        )),
     }
 }
 
@@ -264,7 +285,12 @@ fn shape_to_typed_value(
                     let tv = int_expr_to_typed_value(s)?;
                     match tv {
                         TypedValue::Int(_) => tv,
-                        _ => panic!(format!("{} is not a valid integer index", s)),
+                        _ => {
+                            return Err(Error::unrecoverable(format!(
+                                "{} is not a valid integer index",
+                                s
+                            )))
+                        }
                     }
                 }
                 ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::String(id.1.clone()),
@@ -507,42 +533,46 @@ fn binop_on_values(
     .ok_or(Error::NotLiteral)
 }
 
-fn value_to_expr_(v: TypedValue) -> tast::Expr_ {
+fn value_to_expr_(v: TypedValue) -> Result<tast::Expr_, Error> {
     use tast::*;
     use TypedValue::*;
-    match v {
+    Ok(match v {
         Int(i) => Expr_::Int(i.to_string()),
         Float(i) => Expr_::Float(hhbc_string_utils_rust::float::to_string(i)),
         Bool(false) => Expr_::False,
         Bool(true) => Expr_::True,
         String(s) => Expr_::String(s),
         Null => Expr_::Null,
-        Uninit => panic!("value_to_expr: uninit value"),
-        Vec(_) => panic!("value_to_expr: vec NYI"),
-        Keyset(_) => panic!("value_to_expr: keyset NYI"),
-        HhasAdata(_) => panic!("value_to_expr: HhasAdata NYI"),
+        Uninit => return Err(Error::unrecoverable("value_to_expr: uninit value")),
+        Vec(_) => return Err(Error::unrecoverable("value_to_expr: vec NYI")),
+        Keyset(_) => return Err(Error::unrecoverable("value_to_expr: keyset NYI")),
+        HhasAdata(_) => return Err(Error::unrecoverable("value_to_expr: HhasAdata NYI")),
         Array(pairs) => Expr_::Array(
             pairs
                 .into_iter()
-                .map(|(v1, v2)| Afield::AFkvalue(value_to_expr(v1), value_to_expr(v2)))
-                .collect(),
+                .map(|(v1, v2)| Ok(Afield::AFkvalue(value_to_expr(v1)?, value_to_expr(v2)?)))
+                .collect::<Result<std::vec::Vec<_>, Error>>()?,
         ),
-        VArray((values, _)) => {
-            Expr_::mk_varray(None, values.into_iter().map(value_to_expr).collect())
-        }
+        VArray((values, _)) => Expr_::mk_varray(
+            None,
+            values
+                .into_iter()
+                .map(value_to_expr)
+                .collect::<Result<std::vec::Vec<_>, Error>>()?,
+        ),
         DArray((pairs, _)) => Expr_::mk_darray(
             None,
             pairs
                 .into_iter()
-                .map(|(v1, v2)| (value_to_expr(v1), value_to_expr(v2)))
-                .collect(),
+                .map(|(v1, v2)| Ok((value_to_expr(v1)?, value_to_expr(v2)?)))
+                .collect::<Result<std::vec::Vec<_>, Error>>()?,
         ),
-        Dict(_) => panic!("value_to_expr: dict NYI"),
-    }
+        Dict(_) => return Err(Error::unrecoverable("value_to_expr: dict NYI")),
+    })
 }
 
-fn value_to_expr(v: TypedValue) -> tast::Expr {
-    tast::Expr(Pos::make_none(), value_to_expr_(v))
+fn value_to_expr(v: TypedValue) -> Result<tast::Expr, Error> {
+    Ok(tast::Expr(Pos::make_none(), value_to_expr_(v)?))
 }
 
 struct FolderVisitor<'a> {
@@ -560,13 +590,13 @@ impl<'a> FolderVisitor<'a> {
 }
 
 impl<'ast> VisitorMut<'ast> for FolderVisitor<'_> {
-    type P = AstParams<(), ()>;
+    type P = AstParams<(), Error>;
 
     fn object(&mut self) -> &mut dyn VisitorMut<'ast, P = Self::P> {
         self
     }
 
-    fn visit_expr_(&mut self, c: &mut (), p: &mut tast::Expr_) -> Result<(), ()> {
+    fn visit_expr_(&mut self, c: &mut (), p: &mut tast::Expr_) -> Result<(), Error> {
         p.recurse(c, self.object())?;
         let new_p = match p {
             tast::Expr_::Cast(e) => expr_to_typed_value(self.emitter, self.empty_namespace, &e.1)
@@ -586,18 +616,26 @@ impl<'ast> VisitorMut<'ast> for FolderVisitor<'_> {
             _ => None,
         };
         if let Some(new_p) = new_p {
-            *p = new_p
+            *p = new_p?
         }
         Ok(())
     }
 }
 
-pub fn fold_expr(expr: &mut tast::Expr, e: &mut Emitter, empty_namespace: &Namespace) {
-    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), expr).unwrap();
+pub fn fold_expr(
+    expr: &mut tast::Expr,
+    e: &mut Emitter,
+    empty_namespace: &Namespace,
+) -> Result<(), Error> {
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), expr)
 }
 
-pub fn fold_program(p: &mut tast::Program, e: &mut Emitter, empty_namespace: &Namespace) {
-    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), p).unwrap();
+pub fn fold_program(
+    p: &mut tast::Program,
+    e: &mut Emitter,
+    empty_namespace: &Namespace,
+) -> Result<(), Error> {
+    visit_mut(&mut FolderVisitor::new(e, empty_namespace), &mut (), p)
 }
 
 pub fn literals_from_exprs(
@@ -606,14 +644,15 @@ pub fn literals_from_exprs(
     e: &mut Emitter,
 ) -> Result<Vec<TypedValue>, Error> {
     for expr in exprs.iter_mut() {
-        fold_expr(expr, e, ns);
+        fold_expr(expr, e, ns)?;
     }
     let ret = exprs
         .iter()
         .map(|expr| expr_to_typed_value(e, ns, expr))
         .collect();
     if let Err(Error::NotLiteral) = ret {
-        panic!("literals_from_exprs: not literal");
+        Err(Error::unrecoverable("literals_from_exprs: not literal"))
+    } else {
+        ret
     }
-    ret
 }

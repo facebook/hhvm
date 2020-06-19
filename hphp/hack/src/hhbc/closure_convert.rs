@@ -1475,7 +1475,8 @@ pub fn convert_toplevel_prog(e: &mut Emitter, defs: &mut Program) -> Result<Vec<
         .hack_compiler_flags
         .contains(CompilerFlags::CONSTANT_FOLDING)
     {
-        ast_constant_folder::fold_program(defs, e, &empty_namespace);
+        ast_constant_folder::fold_program(defs, e, &empty_namespace)
+            .map_err(|e| unrecoverable(format!("{}", e)))?;
     }
 
     let mut env = Env::toplevel(

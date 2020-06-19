@@ -754,14 +754,7 @@ bool ArrayData::EqualHelper(const ArrayData* ad1, const ArrayData* ad2,
   assertx(IMPLIES(ad1->isHackArrayType(), !bothVanilla(ad1, ad2)));
 
   if (ad1 == ad2) return true;
-
-  if (!ArrayData::dvArrayEqual(ad1, ad2)) {
-    if (RO::EvalHackArrCompatSpecialization) return false;
-    if (RO::EvalHackArrCompatDVCmpNotices) {
-      raiseHackArrCompatDVArrCmp(ad1, ad2, /* is relational */ false);
-    }
-  }
-
+  if (!ArrayData::dvArrayEqual(ad1, ad2)) return false;
   if (ad1->size() != ad2->size()) return false;
 
   // Prevent circular referenced objects/arrays or deep ones.
@@ -803,21 +796,13 @@ int64_t ArrayData::CompareHelper(const ArrayData* ad1, const ArrayData* ad2) {
   assertx(IMPLIES(ad1->isVecType(), !bothVanilla(ad1, ad2)));
 
   if (!ArrayData::dvArrayEqual(ad1, ad2)) {
-    if (RO::EvalHackArrCompatSpecialization) {
-      if (ad1->isVArray()) throw_varray_compare_exception();
-      if (ad1->isDArray()) throw_darray_compare_exception();
-      if (ad2->isVArray()) throw_varray_compare_exception();
-      if (ad2->isDArray()) throw_darray_compare_exception();
-      always_assert(false);
-    } else if (RO::EvalHackArrCompatDVCmpNotices) {
-      raiseHackArrCompatDVArrCmp(ad1, ad2, /* is relational */ true);
-    }
+    if (ad1->isVArray()) throw_varray_compare_exception();
+    if (ad1->isDArray()) throw_darray_compare_exception();
+    if (ad2->isVArray()) throw_varray_compare_exception();
+    if (ad2->isDArray()) throw_darray_compare_exception();
+    always_assert(false);
   } else if (ad1->isDArray()) {
-    if (RO::EvalHackArrCompatSpecialization) {
-      throw_darray_compare_exception();
-    } else if (RO::EvalHackArrCompatDVCmpNotices) {
-      raise_hackarr_compat_notice("Comparing two darrays relationally");
-    }
+    throw_darray_compare_exception();
   }
 
   auto const size1 = ad1->size();

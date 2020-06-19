@@ -290,8 +290,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NSameVec:
   case SameDict:
   case SameVec:
-    return RuntimeOption::EvalHackArrCompatDVCmpNotices ||
-           RuntimeOption::EvalHackArrCompatCheckCompare;
+    return RuntimeOption::EvalHackArrCompatCheckCompare;
 
   case IsTypeStruct:
     return RuntimeOption::EvalHackArrCompatIsArrayNotices ||

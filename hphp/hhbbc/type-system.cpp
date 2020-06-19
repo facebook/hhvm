@@ -6368,7 +6368,6 @@ bool inner_types_might_raise(const Type& t1, const Type& t2) {
 
 bool compare_might_raise(const Type& t1, const Type& t2) {
   if (!RuntimeOption::EvalHackArrCompatNotices &&
-      !RuntimeOption::EvalHackArrCompatDVCmpNotices &&
       !RuntimeOption::EvalEmitClsMethPointers) {
     return false;
   }
@@ -6382,19 +6381,12 @@ bool compare_might_raise(const Type& t1, const Type& t2) {
     return folly::none;
   };
 
-  if (RuntimeOption::EvalHackArrCompatDVCmpNotices) {
-    if (auto const f = checkOne(BPArr)) return *f;
-    if (auto const f = checkOne(BDArr)) return *f;
-    if (auto const f = checkOne(BVArr)) return *f;
-  } else {
-    if (auto const f = checkOne(BArr)) return *f;
-  }
+  if (auto const f = checkOne(BArr)) return *f;
   if (auto const f = checkOne(BDict)) return *f;
   if (auto const f = checkOne(BVec)) return *f;
   if (auto const f = checkOne(BKeyset)) return *f;
 
-  if (RuntimeOption::EvalHackArrCompatDVCmpNotices ||
-      RuntimeOption::EvalEmitClsMethPointers) {
+  if (RuntimeOption::EvalEmitClsMethPointers) {
     if (!RuntimeOption::EvalHackArrDVArrs) {
       if (t1.couldBe(TClsMeth) && t2.couldBe(TArr))     return true;
       if (t1.couldBe(TArr)     && t2.couldBe(TClsMeth)) return true;

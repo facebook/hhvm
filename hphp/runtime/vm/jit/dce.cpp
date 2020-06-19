@@ -757,12 +757,8 @@ bool canDCE(IRInstruction* inst) {
   case NSameVec:
   case SameDict:
   case NSameDict:
-    return
-      !RuntimeOption::EvalHackArrCompatCheckCompare &&
-      !RuntimeOption::EvalHackArrCompatDVCmpNotices;
-
   case IsTypeStruct:
-    return !opcodeMayRaise(IsTypeStruct);
+    return !opcodeMayRaise(inst->op());
   }
   not_reached();
 }

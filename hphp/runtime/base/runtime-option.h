@@ -1115,7 +1115,6 @@ struct RuntimeOption {
    */                                                                   \
   F(bool, HackArrCompatCheckImplicitVarrayAppend, false)                \
   F(bool, HackArrCompatTypeHintNotices, true)                           \
-  F(bool, HackArrCompatDVCmpNotices, false)                             \
   F(bool, HackArrCompatSerializeNotices, false)                         \
   /* Raise notices when fb_compact_*() would change behavior */         \
   F(bool, HackArrCompatCompactSerializeNotices, false)                  \

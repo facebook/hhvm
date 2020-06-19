@@ -2823,12 +2823,6 @@ void RuntimeOption::Load(
     RuntimeOption::EvalHackArrCompatCheckImplicitVarrayAppend &&
     RuntimeOption::EvalHackArrCompatNotices;
 
-  // By the same token, enabling Specialization disables notices for comparing
-  // darrays and varrays, since these comparisons now have default behaviors.
-  RuntimeOption::EvalHackArrCompatDVCmpNotices =
-    !RuntimeOption::EvalHackArrCompatSpecialization &&
-    RuntimeOption::EvalHackArrCompatDVCmpNotices;
-
   // Enabling Specialization forces us to turn on dvarray type-hint notices.
   // Every site that would raise one of these notices will now raise a warning,
   // but our analysis of these sites (e.g. whether they may throw) is the same.

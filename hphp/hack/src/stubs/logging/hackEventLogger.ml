@@ -184,6 +184,10 @@ let glean_fetch_namespaces ~count:_ ~start_time:_ = ()
 
 let glean_fetch_namespaces_error _ = ()
 
+let ranked_autocomplete_duration ~start_time:_ = ()
+
+let ranked_autocomplete_request_duration ~start_time:_ = ()
+
 let monitor_dead_but_typechecker_alive () = ()
 
 let client_connect_to_monitor_timeout () = ()

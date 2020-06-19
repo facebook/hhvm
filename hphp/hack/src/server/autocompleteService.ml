@@ -755,6 +755,8 @@ let go_ctx
                 ~results:(List.length complete_autocomplete_results)
                 ~context:completion_type
                 ~start_time:ranking_start_time;
+              HackEventLogger.ranked_autocomplete_duration
+                ~start_time:ranking_start_time;
               ranked_results
             ) else
               complete_autocomplete_results );

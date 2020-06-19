@@ -14,13 +14,12 @@ open ServerLocalConfig.RemoteTypeCheck
 let should_do_remote
     (genv : ServerEnv.genv)
     (opts : TypecheckerOptions.t)
-    (fnl : Relative_path.Set.t)
+    ~(file_count : int)
     (errors : Errors.t) : bool =
   let remote_type_check = TypecheckerOptions.remote_type_check opts in
   let remote_type_check_threshold =
     TypecheckerOptions.remote_type_check_threshold opts
   in
-  let file_count = Relative_path.Set.cardinal fnl in
   let do_remote =
     if remote_type_check then begin
       Hh_logger.log "Remote type checking is enabled";

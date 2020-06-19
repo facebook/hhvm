@@ -745,16 +745,6 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     else
       load_naming_table genv env
   in
-  let env =
-    let remote_enabled =
-      genv.ServerEnv.local_config.SLC.remote_type_check
-        .SLC.RemoteTypeCheck.enabled
-    in
-    if remote_enabled && is_check_mode then
-      start_typing_delegate genv env
-    else
-      env
-  in
   if not is_check_mode then
     SearchServiceRunner.update_fileinfo_map env.naming_table SearchUtils.Init;
   let fast = Naming_table.to_fast env.naming_table in
@@ -765,7 +755,24 @@ let full_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
       ~f:(fun x m -> Relative_path.Map.remove m x)
       ~init:fast
   in
-  type_check genv env (Relative_path.Map.keys fast) t
+  let fnl = Relative_path.Map.keys fast in
+  let env =
+    if is_check_mode then
+      let should_start_delegate =
+        ServerCheckUtils.should_do_remote
+          genv
+          env.tcopt
+          ~file_count:(List.length fnl)
+          env.errorl
+      in
+      if should_start_delegate then
+        start_typing_delegate genv env
+      else
+        env
+    else
+      env
+  in
+  type_check genv env fnl t
 
 let parse_only_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
     ServerEnv.env * float =

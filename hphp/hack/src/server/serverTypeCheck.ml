@@ -1311,7 +1311,11 @@ functor
         CheckKind.get_defs_to_recheck files_to_parse fast to_recheck env
       in
       let should_start_delegate =
-        ServerCheckUtils.should_do_remote genv env.tcopt files_to_check errors
+        ServerCheckUtils.should_do_remote
+          genv
+          env.tcopt
+          ~file_count:(Relative_path.Set.cardinal files_to_check)
+          errors
       in
       let env =
         if should_start_delegate then

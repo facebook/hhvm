@@ -15,7 +15,6 @@ external is_nfs : string -> bool = "hh_is_nfs"
 
 external is_apple_os : unit -> bool = "hh_sysinfo_is_apple_os"
 
-(** Option type intead of exception throwing. *)
 let get_env name = (try Some (Sys.getenv name) with Not_found -> None)
 
 let getenv_user () =
@@ -130,7 +129,6 @@ let nl_regexp = Str.regexp "[\r\n]"
 
 let split_lines = Str.split nl_regexp
 
-(** Returns true if substring occurs somewhere inside str. *)
 let string_contains str substring =
   (* regexp_string matches only this string and nothing else. *)
   let re = Str.regexp_string substring in
@@ -169,15 +167,6 @@ let rec collect_paths path_predicate path =
   else
     Utils.singleton_if (path_predicate path) path
 
-(**
- * Sometimes the user wants to pass a list of paths on the command-line.
- * However, we have enough files in the codebase that sometimes that list
- * exceeds the maximum number of arguments that can be passed on the
- * command-line. To work around this, we can use the convention that some Unix
- * tools use: a `@` before a path name represents a file that should be read
- * to get the necessary information (in this case, containing a list of files,
- * one per line).
- *)
 let parse_path_list (paths : string list) : string list =
   List.concat_map paths ~f:(fun path ->
       if String_utils.string_starts_with path "@" then
@@ -259,14 +248,6 @@ let read_all ?(buf_size = 4096) ic =
    with Exit -> ());
   Buffer.contents buf
 
-(**
- * Like Python's os.path.expanduser, though probably doesn't cover some cases.
- * Roughly follow's bash's tilde expansion:
- * http://www.gnu.org/software/bash/manual/html_node/Tilde-Expansion.html
- *
- * ~/foo -> /home/bob/foo if $HOME = "/home/bob"
- * ~joe/foo -> /home/joe/foo if joe's home is /home/joe
- *)
 let expanduser path =
   Str.substitute_first
     (Str.regexp "^~\\([^/]*\\)")
@@ -285,15 +266,6 @@ let expanduser path =
     end
     path
 
-(* Turns out it's surprisingly complex to figure out the path to the current
-   executable, which we need in order to extract its embedded libraries. If
-   argv[0] is a path, then we can use that; sometimes it's just the exe name,
-   so we have to search $PATH for it the same way shells do. for example:
-   https://www.gnu.org/software/bash/manual/html_node/Command-Search-and-Execution.html
-
-   There are other options which might be more reliable when they exist, like
-   using the `_` env var set by bash, or /proc/self/exe on Linux, but they are
-   not portable. *)
 let executable_path : unit -> string =
   let executable_path_ = ref None in
   let dir_sep = Filename.dir_sep.[0] in
@@ -456,8 +428,6 @@ let symlink =
     fun source dest ->
   Unix.symlink source dest
 
-(* Creates a symlink at <dir>/<linkname.ext> to
- * <dir>/<pluralized ext>/<linkname>-<timestamp>.<ext> *)
 let make_link_of_timestamped linkname =
   Unix.(
     let dir = Filename.dirname linkname in
@@ -576,9 +546,6 @@ let name_of_signal = function
   | s when s = Sys.sigxfsz -> "SIGXFSZ (File size limit exceeded)"
   | other -> string_of_int other
 
-(* The units for each of these fields is seconds, similar to Unix.times().
- * cpu_info and processor_info are constructed by c code (see processor_info.c) so be very
- * careful modifying these types! *)
 type cpu_info = {
   cpu_user: float;
   cpu_nice_user: float;
@@ -593,8 +560,6 @@ type processor_info = {
 
 external processor_info : unit -> processor_info = "hh_processor_info"
 
-(* We implement timers using sigalarm which means selects can be interrupted. This is a wrapper
- * around EINTR which continues the select if it gets interrupted by a signal *)
 let rec select_non_intr read write exn timeout =
   let start_time = Unix.gettimeofday () in
   try Unix.select read write exn timeout
@@ -608,14 +573,10 @@ let rec select_non_intr read write exn timeout =
     in
     select_non_intr read write exn timeout
 
-(* Flow uses lwt, which installs a sigchld handler. So the old pattern of fork & waitpid will hit
- * an EINTR when the forked process dies and the parent gets a sigchld signal. Note: this is only a
- * problem if you're not using the WNOHANG flag, since EINTR isn't thrown for WNOHANG *)
 let rec waitpid_non_intr flags pid =
   try Unix.waitpid flags pid
   with Unix.Unix_error (Unix.EINTR, _, _) -> waitpid_non_intr flags pid
 
-(* Exposing this for a unit test *)
 let find_oom_in_dmesg_output pid name lines =
   let re =
     Str.regexp
@@ -669,3 +630,7 @@ external getrusage : unit -> rusage = "hh_getrusage"
 external start_gc_profiling : unit -> unit = "hh_start_gc_profiling" [@@noalloc]
 
 external get_gc_time : unit -> float * float = "hh_get_gc_time"
+
+module For_test = struct
+  let find_oom_in_dmesg_output = find_oom_in_dmesg_output
+end

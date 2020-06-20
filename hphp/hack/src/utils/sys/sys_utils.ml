@@ -205,11 +205,9 @@ let logname_impl () =
        (try Utils.unsafe_opt (exec_try_read "id -un")
         with Invalid_argument _ -> "[unknown]"))
 
-let logname_ref = ref None
+let logname_lazy = lazy (logname_impl ())
 
-let logname () =
-  if !logname_ref = None then logname_ref := Some (logname_impl ());
-  Utils.unsafe_opt !logname_ref
+let logname () = Lazy.force logname_lazy
 
 let with_umask umask f =
   let old_umask = ref 0 in

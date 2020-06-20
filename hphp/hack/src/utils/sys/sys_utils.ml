@@ -209,6 +209,18 @@ let logname_lazy = lazy (logname_impl ())
 
 let logname () = Lazy.force logname_lazy
 
+let get_primary_owner () =
+  let owners_file = "/etc/devserver.owners" in
+  let logged_in_user = logname () in
+  if not (Disk.file_exists owners_file) then
+    logged_in_user
+  else
+    let lines = Core_kernel.String.split_lines (Disk.cat owners_file) in
+    if List.mem lines logged_in_user ~equal:( = ) then
+      logged_in_user
+    else
+      lines |> List.last |> Option.value ~default:logged_in_user
+
 let with_umask umask f =
   let old_umask = ref 0 in
   Utils.with_context

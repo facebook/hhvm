@@ -79,6 +79,8 @@ val logname_impl : unit -> string
 
 val logname : unit -> string
 
+val get_primary_owner : unit -> string
+
 val with_umask : int -> (unit -> 'a) -> 'a
 
 val read_stdin_to_string : unit -> string

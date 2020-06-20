@@ -610,10 +610,7 @@ let apply_overrides ~silent ~current_version ~config ~overrides =
   if enabled then (
     Disk.mkdir_p GlobalConfig.tmp_dir;
     let dir = string_ "path" ~prefix ~default:GlobalConfig.tmp_dir config in
-    let owner =
-      Experiments_config_file.get_primary_owner
-        ~logged_in_user:(Sys_utils.logname ())
-    in
+    let owner = Sys_utils.get_primary_owner () in
     let file = Filename.concat dir (Printf.sprintf "hh.%s.experiments" owner) in
     let update =
       bool_if_min_version

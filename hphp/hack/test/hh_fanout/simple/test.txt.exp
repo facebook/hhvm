@@ -1,8 +1,8 @@
 Fanout calculation at time #0
 {'cursor': 'cursor,0,integration-test,<hash-redacted-for-test>',
- 'debug': {'dependencies': [{'hash': '531250547', 'variant': 'Class Simple'}],
-           'fanout_dependents': ['196570478', '531250547'],
-           'relevant_dep_edges': [{'dependency': {'hash': '531250547',
+ 'debug': {'dependencies': [{'hash': '1604992371', 'variant': 'Class Simple'}],
+           'fanout_dependents': ['196570478', '1604992371'],
+           'relevant_dep_edges': [{'dependency': {'hash': '1604992371',
                                                   'variant': 'Class Simple'},
                                    'dependent': {'hash': '196570478',
                                                  'variant': 'Fun uses_simple'},

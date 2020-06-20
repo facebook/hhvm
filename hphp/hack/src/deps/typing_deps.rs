@@ -61,14 +61,7 @@ fn make_hasher() -> FnvHasher {
     Default::default()
 }
 
-/// Ensure a positive hash value, like OCaml does for `Hashtbl.hash`. Set both
-/// the 31st and 32nd bits, so that the sign bit is zero for both OCaml and Rust.
-fn make_positive_30_bit_int(hash: i32) -> i32 {
-    hash & 0b00111111_11111111_11111111_11111111
-}
-
 fn postprocess_hash(dep_type: DepType, hash: u64) -> i32 {
-    let hash = hash as i32;
     let hash = match dep_type {
         DepType::Class => {
             // For class dependencies, set the lowest bit to 1. For extends
@@ -85,9 +78,10 @@ fn postprocess_hash(dep_type: DepType, hash: u64) -> i32 {
         }
     };
 
-    // Ensure that this is a 30-bit integer. We use 1 bit for the tag when
-    // storing it in shared memory, and OCaml integers are 31 bits.
-    make_positive_30_bit_int(hash)
+    // The shared-memory dependency graph stores edges as pairs of vertices.
+    // Each vertex has 31 bits of actual content and 1 bit of bookkeeping. Thus,
+    // we truncate the hash to 31 bits.
+    (hash as i32) & 0b01111111_11111111_11111111_11111111
 }
 
 fn get_dep_type_hash_key(dep_type: DepType) -> u8 {

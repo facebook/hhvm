@@ -489,6 +489,20 @@ let test_naming_table_hash () =
 
   true
 
+let test_ensure_hashing_outputs_31_bits () =
+  let dep_with_thirty_first_bit_set_to_1 =
+    (* This name selected by trying a bunch of names and finding one that has
+    the 31st bit set to 1. *)
+    Typing_deps.Dep.Class "\\Abcd" |> Typing_deps.ForTest.compute_dep_hash
+  in
+  let thirty_first_bit = 0b01000000_00000000_00000000_00000000 in
+  Asserter.Int_asserter.assert_equals
+    thirty_first_bit
+    (dep_with_thirty_first_bit_set_to_1 land thirty_first_bit)
+    ( "Expected there to be a symbol such that, when hashed, the 31st bit is set to 1 "
+    ^ "(this test must be updated if the hashing logic changes)" );
+  true
+
 let test_naming_table_query_by_dep_hash () =
   run_naming_table_test
     (fun ~ctx ~unbacked_naming_table:_ ~backed_naming_table ~db_name:_ ->
@@ -670,6 +684,8 @@ let () =
       ("test_context_changes_classes", test_context_changes_classes);
       ("test_context_changes_typedefs", test_context_changes_typedefs);
       ("test_naming_table_hash", test_naming_table_hash);
+      ( "test_ensure_hashing_outputs_31_bits",
+        test_ensure_hashing_outputs_31_bits );
       ( "test_naming_table_query_by_dep_hash",
         test_naming_table_query_by_dep_hash );
     ]

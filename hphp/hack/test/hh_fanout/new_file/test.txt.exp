@@ -11,8 +11,9 @@ Fanout calculation at time #0
 
 Fanout calculation at time #1
 {'cursor': 'cursor,2,integration-test,<hash-redacted-for-test>',
- 'debug': {'dependencies': [{'hash': '34021815', 'variant': 'Class NewSymbol'}],
-           'fanout_dependents': ['34021815'],
+ 'debug': {'dependencies': [{'hash': '1107763639',
+                             'variant': 'Class NewSymbol'}],
+           'fanout_dependents': ['1107763639'],
            'relevant_dep_edges': []},
  'explanations': {'new_file.php': {'added_symbols': [{'name': '\\NewSymbol',
                                                       'num_outgoing_edges': 1,

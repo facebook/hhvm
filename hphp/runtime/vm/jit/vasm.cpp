@@ -21,6 +21,7 @@
 #include "hphp/runtime/vm/jit/vasm-instr.h"
 #include "hphp/runtime/vm/jit/vasm-unit.h"
 #include "hphp/runtime/vm/jit/vasm-visit.h"
+#include "hphp/runtime/vm/jit/vasm-print.h"
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -139,7 +140,7 @@ void fixupVmfpUses(Vunit& unit) {
   for (auto const b : rpo) {
     auto& block = unit.blocks[b];
     auto fp = livefp[b];
-    always_assert_flog(fp.isValid(), "B{} cannot have unknown vmfp", b);
+    always_assert_flog(fp.isValid(), "{} cannot have unknown vmfp", b);
 
     for (auto& inst : block.code) {
       auto const curFp = fp;
@@ -173,7 +174,7 @@ void fixupVmfpUses(Vunit& unit) {
     for (auto const s : succs(block)) {
       always_assert_flog(
         !livefp[s].isValid() || livefp[s] == fp,
-        "B{} has multiple known vmfp values ({} and {} via B{})",
+        "{} has multiple known vmfp values ({} and {} via {})",
         s, show(livefp[s]), show(fp), b
       );
       livefp[s] = fp;

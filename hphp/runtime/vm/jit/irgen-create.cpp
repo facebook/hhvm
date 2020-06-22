@@ -620,11 +620,6 @@ void emitNewRecord(IRGS& env, const StringData* name, const ImmVector& immVec) {
   emitNewRecordImpl(env, name, immVec, NewRecord);
 }
 
-void emitNewRecordArray(IRGS& env, const StringData* name,
-                        const ImmVector& immVec) {
-  emitNewRecordImpl(env, name, immVec, NewRecordArray);
-}
-
 void emitColFromArray(IRGS& env, CollectionType type) {
   assertx(type != CollectionType::Pair);
   auto const arr = popC(env);

@@ -146,10 +146,7 @@ bool IterImpl::checkInvariants(const ArrayData* ad /* = nullptr */) const {
     assertx(m_mixed_end == MixedArray::asMixed(arr)->data() + arr->getSize());
   } else {
     assertx(m_pos < m_end);
-    // RecordArray::IterEnd logs a notice, so avoid it in assertions.
-    DEBUG_ONLY auto const end =
-      arr->isRecordArrayKind() ? arr->getSize() : arr->iter_end();
-    assertx(m_end == end);
+    assertx(m_end == arr->iter_end());
   }
   return true;
 }

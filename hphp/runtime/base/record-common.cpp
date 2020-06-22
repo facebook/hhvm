@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/record-common.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/runtime-error.h"
@@ -41,9 +40,6 @@ RecordType* RecordBase::allocRecord(size_t size, AllocMode mode) {
 template
 RecordData* RecordBase::copyRecordBase<RecordData>(const RecordData*,
                                                    AllocMode);
-template
-RecordArray* RecordBase::copyRecordBase<RecordArray>(const RecordArray*,
-                                                   AllocMode);
 
 template<class RecordType>
 RecordType* RecordBase::copyRecordBase(const RecordType* old, AllocMode mode) {
@@ -62,10 +58,6 @@ RecordData* RecordBase::newRecordImpl<RecordData>(const RecordDesc* rec,
                                                   uint32_t initSize,
                                                   const StringData* const *keys,
                                                   const TypedValue* values);
-template
-RecordArray* RecordBase::newRecordImpl<RecordArray>(
-    const RecordDesc* rec, uint32_t initSize, const StringData* const *keys,
-    const TypedValue* values);
 
 template<class RecordType>
 RecordType* RecordBase::newRecordImpl(const RecordDesc* rec,

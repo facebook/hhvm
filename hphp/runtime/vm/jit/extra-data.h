@@ -1779,7 +1779,6 @@ X(NewStructArray,               NewStructData);
 X(NewStructDArray,              NewStructData);
 X(NewStructDict,                NewStructData);
 X(NewRecord,                    NewStructData);
-X(NewRecordArray,               NewStructData);
 X(AllocStructArray,             NewStructData);
 X(AllocStructDArray,            NewStructData);
 X(AllocStructDict,              NewStructData);

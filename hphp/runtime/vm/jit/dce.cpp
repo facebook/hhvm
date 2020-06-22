@@ -491,7 +491,6 @@ bool canDCE(IRInstruction* inst) {
   case InitPackedLayoutArrayLoop:
   case NewKeysetArray:
   case NewRecord:
-  case NewRecordArray:
   case NewStructArray:
   case NewStructDArray:
   case NewStructDict:

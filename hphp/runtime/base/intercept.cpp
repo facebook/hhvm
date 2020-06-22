@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/req-optional.h"
+#include "hphp/runtime/base/string-hash-map.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/jit/target-cache.h"

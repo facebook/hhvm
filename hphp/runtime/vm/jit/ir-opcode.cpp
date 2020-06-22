@@ -436,7 +436,6 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqVec:
   case NewKeysetArray:
   case NewRecord:
-  case NewRecordArray:
   case OODeclExists:
   case OrdStrIdx:
   case PrintBool:

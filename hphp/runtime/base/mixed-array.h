@@ -468,7 +468,6 @@ private:
   friend struct array::HashTable<MixedArray, MixedArrayElm>;
   friend struct MemoryProfile;
   friend struct PackedArray;
-  friend struct RecordArray;
   friend struct HashCollection;
   friend struct BaseMap;
   friend struct c_Map;

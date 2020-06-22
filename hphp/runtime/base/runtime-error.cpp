@@ -190,14 +190,6 @@ void raise_hackarr_compat_notice(const std::string& msg) {
   raise_notice("Hack Array Compat: %s", msg.c_str());
 }
 
-void raise_recordarray_promotion_notice(const std::string& op) {
-  raise_notice("Record-array to mixed-array promotion for %s", op.c_str());
-}
-
-void raise_recordarray_unsupported_op_notice(const std::string& op) {
-  raise_notice("Opertation not supported for records: %s", op.c_str());
-}
-
 #define HC(Opt, opt) \
   void raise_hac_##opt##_notice(const std::string& msg) {       \
     if (UNLIKELY(RID().getSuppressHAC##Opt##Notices())) return; \

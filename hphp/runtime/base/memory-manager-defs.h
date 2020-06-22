@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/mixed-array-defs.h"
 #include "hphp/runtime/base/packed-array-defs.h"
-#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
@@ -322,7 +321,6 @@ inline size_t allocSize(const HeapObject* h) {
   CHECKSIZE(Packed)
   CHECKSIZE(Mixed)
   CHECKSIZE(Plain)
-  CHECKSIZE(RecordArray)
   CHECKSIZE(Dict)
   CHECKSIZE(Vec)
   CHECKSIZE(Keyset)

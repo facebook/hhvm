@@ -274,7 +274,7 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     MixedArray::entry,       /* darray */         \
     BespokeArray::entry,     /* bespoke darray */ \
     GlobalsArray::entry,                          \
-    RecordArray::entry,                           \
+    GlobalsArray::entry,     /* placeholder for record array*/ \
     MixedArray::entry,       /* plain array */    \
     BespokeArray::entry,     /* bespoke array */  \
     PackedArray::entry##Vec, /* vec */            \

@@ -158,7 +158,6 @@ inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKin
 inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }
-inline bool ArrayData::isRecordArrayKind() const { return kind() == kRecordKind; }
 
 inline bool ArrayData::isPHPArrayType() const {
   return kind() < kVecKind;

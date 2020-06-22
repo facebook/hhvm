@@ -248,7 +248,6 @@ public:
   bool isDictKind() const;
   bool isVecKind() const;
   bool isKeysetKind() const;
-  bool isRecordArrayKind() const;
 
   /*
    * Whether the array has a particular Hack type
@@ -545,8 +544,8 @@ public:
   // PHP array functions.
 
   /*
-   * Called prior to sorting this array. Some array kinds, such as struct-like
-   * RecordArrays, have layouts that are overly constrained to sort in-place.
+   * Called prior to sorting this array. Some array kinds
+   * have layouts that are overly constrained to sort in-place.
    */
   ArrayData* escalateForSort(SortFunction sort_function);
 
@@ -753,7 +752,6 @@ protected:
   friend struct BaseMap;
   friend struct c_Map;
   friend struct c_ImmMap;
-  friend struct RecordArray;
 
   // The following fields are blocked into unions with qwords so we
   // can combine the stores when initializing arrays.  (gcc won't do
@@ -778,7 +776,6 @@ static_assert(ArrayData::kPlainKind == uint8_t(HeaderKind::Plain), "");
 static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
-static_assert(ArrayData::kRecordKind == uint8_t(HeaderKind::RecordArray), "");
 
 //////////////////////////////////////////////////////////////////////
 

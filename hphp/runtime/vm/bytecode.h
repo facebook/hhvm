@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/rds-util.h"
-#include "hphp/runtime/base/record-array.h"
 #include "hphp/runtime/base/record-data.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-array-like.h"
@@ -539,13 +538,6 @@ public:
     assertx(m_top != m_elms);
     m_top--;
     *m_top = make_tv<KindOfRecord>(r);
-  }
-
-  ALWAYS_INLINE
-  void pushRecordArrayNoRc(RecordArray* r) {
-    assertx(m_top != m_elms);
-    m_top--;
-    *m_top = make_array_like_tv(r);
   }
 
   ALWAYS_INLINE

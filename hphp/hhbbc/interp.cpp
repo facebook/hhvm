@@ -984,11 +984,6 @@ void in(ISS& env, const bc::NewRecord& op) {
   push(env, rrec ? exactRecord(*rrec) : TRecord);
 }
 
-void in(ISS& env, const bc::NewRecordArray& op) {
-  discard(env, op.keys.size());
-  push(env, TArr);
-}
-
 void in(ISS& env, const bc::NewStructArray& op) {
   auto map = MapElems{};
   for (auto it = op.keys.end(); it != op.keys.begin(); ) {

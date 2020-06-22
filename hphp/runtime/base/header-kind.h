@@ -55,8 +55,7 @@ enum class HeaderKind : uint8_t {
 
   // dvarrays, with bespoke counterparts
   Packed, BespokeVArray, Mixed, BespokeDArray,
-  // Plain PHP arrays. Globals is supported, but deprecated; RecordArray is
-  // incompatible with both dvarray specialization and with bespoke arrays.
+  // Plain PHP arrays. Globals is supported, but deprecated.
   Globals, RecordArray, Plain, BespokeArray,
   // Hack arrays, with bespoke counterparts
   Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
@@ -150,7 +149,7 @@ enum class GCBits : uint8_t {};
  * padding with ONE_BIT_REFCOUNT.
  *
  * 0       32     40      48            56
- * [ cnt | kind | marks | arrBits      | sizeClass ] Packed, Vec, RecordArray
+ * [ cnt | kind | marks | arrBits      | sizeClass ] Packed, Vec
  * [ cnt | kind | marks | arrBits      | keyTypes  ] Mixed, Dict
  * [ cnt | kind | marks |                          ] Empty, Globals, Keyset
  * [ cnt | kind | marks | sizeClass:16             ] String

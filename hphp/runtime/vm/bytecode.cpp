@@ -1564,12 +1564,6 @@ OPTBLD_INLINE void iopNewRecord(const StringData* s, imm_array<int32_t> ids) {
                 [] (Stack& st, RecordData* r) { st.pushRecordNoRc(r); });
 }
 
-OPTBLD_INLINE void iopNewRecordArray(const StringData* s,
-                                     imm_array<int32_t> ids) {
-  newRecordImpl(s, ids, RecordArray::newRecordArray,
-                [] (Stack& st, RecordArray* r) { st.pushRecordArrayNoRc(r); });
-}
-
 OPTBLD_INLINE void iopAddElemC() {
   TypedValue* c1 = vmStack().topC();
   TypedValue* c2 = vmStack().indC(1);

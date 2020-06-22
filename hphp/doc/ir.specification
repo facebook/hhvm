@@ -1582,13 +1582,6 @@ To string conversions:
   This instruction assumes it can take the values from the stack
   without increfing them.
 
-| NewRecordArray<offset,keys...>, DArrRecord, S(RecDesc) S(StkPtr), PRc|CRc
-
-  Allocate a new record array, given the type S0 and N immediate keys
-  and taking N elements off the stack given by S1, at `offset'.
-  This instruction assumes it can take the values from the stack
-  without increfing them.
-
 | NewStructArray<offset,keys...>,  D(Arr),         S(StkPtr), PRc|CRc
 
 | NewStructDArray<offset,keys...>, DDArr,          S(StkPtr), PRc|CRc

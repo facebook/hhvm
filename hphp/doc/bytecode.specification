@@ -933,11 +933,6 @@ NewRecord <record-name><litstr id vector>    [C..C]  ->  [C:Rec]
   type-hints or if a field in %2 is not declared in the record type or if any
   field declared in the record type is left uninitialized.
 
-NewRecordArray <record-name><litstr id vector>    [C..C]  ->  [C:Arr]
-
-  New record-array. Same as NewRecord, except it creates a record-array
-  instead of a record.
-
 AddElemC    [C C C]  ->  [C:Arr|Dict]
 
   Add element. If $3 is an array or dict, this instruction executes $3[$2] = $1

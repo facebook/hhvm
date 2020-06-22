@@ -507,10 +507,6 @@ void cgNewRecord(IRLS& env, const IRInstruction* inst) {
   newRecordImpl(env, inst, RecordData::newRecord);
 }
 
-void cgNewRecordArray(IRLS& env, const IRInstruction* inst) {
-  newRecordImpl(env, inst, RecordArray::newRecordArray);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 }}}

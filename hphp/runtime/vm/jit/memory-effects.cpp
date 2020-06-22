@@ -1145,7 +1145,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     }
 
   case NewRecord:
-  case NewRecordArray:
     {
       auto const extra = inst.extra<NewStructData>();
       auto const stack_in = AStack {

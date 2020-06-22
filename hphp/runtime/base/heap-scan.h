@@ -119,7 +119,8 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Globals:
       return static_cast<const GlobalsArray*>(h)->scan(scanner);
     case HeaderKind::RecordArray:
-      return static_cast<const RecordArray*>(h)->scan(scanner);
+      // We are in the process of removing record arrays
+      return;
     case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:
     case HeaderKind::BespokeDArray:
@@ -227,11 +228,6 @@ inline void RecordBase::scan(type_scan::Scanner& scanner) const {
 
 inline void RecordData::scan(type_scan::Scanner& scanner) const {
   RecordBase::scan(scanner);
-}
-
-inline void RecordArray::scan(type_scan::Scanner& scanner) const {
-  RecordBase::scan(scanner);
-  scanner.scan(extraFieldMap());
 }
 
 inline void ObjectData::scan(type_scan::Scanner& scanner) const {

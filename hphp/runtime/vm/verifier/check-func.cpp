@@ -798,7 +798,6 @@ const FlavorDesc* FuncChecker::sig(PC pc) {
   case Op::NewKeysetArray:  // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewVArray:       // ONE(IVA),     CMANY,   ONE(CV)
   case Op::NewRecord:       // TWO(SA,VSA),  SMANY,   ONE(CV)
-  case Op::NewRecordArray:  // TWO(SA,VSA),  SMANY,   ONE(CV)
   case Op::ConcatN:         // ONE(IVA),     CMANY,   ONE(CV)
   case Op::CombineAndResolveTypeStruct:
                             // ONE(IVA),     CMANY,   ONE(CV)
@@ -1514,7 +1513,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewLikeArrayL:
     case Op::NewPackedArray:
     case Op::NewRecord:
-    case Op::NewRecordArray:
     case Op::NewStructArray:
     case Op::NewStructDArray:
     case Op::NewStructDict:

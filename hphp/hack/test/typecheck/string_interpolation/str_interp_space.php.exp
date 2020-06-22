@@ -1,4 +1,4 @@
-File "str_interp_space.php", line 5, characters 10-13:
+File "str_interp_space.php", line 5, characters 10-14:
 The dollar sign ('$') cannot be used as a unary operator (Parsing[1002])
 File "str_interp_space.php", line 5, characters 10-10:
 Variable Variables are not legal (Parsing[1002])

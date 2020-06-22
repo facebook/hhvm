@@ -1,2 +1,2 @@
-File "do_while_condition_typechange.php", line 16, characters 11-11:
+File "do_while_condition_typechange.php", line 16, characters 11-12:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

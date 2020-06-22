@@ -4,5 +4,5 @@
 (3,27)-(3,27) A semicolon (';') is expected here.
 (3,28)-(3,28) An expression is expected here.
 (3,30)-(3,30) An expression is expected here.
-(3,30)-(3,36) Cannot use collection initialization for non-collection class.
+(3,30)-(3,37) Cannot use collection initialization for non-collection class.
 (3,37)-(4,1) A semicolon (';') is expected here.

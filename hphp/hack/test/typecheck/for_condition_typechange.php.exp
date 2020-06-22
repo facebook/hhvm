@@ -1,2 +1,2 @@
-File "for_condition_typechange.php", line 14, characters 10-10:
+File "for_condition_typechange.php", line 14, characters 10-11:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])

@@ -1,2 +1,2 @@
-File "interface_async_method.php", line 4, characters 10-13:
+File "interface_async_method.php", line 4, characters 10-14:
 'async' cannot be used on a method in an interface. Use an Awaitable<...> return type instead. (Parsing[1002])

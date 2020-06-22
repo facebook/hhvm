@@ -1,2 +1,2 @@
-File "typing_fail_inherit2.php", line 18, characters 3-29:
+File "typing_fail_inherit2.php", line 18, characters 3-30:
 Redeclared method Baz::bar (Parsing[1002])

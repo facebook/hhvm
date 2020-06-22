@@ -1,2 +1,2 @@
-(4,19)-(4,30) Await cannot be used as an expression in this location because it's conditionally executed.
-(4,19)-(4,30) Invalid expression in constant initializer
+(4,19)-(4,31) Await cannot be used as an expression in this location because it's conditionally executed.
+(4,19)-(4,31) Invalid expression in constant initializer

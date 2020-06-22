@@ -1,2 +1,2 @@
-File "parse_missing_reactivity4.php", line 5, characters 1-27:
+File "parse_missing_reactivity4.php", line 5, characters 1-28:
 __OnlyRxIfImpl and __AtMostRxAsArgs annotations cannot be used without __Rx, __RxShallow, or __RxLocal. (Parsing[1002])

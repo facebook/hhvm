@@ -1,4 +1,4 @@
-File "binop_increment.php", line 4, characters 15-15:
+File "binop_increment.php", line 4, characters 15-16:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "binop_increment.php", line 4, characters 15-16:
 Unsequenced modification and access to local variable. Modified here (Typing[4143])

@@ -1,1 +1,1 @@
-(13,9)-(13,12) Soft typehints cannot be used with is-expressions
+(13,9)-(13,13) Soft typehints cannot be used with is-expressions

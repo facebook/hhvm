@@ -1,2 +1,2 @@
-File "parse_multiple7.php", line 3, characters 1-25:
+File "parse_multiple7.php", line 3, characters 1-26:
 Only one of following annotations is allowed: __Pure, __Rx, __RxShallow, __RxLocal, __NonRx. (Parsing[1002])

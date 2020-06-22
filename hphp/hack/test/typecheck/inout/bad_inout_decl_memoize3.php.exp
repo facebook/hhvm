@@ -1,4 +1,4 @@
-File "bad_inout_decl_memoize3.php", line 5, characters 40-43:
+File "bad_inout_decl_memoize3.php", line 5, characters 40-44:
 <<__Memoize>> cannot be used on functions with inout parameters (Parsing[1002])
 File "bad_inout_decl_memoize3.php", line 5, characters 26-28:
 Functions with inout parameters cannot be memoized (NastCheck[3045])

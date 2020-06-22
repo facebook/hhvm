@@ -1,6 +1,6 @@
-File "recursive_typeconst_bad_2.php", line 25, characters 25-46:
+File "recursive_typeconst_bad_2.php", line 25, characters 25-47:
 Type aliases to type constants are not supported (Parsing[1002])
-File "recursive_typeconst_bad_2.php", line 26, characters 24-43:
+File "recursive_typeconst_bad_2.php", line 26, characters 24-44:
 Type aliases to type constants are not supported (Parsing[1002])
 File "recursive_typeconst_bad_2.php", line 6, characters 14-26:
 Cyclic type constant:

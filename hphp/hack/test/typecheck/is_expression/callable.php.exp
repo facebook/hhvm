@@ -1,4 +1,4 @@
-File "callable.php", line 6, characters 13-32:
+File "callable.php", line 6, characters 13-33:
 Callable typehints cannot be used with is-expressions (Parsing[1002])
 File "callable.php", line 7, characters 7-8:
 Invalid argument (Typing[4110])

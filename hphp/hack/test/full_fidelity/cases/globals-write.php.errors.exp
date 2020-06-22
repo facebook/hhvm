@@ -1,1 +1,1 @@
-(5,3)-(5,10) $GLOBALS is not allowed in write context
+(5,3)-(5,11) $GLOBALS is not allowed in write context

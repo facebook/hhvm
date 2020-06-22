@@ -1,4 +1,4 @@
-File "switch_case_assn.php", line 6, characters 11-11:
+File "switch_case_assn.php", line 6, characters 11-12:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "switch_case_assn.php", line 6, characters 11-12:
 Don't assign to variables inside of case labels (Typing[4145])

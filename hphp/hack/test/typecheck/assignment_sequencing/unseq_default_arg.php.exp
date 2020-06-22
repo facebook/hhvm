@@ -1,6 +1,6 @@
-File "unseq_default_arg.php", line 4, characters 33-33:
+File "unseq_default_arg.php", line 4, characters 33-34:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "unseq_default_arg.php", line 4, characters 40-40:
+File "unseq_default_arg.php", line 4, characters 40-41:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "unseq_default_arg.php", line 4, characters 33-34:
 Unsequenced modifications to local variable. Modified here (Typing[4144])

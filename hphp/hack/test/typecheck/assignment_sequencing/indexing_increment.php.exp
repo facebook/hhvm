@@ -1,4 +1,4 @@
-File "indexing_increment.php", line 5, characters 17-17:
+File "indexing_increment.php", line 5, characters 17-18:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "indexing_increment.php", line 5, characters 17-18:
 Unsequenced modification and access to local variable. Modified here (Typing[4143])

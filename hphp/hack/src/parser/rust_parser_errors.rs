@@ -288,7 +288,6 @@ where
     fn end_offset(n: &'a Syntax<Token, Value>) -> usize {
         // TODO: this logic should be moved to SyntaxTrait::position, when implemented
         let w = n.width();
-        let w = if w > 0 { w - 1 } else { w };
         n.leading_start_offset() + n.leading_width() + w
     }
 

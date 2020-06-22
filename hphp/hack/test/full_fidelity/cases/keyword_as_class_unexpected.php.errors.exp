@@ -120,128 +120,128 @@
 (63,7)-(63,12) Encountered unexpected token 'while'.
 (64,7)-(64,7) A name is expected here.
 (64,7)-(64,12) Encountered unexpected token 'yield'.
-(66,5)-(66,12) Unexpected node on right hand side of new or instanceof: token
+(66,5)-(66,13) Unexpected node on right hand side of new or instanceof: token
 (66,13)-(66,13) An expression is expected here.
-(67,5)-(67,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new array()()'?
-(67,5)-(67,11) Unexpected node on right hand side of new or instanceof: array_intrinsic_expression
-(68,5)-(68,6) Unexpected node on right hand side of new or instanceof: token
+(67,5)-(67,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new array()()'?
+(67,5)-(67,12) Unexpected node on right hand side of new or instanceof: array_intrinsic_expression
+(68,5)-(68,7) Unexpected node on right hand side of new or instanceof: token
 (68,7)-(68,7) An expression is expected here.
-(69,5)-(69,9) Unexpected node on right hand side of new or instanceof: token
+(69,5)-(69,10) Unexpected node on right hand side of new or instanceof: token
 (69,10)-(69,10) An expression is expected here.
-(70,5)-(70,8) Unexpected node on right hand side of new or instanceof: token
+(70,5)-(70,9) Unexpected node on right hand side of new or instanceof: token
 (70,9)-(70,9) An expression is expected here.
-(71,5)-(71,9) Unexpected node on right hand side of new or instanceof: token
+(71,5)-(71,10) Unexpected node on right hand side of new or instanceof: token
 (71,10)-(71,10) An expression is expected here.
-(73,5)-(73,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new clone()()'?
-(73,5)-(73,11) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
+(73,5)-(73,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new clone()()'?
+(73,5)-(73,12) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
 (73,12)-(73,12) An expression is expected here.
-(74,5)-(74,9) Unexpected node on right hand side of new or instanceof: token
+(74,5)-(74,10) Unexpected node on right hand side of new or instanceof: token
 (74,10)-(74,10) An expression is expected here.
-(75,5)-(75,12) Unexpected node on right hand side of new or instanceof: token
+(75,5)-(75,13) Unexpected node on right hand side of new or instanceof: token
 (75,13)-(75,13) An expression is expected here.
-(77,5)-(77,11) Unexpected node on right hand side of new or instanceof: token
+(77,5)-(77,12) Unexpected node on right hand side of new or instanceof: token
 (77,12)-(77,12) An expression is expected here.
-(78,5)-(78,6) Unexpected node on right hand side of new or instanceof: token
+(78,5)-(78,7) Unexpected node on right hand side of new or instanceof: token
 (78,7)-(78,7) An expression is expected here.
-(79,5)-(79,8) Unexpected node on right hand side of new or instanceof: token
+(79,5)-(79,9) Unexpected node on right hand side of new or instanceof: token
 (79,9)-(79,9) An expression is expected here.
-(80,5)-(80,8) Unexpected node on right hand side of new or instanceof: token
+(80,5)-(80,9) Unexpected node on right hand side of new or instanceof: token
 (80,9)-(80,9) An expression is expected here.
-(81,5)-(81,10) Unexpected node on right hand side of new or instanceof: token
+(81,5)-(81,11) Unexpected node on right hand side of new or instanceof: token
 (81,11)-(81,11) An expression is expected here.
 (82,5)-(82,5) The empty() expression has been removed from Hack.
-(82,5)-(82,9) Unexpected node on right hand side of new or instanceof: token
-(83,5)-(83,10) Unexpected node on right hand side of new or instanceof: token
+(82,5)-(82,10) Unexpected node on right hand side of new or instanceof: token
+(83,5)-(83,11) Unexpected node on right hand side of new or instanceof: token
 (83,11)-(83,11) An expression is expected here.
-(84,5)-(84,14) Unexpected node on right hand side of new or instanceof: token
+(84,5)-(84,15) Unexpected node on right hand side of new or instanceof: token
 (84,15)-(84,15) An expression is expected here.
-(86,5)-(86,9) Unexpected node on right hand side of new or instanceof: token
+(86,5)-(86,10) Unexpected node on right hand side of new or instanceof: token
 (86,10)-(86,10) An expression is expected here.
-(87,5)-(87,13) Unexpected node on right hand side of new or instanceof: token
+(87,5)-(87,14) Unexpected node on right hand side of new or instanceof: token
 (87,14)-(87,14) An expression is expected here.
-(88,5)-(88,12) Unexpected node on right hand side of new or instanceof: token
+(88,5)-(88,13) Unexpected node on right hand side of new or instanceof: token
 (88,13)-(88,13) An expression is expected here.
-(89,5)-(89,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new eval()()'?
-(89,5)-(89,10) Unexpected node on right hand side of new or instanceof: eval_expression
+(89,5)-(89,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new eval()()'?
+(89,5)-(89,11) Unexpected node on right hand side of new or instanceof: eval_expression
 (89,11)-(89,11) An expression is expected here.
-(90,5)-(90,11) Unexpected node on right hand side of new or instanceof: token
+(90,5)-(90,12) Unexpected node on right hand side of new or instanceof: token
 (90,12)-(90,12) An expression is expected here.
-(91,5)-(91,9) Unexpected node on right hand side of new or instanceof: token
+(91,5)-(91,10) Unexpected node on right hand side of new or instanceof: token
 (91,10)-(91,10) An expression is expected here.
-(92,5)-(92,11) Unexpected node on right hand side of new or instanceof: token
+(92,5)-(92,12) Unexpected node on right hand side of new or instanceof: token
 (92,12)-(92,12) An expression is expected here.
-(93,5)-(93,7) Unexpected node on right hand side of new or instanceof: token
+(93,5)-(93,8) Unexpected node on right hand side of new or instanceof: token
 (93,8)-(93,8) An expression is expected here.
-(94,5)-(94,11) Unexpected node on right hand side of new or instanceof: token
+(94,5)-(94,12) Unexpected node on right hand side of new or instanceof: token
 (94,12)-(94,12) An expression is expected here.
-(95,5)-(95,15) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
-(95,5)-(95,15) Unexpected node on right hand side of new or instanceof: anonymous_function
+(95,5)-(95,16) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new function();()'?
+(95,5)-(95,16) Unexpected node on right hand side of new or instanceof: anonymous_function
 (95,16)-(96,1) A semicolon (';') is expected here.
-(96,5)-(96,10) Unexpected node on right hand side of new or instanceof: token
+(96,5)-(96,11) Unexpected node on right hand side of new or instanceof: token
 (96,11)-(96,11) An expression is expected here.
-(97,5)-(97,8) Unexpected node on right hand side of new or instanceof: token
+(97,5)-(97,9) Unexpected node on right hand side of new or instanceof: token
 (97,9)-(97,9) An expression is expected here.
-(98,5)-(98,6) Unexpected node on right hand side of new or instanceof: token
+(98,5)-(98,7) Unexpected node on right hand side of new or instanceof: token
 (98,7)-(98,7) An expression is expected here.
-(99,5)-(99,14) Unexpected node on right hand side of new or instanceof: token
+(99,5)-(99,15) Unexpected node on right hand side of new or instanceof: token
 (99,15)-(99,15) An expression is expected here.
-(100,5)-(100,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include()()'?
-(100,5)-(100,13) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(100,5)-(100,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include()()'?
+(100,5)-(100,14) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (100,14)-(100,14) An expression is expected here.
-(101,5)-(101,18) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include_once()()'?
-(101,5)-(101,18) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(101,5)-(101,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new include_once()()'?
+(101,5)-(101,19) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (101,19)-(101,19) An expression is expected here.
-(102,5)-(102,9) Unexpected node on right hand side of new or instanceof: token
+(102,5)-(102,10) Unexpected node on right hand side of new or instanceof: token
 (102,10)-(102,10) An expression is expected here.
-(103,5)-(103,14) Unexpected node on right hand side of new or instanceof: token
+(103,5)-(103,15) Unexpected node on right hand side of new or instanceof: token
 (103,15)-(103,15) An expression is expected here.
-(104,5)-(104,13) Unexpected node on right hand side of new or instanceof: token
+(104,5)-(104,14) Unexpected node on right hand side of new or instanceof: token
 (104,14)-(104,14) An expression is expected here.
-(106,5)-(106,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new isset()()'?
-(106,5)-(106,11) Unexpected node on right hand side of new or instanceof: isset_expression
-(107,5)-(107,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new list()()'?
-(107,5)-(107,10) Unexpected node on right hand side of new or instanceof: list_expression
-(108,5)-(108,13) Unexpected node on right hand side of new or instanceof: token
-(109,5)-(109,9) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new new()()'?
-(109,5)-(109,9) Unexpected node on right hand side of new or instanceof: object_creation_expression
-(109,8)-(109,9) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()()'?
+(106,5)-(106,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new isset()()'?
+(106,5)-(106,12) Unexpected node on right hand side of new or instanceof: isset_expression
+(107,5)-(107,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new list()()'?
+(107,5)-(107,11) Unexpected node on right hand side of new or instanceof: list_expression
+(108,5)-(108,14) Unexpected node on right hand side of new or instanceof: token
+(109,5)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new new()()'?
+(109,5)-(109,10) Unexpected node on right hand side of new or instanceof: object_creation_expression
+(109,8)-(109,10) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new ()()'?
 (109,10)-(109,10) An expression is expected here.
-(110,5)-(110,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new print()()'?
-(110,5)-(110,11) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
+(110,5)-(110,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new print()()'?
+(110,5)-(110,12) Unexpected node on right hand side of new or instanceof: prefix_unary_expression
 (110,12)-(110,12) An expression is expected here.
-(111,5)-(111,11) Unexpected node on right hand side of new or instanceof: token
+(111,5)-(111,12) Unexpected node on right hand side of new or instanceof: token
 (111,12)-(111,12) An expression is expected here.
-(112,5)-(112,13) Unexpected node on right hand side of new or instanceof: token
+(112,5)-(112,14) Unexpected node on right hand side of new or instanceof: token
 (112,14)-(112,14) An expression is expected here.
-(113,5)-(113,10) Unexpected node on right hand side of new or instanceof: token
+(113,5)-(113,11) Unexpected node on right hand side of new or instanceof: token
 (113,11)-(113,11) An expression is expected here.
-(114,5)-(114,13) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require()()'?
-(114,5)-(114,13) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(114,5)-(114,14) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require()()'?
+(114,5)-(114,14) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (114,14)-(114,14) An expression is expected here.
-(115,5)-(115,18) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require_once()()'?
-(115,5)-(115,18) Unexpected node on right hand side of new or instanceof: inclusion_expression
+(115,5)-(115,19) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new require_once()()'?
+(115,5)-(115,19) Unexpected node on right hand side of new or instanceof: inclusion_expression
 (115,19)-(115,19) An expression is expected here.
-(116,5)-(116,10) Unexpected node on right hand side of new or instanceof: token
+(116,5)-(116,11) Unexpected node on right hand side of new or instanceof: token
 (116,11)-(116,11) An expression is expected here.
-(117,5)-(117,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new shape()()'?
-(117,5)-(117,11) Unexpected node on right hand side of new or instanceof: shape_expression
-(119,5)-(119,10) Unexpected node on right hand side of new or instanceof: token
+(117,5)-(117,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new shape()()'?
+(117,5)-(117,12) Unexpected node on right hand side of new or instanceof: shape_expression
+(119,5)-(119,11) Unexpected node on right hand side of new or instanceof: token
 (119,11)-(119,11) An expression is expected here.
-(120,5)-(120,9) Unexpected node on right hand side of new or instanceof: token
+(120,5)-(120,10) Unexpected node on right hand side of new or instanceof: token
 (120,10)-(120,10) An expression is expected here.
-(122,5)-(122,7) Unexpected node on right hand side of new or instanceof: token
+(122,5)-(122,8) Unexpected node on right hand side of new or instanceof: token
 (122,8)-(122,8) An expression is expected here.
-(123,5)-(123,9) Unexpected node on right hand side of new or instanceof: token
+(123,5)-(123,10) Unexpected node on right hand side of new or instanceof: token
 (123,10)-(123,10) An expression is expected here.
-(124,5)-(124,7) Unexpected node on right hand side of new or instanceof: token
+(124,5)-(124,8) Unexpected node on right hand side of new or instanceof: token
 (124,8)-(124,8) An expression is expected here.
-(125,5)-(125,9) Unexpected node on right hand side of new or instanceof: token
+(125,5)-(125,10) Unexpected node on right hand side of new or instanceof: token
 (125,10)-(125,10) An expression is expected here.
-(126,5)-(126,7) Unexpected node on right hand side of new or instanceof: token
+(126,5)-(126,8) Unexpected node on right hand side of new or instanceof: token
 (126,8)-(126,8) An expression is expected here.
-(127,5)-(127,9) Unexpected node on right hand side of new or instanceof: token
+(127,5)-(127,10) Unexpected node on right hand side of new or instanceof: token
 (127,10)-(127,10) An expression is expected here.
-(128,5)-(128,11) Yield can only be used inside a function
-(128,5)-(128,11) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new yield()()'?
-(128,5)-(128,11) Unexpected node on right hand side of new or instanceof: yield_expression
+(128,5)-(128,12) Yield can only be used inside a function
+(128,5)-(128,12) A constructor initializing an object must be passed a (possibly empty) list of arguments. Did you mean 'new yield()()'?
+(128,5)-(128,12) Unexpected node on right hand side of new or instanceof: yield_expression
 (128,12)-(128,12) An expression is expected here.

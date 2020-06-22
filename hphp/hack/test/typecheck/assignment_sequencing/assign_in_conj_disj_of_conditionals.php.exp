@@ -1,6 +1,6 @@
-File "assign_in_conj_disj_of_conditionals.php", line 4, characters 14-14:
+File "assign_in_conj_disj_of_conditionals.php", line 4, characters 14-15:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "assign_in_conj_disj_of_conditionals.php", line 15, characters 14-14:
+File "assign_in_conj_disj_of_conditionals.php", line 15, characters 14-15:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "assign_in_conj_disj_of_conditionals.php", line 7, characters 16-17:
 Invalid argument (Typing[4110])

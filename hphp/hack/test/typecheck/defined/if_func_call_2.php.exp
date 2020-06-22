@@ -1,6 +1,6 @@
-File "if_func_call_2.php", line 7, characters 9-9:
+File "if_func_call_2.php", line 7, characters 9-10:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
-File "if_func_call_2.php", line 9, characters 9-9:
+File "if_func_call_2.php", line 9, characters 9-10:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 File "if_func_call_2.php", line 11, characters 10-11:
 Variable $x is undefined, or not always defined (did you mean $b instead?) (Naming[2050])

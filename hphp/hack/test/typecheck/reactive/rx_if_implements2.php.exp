@@ -1,2 +1,2 @@
-File "rx_if_implements2.php", line 6, characters 1-42:
+File "rx_if_implements2.php", line 6, characters 1-43:
 __OnlyRxIfImpl annotations are only valid on class methods. (Parsing[1002])

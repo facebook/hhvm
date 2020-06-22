@@ -1,2 +1,2 @@
-File "function_protected_bad.php", line 4, characters 7-14:
+File "function_protected_bad.php", line 4, characters 7-15:
 Top-level functions cannot be declared protected (Parsing[1002])

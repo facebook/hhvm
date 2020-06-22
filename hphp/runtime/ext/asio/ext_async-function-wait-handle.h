@@ -28,20 +28,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Tail frames embedded in AFWH
 
-// NOTE: We use the physical values of these IDs in several places, because the
-// m_tailFrameIds field is punned with the m_varEnv field in ActRec. A diagram
-// will help a bit. Consider this 64-bit field as four 16-bit words:
+// NOTE: We use the physical values of these IDs in several places. A diagram
+// will help a bit. We use 16 bits for an AsyncFrameId and store up to 4 IDs
+// in a packed 64-bit quadword. Consider this field as four 16-bit words:
 //
-//       m_VarEnv: (higher) ..w3..|..w2..|..w1..|..w0.. (lower)
-// m_tailFrameIds: (higher) .tf0..|.tf1..|.tf2..|.tf3.. (lower)
+// m_packedTailFrameIds: (higher) ..w3..|..w2..|..w1..|..w0.. (lower)
+//       m_tailFrameIds: (higher) .tf0..|.tf1..|.tf2..|.tf3.. (lower)
 //
-// If the function has AttrMayUseVV set, this field will either be a valid
-// 64-bit pointer or a nullptr. In both of these cases, w3 will be all 0s.
-//
-// Otherwise, we'll use this field to store tail-frame IDs. We JIT code to push
-// tail frame IDs into this list, and we can make this (hot) code faster if we
-// push the last frame into the lowest bits, using bit operations. That is why
-// the tail frame indices are reversed from the physical layout.
+// Pushing tail frames into this list is the hot path; we only need to read it
+// if the Awaitable results in an exception, which is rare. We can JIT faster
+// code for the push operation if we push the last frame into the lowest bits,
+// using bit operations - just a shift and an or. That's why the tail frame
+// indices are reversed from the physical layout.
 //
 // As a example, if we've pushed one tail frames into this list, it'll be in
 // tf3 == w0. When we push another frame, that first ID will be in tf2 == w1,
@@ -51,11 +49,10 @@ namespace HPHP {
 //   1. The invalid ID is 0xffff - that is, it's all 1s in binary.
 //   2. Valid IDs are in the range [1, 0x7fff] (both ends inclusive).
 //
-// Using these restrictions, we can test "does an AFWH have any tail frames?"
-// by checking that w3 is non-zero (excluding may-use VV cases) and that w0
-// is not the invalid ID. We can also test "does an AFWH have room for more
-// tail frames?" by checking if the high bit of w3 is set - we shift valid IDs
-// in to the lowest bits first.
+// Using these restrictions, we can initialize these IDs to all-invalid by
+// setting the quadword to -1. We can test "does an AFWH have any tail frames?"
+// by checking that w0 is not the invalid ID. We can also test "does an AFWH
+// have room for more tail frames?" by checking that w3 is the invalid ID.
 //
 using AsyncFrameId = uint16_t;
 constexpr AsyncFrameId kInvalidAsyncFrameId =
@@ -117,6 +114,9 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   static constexpr ptrdiff_t childrenOff() {
     return offsetof(c_AsyncFunctionWaitHandle, m_children);
   }
+  static constexpr ptrdiff_t tailFramesOff() {
+    return offsetof(c_AsyncFunctionWaitHandle, m_tailFrameIds);
+  }
   template <bool mayUseVV>
   static c_AsyncFunctionWaitHandle* Create(
     const ActRec* origFp,
@@ -160,6 +160,7 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   size_t firstTailFrameIndex() const;
   size_t lastTailFrameIndex() const;
   AsyncFrameId tailFrame(size_t index) const;
+  static constexpr size_t kNumTailFrames = 4;
 
  private:
   void setState(uint8_t state) { setKindState(Kind::AsyncFunction, state); }
@@ -169,6 +170,11 @@ struct c_AsyncFunctionWaitHandle final : c_ResumableWaitHandle {
   // valid if STATE_BLOCKED || STATE_READY. For now, always 1 element.
   // May become a flexible array later.
   Node m_children[1];
+
+  union {
+    AsyncFrameId m_tailFrameIds[kNumTailFrames];
+    uint64_t m_packedTailFrameIds;
+  };
 
   TYPE_SCAN_CUSTOM_FIELD(m_children) {
     auto state = getState();

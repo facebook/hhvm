@@ -127,11 +127,10 @@ ObjectData* tearDownFrame(ActRec*& fp, Stack& stack, PC& pc,
       fp->setLocalsDecRefd();
       try {
         if (teardownStack) {
-          // We can't call trashVarEnv() here because we may use the punned
-          // tailFrameIds field in the handler for backtracing.
           frame_free_locals_helper_inl(fp, func->numLocals());
           if (fp->func()->cls() && fp->hasThis()) decRefObj(fp->getThis());
           fp->trashThis();
+          fp->trashVarEnv();
         }
         EventHook::FunctionUnwind(fp, phpException);
       } catch (...) {}

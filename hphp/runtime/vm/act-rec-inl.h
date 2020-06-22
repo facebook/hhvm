@@ -160,7 +160,6 @@ inline void ActRec::trashVarEnv() {
 
 inline bool ActRec::checkVarEnv() const {
   assertx(m_varEnv != reinterpret_cast<VarEnv*>(kTrashedVarEnvSlot));
-  assertx((uintptr_t(m_varEnv) >> 48) == 0);
   return true;
 }
 

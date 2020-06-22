@@ -1093,9 +1093,8 @@ TCA emitEndCatchHelper(CodeBlock& cb, DataBlock& data, UniqueStubs& us) {
 
   us.endCatchSkipTeardownHelper = vwrap(cb, data, meta, [&] (Vout& v) {
     if (debug) {
-      // We can't call trashVarEnv() (rather, write kTrashedVarEnv to the slot)
-      // here because the punned tailFrameIds field is needed for backtracing.
       emitImmStoreq(v, ActRec::kTrashedThisSlot, rvmfp()[AROFF(m_thisUnsafe)]);
+      emitImmStoreq(v, ActRec::kTrashedVarEnvSlot, rvmfp()[AROFF(m_varEnv)]);
     }
     v << copy{v.cns(false), rarg(1)};
     v << jmpi{body, RegSet{} | rarg(1)};

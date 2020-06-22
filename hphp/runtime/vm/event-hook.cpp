@@ -883,10 +883,10 @@ void EventHook::onFunctionSuspendYield(ActRec* suspending) {
 }
 
 void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
-  // The locals are already gone. Tell everyone. We can't trashVarEnv() here
-  // because we may use the punned tailFrameIds in the handler for backtracing.
+  // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
+  ar->trashVarEnv();
 
   try {
     auto const flags = handle_request_surprise();
@@ -918,10 +918,10 @@ void EventHook::onFunctionReturn(ActRec* ar, TypedValue retval) {
 }
 
 void EventHook::onFunctionUnwind(ActRec* ar, ObjectData* phpException) {
-  // The locals are already gone. Tell everyone. We can't trashVarEnv() here
-  // because we may use the punned tailFrameIds in the handler for backtracing.
+  // The locals are already gone. Tell everyone.
   ar->setLocalsDecRefd();
   ar->trashThis();
+  ar->trashVarEnv();
 
   // TODO(#2329497) can't handle_request_surprise() yet, unwinder unable to
   // replace fault

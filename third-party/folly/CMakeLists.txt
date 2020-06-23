@@ -157,27 +157,27 @@ int main() {
 # This is so clients of folly can #include <folly/blah>
 target_include_directories(folly PUBLIC ${FOLLY_ROOT})
 
-target_link_libraries(folly fmt)
+target_link_libraries(folly PUBLIC fmt)
 
 add_dependencies(folly boostMaybeBuild)
-target_link_libraries(folly boost)
+target_link_libraries(folly PUBLIC boost)
 
 add_dependencies(folly libsodiumMaybeBuild)
 target_include_directories(folly PUBLIC "${LIBSODIUM_INCLUDE_DIRS}")
-target_link_libraries(folly libsodium)
+target_link_libraries(folly PUBLIC libsodium)
 
 find_package(Glog REQUIRED)
 target_include_directories(folly PUBLIC ${LIBGLOG_INCLUDE_DIR})
-target_link_libraries(folly ${LIBGLOG_LIBRARY})
+target_link_libraries(folly PUBLIC ${LIBGLOG_LIBRARY})
 
 find_package(PThread REQUIRED)
 target_include_directories(folly PUBLIC ${LIBPTHREAD_INCLUDE_DIRS})
-target_link_libraries(folly ${LIBPTHREAD_LIBRARIES})
+target_link_libraries(folly PRIVATE ${LIBPTHREAD_LIBRARIES})
 
 if (DOUBLE_CONVERSION_FOUND)
-  target_link_libraries(folly ${DOUBLE_CONVERSION_LIBRARY})
+  target_link_libraries(folly PUBLIC ${DOUBLE_CONVERSION_LIBRARY})
 else()
-  target_link_libraries(folly double-conversion)
+  target_link_libraries(folly PUBLIC double-conversion)
 endif()
 
 if (JEMALLOC_ENABLED)

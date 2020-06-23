@@ -67,7 +67,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
   # General options to pass to the C++ compiler
   set(GENERAL_CXX_OPTIONS)
   list(APPEND GENERAL_CXX_OPTIONS
-    "std=gnu++1z"
     "fno-omit-frame-pointer"
     "fno-operator-names"
     "Wall"
@@ -159,20 +158,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       "-param=inline-unit-growth=200"
       "-param=large-unit-insns=10000"
     )
-
-    # Fix problem with GCC 4.9, https://kb.isc.org/article/AA-01167
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.9 OR
-       CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 4.9)
-      list(APPEND GENERAL_OPTIONS "fno-delete-null-pointer-checks")
-    else()
-       message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.9 or greater.")
-    endif()
-
-    # Warn about a GCC 4.9 bug leading to an incorrect refcounting issue
-    # https://github.com/facebook/hhvm/issues/8011
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
-       message(WARNING "HHVM is known to trigger optimization bugs in GCC 4.9. Upgrading to GCC 5 is recommended. See https://github.com/facebook/hhvm/issues/8011 for more details.")
-    endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.3 OR
        CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 8.3)
@@ -312,7 +297,7 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
 # using Intel C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
   set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -w")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -fno-omit-frame-pointer -Wall -Woverloaded-virtual -Wno-deprecated -w1 -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -no-ipo -fp-model precise -wd584 -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593 -fno-omit-frame-pointer -Wall -Woverloaded-virtual -Wno-deprecated -w1 -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof -fno-operator-names")
 # using Visual Studio C++
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   message(WARNING "MSVC support is VERY experimental. It will likely not compile, and is intended for the utterly insane.")

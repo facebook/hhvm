@@ -1,4 +1,9 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.1.3 FATAL_ERROR)
+# OLD: report Apple Clang as "Clang" in CMAKE_COMPILER_ID
+# NEW: report Apple Clang as "AppleClang"
+#
+# TWe have a bunch of checks for "Clang" that need updating
+cmake_policy(SET CMP0025 OLD)
 
 # This needs to be done before any languages are enabled or
 # projects are created.
@@ -8,7 +13,7 @@ INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake" ${CMAKE_MODULE_PATH})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-PROJECT(hhvm C CXX ASM)
+PROJECT(hhvm LANGUAGES C CXX ASM)
 
 include(HHVMProject)
 
@@ -104,6 +109,10 @@ include(MSVCDefaults)
 include(Options)
 include(HPHPCompiler)
 include(HPHPFindLibs)
+
+set(CMAKE_CXX_STANDARD 17) # Enable C++17 mode if supported...
+set(CMAKE_CXX_STANDARD_REQUIRED ON) # ... and fail hard if not
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 ADD_SUBDIRECTORY(third-party EXCLUDE_FROM_ALL)
 ADD_SUBDIRECTORY(hphp)

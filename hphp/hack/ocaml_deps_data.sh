@@ -22,6 +22,7 @@ export HACK_OPAM_DEPS=(
   sexplib.v0.11.0
   sqlite3.4.4.1
   uchar.0.0.2
+  uutf.1.0.2
   visitors.20180513
   wtf8.1.0.1
   yojson.1.5.0

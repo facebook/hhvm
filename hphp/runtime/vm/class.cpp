@@ -2486,7 +2486,7 @@ void Class::setProperties() {
           && (preProp->attrs() & VisibilityAttrs)
              > (parentProp->attrs & VisibilityAttrs)) {
         raise_error(
-          "Access level to %s::$%s() must be %s (as in class %s) or weaker",
+          "Access level to %s::$%s must be %s (as in class %s) or weaker",
           m_preClass->name()->data(), preProp->name()->data(),
           attrToVisibilityStr(parentProp->attrs),
           m_parent->name()->data());
@@ -2635,7 +2635,7 @@ void Class::setProperties() {
         if ((preProp->attrs() & VisibilityAttrs)
             > (parentSProp.attrs & VisibilityAttrs)) {
           raise_error(
-            "Access level to %s::$%s() must be %s (as in class %s) or weaker",
+            "Access level to %s::$%s must be %s (as in class %s) or weaker",
             m_preClass->name()->data(), preProp->name()->data(),
             attrToVisibilityStr(parentSProp.attrs),
             m_parent->name()->data());

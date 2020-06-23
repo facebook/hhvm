@@ -9,6 +9,5 @@ include = ["../../hhas_attribute.rs"]
 path = "../../hhas_attribute.rs"
 
 [dependencies]
-instruction_sequence_rust = { path = "../instruction_sequence" }
 naming_special_names_rust = { path = "../../../naming" }
 runtime = { path = "../runtime" }

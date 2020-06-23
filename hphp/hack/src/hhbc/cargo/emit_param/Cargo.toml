@@ -9,8 +9,6 @@ include = ["../../emit_param.rs"]
 path = "../../emit_param.rs"
 
 [dependencies]
-ast_class_expr_rust = { path = "../ast_class_expr" }
-ast_constant_folder_rust = { path = "../ast_constant_folder" }
 ast_scope_rust = { path = "../ast_scope" }
 emit_attribute_rust = { path = "../emit_attribute" }
 emit_expression_rust = { path = "../emit_expression" }
@@ -20,9 +18,6 @@ emit_type_hint_rust = { path = "../emit_type_hint" }
 env = { path = "../env" }
 hhas_param_rust = { path = "../hhas_param" }
 hhas_type = { path = "../hhas_type" }
-hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_string_utils_rust = { path = "../string_utils" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
-label_rust = { path = "../label" }
-options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }

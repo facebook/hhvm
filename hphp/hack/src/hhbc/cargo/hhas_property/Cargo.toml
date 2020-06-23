@@ -9,7 +9,6 @@ include = ["../../hhas_property.rs"]
 path = "../../hhas_property.rs"
 
 [dependencies]
-env = { path = "../env" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
 hhas_type = { path = "../hhas_type" }
 hhbc_id_rust = { path = "../hhbc_id" }

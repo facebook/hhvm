@@ -21,7 +21,6 @@ emit_record_def_rust = { path = "../emit_record_def" }
 emit_symbol_refs_rust = { path = "../emit_symbol_refs" }
 emit_typedef_rust = { path = "../emit_typedef" }
 env = { path = "../env" }
-global_state = { path = "../global_state" }
 hhas_body_rust = { path = "../hhas_body" }
 hhas_program_rust = { path = "../hhas_program" }
 hhbc_ast_rust = { path = "../hhbc_ast" }

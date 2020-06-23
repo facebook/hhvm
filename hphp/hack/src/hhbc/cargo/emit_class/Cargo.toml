@@ -9,7 +9,6 @@ include = ["../../emit_class.rs"]
 path = "../../emit_class.rs"
 
 [dependencies]
-ast_constant_folder_rust = { path = "../ast_constant_folder" }
 closure_convert_rust = { path = "../closure_convert" }
 emit_attribute_rust = { path = "../emit_attribute" }
 emit_body_rust = { path = "../emit_body" }

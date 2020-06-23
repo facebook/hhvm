@@ -16,7 +16,6 @@ oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 stack_limit = { path = "../../../utils/stack_limit" }
 typing_ast_print_rust = { path = "../typing_ast_print_rust" }
-typing_ast_rust = { path = "../typing_ast_rust" }
 typing_defs_rust = { path = "../typing_defs_rust" }
 typing_rust = { path = "../typing_rust" }
 anyhow = "1.0"

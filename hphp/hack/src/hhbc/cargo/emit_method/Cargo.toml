@@ -18,7 +18,6 @@ emit_native_opcode_rust = { path = "../emit_native_opcode" }
 env = { path = "../env" }
 global_state = { path = "../global_state" }
 hhas_attribute_rust = { path = "../hhas_attribute" }
-hhas_body_rust = { path = "../hhas_body" }
 hhas_method_rust = { path = "../hhas_method" }
 hhas_pos_rust = { path = "../hhas_pos" }
 hhbc_id_rust = { path = "../hhbc_id" }

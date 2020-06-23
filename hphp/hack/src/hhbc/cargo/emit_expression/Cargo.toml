@@ -11,7 +11,6 @@ path = "../../emit_expression.rs"
 [dependencies]
 ast_class_expr_rust = { path = "../ast_class_expr" }
 ast_constant_folder_rust = { path = "../ast_constant_folder" }
-ast_scope_rust = { path = "../ast_scope" }
 emit_adata_rust = { path = "../emit_adata" }
 emit_fatal_rust = { path = "../emit_fatal" }
 emit_pos_rust = { path = "../emit_pos" }
@@ -20,7 +19,6 @@ emit_type_constant_rust = { path = "../emit_type_constant" }
 env = { path = "../env" }
 global_state = { path = "../global_state" }
 hhas_symbol_refs_rust = { path = "../hhas_symbol_refs" }
-hhas_type = { path = "../hhas_type" }
 hhbc_ast_rust = { path = "../hhbc_ast" }
 hhbc_id_rust = { path = "../hhbc_id" }
 hhbc_string_utils_rust = { path = "../string_utils" }

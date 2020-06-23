@@ -9,5 +9,4 @@ include = ["../../hhas_adata.rs"]
 path = "../../hhas_adata.rs"
 
 [dependencies]
-hhbc_ast_rust = { path = "../hhbc_ast" }
 runtime = { path = "../runtime" }

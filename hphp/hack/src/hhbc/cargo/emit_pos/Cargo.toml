@@ -9,7 +9,5 @@ include = ["../../emit_pos.rs"]
 path = "../../emit_pos.rs"
 
 [dependencies]
-hhbc_ast_rust = { path = "../hhbc_ast" }
 instruction_sequence_rust = { path = "../instruction_sequence" }
-options = { path = "../options" }
 oxidized = { path = "../../../oxidized" }

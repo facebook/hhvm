@@ -9,5 +9,5 @@ include = ["../../unique_list_bench.rs"]
 name = "unique_list_bench"
 path = "../../unique_list_bench.rs"
 
-[dependencies]
+[dev-dependencies]
 unique_list_rust = { path = "../unique_list" }

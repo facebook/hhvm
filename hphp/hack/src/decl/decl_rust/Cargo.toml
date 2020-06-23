@@ -10,7 +10,6 @@ path = "../lib.rs"
 
 [dependencies]
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
-direct_decl_smart_constructors = { path = "../direct_decl_smart_constructors" }
 ocamlrep = { path = "../../ocamlrep" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }

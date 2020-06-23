@@ -9,5 +9,4 @@ include = ["../../hhas_type.rs"]
 path = "../../hhas_type.rs"
 
 [dependencies]
-emit_fatal_rust = { path = "../emit_fatal" }
 bitflags = "1.2"

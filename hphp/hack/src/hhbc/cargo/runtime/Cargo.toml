@@ -9,6 +9,5 @@ include = ["../../typed_value.rs"]
 path = "../../typed_value.rs"
 
 [dependencies]
-hhbc_string_utils_rust = { path = "../string_utils" }
 oxidized = { path = "../../../oxidized" }
 lazy_static = "1.0"

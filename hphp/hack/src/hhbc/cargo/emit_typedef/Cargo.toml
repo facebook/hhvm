@@ -9,7 +9,6 @@ include = ["../../emit_typedef.rs"]
 path = "../../emit_typedef.rs"
 
 [dependencies]
-ast_constant_folder_rust = { path = "../ast_constant_folder" }
 emit_attribute_rust = { path = "../emit_attribute" }
 emit_body_rust = { path = "../emit_body" }
 emit_type_constant_rust = { path = "../emit_type_constant" }

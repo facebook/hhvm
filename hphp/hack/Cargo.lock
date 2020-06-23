@@ -19,7 +19,6 @@ dependencies = [
  "parser_core_types 0.0.0",
  "rust_aast_parser_types 0.0.0",
  "rust_parser_errors 0.0.0",
- "smart_constructors 0.0.0",
  "stack_limit 0.0.0",
 ]
 
@@ -497,7 +496,6 @@ version = "0.0.0"
 dependencies = [
  "bumpalo 3.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "direct_decl_parser 0.0.0",
- "direct_decl_smart_constructors 0.0.0",
  "ocamlrep 0.0.0",
  "oxidized 0.0.0",
  "oxidized_by_ref 0.0.0",
@@ -667,7 +665,6 @@ dependencies = [
 name = "emit_class_rust"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder_rust 0.0.0",
  "closure_convert_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_body_rust 0.0.0",
@@ -708,7 +705,6 @@ dependencies = [
 name = "emit_constant_rust"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder_rust 0.0.0",
  "closure_convert_rust 0.0.0",
  "core_utils_rust 0.0.0",
  "emit_body_rust 0.0.0",
@@ -721,7 +717,6 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "oxidized 0.0.0",
- "runtime 0.0.0",
  "rx_rust 0.0.0",
 ]
 
@@ -731,7 +726,6 @@ version = "0.0.0"
 dependencies = [
  "ast_class_expr_rust 0.0.0",
  "ast_constant_folder_rust 0.0.0",
- "ast_scope_rust 0.0.0",
  "emit_adata_rust 0.0.0",
  "emit_fatal_rust 0.0.0",
  "emit_pos_rust 0.0.0",
@@ -740,7 +734,6 @@ dependencies = [
  "env 0.0.0",
  "global_state 0.0.0",
  "hhas_symbol_refs_rust 0.0.0",
- "hhas_type 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
@@ -773,7 +766,6 @@ name = "emit_file_attributes_rust"
 version = "0.0.0"
 dependencies = [
  "emit_attribute_rust 0.0.0",
- "emit_fatal_rust 0.0.0",
  "env 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
@@ -790,7 +782,6 @@ dependencies = [
  "closure_convert_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_body_rust 0.0.0",
- "emit_fatal_rust 0.0.0",
  "emit_memoize_helpers_rust 0.0.0",
  "emit_param_rust 0.0.0",
  "emit_pos_rust 0.0.0",
@@ -806,7 +797,6 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "label_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "ocamlrep 0.0.0",
  "options 0.0.0",
@@ -822,7 +812,6 @@ dependencies = [
  "emit_fatal_rust 0.0.0",
  "env 0.0.0",
  "hhas_param_rust 0.0.0",
- "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "oxidized 0.0.0",
 ]
@@ -871,7 +860,6 @@ dependencies = [
  "env 0.0.0",
  "global_state 0.0.0",
  "hhas_attribute_rust 0.0.0",
- "hhas_body_rust 0.0.0",
  "hhas_method_rust 0.0.0",
  "hhas_pos_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
@@ -903,8 +891,6 @@ dependencies = [
 name = "emit_param_rust"
 version = "0.0.0"
 dependencies = [
- "ast_class_expr_rust 0.0.0",
- "ast_constant_folder_rust 0.0.0",
  "ast_scope_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_expression_rust 0.0.0",
@@ -914,11 +900,8 @@ dependencies = [
  "env 0.0.0",
  "hhas_param_rust 0.0.0",
  "hhas_type 0.0.0",
- "hhbc_ast_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "label_rust 0.0.0",
- "options 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -926,9 +909,7 @@ dependencies = [
 name = "emit_pos_rust"
 version = "0.0.0"
 dependencies = [
- "hhbc_ast_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "options 0.0.0",
  "oxidized 0.0.0",
 ]
 
@@ -949,7 +930,6 @@ dependencies = [
  "emit_symbol_refs_rust 0.0.0",
  "emit_typedef_rust 0.0.0",
  "env 0.0.0",
- "global_state 0.0.0",
  "hhas_body_rust 0.0.0",
  "hhas_program_rust 0.0.0",
  "hhbc_ast_rust 0.0.0",
@@ -963,7 +943,6 @@ dependencies = [
 name = "emit_property_rust"
 version = "0.0.0"
 dependencies = [
- "ast_class_expr_rust 0.0.0",
  "ast_constant_folder_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_expression_rust 0.0.0",
@@ -971,14 +950,12 @@ dependencies = [
  "emit_pos_rust 0.0.0",
  "emit_type_hint_rust 0.0.0",
  "env 0.0.0",
- "hhas_attribute_rust 0.0.0",
  "hhas_property_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhbc_ast_rust 0.0.0",
  "hhbc_id_rust 0.0.0",
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
- "label_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "oxidized 0.0.0",
  "runtime 0.0.0",
@@ -1005,7 +982,6 @@ dependencies = [
  "hhbc_string_utils_rust 0.0.0",
  "instruction_sequence_rust 0.0.0",
  "oxidized 0.0.0",
- "runtime 0.0.0",
 ]
 
 [[package]]
@@ -1047,7 +1023,6 @@ dependencies = [
 name = "emit_typedef_rust"
 version = "0.0.0"
 dependencies = [
- "ast_constant_folder_rust 0.0.0",
  "emit_attribute_rust 0.0.0",
  "emit_body_rust 0.0.0",
  "emit_type_constant_rust 0.0.0",
@@ -1092,7 +1067,6 @@ dependencies = [
  "ocamlrep 0.0.0",
  "options 0.0.0",
  "oxidized 0.0.0",
- "rx_rust 0.0.0",
 ]
 
 [[package]]
@@ -1309,7 +1283,6 @@ dependencies = [
 name = "hhas_adata_rust"
 version = "0.0.0"
 dependencies = [
- "hhbc_ast_rust 0.0.0",
  "runtime 0.0.0",
 ]
 
@@ -1317,7 +1290,6 @@ dependencies = [
 name = "hhas_attribute_rust"
 version = "0.0.0"
 dependencies = [
- "instruction_sequence_rust 0.0.0",
  "naming_special_names_rust 0.0.0",
  "runtime 0.0.0",
 ]
@@ -1428,7 +1400,6 @@ name = "hhas_property_rust"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "env 0.0.0",
  "hhas_attribute_rust 0.0.0",
  "hhas_type 0.0.0",
  "hhbc_id_rust 0.0.0",
@@ -1455,7 +1426,6 @@ name = "hhas_type"
 version = "0.0.0"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "emit_fatal_rust 0.0.0",
 ]
 
 [[package]]
@@ -1582,7 +1552,6 @@ version = "0.0.0"
 dependencies = [
  "env 0.0.0",
  "hhbc_ast_rust 0.0.0",
- "hhbc_id_rust 0.0.0",
  "itertools 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "label_rust 0.0.0",
  "oxidized 0.0.0",
@@ -2237,7 +2206,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "runtime"
 version = "0.0.0"
 dependencies = [
- "hhbc_string_utils_rust 0.0.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "oxidized 0.0.0",
 ]
@@ -2301,7 +2269,6 @@ dependencies = [
  "oxidized 0.0.0",
  "parser_core_types 0.0.0",
  "rust_parser_errors 0.0.0",
- "rust_to_ocaml 0.0.0",
 ]
 
 [[package]]

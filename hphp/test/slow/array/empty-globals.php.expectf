@@ -1,5 +1,0 @@
-
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/empty-globals.php on line 3
-array(0) {
-}
-bool(false)

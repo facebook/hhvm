@@ -60,7 +60,6 @@
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -2180,9 +2179,10 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
 
     auto const uninit_cls = Unit::loadClass(s_uninitClsName.get());
 
-    Array globals{get_global_variables()};
+    auto globals = Array();
+    auto const global = fp && fp->m_varEnv && fp->m_varEnv->isGlobalScope();
     auto& env = [&] () -> Array& {
-      if (fp && fp->m_varEnv && fp->m_varEnv->isGlobalScope()) return globals;
+      if (global) return globals;
       if (m_debuggerEnv.isNull()) m_debuggerEnv = Array::CreateDArray();
       return m_debuggerEnv;
     }();
@@ -2239,7 +2239,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
           }
         }
       }
-      auto const val = env.lookup(StrNR{f->localVarName(id)});
+      auto const val = [&]{
+        if (!global) return env.lookup(StrNR{f->localVarName(id)});
+        auto const rval = fp->m_varEnv->lookup(f->localVarName(id));
+        return rval ? *rval : make_tv<KindOfUninit>();
+      }();
       if (val.is_init()) args.append(val);
       else appendUninit();
     }
@@ -2263,7 +2267,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
           fp->m_varEnv->unset(f->localVarName(id));
           break;
         case StoreEnv:
-          env.remove(StrNR{f->localVarName(id)});
+          if (global) {
+            fp->m_varEnv->unset(f->localVarName(id));
+          } else {
+            env.remove(StrNR{f->localVarName(id)});
+          }
           break;
         }
         continue;
@@ -2276,7 +2284,11 @@ ExecutionContext::evalPHPDebugger(Unit* unit, int frame) {
         fp->m_varEnv->set(f->localVarName(id), &tv);
         break;
       case StoreEnv:
-        env.set(StrNR{f->localVarName(id)}, tv);
+        if (global) {
+          fp->m_varEnv->set(f->localVarName(id), &tv);
+        } else {
+          env.set(StrNR{f->localVarName(id)}, tv);
+        }
         break;
       }
     }

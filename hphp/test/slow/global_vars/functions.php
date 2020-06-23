@@ -41,16 +41,9 @@ function test_unset() {
   var_dump($GLOBALS[__FUNCTION__] is null);
 }
 
-function test_global_keys() {
-  $GLOBALS[__FUNCTION__] = null;
-  var_dump(HH\global_keys() == keyset(array_keys($GLOBALS['GLOBALS'])));
-  var_dump(array_key_exists(__FUNCTION__, HH\global_keys()));
-}
-
 function test_global_key_exists() {
   var_dump(HH\global_key_exists(__FUNCTION__));
   $GLOBALS[__FUNCTION__] = null;
-  var_dump(array_key_exists(__FUNCTION__, $GLOBALS['GLOBALS']));
   var_dump(HH\global_key_exists(__FUNCTION__));
 }
 
@@ -63,6 +56,5 @@ function main() {
   test_set();
   test_bogus_args();
   test_unset();
-  test_global_keys();
   test_global_key_exists();
 }

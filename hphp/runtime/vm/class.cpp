@@ -27,7 +27,6 @@
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/instance-bits.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/native-data.h"
@@ -1408,6 +1407,14 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   }
 
   /*
+   * We use a sentinel static array to mark constants that are being evaluated
+   * during recursive resolution. This array is never exposed to the rest of
+   * the runtime, so we can test for it by pointer equality.
+   */
+  static auto const s_sentinelVec = PackedArray::CopyStatic(staticEmptyVec());
+  assertx(s_sentinelVec != staticEmptyVec());
+
+  /*
    * We have either a constant with a non-scalar initializer or an unresolved
    * type constant, meaning it will be potentially different in different
    * requests, which we store separately in an array in RDS.
@@ -1427,11 +1434,10 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   if (m_nonScalarConstantCache.isInit()) {
     auto const cCns = clsCnsData->get(clsCnsName);
     if (cCns.is_init()) {
-      // There's an entry in the cache for this (type) constant. If its the
-      // globals array, this (type) constant is recursively defined, so raise
-      // an error. Otherwise just return it.
-      if (UNLIKELY(isArrayType(cCns.type()) &&
-                   cCns.val().parr == get_global_variables())) {
+      // There's an entry in the cache for this (type) constant. If it's the
+      // sentinel value, the constant is recursively defined - throw an error.
+      // Otherwise, return the cached result.
+      if (UNLIKELY(tvIsVec(cCns) && val(cCns).parr == s_sentinelVec)) {
         raise_error(
           folly::sformat(
             "Cannot declare self-referencing {} '{}::{}'",
@@ -1456,9 +1462,9 @@ TypedValue Class::clsCnsGet(const StringData* clsCnsName, ClsCnsLookup what) con
   }
 
   // We're going to run the 86cinit to get the constant's value, or try to
-  // resolve the type constant. Store the globals array in the (type)
-  // constant's cache entry to prevent recursion.
-  auto marker = make_array_like_tv(get_global_variables());
+  // resolve the type constant. Store the sentinel value as this (type)
+  // constant's cache entry // so that we can detect recursion.
+  auto marker = make_array_like_tv(s_sentinelVec);
   clsCnsData.set(StrNR(clsCnsName), tvAsCVarRef(&marker), true /* isKey */);
 
   if (cns.isType()) {

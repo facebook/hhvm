@@ -29,11 +29,6 @@ namespace HPHP {
 
 static RDS_LOCAL_NO_CHECK(GlobalsArray*, g_variables)(nullptr);
 
-GlobalsArray* get_global_variables() {
-  assertx(*g_variables != nullptr);
-  return *g_variables;
-}
-
 GlobalsArray::GlobalsArray(NameValueTable* tab)
   : ArrayData(kGlobalsKind)
   , m_tab(tab)

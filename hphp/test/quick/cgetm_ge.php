@@ -14,14 +14,15 @@ function cgetm_ge() {
     var_dump($GLOBALS[$dyn][array_shift(inout $idx)]);
   }
 
+  $k = 'doesnt_exist';
   try {
-    $a = $GLOBALS['doesnt_exist'][12];
+    $a = $GLOBALS[$k][12];
     var_dump($a);
-  } catch (Exception $e) { echo $e->getMessage()."\n"; }
+  } catch (Exception $e) {
+    echo $e->getMessage()."\n";
+  }
 
-  foreach (HH\global_keys() as $k) {
-    if ($k == 'doesnt_exist') {
-      echo "has key $k\n";
-    }
+  if (HH\global_key_exists($k)) {
+    echo "has key $k\n";
   }
 }

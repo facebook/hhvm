@@ -1,11 +1,1 @@
-GLOBALS->Array
-HTTP_RAW_POST_DATA->
-_COOKIE->Array
-_ENV->Array
-_FILES->Array
-_GET->Array
-_POST->Array
-_REQUEST->Array
-_SERVER->Array
-argc->1
-argv->Array
+bool(false)

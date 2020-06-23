@@ -270,13 +270,6 @@ namespace HH {
   function is_late_init_sprop_init(string $cls, string $prop): bool;
 
   /*
-   * Return all of the keys of the globals array shared between
-   * runtime and user code. Currently backed by $GLOBALS.
-   */
-  <<__Native>>
-  function global_keys(): keyset<string>;
-
-  /*
    * Does the key exist in the globals array shared between runtime
    * and code.
    */

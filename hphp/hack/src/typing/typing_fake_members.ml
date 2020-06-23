@@ -95,18 +95,21 @@ let is_invalid fake lid =
     Option.map (BlameSet.find_by_lid_opt lid invalid) snd
   | Valid _ -> None
 
-let forget fake blame =
-  match fake with
-  | Valid valid when BlameSet.is_empty valid -> fake
+let conditionally_forget predicate (fake_members : t) blame : t =
+  let invalidate_using_predicate valid =
+    let (to_invalidate, others) = BlameSet.partition predicate valid in
+    (BlameSet.attach_blame blame to_invalidate, others)
+  in
+  match fake_members with
+  | Valid valid when BlameSet.is_empty valid -> fake_members
   | Valid valid ->
-    Invalidated
-      { valid = BlameSet.empty; invalid = BlameSet.attach_blame blame valid }
-  | Invalidated { valid; invalid; _ } ->
-    Invalidated
-      {
-        valid = BlameSet.empty;
-        invalid = BlameSet.attach_blame blame (BlameSet.union valid invalid);
-      }
+    let (invalid, valid) = invalidate_using_predicate valid in
+    Invalidated { valid; invalid }
+  | Invalidated { valid; invalid } ->
+    let (invalidated, valid) = invalidate_using_predicate valid in
+    Invalidated { valid; invalid = BlameSet.union invalidated invalid }
+
+let forget = conditionally_forget (const true)
 
 let forget_prefixed (fake_members : t) prefix_lid blame : t =
   let is_prefixed (fake_id, _blame) =
@@ -114,18 +117,13 @@ let forget_prefixed (fake_members : t) prefix_lid blame : t =
       ~prefix:(Local_id.to_string prefix_lid ^ "->")
       (Local_id.to_string fake_id)
   in
-  let invalidate_prefixed valid =
-    let (prefixed, others) = BlameSet.partition is_prefixed valid in
-    (BlameSet.attach_blame blame prefixed, others)
+  conditionally_forget is_prefixed fake_members blame
+
+let forget_suffixed (fake_members : t) suffix blame : t =
+  let is_prefixed (fake_id, _blame) =
+    String.is_suffix ~suffix:("->" ^ suffix) (Local_id.to_string fake_id)
   in
-  match fake_members with
-  | Valid valid when BlameSet.is_empty valid -> fake_members
-  | Valid valid ->
-    let (invalid, valid) = invalidate_prefixed valid in
-    Invalidated { valid; invalid }
-  | Invalidated { valid; invalid } ->
-    let (invalidated, valid) = invalidate_prefixed valid in
-    Invalidated { valid; invalid = BlameSet.union invalidated invalid }
+  conditionally_forget is_prefixed fake_members blame
 
 let add fake lid pos =
   match fake with

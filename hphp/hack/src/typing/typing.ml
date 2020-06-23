@@ -3949,6 +3949,8 @@ and assign_ p ur env e1 ty2 =
     (* If we ever extend fake members from $x->a to more complicated lvalues
       such as $x->a->b, we would need to call forget_prefixed_members on
       other lvalues as well. *)
+    | (_, Obj_get (_, (_, Id (_, property)), _)) ->
+      Env.forget_suffixed_members env property Reason.(Blame (p, BSassignment))
     | _ -> env
   in
   match e1 with
@@ -3976,22 +3978,12 @@ and assign_ p ur env e1 ty2 =
     make_result env (fst e1) (Aast.List (List.rev reversed_tel)) ty2
   | (pobj, Obj_get (obj, (pm, Id ((_, member_name) as m)), nullflavor)) ->
     let lenv = env.lenv in
-    let no_fakes = LEnv.env_with_empty_fakes env in
-    (* In this section, we check that the assignment is compatible with
-     * the real type of a member. Remember that members can change
-     * type (cf fake_members). But when we assign a value to $this->x,
-     * we want to make sure that the type assign to $this->x is compatible
-     * with the actual type hint. In this portion of the code, type-check
-     * the assignment in an environment without fakes, and therefore
-     * check that the assignment is compatible with the type of
-     * the member.
-     *)
     let nullsafe =
       match nullflavor with
       | OG_nullthrows -> None
       | OG_nullsafe -> Some pobj
     in
-    let (env, tobj, obj_ty) = expr ~accept_using_var:true no_fakes obj in
+    let (env, tobj, obj_ty) = expr ~accept_using_var:true env obj in
     let env = might_throw env in
     let (env, (result, _tal)) =
       TOG.obj_get

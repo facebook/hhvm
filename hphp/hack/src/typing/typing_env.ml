@@ -1140,15 +1140,20 @@ let update_lost_info name blame env ty =
   let ((env, _seen_tyvars), ty) = update_ty (env, ISet.empty) ty in
   (env, ty)
 
-let forget_members env blame =
+let forget_generic forget env blame =
   let fake_members = get_fake_members env in
-  let fake_members = Fake.forget fake_members blame in
+  let fake_members = forget fake_members blame in
   set_fake_members env fake_members
 
-let forget_prefixed_members env lid blame =
-  let fake_members = get_fake_members env in
-  let fake_members = Fake.forget_prefixed fake_members lid blame in
-  set_fake_members env fake_members
+let forget_members = forget_generic Fake.forget
+
+let forget_prefixed_members env lid =
+  forget_generic (fun fake_members -> Fake.forget_prefixed fake_members lid) env
+
+let forget_suffixed_members env suffix =
+  forget_generic
+    (fun fake_members -> Fake.forget_suffixed fake_members suffix)
+    env
 
 module FakeMembers = struct
   let update_fake_members env fake_members =

@@ -98,9 +98,9 @@ function builtin_io(
   inout mixed $mix,
   bool $retOrig,
   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
-  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("varray")>> inout mixed $out2,
   <<__OutOnly("KindOfObject")>> inout mixed $out3,
-): array;
+): varray;
 
 <<__Native("NoFCallBuiltin")>>
 function builtin_io_no_fca(
@@ -114,9 +114,9 @@ function builtin_io_no_fca(
   inout mixed $mix,
   bool $retOrig,
   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
-  <<__OutOnly("KindOfArray")>> inout mixed $out2,
+  <<__OutOnly("varray")>> inout mixed $out2,
   <<__OutOnly("KindOfObject")>> inout mixed $out3,
-): array;
+): varray;
 
 /*
  * Like serialize(), but serialize d/varrays into their own format so that they

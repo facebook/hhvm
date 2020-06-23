@@ -51,17 +51,11 @@ Array HHVM_FUNCTION(dummy_darray_builtin, const Array& arr) {
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofdarray_builtin) {
-  TypedValue tv;
-  type(tv) = KindOfDArray;
-  val(tv).parr = ArrayData::CreateDArray();
-  return tv;
+  return make_array_like_tv(ArrayData::CreateDArray());
 }
 
 TypedValue HHVM_FUNCTION(dummy_kindofvarray_builtin) {
-  TypedValue tv;
-  type(tv) = KindOfVArray;
-  val(tv).parr = ArrayData::CreateVArray();
-  return tv;
+  return make_array_like_tv(ArrayData::CreateVArray());
 }
 
 TypedValue HHVM_FUNCTION(dummy_varr_or_darr_builtin, const Variant& var) {
@@ -89,26 +83,17 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
   if (arr->isPHPArrayType() && arr->isNotDVArray()) {
     return tvReturn(arr.get());
   }
-  TypedValue tv;
-  val(tv).parr = arr.toPHPArray().detach();
-  type(tv) = KindOfArray;
-  return tv;
+  return make_array_like_tv(arr.toPHPArray().detach());
 }
 
 TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Array& arr) {
   if (arr->isDArray()) return tvReturn(arr.get());
-  TypedValue tv;
-  val(tv).parr = arr.toDArray().detach();
-  type(tv) = KindOfDArray;
-  return tv;
+  return make_array_like_tv(arr.toDArray().detach());
 }
 
 TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Array& arr) {
   if (arr->isVArray()) return tvReturn(arr.get());
-  TypedValue tv;
-  val(tv).parr = arr.toVArray().detach();
-  type(tv) = KindOfVArray;
-  return tv;
+  return make_array_like_tv(arr.toVArray().detach());
 }
 
 Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
@@ -232,7 +217,7 @@ void HHVM_FUNCTION(hhbbc_fail_verification) {
  *   inout mixed $mix,
  *   bool retOrig,
  *   <<__OutOnly("KindOfBoolean")>> inout mixed $out1,
- *   <<__OutOnly("KindOfArray")>> inout mixed $out2,
+ *   <<__OutOnly("varray")>> inout mixed $out2,
  *   <<__OutOnly("KindOfObject")>> inout mixed $out3,
  * ): array;
  */
@@ -253,7 +238,7 @@ Array HHVM_FUNCTION(
 ) {
   auto const orig = retOrig
     ? make_varray(s.get(), str, num, i, obj, o.get(), m, mix)
-    : Array::Create();
+    : Array::CreateVArray();
 
   str += ";; IN =\"";
   str += StrNR{s.get()};
@@ -268,7 +253,7 @@ Array HHVM_FUNCTION(
 
   outArr = retOrig
     ? make_varray(outBool, outArr, outObj)
-    : Array::Create();
+    : Array::CreateVArray();
   outBool = true;
   outObj = SystemLib::AllocStdClassObject();
 
@@ -299,8 +284,7 @@ struct DummyArrayAwait : AsioExternalThreadEvent {
 
   void unserialize(TypedValue& tv) override {
     auto arr = make_map_array("foo", "bar", "baz", "quux");
-    type(tv) = KindOfArray;
-    val(tv).parr = arr.detach();
+    tv = make_array_like_tv(arr.detach());
   }
 };
 
@@ -309,8 +293,7 @@ struct DummyDArrayAwait : AsioExternalThreadEvent {
 
   void unserialize(TypedValue& tv) override {
     auto arr = make_darray("foo", "bar", "baz", "quux");
-    type(tv) = arr->toDataType();
-    val(tv).parr = arr.detach();
+    tv = make_array_like_tv(arr.detach());
   }
 };
 
@@ -319,8 +302,7 @@ struct DummyDictAwait : AsioExternalThreadEvent {
 
   void unserialize(TypedValue& tv) override {
     auto arr = make_dict_array("foo", "bar", "baz", "quux");
-    type(tv) = KindOfDict;
-    val(tv).parr = arr.detach();
+    tv = make_array_like_tv(arr.detach());
   }
 };
 

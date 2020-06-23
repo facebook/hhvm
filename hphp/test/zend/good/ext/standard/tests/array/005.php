@@ -18,12 +18,12 @@ $mixed_array = varray[
   darray[ "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ],
   darray[ "1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five" ],
   darray[ 1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five" ],
-  darray[ "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-         "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, NULL => 3 ],
+  darray[ "f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five", "4name" => "jonny", "a" => NULL, '' => 3 ],
   varray[ 12, "name", 'age', '45' ],
   varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], varray[] ],
   darray[ "one" => 1, "one" => 2, "three" => 3, 0 => 3, 1 => 4, 3 => 33, 4 => 44, 5 => 5, 6 => 6,
-                              5.4 => 54, 5.7 => 57, "5.4" => 554, "5.7" => 557 ]
+                              5 => 54, 5 => 57, "5.4" => 554, "5.7" => 557 ]
 ];
 
 /* Testing Error Conditions */

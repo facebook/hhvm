@@ -1,6 +1,6 @@
 <?hh
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Retuns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -31,36 +31,6 @@ $inputs = darray[
        -2345 => 'negative',
        ],
 
-       // float data
-/*2*/  'float' => darray[
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ],
-       
-       'extreme floats' => darray[
-       12.3456789000e6 => 'large',
-       12.3456789000E-10 => 'small',
-       ],
-
-       // null data
-/*3*/ 'null uppercase' => darray[
-       NULL => 'null 1',
-       ], 
-       'null lowercase' => darray[
-       null => 'null 2',
-       ],
-
-       // boolean data
-/*4*/ 'bool lowercase' => darray[
-       true => 'lowert',
-       false => 'lowerf',
-       ],
-       'bool uppercase' => darray[
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ],
-       
        // empty data
 /*5*/ 'empty double quotes' => darray[
        "" => 'emptyd',
@@ -74,16 +44,6 @@ $inputs = darray[
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ],
-
-       // undefined data
-/*8*/ 'undefined' => darray[
-       @$undefined_var => 'undefined',
-       ],
-
-       // unset data
-/*9*/ 'unset' => darray[
-       @$unset_var => 'unset',
        ],
 ];
 

@@ -1,5 +1,0 @@
-
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/bug29253.php on line 3
-array(0) {
-}
-string(4) "afad"

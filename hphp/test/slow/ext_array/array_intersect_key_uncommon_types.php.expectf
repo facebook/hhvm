@@ -17,16 +17,3 @@ array(2) {
   ["1"]=>
   string(1) "2"
 }
-== GLOBALS array ==
-
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/array_intersect_key_uncommon_types.php on line 21
-array(1) {
-  ["array_intersect_key_uncommon_types.php"]=>
-  string(3) "lol"
-}
-
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/array_intersect_key_uncommon_types.php on line 22
-array(1) {
-  ["array_intersect_key_uncommon_types.php"]=>
-  bool(true)
-}

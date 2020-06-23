@@ -1,7 +1,0 @@
-Test begin
-
-Notice: Hack Array Compat: lookup returning $GLOBALS array in %s/GLOBALS.php on line 11
-Key is set in $GLOBALS
-Key set visible via $a
-Key update visible via $b
-Test end

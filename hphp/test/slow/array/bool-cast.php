@@ -8,7 +8,6 @@ function f($a) {
 
 <<__EntryPoint>>
 function main_bool_cast() {
-f($GLOBALS['GLOBALS']);
 f(darray['a' => 'b']);
 f(varray['a']);
 f(varray[]);

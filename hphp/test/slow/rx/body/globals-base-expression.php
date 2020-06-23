@@ -2,5 +2,5 @@
 
 <<__EntryPoint, __Rx>>
 function test() {
-  $x = $GLOBALS['GLOBALS']['_GET'];
+  $x = $GLOBALS['_GET'];
 }

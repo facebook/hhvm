@@ -28,8 +28,6 @@ function test(string $name, mixed $recursive_thing): void {
 }
 
 function main(): void {
-  test("GLOBALS", $GLOBALS['GLOBALS']);
-
   $r = varray[];
   test("shallow array", $r);
 

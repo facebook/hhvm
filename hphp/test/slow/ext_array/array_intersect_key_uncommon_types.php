@@ -14,17 +14,8 @@ function test_apc_local(): void {
   var_dump(array_intersect_key($a, dict[1 => 2, '1' => '2']));
 }
 
-function test_globals(): void {
-  echo "== GLOBALS array ==\n";
-  $key = basename(__FILE__);
-  $GLOBALS[$key] = 'lol';
-  var_dump(array_intersect_key($GLOBALS['GLOBALS'], dict[$key => true]));
-  var_dump(array_intersect_key(dict[$key => true], $GLOBALS['GLOBALS']));
-}
-
 <<__EntryPoint>>
 function main(): void {
   test_empty();
   test_apc_local();
-  test_globals();
 }

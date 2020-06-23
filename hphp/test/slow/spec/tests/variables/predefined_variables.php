@@ -13,5 +13,4 @@ function entrypoint_predefined_variables(): void {
   var_dump($GLOBALS['argc']);
   var_dump($GLOBALS['argv']);
   var_dump($GLOBALS['_ENV']);
-  var_dump($GLOBALS['GLOBALS']);
 }

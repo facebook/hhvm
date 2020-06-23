@@ -81,18 +81,6 @@ struct MixedArrayKeys {
   static folly::Optional<uint8_t> getMask(const jit::Type& type);
 
   /*
-   * In one comparison we check both the kind and the fact that arr only
-   * has static string keys (no tombstones, int keys, or counted str keys).
-   * As above, this method may return false negatives.
-   */
-  static bool isMixedWithStaticStrKeys(const ArrayData* arr) {
-    auto const test = static_cast<uint32_t>(HeaderKind::Mixed);
-    auto const mask = static_cast<uint32_t>(~kStaticStrKey) << 24 |
-                      static_cast<uint32_t>(0xff);
-    return (*(reinterpret_cast<const uint32_t*>(arr) + 1) & mask) == test;
-  }
-
-  /*
    * Call these methods to get key types in m_aux format. We initialize m_aux
    * in a single store when we write a header, so we can't use the APIs below.
    */

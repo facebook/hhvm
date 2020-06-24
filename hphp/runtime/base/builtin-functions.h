@@ -198,7 +198,7 @@ inline bool is_vec(const TypedValue* c) {
     return false;
   }
 
-  if (tvIsArray(c) && c->m_data.parr->isVArray()) {
+  if (tvIsArrayLike(c) && c->m_data.parr->isVArray()) {
     hacLogging(Strings::HACKARR_COMPAT_VARR_IS_VEC);
     maybe_raise_array_serialization_notice(SerializationSite::IsVec, c);
   }
@@ -216,7 +216,7 @@ inline bool is_dict(const TypedValue* c) {
   auto const hacLogging = [&](const char* msg) {
     if (RO::EvalHackArrCompatIsVecDictNotices) raise_hackarr_compat_notice(msg);
   };
-  if (tvIsArray(c) && c->m_data.parr->isDArray()) {
+  if (tvIsArrayLike(c) && c->m_data.parr->isDArray()) {
     hacLogging(Strings::HACKARR_COMPAT_DARR_IS_DICT);
     maybe_raise_array_serialization_notice(SerializationSite::IsDict, c);
   }
@@ -236,7 +236,7 @@ inline bool is_varray(const TypedValue* c) {
   // only dynamic calls to is_varray will remain at that point.
   if (RuntimeOption::EvalHackArrDVArrs) return is_vec(c);
 
-  if (tvIsVArray(c) || (tvIsArray(c) && c->m_data.parr->isVArray())) {
+  if (tvIsArrayLike(c) && c->m_data.parr->isVArray()) {
     maybe_raise_array_serialization_notice(SerializationSite::IsVArray, c);
     return true;
   }
@@ -264,7 +264,7 @@ inline bool is_darray(const TypedValue* c) {
   // only dynamic calls to is_darray will remain at that point.
   if (RuntimeOption::EvalHackArrDVArrs) return is_dict(c);
 
-  if (tvIsDArray(c) || (tvIsArray(c) && c->m_data.parr->isDArray())) {
+  if (tvIsArrayLike(c) && c->m_data.parr->isDArray()) {
     maybe_raise_array_serialization_notice(SerializationSite::IsDArray, c);
     return true;
   }

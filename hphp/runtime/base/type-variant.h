@@ -718,12 +718,10 @@ struct Variant : private TypedValue {
     return isArrayType(getType());
   }
   bool isDArray() const {
-    return (isArrayType(getType()) && m_data.parr->isDArray()) ||
-      isDArrayType(getType());
+    return isArrayLikeType(getType()) && m_data.parr->isDArray();
   }
   bool isVArray() const {
-    return (isArrayType(getType()) && m_data.parr->isVArray()) ||
-      isVArrayType(getType());
+    return isArrayLikeType(getType()) && m_data.parr->isVArray();
   }
   bool isVec() const {
     return isVecType(getType());

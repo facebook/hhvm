@@ -157,20 +157,6 @@ static_assert(!isArrayLikeType(KindOfString),           "");
 static_assert(!isArrayLikeType(KindOfObject),           "");
 static_assert(!isArrayLikeType(KindOfResource),         "");
 
-static_assert(isVArrayType(KindOfVArray),            "");
-static_assert(isVArrayType(KindOfPersistentVArray),  "");
-static_assert(!isVArrayType(KindOfArray),            "");
-static_assert(!isVArrayType(KindOfPersistentArray),  "");
-static_assert(!isVArrayType(KindOfDArray),           "");
-static_assert(!isVArrayType(KindOfPersistentDArray), "");
-
-static_assert(isDArrayType(KindOfDArray),            "");
-static_assert(isDArrayType(KindOfPersistentDArray),  "");
-static_assert(!isDArrayType(KindOfArray),            "");
-static_assert(!isDArrayType(KindOfPersistentArray),  "");
-static_assert(!isDArrayType(KindOfVArray),           "");
-static_assert(!isDArrayType(KindOfPersistentVArray), "");
-
 static_assert(isNullType(KindOfUninit),            "");
 static_assert(isNullType(KindOfNull),              "");
 static_assert(!isNullType(KindOfArray),            "");

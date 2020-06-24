@@ -324,23 +324,6 @@ inline bool isHackArrayType(MaybeDataType t) {
   return t && isHackArrayType(*t);
 }
 
-constexpr bool isVArrayType(DataType t) {
-  return
-    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentVArray;
-}
-
-inline bool isVArrayType(MaybeDataType t) {
-  return t && isVArrayType(*t);
-}
-
-constexpr bool isDArrayType(DataType t) {
-  return
-    static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentDArray;
-}
-inline bool isDArrayType(MaybeDataType t) {
-  return t && isDArrayType(*t);
-}
-
 constexpr bool isVecType(DataType t) {
   return
     static_cast<DataType>(dt_t(t) & ~kRefCountedBit) == KindOfPersistentVec;

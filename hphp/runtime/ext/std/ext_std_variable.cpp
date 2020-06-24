@@ -175,7 +175,7 @@ bool HHVM_FUNCTION(HH_is_list_like, const Variant& val) {
   }
   auto const& ty = val.getType();
   if (!isArrayLikeType(ty)) return false;
-  if (isVecType(ty) || isVArrayType(ty)) return true;
+  if (isVecType(ty)) return true;
   auto const& arr = val.asCArrRef();
   return arr->isVectorData();
 }

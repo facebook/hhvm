@@ -46,6 +46,8 @@ function is_vec(<<__MaybeMutable>> mixed $arg): bool;
 function is_dict(<<__MaybeMutable>> mixed $arg): bool;
 <<__Pure>>
 function is_keyset(<<__MaybeMutable>> mixed $arg): bool;
+<<__Pure>>
+function is_any_array(<<__MaybeMutable>> mixed $arg): bool;
 }
 
 namespace {

@@ -28,9 +28,9 @@ class X1
 
 function g2()
 {
-    var_dump(isset($GLOBALS['gl']));
-    unset($GLOBALS['gl']);              // unsets global "version"
-    var_dump(isset($GLOBALS['gl']));
+    var_dump(\HH\global_isset('gl'));
+    \HH\global_unset('gl');              // unsets global "version"
+    var_dump(\HH\global_isset('gl'));
 }
 
 function g3($p1, inout $p2)
@@ -119,11 +119,11 @@ function entrypoint_intrinsics_unset(): void {
 
   echo "---------- unsetting inside a function (\$GLOBALS) ------------\n";
 
-  $GLOBALS['gl'] = 100;
-  var_dump(isset($GLOBALS['gl']));       // still set
+  \HH\global_set('gl', 100);
+  var_dump(\HH\global_isset('gl'));       // still set
 
   g2();
-  var_dump(isset($GLOBALS['gl']));       // no longer set
+  var_dump(\HH\global_isset('gl'));       // no longer set
 
   echo "---------- unsetting inside a function (pass-by-inout) ------------\n";
 

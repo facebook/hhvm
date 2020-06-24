@@ -10,7 +10,7 @@
 function entrypoint_predefined_variables(): void {
   error_reporting(-1);
 
-  var_dump($GLOBALS['argc']);
-  var_dump($GLOBALS['argv']);
-  var_dump($GLOBALS['_ENV']);
+  var_dump(\HH\global_get('argc'));
+  var_dump(\HH\global_get('argv'));
+  var_dump(\HH\global_get('_ENV'));
 }

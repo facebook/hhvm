@@ -3,7 +3,7 @@
 class X {
 }
 function bug() {
-  if (!$GLOBALS['x']) {
+  if (!\HH\global_get('x')) {
     return;
   }
   return new X;

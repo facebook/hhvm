@@ -1,7 +1,7 @@
 <?hh
 
 function unknown($x) {
-  return $GLOBALS['asd'];
+  return \HH\global_get('asd');
 }
 
 function foo($ids) {
@@ -24,7 +24,7 @@ function main() {
 <<__EntryPoint>>
 function entrypoint_array_057(): void {
 
-  $GLOBALS['asd'] = '2'.mt_rand();
+  \HH\global_set('asd', '2'.mt_rand());
 
   main();
 }

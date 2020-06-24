@@ -2,7 +2,7 @@
 <<__EntryPoint>> function main(): void {
 $arr = darray["a" => 1, "b" => 2];
 foreach ($arr as $key => $val) {
-	unset($GLOBALS[$key]);
+	\HH\global_unset($key);
 }
 
 var_dump($arr);

@@ -4,7 +4,7 @@ function b($s) {
   if ($s === 'floo') {
     return 12;
   }
-  $GLOBALS['z'] = 234;
+  \HH\global_set('z', 234);
   return 8;
 }
 
@@ -20,8 +20,8 @@ function a($b) {
 function f() {
   for ($i = 0; $i < 4; ++$i) {
     a($i < 3);
-    $GLOBALS['tmp'] = $i;
-    $i = $GLOBALS['tmp'];
+    \HH\global_set('tmp', $i);
+    $i = \HH\global_get('tmp');
   }
 }
 
@@ -29,7 +29,7 @@ function enable() {
   echo "Going to enable\n";
   fb_enable_code_coverage();
   echo "Enabled\n";
-  $GLOBALS['z'] = 3;
+  \HH\global_set('z', 3);
 }
 
 function doenable() {

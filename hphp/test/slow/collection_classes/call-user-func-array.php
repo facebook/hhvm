@@ -6,7 +6,7 @@ class C {
 }
 function main() {
   $cufa = 'call_user_func_array';
-  if ($GLOBALS['argc'] > 1000000000) {
+  if (\HH\global_get('argc') > 1000000000) {
     $cufa = 'call_user_func';
   }
   call_user_func_array('var_dump', darray[4 => 123, 6 => 456]);

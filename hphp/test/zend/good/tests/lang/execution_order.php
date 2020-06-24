@@ -9,8 +9,8 @@ class strclass {
 
 
 function foo() {
-  $GLOBALS['a'] = 'good';
-  return $GLOBALS['a'];
+  \HH\global_set('a', 'good');
+  return \HH\global_get('a');
 }
 
 
@@ -62,14 +62,14 @@ function entrypoint_execution_order(): void {
   echo "\r\n";
 
 
-  $GLOBALS['a'] = "bad";
+  \HH\global_set('a', "bad");
   echo "7)";
-  echo foo() . $a;
+  echo foo() . \HH\global_get('a');
   echo "\r\n";
 
-  $GLOBALS['a'] = "bad";
+  \HH\global_set('a', "bad");
   echo "8)";
-  echo $a . foo();
+  echo \HH\global_get('a') . foo();
   echo "\r\n";
 
   /* other operators */

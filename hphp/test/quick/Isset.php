@@ -8,21 +8,21 @@ function f() {
 
 
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickIsset::$y).":\n";
 
   $x = 0;
-  $GLOBALS['y'] = 0;
+  \HH\global_set('y', 0);
   quickIsset::$y = 0;
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickIsset::$y).":\n";
 
   unset($x);
-  unset($GLOBALS['y']);
+  \HH\global_unset('y');
   quickIsset::$y = null;
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickIsset::$y).":\n";
 
   $a = darray[];

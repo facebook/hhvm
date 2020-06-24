@@ -13,25 +13,25 @@ function f() {
 
 
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickUnset::$y).":\n";
 
   unset($x);
-  unset($GLOBALS['y']);
+  \HH\global_unset('y');
   quickUnset::$y = null;
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickUnset::$y).":\n";
 
   $x = 0;
-  $GLOBALS['y'] = 0;
+  \HH\global_set('y', 0);
   quickUnset::$y = 0;
   print ":".isset($x).":\n";
-  print ":".isset($GLOBALS['y']).":\n";
+  print ":".\HH\global_isset('y').":\n";
   print ":".isset(quickUnset::$y).":\n";
 
   unset($x);
-  unset($GLOBALS['y']);
+  \HH\global_unset('y');
   quickUnset::$y = null;
   print ":".isset($x).":\n";
   print ":".isset($y).":\n";

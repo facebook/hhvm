@@ -3,7 +3,7 @@
 class A {
   public function foo() {
     $x = () ==> {
-      $GLOBALS['heh'] = $this;
+      \HH\global_set('heh', $this);
       yield 1;
       yield 2;
       yield 3;

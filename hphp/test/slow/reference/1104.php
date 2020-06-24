@@ -10,7 +10,7 @@ function test($a) {
   return $a;
 }
 function foo() {
-  return $GLOBALS['x'];
+  return \HH\global_get('x');
 }
 
 <<__EntryPoint>>

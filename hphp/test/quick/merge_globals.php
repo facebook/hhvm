@@ -5,5 +5,5 @@ class X {}
 function main_entry(): void {
 
 
-  $GLOBALS['foo'] = 1;
+  \HH\global_set('foo', 1);
 }

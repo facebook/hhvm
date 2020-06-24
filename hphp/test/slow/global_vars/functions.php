@@ -13,21 +13,21 @@ function test_functions() {
 }
 
 function test_normal() {
-  $GLOBALS[__FUNCTION__] = __FILE__;
-  var_dump($GLOBALS[__FUNCTION__] === __FILE__);
-  unset($GLOBALS[__FUNCTION__]);
+  \HH\global_set(__FUNCTION__, __FILE__);
+  var_dump(\HH\global_get(__FUNCTION__) === __FILE__);
+  \HH\global_unset(__FUNCTION__);
 }
 
 function test_get() {
   var_dump(HH\global_get(__FUNCTION__) is null);
-  $GLOBALS[__FUNCTION__] = __FILE__;
+  \HH\global_set(__FUNCTION__, __FILE__);
   var_dump(HH\global_get(__FUNCTION__) === __FILE__);
 }
 
 function test_set() {
-  var_dump($GLOBALS[__FUNCTION__] is null);
+  var_dump(\HH\global_get(__FUNCTION__) is null);
   HH\global_set(__FUNCTION__, __FILE__);
-  var_dump($GLOBALS[__FUNCTION__] === __FILE__);
+  var_dump(\HH\global_get(__FUNCTION__) === __FILE__);
 }
 
 function test_bogus_args() {
@@ -35,15 +35,15 @@ function test_bogus_args() {
 }
 
 function test_unset() {
-  $GLOBALS[__FUNCTION__] = __FILE__;
-  var_dump($GLOBALS[__FUNCTION__] === __FILE__);
+  \HH\global_set(__FUNCTION__, __FILE__);
+  var_dump(\HH\global_get(__FUNCTION__) === __FILE__);
   HH\global_unset(__FUNCTION__);
-  var_dump($GLOBALS[__FUNCTION__] is null);
+  var_dump(\HH\global_get(__FUNCTION__) is null);
 }
 
 function test_global_key_exists() {
   var_dump(HH\global_key_exists(__FUNCTION__));
-  $GLOBALS[__FUNCTION__] = null;
+  \HH\global_set(__FUNCTION__, null);
   var_dump(HH\global_key_exists(__FUNCTION__));
 }
 

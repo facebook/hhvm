@@ -8,16 +8,16 @@ abstract final class quickEmpty {
 function f() {
 
   $x = 0;
-  $GLOBALS['y'] = 0;
+  \HH\global_set('y', 0);
   quickEmpty::$y = 0;
   print ":".!($x ?? false).":\n";
-  print ":".!($GLOBALS['y'] ?? false).":\n";
+  print ":".!(\HH\global_get('y') ?? false).":\n";
   print ":".!(quickEmpty::$y ?? false).":\n";
 
   $x = 1;
-  $GLOBALS['y'] = 1;
+  \HH\global_set('y', 1);
   quickEmpty::$y = 1;
   print ":".!($x ?? false).":\n";
-  print ":".!($GLOBALS['y'] ?? false).":\n";
+  print ":".!(\HH\global_get('y') ?? false).":\n";
   print ":".!(quickEmpty::$y ?? false).":\n";
 }

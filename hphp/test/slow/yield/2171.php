@@ -7,7 +7,7 @@ function g($a1, $a2, $a3) {
 }
 function h($fcn) {
 
-  $fcn($GLOBALS['_POST'], Yield2171::$x, Yield2171::$x++);
+  $fcn(\HH\global_get('_POST'), Yield2171::$x, Yield2171::$x++);
   yield 64;
 }
 

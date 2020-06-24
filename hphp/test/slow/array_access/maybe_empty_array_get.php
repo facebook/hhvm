@@ -17,7 +17,7 @@ class Gronk {
 
   private function getStuffAndGronk(?int $count): varray {
     foreach ($this->gronks as $gronk) {
-      if ($GLOBALS['break']) {
+      if (\HH\global_get('break')) {
         $z = varray[varray[null, null], $gronk];
         $z[] = new stdclass;
         return $z;

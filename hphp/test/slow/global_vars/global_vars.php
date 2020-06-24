@@ -1,7 +1,7 @@
 <?hh
 <<__EntryPoint>>
 function entrypoint_global_vars(): void {
-  if ($GLOBALS['argc'] > 1) {
+  if (\HH\global_get('argc') > 1) {
     echo "---- " . ini_get('variables_order') . " ----\n";
 
     var_dump(count($_SERVER) > 0);

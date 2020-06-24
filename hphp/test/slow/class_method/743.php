@@ -2,7 +2,7 @@
 class A {
   public static function f($value) {
     $filter = 'g';
-    return call_user_func(varray[$GLOBALS['a'], $filter], $value);
+    return call_user_func(varray[\HH\global_get('a'), $filter], $value);
   }
   public static function g($value) {
     return $value;
@@ -10,6 +10,6 @@ class A {
 }
 <<__EntryPoint>>
 function entrypoint_743(): void {
-  $GLOBALS['a'] = 'A';
+  \HH\global_set('a', 'A');
   var_dump(A::f('test'));
 }

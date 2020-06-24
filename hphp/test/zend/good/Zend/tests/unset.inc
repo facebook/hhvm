@@ -1,5 +1,5 @@
 <?hh
 
 function unset_() {
-  unset($GLOBALS['x']);
+  \HH\global_unset('x');
 }

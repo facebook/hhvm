@@ -2,26 +2,26 @@
 
 <<__EntryPoint>>
 function main() {
-  $GLOBALS['n'] = 10;
+  \HH\global_set('n', 10);
   $vals = varray[];
   for ($i = 0; $i < 10; $i++) {
-    $vals[] = $GLOBALS['n'];
+    $vals[] = \HH\global_get('n');
   }
   var_dump($vals);
 
   for ($i = 0; $i < 10; $i++) {
     $gname = "a" . (string)$i;
-    $GLOBALS[$gname] = $i;
+    \HH\global_set($gname, $i);
   }
 
-  printf("%016x\n", 1 << $GLOBALS['a0']);
-  printf("%016x\n", 1 << $GLOBALS['a1']);
-  printf("%016x\n", 1 << $GLOBALS['a2']);
-  printf("%016x\n", 1 << $GLOBALS['a3']);
+  printf("%016x\n", 1 << \HH\global_get('a0'));
+  printf("%016x\n", 1 << \HH\global_get('a1'));
+  printf("%016x\n", 1 << \HH\global_get('a2'));
+  printf("%016x\n", 1 << \HH\global_get('a3'));
 
-  $GLOBALS[42] = "---42---";
+  \HH\global_set(42, "---42---");
   $a = varray[];
-  $a[] = $GLOBALS[42];
-  $a[] = $GLOBALS["42"];
+  $a[] = \HH\global_get(42);
+  $a[] = \HH\global_get("42");
   var_dump($a);
 }

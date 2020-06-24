@@ -9,7 +9,7 @@ class TestClass
 {
     function testMethod()
     {
-        $GLOBALS['t'] = new stdClass;
+        \HH\global_set('t', new stdClass);
     }
 }
 <<__EntryPoint>> function main(): void {

@@ -1,7 +1,7 @@
 <?hh
 
 function foo() {
-  $bar = $GLOBALS['asd'];
+  $bar = \HH\global_get('asd');
 }
 <<__EntryPoint>> function main(): void {
 // disable array -> "Array" conversion notice

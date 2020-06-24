@@ -2,13 +2,13 @@
 
 <<__EntryPoint>> function foo(): void {
   // Force all the types to be in so these don't get constant folded.
-  if (isset($GLOBALS['a'])) $a = 1;
-  if (isset($GLOBALS['b'])) $a = 1.2;
-  if (isset($GLOBALS['c'])) $a = '1';
-  if (isset($GLOBALS['d'])) $a = new stdclass;
-  if (isset($GLOBALS['e'])) $a = varray[];
-  if (isset($GLOBALS['f'])) $a = false;
-  if (isset($GLOBALS['g'])) $a = null;
+  if (\HH\global_isset('a')) $a = 1;
+  if (\HH\global_isset('b')) $a = 1.2;
+  if (\HH\global_isset('c')) $a = '1';
+  if (\HH\global_isset('d')) $a = new stdclass;
+  if (\HH\global_isset('e')) $a = varray[];
+  if (\HH\global_isset('f')) $a = false;
+  if (\HH\global_isset('g')) $a = null;
 
   echo "set:     ", isset($a)      . "\n";
   echo "nul:     ", is_null($a)    . "\n";

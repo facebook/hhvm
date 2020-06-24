@@ -2,7 +2,7 @@
 <<__EntryPoint>>
 function entrypoint_1188(): void {
 
-  if ($GLOBALS['argc'] > 100) {
+  if (\HH\global_get('argc') > 100) {
     $f = 'var_dump';
   }
   else {

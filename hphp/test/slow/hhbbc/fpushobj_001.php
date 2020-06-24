@@ -1,7 +1,7 @@
 <?hh
 class C { public function heh() { echo "heh\n"; } }
 function foo() {
-  switch ($GLOBALS['x']) {
+  switch (\HH\global_get('x')) {
   case 0:
     return new C;
   }

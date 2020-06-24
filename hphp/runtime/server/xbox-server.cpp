@@ -216,6 +216,11 @@ bool XboxServer::SendMessage(const String& message,
                              Array& ret,
                              int timeout_ms,
                              const String& host /* = "localhost" */) {
+  // Make sure that we only ever return a darray or null.
+  if (!ret.isNull() && !ret.isDArray()) {
+    ret = Array::CreateDArray();
+  }
+
   if (isLocalHost(host)) {
     XboxTransport *job;
     {
@@ -240,6 +245,7 @@ bool XboxServer::SendMessage(const String& message,
     job->decRefCount(); // i'm done with this job
 
     if (code > 0) {
+      ret = Array::CreateDArray();
       ret.set(s_code, code);
       if (code == 200) {
         ret.set(
@@ -278,6 +284,7 @@ bool XboxServer::SendMessage(const String& message,
         int len = 0;
         char *response = http->recv(len);
         String sresponse(response, len, AttachString);
+        ret = Array::CreateDArray();
         ret.set(s_code, code);
         if (code == 200) {
           ret.set(
@@ -293,6 +300,7 @@ bool XboxServer::SendMessage(const String& message,
         return true;
       }
       // code wasn't correctly set by http client, treat it as not found
+      ret = Array::CreateDArray();
       ret.set(s_code, 404);
       ret.set(s_error, "http client failed");
     }

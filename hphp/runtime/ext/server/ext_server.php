@@ -70,7 +70,7 @@ function pagelet_server_task_status(resource $task): int;
 <<__HipHopSpecific, __Native>>
 function pagelet_server_task_result(
   resource $task,
-  <<__OutOnly('KindOfArray')>>
+  <<__OutOnly('varray')>>
   inout mixed $headers,
   <<__OutOnly('KindOfInt64')>>
   inout mixed $code,
@@ -115,7 +115,7 @@ function pagelet_server_is_done(): bool;
  */
 <<__HipHopSpecific, __Native>>
 function xbox_send_message(string $msg,
-                           <<__OutOnly('KindOfArray')>>
+                           <<__OutOnly('darray')>>
                            inout mixed $ret,
                            int $timeout_ms,
                            string $host = "localhost"): bool;

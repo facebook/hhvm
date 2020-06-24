@@ -263,7 +263,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
       m_result.m_data.pstr = StringData::Make(
         m_stringResult.c_str(), m_stringResult.size(), CopyString);
       m_stringResult.clear();
-    } else if ((m_result.m_type == KindOfArray) && !m_result.m_data.parr) {
+    } else if ((m_result.m_type == KindOfResource) && !m_result.m_data.pres) {
       // Deferred string value and cas, see below
       Array ret = make_darray(
         s_value,
@@ -271,7 +271,7 @@ struct MCRouterResult : AsioExternalThreadEvent {
         s_cas, (int64_t)m_cas,
         s_flags, (int64_t)m_flags
       );
-      m_result.m_data.parr = ret.detach();
+      m_result = make_array_like_tv(ret.detach());
       m_stringResult.clear();
     }
     tvDup(m_result, c);
@@ -341,10 +341,11 @@ struct MCRouterResult : AsioExternalThreadEvent {
           }
           /* fallthrough */
         case mc_op_version:
-          m_result.m_type = mc_op == mc_op_gets ? KindOfArray : KindOfString;
+          // We can only allocate memory in the memory-manager thread so stash
+          // the data in a std::string until we get to unserialize(). We use a
+          // sentinal nullptr and a sentinel datatype here.
+          m_result.m_type = mc_op == mc_op_gets ? KindOfResource : KindOfString;
           m_result.m_data.pstr = nullptr;
-          // We're in the wrong thread for making a StringData
-          // so stash it in a std::string until we get to unserialize
           m_stringResult = carbon::valueRangeSlow(reply).str();
           break;
 

@@ -226,6 +226,11 @@ String PageletTransport::getResults(
   int &code,
   int64_t timeout_ms
 ) {
+  // Make sure that we only ever return a varray or null.
+  if (!headers.isNull() && !headers.isVArray()) {
+    headers = Array::CreateVArray();
+  }
+
   {
     Lock lock(this);
     while (!m_done && m_pipeline.empty()) {

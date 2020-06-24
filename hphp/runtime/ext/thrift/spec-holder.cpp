@@ -77,7 +77,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
       } else if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Map::classof()->name());
       } else {
-        return tc.alwaysPasses(KindOfArray);
+        return tc.alwaysPasses(staticEmptyDArray()->toDataType());
       }
       break;
     }
@@ -88,7 +88,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
       } else if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Vector::classof()->name());
       } else {
-        return tc.alwaysPasses(KindOfArray);
+        return tc.alwaysPasses(staticEmptyVArray()->toDataType());
       }
       break;
     }
@@ -99,7 +99,7 @@ bool SpecHolder::typeSatisfiesConstraint(const TypeConstraint& tc,
       } else if (format.equal(s_collection)) {
         return tc.alwaysPasses(c_Set::classof()->name());
       } else {
-        return tc.alwaysPasses(KindOfArray);
+        return tc.alwaysPasses(staticEmptyDArray()->toDataType());
       }
       break;
     }

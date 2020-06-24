@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/set-array.h"
 
 #include "hphp/runtime/vm/class-meth-data.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/rfunc-data.h"
@@ -262,7 +261,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* BespokeVArray */
     0, /* Mixed */
     0, /* BespokeDArray */
-    sizeClass<GlobalsArray>(),
+    0, /* GlobalsArray */
     0, /* RecordArray */
     0, /* Plain */
     0, /* BespokeArray */
@@ -303,7 +302,6 @@ inline size_t allocSize(const HeapObject* h) {
   };
 #define CHECKSIZE(knd, type) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
-  CHECKSIZE(Globals, GlobalsArray)
   CHECKSIZE(ClsMeth, ClsMethData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
   CHECKSIZE(Vector, c_Vector)

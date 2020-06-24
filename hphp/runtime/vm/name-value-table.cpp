@@ -312,22 +312,6 @@ NameValueTable::Iterator::getEnd(const NameValueTable* tab) {
   return it;
 }
 
-NameValueTable::Iterator::Iterator(const NameValueTable* tab, ssize_t pos)
-  : m_tab(tab)
-  , m_idx(pos)
-{
-  assertx(pos >= 0);
-  if (!valid()) next();
-}
-
-NameValueTable::Iterator::Iterator(const NameValueTable* tab,
-                                   const StringData* start)
-  : m_tab(tab)
-{
-  Elm* e = m_tab->findElm(start);
-  m_idx = e ? e - m_tab->m_table : (m_tab->m_tabMask + 1);
-}
-
 ssize_t NameValueTable::Iterator::toInteger() const {
   const ssize_t invalid = m_tab->m_tabMask + 1;
   return valid() ? m_idx : invalid;

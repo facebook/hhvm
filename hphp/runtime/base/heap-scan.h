@@ -42,7 +42,6 @@
 
 #include "hphp/runtime/server/server-note.h"
 
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/named-entity-defs.h"
 #include "hphp/runtime/vm/runtime.h"
@@ -117,9 +116,8 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::Keyset:
       return static_cast<const SetArray*>(h)->scan(scanner);
     case HeaderKind::Globals:
-      return static_cast<const GlobalsArray*>(h)->scan(scanner);
     case HeaderKind::RecordArray:
-      // We are in the process of removing record arrays
+      // We are in the process of removing record and globals arrays
       return;
     case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:

@@ -85,7 +85,7 @@ checkObjEqualRecursively($msg, darray[
         "name" => "Locals",
       ],
       darray[
-        "namedVariables" => 8,
+        "namedVariables" => 7,
         "name" => "Superglobals",
       ],
       darray[

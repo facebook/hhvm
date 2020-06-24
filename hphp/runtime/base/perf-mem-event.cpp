@@ -27,7 +27,6 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/func.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/named-entity.h"
 #include "hphp/runtime/vm/reverse-data-map.h"
 #include "hphp/runtime/vm/unit.h"
@@ -315,11 +314,10 @@ bool record_request_heap_mem_event(const void* addr,
       break;
 
     case HeaderKind::Globals:
-      try_member(static_cast<const GlobalsArray*>(hdr), addr, record);
-      break;
     case HeaderKind::RecordArray:
-      // TODO: T47449944
+      // About to be deleted immediately.
       break;
+
     case HeaderKind::RFunc: // TODO(T63348446)
       break;
 

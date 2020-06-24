@@ -21,7 +21,6 @@
 #include "hphp/runtime/ext/vsdebug/command.h"
 #include "hphp/runtime/ext/vsdebug/debugger.h"
 #include "hphp/runtime/ext/vsdebug/php_executor.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 
 namespace HPHP {

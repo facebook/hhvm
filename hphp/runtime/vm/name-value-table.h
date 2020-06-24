@@ -30,11 +30,8 @@ struct ActRec;
 struct StringData;
 
 /*
- * This class implements a name to TypedValue map.  Basically a hashtable from
- * StringData* to TypedValue.
- *
- * This is for use in variable environments in bytecode.cpp, and is also used
- * for the global variable environment ($GLOBALS via GlobalsArray).
+ * This class implements a name to TypedValue map. Basically a hashtable from
+ * StringData* to TypedValue. Used by variable environments in bytecode.cpp.
  *
  * The table may be optionally attached to an ActRec, in which case it will
  * contain a kNamedLocalDataType TypedValue per every named local defined in
@@ -47,21 +44,6 @@ struct NameValueTable {
     explicit Iterator(const NameValueTable* tab);
     static Iterator getLast(const NameValueTable* tab);
     static Iterator getEnd(const NameValueTable* tab);
-
-    /*
-     * The following two constructors are primarily for using this with
-     * the ArrayData interface (see GlobalsArray), which
-     * expects iterators to be represented by a ssize_t.
-     *
-     * The constructor taking `pos' must be given a value previously
-     * returned from toInteger().
-     *
-     * The constructor taking a const StringData* starts iteration at
-     * the key given, or returns an invalid iterator if that key does
-     * not exist.
-     */
-    explicit Iterator(const NameValueTable* tab, ssize_t pos);
-    explicit Iterator(const NameValueTable* tab, const StringData* start);
 
     ssize_t toInteger() const;
     bool valid() const;

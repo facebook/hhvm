@@ -126,10 +126,6 @@ SSATmp* gen(State& env, Opcode op, Args&&... args) {
   return gen(env, op, env.insts.top()->bcctx(), std::forward<Args>(args)...);
 }
 
-bool arrayKindNeedsVsize(const ArrayData::ArrayKind kind) {
-  return kind == ArrayData::kGlobalsKind;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 DEBUG_ONLY bool validate(const State& env,
@@ -2162,11 +2158,7 @@ SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  auto const kind = src->type().arrSpec().kind();
-  if (src->isA(TStaticArr) || (kind && !arrayKindNeedsVsize(*kind))) {
-    return gen(env, ConvIntToBool, gen(env, CountArrayFast, src));
-  }
-  return nullptr;
+  return gen(env, ConvIntToBool, gen(env, CountArrayFast, src));
 }
 
 SSATmp* simplifyConvDblToBool(State& env, const IRInstruction* inst) {
@@ -3338,16 +3330,8 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
 
 SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
-  auto const ty = src->type();
-
   if (src->hasConstVal()) return cns(env, src->arrVal()->size());
-
-  auto const kind = ty.arrSpec().kind();
-
-  if (kind && !arrayKindNeedsVsize(*kind))
-    return gen(env, CountArrayFast, src);
-
-  return nullptr;
+  return gen(env, CountArrayFast, src);
 }
 
 namespace {

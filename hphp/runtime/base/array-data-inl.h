@@ -146,15 +146,9 @@ inline ArrayData::ArrayKind ArrayData::kind() const {
   return static_cast<ArrayKind>(m_kind);
 }
 
-inline bool ArrayData::noCopyOnWrite() const {
-  // GlobalsArray doesn't support COW.
-  return kind() == kGlobalsKind;
-}
-
 inline bool ArrayData::isPackedKind() const { return kind() == kPackedKind; }
 inline bool ArrayData::isMixedKind() const { return kind() == kMixedKind; }
 inline bool ArrayData::isPlainKind() const { return kind() == kPlainKind; }
-inline bool ArrayData::isGlobalsArrayKind() const { return kind() == kGlobalsKind; }
 inline bool ArrayData::isVecKind() const { return kind() == kVecKind; }
 inline bool ArrayData::isDictKind() const { return kind() == kDictKind; }
 inline bool ArrayData::isKeysetKind() const { return kind() == kKeysetKind; }

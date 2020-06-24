@@ -32,17 +32,13 @@ and store a pointer to it in the `TypedValue.`
 [`ArrayData`](../../runtime/base/array-data.h) is used to represent all
 array-like types in Hack: `array`, `dict`, `vec`, and `keyset`, though you'll
 never see any raw `ArrayData` objects created anywhere. Instead, a specific kind
-of array is created and tagged using one of the [eight current array
-`HeaderKind`
-values](https://github.com/facebook/hhvm/blob/HHVM-3.27/hphp/runtime/base/header-kind.h#L46-L49).
+of array is created and tagged using one of the [several current array `HeaderKind` values]
+(https://github.com/facebook/hhvm/blob/HHVM-3.27/hphp/runtime/base/header-kind.h#L46-L49).
 We use a custom vtable to dispatch to the appropriate implementation for all
 `ArrayData` member functions; the current implementation classes are
-[`EmptyArray`](../../runtime/base/empty-array.h),
 [`PackedArray`](../../runtime/base/packed-array.h),
-[`MixedArray`](../../runtime/base/mixed-array.h),
-[`SetArray`](../../runtime/base/set-array.h),
-[`GlobalsArray`](../../runtime/vm/globals-array.h), and
-[`APCArray`](../../runtime/base/apc-array.h). Note that many of these types
+[`MixedArray`](../../runtime/base/mixed-array.h), and
+[`SetArray`](../../runtime/base/set-array.h). Note that many of these types
 don't directly inherit from `ArrayData`, so they're only subtypes of `ArrayData`
 by convention.
 

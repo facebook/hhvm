@@ -103,7 +103,6 @@
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -307,7 +306,19 @@ static inline Class* frameStaticClass(ActRec* fp) {
 //=============================================================================
 // VarEnv.
 
-const StaticString s_GLOBALS("GLOBALS");
+namespace {
+const StaticString
+  s_argc("argc"),
+  s_argv("argv"),
+  s__SERVER("_SERVER"),
+  s__GET("_GET"),
+  s__POST("_POST"),
+  s__COOKIE("_COOKIE"),
+  s__FILES("_FILES"),
+  s__ENV("_ENV"),
+  s__REQUEST("_REQUEST"),
+  s_HTTP_RAW_POST_DATA("HTTP_RAW_POST_DATA");
+}
 
 void VarEnv::createGlobal() {
   assertx(!g_context->m_globalVarEnv);
@@ -320,11 +331,17 @@ VarEnv::VarEnv()
   , m_global(true)
 {
   TRACE(3, "Creating VarEnv %p [global scope]\n", this);
-  ARRPROV_USE_RUNTIME_LOCATION();
-  auto globals_var = Variant::attach(
-    new (tl_heap->objMalloc(sizeof(GlobalsArray))) GlobalsArray(&m_nvTable)
-  );
-  m_nvTable.set(s_GLOBALS.get(), globals_var.asTypedValue());
+  Variant arr(ArrayData::CreateDArray());
+  m_nvTable.set(s_argc.get(),               init_null_variant.asTypedValue());
+  m_nvTable.set(s_argv.get(),               init_null_variant.asTypedValue());
+  m_nvTable.set(s__SERVER.get(),            arr.asTypedValue());
+  m_nvTable.set(s__GET.get(),               arr.asTypedValue());
+  m_nvTable.set(s__POST.get(),              arr.asTypedValue());
+  m_nvTable.set(s__COOKIE.get(),            arr.asTypedValue());
+  m_nvTable.set(s__FILES.get(),             arr.asTypedValue());
+  m_nvTable.set(s__ENV.get(),               arr.asTypedValue());
+  m_nvTable.set(s__REQUEST.get(),           arr.asTypedValue());
+  m_nvTable.set(s_HTTP_RAW_POST_DATA.get(), init_null_variant.asTypedValue());
 }
 
 VarEnv::VarEnv(ActRec* fp)
@@ -361,11 +378,8 @@ VarEnv::~VarEnv() {
      * not supposed to run destructors for objects that are live at
      * the end of a request.
      */
-    m_nvTable.unset(s_GLOBALS.get());
     m_nvTable.leak();
   }
-  // at this point, m_nvTable is destructed, and GlobalsArray
-  // has a dangling pointer to it.
 }
 
 void VarEnv::deallocate(ActRec* fp) {
@@ -445,22 +459,11 @@ void VarEnv::set(const StringData* name, tv_rval tv) {
 }
 
 tv_lval VarEnv::lookup(const StringData* name) {
-  auto const lval = m_nvTable.lookup(name);
-  if (lval && isArrayType(type(lval)) && val(lval).parr->isGlobalsArrayKind() &&
-      isGlobalScope() && s_GLOBALS.equal(name)) {
-    raise_hackarr_compat_notice("lookup returning $GLOBALS array");
-  }
-  return lval;
+  return m_nvTable.lookup(name);
 }
 
 tv_lval VarEnv::lookupAdd(const StringData* name) {
-  auto const lval = m_nvTable.lookupAdd(name);
-  assertx(lval);
-  if (isArrayType(type(lval)) && val(lval).parr->isGlobalsArrayKind() &&
-      isGlobalScope() && s_GLOBALS.equal(name)) {
-    raise_hackarr_compat_notice("lookup returning $GLOBALS array");
-  }
-  return lval;
+  return m_nvTable.lookupAdd(name);
 }
 
 bool VarEnv::unset(const StringData* name) {
@@ -471,8 +474,6 @@ bool VarEnv::unset(const StringData* name) {
 const StaticString s_reified_generics_var("0ReifiedGenerics");
 
 Array VarEnv::getDefinedVariables() const {
-  // NOTE: If isGlobalScope, we're exposing a GlobalsArray here with the key
-  // "GLOBALS". That's okay - getDefinedVariables is only used by debuggers.
   Array ret = Array::CreateDArray();
 
   NameValueTable::Iterator iter(&m_nvTable);

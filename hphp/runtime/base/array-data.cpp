@@ -35,7 +35,6 @@
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/server/memory-stats.h"
-#include "hphp/runtime/vm/globals-array.h"
 #include "hphp/runtime/vm/interp-helpers.h"
 
 #include "hphp/util/exception.h"
@@ -273,8 +272,8 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
     BespokeArray::entry,     /* bespoke varray */ \
     MixedArray::entry,       /* darray */         \
     BespokeArray::entry,     /* bespoke darray */ \
-    GlobalsArray::entry,                          \
-    GlobalsArray::entry,     /* placeholder for record array*/ \
+    BespokeArray::entry,     /* placeholder */    \
+    BespokeArray::entry,     /* placeholder */    \
     MixedArray::entry,       /* plain array */    \
     BespokeArray::entry,     /* bespoke array */  \
     PackedArray::entry##Vec, /* vec */            \
@@ -378,13 +377,8 @@ const ArrayFunctions g_array_funcs = {
   /*
    * size_t Vsize(const ArrayData*)
    *
-   *   This entry point essentially is only for GlobalsArray;
-   *   all the other cases are not_reached().
-   *
-   *   Because of particulars of how GlobalsArray works,
-   *   determining the size of the array is an O(N) operation---we set
-   *   the size field in the generic ArrayData header to -1 in that
-   *   case and dispatch through this entry point.
+   *   This entry point is only for bespoke array-likes; for vanilla array
+   *   layouts, this function is not_reached().
    */
   DISPATCH(Vsize)
 
@@ -550,8 +544,6 @@ const ArrayFunctions g_array_funcs = {
    *
    *   Explicitly request that an array be copied.  This API does
    *   /not/ actually guarantee a copy occurs.
-   *
-   *   (E.g. GlobalsArray doesn't copy here.)
    */
   DISPATCH(Copy)
 
@@ -1006,13 +998,11 @@ Variant ArrayData::each() {
 // helpers
 
 void ArrayData::getNotFound(int64_t k) const {
-  assertx(kind() != kGlobalsKind);
   if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayIndexException(k, false);
 }
 
 void ArrayData::getNotFound(const StringData* k) const {
-  assertx(kind() != kGlobalsKind);
   if (isVecType()) throwInvalidArrayKeyException(k, this);
   if (isHackArrayType()) throwOOBArrayKeyException(k, this);
   throwArrayKeyException(k, false);
@@ -1024,8 +1014,8 @@ const char* ArrayData::kindToString(ArrayKind kind) {
     "BespokeVArrayKind",
     "MixedKind",
     "BespokeDArrayKind",
-    "GlobalsKind",
-    "RecordKind",
+    "INVALID_FORMERLY_GLOBALS_KIND",
+    "INVALID_FORMERLY_RECORD_KIND",
     "PlainKind",
     "BespokeArrayKind",
     "VecKind",

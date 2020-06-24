@@ -83,7 +83,7 @@ require(__DIR__ . '/common.inc');
           ],
           darray[
             'name' => 'Superglobals',
-            'namedVariables' => 8,
+            'namedVariables' => 7,
             'variablesReference' => 3,
           ],
           darray[
@@ -138,11 +138,6 @@ require(__DIR__ . '/common.inc');
       'success' => true,
       'body' => darray[
         'variables' => varray[
-          darray[
-            'name' => '$GLOBALS',
-            'type' => 'array',
-            'indexedVariables' => 11,
-          ],
           darray[
             'name' => '$_COOKIE',
             'type' => 'array',
@@ -201,12 +196,12 @@ require(__DIR__ . '/common.inc');
         'variables' => varray[
           darray[
             'name' => 'System Defined Constants',
-            'variablesReference' => 12,
+            'variablesReference' => 11,
             // not asserting number of namedVariables, it will change often
           ],
           darray[
             'name' => 'User Defined Constants',
-            'variablesReference' => 11,
+            'variablesReference' => 10,
             'namedVariables' => 2,
           ],
         ],
@@ -218,7 +213,7 @@ require(__DIR__ . '/common.inc');
   $seq = sendVsCommand(darray[
     'command' => 'variables',
     'type' => 'request',
-    'arguments' => darray['variablesReference' => 11]
+    'arguments' => darray['variablesReference' => 10]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
@@ -348,7 +343,7 @@ require(__DIR__ . '/common.inc');
         'totalFrames' => 1,
         'stackFrames' => varray[
           darray[
-            'id' => 13,
+            'id' => 12,
             'source' => darray['path' => $path],
             'line' => $bp2_line,
             'name' => 'main',
@@ -361,7 +356,7 @@ require(__DIR__ . '/common.inc');
   $seq = sendVsCommand(darray[
     'command' => 'scopes',
     'type' => 'request',
-    'arguments' => darray['frameId' => 13]
+    'arguments' => darray['frameId' => 12]
   ]);
   $msg = json_decode(getNextVsDebugMessage(), true);
   checkObjEqualRecursively(
@@ -380,7 +375,7 @@ require(__DIR__ . '/common.inc');
           ],
           darray[
             'name' => 'Superglobals',
-            'namedVariables' => 8,
+            'namedVariables' => 7,
             'variablesReference' => 3,
           ],
           darray[
@@ -431,7 +426,7 @@ require(__DIR__ . '/common.inc');
     'command' => 'evaluate',
     'type' => 'request',
     'arguments' => darray[
-      'frameId' => 13,
+      'frameId' => 12,
       'expression' => '$x = 2;',
     ],
   ]);

@@ -423,23 +423,7 @@ TypedValue HHVM_FUNCTION(array_keys,
   return make_array_like_tv(ai.create());
 }
 
-static bool couldRecur(const Array& arr) {
-  return arr->isGlobalsArrayKind();
-}
-
-using PointerSet = ArrayUtil::PointerSet;
-
-static void php_array_merge_recursive(PointerSet &seen, bool check,
-                                      Array &arr1, const Array& arr2) {
-  auto const arr1_ptr = arr1.get();
-  if (check) {
-    if (seen.find(arr1_ptr) != seen.end()) {
-      raise_warning("array_merge_recursive(): recursion detected");
-      return;
-    }
-    seen.insert(arr1_ptr);
-  }
-
+static void php_array_merge_recursive(Array &arr1, const Array& arr2) {
   for (ArrayIter iter(arr2); iter; ++iter) {
     Variant key(iter.first());
     if (key.isNumeric()) {
@@ -451,9 +435,9 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
         arr1.convertKey<IntishCast::Cast>(*key.asTypedValue());
       auto const lval = arr1.lval(arrkey, AccessFlags::Key);
       auto subarr1 = tvCastToArrayLike<IntishCast::Cast>(lval.tv());
-      if (!couldRecur(subarr1)) subarr1 = subarr1.toDArray();
+      subarr1 = subarr1.toDArray();
       php_array_merge_recursive(
-        seen, couldRecur(subarr1), subarr1,
+        subarr1,
         tvCastToArrayLike<IntishCast::Cast>(iter.secondVal())
       );
       tvUnset(lval); // avoid contamination of the value that was strongly bound
@@ -461,10 +445,6 @@ static void php_array_merge_recursive(PointerSet &seen, bool check,
     } else {
       arr1.set(key, iter.secondVal(), true);
     }
-  }
-
-  if (check) {
-    seen.erase(arr1_ptr);
   }
 }
 
@@ -585,9 +565,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
                          const Array& arrays /* = null array */) {
   getCheckedArray(array1);
   auto ret = Array::CreateDArray();
-  PointerSet seen;
-  php_array_merge_recursive(seen, false, ret, arr_array1);
-  assertx(seen.empty());
+  php_array_merge_recursive(ret, arr_array1);
 
   bool success = true;
   IterateV(
@@ -599,8 +577,7 @@ TypedValue HHVM_FUNCTION(array_merge_recursive,
         return true;
       }
 
-      php_array_merge_recursive(seen, false, ret, asCArrRef(&v));
-      assertx(seen.empty());
+      php_array_merge_recursive(ret, asCArrRef(&v));
       return false;
     }
   );
@@ -618,21 +595,11 @@ static void php_array_replace(Array &arr1, const Array& arr2) {
   }
 }
 
-static void php_array_replace_recursive(PointerSet &seen, bool check,
-                                        Array &arr1, const Array& arr2) {
+static void php_array_replace_recursive(Array &arr1, const Array& arr2) {
   if (arr1.get() == arr2.get()) {
     // This is an optimization; if the arrays are self recursive, this does
     // change the behavior slightly - it skips the "recursion detected" warning.
     return;
-  }
-
-  auto const arr1_ptr = arr1.get();
-  if (check) {
-    if (seen.find(arr1_ptr) != seen.end()) {
-      raise_warning("array_replace_recursive(): recursion detected");
-      return;
-    }
-    seen.insert(arr1_ptr);
   }
 
   for (ArrayIter iter(arr2); iter; ++iter) {
@@ -645,8 +612,7 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
         Array subarr1 = tvCastToArrayLike<IntishCast::Cast>(
           lval.tv()
         ).toPHPArrayIntishCast();
-        php_array_replace_recursive(seen, couldRecur(subarr1),
-                                    subarr1, ArrNR(val(tv).parr));
+        php_array_replace_recursive(subarr1, ArrNR(val(tv).parr));
         tvSet(make_array_like_tv(subarr1.get()), lval);
       } else {
         arr1.set(key, iter.secondVal(), true);
@@ -654,10 +620,6 @@ static void php_array_replace_recursive(PointerSet &seen, bool check,
     } else {
       arr1.set(key, iter.secondVal(), true);
     }
-  }
-
-  if (check) {
-    seen.erase(arr1_ptr);
   }
 }
 
@@ -690,23 +652,19 @@ TypedValue HHVM_FUNCTION(array_replace_recursive,
                          const Array& args /* = null array */) {
   getCheckedArray(array1);
   Array ret = Array::CreateDArray();
-  PointerSet seen;
-  php_array_replace_recursive(seen, false, ret, arr_array1);
-  assertx(seen.empty());
+  php_array_replace_recursive(ret, arr_array1);
 
   if (UNLIKELY(array2.isNull() && args.empty())) {
     return tvReturn(std::move(ret));
   }
 
   getCheckedArray(array2);
-  php_array_replace_recursive(seen, false, ret, arr_array2);
-  assertx(seen.empty());
+  php_array_replace_recursive(ret, arr_array2);
 
   for (ArrayIter iter(args); iter; ++iter) {
     auto const v = VarNR(iter.secondVal());
     getCheckedArray(v);
-    php_array_replace_recursive(seen, false, ret, arr_v);
-    assertx(seen.empty());
+    php_array_replace_recursive(ret, arr_v);
   }
   return tvReturn(std::move(ret));
 }

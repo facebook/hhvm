@@ -182,7 +182,7 @@ bool isObjprofRoot(
 
 /**
  * Measures the size of the array and referenced objects without going
- * into ObjectData* references. GlobalsArray is not measured.
+ * into ObjectData* references.
  */
 std::pair<int, double> sizeOfArray(
   const ArrayData* ad,
@@ -195,11 +195,6 @@ std::pair<int, double> sizeOfArray(
   std::unordered_map<ClassProp, ObjprofMetrics>* histogram,
   ObjprofFlags flags
 ) {
-  auto arrKind = ad->kind();
-  if (arrKind == ArrayData::ArrayKind::kGlobalsKind) {
-    return std::make_pair(0, 0);
-  }
-
   auto ptr_begin = val_stack->begin();
   auto ptr_end = val_stack->end();
   if (std::find(ptr_begin, ptr_end, ad) != ptr_end) {
@@ -428,7 +423,7 @@ void stringsOfArray(
 
 /**
  * Measures the size of the typed value and referenced objects without going
- * into ObjectData* references. GlobalsArray is not measured here.
+ * into ObjectData* references.
  */
 std::pair<int, double> tvGetSize(
   TypedValue tv,

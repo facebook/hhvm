@@ -215,9 +215,7 @@ public:
   size_t vsize() const;
 
   /*
-   * Fast-path number of elements.
-   *
-   * Only valid for arrays that aren't GlobalsArray or BespokeArray.
+   * Fast-path number of elements. Only valid for vanilla array-likes.
    */
   size_t getSize() const;
 
@@ -244,7 +242,6 @@ public:
   bool isPackedKind() const;
   bool isMixedKind() const;
   bool isPlainKind() const;
-  bool isGlobalsArrayKind() const;
   bool isDictKind() const;
   bool isVecKind() const;
   bool isKeysetKind() const;
@@ -757,10 +754,9 @@ protected:
   // can combine the stores when initializing arrays.  (gcc won't do
   // this on its own.)
 
-  // note that m_size does not store the array size for GlobalsArray (where it
-  // is -1) or for BespokeArray (where it is ~bespoke_id) and you must call the
-  // size arraydata method to get the size of these arrays (or, future-proofing
-  // here:) or for any array with the sign bit of its m_size set.
+  // note that m_size does not store the array size for bespoke array-likes -
+  // instead, it is ~BespokeID. Call size() instead for bespokearray-likes,
+  // (or in general, to future-proof code).
   union {
     struct {
       uint32_t m_size;
@@ -773,7 +769,6 @@ protected:
 static_assert(ArrayData::kPackedKind == uint8_t(HeaderKind::Packed), "");
 static_assert(ArrayData::kMixedKind == uint8_t(HeaderKind::Mixed), "");
 static_assert(ArrayData::kPlainKind == uint8_t(HeaderKind::Plain), "");
-static_assert(ArrayData::kGlobalsKind == uint8_t(HeaderKind::Globals), "");
 static_assert(ArrayData::kDictKind == uint8_t(HeaderKind::Dict), "");
 static_assert(ArrayData::kVecKind == uint8_t(HeaderKind::Vec), "");
 

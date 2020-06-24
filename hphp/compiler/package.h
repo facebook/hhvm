@@ -69,6 +69,11 @@ struct Package {
 
   void addUnitEmitter(std::unique_ptr<UnitEmitter> ue);
 private:
+
+  std::unique_ptr<UnitEmitter> createSymlinkWrapper(
+    const std::string& full_path, const std::string& file_name,
+    std::unique_ptr<UnitEmitter> org_ue);
+
   std::string m_root;
   std::set<std::string> m_filesToParse;
 

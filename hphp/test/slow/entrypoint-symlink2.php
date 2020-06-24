@@ -1,0 +1,1 @@
+entrypoint-symlink.php

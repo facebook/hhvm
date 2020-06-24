@@ -1,0 +1,2 @@
+--ffile=hphp/test/slow/entrypoint-symlink2.php
+--ffile=hphp/test/slow/entrypoint-symlink3.php

@@ -115,10 +115,6 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
       return static_cast<const MixedArray*>(h)->scan(scanner);
     case HeaderKind::Keyset:
       return static_cast<const SetArray*>(h)->scan(scanner);
-    case HeaderKind::Globals:
-    case HeaderKind::RecordArray:
-      // We are in the process of removing record and globals arrays
-      return;
     case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:
     case HeaderKind::BespokeDArray:

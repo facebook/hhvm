@@ -95,7 +95,6 @@ bool PackedArray::checkInvariants(const ArrayData* arr) {
   assertx(IMPLIES(arr->isNotDVArray(), arr->isVecKind()));
   assertx(!RO::EvalHackArrDVArrs || arr->isVecKind());
   assertx(arrprov::arrayWantsTag(arr) || !arr->hasProvenanceData());
-  static_assert(ArrayData::kPackedKind == 0, "");
   // Note that m_pos < m_size is not an invariant, because an array
   // that grows will only adjust m_size to zero on the old array.
 

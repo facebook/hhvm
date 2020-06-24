@@ -83,20 +83,18 @@ struct ArrayData : MaybeCountable {
    * kNumKinds-1 since we use these values to index into a table.
    */
   enum ArrayKind : uint8_t {
-    kPackedKind,        // varray: vec-like array with keys in range [0..size)
-    kBespokeVArrayKind,
     kMixedKind,         // darray: dict-like array with int or string keys
     kBespokeDArrayKind,
-    kGlobalsKind,       // GlobalsArray for the awful $GLOBALS['GLOBALS']
-    kRecordKind,        // RecordArray (backed by a record and a MixedArray)
+    kPackedKind,        // varray: vec-like array with keys in range [0..size)
+    kBespokeVArrayKind,
     kPlainKind,         // Plain PHP array (backed by MixedArray)
     kBespokeArrayKind,
-    kVecKind,
-    kBespokeVecKind,
-    kDictKind,
-    kBespokeDictKind,
     kKeysetKind,
     kBespokeKeysetKind,
+    kDictKind,
+    kBespokeDictKind,
+    kVecKind,
+    kBespokeVecKind,
     kNumKinds           // Insert new values before kNumKinds.
   };
 

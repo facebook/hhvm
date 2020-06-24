@@ -268,20 +268,18 @@ static_assert(ArrayFunctions::NK == ArrayData::ArrayKind::kNumKinds,
               "add new kinds here");
 
 #define DISPATCH(entry)                           \
-  { PackedArray::entry,      /* varray */         \
-    BespokeArray::entry,     /* bespoke varray */ \
-    MixedArray::entry,       /* darray */         \
+  { MixedArray::entry,       /* darray */         \
     BespokeArray::entry,     /* bespoke darray */ \
-    BespokeArray::entry,     /* placeholder */    \
-    BespokeArray::entry,     /* placeholder */    \
+    PackedArray::entry,      /* varray */         \
+    BespokeArray::entry,     /* bespoke varray */ \
     MixedArray::entry,       /* plain array */    \
     BespokeArray::entry,     /* bespoke array */  \
-    PackedArray::entry##Vec, /* vec */            \
-    BespokeArray::entry,     /* bespoke vec */    \
-    MixedArray::entry##Dict, /* dict */           \
-    BespokeArray::entry,     /* bespoke dict */   \
     SetArray::entry,         /* keyset */         \
     BespokeArray::entry,     /* bespoke keyset */ \
+    MixedArray::entry##Dict, /* dict */           \
+    BespokeArray::entry,     /* bespoke dict */   \
+    PackedArray::entry##Vec, /* vec */            \
+    BespokeArray::entry,     /* bespoke vec */    \
   },
 
 /*
@@ -552,8 +550,8 @@ const ArrayFunctions g_array_funcs = {
    *
    *   Copy an array, allocating the new array with malloc() instead
    *   of from the request local allocator.  This function does
-   *   guarantee the returned array is a new copy---but it may throw a
-   *   fatal error if this cannot be accomplished (e.g. for $GLOBALS).
+   *   guarantee the returned array is a new copy, but it may throw a
+   *   fatal error if this cannot be accomplished.
    */
   DISPATCH(CopyStatic)
 
@@ -1009,21 +1007,19 @@ void ArrayData::getNotFound(const StringData* k) const {
 }
 
 const char* ArrayData::kindToString(ArrayKind kind) {
-  std::array<const char*, 14> names = {{
-    "PackedKind",
-    "BespokeVArrayKind",
+  std::array<const char*, 12> names = {{
     "MixedKind",
     "BespokeDArrayKind",
-    "INVALID_FORMERLY_GLOBALS_KIND",
-    "INVALID_FORMERLY_RECORD_KIND",
+    "PackedKind",
+    "BespokeVArrayKind",
     "PlainKind",
     "BespokeArrayKind",
-    "VecKind",
-    "BespokeVecKind",
-    "DictKind",
-    "BespokeDictKind",
     "KeysetKind",
     "BespokeKeysetKind",
+    "DictKind",
+    "BespokeDictKind",
+    "VecKind",
+    "BespokeVecKind",
   }};
   static_assert(names.size() == kNumKinds, "add new kinds here");
   return names[kind];

@@ -68,7 +68,6 @@ IRT_RUNTIME
 // Specialized array types that appear in irgen.
 static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
 static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
-static auto const TRecordArr = Type::Array(ArrayData::kRecordKind);
 
 // Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();

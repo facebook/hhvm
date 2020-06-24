@@ -54,11 +54,11 @@ enum class HeaderKind : uint8_t {
   //  5. We support fast mask-compare tests for packed and mixed layouts.
 
   // dvarrays, with bespoke counterparts
-  Packed, BespokeVArray, Mixed, BespokeDArray,
-  // Plain PHP arrays. Globals is supported, but deprecated.
-  Globals, RecordArray, Plain, BespokeArray,
+  Mixed, BespokeDArray, Packed, BespokeVArray,
+  // Plain PHP arrays.
+  Plain, BespokeArray,
   // Hack arrays, with bespoke counterparts
-  Vec, BespokeVec, Dict, BespokeDict, Keyset, BespokeKeyset,
+  Keyset, BespokeKeyset, Dict, BespokeDict, Vec, BespokeVec,
 
   // Other ordinary refcounted heap objects
   String, Resource, ClsMeth, Record, RFunc,
@@ -282,7 +282,7 @@ inline constexpr bool isObjectKind(HeaderKind k) {
 }
 
 inline constexpr bool isArrayKind(HeaderKind k) {
-  return k >= HeaderKind::Packed && k <= HeaderKind::BespokeKeyset;
+  return k >= HeaderKind::Mixed && k <= HeaderKind::BespokeVec;
 }
 
 inline constexpr bool isFreeKind(HeaderKind k) {

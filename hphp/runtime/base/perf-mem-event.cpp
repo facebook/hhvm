@@ -313,11 +313,6 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const SetArray*>(hdr), addr, record);
       break;
 
-    case HeaderKind::Globals:
-    case HeaderKind::RecordArray:
-      // About to be deleted immediately.
-      break;
-
     case HeaderKind::RFunc: // TODO(T63348446)
       break;
 

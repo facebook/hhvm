@@ -148,7 +148,6 @@ HeapObject* Collector::find(const void* ptr) {
 
 DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
   switch (h->kind()) {
-    case HeaderKind::Globals:
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
     case HeaderKind::Packed:
@@ -162,7 +161,6 @@ DEBUG_ONLY bool checkEnqueuedKind(const HeapObject* h) {
     case HeaderKind::BigMalloc:
     case HeaderKind::String:
     case HeaderKind::Record:
-    case HeaderKind::RecordArray:
     case HeaderKind::RFunc: // TODO(T63348446)
     case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:

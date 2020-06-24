@@ -154,9 +154,7 @@ bool ArraySpec::checkInvariants() const {
   assertx(!(m_sort & IsBottom));
   if (m_sort & HasKind) {
     assertx(isArrayKind(HeaderKind(m_kind)));
-    // TODO(arnabde,kshaunak): Delete RecordArray and simplify this check.
-    assertx(m_kind == ArrayData::kRecordKind ||
-            !(m_kind & ArrayData::kBespokeKindMask));
+    assertx(!(m_kind & ArrayData::kBespokeKindMask));
     assertx(m_kind != ArrayData::kVecKind &&
             m_kind != ArrayData::kDictKind &&
             m_kind != ArrayData::kKeysetKind);

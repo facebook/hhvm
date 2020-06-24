@@ -68,8 +68,6 @@ HeaderKind getBespokeKind(ArrayData::ArrayKind kind) {
     case ArrayData::kDictKind:   return HeaderKind::BespokeDict;
     case ArrayData::kKeysetKind: return HeaderKind::BespokeKeyset;
 
-    case ArrayData::kGlobalsKind:
-    case ArrayData::kRecordKind:
     case ArrayData::kBespokeArrayKind:
     case ArrayData::kBespokeVArrayKind:
     case ArrayData::kBespokeDArrayKind:

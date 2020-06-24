@@ -9,11 +9,8 @@ class A {
 function test_eval($name, $f) {
   var_export($f);
   echo "\n";
-  $func = "eval_".$name;
-  eval("function ".$func."() { return ".var_export($f, true)."; }");
-  $m = $func();
-  var_dump($m);
-  var_dump($m());
+  var_dump($f);
+  echo "\n";
 }
 
 <<__EntryPoint>>

@@ -1440,11 +1440,11 @@ HH\is_varray: fb_u(fb_cs(type:vec)) === false
 ====
 x = array (
   0 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
   1 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
 )
 is_array: true
 HH\is_darray: false
@@ -1459,11 +1459,11 @@ bool(true)
 int(1)
 fb_cu(fb_s(array (
   0 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
   1 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
 ))) === array (
   0 => NULL,
   1 => NULL,
@@ -1486,11 +1486,11 @@ HH\is_varray: fb_u(fb_cs(type:array)) === false
 ====
 x = array (
   42 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
   47 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
 )
 is_array: true
 HH\is_darray: true
@@ -1505,11 +1505,11 @@ bool(true)
 int(1)
 fb_cu(fb_s(array (
   42 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
   47 => 
-  stdClass::__set_state(array(
-  )),
+  stdClass::__set_state(darray[
+  ]),
 ))) === array (
   42 => NULL,
   47 => NULL,

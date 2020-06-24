@@ -8,10 +8,9 @@ array(2) {
   [1]=>
   string(2) "f1"
 }
-int(1)
+
 class_meth('A', 'f1')
 classMeth{
     class(A)
     function(f1)
 }
-int(1)

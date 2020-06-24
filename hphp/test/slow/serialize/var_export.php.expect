@@ -1,4 +1,4 @@
-A::__set_state(array(
+A::__set_state(darray[
   'b' => 'b',
   'c' => 'c',
   'd' => 'd',
@@ -9,4 +9,4 @@ A::__set_state(array(
       0 => 'e',
     ),
   ),
-))
+])

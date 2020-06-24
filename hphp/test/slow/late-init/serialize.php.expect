@@ -29,19 +29,19 @@ object(A) (2) {
   string(3) "abc"
 }
 =============== var_export_test ================
-A::__set_state(array(
+A::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
-A::__set_state(array(
+])
+A::__set_state(darray[
   'x' => 123,
   'y' => 777,
   'z' => 'abc',
-))
-A::__set_state(array(
+])
+A::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
+])
 =============== print_r_test ================
 A Object
 (
@@ -90,19 +90,19 @@ object(B) (2) {
   string(3) "abc"
 }
 =============== var_export_test ================
-B::__set_state(array(
+B::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
-B::__set_state(array(
+])
+B::__set_state(darray[
   'x' => 123,
   'y' => 777,
   'z' => 'abc',
-))
-B::__set_state(array(
+])
+B::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
+])
 =============== print_r_test ================
 B Object
 (
@@ -151,19 +151,19 @@ object(C) (2) {
   string(3) "abc"
 }
 =============== var_export_test ================
-C::__set_state(array(
+C::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
-C::__set_state(array(
+])
+C::__set_state(darray[
   'x' => 123,
   'y' => 777,
   'z' => 'abc',
-))
-C::__set_state(array(
+])
+C::__set_state(darray[
   'x' => 123,
   'z' => 'abc',
-))
+])
 =============== print_r_test ================
 C Object
 (

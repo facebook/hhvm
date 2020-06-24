@@ -1,6 +1,6 @@
-stdClass::__set_state(array(
+stdClass::__set_state(darray[
   'prop' => 
   HH\Vector {
   },
-))
+])
 Done

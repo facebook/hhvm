@@ -32,7 +32,7 @@ class Point
         return '(' . $this->x . ',' . $this->y . ')';
     }
 ///*
-    static public function __set_state(array $properties)
+    static public function __set_state(darray $properties)
     {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);
@@ -55,7 +55,7 @@ class B
         $this->bprop = $p;
     }
 
-    static public function __set_state(array $properties)
+    static public function __set_state(darray $properties)
     {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);
@@ -78,7 +78,7 @@ class D extends B
         parent::__construct($bp);
     }
 ///*
-    static public function __set_state(array $properties)
+    static public function __set_state(darray $properties)
     {
         echo "Inside " . __METHOD__ . "\n";
         var_dump($properties);

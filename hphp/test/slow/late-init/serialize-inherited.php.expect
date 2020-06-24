@@ -6,5 +6,5 @@ Accessing <<__LateInit>> property 'A::x' before initialization
 object(B) (0) {
 }
 ---- var_export ----
-B::__set_state(array(
-))
+B::__set_state(darray[
+])

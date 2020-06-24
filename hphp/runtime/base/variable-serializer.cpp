@@ -857,7 +857,7 @@ void VariableSerializer::writeArrayHeader(int size, bool isVectorData,
     if (!m_objClass.empty()) {
       m_buf->append(m_objClass);
       if (m_objCode == 'O') {
-        m_buf->append("::__set_state(array(\n");
+        m_buf->append("::__set_state(darray[\n");
       } else {
         assertx(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append(" {\n");
@@ -1291,7 +1291,7 @@ void VariableSerializer::writeArrayFooter(
     }
     if (info.is_object && m_objCode) {
       if (m_objCode == 'O') {
-        m_buf->append("))");
+        m_buf->append("])");
       } else {
         assertx(m_objCode == 'V' || m_objCode == 'K');
         m_buf->append("}");

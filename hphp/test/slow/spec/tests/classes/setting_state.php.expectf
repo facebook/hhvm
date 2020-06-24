@@ -1,11 +1,11 @@
 ---------------- start -------------------
 ---------------- calling var_export -------------------
-string(%d) "Point::__set_state(array(
+string(%d) "Point::__set_state(darray[
 %w 'x' => 3,
 %w 'y' => 5,
 %w 'proti' => NULL,
 %w 'pubi' => NULL,
-))"
+])"
 ---------------- calling eval -------------------
 Inside Point::__set_state
 array(4) {
@@ -31,9 +31,9 @@ object(Point) (4) {
 Point $z is (3,5)
 ---------------- test with inheritance -------------------
 ---------------- test with type B -------------------
-string(%d) "B::__set_state(array(
+string(%d) "B::__set_state(darray[
 %w 'bprop' => 10,
-))"
+])"
 Inside B::__set_state
 array(1) {
   ["bprop"]=>
@@ -49,10 +49,10 @@ object(B) (1) {
   int(10)
 }
 ---------------- test with type D -------------------
-string(%d) "D::__set_state(array(
+string(%d) "D::__set_state(darray[
 %w 'dprop' => 30,
 %w 'bprop' => 20,
-))"
+])"
 Inside D::__set_state
 array(2) {
   ["dprop"]=>

@@ -18,8 +18,8 @@ A::__invoke
 A::__invoke
 =============== test_debug =========================
 A::__construct
-A::__set_state(array(
-))
+A::__set_state(darray[
+])
 A::__debugInfo
 object(A) (0) {
 }

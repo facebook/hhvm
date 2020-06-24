@@ -1,7 +1,7 @@
-string(31) "stdClass::__set_state(array(
-))"
-string(51) "stdClass::__set_state(array(
+string(32) "stdClass::__set_state(darray[
+])"
+string(52) "stdClass::__set_state(darray[
   'herp' => 'derp',
-))"
-string(26) "Foo::__set_state(array(
-))"
+])"
+string(27) "Foo::__set_state(darray[
+])"

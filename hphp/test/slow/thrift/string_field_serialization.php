@@ -31,12 +31,12 @@ class DummyTransport {
 }
 
 class TestStruct {
-  const SPEC = array(
-    1 => array(
+  const SPEC = darray[
+    1 => darray[
       'var' => 'var',
       'type' => TType::STRING,
-    ),
-  );
+    ],
+  ];
   public function __construct(
     public $var = null,
   ) {}

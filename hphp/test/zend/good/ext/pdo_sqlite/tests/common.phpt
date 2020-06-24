@@ -5,8 +5,8 @@ SQLite
 if (!extension_loaded('pdo_sqlite')) print 'skip'; ?>
 --REDIRECTTEST--
 function redirecttest() {
-	return array(
-		'ENV' => array('PDOTEST_DSN' => 'sqlite::memory:'),
+	return darray[
+		'ENV' => darray['PDOTEST_DSN' => 'sqlite::memory:'],
 		'TESTS' => 'ext/pdo/tests'
-	);
+	];
 }

@@ -526,6 +526,80 @@ and simplify_subtype_i
           |> (* Turn error into a generic error about the type parameter *)
           if_unsat invalid
         | (_, Tdynamic) when subtype_env.treat_dynamic_as_bottom -> valid ()
+        | (_, Tpu_type_access ((_pm, msub), (_pn, nsub))) ->
+          (* If member is actually an expression dependent type,
+           * we need to update this_ty
+           *)
+          let this_ty =
+            if DependentKind.is_generic_dep_ty msub && Option.is_none this_ty
+            then
+              Some ty_sub
+            else
+              this_ty
+          in
+          (* We collect all the upper bounds of the base generic *)
+          let upper_bounds = Env.get_upper_bounds env msub in
+          (*
+           * We are checking if msub:@nsub is a subtype of ty_super.
+           * Since msub is a generic parameter, we are scanning all of its
+           * upper bounds and look for all C:@E.
+           * We then scan the PU definition of these C:@E to gather the 'as'
+           * constraints on the type `case type nsub`.
+           *
+           * Finally, we attempt to use those in recursive subtype calls
+           * to check if they are <: ty_super.
+           *)
+          let (env, upper_bounds) =
+            Typing_set.fold
+              (fun bound (env, acc) ->
+                match get_node bound with
+                (* Only keep Tpu bounds *)
+                | Tpu (cls, (_, enum)) ->
+                  (* Get the type parameter associated to nsub in this PU *)
+                  let (env, info) =
+                    TUtils.class_get_pu_type env cls enum nsub
+                  in
+                  let (env, ltys) =
+                    match info with
+                    | None -> (env, [])
+                    | Some (ety_env, decl_tparam) ->
+                      (* Filter the constraints *)
+                      List.filter_map_env
+                        env
+                        decl_tparam.tp_constraints
+                        ~f:(fun env (ck, dty) ->
+                          match ck with
+                          (* Only keep the "as" constraints *)
+                          | Ast_defs.Constraint_as ->
+                            let (env, lty) = Phase.localize ~ety_env env dty in
+                            (env, Some lty)
+                          | _ -> (env, None))
+                  in
+                  (env, List.rev_append acc ltys)
+                | _ -> (env, acc))
+              upper_bounds
+              (env, [])
+          in
+          let rec try_bounds tyl env =
+            match tyl with
+            | [] -> invalid_env env
+            | [ty] ->
+              simplify_subtype_i
+                ~subtype_env
+                ~this_ty
+                (LoclType ty)
+                ty_super
+                env
+            | ty :: tyl ->
+              env
+              |> try_bounds tyl
+              ||| simplify_subtype_i
+                    ~subtype_env
+                    ~this_ty
+                    (LoclType ty)
+                    ty_super
+          in
+          env |> try_bounds upper_bounds |> if_unsat invalid
         | _ -> invalid ()
       end
   in

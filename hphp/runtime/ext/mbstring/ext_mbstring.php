@@ -566,7 +566,7 @@ function mb_output_handler(string $contents, int $status): string;
  */
 <<__Native>>
 function mb_parse_str(string $encoded_string,
-                      <<__OutOnly("varray")>>
+                      <<__OutOnly("darray")>>
                       inout mixed $result): bool;
 
 /**

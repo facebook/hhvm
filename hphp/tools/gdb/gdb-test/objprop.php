@@ -10,7 +10,7 @@ class A {
   public ?int $foo6 = 49;
   public ?int $foo7 = null;
   public $foo8 = "foo";
-};
+}
 
 function h() {
   return new Exception();

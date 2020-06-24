@@ -96,13 +96,6 @@ class Y {
   }
 }
 
-// HHVM has idx() built in, but PHP5 doesn't
-if (!function_exists('idx')) {
-  function idx($arr, $key, $def = null) {
-    return (isset($arr[$key]) ? $arr[$key] : $def);
-  }
-}
-
 class EmptyArray {
   private $array1 = darray[];
 

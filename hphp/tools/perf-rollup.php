@@ -2,8 +2,6 @@
 <?hh
 // Copyright 2004-present Facebook. All Rights Reserved.
 
-require(__DIR__.'/perf-lib.php');
-
 function usage($script_name) {
   echo <<<EOT
 Usage:
@@ -150,11 +148,15 @@ function categorize_helper($func) {
   return 'Uncategorized';
 }
 
-function main($argv) {
+<<__EntryPoint>>
+function main() {
+  require(__DIR__.'/perf-lib.php');
+
+  $argv = $_SERVER['argv'];
   ini_set('memory_limit', '64G');
   if (posix_isatty(STDIN)) {
     usage($argv[0]);
-    return 1;
+    exit(1);
   }
 
   fprintf(STDERR, ">> Parsing samples from stdin...\n");
@@ -184,5 +186,3 @@ function main($argv) {
     print_map($category, $map, $total_samples);
   }
 }
-
-exit(main($argv));

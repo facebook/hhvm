@@ -1,8 +1,6 @@
 #!/usr/local/bin/php -j
 <?hh
 
-require(__DIR__.'/perf-lib.php');
-
 # Returns true iff $sample contains a line containing $func.
 function contains_frame(Vector $sample, string $func): bool {
   foreach ($sample as $frame) {
@@ -140,11 +138,15 @@ By default, only samples from the 'hhvm' binary will be considered. Giving
 EOT;
 }
 
-function main($argv) {
+<<__EntryPoint>>
+function main() {
+  require(__DIR__.'/perf-lib.php');
+
+  $argv = $_SERVER['argv'];
   ini_set('memory_limit', '64G');
   if (posix_isatty(STDIN)) {
     usage($argv[0]);
-    return 1;
+    exit(1);
   }
   array_shift(inout $argv);
 
@@ -188,7 +190,5 @@ function main($argv) {
     }
   }
 
-  return 0;
+  exit(0);
 }
-
-exit(main($argv));

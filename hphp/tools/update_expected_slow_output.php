@@ -1,20 +1,8 @@
 #!/bin/env php
 <?hh
 
-$php = '/home/engshare/externals/cpp/hphp/centos-dev/php/bin/php';
-// $php = '/home/ptarjan/bin/php-5.4';
-$config = json_decode(file_get_contents(__DIR__.'/update_expected_slow_output.json'), true);
-if (!$config) {
-  die("Invalid config file. Not JSON.\n");
-}
-
 function ends_with($big, $little) {
   return strpos($big, $little, strlen($big) - strlen($little)) !== false;
-}
-
-// More efficient lookups than array_search
-foreach ($config as $key => $value) {
-  $config[$key] = array_fill_keys($value, true);
 }
 
 function is_valid_diff($wanted_re, $output) {
@@ -35,51 +23,75 @@ function is_valid_diff($wanted_re, $output) {
   $wanted_re = str_replace('%c', '.', $wanted_re);
 
   return preg_match("/^$wanted_re\$/sm", $output);
-};
+}
 
-print "Running all test/slow through $php...\n";
-foreach (new RecursiveIteratorIterator (new RecursiveDirectoryIterator ('test/slow')) as $f) {
-  $filename = $f->getRealPath();
-  $name = str_replace('.php', '', $f->getFilename());
-
-  if (!$f->isFile() ||
-      !ends_with($filename, '.php') ||
-      isset($config['hard_coded'][$name])) {
-    continue;
+<<__EntryPoint>>
+function main() {
+  $php = '/home/engshare/externals/cpp/hphp/centos-dev/php/bin/php';
+  // $php = '/home/ptarjan/bin/php-5.4';
+  $config = json_decode(
+    file_get_contents(__DIR__.'/update_expected_slow_output.json'),
+    true,
+  );
+  if (!$config) {
+    die("Invalid config file. Not JSON.\n");
   }
 
-  $opts = '-dapc.enable_cli=1 -ddisplay_errors=off';
-  $output = shell_exec("$php $opts $filename 2>/dev/null");
+  // More efficient lookups than array_search
+  foreach ($config as $key => $value) {
+    $config[$key] = array_fill_keys($value, true);
+  }
 
-  $expect = "$filename.expect";
-  if (is_file($expect)) {
-    file_put_contents($expect, $output);
-  } else if (is_file($expect.'f')) {
-    $wanted_re = file_get_contents($expect.'f');
-    if (isset($config['no_warnings'][$name])) {
-      $wanted_re = preg_replace('/^HipHop .*/m', '', $wanted_re);
-    }
-    $output = str_replace(realpath(__DIR__.'../../..'), '%s', $output);
-    if (is_valid_diff($wanted_re, $output)) {
+  print "Running all test/slow through $php...\n";
+  foreach (
+    new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator('test/slow'),
+    ) as $f
+  ) {
+    $filename = $f->getRealPath();
+    $name = str_replace('.php', '', $f->getFilename());
+
+    if (
+      !$f->isFile() ||
+      !ends_with($filename, '.php') ||
+      isset($config['hard_coded'][$name])
+    ) {
       continue;
     }
 
-    $file = tempnam('/tmp', 'zend-');
-    file_put_contents($file, $output);
-    $diff = shell_exec("diff --text -u {$expect}f $file");
-    echo "\n$diff\n";
+    $opts = '-dapc.enable_cli=1 -ddisplay_errors=off';
+    $output = shell_exec("$php $opts $filename 2>/dev/null");
 
-    do {
-      print "Output differs, use Zend? [y/N]? ";
-      $prompt = strtolower(trim(fgets(STDIN)));
-      if ($prompt == 'y') {
-        file_put_contents($expect.'f', $output);
-        break;
-      } else if (!$prompt || $prompt == 'n') {
-        break;
+    $expect = "$filename.expect";
+    if (is_file($expect)) {
+      file_put_contents($expect, $output);
+    } else if (is_file($expect.'f')) {
+      $wanted_re = file_get_contents($expect.'f');
+      if (isset($config['no_warnings'][$name])) {
+        $wanted_re = preg_replace('/^HipHop .*/m', '', $wanted_re);
       }
-    } while (true);
-  } else {
-    die("No $file.expect or $file.expectf. WTF?\n");
+      $output = str_replace(realpath(__DIR__.'../../..'), '%s', $output);
+      if (is_valid_diff($wanted_re, $output)) {
+        continue;
+      }
+
+      $file = tempnam('/tmp', 'zend-');
+      file_put_contents($file, $output);
+      $diff = shell_exec("diff --text -u {$expect}f $file");
+      echo "\n$diff\n";
+
+      do {
+        print "Output differs, use Zend? [y/N]? ";
+        $prompt = strtolower(trim(fgets(STDIN)));
+        if ($prompt == 'y') {
+          file_put_contents($expect.'f', $output);
+          break;
+        } else if (!$prompt || $prompt == 'n') {
+          break;
+        }
+      } while (true);
+    } else {
+      die("No $file.expect or $file.expectf. WTF?\n");
+    }
   }
 }

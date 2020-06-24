@@ -7,10 +7,6 @@
  * Run it via './hhmeasure (or ./hhmeasure basic)'.
  */
 
-
-// Include microbenchmark code
-require(dirname(__FILE__)."/BasicOps.php");
-
 function mean($array) {
   return (array_sum($array) / count($array));
 }
@@ -1092,18 +1088,24 @@ class Runner {
   }
 }
 
-Runner::openfile();
-if ($argv[1] == 'basic') {
-  Runner::runtestsBasic();
+<<__EntryPoint>>
+function main() {
+  // Include microbenchmark code
+  require(dirname(__FILE__)."/BasicOps.php");
+
+  $argv = $_SERVER['argv'];
+  Runner::openfile();
+  if ($argv[1] == 'basic') {
+    Runner::runtestsBasic();
+  } else {
+    Runner::runtestsBasic();
+    Runner::runtestsInstanceof();
+    Runner::runtestsIsset();
+    Runner::runtestsIteration();
+    Runner::runtestsRegex();
+    Runner::runtestsReflection();
+    Runner::runMathOp();
+  }
+  Runner::closefile();
+  Runner::reportresults();
 }
-else {
-  Runner::runtestsBasic();
-  Runner::runtestsInstanceof();
-  Runner::runtestsIsset();
-  Runner::runtestsIteration();
-  Runner::runtestsRegex();
-  Runner::runtestsReflection();
-  Runner::runMathOp();
-}
-Runner::closefile();
-Runner::reportresults();

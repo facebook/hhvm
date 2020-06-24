@@ -140,7 +140,7 @@ void emitSpecializedTypeTest(Vout& v, IRLS& /*env*/, Type type, Loc dataSrc,
     always_assert(false && "unexpected guard on specialized Resource");
   }
 
-  if (type <= TStaticStr) {
+  if (type == TStaticStr) {
     auto const sf = emitCmpRefCount(v, StaticValue, dataSrc);
     doJcc(CC_E, sf);
     return;
@@ -217,16 +217,18 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
       return CC_E;
     };
 
-    if (type <= TPersistentStr) return cmp(KindOfPersistentString, CC_E);
-    if (type <= TStr)           return cmp(KindOfPersistentString, CC_AE);
-    if (type <= TArr)           return cmp(KindOfArray, CC_LE);
-    if (type <= TVec)           return persistent_type(KindOfPersistentVec);
-    if (type <= TDict)          return persistent_type(KindOfPersistentDict);
-    if (type <= TKeyset)        return persistent_type(KindOfPersistentKeyset);
-    if (type <= TArrLike)       return cmp(KindOfVec, CC_LE);
+    // Type-tests of union types that may be specialized.
+    auto const base = type.unspecialize();
+    if (base == TArr)       return cmp(KindOfArray, CC_LE);
+    if (base == TVec)       return persistent_type(KindOfPersistentVec);
+    if (base == TDict)      return persistent_type(KindOfPersistentDict);
+    if (base == TKeyset)    return persistent_type(KindOfPersistentKeyset);
+    if (base == TArrLike)   return cmp(KindOfVec, CC_LE);
 
-    // These are intentionally == and not <=.
-    if (type == TNull)          return cmp(KindOfNull, CC_BE);
+    // Type-tests of union types that should not be specialized.
+    if (type == TNull)      return cmp(KindOfNull, CC_BE);
+    if (type == TStr)       return cmp(KindOfPersistentString, CC_AE);
+    if (type == TStaticStr) return cmp(KindOfPersistentString, CC_AE);
     if (type == TUncountedInit) {
       auto const rtype = emitGetTVType(v, typeSrc);
       auto const sf2 = v.makeReg();
@@ -242,15 +244,16 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
       return ccNegate(emitIsTVTypeRefCounted(v, sf, typeSrc));
     }
 
-    always_assert(type.isKnownDataType());
-
+    // All other valid types must not be unions.
+    always_assert_flog(type.isKnownDataType(), "Unknown DataType: {}", type);
+    always_assert_flog(!type.isUnion(), "Union type: {}", type);
     auto const dt = type.toDataType();
     return cmp(dt, CC_E);
   }();
 
   doJcc(cc, sf);
 
-  if (type.isSpecialized() || type <= TStaticStr) {
+  if (type.isSpecialized() || type == TStaticStr) {
     auto const sf2 = v.makeReg();
     detail::emitSpecializedTypeTest(v, env, type, dataSrc, sf2, doJcc);
   }

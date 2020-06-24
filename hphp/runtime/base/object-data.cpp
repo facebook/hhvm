@@ -148,7 +148,7 @@ static void freeDynPropArray(ObjectData* inst) {
   auto& table = g_context->dynPropTable;
   auto it = table.find(inst);
   assertx(it != end(table));
-  assertx(it->second.arr().isPHPArray());
+  assertx(it->second.arr().isHAMSafeDArray());
   it->second.destroy();
   table.erase(it);
 }
@@ -323,13 +323,13 @@ Object ObjectData::iterableObject(bool& isIterable,
 Array& ObjectData::dynPropArray() const {
   assertx(getAttribute(HasDynPropArr));
   assertx(g_context->dynPropTable.count(this));
-  assertx(g_context->dynPropTable[this].arr().isPHPArray());
+  assertx(g_context->dynPropTable[this].arr().isHAMSafeDArray());
   return g_context->dynPropTable[this].arr();
 }
 
 void ObjectData::setDynProps(const Array& newArr) {
   // don't expose the ref returned by setDynPropArr
-  (void)setDynPropArray(newArr);
+  (void)setDynPropArray(newArr.toDArray());
 }
 
 void ObjectData::reserveDynProps(int numDynamic) {
@@ -347,15 +347,15 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     check_non_safepoint_surprise();
   }
 
-  return setDynPropArray(
-      Array::attach(MixedArray::MakeReserveMixed(numDynamic))
-  );
+  return setDynPropArray(Array::attach(
+    RO::EvalHackArrDVArrs ? MixedArray::MakeReserveDict(numDynamic)
+                          : MixedArray::MakeReserveDArray(numDynamic)));
 }
 
 Array& ObjectData::setDynPropArray(const Array& newArr) {
   assertx(!g_context->dynPropTable.count(this));
   assertx(!getAttribute(HasDynPropArr));
-  assertx(newArr.isPHPArray());
+  assertx(newArr.isHAMSafeDArray());
 
   if (m_cls->forbidsDynamicProps()) {
     throw_object_forbids_dynamic_props(getClassName().data());
@@ -369,7 +369,7 @@ Array& ObjectData::setDynPropArray(const Array& newArr) {
 
   // newArr can have refcount 2 or higher
   auto& arr = g_context->dynPropTable[this].arr();
-  assertx(arr.isPHPArray());
+  assertx(arr.isNull());
   arr = newArr;
   setAttribute(HasDynPropArr);
   return arr;
@@ -1095,10 +1095,11 @@ ObjectData::~ObjectData() {
 }
 
 Object ObjectData::FromArray(ArrayData* properties) {
-  assertx(properties->isPHPArrayType());
+  auto const props = properties->toDArray(true);
   Object retval{SystemLib::s_stdclassClass};
   retval->setAttribute(HasDynPropArr);
-  g_context->dynPropTable.emplace(retval.get(), properties);
+  g_context->dynPropTable.emplace(retval.get(), props);
+  if (props != properties) decRefArr(props);
   return retval;
 }
 

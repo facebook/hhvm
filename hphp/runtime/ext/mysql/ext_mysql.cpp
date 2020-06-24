@@ -640,7 +640,7 @@ static Variant HHVM_FUNCTION(mysql_fetch_field, const Resource& result,
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  ArrayInit props(13, ArrayInit::Map{});
+  DArrayInit props(13);
   props.set("name",         info->name);
   props.set("table",        info->table);
   props.set("def",          info->def);

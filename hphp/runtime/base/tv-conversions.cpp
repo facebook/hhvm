@@ -656,14 +656,6 @@ Array tvCastToArrayLike(TypedValue tv) {
 template Array tvCastToArrayLike<IntishCast::Cast>(TypedValue);
 template Array tvCastToArrayLike<IntishCast::None>(TypedValue);
 
-template <typename LHS, typename T>
-static enable_if_lval_t<
-  LHS,
-  typename std::enable_if<std::is_rvalue_reference<T&&>::value, void>::type>
-assign(LHS lhs, T&& rhs) {
-  variant_ref{lhs} = std::forward<T>(rhs);
-}
-
 template<typename T, IntishCast IC /* = IntishCast::None */>
 enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
   assertx(tvIsPlausible(*tv));
@@ -712,8 +704,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
       }
 
       case KindOfObject: {
-        assign(tv, ((ObjectData*)val(tv).pobj)->toArray<IC>());
-        return;
+        a = val(tv).pobj->template toArray<IC>().toPHPArray().detach();
+        tvDecRefObj(tv);
+        continue;
       }
 
       case KindOfResource:
@@ -1267,7 +1260,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfResource: {
-      ArrayInit props(1, ArrayInit::Map{});
+      DArrayInit props(1);
       props.set(s_scalar, tv);
       return ObjectData::FromArray(props.create()).detach();
     }
@@ -1277,11 +1270,7 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
-    case KindOfKeyset: {
-      auto const arr = Array::attach(tv.m_data.parr->toPHPArray(true));
-      return ObjectData::FromArray(arr.get()).detach();
-    }
-
+    case KindOfKeyset:
     case KindOfPersistentDArray:
     case KindOfDArray:
     case KindOfPersistentVArray:
@@ -1296,8 +1285,8 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
 
     case KindOfClsMeth: {
       raiseClsMethConvertWarningHelper("array");
-      auto arr = make_varray(
-        val(tv).pclsmeth->getClsStr(), val(tv).pclsmeth->getFuncStr());
+      auto const arr = make_darray(0, val(tv).pclsmeth->getClsStr(),
+                                   1, val(tv).pclsmeth->getFuncStr());
       return ObjectData::FromArray(arr.get()).detach();
     }
 

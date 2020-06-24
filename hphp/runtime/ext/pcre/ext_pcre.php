@@ -36,6 +36,14 @@ function preg_grep(string $pattern,
                    varray_or_darray $input,
                    int $flags = 0): mixed;
 
+<<__Native, __Pure>>
+function preg_grep_with_error(
+  string $pattern,
+  varray_or_darray $input,
+  inout ?int $error,
+  int $flags = 0,
+): mixed;
+
 /**
  * Returns the error code of the last PCRE regex execution
  *
@@ -88,12 +96,32 @@ function preg_match_all(string $pattern,
                         int $offset = 0): mixed;
 
 <<__Native, __Pure>>
+function preg_match_all_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): mixed;
+
+<<__Native, __Pure>>
 function preg_match_all_with_matches(string $pattern,
                                      string $subject,
                                      <<__OutOnly>>
                                      inout mixed $matches,
                                      int $flags = 0,
                                      int $offset = 0): mixed;
+
+<<__Native, __Pure>>
+function preg_match_all_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  <<__OutOnly>>
+  inout mixed $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): mixed;
 
 /**
  * Perform a regular expression match
@@ -128,12 +156,32 @@ function preg_match(string $pattern,
                     int $offset = 0): mixed;
 
 <<__Native, __Pure>>
+function preg_match_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): mixed;
+
+<<__Native, __Pure>>
 function preg_match_with_matches(string $pattern,
                                  string $subject,
                                  <<__OutOnly>>
                                  inout mixed $matches,
                                  int $flags = 0,
                                  int $offset = 0): mixed;
+
+<<__Native, __Pure>>
+function preg_match_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  <<__OutOnly>>
+  inout mixed $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): mixed;
 
 /**
  * Quote regular expression characters
@@ -277,6 +325,15 @@ function preg_replace(mixed $pattern,
                       int $limit = -1): mixed;
 
 <<__Native, __Pure>>
+function preg_replace_with_error(
+  mixed $pattern,
+  mixed $replacement,
+  mixed $subject,
+  inout ?int $error,
+  int $limit = -1,
+): mixed;
+
+<<__Native, __Pure>>
 function preg_replace_with_count(mixed $pattern,
                                  mixed $replacement,
                                  mixed $subject,
@@ -284,6 +341,16 @@ function preg_replace_with_count(mixed $pattern,
                                  <<__OutOnly("KindOfInt64")>>
                                  inout ?int $count): mixed;
 
+<<__Native, __Pure>>
+function preg_replace_with_count_and_error(
+  mixed $pattern,
+  mixed $replacement,
+  mixed $subject,
+  int $limit,
+  <<__OutOnly("KindOfInt64")>>
+  inout ?int $count,
+  inout ?int $error,
+): mixed;
 
 /**
  * Split string by a regular expression
@@ -313,6 +380,15 @@ function preg_split(string $pattern,
                     string $subject,
                     mixed $limit = null,
                     int $flags = 0): mixed;
+
+<<__Native, __Pure>>
+function preg_split_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  mixed $limit = null,
+  int $flags = 0,
+): mixed;
 
 /**
  * Replace regular expression

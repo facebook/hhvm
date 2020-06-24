@@ -36,7 +36,7 @@ namespace HPHP {
 static int s_pcre_has_jit = 0;
 
 Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
-                                 int flags /* = 0 */) {
+                      int flags /* = 0 */) {
   if (!isContainer(input)) {
     raise_warning("input to preg_grep must be an array or collection");
     return init_null();
@@ -44,11 +44,25 @@ Variant HHVM_FUNCTION(preg_grep, const String& pattern, const Variant& input,
   return preg_grep(pattern, input.toArray(), flags);
 }
 
+Variant HHVM_FUNCTION(preg_grep_with_error, const String& pattern,
+                      const Variant& input, Variant& error, int flags /* = 0 */) {
+  PregWithErrorGuard guard(error);
+  return HHVM_FN(preg_grep)(pattern, input, flags);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 TypedValue HHVM_FUNCTION(preg_match,
                          StringArg pattern, StringArg subject,
                          int flags /* = 0 */, int offset /* = 0 */) {
+  return tvReturn(preg_match(pattern.get(), subject.get(),
+                             nullptr, flags, offset));
+}
+
+TypedValue HHVM_FUNCTION(preg_match_with_error, StringArg pattern,
+                         StringArg subject, Variant& error,
+                         int flags /* = 0 */, int offset /* = 0 */) {
+  PregWithErrorGuard guard(error);
   return tvReturn(preg_match(pattern.get(), subject.get(),
                              nullptr, flags, offset));
 }
@@ -61,11 +75,31 @@ TypedValue HHVM_FUNCTION(preg_match_with_matches,
                              &matches, flags, offset));
 }
 
+TypedValue HHVM_FUNCTION(preg_match_with_matches_and_error,
+                         StringArg pattern, StringArg subject,
+                         Variant& matches, Variant& error,
+                         int flags /* = 0 */, int offset /* = 0 */) {
+  PregWithErrorGuard guard(error);
+  return tvReturn(preg_match(pattern.get(), subject.get(),
+                             &matches, flags, offset));
+}
+
 TypedValue HHVM_FUNCTION(preg_match_all,
                          StringArg pattern,
                          StringArg subject,
                          int flags /* = 0 */,
                          int offset /* = 0 */) {
+  return tvReturn(preg_match_all(pattern.get(), subject.get(),
+                                 nullptr, flags, offset));
+}
+
+TypedValue HHVM_FUNCTION(preg_match_all_with_error,
+                         StringArg pattern,
+                         StringArg subject,
+                         Variant& error,
+                         int flags /* = 0 */,
+                         int offset /* = 0 */) {
+  PregWithErrorGuard guard(error);
   return tvReturn(preg_match_all(pattern.get(), subject.get(),
                                  nullptr, flags, offset));
 }
@@ -80,11 +114,31 @@ TypedValue HHVM_FUNCTION(preg_match_all_with_matches,
                                  &matches, flags, offset));
 }
 
+TypedValue HHVM_FUNCTION(preg_match_all_with_matches_and_error,
+                         StringArg pattern,
+                         StringArg subject,
+                         Variant& matches,
+                         Variant& error,
+                         int flags /* = 0 */,
+                         int offset /* = 0 */) {
+  PregWithErrorGuard guard(error);
+  return tvReturn(preg_match_all(pattern.get(), subject.get(),
+                                 &matches, flags, offset));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 
 Variant HHVM_FUNCTION(preg_replace, const Variant& pattern, const Variant& replacement,
                                     const Variant& subject, int limit /* = -1 */) {
+  return preg_replace_impl(pattern, replacement, subject,
+                           limit, nullptr, false, false);
+}
+
+Variant HHVM_FUNCTION(preg_replace_with_error, const Variant& pattern,
+                      const Variant& replacement, const Variant& subject,
+                      Variant& error, int limit /* = -1 */) {
+  PregWithErrorGuard guard(error);
   return preg_replace_impl(pattern, replacement, subject,
                            limit, nullptr, false, false);
 }
@@ -95,6 +149,18 @@ Variant HHVM_FUNCTION(preg_replace_with_count,
                       const Variant& subject,
                       int limit,
                       int64_t& count) {
+  return preg_replace_impl(pattern, replacement, subject,
+                           limit, &count, false, false);
+}
+
+Variant HHVM_FUNCTION(preg_replace_with_count_and_error,
+                      const Variant& pattern,
+                      const Variant& replacement,
+                      const Variant& subject,
+                      int limit,
+                      int64_t& count,
+                      Variant& error) {
+  PregWithErrorGuard guard(error);
   return preg_replace_impl(pattern, replacement, subject,
                            limit, &count, false, false);
 }
@@ -210,6 +276,14 @@ Variant HHVM_FUNCTION(preg_split, const String& pattern, const String& subject,
   return preg_split(pattern, subject, limit.toInt64(), flags);
 }
 
+Variant HHVM_FUNCTION(preg_split_with_error, const String& pattern,
+                      const String& subject, Variant& error,
+                      const Variant& limit /* = null */, int flags /* = 0 */) {
+  PregWithErrorGuard guard(error);
+  //NOTE: .toInt64() returns 0 for null
+  return preg_split(pattern, subject, limit.toInt64(), flags);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 String HHVM_FUNCTION(preg_quote, const String& str,
@@ -320,15 +394,23 @@ struct PcreExtension final : Extension {
 
     HHVM_FE(preg_filter);
     HHVM_FE(preg_grep);
+    HHVM_FE(preg_grep_with_error);
     HHVM_FE(preg_match);
+    HHVM_FE(preg_match_with_error);
     HHVM_FE(preg_match_with_matches);
+    HHVM_FE(preg_match_with_matches_and_error);
     HHVM_FE(preg_match_all);
+    HHVM_FE(preg_match_all_with_error);
     HHVM_FE(preg_match_all_with_matches);
+    HHVM_FE(preg_match_all_with_matches_and_error);
     HHVM_FE(preg_replace);
+    HHVM_FE(preg_replace_with_error);
     HHVM_FE(preg_replace_with_count);
+    HHVM_FE(preg_replace_with_count_and_error);
     HHVM_FE(preg_replace_callback);
     HHVM_FE(preg_replace_callback_array);
     HHVM_FE(preg_split);
+    HHVM_FE(preg_split_with_error);
     HHVM_FE(preg_quote);
     HHVM_FE(preg_last_error);
     HHVM_FE(ereg_replace);

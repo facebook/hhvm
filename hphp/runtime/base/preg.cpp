@@ -2051,8 +2051,20 @@ String preg_quote(const String& str,
   return ret.setSize(q - out_str);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// last_error
+
 int preg_last_error() {
   return *rl_last_error_code;
+}
+
+PregWithErrorGuard::~PregWithErrorGuard() {
+  if (*rl_last_error_code == PHP_PCRE_NO_ERROR) {
+    error.setNull();
+  } else {
+    error = *rl_last_error_code;
+  }
+  *rl_last_error_code = prior_error;
 }
 
 size_t preg_pcre_cache_size() {

@@ -169,6 +169,18 @@ int preg_last_error();
 size_t preg_pcre_cache_size();
 
 ///////////////////////////////////////////////////////////////////////////////
+
+struct PregWithErrorGuard {
+  explicit PregWithErrorGuard(Variant& error_)
+    : error(error_), prior_error(preg_last_error()) {}
+  ~PregWithErrorGuard();
+
+  Variant& error;
+  int prior_error;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 }
 
 #endif // incl_HPHP_PREG_H__

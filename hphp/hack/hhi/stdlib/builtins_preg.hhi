@@ -10,6 +10,13 @@
 
 <<__PHPStdLib>>
 function preg_grep(string $pattern, $input, int $flags = 0);
+<<__PHPStdLib, __Pure>>
+function preg_grep_with_error(
+  string $pattern,
+  $input,
+  inout ?int $error,
+  int $flags = 0,
+);
 /*
  * `preg_match` can actually return false if the regex fails to compile.
  * However, most code has no need to consider this possibility because their
@@ -22,21 +29,71 @@ function preg_grep(string $pattern, $input, int $flags = 0);
 <<__PHPStdLib>>
 function preg_match(string $pattern, string $subject,
                     int $flags = 0, int $offset = 0): int;
+<<__PHPStdLib, __Pure>>
+function preg_match_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): int;
 <<__PHPStdLib>>
 function preg_match_with_matches(string $pattern, string $subject, inout $matches,
                                  int $flags = 0, int $offset = 0): int;
+<<__PHPStdLib, __Pure>>
+function preg_match_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+): int;
 <<__PHPStdLib>>
 function preg_match_all(string $pattern, string $subject,
                         int $flags = 0, int $offset = 0);
+<<__PHPStdLib, __Pure>>
+function preg_match_all_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+);
 <<__PHPStdLib>>
 function preg_match_all_with_matches(string $pattern, string $subject, inout $matches,
                                      int $flags = 0, int $offset = 0);
-
+<<__PHPStdLib, __Pure>>
+function preg_match_all_with_matches_and_error(
+  string $pattern,
+  string $subject,
+  inout $matches,
+  inout ?int $error,
+  int $flags = 0,
+  int $offset = 0,
+);
 <<__PHPStdLib>>
 function preg_replace($pattern, $replacement, $subject, int $limit = -1);
+<<__PHPStdLib, __Pure>>
+function preg_replace_with_error(
+  $pattern,
+  $replacement,
+  $subject,
+  inout ?int $error,
+  int $limit = -1,
+);
 <<__PHPStdLib>>
 function preg_replace_with_count($pattern, $replacement, $subject, int $limit,
                                  inout ?int $count);
+<<__PHPStdLib, __Pure>>
+function preg_replace_with_count_and_error(
+  $pattern,
+  $replacement,
+  $subject,
+  int $limit,
+  inout ?int $count,
+  inout ?int $error,
+);
 <<__PHPStdLib>>
 function preg_replace_callback($pattern, $callback, $subject, int $limit,
                                inout ?int $count);
@@ -45,6 +102,14 @@ function preg_replace_callback_array($patterns_and_callbacks, $subject,
                                      int $limit, inout ?int $count);
 <<__PHPStdLib, __Pure>>
 function preg_split(string $pattern, string $subject, $limit = -1, int $flags = 0);
+<<__PHPStdLib, __Pure>>
+function preg_split_with_error(
+  string $pattern,
+  string $subject,
+  inout ?int $error,
+  $limit = -1,
+  int $flags = 0,
+);
 <<__PHPStdLib, __Pure>>
 function preg_quote(string $str, $delimiter = null);
 <<__PHPStdLib, __NonRx('Reads from global')>>

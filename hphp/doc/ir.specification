@@ -483,8 +483,6 @@ To darray conversion:
 
 To bool conversions:
 
-| ConvArrToBool,               D(Bool), S(Arr),                           NF
-
 | ConvDblToBool,               D(Bool), S(Dbl),                           NF
 
 | ConvIntToBool,               D(Bool), S(Int),                           NF
@@ -1999,8 +1997,6 @@ To string conversions:
 
 | CountArray,      D(Int), S(Arr),    NF
 
-| CountArrayFast,  D(Int), S(Arr),    NF
-
 | CountVec,        D(Int), S(Vec),    NF
 
 | CountDict,       D(Int), S(Dict),   NF
@@ -2009,11 +2005,8 @@ To string conversions:
 
 | CountCollection, D(Int), S(Obj),    NF
 
-  Computes the number of elements in S0 using the same definition as Count, but
-  with a restriction on the input type.
-
-  CountArray expects any array. CountArrayFast expects an array whose kind is
-  not kGlobalsKind. CountCollection expects a collection object.
+  Computes the number of elements in S0 using the same definition as Count,
+  but with a restriction on the input type that allows for optimizations.
 
 | Nop, ND, NA, NF
 

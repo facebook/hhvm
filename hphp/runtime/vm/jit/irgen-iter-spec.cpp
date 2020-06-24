@@ -344,7 +344,7 @@ struct PackedAccessor : public Accessor {
   }
 
   SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    auto const op = is_hack_arr ? CountVec : CountArrayFast;
+    auto const op = is_hack_arr ? CountVec : CountArray;
     return gen(env, op, arr);
   }
 
@@ -396,7 +396,7 @@ struct MixedAccessor : public Accessor {
   }
 
   SSATmp* getSize(IRGS& env, SSATmp* arr) const override {
-    auto const op = is_hack_arr ? CountDict : CountArrayFast;
+    auto const op = is_hack_arr ? CountDict : CountArray;
     return gen(env, op, arr);
   }
 

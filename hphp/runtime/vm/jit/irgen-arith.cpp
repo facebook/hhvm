@@ -864,7 +864,7 @@ void implArrCmp(IRGS& env, Op op, SSATmp* left, SSATmp* right) {
     push(env,
          gen(env,
              toBoolCmpOpcode(op),
-             gen(env, ConvArrToBool, left),
+             gen(env, ConvTVToBool, left),
              gen(env, ConvTVToBool, right)));
   } else if (rightTy <= TObj) {
     // Objects are always greater than arrays. Emit a collection check first.

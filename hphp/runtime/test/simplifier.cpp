@@ -119,7 +119,7 @@ TEST(Simplifier, Count) {
     EXPECT_EQ(1, result.dst->intVal());
   }
 
-  // Count($vanilla_array) --> CountArrayFast($vanilla_array)
+  // Count($vanilla_array) --> CountArray($vanilla_array)
   {
     auto const arr = unit.gen(Conjure, dummy, TVanillaArr);
     auto const count = unit.gen(Count, dummy, arr->dst());
@@ -127,10 +127,10 @@ TEST(Simplifier, Count) {
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArrayFast, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
   }
 
-  // Count($array_packed) --> CountArrayFast($array_packed)
+  // Count($array_packed) --> CountArray($array_packed)
   {
     auto const arr = unit.gen(Conjure, dummy, TPackedArr);
     auto const count = unit.gen(Count, dummy, arr->dst());
@@ -138,7 +138,7 @@ TEST(Simplifier, Count) {
 
     EXPECT_NE(nullptr, result.dst);
     EXPECT_EQ(1, result.instrs.size());
-    EXPECT_MATCH(result.instrs[0], CountArrayFast, arr->dst());
+    EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
   }
 
   // Count($some_obj) --> Count($some_obj)

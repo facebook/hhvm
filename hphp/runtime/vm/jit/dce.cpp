@@ -70,7 +70,6 @@ bool canDCE(IRInstruction* inst) {
   case ConvDblToArr:
   case ConvIntToArr:
   case ConvFuncToArr:
-  case ConvArrToBool:
   case ConvDblToBool:
   case ConvIntToBool:
   case ConvStrToBool:
@@ -215,7 +214,6 @@ bool canDCE(IRInstruction* inst) {
   case LdRetVal:
   case Mov:
   case CountArray:
-  case CountArrayFast:
   case CountVec:
   case CountDict:
   case CountKeyset:

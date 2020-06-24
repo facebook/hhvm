@@ -158,30 +158,6 @@ void implCountArrayLike(IRLS& env, const IRInstruction* inst) {
 IMPL_OPCODE_CALL(Count)
 
 void cgCountArray(IRLS& env, const IRInstruction* inst) {
-  auto const& arr_type = inst->src(0)->type();
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const d = v.makeReg();
-  auto const sf = v.makeReg();
-  v << loadl{src[ArrayData::offsetofSize()], d};
-  v << testl{d, d, sf};
-
-  unlikelyCond(
-    v, vcold(env), CC_S, sf, dst,
-    [&](Vout& v) {
-      auto const d = v.makeReg();
-      auto const call = CallSpec::array(
-        arr_type, &g_array_funcs.vsize, &ArrayData::size);
-      cgCallHelper(v, env, call, callDest(d), SyncOptions::None,
-                   argGroup(env, inst).ssa(0));
-      return d;
-    },
-    [&](Vout& /*v*/) { return d; });
-}
-
-void cgCountArrayFast(IRLS& env, const IRInstruction* inst) {
   implCountArrayLike(env, inst);
 }
 

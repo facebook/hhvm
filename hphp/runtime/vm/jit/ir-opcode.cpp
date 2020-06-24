@@ -600,7 +600,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ContStarted:
   case ContStartedCheck:
   case ContValid:
-  case ConvArrToBool:
   case ConvArrToDArr:
   case ConvArrToDbl:
   case ConvArrToNonDVArr:
@@ -634,7 +633,6 @@ bool opcodeMayRaise(Opcode opc) {
   case ConvVecToVArr:
   case ConvPtrToLval:
   case CountArray:
-  case CountArrayFast:
   case CountCollection:
   case CountDict:
   case CountKeyset:

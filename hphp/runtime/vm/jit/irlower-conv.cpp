@@ -108,35 +108,6 @@ void cgConvStrToBool(IRLS& env, const IRInstruction* inst) {
   );
 }
 
-void cgConvArrToBool(IRLS& env, const IRInstruction* inst) {
-  auto const dst = dstLoc(env, inst, 0).reg();
-  auto const src = srcLoc(env, inst, 0).reg();
-  auto& v = vmain(env);
-
-  auto const sf = v.makeReg();
-  v << cmplim{0, src[ArrayData::offsetofSize()], sf};
-
-  unlikelyCond(v, vcold(env), CC_S, sf, dst,
-    [&] (Vout& v) {
-      auto const vsize = v.makeReg();
-      cgCallHelper(v, env, CallSpec::method(&ArrayData::vsize),
-                   callDest(vsize), SyncOptions::None,
-                   argGroup(env, inst).ssa(0));
-
-      auto const sf = v.makeReg();
-      auto const d = v.makeReg();
-      v << testl{vsize, vsize, sf};
-      v << setcc{CC_NZ, sf, d};
-      return d;
-    },
-    [&] (Vout& v) {
-      auto const d = v.makeReg();
-      v << setcc{CC_NZ, sf, d};
-      return d;
-    }
-  );
-}
-
 void cgConvObjToBool(IRLS& env, const IRInstruction* inst) {
   auto const dst = dstLoc(env, inst, 0).reg();
   auto const src = srcLoc(env, inst, 0).reg();

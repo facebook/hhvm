@@ -2156,11 +2156,6 @@ SSATmp* simplifyConvClsMethToKeyset(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyConvArrToBool(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  return gen(env, ConvIntToBool, gen(env, CountArrayFast, src));
-}
-
 SSATmp* simplifyConvDblToBool(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal()) {
@@ -2283,7 +2278,10 @@ SSATmp* simplifyConvTVToBool(State& env, const IRInstruction* inst) {
 
   if (srcType <= TBool) return src;
   if (srcType <= TNull) return cns(env, false);
-  if (srcType <= TArr)  return gen(env, ConvArrToBool, src);
+  if (srcType <= TArr) {
+    auto const length = gen(env, CountArray, src);
+    return gen(env, NeqInt, length, cns(env, 0));
+  }
   if (srcType <= TVec) {
     auto const length = gen(env, CountVec, src);
     return gen(env, NeqInt, length, cns(env, 0));
@@ -3327,13 +3325,6 @@ SSATmp* simplifyCount(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-
-SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
-  auto const src = inst->src(0);
-  if (src->hasConstVal()) return cns(env, src->arrVal()->size());
-  return gen(env, CountArrayFast, src);
-}
-
 namespace {
 SSATmp* simplifyCountHelper(
   State& env,
@@ -3357,7 +3348,7 @@ SSATmp* simplifyCountHelper(
 }
 }
 
-SSATmp* simplifyCountArrayFast(State& env, const IRInstruction* inst) {
+SSATmp* simplifyCountArray(State& env, const IRInstruction* inst) {
   return simplifyCountHelper(env, inst, TArr);
 }
 
@@ -3713,7 +3704,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(ConcatStr4)
   X(ConcatIntStr)
   X(ConcatStrInt)
-  X(ConvArrToBool)
   X(ConvArrToDbl)
   X(ConvBoolToArr)
   X(ConvBoolToDbl)
@@ -3766,7 +3756,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(DblAsBits)
   X(Count)
   X(CountArray)
-  X(CountArrayFast)
   X(CountVec)
   X(CountDict)
   X(CountKeyset)

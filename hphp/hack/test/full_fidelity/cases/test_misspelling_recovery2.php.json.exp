@@ -424,5 +424,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nabstract ckass C { // error1058\n}\n\nfinal interfsce I { // error1058\n}\n\nabstract final ttait T { // error1058\n}\n\n// Error recovery in this case remains unsophisticated, though.\n\nckass C {\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -1560,18 +1560,12 @@ fn emit_record(
     e: &mut Emitter,
     env: &Env,
     pos: &Pos,
-    (cid, is_array, es): &(tast::Sid, bool, Vec<(tast::Expr, tast::Expr)>),
+    (cid, es): &(tast::Sid, Vec<(tast::Expr, tast::Expr)>),
 ) -> Result {
     let es = mk_afkvalues(es);
     let id = class::Type::from_ast_name_and_mangle(&cid.1);
     emit_symbol_refs::State::add_class(e, id.clone());
-    emit_struct_array(e, env, pos, &es, |_, keys| {
-        if *is_array {
-            Ok(instr::new_recordarray(id, keys))
-        } else {
-            Ok(instr::new_record(id, keys))
-        }
-    })
+    emit_struct_array(e, env, pos, &es, |_, keys| Ok(instr::new_record(id, keys)))
 }
 
 fn emit_call_isset_expr(e: &mut Emitter, env: &Env, outer_pos: &Pos, expr: &tast::Expr) -> Result {

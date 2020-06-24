@@ -460,5 +460,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  abstract final static private protected public async coroutine $x = 1;\n\n  static static $y = 2;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -432,5 +432,5 @@
     }
   },
   "program_text":"<?hh\n\n// async needs to be first so that we parse this as a function declaration\nasync abstract final static private protected public coroutine function f() {}\n\nasync async function g() {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -590,5 +590,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(){\n  varray[];\n  varray[$a];\n  varray[$a,];\n  varray[$a, $b, $c];\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

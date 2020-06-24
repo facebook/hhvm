@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c876f5634101add810061a9fc88d4743>>
+// @generated SignedSource<<44a7dd82808c5c93c08293ee293400c9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -1006,12 +1006,8 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     ) -> Self {
         Expr_::New(Box::new((p0, p1, p2, p3, p4)))
     }
-    pub fn mk_record(
-        p0: Sid,
-        p1: bool,
-        p2: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
-    ) -> Self {
-        Expr_::Record(Box::new((p0, p1, p2)))
+    pub fn mk_record(p0: Sid, p1: Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>) -> Self {
+        Expr_::Record(Box::new((p0, p1)))
     }
     pub fn mk_efun(p0: Fun_<Ex, Fb, En, Hi>, p1: Vec<Lid>) -> Self {
         Expr_::Efun(Box::new((p0, p1)))
@@ -1690,15 +1686,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_record(
-        &self,
-    ) -> Option<(
-        &Sid,
-        &bool,
-        &Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
-    )> {
+    pub fn as_record(&self) -> Option<(&Sid, &Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)> {
         match self {
-            Expr_::Record(p0) => Some((&p0.0, &p0.1, &p0.2)),
+            Expr_::Record(p0) => Some((&p0.0, &p0.1)),
             _ => None,
         }
     }
@@ -2106,11 +2096,10 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
         &mut self,
     ) -> Option<(
         &mut Sid,
-        &mut bool,
         &mut Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>,
     )> {
         match self {
-            Expr_::Record(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
+            Expr_::Record(p0) => Some((&mut p0.0, &mut p0.1)),
             _ => None,
         }
     }
@@ -2491,9 +2480,9 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     }
     pub fn as_record_into(
         self,
-    ) -> Option<(Sid, bool, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)> {
+    ) -> Option<(Sid, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)> {
         match self {
-            Expr_::Record(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
+            Expr_::Record(p0) => Some(((*p0).0, (*p0).1)),
             _ => None,
         }
     }

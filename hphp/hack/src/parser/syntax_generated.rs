@@ -1205,10 +1205,9 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_record_creation_expression(_: &C, record_creation_type: Self, record_creation_array_token: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
+    fn make_record_creation_expression(_: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self {
         let syntax = SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
             record_creation_type,
-            record_creation_array_token,
             record_creation_left_bracket,
             record_creation_members,
             record_creation_right_bracket,
@@ -2787,9 +2786,8 @@ where
                 acc
             },
             SyntaxVariant::RecordCreationExpression(x) => {
-                let RecordCreationExpressionChildren { record_creation_type, record_creation_array_token, record_creation_left_bracket, record_creation_members, record_creation_right_bracket } = *x;
+                let RecordCreationExpressionChildren { record_creation_type, record_creation_left_bracket, record_creation_members, record_creation_right_bracket } = *x;
                 let acc = f(record_creation_type, acc);
-                let acc = f(record_creation_array_token, acc);
                 let acc = f(record_creation_left_bracket, acc);
                 let acc = f(record_creation_members, acc);
                 let acc = f(record_creation_right_bracket, acc);
@@ -4230,11 +4228,10 @@ where
                  constructor_call_type: ts.pop().unwrap(),
                  
              })),
-             (SyntaxKind::RecordCreationExpression, 5) => SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
+             (SyntaxKind::RecordCreationExpression, 4) => SyntaxVariant::RecordCreationExpression(Box::new(RecordCreationExpressionChildren {
                  record_creation_right_bracket: ts.pop().unwrap(),
                  record_creation_members: ts.pop().unwrap(),
                  record_creation_left_bracket: ts.pop().unwrap(),
-                 record_creation_array_token: ts.pop().unwrap(),
                  record_creation_type: ts.pop().unwrap(),
                  
              })),
@@ -5534,7 +5531,6 @@ pub struct ConstructorCallChildren<T, V> {
 #[derive(Debug, Clone)]
 pub struct RecordCreationExpressionChildren<T, V> {
     pub record_creation_type: Syntax<T, V>,
-    pub record_creation_array_token: Syntax<T, V>,
     pub record_creation_left_bracket: Syntax<T, V>,
     pub record_creation_members: Syntax<T, V>,
     pub record_creation_right_bracket: Syntax<T, V>,
@@ -7315,12 +7311,11 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 })
             },
             RecordCreationExpression(x) => {
-                get_index(5).and_then(|index| { match index {
+                get_index(4).and_then(|index| { match index {
                         0 => Some(&x.record_creation_type),
-                    1 => Some(&x.record_creation_array_token),
-                    2 => Some(&x.record_creation_left_bracket),
-                    3 => Some(&x.record_creation_members),
-                    4 => Some(&x.record_creation_right_bracket),
+                    1 => Some(&x.record_creation_left_bracket),
+                    2 => Some(&x.record_creation_members),
+                    3 => Some(&x.record_creation_right_bracket),
                         _ => None,
                     }
                 })

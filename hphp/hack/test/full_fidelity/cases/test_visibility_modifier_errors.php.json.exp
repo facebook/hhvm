@@ -1313,5 +1313,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I1 {\n  function i1(): void; // legal\n  public function i2(): void; // legal\n  private function i3(): void; // error2047\n  protected function i4(): void; // error2047\n  static final function i1(): void; // legal\n  static final public function i2(): void; // legal\n  static final private function i3(): void; // error2047\n  static final protected function i4(): void; // error2047\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

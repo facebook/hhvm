@@ -793,5 +793,5 @@
     }
   },
   "program_text":"<?hh\nfunction f (...$a = null) : int {} // ERROR\nfunction f ($a, ...$b = null) : int {} // ERROR\nfunction f ($a = null, ...$b) : int {} // no error\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

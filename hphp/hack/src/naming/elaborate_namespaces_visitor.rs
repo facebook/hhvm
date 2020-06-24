@@ -339,9 +339,8 @@ impl<'ast> VisitorMut<'ast> for ElaborateNamespacesVisitor {
                 unpacked_el.accept(env, self.object())?;
             }
             Expr_::Record(r) => {
-                let (record_name, l) = (&mut r.0, &mut r.2);
+                let record_name = &mut r.0;
                 env.elaborate_type_name(record_name);
-                l.accept(env, self.object())?;
             }
             Expr_::ClassConst(cc) => {
                 let type_ = &mut cc.0;

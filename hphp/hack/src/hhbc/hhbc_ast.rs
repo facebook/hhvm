@@ -244,7 +244,6 @@ pub enum InstructLitConst {
     NewKeysetArray(isize),
     NewPair,
     NewRecord(ClassId, Vec<String>),
-    NewRecordArray(ClassId, Vec<String>),
     AddElemC,
     AddNewElemC,
     NewCol(CollectionType),

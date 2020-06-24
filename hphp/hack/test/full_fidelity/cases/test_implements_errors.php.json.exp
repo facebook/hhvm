@@ -623,5 +623,5 @@
     }
   },
   "program_text":"<?hh //strict\nclass Bar1 implements Foo1\n{\n}\n\ninterface Bar2 implements Foo1\n{\n}\n\ntrait Bar3 implements Foo1\n{\n}\n\nclass Bar1\n{\n}\n\ninterface Bar2\n{\n}\n\ntrait Bar3\n{\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -354,5 +354,5 @@
     }
   },
   "program_text":"<?hh\n\nclass Bar {\n  public $foo;\n}\n\nclass Bar2 {\n  var $foo;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

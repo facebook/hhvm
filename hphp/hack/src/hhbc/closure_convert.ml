@@ -966,14 +966,14 @@ let rec convert_expr env st ((p, expr_) as expr) =
       let (st, el1) = convert_exprs env st el1 in
       let (st, e2) = convert_opt_expr env st e2 in
       (st, (p, New (cid, targs, el1, e2, annot)))
-    | Record (cid, is_array, es) ->
+    | Record (cid, es) ->
       let convert_pair st (e1, e2) =
         let (st, e1) = convert_expr env st e1 in
         let (st, e2) = convert_expr env st e2 in
         (st, (e1, e2))
       in
       let (st, es) = List.map_env st es convert_pair in
-      (st, (p, Record (cid, is_array, es)))
+      (st, (p, Record (cid, es)))
     | Efun (fd, use_vars) -> convert_lambda env st p fd (Some use_vars)
     | Lfun (fd, _) -> convert_lambda env st p fd None
     | Xml (id, pairs, el) ->

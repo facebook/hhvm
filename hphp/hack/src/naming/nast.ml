@@ -816,7 +816,7 @@ module Visitor_DEPRECATED = struct
         | New (cid, _, el, unpacked_element, _) ->
           this#on_new acc cid el unpacked_element
         | Efun (f, idl) -> this#on_efun acc f idl
-        | Record (cid, _, fl) -> this#on_record acc cid fl
+        | Record (cid, fl) -> this#on_record acc cid fl
         | Xml (sid, attrl, el) -> this#on_xml acc sid attrl el
         | Callconv (kind, e) -> this#on_callconv acc kind e
         | ValCollection (s, ta, el) -> this#on_valCollection acc s ta el

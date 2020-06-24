@@ -714,5 +714,5 @@
     }
   },
   "program_text":"<?hh\n\nabstract class C {\n  <<__Enforceable>>\n  abstract const type T as num;\n\n  abstract const type Tu as num;\n\n  <<__Enforceable>>\n  const type Tv = int;\n\n  const type Tw = int;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

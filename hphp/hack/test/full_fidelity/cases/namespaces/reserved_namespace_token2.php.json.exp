@@ -526,5 +526,5 @@
     }
   },
   "program_text":"<?hh\n\n// Using `namespace` as a name is not allowed\n\nclass namespace {}\n\nfunction test(): void {\n  $x = new namespace();\n}\n\nfunction namespace(): void {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

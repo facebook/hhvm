@@ -2634,7 +2634,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { record_creation_right_bracket = validate_token x.record_creation_right_bracket
     ; record_creation_members = validate_list_with (validate_element_initializer) x.record_creation_members
     ; record_creation_left_bracket = validate_token x.record_creation_left_bracket
-    ; record_creation_array_token = validate_option_with (validate_token) x.record_creation_array_token
     ; record_creation_type = validate_todo_aggregate x.record_creation_type
     }
   | s -> validation_fail (Some SyntaxKind.RecordCreationExpression) s
@@ -2642,7 +2641,6 @@ module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     { Syntax.syntax =
       Syntax.RecordCreationExpression
       { record_creation_type = invalidate_todo_aggregate x.record_creation_type
-      ; record_creation_array_token = invalidate_option_with (invalidate_token) x.record_creation_array_token
       ; record_creation_left_bracket = invalidate_token x.record_creation_left_bracket
       ; record_creation_members = invalidate_list_with (invalidate_element_initializer) x.record_creation_members
       ; record_creation_right_bracket = invalidate_token x.record_creation_right_bracket

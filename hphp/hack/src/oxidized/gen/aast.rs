@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bd4fd9eb20c51888cf71296eeae6719d>>
+// @generated SignedSource<<23113c345ee1eab87c1ddb352d5afff5>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -310,7 +310,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Ex,
         )>,
     ),
-    Record(Box<(Sid, bool, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
+    Record(Box<(Sid, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
     Efun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
     Lfun(Box<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
     Xml(

@@ -507,5 +507,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nabstract class A {\n  private abstract static int $p;\n  protected abstract static int $l;\n  public abstract static int $m;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

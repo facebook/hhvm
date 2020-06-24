@@ -1054,5 +1054,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass C {\n  enum E {\n  case type T;\n  case T val;\n  :@I(type T = int, val = 42);\n  }\n}\n\nclass D {\n  enum E {\n  case type T;\n  case T val;\n  :@I(type T = int, val = 42,);\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -275,5 +275,5 @@
     }
   },
   "program_text":"<?hh\n\n@Attr1\n@Attr2\n<<Attr3, Attr4>>\nfunction f(): void {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

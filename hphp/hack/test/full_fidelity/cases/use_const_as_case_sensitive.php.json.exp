@@ -522,5 +522,5 @@
     }
   },
   "program_text":"<?hh\nnamespace consts {\n  const x = \"x\";\n}\nuse const consts\\x as A;\nuse const consts\\x as a;\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -2651,7 +2651,7 @@ and expr_
       p
       (Aast.New (tc, tal, tel, typed_unpack_element, (p1, ctor_fty)))
       ty
-  | Record ((pos, id), _is_array, field_values) ->
+  | Record ((pos, id), field_values) ->
     (match Decl_provider.get_record_def (Env.get_ctx env) id with
     | Some rd ->
       if rd.rdt_abstract then Errors.new_abstract_record (pos, id);

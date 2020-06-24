@@ -879,5 +879,5 @@
     }
   },
   "program_text":"<?hh\ninterface I { }\nclass B { }\nclass D extends B\n{\n  require extends B; // error\n  require implements I; // error\n}\ninterface I2\n{\n  require extends B; // no error\n  require implements I; // error\n}\ntrait T\n{\n  require extends B; // no error\n  require implements I; // no error\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

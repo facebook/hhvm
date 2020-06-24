@@ -1685,5 +1685,5 @@
     }
   },
   "program_text":"<?hh\n\ntrait T1 {\n  public function animal(): void {\n    echo \"Dog\";\n  }\n}\n\ntrait T2 {\n  public function animal(): void {\n    echo \"Cat\";\n  }\n}\n\nclass C {\n  use T1, T2;\n\n  public function animal(): void = T1::animal;\n}\n\nclass D {\n  public function animal(): void = animal;\n  public function animal(): void = T1::class;\n  public function animal(): void = \\MyNamespace\\T2::foo; // ok\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -399,5 +399,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f(): void {\n  $a = $b || $c = &$d || $e;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

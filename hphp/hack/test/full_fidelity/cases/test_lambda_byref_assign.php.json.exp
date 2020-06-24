@@ -2515,5 +2515,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n$f = &() ==> { $x = 5; return $x; }; // error\n$x = &$foo->bar?->baz; // error\n$f = &$x; // error\n$f = &my_func(); // error\n$f = &$x->member; // error\n$f = &$x->method(); // error\n$f = &$xs[$x]; // error\n$f = &${name}; // error\n$f = &self::$mySelfThing; // error\n$f = &$$s; // error\n$f = &new C(); // error\n$y = &$$$$$$x; // error\n$x = &($foo->bar()); // error\n$x = &(Arrays::slice(self::NORMALIZED_REQUIRED_COLUMN_NAMES, 0)); // error\n$x = &(PHP\\array_slice($app_alerts_array, -1)); // error\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -644,5 +644,5 @@
     }
   },
   "program_text":"<?php\n\nclass C {\n  public static function f() {\n    return \"lol\";\n  }\n}\n\nfunction f($x = varray[C::f()]): void{}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

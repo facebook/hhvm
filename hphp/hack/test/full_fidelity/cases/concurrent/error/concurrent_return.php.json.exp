@@ -441,5 +441,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction f() {\n  concurrent {\n    $a = await f1();\n    return await f2();\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -561,5 +561,5 @@
     }
   },
   "program_text":"<?hh\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass EmptyStdClassProp {\n  public function foo():void{\n    $o = new stdClass();\n    $o->{''} = true;\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

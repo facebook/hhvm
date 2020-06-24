@@ -427,5 +427,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass Foo {\n  final enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

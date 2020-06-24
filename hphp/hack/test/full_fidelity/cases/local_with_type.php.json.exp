@@ -513,5 +513,5 @@
     }
   },
   "program_text":"<?hh\n\nfunction example(): void {\n  Foo $x = 1;\n}\n\nfunction example2(): void {\n  int $x = 1;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

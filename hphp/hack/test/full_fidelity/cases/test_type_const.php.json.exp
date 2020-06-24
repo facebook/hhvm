@@ -370,5 +370,5 @@
     }
   },
   "program_text":"<?hh\nclass C {\n  const type T1 = int;\n  const type T2 as T1 = T1;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

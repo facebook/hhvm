@@ -333,7 +333,7 @@ let handler ctx =
             id
         in
         env
-      | Aast.Record (id, _, _) ->
+      | Aast.Record (id, _) ->
         let () =
           check_type_name
             env

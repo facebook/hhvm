@@ -460,5 +460,5 @@
     }
   },
   "program_text":"<?hh\nfunction f() {\n  g($a);\n  h() -> d;\n  f() + 1;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

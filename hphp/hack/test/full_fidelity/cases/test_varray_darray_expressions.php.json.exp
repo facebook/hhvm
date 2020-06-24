@@ -711,5 +711,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass TestVarrayDarrayExpression {\n  private static function foo(): void {\n    darray['bar' => 0, 'baz' => 1, 'qux' => 2];\n    varray[false, true];\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

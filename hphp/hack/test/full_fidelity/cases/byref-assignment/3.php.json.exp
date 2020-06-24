@@ -521,5 +521,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f(): void {\n  $a = $x ? $y = &$z + 1 : $z = &$x1 * 2;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

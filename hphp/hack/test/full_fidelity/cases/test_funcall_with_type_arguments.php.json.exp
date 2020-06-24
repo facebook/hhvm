@@ -3588,5 +3588,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n// ficticious functions with size-discernable names\nf('hi'); // normal function call w/o generics\nfo<string>('hello'); // annotated function call\nfoo(0 < 0, tuple()); // not generics annotated, but seems so a little\nfooo(Bar < 0, 10 > Qux); // certainly not annotated, but hard to tell\nfoooo(bar<int,string>()); // annotated inside an argument list\n42 * ba<string>('hello');\n\n$x ?? foo<bar>();\n42 * foo<bar>();\n42 * foo<bar>($x);\n42 * foo<bar>($x, $y);\n42 * x::foo<bar>();\n42 * x::foo<bar>($x);\n42 * x::foo<bar>($x, $y);\nbaz(foo<baz>());\nbaz(foo<baz>($x));\nbaz(foo<baz>($x, $y));\nfoo<bar<baz>();\n42 * foo < 90;\n42 * foo < 90 + 50;\n42 * foo < 90 === true;\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

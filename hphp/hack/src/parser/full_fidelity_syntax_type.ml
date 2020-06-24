@@ -781,7 +781,6 @@ module MakeSyntaxType(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   | RecordCreationExpression          of
     { record_creation_type                               : t
-    ; record_creation_array_token                        : t
     ; record_creation_left_bracket                       : t
     ; record_creation_members                            : t
     ; record_creation_right_bracket                      : t
@@ -2080,7 +2079,6 @@ module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
     }
   and record_creation_expression =
     { record_creation_type: todo_aggregate value
-    ; record_creation_array_token: Token.t option value
     ; record_creation_left_bracket: Token.t value
     ; record_creation_members: element_initializer listesque value
     ; record_creation_right_bracket: Token.t value

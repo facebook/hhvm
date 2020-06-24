@@ -238,5 +238,5 @@
     }
   },
   "program_text":"<?hh\n\n@TestAttribute\nfunction f(): void {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

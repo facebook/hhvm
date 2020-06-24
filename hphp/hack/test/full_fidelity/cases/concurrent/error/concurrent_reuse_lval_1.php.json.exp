@@ -495,5 +495,5 @@
     }
   },
   "program_text":"<?hh\n\nasync function f() {\n  concurrent {\n    await genx($x = 42);\n    await genx($x);\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

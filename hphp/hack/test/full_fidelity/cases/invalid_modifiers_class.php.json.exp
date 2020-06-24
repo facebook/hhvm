@@ -304,5 +304,5 @@
     }
   },
   "program_text":"<?hh\n\n// We can't write many of the modifiers or this won't parse as a class (yet).\n// Eventually we want to be testing:\n// abstract final static private protected public async coroutine class C {}\nabstract final class C {}\n\nabstract abstract class D {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -1012,5 +1012,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nclass A {\n  <<__Const>> static int $o;\n  <<__Const>> static int $p = 6;\n  <<__Const>> static int $m, $l = 5;\n  const int P;\n  const int M = 7;\n  const int N, O = 7;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

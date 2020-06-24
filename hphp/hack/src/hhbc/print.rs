@@ -2073,12 +2073,6 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
             w.write(" ")?;
             angle(w, |w| print_shape_fields(w, l))
         }
-        LC::NewRecordArray(cid, l) => {
-            w.write("NewRecordArray ")?;
-            print_class_id(w, cid)?;
-            w.write(" ")?;
-            angle(w, |w| print_shape_fields(w, l))
-        }
         LC::CnsE(id) => {
             w.write("CnsE ")?;
             print_const_id(w, id)
@@ -2749,7 +2743,7 @@ fn print_expr<W: Write>(
         }
         E_::Record(r) => {
             w.write(lstrip(adjust_id(env, &(r.0).1).as_ref(), "\\\\"))?;
-            print_key_values(ctx, w, env, &r.2)
+            print_key_values(ctx, w, env, &r.1)
         }
         E_::ClassGet(cg) => {
             match &(cg.0).1 {

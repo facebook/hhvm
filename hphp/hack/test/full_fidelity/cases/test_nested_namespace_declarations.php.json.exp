@@ -283,5 +283,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nnamespace foo { namespace bar { namespace baz { } } }\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

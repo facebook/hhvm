@@ -902,5 +902,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass MyClassName {\n  const WHITE = \"white\";\n  const string TRUE = \"true\";\n  const Serializable<string> BLUE = \"blue\\u{0123}\";\n  public const string PublicConst = \"this should fail\";\n  protected const string ProtectedConst = \"this should fail\";\n  private const string PrivateConst = \"this should fail\";\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

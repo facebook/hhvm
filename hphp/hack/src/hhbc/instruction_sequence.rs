@@ -746,12 +746,6 @@ pub mod instr {
         instr(Instruct::ILitConst(InstructLitConst::NewRecord(id, keys)))
     }
 
-    pub fn new_recordarray(id: ClassId, keys: Vec<String>) -> InstrSeq {
-        instr(Instruct::ILitConst(InstructLitConst::NewRecordArray(
-            id, keys,
-        )))
-    }
-
     pub fn newstructarray(keys: Vec<String>) -> InstrSeq {
         instr(Instruct::ILitConst(InstructLitConst::NewStructArray(keys)))
     }

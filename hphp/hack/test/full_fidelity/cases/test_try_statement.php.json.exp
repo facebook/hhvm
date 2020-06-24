@@ -520,5 +520,5 @@
     }
   },
   "program_text":"<?hh\nfunction f(){\n  try {\n    $a++;\n  }\n  catch (Bar $a){\n    $b;\n  }\n  finally {\n    $c;\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

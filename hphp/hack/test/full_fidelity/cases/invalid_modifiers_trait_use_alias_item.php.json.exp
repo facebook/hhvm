@@ -576,5 +576,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  use T {\n    T::f as abstract final static private protected public async coroutine g;\n\n    T::h as abstract abstract i;\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

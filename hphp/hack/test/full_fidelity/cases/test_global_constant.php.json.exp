@@ -823,5 +823,5 @@
     }
   },
   "program_text":"<?hh // strict\nconst A = 10;\nconst A;\nconst int A;\nconst int A = 10;\nnamespace V {\n  const A = 10;\n  const A;\n  const int A;\n  const int A = 10;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

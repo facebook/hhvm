@@ -794,5 +794,5 @@
     }
   },
   "program_text":"<?hh\n\nabstract class MyClassName {\n  public abstract const type T1;\n  protected abstract const type T2;\n  private abstract const type T3;\n  public const type T4 = int;\n  protected const type T5 = int;\n  private const type T6 = int;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

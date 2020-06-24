@@ -580,5 +580,5 @@
     }
   },
   "program_text":"<?hh\n<<foo(), bar(1+1), foo(1, 2, 3, 4)>> function f() {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

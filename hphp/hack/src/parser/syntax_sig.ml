@@ -668,7 +668,6 @@ module type Syntax_S = sig
     }
   | RecordCreationExpression          of
     { record_creation_type                               : t
-    ; record_creation_array_token                        : t
     ; record_creation_left_bracket                       : t
     ; record_creation_members                            : t
     ; record_creation_right_bracket                      : t
@@ -1196,7 +1195,7 @@ module type Syntax_S = sig
   val make_collection_literal_expression : t -> t -> t -> t -> t
   val make_object_creation_expression : t -> t -> t
   val make_constructor_call : t -> t -> t -> t -> t
-  val make_record_creation_expression : t -> t -> t -> t -> t -> t
+  val make_record_creation_expression : t -> t -> t -> t -> t
   val make_array_intrinsic_expression : t -> t -> t -> t -> t
   val make_darray_intrinsic_expression : t -> t -> t -> t -> t -> t
   val make_dictionary_intrinsic_expression : t -> t -> t -> t -> t -> t

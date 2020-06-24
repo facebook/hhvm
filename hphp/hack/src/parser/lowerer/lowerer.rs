@@ -2203,11 +2203,8 @@ where
             }
             RecordCreationExpression(c) => {
                 let id = Self::pos_name(&c.record_creation_type, env)?;
-                let is_record_array =
-                    Self::token_kind(&c.record_creation_array_token) == Some(TK::At);
                 Ok(E_::mk_record(
                     id,
-                    is_record_array,
                     Self::could_map(Self::p_member, &c.record_creation_members, env)?,
                 ))
             }

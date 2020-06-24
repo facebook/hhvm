@@ -877,5 +877,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nshape(1 => 1);\nshape(true => 1);\nshape($x => 1);\nshape(\"hi\" => 1);\nshape(\"1hi\" => 1);\nshape(2 => 1, 3 => 4);\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

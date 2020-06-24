@@ -587,5 +587,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ninterface I1 { // legal\n}\n\nabstract interface I1 { // errror2042\n}\n\nclass C1 { // legal\n}\n\nabstract class C2 { // legal\n}\n\ntrait T { // legal\n}\n\nabstract trait T { // error2043\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

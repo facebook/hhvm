@@ -314,5 +314,5 @@
     }
   },
   "program_text":"<?hh\nfunction f() {\n  $a =\n<<<FOO\nFOO;\n  $b =\n<<<'BAR'\nBARBAR\nBAR\n;\n\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

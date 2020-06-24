@@ -1526,5 +1526,5 @@
     }
   },
   "program_text":"<?hh\n\n$i = 1;\ndo {\n  echo \"$i\\t\".($i * $i).\"\\n\"; // output a table of squares\n  ++$i;\n} whike ($i <= 10); // report 'whike' as misspelled\n\n// Known issue: something about the location reported by current_token_text\n// in full_fidelity_parser_helpers is tripped up enough enough by newlines\n// that the misspelling recovery doesn't work on this 'whike'.\n\n$i = 1;\ndo {\n  echo \"$i\\t\".($i * $i).\"\\n\"; // output a table of squares\n  ++$i;\n}\nwhike ($i <= 10);\n\n// Known cases that this error recovery improvement does not address.\n// These are still not-recovered-from because the require_[TokenKind]\n// methods are not invoked when parsing them.\n\n$doublerl = ($p) =>> $p * 2; // ideally would report '=>>' as misspelled\n$doublerl = ($p) ==g $p * 2; // ideally would report '==g' as misspelled\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

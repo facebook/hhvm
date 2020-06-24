@@ -814,5 +814,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nabstract class A {\n  <<__Const>> abstract static public int $a = 5;\n  abstract const int C = 5;\n}\nclass B {\n  <<__Const>> static public int $b;\n  const int C;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

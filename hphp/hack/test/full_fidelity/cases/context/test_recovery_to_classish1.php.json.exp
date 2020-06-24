@@ -213,5 +213,5 @@
     }
   },
   "program_text":"<?hh\n\n// report right brace of C1 as missing\nclass C1 {\n\nclass C2 {\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

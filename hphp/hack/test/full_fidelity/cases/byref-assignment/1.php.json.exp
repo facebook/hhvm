@@ -331,5 +331,5 @@
     }
   },
   "program_text":"<?hh // strict\nfunction f(): void {\n  $a = &$b + 1;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

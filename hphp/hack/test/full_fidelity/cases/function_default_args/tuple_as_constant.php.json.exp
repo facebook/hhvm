@@ -1225,5 +1225,5 @@
     }
   },
   "program_text":"<?hh // strict\n// Copyright 2004-present Facebook. All Rights Reserved.\n\nfunction get_int(): int {\n  return 0;\n}\n\nfunction f((int, int)$mt = tuple(get_int(), get_int())): void{}\n\nclass A {\n  public function f((int, int)$mt = tuple(get_int(), get_int())): void{}\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

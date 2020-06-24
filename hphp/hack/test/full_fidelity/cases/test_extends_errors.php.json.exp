@@ -1162,5 +1162,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n// legal\ninterface c extends a, b {\n}\n\n// error\nclass c extends a, b {\n}\n\n// error\ntrait c extends a, b {\n}\n\n// legal\ninterface c extends a {\n}\n\n// legal\nclass c extends a {\n}\n\n// error\ntrait c extends a {\n}\n\n// error 1007\ninterface c extends {\n}\n\n// error 1007\nclass c extends {\n}\n\n// errors 1007 and 2036\ntrait c extends {\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

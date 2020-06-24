@@ -2277,10 +2277,10 @@ and expr_ env p (e : Nast.expr_) =
         oexpr env unpacked_element,
         p )
   | Aast.New _ -> failwith "ast_to_nast aast.new"
-  | Aast.Record (id, is_array, l) ->
+  | Aast.Record (id, l) ->
     let () = check_name id in
     let l = List.map l (fun (e1, e2) -> (expr env e1, expr env e2)) in
-    N.Record (id, is_array, l)
+    N.Record (id, l)
   | Aast.Efun (f, idl) ->
     let idl =
       List.fold_right idl ~init:[] ~f:(fun ((p, x) as id) acc ->

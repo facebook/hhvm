@@ -215,5 +215,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nclass CEmpty {\n  enum FEmpty {\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

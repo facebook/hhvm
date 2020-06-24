@@ -448,7 +448,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.Is (_, _)
   | A.As (_, _, _)
   | A.New (_, _, _, _, _)
-  | A.Record (_, _, _)
+  | A.Record (_, _)
   | A.Efun (_, _)
   | A.Lfun (_, _)
   | A.Xml (_, _, _)

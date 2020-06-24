@@ -522,5 +522,5 @@
     }
   },
   "program_text":"<?hh // strict\n\n/**\n * Test case with various trivia such as end of line, fixme, whitespace\n * and comments\n */\n\nfunction foo(dict<int,Plain,> $x): dict<\n  int,\n  Plain,\n> {\n  /* HH_FIXME: Some fixme */\n  return $x;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

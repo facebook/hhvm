@@ -353,5 +353,5 @@
     }
   },
   "program_text":"<?hh // strict\n\ntrait T {\n  require extends A;\n}\n\ntrait U {\n  require implements A;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

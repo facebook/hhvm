@@ -1837,5 +1837,5 @@
     }
   },
   "program_text":"<?hh\nfunction foo() {\n  for($x;$y;$z) {\n    return $a;\n  }\n  for($x;$y;$z) {}\n  for(;$y;$z) {}\n  for($x;;$z) {}\n  for($x;$y;) {}\n  for($x;;) {}\n  for(;$y;) {}\n  for(;;$z) {}\n  for($x, $y;;) {}\n  for(;$x, $y, $z;) {}\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

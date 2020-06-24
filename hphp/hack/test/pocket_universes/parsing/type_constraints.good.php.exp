@@ -1307,5 +1307,5 @@
     }
   },
   "program_text":"<?hh\n\nclass U {}\nclass D {}\nclass E {}\n\nclass C {\n  enum E {\n    case type T0;\n    case type reify T1;\n    case type T2 as U;\n    case type reify T3 as U;\n    case type T4 super D;\n    case type reify T5 super D;\n    case type T6 as E super E;\n    case type reify T7 as E super E;\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -345,5 +345,5 @@
     }
   },
   "program_text":"<?hh\n/**\n * Copyright (c) 2014, Facebook, Inc.\n * All rights reserved.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the \"hack\" directory of this source tree.\n *\n *\n */\n\nclass A <T> where T as num T as string {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

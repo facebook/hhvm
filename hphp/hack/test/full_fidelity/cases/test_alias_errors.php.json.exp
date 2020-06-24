@@ -392,5 +392,5 @@
     }
   },
   "program_text":"<?hh //strict\ntype foo as bar = blah; // error\nnewtype foo2 as bar2 = blah2; // legal\ntype foo3 = blah3; // legal\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -1011,16 +1011,10 @@ and emit_new
     empty )
 
 (* TODO(T36697624) more efficient bytecode for static records *)
-and emit_record env pos (_, rname) is_array es =
+and emit_record env pos (_, rname) es =
   let id = Hhbc_id.Class.from_ast_name rname in
-  let instr =
-    if is_array then
-      instr_new_recordarray
-    else
-      instr_new_record
-  in
   Emit_symbol_refs.add_class id;
-  emit_struct_array env pos es (instr id)
+  emit_struct_array env pos es (instr_new_record id)
 
 and emit_clone env expr = gather [emit_expr env expr; instr_clone]
 
@@ -1652,9 +1646,9 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.FunctionPointer (e, targs) -> emit_function_pointer env e targs
   | A.New (cid, targs, args, uarg, _constructor_annot) ->
     emit_new env pos cid targs args uarg
-  | A.Record (cid, is_array, es) ->
+  | A.Record (cid, es) ->
     let es2 = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in
-    emit_record env pos cid is_array es2
+    emit_record env pos cid es2
   | A.Array es -> emit_pos_then pos @@ emit_collection env expr es
   | A.Darray (ta, es) ->
     emit_pos_then pos

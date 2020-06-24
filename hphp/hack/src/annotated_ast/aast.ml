@@ -187,10 +187,7 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
       * ('ex, 'fb, 'en, 'hi) expr list
       * ('ex, 'fb, 'en, 'hi) expr option
       * 'ex (* constructor *)
-  | Record of
-      sid
-      * (* is array *) bool
-      * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
+  | Record of sid * (('ex, 'fb, 'en, 'hi) expr * ('ex, 'fb, 'en, 'hi) expr) list
   | Efun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
   | Lfun of ('ex, 'fb, 'en, 'hi) fun_ * lid list
   | Xml of

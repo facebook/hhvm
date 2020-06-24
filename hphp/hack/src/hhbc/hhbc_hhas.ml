@@ -117,13 +117,6 @@ let string_of_lit_const instruction =
         string_of_class_id cid;
         "<" ^ string_of_list_of_shape_fields l ^ ">";
       ]
-  | NewRecordArray (cid, l) ->
-    sep
-      [
-        "NewRecordArray";
-        string_of_class_id cid;
-        "<" ^ string_of_list_of_shape_fields l ^ ">";
-      ]
   | ClsCns cnsid -> sep ["ClsCns"; string_of_const_id cnsid]
   | ClsCnsD (cnsid, cid) ->
     sep ["ClsCnsD"; string_of_const_id cnsid; string_of_class_id cid]
@@ -1267,7 +1260,7 @@ and string_of_expression ~env expr =
       | _ -> ""
     in
     prefix ^ e ^ "(" ^ String.concat ~sep:", " es ^ ")"
-  | A.Record ((_, record_id), _, es) ->
+  | A.Record ((_, record_id), es) ->
     let record_id = adjust_id record_id in
     let record_id = String_utils.lstrip record_id "\\\\" in
     let es = List.map ~f:(fun (e1, e2) -> A.AFkvalue (e1, e2)) es in

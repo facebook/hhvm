@@ -975,5 +975,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction f (int $a) : Vector<array> {} // error\nfunction f (array $a) : int {} // error\nfunction f (int $a) : array {} // error\nfunction f (array<int> $a) : array<int, string> {} //no error\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

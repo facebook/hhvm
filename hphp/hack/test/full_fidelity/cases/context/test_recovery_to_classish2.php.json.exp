@@ -289,5 +289,5 @@
     }
   },
   "program_text":"<?hh\n\n// This test simply exists to demonstrate a suboptimal case of error recovery\n// in the FFP. If you break this test, it doesn't necessarily mean you've done\n// anything wrong, since the FFP never behaved ideally on this code.\n\n// Ideally, this code would produce an error indicating that nested classes are\n// forbidden. But right now, the FFP assumes the programmer did *not* intend\n// to nest classes, and throws the errors commented below.\n\nclass C1 { // missing right brace\n\n  class C2 {\n  }\n\n} // missing expression, missing semicolon\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

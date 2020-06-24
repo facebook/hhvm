@@ -129,7 +129,7 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_collection_literal_expression(ctx: &C, collection_literal_name: Self, collection_literal_left_brace: Self, collection_literal_initializers: Self, collection_literal_right_brace: Self) -> Self;
     fn make_object_creation_expression(ctx: &C, object_creation_new_keyword: Self, object_creation_object: Self) -> Self;
     fn make_constructor_call(ctx: &C, constructor_call_type: Self, constructor_call_left_paren: Self, constructor_call_argument_list: Self, constructor_call_right_paren: Self) -> Self;
-    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_array_token: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
+    fn make_record_creation_expression(ctx: &C, record_creation_type: Self, record_creation_left_bracket: Self, record_creation_members: Self, record_creation_right_bracket: Self) -> Self;
     fn make_array_intrinsic_expression(ctx: &C, array_intrinsic_keyword: Self, array_intrinsic_left_paren: Self, array_intrinsic_members: Self, array_intrinsic_right_paren: Self) -> Self;
     fn make_darray_intrinsic_expression(ctx: &C, darray_intrinsic_keyword: Self, darray_intrinsic_explicit_type: Self, darray_intrinsic_left_bracket: Self, darray_intrinsic_members: Self, darray_intrinsic_right_bracket: Self) -> Self;
     fn make_dictionary_intrinsic_expression(ctx: &C, dictionary_intrinsic_keyword: Self, dictionary_intrinsic_explicit_type: Self, dictionary_intrinsic_left_bracket: Self, dictionary_intrinsic_members: Self, dictionary_intrinsic_right_bracket: Self) -> Self;

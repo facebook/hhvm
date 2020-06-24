@@ -807,5 +807,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n\n  // 'sta' becomes error trivia\n  public sta function f() {\n  }\n\n  // 'meaninglessword' becomes error trivia\n  public static meaninglessword function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword static function f() {\n  }\n\n  // no change in parsing\n  public meaninglessword1 meaninglessword2 function f() {\n  }\n\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

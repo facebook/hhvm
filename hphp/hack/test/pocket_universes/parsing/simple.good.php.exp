@@ -3211,5 +3211,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nabstract class Foo {\n  enum Field {\n    case type T;\n    case string ident;\n    case T default_value;\n  }\n\n  public function get<TF as this:@Field>(TF $f): TF:@T {\n    return static:@Field::default_value($f);\n  }\n\n  public function getID<TF as this:@Field>(TF $f): string {\n    return static:@Field::ident($f);\n  }\n\n\n  public static function introspect_fields(): void {\n    foreach (static:@Field::Members() as $member) {\n      \\var_dump($member);\n    }\n  }\n}\n\nclass Bar extends Foo {\n  enum Field {\n    :@toto(\n      type T = int,\n      ident = \"toto\",\n      default_value = 42\n    );\n  }\n\n  public function Toto(): int {\n    return $this->get(:@toto);\n  }\n}\n\nclass TestReify {\n  enum XXX {\n    case type reify S;\n    case S expr;\n\n    :@A(\n      type S = int,\n      S = 42\n    );\n  }\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

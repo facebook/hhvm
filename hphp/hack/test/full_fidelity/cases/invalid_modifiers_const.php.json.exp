@@ -420,5 +420,5 @@
     }
   },
   "program_text":"<?hh\n\nclass C {\n  abstract final static private protected public async coroutine const X;\n\n  abstract abstract const Y;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

@@ -281,13 +281,13 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
             List.map el ~f:(self#on_expr env),
             Option.map unpacked_element ~f:(self#on_expr env),
             ex )
-      | Record (id, is_array, l) ->
+      | Record (id, l) ->
         let id = elaborate_type_name env id in
         let l =
           List.map l ~f:(fun (e1, e2) ->
               (self#on_expr env e1, self#on_expr env e2))
         in
-        Record (id, is_array, l)
+        Record (id, l)
       | Class_const ((p1, CIexpr (p2, Id x1)), pstr) ->
         let name = elaborate_type_name env x1 in
         Class_const ((p1, CIexpr (p2, Id name)), pstr)

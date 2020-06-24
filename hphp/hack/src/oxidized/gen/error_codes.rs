@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<cb67f1801551f71b503ed40d45cd541a>>
+// @generated SignedSource<<c35b490901eeccdf2134ede7addd2fa7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -659,6 +659,7 @@ pub enum Typing {
     InvalidArrayKeyWrite,
     NullMemberWrite,
     NonObjectMemberWrite,
+    ConcreteConstInterfaceOverride,
 }
 
 #[derive(

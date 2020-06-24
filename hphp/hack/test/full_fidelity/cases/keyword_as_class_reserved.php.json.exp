@@ -4043,5 +4043,5 @@
     }
   },
   "program_text":"<?hh\n\n// not allowed because reserved\nclass arraykey {}\nclass bool {}\nclass boolean {}\nclass classname {}\nclass darray {}\nclass dict {}\nclass double {}\nclass false {}\nclass float {}\nclass int {}\nclass integer {}\nclass keyset {}\nclass mixed {}\nclass noreturn {}\nclass null {}\nclass num {}\nclass parent {}\nclass real {}\nclass resource {}\nclass self {}\nclass string {}\nclass this {}\nclass true {}\nclass varray {}\nclass vec {}\nclass void {}\n\nnew arraykey();\nnew bool();\nnew boolean();\nnew classname();\nnew darray();\nnew dict();\nnew double();\nnew false();\nnew float();\nnew int();\nnew integer();\nnew keyset();\nnew mixed();\nnew noreturn();\nnew null();\nnew num();\nnew parent();\nnew real();\nnew resource();\nnew self();\nnew string();\nnew this();\nnew true();\nnew varray();\nnew vec();\nnew void();\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

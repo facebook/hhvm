@@ -434,5 +434,5 @@
     }
   },
   "program_text":"<?hh\nasync function f() {\n  await async {\n    using new C();\n    print 1;\n  };\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

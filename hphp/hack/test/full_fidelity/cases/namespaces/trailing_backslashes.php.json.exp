@@ -640,5 +640,5 @@
     }
   },
   "program_text":"<?hh\n\n// Qualified names should not have trailing backslashes\n\nfunction test(): void {\n  $x = new Foospace\\();\n\n  $y = Foospace\\bar\\();\n\n  $z = Foo\\::class;\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

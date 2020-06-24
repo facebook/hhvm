@@ -784,5 +784,5 @@
     }
   },
   "program_text":"<?hh // strict\n\nfunction foo(int $y): int {\n  return $y;\n}\n\nfunction f(?int $x): int {\n  $x ??= 0;\n  $y = 3;\n  return $x ??= $y |> foo();\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

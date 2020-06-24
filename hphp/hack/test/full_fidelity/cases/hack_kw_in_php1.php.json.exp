@@ -871,5 +871,5 @@
     }
   },
   "program_text":"<?php\n\nclass inout {}\n\nfunction foo(): inout {\n  return new inout();\n}\n\nclass bar extends inout {}\n\n\n\n\nclass suspend {}\n\nfunction s(): suspend {\n  return new suspend();\n}\n\nclass S extends suspend {}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

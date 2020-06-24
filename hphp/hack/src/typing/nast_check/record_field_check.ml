@@ -38,7 +38,7 @@ let handler =
     (* Ban duplicate fields in instantiations: Foo['x' => 1, 'x' => 2]; *)
     method! at_expr env (pos, e) =
       match e with
-      | Aast.Record (_, _, fields) ->
+      | Aast.Record (_, fields) ->
         let field_names =
           List.map fields ~f:(fun (id, _) -> id_if_string id) |> List.filter_opt
         in

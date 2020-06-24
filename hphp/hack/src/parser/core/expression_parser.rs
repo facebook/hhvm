@@ -2189,13 +2189,6 @@ where
                     name
                 }
             }
-            TokenKind::At => {
-                if self.peek_token_kind_with_lookahead(1) == TokenKind::LeftBracket {
-                    self.parse_record_creation_expression(name)
-                } else {
-                    name
-                }
-            }
             _ => name,
         }
     }
@@ -2209,11 +2202,6 @@ where
         //   record-field-initializer-list, record-field-initializer
         // record-field-initializer:
         //   field-name => expression
-        let array_token = match self.peek_token_kind() {
-            TokenKind::At => self.assert_token(TokenKind::At),
-            _ => S!(make_missing, self, self.pos()),
-        };
-
         let left_bracket = self.assert_token(TokenKind::LeftBracket);
         let members = self.parse_comma_list_opt_allow_trailing(
             TokenKind::RightBracket,
@@ -2225,7 +2213,6 @@ where
             make_record_creation_expression,
             self,
             name,
-            array_token,
             left_bracket,
             members,
             right_bracket

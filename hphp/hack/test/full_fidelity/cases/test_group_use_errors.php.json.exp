@@ -2233,5 +2233,5 @@
     }
   },
   "program_text":"<?hh //strict\n\nnamespace foo {\n    class C { }\n    class D { }\n}\n\nnamespace illegal1 {\n  use \\foo { C, D };\n}\n\nnamespace illegal2 {\n  use \\foo\\ { type C, D };\n}\n\nnamespace illegal3 {\n  use \\foo\\ { type C, type D };\n}\n\nnamespace legal1 {\n  use \\foo\\ { C, D };\n}\n\nnamespace legal2 {\n  use \\foo;\n}\n\nnamespace illegal4 {\n  use \\foo as false;\n}\n\nnamespace legal3 {\n  use type \\foo\\C, \\foo\\D;\n}\n\nnamespace legal4 {\n  use type \\foo\\ { C, D };\n}\n",
-  "version":"2020-06-02-0001"
+  "version":"2020-06-23-0001"
 }

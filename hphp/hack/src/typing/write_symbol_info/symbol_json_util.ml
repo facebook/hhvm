@@ -28,10 +28,22 @@ let get_type_from_hint ctx h =
   let decl_env = { mode; droot = None; ctx } in
   Typing_print.full_decl ctx (Decl_hint.hint decl_env h)
 
+(* Replace any codepoints that are not valid UTF-8 with
+the unrepresentable character. *)
+let check_utf8 str =
+  let b = Buffer.create (String.length str) in
+  let replace_malformed () _index = function
+    | `Uchar u -> Uutf.Buffer.add_utf_8 b u
+    | `Malformed _ -> Uutf.Buffer.add_utf_8 b Uutf.u_rep
+  in
+  Uutf.String.fold_utf_8 replace_malformed () str;
+  Buffer.contents b
+
 let source_at_span source_text pos =
   let st = Pos.start_cnum pos in
   let fi = Pos.end_cnum pos in
-  Full_fidelity_source_text.sub source_text st (fi - st)
+  let source_text = Full_fidelity_source_text.sub source_text st (fi - st) in
+  check_utf8 source_text
 
 (* Convert ContainerName<TParam> to ContainerName *)
 let strip_tparams name =

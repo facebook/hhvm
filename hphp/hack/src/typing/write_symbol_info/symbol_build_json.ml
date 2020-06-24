@@ -21,7 +21,8 @@ let build_id_json fact_id =
   JSON_Object [("id", JSON_Number (string_of_int fact_id))]
 
 let build_comment_json_nested comment =
-  JSON_Object [("key", JSON_String comment)]
+  let valid_comment = check_utf8 comment in
+  JSON_Object [("key", JSON_String valid_comment)]
 
 let build_file_json_nested filepath =
   JSON_Object [("key", JSON_String filepath)]

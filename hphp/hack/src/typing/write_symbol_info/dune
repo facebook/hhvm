@@ -14,5 +14,6 @@
     typing_ast
     procs_procs
     server_services
-    utils_core)
+    utils_core
+    uutf)
   (preprocess (pps ppx_deriving.std))) ; See T41851208

@@ -8,7 +8,7 @@
 
 open Core_kernel
 
-module Verbosity = struct
+module Detail_level = struct
   type t =
     | Low
     | High
@@ -112,7 +112,7 @@ let get_symbol_edges_for_file_info (file_info : FileInfo.t) : symbol_edge list =
     ]
 
 let file_info_to_dep_set
-    ~(verbosity : Verbosity.t)
+    ~(detail_level : Detail_level.t)
     (naming_table : Naming_table.t)
     (file_info : FileInfo.t) : Typing_deps.DepSet.t * changed_symbol list =
   List.fold
@@ -122,10 +122,10 @@ let file_info_to_dep_set
       let symbol_dep = Typing_deps.Dep.make symbol_edge.symbol_dep in
       let dep_set = Typing_deps.DepSet.add dep_set symbol_dep in
       let changed_symbol =
-        match verbosity with
-        | Verbosity.Low ->
+        match detail_level with
+        | Detail_level.Low ->
           { symbol_edge; num_outgoing_edges = None; outgoing_files = None }
-        | Verbosity.High ->
+        | Detail_level.High ->
           let outgoing_edges =
             symbol_dep
             |> Typing_deps.DepSet.singleton
@@ -147,7 +147,7 @@ the symbols that are currently in the file and construct a set of
 dependencies that can be traversed to find the fanout of the changes to those
 symbols. *)
 let calculate_dep_set_for_path
-    ~(verbosity : Verbosity.t)
+    ~(detail_level : Detail_level.t)
     ~(old_naming_table : Naming_table.t)
     ~(new_naming_table : Naming_table.t)
     ~(path : Relative_path.t)
@@ -155,13 +155,13 @@ let calculate_dep_set_for_path
     Typing_deps.DepSet.t * explanation =
   let (old_deps, old_symbols) =
     Naming_table.get_file_info old_naming_table path
-    |> Option.map ~f:(file_info_to_dep_set ~verbosity old_naming_table)
+    |> Option.map ~f:(file_info_to_dep_set ~detail_level old_naming_table)
     |> Option.value ~default:(Typing_deps.DepSet.empty, [])
   in
   let (new_deps, new_symbols) =
     match delta with
     | Naming_sqlite.Modified new_file_info ->
-      file_info_to_dep_set ~verbosity new_naming_table new_file_info
+      file_info_to_dep_set ~detail_level new_naming_table new_file_info
     | Naming_sqlite.Deleted -> (Typing_deps.DepSet.empty, [])
   in
 
@@ -183,7 +183,7 @@ let calculate_dep_set_for_path
   (Typing_deps.DepSet.union old_deps new_deps, explanation)
 
 let go
-    ~(verbosity : Verbosity.t)
+    ~(detail_level : Detail_level.t)
     ~(old_naming_table : Naming_table.t)
     ~(new_naming_table : Naming_table.t)
     ~(file_deltas : Naming_sqlite.file_deltas)
@@ -209,7 +209,7 @@ let go
         in
         let (file_deps, explanation) =
           calculate_dep_set_for_path
-            ~verbosity
+            ~detail_level
             ~old_naming_table
             ~new_naming_table
             ~path

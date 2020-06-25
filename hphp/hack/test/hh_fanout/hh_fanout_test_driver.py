@@ -112,7 +112,7 @@ def run_hh_fanout(
     common_args = []
     common_args.extend(("--from", "integration-test"))
     common_args.extend(("--root", env.root_dir))
-    common_args.extend(("--verbosity", "high"))
+    common_args.extend(("--detail-level", "high"))
     common_args.extend(("--naming-table-path", saved_state_info.naming_table_path))
     common_args.extend(("--dep-table-path", saved_state_info.dep_table_path))
     common_args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
@@ -130,7 +130,53 @@ def run_hh_fanout(
     debug_result = exec([env.hh_fanout_path, "debug", *common_args, *args])
     debug_result = json.loads(debug_result)
     result["debug"] = debug_result["debug"]
+    return result
 
+
+def run_hh_fanout_calculate_errors(
+    env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
+) -> Dict[str, object]:
+    args = []
+    args.extend(("--from", "integration-test"))
+    args.extend(("--root", env.root_dir))
+    args.extend(("--detail-level", "high"))
+    args.extend(("--naming-table-path", saved_state_info.naming_table_path))
+    args.extend(("--dep-table-path", saved_state_info.dep_table_path))
+    args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
+    args.extend(("--cursor", cursor))
+
+    result = exec([env.hh_fanout_path, "calculate-errors", *args])
+    result = json.loads(result)
+    return result
+
+
+def run_hh_fanout_calculate_errors_pretty_print(
+    env: Env, saved_state_info: SavedStateInfo, work_dir: Path, cursor: Cursor
+) -> str:
+    args = []
+    args.extend(("--from", "integration-test"))
+    args.extend(("--root", env.root_dir))
+    args.extend(("--detail-level", "high"))
+    args.extend(("--naming-table-path", saved_state_info.naming_table_path))
+    args.extend(("--dep-table-path", saved_state_info.dep_table_path))
+    args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
+    args.extend(("--cursor", cursor))
+    args.append("--pretty-print")
+
+    result = exec([env.hh_fanout_path, "calculate-errors", *args])
+    result = result.replace(work_dir, "")
+    result = result.strip()
+    return result
+
+
+def run_hh_server_check(env: Env, work_dir: Path) -> str:
+    result = exec(
+        [env.hh_server_path, "--check", work_dir, "--no-load"],
+        # Returns 1 when there's typechecking errors.
+        raise_on_error=False,
+    )
+    result = result.replace(work_dir, "")
+    result = result.strip()
     return result
 
 

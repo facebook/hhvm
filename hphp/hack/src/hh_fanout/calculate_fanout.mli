@@ -6,7 +6,7 @@
  *
  *)
 
-module Verbosity : sig
+module Detail_level : sig
   type t =
     | Low
     | High
@@ -44,7 +44,7 @@ type result = {
 val explanation_to_json : explanation -> Hh_json.json
 
 val go :
-  verbosity:Verbosity.t ->
+  detail_level:Detail_level.t ->
   old_naming_table:Naming_table.t ->
   new_naming_table:Naming_table.t ->
   file_deltas:Naming_sqlite.file_deltas ->
@@ -54,7 +54,7 @@ val go :
 val get_symbol_edges_for_file_info : FileInfo.t -> symbol_edge list
 
 val file_info_to_dep_set :
-  verbosity:Verbosity.t ->
+  detail_level:Detail_level.t ->
   Naming_table.t ->
   FileInfo.t ->
   Typing_deps.DepSet.t * changed_symbol list

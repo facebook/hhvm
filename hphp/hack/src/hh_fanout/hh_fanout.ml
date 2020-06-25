@@ -15,7 +15,7 @@ type env = {
   from: string;
   root: Path.t;
   ignore_hh_version: bool;
-  verbosity: Calculate_fanout.Verbosity.t;
+  detail_level: Calculate_fanout.Detail_level.t;
   naming_table_path: Path.t option;
   dep_table_path: Path.t option;
   watchman_sockname: Path.t option;
@@ -289,7 +289,7 @@ let mode_calculate
     telemetry = calculate_fanout_telemetry;
   } =
     Calculate_fanout.go
-      ~verbosity:env.verbosity
+      ~detail_level:env.detail_level
       ~old_naming_table
       ~new_naming_table
       ~file_deltas
@@ -339,14 +339,14 @@ let mode_calculate
   Hh_json.json_to_multiline_output Out_channel.stdout json;
   Lwt.return_unit
 
-let verbosity_arg =
+let detail_level_arg =
   Command.Arg_type.create (fun x ->
       match x with
-      | "low" -> Calculate_fanout.Verbosity.Low
-      | "high" -> Calculate_fanout.Verbosity.High
+      | "low" -> Calculate_fanout.Detail_level.Low
+      | "high" -> Calculate_fanout.Detail_level.High
       | other ->
         Printf.eprintf
-          "Invalid verbosity: %s (valid values are 'low', 'high')"
+          "Invalid detail level: %s (valid values are 'low', 'high')"
           other;
         exit 1)
 
@@ -368,10 +368,10 @@ let parse_env () =
       (optional string)
       ~doc:
         "DIR The root directory to run in. If not set, will attempt to locate one by searching upwards for an `.hhconfig` file."
-  and verbosity =
+  and detail_level =
     flag
-      "--verbosity"
-      (optional_with_default Calculate_fanout.Verbosity.Low verbosity_arg)
+      "--detail-level"
+      (optional_with_default Calculate_fanout.Detail_level.Low detail_level_arg)
       ~doc:
         "VERBOSITY How much debugging output to include in the result. May slow down the query."
   and ignore_hh_version =
@@ -449,7 +449,7 @@ let parse_env () =
     from;
     root;
     ignore_hh_version;
-    verbosity;
+    detail_level;
     naming_table_path;
     dep_table_path;
     watchman_sockname;

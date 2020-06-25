@@ -89,7 +89,7 @@ let go
     ~(path : Relative_path.t) : result =
   let { Calculate_fanout.fanout_dependents; fanout_files; explanations; _ } =
     Calculate_fanout.go
-      ~verbosity:Calculate_fanout.Verbosity.Low
+      ~detail_level:Calculate_fanout.Detail_level.Low
       ~old_naming_table
       ~new_naming_table
       ~file_deltas

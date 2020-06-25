@@ -1695,6 +1695,12 @@ let invalid_mutability_in_return_type_hint pos =
     pos
     "OwnedMutable is the only mutability related hint allowed in return type annotation for reactive function types."
 
+let pu_case_in_trait pos kind =
+  add
+    (Naming.err_code Naming.PocketUniversesNotInClass)
+    pos
+    (sprintf "Case %s is not allowed in traits" kind)
+
 let pu_duplication pos kind name seen =
   let name = strip_ns name in
   let seen = strip_ns seen in

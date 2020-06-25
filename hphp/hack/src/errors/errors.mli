@@ -1055,6 +1055,8 @@ val pu_invalid_access : Pos.t -> string -> unit
 
 val pu_reserved_syntax : Pos.t -> unit
 
+val pu_case_in_trait : Pos.t -> string -> unit
+
 val lvar_in_obj_get : Pos.t -> unit
 
 val invalid_freeze_target : Pos.t -> Pos.t -> string -> unit

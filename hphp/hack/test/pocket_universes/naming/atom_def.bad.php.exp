@@ -1,8 +1,8 @@
-File "atom_def.bad.php--file1.php", line 4, characters 8-8:
+File "atom_def.bad.php--file1.php", line 3, characters 17-17:
 In Pocket Universe C:@F, atom A is missing value bar (Naming[2108])
-File "atom_def.bad.php--file1.php", line 4, characters 8-8:
+File "atom_def.bad.php--file1.php", line 3, characters 17-17:
 In Pocket Universe C:@F, atom B is missing value name (Naming[2108])
-File "atom_def.bad.php--file1.php", line 4, characters 8-8:
+File "atom_def.bad.php--file1.php", line 3, characters 17-17:
 In Pocket Universe C:@F, atom B declares unknown value yolo (Naming[2109])
 File "atom_def.bad.php--file1.php", line 5, characters 5-5:
 In Pocket Universe C:@F, atom C is missing type T (Naming[2108])
@@ -14,7 +14,7 @@ File "atom_def.bad.php--file3.php", line 7, characters 10-10:
 Expected T
 File "atom_def.bad.php--file1.php", line 9, characters 12-12:
 But got int
-File "atom_def.bad.php--file2.php", line 4, characters 8-8:
+File "atom_def.bad.php--file2.php", line 3, characters 17-17:
 In Pocket Universe B:@F, atom A is missing value bar (Naming[2108])
 File "atom_def.bad.php--file2.php", line 10, characters 7-7:
 In Pocket Universe B:@F, atom B is missing value name (Naming[2108])

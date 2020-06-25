@@ -26,7 +26,8 @@ let class_get_pu_member_type ?from_class env ty enum member name =
 let reduce_pu_type_access env base enum atom name =
   let (env, base) = Env.expand_type env base in
   match class_get_pu_member_type env base (snd enum) atom (snd name) with
-  | (_env, None) -> assert false (* already caught in localization *)
+  (* already caught in naming *)
+  | (_env, None) -> (env, mk (Reason.Rwitness (fst name), TUtils.tany env))
   | (env, Some lty) ->
     (* Not sure if this expand is necessary, ask Catg *)
     let (env, lty) = Env.expand_type env lty in

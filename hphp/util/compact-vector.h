@@ -79,7 +79,7 @@ struct CompactVector : private Alloc::template rebind<char>::other {
 
   bool empty() const;
   size_type size() const;
-  size_type capacity();
+  size_type capacity() const;
   void clear();
   void push_back(const T& val);
   void push_back(T&& val);
@@ -252,7 +252,7 @@ typename CompactVector<T, A>::size_type CompactVector<T, A>::size() const {
 }
 
 template <typename T, typename A>
-typename CompactVector<T, A>::size_type CompactVector<T, A>::capacity() {
+typename CompactVector<T, A>::size_type CompactVector<T, A>::capacity() const {
   return m_data ? m_data->m_capacity : 0;
 }
 

@@ -887,6 +887,15 @@ void do_optimize(const Index& index, FuncAnalysis&& ainfo, bool isFinal) {
                  insert_assertions);
   }
 
+  // NOTE: We shouldn't duplicate blocks that are shared between two Funcs
+  // in this loop. We shrink BytecodeVec at the time we parse the function,
+  // so we only shrink when we've already mutated (and COWed) the bytecode.
+  for (auto& block : func->blocks) {
+    assertx(block->hhbcs.size());
+    if (block->hhbcs.capacity() == block->hhbcs.size()) continue;
+    block.mutate()->hhbcs.shrink_to_fit();
+  }
+
   for (auto& p : func->params) fixTypeConstraint(index, p.typeConstraint);
 
   if (RuntimeOption::EvalCheckReturnTypeHints >= 3) {

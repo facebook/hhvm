@@ -282,6 +282,7 @@ void populate_block(ParseUnitState& puState,
   auto decode_stringvec = [&] {
     auto const vecLen = decode_iva(pc);
     CompactVector<LSString> keys;
+    keys.reserve(vecLen);
     for (auto i = size_t{0}; i < vecLen; ++i) {
       keys.push_back(ue.lookupLitstr(decode<int32_t>(pc)));
     }
@@ -653,6 +654,7 @@ void build_cfg(ParseUnitState& puState,
     auto const id = kv.second.first;
     blk->multiSucc = predSuccCounts[id].second > 1;
     blk->multiPred = predSuccCounts[id].first > 1;
+    blk->hhbcs.shrink_to_fit();
     func.blocks[id] = std::move(kv.second.second);
   }
 }
@@ -768,8 +770,7 @@ std::unique_ptr<php::Func> parse_func(ParseUnitState& puState,
       auto blk         = php::Block{};
       blk.exnNodeId    = NoExnNodeId;
 
-      blk.hhbcs.push_back(gen_constant(it->second));
-      blk.hhbcs.push_back(bc::RetC {});
+      blk.hhbcs = {gen_constant(it->second), bc::RetC {}};
       ret->blocks.emplace_back(std::move(blk));
 
       ret->dvEntries.resize(fe.params.size(), NoBlockId);

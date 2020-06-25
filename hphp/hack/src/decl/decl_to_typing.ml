@@ -304,6 +304,7 @@ let shallow_pu_enum_to_pu_enum_type origin spu =
   let to_member origin { spum_atom; spum_types; spum_exprs } =
     {
       tpum_atom = spum_atom;
+      tpum_origin = origin;
       tpum_types =
         List.fold
           ~init:SMap.empty

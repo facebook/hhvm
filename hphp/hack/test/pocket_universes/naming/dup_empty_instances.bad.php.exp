@@ -1,0 +1,8 @@
+File "dup_empty_instances.bad.php", line 17, characters 7-7:
+Pocket Universe instance I is already declared in C:@E (Naming[2101])
+File "dup_empty_instances.bad.php", line 30, characters 7-7:
+Pocket Universe instance A is already declared in F:@X (Naming[2101])
+File "dup_empty_instances.bad.php", line 36, characters 7-7:
+Pocket Universe instance A is already declared in F:@X (Naming[2101])
+File "dup_empty_instances.bad.php", line 37, characters 7-7:
+Pocket Universe instance A is already declared in R:@X (Naming[2101])

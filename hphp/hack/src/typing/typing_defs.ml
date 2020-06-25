@@ -228,6 +228,7 @@ and pu_enum_type = {
 
 and pu_member_type = {
   tpum_atom: Nast.sid;
+  tpum_origin: pu_origin;
   tpum_types: (pu_origin * Nast.sid * decl_ty) SMap.t;
   tpum_exprs: (pu_origin * Nast.sid) SMap.t;
 }

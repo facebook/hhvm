@@ -47,6 +47,7 @@ let build_from_origin { pu_class; pu_enum } = build pu_class pu_enum
  *)
 type nast_pu_member_type = {
   npum_name: Nast.sid;
+  npum_origin: pu_origin;
   npum_types: (pu_origin * Nast.sid) SMap.t;
   npum_exprs: (pu_origin * Nast.sid) SMap.t;
 }
@@ -81,7 +82,8 @@ let strip_decl_member p tpum =
     SMap.map (fun (origin, (_, name)) -> (origin, (p, name))) tpum.tpum_exprs
   in
   let npum_name = (p, snd tpum.tpum_atom) in
-  { npum_name; npum_types; npum_exprs }
+  let npum_origin = tpum.tpum_origin in
+  { npum_name; npum_origin; npum_types; npum_exprs }
 
 let strip_decl p tpu =
   let npu_name = (p, snd tpu.tpu_name) in
@@ -166,15 +168,16 @@ let collect_member p existing tpum =
       existing.npum_exprs
   in
   let npum_name = (p, snd existing.npum_name) in
-  { npum_name; npum_types; npum_exprs }
+  let npum_origin = existing.npum_origin in
+  { npum_name; npum_origin; npum_types; npum_exprs }
 
 (* In here, we are processing a pu_enum_type from a parent of the current
  * class. We'll add case types/ case values / members if they are valid.
  *)
 let collect_parent p context tpu =
-  let name = snd tpu.tpu_name in
+  let tpu_name = snd tpu.tpu_name in
   let npu =
-    match SMap.find_opt name context with
+    match SMap.find_opt tpu_name context with
     | None -> strip_decl p tpu
     | Some existing ->
       let npu_case_types =
@@ -213,7 +216,7 @@ let collect_parent p context tpu =
         npu_members;
       }
   in
-  SMap.add name npu context
+  SMap.add tpu_name npu context
 
 (* Translate Ast information into nast_pu_*
  *
@@ -227,7 +230,7 @@ let collect_parent p context tpu =
  * if they are not creating invalid duplication.
  *)
 let collect_ast_member origin existing pum =
-  let atom_name = snd pum.pum_atom in
+  let (p, atom_name) = pum.pum_atom in
   let npum_types =
     List.fold
       ~init:existing.npum_types
@@ -244,7 +247,24 @@ let collect_ast_member origin existing pum =
         merge "value" ~atom_name origin p name exprs)
       pum.pum_exprs
   in
-  { npum_name = pum.pum_atom; npum_types; npum_exprs }
+  (* Prevent repetition of empty atoms, e.g.
+   * class C {
+   *   enum E {
+   *     case string key;
+   *     :@K(key = "K");
+   *   }
+   * }
+   *
+   * class D extends C {
+   *   enum E {
+   *     :@K(); // not completely invalid, but strange duplication
+   *   }
+   * }
+   *)
+  let prefix = build_from_origin existing.npum_origin in
+  if List.is_empty pum.pum_exprs && List.is_empty pum.pum_types then
+    Errors.pu_duplication p "instance" atom_name prefix;
+  { npum_name = pum.pum_atom; npum_origin = origin; npum_types; npum_exprs }
 
 (*
  * strip_* functions are used to translate from Aast to nast_pu_* types, when
@@ -263,7 +283,7 @@ let strip_aast_member origin pum =
   in
   let npum_types = List.fold ~init:SMap.empty ~f:(f "type") pum.pum_types in
   let npum_exprs = List.fold ~init:SMap.empty ~f:(f "value") pum.pum_exprs in
-  { npum_name = pum.pum_atom; npum_types; npum_exprs }
+  { npum_name = pum.pum_atom; npum_origin = origin; npum_types; npum_exprs }
 
 let strip_aast origin pu =
   let npu_case_types =
@@ -337,14 +357,14 @@ let collect c_name context pu =
       let npu_members =
         List.fold
           ~init:existing.npu_members
-          ~f:(fun members member ->
+          ~f:(fun nmembers member ->
             let (_, name) = member.pum_atom in
-            let member =
-              match SMap.find_opt name members with
+            let nmember =
+              match SMap.find_opt name nmembers with
               | None -> strip_aast_member origin member
               | Some nmember -> collect_ast_member origin nmember member
             in
-            SMap.add name member members)
+            SMap.add name nmember nmembers)
           pu.pu_members
       in
       {

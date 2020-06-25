@@ -398,7 +398,12 @@ let pu_enum_fold
               in
               SMap.add
                 (snd sm.spum_atom)
-                { tpum_atom = sm.spum_atom; tpum_types; tpum_exprs }
+                {
+                  tpum_atom = sm.spum_atom;
+                  tpum_origin = origin;
+                  tpum_types;
+                  tpum_exprs;
+                }
                 acc);
       }
   in

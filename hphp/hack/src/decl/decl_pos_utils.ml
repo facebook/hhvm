@@ -235,6 +235,7 @@ struct
   and pu_enum_member pum =
     {
       tpum_atom = string_id pum.tpum_atom;
+      tpum_origin = pum.tpum_origin;
       tpum_types =
         SMap.map
           begin

@@ -43,7 +43,7 @@ void c_WaitableWaitHandle::join() {
   assertx(!isFinished());
 
   auto const context =
-    RO::EvalEnableImplicitContext ? *ImplicitContext::ActiveCtx : nullptr;
+    RO::EvalEnableImplicitContext ? *ImplicitContext::activeCtx : nullptr;
 
   AsioSession* session = AsioSession::Get();
   if (UNLIKELY(session->hasOnJoin())) {
@@ -62,7 +62,7 @@ void c_WaitableWaitHandle::join() {
   session->getCurrentContext()->runUntil(this);
   assertx(isFinished());
   if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::ActiveCtx = context;
+    *ImplicitContext::activeCtx = context;
   }
 }
 

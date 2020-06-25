@@ -929,7 +929,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
-  auto const context = *ImplicitContext::ActiveCtx;
+  auto const context = *ImplicitContext::activeCtx;
   if (!context) return make_tv<KindOfNull>();
   auto const it = context->m_map.find(key.get());
   if (it == context->m_map.end()) return make_tv<KindOfNull>();
@@ -952,7 +952,7 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     throw_implicit_context_exception(
       "Implicit context keys cannot be empty or start with _");
   }
-  auto const prev = *ImplicitContext::ActiveCtx;
+  auto const prev = *ImplicitContext::activeCtx;
   auto const context = req::make_raw<ImplicitContext>();
   assertx(context);
   if (prev) context->m_map = prev->m_map;
@@ -980,7 +980,7 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   }
   context->m_memokey = sb.detach().detach();
   context->m_index = g_context->m_implicitContexts.size();
-  *ImplicitContext::ActiveCtx = context;
+  *ImplicitContext::activeCtx = context;
   g_context->m_implicitContexts.push_back(context);
   return prev ? prev->m_index : ImplicitContext::kEmptyIndex;
 }
@@ -990,7 +990,7 @@ void HHVM_FUNCTION(restore_implicit_context, int64_t index) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
   if (index == ImplicitContext::kEmptyIndex) {
-    *ImplicitContext::ActiveCtx = nullptr;
+    *ImplicitContext::activeCtx = nullptr;
     return;
   }
   if (index >= g_context->m_implicitContexts.size()) {
@@ -998,7 +998,7 @@ void HHVM_FUNCTION(restore_implicit_context, int64_t index) {
       folly::to<std::string>("Implicit context at index ", index,
                              " does not exist"));
   }
-  *ImplicitContext::ActiveCtx = g_context->m_implicitContexts[index];
+  *ImplicitContext::activeCtx = g_context->m_implicitContexts[index];
 }
 
 } // namespace

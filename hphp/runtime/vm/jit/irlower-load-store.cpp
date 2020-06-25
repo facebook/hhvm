@@ -217,7 +217,7 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   auto const wh = srcLoc(env, inst, 0).reg();
   auto const ctx = v.makeReg();
   v << load{
-    rvmtl()[ImplicitContext::ActiveCtx.handle()],
+    rvmtl()[ImplicitContext::activeCtx.handle()],
     ctx
   };
   v << store{ctx, wh[c_ResumableWaitHandle::implicitContextOff()]};

@@ -489,9 +489,9 @@ void cgAFWHBlockOn(IRLS& env, const IRInstruction* inst) {
   v << store{child, parentAR[ar_rel(childOff)]};
 
   if (RO::EvalEnableImplicitContext) {
-    // parent->m_implicitContext = *ImplicitContext::ActiveCtx
+    // parent->m_implicitContext = *ImplicitContext::activeCtx
     auto const implicitContext = v.makeReg();
-    v << load{rvmtl()[ImplicitContext::ActiveCtx.handle()], implicitContext};
+    v << load{rvmtl()[ImplicitContext::activeCtx.handle()], implicitContext};
     v << store{implicitContext, parentAR[ar_rel(AFWH::implicitContextOff())]};
   }
 }

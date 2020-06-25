@@ -26,7 +26,7 @@ namespace HPHP {
 
 struct ImplicitContext {
 
-static rds::Link<ImplicitContext*, rds::Mode::Normal> ActiveCtx;
+static rds::Link<ImplicitContext*, rds::Mode::Normal> activeCtx;
 
 // Denotes that the index does not exist on the g_context->m_implicitContexts
 static constexpr int64_t kEmptyIndex = -1;

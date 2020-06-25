@@ -19,6 +19,6 @@
 
 namespace HPHP {
 
-rds::Link<ImplicitContext*, rds::Mode::Normal> ImplicitContext::ActiveCtx;
+rds::Link<ImplicitContext*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
 } // namespace HPHP

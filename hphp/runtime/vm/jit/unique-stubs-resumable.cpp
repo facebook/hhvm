@@ -190,7 +190,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner) {
         afwh[c_ResumableWaitHandle::implicitContextOff()],
         implicitContext
       };
-      v << store{implicitContext, rvmtl()[ImplicitContext::ActiveCtx.handle()]};
+      v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
     }
 
     auto const child = v.makeReg();
@@ -320,7 +320,7 @@ void asyncFuncMaybeRetToAsyncFunc(Vout& v, PhysReg rdata, PhysReg rtype,
   if (RO::EvalEnableImplicitContext) {
     auto const implicitContext = v.makeReg();
     v << load{parentBl[afwhToBl(AFWH::implicitContextOff())], implicitContext};
-    v << store{implicitContext, rvmtl()[ImplicitContext::ActiveCtx.handle()]};
+    v << store{implicitContext, rvmtl()[ImplicitContext::activeCtx.handle()]};
   }
 
   // Transfer control to the resume address.

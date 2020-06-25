@@ -2386,8 +2386,8 @@ void hphp_process_init() {
 
   if (RO::EvalEnableImplicitContext) {
     // Needs to run prior to emitting unique stubs
-    ImplicitContext::ActiveCtx
-      .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::ActiveCtx"});
+    ImplicitContext::activeCtx
+      .bind(rds::Mode::Normal, rds::LinkID{"ImplicitContext::activeCtx"});
   }
   jit::mcgen::processInit();
   jit::processInitProfData();

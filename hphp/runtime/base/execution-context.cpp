@@ -644,7 +644,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
     // If the main request terminated with a C++ exception, we would not
     // have cleared the implicit context since that logic is
     // done in a PHP try-finally. Let's clear the implicit context here.
-    *ImplicitContext::ActiveCtx = nullptr;
+    *ImplicitContext::activeCtx = nullptr;
   }
 
   // We mustn't destroy any callbacks until we're done with all
@@ -661,7 +661,7 @@ void ExecutionContext::executeFunctions(ShutdownType type) {
         vm_call_user_func(VarNR{v}, init_null_variant);
         // Implicit context should not have leaked between each call
         assertx(!RO::EvalEnableImplicitContext ||
-                !(*ImplicitContext::ActiveCtx));
+                !(*ImplicitContext::activeCtx));
       }
     );
     tmp.append(funcs);
@@ -1425,7 +1425,7 @@ void ExecutionContext::requestInit() {
     assertx(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
   }
 
-  if (RO::EvalEnableImplicitContext) *ImplicitContext::ActiveCtx = nullptr;
+  if (RO::EvalEnableImplicitContext) *ImplicitContext::activeCtx = nullptr;
 
   profileRequestStart();
 
@@ -1766,7 +1766,7 @@ void ExecutionContext::resumeAsyncFunc(Resumable* resumable,
   auto fp = resumable->actRec();
 
   if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::ActiveCtx = [&] {
+    *ImplicitContext::activeCtx = [&] {
       if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
       auto gen = frame_async_generator(fp);
       return gen->getWaitHandle()->m_implicitContext;
@@ -1810,7 +1810,7 @@ void ExecutionContext::resumeAsyncFuncThrow(Resumable* resumable,
   auto fp = resumable->actRec();
 
   if (RO::EvalEnableImplicitContext) {
-    *ImplicitContext::ActiveCtx = [&] {
+    *ImplicitContext::activeCtx = [&] {
       if (!fp->func()->isGenerator()) return frame_afwh(fp)->m_implicitContext;
       auto gen = frame_async_generator(fp);
       return gen->getWaitHandle()->m_implicitContext;

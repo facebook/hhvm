@@ -208,7 +208,7 @@ void c_AsyncFunctionWaitHandle::await(Offset suspendOffset,
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
   if (RO::EvalEnableImplicitContext) {
-    this->m_implicitContext = *ImplicitContext::ActiveCtx;
+    this->m_implicitContext = *ImplicitContext::activeCtx;
   }
 
   // Suspend the async function.

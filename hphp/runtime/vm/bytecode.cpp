@@ -5461,7 +5461,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
     if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::ActiveCtx;
+      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     }
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -5487,7 +5487,7 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
       fp, nullptr, suspendOffset, child);
 
     if (RO::EvalEnableImplicitContext) {
-      waitHandle->m_implicitContext = *ImplicitContext::ActiveCtx;
+      waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     }
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
@@ -5524,14 +5524,14 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
     if (RO::EvalEnableImplicitContext) {
-      frame_afwh(fp)->m_implicitContext = *ImplicitContext::ActiveCtx;
+      frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
     }
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
     if (RO::EvalEnableImplicitContext) {
-      gen->getWaitHandle()->m_implicitContext = *ImplicitContext::ActiveCtx;
+      gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
     }
     gen->getWaitHandle()->await(std::move(child));
   }

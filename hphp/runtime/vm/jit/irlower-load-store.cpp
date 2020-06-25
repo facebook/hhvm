@@ -223,6 +223,16 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   v << store{ctx, wh[c_ResumableWaitHandle::implicitContextOff()]};
 }
 
+void cgCheckImplicitContextNull(IRLS& env, const IRInstruction* inst) {
+  assertx(RO::EvalEnableImplicitContext);
+  auto& v = vmain(env);
+  auto const ctx = v.makeReg();
+  auto const sf = v.makeReg();
+  v << load{rvmtl()[ImplicitContext::activeCtx.handle()], ctx};
+  v << testq{ctx, ctx, sf};
+  fwdJcc(v, env, CC_Z, sf, inst->taken());
+}
+
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
   auto const ptr    = inst->src(0);
   auto const ptrLoc = tmpLoc(env, ptr);

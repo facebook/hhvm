@@ -20,6 +20,7 @@
 #include "hphp/runtime/base/attr.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-structure-helpers-defs.h"
+#include "hphp/runtime/ext/asio/ext_resumable-wait-handle.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/hhbc.h"
@@ -366,6 +367,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
+  emitImplicitContextCheck(env);
 
   // Check surprise flags in the same place as the interpreter: after setting
   // up the callee's frame but before executing any of its code.
@@ -579,6 +581,26 @@ void emitCalleeDynamicCallCheck(IRGS& env, SSATmp* callFlags) {
       if (RuntimeOption::EvalNoticeOnBuiltinDynamicCalls && func->isBuiltin()) {
         gen(env, RaiseNotice, msg);
       }
+    }
+  );
+}
+
+void emitImplicitContextCheck(IRGS& env) {
+  auto const func = curFunc(env);
+  if (!RO::EvalEnableImplicitContext || !func->hasNoContextAttr()) return;
+  ifElse(
+    env,
+    [&] (Block* taken) {
+      gen(env, CheckImplicitContextNull, taken);
+    },
+    [&] {
+      hint(env, Block::Hint::Unlikely);
+      auto const str = folly::to<std::string>(
+        "Function ",
+        func->fullName()->data(),
+        " has implicit context but is marked with __NoContext");
+      auto const msg = cns(env, makeStaticString(str));
+      gen(env, ThrowInvalidOperation, msg);
     }
   );
 }

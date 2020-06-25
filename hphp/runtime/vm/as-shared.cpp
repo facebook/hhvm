@@ -72,7 +72,8 @@ constexpr bool supported(ContextMask mask, AttrContext a) {
   X(AttrInitialSatisfiesTC,       P,       "initial_satisfies_tc"); \
   X(AttrLateInit,                 P,       "late_init");            \
   X(AttrNoReifiedInit,            C,       "noreifiedinit");        \
-  X(AttrIsMethCaller,             F,       "is_meth_caller");
+  X(AttrIsMethCaller,             F,       "is_meth_caller");       \
+  X(AttrNoContext,                F,       "no_context");
   /* */
 
 #define HHAS_TYPE_FLAGS                                     \

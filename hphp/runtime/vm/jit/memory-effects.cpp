@@ -1581,6 +1581,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AssertNonNull:
   case CheckNonNull:
   case CheckNullptr:
+  case CheckImplicitContextNull:
   case CheckSmashableClass:
   case Ceil:
   case Floor:

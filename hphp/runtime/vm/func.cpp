@@ -586,6 +586,7 @@ void Func::print_attrs(std::ostream& out, Attr attrs) {
   if (attrs & AttrSupportsAsyncEagerReturn) { out << " (can_async_eager_ret)"; }
   if (attrs & AttrDynamicallyCallable) { out << " (dyn_callable)"; }
   if (attrs & AttrIsMethCaller) { out << " (is_meth_caller)"; }
+  if (attrs & AttrNoContext) { out << " (no_context)"; }
   auto rxAttrString = rxAttrsToAttrString(attrs);
   if (rxAttrString) out << " (" << rxAttrString << ")";
 }

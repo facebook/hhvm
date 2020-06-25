@@ -559,6 +559,7 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckDArray:
   case CheckDVArray:
   case CheckDictOffset:
+  case CheckImplicitContextNull:
   case CheckInit:
   case CheckInitMem:
   case CheckIter:

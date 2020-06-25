@@ -343,6 +343,7 @@ void beginInlining(IRGS& env,
 
   emitGenericsMismatchCheck(env, callFlags);
   emitCalleeDynamicCallCheck(env, callFlags);
+  emitImplicitContextCheck(env);
 
   assertx(startSk.hasThis() == startSk.func()->hasThisInBody());
   assertx(

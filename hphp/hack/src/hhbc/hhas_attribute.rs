@@ -81,6 +81,10 @@ fn is_meth_caller(attr: &HhasAttribute) -> bool {
     is("__MethCaller", attr)
 }
 
+fn is_no_context(attr: &HhasAttribute) -> bool {
+    is("__NoContext", attr)
+}
+
 fn is_provenance_skip_frame(attr: &HhasAttribute) -> bool {
     is("__ProvenanceSkipFrame", attr)
 }
@@ -123,6 +127,10 @@ pub fn has_const(attrs: &[HhasAttribute]) -> bool {
 
 pub fn has_meth_caller(attrs: &[HhasAttribute]) -> bool {
     has(attrs, is_meth_caller)
+}
+
+pub fn has_no_context(attrs: &[HhasAttribute]) -> bool {
+    has(attrs, is_no_context)
 }
 
 pub fn has_provenance_skip_frame(attrs: &[HhasAttribute]) -> bool {

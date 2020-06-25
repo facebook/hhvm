@@ -1139,6 +1139,17 @@ void checkForReifiedGenericsErrors(const ActRec* ar, bool hasGenerics) {
   );
   checkFunReifiedGenericMismatch(ar->m_func, val(generics).parr);
 }
+
+void checkImplicitContextErrors(const ActRec* ar) {
+  if (!RO::EvalEnableImplicitContext ||
+      !ar->func()->hasNoContextAttr() ||
+      *ImplicitContext::activeCtx == nullptr) {
+    return;
+  }
+  throw_implicit_context_exception(folly::to<std::string>(
+    "Function ", ar->func()->fullName()->data(), " has implicit context "
+    "but is marked with __NoContext"));
+}
 } // namespace
 
 static void dispatch();
@@ -1190,6 +1201,7 @@ void enterVMAtFunc(ActRec* enterFnAr, Array&& generics, bool hasInOut,
   checkForReifiedGenericsErrors(enterFnAr, hasGenerics);
   calleeDynamicCallChecks(enterFnAr->func(), dynamicCall,
                           allowDynCallNoPointer);
+  checkImplicitContextErrors(enterFnAr);
   if (!EventHook::FunctionCall(enterFnAr, EventHook::NormalFunc)) return;
   checkStack(vmStack(), enterFnAr->m_func, 0);
   assertx(vmfp()->func()->contains(vmpc()));
@@ -3854,6 +3866,7 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
     checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
+    checkImplicitContextErrors(ar);
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
   } catch (...) {
     // Manually unwind the pre-live or live frame, as we may be called from JIT

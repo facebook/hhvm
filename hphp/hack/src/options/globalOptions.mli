@@ -221,6 +221,8 @@ type t = {
   symbol_write_root_path: string;
   (* Path prefix to use for hhi files when writing symbol info to JSON *)
   symbol_write_hhi_path: string;
+  (* Filepaths to ignore when writing symbol info to JSON, relative to path prefix, eg: root|foo.php *)
+  symbol_write_ignore_paths: string list;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
   (* Flag to report an error on php style anonymous functions *)
@@ -340,6 +342,7 @@ val make :
   ?glean_reponame:string ->
   ?symbol_write_root_path:string ->
   ?symbol_write_hhi_path:string ->
+  ?symbol_write_ignore_paths:string list ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->
@@ -544,6 +547,8 @@ val glean_reponame : t -> string
 val symbol_write_root_path : t -> string
 
 val symbol_write_hhi_path : t -> string
+
+val symbol_write_ignore_paths : t -> string list
 
 val po_disallow_func_ptrs_in_constants : t -> bool
 

@@ -90,6 +90,7 @@ type t = {
   glean_reponame: string;
   symbol_write_root_path: string;
   symbol_write_hhi_path: string;
+  symbol_write_ignore_paths: string list;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
@@ -250,6 +251,7 @@ let default =
     glean_reponame = "www.autocomplete";
     symbol_write_root_path = "www";
     symbol_write_hhi_path = "hhi";
+    symbol_write_ignore_paths = [];
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
@@ -360,6 +362,7 @@ let make
     ?(glean_reponame = default.glean_reponame)
     ?(symbol_write_root_path = default.symbol_write_root_path)
     ?(symbol_write_hhi_path = default.symbol_write_hhi_path)
+    ?(symbol_write_ignore_paths = default.symbol_write_ignore_paths)
     ?(po_disallow_func_ptrs_in_constants =
       default.po_disallow_func_ptrs_in_constants)
     ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
@@ -461,6 +464,7 @@ let make
     glean_reponame;
     symbol_write_root_path;
     symbol_write_hhi_path;
+    symbol_write_ignore_paths;
     po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas;
     tco_disallow_discarded_nullable_awaitables;
@@ -648,6 +652,8 @@ let glean_reponame t = t.glean_reponame
 let symbol_write_root_path t = t.symbol_write_root_path
 
 let symbol_write_hhi_path t = t.symbol_write_hhi_path
+
+let symbol_write_ignore_paths t = t.symbol_write_ignore_paths
 
 let set_global_inference t = { t with tco_global_inference = true }
 

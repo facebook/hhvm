@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d258a61d6e08df016d54d1f2c7a79186>>
+// @generated SignedSource<<c7ef7d9f907c893a71e90fa1cda0a16c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -109,6 +109,7 @@ pub struct GlobalOptions {
     pub glean_reponame: String,
     pub symbol_write_root_path: String,
     pub symbol_write_hhi_path: String,
+    pub symbol_write_ignore_paths: Vec<String>,
     pub po_disallow_func_ptrs_in_constants: bool,
     pub tco_error_php_lambdas: bool,
     pub tco_disallow_discarded_nullable_awaitables: bool,

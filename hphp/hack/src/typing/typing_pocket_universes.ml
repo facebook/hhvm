@@ -19,7 +19,7 @@ let class_get_pu_member_type ?from_class env ty enum member name =
   in
   match dty with
   | None -> (env, None)
-  | Some (ety_env, (_, dty)) ->
+  | Some (ety_env, (_, _, dty)) ->
     let (env, lty) = Phase.localize ~ety_env env dty in
     (env, Some lty)
 

@@ -308,10 +308,10 @@ let typeconsts child_class_name lin =
     emitting each pocket universe enum in linearization order. *)
 let pu_enums lin =
   lin
-  |> Sequence.map ~f:(fun (_mro, cls, _subst) ->
+  |> Sequence.map ~f:(fun (mro, cls, _subst) ->
          cls.sc_pu_enums
          |> Sequence.of_list
-         |> Sequence.map ~f:DTT.shallow_pu_enum_to_pu_enum_type)
+         |> Sequence.map ~f:(DTT.shallow_pu_enum_to_pu_enum_type mro.mro_name))
   |> Sequence.concat
 
 let make_typeconst_cache class_name lin =

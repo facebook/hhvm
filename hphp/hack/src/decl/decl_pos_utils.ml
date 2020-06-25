@@ -238,15 +238,15 @@ struct
       tpum_types =
         SMap.map
           begin
-            fun (id, t) ->
-            (string_id id, ty t)
+            fun (origin, id, t) ->
+            (origin, string_id id, ty t)
           end
           pum.tpum_types;
       tpum_exprs =
         SMap.map
           begin
-            fun id ->
-            string_id id
+            fun (origin, id) ->
+            (origin, string_id id)
           end
           pum.tpum_exprs;
     }
@@ -255,12 +255,15 @@ struct
     {
       tpu_name = string_id pu.tpu_name;
       tpu_is_final = pu.tpu_is_final;
-      tpu_case_types = SMap.map type_param pu.tpu_case_types;
+      tpu_case_types =
+        SMap.map
+          (fun (origin, tparam) -> (origin, type_param tparam))
+          pu.tpu_case_types;
       tpu_case_values =
         SMap.map
           begin
-            fun (id, t) ->
-            (string_id id, ty t)
+            fun (origin, id, declty) ->
+            (origin, string_id id, ty declty)
           end
           pu.tpu_case_values;
       tpu_members = SMap.map pu_enum_member pu.tpu_members;

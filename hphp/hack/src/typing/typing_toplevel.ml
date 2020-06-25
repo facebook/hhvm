@@ -1192,7 +1192,7 @@ and pu_enum_def
   in
   (* Adds all of the PU case types (not just the local one) as generics in the environment. *)
   let case_types =
-    SMap.fold (fun _ case_ty acc -> case_ty :: acc) pu_enum_case_types []
+    SMap.fold (fun _ (_, case_ty) acc -> case_ty :: acc) pu_enum_case_types []
   in
   let env = Phase.localize_and_add_generic_parameters pos env case_types in
   (* Localize local case values, to check they are correct types *)
@@ -1205,7 +1205,7 @@ and pu_enum_def
    * local information *)
   let (env, pu_enum_case_values) =
     SMap.map_env
-      (fun env _key (sid, decl_ty) ->
+      (fun env _key (_, sid, decl_ty) ->
         let (env, locl_ty) = Phase.localize_with_self env decl_ty in
         (env, (sid, locl_ty)))
       env

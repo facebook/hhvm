@@ -306,7 +306,7 @@ and pu_enum env c_name pu =
     | None ->
       (* error already caught by naming *)
       ()
-    | Some { tp_name = (p, x); tp_constraints = cstrl; _ } ->
+    | Some (_, { tp_name = (p, x); tp_constraints = cstrl; _ }) ->
       let r = Reason.Rwitness p in
       List.iter cstrl ~f:(fun (ck, cstr_ty) ->
           let (env, cstr_ty) = Phase.localize ~ety_env env cstr_ty in

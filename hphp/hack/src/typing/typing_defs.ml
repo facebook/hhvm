@@ -114,6 +114,12 @@ let get_fp_mode fp =
   else
     FPnormal
 
+(* Identifies the class and PU enum from which this element originates *)
+type pu_origin = {
+  pu_class: string;
+  pu_enum: string;
+}
+
 type class_elt = {
   ce_visibility: visibility;
   ce_type: decl_ty Lazy.t;
@@ -215,15 +221,15 @@ and typeconst_type = {
 and pu_enum_type = {
   tpu_name: Nast.sid;
   tpu_is_final: bool;
-  tpu_case_types: decl_tparam SMap.t;
-  tpu_case_values: (Nast.sid * decl_ty) SMap.t;
+  tpu_case_types: (pu_origin * decl_tparam) SMap.t;
+  tpu_case_values: (pu_origin * Nast.sid * decl_ty) SMap.t;
   tpu_members: pu_member_type SMap.t;
 }
 
 and pu_member_type = {
   tpum_atom: Nast.sid;
-  tpum_types: (Nast.sid * decl_ty) SMap.t;
-  tpum_exprs: Nast.sid SMap.t;
+  tpum_types: (pu_origin * Nast.sid * decl_ty) SMap.t;
+  tpum_exprs: (pu_origin * Nast.sid) SMap.t;
 }
 
 and enum_type = {

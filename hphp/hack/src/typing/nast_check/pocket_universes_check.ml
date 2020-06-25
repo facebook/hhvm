@@ -125,7 +125,7 @@ let check_parent
               | None -> (* does not exist locally, skip it *) ()
               | Some seen ->
                 SMap.iter
-                  (fun _ { tp_name = (_, ty); _ } ->
+                  (fun _ (_, { tp_name = (_, ty); _ }) ->
                     match SMap.find_opt ty seen with
                     | Some p -> err_types p c_name enum_name ty
                     | None -> ())
@@ -136,7 +136,7 @@ let check_parent
               | None -> ()
               | Some seen ->
                 SMap.iter
-                  (fun _ ((_, name), _) ->
+                  (fun _ (_, (_, name), _) ->
                     match SMap.find_opt name seen with
                     | Some p -> err_values p c_name enum_name name
                     | None -> ())

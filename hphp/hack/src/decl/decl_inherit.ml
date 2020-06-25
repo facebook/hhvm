@@ -185,7 +185,30 @@ let add_typeconst name sig_ typeconsts =
       SMap.add name sig_ typeconsts)
 
 let add_pu_enum name pu pu_enums =
-  (* TODO(T36532263) deal with multiple inheritance *)
+  (* We only keep one. Nast_check will complain if there are dups *)
+  let merge _key x0 x1 =
+    match (x0, x1) with
+    | (Some x, Some _)
+    | (Some x, None)
+    | (None, Some x) ->
+      Some x
+    | (None, None) -> None
+  in
+  let combine p0 p1 =
+    let tpu_name = p0.tpu_name in
+    let tpu_is_final = p0.tpu_is_final || p1.tpu_is_final in
+    let tpu_case_types = SMap.merge merge p0.tpu_case_types p1.tpu_case_types in
+    let tpu_case_values =
+      SMap.merge merge p0.tpu_case_values p1.tpu_case_values
+    in
+    let tpu_members = SMap.merge merge p0.tpu_members p1.tpu_members in
+    { tpu_name; tpu_is_final; tpu_case_types; tpu_case_values; tpu_members }
+  in
+  let pu =
+    match SMap.find_opt name pu_enums with
+    | None -> pu
+    | Some existing -> combine existing pu
+  in
   SMap.add name pu pu_enums
 
 let add_constructor (cstr, cstr_consist) (acc, acc_consist) =

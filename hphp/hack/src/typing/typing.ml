@@ -5158,7 +5158,7 @@ and dispatch_call
             else
               let case_ty =
                 match SMap.find_opt case et.tpu_case_values with
-                | Some (_, case) -> case
+                | Some (_, _, case) -> case
                 | None ->
                   Errors.pu_typing case_pos "identifier" case;
                   MakeType.err (Reason.Rwitness case_pos)
@@ -5187,7 +5187,9 @@ and dispatch_call
                 let f
                     env
                     _key
-                    { tp_name = pu_case_type_name; tp_reified = _reified; _ } =
+                    ( _,
+                      { tp_name = pu_case_type_name; tp_reified = _reified; _ }
+                    ) =
                   (* Update position to point to the function call site
                    * rather than to the PU enum definition
                    *)

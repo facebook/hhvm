@@ -562,7 +562,7 @@ and simplify_subtype_i
                   let (env, ltys) =
                     match info with
                     | None -> (env, [])
-                    | Some (ety_env, decl_tparam) ->
+                    | Some (ety_env, (_, decl_tparam)) ->
                       (* Filter the constraints *)
                       List.filter_map_env
                         env

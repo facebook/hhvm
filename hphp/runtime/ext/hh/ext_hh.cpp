@@ -985,13 +985,15 @@ int64_t HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   return prev ? prev->m_index : ImplicitContext::kEmptyIndex;
 }
 
-void HHVM_FUNCTION(restore_implicit_context, int64_t index) {
+int64_t HHVM_FUNCTION(set_implicit_context_by_index, int64_t index) {
   if (!RO::EvalEnableImplicitContext) {
     throw_implicit_context_exception("Implicit context feature is not enabled");
   }
+  auto const prev = *ImplicitContext::activeCtx;
+  auto const prev_index = prev ? prev->m_index : ImplicitContext::kEmptyIndex;
   if (index == ImplicitContext::kEmptyIndex) {
     *ImplicitContext::activeCtx = nullptr;
-    return;
+    return prev_index;
   }
   if (index >= g_context->m_implicitContexts.size()) {
     throw_implicit_context_exception(
@@ -999,6 +1001,7 @@ void HHVM_FUNCTION(restore_implicit_context, int64_t index) {
                              " does not exist"));
   }
   *ImplicitContext::activeCtx = g_context->m_implicitContexts[index];
+  return prev_index;
 }
 
 } // namespace
@@ -1038,7 +1041,7 @@ static struct HHExtension final : Extension {
     X(clear_coverage_for_file);
     X(get_implicit_context);
     X(set_implicit_context);
-    X(restore_implicit_context);
+    X(set_implicit_context_by_index);
 #undef X
 #define X(nm) HHVM_NAMED_FE(HH\\rqtrace\\nm, HHVM_FN(nm))
     X(is_enabled);

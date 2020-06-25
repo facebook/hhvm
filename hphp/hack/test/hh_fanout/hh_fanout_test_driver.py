@@ -127,9 +127,10 @@ def run_hh_fanout(
 
     # Also include the debug output for when the test cases fail and need to be
     # debugged.
-    debug_result = exec([env.hh_fanout_path, "debug", *common_args, *args])
-    debug_result = json.loads(debug_result)
-    result["debug"] = debug_result["debug"]
+    if len(args) == 1:
+        debug_result = exec([env.hh_fanout_path, "debug", *common_args, *args])
+        debug_result = json.loads(debug_result)
+        result["debug"] = debug_result["debug"]
     return result
 
 

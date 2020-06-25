@@ -161,3 +161,37 @@ function uses_foo(): void {
                 self.fail("Should have failed to find the cursor ID")
             except RuntimeError as e:
                 self.assertIn("Cursor with ID nonexistent not found", str(e))
+
+    def test_filter_hack_files(self) -> None:
+        work_dir: str
+        with tempfile.TemporaryDirectory() as work_dir:
+
+            def file(path: Path) -> Path:
+                return os.path.join(work_dir, path)
+
+            (env, saved_state_info) = self.set_up_work_dir(work_dir)
+            self.write(
+                file("foo.json"),
+                """
+{"changes":["/foo/bar.php",
+"saved-state.json"],
+"corresponding_base_revision":"-1",
+"state":"hh_mini_saved_state",
+"deptable":"hh_mini_saved_state.sql"}
+""",
+            )
+            self.write(
+                file("foo.php"),
+                """<?hh
+function foo(): void {}
+""",
+            )
+            result = run_hh_fanout(
+                env=env,
+                saved_state_info=saved_state_info,
+                changed_files=[file("foo.json"), file("foo.php")],
+                args=[file("foo.json"), file("foo.php")],
+                cursor=None,
+            )
+            result_files = cast(List[str], result["files"])
+            self.assertEqual(set(result_files), {file("foo.php")})

@@ -450,6 +450,7 @@ let parse_env () =
   let changed_files =
     changed_files
     |> Sys_utils.parse_path_list
+    |> List.filter ~f:FindUtils.file_filter
     |> List.map ~f:(fun path -> Relative_path.create_detect_prefix path)
     |> Relative_path.Set.of_list
   in
@@ -499,6 +500,7 @@ let calculate_subcommand =
      let input_files =
        input_files
        |> Sys_utils.parse_path_list
+       |> List.filter ~f:FindUtils.file_filter
        |> List.map ~f:Path.make
        |> Path.Set.of_list
      in

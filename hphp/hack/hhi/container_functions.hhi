@@ -103,5 +103,10 @@ function varray<Tv>(Traversable<Tv> $arr): varray<Tv>;
 <<__Pure>>
 function is_php_array(<<__MaybeMutable>> mixed $input): bool;
 
+<<__Pure>>
+function is_vec_or_varray(<<__MaybeMutable>> mixed $input): bool;
+
+<<__Pure>>
+function is_dict_or_darray(<<__MaybeMutable>> mixed $input): bool;
 
 }

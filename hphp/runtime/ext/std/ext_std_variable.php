@@ -217,6 +217,12 @@ namespace HH {
   <<__Native, __Pure>>
   function is_php_array(<<__MaybeMutable>> mixed $var): bool;
 
+  <<__Native, __IsFoldable, __Pure>>
+  function is_dict_or_darray(<<__MaybeMutable>> mixed $var): bool;
+
+  <<__Native, __IsFoldable, __Pure>>
+  function is_vec_or_varray(<<__MaybeMutable>> mixed $var): bool;
+
   /*
    * Check if the input is an array-like containing only integer keys running
    * from 0 to N-1, in that order.

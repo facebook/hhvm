@@ -154,6 +154,14 @@ bool HHVM_FUNCTION(HH_is_darray, const Variant& val) {
   return is_darray(val.asTypedValue());
 }
 
+bool HHVM_FUNCTION(HH_is_dict_or_darray, const Variant& val) {
+  return is_dict_or_darray(val.asTypedValue());
+}
+
+bool HHVM_FUNCTION(HH_is_vec_or_varray, const Variant& val) {
+  return is_vec_or_varray(val.asTypedValue());
+}
+
 bool HHVM_FUNCTION(HH_is_any_array, const Variant& val) {
   if (tvIsClsMeth(val.asTypedValue())) {
     if (RuntimeOption::EvalIsCompatibleClsMethType) {
@@ -680,6 +688,8 @@ void StandardExtension::initVariable() {
   HHVM_FALIAS(HH\\is_keyset, HH_is_keyset);
   HHVM_FALIAS(HH\\is_varray, HH_is_varray);
   HHVM_FALIAS(HH\\is_darray, HH_is_darray);
+  HHVM_FALIAS(HH\\is_vec_or_varray, HH_is_vec_or_varray);
+  HHVM_FALIAS(HH\\is_dict_or_darray, HH_is_dict_or_darray);
   HHVM_FALIAS(HH\\is_any_array, HH_is_any_array);
   HHVM_FALIAS(HH\\is_php_array, HH_is_php_array);
   HHVM_FALIAS(HH\\is_list_like, HH_is_list_like);

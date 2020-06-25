@@ -256,6 +256,23 @@ inline bool is_varray(const TypedValue* c) {
   return false;
 }
 
+inline bool is_vec_or_varray(const TypedValue* c) {
+  assertx(tvIsPlausible(*c));
+
+  if (tvIsVec(c) || (tvIsArrayLike(c) && c->m_data.parr->isVArray())) {
+    return true;
+  }
+
+  if (tvIsClsMeth(c) && RO::EvalIsCompatibleClsMethType) {
+    if (RO::EvalIsVecNotices) {
+      raise_notice(Strings::CLSMETH_COMPAT_IS_VEC_OR_VARR);
+    }
+    return true;
+  }
+
+  return false;
+}
+
 inline bool is_darray(const TypedValue* c) {
   assertx(tvIsPlausible(*c));
 
@@ -276,6 +293,16 @@ inline bool is_darray(const TypedValue* c) {
     hacLogging(Strings::HACKARR_COMPAT_DICT_IS_DARR);
     maybe_raise_array_serialization_notice(SerializationSite::IsDArray, c);
   }
+  return false;
+}
+
+inline bool is_dict_or_darray(const TypedValue* c) {
+  assertx(tvIsPlausible(*c));
+
+  if (tvIsDict(c) || (tvIsArrayLike(c) && c->m_data.parr->isDArray())) {
+    return true;
+  }
+
   return false;
 }
 

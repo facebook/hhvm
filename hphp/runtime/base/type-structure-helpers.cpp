@@ -643,6 +643,12 @@ bool checkTypeStructureMatchesTVImpl(
     case TypeStructure::Kind::T_enum: {
       assertx(ts.exists(s_classname));
       auto const cls = Unit::lookupClass(ts[s_classname].asStrRef().get());
+      if (!isOrAsOp) {
+        if (auto const dt = cls ? cls->enumBaseTy() : folly::none) {
+          return equivDataTypes(*dt, type);
+        }
+        return isIntType(type) || isStringType(type);
+      }
       return cls && enumHasValue(cls, &c1);
     }
 

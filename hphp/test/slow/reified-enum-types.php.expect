@@ -1,0 +1,91 @@
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(3): int(3)
+rfun(3): bool(false)
+rfun(3): caught: Expected Bar, got int
+rfun(3): int(3)
+rfun(3): bool(false)
+rfun(3): caught: Expected Bar, got int
+rfun(b): string(1) "b"
+rfun(b): bool(true)
+rfun(b): as ok
+rfun(b): string(1) "b"
+rfun(b): bool(true)
+rfun(b): as ok
+rfun(b): string(1) "b"
+rfun(b): bool(true)
+rfun(b): as ok
+rfun(b): string(1) "b"
+rfun(b): bool(true)
+rfun(b): as ok
+rfun(c): string(1) "c"
+rfun(c): bool(false)
+rfun(c): caught: Expected Buz, got string
+rfun(c): string(1) "c"
+rfun(c): bool(false)
+rfun(c): caught: Expected Buz, got string
+rfun(c): string(1) "c"
+rfun(c): bool(true)
+rfun(c): as ok
+rfun(1): int(1)
+rfun(1): bool(false)
+rfun(1): caught: Expected Alpha, got int
+rfun(c): string(1) "c"
+rfun(c): bool(false)
+rfun(c): caught: Expected Beta, got string
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(3): int(3)
+rfun(3): bool(true)
+rfun(3): as ok
+rfun(3): int(3)
+rfun(3): bool(true)
+rfun(3): as ok
+rfun(4): int(4)
+rfun(4): bool(false)
+rfun(4): caught: Expected Gamma, got int
+rfun(4): int(4)
+rfun(4): bool(false)
+rfun(4): caught: Expected Gamma, got int
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(4): int(4)
+rfun(4): bool(false)
+rfun(4): caught: Expected Delta, got int
+rfun(4): int(4)
+rfun(4): bool(false)
+rfun(4): caught: Expected Delta, got int
+rfun(1): int(1)
+rfun(1): bool(false)
+rfun(1): caught: Expected Alpha, got int
+rfun(1): int(1)
+rfun(1): bool(false)
+rfun(1): caught: Expected Alpha, got int
+rfun(c): string(1) "c"
+rfun(c): bool(false)
+rfun(c): caught: Expected Beta, got string
+rfun(1): int(1)
+rfun(1): bool(true)
+rfun(1): as ok
+rfun(3): int(3)
+rfun(3): bool(true)
+rfun(3): as ok
+rfun(3): int(3)
+rfun(3): bool(true)
+rfun(3): as ok
+ok: Argument 1 passed to rfun() must be an instance of Gamma, string given

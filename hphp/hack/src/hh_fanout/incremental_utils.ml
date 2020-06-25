@@ -26,7 +26,7 @@ let make_client_id (client_config : Incremental.client_config) :
   let client_id =
     Printf.sprintf
       "client,%s,%d"
-      client_config.Incremental.from
+      client_config.Incremental.client_id
       (Hashtbl.hash client_config)
   in
   Incremental.Client_id client_id
@@ -70,7 +70,7 @@ let make_cursor_id (id : int) (client_config : Incremental.client_config) :
     Printf.sprintf
       "cursor,%d,%s,%d"
       id
-      client_config.Incremental.from
+      client_config.Incremental.client_id
       (Hashtbl.hash client_config)
   in
   Incremental.Cursor_id cursor_id

@@ -13,6 +13,7 @@ type state_backend = OCaml_state_backend
 
 type env = {
   from: string;
+  client_id: string;
   root: Path.t;
   ignore_hh_version: bool;
   detail_level: Calculate_fanout.Detail_level.t;
@@ -211,7 +212,7 @@ let advance_cursor
       let client_id =
         incremental_state#look_up_client_id
           {
-            Incremental.from = env.from;
+            Incremental.client_id = env.client_id;
             dep_table_saved_state_path = saved_state_result.dep_table_path;
             errors_saved_state_path = saved_state_result.errors_path;
             naming_table_saved_state_path =
@@ -362,6 +363,14 @@ let parse_env () =
       "--from"
       (required string)
       ~doc:"FROM A descriptive string indicating the caller of this program."
+  and client_id =
+    flag
+      "--client-id"
+      (optional string)
+      ~doc:
+        ( "CLIENT-ID A string identifying the caller of this program. "
+        ^ "Use the same string across multiple callers to reuse hh_fanout cursors and intermediate results. "
+        ^ "If not provided, defaults to the value for 'from'." )
   and root =
     flag
       "--root"
@@ -445,8 +454,23 @@ let parse_env () =
     |> Relative_path.Set.of_list
   in
 
+  let client_id =
+    (* We always require 'from'. We don't want to make the user write out a
+    client ID multiple times when they're using/debugging `hh_fanout`
+    interactively, so provide a default value in that case.
+
+    Most of the time, `from` and `client_id` will be the same anyways. An
+    example of reuse might occur when the IDE service wants to take advantage
+    of any work that the bulk typechecker has already done with regards to
+    updating the dependency graph. *)
+    match client_id with
+    | Some client_id -> client_id
+    | None -> from
+  in
+
   {
     from;
+    client_id;
     root;
     ignore_hh_version;
     detail_level;

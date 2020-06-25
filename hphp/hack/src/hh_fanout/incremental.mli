@@ -17,7 +17,7 @@ type dep_graph_delta = (Typing_deps.Dep.t * Typing_deps.Dep.t) HashSet.t
 
 (** Any options which would affect the results of the returned fanouts. *)
 type client_config = {
-  from: string;
+  client_id: string;
   dep_table_saved_state_path: Path.t;
   errors_saved_state_path: Path.t;
   naming_table_saved_state_path: Naming_sqlite.db_path;

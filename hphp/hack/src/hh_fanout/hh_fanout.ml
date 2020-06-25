@@ -436,6 +436,8 @@ let parse_env () =
       of the directory that we invoked this executable from. *)
   Sys.chdir (Path.to_string root);
   Relative_path.set_path_prefix Relative_path.Root root;
+  Relative_path.set_path_prefix Relative_path.Hhi (Hhi.get_hhi_root ());
+  Relative_path.set_path_prefix Relative_path.Tmp (Path.make "/tmp");
   let changed_files =
     changed_files
     |> Sys_utils.parse_path_list

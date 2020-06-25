@@ -42,10 +42,20 @@ def copy(source: Path, dest: Path) -> None:
     shutil.copy(source, dest)
 
 
-def exec(args: List[str]) -> str:
-    log(f"Running: {' '.join(args)}")
-    result = subprocess.check_output(args, stderr=subprocess.DEVNULL)
-    return result.decode()
+def exec(args: List[str], *, raise_on_error: bool = True) -> str:
+    command_line = " ".join(args)
+    log(f"Running: {command_line}")
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout = result.stdout
+    if raise_on_error and result.returncode != 0:
+        # stderr is pretty noisy ordinarily, and causes the logs to be
+        # truncated with its length, so only surface it in cases of error.
+        stderr = result.stderr.decode()
+        raise RuntimeError(
+            f"Command {command_line} failed with return code {result.returncode}.\n"
+            + f"Stderr: {stderr}\n"
+        )
+    return stdout.decode()
 
 
 @dataclass
@@ -64,21 +74,23 @@ class SavedStateInfo:
 def generate_saved_state(env: Env, target_dir: Path) -> SavedStateInfo:
     saved_state_path = os.path.join(target_dir, "dep_table")
     naming_table_path = os.path.join(target_dir, "naming_table.sqlite")
-    subprocess.check_call(
-        [env.hh_server_path, env.root_dir, "--save-state", saved_state_path],
-        # Don't include the "No errors!" output in the test output.
-        stdout=sys.stderr,
+    exec(
+        [
+            env.hh_server_path,
+            env.root_dir,
+            "--save-state",
+            saved_state_path,
+            "--gen-saved-ignore-type-errors",
+        ]
     )
-    subprocess.check_call(
+    exec(
         [
             env.hh_server_path,
             "--check",
             env.root_dir,
             "--save-naming",
             naming_table_path,
-        ],
-        # Don't include the "No errors!" output in the test output.
-        stdout=sys.stderr,
+        ]
     )
     return SavedStateInfo(
         dep_table_path=saved_state_path + ".sql", naming_table_path=naming_table_path

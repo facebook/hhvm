@@ -2,7 +2,6 @@
 # pyre-strict
 
 import os.path
-import subprocess
 import tempfile
 from typing import List, Tuple, cast
 
@@ -150,7 +149,7 @@ function uses_foo(): void {
                 """<?hh
 """,
             )
-            with self.assertRaises(subprocess.CalledProcessError):
+            try:
                 result = run_hh_fanout(
                     env=env,
                     saved_state_info=saved_state_info,
@@ -159,3 +158,6 @@ function uses_foo(): void {
                     cursor="nonexistent",
                 )
                 print(result)
+                self.fail("Should have failed to find the cursor ID")
+            except RuntimeError as e:
+                self.assertIn("Cursor with ID nonexistent not found", str(e))

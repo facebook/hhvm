@@ -88,15 +88,22 @@ let go
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
+    (ignore_paths : string list)
     (file_tuples : Relative_path.t list) : unit =
   let num_workers =
     match workers with
     | Some w -> List.length w
     | None -> 1
   in
+  let filtered =
+    List.filter file_tuples (fun path ->
+        not
+          (List.exists ignore_paths (fun ignore ->
+               String.equal (Relative_path.S.to_string path) ignore)))
+  in
   MultiWorker.call
     workers
     ~job:(recheck_job ctx out_dir root_path hhi_path)
     ~merge:(fun () () -> ())
-    ~next:(Bucket.make ~num_workers ~max_size:150 file_tuples)
+    ~next:(Bucket.make ~num_workers ~max_size:150 filtered)
     ~neutral:()

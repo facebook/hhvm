@@ -90,7 +90,7 @@ struct RepoOptions {
   E(bool,           EmitInstMethPointers,           EmitFuncPointers) \
   H(bool,           EnableXHPClassModifier,         false)            \
   H(bool,           DisableXHPElementMangling,      false)            \
-  H(bool,           DisableArray,                   false)            \
+  H(bool,           DisableArray,                   true)             \
   /**/
 
   /**/

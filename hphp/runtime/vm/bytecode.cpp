@@ -3159,27 +3159,28 @@ inline void checkThis(ActRec* fp) {
 }
 
 OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
-  assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  assertx(func->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= func->numLocals());
 
   for (auto i = 0; i < keys.count; ++i) {
-    auto const key = frame_local(vmfp(), keys.first + i);
+    auto const key = frame_local(fp, keys.first + i);
     if (!isIntType(type(key)) && !isStringType(type(key))) {
       raise_error("Memoization keys can only be ints or strings");
     }
   }
 
   auto const c = [&] () -> const TypedValue* {
-    auto const func = vmfp()->m_func;
     if (!func->isMethod() || func->isStatic()) {
       auto const lsbCls =
-        func->isMemoizeWrapperLSB() ? vmfp()->getClass() : nullptr;
+        func->isMemoizeWrapperLSB() ? fp->getClass() : nullptr;
       if (keys.count > 0) {
         auto cache =
           lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                  : rds::bindStaticMemoCache(func);
         if (!cache.isInit()) return nullptr;
-        auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+        auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
         if (auto getter = memoCacheGetForKeyCount(keys.count)) {
           return getter(*cache, keysBegin);
         }
@@ -3196,8 +3197,8 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
       return cache.isInit() ? cache.get() : nullptr;
     }
 
-    checkThis(vmfp());
-    auto const this_ = vmfp()->getThis();
+    checkThis(fp);
+    auto const this_ = fp->getThis();
     auto const cls = func->cls();
     assertx(this_->instanceof(cls));
     assertx(cls->hasMemoSlots());
@@ -3223,7 +3224,7 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
           makeSharedOnlyKey(func->getFuncId())
         );
       }
-      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
       if (auto const getter = sharedMemoCacheGetForKeyCount(keys.count)) {
         return getter(cache, func->getFuncId(), keysBegin);
       }
@@ -3235,7 +3236,7 @@ OPTBLD_INLINE const TypedValue* memoGetImpl(LocalRange keys) {
     }
 
     assertx(keys.count > 0);
-    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
     if (auto const getter = memoCacheGetForKeyCount(keys.count)) {
       return getter(cache, keysBegin);
     }
@@ -3282,27 +3283,27 @@ OPTBLD_INLINE void iopMemoGetEager(PC& pc,
 namespace {
 
 OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
-  assertx(vmfp()->m_func->isMemoizeWrapper());
-  assertx(keys.first + keys.count <= vmfp()->m_func->numLocals());
+  auto const fp = vmfp();
+  auto const func = fp->func();
+  assertx(func->isMemoizeWrapper());
+  assertx(keys.first + keys.count <= func->numLocals());
   assertx(tvIsPlausible(val));
 
   for (auto i = 0; i < keys.count; ++i) {
-    auto const key = frame_local(vmfp(), keys.first + i);
+    auto const key = frame_local(fp, keys.first + i);
     if (!isIntType(type(key)) && !isStringType(type(key))) {
       raise_error("Memoization keys can only be ints or strings");
     }
   }
 
-  auto const func = vmfp()->m_func;
   if (!func->isMethod() || func->isStatic()) {
-    auto const lsbCls =
-      func->isMemoizeWrapperLSB() ? vmfp()->getClass() : nullptr;
+    auto const lsbCls = func->isMemoizeWrapperLSB() ? fp->getClass() : nullptr;
     if (keys.count > 0) {
       auto cache =
         lsbCls ? rds::bindLSBMemoCache(lsbCls, func)
                : rds::bindStaticMemoCache(func);
       if (!cache.isInit()) cache.initWith(nullptr);
-      auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+      auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
       if (auto setter = memoCacheSetForKeyCount(keys.count)) {
         return setter(*cache, keysBegin, val);
       }
@@ -3326,8 +3327,8 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
     return;
   }
 
-  checkThis(vmfp());
-  auto const this_ = vmfp()->getThis();
+  checkThis(fp);
+  auto const this_ = fp->getThis();
   auto const cls = func->cls();
   assertx(this_->instanceof(cls));
   assertx(cls->hasMemoSlots());
@@ -3355,7 +3356,7 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
         val
       );
     }
-    auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+    auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
     if (auto const setter = sharedMemoCacheSetForKeyCount(keys.count)) {
       return setter(cache, func->getFuncId(), keysBegin, val);
     }
@@ -3368,7 +3369,7 @@ OPTBLD_INLINE void memoSetImpl(LocalRange keys, TypedValue val) {
   }
 
   assertx(keys.count > 0);
-  auto const keysBegin = frame_local(vmfp(), keys.first + keys.count - 1);
+  auto const keysBegin = frame_local(fp, keys.first + keys.count - 1);
   if (auto const setter = memoCacheSetForKeyCount(keys.count)) {
     return setter(cache, keysBegin, val);
   }

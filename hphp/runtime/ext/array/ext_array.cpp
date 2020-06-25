@@ -2310,7 +2310,7 @@ TypedValue HHVM_FUNCTION(array_intersect,
   /* If any of the containers were empty, we can stop here and return the
      empty array */
   if (!getContainerSize(c1) || !smallestSize) {
-    return make_persistent_array_like_tv(ArrayData::Create());
+    return make_persistent_array_like_tv(ArrayData::CreateDArray());
   }
 
   Array ret = Array::CreateDArray();

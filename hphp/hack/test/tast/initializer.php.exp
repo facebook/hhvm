@@ -71,7 +71,7 @@
            cv_id = ([12:18-20], "s");
            cv_expr =
            (Some (([12:23-34], Set<string>),
-                  (ValCollection (<vc_kind>, None,
+                  (ValCollection (Set, None,
                      [(([12:28-33], string), (String "foo"))]))));
            cv_user_attributes = []; cv_doc_comment = None;
            cv_is_promoted_variadic = false; cv_is_static = true;

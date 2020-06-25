@@ -257,7 +257,3 @@ let pp_og_null_flavor fmt flavor =
   match flavor with
   | OG_nullthrows -> "OG_nullthrows"
   | OG_nullsafe -> "OG_nullsafe"
-
-let pp_kvc_kind fmt _ = Format.pp_print_string fmt "<kvc_kind>"
-
-let pp_vc_kind fmt _ = Format.pp_print_string fmt "<vc_kind>"

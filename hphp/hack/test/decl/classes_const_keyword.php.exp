@@ -76,7 +76,7 @@ Parsed decls:
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
           (Some ([25:34-50],
-                 (ValCollection (<vc_kind>, None,
+                 (ValCollection (Keyset, None,
                     [([25:41-44], (String "a")); ([25:46-49], (String "b"))]
                     ))));
           scc_name = ([25:24-31], "CKEYSET");
@@ -88,8 +88,7 @@ Parsed decls:
               )))
           };
         { Shallow_decl_defs.scc_abstract = false;
-          scc_expr =
-          (Some ([26:47-55], (ValCollection (<vc_kind>, None, []))));
+          scc_expr = (Some ([26:47-55], (ValCollection (Keyset, None, []))));
           scc_name = ([26:27-44], "CCLASSNAME_KEYSET");
           scc_type =
           (Rhint (root|classes_const_keyword.php line 26, characters 9-25),
@@ -219,7 +218,7 @@ Parsed decls:
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
          (Some ([5:35-53],
-                (KeyValCollection (<kvc_kind>, None,
+                (KeyValCollection (Dict, None,
                    [(([5:40-41], (Int "2")), ([5:45-52], (String "folly")))]
                    ))));
          scc_name = ([5:27-32], "CDICT");
@@ -236,10 +235,10 @@ Parsed decls:
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
           (Some ([7:5-34],
-                 (KeyValCollection (<kvc_kind>, None,
+                 (KeyValCollection (Dict, None,
                     [(([7:10-11], (Int "2")),
                       ([7:15-33],
-                       (KeyValCollection (<kvc_kind>, None,
+                       (KeyValCollection (Dict, None,
                           [(([7:20-21], (Int "4")),
                             ([7:25-32], (String "folly")))]
                           ))))
@@ -265,10 +264,10 @@ Parsed decls:
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
           (Some ([9:5-44],
-                 (KeyValCollection (<kvc_kind>, None,
+                 (KeyValCollection (Dict, None,
                     [(([9:10-11], (Int "2")),
                       ([9:15-43],
-                       (KeyValCollection (<kvc_kind>, None,
+                       (KeyValCollection (Dict, None,
                           [(([9:20-21], (Int "4")),
                             ([9:25-32],
                              (Unop (Uminus, ([9:26-32], (Float "4.5e10"))))));
@@ -386,7 +385,7 @@ Parsed decls:
       [{ Shallow_decl_defs.scc_abstract = false;
          scc_expr =
          (Some ([17:25-37],
-                (ValCollection (<vc_kind>, None,
+                (ValCollection (Vec, None,
                    [([17:29-30], (Int "1")); ([17:32-33], (Int "2"));
                      ([17:35-36], (Int "3"))]
                    ))));
@@ -401,16 +400,13 @@ Parsed decls:
         { Shallow_decl_defs.scc_abstract = false;
           scc_expr =
           (Some ([18:37-64],
-                 (ValCollection (<vc_kind>, None,
+                 (ValCollection (Vec, None,
                     [([18:41-47],
-                      (ValCollection (<vc_kind>, None,
-                         [([18:45-46], (Int "1"))])));
+                      (ValCollection (Vec, None, [([18:45-46], (Int "1"))])));
                       ([18:49-55],
-                       (ValCollection (<vc_kind>, None,
-                          [([18:53-54], (Int "2"))])));
+                       (ValCollection (Vec, None, [([18:53-54], (Int "2"))])));
                       ([18:57-63],
-                       (ValCollection (<vc_kind>, None,
-                          [([18:61-62], (Int "3"))])))
+                       (ValCollection (Vec, None, [([18:61-62], (Int "3"))])))
                       ]
                     ))));
           scc_name = ([18:23-34], "CNESTED_VEC");

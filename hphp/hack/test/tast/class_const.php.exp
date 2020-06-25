@@ -11,7 +11,7 @@
       [{ cc_type = None; cc_id = ([5:9-12], "FOO");
          cc_expr =
          (Some (([5:15-8:4], dict<string, int>),
-                (KeyValCollection (<kvc_kind>, None,
+                (KeyValCollection (Dict, None,
                    [((([6:5-8], string), (String "a")),
                      (([6:12-13], int), (Int "1")));
                      ((([7:5-8], string), (String "b")),

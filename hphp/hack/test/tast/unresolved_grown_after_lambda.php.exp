@@ -27,7 +27,7 @@ Errors:
               (Binop ((Eq None),
                  (([4:3-9], Vector<int>), (Lvar ([4:3-9], $items))),
                  (([4:12-25], Vector<int>),
-                  (ValCollection (<vc_kind>, None,
+                  (ValCollection (Vector, None,
                      [(([4:21-23], int), (Lvar ([4:21-23], $i)))])))
                  )))));
           ([5:3-12:5],

@@ -46,7 +46,7 @@
                    (Id ([7:3-15], "\\expect_mixed"))),
                   [],
                   [(([8:5-11:6], dict<arraykey, mixed>),
-                    (KeyValCollection (<kvc_kind>, None,
+                    (KeyValCollection (Dict, None,
                        [((([9:7-10], string), (String "a")),
                          (([9:14-16], int), (Lvar ([9:14-16], $a))));
                          ((([10:7-10], string), (String "b")),

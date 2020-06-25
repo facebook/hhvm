@@ -42,7 +42,7 @@
                         (([16:12-13], Vector<T>), (Id ([16:12-13], "x"))),
                         OG_nullthrows))),
                     (([16:16-25], Vector<T>),
-                     (ValCollection (<vc_kind>, None, [])))
+                     (ValCollection (Vector, None, [])))
                     )))))
              ];
            fb_annotation = () };

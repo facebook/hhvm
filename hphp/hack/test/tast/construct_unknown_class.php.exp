@@ -31,7 +31,7 @@ Errors:
                        [(([4:22-23], int), (Int "3"));
                          (([4:25-28], string), (String "s"));
                          (([4:30-36], vec<int>),
-                          (ValCollection (<vc_kind>, None,
+                          (ValCollection (Vec, None,
                              [(([4:34-35], int), (Int "3"))])))
                          ],
                        (Some (([4:41-43], vec<string>),

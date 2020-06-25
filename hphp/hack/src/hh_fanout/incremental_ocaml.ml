@@ -17,6 +17,7 @@ type fanout_result = {
 type cursor_state =
   | Saved_state of {
       dep_table_saved_state_path: Path.t;
+      dep_table_errors_saved_state_path: Path.t;
       naming_table_saved_state_path: Naming_sqlite.db_path;
     }
   | Saved_state_delta of {
@@ -197,6 +198,8 @@ class state ~state_path ~persistent_state : Incremental.state =
                   {
                     dep_table_saved_state_path =
                       client_config.Incremental.dep_table_saved_state_path;
+                    dep_table_errors_saved_state_path =
+                      client_config.Incremental.errors_saved_state_path;
                     naming_table_saved_state_path =
                       client_config.Incremental.naming_table_saved_state_path;
                   }))

@@ -33,6 +33,7 @@ type saved_state_result = {
   naming_table: Naming_table.t;
   naming_table_path: Path.t;
   dep_table_path: Path.t;
+  errors_path: Path.t;
   saved_state_changed_files: Relative_path.Set.t;
 }
 
@@ -97,9 +98,18 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
           ( saved_state_info
               .Saved_state_loader.Naming_table_info.naming_table_path,
             changed_files ))
-  and (dep_table_path, dep_table_changed_files) =
+  and (dep_table_path, errors_path, dep_table_changed_files) =
     match env.dep_table_path with
-    | Some dep_table_path -> Lwt.return (dep_table_path, [])
+    | Some dep_table_path ->
+      let errors_path =
+        dep_table_path
+        |> Path.to_string
+        |> Filename.split_extension
+        |> fst
+        |> SaveStateService.get_errors_filename
+        |> Path.make
+      in
+      Lwt.return (dep_table_path, errors_path, [])
     | None ->
       let%lwt dep_table_saved_state =
         State_loader_lwt.load
@@ -119,6 +129,8 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
         Lwt.return
           ( saved_state_info
               .Saved_state_loader.Naming_and_dep_table_info.dep_table_path,
+            saved_state_info
+              .Saved_state_loader.Naming_and_dep_table_info.errors_path,
             changed_files ))
   in
   let changed_files =
@@ -159,6 +171,7 @@ let load_saved_state ~(env : env) ~(setup_result : setup_result) :
       naming_table;
       naming_table_path;
       dep_table_path;
+      errors_path;
       saved_state_changed_files = changed_files;
     }
 
@@ -200,6 +213,7 @@ let advance_cursor
           {
             Incremental.from = env.from;
             dep_table_saved_state_path = saved_state_result.dep_table_path;
+            errors_saved_state_path = saved_state_result.errors_path;
             naming_table_saved_state_path =
               Naming_sqlite.Db_path
                 (Path.to_string saved_state_result.naming_table_path);

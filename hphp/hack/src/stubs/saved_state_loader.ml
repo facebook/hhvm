@@ -35,6 +35,7 @@ module Naming_and_dep_table_info = struct
     naming_table_path: Path.t;
     dep_table_path: Path.t;
     hot_decls_path: Path.t;
+    errors_path: Path.t;
   }
 end
 

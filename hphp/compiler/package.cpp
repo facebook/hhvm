@@ -25,6 +25,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include <folly/String.h>
 #include <folly/portability/Dirent.h>
 #include <folly/portability/Unistd.h>
@@ -48,7 +50,11 @@
 #include "hphp/zend/zend-string.h"
 
 using namespace HPHP;
-using std::set;
+namespace fs = boost::filesystem;
+
+///////////////////////////////////////////////////////////////////////////////
+
+const StaticString s___EntryPoint("__EntryPoint");
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -399,6 +405,53 @@ void Package::addUnitEmitter(std::unique_ptr<UnitEmitter> ue) {
   }
 }
 
+std::unique_ptr<UnitEmitter> Package::createSymlinkWrapper(
+  const std::string& full_path, const std::string& file_name,
+  std::unique_ptr<UnitEmitter> org_ue) {
+
+  auto target_path_abs = fs::canonical(full_path);
+  auto target_path = fs::relative(target_path_abs, m_root);
+
+  bool found_entrypoint = false;
+
+  std::stringstream ss;
+  ss << ".hh_file 1;\n\n"
+     << ".main (1,1) {\n"
+     << "  Int 1\n"
+     << "  RetC\n"
+     << "}\n\n";
+
+  for (auto& fe : org_ue->fevec()) {
+    const UserAttributeMap& attrs = fe->userAttributes;
+    if (attrs.find(s___EntryPoint.get()) != attrs.end()) {
+      found_entrypoint = true;
+      ss << ".function{} [unique persistent \"__EntryPoint\"(\"\"\"y:0:{}\"\"\")] (4,7) <\"\" N  > entrypoint$symlink$" << string_sha1(full_path) << "() {\n"
+         << "  String \"" << target_path.string() << "\"\n"
+         << "  ReqOnce\n"
+         << "  PopC\n"
+         << "  NullUninit\n"
+         << "  NullUninit\n"
+         << "  NullUninit\n"
+         << "  FCallFuncD <SkipNumArgsCheck> 0 1 \"\" - \"\" \"" << fe->name->toCppString() << "\"\n"
+         << "  PopC\n"
+         << "  Null\n"
+         << "  RetC\n"
+         << "}\n\n";
+    }
+  }
+
+  if (!found_entrypoint) {
+    return nullptr;
+  }
+
+  auto content = ss.str();
+  SHA1 sha1{string_sha1(content)};
+  return std::unique_ptr<UnitEmitter> {
+    assemble_string(content.data(), content.size(), file_name.c_str(), sha1,
+                    Native::s_noNativeFuncs, false)
+  };
+}
+
 /*
  * Note that the string pointed to by fileName must live until the
  * Package is destroyed. Its expected to be an element of
@@ -415,7 +468,7 @@ bool Package::parseImpl(const std::string* fileName) {
   }
 
   struct stat sb;
-  if (stat(fullPath.c_str(), &sb)) {
+  if (lstat(fullPath.c_str(), &sb)) {
     if (fullPath.find(' ') == std::string::npos) {
       Logger::Error("Unable to stat file %s", fullPath.c_str());
     }
@@ -425,6 +478,8 @@ bool Package::parseImpl(const std::string* fileName) {
     Logger::Error("Unable to parse directory: %s", fullPath.c_str());
     return false;
   }
+
+  bool is_symlink = S_ISLNK(sb.st_mode);
 
   if (RuntimeOption::EvalAllowHhas) {
     if (fileName->size() > 5 &&
@@ -439,6 +494,14 @@ bool Package::parseImpl(const std::string* fileName) {
         assemble_string(content.data(), content.size(), fileName->c_str(), sha1,
                         Native::s_noNativeFuncs)
       };
+      if (is_symlink) {
+        ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
+        if (!ue) {
+          // If the symlink contains no EntryPoint we don't do anything but it
+          // is still success
+          return true;
+        }
+      }
       addUnitEmitter(std::move(ue));
       return true;
     }
@@ -477,6 +540,14 @@ bool Package::parseImpl(const std::string* fileName) {
     if (auto ue = Repo::get().urp().loadEmitter(
           *fileName, sha1, Native::s_noNativeFuncs
         )) {
+      if (is_symlink) {
+        ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
+        if (!ue) {
+          // If the symlink contains no EntryPoint we don't do anything but it
+          // is still success
+          return true;
+        }
+      }
       addUnitEmitter(std::move(ue));
       report(0);
       return true;
@@ -497,6 +568,14 @@ bool Package::parseImpl(const std::string* fileName) {
   try {
     auto ue = uc->compile(true, mode);
     if (ue && !ue->m_ICE) {
+      if (is_symlink) {
+        ue = createSymlinkWrapper(fullPath, *fileName, std::move(ue));
+        if (!ue) {
+          // If the symlink contains no EntryPoint we don't do anything but it
+          // is still success
+          return true;
+        }
+      }
       addUnitEmitter(std::move(ue));
       report(0);
       return true;

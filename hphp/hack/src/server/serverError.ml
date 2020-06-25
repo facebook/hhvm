@@ -30,7 +30,7 @@ let get_save_state_result_json
 let get_error_list_json
     (error_list : Pos.absolute Errors.error_ list)
     ~(save_state_result : SaveStateServiceTypes.save_state_result option)
-    (recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
+    ~(recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
   let (error_list, did_pass) =
     match error_list with
     | [] -> ([], true)
@@ -76,7 +76,7 @@ let print_error_list_json
     (error_list : Pos.absolute Errors.error_ list)
     (save_state_result : SaveStateServiceTypes.save_state_result option)
     (recheck_stats : ServerCommandTypes.Recheck_stats.t option) =
-  let res = get_error_list_json error_list ~save_state_result recheck_stats in
+  let res = get_error_list_json error_list ~save_state_result ~recheck_stats in
   Hh_json.json_to_output oc res;
   Out_channel.flush oc
 

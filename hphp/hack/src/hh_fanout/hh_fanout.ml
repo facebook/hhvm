@@ -340,6 +340,79 @@ let mode_calculate
   Hh_json.json_to_multiline_output Out_channel.stdout json;
   Lwt.return_unit
 
+let mode_calculate_errors
+    ~(env : env) ~(cursor_id : string option) ~(pretty_print : bool) :
+    unit Lwt.t =
+  let { ctx; workers } = set_up_global_environment env in
+  let incremental_state = make_incremental_state ~env in
+  let cursor =
+    match cursor_id with
+    | Some cursor_id ->
+      incremental_state#look_up_cursor ~client_id:None ~cursor_id
+    | None ->
+      incremental_state#make_default_cursor
+        (Incremental.Client_id env.client_id)
+  in
+  let cursor =
+    match cursor with
+    | Error message -> failwith ("Cursor not found: " ^ message)
+    | Ok cursor -> cursor
+  in
+
+  let (errors, cursor) = cursor#calculate_errors ctx workers in
+  let cursor_id =
+    match cursor with
+    | Some cursor ->
+      let cursor_id = incremental_state#add_cursor cursor in
+      incremental_state#save;
+      cursor_id
+    | None ->
+      let cursor_id =
+        Option.value_exn
+          cursor_id
+          ~message:
+            ( "Internal invariant failure -- "
+            ^ "expected a new cursor to be generated, "
+            ^ "given that no cursor was passed in." )
+      in
+      Incremental.Cursor_id cursor_id
+  in
+
+  let error_list =
+    errors |> Errors.get_sorted_error_list |> List.map ~f:Errors.to_absolute
+  in
+  ( if pretty_print then
+    ServerError.print_error_list
+      stdout
+      ~error_list
+      ~stale_msg:None
+      ~output_json:false
+      ~save_state_result:None
+      ~recheck_stats:None
+  else
+    let json =
+      ServerError.get_error_list_json
+        error_list
+        ~save_state_result:None
+        ~recheck_stats:None
+    in
+    let json =
+      match json with
+      | Hh_json.JSON_Object props ->
+        let props =
+          [
+            ( "cursor",
+              let (Incremental.Cursor_id cursor_id) = cursor_id in
+              Hh_json.JSON_String cursor_id );
+          ]
+          @ props
+        in
+        Hh_json.JSON_Object props
+      | _ -> failwith "Expected error JSON to be an object"
+    in
+    Hh_json.json_to_multiline_output Out_channel.stdout json );
+  Lwt.return_unit
+
 let detail_level_arg =
   Command.Arg_type.create (fun x ->
       match x with
@@ -509,9 +582,34 @@ let calculate_subcommand =
 
      (fun () -> Lwt_main.run (mode_calculate ~env ~input_files ~cursor_id)))
 
+let calculate_errors_subcommand =
+  let open Command.Param in
+  let open Command.Let_syntax in
+  Command.basic
+    ~summary:"Produce typechecking errors for the codebase"
+    (let%map env = parse_env ()
+     and cursor_id =
+       flag
+         "--cursor"
+         (optional string)
+         ~doc:
+           ( "CURSOR The cursor returned by a previous request to `calculate`. "
+           ^ "If not provided, uses the cursor corresponding to the saved-state."
+           )
+     and pretty_print =
+       flag
+         "--pretty-print"
+         no_arg
+         ~doc:
+           "Pretty-print the errors to stdout, rather than returning a JSON object."
+     in
+
+     fun () ->
+       Lwt_main.run (mode_calculate_errors ~env ~cursor_id ~pretty_print))
+
 let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
     unit Lwt.t =
-  let ({ ctx; workers; _ } as setup_result) = set_up_global_environment env in
+  let ({ ctx; workers } as setup_result) = set_up_global_environment env in
   let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
     load_saved_state ~env ~setup_result
   in
@@ -639,6 +737,7 @@ let () =
        ~summary:"Provides access to Hack's dependency graph"
        [
          ("calculate", calculate_subcommand);
+         ("calculate-errors", calculate_errors_subcommand);
          ("debug", debug_subcommand);
          ("query", query_subcommand);
          ("query-path", query_path_subcommand);

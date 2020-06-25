@@ -9,9 +9,15 @@
 module Hh_bucket = Bucket
 open Core_kernel
 
-type fanout_result = {
-  fanout_files_deps: Typing_deps.DepSet.t;
+type typecheck_result = {
+  fanout_files_deps: Incremental.dep_graph_delta;
+      (** The delta to the dependency graph saved-state. This field is not
+      cumulative, so it must be merged with any previous `fanout_files_deps`.
+      *)
   errors: Errors.t;
+      (** The errors in the codebase at this point in time. This field is
+      cumulative, so previous cursors need not be consulted. TODO: is that
+      true, or should this be a `Relative_path.Map.t Errors.t`? *)
 }
 
 type cursor_state =
@@ -25,13 +31,11 @@ type cursor_state =
       changed_files: Naming_sqlite.file_deltas;
           (** The files that have changed since the saved-state. This field
           is cumulative, so previous cursors need not be consulted. *)
-      changed_files_deps: Incremental.dep_graph_delta;
-          (** The dependency edges that were produces from typechecking
-          `changed_files`. This field is not cumulative, so it must be
-          merged with the results of previous cursors. *)
-      fanout_result: fanout_result option;
-          (** The result of typechecking the fanout. It's not meaningful to
-          merge this field with the results of previous cursors. *)
+    }
+  | Typecheck_result of {
+      previous: cursor_state;  (** The cursor before this one. *)
+      typecheck_result: typecheck_result;
+          (** The result of typechecking the fanout. *)
     }
 
 type persistent_state = {
@@ -43,26 +47,32 @@ type persistent_state = {
   clients: (Incremental.client_id, Incremental.client_config) Hashtbl.t;
 }
 
-let typecheck_and_get_deps_job
+let typecheck_and_get_deps_and_errors_job
     (ctx : Provider_context.t) _acc (paths : Relative_path.t list) :
-    Incremental.dep_graph_delta =
-  let deps = HashSet.create () in
-  Typing_deps.add_dependency_callback
-    "typecheck_and_get_deps_job"
-    (fun dependent dependency ->
-      let dependent = Typing_deps.Dep.make dependent in
-      let dependency = Typing_deps.Dep.make dependency in
-      HashSet.add deps (dependent, dependency));
-  List.iter paths ~f:(fun path ->
+    Errors.t * Incremental.dep_graph_delta =
+  List.fold
+    paths
+    ~init:(Errors.empty, HashSet.create ())
+    ~f:(fun acc path ->
       let (ctx, entry) = Provider_context.add_entry_if_missing ~ctx ~path in
       match Provider_context.read_file_contents entry with
       | Some _ ->
-        let (_ : Tast_provider.Compute_tast_and_errors.t) =
+        let deps = HashSet.create () in
+        Typing_deps.add_dependency_callback
+          "typecheck_and_get_deps_and_errors_job"
+          (fun dependent dependency ->
+            let dependent = Typing_deps.Dep.make dependent in
+            let dependency = Typing_deps.Dep.make dependency in
+            HashSet.add deps (dependent, dependency));
+        let { Tast_provider.Compute_tast_and_errors.errors; _ } =
           Tast_provider.compute_tast_and_errors_unquarantined ~ctx ~entry
         in
-        ()
-      | None -> ());
-  deps
+
+        let (acc_errors, acc_deps) = acc in
+        let acc_errors = Errors.merge errors acc_errors in
+        HashSet.union acc_deps ~other:deps;
+        (acc_errors, acc_deps)
+      | None -> acc)
 
 let get_state_file_path (state_dir : Path.t) : Path.t =
   Path.concat state_dir "ocaml.state"
@@ -75,45 +85,97 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
 
     method get_file_deltas : Naming_sqlite.file_deltas =
       match cursor_state with
-      | Saved_state _ -> Relative_path.Map.empty
+      | Saved_state _
+      | Typecheck_result _ ->
+        Relative_path.Map.empty
       | Saved_state_delta { changed_files; _ } -> changed_files
+
+    method private load_naming_table (ctx : Provider_context.t) : Naming_table.t
+        =
+      let rec get_naming_table_path (state : cursor_state) :
+          Naming_sqlite.db_path =
+        match state with
+        | Saved_state { naming_table_saved_state_path; _ } ->
+          naming_table_saved_state_path
+        | Saved_state_delta { previous; _ }
+        | Typecheck_result { previous; _ } ->
+          get_naming_table_path previous
+      in
+      let (Naming_sqlite.Db_path naming_table_path) =
+        get_naming_table_path cursor_state
+      in
+      let changed_file_infos =
+        self#get_file_deltas
+        |> Relative_path.Map.fold ~init:[] ~f:(fun path delta acc ->
+               let file_info =
+                 match delta with
+                 | Naming_sqlite.Modified file_info -> Some file_info
+                 | Naming_sqlite.Deleted -> None
+               in
+               (path, file_info) :: acc)
+      in
+      Naming_table.load_from_sqlite_with_changed_file_infos
+        ctx
+        changed_file_infos
+        naming_table_path
 
     method get_dep_graph_delta : Incremental.dep_graph_delta =
       let rec helper cursor_state acc =
         match cursor_state with
         | Saved_state _ -> acc
-        | Saved_state_delta { previous; changed_files_deps; _ } ->
-          HashSet.union acc ~other:changed_files_deps;
+        | Typecheck_result
+            { previous; typecheck_result = { fanout_files_deps; _ } } ->
+          HashSet.union acc ~other:fanout_files_deps;
           helper previous acc
+        | Saved_state_delta { previous; _ } -> helper previous acc
       in
       helper cursor_state (HashSet.create ())
 
     method get_client_id : Incremental.client_id = client_id
 
-    method private find_cursors_up_to_and_including_last_complete
-        : cursor_state list =
+    method private find_cursors_since_last_typecheck : cursor_state list =
       let rec helper cursor_state =
         match cursor_state with
-        | Saved_state _ -> [cursor_state]
-        | Saved_state_delta { fanout_result = Some _; _ } -> [cursor_state]
-        | Saved_state_delta { fanout_result = None; previous; _ } ->
-          cursor_state :: helper previous
+        | Saved_state _
+        | Typecheck_result _ ->
+          [cursor_state]
+        | Saved_state_delta { previous; _ } -> cursor_state :: helper previous
       in
       helper cursor_state
 
     method private get_files_to_typecheck : Relative_path.Set.t =
-      let cursors = self#find_cursors_up_to_and_including_last_complete in
+      let cursors = self#find_cursors_since_last_typecheck in
       List.fold cursors ~init:Relative_path.Set.empty ~f:(fun acc cursor ->
           match cursor with
-          | Saved_state _ -> acc
+          | Saved_state { dep_table_errors_saved_state_path; _ } ->
+            let errors : SaveStateServiceTypes.saved_state_errors =
+              if
+                Sys.file_exists
+                  (Path.to_string dep_table_errors_saved_state_path)
+              then
+                In_channel.with_file
+                  ~binary:true
+                  (Path.to_string dep_table_errors_saved_state_path)
+                  ~f:(fun ic -> Marshal.from_channel ic)
+              else
+                []
+            in
+            errors
+            |> List.map ~f:(fun (_phase, path) -> path)
+            |> List.fold ~init:acc ~f:Relative_path.Set.union
           | Saved_state_delta { changed_files; _ } ->
             changed_files
             |> Relative_path.Map.keys
-            |> List.fold ~init:acc ~f:Relative_path.Set.add)
+            |> List.fold ~init:acc ~f:Relative_path.Set.add
+          | Typecheck_result _ ->
+            (* Don't need to typecheck any previous cursors. The fanout of
+            the files that have changed before this typecheck have already
+            been processed. Stop recursion here. *)
+            acc)
 
     method advance
         (ctx : Provider_context.t)
-        (workers : MultiWorker.worker list)
+        (_workers : MultiWorker.worker list)
         (changed_paths : Relative_path.Set.t) : cursor =
       let changed_paths =
         Relative_path.Set.union changed_paths self#get_files_to_typecheck
@@ -123,7 +185,9 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
           changed_paths
           ~init:
             (match cursor_state with
-            | Saved_state _ -> Relative_path.Map.empty
+            | Saved_state _
+            | Typecheck_result _ ->
+              Relative_path.Map.empty
             | Saved_state_delta { changed_files; _ } -> changed_files)
           ~f:(fun path acc ->
             let (ctx, entry) =
@@ -144,30 +208,47 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
                 ~data:(Naming_sqlite.Modified file_info))
       in
 
-      let changed_files_deps =
-        MultiWorker.call
-          (Some workers)
-          ~job:(typecheck_and_get_deps_job ctx)
-          ~neutral:(HashSet.create ())
-          ~merge:(fun lhs rhs ->
-            HashSet.union lhs ~other:rhs;
-            lhs)
-          ~next:
-            (Hh_bucket.make
-               (Relative_path.Set.elements changed_paths)
-               ~num_workers:(List.length workers))
-      in
+      new cursor
+        ~client_id
+        ~cursor_state:
+          (Saved_state_delta { previous = cursor_state; changed_files })
 
-      let cursor_state =
-        Saved_state_delta
-          {
-            previous = cursor_state;
-            changed_files;
-            changed_files_deps;
-            fanout_result = None;
-          }
-      in
-      new cursor ~client_id ~cursor_state
+    method calculate_errors
+        (ctx : Provider_context.t) (workers : MultiWorker.worker list)
+        : Errors.t * cursor option =
+      match cursor_state with
+      | Typecheck_result { typecheck_result = { errors; _ }; _ } ->
+        (errors, None)
+      (* TODO: update test to not make a new cursor every time? *)
+      | (Saved_state _ | Saved_state_delta _) as current_cursor ->
+        (* The global reverse naming table is updated by calling this
+        function. We can discard the forward naming table returned to us. *)
+        let (_naming_table : Naming_table.t) = self#load_naming_table ctx in
+
+        let files_to_typecheck = self#get_files_to_typecheck in
+
+        let (errors, fanout_files_deps) =
+          MultiWorker.call
+            (Some workers)
+            ~job:(typecheck_and_get_deps_and_errors_job ctx)
+            ~neutral:(Errors.empty, HashSet.create ())
+            ~merge:(fun (errors, deps) (acc_errors, acc_deps) ->
+              let acc_errors = Errors.merge acc_errors errors in
+              HashSet.union acc_deps ~other:deps;
+              (acc_errors, acc_deps))
+            ~next:
+              (Hh_bucket.make
+                 (Relative_path.Set.elements files_to_typecheck)
+                 ~num_workers:(List.length workers))
+        in
+        let typecheck_result = { fanout_files_deps; errors } in
+        let cursor =
+          new cursor
+            ~client_id
+            ~cursor_state:
+              (Typecheck_result { previous = current_cursor; typecheck_result })
+        in
+        (errors, Some cursor)
   end
 
 class state ~state_path ~persistent_state : Incremental.state =
@@ -177,8 +258,10 @@ class state ~state_path ~persistent_state : Incremental.state =
     val persistent_state : persistent_state = persistent_state
 
     method save : unit =
-      Out_channel.with_file (Path.to_string state_path) ~f:(fun oc ->
-          Marshal.to_channel oc persistent_state [Marshal.Closures])
+      Out_channel.with_file
+        ~binary:true
+        (Path.to_string state_path)
+        ~f:(fun oc -> Marshal.to_channel oc persistent_state [Marshal.Closures])
 
     method look_up_client_id (client_config : Incremental.client_config)
         : Incremental.client_id =
@@ -267,7 +350,7 @@ let make (state_dir : Path.t) : Incremental.state =
         state#save);
   let state_path = get_state_file_path state_dir in
   let (persistent_state : persistent_state) =
-    In_channel.with_file (Path.to_string state_path) ~f:(fun ic ->
+    In_channel.with_file ~binary:true (Path.to_string state_path) ~f:(fun ic ->
         Marshal.from_channel ic)
   in
   new state ~state_path ~persistent_state

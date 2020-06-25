@@ -3,7 +3,7 @@
 
 import os.path
 import tempfile
-from typing import List, Tuple, cast
+from typing import List, Mapping, Tuple, cast
 
 from hh_fanout_test_driver import (
     Env,
@@ -11,6 +11,7 @@ from hh_fanout_test_driver import (
     SavedStateInfo,
     generate_saved_state,
     run_hh_fanout,
+    run_hh_fanout_calculate_errors,
 )
 from libfb.py.testutil import BaseFacebookTestCase
 
@@ -128,9 +129,11 @@ function uses_foo(): void {
                 cursor=cursor1,
             )
             result_files = cast(List[str], result["files"])
-            self.assertSetEqual(
-                set(result_files), {file("foo.php"), file("uses_foo.php")}
-            )
+            # `uses_foo.php` should not be in the fanout of `foo.php` yet,
+            # since we haven't done a typecheck of it, so we don't know about
+            # the new dependency edge from `foo.php` to `uses_foo.php`.
+            self.assertSetEqual(set(result_files), {file("foo.php")})
+
             cursor2 = result.get("cursor")
             self.assertIsNotNone(cursor2)
             cursor2 = cast(str, cursor2)
@@ -195,3 +198,47 @@ function foo(): void {}
             )
             result_files = cast(List[str], result["files"])
             self.assertEqual(set(result_files), {file("foo.php")})
+
+    def test_calculate_errors(self) -> None:
+        work_dir: str
+        with tempfile.TemporaryDirectory() as work_dir:
+
+            def file(path: Path) -> Path:
+                return os.path.join(work_dir, path)
+
+            (env, saved_state_info) = self.set_up_work_dir(work_dir)
+            self.write(
+                file("foo.php"),
+                """<?hh
+function foo(): void {
+    return 1;
+}
+""",
+            )
+
+            result = run_hh_fanout(
+                env=env,
+                saved_state_info=saved_state_info,
+                changed_files=[file("foo.php")],
+                args=[file("foo.php")],
+                cursor=None,
+            )
+            cursor1 = cast(str, result["cursor"])
+
+            result = run_hh_fanout_calculate_errors(
+                env=env, saved_state_info=saved_state_info, cursor=cursor1
+            )
+            cursor2 = cast(str, result["cursor"])
+            errors = cast(
+                Mapping[int, Mapping[str, Mapping[int, Mapping[str, str]]]],
+                result["errors"],
+            )
+            self.assertGreater(cursor2, cursor1)
+            self.assertNotEmpty(errors)
+            self.assertIn("You cannot return a value", errors[0]["message"][0]["descr"])
+
+            result = run_hh_fanout_calculate_errors(
+                env=env, saved_state_info=saved_state_info, cursor=cursor2
+            )
+            cursor3 = result["cursor"]
+            self.assertEqual(cursor3, cursor2)

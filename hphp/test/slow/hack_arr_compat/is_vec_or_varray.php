@@ -7,21 +7,35 @@ function check(mixed $arg, string $descr) {
     $descr,
     HH\is_vec_or_varray($arg) ? 'true' : 'false',
   );
+
+
 }
 
 <<__EntryPoint>>
 function main(): void {
-  check(null, 'null');
-  check("abc", '"abc"');
+  $inputs = vec[
+    tuple(null, 'null'),
+    tuple("abc", '"abc"'),
 
-  check(varray[1, 2, 3],  'varray[1, 2, 3]');
-  check(vec[1, 2, 3],  'vec[1, 2, 3]');
+    tuple(varray[1, 2, 3],  'varray[1, 2, 3]'),
+    tuple(vec[1, 2, 3],  'vec[1, 2, 3]'),
 
-  check(darray["a" => "a"], 'darray["a" => "a"]');
-  check(dict["a" => "a"], 'dict["a" => "a"]');
+    tuple(darray["a" => "a"], 'darray["a" => "a"]'),
+    tuple(dict["a" => "a"], 'dict["a" => "a"]'),
 
-  check(keyset[1, 2, 3], 'keyset[1, 2, 3]');
+    tuple(keyset[1, 2, 3], 'keyset[1, 2, 3]'),
 
-  check(Vector{1, 2, 3}, 'Vector{1, 2, 3}');
-  check(Map{"a" => "a"}, 'Map{"a" => "a"}');
+    tuple(Vector{1, 2, 3}, 'Vector{1, 2, 3}'),
+    tuple(Map{"a" => "a"}, 'Map{"a" => "a"}'),
+  ];
+
+  echo "=== constant values ===\n";
+  foreach ($inputs as list($arg, $descr)) {
+    check($arg, $descr);
+  }
+
+  echo "=== laundered values ===\n";
+  foreach ($inputs as list($arg, $descr)) {
+    check(__hhvm_intrinsics\launder_value($arg), $descr);
+  }
 }

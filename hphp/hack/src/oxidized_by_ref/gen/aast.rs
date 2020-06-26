@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<00153e065fa0dd64d92ff7d393c94713>>
+// @generated SignedSource<<25e2e42853801331f58b5f4828c0ad84>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -256,7 +256,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     Record(
         &'a (
             Sid<'a>,
-            bool,
             &'a [(Expr<'a, Ex, Fb, En, Hi>, Expr<'a, Ex, Fb, En, Hi>)],
         ),
     ),
@@ -804,7 +803,7 @@ pub struct PuEnum<'a, Ex, Fb, En, Hi> {
     pub name: Sid<'a>,
     pub user_attributes: &'a [UserAttribute<'a, Ex, Fb, En, Hi>],
     pub is_final: bool,
-    pub case_types: &'a [(Sid<'a>, oxidized::aast::ReifyKind)],
+    pub case_types: &'a [Tparam<'a, Ex, Fb, En, Hi>],
     pub case_values: &'a [PuCaseValue<'a>],
     pub members: &'a [PuMember<'a, Ex, Fb, En, Hi>],
 }

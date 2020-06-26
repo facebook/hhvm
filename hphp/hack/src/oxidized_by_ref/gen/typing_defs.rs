@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<80c803d99a036d0cb7c273c3234dcf17>>
+// @generated SignedSource<<c68919008b773105519384f5f2504d13>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -18,6 +18,15 @@ use crate::*;
 pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
+
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub struct PuOrigin<'a> {
+    pub class: &'a str,
+    pub enum_: &'a str,
+}
+impl<'a> TrivialDrop for PuOrigin<'a> {}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -153,8 +162,8 @@ impl<'a> TrivialDrop for TypeconstType<'a> {}
 pub struct PuEnumType<'a> {
     pub name: nast::Sid<'a>,
     pub is_final: bool,
-    pub case_types: s_map::SMap<'a, (nast::Sid<'a>, oxidized::aast::ReifyKind)>,
-    pub case_values: s_map::SMap<'a, (nast::Sid<'a>, Ty<'a>)>,
+    pub case_types: s_map::SMap<'a, (PuOrigin<'a>, Tparam<'a>)>,
+    pub case_values: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
     pub members: s_map::SMap<'a, PuMemberType<'a>>,
 }
 impl<'a> TrivialDrop for PuEnumType<'a> {}
@@ -164,8 +173,9 @@ impl<'a> TrivialDrop for PuEnumType<'a> {}
 )]
 pub struct PuMemberType<'a> {
     pub atom: nast::Sid<'a>,
-    pub types: s_map::SMap<'a, (nast::Sid<'a>, Ty<'a>)>,
-    pub exprs: s_map::SMap<'a, nast::Sid<'a>>,
+    pub origin: PuOrigin<'a>,
+    pub types: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>, Ty<'a>)>,
+    pub exprs: s_map::SMap<'a, (PuOrigin<'a>, nast::Sid<'a>)>,
 }
 impl<'a> TrivialDrop for PuMemberType<'a> {}
 

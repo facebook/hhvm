@@ -11,7 +11,10 @@ use decl_provider_rust as decl_provider;
 use oxidized::pos::Pos;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::ident::Ident;
-use oxidized_by_ref::shallow_decl_defs::{ShallowClass, ShallowMethod};
+use oxidized_by_ref::{
+    pos::Pos as PosByRef,
+    shallow_decl_defs::{ShallowClass, ShallowMethod},
+};
 use typing_collections_rust::Map;
 use typing_defs_rust as typing_defs;
 use typing_defs_rust::typing_make_type::TypeBuilder;
@@ -60,9 +63,10 @@ impl<'a> Env<'a> {
         if let Some(next_cont) = self.next_cont_opt() {
             let expr_id = match next_cont.local_types.get(&x) {
                 None => self.ident(),
-                Some(Local(_, y)) => *y,
+                Some(Local(_, _, y)) => *y,
             };
-            let local = Local(new_type, expr_id);
+            // TODO(hrust): replace `Pos::none()` with proper pos
+            let local = Local(new_type, PosByRef::none(), expr_id);
             self.set_local_(x, local);
         }
     }
@@ -102,7 +106,7 @@ impl<'a> Env<'a> {
                 let ty = bld.any(bld.mk_rnone());
                 (true, ty)
             }
-            Some(Local(x, _)) => (true, x),
+            Some(Local(x, _, _)) => (true, x),
         }
     }
 
@@ -117,7 +121,8 @@ impl<'a> Env<'a> {
             None => {
                 // If the continuation is absent, we are in dead code so the
                 // variable should have type nothing.
-                Some(Local(bld.nothing(bld.mk_rnone()), 0))
+                // TODO(hrust) replace `Pos::none()` with proper pos
+                Some(Local(bld.nothing(bld.mk_rnone()), PosByRef::none(), 0))
             }
             Some(ctx) => {
                 let lcl = ctx.local_types.find(&x).copied();
@@ -130,9 +135,10 @@ impl<'a> Env<'a> {
     pub fn set_local_expr_id(&mut self, x: LocalId<'a>, new_eid: Ident) {
         if let Some(next_cont) = self.next_cont_opt() {
             match next_cont.local_types.get(&x) {
-                Some(Local(ty, eid)) if *eid != new_eid => {
+                Some(Local(ty, _, eid)) if *eid != new_eid => {
                     let bld = self.bld();
-                    let local = Local(*ty, new_eid);
+                    // TODO(hrust): replace `Pos::none()` with proper pos
+                    let local = Local(*ty, PosByRef::none(), new_eid);
                     let per_cont_env =
                         self.lenv
                             .per_cont_env
@@ -152,7 +158,7 @@ impl<'a> Env<'a> {
             }
             Some(next_cont) => {
                 let lcl = next_cont.local_types.get(&x);
-                lcl.map(|Local(_, x)| *x)
+                lcl.map(|Local(_, _, x)| *x)
             }
         }
     }

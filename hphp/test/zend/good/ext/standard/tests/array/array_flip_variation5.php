@@ -11,19 +11,11 @@
 echo "*** Testing array_flip() : 'input' array with repeatitive keys/values ***\n";
 
 // array with numeric key repeatition
-$input = darray[1 => 'value', 2 => 'VALUE', 1 => "VaLuE", 3.4 => 4, 3.4 => 5];
+$input = darray[1 => 'value', 2 => 'VALUE', 1 => "VaLuE", 3 => 4, 3 => 5];
 var_dump( array_flip($input) );
 
 // array with string key repeatition
 $input = darray["key" => 1, "two" => 'TWO', 'three' => 3, 'key' => "FOUR"];
-var_dump( array_flip($input) );
-
-// array with bool key repeatition
-$input = darray[true => 1, false => 0, TRUE => -1];
-var_dump( array_flip($input) );
-
-// array with null key repeatition
-$input = darray[null => "Hello", NULL => 0];
 var_dump( array_flip($input) );
 
 // array with numeric value repeatition

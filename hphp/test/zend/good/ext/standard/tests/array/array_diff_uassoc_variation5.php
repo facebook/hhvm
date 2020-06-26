@@ -17,7 +17,7 @@ echo "*** Testing array_diff_uassoc() : usage variation ***\n";
 
 //Initialize variables
 $arr_default_int = varray[1, 2, 3, 4];
-$arr_float = darray[0 => 1.00, 1.00 => 2.00, 2.00 => 3.00, 3.00 => 4.00];
+$arr_float = darray[0 => 1.00, 1 => 2.00, 2 => 3.00, 3 => 4.00];
 
 
 echo "\n-- Result of comparing integers and floating point numbers --\n";

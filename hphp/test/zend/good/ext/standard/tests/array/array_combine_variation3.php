@@ -59,15 +59,8 @@ $arrays = varray [
        darray[ "one" => "ten", "two" => "twenty", "three" => "thirty"],  // string key/value
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
-       // associative array, containing null/empty/boolean values as key/value
-/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
-       darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
-       darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
-
        // array with repetative keys
-/*19*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
+/*14*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
 ];
 
 // loop through each sub-array within $arrays to check the behavior of array_combine()

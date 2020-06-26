@@ -30,7 +30,6 @@ $input = darray[
   // numeric keys
   1 => 'int_key', // expected: value will be replaced by 'bool_key3'
   -2 => 'negative_key',
-  8.9 => 'float_key',
   012 => 'octal_key',
   0x34 => 'hex_key',
 
@@ -40,16 +39,6 @@ $input = darray[
   '' => 'string_key3',
   "" => 'string_key4',
   " " => 'string_key5',
-
-  // bool keys
-  true => 'bool_key1',
-  false => 'bool_key2',
-  TRUE => 'bool_key3',
-  FALSE => 'bool_key4',
-
-  // null keys
-  null => 'null_key1',  // expected: value will be replaced by 'null_key2'
-  NULL => 'null_key2',
 
   // binary key
   "a".chr(0)."b" => 'binary_key1',

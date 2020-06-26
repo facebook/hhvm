@@ -2133,6 +2133,12 @@ let variadic_memoize pos =
     pos
     "Memoized functions cannot be variadic."
 
+let abstract_method_memoize pos =
+  add
+    (NastCheck.err_code NastCheck.AbstractMethodMemoize)
+    pos
+    "Abstract methods cannot be memoized."
+
 let inout_params_special pos =
   add
     (NastCheck.err_code NastCheck.InoutParamsSpecial)

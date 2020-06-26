@@ -8,6 +8,10 @@
 
 open Hh_prelude
 open Aast
+module UA = Naming_special_names.UserAttributes
+
+let is_memoizable user_attributes =
+  Naming_attributes.mem2 UA.uaMemoize UA.uaMemoizeLSB user_attributes
 
 let error_if_duplicate_method_names methods =
   let _ =
@@ -28,6 +32,13 @@ let error_if_clone_has_arguments method_ =
     Errors.clone_too_many_arguments pos
   | _ -> ()
 
+let error_if_abstract_method_is_memoized method_ =
+  match method_.m_name with
+  | (pos, _) when method_.m_abstract && is_memoizable method_.m_user_attributes
+    ->
+    Errors.abstract_method_memoize pos
+  | _ -> ()
+
 let handler =
   object
     inherit Nast_visitor.handler_base
@@ -36,5 +47,7 @@ let handler =
       error_if_duplicate_method_names class_.c_methods;
       ()
 
-    method! at_method_ _ method_ = error_if_clone_has_arguments method_
+    method! at_method_ _ method_ =
+      error_if_clone_has_arguments method_;
+      error_if_abstract_method_is_memoized method_
   end

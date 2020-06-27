@@ -28,7 +28,7 @@ use naming_special_names_rust::{
     special_idents, superglobals, typehints, user_attributes,
 };
 use ocaml_helper::int_of_str_opt;
-use options::{CompilerFlags, HhvmFlags, Options};
+use options::{CompilerFlags, HhvmFlags, LangFlags, Options};
 use oxidized::{
     aast, aast_defs,
     aast_visitor::{visit, visit_mut, AstParams, Node, NodeMut, Visitor, VisitorMut},
@@ -4373,8 +4373,23 @@ fn emit_cast(
                 typehints::INT => instr::cast_int(),
                 typehints::BOOL => instr::cast_bool(),
                 typehints::STRING => instr::cast_string(),
-                typehints::ARRAY => instr::cast_array(),
                 typehints::FLOAT => instr::cast_double(),
+                typehints::ARRAY => {
+                    let disable_array_cast = e
+                        .options()
+                        .hhvm
+                        .hack_lang
+                        .flags
+                        .contains(LangFlags::DISABLE_ARRAY_CAST);
+                    if disable_array_cast {
+                        return Err(emit_fatal::raise_fatal_parse(
+                            pos,
+                            "(array) cast is no longer supported",
+                        ));
+                    } else {
+                        instr::cast_array()
+                    }
+                }
                 _ => {
                     return Err(emit_fatal::raise_fatal_parse(
                         pos,

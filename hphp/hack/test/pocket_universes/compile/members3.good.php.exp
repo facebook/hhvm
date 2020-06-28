@@ -267,22 +267,22 @@ L6:
     SetL $result
     .srcloc 15:8,15:8;
     PopC
-    .srcloc 15:8,15:8;
-    NewObjD "ReflectionClass"
-    Dup
-    NullUninit
-    NullUninit
-    .srcloc 15:8,15:8;
-    String "XX"
-    .srcloc 15:8,15:8;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
-    PopC
-    LockObj
-    .srcloc 15:8,15:8;
-    SetL $class
-    .srcloc 15:8,15:8;
-    PopC
     .try {
+      .srcloc 15:8,15:8;
+      NewObjD "ReflectionClass"
+      Dup
+      NullUninit
+      NullUninit
+      .srcloc 15:8,15:8;
+      String "XX"
+      .srcloc 15:8,15:8;
+      FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+      PopC
+      LockObj
+      .srcloc 15:8,15:8;
+      SetL $class
+      .srcloc 15:8,15:8;
+      PopC
       .srcloc 15:8,15:8;
       CGetL $class
       NullUninit
@@ -389,22 +389,22 @@ L6:
     SetL $result
     .srcloc 20:8,20:8;
     PopC
-    .srcloc 20:8,20:8;
-    NewObjD "ReflectionClass"
-    Dup
-    NullUninit
-    NullUninit
-    .srcloc 20:8,20:8;
-    String "XX"
-    .srcloc 20:8,20:8;
-    FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
-    PopC
-    LockObj
-    .srcloc 20:8,20:8;
-    SetL $class
-    .srcloc 20:8,20:8;
-    PopC
     .try {
+      .srcloc 20:8,20:8;
+      NewObjD "ReflectionClass"
+      Dup
+      NullUninit
+      NullUninit
+      .srcloc 20:8,20:8;
+      String "XX"
+      .srcloc 20:8,20:8;
+      FCallCtor <LockWhileUnwinding> 1 1 "0" - "" ""
+      PopC
+      LockObj
+      .srcloc 20:8,20:8;
+      SetL $class
+      .srcloc 20:8,20:8;
+      PopC
       .srcloc 20:8,20:8;
       CGetL $class
       NullUninit

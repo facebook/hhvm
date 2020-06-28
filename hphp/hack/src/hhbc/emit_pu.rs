@@ -396,19 +396,38 @@ fn gen_pu_accessor(
 */
 
 /* As for accessors, we do not have a reliable way to detect, whenever a
-   PU is defined in a subclass, if the PU is inherited from the superclass.
-   We thus systematically perform a call to Members() in the parent class to
-   check if there are instances of the PU defined in the superclass.
-   As the Members method might not exist in the superclass, we encapsulate
+   PU is defined in a subclass, if the PU is inherited from the superclass,
+   or if instances are defined in traits being used.  We thus systematically
+   perform a call to Members() in the used traits and in the parent class to
+   check if there are instances of the PU defined in the trait/superclass.
+   As the Members method might not exist in the trait/superclass, we encapsulate
    the call using reflection and catch the eventual exception.
    Reflection can be slow, but Memoization ensures that the class hierarchy
    is explored only once.
 
+   The general shape is:
+
   <<__Memoize, __Override>>
   public static function pu$E$Members() : keyset<string> {
     $result = keyset[ .. strings based on local PU instances ...];
-    $class = new ReflectionClass(parent::class);
+    // exploring used traits
+    $traits = vec[ ... used traits ...];
+    foreach ($traits as $traits_class) {
+      try {
+        $class = new ReflectionClass($traits_class);
+        // might throw if the method is not in the parent class
+        $method = $class->getMethod('pu$E$Members');
+        // method is here, call it
+        $parent_members = $method->invoke(null);
+        foreach ($parent_members as $p) {
+          $result[] = $p;
+        }
+      } catch (ReflectionException $_) {
+      }
+    }
+    // exploring the parent
     try {
+      $class = new ReflectionClass(parent::class);
       // might throw if the method is not in the parent class
       $method = $class->getMethod('pu$E$Members');
       // method is here, call it
@@ -422,9 +441,11 @@ fn gen_pu_accessor(
    return $result;
   }
 */
-fn gen_members_extends(
+fn gen_members_search(
     instance_name: &str,
     pos: Pos,
+    extends: bool,
+    uses: &[&str],
     pu_members: Vec<Tast::PuMember>,
 ) -> Tast::Method_ {
     let m_members = pu_name_mangle(instance_name, "Members");
@@ -441,77 +462,113 @@ fn gen_members_extends(
         members,
     );
     let mems = Tast::Expr(pos.clone(), mems_);
-    let body = {
-        let ast = vec![
-            /* $result = keyset[ ... names of local instances ... ] */
-            assign_lvar(pos.clone(), "$result", mems),
-            /* $class = new ReflectionClass(parent::class) */
+    let uses_list: Vec<Tast::Afield> = uses
+        .iter()
+        .map(|x| Tast::Afield::AFvalue(str_(pos.clone(), string_utils::strip_ns(x).to_string())))
+        .collect();
+    let update_members_from = |expr: Tast::Expr| {
+        vec![Tast::Stmt(
+            pos.clone(),
+            /* try { */
+            Tast::Stmt_::mk_try(
+                vec![
+                    /* $class = new ReflectionClass(parent::class / $traits_class) */
+                    assign_lvar(
+                        pos.clone(),
+                        "$class",
+                        new_(pos.clone(), "ReflectionClass", vec![expr]),
+                    ),
+                    /* $method = $class->getMethod('pu$E$Members'); */
+                    assign_lvar(
+                        pos.clone(),
+                        "$method",
+                        call(
+                            pos.clone(),
+                            obj_get(pos.clone(), "$class", "getMethod"),
+                            vec![str_(pos.clone(), m_members.clone())],
+                        ),
+                    ),
+                    /* $parent_members = $method->invoke(null); */
+                    assign_lvar(
+                        pos.clone(),
+                        "$parent_members",
+                        call(
+                            pos.clone(),
+                            obj_get(pos.clone(), "$method", "invoke"),
+                            vec![Tast::Expr(pos.clone(), Tast::Expr_::Null)],
+                        ),
+                    ),
+                    /* foreach ($parent_members as $p) { $result[] = $p; } */
+                    Tast::Stmt(
+                        pos.clone(),
+                        Tast::Stmt_::mk_foreach(
+                            lvar(pos.clone(), "$parent_members"),
+                            Tast::AsExpr::AsV(lvar(pos.clone(), "$p")),
+                            vec![assign(
+                                pos.clone(),
+                                Tast::Expr(
+                                    pos.clone(),
+                                    Tast::Expr_::mk_array_get(lvar(pos.clone(), "$result"), None),
+                                ),
+                                lvar(pos.clone(), "$p"),
+                            )],
+                        ),
+                    ),
+                ],
+                /* } catch (ReflectionException $_) { } */
+                vec![Tast::Catch(
+                    ast_defs::Id(pos.clone(), "ReflectionException".to_string()),
+                    aast::Lid(pos.clone(), local_id::make_unscoped("$_".to_string())),
+                    vec![],
+                )],
+                vec![],
+            ),
+        )]
+    };
+    let members_traits = if uses.is_empty() {
+        vec![]
+    } else {
+        vec![
+            /* $traits_classes = vec[ ... used traits ...] */
             assign_lvar(
                 pos.clone(),
-                "$class",
-                new_(
+                "$traits_classes",
+                Tast::Expr(
                     pos.clone(),
-                    "ReflectionClass",
-                    vec![class_const(pos.clone(), "parent", "class")],
+                    Tast::Expr_::mk_collection(
+                        ast_defs::Id(pos.clone(), "vec".to_string()),
+                        None,
+                        uses_list,
+                    ),
                 ),
             ),
+            /* foreach ($traits_classes as $traits_class) */
             Tast::Stmt(
                 pos.clone(),
-                /* try { */
-                Tast::Stmt_::mk_try(
-                    vec![
-                        /* $method = $class->getMethod('pu$E$Members'); */
-                        assign_lvar(
-                            pos.clone(),
-                            "$method",
-                            call(
-                                pos.clone(),
-                                obj_get(pos.clone(), "$class", "getMethod"),
-                                vec![str_(pos.clone(), m_members.clone())],
-                            ),
-                        ),
-                        /* $parent_members = $method->invoke(null); */
-                        assign_lvar(
-                            pos.clone(),
-                            "$parent_members",
-                            call(
-                                pos.clone(),
-                                obj_get(pos.clone(), "$method", "invoke"),
-                                vec![Tast::Expr(pos.clone(), Tast::Expr_::Null)],
-                            ),
-                        ),
-                        /* foreach ($parent_members as $p) { $result[] = $p; } */
-                        Tast::Stmt(
-                            pos.clone(),
-                            Tast::Stmt_::mk_foreach(
-                                lvar(pos.clone(), "$parent_members"),
-                                Tast::AsExpr::AsV(lvar(pos.clone(), "$p")),
-                                vec![assign(
-                                    pos.clone(),
-                                    Tast::Expr(
-                                        pos.clone(),
-                                        Tast::Expr_::mk_array_get(
-                                            lvar(pos.clone(), "$result"),
-                                            None,
-                                        ),
-                                    ),
-                                    lvar(pos.clone(), "$p"),
-                                )],
-                            ),
-                        ),
-                    ],
-                    /* } catch (ReflectionException $_) { } */
-                    vec![Tast::Catch(
-                        ast_defs::Id(pos.clone(), "ReflectionException".to_string()),
-                        aast::Lid(pos.clone(), local_id::make_unscoped("$_".to_string())),
-                        vec![],
-                    )],
-                    vec![],
+                Tast::Stmt_::mk_foreach(
+                    lvar(pos.clone(), "$traits_classes"),
+                    Tast::AsExpr::AsV(lvar(pos.clone(), "$traits_class")),
+                    update_members_from(lvar(pos.clone(), "$traits_class")),
                 ),
             ),
+        ]
+    };
+    let members_parent = if !extends {
+        vec![]
+    } else {
+        update_members_from(class_const(pos.clone(), "parent", "class"))
+    };
+    let body = {
+        let mut ast = vec![
+            /* $result = keyset[ ... names of local instances ... ] */
+            assign_lvar(pos.clone(), "$result", mems),
+        ];
+        ast.extend(members_traits);
+        ast.extend(members_parent);
+        ast.extend(vec![
             /* return $result; */
             return_(pos.clone(), lvar(pos.clone(), "$result")),
-        ];
+        ]);
         Tast::FuncBody {
             ast,
             annotation: (),
@@ -545,7 +602,7 @@ If the class doesn't extends another one, everything is available locally
    return keyset[ .. strings based on local PU instances ...];
   }
 */
-fn gen_members_no_extends(
+fn gen_members_no_search(
     instance_name: &str,
     pos: Pos,
     pu_members: Vec<Tast::PuMember>,
@@ -603,10 +660,10 @@ fn gen_pu_methods(
     let pu_members = instance.members;
     let ast_defs::Id(pos, instance_name) = instance.name.clone();
     let infos = process_class_enum(pu_members.clone());
-    let m_members = if extends {
-        gen_members_extends(&instance_name, pos.clone(), pu_members)
+    let m_members = if extends || !uses.is_empty() {
+        gen_members_search(&instance_name, pos.clone(), extends, uses, pu_members)
     } else {
-        gen_members_no_extends(&instance_name, pos.clone(), pu_members)
+        gen_members_no_search(&instance_name, pos.clone(), pu_members)
     };
     let mut acc = std::iter::once(m_members)
         .chain(infos.into_iter().map(|(key, info)| {

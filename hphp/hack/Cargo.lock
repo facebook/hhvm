@@ -965,6 +965,7 @@ dependencies = [
 name = "emit_pu_rust"
 version = "0.0.0"
 dependencies = [
+ "hhbc_string_utils_rust 0.0.0",
  "oxidized 0.0.0",
 ]
 

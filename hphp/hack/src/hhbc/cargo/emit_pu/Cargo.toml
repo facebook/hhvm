@@ -9,4 +9,5 @@ include = ["../../emit_pu.rs"]
 path = "../../emit_pu.rs"
 
 [dependencies]
+hhbc_string_utils_rust = { path = "../string_utils" }
 oxidized = { path = "../../../oxidized" }

@@ -3,6 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc_string_utils_rust as string_utils;
 use oxidized::aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut};
 use oxidized::{aast, aast_defs, ast_defs, local_id};
 use oxidized::{ast as Tast, pos::Pos};
@@ -140,6 +141,17 @@ fn new_(pos: Pos, cls: impl Into<String>, args: Vec<Tast::Expr>) -> Tast::Expr {
     Tast::Expr(pos, expr)
 }
 
+fn assign(pos: Pos, target: Tast::Expr, expr: Tast::Expr) -> Tast::Stmt {
+    let binop = Tast::Expr_::mk_binop(ast_defs::Bop::Eq(None), target, expr);
+    let expr = Tast::Expr(pos.clone(), binop);
+    let stmt_ = Tast::Stmt_::mk_expr(expr);
+    Tast::Stmt(pos, stmt_)
+}
+
+fn assign_lvar(pos: Pos, target: impl Into<String>, expr: Tast::Expr) -> Tast::Stmt {
+    assign(pos.clone(), lvar(pos, target), expr)
+}
+
 fn obj_get(pos: Pos, var_name: impl Into<String>, method_name: impl Into<String>) -> Tast::Expr {
     let expr = Tast::Expr_::mk_obj_get(
         lvar(pos.clone(), var_name),
@@ -192,6 +204,12 @@ fn error_msg(cls: &str, field: &str, name: &str) -> String {
      }
     }
 
+   If the class uses traits T1, .., Tn, then the default case calls the
+   pu$Field_name$Expr_name method on traits T1, .., Tn, catching method
+   not found errors via reflection (as explained below for the Members function).
+   Given the semantics of trait method override, it is necessary to perform
+   manually the search on the used traits.
+
    If the class extends a superclass, the raise statement is replaced with
    a call to parent::pu$Field_name$Expr_name.
 
@@ -200,12 +218,14 @@ fn error_msg(cls: &str, field: &str, name: &str) -> String {
    or is self-contained.  In this case the accessor functions include the
    default call to parent.  Type checking ensures that the default case is
    not reachable if the PU was not inherited from the super-class.
+
 */
 fn gen_pu_accessor(
     fun_name: String,
     pos: ast_defs::Pos,
     is_final: bool,
     extends: bool,
+    uses: &[&str],
     infos: Vec<(String, Tast::Expr)>,
     error: String,
 ) -> Tast::Method_ {
@@ -221,21 +241,105 @@ fn gen_pu_accessor(
         let (atom_name, value) = info;
         cases.push(do_case(atom_name, value.clone()));
     }
-    let default = if extends {
-        let parent_call = class_const(pos.clone(), "parent", &fun_name);
-        let call = call(pos.clone(), parent_call, vec![var_atom.clone()]);
-        let ret = return_(pos.clone(), call);
-        Tast::Case::Default(pos.clone(), vec![ret])
+    let extends =
+        /* returns a stmt_, to be used in the default branch */
+        if extends {
+            let parent_call = class_const(pos.clone(), "parent", &fun_name);
+            let call = call(pos.clone(), parent_call, vec![var_atom.clone()]);
+            return_(pos.clone(), call)
+        } else {
+            let msg_ = Tast::Expr_::mk_binop(
+                ast_defs::Bop::Dot,
+                str_(pos.clone(), error),
+                var_atom.clone()
+            );
+            let msg = Tast::Expr(pos.clone(), msg_);
+            let new_exn = new_(pos.clone(), "\\Exception", vec![msg]);
+            let throw = Tast::Stmt_::mk_throw(new_exn);
+            Tast::Stmt(pos.clone(), throw)
+        };
+    let default = if uses.is_empty() {
+        Tast::Case::Default(pos.clone(), vec![extends])
     } else {
-        let msg_ = Tast::Expr_::mk_binop(
-            ast_defs::Bop::Dot,
-            str_(pos.clone(), error),
-            var_atom.clone(),
-        );
-        let msg = Tast::Expr(pos.clone(), msg_);
-        let new_exn = new_(pos.clone(), "\\Exception", vec![msg]);
-        let throw = Tast::Stmt_::mk_throw(new_exn);
-        Tast::Case::Default(pos.clone(), vec![Tast::Stmt(pos.clone(), throw)])
+        let uses_list: Vec<Tast::Afield> = uses
+            .iter()
+            .map(|x| {
+                Tast::Afield::AFvalue(str_(pos.clone(), string_utils::strip_ns(x).to_string()))
+            })
+            .collect();
+        let default_block = vec![
+            /* $trait_classes = vec[MyTraitA::class, MyTraitB::class]; */
+            assign_lvar(
+                pos.clone(),
+                "$trait_classes",
+                Tast::Expr(
+                    pos.clone(),
+                    Tast::Expr_::mk_collection(
+                        ast_defs::Id(pos.clone(), "vec".to_string()),
+                        None,
+                        uses_list,
+                    ),
+                ),
+            ),
+            /* foreach ($trait_classes as $trait_class) */
+            Tast::Stmt(
+                pos.clone(),
+                Tast::Stmt_::mk_foreach(
+                    lvar(pos.clone(), "$trait_classes"),
+                    Tast::AsExpr::AsV(lvar(pos.clone(), "$trait_class")),
+                    /* try */
+                    vec![Tast::Stmt(
+                        pos.clone(),
+                        Tast::Stmt_::mk_try(
+                            vec![
+                                /* $class = new ReflectionClass($trait_class); */
+                                assign_lvar(
+                                    pos.clone(),
+                                    "$class",
+                                    new_(
+                                        pos.clone(),
+                                        "ReflectionClass",
+                                        vec![lvar(pos.clone(), "$trait_class")],
+                                    ),
+                                ),
+                                /*  $method = $class->getMethod('pu$E$value'); */
+                                assign_lvar(
+                                    pos.clone(),
+                                    "$method",
+                                    call(
+                                        pos.clone(),
+                                        obj_get(pos.clone(), "$class", "getMethod"),
+                                        vec![str_(pos.clone(), fun_name.clone())],
+                                    ),
+                                ),
+                                /* return $method->invoke(null,$atom); */
+                                return_(
+                                    pos.clone(),
+                                    call(
+                                        pos.clone(),
+                                        obj_get(pos.clone(), "$method", "invoke"),
+                                        vec![
+                                            Tast::Expr(pos.clone(), Tast::Expr_::Null),
+                                            var_atom.clone(),
+                                        ],
+                                    ),
+                                ),
+                            ],
+                            /* catch (ReflectionException $_) {} */
+                            vec![Tast::Catch(
+                                ast_defs::Id(pos.clone(), "ReflectionException".to_string()),
+                                aast::Lid(pos.clone(), local_id::make_unscoped("$_".to_string())),
+                                vec![],
+                            )],
+                            vec![],
+                        ),
+                    )],
+                ),
+            ),
+            /* parent::pu$E$value($atom), or raise an exception */
+            extends,
+        ];
+        Tast::Case::Default(pos.clone(), default_block)
     };
     cases.push(default);
     let body = {
@@ -323,13 +427,6 @@ fn gen_members_extends(
     pos: Pos,
     pu_members: Vec<Tast::PuMember>,
 ) -> Tast::Method_ {
-    let assign = |target, expr| {
-        let binop = Tast::Expr_::mk_binop(ast_defs::Bop::Eq(None), target, expr);
-        let expr = Tast::Expr(pos.clone(), binop);
-        let stmt_ = Tast::Stmt_::mk_expr(expr);
-        Tast::Stmt(pos.clone(), stmt_)
-    };
-    let assign_lvar = |target, expr| assign(lvar(pos.clone(), target), expr);
     let m_members = pu_name_mangle(instance_name, "Members");
     let members = pu_members
         .into_iter()
@@ -347,9 +444,10 @@ fn gen_members_extends(
     let body = {
         let ast = vec![
             /* $result = keyset[ ... names of local instances ... ] */
-            assign_lvar("$result", mems),
+            assign_lvar(pos.clone(), "$result", mems),
             /* $class = new ReflectionClass(parent::class) */
             assign_lvar(
+                pos.clone(),
                 "$class",
                 new_(
                     pos.clone(),
@@ -364,6 +462,7 @@ fn gen_members_extends(
                     vec![
                         /* $method = $class->getMethod('pu$E$Members'); */
                         assign_lvar(
+                            pos.clone(),
                             "$method",
                             call(
                                 pos.clone(),
@@ -373,6 +472,7 @@ fn gen_members_extends(
                         ),
                         /* $parent_members = $method->invoke(null); */
                         assign_lvar(
+                            pos.clone(),
                             "$parent_members",
                             call(
                                 pos.clone(),
@@ -387,6 +487,7 @@ fn gen_members_extends(
                                 lvar(pos.clone(), "$parent_members"),
                                 Tast::AsExpr::AsV(lvar(pos.clone(), "$p")),
                                 vec![assign(
+                                    pos.clone(),
                                     Tast::Expr(
                                         pos.clone(),
                                         Tast::Expr_::mk_array_get(
@@ -492,7 +593,12 @@ fn gen_members_no_extends(
 }
 
 /* Returns the generated methods (accessors + Members) */
-fn gen_pu_methods(class_name: &str, extends: bool, instance: Tast::PuEnum) -> Vec<Tast::Method_> {
+fn gen_pu_methods(
+    class_name: &str,
+    extends: bool,
+    uses: &[&str],
+    instance: Tast::PuEnum,
+) -> Vec<Tast::Method_> {
     let is_final = instance.is_final;
     let pu_members = instance.members;
     let ast_defs::Id(pos, instance_name) = instance.name.clone();
@@ -506,7 +612,7 @@ fn gen_pu_methods(class_name: &str, extends: bool, instance: Tast::PuEnum) -> Ve
         .chain(infos.into_iter().map(|(key, info)| {
             let fun_name = pu_name_mangle(&instance_name, &key);
             let error = error_msg(&class_name, &instance_name, &key);
-            gen_pu_accessor(fun_name, pos.clone(), is_final, extends, info, error)
+            gen_pu_accessor(fun_name, pos.clone(), is_final, extends, uses, info, error)
         }))
         .collect::<Vec<_>>();
 
@@ -583,19 +689,31 @@ fn erase_fun(f: &mut Tast::Fun_) {
 fn process_pufields(
     class_name: &str,
     extends: bool,
+    uses: &[&str],
     pu_enums: Vec<Tast::PuEnum>,
 ) -> Vec<Tast::Method_> {
     pu_enums
         .into_iter()
-        .flat_map(|pu_enum| gen_pu_methods(class_name, extends, pu_enum))
+        .flat_map(|pu_enum| gen_pu_methods(class_name, extends, uses, pu_enum))
         .collect()
 }
 
+fn trait_name_from_hint(h: &aast::TraitHint) -> Option<&str> {
+    let aast_defs::Hint(_, hint) = h;
+    match hint.as_ref() {
+        Tast::Hint_::Happly(sid, _) => {
+            let ast_defs::Id(_, id) = sid;
+            Some(id)
+        }
+        _ => None,
+    }
+}
 fn update_class(c: &mut Tast::Class_) {
     let class_name = &c.name.1;
     let extends = !c.extends.is_empty();
     let pu_enums = std::mem::replace(&mut c.pu_enums, vec![]);
-    let mut pu_methods = process_pufields(class_name, extends, pu_enums);
+    let uses: Vec<&str> = c.uses.iter().filter_map(trait_name_from_hint).collect();
+    let mut pu_methods = process_pufields(class_name, extends, &uses, pu_enums);
     visit_mut(&mut EraseBodyVisitor {}, &mut Ctx {}, c).unwrap();
     c.methods.append(&mut pu_methods);
 }

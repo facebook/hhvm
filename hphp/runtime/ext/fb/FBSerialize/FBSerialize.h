@@ -154,13 +154,13 @@ struct FBUnserializer : private FBSerializeBase {
   double unserializeDouble();
   typename V::StringType unserializeString();
   folly::StringPiece unserializeStringPiece();
-  typename V::MapType unserializeMap();
-  typename V::VectorType unserializeVector();
-  typename V::VectorType unserializeList();
+  typename V::MapType unserializeMap(size_t depth);
+  typename V::VectorType unserializeVector(size_t depth);
+  typename V::VectorType unserializeList(size_t depth);
   // read the next map but don't unserialze it (for lazy or delay
   // unserialization)
   folly::StringPiece getSerializedMap();
-  typename V::VariantType unserializeThing();
+  typename V::VariantType unserializeThing(size_t depth);
 
   void advance(size_t delta);
   Code nextCode() const;

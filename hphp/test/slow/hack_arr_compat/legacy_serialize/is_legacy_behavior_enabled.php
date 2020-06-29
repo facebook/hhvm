@@ -16,7 +16,7 @@ function good_cases(): vec<Container<mixed>> {
   }
   // now mark them
   foreach ($init as $e) {
-    $init[] = HH\mark_legacy_hack_array($e);
+    $init[] = HH\array_mark_legacy($e);
   }
   return $init;
 }
@@ -31,7 +31,7 @@ function bad_cases(): vec<mixed> {
 
 function test(Container<mixed> $cases): void {
   foreach ($cases as $case) {
-    var_dump(HH\is_marked_legacy_hack_array($case));
+    var_dump(HH\is_array_marked_legacy($case));
   }
 }
 

@@ -6,7 +6,7 @@ function test($arr) {
   echo "*** without legacy bit ***\n";
   echo serialize($arr) . "\n";
   echo "*** with legacy bit ***\n";
-  $arr = HH\mark_legacy_hack_array($arr);
+  $arr = HH\array_mark_legacy($arr);
   echo serialize($arr) . "\n";
   echo "*** after a CoW ***\n";
   $arr[] = "blarghghg!";

@@ -4343,7 +4343,6 @@ where
             (!self_.env.parser_options.po_disallow_func_ptrs_in_constants
                 && (text == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
                     || text == Self::strip_hh_ns(sn::autoimported_functions::CLASS_METH)))
-                || (text == sn::std_lib_functions::MARK_LEGACY_HACK_ARRAY)
                 || (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
         };
 

@@ -530,8 +530,6 @@ pub mod std_lib_functions {
 
     pub const TYPE_STRUCTURE: &str = "\\HH\\type_structure";
 
-    pub const MARK_LEGACY_HACK_ARRAY: &str = "\\HH\\mark_legacy_hack_array";
-
     pub const ARRAY_MARK_LEGACY: &str = "\\HH\\array_mark_legacy";
 }
 

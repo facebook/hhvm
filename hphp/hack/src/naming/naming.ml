@@ -1310,7 +1310,6 @@ and check_constant_expr env (pos, e) =
   | Aast.Call (_, (_, Aast.Id (_, cn)), _, el, unpacked_element)
     when String.equal cn SN.AutoimportedFunctions.fun_
          || String.equal cn SN.AutoimportedFunctions.class_meth
-         || String.equal cn SN.StdlibFunctions.mark_legacy_hack_array
          || String.equal cn SN.StdlibFunctions.array_mark_legacy
          (* Tuples are not really function calls, they are just parsed that way*)
          || String.equal cn SN.SpecialFunctions.tuple ->

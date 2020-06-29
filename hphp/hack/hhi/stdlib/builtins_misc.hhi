@@ -11,10 +11,6 @@
 namespace HH {
 function server_warmup_status(): string;
 function execution_context(): string;
-function mark_legacy_hack_array<Tk as arraykey,
-                                Tv,
-                                T as KeyedContainer<Tk,Tv>>(T $in): T;
-function is_marked_legacy_hack_array(mixed $in): bool;
 
 <<__Pure>>
 function array_mark_legacy<T>(T $in, bool $recursive = false): T;

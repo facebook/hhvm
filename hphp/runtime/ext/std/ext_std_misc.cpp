@@ -228,11 +228,6 @@ void StandardExtension::initMisc() {
     HHVM_FE(hphp_to_string);
     HHVM_FALIAS(HH\\array_mark_legacy, array_mark_legacy);
     HHVM_FALIAS(HH\\is_array_marked_legacy, is_array_marked_legacy);
-    // TODO T54978012 remove next 4 after removing refs in WWW
-    HHVM_FALIAS(HH\\mark_legacy_hack_array, array_mark_legacy);
-    HHVM_FALIAS(HH\\is_marked_legacy_hack_array, is_array_marked_legacy);
-    HHVM_FALIAS(HH\\enable_legacy_behavior, array_mark_legacy);
-    HHVM_FALIAS(HH\\is_legacy_behavior_enabled, is_array_marked_legacy);
     HHVM_FALIAS(__SystemLib\\max2, SystemLib_max2);
     HHVM_FALIAS(__SystemLib\\min2, SystemLib_min2);
 

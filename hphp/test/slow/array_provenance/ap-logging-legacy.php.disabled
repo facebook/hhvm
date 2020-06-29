@@ -3,7 +3,7 @@
 <<__EntryPoint>>
 function main() {
   $a = __hhvm_intrinsics\launder_value(varray[]);
-  $a = HH\mark_legacy_hack_array($a);
+  $a = HH\array_mark_legacy($a);
   $a[] = "hello";
   var_dump(json_encode($a));
   var_dump(serialize($a));

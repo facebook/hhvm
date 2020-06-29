@@ -1,0 +1,2 @@
+Notice: Unable to unserialize: [O:3:"foo":1:{S:]. Unknown type 'S'. in %s/no-apc-string-pointer.php on line 10
+bool(false)

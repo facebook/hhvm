@@ -66,6 +66,7 @@ static const UChar32 SUBSTITUTION_CHARACTER = 0xFFFD;
 #define FB_UNSERIALIZE_UNEXPECTED_END            0x0002
 #define FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE  0x0003
 #define FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE 0x0004
+#define FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED        0x0005
 
 #ifdef FACEBOOK
 # define HHVM_FACEBOOK true
@@ -700,7 +701,10 @@ int fb_compact_unserialize_int64_from_buffer(
 const StaticString s_empty("");
 
 int fb_compact_unserialize_from_buffer(
-  Variant& out, const char* buf, int n, int& p) {
+    Variant& out, const char* buf, int n, int& p, size_t depth) {
+  if (UNLIKELY(depth > 1024)) {
+    return FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED;
+  }
 
   CHECK_ENOUGH(1, p, n);
   int code = (unsigned char)buf[p];
@@ -769,7 +773,8 @@ int fb_compact_unserialize_from_buffer(
       Array arr = Array::CreateVArray();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant value;
-        int err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+        int err =
+          fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
         if (err) {
           return err;
         }
@@ -794,7 +799,8 @@ int fb_compact_unserialize_from_buffer(
           ++p;
         } else {
           Variant value;
-          int err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+          int err =
+            fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
           if (err) {
             return err;
           }
@@ -815,12 +821,12 @@ int fb_compact_unserialize_from_buffer(
       Array arr = Array::CreateDArray();
       while (p < n && buf[p] != (char)(kCodePrefix | FB_CS_STOP)) {
         Variant key;
-        int err = fb_compact_unserialize_from_buffer(key, buf, n, p);
+        int err = fb_compact_unserialize_from_buffer(key, buf, n, p, depth + 1);
         if (err) {
           return err;
         }
         Variant value;
-        err = fb_compact_unserialize_from_buffer(value, buf, n, p);
+        err = fb_compact_unserialize_from_buffer(value, buf, n, p, depth + 1);
         if (err) {
           return err;
         }
@@ -856,7 +862,7 @@ Variant fb_compact_unserialize(const char* str, int len,
 
   Variant ret;
   int p = 0;
-  int err = fb_compact_unserialize_from_buffer(ret, str, len, p);
+  int err = fb_compact_unserialize_from_buffer(ret, str, len, p, 0);
   if (err) {
     success = false;
     errcode = err;
@@ -1308,6 +1314,7 @@ struct FBExtension : Extension {
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_END);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE);
     HHVM_RC_INT_SAME(FB_UNSERIALIZE_UNEXPECTED_ARRAY_KEY_TYPE);
+    HHVM_RC_INT_SAME(FB_UNSERIALIZE_MAX_DEPTH_EXCEEDED);
 
     HHVM_RC_INT(FB_SERIALIZE_HACK_ARRAYS, k_FB_SERIALIZE_HACK_ARRAYS);
     HHVM_RC_INT(FB_SERIALIZE_VARRAY_DARRAY, k_FB_SERIALIZE_VARRAY_DARRAY);

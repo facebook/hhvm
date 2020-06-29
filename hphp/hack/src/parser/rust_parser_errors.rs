@@ -4344,6 +4344,7 @@ where
                 && (text == Self::strip_hh_ns(sn::autoimported_functions::FUN_)
                     || text == Self::strip_hh_ns(sn::autoimported_functions::CLASS_METH)))
                 || (text == sn::std_lib_functions::ARRAY_MARK_LEGACY)
+                || (text == Self::strip_ns(sn::std_lib_functions::ARRAY_MARK_LEGACY))
         };
 
         let is_namey = |self_: &Self, token: &Token| -> bool {

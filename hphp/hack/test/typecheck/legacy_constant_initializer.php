@@ -1,7 +1,8 @@
 <?hh
 
 class Foo {
-  const vec<int> baz = \HH\array_mark_legacy(vec[1, 2, 3]);
+  const vec<int> bar = \HH\array_mark_legacy(vec[1, 2, 3]);
+  const vec<int> baz = HH\array_mark_legacy(vec[1, 2, 3]);
 }
 
 <<__EntryPoint>>

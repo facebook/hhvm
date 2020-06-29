@@ -363,7 +363,7 @@ inline typename V::VariantType FBUnserializer<V>::unserialize(
   folly::StringPiece serialized) {
 
   FBUnserializer<V> unserializer(serialized);
-  return unserializer.unserializeThing();
+  return unserializer.unserializeThing(0);
 }
 
 template <class V>
@@ -481,7 +481,7 @@ inline FBSerializeBase::Code FBUnserializer<V>::nextCode() const {
 }
 
 template <class V>
-inline typename V::MapType FBUnserializer<V>::unserializeMap() {
+inline typename V::MapType FBUnserializer<V>::unserializeMap(size_t depth) {
   p_ += CODE_SIZE;
 
   typename V::MapType ret = V::createMap();
@@ -493,14 +493,14 @@ inline typename V::MapType FBUnserializer<V>::unserializeMap() {
       case FB_SERIALIZE_STRING:
         {
           auto key = unserializeString();
-          auto value = unserializeThing();
+          auto value = unserializeThing(depth + 1);
           V::mapSet(ret, std::move(key), std::move(value));
         }
         break;
       default:
         {
           auto key = unserializeInt64();
-          auto value = unserializeThing();
+          auto value = unserializeThing(depth + 1);
           V::mapSet(ret, std::move(key), std::move(value));
         }
     }
@@ -513,14 +513,15 @@ inline typename V::MapType FBUnserializer<V>::unserializeMap() {
 }
 
 template <class V>
-inline typename V::VectorType FBUnserializer<V>::unserializeVector() {
+inline typename V::VectorType
+FBUnserializer<V>::unserializeVector(size_t depth) {
   p_ += CODE_SIZE;
 
   typename V::VectorType ret = V::createVector();
 
   size_t code = nextCode();
   while (code != FB_SERIALIZE_STOP) {
-    V::vectorAppend(ret, unserializeThing());
+    V::vectorAppend(ret, unserializeThing(depth + 1));
     code = nextCode();
   }
   p_ += CODE_SIZE;
@@ -528,7 +529,7 @@ inline typename V::VectorType FBUnserializer<V>::unserializeVector() {
 }
 
 template <class V>
-inline typename V::VectorType FBUnserializer<V>::unserializeList() {
+inline typename V::VectorType FBUnserializer<V>::unserializeList(size_t depth) {
   p_ += CODE_SIZE;
 
   // the list size is written so we can reserve it in the vector
@@ -539,7 +540,7 @@ inline typename V::VectorType FBUnserializer<V>::unserializeList() {
 
   size_t code = nextCode();
   while (code != FB_SERIALIZE_STOP) {
-    V::vectorAppend(ret, unserializeThing());
+    V::vectorAppend(ret, unserializeThing(depth + 1));
     code = nextCode();
   }
   p_ += CODE_SIZE;
@@ -602,7 +603,12 @@ inline folly::StringPiece FBUnserializer<V>::getSerializedMap() {
 }
 
 template <class V>
-inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
+inline typename V::VariantType
+FBUnserializer<V>::unserializeThing(size_t depth) {
+  if (UNLIKELY(depth > 1024)) {
+    throw UnserializeError("depth > 1024");
+  }
+
   size_t code = nextCode();
 
   switch (code) {
@@ -615,7 +621,7 @@ inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
     case FB_SERIALIZE_STRING:
       return V::fromString(unserializeString());
     case FB_SERIALIZE_STRUCT:
-      return V::fromMap(unserializeMap());
+      return V::fromMap(unserializeMap(depth));
     case FB_SERIALIZE_NULL:
       ++p_;
       return V::createNull();
@@ -624,9 +630,9 @@ inline typename V::VariantType FBUnserializer<V>::unserializeThing() {
     case FB_SERIALIZE_BOOLEAN:
       return V::fromBool(unserializeBoolean());
     case FB_SERIALIZE_VECTOR:
-      return V::fromVector(unserializeVector());
+      return V::fromVector(unserializeVector(depth));
     case FB_SERIALIZE_LIST:
-      return V::fromVector(unserializeList());
+      return V::fromVector(unserializeList(depth));
     default:
       throw UnserializeError("Invalid code: " + folly::to<std::string>(code)
                              + " at location " + folly::to<std::string>(p_));

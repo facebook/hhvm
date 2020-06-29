@@ -538,6 +538,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // Unserialize as a dynamic property. If this is the first, we need to
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
+    obj->reserveDynProps(nProp);
     t = obj->makeDynProp(realKey.get());
   } else {
     // We'll check if this doesn't violate the type-hint once we're done

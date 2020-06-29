@@ -578,6 +578,7 @@ void VariableUnserializer::unserializeProp(ObjectData* obj,
     // pre-allocate space in the array to ensure the elements don't move during
     // unserialization.
     SuppressHACFalseyPromoteNotices shacn;
+    obj->reserveDynProps(nProp);
     t = obj->makeDynProp(realKey.get());
   } else {
     // We'll check if this doesn't violate the type-hint once we're done

@@ -34,7 +34,7 @@ function c() {
 function d() {
   $beginning = "foo";
   $end = darray[1 => "bar"];
-  $result = array_replace((array)$beginning, varray[$end]);
+  $result = array_replace(darray[0 => $beginning], varray[$end]);
   var_dump($result);
 }
 

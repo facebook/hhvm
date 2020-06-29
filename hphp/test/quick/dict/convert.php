@@ -50,7 +50,7 @@ function convert_from($d) {
   echo "====================================================\n";
   var_dump($d);
   echo "----------------------------------------------------\n";
-  var_dump((array)$d);
+  var_dump(darray($d));
   var_dump(vec($d));
 
   try {

@@ -6,5 +6,5 @@ class foo
     public $public = 'public';
 }
 <<__EntryPoint>> function main(): void {
-var_export((array) new foo);
+  var_export(HH\object_prop_array(new foo));
 }

@@ -7,10 +7,6 @@ class A {
   public $z = 'abc';
 }
 
-function test_cast($a) {
-  var_dump((array)$a);
-}
-
 function test_iter($a) {
   foreach ($a as $p) {
     echo "$p ";
@@ -47,7 +43,6 @@ function run_test($func) {
   }
 }
 <<__EntryPoint>> function main(): void {
-run_test('test_cast');
 run_test('test_iter');
 run_test('test_obj_prop_array');
 }

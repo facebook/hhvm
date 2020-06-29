@@ -15,8 +15,8 @@ $node = simplexml_load_string(<<<EOF
 EOF
 );
 $node->addChild('test', 'best');
-$nodes = (array)$node;
+$nodes = darray($node);
 var_dump($nodes);
-$arr = darray[$nodes['hello'] => 1];
+$arr = darray[(string)$nodes['hello'] => 1];
 var_dump($arr);
 }

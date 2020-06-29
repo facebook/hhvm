@@ -14,7 +14,6 @@ function stringCast($x) { return (string) $x; }
 function boolCast($x) { return (bool) $x; }
 function doubleCast($x) { return (float)$x; }
 function intCast($x) { return (int) $x; }
-function arrayCast($x) { return (array)$x; }
 function varrayCast($x) { return varray($x); }
 function vecCast($x) { return vec($x); }
 function darrayCast($x) { return darray($x); }
@@ -26,7 +25,6 @@ function test($x): void {
   var_dump(boolCast($x));
   var_dump(doubleCast($x));
   var_dump(intCast($x));
-  var_dump(arrayCast($x));
   var_dump(varrayCast($x));
   var_dump(vecCast($x));
   var_dump(darrayCast($x));

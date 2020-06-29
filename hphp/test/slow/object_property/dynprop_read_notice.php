@@ -25,9 +25,6 @@ function test($thing) {
   $discard = $thing->dynprop['z'] ?? 'w';
   $thing->dynprop = 3; // set prop back to an int
 
-  echo "== cast to array ==\n";
-  $discard = (array)$thing;
-
   echo "== get_object_vars ==\n";
   $discard = get_object_vars($thing);
 

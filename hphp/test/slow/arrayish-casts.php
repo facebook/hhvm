@@ -11,10 +11,6 @@ record B {
 
 function foo() {}
 
-function arrayCast($x) {
-  return (array)$x;
-}
-
 function varrayCast($x) {
   return varray($x);
 }
@@ -50,21 +46,18 @@ function getRec() {
 <<__EntryPoint>>
 function main(): void {
   $tests = vec[
-    () ==> var_dump(arrayCast(getFun())),
     () ==> var_dump(darrayCast(getFun())),
     () ==> var_dump(varrayCast(getFun())),
     () ==> var_dump(dictCast(getFun())),
     () ==> var_dump(vecCast(getFun())),
     () ==> var_dump(keysetCast(getFun())),
 
-    () ==> var_dump(arrayCast(getMeth())),
     () ==> var_dump(darrayCast(getMeth())),
     () ==> var_dump(varrayCast(getMeth())),
     () ==> var_dump(dictCast(getMeth())),
     () ==> var_dump(vecCast(getMeth())),
     () ==> var_dump(keysetCast(getMeth())),
 
-    () ==> var_dump(arrayCast(getRec())),
     () ==> var_dump(darrayCast(getRec())),
     () ==> var_dump(varrayCast(getRec())),
     () ==> var_dump(dictCast(getRec())),

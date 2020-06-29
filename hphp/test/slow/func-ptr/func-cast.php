@@ -26,10 +26,6 @@ function intCast($x) {
     return (int) $x;
 }
 
-function arrayCast($x) {
-  return (array)$x;
-}
-
 function varrayCast($x) {
   return varray($x);
 }
@@ -39,7 +35,6 @@ function test($x): void {
   var_dump(boolCast($x));
   var_dump(doubleCast($x));
   var_dump(intCast($x));
-  var_dump(arrayCast($x));
   try {
     var_dump(varrayCast($x));
   } catch (Exception $e) {

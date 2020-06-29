@@ -88,12 +88,6 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
 string(3) "Foo"
 string(3) "bar"
 array(2) {
@@ -101,116 +95,6 @@ array(2) {
   int(42)
   [1]=>
   int(42)
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
-string(3) "Foo"
-string(3) "bar"
-array(2) {
-  [0]=>
-  int(42)
-  [1]=>
-  int(42)
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
 }
 array(2) {
   [0]=>
@@ -400,6 +284,98 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
+string(3) "Foo"
+string(3) "bar"
+array(2) {
+  [0]=>
+  int(42)
+  [1]=>
+  int(42)
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
+array(2) {
+  [0]=>
+  string(3) "Foo"
+  [1]=>
+  string(3) "bar"
+}
 array(2) {
   [0]=>
   string(3) "Foo"
@@ -504,12 +480,6 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
-}
 string(3) "Foo"
 string(3) "bar"
 array(2) {
@@ -517,12 +487,6 @@ array(2) {
   int(42)
   [1]=>
   int(42)
-}
-array(2) {
-  [0]=>
-  string(3) "Foo"
-  [1]=>
-  string(3) "bar"
 }
 array(2) {
   [0]=>

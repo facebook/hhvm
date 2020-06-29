@@ -7,7 +7,6 @@ function foo($x) {
     $s = 'hello';
     $o = new Foo();
   }
-  var_dump((array)$a, (array)$s, (array)$o);
   var_dump((string)$a, (string)$s, (string)$o);
 }
 

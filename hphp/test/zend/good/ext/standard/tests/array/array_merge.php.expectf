@@ -648,35 +648,17 @@ array(4) {
   }
 }
 
-*** Testing array_merge() with typecasting non-array to array ***
-array(7) {
-  ["a"]=>
-  int(1)
-  ["b"]=>
-  string(6) "string"
-  ["c"]=>
-  NULL
-  ["d"]=>
-  float(-2.344)
-  [0]=>
-  string(5) "type1"
-  [1]=>
-  int(10)
-  [2]=>
-  float(12.34)
-}
-
 *** Testing error conditions ***
-Warning: array_merge() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
+Warning: array_merge() expects at least 1 parameter, 0 given in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 75
 
-Warning: Invalid operand type was used: %s in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 79
+Warning: Invalid operand type was used: %s in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 76
 NULL
 
-Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 80
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 77
 NULL
 
-Notice: Undefined variable: arr4 in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 81
+Notice: Undefined variable: arr4 in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
 
-Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 81
+Warning: Invalid operand type was used: array_merge expects array(s) in %s/test/zend/good/ext/standard/tests/array/array_merge.php on line 78
 NULL
 Done

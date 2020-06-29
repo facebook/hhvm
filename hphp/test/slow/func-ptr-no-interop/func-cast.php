@@ -26,10 +26,6 @@ function intCast($x) {
     return (int) $x;
 }
 
-function arrayCast($x) {
-  return (array)$x;
-}
-
 function varrayCast($x) {
   return varray($x);
 }
@@ -47,7 +43,6 @@ function test($x): void {
   W(() ==> boolCast($x));
   W(() ==> doubleCast($x));
   W(() ==> intCast($x));
-  W(() ==> arrayCast($x));
   W(() ==> varrayCast($x));
 }
 

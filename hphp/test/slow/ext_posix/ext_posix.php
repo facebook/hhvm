@@ -20,21 +20,21 @@ VERIFY(strlen(posix_getcwd()));
 
 $ret = posix_getgrgid(posix_getgid());
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 
 $bynam = posix_getgrnam($ret['name']);
 VS($ret, $bynam);
 
 $ret = posix_getgrnam("wheel");
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 
 $bygid = posix_getgrgid($ret['gid']);
 VS($ret, $bygid);
 
 // $ret = posix_getgroups();
 // VERIFY($ret != false);
-// VERIFY(count((array)$ret) != 0);
+// VERIFY(count(darray($ret)) != 0);
 
 VERIFY(posix_getpgid(0));
 VERIFY(posix_getpgrp());
@@ -43,18 +43,18 @@ VERIFY(posix_getppid());
 
 $ret = posix_getpwnam("root");
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 VS(posix_getpwnam(""), false);
 VS(posix_getpwnam('-1'), false);
 
 $ret = posix_getpwuid(0);
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 VS(posix_getpwuid(-1), false);
 
 $ret = posix_getrlimit();
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 
 VERIFY(posix_getsid(posix_getpid()) !== false);
 
@@ -69,9 +69,9 @@ VERIFY(strlen(posix_strerror(1 /* EPERM */)));
 
 $ret = posix_times();
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 
 $ret = posix_uname();
 VERIFY($ret != false);
-VERIFY(count((array)$ret) != 0);
+VERIFY(count(darray($ret)) != 0);
 }

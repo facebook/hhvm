@@ -5,7 +5,6 @@ function foo($x) {
   var_dump($s);
   $y = unserialize($s);
   var_dump($y);
-  var_dump((array)$y);
   if (function_exists('apc_store')) {
     apc_store('foo', $y);
     $z = __hhvm_intrinsics\apc_fetch_no_check('foo');

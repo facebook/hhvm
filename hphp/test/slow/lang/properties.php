@@ -3,7 +3,7 @@
 function obj_dump($o) {
   var_dump($o);
   print "Properties:\n";
-  $a = (array)$o;
+  $a = get_object_vars($o);
   $i = 0;
   foreach ($a as $k => $v) {
     print "  \"";

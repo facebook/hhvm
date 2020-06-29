@@ -5,7 +5,7 @@ function f($x) {
  }
 function foo($a) {
   yield 1;
-  foreach ((array)f($a) as $x) {
+  foreach (darray(f($a) ) as $x) {
     var_dump('i:'.$x);
   }
 }

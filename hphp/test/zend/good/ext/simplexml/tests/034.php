@@ -10,6 +10,4 @@ $string = '<?xml version="1.0"?>
 $foo = simplexml_load_string($string);
 $p = $foo->bar->p;
 echo count($p);
-$p = (array)$foo->bar->p;
-echo count($p);
 }

@@ -50,7 +50,7 @@ function convert_from($ks) {
   echo "====================================================\n";
   var_dump($ks);
   echo "----------------------------------------------------\n";
-  var_dump((array)$ks);
+  var_dump(darray($ks));
   var_dump(vec($ks));
   var_dump(dict($ks));
   var_dump((bool)$ks);

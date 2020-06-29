@@ -6,7 +6,7 @@ function bar($x) {
 }
 
 function foo($x) {
-  $x = (array)$x;
+  $x = varray[$x];
   array_map(fun("foo"), $x);
   bar($x);
 }

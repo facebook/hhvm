@@ -2,17 +2,9 @@ string(3) "foo"
 bool(true)
 float(0)
 int(0)
-array(1) {
-  [0]=>
-  string(3) "foo"
-}
 Exception: String to varray conversion
 Exception: Cannot convert func to string
 bool(true)
 float(0)
 Exception: Cannot convert func to int
-array(1) {
-  [0]=>
-  function(foo)
-}
 Exception: Func to varray conversion

@@ -91,7 +91,6 @@ function test_static() {
   var_dump($io1, $io2, $io3, $io4);
 
   $foo = class_meth(Foo::class, 'bar');
-  var_dump((array)$foo);
   var_dump(varray($foo));
 
   var_dump(array_map($x ==> var_dump($x) ?? 42, $foo));
@@ -117,7 +116,6 @@ function test_dynamic() {
   var_dump($io1, $io2, $io3, $io4);
 
   $foo = LV(class_meth(Foo::class, 'bar'));
-  var_dump((array)$foo);
   var_dump(varray($foo));
 
   var_dump(array_map($x ==> var_dump($x) ?? 42, $foo));

@@ -1,11 +1,11 @@
 <?hh
 function dump($x) {
   var_dump(get_class($x));
-  var_dump((array)$x);
+  var_dump(darray($x));
 }
 function dump_unordered($x) {
   var_dump(get_class($x));
-  $arr = (array)$x;
+  $arr = darray($x);
   ksort(inout $arr, SORT_STRING);
   var_dump($arr);
   sort(inout $arr, SORT_STRING);

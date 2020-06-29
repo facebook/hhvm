@@ -2,7 +2,3 @@ array(1) {
   ["a"]=>
   string(1) "b"
 }
-array(1) {
-  ["p"]=>
-  string(1) "q"
-}

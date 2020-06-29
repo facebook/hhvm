@@ -7,7 +7,7 @@ function main() {
   var_dump((int) $a->unknown);
   var_dump((string) $a->unknown);
   var_dump((float)$a->unknown);
-  var_dump((array) $a->unknown);
+  var_dump(darray($a->unknown));
   var_dump($a->unknown == null);
   var_dump(null == $a->unknown);
 }

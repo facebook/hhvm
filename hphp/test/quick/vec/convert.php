@@ -50,7 +50,7 @@ function convert_from($v) {
   echo "====================================================\n";
   var_dump($v);
   echo "----------------------------------------------------\n";
-  var_dump((array)$v);
+  var_dump(darray($v));
   var_dump(dict($v));
 
   try {

@@ -50,8 +50,6 @@ function test_const_key_int($a) {
 }
 
 function test_casting($a) {
-  echo "======================= array cast =================\n";
-  var_dump((array)$a);
   echo "======================= dict cast ================\n";
   var_dump(dict($a));
   echo "======================= darray cast ================\n";
@@ -84,9 +82,7 @@ function run_tests() {
   test_casting(keyset['1', '2', '3']);
 
   echo "======================= literals ===================\n";
-  var_dump((array)dict['1' => true, '2' => false]);
   var_dump(darray(dict['1' => true, '2' => false]));
-  var_dump((array)keyset['1', '2', '3']);
   var_dump(darray(keyset['1', '2', '3']));
 }
 

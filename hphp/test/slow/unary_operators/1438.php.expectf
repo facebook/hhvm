@@ -4,18 +4,6 @@ Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 1
 Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 10
 
 Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 10
-array(0) {
-}
-array(0) {
-}
-array(0) {
-}
-
-Notice: Undefined variable: a in %s/test/slow/unary_operators/1438.php on line 11
-
-Notice: Undefined variable: s in %s/test/slow/unary_operators/1438.php on line 11
-
-Notice: Undefined variable: o in %s/test/slow/unary_operators/1438.php on line 11
 string(0) ""
 string(0) ""
 string(0) ""

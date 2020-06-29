@@ -1,6 +1,9 @@
 array(5) {
   ["hello"]=>
-  string(5) "world"
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(5) "world"
+  }
   ["how"]=>
   object(SimpleXMLElement) (1) {
     ["are"]=>
@@ -13,7 +16,10 @@ array(5) {
   object(SimpleXMLElement) (0) {
   }
   ["test"]=>
-  string(4) "best"
+  object(SimpleXMLElement) (1) {
+    [0]=>
+    string(4) "best"
+  }
 }
 array(1) {
   ["world"]=>

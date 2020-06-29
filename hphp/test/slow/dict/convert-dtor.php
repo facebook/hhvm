@@ -32,9 +32,9 @@ function main() {
   echo "====================================================\n";
 
   $i += 3;
-  var_dump((array)dict[$i => new Dtor($i),
+  var_dump(darray(dict[$i => new Dtor($i),
                        $i+1 => new Dtor($i+1),
-                       $i+2 => new Dtor($i+2)]);
+                       $i+2 => new Dtor($i+2)]));
   echo "====================================================\n";
 
   $i += 3;

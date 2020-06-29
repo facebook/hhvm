@@ -17,7 +17,7 @@ abstract final class ServerUtilServerTests {
   public static function error_log_file() {
     return fopen(ServerUtilServerTests::$LOG_ROOT.'_test'.ServerUtilServerTests::test_run_id().".log", 'w');
   }
-  
+
   public static function getRequest() {
     if (self::$request !== null) {
       return self::$request;
@@ -202,7 +202,10 @@ function checkServerId($serverPort, $expectedIds) {
   $r = request($host, $serverPort, "hello.php");
   $matches = null;
   if (preg_match_with_matches('/Hello, World!(.*+)/', $r ?? '', inout $matches)) {
-    foreach ((array)$expectedIds as $id) {
+    if (!is_array($expectedIds)) {
+      $expectedIds = varray[$expectedIds];
+    }
+    foreach ($expectedIds as $id) {
       if ($matches[1] == $id) return true;
     }
     tlog('a server for a different test responded');

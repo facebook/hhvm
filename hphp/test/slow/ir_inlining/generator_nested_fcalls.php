@@ -33,7 +33,7 @@ function foo() {
   // doesn't work.  This test shouldn't inline right now (if it does
   // it crashes).
   SecurityLogger(12, 12)
-    ->setResource((array)unique_function())
+    ->setResource(darray(unique_function()))
     ->log();
   yield 12;
 }

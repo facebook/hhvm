@@ -7,11 +7,11 @@ function reverse($input) {
   echo "reverse discard keys: ";
   $reverse_discard = array_reverse($input);
   var_dump($reverse_discard);
-  var_dump(array_reverse((array) $input) === $reverse_discard);
+  var_dump(array_reverse(darray($input)) === $reverse_discard);
   echo "reverse preserve keys: ";
   $reverse_preserve = array_reverse($input, true);
   var_dump($reverse_preserve);
-  var_dump(array_reverse((array) $input, true) === $reverse_preserve);
+  var_dump(array_reverse(darray($input), true) === $reverse_preserve);
 }
 
 function main() {

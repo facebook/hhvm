@@ -12,7 +12,6 @@ class b2 extends b {
 function main_1543() {
 $x = new b2;
 $x->foo = 100;
-var_dump((array)$x);
 var_dump(serialize($x));
 var_dump($x);
 }

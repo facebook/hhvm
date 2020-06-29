@@ -36,7 +36,7 @@ function map_for_key_conversion($collection) {
   // serialization and not var_dump preserves whether keys are ints or strings
   var_dump($collection);
   $arr = array_map($x ==> $x, $collection);
-  $first_converted = array_map($x ==> $x, (array) $collection);
+  $first_converted = array_map($x ==> $x, darray($collection));
   var_dump($arr === $first_converted);
   echo serialize($arr), "\n";
   var_dump(count($arr) === count($collection));

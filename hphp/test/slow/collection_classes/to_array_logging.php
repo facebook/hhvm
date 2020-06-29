@@ -2,7 +2,7 @@
 
 function test($input) {
   $_ = $input->toArray();
-  $_ = (array)$input;
+  $_ = darray($input);
 }
 
 <<__EntryPoint>>

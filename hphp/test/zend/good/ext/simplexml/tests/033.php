@@ -24,8 +24,6 @@ var_dump((float)$foo);
 var_dump((float)$people);
 var_dump((string)$foo);
 var_dump((string)$people);
-var_dump((array)$foo);
-var_dump((array)$people);
 
 echo "===DONE===\n";
 }

@@ -20,11 +20,7 @@ object(C) (7) {
   int(0)
 }
 Properties:
-  "\0C\0np" => C::C
-  "\0*\0nq" => C::C
   "nr" => C::C
-  "\0C\0p" => 1
-  "\0*\0q" => 2
   "r" => 3
   "s" => 0
 object(C) (7) {
@@ -44,11 +40,7 @@ object(C) (7) {
   int(2)
 }
 Properties:
-  "\0C\0np" => C::Ccc
-  "\0*\0nq" => C::Ccc
   "nr" => C::Ccc
-  "\0C\0p" => 3
-  "\0*\0q" => 4
   "r" => 5
   "s" => 2
 === D ===
@@ -76,14 +68,8 @@ object(D) (9) {
   int(2)
 }
 Properties:
-  "\0D\0np" => D::Ddd
-  "\0*\0nq" => D::Dcdcd
   "nr" => D::Dcdcd
-  "\0D\0p" => 13
-  "\0*\0q" => 26
   "r" => 37
-  "\0C\0np" => C::Ccc
-  "\0C\0p" => 3
   "s" => 2
 === E ===
 E::E
@@ -110,14 +96,8 @@ object(E) (9) {
   int(2)
 }
 Properties:
-  "\0*\0np" => E::Eee
-  "\0*\0nq" => E::Ecece
   "nr" => E::Ecece
-  "\0*\0p" => 13
-  "\0*\0q" => 26
   "r" => 37
-  "\0C\0np" => C::Ccc
-  "\0C\0p" => 3
   "s" => 2
 === F ===
 F::F
@@ -154,8 +134,6 @@ Properties:
   "p" => 13
   "q" => 26
   "r" => 37
-  "\0C\0np" => C::Ccc
-  "\0C\0p" => 3
   "s" => 2
 === G ===
 G::G
@@ -196,10 +174,6 @@ Properties:
   "p" => 113
   "q" => 28
   "r" => 39
-  "\0D\0np" => D::Ddd
-  "\0D\0p" => 13
-  "\0C\0np" => C::Ccc
-  "\0C\0p" => 3
   "s" => 2
 === H ===
 H::H
@@ -229,14 +203,8 @@ object(D) (9) {
   int(1)
 }
 Properties:
-  "\0D\0np" => D::Dd
-  "\0*\0nq" => D::Dcd
   "nr" => D::Dcd
-  "\0D\0p" => 12
-  "\0*\0q" => 24
   "r" => 36
-  "\0C\0np" => C::Cc
-  "\0C\0p" => 2
   "s" => 1
 object(H) (6) {
   ["np"]=>

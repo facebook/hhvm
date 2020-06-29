@@ -2,7 +2,7 @@
 // Copyright 2004-present Facebook. All Rights Reserved.
 
 function convert($d) {
-  var_dump((array)$d);
+  var_dump(darray($d));
 }
 
 <<__EntryPoint>> function main(): void {

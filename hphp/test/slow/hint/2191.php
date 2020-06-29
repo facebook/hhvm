@@ -8,7 +8,7 @@ $y = (string) $x;
  return $y;
  }
 function f2(array $x = null) {
-$y = (array) $x;
+ $y = $x !== null ? darray($x) : darray[];
  var_dump($y);
  return $y;
  }

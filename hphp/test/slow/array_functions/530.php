@@ -5,10 +5,7 @@ class A {
 
 <<__EntryPoint>>
 function main_530() {
-$o = new A;
-$f = '10';
-$o->$f = 100;
-$a = (array)$o;
+$a = darray['10' => 100];
 $v = 1;
 $a[10] = $v;
 $a[11] = varray[$v];

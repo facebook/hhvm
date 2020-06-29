@@ -8,7 +8,7 @@ function f($x) {
   }
 }
 function g($x) {
-  $x = (array) $x;
+  $x = darray($x);
   block();
   var_dump($x[0]);
 }

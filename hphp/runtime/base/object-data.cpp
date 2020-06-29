@@ -322,6 +322,11 @@ Array& ObjectData::reserveProperties(int numDynamic /* = 2 */) {
     return dynPropArray();
   }
 
+  auto const allocsz = MixedArray::computeAllocBytesFromMaxElms(numDynamic);
+  if (UNLIKELY(allocsz > kMaxSmallSize && tl_heap->preAllocOOM(allocsz))) {
+    check_non_safepoint_surprise();
+  }
+
   return setDynPropArray(
       Array::attach(MixedArray::MakeReserveMixed(numDynamic))
   );

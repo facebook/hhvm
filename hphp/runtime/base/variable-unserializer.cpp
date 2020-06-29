@@ -485,7 +485,7 @@ bool VariableUnserializer::matchString(folly::StringPiece str) {
   const char* p = m_buf;
   assertx(p <= m_end);
   int total = 0;
-  if (*p == 'S') {
+  if (*p == 'S' && type() == VariableUnserializer::Type::APCSerialize) {
     total = 2 + 8 + 1;
     if (p + total > m_end) return false;
     p++;

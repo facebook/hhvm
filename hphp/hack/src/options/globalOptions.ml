@@ -103,6 +103,7 @@ type t = {
   po_disable_array: bool;
   tco_enable_systemlib_annotations: bool;
   tco_pu_enabled_paths: bool * Relative_path.t list;
+  tco_widen_is_array: bool;
 }
 [@@deriving eq, show]
 
@@ -264,6 +265,7 @@ let default =
     po_disable_array = false;
     tco_enable_systemlib_annotations = false;
     tco_pu_enabled_paths = (false, []);
+    tco_widen_is_array = false;
   }
 
 let make
@@ -380,6 +382,7 @@ let make
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
     ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
+    ?(tco_widen_is_array = default.tco_widen_is_array)
     () =
   {
     tco_experimental_features;
@@ -477,6 +480,7 @@ let make
     po_disable_array;
     tco_enable_systemlib_annotations;
     tco_pu_enabled_paths;
+    tco_widen_is_array;
   }
 
 let tco_experimental_feature_enabled t s =
@@ -687,3 +691,5 @@ let po_disable_array t = t.po_disable_array
 let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
 
 let tco_pu_enabled_paths t = t.tco_pu_enabled_paths
+
+let tco_widen_is_array t = t.tco_widen_is_array

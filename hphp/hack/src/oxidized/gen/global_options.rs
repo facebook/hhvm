@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c7ef7d9f907c893a71e90fa1cda0a16c>>
+// @generated SignedSource<<3f3f4caef01d871c7da74b167e8fe3ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -122,4 +122,5 @@ pub struct GlobalOptions {
     pub po_disable_array: bool,
     pub tco_enable_systemlib_annotations: bool,
     pub tco_pu_enabled_paths: (bool, Vec<relative_path::RelativePath>),
+    pub tco_widen_is_array: bool,
 }

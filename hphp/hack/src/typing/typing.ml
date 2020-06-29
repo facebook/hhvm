@@ -6659,10 +6659,17 @@ and condition
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
     safely_refine_is_array env `AnyArray p f lv
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
-    when tparamet
-         && ( String.equal f SN.StdlibFunctions.is_array
-            || String.equal f SN.StdlibFunctions.is_php_array ) ->
+    when tparamet && String.equal f SN.StdlibFunctions.is_php_array ->
     safely_refine_is_array env `PHPArray p f lv
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+    when tparamet && String.equal f SN.StdlibFunctions.is_array ->
+    let kind =
+      if TCO.widen_is_array (Env.get_tcopt env) then
+        `AnyArray
+      else
+        `PHPArray
+    in
+    safely_refine_is_array env kind p f lv
   | Aast.Call
       ( Cnormal,
         (_, Aast.Class_const ((_, Aast.CI (_, class_name)), (_, method_name))),
@@ -6936,6 +6943,16 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         in
         MakeType.varray_or_darray r tk tv
       in
+      let any_array_ty =
+        MakeType.union
+          r
+          [
+            MakeType.dict r tarrkey tfresh;
+            MakeType.vec r tfresh;
+            MakeType.keyset r tarrkey;
+            array_ty;
+          ]
+      in
       (* This is the refined type of e inside the branch *)
       let refined_ty =
         match ty with
@@ -6943,15 +6960,7 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         | `HackVec -> MakeType.vec r tfresh
         | `HackKeyset -> MakeType.keyset r tarrkey
         | `PHPArray -> array_ty
-        | `AnyArray ->
-          MakeType.union
-            r
-            [
-              MakeType.dict r tarrkey tfresh;
-              MakeType.vec r tfresh;
-              MakeType.keyset r tarrkey;
-              array_ty;
-            ]
+        | `AnyArray -> any_array_ty
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>

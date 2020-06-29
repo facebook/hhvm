@@ -257,6 +257,10 @@ type t = {
    * Paths are relative to the path of .hhconfig
    *)
   tco_pu_enabled_paths: bool * Relative_path.t list;
+  (* Companion option to the runtime's `Eval.WidenIsArray`: changes `is_array`
+   * to use the same inference rules as `is_any_array`.
+   *)
+  tco_widen_is_array: bool;
 }
 [@@deriving eq, show]
 
@@ -355,6 +359,7 @@ val make :
   ?po_disable_array:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
+  ?tco_widen_is_array:bool ->
   unit ->
   t
 
@@ -573,3 +578,5 @@ val po_disable_array : t -> bool
 val tco_enable_systemlib_annotations : t -> bool
 
 val tco_pu_enabled_paths : t -> bool * Relative_path.t list
+
+val tco_widen_is_array : t -> bool

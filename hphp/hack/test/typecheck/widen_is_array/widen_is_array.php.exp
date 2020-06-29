@@ -1,0 +1,9 @@
+File "widen_is_array.php", line 7, characters 3-15:
+  (dict<Tk#1, T#1> | keyset<Tk#1> | vec<T#1> | varray_or_darray<arraykey, T#1>)
+  where Tk#1 as arraykey
+File "widen_is_array.php", line 10, characters 13-16:
+Invalid argument (Typing[4110])
+File "widen_is_array.php", line 14, characters 20-29:
+Expected vec<mixed>
+File "widen_is_array.php", line 4, characters 8-15:
+But got dict<Tk#1, T#1> from the argument to this \is_array test

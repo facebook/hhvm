@@ -1205,7 +1205,7 @@ bool HHVM_METHOD(PDO, setattribute, int64_t attribute,
   return false;
 }
 
-static Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
+Variant HHVM_METHOD(PDO, getattribute, int64_t attribute) {
   auto data = Native::data<PDOData>(this_);
 
   assertx(data->m_dbh->conn()->driver);
@@ -1355,8 +1355,7 @@ static Array HHVM_METHOD(PDO, errorinfo) {
   return ret;
 }
 
-static Variant HHVM_METHOD(PDO, query, const String& sql,
-                           const Array& _argv) {
+Variant HHVM_METHOD(PDO, query, const String& sql, const Array& _argv) {
 
   auto data = Native::data<PDOData>(this_);
   SYNC_VM_REGS_SCOPED();
@@ -2000,9 +1999,9 @@ static bool do_fetch(sp_PDOStatement stmt,
 }
 
 
-static bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
-                        const Variant& param,
-                        int64_t type /* = PDO_PARAM_STR */) {
+bool HHVM_METHOD(PDOStatement, bindvalue, const Variant& paramno,
+                 const Variant& param,
+                 int64_t type /* = PDO_PARAM_STR */) {
   auto data = Native::data<PDOStatementData>(this_);
   if (data->m_stmt == nullptr) {
     return false;

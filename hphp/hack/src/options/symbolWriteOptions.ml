@@ -14,4 +14,6 @@ let hhi_path = GlobalOptions.symbol_write_hhi_path
 
 let ignore_paths = GlobalOptions.symbol_write_ignore_paths
 
+let index_paths = GlobalOptions.symbol_write_index_paths
+
 let default = GlobalOptions.default

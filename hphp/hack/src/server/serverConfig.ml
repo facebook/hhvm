@@ -402,6 +402,8 @@ let load ~silent config_filename options =
       ?symbol_write_hhi_path:(string_opt "symbol_write_hhi_path" config)
       ?symbol_write_ignore_paths:
         (string_list_opt "symbol_write_ignore_paths" config)
+      ?symbol_write_index_paths:
+        (string_list_opt "symbol_write_index_paths" config)
       ?po_disallow_func_ptrs_in_constants:
         (bool_opt "disallow_func_ptrs_in_constants" config)
       ?tco_error_php_lambdas:(bool_opt "error_php_lambdas" config)

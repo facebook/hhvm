@@ -24,6 +24,7 @@ val solve_all_unsolved_tyvars : env -> Errors.typing_error_callback -> env
 
 val expand_type_and_solve :
   env ->
+  ?freshen:bool ->
   description_of_expected:string ->
   Pos.t ->
   locl_ty ->

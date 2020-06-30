@@ -557,13 +557,14 @@ let unsolved_invariant_tyvars_under_union_and_intersection env ty =
  * will be solved by
  *    #1 := vec<#2>  where C <: #2
  *)
-let expand_type_and_solve env ~description_of_expected p ty on_error =
+let expand_type_and_solve
+    env ?(freshen = true) ~description_of_expected p ty on_error =
   let (env, unsolved_invariant_tyvars) =
     unsolved_invariant_tyvars_under_union_and_intersection env ty
   in
   let (env', ety) =
     Typing_utils.simplify_unions env ty ~on_tyvar:(fun env r v ->
-        let env = always_solve_tyvar_down ~freshen:true env r v on_error in
+        let env = always_solve_tyvar_down ~freshen env r v on_error in
         Env.expand_var env r v)
   in
   let (env', ety) = Env.expand_type env' ety in

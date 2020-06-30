@@ -3,4 +3,4 @@ Invalid return type (Typing[4110])
 File "shape_remove_key3.php", line 5, characters 18-23:
 Expected string
 File "shape_remove_key3.php", line 7, characters 3-34:
-But got shape('y' => [unresolved])
+But got shape('y' => string)

@@ -61,8 +61,14 @@ let refine_shape field_name pos env shape =
 (*****************************************************************************)
 
 let rec shrink_shape pos field_name env shape =
+  (* Make sure we have a shape type in our hands.
+   * Note that we don't want to freshen any types inside the shape
+   * e.g. turn shape('a' => C) into shape('a' => #1) with a subtype constraint on #1,
+   * because we know that the types of the fields don't change
+   *)
   let (env, shape) =
     Typing_solver.expand_type_and_solve
+      ~freshen:false
       ~description_of_expected:"a shape"
       env
       pos

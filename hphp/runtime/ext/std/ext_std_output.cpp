@@ -198,7 +198,7 @@ Variant HHVM_FUNCTION(hphp_get_timers, bool get_as_float /* = true */) {
   const int64_t &nsleep_time_s = transport->getnSleepTimeS();
   const int32_t &nsleep_time_n = transport->getnSleepTimeN();
 
-  ArrayInit ret(7, ArrayInit::Map{});
+  DArrayInit ret(7);
   if (get_as_float) {
     ret.set(s_queue,        ts_float(tsQueue));
     ret.set(s_process_wall, ts_float(tsWall));
@@ -230,7 +230,7 @@ int64_t HHVM_FUNCTION(hphp_instruction_counter) {
 }
 
 Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
-  Array ret;
+  Array ret = Array::CreateDArray();
 
   HardwareCounter::GetPerfEvents(
     [] (const std::string& key, int64_t value, void* data) {
@@ -241,7 +241,7 @@ Variant HHVM_FUNCTION(hphp_get_hardware_counters) {
   );
   jit::getPerfCounters(ret);
 
-  return ret;
+  return ret.empty() ? init_null() : ret;
 }
 
 bool HHVM_FUNCTION(hphp_set_hardware_events,

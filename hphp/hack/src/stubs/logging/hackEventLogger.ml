@@ -238,6 +238,10 @@ let indexing_end _ = ()
 
 let parsing_end _ _ ~parsed_count:_ = ()
 
+let parsing_end_for_init _ _ ~parsed_count:_ = ()
+
+let parsing_end_for_typecheck _ _ ~parsed_count:_ = ()
+
 let updating_deps_end _ = ()
 
 let naming_end _ _ = ()

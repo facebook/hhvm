@@ -1101,7 +1101,7 @@ functor
         do_parsing genv env ~files_to_parse ~stop_at_errors
       in
       let hs = SharedMem.heap_size () in
-      HackEventLogger.parsing_end t hs ~parsed_count:reparse_count;
+      HackEventLogger.parsing_end_for_typecheck t hs ~parsed_count:reparse_count;
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Heap size: %d" hs;
 

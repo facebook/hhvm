@@ -5,7 +5,7 @@ async function f(
     list($a, $b) = await $x;
     yield 3; },
   $y = () ==> {
-    yield from 3; },
+    yield 3; },
   $z = () ==> {
     yield break; },
 

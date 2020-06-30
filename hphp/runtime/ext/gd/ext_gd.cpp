@@ -2801,11 +2801,16 @@ static Variant php_imagettftext_common(int mode, int extended,
   }
 
   /* return array with the text's bounding box */
-  Array ret = Array::CreateDArray();
-  for (int i = 0; i < 8; i++) {
-    ret.set(i, brect[i]);
-  }
-  return ret;
+  return make_varray(
+    brect[0],
+    brect[1],
+    brect[2],
+    brect[3],
+    brect[4],
+    brect[5],
+    brect[6],
+    brect[7]
+  );
 }
 #endif  /* ENABLE_GD_TTF */
 

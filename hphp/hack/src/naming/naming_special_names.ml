@@ -482,6 +482,10 @@ module StdlibFunctions = struct
   let is_php_array = "\\HH\\is_php_array"
 
   let is_any_array = "\\HH\\is_any_array"
+
+  let is_dict_or_darray = "\\HH\\is_dict_or_darray"
+
+  let is_vec_or_varray = "\\HH\\is_vec_or_varray"
 end
 
 module Typehints = struct

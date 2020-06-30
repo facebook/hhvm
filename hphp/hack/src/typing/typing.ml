@@ -6656,6 +6656,12 @@ and condition
     in
     env
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+    when tparamet && String.equal f SN.StdlibFunctions.is_dict_or_darray ->
+    safely_refine_is_array env `HackDictOrDArray p f lv
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
+    when tparamet && String.equal f SN.StdlibFunctions.is_vec_or_varray ->
+    safely_refine_is_array env `HackVecOrVArray p f lv
+  | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
     when tparamet && String.equal f SN.StdlibFunctions.is_any_array ->
     safely_refine_is_array env `AnyArray p f lv
   | Aast.Call (Cnormal, ((p, _), Aast.Id (_, f)), _, [lv], None)
@@ -6961,6 +6967,12 @@ and safely_refine_is_array env ty p pred_name arg_expr =
         | `HackKeyset -> MakeType.keyset r tarrkey
         | `PHPArray -> array_ty
         | `AnyArray -> any_array_ty
+        | `HackDictOrDArray ->
+          MakeType.union
+            r
+            [MakeType.dict r tarrkey tfresh; MakeType.darray r tarrkey tfresh]
+        | `HackVecOrVArray ->
+          MakeType.union r [MakeType.vec r tfresh; MakeType.varray r tfresh]
       in
       (* Add constraints on generic parameters that must
        * hold for refined_ty <:arg_ty. For example, if arg_ty is Traversable<T>

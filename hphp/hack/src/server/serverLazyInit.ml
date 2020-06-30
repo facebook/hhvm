@@ -715,12 +715,18 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
         | None -> acc
         | Some _ -> path :: acc)
   in
-  (* ensuring we are writing to fresh files *)
-  let dir_exists = (try Sys.is_directory out_dir with _ -> false) in
-  if dir_exists then
-    failwith "JSON Write Directory Exists"
-  else
-    Sys_utils.mkdir_p out_dir;
+  (* Ensure we are writing to fresh files *)
+  let is_invalid =
+    try
+      if not (Sys.is_directory out_dir) then
+        true
+      else
+        Array.length (Sys.readdir out_dir) > 0
+    with _ ->
+      Sys_utils.mkdir_p out_dir;
+      false
+  in
+  if is_invalid then failwith "JSON write directory is invalid or non-empty";
 
   Hh_logger.log "Writing JSON to: %s" out_dir;
 

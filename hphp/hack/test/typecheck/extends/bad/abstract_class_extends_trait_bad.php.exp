@@ -1,0 +1,4 @@
+File "abstract_class_extends_trait_bad.php", line 13, characters 16-16:
+an abstract class cannot extend a trait (Typing[4115])
+File "abstract_class_extends_trait_bad.php", line 13, characters 26-26:
+This is a trait

@@ -1,0 +1,4 @@
+File "class_extends_interface_bad.php", line 13, characters 7-7:
+a class cannot extend an interface (Typing[4115])
+File "class_extends_interface_bad.php", line 13, characters 17-17:
+This is an interface

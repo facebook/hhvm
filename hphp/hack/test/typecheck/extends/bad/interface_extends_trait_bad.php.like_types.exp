@@ -1,0 +1,4 @@
+File "interface_extends_trait_bad.php", line 13, characters 11-11:
+an interface cannot extend a trait (Typing[4115])
+File "interface_extends_trait_bad.php", line 13, characters 21-21:
+This is a trait

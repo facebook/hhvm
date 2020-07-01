@@ -1109,8 +1109,7 @@ private:
 private:
   friend struct PublicSPropMutations;
 
-  template<class FuncRange>
-  res::Func resolve_func_helper(const FuncRange&, SString) const;
+  res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
   bool could_be_related(const php::Class*,
                         const php::Class*) const;

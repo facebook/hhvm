@@ -164,23 +164,6 @@ template<class T> using ISStringToOneFastT =
  */
 template<class T> using ISStringToOne = ISStringToOneT<T*>;
 
-template<class MultiMap>
-folly::Range<typename MultiMap::const_iterator>
-find_range(const MultiMap& map, typename MultiMap::key_type key) {
-  auto const pair = map.equal_range(key);
-  return folly::range(pair.first, pair.second);
-}
-
-// Like find_range, but copy them into a temporary buffer instead of
-// returning iterators, so you can still mutate the underlying
-// multimap.
-template<class MultiMap>
-std::vector<typename MultiMap::value_type>
-copy_range(const MultiMap& map, typename MultiMap::key_type key) {
-  auto range = find_range(map, key);
-  return std::vector<typename MultiMap::value_type>(begin(range), end(range));
-}
-
 //////////////////////////////////////////////////////////////////////
 
 Dep operator|(Dep a, Dep b) {
@@ -1130,13 +1113,10 @@ struct Index::IndexData {
   > classExtraMethodMap;
 
   /*
-   * Map from each class name to ClassInfo objects for all
-   * not-known-to-be-impossible resolutions of the class at runtime.
+   * Map from each class name to ClassInfo objects if one exists.
    *
-   * If the class is unique, there will only be one resolution.
-   * Otherwise there will be one for each possible path through the
-   * inheritance hierarchy, potentially excluding cases that we know
-   * would definitely fatal when defined.
+   * It may not exists if we would fatal when defining the class. That could
+   * happen for if the inheritance is bad or __Sealed or other things.
    */
   ISStringToOneT<ClassInfo*> classInfo;
 
@@ -1151,13 +1131,9 @@ struct Index::IndexData {
   std::vector<std::unique_ptr<ClassInfo>> allClassInfos;
 
   /*
-   * Map from each record name to RecordInfo objects for all
-   * not-known-to-be-impossible resolutions of the record at runtime.
+   * Map from each record name to RecordInfo objects if one exists.
    *
-   * If the record is unique, there will only be one resolution.
-   * Otherwise there will be one for each possible path through the
-   * inheritance hierarchy, potentially excluding cases that we know
-   * would definitely fatal when defined.
+   * It may not exists if we would fatal when defining the record.
    */
   ISStringToOneT<RecordInfo*> recordInfo;
 
@@ -2109,15 +2085,13 @@ struct NamingEnv {
   NamingEnv(php::Program* program, IndexData& index, TypeInfoData<T>& tid) :
       program{program}, index{index}, tid{tid} {}
 
-
-
   php::Program*                              program;
   IndexData&                                 index;
   TypeInfoData<T>&                           tid;
-  std::unordered_multimap<
+  std::unordered_map<
     const T*,
     TypeInfo<T>*,
-    pointer_hash<T>>                          resolved;
+    pointer_hash<T>>                         resolved;
 };
 
 using ClassNamingEnv = NamingEnv<php::Class>;
@@ -2634,8 +2608,8 @@ void preresolve(NamingEnv<T>& env, const T* type) {
   ITRACE(3, "preresolve: {}:{} ({} resolutions)\n",
          type->name, (void*)type, env.resolved.count(type));
 
-  auto const range = find_range(env.resolved, type);
-  if (begin(range) != end(range)) {
+  auto const it = env.resolved.find(type);
+  if (it != end(env.resolved)) {
     auto const& users = env.tid.users[type->name];
     for (auto const tu : users) {
       auto const it = env.tid.depCounts.find(tu);
@@ -2653,9 +2627,7 @@ void preresolve(NamingEnv<T>& env, const T* type) {
         ITRACE(6, "  depcount: {}:{} = {}\n", tu->name, (void*)tu, depCount);
       }
     }
-    if (std::next(begin(range)) == end(range)) {
-      PhpTypeHelper<T>::try_flatten_traits(env, type, begin(range)->second);
-    }
+    PhpTypeHelper<T>::try_flatten_traits(env, type, it->second);
   }
 }
 
@@ -3331,20 +3303,6 @@ void check_invariants(const ClassInfo* cinfo) {
 void check_invariants(IndexData& data) {
   if (!debug) return;
 
-  // Every AttrUnique non-trait class has a unique ClassInfo object,
-  // or no ClassInfo object in the case that instantiating it would've
-  // fataled.
-  for (auto& kv : data.classes) {
-    auto const name = kv.first;
-    auto const cls  = kv.second;
-    if (!(cls->attrs & AttrUnique)) continue;
-
-    auto const range = find_range(data.classInfo, name);
-    if (begin(range) != end(range)) {
-      always_assert(std::next(begin(range)) == end(range));
-    }
-  }
-
   for (auto& cinfo : data.allClassInfos) {
     check_invariants(cinfo.get());
   }
@@ -3461,6 +3419,12 @@ Type context_sensitive_return_type(IndexData& data,
 
 //////////////////////////////////////////////////////////////////////
 
+PrepKind func_param_prep_default() {
+  return RuntimeOption::EvalJitEnableRenameFunction
+    ? PrepKind::Unknown
+    : PrepKind::Val;
+}
+
 PrepKind func_param_prep(const php::Func* func,
                          uint32_t paramId) {
   if (func->attrs & AttrInterceptable) return PrepKind::Unknown;
@@ -3468,6 +3432,13 @@ PrepKind func_param_prep(const php::Func* func,
     return PrepKind::Val;
   }
   return func->params[paramId].inout ? PrepKind::InOut : PrepKind::Val;
+}
+
+folly::Optional<uint32_t> func_num_inout_default() {
+  if (RuntimeOption::EvalJitEnableRenameFunction) {
+    return folly::none;
+  }
+  return 0;
 }
 
 folly::Optional<uint32_t> func_num_inout(const php::Func* func) {
@@ -3489,15 +3460,7 @@ PrepKind prep_kind_from_set(PossibleFuncRange range, uint32_t paramId) {
   assert(RuntimeOption::RepoAuthoritative);
 
   if (begin(range) == end(range)) {
-    /*
-     * We can assume it's by value, because we're calling a function that
-     * doesn't exist (about to fatal).
-     *
-     * Or if we've got AllFuncsInterceptable we need to assume someone could
-     * rename a function to the new name.
-     */
-    return RuntimeOption::EvalJitEnableRenameFunction ?
-      PrepKind::Unknown : PrepKind::Val;
+    return func_param_prep_default();
   }
 
   struct FuncFind {
@@ -3528,22 +3491,14 @@ template<class PossibleFuncRange>
 folly::Optional<uint32_t> num_inout_from_set(PossibleFuncRange range) {
 
   /*
-   * In sinlge-unit mode, the range is not complete. Without konwing all
+   * In single-unit mode, the range is not complete. Without konwing all
    * possible resolutions, HHBBC cannot deduce anything about inout args.
    * So the caller should make sure not calling this in single-unit mode.
    */
   assert(RuntimeOption::RepoAuthoritative);
 
   if (begin(range) == end(range)) {
-    /*
-     * We can assume it's by value, because we're calling a function that
-     * doesn't exist (about to fatal).
-     *
-     * Or if we've got AllFuncsInterceptable we need to assume someone could
-     * rename a function to the new name.
-     */
-    if (RuntimeOption::EvalJitEnableRenameFunction) return folly::none;
-    return 0;
+    return func_num_inout_default();
   }
 
   struct FuncFind {
@@ -3640,12 +3595,11 @@ PublicSPropEntry lookup_public_static_impl(
   const php::Class* cls,
   SString name
 ) {
-  auto const classes = find_range(data.classInfo, cls->name);
-  if (begin(classes) == end(classes) ||
-      std::next(begin(classes)) != end(classes)) {
+  auto const cls_it = data.classInfo.find(cls->name);
+  if (cls_it == end(data.classInfo)) {
     return PublicSPropEntry{TInitCell, TInitCell, nullptr, 0, true};
   }
-  return lookup_public_static_impl(data, begin(classes)->second, name);
+  return lookup_public_static_impl(data, cls_it->second, name);
 }
 
 Type lookup_public_prop_impl(
@@ -4098,10 +4052,12 @@ void Index::mark_no_bad_redeclare_props(php::Class& cls) const {
 
   // Mark all resolutions of this class as having any possible bad redeclaration
   // props, even if there's not an unique resolution.
-  for (auto& info : find_range(m_data->classInfo, cls.name)) {
-    auto const cinfo = info.second;
-    if (cinfo->cls != &cls) continue;
-    cinfo->hasBadRedeclareProp = possibleOverride;
+  auto const it = m_data->classInfo.find(cls.name);
+  if (it != end(m_data->classInfo)) {
+    auto const cinfo = it->second;
+    if (cinfo->cls == &cls) {
+      cinfo->hasBadRedeclareProp = possibleOverride;
+    }
   }
 }
 
@@ -4290,36 +4246,28 @@ template<typename T>
 folly::Optional<T> Index::resolve_type_impl(SString name) const {
   auto const& infomap = m_data->infoMap<T>();
   auto const& omap = m_data->infoMap<typename ResTypeHelper<T>::OtherT>();
-  auto const tinfos = find_range(infomap, name);
-  for (auto it = begin(tinfos); it != end(tinfos); ++it) {
+  auto const it = infomap.find(name);
+  if (it != end(infomap)) {
     auto const tinfo = it->second;
     /*
-     * If there's only one preresolved [Class|Record]Info, we can give out a
-     * specific res::Class or res::Record for it.
-     * (Any other possible resolutions were known to fatal,
-     * or it was actually unique.)
+     * If the preresolved [Class|Record]Info is Unique we can give it out.
      */
     if (tinfo->phpType()->attrs & AttrUnique) {
       if (debug &&
-          (std::next(it) != end(tinfos) ||
-           omap.count(name) ||
+          (omap.count(name) ||
            m_data->typeAliases.count(name))) {
         std::fprintf(stderr, "non unique \"unique\" %s: %s\n",
                      ResTypeHelper<T>::name().c_str(),
                      tinfo->phpType()->name->data());
-        while (++it != end(tinfos)) {
-          std::fprintf(stderr, "   and %s\n",
-                       it->second->phpType()->name->data());
-        }
 
-        auto const typeAliases = find_range(m_data->typeAliases, name);
-        for (auto ta = begin(typeAliases); ta != end(typeAliases); ++ta) {
+        auto const ta = m_data->typeAliases.find(name);
+        if (ta != end(m_data->typeAliases)) {
           std::fprintf(stderr, "   and type-alias %s\n",
                        ta->second->name->data());
         }
 
-        auto const others = find_range(omap, name);
-        for (auto to = begin(others); to != end(others); ++to) {
+        auto const to = omap.find(name);
+        if (to != end(omap)) {
           std::fprintf(stderr, "   and %s %s\n",
                        ResTypeHelper<typename ResTypeHelper<T>::OtherT>::
                        name().c_str(),
@@ -4329,7 +4277,6 @@ folly::Optional<T> Index::resolve_type_impl(SString name) const {
       }
       return T { tinfo };
     }
-    break;
   }
   // We refuse to have name-only resolutions of enums and typeAliases,
   // so that all name only resolutions can be treated as records or classes.
@@ -4351,28 +4298,17 @@ folly::Optional<res::Record> Index::resolve_record(SString recName) const {
 
 res::Class Index::resolve_class(const php::Class* cls) const {
 
-  ClassInfo* result = nullptr;
-
-  auto const classes = find_range(m_data->classInfo, cls->name);
-  for (auto it = begin(classes); it != end(classes); ++it) {
-    auto const cinfo = it->second;
-    if (cinfo->cls == cls) {
-      if (result) {
-        result = nullptr;
-        break;
+  // If we are in repo mod or it is a builtin if we find it we can return it.
+  if (RuntimeOption::RepoAuthoritative ||
+        (!RuntimeOption::EvalJitEnableRenameFunction &&
+         cls->attrs & AttrBuiltin)) {
+    auto const it = m_data->classInfo.find(cls->name);
+    if (it != end(m_data->classInfo)) {
+      auto const cinfo = it->second;
+      if (cinfo->cls == cls) {
+        return res::Class { cinfo };
       }
-      result = cinfo;
     }
-  }
-
-  // The function is supposed to return a cinfo if we can uniquely resolve cls.
-  // In repo mode, if there is only one cinfo, return it.
-  // In non-repo mode, we don't know all the cinfo's. So "only one cinfo" does
-  // not mean anything unless it is a built-in and we disable rename/intercept.
-  if (result && (RuntimeOption::RepoAuthoritative ||
-                 (!RuntimeOption::EvalJitEnableRenameFunction &&
-                  cls->attrs & AttrBuiltin))) {
-    return res::Class { result };
   }
 
   // We know its a class, not an enum or type alias, so return
@@ -4433,9 +4369,8 @@ Index::resolve_type_name_internal(SString inName) const {
 
   for (unsigned i = 0; ; ++i) {
     name = normalizeNS(name);
-    auto const records = find_range(m_data->recordInfo, name);
-    auto const rec_it = begin(records);
-    if (rec_it != end(records)) {
+    auto const rec_it = m_data->recordInfo.find(name);
+    if (rec_it != end(m_data->recordInfo)) {
       auto const rinfo = rec_it->second;
       if (rinfo->rec->attrs & AttrUnique) {
         return { AnnotType::Record, nullable, rinfo };
@@ -4443,9 +4378,8 @@ Index::resolve_type_name_internal(SString inName) const {
         return { AnnotType::Record, nullable, name };
       }
     }
-    auto const classes = find_range(m_data->classInfo, name);
-    auto const cls_it = begin(classes);
-    if (cls_it != end(classes)) {
+    auto const cls_it = m_data->classInfo.find(name);
+    if (cls_it != end(m_data->classInfo)) {
       auto const cinfo = cls_it->second;
       if (!(cinfo->cls->attrs & AttrUnique)) {
         if (!m_data->enums.count(name) && !m_data->typeAliases.count(name)) {
@@ -4465,9 +4399,8 @@ Index::resolve_type_name_internal(SString inName) const {
       }
       name = tc.typeName();
     } else {
-      auto const typeAliases = find_range(m_data->typeAliases, name);
-      auto const ta_it = begin(typeAliases);
-      if (ta_it == end(typeAliases)) break;
+      auto const ta_it = m_data->typeAliases.find(name);
+      if (ta_it == end(m_data->typeAliases)) break;
       auto const ta = ta_it->second;
       if (!(ta->attrs & AttrUnique)) {
         return { AnnotType::Object, false, {} };
@@ -4632,8 +4565,8 @@ res::Func Index::resolve_method(Context ctx,
    */
   auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
     if (!ctx.cls) return false;
-    auto const range = find_range(m_data->classInfo, ctx.cls->name);
-    if (begin(range) == end(range)) {
+    auto const cls_it = m_data->classInfo.find(ctx.cls->name);
+    if (cls_it == end(m_data->classInfo)) {
       // This class had no pre-resolved ClassInfos, which means it
       // always fatals in any way it could be defined, so it doesn't
       // matter what we return here (as all methods in the context
@@ -4642,13 +4575,11 @@ res::Func Index::resolve_method(Context ctx,
     }
     // Because of traits, each instantiation of the class could have
     // different private methods; we need to check them all.
-    for (auto ctxInfo : range) {
-      auto const iter = ctxInfo.second->methods.find(name);
-      if (iter != end(ctxInfo.second->methods) &&
-          iter->second.attrs & AttrPrivate &&
-          iter->second.topLevel) {
-        return true;
-      }
+    auto const iter = cls_it->second->methods.find(name);
+    if (iter != end(cls_it->second->methods) &&
+        iter->second.attrs & AttrPrivate &&
+        iter->second.topLevel) {
+      return true;
     }
     return false;
   });
@@ -4738,29 +4669,16 @@ Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
   return res::Func { this, &famIt->second };
 }
 
-template<class FuncRange>
 res::Func
-Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
+Index::resolve_func_helper(const php::Func* func, SString name) const {
   auto name_only = [&] (bool renamable) {
     return res::Func { this, res::Func::FuncName { name, renamable } };
   };
 
   // no resolution
-  if (begin(funcs) == end(funcs)) return name_only(false);
+  if (func == nullptr) return name_only(false);
 
-  auto const func = begin(funcs)->second;
   if (func->attrs & AttrInterceptable) return name_only(true);
-
-  // multiple resolutions
-  if (std::next(begin(funcs)) != end(funcs)) {
-    assert(!(func->attrs & AttrUnique));
-    if (debug && any_interceptable_functions()) {
-      for (auto const DEBUG_ONLY f : funcs) {
-        assertx(!(f.second->attrs & AttrInterceptable));
-      }
-    }
-    return name_only(false);
-  }
 
   // single resolution, in whole-program mode, that's it
   if (RuntimeOption::RepoAuthoritative) {
@@ -4768,20 +4686,13 @@ Index::resolve_func_helper(const FuncRange& funcs, SString name) const {
     return do_resolve(func);
   }
 
-  // single-unit mode, check builtins
-  if (func->attrs & AttrBuiltin) {
-    assert(func->attrs & AttrUnique);
-    return do_resolve(func);
-  }
-
-  // single-unit, non-builtin, not renamable
   return name_only(false);
 }
 
 res::Func Index::resolve_func(Context /*ctx*/, SString name) const {
   name = normalizeNS(name);
-  auto const funcs = find_range(m_data->funcs, name);
-  return resolve_func_helper(funcs, name);
+  auto const it = m_data->funcs.find(name);
+  return resolve_func_helper((it != end(m_data->funcs)) ? it->second : nullptr, name);
 }
 
 /*
@@ -5093,13 +5004,12 @@ Type Index::lookup_class_constant(Context ctx,
 }
 
 Type Index::lookup_constant(Context ctx, SString cnsName) const {
-  auto constants = find_range(m_data->constants, cnsName);
-  if (begin(constants) == end(constants) ||
-      std::next(begin(constants)) != end(constants)) {
+  auto iter = m_data->constants.find(cnsName);
+  if (iter == end(m_data->constants)) {
     return TInitCell;
   }
 
-  auto constant = begin(constants)->second;
+  auto constant = iter->second;
   if (type(constant->val) != KindOfUninit) {
     return from_cell(constant->val);
   }
@@ -5313,7 +5223,10 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
     rfunc.val,
     [&] (res::Func::FuncName s) -> folly::Optional<uint32_t> {
       if (!RuntimeOption::RepoAuthoritative || s.renamable) return folly::none;
-      return num_inout_from_set(find_range(m_data->funcs, s.name));
+      auto const it = m_data->funcs.find(s.name);
+      return it != end(m_data->funcs)
+       ? func_num_inout(it->second)
+       : func_num_inout_default();
     },
     [&] (res::Func::MethodName s) -> folly::Optional<uint32_t> {
       if (!RuntimeOption::RepoAuthoritative) return folly::none;
@@ -5323,7 +5236,8 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
         // by inout.
         return 0;
       }
-      return num_inout_from_set(find_range(m_data->methods, s.name));
+      auto const pair = m_data->methods.equal_range(s.name);
+      return num_inout_from_set(folly::range(pair.first, pair.second));
     },
     [&] (FuncInfo* finfo) {
       return func_num_inout(finfo->func);
@@ -5331,7 +5245,7 @@ folly::Optional<uint32_t> Index::lookup_num_inout_params(
     [&] (const MethTabEntryPair* mte) {
       return func_num_inout(mte->second.func);
     },
-    [&] (FuncFamily* fam) {
+    [&] (FuncFamily* fam) -> folly::Optional<uint32_t> {
       assert(RuntimeOption::RepoAuthoritative);
       return num_inout_from_set(fam->possibleFuncs());
     }
@@ -5344,7 +5258,10 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
     rfunc.val,
     [&] (res::Func::FuncName s) {
       if (!RuntimeOption::RepoAuthoritative || s.renamable) return PrepKind::Unknown;
-      return prep_kind_from_set(find_range(m_data->funcs, s.name), paramId);
+      auto const it = m_data->funcs.find(s.name);
+      return it != end(m_data->funcs)
+        ? func_param_prep(it->second, paramId)
+        : func_param_prep_default();
     },
     [&] (res::Func::MethodName s) {
       if (!RuntimeOption::RepoAuthoritative) return PrepKind::Unknown;
@@ -5359,10 +5276,8 @@ PrepKind Index::lookup_param_prep(Context /*ctx*/, res::Func rfunc,
         // No method of this name takes parameter paramId by inout.
         return PrepKind::Val;
       }
-      return prep_kind_from_set(
-        find_range(m_data->methods, s.name),
-        paramId
-      );
+      auto const pair = m_data->methods.equal_range(s.name);
+      return prep_kind_from_set(folly::range(pair.first, pair.second), paramId);
     },
     [&] (FuncInfo* finfo) {
       return func_param_prep(finfo->func, paramId);
@@ -5529,12 +5444,11 @@ Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
 }
 
 Type Index::lookup_public_prop(const php::Class* cls, SString name) const {
-  auto const classes = find_range(m_data->classInfo, cls->name);
-  if (begin(classes) == end(classes) ||
-      std::next(begin(classes)) != end(classes)) {
+  auto const it = m_data->classInfo.find(cls->name);
+  if (it == end(m_data->classInfo)) {
     return TCell;
   }
-  return lookup_public_prop_impl(*m_data, begin(classes)->second, name);
+  return lookup_public_prop_impl(*m_data, it->second, name);
 }
 
 bool Index::lookup_class_init_might_raise(Context ctx, res::Class cls) const {
@@ -5931,13 +5845,17 @@ void Index::record_public_static_mutations(const php::Func& func,
 
 void Index::update_static_prop_init_val(const php::Class* cls,
                                         SString name) const {
-  for (auto& info : find_range(m_data->classInfo, cls->name)) {
-    auto const cinfo = info.second;
-    if (cinfo->cls != cls) continue;
-    auto const it = cinfo->publicStaticProps.find(name);
-    if (it != cinfo->publicStaticProps.end()) {
-      it->second.initialValueResolved = true;
-    }
+  auto const cls_it = m_data->classInfo.find(cls->name);
+  if (cls_it == end(m_data->classInfo)) {
+    return;
+  }
+  auto const cinfo = cls_it->second;
+  if (cinfo->cls != cls) {
+    return;
+  }
+  auto const it = cinfo->publicStaticProps.find(name);
+  if (it != cinfo->publicStaticProps.end()) {
+    it->second.initialValueResolved = true;
   }
 }
 
@@ -6126,21 +6044,24 @@ void Index::refine_public_statics(DependencyContextSet& deps) {
 void Index::refine_bad_initial_prop_values(const php::Class* cls,
                                            bool value,
                                            DependencyContextSet& deps) {
-   assertx(!is_used_trait(*cls));
+  assertx(!is_used_trait(*cls));
+  auto const it = m_data->classInfo.find(cls->name);
+  if (it == end(m_data->classInfo)) {
+    return;
+  }
+  auto const cinfo = it->second;
+  if (cinfo->cls != cls) {
+    return;
+  }
+  always_assert_flog(
+    cinfo->hasBadInitialPropValues || !value,
+    "Bad initial prop values going from false to true on {}",
+    cls->name->data()
+  );
 
-   for (auto& info : find_range(m_data->classInfo, cls->name)) {
-    auto const cinfo = info.second;
-    if (cinfo->cls != cls) continue;
-    always_assert_flog(
-      cinfo->hasBadInitialPropValues || !value,
-      "Bad initial prop values going from false to true on {}",
-      cls->name->data()
-    );
-
-    if (cinfo->hasBadInitialPropValues && !value) {
-      cinfo->hasBadInitialPropValues = false;
-      find_deps(*m_data, cls, Dep::PropBadInitialValues, deps);
-    }
+  if (cinfo->hasBadInitialPropValues && !value) {
+    cinfo->hasBadInitialPropValues = false;
+    find_deps(*m_data, cls, Dep::PropBadInitialValues, deps);
   }
 }
 
@@ -6227,16 +6148,15 @@ res::Func Index::do_resolve(const php::Func* f) const {
 bool Index::must_be_derived_from(const php::Class* cls,
                                  const php::Class* parent) const {
   if (cls == parent) return true;
-  auto const clsClasses    = find_range(m_data->classInfo, cls->name);
-  auto const parentClasses = find_range(m_data->classInfo, parent->name);
-  for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { kvCls.second };
-    for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { kvPar.second };
-      if (!rCls.mustBeSubtypeOf(rPar)) return false;
-    }
+  auto const clsClass_it   = m_data->classInfo.find(cls->name);
+  auto const parentClass_it = m_data->classInfo.find(parent->name);
+  if (clsClass_it == end(m_data->classInfo) || parentClass_it == end(m_data->classInfo)) {
+    return true;
   }
-  return true;
+
+  auto const rCls = res::Class { clsClass_it->second };
+  auto const rPar = res::Class { parentClass_it->second };
+  return rCls.mustBeSubtypeOf(rPar);
 }
 
 // Return true if any possible definition of one php::Class could
@@ -6245,16 +6165,15 @@ bool
 Index::could_be_related(const php::Class* cls,
                         const php::Class* parent) const {
   if (cls == parent) return true;
-  auto const clsClasses    = find_range(m_data->classInfo, cls->name);
-  auto const parentClasses = find_range(m_data->classInfo, parent->name);
-  for (auto& kvCls : clsClasses) {
-    auto const rCls = res::Class { kvCls.second };
-    for (auto& kvPar : parentClasses) {
-      auto const rPar = res::Class { kvPar.second };
-      if (rCls.couldBe(rPar)) return true;
-    }
+  auto const clsClass_it   = m_data->classInfo.find(cls->name);
+  auto const parentClass_it = m_data->classInfo.find(parent->name);
+  if (clsClass_it == end(m_data->classInfo) || parentClass_it == end(m_data->classInfo)) {
+    return false;
   }
-  return false;
+  
+  auto const rCls = res::Class { clsClass_it->second };
+  auto const rPar = res::Class { parentClass_it->second };
+  return rCls.couldBe(rPar);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -6414,14 +6333,17 @@ void PublicSPropMutations::merge(const Index& index,
                                  const Type& name,
                                  const Type& val,
                                  bool ignoreConst) {
-  auto range = find_range(index.m_data->classInfo, cls.name);
-  for (auto const& pair : range) {
-    auto const cinfo = pair.second;
-    if (cinfo->cls != &cls) continue;
-    // Note that this works for both traits and regular classes
-    for (auto const sub : cinfo->subclassList) {
-      merge(index, ctx, sub, name, val, ignoreConst);
-    }
+  auto it = index.m_data->classInfo.find(cls.name);
+  if (it == end(index.m_data->classInfo)) {
+    return;
+  }
+  auto const cinfo = it->second;
+  if (cinfo->cls != &cls) {
+    return;
+  }
+  // Note that this works for both traits and regular classes
+  for (auto const sub : cinfo->subclassList) {
+    merge(index, ctx, sub, name, val, ignoreConst);
   }
 }
 

@@ -233,11 +233,8 @@ final class Vector implements \MutableVector {
   public function reserve(mixed $sz): void;
 
   /** Returns an array built from the values from this Vector.
-   * @return array
+   * @return varray
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
@@ -872,11 +869,8 @@ final class ImmVector implements \ConstVector {
   }
 
   /** Returns an array built from the values from this ImmVector.
-   * @return array
+   * @return varray
    */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 

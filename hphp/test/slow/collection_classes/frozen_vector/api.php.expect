@@ -8,7 +8,7 @@ object(HH\ImmVector) (3) {
   int(3)
 }
 
-toArray...
+toDArray...
 array(3) {
   [0]=>
   int(1)

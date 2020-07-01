@@ -143,19 +143,15 @@ final class Set implements \MutableSet {
   <<__Native, __Pure, __Mutable>>
   public function reserve(int $sz): void;
 
-  /** Returns an array built from the values from this Set, array(val1 => val1,
-   * val2 => val2, ...). This maintains set-like semantics in array() land: O(1)
-   * membership test with `array_has_key($a['key'])` and iteration with
-   * `foreach($a as $member)`. Int-like strings end up with numerical array
-   * keys.
-   * @return array
-   */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
+  /** Returns an array built from the values from this Set, array(val1 => val1,
+   * val2 => val2, ...). This maintains set-like semantics in array() land: O(1)
+   * membership test with `array_has_key($a['key'])` and iteration with
+   * `foreach($a as $member)`.
+   * @return darray
+   */
   <<__Native, __Pure, __MaybeMutable>>
   public function toDArray(): darray;
 
@@ -533,19 +529,15 @@ final class ImmSet implements \ConstSet {
   <<__Native, __Pure, __MaybeMutable>>
   public function contains(mixed $val): bool;
 
-  /** Returns an array built from the values from this ImmSet, array(val1 =>
-   * val1, val2 => val2, ...). This maintains set-like semantics in array()
-   * land: O(1) membership test with `array_has_key($a['key'])` and iteration
-   * with `foreach($a as $member)`. Int-like strings end up with numerical array
-   * keys.
-   * @return array
-   */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
+  /** Returns an array built from the values from this ImmSet, array(val1 =>
+   * val1, val2 => val2, ...). This maintains set-like semantics in array()
+   * land: O(1) membership test with `array_has_key($a['key'])` and iteration
+   * with `foreach($a as $member)`.
+   * @return darray
+   */
   <<__Native, __Pure, __MaybeMutable>>
   public function toDArray(): darray;
 

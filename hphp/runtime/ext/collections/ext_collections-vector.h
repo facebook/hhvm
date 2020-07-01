@@ -196,13 +196,6 @@ public:
    */
   void reserve(uint32_t sz);
 
-  Array toPHPArray() {
-    if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
-      raise_hack_arr_compat_array_producing_func_notice("Vector::toArray");
-    }
-    return toPHPArrayImpl();
-  }
-
   Array toPHPArrayImpl() {
     if (!m_size) return empty_array();
     auto ad = arrayData()->toPHPArray(true);

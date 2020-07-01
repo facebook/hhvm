@@ -64,13 +64,6 @@ Array c_Pair::toPHPArrayImpl() const {
                         1, tvAsCVarRef(&elm1));
 }
 
-Array c_Pair::toPHPArray() const {
-  if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
-    raise_hack_arr_compat_array_producing_func_notice("Pair::toArray");
-  }
-  return toPHPArrayImpl();
-}
-
 Array c_Pair::toVArrayImpl() const {
   return make_varray(tvAsCVarRef(&elm0), tvAsCVarRef(&elm1));
 }
@@ -144,7 +137,6 @@ void CollectionsExtension::initPair() {
   HHVM_NAMED_ME(HH\\Pair, at,             &c_Pair::php_at);
   HHVM_NAMED_ME(HH\\Pair, get,            &c_Pair::php_get);
   HHVM_NAMED_ME(HH\\Pair, linearSearch,   &c_Pair::linearSearch);
-  HHVM_NAMED_ME(HH\\Pair, toArray,        &c_Pair::toPHPArray);
   HHVM_NAMED_ME(HH\\Pair, toVArray,       &c_Pair::toVArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, toDArray,       &c_Pair::toDArrayImpl);
   HHVM_NAMED_ME(HH\\Pair, toValuesArray,  &c_Pair::toVArrayImpl);

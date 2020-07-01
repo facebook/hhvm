@@ -156,16 +156,6 @@ final class Pair implements \ConstVector {
     return new \LazyKeyedIterableView($this);
   }
 
-  /**
-   * Returns an `array` containing the values from the current `Pair`.
-   *
-   * This method is interchangeable with `toValuesArray()`.
-   *
-   * @return - an `array` containing the values from the current `Pair`.
-   */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
@@ -249,7 +239,7 @@ final class Pair implements \ConstVector {
   /**
    * Returns an `array` containing the values from the current `Pair`.
    *
-   * This method is interchangeable with `toArray()`.
+   * This method is interchangeable with `toVArray()`.
    *
    * @return - an `array` containing the values from the current `Pair`.
    */
@@ -321,7 +311,7 @@ final class Pair implements \ConstVector {
    */
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filter(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback): ImmVector<mixed> {
-    $values = $this->toArray();
+    $values = $this->toVArray();
     if (!$callback($values[0])) { unset($values[0]); }
     if (!$callback($values[1])) { unset($values[1]); }
     return new \HH\ImmVector($values);
@@ -345,7 +335,7 @@ final class Pair implements \ConstVector {
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function filterWithKey(<<__AtMostRxAsFunc>> (function(int, mixed): bool) $callback):
     ImmVector<mixed> {
-    $values = $this->toArray();
+    $values = $this->toVArray();
     if (!$callback(0, $values[0])) { unset($values[0]); }
     if (!$callback(1, $values[1])) { unset($values[1]); }
     return new \HH\ImmVector($values);
@@ -417,7 +407,7 @@ final class Pair implements \ConstVector {
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function takeWhile(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
-    $pair = $this->toArray();
+    $pair = $this->toVArray();
     if (!$callback($pair[0])) return \HH\ImmVector {};
     if (!$callback($pair[1])) return \HH\ImmVector { $pair[0] };
     return $this->toImmVector();
@@ -464,7 +454,7 @@ final class Pair implements \ConstVector {
   <<__Pure, __AtMostRxAsArgs, __MutableReturn, __MaybeMutable>>
   public function skipWhile(<<__AtMostRxAsFunc>> (function(mixed): bool) $callback):
     ImmVector<mixed> {
-    $pair = $this->toArray();
+    $pair = $this->toVArray();
     if (!$callback($pair[0])) return $this->toImmVector();
     if (!$callback($pair[1])) return \HH\ImmVector { $pair[1] };
     return \HH\ImmVector {};

@@ -10,7 +10,7 @@ function array_map($func, $arr, ...$extra) {
   }
 
   if (is_object($arr)) {
-    $arr = $arr->toArray();
+    $arr = $arr->toDArray();
   }
 
   if ($func === null) {

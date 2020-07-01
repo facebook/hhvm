@@ -236,13 +236,6 @@ Variant BaseMap::popFront() {
   return ret;
 }
 
-Array BaseMap::toPHPArray() {
-  if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
-    raise_hack_arr_compat_array_producing_func_notice("Map::toArray");
-  }
-  return toPHPArrayImpl<IntishCast::None>();
-}
-
 void BaseMap::setImpl(int64_t k, TypedValue tv) {
   assertx(canMutateBuffer());
   auto h = hash_int64(k);
@@ -733,7 +726,6 @@ void CollectionsExtension::initMap() {
   HHVM_NAMED_ME(HH\\ImmMap, mn, impl);
   BASE_ME(__construct,   &BaseMap::init);
   BASE_ME(count,         &BaseMap::size);
-  BASE_ME(toArray,       &BaseMap::toPHPArray);
   BASE_ME(toVArray,      &BaseMap::toVArray);
   BASE_ME(toDArray,      &BaseMap::toDArray);
   BASE_ME(toKeysArray,   &BaseMap::toKeysArray);

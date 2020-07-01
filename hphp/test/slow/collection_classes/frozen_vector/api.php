@@ -15,8 +15,8 @@ function materialization_methods() {
   echo "\nvalues...\n";
   var_dump($fv->values());
 
-  echo "\ntoArray...\n";
-  var_dump($fv->toArray());
+  echo "\ntoDArray...\n";
+  var_dump($fv->toDArray());
 
   echo "\ntoKeysArray...\n";
   var_dump($fv->toKeysArray());

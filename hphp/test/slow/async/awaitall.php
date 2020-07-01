@@ -135,9 +135,6 @@ t($wh, $vectors);
 $wh = AwaitAllWaitHandle::fromMap(new ImmMap($maps));
 t($wh, $maps);
 
-$wh = AwaitAllWaitHandle::fromArray($arrays->toArray());
-t($wh, $arrays);
-
 $wh = AwaitAllWaitHandle::fromVec(vec($vecs));
 t($wh, $vecs);
 

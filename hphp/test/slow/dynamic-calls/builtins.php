@@ -16,11 +16,11 @@ function test() {
   $x = 'HH\Vector::fromItems'; $x(varray[]);
   $x = varray['HH\Vector', 'fromItems']; $x(varray[]);
   $x = varray[new Vector, 'fromItems']; $x(varray[]);
-  $x = varray[new Vector, 'toArray']; $x();
+  $x = varray[new Vector, 'toVArray']; $x();
   $x = 'HH\Vector'; $x::fromItems(varray[]);
   $x = 'fromItems'; Vector::$x(varray[]);
 
-  $x = 'toArray'; $obj = new Vector; $obj->$x();
+  $x = 'toVArray'; $obj = new Vector; $obj->$x();
   $x = 'HH\Vector'; new $x();
 
   $obj = new A; $obj->test();

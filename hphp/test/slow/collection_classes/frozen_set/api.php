@@ -71,8 +71,8 @@ function api() {
 function materialization_methods() {
   $fs = new ImmSet(Vector {1, 2, 3});
 
-  echo "\ntoArray...\n";
-  var_dump($fs->toArray());
+  echo "\ntoDArray...\n";
+  var_dump($fs->toDArray());
 
   echo "\ntoKeysArray...\n";
   var_dump($fs->toKeysArray());

@@ -6,13 +6,13 @@ Notice: 'HH\Vector::fromItems' called dynamically without using a function point
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 18
 
-Notice: 'HH\Vector::toArray' called dynamically without using a function pointer in %s/builtins.php on line 19
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 19
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 20
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 21
 
-Notice: 'HH\Vector::toArray' called dynamically without using a function pointer in %s/builtins.php on line 23
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 23
 
 Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
 
@@ -51,13 +51,13 @@ Notice: 'HH\Vector::fromItems' called dynamically without using a function point
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 18
 
-Notice: 'HH\Vector::toArray' called dynamically without using a function pointer in %s/builtins.php on line 19
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 19
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 20
 
 Notice: 'HH\Vector::fromItems' called dynamically without using a function pointer in %s/builtins.php on line 21
 
-Notice: 'HH\Vector::toArray' called dynamically without using a function pointer in %s/builtins.php on line 23
+Notice: 'HH\Vector::toVArray' called dynamically without using a function pointer in %s/builtins.php on line 23
 
 Notice: 'HH\Vector' constructed dynamically in %s/builtins.php on line 24
 

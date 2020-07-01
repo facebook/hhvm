@@ -644,7 +644,6 @@ void CollectionsExtension::initVector() {
   BASE_ME(count,        &BaseVector::size);
   BASE_ME(at,           &BaseVector::php_at);
   BASE_ME(get,          &BaseVector::php_get);
-  BASE_ME(toArray,      &BaseVector::toPHPArray);
   BASE_ME(toVArray,     &BaseVector::toVArray);
   BASE_ME(toDArray,     &BaseVector::toDArray);
   BASE_ME(getIterator,  &BaseVector::getIterator);

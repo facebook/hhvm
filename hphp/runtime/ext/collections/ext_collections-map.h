@@ -89,8 +89,6 @@ public:
   Variant pop();
   Variant popFront();
 
-  Array toPHPArray();
-
 public:
   template <IntishCast intishCast = IntishCast::None>
   static Array ToArray(const ObjectData* obj) {

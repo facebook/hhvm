@@ -188,11 +188,11 @@ final class Map implements \MutableMap {
    * @return array
    */
   <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
-  <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
+  /** Returns an array built from the keys and values from this Map.
+   * @return darray
+   */
   <<__Native, __Pure, __MaybeMutable>>
   public function toDArray(): darray;
 
@@ -566,15 +566,12 @@ final class ImmMap implements \ConstMap {
   <<__Native, __Pure, __MaybeMutable>>
   public function containsKey(mixed $key): bool;
 
-  /** Returns an array built from the keys and values from this ImmMap.
-   * @return array
-   */
-  <<__Native, __Pure, __MaybeMutable>>
-  public function toArray(): array;
-
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
+  /** Returns an array built from the keys and values from this ImmMap.
+   * @return darray
+   */
   <<__Native, __Pure, __MaybeMutable>>
   public function toDArray(): darray;
 

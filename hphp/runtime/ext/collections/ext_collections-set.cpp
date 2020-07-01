@@ -247,13 +247,6 @@ Variant BaseSet::popFront() {
   return ret;
 }
 
-Array BaseSet::toPHPArray() {
-  if (RuntimeOption::EvalHackArrCompatArrayProducingFuncNotices) {
-    raise_hack_arr_compat_array_producing_func_notice("Set::toArray");
-  }
-  return toPHPArrayImpl<IntishCast::None>();
-}
-
 Variant BaseSet::firstValue() {
   if (!m_size) return init_null();
   auto e = firstElm();
@@ -616,7 +609,6 @@ void CollectionsExtension::initSet() {
   BASE_ME(__construct,   &BaseSet::init);
   BASE_ME(count,         &BaseSet::size);
   BASE_ME(contains,      &BaseSet::php_contains);
-  BASE_ME(toArray,       &BaseSet::toPHPArray);
   BASE_ME(toVArray,      &BaseSet::toVArray);
   BASE_ME(toDArray,      &BaseSet::toDArray);
   BASE_ME(toKeysArray,   &BaseSet::toKeysArray);

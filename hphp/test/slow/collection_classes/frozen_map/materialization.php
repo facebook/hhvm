@@ -13,8 +13,8 @@ function show_iter($iter) {
 function main() {
   $fm = new ImmMap(Map {"a" => 10, "b" => 30, 10 => 42});
 
-  echo "\ntoArray...\n";
-  $res = $fm->toArray();
+  echo "\ntoDArray...\n";
+  $res = $fm->toDArray();
   var_dump(is_array($res));
   show_iter($res);
 

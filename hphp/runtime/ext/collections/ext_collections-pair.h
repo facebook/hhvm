@@ -126,7 +126,6 @@ struct c_Pair : ObjectData {
   }
 
   Array toPHPArrayImpl() const;
-  Array toPHPArray() const;
 
   Array toVArrayImpl() const;
   Array toDArrayImpl() const;

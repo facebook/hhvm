@@ -18,7 +18,7 @@ function g2(...$args) {
 function main() {
   echo '= Single-arg array_map =', "\n";
   $v = Vector {1, 2, 3, 4};
-  $a = $v->toArray();
+  $a = $v->toVArray();
   $expected = varray[
     varray[1],
     varray[2],

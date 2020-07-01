@@ -2,8 +2,8 @@
 function foo() {
   $x = Vector {1, 2};
   $y = $x->immutable();
-  $a = $x->toArray();
-  $b = $y->toArray();
+  $a = $x->toVArray();
+  $b = $y->toVArray();
   var_dump($a, $b);
   $a[] = 3;
   $b[] = 4;

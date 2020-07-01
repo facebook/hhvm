@@ -50,7 +50,7 @@ function f() {
   }
   echo "------------------------\n";
   var_dump(darray($t), darray($u));
-  var_dump($t->toArray(), $u->toArray());
+  var_dump($t->toVArray(), $u->toVArray());
   echo "------------------------\n";
   var_dump(clone $t, clone $u);
 }

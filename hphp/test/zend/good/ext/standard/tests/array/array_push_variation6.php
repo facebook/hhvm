@@ -13,10 +13,6 @@ echo "*** Testing array_push() : usage variations ***\n";
 // Initialise function arguments not being substituted
 $var = 'value';
 
-//get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // heredoc string
 $heredoc = <<<EOT
 hello world
@@ -33,38 +29,8 @@ $inputs = darray[
        -2345 => 'negative',
        ],
 
-       // float data
-/*2*/  'float' => darray[
-       10.5 => 'positive',
-       -10.5 => 'negative',
-       .5 => 'half',
-       ],
-
-       'extreme floats' => darray[
-       12.3456789000e10 => 'large',
-       12.3456789000E-10 => 'small',
-       ],
-
-       // null data
-/*3*/ 'null uppercase' => darray[
-       NULL => 'null 1',
-       ],
-       'null lowercase' => darray[
-       null => 'null 2',
-       ],
-
-       // boolean data
-/*4*/ 'bool lowercase' => darray[
-       true => 'lowert',
-       false => 'lowerf',
-       ],
-       'bool uppercase' => darray[
-       TRUE => 'uppert',
-       FALSE => 'upperf',
-       ],
-
        // empty data
-/*5*/ 'empty double quotes' => darray[
+/*2*/ 'empty double quotes' => darray[
        "" => 'emptyd',
        ],
        'empty single quotes' => darray[
@@ -72,20 +38,10 @@ $inputs = darray[
        ],
 
        // string data
-/*6*/ 'string' => darray[
+/*3*/ 'string' => darray[
        "stringd" => 'stringd',
        'strings' => 'strings',
        $heredoc => 'stringh',
-       ],
-
-       // undefined data
-/*8*/ 'undefined' => darray[
-       @$undefined_var => 'undefined',
-       ],
-
-       // unset data
-/*9*/ 'unset' => darray[
-       @$unset_var => 'unset',
        ],
 ];
 

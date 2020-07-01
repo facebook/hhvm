@@ -12,10 +12,6 @@
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_intersect() : assoc array with diff keys to \$arr2 argument ***\n";
 
-// get an unset variable
-$unset_var = 10;
-unset ($unset_var);
-
 // get a heredoc string
 $heredoc = <<<EOT
 Hello world
@@ -33,10 +29,10 @@ $arrays = varray [
        darray[1 => "1", 2 => "2", 3 => "3", 4 => "4"],
 
        // arrays with float keys
-/*5*/  darray[2.3333 => "float"],
-       darray[1.2 => "f1", 3.33 => "f2",
-             4.89999922839999 => "f3",
-             33333333.333333 => "f4"],
+/*5*/  darray[2 => "float"],
+       darray[1 => "f1", 3 => "f2",
+             4 => "f3",
+             33333333 => "f4"],
 
        // arrays with string keys
 /*7*/  darray['\tHello' => 111, 're\td' => "color",
@@ -46,12 +42,12 @@ $arrays = varray [
        darray[0 => "hello", $heredoc => "string"], // heredoc
 
        // array with unset variable
-/*10*/ darray[ @$unset_var => "hello"],
+/*10*/ darray[ '' => "hello"],
 
        // array with mixed keys
 /*11*/ darray['hello' => 1,  "fruit" => 2.2,
-             133 => "int", 444.432 => "float",
-             @$unset_var => "unset", $heredoc => "heredoc"]
+             133 => "int", 444 => "float",
+             '' => "unset", $heredoc => "heredoc"]
 ];
 
 // array to be passsed to $arr1 argument

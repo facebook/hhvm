@@ -16,13 +16,13 @@ echo "*** Testing krsort() : usage variations ***\n";
 
 $various_arrays = varray [
   // diff. escape sequence chars with key values
-  darray [ null =>  null, NULL => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e", 
-          "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh", 
+  darray [ '' =>  null, '' => NULL, "\a" => "\a", "\cx" => "\cx", "\e" => "\e",
+          "\f" => "\f", "\n" =>"\n", "\r" => "\r", "\t" => "\t", "\xhh" => "\xhh",
           "\ddd" => "\ddd", "\v" => "\v"
         ],
 
   // array containing different strings with key values
-  darray [ 'Lemon' => "lemoN", 'o' => "Orange", 'B' => "banana", 'Apple' => "apple", 'te' => "Test", 
+  darray [ 'Lemon' => "lemoN", 'o' => "Orange", 'B' => "banana", 'Apple' => "apple", 'te' => "Test",
           't' => "TTTT", 'T' => "ttt", 'W' => "ww", 'X' => "x", 'x' => "X", 'O' => "oraNGe",
           'B' => "BANANA"
         ]

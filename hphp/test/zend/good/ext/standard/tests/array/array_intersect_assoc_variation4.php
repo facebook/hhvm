@@ -49,7 +49,7 @@ $arr1 = darray [
   7 => 'world', 8 => true, 9 => false, 3 => "b\tbbb", 10 => "aaaa\r",
   11 => $numeric_string, "h3" => $diff_whitespaces, "true" => true,
   "one" => "ten", 4 => "four", "two" => 2, 6 => "six",
-  12 => '', null => "null", '' => 'emptys'
+  12 => '', '' => "null", '' => 'emptys'
 ];
 
 // arrays to be passed to $arr2 argument
@@ -71,11 +71,11 @@ $arrays = varray [
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
+/*14*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
        darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
        darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
+       darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
 
        // array with repetative keys
 /*19*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]

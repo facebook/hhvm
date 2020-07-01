@@ -36,7 +36,7 @@ print "-- Testing various types with no second argument --\n";
 print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
 print "COUNT_NORMAL: should be 2, is ".count(varray["a", varray["b"]])."\n";
 
-$arr = darray['a'=>varray[NULL, NULL, NULL], 1=>darray[NULL=>1, 1=>NULL],
+$arr = darray['a'=>varray[NULL, NULL, NULL], 1=>darray[''=>1, 1=>NULL],
     2 => varray[varray[varray[varray[varray[NULL]]]]]];
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
@@ -46,15 +46,15 @@ echo "\n*** Testing possible variations of count() function on arrays ***";
 $count_array = varray[
   varray[],
   darray[ 1 => "string"],
-  darray[ "" => "string", 0 => "a", NULL => "b", -1.00 => "c",
+  darray[ "" => "string", 0 => "a", '' => "b", -1 => "c",
          1 => varray[varray[varray[NULL]]]],
-  darray[ -2.44444 => 12, 0 => varray[varray[1, 2, varray[varray["0"]]]]],
+  darray[ -2 => 12, 0 => varray[varray[1, 2, varray[varray["0"]]]]],
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
   darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, 5 => varray[]],
-  darray[ TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-     NULL => NULL, "\x000" => "\x000", "\000" => "\000"],
-  darray[ 0 => NULL, 1.23 => "Hi", "string" => "hello",
+  darray[ 1 => TRUE, 0 => FALSE, "" => "", " " => " ",
+     '' => NULL, "\x000" => "\x000", "\000" => "\000"],
+  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
           2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 

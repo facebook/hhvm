@@ -48,11 +48,11 @@ $arrays = varray [
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*13*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
+/*13*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
        darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
        darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
+       darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
 
        // array with repetative keys
 /*18*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]

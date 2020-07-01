@@ -62,14 +62,11 @@ $arrays = varray [
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
-       darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
+/*14*/ darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
        darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
 
        // array with repetative keys
-/*19*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
+/*16*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]
 ];
 
 
@@ -79,7 +76,7 @@ $arr2 = darray [
   7 => 'world', 8 => true,5 => false, 1 => 'aaaa\r', 9 => "aaaa\r",
   'h3' => $diff_whitespaces, 10 => $numeric_string,
   "one" => "ten", 4 => "four", "two" => 2,
-  11 => '', null => "null", '' => 'emptys', "emptyd" => "",
+  11 => '', '' => "null", '' => 'emptys', "emptyd" => "",
 ];
 
 // loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()

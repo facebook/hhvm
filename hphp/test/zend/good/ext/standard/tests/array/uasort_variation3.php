@@ -54,7 +54,7 @@ $array_arg = darray[
   // numeric keys
   1 => 10, // expecting: value will be replaced by 'TRUE'
   -2 => 9,
-  8.9 => 8,
+  8 => 8,
   012 => 7,
   0x34 => 6,
 
@@ -66,14 +66,14 @@ $array_arg = darray[
   " " => 0,  // space as key
 
   // bool keys
-  true => 15,
-  false => 5,
-  TRUE => 100,
-  FALSE => 25,
+  1 => 15,
+  0 => 5,
+  1 => 100,
+  0 => 25,
 
   // null keys
-  null => 20,  // expecting: value will be replaced by 'NULL'
-  NULL => 35,
+  '' => 20,  // expecting: value will be replaced by 'NULL'
+  '' => 35,
 
   // binary key
   "a".chr(0)."b" => 45,

@@ -61,11 +61,11 @@ $arrays = varray [
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
+/*14*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
        darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
        darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
+       darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
 
        // array containing embedded arrays
 /*15*/ darray[0 => "str1", "array" => varray["hello", 'world'], 1 => varray[1, 2]]

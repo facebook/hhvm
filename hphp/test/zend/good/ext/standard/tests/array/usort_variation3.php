@@ -39,7 +39,7 @@ EOT3;
 $array_arg = darray[
   // numeric keys
   -2 => 9,
-  8.9 => 8,
+  8 => 8,
   012 => 7,
   0x34 => 6,
 
@@ -49,11 +49,11 @@ $array_arg = darray[
   " " => 0,  // space as key
 
   // bool keys
-  TRUE => 100,
-  FALSE => 25,
+  1 => 100,
+  0 => 25,
 
   // null keys
-  NULL => 35,
+  '' => 35,
 
   // binary key
   "a".chr(0)."b" => 45,

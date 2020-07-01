@@ -45,10 +45,10 @@ EOT;
 // array to be passsed to $arr1 argument
 $arr1 = darray[
   0 => 1, 1 => 1.1, 2 => "hello", 3 => "one", 4 => NULL, 5 => 2,
-  6 => 'world', 7 => true, 8 => false, false => 5, 9 => 'aaaa\r', 10 => "aaaa\r",
+  6 => 'world', 7 => true, 8 => false, 0 => 5, 9 => 'aaaa\r', 10 => "aaaa\r",
   11 => $numeric_string, 12 => $diff_whitespaces,
   "one" => "ten", 4 => "four", "two" => 2, 2 => "two",
-  13 => '', null => "null", '' => 'emptys'
+  13 => '', '' => "null", '' => 'emptys'
 ];
 
 // arrays to be passed to $arr2 argument
@@ -70,11 +70,11 @@ $arrays = varray [
        darray["one" => 1, 2 => "two", 4 => "four"],  //mixed
 
        // associative array, containing null/empty/boolean values as key/value
-/*14*/ darray[NULL => "NULL", null => "null", "NULL" => NULL, "null" => null],
-       darray[true => "true", false => "false", "false" => false, "true" => true],
+/*14*/ darray['' => "NULL", '' => "null", "NULL" => NULL, "null" => null],
+       darray[1 => "true", 0 => "false", "false" => false, "true" => true],
        darray["" => "emptyd", '' => 'emptys', "emptyd" => "", 'emptys' => ''],
        darray[1 => '', 2 => "", 3 => NULL, 4 => null, 5 => false, 6 => true],
-       darray['' => 1, "" => 2, NULL => 3, null => 4, false => 5, true => 6],
+       darray['' => 1, "" => 2, '' => 3, '' => 4, 0 => 5, 1 => 6],
 
        // array with repetative keys
 /*19*/ darray["One" => 1, "two" => 2, "One" => 10, "two" => 20, "three" => 3]

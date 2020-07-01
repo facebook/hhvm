@@ -97,43 +97,28 @@ array(1) {
   string(4) "four"
 }
 -- Iteration 14 --
-array(0) {
+array(2) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
-array(0) {
+array(2) {
+  [""]=>
+  string(6) "emptys"
+  ["emptyd"]=>
+  string(0) ""
 }
 -- Iteration 15 --
-array(0) {
+array(1) {
+  [5]=>
+  bool(false)
 }
-array(0) {
+array(1) {
+  [5]=>
+  bool(false)
 }
 -- Iteration 16 --
-array(2) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
-}
-array(2) {
-  [""]=>
-  string(6) "emptys"
-  ["emptyd"]=>
-  string(0) ""
-}
--- Iteration 17 --
-array(1) {
-  [5]=>
-  bool(false)
-}
-array(1) {
-  [5]=>
-  bool(false)
-}
--- Iteration 18 --
-array(0) {
-}
-array(0) {
-}
--- Iteration 19 --
 array(0) {
 }
 array(0) {

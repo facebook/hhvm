@@ -15,7 +15,7 @@
 
 function callback($a, $b)
 {
-  return darray[$a => $b];
+  return varray[$a, $b];
 }
 <<__EntryPoint>> function main(): void {
 echo "*** Testing array_map() : arrays with diff. size ***\n";

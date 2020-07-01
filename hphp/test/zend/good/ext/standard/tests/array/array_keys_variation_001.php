@@ -10,8 +10,8 @@ $arrays = varray[
   darray[0 => 1, 1 => 2, 2 => 3, "d" => varray[4,6, "d"]],
   darray["a" => 1, "b" => 2, "c" =>3, "d" => varray[]],
   darray[0 => 0, 1 => 1, 2 => 2, 3 => 3],
-  darray[0.001=>3.000, 1.002=>2, 1.999=>3, "a"=>3, 3=>5, "5"=>3.000],
-  darray[TRUE => TRUE, FALSE => FALSE, NULL => NULL, 2 => "\x000", 3 => "\000"],
+  darray[0=>3.000, 1=>2, 1=>3, "a"=>3, 3=>5, "5"=>3.000],
+  darray[1 => TRUE, 0 => FALSE, '' => NULL, 2 => "\x000", 3 => "\000"],
   darray["a" => "abcd", "a" => "", "ab" => -6, "cd" => -0.5 ],
   darray[0 => varray[], 1=> varray[0], 2 => varray[1], ""=> varray[],""=>"" ]
 ];

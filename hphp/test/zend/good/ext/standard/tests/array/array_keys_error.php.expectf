@@ -12,8 +12,6 @@ NULL
 Warning: array_keys() expects exactly 1 parameter, 0 given in %s/array_keys_error.php on line 7
 
 Warning: array_keys() expects exactly 1 parameter, 4 given in %s/array_keys_error.php on line 8
-
-Warning: Invalid operand type was used: Invalid type used as key in %s/array_keys_error.php on line 9
 array(3) {
   [0]=>
   int(0)

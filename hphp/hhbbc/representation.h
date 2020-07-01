@@ -304,13 +304,11 @@ struct Func : FuncBase {
   Attr attrs;
 
   /*
-   * Parameters, locals, and iterators.
+   * Parameters and locals.
    *
-   * There are at least as many locals as parameters (parameters are
-   * also locals---the names of parameters are stored in the locals
-   * vector).
+   * There are at least as many locals as parameters (parameters are also
+   * locals - the names of parameters are stored in the locals vector.)
    */
-  IterId             numIters;
   CompactVector<Param> params;
   CompactVector<Local> locals;
 
@@ -332,6 +330,11 @@ struct Func : FuncBase {
   CompactVector<BlockId> dvEntries;
 
   /*
+   * The number of (nested) iterators used within this function.
+   */
+  IterId numIters;
+
+  /*
    * Entry point to the function when the number of passed args is
    * equal to the number of parameters.
    */
@@ -342,10 +345,6 @@ struct Func : FuncBase {
    * passed through to expose it to reflection.
    */
   LSString returnUserType;
-
-  bool hasParamsWithMultiUBs : 1;
-  bool hasReturnWithMultiUBs : 1;
-  CompactVector<TypeConstraint> returnUBs;
 
   /*
    * If traits are being flattened by hphpc, we keep the original
@@ -403,6 +402,13 @@ struct Func : FuncBase {
   bool hasInOutArgs : 1;
 
   bool sampleDynamicCalls : 1;
+
+  /*
+   * Type parameter upper bounds. May be enforced and used for optimizations.
+   */
+  bool hasParamsWithMultiUBs : 1;
+  bool hasReturnWithMultiUBs : 1;
+  CompactVector<TypeConstraint> returnUBs;
 
   /*
    * Return type specified in the source code (ex. "function foo(): Bar").

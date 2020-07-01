@@ -111,6 +111,46 @@ module ConditionTypes = struct
     | _ -> do_localize ty
 end
 
+(* Fetch all the constraints of a `Tpu_type_access(tparam, tyname)`, which
+ * are stored in a PU definition, and filter them to only keep upper bounds
+ *)
+let get_tpu_type_param_upper_bounds env tparam tyname =
+  (* Filter the decl type parameter constraints to only keep the `as` ones *)
+  let filter_constraints env ety_env decl_tparam =
+    List.filter_map_env env decl_tparam.tp_constraints ~f:(fun env (ck, dty) ->
+        match ck with
+        (* Only keep the "as" constraints *)
+        | Ast_defs.Constraint_as ->
+          let (env, lty) = Phase.localize ~ety_env env dty in
+          (env, Some lty)
+        | _ -> (env, None))
+  in
+  (* when tparam is bound by a Tpu(C, E), we look at the definition
+   * of the PU to get the constraints on `case type tyname`.
+   * We accumulate such constraints in `acc`
+   *)
+  let get_case_type_constraints env cls enum acc =
+    (* Get the type parameter associated to tyname in this PU *)
+    let (env, info) = TUtils.class_get_pu_type env cls enum tyname in
+    let (env, ltys) =
+      match info with
+      | None -> (env, [])
+      | Some (ety_env, (_, decl_tparam)) ->
+        filter_constraints env ety_env decl_tparam
+    in
+    (env, List.rev_append acc ltys)
+  in
+  (* Get upper bounds of the tparam generic *)
+  let upper_bounds = Env.get_upper_bounds env tparam in
+  Typing_set.fold
+    (fun bound (env, acc) ->
+      match get_node bound with
+      (* Only inspect Tpu bounds *)
+      | Tpu (cls, (_, enum)) -> get_case_type_constraints env cls enum acc
+      | _ -> (env, acc))
+    upper_bounds
+    (env, [])
+
 (* Given a pair of types `ty_sub` and `ty_super` attempt to apply simplifications
  * and add to the accumulated constraints in `constraints` any necessary and
  * sufficient [(t1,ck1,u1);...;(tn,ckn,un)] such that
@@ -537,8 +577,6 @@ and simplify_subtype_i
             else
               this_ty
           in
-          (* We collect all the upper bounds of the base generic *)
-          let upper_bounds = Env.get_upper_bounds env msub in
           (*
            * We are checking if msub:@nsub is a subtype of ty_super.
            * Since msub is a generic parameter, we are scanning all of its
@@ -550,35 +588,7 @@ and simplify_subtype_i
            * to check if they are <: ty_super.
            *)
           let (env, upper_bounds) =
-            Typing_set.fold
-              (fun bound (env, acc) ->
-                match get_node bound with
-                (* Only keep Tpu bounds *)
-                | Tpu (cls, (_, enum)) ->
-                  (* Get the type parameter associated to nsub in this PU *)
-                  let (env, info) =
-                    TUtils.class_get_pu_type env cls enum nsub
-                  in
-                  let (env, ltys) =
-                    match info with
-                    | None -> (env, [])
-                    | Some (ety_env, (_, decl_tparam)) ->
-                      (* Filter the constraints *)
-                      List.filter_map_env
-                        env
-                        decl_tparam.tp_constraints
-                        ~f:(fun env (ck, dty) ->
-                          match ck with
-                          (* Only keep the "as" constraints *)
-                          | Ast_defs.Constraint_as ->
-                            let (env, lty) = Phase.localize ~ety_env env dty in
-                            (env, Some lty)
-                          | _ -> (env, None))
-                  in
-                  (env, List.rev_append acc ltys)
-                | _ -> (env, acc))
-              upper_bounds
-              (env, [])
+            get_tpu_type_param_upper_bounds env msub nsub
           in
           let rec try_bounds tyl env =
             match tyl with
@@ -1316,7 +1326,12 @@ and simplify_subtype_i
       | LoclType lty ->
         (match (deref lty, prim_ty) with
         | ((_, Tprim (Nast.Tint | Nast.Tfloat)), Nast.Tnum) -> valid ()
-        | ((_, Tprim (Nast.Tint | Nast.Tstring)), Nast.Tarraykey) -> valid ()
+        | ((_, Tprim (Nast.Tatom _)), Nast.Tstring) -> valid ()
+        | ((_, Tpu (_, _)), Nast.Tstring) -> valid ()
+        | ((_, Tprim (Nast.Tatom _ | Nast.Tint | Nast.Tstring)), Nast.Tarraykey)
+          ->
+          valid ()
+        | ((_, Tpu (_, _)), Nast.Tarraykey) -> valid ()
         | ((_, Tprim prim_sub), _) when Aast.equal_tprim prim_sub prim_ty ->
           valid ()
         | ((_, Toption arg_ty_sub), Nast.Tnull) ->

@@ -714,14 +714,16 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
           ~f:(fun x m -> Relative_path.Map.remove m x)
           ~init:fast
       in
+      let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
       let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
       Relative_path.Map.fold fast ~init:[] ~f:(fun path _ acc ->
           match Naming_table.get_file_info env.naming_table path with
           | None -> acc
           | Some _ ->
             if
-              List.exists ignore_paths (fun ignore ->
-                  String.equal (Relative_path.S.to_string path) ignore)
+              (exclude_hhi && Relative_path.is_hhi (Relative_path.prefix path))
+              || List.exists ignore_paths (fun ignore ->
+                     String.equal (Relative_path.S.to_string path) ignore)
             then
               acc
             else

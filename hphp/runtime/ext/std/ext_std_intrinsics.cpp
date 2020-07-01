@@ -86,19 +86,22 @@ TypedValue HHVM_FUNCTION(dummy_cast_to_kindofarray, const Variant& var) {
   return make_array_like_tv(arr.toPHPArray().detach());
 }
 
-TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Array& arr) {
+TypedValue HHVM_FUNCTION(dummy_cast_to_kindofdarray, const Variant& var) {
+  if (!var.isArray()) {
+    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+  }
+  auto const& arr = var.asCArrRef();
   if (arr->isDArray()) return tvReturn(arr.get());
   return make_array_like_tv(arr.toDArray().detach());
 }
 
-TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Array& arr) {
+TypedValue HHVM_FUNCTION(dummy_cast_to_kindofvarray, const Variant& var) {
+  if (!var.isArray()) {
+    SystemLib::throwInvalidOperationExceptionObject("must pass arraylike");
+  }
+  auto const& arr = var.asCArrRef();
   if (arr->isVArray()) return tvReturn(arr.get());
   return make_array_like_tv(arr.toVArray().detach());
-}
-
-Array HHVM_FUNCTION(dummy_array_builtin, const Array& arr) {
-  if (!arr.isHAMSafeVArray() && !arr.isHAMSafeDArray()) return arr;
-  return Array::Create();
 }
 
 Array HHVM_FUNCTION(dummy_dict_builtin, const Array& arr) {
@@ -361,7 +364,6 @@ void StandardExtension::initIntrinsics() {
               dummy_varr_or_darr_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_arraylike_builtin,
               dummy_arraylike_builtin);
-  HHVM_FALIAS(__hhvm_intrinsics\\dummy_array_builtin, dummy_array_builtin);
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_dict_builtin, dummy_dict_builtin);
 
   HHVM_FALIAS(__hhvm_intrinsics\\dummy_cast_to_kindofarray,

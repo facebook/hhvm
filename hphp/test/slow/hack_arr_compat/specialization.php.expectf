@@ -23,16 +23,12 @@ Passing darray to boolean: json_decode() expects parameter 2 to be boolean, darr
 
 =====================================
 Builtins:
-Passing array to array: []
 Passing array to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be varray, array given
 Passing array to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, array given
-Passing varray to array: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, varray given
 Passing varray to varray: []
 Passing varray to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, varray given
-Passing darray to array: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, darray given
 Passing darray to varray: __hhvm_intrinsics\dummy_varray_builtin() expects parameter 1 to be varray, darray given
 Passing darray to darray: []
-Passing clsmeth to array: __hhvm_intrinsics\dummy_array_builtin() expects parameter 1 to be array, clsmeth given
 Passing clsmeth to varray: ["ClsMethTest","fn"]
 Passing clsmeth to darray: __hhvm_intrinsics\dummy_darray_builtin() expects parameter 1 to be darray, clsmeth given
 

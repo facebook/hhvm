@@ -30,13 +30,6 @@ function return_values() {
   var_dump(is_darray($x));
   var_dump($x);
   echo "====================================================\n";
-
-  $x = __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
-  var_dump(is_array($x));
-  var_dump(is_varray($x));
-  var_dump(is_darray($x));
-  var_dump($x);
-  echo "====================================================\n";
 }
 
 function parameters() {
@@ -53,11 +46,6 @@ function parameters() {
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(varray[1,2,3]);
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(darray['a'=>1,'b'=>2,'c'=>3]);
   __hhvm_intrinsics\dummy_varr_or_darr_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
-  echo "====================================================\n";
-
-  try { __hhvm_intrinsics\dummy_array_builtin(varray[1,2,3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  try { __hhvm_intrinsics\dummy_array_builtin(darray['a'=>1,'b'=>2,'c'=>3]); } catch (Exception $e) { echo "\n".'Warning: '.$e->getMessage().' in '.__FILE__.' on line '.__LINE__."\n"; }
-  __hhvm_intrinsics\dummy_array_builtin(__hhvm_intrinsics\dummy_cast_to_kindofarray(vec[1,2,3]));
   echo "====================================================\n";
 }
 

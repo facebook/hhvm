@@ -65,8 +65,6 @@ function test_builtin_enforcement() {
   $array = __hhvm_intrinsics\dummy_cast_to_kindofarray(varray[]);
   $clsmeth = class_meth(ClsMethTest::class, 'fn');
   foreach (vec[$array, varray[], darray[], $clsmeth] as $input) {
-    print('Passing '.display($input).' to array: ');
-    run(() ==> __hhvm_intrinsics\dummy_array_builtin($input));
     print('Passing '.display($input).' to varray: ');
     run(() ==> __hhvm_intrinsics\dummy_varray_builtin($input));
     print('Passing '.display($input).' to darray: ');

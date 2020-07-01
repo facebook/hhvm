@@ -344,6 +344,9 @@ Variant HHVM_FUNCTION(apc_store,
         return Variant(false);
       }
       apc_store().set(strKey, v, ttl);
+      if (RuntimeOption::EnableAPCStats) {
+        ServerStats::Log("apc.write", 1);
+      }
     }
     return Variant(ArrayData::Create());
   }
@@ -359,6 +362,9 @@ Variant HHVM_FUNCTION(apc_store,
     return Variant(false);
   }
   apc_store().set(strKey, var, ttl);
+  if (RuntimeOption::EnableAPCStats) {
+    ServerStats::Log("apc.write", 1);
+  }
   return Variant(true);
 }
 
@@ -375,6 +381,9 @@ bool HHVM_FUNCTION(apc_store_as_primed_do_not_use,
     return false;
   }
   apc_store().setWithoutTTL(key, var);
+  if (RuntimeOption::EnableAPCStats) {
+    ServerStats::Log("apc.write", 1);
+  }
   return true;
 }
 
@@ -420,6 +429,9 @@ Variant HHVM_FUNCTION(apc_add,
     raise_invalid_argument_warning("apc key: (contains invalid characters)");
     return false;
   }
+  if (RuntimeOption::EnableAPCStats) {
+    ServerStats::Log("apc.write", 1);
+  }
   return apc_store().add(strKey, var, ttl);
 }
 
@@ -447,6 +459,9 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
       }
       auto strKey = k.asCStrRef();
       if (apc_store().get(strKey, v)) {
+        if (RuntimeOption::EnableAPCStats) {
+          ServerStats::Log("apc.hit", 1);
+        }
         tmp = true;
         init.set(strKey, v);
       }
@@ -457,9 +472,15 @@ TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success) {
 
   if (apc_store().get(key.toString(), v)) {
     success = true;
+    if (RuntimeOption::EnableAPCStats) {
+      ServerStats::Log("apc.hit", 1);
+    }
   } else {
     success = false;
     v = false;
+    if (RuntimeOption::EnableAPCStats) {
+      ServerStats::Log("apc.miss", 1);
+    }
   }
   return tvReturn(std::move(v));
 }

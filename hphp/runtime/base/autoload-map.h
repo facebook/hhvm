@@ -138,23 +138,27 @@ struct AutoloadMap {
  * autoloading.
  */
 struct FactsStore : public AutoloadMap {
+
   virtual ~FactsStore() = default;
 
   /**
-   * Return the kind of the given type (such as "class" or "enum"),
-   * or `null` if the given type does not have a single kind.
+   * Return whether the given type is a class, enum, interface, or trait.
+   *
+   * Return `null` if given none of the above.
    */
   virtual Variant getKind(const String& type) = 0;
 
   /**
    * Return all types in the repo which the given type extends.
    */
-  virtual Array getBaseTypes(const String& derivedType) = 0;
+  virtual Array getBaseTypes(
+      const String& derivedType, const Variant& filters) = 0;
 
   /**
    * Return all types in the repo which extend the given type.
    */
-  virtual Array getDerivedTypes(const String& baseType) = 0;
+  virtual Array getDerivedTypes(
+      const String& baseType, const Variant& filters) = 0;
 };
 
 } // namespace HPHP

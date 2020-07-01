@@ -98,6 +98,7 @@ impl Default for GlobalOptions {
             symbol_write_hhi_path: String::new(),
             symbol_write_ignore_paths: vec![],
             symbol_write_index_paths: vec![],
+            symbol_write_include_hhi: true,
             po_enable_first_class_function_pointers: false,
             po_disable_modes: false,
             po_disable_hh_ignore_error: false,

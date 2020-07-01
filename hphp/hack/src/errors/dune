@@ -7,6 +7,7 @@
     hh_autoimport
     logging
     pos
+    ast
     server_load_flag
     (select coroutine_errors.ml from
     (facebook -> facebook/coroutine_errors.ml)

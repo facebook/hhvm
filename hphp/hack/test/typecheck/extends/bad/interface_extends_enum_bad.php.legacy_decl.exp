@@ -1,4 +1,0 @@
-File "interface_extends_enum_bad.php", line 13, characters 11-11:
-an interface cannot extend an enum (Typing[4115])
-File "interface_extends_enum_bad.php", line 13, characters 21-21:
-This is an enum

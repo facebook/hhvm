@@ -97,7 +97,8 @@ let check_if_cyclic ctx cls =
     let classes = SSet.add classes (Cls.name cls) in
     Errors.cyclic_class_def classes (Cls.pos cls)
 
-let check_extend_kind parent_pos parent_kind child_pos child_kind =
+let check_extend_kind
+    parent_pos parent_kind parent_name child_pos child_kind child_name =
   Ast_defs.(
     match (parent_kind, child_kind) with
     | ((Cabstract | Cnormal), (Cabstract | Cnormal))
@@ -106,19 +107,30 @@ let check_extend_kind parent_pos parent_kind child_pos child_kind =
     | (Cinterface, Cinterface) ->
       ()
     | _ ->
-      let parent = Ast_defs.string_of_class_kind parent_kind in
-      let child = Ast_defs.string_of_class_kind child_kind in
-      Errors.wrong_extend_kind child_pos child parent_pos parent)
+      Errors.wrong_extend_kind
+        ~parent_pos
+        ~parent_kind
+        ~parent_name
+        ~child_pos
+        ~child_kind
+        ~child_name)
 
 let check_extend_kinds ctx shallow_class =
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
+  let class_name = snd shallow_class.sc_name in
   List.iter shallow_class.sc_extends ~f:(fun ty ->
       let (_, (parent_pos, parent_name), _) = Decl_utils.unwrap_class_type ty in
       match Shallow_classes_provider.get ctx parent_name with
       | None -> ()
       | Some parent ->
-        check_extend_kind parent_pos parent.sc_kind class_pos class_kind)
+        check_extend_kind
+          parent_pos
+          parent.sc_kind
+          (snd parent.sc_name)
+          class_pos
+          class_kind
+          class_name)
 
 let disallow_trait_reuse env =
   TypecheckerOptions.disallow_trait_reuse (Env.get_tcopt env)

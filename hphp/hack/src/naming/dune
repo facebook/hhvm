@@ -14,7 +14,8 @@
     nast)
   (libraries
     annotated_ast
-    naming_special_names)
+    naming_special_names
+    errors)
   (preprocess (pps ppx_deriving.std)))
 
 (library

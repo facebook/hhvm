@@ -45,7 +45,7 @@ let test () =
   if not loop_output.did_read_disk_changes then
     Test.fail "Expected the server to process disk updates";
   let expected_error =
-    "File \"/foo.php\", line 3, characters 7-9:\na class cannot extend an interface (Typing[4115])\nFile \"/foo.php\", line 3, characters 19-19:\nThis is an interface"
+    "File \"/foo.php\", line 3, characters 7-9:\nClasses can only extend other classes. Did you mean `implements I`? (Typing[4115])\nFile \"/foo.php\", line 3, characters 19-19:\nThis is an interface."
   in
   Test.assertSingleError expected_error (Errors.get_error_list env.errorl);
 

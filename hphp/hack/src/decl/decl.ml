@@ -87,8 +87,10 @@ let stop_tracking () : FileInfo.names =
 let check_extend_kind
     (parent_pos : Pos.t)
     (parent_kind : Ast_defs.class_kind)
+    (parent_name : string)
     (child_pos : Pos.t)
-    (child_kind : Ast_defs.class_kind) : unit =
+    (child_kind : Ast_defs.class_kind)
+    (child_name : string) : unit =
   match (parent_kind, child_kind) with
   (* What is allowed *)
   | ( (Ast_defs.Cabstract | Ast_defs.Cnormal),
@@ -100,9 +102,13 @@ let check_extend_kind
     ()
   | _ ->
     (* What is disallowed *)
-    let parent = Ast_defs.string_of_class_kind parent_kind in
-    let child = Ast_defs.string_of_class_kind child_kind in
-    Errors.wrong_extend_kind child_pos child parent_pos parent
+    Errors.wrong_extend_kind
+      ~parent_pos
+      ~parent_kind
+      ~parent_name
+      ~child_pos
+      ~child_kind
+      ~child_name
 
 (*****************************************************************************)
 (* Functions used retrieve everything implemented in parent classes
@@ -166,8 +172,15 @@ let add_grand_parents_or_traits
   let (extends, is_complete, pass) = acc in
   let class_pos = fst shallow_class.sc_name in
   let class_kind = shallow_class.sc_kind in
+  let class_name = snd shallow_class.sc_name in
   if phys_equal pass `Extends_pass then
-    check_extend_kind parent_pos parent_type.dc_kind class_pos class_kind;
+    check_extend_kind
+      parent_pos
+      parent_type.dc_kind
+      parent_type.dc_name
+      class_pos
+      class_kind
+      class_name;
 
   (* If we are crawling the xhp attribute deps, we need to merge their xhp deps
    * as well *)

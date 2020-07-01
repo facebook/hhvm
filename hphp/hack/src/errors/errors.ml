@@ -4274,9 +4274,51 @@ let php_lambda_disallowed pos =
 (* Typing decl errors *)
 (*****************************************************************************)
 
-let wrong_extend_kind child_pos child parent_pos parent =
-  let msg1 = (child_pos, child ^ " cannot extend " ^ parent) in
-  let msg2 = (parent_pos, "This is " ^ parent) in
+let wrong_extend_kind
+    ~parent_pos ~parent_kind ~parent_name ~child_pos ~child_kind ~child_name =
+  let parent_kind_str = Ast_defs.string_of_class_kind parent_kind in
+  let parent_name = strip_ns parent_name in
+  let child_name = strip_ns child_name in
+  let use_msg =
+    Printf.sprintf
+      " Did you mean to add `use %s;` within the body of %s?"
+      parent_name
+      child_name
+  in
+  let child_msg =
+    match child_kind with
+    | Ast_defs.Cabstract
+    | Ast_defs.Cnormal ->
+      let extends_msg = "Classes can only extend other classes." in
+      let suggestion =
+        if Ast_defs.is_c_interface parent_kind then
+          " Did you mean `implements " ^ parent_name ^ "`?"
+        else if Ast_defs.is_c_trait parent_kind then
+          use_msg
+        else
+          ""
+      in
+      extends_msg ^ suggestion
+    | Ast_defs.Cinterface ->
+      let extends_msg = "Interfaces can only extend other interfaces." in
+      let suggestion =
+        if Ast_defs.is_c_trait parent_kind then
+          use_msg
+        else
+          ""
+      in
+      extends_msg ^ suggestion
+    | Ast_defs.Cenum ->
+      (* This case should never happen, as the type checker will have already caught
+          it with EnumTypeBad. But just in case, report this error here too. *)
+      "Enums can only extend int, string, or arraykey."
+    | Ast_defs.Ctrait ->
+      (* This case should never happen, as the parser will have caught it before
+          we get here. *)
+      "A trait cannot use `extends`. This is a parser error."
+  in
+  let msg1 = (child_pos, child_msg) in
+  let msg2 = (parent_pos, "This is " ^ parent_kind_str ^ ".") in
   add_list (Typing.err_code Typing.WrongExtendKind) [msg1; msg2]
 
 let unsatisfied_req parent_pos req_name req_pos =

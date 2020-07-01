@@ -607,7 +607,14 @@ val static_property_type_generic_param :
 
 val contravariant_this : Pos.t -> string -> string -> unit
 
-val wrong_extend_kind : Pos.t -> string -> Pos.t -> string -> unit
+val wrong_extend_kind :
+  parent_pos:Pos.t ->
+  parent_kind:Ast_defs.class_kind ->
+  parent_name:string ->
+  child_pos:Pos.t ->
+  child_kind:Ast_defs.class_kind ->
+  child_name:string ->
+  unit
 
 val unsatisfied_req : Pos.t -> string -> Pos.t -> unit
 

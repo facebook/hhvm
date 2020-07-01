@@ -5,7 +5,7 @@
     globalOptions)
   (libraries
     collections
-    errors)
+    utils_find)
   (preprocess (pps ppx_deriving.std)))
 
 (executable

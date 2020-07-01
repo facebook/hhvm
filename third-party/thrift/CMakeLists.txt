@@ -39,9 +39,7 @@ list(REMOVE_ITEM files
 
 if (NOT OPENSSL_HAVE_ALPN)
   HHVM_REMOVE_MATCHES_FROM_LISTS(files MATCHES
-    "/lib/cpp2/transport/rsocket/"
     "/lib/cpp2/transport/rocket/"
-    ".*/RSocket.*"
     ".*/Rocket.*"
   )
 endif()
@@ -58,11 +56,10 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gen")
 include_directories("${TP_DIR}/fmt/fmt/include")
 include_directories("${TP_DIR}/fizz/src")
-include_directories("${TP_DIR}/rsocket-cpp/src")
 include_directories("${TP_DIR}/fatal")
 include_directories("${TP_DIR}/proxygen/src")
 add_library(hphp_thrift STATIC ${CXX_SOURCES})
 
-target_link_libraries(hphp_thrift wangle boost fmt fizz rsocket_cpp hphp_proxygen
+target_link_libraries(hphp_thrift wangle boost fmt fizz hphp_proxygen
                                          ${LIBGLOG_LIBRARY}
                                          ${LIBPTHREAD_LIBRARIES})

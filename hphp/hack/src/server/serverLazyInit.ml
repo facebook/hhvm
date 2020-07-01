@@ -701,19 +701,31 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   in
   let t = update_files genv env.naming_table t in
   let (env, t) = naming env t in
-  let fast = Naming_table.to_fast env.naming_table in
-  let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-  let fast =
-    Relative_path.Set.fold
-      failed_parsing
-      ~f:(fun x m -> Relative_path.Map.remove m x)
-      ~init:fast
-  in
+  let index_paths = env.swriteopt.symbol_write_index_paths in
   let files =
-    Relative_path.Map.fold fast ~init:[] ~f:(fun path _ acc ->
-        match Naming_table.get_file_info env.naming_table path with
-        | None -> acc
-        | Some _ -> path :: acc)
+    if List.length index_paths > 0 then
+      List.map index_paths (fun path -> Relative_path.from_root ~suffix:path)
+    else
+      let fast = Naming_table.to_fast env.naming_table in
+      let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
+      let fast =
+        Relative_path.Set.fold
+          failed_parsing
+          ~f:(fun x m -> Relative_path.Map.remove m x)
+          ~init:fast
+      in
+      let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
+      Relative_path.Map.fold fast ~init:[] ~f:(fun path _ acc ->
+          match Naming_table.get_file_info env.naming_table path with
+          | None -> acc
+          | Some _ ->
+            if
+              List.exists ignore_paths (fun ignore ->
+                  String.equal (Relative_path.S.to_string path) ignore)
+            then
+              acc
+            else
+              path :: acc)
   in
   (* Ensure we are writing to fresh files *)
   let is_invalid =
@@ -733,15 +745,7 @@ let write_symbol_info_init (genv : ServerEnv.genv) (env : ServerEnv.env) :
   let ctx = Provider_utils.ctx_from_server_env env in
   let root_path = env.swriteopt.symbol_write_root_path in
   let hhi_path = env.swriteopt.symbol_write_hhi_path in
-  let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
-  Symbol_info_writer.go
-    genv.workers
-    ctx
-    out_dir
-    root_path
-    hhi_path
-    ignore_paths
-    files;
+  Symbol_info_writer.go genv.workers ctx out_dir root_path hhi_path files;
 
   (env, t)
 

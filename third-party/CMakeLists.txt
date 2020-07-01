@@ -72,9 +72,6 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/proxygen/src")
 list(APPEND THIRD_PARTY_MODULES fmt)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fmt/fmt/include")
 
-list(APPEND THIRD_PARTY_MODULES rsocket-cpp)
-list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/rsocket-cpp/src")
-
 list(APPEND THIRD_PARTY_MODULES thrift)
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/src")
 list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/thrift/gen")

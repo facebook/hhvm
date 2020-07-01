@@ -49,9 +49,6 @@
 [submodule "re2"]
 	path = third-party/re2/src
 	url = https://github.com/google/re2.git
-[submodule "rsocket-cpp"]
-	path = third-party/rsocket-cpp/rsocket-cpp
-	url = https://github.com/rsocket/rsocket-cpp.git
 [submodule "squangle"]
 	path = third-party/squangle/src
 	url = https://github.com/facebook/squangle.git

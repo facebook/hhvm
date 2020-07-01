@@ -19,6 +19,7 @@
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
 #include "hphp/runtime/vm/jit/irgen-internal.h"
+#include "hphp/runtime/vm/jit/irgen-minstr.h"
 #include "hphp/runtime/vm/jit/irgen-types.h"
 
 namespace HPHP { namespace jit { namespace irgen {
@@ -215,6 +216,51 @@ void emitSetS(IRGS& env) {
   discard(env);
   destroyName(env, ssaPropName);
   bindMem(env, lookup.propPtr, value);
+}
+
+void emitSetOpS(IRGS& env, SetOpOp op) {
+  auto const ssaCls      = topC(env, BCSPRelOffset{1});
+  auto const ssaPropName = topC(env, BCSPRelOffset{2});
+
+  if (!ssaPropName->isA(TStr)) PUNT(SetOpS-PropNameNotString);
+  if (!ssaCls->isA(TCls))      PUNT(SetOpS-NotClass);
+
+  auto const rhs = popC(env);
+  auto const lookup = ldClsPropAddr(env, ssaCls, ssaPropName, true, false,
+                                    true);
+
+  auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
+                       lookup.propPtr);
+
+  if (auto value = inlineSetOp(env, op, lhs, rhs)) {
+    if (lookup.tc) {
+      verifyPropType(
+        env,
+        ssaCls,
+        lookup.tc,
+        lookup.ubs,
+        lookup.slot,
+        value,
+        ssaPropName,
+        true,
+        &value
+      );
+    } else if (RuntimeOption::EvalCheckPropTypeHints > 0) {
+      auto const slot = gen(env, LookupSPropSlot, ssaCls, ssaPropName);
+      value = gen(env, VerifyPropCoerceAll, ssaCls, slot, value,
+                  cns(env, true));
+    }
+
+    discard(env);
+    destroyName(env, ssaPropName);
+    pushIncRef(env, value);
+    gen(env, StMem, lookup.propPtr, value);
+    decRef(env, lhs);
+    decRef(env, rhs);
+  } else {
+    // Might be worth handling Concat, and others.
+    PUNT(SetOpS-UnhandledOp);
+  }
 }
 
 void emitIssetS(IRGS& env) {

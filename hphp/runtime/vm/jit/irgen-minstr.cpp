@@ -1970,11 +1970,6 @@ void emitIncDecM(IRGS& env, uint32_t nDiscard, IncDecOp incDec, MemberKey mk) {
   mFinalImpl(env, nDiscard, result);
 }
 
-/*
- * If the op and operand types are a supported combination, return the modified
- * value. Otherwise, return nullptr. The returned value always has an uncounted
- * type.
- */
 SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
   auto const maybeOp = [&]() -> folly::Optional<Op> {
     switch (op) {

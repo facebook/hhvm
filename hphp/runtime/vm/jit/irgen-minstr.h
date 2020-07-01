@@ -50,6 +50,15 @@ bool propertyMayBeCountable(const Class::Prop& prop);
 void logArrayAccessProfile(IRGS& env, SSATmp* arr, SSATmp* key,
                            MOpMode mode, const ArrayAccessProfile& profile);
 
+
+
+/*
+ * If the op and operand types are a supported combination, return the modified
+ * value. Otherwise, return nullptr. The returned value always has an uncounted
+ * type.
+ */
+SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs);
+
 /*
  * Use profiling data from an ArrayAccessProfile to conditionally optimize
  * the array access represented by `generic' using `direct' or `missing`.

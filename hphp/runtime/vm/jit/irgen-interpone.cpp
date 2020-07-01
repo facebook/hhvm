@@ -361,7 +361,6 @@ void interpOne(IRGS& env,
 void emitExit(IRGS& env)                      { interpOne(env); }
 void emitFatal(IRGS& env, FatalOp)            { interpOne(env); }
 void emitSetOpG(IRGS& env, SetOpOp)           { interpOne(env); }
-void emitSetOpS(IRGS& env, SetOpOp)           { interpOne(env); }
 void emitIncDecG(IRGS& env, IncDecOp)         { interpOne(env); }
 void emitUnsetG(IRGS& env)                    { interpOne(env); }
 void emitIncl(IRGS& env)                      { interpOne(env); }

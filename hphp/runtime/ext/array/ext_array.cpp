@@ -230,11 +230,11 @@ TypedValue HHVM_FUNCTION(array_count_values,
 TypedValue HHVM_FUNCTION(array_fill_keys,
                          const Variant& keys,
                          const Variant& value) {
-  folly::Optional<ArrayInit> ai;
+  folly::Optional<DArrayInit> ai;
   auto ok = IterateV(
     *keys.asTypedValue(),
     [&](ArrayData* adata) {
-      ai.emplace(adata->size(), ArrayInit::Mixed{});
+      ai.emplace(adata->size());
     },
     [&](TypedValue v) {
       if (isIntType(v.m_type) || isStringType(v.m_type)) {
@@ -248,7 +248,7 @@ TypedValue HHVM_FUNCTION(array_fill_keys,
     },
     [&](ObjectData* coll) {
       if (coll->collectionType() == CollectionType::Pair) {
-        ai.emplace(2, ArrayInit::Mixed{});
+        ai.emplace(2);
       }
     },
     false

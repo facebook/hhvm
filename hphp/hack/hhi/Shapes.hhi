@@ -32,8 +32,8 @@ abstract final class Shapes {
  * )
  */
   <<__Pure>>
-  public static function idx<T as ?shape(...)>(
-    T $shape,
+  public static function idx(
+    ?shape(...) $shape,
     arraykey $index,
     $default = null,
   );
@@ -43,8 +43,8 @@ abstract final class Shapes {
    * Similar to array_key_exists, but for shapes.
    */
   <<__Pure>>
-  public static function keyExists<T as shape(...)>(
-    T $shape,
+  public static function keyExists(
+    shape(...) $shape,
     arraykey $index
   ): bool;
 
@@ -59,13 +59,13 @@ abstract final class Shapes {
   ): void;
 
   <<__Pure>>
-  public static function toArray<T as shape(...)>(
-    T $shape
+  public static function toArray(
+    shape(...) $shape
   ): darray<arraykey, mixed>;
 
   <<__Pure>>
-  public static function toDict<T as shape(...)>(
-    T $shape
+  public static function toDict(
+    shape(...) $shape
   ): dict<arraykey, mixed>;
 
   /**
@@ -74,8 +74,8 @@ abstract final class Shapes {
    * Use this to access optional fields on shapes.
    */
   <<__Pure>>
-  public static function at<T as shape(...)>(
-    T $shape,
+  public static function at(
+    shape(...) $shape,
     arraykey $index,
   );
 

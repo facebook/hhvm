@@ -68,13 +68,12 @@ Errors:
                  (Expr
                     (([14:5-27], null),
                      (Call (Cnormal,
-                        (([14:5-16], (function<T as ?shape(...)>(shape() $shape, arraykey $index, $default=_): null)),
+                        (([14:5-16], (function(?shape(...) $shape, arraykey $index, $default=_): null)),
                          (Class_const (
                             (([14:5-11], Shapes),
                              (CI ([14:5-11], "\\HH\\Shapes"))),
                             ([14:13-16], "idx")))),
-                        [((shape()),
-                          ([14:13-16], (Happly (([Pos.none], "_"), []))))],
+                        [],
                         [(([14:17-19], shape()), (Lvar ([14:17-19], $s)));
                           (([14:21-26], string), (String "foo"))],
                         None)))))

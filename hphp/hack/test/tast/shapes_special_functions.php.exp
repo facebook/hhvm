@@ -39,12 +39,11 @@
            (Expr
               (([6:3-23], ?int),
                (Call (Cnormal,
-                  (([6:3-14], (function<T as ?shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default=_): ?int)),
+                  (([6:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): ?int)),
                    (Class_const (
                       (([6:3-9], Shapes), (CI ([6:3-9], "\\HH\\Shapes"))),
                       ([6:11-14], "idx")))),
-                  [((shape('x' => int, ?'y' => int)),
-                    ([6:11-14], (Happly (([Pos.none], "_"), []))))],
+                  [],
                   [(([6:15-17], shape('x' => int, ?'y' => int)),
                     (Lvar ([6:15-17], $p)));
                     (([6:19-22], string), (String "x"))],
@@ -53,12 +52,11 @@
             (Expr
                (([7:3-26], int),
                 (Call (Cnormal,
-                   (([7:3-14], (function<T as ?shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index, $default=_): int)),
+                   (([7:3-14], (function(?shape(...) $shape, arraykey $index, $default=_): int)),
                     (Class_const (
                        (([7:3-9], Shapes), (CI ([7:3-9], "\\HH\\Shapes"))),
                        ([7:11-14], "idx")))),
-                   [((shape('x' => int, ?'y' => int)),
-                     ([7:11-14], (Happly (([Pos.none], "_"), []))))],
+                   [],
                    [(([7:15-17], shape('x' => int, ?'y' => int)),
                      (Lvar ([7:15-17], $p)));
                      (([7:19-22], string), (String "x"));
@@ -68,12 +66,11 @@
             (Expr
                (([8:3-29], bool),
                 (Call (Cnormal,
-                   (([8:3-20], (function<T as shape(...)>(shape('x' => int, ?'y' => int) $shape, arraykey $index): bool)),
+                   (([8:3-20], (function(shape(...) $shape, arraykey $index): bool)),
                     (Class_const (
                        (([8:3-9], Shapes), (CI ([8:3-9], "\\HH\\Shapes"))),
                        ([8:11-20], "keyExists")))),
-                   [((shape('x' => int, ?'y' => int)),
-                     ([8:11-20], (Happly (([Pos.none], "_"), []))))],
+                   [],
                    [(([8:21-23], shape('x' => int, ?'y' => int)),
                      (Lvar ([8:21-23], $p)));
                      (([8:25-28], string), (String "y"))],
@@ -99,12 +96,11 @@
             (Expr
                (([10:3-22], darray<string, int>),
                 (Call (Cnormal,
-                   (([10:3-18], (function<T as shape(...)>(shape('x' => int) $shape): darray<string, int>)),
+                   (([10:3-18], (function(shape(...) $shape): darray<string, int>)),
                     (Class_const (
                        (([10:3-9], Shapes), (CI ([10:3-9], "\\HH\\Shapes"))),
                        ([10:11-18], "toArray")))),
-                   [((shape('x' => int)),
-                     ([10:11-18], (Happly (([Pos.none], "_"), []))))],
+                   [],
                    [(([10:19-21], shape('x' => int)), (Lvar ([10:19-21], $p)))
                      ],
                    None)))))

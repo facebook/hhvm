@@ -71,6 +71,6 @@ $send = put_async($server,
   "Now is the time for all good men to come to the aid of their country.\n".
   "The quick brown fox jumped over the lazy dog.");
 $recv = get_async($client);
-HH\Asio\join(AwaitAllWaitHandle::fromArray(array($send, $recv)));
+HH\Asio\join(AwaitAllWaitHandle::fromVArray(varray[$send, $recv]));
 var_dump($send->result());
 var_dump($recv->result());

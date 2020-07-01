@@ -27,21 +27,22 @@ function t(Awaitable $wh, $a): void {
 function get_handles() {
   $maps = Vector {};
   $vectors = Vector {};
-  $arrays = Vector {};
+  $darrays = Vector {};
+  $varrays = Vector {};
   $vecs = Vector {};
   $dicts = Vector {};
 
   // single element
   $vectors[] = Vector {reschedule()};
   $maps[] = Map {0 => reschedule()};
-  $arrays[] = darray[0 => reschedule()];
+  $darrays[] = darray[0 => reschedule()];
   $vecs[] = vec[reschedule()];
   $dicts[] = dict[0 => reschedule()];
 
-  $arrays[] = varray[reschedule()];
+  $varrays[] = varray[reschedule()];
 
   // empty
-  $arrays[] = varray[];
+  $varrays[] = varray[];
   $vectors[] = Vector {};
   $maps[] = Map {};
   $vecs[] = vec[];
@@ -52,12 +53,12 @@ function get_handles() {
   // multiple elements
   $vectors[] = Vector {reschedule(), answer()};
   $maps[] = Map {0 => reschedule(), 1 => answer() };
-  $arrays[] = darray[0 => reschedule(), 1 => answer() ];
-  $arrays[] = darray[0 => reschedule(), 2 => answer() ];
-  $arrays[] = darray[0 => reschedule(), 'zero' => answer() ];
-  $arrays[] = varray[reschedule(), answer()];
-  $arrays[] = darray[0 => reschedule(), 1 => answer()];
-  $arrays[] = darray['zero' => reschedule(), 'one' => answer()];
+  $darrays[] = darray[0 => reschedule(), 1 => answer() ];
+  $darrays[] = darray[0 => reschedule(), 2 => answer() ];
+  $darrays[] = darray[0 => reschedule(), 'zero' => answer() ];
+  $varrays[] = varray[reschedule(), answer()];
+  $darrays[] = darray[0 => reschedule(), 1 => answer()];
+  $darrays[] = darray['zero' => reschedule(), 'one' => answer()];
   $vecs[] = vec[reschedule(), answer()];
   $dicts[] = dict[0 => reschedule(), 1 => answer()];
   $dicts[] = dict[0 => reschedule(), 2 => answer()];
@@ -66,16 +67,16 @@ function get_handles() {
 
   $a = darray[0 => reschedule()];
   $a[2] = answer();
-  $arrays[] = $a;
+  $darrays[] = $a;
 
   $d = dict[0 => reschedule()];
   $d[2] = answer();
   $dicts[] = $d;
 
-  $arrays[] = array_map(
+  $darrays[] = darray(array_map(
     $x ==> $x%2 ? reschedule() : answer(),
     range(0, 30),
-  );
+  ));
   $vecs[] = vec(array_map(
     $x ==> $x%2 ? reschedule() : answer(),
     range(0, 30),
@@ -85,14 +86,15 @@ function get_handles() {
     range(0, 30),
   ));
 
-  return tuple($vectors, $maps, $arrays, $vecs, $dicts);
+  return tuple($vectors, $maps, $darrays, $varrays, $vecs, $dicts);
 }
 function get_wrapped_handles() {
-  list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_handles();
+  list($vectors, $maps, $darrays, $varrays, $vecs, $dicts) = get_handles();
   return tuple(
     $vectors->map($v ==> AwaitAllWaitHandle::fromVector($v)),
     $maps->map($m ==> AwaitAllWaitHandle::fromMap($m)),
-    $arrays->map($a ==> AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($a))),
+    $darrays->map($d ==> AwaitAllWaitHandle::fromDArray($d)),
+    $varrays->map($v ==> AwaitAllWaitHandle::fromVArray($v)),
     $vecs->map($v ==> AwaitAllWaitHandle::fromVec($v)),
     $dicts->map($d ==> AwaitAllWaitHandle::fromDict($d))
   );
@@ -103,7 +105,7 @@ function main_awaitall() {
 ;
 
 echo "children only\n";
-list($vectors, $maps, $arrays, $vecs, $dicts) = get_handles();
+list($vectors, $maps, $darrays, $varrays, $vecs, $dicts) = get_handles();
 
 foreach ($vectors as $v) {
   $wh = AwaitAllWaitHandle::fromVector($v);
@@ -113,9 +115,13 @@ foreach ($maps as $m) {
   $wh = AwaitAllWaitHandle::fromMap($m);
   t($wh, $m);
 }
-foreach ($arrays as $a) {
-  $wh = AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($a));
-  t($wh, $a);
+foreach ($darrays as $d) {
+  $wh = AwaitAllWaitHandle::fromDArray($d);
+  t($wh, $d);
+}
+foreach ($varrays as $v) {
+  $wh = AwaitAllWaitHandle::fromVArray($v);
+  t($wh, $v);
 }
 foreach ($vecs as $v) {
   $wh = AwaitAllWaitHandle::fromVec($v);
@@ -128,7 +134,7 @@ foreach ($dicts as $d) {
 
 echo "parents\n";
 
-list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_wrapped_handles();
+list($vectors, $maps, $darrays, $varrays, $vecs, $dicts) = $handles = get_wrapped_handles();
 $wh = AwaitAllWaitHandle::fromVector($vectors);
 t($wh, $vectors);
 
@@ -141,16 +147,17 @@ t($wh, $vecs);
 $wh = AwaitAllWaitHandle::fromDict(dict($dicts));
 t($wh, $dicts);
 
-list($vectors, $maps, $arrays, $vecs, $dicts) = $handles = get_wrapped_handles();
+list($vectors, $maps, $darrays, $varrays, $vecs, $dicts) = $handles = get_wrapped_handles();
 echo "grandchildren\n";
 $top = varray[
   AwaitAllWaitHandle::fromVector($vectors),
   AwaitAllWaitHandle::fromVector($maps),
-  AwaitAllWaitHandle::fromVector($arrays),
+  AwaitAllWaitHandle::fromVector($darrays),
+  AwaitAllWaitHandle::fromVector($varrays),
   AwaitAllWaitHandle::fromVector($vecs),
   AwaitAllWaitHandle::fromVector($dicts)
 ];
-$wh = AwaitAllWaitHandle::fromArray(__hhvm_intrinsics\dummy_cast_to_kindofarray($top));
+$wh = AwaitAllWaitHandle::fromVArray($top);
 $finished = () ==> {
   foreach ($handles as $hs) {
     echo count($hs), "\t";

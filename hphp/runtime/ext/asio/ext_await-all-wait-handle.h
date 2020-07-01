@@ -120,8 +120,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   // Construct an AAWH from an array-like without making layout assumptions.
   static Object fromArrLike(const ArrayData* ad);
 
-  friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
-                                   const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                                    const Array& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
@@ -130,6 +128,10 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
                           const Variant& dependencies);
   friend Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
                           const Variant& dependencies);
+  friend Object AwaitAllWaitHandleFromPHPArray(
+      const Class *self_,
+      const Array& dependencies
+  );
  private:
   uint32_t const m_cap; // how many children we have room for.
   uint32_t m_unfinished; // index of the first unfinished child
@@ -142,8 +144,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
 
 void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
                         const Variant& callback);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
-                          const Array& dependencies);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
                           const Array& dependencies);
 Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,

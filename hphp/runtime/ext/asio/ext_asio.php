@@ -128,14 +128,6 @@ final class AsyncGeneratorWaitHandle extends ResumableWaitHandle {}
 final class AwaitAllWaitHandle extends WaitableWaitHandle {
 
   /** Create a wait handle that waits for a given array of dependencies
-   * @param array $dependencies - An Array of dependencies to wait for
-   * @return object - A WaitHandle that will wait for a given array of
-   * dependencies
-   */
-  <<__Native>>
-  public static function fromArray(array $dependencies): Awaitable;
-
-  /** Create a wait handle that waits for a given array of dependencies
    * @param array $dependencies - A DArray of dependencies to wait for
    * @return object - A WaitHandle that will wait for a given array of
    * dependencies

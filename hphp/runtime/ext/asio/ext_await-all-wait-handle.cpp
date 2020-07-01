@@ -175,8 +175,10 @@ Object c_AwaitAllWaitHandle::fromArrLike(const ArrayData* ad) {
   return c_AwaitAllWaitHandle::Create([=](auto fn) { IterateV(ad, fn); });
 }
 
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromArray,
-                          const Array& dependencies) {
+Object AwaitAllWaitHandleFromPHPArray(
+    const Class *self_,
+    const Array& dependencies
+) {
   auto ad = dependencies.get();
   assertx(ad);
   assertx(ad->isPHPArrayType());
@@ -285,7 +287,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfVArray:
     case KindOfPersistentArray:
     case KindOfArray:
-      return c_AwaitAllWaitHandle_ns_fromArray(self_, dependencies.asCArrRef());
+      return AwaitAllWaitHandleFromPHPArray(self_, dependencies.asCArrRef());
     case KindOfObject: {
       auto obj = dependencies.getObjectData();
       if (LIKELY(obj->isCollection())) {
@@ -402,7 +404,6 @@ c_WaitableWaitHandle* c_AwaitAllWaitHandle::getChild() {
 void AsioExtension::initAwaitAllWaitHandle() {
 #define AAWH_SME(meth) \
   HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, meth, AwaitAllWaitHandle, meth)
-  AAWH_SME(fromArray);
   AAWH_SME(fromVec);
   AAWH_SME(fromDict);
   AAWH_SME(fromMap);
@@ -414,8 +415,16 @@ void AsioExtension::initAwaitAllWaitHandle() {
     HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromDict);
     HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromVec);
   } else {
-    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromDArray, AwaitAllWaitHandle, fromArray);
-    HHVM_STATIC_MALIAS(HH\\AwaitAllWaitHandle, fromVArray, AwaitAllWaitHandle, fromArray);
+    HHVM_NAMED_STATIC_ME(
+        HH\\AwaitAllWaitHandle,
+        fromDArray,
+        AwaitAllWaitHandleFromPHPArray
+    );
+    HHVM_NAMED_STATIC_ME(
+        HH\\AwaitAllWaitHandle,
+        fromVArray,
+        AwaitAllWaitHandleFromPHPArray
+    );
   }
 }
 

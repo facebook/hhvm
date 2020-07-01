@@ -46,7 +46,7 @@ function prep<T>(Awaitable<T> $aw): T {
 async function gena_<Tk, Tv>(
   KeyedTraversable<Tk, Awaitable<Tv>> $awaitables,
 ): Awaitable<array<Tv>> {
-  await AwaitAllWaitHandle::fromArray($awaitables);
+  await AwaitAllWaitHandle::fromDArray(darray($awaitables));
   return array_map($wh ==> \HH\Asio\result($wh), $awaitables);
 }
 

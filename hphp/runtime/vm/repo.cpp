@@ -139,7 +139,15 @@ void Repo::setCliFile(const std::string& cliFile) {
 
 size_t Repo::stringLengthLimit() const {
   static const size_t limit = sqlite3_limit(m_dbc, SQLITE_LIMIT_LENGTH, -1);
-  return limit;
+  assertx(limit > 8);
+
+  // In addition to restricting the size of text and blob fields, during an
+  // INSERT or SELECT operation an entire row is encoded as blob, therefore,
+  // SQLITE_LIMIT_LENGTH controls the maximum total size of a row. We currently
+  // store litstrs in a table with an INTEGER key and a TEXT litstr, the size of
+  // the litstr must leave room for an integer, which can require between 1 and
+  // 8 bytes.
+  return limit - 8;
 }
 
 bool Repo::hasGlobalData() {

@@ -1667,15 +1667,12 @@ void dce(Env& env, const bc::ClsCns& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClsCnsD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ClassGetTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CnsE& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ContAssignDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCheck& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContCurrent& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContEnter& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ContEnterDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContGetReturn& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContKey& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContRaise& op) { no_dce(env, op); }
-void dce(Env& env, const bc::ContUnsetDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ContValid& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCl& op) { no_dce(env, op); }
 void dce(Env& env, const bc::CreateCont& op) { no_dce(env, op); }
@@ -1781,7 +1778,6 @@ void dce(Env& env, const bc::VerifyRetTypeC& op) { no_dce(env, op); }
 void dce(Env& env, const bc::VerifyRetTypeTS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::WHResult& op) { no_dce(env, op); }
 void dce(Env& env, const bc::Yield& op) { no_dce(env, op); }
-void dce(Env& env, const bc::YieldFromDelegate& op) { no_dce(env, op); }
 void dce(Env& env, const bc::YieldK& op) { no_dce(env, op); }
 
 ////////////////////////////////////////////////////////////////////////////////

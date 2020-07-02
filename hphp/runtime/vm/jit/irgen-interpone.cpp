@@ -376,13 +376,6 @@ void emitDefCls(IRGS& env, uint32_t)          { interpOne(env); }
 void emitDefRecord(IRGS& env, uint32_t)       { interpOne(env); }
 void emitChainFaults(IRGS& env)               { interpOne(env); }
 void emitContGetReturn(IRGS& env)             { interpOne(env); }
-void emitContAssignDelegate(IRGS& env, int32_t)
-                                              { interpOne(env); }
-void emitContEnterDelegate(IRGS& env)         { interpOne(env); }
-void emitYieldFromDelegate(IRGS& env, int32_t, int32_t)
-                                              { interpOne(env); }
-void emitContUnsetDelegate(IRGS& env, CudOp, int32_t)
-                                              { interpOne(env); }
 
 //////////////////////////////////////////////////////////////////////
 

@@ -749,13 +749,6 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ContRaise,       NA,               ONE(CV),         ONE(CV),    CF) \
   O(Yield,           NA,               ONE(CV),         ONE(CV),    CF) \
   O(YieldK,          NA,               TWO(CV,CV),      ONE(CV),    CF) \
-  O(ContAssignDelegate,                                                 \
-                     ONE(IA),          ONE(CV),         NOV,        NF) \
-  O(ContEnterDelegate,                                                  \
-                     NA,               ONE(CV),         NOV,        CF) \
-  O(YieldFromDelegate,                                                  \
-                     TWO(IA,BA),       NOV,             ONE(CV),    CF) \
-  O(ContUnsetDelegate, TWO(OA(CudOp),IA), NOV,          NOV,        NF) \
   O(ContCheck,       ONE(OA(ContCheckOp)), NOV,         NOV,        NF) \
   O(ContValid,       NA,               NOV,             ONE(CV),    NF) \
   O(ContKey,         NA,               NOV,             ONE(CV),    NF) \
@@ -1171,7 +1164,7 @@ constexpr bool instrCanHalt(Op op) {
   return op == OpRetC || op == OpNativeImpl ||
          op == OpAwait || op == OpAwaitAll || op == OpCreateCont ||
          op == OpYield || op == OpYieldK || op == OpRetM ||
-         op == OpRetCSuspended || op == OpYieldFromDelegate;
+         op == OpRetCSuspended;
 }
 
 int instrNumPops(PC opcode);

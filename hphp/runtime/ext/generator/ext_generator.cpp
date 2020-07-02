@@ -35,7 +35,6 @@ Generator::Generator()
   : m_index(-1LL)
   , m_key(make_tv<KindOfInt64>(-1LL))
   , m_value(make_tv<KindOfNull>())
-  , m_delegate(make_tv<KindOfNull>())
 {
 }
 
@@ -47,7 +46,6 @@ Generator::~Generator() {
   assertx(getState() != State::Running);
   tvDecRefGen(m_key);
   tvDecRefGen(m_value);
-  tvDecRefGen(m_delegate);
 
   // Free locals, but don't trigger the EventHook for FunctionReturn since
   // the generator has already been exited. We don't want redundant calls.
@@ -75,7 +73,6 @@ Generator& Generator::operator=(const Generator& other) {
   m_index = other.m_index;
   tvSet(other.m_key, m_key);
   tvSet(other.m_value, m_value);
-  tvSet(other.m_delegate, m_delegate);
   return *this;
 }
 

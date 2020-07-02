@@ -198,7 +198,6 @@ public:
   int64_t m_index;
   TypedValue m_key;
   TypedValue m_value;
-  TypedValue m_delegate;
 
   static Class* s_class;
   static const StaticString s_className;

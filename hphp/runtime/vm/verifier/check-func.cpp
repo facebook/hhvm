@@ -1279,16 +1279,6 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       }
       break;
     }
-    case Op::ContAssignDelegate:
-    case Op::ContEnterDelegate:
-    case Op::YieldFromDelegate:
-    case Op::ContUnsetDelegate:
-      if (m_func->isAsync) {
-        ferror("{} may only appear in a non-async generator\n",
-               opcodeToName(op));
-        return false;
-      }
-      // fallthrough
     case Op::CreateCont:
     case Op::YieldK:
     case Op::Yield:
@@ -1861,15 +1851,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::ReqOnce:
     case Op::ReqDoc:
       ferror("defines/includes are forbidden in Rx functions: {}\n",
-             opcodeToName(op));
-      return RuntimeOption::EvalRxVerifyBody < 2;
-
-    // unsafe: generator delegation (yield from)
-    case Op::ContAssignDelegate:
-    case Op::ContEnterDelegate:
-    case Op::YieldFromDelegate:
-    case Op::ContUnsetDelegate:
-      ferror("`yield from` is forbidden in Rx functions: {}\n",
              opcodeToName(op));
       return RuntimeOption::EvalRxVerifyBody < 2;
 

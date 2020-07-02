@@ -211,18 +211,11 @@ struct alignas(16) Resumable {
     assertx(m_actRec.func()->contains(m_suspendOffset));
     // TODO(alexeyt) remove `yield from` and the need for this complexity
     auto const pc = m_actRec.func()->unit()->at(m_suspendOffset);
-    auto pc2 = pc;
-    auto const suspendedOp = decode_op(pc2);
-    Offset resumeOffset = kInvalidOffset;
-    if (suspendedOp == OpYieldFromDelegate) {
-      decode_iva(pc2);
-      resumeOffset = m_suspendOffset + decode_ba(pc2);
-    } else {
-      assertx(suspendedOp == OpCreateCont ||
-              suspendedOp == OpYield ||
-              suspendedOp == OpYieldK);
-      resumeOffset = m_suspendOffset + instrLen(pc);
-    }
+    DEBUG_ONLY auto const suspendedOp = peek_op(pc);
+    assertx(suspendedOp == OpCreateCont ||
+            suspendedOp == OpYield ||
+            suspendedOp == OpYieldK);
+    auto const resumeOffset = m_suspendOffset + instrLen(pc);
     assertx(m_actRec.func()->contains(resumeOffset));
     return resumeOffset;
   }

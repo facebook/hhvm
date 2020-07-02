@@ -1096,7 +1096,6 @@ bool instrIsVMCall(Op opcode) {
   if (isFCall(opcode)) return true;
   switch (opcode) {
     case OpContEnter:
-    case OpContEnterDelegate:
     case OpContRaise:
     case OpEval:
     case OpIncl:

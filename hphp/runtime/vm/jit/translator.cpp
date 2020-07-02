@@ -378,14 +378,6 @@ static const struct {
   { OpContRaise,   {Stack1,           Stack1,       OutUnknown      }},
   { OpYield,       {Stack1,           Stack1,       OutUnknown      }},
   { OpYieldK,      {StackTop2,        Stack1,       OutUnknown      }},
-  { OpContAssignDelegate,
-                   {Stack1,           None,         OutNone         }},
-  { OpContEnterDelegate,
-                   {Stack1,           None,         OutNone         }},
-  { OpYieldFromDelegate,
-                   {None,             Stack1,       OutUnknown      }},
-  { OpContUnsetDelegate,
-                   {None,             None,         OutNone         }},
   { OpContCheck,   {None,             None,         OutNone         }},
   { OpContValid,   {None,             Stack1,       OutBoolean      }},
   { OpContKey,     {None,             Stack1,       OutUnknown      }},
@@ -1072,10 +1064,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::DefClsNop:
   case Op::DefTypeAlias:
   case Op::ChainFaults:
-  case Op::ContAssignDelegate:
-  case Op::ContEnterDelegate:
-  case Op::YieldFromDelegate:
-  case Op::ContUnsetDelegate:
     return true;
   }
 

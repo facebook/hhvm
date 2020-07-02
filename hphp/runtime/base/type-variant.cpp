@@ -98,11 +98,13 @@ void keysetReleaseWrapper(ArrayData* ad) noexcept {
   ad->isVanilla() ? SetArray::Release(ad) : BespokeArray::Release(ad);
 }
 
-void dictReleaseWrapper(ArrayData* ad) noexcept {
+void mixedReleaseWrapper(ArrayData* ad) noexcept {
+  static_assert(MixedArray::Release == MixedArray::ReleaseDict, "");
   ad->isVanilla() ? MixedArray::Release(ad) : BespokeArray::Release(ad);
 }
 
-void vecReleaseWrapper(ArrayData* ad) noexcept {
+void packedReleaseWrapper(ArrayData* ad) noexcept {
+  static_assert(PackedArray::Release == PackedArray::ReleaseVec, "");
   ad->isVanilla() ? PackedArray::Release(ad) : BespokeArray::Release(ad);
 }
 
@@ -132,12 +134,12 @@ static_assert(kDestrTableSize == 13,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
-  (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfDArray
-  (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfVArray
+  (RawDestructor)&mixedReleaseWrapper,                // KindOfDArray
+  (RawDestructor)&packedReleaseWrapper,               // KindOfVArray
   (RawDestructor)getMethodPtr(&ArrayData::release),   // KindOfArray
   (RawDestructor)&keysetReleaseWrapper,               // KindOfKeyset
-  (RawDestructor)&dictReleaseWrapper,                 // KindOfDict
-  (RawDestructor)&vecReleaseWrapper,                  // KindOfVec
+  (RawDestructor)&mixedReleaseWrapper,                // KindOfDict
+  (RawDestructor)&packedReleaseWrapper,               // KindOfVec
   (RawDestructor)getMethodPtr(&RecordData::release),  // KindOfRecord
   (RawDestructor)getMethodPtr(&StringData::release),  // KindOfString
   nullptr, // hole
@@ -153,6 +155,8 @@ RawDestructor g_destructors[] = {
 
 void specializeVanillaDestructors() {
   using Dtor = RawDestructor;
+  g_destructors[typeToDestrIdx(KindOfVArray)] = (Dtor)&PackedArray::Release;
+  g_destructors[typeToDestrIdx(KindOfDArray)] = (Dtor)&MixedArray::Release;
   g_destructors[typeToDestrIdx(KindOfVec)] = (Dtor)&PackedArray::Release;
   g_destructors[typeToDestrIdx(KindOfDict)] = (Dtor)&MixedArray::Release;
   g_destructors[typeToDestrIdx(KindOfKeyset)] = (Dtor)&SetArray::Release;
@@ -669,7 +673,7 @@ void Variant::setEvalScalar() {
       auto const clsMeth = m_data.pclsmeth;
       m_data.parr = clsMethToVecHelper(clsMeth).detach();
       m_type = RuntimeOption::EvalHackArrDVArrs ?
-               KindOfPersistentVec : KindOfPersistentArray;
+               KindOfPersistentVec : KindOfPersistentVArray;
       decRefClsMeth(clsMeth);
       do_array();
       return;

@@ -1045,11 +1045,9 @@ std::string describeKeyType(const TypedValue* tv) {
   case KindOfPersistentKeyset:
   case KindOfKeyset:           return "keyset";
   case KindOfPersistentDArray:
-  case KindOfDArray:
-    return UNLIKELY(RuntimeOption::EvalSpecializeDVArray) ? "darray" : "array";
+  case KindOfDArray:           return "array";
   case KindOfPersistentVArray:
-  case KindOfVArray:
-    return UNLIKELY(RuntimeOption::EvalSpecializeDVArray) ? "varray" : "array";
+  case KindOfVArray:           return "array";
   case KindOfPersistentArray:
   case KindOfArray:            return "array";
   case KindOfResource:

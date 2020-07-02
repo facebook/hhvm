@@ -96,9 +96,11 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   bool cow_check = mode == MOpMode::Define || mode == MOpMode::Unset;
   assertx(is_dict || is_keyset || arr->isA(TArr));
 
-  // If the access is statically known, don't bother profiling as we'll probably
-  // optimize it away completely.
+  // If the base and key are static, the access will likely get simplified away.
+  // Likewise, if the base is a non-darray PHP array, we can't optimize it.
   if (arr->hasConstVal() && key->hasConstVal()) {
+    return generic(key, SizeHintData{});
+  } else if (arr->isA(TArr) && !arr->isA(TDArr)) {
     return generic(key, SizeHintData{});
   }
 
@@ -174,20 +176,14 @@ SSATmp* profiledArrayAccess(IRGS& env, SSATmp* arr, SSATmp* key, MOpMode mode,
   return cond(
     env,
     [&] (Block* taken) {
-      auto const marr = [&](){
-        if (is_dict || is_keyset) return arr;
-        return gen(env, CheckType, TMixedArr, taken, arr);
-      }();
-
       auto const op = is_dict ? CheckDictOffset
                               : is_keyset ? CheckKeysetOffset
                                           : CheckMixedArrayOffset;
-      gen(env, op, IndexData { result.offset.second }, taken, marr, key);
-      if (cow_check) gen(env, CheckArrayCOW, taken, marr);
-      return marr;
+      gen(env, op, IndexData { result.offset.second }, taken, arr, key);
+      if (cow_check) gen(env, CheckArrayCOW, taken, arr);
     },
-    [&] (SSATmp* tmp) {
-      return direct(tmp, key, cns(env, result.offset.second));
+    [&] {
+      return direct(arr, key, cns(env, result.offset.second));
     },
     [&] {
       hint(env, Block::Hint::Unlikely);

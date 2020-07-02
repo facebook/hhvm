@@ -68,7 +68,7 @@ struct APCTypedValue {
 
   enum class StaticArr {};
   APCTypedValue(StaticArr, ArrayData* data)
-    : m_handle(APCKind::StaticArray, KindOfPersistentArray) {
+    : m_handle(APCKind::StaticArray, data->toPersistentDataType()) {
     assertx(data->isPHPArrayType());
     assertx(data->isStatic());
     m_data.arr = data;
@@ -77,7 +77,7 @@ struct APCTypedValue {
 
   enum class UncountedArr {};
   APCTypedValue(UncountedArr, ArrayData* data)
-    : m_handle(APCKind::UncountedArray, KindOfPersistentArray) {
+    : m_handle(APCKind::UncountedArray, data->toPersistentDataType()) {
     assertx(data->isPHPArrayType());
     assertx(data->isUncounted());
     m_data.arr = data;

@@ -413,9 +413,10 @@ bool checkOperandTypes(const IRInstruction* inst, const IRUnit* /*unit*/) {
   };
 
   auto checkArr = [&] (bool is_kv, bool is_const) {
-    auto t = src()->type();
-    auto cond_type = RuntimeOption::EvalHackArrDVArrs
-      ? (is_kv ? TDict : TVec) : TArr;
+    auto const t = src()->type();
+    auto const cond_type = RuntimeOption::EvalHackArrDVArrs
+      ? (is_kv ? TDict : TVec)
+      : (is_kv ? TDArr : TVArr);
     if (is_const) {
       auto expected = folly::sformat("constant {}", t.toString());
       check(src()->hasConstVal(cond_type), t, expected.c_str());
@@ -533,7 +534,6 @@ using TypeNames::TCA;
 #define DDictLastKey
 #define DKeysetFirstElem
 #define DKeysetLastElem
-#define DArrRecord
 #define DVArr
 #define DDArr
 #define DStaticDArr
@@ -594,7 +594,6 @@ using TypeNames::TCA;
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
-#undef DArrRecord
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr

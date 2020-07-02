@@ -205,7 +205,7 @@ SSATmp* callImpl(IRGS& env, SSATmp* callee, const FCallArgs& fca,
   // stack value per generic argument and extend hhbc with their count
   auto const genericsBitmap = [&] {
     if (!fca.hasGenerics()) return uint32_t{0};
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
     auto const generics = topC(env);
     // Do not bother calculating the bitmap using a C++ helper if generics are
     // not statically known, as the prologue already has the same logic.
@@ -1213,7 +1213,7 @@ void emitNewObjR(IRGS& env) {
 
   emitDynamicConstructChecks(env, cls);
   auto const obj = [&] {
-    if (generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    if (generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
       return gen(env, AllocObjReified, cls, generics);
     } else if (generics->isA(TInitNull)) {
       return gen(env, AllocObj, cls);
@@ -1265,7 +1265,7 @@ void emitNewObjD(IRGS& env, const StringData* className) {
 void emitNewObjRD(IRGS& env, const StringData* className) {
   auto const cell = popC(env);
   auto const tsList = [&] () -> SSATmp* {
-    if (cell->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    if (cell->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr)) {
       return cell;
     } else if (cell->isA(TInitNull)) {
       return nullptr;
@@ -1287,7 +1287,7 @@ void emitNewObjS(IRGS& env, SpecialClsRef ref) {
   }
 
   auto const this_ = checkAndLoadThis(env);
-  auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+  auto const ty = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
   auto const addr = gen(
     env,
     LdPropAddr,

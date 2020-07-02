@@ -1515,16 +1515,15 @@ inline void SetElemRecord(tv_lval base, key_type<keyType> key,
  * arraySetUpdateBase is used by SetElem{Array,Vec,Dict} to do the necessary
  * bookkeeping after mutating an array.
  */
-template<DataType dt>
 ALWAYS_INLINE
 void arraySetUpdateBase(ArrayData* oldData, ArrayData* newData, tv_lval base) {
   if (newData == oldData) return;
 
   assertx(isArrayLikeType(type(base)));
   assertx(val(base).parr == oldData);
-  type(base) = dt;
+  type(base) = dt_with_rc(type(base));
   val(base).parr = newData;
-  assertx(dt == newData->toDataType());
+  assertx(type(base) == newData->toDataType());
   assertx(tvIsPlausible(*base));
 
   decRefArr(oldData);
@@ -1600,22 +1599,9 @@ inline void SetElemArray(tv_lval base, key_type<keyType> key, TypedValue* value)
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto* newData = SetElemArrayPre<setResult>(a, key, value);
-  // NB: If 'a' was sitting inside a reference, it may have been released during
-  // the set (and 'newData' will equal 'a'). We can only safely dereference
-  // 'newData' if its not equal to 'a'.
-  assertx(a == newData || newData->isPHPArrayType());
-
-  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
-    if (newData->toDataType() == KindOfDArray) {
-      arraySetUpdateBase<KindOfDArray>(a, newData, base);
-      return;
-    } else if (newData->toDataType() == KindOfVArray) {
-      arraySetUpdateBase<KindOfVArray>(a, newData, base);
-      return;
-    }
-  }
-  arraySetUpdateBase<KindOfArray>(a, newData, base);
+  auto const newData = SetElemArrayPre<setResult>(a, key, value);
+  assertx(newData->isPHPArrayType());
+  arraySetUpdateBase(a, newData, base);
 }
 
 /**
@@ -1654,10 +1640,9 @@ inline void SetElemVec(tv_lval base, key_type<keyType> key, TypedValue* value) {
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto* newData = SetElemVecPre<setResult>(a, key, value);
+  auto const newData = SetElemVecPre<setResult>(a, key, value);
   assertx(newData->isVecType());
-
-  arraySetUpdateBase<KindOfVec>(a, newData, base);
+  arraySetUpdateBase(a, newData, base);
 }
 
 /**
@@ -1698,10 +1683,9 @@ inline void SetElemDict(tv_lval base, key_type<keyType> key,
   assertx(tvIsPlausible(*base));
 
   ArrayData* a = val(base).parr;
-  auto newData = SetElemDictPre<setResult>(a, key, value);
+  auto const newData = SetElemDictPre<setResult>(a, key, value);
   assertx(newData->isDictKind());
-
-  arraySetUpdateBase<KindOfDict>(a, newData, base);
+  arraySetUpdateBase(a, newData, base);
 }
 
 /**

@@ -63,7 +63,6 @@ const StaticString s_ArrayKindProfile("ArrayKindProfile");
 enum class SimpleOp {
   None,
   Array,
-  ProfiledPackedArray,
   PackedArray,
   Vec,
   Dict,
@@ -254,15 +253,12 @@ folly::Optional<GuardConstraint> simpleOpConstraint(SimpleOp op) {
       return folly::none;
 
     case SimpleOp::Array:
-    case SimpleOp::ProfiledPackedArray:
+    case SimpleOp::PackedArray:
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:
     case SimpleOp::String:
       return GuardConstraint(DataTypeSpecific);
-
-    case SimpleOp::PackedArray:
-      return GuardConstraint(DataTypeSpecialized).setWantArrayKind();
 
     case SimpleOp::Vector:
       return GuardConstraint(c_Vector::classof());
@@ -584,9 +580,7 @@ void checkVecBounds(IRGS& env, SSATmp* base, SSATmp* idx) {
 template<class Finish>
 SSATmp* emitPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
                            Finish finish) {
-  assertx(base->isA(TArr) &&
-          base->type().arrSpec().kind() == ArrayData::kPackedKind &&
-          key->isA(TInt));
+  assertx(base->isA(TVArr) && key->isA(TInt));
 
   auto finishMe = [&](SSATmp* elem) {
     gen(env, IncRef, elem);
@@ -743,38 +737,6 @@ SSATmp* emitArrayGet(IRGS& env, SSATmp* base, SSATmp* key, MOpMode mode,
 }
 
 template<class Finish>
-SSATmp* emitProfiledPackedArrayGet(IRGS& env, SSATmp* base, SSATmp* key,
-                                   MOpMode mode, Finish finish) {
-  TargetProfile<ArrayKindProfile> prof(env.context, env.irb->curMarker(),
-                                       s_ArrayKindProfile.get());
-  if (prof.profiling()) {
-    gen(env, ProfileArrayKind, RDSHandleData{prof.handle()}, base);
-    return emitArrayGet(env, base, key, mode, finish);
-  }
-
-  if (prof.optimizing()) {
-    auto const data = prof.data();
-    if (base->type().maybe(TPackedArr) &&
-        (data.fraction(ArrayData::kPackedKind) == 1.0 ||
-         RuntimeOption::EvalJitPGOArrayGetStress)) {
-      // It's safe to side-exit still because we only do these profiled array
-      // gets on the first element, with simple bases and single-element dims.
-      // See computeSimpleCollectionOp.
-      auto const exit = makeExit(env);
-      base = gen(env, CheckType, TPackedArr, exit, base);
-      env.irb->constrainValue(
-        base,
-        GuardConstraint(DataTypeSpecialized).setWantArrayKind()
-      );
-      return emitPackedArrayGet(env, base, key, mode, finish);
-    }
-  }
-
-  // Fall back to a generic array get.
-  return emitArrayGet(env, base, key, mode, finish);
-}
-
-template<class Finish>
 SSATmp* emitVectorGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
   auto const size = gen(env, LdVectorSize, base);
   checkCollectionBounds(env, base, key, size);
@@ -814,7 +776,7 @@ SSATmp* emitPairGet(IRGS& env, SSATmp* base, SSATmp* key, Finish finish) {
 }
 
 SSATmp* emitPackedArrayIsset(IRGS& env, SSATmp* base, SSATmp* key) {
-  assertx(base->type().arrSpec().kind() == ArrayData::kPackedKind);
+  assertx(base->isA(TVArr) && key->isA(TInt));
 
   auto const elem = arrElemType(base->type(), key->type(), curClass(env));
   if (elem.first <= TNull) {
@@ -912,8 +874,6 @@ SSATmp* emitCGetElem(IRGS& env, SSATmp* base, SSATmp* key,
       return emitArrayGet(env, base, key, mode, finish);
     case SimpleOp::PackedArray:
       return emitPackedArrayGet(env, base, key, mode, finish);
-    case SimpleOp::ProfiledPackedArray:
-      return emitProfiledPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::Vec:
       return emitVecGet(env, base, key, finish);
     case SimpleOp::Dict:
@@ -953,8 +913,6 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
       return emitArrayGet(env, base, key, mode, finish);
     case SimpleOp::PackedArray:
       return emitPackedArrayGet(env, base, key, mode, finish);
-    case SimpleOp::ProfiledPackedArray:
-      return emitProfiledPackedArrayGet(env, base, key, mode, finish);
     case SimpleOp::String:
     case SimpleOp::Vector:
     case SimpleOp::Pair:
@@ -969,7 +927,6 @@ SSATmp* emitCGetElemQuiet(IRGS& env, SSATmp* base, SSATmp* key,
 SSATmp* emitIssetElem(IRGS& env, SSATmp* base, SSATmp* key, SimpleOp simpleOp) {
   switch (simpleOp) {
   case SimpleOp::Array:
-  case SimpleOp::ProfiledPackedArray:
     return gen(env, ArrayIsset, base, key);
   case SimpleOp::PackedArray:
     return emitPackedArrayIsset(env, base, key);
@@ -1003,16 +960,9 @@ SimpleOp simpleCollectionOp(Type baseType, Type keyType, bool readInst,
   if (inOut && !(baseType <= TArrLike)) return SimpleOp::None;
 
   if (baseType <= TArr) {
-    auto isPacked = false;
-    if (auto arrSpec = baseType.arrSpec()) {
-      isPacked = arrSpec.kind() == ArrayData::kPackedKind;
-    }
-    if (keyType <= TInt || keyType <= TStr) {
-      if (readInst && keyType <= TInt) {
-        return isPacked ? SimpleOp::PackedArray : SimpleOp::ProfiledPackedArray;
-      }
-      return SimpleOp::Array;
-    }
+    if (!keyType.subtypeOfAny(TInt, TStr)) return SimpleOp::None;
+    auto const isPacked = (baseType <= TVArr) && (keyType <= TInt);
+    return isPacked ? SimpleOp::PackedArray : SimpleOp::Array;
   } else if (baseType <= TVec) {
     return SimpleOp::Vec;
   } else if (baseType <= TDict) {
@@ -1637,7 +1587,7 @@ void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
       gen(env, StMem, elemPtr, value);
     },
     [&] {
-      if (baseType <= TPackedArr) {
+      if (baseType <= TVArr) {
         gen(env, SetNewElemArray, makeCatchSet(env, nDiscard), basePtr, value);
       } else if (baseType <= TVec) {
         gen(env, SetNewElemVec, makeCatchSet(env, nDiscard), basePtr, value);
@@ -1660,7 +1610,7 @@ SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
   env.irb->constrainLocation(Location::MBase{}, gc);
 
-  if (baseType.subtypeOfAny(TVec, TPackedArr)) {
+  if (baseType.subtypeOfAny(TVArr, TVec)) {
     setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);
   } else if (baseType <= TArr) {
     constrainBase(env);
@@ -1690,7 +1640,6 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
   }
 
   switch (simpleOp) {
-    case SimpleOp::PackedArray:
     case SimpleOp::String:
       always_assert(false && "Bad SimpleOp in setElemImpl");
       break;
@@ -1706,7 +1655,7 @@ SSATmp* setElemImpl(IRGS& env, uint32_t nDiscard, SSATmp* key) {
       break;
 
     case SimpleOp::Array:
-    case SimpleOp::ProfiledPackedArray:
+    case SimpleOp::PackedArray:
     case SimpleOp::Vec:
     case SimpleOp::Dict:
     case SimpleOp::Keyset:

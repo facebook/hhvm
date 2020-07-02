@@ -261,15 +261,17 @@ float decRefDestroyedPercent(Vout& v, IRLS& /*env*/,
 }
 
 CallSpec makeDtorCall(Vout& v, Type ty, Vloc loc, ArgGroup& args) {
-  if (ty <= TArr) {
+  if (ty <= TPArr) {
     return CallSpec::array(ty, &g_array_funcs.release, &ArrayData::release);
   }
 
   // Even if AllowBespokeArrayLikes is set, we can optimize destructors
   // if the value being destructed is a vanilla array-like.
-  if (ty <= TVanillaVec) return CallSpec::direct(PackedArray::Release);
-  if (ty <= TVanillaDict) return CallSpec::direct(MixedArray::Release);
-  if (ty <= TVanillaKeyset) return CallSpec::direct(SetArray::Release);
+  if (ty.arrSpec().vanilla()) {
+    if (ty <= (TVArr|TVec))  return CallSpec::direct(PackedArray::Release);
+    if (ty <= (TDArr|TDict)) return CallSpec::direct(MixedArray::Release);
+    if (ty <= TKeyset)       return CallSpec::direct(SetArray::Release);
+  }
 
   if (ty <= TObj) {
     if (auto const cls = ty.clsSpec().cls()) {

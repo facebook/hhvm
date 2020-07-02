@@ -357,7 +357,8 @@ bool APCHandle::checkInvariants() const {
       return true;
     case APCKind::StaticArray:
     case APCKind::UncountedArray:
-      assertx(m_type == KindOfPersistentArray);
+      assertx(isArrayType(m_type));
+      assertx(!isRefcountedType(m_type));
       return true;
     case APCKind::StaticVec:
     case APCKind::UncountedVec:

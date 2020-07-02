@@ -806,7 +806,7 @@ RegionDescPtr selectCalleeRegion(const irgen::IRGS& irgs,
   if (fca.hasUnpack()) {
     const int32_t ix = fca.numArgs;
     auto const ty = irgen::publicTopType(irgs, BCSPRelOffset{firstArgPos - ix});
-    if (!(ty <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TArr))) {
+    if (!(ty <= (RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr))) {
       traceRefusal(
         sk,
         callee,

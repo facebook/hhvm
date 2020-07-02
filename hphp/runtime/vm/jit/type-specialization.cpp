@@ -152,15 +152,8 @@ bool ArraySpec::checkInvariants() const {
   if ((*this == Top()) || (*this == Bottom())) return true;
   assertx(m_sort != IsTop);
   assertx(!(m_sort & IsBottom));
-  if (m_sort & HasKind) {
-    assertx(isArrayKind(HeaderKind(m_kind)));
-    assertx(!(m_kind & ArrayData::kBespokeKindMask));
-    assertx(m_kind != ArrayData::kVecKind &&
-            m_kind != ArrayData::kDictKind &&
-            m_kind != ArrayData::kKeysetKind);
-  } else {
-    assertx(m_kind == ArrayData::ArrayKind{});
-  }
+  assertx(!(m_sort & HasKind)); // Next diff: drop ArrayKind specialization
+  assertx(m_kind == ArrayData::ArrayKind{});
   if (m_sort & HasType) {
     assertx(m_ptr != 0);
   } else {

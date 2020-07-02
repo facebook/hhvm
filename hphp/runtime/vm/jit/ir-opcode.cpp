@@ -65,7 +65,6 @@ TRACE_SET_MOD(hhir);
 #define DDictLastKey      HasDest
 #define DKeysetFirstElem  HasDest
 #define DKeysetLastElem   HasDest
-#define DArrRecord     HasDest
 #define DVArr          HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
@@ -141,7 +140,6 @@ OpInfo g_opInfo[] = {
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
-#undef DArrRecord
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr

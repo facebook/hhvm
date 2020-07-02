@@ -2037,10 +2037,10 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     TypedValue dv = make_tv<KindOfUninit>();
     const VariableSerializer::DVOverrides* overrides = nullptr;
     SCOPE_EXIT { overrides = nullptr; };
-    auto decode_array = [&] (DataType dt) {
+    auto decode_array = [&] {
       auto const captureCopy = capture;
       if (auto arr = as.ue->lookupArray(decode_raw<uint32_t>(capture))) {
-        dv.m_type = dt;
+        dv.m_type = arr->toPersistentDataType();
         dv.m_data.parr = const_cast<ArrayData*>(arr);
         if (RuntimeOption::EvalHackArrDVArrs) {
           auto const litOffset = captureCopy - as.ue->bc();
@@ -2055,10 +2055,10 @@ void fixup_default_values(AsmState& as, FuncEmitter* fe) {
     case OpNull:   dv = make_tv<KindOfNull>();           break;
     case OpTrue:   dv = make_tv<KindOfBoolean>(true);    break;
     case OpFalse:  dv = make_tv<KindOfBoolean>(false);   break;
-    case OpArray:  decode_array(KindOfPersistentArray);  break;
-    case OpVec:    decode_array(KindOfPersistentVec);    break;
-    case OpDict:   decode_array(KindOfPersistentDict);   break;
-    case OpKeyset: decode_array(KindOfPersistentKeyset); break;
+    case OpArray:  decode_array(); break;
+    case OpVec:    decode_array(); break;
+    case OpDict:   decode_array(); break;
+    case OpKeyset: decode_array(); break;
     case OpInt:
       dv = make_tv<KindOfInt64>(decode_raw<int64_t>(capture));
       break;

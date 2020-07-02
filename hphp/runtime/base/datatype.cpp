@@ -342,14 +342,10 @@ MaybeDataType get_datatype(
     if (!strcasecmp(name.c_str(), "HH\\dict"))   return KindOfDict;
     if (!strcasecmp(name.c_str(), "HH\\keyset")) return KindOfKeyset;
     if (!strcasecmp(name.c_str(), "HH\\varray")) {
-      return RuntimeOption::EvalHackArrDVArrs
-        ? KindOfVec : RuntimeOption::EvalSpecializeDVArray
-        ? KindOfVArray : KindOfArray;
+      return RO::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
     }
     if (!strcasecmp(name.c_str(), "HH\\darray")) {
-      return RuntimeOption::EvalHackArrDVArrs
-        ? KindOfDict : RuntimeOption::EvalSpecializeDVArray
-        ? KindOfDArray : KindOfArray;
+      return RO::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
     }
     if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
     if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;
@@ -375,14 +371,10 @@ MaybeDataType get_datatype(
   if (!strcasecmp(name.c_str(), "HH\\vec"))      return KindOfVec;
   if (!strcasecmp(name.c_str(), "HH\\keyset"))   return KindOfKeyset;
   if (!strcasecmp(name.c_str(), "HH\\varray")) {
-    return RuntimeOption::EvalHackArrDVArrs
-      ? KindOfVec : RuntimeOption::EvalSpecializeDVArray
-      ? KindOfVArray : KindOfArray;
+    return RO::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
   }
   if (!strcasecmp(name.c_str(), "HH\\darray")) {
-    return RuntimeOption::EvalHackArrDVArrs
-      ? KindOfDict : RuntimeOption::EvalSpecializeDVArray
-      ? KindOfDArray : KindOfArray;
+    return RO::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
   }
   if (!strcasecmp(name.c_str(), "HH\\varray_or_darray")) return folly::none;
   if (!strcasecmp(name.c_str(), "HH\\vec_or_dict")) return folly::none;

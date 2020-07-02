@@ -230,7 +230,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     Func::ParamInfo pi = params[i];
     if (pi.isVariadic()) {
       pi.builtinType = RuntimeOption::EvalHackArrDVArrs
-        ? KindOfVec : KindOfArray;
+        ? KindOfVec : KindOfVArray;
     }
     f->appendParam(params[i].isInOut(), pi, fParams);
     auto const& fromUBs = params[i].upperBounds;

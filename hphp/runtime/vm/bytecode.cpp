@@ -696,10 +696,25 @@ static std::string toStringElm(TypedValue tv) {
       continue;
     case KindOfPersistentDArray:
     case KindOfDArray:
+      assertx(tv.m_data.parr->isDArray());
+      assertx(tv.m_data.parr->isPHPArrayType());
+      assertx(tv.m_data.parr->checkCount());
+      os << tv.m_data.parr;
+      print_count();
+      os << ":darray";
+      continue;
     case KindOfPersistentVArray:
     case KindOfVArray:
+      assertx(tv.m_data.parr->isVArray());
+      assertx(tv.m_data.parr->isPHPArrayType());
+      assertx(tv.m_data.parr->checkCount());
+      os << tv.m_data.parr;
+      print_count();
+      os << ":varray";
+      continue;
     case KindOfPersistentArray:
     case KindOfArray:
+      assertx(!tv.m_data.parr->isDVArray());
       assertx(tv.m_data.parr->isPHPArrayType());
       assertx(tv.m_data.parr->checkCount());
       os << tv.m_data.parr;

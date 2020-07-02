@@ -217,12 +217,28 @@ void emitTypeTest(Vout& v, IRLS& env, Type type,
       return CC_E;
     };
 
+    auto const vec_or_dict = [&] {
+      auto const mask = ~0b11;
+      auto const test = int(KindOfVec) & mask;
+      static_assert(test == (int(KindOfDict) & mask), "");
+      static_assert(test == (int(KindOfPersistentVec) & mask), "");
+      static_assert(test == (int(KindOfPersistentDict) & mask), "");
+      auto const masked = emitMaskTVType(v, mask, typeSrc);
+      emitCmpTVType(v, sf, safe_cast<DataType>(test), masked);
+      return CC_E;
+    };
+
     // Type-tests of union types that may be specialized.
     auto const base = type.unspecialize();
+    if (base == TPArr)      return persistent_type(KindOfPersistentArray);
+    if (base == TVArr)      return persistent_type(KindOfPersistentVArray);
+    if (base == TDArr)      return cmp(KindOfDArray, CC_LE);
     if (base == TArr)       return cmp(KindOfArray, CC_LE);
     if (base == TVec)       return persistent_type(KindOfPersistentVec);
     if (base == TDict)      return persistent_type(KindOfPersistentDict);
     if (base == TKeyset)    return persistent_type(KindOfPersistentKeyset);
+    if (base == (TVArr|TDArr))  return cmp(KindOfVArray, CC_LE);
+    if (base == (TVec|TDict))   return vec_or_dict(); // Needed post HADVAs
     if (base == TArrLike)   return cmp(KindOfVec, CC_LE);
 
     // Type-tests of union types that should not be specialized.

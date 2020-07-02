@@ -64,6 +64,7 @@ namespace {
 constexpr irlower::SyncOptions SNone = irlower::SyncOptions::None;
 constexpr irlower::SyncOptions SSync = irlower::SyncOptions::Sync;
 
+constexpr DestType DTV   = DestType::TV;
 constexpr DestType DSSA  = DestType::SSA;
 constexpr DestType DNone = DestType::None;
 
@@ -118,6 +119,7 @@ static auto c_AsyncFunctionWaitHandle_Create_false =
  *                                   function must be non-virtual.
  *
  * Dest
+ *   DTV   - The helper returns a two-register TypedValue
  *   DSSA  - The helper returns a single-register value
  *   DNone - The helper does not return a value
  *
@@ -243,7 +245,7 @@ static CallMap s_callMap {
                            {{SSA, 0}, {SSA, 1}, {SSA, 2}, {SSA, 3}}},
     {AddNewElem,         addNewElemHelper, DSSA, SSync,
                            {{SSA, 0}, {TV, 1}}},
-    {ArrayAdd,           arrayAdd, DSSA, SSync, {{SSA, 0}, {SSA, 1}}},
+    {ArrayAdd,           arrayAdd, DTV, SSync, {{SSA, 0}, {SSA, 1}}},
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewRFunc,           RFuncData::newInstance, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},

@@ -65,21 +65,12 @@ IRT_SPECIAL
 IRT_RUNTIME
 #undef IRT
 
-// Specialized array types that appear in irgen.
-static auto const TMixedArr  = Type::Array(ArrayData::kMixedKind);
-static auto const TPackedArr = Type::Array(ArrayData::kPackedKind);
-
 // Vanilla types that appear in irgen.
 static auto const TVanillaArr     = TArr.narrowToVanilla();
 static auto const TVanillaVec     = TVec.narrowToVanilla();
 static auto const TVanillaDict    = TDict.narrowToVanilla();
 static auto const TVanillaKeyset  = TKeyset.narrowToVanilla();
 static auto const TVanillaArrLike = TArrLike.narrowToVanilla();
-
-// dvarray types that appear in irgen. In most places that we use these
-// types, we call narrowToVanilla() if AllowBespokeArrayLikes is false.
-static auto const TVArr = TPackedArr.widenToBespoke();
-static auto const TDArr = TMixedArr.widenToBespoke();
 
 /*
  * Abbreviated namespace for predefined types.
@@ -141,7 +132,9 @@ inline Type for_const(const StringData* sd) {
 }
 inline Type for_const(const ArrayData* ad) {
   assertx(ad->isStatic());
-  if (ad->isPHPArrayType()) return TStaticArr;
+  if (ad->isVArray()) return TStaticVArr;
+  if (ad->isDArray()) return TStaticDArr;
+  if (ad->isPHPArrayType()) return TStaticPArr;
   if (ad->isVecType()) return TStaticVec;
   if (ad->isDictType()) return TStaticDict;
   if (ad->isKeysetType()) return TStaticKeyset;
@@ -253,7 +246,8 @@ inline bool Type::isKnownDataType() const {
   assertx(*this <= TCell);
 
   // Some unions correspond to single KindOfs.
-  return subtypeOfAny(TStr, TArr, TVec, TDict, TKeyset) || !isUnion();
+  if (!isUnion()) return true;
+  return subtypeOfAny(TStr, TPArr, TVArr, TDArr, TVec, TDict, TKeyset);
 }
 
 inline bool Type::needsReg() const {
@@ -374,8 +368,7 @@ inline Type Type::dropConstVal() const {
   auto const result = Type(m_bits, ptrKind(), memKind());
 
   if (*this <= TArrLike && arrLikeVal()->isVanilla()) {
-    if (!(*this <= TArr)) return result.narrowToVanilla();
-    return Type::StaticArray(arrVal()->kind());
+    return result.narrowToVanilla();
   }
   return result;
 }
@@ -432,17 +425,16 @@ IMPLEMENT_CNS_VAL(TMemToCell,  ptr, const TypedValue*)
 ///////////////////////////////////////////////////////////////////////////////
 // Specialized type creation.
 
-inline Type Type::Array(ArrayData::ArrayKind kind) {
-  return Type(TArr, ArraySpec(kind));
-}
-
 inline Type Type::Array(const RepoAuthType::Array* rat) {
   return Type(TArr, ArraySpec(rat));
 }
 
-inline Type Type::Array(ArrayData::ArrayKind kind,
-                        const RepoAuthType::Array* rat) {
-  return Type(TArr, ArraySpec(kind, rat));
+inline Type Type::VArr(const RepoAuthType::Array* rat) {
+  return Type(TVArr, ArraySpec(rat));
+}
+
+inline Type Type::DArr(const RepoAuthType::Array* rat) {
+  return Type(TDArr, ArraySpec(rat));
 }
 
 inline Type Type::Vec(const RepoAuthType::Array* rat) {
@@ -457,17 +449,16 @@ inline Type Type::Keyset(const RepoAuthType::Array* rat) {
   return Type(TKeyset, ArraySpec(rat));
 }
 
-inline Type Type::StaticArray(ArrayData::ArrayKind kind) {
-  return Type(TStaticArr, ArraySpec(kind));
-}
-
 inline Type Type::StaticArray(const RepoAuthType::Array* rat) {
   return Type(TStaticArr, ArraySpec(rat));
 }
 
-inline Type Type::StaticArray(ArrayData::ArrayKind kind,
-                              const RepoAuthType::Array* rat) {
-  return Type(TStaticArr, ArraySpec(kind, rat));
+inline Type Type::StaticVArr(const RepoAuthType::Array* rat) {
+  return Type(TStaticVArr, ArraySpec(rat));
+}
+
+inline Type Type::StaticDArr(const RepoAuthType::Array* rat) {
+  return Type(TStaticDArr, ArraySpec(rat));
 }
 
 inline Type Type::StaticVec(const RepoAuthType::Array* rat) {
@@ -486,9 +477,12 @@ inline Type Type::CountedArray(const RepoAuthType::Array* rat) {
   return Type(TCountedArr, ArraySpec(rat));
 }
 
-inline Type Type::CountedArray(ArrayData::ArrayKind kind,
-                              const RepoAuthType::Array* rat) {
-  return Type(TCountedArr, ArraySpec(kind, rat));
+inline Type Type::CountedVArr(const RepoAuthType::Array* rat) {
+  return Type(TCountedVArr, ArraySpec(rat));
+}
+
+inline Type Type::CountedDArr(const RepoAuthType::Array* rat) {
+  return Type(TCountedDArr, ArraySpec(rat));
 }
 
 inline Type Type::CountedVec(const RepoAuthType::Array* rat) {
@@ -497,6 +491,10 @@ inline Type Type::CountedVec(const RepoAuthType::Array* rat) {
 
 inline Type Type::CountedDict(const RepoAuthType::Array* rat) {
   return Type(TCountedDict, ArraySpec(rat));
+}
+
+inline Type Type::CountedKeyset(const RepoAuthType::Array* rat) {
+  return Type(TCountedKeyset, ArraySpec(rat));
 }
 
 inline Type Type::SubObj(const Class* cls) {
@@ -570,9 +568,7 @@ inline ArraySpec Type::arrSpec() const {
   if (m_hasConstVal) {
     if (m_ptr != Ptr::NotPtr) return ArraySpec::Top();
     if (!m_arrVal->isVanilla()) return ArraySpec::Top();
-    auto const array = (m_bits & kArr) != kBottom;
-    if (!array) return ArraySpec{ArraySpec::LayoutTag::Vanilla};
-    return ArraySpec{m_arrVal->kind()};
+    return ArraySpec{ArraySpec::LayoutTag::Vanilla};
   }
 
   assertx(m_arrSpec != ArraySpec::Bottom());

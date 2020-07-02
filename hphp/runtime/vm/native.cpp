@@ -370,6 +370,7 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
     auto const check_dvarray = [&]{
       assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
       if (!tvIsArray(tv) || !tc.isArray()) {
+        if (tc.isVArrayOrDArray()) raise_type_error();
         return;
       }
 
@@ -547,10 +548,10 @@ static MaybeDataType typeForOutParam(TypedValue attr) {
 
   auto const str = type.m_data.pstr->data();
   if (strcmp(str, "varray") == 0) {
-    return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfArray;
+    return RuntimeOption::EvalHackArrDVArrs ? KindOfVec : KindOfVArray;
   }
   if (strcmp(str, "darray") == 0) {
-    return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfArray;
+    return RuntimeOption::EvalHackArrDVArrs ? KindOfDict : KindOfDArray;
   }
 
 #define DT(name, ...) if (strcmp(str, "KindOf" #name) == 0) return KindOf##name;

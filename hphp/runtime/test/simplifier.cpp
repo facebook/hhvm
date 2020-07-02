@@ -130,9 +130,9 @@ TEST(Simplifier, Count) {
     EXPECT_MATCH(result.instrs[0], CountArray, arr->dst());
   }
 
-  // Count($array_packed) --> CountArray($array_packed)
+  // Count($varr) --> CountArray($varr)
   {
-    auto const arr = unit.gen(Conjure, dummy, TPackedArr);
+    auto const arr = unit.gen(Conjure, dummy, TVArr);
     auto const count = unit.gen(Count, dummy, arr->dst());
     auto const result = simplify(unit, count);
 

@@ -88,7 +88,7 @@ ArrayData* addNewElemHelper(ArrayData* a, TypedValue value) {
   return r;
 }
 
-ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
+TypedValue arrayAdd(ArrayData* a1, ArrayData* a2) {
   assertx(a1->isPHPArrayType());
   assertx(a2->isPHPArrayType());
 
@@ -99,19 +99,19 @@ ArrayData* arrayAdd(ArrayData* a1, ArrayData* a2) {
       // We consume refs on a2 and also produce references, so there's
       // no need to inc/dec a2.
       decRefArr(a1);
-      return a2;
+      return make_array_like_tv(a2);
     }
     if (a1 != a2) {
       auto const escalated = a1->plusEq(a2);
       if (escalated != a1) {
         decRefArr(a2);
         decRefArr(a1);
-        return escalated;
+        return make_array_like_tv(escalated);
       }
     }
   }
   decRefArr(a2);
-  return a1;
+  return make_array_like_tv(a1);
 }
 
 ArrayData* convTVToArrHelper(TypedValue tv) {
@@ -253,7 +253,8 @@ ArrayData* convObjToKeysetHelper(ObjectData* obj) {
 
 ArrayData* convClsMethToArrHelper(ClsMethDataRef clsmeth) {
   raiseClsMethConvertWarningHelper("array");
-  auto a = make_varray(clsmeth->getClsStr(), clsmeth->getFuncStr()).detach();
+  auto a = make_map_array(
+      0, clsmeth->getClsStr(), 1, clsmeth->getFuncStr()).detach();
   decRefClsMeth(clsmeth);
   return a;
 }

@@ -277,7 +277,7 @@ void ConvertTvToUncounted(
     case KindOfDArray:
     case KindOfVArray:
     case KindOfArray:
-      type = KindOfPersistentArray;
+      type = dt_with_persistence(type);
       // Fall-through.
     case KindOfPersistentDArray:
     case KindOfPersistentVArray:

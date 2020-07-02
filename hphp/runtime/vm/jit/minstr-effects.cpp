@@ -78,22 +78,16 @@ void getBaseType(Opcode rawOp, bool predict,
      * produces a new SSATmp for the base. StaticArr/StaticStr may be promoted
      * to CountedArr/CountedStr. */
     baseValChanged = true;
-    if (baseType.maybe(TArr)) {
-      if (baseType <= TPackedArr) {
-        baseType = TPackedArr;
-      } else if (baseType <= TMixedArr) {
-        baseType = TMixedArr;
-      } else {
-        baseType |= TCountedArr;
-      }
-    }
 
+    if (baseType.maybe(TPArr)) baseType |= TCountedPArr;
+    if (baseType.maybe(TVArr)) baseType |= TCountedVArr;
+    if (baseType.maybe(TDArr)) baseType |= TCountedDArr;
     if (baseType.maybe(TVec)) baseType |= TCountedVec;
     if (baseType.maybe(TDict)) baseType |= TCountedDict;
     if (baseType.maybe(TKeyset)) baseType |= TCountedKeyset;
     if (baseType.maybe(TStr)) baseType |= TCountedStr;
     if (baseType.maybe(TClsMeth)) {
-      baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedArr;
+      baseType |= RO::EvalHackArrDVArrs ? TCountedVec : TCountedVArr;
     }
     if (vanilla) baseType = baseType.narrowToVanilla();
   }

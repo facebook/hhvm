@@ -1194,8 +1194,8 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
       } \
       auto const dt = unit()->lookupArray(id)->toDataType(); \
       if (dt != KindOf##name) { \
-        ferror("{} references array data that is a {}\n", \
-                #name, dt); \
+        auto const display_dt = isArrayType(dt) ? KindOfArray : dt; \
+        ferror("{} references array data that is a {}\n", #name, display_dt); \
         return false; \
       } \
       break; \

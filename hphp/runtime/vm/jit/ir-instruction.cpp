@@ -310,14 +310,9 @@ Type allocObjReturn(const IRInstruction* inst) {
 }
 
 Type arrSetReturn(const IRInstruction* inst) {
-  assertx(inst->is(ArraySet));
-  assertx(inst->src(0)->isA(TArr));
-  assertx(!inst->isLayoutAgnostic());
-
-  auto const& arr = inst->src(0)->type();
-  auto const spec = arr.arrSpec();
-  auto const result = arr <= TMixedArr ? TMixedArr : TArr;
-  return spec.vanilla() ? result.narrowToVanilla() : result;
+  assertx(inst->is(AddNewElem, ArraySet));
+  assertx(inst->src(0)->type().subtypeOfAny(TPArr, TVArr, TDArr));
+  return inst->src(0)->type().modified();
 }
 
 Type arrElemReturn(const IRInstruction* inst) {
@@ -339,7 +334,7 @@ Type arrElemReturn(const IRInstruction* inst) {
 */
 Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
   assertx(inst->is(VecFirst, VecLast));
-  assertx(inst->src(0)->type().subtypeOfAny(TVec, TPackedArr));
+  assertx(inst->src(0)->type().subtypeOfAny(TVArr, TVec));
 
   auto elem = vecFirstLastType(inst->src(0)->type(), first, inst->ctx());
   if (!elem.second) {
@@ -353,7 +348,7 @@ Type vecFirstLastReturn(const IRInstruction* inst, bool first) {
 
 Type dictFirstLastReturn(const IRInstruction* inst, bool first, bool isKey) {
   assertx(inst->is(DictFirst, DictLast, DictFirstKey, DictLastKey));
-  assertx(inst->src(0)->type().subtypeOfAny(TDict, TMixedArr));
+  assertx(inst->src(0)->type().subtypeOfAny(TDArr, TDict));
 
   auto elem = dictFirstLastType(inst->src(0)->type(), isKey, first);
   if (!elem.second) {
@@ -593,14 +588,11 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DDictLastKey      return dictFirstLastReturn(inst, false, true);
 #define DKeysetFirstElem  return keysetFirstLastReturn(inst, true);
 #define DKeysetLastElem   return keysetFirstLastReturn(inst, false);
-#define DArrRecord      return TRecordArr;
-#define DVArr           return RO::EvalHackArrDVArrs ? TVec : TPackedArr;
-#define DDArr           return RO::EvalHackArrDVArrs ? TDict : TMixedArr;
-#define DStaticDArr     return (TStaticDict | TStaticArr) & []{ DDArr }();
-// If the inputs to CheckVArray and CheckDArray are vanilla, then the output
-// will have a known type, but if the inputs are generic arrays, we won't.
-#define DCheckDV(kind)  return inst->getPassthroughValue()->type() & \
-                               checkLayoutFlags(T##kind##Arr);
+#define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
+#define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
+#define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();
+// Refine the input type to be either a TVArr or TDArr, as appropriate.
+#define DCheckDV(k)     return inst->getPassthroughValue()->type() & T##k##Arr;
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);
@@ -648,7 +640,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DDictLastKey
 #undef DKeysetFirstElem
 #undef DKeysetLastElem
-#undef DArrRecord
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr

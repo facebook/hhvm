@@ -194,12 +194,12 @@ Instruction set
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| CheckVArray, DCheckDV(Packed), S(Arr), B|P|LA
+| CheckVArray, DCheckDV(V), S(Arr), B|P|LA
 
   Check that S0 is a varray, and if so copy it to D, and fallthrough. If S0 is
   not a varray, branch to block B.
 
-| CheckDArray, DCheckDV(Mixed), S(Arr), B|P|LA
+| CheckDArray, DCheckDV(D), S(Arr), B|P|LA
 
   Check that S0 is a darray, and if so copy it to D, and fallthrough. If S0 is
   not a darray, branch to block B.
@@ -391,29 +391,29 @@ Instruction set
 
 To array conversions:
 
-| ConvBoolToArr,                D(Arr), S(Bool),                     PRc
+| ConvBoolToArr,                D(PArr), S(Bool),                    PRc
 
-| ConvDblToArr,                 D(Arr), S(Dbl),                      PRc
+| ConvDblToArr,                 D(PArr), S(Dbl),                     PRc
 
-| ConvIntToArr,                 D(Arr), S(Int),                      PRc
+| ConvIntToArr,                 D(PArr), S(Int),                     PRc
 
-| ConvObjToArr,                 D(Arr), S(Obj),                      PRc|CRc
+| ConvObjToArr,                 D(PArr), S(Obj),                     PRc|CRc
 
-| ConvStrToArr,                 D(Arr), S(Str),                      PRc|CRc
+| ConvStrToArr,                 D(PArr), S(Str),                     PRc|CRc
 
-| ConvVecToArr,                 D(Arr), S(Vec),                      PRc|CRc
+| ConvVecToArr,                 D(PArr), S(Vec),                     PRc|CRc
 
-| ConvDictToArr,                D(Arr), S(Dict),                     PRc|CRc
+| ConvDictToArr,                D(PArr), S(Dict),                    PRc|CRc
 
-| ConvKeysetToArr,              D(Arr), S(Keyset),                   PRc|CRc
+| ConvKeysetToArr,              D(PArr), S(Keyset),                  PRc|CRc
 
-| ConvFuncToArr,                D(Arr), S(Func),                     PRc
+| ConvFuncToArr,                D(PArr), S(Func),                    PRc
 
-| ConvClsMethToArr,             D(Arr), S(ClsMeth),                  PRc|CRc
+| ConvClsMethToArr,             D(PArr), S(ClsMeth),                 PRc|CRc
 
-| ConvTVToArr,                  D(Arr), S(Cell),                     PRc|CRc
+| ConvTVToArr,                  D(PArr), S(Cell),                    PRc|CRc
 
-| ConvArrToNonDVArr,            D(Arr), S(Arr),                      PRc|CRc
+| ConvArrToNonDVArr,            D(PArr), S(Arr),                     PRc|CRc
 
 
 To vec conversions:
@@ -1529,7 +1529,7 @@ To string conversions:
 
   Clear the IsBeingConstructed flag on the object.
 
-| NewPlainArray, D(Arr), C(Int), PRc
+| NewPlainArray, D(PArr), C(Int), PRc
 
   Allocate a new plain array (that is, a non-dvarray) with expected capacity S0.
 
@@ -1559,20 +1559,20 @@ To string conversions:
   The array will be initialized with values using either InitPackedLayoutArray
   or InitPackedLayoutArrayLoop.
 
-| InitPackedLayoutArray<index>, ND, S(AK(Packed),Vec) S(Cell), CRc
+| InitPackedLayoutArray<index>, ND, S(VArr,Vec) S(Cell), CRc
 
   Store the S1 into the slot at index in array S0. This instruction assumes
   that it doesn't have to incref the value being stored. Used to initialize an
   array allocated with AllocPackedArray or AllocVec.
 
-| InitPackedLayoutArrayLoop<offset,size>, ND, S(AK(Packed),Vec) S(StkPtr), CRc
+| InitPackedLayoutArrayLoop<offset,size>, ND, S(VArr,Vec) S(StkPtr), CRc
 
   Move `size' elements from the stack given by S1, at `offset', into the array
   S0.  Assumes that the first element on the stack is the last element in the
   array.  Used to initialize an array allocated with AllocPackedArray or
   AllocVec that was too big to use a series of InitPackedLayoutArray ops.
 
-| AllocStructArray<keys...>,  D(Arr),         NA, PRc
+| AllocStructArray<keys...>,  D(PArr),         NA, PRc
 
 | AllocStructDArray<keys...>, DDArr,          NA, PRc
 
@@ -1596,7 +1596,7 @@ To string conversions:
   This instruction assumes it can take the values from the stack
   without increfing them.
 
-| NewStructArray<offset,keys...>,  D(Arr),         S(StkPtr), PRc|CRc
+| NewStructArray<offset,keys...>,  D(PArr),         S(StkPtr), PRc|CRc
 
 | NewStructDArray<offset,keys...>, DDArr,          S(StkPtr), PRc|CRc
 
@@ -2323,7 +2323,7 @@ To string conversions:
 
   Concatenate S0, S1, S2, and S3.
 
-| AddNewElem,       D(Arr),    S(Arr) S(Cell),    CRc|PRc
+| AddNewElem,       DArrSet,   S(PArr,VArr,DArr) S(Cell), CRc|PRc
 
 | AddNewElemKeyset, D(Keyset), S(Keyset) S(Cell), CRc|PRc
 
@@ -2780,9 +2780,9 @@ To string conversions:
   We can use this operation to elide stores for iterator fields that do not
   get loaded again. In debug builds, it will write poison values to the fields.
 
-| GetMixedPtrIter,  DPtrIter, S(AK(Mixed),Dict) S(Int), NF
+| GetMixedPtrIter,  DPtrIter, S(DArr,Dict) S(Int), NF
 
-| GetPackedPtrIter, DPtrIter, S(AK(Packed),Vec) S(Int), NF
+| GetPackedPtrIter, DPtrIter, S(VArr,Vec) S(Int), NF
 
   Returns a pointer to the elm S1 of a {mixed,packed}-layout array S0. S1 does
   not need to be a valid array position; for example, it may equal the size of
@@ -2927,14 +2927,14 @@ fields of that struct for holding intermediate values.
 
   Profile access of the element keyed by S1 in S0, tracking sizes and offsets.
 
-| CheckMixedArrayKeys<T>, ND, S(AK(Mixed),Dict), B
+| CheckMixedArrayKeys<T>, ND, S(DArr,Dict), B
 
   Check that the given mixed array is free of tombstones and that all of its
   elements' keys match the type T. If any check fails, branch to block B.
   Like CheckMixedArrayOffset, this check is allowed to have false negatives -
   it may fail even if the array has keys of the given type.
 
-| CheckMixedArrayOffset<pos>, ND, S(AK(Mixed)) S(Int,Str), B
+| CheckMixedArrayOffset<pos>, ND, S(DArr) S(Int,Str), B
 
   Check that `pos' is within the usage bounds of S0 (including tombstones), and
   that S1 exactly matches the element key of S0 at `pos'.  If any of the checks
@@ -2978,7 +2978,7 @@ fields of that struct for holding intermediate values.
   Similar to ElemDX and ElemUX, but specialized for when the base S0 is an
   array and the key S1 is an int/str.
 
-| ElemMixedArrayK, D(LvalToElemInitCell), S(AK(Mixed)) S(Int,Str) S(Int), NF
+| ElemMixedArrayK, D(LvalToElemInitCell), S(DArr) S(Int,Str) S(Int), NF
 
   Returns an lval to the element of MixedArray S0 at the known position S2 in S1.
 
@@ -3024,7 +3024,7 @@ fields of that struct for holding intermediate values.
 
   Get element with key S1 from base S0.
 
-| MixedArrayGetK, DArrElem, S(AK(Mixed)) S(Int,Str) S(Int), NF
+| MixedArrayGetK, DArrElem, S(DArr) S(Int,Str) S(Int), NF
 
   Like ArrayGet, but the element for S1 is at a known position S2 in S0.
 
@@ -3153,7 +3153,7 @@ fields of that struct for holding intermediate values.
 
   Initialize the memoization instance slots for object S0 of the given class.
 
-| ArraySet, DArrSet, S(Arr) S(Int,Str) S(Cell), PRc|CRc
+| ArraySet, DArrSet, S(PArr,VArr,DArr) S(Int,Str) S(Cell), PRc|CRc
 
   Set element with key S1 in S0 to S2. The dest will be a new Array that should
   replace S0, which may be further constrained by the type of S0.
@@ -3313,24 +3313,24 @@ fields of that struct for holding intermediate values.
 
   Profile the access to property S(1) with base class S(0).
 
-| CheckPackedArrayDataBounds, ND, S(AK(Packed),Vec) S(Int), B
+| CheckPackedArrayDataBounds, ND, S(VArr,Vec) S(Int), B
 
   Checks that the index in S1 is within the bounds of the packed array or
   vector array in S0. Branches to B if the index is out of bounds.
 
-| LdPackedArrayDataElemAddr<T>, DParam(LvalToElemCell), S(AK(Packed),Vec) S(Int), NF
+| LdPackedArrayDataElemAddr<T>, DParam(LvalToElemCell), S(VArr,Vec) S(Int), NF
 
   Loads the address of the element at index S1 of the packed array or vec array
   in S0. This instruction assumes the array actually contains an element at
   that offset (IE, the array has the proper length).
 
-| ReservePackedArrayDataNewElem, D(Int), S(AK(Packed),Vec), B
+| ReservePackedArrayDataNewElem, D(Int), S(VArr,Vec), B
 
   If there is room in the packed or vec array (which is assumed to be mutable),
   increments the array size and returns the index of the new last element
   (which you must initialize); else jumps to the taken branch.
 
-| LdPackedElem, DArrElem, S(AK(Packed)) S(Int), NF
+| LdPackedElem, DArrElem, S(VArr) S(Int), NF
 
   Loads the element of the packed array in S0 at offset S1. This instruction
   assumes that the vec actually contains an element at that offset (IE, the
@@ -3353,33 +3353,32 @@ fields of that struct for holding intermediate values.
   Returns whether a collection instance is empty or not.  S0 must be known to
   be an instance of a collection class at compile time.
 
-
-| VecFirst, DVecFirstElem, S(Vec,AK(Packed)), NF
+| VecFirst, DVecFirstElem, S(VArr,Vec), NF
 
   Returns the first value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| VecLast, DVecLastElem, S(Vec,AK(Packed)), NF
+| VecLast, DVecLastElem, S(VArr,Vec), NF
 
   Returns the last value from the packed or vec array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirst, DDictFirstElem, S(Dict,AK(Mixed)), NF
+| DictFirst, DDictFirstElem, S(DArr,Dict), NF
 
   Returns the first value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLast, DDictLastElem, S(Dict,AK(Mixed)), NF
+| DictLast, DDictLastElem, S(DArr,Dict), NF
 
   Returns the last value from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictFirstKey, DDictFirstKey, S(Dict,AK(Mixed)), NF
+| DictFirstKey, DDictFirstKey, S(DArr,Dict), NF
 
   Returns the first key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.
 
-| DictLastKey, DDictLastKey, S(Dict,AK(Mixed)), NF
+| DictLastKey, DDictLastKey, S(DArr,Dict), NF
 
   Returns the last key from the mixed or dict array in S0.
   If the array is empty, it will return NULL.

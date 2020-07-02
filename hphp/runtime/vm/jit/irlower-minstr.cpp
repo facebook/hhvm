@@ -611,7 +611,7 @@ void cgCheckMissingKeyInArrLike(IRLS& env, const IRInstruction* inst) {
 namespace {
 
 void implArrayGet(IRLS& env, const IRInstruction* inst, MOpMode mode) {
-  if (inst->src(0)->isA(TMixedArr)) {
+  if (inst->src(0)->isA(TDArr)) {
     if (mode == MOpMode::None) return cgDictGetQuiet(env, inst);
     if (mode == MOpMode::Warn) return cgDictGet(env, inst);
   }
@@ -852,7 +852,7 @@ void cgArrayIsset(IRLS& env, const IRInstruction* inst) {
 void cgArrayIdx(IRLS& env, const IRInstruction* inst) {
   auto const arr = inst->src(0);
   auto const def = inst->src(2);
-  if (arr->isA(TMixedArr)) return cgDictIdx(env, inst);
+  if (arr->isA(TDArr))     return cgDictIdx(env, inst);
   if (def->isA(TInitNull)) return implArrayGet(env, inst, MOpMode::None);
   auto const keyType = getKeyType(inst->src(1));
 
@@ -991,40 +991,6 @@ void record_packed_access(const ArrayData* ad) {
 void cgLdPackedArrayDataElemAddr(IRLS& env, const IRInstruction* inst) {
   auto const arrLoc = srcLoc(env, inst, 0);
   auto const idxLoc = srcLoc(env, inst, 1);
-  auto& v = vmain(env);
-  auto& vc = vcold(env);
-
-  if (UNLIKELY(RuntimeOption::EvalProfPackedArraySampleFreq > 0)) {
-    auto const arrTy = inst->src(0)->type();
-
-    if (arrTy.maybe(TPackedArr)) {
-      s_counter.bind(
-        rds::Mode::Local,
-        rds::LinkID{"PackedArraySampleCounter"}
-      );
-
-      auto const profile = [&] (Vout& v) {
-        auto const handle = s_counter.handle();
-        auto const sf = v.makeReg();
-        v << declm{rvmtl()[handle], sf};
-
-        unlikelyIfThen(v, vc, CC_LE, sf, [&] (Vout& v) {
-          // Log this array access.
-          v << vcall{CallSpec::direct(record_packed_access),
-                     v.makeVcallArgs({{arrLoc.reg()}}), v.makeTuple({})};
-        });
-      };
-
-      if (arrTy <= TPackedArr) {
-        profile(v);
-      } else {
-        auto const sf = v.makeReg();
-        v << cmpbim{ArrayData::kPackedKind, arrLoc.reg()[HeaderKindOffset], sf};
-        ifThen(v, CC_E, sf, profile);
-      }
-    }
-  }
-
   auto const dstLoc = irlower::dstLoc(env, inst, 0);
   auto const addr = implPackedLayoutElemAddr(env, arrLoc, idxLoc, inst->src(1));
   vmain(env) << lea{addr.val, dstLoc.reg(tv_lval::val_idx)};

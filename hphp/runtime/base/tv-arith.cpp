@@ -325,12 +325,10 @@ again:
   if (isArrayLikeType(type(c1)) && isArrayLikeType(c2.m_type)) {
     auto const ad1    = val(c1).parr;
     auto const newArr = op(ad1, c2.m_data.parr);
+    type(c1) = newArr->toDataType();
     if (newArr != ad1) {
       val(c1).parr = newArr;
-      type(c1) = newArr->toDataType();
       decRefArr(ad1);
-    } else if (RuntimeOption::EvalEmitDVArray) {
-      type(c1) = ad1->toDataType();
     }
     return;
   }

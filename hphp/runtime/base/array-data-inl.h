@@ -266,20 +266,15 @@ inline bool ArrayData::useWeakKeys() const {
 
 ALWAYS_INLINE
 DataType ArrayData::toDataType() const {
-  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
-    if (isVArray()) {
-      assertx(isPackedKind());
-      return KindOfVArray;
-    } else if (isDArray()) {
-      assertx(isMixedKind());
-      return KindOfDArray;
-    }
-  }
   switch (kind()) {
     case kPackedKind:
     case kBespokeVArrayKind:
+      return KindOfVArray;
+
     case kMixedKind:
     case kBespokeDArrayKind:
+      return KindOfDArray;
+
     case kPlainKind:
     case kBespokeArrayKind:
       return KindOfArray;
@@ -303,20 +298,15 @@ DataType ArrayData::toDataType() const {
 
 ALWAYS_INLINE
 DataType ArrayData::toPersistentDataType() const {
-  if (UNLIKELY(RuntimeOption::EvalEmitDVArray)) {
-    if (isVArray()) {
-      assertx(isPackedKind());
-      return KindOfPersistentVArray;
-    } else if (isDArray()) {
-      assertx(isMixedKind());
-      return KindOfPersistentDArray;
-    }
-  }
   switch (kind()) {
     case kPackedKind:
     case kBespokeVArrayKind:
+      return KindOfPersistentVArray;
+
     case kMixedKind:
     case kBespokeDArrayKind:
+      return KindOfPersistentDArray;
+
     case kPlainKind:
     case kBespokeArrayKind:
       return KindOfPersistentArray;

@@ -315,9 +315,7 @@ TCA emitFuncPrologueRedispatch(CodeBlock& cb, DataBlock& data) {
     v << subq{unpackCellOff, rvmsp(), unpackCellPtr, v.makeReg()};
 
     // Store it.
-    auto const type = RuntimeOption::EvalHackArrDVArrs
-      ? DataType::Vec
-      : DataType::Array;
+    auto const type = RO::EvalHackArrDVArrs ? DataType::Vec : DataType::VArray;
     v << store{packedArr, unpackCellPtr + TVOFF(m_data)};
     v << storeb{v.cns(type), unpackCellPtr + TVOFF(m_type)};
 

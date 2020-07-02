@@ -96,7 +96,7 @@ void init_params(IRGS& env, const Func* func, uint32_t argc,
         // Already at the correct slot.
         if (argc == func->numParams()) return;
 
-        auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+        auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
         auto const generics = [&] {
           if (argc < func->numParams()) {
             gen(env, AssertLoc, type, LocalId{argc}, fp(env));
@@ -345,7 +345,7 @@ void emitPrologueBody(IRGS& env, uint32_t argc, TransID transID,
     // use LdStk instead of LdLoc, as there may be no such local.
     assertx(!func->hasVariadicCaptureParam());
     assertx(argc == func->numNonVariadicParams() + 1);
-    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+    auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
     auto const unpackOff = IRSPRelOffsetData(offsetFromIRSP(
       env, BCSPRelOffset{func->numSlotsInFrame() - int32_t(argc)}));
     gen(env, AssertStk, type, unpackOff, sp(env));
@@ -490,7 +490,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
     },
     [&] {
       // Fail on generics count/wildcard mismatch.
-      auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TArr;
+      auto const type = RuntimeOption::EvalHackArrDVArrs ? TVec : TVArr;
       auto const local = LocalId{func->numParams()};
       gen(env, AssertLoc, type, local, fp(env));
       auto const generics = gen(env, LdLoc, type, local, fp(env));

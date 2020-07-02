@@ -252,7 +252,8 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     isMixed()));
 
   if (!isPrecise()) {
-    if (isVArray() || isDArray() || isVArrayOrDArray()) return KindOfArray;
+    if (isVArray()) return KindOfVArray;
+    if (isDArray()) return KindOfDArray;
     return folly::none;
   }
 
@@ -278,9 +279,10 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
       auto const metatype = getAnnotMetaType(td->type);
       if (metatype == MetaType::Precise) {
         t = getAnnotDataType(td->type);
-      } else if (metatype == MetaType::VArray || metatype == MetaType::DArray ||
-                 metatype == MetaType::VArrOrDArr) {
-        t = KindOfArray;
+      } else if (metatype == MetaType::VArray) {
+        t = KindOfVArray;
+      } else if (metatype == MetaType::DArray) {
+        t = KindOfDArray;
       } else {
         t = folly::none;
       }
@@ -970,20 +972,11 @@ std::string describe_actual_type(tv_rval val) {
     case KindOfPersistentKeyset:
     case KindOfKeyset:        return "HH\\keyset";
     case KindOfPersistentDArray:
-    case KindOfDArray:
-      return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
-        ? "darray" : "array";
+    case KindOfDArray:        return "darray";
     case KindOfPersistentVArray:
-    case KindOfVArray:
-      return UNLIKELY(RuntimeOption::EvalSpecializeDVArray)
-        ? "varray" : "array";
+    case KindOfVArray:        return "varray";
     case KindOfPersistentArray:
-    case KindOfArray: {
-      auto const arr = val.val().parr;
-      if (arr->isVArray()) return "varray";
-      if (arr->isDArray()) return "darray";
-      return "array";
-    }
+    case KindOfArray:         return "array";
     case KindOfResource:
       return val.val().pres->data()->o_getClassName().c_str();
     case KindOfRFunc:         return "reified function";

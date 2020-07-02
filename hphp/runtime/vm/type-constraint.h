@@ -192,9 +192,9 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    if (isVArray() || isDArray() || isVArrayOrDArray()) {
-      return KindOfArray;
-    }
+    if (isVArray()) return KindOfVArray;
+    if (isDArray()) return KindOfDArray;
+    if (isVArrayOrDArray()) return folly::none;
     auto const dt = getAnnotDataType(m_type);
     return (dt != KindOfUninit || isPrecise())
       ? MaybeDataType(dt)

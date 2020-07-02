@@ -42,6 +42,8 @@ namespace HPHP {
  *   a fast implementation of isNullType().
  * - The Array and String types are positioned to allow for fast array/string
  *   checks, ignoring persistence (see isArrayType and isStringType).
+ * - We use the fact that KindOfDArray and KindOfVArray are the two smallest
+ *   values to implement a fast test for TVArr|TDArr in emitTypeTest.
  * - Refcounted types are odd, and uncounted types are even, to allow fast
  *   countness checks.
  * - Types with persistent and non-persistent versions must be negative, for

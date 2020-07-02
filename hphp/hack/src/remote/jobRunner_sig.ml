@@ -19,7 +19,11 @@ module type S = sig
 
   type status [@@deriving show]
 
+  (* Note on the nonce parameter: it is up to the caller to specify a nonce that
+    results in the desired behavior, such as grouping multiple commands together.
+    It can be used later in `begin_cancel` to cancel a group of commands, for example. *)
   val create_command :
+    nonce:Int64.t ->
     key:string ->
     hash:string ->
     check_id:string ->
@@ -33,7 +37,8 @@ module type S = sig
 
   val is_alive : status -> bool
 
-  val begin_cancel : job_id -> (status, string) result Future.t
+  (* Cancels a group of running commands using the nonce they were created with. *)
+  val begin_cancel : Int64.t -> (status, string) result Future.t
 
   val begin_heartbeat : job_id -> (status, string) result Future.t
 

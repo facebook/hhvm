@@ -720,7 +720,7 @@ bool canDCE(IRInstruction* inst) {
   case EndInlining:
   case SyncReturnBC:
   case SetOpTV:
-  case SetOpTVVerify:
+  case OutlineSetOp:
   case ConjureUse:
   case LdClsMethodFCacheFunc:
   case LdClsMethodCacheFunc:

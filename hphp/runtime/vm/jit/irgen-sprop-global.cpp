@@ -232,7 +232,7 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
   auto const lhs = gen(env, LdMem, lookup.propPtr->type().deref(),
                        lookup.propPtr);
 
-  if (auto value = inlineSetOp(env, op, lhs, rhs)) {
+  auto const finish = [&] (SSATmp* value) {
     if (lookup.tc) {
       verifyPropType(
         env,
@@ -257,9 +257,13 @@ void emitSetOpS(IRGS& env, SetOpOp op) {
     gen(env, StMem, lookup.propPtr, value);
     decRef(env, lhs);
     decRef(env, rhs);
+  };
+
+  if (auto value = inlineSetOp(env, op, lhs, rhs)) {
+    finish(value);
   } else {
-    // Might be worth handling Concat, and others.
-    PUNT(SetOpS-UnhandledOp);
+    // Handle cases not performed inline.
+    finish(gen(env, OutlineSetOp, SetOpData{op}, lhs, rhs));
   }
 }
 

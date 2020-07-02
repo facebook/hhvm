@@ -1969,8 +1969,9 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     assertx(obj != nullptr);
 
     auto const lhs = gen(env, LdMem, propPtr->type().deref(), propPtr);
-    if (auto const result = inlineSetOp(env, op, lhs, rhs)) {
-      assertx(!result->type().maybe(TClsMeth));
+
+
+    auto const handleShuffle = [&](SSATmp* result) {
       verifyPropType(
         env,
         gen(env, LdObjClass, obj),
@@ -1992,6 +1993,11 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
         finish(result);
       });
       return finishMe(plhs);
+    };
+
+    if (auto const result = inlineSetOp(env, op, lhs, rhs)) {
+      assertx(!result->type().maybe(TClsMeth));
+      return handleShuffle(result);
     }
 
     /*
@@ -2019,15 +2025,7 @@ SSATmp* setOpPropImpl(IRGS& env, SetOpOp op, SSATmp* base,
     }();
 
     if (!fast) {
-      gen(
-        env,
-        SetOpTVVerify,
-        SetOpData{op},
-        propPtr,
-        rhs,
-        gen(env, LdObjClass, obj),
-        cns(env, propInfo->slot)
-      );
+      return handleShuffle(gen(env, OutlineSetOp, SetOpData{op}, lhs, rhs));
     } else {
       gen(env, SetOpTV, SetOpData{op}, propPtr, rhs);
     }

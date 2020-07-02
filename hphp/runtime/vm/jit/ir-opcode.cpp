@@ -436,6 +436,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NewRecord:
   case OODeclExists:
   case OrdStrIdx:
+  case OutlineSetOp:
   case PrintBool:
   case PrintInt:
   case PrintStr:
@@ -468,7 +469,6 @@ bool opcodeMayRaise(Opcode opc) {
   case SetNewElemKeyset:
   case SetNewElemVec:
   case SetOpTV:
-  case SetOpTVVerify:
   case SetOpElem:
   case SetOpProp:
   case SetProp:

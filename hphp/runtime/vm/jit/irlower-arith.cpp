@@ -212,53 +212,36 @@ void cgSetOpTV(IRLS& env, const IRInstruction* inst) {
 }
 
 template <SetOpOp Op>
-static void setOpTVVerifyImpl(tv_lval lhs, TypedValue rhs,
-                                const Class* cls, Slot slot) {
-  assertx(RuntimeOption::EvalCheckPropTypeHints > 0);
-  assertx(slot < cls->numDeclProperties());
-  auto const& prop = cls->declProperties()[slot];
-  assertx(prop.typeConstraint.isCheckable());
-
-  if (setOpNeedsTypeCheck(prop.typeConstraint, Op, lhs)) {
-    /*
-     * If this property has a type-hint, we can't do the setop truely in
-     * place. We need to verify that the new value satisfies the type-hint
-     * before assigning back to the property (if we raise a warning and throw,
-     * we don't want to have already put the value into the prop).
-     */
-    TypedValue temp;
-    tvDup(*lhs, temp);
-    SCOPE_FAIL { tvDecRefGen(&temp); };
-    setOpOpToHelper(Op)(&temp, rhs);
-    prop.typeConstraint.verifyProperty(&temp, cls, prop.cls, prop.name);
-    tvMove(temp, lhs);
-  } else {
-    setOpOpToHelper(Op)(lhs, rhs);
-  }
+static TypedValue outlineSetOpImpl(TypedValue lhs, TypedValue rhs) {
+  TypedValue temp;
+  tvDup(lhs, temp);
+  SCOPE_FAIL { tvDecRefGen(&temp); };
+  setOpOpToHelper(Op)(&temp, rhs);
+  return temp;
 }
 
-void cgSetOpTVVerify(IRLS& env, const IRInstruction* inst) {
+void cgOutlineSetOp(IRLS& env, const IRInstruction* inst) {
   auto const op = inst->extra<SetOpData>()->op;
   auto& v = vmain(env);
 
   using S = SetOpOp;
   auto const helper = [&]{
     switch (op) {
-      case S::PlusEqual:   return setOpTVVerifyImpl<S::PlusEqual>;
-      case S::MinusEqual:  return setOpTVVerifyImpl<S::MinusEqual>;
-      case S::MulEqual:    return setOpTVVerifyImpl<S::MulEqual>;
-      case S::ConcatEqual: return setOpTVVerifyImpl<S::ConcatEqual>;
-      case S::DivEqual:    return setOpTVVerifyImpl<S::DivEqual>;
-      case S::PowEqual:    return setOpTVVerifyImpl<S::PowEqual>;
-      case S::ModEqual:    return setOpTVVerifyImpl<S::ModEqual>;
-      case S::AndEqual:    return setOpTVVerifyImpl<S::AndEqual>;
-      case S::OrEqual:     return setOpTVVerifyImpl<S::OrEqual>;
-      case S::XorEqual:    return setOpTVVerifyImpl<S::XorEqual>;
-      case S::SlEqual:     return setOpTVVerifyImpl<S::SlEqual>;
-      case S::SrEqual:     return setOpTVVerifyImpl<S::SrEqual>;
-      case S::PlusEqualO:  return setOpTVVerifyImpl<S::PlusEqualO>;
-      case S::MinusEqualO: return setOpTVVerifyImpl<S::MinusEqualO>;
-      case S::MulEqualO:   return setOpTVVerifyImpl<S::MulEqualO>;
+      case S::PlusEqual:   return outlineSetOpImpl<S::PlusEqual>;
+      case S::MinusEqual:  return outlineSetOpImpl<S::MinusEqual>;
+      case S::MulEqual:    return outlineSetOpImpl<S::MulEqual>;
+      case S::ConcatEqual: return outlineSetOpImpl<S::ConcatEqual>;
+      case S::DivEqual:    return outlineSetOpImpl<S::DivEqual>;
+      case S::PowEqual:    return outlineSetOpImpl<S::PowEqual>;
+      case S::ModEqual:    return outlineSetOpImpl<S::ModEqual>;
+      case S::AndEqual:    return outlineSetOpImpl<S::AndEqual>;
+      case S::OrEqual:     return outlineSetOpImpl<S::OrEqual>;
+      case S::XorEqual:    return outlineSetOpImpl<S::XorEqual>;
+      case S::SlEqual:     return outlineSetOpImpl<S::SlEqual>;
+      case S::SrEqual:     return outlineSetOpImpl<S::SrEqual>;
+      case S::PlusEqualO:  return outlineSetOpImpl<S::PlusEqualO>;
+      case S::MinusEqualO: return outlineSetOpImpl<S::MinusEqualO>;
+      case S::MulEqualO:   return outlineSetOpImpl<S::MulEqualO>;
     }
     not_reached();
   }();
@@ -267,13 +250,11 @@ void cgSetOpTVVerify(IRLS& env, const IRInstruction* inst) {
     v,
     env,
     CallSpec::direct(helper),
-    kVoidDest,
+    callDestTV(env, inst),
     SyncOptions::Sync,
     argGroup(env, inst)
-      .ssa(0)
+      .typedValue(0)
       .typedValue(1)
-      .ssa(2)
-      .ssa(3)
   );
 }
 

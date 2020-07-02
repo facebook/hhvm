@@ -2431,10 +2431,11 @@ To string conversions:
 
   Performs S0 <op>= S1.
 
-| SetOpTVVerify<op>, ND, S(LvalToCell) S(Cell) S(Cls) S(Int), NF
+| OutlineSetOp<op>, D(Cell), S(Cell) S(Cell), NF
 
-  Similar to SetOpTV, but does a type-hint check of the result (before
-  assigning to S0) using the type-hint of the property in class S2 at slot S3.
+  Similar to SetOpTV, but does not write back the result to S0, instead it is
+  returned as the dest.  This is useful to handle ops that may require a 
+  type check before writing the value back.
 
 | GetTime, D(Dbl), NA, NF
 

@@ -1967,7 +1967,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case SetLegacyDict:
   case SetLegacyVec:
   case SetOpTV:
-  case SetOpTVVerify:
+  case OutlineSetOp:
   case ThrowAsTypeStructException:
   case PropTypeRedefineCheck: // Can raise and autoload
   case HandleRequestSurprise:

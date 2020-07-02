@@ -1825,7 +1825,7 @@ X(MemoGetInstanceCache,         MemoCacheInstanceData);
 X(MemoSetInstanceCache,         MemoCacheInstanceData);
 X(SetOpProp,                    SetOpData);
 X(SetOpTV,                      SetOpData);
-X(SetOpTVVerify,                SetOpData);
+X(OutlineSetOp,                 SetOpData);
 X(IncDecProp,                   IncDecData);
 X(SetOpElem,                    SetOpData);
 X(IncDecElem,                   IncDecData);

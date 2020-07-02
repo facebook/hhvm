@@ -396,14 +396,6 @@ TEST(Type, GuardConstraints) {
 
   EXPECT_TRUE(fits(TCell, {DataTypeGeneric}));
 
-  auto const kindConstraint =
-    GuardConstraint(DataTypeSpecialized).setWantArrayKind();
-  EXPECT_FALSE(fits(TCell, kindConstraint));
-  EXPECT_FALSE(fits(TArr, kindConstraint));
-  EXPECT_FALSE(fits(TVec, kindConstraint));
-  EXPECT_FALSE(fits(TVanillaArr, kindConstraint));
-  EXPECT_FALSE(fits(TVanillaVec, kindConstraint));
-
   auto const vanillaConstraint =
     GuardConstraint(DataTypeSpecialized).setWantVanillaArray();
   EXPECT_FALSE(fits(TCell, vanillaConstraint));
@@ -554,24 +546,20 @@ TEST(Type, ArrayFitsSpec) {
 TEST(Type, SpecializedArrays) {
   EXPECT_FALSE(TArr.isSpecialized());
   EXPECT_FALSE(TArr.arrSpec());
-  EXPECT_FALSE(TArr.arrSpec().kind());
   EXPECT_FALSE(TArr.arrSpec().vanilla());
 
   auto const const_array = Type::cns(staticEmptyVArray());
   EXPECT_TRUE(const_array.isSpecialized());
   EXPECT_TRUE(const_array.arrSpec());
-  EXPECT_FALSE(const_array.arrSpec().kind());
   EXPECT_TRUE(const_array.arrSpec().vanilla());
 
   EXPECT_FALSE(TDict.isSpecialized());
   EXPECT_FALSE(TDict.arrSpec());
-  EXPECT_FALSE(TDict.arrSpec().kind());
   EXPECT_FALSE(TDict.arrSpec().vanilla());
 
   auto const const_dict = Type::cns(staticEmptyDictArray());
   EXPECT_TRUE(const_dict.isSpecialized());
   EXPECT_TRUE(const_dict.arrSpec());
-  EXPECT_FALSE(const_dict.arrSpec().kind());
   EXPECT_TRUE(const_dict.arrSpec().vanilla());
 }
 
@@ -864,19 +852,16 @@ TEST(Type, VanillaArray) {
   EXPECT_EQ("ArrLike=Vanilla", TVanillaArrLike.toString());
   EXPECT_TRUE(TVanillaArr <= TArr);
   EXPECT_TRUE(TVanillaArr < TArr);
-  EXPECT_FALSE(TVanillaArr.arrSpec().kind());
   EXPECT_FALSE(TVanillaArr.arrSpec().type());
   EXPECT_TRUE(TVanillaArr.arrSpec().vanilla());
 }
 
 TEST(Type, VanillaVec) {
   EXPECT_EQ("Vec", TVec.toString());
-  EXPECT_FALSE(TVec.arrSpec().kind());
   EXPECT_FALSE(TVec.arrSpec().type());
   EXPECT_FALSE(TVec.arrSpec().vanilla());
 
   EXPECT_EQ("Vec=Vanilla", TVanillaVec.toString());
-  EXPECT_FALSE(TVanillaVec.arrSpec().kind());
   EXPECT_FALSE(TVanillaVec.arrSpec().type());
   EXPECT_TRUE(TVanillaVec.arrSpec().vanilla());
   EXPECT_EQ(TVanillaVec, TVec & TVanillaVec);
@@ -895,13 +880,11 @@ TEST(Type, VanillaVecRAT) {
                                       RepoAuthType(RepoAuthType::Tag::Str));
   auto const vecRat = Type::Vec(rat);
   EXPECT_EQ("Vec=N([Str])", vecRat.toString());
-  EXPECT_FALSE(vecRat.arrSpec().kind());
   EXPECT_TRUE(vecRat.arrSpec().type());
   EXPECT_FALSE(vecRat.arrSpec().vanilla());
 
   auto const vanillaVecRat = vecRat.narrowToVanilla();
   EXPECT_EQ("Vec=Vanilla:N([Str])", vanillaVecRat.toString());
-  EXPECT_FALSE(vanillaVecRat.arrSpec().kind());
   EXPECT_TRUE(vanillaVecRat.arrSpec().type());
   EXPECT_TRUE(vanillaVecRat.arrSpec().vanilla());
   EXPECT_EQ(vanillaVecRat, vecRat & TVanillaVec);

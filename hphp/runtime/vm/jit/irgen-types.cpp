@@ -251,8 +251,6 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::VArrayOrDArrayCheck:
     case AnnotAction::NonVArrayOrDArrayCheck: {
       assertx(valType <= TArr);
-      auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
-      env.irb->constrainValue(val, gc);
       auto const type = [&]{
         if (result == AnnotAction::VArrayCheck) return TVArr;
         if (result == AnnotAction::DArrayCheck) return TDArr;
@@ -495,9 +493,6 @@ template <typename Next>
 void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
   assertx(arr->isA(TArr));
   assertx(op == CheckDArray || op == CheckVArray || op == CheckDVArray);
-
-  auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
-  env.irb->constrainValue(arr, gc);
   ifThen(env, [&](Block* taken) { next(gen(env, op, taken, arr)); }, [&]{});
 }
 

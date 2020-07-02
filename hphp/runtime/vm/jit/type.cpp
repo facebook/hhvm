@@ -626,7 +626,6 @@ Type Type::modified() const {
 static bool arrayFitsSpec(const ArrayData* arr, ArraySpec spec) {
   if (spec == ArraySpec::Top()) return true;
   if (arr->isVanilla()) spec = spec.narrowToVanilla();
-  if (spec.kind() && arr->kind() != *spec.kind()) return false;
   if (!spec.type()) return true;
 
   using A = RepoAuthType::Array;
@@ -679,21 +678,13 @@ bool Type::operator<=(Type rhs) const {
     return false;
   }
 
-  // If `rhs' isn't specialized no further checking is needed.
+  // Compare specializations only if `rhs' is specialized.
   if (!rhs.isSpecialized()) {
     return true;
   }
-
   if (lhs.hasConstVal(TArrLike)) {
-    // Arrays can be specialized in different ways.  Here, we check if the
-    // constant array fits the kind()/type() of the specialization of `rhs', if
-    // any.
-    auto const lhs_arr = lhs.m_arrVal;
-    auto const rhs_as = rhs.arrSpec();
-    return arrayFitsSpec(lhs_arr, rhs_as);
+    return arrayFitsSpec(lhs.m_arrVal, rhs.arrSpec());
   }
-
-  // Compare specializations only if `rhs' is specialized.
   return lhs.spec() <= rhs.spec();
 }
 
@@ -1270,8 +1261,9 @@ Type relaxToConstraint(Type t, const GuardConstraint& gc) {
 
   // NOTE: This second check here causes us to guard to specific classes where
   // we could guard to superclasses and unify multiple regions. Rethink it.
-  if (gc.wantArrayKind() || gc.wantClass()) return t;
+  if (gc.wantClass()) return t;
   assertx(gc.wantVanillaArray());
+  assertx(RO::EvalAllowBespokeArrayLikes);
   return t.arrSpec().vanilla() ? t.unspecialize().narrowToVanilla() : t;
 }
 

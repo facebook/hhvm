@@ -91,15 +91,7 @@ struct ParamPrep {
 
 // Will turn into either an int or a double in zend_convert_scalar_to_number.
 bool type_converts_to_number(Type ty) {
-  return ty.subtypeOfAny(
-    TDbl,
-    TInt,
-    TNull,
-    TObj,
-    TRes,
-    TStr,
-    TBool
-  );
+  return ty.subtypeOfAny(TDbl, TInt, TNull, TObj, TRes, TStr, TBool);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2556,22 +2548,7 @@ void emitAKExists(IRGS& env) {
     gen(env, ThrowInvalidArrayKey, arr, key);
   };
 
-  auto const check_packed = [&] {
-    assertx(key->isA(TInt));
-
-    auto const result = cond(
-      env,
-      [&](Block* taken) {
-        gen(env, CheckPackedArrayDataBounds, taken, arr, key);
-      },
-      [&] { return cns(env, true); },
-      [&] { return cns(env, false); }
-    );
-    push(env, result);
-    decRef(env, arr);
-  };
-
-  if (arr->isA(TVec)) {
+  if (arr->type().subtypeOfAny(TVArr, TVec)) {
     if (key->isA(TStr)) {
       push(env, cns(env, false));
       decRef(env, arr);
@@ -2579,7 +2556,17 @@ void emitAKExists(IRGS& env) {
       return;
     }
     if (key->isA(TInt)) {
-      return check_packed();
+      auto const result = cond(
+        env,
+        [&](Block* taken) {
+          gen(env, CheckPackedArrayDataBounds, taken, arr, key);
+        },
+        [&] { return cns(env, true); },
+        [&] { return cns(env, false); }
+      );
+      push(env, result);
+      decRef(env, arr);
+      return;
     }
     return throwBadKey();
   }
@@ -2630,12 +2617,8 @@ void emitAKExists(IRGS& env) {
     decRef(env, arr);
     return;
   }
-  if (arr->isA(TArr) && key->isA(TInt) &&
-      arr->type().arrSpec().kind() == ArrayData::kPackedKind) {
-    return check_packed();
-  }
 
- auto const val =
+  auto const val =
     gen(env, arr->isA(TArr) ? AKExistsArr : AKExistsObj, arr, key);
   push(env, val);
   decRef(env, arr);

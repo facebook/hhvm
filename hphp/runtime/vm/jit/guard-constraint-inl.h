@@ -64,23 +64,11 @@ inline bool GuardConstraint::isSpecialized() const {
   return category == DataTypeSpecialized;
 }
 
-inline GuardConstraint& GuardConstraint::setWantArrayKind() {
-  assertx(!wantClass());
-  assertx(!wantRecord());
-  assertx(isSpecialized());
-  m_specialized |= kWantArrayKind | kWantVanillaArray;
-  return *this;
-}
-
 inline GuardConstraint& GuardConstraint::setWantVanillaArray() {
   assertx(!wantClass());
   assertx(isSpecialized());
   m_specialized |= kWantVanillaArray;
   return *this;
-}
-
-inline bool GuardConstraint::wantArrayKind() const {
-  return m_specialized & kWantArrayKind;
 }
 
 inline bool GuardConstraint::wantVanillaArray() const {

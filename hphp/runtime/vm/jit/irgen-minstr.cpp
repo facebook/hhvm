@@ -56,10 +56,6 @@ namespace {
 
 //////////////////////////////////////////////////////////////////////
 
-const StaticString s_ArrayKindProfile("ArrayKindProfile");
-
-//////////////////////////////////////////////////////////////////////
-
 enum class SimpleOp {
   None,
   Array,
@@ -1600,15 +1596,11 @@ void setNewElemPackedArrayDataImpl(IRGS& env, uint32_t nDiscard,
 
 SSATmp* setNewElemImpl(IRGS& env, uint32_t nDiscard) {
   auto const value = topC(env);
-
   auto const baseType = env.irb->fs().mbase().type;
 
   // We load the member base pointer before calling makeCatchSet() to avoid
   // mismatched in-states for any catch block edges we emit later on.
   auto const basePtr = ldMBase(env);
-
-  auto const gc = GuardConstraint(DataTypeSpecialized).setWantArrayKind();
-  env.irb->constrainLocation(Location::MBase{}, gc);
 
   if (baseType.subtypeOfAny(TVArr, TVec)) {
     setNewElemPackedArrayDataImpl(env, nDiscard, basePtr, baseType, value);

@@ -73,9 +73,8 @@ struct GuardConstraint {
   /////////////////////////////////////////////////////////////////////////////
   // Specialization.
 
-  static constexpr uint8_t kWantArrayKind = 0x1;
-  static constexpr uint8_t kWantVanillaArray = 0x2;
-  static constexpr uint8_t kWantRecord = 0x4;
+  static constexpr uint8_t kWantVanillaArray = 0x1;
+  static constexpr uint8_t kWantRecord = 0x2;
   static_assert(alignof(Class*) > kWantRecord,
                 "Spec bits must fit in lower bits of pointers");
 
@@ -85,14 +84,11 @@ struct GuardConstraint {
   bool isSpecialized() const;
 
   /*
-   * Constrain this type to a specialized array-like subtype. Guarding to kind
-   * is strictly stronger than guarding to vanilla; it sets both flag bits.
+   * Constrain this type to a specialized array-like subtype.
    *
    * @requires: isSpecialized()
    */
-  GuardConstraint& setWantArrayKind();
   GuardConstraint& setWantVanillaArray();
-  bool wantArrayKind() const;
   bool wantVanillaArray() const;
 
   /*

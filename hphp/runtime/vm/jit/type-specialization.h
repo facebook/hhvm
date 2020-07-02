@@ -56,9 +56,7 @@ struct ArraySpec {
    * we'll also set the vanilla bit, but otherwise, we'll leave it unset.
    */
   constexpr explicit ArraySpec(LayoutTag = LayoutTag::Unknown);
-  explicit ArraySpec(ArrayData::ArrayKind kind);
   explicit ArraySpec(const RepoAuthType::Array* arrTy);
-  ArraySpec(ArrayData::ArrayKind kind, const RepoAuthType::Array* arrTy);
 
   /*
    * Set or unset the vanilla bits on an ArraySpec.
@@ -81,16 +79,10 @@ struct ArraySpec {
   /*
    * Accessors.
    *
-   * These return falsey values (folly::none or nullptr) if we can't guarantee
-   * that a value of this type has a known ArrayKind or RepoAuthoritativeType.
-   *
-   * Note that we can return falsey values for, say, kind even w/ HasKind set.
-   * We need to know that the array is vanilla before returning a kind or type.
-   *
-   * bits() returns the raw bits.
+   * bits() returns the raw bits for this ArraySpec.
+   * type() returns nullptr if no RAT is set.
    */
   uintptr_t bits() const;
-  folly::Optional<ArrayData::ArrayKind> kind() const;
   const RepoAuthType::Array* type() const;
   bool vanilla() const;
 
@@ -140,12 +132,11 @@ private:
   /*
    * Mask of specializations that a given ArraySpec represents.
    */
-  enum SortOf : uint8_t {
+  enum SortOf : uint16_t {
     IsTop     = 0,
     IsBottom  = 1 << 0,
-    HasKind   = 1 << 1,
-    HasType   = 1 << 2,
-    IsVanilla = 1 << 3,
+    HasType   = 1 << 1,
+    IsVanilla = 1 << 2,
   };
   friend SortOf operator|(SortOf, SortOf);
   friend SortOf operator&(SortOf, SortOf);
@@ -155,8 +146,7 @@ private:
    */
   union {
     struct {
-      uintptr_t m_sort : 8;
-      uintptr_t m_kind : 8;
+      uintptr_t m_sort : 16;
       uintptr_t m_ptr : 48;
     };
     uintptr_t m_bits;

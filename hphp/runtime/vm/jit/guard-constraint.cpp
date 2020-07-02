@@ -30,9 +30,7 @@ std::string GuardConstraint::toString() const {
   std::string ret = "<" + typeCategoryName(category);
 
   if (category == DataTypeSpecialized) {
-    if (wantArrayKind()) {
-      ret += ",ArrayKind";
-    } else if (wantVanillaArray()) {
+    if (wantVanillaArray()) {
       ret += ",VanillaArray";
     } else if (wantClass()) {
       folly::toAppend("Cls:", desiredClass()->name()->data(), &ret);
@@ -78,7 +76,6 @@ bool typeFitsConstraint(Type t, GuardConstraint gc) {
         auto const recSpec = t.recSpec();
         return recSpec && recSpec.rec()->recordDescOf(gc.desiredRecord());
       } else {
-        if (gc.wantArrayKind()) return !!t.arrSpec().kind();
         if (gc.wantVanillaArray()) return t.arrSpec().vanilla();
       }
       return false;
@@ -109,16 +106,7 @@ GuardConstraint relaxConstraint(GuardConstraint origGc,
 
   while (true) {
     if (newGc.isSpecialized()) {
-      // Check if a vanilla constraint is sufficient before proceeding to kind.
-      if (RO::EvalAllowBespokeArrayLikes && origGc.wantVanillaArray()) {
-        newGc.setWantVanillaArray();
-        newDstType = knownType & relaxToConstraint(toRelax, newGc);
-        if (typeFitsConstraint(newDstType, origGc)) break;
-        ITRACE(5, "newDstType = {}, newGc = {}; vanilla is insufficient\n",
-               newDstType, newGc);
-      }
-      // Include the remainder of the specialization from origGc.
-      if (origGc.wantArrayKind()) newGc.setWantArrayKind();
+      if (origGc.wantVanillaArray()) newGc.setWantVanillaArray();
       if (origGc.wantClass()) newGc.setDesiredClass(origGc.desiredClass());
       if (origGc.wantRecord()) newGc.setDesiredRecord(origGc.desiredRecord());
     }
@@ -148,7 +136,6 @@ GuardConstraint applyConstraint(GuardConstraint gc,
                                 GuardConstraint newGc) {
   gc.category = std::max(newGc.category, gc.category);
 
-  if (newGc.wantArrayKind()) gc.setWantArrayKind();
   if (newGc.wantVanillaArray()) gc.setWantVanillaArray();
 
   if (newGc.wantClass()) {

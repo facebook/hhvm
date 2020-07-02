@@ -1,26 +1,62 @@
-cmake_minimum_required(VERSION 2.8.0)
-include(ExternalProject)
+add_library(mysqlclient INTERFACE)
 
-#foreach(path ${THIRD_PARTY_INCLUDE_PATHS})
-#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${path}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${path}")
-#endforeach()
+if (ENABLE_ASYNC_MYSQL)
+  # Async MySQL requires FB's custom mysqlclient library.
+  cmake_minimum_required(VERSION 2.8.0)
+  include(ExternalProject)
 
-ExternalProject_Add(
-  fbmysqlclient
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
-  CMAKE_ARGS
-  -DWITHOUT_SERVER=TRUE
-  -DDISABLE_SHARED=TRUE
-  -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
-  -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-  -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
-  -DOPENSSL_LIBRARY=${OPENSSL_SSL_LIBRARY}
-  -DCRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
-  BUILD_COMMAND $(MAKE) -C libmysql
-  PREFIX build
-  BUILD_IN_SOURCE true
-  INSTALL_COMMAND ""
-)
+  if (NOT TARGET lz4)
+    message(FATAL_ERROR "third-party/lz4 must be processed before third-party/fb-mysql")
+  endif ()
+
+  # If we're building lz4, pass down its install path to fb-mysql. Otherwise
+  # (i.e., if we're using the system's lz4), no need to pass down anything,
+  # fb-mysql will also find and use the system's lz4. This assumes that HHVM's
+  # minimum lz4 version >= fb-mysql's minimum version.
+  set(EXTRA_ARGS "")
+  if (TARGET lz4Build)
+    ExternalProject_Get_Property(lz4Build INSTALL_DIR)
+    list(APPEND EXTRA_ARGS -DWITH_LZ4=3rdparty -DLZ4_PATH=${INSTALL_DIR})
+  endif ()
+
+  ExternalProject_Add(
+    mysqlclientBuild
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
+    CMAKE_ARGS
+    -DWITHOUT_SERVER=TRUE
+    -DDISABLE_SHARED=TRUE
+    -DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}
+    -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DOPENSSL_INCLUDE_DIR=${OPENSSL_INCLUDE_DIR}
+    -DOPENSSL_LIBRARY=${OPENSSL_SSL_LIBRARY}
+    -DCRYPTO_LIBRARY=${OPENSSL_CRYPTO_LIBRARY}
+    -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+    -DCMAKE_INSTALL_INCLUDEDIR=include
+    -DCMAKE_INSTALL_LIBDIR=lib
+    ${EXTRA_ARGS}
+    BUILD_COMMAND $(MAKE) -C libmysql
+  )
+
+  # TODO: re2, zstd are also dependencies, but first they need to be split into
+  # re2 + re2Build, zstd + zstdBuild -- otherwise putting them here would force
+  # them to always be built, instead of using the system ones where available.
+  set(DEPS lz4)
+  add_dependencies(mysqlclientBuild ${DEPS})
+
+  ExternalProject_Get_Property(mysqlclientBuild INSTALL_DIR)
+
+  add_dependencies(mysqlclient mysqlclientBuild)
+  target_include_directories(mysqlclient INTERFACE "${INSTALL_DIR}/include")
+  target_link_libraries(mysqlclient INTERFACE
+    "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}mysqlclient${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    ${DEPS})
+
+else (ENABLE_ASYNC_MYSQL)
+  # No async MySQL -- use system mysqlclient library.
+  find_package(MySQL REQUIRED)
+  target_include_directories(mysqlclient INTERFACE ${MYSQL_INCLUDE_DIR})
+  target_link_libraries(mysqlclient INTERFACE ${MYSQL_LIB})
+
+endif (ENABLE_ASYNC_MYSQL)

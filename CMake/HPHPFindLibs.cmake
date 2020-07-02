@@ -40,28 +40,15 @@ if (LIBINOTIFY_INCLUDE_DIR)
   include_directories(${LIBINOTIFY_INCLUDE_DIR})
 endif()
 
-# mysql checks - if we're using async mysql, we use fbmysqlclient from
-# third-party/ instead
-if (ENABLE_ASYNC_MYSQL)
-  include_directories(
-    ${RE2_INCLUDE_DIR}
-    ${TP_DIR}/squangle/src/
-    ${TP_DIR}/fb-mysql/src/include/
-  )
-  set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
-  set(MYSQL_CLIENT_LIBS
-    ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
-  )
-else()
-  find_package(MySQL REQUIRED)
-  link_directories(${MYSQL_LIB_DIR})
-  include_directories(${MYSQL_INCLUDE_DIR})
-endif()
 MYSQL_SOCKET_SEARCH()
 if (MYSQL_UNIX_SOCK_ADDR)
   add_definitions(-DPHP_MYSQL_UNIX_SOCK_ADDR="${MYSQL_UNIX_SOCK_ADDR}")
 else ()
   message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
+endif ()
+
+if (ENABLE_ASYNC_MYSQL)
+  add_definitions(-DENABLE_ASYNC_MYSQL=1)
 endif ()
 
 # pcre checks
@@ -387,7 +374,7 @@ macro(hphp_link target)
   add_dependencies(${target} libsodiumMaybeBuild)
   target_link_libraries(${target} libsodium)
 
-  target_link_libraries(${target} ${MYSQL_CLIENT_LIBS})
+  target_link_libraries(${target} mysqlclient)
   if (ENABLE_ASYNC_MYSQL)
     target_link_libraries(${target} squangle)
   endif()

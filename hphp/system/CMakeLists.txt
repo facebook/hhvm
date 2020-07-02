@@ -1,9 +1,6 @@
 set(CXX_SOURCES "systemlib.cpp")
 
 add_library(hphp_system STATIC ${CXX_SOURCES})
-if (ENABLE_ASYNC_MYSQL)
-  add_dependencies(hphp_system fbmysqlclient)
-endif ()
 add_dependencies(hphp_system hphp_util)
 
 auto_sources(files "*.h" "${CMAKE_CURRENT_SOURCE_DIR}")

@@ -324,7 +324,7 @@
         Jmp L3
       } .catch {
         Dup
-        InstanceOfD "ReflectionException"
+        InstanceOfD "Exception"
         JmpZ L4
         SetL $_
         PopC

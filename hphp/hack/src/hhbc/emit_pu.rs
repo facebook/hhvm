@@ -325,9 +325,9 @@ fn gen_pu_accessor(
                                     ),
                                 ),
                             ],
-                            /* catch (ReflectionException $_) {} */
+                            /* catch (Exception $_) {} */
                             vec![Tast::Catch(
-                                ast_defs::Id(pos.clone(), "ReflectionException".to_string()),
+                                ast_defs::Id(pos.clone(), "Exception".to_string()),
                                 aast::Lid(pos.clone(), local_id::make_unscoped("$_".to_string())),
                                 vec![],
                             )],

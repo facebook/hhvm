@@ -16,8 +16,8 @@ $asso_arrays = varray[
 
        // array with numeric keys
 /*1*/  darray[1 => 'one', 2 => 2, 1234567890 => 'big', -1 => 'negative key',
-             2.3 => 'float key', 0 => "zero key", 0.2 => 'decimal key',
-             2e2 => 'exp key1', -2e3 => 'negative exp key'],
+             2 => 'float key', 0 => "zero key", 0 => 'decimal key',
+             (int)2e2 => 'exp key1', (int)-2e3 => 'negative exp key'],
 
        // array with string keys
        darray['one' => 1, "two" => 2.0, "three" => 'three',
@@ -30,8 +30,8 @@ $asso_arrays = varray[
        darray[0123 => 83, 0129 => 10, 010 => "8", -0348 => "-28", 0012 => '10'],
 
        // array with bool values as keys
-       darray[TRUE => '1', true => true, TrUe => "TRUE",
-             FALSE => '0', false => false, FaLsE => "FALSE"],
+       darray[1 => '1', 1 => true, 1 => "TRUE",
+             0 => '0', 0 => false, 0 => "FALSE"],
 
        // array with special chars as keys
 /*6*/  darray['##' => "key1", '&$r' => 'key2', '!' => "key3", '<>' =>'key4',

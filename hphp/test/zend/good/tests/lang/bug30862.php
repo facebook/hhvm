@@ -1,7 +1,7 @@
 <?hh
 
 class T {
-    static $a = darray[false=>"false", true=>"true"];
+    static $a = darray[0=>"false", 1=>"true"];
 }
 
 const X = 0;

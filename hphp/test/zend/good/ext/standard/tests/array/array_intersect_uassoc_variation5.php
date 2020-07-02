@@ -16,7 +16,7 @@ echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
 //Initialize variables
 $arr_default_int = varray[1, 2 ];
-$arr_float = darray[0 => 1.00, 1.00 => 2.00, 2.00 => 3.00];
+$arr_float = darray[0 => 1.00, 1 => 2.00, 2 => 3.00];
 $arr_string = varray['1', '2', '3'];
 $arr_string_float = varray['1.00', '2.00'];
 

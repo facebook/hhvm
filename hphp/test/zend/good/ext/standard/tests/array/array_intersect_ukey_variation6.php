@@ -16,7 +16,7 @@ function key_compare_func($key1, $key2)
 echo "*** Testing array_intersect_ukey() : usage variation ***\n";
 
 //Initialize variables
-$arr_float = darray[0.00 => 1.00, 1.00 => 2.00];
+$arr_float = darray[0 => 1.00, 1 => 2.00];
 $arr_string = darray['0' => '1', '1' => '2', '2' => '3'];
 $arr_string_float = darray['0.00' => '1.00', '1.00' => '2.00'];
 

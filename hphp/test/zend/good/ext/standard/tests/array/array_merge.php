@@ -8,10 +8,10 @@ $begin_array = varray[
   varray[],
   darray[ 1 => "string"],
   darray[ "" => "string"],
-  darray[ -2.44444 => 12],
+  darray[ -2 => 12],
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,    "d" => -2.344],
   darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344],
-  darray[ 0 => NULL, 1.23 => "Hi", "string" => "hello",
+  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
           2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 
@@ -19,10 +19,10 @@ $end_array   = varray[
   varray[],
   darray[ 1 => "string"],
   darray[ "" => "string"],
-  darray[ -2.44444 => 12],
+  darray[ -2 => 12],
   darray[ "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344],
   darray[ 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344],
-  darray[ 0 => NULL, 1.23 => "Hi", "string" => "hello",
+  darray[ 0 => NULL, 1 => "Hi", "string" => "hello",
           2 => darray["" => "World", "-2.34" => "a", "0" => "b"]]
 ];
 

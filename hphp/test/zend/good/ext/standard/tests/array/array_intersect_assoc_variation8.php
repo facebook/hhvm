@@ -49,8 +49,8 @@ $arrays = varray [
        darray["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.333],
 
        // arrays with string values
-/*7*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"],
-       darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'],
+/*7*/  darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"],
+       darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
        darray[1 => "hello", "heredoc" => $heredoc],
 
        // array with object, unset variable and resource variable
@@ -64,7 +64,7 @@ $arrays = varray [
 
 // array to be passsed to $arr1 argument
 $arr1 = darray[0 => "0", 1 => 1, "two" => 2, "float" => 2.3333, "f1" => 1.2,
-              "f4" => 33333333.333, 111 => "\tHello", 3.3 => 'pen\n', 33333334 => '\v\fworld',
+              "f4" => 33333333.333, 111 => "\tHello", 3 => 'pen\n', 33333334 => '\v\fworld',
               "heredoc" => "Hello world", 11 => new classA(), "resource" => $fp,
               "int" => 133, 222 => "fruit"];
 

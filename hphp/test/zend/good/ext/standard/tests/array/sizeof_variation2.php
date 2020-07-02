@@ -25,8 +25,8 @@ $values = varray [
             darray[1 => "Hi", 2 => "Hello" ],
             darray["color" => "red", "item" => "pen"],
   /* 10 */  darray['color' => 'red', 'item' => 'pen'],
-            darray[TRUE => "red", FALSE => "pen" ],
-            darray[false => 'red', true => 'pen' ],
+            darray[1 => "red", 0 => "pen" ],
+            darray[0 => 'red', 1 => 'pen' ],
             darray['color' => "red", "item" => 'pen', 1 => "Hi", "" => "Hello" ],
   /* 14 */  darray[0 => $fp, "resource1" => $fp, 'resource2' => $fp, 1 => darray[0 => $fp, 'type' => $fp] ]
 ];

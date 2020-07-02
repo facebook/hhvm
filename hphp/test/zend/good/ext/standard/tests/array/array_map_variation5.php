@@ -50,8 +50,8 @@ $arrays = varray [
        darray["f1" => 1.2, 'f2' => 3.33, 3 => 4.89999922839999, 'f4' => 33333333.3333],
 
        // arrays with string values
-       darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3.3 =>  "pen\n"],
-/*8*/  darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3.3 =>  'pen\n'],
+       darray[111 => "\tHello", "red" => "col\tor", 2 => "\v\fworld", 3 =>  "pen\n"],
+/*8*/  darray[111 => '\tHello', "red" => 'col\tor', 2 => '\v\fworld', 3 =>  'pen\n'],
        darray[1 => "hello", "heredoc" => $heredoc],
 
        // array with object, unset variable and resource variable

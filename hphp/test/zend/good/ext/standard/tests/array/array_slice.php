@@ -8,8 +8,8 @@ $var_array = varray[
                    darray[ "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee"],
                    darray["1" => "one", "2" => "two", "3" => "three", "4" => "four", "5" => "five"],
                    darray[1 => "one", 2 => "two", 3 => 7, 4 => "four", 5 => "five"],
-                   darray["f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2.4 => "float", "F" => "FFF",
-                         "blank" => "", 3.7 => 3.7, 5.4 => 7, 6 => 8.6, '5' => "Five"],
+                   darray["f" => "fff", "1" => "one", 4 => 6, "" => "blank", 2 => "float", "F" => "FFF",
+                         "blank" => "", 3 => 3.7, 5 => 7, 6 => 8.6, '5' => "Five"],
                    varray[12, "name", 'age', '45'],
                    varray[ varray["oNe", "tWo", 4], varray[10, 20, 30, 40, 50], varray[]]
                  ];

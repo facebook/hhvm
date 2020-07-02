@@ -54,6 +54,7 @@ namespace detail {
   T(AsioBlockableChain, TABC)    \
   T(Class*, TCls)                \
   T(Func*, TFunc)                \
+  T(RFuncData*, TRFunc)          \
   T(ClsMethDataRef, TClsMeth)    \
   T(NamedEntity*, TNamedEntity)  \
   T(ResourceHdr*, TRes)          \

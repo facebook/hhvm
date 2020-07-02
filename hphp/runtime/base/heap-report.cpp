@@ -62,7 +62,12 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::String:
       out << "[" << static_cast<const StringData*>(h)->size() << "]";
       break;
-    case HeaderKind::RFunc: // TODO(T63348446)
+    case HeaderKind::RFunc: {
+      auto const rfunc = static_cast<const RFuncData*>(h);
+      out << ":" << rfunc->m_func->name()->data()
+          << "[" << rfunc->m_arr->size() << "]";
+      break;
+    }
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
       break;

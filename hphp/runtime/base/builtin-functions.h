@@ -400,7 +400,6 @@ bool is_constructor_name(const char* func);
 [[noreturn]] void throw_dict_compare_exception();
 [[noreturn]] void throw_keyset_compare_exception();
 [[noreturn]] void throw_clsmeth_compare_exception();
-[[noreturn]] void throw_rfunc_non_rfunc_compare_exception();
 [[noreturn]] void throw_record_compare_exception();
 [[noreturn]] void throw_rfunc_compare_exception();
 [[noreturn]] void throw_rec_non_rec_compare_exception();

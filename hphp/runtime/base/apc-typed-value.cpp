@@ -87,6 +87,7 @@ bool APCTypedValue::checkInvariants() const {
       assertx(m_data.arr->isUncounted());
       break;
     case APCKind::FuncEntity:
+    case APCKind::RFunc:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:

@@ -547,6 +547,18 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushRFuncNoRc(RFuncData* f) {
+    m_top--;
+    *m_top = make_tv<KindOfRFunc>(f);
+  }
+
+  ALWAYS_INLINE
+  void pushRFunc(RFuncData* f) {
+    pushRFuncNoRc(f);
+    f->incRefCount();
+  }
+
+  ALWAYS_INLINE
   void pushClsMethNoRc(ClsMethDataRef clsMeth) {
     m_top--;
     *m_top = make_tv<KindOfClsMeth>(clsMeth);
@@ -696,7 +708,8 @@ using InterpOneFunc = jit::TCA (*) (ActRec*, TypedValue*, Offset);
 extern InterpOneFunc interpOneEntryPoints[];
 
 bool doFCallUnpackTC(PC origpc, int32_t numInputs, CallFlags callFlags, void*);
-bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags);
+bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack, CallFlags callFlags,
+             Array* savedGenerics = nullptr);
 jit::TCA dispatchBB();
 void pushFrameSlots(const Func* func, int nparams = 0);
 Array getDefinedVariables(const ActRec*);

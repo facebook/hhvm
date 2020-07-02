@@ -132,6 +132,8 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
       return EntryInfo::Type::APCObject;
+    case APCKind::RFunc:
+      return EntryInfo::Type::APCRFunc;
   }
   not_reached();
 }

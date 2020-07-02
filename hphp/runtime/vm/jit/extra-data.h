@@ -1765,8 +1765,6 @@ X(ThrowArrayKeyException,       ArrayGetExceptionData);
 X(ThrowParameterWrongType,      FuncArgTypeData);
 X(CheckClsReifiedGenericMismatch,
                                 ClassData);
-X(CheckFunReifiedGenericMismatch,
-                                FuncData);
 X(IsFunReifiedGenericsMatched,  FuncData);
 X(IsTypeStruct,                 RDSHandleData);
 X(InterpOne,                    InterpOneData);

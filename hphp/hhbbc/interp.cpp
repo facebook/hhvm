@@ -3975,6 +3975,11 @@ void in(ISS& env, const bc::ResolveMethCaller& op) {
   else                                 push(env, TFuncS);
 }
 
+void in(ISS& env, const bc::ResolveRFunc& op) {
+  popC(env);
+  push(env, TFuncLike);
+}
+
 void in(ISS& env, const bc::ResolveObjMethod& op) {
   popC(env);
   popC(env);

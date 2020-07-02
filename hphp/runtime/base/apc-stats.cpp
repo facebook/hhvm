@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/apc-handle.h"
 #include "hphp/runtime/base/apc-array.h"
 #include "hphp/runtime/base/apc-object.h"
+#include "hphp/runtime/base/apc-rfunc.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 
 #include "hphp/util/trace.h"
@@ -114,6 +115,9 @@ size_t getMemSize(const APCHandle* handle) {
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
       return getMemSize(APCObject::fromHandle(handle));
+
+    case APCKind::RFunc:
+      return getMemSize(APCRFunc::fromHandle(handle));
   }
   assertx(!"Unsupported APCHandle Type in getMemSize");
   return 0;
@@ -161,6 +165,10 @@ size_t getMemSize(const APCObject* obj) {
     if (prop->val) size += getMemSize(prop->val);
   }
   return size;
+}
+
+size_t getMemSize(const APCRFunc* rfunc) {
+  return sizeof(APCRFunc) + getMemSize(rfunc->m_generics);
 }
 
 size_t getMemSize(const ArrayData* arr, bool recurse) {
@@ -352,6 +360,7 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
                                      , m_uncKeyset(nullptr)
                                      , m_serObject(nullptr)
                                      , m_apcObject(nullptr)
+                                     , m_apcRFunc(nullptr)
                                      , m_setValues(nullptr)
                                      , m_delValues(nullptr)
                                      , m_replValues(nullptr)
@@ -373,6 +382,7 @@ APCDetailedStats::APCDetailedStats() : m_uncounted(nullptr)
   m_uncKeyset = ServiceData::createCounter("apc.type_unc_keyset");
   m_serObject = ServiceData::createCounter("apc.type_ser_object");
   m_apcObject = ServiceData::createCounter("apc.type_apc_object");
+  m_apcRFunc = ServiceData::createCounter("apc.type_apc_rfunc");
 
   m_setValues = ServiceData::createCounter("apc.set_values");
   m_delValues = ServiceData::createCounter("apc.deleted_values");
@@ -397,6 +407,7 @@ const StaticString s_typUncountedDict("type_unc_dict");
 const StaticString s_typUncountedKeyset("type_unc_keyset");
 const StaticString s_typeSerObject("type_ser_object");
 const StaticString s_typeAPCObject("type_apc_object");
+const StaticString s_typeAPCRFunc("type_apc_rfunc");
 const StaticString s_setValueCount("set_values_count");
 const StaticString s_deleteValuesCount("deleted_values_count");
 const StaticString s_replacedValueCount("replaced_values_count");
@@ -437,6 +448,8 @@ std::string APCDetailedStats::getStatsInfo() const {
          std::to_string(m_serObject->getValue()) +
          "\nAPC object count: " +
          std::to_string(m_apcObject->getValue()) +
+         "\nAPC rfunc count: " +
+         std::to_string(m_apcRFunc->getValue()) +
          "\add count: " +
          std::to_string(m_setValues->getValue()) +
          "\ndelete count: " +
@@ -501,6 +514,9 @@ void APCDetailedStats::collectStats(
   stats.insert(
         std::pair<const StringData*, int64_t>(s_typeAPCObject.get(),
                                               m_apcObject->getValue()));
+  stats.insert(
+        std::pair<const StringData*, int64_t>(s_typeAPCRFunc.get(),
+                                              m_apcRFunc->getValue()));
   stats.insert(
         std::pair<const StringData*, int64_t>(s_setValueCount.get(),
                                               m_setValues->getValue()));
@@ -609,6 +625,9 @@ APCDetailedStats::counterFor(const APCHandle* handle) {
     case APCKind::SharedObject:
     case APCKind::SharedCollection:
       return m_apcObject;
+
+    case APCKind::RFunc:
+      return m_apcRFunc;
   }
   not_reached();
 }

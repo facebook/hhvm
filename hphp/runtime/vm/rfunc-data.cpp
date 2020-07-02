@@ -28,7 +28,6 @@ RFuncData::RFuncData(Func* m_func, ArrayData* m_arr) : m_func(m_func), m_arr(m_a
 }
 
 RFuncData* RFuncData::newInstance(Func* func, ArrayData* reified_generics) {
-  reified_generics->incRefCount();
   auto const rfunc =
     new (tl_heap->objMalloc(sizeof(RFuncData))) RFuncData(func, reified_generics);
   return rfunc;

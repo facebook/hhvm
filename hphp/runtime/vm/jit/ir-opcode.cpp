@@ -724,6 +724,7 @@ bool opcodeMayRaise(Opcode opc) {
   case GtRes:
   case GtStr:
   case GtStrInt:
+  case HasReifiedGenerics:
   case HasToString:
   case IncCallCounter:
   case IncProfCounter:
@@ -803,10 +804,12 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFrameCls:
   case LdFrameThis:
   case LdFuncFromClsMeth:
+  case LdFuncFromRFunc:
   case LdFuncNumParams:
   case LdFuncName:
   case LdFuncRxLevel:
   case LdFuncVecLen:
+  case LdGenericsFromRFunc:
   case LdIfaceMethod:
   case LdInitPropAddr:
   case LdInitRDSAddr:
@@ -906,6 +909,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NewInstanceRaw:
   case NewPair:
   case NewPlainArray:
+  case NewRFunc:
   case NewStructArray:
   case NewStructDArray:
   case NewStructDict:

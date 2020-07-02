@@ -102,7 +102,8 @@ const StaticString s_cmpWithClsMeth(
   "a clsmeth with a non-clsmeth"
 );
 const StaticString s_cmpWithRFunc(
-  "Cannot compare reified functions with other types"
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
+  "reified functions"
 );
 const StaticString s_cmpWithNonRecord(
   "Cannot compare records with non-records"
@@ -799,10 +800,6 @@ void throw_record_compare_exception() {
 }
 
 void throw_rfunc_compare_exception() {
-  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
-}
-
-void throw_rfunc_non_rfunc_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRFunc);
 }
 

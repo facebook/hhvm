@@ -549,13 +549,13 @@ void MemoryManager::checkHeap(const char* phase) {
       case HeaderKind::SmallMalloc:
       case HeaderKind::BigMalloc:
       case HeaderKind::Record:
-      case HeaderKind::RFunc: // TODO(T63348446)
       case HeaderKind::BespokeArray:
       case HeaderKind::BespokeVArray:
       case HeaderKind::BespokeDArray:
       case HeaderKind::BespokeVec:
       case HeaderKind::BespokeDict:
       case HeaderKind::BespokeKeyset:
+      case HeaderKind::RFunc:
         break;
       case HeaderKind::Hole:
       case HeaderKind::Slab:

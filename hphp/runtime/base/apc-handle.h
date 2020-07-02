@@ -58,7 +58,8 @@ enum class APCKind: uint8_t {
   SerializedDict,
   SerializedKeyset,
   SerializedObject,
-  FuncEntity
+  FuncEntity,
+  RFunc
 };
 
 /*
@@ -128,6 +129,7 @@ enum class APCKind: uint8_t {
  *  SerializedDict    APCString       kInvalidDataType
  *  SerializedKeyset  APCString       kInvalidDataType
  *  SerializedObject  APCString       kInvalidDataType
+ *  RFunc             APCRFunc        kInvalidDataType
  *
  * Thread safety:
  *

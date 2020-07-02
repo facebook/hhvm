@@ -566,5 +566,35 @@ void cgCheckInOuts(IRLS& env, const IRInstruction* inst)  {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+IMPL_OPCODE_CALL(NewRFunc)
+
+void cgHasReifiedGenerics(IRLS& env, const IRInstruction* inst) {
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto const func = srcLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  auto const shared = v.makeReg();
+  auto const sf = v.makeReg();
+
+  v << load{func[Func::sharedOff()], shared};
+  v << testlim{(int32_t)Func::reifiedGenericsMask(),
+               shared[Func::sharedAllFlags()], sf};
+
+  v << setcc{CC_NZ, sf, dst};
+}
+
+void cgLdFuncFromRFunc(IRLS& env, const IRInstruction* inst) {
+  auto const rfuncRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rfuncRef[RFuncData::funcOffset()], dst};
+}
+
+void cgLdGenericsFromRFunc(IRLS& env, const IRInstruction* inst) {
+  auto const rfuncRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rfuncRef[RFuncData::genericsOffset()], dst};
+}
 
 }}}

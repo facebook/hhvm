@@ -126,7 +126,7 @@ inline FuncId Func::getFuncId() const {
 // Basic info.
 
 inline bool Func::top() const {
-  return shared()->m_top;
+  return shared()->m_allFlags.m_top;
 }
 
 inline Unit* Func::unit() const {
@@ -323,7 +323,7 @@ inline RepoAuthType Func::repoAwaitedReturnType() const {
 }
 
 inline bool Func::isReturnByValue() const {
-  return shared()->m_returnByValue;
+  return shared()->m_allFlags.m_returnByValue;
 }
 
 inline const TypeConstraint& Func::returnTypeConstraint() const {
@@ -335,7 +335,7 @@ inline const StringData* Func::returnUserType() const {
 }
 
 inline bool Func::hasReturnWithMultiUBs() const {
-  return shared()->m_hasReturnWithMultiUBs;
+  return shared()->m_allFlags.m_hasReturnWithMultiUBs;
 }
 
 inline const Func::UpperBoundVec& Func::returnUBs() const {
@@ -378,7 +378,7 @@ inline bool Func::hasVariadicCaptureParam() const {
 }
 
 inline bool Func::hasParamsWithMultiUBs() const {
-  return shared()->m_hasParamsWithMultiUBs;
+  return shared()->m_allFlags.m_hasParamsWithMultiUBs;
 }
 
 inline const Func::ParamUBMap& Func::paramUBs() const {
@@ -429,7 +429,7 @@ inline void Func::setHasForeignThis(bool hasForeignThis) {
 }
 
 inline void Func::setGenerated(bool isGenerated) {
-  shared()->m_isGenerated = isGenerated;
+  shared()->m_allFlags.m_isGenerated = isGenerated;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -476,11 +476,11 @@ inline bool Func::isPreFunc() const {
 }
 
 inline bool Func::isMemoizeWrapper() const {
-  return shared()->m_isMemoizeWrapper;
+  return shared()->m_allFlags.m_isMemoizeWrapper;
 }
 
 inline bool Func::isMemoizeWrapperLSB() const {
-  return shared()->m_isMemoizeWrapperLSB;
+  return shared()->m_allFlags.m_isMemoizeWrapperLSB;
 }
 
 inline bool Func::isMemoizeImpl() const {
@@ -518,22 +518,22 @@ inline NativeFunction Func::nativeFuncPtr() const {
 // Closures.
 
 inline bool Func::isClosureBody() const {
-  return shared()->m_isClosureBody;
+  return shared()->m_allFlags.m_isClosureBody;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Resumables.
 
 inline bool Func::isAsync() const {
-  return shared()->m_isAsync;
+  return shared()->m_allFlags.m_isAsync;
 }
 
 inline bool Func::isGenerator() const {
-  return shared()->m_isGenerator;
+  return shared()->m_allFlags.m_isGenerator;
 }
 
 inline bool Func::isPairGenerator() const {
-  return shared()->m_isPairGenerator;
+  return shared()->m_allFlags.m_isPairGenerator;
 }
 
 inline bool Func::isAsyncFunction() const {
@@ -560,7 +560,7 @@ inline RxLevel Func::rxLevel() const {
 }
 
 inline bool Func::isRxDisabled() const {
-  return shared()->m_isRxDisabled;
+  return shared()->m_allFlags.m_isRxDisabled;
 }
 
 inline bool Func::isRxConditional() const {
@@ -583,7 +583,7 @@ inline bool Func::hasPrivateAncestor() const {
 // Magic methods.
 
 inline bool Func::isGenerated() const {
-  return shared()->m_isGenerated;
+  return shared()->m_allFlags.m_isGenerated;
 }
 
 inline bool Func::isSpecial(const StringData* name) {
@@ -649,11 +649,11 @@ inline bool Func::isMethCaller() const {
 }
 
 inline bool Func::isPhpLeafFn() const {
-  return shared()->m_isPhpLeafFn;
+  return shared()->m_allFlags.m_isPhpLeafFn;
 }
 
 inline bool Func::hasReifiedGenerics() const {
-  return shared()->m_hasReifiedGenerics;
+  return shared()->m_allFlags.m_hasReifiedGenerics;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -753,7 +753,7 @@ inline const Func::ExtendedSharedData* Func::extShared() const {
 
 inline Func::ExtendedSharedData* Func::extShared() {
   auto const s = shared();
-  return UNLIKELY(s->m_hasExtendedSharedData)
+  return UNLIKELY(s->m_allFlags.m_hasExtendedSharedData)
     ? static_cast<ExtendedSharedData*>(s)
     : nullptr;
 }

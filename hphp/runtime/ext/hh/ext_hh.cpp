@@ -231,7 +231,8 @@ enum SerializeMemoizeCode {
   SER_MC_CLS       = 11,
   SER_MC_FUNC      = 12,
   SER_MC_CLSMETH   = 13,
-  SER_MC_STOP      = 14,
+  SER_MC_RFUNC     = 14,
+  SER_MC_STOP      = 15,
 };
 
 const uint64_t kCodeMask DEBUG_ONLY = 0x0f;
@@ -350,6 +351,12 @@ void serialize_memoize_obj(StringBuffer& sb, int depth, ObjectData* obj) {
   }
 }
 
+void serialize_memoize_rfunc(StringBuffer& sb, int depth, RFuncData* rfunc) {
+  serialize_memoize_code(sb, SER_MC_RFUNC);
+  serialize_memoize_string_data(sb, rfunc->m_func->fullName());
+  serialize_memoize_array(sb, depth, rfunc->m_arr);
+}
+
 void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
   if (depth > 256) {
     SystemLib::throwInvalidArgumentExceptionObject("Array depth exceeded");
@@ -419,8 +426,11 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
       serialize_memoize_obj(sb, depth, tv.m_data.pobj);
       break;
 
+    case KindOfRFunc:
+      serialize_memoize_rfunc(sb, depth, tv.m_data.prfunc);
+      break;
+
     case KindOfResource:
-    case KindOfRFunc: // TODO(T64141543)
     case KindOfRecord: { // TODO(T41025646)
       auto msg = folly::format(
         "Cannot Serialize unexpected type {}",

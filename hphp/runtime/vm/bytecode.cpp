@@ -736,7 +736,9 @@ static std::string toStringElm(TypedValue tv) {
       print_count();
       os << ":RFunc("
          << tv.m_data.prfunc->m_func->fullName()->data()
-         << ")";
+         << ")<"
+         << tv.m_data.prfunc->m_arr
+         << ">";
       continue;
     case KindOfFunc:
       os << ":Func("
@@ -2364,8 +2366,10 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
           tvDecRefRes(val);
           return;
 
-        case KindOfRFunc: // TODO(T63348446)
-          raise_error(Strings::RFUNC_NOT_SUPPORTED);
+        case KindOfRFunc:
+          tvDecRefRFunc(val);
+          match = SwitchMatch::DEFAULT;
+          return;
 
         case KindOfRecord: // TODO (T41029094)
           raise_error(Strings::RECORD_NOT_SUPPORTED);
@@ -3837,15 +3841,23 @@ OPTBLD_INLINE void iopUnsetG() {
 }
 
 bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
-             CallFlags callFlags) {
+             CallFlags callFlags, Array* savedGenerics) {
   TRACE(3, "FCall: pc %p func %p base %d\n", vmpc(),
         vmfp()->unit()->entry(),
         int(vmfp()->func()->base()));
 
   try {
     assertx(!callFlags.hasGenerics() || tvIsHAMSafeVArray(vmStack().topC()));
-    auto generics = callFlags.hasGenerics()
-      ? Array::attach(vmStack().topC()->m_data.parr) : Array();
+    auto generics = [&] () -> Array {
+        if (callFlags.hasGenerics()) {
+          assertx(savedGenerics == nullptr);
+          return Array::attach(vmStack().topC()->m_data.parr);
+        } else if (savedGenerics) {
+          return *savedGenerics;
+        } else {
+          return Array();
+        }
+      }();
     if (callFlags.hasGenerics()) vmStack().discard();
 
     auto const func = ar->func();
@@ -3864,7 +3876,9 @@ bool doFCall(ActRec* ar, uint32_t numArgs, bool hasUnpack,
 
     prepareFuncEntry(ar, std::move(generics));
 
-    checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
+    if (!savedGenerics) { // Checked when constructing the rfunc
+      checkForReifiedGenericsErrors(ar, callFlags.hasGenerics());
+    }
     calleeDynamicCallChecks(ar->func(), callFlags.isDynamicCall());
     checkImplicitContextErrors(ar);
     return EventHook::FunctionCall(ar, EventHook::NormalFunc);
@@ -3911,7 +3925,8 @@ void* takeCtx(NoCtx) {
 
 template<bool dynamic, typename Ctx>
 void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
-               Ctx&& ctx, bool logAsDynamicCall = true) {
+               Ctx&& ctx, bool logAsDynamicCall = true,
+               Array* savedGenerics = nullptr) {
   if (fca.enforceInOut()) callerInOutChecks(func, fca);
   if (dynamic && logAsDynamicCall) callerDynamicCallChecks(func);
   callerRxChecks(vmfp(), func);
@@ -3935,7 +3950,7 @@ void fcallImpl(PC origpc, PC& pc, const FCallArgs& fca, const Func* func,
     0  // generics bitmap not used by interpreter
   );
 
-  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags);
+  doFCall(ar, fca.numArgs, fca.hasUnpack(), callFlags, savedGenerics);
   pc = vmpc();
 }
 
@@ -4046,6 +4061,16 @@ OPTBLD_INLINE void fcallFuncFunc(PC origpc, PC& pc, const FCallArgs& fca) {
   fcallImpl<false>(origpc, pc, fca, func, NoCtx{});
 }
 
+OPTBLD_INLINE void fcallFuncRFunc(PC origpc, PC& pc, FCallArgs& fca) {
+  assertx(tvIsRFunc(vmStack().topC()));
+  auto rfunc = vmStack().topC()->m_data.prfunc;
+
+  auto func = rfunc->m_func;
+  auto generics = Array(rfunc->m_arr);
+  vmStack().popC();
+  fcallImpl<false>(origpc, pc, fca, func, NoCtx{}, true, &generics);
+}
+
 OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   assertx(tvIsClsMeth(vmStack().topC()));
   auto const clsMeth = vmStack().topC()->m_data.pclsmeth;
@@ -4058,13 +4083,16 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   fcallImpl<false>(origpc, pc, fca, func, cls);
 }
 
-} // namespace
-
-OPTBLD_INLINE void iopResolveFunc(Id id) {
+Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->m_func->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
   auto func = Unit::loadFunc(nep.second, nep.first);
   if (func == nullptr) raise_resolve_undefined(unit->lookupLitstrId(id));
+  return func;
+}
+
+OPTBLD_INLINE void iopResolveFunc(Id id) {
+  auto func = resolveFuncImpl(id);
   vmStack().pushFunc(func);
 }
 
@@ -4077,12 +4105,45 @@ OPTBLD_INLINE void iopResolveMethCaller(Id id) {
   vmStack().pushFunc(func);
 }
 
+RFuncData* newRFuncImpl(Func* func, ArrayData* reified_generics) {
+  auto rfunc = RFuncData::newInstance(func, reified_generics);
+  TRACE(2, "ResolveRFunc: just created new rfunc %s: %p\n",
+        func->name()->data(), rfunc);
+  return rfunc;
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopResolveRFunc(Id id) {
+  auto const tsList = vmStack().topC();
+
+  // Should I refactor this out with iopNewObj*?
+  auto const reified = [&] () -> ArrayData* {
+      if (!tvIsHAMSafeVArray(tsList)) {
+        raise_error("Attempting ResolveRFunc with invalid reified generics");
+      }
+      return tsList->m_data.parr;
+    }();
+
+  auto func = resolveFuncImpl(id);
+  if (!func->hasReifiedGenerics()) {
+    vmStack().popC();
+    vmStack().pushFunc(func);
+  } else {
+    checkFunReifiedGenericMismatch(func, reified);
+    auto rfunc = newRFuncImpl(func, reified);
+    vmStack().discard();
+    vmStack().pushRFuncNoRc(rfunc);
+  }
+}
+
 OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
   auto const type = vmStack().topC()->m_type;
   if (isObjectType(type)) return fcallFuncObj(origpc, pc, fca);
   if (isArrayLikeType(type)) return fcallFuncArr(origpc, pc, fca);
   if (isStringType(type)) return fcallFuncStr(origpc, pc, fca);
   if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca);
+  if (isRFuncType(type)) return fcallFuncRFunc(origpc, pc, fca);
   if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);

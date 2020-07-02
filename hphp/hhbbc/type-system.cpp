@@ -93,6 +93,8 @@ bool mayHaveData(trep bits) {
   case BOptArr:  case BOptSArr:  case BOptCArr:
   case BOptArrN: case BOptSArrN: case BOptCArrN:
   case BFunc:    case BFuncS:
+  case BRFunc:   case BOptRFunc:
+  case BFuncLike: case BOptFuncLike:
   case BVec:      case BSVec:      case BCVec:
   case BVecN:     case BSVecN:     case BCVecN:
   case BOptVec:   case BOptSVec:   case BOptCVec:
@@ -255,6 +257,8 @@ bool canBeOptional(trep bits) {
   case BCls:
   case BClsMeth:
   case BRecord:
+  case BRFunc:
+  case BFuncLike:
     return true;
 
   case BSPArrE:
@@ -393,6 +397,8 @@ bool canBeOptional(trep bits) {
   case BOptSArrLike:
   case BOptArrLikeCompat:
   case BOptArrLikeCompatSA:
+  case BOptRFunc:
+  case BOptFuncLike:
     return false;
 
   case BInitPrim:
@@ -4159,7 +4165,7 @@ Type from_DataType(DataType dt) {
   case KindOfArray:    return TArr;
   case KindOfObject:   return TObj;
   case KindOfResource: return TRes;
-  case KindOfRFunc:    // TODO(T63348446)
+  case KindOfRFunc:    return TRFunc;
   case KindOfFunc:     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;
@@ -4565,6 +4571,7 @@ Type union_of(Type a, Type b) {
   Y(UncArrKey)
   Y(ArrKey)
 
+  Y(FuncLike)
   Y(FuncOrCls)
 
   Y(UncStrLike)

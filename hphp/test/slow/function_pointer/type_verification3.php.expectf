@@ -1,0 +1,6 @@
+array(1) {
+  ["kind"]=>
+  int(4)
+}
+
+Catchable fatal error: Value returned from function f() must be of type C<string>, C<int> given in %s on line %d

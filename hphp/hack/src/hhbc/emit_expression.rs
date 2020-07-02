@@ -434,7 +434,7 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         }
         Expr_::Call(c) => emit_call_expr(emitter, env, pos, None, c),
         Expr_::New(e) => emit_new(emitter, env, pos, e),
-        Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, &fp.0),
+        Expr_::FunctionPointer(fp) => emit_function_pointer(emitter, env, &fp.0, &fp.1),
         Expr_::Record(e) => emit_record(emitter, env, pos, e),
         Expr_::Array(es) => Ok(emit_pos_then(
             pos,
@@ -2467,7 +2467,13 @@ fn emit_special_function(
             } else {
                 match args {
                     [tast::Expr(_, tast::Expr_::String(func_name))] => {
-                        Ok(Some(emit_hh_fun(e, func_name)))
+                        Ok(Some(emit_hh_fun(
+                            e,
+                            env,
+                            pos,
+                            &vec![ /* targs */ ],
+                            func_name,
+                        )?))
                     }
                     _ => Err(emit_fatal::raise_fatal_runtime(
                         pos,
@@ -2793,11 +2799,12 @@ fn emit_function_pointer(
     e: &mut Emitter,
     env: &Env,
     tast::Expr(annot, expr_): &tast::Expr,
+    targs: &[tast::Targ],
 ) -> Result {
     use tast::Expr_;
     match expr_ {
         // This is a function name. Equivalent to HH\fun('str')
-        Expr_::Id(id) => Ok(emit_hh_fun(e, id.name())),
+        Expr_::Id(id) => emit_hh_fun(e, env, annot, targs, id.name()),
         // class_meth
         Expr_::ClassConst(cc) => {
             // TODO(hrust) should accept `let method_id = method::Type::from_ast_name(&(cc.1).1);`
@@ -2841,16 +2848,39 @@ fn emit_function_pointer(
     }
 }
 
-fn emit_hh_fun(e: &mut Emitter, fname: &str) -> InstrSeq {
+fn emit_hh_fun(
+    e: &mut Emitter,
+    env: &Env,
+    pos: &Pos,
+    targs: &[tast::Targ],
+    fname: &str,
+) -> Result<InstrSeq> {
     let fname = string_utils::strip_global_ns(fname);
     if e.options()
         .hhvm
         .flags
         .contains(HhvmFlags::EMIT_FUNC_POINTERS)
     {
-        instr::resolve_func(fname.to_owned().into())
+        if has_non_tparam_generics_targs(env, targs) {
+            let generics = emit_reified_targs(
+                e,
+                env,
+                pos,
+                targs
+                    .iter()
+                    .map(|targ| &targ.1)
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+            )?;
+            Ok(InstrSeq::gather(vec![
+                generics,
+                instr::resolve_rfunc(fname.to_owned().into()),
+            ]))
+        } else {
+            Ok(instr::resolve_func(fname.to_owned().into()))
+        }
     } else {
-        instr::string(fname)
+        Ok(instr::string(fname))
     }
 }
 

@@ -317,6 +317,7 @@ auto const primitives = folly::lazy([] {
     TClsMeth,
     TFunc,
     TFuncS,
+    TRFunc,
   };
 });
 
@@ -366,7 +367,9 @@ auto const optionals = folly::lazy([] {
     TOptClsMeth,
     TOptArrLikeE,
     TOptArrLikeN,
-    TOptArrLike
+    TOptArrLike,
+    TOptFunc,
+    TOptRFunc,
   };
 });
 
@@ -426,6 +429,7 @@ auto const non_opt_unions = folly::lazy([] {
     TVecCompatSA,
     TStrLike,
     TUncStrLike,
+    TFuncLike,
     TFuncOrCls,
     TTop
   };
@@ -666,11 +670,13 @@ TEST(Type, Prim) {
     { TSArr, TPrim },
     { TRes, TPrim },
     { TObj, TPrim },
+    { TRFunc, TPrim },
     { TPrim, dval(0.0) },
     { TVArrCompat, TPrim },
     { TVecCompat, TPrim },
     { TArrCompat, TPrim },
     { TStrLike, TPrim },
+    { TFuncLike, TPrim },
   };
 
   const std::initializer_list<std::pair<Type, Type>> couldbe_true{
@@ -686,6 +692,7 @@ TEST(Type, Prim) {
     { TPrim, TFunc },
     { TPrim, TFuncS },
     { TPrim, TCls },
+    { TPrim, TFuncLike },
     { TPrim, TFuncOrCls },
     { TPrim, TStrLike },
   };
@@ -699,6 +706,7 @@ TEST(Type, Prim) {
     { TPrim, TObj },
     { TPrim, TRecord },
     { TPrim, TRes },
+    { TPrim, TRFunc },
   };
 
   for (auto kv : subtype_true) {
@@ -975,6 +983,10 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptBool, union_of(TOptTrue, TFalse));
 
   EXPECT_EQ(TOptClsMeth, union_of(TInitNull, TClsMeth));
+
+  EXPECT_EQ(TOptFuncLike, union_of(TInitNull, TFuncLike));
+  EXPECT_EQ(TOptFuncLike, union_of(TFunc, TOptRFunc));
+  EXPECT_EQ(TOptFuncLike, union_of(TRFunc, TOptFunc));
 
   EXPECT_EQ(TOptFuncOrCls, union_of(TInitNull, TFuncOrCls));
   EXPECT_EQ(TOptFuncOrCls, union_of(TFunc, TOptCls));
@@ -2581,6 +2593,7 @@ TEST(Type, LoosenStaticness) {
     { sarr_mapn(TInt, TSDictN), arr_mapn(TInt, TDictN) },
     { sarr_map(test_map), arr_map(test_map) },
     { TClsMeth, TClsMeth },
+    { TFuncLike, TFuncLike },
     { TFuncOrCls, TFuncOrCls },
     { TStrLike, TStrLike },
     { TUncStrLike, TStrLike },
@@ -3090,6 +3103,7 @@ TEST(Type, MustBeCounted) {
     { TDbl, false },
     { TFunc, false },
     { TFuncS, false },
+    { TRFunc, true },
     { TSArr, false },
     { TCls, false },
     { TPrim, false },

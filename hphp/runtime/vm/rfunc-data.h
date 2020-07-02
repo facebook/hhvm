@@ -47,6 +47,14 @@ struct RFuncData : Countable, type_scan::MarkCollectable<RFuncData> {
     if (decReleaseCheck()) release();
   }
 
+  static constexpr ptrdiff_t funcOffset() {
+    return offsetof(RFuncData, m_func);
+  }
+
+  static constexpr ptrdiff_t genericsOffset() {
+    return offsetof(RFuncData, m_arr);
+  }
+
   static bool Same(const RFuncData* rfunc1, const RFuncData* rfunc2);
 
 private:

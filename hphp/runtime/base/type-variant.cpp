@@ -427,8 +427,8 @@ bool Variant::toBooleanHelper() const {
     case KindOfObject:        return m_data.pobj->toBoolean();
     case KindOfResource:      return m_data.pres->data()->o_toBoolean();
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("bool");
-      return false;
+      SystemLib::throwInvalidOperationExceptionObject("RFunc to bool conversion");
+      return true;
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:       return true;
@@ -463,8 +463,8 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
     case KindOfObject:        return m_data.pobj->toInt64();
     case KindOfResource:      return m_data.pres->data()->o_toInt64();
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("int");
-      return 0; // Should we return 0 or 1 or something else?
+      SystemLib::throwInvalidOperationExceptionObject("RFunc to Int64 conversion");
+      return 1;
     case KindOfFunc:
       invalidFuncConversion("int");
       return funcToInt64Helper(m_data.pfunc);
@@ -508,7 +508,7 @@ Array Variant::toPHPArrayHelper() const {
     case KindOfObject:        return m_data.pobj->toArray().toPHPArray();
     case KindOfResource:      return m_data.pres->data()->o_toArray();
     case KindOfRFunc:
-      raise_convert_rfunc_to_type("array");
+      SystemLib::throwInvalidOperationExceptionObject("RFunc to PHPArray conversion");
       return empty_array();
     case KindOfFunc:
       invalidFuncConversion("array");

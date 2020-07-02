@@ -313,9 +313,6 @@ bool record_request_heap_mem_event(const void* addr,
       try_member(static_cast<const SetArray*>(hdr), addr, record);
       break;
 
-    case HeaderKind::RFunc: // TODO(T63348446)
-      break;
-
     case HeaderKind::BespokeArray:
     case HeaderKind::BespokeVArray:
     case HeaderKind::BespokeDArray:
@@ -347,6 +344,7 @@ bool record_request_heap_mem_event(const void* addr,
     case HeaderKind::ClosureHdr:
     case HeaderKind::MemoData:
 
+    case HeaderKind::RFunc:
     case HeaderKind::Record:
       break;
 

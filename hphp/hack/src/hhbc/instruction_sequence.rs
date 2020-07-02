@@ -982,6 +982,10 @@ pub mod instr {
         instr(Instruct::IOp(InstructOperator::ResolveFunc(func_id)))
     }
 
+    pub fn resolve_rfunc(func_id: FunctionId) -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::ResolveRFunc(func_id)))
+    }
+
     pub fn resolve_obj_method() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::ResolveObjMethod))
     }

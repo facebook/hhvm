@@ -214,15 +214,15 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->init(params.size());
 
   if (auto const ex = f->extShared()) {
-    ex->m_hasExtendedSharedData = true;
+    ex->m_allFlags.m_hasExtendedSharedData = true;
     ex->m_arFuncPtr = nullptr;
     ex->m_nativeFuncPtr = nullptr;
     ex->m_line2 = line2;
     ex->m_past = past;
-    ex->m_returnByValue = false;
-    ex->m_isMemoizeWrapper = false;
-    ex->m_isMemoizeWrapperLSB = false;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
+    ex->m_allFlags.m_returnByValue = false;
+    ex->m_allFlags.m_isMemoizeWrapper = false;
+    ex->m_allFlags.m_isMemoizeWrapperLSB = false;
   }
 
   std::vector<Func::ParamInfo> fParams;
@@ -238,7 +238,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
       auto& ub = f->extShared()->m_paramUBs[i];
       ub.resize(fromUBs.size());
       std::copy(fromUBs.begin(), fromUBs.end(), ub.begin());
-      f->shared()->m_hasParamsWithMultiUBs = true;
+      f->shared()->m_allFlags.m_hasParamsWithMultiUBs = true;
     }
   }
 
@@ -255,10 +255,10 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_numIterators = m_numIterators;
   f->m_maxStackCells = maxStackCells;
   f->shared()->m_ehtab = ehtab;
-  f->shared()->m_isClosureBody = isClosureBody;
-  f->shared()->m_isAsync = isAsync;
-  f->shared()->m_isGenerator = isGenerator;
-  f->shared()->m_isPairGenerator = isPairGenerator;
+  f->shared()->m_allFlags.m_isClosureBody = isClosureBody;
+  f->shared()->m_allFlags.m_isAsync = isAsync;
+  f->shared()->m_allFlags.m_isGenerator = isGenerator;
+  f->shared()->m_allFlags.m_isPairGenerator = isPairGenerator;
   f->shared()->m_userAttributes = userAttributes;
   f->shared()->m_retTypeConstraint = retTypeConstraint;
   f->shared()->m_retUserType = retUserType;
@@ -266,16 +266,16 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     f->extShared()->m_returnUBs.resize(retUpperBounds.size());
     std::copy(retUpperBounds.begin(), retUpperBounds.end(),
               f->extShared()->m_returnUBs.begin());
-    f->shared()->m_hasReturnWithMultiUBs = true;
+    f->shared()->m_allFlags.m_hasReturnWithMultiUBs = true;
   }
   f->shared()->m_originalFilename = originalFullName;
-  f->shared()->m_isGenerated = isGenerated;
+  f->shared()->m_allFlags.m_isGenerated = isGenerated;
   f->shared()->m_repoReturnType = repoReturnType;
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
-  f->shared()->m_isMemoizeWrapper = isMemoizeWrapper;
-  f->shared()->m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
-  f->shared()->m_hasReifiedGenerics = hasReifiedGenerics;
-  f->shared()->m_isRxDisabled = isRxDisabled;
+  f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;
+  f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
+  f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
+  f->shared()->m_allFlags.m_isRxDisabled = isRxDisabled;
 
   if (hasReifiedGenerics) {
     auto tv = uait->second;
@@ -302,7 +302,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
 
     if (ex->m_nativeFuncPtr) {
       if (info.sig.ret == Native::NativeSig::Type::MixedTV) {
-        ex->m_returnByValue = true;
+        ex->m_allFlags.m_returnByValue = true;
       }
       int extra = isMethod() ? 1 : 0;
       assertx(info.sig.args.size() == params.size() + extra);

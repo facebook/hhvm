@@ -301,6 +301,7 @@ type instruct_operator =
   | Exit
   | Fatal of FatalOp.t
   | ResolveFunc of function_id
+  | ResolveRFunc of function_id
   | ResolveMethCaller of function_id
   | ResolveObjMethod
   | ResolveClsMethod of method_id

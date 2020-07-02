@@ -245,6 +245,7 @@ enum trep : uint64_t {
   BCKeysetN = 1ULL << 37, // counted non-empty keyset
 
   BRecord   = 1ULL << 38,
+  BRFunc    = 1ULL << 39, // Reified function
 
   // NOTE: We only have kTRepBitsStored = 48 bits available.
   // We can bump that to 56 bits, at the cost of a taking a few
@@ -351,6 +352,7 @@ enum trep : uint64_t {
   BOptKeysetN  = BInitNull | BKeysetN,
   BOptKeyset   = BInitNull | BKeyset,
   BOptRecord   = BInitNull | BRecord,
+  BOptRFunc    = BInitNull | BRFunc,
 
   BOptSPArrE   = BInitNull | BSPArrE,
   BOptCPArrE   = BInitNull | BCPArrE,
@@ -387,6 +389,8 @@ enum trep : uint64_t {
   BOptUncArrKey = BInitNull | BUncArrKey,
   BOptArrKey    = BInitNull | BArrKey,
 
+  BFuncLike     = BFunc | BRFunc,
+  BOptFuncLike  = BInitNull | BFuncLike,
   BFuncOrCls    = BFunc | BCls,
   BOptFuncOrCls = BInitNull | BFuncOrCls,
 
@@ -448,7 +452,7 @@ enum trep : uint64_t {
   BUnc      = BInitUnc | BUninit,
   BInitCell = BInitNull | BBool | BInt | BDbl | BStr | BArr | BObj | BRes |
               BVec | BDict | BKeyset | BFunc | BFuncS | BCls | BClsMeth |
-              BRecord,
+              BRecord | BRFunc,
   BCell     = BUninit | BInitCell,
 
   BTop      = (uint64_t{1} << kTRepBitsStored) - 1,
@@ -1002,6 +1006,7 @@ X(Res)                                          \
 X(Cls)                                          \
 X(Func)                                         \
 X(FuncS)                                        \
+X(RFunc)                                        \
 X(ClsMeth)                                      \
 X(Record)                                       \
 X(SVecE)                                        \
@@ -1050,6 +1055,7 @@ X(DArrN)                                        \
 X(DArr)                                         \
 X(UncArrKey)                                    \
 X(ArrKey)                                       \
+X(FuncLike)                                     \
 X(FuncOrCls)                                    \
 X(UncStrLike)                                   \
 X(StrLike)                                      \
@@ -1122,6 +1128,7 @@ X(OptDArrN)                                     \
 X(OptDArr)                                      \
 X(OptUncArrKey)                                 \
 X(OptArrKey)                                    \
+X(OptFuncLike)                                  \
 X(OptFuncOrCls)                                 \
 X(OptUncStrLike)                                \
 X(OptStrLike)                                   \
@@ -1147,6 +1154,7 @@ X(ArrLikeCompat)                                \
 X(ArrLikeCompatSA)                              \
 X(OptArrLikeCompat)                             \
 X(OptArrLikeCompatSA)                           \
+X(OptRFunc)                                     \
 X(InitCell)                                     \
 X(Cell)                                         \
 X(Top)

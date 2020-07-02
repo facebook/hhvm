@@ -2196,6 +2196,10 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
             w.write("ResolveFunc ")?;
             print_function_id(w, id)
         }
+        I::ResolveRFunc(id) => {
+            w.write("ResolveRFunc ")?;
+            print_function_id(w, id)
+        }
         I::ResolveMethCaller(id) => {
             w.write("ResolveMethCaller ")?;
             print_function_id(w, id)

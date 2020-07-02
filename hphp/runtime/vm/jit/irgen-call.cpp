@@ -967,6 +967,36 @@ void fcallFuncFunc(IRGS& env, const FCallArgs& fca) {
   prepareAndCallProfiled(env, func, fca, nullptr, false, false);
 }
 
+void fcallFuncRFunc(IRGS& env, const FCallArgs& fca) {
+  auto const rfunc = popC(env);
+  assertx(rfunc->isA(TRFunc));
+
+  auto const func = gen(env, LdFuncFromRFunc, rfunc);
+  auto const generics = gen(env, LdGenericsFromRFunc, rfunc);
+
+  auto const new_fca = FCallArgs(
+    static_cast<FCallArgsBase::Flags>(
+      fca.flags | FCallArgsBase::Flags::HasGenerics
+    ),
+    fca.numArgs,
+    fca.numRets,
+    fca.inoutArgs,
+    fca.asyncEagerOffset,
+    fca.lockWhileUnwinding,
+    fca.skipNumArgsCheck,
+    fca.context
+  );
+
+  gen(env, IncRef, generics);
+  push(env, generics);
+
+  // We just wrote to the stack, make sure the function call can proceed.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  prepareAndCallProfiled(env, func, new_fca, nullptr, false, false);
+}
+
 void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
   auto const clsMeth = popC(env);
   assertx(clsMeth->isA(TClsMeth));
@@ -1029,6 +1059,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
   if (callee->isA(TArr)) return fcallFuncArr(env, fca);
   if (callee->isA(TVec)) return fcallFuncArr(env, fca);
   if (callee->isA(TDict)) return fcallFuncArr(env, fca);
+  if (callee->isA(TRFunc)) return fcallFuncRFunc(env, fca);
   return interpOne(env);
 }
 
@@ -1065,6 +1096,41 @@ void emitResolveMethCaller(IRGS& env, const StringData* name) {
 
   if (!ok) return interpOne(env);
   push(env, cns(env, func));
+}
+
+void emitResolveRFunc(IRGS& env, const StringData* name) {
+  if (!topC(env)->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    return interpOne(env);
+  }
+  auto const tsList = popC(env);
+
+  auto const funcTmp = [&] () -> SSATmp* {
+    auto const lookup = lookupImmutableFunc(curUnit(env), name);
+    auto const func = lookup.func;
+    if (!func) {
+      return gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+    }
+    if (lookup.needsUnitLoad) {
+      gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
+    }
+    return cns(env, func);
+  }();
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const res = gen(env, HasReifiedGenerics, funcTmp);
+      gen(env, JmpZero, taken, res);
+    },
+    [&] {
+      gen(env, CheckFunReifiedGenericMismatch, funcTmp, tsList);
+      push(env, gen(env, NewRFunc, funcTmp, tsList));
+    },
+    [&] {
+      decRef(env, tsList);
+      push(env, funcTmp);
+    }
+  );
 }
 
 namespace {

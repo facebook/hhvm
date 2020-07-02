@@ -160,9 +160,10 @@ def create_php(idx, ar, rip='0x????????', pc=None):
     """
     func = ar['m_func']
     shared = rawptr(func['m_shared'])
+    flags = shared['m_allFlags']
 
     # Pull the function name.
-    if not shared['m_isClosureBody']:
+    if not flags['m_isClosureBody']:
         func_name = nameof(func)
     else:
         func_name = nameof(func['m_baseCls'].cast(T('HPHP::Class').pointer()))
@@ -306,8 +307,9 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
         try:
             func = self.ar['m_func']
             shared = rawptr(func['m_shared'])
+            flags = shared['m_allFlags']
 
-            if not shared['m_isClosureBody']:
+            if not flags['m_isClosureBody']:
                 func_name = nameof(func)
             else:
                 func_name = nameof(func['m_baseCls'].cast(T('HPHP::Class').pointer()))

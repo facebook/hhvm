@@ -142,6 +142,7 @@ bool canDCE(IRInstruction* inst) {
   case EqFunc:
   case EqStrPtr:
   case EqArrayDataPtr:
+  case HasReifiedGenerics:
   case InstanceOf:
   case InstanceOfIface:
   case InstanceOfIfaceVtable:
@@ -180,6 +181,8 @@ bool canDCE(IRInstruction* inst) {
   case LdSmashableFunc:
   case LdClsFromClsMeth:
   case LdFuncFromClsMeth:
+  case LdFuncFromRFunc:
+  case LdGenericsFromRFunc:
   case LdRecDesc:
   case DefConst:
   case Conjure:
@@ -207,6 +210,7 @@ bool canDCE(IRInstruction* inst) {
   case NewPlainArray:
   case NewCol:
   case NewPair:
+  case NewRFunc:
   case DefCallFlags:
   case DefCallFunc:
   case DefCallNumArgs:

@@ -367,6 +367,17 @@ struct Variant : private TypedValue {
     m_data.pfunc = f;
   }
 
+  explicit Variant(RFuncData* v) noexcept {
+    if (v) {
+      assertx(v);
+      m_type = KindOfRFunc;
+      m_data.prfunc = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
   template <typename T>
   explicit Variant(const req::ptr<T>& ptr) : Variant(ptr.get()) { }
   template <typename T>

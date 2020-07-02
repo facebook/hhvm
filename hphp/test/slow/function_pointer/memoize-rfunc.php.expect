@@ -1,0 +1,10 @@
+foo(1)
+array(1) {
+  ["kind"]=>
+  int(1)
+}
+foo(2)
+array(1) {
+  ["kind"]=>
+  int(1)
+}

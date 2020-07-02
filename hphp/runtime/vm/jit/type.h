@@ -323,7 +323,8 @@ constexpr bool operator>(Mem a, Mem b) {
   c(UncountedInit,       UNCCOUNTED_INIT_UNION)                         \
   c(Uncounted,           kUninit|kUncountedInit)                        \
   c(InitCell,            INIT_CELL_UNION)                               \
-  c(Cell,                kUninit|kInitCell)
+  c(Cell,                kUninit|kInitCell)                             \
+  c(FuncLike,            kFunc|kRFunc)
 
 /*
  * Adding a new runtime type needs updating numRuntime variable.

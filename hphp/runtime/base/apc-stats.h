@@ -25,6 +25,7 @@ namespace HPHP {
 struct APCHandle;
 struct APCArray;
 struct APCObject;
+struct APCRFunc;
 struct APCString;
 struct StringData;
 struct ArrayData;
@@ -42,6 +43,7 @@ struct ArrayData;
 size_t getMemSize(const APCHandle*);
 size_t getMemSize(const APCArray*);
 size_t getMemSize(const APCObject*);
+size_t getMemSize(const APCRFunc*);
 /* Recurses on array/object values iff 'recurse'. Always includes strings. */
 size_t getMemSize(const ArrayData*, bool recurse = true);
 
@@ -131,6 +133,8 @@ private:
   ServiceData::ExportedCounter* m_serObject;
   // Number of APC objects
   ServiceData::ExportedCounter* m_apcObject;
+  // Number of RFuncs
+  ServiceData::ExportedCounter* m_apcRFunc;
 
   /*
    * Operation counters.

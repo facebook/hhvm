@@ -163,6 +163,7 @@ struct EntryInfo {
     APCVec,
     APCDict,
     APCKeyset,
+    APCRFunc,
   };
 
   EntryInfo(const char* apckey,

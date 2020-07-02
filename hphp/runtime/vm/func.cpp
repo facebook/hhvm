@@ -560,7 +560,7 @@ const ReifiedGenericsInfo k_defaultReifiedGenericsInfo{0, false, 0, {}};
 } // namespace
 
 const ReifiedGenericsInfo& Func::getReifiedGenericsInfo() const {
-  if (!shared()->m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
+  if (!shared()->m_allFlags.m_hasReifiedGenerics) return k_defaultReifiedGenericsInfo;
   auto const ex = extShared();
   assertx(ex);
   return ex->m_reifiedGenericsInfo;
@@ -696,24 +696,25 @@ Func::SharedData::SharedData(PreClass* preClass, Offset base, Offset past,
   , m_line1(line1)
   , m_docComment(docComment)
   , m_inoutBitPtr(0)
-  , m_top(top)
-  , m_isClosureBody(false)
-  , m_isAsync(false)
-  , m_isGenerator(false)
-  , m_isPairGenerator(false)
-  , m_isGenerated(false)
-  , m_hasExtendedSharedData(false)
-  , m_returnByValue(false)
-  , m_isMemoizeWrapper(false)
-  , m_isMemoizeWrapperLSB(false)
-  , m_isPhpLeafFn(isPhpLeafFn)
-  , m_hasReifiedGenerics(false)
-  , m_isRxDisabled(false)
-  , m_hasParamsWithMultiUBs(false)
-  , m_hasReturnWithMultiUBs(false)
   , m_originalFilename(nullptr)
   , m_cti_base(0)
 {
+  m_allFlags.m_top = top;
+  m_allFlags.m_isClosureBody = false;
+  m_allFlags.m_isAsync = false;
+  m_allFlags.m_isGenerator = false;
+  m_allFlags.m_isPairGenerator = false;
+  m_allFlags.m_isGenerated = false;
+  m_allFlags.m_hasExtendedSharedData = false;
+  m_allFlags.m_returnByValue = false;
+  m_allFlags.m_isMemoizeWrapper = false;
+  m_allFlags.m_isMemoizeWrapperLSB = false;
+  m_allFlags.m_isPhpLeafFn = isPhpLeafFn;
+  m_allFlags.m_hasReifiedGenerics = false;
+  m_allFlags.m_isRxDisabled = false;
+  m_allFlags.m_hasParamsWithMultiUBs = false;
+  m_allFlags.m_hasReturnWithMultiUBs = false;
+
   m_pastDelta = std::min<uint32_t>(past - base, kSmallDeltaLimit);
   m_line2Delta = std::min<uint32_t>(line2 - line1, kSmallDeltaLimit);
 }
@@ -724,7 +725,7 @@ Func::SharedData::~SharedData() {
 }
 
 void Func::SharedData::atomicRelease() {
-  if (UNLIKELY(m_hasExtendedSharedData)) {
+  if (UNLIKELY(m_allFlags.m_hasExtendedSharedData)) {
     delete (ExtendedSharedData*)this;
   } else {
     delete this;

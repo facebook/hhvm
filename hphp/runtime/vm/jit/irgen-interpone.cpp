@@ -180,6 +180,7 @@ folly::Optional<Type> interpOutputType(IRGS& env,
       return TCell;
     }
     case OutFunc: return TFunc;
+    case OutFuncLike: return TFuncLike;
     case OutClass: return TCls;
     case OutClsMeth: return TClsMeth;
   }

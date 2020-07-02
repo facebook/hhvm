@@ -528,7 +528,7 @@ void emitGenericsMismatchCheck(IRGS& env, SSATmp* callFlags) {
           hint(env, Block::Hint::Unlikely);
           updateMarker(env);
           env.irb->exceptionStackBoundary();
-          gen(env, CheckFunReifiedGenericMismatch, FuncData{func}, generics);
+          gen(env, CheckFunReifiedGenericMismatch, cns(env, func), generics);
         }
       );
     },

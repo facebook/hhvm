@@ -78,6 +78,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
   } else if (UNLIKELY(!RO::EvalEnableFuncStringInterop &&
                       isFuncType(type(cell)))) {
     return op.funcVsNonFunc();
+  } else if (UNLIKELY(isRFuncType(cell.m_type))) {
+    return op(cell.m_data.prfunc, val);
   } else {
     return op(tvToBool(cell), val);
   }
@@ -1133,6 +1135,10 @@ struct Eq {
     return RecordData::equal(r1, r2);
   }
 
+  bool operator()(const RFuncData*, bool b) const {
+    return b;
+  }
+
   bool operator()(const RFuncData* r1, const RFuncData* r2) const {
     return RFuncData::Same(r1, r2);
   }
@@ -1202,7 +1208,7 @@ struct CompareBase {
     throw_collection_compare_exception();
   }
   RetType rfuncVsNonRFunc() const {
-    throw_rfunc_non_rfunc_compare_exception();
+    throw_rfunc_compare_exception();
   }
   RetType recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
@@ -1247,6 +1253,10 @@ struct CompareBase {
   }
 
   RetType operator()(const RFuncData*, const RFuncData*) const {
+    throw_rfunc_compare_exception();
+  }
+
+  RetType operator()(const RFuncData*, bool) const {
     throw_rfunc_compare_exception();
   }
 };

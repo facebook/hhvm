@@ -1115,6 +1115,16 @@ struct Func final {
     return offsetof(SharedData, m_inoutBitPtr);
   }
 
+  static constexpr ptrdiff_t sharedAllFlags() {
+    return offsetof(SharedData, m_allFlags);
+  }
+
+  static uint32_t reifiedGenericsMask() {
+    ExtendedSharedData::Flags mask;
+    mask.m_allFlags = 0;
+    mask.m_hasReifiedGenerics = true;
+    return mask.m_allFlags;
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // SharedData.
@@ -1162,21 +1172,29 @@ private:
     /*
      * Up to 32 bits.
      */
-    bool m_top : 1;
-    bool m_isClosureBody : 1;
-    bool m_isAsync : 1;
-    bool m_isGenerator : 1;
-    bool m_isPairGenerator : 1;
-    bool m_isGenerated : 1;
-    bool m_hasExtendedSharedData : 1;
-    bool m_returnByValue : 1; // only for builtins
-    bool m_isMemoizeWrapper : 1;
-    bool m_isMemoizeWrapperLSB : 1;
-    bool m_isPhpLeafFn : 1;
-    bool m_hasReifiedGenerics : 1;
-    bool m_isRxDisabled : 1;
-    bool m_hasParamsWithMultiUBs : 1;
-    bool m_hasReturnWithMultiUBs : 1;
+    union Flags {
+      struct {
+        bool m_top : true;
+        bool m_isClosureBody : true;
+        bool m_isAsync : true;
+        bool m_isGenerator : true;
+        bool m_isPairGenerator : true;
+        bool m_isGenerated : true;
+        bool m_hasExtendedSharedData : true;
+        bool m_returnByValue : true; // only for builtins
+        bool m_isMemoizeWrapper : true;
+        bool m_isMemoizeWrapperLSB : true;
+        bool m_isPhpLeafFn : true;
+        bool m_hasReifiedGenerics : true;
+        bool m_isRxDisabled : true;
+        bool m_hasParamsWithMultiUBs : true;
+        bool m_hasReturnWithMultiUBs : true;
+      };
+      uint32_t m_allFlags;
+    };
+    static_assert(sizeof(Flags) == sizeof(uint32_t));
+
+    Flags m_allFlags;
 
     // 16 bits of padding here in LOWPTR builds
 
@@ -1216,7 +1234,7 @@ private:
     explicit ExtendedSharedData(Args&&... args)
       : SharedData(std::forward<Args>(args)...)
     {
-      m_hasExtendedSharedData = true;
+      m_allFlags.m_hasExtendedSharedData = true;
     }
     ExtendedSharedData(const ExtendedSharedData&) = delete;
     ExtendedSharedData(ExtendedSharedData&&) = delete;

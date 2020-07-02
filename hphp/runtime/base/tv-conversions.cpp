@@ -1307,7 +1307,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
     switch (type(tv)) {
       DT_UNCOUNTED_CASE:
         continue;
-      case KindOfRFunc: // TODO(T63348446)
+      case KindOfRFunc:
       case KindOfString:
       case KindOfVec:
       case KindOfDict:

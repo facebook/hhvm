@@ -339,6 +339,8 @@ let instr_setm_pt num_params key = instr_setm num_params (MemberKey.PT key)
 
 let instr_resolve_func func_id = instr (IOp (ResolveFunc func_id))
 
+let instr_resolve_rfunc func_id = instr (IOp (ResolveRFunc func_id))
+
 let instr_resolve_meth_caller func_id = instr (IOp (ResolveMethCaller func_id))
 
 let instr_resolve_obj_method = instr (IOp ResolveObjMethod)

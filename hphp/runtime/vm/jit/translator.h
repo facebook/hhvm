@@ -282,6 +282,7 @@ enum OutTypeConstraints {
   OutIsTypeL,           // output for IsTypeL instructions
 
   OutFunc,              // for function pointers
+  OutFuncLike,          // For ResolveRFunc instruction
   OutClass,             // for class pointers
   OutClsMeth,           // For ClsMeth pointers
 

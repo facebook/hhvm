@@ -358,6 +358,7 @@ static const struct {
   { OpAssertRATStk,{None,             None,         OutNone         }},
   { OpBreakTraceHint,{None,           None,         OutNone         }},
   { OpGetMemoKeyL, {Local,            Stack1,       OutUnknown      }},
+  { OpResolveRFunc,{Stack1,           Stack1,       OutFuncLike     }},
   { OpResolveFunc, {None,             Stack1,       OutFunc         }},
   { OpResolveMethCaller,
                    {None,             Stack1,       OutFunc         }},
@@ -944,6 +945,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::FCallFunc:
   case Op::FCallFuncD:
   case Op::FCallObjMethodD:
+  case Op::ResolveRFunc:
   case Op::ResolveFunc:
   case Op::ResolveMethCaller:
   case Op::ResolveClsMethod:

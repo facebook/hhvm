@@ -3764,7 +3764,8 @@ and emit_special_function
         ("fun() expects exactly 1 parameter, " ^ string_of_int nargs ^ " given")
     else (
       match args with
-      | [(_, A.String func_name)] -> Some (emit_hh_fun func_name)
+      | [(_, A.String func_name)] ->
+        Some (emit_hh_fun env pos [ (* targs *) ] func_name)
       | _ ->
         Emit_fatal.raise_fatal_runtime pos "Constant string expected in fun()"
     )
@@ -3923,10 +3924,18 @@ and emit_special_function
         end
     end
 
-and emit_hh_fun func_name =
+and emit_hh_fun env pos targs func_name =
   let func_name = SU.strip_global_ns func_name in
   if Hhbc_options.emit_func_pointers !Hhbc_options.compiler_options then
-    instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name
+    if has_non_tparam_generics_targs env targs then
+      let generics = emit_reified_targs env pos (List.map ~f:snd targs) in
+      gather
+        [
+          generics;
+          instr_resolve_rfunc @@ Hhbc_id.Function.from_raw_string func_name;
+        ]
+    else
+      instr_resolve_func @@ Hhbc_id.Function.from_raw_string func_name
   else
     instr_string func_name
 
@@ -4058,10 +4067,11 @@ and emit_call
   | _ -> default ()
 
 (* How do we make these work with reified generics? *)
-and emit_function_pointer env (annot, e) _targs =
+and emit_function_pointer env (annot, e) targs =
+  let pos = fst annot in
   match e with
   (* This is a function name. Equivalent to HH\fun('str') *)
-  | A.Id (_, str) -> emit_hh_fun str
+  | A.Id (_, str) -> emit_hh_fun env pos targs str
   (* class_meth *)
   | A.Class_const (cid, (_, method_name)) ->
     let method_id = Hhbc_id.Method.from_ast_name method_name in

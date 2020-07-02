@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/apc-named-entity.h"
+#include "hphp/runtime/base/apc-rfunc.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
@@ -56,8 +57,8 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       auto const value = new APCTypedValue(val(cell).dbl);
       return {value->getHandle(), sizeof(APCTypedValue)};
     }
-    case KindOfRFunc: // TODO(T64133790)
-      raise_error(Strings::RFUNC_NOT_SUPPORTED);
+    case KindOfRFunc:
+      return APCRFunc::Construct(val(cell).prfunc);
     case KindOfFunc: {
       auto const func = val(cell).pfunc;
       auto const serialize_func =
@@ -259,6 +260,8 @@ Variant APCHandle::toLocalHelper() const {
       return APCCollection::fromHandle(this)->createObject();
     case APCKind::SharedObject:
       return APCObject::MakeLocalObject(this);
+    case APCKind::RFunc:
+      return APCRFunc::Make(this);
   }
   not_reached();
 }
@@ -311,6 +314,10 @@ void APCHandle::deleteShared() {
 
     case APCKind::SharedCollection:
       APCCollection::Delete(this);
+      return;
+
+    case APCKind::RFunc:
+      APCRFunc::Delete(this);
       return;
 
     case APCKind::UncountedArray:
@@ -368,6 +375,7 @@ bool APCHandle::checkInvariants() const {
     case APCKind::SharedDArray:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::FuncEntity:
+    case APCKind::RFunc:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:

@@ -3527,6 +3527,14 @@ SSATmp* simplifyHasToString(State& env, const IRInstruction* inst) {
     });
 }
 
+SSATmp* simplifyHasReifiedGenerics(State& env, const IRInstruction* inst) {
+  auto const src = inst->src(0);
+  if (src->hasConstVal()) {
+    return cns(env, src->funcVal()->hasReifiedGenerics());
+  }
+  return nullptr;
+}
+
 SSATmp* simplifyChrInt(State& env, const IRInstruction* inst) {
   auto const src = inst->src(0);
   if (src->hasConstVal(TInt)) {
@@ -3780,6 +3788,7 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(IsWaitHandle)
   X(IsCol)
   X(HasToString)
+  X(HasReifiedGenerics)
   X(LdCls)
   X(LdClsName)
   X(LdWHResult)

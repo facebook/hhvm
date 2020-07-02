@@ -3306,6 +3306,15 @@ ResolveMethCaller <litstr id>   []  ->  [C]
   of the stack. The meth caller must exist in the same unit as the resolving
   function.
 
+ResolveRFunc <litstr id> [C:VArr]  ->  [C]
+
+  Similar to ResolveFunc, resolve %1 as a function name to a function pointer
+  and raises an error if the resolution fails. $1 contains a list of reified
+  generics. If the function pointer takes reified generics, pushes a value
+  capturing the function pointer and reified generics onto the top of stack.
+  If the function pointer does not take reified generics, pushes just the
+  function pointer into the top of stack.
+
 ResolveObjMethod [C C] -> [C]
 
   Resolve $1 as a method of $2 to a method array, then push the array onto the

@@ -295,6 +295,7 @@ X(KindOfResource,     ResourceHdr*);
 X(KindOfString,       StringData*);
 X(KindOfPersistentString, const StringData*);
 X(KindOfFunc,         Func*);
+X(KindOfRFunc,        RFuncData*);
 X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
 X(KindOfRecord,       RecordData*);

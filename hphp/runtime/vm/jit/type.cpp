@@ -567,6 +567,7 @@ DataType Type::toDataType() const {
   if (*this <= TCls)         return KindOfClass;
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRecord)      return KindOfRecord;
+  if (*this <= TRFunc)       return KindOfRFunc;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
 }
 

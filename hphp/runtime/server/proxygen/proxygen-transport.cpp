@@ -175,10 +175,12 @@ struct PushTxnHandler : proxygen::HTTPPushTransactionHandler {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ProxygenTransport::ProxygenTransport(ProxygenServer *server)
+ProxygenTransport::ProxygenTransport(ProxygenServer *server,
+                                     HPHPWorkerThread *worker)
   : m_server(server)
+  , m_worker(worker)
 {
-  m_server->addPendingTransport(*this);
+  m_worker->addPendingTransport(*this);
 }
 
 ProxygenTransport::~ProxygenTransport() {
@@ -190,7 +192,7 @@ ProxygenTransport::~ProxygenTransport() {
     Lock lock(this);
     CHECK(m_pushHandlers.empty());
   }
-  // Destructor of IntrusiveListHook will automatically unlink()
+  m_worker->removePendingTransport(*this);
 }
 
 bool ProxygenTransport::bufferRequest() const {
@@ -482,7 +484,7 @@ const void *ProxygenTransport::getMorePostData(size_t &size) {
   if (oldLength >= RuntimeOption::RequestBodyReadLimit &&
       m_bodyData.chainLength() < RuntimeOption::RequestBodyReadLimit) {
     VLOG(4) << "resuming ingress";
-    m_server->putResponseMessage(ResponseMessage(
+    m_worker->putResponseMessage(ResponseMessage(
         shared_from_this(), ResponseMessage::Type::RESUME_INGRESS));
   }
   VLOG(4) << "returning POST body chunk size=" << size;
@@ -610,7 +612,7 @@ void ProxygenTransport::onError(const HTTPException& err) noexcept {
 }
 
 void ProxygenTransport::finish(shared_ptr<ProxygenTransport> &&transport) {
-  m_server->putResponseMessage(ResponseMessage(std::move(transport)));
+  m_worker->putResponseMessage(ResponseMessage(std::move(transport)));
 }
 
 HTTPTransaction *ProxygenTransport::getTransaction(uint64_t id,
@@ -738,13 +740,13 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
     m_response.setHTTPVersion(1, 1);
     m_response.setIsChunked(chunked);
     m_response.dumpMessage(4);
-    m_server->putResponseMessage(
+    m_worker->putResponseMessage(
       ResponseMessage(shared_from_this(),
                       ResponseMessage::Type::HEADERS, 0,
                       chunked, data, size, eom));
     m_sendStarted = true;
   } else {
-    m_server->putResponseMessage(
+    m_worker->putResponseMessage(
       ResponseMessage(shared_from_this(),
                       ResponseMessage::Type::BODY, 0,
                       chunked, data, size, eom));
@@ -772,7 +774,7 @@ void ProxygenTransport::sendImpl(const void *data, int size, int code,
 void ProxygenTransport::onSendEndImpl() {
   if (!m_sendEnded) {
     VLOG(4) << "onSendEndImpl called";
-    m_server->putResponseMessage(
+    m_worker->putResponseMessage(
         ResponseMessage(shared_from_this(), ResponseMessage::Type::EOM));
     m_sendEnded = true;
   }
@@ -808,11 +810,11 @@ int64_t ProxygenTransport::pushResource(const char *host, const char *path,
   }
 
   // Push Promise
-  m_server->putResponseMessage(
+  m_worker->putResponseMessage(
     ResponseMessage(shared_from_this(), ResponseMessage::Type::HEADERS,
                     pushId));
 
-  m_server->putResponseMessage(
+  m_worker->putResponseMessage(
     ResponseMessage(shared_from_this(),
                     ResponseMessage::Type::HEADERS,
                     pushId, false, data, size, eom));
@@ -824,7 +826,7 @@ void ProxygenTransport::pushResourceBody(int64_t id, const void *data,
   if (id == 0 || (size <= 0 && !eom)) {
     return;
   }
-  m_server->putResponseMessage(
+  m_worker->putResponseMessage(
     ResponseMessage(shared_from_this(), ResponseMessage::Type::BODY,
                     id, false, data, size, eom));
 }
@@ -870,7 +872,7 @@ void ProxygenTransport::beginPartialPostEcho() {
 }
 
 void ProxygenTransport::abort() {
-  unlink();
+  m_worker->removePendingTransport(*this);
   if (m_clientTxn) {
     m_clientTxn->sendAbort();
   }

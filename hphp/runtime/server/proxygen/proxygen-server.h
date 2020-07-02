@@ -50,11 +50,13 @@ using ProxygenWorker = ServerWorker<std::shared_ptr<ProxygenJob>,
                                     ProxygenTransportTraits>;
 
 struct ProxygenServer;
+struct HPHPWorkerThread;
 
 struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
   explicit HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
-    ProxygenServer *server);
+    ProxygenServer *server,
+    HPHPWorkerThread *worker);
   ~HPHPSessionAcceptor() override {}
 
   proxygen::HTTPTransaction::Handler* newHandler(
@@ -83,24 +85,54 @@ struct HPHPSessionAcceptor : proxygen::HTTPSessionAcceptor {
 
  private:
   ProxygenServer *m_server;
+  HPHPWorkerThread *m_worker;
   proxygen::SimpleController m_simpleController{this};
   proxygen::HTTPSessionController* m_controllerPtr{&m_simpleController};
 };
 
 using ResponseMessageQueue = folly::NotificationQueue<ResponseMessage>;
 
-struct HPHPWorkerThread : proxygen::WorkerThread {
-  explicit HPHPWorkerThread(folly::EventBaseManager* ebm)
-      : WorkerThread(ebm, "ProxygenWorker") {}
+struct HPHPWorkerThread : proxygen::WorkerThread,
+                          ResponseMessageQueue::Consumer {
+  explicit HPHPWorkerThread(folly::EventBaseManager* ebm,
+                            ProxygenServer* server)
+      : WorkerThread(ebm, "ProxygenWorker")
+      , m_server(server) {}
   ~HPHPWorkerThread() override {}
   void setup() override;
   void cleanup() override;
+
+  using proxygen::WorkerThread::getEventBase;
+
+  void messageAvailable(ResponseMessage&& message) noexcept override {
+    auto transport = message.m_transport;
+    transport->messageAvailable(std::move(message));
+  }
+
+  virtual void putResponseMessage(ResponseMessage&& message) {
+    m_responseQueue.putMessage(std::move(message));
+  }
+
+  uint32_t getPendingTransportsCount() {
+    return m_pendingTransportsCount.load(std::memory_order_acquire);
+  }
+
+  void addPendingTransport(ProxygenTransport& transport);
+  void removePendingTransport(ProxygenTransport& transport);
+  void returnPartialPosts();
+  void abortPendingTransports();
+
+ private:
+  ProxygenServer *m_server;
+  ResponseMessageQueue m_responseQueue;
+  ProxygenTransportList m_pendingTransports;
+  std::atomic<uint32_t> m_pendingTransportsCount;
 };
 
 struct ProxygenServer : Server,
-                        ResponseMessageQueue::Consumer,
                         folly::AsyncTimeout,
                         TakeoverAgent::Callback {
+  friend HPHPWorkerThread;
   explicit ProxygenServer(const ServerOptions& options);
   ~ProxygenServer() override;
 
@@ -125,6 +157,7 @@ struct ProxygenServer : Server,
     return m_dispatcher.getQueuedJobs();
   }
   int getLibEventConnectionCount() override;
+  uint32_t getPendingTransportsCount();
   bool enableSSL(int port) override;
   bool enableSSLWithPlainText() override;
 
@@ -134,11 +167,6 @@ struct ProxygenServer : Server,
 
   folly::EventBase *getEventBase() {
     return m_eventBaseManager.getEventBase();
-  }
-
-  void messageAvailable(ResponseMessage&& message) noexcept override {
-    auto m_transport = message.m_transport;
-    m_transport->messageAvailable(std::move(message));
   }
 
   bool canAccept();
@@ -155,22 +183,9 @@ struct ProxygenServer : Server,
   // Methods invoked by ProxygenTransport, virtual for mocking
   virtual void onRequest(std::shared_ptr<ProxygenTransport> transport);
 
-  virtual void putResponseMessage(ResponseMessage&& message) {
-    m_responseQueue.putMessage(std::move(message));
-  }
-
   virtual void decrementEnqueuedCount();
 
   virtual void onRequestError(Transport* transport);
-
-  void addPendingTransport(ProxygenTransport& transport) {
-    if (partialPostEchoEnabled()) {
-      const auto status = getStatus();
-      transport.setShouldRepost(status == RunStatus::STOPPING
-                                || status == RunStatus::STOPPED);
-    }
-    m_pendingTransports.push_back(transport);
-  }
 
  private:
   class ProxygenEventBaseObserver : public folly::EventBaseObserver {
@@ -225,10 +240,6 @@ struct ProxygenServer : Server,
 
   virtual bool partialPostEchoEnabled() { return false; }
 
-  void returnPartialPosts();
-
-  void abortPendingTransports();
-
   void doShutdown();
 
   void stopVM();
@@ -249,7 +260,8 @@ struct ProxygenServer : Server,
   void updateTLSTicketSeeds(wangle::TLSTicketKeySeeds seeds);
 
   virtual std::unique_ptr<HPHPSessionAcceptor> createAcceptor(
-    const proxygen::AcceptorConfiguration& config);
+    const proxygen::AcceptorConfiguration& config,
+    HPHPWorkerThread *worker);
 
   // Forbidden copy constructor and assignment operator
   ProxygenServer(ProxygenServer const &) = delete;
@@ -258,7 +270,7 @@ struct ProxygenServer : Server,
   int m_accept_sock_ssl{-1};
   bool m_https{false};
   uint32_t m_drainCount{0};
-  uint32_t m_enqueuedCount{0};
+  std::atomic<uint32_t> m_enqueuedCount{0};
   ShutdownState m_shutdownState{ShutdownState::SHUTDOWN_NONE};
   std::unique_ptr<RequestHandler> m_handler;
   folly::AsyncServerSocket::UniquePtr m_httpServerSocket;
@@ -272,9 +284,7 @@ struct ProxygenServer : Server,
   std::unique_ptr<wangle::FilePoller> m_filePoller;
 
   JobQueueDispatcher<ProxygenWorker> m_dispatcher;
-  ResponseMessageQueue m_responseQueue;
   std::unique_ptr<TakeoverAgent> m_takeover_agent;
-  ProxygenTransportList m_pendingTransports;
   std::unique_ptr<wangle::TLSCredProcessor> m_credProcessor;
 };
 

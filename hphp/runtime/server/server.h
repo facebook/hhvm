@@ -220,6 +220,7 @@ public:
   std::string getAddress() const { return m_address;}
   int getPort() const { return m_port;}
 
+  // Access to the status should be synchronized, but isn't.
   RunStatus getStatus() const { return m_status;}
   void setStatus(RunStatus status) { m_status = status;}
   /**

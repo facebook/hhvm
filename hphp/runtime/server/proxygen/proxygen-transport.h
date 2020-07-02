@@ -28,6 +28,7 @@
 #include <folly/IPAddress.h>
 
 namespace HPHP {
+struct HPHPWorkerThread;
 struct ProxygenServer;
 struct ProxygenTransport;
 
@@ -100,7 +101,7 @@ struct ProxygenTransport final
   , std::enable_shared_from_this<ProxygenTransport>
   , Synchronizable
 {
-  explicit ProxygenTransport(ProxygenServer *server);
+  explicit ProxygenTransport(ProxygenServer *server, HPHPWorkerThread *worker);
   ~ProxygenTransport() override;
 
   ///////////////////////////////////////////////////////////////////////////
@@ -311,12 +312,18 @@ struct ProxygenTransport final
     return m_clientAddress;
   }
 
- private:
-  bool bufferRequest() const;
+
+  // Pending transport list methods.
+  bool is_linked() const {
+    return m_listHook.is_linked();
+  }
 
   void unlink() {
     m_listHook.unlink();
   }
+
+ private:
+  bool bufferRequest() const;
 
   void sendErrorResponse(uint32_t code) noexcept;
 
@@ -334,6 +341,7 @@ struct ProxygenTransport final
   // Tracks HTTPTransaction's reference to this object
   std::shared_ptr<ProxygenTransport> m_transactionReference;
   ProxygenServer *m_server;
+  HPHPWorkerThread *m_worker;
   proxygen::HTTPTransaction *m_clientTxn{nullptr}; // locked
   folly::SocketAddress m_clientAddress;
   std::string m_addressStr;

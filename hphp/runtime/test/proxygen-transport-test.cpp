@@ -47,25 +47,30 @@ namespace HPHP {
 static ServerOptions s_options{std::string(""), 80, 1};
 
 struct MockProxygenServer : ProxygenServer {
-
   MockProxygenServer()
       : ProxygenServer(s_options) {}
 
   MOCK_METHOD1(onRequestError, void(Transport*));
 
   MOCK_METHOD1(onRequest, void(std::shared_ptr<ProxygenTransport>));
+
+  MOCK_METHOD0(decrementEnqueuedCount, void());
+};
+
+struct MockHPHPWorkerThread : HPHPWorkerThread {
+  explicit MockHPHPWorkerThread(MockProxygenServer* server)
+      : HPHPWorkerThread(nullptr, server) {}
+
   void putResponseMessage(ResponseMessage&& message) override {
     m_messageQueue.emplace_back(std::move(message));
   }
-
-  MOCK_METHOD0(decrementEnqueuedCount, void());
 
   void deliverMessages(int32_t n = -1) {
     while (n > 0 || (n < 0 && !m_messageQueue.empty())) {
       EXPECT_FALSE(m_messageQueue.empty());
       auto message = std::move(m_messageQueue.front());
-      auto m_transport = message.m_transport;
-      m_transport->messageAvailable(std::move(message));
+      auto transport = message.m_transport;
+      transport->messageAvailable(std::move(message));
       m_messageQueue.pop_front();
       n--;
     }
@@ -90,13 +95,14 @@ struct ProxygenTransportBasicTest : testing::Test {
                 folly::HHWheelTimer::DEFAULT_TICK_INTERVAL),
             folly::AsyncTimeout::InternalEnum::NORMAL,
             std::chrono::milliseconds(100))),
+        m_worker(&m_server),
         m_txn(
             TransportDirection::DOWNSTREAM,
             HTTPCodec::StreamID(1),
             1,
             m_egressQueue,
             WheelTimerInstance(m_timeouts.get())) {
-    m_transport = std::make_shared<ProxygenTransport>(&m_server);
+    m_transport = std::make_shared<ProxygenTransport>(&m_server, &m_worker);
     m_transport->setTransactionReference(m_transport);
     m_transport->setTransaction(&m_txn);
   }
@@ -112,6 +118,7 @@ struct ProxygenTransportBasicTest : testing::Test {
   folly::HHWheelTimer::UniquePtr m_timeouts;
   proxygen::HTTP2PriorityQueue m_egressQueue;
   StrictMock<MockProxygenServer> m_server;
+  StrictMock<MockHPHPWorkerThread> m_worker;
   StrictMock<MockHTTPTransaction> m_txn;
   std::shared_ptr<ProxygenTransport> m_transport;
 };
@@ -136,8 +143,8 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
       return;
     }
     m_transport->finish(std::move(m_transport));
-    EXPECT_EQ(m_server.m_messageQueue.size(), 1);
-    m_server.deliverMessages();
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
+    m_worker.deliverMessages();
     EXPECT_CALL(m_server, decrementEnqueuedCount());
     transport->detachTransaction();
   }
@@ -151,7 +158,7 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
     auto id = m_transport->pushResource("foo", "/bar", pri, promiseHeaders,
                                         responseHeaders,  nullptr, 0, eom);
     EXPECT_GT(id, 0);
-    EXPECT_EQ(m_server.m_messageQueue.size(), 2);
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 2);
     return id;
   }
 
@@ -183,11 +190,11 @@ struct ProxygenTransportTest : ProxygenTransportBasicTest {
 
   void sendResponse(const std::string& body) {
     m_transport->sendImpl(body.data(), body.length(), 200, false, true);
-    EXPECT_EQ(m_server.m_messageQueue.size(), 1);
+    EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
     EXPECT_CALL(m_txn, sendHeaders(_));
     EXPECT_CALL(m_txn, sendBody(_));
     EXPECT_CALL(m_txn, sendEOM());
-    m_server.deliverMessages();
+    m_worker.deliverMessages();
   }
 };
 
@@ -349,7 +356,7 @@ TEST_F(ProxygenTransportTest, push) {
   // And some body bytes
   std::string body("12345");
   m_transport->pushResourceBody(id, body.data(), body.length(), false);
-  EXPECT_EQ(m_server.m_messageQueue.size(), 3);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 3);
 
   // Creates a new transaction and sends headers/body
   MockHTTPTransaction pushTxn(TransportDirection::DOWNSTREAM,
@@ -358,13 +365,13 @@ TEST_F(ProxygenTransportTest, push) {
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
   EXPECT_CALL(pushTxn, sendBody(_));
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   // Send Push EOM
   m_transport->pushResourceBody(id, nullptr, 0, true);
-  EXPECT_EQ(m_server.m_messageQueue.size(), 1);
+  EXPECT_EQ(m_worker.m_messageQueue.size(), 1);
   EXPECT_CALL(pushTxn, sendEOM());
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   pushHandler->detachTransaction();
   // Send response
   sendResponse("12345");
@@ -388,7 +395,7 @@ TEST_F(ProxygenTransportTest, push_empty_body) {
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
   EXPECT_CALL(pushTxn, sendEOM());
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   pushHandler->detachTransaction();
   // Send response
@@ -412,7 +419,7 @@ TEST_F(ProxygenTransportTest, push_abort_incomplete) {
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   sendResponse("12345");
 
   EXPECT_CALL(pushTxn, sendAbort())
@@ -441,7 +448,7 @@ TEST_F(ProxygenTransportTest, push_abort) {
                               WheelTimerInstance(m_timeouts.get()));
   HTTPPushTransactionHandler* pushHandler = nullptr;
   expectPushPromiseAndHeaders(pushTxn, pri, &pushHandler);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
 
   HTTPException ex(HTTPException::Direction::INGRESS_AND_EGRESS,
                    "Stream aborted, streamID");
@@ -450,7 +457,7 @@ TEST_F(ProxygenTransportTest, push_abort) {
   pushTxn.onError(ex);
   pushHandler->detachTransaction();
   m_transport->pushResourceBody(id, nullptr, 0, true);
-  m_server.deliverMessages();
+  m_worker.deliverMessages();
   sendResponse("12345");
 }
 

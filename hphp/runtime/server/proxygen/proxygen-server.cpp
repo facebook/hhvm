@@ -46,9 +46,11 @@ using wangle::Acceptor;
 
 HPHPSessionAcceptor::HPHPSessionAcceptor(
     const proxygen::AcceptorConfiguration& config,
-    ProxygenServer *server)
+    ProxygenServer *server,
+    HPHPWorkerThread *worker)
       : HTTPSessionAcceptor(config),
-        m_server(server) {
+        m_server(server),
+        m_worker(worker) {
 }
 
 bool HPHPSessionAcceptor::canAccept(const SocketAddress& /*address*/) {
@@ -75,7 +77,7 @@ void HPHPSessionAcceptor::onIngressError(
 proxygen::HTTPTransaction::Handler*
 HPHPSessionAcceptor::newHandler(proxygen::HTTPTransaction& /*txn*/,
                                 proxygen::HTTPMessage* /*msg*/) noexcept {
-  auto transport = std::make_shared<ProxygenTransport>(m_server);
+  auto transport = std::make_shared<ProxygenTransport>(m_server, m_worker);
   transport->setTransactionReference(transport);
   return transport.get();
 }
@@ -111,11 +113,50 @@ ProxygenTransportTraits::~ProxygenTransportTraits() {
 void HPHPWorkerThread::setup() {
   WorkerThread::setup();
   hphp_thread_init();
+  startConsuming(getEventBase(), &m_responseQueue);
 }
 
 void HPHPWorkerThread::cleanup() {
   hphp_thread_exit();
   WorkerThread::cleanup();
+}
+
+void HPHPWorkerThread::addPendingTransport(ProxygenTransport& transport) {
+  m_pendingTransportsCount.fetch_add(1, std::memory_order_acquire);
+  if (m_server->partialPostEchoEnabled()) {
+    const auto status = m_server->getStatus();
+    transport.setShouldRepost(status == ProxygenServer::RunStatus::STOPPING
+                              || status == ProxygenServer::RunStatus::STOPPED);
+  }
+  m_pendingTransports.push_back(transport);
+}
+
+void HPHPWorkerThread::removePendingTransport(ProxygenTransport& transport) {
+  if (transport.is_linked()) {
+    transport.unlink();
+    m_pendingTransportsCount.fetch_sub(1, std::memory_order_release);
+  }
+}
+
+void HPHPWorkerThread::returnPartialPosts() {
+  for (auto& transport : m_pendingTransports) {
+    if (!transport.getClientComplete()) {
+      transport.beginPartialPostEcho();
+    }
+  }
+}
+
+void HPHPWorkerThread::abortPendingTransports() {
+  if (!m_pendingTransports.empty()) {
+    Logger::Warning("aborting %lu incomplete requests",
+                    m_pendingTransports.size());
+    // Avoid iterating the list, as abort() will unlink(), leaving the
+    // list iterator in a corrupt state.
+    do {
+      auto& transport = m_pendingTransports.front();
+      transport.abort();                // will unlink()
+    } while (!m_pendingTransports.empty());
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -161,7 +202,7 @@ ProxygenServer::ProxygenServer(
   ) : Server(options.m_address, options.m_port),
       m_accept_sock(options.m_serverFD),
       m_accept_sock_ssl(options.m_sslFD),
-      m_worker(&m_eventBaseManager),
+      m_worker(&m_eventBaseManager, this),
       m_dispatcher(options.m_maxThreads,
                    options.m_maxQueue,
                    RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
@@ -263,8 +304,9 @@ void ProxygenServer::removeTakeoverListener(TakeoverListener* listener) {
 }
 
 std::unique_ptr<HPHPSessionAcceptor> ProxygenServer::createAcceptor(
-    const proxygen::AcceptorConfiguration& config) {
-  return std::make_unique<HPHPSessionAcceptor>(config, this);
+    const proxygen::AcceptorConfiguration& config,
+    HPHPWorkerThread *worker) {
+  return std::make_unique<HPHPSessionAcceptor>(config, this, worker);
 }
 
 void ProxygenServer::start() {
@@ -331,7 +373,7 @@ void ProxygenServer::start() {
                                     m_httpServerSocket->getNetworkSocket().toFd(), this);
   }
 
-  m_httpAcceptor = createAcceptor(m_httpConfig);
+  m_httpAcceptor = createAcceptor(m_httpConfig, &m_worker);
   m_httpAcceptor->init(m_httpServerSocket.get(), m_worker.getEventBase());
 
   if (m_httpConfig.isSSL() || m_httpsConfig.isSSL()) {
@@ -373,7 +415,7 @@ void ProxygenServer::start() {
       failedToListen(ex, m_httpsConfig.bindAddress);
     }
 
-    m_httpsAcceptor = createAcceptor(m_httpsConfig);
+    m_httpsAcceptor = createAcceptor(m_httpsConfig, &m_worker);
     try {
       m_httpsAcceptor->init(m_httpsServerSocket.get(), m_worker.getEventBase());
     } catch (const std::exception& ex) {
@@ -416,7 +458,6 @@ void ProxygenServer::start() {
   if (m_httpsServerSocket) {
     m_httpsServerSocket->startAccepting();
   }
-  startConsuming(m_worker.getEventBase(), &m_responseQueue);
 
   setStatus(RunStatus::RUNNING);
   folly::AsyncTimeout::attachEventBase(m_worker.getEventBase());
@@ -517,39 +558,17 @@ void ProxygenServer::stopListening(bool hard) {
     scheduleTimeout(s);
     if (RuntimeOption::ServerShutdownEOMWait > 0) {
       int delayMilliSeconds = RuntimeOption::ServerShutdownEOMWait * 1000;
-      m_worker.getEventBase()->runAfterDelay(
-        [this] { abortPendingTransports(); }, delayMilliSeconds);
+      m_worker.getEventBase()->runAfterDelay([this] {
+        m_worker.abortPendingTransports();
+        // Accelerate shutdown if all requests that were enqueued are done,
+        // since no more is coming in.
+        if (m_enqueuedCount == 0 &&
+            m_shutdownState == ShutdownState::DRAINING_READS) {
+          doShutdown();
+        }
+      }, delayMilliSeconds);
     }
   } else {
-    doShutdown();
-  }
-}
-
-void ProxygenServer::returnPartialPosts() {
-  VLOG(2) << "Running returnPartialPosts for "
-          << m_pendingTransports.size() << " pending transports";
-  for (auto& transport : m_pendingTransports) {
-    if (!transport.getClientComplete()) {
-      transport.beginPartialPostEcho();
-    }
-  }
-}
-
-void ProxygenServer::abortPendingTransports() {
-  if (!m_pendingTransports.empty()) {
-    Logger::Warning("aborting %lu incomplete requests",
-                    m_pendingTransports.size());
-    // Avoid iterating the list, as abort() will unlink(), leaving the
-    // list iterator in a corrupt state.
-    do {
-      auto& transport = m_pendingTransports.front();
-      transport.abort();                // will unlink()
-    } while (!m_pendingTransports.empty());
-  }
-  // Accelerate shutdown if all requests that were enqueued are done,
-  // since no more is coming in.
-  if (m_enqueuedCount == 0 &&
-      m_shutdownState == ShutdownState::DRAINING_READS) {
     doShutdown();
   }
 }
@@ -639,7 +658,8 @@ void ProxygenServer::vmStopped() {
 
 void ProxygenServer::forceStop() {
   Logger::Info("%p: forceStop ProxygenServer port=%d, enqueued=%d, conns=%d",
-               this, m_port, m_enqueuedCount, getLibEventConnectionCount());
+               this, m_port, m_enqueuedCount.load(std::memory_order_relaxed),
+               getLibEventConnectionCount());
   m_httpServerSocket.reset();
   m_httpsServerSocket.reset();
 
@@ -652,7 +672,7 @@ void ProxygenServer::forceStop() {
   }
 
   // No more responses coming from worker threads
-  stopConsuming();
+  m_worker.stopConsuming();
   Logger::Verbose("%p: Stopped response queue consumer port=%d", this, m_port);
 
   // The worker should exit gracefully
@@ -677,7 +697,7 @@ void ProxygenServer::reportShutdownStatus() {
                 getActiveWorker(),
                 getQueuedJobs(),
                 getLibEventConnectionCount(),
-                m_pendingTransports.size(),
+                getPendingTransportsCount(),
                 Process::GetMemUsageMb());
   m_worker.getEventBase()->runAfterDelay([this]{reportShutdownStatus();}, 500);
 }
@@ -693,6 +713,12 @@ int ProxygenServer::getLibEventConnectionCount() {
     conns += m_httpsAcceptor->getNumConnections();
   }
   return conns;
+}
+
+uint32_t ProxygenServer::getPendingTransportsCount() {
+  uint32_t count = 0;
+  count += m_worker.getPendingTransportsCount();
+  return count;
 }
 
 void ProxygenServer::resetSSLContextConfigs(
@@ -844,7 +870,7 @@ void ProxygenServer::decrementEnqueuedCount() {
     // If all requests that got enqueued are done, and no more request
     // is coming in, accelerate shutdown.
     if ((m_shutdownState == ShutdownState::DRAINING_READS &&
-         m_pendingTransports.empty()) ||
+         !getPendingTransportsCount()) ||
         m_shutdownState == ShutdownState::DRAINING_WRITES) {
       cancelTimeout();
       doShutdown();

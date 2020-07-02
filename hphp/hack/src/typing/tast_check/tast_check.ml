@@ -59,6 +59,7 @@ let visitor ctx =
         Type_const_check.handler;
         Pocket_universes_runtime_check.handler;
         Pocket_universes_path_check.handler;
+        Static_method_generics_check.handler;
       ] )
 
 let program ctx = (visitor ctx)#go ctx

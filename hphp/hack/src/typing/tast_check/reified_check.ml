@@ -188,61 +188,6 @@ let handler =
       | ((call_pos, _), Class_get ((_, CI (_, t)), _)) ->
         if equal_reify_kind (Env.get_reified env t) Reified then
           Errors.class_get_reified call_pos
-      (* Call of the form C::f where f is a static method:
-       * error when f uses any C's reified generic *)
-      | ( (call_pos, _),
-          Call
-            ( _,
-              ((_, fun_ty), Class_const ((_, CI (_, class_id)), (_, fname))),
-              targs,
-              _,
-              _ ) ) ->
-        begin
-          match get_node fun_ty with
-          | Tfun { ft_tparams; _ } ->
-            (match Env.get_class env class_id with
-            | Some cls ->
-              let tp_names =
-                List.filter_map (Cls.tparams cls) (function tp ->
-                    if is_reified tp then
-                      Some tp.tp_name
-                    else
-                      None)
-              in
-              (match Cls.get_smethod cls fname with
-              | Some ce_m ->
-                (match
-                   Env.get_class env ce_m.ce_origin
-                   |> Option.bind ~f:(fun cls -> Cls.get_smethod cls fname)
-                 with
-                | Some m ->
-                  let check_type ty =
-                    let check_names t_pos t =
-                      List.iter tp_names ~f:(function (_, name) ->
-                          if String.equal name t then
-                            Errors.static_call_with_class_level_reified_generic
-                              call_pos
-                              t_pos)
-                    in
-                    match Typing_defs.deref ty with
-                    | (r, Tgeneric t) -> check_names (Reason.to_pos r) t
-                    | (_, Tapply ((t_pos, t), _)) -> check_names t_pos t
-                    | _ -> ()
-                  in
-                  (match Typing_defs.deref (Lazy.force m.ce_type) with
-                  | (_, Tfun ft) ->
-                    List.iter ft.ft_params ~f:(fun param ->
-                        check_type param.fp_type.et_type);
-                    check_type ft.ft_ret.et_type
-                  | _ ->
-                    failwith
-                      "Expected Tfun type in result of Typing_classes_heap.get_smethod")
-                | None -> ())
-              | _ -> ())
-            | None -> ());
-            verify_call_targs env call_pos (get_pos fun_ty) ft_tparams targs
-          | _ -> ()
-        end
       | ((pos, fun_ty), FunctionPointer (_, _targs)) ->
         begin
           match get_node fun_ty with

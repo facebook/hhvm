@@ -3654,11 +3654,11 @@ let class_get_reified pos =
     pos
     "Cannot access static properties on reified generics"
 
-let static_call_with_class_level_reified_generic call_pos generic_pos =
+let static_meth_with_class_reified_generic meth_pos generic_pos =
   add_list
-    (Typing.err_code Typing.StaticCallWithClassLevelReifiedGeneric)
+    (Typing.err_code Typing.StaticMethWithClassReifiedGeneric)
     [
-      ( call_pos,
+      ( meth_pos,
         "Static methods cannot use generics reified at the class level. Try reifying them at the static method itself."
       );
       (generic_pos, "Class-level reified generic used here.");

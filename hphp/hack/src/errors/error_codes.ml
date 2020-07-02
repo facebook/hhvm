@@ -621,7 +621,7 @@ module Typing = struct
     | RecordUnknownField
     | CyclicRecordDef
     | InvalidDestructure
-    | StaticCallWithClassLevelReifiedGeneric
+    | StaticMethWithClassReifiedGeneric
     | SplatArrayRequired
     | SplatArrayVariadic
     | ExceptionOccurred

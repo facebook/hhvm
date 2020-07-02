@@ -34,7 +34,6 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/arg-group.h"
-#include "hphp/runtime/vm/jit/array-kind-profile.h"
 #include "hphp/runtime/vm/jit/call-spec.h"
 #include "hphp/runtime/vm/jit/code-gen-cf.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
@@ -57,21 +56,6 @@ namespace HPHP { namespace jit { namespace irlower {
 TRACE_SET_MOD(irlower);
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void profileArrayKindHelper(ArrayKindProfile* profile, ArrayData* arr) {
-  profile->report(arr->kind());
-}
-
-void cgProfileArrayKind(IRLS& env, const IRInstruction* inst) {
-  auto const extra = inst->extra<RDSHandleData>();
-  assertx(!rds::isPersistentHandle(extra->handle));
-  auto& v = vmain(env);
-
-  auto const profile = v.makeReg();
-  v << lea{rvmtl()[extra->handle], profile};
-  cgCallHelper(v, env, CallSpec::direct(profileArrayKindHelper), kVoidDest,
-               SyncOptions::None, argGroup(env, inst).reg(profile).ssa(0));
-}
 
 void cgCheckPackedArrayDataBounds(IRLS& env, const IRInstruction* inst) {
   static_assert(ArrayData::sizeofSize() == 4, "");

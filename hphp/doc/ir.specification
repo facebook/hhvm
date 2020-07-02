@@ -194,21 +194,6 @@ Instruction set
 
   If the value pointed to by S0 is not type T, branch to the block B.
 
-| CheckVArray, DCheckDV(V), S(Arr), B|P|LA
-
-  Check that S0 is a varray, and if so copy it to D, and fallthrough. If S0 is
-  not a varray, branch to block B.
-
-| CheckDArray, DCheckDV(D), S(Arr), B|P|LA
-
-  Check that S0 is a darray, and if so copy it to D, and fallthrough. If S0 is
-  not a darray, branch to block B.
-
-| CheckDVArray, D(Arr), S(Arr), B|P|LA
-
-  Check that S0 is a darray or varray, and if so copy it to D, and fallthrough.
-  If S0 is not a darray or varray, branch to block B.
-
 | CheckIter<iterId,iterType>, ND, S(FramePtr), B
 
   Check that specialization type of the given iterator `iterId` on the frame S0
@@ -3292,10 +3277,6 @@ fields of that struct for holding intermediate values.
 
   Throws a RuntimeException if calling a function with an argument that has the
   wrong type
-
-| ProfileArrayKind, ND, S(Arr), NF
-
-  Profile the array kind of S0.
 
 | ProfileType, ND, S(Cell), NF
 

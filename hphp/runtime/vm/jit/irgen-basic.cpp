@@ -341,14 +341,9 @@ void emitCastVArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TArr)) {
-        return cond(
-          env,
-          [&](Block* taken) { return gen(env, CheckVArray, taken, src); },
-          [&](SSATmp* varr) { return varr; },
-          [&]{ return gen(env, ConvArrToVArr, src); }
-        );
-      }
+      if (src->isA(TPArr))   return gen(env, ConvArrToVArr, src);
+      if (src->isA(TVArr))   return src;
+      if (src->isA(TDArr))   return gen(env, ConvArrToVArr, src);
       if (src->isA(TVec))    return gen(env, ConvVecToVArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToVArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToVArr, src);
@@ -387,14 +382,9 @@ void emitCastDArray(IRGS& env) {
   push(
     env,
     [&] {
-      if (src->isA(TArr)) {
-        return cond(
-          env,
-          [&](Block* taken) { return gen(env, CheckDArray, taken, src); },
-          [&](SSATmp* darr) { return darr; },
-          [&]{ return gen(env, ConvArrToDArr, src); }
-        );
-      }
+      if (src->isA(TPArr))   return gen(env, ConvArrToDArr, src);
+      if (src->isA(TVArr))   return gen(env, ConvArrToDArr, src);
+      if (src->isA(TDArr))   return src;
       if (src->isA(TVec))    return gen(env, ConvVecToDArr, src);
       if (src->isA(TDict))   return gen(env, ConvDictToDArr, src);
       if (src->isA(TKeyset)) return gen(env, ConvKeysetToDArr, src);

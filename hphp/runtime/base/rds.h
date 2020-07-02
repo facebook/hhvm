@@ -50,7 +50,6 @@ struct Class;
 namespace jit {
 struct ArrayAccessProfile;
 struct ArrayIterProfile;
-struct ArrayKindProfile;
 struct CallTargetProfile;
 struct ClsCnsProfile;
 struct DecRefProfile;
@@ -215,7 +214,6 @@ struct StaticMethodF { LowStringPtr name; };
 #define RDS_PROFILE_SYMBOLS   \
   PR(ArrayAccessProfile)  \
   PR(ArrayIterProfile)    \
-  PR(ArrayKindProfile)    \
   PR(CallTargetProfile)   \
   PR(ClsCnsProfile)       \
   PR(DecRefProfile)       \

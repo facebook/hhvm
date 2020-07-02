@@ -849,8 +849,6 @@ Flags analyze_inst(Local& env, const IRInstruction& inst) {
   case AssertType:
   case CheckType:
   case CheckNonNull:
-  case CheckVArray:
-  case CheckDArray:
     // Type information for one use of a pointer can't be transferred to
     // other uses, because we may overwrite the pointer's target in between
     // the uses (e.g. due to minstr escalation).

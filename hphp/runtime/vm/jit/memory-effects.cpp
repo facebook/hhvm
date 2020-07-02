@@ -1705,9 +1705,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case BeginCatch:
   case CheckSurpriseFlags:
   case CheckType:
-  case CheckVArray:
-  case CheckDArray:
-  case CheckDVArray:
   case ZeroErrorLevel:
   case RestoreErrorLevel:
   case CheckCold:
@@ -1791,7 +1788,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdClsMethodFCacheFunc:
   case LdClsTypeCns:
   case LdClsTypeCnsClsName:
-  case ProfileArrayKind:
   case ProfileSwitchDest:
   case LdFuncCls:
   case LdFuncNumParams:

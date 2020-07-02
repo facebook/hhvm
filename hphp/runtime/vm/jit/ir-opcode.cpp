@@ -554,8 +554,6 @@ bool opcodeMayRaise(Opcode opc) {
   case Ceil:
   case CheckArrayCOW:
   case CheckCold:
-  case CheckDArray:
-  case CheckDVArray:
   case CheckDictOffset:
   case CheckImplicitContextNull:
   case CheckInit:
@@ -579,7 +577,6 @@ bool opcodeMayRaise(Opcode opc) {
   case CheckSurpriseFlags:
   case CheckType:
   case CheckTypeMem:
-  case CheckVArray:
   case ChrInt:
   case CmpBool:
   case CmpDbl:
@@ -919,7 +916,6 @@ bool opcodeMayRaise(Opcode opc) {
   case OrdStr:
   case OrInt:
   case PairIsset:
-  case ProfileArrayKind:
   case ProfileCall:
   case ProfileDecRef:
   case ProfileDictAccess:

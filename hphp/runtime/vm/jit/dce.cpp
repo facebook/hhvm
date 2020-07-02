@@ -374,9 +374,6 @@ bool canDCE(IRInstruction* inst) {
   case CheckType:
   case CheckNullptr:
   case CheckTypeMem:
-  case CheckVArray:
-  case CheckDArray:
-  case CheckDVArray:
   case CheckMixedArrayKeys:
   case CheckSmashableClass:
   case CheckLoc:
@@ -687,7 +684,6 @@ bool canDCE(IRInstruction* inst) {
   case PairIsset:
   case MapIsset:
   case IssetElem:
-  case ProfileArrayKind:
   case ProfileType:
   case ProfileCall:
   case ProfileMethod:

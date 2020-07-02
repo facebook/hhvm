@@ -251,14 +251,6 @@ void verifyTypeImpl(IRGS& env,
     case AnnotAction::VArrayOrDArrayCheck:
     case AnnotAction::NonVArrayOrDArrayCheck: {
       assertx(valType <= TArr);
-      auto const type = [&]{
-        if (result == AnnotAction::VArrayCheck) return TVArr;
-        if (result == AnnotAction::DArrayCheck) return TDArr;
-        return TBottom;
-      }();
-      if (val->type().maybe(type)) {
-        val = gen(env, CheckType, type, makeExit(env), val);
-      }
       ifThen(env,
         [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
         [&]{ genFail(); }
@@ -487,15 +479,6 @@ SSATmp* isStrImpl(IRGS& env, SSATmp* src) {
   return mc.elseDo([&]{ return cns(env, false); });
 }
 
-// Checks if `arr` is a darray, varray, or varray (based on op). Executes the
-// code in `next` if that is the case.
-template <typename Next>
-void ifDVArray(IRGS& env, Opcode op, SSATmp* arr, Next next) {
-  assertx(arr->isA(TArr));
-  assertx(op == CheckDArray || op == CheckVArray || op == CheckDVArray);
-  ifThen(env, [&](Block* taken) { next(gen(env, op, taken, arr)); }, [&]{});
-}
-
 // Checks if the `arr` has provenance, implementing the same logic as in the
 // runtume helper arrprov::arrayWantsTag. If so, logs a serialization notice.
 void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
@@ -503,9 +486,10 @@ void maybeLogSerialization(IRGS& env, SSATmp* arr, SerializationSite site) {
   if (!RO::EvalLogArrayProvenance) return;
 
   if (arr->isA(TArr) && RO::EvalArrProvDVArrays) {
-    ifDVArray(env, CheckDVArray, arr, [&](SSATmp* arr) {
+    ifThen(env, [&](Block* taken) {
+      arr = gen(env, CheckType, TVArr|TDArr, taken, arr);
       gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
-    });
+    }, [&]{});
   } else if ((arr->isA(TVec) || arr->isA(TDict)) && RO::EvalArrProvHackArrays) {
     gen(env, RaiseArraySerializeNotice, cns(env, site), arr);
   }
@@ -1876,13 +1860,13 @@ void emitAssertRATStk(IRGS& env, uint32_t offset, RepoAuthType rat) {
 SSATmp* doDVArrChecks(IRGS& env, SSATmp* arr, Block* taken,
                       const TypeConstraint& tc) {
   assertx(tc.isArray());
-  if (tc.isVArray()) return gen(env, CheckVArray, taken, arr);
-  if (tc.isDArray()) return gen(env, CheckDArray, taken, arr);
-  if (tc.isVArrayOrDArray()) return gen(env, CheckDVArray, taken, arr);
-
-  ifElse(env, [&](Block* okay) { gen(env, CheckDVArray, okay, arr); },
-              [&]{ gen(env, Jmp, taken); });
-  return arr;
+  auto const type = [&]{
+    if (tc.isVArray()) return TVArr;
+    if (tc.isDArray()) return TDArr;
+    if (tc.isVArrayOrDArray()) return TVArr|TDArr;
+    return TPArr;
+  }();
+  return gen(env, CheckType, type, taken, arr);
 }
 
 //////////////////////////////////////////////////////////////////////

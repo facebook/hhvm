@@ -1668,11 +1668,6 @@ where
         //
         let yield_kw = self.assert_token(TokenKind::Yield);
         match self.peek_token_kind() {
-            TokenKind::From => {
-                let from_kw = self.assert_token(TokenKind::From);
-                let operand = self.parse_expression();
-                S!(make_yield_from_expression, self, yield_kw, from_kw, operand)
-            }
             TokenKind::Break => {
                 let break_kw = self.assert_token(TokenKind::Break);
                 S!(make_yield_expression, self, yield_kw, break_kw)

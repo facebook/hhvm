@@ -109,7 +109,6 @@ pub trait SyntaxType<'a, C>: SyntaxTypeBase<'a, C>
     fn make_safe_member_selection_expression(ctx: &C, safe_member_object: Self, safe_member_operator: Self, safe_member_name: Self) -> Self;
     fn make_embedded_member_selection_expression(ctx: &C, embedded_member_object: Self, embedded_member_operator: Self, embedded_member_name: Self) -> Self;
     fn make_yield_expression(ctx: &C, yield_keyword: Self, yield_operand: Self) -> Self;
-    fn make_yield_from_expression(ctx: &C, yield_from_yield_keyword: Self, yield_from_from_keyword: Self, yield_from_operand: Self) -> Self;
     fn make_prefix_unary_expression(ctx: &C, prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self;
     fn make_postfix_unary_expression(ctx: &C, postfix_unary_operand: Self, postfix_unary_operator: Self) -> Self;
     fn make_binary_expression(ctx: &C, binary_left_operand: Self, binary_operator: Self, binary_right_operand: Self) -> Self;

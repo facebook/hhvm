@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<52749c0021e4a4899616a2b544692bb2>>
+// @generated SignedSource<<50afb3468cfdbd67935b5bd7cd9bdd8a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -175,7 +175,7 @@ pub enum Ty_ {
     /// The type of a generic parameter. The constraints on a generic parameter
     /// are accessed through the lenv.tpenv component of the environment, which
     /// is set up when checking the body of a function or method. See uses of
-    /// Typing_phase.localize_generic_parameters_with_bounds.
+    /// Typing_phase.add_generic_parameters_and_constraints.
     Tgeneric(std::rc::Rc<String>),
     /// Union type.
     /// The values that are members of this type are the union of the values

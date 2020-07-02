@@ -515,8 +515,6 @@ module Visitor_DEPRECATED = struct
 
       method on_yield : 'a -> afield -> 'a
 
-      method on_yield_from : 'a -> expr -> 'a
-
       method on_await : 'a -> expr -> 'a
 
       method on_suspend : 'a -> expr -> 'a
@@ -789,7 +787,6 @@ module Visitor_DEPRECATED = struct
         | Smethod_id (sid, pstr) -> this#on_smethod_id acc sid pstr
         | Yield_break -> this#on_yield_break acc
         | Yield e -> this#on_yield acc e
-        | Yield_from e -> this#on_yield_from acc e
         | Await e -> this#on_await acc e
         | Suspend e -> this#on_suspend acc e
         | List el -> this#on_list acc el
@@ -963,8 +960,6 @@ module Visitor_DEPRECATED = struct
       method on_yield_break acc = acc
 
       method on_yield acc e = this#on_afield acc e
-
-      method on_yield_from acc e = this#on_expr acc e
 
       method on_await acc e = this#on_expr acc e
 

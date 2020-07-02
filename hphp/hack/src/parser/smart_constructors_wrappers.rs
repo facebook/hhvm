@@ -334,9 +334,6 @@ where S: SmartConstructors<'src, State> {
     fn make_yield_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::YieldExpression, self.s.make_yield_expression(arg0.1, arg1.1))
     }
-    fn make_yield_from_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        compose(SyntaxKind::YieldFromExpression, self.s.make_yield_from_expression(arg0.1, arg1.1, arg2.1))
-    }
     fn make_prefix_unary_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         compose(SyntaxKind::PrefixUnaryExpression, self.s.make_prefix_unary_expression(arg0.1, arg1.1))
     }

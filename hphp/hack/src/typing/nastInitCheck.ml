@@ -536,7 +536,6 @@ and expr_ env acc p e =
     acc
   | Assert (AE_assert e) -> expr acc e
   | Yield e -> afield acc e
-  | Yield_from e -> expr acc e
   | Yield_break -> acc
   | Await e -> expr acc e
   | Suspend e -> expr acc e

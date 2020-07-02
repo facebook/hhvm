@@ -1688,7 +1688,6 @@ and emit_expr (env : Emit_env.t) (expr : Tast.expr) =
   | A.Await e -> emit_await env pos e
   | A.Yield e -> emit_yield env pos e
   | A.Yield_break -> failwith "yield break should be in statement position"
-  | A.Yield_from _ -> failwith "complex yield_from expression"
   | A.Lfun _ ->
     failwith
       "expected Lfun to be converted to Efun during closure conversion emit_expr"
@@ -4233,7 +4232,6 @@ and can_use_as_rhs_in_list_assignment (expr : Tast.expr_) =
     | String2 _
     | PrefixedString _
     | Yield_break
-    | Yield_from _
     | Suspend _
     | Is _
     | BracedExpr _

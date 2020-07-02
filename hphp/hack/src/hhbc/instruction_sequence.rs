@@ -1163,36 +1163,6 @@ pub mod instr {
         )))
     }
 
-    pub fn cont_assign_delegate(iter: IterId) -> InstrSeq {
-        instr(Instruct::IGenDelegation(GenDelegation::ContAssignDelegate(
-            iter,
-        )))
-    }
-
-    pub fn cont_enter_delegate() -> InstrSeq {
-        instr(Instruct::IGenDelegation(GenDelegation::ContEnterDelegate))
-    }
-
-    pub fn yield_from_delegate(iter: IterId, l: Label) -> InstrSeq {
-        instr(Instruct::IGenDelegation(GenDelegation::YieldFromDelegate(
-            iter, l,
-        )))
-    }
-
-    pub fn cont_unset_delegate_free(iter: IterId) -> InstrSeq {
-        instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
-            FreeIterator::FreeIter,
-            iter,
-        )))
-    }
-
-    pub fn cont_unset_delegate_ignore(iter: IterId) -> InstrSeq {
-        instr(Instruct::IGenDelegation(GenDelegation::ContUnsetDelegate(
-            FreeIterator::IgnoreIter,
-            iter,
-        )))
-    }
-
     pub fn contcheck_check() -> InstrSeq {
         instr(Instruct::IGenerator(GenCreationExecution::ContCheck(
             CheckStarted::CheckStarted,

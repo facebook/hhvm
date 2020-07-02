@@ -407,20 +407,6 @@ let instr_silence_start local = instr (IMisc (Silence (local, Start)))
 
 let instr_silence_end local = instr (IMisc (Silence (local, End)))
 
-let instr_contAssignDelegate iter =
-  instr (IGenDelegation (ContAssignDelegate iter))
-
-let instr_contEnterDelegate = instr (IGenDelegation ContEnterDelegate)
-
-let instr_yieldFromDelegate iter l =
-  instr (IGenDelegation (YieldFromDelegate (iter, l)))
-
-let instr_contUnsetDelegate_free iter =
-  instr (IGenDelegation (ContUnsetDelegate (FreeIter, iter)))
-
-let instr_contUnsetDelegate_ignore iter =
-  instr (IGenDelegation (ContUnsetDelegate (IgnoreIter, iter)))
-
 let instr_contcheck_check = instr (IGenerator (ContCheck CheckStarted))
 
 let instr_contcheck_ignore = instr (IGenerator (ContCheck IgnoreStarted))

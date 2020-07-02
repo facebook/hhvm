@@ -96,11 +96,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
     match &stmt.1 {
         a::Stmt_::Expr(e_) => match &e_.1 {
             a::Expr_::YieldBreak => Ok(InstrSeq::gather(vec![instr::null(), emit_return(e, env)?])),
-            a::Expr_::YieldFrom(e_) => Ok(InstrSeq::gather(vec![
-                emit_yield_from_delegates(e, env, pos, e_)?,
-                emit_pos(pos),
-                instr::popc(),
-            ])),
             a::Expr_::Await(a) => Ok(InstrSeq::gather(vec![
                 emit_await(e, env, &e_.0, a)?,
                 instr::popc(),
@@ -182,27 +177,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                         } else {
                             emit_await_assignment(e, env, await_pos, e_lhs, e_await)
                         }
-                    } else if let Some(e_yeild) = e_rhs.1.as_yield_from() {
-                        e.local_scope(|e| {
-                            let temp = e.local_gen_mut().get_unnamed();
-                            let rhs_instrs = instr::pushl(temp.clone());
-                            Ok(InstrSeq::gather(vec![
-                                emit_yield_from_delegates(e, env, &e_.0, e_yeild)?,
-                                instr::setl(temp),
-                                instr::popc(),
-                                emit_expr::emit_lval_op_nonlist(
-                                    e,
-                                    env,
-                                    &e_.0,
-                                    LValOp::Set,
-                                    e_lhs,
-                                    rhs_instrs,
-                                    1,
-                                    false,
-                                )?,
-                                instr::popc(),
-                            ]))
-                        })
                     } else {
                         emit_expr::emit_ignored_expr(e, env, pos, e_)
                     }
@@ -217,8 +191,6 @@ pub fn emit_stmt(e: &mut Emitter, env: &mut Env, stmt: &tast::Stmt) -> Result {
                 let ret = emit_return(e, env)?;
                 let expr_instr = if let Some(e_) = r.1.as_await() {
                     emit_await(e, env, &r.0, e_)?
-                } else if let Some(yf) = r.1.as_yield_from() {
-                    emit_yield_from_delegates(e, env, pos, yf)?
                 } else {
                     emit_expr(e, env, &r)?
                 };
@@ -1484,34 +1456,6 @@ fn emit_for(
         i4,
         i5,
         instr::label(break_label),
-    ]))
-}
-
-fn emit_yield_from_delegates(
-    e: &mut Emitter,
-    env: &mut Env,
-    pos: &Pos,
-    expr: &tast::Expr,
-) -> Result {
-    let iter_num = e.iterator_mut().get();
-    let loop_label = e.label_gen_mut().next_regular();
-    Ok(InstrSeq::gather(vec![
-        emit_expr(e, env, expr)?,
-        emit_pos(pos),
-        instr::cont_assign_delegate(iter_num),
-        InstrSeq::create_try_catch(
-            e.label_gen_mut(),
-            None,
-            false,
-            InstrSeq::gather(vec![
-                instr::null(),
-                instr::label(loop_label.clone()),
-                instr::cont_enter_delegate(),
-                instr::yield_from_delegate(iter_num, loop_label),
-            ]),
-            instr::cont_unset_delegate_free(iter_num),
-        ),
-        instr::cont_unset_delegate_ignore(iter_num),
     ]))
 }
 

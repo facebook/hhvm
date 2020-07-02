@@ -2072,18 +2072,6 @@ where
                     Ok(E_::mk_yield(Self::p_afield(&c.yield_operand, env)?))
                 }
             }
-            YieldFromExpression(c) => {
-                use ExprLocation::*;
-                env.saw_yield = true;
-                if location != AsStatement
-                    && location != RightOfAssignment
-                    && location != RightOfAssignmentInUsingStatement
-                    && location != RightOfReturn
-                {
-                    Self::raise_parsing_error(node, env, &syntax_error::invalid_yield_from);
-                }
-                Ok(E_::mk_yield_from(Self::p_expr(&c.yield_from_operand, env)?))
-            }
             DefineExpression(c) => {
                 let name = Self::pos_name(&c.define_keyword, env)?;
                 Ok(E_::mk_call(
@@ -2456,10 +2444,10 @@ where
             }
             Array(_) | Darray(_) | Varray(_) | Shape(_) | Collection(_) | Record(_) | Null
             | True | False | Id(_) | Clone(_) | ClassConst(_) | Int(_) | Float(_)
-            | PrefixedString(_) | String(_) | String2(_) | Yield(_) | YieldBreak | YieldFrom(_)
-            | Await(_) | Suspend(_) | ExprList(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_)
-            | New(_) | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_)
-            | As(_) | ParenthesizedExpr(_) | PUIdentifier(_) => raise("Invalid lvalue"),
+            | PrefixedString(_) | String(_) | String2(_) | Yield(_) | YieldBreak | Await(_)
+            | Suspend(_) | ExprList(_) | Cast(_) | Unop(_) | Binop(_) | Eif(_) | New(_)
+            | Efun(_) | Lfun(_) | Xml(_) | Import(_) | Pipe(_) | Callconv(_) | Is(_) | As(_)
+            | ParenthesizedExpr(_) | PUIdentifier(_) => raise("Invalid lvalue"),
             _ => {}
         }
     }

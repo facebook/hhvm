@@ -602,14 +602,6 @@ pub enum GenCreationExecution {
 }
 
 #[derive(Clone, Debug)]
-pub enum GenDelegation {
-    ContAssignDelegate(IterId),
-    ContEnterDelegate,
-    YieldFromDelegate(IterId, label::Label),
-    ContUnsetDelegate(FreeIterator, IterId),
-}
-
-#[derive(Clone, Debug)]
 pub enum AsyncFunctions {
     WHResult,
     Await,
@@ -652,6 +644,5 @@ pub enum Instruct {
     ISrcLoc(Srcloc),
     IAsync(AsyncFunctions),
     IGenerator(GenCreationExecution),
-    IGenDelegation(GenDelegation),
     IIncludeEvalDefine(InstructIncludeEvalDefine),
 }

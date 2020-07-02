@@ -406,10 +406,6 @@ impl<'src> SmartConstructors<'src, State<'src>> for DirectDeclSmartConstructors<
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_yield_expression(self, arg0, arg1)
     }
 
-    fn make_yield_from_expression(&mut self, arg0: Self::R, arg1: Self::R, arg2: Self::R) -> Self::R {
-        <Self as FlattenSmartConstructors<'src, State<'src>>>::make_yield_from_expression(self, arg0, arg1, arg2)
-    }
-
     fn make_prefix_unary_expression(&mut self, arg0: Self::R, arg1: Self::R) -> Self::R {
         <Self as FlattenSmartConstructors<'src, State<'src>>>::make_prefix_unary_expression(self, arg0, arg1)
     }

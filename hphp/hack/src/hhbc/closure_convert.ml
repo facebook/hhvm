@@ -1021,9 +1021,6 @@ let rec convert_expr env st ((p, expr_) as expr) =
     | PrefixedString (s, e) ->
       let (st, e) = convert_expr env st e in
       (st, (p, PrefixedString (s, e)))
-    | Yield_from e ->
-      let (st, e) = convert_expr env st e in
-      (st, (p, Yield_from e))
     | Suspend e ->
       let (st, e) = convert_expr env st e in
       (st, (p, Suspend e))

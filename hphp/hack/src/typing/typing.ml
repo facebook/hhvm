@@ -2533,68 +2533,6 @@ and expr_
       p
       (Aast.Yield taf)
       (MakeType.nullable_locl (Reason.Ryield_send p) send)
-  | Yield_from e ->
-    let (env, key) = Env.fresh_type env p in
-    let (env, value) = Env.fresh_type env p in
-    let (env, te, yield_from_ty) = expr ~is_using_clause env e in
-    (* Expected type of `e` in `yield from e` is KeyedTraversable<Tk,Tv> (but might be dynamic)*)
-    let expected_yield_from_ty =
-      MakeType.keyed_traversable (Reason.Ryield_gen p) key value
-    in
-    let from_dynamic =
-      Typing_solver.is_sub_type
-        env
-        yield_from_ty
-        (MakeType.dynamic (get_reason yield_from_ty))
-    in
-    let env =
-      if from_dynamic then
-        env
-      (* all set if dynamic, otherwise need to check against KeyedTraversable *)
-      else
-        Typing_coercion.coerce_type
-          p
-          Reason.URyield_from
-          env
-          yield_from_ty
-          (MakeType.unenforced expected_yield_from_ty)
-          Errors.unify_error
-    in
-    let rty =
-      match Env.get_fn_kind env with
-      | Ast_defs.FCoroutine ->
-        (* yield in coroutine is already reported as error in NastCheck *)
-        let (_, _, ty) = expr_error env (Reason.Rwitness p) outer in
-        ty
-      | Ast_defs.FGenerator ->
-        if from_dynamic then
-          MakeType.dynamic (Reason.Ryield_gen p)
-        (*TODO: give better reason*)
-        else
-          MakeType.generator
-            (Reason.Ryield_gen p)
-            key
-            value
-            (MakeType.void (Reason.Rwitness p))
-      | Ast_defs.FSync
-      | Ast_defs.FAsync
-      | Ast_defs.FAsyncGenerator ->
-        failwith "Parsing should never allow this"
-    in
-    let Typing_env_return_info.{ return_type = expected_return; _ } =
-      Env.get_return env
-    in
-    let env =
-      Typing_coercion.coerce_type
-        p
-        Reason.URyield_from
-        env
-        rty
-        { expected_return with et_enforced = false }
-        Errors.unify_error
-    in
-    let env = Env.forget_members env Reason.(Blame (p, BScall)) in
-    make_result env p (Aast.Yield_from te) (MakeType.void (Reason.Rwitness p))
   | Await e ->
     let env = might_throw env in
     (* Await is permitted in a using clause e.g. using (await make_handle()) *)

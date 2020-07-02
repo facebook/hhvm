@@ -123,8 +123,7 @@ let declvar_visitor explicit_use_set_opt is_in_static_method is_closure_body =
       | Aast.Binop (binop, e1, e2) ->
         (match (binop, e2) with
         | (Ast_defs.Eq _, (_, Aast.Await _))
-        | (Ast_defs.Eq _, (_, Aast.Yield _))
-        | (Ast_defs.Eq _, (_, Aast.Yield_from _)) ->
+        | (Ast_defs.Eq _, (_, Aast.Yield _)) ->
           (* Visit e2 before e1. The ordering of declvars in async
                 expressions matters to HHVM. See D5674623. *)
           self#on_expr () e2;

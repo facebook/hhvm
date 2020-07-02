@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<25e2e42853801331f58b5f4828c0ad84>>
+// @generated SignedSource<<cdb1bcddbc08e4a0e794520b7bf22a8e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_ref/regen.sh
@@ -219,7 +219,6 @@ pub enum Expr_<'a, Ex, Fb, En, Hi> {
     PrefixedString(&'a (&'a str, Expr<'a, Ex, Fb, En, Hi>)),
     Yield(&'a Afield<'a, Ex, Fb, En, Hi>),
     YieldBreak,
-    YieldFrom(&'a Expr<'a, Ex, Fb, En, Hi>),
     Await(&'a Expr<'a, Ex, Fb, En, Hi>),
     Suspend(&'a Expr<'a, Ex, Fb, En, Hi>),
     List(&'a [Expr<'a, Ex, Fb, En, Hi>]),

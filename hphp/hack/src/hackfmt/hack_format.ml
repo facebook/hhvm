@@ -1385,21 +1385,6 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
       handle_possible_chaining env node
     | Syntax.YieldExpression { yield_keyword = kw; yield_operand = operand } ->
       Concat [t env kw; Space; SplitWith Cost.Base; Nest [t env operand]]
-    | Syntax.YieldFromExpression
-        {
-          yield_from_yield_keyword = yield_kw;
-          yield_from_from_keyword = from_kw;
-          yield_from_operand = operand;
-        } ->
-      Concat
-        [
-          t env yield_kw;
-          Space;
-          t env from_kw;
-          Space;
-          SplitWith Cost.Base;
-          Nest [t env operand];
-        ]
     | Syntax.PrefixUnaryExpression
         { prefix_unary_operator = operator; prefix_unary_operand = operand } ->
       Concat

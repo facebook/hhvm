@@ -1,0 +1,3 @@
+int(42)
+
+Fatal error: Call to undefined function from() in %s/yield_from_greedy_parse.php on line 10

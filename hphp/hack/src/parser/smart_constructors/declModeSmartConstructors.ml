@@ -58,10 +58,6 @@ module WithSyntax (Syntax : Syntax_sig.Syntax_S) = struct
       | _s2 :: _s1 :: t -> (true :: t, missing)
       | _ -> failwith "Invalid state"
 
-    let make_yield_from_expression _a1 _a2 _a3 = function
-      | _s3 :: _s2 :: _s1 :: t -> (true :: t, missing)
-      | _ -> failwith "Invalid state"
-
     let make_lambda_expression a1 a2 a3 a4 a5 body = function
       | saw_yield :: _s5 :: _s4 :: _s3 :: _s2 :: _s1 :: t ->
         let body = replace_body body saw_yield in

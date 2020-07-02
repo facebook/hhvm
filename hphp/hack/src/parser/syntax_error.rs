@@ -421,9 +421,6 @@ pub const invalid_variable_name: Error = Cow::Borrowed(
 pub const invalid_variable_variable: Error = Cow::Borrowed("Variable Variables are not legal");
 pub const invalid_yield: Error =
     Cow::Borrowed("Yield can only appear as a statement or on the right of an assignment");
-pub const invalid_yield_from: Error = Cow::Borrowed(
-    "`yield from` can only appear as a statement, after `return`, or on the right of an assignment",
-);
 pub const invalid_class_in_collection_initializer: Error =
     Cow::Borrowed("Cannot use collection initialization for non-collection class.");
 pub const invalid_brace_kind_in_collection_initializer: Error = Cow::Borrowed(

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<711f1947db0e5421e9631cb2b98a27fe>>
+// @generated SignedSource<<114e7da3db4c5bce1e66c9caa612cfd8>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -17,6 +17,14 @@ use crate::*;
 pub use typing_defs_flags::*;
 
 pub use typing_defs_core::*;
+
+#[derive(
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
+)]
+pub struct PuOrigin {
+    pub class: std::rc::Rc<String>,
+    pub enum_: std::rc::Rc<String>,
+}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToOcamlRep
@@ -148,8 +156,8 @@ pub struct TypeconstType {
 pub struct PuEnumType {
     pub name: nast::Sid,
     pub is_final: bool,
-    pub case_types: s_map::SMap<(nast::Sid, oxidized::aast::ReifyKind)>,
-    pub case_values: s_map::SMap<(nast::Sid, Ty)>,
+    pub case_types: s_map::SMap<(PuOrigin, Tparam)>,
+    pub case_values: s_map::SMap<(PuOrigin, nast::Sid, Ty)>,
     pub members: s_map::SMap<PuMemberType>,
 }
 
@@ -158,8 +166,9 @@ pub struct PuEnumType {
 )]
 pub struct PuMemberType {
     pub atom: nast::Sid,
-    pub types: s_map::SMap<(nast::Sid, Ty)>,
-    pub exprs: s_map::SMap<nast::Sid>,
+    pub origin: PuOrigin,
+    pub types: s_map::SMap<(PuOrigin, nast::Sid, Ty)>,
+    pub exprs: s_map::SMap<(PuOrigin, nast::Sid)>,
 }
 
 #[derive(

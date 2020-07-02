@@ -6,8 +6,7 @@
 use env::emitter::Emitter;
 use hhas_param_rust::HhasParam;
 use hhbc_ast_rust::{
-    FcallArgs, GenDelegation, Instruct, InstructCall, InstructControlFlow, InstructIterator,
-    InstructMisc,
+    FcallArgs, Instruct, InstructCall, InstructControlFlow, InstructIterator, InstructMisc,
 };
 use instruction_sequence_rust::InstrSeq;
 use label_rust::{Id, Label};
@@ -37,7 +36,6 @@ fn lookup_def<'h>(l: &Id, defs: &'h HashMap<Id, usize>) -> &'h usize {
 }
 
 fn get_regular_labels(instr: &Instruct) -> Vec<&Label> {
-    use GenDelegation::*;
     use Instruct::*;
     use InstructCall::*;
     use InstructControlFlow::*;
@@ -46,7 +44,6 @@ fn get_regular_labels(instr: &Instruct) -> Vec<&Label> {
     match instr {
         IIterator(IterInit(_, l))
         | IIterator(IterNext(_, l))
-        | IGenDelegation(YieldFromDelegate(_, l))
         | IMisc(MemoGet(l, _))
         | IContFlow(Jmp(l))
         | IContFlow(JmpNS(l))
@@ -112,7 +109,6 @@ fn relabel_instr<F>(instr: &mut Instruct, relabel: &mut F)
 where
     F: FnMut(&mut Label),
 {
-    use GenDelegation::*;
     use Instruct::*;
     use InstructCall::*;
     use InstructControlFlow::*;
@@ -121,7 +117,6 @@ where
     match instr {
         IIterator(IterInit(_, l))
         | IIterator(IterNext(_, l))
-        | IGenDelegation(YieldFromDelegate(_, l))
         | ICall(FCall(FcallArgs(_, _, _, _, Some(l), _)))
         | ICall(FCallClsMethod(FcallArgs(_, _, _, _, Some(l), _), _))
         | ICall(FCallClsMethodD(FcallArgs(_, _, _, _, Some(l), _), _, _))

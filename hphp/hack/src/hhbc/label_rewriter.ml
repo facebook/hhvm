@@ -38,7 +38,6 @@ let get_regular_labels instr =
   | ICall (FCallFuncD ((_, _, _, _, Some l, _), _))
   | ICall (FCallObjMethod ((_, _, _, _, Some l, _), _))
   | ICall (FCallObjMethodD ((_, _, _, _, Some l, _), _, _))
-  | IGenDelegation (YieldFromDelegate (_, l))
   | IMisc (MemoGet (l, _))
   | IContFlow (Jmp l | JmpNS l | JmpZ l | JmpNZ l) ->
     [l]
@@ -81,8 +80,6 @@ let relabel_instr instr relabel =
   match instr with
   | IIterator (IterInit (id, l)) -> IIterator (IterInit (id, relabel l))
   | IIterator (IterNext (id, l)) -> IIterator (IterNext (id, relabel l))
-  | IGenDelegation (YieldFromDelegate (i, l)) ->
-    IGenDelegation (YieldFromDelegate (i, relabel l))
   | ICall (FCall (fl, na, nr, br, Some l, c)) ->
     ICall (FCall (fl, na, nr, br, Some (relabel l), c))
   | ICall (FCallClsMethod ((fl, na, nr, br, Some l, c), is_log_as_dynamic_call))

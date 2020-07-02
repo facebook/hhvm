@@ -117,12 +117,6 @@ where
         Self::R::make_missing(&self.state, 0)
     }
 
-    fn make_yield_from_expression(&mut self, _r1: Self::R, _r2: Self::R, _r3: Self::R) -> Self::R {
-        self.state.pop_n(3);
-        self.state.push(true);
-        Self::R::make_missing(&self.state, 0)
-    }
-
     fn make_lambda_expression(
         &mut self,
         r1: Self::R,

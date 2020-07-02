@@ -169,9 +169,7 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
             Binop(x) => {
                 let (binop, e1, e2) = (&x.0, &x.1, &x.2);
                 match (binop, &e2.1) {
-                    (Bop::Eq(_), Await(_))
-                    | (Bop::Eq(_), Yield(_))
-                    | (Bop::Eq(_), YieldFrom(_)) => {
+                    (Bop::Eq(_), Await(_)) | (Bop::Eq(_), Yield(_)) => {
                         // Visit e2 before e1. The ordering of declvars in async
                         // expressions matters to HHVM. See D5674623.
                         self.visit_expr(env, e2)?;

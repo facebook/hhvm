@@ -1025,7 +1025,7 @@ impl<'a> DirectDeclSmartConstructors<'a> {
                         | Lplaceholder(_) | Lvar(_) | MethodCaller(_) | MethodId(_) | New(_)
                         | ObjGet(_) | Omitted | Pair(_) | Pipe(_) | PUAtom(_) | PUIdentifier(_)
                         | Record(_) | Shape(_) | SmethodId(_) | Suspend(_) | ValCollection(_)
-                        | Varray(_) | Xml(_) | Yield(_) | YieldBreak | YieldFrom(_) => None,
+                        | Varray(_) | Xml(_) | Yield(_) | YieldBreak => None,
                     }
                 }
 
@@ -2380,15 +2380,6 @@ impl<'a> FlattenSmartConstructors<'a, State<'a>> for DirectDeclSmartConstructors
     }
 
     fn make_yield_expression(&mut self, _arg0: Self::R, _arg1: Self::R) -> Self::R {
-        Node::Token(TokenKind::Yield)
-    }
-
-    fn make_yield_from_expression(
-        &mut self,
-        _arg0: Self::R,
-        _arg1: Self::R,
-        _arg2: Self::R,
-    ) -> Self::R {
         Node::Token(TokenKind::Yield)
     }
 

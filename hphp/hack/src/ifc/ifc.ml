@@ -436,7 +436,6 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.PrefixedString (_, _)
   | A.Yield _
   | A.Yield_break
-  | A.Yield_from _
   | A.Await _
   | A.Suspend _
   | A.List _

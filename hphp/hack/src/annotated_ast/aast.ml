@@ -164,7 +164,6 @@ and ('ex, 'fb, 'en, 'hi) expr_ =
   | PrefixedString of string * ('ex, 'fb, 'en, 'hi) expr
   | Yield of ('ex, 'fb, 'en, 'hi) afield
   | Yield_break
-  | Yield_from of ('ex, 'fb, 'en, 'hi) expr
   | Await of ('ex, 'fb, 'en, 'hi) expr
   | Suspend of ('ex, 'fb, 'en, 'hi) expr
   | List of ('ex, 'fb, 'en, 'hi) expr list

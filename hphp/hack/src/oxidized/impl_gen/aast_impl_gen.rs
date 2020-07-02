@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<44a7dd82808c5c93c08293ee293400c9>>
+// @generated SignedSource<<70e02e908792594eb9e563020cf09760>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized/regen.sh
@@ -957,9 +957,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn mk_yield_break() -> Self {
         Expr_::YieldBreak
     }
-    pub fn mk_yield_from(p0: Expr<Ex, Fb, En, Hi>) -> Self {
-        Expr_::YieldFrom(Box::new(p0))
-    }
     pub fn mk_await(p0: Expr<Ex, Fb, En, Hi>) -> Self {
         Expr_::Await(Box::new(p0))
     }
@@ -1240,12 +1237,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn is_yield_break(&self) -> bool {
         match self {
             Expr_::YieldBreak => true,
-            _ => false,
-        }
-    }
-    pub fn is_yield_from(&self) -> bool {
-        match self {
-            Expr_::YieldFrom(..) => true,
             _ => false,
         }
     }
@@ -1589,12 +1580,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_yield(&self) -> Option<&Afield<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Yield(p0) => Some(&p0),
-            _ => None,
-        }
-    }
-    pub fn as_yield_from(&self) -> Option<&Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::YieldFrom(p0) => Some(&p0),
             _ => None,
         }
     }
@@ -1988,12 +1973,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
             _ => None,
         }
     }
-    pub fn as_yield_from_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::YieldFrom(p0) => Some(p0.as_mut()),
-            _ => None,
-        }
-    }
     pub fn as_await_mut(&mut self) -> Option<&mut Expr<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Await(p0) => Some(p0.as_mut()),
@@ -2381,12 +2360,6 @@ impl<Ex, Fb, En, Hi> Expr_<Ex, Fb, En, Hi> {
     pub fn as_yield_into(self) -> Option<Afield<Ex, Fb, En, Hi>> {
         match self {
             Expr_::Yield(p0) => Some(*p0),
-            _ => None,
-        }
-    }
-    pub fn as_yield_from_into(self) -> Option<Expr<Ex, Fb, En, Hi>> {
-        match self {
-            Expr_::YieldFrom(p0) => Some(*p0),
             _ => None,
         }
     }

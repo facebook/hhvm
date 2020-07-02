@@ -149,7 +149,6 @@ module WithToken(Token: TokenType) = struct
       | SafeMemberSelectionExpression     _ -> SyntaxKind.SafeMemberSelectionExpression
       | EmbeddedMemberSelectionExpression _ -> SyntaxKind.EmbeddedMemberSelectionExpression
       | YieldExpression                   _ -> SyntaxKind.YieldExpression
-      | YieldFromExpression               _ -> SyntaxKind.YieldFromExpression
       | PrefixUnaryExpression             _ -> SyntaxKind.PrefixUnaryExpression
       | PostfixUnaryExpression            _ -> SyntaxKind.PostfixUnaryExpression
       | BinaryExpression                  _ -> SyntaxKind.BinaryExpression
@@ -342,7 +341,6 @@ module WithToken(Token: TokenType) = struct
     let is_safe_member_selection_expression     = has_kind SyntaxKind.SafeMemberSelectionExpression
     let is_embedded_member_selection_expression = has_kind SyntaxKind.EmbeddedMemberSelectionExpression
     let is_yield_expression                     = has_kind SyntaxKind.YieldExpression
-    let is_yield_from_expression                = has_kind SyntaxKind.YieldFromExpression
     let is_prefix_unary_expression              = has_kind SyntaxKind.PrefixUnaryExpression
     let is_postfix_unary_expression             = has_kind SyntaxKind.PostfixUnaryExpression
     let is_binary_expression                    = has_kind SyntaxKind.BinaryExpression
@@ -1475,15 +1473,6 @@ module WithToken(Token: TokenType) = struct
       } ->
          let acc = f acc yield_keyword in
          let acc = f acc yield_operand in
-         acc
-      | YieldFromExpression {
-        yield_from_yield_keyword;
-        yield_from_from_keyword;
-        yield_from_operand;
-      } ->
-         let acc = f acc yield_from_yield_keyword in
-         let acc = f acc yield_from_from_keyword in
-         let acc = f acc yield_from_operand in
          acc
       | PrefixUnaryExpression {
         prefix_unary_operator;
@@ -3332,15 +3321,6 @@ module WithToken(Token: TokenType) = struct
         yield_keyword;
         yield_operand;
       ]
-      | YieldFromExpression {
-        yield_from_yield_keyword;
-        yield_from_from_keyword;
-        yield_from_operand;
-      } -> [
-        yield_from_yield_keyword;
-        yield_from_from_keyword;
-        yield_from_operand;
-      ]
       | PrefixUnaryExpression {
         prefix_unary_operator;
         prefix_unary_operand;
@@ -5188,15 +5168,6 @@ module WithToken(Token: TokenType) = struct
       } -> [
         "yield_keyword";
         "yield_operand";
-      ]
-      | YieldFromExpression {
-        yield_from_yield_keyword;
-        yield_from_from_keyword;
-        yield_from_operand;
-      } -> [
-        "yield_from_yield_keyword";
-        "yield_from_from_keyword";
-        "yield_from_operand";
       ]
       | PrefixUnaryExpression {
         prefix_unary_operator;
@@ -7189,16 +7160,6 @@ module WithToken(Token: TokenType) = struct
         YieldExpression {
           yield_keyword;
           yield_operand;
-        }
-      | (SyntaxKind.YieldFromExpression, [
-          yield_from_yield_keyword;
-          yield_from_from_keyword;
-          yield_from_operand;
-        ]) ->
-        YieldFromExpression {
-          yield_from_yield_keyword;
-          yield_from_from_keyword;
-          yield_from_operand;
         }
       | (SyntaxKind.PrefixUnaryExpression, [
           prefix_unary_operator;
@@ -9524,19 +9485,6 @@ module WithToken(Token: TokenType) = struct
         let syntax = YieldExpression {
           yield_keyword;
           yield_operand;
-        } in
-        let value = ValueBuilder.value_from_syntax syntax in
-        make syntax value
-
-      let make_yield_from_expression
-        yield_from_yield_keyword
-        yield_from_from_keyword
-        yield_from_operand
-      =
-        let syntax = YieldFromExpression {
-          yield_from_yield_keyword;
-          yield_from_from_keyword;
-          yield_from_operand;
         } in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

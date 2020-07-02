@@ -560,11 +560,6 @@ module type Syntax_S = sig
     { yield_keyword                                      : t
     ; yield_operand                                      : t
     }
-  | YieldFromExpression               of
-    { yield_from_yield_keyword                           : t
-    ; yield_from_from_keyword                            : t
-    ; yield_from_operand                                 : t
-    }
   | PrefixUnaryExpression             of
     { prefix_unary_operator                              : t
     ; prefix_unary_operand                               : t
@@ -1175,7 +1170,6 @@ module type Syntax_S = sig
   val make_safe_member_selection_expression : t -> t -> t -> t
   val make_embedded_member_selection_expression : t -> t -> t -> t
   val make_yield_expression : t -> t -> t
-  val make_yield_from_expression : t -> t -> t -> t
   val make_prefix_unary_expression : t -> t -> t
   val make_postfix_unary_expression : t -> t -> t
   val make_binary_expression : t -> t -> t -> t
@@ -1356,7 +1350,6 @@ module type Syntax_S = sig
   val is_safe_member_selection_expression : t -> bool
   val is_embedded_member_selection_expression : t -> bool
   val is_yield_expression : t -> bool
-  val is_yield_from_expression : t -> bool
   val is_prefix_unary_expression : t -> bool
   val is_postfix_unary_expression : t -> bool
   val is_binary_expression : t -> bool

@@ -1976,26 +1976,6 @@ where
       Self { syntax, value }
     }
 
-    fn make_yield_from_expression(ctx: &C, arg0: Self, arg1: Self, arg2: Self) -> Self {
-      let children = [
-          &arg0.value, 
-          &arg1.value, 
-          &arg2.value
-      ];
-      let value = V::from_values(&children);
-      let syntax = Self::make(
-          ctx,
-          SyntaxKind::YieldFromExpression,
-          &value,
-          &[
-              arg0.syntax, 
-              arg1.syntax, 
-              arg2.syntax
-          ],
-      );
-      Self { syntax, value }
-    }
-
     fn make_prefix_unary_expression(ctx: &C, arg0: Self, arg1: Self) -> Self {
       let children = [
           &arg0.value, 

@@ -166,30 +166,9 @@ and emit_stmt env (pos, stmt) =
       (_, A.Binop (Ast_defs.Eq None, e_lhs, ((await_pos, _), A.Await e_await)))
     ->
     emit_await_assignment env await_pos e_lhs e_await
-  | A.Expr (_, A.Yield_from e) ->
-    gather [emit_yield_from_delegates env pos e; emit_pos pos; instr_popc]
-  | A.Expr ((pos, _), A.Binop (Ast_defs.Eq None, e_lhs, (_, A.Yield_from e))) ->
-    Local.scope @@ fun () ->
-    let temp = Local.get_unnamed_local () in
-    let rhs_instrs = instr_pushl temp in
-    gather
-      [
-        emit_yield_from_delegates env pos e;
-        instr_setl temp;
-        instr_popc;
-        emit_lval_op_nonlist env pos LValOp.Set e_lhs rhs_instrs 1;
-        instr_popc;
-      ]
   | A.Expr expr -> emit_ignored_expr ~pop_pos:pos env expr
   | A.Return (Some ((inner_pos, _), A.Await e)) ->
     gather [emit_await env inner_pos e; Emit_pos.emit_pos pos; emit_return env]
-  | A.Return (Some (_, A.Yield_from e)) ->
-    gather
-      [
-        emit_yield_from_delegates env pos e;
-        Emit_pos.emit_pos pos;
-        emit_return env;
-      ]
   | A.Return None -> gather [instr_null; Emit_pos.emit_pos pos; emit_return env]
   | A.Return (Some expr) ->
     gather [emit_expr env expr; Emit_pos.emit_pos pos; emit_return env]
@@ -1114,26 +1093,6 @@ and emit_foreach_ env pos collection iterator block =
         next;
       ],
     gather [instr_label loop_break_label] )
-
-and emit_yield_from_delegates env pos e =
-  let iterator_number = Iterator.get_iterator () in
-  let loop_label = Label.next_regular () in
-  gather
-    [
-      emit_expr env e;
-      emit_pos pos;
-      instr_contAssignDelegate iterator_number;
-      create_try_catch
-        (gather
-           [
-             instr_null;
-             instr_label loop_label;
-             instr_contEnterDelegate;
-             instr_yieldFromDelegate iterator_number loop_label;
-           ])
-        (instr_contUnsetDelegate_free iterator_number);
-      instr_contUnsetDelegate_ignore iterator_number;
-    ]
 
 and emit_stmts env stl =
   let results = List.map stl (emit_stmt env) in

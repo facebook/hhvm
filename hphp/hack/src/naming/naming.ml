@@ -2319,7 +2319,6 @@ and expr_ env p (e : Nast.expr_) =
     in
     N.Shape shp
   | Aast.BracedExpr _ -> N.Any
-  | Aast.Yield_from e -> N.Yield_from (expr env e)
   | Aast.Import _ -> N.Any
   | Aast.Omitted -> N.Omitted
   | Aast.Callconv (kind, e) -> N.Callconv (kind, expr env e)

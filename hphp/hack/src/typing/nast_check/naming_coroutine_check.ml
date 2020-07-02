@@ -37,8 +37,7 @@ let handler =
     method! at_expr env (p, e) =
       match e with
       | Yield _
-      | Yield_break
-      | Yield_from _ ->
+      | Yield_break ->
         if is_coroutine env then Errors.yield_in_coroutine p
       | Await _ ->
         if is_coroutine env then Errors.await_in_coroutine p;

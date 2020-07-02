@@ -1379,33 +1379,7 @@ fn print_instr<W: Write>(w: &mut W, instr: &Instruct) -> Result<(), W::Error> {
         IAsync(a) => print_async(w, a),
         IGenerator(gen) => print_gen_creation_execution(w, gen),
         IIncludeEvalDefine(ed) => print_include_eval_define(w, ed),
-        IGenDelegation(g) => print_gen_delegation(w, g),
         _ => Err(Error::fail("invalid instruction")),
-    }
-}
-
-fn print_gen_delegation<W: Write>(w: &mut W, g: &GenDelegation) -> Result<(), W::Error> {
-    use GenDelegation as G;
-    match g {
-        G::ContAssignDelegate(i) => {
-            w.write("ContAssignDelegate ")?;
-            print_iterator_id(w, i)
-        }
-        G::ContEnterDelegate => w.write("ContEnterDelegate"),
-        G::YieldFromDelegate(i, l) => {
-            w.write("YieldFromDelegate ")?;
-            print_iterator_id(w, i)?;
-            w.write(" ")?;
-            print_label(w, l)
-        }
-        G::ContUnsetDelegate(free, i) => {
-            w.write("ContUnsetDelegate ")?;
-            w.write(match free {
-                FreeIterator::IgnoreIter => "IgnoreIter ",
-                FreeIterator::FreeIter => "FreeIter ",
-            })?;
-            print_iterator_id(w, i)
-        }
     }
 }
 
@@ -2877,10 +2851,6 @@ fn print_expr<W: Write>(
             print_expr(ctx, w, env, e)
         }
         E_::YieldBreak => w.write("return"),
-        E_::YieldFrom(e) => {
-            w.write("yield from ")?;
-            print_expr(ctx, w, env, e)
-        }
         E_::Import(i) => {
             print_import_flavor(w, &i.0)?;
             w.write(" ")?;

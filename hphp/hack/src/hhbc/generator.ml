@@ -28,10 +28,6 @@ let generator_visitor () =
       let (_, is_pair_generator) = !state in
       state := (true, is_pair_generator)
 
-    method! on_Yield_from _ _ =
-      let (_, is_pair_generator) = !state in
-      state := (true, is_pair_generator)
-
     method! on_class_ _ _ = ()
 
     method! on_fun_ _ _ = ()

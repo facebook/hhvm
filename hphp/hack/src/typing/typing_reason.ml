@@ -679,7 +679,6 @@ type ureason =
   | URvalue
   | URawait
   | URyield
-  | URyield_from
   | URxhp of string * string  (** Name of XHP class, Name of XHP attribute *)
   | URxhp_spread
   | URindex of string
@@ -721,7 +720,6 @@ let string_of_ureason = function
   | URvalue -> "The values of this Map are incompatible"
   | URawait -> "await can only operate on an Awaitable"
   | URyield -> "Invalid yield"
-  | URyield_from -> "Invalid yield from"
   | URxhp (cls, attr) ->
     "Invalid xhp value for attribute " ^ attr ^ " in " ^ strip_ns cls
   | URxhp_spread -> "The attribute spread operator cannot be called on non-XHP"

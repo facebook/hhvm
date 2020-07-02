@@ -683,23 +683,6 @@ let string_of_include_eval_define = function
   | DefCns id -> sep ["DefCns"; string_of_const_num id]
   | DefTypeAlias id -> sep ["DefTypeAlias"; string_of_typedef_num id]
 
-let string_of_free_iterator = function
-  | IgnoreIter -> "IgnoreIter"
-  | FreeIter -> "FreeIter"
-
-let string_of_gen_delegation = function
-  | ContAssignDelegate i -> sep ["ContAssignDelegate"; string_of_iterator_id i]
-  | ContEnterDelegate -> "ContEnterDelegate"
-  | YieldFromDelegate (i, l) ->
-    sep ["YieldFromDelegate"; string_of_iterator_id i; string_of_label l]
-  | ContUnsetDelegate (free, i) ->
-    sep
-      [
-        "ContUnsetDelegate";
-        string_of_free_iterator free;
-        string_of_iterator_id i;
-      ]
-
 let string_of_instruction instruction =
   let s =
     match instruction with
@@ -722,7 +705,6 @@ let string_of_instruction instruction =
     | IAsync i -> string_of_async i
     | IGenerator i -> string_of_generator i
     | IIncludeEvalDefine i -> string_of_include_eval_define i
-    | IGenDelegation i -> string_of_gen_delegation i
     | _ -> failwith "invalid instruction"
   in
   s ^ "\n"
@@ -1373,7 +1355,6 @@ and string_of_expression ~env expr =
   | A.Yield y -> "yield " ^ string_of_afield ~env y
   | A.Await a -> "await " ^ string_of_expression ~env a
   | A.Yield_break -> "return"
-  | A.Yield_from e -> "yield from " ^ string_of_expression ~env e
   | A.Import (fl, e) ->
     let fl = string_of_import_flavor fl in
     let e = string_of_expression ~env e in

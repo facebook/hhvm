@@ -119,7 +119,6 @@ pub trait SmartConstructors<'src, State>: Clone {
     fn make_safe_member_selection_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_embedded_member_selection_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_yield_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
-    fn make_yield_from_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;
     fn make_prefix_unary_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_postfix_unary_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R;
     fn make_binary_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R;

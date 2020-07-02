@@ -999,16 +999,6 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_yield_from_expression(_: &C, yield_from_yield_keyword: Self, yield_from_from_keyword: Self, yield_from_operand: Self) -> Self {
-        let syntax = SyntaxVariant::YieldFromExpression(Box::new(YieldFromExpressionChildren {
-            yield_from_yield_keyword,
-            yield_from_from_keyword,
-            yield_from_operand,
-        }));
-        let value = V::from_syntax(&syntax);
-        Self::make(syntax, value)
-    }
-
     fn make_prefix_unary_expression(_: &C, prefix_unary_operator: Self, prefix_unary_operand: Self) -> Self {
         let syntax = SyntaxVariant::PrefixUnaryExpression(Box::new(PrefixUnaryExpressionChildren {
             prefix_unary_operator,
@@ -2639,13 +2629,6 @@ where
                 let acc = f(yield_operand, acc);
                 acc
             },
-            SyntaxVariant::YieldFromExpression(x) => {
-                let YieldFromExpressionChildren { yield_from_yield_keyword, yield_from_from_keyword, yield_from_operand } = *x;
-                let acc = f(yield_from_yield_keyword, acc);
-                let acc = f(yield_from_from_keyword, acc);
-                let acc = f(yield_from_operand, acc);
-                acc
-            },
             SyntaxVariant::PrefixUnaryExpression(x) => {
                 let PrefixUnaryExpressionChildren { prefix_unary_operator, prefix_unary_operand } = *x;
                 let acc = f(prefix_unary_operator, acc);
@@ -3391,7 +3374,6 @@ where
             SyntaxVariant::SafeMemberSelectionExpression {..} => SyntaxKind::SafeMemberSelectionExpression,
             SyntaxVariant::EmbeddedMemberSelectionExpression {..} => SyntaxKind::EmbeddedMemberSelectionExpression,
             SyntaxVariant::YieldExpression {..} => SyntaxKind::YieldExpression,
-            SyntaxVariant::YieldFromExpression {..} => SyntaxKind::YieldFromExpression,
             SyntaxVariant::PrefixUnaryExpression {..} => SyntaxKind::PrefixUnaryExpression,
             SyntaxVariant::PostfixUnaryExpression {..} => SyntaxKind::PostfixUnaryExpression,
             SyntaxVariant::BinaryExpression {..} => SyntaxKind::BinaryExpression,
@@ -4100,12 +4082,6 @@ where
              (SyntaxKind::YieldExpression, 2) => SyntaxVariant::YieldExpression(Box::new(YieldExpressionChildren {
                  yield_operand: ts.pop().unwrap(),
                  yield_keyword: ts.pop().unwrap(),
-                 
-             })),
-             (SyntaxKind::YieldFromExpression, 3) => SyntaxVariant::YieldFromExpression(Box::new(YieldFromExpressionChildren {
-                 yield_from_operand: ts.pop().unwrap(),
-                 yield_from_from_keyword: ts.pop().unwrap(),
-                 yield_from_yield_keyword: ts.pop().unwrap(),
                  
              })),
              (SyntaxKind::PrefixUnaryExpression, 2) => SyntaxVariant::PrefixUnaryExpression(Box::new(PrefixUnaryExpressionChildren {
@@ -5383,13 +5359,6 @@ pub struct YieldExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
-pub struct YieldFromExpressionChildren<T, V> {
-    pub yield_from_yield_keyword: Syntax<T, V>,
-    pub yield_from_from_keyword: Syntax<T, V>,
-    pub yield_from_operand: Syntax<T, V>,
-}
-
-#[derive(Debug, Clone)]
 pub struct PrefixUnaryExpressionChildren<T, V> {
     pub prefix_unary_operator: Syntax<T, V>,
     pub prefix_unary_operand: Syntax<T, V>,
@@ -6131,7 +6100,6 @@ pub enum SyntaxVariant<T, V> {
     SafeMemberSelectionExpression(Box<SafeMemberSelectionExpressionChildren<T, V>>),
     EmbeddedMemberSelectionExpression(Box<EmbeddedMemberSelectionExpressionChildren<T, V>>),
     YieldExpression(Box<YieldExpressionChildren<T, V>>),
-    YieldFromExpression(Box<YieldFromExpressionChildren<T, V>>),
     PrefixUnaryExpression(Box<PrefixUnaryExpressionChildren<T, V>>),
     PostfixUnaryExpression(Box<PostfixUnaryExpressionChildren<T, V>>),
     BinaryExpression(Box<BinaryExpressionChildren<T, V>>),
@@ -7120,15 +7088,6 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                 get_index(2).and_then(|index| { match index {
                         0 => Some(&x.yield_keyword),
                     1 => Some(&x.yield_operand),
-                        _ => None,
-                    }
-                })
-            },
-            YieldFromExpression(x) => {
-                get_index(3).and_then(|index| { match index {
-                        0 => Some(&x.yield_from_yield_keyword),
-                    1 => Some(&x.yield_from_from_keyword),
-                    2 => Some(&x.yield_from_operand),
                         _ => None,
                     }
                 })

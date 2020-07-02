@@ -306,7 +306,9 @@ def filter_ocaml_stacktrace(text: str) -> str:
 def filter_version_field(text: str) -> str:
     """given a string, remove the part that looks like the schema version"""
     assert isinstance(text, str)
-    return re.sub(r',"version":"\d{4}-\d{2}-\d{2}-\d{4}"', "", text, count=1)
+    return re.sub(
+        r'"version":"\d{4}-\d{2}-\d{2}-\d{4}"', r'"version":"sanitised"', text, count=1
+    )
 
 
 def compare_expected(expected: str, out: str) -> bool:
@@ -332,14 +334,15 @@ def check_result(
     output, or if a :default_expect_regex is provided,
     check that the output in :out contains the provided regex.
     """
+    expected = filter_version_field(strip_lines(test_case.expected))
+    normalized_out = filter_version_field(strip_lines(out))
     is_ok = (
-        strip_lines(test_case.expected) == strip_lines(out)
-        or (ignore_error_messages and compare_expected(test_case.expected, out))
-        or test_case.expected == filter_ocaml_stacktrace(out)
-        or filter_version_field(test_case.expected) == filter_version_field(out)
+        expected == normalized_out
+        or (ignore_error_messages and compare_expected(expected, normalized_out))
+        or expected == filter_ocaml_stacktrace(normalized_out)
         or (
             default_expect_regex is not None
-            and re.search(default_expect_regex, out) is not None
+            and re.search(default_expect_regex, normalized_out) is not None
         )
     )
 

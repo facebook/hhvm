@@ -3234,7 +3234,7 @@ where
                     self.await_as_an_expression_errors(node)
                 }
             }
-            YieldFromExpression(_) | YieldExpression(_) => {
+            YieldExpression(_) => {
                 if self.is_in_unyieldable_magic_method() {
                     self.errors.push(Self::make_error_from_node(
                         node,
@@ -4961,7 +4961,6 @@ where
             | CollectionLiteralExpression(_)
             | GenericTypeSpecifier(_)
             | YieldExpression(_)
-            | YieldFromExpression(_)
             | CastExpression(_)
             | BinaryExpression(_)
             | ConditionalExpression(_)
@@ -5337,7 +5336,6 @@ where
             | KeysetIntrinsicExpression(_)
             | VarrayIntrinsicExpression(_)
             | DarrayIntrinsicExpression(_)
-            | YieldFromExpression(_)
             | YieldExpression(_)
             | ScopeResolutionExpression(_)
             | PrefixUnaryExpression(_)

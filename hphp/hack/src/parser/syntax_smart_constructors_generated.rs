@@ -492,11 +492,6 @@ where
         Self::R::make_yield_expression(self.state_mut(), arg0, arg1)
     }
 
-    fn make_yield_from_expression(&mut self, arg0 : Self::R, arg1 : Self::R, arg2 : Self::R) -> Self::R {
-        self.state_mut().next(&[&arg0, &arg1, &arg2]);
-        Self::R::make_yield_from_expression(self.state_mut(), arg0, arg1, arg2)
-    }
-
     fn make_prefix_unary_expression(&mut self, arg0 : Self::R, arg1 : Self::R) -> Self::R {
         self.state_mut().next(&[&arg0, &arg1]);
         Self::R::make_prefix_unary_expression(self.state_mut(), arg0, arg1)

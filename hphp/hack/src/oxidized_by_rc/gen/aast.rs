@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f84a58d5d6192288132a4ca8c1a5943c>>
+// @generated SignedSource<<99cf80fb2633d461ffc59db5c0596cb3>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_by_rc/regen.sh
@@ -202,7 +202,6 @@ pub enum Expr_<Ex, Fb, En, Hi> {
     PrefixedString(std::rc::Rc<(std::rc::Rc<String>, Expr<Ex, Fb, En, Hi>)>),
     Yield(std::rc::Rc<Afield<Ex, Fb, En, Hi>>),
     YieldBreak,
-    YieldFrom(std::rc::Rc<Expr<Ex, Fb, En, Hi>>),
     Await(std::rc::Rc<Expr<Ex, Fb, En, Hi>>),
     Suspend(std::rc::Rc<Expr<Ex, Fb, En, Hi>>),
     List(Vec<Expr<Ex, Fb, En, Hi>>),
@@ -230,7 +229,7 @@ pub enum Expr_<Ex, Fb, En, Hi> {
             Ex,
         )>,
     ),
-    Record(std::rc::Rc<(Sid, bool, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
+    Record(std::rc::Rc<(Sid, Vec<(Expr<Ex, Fb, En, Hi>, Expr<Ex, Fb, En, Hi>)>)>),
     Efun(std::rc::Rc<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
     Lfun(std::rc::Rc<(Fun_<Ex, Fb, En, Hi>, Vec<Lid>)>),
     Xml(
@@ -734,7 +733,7 @@ pub struct PuEnum<Ex, Fb, En, Hi> {
     pub name: Sid,
     pub user_attributes: Vec<UserAttribute<Ex, Fb, En, Hi>>,
     pub is_final: bool,
-    pub case_types: Vec<(Sid, oxidized::aast::ReifyKind)>,
+    pub case_types: Vec<Tparam<Ex, Fb, En, Hi>>,
     pub case_values: Vec<PuCaseValue>,
     pub members: Vec<PuMember<Ex, Fb, En, Hi>>,
 }

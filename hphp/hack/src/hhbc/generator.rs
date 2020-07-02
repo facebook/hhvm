@@ -24,7 +24,7 @@ pub fn is_function_generator(body: &AstBody) -> (bool, bool) {
                     tast::Afield::AFvalue(_) => (self.0).0 = true,
                     tast::Afield::AFkvalue(_, _) => self.0 = (true, true),
                 }),
-                tast::Expr_::YieldFrom(_) | tast::Expr_::YieldBreak => Ok((self.0).0 = true),
+                tast::Expr_::YieldBreak => Ok((self.0).0 = true),
                 _ => expr_.recurse(c, self),
             }
         }

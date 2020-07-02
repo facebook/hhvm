@@ -498,7 +498,6 @@ pub fn emit_expr(emitter: &mut Emitter, env: &Env, expression: &tast::Expr) -> R
         Expr_::Import(e) => emit_import(emitter, env, pos, &e.0, &e.1),
         Expr_::Omitted => Ok(instr::empty()),
         Expr_::YieldBreak => Err(unrecoverable("yield break should be in statement position")),
-        Expr_::YieldFrom(_) => Err(unrecoverable("complex yield_from expression")),
         Expr_::Lfun(_) => Err(unrecoverable(
             "expected Lfun to be converted to Efun during closure conversion emit_expr",
         )),

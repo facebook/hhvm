@@ -775,20 +775,19 @@ functor
         match stack_opt with
         | None -> Raw.mem key
         | Some stack ->
-          (try Hashtbl.find stack.current key <> Remove
-           with Not_found -> mem stack.prev key)
+          (match Hashtbl.find_opt stack.current key with
+          | Some Remove -> false
+          | Some _ -> true
+          | None -> mem stack.prev key)
 
       let rec get stack_opt key =
         match stack_opt with
         | None -> Raw.get key
         | Some stack ->
-          (try
-             match Hashtbl.find stack.current key with
-             | Remove -> failwith "Trying to get a non-existent value"
-             | Replace value
-             | Add value ->
-               value
-           with Not_found -> get stack.prev key)
+          (match Hashtbl.find_opt stack.current key with
+          | Some Remove -> failwith "Trying to get a non-existent value"
+          | Some (Replace value | Add value) -> value
+          | None -> get stack.prev key)
 
       (*
        * For remove/add it is best to think of them in terms of a state machine.
@@ -820,16 +819,15 @@ functor
         match stack_opt with
         | None -> Raw.remove key
         | Some stack ->
-          (try
-             match Hashtbl.find stack.current key with
-             | Remove -> failwith "Trying to remove a non-existent value"
-             | Replace _ -> Hashtbl.replace stack.current key Remove
-             | Add _ -> Hashtbl.remove stack.current key
-           with Not_found ->
-             if mem stack.prev key then
-               Hashtbl.replace stack.current key Remove
-             else
-               failwith "Trying to remove a non-existent value")
+          (match Hashtbl.find_opt stack.current key with
+          | Some Remove -> failwith "Trying to remove a non-existent value"
+          | Some (Replace _) -> Hashtbl.replace stack.current key Remove
+          | Some (Add _) -> Hashtbl.remove stack.current key
+          | None ->
+            if mem stack.prev key then
+              Hashtbl.replace stack.current key Remove
+            else
+              failwith "Trying to remove a non-existent value")
 
       (*
        * Transitions table:
@@ -843,17 +841,15 @@ functor
         match stack_opt with
         | None -> Raw.add key value
         | Some stack ->
-          (try
-             match Hashtbl.find stack.current key with
-             | Remove
-             | Replace _ ->
-               Hashtbl.replace stack.current key (Replace value)
-             | Add _ -> Hashtbl.replace stack.current key (Add value)
-           with Not_found ->
-             if mem stack.prev key then
-               Hashtbl.replace stack.current key (Replace value)
-             else
-               Hashtbl.replace stack.current key (Add value))
+          (match Hashtbl.find_opt stack.current key with
+          | Some (Remove | Replace _) ->
+            Hashtbl.replace stack.current key (Replace value)
+          | Some (Add _) -> Hashtbl.replace stack.current key (Add value)
+          | None ->
+            if mem stack.prev key then
+              Hashtbl.replace stack.current key (Replace value)
+            else
+              Hashtbl.replace stack.current key (Add value))
 
       let move stack_opt from_key to_key =
         match stack_opt with
@@ -892,10 +888,9 @@ functor
         match !stack with
         | None -> ()
         | Some changeset ->
-          (try
-             commit_action changeset.prev key
-             @@ Hashtbl.find changeset.current key
-           with Not_found -> ())
+          (match Hashtbl.find_opt changeset.current key with
+          | None -> ()
+          | Some r -> commit_action changeset.prev key r)
 
       let revert_all () =
         match !stack with
@@ -1175,7 +1170,7 @@ struct
 
   let find_unsafe x = New.find_unsafe (Key.make Value.prefix x)
 
-  let get x = (try Some (find_unsafe x) with Not_found -> None)
+  let get x = New.get (Key.make Value.prefix x)
 
   let get_old x =
     let key = Key.make_old Value.prefix x in
@@ -1382,25 +1377,25 @@ struct
 
   let add x y =
     collect ();
-    try
-      let (freq, y') = Hashtbl.find cache x in
+    match Hashtbl.find_opt cache x with
+    | Some (freq, y') ->
       incr freq;
       if y' == y then
         ()
       else
         Hashtbl.replace cache x (freq, y)
-    with Not_found ->
+    | None ->
       incr size;
       let elt = (ref 0, y) in
       Hashtbl.replace cache x elt;
       ()
 
-  let find x =
-    let (freq, value) = Hashtbl.find cache x in
-    incr freq;
-    value
-
-  let get x = (try Some (find x) with Not_found -> None)
+  let get x =
+    match Hashtbl.find_opt cache x with
+    | None -> None
+    | Some (freq, value) ->
+      incr freq;
+      Some value
 
   let remove x =
     if Hashtbl.mem cache x then decr size;
@@ -1448,15 +1443,13 @@ struct
     if not (Hashtbl.mem cache x) then incr size;
     Hashtbl.replace cache x y
 
-  let find x = Hashtbl.find cache x
-
-  let get x = (try Some (find x) with Not_found -> None)
+  let get x = Hashtbl.find_opt cache x
 
   let remove x =
-    try
-      if Hashtbl.mem cache x then decr size;
+    if Hashtbl.mem cache x then begin
+      decr size;
       Hashtbl.remove cache x
-    with Not_found -> ()
+    end
 end
 
 (*****************************************************************************)

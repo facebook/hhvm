@@ -28,12 +28,15 @@ let tmp () =
 [@@@warning "-3"]
 
 let to_string x =
-  (try IMap.find x !trace with Not_found -> "v" ^ string_of_int x)
+  match IMap.find_opt x !trace with
+  | Some res -> res
+  | None -> "v" ^ string_of_int x
 
 let debug ?normalize:(f = (fun x -> x)) x =
   let normalized_x = string_of_int (f x) in
-  try IMap.find x !trace ^ "[" ^ normalized_x ^ "]"
-  with Not_found -> "tvar_" ^ normalized_x
+  match IMap.find_opt x !trace with
+  | Some result -> result ^ "[" ^ normalized_x ^ "]"
+  | None -> "tvar_" ^ normalized_x
 
 [@@@warning "+3"]
 

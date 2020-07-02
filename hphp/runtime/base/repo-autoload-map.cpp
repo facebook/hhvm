@@ -20,6 +20,8 @@
 #include "hphp/runtime/vm/repo.h"
 #include "hphp/util/assertions.h"
 
+TRACE_SET_MOD(repo_autoload);
+
 namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
@@ -30,18 +32,49 @@ namespace {
   UnitToPathMap unitToPathMap;
 }
 
+RepoAutoloadMap::RepoAutoloadMap(
+      CaseInsensitiveMap types,
+      CaseInsensitiveMap functions,
+      CaseSensitiveMap constants,
+      CaseInsensitiveMap typeAliases)
+  : m_types{std::move(types)},
+    m_functions{std::move(functions)},
+    m_constants{std::move(constants)},
+    m_typeAliases{std::move(typeAliases)} {
+  if (Trace::moduleEnabled(Trace::repo_autoload, 2)) {
+    FTRACE(2, "Type:\n");
+    for (auto const DEBUG_ONLY& s : types) {
+      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
+    }
+    FTRACE(2, "Functions:\n");
+    for (auto const DEBUG_ONLY& s : functions) {
+      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
+    }
+    FTRACE(2, "Constants:\n");
+    for (auto const DEBUG_ONLY& s : constants) {
+      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
+    }
+    FTRACE(2, "TypeAliases:\n");
+    for (auto const DEBUG_ONLY& s : typeAliases) {
+      FTRACE(2, "{} => {}\n", s.first->data(), s.second);
+    }
+  }
+}
+
 template <typename Compare>
 static std::optional<String> getPathFromSymbol(
     const RepoAutoloadMap::Map<Compare>& map,
     const String& name) {
   auto search = map.find(name.get());
   if (search == map.end()) {
+    FTRACE(1, "Fail autoload {}\n", name.data());
     return {};
   }
   auto unitSn = search->second;
 
   UnitToPathMap::const_accessor acc;
   if (unitToPathMap.find(acc, unitSn)) {
+    FTRACE(1, "Success autoload (cache) {} {}\n", name.data(), acc->second->data());
     return {StrNR(acc->second).asString()};
   }
 
@@ -50,6 +83,8 @@ static std::optional<String> getPathFromSymbol(
   always_assert(res == RepoStatus::success);
   auto spath = makeStaticString(path.get());
   unitToPathMap.insert(std::make_pair(unitSn, spath));
+
+  FTRACE(1, "Success autoload {} {}\n", name.data(), spath->data());
   return {StrNR(spath).asString()};
 }
 

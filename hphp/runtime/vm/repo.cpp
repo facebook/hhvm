@@ -527,7 +527,11 @@ RepoStatus Repo::findPath(int64_t unitSn, const std::string& root, String& path)
   for (repoId = RepoIdCount - 1; repoId >= 0; --repoId) {
     String relPath;
     if (m_getUnitPath[repoId].get(unitSn, relPath) == RepoStatus::success) {
-      path = root + relPath;
+      if (relPath[0] == '/') {
+        path = relPath;
+      } else {
+        path = root + relPath;
+      }
       TRACE(3, "Repo loaded file path for '%ld' from '%s'\n",
                 unitSn, repoName(repoId).c_str());
       return RepoStatus::success;

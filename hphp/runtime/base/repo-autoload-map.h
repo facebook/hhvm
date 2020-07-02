@@ -49,11 +49,7 @@ struct RepoAutoloadMap final : AutoloadMap {
       CaseInsensitiveMap types,
       CaseInsensitiveMap functions,
       CaseSensitiveMap constants,
-      CaseInsensitiveMap typeAliases)
-    : m_types{std::move(types)},
-      m_functions{std::move(functions)},
-      m_constants{std::move(constants)},
-      m_typeAliases{std::move(typeAliases)} {}
+      CaseInsensitiveMap typeAliases);
 
   virtual std::optional<String> getTypeFile(
       const String& typeName) override;

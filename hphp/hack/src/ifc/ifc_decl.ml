@@ -45,6 +45,16 @@ let callable_decl attrs =
   in
   { fd_kind }
 
+let magic_class_decls =
+  SMap.of_list
+    [
+      ( "\\HH\\vec",
+        {
+          cd_policied_properties = [];
+          cd_tparam_variance = [Ast_defs.Covariant];
+        } );
+    ]
+
 let collect_sigs =
   let find_policy property =
     match get_attr policied_id property.A.cv_user_attributes with
@@ -90,4 +100,4 @@ let collect_sigs =
       { decl_env with de_fun }
     | _ -> decl_env
   in
-  List.fold ~f:def ~init:{ de_class = SMap.empty; de_fun = SMap.empty }
+  List.fold ~f:def ~init:{ de_class = magic_class_decls; de_fun = SMap.empty }

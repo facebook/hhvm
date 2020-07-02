@@ -48,6 +48,7 @@ let rec ptype fmt ty =
   match ty with
   | Tprim p -> fprintf fmt "<%a>" policy p
   | Ttuple tl -> list' "," tl
+  | Tunion [] -> fprintf fmt "nothing"
   | Tunion tl -> list' " |" tl
   | Tinter tl -> list' " &" tl
   | Tclass { c_name; c_self; c_lump; c_property_map; c_tparams } ->

@@ -1,4 +1,5 @@
 Decls:
+  class \HH\vec: { policied_props = [] }
   class \My: { policied_props = [mInt, other] }
   class \Other: { policied_props = [oBool] }
   function \My#__construct: { kind = public }

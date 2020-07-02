@@ -1,5 +1,6 @@
 Decls:
   class \G: { policied_props = [] }
+  class \HH\vec: { policied_props = [] }
   function \test: { kind = public }
   
 Analyzing \test:

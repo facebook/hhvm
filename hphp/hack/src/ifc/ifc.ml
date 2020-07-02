@@ -279,10 +279,6 @@ let add_params renv =
   in
   List.map_env ~f:add_param
 
-type lvalue =
-  | Local of A.local_id
-  | Property of ptype
-
 let binop renv env ty1 ty2 =
   match (ty1, ty2) with
   | (Tprim p1, Tprim p2) ->
@@ -331,16 +327,75 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
   in
   (env, ret_pty)
 
-let rec lvalue renv env (((_epos, ety), e) : Tast.expr) =
-  match e with
-  | A.Lvar (_pos, lid) -> (env, Local lid)
+let vec_element_pty vec_pty =
+  let class_ =
+    match vec_pty with
+    | Tclass cls when String.equal cls.c_name "\\HH\\vec" -> cls
+    | _ -> fail "expected a vector"
+  in
+  match class_.c_tparams with
+  | [(element_pty, _)] -> element_pty
+  | _ -> fail "expected one type parameter from a vector object"
+
+(* Finds what we flow into in an assignment.
+ * The type LHS has in the input is the type after the assignment takes place. *)
+let rec flux_target renv env ((_, lhs_ty), lhs_exp) =
+  match lhs_exp with
+  | A.Lvar (_, lid) ->
+    let prefix = Local_id.to_string lid in
+    let local_pty = ptype None renv.re_proto lhs_ty ~prefix in
+    let env = Env.set_local_type env lid local_pty in
+    (env, local_pty, renv.re_lpc)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
-    let (env, obj_ptype) = expr renv env obj in
-    let obj_pol = (receiver_of_obj_get obj_ptype property).c_self in
-    let prop_ptype = property_ptype renv.re_proto obj_ptype property ety in
-    let env = Env.acc env (add_dependencies [obj_pol] prop_ptype) in
-    (env, Property prop_ptype)
-  | _ -> fail "unsupported lvalue"
+    let (env, obj_pty) = expr renv env obj in
+    let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
+    let prop_pty = property_ptype renv.re_proto obj_pty property lhs_ty in
+    let env = Env.acc env (add_dependencies [obj_pol] prop_pty) in
+    (env, prop_pty, renv.re_gpc)
+  | A.Array_get (vec, ix_opt) ->
+    (* Copy-on-Write handling of Array_get LHS in an assignment. When there is
+     * an assignmnet lhs[ix] = rhs or lhs[] = rhs, we
+     * 1. evaluate ix in case it has side-effects
+     * 2. (a) retrieve the original flux type for the vector
+     *    (b) use flux_target recursively on the vector to generate a new flux
+     *        type and retrieve info. from the mutation root
+     *    (c) make the original flux type flow into the new one to achieve CoW
+     * 3. record the flow due to length increase when ix is not present. (not
+     *    implemented, TODO: T68269878)
+     * 4. access and return the element parameter of the vector
+     *)
+    let env =
+      match ix_opt with
+      | Some ix -> fst @@ expr renv env ix
+      | None -> env
+    in
+    let (env, old_vec_pty) = expr renv env vec in
+    let (env, vec_pty, pc) = flux_target renv env vec in
+    let env = Env.acc env (subtype old_vec_pty vec_pty) in
+    let element_pty = vec_element_pty vec_pty in
+    (* Even though the runtime updates the entire vector, we treat
+     * the mutation as if it were happening on a single element.
+     * That is sound because, after the mutation, changes can only
+     * be observed via the updated element.
+     *)
+    (env, element_pty, pc)
+  | _ -> fail "unhandled flux target (lvalue)"
+
+and assign renv env op lhs_exp rhs_exp =
+  (* Handle the incorporation of LHS in RHS if assignment uses and operation,
+   * e.g., $a += $b. *)
+  let (env, rhs_pty) =
+    if Option.is_none op then
+      expr renv env rhs_exp
+    else
+      let (env, lhs_pty) = expr renv env lhs_exp in
+      let (env, rhs_pty) = expr renv env rhs_exp in
+      binop renv env lhs_pty rhs_pty
+  in
+  let (env, lhs_pty, pc) = flux_target renv env lhs_exp in
+  let env = Env.acc env (subtype rhs_pty lhs_pty) in
+  let env = Env.acc env (add_dependencies pc lhs_pty) in
+  (env, lhs_pty)
 
 (* Generate flow constraints for an expression *)
 and expr renv env (((_epos, ety), e) : Tast.expr) =
@@ -353,34 +408,7 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.String _ ->
     (* literals are public *)
     (env, Tprim Pbot)
-  | A.Binop (Ast_defs.Eq op, e1, e2) ->
-    let (env, tyo) = lvalue renv env e1 in
-    let (env, ty) = expr env e2 in
-    let env =
-      match tyo with
-      | Local lid ->
-        let (env, ty) =
-          if Option.is_none op then
-            (env, ty)
-          else
-            let lty = Env.get_local_type env lid in
-            binop renv env lty ty
-        in
-        let prefix = Local_id.to_string lid in
-        let (env, ty) = weaken renv env ty ~prefix in
-        let env = Env.acc env (add_dependencies renv.re_lpc ty) in
-        Env.set_local_type env lid ty
-      | Property prop_ptype ->
-        let (env, ty) =
-          if Option.is_none op then
-            (env, ty)
-          else
-            binop renv env prop_ptype ty
-        in
-        let env = Env.acc env (subtype ty prop_ptype) in
-        Env.acc env (add_dependencies renv.re_gpc prop_ptype)
-    in
-    (env, ty)
+  | A.Binop (Ast_defs.Eq op, e1, e2) -> assign renv env op e1 e2
   | A.Binop (_, e1, e2) ->
     let (env, ty1) = expr env e1 in
     let (env, ty2) = expr env e2 in
@@ -414,6 +442,28 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
       in
       call renv env callable_name (Some obj_pty) args_pty ety
     | _ -> fail "unhandled method call on %a" Pp.ptype obj_pty)
+  | A.ValCollection (A.Vec, _, exprs) ->
+    (* We require each collection element to be a subtype of the vector
+     * element parameter. *)
+    let vec_pty = ptype ~prefix:"vec" None renv.re_proto ety in
+    let element_pty = vec_element_pty vec_pty in
+    let mk_element_subtype env exp =
+      let (env, pty) = expr env exp in
+      Env.acc env (subtype pty element_pty)
+    in
+    let env = List.fold ~f:mk_element_subtype ~init:env exprs in
+    (env, vec_pty)
+  | A.Array_get (exp, ix_opt) ->
+    (* Return the type parameter corresponding to the vector element type. *)
+    let env =
+      (* Evaluate the index in case it has side-effects. *)
+      match ix_opt with
+      | Some ix -> fst @@ expr env ix
+      | None -> fail "cannot have an empty index when reading"
+    in
+    let (env, vec_pty) = expr env exp in
+    let element_pty = vec_element_pty vec_pty in
+    (env, element_pty)
   (* --- expressions below are not yet supported *)
   | A.Array _
   | A.Darray (_, _)
@@ -427,7 +477,6 @@ and expr renv env (((_epos, ety), e) : Tast.expr) =
   | A.Dollardollar _
   | A.Clone _
   | A.Obj_get (_, _, _)
-  | A.Array_get (_, _)
   | A.Class_get (_, _)
   | A.Class_const (_, _)
   | A.Call (_, _, _, _, _)

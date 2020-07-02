@@ -1,6 +1,7 @@
 Decls:
   class \C: { policied_props = [ci:Secret, d:Secret] }
   class \D: { policied_props = [] }
+  class \HH\vec: { policied_props = [] }
   function \C#__construct: { kind = public }
   function \C#getDeep: { kind = public }
   function \C#getShallow1: { kind = public }

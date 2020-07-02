@@ -1,4 +1,5 @@
 Decls:
+  class \HH\vec: { policied_props = [] }
   class \R: { policied_props = [] }
   function \R#__construct: { kind = public }
   function \R#recursiveGet: { kind = public }

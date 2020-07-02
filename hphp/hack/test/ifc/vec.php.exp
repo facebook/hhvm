@@ -1,0 +1,171 @@
+Decls:
+  class \C: { policied_props = [i:INT, v:VEC] }
+  class \HH\vec: { policied_props = [] }
+  function \C#mutation: { kind = public }
+  function \C#nested: { kind = public }
+  function \C#set: { kind = public }
+  function \copyOnWrite: { kind = public }
+  function \empty: { kind = public }
+  function \retElem: { kind = public }
+  function \testAdd1: { kind = public }
+  function \testAdd2: { kind = public }
+  function \testCollection: { kind = public }
+  
+Analyzing \empty:
+* pc: pc
+* This: None
+* Return: \HH\vec<<tp>><\HH\vec, lump>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: { $vec -> \HH\vec<nothing><\HH\vec'2, lump'2> }
+  Constraints:
+    [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump,
+     \HH\vec'2 < \HH\vec]
+
+Analyzing \testCollection:
+* pc: pc
+* This: None
+* Return: \HH\vec<<tp>><\HH\vec, lump>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: { $there -> <$there>; $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
+  Constraints:
+    [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
+     \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
+
+Analyzing \testAdd1:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params: { $vec -> \HH\vec<<tp>><\HH\vec, lump> }
+* Final environment:
+  Deps: {}
+  Locals: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
+  Constraints:
+    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
+
+Analyzing \testAdd2:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: { $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
+  Constraints:
+    [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
+     tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
+
+Analyzing \retElem:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
+  Constraints:
+    [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
+     \HH\vec < \HH\vec'1, tp'1 < ret]
+
+Analyzing set:
+* pc: pc
+* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: {}
+  Constraints:
+    [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
+     VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
+
+Analyzing nested:
+* pc: pc
+* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* Return: <ret>
+* Params:
+    { $vv -> \HH\vec<\HH\vec<<tp>><\HH\vec, lump'2>><\HH\vec'1, lump'1> }
+* Final environment:
+  Deps: {}
+  Locals:
+    { $vv -> \HH\vec<\HH\vec<<tp'1>><\HH\vec'2, lump'4>><\HH\vec'3, lump'3> }
+  Constraints:
+    [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
+     \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
+     lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
+     pc < INT]
+
+Analyzing mutation:
+* pc: pc
+* This: \C<\C, lump, i=<INT>, v=\HH\vec<<VEC>><VEC, VEC>>
+* Return: <ret>
+* Params: {}
+* Final environment:
+  Deps: {}
+  Locals: {}
+  Constraints:
+    [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
+     VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
+     .v'2 < VEC, bop < VEC, pc < VEC]
+
+Analyzing \copyOnWrite:
+* pc: pc
+* This: None
+* Return: <ret>
+* Params: { $v -> \HH\vec<<tp>><\HH\vec, lump>; $x -> <$x>; $y -> <$y> }
+* Final environment:
+  Deps: {}
+  Locals:
+    { $v -> \HH\vec<<tp'3>><\HH\vec'3, lump'3>;
+      $vx -> \HH\vec<<tp'2>><\HH\vec'2, lump'2>;
+      $x -> <$x>;
+      $y -> <$y> }
+  Constraints:
+    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
+     lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
+     \HH\vec'1 < \HH\vec'3, $y < tp'3]
+
+Global solving:
+  Flows for \C#mutation:
+    [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
+     VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
+     .v'2 < VEC, bop < VEC, pc < VEC]
+    simplified: INT < VEC
+  Flows for \C#nested:
+    [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
+     \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
+     lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
+     pc < INT]
+    simplified: VEC < INT
+  Flows for \C#set:
+    [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
+     VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
+    simplified: INT < VEC
+  Flows for \copyOnWrite:
+    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
+     lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
+     \HH\vec'1 < \HH\vec'3, $y < tp'3]
+    simplified: True
+  Flows for \empty:
+    [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump,
+     \HH\vec'2 < \HH\vec]
+    simplified: True
+  Flows for \retElem:
+    [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
+     \HH\vec < \HH\vec'1, tp'1 < ret]
+    simplified: True
+  Flows for \testAdd1:
+    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
+    simplified: True
+  Flows for \testAdd2:
+    [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
+     tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
+    simplified: True
+  Flows for \testCollection:
+    [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
+     \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
+    simplified: True
+  

@@ -1,4 +1,5 @@
 Decls:
+  class \HH\vec: { policied_props = [] }
   function \assign0: { kind = public }
   function \assign1: { kind = public }
   function \binop: { kind = public }

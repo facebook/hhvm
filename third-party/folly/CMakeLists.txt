@@ -114,6 +114,10 @@ list(REMOVE_ITEM hfiles
   ${FOLLY_DIR}/python/GILAwareManualExecutor.h
 )
 
+# Actually delete this file (not just remove from the list) because
+# proxygen/lib/services/WorkerThread.cpp checks for it via __has_include.
+file(REMOVE ${FOLLY_DIR}/experimental/io/IoUringBackend.h)
+
 CHECK_CXX_SOURCE_COMPILES("#include <bits/functexcept.h>
 int main() {
   return 0;

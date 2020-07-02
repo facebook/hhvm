@@ -257,6 +257,7 @@ prefixed_flags!(
     ENABLE_FIRST_CLASS_FUNCTION_POINTERS,
     ENABLE_XHP_CLASS_MODIFIER,
     DISABLE_ARRAY_CAST,
+    DISABLE_ARRAY_TYPEHINT,
     DISABLE_ARRAY,
     RUST_EMITTER,
 );
@@ -687,6 +688,9 @@ mod tests {
     "global_value": false
   },
   "hhvm.hack.lang.disable_array_cast": {
+    "global_value": false
+  },
+  "hhvm.hack.lang.disable_array_typehint": {
     "global_value": false
   },
   "hhvm.hack.lang.disable_legacy_attribute_syntax": {
@@ -1137,5 +1141,6 @@ bitflags! {
         const DISABLE_ARRAY = 1 << 50;
         const RUST_EMITTER = 1 << 51;
         const DISABLE_ARRAY_CAST = 1 << 52;
+        const DISABLE_ARRAY_TYPEHINT = 1 << 53;
     }
 }

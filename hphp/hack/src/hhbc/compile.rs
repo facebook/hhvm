@@ -270,6 +270,7 @@ fn create_parser_options(opts: &Options) -> ParserOptions {
     popt.po_enable_first_class_function_pointers =
         hack_lang_flags(LangFlags::ENABLE_FIRST_CLASS_FUNCTION_POINTERS);
     popt.po_disable_array = hack_lang_flags(LangFlags::DISABLE_ARRAY);
+    popt.po_disable_array_typehint = hack_lang_flags(LangFlags::DISABLE_ARRAY_TYPEHINT);
     popt
 }
 

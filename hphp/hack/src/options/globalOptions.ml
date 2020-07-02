@@ -103,6 +103,7 @@ type t = {
   po_disable_modes: bool;
   po_disable_hh_ignore_error: bool;
   po_disable_array: bool;
+  po_disable_array_typehint: bool;
   tco_enable_systemlib_annotations: bool;
   tco_pu_enabled_paths: bool * Relative_path.t list;
   tco_widen_is_array: bool;
@@ -267,6 +268,7 @@ let default =
     po_disable_modes = false;
     po_disable_hh_ignore_error = false;
     po_disable_array = false;
+    po_disable_array_typehint = false;
     tco_enable_systemlib_annotations = false;
     tco_pu_enabled_paths = (false, []);
     tco_widen_is_array = false;
@@ -385,6 +387,7 @@ let make
     ?(po_disable_modes = default.po_disable_modes)
     ?(po_disable_hh_ignore_error = default.po_disable_hh_ignore_error)
     ?(po_disable_array = default.po_disable_array)
+    ?(po_disable_array_typehint = default.po_disable_array_typehint)
     ?(tco_enable_systemlib_annotations =
       default.tco_enable_systemlib_annotations)
     ?(tco_pu_enabled_paths = default.tco_pu_enabled_paths)
@@ -486,6 +489,7 @@ let make
     po_disable_modes;
     po_disable_hh_ignore_error;
     po_disable_array;
+    po_disable_array_typehint;
     tco_enable_systemlib_annotations;
     tco_pu_enabled_paths;
     tco_widen_is_array;
@@ -699,6 +703,8 @@ let po_disable_modes t = t.po_disable_modes
 let po_disable_hh_ignore_error t = t.po_disable_hh_ignore_error
 
 let po_disable_array t = t.po_disable_array
+
+let po_disable_array_typehint t = t.po_disable_array_typehint
 
 let tco_enable_systemlib_annotations t = t.tco_enable_systemlib_annotations
 

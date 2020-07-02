@@ -56,6 +56,7 @@ type t = {
   option_enable_xhp_class_modifier: bool;
   option_enable_first_class_function_pointers: bool;
   option_disable_array: bool;
+  option_disable_array_typehint: bool;
 }
 [@@deriving eq, ord]
 
@@ -108,6 +109,7 @@ let default =
     option_enable_xhp_class_modifier = false;
     option_enable_first_class_function_pointers = false;
     option_disable_array = false;
+    option_disable_array_typehint = false;
   }
 
 let constant_folding o = o.option_constant_folding
@@ -204,6 +206,8 @@ let enable_first_class_function_pointers o =
 
 let disable_array o = o.option_disable_array
 
+let disable_array_typehint o = o.option_disable_array_typehint
+
 let canonical_aliased_namespaces an =
   List.sort (fun p1 p2 -> String.compare (fst p1) (fst p2)) an
 
@@ -286,6 +290,7 @@ let to_string o =
       Printf.sprintf "disable_xhp_element_mangling: %B"
       @@ disable_xhp_element_mangling o;
       Printf.sprintf "disable_array: %B" @@ disable_array o;
+      Printf.sprintf "disable_array_typehint: %B" @@ disable_array_typehint o;
     ]
 
 let as_bool s =
@@ -386,6 +391,8 @@ let set_option options name value =
     }
   | "hhvm.hack.lang.disable_array" ->
     { options with option_disable_array = as_bool value }
+  | "hhvm.hack.lang.disable_array_typehint" ->
+    { options with option_disable_array_typehint = as_bool value }
   | _ -> options
 
 let get_value_from_config_ config key =
@@ -590,6 +597,8 @@ let value_setters =
       { opts with option_enable_first_class_function_pointers = v = 1 } );
     ( set_value "hhvm.hack.lang.disable_array" get_value_from_config_int
     @@ fun opts v -> { opts with option_disable_array = v = 1 } );
+    ( set_value "hhvm.hack.lang.disable_array_typehint" get_value_from_config_int
+    @@ fun opts v -> { opts with option_disable_array_typehint = v = 1 } );
   ]
 
 let extract_config_options_from_json ~init config_json =

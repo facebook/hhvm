@@ -1,0 +1,1 @@
+Fatal error: Array typehints are no longer legal; use varray or darray instead in %s/ban_typehint1.php on line 4

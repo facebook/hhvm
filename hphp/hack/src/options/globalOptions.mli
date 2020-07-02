@@ -253,6 +253,7 @@ type t = {
   po_disable_hh_ignore_error: bool;
   (* Disable array(...) *)
   po_disable_array: bool;
+  po_disable_array_typehint: bool;
   (* Enable features used to typecheck systemlib *)
   tco_enable_systemlib_annotations: bool;
   (* Controls if/where the pocket universe syntax is enabled
@@ -363,6 +364,7 @@ val make :
   ?po_disable_modes:bool ->
   ?po_disable_hh_ignore_error:bool ->
   ?po_disable_array:bool ->
+  ?po_disable_array_typehint:bool ->
   ?tco_enable_systemlib_annotations:bool ->
   ?tco_pu_enabled_paths:bool * Relative_path.t list ->
   ?tco_widen_is_array:bool ->
@@ -584,6 +586,8 @@ val po_disable_modes : t -> bool
 val po_disable_hh_ignore_error : t -> bool
 
 val po_disable_array : t -> bool
+
+val po_disable_array_typehint : t -> bool
 
 val tco_enable_systemlib_annotations : t -> bool
 

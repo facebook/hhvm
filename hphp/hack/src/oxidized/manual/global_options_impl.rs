@@ -103,6 +103,7 @@ impl Default for GlobalOptions {
             po_disable_modes: false,
             po_disable_hh_ignore_error: false,
             po_disable_array: false,
+            po_disable_array_typehint: false,
             tco_enable_systemlib_annotations: false,
             tco_pu_enabled_paths: (false, vec![]),
             tco_widen_is_array: false,

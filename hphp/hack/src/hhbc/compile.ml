@@ -127,7 +127,8 @@ let parse_file ~hhbc_options env text :
           (enable_first_class_function_pointers co)
         ~disable_modes:false
         ~disable_hh_ignore_error:false
-        ~disable_array:(disable_array co))
+        ~disable_array:(disable_array co)
+        ~disable_array_typehint:(disable_array_typehint co))
   in
   let env =
     Full_fidelity_ast.make_env

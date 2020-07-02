@@ -1,13 +1,5 @@
 <?hh // partial
 
-function a0(): array {
-  return array();
-}
-
-function a1(): array<int> {
-  return array();
-}
-
 function a2(): array<int, string> {
   throw new Exception();
 }

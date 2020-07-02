@@ -19,8 +19,6 @@ class VecConsts {
 }
 
 class ArrayConsts {
-  const array<string> CARRAY = array("test");
-  const array<string, int> CDICT_STYLE_ARRAY = array("test" => 1);
   const darray<string, int> CDARRAY = darray["test" => 1];
   const keyset<string> CKEYSET = keyset['a', 'b'];
   const keyset<classname> CCLASSNAME_KEYSET = keyset[];

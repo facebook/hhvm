@@ -605,6 +605,7 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
     ${libraryName} STREQUAL "lz4" OR
     ${libraryName} STREQUAL "mbfl" OR
     ${libraryName} STREQUAL "mcrouter" OR
+    ${libraryName} STREQUAL "mysql" OR
     ${libraryName} STREQUAL "oniguruma" OR
     ${libraryName} STREQUAL "openssl" OR
     ${libraryName} STREQUAL "pcre" OR
@@ -904,51 +905,6 @@ function (HHVM_EXTENSION_INTERNAL_HANDLE_LIBRARY_DEPENDENCY extensionID dependen
       HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${LIBMEMCACHED_INCLUDE_DIR})
       HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${LIBMEMCACHED_LIBRARY})
       HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DHAVE_LIBMEMCACHED")
-    endif()
-  elseif (${libraryName} STREQUAL "mysql")
-    # mysql checks - if we're using async mysql, we use fbmysqlclient from
-    # third-party/ instead
-    if (ENABLE_ASYNC_MYSQL)
-      set(MYSQL_CLIENT_LIB_DIR ${TP_DIR}/fb-mysql/src/)
-      set(MYSQL_CLIENT_LIBS
-        ${MYSQL_CLIENT_LIB_DIR}/libmysql/libfbmysqlclient_r.a
-      )
-
-      if (${addPaths})
-        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(
-          ${RE2_INCLUDE_DIR}
-          ${TP_DIR}/squangle/src/
-          ${TP_DIR}/fb-mysql/src/include/
-        )
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DENABLE_ASYNC_MYSQL=1")
-      endif()
-    else()
-      find_package(MySQL ${requiredVersion})
-      if (NOT MYSQL_LIB_DIR OR NOT MYSQL_INCLUDE_DIR OR NOT MYSQL_CLIENT_LIBS)
-        HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-        return()
-      endif()
-
-      if (${addPaths})
-        link_directories(${MYSQL_LIB_DIR})
-        HHVM_EXTENSION_INTERNAL_ADD_INCLUDE_DIRS(${MYSQL_INCLUDE_DIR})
-      endif()
-    endif()
-
-    MYSQL_SOCKET_SEARCH()
-    if (MYSQL_UNIX_SOCK_ADDR)
-      if (${addPaths})
-        HHVM_EXTENSION_INTERNAL_ADD_DEFINES("-DPHP_MYSQL_UNIX_SOCK_ADDR=\"${MYSQL_UNIX_SOCK_ADDR}\"")
-      endif()
-    elseif (NOT ${addPaths})
-      HHVM_EXTENSION_INTERNAL_SET_FAILED_DEPENDENCY(${extensionID} ${dependencyName})
-      return()
-    else()
-      message(FATAL_ERROR "Could not find MySQL socket path - if you install a MySQL server, this should be automatically detected. Alternatively, specify -DMYSQL_UNIX_SOCK_ADDR=/path/to/mysql.socket ; if you don't care about unix socket support for MySQL, specify -DMYSQL_UNIX_SOCK_ADDR=/dev/null")
-    endif()
-
-    if (${addPaths})
-      HHVM_EXTENSION_INTERNAL_ADD_LINK_LIBRARIES(${MYSQL_CLIENT_LIBS})
     endif()
   elseif (${libraryName} STREQUAL "pgsql")
     FIND_PATH(PGSQL_INCLUDE_DIR NAMES libpq-fe.h

@@ -85,14 +85,18 @@ if (NOT MSVC)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/libafdt/src/src")
 endif()
 
+# Add bundled lz4 if the system one will not be used
+add_subdirectory(lz4)
+
+# fb-mysql must go after lz4 because it needs to know its <INSTALL_DIR>
+add_subdirectory(fb-mysql)
 if(ENABLE_ASYNC_MYSQL)
   find_package(RE2)
   if(NOT RE2_LIBRARY)
     message(STATUS "Building RE2 from third-party")
-    list(APPEND THIRD_PARTY_MODULES re2)
+    add_subdirectory(re2)
   endif()
-  list(APPEND THIRD_PARTY_MODULES squangle)
-  list(APPEND THIRD_PARTY_MODULES fb-mysql)
+  add_subdirectory(squangle)
 endif()
 
 if (ENABLE_MCROUTER)
@@ -115,9 +119,6 @@ if(NOT LIBSQLITE3_LIBRARY)
   list(APPEND THIRD_PARTY_MODULES forks/libsqlite3)
   list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/forks/libsqlite3")
 endif()
-
-# Add bundled lz4 if the system one will not be used
-add_subdirectory(lz4)
 
 # Add bundled double-conversion if the system one will not be used
 if(NOT DOUBLE_CONVERSION_FOUND)

@@ -113,7 +113,6 @@ static const struct {
   { OpNewArray,    {None,             Stack1,       OutArray        }},
   { OpNewMixedArray,  {None,          Stack1,       OutArray        }},
   { OpNewDictArray,   {None,          Stack1,       OutDict         }},
-  { OpNewLikeArrayL,  {Local,         Stack1,       OutArray        }},
   { OpNewPackedArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructArray, {StackN,        Stack1,       OutArray        }},
   { OpNewStructDArray,{StackN,        Stack1,       OutDArray       }},
@@ -970,7 +969,6 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::NewArray:
   case Op::NewCol:
   case Op::NewPair:
-  case Op::NewLikeArrayL:
   case Op::NewMixedArray:
   case Op::NewDictArray:
   case Op::NewPackedArray:

@@ -3881,13 +3881,6 @@ and emit_special_function
     Some
       (gather
          [instr_cgetl (Local.Named (Local_id.get_name param)); instr_whresult])
-  | ("__hhvm_internal_newlikearrayl", [(_, A.Lvar (_, param)); (_, A.Int n)])
-    when Emit_env.is_systemlib () ->
-    Some
-      (instr
-         (ILitConst
-            (NewLikeArrayL
-               (Local.Named (Local_id.get_name param), int_of_string n))))
   | _ ->
     begin
       match (args, istype_op lower_fq_name, is_isexp_op lower_fq_name) with

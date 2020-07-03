@@ -1471,10 +1471,6 @@ OPTBLD_INLINE void iopNewMixedArray(uint32_t capacity) {
   iopNewArray(capacity);
 }
 
-OPTBLD_INLINE void iopNewLikeArrayL(tv_lval /*unused*/, uint32_t capacity) {
-  iopNewArray(capacity);
-}
-
 OPTBLD_INLINE void iopNewDictArray(uint32_t capacity) {
   auto const ad = capacity ? MixedArray::MakeReserveDict(capacity)
                            : ArrayData::CreateDict();

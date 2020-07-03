@@ -1,7 +1,7 @@
 <?hh // decl
 
 class Wrapper {
-  public function __construct(public array $val) { var_dump("Make wrapper"); }
+  public function __construct(public darray $val) { var_dump("Make wrapper"); }
 }
 
 function beep($x) {

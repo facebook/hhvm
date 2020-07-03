@@ -86,7 +86,6 @@ bool poppable(Op op) {
     case Op::NewDArray:
     case Op::NewMixedArray:
     case Op::NewDictArray:
-    case Op::NewLikeArrayL:
     case Op::NewCol:
       return true;
     default:
@@ -1060,11 +1059,6 @@ void in(ISS& env, const bc::NewKeysetArray& op) {
     unreachable(env);
     push(env, TBottom);
   }
-}
-
-void in(ISS& env, const bc::NewLikeArrayL& op) {
-  locAsCell(env, op.loc1);
-  push(env, some_aempty());
 }
 
 void in(ISS& env, const bc::AddElemC& /*op*/) {

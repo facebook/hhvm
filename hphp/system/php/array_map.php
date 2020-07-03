@@ -25,7 +25,7 @@ function array_map($func, $arr, ...$extra) {
     return null;
   }
 
-  $res = \__hhvm_internal_newlikearrayl($arr, 0);
+  $res = darray[];
   foreach ($arr as $k => $v) {
     $res[$k] = $func($v);
   }

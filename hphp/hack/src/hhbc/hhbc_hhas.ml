@@ -126,8 +126,6 @@ let string_of_lit_const instruction =
   | NullUninit -> "NullUninit"
   | Method -> "Method"
   | NewArray n -> sep ["NewArray"; string_of_int n]
-  | NewLikeArrayL (id, n) ->
-    sep ["NewLikeArrayL"; string_of_local_id id; string_of_int n]
   | CnsE cnsid -> sep ["CnsE"; string_of_const_id cnsid]
 
 let string_of_typestruct_resolve_op = function

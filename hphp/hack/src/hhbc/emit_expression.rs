@@ -2603,16 +2603,6 @@ fn emit_special_function(
                 instr::whresult(),
             ])))
         }
-        ("__hhvm_internal_newlikearrayl", &[E(_, E_::Lvar(ref param)), E(_, E_::Int(ref n))])
-            if e.systemlib() =>
-        {
-            Ok(Some(instr::newlikearrayl(
-                local::Type::Named(local_id::get_name(&param.1).into()),
-                n.parse::<isize>().map_err(|_| {
-                    unrecoverable(format!("emit_special_function: error parsing {}", n))
-                })?,
-            )))
-        }
         ("__hhvm_internal_getmemokeyl", &[E(_, E_::Lvar(ref param))]) if e.systemlib() => Ok(Some(
             instr::getmemokeyl(local::Type::Named(local_id::get_name(&param.1).into())),
         )),

@@ -401,10 +401,6 @@ void emitNewMixedArray(IRGS& env, uint32_t capacity) {
   emitNewArray(env, capacity);
 }
 
-void emitNewLikeArrayL(IRGS& env, int32_t /*unused*/, uint32_t capacity) {
-  emitNewArray(env, capacity);
-}
-
 void emitNewDArray(IRGS& env, uint32_t capacity) {
   assertx(!RuntimeOption::EvalHackArrDVArrs);
   if (capacity == 0) {

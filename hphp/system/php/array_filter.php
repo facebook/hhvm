@@ -9,7 +9,7 @@ function array_filter(\HH\KeyedTraversable $arr, $func = null, $flag = null) {
     return null;
   }
 
-  $res = \__hhvm_internal_newlikearrayl($arr, 0);
+  $res = darray[];
   if ($func === null) {
     foreach ($arr as $k => $v) {
       if ($v) {

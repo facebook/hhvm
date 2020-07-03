@@ -12,7 +12,7 @@ abstract class AC4 extends AC3 { }
 
 class C1 extends AC4 { }
 
-function array_some(array $array) {
+function array_some(darray $array) {
   foreach ($array as $value) {
     if ($value) {
       echo "Empty: ";

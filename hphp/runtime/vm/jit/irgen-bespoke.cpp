@@ -96,8 +96,7 @@ Locations getVanillaLocations(const IRGS& env, SrcKey sk) {
       return {Location::Local{safe_cast<uint32_t>(local.id)}};
     }
     case Op::LIterInit:
-    case Op::LIterNext:
-    case Op::NewLikeArrayL: {
+    case Op::LIterNext: {
       auto const local = getImm(sk.pc(), localImmIdx(op)).u_LA;
       return {Location::Local{safe_cast<uint32_t>(local)}};
     }

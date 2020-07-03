@@ -225,7 +225,6 @@ type instruct_lit_const =
   | NewMixedArray of int (* capacity hint *)
   | NewDictArray of int (* capacity hint *)
   | NewDArray of int (* capacity hint *)
-  | NewLikeArrayL of local_id * int (* capacity hint *)
   | NewPackedArray of int
   | NewStructArray of string list
   | NewStructDArray of string list

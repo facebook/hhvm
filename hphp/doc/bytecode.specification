@@ -853,13 +853,6 @@ NewDictArray <capacity hint>    []  ->  [C:Dict]
   it onto the stack. The implementation may make use of the hint in %1 to
   pre-size the array. The hint %1 must be greater than or equal to 0.
 
-NewLikeArrayL <local variable id> <capacity hint>   []  ->  [C:Arr]
-
-  New array with the same kind as the array stored in the local variable %1.
-  If %1 is not an array, returns an array in mixed mode.  The implementation
-  may make use of the hint in %2 to pre-size the array.  If %2 == 0, the
-  implementation may instead use the size of %1 as the hint.
-
 NewPackedArray <num elems>    [C..C]  ->  [C]
 
   New array. Creates a new array from the top %1 cells on the stack, pops those

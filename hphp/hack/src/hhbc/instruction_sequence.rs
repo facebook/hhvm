@@ -286,10 +286,6 @@ pub mod instr {
         instr(Instruct::ILitConst(InstructLitConst::ClsCns(const_id)))
     }
 
-    pub fn newlikearrayl(local: local::Type, size: isize) -> InstrSeq {
-        lit_const(InstructLitConst::NewLikeArrayL(local, size))
-    }
-
     pub fn eq() -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::Eq))
     }

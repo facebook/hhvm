@@ -2023,12 +2023,6 @@ fn print_lit_const<W: Write>(w: &mut W, lit: &InstructLitConst) -> Result<(), W:
         LC::NewVArray(i) => concat_str_by(w, " ", ["NewVArray", i.to_string().as_str()]),
         LC::NewVec(i) => concat_str_by(w, " ", ["NewVec", i.to_string().as_str()]),
         LC::NewKeysetArray(i) => concat_str_by(w, " ", ["NewKeysetArray", i.to_string().as_str()]),
-        LC::NewLikeArrayL(local, i) => {
-            w.write("NewLikeArrayL ")?;
-            print_local(w, local)?;
-            w.write(" ")?;
-            w.write(i.to_string().as_str())
-        }
         LC::NewStructArray(l) => {
             w.write("NewStructArray ")?;
             angle(w, |w| print_shape_fields(w, l))

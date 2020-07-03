@@ -233,8 +233,6 @@ pub enum InstructLitConst {
     /// capacity hint
     NewDArray(isize),
     /// capacity hint
-    NewLikeArrayL(local::Type, isize),
-    /// capacity hint
     NewPackedArray(isize),
     NewStructArray(Vec<String>),
     NewStructDArray(Vec<String>),

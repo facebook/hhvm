@@ -1500,7 +1500,6 @@ bool FuncChecker::checkRxOp(State* cur, PC pc, Op op) {
     case Op::NewArray:
     case Op::NewMixedArray:
     case Op::NewDictArray:
-    case Op::NewLikeArrayL:
     case Op::NewPackedArray:
     case Op::NewRecord:
     case Op::NewStructArray:

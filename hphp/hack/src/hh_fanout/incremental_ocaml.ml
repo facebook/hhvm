@@ -80,7 +80,7 @@ let typecheck_and_get_deps_and_errors_job
 let get_state_file_path (state_dir : Path.t) : Path.t =
   Path.concat state_dir "ocaml.state"
 
-class cursor ~client_id ~cursor_state : Incremental.cursor =
+class cursor ~client_id ~cursor_state =
   object (self)
     val client_id : Incremental.client_id = client_id
 
@@ -274,8 +274,8 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
         (errors, Some cursor)
   end
 
-class state ~state_path ~persistent_state : Incremental.state =
-  object
+class state ~state_path ~persistent_state =
+  object (self)
     val state_path : Path.t = state_path
 
     val persistent_state : persistent_state = persistent_state
@@ -353,6 +353,7 @@ class state ~state_path ~persistent_state : Incremental.state =
       in
       incr persistent_state.max_cursor_id;
       Hashtbl.set persistent_state.cursors cursor_id (client_id, cursor);
+      self#save;
       cursor_id
   end
 
@@ -376,4 +377,5 @@ let make (state_dir : Path.t) : Incremental.state =
     In_channel.with_file ~binary:true (Path.to_string state_path) ~f:(fun ic ->
         Marshal.from_channel ic)
   in
-  new state ~state_path ~persistent_state
+  let state = new state ~state_path ~persistent_state in
+  (state :> Incremental.state)

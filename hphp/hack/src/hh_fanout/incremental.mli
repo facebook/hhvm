@@ -76,12 +76,6 @@ class type cursor =
 
 class type state =
   object
-    (** Commit any changes to this state to disk.
-
-    Changes to this state are NOT guaranteed to be automatically persisted to
-    disk, so you must call this function once done. *)
-    method save : unit
-
     (** Look up the ID of the client corresponding to the provided
     `client_config`.
 
@@ -109,9 +103,6 @@ class type state =
     method look_up_cursor :
       client_id:client_id option -> cursor_id:string -> (cursor, string) result
 
-    (** Add the given cursor to the state.
-
-    Make sure to follow this up with a call to `save` to persist it to disk.
-    *)
+    (** Add the given cursor to the state, committing any changes to disk. *)
     method add_cursor : cursor -> cursor_id
   end

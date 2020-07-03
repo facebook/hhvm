@@ -306,7 +306,6 @@ let mode_calculate
   in
 
   let cursor_id = incremental_state#add_cursor cursor in
-  incremental_state#save;
 
   let json =
     Hh_json.JSON_Object
@@ -354,10 +353,7 @@ let mode_calculate_errors
   let (errors, cursor) = cursor#calculate_errors ctx workers in
   let cursor_id =
     match cursor with
-    | Some cursor ->
-      let cursor_id = incremental_state#add_cursor cursor in
-      incremental_state#save;
-      cursor_id
+    | Some cursor -> incremental_state#add_cursor cursor
     | None ->
       let cursor_id =
         Option.value_exn
@@ -624,7 +620,6 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   in
 
   let cursor_id = incremental_state#add_cursor cursor in
-  incremental_state#save;
 
   let json =
     Debug_fanout.go

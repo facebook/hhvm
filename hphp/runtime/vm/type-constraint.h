@@ -192,13 +192,7 @@ struct TypeConstraint {
    * Returns the underlying DataType for this TypeConstraint.
    */
   MaybeDataType underlyingDataType() const {
-    if (isVArray()) return KindOfVArray;
-    if (isDArray()) return KindOfDArray;
-    if (isVArrayOrDArray()) return folly::none;
-    auto const dt = getAnnotDataType(m_type);
-    return (dt != KindOfUninit || isPrecise())
-      ? MaybeDataType(dt)
-      : folly::none;
+    return isPrecise() ? MaybeDataType(getAnnotDataType(m_type)) : folly::none;
   }
 
   /*
@@ -259,44 +253,44 @@ struct TypeConstraint {
   bool isArrayKey() const { return m_type == Type::ArrayKey; }
   bool isArrayLike() const { return m_type == Type::ArrayLike; }
 
-  bool isArray()    const {
+  bool isArray() const {
     return m_type == Type::Array ||
       isVArray() || isDArray() || isVArrayOrDArray();
   }
-  bool isDict()     const {
-    return m_type == Type::Dict ||
-      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::DArray);
+  bool isDict() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
+    return m_type == Type::Dict;
   }
-  bool isVec()      const {
-    return m_type == Type::Vec ||
-      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArray);
+  bool isVec() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
+    return m_type == Type::Vec;
   }
-  bool isKeyset()   const { return m_type == Type::Keyset; }
   bool isVecOrDict() const {
-    return m_type == Type::VecOrDict ||
-      (RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr);
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
+    return m_type == Type::VecOrDict;
   }
 
+  bool isKeyset()   const { return m_type == Type::Keyset; }
   bool isObject()   const { return m_type == Type::Object; }
   bool isInt()      const { return m_type == Type::Int; }
   bool isString()   const { return m_type == Type::String; }
   bool isRecord()   const { return m_type == Type::Record; }
 
-  bool isVArray()   const {
-    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArray;
+  bool isVArray() const {
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArray));
+    return m_type == Type::VArray;
   }
   bool isDArray()   const {
-    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::DArray;
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::DArray));
+    return m_type == Type::DArray;
   }
   bool isVArrayOrDArray() const {
-    return !RuntimeOption::EvalHackArrDVArrs && m_type == Type::VArrOrDArr;
+    assertx(IMPLIES(RO::EvalHackArrDVArrs, m_type != Type::VArrOrDArr));
+    return m_type == Type::VArrOrDArr;
   }
 
   // Returns true if we should convert a ClsMeth to a varray for this typehint.
   bool convertClsMethToArrLike() const;
-
-  // Returns true if we must notice after converting a ClsMeth to varray.
-  bool raiseClsMethHackArrCompatNotice() const;
 
   AnnotType type()  const { return m_type; }
 
@@ -361,12 +355,7 @@ struct TypeConstraint {
    * equivalent. Unlike maybeInequivalentForProp(), this function is exact and
    * can autoload. Only meant for property type-hints.
    */
-  enum class EquivalentResult {
-    Pass,    // Equivalent
-    DVArray, // Not equivalent because of d/varray mismatch
-    Fail     // Not equivalent
-  };
-  EquivalentResult equivalentForProp(const TypeConstraint& other) const;
+  bool equivalentForProp(const TypeConstraint& other) const;
 
   /*
    * Normal check if this type-constraint is compatible with the given value

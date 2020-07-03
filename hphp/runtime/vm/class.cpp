@@ -995,8 +995,7 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
   auto const& oldTC = oldProp.typeConstraint;
   auto const& newTC = prop.typeConstraint;
 
-  auto const result = oldTC.equivalentForProp(newTC);
-  if (result != TypeConstraint::EquivalentResult::Pass) {
+  if (!oldTC.equivalentForProp(newTC)) {
     auto const oldTCName =
       oldTC.hasConstraint() ? oldTC.displayName() : "mixed";
     auto const newTCName =
@@ -1028,8 +1027,7 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     for (auto const& ub : newTCs) {
       if (std::none_of(oldTCs.begin(), oldTCs.end(),
             [&](const TypeConstraint& tc) {
-              auto r = tc.equivalentForProp(ub);
-              return r == TypeConstraint::EquivalentResult::Pass;
+              return tc.equivalentForProp(ub);
             })) {
         auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
         auto const msg = folly::sformat(
@@ -1042,8 +1040,7 @@ void Class::checkPropTypeRedefinition(Slot slot) const {
     for (auto const& ub : oldTCs) {
       if (std::none_of(newTCs.begin(), newTCs.end(),
             [&](const TypeConstraint& tc) {
-              auto r = tc.equivalentForProp(ub);
-              return r == TypeConstraint::EquivalentResult::Pass;
+              return tc.equivalentForProp(ub);
             })) {
         auto const ubName = ub.hasConstraint() ? ub.displayName() : "mixed";
         auto const msg = folly::sformat(

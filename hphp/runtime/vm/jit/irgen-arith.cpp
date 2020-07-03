@@ -1505,6 +1505,7 @@ void implCmp(IRGS& env, Op op) {
   auto equiv = [&] {
     return
       equivDataTypes(leftTy.toDataType(), rightTy.toDataType()) ||
+      (isArrayType(leftTy.toDataType()) && isArrayType(rightTy.toDataType())) ||
       (isFuncType(leftTy.toDataType()) && isClassType(rightTy.toDataType())) ||
       (isClassType(leftTy.toDataType()) && isFuncType(rightTy.toDataType())) ||
       (isFuncType(leftTy.toDataType()) && isStringType(rightTy.toDataType())) ||

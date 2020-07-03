@@ -349,12 +349,9 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
 
     auto const raise_type_error = [&]{
       auto const expected_type = [&]{
-        if (tc.isArray()) {
-          if (tc.isVArray()) return "varray";
-          if (tc.isDArray()) return "darray";
-          if (tc.isVArrayOrDArray()) return "varray_or_darray";
-          return "array";
-        }
+        if (tc.isVArray()) return "varray";
+        if (tc.isDArray()) return "darray";
+        if (tc.isVArrayOrDArray()) return "varray_or_darray";
         return getDataTypeString(*targetType).data();
       }();
       auto const msg = param_type_error_message(
@@ -365,23 +362,15 @@ void coerceFCallArgsImpl(int32_t numArgs, int32_t numNonDefault,
       SystemLib::throwRuntimeExceptionObject(msg);
     };
 
-    // Checks if we need to raise an error due to a dvarray typehint mismatch.
+    // Check the varray_or_darray and vec_or_dict union types.
     // Precondition: the DataType of the TypedValue is correct.
+    //
+    // TODO(arnabde,kshaunak): Also support vec_or_dict here.
     auto const check_dvarray = [&]{
       assertx(IMPLIES(targetType, equivDataTypes(type(tv), *targetType)));
-      if (!tvIsArray(tv) || !tc.isArray()) {
-        if (tc.isVArrayOrDArray()) raise_type_error();
-        return;
+      if (tc.isVArrayOrDArray() && !tvIsHAMSafeDVArray(tv)) {
+        raise_type_error();
       }
-
-      auto const ad = val(tv).parr;
-      auto const error = [&] {
-        if (tc.isVArray()) return !ad->isVArray();
-        if (tc.isDArray()) return !ad->isDArray();
-        if (tc.isVArrayOrDArray()) return !ad->isDVArray();
-        return ad->isDVArray();
-      }();
-      if (error) raise_type_error();
     };
 
     // Check if we have the right type, or if its a Variant.

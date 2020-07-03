@@ -175,7 +175,6 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
  * - FuncToStr: Emit code to deal with any func to string conversions.
  * - ClsMethToVec: Emit code to deal with any ClsMeth to array conversions
  * - Fail:      Emit code to deal with the type check failing.
- * - DVArr:     Emit code to deal with a dvarray mismatch.
  * - Callable:  Emit code to verify that the given value is callable.
  * - VerifyCls: Emit code to verify that the given value is an instance of the
  *              given Class.
@@ -192,7 +191,6 @@ template <typename GetVal,
           typename ClassToStr,
           typename ClsMethToVec,
           typename Fail,
-          typename DVArr,
           typename Callable,
           typename VerifyCls,
           typename VerifyRecordDesc,
@@ -206,7 +204,6 @@ void verifyTypeImpl(IRGS& env,
                     ClassToStr classToStr,
                     ClsMethToVec clsMethToVec,
                     Fail fail,
-                    DVArr dvArr,
                     Callable callable,
                     VerifyCls verifyCls,
                     VerifyRecordDesc verifyRecDesc,
@@ -246,17 +243,6 @@ void verifyTypeImpl(IRGS& env,
       return callable(val);
     case AnnotAction::ObjectCheck:
       break;
-    case AnnotAction::VArrayCheck:
-    case AnnotAction::DArrayCheck:
-    case AnnotAction::VArrayOrDArrayCheck:
-    case AnnotAction::NonVArrayOrDArrayCheck: {
-      assertx(valType <= TArr);
-      ifThen(env,
-        [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
-        [&]{ genFail(); }
-      );
-      return;
-    }
     case AnnotAction::WarnFunc:
       assertx(valType <= TFunc);
       assertx(RO::EvalEnableFuncStringInterop);
@@ -329,7 +315,7 @@ void verifyTypeImpl(IRGS& env,
       if (cachedClass && classHasPersistentRDS(cachedClass) &&
           cachedClass->enumBaseTy() &&
           annotCompat(valType.toDataType(),
-                      dataTypeToAnnotType(*cachedClass->enumBaseTy()),
+                      enumDataTypeToAnnotType(*cachedClass->enumBaseTy()),
                       nullptr) == AnnotAction::Pass) {
         env.irb->constrainValue(val, DataTypeSpecific);
         return;
@@ -1351,16 +1337,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
         }
-        if (tc.raiseClsMethHackArrCompatNotice()) {
-          ARRPROV_USE_RUNTIME_LOCATION();
-          gen(
-            env,
-            RaiseHackArrParamNotice,
-            RaiseHackArrParamNoticeData { tc, id, true },
-            cns(env, empty_varray().get()),
-            cns(env, func)
-          );
-        }
         auto clsMethArr = convertClsMethToVec(env, val);
         discard(env, 1);
         push(env, clsMethArr);
@@ -1377,15 +1353,6 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
           failHard ? VerifyRetFailHard : VerifyRetFail,
           ParamWithTCData { id, &tc },
           ldStkAddr(env, BCSPRelOffset { ind })
-        );
-      },
-      [&] (SSATmp* val) { // dvarray mismatch notice
-        gen(
-          env,
-          RaiseHackArrParamNotice,
-          RaiseHackArrParamNoticeData { tc, id, true },
-          val,
-          cns(env, func)
         );
       },
       [&] (SSATmp* val) { // Callable check
@@ -1474,16 +1441,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
         if (RuntimeOption::EvalVecHintNotices) {
           raiseClsmethCompatTypeHint(env, id, func, tc);
         }
-        if (tc.raiseClsMethHackArrCompatNotice()) {
-          ARRPROV_USE_RUNTIME_LOCATION();
-          gen(
-            env,
-            RaiseHackArrParamNotice,
-            RaiseHackArrParamNoticeData { tc, id, false },
-            cns(env, empty_varray().get()),
-            cns(env, func)
-          );
-        }
         auto clsMethArr = convertClsMethToVec(env, val);
         stLocRaw(env, id, fp(env), clsMethArr);
         decRef(env, val);
@@ -1496,15 +1453,6 @@ void verifyParamTypeImpl(IRGS& env, int32_t id) {
           env,
           failHard ? VerifyParamFailHard : VerifyParamFail,
           ParamWithTCData { id, &tc }
-        );
-      },
-      [&] (SSATmp* val) { // dvarray mismatch
-        gen(
-          env,
-          RaiseHackArrParamNotice,
-          RaiseHackArrParamNoticeData { tc, id, false },
-          val,
-          cns(env, func)
         );
       },
       [&] (SSATmp* val) { // Callable check
@@ -1614,18 +1562,6 @@ void verifyPropType(IRGS& env,
             );
           }
         }
-        if (tc->raiseClsMethHackArrCompatNotice()) {
-          ARRPROV_USE_RUNTIME_LOCATION();
-          gen(
-            env,
-            RaiseHackArrPropNotice,
-            RaiseHackArrTypehintNoticeData { *tc },
-            cls,
-            cns(env, empty_varray().get()),
-            cns(env, slot),
-            cns(env, isSProp)
-          );
-        }
         *coerce = convertClsMethToVec(env, val);
         return true;
       },
@@ -1640,17 +1576,6 @@ void verifyPropType(IRGS& env,
           cls,
           cns(env, slot),
           val,
-          cns(env, isSProp)
-        );
-      },
-      [&] (SSATmp* val) { // dvarray mismatch
-        gen(
-          env,
-          RaiseHackArrPropNotice,
-          RaiseHackArrTypehintNoticeData { *tc },
-          cls,
-          val,
-          cns(env, slot),
           cns(env, isSProp)
         );
       },

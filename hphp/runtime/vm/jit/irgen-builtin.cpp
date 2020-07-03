@@ -1664,31 +1664,14 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
   auto const genFail = [&](uint32_t param, SSATmp* val) {
     auto const expected_type = [&]{
       auto const& tc = callee->params()[param].typeConstraint;
-      if (tc.isArray()) {
-        if (tc.isVArray()) return s_varray.get();
-        if (tc.isDArray()) return s_darray.get();
-        if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
-        return s_array.get();
-      }
+      if (tc.isVArray()) return s_varray.get();
+      if (tc.isDArray()) return s_darray.get();
+      if (tc.isVArrayOrDArray()) return s_varray_or_darray.get();
       auto const dt = param_target_type(callee, param) - TNull;
       return getDataTypeString(dt.toDataType()).get();
     }();
     auto const data = FuncArgTypeData { callee, param + 1, expected_type };
     gen(env, ThrowParameterWrongType, data, maker.makeUnusualCatch(), val);
-  };
-
-  auto const needDVCheck = [&](uint32_t param, const Type& ty) {
-    if (!callee->params()[param].typeConstraint.isArray()) return false;
-    return ty <= TArr;
-  };
-
-  auto const dvCheck = [&](uint32_t param, SSATmp* val) {
-    assertx(needDVCheck(param, val->type()));
-    auto const& tc = callee->params()[param].typeConstraint;
-    ifThen(env,
-      [&](Block* taken) { doDVArrChecks(env, val, taken, tc); },
-      [&]{ genFail(param, val); }
-    );
   };
 
   DEBUG_ONLY auto seenBottom = false;
@@ -1705,9 +1688,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         env, param, callee, targetTy,
         [&] (const Type& ty, Block* fail) -> SSATmp* {
           gen(env, CheckTypeMem, ty, fail, param.value);
-          if (needDVCheck(paramIdx, ty)) {
-            dvCheck(paramIdx, gen(env, LdMem, ty, param.value));
-          }
           return nullptr;
         },
         [&] (const Type& ty) -> SSATmp* {
@@ -1720,7 +1700,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             paramIdx,
             callee,
             [&] (SSATmp* val) {
-              if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
               gen(env, StLoc, LocalId{paramIdx}, fp(env), val);
               return val;
             },
@@ -1753,7 +1732,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         [&] (const Type& ty, Block* fail) {
           auto ret = gen(env, CheckType, ty, fail, param.value);
           env.irb->constrainValue(ret, DataTypeSpecific);
-          if (needDVCheck(paramIdx, ty)) dvCheck(paramIdx, ret);
           return ret;
         },
         [&] (const Type& ty) -> SSATmp* {
@@ -1764,10 +1742,7 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
             ty,
             paramIdx,
             callee,
-            [&] (SSATmp* val) {
-              if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
-              return val;
-            },
+            [&] (SSATmp* val) { return val; },
             [&] { genFail(paramIdx, oldVal); }
           );
         },
@@ -1798,12 +1773,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
         auto irSPRel = offsetFromIRSP(env, offset);
         gen(env, CheckStk, IRSPRelOffsetData { irSPRel }, ty, fail, sp(env));
         env.irb->constrainStack(irSPRel, DataTypeSpecific);
-        if (needDVCheck(paramIdx, ty)) {
-          dvCheck(
-            paramIdx,
-            gen(env, LdStk, ty, IRSPRelOffsetData { irSPRel }, sp(env))
-          );
-        }
         return nullptr;
       },
       [&] (const Type& ty) -> SSATmp* {
@@ -1817,7 +1786,6 @@ jit::vector<SSATmp*> realize_params(IRGS& env,
           paramIdx,
           callee,
           [&] (SSATmp* val) {
-            if (needDVCheck(paramIdx, val->type())) dvCheck(paramIdx, val);
             gen(env, StStk, off, sp(env), val);
             env.irb->exceptionStackBoundary();
             return val;
@@ -2226,14 +2194,12 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
       return TInt | TStr;
     case AnnotMetaType::This:
       return TObj;
-    case AnnotMetaType::VArray:
-      return RO::EvalHackArrDVArrs ? TVec : TVArr;
-    case AnnotMetaType::DArray:
-      return RO::EvalHackArrDVArrs ? TDict : TDArr;
     case AnnotMetaType::VArrOrDArr:
-      return RO::EvalHackArrDVArrs ? TVec|TDict : TVArr|TDArr;
+      assertx(!RO::EvalHackArrDVArrs);
+      return TVArr|TDArr;
     case AnnotMetaType::VecOrDict:
-      return TVec | TDict;
+      assertx(RO::EvalHackArrDVArrs);
+      return TVec|TDict;
     case AnnotMetaType::ArrayLike:
       return TArrLike;
     case AnnotMetaType::Nonnull:
@@ -2267,11 +2233,6 @@ Type builtinReturnType(const Func* builtin) {
       return Type::ExactObj(builtin->implCls());
     }
     if (auto const hniType = builtin->hniReturnType()) {
-      if (isArrayType(*hniType)) {
-        auto const& constraint = builtin->returnTypeConstraint();
-        if (constraint.isVArray()) return TVArr;
-        if (constraint.isDArray()) return TDArr;
-      }
       return Type{*hniType};
     }
     return TInitCell;

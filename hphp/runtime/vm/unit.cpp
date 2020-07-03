@@ -1389,7 +1389,7 @@ TypeAliasReq typeAliasFromClass(Unit* unit, const TypeAlias* thisType,
   if (isEnum(klass)) {
     // If the class is an enum, pull out the actual base type.
     if (auto const enumType = klass->enumBaseTy()) {
-      req.type = dataTypeToAnnotType(*enumType);
+      req.type = enumDataTypeToAnnotType(*enumType);
     } else {
       req.type = AnnotType::ArrayKey;
     }

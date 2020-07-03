@@ -1178,7 +1178,7 @@ bool FuncChecker::checkOp(State* cur, PC pc, Op op, Block* b, PC prev_pc) {
         return false;
       }
       auto const dt = unit()->lookupArray(id)->toDataType();
-      if (!equivDataTypes(KindOfArray, dt)) {
+      if (!isArrayType(dt)) {
         ferror("Array references array data that is a {}\n", dt);
         return false;
       }

@@ -4837,15 +4837,11 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       if (candidate.subtypeOf(BInt)) return TInt;
       if (candidate.subtypeOf(BStr)) return TStr;
       return TArrKey;
-    case AnnotMetaType::VArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return TVArr;
-    case AnnotMetaType::DArray:
-      assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return TDArr;
     case AnnotMetaType::VArrOrDArr:
       assertx(!RuntimeOption::EvalHackArrDVArrs);
-      return TArr;
+      if (candidate.subtypeOf(BVArr)) return TVArr;
+      if (candidate.subtypeOf(BDArr)) return TDArr;
+      break;
     case AnnotMetaType::VecOrDict:
       if (candidate.subtypeOf(BVec)) return TVec;
       if (candidate.subtypeOf(BDict)) return TDict;

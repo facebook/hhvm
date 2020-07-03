@@ -251,11 +251,7 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
     !hasConstraint() || isTypeVar() || isTypeConstant(),
     isMixed()));
 
-  if (!isPrecise()) {
-    if (isVArray()) return KindOfVArray;
-    if (isDArray()) return KindOfDArray;
-    return folly::none;
-  }
+  if (!isPrecise()) return folly::none;
 
   auto t = underlyingDataType();
   assertx(t);
@@ -279,10 +275,6 @@ MaybeDataType TypeConstraint::underlyingDataTypeResolved() const {
       auto const metatype = getAnnotMetaType(td->type);
       if (metatype == MetaType::Precise) {
         t = getAnnotDataType(td->type);
-      } else if (metatype == MetaType::VArray) {
-        t = KindOfVArray;
-      } else if (metatype == MetaType::DArray) {
-        t = KindOfDArray;
       } else {
         t = folly::none;
       }
@@ -341,18 +333,17 @@ TypeConstraint::maybeInequivalentForProp(const TypeConstraint& other) const {
   return type() != other.type();
 }
 
-TypeConstraint::EquivalentResult
-TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
+bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
   assertx(validForProp());
   assertx(other.validForProp());
 
-  if (isSoft() != other.isSoft()) return EquivalentResult::Fail;
+  if (isSoft() != other.isSoft()) return false;
 
   if (isObject() && other.isObject() &&
       isNullable() == other.isNullable() &&
       m_typeName->isame(other.m_typeName)) {
     // We can avoid having to resolve the type-hint if they have the same name.
-    return EquivalentResult::Pass;
+    return true;
   }
 
   auto const resolve = [&] (const TypeConstraint& tc)
@@ -367,8 +358,6 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::ArrayKey:
       case MetaType::Nonnull:
       case MetaType::VecOrDict:
-      case MetaType::VArray:
-      case MetaType::DArray:
       case MetaType::VArrOrDArr:
       case MetaType::ArrayLike:
       case MetaType::Precise:
@@ -415,7 +404,7 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
     if (klass && isEnum(klass)) {
       auto const maybeDt = klass->enumBaseTy();
-      at = maybeDt ? dataTypeToAnnotType(*maybeDt) : AnnotType::ArrayKey;
+      at = maybeDt ? enumDataTypeToAnnotType(*maybeDt) : AnnotType::ArrayKey;
       klass = nullptr;
     }
 
@@ -425,37 +414,15 @@ TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
 
   auto const resolved1 = resolve(*this);
   auto const resolved2 = resolve(other);
-  if (resolved1 != resolved2) {
-    // The resolutions aren't the same. This still might be okay once you take
-    // into account d/varrays.
-    auto const resType1 = std::get<0>(resolved1);
-    auto const resType2 = std::get<0>(resolved2);
-    auto const isArray1 =
-      resType1 == AnnotType::Array ||
-      resType1 == AnnotType::VArray ||
-      resType1 == AnnotType::DArray ||
-      resType1 == AnnotType::VArrOrDArr;
-    auto const isArray2 =
-      resType2 == AnnotType::Array ||
-      resType2 == AnnotType::VArray ||
-      resType2 == AnnotType::DArray ||
-      resType2 == AnnotType::VArrOrDArr;
-    if (!isArray1 || !isArray2 ||
-        std::get<2>(resolved1) != std::get<2>(resolved2)) {
-      return EquivalentResult::Fail;
-    }
-    return EquivalentResult::DVArray;
-  }
+  if (resolved1 != resolved2) return false;
 
   // The resolutions are the same. However, both could have failed to resolve to
   // anything. In that case, rely on their name.
   auto const resType = std::get<0>(resolved1);
   if (resType == AnnotType::Object && !std::get<1>(resolved1)) {
-    return m_typeName->isame(other.m_typeName)
-      ? EquivalentResult::Pass
-      : EquivalentResult::Fail;
+    return m_typeName->isame(other.m_typeName);
   }
-  return EquivalentResult::Pass;
+  return true;
 }
 
 template <bool Assert, bool ForProp>
@@ -500,18 +467,6 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val) const {
         assertx(td->type == AnnotType::Object);
         c = td->klass;
         break;
-      case AnnotAction::VArrayCheck:
-        assertx(tvIsArray(val));
-        return Assert || val.val().parr->isVArray();
-      case AnnotAction::DArrayCheck:
-        assertx(tvIsArray(val));
-        return Assert || val.val().parr->isDArray();
-      case AnnotAction::VArrayOrDArrayCheck:
-        assertx(tvIsArray(val));
-        return Assert || val.val().parr->isDVArray();
-      case AnnotAction::NonVArrayOrDArrayCheck:
-        assertx(tvIsArray(val));
-        return Assert || val.val().parr->isNotDVArray();
       case AnnotAction::WarnFunc:
       case AnnotAction::WarnClass:
       case AnnotAction::ConvertFunc:
@@ -613,8 +568,6 @@ bool TypeConstraint::checkTypeAliasImpl(const T* type) const {
     case AnnotMetaType::Number:
     case AnnotMetaType::ArrayKey:
     case AnnotMetaType::This:
-    case AnnotMetaType::VArray:
-    case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:
@@ -705,8 +658,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
         case MetaType::Precise:
         case MetaType::Number:
         case MetaType::ArrayKey:
-        case MetaType::VArray:
-        case MetaType::DArray:
         case MetaType::VArrOrDArr:
         case MetaType::VecOrDict:
         case MetaType::ArrayLike:
@@ -739,20 +690,6 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::ObjectCheck:
       assertx(isObject());
       return !isPasses && checkNamedTypeNonObj<isAssert, isProp>(val);
-    case AnnotAction::VArrayCheck:
-      // Since d/varray type-hints are always soft, we can never assert on their
-      // correctness.
-      assertx(tvIsArray(val));
-      return isAssert || val.val().parr->isVArray();
-    case AnnotAction::DArrayCheck:
-      assertx(tvIsArray(val));
-      return isAssert || val.val().parr->isDArray();
-    case AnnotAction::VArrayOrDArrayCheck:
-      assertx(tvIsArray(val));
-      return isAssert || val.val().parr->isDVArray();
-    case AnnotAction::NonVArrayOrDArrayCheck:
-      assertx(tvIsArray(val));
-      return isAssert || val.val().parr->isNotDVArray();
     case AnnotAction::WarnFunc:
     case AnnotAction::WarnClass:
     case AnnotAction::ConvertFunc:
@@ -809,10 +746,6 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
       case AnnotAction::CallableCheck:
       case AnnotAction::ObjectCheck:
         return false;
-      case AnnotAction::VArrayCheck:
-      case AnnotAction::DArrayCheck:
-      case AnnotAction::VArrayOrDArrayCheck:
-      case AnnotAction::NonVArrayOrDArrayCheck:
       case AnnotAction::WarnFunc:
       case AnnotAction::ConvertFunc:
       case AnnotAction::WarnClass:
@@ -835,8 +768,6 @@ bool TypeConstraint::alwaysPasses(const StringData* clsName) const {
     case MetaType::NoReturn:
     case MetaType::Number:
     case MetaType::ArrayKey:
-    case MetaType::VArray:
-    case MetaType::DArray:
     case MetaType::VArrOrDArr:
     case MetaType::VecOrDict:
     case MetaType::ArrayLike:
@@ -865,10 +796,6 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::Fail:
     case AnnotAction::CallableCheck:
     case AnnotAction::ObjectCheck:
-    case AnnotAction::VArrayCheck:
-    case AnnotAction::DArrayCheck:
-    case AnnotAction::VArrayOrDArrayCheck:
-    case AnnotAction::NonVArrayOrDArrayCheck:
     case AnnotAction::WarnFunc:
     case AnnotAction::ConvertFunc:
     case AnnotAction::WarnClass:
@@ -1002,10 +929,6 @@ bool TypeConstraint::convertClsMethToArrLike() const {
   return result == AnnotAction::ClsMethCheck;
 }
 
-bool TypeConstraint::raiseClsMethHackArrCompatNotice() const {
-  return m_type == AnnotType::Array || isDArray();
-}
-
 void TypeConstraint::verifyParamFail(const Func* func, tv_lval val,
                                      int paramNums) const {
   verifyFail(func, val, paramNums);
@@ -1064,10 +987,6 @@ void TypeConstraint::verifyOutParamFail(const Func* func,
       castClsMeth(c, make_vec_array<String,String>);
     } else {
       castClsMeth(c, make_varray<String,String>);
-      if (raiseClsMethHackArrCompatNotice()) {
-        raise_hackarr_compat_type_hint_outparam_notice(
-          func, c->m_data.parr, displayName(func->cls()).c_str(), paramNum);
-      }
     }
     return;
   }
@@ -1134,10 +1053,6 @@ void TypeConstraint::verifyPropFail(const Class* thisCls,
       castClsMeth(val, make_vec_array<String,String>);
     } else {
       castClsMeth(val, make_varray<String,String>);
-      if (raiseClsMethHackArrCompatNotice()) {
-        raise_hackarr_compat_type_hint_property_notice(
-          declCls, val.val().parr, displayName().c_str(), propName, isStatic);
-      }
     }
     return;
   }
@@ -1199,15 +1114,6 @@ void TypeConstraint::verifyFail(const Func* func, tv_lval c,
       castClsMeth(c, make_vec_array<String,String>);
     } else {
       castClsMeth(c, make_varray<String,String>);
-      if (raiseClsMethHackArrCompatNotice()) {
-        if (id == ReturnId) {
-          raise_hackarr_compat_type_hint_ret_notice(
-            func, val(c).parr, name.c_str());
-        } else {
-          raise_hackarr_compat_type_hint_param_notice(
-            func, val(c).parr, name.c_str(), id);
-        }
-      }
     }
     return;
   }
@@ -1363,8 +1269,6 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Parent:
     case AnnotMetaType::Callable:
     case AnnotMetaType::Number:
-    case AnnotMetaType::VArray:
-    case AnnotMetaType::DArray:
     case AnnotMetaType::VArrOrDArr:
     case AnnotMetaType::VecOrDict:
     case AnnotMetaType::ArrayLike:

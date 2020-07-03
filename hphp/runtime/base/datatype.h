@@ -374,7 +374,6 @@ constexpr int kHasPersistentMask = -128;
  */
 constexpr bool equivDataTypes(DataType t1, DataType t2) {
   return t1 == t2 ||
-    (isArrayType(t1) && isArrayType(t2)) ||
     ((dt_t(t1) & dt_t(t2) & kHasPersistentMask) &&
      (dt_t(t1) & ~kRefCountedBit) == (dt_t(t2) & ~kRefCountedBit));
 }

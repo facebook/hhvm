@@ -44,14 +44,12 @@ enum class AnnotMetaType : uint8_t {
   Number = 5,
   ArrayKey = 6,
   This = 7,
-  VArray = 8,
-  DArray = 9,
-  VArrOrDArr = 10,
-  VecOrDict = 11,
-  ArrayLike = 12,
-  Nonnull = 13,
-  NoReturn = 14,
-  Nothing = 15
+  VArrOrDArr = 8,
+  VecOrDict = 9,
+  ArrayLike = 10,
+  Nonnull = 11,
+  NoReturn = 12,
+  Nothing = 13,
 };
 
 enum class AnnotType : uint16_t {
@@ -61,6 +59,8 @@ enum class AnnotType : uint16_t {
   Float    = (uint8_t)KindOfDouble   | (uint16_t)AnnotMetaType::Precise << 8,
   String   = (uint8_t)KindOfString   | (uint16_t)AnnotMetaType::Precise << 8,
   Array    = (uint8_t)KindOfArray    | (uint16_t)AnnotMetaType::Precise << 8,
+  VArray   = (uint8_t)KindOfVArray   | (uint16_t)AnnotMetaType::Precise << 8,
+  DArray   = (uint8_t)KindOfDArray   | (uint16_t)AnnotMetaType::Precise << 8,
   Object   = (uint8_t)KindOfObject   | (uint16_t)AnnotMetaType::Precise << 8,
   Resource = (uint8_t)KindOfResource | (uint16_t)AnnotMetaType::Precise << 8,
   Dict     = (uint8_t)KindOfDict     | (uint16_t)AnnotMetaType::Precise << 8,
@@ -76,8 +76,6 @@ enum class AnnotType : uint16_t {
   Number   = (uint16_t)AnnotMetaType::Number << 8       | (uint8_t)KindOfUninit,
   ArrayKey = (uint16_t)AnnotMetaType::ArrayKey << 8     | (uint8_t)KindOfUninit,
   This     = (uint16_t)AnnotMetaType::This << 8         | (uint8_t)KindOfUninit,
-  VArray   = (uint16_t)AnnotMetaType::VArray << 8       | (uint8_t)KindOfUninit,
-  DArray   = (uint16_t)AnnotMetaType::DArray << 8       | (uint8_t)KindOfUninit,
   VArrOrDArr = (uint16_t)AnnotMetaType::VArrOrDArr << 8 | (uint8_t)KindOfUninit,
   VecOrDict  = (uint16_t)AnnotMetaType::VecOrDict << 8  | (uint8_t)KindOfUninit,
   ArrayLike  = (uint16_t)AnnotMetaType::ArrayLike << 8  | (uint8_t)KindOfUninit,
@@ -94,11 +92,8 @@ inline DataType getAnnotDataType(AnnotType at) {
   return dt;
 }
 
-inline AnnotType dataTypeToAnnotType(DataType dt) {
-  assertx(dt == KindOfBoolean || dt == KindOfInt64 ||
-         dt == KindOfDouble || dt == KindOfString || dt == KindOfArray ||
-         dt == KindOfVec || dt == KindOfDict || dt == KindOfKeyset ||
-         dt == KindOfObject || dt == KindOfResource);
+inline AnnotType enumDataTypeToAnnotType(DataType dt) {
+  assertx(dt == KindOfInt64 || dt == KindOfString);
   return (AnnotType)((uint8_t)dt | (uint16_t)AnnotMetaType::Precise << 8);
 }
 
@@ -126,10 +121,6 @@ enum class AnnotAction {
   Fail,
   ObjectCheck,
   CallableCheck,
-  VArrayCheck,
-  DArrayCheck,
-  VArrayOrDArrayCheck,
-  NonVArrayOrDArrayCheck,
   WarnFunc,
   ConvertFunc,
   WarnClass,
@@ -170,16 +161,6 @@ enum class AnnotAction {
  * types and we've already checked if the annotation was "self" / "parent",
  * but the caller still needs to check if the annotation is a type alias or
  * an enum.
- *
- * VArrayCheck: `dt' is an array on which the caller needs to do a varray check.
- *
- * DArrayCheck: `dt' is an array on which the caller needs to do a darray check.
- *
- * VArrayOrDArrayCheck: `dt' is an array on which the caller needs to do a
- * varray or darray check.
- *
- * NonVArrayOrDArrayCheck: `dt' is an array on which the caller needs to check
- * for non-dvarray-ness.
  *
  * RecordCheck: 'at' and 'dt' are both records and the caller needs to check
  * if the record in the value matches annotation.

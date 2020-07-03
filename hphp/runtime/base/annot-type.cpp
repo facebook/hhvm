@@ -20,6 +20,7 @@
 #include <folly/MapUtil.h>
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/static-string-table.h"
+#include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/util/hash-map.h"
 
@@ -88,16 +89,15 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { "HH\\keyset",   AnnotType::Keyset },
       {
         "HH\\varray",
-        RuntimeOption::EvalHackArrDVArrs ? AnnotType::Vec : AnnotType::VArray
+        RO::EvalHackArrDVArrs ? AnnotType::Vec : AnnotType::VArray
       },
       {
         "HH\\darray",
-        RuntimeOption::EvalHackArrDVArrs ? AnnotType::Dict : AnnotType::DArray
+        RO::EvalHackArrDVArrs ? AnnotType::Dict : AnnotType::DArray
       },
       {
         "HH\\varray_or_darray",
-        RuntimeOption::EvalHackArrDVArrs
-          ? AnnotType::VecOrDict : AnnotType::VArrOrDArr
+        RO::EvalHackArrDVArrs ? AnnotType::VecOrDict : AnnotType::VArrOrDArr
       },
       { "HH\\vec_or_dict", AnnotType::VecOrDict },
       { "HH\\arraylike", AnnotType::ArrayLike },
@@ -255,46 +255,26 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
               isFuncType(dt) || dt == KindOfObject || isClsMethType(dt) ||
               isRFuncType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
-    case AnnotMetaType::VArray:
-      if (isClsMethType(dt)) {
-        return RuntimeOption::EvalHackArrDVArrs ?
-          AnnotAction::Fail : AnnotAction::ClsMethCheck;
-      }
-      if (!isArrayType(dt)) return AnnotAction::Fail;
-      return AnnotAction::VArrayCheck;
-    case AnnotMetaType::DArray:
-      if (!isArrayType(dt)) return AnnotAction::Fail;
-      return AnnotAction::DArrayCheck;
     case AnnotMetaType::VArrOrDArr:
-      if (isClsMethType(dt)) {
-        return RuntimeOption::EvalHackArrDVArrs ?
-          AnnotAction::Fail : AnnotAction::ClsMethCheck;
-      }
-      if (!isArrayType(dt)) return AnnotAction::Fail;
-      return AnnotAction::VArrayOrDArrayCheck;
+      assertx(!RO::EvalHackArrDVArrs);
+      if (isClsMethType(dt)) return AnnotAction::ClsMethCheck;
+      return isHAMSafeDVArrayType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::VecOrDict:
       if (isClsMethType(dt)) {
-        return !RuntimeOption::EvalHackArrDVArrs ?
-          AnnotAction::Fail : AnnotAction::ClsMethCheck;
+        return RO::EvalHackArrDVArrs
+          ? AnnotAction::ClsMethCheck
+          : AnnotAction::Fail;
       }
       return (isVecType(dt) || isDictType(dt))
         ? AnnotAction::Pass
         : AnnotAction::Fail;
     case AnnotMetaType::ArrayLike:
-      if (isClsMethType(dt)) {
-        return AnnotAction::ClsMethCheck;
-      }
-      return (isArrayType(dt) || isVecType(dt) ||
-              isDictType(dt) || isKeysetType(dt))
-        ? AnnotAction::Pass
-        : AnnotAction::Fail;
+      if (isClsMethType(dt)) return AnnotAction::ClsMethCheck;
+      return isArrayLikeType(dt) ? AnnotAction::Pass : AnnotAction::Fail;
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
       return AnnotAction::Fail;
     case AnnotMetaType::Precise:
-      if (at == AnnotType::Array && isArrayType(dt)) {
-        return AnnotAction::NonVArrayOrDArrayCheck;
-      }
       break;
   }
 

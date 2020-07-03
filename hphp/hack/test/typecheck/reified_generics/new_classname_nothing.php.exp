@@ -1,0 +1,4 @@
+File "new_classname_nothing.php", line 6, characters 3-10:
+All type arguments must be specified because a type parameter is reified (Typing[4303])
+File "new_classname_nothing.php", line 3, characters 13-15:
+Definition is here

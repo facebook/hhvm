@@ -228,6 +228,22 @@ let handler =
           in
           Option.iter t ~f:(fun has_reified ->
               if has_reified then Errors.new_static_class_reified pos))
+      | (_, New ((_, (CIself | CIparent)), _, _, _, _)) -> ()
+      | ((pos, _), New (((_, ty), _), targs, _, _, _)) ->
+        let (env, ty) = Env.expand_type env ty in
+        begin
+          match get_node ty with
+          | Tclass ((_, cid), _, _) ->
+            begin
+              match Env.get_class env cid with
+              | Some cls ->
+                let tparams = Cls.tparams cls in
+                let class_pos = Cls.pos cls in
+                verify_call_targs env pos class_pos tparams targs
+              | _ -> ()
+            end
+          | _ -> ()
+        end
       | _ -> ()
 
     method! at_hint env =

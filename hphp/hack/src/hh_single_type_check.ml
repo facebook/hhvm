@@ -28,7 +28,7 @@ module PositionedTree = Full_fidelity_syntax_tree.WithSyntax (PS)
 (*****************************************************************************)
 
 type mode =
-  | Ifc of string
+  | Ifc of int
   | Ai of Ai_options.t
   | Autocomplete
   | Autocomplete_manually_invoked
@@ -249,7 +249,7 @@ let parse_options () =
   let widen_is_array = ref false in
   let options =
     [
-      ("--ifc", Arg.String set_ifc, " Run the flow analysis");
+      ("--ifc", Arg.Int set_ifc, " Run the flow analysis");
       ("--ai", Arg.String set_ai, " Run the abstract interpreter (Zoncolan)");
       ( "--deregister-attributes",
         Arg.Unit (set_bool deregister_attributes),
@@ -1281,7 +1281,7 @@ let handle_mode
   in
   let iter_over_files f : unit = List.iter filenames f in
   match mode with
-  | Ifc ifc_options ->
+  | Ifc ifc_verbosity ->
     let print_errors errors = List.iter ~f:(print_error error_format) errors in
     if not (List.is_empty parse_errors) then
       print_errors parse_errors
@@ -1292,7 +1292,7 @@ let handle_mode
       if not (List.is_empty errors) then
         print_errors errors
       else
-        Ifc.do_ files_info ifc_options ctx
+        Ifc.do_ files_info ifc_verbosity ctx
   | Ai ai_options ->
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors

@@ -134,34 +134,44 @@ Analyzing \tlSetOtherBool:
     [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
      pc < .oBool]
 
-Global solving:
-  Flows for \My#__construct:
-    [\My < .mInt, $mInt < .mInt, pc < .mInt, \My < \Other'1,
-     .oBool < .oBool'1, .oBool'1 < .oBool, lump'1 = lump'2,
-     \Other < \Other'1, pc < \Other'1, \My < lump, $mBool < lump, pc < lump]
-    simplified: True
-  Flows for \My#getMInt:
-    [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
-    simplified: True
-  Flows for \My#setMInt:
-    [\My < .mInt, $candidate < .mInt, pc < .mInt]
-    simplified: True
-  Flows for \tlGetMyInt:
-    [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
-    simplified: True
-  Flows for \tlGetOther:
-    [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
-     lump'2 = lump, .other < \Other]
-    simplified: True
-  Flows for \tlGetOtherBool:
-    [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
-     .oBool'1 < ret]
-    simplified: True
-  Flows for \tlSetMyInt:
-    [\My < .mInt, $val < .mInt, pc < .mInt]
-    simplified: True
-  Flows for \tlSetOtherBool:
-    [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
-     pc < .oBool]
-    simplified: True
-  
+Flows constraints for \My#__construct:
+  Simplified: True
+  Raw:
+  [\My < .mInt, $mInt < .mInt, pc < .mInt, \My < \Other'1, .oBool < .oBool'1,
+   .oBool'1 < .oBool, lump'1 = lump'2, \Other < \Other'1, pc < \Other'1,
+   \My < lump, $mBool < lump, pc < lump]
+
+Flows constraints for \My#getMInt:
+  Simplified: True
+  Raw: [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
+
+Flows constraints for \My#setMInt:
+  Simplified: True
+  Raw: [\My < .mInt, $candidate < .mInt, pc < .mInt]
+
+Flows constraints for \tlGetMyInt:
+  Simplified: True
+  Raw: [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
+
+Flows constraints for \tlGetOther:
+  Simplified: True
+  Raw:
+  [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
+   lump'2 = lump, .other < \Other]
+
+Flows constraints for \tlGetOtherBool:
+  Simplified: True
+  Raw:
+  [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
+   .oBool'1 < ret]
+
+Flows constraints for \tlSetMyInt:
+  Simplified: True
+  Raw: [\My < .mInt, $val < .mInt, pc < .mInt]
+
+Flows constraints for \tlSetOtherBool:
+  Simplified: True
+  Raw:
+  [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
+   pc < .oBool]
+

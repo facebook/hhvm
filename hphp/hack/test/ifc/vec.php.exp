@@ -128,44 +128,60 @@ Analyzing \copyOnWrite:
      lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
      \HH\vec'1 < \HH\vec'3, $y < tp'3]
 
-Global solving:
-  Flows for \C#mutation:
-    [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
-     VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
-     .v'2 < VEC, bop < VEC, pc < VEC]
-    simplified: INT < VEC
-  Flows for \C#nested:
-    [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
-     \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
-     lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
-     pc < INT]
-    simplified: VEC < INT
-  Flows for \C#set:
-    [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
-     VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
-    simplified: INT < VEC
-  Flows for \copyOnWrite:
-    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
-     lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
-     \HH\vec'1 < \HH\vec'3, $y < tp'3]
-    simplified: True
-  Flows for \empty:
-    [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump,
-     \HH\vec'2 < \HH\vec]
-    simplified: True
-  Flows for \retElem:
-    [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
-     \HH\vec < \HH\vec'1, tp'1 < ret]
-    simplified: True
-  Flows for \testAdd1:
-    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
-    simplified: True
-  Flows for \testAdd2:
-    [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
-     tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
-    simplified: True
-  Flows for \testCollection:
-    [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
-     \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
-    simplified: True
-  
+Flows constraints for \C#mutation:
+  Simplified: INT < VEC
+  Raw:
+  [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
+   VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
+   .v'2 < VEC, bop < VEC, pc < VEC]
+
+Flows constraints for \C#nested:
+  Simplified: VEC < INT
+  Raw:
+  [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
+   \HH\vec < \HH\vec'2, lump'1 = lump'3, \HH\vec'1 < \HH\vec'3, tp < tp'1,
+   lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
+   pc < INT]
+
+Flows constraints for \C#set:
+  Simplified: INT < VEC
+  Raw:
+  [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
+   VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
+
+Flows constraints for \copyOnWrite:
+  Simplified: True
+  Raw:
+  [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
+   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
+   \HH\vec'1 < \HH\vec'3, $y < tp'3]
+
+Flows constraints for \empty:
+  Simplified: True
+  Raw:
+  [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump, \HH\vec'2 < \HH\vec]
+
+
+Flows constraints for \retElem:
+  Simplified: True
+  Raw:
+  [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
+   \HH\vec < \HH\vec'1, tp'1 < ret]
+
+Flows constraints for \testAdd1:
+  Simplified: True
+  Raw: [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
+
+Flows constraints for \testAdd2:
+  Simplified: True
+  Raw:
+  [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
+   tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
+
+
+Flows constraints for \testCollection:
+  Simplified: True
+  Raw:
+  [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
+   \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
+

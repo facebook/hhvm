@@ -50,18 +50,21 @@ Analyzing \condition:
     [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
      $x'2 < ret]
 
-Global solving:
-  Flows for \assign0:
-    [$arg < $x, Bot < $x'1, $x'1 < ret]
-    simplified: True
-  Flows for \assign1:
-    [$arg < $x, $x < $x'1, $x'1 < ret]
-    simplified: True
-  Flows for \binop:
-    $x < ret
-    simplified: True
-  Flows for \condition:
-    [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
-     $x'2 < ret]
-    simplified: True
-  
+Flows constraints for \assign0:
+  Simplified: True
+  Raw: [$arg < $x, Bot < $x'1, $x'1 < ret]
+
+Flows constraints for \assign1:
+  Simplified: True
+  Raw: [$arg < $x, $x < $x'1, $x'1 < ret]
+
+Flows constraints for \binop:
+  Simplified: True
+  Raw: $x < ret
+
+Flows constraints for \condition:
+  Simplified: True
+  Raw:
+  [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
+   $x'2 < ret]
+

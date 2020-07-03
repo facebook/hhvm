@@ -20,6 +20,8 @@ module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
 
+let verbosity_level = ref 0
+
 exception FlowInference of string
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
@@ -575,11 +577,13 @@ let callable decl_env class_name_opt name saved_env params body lrty =
     let end_env = env in
 
     (* Display the analysis results *)
-    Format.printf "Analyzing %s:@." name;
-    Format.printf "%a@." Pp.renv renv;
-    Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
-    Format.printf "* Final environment:@,  %a@." Pp.env end_env;
-    Format.printf "@.";
+    if !verbosity_level >= 2 then begin
+      Format.printf "Analyzing %s:@." name;
+      Format.printf "%a@." Pp.renv renv;
+      Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
+      Format.printf "* Final environment:@,  %a@." Pp.env end_env;
+      Format.printf "@."
+    end;
 
     (* Return the results *)
     let res =
@@ -635,7 +639,8 @@ let walk_tast decl_env =
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-let do_ files_info opts ctx =
+let do_ files_info verbosity ctx =
+  verbosity_level := verbosity;
   Relative_path.Map.iter files_info ~f:(fun path i ->
       (* skip decls and partial *)
       match i.FileInfo.file_mode with
@@ -645,14 +650,11 @@ let do_ files_info opts ctx =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
         let decl_env = Decl.collect_sigs tast in
-        Format.printf "%a@." Pp.decl_env decl_env;
-
-        if String.equal opts "prtast" then
-          Format.printf "TAST: %a@." Tast.pp_program tast;
+        if !verbosity_level >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
 
         let results = walk_tast decl_env tast in
         begin
-          try Solver.global_exn ~subtype results with
+          try Solver.global_exn !verbosity_level ~subtype results with
           | Solver.Error Solver.RecursiveCycle ->
             fail "solver error: cyclic call graph"
           | Solver.Error (Solver.MissingResults callable) ->

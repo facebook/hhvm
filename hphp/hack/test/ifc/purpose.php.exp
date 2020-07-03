@@ -76,24 +76,30 @@ Analyzing writeDeep:
   Constraints:
     [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
 
-Global solving:
-  Flows for \C#__construct:
-    [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
-     \D < Secret, pc < Secret]
-    simplified: True
-  Flows for \C#getDeep:
-    [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
-    simplified: True
-  Flows for \C#getShallow1:
-    [Secret < .ci, \C < .ci, .ci < ret]
-    simplified: True
-  Flows for \C#getShallow2:
-    [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
-    simplified: True
-  Flows for \C#writeDeep:
-    [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
-    simplified: Bot < Secret
-  Flows for \D#__construct:
-    [\D < lump, $di < lump, pc < lump]
-    simplified: True
-  
+Flows constraints for \C#__construct:
+  Simplified: True
+  Raw:
+  [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
+   \D < Secret, pc < Secret]
+
+Flows constraints for \C#getDeep:
+  Simplified: True
+  Raw: [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
+
+Flows constraints for \C#getShallow1:
+  Simplified: True
+  Raw: [Secret < .ci, \C < .ci, .ci < ret]
+
+Flows constraints for \C#getShallow2:
+  Simplified: True
+  Raw: [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
+
+Flows constraints for \C#writeDeep:
+  Simplified: Bot < Secret
+  Raw: [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
+
+
+Flows constraints for \D#__construct:
+  Simplified: True
+  Raw: [\D < lump, $di < lump, pc < lump]
+

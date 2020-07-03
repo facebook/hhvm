@@ -20,8 +20,6 @@ module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
 
-let verbosity_level = ref 0
-
 exception FlowInference of string
 
 let fail fmt = Format.kasprintf (fun s -> raise (FlowInference s)) fmt
@@ -553,7 +551,7 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
 and block renv env (blk : Tast.block) =
   List.fold_left ~f:(stmt renv) ~init:env blk
 
-let callable decl_env class_name_opt name saved_env params body lrty =
+let callable opts decl_env class_name_opt name saved_env params body lrty =
   try
     (* Setup the read-only environment *)
     let scope = Scope.alloc () in
@@ -577,7 +575,7 @@ let callable decl_env class_name_opt name saved_env params body lrty =
     let end_env = env in
 
     (* Display the analysis results *)
-    if !verbosity_level >= 2 then begin
+    if opts.verbosity >= 2 then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
       Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
@@ -608,7 +606,7 @@ let callable decl_env class_name_opt name saved_env params body lrty =
     Format.printf "Analyzing %s:@.  Failure: %s@.@." name s;
     None
 
-let walk_tast decl_env =
+let walk_tast opts decl_env =
   let def = function
     | A.Fun
         {
@@ -621,7 +619,7 @@ let walk_tast decl_env =
         } ->
       Option.map
         ~f:(fun x -> [x])
-        (callable decl_env None name saved_env params body lrty)
+        (callable opts decl_env None name saved_env params body lrty)
     | A.Class { A.c_name = (_, class_name); c_methods = methods; _ } ->
       let handle_method
           {
@@ -632,15 +630,14 @@ let walk_tast decl_env =
             m_ret = (lrty, _);
             _;
           } =
-        callable decl_env (Some class_name) name saved_env params body lrty
+        callable opts decl_env (Some class_name) name saved_env params body lrty
       in
       Some (List.filter_map ~f:handle_method methods)
     | _ -> None
   in
   (fun tast -> List.concat (List.filter_map ~f:def tast))
 
-let do_ files_info verbosity ctx =
-  verbosity_level := verbosity;
+let do_ opts files_info ctx =
   Relative_path.Map.iter files_info ~f:(fun path i ->
       (* skip decls and partial *)
       match i.FileInfo.file_mode with
@@ -650,11 +647,11 @@ let do_ files_info verbosity ctx =
           Tast_provider.compute_tast_unquarantined ~ctx ~entry
         in
         let decl_env = Decl.collect_sigs tast in
-        if !verbosity_level >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
+        if opts.verbosity >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
 
-        let results = walk_tast decl_env tast in
+        let results = walk_tast opts decl_env tast in
         begin
-          try Solver.global_exn !verbosity_level ~subtype results with
+          try Solver.global_exn opts ~subtype results with
           | Solver.Error Solver.RecursiveCycle ->
             fail "solver error: cyclic call graph"
           | Solver.Error (Solver.MissingResults callable) ->

@@ -26,7 +26,7 @@ exception Error of solving_error
 (* Combine the results of each individual function into a global
    constraint. If the resulting constraint is satisfiable all the
    flows in the program are safe *)
-let global_exn ~subtype verbosity callable_results =
+let global_exn ~subtype opts callable_results =
   let results_map =
     let add_result resm res = SMap.add res.res_proto.fp_name res resm in
     List.fold ~init:SMap.empty ~f:add_result callable_results
@@ -83,11 +83,11 @@ let global_exn ~subtype verbosity callable_results =
       let pred _ = true in
       Logic.simplify (Logic.quantify ~pred ~quant:Qexists closed_constr)
     in
-    if verbosity >= 0 then begin
+    if opts.verbosity >= 0 then begin
       Format.printf "@[<v>";
       Format.printf "Flows constraints for %s:@.  @[<v>" res_name;
       Format.printf "@[<hov>Simplified:@ @[<hov>%a@]@]" Pp.prop simpl_constr;
-      if verbosity >= 1 then
+      if opts.verbosity >= 1 then
         Format.printf "@,@[<hov>Raw:@ @[<hov>%a@]@]" Pp.prop closed_constr;
       Format.printf "@]";
       Format.printf "@]\n\n"

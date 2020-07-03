@@ -1292,7 +1292,8 @@ let handle_mode
       if not (List.is_empty errors) then
         print_errors errors
       else
-        Ifc.do_ files_info ifc_verbosity ctx
+        let opts = { Ifc_types.verbosity = ifc_verbosity } in
+        Ifc.do_ opts files_info ctx
   | Ai ai_options ->
     if not (List.is_empty parse_errors) then
       List.iter ~f:(print_error error_format) parse_errors

@@ -164,3 +164,14 @@ type callable_result = {
      res_constraint *)
   res_deps: SSet.t;
 }
+
+type options = {
+  (* Verbosity level for the IFC output.
+   * Each level includes everything below it as well.
+   * 0: What the user is meant to see
+   * 1: Details constraints after solving
+   * 2: Results of IFC analysis on functions/methods
+   * 3: Declaration analysis results
+   *)
+  verbosity: int;
+}

@@ -2148,16 +2148,6 @@ To string conversions:
   Raises a catchable type hint error if the reified generics of S0 does not
   match the type structure given on S1.
 
-| RaiseHackArrParamNotice<type,id,isReturn>, ND, S(Arr) S(Func), LA
-
-  Raise a HackArrCompatNotice corresponding to a param or return typehint
-  dvarray mismatch. S0 is the array being passed to the callee S1.
-
-| RaiseHackArrPropNotice<type>, ND, S(Cls) S(Arr) S(Int) C(Bool), LA
-
-  Raise a HackArrCompatNotice corresponding to a property typehint dvarray
-  mismatch. Behaves like RaiseHackArrParamNotice.
-
 | RaiseArraySerializeNotice, ND, C(Int) S(ArrLike), LA
 
   Raise a serialization notice with provenance information from the given vec or

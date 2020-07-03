@@ -1523,14 +1523,6 @@ struct ParamWithTCData : IRExtraData {
   const TypeConstraint* tc;
 };
 
-struct RaiseHackArrTypehintNoticeData : IRExtraData {
-  explicit RaiseHackArrTypehintNoticeData(const TypeConstraint& tc) : tc{tc} {}
-
-  std::string show() const { return tc.displayName(); }
-
-  TypeConstraint tc;
-};
-
 struct TypeConstraintData : IRExtraData {
   explicit TypeConstraintData(const TypeConstraint* tc)
     : tc(tc) {}
@@ -1538,26 +1530,6 @@ struct TypeConstraintData : IRExtraData {
   std::string show() const { return tc->displayName(); }
 
   const TypeConstraint* tc;
-};
-
-struct RaiseHackArrParamNoticeData : RaiseHackArrTypehintNoticeData {
-  RaiseHackArrParamNoticeData(const TypeConstraint& tc,
-                              int32_t id, bool isReturn)
-    : RaiseHackArrTypehintNoticeData{tc}
-    , id{id}
-    , isReturn{isReturn} {}
-
-  std::string show() const {
-    auto const typeStr = RaiseHackArrTypehintNoticeData::show();
-    return folly::to<std::string>(
-      typeStr, ",",
-      id, ",",
-      isReturn ? "true" : "false"
-    );
-  }
-
-  int32_t id;
-  bool isReturn;
 };
 
 struct RaiseClsMethPropConvertNoticeData : IRExtraData {
@@ -1853,8 +1825,6 @@ X(DecRefNZ,                     DecRefData);
 X(ProfileDecRef,                DecRefData);
 X(LdTVAux,                      LdTVAuxData);
 X(CheckInOuts,                  CheckInOutsData);
-X(RaiseHackArrParamNotice,      RaiseHackArrParamNoticeData);
-X(RaiseHackArrPropNotice,       RaiseHackArrTypehintNoticeData);
 X(DbgAssertRefCount,            AssertReason);
 X(Unreachable,                  AssertReason);
 X(EndBlock,                     AssertReason);

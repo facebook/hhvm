@@ -384,33 +384,6 @@ raise_hack_arr_compat_array_producing_func_notice(const std::string& name) {
 
 namespace {
 
-const char* arrayToName(const ArrayData* ad) {
-  always_assert(ad->kindIsValid());
-  if (ad->isVArray()) return "varray";
-  if (ad->isDArray()) return "darray";
-  return "array";
-}
-
-void raise_hackarr_compat_type_hint_impl(const Func* func,
-                                         const ArrayData* ad,
-                                         const char* name,
-                                         folly::Optional<int> param) {
-  auto const given = arrayToName(ad);
-
-  if (param) {
-    raise_notice(
-      "Hack Array Compat: Argument %d to %s() must be of type %s, %s given",
-      *param + 1, func->fullName()->data(), name, given
-    );
-  } else {
-    raise_notice(
-      "Hack Array Compat: Value returned from %s() must be of type %s, "
-      "%s given",
-      func->fullName()->data(), name, given
-    );
-  }
-}
-
 [[noreturn]]
 void raise_func_undefined(const char* prefix, const StringData* name,
                           const Class* cls) {
@@ -421,62 +394,6 @@ void raise_func_undefined(const char* prefix, const StringData* name,
   raise_error("%s undefined function %s()", prefix, name->data());
 }
 
-}
-
-void raise_hackarr_compat_type_hint_param_notice(const Func* func,
-                                                 const ArrayData* ad,
-                                                 const char* name,
-                                                 int param) {
-  raise_hackarr_compat_type_hint_impl(func, ad, name, param);
-}
-
-void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
-                                               const ArrayData* ad,
-                                               const char* name) {
-  raise_hackarr_compat_type_hint_impl(func, ad, name, folly::none);
-}
-
-void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
-                                                    const ArrayData* ad,
-                                                    const char* name,
-                                                    int param) {
-  auto const given = arrayToName(ad);
-  raise_notice(
-    "Hack Array Compat: Argument %d returned from %s() as an inout parameter "
-    "must be of type %s, %s given",
-    param + 1, func->fullName()->data(), name, given
-  );
-}
-
-void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
-                                                    const ArrayData* ad,
-                                                    const char* name,
-                                                    const StringData* propName,
-                                                    bool isStatic) {
-  auto const given = arrayToName(ad);
-  raise_notice(
-    "Hack Array Compat: %s '%s::%s' declared as type %s, %s assigned",
-    isStatic ? "Static property" : "Property",
-    declCls->name()->data(),
-    propName->data(),
-    name,
-    given
-  );
-}
-
-void raise_hackarr_compat_type_hint_rec_field_notice(
-    const StringData* recName,
-    const ArrayData* ad,
-    const char* typeName,
-    const StringData* fieldName) {
-  auto const given = arrayToName(ad);
-  raise_notice(
-    "Hack Array Compat: Record field '%s::%s' declared as type %s, %s assigned",
-    recName->data(),
-    fieldName->data(),
-    typeName,
-    given
-  );
 }
 
 void raise_hackarr_compat_is_operator(const char* source, const char* target) {

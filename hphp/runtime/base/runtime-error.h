@@ -194,27 +194,6 @@ void raise_hack_arr_compat_serialize_notice(const ArrayData*);
 
 void raise_hack_arr_compat_array_producing_func_notice(const std::string& name);
 
-void raise_hackarr_compat_type_hint_param_notice(const Func* func,
-                                                 const ArrayData* ad,
-                                                 const char* name,
-                                                 int param);
-void raise_hackarr_compat_type_hint_ret_notice(const Func* func,
-                                               const ArrayData* ad,
-                                               const char* name);
-void raise_hackarr_compat_type_hint_outparam_notice(const Func* func,
-                                                    const ArrayData* ad,
-                                                    const char* name,
-                                                    int param);
-void raise_hackarr_compat_type_hint_property_notice(const Class* declCls,
-                                                    const ArrayData* ad,
-                                                    const char* name,
-                                                    const StringData* propName,
-                                                    bool isStatic);
-void raise_hackarr_compat_type_hint_rec_field_notice(
-    const StringData* recName,
-    const ArrayData* ad,
-    const char* name,
-    const StringData* fieldName);
 void raise_hackarr_compat_is_operator(const char* source, const char* target);
 
 void raise_hackarr_compat_notice(const std::string& msg);

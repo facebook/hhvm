@@ -451,8 +451,6 @@ bool opcodeMayRaise(Opcode opc) {
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseHackArrCompatNotice:
-  case RaiseHackArrParamNotice:
-  case RaiseHackArrPropNotice:
   case RaiseNotice:
   case RaiseRxCallViolation:
   case RaiseStrToClassNotice:

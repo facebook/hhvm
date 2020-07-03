@@ -2575,33 +2575,6 @@ SSATmp* simplifyCheckType(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-namespace {
-
-SSATmp* implSimplifyHackArrTypehint(
-    State& env, const IRInstruction* inst, SSATmp* arr) {
-  auto const extra = inst->extra<RaiseHackArrTypehintNoticeData>();
-  auto const match = [&]{
-    auto const& type = arr->type();
-    switch (extra->tc.type()) {
-      case AnnotType::VArrOrDArr: return type.subtypeOfAny(TVArr, TDArr);
-      case AnnotType::VArray:     return type <= TVArr;
-      case AnnotType::DArray:     return type <= TDArr;
-      default:                    return false;
-    }
-  }();
-  return match ? gen(env, Nop) : nullptr;
-}
-
-}
-
-SSATmp* simplifyRaiseHackArrParamNotice(State& env, const IRInstruction* inst) {
-  return implSimplifyHackArrTypehint(env, inst, inst->src(0));
-}
-
-SSATmp* simplifyRaiseHackArrPropNotice(State& env, const IRInstruction* inst) {
-  return implSimplifyHackArrTypehint(env, inst, inst->src(1));
-}
-
 SSATmp* simplifyCheckTypeMem(State& env, const IRInstruction* inst) {
   if (inst->next() == inst->taken() ||
       inst->typeParam() == TBottom) {
@@ -3662,8 +3635,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
   X(CheckStk)
   X(CheckType)
   X(CheckTypeMem)
-  X(RaiseHackArrParamNotice)
-  X(RaiseHackArrPropNotice)
   X(AssertType)
   X(CheckNonNull)
   X(CheckPackedArrayDataBounds)

@@ -1872,8 +1872,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case RaiseNotice:
   case RaiseWarning:
   case RaiseHackArrCompatNotice:
-  case RaiseHackArrParamNotice:
-  case RaiseHackArrPropNotice:
   case RaiseForbiddenDynCall:
   case RaiseForbiddenDynConstruct:
   case RaiseStrToClassNotice:

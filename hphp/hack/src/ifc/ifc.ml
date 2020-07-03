@@ -305,7 +305,10 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
   in
   let env =
     match SMap.find_opt callable_name renv.re_proto.pre_decl.de_fun with
-    | Some { fd_kind = FDInferFlows } ->
+    (* TODO(T68007489): Temporarily infer everything for every function call.
+     * switch back to using InferFlows annotation when scaling is an issue.
+     *)
+    | Some _ ->
       let (env, pc_joined) =
         let join (env, pc) pc' = policy_join renv env ~prefix:"pcjoin" pc pc' in
         List.fold ~f:join ~init:(env, Pbot) renv.re_gpc
@@ -322,7 +325,6 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
       let env = Env.acc env (fun acc -> Chole fp :: acc) in
       let env = Env.add_dep env callable_name in
       env
-    | Some _ -> fail "TODO(T68007489): function calls"
     | None -> fail "unknown function '%s'" callable_name
   in
   (env, ret_pty)

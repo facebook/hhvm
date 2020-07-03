@@ -11,6 +11,7 @@ use env::emitter::Emitter;
 use hhbc_id_rust::Id;
 use hhbc_string_utils_rust as string_utils;
 use naming_special_names_rust::{math, members, special_functions, typehints};
+use options::{HhvmFlags, Options};
 use oxidized::{
     aast,
     aast_visitor::{visit_mut, AstParams, NodeMut, VisitorMut},
@@ -21,6 +22,14 @@ use oxidized::{
 use runtime::TypedValue;
 
 use itertools::Itertools;
+
+fn hack_arr_dv_arrs(opts: &Options) -> bool {
+    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
+}
+
+fn hack_arr_dv_arr_mark(opts: &Options) -> bool {
+    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -163,7 +172,15 @@ fn varray_to_typed_value(
         .iter()
         .map(|x| expr_to_typed_value(emitter, ns, x))
         .collect();
-    Ok(TypedValue::VArray((tv_fields?, Some(pos.clone()))))
+    if hack_arr_dv_arrs(emitter.options()) {
+        Ok(TypedValue::Vec((
+            tv_fields?,
+            Some(pos.clone()),
+            hack_arr_dv_arr_mark(emitter.options()),
+        )))
+    } else {
+        Ok(TypedValue::VArray((tv_fields?, Some(pos.clone()))))
+    }
 }
 
 fn darray_to_typed_value(
@@ -181,10 +198,18 @@ fn darray_to_typed_value(
             ))
         })
         .collect::<Result<_, Error>>()?;
-    Ok(TypedValue::DArray((
-        update_duplicates_in_map(tv_fields),
-        Some(pos.clone()),
-    )))
+    if hack_arr_dv_arrs(emitter.options()) {
+        Ok(TypedValue::Dict((
+            update_duplicates_in_map(tv_fields),
+            Some(pos.clone()),
+            hack_arr_dv_arr_mark(emitter.options()),
+        )))
+    } else {
+        Ok(TypedValue::DArray((
+            update_duplicates_in_map(tv_fields),
+            Some(pos.clone()),
+        )))
+    }
 }
 
 fn set_afield_to_typed_value_pair(
@@ -318,6 +343,7 @@ pub fn vec_to_typed_value(
             .map(|f| value_afield_to_typed_value(e, ns, f))
             .collect::<Result<_, _>>()?,
         Some(pos.clone()),
+        false, // LegacyFlag
     )))
 }
 
@@ -403,6 +429,7 @@ pub fn expr_to_typed_value_(
             Ok(TypedValue::Dict((
                 update_duplicates_in_map(values),
                 Some(pos.clone()),
+                false, // LegacyFlag
             )))
         }
         Collection(x)
@@ -417,6 +444,7 @@ pub fn expr_to_typed_value_(
             Ok(TypedValue::Dict((
                 update_duplicates_in_map(values),
                 Some(pos.clone()),
+                false, // LegacyFlag
             )))
         }
         ValCollection(x) if x.0 == tast::VcKind::Vec || x.0 == tast::VcKind::Vector => {
@@ -425,6 +453,7 @@ pub fn expr_to_typed_value_(
                     .map(|e| expr_to_typed_value(emitter, ns, e))
                     .collect::<Result<_, _>>()?,
                 Some(pos.clone()),
+                false, // LegacyFlag
             )))
         }
         ValCollection(x) if x.0 == tast::VcKind::Keyset => Ok(TypedValue::Keyset(
@@ -448,6 +477,7 @@ pub fn expr_to_typed_value_(
             Ok(TypedValue::Dict((
                 update_duplicates_in_map(values),
                 Some(pos.clone()),
+                false, // LegacyFlag
             )))
         }
 
@@ -459,6 +489,7 @@ pub fn expr_to_typed_value_(
             Ok(TypedValue::Dict((
                 update_duplicates_in_map(values),
                 Some(pos.clone()),
+                false, // LegacyFlag
             )))
         }
 

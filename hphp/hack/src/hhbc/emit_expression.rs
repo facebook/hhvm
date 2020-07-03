@@ -274,6 +274,23 @@ mod inout_locals {
     }
 }
 
+pub fn wrap_array_mark_legacy(e: &Emitter, ins: InstrSeq) -> InstrSeq {
+    if mark_as_legacy(e.options()) {
+        InstrSeq::gather(vec![
+            instr::nulluninit(),
+            instr::nulluninit(),
+            instr::nulluninit(),
+            ins,
+            instr::fcallfuncd(
+                FcallArgs::new(FcallFlags::default(), 1, vec![], None, 1, None),
+                function::from_raw_string("HH\\array_mark_legacy"),
+            ),
+        ])
+    } else {
+        ins
+    }
+}
+
 pub fn get_type_structure_for_hint(
     e: &mut Emitter,
     tparams: &[&str],
@@ -294,11 +311,14 @@ pub fn get_type_structure_for_hint(
         false,
     )?;
     let i = emit_adata::get_array_identifier(e, &tv);
-    Ok(if hack_arr_dv_arrs(e.options()) {
-        instr::lit_const(InstructLitConst::Dict(i))
-    } else {
-        instr::lit_const(InstructLitConst::Array(i))
-    })
+    Ok(wrap_array_mark_legacy(
+        e,
+        if hack_arr_dv_arrs(e.options()) {
+            instr::lit_const(InstructLitConst::Dict(i))
+        } else {
+            instr::lit_const(InstructLitConst::Array(i))
+        },
+    ))
 }
 
 pub struct Setrange {
@@ -869,6 +889,11 @@ fn hack_arr_dv_arrs(opts: &Options) -> bool {
     opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
 }
 
+fn mark_as_legacy(opts: &Options) -> bool {
+    opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS)
+        && opts.hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARR_MARK)
+}
+
 fn inline_gena_call(emitter: &mut Emitter, env: &Env, arg: &tast::Expr) -> Result {
     let load_arr = emit_expr(emitter, env, arg)?;
     let async_eager_label = emitter.label_gen_mut().next_regular();
@@ -1435,32 +1460,36 @@ fn emit_dynamic_collection(
         }
         E_::Varray(_) => {
             let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
-            emit_value_only_collection(e, env, pos, fields, |n| {
+            let instrs = emit_value_only_collection(e, env, pos, fields, |n| {
                 if hack_arr_dv_arrs {
                     InstructLitConst::NewVec(n)
                 } else {
                     InstructLitConst::NewVArray(n)
                 }
-            })
+            });
+            Ok(wrap_array_mark_legacy(e, instrs?))
         }
         E_::Darray(_) => {
             if is_struct_init(e, env, fields, false /* allow_numerics */)? {
                 let hack_arr_dv_arrs = hack_arr_dv_arrs(e.options());
-                emit_struct_array(e, env, pos, fields, |_, arg| {
+                let instrs = emit_struct_array(e, env, pos, fields, |_, arg| {
                     let instr = if hack_arr_dv_arrs {
                         instr::newstructdict(arg)
                     } else {
                         instr::newstructdarray(arg)
                     };
                     Ok(emit_pos_then(pos, instr))
-                })
+                });
+                Ok(wrap_array_mark_legacy(e, instrs?))
             } else {
                 let constr = if hack_arr_dv_arrs(e.options()) {
                     InstructLitConst::NewDictArray(count as isize)
                 } else {
                     InstructLitConst::NewDArray(count as isize)
                 };
-                emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr)
+                let instrs =
+                    emit_keyvalue_collection(e, env, pos, fields, CollectionType::Array, constr);
+                Ok(wrap_array_mark_legacy(e, instrs?))
             }
         }
         _ => {
@@ -1816,7 +1845,7 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
             ),
         ])
     } else {
-        InstrSeq::gather(vec![
+        let instrs = InstrSeq::gather(vec![
             InstrSeq::gather(
                 targs
                     .iter()
@@ -1828,7 +1857,8 @@ pub fn emit_reified_targs(e: &mut Emitter, env: &Env, pos: &Pos, targs: &[&tast:
             } else {
                 instr::new_varray(targs.len() as isize)
             },
-        ])
+        ]);
+        wrap_array_mark_legacy(e, instrs)
     })
 }
 
@@ -2658,7 +2688,7 @@ fn emit_inst_meth(
     obj_expr: &tast::Expr,
     method_name: &tast::Expr,
 ) -> Result {
-    Ok(InstrSeq::gather(vec![
+    let instrs = InstrSeq::gather(vec![
         emit_expr(e, env, obj_expr)?,
         emit_expr(e, env, method_name)?,
         if e.options()
@@ -2672,7 +2702,16 @@ fn emit_inst_meth(
         } else {
             instr::new_varray(2)
         },
-    ]))
+    ]);
+    if e.options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
+    {
+        Ok(instrs)
+    } else {
+        Ok(wrap_array_mark_legacy(e, instrs))
+    }
 }
 
 fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Expr) -> Result {
@@ -2705,7 +2744,7 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
         }
         Err(unrecoverable("emit_class_meth: unhandled method"))
     } else {
-        Ok(InstrSeq::gather(vec![
+        let instrs = InstrSeq::gather(vec![
             emit_expr(e, env, cls)?,
             emit_expr(e, env, meth)?,
             if hack_arr_dv_arrs(e.options()) {
@@ -2713,7 +2752,8 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
             } else {
                 instr::new_varray(2)
             },
-        ]))
+        ]);
+        Ok(wrap_array_mark_legacy(e, instrs))
     }
 }
 
@@ -2808,7 +2848,7 @@ fn emit_function_pointer(
                 if og.2.eq(&ast_defs::OgNullFlavor::OGNullsafe) {
                     let end_label = e.label_gen_mut().next_regular();
                     let meth_instr = emit_expr(e, env, &substitute_method_name)?;
-                    Ok(InstrSeq::gather(vec![
+                    let inst_meth_instrs = InstrSeq::gather(vec![
                         emit_quiet_expr(e, env, &(og.1).0, &og.0, false)?.0,
                         instr::dup(),
                         instr::istypec(IstypeOp::OpNull),
@@ -2825,8 +2865,22 @@ fn emit_function_pointer(
                         } else {
                             instr::new_varray(2)
                         },
-                        instr::label(end_label),
-                    ]))
+                    ]);
+                    if e.options()
+                        .hhvm
+                        .flags
+                        .contains(HhvmFlags::EMIT_INST_METH_POINTERS)
+                    {
+                        Ok(InstrSeq::gather(vec![
+                            inst_meth_instrs,
+                            instr::label(end_label),
+                        ]))
+                    } else {
+                        Ok(InstrSeq::gather(vec![
+                            wrap_array_mark_legacy(e, inst_meth_instrs),
+                            instr::label(end_label),
+                        ]))
+                    }
                 } else {
                     emit_inst_meth(e, env, &og.0, &substitute_method_name)
                 }

@@ -18,7 +18,8 @@ use env::{iterator::Id as IterId, local::Type as Local, Env as BodyEnv};
 use escaper::{escape, escape_by, is_lit_printable};
 use hhas_adata_rust::HhasAdata;
 use hhas_adata_rust::{
-    ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, VARRAY_PREFIX, VEC_PREFIX,
+    ARRAY_PREFIX, DARRAY_PREFIX, DICT_PREFIX, KEYSET_PREFIX, LEGACY_DICT_PREFIX, LEGACY_VEC_PREFIX,
+    VARRAY_PREFIX, VEC_PREFIX,
 };
 use hhas_attribute_rust::{self as hhas_attribute, HhasAttribute};
 use hhas_body_rust::HhasBody;
@@ -1018,11 +1019,21 @@ fn print_adata<W: Write>(ctx: &mut Context, w: &mut W, tv: &TypedValue) -> Resul
         // TODO: The False case seems to sometimes be b:0 and sometimes i:0.  Why?
         TypedValue::Bool(false) => w.write("b:0;"),
         TypedValue::Bool(true) => w.write("b:1;"),
-        TypedValue::Dict((pairs, loc)) => {
-            print_adata_dict_collection_argument(ctx, w, DICT_PREFIX, loc, pairs)
+        TypedValue::Dict((pairs, loc, is_legacy)) => {
+            let prefix = if *is_legacy {
+                LEGACY_DICT_PREFIX
+            } else {
+                DICT_PREFIX
+            };
+            print_adata_dict_collection_argument(ctx, w, prefix, loc, pairs)
         }
-        TypedValue::Vec((values, loc)) => {
-            print_adata_collection_argument(ctx, w, VEC_PREFIX, loc, values)
+        TypedValue::Vec((values, loc, is_legacy)) => {
+            let prefix = if *is_legacy {
+                LEGACY_VEC_PREFIX
+            } else {
+                VEC_PREFIX
+            };
+            print_adata_collection_argument(ctx, w, prefix, loc, values)
         }
         TypedValue::DArray((pairs, loc)) => {
             print_adata_dict_collection_argument(ctx, w, DARRAY_PREFIX, loc, pairs)

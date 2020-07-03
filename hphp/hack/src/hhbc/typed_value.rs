@@ -61,12 +61,13 @@ pub enum TypedValue {
     VArray((Vec<Self>, ProvTag)),
     DArray((Vec<(TypedValue, TypedValue)>, ProvTag)),
     // Hack arrays: vectors, keysets, and dictionaries
-    Vec((Vec<TypedValue>, ProvTag)),
+    Vec((Vec<TypedValue>, ProvTag, LegacyFlag)),
     Keyset(Vec<TypedValue>),
-    Dict((Vec<(TypedValue, TypedValue)>, ProvTag)),
+    Dict((Vec<(TypedValue, TypedValue)>, ProvTag, LegacyFlag)),
 }
 
 type ProvTag = Option<ast_defs::Pos>;
+type LegacyFlag = bool;
 
 mod string_ops {
     pub fn bitwise_not(s: &str) -> String {
@@ -96,9 +97,9 @@ impl From<TypedValue> for bool {
             TypedValue::Array(v) => !v.is_empty(),
             TypedValue::VArray((v, _)) => !v.is_empty(),
             TypedValue::DArray((v, _)) => !v.is_empty(),
-            TypedValue::Vec((v, _)) => !v.is_empty(),
+            TypedValue::Vec((v, _, _)) => !v.is_empty(),
             TypedValue::Keyset(v) => !v.is_empty(),
-            TypedValue::Dict((v, _)) => !v.is_empty(),
+            TypedValue::Dict((v, _, _)) => !v.is_empty(),
             // Non-empty collections cast to true
             TypedValue::HhasAdata(_) => true,
         }

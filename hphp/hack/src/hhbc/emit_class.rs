@@ -315,8 +315,13 @@ fn emit_reified_extends_params<'a>(
         },
         _ => (),
     }
+    let hack_arr_dv_arr_mark = e
+        .options()
+        .hhvm
+        .flags
+        .contains(HhvmFlags::HACK_ARR_DV_ARR_MARK);
     let tv = if e.options().hhvm.flags.contains(HhvmFlags::HACK_ARR_DV_ARRS) {
-        TypedValue::Vec((vec![], None))
+        TypedValue::Vec((vec![], None, hack_arr_dv_arr_mark))
     } else {
         TypedValue::VArray((vec![], None))
     };

@@ -167,6 +167,7 @@ prefixed_flags!(
     EMIT_METH_CALLER_FUNC_POINTERS,
     ENABLE_INTRINSICS_EXTENSION,
     HACK_ARR_COMPAT_NOTICES,
+    HACK_ARR_DV_ARR_MARK,
     HACK_ARR_DV_ARRS,
     JIT_ENABLE_RENAME_FUNCTION,
     LOG_EXTERN_COMPILER_PERF,
@@ -729,6 +730,9 @@ mod tests {
   "hhvm.hack_arr_compat_notices": {
     "global_value": false
   },
+  "hhvm.hack_arr_dv_arr_mark": {
+    "global_value": false
+  },
   "hhvm.hack_arr_dv_arrs": {
     "global_value": false
   },
@@ -1142,5 +1146,6 @@ bitflags! {
         const RUST_EMITTER = 1 << 51;
         const DISABLE_ARRAY_CAST = 1 << 52;
         const DISABLE_ARRAY_TYPEHINT = 1 << 53;
+        const HACK_ARR_DV_ARR_MARK = 1 << 54;
     }
 }

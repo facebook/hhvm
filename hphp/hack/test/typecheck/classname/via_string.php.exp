@@ -1,0 +1,2 @@
+File "via_string.php", line 6, characters 3-14:
+Dynamic class names are not allowed in compile-time ::class fetch (Parsing[1002])

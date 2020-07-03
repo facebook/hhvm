@@ -77,14 +77,13 @@ function deleted(): void {
             result_files = cast(List[str], result["files"])
             self.assertSetEqual(set(result_files), {file("foo.php")})
 
-    def test_cursor_advance(self) -> None:
+    def test_cursor_increases_lexicographically(self) -> None:
         work_dir: str
         with tempfile.TemporaryDirectory() as work_dir:
 
             def file(path: Path) -> Path:
                 return os.path.join(work_dir, path)
 
-            (env, saved_state_info) = self.set_up_work_dir(work_dir)
             self.write(
                 file("foo.php"),
                 """<?hh
@@ -92,48 +91,31 @@ function foo(): void {}
 """,
             )
             self.write(
-                file("uses_foo.php"),
+                file("bar.php"),
                 """<?hh
-function uses_foo(): void {
-    // Doesn't yet use foo
-}
+function bar(): void {}
 """,
             )
+            (env, saved_state_info) = self.set_up_work_dir(work_dir)
 
             result = run_hh_fanout(
                 env=env,
                 saved_state_info=saved_state_info,
-                changed_files=[file("foo.php"), file("uses_foo.php")],
+                changed_files=[],
                 args=[file("foo.php")],
                 cursor=None,
             )
-            result_files = cast(List[str], result["files"])
-            self.assertSetEqual(set(result_files), {file("foo.php")})
             cursor1 = result.get("cursor")
             self.assertIsNotNone(cursor1)
             cursor1 = cast(str, cursor1)
 
-            self.write(
-                file("uses_foo.php"),
-                """<?hh
-function uses_foo(): void {
-    foo();
-}
-""",
-            )
             result = run_hh_fanout(
                 env=env,
                 saved_state_info=saved_state_info,
-                changed_files=[file("uses_foo.php")],
-                args=[file("foo.php")],
+                changed_files=[file("bar.php")],
+                args=[],
                 cursor=cursor1,
             )
-            result_files = cast(List[str], result["files"])
-            # `uses_foo.php` should not be in the fanout of `foo.php` yet,
-            # since we haven't done a typecheck of it, so we don't know about
-            # the new dependency edge from `foo.php` to `uses_foo.php`.
-            self.assertSetEqual(set(result_files), {file("foo.php")})
-
             cursor2 = result.get("cursor")
             self.assertIsNotNone(cursor2)
             cursor2 = cast(str, cursor2)

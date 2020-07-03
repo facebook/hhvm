@@ -35,9 +35,9 @@ class type cursor =
     saved-state for the point in time represented by this cursor. *)
     method get_file_deltas : Naming_sqlite.file_deltas
 
-    (** Get the cumulative file deltas that have occurred since the
-    saved-state for the point in time represented by this cursor. *)
-    method get_file_deltas : Naming_sqlite.file_deltas
+    (** Get the fanout calculated for the files changed in this cursor.
+    Returns `None` if inapplicable for this type of cursor. *)
+    method get_calculate_fanout_result : Calculate_fanout.result option
 
     (** Get the cumulative dependency graph delta that has occurred since the
     saved-state for the point in time represented by this cursor. *)
@@ -54,6 +54,7 @@ class type cursor =
     The resulting cursor is NOT persisted to disk. The caller is responsible
     for persisting it using `State.add_cursor`. *)
     method advance :
+      detail_level:Calculate_fanout.Detail_level.t ->
       Provider_context.t ->
       MultiWorker.worker list ->
       Relative_path.Set.t ->

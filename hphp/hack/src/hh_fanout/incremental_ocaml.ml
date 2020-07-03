@@ -31,6 +31,9 @@ type cursor_state =
       changed_files: Naming_sqlite.file_deltas;
           (** The files that have changed since the saved-state. This field
           is cumulative, so previous cursors need not be consulted. *)
+      fanout_result: Calculate_fanout.result;
+          (** The result of calcluating
+          the fanout for the changed files at the given point in time. *)
     }
   | Typecheck_result of {
       previous: cursor_state;  (** The cursor before this one. *)
@@ -89,6 +92,13 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
       | Typecheck_result _ ->
         Relative_path.Map.empty
       | Saved_state_delta { changed_files; _ } -> changed_files
+
+    method get_calculate_fanout_result : Calculate_fanout.result option =
+      match cursor_state with
+      | Saved_state _
+      | Typecheck_result _ ->
+        None
+      | Saved_state_delta { fanout_result; _ } -> Some fanout_result
 
     method private load_naming_table (ctx : Provider_context.t) : Naming_table.t
         =
@@ -174,6 +184,7 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
             acc)
 
     method advance
+        ~(detail_level : Calculate_fanout.Detail_level.t)
         (ctx : Provider_context.t)
         (_workers : MultiWorker.worker list)
         (changed_paths : Relative_path.Set.t) : cursor =
@@ -208,10 +219,23 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
                 ~data:(Naming_sqlite.Modified file_info))
       in
 
-      new cursor
-        ~client_id
-        ~cursor_state:
-          (Saved_state_delta { previous = cursor_state; changed_files })
+      let old_naming_table = self#load_naming_table ctx in
+      let new_naming_table =
+        Naming_table.update_from_deltas old_naming_table changed_files
+      in
+      let fanout_result =
+        Calculate_fanout.go
+          ~detail_level
+          ~old_naming_table
+          ~new_naming_table
+          ~file_deltas:changed_files
+          ~input_files:changed_paths
+      in
+      let cursor_state =
+        Saved_state_delta
+          { previous = cursor_state; changed_files; fanout_result }
+      in
+      new cursor ~client_id ~cursor_state
 
     method calculate_errors
         (ctx : Provider_context.t) (workers : MultiWorker.worker list)
@@ -219,7 +243,6 @@ class cursor ~client_id ~cursor_state : Incremental.cursor =
       match cursor_state with
       | Typecheck_result { typecheck_result = { errors; _ }; _ } ->
         (errors, None)
-      (* TODO: update test to not make a new cursor every time? *)
       | (Saved_state _ | Saved_state_delta _) as current_cursor ->
         (* The global reverse naming table is updated by calling this
         function. We can discard the forward naming table returned to us. *)

@@ -205,63 +205,55 @@ let advance_cursor
     ~(saved_state_result : saved_state_result)
     ~(incremental_state : Incremental.state)
     ~(input_files : Relative_path.Set.t)
-    ~(cursor_id : string option) : Incremental.cursor * Incremental.cursor_id =
-  Utils.try_finally
-    ~finally:(fun () -> incremental_state#save)
-    ~f:(fun () ->
-      let client_id =
-        incremental_state#look_up_client_id
-          {
-            Incremental.client_id = env.client_id;
-            dep_table_saved_state_path = saved_state_result.dep_table_path;
-            errors_saved_state_path = saved_state_result.errors_path;
-            naming_table_saved_state_path =
-              Naming_sqlite.Db_path
-                (Path.to_string saved_state_result.naming_table_path);
-          }
-      in
-      let (cursor, cursor_changed_files) =
-        match cursor_id with
-        | None ->
-          let cursor = incremental_state#make_default_cursor client_id in
-          let cursor = Result.ok_or_failwith cursor in
-          (cursor, saved_state_result.saved_state_changed_files)
-        | Some cursor_id ->
-          let cursor =
-            incremental_state#look_up_cursor
-              ~client_id:(Some client_id)
-              ~cursor_id
-          in
-          let cursor = Result.ok_or_failwith cursor in
-          (cursor, Relative_path.Set.empty)
-      in
-      let cursor_changed_files =
-        Relative_path.Set.union cursor_changed_files env.changed_files
-      in
-      let cursor_changed_files =
-        Relative_path.Set.union cursor_changed_files input_files
-      in
+    ~(cursor_id : string option) : Incremental.cursor =
+  let client_id =
+    incremental_state#look_up_client_id
+      {
+        Incremental.client_id = env.client_id;
+        dep_table_saved_state_path = saved_state_result.dep_table_path;
+        errors_saved_state_path = saved_state_result.errors_path;
+        naming_table_saved_state_path =
+          Naming_sqlite.Db_path
+            (Path.to_string saved_state_result.naming_table_path);
+      }
+  in
+  let (cursor, cursor_changed_files) =
+    match cursor_id with
+    | None ->
+      let cursor = incremental_state#make_default_cursor client_id in
+      let cursor = Result.ok_or_failwith cursor in
+      (cursor, saved_state_result.saved_state_changed_files)
+    | Some cursor_id ->
       let cursor =
-        cursor#advance
-          setup_result.ctx
-          setup_result.workers
-          cursor_changed_files
+        incremental_state#look_up_cursor ~client_id:(Some client_id) ~cursor_id
+        |> Result.ok_or_failwith
       in
-      let new_cursor_id = incremental_state#add_cursor cursor in
-      let dep_graph_delta = cursor#get_dep_graph_delta in
-      HashSet.iter dep_graph_delta ~f:(fun (dependent, dependency) ->
-          Typing_deps.add_idep_directly_to_graph dependent dependency);
+      (cursor, Relative_path.Set.empty)
+  in
+  let cursor_changed_files =
+    cursor_changed_files
+    |> Relative_path.Set.union env.changed_files
+    |> Relative_path.Set.union input_files
+  in
+  let cursor =
+    cursor#advance
+      ~detail_level:env.detail_level
+      setup_result.ctx
+      setup_result.workers
+      cursor_changed_files
+  in
+  let dep_graph_delta = cursor#get_dep_graph_delta in
+  HashSet.iter dep_graph_delta ~f:(fun (dependent, dependency) ->
+      Typing_deps.add_idep_directly_to_graph dependent dependency);
 
-      (cursor, new_cursor_id))
+  cursor
 
 let mode_calculate
     ~(env : env) ~(input_files : Path.Set.t) ~(cursor_id : string option) :
     unit Lwt.t =
   let telemetry = Telemetry.create () in
   let setup_result = set_up_global_environment env in
-  let%lwt ({ naming_table = old_naming_table; _ } as saved_state_result) =
-    load_saved_state ~env ~setup_result
-  in
+  let%lwt saved_state_result = load_saved_state ~env ~setup_result in
 
   let input_files =
     Path.Set.fold input_files ~init:Relative_path.Set.empty ~f:(fun path acc ->
@@ -269,7 +261,7 @@ let mode_calculate
         Relative_path.Set.add acc path)
   in
   let incremental_state = make_incremental_state ~env in
-  let (cursor, cursor_id) =
+  let cursor =
     advance_cursor
       ~env
       ~setup_result
@@ -278,23 +270,20 @@ let mode_calculate
       ~input_files
       ~cursor_id
   in
-  let file_deltas = cursor#get_file_deltas in
-  let new_naming_table =
-    Naming_table.update_from_deltas old_naming_table file_deltas
-  in
 
+  let calculate_fanout_result = cursor#get_calculate_fanout_result in
   let {
     Calculate_fanout.fanout_dependents = _;
     fanout_files;
     explanations;
     telemetry = calculate_fanout_telemetry;
   } =
-    Calculate_fanout.go
-      ~detail_level:env.detail_level
-      ~old_naming_table
-      ~new_naming_table
-      ~file_deltas
-      ~input_files
+    Option.value_exn
+      calculate_fanout_result
+      ~message:
+        ( "Internal invariant failure -- "
+        ^ "produced cursor did not have an associated `Calculate_fanout.result`"
+        )
   in
   let telemetry =
     Telemetry.object_
@@ -315,6 +304,9 @@ let mode_calculate
       ~key:"num_fanout_files"
       ~value:(Relative_path.Set.cardinal fanout_files)
   in
+
+  let cursor_id = incremental_state#add_cursor cursor in
+  incremental_state#save;
 
   let json =
     Hh_json.JSON_Object
@@ -617,7 +609,7 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let path = Relative_path.create_detect_prefix (Path.to_string path) in
   let input_files = Relative_path.Set.singleton path in
   let incremental_state = make_incremental_state ~env in
-  let (cursor, cursor_id) =
+  let cursor =
     advance_cursor
       ~env
       ~setup_result
@@ -630,6 +622,9 @@ let mode_debug ~(env : env) ~(path : Path.t) ~(cursor_id : string option) :
   let new_naming_table =
     Naming_table.update_from_deltas old_naming_table file_deltas
   in
+
+  let cursor_id = incremental_state#add_cursor cursor in
+  incremental_state#save;
 
   let json =
     Debug_fanout.go

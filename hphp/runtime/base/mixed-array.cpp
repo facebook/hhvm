@@ -1433,8 +1433,7 @@ ArrayData* MixedArray::PlusEq(ArrayData* ad, const ArrayData* elems) {
 NEVER_INLINE
 ArrayData* MixedArray::ArrayMergeGeneric(MixedArray* ret,
                                          const ArrayData* elems) {
-  assertx(ret->isPlainKind());
-  assertx(ret->isNotDVArray());
+  assertx(ret->isHAMSafeDArray());
 
   for (ArrayIter it(elems); !it.end(); it.next()) {
     Variant key = it.first();
@@ -1455,9 +1454,9 @@ ArrayData* MixedArray::Merge(ArrayData* ad, const ArrayData* elems) {
   assertx(asMixed(ad)->checkInvariants());
   auto const ret = CopyReserve(asMixed(ad), ad->size() + elems->size());
   assertx(ret->hasExactlyOneRef());
-  // Output is always a non-darray
   auto const aux = asMixed(ad)->keyTypes().packForAux();
-  ret->initHeader_16(HeaderKind::Plain, OneReference, aux);
+  auto const hk  = RO::EvalHackArrDVArrs ? HeaderKind::Dict : HeaderKind::Mixed;
+  ret->initHeader_16(hk, OneReference, aux);
 
   if (elems->hasVanillaMixedLayout()) {
     auto const rhs = asMixed(elems);

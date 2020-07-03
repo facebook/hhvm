@@ -245,8 +245,7 @@ inline ArrayData* ArrayData::plusEq(const ArrayData* elms) {
 
 inline ArrayData* ArrayData::merge(const ArrayData* elms) {
   auto ret = g_array_funcs.merge[kind()](this, elms);
-  assertx(ret->isPHPArrayType());
-  assertx(ret->isNotDVArray());
+  assertx(ret->isHAMSafeDArray());
   return ret;
 }
 

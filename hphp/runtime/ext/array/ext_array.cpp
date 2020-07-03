@@ -536,7 +536,7 @@ TypedValue HHVM_FUNCTION(array_merge,
                          const Variant& array1,
                          const Array& arrays /* = null array */) {
   getCheckedContainer(array1);
-  Array ret = Array::Create();
+  Array ret = Array::CreateDArray();
   ret.merge(arr_array1);
 
   bool success = true;

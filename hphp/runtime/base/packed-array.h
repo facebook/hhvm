@@ -120,7 +120,7 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   static constexpr auto ToPHPArrayVec = &ToPHPArray;
   static constexpr auto ToPHPArrayIntishCastVec = &ToPHPArray;
   static ArrayData* ToVArrayVec(ArrayData*, bool);
-  static ArrayData* ToDictVec(ArrayData*, bool);
+  static constexpr auto ToDictVec = &ToDict;
   static ArrayData* ToVecVec(ArrayData*, bool);
 
   static constexpr auto MergeVec = &Merge;
@@ -246,6 +246,8 @@ struct PackedArray final : type_scan::MarkCollectable<PackedArray> {
   template <class F, bool inc = true>
   static void IterateKV(const ArrayData* arr, F fn);
 
+  // Return a MixedArray with the same elements as this PackedArray.
+  // The target type is based on the source: varray -> darray, vec -> dict.
   static MixedArray* ToMixed(ArrayData*);
   static MixedArray* ToMixedCopy(const ArrayData*);
   static MixedArray* ToMixedCopyReserve(const ArrayData*, size_t);

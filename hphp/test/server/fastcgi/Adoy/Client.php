@@ -386,10 +386,10 @@ class Client
     /**
      * Get Informations on the FastCGI application
      *
-     * @param array $requestedInfo information to retrieve
+     * @param darray $requestedInfo information to retrieve
      * @return array
      */
-    public function getValues(array $requestedInfo)
+    public function getValues(darray $requestedInfo)
     {
         $this->connect();
 
@@ -410,11 +410,11 @@ class Client
     /**
      * Execute a request to the FastCGI application
      *
-     * @param array $params Array of parameters
+     * @param darray $params Array of parameters
      * @param String $stdin Content
      * @return String
      */
-    public function request(array $params, $stdin)
+    public function request(darray $params, $stdin)
     {
         $id = $this->async_request($params, $stdin);
         return $this->wait_for_response($id);
@@ -431,11 +431,11 @@ class Client
      * invocation comes back on this socket and is mistaken for response to request made with same ID
      * during this request.
      *
-     * @param array $params Array of parameters
+     * @param darray $params Array of parameters
      * @param String $stdin Content
      * @return Integer
      */
-    public function async_request(array $params, $stdin)
+    public function async_request(darray $params, $stdin)
     {
         $this->connect();
 

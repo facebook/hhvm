@@ -770,7 +770,7 @@ ArrayData* PackedArray::Merge(ArrayData* adIn, const ArrayData* elems) {
   assertx(checkInvariants(adIn));
   auto const neededSize = adIn->m_size + elems->size();
   auto const ret = ToMixedCopyReserve(adIn, neededSize);
-  ret->m_kind = HeaderKind::Plain;
+  ret->m_kind = RO::EvalHackArrDVArrs ? HeaderKind::Dict : HeaderKind::Mixed;
   return MixedArray::ArrayMergeGeneric(ret, elems);
 }
 
@@ -845,10 +845,8 @@ ArrayData* PackedArray::ToVArray(ArrayData* adIn, bool copy) {
 
 ArrayData* PackedArray::ToDArray(ArrayData* adIn, bool /*copy*/) {
   assertx(checkInvariants(adIn));
-
   auto const size = adIn->getSize();
   if (size == 0) return ArrayData::CreateDArray();
-
   DArrayInit init{size};
   for (int64_t i = 0; i < size; ++i) init.add(i, GetPosVal(adIn, i));
   return init.create();
@@ -869,19 +867,8 @@ ArrayData* PackedArray::ToVArrayVec(ArrayData* adIn, bool copy) {
 
 ArrayData* PackedArray::ToDict(ArrayData* ad, bool copy) {
   assertx(checkInvariants(ad));
-  assertx(ad->isPackedKind());
-
   if (ad->empty()) return ArrayData::CreateDict();
-
   auto const mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
-  return MixedArray::ToDictInPlace(mixed);
-}
-
-ArrayData* PackedArray::ToDictVec(ArrayData* ad, bool copy) {
-  assertx(checkInvariants(ad));
-  assertx(ad->isVecKind());
-  if (ad->empty()) return ArrayData::CreateDict();
-  auto mixed = copy ? ToMixedCopy(ad) : ToMixed(ad);
   return MixedArray::ToDictInPlace(mixed);
 }
 

@@ -78,6 +78,16 @@ type prop =
      we do not have a flow type at hand *)
   | Chole of fun_proto
 
+module Flow = struct
+  type t = policy * policy
+
+  let compare = compare
+end
+
+module FlowSet = Set.Make (Flow)
+
+type security_lattice = FlowSet.t
+
 type local_env = { le_vars: ptype LMap.t }
 
 (* The environment is mutable data that
@@ -174,4 +184,6 @@ type options = {
    * 3: Declaration analysis results
    *)
   verbosity: int;
+  (* String representation of a security lattice. *)
+  security_lattice: string;
 }

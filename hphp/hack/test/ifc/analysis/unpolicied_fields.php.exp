@@ -40,8 +40,8 @@ Analyzing testSetMultipleUnpolicied:
   Deps: {}
   Locals: { $d -> \D<\D, lump'1> }
   Constraints:
-    [\C < lump, Bot < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
-     pc < lump]
+    [\C < lump, PUBLIC < lump, pc < lump, \C < lump, lump'1 = lump,
+     \D < lump, pc < lump]
 
 Analyzing testSetDeep:
 * pc: pc
@@ -65,27 +65,32 @@ Analyzing __construct:
   Constraints:
     [\D < lump, $di < lump, pc < lump]
 
-Flows constraints for \C#__construct:
+Flow constraints for \C#__construct:
+  
   Simplified: True
   Raw:
   [\C < .cx, $cx < .cx, pc < .cx, \C < lump, $cy < lump, pc < lump,
    \C < lump, lump'1 = lump, \D < lump, pc < lump]
 
-Flows constraints for \C#testGetUnpolicied:
+Flow constraints for \C#testGetUnpolicied:
+  
   Simplified: True
   Raw: [lump < .cd, \C < .cd, lump = lump'1, .cd < \D]
 
-Flows constraints for \C#testSetDeep:
+Flow constraints for \C#testSetDeep:
+  
   Simplified: True
   Raw: [lump < .cd, \C < .cd, .cd < lump, $i < lump, pc < lump]
 
-Flows constraints for \C#testSetMultipleUnpolicied:
+Flow constraints for \C#testSetMultipleUnpolicied:
+  
   Simplified: True
   Raw:
-  [\C < lump, Bot < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
+  [\C < lump, PUBLIC < lump, pc < lump, \C < lump, lump'1 = lump, \D < lump,
    pc < lump]
 
-Flows constraints for \D#__construct:
+Flow constraints for \D#__construct:
+  
   Simplified: True
   Raw: [\D < lump, $di < lump, pc < lump]
 

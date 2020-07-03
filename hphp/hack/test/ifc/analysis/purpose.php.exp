@@ -22,84 +22,93 @@ Analyzing __construct:
 
 Analyzing __construct:
 * pc: pc
-* This: \C<\C, lump, ci=<Secret>, d=\D<Secret, Secret>>
+* This: \C<\C, lump, ci=<SECRET>, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
 * Final environment:
   Deps: {}
   Locals: { $ci -> <$ci>; $d -> \D<\D, lump'1> }
   Constraints:
-    [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
-     \D < Secret, pc < Secret]
+    [\C < SECRET, $ci < SECRET, pc < SECRET, \C < SECRET, lump'1 = SECRET,
+     \D < SECRET, pc < SECRET]
 
 Analyzing getShallow1:
 * pc: pc
-* This: \C<\C, lump, ci=<Secret>, d=?thunk>
+* This: \C<\C, lump, ci=<SECRET>, d=?thunk>
 * Return: <ret>
 * Params: {}
 * Final environment:
   Deps: {}
   Locals: {}
   Constraints:
-    [Secret < .ci, \C < .ci, .ci < ret]
+    [SECRET < .ci, \C < .ci, .ci < ret]
 
 Analyzing getShallow2:
 * pc: pc
-* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
+* This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: \D<\D, lump'1>
 * Params: {}
 * Final environment:
   Deps: {}
   Locals: {}
   Constraints:
-    [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
+    [SECRET < .d, \C < .d, SECRET = lump'1, .d < \D]
 
 Analyzing getDeep:
 * pc: pc
-* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
+* This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params: {}
 * Final environment:
   Deps: {}
   Locals: {}
   Constraints:
-    [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
+    [SECRET < .d, \C < .d, SECRET < .di, .d < .di, .di < ret]
 
 Analyzing writeDeep:
 * pc: pc
-* This: \C<\C, lump, ci=?thunk, d=\D<Secret, Secret>>
+* This: \C<\C, lump, ci=?thunk, d=\D<SECRET, SECRET>>
 * Return: <ret>
 * Params: {}
 * Final environment:
   Deps: {}
   Locals: {}
   Constraints:
-    [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
+    [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
 
-Flows constraints for \C#__construct:
+Flow constraints for \C#__construct:
+  
   Simplified: True
   Raw:
-  [\C < Secret, $ci < Secret, pc < Secret, \C < Secret, lump'1 = Secret,
-   \D < Secret, pc < Secret]
+  [\C < SECRET, $ci < SECRET, pc < SECRET, \C < SECRET, lump'1 = SECRET,
+   \D < SECRET, pc < SECRET]
 
-Flows constraints for \C#getDeep:
+Flow constraints for \C#getDeep:
+  
   Simplified: True
-  Raw: [Secret < .d, \C < .d, Secret < .di, .d < .di, .di < ret]
+  Raw: [SECRET < .d, \C < .d, SECRET < .di, .d < .di, .di < ret]
 
-Flows constraints for \C#getShallow1:
+Flow constraints for \C#getShallow1:
+  
   Simplified: True
-  Raw: [Secret < .ci, \C < .ci, .ci < ret]
+  Raw: [SECRET < .ci, \C < .ci, .ci < ret]
 
-Flows constraints for \C#getShallow2:
+Flow constraints for \C#getShallow2:
+  
   Simplified: True
-  Raw: [Secret < .d, \C < .d, Secret = lump'1, .d < \D]
+  Raw: [SECRET < .d, \C < .d, SECRET = lump'1, .d < \D]
 
-Flows constraints for \C#writeDeep:
-  Simplified: Bot < Secret
-  Raw: [Secret < .d, \C < .d, .d < Secret, Bot < Secret, pc < Secret]
+Flow constraints for \C#writeDeep:
+  
+  Simplified: PUBLIC < SECRET
+  Raw: [SECRET < .d, \C < .d, .d < SECRET, PUBLIC < SECRET, pc < SECRET]
 
 
-Flows constraints for \D#__construct:
+Flow constraints for \D#__construct:
+  
   Simplified: True
   Raw: [\D < lump, $di < lump, pc < lump]
 
+There are privacy policy errors in \C#writeDeep:
+  Data with policy PUBLIC appears in context SECRET.
+  

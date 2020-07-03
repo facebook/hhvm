@@ -1,0 +1,5 @@
+There are privacy policy errors in \C#testLatticeProper:
+  Data with policy C appears in context D.
+  Data with policy C appears in context A.
+  Data with policy B appears in context A.
+  

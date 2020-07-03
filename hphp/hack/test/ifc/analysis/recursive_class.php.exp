@@ -39,23 +39,26 @@ Analyzing recursiveWrite:
   Locals: {}
   Constraints:
     [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
-     .r'2 < lump, Bot < lump, pc < lump]
+     .r'2 < lump, PUBLIC < lump, pc < lump]
 
-Flows constraints for \R#__construct:
+Flow constraints for \R#__construct:
+  
   Simplified: True
   Raw:
   [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump, \R'1 < lump,
    pc < lump]
 
-Flows constraints for \R#recursiveGet:
+Flow constraints for \R#recursiveGet:
+  
   Simplified: True
   Raw:
   [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
    lump < .prop, .r'2 < .prop, .prop < ret]
 
-Flows constraints for \R#recursiveWrite:
+Flow constraints for \R#recursiveWrite:
+  
   Simplified: True
   Raw:
   [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
-   .r'2 < lump, Bot < lump, pc < lump]
+   .r'2 < lump, PUBLIC < lump, pc < lump]
 

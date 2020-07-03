@@ -181,7 +181,7 @@ let rec class_ptype lump_pol_opt proto_renv tparams name =
     (* Purpose of the property takes precedence over any lump policy. *)
     let lump_pol_opt =
       Option.merge
-        (Option.map ~f:(fun pur -> Ppurpose pur) pp_purpose)
+        (Option.map ~f:Ifc_security_lattice.parse_policy pp_purpose)
         lump_pol_opt
         ~f:(fun a _ -> a)
     in
@@ -652,8 +652,9 @@ let do_ opts files_info ctx =
         if opts.verbosity >= 3 then Format.printf "%a@." Pp.decl_env decl_env;
 
         let results = walk_tast opts decl_env tast in
-        begin
-          try Solver.global_exn opts ~subtype results with
+
+        let results =
+          try Solver.global_exn ~subtype results with
           | Solver.Error Solver.RecursiveCycle ->
             fail "solver error: cyclic call graph"
           | Solver.Error (Solver.MissingResults callable) ->
@@ -664,7 +665,51 @@ let do_ opts files_info ctx =
               callee
               caller
               reason
-        end
+        in
+
+        let simplify result =
+          let pred = const true in
+          ( result,
+            Logic.simplify
+            @@ Logic.quantify ~pred ~quant:Qexists result.res_constraint )
+        in
+        let simplified_results = SMap.map simplify results in
+
+        let log_solver name (result, simplified) =
+          Format.printf "@[<v>";
+          Format.printf "Flow constraints for %s:@.  @[<v>" name;
+          Format.printf "@,@[<hov>Simplified:@ @[<hov>%a@]@]" Pp.prop simplified;
+          let raw = result.res_constraint in
+          Format.printf "@,@[<hov>Raw:@ @[<hov>%a@]@]" Pp.prop raw;
+          Format.printf "@]";
+          Format.printf "@]\n\n"
+        in
+        if opts.verbosity >= 1 then SMap.iter log_solver simplified_results;
+
+        let lattice =
+          try Ifc_security_lattice.mk_exn opts.security_lattice
+          with Ifc_security_lattice.Invalid_security_lattice ->
+            fail
+              "lattice parsing error: lattice specification should be `;` basic flux constraints, e.g., `A < B`"
+        in
+        let log_checking name (_, simple) =
+          let violations =
+            try Ifc_security_lattice.check_exn lattice simple
+            with Ifc_security_lattice.Checking_error ->
+              fail
+                "lattice checking error: something went wrong while checking %a against %s"
+                Pp.prop
+                simple
+                opts.security_lattice
+          in
+
+          if not @@ List.is_empty violations then begin
+            Format.printf "There are privacy policy errors in %s:@.  @[<v>" name;
+            List.iter ~f:(Format.printf "%a@," Pp.violation) violations;
+            Format.printf "@]\n"
+          end
+        in
+        SMap.iter log_checking simplified_results
       | _ -> ());
   ()
 

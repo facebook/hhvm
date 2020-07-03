@@ -25,7 +25,7 @@ Analyzing \assign0:
   Deps: {}
   Locals: { $arg -> <$arg>; $x -> <$x'1> }
   Constraints:
-    [$arg < $x, Bot < $x'1, $x'1 < ret]
+    [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
 
 Analyzing \assign1:
 * pc: pc
@@ -50,19 +50,23 @@ Analyzing \condition:
     [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
      $x'2 < ret]
 
-Flows constraints for \assign0:
+Flow constraints for \assign0:
+  
   Simplified: True
-  Raw: [$arg < $x, Bot < $x'1, $x'1 < ret]
+  Raw: [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
 
-Flows constraints for \assign1:
+Flow constraints for \assign1:
+  
   Simplified: True
   Raw: [$arg < $x, $x < $x'1, $x'1 < ret]
 
-Flows constraints for \binop:
+Flow constraints for \binop:
+  
   Simplified: True
   Raw: $x < ret
 
-Flows constraints for \condition:
+Flow constraints for \condition:
+  
   Simplified: True
   Raw:
   [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,

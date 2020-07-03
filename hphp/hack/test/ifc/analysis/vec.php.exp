@@ -32,8 +32,9 @@ Analyzing \testCollection:
   Deps: {}
   Locals: { $there -> <$there>; $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
   Constraints:
-    [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
-     \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
+    [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
+     lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump,
+     \HH\vec'2 < \HH\vec]
 
 Analyzing \testAdd1:
 * pc: pc
@@ -44,7 +45,7 @@ Analyzing \testAdd1:
   Deps: {}
   Locals: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
   Constraints:
-    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
+    [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
 
 Analyzing \testAdd2:
 * pc: pc
@@ -55,8 +56,8 @@ Analyzing \testAdd2:
   Deps: {}
   Locals: { $vec -> \HH\vec<<tp'2>><\HH\vec'2, lump'2> }
   Constraints:
-    [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
-     tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
+    [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
+     tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
 
 Analyzing \retElem:
 * pc: pc
@@ -67,7 +68,7 @@ Analyzing \retElem:
   Deps: {}
   Locals: { $vec -> \HH\vec<<tp'1>><\HH\vec'1, lump'1> }
   Constraints:
-    [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
+    [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1,
      \HH\vec < \HH\vec'1, tp'1 < ret]
 
 Analyzing set:
@@ -128,14 +129,16 @@ Analyzing \copyOnWrite:
      lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
      \HH\vec'1 < \HH\vec'3, $y < tp'3]
 
-Flows constraints for \C#mutation:
+Flow constraints for \C#mutation:
+  
   Simplified: INT < VEC
   Raw:
   [VEC < .v, VEC < .v'1, \C < .v, INT < .i, \C < .i, .v'1 < bop, .i < bop,
    VEC < .v'2, VEC < .v'3, \C < .v'2, \C < VEC, .v'3 < VEC, VEC = VEC,
    .v'2 < VEC, bop < VEC, pc < VEC]
 
-Flows constraints for \C#nested:
+Flow constraints for \C#nested:
+  
   Simplified: VEC < INT
   Raw:
   [VEC < .v, VEC < .v'1, \C < .v, tp < tp'1, lump'2 = lump'4,
@@ -143,45 +146,63 @@ Flows constraints for \C#nested:
    lump'2 = lump'4, \HH\vec < \HH\vec'2, .v'1 < tp'1, \C < INT, tp'1 < INT,
    pc < INT]
 
-Flows constraints for \C#set:
+Flow constraints for \C#set:
+  
   Simplified: INT < VEC
   Raw:
   [INT < .i, \C < .i, VEC < .v, VEC < .v'1, \C < .v, \C < VEC, .v'1 < VEC,
    VEC = VEC, .v < VEC, .i < VEC, pc < VEC]
 
-Flows constraints for \copyOnWrite:
+Flow constraints for \copyOnWrite:
+  
   Simplified: True
   Raw:
   [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, $x < tp'1, tp'1 < tp'2,
    lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'1 < tp'3, lump'1 = lump'3,
    \HH\vec'1 < \HH\vec'3, $y < tp'3]
 
-Flows constraints for \empty:
+Flow constraints for \empty:
+  
   Simplified: True
   Raw:
   [lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, lump'2 = lump, \HH\vec'2 < \HH\vec]
 
 
-Flows constraints for \retElem:
+Flow constraints for \retElem:
+  
   Simplified: True
   Raw:
-  [Bot < tp, Bot < tp, Bot < tp, tp < tp'1, lump = lump'1,
+  [PUBLIC < tp, PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1,
    \HH\vec < \HH\vec'1, tp'1 < ret]
 
-Flows constraints for \testAdd1:
+Flow constraints for \testAdd1:
+  
   Simplified: True
-  Raw: [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, Bot < tp'1]
-
-Flows constraints for \testAdd2:
-  Simplified: True
-  Raw:
-  [Bot < tp, Bot < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
-   tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, Bot < tp'2]
+  Raw: [tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1, PUBLIC < tp'1]
 
 
-Flows constraints for \testCollection:
+Flow constraints for \testAdd2:
+  
   Simplified: True
   Raw:
-  [Bot < $there, Bot < tp'1, $there < tp'1, tp'1 < tp'2, lump'1 = lump'2,
-   \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump, \HH\vec'2 < \HH\vec]
+  [PUBLIC < tp, PUBLIC < tp, tp < tp'1, lump = lump'1, \HH\vec < \HH\vec'1,
+   tp'1 < tp'2, lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, PUBLIC < tp'2]
 
+
+Flow constraints for \testCollection:
+  
+  Simplified: True
+  Raw:
+  [PUBLIC < $there, PUBLIC < tp'1, $there < tp'1, tp'1 < tp'2,
+   lump'1 = lump'2, \HH\vec'1 < \HH\vec'2, tp'2 < tp, lump'2 = lump,
+   \HH\vec'2 < \HH\vec]
+
+There are privacy policy errors in \C#mutation:
+  Data with policy INT appears in context VEC.
+  
+There are privacy policy errors in \C#nested:
+  Data with policy VEC appears in context INT.
+  
+There are privacy policy errors in \C#set:
+  Data with policy INT appears in context VEC.
+  

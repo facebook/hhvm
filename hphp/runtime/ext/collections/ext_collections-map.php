@@ -184,13 +184,10 @@ final class Map implements \MutableMap {
   <<__Native, __Pure, __Mutable>>
   public function reserve(int $sz): void;
 
-  /** Returns an array built from the keys and values from this Map.
-   * @return array
-   */
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
-  /** Returns an array built from the keys and values from this Map.
+  /** Returns a darray built from the keys and values from this Map.
    * @return darray
    */
   <<__Native, __Pure, __MaybeMutable>>
@@ -248,14 +245,14 @@ final class Map implements \MutableMap {
   <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
-  /** Returns an array built from the keys from this Map.
-   * @return array
+  /** Returns a varray built from the keys from this Map.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toKeysArray(): varray;
 
-  /** Returns an array built from the values from this Map.
-   * @return array
+  /** Returns a varray built from the values from this Map.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toValuesArray(): varray;
@@ -569,7 +566,7 @@ final class ImmMap implements \ConstMap {
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
-  /** Returns an array built from the keys and values from this ImmMap.
+  /** Returns a darray built from the keys and values from this ImmMap.
    * @return darray
    */
   <<__Native, __Pure, __MaybeMutable>>
@@ -627,15 +624,15 @@ final class ImmMap implements \ConstMap {
   <<__Native, __Pure, __MutableReturn, __MaybeMutable>>
   public function values(): object;
 
-  /** Returns an array built from the keys from this ImmMap.
-   * @return array
+  /** Returns a varray built from the keys from this ImmMap.
+   * @return varray
    */
 
   <<__Native, __Pure, __MaybeMutable>>
   public function toKeysArray(): varray;
 
-  /** Returns an array built from the values from this ImmMap.
-   * @return array
+  /** Returns a varray built from the values from this ImmMap.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toValuesArray(): varray;

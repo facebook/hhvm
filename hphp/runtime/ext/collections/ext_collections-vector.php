@@ -232,7 +232,7 @@ final class Vector implements \MutableVector {
   <<__Native, __Pure, __Mutable>>
   public function reserve(mixed $sz): void;
 
-  /** Returns an array built from the values from this Vector.
+  /** Returns a varray built from the values from this Vector.
    * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
@@ -287,8 +287,8 @@ final class Vector implements \MutableVector {
   <<__Native, __Pure, __MaybeMutable>>
   public function toImmSet(): object;
 
-  /** Returns an array built from the keys from this Vector.
-   * @return array
+  /** Returns a varray built from the keys from this Vector.
+   * @return varray
    */
   <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toKeysArray(): varray {
@@ -296,8 +296,8 @@ final class Vector implements \MutableVector {
     return $count ? varray(\range(0, $count - 1)) : varray[];
   }
 
-  /** Returns an array built from the values from this Vector.
-   * @return array
+  /** Returns a varray built from the values from this Vector.
+   * @return varray
    */
   <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toValuesArray(): varray {
@@ -868,7 +868,7 @@ final class ImmVector implements \ConstVector {
     return new \LazyKeyedIterableView($this);
   }
 
-  /** Returns an array built from the values from this ImmVector.
+  /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
@@ -877,8 +877,8 @@ final class ImmVector implements \ConstVector {
   <<__Native, __Pure, __MaybeMutable>>
   public function toDArray(): darray;
 
-  /** Returns an array built from the keys from this ImmVector.
-   * @return array
+  /** Returns a varray built from the keys from this ImmVector.
+   * @return varray
    */
   <<__Pure, __ProvenanceSkipFrame>>
   public function toKeysArray(): varray {
@@ -886,8 +886,8 @@ final class ImmVector implements \ConstVector {
     return $count ? varray(\range(0, $count - 1)) : varray[];
   }
 
-  /** Returns an array built from the values from this ImmVector.
-   * @return array
+  /** Returns a varray built from the values from this ImmVector.
+   * @return varray
    */
   <<__Pure, __MaybeMutable, __ProvenanceSkipFrame>>
   public function toValuesArray(): varray {

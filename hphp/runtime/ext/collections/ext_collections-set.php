@@ -146,10 +146,10 @@ final class Set implements \MutableSet {
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
-  /** Returns an array built from the values from this Set, array(val1 => val1,
-   * val2 => val2, ...). This maintains set-like semantics in array() land: O(1)
-   * membership test with `array_has_key($a['key'])` and iteration with
-   * `foreach($a as $member)`.
+  /** Returns a darray built from the values from this Set, darray[val1 => val1,
+   * val2 => val2, ...]. This maintains set-like semantics in darray[] land:
+   * O(1) membership test with `array_has_key($a['key'])` and iteration with
+   *  `foreach($a as $member)`.
    * @return darray
    */
   <<__Native, __Pure, __MaybeMutable>>
@@ -199,14 +199,14 @@ final class Set implements \MutableSet {
   <<__Pure, __MaybeMutable>>
   public function immutable() { return $this->toImmSet(); }
 
-  /** Returns an array built from the values from this Set.
-   * @return array
+  /** Returns a varray built from the values from this Set.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toKeysArray(): varray;
 
-  /** Returns an array built from the values from this Set.
-   * @return array
+  /** Returns a varray built from the values from this Set.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toValuesArray(): varray;
@@ -532,8 +532,8 @@ final class ImmSet implements \ConstSet {
   <<__Native, __Pure, __MaybeMutable>>
   public function toVArray(): varray;
 
-  /** Returns an array built from the values from this ImmSet, array(val1 =>
-   * val1, val2 => val2, ...). This maintains set-like semantics in array()
+  /** Returns a darray built from the values from this ImmSet, darray[val1 =>
+   * val1, val2 => val2, ...]. This maintains set-like semantics in darray[]
    * land: O(1) membership test with `array_has_key($a['key'])` and iteration
    * with `foreach($a as $member)`.
    * @return darray
@@ -587,14 +587,14 @@ final class ImmSet implements \ConstSet {
     return $this;
   }
 
-  /** Returns an array built from the values from this ImmSet.
-   * @return array
+  /** Returns a varray built from the values from this ImmSet.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toKeysArray(): varray;
 
-  /** Returns an array built from the values from this ImmSet.
-   * @return array
+  /** Returns a varray built from the values from this ImmSet.
+   * @return varray
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toValuesArray(): varray;

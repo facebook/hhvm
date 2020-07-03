@@ -229,19 +229,19 @@ final class Pair implements \ConstVector {
   public function immutable(): this { return $this; }
 
   /**
-   * Returns an `array` whose values are the keys from the current `Pair`.
+   * Returns a `varray` whose values are the keys from the current `Pair`.
    *
-   * @return - an `array` with the integer keys from the current `Pair`.
+   * @return - a `varray` with the integer keys from the current `Pair`.
    */
   <<__Pure, __MaybeMutable>>
   public function toKeysArray(): varray { return varray[0, 1]; }
 
   /**
-   * Returns an `array` containing the values from the current `Pair`.
+   * Returns an `varray` containing the values from the current `Pair`.
    *
    * This method is interchangeable with `toVArray()`.
    *
-   * @return - an `array` containing the values from the current `Pair`.
+   * @return - an `varray` containing the values from the current `Pair`.
    */
   <<__Native, __Pure, __MaybeMutable>>
   public function toValuesArray(): varray;

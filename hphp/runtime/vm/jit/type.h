@@ -291,6 +291,7 @@ constexpr bool operator>(Mem a, Mem b) {
   c(StaticDArr,      bits_t::bit<31>())                                 \
   c(UncountedDArr,   bits_t::bit<32>())                                 \
   c(CountedDArr,     bits_t::bit<33>())                                 \
+  c(RClsMeth,        bits_t::bit<34>())                                 \
 /**/
 
 /*
@@ -305,9 +306,11 @@ constexpr bool operator>(Mem a, Mem b) {
 #endif
 
 #ifdef USE_LOWPTR
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kRFunc
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord| \
+                        kRFunc|kRClsMeth
 #else
-#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord|kClsMeth|kRFunc
+#define INIT_CELL_UNION kUncountedInit|kStr|kArrLike|kObj|kRes|kRecord| \
+                        kClsMeth|kRFunc|kRClsMeth
 #endif
 
 #define IRT_PHP_UNIONS(c)                                               \
@@ -339,7 +342,8 @@ constexpr bool operator>(Mem a, Mem b) {
   c(Uncounted,           kUninit|kUncountedInit)                        \
   c(InitCell,            INIT_CELL_UNION)                               \
   c(Cell,                kUninit|kInitCell)                             \
-  c(FuncLike,            kFunc|kRFunc)
+  c(FuncLike,            kFunc|kRFunc)                                  \
+  c(ClsMethLike,         kClsMeth|kRClsMeth)
 
 /*
  * Adding a new runtime type needs updating numRuntime variable.
@@ -362,10 +366,12 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 #ifdef USE_LOWPTR
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kRFunc
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes| \
+  kRecord|kRFunc|kRClsMeth
 #else
 #define COUNTED_INIT_UNION \
-  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes|kRecord|kClsMeth|kRFunc
+  kCountedStr|kCountedArr|kCountedVec|kCountedDict|kCountedKeyset|kObj|kRes| \
+  kRecord|kClsMeth|kRFunc|kRClsMeth
 #endif
 
 #define IRT_SPECIAL                                           \
@@ -412,7 +418,7 @@ constexpr bool operator>(Mem a, Mem b) {
  */
 struct Type {
 private:
-  static constexpr size_t kRuntime = 34;
+  static constexpr size_t kRuntime = 35;
   static constexpr size_t numRuntime = 10;
   using bits_t = BitSet<kRuntime + numRuntime>;
 

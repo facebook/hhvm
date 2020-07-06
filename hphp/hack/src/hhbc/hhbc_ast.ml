@@ -306,6 +306,9 @@ type instruct_operator =
   | ResolveClsMethod of method_id
   | ResolveClsMethodD of class_id * method_id
   | ResolveClsMethodS of SpecialClsRef.t * method_id
+  | ResolveRClsMethod of method_id
+  | ResolveRClsMethodD of class_id * method_id
+  | ResolveRClsMethodS of SpecialClsRef.t * method_id
 
 type switchkind =
   | Bounded

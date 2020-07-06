@@ -315,6 +315,7 @@ auto const primitives = folly::lazy([] {
     TRes,
     TCls,
     TClsMeth,
+    TRClsMeth,
     TFunc,
     TFuncS,
     TRFunc,
@@ -365,6 +366,7 @@ auto const optionals = folly::lazy([] {
     TOptRecord,
     TOptRes,
     TOptClsMeth,
+    TOptRClsMeth,
     TOptArrLikeE,
     TOptArrLikeN,
     TOptArrLike,
@@ -431,6 +433,7 @@ auto const non_opt_unions = folly::lazy([] {
     TUncStrLike,
     TFuncLike,
     TFuncOrCls,
+    TClsMethLike,
     TTop
   };
 });
@@ -908,6 +911,10 @@ TEST(Type, Option) {
   EXPECT_TRUE(TInitNull.subtypeOf(BOptClsMeth));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptClsMeth));
 
+  EXPECT_TRUE(TRClsMeth.subtypeOf(BOptRClsMeth));
+  EXPECT_TRUE(TInitNull.subtypeOf(BOptRClsMeth));
+  EXPECT_TRUE(!TUninit.subtypeOf(BOptRClsMeth));
+
   EXPECT_TRUE(TArrKey.subtypeOf(BOptArrKey));
   EXPECT_TRUE(TInitNull.subtypeOf(BOptArrKey));
   EXPECT_TRUE(!TUninit.subtypeOf(BOptArrKey));
@@ -983,6 +990,8 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptBool, union_of(TOptTrue, TFalse));
 
   EXPECT_EQ(TOptClsMeth, union_of(TInitNull, TClsMeth));
+  EXPECT_EQ(TOptRClsMeth, union_of(TInitNull, TRClsMeth));
+  EXPECT_EQ(TOptClsMethLike, union_of(TInitNull, TClsMethLike));
 
   EXPECT_EQ(TOptFuncLike, union_of(TInitNull, TFuncLike));
   EXPECT_EQ(TOptFuncLike, union_of(TFunc, TOptRFunc));

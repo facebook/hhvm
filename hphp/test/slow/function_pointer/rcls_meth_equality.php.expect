@@ -1,0 +1,89 @@
+Same
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+Different generic
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Different method
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Different class
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Child class
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+via parent::
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+via self::
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+self:: on child class
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+via static::
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+
+static:: on child class
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+String
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Regular class_meth
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Boolean
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+
+Int
+bool(false)
+bool(false)
+bool(true)
+bool(true)
+
+Vec
+bool(false)
+bool(false)
+bool(true)
+bool(true)

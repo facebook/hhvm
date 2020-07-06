@@ -310,6 +310,7 @@ void callFunc(const Func* const func,
     }
 
     case KindOfRFunc:
+    case KindOfRClsMeth:
     case KindOfUninit:
       break;
   }
@@ -600,6 +601,7 @@ static folly::Optional<TypedValue> builtinInValue(
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRClsMeth:
   case KindOfRecord:  return make_tv<KindOfNull>();
   }
 
@@ -651,6 +653,7 @@ static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
     case KindOfFunc:         return ty == T::Func;
     case KindOfClass:        return ty == T::Class;
     case KindOfClsMeth:      return ty == T::ClsMeth;
+    case KindOfRClsMeth:     return false; // TODO(T67037453)
     case KindOfRecord:       return false; // TODO (T41031632)
   }
   not_reached();
@@ -688,6 +691,7 @@ static bool tcCheckNativeIO(
       case KindOfFunc:         return ty == T::FuncIO;
       case KindOfClass:        return ty == T::ClassIO;
       case KindOfClsMeth:      return ty == T::ClsMethIO;
+      case KindOfRClsMeth:     return false; // TODO (T67037453)
       case KindOfRecord:       return false; // TODO (T41031632)
     }
     not_reached();

@@ -209,6 +209,7 @@ private:
   void serializeFunc(const Func* func);
   void serializeClass(const Class* cls);
   void serializeClsMeth(ClsMethDataRef clsMeth, bool skipNestCheck = false);
+  void serializeRClsMeth(RClsMethData* rclsMeth);
 
   Array getSerializeProps(const ObjectData* obj) const;
 

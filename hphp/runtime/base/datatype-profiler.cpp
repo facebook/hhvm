@@ -46,6 +46,7 @@ DataTypeProfiler::DataTypeProfiler(std::string name)
   , m_rfunc(name + "=KindOfRFunc")
   , m_class(name + "=KindOfClass")
   , m_clsmeth(name + "=KindOfClsMeth")
+  , m_rclsmeth(name + "=KindOfRClsMeth")
   , m_record(name + "=KindOfRecord")
 {}
 
@@ -76,6 +77,7 @@ DataType DataTypeProfiler::operator()(DataType type) {
     case KindOfFunc:          m_func.count(); break;
     case KindOfClass:         m_class.count(); break;
     case KindOfClsMeth:       m_clsmeth.count(); break;
+    case KindOfRClsMeth:      m_rclsmeth.count(); break;
     case KindOfRecord:        m_record.count(); break;
   }
   return type;
@@ -108,6 +110,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                m_rfunc.hits() +
                m_class.hits() +
                m_clsmeth.hits() +
+               m_rclsmeth.hits() +
                m_record.hits();
   if (!total) return;
   fprintf(stderr, "%s: total=%zu KindOfUninit=%.1f%% "
@@ -135,6 +138,7 @@ DataTypeProfiler::~DataTypeProfiler() {
                   "KindOfRFunc=%.1f%%"
                   "KindOfClass=%.1f%% "
                   "KindOfClsMeth=%.1f%% "
+                  "KindOfRClsMeth=%.1f%% "
                   "KindOfRecord=%.1f%% ",
           m_name.c_str(), total,
           100.0 * m_uninit.hits() / total,
@@ -162,6 +166,7 @@ DataTypeProfiler::~DataTypeProfiler() {
           100.0 * m_rfunc.hits() / total,
           100.0 * m_class.hits() / total,
           100.0 * m_clsmeth.hits() / total,
+          100.0 * m_rclsmeth.hits() / total,
           100.0 * m_record.hits() / total);
 }
 

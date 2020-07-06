@@ -101,6 +101,10 @@ const StaticString s_cmpWithClsMeth(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
   "a clsmeth with a non-clsmeth"
 );
+const StaticString s_cmpWithRClsMeth(
+  "Cannot use relational comparison operators (<, <=, >, >=, <=>) to compare "
+  "a reified class meth"
+);
 const StaticString s_cmpWithRFunc(
   "Cannot use relational comparison operators (<, <=, >, >=, <=>) with "
   "reified functions"
@@ -813,6 +817,10 @@ void throw_keyset_compare_exception() {
 
 void throw_clsmeth_compare_exception() {
   SystemLib::throwInvalidOperationExceptionObject(s_cmpWithClsMeth);
+}
+
+void throw_rclsmeth_compare_exception() {
+  SystemLib::throwInvalidOperationExceptionObject(s_cmpWithRClsMeth);
 }
 
 void throw_arr_non_arr_compare_exception() {

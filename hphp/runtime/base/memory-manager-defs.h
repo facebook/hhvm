@@ -26,6 +26,7 @@
 #include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/rfunc-data.h"
+#include "hphp/runtime/vm/rclass-meth-data.h"
 
 #include "hphp/runtime/ext/asio/ext_asio.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
@@ -272,6 +273,7 @@ inline size_t allocSize(const HeapObject* h) {
     0, /* String */
     0, /* Resource */
     sizeClass<ClsMethData>(),
+    sizeClass<RClsMethData>(),
     0, /* Record */
     sizeClass<RFuncData>(),
     0, /* Object */
@@ -301,6 +303,7 @@ inline size_t allocSize(const HeapObject* h) {
 #define CHECKSIZE(knd, type) \
   static_assert(kind_sizes[(int)HeaderKind::knd] == sizeClass<type>(), #knd);
   CHECKSIZE(ClsMeth, ClsMethData)
+  CHECKSIZE(RClsMeth, RClsMethData)
   CHECKSIZE(AsyncFuncWH, c_AsyncFunctionWaitHandle)
   CHECKSIZE(Vector, c_Vector)
   CHECKSIZE(Map, c_Map)
@@ -462,6 +465,7 @@ inline size_t allocSize(const HeapObject* h) {
     case HeaderKind::ImmMap:
     case HeaderKind::ImmSet:
     case HeaderKind::ClsMeth:
+    case HeaderKind::RClsMeth:
     case HeaderKind::RFunc:
       not_reached();
   }

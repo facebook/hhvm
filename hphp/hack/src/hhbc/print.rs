@@ -2200,6 +2200,22 @@ fn print_op<W: Write>(w: &mut W, op: &InstructOperator) -> Result<(), W::Error> 
             w.write(" ")?;
             print_method_id(w, mid)
         }
+        I::ResolveRClsMethod(mid) => {
+            w.write("ResolveRClsMethod ")?;
+            print_method_id(w, mid)
+        }
+        I::ResolveRClsMethodD(cid, mid) => {
+            w.write("ResolveRClsMethodD ")?;
+            print_class_id(w, cid)?;
+            w.write(" ")?;
+            print_method_id(w, mid)
+        }
+        I::ResolveRClsMethodS(r, mid) => {
+            w.write("ResolveRClsMethodS ")?;
+            print_special_cls_ref(w, r)?;
+            w.write(" ")?;
+            print_method_id(w, mid)
+        }
         I::Fatal(fatal_op) => print_fatal_op(w, fatal_op),
     }
 }

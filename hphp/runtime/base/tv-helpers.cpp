@@ -22,6 +22,7 @@
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/rclass-meth-data.h"
 
 #include "hphp/util/assertions.h"
 
@@ -171,6 +172,20 @@ bool tvIsPlausible(const TypedValue cell) {
       case KindOfClsMeth:
         assertx(cell.m_data.pclsmeth->validate());
         return;
+      case KindOfRClsMeth: {
+        assertPtr(cell.m_data.prclsmeth);
+        assertx(cell.m_data.prclsmeth->m_func->validate());
+        assertx(cell.m_data.prclsmeth->m_cls->validate());
+        assertPtr(cell.m_data.prclsmeth->m_arr);
+        assertx(cell.m_data.prclsmeth->m_arr->checkCountZ());
+        if (RuntimeOption::EvalHackArrDVArrs) {
+          assertx(cell.m_data.prclsmeth->m_arr->isVecType());
+          assertx(cell.m_data.prclsmeth->m_arr->isNotDVArray());
+        } else {
+          assertx(cell.m_data.prclsmeth->m_arr->isPHPArrayType());
+        }
+        return;
+      }
     }
     not_reached();
   }();

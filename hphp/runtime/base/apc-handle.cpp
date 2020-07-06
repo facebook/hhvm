@@ -21,6 +21,7 @@
 #include "hphp/runtime/base/apc-object.h"
 #include "hphp/runtime/base/apc-collection.h"
 #include "hphp/runtime/base/apc-named-entity.h"
+#include "hphp/runtime/base/apc-rclass-meth.h"
 #include "hphp/runtime/base/apc-rfunc.h"
 #include "hphp/runtime/base/mixed-array.h"
 #include "hphp/runtime/ext/apc/ext_apc.h"
@@ -167,6 +168,9 @@ APCHandle::Pair APCHandle::Create(const_variant_ref source,
       }
     }
 
+    case KindOfRClsMeth:
+      return APCRClsMeth::Construct(val(cell).prclsmeth);
+
     case KindOfRecord: // TODO (T41019518)
       raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
@@ -262,6 +266,8 @@ Variant APCHandle::toLocalHelper() const {
       return APCObject::MakeLocalObject(this);
     case APCKind::RFunc:
       return APCRFunc::Make(this);
+    case APCKind::RClsMeth:
+      return APCRClsMeth::Make(this);
   }
   not_reached();
 }
@@ -318,6 +324,10 @@ void APCHandle::deleteShared() {
 
     case APCKind::RFunc:
       APCRFunc::Delete(this);
+      return;
+
+    case APCKind::RClsMeth:
+      APCRClsMeth::Delete(this);
       return;
 
     case APCKind::UncountedArray:
@@ -377,6 +387,7 @@ bool APCHandle::checkInvariants() const {
       assertx(!RuntimeOption::EvalHackArrDVArrs);
     case APCKind::FuncEntity:
     case APCKind::RFunc:
+    case APCKind::RClsMeth:
     case APCKind::SharedString:
     case APCKind::SharedArray:
     case APCKind::SharedPackedArray:

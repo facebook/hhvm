@@ -136,6 +136,9 @@ TypedNum numericConvHelper(TypedValue cell) {
       throw ExtendedException("Invalid operand type was used: cannot perform "
                               "this operation with clsmeth");
 
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("num");
+
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);
     case KindOfObject:
@@ -543,6 +546,7 @@ void tvIncDecOp(Op op, tv_lval cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRFunc:
     case KindOfRecord:
       raiseIncDecInvalidType(cell);
@@ -852,6 +856,7 @@ void tvBitNot(TypedValue& cell) {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRFunc:
     case KindOfRecord:
       raise_error("Unsupported operand type for ~");

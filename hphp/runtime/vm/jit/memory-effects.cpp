@@ -1061,7 +1061,10 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case LdFuncFromClsMeth:
   case LdFuncFromRFunc:
   case LdGenericsFromRFunc:
-    return may_load_store(AHeapAny, AEmpty);
+  case LdClsFromRClsMeth:
+  case LdFuncFromRClsMeth:
+  case LdGenericsFromRClsMeth:
+    return may_load_store(AEmpty, AEmpty);
 
   //////////////////////////////////////////////////////////////////////
   // Object/Ref loads/stores
@@ -1421,6 +1424,7 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // track are isolated from anything else we care about.
 
   case NewClsMeth:
+  case NewRClsMeth:
   case NewCol:
   case NewColFromArray:
   case NewPair:

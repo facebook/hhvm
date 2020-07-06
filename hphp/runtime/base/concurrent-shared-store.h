@@ -164,6 +164,7 @@ struct EntryInfo {
     APCDict,
     APCKeyset,
     APCRFunc,
+    APCRClsMeth,
   };
 
   EntryInfo(const char* apckey,

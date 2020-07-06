@@ -795,6 +795,7 @@ bool StringData::isNumeric() const {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       break;
   }
@@ -833,6 +834,7 @@ bool StringData::isInteger() const {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       break;
   }

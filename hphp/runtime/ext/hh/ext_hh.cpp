@@ -232,11 +232,12 @@ enum SerializeMemoizeCode {
   SER_MC_FUNC      = 12,
   SER_MC_CLSMETH   = 13,
   SER_MC_RFUNC     = 14,
-  SER_MC_STOP      = 15,
+  SER_MC_RCLSMETH  = 15,
+  SER_MC_STOP      = 16,
 };
 
-const uint64_t kCodeMask DEBUG_ONLY = 0x0f;
-const uint64_t kCodePrefix          = 0xf0;
+const uint64_t kCodeMask DEBUG_ONLY = 0x1f;
+const uint64_t kCodePrefix          = 0xe0;
 
 ALWAYS_INLINE void serialize_memoize_code(StringBuffer& sb,
                                           SerializeMemoizeCode code) {
@@ -357,6 +358,14 @@ void serialize_memoize_rfunc(StringBuffer& sb, int depth, RFuncData* rfunc) {
   serialize_memoize_array(sb, depth, rfunc->m_arr);
 }
 
+void serialize_memoize_rcls_meth(StringBuffer& sb, int depth,
+                                 RClsMethData* rclsmeth) {
+  serialize_memoize_code(sb, SER_MC_RCLSMETH);
+  serialize_memoize_string_data(sb, rclsmeth->m_cls->name());
+  serialize_memoize_string_data(sb, rclsmeth->m_func->fullName());
+  serialize_memoize_array(sb, depth, rclsmeth->m_arr);
+}
+
 void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
   if (depth > 256) {
     SystemLib::throwInvalidArgumentExceptionObject("Array depth exceeded");
@@ -428,6 +437,10 @@ void serialize_memoize_tv(StringBuffer& sb, int depth, TypedValue tv) {
 
     case KindOfRFunc:
       serialize_memoize_rfunc(sb, depth, tv.m_data.prfunc);
+      break;
+
+    case KindOfRClsMeth:
+      serialize_memoize_rcls_meth(sb, depth, tv.m_data.prclsmeth);
       break;
 
     case KindOfResource:

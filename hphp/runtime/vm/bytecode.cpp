@@ -772,6 +772,15 @@ static std::string toStringElm(TypedValue tv) {
        << tv.m_data.pclsmeth->getFunc()->fullName()->data()
        << ")";
        continue;
+    case KindOfRClsMeth:
+      os << ":RClsMeth("
+         << tv.m_data.prclsmeth->m_cls->name()->data()
+         << ", "
+         << tv.m_data.prclsmeth->m_func->fullName()->data()
+         << ")<"
+         << tv.m_data.prclsmeth->m_arr
+         << ">";
+      continue;
     }
     not_reached();
   } while (0);
@@ -2320,6 +2329,7 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
             case KindOfFunc:
             case KindOfClass:
             case KindOfClsMeth:
+            case KindOfRClsMeth:
             case KindOfRecord:
               not_reached();
           }
@@ -2357,6 +2367,11 @@ void iopSwitch(PC origpc, PC& pc, SwitchKind kind, int64_t base,
 
         case KindOfClsMeth:
           tvDecRefClsMeth(val);
+          match = SwitchMatch::DEFAULT;
+          break;
+
+        case KindOfRClsMeth:
+          tvDecRefRClsMeth(val);
           match = SwitchMatch::DEFAULT;
           break;
 
@@ -4087,6 +4102,17 @@ OPTBLD_INLINE void fcallFuncClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
   fcallImpl<false>(origpc, pc, fca, func, cls);
 }
 
+OPTBLD_INLINE void fcallFuncRClsMeth(PC origpc, PC& pc, const FCallArgs& fca) {
+  assertx(tvIsRClsMeth(vmStack().topC()));
+  auto const rclsMeth = vmStack().topC()->m_data.prclsmeth;
+
+  auto const cls = rclsMeth->m_cls;
+  auto const func = rclsMeth->m_func;
+  auto generics = Array(rclsMeth->m_arr);
+  vmStack().popC();
+  fcallImpl<false>(origpc, pc, fca, func, cls, true, &generics);
+}
+
 Func* resolveFuncImpl(Id id) {
   auto unit = vmfp()->m_func->unit();
   auto const nep = unit->lookupNamedEntityPairId(id);
@@ -4149,6 +4175,7 @@ OPTBLD_INLINE void iopFCallFunc(PC origpc, PC& pc, FCallArgs fca) {
   if (isFuncType(type)) return fcallFuncFunc(origpc, pc, fca);
   if (isRFuncType(type)) return fcallFuncRFunc(origpc, pc, fca);
   if (isClsMethType(type)) return fcallFuncClsMeth(origpc, pc, fca);
+  if (isRClsMethType(type)) return fcallFuncRClsMeth(origpc, pc, fca);
 
   raise_error(Strings::FUNCTION_NAME_MUST_BE_STRING);
 }
@@ -4346,8 +4373,7 @@ Class* specialClsRefToCls(SpecialClsRef ref) {
   always_assert(false);
 }
 
-template<bool extraStk = false>
-void resolveClsMethodImpl(Class* cls, const StringData* methName) {
+const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   const Func* func;
   auto const res = lookupClsMethod(func, cls, methName, nullptr,
                                    arGetContextClass(vmfp()), false);
@@ -4358,6 +4384,12 @@ void resolveClsMethodImpl(Class* cls, const StringData* methName) {
   assertx(res == LookupResult::MethodFoundNoThis);
   assertx(func);
   if (!func->isStaticInPrologue()) throw_missing_this(func);
+  return func;
+}
+
+template<bool extraStk = false>
+void resolveClsMethodImpl(Class* cls, const StringData* methName) {
+  const Func* func = resolveClsMethodFunc(cls, methName);
   auto clsmeth = ClsMethDataRef::create(cls, const_cast<Func*>(func));
   if (extraStk) vmStack().popC();
   vmStack().pushClsMethNoRc(clsmeth);
@@ -4386,6 +4418,59 @@ OPTBLD_INLINE void iopResolveClsMethodD(Id classId,
 OPTBLD_INLINE void iopResolveClsMethodS(SpecialClsRef ref,
                                         const StringData* methName) {
   resolveClsMethodImpl(specialClsRefToCls(ref), methName);
+}
+
+namespace {
+
+template<bool extraStk = false>
+void resolveRClsMethodImpl(Class* cls, const StringData* methName) {
+  const Func* func = resolveClsMethodFunc(cls, methName);
+
+  auto const tsList = vmStack().topC();
+  auto const reified = [&] () -> ArrayData* {
+      if (!tvIsHAMSafeVArray(tsList)) {
+        raise_error("Invalid reified generics when resolving class method");
+      }
+      return tsList->m_data.parr;
+    }();
+
+  if (func->hasReifiedGenerics()) {
+    checkFunReifiedGenericMismatch(func, reified);
+    auto rclsmeth = RClsMethData::create(cls, const_cast<Func*>(func), reified);
+    vmStack().discard();
+    if (extraStk) vmStack().popC();
+    vmStack().pushRClsMethNoRc(rclsmeth);
+  } else {
+    auto clsmeth = ClsMethDataRef::create(cls, const_cast<Func*>(func));
+    vmStack().popC();
+    if (extraStk) vmStack().popC();
+    vmStack().pushClsMethNoRc(clsmeth);
+  }
+}
+
+} // namespace
+
+OPTBLD_INLINE void iopResolveRClsMethod(const StringData* methName) {
+  auto const c = vmStack().indC(1);
+  if (!isClassType(c->m_type)) {
+    raise_error("Attempting ResolveRClsMethod with non-class");
+  }
+  resolveRClsMethodImpl<true>(c->m_data.pclass, methName);
+}
+
+OPTBLD_INLINE void iopResolveRClsMethodD(Id classId,
+                                         const StringData* methName) {
+  auto const nep = vmfp()->m_func->unit()->lookupNamedEntityPairId(classId);
+  auto cls = Unit::loadClass(nep.second, nep.first);
+  if (UNLIKELY(cls == nullptr)) {
+    raise_error("Failure to resolve class name \'%s\'", nep.first->data());
+  }
+  resolveRClsMethodImpl<false>(cls, methName);
+}
+
+OPTBLD_INLINE void iopResolveRClsMethodS(SpecialClsRef ref,
+                                         const StringData* methName) {
+  resolveRClsMethodImpl<false>(specialClsRefToCls(ref), methName);
 }
 
 namespace {

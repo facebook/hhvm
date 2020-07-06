@@ -1002,6 +1002,37 @@ void fcallFuncClsMeth(IRGS& env, const FCallArgs& fca) {
   prepareAndCallProfiled(env, func, fca, cls, false, false);
 }
 
+void fcallFuncRClsMeth(IRGS& env, const FCallArgs& fca) {
+  auto const rclsMeth = popC(env);
+  assertx(rclsMeth->isA(TRClsMeth));
+
+  auto const cls = gen(env, LdClsFromRClsMeth, rclsMeth);
+  auto const func = gen(env, LdFuncFromRClsMeth, rclsMeth);
+  auto const generics = gen(env, LdGenericsFromRClsMeth, rclsMeth);
+
+  auto const new_fca = FCallArgs(
+    static_cast<FCallArgsBase::Flags>(
+      fca.flags | FCallArgsBase::Flags::HasGenerics
+    ),
+    fca.numArgs,
+    fca.numRets,
+    fca.inoutArgs,
+    fca.asyncEagerOffset,
+    fca.lockWhileUnwinding,
+    fca.skipNumArgsCheck,
+    fca.context
+  );
+
+  gen(env, IncRef, generics);
+  push(env, generics);
+
+  // We just wrote to the stack, make sure the function call can proceed.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
+
+  prepareAndCallProfiled(env, func, new_fca, cls, false, false);
+}
+
 void fcallFuncStr(IRGS& env, const FCallArgs& fca) {
   auto const str = topC(env);
   assertx(str->isA(TStr));
@@ -1056,6 +1087,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
   if (callee->isA(TVec)) return fcallFuncArr(env, fca);
   if (callee->isA(TDict)) return fcallFuncArr(env, fca);
   if (callee->isA(TRFunc)) return fcallFuncRFunc(env, fca);
+  if (callee->isA(TRClsMeth)) return fcallFuncRClsMeth(env, fca);
   return interpOne(env);
 }
 
@@ -1549,6 +1581,28 @@ void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
   push(env, gen(env, NewClsMeth, clsVal, funcTmp));
 }
 
+void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
+                            const StringData* className) {
+  if (!func->isStaticInPrologue()) {
+    gen(env, ThrowMissingThis, cns(env, func));
+  }
+  if (!classIsPersistentOrCtxParent(env, cls)) {
+    gen(env, LdClsCached, cns(env, className));
+  }
+  ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+}
+
+std::pair<SSATmp*, SSATmp*>
+resolveClsMethodDSlow(IRGS& env, const StringData* className,
+                      const StringData* methodName) {
+  auto const slowExit = makeExitSlow(env);
+  auto const ne = NamedEntity::get(className);
+  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
+  auto const func = loadClsMethodUnknown(env, data, slowExit);
+  auto const cls = gen(env, LdClsCached, cns(env, className));
+  return std::pair(cls, func);
+}
+
 } // namespace
 
 void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
@@ -1564,13 +1618,7 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
     auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
                                                true);
     if (func) {
-      if (!func->isStaticInPrologue()) {
-        gen(env, ThrowMissingThis, cns(env, func));
-      }
-      if (!classIsPersistentOrCtxParent(env, cls)) {
-        gen(env, LdClsCached, cns(env, className));
-      }
-      ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+      checkClsMethodAndLdCtx(env, cls, func, className);
 
       // For clsmeth, we want to return the class user gave,
       // not the class where func is associated with.
@@ -1581,11 +1629,7 @@ void emitResolveClsMethodD(IRGS& env, const StringData* className,
     return;
   }
 
-  auto const slowExit = makeExitSlow(env);
-  auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
-  auto const funcTmp = loadClsMethodUnknown(env, data, slowExit);
-  auto const clsTmp = gen(env, LdClsCached, cns(env, className));
+  auto [clsTmp, funcTmp] = resolveClsMethodDSlow(env, className, methodName);
   push(env, gen(env, NewClsMeth, clsTmp, funcTmp));
 }
 
@@ -1594,6 +1638,102 @@ void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
   resolveClsMethodCommon(env, cls, methodName, 0);
+}
+
+namespace {
+
+void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
+                                     SSATmp* tsList) {
+  popC(env); // Pop generics
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const res = gen(env, HasReifiedGenerics, func);
+      gen(env, JmpZero, taken, res);
+    },
+    [&] {
+      gen(env, CheckFunReifiedGenericMismatch, func, tsList);
+      push(env, gen(env, NewRClsMeth, cls, func, tsList));
+      // NewRClsMeth consumes the reference to the generics
+    },
+    [&] {
+      push(env, gen(env, NewClsMeth, cls, func));
+      decRef(env, tsList);
+    }
+  );
+}
+
+void resolveRClsMethodCommon(IRGS& env,
+                             SSATmp* clsVal,
+                             const StringData* methodName,
+                             SSATmp* generics,
+                             uint32_t numExtraInputs) {
+  assertx(clsVal->isA(TCls));
+  auto const cs = clsVal->type().clsSpec();
+  if (!cs) return interpOne(env);
+  auto const exactClass = cs.exact() || cs.cls()->attrs() & AttrNoOverride;
+  SSATmp* ctx;
+  auto const funcTmp = lookupClsMethodKnown(env, methodName, clsVal, cs.cls(),
+                                            exactClass, false, ctx,
+                                            curClass(env));
+  if (!funcTmp) return interpOne(env);
+  assertx(funcTmp->isA(TFunc));
+  if (!funcTmp->hasConstVal()) return interpOne(env);
+  if (!funcTmp->funcVal()->isStaticInPrologue()) {
+    gen(env, ThrowMissingThis, funcTmp);
+  }
+  discard(env, numExtraInputs);
+  checkGenericsAndResolveRClsMeth(env, clsVal, funcTmp, generics);
+}
+
+} // namespace
+
+void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
+  auto const generics = topC(env);
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    return interpOne(env);
+  }
+  auto const cls = topC(env, BCSPRelOffset { 1 });
+  if (!cls->isA(TCls)) return interpOne(env);
+  resolveRClsMethodCommon(env, cls, methodName, generics, 1);
+}
+
+void emitResolveRClsMethodD(IRGS& env, const StringData* className,
+                            const StringData* methodName) {
+  auto const generics = topC(env);
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    return interpOne(env);
+  }
+
+  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
+  if (cls) {
+    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env), true);
+    if (func) {
+      checkClsMethodAndLdCtx(env, cls, func, className);
+
+      // For cls meth, we want to return the class user gave,
+      // not the class where func is associated with.
+      checkGenericsAndResolveRClsMeth(env, cns(env, cls), cns(env, func), generics);
+    } else {
+      resolveRClsMethodCommon(env, cns(env, cls), methodName, generics, 0);
+    }
+    return;
+  }
+
+  auto [clsTmp, funcTmp] = resolveClsMethodDSlow(env, className, methodName);
+  checkGenericsAndResolveRClsMeth(env, clsTmp, funcTmp, generics);
+}
+
+void emitResolveRClsMethodS(IRGS& env, SpecialClsRef ref,
+                            const StringData* methodName) {
+  auto const generics = topC(env);
+  if (!generics->isA(RuntimeOption::EvalHackArrDVArrs ? TVec : TArr)) {
+    return interpOne(env);
+  }
+  auto const cls = specialClsRefToCls(env, ref);
+  if (!cls) return interpOne(env);
+  resolveRClsMethodCommon(env, cls, methodName, generics, 0);
 }
 
 namespace {

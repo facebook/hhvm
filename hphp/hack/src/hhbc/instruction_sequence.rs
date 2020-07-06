@@ -1002,6 +1002,24 @@ pub mod instr {
         )))
     }
 
+    pub fn resolverclsmethod(method_id: MethodId) -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::ResolveRClsMethod(
+            method_id,
+        )))
+    }
+
+    pub fn resolverclsmethodd(class_id: ClassId, method_id: MethodId) -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::ResolveRClsMethodD(
+            class_id, method_id,
+        )))
+    }
+
+    pub fn resolverclsmethods(scref: SpecialClsRef, method_id: MethodId) -> InstrSeq {
+        instr(Instruct::IOp(InstructOperator::ResolveRClsMethodS(
+            scref, method_id,
+        )))
+    }
+
     pub fn resolve_meth_caller(fun_id: FunctionId) -> InstrSeq {
         instr(Instruct::IOp(InstructOperator::ResolveMethCaller(fun_id)))
     }

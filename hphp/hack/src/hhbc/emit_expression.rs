@@ -2727,7 +2727,14 @@ fn emit_class_meth(e: &mut Emitter, env: &Env, cls: &tast::Expr, meth: &tast::Ex
         };
         if let Some((cid, (_, id))) = cls.1.as_class_const() {
             if string_utils::is_class(id) {
-                return emit_class_meth_native(e, env, &cls.0, cid, method_id);
+                return emit_class_meth_native(
+                    e,
+                    env,
+                    &cls.0,
+                    cid,
+                    method_id,
+                    &vec![ /* targs */ ],
+                );
             }
         }
         if let Some(ast_defs::Id(_, s)) = cls.1.as_id() {
@@ -2763,6 +2770,7 @@ fn emit_class_meth_native(
     pos: &Pos,
     cid: &tast::ClassId,
     method_id: MethodId,
+    targs: &[tast::Targ],
 ) -> Result {
     let mut cexpr = ClassExpr::class_id_to_class_expr(e, false, true, &env.scope, cid);
     if let ClassExpr::Id(ast_defs::Id(_, name)) = &cexpr {
@@ -2770,15 +2778,38 @@ fn emit_class_meth_native(
             cexpr = reified_var_cexpr;
         }
     }
+    let has_generics = has_non_tparam_generics_targs(env, targs);
+    let mut emit_generics = || -> Result {
+        emit_reified_targs(
+            e,
+            env,
+            pos,
+            &targs.iter().map(|targ| &targ.1).collect::<Vec<_>>(),
+        )
+    };
     Ok(match cexpr {
-        ClassExpr::Id(ast_defs::Id(_, name)) => {
+        ClassExpr::Id(ast_defs::Id(_, name)) if !has_generics => {
             instr::resolveclsmethodd(class::Type::from_ast_name_and_mangle(&name), method_id)
         }
-        ClassExpr::Special(clsref) => instr::resolveclsmethods(clsref, method_id),
-        ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
+        ClassExpr::Id(ast_defs::Id(_, name)) => InstrSeq::gather(vec![
+            emit_generics()?,
+            instr::resolverclsmethodd(class::Type::from_ast_name_and_mangle(&name), method_id),
+        ]),
+        ClassExpr::Special(clsref) if !has_generics => instr::resolveclsmethods(clsref, method_id),
+        ClassExpr::Special(clsref) => InstrSeq::gather(vec![
+            emit_generics()?,
+            instr::resolverclsmethods(clsref, method_id),
+        ]),
+        ClassExpr::Reified(instrs) if !has_generics => InstrSeq::gather(vec![
             instrs,
             instr::classgetc(),
             instr::resolveclsmethod(method_id),
+        ]),
+        ClassExpr::Reified(instrs) => InstrSeq::gather(vec![
+            instrs,
+            instr::classgetc(),
+            emit_generics()?,
+            instr::resolverclsmethod(method_id),
         ]),
         ClassExpr::Expr(_) => {
             return Err(unrecoverable(
@@ -2839,7 +2870,7 @@ fn emit_function_pointer(
             // TODO(hrust) should accept `let method_id = method::Type::from_ast_name(&(cc.1).1);`
             let method_id: method::Type =
                 string_utils::strip_global_ns(&(cc.1).1).to_string().into();
-            emit_class_meth_native(e, env, annot, &cc.0, method_id)
+            emit_class_meth_native(e, env, annot, &cc.0, method_id, targs)
         }
         Expr_::ObjGet(og) => match (og.1).1.as_id() {
             Some(ast_defs::Id(_, method_name)) => {

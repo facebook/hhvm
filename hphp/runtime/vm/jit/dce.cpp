@@ -181,6 +181,9 @@ bool canDCE(IRInstruction* inst) {
   case LdSmashableFunc:
   case LdClsFromClsMeth:
   case LdFuncFromClsMeth:
+  case LdClsFromRClsMeth:
+  case LdFuncFromRClsMeth:
+  case LdGenericsFromRClsMeth:
   case LdFuncFromRFunc:
   case LdGenericsFromRFunc:
   case LdRecDesc:
@@ -211,6 +214,7 @@ bool canDCE(IRInstruction* inst) {
   case NewCol:
   case NewPair:
   case NewRFunc:
+  case NewRClsMeth:
   case DefCallFlags:
   case DefCallFunc:
   case DefCallNumArgs:

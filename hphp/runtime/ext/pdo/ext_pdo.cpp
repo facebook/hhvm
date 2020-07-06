@@ -2520,6 +2520,7 @@ safe:
               case KindOfFunc:
               case KindOfClass:
               case KindOfClsMeth:
+              case KindOfRClsMeth:
               case KindOfRecord:
                 if (!stmt->dbh->conn()->quoter(
                       param->parameter.toString(),

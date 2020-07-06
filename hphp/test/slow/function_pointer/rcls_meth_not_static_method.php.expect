@@ -1,0 +1,1 @@
+Non-static method Test::notStatic() cannot be called statically

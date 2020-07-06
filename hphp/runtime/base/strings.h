@@ -116,6 +116,8 @@ constexpr char CALL_ILLFORMED_FUNC[] =
   "class/object pointer";
 constexpr char RFUNC_NOT_SUPPORTED[] =
   "Reified functions not supported";
+constexpr char RCLS_METH_NOT_SUPPORTED[] =
+  "Reified class method pointers no supported";
 
 constexpr char CLSMETH_COMPAT_IS_ARR[] = "is_array() called on clsmeth";
 constexpr char CLSMETH_COMPAT_IS_VEC[] = "is_vec() called on clsmeth";

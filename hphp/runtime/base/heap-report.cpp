@@ -71,6 +71,13 @@ DEBUG_ONLY std::string describe(const HeapGraph& g, int n) {
     case HeaderKind::Resource:
     case HeaderKind::ClsMeth:
       break;
+    case HeaderKind::RClsMeth: {
+      auto const rclsmeth = static_cast<const RClsMethData*>(h);
+      out << ":" << rclsmeth->m_cls->name()->data()
+          << "::" << rclsmeth->m_func->name()->data()
+          << "[" << rclsmeth->m_arr->size() << "]";
+      break;
+    }
     case HeaderKind::Object:
     case HeaderKind::NativeObject:
     case HeaderKind::Closure:

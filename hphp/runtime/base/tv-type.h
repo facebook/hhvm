@@ -55,6 +55,7 @@ CASE(Func)
 CASE(RFunc)
 CASE(Class)
 CASE(ClsMeth)
+CASE(RClsMeth)
 CASE(Record)
 
 #undef CASE

@@ -389,6 +389,7 @@ const StaticString
   s_func("function"),
   s_class("class"),
   s_clsmeth("clsmeth"),
+  s_rclsmeth("rclsmeth"),
   s_record("record");
 
 StaticString getDataTypeString(DataType t) {
@@ -418,6 +419,7 @@ StaticString getDataTypeString(DataType t) {
     case KindOfFunc:       return s_func;
     case KindOfClass:      return s_class;
     case KindOfClsMeth:    return s_clsmeth;
+    case KindOfRClsMeth:   return s_rclsmeth;
     case KindOfRecord:     return s_record;
   }
   not_reached();

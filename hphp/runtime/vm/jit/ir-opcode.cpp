@@ -776,6 +776,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdClsCns:
   case LdClsCnsVecLen:
   case LdClsFromClsMeth:
+  case LdClsFromRClsMeth:
   case LdClsInitData:
   case LdClsInitElem:
   case LdClsMethod:
@@ -795,12 +796,14 @@ bool opcodeMayRaise(Opcode opc) {
   case LdFrameCls:
   case LdFrameThis:
   case LdFuncFromClsMeth:
+  case LdFuncFromRClsMeth:
   case LdFuncFromRFunc:
   case LdFuncNumParams:
   case LdFuncName:
   case LdFuncRxLevel:
   case LdFuncVecLen:
   case LdGenericsFromRFunc:
+  case LdGenericsFromRClsMeth:
   case LdIfaceMethod:
   case LdInitPropAddr:
   case LdInitRDSAddr:
@@ -893,6 +896,7 @@ bool opcodeMayRaise(Opcode opc) {
   case NeqStr:
   case NeqStrInt:
   case NewClsMeth:
+  case NewRClsMeth:
   case NewCol:
   case NewColFromArray:
   case NewDArray:

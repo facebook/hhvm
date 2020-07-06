@@ -285,6 +285,7 @@ enum OutTypeConstraints {
   OutFuncLike,          // For ResolveRFunc instruction
   OutClass,             // for class pointers
   OutClsMeth,           // For ClsMeth pointers
+  OutClsMethLike,       // For ResolveRClsMeth* instructions
 
   OutNone,
 };

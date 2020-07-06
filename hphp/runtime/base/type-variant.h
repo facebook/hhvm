@@ -29,6 +29,7 @@
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/rclass-meth-data.h"
 #include "hphp/runtime/vm/rfunc-data.h"
 
 #include <algorithm>
@@ -372,6 +373,17 @@ struct Variant : private TypedValue {
       assertx(v);
       m_type = KindOfRFunc;
       m_data.prfunc = v;
+      v->incRefCount();
+    } else {
+      m_type = KindOfNull;
+    }
+  }
+
+  explicit Variant(RClsMethData* v) noexcept {
+    if (v) {
+      assertx(v);
+      m_type = KindOfRClsMeth;
+      m_data.prclsmeth = v;
       v->incRefCount();
     } else {
       m_type = KindOfNull;
@@ -794,6 +806,7 @@ struct Variant : private TypedValue {
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfRecord:
         return false;
     }
@@ -1438,6 +1451,8 @@ private:
       case KindOfClsMeth:
         assertx(checkCountClsMeth(m_data.pclsmeth));
         return;
+      case KindOfRClsMeth:
+        assertx(m_data.prclsmeth->checkCount());
       case KindOfObject:
         assertx(m_data.pobj->checkCount());
         return;

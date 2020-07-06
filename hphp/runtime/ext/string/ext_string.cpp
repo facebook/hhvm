@@ -1014,6 +1014,7 @@ String HHVM_FUNCTION(chr, const Variant& ascii) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       return String::FromChar(0);
   }

@@ -177,6 +177,7 @@ void deepCopy(tv_lval lval) {
     case KindOfResource:
     case KindOfKeyset:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRFunc:
       return;
 

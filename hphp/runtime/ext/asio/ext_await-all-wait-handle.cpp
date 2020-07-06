@@ -318,6 +318,7 @@ Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromContainer,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
       failNotContainer();
       break;
   }

@@ -682,6 +682,13 @@ constexpr uint32_t kMaxConcatN = 4;
   O(ResolveClsMethodS,                                                  \
                      TWO(OA(SpecialClsRef),SA),                         \
                                        NOV,             ONE(CV),    NF) \
+  O(ResolveRClsMethod,                                                  \
+                     ONE(SA),          TWO(CV,CV),      ONE(CV),    NF) \
+  O(ResolveRClsMethodD,                                                 \
+                     TWO(SA,SA),       ONE(CV),         ONE(CV),    NF) \
+  O(ResolveRClsMethodS,                                                 \
+                     TWO(OA(SpecialClsRef),SA),                         \
+                                       ONE(CV),         ONE(CV),    NF) \
   O(NewObj,          NA,               ONE(CV),         ONE(CV),    NF) \
   O(NewObjR,         NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(NewObjD,         ONE(SA),          NOV,             ONE(CV),    NF) \

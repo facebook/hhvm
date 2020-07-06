@@ -201,6 +201,12 @@ let string_of_operator instruction =
   | ResolveClsMethodS (r, mid) ->
     sep
       ["ResolveClsMethodS"; SpecialClsRef.to_string r; string_of_method_id mid]
+  | ResolveRClsMethod mid -> sep ["ResolveRClsMethod"; string_of_method_id mid]
+  | ResolveRClsMethodD (cid, mid) ->
+    sep ["ResolveRClsMethodD"; string_of_class_id cid; string_of_method_id mid]
+  | ResolveRClsMethodS (r, mid) ->
+    sep
+      ["ResolveRClsMethodS"; SpecialClsRef.to_string r; string_of_method_id mid]
   | Fatal op -> sep ["Fatal"; FatalOp.to_string op]
 
 let string_of_get x =

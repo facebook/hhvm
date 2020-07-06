@@ -117,6 +117,11 @@ enable_if_lval_t<T, void> tvCastToBooleanInPlace(T tv) {
         b = true;
         continue;
 
+      case KindOfRClsMeth:
+        tvDecRefRClsMeth(tv);
+        b = true;
+        continue;
+
       case KindOfRFunc:
         tvDecRefRFunc(tv);
         b = true;
@@ -222,6 +227,9 @@ enable_if_lval_t<T, void> tvCastToDoubleInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
 
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("double");
+
       case KindOfRecord:
         raise_convert_record_to_type("double");
     }
@@ -311,6 +319,9 @@ enable_if_lval_t<T, void> tvCastToInt64InPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
 
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("int");
+
       case KindOfRecord:
         raise_convert_record_to_type("int");
     }
@@ -381,6 +392,9 @@ double tvCastToDouble(TypedValue tv) {
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("double");
       return 1.0;
+
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("double");
 
     case KindOfRecord:
       raise_convert_record_to_type("double");
@@ -493,6 +507,9 @@ enable_if_lval_t<T, void> tvCastToStringInPlace(T tv) {
         return persistentString(array_string.get());
       }
 
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("string");
+
     case KindOfRecord:
       raise_convert_record_to_type("string");
   }
@@ -579,6 +596,9 @@ StringData* tvCastToStringData(TypedValue tv) {
         return array_string.get();
       }
 
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("string");
+
     case KindOfRecord:
       raise_convert_record_to_type("string");
   }
@@ -627,6 +647,9 @@ ArrayData* tvCastToArrayLikeData(TypedValue tv) {
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper();
       return clsMethToVecHelper(tv.m_data.pclsmeth).detach();
+
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("array");
 
     case KindOfObject: {
       auto ad = tv.m_data.pobj->toArray<IC>();
@@ -728,6 +751,9 @@ enable_if_lval_t<T, void> tvCastToArrayInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
       }
+
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("array");
 
       case KindOfRFunc:
         raise_convert_rfunc_to_type("array");
@@ -834,6 +860,9 @@ enable_if_lval_t<T, void> tvCastToVecInPlace(T tv) {
         continue;
       }
 
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("vec");
+
       case KindOfRecord:
         raise_convert_record_to_type("vec");
     }
@@ -932,6 +961,9 @@ enable_if_lval_t<T, void> tvCastToDictInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
       }
+
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("dict");
 
       case KindOfRecord:
         raise_convert_record_to_type("dict");
@@ -1033,6 +1065,9 @@ enable_if_lval_t<T, void> tvCastToKeysetInPlace(T tv) {
         continue;
       }
 
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("keyset");
+
       case KindOfRecord:
         raise_convert_record_to_type("keyset");
     }
@@ -1129,6 +1164,9 @@ enable_if_lval_t<T, void> tvCastToVArrayInPlace(T tv) {
         tvDecRefClsMeth(tv);
         continue;
       }
+
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("varray");
 
       case KindOfRecord:
         raise_convert_record_to_type("varray");
@@ -1231,6 +1269,9 @@ enable_if_lval_t<T, void> tvCastToDArrayInPlace(T tv) {
         continue;
       }
 
+      case KindOfRClsMeth:
+        raise_convert_rcls_meth_to_type("darray");
+
       case KindOfRecord:
         raise_convert_record_to_type("darray");
     }
@@ -1290,6 +1331,9 @@ ObjectData* tvCastToObjectData(TypedValue tv) {
       return ObjectData::FromArray(arr.get()).detach();
     }
 
+    case KindOfRClsMeth:
+      raise_convert_rcls_meth_to_type("object");
+
     case KindOfRFunc:
       raise_convert_rfunc_to_type("object");
 
@@ -1317,6 +1361,7 @@ enable_if_lval_t<T, void> tvCastToResourceInPlace(T tv) {
       case KindOfArray:
       case KindOfObject:
       case KindOfRecord:
+      case KindOfRClsMeth:
         tvDecRefCountable(tv);
         continue;
       case KindOfClsMeth:

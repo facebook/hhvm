@@ -565,6 +565,12 @@ public:
   }
 
   ALWAYS_INLINE
+  void pushRClsMethNoRc(RClsMethData* clsMeth) {
+    m_top--;
+    *m_top = make_tv<KindOfRClsMeth>(clsMeth);
+  }
+
+  ALWAYS_INLINE
   void nalloc(size_t n) {
     assertx((uintptr_t)(m_top - n) <= (uintptr_t)m_base);
     m_top -= n;

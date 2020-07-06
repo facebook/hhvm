@@ -49,6 +49,7 @@ bool tvInstanceOfImpl(const TypedValue* tv, F lookupClass) {
     case KindOfResource:
     case KindOfRecord:
     case KindOfRFunc:
+    case KindOfRClsMeth:
       return false;
 
     case KindOfClass: {

@@ -682,6 +682,7 @@ void staticStreamer(const TypedValue* tv, std::string& out) {
       staticArrayStreamer(tv->m_data.parr, out);
       return;
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:

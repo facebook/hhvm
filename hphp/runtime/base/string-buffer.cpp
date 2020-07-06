@@ -201,6 +201,7 @@ void StringBuffer::append(const Variant& v) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       append(v.toString());
   }

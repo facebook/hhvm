@@ -129,8 +129,9 @@ static_assert(typeToDestrIdx(KindOfResource) == 10, "Resource destruct index");
 static_assert(typeToDestrIdx(KindOfClsMeth)  == 11, "ClsMeth destruct index");
 #endif
 static_assert(typeToDestrIdx(KindOfRFunc)    == 12, "RFunc destruct index");
+static_assert(typeToDestrIdx(KindOfRClsMeth) == 13, "RFunc destruct index");
 
-static_assert(kDestrTableSize == 13,
+static_assert(kDestrTableSize == 14,
               "size of g_destructors[] must be kDestrTableSize");
 
 RawDestructor g_destructors[] = {
@@ -151,6 +152,7 @@ RawDestructor g_destructors[] = {
   nullptr,
 #endif
   (RawDestructor)getMethodPtr(&RFuncData::release),   // KindOfRFunc
+  (RawDestructor)getMethodPtr(&RClsMethData::release),// KindOfRClsMeth
 };
 
 void specializeVanillaDestructors() {
@@ -297,6 +299,7 @@ DataType Variant::toNumeric(int64_t &ival, double &dval,
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
       return m_type;
 
     case KindOfInt64:
@@ -333,6 +336,7 @@ bool Variant::isScalar() const noexcept {
     case KindOfObject:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
     case KindOfRFunc:
       return false;
@@ -386,6 +390,7 @@ static bool isAllowedAsConstantValueImpl(TypedValue tv) {
     case KindOfObject:
     case KindOfClass:
     case KindOfRFunc:
+    case KindOfRClsMeth:
     case KindOfRecord:
       return false;
   }
@@ -435,7 +440,8 @@ bool Variant::toBooleanHelper() const {
       return true;
     case KindOfFunc:
     case KindOfClass:
-    case KindOfClsMeth:       return true;
+    case KindOfClsMeth:
+    case KindOfRClsMeth:      return true;
     case KindOfRecord:
       raise_convert_record_to_type("bool");
       return false;
@@ -476,6 +482,10 @@ int64_t Variant::toInt64Helper(int base /* = 10 */) const {
       return classToStringHelper(m_data.pclass)->toInt64();
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
+      return 1;
+    case KindOfRClsMeth:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "RClsMeth to Int64 conversion");
       return 1;
     case KindOfRecord:
       raise_convert_record_to_type("int");
@@ -527,6 +537,10 @@ Array Variant::toPHPArrayHelper() const {
       raiseClsMethConvertWarningHelper("array");
       return make_map_array(0, m_data.pclsmeth->getClsStr(),
                             1, m_data.pclsmeth->getFuncStr());
+    case KindOfRClsMeth:
+      SystemLib::throwInvalidOperationExceptionObject(
+        "RClsMeth to PHPArray conversion");
+      return empty_array();
     case KindOfRecord:
       raise_convert_record_to_type("array");
       return empty_array();
@@ -560,6 +574,7 @@ Resource Variant::toResourceHelper() const {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       return Resource(req::make<DummyResource>());
 
@@ -667,6 +682,9 @@ void Variant::setEvalScalar() {
 
     case KindOfRecord:
       raise_error(Strings::RECORD_NOT_SUPPORTED);
+
+    case KindOfRClsMeth:
+      raise_error(Strings::RCLS_METH_NOT_SUPPORTED);
 
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper();

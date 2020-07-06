@@ -585,6 +585,13 @@ static int fb_compact_serialize_variant(
       return 0;
     }
 
+    case KindOfRClsMeth: {
+      SystemLib::throwInvalidOperationExceptionObject(
+        "Unable to serialize reified class method pointer"
+      );
+      break;
+    }
+
     case KindOfObject:
     case KindOfResource:
     case KindOfRecord: // TODO(T41025646)

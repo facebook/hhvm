@@ -249,6 +249,8 @@ static CallMap s_callMap {
     {Clone,              &ObjectData::clone, DSSA, SSync, {{SSA, 0}}},
     {NewRFunc,           RFuncData::newInstance, DSSA, SNone,
                            {{SSA, 0}, {SSA, 1}}},
+    {NewRClsMeth,        RClsMethData::create, DSSA, SNone,
+                           {{SSA, 0}, {SSA, 1}, {SSA, 2}}},
     {NewPair,            collections::allocPair, DSSA, SNone,
                            {{TV, 0}, {TV, 1}}},
     {FuncCred,           &FunctionCredential::newInstance, DSSA, SNone,

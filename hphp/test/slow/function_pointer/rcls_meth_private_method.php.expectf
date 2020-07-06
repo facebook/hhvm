@@ -1,0 +1,1 @@
+Fatal error: Failure to resolve method name 'Test::notPublic' in %s on line %d

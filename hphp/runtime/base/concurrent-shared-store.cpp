@@ -134,6 +134,8 @@ EntryInfo::Type EntryInfo::getAPCType(const APCHandle* handle) {
       return EntryInfo::Type::APCObject;
     case APCKind::RFunc:
       return EntryInfo::Type::APCRFunc;
+    case APCKind::RClsMeth:
+      return EntryInfo::Type::APCRClsMeth;
   }
   not_reached();
 }

@@ -316,6 +316,9 @@ pub enum InstructOperator {
     ResolveClsMethod(MethodId),
     ResolveClsMethodD(ClassId, MethodId),
     ResolveClsMethodS(SpecialClsRef, MethodId),
+    ResolveRClsMethod(MethodId),
+    ResolveRClsMethodD(ClassId, MethodId),
+    ResolveRClsMethodS(SpecialClsRef, MethodId),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

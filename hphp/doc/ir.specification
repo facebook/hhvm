@@ -1434,6 +1434,18 @@ To string conversions:
 
   Load the Func* of the ClsMethDataRef in S0.
 
+| LdClsFromRClsMeth, D(Cls), S(RClsMeth), NF
+
+  Load the Class* of the RClsMeth* in S0.
+
+| LdFuncFromRClsMeth, D(Func), S(RClsMeth), NF
+
+  Load the Func* of the RClsMeth* in S0.
+
+| LdGenericsFromRClsMeth, DVArr, S(RClsMeth), NF
+
+  Load the ArrayData* containing the generics attached to the RClsMeth in S0
+
 | LdFuncFromRFunc, D(Func), S(RFunc), NF
 
   Load the Func* of the RFuncData in S0
@@ -1614,6 +1626,11 @@ To string conversions:
 | NewClsMeth, D(ClsMeth), S(Cls) S(Func), NF
 
   Allocate a new ClsMethDataRef.
+
+| NewRClsMeth, D(RClsMeth), S(Cls) S(Func) SVArr, PRc
+
+  Allocate a new reified class method by storing the Class in S0,
+  the Func in S1 and the reified generics in S2.
 
 | NewRFunc, D(RFunc), S(Func) SVArr, PRc
 

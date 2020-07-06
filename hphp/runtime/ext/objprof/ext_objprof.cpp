@@ -300,6 +300,7 @@ std::pair<int, double> sizeOfArray(
         case KindOfFunc:
         case KindOfClass:
         case KindOfClsMeth:
+        case KindOfRClsMeth:
         case KindOfRecord:
           always_assert(false);
       }
@@ -403,6 +404,7 @@ void stringsOfArray(
         case KindOfFunc:
         case KindOfClass:
         case KindOfClsMeth:
+        case KindOfRClsMeth:
         case KindOfRecord:
           // this should be an always_assert(false), but that appears to trigger
           // a gcc-4.9 bug (t16350411); even after t16350411 is fixed, we
@@ -620,6 +622,22 @@ std::pair<int, double> tvGetSize(
       break;
     }
 
+    case KindOfRClsMeth: {
+      auto const rclsmeth = tv.m_data.prclsmeth;
+      auto const sz = sizeof(RClsMethData);
+      auto ref_count = int{tvGetCount(tv)};
+      size += sz;
+      FTRACE(3, " RClsMeth tv: rclsmeth at {} with ref count {}\n",
+             (void*)rclsmeth, ref_count);
+      if (one_bit_refcount) {
+        sized += sz;
+      } else {
+        assertx(ref_count > 0);
+        sized += sz / (double)ref_count;
+      }
+      add_array_size(rclsmeth->m_arr);
+    }
+
     case KindOfRecord: // TODO(T41026982)
       raise_error(Strings::RECORD_NOT_SUPPORTED);
   }
@@ -644,7 +662,8 @@ void tvGetStrings(
     case HPHP::KindOfRFunc:
     case HPHP::KindOfFunc:
     case HPHP::KindOfClass:
-    case HPHP::KindOfClsMeth: {
+    case HPHP::KindOfClsMeth:
+    case HPHP::KindOfRClsMeth: {
       // Not strings
       break;
     }

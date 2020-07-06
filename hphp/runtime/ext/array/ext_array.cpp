@@ -361,6 +361,7 @@ bool HHVM_FUNCTION(array_key_exists,
     case KindOfClsMeth:
       raiseClsMethToVecWarningHelper(__FUNCTION__+2);
       // fallthrough
+    case KindOfRClsMeth:
     case KindOfBoolean:
     case KindOfDouble:
     case KindOfPersistentVec:
@@ -767,6 +768,7 @@ TypedValue HHVM_FUNCTION(array_product,
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfRecord:
         continue;
     }
@@ -790,6 +792,7 @@ DOUBLE:
       case KindOfVArray:
       case KindOfArray:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:
       case KindOfRecord:
@@ -1050,6 +1053,7 @@ TypedValue HHVM_FUNCTION(array_sum,
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfRecord:
         continue;
     }
@@ -1073,6 +1077,7 @@ DOUBLE:
       case KindOfVArray:
       case KindOfArray:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfObject:
       case KindOfResource:
       case KindOfRecord:
@@ -1264,6 +1269,7 @@ int64_t HHVM_FUNCTION(count,
     case KindOfResource:
     case KindOfRFunc:
     case KindOfFunc:
+    case KindOfRClsMeth:
     case KindOfClass:
       return 1;
 
@@ -3290,6 +3296,10 @@ TypedValue HHVM_FUNCTION(HH_array_key_cast, const Variant& input) {
     case KindOfClsMeth:
       SystemLib::throwInvalidArgumentExceptionObject(
         "ClsMeths cannot be cast to an array-key"
+      );
+    case KindOfRClsMeth:
+      SystemLib::throwInvalidArgumentExceptionObject(
+        "RClsMeths cannot be cast to an array-key"
       );
     case KindOfObject:
       SystemLib::throwInvalidArgumentExceptionObject(

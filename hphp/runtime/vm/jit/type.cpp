@@ -537,6 +537,7 @@ Type::bits_t Type::bitsFromDataType(DataType outer) {
     case KindOfFunc             : return kFunc;
     case KindOfClass            : return kCls;
     case KindOfClsMeth          : return kClsMeth;
+    case KindOfRClsMeth         : return kRClsMeth;
     case KindOfRecord           : return kRecord;
   }
   not_reached();
@@ -574,6 +575,7 @@ DataType Type::toDataType() const {
   if (*this <= TClsMeth)     return KindOfClsMeth;
   if (*this <= TRecord)      return KindOfRecord;
   if (*this <= TRFunc)       return KindOfRFunc;
+  if (*this <= TRClsMeth)    return KindOfRClsMeth;
   always_assert_flog(false, "Bad Type {} in Type::toDataType()", *this);
 }
 

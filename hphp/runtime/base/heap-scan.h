@@ -175,6 +175,10 @@ inline void scanHeapObject(const HeapObject* h, type_scan::Scanner& scanner) {
     case HeaderKind::ClsMeth:
       // ClsMeth only holds pointers to non-request allocated data
       return;
+    case HeaderKind::RClsMeth: {
+      auto const rclsmeth = static_cast<const RClsMethData*>(h);
+      return PackedArray::scan(rclsmeth->m_arr, scanner);
+    }
     case HeaderKind::Record:
       return static_cast<const RecordData*>(h)->scan(scanner);
     case HeaderKind::RFunc: {

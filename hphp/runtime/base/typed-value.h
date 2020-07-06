@@ -41,6 +41,7 @@ struct Func;
 struct RFuncData;
 struct Class;
 struct RecordData;
+struct RClsMethData;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -63,6 +64,7 @@ union Value {
   RFuncData*    prfunc; // KindOfRFunc
   Class*        pclass; // KindOfClass
   ClsMethDataRef pclsmeth; // KindOfClsMeth
+  RClsMethData* prclsmeth; // KindOfRClsMeth
   RecordData*   prec;   // KindOfRecord
 };
 
@@ -298,6 +300,7 @@ X(KindOfFunc,         Func*);
 X(KindOfRFunc,        RFuncData*);
 X(KindOfClass,        Class*);
 X(KindOfClsMeth,      ClsMethDataRef);
+X(KindOfRClsMeth,     RClsMethData*);
 X(KindOfRecord,       RecordData*);
 
 #undef X

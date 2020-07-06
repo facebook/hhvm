@@ -283,6 +283,7 @@ static MaybeDataType convert_for_pow(const Variant& val,
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRFunc:
       // Not reachable since HHVM_FN(pow) deals with these base cases first.
     case KindOfRecord:

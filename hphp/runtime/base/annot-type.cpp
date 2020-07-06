@@ -253,7 +253,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       // it's not compatible, otherwise more checks are required
       return (isStringType(dt) || isArrayType(dt) || isVecType(dt) ||
               isFuncType(dt) || dt == KindOfObject || isClsMethType(dt) ||
-              isRFuncType(dt))
+              isRFuncType(dt) || isRClsMethType(dt))
         ? AnnotAction::CallableCheck : AnnotAction::Fail;
     case AnnotMetaType::VArrOrDArr:
       assertx(!RO::EvalHackArrDVArrs);
@@ -354,6 +354,7 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfClsMeth:
         return interface_supports_arrlike(annotClsName) ?
           AnnotAction::ClsMethCheck : AnnotAction::Fail;
+      case KindOfRClsMeth:
       case KindOfRFunc:
       case KindOfUninit:
       case KindOfNull:

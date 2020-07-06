@@ -597,4 +597,31 @@ void cgLdGenericsFromRFunc(IRLS& env, const IRInstruction* inst) {
   v << load{rfuncRef[RFuncData::genericsOffset()], dst};
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+IMPL_OPCODE_CALL(NewRClsMeth)
+
+namespace {
+
+void ldFromRClsMethCommon(IRLS& env, const IRInstruction* inst, ptrdiff_t offset) {
+  auto const rclsMethRef = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+  auto& v = vmain(env);
+  v << load{rclsMethRef[offset], dst};
+}
+
+}// namespace
+
+void cgLdClsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::clsOffset());
+}
+
+void cgLdFuncFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::funcOffset());
+}
+
+void cgLdGenericsFromRClsMeth(IRLS& env, const IRInstruction* inst) {
+  ldFromRClsMethCommon(env, inst, RClsMethData::genericsOffset());
+}
+
 }}}

@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/set-array.h"
 #include "hphp/runtime/ext/datetime/ext_datetime.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
+#include "hphp/runtime/vm/rclass-meth-data.h"
 
 namespace HPHP {
 
@@ -80,6 +81,8 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, bool val) {
     return op.funcVsNonFunc();
   } else if (UNLIKELY(isRFuncType(cell.m_type))) {
     return op(cell.m_data.prfunc, val);
+  } else if (UNLIKELY(isRClsMethType(cell.m_type))) {
+    return op(cell.m_data.prclsmeth, val);
   } else {
     return op(tvToBool(cell), val);
   }
@@ -160,6 +163,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, int64_t val) {
         return op(true, false);
       }
 
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
 
@@ -235,6 +241,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, double val) {
         }
         return op(true, false);
       }
+
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
 
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
@@ -327,6 +336,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const StringData* val) {
         return op(true, false);
       }
 
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
 
@@ -399,6 +411,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ArrayData* ad) {
         raiseClsMethToVecWarningHelper();
         return op(clsMethToVecHelper(cell.m_data.pclsmeth).get(), ad);
       }
+
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
 
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
@@ -485,6 +500,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ObjectData* od) {
         }
         return od->isCollection() ? op.collectionVsNonObj() : op(false, true);
       }
+
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
 
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
@@ -573,6 +591,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const ResourceData* rd) {
         }
         return op(true, false);
       }
+
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
 
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
@@ -692,6 +713,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
 
     case KindOfClsMeth:  return op(cell.m_data.pclsmeth, clsMeth);
 
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
     case KindOfPersistentDict:
     case KindOfDict:
       if (RuntimeOption::EvalHackArrDVArrs) {
@@ -764,6 +788,45 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, ClsMethDataRef clsMeth) {
 }
 
 template<class Op>
+typename Op::RetType tvRelOp(Op op, TypedValue cell, RClsMethData* rclsmeth) {
+  assertx(tvIsPlausible(cell));
+
+  switch (cell.m_type) {
+    case KindOfUninit:
+    case KindOfNull:
+    case KindOfInt64:
+    case KindOfDouble:
+    case KindOfPersistentString:
+    case KindOfString:
+    case KindOfFunc:
+    case KindOfRFunc:
+    case KindOfClass:
+    case KindOfResource:
+    case KindOfClsMeth:
+    case KindOfPersistentDict:
+    case KindOfDict:
+    case KindOfPersistentKeyset:
+    case KindOfKeyset:
+    case KindOfPersistentDArray:
+    case KindOfDArray:
+    case KindOfPersistentVArray:
+    case KindOfVArray:
+    case KindOfPersistentArray:
+    case KindOfArray:
+    case KindOfPersistentVec:
+    case KindOfVec:
+    case KindOfObject:
+    case KindOfRecord:
+    case KindOfBoolean:
+      return op.rclsMethVsNonRClsMeth();
+
+    case KindOfRClsMeth:
+      return op(cell.m_data.prclsmeth, rclsmeth);
+  }
+  not_reached();
+}
+
+template<class Op>
 typename Op::RetType tvRelOp(Op op, TypedValue cell, RFuncData* rfunc) {
   assertx(tvIsPlausible(cell));
 
@@ -778,6 +841,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, RFuncData* rfunc) {
     case KindOfClass:
     case KindOfResource:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfPersistentDict:
     case KindOfDict:
     case KindOfPersistentKeyset:
@@ -889,6 +953,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Func* val) {
         return op(true, false);
       }
 
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
 
@@ -983,6 +1050,9 @@ typename Op::RetType tvRelOp(Op op, TypedValue cell, const Class* val) {
         return op(true, false);
       }
 
+    case KindOfRClsMeth:
+      return op.rclsMethVsNonRClsMeth();
+
     case KindOfRFunc:
       return op.rfuncVsNonRFunc();
 
@@ -1027,6 +1097,7 @@ typename Op::RetType tvRelOp(Op op, TypedValue c1, TypedValue c2) {
   case KindOfFunc:         return tvRelOp(op, c1, c2.m_data.pfunc);
   case KindOfClass:        return tvRelOp(op, c1, c2.m_data.pclass);
   case KindOfClsMeth:      return tvRelOp(op, c1, c2.m_data.pclsmeth);
+  case KindOfRClsMeth:     return tvRelOp(op, c1, c2.m_data.prclsmeth);
   case KindOfRecord:       return tvRelOp(op, c1, c2.m_data.prec);
   }
   not_reached();
@@ -1116,6 +1187,7 @@ struct Eq {
   bool keysetVsNonKeyset() const { return false; }
   bool collectionVsNonObj() const { return false; }
   bool rfuncVsNonRFunc() const { return false; }
+  bool rclsMethVsNonRClsMeth() const { return false; }
   bool recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
@@ -1129,6 +1201,14 @@ struct Eq {
 
   bool operator()(ClsMethDataRef c1, ClsMethDataRef c2) const {
     return c1 == c2;
+  }
+
+  bool operator()(RClsMethData* c1, RClsMethData* c2) const {
+    return RClsMethData::Same(c1, c2);
+  }
+
+  bool operator()(RClsMethData*, bool b) const {
+    return b;
   }
 
   bool operator()(const RecordData* r1, const RecordData* r2) const {
@@ -1210,6 +1290,9 @@ struct CompareBase {
   RetType rfuncVsNonRFunc() const {
     throw_rfunc_compare_exception();
   }
+  RetType rclsMethVsNonRClsMeth() const {
+    throw_rclsmeth_compare_exception();
+  }
   RetType recordVsNonRecord() const {
     throw_rec_non_rec_compare_exception();
   }
@@ -1258,6 +1341,14 @@ struct CompareBase {
 
   RetType operator()(const RFuncData*, bool) const {
     throw_rfunc_compare_exception();
+  }
+
+  RetType operator()(const RClsMethData*, const RClsMethData*) const {
+    throw_rclsmeth_compare_exception();
+  }
+
+  RetType operator()(const RClsMethData*, bool) const {
+    throw_rclsmeth_compare_exception();
   }
 };
 
@@ -1568,6 +1659,10 @@ bool tvSame(TypedValue c1, TypedValue c2) {
         return false;
       }
       return c1.m_data.pclsmeth == c2.m_data.pclsmeth;
+
+    case KindOfRClsMeth:
+      return isRClsMethType(c2.m_type) &&
+        RClsMethData::Same(c1.m_data.prclsmeth, c2.m_data.prclsmeth);
 
     case KindOfRecord:
       return c2.m_type == KindOfRecord &&

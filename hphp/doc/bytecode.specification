@@ -3340,6 +3340,20 @@ ResolveClsMethodS <mode>      <litstr id>   []        -> [C]
   used to call that method and pushes the resulting class method pointer onto
   the stack.
 
+ResolveRClsMethod  <litstr id>               [C:VArr C:Class] -> [C]
+ResolveRClsMethodD <litstr id> <litstr id>   [C:VArr]         -> [C]
+ResolveRClsMethodS <mode>      <litstr id>   [C:VArr]         -> [C]
+
+  Similar to their non-reified counterparts (ResolveClsMethod*), these
+  instructions load values into x and y based on the same table and performing
+  the same work and the same checks to resolve the class method pointer.
+
+  $1 contains a list of reified generics. If the class x has accessible
+  static method y and takes the given reified generics, pushes a value
+  capturing the class method pointer and the reified generics. If the
+  class method does not accept the reified generics, pushes the class
+  method pointer onto the stack.
+
 ThrowNonExhaustiveSwitch [] -> []
 
   Throws an exception indicating that the switch statement is non exhaustive.

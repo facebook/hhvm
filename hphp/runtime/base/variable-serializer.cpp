@@ -1545,6 +1545,12 @@ void VariableSerializer::serializeClsMeth(
   }
 }
 
+void VariableSerializer::serializeRClsMeth(RClsMethData* rclsMeth) {
+  SystemLib::throwInvalidOperationExceptionObject(
+    "Unable to serialize reified class meth pointer"
+  );
+}
+
 NEVER_INLINE
 void VariableSerializer::serializeVariant(tv_rval tv,
                                           bool isArrayKey /* = false */,
@@ -1637,6 +1643,10 @@ void VariableSerializer::serializeVariant(tv_rval tv,
       assertx(!isArrayKey);
       serializeClsMeth(val(tv).pclsmeth, skipNestCheck);
       return;
+
+    case KindOfRClsMeth:
+      assertx(!isArrayKey);
+      serializeRClsMeth(val(tv).prclsmeth);
 
     case KindOfRecord:
       // TODO(T41025646): implement serialization of record

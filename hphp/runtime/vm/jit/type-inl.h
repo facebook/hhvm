@@ -349,6 +349,7 @@ inline Type Type::cns(const TypedValue& tv) {
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfRecord:
         always_assert(false && "Invalid KindOf for constant TypedValue");
     }

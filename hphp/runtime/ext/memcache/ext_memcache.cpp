@@ -175,6 +175,7 @@ static uint32_t memcache_get_flag_for_type(const Variant& var) {
     case KindOfFunc:
     case KindOfClass:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfRecord:
       return MMC_TYPE_STRING;
   }

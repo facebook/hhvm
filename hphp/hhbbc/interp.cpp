@@ -4004,6 +4004,23 @@ Type specialClsRefToCls(ISS& env, SpecialClsRef ref) {
   return op ? *op : TCls;
 }
 
+template<bool reifiedVersion = false>
+void resolveClsMethodSImpl(ISS& env, SpecialClsRef ref, LSString meth_name) {
+  auto const clsTy = specialClsRefToCls(env, ref);
+  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, meth_name);
+  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
+      !rfunc.couldHaveReifiedGenerics()) {
+    auto const clsName = dcls_of(clsTy).cls.name();
+    return reduce(env, bc::ResolveClsMethodD { clsName, meth_name });
+  }
+  if (reifiedVersion) popC(env);
+  if (!reifiedVersion || !rfunc.couldHaveReifiedGenerics()) {
+    push(env, TClsMeth);
+  } else {
+    push(env, TClsMethLike);
+  }
+}
+
 } // namespace
 
 void in(ISS& env, const bc::ResolveClsMethod& op) {
@@ -4016,14 +4033,22 @@ void in(ISS& env, const bc::ResolveClsMethodD& op) {
 }
 
 void in(ISS& env, const bc::ResolveClsMethodS& op) {
-  auto const clsTy = specialClsRefToCls(env, op.subop1);
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str2);
-  if (is_specialized_cls(clsTy) && dcls_of(clsTy).type == DCls::Exact &&
-      !rfunc.couldHaveReifiedGenerics()) {
-    auto const clsName = dcls_of(clsTy).cls.name();
-    return reduce(env, bc::ResolveClsMethodD { clsName, op.str2 });
-  }
-  push(env, TClsMeth);
+  resolveClsMethodSImpl<false>(env, op.subop1, op.str2);
+}
+
+void in(ISS& env, const bc::ResolveRClsMethod&) {
+  popC(env);
+  popC(env);
+  push(env, TClsMethLike);
+}
+
+void in(ISS& env, const bc::ResolveRClsMethodD&) {
+  popC(env);
+  push(env, TClsMethLike);
+}
+
+void in(ISS& env, const bc::ResolveRClsMethodS& op) {
+  resolveClsMethodSImpl<true>(env, op.subop1, op.str2);
 }
 
 namespace {

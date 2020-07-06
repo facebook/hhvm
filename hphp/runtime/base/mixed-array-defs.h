@@ -335,6 +335,7 @@ void ConvertTvToUncounted(
     case KindOfObject:
     case KindOfResource:
     case KindOfRFunc:
+    case KindOfRClsMeth:
       not_reached();
   }
 }

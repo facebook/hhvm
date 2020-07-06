@@ -4800,6 +4800,7 @@ Index::ConstraintResolution Index::get_type_for_annotated_type(
       case KindOfUninit:
       case KindOfRFunc:
       case KindOfFunc:
+      case KindOfRClsMeth:
       case KindOfClass:
         always_assert_flog(false, "Unexpected DataType");
         break;

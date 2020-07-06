@@ -353,6 +353,14 @@ let instr_resolveclsmethodd cls_id method_id =
 let instr_resolveclsmethods scref method_id =
   instr (IOp (ResolveClsMethodS (scref, method_id)))
 
+let instr_resolverclsmethod method_id = instr (IOp (ResolveRClsMethod method_id))
+
+let instr_resolverclsmethodd cls_id method_id =
+  instr (IOp (ResolveRClsMethodD (cls_id, method_id)))
+
+let instr_resolverclsmethods scref method_id =
+  instr (IOp (ResolveRClsMethodS (scref, method_id)))
+
 let instr_await = instr (IAsync Await)
 
 let instr_yield = instr (IGenerator Yield)

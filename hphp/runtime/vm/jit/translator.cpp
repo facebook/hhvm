@@ -369,6 +369,13 @@ static const struct {
                    {None,             Stack1,       OutClsMeth      }},
   { OpResolveClsMethodS,
                    {None,             Stack1,       OutClsMeth      }},
+  { OpResolveRClsMethod,
+                   {StackTop2,        Stack1,       OutClsMethLike  }},
+  { OpResolveRClsMethodD,
+                   {Stack1,           Stack1,       OutClsMethLike  }},
+  { OpResolveRClsMethodS,
+                   {Stack1,           Stack1,       OutClsMethLike  }},
+
 
   /*** 14. Generator instructions ***/
 
@@ -942,6 +949,9 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::ResolveClsMethod:
   case Op::ResolveClsMethodD:
   case Op::ResolveClsMethodS:
+  case Op::ResolveRClsMethod:
+  case Op::ResolveRClsMethodD:
+  case Op::ResolveRClsMethodS:
   case Op::ResolveObjMethod:
   case Op::False:
   case Op::File:

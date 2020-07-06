@@ -1746,6 +1746,9 @@ void dce(Env& env, const bc::ReqOnce& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClsMethod& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClsMethodD& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveClsMethodS& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ResolveRClsMethod& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ResolveRClsMethodD& op) { no_dce(env, op); }
+void dce(Env& env, const bc::ResolveRClsMethodS& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveFunc& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveMethCaller& op) { no_dce(env, op); }
 void dce(Env& env, const bc::ResolveRFunc& op) { no_dce(env, op); }

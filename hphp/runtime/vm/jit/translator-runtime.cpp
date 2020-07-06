@@ -712,6 +712,7 @@ int64_t switchStringHelper(StringData* s, int64_t base, int64_t nTargets) {
       case KindOfFunc:
       case KindOfClass:
       case KindOfClsMeth:
+      case KindOfRClsMeth:
       case KindOfRecord:
         break;
     }

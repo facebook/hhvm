@@ -67,7 +67,8 @@ inline bool tvToBool(TypedValue cell) {
     case KindOfRFunc:
     case KindOfFunc:
     case KindOfClass:
-    case KindOfClsMeth:       return true;
+    case KindOfClsMeth:
+    case KindOfRClsMeth:      return true;
   }
   not_reached();
 }
@@ -107,6 +108,7 @@ inline int64_t tvToInt(TypedValue cell) {
     case KindOfClsMeth:
       raiseClsMethConvertWarningHelper("int");
       return 1;
+    case KindOfRClsMeth:      raise_convert_rcls_meth_to_type("int"); break;
   }
   not_reached();
 }
@@ -167,6 +169,7 @@ inline TypedValue tvToKey(TypedValue cell, const ArrayData* ad) {
     case KindOfVArray:
     case KindOfPersistentVArray:
     case KindOfClsMeth:
+    case KindOfRClsMeth:
     case KindOfPersistentArray:
     case KindOfArray:
     case KindOfPersistentVec:

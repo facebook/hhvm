@@ -217,6 +217,10 @@ bool mayHaveData(trep bits) {
   case BOptCls:
   case BClsMeth:
   case BOptClsMeth:
+  case BRClsMeth:
+  case BOptRClsMeth:
+  case BClsMethLike:
+  case BOptClsMethLike:
   case BInitCell:
   case BCell:
   case BTop:
@@ -256,6 +260,8 @@ bool canBeOptional(trep bits) {
   case BFuncS:
   case BCls:
   case BClsMeth:
+  case BRClsMeth:
+  case BClsMethLike:
   case BRecord:
   case BRFunc:
   case BFuncLike:
@@ -388,6 +394,8 @@ bool canBeOptional(trep bits) {
   case BOptFuncS:
   case BOptCls:
   case BOptClsMeth:
+  case BOptRClsMeth:
+  case BOptClsMethLike:
   case BOptRecord:
   case BOptArrLikeE:
   case BOptArrLikeN:
@@ -4134,6 +4142,7 @@ Type from_cell(TypedValue cell) {
   case KindOfFunc:
   case KindOfClass:
   case KindOfClsMeth:
+  case KindOfRClsMeth:
   case KindOfRecord:
     break;
   }
@@ -4169,6 +4178,7 @@ Type from_DataType(DataType dt) {
   case KindOfFunc:     return RO::EvalEnableFuncStringInterop ? TFunc : TFuncS;
   case KindOfClass:    return TCls;
   case KindOfClsMeth:  return TClsMeth;
+  case KindOfRClsMeth: return TRClsMeth;
   }
   always_assert(0 && "dt in from_DataType didn't satisfy preconditions");
 }

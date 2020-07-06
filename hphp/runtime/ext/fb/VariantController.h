@@ -137,6 +137,11 @@ struct VariantControllerImpl {
           return HPHP::serialize::Type::MAP;
         }
 
+      case KindOfRClsMeth:
+        throw HPHP::serialize::SerializeError(
+          "Unable to serialize reified class method pointer"
+        );
+
       case KindOfResource:
       case KindOfRecord: // TODO(T41025646): implement serialization for records
         throw HPHP::serialize::SerializeError(

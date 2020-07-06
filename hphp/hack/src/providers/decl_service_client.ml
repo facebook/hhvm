@@ -15,6 +15,10 @@ type t = {
   typedef_cache: Typing_defs.typedef_type option String.Table.t;
   record_cache: Typing_defs.record_def_type option String.Table.t;
   gconst_cache: Typing_defs.decl_ty option String.Table.t;
+  gconst_path_cache: Relative_path.t option String.Table.t;
+  fun_path_cache: Relative_path.t option String.Table.t;
+  type_path_and_kind_cache:
+    (Relative_path.t * Naming_types.kind_of_type) option String.Table.t;
 }
 
 let from_raw_client (client : Decl_ipc_ffi_externs.decl_client) : t =
@@ -25,6 +29,9 @@ let from_raw_client (client : Decl_ipc_ffi_externs.decl_client) : t =
     typedef_cache = String.Table.create ();
     record_cache = String.Table.create ();
     gconst_cache = String.Table.create ();
+    gconst_path_cache = String.Table.create ();
+    fun_path_cache = String.Table.create ();
+    type_path_and_kind_cache = String.Table.create ();
   }
 
 (* HACK: The decl service just stores the decl (rather than a decl option),
@@ -84,11 +91,26 @@ let rpc_get_gconst (t : t) (name : string) : Typing_defs.decl_ty option =
     gconst_ty_opt
 
 let rpc_get_gconst_path (t : t) (name : string) : Relative_path.t option =
-  Decl_ipc_ffi_externs.get_const_path t.client name
+  match String.Table.find t.gconst_path_cache name with
+  | Some opt -> opt
+  | None ->
+    let opt = Decl_ipc_ffi_externs.get_const_path t.client name in
+    String.Table.add_exn t.gconst_path_cache name opt;
+    opt
 
 let rpc_get_fun_path (t : t) (name : string) : Relative_path.t option =
-  Decl_ipc_ffi_externs.get_fun_path t.client name
+  match String.Table.find t.fun_path_cache name with
+  | Some opt -> opt
+  | None ->
+    let opt = Decl_ipc_ffi_externs.get_fun_path t.client name in
+    String.Table.add_exn t.fun_path_cache name opt;
+    opt
 
 let rpc_get_type_path_and_kind (t : t) (name : string) :
     (Relative_path.t * Naming_types.kind_of_type) option =
-  Decl_ipc_ffi_externs.get_type_path_and_kind t.client name
+  match String.Table.find t.type_path_and_kind_cache name with
+  | Some opt -> opt
+  | None ->
+    let opt = Decl_ipc_ffi_externs.get_type_path_and_kind t.client name in
+    String.Table.add_exn t.type_path_and_kind_cache name opt;
+    opt

@@ -64,6 +64,14 @@ impl Names {
     pub fn get_const_path(&self, name: &str) -> Result<Option<RelativePath>> {
         consts::get_path(&self.connection, name)
     }
+
+    pub fn get_fun_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+        funs::get_path_case_insensitive(&self.connection, name)
+    }
+
+    pub fn get_type_path_case_insensitive(&self, name: String) -> Result<Option<RelativePath>> {
+        types::get_path_case_insensitive(&self.connection, name)
+    }
 }
 
 #[cfg(test)]

@@ -3,10 +3,11 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::convert::TryFrom;
+use std::convert::{From, TryFrom};
 
 use crate::gen::file_info::Mode;
 use crate::gen::file_info::NameType;
+use crate::gen::naming_types::KindOfType;
 
 impl Mode {
     pub fn from_string(s: &str) -> Option<Self> {
@@ -33,6 +34,16 @@ impl TryFrom<u32> for NameType {
             3 => Ok(NameType::Typedef),
             4 => Ok(NameType::Const),
             _ => Err(format!("Out of range for NameType: {}", kind)),
+        }
+    }
+}
+
+impl From<KindOfType> for NameType {
+    fn from(kind: KindOfType) -> Self {
+        match kind {
+            KindOfType::TClass => NameType::Class,
+            KindOfType::TTypedef => NameType::Typedef,
+            KindOfType::TRecordDef => NameType::RecordDef,
         }
     }
 }

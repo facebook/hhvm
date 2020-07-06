@@ -20,121 +20,92 @@ end
 module BlameSet = struct
   include Caml.Set.Make (S)
 
-  let find_by_lid_opt lid blame_set =
+  let find_opt lid blame_set =
     filter (fun (lid', _) -> Local_id.equal lid lid') blame_set |> choose_opt
 
-  let member_by_lid lid blame_set =
+  let member lid blame_set =
     exists (fun (lid', _) -> Local_id.equal lid lid') blame_set
+
+  let add lid blame blame_set = add (lid, blame) blame_set
 
   let attach_blame blame blame_set =
     map (fun (lid, _) -> (lid, blame)) blame_set
 end
 
-(* Fake member validation.
- *   Valid valid
- * means that identifiers in [valid] are valid fake members
- *   Invalidated { valid, invalid }
- * means that identifiers in [invalid] have been invalidated
- * by a call, lambda, or assignment described by the blame attached to
- * the element, but [valid] are more recent valid fake members. For example
+(* A ledger consisting [valid] and [invalid] fake member sets.
  *
- *   // Valid []
- *   if ($x::f !== null) { // P0
- *     // Valid [("$x::f", Blame_out_of_scope P0)]
+ * Those in [invalid] have been invalidated by a call, lambda, assignment, or
+ * by going out of scope described by the blame attached to the element, but
+ * [valid] are fake members that can still be used in typing. For example
+ *
+ *   // { valid = []; invalid = [] }
+ *   if ($x::f is nonnull) { // P0
+ *     // { valid = [("$x::f", Blame_out_of_scope P0)]; invalid = [] }
  *     foo(); // P1
- *     // Invalidated { valid = []; invalid = [("$x::f", Blame_call P1)] }
- *     if ($y::g !== null) { // P2
- *       // Invalidated { valid = [("$y::g", Blame_out_of_scope P2)]; invalid = [("$x::f", Blame_call P1)] }
- *       $f = () ==>  // P3
- *       // Invalidated { valid = []; invalid = [("$x::f", Blame_lambda P3); ("$y::g", Blame_lambda P2)] }
-         ...
+ *     // { valid = []; invalid = [("$x::f", Blame_call P1)] }
+ *     if ($y::g is nonnull) { // P2
+ *       // { valid = [("$y::g", Blame_out_of_scope P2)]; invalid = [("$x::f", Blame_call P1)] }
+ *       $f = () ==> ... // P3
+ *       // { valid = []; invalid = [("$x::f", Blame_lambda P3); ("$y::g", Blame_lambda P2)] }
+ *       $y::g = 42; // P4
+ *       // { valid = [("$y::g", Blame_out_of_scope P4)]; invalid = [("$x::f", Blame_call P1)] }
+ * .   } // { valid = []; invalid = [("$y::g", Blame_out_of_scope P4); ("$x::f", Blame_lambda P3)] }
  *)
-type t =
-  | Valid of BlameSet.t
-  | Invalidated of {
-      valid: BlameSet.t;
-      (* Non-empty and disjoint from valid. *)
-      invalid: BlameSet.t;
-    }
+type t = {
+  valid: BlameSet.t;
+  (* Non-empty and disjoint from valid. *)
+  invalid: BlameSet.t;
+}
 
-let empty = Valid BlameSet.empty
+(* An empty validation ledger *)
+let empty = { valid = BlameSet.empty; invalid = BlameSet.empty }
 
-(* Combine validation information at a join point *)
-let join fake1 fake2 =
-  match (fake1, fake2) with
-  | (Valid ids1, Valid ids2) -> Valid (BlameSet.inter ids1 ids2)
-  | (Invalidated { valid = v2; invalid }, Valid v1)
-  | (Valid v1, Invalidated { valid = v2; invalid }) ->
-    let valid = BlameSet.inter v1 v2 in
-    let invalid = BlameSet.union invalid (BlameSet.diff v2 valid) in
-    Invalidated { valid; invalid }
-  | ( Invalidated { valid = v1; invalid = i1 },
-      Invalidated { valid = v2; invalid = i2 } ) ->
-    Invalidated { valid = BlameSet.inter v1 v2; invalid = BlameSet.union i1 i2 }
+(* Combine validation ledger information at a join point *)
+let join ledger1 ledger2 =
+  let old_valid = BlameSet.union ledger1.valid ledger2.valid in
+  let old_invalid = BlameSet.union ledger1.invalid ledger2.invalid in
+  let valid = BlameSet.inter ledger1.valid ledger2.valid in
+  let invalid = BlameSet.union old_invalid (BlameSet.diff old_valid valid) in
+  { valid; invalid }
 
-(* Does fake1 entail fake2? *)
-let sub fake1 fake2 =
-  match (fake1, fake2) with
-  | (Valid ids1, Valid ids2) -> BlameSet.subset ids2 ids1
-  | (Invalidated { valid = v2; invalid; _ }, Valid v1) ->
-    BlameSet.subset v1 v2 && BlameSet.is_empty (BlameSet.diff invalid v2)
-  | (Valid v1, Invalidated { valid = v2; _ }) -> BlameSet.subset v2 v1
-  | ( Invalidated { valid = v1; invalid = i1; _ },
-      Invalidated { valid = v2; invalid = i2; _ } ) ->
-    BlameSet.subset v2 v1 && BlameSet.subset i1 i2
+(* Does ledger1 entail ledger2? *)
+let sub ledger1 ledger2 =
+  BlameSet.subset ledger2.valid ledger1.valid
+  && BlameSet.subset ledger1.invalid ledger2.invalid
 
-let is_valid fake lid =
-  match fake with
-  | Invalidated { valid; _ }
-  | Valid valid ->
-    BlameSet.member_by_lid lid valid
+let is_valid ledger lid = BlameSet.member lid ledger.valid
 
-let is_invalid fake lid =
-  match fake with
-  | Invalidated { invalid; _ } ->
-    Option.map (BlameSet.find_by_lid_opt lid invalid) snd
-  | Valid _ -> None
+let is_invalid ledger lid =
+  Option.map (BlameSet.find_opt lid ledger.invalid) snd
 
-let conditionally_forget predicate (fake_members : t) blame : t =
-  let invalidate_using_predicate valid =
-    let (to_invalidate, others) = BlameSet.partition predicate valid in
-    (BlameSet.attach_blame blame to_invalidate, others)
-  in
-  match fake_members with
-  | Valid valid when BlameSet.is_empty valid -> fake_members
-  | Valid valid ->
-    let (invalid, valid) = invalidate_using_predicate valid in
-    Invalidated { valid; invalid }
-  | Invalidated { valid; invalid } ->
-    let (invalidated, valid) = invalidate_using_predicate valid in
-    Invalidated { valid; invalid = BlameSet.union invalidated invalid }
+let conditionally_forget predicate (ledger : t) blame : t =
+  let (to_invalidate, valid) = BlameSet.partition predicate ledger.valid in
+  (* Don't allocate if there is nothing to forget *)
+  if BlameSet.is_empty to_invalidate then
+    ledger
+  else
+    let to_invalidate = BlameSet.attach_blame blame to_invalidate in
+    { valid; invalid = BlameSet.union to_invalidate ledger.invalid }
 
 let forget = conditionally_forget (const true)
 
-let forget_prefixed (fake_members : t) prefix_lid blame : t =
+let forget_prefixed (ledger : t) prefix_lid blame : t =
   let is_prefixed (fake_id, _blame) =
     String.is_prefix
       ~prefix:(Local_id.to_string prefix_lid ^ "->")
       (Local_id.to_string fake_id)
   in
-  conditionally_forget is_prefixed fake_members blame
+  conditionally_forget is_prefixed ledger blame
 
-let forget_suffixed (fake_members : t) suffix blame : t =
+let forget_suffixed (ledger : t) suffix blame : t =
   let is_prefixed (fake_id, _blame) =
     String.is_suffix ~suffix:("->" ^ suffix) (Local_id.to_string fake_id)
   in
-  conditionally_forget is_prefixed fake_members blame
+  conditionally_forget is_prefixed ledger blame
 
-let add fake lid pos =
-  match fake with
-  | Valid valid ->
-    Valid (BlameSet.add (lid, Reason.(Blame (pos, BSout_of_scope))) valid)
-  | Invalidated ({ valid; _ } as info) ->
-    Invalidated
-      {
-        info with
-        valid = BlameSet.add (lid, Reason.(Blame (pos, BSout_of_scope))) valid;
-      }
+let add ledger lid pos =
+  let reason = Reason.(Blame (pos, BSout_of_scope)) in
+  { ledger with valid = BlameSet.add lid reason ledger.valid }
 
 let blame_as_log_value (Reason.Blame (p, blame_source)) =
   match blame_source with
@@ -147,27 +118,23 @@ let blame_as_log_value (Reason.Blame (p, blame_source)) =
   | Reason.BSout_of_scope ->
     Typing_log_value.(make_map [("Blame_out_of_scope", pos_as_value p)])
 
-let as_log_value fake =
+let as_log_value ledger =
   let log_blame_set_as_value set =
     Typing_log_value.make_map
       (List.map (BlameSet.elements set) (fun (lid, blame_opt) ->
            ( Typing_log_value.local_id_as_string lid,
              blame_as_log_value blame_opt )))
   in
-  match fake with
-  | Valid valid ->
-    Typing_log_value.(make_map [("Valid", log_blame_set_as_value valid)])
-  | Invalidated { valid; invalid } ->
-    Typing_log_value.(
-      make_map
-        [
-          ( "Invalidated",
-            make_map
-              [
-                ("valid", log_blame_set_as_value valid);
-                ("invalid", log_blame_set_as_value invalid);
-              ] );
-        ])
+  Typing_log_value.(
+    make_map
+      [
+        ( "Fake member ledger",
+          make_map
+            [
+              ("valid", log_blame_set_as_value ledger.valid);
+              ("invalid", log_blame_set_as_value ledger.invalid);
+            ] );
+      ])
 
 let make_id obj_name member_name =
   let obj_name =

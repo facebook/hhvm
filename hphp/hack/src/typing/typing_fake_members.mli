@@ -39,6 +39,8 @@ val forget : t -> Reason.blame -> t
  * the position of the assignment that is responsible *)
 val forget_prefixed : t -> Local_id.t -> Reason.blame -> t
 
+(* Invalidate fake members that are suffixed by some identifier, and remember
+ * the position of the assignment that is responsible *)
 val forget_suffixed : t -> string -> Reason.blame -> t
 
 (* Add a valid fake member access *)

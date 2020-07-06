@@ -82,18 +82,6 @@ type aast_result = {
 (* TODO: Make these not default to positioned_syntax *)
 include Full_fidelity_ast_types
 module SourceText = Full_fidelity_source_text
-module DeclModeSC_ = DeclModeSmartConstructors.WithSyntax (PositionedSyntax)
-
-module DeclModeSC = DeclModeSC_.WithRustParser (struct
-  type r = PositionedSyntax.t
-
-  type t = bool list
-
-  let rust_parse = Rust_parser_ffi.parse_positioned_with_decl_mode_sc
-end)
-
-module DeclModeParser_ = Full_fidelity_parser.WithSyntax (PositionedSyntax)
-module DeclModeParser = DeclModeParser_.WithSmartConstructors (DeclModeSC)
 
 (* Creates a relative position out of the error and the given path and source text. *)
 let pos_of_error path source_text error =
@@ -102,55 +90,6 @@ let pos_of_error path source_text error =
     source_text
     (SyntaxError.start_offset error)
     (SyntaxError.end_offset error)
-
-let parse_text (env : env) (source_text : SourceText.t) :
-    FileInfo.mode option * PositionedSyntaxTree.t =
-  let mode = Full_fidelity_parser.parse_mode source_text in
-  let quick_mode =
-    (not env.codegen)
-    &&
-    match mode with
-    | None
-    | Some FileInfo.Mdecl
-    | Some FileInfo.Mphp ->
-      true
-    | _ -> env.quick_mode
-  in
-  (* DANGER: Needs to be kept in sync with other logic in this file, ensuring
-       that the tree created here is later passed to ParserErrors. This can
-       currently leak memory when an exception is thrown between parsing and
-       error checking
-     *)
-  let leak_rust_tree = true in
-  let tree =
-    let env' =
-      Full_fidelity_parser_env.make
-        ~hhvm_compat_mode:env.codegen
-        ~codegen:env.codegen
-        ~php5_compat_mode:env.php5_compat_mode
-        ~disable_nontoplevel_declarations:
-          (GlobalOptions.po_disable_nontoplevel_declarations env.parser_options)
-        ~leak_rust_tree
-        ~disable_legacy_soft_typehints:
-          (GlobalOptions.po_disable_legacy_soft_typehints env.parser_options)
-        ~allow_new_attribute_syntax:
-          (GlobalOptions.po_allow_new_attribute_syntax env.parser_options)
-        ~disable_legacy_attribute_syntax:
-          (GlobalOptions.po_disable_legacy_attribute_syntax env.parser_options)
-        ?mode
-        ~enable_xhp_class_modifier:
-          (GlobalOptions.po_enable_xhp_class_modifier env.parser_options)
-        ()
-    in
-    if quick_mode then
-      let parser = DeclModeParser.make env' source_text in
-      let (parser, root, rust_tree) = DeclModeParser.parse_script parser in
-      let errors = DeclModeParser.errors parser in
-      PositionedSyntaxTree.create source_text root rust_tree errors mode false
-    else
-      PositionedSyntaxTree.make ~env:env' source_text
-  in
-  (mode, tree)
 
 let process_scour_comments (env : env) (sc : Scoured_comments.t) =
   List.iter sc.sc_error_pos ~f:Errors.fixme_format;

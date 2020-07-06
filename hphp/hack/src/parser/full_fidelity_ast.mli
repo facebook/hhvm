@@ -37,11 +37,6 @@ val from_source_text_with_legacy :
 
 val from_text_with_legacy : env -> string -> Parser_return.t
 
-val parse_text :
-  env ->
-  Full_fidelity_source_text.t ->
-  FileInfo.mode option * PositionedSyntaxTree.t
-
 (* Only for hh_single_compile at the moment. *)
 val from_text_to_empty_tast :
   env -> Full_fidelity_source_text.t -> Rust_aast_parser_types.tast_result

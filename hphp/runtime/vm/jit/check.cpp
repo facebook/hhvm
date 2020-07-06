@@ -537,7 +537,6 @@ using TypeNames::TCA;
 #define DVArr
 #define DDArr
 #define DStaticDArr
-#define DCheckDV(...)
 #define DCol
 #define DCns
 #define DMemoKey

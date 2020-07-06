@@ -591,8 +591,6 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DVArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TVec : TVArr);
 #define DDArr return checkLayoutFlags(RO::EvalHackArrDVArrs ? TDict : TDArr);
 #define DStaticDArr     return (TStaticDict | TStaticArr) & [&]{ DDArr }();
-// Refine the input type to be either a TVArr or TDArr, as appropriate.
-#define DCheckDV(k)     return inst->getPassthroughValue()->type() & T##k##Arr;
 #define DCol            return newColReturn(inst);
 #define DMulti          return TBottom;
 #define DSetElem        return setElemReturn(inst);

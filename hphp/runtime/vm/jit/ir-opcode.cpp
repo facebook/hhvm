@@ -68,7 +68,6 @@ TRACE_SET_MOD(hhir);
 #define DVArr          HasDest
 #define DDArr          HasDest
 #define DStaticDArr    HasDest
-#define DCheckDV(...)  HasDest
 #define DCol           HasDest
 #define DMulti         NaryDest
 #define DSetElem       HasDest
@@ -143,7 +142,6 @@ OpInfo g_opInfo[] = {
 #undef DVArr
 #undef DDArr
 #undef DStaticDArr
-#undef DCheckDV
 #undef DCol
 #undef DAllocObj
 #undef DMulti

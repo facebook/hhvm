@@ -17,8 +17,71 @@ module Env = Typing_env
 module Phase = Typing_phase
 module MakeType = Typing_make_type
 
-(** Check that the method with signature ft_sub can be used to override
- * (is a subtype of) method with signature ft_super.
+(* Helper method for subtype_method_decl. See below *)
+let subtype_method
+    ~(check_return : bool)
+    ~(extra_info : reactivity_extra_info)
+    (env : env)
+    (r_sub : Reason.t)
+    (ft_sub : locl_fun_type)
+    (r_super : Reason.t)
+    (ft_super : locl_fun_type)
+    (on_error : Errors.typing_error_callback) : env =
+  (* This is (1) and (2) below *)
+  let env =
+    subtype_funs
+      ~on_error
+      ~check_return
+      ~extra_info
+      r_sub
+      ft_sub
+      r_super
+      ft_super
+      env
+  in
+  (* This is (3) below *)
+  let check_tparams_constraints env tparams =
+    let check_tparam_constraints
+        env { tp_name = (p, name); tp_constraints = cstrl; _ } =
+      List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
+          let tgeneric = MakeType.generic (Reason.Rwitness p) name in
+          Typing_generic_constraint.check_constraint
+            env
+            ck
+            tgeneric
+            ~cstr_ty
+            on_error)
+    in
+    List.fold_left tparams ~init:env ~f:check_tparam_constraints
+  in
+  let check_where_constraints env cstrl =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+        Typing_generic_constraint.check_constraint
+          env
+          ck
+          ty1
+          ~cstr_ty:ty2
+          on_error)
+  in
+  (* We only do this if the ft_tparam lengths match. Currently we don't even
+   * report this as an error, indeed different names for type parameters.
+   * TODO: make it an error to override with wrong number of type parameters
+   *)
+  let env =
+    if
+      Int.( <> )
+        (List.length ft_sub.ft_tparams)
+        (List.length ft_super.ft_tparams)
+    then
+      env
+    else
+      check_tparams_constraints env ft_sub.ft_tparams
+  in
+  let env = check_where_constraints env ft_sub.ft_where_constraints in
+  env
+
+(** Check that the method decl with signature ft_sub can be used to override
+ * (is a subtype of) method decl with signature ft_super.
  *
  * This goes beyond subtyping on function types because methods can have
  * generic parameters with bounds, and `where` constraints.
@@ -66,88 +129,6 @@ module MakeType = Typing_make_type
  *     and wsuper, and check that T1 satisfies csub1, ..., Tn satisfies csubn
  *     and that wsub holds under those assumptions.
  *)
-let subtype_method
-    ~(check_return : bool)
-    ~(extra_info : reactivity_extra_info)
-    (env : env)
-    (r_sub : Reason.t)
-    (ft_sub : locl_fun_type)
-    (r_super : Reason.t)
-    (ft_super : locl_fun_type)
-    (on_error : Errors.typing_error_callback) : env =
-  Env.log_env_change "subtype_method" env
-  @@
-  let old_tpenv = Env.get_tpenv env in
-  (* We check constraint entailment and contravariant parameter/covariant result
-   * subtyping in the context of the ft_super constraints. But we'd better
-   * restore tpenv afterwards *)
-  let add_tparams_constraints env (tparams : locl_tparam list) =
-    let add_bound env { tp_name = (pos, name); tp_constraints = cstrl; _ } =
-      List.fold_left cstrl ~init:env ~f:(fun env (ck, ty) ->
-          let tparam_ty = MakeType.generic (Reason.Rwitness pos) name in
-          add_constraint pos env ck tparam_ty ty)
-    in
-    List.fold_left tparams ~f:add_bound ~init:env
-  in
-  let p_sub = Reason.to_pos r_sub in
-  let add_where_constraints env (cstrl : locl_where_constraint list) =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        add_constraint p_sub env ck ty1 ty2)
-  in
-  let env = add_tparams_constraints env ft_super.ft_tparams in
-  let env = add_where_constraints env ft_super.ft_where_constraints in
-  let env =
-    subtype_funs
-      ~on_error
-      ~check_return
-      ~extra_info
-      r_sub
-      ft_sub
-      r_super
-      ft_super
-      env
-  in
-  (* This is (3) above *)
-  let check_tparams_constraints env tparams =
-    let check_tparam_constraints
-        env { tp_name = (p, name); tp_constraints = cstrl; _ } =
-      List.fold_left cstrl ~init:env ~f:(fun env (ck, cstr_ty) ->
-          let tgeneric = MakeType.generic (Reason.Rwitness p) name in
-          Typing_generic_constraint.check_constraint
-            env
-            ck
-            tgeneric
-            ~cstr_ty
-            on_error)
-    in
-    List.fold_left tparams ~init:env ~f:check_tparam_constraints
-  in
-  let check_where_constraints env cstrl =
-    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
-        Typing_generic_constraint.check_constraint
-          env
-          ck
-          ty1
-          ~cstr_ty:ty2
-          on_error)
-  in
-  (* We only do this if the ft_tparam lengths match. Currently we don't even
-   * report this as an error, indeed different names for type parameters.
-   * TODO: make it an error to override with wrong number of type parameters
-   *)
-  let env =
-    if
-      Int.( <> )
-        (List.length ft_sub.ft_tparams)
-        (List.length ft_super.ft_tparams)
-    then
-      env
-    else
-      check_tparams_constraints env ft_sub.ft_tparams
-  in
-  let env = check_where_constraints env ft_sub.ft_where_constraints in
-  Env.env_with_tpenv env old_tpenv
-
 let subtype_method_decl
     ~(check_return : bool)
     ~(extra_info : reactivity_extra_info)
@@ -157,19 +138,44 @@ let subtype_method_decl
     (r_super : Reason.t)
     (ft_super : decl_fun_type)
     (on_error : Errors.typing_error_callback) : env =
+  let p_sub = Reason.to_pos r_sub in
+  let p_super = Reason.to_pos r_super in
   let ety_env = Phase.env_with_self env ~quiet:true in
-  let (env, ft_sub) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_sub) env ft_sub
+  (* We check constraint entailment and contravariant parameter/covariant result
+   * subtyping in the context of the ft_super constraints. But we'd better
+   * restore tpenv afterwards *)
+  let old_tpenv = Env.get_tpenv env in
+  (* First extend the environment with the type parameters from the supertype, along
+   * with their bounds
+   *)
+  let env =
+    Phase.localize_and_add_generic_parameters p_super env ft_super.ft_tparams
   in
-  let (env, ft_super) =
-    Phase.localize_ft ~ety_env ~def_pos:(Reason.to_pos r_super) env ft_super
+  (* Localize the function type itself *)
+  let (env, locl_ft_sub) =
+    Phase.localize_ft ~ety_env ~def_pos:p_sub env ft_sub
   in
-  subtype_method
-    ~extra_info
-    ~check_return
-    env
-    r_sub
-    ft_sub
-    r_super
-    ft_super
-    on_error
+  let (env, locl_ft_super) =
+    Phase.localize_ft ~ety_env ~def_pos:p_super env ft_super
+  in
+  let add_where_constraints env (cstrl : locl_where_constraint list) =
+    List.fold_left cstrl ~init:env ~f:(fun env (ty1, ck, ty2) ->
+        Typing_subtype.add_constraint (Reason.to_pos r_sub) env ck ty1 ty2)
+  in
+  (* Now extend the environment with `where` constraints from the supertype *)
+  let env = add_where_constraints env locl_ft_super.ft_where_constraints in
+  (* Finally apply contra/co subtyping on the function type, and check that
+   * the constraints on the supertype entail the constraints on the subtype *)
+  let env =
+    subtype_method
+      ~extra_info
+      ~check_return
+      env
+      r_sub
+      locl_ft_sub
+      r_super
+      locl_ft_super
+      on_error
+  in
+  (* Restore the type parameter environment *)
+  Env.env_with_tpenv env old_tpenv

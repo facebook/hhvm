@@ -28,6 +28,9 @@ module BlameSet = struct
 
   let add lid blame blame_set = add (lid, blame) blame_set
 
+  let remove lid blame_set =
+    filter (fun (lid', _) -> not @@ Local_id.equal lid lid') blame_set
+
   let attach_blame blame blame_set =
     map (fun (lid, _) -> (lid, blame)) blame_set
 end
@@ -105,7 +108,10 @@ let forget_suffixed (ledger : t) suffix blame : t =
 
 let add ledger lid pos =
   let reason = Reason.(Blame (pos, BSout_of_scope)) in
-  { ledger with valid = BlameSet.add lid reason ledger.valid }
+  {
+    valid = BlameSet.add lid reason ledger.valid;
+    invalid = BlameSet.remove lid ledger.invalid;
+  }
 
 let blame_as_log_value (Reason.Blame (p, blame_source)) =
   match blame_source with

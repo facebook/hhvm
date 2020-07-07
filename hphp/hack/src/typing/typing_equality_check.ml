@@ -49,6 +49,19 @@ let is_arraykey t =
   | Tprim N.Tarraykey -> true
   | _ -> false
 
+let bad_compare_prim_to_enum ty enum_bound =
+  match get_node enum_bound with
+  | Tprim enum_bound ->
+    (match (enum_bound, ty) with
+    | (N.Tint, (N.Tint | N.Tarraykey | N.Tnum)) -> false
+    | (N.Tint, _) -> true
+    | (N.Tstring, (N.Tstring | N.Tarraykey)) -> false
+    | (N.Tstring, _) -> true
+    | (N.Tarraykey, (N.Tarraykey | N.Tint | N.Tstring | N.Tnum)) -> false
+    | (N.Tarraykey, _) -> true
+    | _ -> false)
+  | _ -> false
+
 let rec assert_nontrivial p bop env ty1 ty2 =
   let ety_env = Phase.env_with_self env in
   let (_, ty1) = Env.expand_type env ty1 in
@@ -85,6 +98,12 @@ let rec assert_nontrivial p bop env ty1 ty2 =
     | (_, (r, Tprim N.Tvoid)) ->
       (* Ideally we shouldn't hit this case, but well... *)
       Errors.void_usage p (Reason.to_string "This is void" r)
+    | ((_, Tprim a), (_, Tnewtype (e, _, bound)))
+      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+      trivial_comparison_error env p bop ty1 bound trail1 trail2
+    | ((_, Tnewtype (e, _, bound)), (_, Tprim a))
+      when Env.is_enum env e && bad_compare_prim_to_enum a bound ->
+      trivial_comparison_error env p bop bound ty2 trail1 trail2
     | ((_, Tprim a), (_, Tprim b)) when not (Aast.equal_tprim a b) ->
       trivial_comparison_error env p bop ty1 ty2 trail1 trail2
     | ((_, Toption ty1), (_, Tprim _)) -> assert_nontrivial p bop env ty1 ty2

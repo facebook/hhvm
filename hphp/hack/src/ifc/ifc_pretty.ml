@@ -131,7 +131,16 @@ let prop =
   (fun fmt c -> aux 0 fmt (conjuncts c))
 
 let locals fmt env =
-  let pp_lenv fmt { le_vars } = LMap.make_pp Local_id.pp ptype fmt le_vars in
+  let pp_lenv fmt lenv =
+    pp_open_vbox fmt 0;
+    fprintf
+      fmt
+      "@[<hov2>lvars:@ %a@]"
+      (LMap.make_pp Local_id.pp ptype)
+      lenv.le_vars;
+    fprintf fmt "@,@[<hov2>pc: @[<hov>%a@]@]" policy (List.last_exn lenv.le_gpc);
+    pp_close_box fmt ()
+  in
   let pp_lenv_opt fmt = function
     | Some lenv -> pp_lenv fmt lenv
     | None -> fprintf fmt "<empty>"
@@ -140,15 +149,14 @@ let locals fmt env =
 
 let renv fmt renv =
   pp_open_vbox fmt 0;
-  fprintf fmt "* @[<hov2>pc: @[<hov>%a@]@]" policy (List.last_exn renv.re_gpc);
-  fprintf fmt "@,* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
+  fprintf fmt "* @[<hov2>This:@ @[<hov>%a@]@]" (option ptype) renv.re_this;
   fprintf fmt "@,* @[<hov2>Return:@ @[<hov>%a@]@]" ptype renv.re_ret;
   pp_close_box fmt ()
 
 let env fmt env =
   pp_open_vbox fmt 0;
   fprintf fmt "@[<hov2>Deps:@ %a@]" SSet.pp env.e_deps;
-  fprintf fmt "@,@[<hov2>Locals:@ %a@]" locals env;
+  fprintf fmt "@,Locals:@,  %a@." locals env;
   let p = Logic.conjoin env.e_acc in
   fprintf fmt "@,Constraints:@,  @[<v>%a@]" prop p;
   pp_close_box fmt ()

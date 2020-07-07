@@ -19,6 +19,7 @@ module Utils = Ifc_utils
 module A = Aast
 module T = Typing_defs
 module L = Logic.Infix
+module K = Typing_cont_key
 
 exception FlowInference of string
 
@@ -311,7 +312,7 @@ let call renv env callable_name that_pty_opt args_pty ret_ty =
     | Some _ ->
       let (env, pc_joined) =
         let join (env, pc) pc' = policy_join renv env ~prefix:"pcjoin" pc pc' in
-        List.fold ~f:join ~init:(env, Pbot) renv.re_gpc
+        List.fold ~f:join ~init:(env, Pbot) (Env.get_gpc_policy env K.Next)
       in
       let fp =
         {
@@ -347,13 +348,13 @@ let rec flux_target renv env ((_, lhs_ty), lhs_exp) =
     let prefix = Local_id.to_string lid in
     let local_pty = ptype None renv.re_proto lhs_ty ~prefix in
     let env = Env.set_local_type env lid local_pty in
-    (env, local_pty, renv.re_lpc)
+    (env, local_pty, Env.get_lpc_policy env K.Next)
   | A.Obj_get (obj, (_, A.Id (_, property)), _) ->
     let (env, obj_pty) = expr renv env obj in
     let obj_pol = (receiver_of_obj_get obj_pty property).c_self in
     let prop_pty = property_ptype renv.re_proto obj_pty property lhs_ty in
     let env = Env.acc env (add_dependencies [obj_pol] prop_pty) in
-    (env, prop_pty, renv.re_gpc)
+    (env, prop_pty, Env.get_gpc_policy env K.Next)
   | A.Array_get (vec, ix_opt) ->
     (* Copy-on-Write handling of Array_get LHS in an assignment. When there is
      * an assignmnet lhs[ix] = rhs or lhs[] = rhs, we
@@ -525,28 +526,31 @@ let rec stmt renv env ((_pos, s) : Tast.stmt) =
     env
   | A.If (e, b1, b2) ->
     let (env, ety) = expr renv env e in
-    let renv' =
+    (* Stash the PC's so they can be restored after the if *)
+    let gpc = Env.get_gpc_policy env K.Next in
+    let lpc = Env.get_lpc_policy env K.Next in
+    let env =
       let epol =
         match ety with
         | Tprim p -> p
         | _ -> fail "condition expression must be of type bool"
       in
-      { renv with re_lpc = epol :: renv.re_lpc; re_gpc = epol :: renv.re_gpc }
+      Env.push_pc env K.Next epol
     in
     let cenv = Env.get_cenv env in
-    let env = block renv' (Env.set_cenv env cenv) b1 in
+    let env = block renv (Env.set_cenv env cenv) b1 in
     let cenv1 = Env.get_cenv env in
-    let env = block renv' (Env.set_cenv env cenv) b2 in
+    let env = block renv (Env.set_cenv env cenv) b2 in
     let cenv2 = Env.get_cenv env in
     let union _env t1 t2 = (env, mk_union t1 t2) in
-    Env.merge_and_set_cenv ~union env cenv1 cenv2
+    let env = Env.merge_and_set_cenv ~union env cenv1 cenv2 in
+    Env.set_pcs env K.Next gpc lpc
   | A.Return (Some e) ->
     let (env, te) = expr renv env e in
     (* to account for enclosing conditionals, make the return
        type depend on the local pc *)
-    Env.acc
-      env
-      L.(add_dependencies renv.re_lpc renv.re_ret && subtype te renv.re_ret)
+    let lpc = Env.get_lpc_policy env K.Next in
+    Env.acc env L.(add_dependencies lpc renv.re_ret && subtype te renv.re_ret)
   | A.Return None -> env
   | _ -> env
 
@@ -565,10 +569,10 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
      *)
     let this_ty = Option.map class_name_opt (class_ptype None proto_renv []) in
     let ret_ty = ptype ~prefix:"ret" None proto_renv lrty in
-    let renv = Env.new_renv proto_renv global_pc this_ty ret_ty in
+    let renv = Env.new_renv proto_renv this_ty ret_ty in
 
     (* Initialise the mutable environment *)
-    let env = Env.new_env in
+    let env = Env.new_env global_pc in
     let (env, param_tys) = add_params renv env params in
 
     (* Run the analysis *)
@@ -580,7 +584,7 @@ let callable opts decl_env class_name_opt name saved_env params body lrty =
     if opts.verbosity >= 2 then begin
       Format.printf "Analyzing %s:@." name;
       Format.printf "%a@." Pp.renv renv;
-      Format.printf "* @[<hov2>Params:@ %a@]@." Pp.locals beg_env;
+      Format.printf "* Params:@,  %a@." Pp.locals beg_env;
       Format.printf "* Final environment:@,  %a@." Pp.env end_env;
       Format.printf "@."
     end;

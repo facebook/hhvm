@@ -6,49 +6,61 @@ Decls:
   function \condition: { kind = public }
   
 Analyzing \binop:
-* pc: pc
 * This: None
 * Return: <ret>
-* Params: { $x -> <$x>; $y -> <$y> }
+* Params:
+  lvars: { $x -> <$x>; $y -> <$y> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $x -> <$x>; $y -> <$y> }
-  Constraints:
-    $x < ret
+  Locals:
+    lvars: { $x -> <$x>; $y -> <$y> }
+    pc: pc
+Constraints:
+  $x < ret
 
 Analyzing \assign0:
-* pc: pc
 * This: None
 * Return: <ret>
-* Params: { $arg -> <$arg> }
+* Params:
+  lvars: { $arg -> <$arg> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $arg -> <$arg>; $x -> <$x'1> }
-  Constraints:
-    [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
+  Locals:
+    lvars: { $arg -> <$arg>; $x -> <$x'1> }
+    pc: pc
+Constraints:
+  [$arg < $x, PUBLIC < $x'1, $x'1 < ret]
 
 Analyzing \assign1:
-* pc: pc
 * This: None
 * Return: <ret>
-* Params: { $arg -> <$arg> }
+* Params:
+  lvars: { $arg -> <$arg> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $arg -> <$arg>; $x -> <$x'1> }
-  Constraints:
-    [$arg < $x, $x < $x'1, $x'1 < ret]
+  Locals:
+    lvars: { $arg -> <$arg>; $x -> <$x'1> }
+    pc: pc
+Constraints:
+  [$arg < $x, $x < $x'1, $x'1 < ret]
 
 Analyzing \condition:
-* pc: pc
 * This: None
 * Return: <ret>
-* Params: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
+* Params:
+  lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
-  Constraints:
-    [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
-     $x'2 < ret]
+  Locals:
+    lvars: { $a0 -> <$a0>; $a1 -> <$a1>; $a2 -> <$a2>; $x -> <$x'2> }
+    pc: pc
+Constraints:
+  [$a0 < $x, $a2 < $x, $a1 < $x'1, $a2 < $x'1, $x < $x'2, $x'1 < $x'2,
+   $x'2 < ret]
 
 Flow constraints for \assign0:
   

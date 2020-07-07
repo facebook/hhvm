@@ -4,16 +4,18 @@ Decls:
   function \test: { kind = public }
   
 Analyzing \test:
-* pc: pc
 * This: None
 * Return: \G<<tp>, <tp'1>, <tp'2>><\G, lump>
-* Params: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
+* Params:
+  lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
-  Constraints:
-    [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'1 = lump,
-     \G'1 < \G]
+  Locals:
+    lvars: { $g -> \G<<tp'3>, <tp'4>, <tp'5>><\G'1, lump'1> }
+    pc: pc
+Constraints:
+  [tp'3 < tp, tp'1 < tp'4, tp'2 < tp'5, tp'5 < tp'2, lump'1 = lump, \G'1 < \G]
 
 Flow constraints for \test:
   

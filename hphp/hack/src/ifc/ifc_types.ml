@@ -88,7 +88,17 @@ module FlowSet = Set.Make (Flow)
 
 type security_lattice = FlowSet.t
 
-type local_env = { le_vars: ptype LMap.t }
+type local_env = {
+  le_vars: ptype LMap.t;
+  (* Policy tracking local effects, these effects
+     are not observable outside the current function.
+     Assignments to local variables fall into this
+     category. *)
+  le_lpc: policy list;
+  (* Policy tracking effects with global visibility,
+     like assignments to fields of an argument. *)
+  le_gpc: policy list;
+}
 
 (* The environment is mutable data that
    has to be threaded through *)
@@ -146,14 +156,6 @@ type proto_renv = {
 type renv = {
   (* Section of renv needed to initialize full renv *)
   re_proto: proto_renv;
-  (* Policy tracking local effects, these effects
-     are not observable outside the current function.
-     Assignments to local variables fall into this
-     category. *)
-  re_lpc: policy list;
-  (* Policy tracking effects with global visibility,
-     like assignments to fields of an argument. *)
-  re_gpc: policy list;
   (* Policy type of $this. *)
   re_this: ptype option;
   (* Return type of the function being checked. *)

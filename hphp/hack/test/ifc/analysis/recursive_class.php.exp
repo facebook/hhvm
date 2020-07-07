@@ -6,40 +6,49 @@ Decls:
   function \R#recursiveWrite: { kind = public }
   
 Analyzing __construct:
-* pc: pc
 * This: \R<\R, lump>
 * Return: <ret>
-* Params: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
+* Params:
+  lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
-  Constraints:
-    [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump,
-     \R'1 < lump, pc < lump]
+  Locals:
+    lvars: { $prop -> <$prop>; $r -> \R<\R'1, lump'1> }
+    pc: pc
+Constraints:
+  [\R < lump, $prop < lump, pc < lump, \R < lump, lump'1 = lump, \R'1 < lump,
+   pc < lump]
 
 Analyzing recursiveGet:
-* pc: pc
 * This: \R<\R, lump>
 * Return: <ret>
-* Params: {}
+* Params:
+  lvars: {}
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: {}
-  Constraints:
-    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
-     lump < .prop, .r'2 < .prop, .prop < ret]
+  Locals:
+    lvars: {}
+    pc: pc
+Constraints:
+  [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+   lump < .prop, .r'2 < .prop, .prop < ret]
 
 Analyzing recursiveWrite:
-* pc: pc
 * This: \R<\R, lump>
 * Return: <ret>
-* Params: {}
+* Params:
+  lvars: {}
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: {}
-  Constraints:
-    [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
-     .r'2 < lump, PUBLIC < lump, pc < lump]
+  Locals:
+    lvars: {}
+    pc: pc
+Constraints:
+  [lump < .r, \R < .r, lump < .r'1, .r < .r'1, lump < .r'2, .r'1 < .r'2,
+   .r'2 < lump, PUBLIC < lump, pc < lump]
 
 Flow constraints for \R#__construct:
   

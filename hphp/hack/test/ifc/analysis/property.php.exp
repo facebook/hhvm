@@ -12,127 +12,151 @@ Decls:
   function \tlSetOtherBool: { kind = public }
   
 Analyzing __construct:
-* pc: pc
 * This:
     \My<\My, lump, mInt=<.mInt>,
           other=\Other<\Other'1, lump'2, oBool=<.oBool>>>
 * Return: <ret>
 * Params:
+  lvars:
     { $mBool -> <$mBool>;
       $mInt -> <$mInt>;
       $other -> \Other<\Other, lump'1, oBool=<.oBool'1>> }
+  pc: pc
 * Final environment:
   Deps: {}
   Locals:
-    { $mBool -> <$mBool>;
-      $mInt -> <$mInt>;
-      $other -> \Other<\Other, lump'1, oBool=<.oBool'1>> }
-  Constraints:
-    [\My < .mInt, $mInt < .mInt, pc < .mInt, \My < \Other'1,
-     .oBool < .oBool'1, .oBool'1 < .oBool, lump'1 = lump'2,
-     \Other < \Other'1, pc < \Other'1, \My < lump, $mBool < lump, pc < lump]
+    lvars:
+      { $mBool -> <$mBool>;
+        $mInt -> <$mInt>;
+        $other -> \Other<\Other, lump'1, oBool=<.oBool'1>> }
+    pc: pc
+Constraints:
+  [\My < .mInt, $mInt < .mInt, pc < .mInt, \My < \Other'1, .oBool < .oBool'1,
+   .oBool'1 < .oBool, lump'1 = lump'2, \Other < \Other'1, pc < \Other'1,
+   \My < lump, $mBool < lump, pc < lump]
 
 Analyzing getMInt:
-* pc: pc
 * This: \My<\My, lump, mInt=<.mInt>, other=?thunk>
 * Return: <ret>
-* Params: {}
+* Params:
+  lvars: {}
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: {}
-  Constraints:
-    [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
+  Locals:
+    lvars: {}
+    pc: pc
+Constraints:
+  [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
 
 Analyzing setMInt:
-* pc: pc
 * This: \My<\My, lump, mInt=<.mInt>, other=?thunk>
 * Return: <ret>
-* Params: { $candidate -> <$candidate> }
+* Params:
+  lvars: { $candidate -> <$candidate> }
+  pc: pc
 * Final environment:
   Deps: {}
-  Locals: { $candidate -> <$candidate> }
-  Constraints:
-    [\My < .mInt, $candidate < .mInt, pc < .mInt]
+  Locals:
+    lvars: { $candidate -> <$candidate> }
+    pc: pc
+Constraints:
+  [\My < .mInt, $candidate < .mInt, pc < .mInt]
 
 Analyzing \tlGetMyInt:
-* pc: pc
-* This: None
-* Return: <ret>
-* Params: { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk> }
-* Final environment:
-  Deps: {}
-  Locals: { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk> }
-  Constraints:
-    [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
-
-Analyzing \tlSetMyInt:
-* pc: pc
 * This: None
 * Return: <ret>
 * Params:
-    { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk>; $val -> <$val> }
+  lvars: { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk> }
+  pc: pc
 * Final environment:
   Deps: {}
   Locals:
+    lvars: { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk> }
+    pc: pc
+Constraints:
+  [.mInt < .mInt'1, \My < .mInt'1, .mInt'1 < ret]
+
+Analyzing \tlSetMyInt:
+* This: None
+* Return: <ret>
+* Params:
+  lvars:
     { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk>; $val -> <$val> }
-  Constraints:
-    [\My < .mInt, $val < .mInt, pc < .mInt]
+  pc: pc
+* Final environment:
+  Deps: {}
+  Locals:
+    lvars:
+      { $obj -> \My<\My, lump, mInt=<.mInt>, other=?thunk>; $val -> <$val> }
+    pc: pc
+Constraints:
+  [\My < .mInt, $val < .mInt, pc < .mInt]
 
 Analyzing \tlGetOther:
-* pc: pc
 * This: None
 * Return: \Other<\Other, lump, oBool=<.oBool>>
 * Params:
+  lvars:
     { $obj ->
       \My<\My, lump'1, mInt=?thunk,
             other=\Other<\Other'1, lump'2, oBool=<.oBool'1>>> }
+  pc: pc
 * Final environment:
   Deps: {}
   Locals:
-    { $obj ->
-      \My<\My, lump'1, mInt=?thunk,
-            other=\Other<\Other'1, lump'2, oBool=<.oBool'1>>> }
-  Constraints:
-    [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
-     lump'2 = lump, .other < \Other]
+    lvars:
+      { $obj ->
+        \My<\My, lump'1, mInt=?thunk,
+              other=\Other<\Other'1, lump'2, oBool=<.oBool'1>>> }
+    pc: pc
+Constraints:
+  [\Other'1 < .other, \My < .other, .oBool < .oBool'1, .oBool'1 < .oBool,
+   lump'2 = lump, .other < \Other]
 
 Analyzing \tlGetOtherBool:
-* pc: pc
 * This: None
 * Return: <ret>
 * Params:
+  lvars:
     { $obj ->
       \My<\My, lump, mInt=?thunk,
             other=\Other<\Other, lump'1, oBool=<.oBool>>> }
+  pc: pc
 * Final environment:
   Deps: {}
   Locals:
-    { $obj ->
-      \My<\My, lump, mInt=?thunk,
-            other=\Other<\Other, lump'1, oBool=<.oBool>>> }
-  Constraints:
-    [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
-     .oBool'1 < ret]
+    lvars:
+      { $obj ->
+        \My<\My, lump, mInt=?thunk,
+              other=\Other<\Other, lump'1, oBool=<.oBool>>> }
+    pc: pc
+Constraints:
+  [\Other < .other, \My < .other, .oBool < .oBool'1, .other < .oBool'1,
+   .oBool'1 < ret]
 
 Analyzing \tlSetOtherBool:
-* pc: pc
 * This: None
 * Return: <ret>
 * Params:
+  lvars:
     { $bool -> <$bool>;
       $obj ->
       \My<\My, lump, mInt=?thunk,
             other=\Other<\Other, lump'1, oBool=<.oBool>>> }
+  pc: pc
 * Final environment:
   Deps: {}
   Locals:
-    { $bool -> <$bool>;
-      $obj ->
-      \My<\My, lump, mInt=?thunk,
-            other=\Other<\Other, lump'1, oBool=<.oBool>>> }
-  Constraints:
-    [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
-     pc < .oBool]
+    lvars:
+      { $bool -> <$bool>;
+        $obj ->
+        \My<\My, lump, mInt=?thunk,
+              other=\Other<\Other, lump'1, oBool=<.oBool>>> }
+    pc: pc
+Constraints:
+  [\Other < .other, \My < .other, .other < .oBool, $bool < .oBool,
+   pc < .oBool]
 
 Flow constraints for \My#__construct:
   

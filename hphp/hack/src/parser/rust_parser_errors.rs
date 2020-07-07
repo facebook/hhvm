@@ -131,6 +131,7 @@ struct UsedNames {
     namespaces: Strmap<FirstUseOrDef>, // NoCase
     functions: Strmap<FirstUseOrDef>,  // NoCase
     constants: Strmap<FirstUseOrDef>,  // YesCase
+    attributes: Strmap<FirstUseOrDef>, // YesCase
 }
 
 impl UsedNames {
@@ -140,6 +141,7 @@ impl UsedNames {
             namespaces: NoCase(HashMap::new()),
             functions: NoCase(HashMap::new()),
             constants: YesCase(HashMap::new()),
+            attributes: YesCase(HashMap::new()),
         }
     }
 }
@@ -2298,6 +2300,56 @@ where
                 }
             }
             DecoratedExpression(_) => self.decoration_errors(node),
+            _ => (),
+        }
+    }
+
+    // Only check the functions; invalid attributes on methods (like <<__EntryPoint>>) are caught elsewhere
+    fn multiple_entrypoint_attribute_errors(&mut self, node: &'a Syntax<Token, Value>) {
+        match &node.syntax {
+            FunctionDeclaration(f)
+                if self.attribute_specification_contains(
+                    &f.function_attribute_spec,
+                    sn::user_attributes::ENTRY_POINT,
+                ) =>
+            {
+                // Get the location of the <<...>> annotation
+                let location = match &f.function_attribute_spec.syntax {
+                    AttributeSpecification(x) => {
+                        Self::make_location_of_node(&x.attribute_specification_attributes)
+                    }
+                    OldAttributeSpecification(x) => {
+                        Self::make_location_of_node(&x.old_attribute_specification_attributes)
+                    }
+                    _ => panic!("Expected attribute specification node"),
+                };
+                let def = make_first_use_or_def(
+                    false,
+                    NameDef,
+                    location,
+                    &self.namespace_name,
+                    sn::user_attributes::ENTRY_POINT,
+                );
+                match self.names.attributes.get(sn::user_attributes::ENTRY_POINT) {
+                    Some(prev_def) => {
+                        let (line_num, _) = self
+                            .env
+                            .text
+                            .offset_to_position(prev_def.location.start_offset as isize);
+
+                        let path = self.env.text.source_text().file_path().path_str();
+                        let loc = String::from(path) + ":" + &line_num.to_string();
+                        let err = errors::multiple_entrypoints(&loc);
+                        let err_type = ErrorType::ParseError;
+                        self.errors
+                            .push(Self::make_error_from_node_with_type(node, err, err_type))
+                    }
+                    _ => (),
+                };
+                self.names
+                    .attributes
+                    .add(sn::user_attributes::ENTRY_POINT, def)
+            }
             _ => (),
         }
     }
@@ -5321,6 +5373,7 @@ where
             MethodishDeclaration(_) | FunctionDeclaration(_) | FunctionDeclarationHeader(_) => {
                 self.reified_parameter_errors(node);
                 self.redeclaration_errors(node);
+                self.multiple_entrypoint_attribute_errors(node);
                 self.methodish_errors(node);
             }
 

@@ -946,3 +946,10 @@ pub const empty_switch_cases: Error =
     Cow::Borrowed("Switch statements need to have at least one case or a default block");
 
 pub const preceding_backslash: Error = Cow::Borrowed("Unnecessary preceding backslash");
+
+pub fn multiple_entrypoints(loc: &str) -> Error {
+    Cow::Owned(format!(
+        "Only one __EntryPoint annotation is permitted per file (previous __EntryPoint annotation in {})",
+        loc.to_string()
+    ))
+}

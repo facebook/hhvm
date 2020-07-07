@@ -28,3 +28,7 @@ val rpc_get_fun_path : t -> string -> Relative_path.t option
 
 val rpc_get_type_path_and_kind :
   t -> string -> (Relative_path.t * Naming_types.kind_of_type) option
+
+val rpc_get_fun_canon_name : t -> string -> string option
+
+val rpc_get_type_canon_name : t -> string -> string option

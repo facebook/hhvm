@@ -154,3 +154,9 @@ let rpc_get_type_path_and_kind (t : t) (name : string) :
     if kind_opt <> Some Naming_types.TRecordDef then
       add_to_cache t.record_cache name None;
     opt
+
+let rpc_get_fun_canon_name (t : t) (name : string) : string option =
+  Decl_ipc_ffi_externs.get_fun_canon_name t.client name
+
+let rpc_get_type_canon_name (t : t) (name : string) : string option =
+  Decl_ipc_ffi_externs.get_type_canon_name t.client name

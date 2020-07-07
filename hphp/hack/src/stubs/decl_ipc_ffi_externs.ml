@@ -15,3 +15,7 @@ let get_const_path _ _ = failwith "decl_ipc not implemented"
 let get_fun_path _ _ = failwith "decl_ipc not implemented"
 
 let get_type_path_and_kind _ _ = failwith "decl_ipc not implemented"
+
+let get_fun_canon_name _ _ = failwith "decl_ipc not implemented"
+
+let get_type_canon_name _ _ = failwith "decl_ipc not implemented"

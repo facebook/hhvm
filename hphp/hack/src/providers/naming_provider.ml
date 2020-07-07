@@ -259,12 +259,8 @@ let get_fun_canon_name (ctx : Provider_context.t) (name : string) :
         None
       else
         compute_symbol_canon_name path
-    | Provider_backend.Decl_service _ ->
-      (* FIXME: Not correct! We need to add a canon-name API to the decl service. *)
-      if fun_exists ctx name then
-        Some name
-      else
-        None)
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.rpc_get_fun_canon_name decl name)
 
 let add_fun (backend : Provider_backend.t) (name : string) (pos : FileInfo.pos)
     : unit =
@@ -485,12 +481,8 @@ let get_type_canon_name (ctx : Provider_context.t) (name : string) :
         None
       else
         compute_symbol_canon_name path (name_type_to_kind name_type)
-    | Provider_backend.Decl_service _ ->
-      (* FIXME: Not correct! We need to add a canon-name API to the decl service. *)
-      if Option.is_some (get_type_kind ctx name) then
-        Some name
-      else
-        None)
+    | Provider_backend.Decl_service { decl; _ } ->
+      Decl_service_client.rpc_get_type_canon_name decl name)
 
 let get_class_path (ctx : Provider_context.t) (name : string) :
     Relative_path.t option =

@@ -1424,10 +1424,11 @@ class Status {
   const BLUE = 34;
 
   public static function createTmpDir(): void {
-    // TODO: one day we should have hack-accessible mkdtemp
-    self::$tmpdir = tempnam(sys_get_temp_dir(), "hphp-test-");
-    unlink(self::$tmpdir);
-    mkdir(self::$tmpdir);
+    $parent = sys_get_temp_dir();
+    if (substr($parent, -1) !== "/") {
+      $parent .= "/";
+    }
+    self::$tmpdir = HH\Lib\_Private\_OS\mkdtemp($parent . 'hphp-test-XXXXXX');
   }
 
   public static function getRunTmpDir(): string {

@@ -1464,11 +1464,17 @@ functor
       (env, { reparse_count; total_rechecked_count; telemetry })
   end
 
+(* This function is used to get the variant contstructor names of
+    the check kind type. The names are used in at least 3 places:
+    - the `type_check_unsafe` function below:
+      - logs the names into the server log
+      - uses HackEventLogger to log the names as the check_kind column value
+    - HhMonitorInformant greps for it in the server log in order to set
+        HackEventLogger's is_lazy_incremental column to true/false
+*)
 let check_kind_to_string = function
-  | Full_check ->
-    "will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('Full_check')"
-  | Lazy_check ->
-    "will check only those files already open in IDE or with reported errors ('Lazy_check')"
+  | Full_check -> "Full_check"
+  | Lazy_check -> "Lazy_check"
 
 module FC = Make (FullCheckKind)
 module LC = Make (LazyCheckKind)
@@ -1478,16 +1484,22 @@ let type_check_unsafe genv env kind =
   | Lazy_check -> HackEventLogger.set_lazy_incremental ()
   | Full_check -> ());
   let check_kind = check_kind_to_string kind in
+
   HackEventLogger.with_check_kind check_kind @@ fun () ->
   Printf.eprintf "******************************************\n";
-  Hh_logger.log "Check kind: %s" check_kind;
   match kind with
   | Lazy_check ->
+    Hh_logger.log
+      "Check kind: will check only those files already open in IDE or with reported errors ('%s')"
+      check_kind;
     ServerBusyStatus.send env ServerCommandTypes.Doing_local_typecheck;
     let res = LC.type_check_core genv env in
     ServerBusyStatus.send env ServerCommandTypes.Done_local_typecheck;
     res
   | Full_check ->
+    Hh_logger.log
+      "Check kind: will bring hh_server to consistency with code changes, by checking whatever fanout is needed ('%s')"
+      check_kind;
     ServerBusyStatus.send
       env
       (ServerCommandTypes.Doing_global_typecheck

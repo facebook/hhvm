@@ -418,6 +418,8 @@ let load ~silent config_filename options =
         (bool_opt "enable_xhp_class_modifier" config)
       ?po_disable_modes:(bool_opt "disable_modes" config)
       ?po_disable_hh_ignore_error:(bool_opt "disable_hh_ignore_error" config)
+      ?po_enable_first_class_function_pointers:
+        (bool_opt "enable_first_class_function_pointers" config)
       ?tco_pu_enabled_paths:
         (match
            string_list

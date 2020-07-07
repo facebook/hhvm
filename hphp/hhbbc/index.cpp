@@ -2184,9 +2184,11 @@ std::unique_ptr<php::Func> clone_meth_helper(
     return true;
   };
 
+  auto mf = php::MutFunc(cloneMeth.get());
   hphp_fast_map<size_t, hphp_fast_map<size_t, uint32_t>> updates;
-  for (size_t bid = 0; bid < cloneMeth->blocks.size(); bid++) {
-    auto const b = cloneMeth->blocks[bid].get();
+
+  for (size_t bid = 0; bid < mf.blocks().size(); bid++) {
+    auto const b = mf.blocks()[bid].get();
     for (size_t ix = 0; ix < b->hhbcs.size(); ix++) {
       auto const& bc = b->hhbcs[ix];
       switch (bc.op) {
@@ -2206,8 +2208,7 @@ std::unique_ptr<php::Func> clone_meth_helper(
   }
 
   for (auto elm : updates) {
-    auto& cblk = cloneMeth->blocks[elm.first];
-    auto const blk = cblk.mutate();
+    auto const blk = mf.blocks_mut()[elm.first].mutate();
     for (auto const& ix : elm.second) {
       blk->hhbcs[ix.first].CreateCl.arg2 = ix.second;
     }
@@ -6167,7 +6168,7 @@ Index::could_be_related(const php::Class* cls,
   if (clsClass_it == end(m_data->classInfo) || parentClass_it == end(m_data->classInfo)) {
     return false;
   }
-  
+
   auto const rCls = res::Class { clsClass_it->second };
   auto const rPar = res::Class { parentClass_it->second };
   return rCls.couldBe(rPar);

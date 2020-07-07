@@ -288,13 +288,13 @@ std::string dot_instructions(const Func& func, const Block& b) {
 }
 
 // Output DOT-format graph.  Paste into dot -Txlib or similar.
-std::string dot_cfg(const Func& func) {
+std::string dot_cfg(php::ConstFunc func) {
   std::string ret;
   for (auto const bid : rpoSortAddDVs(func)) {
-    auto const b = func.blocks[bid].get();
+    auto const b = func.blocks()[bid].get();
     ret += folly::format(
       "B{} [ label = \"blk:{}\\n\"+{} ]\n",
-      bid, bid, dot_instructions(func, *b)).str();
+      bid, bid, dot_instructions(*func, *b)).str();
     bool outputed = false;
     forEachNormalSuccessor(*b, [&] (BlockId target) {
       ret += folly::format("B{} -> B{};", bid, target).str();
@@ -308,10 +308,11 @@ std::string dot_cfg(const Func& func) {
   return ret;
 }
 
-std::string show(const Func& func) {
+std::string show(const Func& f) {
   std::string ret;
+  auto const func = php::ConstFunc(&f);
 
-#define X(what) if (func.what) folly::toAppend(#what "\n", &ret)
+#define X(what) if (func->what) folly::toAppend(#what "\n", &ret)
   X(isClosureBody);
   X(isAsync);
   X(isGenerator);
@@ -321,16 +322,16 @@ std::string show(const Func& func) {
   if (getenv("HHBBC_DUMP_DOT")) {
     folly::format(&ret,
                   "digraph {} {{\n  node [shape=box];\n{}}}\n",
-                  func.name, indent(2, dot_cfg(func)));
+                  func->name, indent(2, dot_cfg(func)));
   }
 
   for (auto const bid : func.blockRange()) {
-    auto const blk = func.blocks[bid].get();
+    auto const blk = func.blocks()[bid].get();
     if (blk->dead) continue;
-    folly::format(&ret, "block #{}\n{}", bid, indent(2, show(func, *blk)));
+    folly::format(&ret, "block #{}\n{}", bid, indent(2, show(*func, *blk)));
   }
 
-  visitExnLeaves(func, [&] (const php::ExnNode& node) {
+  visitExnLeaves(*func, [&] (const php::ExnNode& node) {
     folly::format(&ret, "exn node #{} ", node.idx);
     if (node.parent != NoExnNodeId) {
       folly::format(&ret, "(^{}) ", node.parent);

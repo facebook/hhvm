@@ -37,7 +37,7 @@ namespace {
  *
  */
 struct PostOrderWalker {
-  const php::Func& func;
+  php::ConstFunc func;
   std::vector<BlockId>& out;
   boost::dynamic_bitset<>& visited;
 
@@ -45,7 +45,7 @@ struct PostOrderWalker {
     if (visited[blk]) return;
     visited[blk] = true;
     forEachSuccessor(
-      *func.blocks[blk],
+      *func.blocks()[blk],
       [this] (BlockId next) {
         walk(next);
       }
@@ -55,7 +55,7 @@ struct PostOrderWalker {
 };
 
 void postorderWalk(
-    const php::Func& func,
+    php::ConstFunc func,
     std::vector<BlockId>& out,
     boost::dynamic_bitset<>& visited,
     BlockId blk) {
@@ -67,24 +67,24 @@ void postorderWalk(
 
 //////////////////////////////////////////////////////////////////////
 
-std::vector<BlockId> rpoSortFromBlock(const php::Func& func, BlockId start) {
-  boost::dynamic_bitset<> visited(func.blocks.size());
+std::vector<BlockId> rpoSortFromBlock(php::ConstFunc func, BlockId start) {
+  boost::dynamic_bitset<> visited(func.blocks().size());
   std::vector<BlockId> ret;
-  ret.reserve(func.blocks.size());
+  ret.reserve(func.blocks().size());
   postorderWalk(func, ret, visited, start);
   std::reverse(begin(ret), end(ret));
   return ret;
 }
 
-std::vector<BlockId> rpoSortFromMain(const php::Func& func) {
-  return rpoSortFromBlock(func, func.mainEntry);
+std::vector<BlockId> rpoSortFromMain(php::ConstFunc func) {
+  return rpoSortFromBlock(func, func->mainEntry);
 }
 
-std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {
-  boost::dynamic_bitset<> visited(func.blocks.size());
+std::vector<BlockId> rpoSortAddDVs(php::ConstFunc func) {
+  boost::dynamic_bitset<> visited(func.blocks().size());
   std::vector<BlockId> ret;
-  ret.reserve(func.blocks.size());
-  postorderWalk(func, ret, visited, func.mainEntry);
+  ret.reserve(func.blocks().size());
+  postorderWalk(func, ret, visited, func->mainEntry);
 
   /*
    * We've already marked the blocks reachable from the main entry
@@ -92,7 +92,7 @@ std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {
    * visited set (so we'll stop if they chain to the main entry, which
    * is the normal case).
    */
-  for (auto it = func.params.end(); it != func.params.begin(); ) {
+  for (auto it = func->params.end(); it != func->params.begin(); ) {
     --it;
     if (it->dvEntryPoint == NoBlockId) continue;
     postorderWalk(func, ret, visited, it->dvEntryPoint);
@@ -102,7 +102,7 @@ std::vector<BlockId> rpoSortAddDVs(const php::Func& func) {
 }
 
 BlockToBlocks
-computeNonThrowPreds(const php::Func& func,
+computeNonThrowPreds(php::ConstFunc func,
                      const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
@@ -110,7 +110,7 @@ computeNonThrowPreds(const php::Func& func,
     if (preds.size() < bid + 1) {
       preds.resize(bid + 1);
     }
-    auto const b = func.blocks[bid].get();
+    auto const b = func.blocks()[bid].get();
     forEachNonThrowSuccessor(*b, [&] (BlockId blkId) {
       if (preds.size() < blkId + 1) {
         preds.resize(blkId + 1);
@@ -122,7 +122,7 @@ computeNonThrowPreds(const php::Func& func,
 }
 
 BlockToBlocks
-computeThrowPreds(const php::Func& func,
+computeThrowPreds(php::ConstFunc func,
                   const std::vector<BlockId>& rpoBlocks) {
   auto preds = BlockToBlocks{};
   preds.reserve(rpoBlocks.size());
@@ -130,7 +130,7 @@ computeThrowPreds(const php::Func& func,
     if (preds.size() < bid + 1) {
       preds.resize(bid + 1);
     }
-    auto const b = func.blocks[bid].get();
+    auto const b = func.blocks()[bid].get();
     if (b->throwExit != NoBlockId) {
       if (preds.size() < b->throwExit + 1) {
         preds.resize(b->throwExit + 1);
@@ -147,8 +147,8 @@ computeThrowPreds(const php::Func& func,
  * date (this is just a heuristic to avoid having to keep a seen set,
  * because we don't expect long cyclic chains of no-op blocks).
  */
-BlockId next_real_block(const php::Func& func, BlockId id) {
-  auto blk = func.blocks[id].get();
+BlockId next_real_block(php::ConstFunc func, BlockId id) {
+  auto blk = func.blocks()[id].get();
   auto min = id;
   while (is_single_nop(*blk)) {
     if (blk->fallthrough == id || blk->fallthrough == NoBlockId) break;
@@ -162,7 +162,7 @@ BlockId next_real_block(const php::Func& func, BlockId id) {
       min = blk->fallthrough;
     }
     id = blk->fallthrough;
-    blk = func.blocks[id].get();
+    blk = func.blocks()[id].get();
   }
   return id;
 }

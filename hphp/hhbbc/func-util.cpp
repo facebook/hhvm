@@ -92,17 +92,17 @@ namespace {
 
 using ExnNode = php::ExnNode;
 
-void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
+void copy_into(php::MutFunc dst, php::ConstFunc other) {
   hphp_fast_map<ExnNode*, ExnNode*> processed;
 
-  BlockId delta = dst->blocks.size();
-  always_assert(!dst->exnNodes.size() || !other.exnNodes.size());
-  dst->exnNodes.reserve(dst->exnNodes.size() + other.exnNodes.size());
-  for (auto en : other.exnNodes) {
+  BlockId delta = dst.blocks().size();
+  always_assert(!dst->exnNodes.size() || !other->exnNodes.size());
+  dst->exnNodes.reserve(dst->exnNodes.size() + other->exnNodes.size());
+  for (auto en : other->exnNodes) {
     en.region.catchEntry += delta;
     dst->exnNodes.push_back(std::move(en));
   }
-  for (auto theirs : other.blocks) {
+  for (auto theirs : other.blocks()) {
     if (delta) {
       auto const ours = theirs.mutate();
       if (ours->fallthrough != NoBlockId) ours->fallthrough += delta;
@@ -116,7 +116,7 @@ void copy_into(php::FuncBase* dst, const php::FuncBase& other) {
         bc.forEachTarget([&] (BlockId& b) { b += delta; });
       }
     }
-    dst->blocks.push_back(std::move(theirs));
+    dst.blocks_mut().push_back(std::move(theirs));
   }
 }
 
@@ -130,33 +130,40 @@ bool append_func(php::Func* dst, const php::Func& src) {
   if (src.numIters || src.locals.size()) return false;
   if (src.exnNodes.size() && dst->exnNodes.size()) return false;
 
+  auto const src_func = php::ConstFunc(&src);
+  auto const dst_func = php::MutFunc(dst);
+
   bool ok = false;
-  for (auto& b : dst->blocks) {
-    if (b->hhbcs.back().op != Op::RetC) continue;
-    auto const blk = b.mutate();
+  for (auto const bid : dst_func.blockRange()) {
+    auto const& cblk = dst_func.blocks()[bid];
+    if (cblk->hhbcs.back().op != Op::RetC) continue;
+    auto const blk = dst_func.blocks_mut()[bid].mutate();
     blk->hhbcs.back() = bc::PopC {};
-    blk->fallthrough = dst->blocks.size();
+    blk->fallthrough = dst_func.blocks().size();
     ok = true;
   }
   if (!ok) return false;
-  copy_into(dst, src);
+  copy_into(dst_func, src_func);
   return true;
 }
 
-BlockId make_block(php::Func* func, const php::Block* srcBlk) {
-  auto newBlk           = copy_ptr<php::Block>{php::Block{}};
-  auto const blk        = newBlk.mutate();
-  blk->exnNodeId        = srcBlk->exnNodeId;
-  blk->throwExit        = srcBlk->throwExit;
-  auto const bid        = func->blocks.size();
-  func->blocks.push_back(std::move(newBlk));
-
+BlockId make_block(php::MutFunc func, const php::Block* srcBlk) {
+  auto newBlk    = copy_ptr<php::Block>{php::Block{}};
+  auto const blk = newBlk.mutate();
+  blk->exnNodeId = srcBlk->exnNodeId;
+  blk->throwExit = srcBlk->throwExit;
+  auto const bid = func.blocks().size();
+  func.blocks_mut().push_back(std::move(newBlk));
   return bid;
 }
 
 php::FuncBase::FuncBase(const FuncBase& other) {
-  copy_into(this, other);
-
+  // NOTE: These casts are safe because copy_into only accesses fields of
+  // FuncBase within its input Funcs. We can introduce another wrapper type
+  // instead to make the code safer, or rewrite copy_into somehow.
+  auto const src_func = php::ConstFunc(reinterpret_cast<const Func*>(&other));
+  auto const dst_func = php::MutFunc(reinterpret_cast<Func*>(this));
+  copy_into(dst_func, src_func);
   assertx(!other.nativeInfo);
 }
 

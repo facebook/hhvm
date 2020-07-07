@@ -249,6 +249,8 @@ struct NativeInfo {
   folly::Optional<DataType> returnType;
 };
 
+using BlockVec = CompactVector<copy_ptr<Block>>;
+
 /*
  * Separate out the fields that need special attention when copying,
  * so that Func can just have default copy/move semantics.
@@ -258,16 +260,6 @@ struct FuncBase {
   FuncBase(const FuncBase&);
   FuncBase(FuncBase&&) = delete;
   FuncBase& operator=(const FuncBase&) = delete;
-
-  /*
-   * All owning pointers to blocks are in this vector, which has the
-   * blocks in an unspecified order.  Blocks use BlockIds
-   * to represent control flow arcs. The id of a block is its
-   * index in this vector.
-   */
-  CompactVector<copy_ptr<Block>> blocks;
-
-  auto blockRange() const { return IntLikeRange<BlockId> {blocks}; }
 
   /*
    * Catch regions form a tree structure.  The tree is hanging
@@ -285,6 +277,19 @@ struct FuncBase {
    * with an HNI-based native implementation, this will be nullptr.
    */
   std::unique_ptr<NativeInfo> nativeInfo;
+
+private:
+  /*
+   * All owning pointers to blocks are in this vector, which has the
+   * blocks in an unspecified order.  Blocks use BlockIds to represent
+   * control flow arcs. The id of a block is its index in this vector.
+   *
+   * Use ConstFunc / MutFunc wrapper types to access this data.
+   */
+  BlockVec rawBlocks;
+
+  friend struct ConstFunc;
+  friend struct MutFunc;
 };
 
 /*
@@ -421,6 +426,35 @@ struct Func : FuncBase {
    * User attribute list.
    */
   UserAttributeMap userAttributes;
+};
+
+/*
+ * We keep the code of a Func compressed at rest, so you must instantiate
+ * one of the two "fat pointers" below to actually read or write its code.
+ * Instantiating these pointers is a potentially heavy-weight operation.
+ */
+struct ConstFunc {
+  ConstFunc() = default;
+  explicit ConstFunc(const Func* f) : func(f) {}
+
+  const BlockVec& blocks() const { return func->rawBlocks; }
+  operator const Func*() const { return func; }
+  const Func& operator*() const { return *func; }
+  const Func* operator->() const { return func; }
+
+  operator bool() const { return func; }
+  auto blockRange() const { return IntLikeRange<BlockId>{func->rawBlocks}; }
+
+  const Func* func;
+};
+struct MutFunc : public ConstFunc {
+  MutFunc() = default;
+  explicit MutFunc(const Func* f) : ConstFunc(f) {}
+
+  BlockVec& blocks_mut() const { return const_cast<Func*>(func)->rawBlocks; }
+  operator Func*() const { return const_cast<Func*>(func); }
+  Func* operator->() const { return const_cast<Func*>(func); }
+  Func& operator*() const { return *const_cast<Func*>(func); }
 };
 
 //////////////////////////////////////////////////////////////////////

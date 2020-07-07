@@ -164,7 +164,7 @@ struct StepFlags {
  */
 struct Interp {
   const Index& index;
-  Context ctx;
+  AnalysisContext ctx;
   CollectedInfo& collect;
   const BlockId bid;
   const php::Block* blk;

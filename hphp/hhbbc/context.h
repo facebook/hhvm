@@ -20,6 +20,7 @@
 #include <folly/Optional.h>
 
 #include "hphp/hhbbc/index.h"
+#include "hphp/hhbbc/representation.h"
 #include "hphp/hhbbc/type-system.h"
 
 #include "hphp/util/compact-vector.h"
@@ -76,6 +77,23 @@ inline bool operator==(const CallContext& a, const CallContext& b) {
          equivalently_refined(a.args, b.args) &&
          equivalently_refined(a.context, b.context);
 }
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * Context used to analyze or optimize a function. Instantiating this type
+ * of context requires accessing the Func's bytecode, which is a potentially
+ * heavy-weight deserialization operation. We only do it once per analysis.
+ */
+struct AnalysisContext {
+  const php::Unit* unit;
+  php::MutFunc func;
+  const php::Class* cls;
+
+  operator Context() const {
+    return Context { unit, const_cast<php::Func*>(func.func), cls };
+  }
+};
 
 //////////////////////////////////////////////////////////////////////
 

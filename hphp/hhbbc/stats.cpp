@@ -418,8 +418,9 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   add_type(stats.returns, ty);
 
-  for (auto const bid : func.blockRange()) {
-    auto const blk = func.blocks[bid].get();
+  auto mf = php::MutFunc(&func);
+  for (auto const bid : mf.blockRange()) {
+    auto const blk = mf.blocks()[bid].get();
     if (blk->dead) continue;
     for (auto& bc : blk->hhbcs) {
       collect_simple(stats, bc);
@@ -428,12 +429,12 @@ void collect_func(Stats& stats, const Index& index, php::Func& func) {
 
   if (!options.extendedStats) return;
 
-  auto const ctx = Context { func.unit, &func, func.cls };
+  auto const ctx = AnalysisContext { func.unit, mf, func.cls };
   auto const fa  = analyze_func(index, ctx, CollectionOpts{});
   {
     Trace::Bump bumper{Trace::hhbbc, kStatsBump};
-    for (auto const bid : func.blockRange()) {
-      auto const blk = func.blocks[bid].get();
+    for (auto const bid : mf.blockRange()) {
+      auto const blk = mf.blocks()[bid].get();
       auto state = fa.bdata[bid].stateIn;
       if (!state.initialized) continue;
 

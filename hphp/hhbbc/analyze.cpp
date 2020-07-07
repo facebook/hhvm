@@ -286,20 +286,25 @@ Context adjust_closure_context(Context ctx) {
 }
 
 FuncAnalysis do_analyze_collect(const Index& index,
-                                Context const ctx,
+                                Context const base_ctx,
                                 CollectedInfo& collect,
                                 const KnownArgs* knownArgs) {
-  assertx(ctx.cls == adjust_closure_context(ctx).cls);
+  assertx(base_ctx.cls == adjust_closure_context(base_ctx).cls);
+  auto const ctx = AnalysisContext {
+    base_ctx.unit,
+    php::MutFunc(base_ctx.func),
+    base_ctx.cls
+  };
   FuncAnalysis ai{ctx};
 
   SCOPE_ASSERT_DETAIL("do-analyze-collect-2") {
     std::string ret;
-    for (auto bid : ctx.func->blockRange()) {
+    for (auto bid : ctx.func.blockRange()) {
       folly::format(&ret,
                     "block #{}\nin-{}\n{}",
                     bid,
                     state_string(*ctx.func, ai.bdata[bid].stateIn, collect),
-                    show(*ctx.func, *ctx.func->blocks[bid])
+                    show(*ctx.func, *ctx.func.blocks()[bid])
                    );
     }
 
@@ -348,7 +353,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
    * Termination is guaranteed because the widening operator has only finite
    * chains in the type lattice.
    */
-  auto totalVisits = std::vector<uint32_t>(ctx.func->blocks.size());
+  auto totalVisits = std::vector<uint32_t>(ctx.func.blocks().size());
 
   // For debugging, count how many times basic blocks get interpreted.
   auto interp_counter = uint32_t{0};
@@ -398,7 +403,7 @@ FuncAnalysis do_analyze_collect(const Index& index,
                state_string(*ctx.func, ai.bdata[target].stateIn, collect));
       };
 
-      auto const blk = ctx.func->blocks[bid].get();
+      auto const blk = ctx.func.blocks()[bid].get();
       auto stateOut = ai.bdata[bid].stateIn;
       auto interp   = Interp {
         index, ctx, collect, bid, blk, stateOut
@@ -573,16 +578,16 @@ void expand_hni_prop_types(ClassAnalysis& clsAnalysis) {
 
 //////////////////////////////////////////////////////////////////////
 
-FuncAnalysisResult::FuncAnalysisResult(Context ctx)
+FuncAnalysisResult::FuncAnalysisResult(AnalysisContext ctx)
   : ctx(ctx)
   , inferredReturn(TBottom)
 {
 }
 
-FuncAnalysis::FuncAnalysis(Context ctx)
+FuncAnalysis::FuncAnalysis(AnalysisContext ctx)
   : FuncAnalysisResult{ctx}
-  , rpoBlocks{rpoSortAddDVs(*ctx.func)}
-  , bdata{ctx.func->blocks.size()}
+  , rpoBlocks{rpoSortAddDVs(ctx.func)}
+  , bdata{ctx.func.blocks().size()}
 {
   for (auto rpoId = size_t{0}; rpoId < rpoBlocks.size(); ++rpoId) {
     bdata[rpoBlocks[rpoId]].rpoId = rpoId;
@@ -733,14 +738,9 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
   CompactVector<FuncAnalysis> initResults;
   auto analyze_86init = [&](const StaticString &name) {
     if (auto f = find_method(ctx.cls, name.get())) {
+      auto context = Context { ctx.unit, f, ctx.cls };
       initResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, f, ctx.cls },
-          &clsAnalysis,
-          nullptr,
-          CollectionOpts{}
-        )
+        do_analyze(index, context, &clsAnalysis, nullptr, CollectionOpts{})
       );
     }
   };
@@ -787,28 +787,18 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
         continue;
       }
 
+      auto context = Context { ctx.unit, f.get(), ctx.cls };
       methodResults.push_back(
-        do_analyze(
-          index,
-          Context { ctx.unit, f.get(), ctx.cls },
-          &clsAnalysis,
-          nullptr,
-          CollectionOpts{}
-        )
+        do_analyze(index, context, &clsAnalysis, nullptr, CollectionOpts{})
       );
     }
 
     if (associatedClosures) {
       for (auto const c : *associatedClosures) {
         auto const invoke = c->methods[0].get();
+        auto context = Context { ctx.unit, invoke, c };
         closureResults.push_back(
-          do_analyze(
-            index,
-            Context { ctx.unit, invoke, c },
-            &clsAnalysis,
-            nullptr,
-            CollectionOpts{}
-          )
+          do_analyze(index, context, &clsAnalysis, nullptr, CollectionOpts{})
         );
       }
     }
@@ -818,13 +808,8 @@ ClassAnalysis analyze_class(const Index& index, Context const ctx) {
         // We throw the results of the analysis away. We're only doing
         // this for the effects on the private properties, and the
         // results aren't meaningful outside of this context.
-        do_analyze(
-          index,
-          Context { m->unit, m, ctx.cls },
-          &clsAnalysis,
-          nullptr,
-          CollectionOpts{}
-        );
+        auto context = Context { m->unit, m, ctx.cls };
+        do_analyze(index, context, &clsAnalysis, nullptr, CollectionOpts{});
       }
     }
 
@@ -908,7 +893,7 @@ locally_propagated_states(const Index& index,
 
   std::vector<std::pair<State,StepFlags>> ret;
 
-  auto const blk = fa.ctx.func->blocks[bid].get();
+  auto const blk = fa.ctx.func.blocks()[bid].get();
   ret.reserve(blk->hhbcs.size() + 1);
 
   auto interp = Interp { index, fa.ctx, collect, bid, blk, state };
@@ -933,7 +918,7 @@ State locally_propagated_bid_state(const Index& index,
   Trace::Bump bumper{Trace::hhbbc, 10};
   if (!state.initialized) return {};
 
-  auto const blk = fa.ctx.func->blocks[bid].get();
+  auto const blk = fa.ctx.func.blocks()[bid].get();
   auto stateOut = state;
   Interp interp {
     index, fa.ctx, collect, bid, blk, stateOut

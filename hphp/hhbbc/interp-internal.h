@@ -73,7 +73,7 @@ struct ISS {
   {}
 
   const Index& index;
-  const Context ctx;
+  const AnalysisContext ctx;
   CollectedInfo& collect;
   const BlockId bid;
   const php::Block& blk;

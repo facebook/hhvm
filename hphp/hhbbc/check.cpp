@@ -135,7 +135,9 @@ bool DEBUG_ONLY checkName(SString name) {
 bool check(const php::Func& f) {
   assert(checkParams(f));
   assert(checkName(f.name));
-  for (DEBUG_ONLY auto& block : f.blocks) assert(checkBlock(f, *block));
+
+  auto const func = php::ConstFunc(&f);
+  for (DEBUG_ONLY auto& block : func.blocks()) assert(checkBlock(f, *block));
 
   /*
    * Some of these relationships may change as async/await

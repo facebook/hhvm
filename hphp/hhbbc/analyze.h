@@ -41,7 +41,7 @@ struct FuncAnalysisResult {
    * blocks according to rpoSortAddDVs(), each bdata entry has an
    * rpoId index, and all block states are uninitialized.
    */
-  explicit FuncAnalysisResult(Context);
+  explicit FuncAnalysisResult(AnalysisContext);
 
   FuncAnalysisResult(FuncAnalysisResult&&) = default;
   FuncAnalysisResult& operator=(FuncAnalysisResult&&) = default;
@@ -56,7 +56,7 @@ struct FuncAnalysisResult {
    * their declaring class.  So ctx.func->cls will not be the same as
    * ctx->cls in this case.
    */
-  Context ctx;
+  AnalysisContext ctx;
 
   /*
    * If this function allocates closures, this maps each of those
@@ -133,7 +133,7 @@ struct FuncAnalysisResult {
 struct FuncAnalysis : FuncAnalysisResult {
   using BlockData = struct { uint32_t rpoId; State stateIn; };
 
-  explicit FuncAnalysis(Context);
+  explicit FuncAnalysis(AnalysisContext);
 
   FuncAnalysis(FuncAnalysis&&) = default;
   FuncAnalysis& operator=(FuncAnalysis&&) = default;

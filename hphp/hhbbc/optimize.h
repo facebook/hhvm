@@ -41,7 +41,7 @@ struct BlockUpdateInfo;
 void optimize_func(const Index&, FuncAnalysis&&, bool isFinal);
 
 void update_bytecode(
-    php::Func* func,
+    php::MutFunc func,
     CompactVector<std::pair<BlockId, BlockUpdateInfo>>&& blockUpdates,
     FuncAnalysis* = nullptr);
 

@@ -2146,8 +2146,8 @@ void jmpImpl(ISS& env, const JmpOp& op) {
   }
 
   if (e == (Negate ? Emptiness::Empty : Emptiness::NonEmpty) ||
-      (next_real_block(*env.ctx.func, env.blk.fallthrough) ==
-       next_real_block(*env.ctx.func, op.target1))) {
+      (next_real_block(env.ctx.func, env.blk.fallthrough) ==
+       next_real_block(env.ctx.func, op.target1))) {
     return reduce(env, bc::PopC{});
   }
 
@@ -4126,9 +4126,9 @@ void fcallObjMethodImpl(ISS& env, const Op& op, SString methName, bool dynamic,
     if (auto const name = op.fca.context()) {
       auto const rcls = env.index.resolve_class(env.ctx, name);
       if (rcls && rcls->cls()) {
-        return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
+        return AnalysisContext { env.ctx.unit, env.ctx.func, rcls->cls() };
       }
-      return Context { env.ctx.unit, env.ctx.func, nullptr };
+      return AnalysisContext { env.ctx.unit, env.ctx.func, nullptr };
     }
     return env.ctx;
   }();
@@ -4218,9 +4218,9 @@ void fcallClsMethodImpl(ISS& env, const Op& op, Type clsTy, SString methName,
     if (auto const name = op.fca.context()) {
       auto const rcls = env.index.resolve_class(env.ctx, name);
       if (rcls && rcls->cls()) {
-        return Context { env.ctx.unit, env.ctx.func, rcls->cls() };
+        return AnalysisContext { env.ctx.unit, env.ctx.func, rcls->cls() };
       }
-      return Context { env.ctx.unit, env.ctx.func, nullptr };
+      return AnalysisContext { env.ctx.unit, env.ctx.func, nullptr };
     }
     return env.ctx;
   }();
@@ -5747,7 +5747,7 @@ BlockId speculateHelper(ISS& env, BlockId orig, bool updateTaken) {
     State temp{env.state, State::Compact{}};
     while (true) {
       auto const func = env.ctx.func;
-      auto const targetBlk = func->blocks[target].get();
+      auto const targetBlk = func.blocks()[target].get();
       if (!targetBlk->multiPred) break;
       auto const ok = [&] {
         switch (targetBlk->hhbcs.back().op) {

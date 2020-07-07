@@ -559,7 +559,8 @@ void whole_program(php::ProgramPtr program,
   Index index(program.get());
   auto stats = allocate_stats();
   auto freeFuncMem = [&] (php::Func* fun) {
-    fun->blocks = {};
+    auto mf = php::MutFunc(fun);
+    mf.blocks_mut().clear();
   };
   auto emitUnit = [&] (php::Unit& unit) {
     auto ue = emit_unit(index, unit);

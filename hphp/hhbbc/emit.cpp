@@ -161,7 +161,7 @@ php::SrcLoc srcLoc(const php::Func& func, int32_t ix) {
  * case for DV initializers is that each one falls through to the
  * next, with the block jumping back to the main entry point.
  */
-std::vector<BlockId> order_blocks(const php::Func& f) {
+std::vector<BlockId> order_blocks(php::ConstFunc f) {
   auto sorted = rpoSortFromMain(f);
 
   // Get the DV blocks, without the rest of the primary function body,
@@ -272,10 +272,10 @@ const StaticString
 
 EmitBcInfo emit_bytecode(EmitUnitState& euState,
                          UnitEmitter& ue,
-                         const php::Func& func) {
+                         php::ConstFunc func) {
   EmitBcInfo ret = {};
   auto& blockInfo = ret.blockInfo;
-  blockInfo.resize(func.blocks.size());
+  blockInfo.resize(func.blocks().size());
 
   // Track the stack depth while emitting to determine maxStackDepth.
   int32_t currentStackDepth { 0 };
@@ -294,17 +294,14 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   SCOPE_ASSERT_DETAIL("emit") {
     std::string ret;
     for (auto bid : func.blockRange()) {
-      folly::format(&ret,
-                    "block #{}\n{}",
-                    bid,
-                    show(func, *func.blocks[bid])
-                   );
+      auto const block = show(*func, *func.blocks()[bid]);
+      folly::format(&ret, "block #{}\n{}", bid, block);
     }
 
     return ret;
   };
 
-  auto const pseudomain = is_pseudomain(&func);
+  auto const pseudomain = is_pseudomain(func);
   auto process_mergeable = [&] (const Bytecode& bc) {
     if (!pseudomain) return;
     switch (bc.op) {
@@ -373,8 +370,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   };
 
   auto const map_local = [&] (LocalId id) {
-    if (id >= func.locals.size()) return id;
-    auto const loc = func.locals[id];
+    if (id >= func->locals.size()) return id;
+    auto const loc = func->locals[id];
     assertx(!loc.killed);
     assertx(loc.id <= id);
     id = loc.id;
@@ -384,8 +381,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   auto const map_local_name = [&] (NamedLocal nl) {
     nl.id = map_local(nl.id);
     if (nl.name == kInvalidLocalName) return nl;
-    if (nl.name >= func.locals.size()) return nl;
-    auto const loc = func.locals[nl.name];
+    if (nl.name >= func->locals.size()) return nl;
+    auto const loc = func->locals[nl.name];
     if (!loc.name) {
       nl.name = kInvalidLocalName;
       return nl;
@@ -426,8 +423,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     auto const startOffset = ue.bcPos();
     lastOff = startOffset;
 
-    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(&func, inst),
-           show(srcLoc(func, inst.srcLoc)));
+    FTRACE(4, " emit: {} -- {} @ {}\n", currentStackDepth, show(func, inst),
+           show(srcLoc(*func, inst.srcLoc)));
 
     if (options.TraceBytecodes.count(inst.op)) traceBc = true;
 
@@ -470,7 +467,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
     };
 
     auto emit_srcloc = [&] {
-      auto const sl = srcLoc(func, inst.srcLoc);
+      auto const sl = srcLoc(*func, inst.srcLoc);
       if (!sl.isValid()) return;
       Location::Range loc(sl.start.line, sl.start.col,
                           sl.past.line, sl.past.col);
@@ -716,7 +713,7 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
   for (; blockIt != endBlockIt; ++blockIt) {
     auto bid = *blockIt;
     auto& info = blockInfo[bid];
-    auto const b = func.blocks[bid].get();
+    auto const b = func.blocks()[bid].get();
 
     info.offset = ue.bcPos();
     FTRACE(2, "      block {}: {}\n", bid, info.offset);
@@ -781,12 +778,11 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
           emit_inst(bc::Jmp { fallthrough });
         }
 
-        auto const parent = commonParent(func,
-                                         func.blocks[fallthrough]->exnNodeId,
-                                         b->exnNodeId);
+        auto const nextExnId = func.blocks()[fallthrough]->exnNodeId;
+        auto const parent = commonParent(*func, nextExnId, b->exnNodeId);
 
         auto depth = [&] (ExnNodeId eid) {
-          return eid == NoExnNodeId ? 0 : func.exnNodes[eid].depth;
+          return eid == NoExnNodeId ? 0 : func->exnNodes[eid].depth;
         };
         // If we are in an exn region we pop from the current region to the
         // common parent. If the common parent is null, we pop all regions
@@ -807,8 +803,8 @@ EmitBcInfo emit_bytecode(EmitUnitState& euState,
 
   if (traceBc) {
     FTRACE(0, "TraceBytecode (emit): {}::{} in {}\n",
-           func.cls ? func.cls->name->data() : "",
-           func.name, func.unit->filename);
+           func->cls ? func->cls->name->data() : "",
+           func->name, func->unit->filename);
   }
 
   return ret;
@@ -963,7 +959,7 @@ size_t shared_prefix(ForwardRange1& r1, ForwardRange2& r2) {
  * reasonably likely to have the same ExnNode.  Try to coalesce the EH
  * regions we create for in those cases.
  */
-void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
+void emit_ehent_tree(FuncEmitter& fe, php::ConstFunc func,
                      const EmitBcInfo& info) {
   hphp_fast_map<
     const php::ExnNode*,
@@ -1003,7 +999,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
    * set it to the new block's path.
    */
   for (auto const bid : info.blockOrder) {
-    auto const b = func.blocks[bid].get();
+    auto const b = func.blocks()[bid].get();
     auto const offset = info.blockInfo[bid].offset;
 
     if (b->exnNodeId == NoExnNodeId) {
@@ -1012,7 +1008,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
     }
 
     std::vector<const php::ExnNode*> current;
-    exn_path(func, current, b->exnNodeId);
+    exn_path(*func, current, b->exnNodeId);
 
     auto const prefix = shared_prefix(current, activeList);
     for (size_t i = prefix, sz = activeList.size(); i < sz; ++i) {
@@ -1030,7 +1026,7 @@ void emit_ehent_tree(FuncEmitter& fe, const php::Func& func,
 
     if (debug && !activeList.empty()) {
       current.clear();
-      exn_path(func, current, activeList.back()->idx);
+      exn_path(*func, current, activeList.back()->idx);
       assert(current == activeList);
     }
   }
@@ -1209,17 +1205,18 @@ void merge_repo_auth_type(UnitEmitter& ue, RepoAuthType rat) {
 }
 
 void emit_finish_func(EmitUnitState& state,
-                      const php::Func& func,
+                      php::ConstFunc cf,
                       FuncEmitter& fe,
                       const EmitBcInfo& info) {
+  auto const& func = *cf;
   if (info.containsCalls) fe.containsCalls = true;;
 
   emit_locals_and_params(fe, func, info);
-  emit_ehent_tree(fe, func, info);
+  emit_ehent_tree(fe, cf, info);
 
   // Nothing should look at the bytecode from now on. Free it up to
   // compensate for the UnitEmitter we're creating.
-  const_cast<php::Func&>(func).blocks.clear();
+  const_cast<php::BlockVec&>(cf.blocks()).clear();
 
   fe.userAttributes = func.userAttributes;
   fe.retUserType = func.returnUserType;
@@ -1312,9 +1309,10 @@ void emit_init_func(FuncEmitter& fe, const php::Func& func) {
 }
 
 void emit_func(EmitUnitState& state, UnitEmitter& ue,
-               FuncEmitter* fe, const php::Func& func) {
-  FTRACE(2,  "    func {}\n", func.name->data());
-  emit_init_func(*fe, func);
+               FuncEmitter* fe, const php::Func& f) {
+  FTRACE(2,  "    func {}\n", f.name->data());
+  emit_init_func(*fe, f);
+  auto const func = php::ConstFunc(&f);
   auto const info = emit_bytecode(state, ue, func);
   emit_finish_func(state, func, *fe, info);
 }
@@ -1329,7 +1327,8 @@ void emit_pseudomain(EmitUnitState& state,
   ue.initMain(std::get<0>(pm.srcInfo.loc),
               std::get<1>(pm.srcInfo.loc));
   auto const fe = ue.getMain();
-  auto const info = emit_bytecode(state, ue, pm);
+  auto const func = php::ConstFunc(&pm);
+  auto const info = emit_bytecode(state, ue, func);
   if (is_systemlib_part(unit)) {
     ue.m_mergeOnly = true;
     auto const tv = make_tv<KindOfInt64>(1);
@@ -1341,7 +1340,7 @@ void emit_pseudomain(EmitUnitState& state,
          == ue.m_fileAttributes.end();
   }
 
-  emit_finish_func(state, pm, *fe, info);
+  emit_finish_func(state, func, *fe, info);
 }
 
 void emit_record(UnitEmitter& ue, const php::Record& rec) {
@@ -1428,8 +1427,9 @@ void emit_class(EmitUnitState& state,
     auto const fe = ue.newMethodEmitter(m->name, pce);
     emit_init_func(*fe, *m);
     pce->addMethod(fe);
-    auto const info = emit_bytecode(state, ue, *m);
-    emit_finish_func(state, *m, *fe, info);
+    auto const func = php::ConstFunc(m.get());
+    auto const info = emit_bytecode(state, ue, func);
+    emit_finish_func(state, func, *fe, info);
   }
 
   CompactVector<Type> useVars;

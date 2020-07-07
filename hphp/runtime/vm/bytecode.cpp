@@ -4377,7 +4377,7 @@ const Func* resolveClsMethodFunc(Class* cls, const StringData* methName) {
   }
   assertx(res == LookupResult::MethodFoundNoThis);
   assertx(func);
-  if (!func->isStaticInPrologue()) throw_missing_this(func);
+  checkClsMethFuncHelper(func);
   return func;
 }
 

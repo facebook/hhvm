@@ -5,3 +5,4 @@ string(8) "Cls::bar"
 string(9) "Cls::prot"
 string(9) "Cls::priv"
 Caught: Method Cls::inst is not static
+Caught: Method Cls::abstr is abstract

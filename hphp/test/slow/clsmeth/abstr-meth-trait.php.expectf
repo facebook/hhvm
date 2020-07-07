@@ -1,0 +1,1 @@
+Fatal error: Cannot call abstract method C::foo in %s/test/slow/clsmeth/abstr-meth-trait.php on line 12

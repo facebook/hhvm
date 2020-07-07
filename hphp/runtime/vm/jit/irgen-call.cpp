@@ -1560,88 +1560,6 @@ SSATmp* lookupClsMethodKnown(IRGS& env,
   return funcTmp;
 }
 
-void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
-                            const StringData* methodName,
-                            uint32_t numExtraInputs) {
-  assertx(clsVal->isA(TCls));
-  auto const cs = clsVal->type().clsSpec();
-  if (!cs) return interpOne(env);
-  auto const exactClass = cs.exact() || cs.cls()->attrs() & AttrNoOverride;
-  SSATmp* ctx;
-  auto const funcTmp = lookupClsMethodKnown(env, methodName, clsVal, cs.cls(),
-                                            exactClass, false, ctx,
-                                            curClass(env));
-  if (!funcTmp) return interpOne(env);
-  assertx(funcTmp->isA(TFunc));
-  if (!funcTmp->hasConstVal()) return interpOne(env);
-  if (!funcTmp->funcVal()->isStaticInPrologue()) {
-    gen(env, ThrowMissingThis, funcTmp);
-  }
-  discard(env, numExtraInputs);
-  push(env, gen(env, NewClsMeth, clsVal, funcTmp));
-}
-
-void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
-                            const StringData* className) {
-  if (!func->isStaticInPrologue()) {
-    gen(env, ThrowMissingThis, cns(env, func));
-  }
-  if (!classIsPersistentOrCtxParent(env, cls)) {
-    gen(env, LdClsCached, cns(env, className));
-  }
-  ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
-}
-
-std::pair<SSATmp*, SSATmp*>
-resolveClsMethodDSlow(IRGS& env, const StringData* className,
-                      const StringData* methodName) {
-  auto const slowExit = makeExitSlow(env);
-  auto const ne = NamedEntity::get(className);
-  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
-  auto const func = loadClsMethodUnknown(env, data, slowExit);
-  auto const cls = gen(env, LdClsCached, cns(env, className));
-  return std::pair(cls, func);
-}
-
-} // namespace
-
-void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
-  auto const cls = topC(env);
-  if (!cls->isA(TCls)) return interpOne(env);
-  resolveClsMethodCommon(env, cls, methodName, 1);
-}
-
-void emitResolveClsMethodD(IRGS& env, const StringData* className,
-                           const StringData* methodName) {
-  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
-  if (cls) {
-    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
-                                               true);
-    if (func) {
-      checkClsMethodAndLdCtx(env, cls, func, className);
-
-      // For clsmeth, we want to return the class user gave,
-      // not the class where func is associated with.
-      push(env, gen(env, NewClsMeth, cns(env, cls), cns(env, func)));
-    } else {
-      resolveClsMethodCommon(env, cns(env, cls), methodName, 0);
-    }
-    return;
-  }
-
-  auto [clsTmp, funcTmp] = resolveClsMethodDSlow(env, className, methodName);
-  push(env, gen(env, NewClsMeth, clsTmp, funcTmp));
-}
-
-void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
-                           const StringData* methodName) {
-  auto const cls = specialClsRefToCls(env, ref);
-  if (!cls) return interpOne(env);
-  resolveClsMethodCommon(env, cls, methodName, 0);
-}
-
-namespace {
-
 void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
                                      SSATmp* tsList) {
   popC(env); // Pop generics
@@ -1664,11 +1582,10 @@ void checkGenericsAndResolveRClsMeth(IRGS& env, SSATmp* cls, SSATmp* func,
   );
 }
 
-void resolveRClsMethodCommon(IRGS& env,
-                             SSATmp* clsVal,
-                             const StringData* methodName,
-                             SSATmp* generics,
-                             uint32_t numExtraInputs) {
+void resolveClsMethodCommon(IRGS& env, SSATmp* clsVal,
+                            const StringData* methodName,
+                            uint32_t numExtraInputs,
+                            SSATmp* generics) {
   assertx(clsVal->isA(TCls));
   auto const cs = clsVal->type().clsSpec();
   if (!cs) return interpOne(env);
@@ -1679,15 +1596,72 @@ void resolveRClsMethodCommon(IRGS& env,
                                             curClass(env));
   if (!funcTmp) return interpOne(env);
   assertx(funcTmp->isA(TFunc));
-  if (!funcTmp->hasConstVal()) return interpOne(env);
-  if (!funcTmp->funcVal()->isStaticInPrologue()) {
-    gen(env, ThrowMissingThis, funcTmp);
-  }
+  gen(env, CheckClsMethFunc, funcTmp);
   discard(env, numExtraInputs);
-  checkGenericsAndResolveRClsMeth(env, clsVal, funcTmp, generics);
+  if (generics != nullptr) {
+    checkGenericsAndResolveRClsMeth(env, clsVal, funcTmp, generics);
+  } else {
+    push(env, gen(env, NewClsMeth, clsVal, funcTmp));
+  }
+}
+
+void checkClsMethodAndLdCtx(IRGS& env, const Class* cls, const Func* func,
+                            const StringData* className) {
+  gen(env, CheckClsMethFunc, cns(env, func));
+  if (!classIsPersistentOrCtxParent(env, cls)) {
+    gen(env, LdClsCached, cns(env, className));
+  }
+  ldCtxForClsMethod(env, func, cns(env, cls), cls, true);
+}
+
+std::pair<SSATmp*, SSATmp*>
+resolveClsMethodDSlow(IRGS& env, const StringData* className,
+                      const StringData* methodName) {
+  auto const slowExit = makeExitSlow(env);
+  auto const ne = NamedEntity::get(className);
+  auto const data = ClsMethodData { className, methodName, ne, curClass(env) };
+  auto const func = loadClsMethodUnknown(env, data, slowExit);
+  gen(env, CheckClsMethFunc, func);
+  auto const cls = gen(env, LdClsCached, cns(env, className));
+  return std::pair(cls, func);
 }
 
 } // namespace
+
+void emitResolveClsMethod(IRGS& env, const StringData* methodName) {
+  auto const cls = topC(env);
+  if (!cls->isA(TCls)) return interpOne(env);
+  resolveClsMethodCommon(env, cls, methodName, 1, nullptr);
+}
+
+void emitResolveClsMethodD(IRGS& env, const StringData* className,
+                           const StringData* methodName) {
+  auto const cls = lookupUniqueClass(env, className, false /* trustUnit */);
+  if (cls) {
+    auto const func = lookupImmutableClsMethod(cls, methodName, curClass(env),
+                                               true);
+    if (func) {
+      checkClsMethodAndLdCtx(env, cls, func, className);
+
+      // For clsmeth, we want to return the class user gave,
+      // not the class where func is associated with.
+      push(env, gen(env, NewClsMeth, cns(env, cls), cns(env, func)));
+    } else {
+      resolveClsMethodCommon(env, cns(env, cls), methodName, 0, nullptr);
+    }
+    return;
+  }
+
+  auto [clsTmp, funcTmp] = resolveClsMethodDSlow(env, className, methodName);
+  push(env, gen(env, NewClsMeth, clsTmp, funcTmp));
+}
+
+void emitResolveClsMethodS(IRGS& env, SpecialClsRef ref,
+                           const StringData* methodName) {
+  auto const cls = specialClsRefToCls(env, ref);
+  if (!cls) return interpOne(env);
+  resolveClsMethodCommon(env, cls, methodName, 0, nullptr);
+}
 
 void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
   auto const generics = topC(env);
@@ -1696,7 +1670,7 @@ void emitResolveRClsMethod(IRGS& env, const StringData* methodName) {
   }
   auto const cls = topC(env, BCSPRelOffset { 1 });
   if (!cls->isA(TCls)) return interpOne(env);
-  resolveRClsMethodCommon(env, cls, methodName, generics, 1);
+  resolveClsMethodCommon(env, cls, methodName, 1, generics);
 }
 
 void emitResolveRClsMethodD(IRGS& env, const StringData* className,
@@ -1716,7 +1690,7 @@ void emitResolveRClsMethodD(IRGS& env, const StringData* className,
       // not the class where func is associated with.
       checkGenericsAndResolveRClsMeth(env, cns(env, cls), cns(env, func), generics);
     } else {
-      resolveRClsMethodCommon(env, cns(env, cls), methodName, generics, 0);
+      resolveClsMethodCommon(env, cns(env, cls), methodName, 0, generics);
     }
     return;
   }
@@ -1733,7 +1707,7 @@ void emitResolveRClsMethodS(IRGS& env, SpecialClsRef ref,
   }
   auto const cls = specialClsRefToCls(env, ref);
   if (!cls) return interpOne(env);
-  resolveRClsMethodCommon(env, cls, methodName, generics, 0);
+  resolveClsMethodCommon(env, cls, methodName, 0, generics);
 }
 
 namespace {

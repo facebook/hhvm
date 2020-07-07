@@ -210,7 +210,6 @@ let method_type env m =
     match m.m_variadic with
     | FVvariadicArg param ->
       assert param.param_is_variadic;
-      assert (Option.is_none param.param_expr);
       Fvariadic (make_param_ty env ~is_lambda:false param)
     | FVellipsis p -> Fvariadic (make_ellipsis_param_ty p)
     | FVnonVariadic -> Fstandard

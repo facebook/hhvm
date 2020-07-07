@@ -8,6 +8,7 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet};
 use std::convert::TryInto;
 use std::ffi::{OsStr, OsString};
+use std::mem::size_of;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
@@ -179,15 +180,23 @@ impl<T: FromOcamlRep> FromOcamlRep for Box<T> {
     }
 }
 
-impl<T: ToOcamlRep + ?Sized> ToOcamlRep for &'_ T {
+impl<T: ToOcamlRep + Sized> ToOcamlRep for &'_ T {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        (**self).to_ocamlrep(alloc)
+        alloc.memoized(
+            *self as *const T as *const usize as usize,
+            size_of::<T>(),
+            |alloc| (**self).to_ocamlrep(alloc),
+        )
     }
 }
 
-impl<T: ToOcamlRep> ToOcamlRep for Rc<T> {
+impl<T: ToOcamlRep + Sized> ToOcamlRep for Rc<T> {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
-        alloc.add(self.as_ref())
+        alloc.memoized(
+            self.as_ref() as *const T as usize,
+            size_of::<T>(),
+            |alloc| alloc.add(self.as_ref()),
+        )
     }
 }
 
@@ -277,6 +286,16 @@ impl<T: ToOcamlRep> ToOcamlRep for [T] {
             hd = block.build();
         }
         hd
+    }
+}
+
+impl<T: ToOcamlRep> ToOcamlRep for &'_ [T] {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.memoized(
+            self.as_ptr() as usize,
+            self.len() * size_of::<T>(),
+            |alloc| (**self).to_ocamlrep(alloc),
+        )
     }
 }
 
@@ -433,6 +452,14 @@ impl ToOcamlRep for OsStr {
     }
 }
 
+impl ToOcamlRep for &'_ OsStr {
+    #[cfg(unix)]
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        use std::os::unix::ffi::OsStrExt;
+        alloc.add(self.as_bytes())
+    }
+}
+
 impl ToOcamlRep for OsString {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         alloc.add(self.as_os_str())
@@ -450,6 +477,12 @@ impl FromOcamlRep for OsString {
 }
 
 impl ToOcamlRep for Path {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.add(self.as_os_str())
+    }
+}
+
+impl ToOcamlRep for &'_ Path {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         alloc.add(self.as_os_str())
     }
@@ -498,6 +531,14 @@ impl ToOcamlRep for str {
     }
 }
 
+impl ToOcamlRep for &'_ str {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.memoized(self.as_bytes().as_ptr() as usize, self.len(), |alloc| {
+            (**self).to_ocamlrep(alloc)
+        })
+    }
+}
+
 /// Allocate an OCaml string using the given allocator and copy the given string
 /// slice into it.
 pub fn str_to_ocamlrep<'a, A: Allocator>(s: &str, alloc: &'a A) -> Value<'a> {
@@ -525,6 +566,14 @@ impl FromOcamlRep for Vec<u8> {
 impl ToOcamlRep for [u8] {
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
         bytes_to_ocamlrep(self, alloc)
+    }
+}
+
+impl ToOcamlRep for &'_ [u8] {
+    fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a> {
+        alloc.memoized(self.as_ptr() as usize, self.len(), |alloc| {
+            (**self).to_ocamlrep(alloc)
+        })
     }
 }
 

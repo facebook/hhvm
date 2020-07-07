@@ -7,7 +7,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::max;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use crate::{block::Header, Allocator, BlockBuilder, ToOcamlRep, Value};
+use crate::{block::Header, Allocator, BlockBuilder, MemoizationCache, ToOcamlRep, Value};
 
 struct Chunk {
     data: Box<[Value<'static>]>,
@@ -60,6 +60,7 @@ static NEXT_GENERATION: AtomicUsize = AtomicUsize::new(usize::max_value() / 2);
 pub struct Arena {
     generation: Cell<usize>,
     current_chunk: RefCell<Chunk>,
+    cache: MemoizationCache,
 }
 
 impl Arena {
@@ -75,6 +76,7 @@ impl Arena {
         Self {
             generation: Cell::new(generation),
             current_chunk: RefCell::new(Chunk::with_capacity(capacity_in_words)),
+            cache: MemoizationCache::new(),
         }
     }
 
@@ -129,6 +131,23 @@ impl Allocator for Arena {
     #[inline(always)]
     fn set_field<'a>(block: &mut BlockBuilder<'a>, index: usize, value: Value<'a>) {
         block.0[index] = value;
+    }
+
+    fn memoized<'a>(
+        &'a self,
+        ptr: usize,
+        size: usize,
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a> {
+        let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
+        // SAFETY: The only memoized values in the cache are those computed in
+        // the closure on the previous line. Since f returns Value<'a>, any
+        // cached bits must represent a valid Value<'a>,
+        unsafe { Value::from_bits(bits) }
+    }
+
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+        self.cache.with_cache(|| value.to_ocamlrep(self))
     }
 }
 

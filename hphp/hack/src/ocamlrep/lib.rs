@@ -301,6 +301,7 @@ corresponding type in the OCaml source file.
 
 mod arena;
 mod block;
+mod cache;
 mod error;
 mod impls;
 mod value;
@@ -312,6 +313,7 @@ pub mod slab;
 
 pub use arena::Arena;
 pub use block::{Block, BlockBuilder};
+pub use cache::MemoizationCache;
 pub use error::{FromError, SlabIntegrityError};
 pub use impls::{
     bytes_from_ocamlrep, bytes_to_ocamlrep, sorted_iter_to_ocaml_map, sorted_iter_to_ocaml_set,
@@ -323,6 +325,10 @@ pub use value::{OpaqueValue, Value};
 /// reconstructed from an OCaml value of the same (OCaml) type.
 pub trait ToOcamlRep {
     /// Allocate an OCaml representation of `self` using the given Allocator.
+    ///
+    /// Implementors of this method must not mutate or drop any values after
+    /// passing them to `Allocator::add` (or invoking `to_ocamlrep` on them),
+    /// else `Allocator::memoized` may return incorrect results.
     fn to_ocamlrep<'a, A: Allocator>(&self, alloc: &'a A) -> Value<'a>;
 }
 
@@ -368,8 +374,57 @@ pub trait Allocator: Sized {
         self.block_with_size_and_tag(size, 0u8)
     }
 
+    /// Convert the given data structure to an OCaml value. Structural sharing
+    /// (via references or `Rc`) will not be preserved unless `add` is invoked
+    /// within an outer invocation of `add_root`.
+    ///
+    /// To preserve structural sharing without using `add_root` (and the
+    /// overhead of maintaining a cache that comes with it), consider using
+    /// `ocamlrep::rc::RcOc` instead of `Rc`.
     #[inline(always)]
     fn add<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
         value.to_ocamlrep(self)
     }
+
+    /// Given the address and size of some value, and a function to convert the
+    /// value to OCaml (e.g., a closure `|alloc| (*slice).to_ocamlrep(alloc)`),
+    /// either execute the function and return its result, or return a cached
+    /// result for that address.
+    ///
+    /// If `memoized` is invoked without an outer invocation of `add_root`, it
+    /// must never return a cached result. If `memoized` is invoked within an
+    /// outer invocation of `add_root`, it must return a result computed within
+    /// that invocation of `add_root`.
+    fn memoized<'a>(
+        &'a self,
+        ptr: usize,
+        size_in_bytes: usize,
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a>;
+
+    /// Convert the given data structure to an OCaml value. Structural sharing
+    /// (via references or `Rc`) will be preserved.
+    ///
+    /// Note that sharing is preserved using a memoization cache keyed off of
+    /// address and size only. If the given value contains multiple references
+    /// or slices pointing to equal-sized views of the same data, but with
+    /// different OCaml representations, e.g.:
+    ///
+    /// ```
+    /// let x: &(u32, u32) = &(0u32, 1u32);
+    /// let y: &u64 = unsafe { std::mem::transmute(x) };
+    /// let value = (x, y);
+    /// alloc.add_root(&value) // PROBLEM!
+    /// ```
+    ///
+    /// Then the converted OCaml value will not have the intended type (i.e.,
+    /// the one which would be produced by `Allocator::add`). In this example,
+    /// the allocator will memoize the result of converting `x` (an OCaml
+    /// tuple), and use it for both `x` and `y` in `value` (since they point to
+    /// equal-sized types at the same address).
+    ///
+    /// # Panics
+    ///
+    /// `add_root` is not re-entrant, and panics upon attempts to do so.
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_>;
 }

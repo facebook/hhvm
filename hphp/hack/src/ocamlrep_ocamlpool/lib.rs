@@ -7,7 +7,7 @@ use std::ffi::CString;
 use std::panic::UnwindSafe;
 
 use ocamlpool_rust::utils::{caml_set_field, reserve_block};
-use ocamlrep::{Allocator, BlockBuilder, ToOcamlRep, Value};
+use ocamlrep::{Allocator, BlockBuilder, MemoizationCache, ToOcamlRep, Value};
 
 pub use ocamlrep::FromOcamlRep;
 
@@ -17,7 +17,9 @@ extern "C" {
     static mut ocamlpool_generation: usize;
 }
 
-pub struct Pool(());
+pub struct Pool {
+    cache: MemoizationCache,
+}
 
 impl Pool {
     /// Prepare the ocamlpool library to allocate values directly on the OCaml
@@ -32,7 +34,9 @@ impl Pool {
     #[inline(always)]
     pub unsafe fn new() -> Self {
         ocamlpool_enter();
-        Self(())
+        Self {
+            cache: MemoizationCache::new(),
+        }
     }
 
     #[inline(always)]
@@ -68,6 +72,23 @@ impl Allocator for Pool {
         assert!(index < block.size());
         unsafe { caml_set_field(block.as_mut_ptr() as usize, index, value.to_bits()) };
     }
+
+    fn memoized<'a>(
+        &'a self,
+        ptr: usize,
+        size: usize,
+        f: impl FnOnce(&'a Self) -> Value<'a>,
+    ) -> Value<'a> {
+        let bits = self.cache.memoized(ptr, size, || f(self).to_bits());
+        // SAFETY: The only memoized values in the cache are those computed in
+        // the closure on the previous line. Since f returns Value<'a>, any
+        // cached bits must represent a valid Value<'a>,
+        unsafe { Value::from_bits(bits) }
+    }
+
+    fn add_root<T: ToOcamlRep + ?Sized>(&self, value: &T) -> Value<'_> {
+        self.cache.with_cache(|| value.to_ocamlrep(self))
+    }
 }
 
 /// Convert the given value to an OCaml value on the OCaml runtime's
@@ -78,10 +99,14 @@ impl Allocator for Pool {
 /// The OCaml runtime is not thread-safe, and this function will interact with
 /// it. If any other thread interacts with the OCaml runtime or ocamlpool
 /// library during the execution of `to_ocaml`, undefined behavior will result.
+///
+/// # Panics
+///
+/// Panics upon attempts to re-enter `to_ocaml`.
 #[inline(always)]
 pub unsafe fn to_ocaml<T: ToOcamlRep>(value: &T) -> usize {
     let pool = Pool::new();
-    let result = pool.add(value);
+    let result = pool.add_root(value);
     result.to_bits()
 }
 
@@ -124,6 +149,9 @@ pub fn catch_unwind_with_handler(
 /// implemented with statics, we don't need a reference to that pool to write to
 /// it.
 ///
+/// Does not preserve sharing of values referred to by multiple references or
+/// Rcs (but sharing is preserved for `ocamlrep::rc::RcOc`).
+///
 /// # Safety
 ///
 /// The OCaml runtime is not thread-safe, and this function will interact with
@@ -132,7 +160,9 @@ pub fn catch_unwind_with_handler(
 /// result.
 #[inline(always)]
 pub unsafe fn add_to_ambient_pool<T: ToOcamlRep>(value: &T) -> usize {
-    let mut fake_pool = Pool(());
+    let mut fake_pool = Pool {
+        cache: MemoizationCache::new(),
+    };
     let result = value.to_ocamlrep(&mut fake_pool).to_bits();
     std::mem::forget(fake_pool);
     result

@@ -9,11 +9,13 @@
 open Core_kernel
 
 module Types = struct
-  type job_id = int [@@deriving show, eq]
+  type job_id = Job_id of Int64.t [@@deriving show, eq]
+
+  type nonce = Nonce of Int64.t [@@deriving show, eq]
 end
 
 module type S = sig
-  include module type of Types
+  (* include module type of Types *)
 
   type command
 
@@ -38,12 +40,14 @@ module type S = sig
   val is_alive : status -> bool
 
   (* Cancels a group of running commands using the nonce they were created with. *)
-  val begin_cancel : Int64.t -> (status, string) result Future.t
+  val begin_cancel_batch : Types.nonce -> (status list, string) result Future.t
 
-  val begin_heartbeat : job_id -> (status, string) result Future.t
+  val begin_cancel : Types.job_id -> (status, string) result Future.t
+
+  val begin_heartbeat : Types.job_id -> (status, string) result Future.t
 
   val begin_run :
-    command:command -> root:string -> (job_id, string) result Future.t
+    command:command -> root:string -> (Types.job_id, string) result Future.t
 
-  val run : command:command -> root:string -> (job_id, string) result
+  val run : command:command -> root:string -> (Types.job_id, string) result
 end
